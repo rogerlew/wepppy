@@ -73,6 +73,11 @@ class GenevaResultsService:
             "storm_count_completed": storm_count_completed,
             "storm_count_failed": storm_count_failed,
             "storm_count_unavailable": storm_count_unavailable,
+            "completed_storm_ids": [
+                str(storm_id)
+                for storm_id in batch_result.get("completed_storm_ids", []) or []
+                if str(storm_id).strip()
+            ],
             "failed_storm_ids": [str(item.get("storm_id", "")) for item in failed],
             "warnings": warnings,
             "errors": errors,

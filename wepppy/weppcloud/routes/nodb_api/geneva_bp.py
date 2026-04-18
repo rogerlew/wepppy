@@ -3,6 +3,7 @@
 from __future__ import annotations
 
 import logging
+from types import SimpleNamespace
 from typing import Any, Mapping, Optional, Union
 from urllib.parse import quote
 
@@ -11,7 +12,11 @@ from flask import Response, jsonify
 from rq import Queue
 
 from wepppy.config.redis_settings import RedisDB, redis_connection_kwargs
+from wepppy.nodb.core import Ron
+from wepppy.nodb.core.ron import RonViewModel
 from wepppy.nodb.mods.geneva import Geneva, GenevaNoDbError, GenevaValidationError
+from wepppy.nodb.unitizer import Unitizer
+from wepppy.nodb.unitizer import precisions as UNITIZER_PRECISIONS
 from wepppy.nodb.mods.geneva.collaborators.cn_table_service import (
     CN_TABLE_CONTRACT_PATH,
     GENEVA_CN_TABLE_SCHEMA_VERSION,
@@ -63,6 +68,38 @@ def _geneva_error_response(exc: GenevaNoDbError) -> Response:
         code=exc.code,
         details=details,
     )
+
+
+def _resolve_report_shell_context(wd: str, runid: str, config: str) -> tuple[Any, Any]:
+    try:
+        ron = Ron.getInstance(wd)
+        return ron, RonViewModel(ron)
+    except (FileNotFoundError, OSError, RuntimeError, ValueError):
+        # Boundary fallback: keep report shell renderable even if Ron metadata is unavailable.
+        fallback = SimpleNamespace(
+            runid=runid,
+            config_stem=config,
+            name="",
+            scenario="",
+            nodb_version=None,
+            mods=[],
+            readonly=False,
+            public=False,
+        )
+        return fallback, fallback
+
+
+def _resolve_report_unitizer_context(wd: str) -> Any:
+    try:
+        return Unitizer.getInstance(wd)
+    except (FileNotFoundError, OSError, RuntimeError, ValueError):
+        # Boundary fallback for report shell rendering when unitizer state cannot load.
+        preference_map = {
+            unit_class: next(iter(unit_options.keys()))
+            for unit_class, unit_options in UNITIZER_PRECISIONS.items()
+            if unit_options
+        }
+        return SimpleNamespace(is_english=False, preferences=preference_map)
 
 
 def _json_object_payload() -> dict[str, Any]:
@@ -389,6 +426,7 @@ def query_geneva_summary(runid: str, config: str) -> Response:
     datasource_id = str(request.args.get("datasource_id", "all") or "all").strip() or "all"
     measure = str(request.args.get("measure", "peak_discharge") or "peak_discharge").strip()
     ari_years = _parse_optional_ari_years_filter()
+    selected_storm_id = str(request.args.get("selected_storm_id", "") or "").strip() or None
 
     geneva = _ensure_geneva_controller(wd, f"{config}.cfg")
     try:
@@ -396,10 +434,11 @@ def query_geneva_summary(runid: str, config: str) -> Response:
             datasource_id=datasource_id,
             ari_years=ari_years,
             measure=measure,
+            selected_storm_id=selected_storm_id,
         )
     except GenevaNoDbError as exc:
         return _geneva_error_response(exc)
-    return jsonify(payload)
+    return _set_no_store_headers(jsonify(payload))
 
 
 @geneva_bp.route("/runs/<string:runid>/<config>/report/geneva/summary")
@@ -411,6 +450,7 @@ def report_geneva_summary(runid: str, config: str) -> Response:
     datasource_id = str(request.args.get("datasource_id", "all") or "all").strip() or "all"
     measure = str(request.args.get("measure", "peak_discharge") or "peak_discharge").strip()
     ari_years = _parse_optional_ari_years_filter()
+    selected_storm_id = str(request.args.get("selected_storm_id", "") or "").strip() or None
 
     geneva = _ensure_geneva_controller(wd, f"{config}.cfg")
     try:
@@ -418,16 +458,28 @@ def report_geneva_summary(runid: str, config: str) -> Response:
             datasource_id=datasource_id,
             ari_years=ari_years,
             measure=measure,
+            selected_storm_id=selected_storm_id,
         )
     except GenevaNoDbError as exc:
         return _geneva_error_response(exc)
 
-    return render_template(
-        "reports/geneva/summary.htm",
-        runid=runid,
-        config=config,
-        summary_payload=summary_payload,
-        user=current_user,
+    ron, current_ron = _resolve_report_shell_context(wd, runid, config)
+    unitizer = _resolve_report_unitizer_context(wd)
+
+    return _set_no_store_headers(
+        Response(
+            render_template(
+                "reports/geneva/summary.htm",
+                runid=runid,
+                config=config,
+                summary_payload=summary_payload,
+                ron=ron,
+                current_ron=current_ron,
+                unitizer_nodb=unitizer,
+                precisions=UNITIZER_PRECISIONS,
+                user=current_user,
+            )
+        )
     )
 
 

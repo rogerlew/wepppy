@@ -1,0 +1,211 @@
+.geneva-summary__filters {
+  display: grid;
+  gap: var(--wc-space-md);
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+}
+
+.geneva-summary__filters .wc-field {
+  max-width: none;
+}
+
+.geneva-summary__availability-note {
+  margin: 0;
+}
+
+.geneva-summary__chart-frame {
+  border: 1px solid var(--wc-color-border);
+  border-radius: var(--wc-radius-sm);
+  background: var(--wc-color-surface);
+  padding: var(--wc-space-sm);
+}
+
+.geneva-summary__chart {
+  min-height: 340px;
+}
+
+.geneva-summary__chart-svg {
+  display: block;
+  width: 100%;
+  height: auto;
+}
+
+.geneva-summary__axis {
+  stroke: var(--wc-color-border-strong);
+  stroke-width: 1.4;
+  fill: none;
+}
+
+.geneva-summary__grid-line {
+  stroke: color-mix(in srgb, var(--wc-color-border) 70%, transparent);
+  stroke-width: 1;
+  fill: none;
+}
+
+.geneva-summary__axis-label,
+.geneva-summary__tick-label {
+  fill: var(--wc-color-text-muted);
+  font-size: 0.84rem;
+}
+
+.geneva-summary__axis-label {
+  font-weight: var(--wc-font-weight-semibold);
+}
+
+.geneva-summary__series-line {
+  fill: none;
+  stroke-width: 2;
+}
+
+.geneva-summary__series-line--0 {
+  stroke: var(--wc-color-accent);
+}
+
+.geneva-summary__series-line--1 {
+  stroke: var(--wc-color-link);
+}
+
+.geneva-summary__series-line--2 {
+  stroke: var(--wc-color-positive);
+}
+
+.geneva-summary__series-line--3 {
+  stroke: var(--wc-color-attention);
+}
+
+.geneva-summary__series-line--4 {
+  stroke: var(--wc-color-critical);
+}
+
+.geneva-summary__series-line--fallback {
+  stroke: color-mix(in srgb, var(--wc-color-link) 55%, var(--wc-color-text) 45%);
+}
+
+.geneva-summary__marker-group {
+  cursor: pointer;
+  outline: none;
+}
+
+.geneva-summary__marker-circle {
+  stroke: var(--wc-color-surface);
+  stroke-width: 1.5;
+}
+
+.geneva-summary__marker-circle--0 {
+  fill: var(--wc-color-accent);
+}
+
+.geneva-summary__marker-circle--1 {
+  fill: var(--wc-color-link);
+}
+
+.geneva-summary__marker-circle--2 {
+  fill: var(--wc-color-positive);
+}
+
+.geneva-summary__marker-circle--3 {
+  fill: var(--wc-color-attention);
+}
+
+.geneva-summary__marker-circle--4 {
+  fill: var(--wc-color-critical);
+}
+
+.geneva-summary__marker-circle--fallback {
+  fill: color-mix(in srgb, var(--wc-color-link) 55%, var(--wc-color-text) 45%);
+}
+
+.geneva-summary__marker-label {
+  fill: var(--wc-color-text);
+  font-size: 0.73rem;
+  text-anchor: middle;
+  dominant-baseline: central;
+  font-variant-numeric: tabular-nums;
+  pointer-events: none;
+}
+
+.geneva-summary__marker-group:focus-visible .geneva-summary__marker-circle {
+  stroke: var(--wc-color-accent);
+  stroke-width: 3;
+}
+
+.geneva-summary__marker-group.is-selected .geneva-summary__marker-circle {
+  stroke: var(--wc-color-accent);
+  stroke-width: 2.8;
+  fill: color-mix(in srgb, var(--wc-color-accent-soft) 65%, var(--wc-color-surface));
+}
+
+.geneva-summary__marker-group.is-selected .geneva-summary__marker-label {
+  font-weight: var(--wc-font-weight-semibold);
+}
+
+.geneva-summary__event-select {
+  width: 100%;
+  padding: 0;
+}
+
+.geneva-summary__event-row {
+  cursor: pointer;
+}
+
+.geneva-summary__event-row.is-selected > td {
+  background: color-mix(in srgb, var(--wc-color-accent-soft) 60%, var(--wc-color-surface));
+}
+
+.geneva-summary__event-row.is-selected > td:first-child {
+  box-shadow: inset 3px 0 0 var(--wc-color-accent);
+}
+
+.geneva-summary__event-row:focus-visible {
+  outline: 2px solid color-mix(in srgb, var(--wc-color-accent) 55%, transparent);
+  outline-offset: -2px;
+}
+
+.geneva-summary__status-pill {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--wc-space-xs);
+  border-radius: var(--wc-radius-pill);
+  padding: 0 var(--wc-space-sm);
+  min-height: 1.5rem;
+  font-size: 0.84rem;
+  border: 1px solid var(--wc-color-border);
+  background: var(--wc-color-surface-alt);
+}
+
+.geneva-summary__status-pill[data-status="completed"] {
+  color: var(--wc-color-positive);
+  border-color: color-mix(in srgb, var(--wc-color-positive) 45%, var(--wc-color-border));
+  background: color-mix(in srgb, var(--wc-color-positive-soft) 70%, var(--wc-color-surface));
+}
+
+.geneva-summary__status-pill[data-status="failed"] {
+  color: var(--wc-color-critical);
+  border-color: color-mix(in srgb, var(--wc-color-critical) 45%, var(--wc-color-border));
+  background: color-mix(in srgb, var(--wc-color-critical-soft) 70%, var(--wc-color-surface));
+}
+
+.geneva-summary__status-pill[data-status="unavailable"] {
+  color: var(--wc-color-attention);
+  border-color: color-mix(in srgb, var(--wc-color-attention) 40%, var(--wc-color-border));
+  background: color-mix(in srgb, var(--wc-color-attention-soft) 70%, var(--wc-color-surface));
+}
+
+.geneva-summary__legend-table {
+  margin-top: var(--wc-space-sm);
+}
+
+@media (max-width: 1080px) {
+  .geneva-summary__filters {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+}
+
+@media (max-width: 760px) {
+  .geneva-summary__filters {
+    grid-template-columns: minmax(0, 1fr);
+  }
+
+  .geneva-summary__chart {
+    min-height: 280px;
+  }
+}

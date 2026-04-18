@@ -1,7 +1,7 @@
 # PROJECT_TRACKER.md
 > Kanban board for wepppy work packages and vision items
 
-**Last Updated**: 2026-04-14  
+**Last Updated**: 2026-04-18  
 **Active Packages**: 2  
 **Quick Links**: [Work Packages Directory](docs/work-packages/) | [God-Tier Prompting Strategy](docs/god-tier-prompting-strategy.md)
 
@@ -226,6 +226,11 @@ Currently active work packages. Limit to 2-4 packages to maintain focus.
 ## ✅ Done
 
 Recently completed work packages. Archived immediately upon completion.
+
+### Geneva Interactive Summary Report (Retroactive) (2026-04-18)
+**Status**: ✅ **COMPLETE**  
+**Link**: [docs/work-packages/20260418_geneva_interactive_summary_report/](docs/work-packages/20260418_geneva_interactive_summary_report/)  
+**Summary**: Recorded retroactive closure for the completed Geneva summary report upgrade. Work shipped interactive `/query/geneva/summary` and `/report/geneva/summary` contracts (filters/options/chart metadata/selected storm/event table), canonical Pure report rendering, marker-to-table linkage, and review-driven hardening (stale-summary suppression, payload sanitization, `no-store` response headers). Follow-on runtime fixes ensured `_base_report.htm` shell dependencies are always provided (`ron`, `current_ron`, `unitizer_nodb`, `precisions`), and regression coverage was updated accordingly.
 
 ### Iterative First-Order Link Prune WP-10 WEPPpy E2E Cutover (2026-04-14)
 **Status**: ✅ **COMPLETE**  

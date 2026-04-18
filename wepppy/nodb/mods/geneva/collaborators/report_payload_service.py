@@ -3,10 +3,28 @@ from __future__ import annotations
 from typing import TYPE_CHECKING, Any
 
 from wepppy.nodb.mods.geneva.errors import GenevaValidationError
-from wepppy.nodb.mods.geneva.schemas import validate_measure_id
+from wepppy.nodb.mods.geneva.schemas import (
+    GENEVA_DATASOURCE_IDS,
+    GENEVA_MEASURE_IDS,
+    validate_measure_id,
+)
 
 if TYPE_CHECKING:
     from wepppy.nodb.mods.geneva.geneva import Geneva
+
+
+_CANONICAL_DATASOURCE_OPTIONS: tuple[str, ...] = ("all", *GENEVA_DATASOURCE_IDS)
+_DURATION_MARKER_LABELS: dict[int, str] = {
+    5: "5m",
+    10: "10m",
+    30: "30m",
+    60: "1h",
+    120: "2h",
+    180: "3h",
+    360: "6h",
+    720: "12h",
+    1440: "24h",
+}
 
 
 class GenevaReportPayloadService:
@@ -19,14 +37,21 @@ class GenevaReportPayloadService:
         datasource_id: str = "all",
         ari_years: list[int] | tuple[int, ...] | None = None,
         measure: str = "peak_discharge",
+        selected_storm_id: str | None = None,
     ) -> dict[str, Any]:
         panel = geneva.frequency_panel_service.get_frequency_panel(geneva)
         measure_id = self._validate_measure(measure)
+        datasource_filter = self._validate_datasource_filter(datasource_id)
 
         event_table_all = self._build_event_table(geneva, panel)
-        available_ari_years = sorted({int(row["ari_years"]) for row in event_table_all})
+        available_ari_years = sorted(
+            {
+                int(row["ari_years"])
+                for row in event_table_all
+                if isinstance(row.get("ari_years"), int) and int(row["ari_years"]) > 0
+            }
+        )
 
-        datasource_filter = self._validate_datasource_filter(datasource_id, panel)
         selected_ari = self._normalize_ari_filter(
             ari_years=ari_years,
             available_ari_years=available_ari_years,
@@ -39,34 +64,55 @@ class GenevaReportPayloadService:
             and row["ari_years"] in selected_ari
         ]
 
-        chart = self._build_chart(filtered_rows, measure_id)
-        warnings = list(geneva._warnings) + list(panel.get("warnings", []) or [])
+        selected_storm = self._normalize_selected_storm_id(
+            requested_storm_id=selected_storm_id,
+            rows=filtered_rows,
+        )
+        chart = self._build_chart(filtered_rows, measure_id, selected_storm)
+        filter_options = self._build_filter_options(panel=panel, event_rows=event_table_all)
+        warnings = self._build_warning_list(geneva=geneva, panel=panel)
+        errors = list(getattr(geneva, "_errors", []) or [])
 
         return {
+            "schema_version": int(panel.get("schema_version", 1) or 1),
             "filters": {
                 "datasource_id": datasource_filter,
                 "ari_years": selected_ari,
                 "measure": measure_id,
             },
+            "filter_options": filter_options,
             "assumptions": {
                 "arc_condition": "arc_ii",
                 "storm_distribution_assumption": "neh4_type_b",
                 "uniform_rainfall_assumed": True,
             },
             "chart": chart,
+            "selected_storm_id": selected_storm,
             "event_table": filtered_rows,
-            "warnings": warnings,
+            "warnings": self._sanitize_message_entries(warnings),
+            "errors": self._sanitize_message_entries(errors),
         }
 
     def _build_event_table(self, geneva: "Geneva", panel: dict[str, Any]) -> list[dict[str, Any]]:
         artifact_io = geneva.artifact_io
         wd = geneva.wd
+        run_summary = dict(getattr(geneva, "_run_summary", {}) or {})
+        failed_storm_ids = {
+            str(storm_id)
+            for storm_id in run_summary.get("failed_storm_ids", []) or []
+            if str(storm_id).strip()
+        }
+        completed_storm_ids = {
+            str(storm_id)
+            for storm_id in run_summary.get("completed_storm_ids", []) or []
+            if str(storm_id).strip()
+        }
+        run_warning_counts = self._storm_count_index(run_summary.get("warnings", []), key="storm_id")
+        run_error_counts = self._storm_count_index(run_summary.get("errors", []), key="storm_id")
 
         rows: list[dict[str, Any]] = []
         for cell in panel.get("cells", []):
             if not isinstance(cell, dict):
-                continue
-            if str(cell.get("availability", "")) != "available":
                 continue
 
             storm_id = str(cell.get("storm_id", "")).strip()
@@ -74,15 +120,22 @@ class GenevaReportPayloadService:
                 continue
 
             summary_relpath = f"storms/{storm_id}/summary.json"
-            if not artifact_io.exists(wd, summary_relpath):
-                continue
-
-            summary = artifact_io.read_json(wd, summary_relpath)
-            metrics = dict(summary.get("summary_metrics", {}) or {})
+            summary_exists = artifact_io.exists(wd, summary_relpath)
+            summary = artifact_io.read_json(wd, summary_relpath) if summary_exists else {}
+            status = self._resolve_row_status(
+                cell=cell,
+                summary=summary,
+                failed_storm_ids=failed_storm_ids,
+                completed_storm_ids=completed_storm_ids,
+            )
+            metrics = dict(summary.get("summary_metrics", {}) or {}) if status == "completed" else {}
+            summary_warnings = list(summary.get("warnings", []) or []) if status == "completed" else []
+            summary_errors = list(summary.get("errors", []) or []) if status == "completed" else []
 
             rows.append(
                 {
                     "storm_id": storm_id,
+                    "status": status,
                     "datasource_id": str(cell.get("datasource_id", "")),
                     "duration_minutes": int(cell.get("duration_minutes", 0) or 0),
                     "depth_mm": self._to_float(cell.get("depth_mm")),
@@ -93,10 +146,21 @@ class GenevaReportPayloadService:
                         or "neh4_type_b"
                     ),
                     "ari_years": int(cell.get("ari_years", 0) or 0),
-                    "peak_discharge": self._to_float(metrics.get("peak_discharge")),
-                    "time_to_peak": self._to_float(metrics.get("time_to_peak")),
-                    "runoff_volume": self._to_float(metrics.get("runoff_volume")),
-                    "runoff_depth": self._to_float(metrics.get("runoff_depth")),
+                    "peak_discharge": {
+                        "value": self._to_float(metrics.get("peak_discharge")),
+                        "unit": "m3_s",
+                    },
+                    "time_to_peak_minutes": self._to_float(metrics.get("time_to_peak")),
+                    "runoff_volume": {
+                        "value": self._to_float(metrics.get("runoff_volume")),
+                        "unit": "m3",
+                    },
+                    "runoff_depth": {
+                        "value": self._to_float(metrics.get("runoff_depth")),
+                        "unit": "mm",
+                    },
+                    "warning_count": int(len(summary_warnings)) + int(run_warning_counts.get(storm_id, 0)),
+                    "error_count": int(len(summary_errors)) + int(run_error_counts.get(storm_id, 0)),
                 }
             )
 
@@ -110,13 +174,31 @@ class GenevaReportPayloadService:
         )
         return rows
 
-    def _build_chart(self, rows: list[dict[str, Any]], measure: str) -> dict[str, Any]:
+    def _build_chart(
+        self,
+        rows: list[dict[str, Any]],
+        measure: str,
+        selected_storm_id: str | None,
+    ) -> dict[str, Any]:
         grouped: dict[int, list[dict[str, Any]]] = {}
         for row in rows:
-            if row.get(measure) is None:
+            if row.get("status") != "completed":
+                continue
+            measure_payload = row.get(measure) if isinstance(row.get(measure), dict) else {}
+            measure_value = self._to_float(measure_payload.get("value"))
+            intensity_mm_per_hr = self._to_float(row.get("intensity_mm_per_hr"))
+            if measure_value is None or intensity_mm_per_hr is None:
                 continue
             ari = int(row["ari_years"])
-            grouped.setdefault(ari, []).append(row)
+            grouped.setdefault(ari, []).append(
+                {
+                    "storm_id": str(row["storm_id"]),
+                    "duration_minutes": int(row["duration_minutes"]),
+                    "datasource_id": str(row["datasource_id"]),
+                    "intensity_mm_per_hr": intensity_mm_per_hr,
+                    "measure_value": measure_value,
+                }
+            )
 
         series: list[dict[str, Any]] = []
         for ari in sorted(grouped):
@@ -130,14 +212,21 @@ class GenevaReportPayloadService:
             )
             series.append(
                 {
+                    "series_id": f"ari_{ari}",
+                    "series_label": f"ARI {ari}-year",
                     "ari_years": ari,
                     "points": [
                         {
                             "storm_id": row["storm_id"],
                             "duration_minutes": row["duration_minutes"],
                             "datasource_id": row["datasource_id"],
+                            "intensity_mm_per_hr": row["intensity_mm_per_hr"],
+                            "measure_value": row["measure_value"],
+                            "marker_label": self._duration_marker_label(int(row["duration_minutes"])),
+                            "selected": selected_storm_id is not None
+                            and str(row["storm_id"]) == selected_storm_id,
                             "x": row["intensity_mm_per_hr"],
-                            "y": row[measure],
+                            "y": row["measure_value"],
                         }
                         for row in points
                     ],
@@ -147,8 +236,90 @@ class GenevaReportPayloadService:
         return {
             "x_axis": "intensity_mm_per_hr",
             "y_axis": "selected_measure",
+            "series_grouping": "ari_years",
+            "marker_grouping": "duration_minutes",
             "series": series,
         }
+
+    def _build_filter_options(
+        self,
+        *,
+        panel: dict[str, Any],
+        event_rows: list[dict[str, Any]],
+    ) -> dict[str, Any]:
+        ari_years = self._sorted_positive_ints(
+            panel.get("ari_years"),
+            fallback=[row.get("ari_years") for row in event_rows],
+        )
+        durations_minutes = self._sorted_positive_ints(
+            panel.get("durations_minutes"),
+            fallback=[row.get("duration_minutes") for row in event_rows],
+        )
+        datasource_availability = self._datasource_availability(panel)
+        return {
+            "datasource_ids": list(_CANONICAL_DATASOURCE_OPTIONS),
+            "datasource_availability": datasource_availability,
+            "ari_years": ari_years,
+            "measures": list(GENEVA_MEASURE_IDS),
+            "duration_minutes": durations_minutes,
+        }
+
+    def _datasource_availability(self, panel: dict[str, Any]) -> dict[str, bool]:
+        availability: dict[str, bool] = {datasource_id: False for datasource_id in GENEVA_DATASOURCE_IDS}
+        for cell in panel.get("cells", []):
+            if not isinstance(cell, dict):
+                continue
+            datasource_id = str(cell.get("datasource_id", "")).strip()
+            if datasource_id not in availability:
+                continue
+            if str(cell.get("availability", "unavailable")).strip() == "available":
+                availability[datasource_id] = True
+        return availability
+
+    def _build_warning_list(self, *, geneva: "Geneva", panel: dict[str, Any]) -> list[Any]:
+        warnings: list[Any] = []
+        warnings.extend(list(getattr(geneva, "_warnings", []) or []))
+        warnings.extend(list(panel.get("warnings", []) or []))
+        return warnings
+
+    def _resolve_row_status(
+        self,
+        *,
+        cell: dict[str, Any],
+        summary: dict[str, Any],
+        failed_storm_ids: set[str],
+        completed_storm_ids: set[str],
+    ) -> str:
+        availability = str(cell.get("availability", "unavailable")).strip()
+        storm_id = str(cell.get("storm_id", "")).strip()
+        if availability != "available":
+            return "unavailable"
+
+        if storm_id and storm_id in failed_storm_ids:
+            return "failed"
+
+        if completed_storm_ids:
+            if storm_id and storm_id in completed_storm_ids:
+                return "completed"
+            return "unavailable"
+
+        summary_status = str(summary.get("status", "")).strip()
+        if summary_status in {"completed", "failed"}:
+            return summary_status
+        return "unavailable"
+
+    def _storm_count_index(self, rows: Any, *, key: str) -> dict[str, int]:
+        counts: dict[str, int] = {}
+        if not isinstance(rows, list):
+            return counts
+        for row in rows:
+            if not isinstance(row, dict):
+                continue
+            storm_id = str(row.get(key, "")).strip()
+            if not storm_id:
+                continue
+            counts[storm_id] = int(counts.get(storm_id, 0)) + 1
+        return counts
 
     def _validate_measure(self, measure: str) -> str:
         try:
@@ -161,19 +332,18 @@ class GenevaReportPayloadService:
                 status_code=400,
             ) from exc
 
-    def _validate_datasource_filter(self, datasource_id: str, panel: dict[str, Any]) -> str:
+    def _validate_datasource_filter(self, datasource_id: str) -> str:
         value = str(datasource_id or "all").strip() or "all"
         if value == "all":
             return value
 
-        available = set(panel.get("datasource_ids", []))
-        if value not in available:
+        if value not in GENEVA_DATASOURCE_IDS:
             raise GenevaValidationError(
-                "datasource_id must be one of panel datasource_ids or all",
+                "datasource_id must be one of all, cligen_freq, noaa14_pds",
                 code="invalid_input",
                 details={
                     "datasource_id": value,
-                    "available_datasource_ids": sorted(available),
+                    "available_datasource_ids": list(_CANONICAL_DATASOURCE_OPTIONS),
                 },
                 status_code=400,
             )
@@ -204,6 +374,43 @@ class GenevaReportPayloadService:
             )
         return sorted(set(requested))
 
+    def _normalize_selected_storm_id(
+        self,
+        *,
+        requested_storm_id: str | None,
+        rows: list[dict[str, Any]],
+    ) -> str | None:
+        if not rows:
+            return None
+
+        requested = str(requested_storm_id or "").strip()
+        if requested and any(str(row.get("storm_id", "")) == requested for row in rows):
+            return requested
+
+        for row in rows:
+            if row.get("status") == "completed":
+                return str(row.get("storm_id", ""))
+        return str(rows[0].get("storm_id", "")) or None
+
+    def _sorted_positive_ints(self, values: Any, *, fallback: list[Any]) -> list[int]:
+        source = values if isinstance(values, list) else fallback
+        normalized: set[int] = set()
+        for value in source:
+            try:
+                parsed = int(value)
+            except (TypeError, ValueError):
+                continue
+            if parsed > 0:
+                normalized.add(parsed)
+        return sorted(normalized)
+
+    def _duration_marker_label(self, duration_minutes: int) -> str:
+        if duration_minutes in _DURATION_MARKER_LABELS:
+            return _DURATION_MARKER_LABELS[duration_minutes]
+        if duration_minutes > 0 and duration_minutes % 60 == 0:
+            return f"{duration_minutes // 60}h"
+        return f"{duration_minutes}m"
+
     def _to_float(self, value: Any) -> float | None:
         if value in (None, ""):
             return None
@@ -211,6 +418,33 @@ class GenevaReportPayloadService:
             return float(value)
         except (TypeError, ValueError):
             return None
+
+    def _sanitize_message_entries(self, rows: Any) -> list[dict[str, Any]]:
+        if not isinstance(rows, list):
+            return []
+
+        allowed_keys = (
+            "code",
+            "message",
+            "storm_id",
+            "datasource_id",
+            "duration_minutes",
+            "ari_years",
+            "reason_code",
+        )
+        sanitized: list[dict[str, Any]] = []
+        for row in rows:
+            if isinstance(row, dict):
+                cleaned = {key: row[key] for key in allowed_keys if key in row and row.get(key) not in (None, "")}
+                if cleaned:
+                    sanitized.append(cleaned)
+                    continue
+                row = str(row)
+
+            text = str(row).strip()
+            if text:
+                sanitized.append({"message": text})
+        return sanitized
 
 
 __all__ = ["GenevaReportPayloadService"]

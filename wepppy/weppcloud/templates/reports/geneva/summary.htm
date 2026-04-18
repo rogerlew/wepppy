@@ -1,31 +1,150 @@
-{% extends "base_pure.htm" %}
+{% extends "reports/_base_report.htm" %}
+{% from "controls/_pure_macros.html" import select_field %}
 
-{% block title %}Geneva Summary{% endblock %}
+{% block report_title %}Geneva Summary{% endblock %}
 
-{% block body %}
-<div class="wc-container wc-stack">
+{% block head_extras %}
+{{ super() }}
+<link rel="stylesheet" href="{{ static_url('css/geneva-summary-report.css') }}">
+{% endblock %}
+
+{% block report_content %}
+{% set run_base = site_prefix ~ "/runs/" ~ (runid | urlencode) ~ "/" ~ (config | urlencode) %}
+{% set datasource_options = [
+  ("all", "All Datasources"),
+  ("cligen_freq", "CLIGEN Frequency"),
+  ("noaa14_pds", "NOAA Atlas 14 PDS")
+] %}
+{% set ari_ns = namespace(options=[("all", "All ARI Years")]) %}
+{% for ari in summary_payload.filter_options.ari_years %}
+  {% set ari_ns.options = ari_ns.options + [(ari|string, "ARI " ~ ari ~ "-year")] %}
+{% endfor %}
+{% set measure_labels = {
+  "peak_discharge": "Peak Discharge",
+  "runoff_depth": "Runoff Depth",
+  "runoff_volume": "Runoff Volume"
+} %}
+{% set measure_ns = namespace(options=[]) %}
+{% for measure_id in summary_payload.filter_options.measures %}
+  {% set measure_ns.options = measure_ns.options + [(measure_id, measure_labels.get(measure_id, measure_id))] %}
+{% endfor %}
+{% set selected_ari = "all" %}
+{% if summary_payload.filters.ari_years and summary_payload.filters.ari_years | length == 1 %}
+  {% set selected_ari = summary_payload.filters.ari_years[0] | string %}
+{% endif %}
+
+<section class="wc-stack geneva-summary"
+         data-geneva-summary-root
+         data-query-url="{{ run_base ~ '/query/geneva/summary' }}">
+  <script id="geneva-summary-payload" type="application/json">{{ summary_payload | tojson }}</script>
+
   <header class="wc-stack-sm">
-    <h1 class="wc-heading__title">Geneva Summary</h1>
-    <p class="wc-text-muted">Run: <code>{{ runid }}/{{ config }}</code></p>
+    <h1 class="wc-heading__title">Geneva Interactive Summary</h1>
+    <p class="wc-text-muted">
+      Compare datasource/ARI storm events and select chart markers to focus matching table rows.
+    </p>
   </header>
 
-  <section class="wc-panel wc-stack-sm">
-    <h2 class="wc-heading__subtitle">Report Filters</h2>
-    <dl>
-      <dt>Datasource</dt>
-      <dd>{{ summary_payload.filters.datasource_id }}</dd>
-      <dt>ARI Years</dt>
-      <dd>{{ summary_payload.filters.ari_years | join(', ') if summary_payload.filters.ari_years else 'none' }}</dd>
-      <dt>Measure</dt>
-      <dd>{{ summary_payload.filters.measure }}</dd>
-    </dl>
+  <section class="wc-panel wc-stack">
+    <header class="wc-stack-sm">
+      <h2 class="wc-heading__subtitle">Filters</h2>
+      <p class="wc-text-muted">Filter the storm panel and refresh the chart and event table.</p>
+    </header>
+    <form id="geneva-summary-filters" class="pure-form pure-form-stacked geneva-summary__filters" action="javascript:void(0);">
+      {{ select_field(
+           "geneva-summary-datasource",
+           "Climate Frequency Datasource",
+           datasource_options,
+           selected=summary_payload.filters.datasource_id,
+           attrs={"data-geneva-summary-field": "datasource"},
+           max_width=None
+      ) }}
+      {{ select_field(
+           "geneva-summary-ari",
+           "Return Period Interval (ARI years)",
+           ari_ns.options,
+           selected=selected_ari,
+           attrs={"data-geneva-summary-field": "ari"},
+           max_width=None
+      ) }}
+      {{ select_field(
+           "geneva-summary-measure",
+           "Measure of Interest",
+           measure_ns.options,
+           selected=summary_payload.filters.measure,
+           attrs={"data-geneva-summary-field": "measure"},
+           max_width=None
+      ) }}
+    </form>
+    <p class="wc-text-muted geneva-summary__availability-note"
+       data-geneva-summary-noaa-note
+       hidden>
+      NOAA Atlas 14 data is unavailable for this run; CLIGEN filters remain active.
+    </p>
   </section>
 
-  <section class="wc-panel wc-stack-sm">
-    <h2 class="wc-heading__subtitle">Event Count</h2>
-    <p>{{ summary_payload.event_table | length }} storms in current filter selection.</p>
+  <section class="wc-panel wc-stack">
+    <header class="wc-stack-sm">
+      <h2 class="wc-heading__subtitle">Storm Measure vs Intensity</h2>
+      <p class="wc-text-muted">Click or press Enter/Space on a marker to select its storm event.</p>
+    </header>
+    <div class="geneva-summary__chart-frame" data-geneva-summary-chart-frame>
+      <div class="geneva-summary__chart" data-geneva-summary-chart></div>
+    </div>
+    <p class="wc-text-muted" data-geneva-summary-chart-empty hidden>No completed storms match the selected filters.</p>
+    <div class="wc-table-wrapper">
+      <table class="wc-table wc-table--dense geneva-summary__legend-table">
+        <caption class="wc-sr-only">Duration marker legend</caption>
+        <thead>
+          <tr>
+            <th scope="col">Duration</th>
+            <th scope="col">Marker label</th>
+          </tr>
+        </thead>
+        <tbody data-geneva-summary-marker-legend></tbody>
+      </table>
+    </div>
   </section>
 
-  <script id="geneva-summary-payload" type="application/json">{{ summary_payload | tojson }}</script>
-</div>
+  <section class="wc-panel wc-stack">
+    <header class="wc-stack-sm">
+      <h2 class="wc-heading__subtitle">Event Table</h2>
+      <p class="wc-text-muted">Selected chart marker and selected table row stay synchronized.</p>
+    </header>
+    <div class="wc-table-wrapper">
+      <table class="wc-table wc-table--dense" id="geneva-summary-event-table">
+        <thead>
+          <tr>
+            <th scope="col" class="sorttable_nosort">Select</th>
+            <th scope="col">Storm ID</th>
+            <th scope="col">Status</th>
+            <th scope="col">Datasource</th>
+            <th scope="col" class="wc-text-right">Duration (min)</th>
+            <th scope="col" class="wc-text-right">ARI (years)</th>
+            <th scope="col" class="wc-text-right">Depth (mm)</th>
+            <th scope="col" class="wc-text-right">Intensity (mm/hr)</th>
+            <th scope="col">Distribution</th>
+            <th scope="col" class="wc-text-right">Peak Discharge</th>
+            <th scope="col" class="wc-text-right">Time to Peak (min)</th>
+            <th scope="col" class="wc-text-right">Runoff Volume</th>
+            <th scope="col" class="wc-text-right">Runoff Depth</th>
+            <th scope="col" class="wc-text-right">Warnings</th>
+            <th scope="col" class="wc-text-right">Errors</th>
+          </tr>
+        </thead>
+        <tbody data-geneva-summary-event-body></tbody>
+      </table>
+    </div>
+    <p class="wc-text-muted" data-geneva-summary-events-empty hidden>No storms match the selected filters.</p>
+  </section>
+
+  <section class="wc-stack-sm" data-geneva-summary-messages hidden>
+    <div class="wc-alert wc-alert--warning" role="alert" data-geneva-summary-warnings hidden>
+      <p class="wc-alert__body" data-geneva-summary-warnings-body></p>
+    </div>
+    <div class="wc-alert wc-alert--error" role="alert" data-geneva-summary-errors hidden>
+      <p class="wc-alert__body" data-geneva-summary-errors-body></p>
+    </div>
+  </section>
+</section>
 {% endblock %}

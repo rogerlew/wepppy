@@ -191,19 +191,35 @@ def test_geneva_template_renders_parameterized_controls_and_standard_button_row(
 def test_geneva_summary_report_template_embeds_single_json_payload(jinja_env: Environment) -> None:
     template = jinja_env.get_template("reports/geneva/summary.htm")
     summary_payload = {
+        "schema_version": 1,
         "filters": {
             "datasource_id": "all",
             "ari_years": [10],
             "measure": "peak_discharge",
+        },
+        "filter_options": {
+            "datasource_ids": ["all", "cligen_freq", "noaa14_pds"],
+            "datasource_availability": {"cligen_freq": True, "noaa14_pds": False},
+            "ari_years": [10, 25],
+            "measures": ["peak_discharge", "runoff_depth", "runoff_volume"],
+            "duration_minutes": [30, 60],
         },
         "assumptions": {
             "arc_condition": "arc_ii",
             "storm_distribution_assumption": "neh4_type_b",
             "uniform_rainfall_assumed": True,
         },
-        "chart": {"x_axis": "intensity_mm_per_hr", "y_axis": "selected_measure", "series": []},
+        "chart": {
+            "x_axis": "intensity_mm_per_hr",
+            "y_axis": "selected_measure",
+            "series_grouping": "ari_years",
+            "marker_grouping": "duration_minutes",
+            "series": [],
+        },
+        "selected_storm_id": None,
         "event_table": [],
         "warnings": [],
+        "errors": [],
     }
     rendered = template.render(
         runid="run-1",
@@ -214,6 +230,13 @@ def test_geneva_summary_report_template_embeds_single_json_payload(jinja_env: En
     assert rendered.count('id="geneva-summary-payload"') == 1
     assert 'type="application/json"' in rendered
     assert '"storm_distribution_assumption": "neh4_type_b"' in rendered
+    assert 'id="geneva-summary-datasource"' in rendered
+    assert 'id="geneva-summary-ari"' in rendered
+    assert 'id="geneva-summary-measure"' in rendered
+    assert 'data-query-url="/runs/run-1/cfg/query/geneva/summary"' in rendered
+    assert 'class="wc-panel wc-stack"' in rendered
+    assert 'data-geneva-summary-chart' in rendered
+    assert 'data-geneva-summary-event-body' in rendered
 
 
 def test_roads_summary_report_template_renders_with_base_layout(jinja_env: Environment) -> None:

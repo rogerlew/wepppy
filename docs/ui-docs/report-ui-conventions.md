@@ -2,6 +2,8 @@
 
 This note captures the patterns we just introduced while modernizing the WEPP report pages. Use it whenever you touch report templates so we keep behavior and styling consistent.
 
+For route/template contract details specific to `reports/_base_report.htm`, also read `docs/dev-notes/weppcloud-base-report-shell.md`.
+
 ## Layout & framing
 - Reports always render in a full–width container. Override `body_container_class` **and** `header_container_class` with `wc-container wc-container--fluid` (see `reports/_base_report.htm`).
 - Pages with a run context reuse the Pure header, not the old Bootstrap nav. `reports/_base_report.htm` already injects the run badge, name/scenario inputs, PowerUser/Unitizer toggles, etc. **Do not** include `header/_run_header_fixed.htm` directly.

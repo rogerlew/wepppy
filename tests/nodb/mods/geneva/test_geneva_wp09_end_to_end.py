@@ -451,10 +451,10 @@ def test_wp09_collapsed_vs_uncollapsed_sensitivity_thresholds(
     default_row = default_geneva.query_summary_payload(measure="runoff_depth")["event_table"][0]
     cross_row = cross_geneva.query_summary_payload(measure="runoff_depth")["event_table"][0]
 
-    assert _rel_delta(default_row["runoff_depth"], reference["runoff_depth"]) <= 0.02
-    assert _rel_delta(default_row["runoff_volume"], reference["runoff_volume"]) <= 0.02
-    assert _rel_delta(default_row["peak_discharge"], reference["peak_discharge"]) <= 0.05
-    assert _rel_delta(cross_row["runoff_depth"], reference["runoff_depth"]) <= 0.02
+    assert _rel_delta(default_row["runoff_depth"]["value"], reference["runoff_depth"]) <= 0.02
+    assert _rel_delta(default_row["runoff_volume"]["value"], reference["runoff_volume"]) <= 0.02
+    assert _rel_delta(default_row["peak_discharge"]["value"], reference["peak_discharge"]) <= 0.05
+    assert _rel_delta(cross_row["runoff_depth"]["value"], reference["runoff_depth"]) <= 0.02
 
     assert default_kernel.prepare_payloads[0]["allow_cross_hsg_merge"] is False
     assert cross_kernel.prepare_payloads[0]["allow_cross_hsg_merge"] is True

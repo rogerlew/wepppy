@@ -306,12 +306,14 @@ class Geneva(NoDbBase):
         datasource_id: str = "all",
         ari_years: list[int] | tuple[int, ...] | None = None,
         measure: str = "peak_discharge",
+        selected_storm_id: str | None = None,
     ) -> dict[str, Any]:
         return self.report_payload_service.build_summary_payload(
             self,
             datasource_id=datasource_id,
             ari_years=ari_years,
             measure=measure,
+            selected_storm_id=selected_storm_id,
         )
 
     def assert_task_guardrails(self) -> None:

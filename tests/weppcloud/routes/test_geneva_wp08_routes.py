@@ -167,6 +167,7 @@ class GenevaRouteStub:
         datasource_id: str = "all",
         ari_years: list[int] | tuple[int, ...] | None = None,
         measure: str = "peak_discharge",
+        selected_storm_id: str | None = None,
     ) -> dict[str, Any]:
         selected_measure = validate_measure_id(measure)
         datasource_filter = str(datasource_id or "all")
@@ -181,23 +182,35 @@ class GenevaRouteStub:
         event_table = [
             {
                 "storm_id": "cligen_30m_10y",
+                "status": "completed",
                 "datasource_id": "cligen_freq",
                 "duration_minutes": 30,
                 "depth_mm": 20.0,
                 "intensity_mm_per_hr": 40.0,
                 "distribution_type": "neh4_type_b",
                 "ari_years": 10,
-                "peak_discharge": 1.2,
-                "time_to_peak": 5.0,
-                "runoff_volume": 100.0,
-                "runoff_depth": 4.0,
+                "peak_discharge": {"value": 1.2, "unit": "m3_s"},
+                "time_to_peak_minutes": 5.0,
+                "runoff_volume": {"value": 100.0, "unit": "m3"},
+                "runoff_depth": {"value": 4.0, "unit": "mm"},
+                "warning_count": 0,
+                "error_count": 0,
             }
         ]
+        measure_value = event_table[0][selected_measure]["value"]
         return {
+            "schema_version": 1,
             "filters": {
                 "datasource_id": datasource_filter,
                 "ari_years": ari_filter,
                 "measure": selected_measure,
+            },
+            "filter_options": {
+                "datasource_ids": ["all", "cligen_freq", "noaa14_pds"],
+                "datasource_availability": {"cligen_freq": True, "noaa14_pds": False},
+                "ari_years": [10],
+                "measures": ["peak_discharge", "runoff_depth", "runoff_volume"],
+                "duration_minutes": [30],
             },
             "assumptions": {
                 "arc_condition": "arc_ii",
@@ -207,23 +220,32 @@ class GenevaRouteStub:
             "chart": {
                 "x_axis": "intensity_mm_per_hr",
                 "y_axis": "selected_measure",
+                "series_grouping": "ari_years",
+                "marker_grouping": "duration_minutes",
                 "series": [
                     {
+                        "series_id": "ari_10",
+                        "series_label": "ARI 10-year",
                         "ari_years": 10,
                         "points": [
                             {
                                 "storm_id": "cligen_30m_10y",
                                 "duration_minutes": 30,
                                 "datasource_id": "cligen_freq",
+                                "intensity_mm_per_hr": 40.0,
+                                "measure_value": measure_value,
+                                "marker_label": "30m",
                                 "x": 40.0,
-                                "y": event_table[0][selected_measure],
+                                "y": measure_value,
                             }
                         ],
                     }
                 ],
             },
+            "selected_storm_id": selected_storm_id or "cligen_30m_10y",
             "event_table": event_table,
             "warnings": [],
+            "errors": [],
         }
 
 
@@ -403,15 +425,24 @@ def test_query_and_report_summary_payloads_stay_in_sync(geneva_wp08_client: Any)
         "?datasource_id=cligen_freq&ari_years=10&measure=runoff_depth"
     )
     assert query_response.status_code == 200
+    assert query_response.headers["Cache-Control"] == "no-store, no-cache, must-revalidate, max-age=0"
+    assert query_response.headers["Pragma"] == "no-cache"
+    assert query_response.headers["Expires"] == "0"
     query_payload = query_response.get_json()
+    assert query_payload["schema_version"] == 1
     assert query_payload["filters"]["datasource_id"] == "cligen_freq"
     assert query_payload["filters"]["measure"] == "runoff_depth"
+    assert query_payload["filter_options"]["datasource_ids"] == ["all", "cligen_freq", "noaa14_pds"]
+    assert query_payload["selected_storm_id"] == "cligen_30m_10y"
 
     report_response = client.get(
         f"/runs/{RUN_ID}/{CONFIG}/report/geneva/summary"
         "?datasource_id=cligen_freq&ari_years=10&measure=runoff_depth"
     )
     assert report_response.status_code == 200
+    assert report_response.headers["Cache-Control"] == "no-store, no-cache, must-revalidate, max-age=0"
+    assert report_response.headers["Pragma"] == "no-cache"
+    assert report_response.headers["Expires"] == "0"
     assert captured["template"] == "reports/geneva/summary.htm"
     assert captured["context"]["summary_payload"] == query_payload
 
