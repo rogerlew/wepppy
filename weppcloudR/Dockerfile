@@ -4,7 +4,7 @@ ENV RENV_CONFIG_CACHE_SYMLINKS=FALSE \
     RENVMGR_PATHS_CACHE=/opt/weppcloudr/renv/cache \
     RENV_PATHS_CACHE=/opt/weppcloudr/renv/cache \
     PORT=8000 \
-    # Use the OS-specific URL for binaries. rocker/r-ver:4.3.2 is Debian Bookworm.
+    # Use the OS-specific URL for binaries. rocker/r-ver:4.3.2 is Ubuntu Jammy.
     RSPM=https://packagemanager.posit.co/cran/__linux__/jammy/latest
 
 # Add prerequisites for adding the Arrow repository
@@ -41,9 +41,10 @@ RUN apt-get update && apt-get install -y --no-install-recommends \
         libsqlite3-dev \
     && rm -rf /var/lib/apt/lists/*
 
-# Install all R packages at once using pak
-RUN R -q -e "options(repos = c(CRAN = Sys.getenv('RSPM'))); install.packages('pak', dependencies = TRUE)" \
-    && R -q -e "options(repos = c(CRAN = Sys.getenv('RSPM'))); pak::pkg_install(c( \
+# Install R packages directly from RSPM. The current pak release no longer
+# loads on R 4.3.2 during image builds because its embedded cli expects
+# R_getVarEx, which is not present in this R runtime.
+RUN R -q -e "options(repos = c(CRAN = Sys.getenv('RSPM'))); install.packages(c( \
           'arrow', \
           'plumber','rmarkdown','duckdb','jsonlite','glue','logger','tidyverse', \
           'cleanrmd','plotly','furrr','janitor','htmltools','echarts4r','DT', \
