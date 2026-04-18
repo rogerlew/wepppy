@@ -1,11 +1,12 @@
-FROM rocker/r-ver:4.3.2
+FROM rocker/r-ver:4.3.2@sha256:4e32addfc4da3e660f6e0d05ce5e43d3eceb9db58a60b9a142e0dde9a654ead1
 
 ENV RENV_CONFIG_CACHE_SYMLINKS=FALSE \
     RENVMGR_PATHS_CACHE=/opt/weppcloudr/renv/cache \
     RENV_PATHS_CACHE=/opt/weppcloudr/renv/cache \
     PORT=8000 \
-    # Use the OS-specific URL for binaries. rocker/r-ver:4.3.2 is Ubuntu Jammy.
-    RSPM=https://packagemanager.posit.co/cran/__linux__/jammy/latest
+    # Pin the RSPM snapshot date so package resolution is reproducible.
+    # Base image is Ubuntu Jammy.
+    RSPM=https://packagemanager.posit.co/cran/__linux__/jammy/2026-04-17
 
 # Add prerequisites for adding the Arrow repository
 RUN apt-get update && apt-get install -y --no-install-recommends \
