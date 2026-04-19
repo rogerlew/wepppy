@@ -374,9 +374,15 @@
 
     const sourceCrs = payload.detected_crs;
     const targetCrs = payload.output_crs;
+    const projectionState =
+      typeof payload.projection_status === "string" && payload.projection_status.trim()
+        ? payload.projection_status
+        : sourceCrs
+          ? "known"
+          : "unknown";
 
     if (projectionStatus instanceof HTMLElement) {
-      projectionStatus.textContent = sourceCrs ? "known" : "unknown";
+      projectionStatus.textContent = projectionState;
     }
     if (detectedCrs instanceof HTMLElement) {
       detectedCrs.textContent = formatCrs(sourceCrs, true);
@@ -410,7 +416,7 @@
 
     const schemaRows = [];
     for (const row of schemaTableBody.querySelectorAll("tr")) {
-      if (row.children.length >= 4) {
+      if (row.children.length >= 5) {
         schemaRows.push(row);
       }
     }
@@ -435,8 +441,18 @@
       tr.appendChild(buildCell(asDisplayString(row && row.type)));
       tr.appendChild(buildCell(asDisplayString(row && row.width)));
       tr.appendChild(buildCell(asDisplayString(row && row.precision)));
+      tr.appendChild(buildCell(resolveNullabilityNote(row)));
       schemaTableBody.appendChild(tr);
     }
+  }
+
+  function resolveNullabilityNote(row) {
+    if (!(row && typeof row === "object")) {
+      return "Not inferable from source DBF metadata.";
+    }
+    const note =
+      typeof row.nullability_note === "string" ? row.nullability_note.trim() : "";
+    return note || "Not inferable from source DBF metadata.";
   }
 
   function buildCell(value) {

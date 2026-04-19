@@ -52,8 +52,19 @@ _BODY_READ_TIMEOUT_SECONDS = max(
     1,
     int(os.getenv("SHAPE_CONVERTER_BODY_READ_TIMEOUT_SECONDS", "15")),
 )
+_MULTIPART_MAX_PARTS = max(1, int(os.getenv("SHAPE_CONVERTER_MULTIPART_MAX_PARTS", "8")))
+_MULTIPART_MAX_FIELD_BYTES = max(1, int(os.getenv("SHAPE_CONVERTER_MULTIPART_MAX_FIELD_BYTES", "4096")))
 _JANITOR_STALE_SECONDS = max(1, int(os.getenv("SHAPE_CONVERTER_JANITOR_STALE_SECONDS", "900")))
 _JANITOR_INTERVAL_SECONDS = max(1, int(os.getenv("SHAPE_CONVERTER_JANITOR_INTERVAL_SECONDS", "60")))
+_RELAY_CORS_ALLOWED_ORIGINS_ENV = "SHAPE_CONVERTER_RELAY_CORS_ALLOWED_ORIGINS"
+_RELAY_CORS_ALLOWED_METHODS = "POST, OPTIONS"
+_RELAY_CORS_ALLOWED_HEADERS = "Content-Type"
+_RELAY_CORS_EXPOSE_HEADERS = (
+    "X-Shape-Converter-Request-Id, "
+    "X-Shape-Converter-Metadata-Path, "
+    "Content-Disposition"
+)
+_RELAY_CORS_MAX_AGE_SECONDS = max(1, int(os.getenv("SHAPE_CONVERTER_RELAY_CORS_MAX_AGE_SECONDS", "600")))
 _SANDBOX_MODE_ENV = "SHAPE_CONVERTER_SANDBOX_MODE"
 _REQUIRED_SANDBOX_MODE_ENV = "SHAPE_CONVERTER_REQUIRED_SANDBOX_MODE"
 _DEFAULT_SANDBOX_MODE = "container"
@@ -185,6 +196,95 @@ def _allocate_request_scratch_layout(
 async def _read_form_with_timeout(request: Request) -> FormData:
     async with asyncio.timeout(_BODY_READ_TIMEOUT_SECONDS):
         return await request.form()
+
+
+def _elapsed_ms(start_time: float) -> float:
+    return round((time.perf_counter() - start_time) * 1000, 3)
+
+
+def _enforce_multipart_guardrails(
+    form: FormData,
+    *,
+    error_code: str,
+) -> None:
+    multipart_items = list(form.multi_items())
+    if len(multipart_items) > _MULTIPART_MAX_PARTS:
+        raise ShapeConverterError(
+            code=error_code,
+            message="Multipart payload exceeds max-part limit.",
+            details=(
+                f"Multipart payload contains {len(multipart_items)} parts, exceeding "
+                f"limit {_MULTIPART_MAX_PARTS}."
+            ),
+            status_code=413,
+        )
+
+    for field_name, value in multipart_items:
+        if len(field_name.encode("utf-8")) > _MULTIPART_MAX_FIELD_BYTES:
+            raise ShapeConverterError(
+                code=error_code,
+                message="Multipart field name exceeds configured size limit.",
+                details=(
+                    f"Multipart field name {field_name!r} exceeds "
+                    f"{_MULTIPART_MAX_FIELD_BYTES} bytes."
+                ),
+                status_code=413,
+            )
+
+        if isinstance(value, str):
+            field_size = len(value.encode("utf-8"))
+            if field_size > _MULTIPART_MAX_FIELD_BYTES:
+                raise ShapeConverterError(
+                    code=error_code,
+                    message="Multipart form field exceeds configured size limit.",
+                    details=(
+                        f"Multipart field {field_name!r} is {field_size} bytes, "
+                        f"exceeding {_MULTIPART_MAX_FIELD_BYTES} bytes."
+                    ),
+                    status_code=413,
+                )
+
+
+def _resolve_relay_cors_allowed_origins() -> tuple[str, ...]:
+    raw = os.getenv(_RELAY_CORS_ALLOWED_ORIGINS_ENV, "")
+    if not raw.strip():
+        return ()
+
+    origins = sorted({origin.strip() for origin in raw.split(",") if origin.strip()})
+    return tuple(origins)
+
+
+def _relay_cors_allowed_origins(app: Starlette) -> tuple[str, ...]:
+    allowed_origins = getattr(app.state, "relay_cors_allowed_origins", None)
+    if isinstance(allowed_origins, tuple):
+        return allowed_origins
+
+    fallback = _resolve_relay_cors_allowed_origins()
+    app.state.relay_cors_allowed_origins = fallback
+    return fallback
+
+
+def _is_relay_cors_origin_allowed(*, origin: str, allowed_origins: tuple[str, ...]) -> bool:
+    if not allowed_origins:
+        return False
+    if "*" in allowed_origins:
+        return True
+    return origin in allowed_origins
+
+
+def _apply_relay_cors_headers(
+    response: Response,
+    *,
+    origin: str,
+    allowed_origins: tuple[str, ...],
+) -> None:
+    allow_origin = "*" if "*" in allowed_origins else origin
+    response.headers["Access-Control-Allow-Origin"] = allow_origin
+    response.headers["Access-Control-Allow-Methods"] = _RELAY_CORS_ALLOWED_METHODS
+    response.headers["Access-Control-Allow-Headers"] = _RELAY_CORS_ALLOWED_HEADERS
+    response.headers["Access-Control-Expose-Headers"] = _RELAY_CORS_EXPOSE_HEADERS
+    response.headers["Access-Control-Max-Age"] = str(_RELAY_CORS_MAX_AGE_SECONDS)
+    response.headers["Vary"] = "Origin"
 
 
 def _attach_inflight_release_background(
@@ -397,6 +497,11 @@ async def inspect_archive(request: Request) -> JSONResponse:
                     ),
                     request_id=request_id,
                 )
+            try:
+                _enforce_multipart_guardrails(form, error_code="invalid_archive")
+            except ShapeConverterError as exc:
+                cleanup_reason = f"shape_error:{exc.code}"
+                return error_response(exc, request_id=request_id)
 
             if set(form.keys()) != {"archive"}:
                 cleanup_reason = "invalid_fields"
@@ -422,17 +527,41 @@ async def inspect_archive(request: Request) -> JSONResponse:
                 )
 
             try:
+                inspect_started = time.perf_counter()
                 payload = await inspect_uploaded_archive(
                     archive=archive_field,
                     scratch=scratch_layout,
                     request_id=request_id,
                 )
+                parse_duration_ms = _elapsed_ms(inspect_started)
+                _log_structured_event(
+                    level=logging.INFO,
+                    event="shape_converter_inspect_completed",
+                    request_id=request_id,
+                    parse_duration_ms=parse_duration_ms,
+                    feature_count=payload.get("feature_count"),
+                    projection_status=payload.get("projection_status"),
+                )
             except ShapeConverterError as exc:
                 cleanup_reason = f"shape_error:{exc.code}"
+                _log_structured_event(
+                    level=logging.INFO,
+                    event="shape_converter_inspect_failed",
+                    request_id=request_id,
+                    parse_duration_ms=_elapsed_ms(inspect_started),
+                    error_code=exc.code,
+                )
                 return error_response(exc, request_id=request_id)
             except (OSError, RuntimeError, ValueError, TypeError) as exc:
                 # Boundary catch: ensure inspect failures still return canonical payloads.
                 cleanup_reason = "inspect_unexpected_failure"
+                _log_structured_event(
+                    level=logging.ERROR,
+                    event="shape_converter_inspect_failed",
+                    request_id=request_id,
+                    parse_duration_ms=_elapsed_ms(inspect_started),
+                    error_code="invalid_shapefile",
+                )
                 return error_response(
                     ShapeConverterError(
                         code="invalid_shapefile",
@@ -656,6 +785,11 @@ async def convert_archive(request: Request) -> Response:
                     ),
                     request_id=request_id,
                 )
+            try:
+                _enforce_multipart_guardrails(form, error_code="invalid_request")
+            except ShapeConverterError as exc:
+                cleanup_reason = f"shape_error:{exc.code}"
+                return error_response(exc, request_id=request_id)
 
             try:
                 archive_field, output_format, target_crs, response_mode = _validate_convert_form(form)
@@ -690,6 +824,7 @@ async def convert_archive(request: Request) -> Response:
                 )
 
             try:
+                convert_started = time.perf_counter()
                 converted = await convert_uploaded_archive(
                     archive=archive_field,
                     scratch=scratch_layout,
@@ -697,12 +832,43 @@ async def convert_archive(request: Request) -> Response:
                     output_format=output_format,
                     target_crs=target_crs,
                 )
+                convert_duration_ms = _elapsed_ms(convert_started)
+                _log_structured_event(
+                    level=logging.INFO,
+                    event="shape_converter_convert_completed",
+                    request_id=request_id,
+                    convert_duration_ms=convert_duration_ms,
+                    output_format=output_format,
+                    target_crs=target_crs,
+                    response_mode=response_mode,
+                    feature_count=converted.metadata.get("feature_count"),
+                )
             except ShapeConverterError as exc:
                 cleanup_reason = f"shape_error:{exc.code}"
+                _log_structured_event(
+                    level=logging.INFO,
+                    event="shape_converter_convert_failed",
+                    request_id=request_id,
+                    convert_duration_ms=_elapsed_ms(convert_started),
+                    output_format=output_format,
+                    target_crs=target_crs,
+                    response_mode=response_mode,
+                    error_code=exc.code,
+                )
                 return error_response(exc, request_id=request_id)
             except (OSError, RuntimeError, ValueError, TypeError) as exc:
                 # Boundary catch: ensure convert failures still return canonical payloads.
                 cleanup_reason = "convert_unexpected_failure"
+                _log_structured_event(
+                    level=logging.ERROR,
+                    event="shape_converter_convert_failed",
+                    request_id=request_id,
+                    convert_duration_ms=_elapsed_ms(convert_started),
+                    output_format=output_format,
+                    target_crs=target_crs,
+                    response_mode=response_mode,
+                    error_code="reprojection_failed",
+                )
                 return error_response(
                     ShapeConverterError(
                         code="reprojection_failed",
@@ -813,6 +979,7 @@ async def convert_metadata(request: Request) -> JSONResponse:
 async def app_lifespan(app: Starlette):
     app.state.scratch_root = _resolve_scratch_root()
     app.state.sandbox_mode_contract = _resolve_sandbox_mode_contract()
+    app.state.relay_cors_allowed_origins = _resolve_relay_cors_allowed_origins()
     app.state.active_request_scratch_registry = ActiveRequestScratchRegistry()
     app.state.convert_metadata = OrderedDict()
     app.state.abuse_controls = AbuseControlState(load_abuse_control_config())
@@ -855,6 +1022,28 @@ def create_app() -> Starlette:
 
     app = Starlette(debug=False, routes=routes, lifespan=app_lifespan)
     app.mount("/assets", StaticFiles(directory=str(_UI_DIR)), name="ui-assets")
+
+    @app.middleware("http")
+    async def relay_cors_middleware(request: Request, call_next):
+        if request.url.path != "/v1/convert":
+            return await call_next(request)
+
+        origin = str(request.headers.get("Origin") or "").strip()
+        if not origin:
+            return await call_next(request)
+
+        allowed_origins = _relay_cors_allowed_origins(request.app)
+        if not _is_relay_cors_origin_allowed(origin=origin, allowed_origins=allowed_origins):
+            return await call_next(request)
+
+        if request.method.upper() == "OPTIONS" and request.headers.get("Access-Control-Request-Method"):
+            response = Response(status_code=204)
+            _apply_relay_cors_headers(response, origin=origin, allowed_origins=allowed_origins)
+            return response
+
+        response = await call_next(request)
+        _apply_relay_cors_headers(response, origin=origin, allowed_origins=allowed_origins)
+        return response
 
     @app.middleware("http")
     async def abuse_control_middleware(request: Request, call_next):

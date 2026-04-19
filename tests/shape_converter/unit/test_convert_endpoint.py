@@ -1,6 +1,7 @@
 from __future__ import annotations
 
 import asyncio
+import errno
 import importlib
 import json
 import logging
@@ -18,6 +19,7 @@ from starlette.testclient import TestClient
 
 from tests.shape_converter.helpers.archive_builder import (
     SENSITIVE_METADATA_MARKERS,
+    build_minimal_line_dataset,
     build_minimal_point_dataset,
     build_sensitive_metadata_payload,
     build_xml_entity_expansion_payload,
@@ -260,6 +262,125 @@ def test_convert_json_body_returns_relay_payload_for_geojson_output() -> None:
     assert payload["geojson"]["type"] == "FeatureCollection"
     assert payload["metadata"]["output_format"] == "geojson"
     assert payload["metadata"]["target_crs"] == "wgs84"
+    assert payload["metadata"]["projection_status"] == "known"
+    assert isinstance(payload["metadata"]["attribute_schema"], list)
+    assert payload["metadata"]["attribute_schema"]
+    assert "nullability_note" in payload["metadata"]["attribute_schema"][0]
+
+
+def test_convert_preflight_options_returns_scoped_cors_headers_for_allowed_origin(
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    monkeypatch.setenv(
+        "SHAPE_CONVERTER_RELAY_CORS_ALLOWED_ORIGINS",
+        "https://relay-client.example",
+    )
+
+    with TestClient(create_app()) as client:
+        response = client.options(
+            "/v1/convert",
+            headers={
+                "Origin": "https://relay-client.example",
+                "Access-Control-Request-Method": "POST",
+                "Access-Control-Request-Headers": "content-type",
+            },
+        )
+
+    assert response.status_code == 204
+    assert response.headers["access-control-allow-origin"] == "https://relay-client.example"
+    assert "POST" in response.headers["access-control-allow-methods"]
+    assert "Content-Type" in response.headers["access-control-allow-headers"]
+
+
+def test_convert_preflight_options_without_requested_method_passes_through(
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    monkeypatch.setenv(
+        "SHAPE_CONVERTER_RELAY_CORS_ALLOWED_ORIGINS",
+        "https://relay-client.example",
+    )
+
+    with TestClient(create_app()) as client:
+        response = client.options(
+            "/v1/convert",
+            headers={"Origin": "https://relay-client.example"},
+        )
+
+    assert response.status_code == 405
+    assert response.headers["access-control-allow-origin"] == "https://relay-client.example"
+
+
+def test_convert_json_body_includes_cors_headers_for_allowed_origin(
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    monkeypatch.setenv(
+        "SHAPE_CONVERTER_RELAY_CORS_ALLOWED_ORIGINS",
+        "https://relay-client.example",
+    )
+    archive_bytes = build_zip_bytes(build_minimal_point_dataset(prefix="relay-cors"))
+
+    with TestClient(create_app()) as client:
+        response = client.post(
+            "/v1/convert",
+            files={"archive": ("relay-cors.zip", archive_bytes, "application/zip")},
+            data={
+                "output_format": "geojson",
+                "target_crs": "wgs84",
+                "response_mode": "json_body",
+            },
+            headers={"Origin": "https://relay-client.example"},
+        )
+
+    assert response.status_code == 200
+    assert response.headers["access-control-allow-origin"] == "https://relay-client.example"
+    assert "x-shape-converter-request-id" in response.headers["access-control-expose-headers"].lower()
+
+
+def test_convert_json_body_disallowed_origin_does_not_include_cors_headers(
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    monkeypatch.setenv(
+        "SHAPE_CONVERTER_RELAY_CORS_ALLOWED_ORIGINS",
+        "https://relay-client.example",
+    )
+    archive_bytes = build_zip_bytes(build_minimal_point_dataset(prefix="relay-cors-disallowed"))
+
+    with TestClient(create_app()) as client:
+        response = client.post(
+            "/v1/convert",
+            files={"archive": ("relay-cors-disallowed.zip", archive_bytes, "application/zip")},
+            data={
+                "output_format": "geojson",
+                "target_crs": "wgs84",
+                "response_mode": "json_body",
+            },
+            headers={"Origin": "https://not-allowed.example"},
+        )
+
+    assert response.status_code == 200
+    assert "access-control-allow-origin" not in response.headers
+
+
+def test_convert_json_body_wildcard_origin_sets_star_header(
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    monkeypatch.setenv("SHAPE_CONVERTER_RELAY_CORS_ALLOWED_ORIGINS", "*")
+    archive_bytes = build_zip_bytes(build_minimal_point_dataset(prefix="relay-cors-wildcard"))
+
+    with TestClient(create_app()) as client:
+        response = client.post(
+            "/v1/convert",
+            files={"archive": ("relay-cors-wildcard.zip", archive_bytes, "application/zip")},
+            data={
+                "output_format": "geojson",
+                "target_crs": "wgs84",
+                "response_mode": "json_body",
+            },
+            headers={"Origin": "https://any-origin.example"},
+        )
+
+    assert response.status_code == 200
+    assert response.headers["access-control-allow-origin"] == "*"
 
 
 def test_convert_json_body_rejects_non_geojson_output_format() -> None:
@@ -324,6 +445,31 @@ def test_convert_missing_prj_wgs84_returns_unknown_source_crs() -> None:
     assert payload["error"]["details"]
 
 
+def test_convert_invalid_prj_wgs84_returns_invalid_source_crs() -> None:
+    archive_bytes = build_zip_bytes(
+        build_minimal_point_dataset(
+            prefix="invalid-prj",
+            include_prj=True,
+            prj_text="NOT_A_VALID_WKT",
+        )
+    )
+
+    with TestClient(create_app()) as client:
+        response = client.post(
+            "/v1/convert",
+            files={"archive": ("invalid-prj.zip", archive_bytes, "application/zip")},
+            data={
+                "output_format": "geojson",
+                "target_crs": "wgs84",
+            },
+        )
+
+    assert response.status_code == 400
+    payload = response.json()
+    assert payload["error"]["code"] == "invalid_source_crs"
+    assert "malformed" in payload["error"]["details"].lower()
+
+
 def test_convert_same_as_shapefile_unknown_source_crs_preserves_coordinates() -> None:
     archive_bytes = build_zip_bytes(build_minimal_point_dataset(prefix="unknown", include_prj=False))
 
@@ -348,6 +494,37 @@ def test_convert_same_as_shapefile_unknown_source_crs_preserves_coordinates() ->
     assert metadata["output_crs"] is None
     assert metadata["rfc7946_compliant_geojson"] is False
     assert any("unknown" in warning.lower() for warning in metadata["warnings"])
+
+
+def test_convert_same_as_shapefile_invalid_source_crs_preserves_coordinates() -> None:
+    archive_bytes = build_zip_bytes(
+        build_minimal_point_dataset(
+            prefix="invalid-same-as",
+            include_prj=True,
+            prj_text="NOT_A_VALID_WKT",
+        )
+    )
+
+    with TestClient(create_app()) as client:
+        response = client.post(
+            "/v1/convert",
+            files={"archive": ("invalid-same-as.zip", archive_bytes, "application/zip")},
+            data={
+                "output_format": "geojson",
+                "target_crs": "same_as_shapefile",
+            },
+        )
+        metadata_response = client.get(response.headers["x-shape-converter-metadata-path"])
+
+    assert response.status_code == 200
+    payload = response.json()
+    assert payload["type"] == "FeatureCollection"
+    assert payload.get("crs") is None
+
+    metadata = metadata_response.json()
+    assert metadata["projection_status"] == "invalid"
+    assert metadata["output_crs"] is None
+    assert any("invalid" in warning.lower() for warning in metadata["warnings"])
 
 
 def test_convert_same_as_shapefile_projected_geojson_is_non_rfc() -> None:
@@ -477,6 +654,160 @@ def test_convert_returns_archive_quota_exceeded_for_member_count_limit() -> None
 
     assert response.status_code == 413
     assert response.json()["error"]["code"] == "archive_quota_exceeded"
+
+
+def test_convert_rejects_vertex_heavy_features_with_archive_quota_exceeded(
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    archive_bytes = build_zip_bytes(build_minimal_line_dataset(prefix="vertex-limit"))
+    monkeypatch.setattr(shape_converter_convert_module, "_MAX_VERTICES_PER_FEATURE", 1)
+
+    with TestClient(create_app()) as client:
+        response = client.post(
+            "/v1/convert",
+            files={"archive": ("vertex-limit.zip", archive_bytes, "application/zip")},
+            data={"output_format": "geojson", "target_crs": "wgs84"},
+        )
+
+    assert response.status_code == 413
+    payload = response.json()
+    assert payload["error"]["code"] == "archive_quota_exceeded"
+    assert "vertex_limit_exceeded" in payload["error"]["details"]
+
+
+def test_convert_rejects_multipart_payload_exceeding_part_limit(
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    archive_bytes = build_zip_bytes(build_minimal_point_dataset(prefix="multipart-parts"))
+    monkeypatch.setattr(shape_converter_app_module, "_MULTIPART_MAX_PARTS", 3)
+
+    with TestClient(create_app()) as client:
+        response = client.post(
+            "/v1/convert",
+            files={"archive": ("multipart-parts.zip", archive_bytes, "application/zip")},
+            data={
+                "output_format": "geojson",
+                "target_crs": "wgs84",
+                "response_mode": "download",
+            },
+        )
+
+    assert response.status_code == 413
+    payload = response.json()
+    assert payload["error"]["code"] == "invalid_request"
+    assert "max-part limit" in payload["error"]["message"].lower()
+
+
+def test_convert_rejects_multipart_string_field_exceeding_size_limit(
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    archive_bytes = build_zip_bytes(build_minimal_point_dataset(prefix="multipart-field"))
+    monkeypatch.setattr(shape_converter_app_module, "_MULTIPART_MAX_FIELD_BYTES", 14)
+
+    with TestClient(create_app()) as client:
+        response = client.post(
+            "/v1/convert",
+            files={"archive": ("multipart-field.zip", archive_bytes, "application/zip")},
+            data={
+                "output_format": "geojson",
+                "target_crs": "wgs84",
+                "response_mode": "download-download-download",
+            },
+        )
+
+    assert response.status_code == 413
+    payload = response.json()
+    assert payload["error"]["code"] == "invalid_request"
+    assert "size limit" in payload["error"]["message"].lower()
+
+
+def test_convert_returns_service_saturated_when_scratch_free_space_is_insufficient(
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    archive_bytes = build_zip_bytes(build_minimal_point_dataset(prefix="scratch-free-space"))
+    disk_usage = SimpleNamespace(total=1024, used=1000, free=24)
+    monkeypatch.setattr(shape_converter_convert_module.shutil, "disk_usage", lambda _path: disk_usage)
+
+    with TestClient(create_app()) as client:
+        response = client.post(
+            "/v1/convert",
+            files={"archive": ("scratch-free-space.zip", archive_bytes, "application/zip")},
+            data={"output_format": "geojson", "target_crs": "wgs84"},
+        )
+
+    assert response.status_code == 503
+    payload = response.json()
+    assert payload["error"]["code"] == "service_saturated"
+
+
+def test_convert_returns_archive_quota_exceeded_when_archive_write_exceeds_request_quota(
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    archive_bytes = build_zip_bytes(build_minimal_point_dataset(prefix="archive-write-quota"))
+    monkeypatch.setattr(shape_converter_convert_module, "_REQUEST_SCRATCH_QUOTA_BYTES", 1)
+
+    with TestClient(create_app()) as client:
+        response = client.post(
+            "/v1/convert",
+            files={"archive": ("archive-write-quota.zip", archive_bytes, "application/zip")},
+            data={"output_format": "geojson", "target_crs": "wgs84"},
+        )
+
+    assert response.status_code == 413
+    payload = response.json()
+    assert payload["error"]["code"] == "archive_quota_exceeded"
+    assert "archive_write" in payload["error"]["details"]
+
+
+def test_convert_returns_archive_quota_exceeded_when_parser_budget_exceeds_request_quota(
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    archive_bytes = build_zip_bytes(build_minimal_point_dataset(prefix="parser-budget-quota"))
+    monkeypatch.setattr(shape_converter_convert_module, "_REQUEST_SCRATCH_QUOTA_BYTES", 10_000)
+    monkeypatch.setattr(shape_converter_convert_module, "_MAX_PARSER_PAYLOAD_BYTES", 20_000)
+
+    with TestClient(create_app()) as client:
+        response = client.post(
+            "/v1/convert",
+            files={"archive": ("parser-budget-quota.zip", archive_bytes, "application/zip")},
+            data={"output_format": "geojson", "target_crs": "wgs84"},
+        )
+
+    assert response.status_code == 413
+    payload = response.json()
+    assert payload["error"]["code"] == "archive_quota_exceeded"
+    assert "parser_payload_budget" in payload["error"]["details"]
+
+
+def test_convert_maps_enospc_os_error_to_service_saturated() -> None:
+    mapped = shape_converter_convert_module._map_capacity_os_error(
+        exc=OSError(errno.ENOSPC, "no space left on device"),
+        stage="unit_test",
+        fallback_code="reprojection_failed",
+        fallback_message="fallback",
+        fallback_status_code=500,
+    )
+
+    assert mapped.code == "service_saturated"
+    assert mapped.status_code == 503
+
+
+def test_convert_emits_structured_duration_observability_fields(
+    caplog: pytest.LogCaptureFixture,
+) -> None:
+    archive_bytes = build_zip_bytes(build_minimal_point_dataset(prefix="duration-log"))
+    caplog.set_level(logging.INFO, logger="wepppy.microservices.shape_converter.app")
+
+    with TestClient(create_app()) as client:
+        response = client.post(
+            "/v1/convert",
+            files={"archive": ("duration-log.zip", archive_bytes, "application/zip")},
+            data={"output_format": "geojson", "target_crs": "wgs84"},
+        )
+
+    assert response.status_code == 200
+    assert "\"event\":\"shape_converter_convert_completed\"" in caplog.text
+    assert "\"convert_duration_ms\":" in caplog.text
 
 
 def test_convert_returns_reprojection_failed_when_transformer_init_fails(
@@ -783,6 +1114,7 @@ def test_parser_worker_applies_parser_egress_guards_and_driver_allowlist(
     payload = shape_converter_parser_worker_module._load_shapefile_payload(
         shp_path=tmp_path / "roads.shp",
         max_features=10,
+        max_vertices_per_feature=250000,
     )
 
     assert payload["source_bounds"] == (10.0, 20.0, 10.0, 20.0)

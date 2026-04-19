@@ -46,6 +46,18 @@ def test_resolve_target_crs_wgs84_requires_known_source() -> None:
     assert exc_info.value.code == "unknown_source_crs"
 
 
+def test_resolve_target_crs_wgs84_returns_invalid_source_crs_when_projection_is_invalid() -> None:
+    with pytest.raises(ShapeConverterError) as exc_info:
+        resolve_target_crs(
+            target_crs_token="wgs84",
+            source_crs=None,
+            source_bounds=(10.0, 20.0, 10.0, 20.0),
+            source_projection_status="invalid",
+        )
+
+    assert exc_info.value.code == "invalid_source_crs"
+
+
 def test_resolve_target_crs_utm_uses_upper_left_corner_rule() -> None:
     plan = resolve_target_crs(
         target_crs_token="utm_wepppy_upper_left",

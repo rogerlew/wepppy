@@ -2,6 +2,7 @@
 
 from __future__ import annotations
 
+import errno
 import io
 import re
 import shutil
@@ -44,6 +45,8 @@ class ExtractedArchive:
     extraction_root: Path
     extracted_files: tuple[Path, ...]
     removed_shp_xml_sidecars: tuple[str, ...] = ()
+    total_compressed_bytes: int = 0
+    total_uncompressed_bytes: int = 0
 
 
 async def read_upload_bytes_with_limit(
@@ -96,6 +99,7 @@ def validate_and_extract_zip_archive(
     archive_bytes: bytes,
     extraction_root: Path,
     limits: ArchiveLimits | None = None,
+    request_quota_bytes: int | None = None,
     member_policy: ArchiveMemberPolicy | None = None,
     sanitize_metadata_sidecars: bool = True,
 ) -> ExtractedArchive:
@@ -180,6 +184,13 @@ def validate_and_extract_zip_archive(
                         ),
                         status_code=413,
                     )
+                if request_quota_bytes is not None and total_uncompressed_bytes > request_quota_bytes:
+                    raise ShapeConverterError(
+                        code="archive_quota_exceeded",
+                        message="Request scratch quota exceeds configured limit.",
+                        details="Archive extraction exceeds configured request scratch quota.",
+                        status_code=413,
+                    )
 
                 validated_members.append((member, normalized_path))
 
@@ -209,6 +220,20 @@ def validate_and_extract_zip_archive(
             message="Archive is not a valid ZIP file.",
             details=str(exc),
         ) from exc
+    except OSError as exc:
+        if exc.errno == errno.ENOSPC:
+            raise ShapeConverterError(
+                code="service_saturated",
+                message="Scratch capacity exhausted during archive extraction.",
+                details="Archive extraction could not be completed due to scratch capacity limits.",
+                status_code=503,
+            ) from exc
+        raise ShapeConverterError(
+            code="invalid_archive",
+            message="Archive extraction failed.",
+            details=str(exc),
+            status_code=500,
+        ) from exc
 
     if sanitize_metadata_sidecars:
         kept_files, removed_shp_xml_sidecars = _strip_sanitized_sidecars(
@@ -223,6 +248,8 @@ def validate_and_extract_zip_archive(
         extraction_root=extraction_root_resolved,
         extracted_files=kept_files,
         removed_shp_xml_sidecars=removed_shp_xml_sidecars,
+        total_compressed_bytes=total_compressed_bytes,
+        total_uncompressed_bytes=total_uncompressed_bytes,
     )
 
 

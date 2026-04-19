@@ -1,6 +1,6 @@
 # Mini Work Package: Sandboxed Shapefile Conversion Web App Spec
-Status: Draft
-Last Updated: 2026-04-12
+Status: Ready
+Last Updated: 2026-04-18
 Primary Areas: `docker/docker-compose.dev.yml`, `docker/caddy/Caddyfile`, `wepppy/microservices/*`, `wepppy/all_your_base/geo/geo.py`, `wepppy/weppcloud/*`
 
 ## Objective
@@ -36,7 +36,7 @@ Users currently struggle with local shapefile conversion workflows. A dedicated 
 4. User clicks `Inspect Upload` (secondary action) to populate metadata panels:
    - Projection status (detected CRS / unknown).
    - Geometry summary (feature count, geometry types, bounds).
-   - Attribute schema table (field name, type, width/precision where available).
+   - Attribute schema table (field name, type, width/precision, nullability note).
    - Warnings (lossy/null/geometry/CRS caveats).
 5. User clicks `Convert And Download` (primary action) to run conversion and download the artifact.
 6. `inspect` and `convert` remain independent request-scoped uploads by backend contract; the browser may reuse the same selected local file, but each action sends its own multipart request and no server-side cross-request staging is allowed.
@@ -78,10 +78,12 @@ Users currently struggle with local shapefile conversion workflows. A dedicated 
 - `wgs84`:
   - Reproject to EPSG:4326 (longitude, latitude axis order in outputs).
   - If source CRS missing/unknown, fail with explicit error requiring known CRS.
+  - If source CRS is present but invalid (`.prj` malformed), fail with explicit `invalid_source_crs`.
 - `utm_wepppy_upper_left`:
   - Determine target UTM zone from upper-left extent in WGS84 using the same approach as `wepppy/all_your_base/geo/geo.py` (`utm.from_latlon(north, west)` using bbox top-left).
   - Use hemisphere from north coordinate sign (`north > 0` => northern hemisphere, else southern), consistent with current WEPPpy behavior.
   - If source CRS missing/unknown, fail with explicit error requiring known CRS.
+  - If source CRS is present but invalid (`.prj` malformed), fail with explicit `invalid_source_crs`.
   - Fail with explicit `utm_not_supported_for_extent` when extent is outside supported UTM latitude domain.
 
 ### Output requirements
@@ -95,7 +97,7 @@ Users currently struggle with local shapefile conversion workflows. A dedicated 
 - UI/API metadata response must include:
   - `detected_crs` (authority/WKT/PROJJSON when available)
   - `projection_status` (`known`, `unknown`, `invalid`)
-  - `attribute_schema` array
+  - `attribute_schema` array (`name`, `type`, `width`, `precision`, `nullability_note`)
   - `geometry_types`
   - `feature_count`
   - `bbox`
@@ -113,6 +115,7 @@ Users currently struggle with local shapefile conversion workflows. A dedicated 
 - Human-facing converter UI remains download-oriented (`response_mode=download`) and does not expose a relay-mode selector.
 - `json_body` is an API-level mode for programmatic relay clients.
 - Browser client forwards resulting relay payload to WEPPcloud endpoint over authenticated WEPPcloud session/API.
+- Relay CORS policy is allowlist-driven via `SHAPE_CONVERTER_RELAY_CORS_ALLOWED_ORIGINS` and scoped to `/v1/convert`.
 - Relay mode keeps `.zip` and shapefile sidecars processed/deleted inside shape-converter request scope.
 - Shape-converter does not require WEPPcloud credentials and does not call WEPPcloud directly.
 
@@ -129,12 +132,15 @@ Users currently struggle with local shapefile conversion workflows. A dedicated 
 - Resource limits (initial defaults, tune with data):
   - Request timeout: 30s metadata scan, 120s conversion hard timeout.
   - Max ZIP upload size: 100 MB.
+  - Edge proxy body cap must include multipart overhead headroom above the ZIP limit so canonical app quota errors remain observable (current WEPP1 policy: 120 MB edge cap for 100 MB ZIP quota).
   - Max total uncompressed bytes: 600 MB.
   - Max member count: 200.
   - Max features: 1,000,000.
   - Max vertices per feature: configurable guardrail (start 250,000).
+  - Multipart guardrails: max part count and max text-field size.
+  - Scratch-space guardrails: extraction/write free-space preflight and per-request scratch quota.
 - Observability:
-  - Request ID, rejection reason codes, parse duration, convert duration, cleanup success/failure.
+  - Request ID, rejection reason codes, structured `parse_duration_ms`, structured `convert_duration_ms`, cleanup success/failure.
   - Do not log raw uploaded content.
 
 ## Service Design
@@ -316,8 +322,10 @@ Error response contract:
   - `archive_quota_exceeded`
   - `missing_required_sidecar`
   - `invalid_shapefile`
+  - `invalid_source_crs`
   - `unknown_source_crs`
   - `reprojection_failed`
+  - `service_saturated`
   - `utm_not_supported_for_extent`
 - Error status mapping (minimum):
   - `400`: validation/input errors.
@@ -492,7 +500,9 @@ Error response contract:
 - `Warnings` panel is positioned directly after `Upload` and is hidden until warning/error/advisory content exists.
 - `Projection`, `Geometry Summary`, and `Attribute Schema` remain hidden until successful inspect metadata is available.
 - Convert API supports both `response_mode=download` and relay `response_mode=json_body` (GeoJSON-only), with explicit canonical 4xx errors for unsupported combinations; the public UI remains download-oriented.
+- Attribute schema rendering includes nullability notes with explicit fallback text when nullability is not inferable from DBF metadata.
 - CRS options behave exactly as specified (including WEPPpy UL-corner UTM mode and explicit out-of-domain failures).
+- Invalid `.prj` reprojection paths return explicit `invalid_source_crs` while missing CRS remains `unknown_source_crs`.
 - GeoJSON behavior is explicit: RFC 7946 in WGS84 mode and clearly labeled non-RFC projected mode for UTM/same-CRS output.
 - ZIP and shapefile risk tests are implemented and passing.
 - XML sidecar and parser-loop abuse tests are implemented and passing.

@@ -1,5 +1,6 @@
 from __future__ import annotations
 
+import errno
 import io
 import stat
 import zipfile
@@ -32,6 +33,23 @@ def test_validate_and_extract_zip_archive_accepts_valid_dataset(tmp_path) -> Non
 
     extracted_names = sorted(path.name for path in extracted.extracted_files)
     assert extracted_names == ["parcel.dbf", "parcel.prj", "parcel.shp", "parcel.shx"]
+    assert extracted.total_compressed_bytes > 0
+    assert extracted.total_uncompressed_bytes > 0
+
+
+def test_validate_and_extract_zip_archive_enforces_request_quota(tmp_path) -> None:
+    archive_bytes = build_zip_bytes(build_minimal_point_dataset(prefix="parcel"))
+
+    with pytest.raises(ShapeConverterError) as exc_info:
+        validate_and_extract_zip_archive(
+            archive_name="parcel.zip",
+            archive_bytes=archive_bytes,
+            extraction_root=tmp_path / "extract",
+            request_quota_bytes=1,
+        )
+
+    assert exc_info.value.code == "archive_quota_exceeded"
+    assert exc_info.value.status_code == 413
 
 
 def test_validate_and_extract_zip_archive_removes_shp_xml_sidecar(tmp_path) -> None:
@@ -246,3 +264,25 @@ def test_validate_and_extract_zip_archive_enforces_path_depth_limit(tmp_path) ->
         )
 
     assert exc_info.value.code == "invalid_archive"
+
+
+def test_validate_and_extract_zip_archive_maps_enospc_to_service_saturated(
+    monkeypatch: pytest.MonkeyPatch,
+    tmp_path,
+) -> None:
+    archive_bytes = build_zip_bytes(build_minimal_point_dataset(prefix="parcel"))
+
+    def _raise_enospc(*_args, **_kwargs):  # noqa: ANN002, ANN003
+        raise OSError(errno.ENOSPC, "no space left on device")
+
+    monkeypatch.setattr("wepppy.microservices.shape_converter.archive_validation.shutil.copyfileobj", _raise_enospc)
+
+    with pytest.raises(ShapeConverterError) as exc_info:
+        validate_and_extract_zip_archive(
+            archive_name="parcel.zip",
+            archive_bytes=archive_bytes,
+            extraction_root=tmp_path / "extract",
+        )
+
+    assert exc_info.value.code == "service_saturated"
+    assert exc_info.value.status_code == 503

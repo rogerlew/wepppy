@@ -207,7 +207,12 @@ def test_convert_endpoint_explicit_download_mode_remains_backward_compatible() -
     assert response.headers["content-type"].startswith("application/geo+json")
     assert "attachment;" in response.headers["content-disposition"]
     assert metadata_response.status_code == 200
-    assert metadata_response.json()["target_crs"] == "wgs84"
+    metadata_payload = metadata_response.json()
+    assert metadata_payload["target_crs"] == "wgs84"
+    assert metadata_payload["projection_status"] == "known"
+    assert isinstance(metadata_payload["attribute_schema"], list)
+    assert metadata_payload["attribute_schema"]
+    assert "nullability_note" in metadata_payload["attribute_schema"][0]
 
 
 def test_convert_endpoint_returns_utm_not_supported_for_extent() -> None:
@@ -233,6 +238,30 @@ def test_convert_endpoint_returns_utm_not_supported_for_extent() -> None:
     assert response.status_code == 400
     payload = response.json()
     assert payload["error"]["code"] == "utm_not_supported_for_extent"
+
+
+def test_convert_endpoint_returns_invalid_source_crs_for_malformed_prj() -> None:
+    archive_bytes = build_zip_bytes(
+        build_minimal_point_dataset(
+            prefix="invalid-prj",
+            include_prj=True,
+            prj_text="NOT_A_VALID_WKT",
+        )
+    )
+
+    with TestClient(app) as client:
+        response = client.post(
+            "/v1/convert",
+            files={"archive": ("invalid-prj.zip", archive_bytes, "application/zip")},
+            data={
+                "output_format": "geojson",
+                "target_crs": "wgs84",
+            },
+        )
+
+    assert response.status_code == 400
+    payload = response.json()
+    assert payload["error"]["code"] == "invalid_source_crs"
 
 
 def test_convert_endpoint_reuses_archive_path_traversal_control() -> None:

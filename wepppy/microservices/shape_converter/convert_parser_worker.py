@@ -21,7 +21,12 @@ _PARSER_GDAL_OPTIONS = {
 _ALLOWED_OGR_DRIVERS = ["ESRI Shapefile"]
 
 
-def _load_shapefile_payload(*, shp_path: Path, max_features: int) -> dict[str, object]:
+def _load_shapefile_payload(
+    *,
+    shp_path: Path,
+    max_features: int,
+    max_vertices_per_feature: int,
+) -> dict[str, object]:
     if shp_path.suffix.lower() != ".shp":
         raise ValueError(f"Expected .shp input but received '{shp_path.name}'.")
 
@@ -67,6 +72,13 @@ def _load_shapefile_payload(*, shp_path: Path, max_features: int) -> dict[str, o
                         normalized_geometry = None
                     elif isinstance(geometry_payload, cabc.Mapping):
                         normalized_geometry = dict(geometry_payload)
+                        vertex_count = _count_feature_vertices(normalized_geometry)
+                        if vertex_count > max_vertices_per_feature:
+                            raise OverflowError(
+                                "vertex_limit_exceeded: "
+                                f"feature index {index} has {vertex_count} vertices, "
+                                f"exceeding limit {max_vertices_per_feature}."
+                            )
                     else:
                         raise ValueError(
                             f"Feature at index {index} has non-object geometry payload."
@@ -99,6 +111,7 @@ def _build_parser() -> argparse.ArgumentParser:
     parser.add_argument("--shp-path", required=True)
     parser.add_argument("--output-path", required=True)
     parser.add_argument("--max-features", required=True, type=int)
+    parser.add_argument("--max-vertices-per-feature", required=True, type=int)
     return parser
 
 
@@ -109,14 +122,19 @@ def main(argv: list[str] | None = None) -> int:
     shp_path = Path(args.shp_path)
     output_path = Path(args.output_path)
     max_features = int(args.max_features)
+    max_vertices_per_feature = int(args.max_vertices_per_feature)
     if max_features < 1:
         print("--max-features must be >= 1", file=sys.stderr)
+        return 2
+    if max_vertices_per_feature < 1:
+        print("--max-vertices-per-feature must be >= 1", file=sys.stderr)
         return 2
 
     try:
         payload = _load_shapefile_payload(
             shp_path=shp_path,
             max_features=max_features,
+            max_vertices_per_feature=max_vertices_per_feature,
         )
     except Exception as exc:  # noqa: BLE001
         # Worker boundary: parent maps this stderr text into canonical API errors.
@@ -132,6 +150,41 @@ def main(argv: list[str] | None = None) -> int:
         return 3
 
     return 0
+
+def _count_feature_vertices(geometry: dict[str, object]) -> int:
+    geometry_type = geometry.get("type")
+    if not isinstance(geometry_type, str) or not geometry_type.strip():
+        raise ValueError("Geometry payload is missing a valid 'type' field.")
+
+    if geometry_type == "GeometryCollection":
+        raw_geometries = geometry.get("geometries")
+        if not isinstance(raw_geometries, list):
+            raise ValueError("GeometryCollection payload has invalid 'geometries' field.")
+        total = 0
+        for nested in raw_geometries:
+            if not isinstance(nested, cabc.Mapping):
+                raise ValueError("GeometryCollection contains a non-object geometry entry.")
+            total += _count_feature_vertices(dict(nested))
+        return total
+
+    coordinates = geometry.get("coordinates")
+    return _count_coordinate_positions(coordinates)
+
+
+def _count_coordinate_positions(value: object) -> int:
+    if not isinstance(value, (list, tuple)):
+        raise ValueError("Geometry coordinates field is invalid.")
+    if not value:
+        return 0
+
+    first = value[0]
+    if isinstance(first, (int, float)):
+        return 1
+
+    total = 0
+    for item in value:
+        total += _count_coordinate_positions(item)
+    return total
 
 
 if __name__ == "__main__":

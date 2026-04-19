@@ -17,6 +17,7 @@ from .errors import ShapeConverterError
 
 WGS84_CRS = CRS.from_epsg(4326)
 TARGET_CRS_OPTIONS = frozenset({"same_as_shapefile", "wgs84", "utm_wepppy_upper_left"})
+SOURCE_PROJECTION_STATUS_OPTIONS = frozenset({"known", "unknown", "invalid"})
 
 
 @dataclass(frozen=True, slots=True)
@@ -52,6 +53,7 @@ def resolve_target_crs(
     target_crs_token: str,
     source_crs: CRS | None,
     source_bounds: tuple[float, float, float, float],
+    source_projection_status: str = "known",
 ) -> ResolvedTargetCrs:
     """Resolve conversion target CRS and warnings for the requested mode."""
 
@@ -64,16 +66,31 @@ def resolve_target_crs(
                 f"expected one of {sorted(TARGET_CRS_OPTIONS)}."
             ),
         )
+    if source_projection_status not in SOURCE_PROJECTION_STATUS_OPTIONS:
+        raise ShapeConverterError(
+            code="invalid_request",
+            message="Source projection status is invalid.",
+            details=(
+                f"source_projection_status={source_projection_status!r} is invalid; "
+                f"expected one of {sorted(SOURCE_PROJECTION_STATUS_OPTIONS)}."
+            ),
+        )
 
     if target_crs_token == "same_as_shapefile":
         if source_crs is None:
+            if source_projection_status == "invalid":
+                warning = (
+                    "Source CRS is invalid; coordinates were preserved without reprojection."
+                )
+            else:
+                warning = (
+                    "Source CRS is unknown; coordinates were preserved without reprojection."
+                )
             return ResolvedTargetCrs(
                 source_crs=None,
                 target_crs=None,
                 rfc7946_compliant_geojson=False,
-                warnings=(
-                    "Source CRS is unknown; coordinates were preserved without reprojection.",
-                ),
+                warnings=(warning,),
             )
 
         return ResolvedTargetCrs(
@@ -84,6 +101,15 @@ def resolve_target_crs(
         )
 
     if source_crs is None:
+        if source_projection_status == "invalid":
+            raise ShapeConverterError(
+                code="invalid_source_crs",
+                message="Source CRS is invalid and cannot be used for reprojection.",
+                details=(
+                    f"target_crs={target_crs_token!r} requires a valid source CRS, "
+                    "but the uploaded dataset provides an invalid projection definition."
+                ),
+            )
         raise ShapeConverterError(
             code="unknown_source_crs",
             message="Source CRS is required for reprojection.",
@@ -255,6 +281,7 @@ def crs_identifier(crs: CRS | None) -> str | None:
 
 __all__ = [
     "TARGET_CRS_OPTIONS",
+    "SOURCE_PROJECTION_STATUS_OPTIONS",
     "WGS84_CRS",
     "ResolvedTargetCrs",
     "crs_identifier",

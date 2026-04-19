@@ -59,6 +59,8 @@ def test_ui_flow_inspect_then_convert_surfaces_required_warnings() -> None:
     assert inspect_response.status_code == 200
     inspect_payload = inspect_response.json()
     assert any(".shp.xml" in warning for warning in inspect_payload["warnings"])
+    assert inspect_payload["attribute_schema"]
+    assert "nullability_note" in inspect_payload["attribute_schema"][0]
 
     assert convert_response.status_code == 200
     assert convert_response.headers["content-type"].startswith("application/json")

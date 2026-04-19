@@ -34,6 +34,8 @@ def test_ui_route_serves_shape_converter_shell() -> None:
     assert "id=\"geometry-panel\" class=\"panel\" aria-label=\"Geometry summary\" hidden" in body
     assert "id=\"schema-panel\" class=\"panel panel-schema\" aria-label=\"Attribute schema\" hidden" in body
     assert "Convert And Download" in body
+    assert "Nullability Note" in body
+    assert "colspan=\"5\"" in body
     assert "response_mode" not in body
 
 

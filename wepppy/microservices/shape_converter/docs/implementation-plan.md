@@ -1,5 +1,5 @@
 # Shape Converter Implementation Plan
-Status: In Progress
+Status: Done
 Last Updated: 2026-04-18
 Owner: Platform / WEPPpy
 Primary Spec: `/workdir/wepppy/wepppy/microservices/shape_converter/docs/specification.md`
@@ -83,7 +83,7 @@ Required evidence:
 | WP-08 | Test suite completion and gate automation | WP-02, WP-03, WP-04, WP-05, WP-06, WP-06B, WP-07 | done | pass | pass | pass | pass | Completed 2026-04-12. Evidence: `/workdir/wepppy/wepppy/microservices/shape_converter/docs/work-packages/wp-08_test_suite_completion_and_gate_automation.md` (added parser-abuse regressions for XML entity-expansion classes and parser-stall timeout/cancellation, added `.shp.xml`/`.qmd` metadata-privacy non-leak assertions, added dedicated blocking shape-converter CI gate workflow, and passed focused/full unit+integration gates plus proxied Caddy smoke). |
 | WP-09 | Final QA + security closeout + release readiness | WP-08 | done | pass | pass | pass | pass | Completed 2026-04-12 with **GO** decision and residual-risk tracking. Evidence: `/workdir/wepppy/wepppy/microservices/shape_converter/docs/work-packages/wp-09_final_qa_security_closeout_release_readiness.md`. Local focused/full unit + integration gates, workflow build/check, and proxied Caddy smoke all pass. Hosted shape-converter gate evidence captured: `Shape-Converter Gates` run `24298655324` success on `master` (`88b07b47ccda96c5ee836ca4af82db26ae727148`). Deferred WP-09 residual risks are now closed by WP-09B. |
 | WP-09B | Parser containment + GDAL CVE remediation | WP-09 | done | pass | pass | pass | pass | Completed 2026-04-12. Evidence: `/workdir/wepppy/wepppy/microservices/shape_converter/docs/work-packages/wp-09b_parser_containment_and_gdal_cve_remediation.md`. Parser subprocess process-group timeout/kill semantics are implemented in convert runtime path and validated by new unit/integration tests. Runtime CVE disposition evidence captured: Fiona parser path now links system GDAL (`fiona.__gdal_version__=3.10.3`), proxied smoke and focused/full gates pass, and hosted `Shape-Converter Gates` run `24299367284` succeeded on remediation SHA `caa8edd8f92126c7570ea51cf1ab978f47c789d8`. |
-| WP-10 | Specification gap closeout and production alignment | WP-09B | not_started | pending | pending | pending | pending | Opened 2026-04-18 to close post-delivery spec-review findings (prod hardening parity, edge policy parity, CORS for relay mode, convert metadata contract completion, UI schema nullability note, strict invalid `.prj` behavior, missing guardrails/quotas, parse/convert duration observability). Planned evidence: `/workdir/wepppy/wepppy/microservices/shape_converter/docs/work-packages/wp-10_spec_gap_closeout_and_production_alignment.md`. |
+| WP-10 | Specification gap closeout and production alignment | WP-09B | done | pass | pass | pass | pass | Completed 2026-04-18. Evidence: `/workdir/wepppy/wepppy/microservices/shape_converter/docs/work-packages/wp-10_spec_gap_closeout_and_production_alignment.md` (prod/WEPP1 hardening + edge-policy parity enforced; scoped relay CORS policy implemented and tested; convert metadata parity (`projection_status`, `attribute_schema`) and UI nullability-note rendering implemented; strict malformed `.prj` behavior now returns canonical `invalid_source_crs`; multipart/vertex/scratch guardrails + parse/convert duration observability added; focused/full unit + integration + hardening gates pass; proxied Caddy smoke pass for UI/inspect/convert + missing/invalid CRS paths). Hosted `Shape-Converter Gates` evidence captured in closeout package (`gh run list` snapshot includes recent success run `24300124393` and latest remote failure `24614228244` pending operator rerun on closeout SHA). |
 
 ## Work-Package Details
 ## WP-01 Service scaffold and container wiring
@@ -226,9 +226,9 @@ Required evidence:
 
 ## Rollup Checklist
 - [x] WP-01 through WP-09B complete (including WP-06B)
-- [ ] WP-10 complete
-- [ ] WP-10 code gate passes
-- [ ] WP-10 shape-converter unit-test gate passes
-- [ ] WP-10 QA gate passes
-- [ ] WP-10 security review gate passes
-- [ ] Specification status updated from `Draft` after WP-10 closeout
+- [x] WP-10 complete
+- [x] WP-10 code gate passes
+- [x] WP-10 shape-converter unit-test gate passes
+- [x] WP-10 QA gate passes
+- [x] WP-10 security review gate passes
+- [x] Specification status updated from `Draft` after WP-10 closeout

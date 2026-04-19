@@ -3,8 +3,10 @@
 from __future__ import annotations
 
 import collections.abc as cabc
-import pickle
+import errno
 import os
+import pickle
+import shutil
 import signal
 import subprocess
 import sys
@@ -33,15 +35,27 @@ from .crs import (
     resolve_target_crs,
 )
 from .errors import ShapeConverterError
-from .inspect import select_single_shapefile_dataset
+from .inspect import read_dbf_metadata, read_projection_metadata, select_single_shapefile_dataset
 from .serialization import serialize_geojson, serialize_geoparquet
 
 OUTPUT_FORMAT_OPTIONS = frozenset({"geojson", "geoparquet"})
 _MAX_UPLOAD_COMPRESSED_BYTES = ArchiveLimits().max_compressed_bytes
 _MAX_CONVERT_FEATURES = int(os.getenv("SHAPE_CONVERTER_MAX_CONVERT_FEATURES", "1000000"))
+_MAX_VERTICES_PER_FEATURE = max(
+    1,
+    int(os.getenv("SHAPE_CONVERTER_MAX_VERTICES_PER_FEATURE", "250000")),
+)
 _MAX_PARSER_PAYLOAD_BYTES = max(
     1,
     int(os.getenv("SHAPE_CONVERTER_MAX_PARSER_PAYLOAD_BYTES", str(256 * 1024 * 1024))),
+)
+_REQUEST_SCRATCH_QUOTA_BYTES = max(
+    1,
+    int(os.getenv("SHAPE_CONVERTER_REQUEST_SCRATCH_QUOTA_BYTES", str(700 * 1024 * 1024))),
+)
+_SCRATCH_PRECHECK_FREE_BYTES = max(
+    1,
+    int(os.getenv("SHAPE_CONVERTER_SCRATCH_PRECHECK_FREE_BYTES", str(128 * 1024 * 1024))),
 )
 _PARSER_SUBPROCESS_TIMEOUT_SECONDS = max(
     1,
@@ -133,26 +147,67 @@ async def convert_uploaded_archive(
             details="Uploaded archive contained zero bytes.",
         )
 
+    _assert_scratch_free_space(
+        scratch=scratch,
+        required_free_bytes=len(archive_bytes) + _SCRATCH_PRECHECK_FREE_BYTES,
+        stage="archive_preflight",
+    )
+    _assert_request_scratch_quota(
+        scratch=scratch,
+        additional_bytes=len(archive_bytes),
+        stage="archive_write",
+    )
+
     try:
         scratch.upload_archive_path.write_bytes(archive_bytes)
     except OSError as exc:
-        raise ShapeConverterError(
-            code="invalid_archive",
-            message="Unable to persist uploaded archive.",
-            details=str(exc),
-            status_code=500,
+        raise _map_capacity_os_error(
+            exc=exc,
+            stage="archive_write",
+            fallback_code="invalid_archive",
+            fallback_message="Unable to persist uploaded archive.",
+            fallback_status_code=500,
         ) from exc
+
+    extraction_request_quota = _REQUEST_SCRATCH_QUOTA_BYTES - len(archive_bytes)
+    if extraction_request_quota <= 0:
+        raise ShapeConverterError(
+            code="archive_quota_exceeded",
+            message="Request scratch quota exceeded.",
+            details="Request scratch quota does not allow archive extraction after upload persistence.",
+            status_code=413,
+        )
 
     extracted_archive = validate_and_extract_zip_archive(
         archive_name=archive_name,
         archive_bytes=archive_bytes,
         extraction_root=scratch.extraction_root,
+        request_quota_bytes=extraction_request_quota,
     )
     sidecar_warning = shp_xml_sidecar_warning_message(
         removed_sidecars=extracted_archive.removed_shp_xml_sidecars
     )
     dataset = select_single_shapefile_dataset(extracted_archive)
+    dbf_metadata = read_dbf_metadata(dataset.prefix_path.with_suffix(".dbf"))
+    detected_crs, projection_status, projection_warnings = read_projection_metadata(
+        dataset.prefix_path.with_suffix(".prj")
+    )
 
+    if projection_status == "invalid" and target_crs != "same_as_shapefile":
+        raise ShapeConverterError(
+            code="invalid_source_crs",
+            message="Source CRS is invalid and cannot be used for reprojection.",
+            details=(
+                f"target_crs={target_crs!r} requires a valid source CRS, "
+                "but the uploaded dataset projection (.prj) is malformed."
+            ),
+        )
+
+    _assert_request_scratch_quota(
+        scratch=scratch,
+        additional_bytes=_MAX_PARSER_PAYLOAD_BYTES,
+        stage="parser_payload_budget",
+    )
     loaded = _load_shapefile(
         shp_path=dataset.prefix_path.with_suffix(".shp"),
         scratch=scratch,
@@ -161,8 +216,10 @@ async def convert_uploaded_archive(
         target_crs_token=target_crs,
         source_crs=loaded.source_crs,
         source_bounds=loaded.source_bounds,
+        source_projection_status=projection_status,
     )
     conversion_warnings = list(crs_plan.warnings)
+    conversion_warnings.extend(projection_warnings)
     if sidecar_warning:
         conversion_warnings.append(sidecar_warning)
 
@@ -195,21 +252,37 @@ async def convert_uploaded_archive(
         crs_plan=crs_plan,
         transformed_geometries=transformed_geometries,
         feature_count=len(loaded.properties),
+        projection_status=projection_status,
+        attribute_schema=dbf_metadata["fields"],
+        detected_crs=detected_crs,
         warnings=serialized.warnings,
     )
 
     prefix_name = dataset.prefix_path.name
     filename = f"{prefix_name}_{target_crs}.{serialized.extension}"
     output_path = scratch.output_root / filename
+
+    _assert_request_scratch_quota(
+        scratch=scratch,
+        additional_bytes=len(serialized.content),
+        stage="output_write",
+    )
+    _assert_scratch_free_space(
+        scratch=scratch,
+        required_free_bytes=len(serialized.content) + _SCRATCH_PRECHECK_FREE_BYTES,
+        stage="output_preflight",
+    )
+
     try:
         scratch.output_root.mkdir(parents=True, exist_ok=True)
         output_path.write_bytes(serialized.content)
     except OSError as exc:
-        raise ShapeConverterError(
-            code="reprojection_failed",
-            message="Unable to persist converted output artifact.",
-            details=str(exc),
-            status_code=500,
+        raise _map_capacity_os_error(
+            exc=exc,
+            stage="output_write",
+            fallback_code="reprojection_failed",
+            fallback_message="Unable to persist converted output artifact.",
+            fallback_status_code=500,
         ) from exc
 
     return ConvertedArtifact(
@@ -219,6 +292,88 @@ async def convert_uploaded_archive(
         content=serialized.content,
         metadata=metadata,
     )
+
+
+def _assert_scratch_free_space(
+    *,
+    scratch: RequestScratchLayout,
+    required_free_bytes: int,
+    stage: str,
+) -> None:
+    try:
+        free_bytes = shutil.disk_usage(scratch.request_dir).free
+    except OSError as exc:
+        raise ShapeConverterError(
+            code="service_saturated",
+            message="Unable to verify scratch free space.",
+            details=f"Scratch free-space probe failed during {stage}: {exc}",
+            status_code=503,
+        ) from exc
+
+    if free_bytes < required_free_bytes:
+        raise ShapeConverterError(
+            code="service_saturated",
+            message="Insufficient scratch free space for conversion request.",
+            details=f"Scratch free-space preflight failed during {stage}.",
+            status_code=503,
+        )
+
+
+def _assert_request_scratch_quota(
+    *,
+    scratch: RequestScratchLayout,
+    additional_bytes: int,
+    stage: str,
+) -> None:
+    try:
+        current_usage = _scratch_tree_size_bytes(scratch.request_dir)
+    except OSError as exc:
+        raise ShapeConverterError(
+            code="service_saturated",
+            message="Unable to evaluate request scratch usage.",
+            details=f"Scratch quota evaluation failed during {stage}: {exc}",
+            status_code=503,
+        ) from exc
+    projected_usage = current_usage + max(0, additional_bytes)
+    if projected_usage > _REQUEST_SCRATCH_QUOTA_BYTES:
+        raise ShapeConverterError(
+            code="archive_quota_exceeded",
+            message="Request scratch quota exceeded.",
+            details=f"Request scratch usage exceeded configured quota during {stage}.",
+            status_code=413,
+        )
+
+
+def _map_capacity_os_error(
+    *,
+    exc: OSError,
+    stage: str,
+    fallback_code: str,
+    fallback_message: str,
+    fallback_status_code: int,
+) -> ShapeConverterError:
+    if exc.errno == errno.ENOSPC:
+        return ShapeConverterError(
+            code="service_saturated",
+            message="Scratch capacity exhausted during conversion request.",
+            details=f"Scratch capacity exhausted during {stage}.",
+            status_code=503,
+        )
+
+    return ShapeConverterError(
+        code=fallback_code,
+        message=fallback_message,
+        details=str(exc),
+        status_code=fallback_status_code,
+    )
+
+
+def _scratch_tree_size_bytes(path: Path) -> int:
+    total = 0
+    for candidate in path.rglob("*"):
+        if candidate.is_file():
+            total += candidate.stat().st_size
+    return total
 
 
 def _load_shapefile(*, shp_path: Path, scratch: RequestScratchLayout) -> LoadedShapefile:
@@ -266,6 +421,8 @@ def _run_parser_worker(
         output_path.as_posix(),
         "--max-features",
         str(_MAX_CONVERT_FEATURES),
+        "--max-vertices-per-feature",
+        str(_MAX_VERTICES_PER_FEATURE),
     ]
     worker_env = _build_parser_worker_env()
 
@@ -280,11 +437,12 @@ def _run_parser_worker(
             start_new_session=True,
         )
     except OSError as exc:
-        raise ShapeConverterError(
-            code="reprojection_failed",
-            message="Unable to start parser subprocess.",
-            details=str(exc),
-            status_code=500,
+        raise _map_capacity_os_error(
+            exc=exc,
+            stage="parser_subprocess_start",
+            fallback_code="reprojection_failed",
+            fallback_message="Unable to start parser subprocess.",
+            fallback_status_code=500,
         ) from exc
 
     try:
@@ -307,6 +465,20 @@ def _run_parser_worker(
 
     if process.returncode != 0:
         details = worker_stderr.strip() or worker_stdout.strip() or f"Parser subprocess exited with code {process.returncode}."
+        if details.startswith("vertex_limit_exceeded:"):
+            raise ShapeConverterError(
+                code="archive_quota_exceeded",
+                message="Feature vertex count exceeds configured limit.",
+                details=details,
+                status_code=413,
+            )
+        if details.startswith("Feature count exceeded limit"):
+            raise ShapeConverterError(
+                code="archive_quota_exceeded",
+                message="Feature count exceeds configured limit.",
+                details=details,
+                status_code=413,
+            )
         raise ShapeConverterError(
             code="invalid_shapefile",
             message="Unable to parse shapefile content for conversion.",
@@ -509,6 +681,9 @@ def _build_convert_metadata(
     crs_plan: ResolvedTargetCrs,
     transformed_geometries: tuple[BaseGeometry | None, ...],
     feature_count: int,
+    projection_status: str,
+    attribute_schema: list[dict[str, object]],
+    detected_crs: dict[str, object] | None,
     warnings: tuple[str, ...],
 ) -> dict[str, object]:
     geometry_types = sorted({geometry.geom_type for geometry in transformed_geometries if geometry is not None})
@@ -518,7 +693,9 @@ def _build_convert_metadata(
         "request_id": request_id,
         "output_format": output_format,
         "target_crs": target_crs,
-        "detected_crs": crs_to_response_payload(crs_plan.source_crs),
+        "detected_crs": detected_crs if detected_crs is not None else crs_to_response_payload(crs_plan.source_crs),
+        "projection_status": projection_status,
+        "attribute_schema": attribute_schema,
         "output_crs": crs_to_response_payload(crs_plan.target_crs),
         "output_crs_identifier": crs_identifier(crs_plan.target_crs),
         "feature_count": feature_count,

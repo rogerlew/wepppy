@@ -360,10 +360,25 @@ services:
 
   shape-converter:
     <<: *wepppy-service
+    user: "10001:10001"
+    read_only: true
+    security_opt:
+      - no-new-privileges:true
+    cap_drop:
+      - ALL
+    pids_limit: 256
+    mem_limit: 1g
+    cpus: "1.50"
     ulimits:
       nofile:
         soft: 65536
         hard: 65536
+    volumes: []
+    tmpfs:
+      - /tmp:size=734003200,noexec,nosuid,nodev,mode=1777
+      - /run/shape-converter:size=8388608,noexec,nosuid,nodev,mode=755
+    networks:
+      - shape-converter-sandbox
     environment:
       <<: *wepppy-env
       SHAPE_CONVERTER_RATE_LIMIT_COUNT: ${SHAPE_CONVERTER_RATE_LIMIT_COUNT:-120}
@@ -373,6 +388,16 @@ services:
       SHAPE_CONVERTER_TRUSTED_PROXY_HOPS: ${SHAPE_CONVERTER_TRUSTED_PROXY_HOPS:-1}
       SHAPE_CONVERTER_TRUSTED_PROXY_CIDRS: "${SHAPE_CONVERTER_TRUSTED_PROXY_CIDRS:-127.0.0.1/32,::1/128,10.0.0.0/8,172.16.0.0/12,192.168.0.0/16}"
       SHAPE_CONVERTER_BODY_READ_TIMEOUT_SECONDS: ${SHAPE_CONVERTER_BODY_READ_TIMEOUT_SECONDS:-15}
+      SHAPE_CONVERTER_MULTIPART_MAX_PARTS: ${SHAPE_CONVERTER_MULTIPART_MAX_PARTS:-8}
+      SHAPE_CONVERTER_MULTIPART_MAX_FIELD_BYTES: ${SHAPE_CONVERTER_MULTIPART_MAX_FIELD_BYTES:-4096}
+      SHAPE_CONVERTER_MAX_VERTICES_PER_FEATURE: ${SHAPE_CONVERTER_MAX_VERTICES_PER_FEATURE:-250000}
+      SHAPE_CONVERTER_REQUEST_SCRATCH_QUOTA_BYTES: ${SHAPE_CONVERTER_REQUEST_SCRATCH_QUOTA_BYTES:-734003200}
+      SHAPE_CONVERTER_SCRATCH_PRECHECK_FREE_BYTES: ${SHAPE_CONVERTER_SCRATCH_PRECHECK_FREE_BYTES:-134217728}
+      SHAPE_CONVERTER_SCRATCH_ROOT: /tmp/shape-converter
+      SHAPE_CONVERTER_SANDBOX_MODE: ${SHAPE_CONVERTER_SANDBOX_MODE:-container}
+      SHAPE_CONVERTER_REQUIRED_SANDBOX_MODE: ${SHAPE_CONVERTER_REQUIRED_SANDBOX_MODE:-container}
+      SHAPE_CONVERTER_RELAY_CORS_ALLOWED_ORIGINS: ${SHAPE_CONVERTER_RELAY_CORS_ALLOWED_ORIGINS:-https://wepp.cloud}
+      PYTHONDONTWRITEBYTECODE: "1"
     command:
       - uvicorn
       - wepppy.microservices.shape_converter:app
@@ -656,6 +681,7 @@ services:
         condition: service_started
     networks:
       - backend
+      - shape-converter-sandbox
 
   f-esri:
     image: ${F_ESRI_IMAGE:-wepppy-f-esri:latest}
@@ -842,6 +868,10 @@ services:
 networks:
   backend:
     driver: bridge
+  shape-converter-sandbox:
+    name: wepppy-shape-converter-sandbox
+    driver: bridge
+    internal: true
 
 volumes:
   redis-data:

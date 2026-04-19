@@ -120,9 +120,6 @@ services:
   query-engine:
     <<: *wepppy-image
     volumes: *wepp1-volumes
-  shape-converter:
-    <<: *wepppy-image
-    volumes: *wepp1-volumes
   rq-engine:
     <<: *wepppy-image
     volumes: *wepp1-volumes

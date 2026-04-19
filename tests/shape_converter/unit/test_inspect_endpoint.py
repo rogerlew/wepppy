@@ -1,9 +1,11 @@
 from __future__ import annotations
 
+import errno
 import importlib
 import json
 import logging
 import re
+from types import SimpleNamespace
 
 import pytest
 
@@ -44,6 +46,8 @@ def test_inspect_success_returns_required_metadata_fields() -> None:
     assert payload["geometry_types"] == ["Point"]
     assert payload["bbox"] == [10.0, 20.0, 10.0, 20.0]
     assert isinstance(payload["attribute_schema"], list)
+    assert payload["attribute_schema"]
+    assert "nullability_note" in payload["attribute_schema"][0]
     assert isinstance(payload["warnings"], list)
     assert payload["detected_crs"]["authority"] == "EPSG:4326"
 
@@ -238,6 +242,28 @@ def test_inspect_rejects_oversize_projection_file() -> None:
     assert "size limit" in payload["error"]["message"].lower()
 
 
+def test_inspect_marks_invalid_projection_file_as_invalid_status() -> None:
+    archive_bytes = build_zip_bytes(
+        build_minimal_point_dataset(
+            prefix="invalid-prj",
+            include_prj=True,
+            prj_text="NOT_A_VALID_WKT",
+        )
+    )
+
+    with TestClient(create_app()) as client:
+        response = client.post(
+            "/v1/inspect",
+            files={"archive": ("invalid-prj.zip", archive_bytes, "application/zip")},
+        )
+
+    assert response.status_code == 200
+    payload = response.json()
+    assert payload["projection_status"] == "invalid"
+    assert payload["detected_crs"] is None
+    assert any("invalid wkt" in warning.lower() for warning in payload["warnings"])
+
+
 def test_inspect_rejects_oversize_upload_before_full_buffer(
     monkeypatch: pytest.MonkeyPatch,
 ) -> None:
@@ -253,6 +279,55 @@ def test_inspect_rejects_oversize_upload_before_full_buffer(
     assert response.status_code == 413
     payload = response.json()
     assert payload["error"]["code"] == "archive_quota_exceeded"
+
+
+def test_inspect_returns_service_saturated_when_scratch_free_space_is_insufficient(
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    archive_bytes = build_zip_bytes(build_minimal_point_dataset(prefix="inspect-free-space"))
+    disk_usage = SimpleNamespace(total=1024, used=1000, free=24)
+    monkeypatch.setattr(shape_converter_inspect_module.shutil, "disk_usage", lambda _path: disk_usage)
+
+    with TestClient(create_app()) as client:
+        response = client.post(
+            "/v1/inspect",
+            files={"archive": ("inspect-free-space.zip", archive_bytes, "application/zip")},
+        )
+
+    assert response.status_code == 503
+    payload = response.json()
+    assert payload["error"]["code"] == "service_saturated"
+
+
+def test_inspect_returns_archive_quota_exceeded_when_archive_write_exceeds_request_quota(
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    archive_bytes = build_zip_bytes(build_minimal_point_dataset(prefix="inspect-archive-write-quota"))
+    monkeypatch.setattr(shape_converter_inspect_module, "_REQUEST_SCRATCH_QUOTA_BYTES", 1)
+
+    with TestClient(create_app()) as client:
+        response = client.post(
+            "/v1/inspect",
+            files={"archive": ("inspect-archive-write-quota.zip", archive_bytes, "application/zip")},
+        )
+
+    assert response.status_code == 413
+    payload = response.json()
+    assert payload["error"]["code"] == "archive_quota_exceeded"
+    assert "inspect_archive_write" in payload["error"]["details"]
+
+
+def test_inspect_maps_enospc_os_error_to_service_saturated() -> None:
+    mapped = shape_converter_inspect_module._map_capacity_os_error(
+        exc=OSError(errno.ENOSPC, "no space left on device"),
+        stage="unit_test",
+        fallback_code="invalid_archive",
+        fallback_message="fallback",
+        fallback_status_code=500,
+    )
+
+    assert mapped.code == "service_saturated"
+    assert mapped.status_code == 503
 
 
 def test_inspect_returns_timeout_when_body_read_stalls(monkeypatch: pytest.MonkeyPatch) -> None:
@@ -273,3 +348,38 @@ def test_inspect_returns_timeout_when_body_read_stalls(monkeypatch: pytest.Monke
     payload = response.json()
     assert payload["error"]["code"] == "request_timeout"
     assert "body" in payload["error"]["message"].lower()
+
+
+def test_inspect_rejects_multipart_payload_exceeding_part_limit(
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    archive_bytes = build_zip_bytes(build_minimal_point_dataset(prefix="inspect-part-limit"))
+    monkeypatch.setattr(shape_converter_app_module, "_MULTIPART_MAX_PARTS", 1)
+
+    with TestClient(create_app()) as client:
+        response = client.post(
+            "/v1/inspect",
+            files={"archive": ("inspect-part-limit.zip", archive_bytes, "application/zip")},
+            data={"extra": "x"},
+        )
+
+    assert response.status_code == 413
+    payload = response.json()
+    assert payload["error"]["code"] == "invalid_archive"
+
+
+def test_inspect_emits_structured_parse_duration_observability_fields(
+    caplog: pytest.LogCaptureFixture,
+) -> None:
+    archive_bytes = build_zip_bytes(build_minimal_point_dataset(prefix="inspect-duration-log"))
+    caplog.set_level(logging.INFO, logger="wepppy.microservices.shape_converter.app")
+
+    with TestClient(create_app()) as client:
+        response = client.post(
+            "/v1/inspect",
+            files={"archive": ("inspect-duration-log.zip", archive_bytes, "application/zip")},
+        )
+
+    assert response.status_code == 200
+    assert "\"event\":\"shape_converter_inspect_completed\"" in caplog.text
+    assert "\"parse_duration_ms\":" in caplog.text

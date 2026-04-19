@@ -2,11 +2,15 @@
 
 from __future__ import annotations
 
-import re
+import errno
+import os
+import shutil
 import struct
 from dataclasses import dataclass
 from pathlib import Path
 
+from pyproj import CRS
+from pyproj.exceptions import CRSError
 from starlette.datastructures import UploadFile
 
 from .archive_validation import (
@@ -46,9 +50,17 @@ _DBF_TYPE_NAMES = {
     "M": "memo",
 }
 
-_AUTHORITY_RE = re.compile(r'AUTHORITY\["([^"]+)","([^"]+)"\]')
 _MAX_PRJ_BYTES = 32 * 1024
 _MAX_UPLOAD_COMPRESSED_BYTES = ArchiveLimits().max_compressed_bytes
+_NULLABILITY_NOTE_FALLBACK = "Not inferable from DBF header metadata."
+_SCRATCH_PRECHECK_FREE_BYTES = max(
+    1,
+    int(os.getenv("SHAPE_CONVERTER_SCRATCH_PRECHECK_FREE_BYTES", str(128 * 1024 * 1024))),
+)
+_REQUEST_SCRATCH_QUOTA_BYTES = max(
+    1,
+    int(os.getenv("SHAPE_CONVERTER_REQUEST_SCRATCH_QUOTA_BYTES", str(700 * 1024 * 1024))),
+)
 
 
 @dataclass(frozen=True, slots=True)
@@ -75,20 +87,42 @@ async def inspect_uploaded_archive(
             details="Uploaded archive contained zero bytes.",
         )
 
+    _assert_scratch_free_space(
+        scratch=scratch,
+        required_free_bytes=len(archive_bytes) + _SCRATCH_PRECHECK_FREE_BYTES,
+        stage="inspect_archive_preflight",
+    )
+    _assert_request_scratch_quota(
+        scratch=scratch,
+        additional_bytes=len(archive_bytes),
+        stage="inspect_archive_write",
+    )
+
     try:
         scratch.upload_archive_path.write_bytes(archive_bytes)
     except OSError as exc:
-        raise ShapeConverterError(
-            code="invalid_archive",
-            message="Unable to persist uploaded archive.",
-            details=str(exc),
-            status_code=500,
+        raise _map_capacity_os_error(
+            exc=exc,
+            stage="inspect_archive_write",
+            fallback_code="invalid_archive",
+            fallback_message="Unable to persist uploaded archive.",
+            fallback_status_code=500,
         ) from exc
+
+    extraction_request_quota = _REQUEST_SCRATCH_QUOTA_BYTES - len(archive_bytes)
+    if extraction_request_quota <= 0:
+        raise ShapeConverterError(
+            code="archive_quota_exceeded",
+            message="Request scratch quota exceeded.",
+            details="Request scratch quota does not allow archive extraction after upload persistence.",
+            status_code=413,
+        )
 
     extracted_archive = validate_and_extract_zip_archive(
         archive_name=archive_name,
         archive_bytes=archive_bytes,
         extraction_root=scratch.extraction_root,
+        request_quota_bytes=extraction_request_quota,
     )
 
     dataset = select_single_shapefile_dataset(extracted_archive)
@@ -100,6 +134,89 @@ async def inspect_uploaded_archive(
         dataset=dataset,
         request_id=request_id,
         additional_warnings=additional_warnings,
+    )
+
+
+def _assert_scratch_free_space(
+    *,
+    scratch: RequestScratchLayout,
+    required_free_bytes: int,
+    stage: str,
+) -> None:
+    try:
+        free_bytes = shutil.disk_usage(scratch.request_dir).free
+    except OSError as exc:
+        raise ShapeConverterError(
+            code="service_saturated",
+            message="Unable to verify scratch free space.",
+            details=f"Scratch free-space probe failed during {stage}: {exc}",
+            status_code=503,
+        ) from exc
+
+    if free_bytes < required_free_bytes:
+        raise ShapeConverterError(
+            code="service_saturated",
+            message="Insufficient scratch free space for inspect request.",
+            details=f"Scratch free-space preflight failed during {stage}.",
+            status_code=503,
+        )
+
+
+def _assert_request_scratch_quota(
+    *,
+    scratch: RequestScratchLayout,
+    additional_bytes: int,
+    stage: str,
+) -> None:
+    try:
+        current_usage = _scratch_tree_size_bytes(scratch.request_dir)
+    except OSError as exc:
+        raise ShapeConverterError(
+            code="service_saturated",
+            message="Unable to evaluate request scratch usage.",
+            details=f"Scratch quota evaluation failed during {stage}: {exc}",
+            status_code=503,
+        ) from exc
+
+    projected_usage = current_usage + max(0, additional_bytes)
+    if projected_usage > _REQUEST_SCRATCH_QUOTA_BYTES:
+        raise ShapeConverterError(
+            code="archive_quota_exceeded",
+            message="Request scratch quota exceeded.",
+            details=f"Request scratch usage exceeded configured quota during {stage}.",
+            status_code=413,
+        )
+
+
+def _scratch_tree_size_bytes(path: Path) -> int:
+    total = 0
+    for candidate in path.rglob("*"):
+        if candidate.is_file():
+            total += candidate.stat().st_size
+    return total
+
+
+def _map_capacity_os_error(
+    *,
+    exc: OSError,
+    stage: str,
+    fallback_code: str,
+    fallback_message: str,
+    fallback_status_code: int,
+) -> ShapeConverterError:
+    if exc.errno == errno.ENOSPC:
+        return ShapeConverterError(
+            code="service_saturated",
+            message="Scratch capacity exhausted during inspect request.",
+            details=f"Scratch capacity exhausted during {stage}.",
+            status_code=503,
+        )
+
+    return ShapeConverterError(
+        code=fallback_code,
+        message=fallback_message,
+        details=str(exc),
+        status_code=fallback_status_code,
     )
 
 
@@ -153,8 +270,8 @@ def _build_inspect_payload(
     additional_warnings: tuple[str, ...] = (),
 ) -> dict[str, object]:
     shp_metadata = _read_shp_metadata(dataset.prefix_path.with_suffix(".shp"))
-    dbf_metadata = _read_dbf_metadata(dataset.prefix_path.with_suffix(".dbf"))
-    detected_crs, projection_status, projection_warnings = _read_projection_metadata(
+    dbf_metadata = read_dbf_metadata(dataset.prefix_path.with_suffix(".dbf"))
+    detected_crs, projection_status, projection_warnings = read_projection_metadata(
         dataset.prefix_path.with_suffix(".prj")
     )
     warnings = list(additional_warnings)
@@ -228,7 +345,7 @@ def _read_shp_metadata(shp_path: Path) -> dict[str, object]:
     }
 
 
-def _read_dbf_metadata(dbf_path: Path) -> dict[str, object]:
+def read_dbf_metadata(dbf_path: Path) -> dict[str, object]:
     try:
         with dbf_path.open("rb") as handle:
             header = handle.read(32)
@@ -282,6 +399,7 @@ def _read_dbf_metadata(dbf_path: Path) -> dict[str, object]:
                         "dbf_type": dbf_type,
                         "width": width,
                         "precision": precision,
+                        "nullability_note": _dbf_nullability_note(dbf_type),
                     }
                 )
 
@@ -297,7 +415,7 @@ def _read_dbf_metadata(dbf_path: Path) -> dict[str, object]:
         ) from exc
 
 
-def _read_projection_metadata(prj_path: Path) -> tuple[dict[str, object] | None, str, list[str]]:
+def read_projection_metadata(prj_path: Path) -> tuple[dict[str, object] | None, str, list[str]]:
     warnings: list[str] = []
 
     if not prj_path.exists():
@@ -339,21 +457,34 @@ def _read_projection_metadata(prj_path: Path) -> tuple[dict[str, object] | None,
         warnings.append("Projection file could not be decoded.")
         return None, "invalid", warnings
 
-    authority = _extract_authority(wkt_text)
-    detected_crs: dict[str, object] = {"wkt": wkt_text}
-    if authority is not None:
-        detected_crs["authority"] = authority
+    try:
+        parsed = CRS.from_wkt(wkt_text)
+    except (CRSError, TypeError, ValueError):
+        warnings.append("Projection file exists but contains invalid WKT.")
+        return None, "invalid", warnings
+
+    authority_tuple = parsed.to_authority()
+    detected_crs: dict[str, object] = {"wkt": parsed.to_wkt()}
+    if authority_tuple is not None:
+        detected_crs["authority"] = f"{authority_tuple[0].upper()}:{authority_tuple[1]}"
 
     return detected_crs, "known", warnings
 
 
-def _extract_authority(wkt_text: str) -> str | None:
-    matches = _AUTHORITY_RE.findall(wkt_text)
-    if not matches:
-        return None
+def _dbf_nullability_note(dbf_type: str) -> str:
+    # DBF headers do not carry a strict nullable constraint bit.
+    if dbf_type == "L":
+        return (
+            "Logical fields can encode unknown values (for example '?'), "
+            "but strict nullability is not inferable from DBF metadata."
+        )
+    return _NULLABILITY_NOTE_FALLBACK
 
-    authority_name, authority_code = matches[-1]
-    return f"{authority_name.upper()}:{authority_code}"
 
-
-__all__ = ["ShapefileDataset", "inspect_uploaded_archive", "select_single_shapefile_dataset"]
+__all__ = [
+    "ShapefileDataset",
+    "inspect_uploaded_archive",
+    "read_dbf_metadata",
+    "read_projection_metadata",
+    "select_single_shapefile_dataset",
+]
