@@ -115,7 +115,7 @@ Why this matters for stakeholders:
 - it reduces regression risk,
 - it gives clear evidence for every keep/rollback decision.
 
-Reference protocol: `docs/ablation-testing-protocol.md`.
+Reference protocol: `docs/ablation/protocol.md`.
 
 ### 4) Separate "parity" from "correctness" in release decisions
 
@@ -133,7 +133,7 @@ For each incident/fix set:
 - keep/rollback decision,
 - residual risk statement.
 
-Reference example incident record: `docs/20260414-numerical-stability-patches.md`.
+Reference example incident record: `docs/ablation/20260414-numerical-stability-patches.md`.
 
 ## What Stakeholders Should Expect
 

@@ -1,6 +1,6 @@
 # Mini Work Package: Sandboxed Shapefile Conversion Web App Spec
-Status: Ready
-Last Updated: 2026-04-18
+Status: Complete (Implemented)
+Last Updated: 2026-04-19
 Primary Areas: `docker/docker-compose.dev.yml`, `docker/caddy/Caddyfile`, `wepppy/microservices/*`, `wepppy/all_your_base/geo/geo.py`, `wepppy/weppcloud/*`
 
 ## Objective
@@ -34,7 +34,7 @@ Users currently struggle with local shapefile conversion workflows. A dedicated 
 2. User selects `.zip` (containing exactly one logical shapefile dataset) in a single archive input.
 3. User can choose output format (`GeoJSON`/`GeoParquet`) and target CRS (`same_as_shapefile`/`wgs84`/`utm_wepppy_upper_left`) in that same panel.
 4. User clicks `Inspect Upload` (secondary action) to populate metadata panels:
-   - Projection status (detected CRS / unknown).
+   - Projection status (`known` / `unknown` / `invalid`) with detected CRS details when present.
    - Geometry summary (feature count, geometry types, bounds).
    - Attribute schema table (field name, type, width/precision, nullability note).
    - Warnings (lossy/null/geometry/CRS caveats).
@@ -95,7 +95,7 @@ Users currently struggle with local shapefile conversion workflows. A dedicated 
 - GeoParquet output:
   - Write valid GeoParquet metadata (`geo` metadata key, `primary_column`, `columns`, `crs` where known).
 - UI/API metadata response must include:
-  - `detected_crs` (authority/WKT/PROJJSON when available)
+  - `detected_crs` (authority/WKT when available)
   - `projection_status` (`known`, `unknown`, `invalid`)
   - `attribute_schema` array (`name`, `type`, `width`, `precision`, `nullability_note`)
   - `geometry_types`
@@ -145,29 +145,39 @@ Users currently struggle with local shapefile conversion workflows. A dedicated 
 
 ## Service Design
 ### Deployment shape
-- New service: `shape-converter`.
-- New Caddy utility namespace route: `/utils/shape-converter`.
-- Caddy matcher must be tightened to avoid prefix bleed (do not use `/utils/shape-converter*` glob matching).
-- Required Caddy route shape:
+- Service: `shape-converter`.
+- Caddy utility namespace route: `/utils/shape-converter`.
+- Caddy matcher is tightened to avoid prefix bleed (no `/utils/shape-converter*` glob matching).
+- Implemented Caddy route shape:
 ```caddy
-@shape_converter_exact path /utils/shape-converter /utils/shape-converter/
-@shape_converter_subtree path /utils/shape-converter/*
-
-handle @shape_converter_exact {
-    redir /utils/shape-converter/ 308
-}
+@shape_converter_exact path /utils/shape-converter
+redir @shape_converter_exact /utils/shape-converter/ 308
 
 handle_path /utils/shape-converter/* {
+    request_body {
+        max_size 100MB
+    }
+
     reverse_proxy shape-converter:8060 {
         header_up X-Forwarded-Prefix /utils/shape-converter
+        header_up -Forwarded
+        header_up -X-Forwarded-For
+        header_up -X-Forwarded-Host
+        header_up -X-Forwarded-Proto
+        header_up X-Forwarded-For {remote_host}
+        header_up X-Forwarded-Host {host}
         header_up X-Forwarded-Proto {scheme}
         header_up Host {host}
+        transport http {
+            read_timeout 130s
+            write_timeout 30s
+            response_header_timeout 130s
+        }
     }
 }
 ```
-- UI can be:
-  - Minimal static page served by this service, or
-  - Embedded WEPPcloud page that POSTs directly to `shape-converter`.
+- WEPP1-specific runtime keeps the same header-sanitization/timeouts policy with a `120MB` edge body cap to preserve canonical app-level `100MB` ZIP quota behavior under multipart overhead.
+- UI implementation is a minimal static page served by this service; WEPPcloud relay integration remains separate and consumes API contracts (`response_mode=json_body`) rather than replacing the local UI flow.
 
 ### Container specification (detailed)
 #### Image and runtime
@@ -179,7 +189,7 @@ handle_path /utils/shape-converter/* {
 - Writable paths only via `tmpfs` mounts:
   - `/tmp` for request scratch (archive, extraction, generated output).
   - `/run/shape-converter` for process/runtime state.
-- No host path mounts except explicit config/secrets mounts.
+- Production compose runs without host path mounts; dev compose mounts the repo read-only for local iteration only.
 
 #### Compose-level hardening contract
 - `read_only: true`
@@ -193,7 +203,7 @@ handle_path /utils/shape-converter/* {
 - East-west access to other app services is denied by network policy
 - Outbound egress is deny-all (including DNS) unless explicitly allowlisted
 - No Docker socket mount, no privileged mode, no host PID/IPC namespaces
-- Runtime image and base image are digest-pinned in build/deploy manifests
+- Runtime/image digest pinning is tracked as an operational hardening follow-up (not yet enforced directly in current compose manifests)
 
 #### Health and lifecycle
 - `GET /utils/shape-converter/health/live` for liveness.
@@ -212,15 +222,15 @@ handle_path /utils/shape-converter/* {
   - Validate parser subprocess sandbox mode (production hard requirement).
 
 #### Performance and concurrency contract
-- Bound active conversions with semaphore:
-  - `MAX_ACTIVE_CONVERSIONS_PER_WORKER` default `2`.
-- Bound active requests:
-  - `MAX_INFLIGHT_REQUESTS` with immediate `429` when saturated.
+- Bound active requests with middleware abuse controls:
+  - `SHAPE_CONVERTER_MAX_INFLIGHT_GLOBAL` (default `32`) with immediate `503 service_saturated` when global slots are exhausted.
+  - `SHAPE_CONVERTER_MAX_INFLIGHT_PER_IP` (default `8`) with immediate `429 rate_limited` when per-client slots are exhausted.
+  - `SHAPE_CONVERTER_RATE_LIMIT_COUNT` / `SHAPE_CONVERTER_RATE_LIMIT_WINDOW_SECONDS` (defaults `120` / `60`) for sliding-window request throttling.
 - Per-request timeout:
   - Metadata inspect timeout: 30 seconds.
   - Conversion timeout: 120 seconds.
-  - Upload header/body read timeout and minimum upload data rate are enforced.
-  - Response write/idle timeout and max download lifetime are enforced.
+  - Multipart body read timeout is enforced via `SHAPE_CONVERTER_BODY_READ_TIMEOUT_SECONDS` (default `15`).
+  - Edge proxy read/write/response-header timeouts enforce bounded request/response lifetime.
 - Backpressure policy:
   - No unbounded in-memory queue.
   - Reject quickly with retry guidance once capacity is reached.
@@ -281,7 +291,7 @@ handle_path /utils/shape-converter/* {
 - Cleanup failures are logged as structured security events and retried by janitor.
 - No artifact persistence after request terminal response.
 
-## API Sketch (Draft)
+## API Contract (Implemented)
 ### `POST /utils/shape-converter/v1/inspect`
 Request:
 - `archive` (ZIP)
@@ -296,6 +306,10 @@ Response 200:
 - `bbox`
 - `attribute_schema`
 - `warnings`
+
+Error behavior:
+- Canonical error payload with `error.code`, `error.message`, and `error.details`.
+- `request_id` is included in error payloads.
 
 ### `POST /utils/shape-converter/v1/convert`
 Request:
@@ -313,9 +327,24 @@ Response 200:
   - `geojson`
   - `metadata`
 
+Download headers:
+- `X-Shape-Converter-Request-Id`
+- `X-Shape-Converter-Metadata-Path`
+- `Content-Disposition` attachment filename (RFC 5987-compatible encoding)
+
+### `GET /utils/shape-converter/v1/convert/metadata/{request_id}`
+Response 200:
+- Convert metadata for download-mode conversions (`output_format`, `target_crs`, `projection_status`, `detected_crs`, `attribute_schema`, geometry summary, warnings, output CRS details, and download metadata fields).
+
+Response 404:
+- Canonical `metadata_not_found` when request metadata has expired or is unknown.
+
 Error response contract:
 - Follow canonical WEPPpy error payload style (`error.code`, `error.message`, `error.details` required).
 - Use explicit codes like:
+  - `metadata_not_found`
+  - `rate_limited`
+  - `request_timeout`
   - `invalid_request`
   - `invalid_archive`
   - `archive_path_traversal`
@@ -330,8 +359,10 @@ Error response contract:
 - Error status mapping (minimum):
   - `400`: validation/input errors.
   - `404`: metadata sidecar `request_id` not found.
+  - `408`: request body/processing timeout.
   - `413`: upload/body/expansion quota exceeded.
   - `429`: rate-limit or concurrency saturation.
+  - `503`: service saturation and scratch-capacity exhaustion.
   - `500`: unexpected internal failure.
 
 ## ZIP Upload Risk Matrix (Comprehensive)
@@ -433,24 +464,24 @@ Error response contract:
 - Keep messages explicit; no silent fallback behavior.
 
 ## Security Controls Baseline
-- Follow OWASP file upload defense-in-depth: extension allowlist, signature checks, strict size/runtime limits, sandboxing, dependency patching, and abuse controls for anonymous access.
-- Apply container hardening controls: non-root, no privilege escalation, seccomp/AppArmor/SELinux, read-only filesystem, resource limits.
-- Require an additional runtime sandbox layer (e.g., gVisor runsc) in production for parser isolation.
-- No container access to Docker socket, host root, or unrelated volumes.
-- Public-service edge controls are required:
+- Implemented baseline controls:
+  - OWASP-style upload defense-in-depth: extension allowlist, signature checks, strict size/runtime limits, sandboxing, and abuse controls for anonymous access.
+  - Container/runtime hardening in compose: non-root user, `read_only`, `no-new-privileges`, `cap_drop=ALL`, explicit pid/memory/cpu limits, hardened tmpfs mounts.
+  - No Docker socket mount, no privileged mode, and isolated internal network segment.
+  - Public-service edge controls:
   - Edge request body size cap.
-  - Edge upload/read/write timeouts and minimum upload data rate controls.
+  - Edge upload/read/write/response-header timeout controls.
   - Edge forwarding-header sanitization and trusted-proxy configuration.
   - CORS policy for browser relay use-cases is required for `json_body` mode.
-- Application-level controls are also required (authoritative when edge lacks native rate-limit module support):
+  - Application-level controls (authoritative when edge lacks native rate-limit module support):
   - Per-IP rate/concurrency controls in service middleware.
   - Per-request scratch quotas and timeout cancellation hooks.
   - Metadata sanitization and length bounds before serialization/logging.
-- Supply-chain controls are required:
+- Program/release controls retained for future hardening:
   - Runtime image digest pinning.
   - SBOM generation for release builds.
   - Vulnerability scan gate that blocks unresolved High/Critical issues in reachable runtime components.
-- Parser dependency controls are required:
+- Parser dependency controls:
   - Track and triage GDAL/OGR parser vulnerabilities (including memory-corruption and parser-DoS classes) before each release; keep known examples such as `CVE-2021-45943` and `CVE-2025-29480` on the watchlist.
   - Maintain explicit timeout/kill behavior for parser non-termination classes (for example malformed WKB infinite-loop conditions).
   - Treat `/vsizip/` as an implementation detail, not a security boundary; archive and contained parser risks still require full validation/sandbox controls.

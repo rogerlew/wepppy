@@ -12,6 +12,7 @@ first), through **07/19/2022**.
 
 | Date | Commit Hash | Compiler | Version | Notes |
 | --- | --- | --- | --- | --- |
+| 04/19/2026 | `a3ec823` | `gfortran` | `wepp_260419` | Released `wepp_260419` and `wepp_260419_hill` with `/usr/bin/gfortran` via `tools/build_wepp_dated_release.sh`; added watershed numeric guards in `wshdrv.for`/`wshchr.for`/`case34.for` for data-triggered SIGFPE containment; validated host smoke gates, full `pytest`, reconciled-condenser manual watershed replay, and ELF interpreter compatibility (`/lib64/ld-linux-x86-64.so.2`). |
 | 04/18/2026 | `c3a082e` | `gfortran` | `wepp_260418` | Rebuilt `wepp_260418`/`wepp_260418_hill` from current source with `/usr/bin/gfortran`; promoted p325 SIGFPE hardening guard in `src/param.for` into the canonical `wepp_260418_hill` release; added `srivas42-claustrophobic-shortcut` p325/p326 fixture coverage and ablation evidence. |
 | 04/18/2026 | `9e09730` | `gfortran` | `wepp_260418` | Released `wepp_260418` and `wepp_260418_hill` using `/usr/bin/gfortran` via `tools/build_wepp_dated_release.sh`; validated host smoke gates, full pytest suite, and reconciled-condenser watershed replay success marker. |
 | 04/17/2026 | `eb88c57` | `gfortran` | `wepp_260417` | Released `wepp_260417` and `wepp_260417_hill` from the peak-flow multi-OFE saturation-excess runoff correction in `src/irs.for` (contour/non-contour scaling parity fix). |
