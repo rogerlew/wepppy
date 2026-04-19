@@ -1,6 +1,6 @@
 #!/bin/bash
 # Production Deployment Script for WEPPcloud
-# Usage: ./scripts/deploy-production.sh [--skip-pull] [--skip-build] [--skip-themes] [--flush-rq-db|--no-flush-rq-db]
+# Usage: ./scripts/deploy-production.sh [--skip-pull] [--skip-build] [--skip-themes] [--flush-rq-db|--no-flush-rq-db] [--skip-docker-prune] [--docker-prune-volumes]
 
 set -euo pipefail
 
@@ -119,6 +119,8 @@ SKIP_THEMES=false
 FLUSH_RQ_DB=false
 FLUSH_RQ_DB_EXPLICIT=false
 REQUIRE_RQ_REDIS=false
+SKIP_DOCKER_PRUNE=false
+DOCKER_PRUNE_VOLUMES=false
 HEALTHCHECK_URL="${HEALTHCHECK_URL:-}"
 
 while [[ $# -gt 0 ]]; do
@@ -149,9 +151,17 @@ while [[ $# -gt 0 ]]; do
             REQUIRE_RQ_REDIS=true
             shift
             ;;
+        --skip-docker-prune)
+            SKIP_DOCKER_PRUNE=true
+            shift
+            ;;
+        --docker-prune-volumes)
+            DOCKER_PRUNE_VOLUMES=true
+            shift
+            ;;
         *)
             echo "Unknown option: $1"
-            echo "Usage: $0 [--skip-pull] [--skip-build] [--skip-themes] [--flush-rq-db|--no-flush-rq-db] [--require-rq-redis]"
+            echo "Usage: $0 [--skip-pull] [--skip-build] [--skip-themes] [--flush-rq-db|--no-flush-rq-db] [--require-rq-redis] [--skip-docker-prune] [--docker-prune-volumes]"
             exit 1
             ;;
     esac
@@ -370,6 +380,20 @@ if [ "${HAS_WEPPCLOUD}" = true ]; then
     done
 else
     echo ">>> Step 6: Skipping WEPPcloud health check (worker stack detected)..."
+fi
+
+if [ "${SKIP_DOCKER_PRUNE}" = false ]; then
+    echo ""
+    echo ">>> Step 7: Pruning unused Docker runtime artifacts..."
+    PRUNE_ARGS=(-a -f)
+    if [ "${DOCKER_PRUNE_VOLUMES}" = true ]; then
+        echo "    WARNING: --docker-prune-volumes enabled; unused Docker volumes will be deleted."
+        PRUNE_ARGS+=(--volumes)
+    fi
+    docker system prune "${PRUNE_ARGS[@]}"
+else
+    echo ""
+    echo ">>> Step 7: Skipping Docker runtime prune (--skip-docker-prune)"
 fi
 
 echo ""

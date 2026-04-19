@@ -24,6 +24,12 @@ cd /workdir/wepppy
 docker compose --env-file docker/.env -f docker/docker-compose.prod.yml up -d
 ```
 
+`deploy-production.sh` cleanup behavior:
+- Runs `docker builder prune -af` after builds (build cache/layers only).
+- Runs `docker system prune -a -f` at the end of deploy (unused images, stopped containers, and unused networks).
+- Does **not** prune volumes unless explicitly requested with `--docker-prune-volumes`.
+- Use `--skip-docker-prune` to disable the end-of-deploy runtime prune.
+
 ### Production Worker Pool (Dedicated RQ Hosts)
 
 Worker-only stacks (no Flask/Caddy/Redis/Postgres) use:
