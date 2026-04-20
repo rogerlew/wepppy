@@ -1,5 +1,6 @@
 from __future__ import annotations
 
+import asyncio
 import re
 from types import SimpleNamespace
 from typing import Any, Dict, List
@@ -301,3 +302,245 @@ def test_query_engine_preflight_emits_correlation_id_header() -> None:
     assert response.status_code == 200
     assert _CORRELATION_HEADER in response.headers
     assert _CORRELATION_ID_PATTERN.match(response.headers[_CORRELATION_HEADER])
+
+
+def _reset_bandwidth_rate_limit_state(server_module) -> None:
+    with server_module._BANDWIDTH_RATE_LIMIT_LOCK:
+        server_module._BANDWIDTH_RATE_LIMIT_BUCKETS.clear()
+
+
+@pytest.mark.unit
+def test_diagnostics_bandwidth_download_returns_deterministic_payload() -> None:
+    from wepppy.query_engine.app import server
+
+    _reset_bandwidth_rate_limit_state(server)
+
+    app = server.create_app()
+    client = TestClient(app)
+
+    response = client.get("/diagnostics/bandwidth/download?bytes=4096")
+
+    assert response.status_code == 200
+    assert response.headers.get("Cache-Control") == "no-store"
+    assert response.headers.get("Content-Length") == "4096"
+    assert response.headers.get("content-type", "").startswith("application/octet-stream")
+    assert len(response.content) == 4096
+    assert response.content.startswith(server._BANDWIDTH_PATTERN)
+
+
+@pytest.mark.unit
+def test_diagnostics_bandwidth_download_blocks_cross_origin() -> None:
+    from wepppy.query_engine.app import server
+
+    _reset_bandwidth_rate_limit_state(server)
+
+    app = server.create_app()
+    client = TestClient(app)
+
+    response = client.get(
+        "/diagnostics/bandwidth/download?bytes=1024",
+        headers={"Origin": "https://evil.example", "Host": "query.example"},
+    )
+
+    assert response.status_code == 403
+    assert response.headers.get("Cache-Control") == "no-store"
+    assert response.json()["error"]["code"] == "cross_origin_blocked"
+
+
+@pytest.mark.unit
+def test_diagnostics_bandwidth_download_rejects_invalid_bytes() -> None:
+    from wepppy.query_engine.app import server
+
+    _reset_bandwidth_rate_limit_state(server)
+
+    app = server.create_app()
+    client = TestClient(app)
+
+    invalid_response = client.get("/diagnostics/bandwidth/download?bytes=zero")
+    assert invalid_response.status_code == 400
+    assert invalid_response.headers.get("Cache-Control") == "no-store"
+    assert invalid_response.json()["error"]["code"] == "invalid_probe_size"
+
+    too_large = server._BANDWIDTH_MAX_BYTES + 1
+    too_large_response = client.get(f"/diagnostics/bandwidth/download?bytes={too_large}")
+    assert too_large_response.status_code == 413
+    assert too_large_response.headers.get("Cache-Control") == "no-store"
+    assert too_large_response.json()["error"]["code"] == "probe_too_large"
+
+
+@pytest.mark.unit
+def test_diagnostics_bandwidth_download_busy_path(monkeypatch: pytest.MonkeyPatch) -> None:
+    from wepppy.query_engine.app import server
+
+    _reset_bandwidth_rate_limit_state(server)
+    monkeypatch.setattr(server, "_BANDWIDTH_SEMAPHORE_WAIT_SECONDS", 0)
+    monkeypatch.setattr(server, "_BANDWIDTH_SEMAPHORE", asyncio.Semaphore(0))
+
+    app = server.create_app()
+    client = TestClient(app)
+
+    response = client.get("/diagnostics/bandwidth/download?bytes=1024")
+    assert response.status_code == 503
+    assert response.headers.get("Cache-Control") == "no-store"
+    assert response.json()["error"]["code"] == "busy"
+
+
+@pytest.mark.unit
+def test_diagnostics_bandwidth_upload_reports_bytes_received() -> None:
+    from wepppy.query_engine.app import server
+
+    _reset_bandwidth_rate_limit_state(server)
+
+    app = server.create_app()
+    client = TestClient(app)
+
+    payload = b"x" * 2048
+    response = client.post(
+        "/diagnostics/bandwidth/upload",
+        content=payload,
+        headers={"content-type": "application/octet-stream"},
+    )
+
+    assert response.status_code == 200
+    assert response.headers.get("Cache-Control") == "no-store"
+    data = response.json()
+    assert data["ok"] is True
+    assert data["bytes_received"] == len(payload)
+    assert data["elapsed_ms"] >= 0
+
+
+@pytest.mark.unit
+def test_diagnostics_bandwidth_upload_blocks_cross_origin() -> None:
+    from wepppy.query_engine.app import server
+
+    _reset_bandwidth_rate_limit_state(server)
+
+    app = server.create_app()
+    client = TestClient(app)
+
+    response = client.post(
+        "/diagnostics/bandwidth/upload",
+        content=b"abc",
+        headers={
+            "Origin": "https://evil.example",
+            "Host": "query.example",
+            "content-type": "application/octet-stream",
+        },
+    )
+
+    assert response.status_code == 403
+    assert response.headers.get("Cache-Control") == "no-store"
+    assert response.json()["error"]["code"] == "cross_origin_blocked"
+
+
+@pytest.mark.unit
+def test_diagnostics_bandwidth_upload_rejects_oversized_payload(monkeypatch: pytest.MonkeyPatch) -> None:
+    from wepppy.query_engine.app import server
+
+    _reset_bandwidth_rate_limit_state(server)
+    monkeypatch.setattr(server, "_BANDWIDTH_MAX_BYTES", 1024)
+
+    app = server.create_app()
+    client = TestClient(app)
+
+    response = client.post(
+        "/diagnostics/bandwidth/upload",
+        content=(b"y" * 2048),
+        headers={"content-type": "application/octet-stream"},
+    )
+
+    assert response.status_code == 413
+    assert response.headers.get("Cache-Control") == "no-store"
+    assert response.json()["error"]["code"] == "upload_too_large"
+
+
+@pytest.mark.unit
+def test_diagnostics_bandwidth_upload_timeout(monkeypatch: pytest.MonkeyPatch) -> None:
+    from wepppy.query_engine.app import server
+
+    _reset_bandwidth_rate_limit_state(server)
+    monkeypatch.setattr(server, "_BANDWIDTH_REQUEST_TIMEOUT_SECONDS", 0)
+
+    app = server.create_app()
+    client = TestClient(app)
+
+    response = client.post(
+        "/diagnostics/bandwidth/upload",
+        content=(b"x" * 1024),
+        headers={"content-type": "application/octet-stream"},
+    )
+
+    assert response.status_code == 408
+    assert response.headers.get("Cache-Control") == "no-store"
+    assert response.json()["error"]["code"] == "upload_timeout"
+
+
+@pytest.mark.unit
+def test_diagnostics_bandwidth_rate_limit(monkeypatch: pytest.MonkeyPatch) -> None:
+    from wepppy.query_engine.app import server
+
+    _reset_bandwidth_rate_limit_state(server)
+    monkeypatch.setattr(server, "_BANDWIDTH_RATE_LIMIT_MAX_REQUESTS", 1)
+    monkeypatch.setattr(server, "_BANDWIDTH_RATE_LIMIT_WINDOW_SECONDS", 60)
+
+    app = server.create_app()
+    client = TestClient(app)
+
+    first = client.get("/diagnostics/bandwidth/download?bytes=1024")
+    second = client.get("/diagnostics/bandwidth/download?bytes=1024")
+
+    assert first.status_code == 200
+    assert second.status_code == 429
+    assert second.headers.get("Cache-Control") == "no-store"
+    assert second.json()["error"]["code"] == "rate_limited"
+    assert int(second.headers.get("Retry-After", "0")) >= 1
+
+
+@pytest.mark.unit
+def test_diagnostics_bandwidth_upload_rate_limit(monkeypatch: pytest.MonkeyPatch) -> None:
+    from wepppy.query_engine.app import server
+
+    _reset_bandwidth_rate_limit_state(server)
+    monkeypatch.setattr(server, "_BANDWIDTH_RATE_LIMIT_MAX_REQUESTS", 1)
+    monkeypatch.setattr(server, "_BANDWIDTH_RATE_LIMIT_WINDOW_SECONDS", 60)
+
+    app = server.create_app()
+    client = TestClient(app)
+
+    first = client.post(
+        "/diagnostics/bandwidth/upload",
+        content=b"a",
+        headers={"content-type": "application/octet-stream"},
+    )
+    second = client.post(
+        "/diagnostics/bandwidth/upload",
+        content=b"b",
+        headers={"content-type": "application/octet-stream"},
+    )
+
+    assert first.status_code == 200
+    assert second.status_code == 429
+    assert second.headers.get("Cache-Control") == "no-store"
+    assert second.json()["error"]["code"] == "rate_limited"
+
+
+@pytest.mark.unit
+def test_bandwidth_rate_limit_key_uses_rightmost_forwarded_for() -> None:
+    from wepppy.query_engine.app import server
+
+    request = SimpleNamespace(
+        headers={"X-Forwarded-For": "198.51.100.11, 203.0.113.7"},
+        client=SimpleNamespace(host="10.0.0.9"),
+        url=SimpleNamespace(path="/diagnostics/bandwidth/download"),
+    )
+    key = server._bandwidth_rate_limit_key(request)
+    assert key.startswith("203.0.113.7:")
+
+
+@pytest.mark.unit
+def test_read_positive_int_env_invalid_falls_back(monkeypatch: pytest.MonkeyPatch) -> None:
+    from wepppy.query_engine.app import server
+
+    monkeypatch.setenv("QUERY_ENGINE_TEST_INT_VALUE", "not-an-int")
+    value = server._read_positive_int_env("QUERY_ENGINE_TEST_INT_VALUE", 9, 1)
+    assert value == 9

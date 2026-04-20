@@ -2,15 +2,20 @@
 
 from __future__ import annotations
 
+import asyncio
 import os
 import json
 import logging
+import math
+import threading
+import time
 import traceback
-from collections import OrderedDict
+from collections import OrderedDict, deque
 from dataclasses import asdict
 from datetime import datetime
 from pathlib import Path
 from typing import Any
+from urllib.parse import urlparse
 
 import yaml
 from starlette.applications import Starlette
@@ -21,6 +26,7 @@ from starlette.responses import (
     JSONResponse,
     Response,
     PlainTextResponse,
+    StreamingResponse,
 )
 from starlette.exceptions import HTTPException
 from starlette.routing import Route, Mount
@@ -55,6 +61,310 @@ install_correlation_log_record_factory()
 DOCS_ROOT = Path(__file__).resolve().parent.parent / "docs"
 MCP_OPENAPI_PATH = DOCS_ROOT / "mcp_openapi.yaml"
 ASSET_VERSION = resolve_asset_version()
+
+
+def _read_positive_int_env(name: str, default: int, minimum: int) -> int:
+    raw = str(os.getenv(name, "")).strip()
+    if not raw:
+        return default
+    try:
+        return max(minimum, int(raw))
+    except ValueError:
+        LOGGER.warning("Invalid integer for %s=%r; using default=%d", name, raw, default)
+        return default
+
+
+_BANDWIDTH_DEFAULT_BYTES = 256 * 1024
+_BANDWIDTH_MAX_BYTES = 4 * 1024 * 1024
+_BANDWIDTH_CHUNK_BYTES = 64 * 1024
+_BANDWIDTH_PATTERN = b"weppcloud-diagnostics-bandwidth-probe-"
+_BANDWIDTH_MAX_CONCURRENT = _read_positive_int_env("QUERY_ENGINE_BANDWIDTH_MAX_CONCURRENT", 4, 1)
+_BANDWIDTH_SEMAPHORE_WAIT_SECONDS = _read_positive_int_env(
+    "QUERY_ENGINE_BANDWIDTH_SEMAPHORE_WAIT_SECONDS",
+    5,
+    1,
+)
+_BANDWIDTH_REQUEST_TIMEOUT_SECONDS = _read_positive_int_env(
+    "QUERY_ENGINE_BANDWIDTH_REQUEST_TIMEOUT_SECONDS",
+    15,
+    1,
+)
+_BANDWIDTH_RATE_LIMIT_MAX_REQUESTS = _read_positive_int_env(
+    "QUERY_ENGINE_BANDWIDTH_RATE_LIMIT_MAX_REQUESTS",
+    12,
+    1,
+)
+_BANDWIDTH_RATE_LIMIT_WINDOW_SECONDS = _read_positive_int_env(
+    "QUERY_ENGINE_BANDWIDTH_RATE_LIMIT_WINDOW_SECONDS",
+    30,
+    1,
+)
+_BANDWIDTH_RATE_LIMIT_MAX_BUCKETS = _read_positive_int_env(
+    "QUERY_ENGINE_BANDWIDTH_RATE_LIMIT_MAX_BUCKETS",
+    2048,
+    128,
+)
+_BANDWIDTH_SEMAPHORE = asyncio.Semaphore(_BANDWIDTH_MAX_CONCURRENT)
+_BANDWIDTH_RATE_LIMIT_LOCK = threading.Lock()
+_BANDWIDTH_RATE_LIMIT_BUCKETS: OrderedDict[str, deque[float]] = OrderedDict()
+
+
+def _set_no_store_header(response: Response) -> Response:
+    response.headers["Cache-Control"] = "no-store"
+    return response
+
+
+def _bandwidth_json(payload: dict[str, Any], status_code: int = 200) -> JSONResponse:
+    return _set_no_store_header(JSONResponse(payload, status_code=status_code))
+
+
+def _bandwidth_error(status_code: int, message: str, code: str, *, retry_after: int | None = None) -> JSONResponse:
+    response = _bandwidth_json(
+        {"error": {"message": message, "code": code}, "status_code": status_code},
+        status_code=status_code,
+    )
+    if retry_after is not None:
+        response.headers["Retry-After"] = str(max(1, retry_after))
+    return response
+
+
+def _bandwidth_probe_bytes(value: str | None) -> tuple[int | None, JSONResponse | None]:
+    if value is None or not value.strip():
+        return _BANDWIDTH_DEFAULT_BYTES, None
+    token = value.strip()
+    try:
+        parsed = int(token)
+    except ValueError:
+        return None, _bandwidth_error(
+            400,
+            "Query parameter 'bytes' must be an integer.",
+            "invalid_probe_size",
+        )
+
+    if parsed <= 0:
+        return None, _bandwidth_error(
+            400,
+            "Query parameter 'bytes' must be greater than zero.",
+            "invalid_probe_size",
+        )
+    if parsed > _BANDWIDTH_MAX_BYTES:
+        return None, _bandwidth_error(
+            413,
+            f"Requested size exceeds maximum {_BANDWIDTH_MAX_BYTES} bytes.",
+            "probe_too_large",
+        )
+
+    return parsed, None
+
+
+def _normalized_origin(origin: str) -> tuple[str, str, int] | None:
+    parsed = urlparse(origin)
+    if not parsed.scheme or not parsed.hostname:
+        return None
+    scheme = parsed.scheme.lower()
+    host = parsed.hostname.lower()
+    if parsed.port is not None:
+        port = parsed.port
+    elif scheme == "https":
+        port = 443
+    elif scheme == "http":
+        port = 80
+    else:
+        return None
+    return scheme, host, port
+
+
+def _request_allowed_origins(request: StarletteRequest) -> set[tuple[str, str, int]]:
+    origins: set[tuple[str, str, int]] = set()
+    if request.url.hostname:
+        port = request.url.port
+        if port is None:
+            if request.url.scheme == "https":
+                port = 443
+            elif request.url.scheme == "http":
+                port = 80
+        if port is not None:
+            origins.add((request.url.scheme.lower(), request.url.hostname.lower(), port))
+
+    host = (request.headers.get("host") or "").strip()
+    if host:
+        scheme = (request.headers.get("x-forwarded-proto") or request.url.scheme or "http").split(",")[0].strip()
+        candidate = _normalized_origin(f"{scheme}://{host}")
+        if candidate is not None:
+            origins.add(candidate)
+
+    forwarded_host = (request.headers.get("x-forwarded-host") or "").split(",")[0].strip()
+    if forwarded_host:
+        forwarded_scheme = (request.headers.get("x-forwarded-proto") or request.url.scheme or "http").split(",")[0].strip()
+        candidate = _normalized_origin(f"{forwarded_scheme}://{forwarded_host}")
+        if candidate is not None:
+            origins.add(candidate)
+
+    return origins
+
+
+def _is_same_origin_request(request: StarletteRequest) -> bool:
+    origin = (request.headers.get("origin") or "").strip()
+    if not origin:
+        return True
+    normalized_origin = _normalized_origin(origin)
+    if normalized_origin is None:
+        return False
+    return normalized_origin in _request_allowed_origins(request)
+
+
+def _trusted_client_host(request: StarletteRequest) -> str:
+    # Trust the right-most X-Forwarded-For hop as the proxy-inserted client address.
+    forwarded_for = str(request.headers.get("X-Forwarded-For") or "").strip()
+    if forwarded_for:
+        tokens = [token.strip() for token in forwarded_for.split(",") if token.strip()]
+        if tokens:
+            return tokens[-1]
+    if request.client and request.client.host:
+        return request.client.host
+    return "unknown"
+
+
+def _bandwidth_rate_limit_key(request: StarletteRequest) -> str:
+    return f"{_trusted_client_host(request)}:{request.url.path}"
+
+
+def _bandwidth_rate_limit_allow(key: str) -> tuple[bool, int]:
+    now = time.monotonic()
+    with _BANDWIDTH_RATE_LIMIT_LOCK:
+        while len(_BANDWIDTH_RATE_LIMIT_BUCKETS) > _BANDWIDTH_RATE_LIMIT_MAX_BUCKETS:
+            _BANDWIDTH_RATE_LIMIT_BUCKETS.popitem(last=False)
+
+        window = _BANDWIDTH_RATE_LIMIT_WINDOW_SECONDS
+        cutoff = now - window
+        bucket = _BANDWIDTH_RATE_LIMIT_BUCKETS.get(key)
+        if bucket is None:
+            bucket = deque()
+            _BANDWIDTH_RATE_LIMIT_BUCKETS[key] = bucket
+        else:
+            _BANDWIDTH_RATE_LIMIT_BUCKETS.move_to_end(key)
+
+        while bucket and bucket[0] <= cutoff:
+            bucket.popleft()
+
+        if len(bucket) >= _BANDWIDTH_RATE_LIMIT_MAX_REQUESTS:
+            retry_after = int(math.ceil((bucket[0] + window) - now))
+            return False, max(1, retry_after)
+
+        bucket.append(now)
+        return True, 0
+
+
+async def diagnostics_bandwidth_download(request: StarletteRequest) -> Response:
+    if not _is_same_origin_request(request):
+        return _bandwidth_error(
+            403,
+            "Cross-origin request blocked.",
+            "cross_origin_blocked",
+        )
+
+    bytes_requested, parse_error = _bandwidth_probe_bytes(request.query_params.get("bytes"))
+    if parse_error is not None:
+        return parse_error
+    assert bytes_requested is not None
+
+    allowed, retry_after = _bandwidth_rate_limit_allow(_bandwidth_rate_limit_key(request))
+    if not allowed:
+        return _bandwidth_error(
+            429,
+            "Bandwidth diagnostics rate limit exceeded.",
+            "rate_limited",
+            retry_after=retry_after,
+        )
+
+    try:
+        await asyncio.wait_for(_BANDWIDTH_SEMAPHORE.acquire(), timeout=_BANDWIDTH_SEMAPHORE_WAIT_SECONDS)
+    except TimeoutError:
+        return _bandwidth_error(
+            503,
+            "Bandwidth diagnostics service is busy. Retry shortly.",
+            "busy",
+        )
+
+    async def _stream() -> Any:
+        remaining = bytes_requested
+        while remaining > 0:
+            chunk_size = min(_BANDWIDTH_CHUNK_BYTES, remaining)
+            repeats, remainder = divmod(chunk_size, len(_BANDWIDTH_PATTERN))
+            chunk = (_BANDWIDTH_PATTERN * repeats) + _BANDWIDTH_PATTERN[:remainder]
+            remaining -= chunk_size
+            yield chunk
+            await asyncio.sleep(0)
+
+    try:
+        response = _set_no_store_header(
+            StreamingResponse(_stream(), media_type="application/octet-stream")
+        )
+        response.headers["Content-Length"] = str(bytes_requested)
+        return response
+    finally:
+        _BANDWIDTH_SEMAPHORE.release()
+
+
+async def diagnostics_bandwidth_upload(request: StarletteRequest) -> Response:
+    if not _is_same_origin_request(request):
+        return _bandwidth_error(
+            403,
+            "Cross-origin request blocked.",
+            "cross_origin_blocked",
+        )
+
+    allowed, retry_after = _bandwidth_rate_limit_allow(_bandwidth_rate_limit_key(request))
+    if not allowed:
+        return _bandwidth_error(
+            429,
+            "Bandwidth diagnostics rate limit exceeded.",
+            "rate_limited",
+            retry_after=retry_after,
+        )
+
+    try:
+        await asyncio.wait_for(_BANDWIDTH_SEMAPHORE.acquire(), timeout=_BANDWIDTH_SEMAPHORE_WAIT_SECONDS)
+    except TimeoutError:
+        return _bandwidth_error(
+            503,
+            "Bandwidth diagnostics service is busy. Retry shortly.",
+            "busy",
+        )
+
+    started = time.monotonic()
+    bytes_received = 0
+    try:
+        try:
+            async with asyncio.timeout(_BANDWIDTH_REQUEST_TIMEOUT_SECONDS):
+                async for chunk in request.stream():
+                    if not chunk:
+                        continue
+                    bytes_received += len(chunk)
+                    if bytes_received > _BANDWIDTH_MAX_BYTES:
+                        return _bandwidth_error(
+                            413,
+                            f"Upload exceeds maximum {_BANDWIDTH_MAX_BYTES} bytes.",
+                            "upload_too_large",
+                        )
+        except TimeoutError:
+            return _bandwidth_error(
+                408,
+                "Upload timed out while reading request payload.",
+                "upload_timeout",
+            )
+    finally:
+        _BANDWIDTH_SEMAPHORE.release()
+
+    elapsed_ms = int((time.monotonic() - started) * 1000)
+    return _bandwidth_json(
+        {
+            "ok": True,
+            "bytes_received": bytes_received,
+            "elapsed_ms": elapsed_ms,
+            "max_bytes": _BANDWIDTH_MAX_BYTES,
+        }
+    )
 
 
 def _render_mcp_openapi_yaml() -> str | None:
@@ -601,6 +911,18 @@ def create_app() -> Starlette:
             '/health',
             health,
             methods=['GET']
+        ),
+        Route(
+            "/diagnostics/bandwidth/download",
+            diagnostics_bandwidth_download,
+            methods=["GET"],
+            name="diagnostics_bandwidth_download",
+        ),
+        Route(
+            "/diagnostics/bandwidth/upload",
+            diagnostics_bandwidth_upload,
+            methods=["POST"],
+            name="diagnostics_bandwidth_upload",
         ),
         Route("/", homepage, name="homepage"),
         Route("/runs/{runid:path}/activate", activate_run, methods=["GET", "POST"], name="activate_run"),

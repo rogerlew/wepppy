@@ -1,0 +1,40 @@
+{% extends "base_pure.htm" %}
+{% import "controls/_pure_macros.html" as ui %}
+
+{% block title %}WEPPcloud Diagnostics{% endblock %}
+
+{% block body %}
+<div class="wc-stack" id="diagnostics_page_root" data-diagnostics-root>
+  {% call ui.card_shell(
+       title="WEPPcloud Diagnostics",
+       description="Use this page to verify whether the current browser session can run WEPPcloud requirements."
+     ) %}
+    <p class="wc-text-muted">
+      Diagnostics checks are grouped as blockers, degraded capabilities, and informational signals.
+      A page-level checker will populate this panel in follow-on work packages.
+    </p>
+    <noscript>
+      <p role="alert">
+        <strong>Blocking failure:</strong> JavaScript is disabled in this browser. WEPPcloud requires JavaScript to run.
+      </p>
+    </noscript>
+  {% endcall %}
+
+  {% call ui.card_shell(
+       title="Checks",
+       description="This shell reserves the diagnostics check list and report area."
+     ) %}
+    <section aria-label="Diagnostics checks">
+      <ul id="diagnostics_check_list" data-diagnostics-check-list>
+        <li data-check-id="javascript">JavaScript execution: pending</li>
+        <li data-check-id="browser-baseline">Browser API baseline: pending</li>
+        <li data-check-id="cookies">Cookie support: pending</li>
+        <li data-check-id="realtime">Realtime websocket capability: pending</li>
+      </ul>
+    </section>
+    <section aria-label="Diagnostics report">
+      <p id="diagnostics_report_status" data-diagnostics-report-status>Report status: not generated</p>
+    </section>
+  {% endcall %}
+</div>
+{% endblock %}

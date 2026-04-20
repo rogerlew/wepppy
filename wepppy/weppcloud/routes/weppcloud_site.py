@@ -1058,6 +1058,14 @@ def interfaces():
         return exception_factory()
 
 
+@weppcloud_site_bp.route('/diagnostics/', strict_slashes=False)
+@handle_with_exception_factory
+def diagnostics():
+    response = make_response(render_template('diagnostics/diagnostics.htm', user=current_user))
+    response.headers["Cache-Control"] = "no-store"
+    return response
+
+
 @weppcloud_site_bp.route('/cap/verify', methods=['POST'])
 @handle_with_exception_factory
 def cap_verify():
