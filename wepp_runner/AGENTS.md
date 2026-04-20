@@ -53,6 +53,14 @@ tools/smoke_wepp_binary_host.sh wepp_runner/bin/wepp_<tag>_hill
 pytest tests/wepp_runner/test_run_hillslope_retries.py tests/wepp/test_wepp_runner_outputs.py
 ```
 
+Provenance gate policy (enforced by `tools/check_wepp_binary_provenance.sh`):
+- required interpreter: `/lib64/ld-linux-x86-64.so.2`
+- reject Homebrew/Conda loader and runtime paths
+- reject unexpected non-system `RPATH/RUNPATH` and non-system `libgfortran` sources
+
+Canonical reference:
+- `docs/binary-lifecycle.md`
+
 Optional when container is running:
 ```bash
 tools/smoke_wepp_binary_in_container.sh wepp_runner/bin/wepp_<tag>

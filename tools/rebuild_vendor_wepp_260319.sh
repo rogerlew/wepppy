@@ -21,11 +21,15 @@ src_hill="${FOREST_DIR}/release/wepp_${TARGET_TAG}_hill"
 dst_wepp="${ROOT_DIR}/wepp_runner/bin/wepp_${TARGET_TAG}"
 dst_hill="${ROOT_DIR}/wepp_runner/bin/wepp_${TARGET_TAG}_hill"
 
+echo
+echo "Running provenance checks on build outputs before vendoring"
+"${ROOT_DIR}/tools/check_wepp_binary_provenance.sh" "${src_wepp}" "${src_hill}"
+
 install -m 0755 "${src_wepp}" "${dst_wepp}"
 install -m 0755 "${src_hill}" "${dst_hill}"
 
 echo
-echo "Running provenance checks"
+echo "Running provenance checks on vendored binaries"
 "${ROOT_DIR}/tools/check_wepp_binary_provenance.sh" "${dst_wepp}" "${dst_hill}"
 
 echo
