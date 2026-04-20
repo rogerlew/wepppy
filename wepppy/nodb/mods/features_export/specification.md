@@ -324,7 +324,7 @@ Behavior:
 - Published endpoint resolves `{profile}` through `export/features/published/index.json` (source of truth).
 - Published endpoint profile tokens are canonical kebab-case profile IDs (for cutover: `prep-wepp`, `prep-wepp-geodatabase`, `prep-details`); no `latest` path segment is used.
 - Published endpoint returns 404 when the profile has no published entry.
-- Published endpoint returns 409 `stale_publication` when the registry entry no longer matches resolvable current dependency/request fingerprints for the published request.
+- Published endpoint returns 409 `stale_publication` when the registry entry no longer maps to a valid cache/artifact binding for the published profile request.
 - Published endpoint sets `Content-Disposition` filename as `<runid>.<canonical-profile>.<format>.zip` (for example `run-1.prep-wepp.geopackage.zip`).
 
 ## 6. Dependency Tracking And Options-Aware Caching
@@ -410,7 +410,7 @@ Registry contract:
   - `cache_key`,
   - `published_at_utc`.
 - Registry writes are atomic and idempotent per profile key.
-- Published download resolution must verify that the registry entry still maps to an existing artifact and that its cache/dependency fingerprint remains valid for the resolved published request contract.
+- Published download resolution must verify that the registry entry still maps to an existing artifact and a valid cache entry compatible with the canonical published profile format; registry fingerprint fields may be repaired from cache key components when recoverable.
 
 ### 6.6 WP-2 Milestone Status (Completed 2026-03-26)
 

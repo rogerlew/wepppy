@@ -31,7 +31,13 @@ from .cache_rehydration import (
     cache_entry_artifact_relpath as _cache_entry_artifact_relpath_helper,
     layer_outputs_from_cache_entry as _layer_outputs_from_cache_entry_helper,
 )
-from .cache_key import CacheKeyParts, build_cache_key, get_cache_index_entry, upsert_cache_index_entry
+from .cache_key import (
+    CacheKeyParts,
+    build_cache_key,
+    get_cache_index_entry,
+    load_cache_index,
+    upsert_cache_index_entry,
+)
 from .catalog_loader import LayerCatalog, load_layer_catalog
 from .column_selection import (
     dedupe_identity_selected_columns as _dedupe_identity_selected_columns_helper,
@@ -692,46 +698,37 @@ def resolve_published_artifact_path(
             details=f"Missing artifact at {artifact_relpath}.",
         )
 
-    submission = prepare_export_submission(wd_path, request_payload)
+    canonical_request_format = str(request_payload.get("format") or "").strip().lower()
     expected_cache_key = str(entry.get("cache_key") or "").strip()
     expected_request_hash = str(entry.get("request_hash") or "").strip()
     expected_dependency_fingerprint = str(entry.get("dependency_fingerprint") or "").strip()
     expected_format = str(entry.get("format") or "").strip().lower()
 
-    if not expected_cache_key or not expected_request_hash or not expected_dependency_fingerprint:
-        raise _stale_publication_error(
-            canonical_profile,
-            "Registry entry is missing cache/dependency fingerprints.",
-        )
-
-    if expected_format and expected_format != str(submission.plan.request.format).strip().lower():
+    if expected_format and expected_format != canonical_request_format:
         raise _stale_publication_error(
             canonical_profile,
             "Published format no longer matches canonical profile request.",
         )
 
-    if expected_cache_key != submission.cache_key_parts.cache_key:
-        raise _stale_publication_error(
-            canonical_profile,
-            "Published cache key no longer matches current dependency/request state.",
-        )
-    if expected_request_hash != submission.cache_key_parts.request_hash:
-        raise _stale_publication_error(
-            canonical_profile,
-            "Published request hash no longer matches current profile request.",
-        )
-    if expected_dependency_fingerprint != submission.dependency_snapshot.fingerprint:
-        raise _stale_publication_error(
-            canonical_profile,
-            "Published dependency fingerprint no longer matches current run assets.",
-        )
+    resolved_cache_key = expected_cache_key
+    cache_entry = get_cache_index_entry(wd_path, resolved_cache_key) if resolved_cache_key else None
 
-    cache_entry = get_cache_index_entry(wd_path, submission.cache_key_parts.cache_key)
+    if cache_entry is not None:
+        cache_artifact_relpath = _cache_entry_artifact_relpath(cache_entry)
+        if cache_artifact_relpath != artifact_relpath:
+            cache_entry = None
+
     if cache_entry is None:
-        raise _stale_publication_error(
-            canonical_profile,
-            "Published cache entry is missing.",
+        matched_cache_entries = _find_cache_entries_by_artifact_relpath(
+            wd_path,
+            artifact_relpath=artifact_relpath,
         )
+        if not matched_cache_entries:
+            raise _stale_publication_error(
+                canonical_profile,
+                "Published cache entry is missing.",
+            )
+        resolved_cache_key, cache_entry = _select_latest_cache_entry(matched_cache_entries)
 
     cache_artifact_relpath = _cache_entry_artifact_relpath(cache_entry)
     if cache_artifact_relpath is None:
@@ -744,6 +741,43 @@ def resolve_published_artifact_path(
             canonical_profile,
             "Published artifact no longer matches cache mapping.",
         )
+    if not _cache_entry_has_valid_artifact_for_format(
+        wd_path,
+        cache_entry,
+        format_token=canonical_request_format,
+    ):
+        raise _stale_publication_error(
+            canonical_profile,
+            "Published artifact is incompatible with canonical profile format.",
+        )
+
+    parsed_request_hash, parsed_dependency_fingerprint = _parse_cache_key_components(resolved_cache_key)
+    resolved_request_hash = parsed_request_hash or expected_request_hash
+    resolved_dependency_fingerprint = parsed_dependency_fingerprint or expected_dependency_fingerprint
+    if not resolved_request_hash or not resolved_dependency_fingerprint:
+        raise _stale_publication_error(
+            canonical_profile,
+            "Published cache key cannot be resolved to request/dependency fingerprints.",
+        )
+
+    registry_repair_required = False
+    if entry.get("cache_key") != resolved_cache_key:
+        entry["cache_key"] = resolved_cache_key
+        registry_repair_required = True
+    if entry.get("request_hash") != resolved_request_hash:
+        entry["request_hash"] = resolved_request_hash
+        registry_repair_required = True
+    if entry.get("dependency_fingerprint") != resolved_dependency_fingerprint:
+        entry["dependency_fingerprint"] = resolved_dependency_fingerprint
+        registry_repair_required = True
+    if entry.get("format") != canonical_request_format:
+        entry["format"] = canonical_request_format
+        registry_repair_required = True
+
+    if registry_repair_required:
+        profiles[canonical_profile] = entry
+        registry["updated_at_utc"] = _utcnow_iso()
+        _write_publication_registry(wd_path, registry)
 
     return artifact_path, artifact_relpath
 
@@ -2880,6 +2914,52 @@ def _cache_entry_artifact_relpath(cache_entry: dict[str, object]) -> str | None:
     return _cache_entry_artifact_relpath_helper(cache_entry)
 
 
+def _find_cache_entries_by_artifact_relpath(
+    wd: Path,
+    *,
+    artifact_relpath: str,
+) -> list[tuple[str, dict[str, object]]]:
+    cache_index = load_cache_index(wd)
+    entries_raw = cache_index.get("entries")
+    if not isinstance(entries_raw, dict):
+        return []
+
+    matches: list[tuple[str, dict[str, object]]] = []
+    for cache_key, raw_entry in entries_raw.items():
+        if not isinstance(cache_key, str) or not cache_key:
+            continue
+        if not isinstance(raw_entry, dict):
+            continue
+        candidate_relpath = _cache_entry_artifact_relpath(raw_entry)
+        if candidate_relpath != artifact_relpath:
+            continue
+        matches.append((cache_key, raw_entry))
+    return matches
+
+
+def _select_latest_cache_entry(
+    matches: list[tuple[str, dict[str, object]]],
+) -> tuple[str, dict[str, object]]:
+    if not matches:
+        raise ValueError("matches must be non-empty.")
+
+    def _sort_key(item: tuple[str, dict[str, object]]) -> tuple[str, str]:
+        cache_key, cache_entry = item
+        updated_at_utc = str(cache_entry.get("updated_at_utc") or "").strip()
+        return updated_at_utc, cache_key
+
+    return max(matches, key=_sort_key)
+
+
+def _parse_cache_key_components(cache_key: str) -> tuple[str, str]:
+    request_hash, separator, dependency_fingerprint = cache_key.partition("+")
+    request_hash_token = request_hash.strip()
+    dependency_token = dependency_fingerprint.strip()
+    if not separator or not request_hash_token or not dependency_token:
+        return "", ""
+    return request_hash_token, dependency_token
+
+
 def _artifact_relpath_from_result(job_result: dict[str, object] | None) -> str | None:
     return _artifact_relpath_from_result_helper(job_result)
 
@@ -2924,6 +3004,15 @@ def _cache_entry_has_valid_artifact_for_format(
 
     if normalized_format == "geopackage":
         return _is_valid_cached_geopackage_artifact(
+            artifact_path=artifact_path,
+            packaged_member_relpaths=_cache_entry_packaged_member_relpaths(cache_entry),
+        )
+    if normalized_format == "geodatabase":
+        return _is_valid_cached_geodatabase_artifact(
+            artifact_path=artifact_path,
+        )
+    if normalized_format == "csv":
+        return _is_valid_cached_csv_artifact(
             artifact_path=artifact_path,
             packaged_member_relpaths=_cache_entry_packaged_member_relpaths(cache_entry),
         )
@@ -3009,6 +3098,57 @@ def _is_valid_cached_geopackage_file(artifact_path: Path) -> bool:
             ).fetchone()
             return gpkg_contents_exists is not None
     except sqlite3.Error:
+        return False
+
+
+def _is_valid_cached_geodatabase_artifact(
+    *,
+    artifact_path: Path,
+) -> bool:
+    if artifact_path.suffix.lower() != ".zip":
+        return False
+    return _is_valid_cached_geodatabase_zip(artifact_path)
+
+
+def _is_valid_cached_geodatabase_zip(artifact_path: Path) -> bool:
+    try:
+        with zipfile.ZipFile(artifact_path, mode="r") as zip_handle:
+            names = tuple(zip_handle.namelist())
+            if not names:
+                return False
+            if artifact_path.name.lower().endswith(".gdb.zip"):
+                return True
+            lowered_names = tuple(name.lower() for name in names)
+            if any(".gdb/" in name for name in lowered_names):
+                return True
+            if any(name.endswith(".gdbtable") for name in lowered_names):
+                return True
+            return False
+    except (OSError, zipfile.BadZipFile):
+        return False
+
+
+def _is_valid_cached_csv_artifact(
+    *,
+    artifact_path: Path,
+    packaged_member_relpaths: cabc.Sequence[str],
+) -> bool:
+    if artifact_path.suffix.lower() != ".zip":
+        return artifact_path.suffix.lower() == ".csv"
+    try:
+        with zipfile.ZipFile(artifact_path, mode="r") as zip_handle:
+            names = tuple(zip_handle.namelist())
+            if not names:
+                return False
+            candidate_members = [
+                member
+                for member in packaged_member_relpaths
+                if member.lower().endswith(".csv") and member in names
+            ]
+            if not candidate_members:
+                candidate_members = [member for member in names if member.lower().endswith(".csv")]
+            return bool(candidate_members)
+    except (OSError, zipfile.BadZipFile):
         return False
 
 

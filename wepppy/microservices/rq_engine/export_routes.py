@@ -794,8 +794,9 @@ async def export_features_download(runid: str, config: str, job_id: str, request
     summary="Download published features export artifact",
     description=(
         "Requires JWT Bearer scope `rq:export` and run access via `authorize_run_access`. "
-        "Read-only endpoint (no queue): resolves one canonical published profile id through "
-        "`export/features/published/index.json` and returns its artifact file."
+        "No-queue endpoint: resolves one canonical published profile id through "
+        "`export/features/published/index.json`, may repair publication metadata from cache "
+        "key state, and returns the artifact file."
     ),
     tags=["rq-engine", "exports"],
     operation_id=rq_operation_id("export_features_download_published"),
@@ -804,7 +805,7 @@ async def export_features_download(runid: str, config: str, job_id: str, request
         success_description="Published features export artifact file returned.",
         extra={
             404: "Published profile or artifact mapping not found. Returns the canonical error payload.",
-            409: "Published mapping is stale relative to current dependency/request fingerprints.",
+            409: "Published mapping is stale relative to registry/cache artifact integrity checks.",
         },
     ),
 )
