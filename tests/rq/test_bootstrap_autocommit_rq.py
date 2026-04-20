@@ -379,6 +379,8 @@ def test_noprep_watershed_enqueue_keeps_autocommit_disabled(monkeypatch: pytest.
 
 def test_run_wepp_rq_locked_run_publishes_exception_status(monkeypatch: pytest.MonkeyPatch) -> None:
     published: list[tuple[str, str]] = []
+    monkeypatch.setattr(wepp_rq, "WEPP_LOCK_RETRY_ATTEMPTS", 0)
+    monkeypatch.setattr(wepp_rq, "WEPP_LOCK_RETRY_DELAY_SECONDS", 0.0)
     monkeypatch.setattr(wepp_rq, "get_current_job", _make_parent_job)
     monkeypatch.setattr(
         wepp_rq.StatusMessenger,
@@ -406,6 +408,39 @@ def test_run_wepp_rq_locked_run_publishes_exception_status(monkeypatch: pytest.M
         channel == "ab-run:wepp" and "EXCEPTION run_wepp_rq(ab-run)" in message
         for channel, message in published
     )
+
+
+def test_wait_for_wepp_unlock_allows_transient_lock(monkeypatch: pytest.MonkeyPatch) -> None:
+    monkeypatch.setattr(wepp_rq, "WEPP_LOCK_RETRY_ATTEMPTS", 3)
+    monkeypatch.setattr(wepp_rq, "WEPP_LOCK_RETRY_DELAY_SECONDS", 0.0)
+
+    lock_states = iter([True, True, False])
+    probe_count = {"count": 0}
+
+    class DummyWepp:
+        @staticmethod
+        def islocked() -> bool:
+            probe_count["count"] += 1
+            try:
+                return next(lock_states)
+            except StopIteration:
+                return False
+
+    wepp_rq._wait_for_wepp_unlock(DummyWepp(), runid="ab-run")
+    assert probe_count["count"] == 3
+
+
+def test_wait_for_wepp_unlock_raises_when_lock_persists(monkeypatch: pytest.MonkeyPatch) -> None:
+    monkeypatch.setattr(wepp_rq, "WEPP_LOCK_RETRY_ATTEMPTS", 2)
+    monkeypatch.setattr(wepp_rq, "WEPP_LOCK_RETRY_DELAY_SECONDS", 0.0)
+
+    class DummyWepp:
+        @staticmethod
+        def islocked() -> bool:
+            return True
+
+    with pytest.raises(RuntimeError, match="ab-run is locked"):
+        wepp_rq._wait_for_wepp_unlock(DummyWepp(), runid="ab-run")
 
 
 def test_build_swat_inputs_autocommits(monkeypatch: pytest.MonkeyPatch) -> None:

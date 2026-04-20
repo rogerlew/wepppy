@@ -389,7 +389,8 @@ def test_bootstrap_run_wepp_npprep_enqueues(monkeypatch: pytest.MonkeyPatch) -> 
     tasks: list[TaskEnum] = []
     _stub_prep(monkeypatch, tasks)
 
-    monkeypatch.setattr(bootstrap_routes.Wepp, "getInstance", lambda wd: type("W", (), {"bootstrap_enabled": True})())
+    dummy_wepp = type("W", (), {"bootstrap_enabled": True, "job_id": None, "job_key": None})()
+    monkeypatch.setattr(bootstrap_routes.Wepp, "getInstance", lambda wd: dummy_wepp)
     monkeypatch.setattr(bootstrap_routes, "get_wd", lambda runid, prefer_active=False: "/tmp/run")
 
     with TestClient(rq_engine.app) as client:
@@ -403,6 +404,88 @@ def test_bootstrap_run_wepp_npprep_enqueues(monkeypatch: pytest.MonkeyPatch) -> 
         TaskEnum.run_omni_scenarios,
         TaskEnum.run_path_cost_effective,
     }
+    assert dummy_wepp.job_id == "job-77"
+    assert dummy_wepp.job_key == "run_wepp_noprep_rq"
+
+
+@pytest.mark.parametrize(
+    ("endpoint", "job_id", "job_key"),
+    [
+        ("/api/runs/run-1/cfg/run-wepp-npprep", "job-bootstrap-201", "run_wepp_noprep_rq"),
+        ("/api/runs/run-1/cfg/run-wepp-watershed-no-prep", "job-bootstrap-202", "run_wepp_watershed_noprep_rq"),
+    ],
+)
+def test_bootstrap_wepp_noprep_persists_job_id_to_wepp_nodb(
+    monkeypatch: pytest.MonkeyPatch,
+    endpoint: str,
+    job_id: str,
+    job_key: str,
+) -> None:
+    _stub_auth(monkeypatch)
+    _stub_queue(monkeypatch, job_id=job_id)
+    tasks: list[TaskEnum] = []
+    _stub_prep(monkeypatch, tasks)
+
+    dummy_wepp = type("W", (), {"bootstrap_enabled": True, "job_id": None, "job_key": None})()
+    monkeypatch.setattr(bootstrap_routes.Wepp, "getInstance", lambda wd: dummy_wepp)
+    monkeypatch.setattr(bootstrap_routes, "get_wd", lambda runid, prefer_active=False: "/tmp/run")
+
+    with TestClient(rq_engine.app) as client:
+        response = client.post(endpoint, json={})
+
+    assert response.status_code == 200
+    assert response.json()["job_id"] == job_id
+    assert dummy_wepp.job_id == job_id
+    assert dummy_wepp.job_key == job_key
+
+
+def test_bootstrap_run_swat_noprep_persists_job_hint_to_wepp_nodb(
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    _stub_auth(monkeypatch)
+    _stub_queue(monkeypatch, job_id="job-swat-501")
+    _stub_prep(monkeypatch, [])
+
+    dummy_wepp = type("W", (), {"bootstrap_enabled": True, "job_id": None, "job_key": None})()
+    monkeypatch.setattr(bootstrap_routes.Wepp, "getInstance", lambda wd: dummy_wepp)
+    monkeypatch.setattr(bootstrap_routes, "get_wd", lambda runid, prefer_active=False: "/tmp/run")
+
+    with TestClient(rq_engine.app) as client:
+        response = client.post("/api/runs/run-1/cfg/run-swat-noprep", json={})
+
+    assert response.status_code == 200
+    assert response.json() == {"job_id": "job-swat-501"}
+    assert dummy_wepp.job_id == "job-swat-501"
+    assert dummy_wepp.job_key == "run_swat_noprep_rq"
+
+
+def test_bootstrap_run_wepp_noprep_job_hint_persist_failure_after_enqueue_returns_job_id(
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    _stub_auth(monkeypatch)
+    _stub_queue(monkeypatch, job_id="job-bootstrap-hint-failed")
+    _stub_prep(monkeypatch, [])
+
+    class DummyWepp:
+        bootstrap_enabled = True
+        job_key = None
+
+        @property
+        def job_id(self):
+            return None
+
+        @job_id.setter
+        def job_id(self, value):
+            raise RuntimeError("nodb write failed")
+
+    monkeypatch.setattr(bootstrap_routes.Wepp, "getInstance", lambda wd: DummyWepp())
+    monkeypatch.setattr(bootstrap_routes, "get_wd", lambda runid, prefer_active=False: "/tmp/run")
+
+    with TestClient(rq_engine.app) as client:
+        response = client.post("/api/runs/run-1/cfg/run-wepp-npprep", json={})
+
+    assert response.status_code == 200
+    assert response.json() == {"job_id": "job-bootstrap-hint-failed"}
 
 
 def test_bootstrap_run_wepp_npprep_sparse_payload_preserves_existing_booleans(

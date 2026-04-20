@@ -12,6 +12,7 @@ import inspect
 import logging
 import socket
 import sys
+import time
 from glob import glob
 from os.path import exists as _exists
 from os.path import join as _join
@@ -112,6 +113,8 @@ WEPP_RQ_JOB_KEYS: tuple[str, ...] = (
 )
 ACTIVE_RQ_JOB_STATUSES: frozenset[str] = frozenset({"queued", "started", "deferred", "scheduled"})
 WEPP_SUBMIT_LOCK_TTL_SECONDS: int = 30
+WEPP_LOCK_RETRY_ATTEMPTS: int = 25
+WEPP_LOCK_RETRY_DELAY_SECONDS: float = 0.2
 
 _cleanup_dss_export_dir = _dss_helpers._cleanup_dss_export_dir
 _copy_dss_readme = _dss_helpers._copy_dss_readme
@@ -166,6 +169,22 @@ def _publish_boundary_exception(
         extra={"runid": runid, "job_id": job_id, "operation": operation},
     )
     StatusMessenger.publish(status_channel, f"rq:{job_id} EXCEPTION {operation}")
+
+
+def _wait_for_wepp_unlock(wepp: Any, *, runid: str) -> None:
+    """Wait briefly for transient NoDb locks before failing the run."""
+    if not wepp.islocked():
+        return
+
+    retry_attempts = max(0, int(WEPP_LOCK_RETRY_ATTEMPTS))
+    retry_delay_seconds = max(0.0, float(WEPP_LOCK_RETRY_DELAY_SECONDS))
+    for _ in range(retry_attempts):
+        if retry_delay_seconds > 0:
+            time.sleep(retry_delay_seconds)
+        if not wepp.islocked():
+            return
+
+    raise _WeppRunLockedError(f"{runid} is locked")
 
 
 def _wepp_lock_key(runid: str, *, domain: str) -> str:
@@ -585,8 +604,7 @@ def run_wepp_rq(runid: str) -> Job:
             wepp.logger.warning(recovery_msg)
             StatusMessenger.publish(status_channel, recovery_msg)
 
-        if wepp.islocked():
-            raise _WeppRunLockedError(f"{runid} is locked")
+        _wait_for_wepp_unlock(wepp, runid=runid)
 
         wepp.ensure_bootstrap_main()
 
@@ -659,8 +677,7 @@ def run_wepp_noprep_rq(runid: str) -> Job:
             wepp.logger.warning(recovery_msg)
             StatusMessenger.publish(status_channel, recovery_msg)
 
-        if wepp.islocked():
-            raise _WeppRunLockedError(f"{runid} is locked")
+        _wait_for_wepp_unlock(wepp, runid=runid)
 
         wepp.logger.info("Running Wepp (no-prep)\n")
 
@@ -739,8 +756,7 @@ def run_wepp_watershed_rq(runid: str) -> Job:
             wepp.logger.warning(recovery_msg)
             StatusMessenger.publish(status_channel, recovery_msg)
 
-        if wepp.islocked():
-            raise _WeppRunLockedError(f"{runid} is locked")
+        _wait_for_wepp_unlock(wepp, runid=runid)
 
         wepp.ensure_bootstrap_main()
 
@@ -829,8 +845,7 @@ def prep_wepp_watershed_rq(runid: str) -> Job:
             wepp.logger.warning(recovery_msg)
             StatusMessenger.publish(status_channel, recovery_msg)
 
-        if wepp.islocked():
-            raise _WeppRunLockedError(f"{runid} is locked")
+        _wait_for_wepp_unlock(wepp, runid=runid)
 
         wepp.ensure_bootstrap_main()
 
@@ -889,8 +904,7 @@ def run_wepp_watershed_noprep_rq(runid: str) -> Job:
         wd = get_wd(runid)
         wepp = Wepp.getInstance(wd)
 
-        if wepp.islocked():
-            raise _WeppRunLockedError(f"{runid} is locked")
+        _wait_for_wepp_unlock(wepp, runid=runid)
 
         if not wepp.run_wepp_watershed:
             wepp.logger.info("Skipping WEPP watershed run (wepp.run_wepp_watershed=False)")

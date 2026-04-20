@@ -120,6 +120,7 @@ describe("Wepp controller", () => {
         delete global.Project;
         delete global.Observed;
         delete global.url_for_run;
+        delete window.WCControllerBootstrap;
         delete window.Wepp;
         if (global.WCDom) {
             delete global.WCDom;
@@ -535,5 +536,23 @@ describe("Wepp controller", () => {
         expect(controlBaseInstance.set_rq_job_id).toHaveBeenCalledWith(wepp, "wepp-prep-job");
         expect(prepCompleted).toHaveBeenCalledWith(expect.objectContaining({ source: "status" }));
         expect(runCompleted).not.toHaveBeenCalled();
+    });
+
+    test("bootstrap resolves controller job key hint for swat no-prep fallback", () => {
+        const pollCompletionValues = [];
+        controlBaseInstance.set_rq_job_id.mockImplementationOnce((self) => {
+            pollCompletionValues.push(self.poll_completion_event);
+        });
+        window.WCControllerBootstrap = {
+            resolveJobId: jest.fn(() => null),
+            getControllerContext: jest.fn(() => ({ job_id: "swat-job-33", job_key: "run_swat_noprep_rq" }))
+        };
+
+        wepp.bootstrap({
+            data: { wepp: { hasRun: false } }
+        });
+
+        expect(controlBaseInstance.set_rq_job_id).toHaveBeenCalledWith(wepp, "swat-job-33");
+        expect(pollCompletionValues).toEqual(["SWAT_RUN_TASK_COMPLETED"]);
     });
 });

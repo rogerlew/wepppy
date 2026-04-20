@@ -58,6 +58,17 @@ BOOTSTRAP_READ_SCOPE = "bootstrap:read"
 BOOTSTRAP_CHECKOUT_SCOPE = "bootstrap:checkout"
 
 
+def _persist_wepp_job_hint(wepp: Wepp, *, job_id: str, job_key: str) -> None:
+    """Persist a last-known WEPP/SWAT job hint without failing enqueue."""
+    try:
+        wepp.job_id = job_id
+        wepp.job_key = job_key
+    except RuntimeError:
+        # Boundary catch: enqueue already succeeded; keep response stable even
+        # if NoDb hint persistence fails.
+        logger.exception("rq-engine bootstrap enqueue failed to persist NoDb WEPP job hint")
+
+
 def _extract_scopes(claims: Mapping[str, Any]) -> set[str]:
     raw = claims.get("scope")
     separator = get_jwt_config().scope_separator
@@ -165,6 +176,7 @@ def _enqueue_no_prep_job(
             q = Queue(connection=redis_conn)
             job = q.enqueue_call(job_fn, (runid,), timeout=RQ_TIMEOUT)
             prep.set_rq_job_id(job_key, job.id)
+            _persist_wepp_job_hint(resolved_wepp, job_id=str(job.id), job_key=job_key)
     finally:
         if enforce_wepp_singleflight:
             try:

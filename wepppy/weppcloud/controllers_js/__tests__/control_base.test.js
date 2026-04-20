@@ -78,6 +78,57 @@ describe("controlBase job status error handling", () => {
         expect(base.rq_job.innerHTML).toContain("Authentication required.");
     });
 
+    test("set_rq_job_id mirrors canonical controller job_id", () => {
+        base.fetch_job_status = jest.fn();
+        base.render_job_status = jest.fn();
+        base.render_job_hint = jest.fn();
+        base.update_command_button_state = jest.fn();
+        base.manage_status_stream = jest.fn();
+        base.reset_status_spinner = jest.fn();
+
+        base.set_rq_job_id(base, "job-42");
+        expect(base.job_id).toBe("job-42");
+        expect(base.rq_job_id).toBe("job-42");
+
+        base.set_rq_job_id(base, null);
+        expect(base.job_id).toBeNull();
+        expect(base.rq_job_id).toBeNull();
+    });
+
+    test("set_rq_job_id mirrors normalized job id values", () => {
+        base.fetch_job_status = jest.fn();
+        base.render_job_status = jest.fn();
+        base.render_job_hint = jest.fn();
+        base.update_command_button_state = jest.fn();
+        base.manage_status_stream = jest.fn();
+        base.reset_status_spinner = jest.fn();
+
+        base.set_rq_job_id(base, "  job-42  ");
+        expect(base.job_id).toBe("job-42");
+        expect(base.rq_job_id).toBe("job-42");
+
+        base.set_rq_job_id(base, "   ");
+        expect(base.job_id).toBeNull();
+        expect(base.rq_job_id).toBeNull();
+    });
+
+    test("set_rq_job_id same-id fast path keeps mirrored job_id synced", () => {
+        base.fetch_job_status = jest.fn();
+        base.render_job_status = jest.fn();
+        base.render_job_hint = jest.fn();
+        base.update_command_button_state = jest.fn();
+        base.manage_status_stream = jest.fn();
+        base.reset_status_spinner = jest.fn();
+
+        base.set_rq_job_id(base, "job-fast");
+        base.fetch_job_status.mockClear();
+
+        base.set_rq_job_id(base, "job-fast");
+        expect(base.job_id).toBe("job-fast");
+        expect(base.rq_job_id).toBe("job-fast");
+        expect(base.fetch_job_status).toHaveBeenCalledTimes(1);
+    });
+
     test("retries polling with session token after 401 and reuses auth mode", async () => {
         const unauthenticatedError = {
             name: "HttpError",

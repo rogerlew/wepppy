@@ -807,6 +807,8 @@ class Wepp(NoDbBase):
             self._dss_export_on_run_completion = self.config_get_bool('wepp', 'dss_export_on_run_completion', False)  # view model property
             self._dss_excluded_channel_orders = self.config_get_list('wepp', 'dss_excluded_channel_orders', [1, 2])  # view model property
             self._dss_export_channel_ids = [] # specifies which channels are exported
+            self._job_id = None
+            self._job_key = None
 
             self._dtchr_override = None
             self._ichout_override = None
@@ -830,6 +832,10 @@ class Wepp(NoDbBase):
 
         if not hasattr(instance, '_bootstrap_enabled'):
             instance._bootstrap_enabled = False
+        if not hasattr(instance, "_job_id"):
+            instance._job_id = None
+        if not hasattr(instance, "_job_key"):
+            instance._job_key = None
         if not hasattr(instance, "_delete_after_interchange"):
             instance._delete_after_interchange = instance.config_get_bool(
                 "interchange",
@@ -885,6 +891,44 @@ class Wepp(NoDbBase):
     @nodb_setter
     def bootstrap_enabled(self, value: bool) -> None:
         self._bootstrap_enabled = bool(value)
+
+    @property
+    def job_id(self) -> Optional[str]:
+        raw_value = getattr(self, "_job_id", None)
+        if raw_value is None:
+            return None
+        normalized = str(raw_value).strip()
+        if not normalized:
+            return None
+        return normalized
+
+    @job_id.setter
+    @nodb_setter
+    def job_id(self, value: Optional[str]) -> None:
+        if value is None:
+            self._job_id = None
+            return
+        normalized = str(value).strip()
+        self._job_id = normalized if normalized else None
+
+    @property
+    def job_key(self) -> Optional[str]:
+        raw_value = getattr(self, "_job_key", None)
+        if raw_value is None:
+            return None
+        normalized = str(raw_value).strip()
+        if not normalized:
+            return None
+        return normalized
+
+    @job_key.setter
+    @nodb_setter
+    def job_key(self, value: Optional[str]) -> None:
+        if value is None:
+            self._job_key = None
+            return
+        normalized = str(value).strip()
+        self._job_key = normalized if normalized else None
 
     def init_bootstrap(self) -> None:
         _WEPP_BOOTSTRAP_SERVICE.init_bootstrap(self)

@@ -383,6 +383,29 @@ var Wepp = (function () {
             wepp._active_wepp_run_event = "run";
         }
 
+        function applyJobKeyCompletionHint(jobKey) {
+            var normalizedJobKey = jobKey ? String(jobKey).trim() : "";
+            if (!normalizedJobKey) {
+                return null;
+            }
+            if (normalizedJobKey === "prep_wepp_watershed_rq") {
+                setActiveWeppRunEvent("prep_only");
+                return "WEPP_PREP_TASK_COMPLETED";
+            }
+            if (normalizedJobKey === "run_swat_rq" || normalizedJobKey === "run_swat_noprep_rq") {
+                return "SWAT_RUN_TASK_COMPLETED";
+            }
+            if (normalizedJobKey === "run_wepp_watershed_rq" || normalizedJobKey === "run_wepp_watershed_noprep_rq") {
+                setActiveWeppRunEvent("run_watershed");
+                return "WEPP_RUN_TASK_COMPLETED";
+            }
+            if (normalizedJobKey === "run_wepp_rq" || normalizedJobKey === "run_wepp_noprep_rq") {
+                setActiveWeppRunEvent("run");
+                return "WEPP_RUN_TASK_COMPLETED";
+            }
+            return null;
+        }
+
         function emitActiveWeppCompletion(payload) {
             if (!weppEvents || typeof weppEvents.emit !== "function") {
                 return;
@@ -1326,6 +1349,7 @@ var Wepp = (function () {
             }
             if (!jobId && controllerContext.job_id) {
                 jobId = controllerContext.job_id;
+                completionEvent = applyJobKeyCompletionHint(controllerContext.job_key);
             }
             if (!jobId) {
                 var jobIds = ctx && (ctx.jobIds || ctx.jobs);

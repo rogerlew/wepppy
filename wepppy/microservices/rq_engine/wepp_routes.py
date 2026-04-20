@@ -42,6 +42,17 @@ RQ_TIMEOUT = int(os.getenv("RQ_ENGINE_RQ_TIMEOUT", "216000"))
 RQ_ENQUEUE_SCOPES = ["rq:enqueue"]
 
 
+def _persist_wepp_job_hint(wepp: Wepp, *, job_id: str, job_key: str) -> None:
+    """Persist a last-known WEPP controller job hint without failing enqueue."""
+    try:
+        wepp.job_id = job_id
+        wepp.job_key = job_key
+    except RuntimeError:
+        # Boundary catch: enqueue already succeeded; keep response stable even
+        # if NoDb hint persistence fails.
+        logger.exception("rq-engine run-wepp failed to persist NoDb WEPP job hint")
+
+
 def _is_base_project_context(runid: str, config: str) -> bool:
     runid_leaf = runid.split(";;")[-1].strip().lower() if runid else ""
     config_token = str(config).strip().lower() if config is not None else ""
@@ -105,6 +116,7 @@ async def _handle_run_wepp_request(
                 q = Queue(connection=redis_conn)
                 job = q.enqueue_call(job_fn, (runid,), timeout=RQ_TIMEOUT)
                 prep.set_rq_job_id(job_key, job.id)
+                _persist_wepp_job_hint(wepp, job_id=str(job.id), job_key=job_key)
         finally:
             try:
                 release_wepp_submit_lock(runid, submit_owner)

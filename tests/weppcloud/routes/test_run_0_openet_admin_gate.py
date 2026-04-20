@@ -88,6 +88,8 @@ def _bootstrap_context(user_roles: set[str]) -> dict:
             dss_export_mode=0,
             has_dss_zip=False,
             bootstrap_enabled=False,
+            job_id=None,
+            job_key=None,
         ),
         "bootstrap_admin_disabled": False,
         "bootstrap_is_anonymous": True,
@@ -208,6 +210,19 @@ def test_run_page_bootstrap_openet_flag_true_for_admin(run0_template_app) -> Non
     with run0_template_app.app_context():
         js = render_template("run_page_bootstrap.js.j2", **context)
     assert _extract_openet_flag(js) == "true"
+
+
+def test_run_page_bootstrap_serializes_wepp_controller_job_id(run0_template_app) -> None:
+    context = _bootstrap_context(set())
+    context["wepp"].job_id = "wepp-job-42"
+    context["wepp"].job_key = "run_wepp_watershed_rq"
+    with run0_template_app.app_context():
+        js = render_template("run_page_bootstrap.js.j2", **context)
+
+    assert re.search(
+        r'"wepp"\s*:\s*\{\s*"job_id"\s*:\s*"wepp-job-42"\s*,\s*"job_key"\s*:\s*"run_wepp_watershed_rq"\s*\}',
+        js,
+    )
 
 
 def test_run_page_bootstrap_rusle_flag_false_without_disturbed(run0_template_app) -> None:

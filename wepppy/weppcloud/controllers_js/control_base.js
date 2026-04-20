@@ -939,6 +939,7 @@ function controlBase() {
 
     return {
         command_btn_id: null,
+        job_id: null,
         rq_job_id: null,
         rq_job_status: null,
         job_status_poll_interval_ms: DEFAULT_POLL_INTERVAL_MS,
@@ -1133,6 +1134,7 @@ function controlBase() {
         set_rq_job_id: function (self, job_id) {
             self.clear_stacktrace_backfill(self);
             const normalizedJobId = normalizeJobId(job_id);
+            self.job_id = normalizedJobId;
 
             self._job_completion_dispatched = false;
             self._job_failure_dispatched = false;

@@ -57,6 +57,7 @@ def _stub_wepp_stack(
     *,
     parse_error: bool = False,
     run_group: str = "",
+    persist_job_hint_error: bool = False,
     capture: dict[str, object] | None = None,
 ) -> None:
     class DummyRon:
@@ -83,6 +84,20 @@ def _stub_wepp_stack(
         _run_frost = False
         _run_tcr = False
         _run_snow = True
+
+        def __init__(self) -> None:
+            self._job_id = None
+            self.job_key = None
+
+        @property
+        def job_id(self):
+            return self._job_id
+
+        @job_id.setter
+        def job_id(self, value):
+            if persist_job_hint_error:
+                raise RuntimeError("nodb write failed")
+            self._job_id = value
 
         def parse_inputs(self, payload) -> None:
             if parse_error:
@@ -127,6 +142,52 @@ def test_run_wepp_enqueues_job(monkeypatch: pytest.MonkeyPatch) -> None:
 
     assert response.status_code == 200
     assert response.json()["job_id"] == "job-77"
+
+
+@pytest.mark.parametrize(
+    ("endpoint", "job_id", "job_key"),
+    [
+        ("/api/runs/run-1/cfg/run-wepp", "job-wepp-201", "run_wepp_rq"),
+        ("/api/runs/run-1/cfg/run-wepp-watershed", "job-wepp-202", "run_wepp_watershed_rq"),
+        ("/api/runs/run-1/cfg/prep-wepp-watershed", "job-wepp-203", "prep_wepp_watershed_rq"),
+    ],
+)
+def test_wepp_endpoints_persist_job_id_to_wepp_nodb(
+    monkeypatch: pytest.MonkeyPatch,
+    endpoint: str,
+    job_id: str,
+    job_key: str,
+) -> None:
+    _stub_auth(monkeypatch)
+    _stub_queue(monkeypatch, job_id=job_id)
+    _stub_prep(monkeypatch)
+    capture: dict[str, object] = {}
+    _stub_wepp_stack(monkeypatch, capture=capture)
+    monkeypatch.setattr(wepp_routes, "get_wd", lambda runid: "/tmp/run")
+
+    with TestClient(rq_engine.app) as client:
+        response = client.post(endpoint, json={})
+
+    assert response.status_code == 200
+    assert response.json()["job_id"] == job_id
+    assert capture["wepp"].job_id == job_id
+    assert capture["wepp"].job_key == job_key
+
+
+def test_run_wepp_job_hint_persist_failure_after_enqueue_returns_job_id(
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    _stub_auth(monkeypatch)
+    _stub_queue(monkeypatch, job_id="job-hint-failed")
+    _stub_prep(monkeypatch)
+    _stub_wepp_stack(monkeypatch, persist_job_hint_error=True)
+    monkeypatch.setattr(wepp_routes, "get_wd", lambda runid: "/tmp/run")
+
+    with TestClient(rq_engine.app) as client:
+        response = client.post("/api/runs/run-1/cfg/run-wepp", json={})
+
+    assert response.status_code == 200
+    assert response.json() == {"job_id": "job-hint-failed"}
 
 
 def test_run_wepp_persists_minimum_clip_fields(monkeypatch: pytest.MonkeyPatch) -> None:

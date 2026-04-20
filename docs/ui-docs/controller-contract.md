@@ -56,6 +56,7 @@
 ### Job hints
 - `controlBase.set_rq_job_id` will set and render hints if `hint` points at a `data-job-hint` element. Do not clear hints in `reset_panel_state` when `rq_job_id` is set—rely on the control_base guard instead.
 - **Hydrate on load:** In `bootstrap(context)` always look up the last job id from (in order) `WCControllerBootstrap.resolveJobId(ctx, "<rq_key>")`, `controllerContext.job_id`, and `ctx.jobIds.<rq_key>`, then pass it to `set_rq_job_id`. This keeps the job link visible after page reloads or mod toggles.
+- Route bootstrap payloads should serialize persisted controller job hints into `context.controllers.<name>.job_id` and `context.controllers.<name>.job_key` when available (for example, `controllers.wepp.job_id` / `controllers.wepp.job_key` sourced from NoDb state) so reload hydration still works if Redis job-id hints are absent and completion semantics remain correct.
 - **Bootstrap IDs are not active locks:** `context.jobIds` and controller `job_id` hints are last-known metadata only. Do not set domain-specific active-task latches (or disable queue buttons) from bootstrap hints alone.
 - **Authority order for "is active":**
   - queue/post response contract (`202 Accepted` + new `job_id`, or conflict status from server),
