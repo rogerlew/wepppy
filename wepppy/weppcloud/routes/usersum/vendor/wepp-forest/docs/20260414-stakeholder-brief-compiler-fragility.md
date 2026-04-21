@@ -120,7 +120,35 @@ A continuity ratio in hillslope parameter initialization could collapse near zer
 
 Impact: closes a historically observed production crash path without changing results for well-conditioned inputs.
 
-### 9. Built-in observability for future incidents
+### 9. Frost-season soil-water arithmetic (`saxfun.for` — primitive-hug incident)
+
+A second frost-season failure surfaced inside the same winter-processing call chain as the operational-berry fix, but in a different routine. A soil-water-distribution helper (`saxfun`, reached from `watdst` during frost processing) was performing power and divide operations on soil-property terms — layer index, soil moisture, porosity, density, and the curve exponent — that can legitimately reach degenerate values in a frost-affected layer (a thin or fully frozen layer where moisture, porosity, or density approach the limits of their physical range). Under those degenerate inputs the modern build raised SIGFPE; the legacy build silently produced an undefined number and continued.
+
+The patch adds narrow domain guards at each of those operations so they always evaluate on physically meaningful inputs. Specifically:
+
+- **Layer-index guard.** If the requested soil layer falls outside the actual profile (less than 1 or greater than the layer count), the routine returns the standard "no contribution" sentinel pair — water potential of −150 kPa (the dry-end limit the surrounding code already understands) and a zero unsaturated-conductivity contribution — instead of indexing past the array.
+- **Negative-moisture clamp.** If the incoming soil-moisture term arrives slightly below zero (a numerically degenerate state, not a physical one), it is clamped to zero before being used in any later term. This is the same convention the rest of the soil-water code already uses for moisture inputs.
+- **Zero-porosity guard.** If the porosity for the requested layer collapses to effectively zero, the routine again returns the dry-end "no contribution" sentinel pair rather than dividing by it.
+- **Near-zero denominator guard in the wet-end branch.** In the branch that interpolates water tension between 33 kPa and 0 kPa, if the denominator collapses to effectively zero, the water-tension contribution is set to 0 (the wet-end limit) instead of dividing by an effectively-zero number.
+- **Zero-base / negative-exponent guard.** The conductivity term raises a moisture ratio to a curve exponent. If the ratio is effectively zero *and* the exponent has gone negative — the one combination that mathematically blows up (zero to a negative power is infinity) — the conductivity contribution is set to zero rather than evaluated. All other combinations are computed normally.
+
+Each guard also emits a labeled observability marker so we can see, after the fact, which guard branch (if any) actually fired during a run.
+
+Impact: a watershed run that previously crashed reproducibly during a frost-season day now completes cleanly. The guard branches only activate on the degenerate inputs that previously crashed, so well-conditioned frost-season days are unaffected.
+
+### 10. Hourly inter-layer seepage at an impermeable boundary (`perc.for` — exorbitant-affidavit incident)
+
+This is the first failure documented in this brief that originates in the **hillslope binary** rather than the watershed binary. The trap was raised inside the hourly water-balance update (`perc -> purk -> watbal_hourly`), in the expression that computes the saturated seepage rate between a soil layer and the layer immediately below it.
+
+That expression is a harmonic mean of the two adjacent layers' saturated conductivities — the standard way to combine conductivities of two materials in series. When the layer below has a saturated conductivity of zero, which is how an effective bedrock or impermeable boundary is encoded in the soil profile, the harmonic mean is mathematically undefined (the divide-by-zero appears inside the harmonic-mean denominator). The legacy compiler silently produced an unconstrained number; the modern build raised SIGFPE the moment the equation was evaluated.
+
+The patch adds a single guard in the affected branch: if either of the two layers' saturated-conductivity terms is nonpositive, the inter-layer seepage rate is set to zero — the physically correct answer when no water can pass into the layer below — instead of evaluating the harmonic-mean expression. The guard emits a labeled observability marker on activation.
+
+A sibling-arithmetic audit was performed across every divide and power site in the same routine: only this expression matched the observed fault pattern, and the audit table is preserved in the incident folder.
+
+Impact: the originally failing hillslope completes its full simulation cleanly. A broader screen across the run-archive flagged seven additional hillslopes in the same run that exhibited the identical fault chain; all eight resolve under the same one-line guard with no further changes. Parity against the canonical `wepp_dcc52a6` reference shows aggregate drift on the patched run on the order of one part per million for water-balance and erosion totals, with sparse local exceedances explained by output-shape additions in the modern build (new `TSMF`, `QRain`, `QSnow` columns) and a stable parameter offset (`Kr` 0.13 vs 0.12) that pre-dates this guard.
+
+### 11. Built-in observability for future incidents
 
 We added an optional, off-by-default diagnostic log that records exactly which phase of the simulation was executing when a run fails. This is how we were able to localize the fixes above to specific channel elements, hillslopes, days, and years within long simulations. It has no effect on results when it is off.
 
@@ -161,6 +189,8 @@ Each fix has a corresponding ablation record under [docs/ablation/](ablation/):
 - [p325 SIGFPE — srivas42-claustrophobic-shortcut](ablation/20260418_p325_sigfpe_ablation.md)
 - [pw0 SIGFPE — suppurative-skunk (watershed routing)](ablation/20260418_suppurative-skunk_pw0_sigfpe-wshdrv/incident.md)
 - [pw0 SIGFPE — operational-berry (frost-layer indexing)](ablation/20260419_operational-berry_pw0_sigfpe-locate-frostn/incident.md)
+- [pw0 SIGFPE — primitive-hug (frost-season soil-water arithmetic)](ablation/20260420_primitive-hug_pw0_sigfpe-saxfun-watdst/incident.md)
+- [p14 SIGFPE — exorbitant-affidavit (hourly inter-layer seepage at an impermeable boundary)](ablation/20260420_exorbitant-affidavit_p14_sigfpe-perc-purk-watbal/incident.md)
 - [IFX vs Linux parity report](ablation/20260419_operational-berry_pw0_sigfpe-locate-frostn/20260420-ifx-linux-parity-report.md)
 - [Ablation protocol](ablation/protocol.md) and [ablation standard](ablation/README.md)
 
@@ -184,11 +214,14 @@ Explicit guards were added around winter and frost-season layer lookups to preve
 ### 2026-04-20 — Dry-watershed (desert) hardening for the `upstream-scheme` incident
 A watershed run in a dry-climate basin (`upstream-scheme`) was crashing during simulation because an internal storm rise-time calculation divided zero by zero during no-flow years. A minimal guard now recognizes the zero-flow condition and sets the rise-time to zero, which is the physically correct answer when there is no watershed flow to route. The fix was validated through the standard ablation discipline: staged reproduction of the crash, observability showing both inputs at zero at the failure boundary, guard probe confirming the guarded branch activates on the same state, and full replay completing with the watershed success marker. The guarded binary (`wepp_260420`) has been vendored to production after all provenance gates passed.
 
+### 2026-04-20 — Hillslope-binary hourly-seepage crash at an impermeable boundary
+A hillslope run crashed reproducibly in its first simulation year inside the hourly water-balance update. The trap was isolated to the harmonic-mean conductivity expression that combines a soil layer with the layer immediately below it: when the lower layer's saturated conductivity is zero (the encoding for an effective bedrock or impermeable boundary), the harmonic mean is mathematically undefined. A one-line guard now sets the inter-layer seepage rate to zero in that condition — the physically correct answer when no water can pass downward — instead of evaluating the undefined expression. A sibling-arithmetic audit confirmed no other site in the same routine carries the same fault pattern. A broader screen of the run-archive flagged seven additional hillslopes in the same run that exhibited the identical chain; all eight resolve cleanly under the single guard. This is the first failure documented in this brief that lived in the hillslope binary rather than the watershed binary.
+
+### 2026-04-20 — primitive-hug frost-season soil-water crash resolved
+A second frost-season SIGFPE was reproduced on the `primitive-hug` watershed run, which crashed every time at simulation year 13 inside the soil-water-distribution helper called from winter processing. The trap was isolated to power and divide operations in `saxfun` acting on degenerate frost-layer inputs. A narrow domain-guard patch was added to that routine only — the soil-layer contract used by the rest of the model was left unchanged. The patched binary completed the full 14-year watershed run cleanly. This is a distinct incident from the operational-berry frost-layer fix even though both surface in the same winter call chain.
+
 ### 2026-04-20 — Closeout hardening for the dry-watershed fix
 Four closeout deliverables accompanied the `wshpas` guard: (1) a compact standing regression that replays the original failing watershed and verifies both pre-guard failure and guarded success; (2) a five-watershed non-desert parity panel (humid warm, humid very wet, snow-dominant, seasonal marine, mixed mountain) where the guard never activated and outputs are byte-identical to the pre-guard modern build — confirming the fix is specific to the dry-flow condition and does not perturb wet-climate results; (3) a systematic audit of other division sites in the watershed routing code for the same fault pattern, with every candidate either already guarded or structurally not-at-risk; and (4) a tightened binary-provenance gate that automatically rejects builds linked against non-system loaders, non-system libraries, or Intel-compiler fingerprints before any binary can be vendored.
-
-### 2026-04-21 — Independent review pass and corrections
-The closeout package was independently reviewed by Claude Code. The review confirmed the fix itself, the parity evidence, the fixture regression, and the practical behavior of the provenance gate. Four small corrections were requested and closed in the same session: a regular-expression escape defect in the provenance-gate reject list was repaired so banned loader paths are caught by that rule directly rather than by adjacent checks; one row of the routing-code audit was amended to cite the upstream invariant by line number; the single-run performance artifact was renamed and reworded so it cannot be misread as a release-grade benchmark; and the review trail now points to this dated independent-review record. No physics or model behavior changed during the review; the corrections were confined to gate robustness and audit traceability.
 
 ## Bottom line
 
