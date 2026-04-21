@@ -242,6 +242,9 @@ Consolidated configuration surfaces discovered from:
 | `SCHEDULE_CONFIG` | `compose(dev|prod): /workdir/wepppy/docker/scheduled-tasks.yml` | compose (`scheduler`) | Scheduled task config file path. |
 | `SCHEDULE_SLEEP_SECONDS` | `compose(dev|prod): 30` | compose (`scheduler`) | Scheduler poll interval (seconds). |
 | `SCHEDULE_LOG_LEVEL` | `compose(dev|prod): INFO` | compose (`scheduler`) | Scheduler log level. |
+| `RUN_LOCATIONS_PATH` | `scheduler runtime default (code): /geodata/weppcloud_runs/runid-locations.json` | compose (`scheduler`) | Path used by scheduler freshness monitor for `runid-locations.json`. |
+| `RUN_LOCATIONS_STALE_SECONDS` | `scheduler runtime default (code): 172800` | compose (`scheduler`) | Staleness threshold (seconds) before scheduler logs `run-locations stale` warning. |
+| `RUN_LOCATIONS_CHECK_INTERVAL_SECONDS` | `scheduler runtime default (code): 900` | compose (`scheduler`) | Freshness monitor check interval in scheduler loop (seconds). |
 | `RQ_DASHBOARD_URL_PREFIX` | `compose(dev): /rq-dashboard` | compose(dev): `rq-dashboard` | URL prefix for rq-dashboard behind a proxy. |
 | `PIP_DISABLE_PIP_VERSION_CHECK` | `compose(dev): 1` | compose(dev): `rq-dashboard` | Disables pip version check noise. |
 | `WEPPPY_NCPU` | `compose(dev|prod): 6` | compose (`rq-worker-batch`) | Worker concurrency / CPU hint used by rq-worker-batch. |

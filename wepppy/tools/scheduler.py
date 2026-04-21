@@ -3,6 +3,7 @@ import importlib
 import json
 import logging
 import os
+from pathlib import Path
 import random
 import re
 import signal
@@ -24,6 +25,10 @@ else:
     YAML_IMPORT_ERROR = None
 
 _ENV_TOKEN_RE = re.compile(r"^\$\{(?P<name>[A-Za-z_][A-Za-z0-9_]*)(?::-(?P<default>[^}]*))?\}$")
+_RUN_LOCATIONS_PATH_DEFAULT = "/geodata/weppcloud_runs/runid-locations.json"
+_RUN_LOCATIONS_STALE_SECONDS_DEFAULT = 172800
+_RUN_LOCATIONS_CHECK_INTERVAL_SECONDS_DEFAULT = 900
+_TASK_FAILURE_RETRY_SECONDS = 60
 
 
 @dataclass
@@ -46,7 +51,7 @@ class TaskSpec:
 @dataclass
 class TaskState:
     spec: TaskSpec
-    func: Callable[..., Any]
+    func: Optional[Callable[..., Any]]
     next_run: float
 
 
@@ -166,17 +171,41 @@ def _build_states(specs: list[TaskSpec]) -> list[TaskState]:
     now = time.monotonic()
     states: list[TaskState] = []
     for spec in specs:
-        func = _resolve_callable(spec.func_path)
         delay = float(spec.initial_delay_seconds)
         next_run = now + delay
         if spec.jitter_seconds > 0:
             next_run += random.uniform(0, spec.jitter_seconds)
-        states.append(TaskState(spec=spec, func=func, next_run=next_run))
+        states.append(TaskState(spec=spec, func=None, next_run=next_run))
     return states
 
 
-def _enqueue_task(queue: Queue, task: TaskState) -> None:
+def _resolve_task_callable(task: TaskState) -> Optional[Callable[..., Any]]:
+    if task.func is not None:
+        return task.func
+    try:
+        task.func = _resolve_callable(task.spec.func_path)
+    except (
+        ImportError,
+        AttributeError,
+        TypeError,
+        ValueError,
+        RuntimeError,
+        OSError,
+    ):
+        logging.exception(
+            "Failed to resolve callable for task %s (%s); skipping this run",
+            task.spec.name,
+            task.spec.func_path,
+        )
+        return None
+    return task.func
+
+
+def _enqueue_task(queue: Queue, task: TaskState) -> bool:
     spec = task.spec
+    func = _resolve_task_callable(task)
+    if func is None:
+        return False
     enqueue_kwargs: dict[str, Any] = {}
     if spec.job_timeout is not None:
         enqueue_kwargs["job_timeout"] = spec.job_timeout
@@ -186,7 +215,57 @@ def _enqueue_task(queue: Queue, task: TaskState) -> None:
         enqueue_kwargs["job_id"] = spec.job_id
     if spec.description:
         enqueue_kwargs["description"] = spec.description
-    queue.enqueue(task.func, *spec.args, **spec.kwargs, **enqueue_kwargs)
+    queue.enqueue(func, *spec.args, **spec.kwargs, **enqueue_kwargs)
+    return True
+
+
+def _env_int_with_default(*, env_name: str, default: int, minimum: int = 1) -> int:
+    raw = (os.getenv(env_name) or "").strip()
+    if not raw:
+        return default
+    try:
+        parsed = _as_int(raw, name=env_name)
+    except ValueError:
+        logging.warning("%s must be an integer; using default=%d", env_name, default)
+        return default
+    if parsed < minimum:
+        logging.warning("%s must be >= %d; using default=%d", env_name, minimum, default)
+        return default
+    return parsed
+
+
+def _monitor_run_locations_freshness(path: Path, stale_after_seconds: int) -> None:
+    try:
+        mtime = path.stat().st_mtime
+    except FileNotFoundError:
+        logging.warning("run-locations freshness check: file missing at %s", path)
+        return
+    except OSError as exc:
+        logging.warning("run-locations freshness check failed for %s (%s)", path, exc)
+        return
+
+    age_seconds = max(0.0, time.time() - mtime)
+    if age_seconds > stale_after_seconds:
+        mtime_iso = time.strftime("%Y-%m-%dT%H:%M:%S%z", time.localtime(mtime))
+        logging.warning(
+            "run-locations stale: path=%s age_s=%.0f threshold_s=%d mtime=%s",
+            path,
+            age_seconds,
+            stale_after_seconds,
+            mtime_iso,
+        )
+        return
+    logging.debug(
+        "run-locations fresh: path=%s age_s=%.0f threshold_s=%d",
+        path,
+        age_seconds,
+        stale_after_seconds,
+    )
+
+
+def _failure_retry_time(base: float, sleep_seconds: int) -> float:
+    retry_delay_seconds = max(5, min(max(1, sleep_seconds), _TASK_FAILURE_RETRY_SECONDS))
+    return base + float(retry_delay_seconds)
 
 
 def run_scheduler(
@@ -208,6 +287,18 @@ def run_scheduler(
     }
     specs = _normalize_tasks(tasks, defaults)
     states = _build_states(specs)
+    run_locations_path = Path(os.getenv("RUN_LOCATIONS_PATH", _RUN_LOCATIONS_PATH_DEFAULT))
+    run_locations_stale_seconds = _env_int_with_default(
+        env_name="RUN_LOCATIONS_STALE_SECONDS",
+        default=_RUN_LOCATIONS_STALE_SECONDS_DEFAULT,
+        minimum=1,
+    )
+    run_locations_check_interval_seconds = _env_int_with_default(
+        env_name="RUN_LOCATIONS_CHECK_INTERVAL_SECONDS",
+        default=_RUN_LOCATIONS_CHECK_INTERVAL_SECONDS_DEFAULT,
+        minimum=1,
+    )
+    next_run_locations_check = 0.0
 
     conn_kwargs = redis_connection_kwargs(RedisDB.RQ)
     redis_conn = redis.Redis(**conn_kwargs)
@@ -231,9 +322,19 @@ def run_scheduler(
     signal.signal(signal.SIGINT, _handle_stop)
 
     logging.info("Scheduler loaded %d task(s) from %s", len(states), config_path)
+    logging.info(
+        "run-locations freshness monitor enabled: path=%s stale_after_s=%d check_interval_s=%d",
+        run_locations_path,
+        run_locations_stale_seconds,
+        run_locations_check_interval_seconds,
+    )
 
     while not stop:
         now = time.monotonic()
+        if now >= next_run_locations_check:
+            _monitor_run_locations_freshness(run_locations_path, run_locations_stale_seconds)
+            next_run_locations_check = now + run_locations_check_interval_seconds
+
         for task in states:
             spec = task.spec
             if not spec.enabled:
@@ -241,12 +342,26 @@ def run_scheduler(
             if now < task.next_run:
                 continue
             logging.info("Scheduling task %s", spec.name)
+            enqueue_ok = False
             if not dry_run:
                 queue = get_queue(spec.queue)
-                _enqueue_task(queue, task)
+                try:
+                    enqueue_ok = _enqueue_task(queue, task)
+                except (
+                    redis.exceptions.RedisError,
+                    OSError,
+                    RuntimeError,
+                    TypeError,
+                    ValueError,
+                ):
+                    logging.exception("Failed to enqueue task %s", spec.name)
             else:
                 logging.info("Dry run enabled, skipping enqueue for %s", spec.name)
-            task.next_run = _schedule_time(now, spec.interval_seconds, spec.jitter_seconds)
+                enqueue_ok = True
+            if enqueue_ok:
+                task.next_run = _schedule_time(now, spec.interval_seconds, spec.jitter_seconds)
+            else:
+                task.next_run = _failure_retry_time(now, sleep_seconds)
         if run_once:
             break
         time.sleep(sleep_seconds)

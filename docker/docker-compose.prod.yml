@@ -849,6 +849,7 @@ services:
     secrets:
       - redis_password
       - postgres_password
+      - *discord-bot-token-secret
     depends_on:
       redis:
         condition: service_started
