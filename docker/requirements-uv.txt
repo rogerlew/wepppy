@@ -190,7 +190,7 @@ pysocks==1.7.1
 pytest==8.4.2
 pytest-cov==7.0.0
 pytest-reportlog==0.4.0
-python-dotenv==1.0.1
+python-dotenv==1.2.2
 python-frontmatter==1.1.0
 python-multipart==0.0.22
 pythran==0.10.0
