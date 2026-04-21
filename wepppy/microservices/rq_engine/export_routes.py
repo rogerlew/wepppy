@@ -794,7 +794,7 @@ async def export_features_download(runid: str, config: str, job_id: str, request
     summary="Download published features export artifact",
     description=(
         "Requires JWT Bearer scope `rq:export` and run access via `authorize_run_access`. "
-        "No-queue endpoint: resolves one canonical published profile id through "
+        "No queue endpoint: resolves one canonical published profile id through "
         "`export/features/published/index.json`, may repair publication metadata from cache "
         "key state, and returns the artifact file."
     ),

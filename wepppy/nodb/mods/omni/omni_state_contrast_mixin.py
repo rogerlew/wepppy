@@ -492,6 +492,7 @@ class OmniStateContrastMixin:
                 os.remove(contrasts_report)
             except OSError as exc:
                 self.logger.debug('Failed to remove contrast summary %s: %s', contrasts_report, exc)
+        self._remove_contrast_id_definitions_psv()
 
     def _reset_contrast_build_state(self) -> None:
         with self.locked():
@@ -500,6 +501,7 @@ class OmniStateContrastMixin:
             self._contrast_labels = {}
             self._contrast_dependency_tree = {}
         self._clean_contrast_runs()
+        self._remove_contrast_id_definitions_psv()
 
     def _clean_contrast_runs(self) -> None:
         contrasts_dir = _join(self.wd, OMNI_REL_DIR, 'contrasts')
@@ -573,6 +575,227 @@ class OmniStateContrastMixin:
 
     def _contrast_ids_geojson_path(self) -> str:
         return _join(self.omni_dir, "contrasts", "contrast_ids.wgs.geojson")
+
+    def _contrast_id_definitions_path(self) -> str:
+        return _join(self.omni_dir, "contrast_id_definitions.psv")
+
+    def _remove_contrast_id_definitions_psv(self) -> None:
+        path = self._contrast_id_definitions_path()
+        if _exists(path):
+            try:
+                os.remove(path)
+            except OSError as exc:
+                self.logger.debug(
+                    "Failed to remove contrast id definitions %s: %s",
+                    path,
+                    exc,
+                )
+
+    @staticmethod
+    def _normalize_contrast_id(value: Any) -> Optional[int]:
+        if isinstance(value, str):
+            value = value.strip()
+        try:
+            return int(value)
+        except (TypeError, ValueError):
+            return None
+
+    @staticmethod
+    def _sorted_topaz_ids(values: Set[int]) -> List[int]:
+        return sorted(values)
+
+    def _merge_contrast_report_entries(
+        self,
+        existing: Dict[str, Any],
+        incoming: Dict[str, Any],
+    ) -> Dict[str, Any]:
+        merged = dict(existing)
+        merged.update(incoming)
+
+        merged_topaz_ids = self._topaz_ids_from_report_entry(existing)
+        merged_topaz_ids.update(self._topaz_ids_from_report_entry(incoming))
+        if merged_topaz_ids:
+            merged["topaz_ids"] = self._sorted_topaz_ids(merged_topaz_ids)
+            merged.pop("topaz_id", None)
+        return merged
+
+    def _contrast_report_entries_by_id(self) -> Dict[int, Dict[str, Any]]:
+        report_entries: Dict[int, Dict[str, Any]] = {}
+        for entry in self._load_contrast_build_report():
+            contrast_id = self._normalize_contrast_id(entry.get("contrast_id"))
+            if contrast_id is None:
+                continue
+            existing = report_entries.get(contrast_id)
+            if existing is None:
+                report_entries[contrast_id] = dict(entry)
+            else:
+                report_entries[contrast_id] = self._merge_contrast_report_entries(existing, entry)
+        return report_entries
+
+    def _topaz_ids_from_report_entry(self, entry: Optional[Dict[str, Any]]) -> Set[int]:
+        topaz_ids: Set[int] = set()
+        if not entry:
+            return topaz_ids
+
+        raw_topaz_ids = entry.get("topaz_ids")
+        if isinstance(raw_topaz_ids, list):
+            for raw_topaz_id in raw_topaz_ids:
+                parsed = self._normalize_contrast_id(raw_topaz_id)
+                if parsed is not None:
+                    topaz_ids.add(parsed)
+        if topaz_ids:
+            return topaz_ids
+
+        parsed_topaz_id = self._normalize_contrast_id(entry.get("topaz_id"))
+        if parsed_topaz_id is not None:
+            topaz_ids.add(parsed_topaz_id)
+        return topaz_ids
+
+    def _normalized_contrast_selection_mode(self) -> str:
+        selection_mode = (getattr(self, "_contrast_selection_mode", None) or "cumulative").strip().lower()
+        aliases = {
+            "objective": "cumulative",
+            "objective_parameter": "cumulative",
+            "cumulative_objective": "cumulative",
+            "cumulative_obj_param": "cumulative",
+            "stream_order_pruning": "stream_order",
+            "stream-order-pruning": "stream_order",
+            "user-defined-hillslope-groups": "user_defined_hillslope_groups",
+            "user-defined-hillslope-group": "user_defined_hillslope_groups",
+        }
+        return aliases.get(selection_mode, selection_mode)
+
+    def _topaz_id_from_contrast_name(self, contrast_name: str) -> Optional[int]:
+        control_part, _separator, _target = str(contrast_name).partition("__to__")
+        _control, _separator, topaz_token = control_part.partition(",")
+        if not topaz_token:
+            return None
+        return self._normalize_contrast_id(topaz_token)
+
+    def _selected_topaz_ids_for_contrast(
+        self,
+        contrast_id: int,
+        contrast_name: str,
+        contrast_payload: Dict[str, str],
+        report_entry: Optional[Dict[str, Any]],
+    ) -> List[int]:
+        selection_mode = self._normalized_contrast_selection_mode()
+        report_topaz_ids = self._topaz_ids_from_report_entry(report_entry)
+        topaz_ids: Set[int] = set()
+
+        if selection_mode == "cumulative":
+            topaz_ids = report_topaz_ids
+            if not topaz_ids:
+                parsed_topaz_id = self._topaz_id_from_contrast_name(contrast_name)
+                if parsed_topaz_id is not None:
+                    topaz_ids = {parsed_topaz_id}
+        elif selection_mode in {"user_defined_areas", "user_defined_hillslope_groups"}:
+            topaz_ids = report_topaz_ids
+
+        if not topaz_ids:
+            _, contrast_key = self._contrast_scenario_keys(contrast_name)
+            base_key = self._normalize_scenario_key(None)
+            if contrast_key == base_key:
+                contrast_wd = self.wd
+            else:
+                contrast_wd = _join(self.wd, OMNI_REL_DIR, "scenarios", contrast_key)
+            topaz_ids = _omni_module()._contrast_topaz_ids_from_mapping(contrast_payload, contrast_wd)
+
+        if not topaz_ids:
+            topaz_ids = report_topaz_ids
+
+        if not topaz_ids:
+            self.logger.info(
+                "No contrast topaz ids resolved for contrast_id=%s contrast_name=%s.",
+                contrast_id,
+                contrast_name,
+            )
+        return self._sorted_topaz_ids(topaz_ids)
+
+    def _write_contrast_id_definitions_psv(self) -> str:
+        path = self._contrast_id_definitions_path()
+        os.makedirs(self.omni_dir, exist_ok=True)
+        report_entries = self._contrast_report_entries_by_id()
+        tmp_path = f"{path}.tmp.{os.getpid()}.{time.time_ns()}"
+        try:
+            with open(tmp_path, "w", encoding="ascii", newline="\n") as fp:
+                for contrast_id, contrast_name in enumerate(self.contrast_names or [], start=1):
+                    if not contrast_name:
+                        continue
+                    try:
+                        contrast_payload = self._load_contrast_sidecar(contrast_id)
+                    except FileNotFoundError:
+                        self.logger.info(
+                            "Contrast sidecar missing for contrast_id=%s while writing contrast definitions.",
+                            contrast_id,
+                        )
+                        continue
+
+                    topaz_ids = self._selected_topaz_ids_for_contrast(
+                        contrast_id,
+                        contrast_name,
+                        contrast_payload,
+                        report_entries.get(contrast_id),
+                    )
+                    topaz_value = ",".join(str(topaz_id) for topaz_id in topaz_ids)
+                    fp.write(f"{contrast_id}|{topaz_value}\n")
+            os.replace(tmp_path, path)
+        except Exception:
+            if _exists(tmp_path):
+                try:
+                    os.remove(tmp_path)
+                except OSError as exc:
+                    self.logger.debug(
+                        "Failed to remove temporary contrast id definitions %s: %s",
+                        tmp_path,
+                        exc,
+                    )
+            raise
+        return path
+
+    def _load_contrast_id_definitions_psv(self) -> Dict[int, List[int]]:
+        path = self._contrast_id_definitions_path()
+        if not _exists(path):
+            return {}
+
+        parsed: Dict[int, List[int]] = {}
+        with open(path, "r", encoding="ascii") as fp:
+            for line_number, raw_line in enumerate(fp, start=1):
+                line = raw_line.rstrip("\n")
+                if not line:
+                    continue
+                contrast_token, separator, topaz_ids_token = line.partition("|")
+                if not separator:
+                    raise ValueError(
+                        f"Invalid contrast_id_definitions.psv row {line_number}: missing '|' separator."
+                    )
+                contrast_id = self._normalize_contrast_id(contrast_token)
+                if contrast_id is None or contrast_id <= 0:
+                    raise ValueError(
+                        f"Invalid contrast_id_definitions.psv row {line_number}: contrast_id must be a positive integer."
+                    )
+                if contrast_id in parsed:
+                    raise ValueError(
+                        f"Invalid contrast_id_definitions.psv row {line_number}: duplicate contrast_id {contrast_id}."
+                    )
+
+                topaz_ids: List[int] = []
+                if topaz_ids_token:
+                    seen_topaz_ids: Set[int] = set()
+                    for topaz_token in topaz_ids_token.split(","):
+                        parsed_topaz_id = self._normalize_contrast_id(topaz_token)
+                        if parsed_topaz_id is None or parsed_topaz_id <= 0:
+                            raise ValueError(
+                                f"Invalid contrast_id_definitions.psv row {line_number}: topaz_id must be a positive integer."
+                            )
+                        if parsed_topaz_id in seen_topaz_ids:
+                            raise ValueError(
+                                f"Invalid contrast_id_definitions.psv row {line_number}: duplicate topaz_id {parsed_topaz_id}."
+                            )
+                        seen_topaz_ids.add(parsed_topaz_id)
+                        topaz_ids.append(parsed_topaz_id)
+                parsed[contrast_id] = topaz_ids
+        return parsed
 
     def _load_contrast_build_report(self) -> List[Dict[str, Any]]:
         report_path = self._contrast_build_report_path()

@@ -106,6 +106,7 @@ your_project/
 | `scenarios.out.parquet` | Watershed-level metrics for all scenarios (outlet discharge, total soil loss) |
 | `scenarios.hillslope_summaries.parquet` | Per-hillslope metrics for all scenarios |
 | `contrasts.out.parquet` | Control vs. treatment comparisons with computed differences |
+| `contrast_id_definitions.psv` | Canonical `contrast_id -> selected topaz_id list` mappings (`<contrast_id>|<topaz_id_1>,<topaz_id_2>,...`; empty selections are encoded as `<contrast_id>|`) |
 
 These Parquet files can be opened in Python (pandas), R, or tools like DuckDB for custom analysis. CSV exports are also available through the web reports.
 
@@ -201,6 +202,7 @@ Upload a polygon file defining treatment zones:
 - Hillslopes are included if at least 50% of their area falls within a polygon
 - You can define multiple polygons with different names (via a feature property)
 - Overlapping polygons are allowed
+- Features that share the same area label are merged into one contrast ID for that control/contrast pair
 
 This mode answers: *"What happens if I treat these specific areas I've identified?"*
 
@@ -357,9 +359,12 @@ wepppy/weppcloud/templates/controls/
 1. **Definition**: User selects control/contrast scenarios, objective parameter, and selection mode
 2. **Hillslope Selection**: `build_contrasts()` reads control scenario outputs, sorts hillslopes by objective parameter, selects based on mode
 3. **Selection Sidecar**: Each contrast mapping is written to `omni/contrasts/contrast_<id>.tsv`
-4. **Clone Assembly**: Creates contrast workspace, merges hillslope outputs from control + contrast scenarios
-5. **WEPP Execution**: Runs watershed simulation with mixed hillslope inputs
-6. **Reporting**: `contrasts_report()` computes deltas between control and contrast metrics
+4. **Canonical ID Mapping**: `omni/contrast_id_definitions.psv` is refreshed with `<contrast_id>|<topaz_id_1>,<topaz_id_2>,...` rows for downstream consumers
+5. **Clone Assembly**: Creates contrast workspace, merges hillslope outputs from control + contrast scenarios
+6. **WEPP Execution**: Runs watershed simulation with mixed hillslope inputs
+7. **Reporting**: `contrasts_report()` computes deltas between control and contrast metrics
+
+For cumulative mode, `contrast_id` is the sequential run/sidecar ID (1..N), while the selected hillslope ID is represented in the PSV value list.
 
 ### Contrast Selection Mode Details
 

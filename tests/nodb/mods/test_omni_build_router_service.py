@@ -16,7 +16,9 @@ class _BuildOmniStub:
     def __init__(self, selection_mode: str = "cumulative") -> None:
         self._contrast_selection_mode = selection_mode
         self._contrast_pairs = []
+        self._remove_calls = 0
         self._build_calls = 0
+        self._definitions_calls = 0
         self._geojson_calls = 0
         self.events: list[str] = []
 
@@ -29,11 +31,22 @@ class _BuildOmniStub:
     def _normalize_contrast_pairs(self, value):
         return [{"control_scenario": "uniform_low", "contrast_scenario": "mulch"}] if value else []
 
+    def _remove_contrast_id_definitions_psv(self) -> None:
+        self._remove_calls += 1
+        self.events.append("remove-psv")
+
     def _build_contrasts(self) -> None:
         self._build_calls += 1
+        self.events.append("build")
+
+    def _write_contrast_id_definitions_psv(self) -> str:
+        self._definitions_calls += 1
+        self.events.append("write-psv")
+        return "contrast_id_definitions.psv"
 
     def _build_contrast_ids_geojson(self) -> str:
         self._geojson_calls += 1
+        self.events.append("build-geojson")
         return "contrast_ids.geojson"
 
     class logger:
@@ -60,7 +73,14 @@ def test_build_router_sets_contrast_inputs_inside_lock_scope() -> None:
         contrast_pairs=[{"control_scenario": "uniform_low", "contrast_scenario": "mulch"}],
     )
 
-    assert omni.events == ["lock-enter", "lock-exit"]
+    assert omni.events == [
+        "lock-enter",
+        "lock-exit",
+        "remove-psv",
+        "build",
+        "write-psv",
+        "build-geojson",
+    ]
     assert omni._control_scenario == omni_module._scenario_name_from_scenario_definition({"type": "uniform_low"})
     assert omni._contrast_scenario == omni_module._scenario_name_from_scenario_definition({"type": "mulch"})
     assert omni._contrast_object_param == "Runoff_mm"
@@ -73,7 +93,9 @@ def test_build_router_sets_contrast_inputs_inside_lock_scope() -> None:
     assert omni._contrast_pairs == [
         {"control_scenario": "uniform_low", "contrast_scenario": "mulch"}
     ]
+    assert omni._remove_calls == 1
     assert omni._build_calls == 1
+    assert omni._definitions_calls == 1
     assert omni._geojson_calls == 1
 
 
@@ -117,7 +139,9 @@ def test_build_router_allows_selection_modes_without_scenario_defs() -> None:
 
     assert omni._control_scenario is None
     assert omni._contrast_scenario is None
+    assert omni._remove_calls == 1
     assert omni._build_calls == 1
+    assert omni._definitions_calls == 1
     assert omni._geojson_calls == 1
 
 
@@ -149,8 +173,42 @@ def test_build_router_uses_scaling_singleton_seam(
     )
 
     assert seen_modes == ["cumulative"]
+    assert omni._remove_calls == 1
     assert omni._build_calls == 1
+    assert omni._definitions_calls == 1
     assert omni._geojson_calls == 1
+
+
+def test_build_router_removes_definitions_before_build_and_skips_write_on_build_failure() -> None:
+    router = OmniBuildRouter()
+    omni = _BuildOmniStub(selection_mode="cumulative")
+
+    def _raise_build() -> None:
+        omni._build_calls += 1
+        omni.events.append("build")
+        raise RuntimeError("build-failed")
+
+    omni._build_contrasts = _raise_build
+
+    with pytest.raises(RuntimeError, match="build-failed"):
+        router.build_contrasts(
+            omni,
+            control_scenario_def={"type": "uniform_low"},
+            contrast_scenario_def={"type": "mulch"},
+            obj_param="Runoff_mm",
+            contrast_cumulative_obj_param_threshold_fraction=0.8,
+            contrast_hillslope_limit=None,
+            hill_min_slope=None,
+            hill_max_slope=None,
+            select_burn_severities=None,
+            select_topaz_ids=None,
+            contrast_pairs=None,
+        )
+
+    assert omni.events == ["lock-enter", "lock-exit", "remove-psv", "build"]
+    assert omni._remove_calls == 1
+    assert omni._definitions_calls == 0
+    assert omni._geojson_calls == 0
 
 
 class _StatusOmniStub:
@@ -174,6 +232,8 @@ class _StatusOmniStub:
         self._control_scenario = control_scenario
         self._contrast_scenario = contrast_scenario
         self._contrast_labels = contrast_labels or {}
+        self._contrast_id_definitions_removes = 0
+        self._contrast_id_definitions_writes = 0
 
     def _load_contrast_build_report(self):
         return list(self._build_report)
@@ -188,6 +248,13 @@ class _StatusOmniStub:
 
     def _contrast_run_status(self, contrast_id, _contrast_name):
         return self._run_status_map.get(int(contrast_id), "needs_run")
+
+    def _write_contrast_id_definitions_psv(self):
+        self._contrast_id_definitions_writes += 1
+        return "contrast_id_definitions.psv"
+
+    def _remove_contrast_id_definitions_psv(self):
+        self._contrast_id_definitions_removes += 1
 
 
 def test_contrast_status_report_cumulative_payload_shape() -> None:

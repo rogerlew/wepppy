@@ -82,7 +82,9 @@ class OmniBuildRouter:
             if contrast_pairs is not None:
                 omni._contrast_pairs = omni._normalize_contrast_pairs(contrast_pairs)
 
+        omni._remove_contrast_id_definitions_psv()
         omni._build_contrasts()
+        omni._write_contrast_id_definitions_psv()
         omni._build_contrast_ids_geojson()
 
     def build_contrasts_dry_run_report(

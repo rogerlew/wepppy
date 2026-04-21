@@ -23,6 +23,7 @@ def omni_module_stub(monkeypatch: pytest.MonkeyPatch) -> types.ModuleType:
 
     time_stub = types.SimpleNamespace(
         time=lambda: 123.0,
+        time_ns=lambda: 123_000_000_000,
         sleep=lambda seconds: sleep_calls.append(float(seconds)),
     )
 
@@ -152,3 +153,20 @@ def test_clear_contrast_run_status_swallows_oserror_and_logs_debug(
         omni._clear_contrast_run_status(1)
 
     assert "Failed to remove contrast status" in caplog.text
+
+
+def test_reset_contrast_build_state_removes_contrast_id_definitions_psv(
+    tmp_path: Path,
+    omni_module_stub: types.ModuleType,
+) -> None:
+    omni = _OmniContrastDummy(tmp_path, logger_name="tests.omni_state_contrast_mixin.reset")
+    type(omni)._instance = omni
+    omni._fail_first_lock = False
+
+    definitions_path = Path(omni._contrast_id_definitions_path())
+    definitions_path.parent.mkdir(parents=True, exist_ok=True)
+    definitions_path.write_text("1|10\n", encoding="ascii")
+
+    omni._reset_contrast_build_state()
+
+    assert not definitions_path.exists()

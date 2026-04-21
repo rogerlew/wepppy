@@ -877,6 +877,7 @@ class OmniContrastBuildService:
     ) -> Tuple[List[Optional[str]], Dict[int, str], Set[str]]:
         contrast_names: List[Optional[str]] = []
         contrast_labels: Dict[int, str] = {}
+        merged_topaz_by_contrast: Dict[int, Set[str]] = {}
         missing_topaz: Set[str] = set()
         valid_topaz = set(top2wepp.keys())
 
@@ -925,10 +926,18 @@ class OmniContrastBuildService:
                         report_fp.write(json.dumps(report_entry) + "\n")
                         continue
 
+                    merged_topaz = set(selected_topaz)
+                    prior_topaz = merged_topaz_by_contrast.get(contrast_id)
+                    if prior_topaz:
+                        merged_topaz.update(prior_topaz)
+                    merged_topaz_by_contrast[contrast_id] = merged_topaz
+                    report_entry["topaz_ids"] = self._sorted_values(merged_topaz)
+                    report_entry["n_hillslopes"] = len(merged_topaz)
+
                     contrast_name, contrast = mode_build_services.build_contrast_mapping(
                         omni,
                         top2wepp=top2wepp,
-                        selected_topaz_ids=selected_topaz,
+                        selected_topaz_ids=merged_topaz,
                         control_scenario=control_scenario,
                         contrast_scenario=contrast_scenario,
                         contrast_id=contrast_id,
@@ -1249,6 +1258,7 @@ class OmniContrastBuildService:
     ) -> Tuple[List[Optional[str]], Dict[int, str]]:
         contrast_names: List[Optional[str]] = []
         contrast_labels: Dict[int, str] = {}
+        merged_topaz_by_contrast: Dict[int, Set[str]] = {}
 
         with open(report_fn, "w", encoding="ascii") as report_fp:
             for pair_index, pair in enumerate(contrast_pairs, start=1):
@@ -1294,10 +1304,18 @@ class OmniContrastBuildService:
                         report_fp.write(json.dumps(report_entry) + "\n")
                         continue
 
+                    merged_topaz = set(selected_topaz)
+                    prior_topaz = merged_topaz_by_contrast.get(contrast_id)
+                    if prior_topaz:
+                        merged_topaz.update(prior_topaz)
+                    merged_topaz_by_contrast[contrast_id] = merged_topaz
+                    report_entry["topaz_ids"] = self._sorted_values(merged_topaz)
+                    report_entry["n_hillslopes"] = len(merged_topaz)
+
                     contrast_name, contrast = mode_build_services.build_contrast_mapping(
                         omni,
                         top2wepp=top2wepp,
-                        selected_topaz_ids=selected_topaz,
+                        selected_topaz_ids=merged_topaz,
                         control_scenario=control_scenario,
                         contrast_scenario=contrast_scenario,
                         contrast_id=contrast_id,

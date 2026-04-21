@@ -745,6 +745,261 @@ def test_contrast_sidecar_roundtrip(tmp_path, omni_module):
     }
 
 
+def test_write_contrast_id_definitions_psv_cumulative(tmp_path, monkeypatch, omni_module):
+    omni = omni_module.Omni.__new__(omni_module.Omni)
+    omni.wd = str(tmp_path)
+    omni.logger = logging.getLogger("tests.omni.contrast_ids_psv.cumulative")
+    omni._contrast_selection_mode = "cumulative"
+    omni._contrast_names = [
+        "uniform_high,101__to__undisturbed",
+        "uniform_high,102__to__undisturbed",
+    ]
+    omni._contrast_dependency_tree = {}
+    omni.locked = _noop_lock
+
+    monkeypatch.setattr(
+        omni_module.Omni,
+        "base_scenario",
+        property(lambda self: omni_module.OmniScenario.Undisturbed),
+        raising=False,
+    )
+
+    control_output = tmp_path / "_pups" / "omni" / "scenarios" / "uniform_high" / "wepp" / "output"
+    contrast_output = tmp_path / "wepp" / "output"
+
+    omni._write_contrast_sidecar(
+        1,
+        {
+            "101": str(contrast_output / "H1"),
+            "102": str(control_output / "H2"),
+        },
+    )
+    omni._write_contrast_sidecar(
+        2,
+        {
+            "101": str(control_output / "H1"),
+            "102": str(contrast_output / "H2"),
+        },
+    )
+
+    psv_path = Path(omni._write_contrast_id_definitions_psv())
+    assert psv_path.exists()
+    assert psv_path.read_text(encoding="ascii").splitlines() == [
+        "1|101",
+        "2|102",
+    ]
+
+
+def test_write_contrast_id_definitions_psv_user_defined_hillslope_groups(tmp_path, monkeypatch, omni_module):
+    omni = omni_module.Omni.__new__(omni_module.Omni)
+    omni.wd = str(tmp_path)
+    omni.logger = logging.getLogger("tests.omni.contrast_ids_psv.groups")
+    omni._contrast_selection_mode = "user_defined_hillslope_groups"
+    omni._contrast_names = [None, "uniform_low,2__to__mulch"]
+    omni._contrast_dependency_tree = {}
+    omni.locked = _noop_lock
+
+    monkeypatch.setattr(
+        omni_module.Omni,
+        "base_scenario",
+        property(lambda self: omni_module.OmniScenario.Undisturbed),
+        raising=False,
+    )
+
+    control_output = tmp_path / "_pups" / "omni" / "scenarios" / "uniform_low" / "wepp" / "output"
+    contrast_output = tmp_path / "_pups" / "omni" / "scenarios" / "mulch" / "wepp" / "output"
+
+    omni._write_contrast_sidecar(
+        2,
+        {
+            "10": str(contrast_output / "H1"),
+            "11": str(contrast_output / "H2"),
+            "12": str(control_output / "H3"),
+        },
+    )
+
+    psv_path = Path(omni._write_contrast_id_definitions_psv())
+    assert psv_path.exists()
+    assert psv_path.read_text(encoding="ascii").splitlines() == ["2|10,11"]
+
+
+def test_write_contrast_id_definitions_psv_user_defined_areas_merges_report_rows(
+    tmp_path,
+    monkeypatch,
+    omni_module,
+):
+    omni = omni_module.Omni.__new__(omni_module.Omni)
+    omni.wd = str(tmp_path)
+    omni.logger = logging.getLogger("tests.omni.contrast_ids_psv.user_defined_areas")
+    omni._contrast_selection_mode = "user_defined_areas"
+    omni._contrast_names = ["uniform_low,1__to__mulch"]
+    omni._contrast_dependency_tree = {}
+    omni.locked = _noop_lock
+
+    monkeypatch.setattr(
+        omni_module.Omni,
+        "base_scenario",
+        property(lambda self: omni_module.OmniScenario.Undisturbed),
+        raising=False,
+    )
+
+    contrast_output = tmp_path / "_pups" / "omni" / "scenarios" / "mulch" / "wepp" / "output"
+    omni._write_contrast_sidecar(
+        1,
+        {
+            "10": str(contrast_output / "H1"),
+            "11": str(contrast_output / "H2"),
+            "12": str(contrast_output / "H3"),
+        },
+    )
+
+    report_path = Path(omni._contrast_build_report_path())
+    report_path.parent.mkdir(parents=True, exist_ok=True)
+    report_path.write_text(
+        "\n".join(
+            [
+                json.dumps(
+                    {
+                        "contrast_id": 1,
+                        "selection_mode": "user_defined_areas",
+                        "topaz_ids": ["12", "10"],
+                    }
+                ),
+                json.dumps(
+                    {
+                        "contrast_id": 1,
+                        "selection_mode": "user_defined_areas",
+                        "topaz_ids": ["11"],
+                    }
+                ),
+            ]
+        )
+        + "\n",
+        encoding="ascii",
+    )
+
+    assert Path(omni._write_contrast_id_definitions_psv()).read_text(encoding="ascii").splitlines() == [
+        "1|10,11,12",
+    ]
+
+
+def test_write_contrast_id_definitions_psv_stream_order(tmp_path, monkeypatch, omni_module):
+    omni = omni_module.Omni.__new__(omni_module.Omni)
+    omni.wd = str(tmp_path)
+    omni.logger = logging.getLogger("tests.omni.contrast_ids_psv.stream_order")
+    omni._contrast_selection_mode = "stream_order"
+    omni._contrast_names = [None, "uniform_low,2__to__mulch"]
+    omni._contrast_dependency_tree = {}
+    omni.locked = _noop_lock
+
+    monkeypatch.setattr(
+        omni_module.Omni,
+        "base_scenario",
+        property(lambda self: omni_module.OmniScenario.Undisturbed),
+        raising=False,
+    )
+
+    control_output = tmp_path / "_pups" / "omni" / "scenarios" / "uniform_low" / "wepp" / "output"
+    contrast_output = tmp_path / "_pups" / "omni" / "scenarios" / "mulch" / "wepp" / "output"
+
+    omni._write_contrast_sidecar(
+        2,
+        {
+            "20": str(contrast_output / "H1"),
+            "21": str(control_output / "H2"),
+            "22": str(contrast_output / "H3"),
+        },
+    )
+
+    psv_path = Path(omni._write_contrast_id_definitions_psv())
+    assert psv_path.exists()
+    assert psv_path.read_text(encoding="ascii").splitlines() == ["2|20,22"]
+
+
+def test_load_contrast_id_definitions_psv_allows_empty_topaz_values(tmp_path, omni_module):
+    omni = omni_module.Omni.__new__(omni_module.Omni)
+    omni.wd = str(tmp_path)
+    omni.logger = logging.getLogger("tests.omni.contrast_ids_psv.load_empty")
+
+    path = Path(omni._contrast_id_definitions_path())
+    path.parent.mkdir(parents=True, exist_ok=True)
+    path.write_text("1|\n2|10,20\n", encoding="ascii")
+
+    assert omni._load_contrast_id_definitions_psv() == {1: [], 2: [10, 20]}
+
+
+@pytest.mark.parametrize(
+    ("payload", "error_fragment"),
+    [
+        ("1,10\n", "missing '|'"),
+        ("0|10\n", "contrast_id must be a positive integer"),
+        ("1|10,\n", "topaz_id must be a positive integer"),
+        ("1|abc\n", "topaz_id must be a positive integer"),
+        ("1|10\n1|11\n", "duplicate contrast_id"),
+        ("1|10,10\n", "duplicate topaz_id"),
+    ],
+)
+def test_load_contrast_id_definitions_psv_rejects_invalid_rows(
+    tmp_path,
+    omni_module,
+    payload,
+    error_fragment,
+):
+    omni = omni_module.Omni.__new__(omni_module.Omni)
+    omni.wd = str(tmp_path)
+    omni.logger = logging.getLogger("tests.omni.contrast_ids_psv.load_invalid")
+
+    path = Path(omni._contrast_id_definitions_path())
+    path.parent.mkdir(parents=True, exist_ok=True)
+    path.write_text(payload, encoding="ascii")
+
+    with pytest.raises(ValueError, match=error_fragment):
+        omni._load_contrast_id_definitions_psv()
+
+
+def test_write_contrast_id_definitions_psv_cumulative_falls_back_to_report_topaz_id(
+    tmp_path,
+    monkeypatch,
+    omni_module,
+):
+    omni = omni_module.Omni.__new__(omni_module.Omni)
+    omni.wd = str(tmp_path)
+    omni.logger = logging.getLogger("tests.omni.contrast_ids_psv.fallback")
+    omni._contrast_selection_mode = "cumulative"
+    omni._contrast_names = ["uniform_low,301__to__uniform_low"]
+    omni._contrast_dependency_tree = {}
+    omni.locked = _noop_lock
+
+    monkeypatch.setattr(
+        omni_module.Omni,
+        "base_scenario",
+        property(lambda self: omni_module.OmniScenario.Undisturbed),
+        raising=False,
+    )
+
+    uniform_low_output = (
+        tmp_path / "_pups" / "omni" / "scenarios" / "uniform_low" / "wepp" / "output"
+    )
+    omni._write_contrast_sidecar(
+        1,
+        {
+            "301": str(uniform_low_output / "H1"),
+            "302": str(uniform_low_output / "H2"),
+        },
+    )
+
+    report_path = Path(omni._contrast_build_report_path())
+    report_path.parent.mkdir(parents=True, exist_ok=True)
+    report_path.write_text(
+        json.dumps({"contrast_id": 1, "topaz_id": 301, "selection_mode": "cumulative"}) + "\n",
+        encoding="ascii",
+    )
+
+    assert Path(omni._write_contrast_id_definitions_psv()).read_text(encoding="ascii").splitlines() == [
+        "1|301",
+    ]
+
+
 def test_clear_contrasts_removes_runs_and_sidecars(tmp_path, omni_module):
     omni = omni_module.Omni.__new__(omni_module.Omni)
     omni.wd = str(tmp_path)
@@ -766,6 +1021,8 @@ def test_clear_contrasts_removes_runs_and_sidecars(tmp_path, omni_module):
     contrasts_report = tmp_path / "omni" / "contrasts.out.parquet"
     contrasts_report.parent.mkdir(parents=True, exist_ok=True)
     contrasts_report.write_text("placeholder", encoding="ascii")
+    contrast_definitions = tmp_path / "omni" / "contrast_id_definitions.psv"
+    contrast_definitions.write_text("1|10\n", encoding="ascii")
 
     omni.clear_contrasts()
 
@@ -775,6 +1032,7 @@ def test_clear_contrasts_removes_runs_and_sidecars(tmp_path, omni_module):
     assert not sidecar_dir.exists()
     assert not report_path.exists()
     assert not contrasts_report.exists()
+    assert not contrast_definitions.exists()
     assert (contrasts_dir / "_uploads").exists()
     assert not (contrasts_dir / "1").exists()
     assert not (contrasts_dir / "2").exists()
@@ -872,6 +1130,62 @@ def test_user_defined_areas_contrast_builds_sidecars_with_overlap(tmp_path, omni
     assert contrast2["10"].endswith("/_pups/omni/scenarios/mulch/wepp/output/H1")
     assert contrast2["20"].endswith("/_pups/omni/scenarios/mulch/wepp/output/H2")
     assert not Path(omni._contrast_sidecar_path(3)).exists()
+
+
+def test_user_defined_areas_duplicate_labels_merge_selected_topaz_ids(
+    tmp_path,
+    omni_module,
+    monkeypatch,
+):
+    hillslope_rows = [
+        {"TopazID": "10", "geometry": Rect(0.0, 0.0, 10.0, 10.0)},
+        {"TopazID": "20", "geometry": Rect(10.0, 0.0, 20.0, 10.0)},
+    ]
+    user_rows = [
+        {"name": "Alpha", "geometry": Rect(0.0, 0.0, 10.0, 10.0)},
+        {"name": "Alpha", "geometry": Rect(10.0, 0.0, 20.0, 10.0)},
+    ]
+    user_geojson_path = _stub_user_defined_geodata(
+        monkeypatch,
+        omni_module,
+        tmp_path,
+        hillslope_rows=hillslope_rows,
+        user_rows=user_rows,
+    )
+
+    omni = omni_module.Omni.__new__(omni_module.Omni)
+    omni.wd = str(tmp_path)
+    omni.locked = _noop_lock
+    omni.logger = logging.getLogger("tests.omni.user_defined_merge")
+    omni._contrast_selection_mode = "user_defined_areas"
+    omni._contrast_geojson_path = str(user_geojson_path)
+    omni._contrast_geojson_name_key = "name"
+    omni._contrast_pairs = [
+        {"control_scenario": "uniform_low", "contrast_scenario": "mulch"}
+    ]
+    omni._contrast_object_param = "Runoff_mm"
+    omni._contrast_cumulative_obj_param_threshold_fraction = 0.8
+    omni._contrast_hillslope_limit = None
+    omni._contrast_hill_min_slope = None
+    omni._contrast_hill_max_slope = None
+    omni._contrast_select_burn_severities = None
+    omni._contrast_select_topaz_ids = None
+    omni._control_scenario = "uniform_low"
+    omni._contrast_scenario = "mulch"
+
+    omni._build_contrasts()
+
+    assert omni.contrast_names == ["uniform_low,1__to__mulch"]
+    assert omni._contrast_labels == {1: "Alpha"}
+
+    sidecar = omni._load_contrast_sidecar(1)
+    mulch_root = "/_pups/omni/scenarios/mulch/wepp/output/"
+    assert sidecar["10"].endswith(f"{mulch_root}H1")
+    assert sidecar["20"].endswith(f"{mulch_root}H2")
+
+    report_rows = omni._load_contrast_build_report()
+    assert [row["contrast_id"] for row in report_rows] == [1, 1]
+    assert report_rows[-1]["topaz_ids"] == ["10", "20"]
 
 
 def test_user_defined_contrast_pairs_expand_and_skip_duplicates(tmp_path, omni_module, monkeypatch):
