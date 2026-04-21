@@ -28,6 +28,11 @@ def _write_hillslope_inputs(tmp_path, wepp_id):
         (tmp_path / f"p{wepp_id}.{suffix}").write_text("stub\n", encoding="ascii")
 
 
+@pytest.fixture(autouse=True)
+def _disable_binary_provenance_runtime_guard(monkeypatch):
+    monkeypatch.setattr(wepp_runner_module, "_assert_binary_runtime_provenance", lambda *_args, **_kwargs: None)
+
+
 def test_run_hillslope_retries_timeout_and_logs_flake(monkeypatch, tmp_path):
     wepp_id = 101
     _write_hillslope_inputs(tmp_path, wepp_id)

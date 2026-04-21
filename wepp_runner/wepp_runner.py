@@ -48,6 +48,7 @@ from os.path import exists as _exists
 from os.path import split as _split
 import random
 import math
+import re
 
 from glob import glob
 
@@ -101,10 +102,178 @@ linux_wepp_bin_opts = _compute_linux_wepp_bin_opts()
 _HILLSLOPE_INPUT_WAIT_S_DEFAULT = 30.0
 _HILLSLOPE_INPUT_WAIT_POLL_S_DEFAULT = 0.25
 
+_EXPECTED_ELF_INTERPRETER = "/lib64/ld-linux-x86-64.so.2"
+_ALLOWED_LIBRARY_PREFIXES = ("/lib/", "/lib64/", "/usr/lib/", "/usr/lib64/")
+_BANNED_RUNTIME_PATHS_PATTERN = re.compile(
+    r"(/home/linuxbrew/\.linuxbrew/lib/ld\.so|/opt/homebrew/|/home/\S*/miniconda\S*/|/home/\S*/miniforge\S*/)"
+)
+_SKIP_RUNTIME_CHECK_ENV_VAR = "WEPP_RUNNER_SKIP_BINARY_PROVENANCE_CHECK"
+_PROVENANCE_OK_BINARY_PATHS = set()
+
 
 def get_linux_wepp_bin_opts():
     """Return the current linux WEPP binaries available on disk."""
     return _compute_linux_wepp_bin_opts()
+
+
+def _run_text_command(args):
+    return subprocess.run(args, capture_output=True, text=True, check=False)
+
+
+def _binary_provenance_error(binary_path, reason):
+    return RuntimeError(
+        f'WEPP binary runtime provenance check failed for "{binary_path}": {reason}. '
+        f"Rebuild with /usr/bin/gfortran and run tools/check_wepp_binary_provenance.sh on the candidate binary. "
+        f"Break-glass override only: set {_SKIP_RUNTIME_CHECK_ENV_VAR}=1."
+    )
+
+
+def _runtime_path_is_allowed(path):
+    return path.startswith(_ALLOWED_LIBRARY_PREFIXES)
+
+
+def _extract_elf_interpreter(readelf_program_headers):
+    match = re.search(
+        r"Requesting program interpreter:\s*(.*?)\]",
+        readelf_program_headers,
+        flags=re.MULTILINE,
+    )
+    if not match:
+        return ""
+    return match.group(1).strip()
+
+
+def _extract_rpath_entries(readelf_dynamic_tags):
+    entries = []
+    for match in re.finditer(r"\((?:RPATH|RUNPATH)\).*?\[(.*?)\]", readelf_dynamic_tags):
+        blob = match.group(1).strip()
+        if not blob:
+            continue
+        entries.extend(path.strip() for path in blob.split(":") if path.strip())
+    return entries
+
+
+def _extract_resolved_ldd_paths(ldd_output):
+    resolved_paths = []
+    for line in ldd_output.splitlines():
+        match = re.search(r"=>\s+(\S+)\s+\(", line)
+        if match:
+            resolved_paths.append(match.group(1))
+    return resolved_paths
+
+
+def _extract_libgfortran_paths(ldd_output):
+    resolved_paths = []
+    for line in ldd_output.splitlines():
+        if "libgfortran" not in line:
+            continue
+        match = re.search(r"=>\s+(\S+)\s+\(", line)
+        if match:
+            resolved_paths.append(match.group(1))
+    return resolved_paths
+
+
+def _assert_binary_runtime_provenance(binary_path):
+    if _IS_WINDOWS:
+        return
+
+    binary_path = os.path.abspath(binary_path)
+
+    if os.getenv(_SKIP_RUNTIME_CHECK_ENV_VAR, "").strip().lower() in {"1", "true", "yes", "on"}:
+        return
+
+    if binary_path in _PROVENANCE_OK_BINARY_PATHS:
+        return
+
+    if not _exists(binary_path):
+        raise FileNotFoundError(f"WEPP binary does not exist: {binary_path}")
+    if not os.access(binary_path, os.X_OK):
+        raise PermissionError(f"WEPP binary is not executable: {binary_path}")
+
+    try:
+        readelf_program_headers = _run_text_command(["readelf", "-l", binary_path])
+    except FileNotFoundError as exc:
+        raise _binary_provenance_error(binary_path, "required tool readelf is not available") from exc
+    if readelf_program_headers.returncode != 0:
+        stderr = (readelf_program_headers.stderr or "").strip() or "<no stderr>"
+        raise _binary_provenance_error(binary_path, f"readelf -l failed ({stderr})")
+
+    interpreter = _extract_elf_interpreter(readelf_program_headers.stdout or "")
+    missing_interpreter = not interpreter
+    if interpreter:
+        if interpreter != _EXPECTED_ELF_INTERPRETER:
+            raise _binary_provenance_error(
+                binary_path,
+                f"unexpected ELF interpreter {interpreter}; expected {_EXPECTED_ELF_INTERPRETER}",
+            )
+        if _BANNED_RUNTIME_PATHS_PATTERN.search(interpreter):
+            raise _binary_provenance_error(binary_path, f"interpreter path is blocked by policy ({interpreter})")
+
+    try:
+        readelf_dynamic = _run_text_command(["readelf", "-d", binary_path])
+    except FileNotFoundError as exc:
+        raise _binary_provenance_error(binary_path, "required tool readelf is not available") from exc
+    if readelf_dynamic.returncode == 0:
+        for runtime_path in _extract_rpath_entries(readelf_dynamic.stdout or ""):
+            if _BANNED_RUNTIME_PATHS_PATTERN.search(runtime_path):
+                raise _binary_provenance_error(
+                    binary_path,
+                    f"RPATH/RUNPATH includes blocked path ({runtime_path})",
+                )
+            if not _runtime_path_is_allowed(runtime_path):
+                raise _binary_provenance_error(
+                    binary_path,
+                    f"RPATH/RUNPATH includes non-system path ({runtime_path})",
+                )
+
+    try:
+        ldd_result = _run_text_command(["ldd", binary_path])
+    except FileNotFoundError as exc:
+        raise _binary_provenance_error(binary_path, "required tool ldd is not available") from exc
+    ldd_output = "\n".join(
+        part.strip() for part in ((ldd_result.stdout or ""), (ldd_result.stderr or "")) if part.strip()
+    )
+    is_static_binary = "not a dynamic executable" in ldd_output
+    if ldd_result.returncode != 0 and not is_static_binary:
+        raise _binary_provenance_error(binary_path, f"ldd failed ({ldd_output or '<no output>'})")
+    if missing_interpreter and not is_static_binary:
+        raise _binary_provenance_error(binary_path, "missing ELF interpreter entry")
+
+    if not is_static_binary and _BANNED_RUNTIME_PATHS_PATTERN.search(ldd_output):
+        raise _binary_provenance_error(binary_path, "ldd output includes blocked Homebrew/Conda runtime paths")
+
+    resolved_paths = _extract_resolved_ldd_paths(ldd_output)
+    for resolved in resolved_paths:
+        if not is_static_binary and not _runtime_path_is_allowed(resolved):
+            raise _binary_provenance_error(
+                binary_path,
+                f"ldd resolved non-system dependency path ({resolved})",
+            )
+
+    if not is_static_binary:
+        libgfortran_paths = _extract_libgfortran_paths(ldd_output)
+        if not libgfortran_paths:
+            raise _binary_provenance_error(binary_path, "ldd did not resolve libgfortran")
+        for libgfortran_path in libgfortran_paths:
+            if not _runtime_path_is_allowed(libgfortran_path):
+                raise _binary_provenance_error(
+                    binary_path,
+                    f"libgfortran resolved outside system paths ({libgfortran_path})",
+                )
+
+    _PROVENANCE_OK_BINARY_PATHS.add(binary_path)
+
+
+def _resolve_wepp_cmd(wepp_bin, *, prefer_hill):
+    if wepp_bin is not None:
+        hill_candidate = os.path.abspath(_join(wepp_bin_dir, f"{wepp_bin}_hill"))
+        plain_candidate = os.path.abspath(_join(wepp_bin_dir, wepp_bin))
+        selected_binary = hill_candidate if prefer_hill and _exists(hill_candidate) else plain_candidate
+    else:
+        selected_binary = os.path.abspath(_wepp)
+
+    _assert_binary_runtime_provenance(selected_binary)
+    return [selected_binary]
 
 
 def _env_float_or_default(name, default, *, min_value=None):
@@ -338,13 +507,7 @@ def run_ss_batch_hillslope(wepp_id, runs_dir, wepp_bin=None, ss_batch_id=None, s
     assert ss_batch_id is not None
     t0 = time()
 
-    if wepp_bin is not None:
-        if _exists(os.path.abspath(_join(wepp_bin_dir, f'{wepp_bin}_hill'))):
-            cmd = [os.path.abspath(_join(wepp_bin_dir, f'{wepp_bin}_hill'))]
-        else:
-            cmd = [os.path.abspath(_join(wepp_bin_dir, wepp_bin))]
-    else:
-        cmd = [os.path.abspath(_wepp)]
+    cmd = _resolve_wepp_cmd(wepp_bin, prefer_hill=True)
 
     assert _exists(_join(runs_dir, man_relpath, f'p{wepp_id}.man'))
     assert _exists(_join(runs_dir, slp_relpath, f'p{wepp_id}.slp'))
@@ -407,13 +570,7 @@ def run_hillslope(wepp_id, runs_dir, wepp_bin=None, status_channel=None,
 
     t0 = time()
 
-    if wepp_bin is not None:
-        if _exists(os.path.abspath(_join(wepp_bin_dir, f'{wepp_bin}_hill'))):
-            cmd = [os.path.abspath(_join(wepp_bin_dir, f'{wepp_bin}_hill'))]
-        else:
-            cmd = [os.path.abspath(_join(wepp_bin_dir, wepp_bin))]
-    else:
-        cmd = [os.path.abspath(_wepp)]
+    cmd = _resolve_wepp_cmd(wepp_bin, prefer_hill=True)
 
     if not no_file_checks:
         input_wait_s = _env_float_or_default(
@@ -606,13 +763,7 @@ def run_hillslope(wepp_id, runs_dir, wepp_bin=None, status_channel=None,
 def run_flowpath(fp_id, wepp_id, runs_dir, fp_runs_dir, wepp_bin=None, status_channel=None):
     t0 = time()
 
-    if wepp_bin is not None:
-        if _exists(os.path.abspath(_join(wepp_bin_dir, f'{wepp_bin}_hill'))):
-            cmd = [os.path.abspath(_join(wepp_bin_dir, f'{wepp_bin}_hill'))]
-        else:
-            cmd = [os.path.abspath(_join(wepp_bin_dir, wepp_bin))]
-    else:
-        cmd = [os.path.abspath(_wepp)]
+    cmd = _resolve_wepp_cmd(wepp_bin, prefer_hill=True)
 
     assert _exists(_join(runs_dir, f'p{wepp_id}.man'))
     assert _exists(_join(fp_runs_dir, f'{fp_id}.slp'))
@@ -780,10 +931,7 @@ def make_ss_batch_watershed_run(wepp_ids, runs_dir, ss_batch_key, ss_batch_id):
 def run_watershed(runs_dir, wepp_bin=None, status_channel=None):
     t0 = time()
 
-    if wepp_bin is not None:
-        cmd = [os.path.abspath(os.path.join(wepp_bin_dir, wepp_bin))]
-    else:
-        cmd = [os.path.abspath(_wepp)]
+    cmd = _resolve_wepp_cmd(wepp_bin, prefer_hill=False)
 
     _run = open(os.path.join(runs_dir, 'pw0.run'))
     _stderr_fn = os.path.join(runs_dir, 'pw0.err')
@@ -828,10 +976,7 @@ def run_ss_batch_watershed(runs_dir, wepp_bin=None, ss_batch_id=None, status_cha
 
     t0 = time()
 
-    if wepp_bin is not None:
-        cmd = [os.path.abspath(_join(wepp_bin_dir, wepp_bin))]
-    else:
-        cmd = [os.path.abspath(_wepp)]
+    cmd = _resolve_wepp_cmd(wepp_bin, prefer_hill=False)
 
     assert _exists(_join(runs_dir, 'pw0.str'))
     assert _exists(_join(runs_dir, 'pw0.chn'))
