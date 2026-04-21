@@ -64,7 +64,7 @@ services:
     command:
       - gunicorn
       - --workers
-      - "8"
+      - "10"
       - --threads
       - "4"
       - --timeout
