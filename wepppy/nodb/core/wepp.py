@@ -673,6 +673,115 @@ def prep_soil(
     return topaz_id, time.time() - t0
 
 
+def _coerce_sim_years(sim_years: Any) -> int:
+    if isint(sim_years):
+        years = int(sim_years)
+    elif isinstance(sim_years, (str, bytes, bytearray)):
+        raise TypeError(f'Expected numeric or iterable sim_years, got {type(sim_years).__name__}')
+    else:
+        try:
+            years = len(tuple(sim_years))
+        except TypeError as exc:
+            raise TypeError(
+                f'Expected numeric or iterable sim_years, got {type(sim_years).__name__}'
+            ) from exc
+
+    if years < 1:
+        raise ValueError(f'Expected sim_years >= 1, got {years}')
+
+    return years
+
+
+def prep_multi_ofe_hillslope(
+    args: Tuple[
+        str,
+        int,
+        str,
+        str,
+        int,
+        Optional[float],
+        float,
+        bool,
+        float,
+        bool,
+        float,
+    ]
+) -> Tuple[str, float]:
+    t0 = time.time()
+    (
+        topaz_id,
+        wepp_id,
+        wd,
+        runs_dir,
+        sim_years,
+        kslast,
+        initial_sat,
+        clip_soils,
+        clip_soils_depth,
+        clip_soils_minimum,
+        clip_soils_minimum_depth,
+    ) = args
+
+    copy_input_file(
+        wd,
+        f'watershed/slope_files/hillslopes/hill_{topaz_id}.mofe.slp',
+        _join(runs_dir, f'p{wepp_id}.slp'),
+    )
+
+    soil_dst_fn = _join(runs_dir, f'p{wepp_id}.sol')
+    with with_input_file_path(
+        wd,
+        f'soils/hill_{topaz_id}.mofe.sol',
+        purpose='wepp-prep-multi-ofe-soils',
+        tolerate_mixed=True,
+        mixed_prefer='archive',
+        allow_materialize_fallback=True,
+    ) as soil_src_fn:
+        soilu = WeppSoilUtil(soil_src_fn)
+        if _soil_has_symbolic_wepp_parameters(soilu):
+            soilu = WeppSoilUtil(
+                soil_src_fn,
+                compute_erodibilities=True,
+                compute_conductivity=True,
+            ).to7778()
+        soilu.modify_initial_sat(initial_sat)
+
+        if kslast is not None:
+            soilu.modify_kslast(kslast)
+
+        if clip_soils_minimum:
+            soilu.ensure_minimum_soil_depth(clip_soils_minimum_depth)
+
+        if clip_soils:
+            soilu.clip_soil_depth(clip_soils_depth)
+
+        soilu.write(soil_dst_fn)
+
+    man_fn = f'hill_{topaz_id}.mofe.man'
+    with with_input_file_path(
+        wd,
+        f'landuse/{man_fn}',
+        purpose='wepp-prep-multi-ofe-management',
+        tolerate_mixed=True,
+        mixed_prefer='archive',
+        allow_materialize_fallback=True,
+    ) as man_src:
+        man = Management(
+            Key=f'hill_{topaz_id}',
+            ManagementFile=Path(man_src).name,
+            ManagementDir=str(Path(man_src).parent),
+            Description=f'hill_{topaz_id} Multiple OFE',
+            Color=(0, 0, 0, 255),
+        )
+        man = man.build_multiple_year_man(sim_years)
+
+        man_dst_fn = _join(runs_dir, f'p{wepp_id}.man')
+        with open(man_dst_fn, 'w') as pf:
+            pf.write(str(man))
+
+    return topaz_id, time.time() - t0
+
+
 def _soil_has_symbolic_wepp_parameters(soilu: WeppSoilUtil) -> bool:
     for ofe in soilu.obj.get('ofes', []):
         if not isfloat(ofe.get('ki')) or not isfloat(ofe.get('kr')) or not isfloat(ofe.get('shcrit')):
@@ -1961,13 +2070,10 @@ class Wepp(NoDbBase):
                 else:
                     shutil.copyfile(projected_src_fn, dst_fn)
 
-    def _prep_multi_ofe(self, translator):
-        from wepppy.topo.watershed_abstraction import HillSummary as WatHillSummary
-
+    def _prep_multi_ofe(self, translator, max_workers: Optional[int] = None):
         self.logger.info('    Prepping _prep_multi_ofe... ')
         wd = self.wd
 
-        landuse = self.landuse_instance
         climate = self.climate_instance
         watershed = self.watershed_instance
         soils = self.soils_instance
@@ -1978,9 +2084,7 @@ class Wepp(NoDbBase):
         clip_soils_minimum_depth = soils.clip_soils_minimum_depth
         initial_sat = soils.initial_sat
 
-        disturbed = Disturbed.tryGetInstance(wd)
-
-        years = climate.input_years
+        sim_years = _coerce_sim_years(climate.input_years)
 
         runs_dir = self.runs_dir
 
@@ -1991,17 +2095,25 @@ class Wepp(NoDbBase):
         if kslast_map_fn is not None:
             kslast_map = RasterDatasetInterpolator(kslast_map_fn)
 
-        for topaz_id, ss in watershed.subs_summary.items():
+        cpu_count = os.cpu_count() or 1
+        ncpu_override = os.getenv('WEPPPY_NCPU')
+        if max_workers is None:
+            max_workers = NCPU if ncpu_override else cpu_count
+
+        if max_workers < 1:
+            max_workers = 1
+        if ncpu_override:
+            if max_workers > NCPU:
+                max_workers = NCPU
+        elif max_workers > max(cpu_count, 20):
+            max_workers = max(cpu_count, 20)
+
+        self.logger.info(f'  Using max_workers={max_workers} for multi OFE prep')
+
+        task_args_list = []
+        for topaz_id in watershed.subs_summary:
             wepp_id = translator.wepp(top=int(topaz_id))
             lng, lat = watershed.hillslope_centroid_lnglat(topaz_id)
-
-            # slope files
-            src_rel = f'watershed/slope_files/hillslopes/hill_{topaz_id}.mofe.slp'
-            dst_fn = _join(runs_dir, 'p%i.slp' % wepp_id)
-            copy_input_file(self.wd, src_rel, dst_fn)
-
-            # soils
-            dst_fn = _join(runs_dir, 'p%i.sol' % wepp_id)
 
             _kslast = None
 
@@ -2024,54 +2136,122 @@ class Wepp(NoDbBase):
             elif kslast is not None:
                 _kslast = kslast
 
-            with with_input_file_path(
-                self.wd,
-                f'soils/hill_{topaz_id}.mofe.sol',
-                purpose='wepp-prep-multi-ofe-soils',
-                tolerate_mixed=True,
-                mixed_prefer='archive',
-                allow_materialize_fallback=True,
-            ) as src_fn:
-                soilu = WeppSoilUtil(src_fn)
-                if _soil_has_symbolic_wepp_parameters(soilu):
-                    soilu = WeppSoilUtil(
-                        src_fn,
-                        compute_erodibilities=True,
-                        compute_conductivity=True,
-                    ).to7778()
-                soilu.modify_initial_sat(initial_sat)
+            task_args_list.append(
+                (
+                    str(topaz_id),
+                    wepp_id,
+                    wd,
+                    runs_dir,
+                    sim_years,
+                    _kslast,
+                    initial_sat,
+                    clip_soils,
+                    clip_soils_depth,
+                    clip_soils_minimum,
+                    clip_soils_minimum_depth,
+                )
+            )
 
-                if _kslast is not None:
-                    soilu.modify_kslast(_kslast)
+        if not task_args_list:
+            self.logger.info('  No multi OFE hillslopes require preparation.')
+            return
 
-                if clip_soils_minimum:
-                    soilu.ensure_minimum_soil_depth(clip_soils_minimum_depth)
+        def _run_multi_ofe_pool(prefer_spawn: bool):
+            try:
+                with createProcessPoolExecutor(
+                    max_workers=max_workers,
+                    logger=self.logger,
+                    prefer_spawn=prefer_spawn,
+                ) as executor:
+                    futures = [executor.submit(prep_multi_ofe_hillslope, args) for args in task_args_list]
 
-                if clip_soils:
-                    soilu.clip_soil_depth(clip_soils_depth)
+                    futures_n = len(futures)
+                    count = 0
+                    pending_futures = set(futures)
+                    last_progress_time = time.time()
 
-                soilu.write(dst_fn)
+                    while pending_futures:
+                        done, pending_futures = wait(
+                            pending_futures, timeout=5, return_when=FIRST_COMPLETED
+                        )
 
-            # managements
-            man_fn = f'hill_{topaz_id}.mofe.man'
-            with with_input_file_path(
-                self.wd,
-                f'landuse/{man_fn}',
-                purpose='wepp-prep-multi-ofe-management',
-                tolerate_mixed=True,
-                mixed_prefer='archive',
-                allow_materialize_fallback=True,
-            ) as man_src:
-                man = Management(Key=f'hill_{topaz_id}',
-                                 ManagementFile=Path(man_src).name,
-                                 ManagementDir=str(Path(man_src).parent),
-                                 Description=f"hill_{topaz_id} Multiple OFE",
-                                 Color=(0, 0, 0, 255))
+                        if not done:
+                            since_progress = time.time() - last_progress_time
+                            pending_count = len(pending_futures)
 
-                man = man.build_multiple_year_man(years)
-                dst_fn = _join(runs_dir, 'p%i.man' % wepp_id)
-                with open(dst_fn, 'w') as pf:
-                    pf.write(str(man))
+                            if since_progress >= 60:
+                                self.logger.error(
+                                    '  Multi OFE prep tasks still pending after %.1fs; %s tasks waiting.',
+                                    round(since_progress, 1),
+                                    pending_count,
+                                )
+                            else:
+                                self.logger.info(
+                                    '  Waiting on multi OFE prep tasks (pending=%s, %.1fs since last completion).',
+                                    pending_count,
+                                    round(since_progress, 1),
+                                )
+                            continue
+
+                        for future in done:
+                            try:
+                                topaz_id, elapsed_time = future.result()
+                                count += 1
+                                self.logger.info(
+                                    f'  ({count}/{futures_n}) Completed multi OFE prep for {topaz_id} in {elapsed_time}s'
+                                )
+                                last_progress_time = time.time()
+                            except BrokenProcessPool as exc:
+                                self.logger.error(
+                                    '  Multi OFE process pool terminated unexpectedly: %s', exc
+                                )
+                                for pending_future in pending_futures:
+                                    pending_future.cancel()
+                                return False, exc
+                            except Exception as exc:
+                                self.logger.error(f'  A multi OFE prep task failed with an error: {exc}')
+                                for pending_future in pending_futures:
+                                    pending_future.cancel()
+                                return False, exc
+
+                    return True, None
+            except BrokenProcessPool as exc:
+                self.logger.error('  Failed to initialize multi OFE process pool: %s', exc)
+                return False, exc
+            except Exception as exc:
+                self.logger.error('  Unexpected error during multi OFE pool execution: %s', exc)
+                return False, exc
+
+        def _run_multi_ofe_sequential():
+            total = len(task_args_list)
+            self.logger.warning('  Running multi OFE prep sequentially')
+            for idx, task_args in enumerate(task_args_list, start=1):
+                topaz_id, elapsed_time = prep_multi_ofe_hillslope(task_args)
+                self.logger.info(
+                    f'  ({idx}/{total}) Completed multi OFE prep for {topaz_id} in {elapsed_time}s [sequential]'
+                )
+
+        run_concurrent = max_workers > 1 and len(task_args_list) > 1
+        if run_concurrent:
+            self.logger.info('  Submitting multi OFE prep tasks to ProcessPoolExecutor')
+            success, failure_exc = _run_multi_ofe_pool(prefer_spawn=True)
+
+            if not success and isinstance(failure_exc, BrokenProcessPool):
+                self.logger.warning(
+                    '  Retrying multi OFE prep with fork-based executor after spawn failure'
+                )
+                success, failure_exc = _run_multi_ofe_pool(prefer_spawn=False)
+
+            if not success:
+                if isinstance(failure_exc, BrokenProcessPool):
+                    self.logger.warning(
+                        '  Falling back to sequential multi OFE prep after process pool failures'
+                    )
+                    _run_multi_ofe_sequential()
+                else:
+                    raise failure_exc
+        else:
+            _run_multi_ofe_sequential()
 
 
     def _prep_managements(self, translator):

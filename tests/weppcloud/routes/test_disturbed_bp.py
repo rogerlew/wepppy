@@ -13,6 +13,7 @@ pytest.importorskip("flask")
 from flask import Flask, Response, render_template
 
 import wepppy.weppcloud.routes.nodb_api.disturbed_bp as disturbed_module
+from wepppy.nodb.base import NoDbAlreadyLockedError
 from wepppy.nodb.redis_prep import TaskEnum
 from tests.factories.singleton import LockedMixin, singleton_factory
 
@@ -844,6 +845,51 @@ def test_lookup_endpoints_use_non_mutating_lock(monkeypatch: pytest.MonkeyPatch,
     assert disturbed_instance.lock_calls == 2
     assert disturbed_instance.unlock_calls == 2
     assert disturbed_instance.locked_calls == 0
+
+
+def test_lookup_endpoints_fallback_when_read_lock_busy(monkeypatch: pytest.MonkeyPatch, tmp_path: Path) -> None:
+    app = Flask(__name__)
+    app.config["TESTING"] = True
+    app.register_blueprint(disturbed_module.disturbed_bp)
+
+    run_dir = tmp_path / RUN_ID
+    run_dir.mkdir()
+    lookup_csv = run_dir / "lookup.csv"
+    lookup_csv.write_text("luse,stext,ki\nforest,loam,1\n")
+    context = SimpleNamespace(active_root=run_dir)
+    monkeypatch.setattr(disturbed_module, "load_run_context", lambda runid, config: context)
+
+    class DisturbedInstance:
+        def __init__(self, lookup_fn: str):
+            self.lookup_fn = lookup_fn
+            self.readonly = False
+            self.lock_calls = 0
+            self.unlock_calls = 0
+
+        def lock(self) -> None:
+            self.lock_calls += 1
+            raise NoDbAlreadyLockedError("lock busy")
+
+        def unlock(self, flag=None) -> None:
+            self.unlock_calls += 1
+
+    disturbed_instance = DisturbedInstance(str(lookup_csv))
+
+    class DisturbedStub:
+        @classmethod
+        def getInstance(cls, wd: str):
+            return disturbed_instance
+
+    monkeypatch.setattr(disturbed_module, "Disturbed", DisturbedStub)
+
+    with app.test_client() as client:
+        meta_response = client.get(f"/runs/{RUN_ID}/{CONFIG}/api/disturbed/lookup_meta")
+        assert meta_response.status_code == 200
+        snapshot_response = client.get(f"/runs/{RUN_ID}/{CONFIG}/api/disturbed/lookup_snapshot")
+        assert snapshot_response.status_code == 200
+
+    assert disturbed_instance.lock_calls == 2
+    assert disturbed_instance.unlock_calls == 0
 
 
 def test_task_modify_disturbed_rejects_partial_table_payload(

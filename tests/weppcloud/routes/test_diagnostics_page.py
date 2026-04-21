@@ -15,6 +15,11 @@ pytestmark = pytest.mark.routes
 
 REPO_ROOT = Path(__file__).resolve().parents[3]
 DIAGNOSTICS_TEMPLATE = REPO_ROOT / "wepppy" / "weppcloud" / "templates" / "diagnostics" / "diagnostics.htm"
+DIAGNOSTICS_CORE_JS = REPO_ROOT / "wepppy" / "weppcloud" / "static" / "js" / "diagnostics" / "core.js"
+DIAGNOSTICS_AUTH_CHECKS_JS = REPO_ROOT / "wepppy" / "weppcloud" / "static" / "js" / "diagnostics" / "auth_checks.js"
+DIAGNOSTICS_REALTIME_JS = REPO_ROOT / "wepppy" / "weppcloud" / "static" / "js" / "diagnostics" / "diagnostics-realtime.js"
+DIAGNOSTICS_REPORT_JS = REPO_ROOT / "wepppy" / "weppcloud" / "static" / "js" / "diagnostics" / "report.js"
+DIAGNOSTICS_PAGE_JS = REPO_ROOT / "wepppy" / "weppcloud" / "static" / "js" / "diagnostics" / "page.js"
 
 
 def _build_app() -> Flask:
@@ -67,3 +72,36 @@ def test_diagnostics_template_includes_base_and_noscript_blocker() -> None:
     assert '{% extends "base_pure.htm" %}' in source
     assert "<noscript>" in source
     assert "Blocking failure" in source
+    assert "data-diagnostics-root" in source
+    assert "data-diagnostics-check-list" in source
+    assert "data-diagnostics-copy-json" in source
+    assert "static_url('js/diagnostics/core.js')" in source
+    assert "static_url('js/diagnostics/auth_checks.js')" in source
+    assert "static_url('js/diagnostics/report.js')" in source
+    assert "static_url('js/diagnostics/diagnostics-realtime.js')" in source
+    assert "static_url('js/diagnostics/page.js')" in source
+
+
+def test_diagnostics_core_js_uses_site_prefix_dataset_contract() -> None:
+    source = DIAGNOSTICS_CORE_JS.read_text(encoding="utf-8")
+
+    assert "document.body.dataset.sitePrefix" in source
+    assert 'return "";' in source
+
+
+def test_diagnostics_assets_include_core_report_page_modules() -> None:
+    assert DIAGNOSTICS_CORE_JS.exists()
+    assert DIAGNOSTICS_AUTH_CHECKS_JS.exists()
+    assert DIAGNOSTICS_REALTIME_JS.exists()
+    assert DIAGNOSTICS_REPORT_JS.exists()
+    assert DIAGNOSTICS_PAGE_JS.exists()
+
+
+def test_diagnostics_realtime_js_includes_service_health_reachability_checks() -> None:
+    source = DIAGNOSTICS_REALTIME_JS.read_text(encoding="utf-8")
+
+    assert "status-health-reachability" in source
+    assert "preflight-health-reachability" in source
+    assert "/weppcloud-microservices/status/health" in source
+    assert "/weppcloud-microservices/preflight/health" in source
+    assert 'severity: "degraded"' in source

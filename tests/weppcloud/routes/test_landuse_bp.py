@@ -60,6 +60,15 @@ def landuse_client(monkeypatch: pytest.MonkeyPatch, tmp_path):
                 cls._instances[wd] = instance
             return instance
 
+        @classmethod
+        def load_detached(
+            cls,
+            wd: str,
+            allow_nonexistent: bool = False,
+        ) -> "DummyLanduse" | None:
+            _ = allow_nonexistent
+            return cls.getInstance(wd)
+
         def modify_coverage(self, dom, cover, value) -> None:
             self.cover_changes.append((dom, cover, value))
 
@@ -141,10 +150,40 @@ def test_report_landuse_renders_template(landuse_client):
 
     assert response.status_code == 200
     assert response.get_data(as_text=True) == "rendered"
+    assert response.headers["Cache-Control"] == "no-store, no-cache, must-revalidate, max-age=0"
+    assert response.headers["Pragma"] == "no-cache"
+    assert response.headers["Expires"] == "0"
     assert captured["template"] == "reports/landuse.htm"
     assert captured["context"]["runid"] == RUN_ID
     assert captured["context"]["landuseoptions"] == {"options": []}
     assert captured["context"]["disturbed_preview_available"] is False
+
+
+def test_report_landuse_prefers_detached_snapshot(
+    landuse_client,
+    monkeypatch: pytest.MonkeyPatch,
+):
+    client, DummyLanduse, captured, run_dir = landuse_client
+    stale = DummyLanduse.getInstance(run_dir)
+    fresh = DummyLanduse(run_dir)
+    fresh.report = [{"key": "fresh", "pct_coverage": 100.0}]
+
+    def fake_get_instance(cls, wd: str):
+        _ = wd
+        return stale
+
+    def fake_load_detached(cls, wd: str, allow_nonexistent: bool = False):
+        _ = wd
+        _ = allow_nonexistent
+        return fresh
+
+    monkeypatch.setattr(DummyLanduse, "getInstance", classmethod(fake_get_instance))
+    monkeypatch.setattr(DummyLanduse, "load_detached", classmethod(fake_load_detached))
+
+    response = client.get(f"/runs/{RUN_ID}/{CONFIG}/report/landuse/")
+
+    assert response.status_code == 200
+    assert captured["context"]["landuse"] is fresh
 
 
 def test_report_landuse_enables_disturbed_preview_context(landuse_client):
