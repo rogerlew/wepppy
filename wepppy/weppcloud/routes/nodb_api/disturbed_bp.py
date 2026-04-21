@@ -24,6 +24,7 @@ from .._common import (
     success_factory,
 )
 from wepppy.nodb.core import Ron
+from wepppy.nodb.base import NoDbAlreadyLockedError
 from wepppy.nodb.mods.baer import Baer
 from wepppy.nodb.mods.disturbed import (
     Disturbed,
@@ -74,10 +75,37 @@ def _controller_lock(controller: Any):
             controller.unlock()
 
 
+@contextmanager
+def _best_effort_read_lock(controller: Any):
+    if not hasattr(controller, 'lock') or not hasattr(controller, 'unlock'):
+        # Test stubs may only expose locked(); production NoDb controllers provide lock/unlock.
+        with controller.locked():
+            yield
+        return
+
+    acquired = False
+    try:
+        controller.lock()
+        acquired = True
+    except NoDbAlreadyLockedError:
+        # Read-only lookup refresh should not fail when a writer holds the lock.
+        _logger.debug(
+            'disturbed_lookup_read_lock_busy controller=%s',
+            getattr(controller, '__class__', type(controller)).__name__,
+            exc_info=True,
+        )
+
+    try:
+        yield
+    finally:
+        if acquired:
+            controller.unlock()
+
+
 def _read_lock_context(controller: Any):
     if getattr(controller, 'readonly', False):
         return nullcontext()
-    return _controller_lock(controller)
+    return _best_effort_read_lock(controller)
 
 
 def _is_blank_lookup_cell(value: Any) -> bool:

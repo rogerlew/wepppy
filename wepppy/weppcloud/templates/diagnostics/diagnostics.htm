@@ -11,30 +11,64 @@
      ) %}
     <p class="wc-text-muted">
       Diagnostics checks are grouped as blockers, degraded capabilities, and informational signals.
-      A page-level checker will populate this panel in follow-on work packages.
     </p>
     <noscript>
-      <p role="alert">
-        <strong>Blocking failure:</strong> JavaScript is disabled in this browser. WEPPcloud requires JavaScript to run.
-      </p>
+      <div class="wc-alert wc-alert--error" role="alert">
+        <p class="wc-alert__body">
+          <strong>Blocking failure:</strong> JavaScript is disabled in this browser. WEPPcloud requires JavaScript to run.
+        </p>
+      </div>
     </noscript>
   {% endcall %}
 
   {% call ui.card_shell(
-       title="Checks",
-       description="This shell reserves the diagnostics check list and report area."
+       title="Diagnostics Results",
+       description="Core browser/storage checks run on page load and produce a copyable redacted report."
      ) %}
-    <section aria-label="Diagnostics checks">
-      <ul id="diagnostics_check_list" data-diagnostics-check-list>
-        <li data-check-id="javascript">JavaScript execution: pending</li>
-        <li data-check-id="browser-baseline">Browser API baseline: pending</li>
-        <li data-check-id="cookies">Cookie support: pending</li>
-        <li data-check-id="realtime">Realtime websocket capability: pending</li>
-      </ul>
+    <section class="wc-stack" aria-live="polite" aria-atomic="true">
+      <p>
+        Overall readiness:
+        <span data-diagnostics-overall-chip>
+          <span class="wc-status-chip" data-state="info">pending</span>
+        </span>
+        <span data-diagnostics-overall-value>not generated</span>
+      </p>
+      <p class="wc-text-muted" data-diagnostics-report-generated>Report not generated yet.</p>
     </section>
-    <section aria-label="Diagnostics report">
-      <p id="diagnostics_report_status" data-diagnostics-report-status>Report status: not generated</p>
+
+    <section aria-label="Diagnostics checks">
+      <ol id="diagnostics_check_list" class="wc-stack" data-diagnostics-check-list>
+        <li class="wc-text-muted">Running diagnostics...</li>
+      </ol>
+    </section>
+
+    <section class="wc-stack" aria-label="Diagnostics report">
+      <div>
+        <button
+          type="button"
+          class="pure-button pure-button-secondary"
+          data-diagnostics-copy-json
+          disabled>
+          Copy JSON
+        </button>
+      </div>
+      <p class="wc-text-muted" data-diagnostics-copy-feedback>
+        Copy JSON is available after checks finish.
+      </p>
+      <details>
+        <summary>Report Preview</summary>
+        <pre data-diagnostics-json-preview>Report not generated yet.</pre>
+      </details>
     </section>
   {% endcall %}
 </div>
+{% endblock %}
+
+{% block script_extras %}
+  {{ super() }}
+  <script src="{{ static_url('js/diagnostics/core.js') }}" defer></script>
+  <script src="{{ static_url('js/diagnostics/auth_checks.js') }}" defer></script>
+  <script src="{{ static_url('js/diagnostics/report.js') }}" defer></script>
+  <script src="{{ static_url('js/diagnostics/diagnostics-realtime.js') }}" defer></script>
+  <script src="{{ static_url('js/diagnostics/page.js') }}" defer></script>
 {% endblock %}

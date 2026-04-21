@@ -10,6 +10,7 @@ from .._common import (
     Blueprint,
     authorize_and_handle_with_exception_factory,
     jsonify,
+    make_response,
     parse_request_payload,
     render_template,
     request,
@@ -257,23 +258,33 @@ def report_landuse(runid: str, config: str) -> Response:
     ron = Ron.getInstance(wd)
 
     try:
-        landuse = Landuse.getInstance(wd)
+        # Read a detached snapshot so cross-worker singleton cache drift cannot
+        # serve stale mapping rows right after a successful modify request.
+        landuse = Landuse.load_detached(wd, allow_nonexistent=True)
+        if landuse is None:
+            landuse = Landuse.getInstance(wd)
         landuseoptions = landuse.landuseoptions
         report_context = build_landuse_report_context(landuse)
         disturbed_preview_available = "disturbed" in tuple(getattr(landuse, "mods", ()))
 
-        return render_template(
-            'reports/landuse.htm',
-            runid=runid,
-            config=config,
-            landuse=landuse,
-            landuseoptions=landuseoptions,
-            dataset_options=report_context['dataset_options'],
-            coverage_percentages=report_context['coverage_percentages'],
-            report=report_context['report_rows'],
-            disturbed_preview_available=disturbed_preview_available,
-            disturbed_preview_textures=_DISTURBED_PREVIEW_TEXTURES,
+        response = make_response(
+            render_template(
+                'reports/landuse.htm',
+                runid=runid,
+                config=config,
+                landuse=landuse,
+                landuseoptions=landuseoptions,
+                dataset_options=report_context['dataset_options'],
+                coverage_percentages=report_context['coverage_percentages'],
+                report=report_context['report_rows'],
+                disturbed_preview_available=disturbed_preview_available,
+                disturbed_preview_textures=_DISTURBED_PREVIEW_TEXTURES,
+            )
         )
+        response.headers["Cache-Control"] = "no-store, no-cache, must-revalidate, max-age=0"
+        response.headers["Pragma"] = "no-cache"
+        response.headers["Expires"] = "0"
+        return response
 
     except Exception:
         # Boundary catch: preserve contract behavior while logging unexpected failures.

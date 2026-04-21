@@ -257,6 +257,11 @@ var Landuse = (function () {
             landuse.pushResponseStacktrace(landuse, toResponsePayload(http, error));
         }
 
+        function hasErrorPayload(result) {
+            var body = result && result.body;
+            return Boolean(body && typeof body === "object" && (body.error || body.errors));
+        }
+
         function ensureReportDelegates() {
             if (!landuse.infoElement) {
                 return;
@@ -406,6 +411,9 @@ var Landuse = (function () {
 
             http.postJson(url_for_run("tasks/modify_landuse_mapping/"), payload, { form: formElement })
                 .then(function (result) {
+                    if (hasErrorPayload(result)) {
+                        throw { body: result.body };
+                    }
                     landuse.report();
                 })
                 .catch(handleError);

@@ -225,6 +225,21 @@ describe("Landuse controller", () => {
         expect(landuse.report).toHaveBeenCalled();
     });
 
+    test("modify_mapping does not refresh report when response body has error payload", async () => {
+        jest.spyOn(landuse, "report").mockImplementation(() => {});
+        httpPostJsonMock.mockResolvedValueOnce({ body: { error: { message: "Failed to modify landuse mapping" } } });
+
+        landuse.modify_mapping("100", "200");
+        await Promise.resolve();
+        await Promise.resolve();
+
+        expect(landuse.report).not.toHaveBeenCalled();
+        expect(baseInstance.pushResponseStacktrace).toHaveBeenCalledWith(
+            landuse,
+            { error: { message: "Failed to modify landuse mapping" } }
+        );
+    });
+
     test("mapping select delegate posts updates", async () => {
         landuse.infoElement.innerHTML = `
             <select data-landuse-role="mapping-select" data-landuse-dom="5">
