@@ -79,7 +79,6 @@ services:
       - info
       - --forwarded-allow-ips
       - "192.168.1.1"
-      - --reload
       - --max-requests
       - "1000"
       - --max-requests-jitter
@@ -420,7 +419,6 @@ services:
       - 0.0.0.0
       - --port
       - "8041"
-      - --reload
     ports:
       - "8041:8041"
 
@@ -506,7 +504,6 @@ services:
       - 0.0.0.0
       - --port
       - "8042"
-      - --reload
     ports:
       - "8042:8042"
 
