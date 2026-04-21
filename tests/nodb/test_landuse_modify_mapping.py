@@ -32,7 +32,11 @@ def test_modify_mapping_updates_multi_ofe_assignments(
     monkeypatch.setattr(
         Landuse,
         "getInstance",
-        classmethod(lambda cls, wd: landuse),
+        classmethod(
+            lambda cls, wd: (_ for _ in ()).throw(
+                AssertionError("modify_mapping should not rehydrate from cache")
+            )
+        ),
     )
 
     Landuse.modify_mapping(landuse, "21", "42")

@@ -143,6 +143,37 @@ def test_modify_landuse_coverage_records_change(landuse_client):
     assert controller.cover_changes == [("1", "forest", 75.0)]
 
 
+def test_task_modify_landuse_mapping_prefers_detached_snapshot(
+    landuse_client,
+    monkeypatch: pytest.MonkeyPatch,
+):
+    client, DummyLanduse, _, run_dir = landuse_client
+    stale = DummyLanduse.getInstance(run_dir)
+    fresh = DummyLanduse(run_dir)
+
+    def fake_get_instance(cls, wd: str):
+        _ = wd
+        return stale
+
+    def fake_load_detached(cls, wd: str, allow_nonexistent: bool = False):
+        _ = wd
+        _ = allow_nonexistent
+        return fresh
+
+    monkeypatch.setattr(DummyLanduse, "getInstance", classmethod(fake_get_instance))
+    monkeypatch.setattr(DummyLanduse, "load_detached", classmethod(fake_load_detached))
+
+    response = client.post(
+        f"/runs/{RUN_ID}/{CONFIG}/tasks/modify_landuse_mapping/",
+        json={"dom": "21", "newdom": "42"},
+    )
+
+    assert response.status_code == 200
+    assert response.get_json() == {}
+    assert fresh.mapping_changes == [("21", "42")]
+    assert stale.mapping_changes == []
+
+
 def test_report_landuse_renders_template(landuse_client):
     client, DummyLanduse, captured, _ = landuse_client
 

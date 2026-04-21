@@ -1621,7 +1621,9 @@ def _build_runs0_context(runid, config, playwright_load_all):
         except Exception as exc:
             current_app.logger.warning('Failed to mark pup project as readonly: %s', exc)
 
-    landuse = Landuse.getInstance(wd)
+    landuse = Landuse.load_detached(wd, allow_nonexistent=True)
+    if landuse is None:
+        landuse = Landuse.getInstance(wd)
     soils = Soils.getInstance(wd)
     climate = Climate.getInstance(wd)
     wepp = Wepp.getInstance(wd)

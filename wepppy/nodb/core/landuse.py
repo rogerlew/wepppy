@@ -1281,8 +1281,6 @@ class Landuse(NoDbBase):
                         if str(ofe_map[ofe_id]) == dom:
                             ofe_map[ofe_id] = newdom
 
-            self = self.getInstance(self.wd)  # reload instance from .nodb
-
         self.build_managements()
 
     @property

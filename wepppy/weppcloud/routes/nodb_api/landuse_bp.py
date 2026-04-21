@@ -210,7 +210,9 @@ def task_modify_landuse_mapping(runid: str, config: str) -> Response:
     if dom is None or newdom is None:
         return exception_factory('dom and newdom must be provided', runid=runid)
 
-    landuse = Landuse.getInstance(wd)
+    landuse = Landuse.load_detached(wd, allow_nonexistent=True)
+    if landuse is None:
+        landuse = Landuse.getInstance(wd)
     try:
         landuse.modify_mapping(str(dom), str(newdom))
     except Exception:
