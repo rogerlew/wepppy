@@ -803,7 +803,10 @@ services:
     build:
       context: ..
       dockerfile: docker/Dockerfile.fcgiwrap
+      additional_contexts:
+        wepppy_dev: "service:weppcloud"
       args:
+        BASE_IMAGE: wepppy_dev
         APP_USER: "${UID:-1000}"
     volumes:
       - ../:/workdir/wepppy
