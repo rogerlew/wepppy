@@ -1270,6 +1270,17 @@ class Landuse(NoDbBase):
                 if self.domlc_d[topazid] == dom:
                     self.domlc_d[topazid] = newdom
 
+            # Multi-OFE runs track landuse assignments per OFE segment in
+            # domlc_mofe_d; remap those values too so report reloads persist.
+            domlc_mofe_d = getattr(self, 'domlc_mofe_d', None)
+            if isinstance(domlc_mofe_d, dict):
+                for topaz_id, ofe_map in domlc_mofe_d.items():
+                    if not isinstance(ofe_map, dict):
+                        continue
+                    for ofe_id in ofe_map:
+                        if str(ofe_map[ofe_id]) == dom:
+                            ofe_map[ofe_id] = newdom
+
             self = self.getInstance(self.wd)  # reload instance from .nodb
 
         self.build_managements()
