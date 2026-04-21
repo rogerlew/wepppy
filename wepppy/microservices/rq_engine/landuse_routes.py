@@ -2,6 +2,7 @@ from __future__ import annotations
 
 import logging
 import os
+import re
 from os.path import exists as _exists
 from os.path import join as _join
 from pathlib import Path
@@ -38,6 +39,8 @@ RQ_TIMEOUT = int(os.getenv("RQ_ENGINE_RQ_TIMEOUT", "216000"))
 RQ_ENQUEUE_SCOPES = ["rq:enqueue"]
 LANDUSE_USER_DEFINED_ALLOWED_EXTENSIONS = ("tif", "tiff", "img", "vrt")
 LANDUSE_USER_DEFINED_MAX_BYTES = 500 * 1024 * 1024
+LANDUSE_MAPPING_MAX_KEY_LENGTH = 128
+LANDUSE_MAPPING_CONTROL_CHAR_RE = re.compile(r"[\x00-\x1f\x7f]")
 
 
 def _maybe_nodir_error_response(exc: Exception):
@@ -88,6 +91,17 @@ def _upload_status_from_message(message: str) -> int:
     if "maximum allowed size" in message.lower():
         return 413
     return 400
+
+
+def _normalize_landuse_mapping_key(value: Any, *, field: str) -> str:
+    normalized = str(value).strip()
+    if not normalized:
+        raise ValueError("dom and newdom must be provided")
+    if len(normalized) > LANDUSE_MAPPING_MAX_KEY_LENGTH:
+        raise ValueError(f"{field} exceeds {LANDUSE_MAPPING_MAX_KEY_LENGTH} characters")
+    if LANDUSE_MAPPING_CONTROL_CHAR_RE.search(normalized):
+        raise ValueError(f"{field} contains unsupported control characters")
+    return normalized
 
 
 @router.post(
@@ -288,10 +302,11 @@ async def modify_landuse_mapping(runid: str, config: str, request: Request) -> J
         if dom is None or newdom is None:
             return error_response("dom and newdom must be provided", status_code=400)
 
-        dom_value = str(dom).strip()
-        newdom_value = str(newdom).strip()
-        if not dom_value or not newdom_value:
-            return error_response("dom and newdom must be provided", status_code=400)
+        try:
+            dom_value = _normalize_landuse_mapping_key(dom, field="dom")
+            newdom_value = _normalize_landuse_mapping_key(newdom, field="newdom")
+        except ValueError as exc:
+            return error_response(str(exc), status_code=400)
 
         wd = get_wd(runid)
         _preflight_landuse_mutation_root(wd)
@@ -300,10 +315,15 @@ async def modify_landuse_mapping(runid: str, config: str, request: Request) -> J
         conn_kwargs = redis_connection_kwargs(RedisDB.RQ)
         with redis.Redis(**conn_kwargs) as redis_conn:
             q = Queue(connection=redis_conn)
+            previous_job = None
+            previous_job_id = prep.get_rq_job_id("modify_landuse_mapping_rq")
+            if previous_job_id:
+                previous_job = q.fetch_job(previous_job_id)
             job = q.enqueue_call(
                 modify_landuse_mapping_rq,
                 (runid, dom_value, newdom_value),
                 timeout=RQ_TIMEOUT,
+                depends_on=previous_job,
             )
             prep.set_rq_job_id("modify_landuse_mapping_rq", job.id)
 

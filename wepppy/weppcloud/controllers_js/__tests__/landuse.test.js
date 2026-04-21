@@ -382,6 +382,50 @@ describe("Landuse controller", () => {
         expect(landuse.report).toHaveBeenCalledTimes(1);
     });
 
+    test("out-of-order mapping enqueue responses keep latest job id", async () => {
+        const deferred = () => {
+            let resolve;
+            let reject;
+            const promise = new Promise((res, rej) => {
+                resolve = res;
+                reject = rej;
+            });
+            return { promise, resolve, reject };
+        };
+
+        const first = deferred();
+        const second = deferred();
+        let mappingRequestCount = 0;
+        httpRequestMock.mockImplementation((url) => {
+            if (url === "/rq-engine/api/runs/test/cfg/modify-landuse-mapping") {
+                mappingRequestCount += 1;
+                return mappingRequestCount === 1 ? first.promise : second.promise;
+            }
+            if (url === "/rq-engine/api/runs/test/cfg/build-landuse") {
+                return Promise.resolve({ body: { job_id: "job-1" } });
+            }
+            if (url === "report/landuse/") {
+                return Promise.resolve({ body: "<div>report</div>" });
+            }
+            return Promise.resolve({ body: {} });
+        });
+
+        landuse.modify_mapping("44", "71");
+        landuse.modify_mapping("44", "42");
+
+        second.resolve({ body: { job_id: "job-new" } });
+        await flushPromises();
+        await flushPromises();
+
+        first.resolve({ body: { job_id: "job-old" } });
+        await flushPromises();
+        await flushPromises();
+
+        expect(landuse._mapping_job_id).toBe("job-new");
+        expect(baseInstance.set_rq_job_id).toHaveBeenCalledWith(landuse, "job-new");
+        expect(baseInstance.set_rq_job_id).not.toHaveBeenCalledWith(landuse, "job-old");
+    });
+
     test("report emits event and updates unitizer", async () => {
         const listener = jest.fn();
         landuse.events.on("landuse:report:loaded", listener);

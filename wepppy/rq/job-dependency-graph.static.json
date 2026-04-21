@@ -200,17 +200,19 @@
     "notes": [],
     "queue_name": "default",
     "source_function": "build_landuse",
-    "source_lineno": 243,
+    "source_lineno": 257,
     "source_module": "wepppy/microservices/rq_engine/landuse_routes.py"
   },
   {
-    "depends_on": [],
+    "depends_on": [
+      "previous_job"
+    ],
     "enqueue_target": "modify_landuse_mapping_rq",
     "job_meta_stage": null,
     "notes": [],
     "queue_name": "default",
     "source_function": "modify_landuse_mapping",
-    "source_lineno": 303,
+    "source_lineno": 322,
     "source_module": "wepppy/microservices/rq_engine/landuse_routes.py"
   },
   {
@@ -600,7 +602,7 @@
     "notes": [],
     "queue_name": "default",
     "source_function": "fork_rq",
-    "source_lineno": 1390,
+    "source_lineno": 1399,
     "source_module": "wepppy/rq/project_rq.py"
   },
   {

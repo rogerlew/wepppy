@@ -87,6 +87,107 @@ def test_build_landuse_rq_rejects_archive_form_root(
     assert call_roots == ["landuse"]
 
 
+def test_modify_landuse_mapping_rq_rejects_archive_form_root(
+    monkeypatch: pytest.MonkeyPatch,
+    tmp_path: Path,
+) -> None:
+    _run_wd, set_archive_roots, call_roots = _stub_rq_context(monkeypatch, tmp_path)
+    set_archive_roots("landuse")
+    monkeypatch.setattr(
+        project_rq.Landuse,
+        "load_detached",
+        lambda _wd, allow_nonexistent=True: (_ for _ in ()).throw(
+            AssertionError("Landuse should not be loaded when root is archive-backed")
+        ),
+    )
+
+    class DummyPrep:
+        def get_rq_job_id(self, key: str):
+            return "job-guard"
+
+    monkeypatch.setattr(project_rq.RedisPrep, "getInstance", lambda _wd: DummyPrep())
+
+    with pytest.raises(NoDirError) as exc_info:
+        project_rq.modify_landuse_mapping_rq("demo", "44", "71")
+
+    assert exc_info.value.code == "NODIR_ARCHIVE_RETIRED"
+    assert call_roots == ["landuse"]
+
+
+def test_modify_landuse_mapping_rq_publishes_trigger_and_mutates_landuse(
+    monkeypatch: pytest.MonkeyPatch,
+    tmp_path: Path,
+) -> None:
+    _run_wd, _set_archive_roots, call_roots = _stub_rq_context(monkeypatch, tmp_path)
+    published: list[tuple[str, str]] = []
+    monkeypatch.setattr(
+        project_rq.StatusMessenger,
+        "publish",
+        lambda channel, message: published.append((channel, message)),
+    )
+    monkeypatch.setattr(project_rq, "get_current_job", lambda: SimpleNamespace(id="job-latest"))
+
+    class DummyPrep:
+        def get_rq_job_id(self, key: str):
+            return "job-latest"
+
+    monkeypatch.setattr(project_rq.RedisPrep, "getInstance", lambda _wd: DummyPrep())
+
+    class DummyLanduse:
+        def __init__(self):
+            self.calls: list[tuple[str, str]] = []
+
+        def modify_mapping(self, dom: str, newdom: str) -> None:
+            self.calls.append((dom, newdom))
+
+    landuse = DummyLanduse()
+    monkeypatch.setattr(project_rq.Landuse, "load_detached", lambda _wd, allow_nonexistent=True: landuse)
+    monkeypatch.setattr(
+        project_rq.Landuse,
+        "getInstance",
+        lambda _wd: (_ for _ in ()).throw(AssertionError("Detached landuse should be used")),
+    )
+
+    project_rq.modify_landuse_mapping_rq("demo", "44", "71")
+
+    assert landuse.calls == [("44", "71")]
+    assert call_roots == ["landuse", "landuse"]
+    assert any("LANDUSE_MODIFY_MAPPING_TASK_COMPLETED" in message for _channel, message in published)
+
+
+def test_modify_landuse_mapping_rq_skips_stale_job_without_mutation(
+    monkeypatch: pytest.MonkeyPatch,
+    tmp_path: Path,
+) -> None:
+    _run_wd, _set_archive_roots, call_roots = _stub_rq_context(monkeypatch, tmp_path)
+    published: list[tuple[str, str]] = []
+    monkeypatch.setattr(
+        project_rq.StatusMessenger,
+        "publish",
+        lambda channel, message: published.append((channel, message)),
+    )
+    monkeypatch.setattr(project_rq, "get_current_job", lambda: SimpleNamespace(id="job-stale"))
+
+    class DummyPrep:
+        def get_rq_job_id(self, key: str):
+            return "job-latest"
+
+    monkeypatch.setattr(project_rq.RedisPrep, "getInstance", lambda _wd: DummyPrep())
+    monkeypatch.setattr(
+        project_rq.Landuse,
+        "load_detached",
+        lambda _wd, allow_nonexistent=True: (_ for _ in ()).throw(
+            AssertionError("Stale jobs should not mutate landuse")
+        ),
+    )
+
+    project_rq.modify_landuse_mapping_rq("demo", "44", "71")
+
+    assert call_roots == []
+    assert any("SKIPPED" in message for _channel, message in published)
+    assert all("LANDUSE_MODIFY_MAPPING_TASK_COMPLETED" not in message for _channel, message in published)
+
+
 def test_build_treatments_rq_rejects_archive_form_roots(
     monkeypatch: pytest.MonkeyPatch,
     tmp_path: Path,

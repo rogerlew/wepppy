@@ -476,6 +476,8 @@ var Landuse = (function () {
                 dom: domId,
                 newdom: newDom
             };
+            landuse._mapping_request_seq = (landuse._mapping_request_seq || 0) + 1;
+            var requestSeq = landuse._mapping_request_seq;
 
             resetStatus(taskMsg);
             resetMappingCompletionSeen();
@@ -494,6 +496,9 @@ var Landuse = (function () {
                 }
             )
                 .then(function (result) {
+                    if (requestSeq !== landuse._mapping_request_seq) {
+                        return;
+                    }
                     var response = result && result.body ? result.body : null;
                     if (response && response.job_id) {
                         landuse.append_status_message(landuse, "modify_landuse_mapping job submitted: " + response.job_id);
@@ -508,6 +513,9 @@ var Landuse = (function () {
                     landuse.disconnect_status_stream(landuse);
                 })
                 .catch(function (error) {
+                    if (requestSeq !== landuse._mapping_request_seq) {
+                        return;
+                    }
                     landuse.disconnect_status_stream(landuse);
                     handleError(error);
                 });

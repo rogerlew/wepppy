@@ -1005,7 +1005,16 @@ def modify_landuse_mapping_rq(runid: str, dom: str, newdom: str) -> None:
         wd = get_wd(runid)
         func_name = inspect.currentframe().f_code.co_name
         status_channel = f"{runid}:landuse"
-        StatusMessenger.publish(status_channel, f"rq:{job.id} STARTED {func_name}({runid}, {dom}, {newdom})")
+        StatusMessenger.publish(status_channel, f"rq:{job.id} STARTED {func_name}({runid})")
+
+        prep = RedisPrep.getInstance(wd)
+        latest_mapping_job_id = prep.get_rq_job_id("modify_landuse_mapping_rq")
+        if latest_mapping_job_id and latest_mapping_job_id != job.id:
+            StatusMessenger.publish(
+                status_channel,
+                f"rq:{job.id} SKIPPED {func_name}({runid}) stale job superseded by rq:{latest_mapping_job_id}",
+            )
+            return
 
         def _modify_mapping() -> None:
             landuse = Landuse.load_detached(wd, allow_nonexistent=True)
@@ -1020,7 +1029,7 @@ def modify_landuse_mapping_rq(runid: str, dom: str, newdom: str) -> None:
             purpose="modify-landuse-mapping-rq",
         )
 
-        StatusMessenger.publish(status_channel, f"rq:{job.id} COMPLETED {func_name}({runid}, {dom}, {newdom})")
+        StatusMessenger.publish(status_channel, f"rq:{job.id} COMPLETED {func_name}({runid})")
         StatusMessenger.publish(
             status_channel,
             f"rq:{job.id} TRIGGER   landuse LANDUSE_MODIFY_MAPPING_TASK_COMPLETED",
