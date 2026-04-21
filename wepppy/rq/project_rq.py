@@ -998,6 +998,41 @@ def build_landuse_rq(runid: str) -> None:
 
 
 @with_exception_logging
+def modify_landuse_mapping_rq(runid: str, dom: str, newdom: str) -> None:
+    """Remap a landuse domain assignment asynchronously and rebuild managements."""
+    try:
+        job = get_current_job()
+        wd = get_wd(runid)
+        func_name = inspect.currentframe().f_code.co_name
+        status_channel = f"{runid}:landuse"
+        StatusMessenger.publish(status_channel, f"rq:{job.id} STARTED {func_name}({runid}, {dom}, {newdom})")
+
+        def _modify_mapping() -> None:
+            landuse = Landuse.load_detached(wd, allow_nonexistent=True)
+            if landuse is None:
+                landuse = Landuse.getInstance(wd)
+            landuse.modify_mapping(str(dom), str(newdom))
+
+        _run_with_directory_root_lock(
+            wd,
+            "landuse",
+            _modify_mapping,
+            purpose="modify-landuse-mapping-rq",
+        )
+
+        StatusMessenger.publish(status_channel, f"rq:{job.id} COMPLETED {func_name}({runid}, {dom}, {newdom})")
+        StatusMessenger.publish(
+            status_channel,
+            f"rq:{job.id} TRIGGER   landuse LANDUSE_MODIFY_MAPPING_TASK_COMPLETED",
+        )
+    except Exception:
+        # Boundary catch: preserve contract behavior while logging unexpected failures.
+        __import__("logging").getLogger(__name__).exception("Boundary exception at wepppy/rq/project_rq.py:859", extra={"runid": locals().get("runid"), "config": locals().get("config"), "job_id": locals().get("job_id")})
+        StatusMessenger.publish(status_channel, f"rq:{job.id} EXCEPTION {func_name}({runid}, {dom}, {newdom})")
+        raise
+
+
+@with_exception_logging
 def build_treatments_rq(runid: str) -> None:
     """Apply treatments to landuse and soils."""
     try:

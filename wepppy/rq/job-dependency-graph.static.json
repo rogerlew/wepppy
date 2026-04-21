@@ -36,7 +36,7 @@
     "notes": [],
     "queue_name": "default",
     "source_function": "_enqueue_no_prep_job",
-    "source_lineno": 166,
+    "source_lineno": 177,
     "source_module": "wepppy/microservices/rq_engine/bootstrap_routes.py"
   },
   {
@@ -201,6 +201,16 @@
     "queue_name": "default",
     "source_function": "build_landuse",
     "source_lineno": 243,
+    "source_module": "wepppy/microservices/rq_engine/landuse_routes.py"
+  },
+  {
+    "depends_on": [],
+    "enqueue_target": "modify_landuse_mapping_rq",
+    "job_meta_stage": null,
+    "notes": [],
+    "queue_name": "default",
+    "source_function": "modify_landuse_mapping",
+    "source_lineno": 303,
     "source_module": "wepppy/microservices/rq_engine/landuse_routes.py"
   },
   {
@@ -412,7 +422,7 @@
     "notes": [],
     "queue_name": "default",
     "source_function": "_handle_run_wepp_request",
-    "source_lineno": 106,
+    "source_lineno": 117,
     "source_module": "wepppy/microservices/rq_engine/wepp_routes.py"
   },
   {
@@ -590,7 +600,7 @@
     "notes": [],
     "queue_name": "default",
     "source_function": "fork_rq",
-    "source_lineno": 1355,
+    "source_lineno": 1390,
     "source_module": "wepppy/rq/project_rq.py"
   },
   {
@@ -632,7 +642,7 @@
     "notes": [],
     "queue_name": "default",
     "source_function": "run_wepp_watershed_noprep_rq",
-    "source_lineno": 900,
+    "source_lineno": 914,
     "source_module": "wepppy/rq/wepp_rq.py"
   },
   {
@@ -642,7 +652,7 @@
     "notes": [],
     "queue_name": "default",
     "source_function": "run_wepp_watershed_rq",
-    "source_lineno": 752,
+    "source_lineno": 768,
     "source_module": "wepppy/rq/wepp_rq.py"
   },
   {
@@ -1523,7 +1533,7 @@
     "notes": [],
     "queue_name": "default",
     "source_function": "_enqueue_geneva_job",
-    "source_lineno": 148,
+    "source_lineno": 185,
     "source_module": "wepppy/weppcloud/routes/nodb_api/geneva_bp.py"
   },
   {

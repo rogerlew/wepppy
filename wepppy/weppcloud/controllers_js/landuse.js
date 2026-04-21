@@ -138,6 +138,41 @@ var Landuse = (function () {
         return parsed;
     }
 
+    function parseTriggerJobId(payload) {
+        if (payload && payload.job_id !== undefined && payload.job_id !== null) {
+            var directJobId = String(payload.job_id).trim();
+            if (directJobId) {
+                return directJobId;
+            }
+        }
+        if (
+            payload
+            && payload.status
+            && payload.status.job_id !== undefined
+            && payload.status.job_id !== null
+        ) {
+            var nestedJobId = String(payload.status.job_id).trim();
+            if (nestedJobId) {
+                return nestedJobId;
+            }
+        }
+        if (!payload || !Array.isArray(payload.tokens) || payload.tokens.length === 0) {
+            return null;
+        }
+        var token = payload.tokens[0];
+        if (token === undefined || token === null) {
+            return null;
+        }
+        var normalized = String(token).trim();
+        if (!normalized) {
+            return null;
+        }
+        if (normalized.indexOf("rq:") === 0) {
+            normalized = normalized.slice(3);
+        }
+        return normalized || null;
+    }
+
     function createInstance() {
         var helpers = ensureHelpers();
         var dom = helpers.dom;
@@ -147,6 +182,8 @@ var Landuse = (function () {
 
         var landuse = controlBase();
         var landuseEvents = null;
+        var LANDUSE_BUILD_COMPLETION_EVENT = "LANDUSE_BUILD_TASK_COMPLETED";
+        var LANDUSE_MAPPING_COMPLETION_EVENT = "LANDUSE_MODIFY_MAPPING_TASK_COMPLETED";
 
         if (events && typeof events.createEmitter === "function") {
             var emitterBase = events.createEmitter();
@@ -154,6 +191,8 @@ var Landuse = (function () {
                 landuseEvents = events.useEventMap([
                     "landuse:build:started",
                     "landuse:build:completed",
+                    "landuse:mapping:started",
+                    "landuse:mapping:completed",
                     "landuse:report:loaded",
                     "landuse:mode:change",
                     "landuse:db:change"
@@ -200,12 +239,19 @@ var Landuse = (function () {
             spinner: spinnerElement
         });
 
-        function resetCompletionSeen() {
-            landuse._completion_seen = false;
+        function resetBuildCompletionSeen() {
+            landuse._build_completion_seen = false;
         }
 
-        landuse.poll_completion_event = "LANDUSE_BUILD_TASK_COMPLETED";
-        resetCompletionSeen();
+        function resetMappingCompletionSeen() {
+            landuse._mapping_completion_seen = false;
+            landuse._mapping_completion_job_id = null;
+            landuse._mapping_job_id = null;
+        }
+
+        landuse.poll_completion_event = LANDUSE_BUILD_COMPLETION_EVENT;
+        resetBuildCompletionSeen();
+        resetMappingCompletionSeen();
 
         var modePanels = [
             dom.qs("#landuse_mode0_controls"),
@@ -218,11 +264,11 @@ var Landuse = (function () {
         var baseTriggerEvent = landuse.triggerEvent.bind(landuse);
         landuse.triggerEvent = function (eventName, payload) {
             var normalized = eventName ? String(eventName).toUpperCase() : "";
-            if (normalized === "LANDUSE_BUILD_TASK_COMPLETED") {
-                if (landuse._completion_seen) {
+            if (normalized === LANDUSE_BUILD_COMPLETION_EVENT) {
+                if (landuse._build_completion_seen) {
                     return baseTriggerEvent(eventName, payload);
                 }
-                landuse._completion_seen = true;
+                landuse._build_completion_seen = true;
                 landuse.disconnect_status_stream(landuse);
                 landuse.report();
                 try {
@@ -232,6 +278,32 @@ var Landuse = (function () {
                 }
                 if (landuseEvents && typeof landuseEvents.emit === "function") {
                     landuseEvents.emit("landuse:build:completed", payload || {});
+                }
+            }
+            if (normalized === LANDUSE_MAPPING_COMPLETION_EVENT) {
+                var triggerJobId = parseTriggerJobId(payload);
+                var activeMappingJobId = landuse._mapping_job_id || null;
+                if (!triggerJobId && activeMappingJobId) {
+                    triggerJobId = activeMappingJobId;
+                }
+                if (activeMappingJobId && triggerJobId && triggerJobId !== activeMappingJobId) {
+                    return baseTriggerEvent(eventName, payload);
+                }
+                if (landuse._mapping_completion_seen) {
+                    if (
+                        !landuse._mapping_completion_job_id
+                        || !triggerJobId
+                        || landuse._mapping_completion_job_id === triggerJobId
+                    ) {
+                        return baseTriggerEvent(eventName, payload);
+                    }
+                }
+                landuse._mapping_completion_seen = true;
+                landuse._mapping_completion_job_id = triggerJobId || activeMappingJobId;
+                landuse.disconnect_status_stream(landuse);
+                landuse.report();
+                if (landuseEvents && typeof landuseEvents.emit === "function") {
+                    landuseEvents.emit("landuse:mapping:completed", payload || {});
                 }
             }
 
@@ -255,11 +327,6 @@ var Landuse = (function () {
 
         function handleError(error) {
             landuse.pushResponseStacktrace(landuse, toResponsePayload(http, error));
-        }
-
-        function hasErrorPayload(result) {
-            var body = result && result.body;
-            return Boolean(body && typeof body === "object" && (body.error || body.errors));
         }
 
         function ensureReportDelegates() {
@@ -358,7 +425,7 @@ var Landuse = (function () {
         landuse.build = function () {
             var taskMsg = "Building landuse";
             resetStatus(taskMsg);
-            resetCompletionSeen();
+            resetBuildCompletionSeen();
 
             if (landuseEvents && typeof landuseEvents.emit === "function") {
                 landuseEvents.emit("landuse:build:started", {
@@ -381,7 +448,7 @@ var Landuse = (function () {
                 var response = result && result.body ? result.body : null;
                 if (response && response.job_id) {
                     landuse.append_status_message(landuse, "build_landuse job submitted: " + response.job_id);
-                    landuse.poll_completion_event = "LANDUSE_BUILD_TASK_COMPLETED";
+                    landuse.poll_completion_event = LANDUSE_BUILD_COMPLETION_EVENT;
                     landuse.set_rq_job_id(landuse, response.job_id);
                 } else if (response) {
                     landuse.pushResponseStacktrace(landuse, response);
@@ -404,19 +471,46 @@ var Landuse = (function () {
         };
 
         landuse.modify_mapping = function (domId, newDom) {
+            var taskMsg = "Updating landuse mapping";
             var payload = {
                 dom: domId,
                 newdom: newDom
             };
 
-            http.postJson(url_for_run("tasks/modify_landuse_mapping/"), payload, { form: formElement })
+            resetStatus(taskMsg);
+            resetMappingCompletionSeen();
+            landuse.connect_status_stream(landuse);
+            if (landuseEvents && typeof landuseEvents.emit === "function") {
+                landuseEvents.emit("landuse:mapping:started", payload);
+            }
+
+            http.requestWithSessionToken(
+                url_for_run("modify-landuse-mapping", { prefix: "/rq-engine/api" }),
+                {
+                    method: "POST",
+                    headers: { "Content-Type": "application/json" },
+                    body: JSON.stringify(payload),
+                    form: formElement
+                }
+            )
                 .then(function (result) {
-                    if (hasErrorPayload(result)) {
-                        throw { body: result.body };
+                    var response = result && result.body ? result.body : null;
+                    if (response && response.job_id) {
+                        landuse.append_status_message(landuse, "modify_landuse_mapping job submitted: " + response.job_id);
+                        landuse.poll_completion_event = LANDUSE_MAPPING_COMPLETION_EVENT;
+                        landuse._mapping_job_id = response.job_id;
+                        landuse.set_rq_job_id(landuse, response.job_id);
+                        return;
                     }
-                    landuse.report();
+                    if (response) {
+                        landuse.pushResponseStacktrace(landuse, response);
+                    }
+                    landuse.disconnect_status_stream(landuse);
                 })
-                .catch(handleError);
+                .catch(function (error) {
+                    landuse.disconnect_status_stream(landuse);
+                    handleError(error);
+                });
         };
 
         landuse.report = function () {
@@ -580,21 +674,45 @@ var Landuse = (function () {
                 ? helper.getControllerContext(ctx, "landuse")
                 : {};
 
-            var jobId = helper && typeof helper.resolveJobId === "function"
+            var buildJobId = helper && typeof helper.resolveJobId === "function"
                 ? helper.resolveJobId(ctx, "build_landuse_rq")
                 : null;
-            if (!jobId && controllerContext.job_id) {
-                jobId = controllerContext.job_id;
+            var mappingJobId = helper && typeof helper.resolveJobId === "function"
+                ? helper.resolveJobId(ctx, "modify_landuse_mapping_rq")
+                : null;
+            if (!buildJobId && !mappingJobId && controllerContext.job_id) {
+                buildJobId = controllerContext.job_id;
             }
-            if (!jobId) {
+            if (!buildJobId && !mappingJobId) {
                 var jobIds = ctx && (ctx.jobIds || ctx.jobs);
-                if (jobIds && typeof jobIds === "object" && Object.prototype.hasOwnProperty.call(jobIds, "build_landuse_rq")) {
+                if (
+                    jobIds
+                    && typeof jobIds === "object"
+                    && Object.prototype.hasOwnProperty.call(jobIds, "modify_landuse_mapping_rq")
+                ) {
+                    var mappingValue = jobIds.modify_landuse_mapping_rq;
+                    if (mappingValue !== undefined && mappingValue !== null) {
+                        mappingJobId = String(mappingValue);
+                    }
+                }
+                if (
+                    !mappingJobId
+                    && jobIds
+                    && typeof jobIds === "object"
+                    && Object.prototype.hasOwnProperty.call(jobIds, "build_landuse_rq")
+                ) {
                     var value = jobIds.build_landuse_rq;
                     if (value !== undefined && value !== null) {
-                        jobId = String(value);
+                        buildJobId = String(value);
                     }
                 }
             }
+
+            var jobId = mappingJobId || buildJobId || null;
+            landuse.poll_completion_event = mappingJobId
+                ? LANDUSE_MAPPING_COMPLETION_EVENT
+                : LANDUSE_BUILD_COMPLETION_EVENT;
+            landuse._mapping_job_id = mappingJobId || null;
 
             if (typeof landuse.set_rq_job_id === "function") {
                 landuse.set_rq_job_id(landuse, jobId);
@@ -617,7 +735,7 @@ var Landuse = (function () {
                 hasLanduse = settings.hasLanduse;
             }
 
-            if (hasLanduse && !bootstrapState.buildTriggered && typeof landuse.triggerEvent === "function") {
+            if (hasLanduse && !mappingJobId && !bootstrapState.buildTriggered && typeof landuse.triggerEvent === "function") {
                 landuse.triggerEvent("LANDUSE_BUILD_TASK_COMPLETED");
                 bootstrapState.buildTriggered = true;
             }

@@ -111,6 +111,9 @@ describe("Landuse controller", () => {
             if (url === "/rq-engine/api/runs/test/cfg/build-landuse") {
                 return Promise.resolve({ body: { job_id: "job-1" } });
             }
+            if (url === "/rq-engine/api/runs/test/cfg/modify-landuse-mapping") {
+                return Promise.resolve({ body: { job_id: "job-map-1" } });
+            }
             if (url === "report/landuse/") {
                 return Promise.resolve({ body: "<div>report</div>" });
             }
@@ -211,33 +214,47 @@ describe("Landuse controller", () => {
         expect(jobErrorCalls[0][1]).toEqual(expect.objectContaining({ job_id: "job-123", status: "failed", source: "poll" }));
     });
 
-    test("modify_mapping posts payload and refreshes report", async () => {
+    test("modify_mapping enqueues rq job for async completion", async () => {
         jest.spyOn(landuse, "report").mockImplementation(() => {});
 
         landuse.modify_mapping("100", "200");
-        await Promise.resolve();
+        await flushPromises();
+        await flushPromises();
 
-        expect(httpPostJsonMock).toHaveBeenCalledWith(
-            "tasks/modify_landuse_mapping/",
-            { dom: "100", newdom: "200" },
-            expect.objectContaining({ form: expect.any(HTMLFormElement) })
+        expect(httpRequestMock).toHaveBeenCalledWith(
+            "/rq-engine/api/runs/test/cfg/modify-landuse-mapping",
+            expect.objectContaining({
+                method: "POST",
+                headers: expect.objectContaining({ "Content-Type": "application/json" }),
+                form: expect.any(HTMLFormElement),
+            })
         );
-        expect(landuse.report).toHaveBeenCalled();
+        const options = httpRequestMock.mock.calls.find((call) => call[0] === "/rq-engine/api/runs/test/cfg/modify-landuse-mapping")[1];
+        expect(JSON.parse(options.body)).toEqual({ dom: "100", newdom: "200" });
+        expect(baseInstance.connect_status_stream).toHaveBeenCalledWith(expect.any(Object));
+        expect(baseInstance.set_rq_job_id).toHaveBeenCalledWith(landuse, "job-map-1");
+        expect(baseInstance.append_status_message).toHaveBeenCalledWith(
+            landuse,
+            expect.stringContaining("modify_landuse_mapping job submitted")
+        );
+        expect(landuse.poll_completion_event).toBe("LANDUSE_MODIFY_MAPPING_TASK_COMPLETED");
+        expect(landuse.report).not.toHaveBeenCalled();
     });
 
-    test("modify_mapping does not refresh report when response body has error payload", async () => {
+    test("modify_mapping handles response error payload without refreshing report", async () => {
         jest.spyOn(landuse, "report").mockImplementation(() => {});
-        httpPostJsonMock.mockResolvedValueOnce({ body: { error: { message: "Failed to modify landuse mapping" } } });
+        httpRequestMock.mockResolvedValueOnce({ body: { error: { message: "Failed to modify landuse mapping" } } });
 
         landuse.modify_mapping("100", "200");
-        await Promise.resolve();
-        await Promise.resolve();
+        await flushPromises();
+        await flushPromises();
 
         expect(landuse.report).not.toHaveBeenCalled();
         expect(baseInstance.pushResponseStacktrace).toHaveBeenCalledWith(
             landuse,
             { error: { message: "Failed to modify landuse mapping" } }
         );
+        expect(baseInstance.disconnect_status_stream).toHaveBeenCalledWith(landuse);
     });
 
     test("mapping select delegate posts updates", async () => {
@@ -248,17 +265,22 @@ describe("Landuse controller", () => {
         `;
         landuse.bindReportEvents();
         jest.spyOn(landuse, "report").mockImplementation(() => {});
-        httpPostJsonMock.mockClear();
+        httpRequestMock.mockClear();
 
         const select = landuse.infoElement.querySelector("select");
         select.dispatchEvent(new Event("change", { bubbles: true }));
-        await Promise.resolve();
+        await flushPromises();
+        await flushPromises();
 
-        expect(httpPostJsonMock).toHaveBeenCalledWith(
-            "tasks/modify_landuse_mapping/",
-            { dom: "5", newdom: "alpha" },
-            expect.any(Object)
+        expect(httpRequestMock).toHaveBeenCalledWith(
+            "/rq-engine/api/runs/test/cfg/modify-landuse-mapping",
+            expect.objectContaining({
+                method: "POST",
+                headers: expect.objectContaining({ "Content-Type": "application/json" }),
+            })
         );
+        const requestOptions = httpRequestMock.mock.calls[0][1];
+        expect(JSON.parse(requestOptions.body)).toEqual({ dom: "5", newdom: "alpha" });
     });
 
     test("toggle button expands details panel", () => {
@@ -280,13 +302,14 @@ describe("Landuse controller", () => {
     test("network errors surface via pushResponseStacktrace", async () => {
         const error = new Error("boom");
         global.WCHttp.isHttpError.mockReturnValue(true);
-        httpPostJsonMock.mockRejectedValueOnce(error);
+        httpRequestMock.mockRejectedValueOnce(error);
 
         landuse.modify_mapping("10", "11");
-        await Promise.resolve();
-        await Promise.resolve();
+        await flushPromises();
+        await flushPromises();
 
         expect(baseInstance.pushResponseStacktrace).toHaveBeenCalledWith(landuse, { error: { message: "boom" } });
+        expect(baseInstance.disconnect_status_stream).toHaveBeenCalledWith(landuse);
     });
 
     test("emits lifecycle events", async () => {
@@ -312,6 +335,50 @@ describe("Landuse controller", () => {
 
         expect(baseInstance.disconnect_status_stream).toHaveBeenCalledTimes(1);
         expect(enableColorMap).toHaveBeenCalledTimes(1);
+        expect(landuse.report).toHaveBeenCalledTimes(1);
+    });
+
+    test("mapping completion trigger is idempotent", () => {
+        jest.spyOn(landuse, "report").mockImplementation(() => {});
+
+        landuse.triggerEvent("LANDUSE_MODIFY_MAPPING_TASK_COMPLETED");
+        landuse.triggerEvent("LANDUSE_MODIFY_MAPPING_TASK_COMPLETED");
+
+        expect(baseInstance.disconnect_status_stream).toHaveBeenCalledTimes(1);
+        expect(landuse.report).toHaveBeenCalledTimes(1);
+    });
+
+    test("mapping completion ignores stale job trigger when newer mapping job is active", () => {
+        jest.spyOn(landuse, "report").mockImplementation(() => {});
+        landuse._mapping_job_id = "job-new";
+
+        landuse.triggerEvent("LANDUSE_MODIFY_MAPPING_TASK_COMPLETED", {
+            tokens: ["rq:job-old", "TRIGGER", "landuse", "LANDUSE_MODIFY_MAPPING_TASK_COMPLETED"]
+        });
+
+        expect(landuse.report).not.toHaveBeenCalled();
+
+        landuse.triggerEvent("LANDUSE_MODIFY_MAPPING_TASK_COMPLETED", {
+            tokens: ["rq:job-new", "TRIGGER", "landuse", "LANDUSE_MODIFY_MAPPING_TASK_COMPLETED"]
+        });
+
+        expect(landuse.report).toHaveBeenCalledTimes(1);
+    });
+
+    test("mapping completion handles poll payload job_id and ignores stale poll completion", () => {
+        jest.spyOn(landuse, "report").mockImplementation(() => {});
+        landuse._mapping_job_id = "job-new";
+
+        landuse.triggerEvent("LANDUSE_MODIFY_MAPPING_TASK_COMPLETED", {
+            job_id: "job-old",
+            status: { status: "finished", job_id: "job-old" }
+        });
+        expect(landuse.report).not.toHaveBeenCalled();
+
+        landuse.triggerEvent("LANDUSE_MODIFY_MAPPING_TASK_COMPLETED", {
+            job_id: "job-new",
+            status: { status: "finished", job_id: "job-new" }
+        });
         expect(landuse.report).toHaveBeenCalledTimes(1);
     });
 
@@ -356,5 +423,20 @@ describe("Landuse controller", () => {
 
         expect(baseInstance.set_rq_job_id).toHaveBeenCalledWith(landuse, "job-abc");
         expect(triggerSpy).toHaveBeenCalledWith("LANDUSE_BUILD_TASK_COMPLETED");
+    });
+
+    test("bootstrap restores mapping job id when mapping update is active", () => {
+        const triggerSpy = jest.spyOn(landuse, "triggerEvent");
+        landuse.report = jest.fn();
+
+        landuse.bootstrap({
+            jobIds: { modify_landuse_mapping_rq: "job-map", build_landuse_rq: "job-abc" },
+            data: { landuse: { hasLanduse: true, mode: 3, singleSelection: 202 } }
+        });
+
+        expect(baseInstance.set_rq_job_id).toHaveBeenCalledWith(landuse, "job-map");
+        expect(landuse.poll_completion_event).toBe("LANDUSE_MODIFY_MAPPING_TASK_COMPLETED");
+        expect(landuse._mapping_job_id).toBe("job-map");
+        expect(triggerSpy).not.toHaveBeenCalledWith("LANDUSE_BUILD_TASK_COMPLETED");
     });
 });

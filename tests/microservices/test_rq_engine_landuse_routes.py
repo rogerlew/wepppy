@@ -83,6 +83,63 @@ def test_build_landuse_enqueues_job(monkeypatch: pytest.MonkeyPatch) -> None:
     assert response.json()["job_id"] == "job-42"
 
 
+def test_modify_landuse_mapping_enqueues_job(monkeypatch: pytest.MonkeyPatch) -> None:
+    _stub_auth(monkeypatch)
+    _stub_prep(monkeypatch)
+    monkeypatch.setattr(landuse_routes, "get_wd", lambda runid: "/tmp/run")
+
+    captured: dict[str, object] = {}
+
+    class DummyJob:
+        id = "job-map-42"
+
+    class DummyQueue:
+        def __init__(self, *args, **kwargs) -> None:
+            pass
+
+        def enqueue_call(self, func, args, timeout=None):
+            captured["func"] = func
+            captured["args"] = args
+            captured["timeout"] = timeout
+            return DummyJob()
+
+    class DummyRedis:
+        def __enter__(self):
+            return self
+
+        def __exit__(self, exc_type, exc, tb):
+            return False
+
+    monkeypatch.setattr(landuse_routes, "Queue", DummyQueue)
+    monkeypatch.setattr(landuse_routes.redis, "Redis", lambda **kwargs: DummyRedis())
+
+    with TestClient(rq_engine.app) as client:
+        response = client.post(
+            "/api/runs/run-1/cfg/modify-landuse-mapping",
+            json={"dom": "44", "newdom": "71"},
+        )
+
+    assert response.status_code == 200
+    assert response.json()["job_id"] == "job-map-42"
+    assert captured["func"] is landuse_routes.modify_landuse_mapping_rq
+    assert captured["args"] == ("run-1", "44", "71")
+
+
+def test_modify_landuse_mapping_requires_payload_fields(monkeypatch: pytest.MonkeyPatch) -> None:
+    _stub_auth(monkeypatch)
+    monkeypatch.setattr(landuse_routes, "get_wd", lambda runid: "/tmp/run")
+
+    with TestClient(rq_engine.app) as client:
+        response = client.post(
+            "/api/runs/run-1/cfg/modify-landuse-mapping",
+            json={"dom": "44"},
+        )
+
+    assert response.status_code == 400
+    payload = response.json()
+    assert payload["error"]["message"] == "dom and newdom must be provided"
+
+
 def test_build_landuse_parse_error(monkeypatch: pytest.MonkeyPatch) -> None:
     _stub_auth(monkeypatch)
     monkeypatch.setattr(landuse_routes, "get_wd", lambda runid: "/tmp/run")

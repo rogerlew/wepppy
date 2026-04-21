@@ -21,7 +21,7 @@ from wepppy.nodb.redis_prep import RedisPrep, TaskEnum
 from wepppy.runtime_paths.errors import NoDirError
 from wepppy.runtime_paths.fs import resolve as _nodir_resolve
 from wepppy.runtime_paths.thaw_freeze import maintenance_lock as nodir_maintenance_lock
-from wepppy.rq.project_rq import build_landuse_rq
+from wepppy.rq.project_rq import build_landuse_rq, modify_landuse_mapping_rq
 from wepppy.weppcloud.utils.helpers import get_wd
 
 from .auth import AuthError, authorize_run_access, require_jwt
@@ -254,6 +254,66 @@ async def build_landuse(runid: str, config: str, request: Request) -> JSONRespon
             return nodir_response
         logger.exception("rq-engine build-landuse enqueue failed")
         return error_response("Building Landuse Failed", status_code=500)
+
+
+@router.post(
+    "/runs/{runid}/{config}/modify-landuse-mapping",
+    summary="Queue a landuse mapping update",
+    description=(
+        "Requires JWT Bearer scope `rq:enqueue` and run access via `authorize_run_access`. "
+        "Enqueues a run-scoped mapping mutation so long-running MOFE remaps do not block web workers."
+    ),
+    tags=["rq-engine", "runs"],
+    operation_id=rq_operation_id("modify_landuse_mapping"),
+    responses=agent_route_responses(
+        success_code=200,
+        success_description="Mapping update accepted; returns enqueued `job_id`.",
+        extra={400: "Validation error for required `dom`/`newdom` payload fields."},
+    ),
+)
+async def modify_landuse_mapping(runid: str, config: str, request: Request) -> JSONResponse:
+    try:
+        claims = require_jwt(request, required_scopes=RQ_ENQUEUE_SCOPES)
+        authorize_run_access(claims, runid)
+    except AuthError as exc:
+        return error_response(exc.message, status_code=exc.status_code, code=exc.code)
+    except Exception:  # broad-except: boundary contract
+        logger.exception("rq-engine modify-landuse-mapping auth failed")
+        return error_response("Failed to authorize request", status_code=401, code="unauthorized")
+
+    try:
+        payload = await parse_request_payload(request)
+        dom = payload.get("dom")
+        newdom = payload.get("newdom")
+        if dom is None or newdom is None:
+            return error_response("dom and newdom must be provided", status_code=400)
+
+        dom_value = str(dom).strip()
+        newdom_value = str(newdom).strip()
+        if not dom_value or not newdom_value:
+            return error_response("dom and newdom must be provided", status_code=400)
+
+        wd = get_wd(runid)
+        _preflight_landuse_mutation_root(wd)
+
+        prep = RedisPrep.getInstance(wd)
+        conn_kwargs = redis_connection_kwargs(RedisDB.RQ)
+        with redis.Redis(**conn_kwargs) as redis_conn:
+            q = Queue(connection=redis_conn)
+            job = q.enqueue_call(
+                modify_landuse_mapping_rq,
+                (runid, dom_value, newdom_value),
+                timeout=RQ_TIMEOUT,
+            )
+            prep.set_rq_job_id("modify_landuse_mapping_rq", job.id)
+
+        return JSONResponse({"job_id": job.id})
+    except Exception as exc:  # broad-except: boundary contract
+        nodir_response = _maybe_nodir_error_response(exc)
+        if nodir_response is not None:
+            return nodir_response
+        logger.exception("rq-engine modify-landuse-mapping enqueue failed")
+        return error_response("Failed to modify landuse mapping", status_code=500)
 
 
 __all__ = ["router"]
