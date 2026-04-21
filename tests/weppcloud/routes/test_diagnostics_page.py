@@ -17,6 +17,7 @@ REPO_ROOT = Path(__file__).resolve().parents[3]
 DIAGNOSTICS_TEMPLATE = REPO_ROOT / "wepppy" / "weppcloud" / "templates" / "diagnostics" / "diagnostics.htm"
 DIAGNOSTICS_CORE_JS = REPO_ROOT / "wepppy" / "weppcloud" / "static" / "js" / "diagnostics" / "core.js"
 DIAGNOSTICS_AUTH_CHECKS_JS = REPO_ROOT / "wepppy" / "weppcloud" / "static" / "js" / "diagnostics" / "auth_checks.js"
+DIAGNOSTICS_BANDWIDTH_JS = REPO_ROOT / "wepppy" / "weppcloud" / "static" / "js" / "diagnostics" / "bandwidth_checks.js"
 DIAGNOSTICS_REALTIME_JS = REPO_ROOT / "wepppy" / "weppcloud" / "static" / "js" / "diagnostics" / "diagnostics-realtime.js"
 DIAGNOSTICS_REPORT_JS = REPO_ROOT / "wepppy" / "weppcloud" / "static" / "js" / "diagnostics" / "report.js"
 DIAGNOSTICS_PAGE_JS = REPO_ROOT / "wepppy" / "weppcloud" / "static" / "js" / "diagnostics" / "page.js"
@@ -77,9 +78,18 @@ def test_diagnostics_template_includes_base_and_noscript_blocker() -> None:
     assert "data-diagnostics-copy-json" in source
     assert "static_url('js/diagnostics/core.js')" in source
     assert "static_url('js/diagnostics/auth_checks.js')" in source
+    assert "static_url('js/diagnostics/bandwidth_checks.js')" in source
     assert "static_url('js/diagnostics/report.js')" in source
     assert "static_url('js/diagnostics/diagnostics-realtime.js')" in source
     assert "static_url('js/diagnostics/page.js')" in source
+
+    core_idx = source.index("static_url('js/diagnostics/core.js')")
+    auth_idx = source.index("static_url('js/diagnostics/auth_checks.js')")
+    bandwidth_idx = source.index("static_url('js/diagnostics/bandwidth_checks.js')")
+    report_idx = source.index("static_url('js/diagnostics/report.js')")
+    realtime_idx = source.index("static_url('js/diagnostics/diagnostics-realtime.js')")
+    page_idx = source.index("static_url('js/diagnostics/page.js')")
+    assert core_idx < auth_idx < bandwidth_idx < report_idx < realtime_idx < page_idx
 
 
 def test_diagnostics_core_js_uses_site_prefix_dataset_contract() -> None:
@@ -92,6 +102,7 @@ def test_diagnostics_core_js_uses_site_prefix_dataset_contract() -> None:
 def test_diagnostics_assets_include_core_report_page_modules() -> None:
     assert DIAGNOSTICS_CORE_JS.exists()
     assert DIAGNOSTICS_AUTH_CHECKS_JS.exists()
+    assert DIAGNOSTICS_BANDWIDTH_JS.exists()
     assert DIAGNOSTICS_REALTIME_JS.exists()
     assert DIAGNOSTICS_REPORT_JS.exists()
     assert DIAGNOSTICS_PAGE_JS.exists()
