@@ -4,6 +4,7 @@ from typing import Any, Dict, Optional
 
 DISTURBED_BD_MIN_G_CM3: float
 DISTURBED_BD_MAX_G_CM3: float
+VG_PAR_KEYS: tuple[str, ...]
 
 class WeppSoilUtil:
     obj: Dict[str, Any]
