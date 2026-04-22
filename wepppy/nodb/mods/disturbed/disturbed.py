@@ -42,6 +42,7 @@ import shutil
 import tempfile
 import inspect
 import logging
+import time
 from collections import Counter
 from datetime import datetime, timezone
 from subprocess import Popen, PIPE
@@ -50,6 +51,8 @@ from os.path import exists as _exists
 from os.path import split as _split
 from copy import deepcopy
 from collections import Counter
+from concurrent.futures import FIRST_COMPLETED, wait
+from concurrent.futures.process import BrokenProcessPool
 from typing import Optional, Dict, List, Tuple, Any, Union, Sequence
 
 import rasterio
@@ -61,14 +64,14 @@ from osgeo import gdal
 
 from deprecated import deprecated
 
-from wepppy.all_your_base import isint, isfloat
+from wepppy.all_your_base import NCPU, isint, isfloat
 from wepppy.all_your_base.geo import wgs84_proj4, read_raster, haversine, raster_stacker, validate_srs
 from wepppy.soils.ssurgo import SoilSummary
 from wepppy.wepp.soils.utils import simple_texture, WeppSoilUtil, SoilMultipleOfeSynth
 
 from wepppy.nodb.core import *
 from ...redis_prep import RedisPrep, TaskEnum
-from ...base import NoDbBase, TriggerEvents, nodb_setter
+from ...base import NoDbBase, TriggerEvents, createProcessPoolExecutor, nodb_setter
 from ..baer.sbs_map import SoilBurnSeverityMap
 from .. import MODS_DIR, EXTENDED_MODS_DATA
 
@@ -536,6 +539,36 @@ def upgrade_disturbed_land_soil_lookup(
         },
     )
     return changed
+
+
+def _build_disturbed_mofe_soil(task_args: Dict[str, Any]) -> Tuple[str, float]:
+    """Build one disturbed MOFE soil file and return its key plus elapsed seconds."""
+
+    started = time.time()
+    replacements = task_args.get('replacements')
+    replacement_values = dict(replacements) if isinstance(replacements, dict) else None
+
+    soil_u = WeppSoilUtil(task_args['source_soil_path'])
+    if task_args['sol_ver'] == 7778.0:
+        new = soil_u.to_7778disturbed(
+            replacement_values,
+            h0_max_om=task_args.get('h0_max_om'),
+            recompute_wp_fc_using_rosetta_on_bd_override=task_args[
+                'recompute_wp_fc_using_rosetta_on_bd_override'
+            ],
+        )
+    else:
+        new = soil_u.to_over9000(
+            replacement_values,
+            h0_max_om=task_args.get('h0_max_om'),
+            recompute_wp_fc_using_rosetta_on_bd_override=task_args[
+                'recompute_wp_fc_using_rosetta_on_bd_override'
+            ],
+            version=task_args['sol_ver'],
+        )
+
+    new.write(task_args['output_path'])
+    return task_args['disturbed_mukey'], round(time.time() - started, 3)
 
 
 class DisturbedNoDbLockedException(Exception):
@@ -1631,7 +1664,7 @@ class Disturbed(NoDbBase):
         wd = self.wd
         sol_ver = self.sol_ver
 
-        ron = Ron.getInstance(wd)
+        _ = Ron.getInstance(wd)
         landuse = self.landuse_instance
         soils = self.soils_instance
 
@@ -1642,7 +1675,12 @@ class Disturbed(NoDbBase):
 
         soils.logger.info(f'Disturbed::modify_mofe_soils, sol_ver: {sol_ver}')
 
+        generation_tasks: List[Dict[str, Any]] = []
+        hillslope_plans: List[Dict[str, Any]] = []
+
         with soils.locked():
+            planned_soil_keys = set(soils.soils.keys())
+
             for topaz_id, mukey in soils.domsoil_d.items():
                 if str(topaz_id).endswith('4'):
                     continue
@@ -1650,8 +1688,8 @@ class Disturbed(NoDbBase):
                 self.logger.info(f'  topaz_id: {topaz_id}, mukey: {mukey}')
                 soils.logger.info(f'  topaz_id: {topaz_id}, mukey: {mukey}')
 
-                stack = []
-                desc = []
+                stack: List[str] = []
+                desc: List[str] = []
 
                 _soil = soils.soils[mukey]
                 clay = _soil.clay
@@ -1661,6 +1699,13 @@ class Disturbed(NoDbBase):
                 assert isfloat(sand), sand
 
                 texid = simple_texture(clay=clay, sand=sand)
+                source_soil_path = self._resolve_source_soil_path(
+                    soils,
+                    getattr(_soil, 'fname', None),
+                    topaz_id=str(topaz_id),
+                    mukey=str(mukey),
+                    soil_summary_dir=getattr(_soil, 'soils_dir', None),
+                )
 
                 assert len(landuse.domlc_mofe_d[topaz_id]) > 0, topaz_id
 
@@ -1694,67 +1739,199 @@ class Disturbed(NoDbBase):
                         disturbed_mukey = f'{mukey}-{texid}-{man.disturbed_class}'
 
                     disturbed_fn = f'{disturbed_mukey}.sol'
-                    if disturbed_mukey not in soils.soils:
+                    output_path = _join(soils.soils_dir, disturbed_fn)
+                    if disturbed_mukey not in planned_soil_keys:
                         _h0_max_om = None
-                        if man.disturbed_class is not None:
-                            if 'fire' in man.disturbed_class:
-                                _h0_max_om = self.h0_max_om
-     
-                        soil_u = WeppSoilUtil(
-                            self._resolve_source_soil_path(
-                                soils,
-                                getattr(_soil, 'fname', None),
-                                topaz_id=str(topaz_id),
-                                mukey=str(mukey),
-                                soil_summary_dir=getattr(_soil, 'soils_dir', None),
+                        if man.disturbed_class is not None and 'fire' in man.disturbed_class:
+                            _h0_max_om = self.h0_max_om
+
+                        generation_tasks.append(
+                            dict(
+                                disturbed_mukey=disturbed_mukey,
+                                disturbed_fn=disturbed_fn,
+                                source_soil_path=source_soil_path,
+                                output_path=output_path,
+                                replacements=dict(replacements) if replacements is not None else None,
+                                sol_ver=sol_ver,
+                                h0_max_om=_h0_max_om,
+                                recompute_wp_fc_using_rosetta_on_bd_override=(
+                                    recompute_wp_fc_using_rosetta_on_bd_override
+                                ),
+                                desc=f'{_soil.desc} - {man.disturbed_class}',
+                                meta_fn=_soil.meta_fn,
                             )
                         )
-                        replacement_values = dict(replacements) if replacements is not None else None
-                        if sol_ver == 7778.0:
-                            new = soil_u.to_7778disturbed(
-                                replacement_values,
-                                h0_max_om=_h0_max_om,
-                                recompute_wp_fc_using_rosetta_on_bd_override=(
-                                    recompute_wp_fc_using_rosetta_on_bd_override
-                                ),
-                            )
-                        else:
-                            new = soil_u.to_over9000(
-                                replacement_values,
-                                h0_max_om=_h0_max_om,
-                                recompute_wp_fc_using_rosetta_on_bd_override=(
-                                    recompute_wp_fc_using_rosetta_on_bd_override
-                                ),
-                                version=sol_ver,
-                            )
-
-                        new.write(_join(soils.soils_dir, disturbed_fn))
-
-                        _desc = f'{_soil.desc} - {man.disturbed_class}'
-                        soils.soils[disturbed_mukey] = SoilSummary(mukey=disturbed_mukey,
-                                                               fname=disturbed_fn,
-                                                               soils_dir=soils.soils_dir,
-                                                               desc=_desc,
-                                                               meta_fn=_soil.meta_fn,
-                                                               build_date=str(datetime.now()))
+                        planned_soil_keys.add(disturbed_mukey)
 
                     desc.append(f'{man.disturbed_class}')
-                    stack.append(_join(soils.soils_dir, disturbed_fn))
+                    stack.append(output_path)
 
                 key = f'hill_{topaz_id}.mofe'
-                with self.timed('  Generating MOFE soil file with SoilMultipleOfeSynth'):
-                    sol_fn = f'{key}.sol'
-                    mofe_synth = SoilMultipleOfeSynth(stack=stack)
-                    mofe_synth.write(_join(soils.soils_dir, sol_fn))
-               
+                hillslope_plans.append(
+                    dict(
+                        topaz_id=topaz_id,
+                        key=key,
+                        sol_fn=f'{key}.sol',
+                        stack=stack,
+                        desc='|'.join(desc),
+                    )
+                )
+
+        cpu_count = os.cpu_count() or 1
+        ncpu_override = os.getenv('WEPPPY_NCPU')
+        max_workers = NCPU if ncpu_override else cpu_count
+
+        if max_workers < 1:
+            max_workers = 1
+        if ncpu_override:
+            if max_workers > NCPU:
+                max_workers = NCPU
+        elif max_workers > max(cpu_count, 20):
+            max_workers = max(cpu_count, 20)
+
+        if generation_tasks:
+            max_workers = min(max_workers, len(generation_tasks))
+
+        def _run_mofe_soil_pool(prefer_spawn: bool) -> None:
+            with createProcessPoolExecutor(
+                max_workers=max_workers,
+                logger=self.logger,
+                prefer_spawn=prefer_spawn,
+            ) as executor:
+                futures = [executor.submit(_build_disturbed_mofe_soil, task) for task in generation_tasks]
+                futures_n = len(futures)
+                count = 0
+                pending_futures = set(futures)
+                last_progress_time = time.time()
+
+                while pending_futures:
+                    done, pending_futures = wait(
+                        pending_futures, timeout=5, return_when=FIRST_COMPLETED
+                    )
+
+                    if not done:
+                        since_progress = time.time() - last_progress_time
+                        pending_count = len(pending_futures)
+
+                        if since_progress >= 60:
+                            self.logger.error(
+                                '  MOFE disturbed soil tasks still pending after %.1fs; %s tasks waiting.',
+                                round(since_progress, 1),
+                                pending_count,
+                            )
+                        else:
+                            self.logger.info(
+                                '  Waiting on MOFE disturbed soil tasks (pending=%s, %.1fs since last completion).',
+                                pending_count,
+                                round(since_progress, 1),
+                            )
+                        continue
+
+                    for future in done:
+                        try:
+                            disturbed_mukey, elapsed_time = future.result()
+                            count += 1
+                            self.logger.info(
+                                '  (%s/%s) Completed MOFE disturbed soil build for %s in %ss',
+                                count,
+                                futures_n,
+                                disturbed_mukey,
+                                elapsed_time,
+                            )
+                            last_progress_time = time.time()
+                        except BrokenProcessPool as exc:
+                            self.logger.error(
+                                '  MOFE disturbed soil process pool terminated unexpectedly: %s',
+                                exc,
+                            )
+                            for pending_future in pending_futures:
+                                pending_future.cancel()
+                            raise
+                        except Exception:
+                            for pending_future in pending_futures:
+                                pending_future.cancel()
+                            raise
+
+        def _run_mofe_soil_sequential() -> None:
+            total = len(generation_tasks)
+            self.logger.warning('  Running MOFE disturbed soil generation sequentially')
+            for idx, task in enumerate(generation_tasks, start=1):
+                disturbed_mukey, elapsed_time = _build_disturbed_mofe_soil(task)
+                self.logger.info(
+                    '  (%s/%s) Completed MOFE disturbed soil build for %s in %ss [sequential]',
+                    idx,
+                    total,
+                    disturbed_mukey,
+                    elapsed_time,
+                )
+
+        if generation_tasks:
+            run_concurrent = max_workers > 1 and len(generation_tasks) > 1
+            self.logger.info(
+                '  Prepared %s MOFE disturbed soil generation task(s) with max_workers=%s',
+                len(generation_tasks),
+                max_workers,
+            )
+            if run_concurrent:
+                self.logger.info('  Submitting MOFE disturbed soil tasks to ProcessPoolExecutor')
+                try:
+                    _run_mofe_soil_pool(prefer_spawn=True)
+                except BrokenProcessPool as exc:
+                    self.logger.warning(
+                        '  Retrying MOFE disturbed soil pool with fork-based executor after spawn failure (%s)',
+                        exc,
+                    )
+                    try:
+                        _run_mofe_soil_pool(prefer_spawn=False)
+                    except BrokenProcessPool as retry_exc:
+                        self.logger.warning(
+                            '  Falling back to sequential MOFE disturbed soil generation after process pool failures (%s)',
+                            retry_exc,
+                        )
+                        _run_mofe_soil_sequential()
+            else:
+                _run_mofe_soil_sequential()
+        else:
+            self.logger.info('  No MOFE disturbed soils required regeneration.')
+
+        for idx, hillslope_plan in enumerate(hillslope_plans, start=1):
+            with self.timed('  Generating MOFE soil file with SoilMultipleOfeSynth'):
+                mofe_synth = SoilMultipleOfeSynth(stack=hillslope_plan['stack'])
+                mofe_synth.write(_join(soils.soils_dir, hillslope_plan['sol_fn']))
+
+            self.logger.info(
+                '  (%s/%s) Generated MOFE soil file for topaz_id=%s',
+                idx,
+                len(hillslope_plans),
+                hillslope_plan['topaz_id'],
+            )
+
+        with soils.locked():
+            for task in generation_tasks:
+                disturbed_mukey = task['disturbed_mukey']
+                if disturbed_mukey not in soils.soils:
+                    soils.soils[disturbed_mukey] = SoilSummary(
+                        mukey=disturbed_mukey,
+                        fname=task['disturbed_fn'],
+                        soils_dir=soils.soils_dir,
+                        desc=task['desc'],
+                        meta_fn=task['meta_fn'],
+                        build_date=str(datetime.now()),
+                    )
+
+            for hillslope_plan in hillslope_plans:
+                topaz_id = hillslope_plan['topaz_id']
+                key = hillslope_plan['key']
                 soils.domsoil_d[topaz_id] = key
-                soils.soils[key] = SoilSummary(mukey=key,
-                                               fname=sol_fn,
-                                               soils_dir=soils.soils_dir,
-                                               desc='|'.join(desc),
-                                               meta_fn=None,
-                                               build_date=str(datetime.now()))
-           
+                soils.soils[key] = SoilSummary(
+                    mukey=key,
+                    fname=hillslope_plan['sol_fn'],
+                    soils_dir=soils.soils_dir,
+                    desc=hillslope_plan['desc'],
+                    meta_fn=None,
+                    build_date=str(datetime.now()),
+                )
+
             with self.timed('  Recalculating soil areas and pct_coverage'):
                 watershed = self.watershed_instance
 
