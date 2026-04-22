@@ -17,6 +17,7 @@ from wepppy.all_your_base import isfloat, try_parse, try_parse_float
 
 DISTURBED_BD_MIN_G_CM3 = 0.6
 DISTURBED_BD_MAX_G_CM3 = 2.2
+VG_PAR_KEYS = ("theta_r", "theta_s", "alpha", "npar", "ks", "wp", "fc")
 
 
 def _replace_parameter(original: Any, replacement: Any) -> Any:
@@ -104,6 +105,20 @@ def _compute_rosetta_wp_fc(horizon: Dict[str, Any]) -> tuple[float, float]:
         )
 
     return float(wp), float(fc)
+
+
+def _require_rosetta3_for_serialization(datver: float):
+    """Return Rosetta3 predictor; fail fast for over-9000 serialization when unavailable."""
+    if datver < 9002.0:
+        return None
+    try:
+        from rosetta import Rosetta3
+    except (ModuleNotFoundError, ImportError) as exc:
+        raise RuntimeError(
+            "Rosetta3 is required for datver>=9002 soil serialization; "
+            "install the vendored rosetta dependency."
+        ) from exc
+    return Rosetta3()
 
 
 class WeppSoilUtil(object):
@@ -482,9 +497,6 @@ class WeppSoilUtil(object):
 
     def __str__(self) -> str:
         """Serialize the soil definition back into WEPP ``.sol`` text."""
-        from rosetta import Rosetta3
-        r3 = Rosetta3()
-
         header = self.obj['header'] 
         header = [f'# {L}' for L in header]
 
@@ -495,6 +507,7 @@ class WeppSoilUtil(object):
         ofes = self.obj['ofes']
 
         assert datver in (7778.0, 9001.0, 9002.0, 9003.0, 9005.0), datver
+        r3 = _require_rosetta3_for_serialization(datver)
 
         s = [str(int(datver))] 
         s += header
@@ -570,8 +583,7 @@ class WeppSoilUtil(object):
                     silt = 100.0 - clay - sand
                     bd = horizon['bd']
                     res = r3.predict_kwargs(clay=clay, sand=sand, silt=silt, bd=bd)
-                    vg_pars = 'theta_r theta_s alpha npar ks wp fc'.split()
-                    s[-1] += '\t ' + '\t '.join([f'{res[p]:.4}' for p in vg_pars])
+                    s[-1] += '\t ' + '\t '.join([f'{res[p]:.4}' for p in VG_PAR_KEYS])
 
             res_lyr = ofe['res_lyr']
             if res_lyr is not None:
@@ -584,9 +596,6 @@ class WeppSoilUtil(object):
 
     def __repr__(self) -> str:
         """Return a brief developer-friendly summary of the soil object."""
-        from rosetta import Rosetta3
-        r3 = Rosetta3()
-
         header = self.obj['header'] 
         header = [f'# {L}' for L in header]
 
@@ -597,6 +606,7 @@ class WeppSoilUtil(object):
         ofes = self.obj['ofes']
 
         assert datver in (7778.0, 9001.0, 9002.0, 9003.0, 9005.0), datver
+        r3 = _require_rosetta3_for_serialization(datver)
 
         s = [f'datver:{int(datver)}'] 
         s += header
@@ -674,8 +684,7 @@ class WeppSoilUtil(object):
                     silt = 100.0 - clay - sand
                     bd = horizon['bd']
                     res = r3.predict_kwargs(clay=clay, sand=sand, silt=silt, bd=bd)
-                    vg_pars = 'theta_r theta_s alpha npar ks wp fc'.split()
-                    s[-1] += '\t ' + '\t '.join([f'{p}:{res[p]:.4}' for p in vg_pars])
+                    s[-1] += '\t ' + '\t '.join([f'{p}:{res[p]:.4}' for p in VG_PAR_KEYS])
 
             s.append('\t</Horizons>')
             s.append('<Restrictive Layer>')

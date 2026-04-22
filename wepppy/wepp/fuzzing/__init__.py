@@ -9,6 +9,15 @@ from .seeded_soil_landuse_generators import (
     sample_seed_tuples,
     summarize_seed_inventory,
 )
+from .single_ofe_stratified_campaign import (
+    EligibleRecord,
+    QuarantineRecord,
+    StratificationThresholds,
+    preflight_single_ofe_seeds,
+    select_stratified_seeds,
+    shard_selected_seeds,
+    stratify_eligible_seeds,
+)
 
 __all__ = [
     "SeedTuple",
@@ -18,4 +27,11 @@ __all__ = [
     "sample_seed_tuples",
     "summarize_seed_inventory",
     "evaluate_soft_invariants",
+    "EligibleRecord",
+    "QuarantineRecord",
+    "StratificationThresholds",
+    "preflight_single_ofe_seeds",
+    "stratify_eligible_seeds",
+    "select_stratified_seeds",
+    "shard_selected_seeds",
 ]

@@ -567,6 +567,41 @@ def test_to_7778disturbed_uses_to7778_when_source_not_7778(make_soil_util, monke
     assert disturbed.obj["ofes"][0]["ki"] == "4"
 
 
+def test_str_datver9002_requires_rosetta3(make_soil_util, monkeypatch):
+    util = make_soil_util()
+    util.obj["datver"] = 9002.0
+    rosetta_stub = types.ModuleType("rosetta")
+    monkeypatch.setitem(sys.modules, "rosetta", rosetta_stub)
+
+    with pytest.raises(RuntimeError, match="Rosetta3 is required for datver>=9002"):
+        str(util)
+
+
+def test_str_datver9002_uses_rosetta_predictions(make_soil_util, monkeypatch):
+    util = make_soil_util()
+    util.obj["datver"] = 9002.0
+
+    class _FakeRosetta3:
+        def predict_kwargs(self, **_kwargs):
+            return {
+                "theta_r": 0.01,
+                "theta_s": 0.43,
+                "alpha": 0.02,
+                "npar": 1.5,
+                "ks": 0.77,
+                "wp": 0.12,
+                "fc": 0.34,
+            }
+
+    rosetta_stub = types.ModuleType("rosetta")
+    rosetta_stub.Rosetta3 = _FakeRosetta3
+    monkeypatch.setitem(sys.modules, "rosetta", rosetta_stub)
+
+    serialized = str(util)
+    assert "0.01\t 0.43\t 0.02\t 1.5\t 0.77\t 0.12\t 0.34" in serialized
+    assert "0.0000\t 0.0000\t 0.0000\t 0.0000\t 0.0000\t 0.0000\t 0.0000" not in serialized
+
+
 def test_to_over9000_applies_replacements_and_sets_datver(make_soil_util):
     util = make_soil_util()
 

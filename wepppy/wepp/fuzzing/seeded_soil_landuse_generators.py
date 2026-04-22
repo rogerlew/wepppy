@@ -19,6 +19,15 @@ from wepppy.wepp.soils.utils import SoilMultipleOfeSynth, WeppSoilUtil
 
 SUPPORTED_EXTENSIONS: tuple[str, ...] = ("sol", "man", "slp", "cli")
 DEFAULT_GENERATOR_SEED = 20260421
+DEFAULT_MUTATION_PROFILE = "P0_BASELINE"
+MUTATION_PROFILES: tuple[str, ...] = (
+    DEFAULT_MUTATION_PROFILE,
+    "P1_DENOMINATOR_EDGE",
+    "P2_EVENT_EDGE",
+    "P3_CONDUCTIVITY_SATURATION_CONTRAST",
+    "P4_TEXTURE_DENSITY_DISCONTINUITY",
+    "P5_SLOPE_RESPONSE_AMPLIFICATION",
+)
 
 
 @dataclass(frozen=True, slots=True)
@@ -213,8 +222,14 @@ def _existing_generated_paths(case_dir: Path, stem: str) -> dict[str, str | None
     return generated_paths
 
 
-def _mutate_soil(soil_util: WeppSoilUtil, rng: random.Random) -> list[dict[str, Any]]:
+def _mutate_soil(
+    soil_util: WeppSoilUtil,
+    rng: random.Random,
+    *,
+    mutation_profile_id: str = DEFAULT_MUTATION_PROFILE,
+) -> list[dict[str, Any]]:
     mutations: list[dict[str, Any]] = []
+    profile = mutation_profile_id.upper().strip() or DEFAULT_MUTATION_PROFILE
     for ofe_idx, ofe in enumerate(soil_util.obj.get("ofes", [])):
         sat_value = _to_float(ofe.get("sat"))
         if sat_value is not None:
@@ -252,6 +267,111 @@ def _mutate_soil(soil_util: WeppSoilUtil, rng: random.Random) -> list[dict[str, 
                     }
                 )
 
+            if profile == "P1_DENOMINATOR_EDGE":
+                for key, low, high in (
+                    ("ksat", 1.0e-6, 0.02),
+                    ("fc", 1.0e-6, 0.04),
+                    ("wp", 1.0e-6, 0.03),
+                ):
+                    current = _to_float(horizon.get(key))
+                    if current is None:
+                        continue
+                    horizon[key] = round(max(min(current, high), low), 6)
+                    mutations.append(
+                        {
+                            "target": f"ofe[{ofe_idx}].horizons[{horizon_idx}].{key}",
+                            "mode": "profile_clamp",
+                            "profile": profile,
+                            "bounds": [low, high],
+                            "value": horizon[key],
+                        }
+                    )
+
+            if profile == "P3_CONDUCTIVITY_SATURATION_CONTRAST":
+                ksat = _to_float(horizon.get("ksat"))
+                fc = _to_float(horizon.get("fc"))
+                wp = _to_float(horizon.get("wp"))
+                if ksat is not None:
+                    horizon["ksat"] = round(max(ksat * rng.uniform(2.5, 5.5), 1.0e-6), 6)
+                    mutations.append(
+                        {
+                            "target": f"ofe[{ofe_idx}].horizons[{horizon_idx}].ksat",
+                            "mode": "profile_contrast",
+                            "profile": profile,
+                            "value": horizon["ksat"],
+                        }
+                    )
+                if fc is not None and wp is not None:
+                    horizon["fc"] = round(max(fc * rng.uniform(1.15, 1.6), 1.0e-6), 6)
+                    horizon["wp"] = round(max(wp * rng.uniform(0.2, 0.65), 1.0e-6), 6)
+                    mutations.append(
+                        {
+                            "target": f"ofe[{ofe_idx}].horizons[{horizon_idx}].fc_wp_pair",
+                            "mode": "profile_pair",
+                            "profile": profile,
+                            "value": {"fc": horizon["fc"], "wp": horizon["wp"]},
+                        }
+                    )
+
+            if profile == "P4_TEXTURE_DENSITY_DISCONTINUITY":
+                sand = _to_float(horizon.get("sand"))
+                clay = _to_float(horizon.get("clay"))
+                bd = _to_float(horizon.get("bd"))
+                if sand is not None and clay is not None:
+                    if horizon_idx % 2 == 0:
+                        horizon["sand"] = round(
+                            min(99.0, max(0.1, sand + rng.uniform(18.0, 32.0))), 6
+                        )
+                        horizon["clay"] = round(
+                            min(99.0, max(0.1, clay - rng.uniform(8.0, 18.0))), 6
+                        )
+                    else:
+                        horizon["sand"] = round(
+                            min(99.0, max(0.1, sand - rng.uniform(8.0, 18.0))), 6
+                        )
+                        horizon["clay"] = round(
+                            min(99.0, max(0.1, clay + rng.uniform(18.0, 32.0))), 6
+                        )
+                    mutations.append(
+                        {
+                            "target": f"ofe[{ofe_idx}].horizons[{horizon_idx}].texture_pair",
+                            "mode": "profile_discontinuity",
+                            "profile": profile,
+                            "value": {"sand": horizon["sand"], "clay": horizon["clay"]},
+                        }
+                    )
+                if bd is not None:
+                    horizon["bd"] = round(min(2.35, max(0.55, bd * rng.uniform(0.7, 1.55))), 6)
+                    mutations.append(
+                        {
+                            "target": f"ofe[{ofe_idx}].horizons[{horizon_idx}].bd",
+                            "mode": "profile_discontinuity",
+                            "profile": profile,
+                            "value": horizon["bd"],
+                        }
+                    )
+
+        if profile == "P3_CONDUCTIVITY_SATURATION_CONTRAST" and sat_value is not None:
+            ofe["sat"] = round(0.01 if sat_value >= 0.5 else 0.92, 6)
+            mutations.append(
+                {
+                    "target": f"ofe[{ofe_idx}].sat",
+                    "mode": "profile_contrast",
+                    "profile": profile,
+                    "value": ofe["sat"],
+                }
+            )
+        if profile == "P5_SLOPE_RESPONSE_AMPLIFICATION" and sat_value is not None:
+            ofe["sat"] = round(min(1.45, max(0.01, sat_value * rng.uniform(0.12, 1.95))), 6)
+            mutations.append(
+                {
+                    "target": f"ofe[{ofe_idx}].sat",
+                    "mode": "profile_slope_amplification",
+                    "profile": profile,
+                    "value": ofe["sat"],
+                }
+            )
+
             for key in ("sand", "clay"):
                 current = _to_float(horizon.get(key))
                 if current is None:
@@ -282,9 +402,13 @@ def _set_management_override(
 
 
 def _mutate_management(
-    management: Any, rng: random.Random
+    management: Any,
+    rng: random.Random,
+    *,
+    mutation_profile_id: str = DEFAULT_MUTATION_PROFILE,
 ) -> list[dict[str, Any]]:
     mutations: list[dict[str, Any]] = []
+    profile = mutation_profile_id.upper().strip() or DEFAULT_MUTATION_PROFILE
     candidates = [
         ("ini.data.cancov", round(rng.uniform(-0.2, 1.35), 6)),
         ("ini.data.inrcov", round(rng.uniform(-0.2, 1.35), 6)),
@@ -297,6 +421,33 @@ def _mutate_management(
         result = _set_management_override(management, attr, value)
         if result is not None:
             mutations.append(result)
+
+    if profile == "P2_EVENT_EDGE":
+        edge_candidates = [
+            ("ini.data.cancov", round(rng.uniform(-0.25, 0.08), 6)),
+            ("ini.data.inrcov", round(rng.uniform(0.95, 1.35), 6)),
+            ("plant.data.rdmax", round(rng.uniform(-0.25, 0.18), 6)),
+            ("plant.data.xmxlai", round(rng.uniform(-0.5, 0.35), 6)),
+        ]
+        for attr, value in edge_candidates:
+            result = _set_management_override(management, attr, value)
+            if result is not None:
+                result["mode"] = "profile_event_edge"
+                result["profile"] = profile
+                mutations.append(result)
+
+    if profile == "P5_SLOPE_RESPONSE_AMPLIFICATION":
+        slope_candidates = [
+            ("ini.data.rilcov", round(rng.uniform(-0.25, 0.25), 6)),
+            ("plant.data.rdmax", round(rng.uniform(2.2, 5.25), 6)),
+            ("plant.data.xmxlai", round(rng.uniform(5.5, 13.0), 6)),
+        ]
+        for attr, value in slope_candidates:
+            result = _set_management_override(management, attr, value)
+            if result is not None:
+                result["mode"] = "profile_slope_amplification"
+                result["profile"] = profile
+                mutations.append(result)
 
     return mutations
 
@@ -455,9 +606,12 @@ class SeededSoilLanduseGenerator:
         seed: SeedTuple,
         rng: random.Random,
         output_sol_path: Path,
+        mutation_profile_id: str = DEFAULT_MUTATION_PROFILE,
     ) -> tuple[WeppSoilUtil, list[dict[str, Any]]]:
         soil_util = WeppSoilUtil(seed.sol_path)
-        soil_mutations = _mutate_soil(soil_util, rng)
+        soil_mutations = _mutate_soil(
+            soil_util, rng, mutation_profile_id=mutation_profile_id
+        )
 
         ntemp = int(soil_util.obj.get("ntemp", 1))
         if ntemp <= 1:
@@ -484,6 +638,7 @@ class SeededSoilLanduseGenerator:
         seed: SeedTuple,
         case_index: int,
         output_root: str | Path,
+        case_config: dict[str, Any] | None = None,
     ) -> dict[str, Any]:
         """Generate one case with structural hard-fails and soft invariant metadata."""
 
@@ -496,6 +651,12 @@ class SeededSoilLanduseGenerator:
         case_id = f"m2-case-{case_index:04d}-{seed.seed_id}"
         mutation_seed = _mutation_seed(self.random_seed, case_index, seed.seed_id)
         rng = random.Random(mutation_seed)
+        config = case_config or {}
+        mutation_profile_id = str(
+            config.get("mutation_profile_id", DEFAULT_MUTATION_PROFILE)
+        ).strip()
+        if mutation_profile_id not in MUTATION_PROFILES:
+            raise ValueError(f"Unknown mutation_profile_id={mutation_profile_id}")
 
         case_dir = Path(output_root) / case_id
         if case_dir.exists():
@@ -509,11 +670,16 @@ class SeededSoilLanduseGenerator:
         generated_run = case_dir / f"{seed.stem}.run"
 
         parsed_generated_soil, soil_mutations = self._write_mutated_soil(
-            seed=seed, rng=rng, output_sol_path=generated_sol
+            seed=seed,
+            rng=rng,
+            output_sol_path=generated_sol,
+            mutation_profile_id=mutation_profile_id,
         )
 
         management, management_source = self._choose_management_source(seed=seed, rng=rng)
-        management_mutations = _mutate_management(management, rng)
+        management_mutations = _mutate_management(
+            management, rng, mutation_profile_id=mutation_profile_id
+        )
         try:
             with generated_man.open("w", encoding="utf-8") as handle:
                 handle.write(str(management))
@@ -524,7 +690,9 @@ class SeededSoilLanduseGenerator:
                 raise
 
             fallback_management = read_management(seed.man_path)
-            management_mutations = _mutate_management(fallback_management, rng)
+            management_mutations = _mutate_management(
+                fallback_management, rng, mutation_profile_id=mutation_profile_id
+            )
             management_source = {
                 "source": "seed_fallback_after_catalog_parse_failure",
                 "seed_man_path": seed.man_path,
@@ -556,11 +724,14 @@ class SeededSoilLanduseGenerator:
             "seed_id": seed.seed_id,
             "seed_lineage": seed.as_dict(),
             "mutation_seed": mutation_seed,
+            "mutation_profile_id": mutation_profile_id,
             "lineage": {
                 "soil_mutations": soil_mutations,
                 "management_source": management_source,
                 "management_mutations": management_mutations,
                 "slope_climate_policy": "borrowed_from_seed_context",
+                "mutation_profile_id": mutation_profile_id,
+                "mutation_profile_attribution": config.get("mutation_profile_attribution", {}),
             },
             "hard_failures": [],
             "soft_invariants": soft_invariants,
@@ -585,17 +756,24 @@ class SeededSoilLanduseGenerator:
         *,
         seeds: Sequence[SeedTuple],
         output_root: str | Path,
+        case_configs: Sequence[dict[str, Any]] | None = None,
     ) -> dict[str, Any]:
         """Generate a reproducible case batch and write manifest artifacts."""
 
         output_dir = Path(output_root)
         output_dir.mkdir(parents=True, exist_ok=True)
+        if case_configs is not None and len(case_configs) != len(seeds):
+            raise ValueError("case_configs length must match seeds length.")
 
         case_metadata: list[dict[str, Any]] = []
         for index, seed in enumerate(seeds, start=1):
+            case_config = case_configs[index - 1] if case_configs is not None else None
             try:
                 metadata = self.generate_case(
-                    seed=seed, case_index=index, output_root=output_dir
+                    seed=seed,
+                    case_index=index,
+                    output_root=output_dir,
+                    case_config=case_config,
                 )
             # Deliberate boundary: upstream parser/writer APIs raise heterogeneous exceptions.
             except Exception as exc:
@@ -608,6 +786,11 @@ class SeededSoilLanduseGenerator:
                     "seed_id": seed.seed_id,
                     "seed_lineage": seed.as_dict(),
                     "mutation_seed": _mutation_seed(self.random_seed, index, seed.seed_id),
+                    "mutation_profile_id": (
+                        str(case_config.get("mutation_profile_id", DEFAULT_MUTATION_PROFILE))
+                        if case_config is not None
+                        else DEFAULT_MUTATION_PROFILE
+                    ),
                     "hard_failures": [str(exc)],
                     "soft_invariants": [],
                     "soft_warning_count": 0,
@@ -640,6 +823,7 @@ class SeededSoilLanduseGenerator:
                     "status",
                     "seed_id",
                     "mutation_seed",
+                    "mutation_profile_id",
                     "soft_warning_count",
                     "hard_failure_count",
                     "sol_path",
@@ -658,6 +842,9 @@ class SeededSoilLanduseGenerator:
                         "status": case["status"],
                         "seed_id": case["seed_id"],
                         "mutation_seed": case["mutation_seed"],
+                        "mutation_profile_id": case.get(
+                            "mutation_profile_id", DEFAULT_MUTATION_PROFILE
+                        ),
                         "soft_warning_count": case.get("soft_warning_count", 0),
                         "hard_failure_count": len(case.get("hard_failures", [])),
                         "sol_path": generated_paths.get("sol"),

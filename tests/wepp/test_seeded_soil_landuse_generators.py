@@ -7,6 +7,7 @@ from pathlib import Path
 import pytest
 
 from wepppy.wepp.fuzzing.seeded_soil_landuse_generators import (
+    DEFAULT_MUTATION_PROFILE,
     SeedTuple,
     SeededSoilLanduseGenerator,
     discover_seed_tuples,
@@ -138,6 +139,7 @@ def test_generate_case_writes_valid_artifacts_and_metadata(tmp_path: Path) -> No
 
     assert metadata["status"] == "ok"
     assert metadata["seed_id"] == seed.seed_id
+    assert metadata["mutation_profile_id"] == DEFAULT_MUTATION_PROFILE
     assert metadata["hard_failures"] == []
     assert metadata["soft_invariants"]
 
@@ -151,6 +153,34 @@ def test_generate_case_writes_valid_artifacts_and_metadata(tmp_path: Path) -> No
 
     WeppSoilUtil(str(generated_sol))
     read_management(str(generated_man))
+
+
+def test_generate_case_records_mutation_profile_attribution(tmp_path: Path) -> None:
+    seed = SeedTuple(
+        seed_id="seed-fixture-p1-p2",
+        run_id="fx/deductive-futurist",
+        runs_dir=str(FIXTURE_RUNS_DIR),
+        stem="p1",
+        sol_path=str(FIXTURE_RUNS_DIR / "p1.sol"),
+        man_path=str(FIXTURE_RUNS_DIR / "p1.man"),
+        slp_path=str(FIXTURE_RUNS_DIR / "p1.slp"),
+        cli_path=str(FIXTURE_RUNS_DIR / "p1.cli"),
+        run_path=str(FIXTURE_RUNS_DIR / "p1.run"),
+    )
+    generator = SeededSoilLanduseGenerator(random_seed=20260421)
+    metadata = generator.generate_case(
+        seed=seed,
+        case_index=1,
+        output_root=tmp_path,
+        case_config={
+            "mutation_profile_id": "P2_EVENT_EDGE",
+            "mutation_profile_attribution": {"adaptive_score": 3.5, "lane": "test"},
+        },
+    )
+
+    assert metadata["mutation_profile_id"] == "P2_EVENT_EDGE"
+    assert metadata["lineage"]["mutation_profile_id"] == "P2_EVENT_EDGE"
+    assert metadata["lineage"]["mutation_profile_attribution"]["lane"] == "test"
 
 
 def test_generate_case_preserves_multi_ofe_soil_structure(tmp_path: Path) -> None:
@@ -210,3 +240,24 @@ def test_generate_batch_writes_case_metadata_for_hard_failures(tmp_path: Path) -
 
     assert persisted["status"] == "hard_fail"
     assert persisted["hard_failures"]
+
+
+def test_generate_batch_validates_case_config_cardinality(tmp_path: Path) -> None:
+    seed = SeedTuple(
+        seed_id="seed-fixture-p1",
+        run_id="fx/deductive-futurist",
+        runs_dir=str(FIXTURE_RUNS_DIR),
+        stem="p1",
+        sol_path=str(FIXTURE_RUNS_DIR / "p1.sol"),
+        man_path=str(FIXTURE_RUNS_DIR / "p1.man"),
+        slp_path=str(FIXTURE_RUNS_DIR / "p1.slp"),
+        cli_path=str(FIXTURE_RUNS_DIR / "p1.cli"),
+        run_path=str(FIXTURE_RUNS_DIR / "p1.run"),
+    )
+    generator = SeededSoilLanduseGenerator(random_seed=20260421)
+    with pytest.raises(ValueError, match="case_configs length must match seeds length"):
+        generator.generate_batch(
+            seeds=[seed],
+            output_root=tmp_path,
+            case_configs=[],
+        )

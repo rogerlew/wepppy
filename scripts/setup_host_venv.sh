@@ -6,6 +6,8 @@ WORKDIR_ROOT="$(cd "${ROOT_DIR}/.." && pwd)"
 VENV_DIR="${ROOT_DIR}/.venv"
 PYTHON="${VENV_DIR}/bin/python"
 ENV_FILE="${ROOT_DIR}/.vscode/.env"
+ROSETTA_REPO_URL="https://github.com/rogerlew/rosetta"
+ROSETTA_GIT_REF="2aea4acd0529177719f9e22055198e6f4792a0dc"
 
 if ! command -v uv >/dev/null 2>&1; then
   echo "uv not found; install uv to build the host .venv." >&2
@@ -54,5 +56,16 @@ for entry in "${PTH_ENTRIES[@]}"; do
   path="${entry#*:}"
   printf '%s\n' "${path}" > "${SITE_PACKAGES}/${name}"
 done
+
+# Match Docker image behavior: vendor Rosetta directly into site-packages
+# (includes git-lfs data and exposes `from rosetta import Rosetta3`).
+rm -rf "${SITE_PACKAGES}/rosetta"
+tmpdir="$(mktemp -d)"
+git clone "${ROSETTA_REPO_URL}" "${tmpdir}/rosetta" >/dev/null 2>&1
+git -C "${tmpdir}/rosetta" checkout "${ROSETTA_GIT_REF}" >/dev/null 2>&1
+git -C "${tmpdir}/rosetta" lfs pull >/dev/null 2>&1
+rm -rf "${tmpdir}/rosetta/.git"
+mv "${tmpdir}/rosetta" "${SITE_PACKAGES}/rosetta"
+rmdir "${tmpdir}"
 
 echo "Host .venv ready at ${VENV_DIR}"
