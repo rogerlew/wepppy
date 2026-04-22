@@ -1,0 +1,1138 @@
+98.4
+19 # number of ofes or channels
+3 # sim_years
+
+#############################
+#   Plant Growth Section    #
+#############################
+19 # ncrop
+Tah_2997
+With no Senescence or decomposition
+(null)
+W. Elliot 05/10
+1 # Landuse - <Cropland>
+WeppWillSet
+14.00000 3.00000 0.00000 2.00000 4.99968 5.00000 0.00000 0.29998 1.00000 0.00500
+0.50000 1.00000 0.50000 0.99000 17.00000 0.00000 0.42000 0.27940
+2
+0.00000 0.00000 20.00000 0.10000 0.49988 0.30000 0.33000 0.19997 90 37.77778
+-40.00000 4.00000 0.00000 
+
+OFE2_Tah_9591
+With no Senescence or decomposition
+(null)
+W. Elliot 05/10
+1 # Landuse - <Cropland>
+WeppWillSet
+14.00000 3.00000 0.00000 2.00000 5.00000 5.00000 0.00000 4.00000 1.00000 0.10000
+0.50000 1.00000 0.75000 0.99000 17.00000 0.00000 0.42000 2.00000
+2
+0.00000 0.00000 20.00000 0.10000 1.00000 0.50000 0.33000 0.50000 90 40.00000
+-40.00000 5.00000 0.00000 
+
+OFE3_Mou_4129
+Mountain Big Sagebrush-up to 1 m tall
+jml 4-10-01
+(null)
+1 # Landuse - <Cropland>
+WeppWillSet
+5.00000 5.00000 5.00000 10.00000 5.00000 30.00000 0.05000 0.00010 1.00000 0.00500
+0.85000 1.00000 0.65000 0.99000 12.00000 0.00000 0.90000 1.00000
+2
+0.00001 0.00001 25.00000 0.25000 0.00600 0.30000 0.33000 0.34000 14 30.00000
+-50.00000 4.00000 0.00000 
+
+OFE4_Mou_4129
+Mountain Big Sagebrush-up to 1 m tall
+jml 4-10-01
+(null)
+1 # Landuse - <Cropland>
+WeppWillSet
+5.00000 5.00000 5.00000 10.00000 5.00000 30.00000 0.05000 0.00010 1.00000 0.00500
+0.85000 1.00000 0.65000 0.99000 12.00000 0.00000 0.90000 1.00000
+2
+0.00001 0.00001 25.00000 0.25000 0.00600 0.30000 0.33000 0.34000 14 30.00000
+-50.00000 4.00000 0.00000 
+
+OFE5_Mou_4129
+Mountain Big Sagebrush-up to 1 m tall
+jml 4-10-01
+(null)
+1 # Landuse - <Cropland>
+WeppWillSet
+5.00000 5.00000 5.00000 10.00000 5.00000 30.00000 0.05000 0.00010 1.00000 0.00500
+0.85000 1.00000 0.65000 0.99000 12.00000 0.00000 0.90000 1.00000
+2
+0.00001 0.00001 25.00000 0.25000 0.00600 0.30000 0.33000 0.34000 14 30.00000
+-50.00000 4.00000 0.00000 
+
+OFE6_Mou_4129
+Mountain Big Sagebrush-up to 1 m tall
+jml 4-10-01
+(null)
+1 # Landuse - <Cropland>
+WeppWillSet
+5.00000 5.00000 5.00000 10.00000 5.00000 30.00000 0.05000 0.00010 1.00000 0.00500
+0.85000 1.00000 0.65000 0.99000 12.00000 0.00000 0.90000 1.00000
+2
+0.00001 0.00001 25.00000 0.25000 0.00600 0.30000 0.33000 0.34000 14 30.00000
+-50.00000 4.00000 0.00000 
+
+OFE7_Mou_4129
+Mountain Big Sagebrush-up to 1 m tall
+jml 4-10-01
+(null)
+1 # Landuse - <Cropland>
+WeppWillSet
+5.00000 5.00000 5.00000 10.00000 5.00000 30.00000 0.05000 0.00010 1.00000 0.00500
+0.85000 1.00000 0.65000 0.99000 12.00000 0.00000 0.90000 1.00000
+2
+0.00001 0.00001 25.00000 0.25000 0.00600 0.30000 0.33000 0.34000 14 30.00000
+-50.00000 4.00000 0.00000 
+
+OFE8_Mou_4129
+Mountain Big Sagebrush-up to 1 m tall
+jml 4-10-01
+(null)
+1 # Landuse - <Cropland>
+WeppWillSet
+5.00000 5.00000 5.00000 10.00000 5.00000 30.00000 0.05000 0.00010 1.00000 0.00500
+0.85000 1.00000 0.65000 0.99000 12.00000 0.00000 0.90000 1.00000
+2
+0.00001 0.00001 25.00000 0.25000 0.00600 0.30000 0.33000 0.34000 14 30.00000
+-50.00000 4.00000 0.00000 
+
+OFE9_Tah_2823
+With no Senescence or decomposition
+(null)
+W. Elliot 05/10
+1 # Landuse - <Cropland>
+WeppWillSet
+14.00000 3.00000 0.00000 2.00000 5.00000 5.00000 0.00000 0.30000 1.00000 0.00500
+0.50000 1.00000 0.55000 0.99000 17.00000 0.00000 0.42000 0.30000
+2
+0.00000 0.00000 20.00000 0.10000 0.50000 0.30000 0.33000 0.20000 90 40.00000
+-40.00000 4.00000 0.00000 
+
+OFE10_Tah_2823
+With no Senescence or decomposition
+(null)
+W. Elliot 05/10
+1 # Landuse - <Cropland>
+WeppWillSet
+14.00000 3.00000 0.00000 2.00000 5.00000 5.00000 0.00000 0.30000 1.00000 0.00500
+0.50000 1.00000 0.55000 0.99000 17.00000 0.00000 0.42000 0.30000
+2
+0.00000 0.00000 20.00000 0.10000 0.50000 0.30000 0.33000 0.20000 90 40.00000
+-40.00000 4.00000 0.00000 
+
+OFE11_Tah_2823
+With no Senescence or decomposition
+(null)
+W. Elliot 05/10
+1 # Landuse - <Cropland>
+WeppWillSet
+14.00000 3.00000 0.00000 2.00000 5.00000 5.00000 0.00000 0.30000 1.00000 0.00500
+0.50000 1.00000 0.55000 0.99000 17.00000 0.00000 0.42000 0.30000
+2
+0.00000 0.00000 20.00000 0.10000 0.50000 0.30000 0.33000 0.20000 90 40.00000
+-40.00000 4.00000 0.00000 
+
+OFE12_Tah_2997
+With no Senescence or decomposition
+(null)
+W. Elliot 05/10
+1 # Landuse - <Cropland>
+WeppWillSet
+14.00000 3.00000 0.00000 2.00000 4.99968 5.00000 0.00000 0.29998 1.00000 0.00500
+0.50000 1.00000 0.50000 0.99000 17.00000 0.00000 0.42000 0.27940
+2
+0.00000 0.00000 20.00000 0.10000 0.49988 0.30000 0.33000 0.19997 90 37.77778
+-40.00000 4.00000 0.00000 
+
+OFE13_Tah_2997
+With no Senescence or decomposition
+(null)
+W. Elliot 05/10
+1 # Landuse - <Cropland>
+WeppWillSet
+14.00000 3.00000 0.00000 2.00000 4.99968 5.00000 0.00000 0.29998 1.00000 0.00500
+0.50000 1.00000 0.50000 0.99000 17.00000 0.00000 0.42000 0.27940
+2
+0.00000 0.00000 20.00000 0.10000 0.49988 0.30000 0.33000 0.19997 90 37.77778
+-40.00000 4.00000 0.00000 
+
+OFE14_Tah_2997
+With no Senescence or decomposition
+(null)
+W. Elliot 05/10
+1 # Landuse - <Cropland>
+WeppWillSet
+14.00000 3.00000 0.00000 2.00000 4.99968 5.00000 0.00000 0.29998 1.00000 0.00500
+0.50000 1.00000 0.50000 0.99000 17.00000 0.00000 0.42000 0.27940
+2
+0.00000 0.00000 20.00000 0.10000 0.49988 0.30000 0.33000 0.19997 90 37.77778
+-40.00000 4.00000 0.00000 
+
+OFE15_Tah_2823
+With no Senescence or decomposition
+(null)
+W. Elliot 05/10
+1 # Landuse - <Cropland>
+WeppWillSet
+14.00000 3.00000 0.00000 2.00000 5.00000 5.00000 0.00000 0.30000 1.00000 0.00500
+0.50000 1.00000 0.55000 0.99000 17.00000 0.00000 0.42000 0.30000
+2
+0.00000 0.00000 20.00000 0.10000 0.50000 0.30000 0.33000 0.20000 90 40.00000
+-40.00000 4.00000 0.00000 
+
+OFE16_Tah_2823
+With no Senescence or decomposition
+(null)
+W. Elliot 05/10
+1 # Landuse - <Cropland>
+WeppWillSet
+14.00000 3.00000 0.00000 2.00000 5.00000 5.00000 0.00000 0.30000 1.00000 0.00500
+0.50000 1.00000 0.55000 0.99000 17.00000 0.00000 0.42000 0.30000
+2
+0.00000 0.00000 20.00000 0.10000 0.50000 0.30000 0.33000 0.20000 90 40.00000
+-40.00000 4.00000 0.00000 
+
+OFE17_Tah_2823
+With no Senescence or decomposition
+(null)
+W. Elliot 05/10
+1 # Landuse - <Cropland>
+WeppWillSet
+14.00000 3.00000 0.00000 2.00000 5.00000 5.00000 0.00000 0.30000 1.00000 0.00500
+0.50000 1.00000 0.55000 0.99000 17.00000 0.00000 0.42000 0.30000
+2
+0.00000 0.00000 20.00000 0.10000 0.50000 0.30000 0.33000 0.20000 90 40.00000
+-40.00000 4.00000 0.00000 
+
+OFE18_Tah_4899
+With no Senescence or decomposition
+(null)
+W. Elliot 05/10
+1 # Landuse - <Cropland>
+WeppWillSet
+14.00000 3.00000 0.00000 2.00000 5.00000 5.00000 0.00000 20.00000 1.00000 1.00000
+0.50000 1.00000 0.90000 0.99000 17.00000 0.00000 0.42000 20.00000
+2
+0.00000 0.00000 20.00000 0.10000 4.00000 2.00000 0.33000 0.50000 90 40.00000
+-40.00000 14.00000 0.00000 
+
+OFE19_Tah_4899
+With no Senescence or decomposition
+(null)
+W. Elliot 05/10
+1 # Landuse - <Cropland>
+WeppWillSet
+14.00000 3.00000 0.00000 2.00000 5.00000 5.00000 0.00000 20.00000 1.00000 1.00000
+0.50000 1.00000 0.90000 0.99000 17.00000 0.00000 0.42000 20.00000
+2
+0.00000 0.00000 20.00000 0.10000 4.00000 2.00000 0.33000 0.50000 90 40.00000
+-40.00000 14.00000 0.00000 
+
+#############################
+#     Operation Section     #
+#############################
+0 # nop
+
+#############################
+# Initial Condition Section
+#############################
+19 # nini
+Tah_3471
+For no growth, no decomp, no senescence
+(null)
+W. Elliot  05/10
+1 # Landuse - <Cropland>
+1.10000 0.60000 330 1000 0.00000 0.60000
+1
+2
+400.04999 0.04826 0.60000 0.06000 0.00000
+1
+0.00000 0.00000 0.00000 0.00000 0.00000
+0.14998 0.14998  
+
+OFE2_Tah_8719
+For no growth, no decomp, no senescence
+(null)
+W. Elliot  05/10
+1 # Landuse - <Cropland>
+1.10000 0.70000 330 1000 0.00000 0.90000
+2
+2
+400.00000 0.06000 0.90000 0.06000 2.00000
+1
+0.00000 0.00000 0.00000 0.00000 0.00000
+0.30000 0.30000  
+
+OFE3_Mou_4482
+Mountain Big Sagebrush
+jml 4-10-01
+3
+1 # Landuse - <Cropland>
+1.10000 0.60000 20000 20000 0.00000 0.30000
+3
+2
+700.02399 0.01700 0.30000 0.00800 0.00000
+1
+0.00000 0.00000 0.10000 0.00000 0.00000
+0.19997 0.00000  
+
+OFE4_Mou_4482
+Mountain Big Sagebrush
+jml 4-10-01
+3
+1 # Landuse - <Cropland>
+1.10000 0.60000 20000 20000 0.00000 0.30000
+4
+2
+700.02399 0.01700 0.30000 0.00800 0.00000
+1
+0.00000 0.00000 0.10000 0.00000 0.00000
+0.19997 0.00000  
+
+OFE5_Mou_4482
+Mountain Big Sagebrush
+jml 4-10-01
+3
+1 # Landuse - <Cropland>
+1.10000 0.60000 20000 20000 0.00000 0.30000
+5
+2
+700.02399 0.01700 0.30000 0.00800 0.00000
+1
+0.00000 0.00000 0.10000 0.00000 0.00000
+0.19997 0.00000  
+
+OFE6_Mou_4482
+Mountain Big Sagebrush
+jml 4-10-01
+3
+1 # Landuse - <Cropland>
+1.10000 0.60000 20000 20000 0.00000 0.30000
+6
+2
+700.02399 0.01700 0.30000 0.00800 0.00000
+1
+0.00000 0.00000 0.10000 0.00000 0.00000
+0.19997 0.00000  
+
+OFE7_Mou_4482
+Mountain Big Sagebrush
+jml 4-10-01
+3
+1 # Landuse - <Cropland>
+1.10000 0.60000 20000 20000 0.00000 0.30000
+7
+2
+700.02399 0.01700 0.30000 0.00800 0.00000
+1
+0.00000 0.00000 0.10000 0.00000 0.00000
+0.19997 0.00000  
+
+OFE8_Mou_4482
+Mountain Big Sagebrush
+jml 4-10-01
+3
+1 # Landuse - <Cropland>
+1.10000 0.60000 20000 20000 0.00000 0.30000
+8
+2
+700.02399 0.01700 0.30000 0.00800 0.00000
+1
+0.00000 0.00000 0.10000 0.00000 0.00000
+0.19997 0.00000  
+
+OFE9_Tah_2307
+For no growth, no decomp, no senescence
+(null)
+W. Elliot  05/10
+1 # Landuse - <Cropland>
+1.10000 0.75000 330 1000 0.00000 0.85000
+9
+2
+400.00000 0.04000 0.85000 0.04000 0.00000
+1
+0.00000 0.00000 0.00000 0.00000 0.00000
+0.10000 0.10000  
+
+OFE10_Tah_2307
+For no growth, no decomp, no senescence
+(null)
+W. Elliot  05/10
+1 # Landuse - <Cropland>
+1.10000 0.75000 330 1000 0.00000 0.85000
+10
+2
+400.00000 0.04000 0.85000 0.04000 0.00000
+1
+0.00000 0.00000 0.00000 0.00000 0.00000
+0.10000 0.10000  
+
+OFE11_Tah_2307
+For no growth, no decomp, no senescence
+(null)
+W. Elliot  05/10
+1 # Landuse - <Cropland>
+1.10000 0.75000 330 1000 0.00000 0.85000
+11
+2
+400.00000 0.04000 0.85000 0.04000 0.00000
+1
+0.00000 0.00000 0.00000 0.00000 0.00000
+0.10000 0.10000  
+
+OFE12_Tah_3471
+For no growth, no decomp, no senescence
+(null)
+W. Elliot  05/10
+1 # Landuse - <Cropland>
+1.10000 0.60000 330 1000 0.00000 0.60000
+12
+2
+400.04999 0.04826 0.60000 0.06000 0.00000
+1
+0.00000 0.00000 0.00000 0.00000 0.00000
+0.14998 0.14998  
+
+OFE13_Tah_3471
+For no growth, no decomp, no senescence
+(null)
+W. Elliot  05/10
+1 # Landuse - <Cropland>
+1.10000 0.60000 330 1000 0.00000 0.60000
+13
+2
+400.04999 0.04826 0.60000 0.06000 0.00000
+1
+0.00000 0.00000 0.00000 0.00000 0.00000
+0.14998 0.14998  
+
+OFE14_Tah_3471
+For no growth, no decomp, no senescence
+(null)
+W. Elliot  05/10
+1 # Landuse - <Cropland>
+1.10000 0.60000 330 1000 0.00000 0.60000
+14
+2
+400.04999 0.04826 0.60000 0.06000 0.00000
+1
+0.00000 0.00000 0.00000 0.00000 0.00000
+0.14998 0.14998  
+
+OFE15_Tah_2307
+For no growth, no decomp, no senescence
+(null)
+W. Elliot  05/10
+1 # Landuse - <Cropland>
+1.10000 0.75000 330 1000 0.00000 0.85000
+15
+2
+400.00000 0.04000 0.85000 0.04000 0.00000
+1
+0.00000 0.00000 0.00000 0.00000 0.00000
+0.10000 0.10000  
+
+OFE16_Tah_2307
+For no growth, no decomp, no senescence
+(null)
+W. Elliot  05/10
+1 # Landuse - <Cropland>
+1.10000 0.75000 330 1000 0.00000 0.85000
+16
+2
+400.00000 0.04000 0.85000 0.04000 0.00000
+1
+0.00000 0.00000 0.00000 0.00000 0.00000
+0.10000 0.10000  
+
+OFE17_Tah_2307
+For no growth, no decomp, no senescence
+(null)
+W. Elliot  05/10
+1 # Landuse - <Cropland>
+1.10000 0.75000 330 1000 0.00000 0.85000
+17
+2
+400.00000 0.04000 0.85000 0.04000 0.00000
+1
+0.00000 0.00000 0.00000 0.00000 0.00000
+0.10000 0.10000  
+
+OFE18_Tah_4089
+For no growth, no decomp, no senescence
+(null)
+W. Elliot  05/10
+1 # Landuse - <Cropland>
+1.10000 0.90000 330 1000 0.00000 1.00000
+18
+2
+400.00000 0.10000 1.00000 0.10000 0.00000
+1
+0.00000 0.00000 0.00000 0.00000 0.00000
+0.50000 0.50000  
+
+OFE19_Tah_4089
+For no growth, no decomp, no senescence
+(null)
+W. Elliot  05/10
+1 # Landuse - <Cropland>
+1.10000 0.90000 330 1000 0.00000 1.00000
+19
+2
+400.00000 0.10000 1.00000 0.10000 0.00000
+1
+0.00000 0.00000 0.00000 0.00000 0.00000
+0.50000 0.50000  
+
+#############################
+#  Surface Effects Section  #
+#############################
+0 # nseq
+
+#############################
+#      Contour Section      #
+#############################
+0 # ncnt
+
+#############################
+#      Drainage Section     #
+#############################
+0 # ndrain
+
+#############################
+#       Yearly Section      #
+#############################
+25 # nscen
+Year 1
+(null)
+(null)
+(null)
+1 # Landuse - <Cropland>
+1 	# Plant Growth Scenario index (itype)
+0 	# Surface Effect Scenario index (itype)
+0 	# Contour Scenario index (conset)
+0 	# Drainage Scenario index (drset)
+2 	# Cropping system (imngmt)
+   0 	# Harvesting date or end of fallow period (jdharv)
+   0 	# Planting date or start of fallow period (jdplt)
+   0 	# Planting date or start of fallow period (jdstop)
+   0.00000 	# Row width (rw)
+   3 	# Crop management option (mgtopt)
+   
+   
+
+
+OFE2_Year 1
+(null)
+(null)
+(null)
+1 # Landuse - <Cropland>
+2 	# Plant Growth Scenario index (itype)
+0 	# Surface Effect Scenario index (itype)
+0 	# Contour Scenario index (conset)
+0 	# Drainage Scenario index (drset)
+2 	# Cropping system (imngmt)
+   0 	# Harvesting date or end of fallow period (jdharv)
+   0 	# Planting date or start of fallow period (jdplt)
+   0 	# Planting date or start of fallow period (jdstop)
+   0.00000 	# Row width (rw)
+   3 	# Crop management option (mgtopt)
+   
+   
+
+
+OFE3_Year 1
+(null)
+(null)
+(null)
+1 # Landuse - <Cropland>
+3 	# Plant Growth Scenario index (itype)
+0 	# Surface Effect Scenario index (itype)
+0 	# Contour Scenario index (conset)
+0 	# Drainage Scenario index (drset)
+2 	# Cropping system (imngmt)
+   0 	# Harvesting date or end of fallow period (jdharv)
+   0 	# Planting date or start of fallow period (jdplt)
+   0 	# Planting date or start of fallow period (jdstop)
+   0.00000 	# Row width (rw)
+   3 	# Crop management option (mgtopt)
+   
+   
+
+
+OFE3_Year 2
+(null)
+(null)
+(null)
+1 # Landuse - <Cropland>
+3 	# Plant Growth Scenario index (itype)
+0 	# Surface Effect Scenario index (itype)
+0 	# Contour Scenario index (conset)
+0 	# Drainage Scenario index (drset)
+2 	# Cropping system (imngmt)
+   0 	# Harvesting date or end of fallow period (jdharv)
+   0 	# Planting date or start of fallow period (jdplt)
+   0 	# Planting date or start of fallow period (jdstop)
+   0.00000 	# Row width (rw)
+   1 	# Crop management option (mgtopt)
+   1
+   243
+
+
+
+OFE4_Year 1
+(null)
+(null)
+(null)
+1 # Landuse - <Cropland>
+4 	# Plant Growth Scenario index (itype)
+0 	# Surface Effect Scenario index (itype)
+0 	# Contour Scenario index (conset)
+0 	# Drainage Scenario index (drset)
+2 	# Cropping system (imngmt)
+   0 	# Harvesting date or end of fallow period (jdharv)
+   0 	# Planting date or start of fallow period (jdplt)
+   0 	# Planting date or start of fallow period (jdstop)
+   0.00000 	# Row width (rw)
+   3 	# Crop management option (mgtopt)
+   
+   
+
+
+OFE4_Year 2
+(null)
+(null)
+(null)
+1 # Landuse - <Cropland>
+4 	# Plant Growth Scenario index (itype)
+0 	# Surface Effect Scenario index (itype)
+0 	# Contour Scenario index (conset)
+0 	# Drainage Scenario index (drset)
+2 	# Cropping system (imngmt)
+   0 	# Harvesting date or end of fallow period (jdharv)
+   0 	# Planting date or start of fallow period (jdplt)
+   0 	# Planting date or start of fallow period (jdstop)
+   0.00000 	# Row width (rw)
+   1 	# Crop management option (mgtopt)
+   1
+   243
+
+
+
+OFE5_Year 1
+(null)
+(null)
+(null)
+1 # Landuse - <Cropland>
+5 	# Plant Growth Scenario index (itype)
+0 	# Surface Effect Scenario index (itype)
+0 	# Contour Scenario index (conset)
+0 	# Drainage Scenario index (drset)
+2 	# Cropping system (imngmt)
+   0 	# Harvesting date or end of fallow period (jdharv)
+   0 	# Planting date or start of fallow period (jdplt)
+   0 	# Planting date or start of fallow period (jdstop)
+   0.00000 	# Row width (rw)
+   3 	# Crop management option (mgtopt)
+   
+   
+
+
+OFE5_Year 2
+(null)
+(null)
+(null)
+1 # Landuse - <Cropland>
+5 	# Plant Growth Scenario index (itype)
+0 	# Surface Effect Scenario index (itype)
+0 	# Contour Scenario index (conset)
+0 	# Drainage Scenario index (drset)
+2 	# Cropping system (imngmt)
+   0 	# Harvesting date or end of fallow period (jdharv)
+   0 	# Planting date or start of fallow period (jdplt)
+   0 	# Planting date or start of fallow period (jdstop)
+   0.00000 	# Row width (rw)
+   1 	# Crop management option (mgtopt)
+   1
+   243
+
+
+
+OFE6_Year 1
+(null)
+(null)
+(null)
+1 # Landuse - <Cropland>
+6 	# Plant Growth Scenario index (itype)
+0 	# Surface Effect Scenario index (itype)
+0 	# Contour Scenario index (conset)
+0 	# Drainage Scenario index (drset)
+2 	# Cropping system (imngmt)
+   0 	# Harvesting date or end of fallow period (jdharv)
+   0 	# Planting date or start of fallow period (jdplt)
+   0 	# Planting date or start of fallow period (jdstop)
+   0.00000 	# Row width (rw)
+   3 	# Crop management option (mgtopt)
+   
+   
+
+
+OFE6_Year 2
+(null)
+(null)
+(null)
+1 # Landuse - <Cropland>
+6 	# Plant Growth Scenario index (itype)
+0 	# Surface Effect Scenario index (itype)
+0 	# Contour Scenario index (conset)
+0 	# Drainage Scenario index (drset)
+2 	# Cropping system (imngmt)
+   0 	# Harvesting date or end of fallow period (jdharv)
+   0 	# Planting date or start of fallow period (jdplt)
+   0 	# Planting date or start of fallow period (jdstop)
+   0.00000 	# Row width (rw)
+   1 	# Crop management option (mgtopt)
+   1
+   243
+
+
+
+OFE7_Year 1
+(null)
+(null)
+(null)
+1 # Landuse - <Cropland>
+7 	# Plant Growth Scenario index (itype)
+0 	# Surface Effect Scenario index (itype)
+0 	# Contour Scenario index (conset)
+0 	# Drainage Scenario index (drset)
+2 	# Cropping system (imngmt)
+   0 	# Harvesting date or end of fallow period (jdharv)
+   0 	# Planting date or start of fallow period (jdplt)
+   0 	# Planting date or start of fallow period (jdstop)
+   0.00000 	# Row width (rw)
+   3 	# Crop management option (mgtopt)
+   
+   
+
+
+OFE7_Year 2
+(null)
+(null)
+(null)
+1 # Landuse - <Cropland>
+7 	# Plant Growth Scenario index (itype)
+0 	# Surface Effect Scenario index (itype)
+0 	# Contour Scenario index (conset)
+0 	# Drainage Scenario index (drset)
+2 	# Cropping system (imngmt)
+   0 	# Harvesting date or end of fallow period (jdharv)
+   0 	# Planting date or start of fallow period (jdplt)
+   0 	# Planting date or start of fallow period (jdstop)
+   0.00000 	# Row width (rw)
+   1 	# Crop management option (mgtopt)
+   1
+   243
+
+
+
+OFE8_Year 1
+(null)
+(null)
+(null)
+1 # Landuse - <Cropland>
+8 	# Plant Growth Scenario index (itype)
+0 	# Surface Effect Scenario index (itype)
+0 	# Contour Scenario index (conset)
+0 	# Drainage Scenario index (drset)
+2 	# Cropping system (imngmt)
+   0 	# Harvesting date or end of fallow period (jdharv)
+   0 	# Planting date or start of fallow period (jdplt)
+   0 	# Planting date or start of fallow period (jdstop)
+   0.00000 	# Row width (rw)
+   3 	# Crop management option (mgtopt)
+   
+   
+
+
+OFE8_Year 2
+(null)
+(null)
+(null)
+1 # Landuse - <Cropland>
+8 	# Plant Growth Scenario index (itype)
+0 	# Surface Effect Scenario index (itype)
+0 	# Contour Scenario index (conset)
+0 	# Drainage Scenario index (drset)
+2 	# Cropping system (imngmt)
+   0 	# Harvesting date or end of fallow period (jdharv)
+   0 	# Planting date or start of fallow period (jdplt)
+   0 	# Planting date or start of fallow period (jdstop)
+   0.00000 	# Row width (rw)
+   1 	# Crop management option (mgtopt)
+   1
+   243
+
+
+
+OFE9_Year 1
+(null)
+(null)
+(null)
+1 # Landuse - <Cropland>
+9 	# Plant Growth Scenario index (itype)
+0 	# Surface Effect Scenario index (itype)
+0 	# Contour Scenario index (conset)
+0 	# Drainage Scenario index (drset)
+2 	# Cropping system (imngmt)
+   0 	# Harvesting date or end of fallow period (jdharv)
+   0 	# Planting date or start of fallow period (jdplt)
+   0 	# Planting date or start of fallow period (jdstop)
+   0.00000 	# Row width (rw)
+   3 	# Crop management option (mgtopt)
+   
+   
+
+
+OFE10_Year 1
+(null)
+(null)
+(null)
+1 # Landuse - <Cropland>
+10 	# Plant Growth Scenario index (itype)
+0 	# Surface Effect Scenario index (itype)
+0 	# Contour Scenario index (conset)
+0 	# Drainage Scenario index (drset)
+2 	# Cropping system (imngmt)
+   0 	# Harvesting date or end of fallow period (jdharv)
+   0 	# Planting date or start of fallow period (jdplt)
+   0 	# Planting date or start of fallow period (jdstop)
+   0.00000 	# Row width (rw)
+   3 	# Crop management option (mgtopt)
+   
+   
+
+
+OFE11_Year 1
+(null)
+(null)
+(null)
+1 # Landuse - <Cropland>
+11 	# Plant Growth Scenario index (itype)
+0 	# Surface Effect Scenario index (itype)
+0 	# Contour Scenario index (conset)
+0 	# Drainage Scenario index (drset)
+2 	# Cropping system (imngmt)
+   0 	# Harvesting date or end of fallow period (jdharv)
+   0 	# Planting date or start of fallow period (jdplt)
+   0 	# Planting date or start of fallow period (jdstop)
+   0.00000 	# Row width (rw)
+   3 	# Crop management option (mgtopt)
+   
+   
+
+
+OFE12_Year 1
+(null)
+(null)
+(null)
+1 # Landuse - <Cropland>
+12 	# Plant Growth Scenario index (itype)
+0 	# Surface Effect Scenario index (itype)
+0 	# Contour Scenario index (conset)
+0 	# Drainage Scenario index (drset)
+2 	# Cropping system (imngmt)
+   0 	# Harvesting date or end of fallow period (jdharv)
+   0 	# Planting date or start of fallow period (jdplt)
+   0 	# Planting date or start of fallow period (jdstop)
+   0.00000 	# Row width (rw)
+   3 	# Crop management option (mgtopt)
+   
+   
+
+
+OFE13_Year 1
+(null)
+(null)
+(null)
+1 # Landuse - <Cropland>
+13 	# Plant Growth Scenario index (itype)
+0 	# Surface Effect Scenario index (itype)
+0 	# Contour Scenario index (conset)
+0 	# Drainage Scenario index (drset)
+2 	# Cropping system (imngmt)
+   0 	# Harvesting date or end of fallow period (jdharv)
+   0 	# Planting date or start of fallow period (jdplt)
+   0 	# Planting date or start of fallow period (jdstop)
+   0.00000 	# Row width (rw)
+   3 	# Crop management option (mgtopt)
+   
+   
+
+
+OFE14_Year 1
+(null)
+(null)
+(null)
+1 # Landuse - <Cropland>
+14 	# Plant Growth Scenario index (itype)
+0 	# Surface Effect Scenario index (itype)
+0 	# Contour Scenario index (conset)
+0 	# Drainage Scenario index (drset)
+2 	# Cropping system (imngmt)
+   0 	# Harvesting date or end of fallow period (jdharv)
+   0 	# Planting date or start of fallow period (jdplt)
+   0 	# Planting date or start of fallow period (jdstop)
+   0.00000 	# Row width (rw)
+   3 	# Crop management option (mgtopt)
+   
+   
+
+
+OFE15_Year 1
+(null)
+(null)
+(null)
+1 # Landuse - <Cropland>
+15 	# Plant Growth Scenario index (itype)
+0 	# Surface Effect Scenario index (itype)
+0 	# Contour Scenario index (conset)
+0 	# Drainage Scenario index (drset)
+2 	# Cropping system (imngmt)
+   0 	# Harvesting date or end of fallow period (jdharv)
+   0 	# Planting date or start of fallow period (jdplt)
+   0 	# Planting date or start of fallow period (jdstop)
+   0.00000 	# Row width (rw)
+   3 	# Crop management option (mgtopt)
+   
+   
+
+
+OFE16_Year 1
+(null)
+(null)
+(null)
+1 # Landuse - <Cropland>
+16 	# Plant Growth Scenario index (itype)
+0 	# Surface Effect Scenario index (itype)
+0 	# Contour Scenario index (conset)
+0 	# Drainage Scenario index (drset)
+2 	# Cropping system (imngmt)
+   0 	# Harvesting date or end of fallow period (jdharv)
+   0 	# Planting date or start of fallow period (jdplt)
+   0 	# Planting date or start of fallow period (jdstop)
+   0.00000 	# Row width (rw)
+   3 	# Crop management option (mgtopt)
+   
+   
+
+
+OFE17_Year 1
+(null)
+(null)
+(null)
+1 # Landuse - <Cropland>
+17 	# Plant Growth Scenario index (itype)
+0 	# Surface Effect Scenario index (itype)
+0 	# Contour Scenario index (conset)
+0 	# Drainage Scenario index (drset)
+2 	# Cropping system (imngmt)
+   0 	# Harvesting date or end of fallow period (jdharv)
+   0 	# Planting date or start of fallow period (jdplt)
+   0 	# Planting date or start of fallow period (jdstop)
+   0.00000 	# Row width (rw)
+   3 	# Crop management option (mgtopt)
+   
+   
+
+
+OFE18_Year 1
+(null)
+(null)
+(null)
+1 # Landuse - <Cropland>
+18 	# Plant Growth Scenario index (itype)
+0 	# Surface Effect Scenario index (itype)
+0 	# Contour Scenario index (conset)
+0 	# Drainage Scenario index (drset)
+2 	# Cropping system (imngmt)
+   0 	# Harvesting date or end of fallow period (jdharv)
+   0 	# Planting date or start of fallow period (jdplt)
+   0 	# Planting date or start of fallow period (jdstop)
+   0.00000 	# Row width (rw)
+   3 	# Crop management option (mgtopt)
+   
+   
+
+
+OFE19_Year 1
+(null)
+(null)
+(null)
+1 # Landuse - <Cropland>
+19 	# Plant Growth Scenario index (itype)
+0 	# Surface Effect Scenario index (itype)
+0 	# Contour Scenario index (conset)
+0 	# Drainage Scenario index (drset)
+2 	# Cropping system (imngmt)
+   0 	# Harvesting date or end of fallow period (jdharv)
+   0 	# Planting date or start of fallow period (jdplt)
+   0 	# Planting date or start of fallow period (jdstop)
+   0.00000 	# Row width (rw)
+   3 	# Crop management option (mgtopt)
+   
+   
+
+
+#############################
+#     Management Section    #
+#############################
+Manage
+description 1
+description 2
+description 3
+19 # number of ofes in the rotation (nofe)
+# Initial Condition Scenario indices used for each OFE
+  1
+  2
+  3
+  4
+  5
+  6
+  7
+  8
+  9
+  10
+  11
+  12
+  13
+  14
+  15
+  16
+  17
+  18
+  19
+1 # number of times the rotation is repeated (nrots)
+3 # number of years in a single rotation
+   1 	# plants/year; <Year: 1 - OFE: 1>  (nycrop)
+      1 	# yearly index <Year 1>
+   1 	# plants/year; <Year: 1 - OFE: 2>  (nycrop)
+      2 	# yearly index <OFE2_Year 1>
+   1 	# plants/year; <Year: 1 - OFE: 3>  (nycrop)
+      3 	# yearly index <OFE3_Year 1>
+   1 	# plants/year; <Year: 1 - OFE: 4>  (nycrop)
+      5 	# yearly index <OFE4_Year 1>
+   1 	# plants/year; <Year: 1 - OFE: 5>  (nycrop)
+      7 	# yearly index <OFE5_Year 1>
+   1 	# plants/year; <Year: 1 - OFE: 6>  (nycrop)
+      9 	# yearly index <OFE6_Year 1>
+   1 	# plants/year; <Year: 1 - OFE: 7>  (nycrop)
+      11 	# yearly index <OFE7_Year 1>
+   1 	# plants/year; <Year: 1 - OFE: 8>  (nycrop)
+      13 	# yearly index <OFE8_Year 1>
+   1 	# plants/year; <Year: 1 - OFE: 9>  (nycrop)
+      15 	# yearly index <OFE9_Year 1>
+   1 	# plants/year; <Year: 1 - OFE: 10>  (nycrop)
+      16 	# yearly index <OFE10_Year 1>
+   1 	# plants/year; <Year: 1 - OFE: 11>  (nycrop)
+      17 	# yearly index <OFE11_Year 1>
+   1 	# plants/year; <Year: 1 - OFE: 12>  (nycrop)
+      18 	# yearly index <OFE12_Year 1>
+   1 	# plants/year; <Year: 1 - OFE: 13>  (nycrop)
+      19 	# yearly index <OFE13_Year 1>
+   1 	# plants/year; <Year: 1 - OFE: 14>  (nycrop)
+      20 	# yearly index <OFE14_Year 1>
+   1 	# plants/year; <Year: 1 - OFE: 15>  (nycrop)
+      21 	# yearly index <OFE15_Year 1>
+   1 	# plants/year; <Year: 1 - OFE: 16>  (nycrop)
+      22 	# yearly index <OFE16_Year 1>
+   1 	# plants/year; <Year: 1 - OFE: 17>  (nycrop)
+      23 	# yearly index <OFE17_Year 1>
+   1 	# plants/year; <Year: 1 - OFE: 18>  (nycrop)
+      24 	# yearly index <OFE18_Year 1>
+   1 	# plants/year; <Year: 1 - OFE: 19>  (nycrop)
+      25 	# yearly index <OFE19_Year 1>
+   1 	# plants/year; <Year: 2 - OFE: 1>  (nycrop)
+      1 	# yearly index <Year 1>
+   1 	# plants/year; <Year: 2 - OFE: 2>  (nycrop)
+      2 	# yearly index <OFE2_Year 1>
+   1 	# plants/year; <Year: 2 - OFE: 3>  (nycrop)
+      3 	# yearly index <OFE3_Year 1>
+   1 	# plants/year; <Year: 2 - OFE: 4>  (nycrop)
+      5 	# yearly index <OFE4_Year 1>
+   1 	# plants/year; <Year: 2 - OFE: 5>  (nycrop)
+      7 	# yearly index <OFE5_Year 1>
+   1 	# plants/year; <Year: 2 - OFE: 6>  (nycrop)
+      9 	# yearly index <OFE6_Year 1>
+   1 	# plants/year; <Year: 2 - OFE: 7>  (nycrop)
+      11 	# yearly index <OFE7_Year 1>
+   1 	# plants/year; <Year: 2 - OFE: 8>  (nycrop)
+      13 	# yearly index <OFE8_Year 1>
+   1 	# plants/year; <Year: 2 - OFE: 9>  (nycrop)
+      15 	# yearly index <OFE9_Year 1>
+   1 	# plants/year; <Year: 2 - OFE: 10>  (nycrop)
+      16 	# yearly index <OFE10_Year 1>
+   1 	# plants/year; <Year: 2 - OFE: 11>  (nycrop)
+      17 	# yearly index <OFE11_Year 1>
+   1 	# plants/year; <Year: 2 - OFE: 12>  (nycrop)
+      18 	# yearly index <OFE12_Year 1>
+   1 	# plants/year; <Year: 2 - OFE: 13>  (nycrop)
+      19 	# yearly index <OFE13_Year 1>
+   1 	# plants/year; <Year: 2 - OFE: 14>  (nycrop)
+      20 	# yearly index <OFE14_Year 1>
+   1 	# plants/year; <Year: 2 - OFE: 15>  (nycrop)
+      21 	# yearly index <OFE15_Year 1>
+   1 	# plants/year; <Year: 2 - OFE: 16>  (nycrop)
+      22 	# yearly index <OFE16_Year 1>
+   1 	# plants/year; <Year: 2 - OFE: 17>  (nycrop)
+      23 	# yearly index <OFE17_Year 1>
+   1 	# plants/year; <Year: 2 - OFE: 18>  (nycrop)
+      24 	# yearly index <OFE18_Year 1>
+   1 	# plants/year; <Year: 2 - OFE: 19>  (nycrop)
+      25 	# yearly index <OFE19_Year 1>
+   1 	# plants/year; <Year: 3 - OFE: 1>  (nycrop)
+      1 	# yearly index <Year 1>
+   1 	# plants/year; <Year: 3 - OFE: 2>  (nycrop)
+      2 	# yearly index <OFE2_Year 1>
+   1 	# plants/year; <Year: 3 - OFE: 3>  (nycrop)
+      3 	# yearly index <OFE3_Year 1>
+   1 	# plants/year; <Year: 3 - OFE: 4>  (nycrop)
+      5 	# yearly index <OFE4_Year 1>
+   1 	# plants/year; <Year: 3 - OFE: 5>  (nycrop)
+      7 	# yearly index <OFE5_Year 1>
+   1 	# plants/year; <Year: 3 - OFE: 6>  (nycrop)
+      9 	# yearly index <OFE6_Year 1>
+   1 	# plants/year; <Year: 3 - OFE: 7>  (nycrop)
+      11 	# yearly index <OFE7_Year 1>
+   1 	# plants/year; <Year: 3 - OFE: 8>  (nycrop)
+      13 	# yearly index <OFE8_Year 1>
+   1 	# plants/year; <Year: 3 - OFE: 9>  (nycrop)
+      15 	# yearly index <OFE9_Year 1>
+   1 	# plants/year; <Year: 3 - OFE: 10>  (nycrop)
+      16 	# yearly index <OFE10_Year 1>
+   1 	# plants/year; <Year: 3 - OFE: 11>  (nycrop)
+      17 	# yearly index <OFE11_Year 1>
+   1 	# plants/year; <Year: 3 - OFE: 12>  (nycrop)
+      18 	# yearly index <OFE12_Year 1>
+   1 	# plants/year; <Year: 3 - OFE: 13>  (nycrop)
+      19 	# yearly index <OFE13_Year 1>
+   1 	# plants/year; <Year: 3 - OFE: 14>  (nycrop)
+      20 	# yearly index <OFE14_Year 1>
+   1 	# plants/year; <Year: 3 - OFE: 15>  (nycrop)
+      21 	# yearly index <OFE15_Year 1>
+   1 	# plants/year; <Year: 3 - OFE: 16>  (nycrop)
+      22 	# yearly index <OFE16_Year 1>
+   1 	# plants/year; <Year: 3 - OFE: 17>  (nycrop)
+      23 	# yearly index <OFE17_Year 1>
+   1 	# plants/year; <Year: 3 - OFE: 18>  (nycrop)
+      24 	# yearly index <OFE18_Year 1>
+   1 	# plants/year; <Year: 3 - OFE: 19>  (nycrop)
+      25 	# yearly index <OFE19_Year 1>
+
+

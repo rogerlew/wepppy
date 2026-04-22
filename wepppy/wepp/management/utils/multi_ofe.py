@@ -17,6 +17,8 @@ if False:  # pragma: no cover - typing only
 class ManagementMultipleOfeSynth(object):
     """Compose a single management file from several single-OFE managements."""
 
+    WEPP_HILLSLOPE_MAX_YEARLY_SCENARIOS = 20
+
     def __init__(self, stack: Optional[Iterable['Management']] = None) -> None:
         """
         Parameters
@@ -41,6 +43,73 @@ class ManagementMultipleOfeSynth(object):
     def num_ofes(self) -> int:
         return len(self.stack)
 
+    @staticmethod
+    def _collect_referenced_yearly_loop_names(management: 'Management') -> List[str]:
+        """Return unique yearly loop names referenced by management rotations."""
+        referenced_names: List[str] = []
+        seen = set()
+
+        for rotation in management.man.loops:
+            for year in rotation.years:
+                for ofe in year:
+                    for year_ref in ofe.manindx:
+                        loop_name = getattr(year_ref, "loop_name", None)
+                        if loop_name is None or loop_name in seen:
+                            continue
+                        referenced_names.append(loop_name)
+                        seen.add(loop_name)
+
+        return referenced_names
+
+    @classmethod
+    def _compact_yearly_scenarios(cls, management: 'Management') -> None:
+        """
+        Cull unreferenced yearly scenarios and enforce WEPP hillslope limits.
+
+        Keeps yearly scenarios that are actually referenced from the management
+        section, preserving the existing yearly section order to keep output
+        deterministic.
+        """
+        referenced_names = cls._collect_referenced_yearly_loop_names(management)
+        referenced_name_set = set(referenced_names)
+        if not referenced_name_set:
+            raise ValueError(
+                "MOFE synthesis produced no referenced yearly scenarios; cannot serialize "
+                "a valid management file."
+            )
+
+        available_names = {year_loop.name for year_loop in management.years}
+        missing_names = [name for name in referenced_names if name not in available_names]
+        if missing_names:
+            raise ValueError(
+                "MOFE synthesis referenced yearly scenarios that were not defined in "
+                f"the yearly section: {missing_names}"
+            )
+
+        referenced_count = len(referenced_names)
+        if referenced_count > cls.WEPP_HILLSLOPE_MAX_YEARLY_SCENARIOS:
+            raise ValueError(
+                "MOFE synthesis produced "
+                f"{referenced_count} referenced yearly scenarios, exceeding the WEPP "
+                "hillslope limit of 20 (nmscen must be between 1 and 20)."
+            )
+
+        compacted_year_loops = []
+        seen_compacted = set()
+        for year_loop in management.years:
+            if year_loop.name not in referenced_name_set or year_loop.name in seen_compacted:
+                continue
+            compacted_year_loops.append(year_loop)
+            seen_compacted.add(year_loop.name)
+
+        if len(compacted_year_loops) != referenced_count:
+            raise ValueError(
+                "MOFE yearly scenario compaction failed to preserve all referenced "
+                f"scenarios: expected {referenced_count}, got {len(compacted_year_loops)}."
+            )
+
+        management.years[:] = compacted_year_loops
+
     def write(self, dst_fn: str) -> None:
         """Merge the stack and write the synthesized management to ``dst_fn``."""
         # We need access to the ScenarioReference class for type checking
@@ -49,10 +118,14 @@ class ManagementMultipleOfeSynth(object):
         if not self.stack:
             raise ValueError("Management stack cannot be empty.")
 
-        # If there's only one management file, just write it out directly.
+        # Preserve historical single-stack behavior while still enforcing
+        # yearly scenario validity and WEPP limits.
         if len(self.stack) == 1:
+            mf = deepcopy(self.stack[0])
+            self._compact_yearly_scenarios(mf)
+            mf.setroot()
             with open(dst_fn, 'w') as pf:
-                pf.write(str(self.stack[0]))
+                pf.write(str(mf))
             return
 
         # Start with a deep copy of the first management file as our base.
@@ -146,7 +219,10 @@ class ManagementMultipleOfeSynth(object):
                     ofe_data_to_add._ofe = new_ofe_num
                     year_ofe_list.append(ofe_data_to_add)
 
-        # Step 5: Finalize by ensuring all objects reference the final merged parent.
+        # Step 5: Remove orphan yearly scenarios and enforce WEPP limits.
+        self._compact_yearly_scenarios(mf)
+
+        # Step 6: Finalize by ensuring all objects reference the final merged parent.
         mf.setroot()
 
         # Write the complete, synthesized management file.
