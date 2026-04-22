@@ -647,6 +647,70 @@ def _weighted_without_replacement(
     return selected
 
 
+def _parse_target_slice(target_slice: str) -> tuple[str, str, str]:
+    parts = [part.strip() for part in target_slice.split(":")]
+    if len(parts) != 3:
+        raise ValueError(
+            "target_slice must be formatted as climate_bin:slope_bin:mutation_profile_id"
+        )
+    climate_bin, slope_bin, mutation_profile_id = parts
+    if climate_bin not in CLIMATE_BINS:
+        raise ValueError(f"Unknown target climate_bin={climate_bin}")
+    if slope_bin not in SLOPE_BINS:
+        raise ValueError(f"Unknown target slope_bin={slope_bin}")
+    if mutation_profile_id not in MUTATION_PROFILES:
+        raise ValueError(f"Unknown target mutation_profile_id={mutation_profile_id}")
+    if mutation_profile_id == DEFAULT_MUTATION_PROFILE:
+        raise ValueError("target_slice mutation_profile_id must be a non-baseline profile.")
+    return climate_bin, slope_bin, mutation_profile_id
+
+
+def build_targeted_slice_selection_plan(
+    stratified: Sequence[EligibleRecord],
+    *,
+    target_slice: str,
+    target_case_count: int,
+    random_seed: int,
+) -> tuple[list[EligibleRecord], dict[tuple[str, str], int], dict[str, dict[str, Any]]]:
+    if target_case_count <= 0:
+        raise ValueError("target_case_count must be > 0.")
+    climate_bin, slope_bin, mutation_profile_id = _parse_target_slice(target_slice)
+
+    by_bin: dict[tuple[str, str], list[EligibleRecord]] = defaultdict(list)
+    for record in stratified:
+        by_bin[(record.climate_bin, record.slope_bin)].append(record)
+
+    availability: dict[tuple[str, str], int] = {
+        key: len(by_bin.get(key, [])) for key in REQUIRED_BIN_KEYS
+    }
+    candidates = sorted(
+        by_bin.get((climate_bin, slope_bin), []), key=lambda row: row.seed.seed_id
+    )
+    if len(candidates) < target_case_count:
+        raise RuntimeError(
+            "Insufficient eligible seeds for targeted slice "
+            f"{climate_bin}:{slope_bin}. available={len(candidates)} "
+            f"required={target_case_count}"
+        )
+
+    rng = random.Random(random_seed)
+    rng.shuffle(candidates)
+    selected = sorted(candidates[:target_case_count], key=lambda row: row.seed.seed_id)
+
+    selection_meta: dict[str, dict[str, Any]] = {}
+    for row in selected:
+        selection_meta[row.seed.seed_id] = {
+            "adaptive_score": 1.0,
+            "adaptive_components": {},
+            "mutation_profile_id": mutation_profile_id,
+            "climate_bin": row.climate_bin,
+            "slope_bin": row.slope_bin,
+            "target_slice": target_slice,
+        }
+
+    return selected, availability, selection_meta
+
+
 def build_adaptive_selection_plan(
     stratified: Sequence[EligibleRecord],
     *,
@@ -882,24 +946,106 @@ def _write_json(path: Path, payload: Any) -> None:
     path.write_text(json.dumps(payload, indent=2, sort_keys=True) + "\n", encoding="utf-8")
 
 
+def _seed_tuple_from_dict(payload: dict[str, Any]) -> SeedTuple:
+    run_path_raw = payload.get("run_path")
+    run_path = (
+        str(run_path_raw)
+        if run_path_raw not in (None, "")
+        else None
+    )
+    return SeedTuple(
+        seed_id=str(payload["seed_id"]),
+        run_id=str(payload["run_id"]),
+        runs_dir=str(payload["runs_dir"]),
+        stem=str(payload["stem"]),
+        sol_path=str(payload["sol_path"]),
+        man_path=str(payload["man_path"]),
+        slp_path=str(payload["slp_path"]),
+        cli_path=str(payload["cli_path"]),
+        run_path=run_path,
+    )
+
+
+def _eligible_record_from_dict(payload: dict[str, Any]) -> EligibleRecord:
+    return EligibleRecord(
+        seed=_seed_tuple_from_dict(dict(payload["seed"])),
+        soil_ofe_count=int(payload["soil_ofe_count"]),
+        climate_annual_precip_mm=float(payload["climate_annual_precip_mm"]),
+        slope_scalar=float(payload["slope_scalar"]),
+        climate_bin=str(payload["climate_bin"]),
+        slope_bin=str(payload["slope_bin"]),
+    )
+
+
+def _quarantine_record_from_dict(payload: dict[str, Any]) -> QuarantineRecord:
+    return QuarantineRecord(
+        seed_id=str(payload["seed_id"]),
+        run_id=str(payload["run_id"]),
+        stem=str(payload["stem"]),
+        reason_codes=tuple(str(item) for item in payload.get("reason_codes", [])),
+        details=tuple(str(item) for item in payload.get("details", [])),
+        soil_ofe_count=(
+            int(payload["soil_ofe_count"])
+            if payload.get("soil_ofe_count") not in (None, "")
+            else None
+        ),
+        seed_lineage=dict(payload.get("seed_lineage", {})),
+    )
+
+
 def run_campaign(args: argparse.Namespace) -> dict[str, Any]:
     output_root = Path(args.output_root)
     output_root.mkdir(parents=True, exist_ok=True)
     _ensure_rosetta3_available()
+    targeted_slice_mode = bool((args.target_slice or "").strip())
     minimum_required = args.per_bin_quota * len(REQUIRED_BIN_KEYS)
-    if args.target_case_count < minimum_required:
+    if not targeted_slice_mode and args.target_case_count < minimum_required:
         raise ValueError(
             "target_case_count must be >= per_bin_quota * 9 to preserve mandatory 3x3 bins."
         )
     if args.profile_floor_count < 0:
         raise ValueError("profile_floor_count must be >= 0.")
 
-    discovered = discover_seed_tuples(args.run_root, max_run_dirs=args.max_run_dirs)
-    if not discovered:
-        raise RuntimeError("No seed tuples discovered from run root.")
+    cached_preflight_path = (
+        Path(args.preflight_cache_json).resolve()
+        if (args.preflight_cache_json or "").strip()
+        else None
+    )
+    if cached_preflight_path is not None:
+        if not cached_preflight_path.exists():
+            raise FileNotFoundError(f"Missing preflight cache json: {cached_preflight_path}")
+        cached_preflight = json.loads(cached_preflight_path.read_text(encoding="utf-8"))
+        stratified = [
+            _eligible_record_from_dict(dict(row))
+            for row in cached_preflight.get("eligible_records", [])
+        ]
+        quarantined = [
+            _quarantine_record_from_dict(dict(row))
+            for row in cached_preflight.get("quarantined_records", [])
+        ]
+        if not stratified:
+            raise RuntimeError("Cached preflight contains no eligible_records.")
+        discovered_total = int(
+            cached_preflight.get("total_discovered", len(stratified) + len(quarantined))
+        )
+        climate_values = [record.climate_annual_precip_mm for record in stratified]
+        slope_values = [record.slope_scalar for record in stratified]
+        thresholds = StratificationThresholds(
+            climate_dry_upper=_linear_quantile(climate_values, 1.0 / 3.0),
+            climate_mesic_upper=_linear_quantile(climate_values, 2.0 / 3.0),
+            slope_gradual_upper=_linear_quantile(slope_values, 1.0 / 3.0),
+            slope_moderate_upper=_linear_quantile(slope_values, 2.0 / 3.0),
+        )
+    else:
+        discovered = discover_seed_tuples(args.run_root, max_run_dirs=args.max_run_dirs)
+        if not discovered:
+            raise RuntimeError("No seed tuples discovered from run root.")
 
-    eligible, quarantined = preflight_single_ofe_seeds(discovered)
-    stratified, thresholds = stratify_eligible_seeds(eligible)
+        eligible, quarantined = preflight_single_ofe_seeds(discovered)
+        stratified, thresholds = stratify_eligible_seeds(eligible)
+        discovered_total = len(discovered)
+
+    eligible = stratified
     prior_signals = load_seed_signals_from_prior_campaign(
         prior_campaign_root=args.prior_campaign_root,
         known_failures_manifest=args.known_failures_manifest,
@@ -918,16 +1064,24 @@ def run_campaign(args: argparse.Namespace) -> dict[str, Any]:
         "P4_TEXTURE_DENSITY_DISCONTINUITY": args.profile_weight_p4,
         "P5_SLOPE_RESPONSE_AMPLIFICATION": args.profile_weight_p5,
     }
-    selected, availability, selection_meta = build_adaptive_selection_plan(
-        stratified,
-        per_bin_quota=args.per_bin_quota,
-        target_case_count=args.target_case_count,
-        base_seed=args.stratification_seed,
-        oversampling_weights=oversampling_config,
-        prior_signals=prior_signals,
-        profile_weights=profile_weights,
-        profile_floor=args.profile_floor_count,
-    )
+    if targeted_slice_mode:
+        selected, availability, selection_meta = build_targeted_slice_selection_plan(
+            stratified,
+            target_slice=str(args.target_slice).strip(),
+            target_case_count=args.target_case_count,
+            random_seed=args.stratification_seed,
+        )
+    else:
+        selected, availability, selection_meta = build_adaptive_selection_plan(
+            stratified,
+            per_bin_quota=args.per_bin_quota,
+            target_case_count=args.target_case_count,
+            base_seed=args.stratification_seed,
+            oversampling_weights=oversampling_config,
+            prior_signals=prior_signals,
+            profile_weights=profile_weights,
+            profile_floor=args.profile_floor_count,
+        )
     shards = shard_selected_seeds(
         selected,
         shard_count=args.shard_count,
@@ -939,9 +1093,10 @@ def run_campaign(args: argparse.Namespace) -> dict[str, Any]:
     seed_by_bin_counter = Counter((r.climate_bin, r.slope_bin) for r in stratified)
 
     preflight_payload = {
-        "total_discovered": len(discovered),
+        "total_discovered": discovered_total,
         "eligible_single_ofe": len(eligible),
         "quarantined": len(quarantined),
+        "preflight_cache_json": str(cached_preflight_path) if cached_preflight_path else "",
         "quarantine_reason_counts": dict(
             sorted(
                 Counter(reason for row in quarantined for reason in row.reason_codes).items()
@@ -1012,6 +1167,8 @@ def run_campaign(args: argparse.Namespace) -> dict[str, Any]:
         "thresholds": thresholds.as_dict(),
         "per_bin_quota": args.per_bin_quota,
         "target_case_count": args.target_case_count,
+        "target_slice": str(args.target_slice).strip(),
+        "targeted_slice_mode": targeted_slice_mode,
         "seed_count_by_bin": {
             f"{climate}:{slope}": seed_by_bin_counter.get((climate, slope), 0)
             for climate, slope in REQUIRED_BIN_KEYS
@@ -1290,7 +1447,7 @@ def run_campaign(args: argparse.Namespace) -> dict[str, Any]:
         "known_failures_manifest": args.known_failures_manifest,
         "positive_controls_manifest": args.positive_controls_manifest,
         "preflight": {
-            "total_discovered": len(discovered),
+            "total_discovered": discovered_total,
             "eligible_single_ofe": len(eligible),
             "quarantined": len(quarantined),
             "quarantine_reason_counts": preflight_payload["quarantine_reason_counts"],
@@ -1840,8 +1997,24 @@ def _build_parser() -> argparse.ArgumentParser:
     run_parser.add_argument("--output-root", required=True)
     run_parser.add_argument("--catalog-map", default=None)
     run_parser.add_argument("--max-run-dirs", type=int, default=None)
+    run_parser.add_argument(
+        "--preflight-cache-json",
+        default="",
+        help=(
+            "Optional path to a preflight_manifest.json from a prior run. "
+            "When provided, skips /wc1/runs discovery and reuses eligible/quarantine inventory."
+        ),
+    )
     run_parser.add_argument("--per-bin-quota", type=int, default=12)
     run_parser.add_argument("--target-case-count", type=int, default=216)
+    run_parser.add_argument(
+        "--target-slice",
+        default="",
+        help=(
+            "Optional targeted mode selector formatted as "
+            "climate_bin:slope_bin:mutation_profile_id."
+        ),
+    )
     run_parser.add_argument("--shard-count", type=int, default=6)
     run_parser.add_argument("--generator-seed", type=int, default=DEFAULT_GENERATOR_SEED)
     run_parser.add_argument("--stratification-seed", type=int, default=20260422)

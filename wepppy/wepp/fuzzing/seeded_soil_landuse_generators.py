@@ -29,6 +29,29 @@ MUTATION_PROFILES: tuple[str, ...] = (
     "P5_SLOPE_RESPONSE_AMPLIFICATION",
 )
 
+PROFILE_TEXTURE_COMPONENT_MIN = 0.1
+PROFILE_TEXTURE_COMPONENT_MAX = 99.0
+PROFILE_TEXTURE_SUM_MAX = 99.0
+PROFILE_BD_MIN = 0.6
+PROFILE_BD_MAX = 2.2
+PROFILE_KSAT_MIN = 1.0e-6
+PROFILE_KSAT_MAX = 250.0
+PROFILE_SAT_MIN = 0.01
+PROFILE_SAT_MAX = 1.0
+PROFILE_SAFE_TEXTURE_COMPONENT_MIN = 1.0
+PROFILE_SAFE_TEXTURE_COMPONENT_MAX = 85.0
+PROFILE_SAFE_TEXTURE_SUM_MAX = 92.0
+PROFILE_SAFE_BD_MIN = 0.8
+PROFILE_SAFE_BD_MAX = 1.9
+PROFILE_SAFE_KSAT_MIN = 1.0e-4
+PROFILE_SAFE_KSAT_MAX = 125.0
+PROFILE_SAFE_FC_MIN = 0.02
+PROFILE_SAFE_FC_MAX = 0.75
+PROFILE_SAFE_WP_MIN = 0.01
+PROFILE_SAFE_WP_MAX = 0.55
+PROFILE_SAFE_SAT_MIN = 0.08
+PROFILE_SAFE_SAT_MAX = 0.92
+
 
 @dataclass(frozen=True, slots=True)
 class SeedTuple:
@@ -59,6 +82,179 @@ def _to_float(value: Any) -> float | None:
     except (TypeError, ValueError):
         return None
 
+
+def _ensure_rosetta3_available() -> None:
+    try:
+        from rosetta import Rosetta3
+    except (ModuleNotFoundError, ImportError) as exc:
+        raise RuntimeError(
+            "Rosetta3 dependency unavailable. "
+            "Install vendored rosetta in host .venv before running campaign generation."
+        ) from exc
+    _ = Rosetta3
+
+
+def _normalize_texture_pair(sand: float, clay: float) -> tuple[float, float]:
+    sand = max(PROFILE_TEXTURE_COMPONENT_MIN, min(PROFILE_TEXTURE_COMPONENT_MAX, sand))
+    clay = max(PROFILE_TEXTURE_COMPONENT_MIN, min(PROFILE_TEXTURE_COMPONENT_MAX, clay))
+    total = sand + clay
+    if total > PROFILE_TEXTURE_SUM_MAX:
+        scale = PROFILE_TEXTURE_SUM_MAX / total
+        sand *= scale
+        clay *= scale
+        sand = max(PROFILE_TEXTURE_COMPONENT_MIN, sand)
+        clay = max(PROFILE_TEXTURE_COMPONENT_MIN, clay)
+        overflow = (sand + clay) - PROFILE_TEXTURE_SUM_MAX
+        if overflow > 0.0:
+            if sand >= clay:
+                sand = max(PROFILE_TEXTURE_COMPONENT_MIN, sand - overflow)
+            else:
+                clay = max(PROFILE_TEXTURE_COMPONENT_MIN, clay - overflow)
+    return round(sand, 6), round(clay, 6)
+
+
+def _normalize_texture_pair_with_limits(
+    sand: float,
+    clay: float,
+    *,
+    component_min: float,
+    component_max: float,
+    sum_max: float,
+) -> tuple[float, float]:
+    sand = max(component_min, min(component_max, sand))
+    clay = max(component_min, min(component_max, clay))
+    total = sand + clay
+    if total > sum_max:
+        scale = sum_max / total
+        sand *= scale
+        clay *= scale
+        sand = max(component_min, sand)
+        clay = max(component_min, clay)
+        overflow = (sand + clay) - sum_max
+        if overflow > 0.0:
+            if sand >= clay:
+                sand = max(component_min, sand - overflow)
+            else:
+                clay = max(component_min, clay - overflow)
+    return round(sand, 6), round(clay, 6)
+
+
+def _apply_profile_horizon_boundary_clamps(
+    *,
+    horizon: dict[str, Any],
+    ofe_idx: int,
+    horizon_idx: int,
+    profile: str,
+    mutations: list[dict[str, Any]],
+) -> None:
+    targeted_profile = profile in {
+        "P2_EVENT_EDGE",
+        "P4_TEXTURE_DENSITY_DISCONTINUITY",
+        "P5_SLOPE_RESPONSE_AMPLIFICATION",
+    }
+    sand = _to_float(horizon.get("sand"))
+    clay = _to_float(horizon.get("clay"))
+    if sand is not None and clay is not None:
+        if targeted_profile:
+            normalized_sand, normalized_clay = _normalize_texture_pair_with_limits(
+                sand,
+                clay,
+                component_min=PROFILE_SAFE_TEXTURE_COMPONENT_MIN,
+                component_max=PROFILE_SAFE_TEXTURE_COMPONENT_MAX,
+                sum_max=PROFILE_SAFE_TEXTURE_SUM_MAX,
+            )
+        else:
+            normalized_sand, normalized_clay = _normalize_texture_pair(sand, clay)
+        if normalized_sand != round(sand, 6) or normalized_clay != round(clay, 6):
+            horizon["sand"] = normalized_sand
+            horizon["clay"] = normalized_clay
+            mutations.append(
+                {
+                    "target": f"ofe[{ofe_idx}].horizons[{horizon_idx}].texture_pair",
+                    "mode": "profile_boundary_clamp",
+                    "profile": profile,
+                    "value": {"sand": normalized_sand, "clay": normalized_clay},
+                }
+            )
+
+    bd = _to_float(horizon.get("bd"))
+    if bd is not None:
+        bd_min = PROFILE_SAFE_BD_MIN if targeted_profile else PROFILE_BD_MIN
+        bd_max = PROFILE_SAFE_BD_MAX if targeted_profile else PROFILE_BD_MAX
+        clamped_bd = round(max(bd_min, min(bd_max, bd)), 6)
+        if clamped_bd != round(bd, 6):
+            horizon["bd"] = clamped_bd
+            mutations.append(
+                {
+                    "target": f"ofe[{ofe_idx}].horizons[{horizon_idx}].bd",
+                    "mode": "profile_boundary_clamp",
+                    "profile": profile,
+                    "value": clamped_bd,
+                }
+            )
+
+    ksat = _to_float(horizon.get("ksat"))
+    if ksat is not None:
+        ksat_min = PROFILE_SAFE_KSAT_MIN if targeted_profile else PROFILE_KSAT_MIN
+        ksat_max = PROFILE_SAFE_KSAT_MAX if targeted_profile else PROFILE_KSAT_MAX
+        clamped_ksat = round(max(ksat_min, min(ksat_max, ksat)), 6)
+        if clamped_ksat != round(ksat, 6):
+            horizon["ksat"] = clamped_ksat
+            mutations.append(
+                {
+                    "target": f"ofe[{ofe_idx}].horizons[{horizon_idx}].ksat",
+                    "mode": "profile_boundary_clamp",
+                    "profile": profile,
+                    "value": clamped_ksat,
+                }
+            )
+
+    fc = _to_float(horizon.get("fc"))
+    if fc is not None:
+        fc_min = PROFILE_SAFE_FC_MIN if targeted_profile else PROFILE_KSAT_MIN
+        fc_max = PROFILE_SAFE_FC_MAX if targeted_profile else PROFILE_SAT_MAX
+        clamped_fc = round(max(fc_min, min(fc_max, fc)), 6)
+        if clamped_fc != round(fc, 6):
+            horizon["fc"] = clamped_fc
+            mutations.append(
+                {
+                    "target": f"ofe[{ofe_idx}].horizons[{horizon_idx}].fc",
+                    "mode": "profile_boundary_clamp",
+                    "profile": profile,
+                    "value": clamped_fc,
+                }
+            )
+
+    wp = _to_float(horizon.get("wp"))
+    if wp is not None:
+        wp_min = PROFILE_SAFE_WP_MIN if targeted_profile else PROFILE_KSAT_MIN
+        wp_max = PROFILE_SAFE_WP_MAX if targeted_profile else PROFILE_SAT_MAX
+        clamped_wp = round(max(wp_min, min(wp_max, wp)), 6)
+        if clamped_wp != round(wp, 6):
+            horizon["wp"] = clamped_wp
+            mutations.append(
+                {
+                    "target": f"ofe[{ofe_idx}].horizons[{horizon_idx}].wp",
+                    "mode": "profile_boundary_clamp",
+                    "profile": profile,
+                    "value": clamped_wp,
+                }
+            )
+
+    fc_now = _to_float(horizon.get("fc"))
+    wp_now = _to_float(horizon.get("wp"))
+    if fc_now is not None and wp_now is not None and wp_now > fc_now:
+        corrected_wp = round(max(PROFILE_SAFE_WP_MIN, min(wp_now, fc_now * 0.95)), 6)
+        if corrected_wp != round(wp_now, 6):
+            horizon["wp"] = corrected_wp
+            mutations.append(
+                {
+                    "target": f"ofe[{ofe_idx}].horizons[{horizon_idx}].wp",
+                    "mode": "profile_boundary_clamp",
+                    "profile": profile,
+                    "value": corrected_wp,
+                }
+            )
 
 def _seed_id(run_id: str, stem: str) -> str:
     digest = hashlib.sha1(f"{run_id}:{stem}".encode("utf-8")).hexdigest()[:12]
@@ -320,17 +516,17 @@ def _mutate_soil(
                 if sand is not None and clay is not None:
                     if horizon_idx % 2 == 0:
                         horizon["sand"] = round(
-                            min(99.0, max(0.1, sand + rng.uniform(18.0, 32.0))), 6
+                            min(95.0, max(0.5, sand + rng.uniform(8.0, 14.0))), 6
                         )
                         horizon["clay"] = round(
-                            min(99.0, max(0.1, clay - rng.uniform(8.0, 18.0))), 6
+                            min(95.0, max(0.5, clay - rng.uniform(4.0, 10.0))), 6
                         )
                     else:
                         horizon["sand"] = round(
-                            min(99.0, max(0.1, sand - rng.uniform(8.0, 18.0))), 6
+                            min(95.0, max(0.5, sand - rng.uniform(4.0, 10.0))), 6
                         )
                         horizon["clay"] = round(
-                            min(99.0, max(0.1, clay + rng.uniform(18.0, 32.0))), 6
+                            min(95.0, max(0.5, clay + rng.uniform(8.0, 14.0))), 6
                         )
                     mutations.append(
                         {
@@ -341,7 +537,10 @@ def _mutate_soil(
                         }
                     )
                 if bd is not None:
-                    horizon["bd"] = round(min(2.35, max(0.55, bd * rng.uniform(0.7, 1.55))), 6)
+                    horizon["bd"] = round(
+                        min(PROFILE_SAFE_BD_MAX, max(PROFILE_SAFE_BD_MIN, bd * rng.uniform(0.85, 1.25))),
+                        6,
+                    )
                     mutations.append(
                         {
                             "target": f"ofe[{ofe_idx}].horizons[{horizon_idx}].bd",
@@ -350,6 +549,35 @@ def _mutate_soil(
                             "value": horizon["bd"],
                         }
                     )
+
+            if profile == "P5_SLOPE_RESPONSE_AMPLIFICATION":
+                for key in ("sand", "clay"):
+                    current = _to_float(horizon.get(key))
+                    if current is None:
+                        continue
+                    delta = rng.uniform(-6.0, 6.0)
+                    horizon[key] = round(current + delta, 6)
+                    mutations.append(
+                        {
+                            "target": f"ofe[{ofe_idx}].horizons[{horizon_idx}].{key}",
+                            "mode": "add",
+                            "delta": round(delta, 6),
+                            "value": horizon[key],
+                        }
+                    )
+
+            if profile in {
+                "P2_EVENT_EDGE",
+                "P4_TEXTURE_DENSITY_DISCONTINUITY",
+                "P5_SLOPE_RESPONSE_AMPLIFICATION",
+            }:
+                _apply_profile_horizon_boundary_clamps(
+                    horizon=horizon,
+                    ofe_idx=ofe_idx,
+                    horizon_idx=horizon_idx,
+                    profile=profile,
+                    mutations=mutations,
+                )
 
         if profile == "P3_CONDUCTIVITY_SATURATION_CONTRAST" and sat_value is not None:
             ofe["sat"] = round(0.01 if sat_value >= 0.5 else 0.92, 6)
@@ -362,7 +590,10 @@ def _mutate_soil(
                 }
             )
         if profile == "P5_SLOPE_RESPONSE_AMPLIFICATION" and sat_value is not None:
-            ofe["sat"] = round(min(1.45, max(0.01, sat_value * rng.uniform(0.12, 1.95))), 6)
+            ofe["sat"] = round(
+                min(PROFILE_SAFE_SAT_MAX, max(PROFILE_SAFE_SAT_MIN, sat_value * rng.uniform(0.55, 1.35))),
+                6,
+            )
             mutations.append(
                 {
                     "target": f"ofe[{ofe_idx}].sat",
@@ -371,21 +602,27 @@ def _mutate_soil(
                     "value": ofe["sat"],
                 }
             )
-
-            for key in ("sand", "clay"):
-                current = _to_float(horizon.get(key))
-                if current is None:
-                    continue
-                delta = rng.uniform(-18.0, 18.0)
-                horizon[key] = round(current + delta, 6)
-                mutations.append(
-                    {
-                        "target": f"ofe[{ofe_idx}].horizons[{horizon_idx}].{key}",
-                        "mode": "add",
-                        "delta": round(delta, 6),
-                        "value": horizon[key],
-                    }
+        if profile in {
+            "P2_EVENT_EDGE",
+            "P4_TEXTURE_DENSITY_DISCONTINUITY",
+            "P5_SLOPE_RESPONSE_AMPLIFICATION",
+        }:
+            sat_current = _to_float(ofe.get("sat"))
+            if sat_current is not None:
+                clamped_sat = round(
+                    min(PROFILE_SAFE_SAT_MAX, max(PROFILE_SAFE_SAT_MIN, sat_current)),
+                    6,
                 )
+                if clamped_sat != round(sat_current, 6):
+                    ofe["sat"] = clamped_sat
+                    mutations.append(
+                        {
+                            "target": f"ofe[{ofe_idx}].sat",
+                            "mode": "profile_boundary_clamp",
+                            "profile": profile,
+                            "value": clamped_sat,
+                        }
+                    )
 
     return mutations
 
@@ -410,11 +647,11 @@ def _mutate_management(
     mutations: list[dict[str, Any]] = []
     profile = mutation_profile_id.upper().strip() or DEFAULT_MUTATION_PROFILE
     candidates = [
-        ("ini.data.cancov", round(rng.uniform(-0.2, 1.35), 6)),
-        ("ini.data.inrcov", round(rng.uniform(-0.2, 1.35), 6)),
-        ("ini.data.rilcov", round(rng.uniform(-0.2, 1.35), 6)),
-        ("plant.data.rdmax", round(rng.uniform(-0.25, 4.5), 6)),
-        ("plant.data.xmxlai", round(rng.uniform(-0.5, 12.0), 6)),
+        ("ini.data.cancov", round(rng.uniform(0.0, 1.0), 6)),
+        ("ini.data.inrcov", round(rng.uniform(0.0, 1.0), 6)),
+        ("ini.data.rilcov", round(rng.uniform(0.0, 1.0), 6)),
+        ("plant.data.rdmax", round(rng.uniform(0.01, 4.5), 6)),
+        ("plant.data.xmxlai", round(rng.uniform(0.0, 12.0), 6)),
     ]
 
     for attr, value in candidates:
@@ -424,10 +661,11 @@ def _mutate_management(
 
     if profile == "P2_EVENT_EDGE":
         edge_candidates = [
-            ("ini.data.cancov", round(rng.uniform(-0.25, 0.08), 6)),
-            ("ini.data.inrcov", round(rng.uniform(0.95, 1.35), 6)),
-            ("plant.data.rdmax", round(rng.uniform(-0.25, 0.18), 6)),
-            ("plant.data.xmxlai", round(rng.uniform(-0.5, 0.35), 6)),
+            ("ini.data.cancov", round(rng.uniform(0.05, 0.2), 6)),
+            ("ini.data.inrcov", round(rng.uniform(0.75, 0.95), 6)),
+            ("ini.data.rilcov", round(rng.uniform(0.05, 0.25), 6)),
+            ("plant.data.rdmax", round(rng.uniform(0.15, 0.7), 6)),
+            ("plant.data.xmxlai", round(rng.uniform(0.2, 1.2), 6)),
         ]
         for attr, value in edge_candidates:
             result = _set_management_override(management, attr, value)
@@ -438,9 +676,9 @@ def _mutate_management(
 
     if profile == "P5_SLOPE_RESPONSE_AMPLIFICATION":
         slope_candidates = [
-            ("ini.data.rilcov", round(rng.uniform(-0.25, 0.25), 6)),
-            ("plant.data.rdmax", round(rng.uniform(2.2, 5.25), 6)),
-            ("plant.data.xmxlai", round(rng.uniform(5.5, 13.0), 6)),
+            ("ini.data.rilcov", round(rng.uniform(0.1, 0.4), 6)),
+            ("plant.data.rdmax", round(rng.uniform(1.0, 3.0), 6)),
+            ("plant.data.xmxlai", round(rng.uniform(2.0, 7.0), 6)),
         ]
         for attr, value in slope_candidates:
             result = _set_management_override(management, attr, value)
@@ -760,6 +998,7 @@ class SeededSoilLanduseGenerator:
     ) -> dict[str, Any]:
         """Generate a reproducible case batch and write manifest artifacts."""
 
+        _ensure_rosetta3_available()
         output_dir = Path(output_root)
         output_dir.mkdir(parents=True, exist_ok=True)
         if case_configs is not None and len(case_configs) != len(seeds):

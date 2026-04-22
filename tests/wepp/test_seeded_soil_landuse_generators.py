@@ -2,7 +2,10 @@ from __future__ import annotations
 
 from collections import Counter
 import json
+from random import Random
 from pathlib import Path
+import sys
+import types
 
 import pytest
 
@@ -10,6 +13,9 @@ from wepppy.wepp.fuzzing.seeded_soil_landuse_generators import (
     DEFAULT_MUTATION_PROFILE,
     SeedTuple,
     SeededSoilLanduseGenerator,
+    _ensure_rosetta3_available,
+    _mutate_management,
+    _mutate_soil,
     discover_seed_tuples,
     evaluate_soft_invariants,
     sample_seed_tuples,
@@ -118,6 +124,115 @@ def test_evaluate_soft_invariants_reports_warnings_without_structural_reject() -
     assert any("texture_sum" in check["name"] for check in warns)
     assert any("cancov_range" in check["name"] for check in warns)
     assert any("rdmax_positive" in check["name"] for check in warns)
+
+
+def test_p2_event_edge_management_mutations_stay_within_safe_bounds() -> None:
+    management = read_management(str(FIXTURE_RUNS_DIR / "p1.man"))
+    _mutate_management(
+        management,
+        Random(20260421),
+        mutation_profile_id="P2_EVENT_EDGE",
+    )
+
+    ini_data = management.inis[0].data
+    plant_data = management.plants[0].data
+    assert 0.05 <= float(ini_data.cancov) <= 0.2
+    assert 0.75 <= float(ini_data.inrcov) <= 0.95
+    assert 0.05 <= float(ini_data.rilcov) <= 0.25
+    assert 0.15 <= float(plant_data.rdmax) <= 0.7
+    assert 0.2 <= float(plant_data.xmxlai) <= 1.2
+
+
+def test_p4_texture_discontinuity_mutations_keep_texture_sum_bounded() -> None:
+    soil = WeppSoilUtil(str(FIXTURE_RUNS_DIR / "p1.sol"))
+    _mutate_soil(
+        soil,
+        Random(20260421),
+        mutation_profile_id="P4_TEXTURE_DENSITY_DISCONTINUITY",
+    )
+
+    for ofe in soil.obj.get("ofes", []):
+        for horizon in ofe.get("horizons", []):
+            sand = float(horizon["sand"])
+            clay = float(horizon["clay"])
+            assert 1.0 <= sand <= 85.0
+            assert 1.0 <= clay <= 85.0
+            assert sand + clay <= 92.0 + 1.0e-6
+            assert float(horizon["wp"]) <= float(horizon["fc"]) + 1.0e-6
+
+
+def test_p5_slope_amplification_mutations_clamp_sat_texture_and_bd() -> None:
+    soil = WeppSoilUtil(str(FIXTURE_RUNS_DIR / "p1.sol"))
+    _mutate_soil(
+        soil,
+        Random(20260421),
+        mutation_profile_id="P5_SLOPE_RESPONSE_AMPLIFICATION",
+    )
+
+    for ofe in soil.obj.get("ofes", []):
+        sat = float(ofe["sat"])
+        assert 0.08 <= sat <= 0.92
+        for horizon in ofe.get("horizons", []):
+            sand = float(horizon["sand"])
+            clay = float(horizon["clay"])
+            bd = float(horizon["bd"])
+            assert 1.0 <= sand <= 85.0
+            assert 1.0 <= clay <= 85.0
+            assert sand + clay <= 92.0 + 1.0e-6
+            assert 0.8 <= bd <= 1.9
+            assert float(horizon["wp"]) <= float(horizon["fc"]) + 1.0e-6
+
+
+def test_p5_slope_amplification_management_window_is_stabilized() -> None:
+    management = read_management(str(FIXTURE_RUNS_DIR / "p1.man"))
+    _mutate_management(
+        management,
+        Random(20260421),
+        mutation_profile_id="P5_SLOPE_RESPONSE_AMPLIFICATION",
+    )
+
+    ini_data = management.inis[0].data
+    plant_data = management.plants[0].data
+    assert 0.1 <= float(ini_data.rilcov) <= 0.4
+    assert 1.0 <= float(plant_data.rdmax) <= 3.0
+    assert 2.0 <= float(plant_data.xmxlai) <= 7.0
+
+
+def test_generator_rosetta_guard_fails_when_missing(monkeypatch: pytest.MonkeyPatch) -> None:
+    monkeypatch.delitem(sys.modules, "rosetta", raising=False)
+    rosetta_stub = types.ModuleType("rosetta")
+    monkeypatch.setitem(sys.modules, "rosetta", rosetta_stub)
+
+    with pytest.raises(RuntimeError, match="Rosetta3 dependency unavailable"):
+        _ensure_rosetta3_available()
+
+
+def test_generator_rosetta_guard_passes_when_available() -> None:
+    _ensure_rosetta3_available()
+
+
+def test_generate_batch_fails_fast_when_rosetta_missing(
+    tmp_path: Path,
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    seed = SeedTuple(
+        seed_id="seed-fixture-p1-rosetta",
+        run_id="fx/deductive-futurist",
+        runs_dir=str(FIXTURE_RUNS_DIR),
+        stem="p1",
+        sol_path=str(FIXTURE_RUNS_DIR / "p1.sol"),
+        man_path=str(FIXTURE_RUNS_DIR / "p1.man"),
+        slp_path=str(FIXTURE_RUNS_DIR / "p1.slp"),
+        cli_path=str(FIXTURE_RUNS_DIR / "p1.cli"),
+        run_path=str(FIXTURE_RUNS_DIR / "p1.run"),
+    )
+    monkeypatch.delitem(sys.modules, "rosetta", raising=False)
+    rosetta_stub = types.ModuleType("rosetta")
+    monkeypatch.setitem(sys.modules, "rosetta", rosetta_stub)
+
+    generator = SeededSoilLanduseGenerator(random_seed=20260421)
+    with pytest.raises(RuntimeError, match="Rosetta3 dependency unavailable"):
+        generator.generate_batch(seeds=[seed], output_root=tmp_path)
 
 
 def test_generate_case_writes_valid_artifacts_and_metadata(tmp_path: Path) -> None:

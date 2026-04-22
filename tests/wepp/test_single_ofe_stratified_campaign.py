@@ -18,6 +18,7 @@ from wepppy.wepp.fuzzing.single_ofe_stratified_campaign import (
     _load_positive_controls,
     _upper_bound,
     build_adaptive_selection_plan,
+    build_targeted_slice_selection_plan,
     summarize_classifier_outputs,
     preflight_single_ofe_seeds,
     select_stratified_seeds,
@@ -197,6 +198,73 @@ def test_adaptive_selection_retains_bins_and_assigns_profiles() -> None:
     )
     selected_bins = {(row.climate_bin, row.slope_bin) for row in selected}
     assert len(selected_bins) == 9
+
+
+def test_targeted_slice_selection_is_deterministic_and_single_slice() -> None:
+    prepared: list[EligibleRecord] = []
+    climate_bins = ("dry", "mesic", "wet")
+    slope_bins = ("gradual", "moderate", "steep")
+    idx = 0
+    for climate_bin in climate_bins:
+        for slope_bin in slope_bins:
+            repeat = 220 if (climate_bin, slope_bin) == ("wet", "moderate") else 3
+            for _ in range(repeat):
+                idx += 1
+                prepared.append(
+                    EligibleRecord(
+                        seed=_seed("p1", f"seed-{idx:04d}"),
+                        soil_ofe_count=1,
+                        climate_annual_precip_mm=100.0 + idx,
+                        slope_scalar=0.01 + idx * 0.001,
+                        climate_bin=climate_bin,
+                        slope_bin=slope_bin,
+                    )
+                )
+
+    target = "wet:moderate:P5_SLOPE_RESPONSE_AMPLIFICATION"
+    selected_a, availability_a, meta_a = build_targeted_slice_selection_plan(
+        prepared,
+        target_slice=target,
+        target_case_count=200,
+        random_seed=20260422,
+    )
+    selected_b, availability_b, meta_b = build_targeted_slice_selection_plan(
+        prepared,
+        target_slice=target,
+        target_case_count=200,
+        random_seed=20260422,
+    )
+
+    assert len(selected_a) == 200
+    assert len(selected_b) == 200
+    assert [row.seed.seed_id for row in selected_a] == [row.seed.seed_id for row in selected_b]
+    assert availability_a == availability_b
+    assert all(row.climate_bin == "wet" and row.slope_bin == "moderate" for row in selected_a)
+    assert all(
+        meta_a[row.seed.seed_id]["mutation_profile_id"] == "P5_SLOPE_RESPONSE_AMPLIFICATION"
+        for row in selected_a
+    )
+    assert meta_a == meta_b
+
+
+def test_targeted_slice_selection_rejects_baseline_profile() -> None:
+    prepared = [
+        EligibleRecord(
+            seed=_seed("p1", "seed-a"),
+            soil_ofe_count=1,
+            climate_annual_precip_mm=100.0,
+            slope_scalar=0.01,
+            climate_bin="wet",
+            slope_bin="moderate",
+        )
+    ]
+    with pytest.raises(ValueError, match="non-baseline profile"):
+        build_targeted_slice_selection_plan(
+            prepared,
+            target_slice="wet:moderate:P0_BASELINE",
+            target_case_count=1,
+            random_seed=20260422,
+        )
 
 
 def test_load_positive_controls_prefixes_case_id(tmp_path: Path) -> None:
