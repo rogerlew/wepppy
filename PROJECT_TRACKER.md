@@ -1,8 +1,8 @@
 # PROJECT_TRACKER.md
 > Kanban board for wepppy work packages and vision items
 
-**Last Updated**: 2026-04-18  
-**Active Packages**: 2  
+**Last Updated**: 2026-04-22  
+**Active Packages**: 1  
 **Quick Links**: [Work Packages Directory](docs/work-packages/) | [God-Tier Prompting Strategy](docs/god-tier-prompting-strategy.md)
 
 ## Purpose
@@ -37,7 +37,7 @@ This tracker makes all work visible at a glance, helping agents coordinate and a
 ### 2. Limit Work in Progress
 **Target**: 2-4 active packages maximum to maintain focus and ensure packages complete rather than stall.
 
-**Current WIP**: 2 packages ✅ **Within target range**
+**Current WIP**: 1 package ⚠️ **Below target range (capacity available)**
 
 If WIP exceeds 4, prioritize completing existing packages before starting new ones. This prevents context switching overhead and ensures clean handoffs.
 
@@ -226,6 +226,11 @@ Currently active work packages. Limit to 2-4 packages to maintain focus.
 ## ✅ Done
 
 Recently completed work packages. Archived immediately upon completion.
+
+### Disturbed MOFE 9002 Soil Support Parity (2026-04-22)
+**Status**: ✅ **COMPLETE**  
+**Link**: [docs/work-packages/20260421_disturbed_mofe_9002_soils/](docs/work-packages/20260421_disturbed_mofe_9002_soils/)  
+**Summary**: Completed end-to-end with an explicit MOFE `sol_ver=9002` contract locked to single-OFE reference semantics for lookup hits and a documented MOFE-specific lookup-miss deviation required by same-version MOFE stack synthesis. Implemented minimal `Disturbed.modify_mofe_soils` update so `9002` lookup misses remain class-aware (`mukey-texid-disturbed_class`) while preserving explicit fallback replacements (`luse`, `stext`, `ksatfac=0.0`, `ksatrec=0.0`). Added MOFE `9002` regression coverage for lookup-hit, lookup-miss, treatment-suffix normalization, class-keying, and area/pct recomputation. Required gates passed: disturbed single+MOFE tests (`17 passed`), lookup contract tests (`30 passed`), soil util tests (`49 passed`). Config-level check against `disturbed9002-10-mofe.cfg` confirmed `disturbed.sol_ver=9002.0` and `wepp.multi_ofe=true` flag presence.
 
 ### Geneva Interactive Summary Report (Retroactive) (2026-04-18)
 **Status**: ✅ **COMPLETE**  

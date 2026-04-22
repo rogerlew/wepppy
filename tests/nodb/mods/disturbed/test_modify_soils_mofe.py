@@ -141,6 +141,352 @@ def test_modify_mofe_soils_uses_base_lookup_class_for_treatments(
     assert soils.soils["hill_101.mofe"].pct_coverage == pytest.approx(100.0)
 
 
+def test_modify_mofe_soils_9002_lookup_hit_uses_lookup_row_and_class_key(
+    disturbed_factory,
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    disturbed, run_dir = disturbed_factory("modify-mofe-9002-hit")
+    disturbed._sol_ver = 9002.0
+    (run_dir / "soils" / "src.sol").write_text("soil", encoding="utf-8")
+
+    soils = _FakeSoils(
+        domsoil_d={"101": "m1"},
+        soils={"m1": _SoilStub(clay=30.0, sand=40.0, fname="src.sol")},
+        soils_dir=str(run_dir / "soils"),
+    )
+    landuse = _FakeLanduse(
+        domlc_mofe_d={"101": {"1": "dom-1"}},
+        managements={"dom-1": _ManagementSummary("forest high sev fire")},
+    )
+    watershed = _FakeWatershed({"101": 1.0})
+
+    replacements_seen: list[dict[str, object]] = []
+    versions_seen: list[float | None] = []
+    stack_paths: list[list[str]] = []
+
+    class _FakeWeppSoilUtil:
+        def __init__(self, source_path: str) -> None:
+            self.clay = 30.0
+            self.sand = 40.0
+
+        def to_over9000(
+            self,
+            replacements,
+            h0_max_om=None,
+            recompute_wp_fc_using_rosetta_on_bd_override=False,
+            version=None,
+        ):
+            replacements_seen.append(dict(replacements))
+            versions_seen.append(version)
+            return _FakeWriter([])
+
+    class _FakeMofeSynth:
+        def __init__(self, stack):
+            stack_paths.append(list(stack))
+
+        def write(self, path: str) -> None:
+            return
+
+    lookup_row = {"ki": "1", "ksatfac": "1.5", "ksatrec": "0.3"}
+
+    monkeypatch.setattr(disturbed_module, "Ron", SimpleNamespace(getInstance=lambda _wd: object()))
+    monkeypatch.setattr(Disturbed, "soils_instance", property(lambda self: soils))
+    monkeypatch.setattr(Disturbed, "landuse_instance", property(lambda self: landuse))
+    monkeypatch.setattr(Disturbed, "watershed_instance", property(lambda self: watershed))
+    monkeypatch.setattr(disturbed_module, "simple_texture", lambda clay, sand: "mock-texture")
+    monkeypatch.setattr(disturbed_module, "WeppSoilUtil", _FakeWeppSoilUtil)
+    monkeypatch.setattr(disturbed_module, "SoilMultipleOfeSynth", _FakeMofeSynth)
+    monkeypatch.setattr(
+        Disturbed,
+        "land_soil_replacements_d",
+        property(lambda self: {("mock-texture", "forest high sev fire"): lookup_row}),
+    )
+
+    disturbed.modify_mofe_soils()
+
+    assert "m1-mock-texture-forest high sev fire" in soils.soils
+    assert replacements_seen == [lookup_row]
+    assert versions_seen == [9002.0]
+    assert stack_paths == [[str(run_dir / "soils" / "m1-mock-texture-forest high sev fire.sol")]]
+
+
+def test_modify_mofe_soils_9002_strips_treatment_suffix_for_lookup(
+    disturbed_factory,
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    disturbed, run_dir = disturbed_factory("modify-mofe-9002-suffix")
+    disturbed._sol_ver = 9002.0
+    (run_dir / "soils" / "src.sol").write_text("soil", encoding="utf-8")
+
+    soils = _FakeSoils(
+        domsoil_d={"101": "m1"},
+        soils={"m1": _SoilStub(clay=30.0, sand=40.0, fname="src.sol")},
+        soils_dir=str(run_dir / "soils"),
+    )
+    landuse = _FakeLanduse(
+        domlc_mofe_d={"101": {"1": "dom-1", "2": "dom-2"}},
+        managements={
+            "dom-1": _ManagementSummary("forest high sev fire-mulch_15"),
+            "dom-2": _ManagementSummary("forest high sev fire"),
+        },
+    )
+    watershed = _FakeWatershed({"101": 1.0})
+
+    replacements_seen: list[dict[str, str]] = []
+
+    class _FakeWeppSoilUtil:
+        def __init__(self, source_path: str) -> None:
+            self.clay = 30.0
+            self.sand = 40.0
+
+        def to_over9000(
+            self,
+            replacements,
+            h0_max_om=None,
+            recompute_wp_fc_using_rosetta_on_bd_override=False,
+            version=None,
+        ):
+            replacements_seen.append(dict(replacements))
+            return _FakeWriter([])
+
+    class _FakeMofeSynth:
+        def __init__(self, stack):
+            self.stack = stack
+
+        def write(self, path: str) -> None:
+            return
+
+    lookup_row = {"ki": "1"}
+
+    monkeypatch.setattr(disturbed_module, "Ron", SimpleNamespace(getInstance=lambda _wd: object()))
+    monkeypatch.setattr(Disturbed, "soils_instance", property(lambda self: soils))
+    monkeypatch.setattr(Disturbed, "landuse_instance", property(lambda self: landuse))
+    monkeypatch.setattr(Disturbed, "watershed_instance", property(lambda self: watershed))
+    monkeypatch.setattr(disturbed_module, "simple_texture", lambda clay, sand: "mock-texture")
+    monkeypatch.setattr(disturbed_module, "WeppSoilUtil", _FakeWeppSoilUtil)
+    monkeypatch.setattr(disturbed_module, "SoilMultipleOfeSynth", _FakeMofeSynth)
+    monkeypatch.setattr(
+        Disturbed,
+        "land_soil_replacements_d",
+        property(lambda self: {("mock-texture", "forest high sev fire"): lookup_row}),
+    )
+
+    disturbed.modify_mofe_soils()
+
+    assert "m1-mock-texture-forest high sev fire-mulch_15" in soils.soils
+    assert "m1-mock-texture-forest high sev fire" in soils.soils
+    assert replacements_seen == [{"ki": "1"}, {"ki": "1"}]
+
+
+def test_modify_mofe_soils_9002_lookup_miss_uses_explicit_fallback_replacements(
+    disturbed_factory,
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    disturbed, run_dir = disturbed_factory("modify-mofe-9002-miss")
+    disturbed._sol_ver = 9002.0
+    (run_dir / "soils" / "src.sol").write_text("soil", encoding="utf-8")
+
+    soils = _FakeSoils(
+        domsoil_d={"101": "m1"},
+        soils={"m1": _SoilStub(clay=30.0, sand=40.0, fname="src.sol")},
+        soils_dir=str(run_dir / "soils"),
+    )
+    landuse = _FakeLanduse(
+        domlc_mofe_d={"101": {"1": "dom-1"}},
+        managements={"dom-1": _ManagementSummary("developed low intensity")},
+    )
+    watershed = _FakeWatershed({"101": 1.0})
+
+    replacements_seen: list[dict[str, object]] = []
+    versions_seen: list[float | None] = []
+
+    class _FakeWeppSoilUtil:
+        def __init__(self, source_path: str) -> None:
+            self.clay = 30.0
+            self.sand = 40.0
+
+        def to_over9000(
+            self,
+            replacements,
+            h0_max_om=None,
+            recompute_wp_fc_using_rosetta_on_bd_override=False,
+            version=None,
+        ):
+            replacements_seen.append(dict(replacements))
+            versions_seen.append(version)
+            return _FakeWriter([])
+
+    class _FakeMofeSynth:
+        def __init__(self, stack):
+            self.stack = stack
+
+        def write(self, path: str) -> None:
+            return
+
+    monkeypatch.setattr(disturbed_module, "Ron", SimpleNamespace(getInstance=lambda _wd: object()))
+    monkeypatch.setattr(Disturbed, "soils_instance", property(lambda self: soils))
+    monkeypatch.setattr(Disturbed, "landuse_instance", property(lambda self: landuse))
+    monkeypatch.setattr(Disturbed, "watershed_instance", property(lambda self: watershed))
+    monkeypatch.setattr(disturbed_module, "simple_texture", lambda clay, sand: "mock-texture")
+    monkeypatch.setattr(disturbed_module, "WeppSoilUtil", _FakeWeppSoilUtil)
+    monkeypatch.setattr(disturbed_module, "SoilMultipleOfeSynth", _FakeMofeSynth)
+    monkeypatch.setattr(Disturbed, "land_soil_replacements_d", property(lambda self: {}))
+
+    disturbed.modify_mofe_soils()
+
+    assert replacements_seen == [
+        {
+            "luse": "developed low intensity",
+            "stext": "mock-texture",
+            "ksatfac": 0.0,
+            "ksatrec": 0.0,
+        }
+    ]
+    assert versions_seen == [9002.0]
+    assert "m1-mock-texture-developed low intensity" in soils.soils
+    assert "m1-mock-texture" not in soils.soils
+
+
+def test_modify_mofe_soils_9002_lookup_miss_uses_class_aware_keys(
+    disturbed_factory,
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    disturbed, run_dir = disturbed_factory("modify-mofe-9002-miss-class-keys")
+    disturbed._sol_ver = 9002.0
+    (run_dir / "soils" / "src.sol").write_text("soil", encoding="utf-8")
+
+    soils = _FakeSoils(
+        domsoil_d={"101": "m1"},
+        soils={"m1": _SoilStub(clay=30.0, sand=40.0, fname="src.sol")},
+        soils_dir=str(run_dir / "soils"),
+    )
+    landuse = _FakeLanduse(
+        domlc_mofe_d={"101": {"1": "dom-1", "2": "dom-2"}},
+        managements={
+            "dom-1": _ManagementSummary("developed low intensity"),
+            "dom-2": _ManagementSummary("developed med intensity"),
+        },
+    )
+    watershed = _FakeWatershed({"101": 1.0})
+
+    replacement_classes: list[str] = []
+    stack_paths: list[list[str]] = []
+
+    class _FakeWeppSoilUtil:
+        def __init__(self, source_path: str) -> None:
+            self.clay = 30.0
+            self.sand = 40.0
+
+        def to_over9000(
+            self,
+            replacements,
+            h0_max_om=None,
+            recompute_wp_fc_using_rosetta_on_bd_override=False,
+            version=None,
+        ):
+            replacement_classes.append(str(replacements["luse"]))
+            return _FakeWriter([])
+
+    class _FakeMofeSynth:
+        def __init__(self, stack):
+            stack_paths.append(list(stack))
+
+        def write(self, path: str) -> None:
+            return
+
+    monkeypatch.setattr(disturbed_module, "Ron", SimpleNamespace(getInstance=lambda _wd: object()))
+    monkeypatch.setattr(Disturbed, "soils_instance", property(lambda self: soils))
+    monkeypatch.setattr(Disturbed, "landuse_instance", property(lambda self: landuse))
+    monkeypatch.setattr(Disturbed, "watershed_instance", property(lambda self: watershed))
+    monkeypatch.setattr(disturbed_module, "simple_texture", lambda clay, sand: "mock-texture")
+    monkeypatch.setattr(disturbed_module, "WeppSoilUtil", _FakeWeppSoilUtil)
+    monkeypatch.setattr(disturbed_module, "SoilMultipleOfeSynth", _FakeMofeSynth)
+    monkeypatch.setattr(Disturbed, "land_soil_replacements_d", property(lambda self: {}))
+
+    disturbed.modify_mofe_soils()
+
+    assert replacement_classes == ["developed low intensity", "developed med intensity"]
+    assert "m1-mock-texture-developed low intensity" in soils.soils
+    assert "m1-mock-texture-developed med intensity" in soils.soils
+    assert "m1-mock-texture" not in soils.soils
+    assert stack_paths == [
+        [
+            str(run_dir / "soils" / "m1-mock-texture-developed low intensity.sol"),
+            str(run_dir / "soils" / "m1-mock-texture-developed med intensity.sol"),
+        ]
+    ]
+
+
+def test_modify_mofe_soils_9002_recomputes_area_and_pct_coverage(
+    disturbed_factory,
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    disturbed, run_dir = disturbed_factory("modify-mofe-9002-area")
+    disturbed._sol_ver = 9002.0
+    (run_dir / "soils" / "src-1.sol").write_text("soil", encoding="utf-8")
+    (run_dir / "soils" / "src-2.sol").write_text("soil", encoding="utf-8")
+
+    soils = _FakeSoils(
+        domsoil_d={"101": "m1", "102": "m2"},
+        soils={
+            "m1": _SoilStub(clay=30.0, sand=40.0, fname="src-1.sol"),
+            "m2": _SoilStub(clay=30.0, sand=40.0, fname="src-2.sol"),
+        },
+        soils_dir=str(run_dir / "soils"),
+    )
+    landuse = _FakeLanduse(
+        domlc_mofe_d={"101": {"1": "dom-1"}, "102": {"1": "dom-2"}},
+        managements={
+            "dom-1": _ManagementSummary("forest high sev fire"),
+            "dom-2": _ManagementSummary("forest high sev fire"),
+        },
+    )
+    watershed = _FakeWatershed({"101": 2.0, "102": 3.0})
+
+    class _FakeWeppSoilUtil:
+        def __init__(self, source_path: str) -> None:
+            self.clay = 30.0
+            self.sand = 40.0
+
+        def to_over9000(
+            self,
+            replacements,
+            h0_max_om=None,
+            recompute_wp_fc_using_rosetta_on_bd_override=False,
+            version=None,
+        ):
+            return _FakeWriter([])
+
+    class _FakeMofeSynth:
+        def __init__(self, stack):
+            self.stack = stack
+
+        def write(self, path: str) -> None:
+            return
+
+    monkeypatch.setattr(disturbed_module, "Ron", SimpleNamespace(getInstance=lambda _wd: object()))
+    monkeypatch.setattr(Disturbed, "soils_instance", property(lambda self: soils))
+    monkeypatch.setattr(Disturbed, "landuse_instance", property(lambda self: landuse))
+    monkeypatch.setattr(Disturbed, "watershed_instance", property(lambda self: watershed))
+    monkeypatch.setattr(disturbed_module, "simple_texture", lambda clay, sand: "mock-texture")
+    monkeypatch.setattr(disturbed_module, "WeppSoilUtil", _FakeWeppSoilUtil)
+    monkeypatch.setattr(disturbed_module, "SoilMultipleOfeSynth", _FakeMofeSynth)
+    monkeypatch.setattr(
+        Disturbed,
+        "land_soil_replacements_d",
+        property(lambda self: {("mock-texture", "forest high sev fire"): {"ki": "1"}}),
+    )
+
+    disturbed.modify_mofe_soils()
+
+    assert soils.domsoil_d["101"] == "hill_101.mofe"
+    assert soils.domsoil_d["102"] == "hill_102.mofe"
+    assert soils.soils["hill_101.mofe"].area == pytest.approx(2.0)
+    assert soils.soils["hill_102.mofe"].area == pytest.approx(3.0)
+    assert soils.soils["hill_101.mofe"].pct_coverage == pytest.approx(40.0)
+    assert soils.soils["hill_102.mofe"].pct_coverage == pytest.approx(60.0)
+
+
 def test_modify_mofe_soils_passes_copy_of_lookup_replacements(
     disturbed_factory,
     monkeypatch: pytest.MonkeyPatch,

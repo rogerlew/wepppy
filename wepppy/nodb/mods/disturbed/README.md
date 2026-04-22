@@ -232,6 +232,7 @@ disturbed.modify_soils()
 - If a management entry defines `SoilFile`/`sol_path`, the controller copies that soil directly instead of regenerating from the lookup table.
 - For treatment suffixes (`-mulch_15`, `-thinning`, etc.), `lookup_disturbed_class()` strips the suffix so soils are keyed by burn severity, not treatment type.
 - For MOFE runs, each OFE gets its own disturbed soil file, reassembled into a `.mofe.sol` via `SoilMultipleOfeSynth`.
+- For MOFE `sol_ver=9002` lookup misses, the controller creates class-specific fallback `9002` soils (`mukey-texid-disturbed_class`) with explicit neutral metadata replacements (`luse`, `stext`, `ksatfac=0.0`, `ksatrec=0.0`) so MOFE stacks remain same-version; single-OFE lookup misses still return base `mukey`.
 - `build_extended_land_soil_lookup()` exports the extended scheme (management + soil parameters) and normalizes scalar plant keys to `plant.data.rdmax` / `plant.data.xmxlai`; it is not part of the default run workflow.
 - All mutations must occur inside `with disturbed.locked():` blocks to respect Redis-backed locking.
 

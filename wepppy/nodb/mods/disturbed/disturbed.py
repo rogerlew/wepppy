@@ -1678,14 +1678,18 @@ class Disturbed(NoDbBase):
 
                     if replacements is None:  # e.g. developed low intensity
                         if sol_ver == 9002.0:
+                            # MOFE 9002 stacks must stay same-version for SoilMultipleOfeSynth.
+                            # On lookup miss we keep lookup-driven erodibility untouched while
+                            # migrating into an explicit class-specific 9002 fallback soil.
                             replacements = dict(
                                 luse=man.disturbed_class,
                                 stext=texid,
                                 ksatfac=0.0,
                                 ksatrec=0.0
                             )
-
-                        disturbed_mukey = f'{mukey}-{texid}'
+                            disturbed_mukey = f'{mukey}-{texid}-{man.disturbed_class}'
+                        else:
+                            disturbed_mukey = f'{mukey}-{texid}'
                     else:
                         disturbed_mukey = f'{mukey}-{texid}-{man.disturbed_class}'
 
