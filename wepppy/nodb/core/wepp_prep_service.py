@@ -465,16 +465,21 @@ class WeppPrepService:
                         if not done:
                             since_progress = time.time() - last_progress_time
                             pending_count = len(pending_futures)
+                            completed_count = count
 
                             if since_progress >= 60:
                                 wepp.logger.error(
-                                    "  Soil prep tasks still pending after %.1fs; %s tasks waiting.",
+                                    "  (%s/%s) Soil prep tasks still pending after %.1fs; %s tasks waiting.",
+                                    completed_count,
+                                    futures_n,
                                     round(since_progress, 1),
                                     pending_count,
                                 )
                             else:
                                 wepp.logger.info(
-                                    "  Waiting on soil prep tasks (pending=%s, %.1fs since last completion).",
+                                    "  (%s/%s) Waiting on soil prep tasks (pending=%s, %.1fs since last completion).",
+                                    completed_count,
+                                    futures_n,
                                     pending_count,
                                     round(since_progress, 1),
                                 )
@@ -490,13 +495,21 @@ class WeppPrepService:
                                 last_progress_time = time.time()
                             except BrokenProcessPool as exc:
                                 wepp.logger.error(
-                                    "  Soil prep process pool terminated unexpectedly: %s", exc
+                                    "  (%s/%s) Soil prep process pool terminated unexpectedly: %s",
+                                    count,
+                                    futures_n,
+                                    exc,
                                 )
                                 for pending_future in pending_futures:
                                     pending_future.cancel()
                                 return False, exc
                             except Exception as exc:
-                                wepp.logger.error(f"  A soil prep task failed with an error: {exc}")
+                                wepp.logger.error(
+                                    "  (%s/%s) A soil prep task failed with an error: %s",
+                                    count,
+                                    futures_n,
+                                    exc,
+                                )
                                 for pending_future in pending_futures:
                                     pending_future.cancel()
                                 return False, exc
