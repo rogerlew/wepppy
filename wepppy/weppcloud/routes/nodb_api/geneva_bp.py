@@ -425,7 +425,10 @@ def query_geneva_summary(runid: str, config: str) -> Response:
 
     datasource_id = str(request.args.get("datasource_id", "all") or "all").strip() or "all"
     measure = str(request.args.get("measure", "peak_discharge") or "peak_discharge").strip()
-    ari_years = _parse_optional_ari_years_filter()
+    try:
+        ari_years = _parse_optional_ari_years_filter()
+    except GenevaNoDbError as exc:
+        return _geneva_error_response(exc)
     selected_storm_id = str(request.args.get("selected_storm_id", "") or "").strip() or None
 
     geneva = _ensure_geneva_controller(wd, f"{config}.cfg")
@@ -449,7 +452,10 @@ def report_geneva_summary(runid: str, config: str) -> Response:
 
     datasource_id = str(request.args.get("datasource_id", "all") or "all").strip() or "all"
     measure = str(request.args.get("measure", "peak_discharge") or "peak_discharge").strip()
-    ari_years = _parse_optional_ari_years_filter()
+    try:
+        ari_years = _parse_optional_ari_years_filter()
+    except GenevaNoDbError as exc:
+        return _geneva_error_response(exc)
     selected_storm_id = str(request.args.get("selected_storm_id", "") or "").strip() or None
 
     geneva = _ensure_geneva_controller(wd, f"{config}.cfg")

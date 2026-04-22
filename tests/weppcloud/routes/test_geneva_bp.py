@@ -414,6 +414,19 @@ def test_query_geneva_summary_rejects_non_integer_ari_filter(
     assert payload["error"]["details"] == "ari_years filter values must be integers"
 
 
+def test_report_geneva_summary_rejects_non_integer_ari_filter(
+    geneva_client: Any,
+) -> None:
+    client, _, _ = geneva_client
+
+    response = client.get(f"/runs/{RUN_ID}/{CONFIG}/report/geneva/summary?ari_years=bad")
+
+    assert response.status_code == 400
+    payload = response.get_json()
+    assert payload["error"]["code"] == "invalid_input"
+    assert payload["error"]["details"] == "ari_years filter values must be integers"
+
+
 def test_query_geneva_summary_normalizes_comma_separated_ari_filter(
     geneva_client: Any,
     monkeypatch: pytest.MonkeyPatch,
