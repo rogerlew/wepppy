@@ -57,12 +57,12 @@ Status legend:
 | --- | --- | --- | --- | --- | --- |
 | WP-00 | DONE | Contract freeze and implementation map | None | `explorer` | Locked interfaces, endpoint contracts, acceptance matrix |
 | WP-01 | DONE | WEPPcloud route + diagnostics page shell | WP-00 | `worker` | `/diagnostics/` route, template, no-store headers, `<noscript>` blocker |
-| WP-02 | READY | Client diagnostics engine (browser/storage/report) | WP-01 | `worker` | JS check runner, severity model, copy JSON |
-| WP-03 | READY | Auth/session checks (`session-heartbeat`, `rq-engine-token`) | WP-01 | `worker` | Auth probe module with CSRF + same-origin behaviors |
-| WP-04 | READY | Realtime probes (status/preflight websocket) | WP-01 | `worker` | `diagRunId` generation, status/preflight probe and retry logic |
+| WP-02 | DONE | Client diagnostics engine (browser/storage/report) | WP-01 | `worker` | JS check runner, severity model, copy JSON |
+| WP-03 | DONE | Auth/session checks (`session-heartbeat`, `rq-engine-token`) | WP-01 | `worker` | Auth probe module with CSRF + same-origin behaviors |
+| WP-04 | DONE | Realtime probes (status/preflight websocket) | WP-01 | `worker` | `diagRunId` generation, status/preflight probe and retry logic |
 | WP-05 | DONE | Query-engine async bandwidth endpoints | WP-00 | `query_engine_refactorer` | `GET/POST /query-engine/diagnostics/bandwidth/*` with guards |
-| WP-06 | READY | Bandwidth UI integration (informational only) | WP-02, WP-05 | `worker` | Client bandwidth runner + Save-Data skip + UI surfacing |
-| WP-07 | READY | Test, accessibility, docs, and rollout closeout | WP-02..WP-06 | `test_guardian` + `reviewer` + `security_reviewer` | Regression tests, lint/test evidence, final docs updates |
+| WP-06 | DONE | Bandwidth UI integration (informational only) | WP-02, WP-05 | `worker` | Client bandwidth runner + Save-Data skip + UI surfacing |
+| WP-07 | DONE | Test, accessibility, docs, and rollout closeout | WP-02..WP-06 | `test_guardian` + `reviewer` + `security_reviewer` | Regression tests, lint/test evidence, final docs updates |
 
 ## 5. Parallelization and Execution Order
 
@@ -312,13 +312,39 @@ Required behavior:
 - Mark as `info` or `warn`, never blocker.
 - Clearly label metrics as approximate/environment-dependent.
 
+WP-06 frozen endpoint contract (from current query-engine implementation):
+
+- Download probe endpoint:
+  - `GET /query-engine/diagnostics/bandwidth/download?bytes=<n>`
+  - default size: `262144` bytes when `bytes` omitted
+  - maximum size: `4194304` bytes
+  - success: `200` streaming octet response with explicit `Content-Length` and `Cache-Control: no-store`
+  - expected failures: `400` invalid bytes, `413` probe too large, `429` rate-limited, `503` busy
+- Upload probe endpoint:
+  - `POST /query-engine/diagnostics/bandwidth/upload`
+  - success JSON includes `ok`, `bytes_received`, `elapsed_ms`, `max_bytes`
+  - expected failures: `403` cross-origin blocked, `408` upload timeout, `413` upload too large, `429` rate-limited, `503` busy
+- Both endpoints enforce same-origin and anti-abuse controls server-side; client must treat non-2xx as informational degradation, not blocker.
+
+WP-06 implementation constraints (client):
+
+- Probe calls should be same-origin and root-relative under `/query-engine/...`.
+- Do not surface secrets/tokens/cookies in evidence text.
+- Time-bound UI probe execution (client timeout) so diagnostics page does not hang on network stalls.
+- Keep probe sizes lightweight by default (for example: RTT tiny request, download `256 KiB`, upload `256 KiB`).
+- Skip bandwidth probes when `navigator.connection.saveData === true` with explicit `status=skipped` evidence.
+
 Acceptance criteria:
 
 - Bandwidth section can be skipped gracefully and still produces valid report.
 - Results include probe sizes and elapsed times for reproducibility.
+- Overall diagnostics rollup remains governed by blocker/degraded checks; bandwidth checks must not force `not_ready`.
+- UI output follows existing WEPPcloud status chip + card conventions from `ui-style-guide.md`.
 
 Validation commands:
 
+- `wctl run-npm lint`
+- `wctl run-npm test -- diagnostics`
 - `wctl run-npm test`
 - `wctl run-pytest tests/query_engine/test_server_routes.py --maxfail=1 -k bandwidth`
 
@@ -335,6 +361,24 @@ Scope:
 - Security review of new endpoints and redaction rules.
 - Final documentation touch-ups in spec/plan if implementation details changed.
 
+WP-07 execution packet (must deliver all):
+
+- Validation evidence bundle:
+  - command log with exact commands and pass/fail outcomes
+  - failed-command diagnosis and disposition (if any)
+- Accessibility review notes for diagnostics page:
+  - heading/landmark structure
+  - status/alert semantics
+  - keyboard and focus behavior for Copy JSON/report preview interactions
+  - concise remediation list if any violations are found
+- Security review notes:
+  - diagnostics report redaction verification
+  - same-origin enforcement expectations for auth and bandwidth probes
+  - timeout/bounded-resource checks for realtime/bandwidth diagnostics
+- Documentation closeout:
+  - update WP statuses in this plan to final dispositions
+  - if behavior changed from spec, update `docs/ui-docs/diagnostics-page.spec.md` in same change set
+
 Required checks:
 
 - `wctl run-pytest tests/weppcloud --maxfail=1`
@@ -343,11 +387,46 @@ Required checks:
 - `wctl run-npm test`
 - `wctl doc-lint --path docs/ui-docs/diagnostics-page.spec.md --path docs/ui-docs/diagnostics-page.plan.md`
 
+Recommended targeted confidence checks (run before full sweeps):
+
+- `wctl run-npm test -- diagnostics`
+- `wctl run-pytest tests/weppcloud/routes/test_diagnostics_page.py --maxfail=1`
+- `wctl run-pytest tests/query_engine/test_server_routes.py --maxfail=1 -k bandwidth`
+
 Disposition criteria:
 
 - All blockers fixed.
 - Degraded/info known limitations documented.
 - Security review confirms no sensitive leakage and bounded resource usage.
+- Accessibility review confirms diagnostics UI aligns with existing WEPPcloud conventions or includes explicit accepted follow-ups.
+
+### WP-07 Closeout Snapshot (2026-04-21)
+
+Final disposition: `DONE`.
+
+Validation summary:
+
+- ✅ `wctl run-npm test -- diagnostics`
+- ✅ `wctl run-pytest tests/weppcloud/routes/test_diagnostics_page.py --maxfail=1`
+- ✅ `wctl run-pytest tests/query_engine/test_server_routes.py --maxfail=1 -k bandwidth`
+- ✅ `wctl run-pytest tests/weppcloud --maxfail=1`
+- ✅ `wctl run-pytest tests/query_engine --maxfail=1`
+- ✅ `wctl run-npm lint`
+- ✅ `wctl run-npm test`
+- ✅ `wctl doc-lint --path docs/ui-docs/diagnostics-page.spec.md --path docs/ui-docs/diagnostics-page.plan.md`
+
+Accessibility disposition:
+
+- Added a screen-reader heading (`<h1 class="wc-sr-only">`) for page-level heading hierarchy.
+- Added live-region semantics (`role="status"`, `aria-live="polite"`, `aria-atomic="true"`) for copy feedback updates.
+- `<noscript>` blocker copy, keyboard behavior for `Copy JSON`, and native keyboard support for `<details>/<summary>` report preview were verified as conformant.
+
+Security disposition:
+
+- Report redaction verified in `report.js` for authorization/token/cookie markers and JWT-like payloads.
+- Auth probes remain same-origin + CSRF aligned (`credentials: "same-origin"` + `X-CSRFToken`; server enforces same-origin and CSRF contract).
+- Realtime probes are time-bounded (minimum 20s windows) with a single reconnect retry and degraded classification on failure.
+- Bandwidth probes remain informational-only client-side and server-side bounded by request caps, per-request timeout, semaphore concurrency guard, and rate limiting.
 
 ## 7. Handoff Contract Per Work-Package
 
@@ -388,3 +467,7 @@ Each WP completion handoff must include:
   - `docs/ui-docs/diagnostics-page.wp03.prompt.md`
   - `docs/ui-docs/diagnostics-page.wp04.prompt.md`
   - `docs/ui-docs/diagnostics-page.wavec.board.md`
+- Wave D prompts:
+  - `docs/ui-docs/diagnostics-page.wp06.prompt.md`
+- Wave E prompts:
+  - `docs/ui-docs/diagnostics-page.wp07.prompt.md`

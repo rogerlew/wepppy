@@ -5,6 +5,7 @@
 
 {% block body %}
 <div class="wc-stack" id="diagnostics_page_root" data-diagnostics-root>
+  <h1 class="wc-sr-only">WEPPcloud Diagnostics</h1>
   {% call ui.card_shell(
        title="WEPPcloud Diagnostics",
        description="Use this page to verify whether the current browser session can run WEPPcloud requirements."
@@ -52,7 +53,7 @@
           Copy JSON
         </button>
       </div>
-      <p class="wc-text-muted" data-diagnostics-copy-feedback>
+      <p class="wc-text-muted" data-diagnostics-copy-feedback role="status" aria-live="polite" aria-atomic="true">
         Copy JSON is available after checks finish.
       </p>
       <details>
