@@ -1288,7 +1288,7 @@ class Soils(NoDbBase):
             shutil.copyfile(sol, _join(soils_dir, fn))
 
             domsoil_d = {}
-            for topaz_id, in watershed._subs_summary:
+            for topaz_id in watershed._subs_summary:
                 domsoil_d[str(topaz_id)] = mukey
 
             soils[mukey].pct_coverage = 100.0

@@ -210,6 +210,43 @@ def test_build_from_map_db_refreshes_existing_run_local_sol_from_db(
     assert soils.soils["30"].pct_coverage == pytest.approx(100.0)
 
 
+def test_build_singledb_handles_multidigit_topaz_ids(
+    tmp_path: Path,
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    wd = tmp_path / "run"
+    soils_dir = wd / "soils"
+    soils_dir.mkdir(parents=True, exist_ok=True)
+
+    src_sol = tmp_path / "Forest silt loam.sol"
+    src_sol.write_text("soil-body\n", encoding="utf-8")
+
+    soils = Soils.__new__(Soils)
+    soils.wd = str(wd)
+    soils.logger = logging.getLogger("tests.nodb.soils_singledb")
+    soils._single_dbselection = "Forest2006/Forest silt loam.sol"
+    soils.locked = lambda: nullcontext()
+    soils.trigger = lambda *_args, **_kwargs: None
+
+    watershed_stub = SimpleNamespace(
+        _subs_summary={"22": None, "123": None, "7": None},
+        hillslope_area=lambda topaz_id: {"22": 1.5, "123": 3.0, "7": 0.5}[str(topaz_id)],
+    )
+
+    monkeypatch.setattr(Soils, "watershed_instance", property(lambda _self: watershed_stub))
+    monkeypatch.setattr(Soils, "getInstance", classmethod(lambda cls, _wd: soils))
+    monkeypatch.setattr("wepppy.nodb.core.soils.get_soil", lambda _key: str(src_sol))
+
+    soils._build_singledb()
+
+    mukey = "Forest2006-Forest silt loam"
+    assert soils.domsoil_d == {"22": mukey, "123": mukey, "7": mukey}
+    assert soils.ssurgo_domsoil_d == soils.domsoil_d
+    assert soils.soils[mukey].pct_coverage == pytest.approx(100.0)
+    assert soils.soils[mukey].area == pytest.approx(5.0)
+    assert (soils_dir / "Forest silt loam.sol").read_text(encoding="utf-8") == "soil-body\n"
+
+
 def test_post_dump_skips_parquet_when_soils_dir_missing(
     tmp_path: Path,
     monkeypatch: pytest.MonkeyPatch,
