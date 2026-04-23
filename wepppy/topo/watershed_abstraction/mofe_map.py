@@ -11,7 +11,7 @@ import numpy as np
 def _load_wepppyo3_mofe_map_assigner() -> Callable[..., np.ndarray]:
     try:
         module = importlib.import_module("wepppyo3.watershed_abstraction")
-    except Exception as exc:
+    except ImportError as exc:
         raise RuntimeError(
             "MOFE map assignment requires `wepppyo3.watershed_abstraction`; install/update wepppyo3 to continue."
         ) from exc
