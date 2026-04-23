@@ -20,10 +20,14 @@ REDIS_APPENDONLY="${REDIS_APPENDONLY:-yes}"
 REDIS_APPENDFSYNC="${REDIS_APPENDFSYNC:-everysec}"
 REDIS_SAVE_SCHEDULE="${REDIS_SAVE_SCHEDULE:-900 1 300 10 60 10000}"
 REDIS_AOF_USE_RDB_PREAMBLE="${REDIS_AOF_USE_RDB_PREAMBLE:-yes}"
+REDIS_DIR="${REDIS_DIR:-/data}"
+
+mkdir -p "${REDIS_DIR}"
 
 set -- \
   redis-server \
   --notify-keyspace-events "Kh" \
+  --dir "${REDIS_DIR}" \
   --appendonly "${REDIS_APPENDONLY}" \
   --appendfsync "${REDIS_APPENDFSYNC}" \
   --aof-use-rdb-preamble "${REDIS_AOF_USE_RDB_PREAMBLE}" \
