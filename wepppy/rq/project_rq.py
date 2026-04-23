@@ -872,6 +872,38 @@ def abstract_watershed_rq(runid: str) -> None:
             wait_for_path(watershed.subwta, logger=watershed.logger)
             watershed.abstract_watershed()
 
+            persisted = Watershed.load_detached(wd, allow_nonexistent=True)
+            persisted_centroid = (
+                None
+                if persisted is None
+                else Watershed._coerce_centroid(getattr(persisted, "centroid", None))
+            )
+            if persisted_centroid is not None:
+                return
+
+            watershed.logger.warning(
+                "Watershed centroid durability check failed after abstraction for runid=%s; "
+                "attempting one bounded repair",
+                runid,
+            )
+            watershed.require_centroid()
+
+            repaired = Watershed.load_detached(wd, allow_nonexistent=True)
+            repaired_centroid = (
+                None
+                if repaired is None
+                else Watershed._coerce_centroid(getattr(repaired, "centroid", None))
+            )
+            if repaired_centroid is None:
+                raise WatershedCentroidStateError(
+                    runid=runid,
+                    wd=wd,
+                    detail=(
+                        "post-abstraction durability verification failed after one repair attempt; "
+                        "persisted centroid remains unavailable"
+                    ),
+                )
+
         _run_with_directory_root_lock(
             wd,
             "watershed",

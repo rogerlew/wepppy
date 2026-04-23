@@ -1271,7 +1271,7 @@ class Climate(NoDbBase):
             years = self._input_years
 
             # build a climate for the channels.
-            lng, lat = watershed.centroid
+            lng, lat = watershed.require_centroid()
 
             self.par_fn = '{}.par'.format(climatestation)
             self.cli_fn = '{}.cli'.format(climatestation)
@@ -1384,7 +1384,7 @@ class Climate(NoDbBase):
             self.logger.info('  running _build_climate_observed_daymet')
 
             watershed = self.watershed_instance
-            ws_lng, ws_lat = watershed.centroid
+            ws_lng, ws_lat = watershed.require_centroid()
 
             cli_dir = self.cli_dir
             start_year, end_year = self._require_observed_year_bounds_for_build()
@@ -1432,7 +1432,7 @@ class Climate(NoDbBase):
             self.logger.info('  running _build_climate_observed_gridmet')
 
             watershed = self.watershed_instance
-            ws_lng, ws_lat = watershed.centroid
+            ws_lng, ws_lat = watershed.require_centroid()
 
             cli_dir = self.cli_dir
             start_year, end_year = self._require_observed_year_bounds_for_build()
@@ -1466,7 +1466,7 @@ class Climate(NoDbBase):
             self.logger.info('  running _build_climate_future')
 
             watershed = self.watershed_instance
-            ws_lng, ws_lat = watershed.centroid
+            ws_lng, ws_lat = watershed.require_centroid()
             self.logger.info(f'    watershed centroid: ({ws_lng:.4f}, {ws_lat:.4f})')
 
             cli_dir = self.cli_dir

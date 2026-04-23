@@ -1,8 +1,8 @@
 # PROJECT_TRACKER.md
 > Kanban board for wepppy work packages and vision items
 
-**Last Updated**: 2026-04-22  
-**Active Packages**: 1  
+**Last Updated**: 2026-04-23  
+**Active Packages**: 4  
 **Quick Links**: [Work Packages Directory](docs/work-packages/) | [God-Tier Prompting Strategy](docs/god-tier-prompting-strategy.md)
 
 ## Purpose
@@ -37,7 +37,7 @@ This tracker makes all work visible at a glance, helping agents coordinate and a
 ### 2. Limit Work in Progress
 **Target**: 2-4 active packages maximum to maintain focus and ensure packages complete rather than stall.
 
-**Current WIP**: 1 package ⚠️ **Below target range (capacity available)**
+**Current WIP**: 4 packages ✅ **Within target range**
 
 If WIP exceeds 4, prioritize completing existing packages before starting new ones. This prevents context switching overhead and ensures clean handoffs.
 
@@ -175,7 +175,72 @@ When resuming Kubernetes work:
 
 Currently active work packages. Limit to 2-4 packages to maintain focus.
 
-**Current WIP Count**: 1 package
+**Current WIP Count**: 4 packages
+
+---
+
+### Watershed Centroid Persistence Hardening for Climate Build Reliability
+**Started**: 2026-04-22  
+**Status**: Implementation complete with targeted validation; global suite closure blocked by unrelated Geneva failure  
+**Size**: Medium-High (2-5 focused sessions)  
+**Owner**: Codex  
+**Link**: [docs/work-packages/20260422_watershed_centroid_persistence_hardening/](docs/work-packages/20260422_watershed_centroid_persistence_hardening/)  
+**Description**: Harden watershed centroid durability and climate-call-site contracts to prevent `build_climate_rq` failures when `watershed.nodb` persists with missing centroid state despite successful abstraction artifacts.
+
+**Current Status**:
+- Watershed centroid contract now supports repair-or-fail semantics with typed `WatershedCentroidStateError`.
+- Climate/station centroid consumers now use `require_centroid()` instead of nullable unpack paths.
+- NoDb stale-write rejection is active and covered by regression (`NoDbStaleWriteError`).
+- `abstract_watershed_rq` now verifies persisted centroid durability, performs one bounded repair attempt, and fails typed if durability still fails.
+- Targeted validation passed (`43 passed`) across nodb/rq/climate touched modules.
+- Full-suite gate is currently blocked by unrelated existing failure in `tests/nodb/mods/geneva/test_geneva_wp09_end_to_end.py::test_wp09_watershed_warning_thresholds_propagate_to_results_query_report[...]` (`KeyError: 'severity'`).
+
+**Next Steps**:
+1. Fix unrelated Geneva worktree failure (`KeyError: 'severity'` in `test_geneva_wp09_end_to_end.py`).
+2. Re-run `wctl run-pytest tests --maxfail=1` and close package after global gate clears.
+
+---
+
+### Peridot Side-Hillslope Length Capping + Provenance Mode
+**Started**: 2026-04-22  
+**Status**: Discovery/Planning complete; ExecPlan authored, implementation pending  
+**Size**: Medium (2-4 focused sessions)  
+**Owner**: Codex  
+**Link**: [docs/work-packages/20260422_peridot_side_hillslope_length_capping/](docs/work-packages/20260422_peridot_side_hillslope_length_capping/)  
+**Description**: Stabilize side hillslope length estimation by capping `area/channel_length` with edge/source median flowpath length for side hillslopes (`topaz_id % 10 in {2,3}`), preserve area via width recomputation, and add additive length-estimation provenance fields to hillslope outputs.
+
+**Current Status**:
+- Package scaffolded with `package.md`, `tracker.md`, and active ExecPlan.
+- Scope bounded to side hillslopes; top/source hillslope logic remains unchanged in this package.
+- Output contract plan is additive (`length` retained, provenance mode field(s) added).
+
+**Next Steps**:
+1. Implement side-hillslope cap logic in Peridot non-representative and representative paths.
+2. Add output provenance field(s) and update manifest/schema docs.
+3. Add targeted regression coverage for cap activation, fallback, and area-preservation invariants.
+
+---
+
+### Jagged Hyperpigmentation Hillslope Ablation Queue (`H3507`, `H1271`)
+**Started**: 2026-04-22  
+**Status**: Observe-only + first hypothesis lanes complete; Windows comparator baseline established  
+**Size**: Medium (2-3 focused sessions)  
+**Owner**: Codex  
+**Link**: [docs/work-packages/20260422_jagged_hyperpigmentation_hillslope_ablation_queue/](docs/work-packages/20260422_jagged_hyperpigmentation_hillslope_ablation_queue/)  
+**Description**: Prepared next ablation campaign slice for run `jagged-hyperpigmentation/disturbed9002-10-mofe`, focused on anomalous `element.dat` signatures and sediment concentration in hillslopes `H3507` and `H1271`.
+
+**Current Status**:
+- Incident package initialized at `/workdir/wepp-forest/docs/ablation/20260422_jagged-hyperpigmentation_hillslope_elementdat-stars/`.
+- Source artifacts staged from `wepp1:/geodata/wc1/runs/ja/jagged-hyperpigmentation`.
+- Baseline local replays complete for `p1271` and `p3507`; source-vs-staged signature scans recorded (`C099`, `C100`).
+- `blarhg` Windows comparator binary inventory captured (SHA256 `07d348d5f9ebff607b6f8e15bea8647410a080c8451b9017f74a9475f39c569d`, timestamp `2026-04-18T02:41:59Z`) as case `C101`.
+- Observe-only and first hypothesis lanes completed (`C101-C106`), including Windows target replays and cross-lane signature census.
+- Decision recorded: use `C:\src\wepppy-win-bootstrap\bin\wepppy-win-bootstrap.exe` as parity comparator baseline for this incident.
+
+**Next Steps**:
+1. Execute the next one-change hypothesis lane group using the pinned Windows comparator baseline.
+2. Isolate minimal causal delta for source-only starred signatures.
+3. Publish keep/rollback recommendation for next implementation package.
 
 ---
 

@@ -107,13 +107,7 @@ class ClimateStationCatalogService:
 
         with climate.locked():
             watershed = climate.watershed_instance
-            centroid = watershed.centroid
-
-            if centroid is None:
-                climate.logger.warning("Cannot find closest stations: watershed centroid is not set")
-                return None
-
-            lng, lat = centroid
+            lng, lat = watershed.require_centroid()
             station_manager = CligenStationsManager(version=climate.cligen_db)
             results = station_manager.get_closest_stations((lng, lat), num_stations)
             climate._closest_stations = results
@@ -136,7 +130,7 @@ class ClimateStationCatalogService:
 
         with climate.locked():
             watershed = climate.watershed_instance
-            lng, lat = watershed.centroid
+            lng, lat = watershed.require_centroid()
             station_manager = CligenStationsManager(version=climate.cligen_db)
             results = station_manager.get_stations_heuristic_search((lng, lat), num_stations)
             climate._heuristic_stations = results
@@ -150,7 +144,7 @@ class ClimateStationCatalogService:
     ) -> Optional[List[Dict[str, Any]]]:
         with climate.locked():
             watershed = climate.watershed_instance
-            lng, lat = watershed.centroid
+            lng, lat = watershed.require_centroid()
             ron = climate.ron_instance
 
             rdi = RasterDatasetInterpolator(ron.dem_fn)
@@ -169,7 +163,7 @@ class ClimateStationCatalogService:
     ) -> Optional[List[Dict[str, Any]]]:
         with climate.locked():
             watershed = climate.watershed_instance
-            lng, lat = watershed.centroid
+            lng, lat = watershed.require_centroid()
             ron = climate.ron_instance
 
             rdi = RasterDatasetInterpolator(ron.dem_fn)

@@ -302,6 +302,91 @@ def test_abstract_watershed_rq_rejects_archive_form_root(
     assert call_roots == ["watershed"]
 
 
+def test_abstract_watershed_rq_repairs_missing_persisted_centroid_once(
+    monkeypatch: pytest.MonkeyPatch,
+    tmp_path: Path,
+) -> None:
+    _run_wd, _set_archive_roots, _call_roots = _stub_rq_context(monkeypatch, tmp_path)
+    monkeypatch.setattr(project_rq, "wait_for_path", lambda *_args, **_kwargs: None)
+
+    class _WatershedStub:
+        def __init__(self) -> None:
+            self.abstract_calls = 0
+            self.repair_calls = 0
+            self.subwta = "dem/topaz/SUBWTA.ARC"
+            self.logger = SimpleNamespace(warning=lambda *_args, **_kwargs: None)
+
+        def abstract_watershed(self) -> None:
+            self.abstract_calls += 1
+
+        def require_centroid(self):
+            self.repair_calls += 1
+            return (-116.2, 43.6)
+
+    watershed = _WatershedStub()
+    monkeypatch.setattr(project_rq.Watershed, "getInstance", lambda _wd: watershed)
+
+    persisted_states = [
+        SimpleNamespace(centroid=None),
+        SimpleNamespace(centroid=(-116.2, 43.6)),
+    ]
+    monkeypatch.setattr(
+        project_rq.Watershed,
+        "load_detached",
+        lambda _wd, allow_nonexistent=True: persisted_states.pop(0),
+    )
+
+    prep_timestamps: list[object] = []
+
+    class _PrepStub:
+        def timestamp(self, task):
+            prep_timestamps.append(task)
+
+    monkeypatch.setattr(project_rq.RedisPrep, "getInstance", lambda _wd: _PrepStub())
+
+    project_rq.abstract_watershed_rq("demo")
+
+    assert watershed.abstract_calls == 1
+    assert watershed.repair_calls == 1
+    assert prep_timestamps == [project_rq.TaskEnum.abstract_watershed]
+
+
+def test_abstract_watershed_rq_fails_when_centroid_still_missing_after_repair(
+    monkeypatch: pytest.MonkeyPatch,
+    tmp_path: Path,
+) -> None:
+    _run_wd, _set_archive_roots, _call_roots = _stub_rq_context(monkeypatch, tmp_path)
+    monkeypatch.setattr(project_rq, "wait_for_path", lambda *_args, **_kwargs: None)
+
+    class _WatershedStub:
+        def __init__(self) -> None:
+            self.abstract_calls = 0
+            self.repair_calls = 0
+            self.subwta = "dem/topaz/SUBWTA.ARC"
+            self.logger = SimpleNamespace(warning=lambda *_args, **_kwargs: None)
+
+        def abstract_watershed(self) -> None:
+            self.abstract_calls += 1
+
+        def require_centroid(self):
+            self.repair_calls += 1
+            return (-116.2, 43.6)
+
+    watershed = _WatershedStub()
+    monkeypatch.setattr(project_rq.Watershed, "getInstance", lambda _wd: watershed)
+    monkeypatch.setattr(
+        project_rq.Watershed,
+        "load_detached",
+        lambda _wd, allow_nonexistent=True: SimpleNamespace(centroid=None),
+    )
+
+    with pytest.raises(project_rq.WatershedCentroidStateError):
+        project_rq.abstract_watershed_rq("demo")
+
+    assert watershed.abstract_calls == 1
+    assert watershed.repair_calls == 1
+
+
 def test_upload_cli_rq_rejects_archive_form_root(
     monkeypatch: pytest.MonkeyPatch,
     tmp_path: Path,

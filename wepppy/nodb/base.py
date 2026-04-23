@@ -95,6 +95,7 @@ import os
 
 __all__ = [
     'NoDbAlreadyLockedError',
+    'NoDbStaleWriteError',
     'redis_nodb_cache_client',
     'redis_status_client',
     'redis_log_level_client',
@@ -155,6 +156,11 @@ from wepppy.nodb.status_messenger import StatusMessengerHandler
 
 class NoDbAlreadyLockedError(Exception):
     """Raised when attempting to lock a NoDb instance that is already locked."""
+    pass
+
+
+class NoDbStaleWriteError(RuntimeError):
+    """Raised when dump() would overwrite a newer on-disk NoDb payload."""
     pass
 
 from wepppy.all_your_base import isfloat, isint, isbool
@@ -1022,6 +1028,15 @@ class NoDbBase(object):
                         db = cls._post_instance_loaded(db)
                         db.wd = abs_wd
                         db._init_logging()
+                        db._nodb_mtime = None
+                        db._nodb_size = None
+                        try:
+                            stat_result = os.stat(filepath)
+                        except OSError:
+                            stat_result = None
+                        if stat_result is not None:
+                            db._nodb_mtime = stat_result.st_mtime
+                            db._nodb_size = stat_result.st_size
                         db.logger.debug(
                             'Loaded NoDb instance from redis://%s/%s%s',
                             REDIS_HOST,
@@ -1265,6 +1280,15 @@ class NoDbBase(object):
 
         db = cls._post_instance_loaded(db)
         db.wd = abs_wd
+        db._nodb_mtime = None
+        db._nodb_size = None
+        try:
+            stat_result = os.stat(filepath)
+        except OSError:
+            stat_result = None
+        if stat_result is not None:
+            db._nodb_mtime = stat_result.st_mtime
+            db._nodb_size = stat_result.st_size
         return db
 
     @classmethod
@@ -1399,7 +1423,21 @@ class NoDbBase(object):
             )
             self.unlock()
             raise
-        self.dump_and_unlock()
+        try:
+            self.dump_and_unlock(validate=validate_on_success)
+        except Exception:
+            # Lock boundary: if persistence fails after a successful critical section,
+            # force lock cleanup before propagating the persistence error.
+            getattr(self, "logger", logging.getLogger(__name__)).debug(
+                "NoDbBase.locked: dump_and_unlock failed; unlocking",
+                extra={"runid": getattr(self, "runid", None), "nodb": getattr(self, "_nodb", None)},
+                exc_info=True,
+            )
+            try:
+                self.unlock()
+            except RuntimeError:
+                self.unlock(flag="-f")
+            raise
 
     def dump_and_unlock(self, validate: bool = True) -> None:
         """Persist the controller and release its lock."""
@@ -1427,6 +1465,27 @@ class NoDbBase(object):
 
         if not self.islocked():
             raise RuntimeError("cannot dump to unlocked db")
+
+        expected_mtime = getattr(self, "_nodb_mtime", None)
+        expected_size = getattr(self, "_nodb_size", None)
+        if expected_mtime is not None or expected_size is not None:
+            try:
+                on_disk_stat = os.stat(self._nodb)
+            except OSError as exc:
+                raise NoDbStaleWriteError(
+                    "cannot persist NoDb state because expected prior payload is missing on disk "
+                    f"({self._nodb})"
+                ) from exc
+
+            if (
+                on_disk_stat.st_mtime != expected_mtime
+                or on_disk_stat.st_size != expected_size
+            ):
+                raise NoDbStaleWriteError(
+                    "stale NoDb write rejected for "
+                    f"{self._nodb}: expected (mtime={expected_mtime}, size={expected_size}), "
+                    f"observed (mtime={on_disk_stat.st_mtime}, size={on_disk_stat.st_size})"
+                )
 
         js = jsonpickle.encode(self)
 

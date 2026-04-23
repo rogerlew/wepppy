@@ -136,6 +136,7 @@ __all__ = [
     'NCPU',
     'DelineationBackend',
     'WatershedNotAbstractedError',
+    'WatershedCentroidStateError',
     'WatershedNoDbLockedException',
     'NoOutletFoundError',
     'process_channel',
@@ -176,6 +177,26 @@ class NoOutletFoundError(Exception):
     def __init__(self, message: str = "No outlet stream cell found for watershed"):
         self.message = message
         super().__init__(self.message)
+
+
+class WatershedCentroidStateError(RuntimeError):
+    """Raised when watershed centroid state is missing and cannot be repaired."""
+
+    __name__ = "WatershedCentroidStateError"
+
+    def __init__(
+        self,
+        *,
+        runid: str,
+        wd: str,
+        detail: str,
+    ) -> None:
+        self.runid = runid
+        self.wd = wd
+        self.detail = detail
+        super().__init__(
+            f"Watershed centroid is unavailable (runid={runid}, wd={wd}): {detail}"
+        )
 
 
 @deprecated

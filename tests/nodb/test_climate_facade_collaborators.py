@@ -262,7 +262,12 @@ def test_gridmet_single_build_uses_normalized_observed_year_bounds(
     monkeypatch.setattr(
         climate_module.Climate,
         "watershed_instance",
-        property(lambda _self: types.SimpleNamespace(centroid=(-116.2, 43.6))),
+        property(
+            lambda _self: types.SimpleNamespace(
+                centroid=(-116.2, 43.6),
+                require_centroid=lambda: (-116.2, 43.6),
+            )
+        ),
     )
     monkeypatch.setattr(climate_module.Climate, "cli_dir", property(lambda _self: str(tmp_path)))
     monkeypatch.setattr(climate_module.Climate, "cligen_db", property(lambda _self: "2015_stations.db"))

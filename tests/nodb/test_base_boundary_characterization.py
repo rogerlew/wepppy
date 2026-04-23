@@ -205,3 +205,54 @@ def test_load_detached_drops_corrupt_cache_payload_and_loads_from_disk(
     assert loaded is not None
     assert loaded.value == 7
     assert cache.deleted == [os.fspath(tmp_path / nodb.filename)]
+
+
+def test_locked_releases_lock_when_dump_fails_after_successful_context_body(
+    tmp_path: Path,
+    redis_lock_stub: _RedisStub,
+    disable_redis_cache: None,
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    _install_db_api_stub(monkeypatch, update_last_modified=lambda *_args, **_kwargs: None)
+    nodb = _DummyNoDb(str(tmp_path))
+
+    def _raise_stale_dump(_self) -> None:
+        raise base.NoDbStaleWriteError("stale-write")
+
+    monkeypatch.setattr(_DummyNoDb, "dump", _raise_stale_dump)
+
+    with pytest.raises(base.NoDbStaleWriteError):
+        with nodb.locked():
+            nodb.value = 9
+
+    assert not nodb.islocked()
+
+
+def test_dump_rejects_stale_overwrite_when_on_disk_payload_changed(
+    tmp_path: Path,
+    redis_lock_stub: _RedisStub,
+    disable_redis_cache: None,
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    _install_db_api_stub(monkeypatch, update_last_modified=lambda *_args, **_kwargs: None)
+
+    nodb = _DummyNoDb(str(tmp_path))
+    nodb.lock()
+    try:
+        nodb.value = 1
+        nodb.dump()
+    finally:
+        nodb.unlock(flag="-f")
+
+    nodb_path = tmp_path / nodb.filename
+    nodb_path.write_text('{"external":"newer"}', encoding="utf-8")
+
+    nodb.value = 2
+    nodb.lock()
+    try:
+        with pytest.raises(base.NoDbStaleWriteError):
+            nodb.dump()
+    finally:
+        nodb.unlock(flag="-f")
+
+    assert nodb_path.read_text(encoding="utf-8") == '{"external":"newer"}'

@@ -33,6 +33,7 @@ class _DummyClimate:
         self.ron_instance = SimpleNamespace(mods=[], dem_fn="dem.tif")
         self.watershed_instance = SimpleNamespace(
             centroid=(-116.2, 43.6),
+            require_centroid=lambda: (-116.2, 43.6),
             hillslope_centroid_lnglat=lambda _topaz_id: (-115.9, 43.8),
         )
         self.cligen_db = "ghcn"

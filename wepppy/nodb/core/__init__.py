@@ -3,7 +3,7 @@ from .landuse import Landuse, LanduseMode
 from .ron import Map, Ron
 from .soils import Soils, SoilsMode
 from .topaz import Topaz, WatershedBoundaryTouchesEdgeError, MinimumChannelLengthTooShortError
-from .watershed import Watershed, WatershedNotAbstractedError
+from .watershed import Watershed, WatershedNotAbstractedError, WatershedCentroidStateError
 from .wepp import Wepp
 
 __all__ = [
@@ -23,5 +23,6 @@ __all__ = [
     'MinimumChannelLengthTooShortError',
     'Watershed', 
     'WatershedNotAbstractedError',
+    'WatershedCentroidStateError',
     'Wepp'
     ]

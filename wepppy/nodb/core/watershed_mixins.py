@@ -35,6 +35,7 @@ from wepppy.topo.watershed_abstraction import WeppTopTranslator
 from wepppy.topo.peridot.peridot_runner import (
     run_peridot_abstract_watershed,
     run_peridot_wbt_abstract_watershed,
+    post_abstract_watershed,
     read_network,
 )
 from wepppy.topo.peridot.flowpath import (
@@ -722,6 +723,74 @@ class WatershedLookupMixin:
     @property
     def centroid(self) -> Optional[Tuple[float, float]]:
         return self._centroid
+
+    @staticmethod
+    def _coerce_centroid(
+        centroid: object,
+    ) -> Optional[Tuple[float, float]]:
+        if not isinstance(centroid, (tuple, list)) or len(centroid) != 2:
+            return None
+
+        try:
+            lng = float(centroid[0])
+            lat = float(centroid[1])
+        except (TypeError, ValueError):
+            return None
+
+        if (
+            not math.isfinite(lng)
+            or not math.isfinite(lat)
+            or not (-180.0 <= lng <= 180.0)
+            or not (-90.0 <= lat <= 90.0)
+        ):
+            return None
+
+        return lng, lat
+
+    def _centroid_state_error(self, detail: str) -> Exception:
+        watershed_module = sys.modules.get("wepppy.nodb.core.watershed")
+        error_cls = getattr(watershed_module, "WatershedCentroidStateError", RuntimeError)
+        return error_cls(runid=self.runid, wd=self.wd, detail=detail)
+
+    def _repair_centroid_from_artifacts_locked(self) -> None:
+        sub_area, chn_area, ws_centroid, sub_ids, chn_ids = post_abstract_watershed(self.wd)
+        self._centroid = ws_centroid
+        self._sub_area = sub_area
+        self._chn_area = chn_area
+        self._wsarea = sub_area + chn_area
+        self._subs_summary = {str(topaz_id): None for topaz_id in sub_ids}
+        self._chns_summary = {str(topaz_id): None for topaz_id in chn_ids}
+
+    def require_centroid(self) -> Tuple[float, float]:
+        """Return watershed centroid or repair persisted state from abstraction artifacts."""
+        centroid = self._coerce_centroid(self._centroid)
+        if centroid is not None:
+            return centroid
+
+        self.logger.warning(
+            "Watershed centroid missing for runid=%s; attempting artifact-based repair",
+            self.runid,
+        )
+
+        try:
+            if self.islocked():
+                self._repair_centroid_from_artifacts_locked()
+                self.dump()
+            else:
+                with self.locked():
+                    self._repair_centroid_from_artifacts_locked()
+        except (FileNotFoundError, KeyError, OSError, RuntimeError, TypeError, ValueError) as exc:
+            raise self._centroid_state_error(
+                "centroid missing and repair from watershed abstraction artifacts failed"
+            ) from exc
+
+        centroid = self._coerce_centroid(self._centroid)
+        if centroid is None:
+            raise self._centroid_state_error(
+                "centroid remained unset after artifact-based repair"
+            )
+
+        return centroid
 
     def sub_summary(self, topaz_id: Union[str, int]) -> Union[PeridotHillslope, Dict[str, Any], None]:
         if _pick_existing_parquet_path(self.wd, "watershed/hillslopes.parquet") is not None:
