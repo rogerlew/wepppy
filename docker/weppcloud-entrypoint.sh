@@ -64,7 +64,7 @@ except Exception as exc:
 module_path = getattr(wepppyo3, "__file__", "<namespace>")
 print(f">>> wepppyo3 import OK: {module_path}")
 if str(module_path).startswith(fallback_release):
-    print(">>> Warning: using baked wepppyo3 fallback from image (bind mount not active).")
+    print(">>> Warning: using baked wepppyo3 fallback from image (bind mount missing or incomplete).")
 PY
 
 echo ">>> Validating whitebox_tools import..."
@@ -90,7 +90,7 @@ except Exception as exc:
 module_path = getattr(whitebox_tools, "__file__", "<namespace>")
 print(f">>> whitebox_tools import OK: {module_path}")
 if str(module_path).startswith(fallback_wbt):
-    print(">>> Warning: using baked whitebox_tools fallback from image (bind mount not active).")
+    print(">>> Warning: using baked whitebox_tools fallback from image (bind mount missing or incomplete).")
 PY
 
 # Replace the shell with the primary process to preserve signal handling.
