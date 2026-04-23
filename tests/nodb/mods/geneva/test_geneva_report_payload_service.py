@@ -305,3 +305,54 @@ def test_build_summary_payload_uses_run_summary_status_over_stale_summary_artifa
     # Summary payload sanitizes free-form/internal warning/error fields.
     assert payload["warnings"] == [{"code": "upstream_warning"}]
     assert payload["errors"] == [{"code": "batch_error"}]
+
+
+def test_build_summary_payload_preserves_watershed_warning_severity_fields(tmp_path: Path) -> None:
+    artifact_io = GenevaArtifactIO()
+    wd = str(tmp_path)
+    panel_payload = {
+        "schema_version": 1,
+        "datasource_ids": ["cligen_freq"],
+        "durations_minutes": [30],
+        "ari_years": [10],
+        "distribution_type": "neh4_type_b",
+        "cells": [],
+        "warnings": [],
+    }
+    geneva_stub = SimpleNamespace(
+        wd=wd,
+        artifact_io=artifact_io,
+        frequency_panel_service=SimpleNamespace(get_frequency_panel=lambda _geneva: panel_payload),
+        _warnings=[
+            {
+                "code": "point_rainfall_assumption",
+                "severity": "warning",
+                "message": "Point rainfall assumption may under-represent watershed-scale variability.",
+                "wsarea_km2": 30.0,
+                "threshold_km2": 25.0,
+                "thresholds_km2": {"warning": 25.0, "severe": 100.0, "extreme": 250.0},
+                "arf_method": "constant_1.0",
+                "arf_value": 1.0,
+                "uniform_rainfall_assumed": True,
+                "debug_trace": "internal detail",
+            }
+        ],
+        _errors=[],
+    )
+
+    service = GenevaReportPayloadService()
+    payload = service.build_summary_payload(geneva_stub)
+
+    assert payload["warnings"] == [
+        {
+            "code": "point_rainfall_assumption",
+            "severity": "warning",
+            "message": "Point rainfall assumption may under-represent watershed-scale variability.",
+            "wsarea_km2": 30.0,
+            "threshold_km2": 25.0,
+            "thresholds_km2": {"warning": 25.0, "severe": 100.0, "extreme": 250.0},
+            "arf_method": "constant_1.0",
+            "arf_value": 1.0,
+            "uniform_rainfall_assumed": True,
+        }
+    ]

@@ -426,11 +426,20 @@ class GenevaReportPayloadService:
         allowed_keys = (
             "code",
             "message",
+            "severity",
             "storm_id",
             "datasource_id",
             "duration_minutes",
             "ari_years",
             "reason_code",
+            "wsarea_km2",
+            "wsarea_mi2",
+            "wsarea_acres",
+            "threshold_km2",
+            "thresholds_km2",
+            "arf_method",
+            "arf_value",
+            "uniform_rainfall_assumed",
         )
         sanitized: list[dict[str, Any]] = []
         for row in rows:
