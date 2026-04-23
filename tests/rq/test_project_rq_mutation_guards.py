@@ -445,6 +445,70 @@ def test_run_with_directory_root_lock_executes_callback_for_directory_root(
     ]
 
 
+def test_run_with_directory_root_lock_retries_nodir_locked_once(
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    monkeypatch.setattr(project_rq, "DIRECTORY_ROOT_LOCK_RETRY_ATTEMPTS", 3)
+    monkeypatch.setattr(project_rq, "DIRECTORY_ROOT_LOCK_RETRY_SECONDS", 0.0)
+    monkeypatch.setattr(project_rq, "nodir_resolve", lambda _wd, _root, view="effective": SimpleNamespace(form="dir"))
+
+    attempts = {"count": 0}
+
+    @contextmanager
+    def _lock(_wd: str, _root: str, *, purpose: str):
+        attempts["count"] += 1
+        if attempts["count"] == 1:
+            raise NoDirError(http_status=503, code="NODIR_LOCKED", message=f"busy ({purpose})")
+        yield
+
+    monkeypatch.setattr(project_rq, "nodir_maintenance_lock", _lock)
+
+    callback_calls: list[str] = []
+    result = project_rq._run_with_directory_root_lock(
+        "/tmp/run",
+        "watershed",
+        lambda: callback_calls.append("called") or "ok",
+        purpose="unit-root-lock-retry",
+    )
+
+    assert result == "ok"
+    assert callback_calls == ["called"]
+    assert attempts["count"] == 2
+
+
+def test_run_with_directory_root_lock_does_not_retry_non_lock_nodir_errors(
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    monkeypatch.setattr(project_rq, "DIRECTORY_ROOT_LOCK_RETRY_ATTEMPTS", 3)
+    monkeypatch.setattr(project_rq, "DIRECTORY_ROOT_LOCK_RETRY_SECONDS", 0.0)
+    monkeypatch.setattr(project_rq, "nodir_resolve", lambda _wd, _root, view="effective": SimpleNamespace(form="dir"))
+
+    attempts = {"count": 0}
+
+    @contextmanager
+    def _lock(_wd: str, _root: str, *, purpose: str):
+        attempts["count"] += 1
+        raise NoDirError(
+            http_status=409,
+            code="NODIR_ARCHIVE_RETIRED",
+            message=f"archive-backed ({purpose})",
+        )
+        yield
+
+    monkeypatch.setattr(project_rq, "nodir_maintenance_lock", _lock)
+
+    with pytest.raises(NoDirError) as exc_info:
+        project_rq._run_with_directory_root_lock(
+            "/tmp/run",
+            "watershed",
+            lambda: "ok",
+            purpose="unit-root-lock-no-retry",
+        )
+
+    assert exc_info.value.code == "NODIR_ARCHIVE_RETIRED"
+    assert attempts["count"] == 1
+
+
 def test_run_with_directory_roots_lock_sorts_lock_order_and_rechecks_roots(
     monkeypatch: pytest.MonkeyPatch,
 ) -> None:
@@ -485,4 +549,41 @@ def test_run_with_directory_roots_lock_sorts_lock_order_and_rechecks_roots(
         ("enter", "soils", "unit-roots-lock/soils"),
         ("exit", "soils", "unit-roots-lock/soils"),
         ("exit", "landuse", "unit-roots-lock/landuse"),
+    ]
+
+
+def test_run_with_directory_roots_lock_retries_nodir_locked_once(
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    monkeypatch.setattr(project_rq, "DIRECTORY_ROOT_LOCK_RETRY_ATTEMPTS", 3)
+    monkeypatch.setattr(project_rq, "DIRECTORY_ROOT_LOCK_RETRY_SECONDS", 0.0)
+    monkeypatch.setattr(project_rq, "nodir_resolve", lambda _wd, _root, view="effective": SimpleNamespace(form="dir"))
+
+    lock_events: list[tuple[str, str]] = []
+    contention_emitted = {"value": False}
+
+    @contextmanager
+    def _lock(_wd: str, root: str, *, purpose: str):
+        lock_events.append((root, purpose))
+        if not contention_emitted["value"]:
+            contention_emitted["value"] = True
+            raise NoDirError(http_status=503, code="NODIR_LOCKED", message="busy")
+        yield
+
+    monkeypatch.setattr(project_rq, "nodir_maintenance_lock", _lock)
+
+    callback_calls: list[str] = []
+    result = project_rq._run_with_directory_roots_lock(
+        "/tmp/run",
+        ("soils", "landuse"),
+        lambda: callback_calls.append("called") or "ok",
+        purpose="unit-roots-lock-retry",
+    )
+
+    assert result == "ok"
+    assert callback_calls == ["called"]
+    assert lock_events == [
+        ("landuse", "unit-roots-lock-retry/landuse"),
+        ("landuse", "unit-roots-lock-retry/landuse"),
+        ("soils", "unit-roots-lock-retry/soils"),
     ]

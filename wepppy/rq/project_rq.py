@@ -69,6 +69,8 @@ RQ_DB: int = int(RedisDB.RQ)
 
 TIMEOUT: int = 43_200
 DEFAULT_ZOOM: int = 12
+DIRECTORY_ROOT_LOCK_RETRY_ATTEMPTS: int = 5
+DIRECTORY_ROOT_LOCK_RETRY_SECONDS: float = 1.0
 
 _clean_env_for_system_tools = _fork_helpers._clean_env_for_system_tools
 _build_fork_rsync_cmd = _fork_helpers._build_fork_rsync_cmd
@@ -129,10 +131,27 @@ def _run_with_directory_root_lock(
     *,
     purpose: str,
 ):
-    _require_directory_root(wd, root)
-    with nodir_maintenance_lock(wd, root, purpose=purpose):
+    retry_attempts = max(1, int(DIRECTORY_ROOT_LOCK_RETRY_ATTEMPTS))
+    retry_delay_seconds = max(0.0, float(DIRECTORY_ROOT_LOCK_RETRY_SECONDS))
+
+    for attempt in range(1, retry_attempts + 1):
         _require_directory_root(wd, root)
-        return callback()
+        try:
+            with nodir_maintenance_lock(wd, root, purpose=purpose):
+                _require_directory_root(wd, root)
+                return callback()
+        except NoDirError as exc:
+            if exc.code != "NODIR_LOCKED" or attempt >= retry_attempts:
+                raise
+            _logger.warning(
+                "Directory lock busy for root=%s purpose=%s; retrying (%d/%d)",
+                root,
+                purpose,
+                attempt,
+                retry_attempts,
+            )
+            if retry_delay_seconds > 0:
+                time.sleep(retry_delay_seconds)
 
 
 def _run_with_directory_roots_lock(
@@ -143,12 +162,29 @@ def _run_with_directory_roots_lock(
     purpose: str,
 ):
     lock_roots = tuple(sorted({str(root) for root in roots}))
-    _require_directory_roots(wd, lock_roots)
-    with ExitStack() as stack:
-        for root in lock_roots:
-            stack.enter_context(nodir_maintenance_lock(wd, root, purpose=f"{purpose}/{root}"))
+    retry_attempts = max(1, int(DIRECTORY_ROOT_LOCK_RETRY_ATTEMPTS))
+    retry_delay_seconds = max(0.0, float(DIRECTORY_ROOT_LOCK_RETRY_SECONDS))
+
+    for attempt in range(1, retry_attempts + 1):
         _require_directory_roots(wd, lock_roots)
-        return callback()
+        try:
+            with ExitStack() as stack:
+                for root in lock_roots:
+                    stack.enter_context(nodir_maintenance_lock(wd, root, purpose=f"{purpose}/{root}"))
+                _require_directory_roots(wd, lock_roots)
+                return callback()
+        except NoDirError as exc:
+            if exc.code != "NODIR_LOCKED" or attempt >= retry_attempts:
+                raise
+            _logger.warning(
+                "Directory locks busy for roots=%s purpose=%s; retrying (%d/%d)",
+                ",".join(lock_roots),
+                purpose,
+                attempt,
+                retry_attempts,
+            )
+            if retry_delay_seconds > 0:
+                time.sleep(retry_delay_seconds)
 
 
 @with_exception_logging
