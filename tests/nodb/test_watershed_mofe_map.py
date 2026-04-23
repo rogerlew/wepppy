@@ -35,7 +35,26 @@ class _DummyWatershed(watershed_mixins_module.WatershedOperationsMixin):
 
 
 @pytest.mark.unit
-def test_build_mofe_map_repairs_non_contiguous_ids(monkeypatch: pytest.MonkeyPatch, tmp_path: Path) -> None:
+def test_build_mofe_map_python_legacy_repairs_non_contiguous_ids() -> None:
+    subwta = np.array([[171, 171, 171, 171]], dtype=np.int32)
+    discha = np.array([[5, 5, 5, 5]], dtype=np.int32)
+    topaz_ids = [171]
+    d_fractions_by_topaz = {171: np.array([0.0, 0.34, 0.67, 1.0], dtype=np.float64)}
+
+    legacy_map = watershed_mixins_module._build_mofe_map_labels_python_legacy(
+        subwta=subwta,
+        discha=discha,
+        topaz_ids=topaz_ids,
+        d_fractions_by_topaz=d_fractions_by_topaz,
+    )
+    repaired_ids = {int(value) for value in np.unique(legacy_map[subwta == 171])}
+    assert repaired_ids == {1, 2, 3}
+
+
+@pytest.mark.unit
+def test_build_mofe_map_uses_wepppyo3_assigner(
+    monkeypatch: pytest.MonkeyPatch, tmp_path: Path
+) -> None:
     watershed = _DummyWatershed(tmp_path)
     subwta = np.array([[171, 171, 171, 171]], dtype=np.int32)
     discha = np.array([[5, 5, 5, 5]], dtype=np.int32)
@@ -85,11 +104,39 @@ def test_build_mofe_map_repairs_non_contiguous_ids(monkeypatch: pytest.MonkeyPat
     monkeypatch.setattr(watershed_mixins_module.gdal, "GetDriverByName", lambda _name: _FakeDriver())
     monkeypatch.setattr(watershed_mixins_module.osr, "SpatialReference", _FakeSpatialReference)
 
+    captured: dict[str, object] = {}
+
+    def _fake_assign_mofe_map_with_wepppyo3(
+        subwta: np.ndarray,
+        discha: np.ndarray,
+        topaz_ids: list[int],
+        d_fractions_by_topaz: dict[int, np.ndarray],
+    ) -> np.ndarray:
+        captured["topaz_ids"] = list(topaz_ids)
+        captured["d_fractions_by_topaz"] = {
+            key: np.asarray(value, dtype=np.float64).tolist()
+            for key, value in d_fractions_by_topaz.items()
+        }
+        return watershed_mixins_module._build_mofe_map_labels_python_legacy(
+            subwta=subwta,
+            discha=discha,
+            topaz_ids=topaz_ids,
+            d_fractions_by_topaz=d_fractions_by_topaz,
+        )
+
+    monkeypatch.setattr(
+        watershed_mixins_module,
+        "assign_mofe_map_with_wepppyo3",
+        _fake_assign_mofe_map_with_wepppyo3,
+    )
+
     watershed._build_mofe_map()
 
     repaired_map = sink["values"].T
     repaired_ids = {int(value) for value in np.unique(repaired_map[subwta == 171])}
     assert repaired_ids == {1, 2, 3}
+    assert captured["topaz_ids"] == [171]
+    assert captured["d_fractions_by_topaz"] == {171: [0.0, 0.34, 0.67, 1.0]}
 
 
 @pytest.mark.unit

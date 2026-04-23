@@ -2,7 +2,7 @@
 > Kanban board for wepppy work packages and vision items
 
 **Last Updated**: 2026-04-23  
-**Active Packages**: 4  
+**Active Packages**: 3  
 **Quick Links**: [Work Packages Directory](docs/work-packages/) | [God-Tier Prompting Strategy](docs/god-tier-prompting-strategy.md)
 
 ## Purpose
@@ -37,7 +37,7 @@ This tracker makes all work visible at a glance, helping agents coordinate and a
 ### 2. Limit Work in Progress
 **Target**: 2-4 active packages maximum to maintain focus and ensure packages complete rather than stall.
 
-**Current WIP**: 4 packages ✅ **Within target range**
+**Current WIP**: 3 packages ✅ **Within target range**
 
 If WIP exceeds 4, prioritize completing existing packages before starting new ones. This prevents context switching overhead and ensures clean handoffs.
 
@@ -271,6 +271,11 @@ Currently active work packages. Limit to 2-4 packages to maintain focus.
 ## ✅ Done
 
 Recently completed work packages. Archived immediately upon completion.
+
+### MOFE Map Migration to wepppyo3 (Topaz Pre-Index + One-Pass Rank Assignment) (2026-04-23)
+**Status**: ✅ **COMPLETE**  
+**Link**: [docs/work-packages/20260423_mofe_map_wepppyo3/](docs/work-packages/20260423_mofe_map_wepppyo3/)  
+**Summary**: Closed end-to-end with MOFE map assignment production behavior moved from WEPPpy Python loops to `wepppyo3.watershed_abstraction.assign_mofe_map` (new crate/module), keeping explicit fallback/repair contracts and contiguous-id guarantees. WEPPpy `_build_mofe_map` now delegates to the Rust path via strict loader `wepppy/topo/watershed_abstraction/mofe_map.py`; legacy Python assignment remains available only as parity oracle helper (`_build_mofe_map_labels_python_legacy`) and is not used as silent fallback. Validation artifacts captured on `/wc1/runs/po/pointy-toed-fluff` subset (`200` hillslopes, isolated temp dirs): parity `mismatch_count=0`; benchmark (6 alternating samples) old mean `65.949408s`, new mean `0.282354s`, `-99.57%`. Targeted gates passed in both repos (`cargo test -p watershed_abstraction_rust`, wepppyo3 pytest, WEPPpy targeted `wctl run-pytest`). Broad WEPPpy sweep (`wctl run-pytest tests --maxfail=1`) surfaced one unrelated existing failure in `tests/nodb/test_wepp_run_service.py::test_run_watershed_does_not_rewrite_wepp_50k_bin`.
 
 ### Segmented MOFE Migration to wepppyo3 + Process-Pool Refactor (2026-04-23)
 **Status**: ✅ **COMPLETE**  

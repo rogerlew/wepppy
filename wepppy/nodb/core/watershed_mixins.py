@@ -53,6 +53,7 @@ from wepppy.topo.watershed_abstraction.support import (
     json_to_wgs,
     polygonize_netful,
 )
+from wepppy.topo.watershed_abstraction.mofe_map import assign_mofe_map_with_wepppyo3
 from wepppy.topo.watershed_abstraction.slope_file import mofe_distance_fractions
 from wepppy.topo.wbt import WhiteboxToolsTopazEmulator
 from wepppy.all_your_base import NCPU
@@ -156,6 +157,91 @@ def _assign_mofe_ids_by_discharge_rank(discha_vals: np.ndarray, d_fractions: np.
         raise ValueError(f"MOFE rank assignment mismatch: assigned={start}, n_cells={n_cells}")
 
     return labels
+
+
+def _resolve_hillslope_slope_path(
+    wat_dir: str, wat_ss: Union[HillSummary, PeridotHillslope, Dict[str, Any]]
+) -> str:
+    if isinstance(wat_ss, HillSummary):
+        return _join(wat_dir, wat_ss.fname)
+    if isinstance(wat_ss, PeridotHillslope):
+        return _join(wat_dir, wat_ss.slp_rel_path)
+    return _join(wat_dir, wat_ss.get("slp_rel_path", wat_ss.get("fname", "")))
+
+
+def _build_mofe_map_labels_python_legacy(
+    subwta: np.ndarray,
+    discha: np.ndarray,
+    topaz_ids: List[int],
+    d_fractions_by_topaz: Dict[int, np.ndarray],
+) -> np.ndarray:
+    """Legacy Python MOFE-map assignment retained for parity/benchmark comparison."""
+    mofe_map = np.zeros(subwta.shape, np.int32)
+
+    for topaz_id in topaz_ids:
+        indices = np.where(subwta == int(topaz_id))
+        if len(indices[0]) == 0:
+            raise ValueError(
+                f"No subwta cells found for topaz_id={topaz_id} while building MOFE map"
+            )
+
+        _discha_vals = discha[indices]
+        max_discha = np.max(_discha_vals)
+        d_fractions = np.asarray(d_fractions_by_topaz[topaz_id], dtype=np.float64)
+
+        n_ofe = len(d_fractions) - 1
+        if n_ofe == 1:
+            mofe_indices = np.where(subwta == int(topaz_id))
+            mofe_map[mofe_indices] = 1
+        else:
+            j = 1
+            for i in range(n_ofe):
+                _max_pct = (1.0 - d_fractions[i]) * 100
+                _min_pct = (1.0 - d_fractions[i + 1]) * 100
+                _min = np.percentile(_discha_vals, _min_pct)
+                _max = np.percentile(_discha_vals, _max_pct)
+
+                mofe_indices = np.where(
+                    (subwta == int(topaz_id))
+                    & (mofe_map == 0)
+                    & (discha >= _min)
+                    & (discha <= _max)
+                )
+                if len(mofe_indices[0]) == 0:
+                    available_indices = np.where((subwta == int(topaz_id)) & (mofe_map == 0))
+                    candidate_indices = available_indices if len(available_indices[0]) > 0 else indices
+                    candidate_discha_vals = discha[candidate_indices]
+                    target_value = (1.0 - d_fractions[i]) * max_discha
+                    diff = np.abs(target_value - candidate_discha_vals)
+                    closest_index = np.argmin(diff)
+                    mofe_indices = (
+                        candidate_indices[0][closest_index],
+                        candidate_indices[1][closest_index],
+                    )
+
+                mofe_map[mofe_indices] = j
+                j += 1
+
+        mofe_ids = set(mofe_map[indices])
+        if 0 in mofe_ids:
+            mofe_ids.remove(0)
+
+        if len(mofe_ids) != n_ofe:
+            repaired_labels = _assign_mofe_ids_by_discharge_rank(_discha_vals, d_fractions)
+            mofe_map[indices] = repaired_labels
+            mofe_ids = set(mofe_map[indices])
+            mofe_ids.discard(0)
+
+        if len(mofe_ids) != n_ofe:
+            expected = set(range(1, n_ofe + 1))
+            missing = sorted(expected.difference(mofe_ids))
+            raise ValueError(
+                f"Unable to assign contiguous MOFE ids for topaz_id={topaz_id}: "
+                f"expected=1..{n_ofe} present={sorted(mofe_ids)} missing={missing} "
+                f"cells={len(indices[0])}"
+            )
+
+    return mofe_map
 
 
 def _segment_hillslope_mofe_task(
@@ -780,82 +866,32 @@ class WatershedOperationsMixin:
             raise ValueError("discha path is None")
         discha, _, _ = read_raster(discha_path, dtype=np.int32)
 
-        mofe_map = np.zeros(subwta.shape, np.int32)
+        topaz_ids: List[int] = []
+        d_fractions_by_topaz: Dict[int, np.ndarray] = {}
         for topaz_id, wat_ss in self.subs_summary.items():
-            indices = np.where(subwta == int(topaz_id))
-            if len(indices[0]) == 0:
-                raise ValueError(f"No subwta cells found for topaz_id={topaz_id} while building MOFE map")
-            _discha_vals = discha[indices]
-            max_discha = np.max(_discha_vals)
+            topaz_id_i = int(topaz_id)
+            topaz_ids.append(topaz_id_i)
 
-            if isinstance(wat_ss, HillSummary):
-                slp_fn = _join(self.wat_dir, wat_ss.fname)
-            elif isinstance(wat_ss, PeridotHillslope):
-                slp_fn = _join(self.wat_dir, wat_ss.slp_rel_path)
-            else:
-                # Handle dict case
-                slp_fn = _join(self.wat_dir, wat_ss.get('slp_rel_path', wat_ss.get('fname', '')))
+            slp_fn = _resolve_hillslope_slope_path(self.wat_dir, wat_ss)
+            mofe_slp_fn = slp_fn.replace(".slp", ".mofe.slp")
+            d_fractions_by_topaz[topaz_id_i] = np.asarray(
+                mofe_distance_fractions(mofe_slp_fn),
+                dtype=np.float64,
+            )
 
-            mofe_slp_fn = _join(self.wat_dir, slp_fn.replace(".slp", ".mofe.slp"))
-            d_fractions = mofe_distance_fractions(mofe_slp_fn)
+        mofe_map = assign_mofe_map_with_wepppyo3(
+            subwta=subwta,
+            discha=discha,
+            topaz_ids=topaz_ids,
+            d_fractions_by_topaz=d_fractions_by_topaz,
+        )
 
-            n_ofe = len(d_fractions) - 1
-            if n_ofe == 1:
-                mofe_indices = np.where(subwta == int(topaz_id))
-                mofe_map[mofe_indices] = 1
-            else:
-                j = 1
-                for i in range(n_ofe):
-                    _max_pct = (1.0 - d_fractions[i]) * 100
-                    _min_pct = (1.0 - d_fractions[i + 1]) * 100
-                    _min = np.percentile(_discha_vals, _min_pct)
-                    _max = np.percentile(_discha_vals, _max_pct)
+        if mofe_map.shape != subwta.shape:
+            raise ValueError(
+                f"MOFE map shape mismatch from wepppyo3: expected={subwta.shape}, received={mofe_map.shape}"
+            )
 
-                    mofe_indices = np.where(
-                        (subwta == int(topaz_id))
-                        & (mofe_map == 0)
-                        & (discha >= _min)
-                        & (discha <= _max)
-                    )
-                    if len(mofe_indices[0]) == 0:
-                        available_indices = np.where((subwta == int(topaz_id)) & (mofe_map == 0))
-                        candidate_indices = available_indices if len(available_indices[0]) > 0 else indices
-                        candidate_discha_vals = discha[candidate_indices]
-                        target_value = (1.0 - d_fractions[i]) * max_discha
-                        diff = np.abs(target_value - candidate_discha_vals)
-                        closest_index = np.argmin(diff)
-                        mofe_indices = (
-                            candidate_indices[0][closest_index],
-                            candidate_indices[1][closest_index],
-                        )
-
-                    mofe_map[mofe_indices] = j
-                    j += 1
-
-            mofe_ids = set(mofe_map[indices])
-            if 0 in mofe_ids:
-                mofe_ids.remove(0)
-
-            if len(mofe_ids) != n_ofe:
-                self.logger.warning(
-                    "Repairing non-contiguous MOFE ids for topaz_id=%s: expected=%s present=%s",
-                    topaz_id,
-                    n_ofe,
-                    sorted(mofe_ids),
-                )
-                repaired_labels = _assign_mofe_ids_by_discharge_rank(_discha_vals, d_fractions)
-                mofe_map[indices] = repaired_labels
-                mofe_ids = set(mofe_map[indices])
-                mofe_ids.discard(0)
-
-            if len(mofe_ids) != n_ofe:
-                expected = set(range(1, n_ofe + 1))
-                missing = sorted(expected.difference(mofe_ids))
-                raise ValueError(
-                    f"Unable to assign contiguous MOFE ids for topaz_id={topaz_id}: "
-                    f"expected=1..{n_ofe} present={sorted(mofe_ids)} missing={missing} "
-                    f"cells={len(indices[0])}"
-                )
+        mofe_map = np.asarray(mofe_map, dtype=np.int32)
 
         num_cols, num_rows = mofe_map.shape
 
