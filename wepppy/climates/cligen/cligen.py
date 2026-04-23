@@ -16,6 +16,7 @@ from collections.abc import Iterable
 import json
 import warnings
 import logging
+from pathlib import Path
 from os.path import join as _join
 from os.path import exists as _exists
 from os.path import split as _split
@@ -170,6 +171,30 @@ def _load_fallback_station_data(
 
     _stations_dir = fallback_dir
     return fallback_dir, stations, fallback_states
+
+
+def _try_rebuild_tenerife_station_catalog() -> bool:
+    """Rebuild the Tenerife station catalog in-place when the DB is invalid."""
+    source_dir = Path(_thisdir)
+    if not (source_dir / "tenerife_stations.csv").exists():
+        return False
+    if not (source_dir / "tenerife_par_files").exists():
+        return False
+
+    try:
+        from wepppy.climates.cligen._scripts.build_tenerife_station_db import (
+            build_tenerife_catalog,
+        )
+    except ImportError:
+        return False
+
+    try:
+        build_tenerife_catalog(source_dir, source_dir)
+    except (FileNotFoundError, OSError, sqlite3.DatabaseError, ValueError) as exc:
+        _LOGGER.warning("Unable to rebuild Tenerife station catalog: %s", exc)
+        return False
+
+    return True
 
 def _row_formatter(values: Iterable[float]) -> str:
     """Format monthly climate values using CLIGEN's six-character columns."""
@@ -1713,6 +1738,11 @@ class CligenStationsManager:
             self.stations = [StationMeta(*row) for row in station_rows]
             self.states = {row[0]: row[1] for row in state_rows}
         except (sqlite3.DatabaseError, sqlite3.OperationalError, AssertionError):
+            if "tenerife" in str(version) and _try_rebuild_tenerife_station_catalog():
+                station_rows, state_rows = _query_station_db(_db, bbox)
+                self.stations = [StationMeta(*row) for row in station_rows]
+                self.states = {row[0]: row[1] for row in state_rows}
+                return
             fallback = _load_fallback_station_data(bbox)
             if fallback is None:
                 raise
