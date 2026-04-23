@@ -14,6 +14,7 @@ __all__ = [
     'NCPU',
     'DelineationBackend',
     'WatershedNotAbstractedError',
+    'WatershedCentroidStateError',
     'WatershedNoDbLockedException',
     'NoOutletFoundError',
     'process_channel',
@@ -33,6 +34,14 @@ class DelineationBackend(IntEnum):
 class WatershedNotAbstractedError(Exception):
     __name__: ClassVar[str]
     def __init__(self) -> None: ...
+
+
+class WatershedCentroidStateError(RuntimeError):
+    __name__: ClassVar[str]
+    runid: str
+    wd: str
+    detail: str
+    def __init__(self, *, runid: str, wd: str, detail: str) -> None: ...
 
 
 class WatershedNoDbLockedException(Exception): ...
