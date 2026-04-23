@@ -52,6 +52,8 @@ Warning:
 # standard library
 import csv
 import json
+from concurrent.futures import FIRST_COMPLETED, wait
+from concurrent.futures.process import BrokenProcessPool
 
 import logging
 import os
@@ -74,7 +76,7 @@ from wepppy.landcover import LandcoverMap
 from wepppy.query_engine import update_catalog_entry
 from wepppy.wepp.management import get_management_summary
 from wepppy.topo.watershed_abstraction.support import is_channel
-from wepppy.all_your_base import isfloat
+from wepppy.all_your_base import NCPU, isfloat
 from wepppy.all_your_base.geo.webclients import wmesque_retrieve
 from wepppy.all_your_base.geo.vrt import build_windowed_vrt_from_window
 from wepppy.all_your_base.geo import read_raster
@@ -82,6 +84,7 @@ from wepppy.all_your_base.geo import read_raster
 from wepppy.nodb.base import (
     NoDbBase,
     TriggerEvents,
+    createProcessPoolExecutor,
     nodb_setter,
 )
 
@@ -116,6 +119,107 @@ from wepppyo3.raster_characteristics import count_intersecting_raster_key_pairs
 
 _GDAL_OPEN_PROBE: Optional[Callable[[str], bool]] = None
 _GDAL_OPEN_PROBE_INIT = False
+_MOFE_MAN_SYNTH_MAX_WORKERS = 4
+
+
+def _materialize_mofe_management_segment(segment_plan: Mapping[str, Any]) -> Any:
+    preloaded_management = segment_plan.get('preloaded_management')
+    if preloaded_management is not None:
+        return preloaded_management
+
+    from wepppy.wepp.management.managements import Management
+
+    missing = [
+        key for key in ('key', 'man_fn', 'man_dir', 'desc', 'color') if key not in segment_plan
+    ]
+    if missing:
+        raise ValueError(
+            f"MOFE management segment plan missing required keys {missing}: {sorted(segment_plan.keys())}"
+        )
+
+    management = Management.load(
+        key=segment_plan['key'],
+        man_fn=segment_plan['man_fn'],
+        man_dir=segment_plan['man_dir'],
+        desc=segment_plan['desc'],
+        color=segment_plan['color'],
+    )
+
+    replacements = segment_plan.get('replacements')
+    if replacements is not None:
+        apply_disturbed_management_overrides(management, replacements)
+
+    cancov_override = segment_plan.get('cancov_override')
+    if cancov_override is not None:
+        management.set_cancov(float(cancov_override))
+
+    rdmax = segment_plan.get('rdmax')
+    if rdmax is not None and isfloat(rdmax):
+        management.set_rdmax(float(rdmax))
+
+    xmxlai = segment_plan.get('xmxlai')
+    if xmxlai is not None and isfloat(xmxlai):
+        management.set_xmxlai(float(xmxlai))
+
+    return management
+
+
+def _write_mofe_management_file_task(
+    task_args: Tuple[str, str, int, List[Dict[str, Any]]]
+) -> Tuple[str, float]:
+    from wepppy.wepp.management.utils import ManagementMultipleOfeSynth
+
+    topaz_id, mofe_lc_fn, expected_nsegments, segment_plans = task_args
+    topaz_id_s = str(topaz_id)
+    expected_name = f'hill_{topaz_id_s}.mofe.man'
+
+    if os.path.basename(mofe_lc_fn) != expected_name:
+        raise ValueError(
+            f"MOFE management output path mismatch for topaz_id={topaz_id_s}: "
+            f"expected basename '{expected_name}', got '{os.path.basename(mofe_lc_fn)}'."
+        )
+
+    if not segment_plans:
+        raise ValueError(f'MOFE management stack cannot be empty for topaz_id={topaz_id_s}.')
+
+    if len(segment_plans) != int(expected_nsegments):
+        raise ValueError(
+            f'MOFE management stack length mismatch for topaz_id={topaz_id_s}: '
+            f'expected {int(expected_nsegments)}, got {len(segment_plans)}.'
+        )
+
+    start = time.perf_counter()
+    stack = [_materialize_mofe_management_segment(segment_plan) for segment_plan in segment_plans]
+    if len(stack) == 1:
+        with open(mofe_lc_fn, 'w') as pf:
+            pf.write(str(stack[0]))
+    else:
+        mofe_synth = ManagementMultipleOfeSynth(stack=stack)
+        mofe_synth.write(mofe_lc_fn)
+
+    elapsed = time.perf_counter() - start
+    return topaz_id_s, round(elapsed, 3)
+
+
+def _write_mofe_management_file_batch_task(
+    task_batch: List[Tuple[str, str, int, List[Dict[str, Any]]]]
+) -> List[Tuple[str, float]]:
+    return [_write_mofe_management_file_task(task_args) for task_args in task_batch]
+
+
+def _chunk_mofe_management_tasks(
+    task_args_list: List[Tuple[str, str, int, List[Dict[str, Any]]]],
+    max_workers: int,
+) -> List[List[Tuple[str, str, int, List[Dict[str, Any]]]]]:
+    if not task_args_list:
+        return []
+
+    batch_count = min(max(1, max_workers), len(task_args_list))
+    batch_size = max(1, (len(task_args_list) + batch_count - 1) // batch_count)
+    return [
+        task_args_list[idx: idx + batch_size]
+        for idx in range(0, len(task_args_list), batch_size)
+    ]
 
 def _get_gdal_open_probe(logger: Optional[logging.Logger]) -> Optional[Callable[[str], bool]]:
     global _GDAL_OPEN_PROBE
@@ -956,7 +1060,6 @@ class Landuse(NoDbBase):
             json.dump(frac_d, fp, indent=2)
 
     def _build_multiple_ofe(self) -> None:
-        from wepppy.wepp.management.utils import ManagementMultipleOfeSynth
         from wepppy.nodb.mods.disturbed import Disturbed
 
         wd = self.wd
@@ -1055,6 +1158,7 @@ class Landuse(NoDbBase):
 
         lc_dir = self.lc_dir
         managements = self.managements
+        task_args_list: List[Tuple[str, str, int, List[Dict[str, Any]]]] = []
 
         watershed = self.watershed_instance
         cancov_d = {}
@@ -1079,27 +1183,26 @@ class Landuse(NoDbBase):
 
             doms = [domlc_d[topaz_id][_id] for _id in mofe_ids]
 
-            stack = []
+            segment_plans: List[Dict[str, Any]] = []
             for i, dom in enumerate(doms):
                 mofe_id = str(i + 1)
 
                 if dom not in managements:
                     managements[dom] = get_management_summary(dom, self.mapping)
 
-                management = managements[dom].get_management()
-                disturbed_class = managements[dom].disturbed_class
+                summary = managements[dom]
+                disturbed_class = summary.disturbed_class
                 texid = 'sand loam'
+                replacements = None
+                cancov_override = None
+                rdmax = None
+                xmxlai = None
 
                 if disturbed_class is None or disturbed_class == '':
-                    rdmax = None
-                    xmxlai = None
+                    pass
                 else:
-                    replacements = None
                     if _land_soil_replacements_d is not None:
                         replacements = _land_soil_replacements_d.get((texid, disturbed_class))
-
-                    if replacements is not None:
-                        apply_disturbed_management_overrides(management, replacements)
 
                     if rap is not None:
                         _tree_cov = rap.mofe_data[RAP_Band.TREE][topaz_id][mofe_id] / 100.0
@@ -1113,8 +1216,7 @@ class Landuse(NoDbBase):
                         elif disturbed_class in ['forest', 'young forest', 'forest high sev fire', 'forest moderate sev fire', 'forest low sev fire']:
                             cancov = _grass_cov + _shrub_cov + _tree_cov
                         cancov_d[topaz_id][mofe_id] = max(cancov, 0.05)
-
-                        management.set_cancov(cancov_d[topaz_id][mofe_id])
+                        cancov_override = cancov_d[topaz_id][mofe_id]
 
                     rdmax, xmxlai = resolve_disturbed_scalar_replacements(
                         disturbed_class=disturbed_class,
@@ -1123,30 +1225,170 @@ class Landuse(NoDbBase):
                         cancov_override=None,
                     )
 
-                if rdmax is not None:
-                    if isfloat(rdmax):
+                if all(
+                    hasattr(summary, attr)
+                    for attr in ('key', 'man_fn', 'man_dir', 'desc', 'color')
+                ):
+                    segment_plan = {
+                        'key': summary.key,
+                        'man_fn': summary.man_fn,
+                        'man_dir': summary.man_dir,
+                        'desc': summary.desc,
+                        'color': summary.color,
+                        'replacements': replacements,
+                        'cancov_override': cancov_override,
+                        'rdmax': rdmax,
+                        'xmxlai': xmxlai,
+                    }
+                else:
+                    management = summary.get_management()
+                    if replacements is not None:
+                        apply_disturbed_management_overrides(management, replacements)
+                    if cancov_override is not None:
+                        management.set_cancov(cancov_override)
+                    if rdmax is not None and isfloat(rdmax):
                         management.set_rdmax(float(rdmax))
-
-                if xmxlai is not None:
-                    if isfloat(xmxlai):
+                    if xmxlai is not None and isfloat(xmxlai):
                         management.set_xmxlai(float(xmxlai))
+                    segment_plan = {'preloaded_management': management}
 
-                stack.append(management)
+                segment_plans.append(segment_plan)
 
-            assert len(stack) > 0, topaz_id
-            assert len(stack) == nsegments, (topaz_id, len(stack),  nsegments)
+            assert len(segment_plans) > 0, topaz_id
+            assert len(segment_plans) == nsegments, (topaz_id, len(segment_plans),  nsegments)
 
-            if len(stack) == 1:
-                with open(mofe_lc_fn, 'w') as pf:
-                    pf.write(str(stack[0]))
-            else:
-
+            if len(segment_plans) > 1:
                 self.logger.info(f"building management for hillslope: {topaz_id} with doms {doms}")
-                mofe_synth = ManagementMultipleOfeSynth()
+            task_args_list.append((str(topaz_id), mofe_lc_fn, nsegments, segment_plans))
 
-                # just replicate the dom
-                mofe_synth.stack = stack
-                merged = mofe_synth.write(mofe_lc_fn)
+        cpu_count = os.cpu_count() or 1
+        ncpu_override = os.getenv('WEPPPY_NCPU')
+        max_workers = NCPU if ncpu_override else cpu_count
+        if max_workers < 1:
+            max_workers = 1
+        if ncpu_override:
+            if max_workers > NCPU:
+                max_workers = NCPU
+        elif max_workers > max(cpu_count, 20):
+            max_workers = max(cpu_count, 20)
+        if task_args_list:
+            max_workers = min(max_workers, len(task_args_list))
+        max_workers = min(max_workers, _MOFE_MAN_SYNTH_MAX_WORKERS)
+        task_batches = _chunk_mofe_management_tasks(task_args_list, max_workers)
+
+        def _run_mofe_management_pool(
+            prefer_spawn: bool,
+        ) -> Tuple[bool, Optional[Exception]]:
+            try:
+                with createProcessPoolExecutor(
+                    max_workers=max_workers,
+                    logger=self.logger,
+                    prefer_spawn=prefer_spawn,
+                ) as executor:
+                    futures = [
+                        executor.submit(_write_mofe_management_file_batch_task, task_batch)
+                        for task_batch in task_batches
+                    ]
+                    futures_n = len(futures)
+                    count = 0
+                    pending_futures = set(futures)
+                    last_progress_time = time.time()
+
+                    while pending_futures:
+                        done, pending_futures = wait(
+                            pending_futures, timeout=5, return_when=FIRST_COMPLETED
+                        )
+
+                        if not done:
+                            since_progress = time.time() - last_progress_time
+                            pending_count = len(pending_futures)
+                            if since_progress >= 60:
+                                self.logger.error(
+                                    '  MOFE management synthesis tasks still pending after %.1fs; %s tasks waiting.',
+                                    round(since_progress, 1),
+                                    pending_count,
+                                )
+                            else:
+                                self.logger.info(
+                                    '  Waiting on MOFE management synthesis tasks (pending=%s, %.1fs since last completion).',
+                                    pending_count,
+                                    round(since_progress, 1),
+                                )
+                            continue
+
+                        for future in done:
+                            exc = future.exception()
+                            if exc is not None:
+                                if isinstance(exc, BrokenProcessPool):
+                                    self.logger.error(
+                                        '  MOFE management synthesis process pool terminated unexpectedly: %s',
+                                        exc,
+                                    )
+                                    for pending_future in pending_futures:
+                                        pending_future.cancel()
+                                    return False, exc
+                                self.logger.error(
+                                    '  A MOFE management synthesis task failed with an error: %s',
+                                    exc,
+                                )
+                                for pending_future in pending_futures:
+                                    pending_future.cancel()
+                                raise exc
+
+                            completed_batch = future.result()
+                            for completed_topaz_id, elapsed_time in completed_batch:
+                                count += 1
+                                self.logger.info(
+                                    '  (%s/%s) Completed MOFE management synthesis for %s in %ss',
+                                    count,
+                                    len(task_args_list),
+                                    completed_topaz_id,
+                                    elapsed_time,
+                                )
+                            last_progress_time = time.time()
+
+                    return True, None
+            except BrokenProcessPool as exc:
+                self.logger.error('  Failed to initialize MOFE management synthesis process pool: %s', exc)
+                return False, exc
+
+        def _run_mofe_management_sequential() -> None:
+            total = len(task_args_list)
+            self.logger.warning('  Running MOFE management synthesis sequentially')
+            for idx, task_args in enumerate(task_args_list, start=1):
+                completed_topaz_id, elapsed_time = _write_mofe_management_file_task(task_args)
+                self.logger.info(
+                    '  (%s/%s) Completed MOFE management synthesis for %s in %ss [sequential]',
+                    idx,
+                    total,
+                    completed_topaz_id,
+                    elapsed_time,
+                )
+
+        run_concurrent = max_workers > 1 and len(task_args_list) > 1
+        if run_concurrent:
+            self.logger.info('  Submitting MOFE management synthesis tasks to ProcessPoolExecutor')
+            success, failure_exc = _run_mofe_management_pool(prefer_spawn=True)
+            if not success and isinstance(failure_exc, BrokenProcessPool):
+                self.logger.warning(
+                    '  Retrying MOFE management synthesis with fork-based executor after spawn failure'
+                )
+                success, failure_exc = _run_mofe_management_pool(prefer_spawn=False)
+
+            if not success:
+                if isinstance(failure_exc, BrokenProcessPool):
+                    self.logger.warning(
+                        '  Falling back to sequential MOFE management synthesis after process pool failures'
+                    )
+                    _run_mofe_management_sequential()
+                else:
+                    if failure_exc is None:
+                        raise RuntimeError(
+                            'MOFE management synthesis process pool failed without an exception payload.'
+                        )
+                    raise failure_exc
+        elif task_args_list:
+            _run_mofe_management_sequential()
 
         with self.locked():
             if cancov_d:

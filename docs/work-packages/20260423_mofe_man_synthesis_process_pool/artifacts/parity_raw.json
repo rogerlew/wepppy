@@ -1,0 +1,77 @@
+{
+  "generated_at_utc": "2026-04-23T18:30:33+00:00",
+  "baseline_cpu_count": 1,
+  "parallel_cpu_count": 4,
+  "runs": [
+    {
+      "run_id": "moth-eaten-blackhead",
+      "url": "https://wc.bearhive.duckdns.org/weppcloud/runs/moth-eaten-blackhead/disturbed9002-wbt-mofe/",
+      "local_root": "/wc1/runs/mo/moth-eaten-blackhead",
+      "synthetic_single_ofe_adaptation": false,
+      "baseline_file_count": 209,
+      "concurrent_file_count": 209,
+      "missing_in_baseline": [],
+      "missing_in_concurrent": [],
+      "content_mismatch_count": 0,
+      "content_mismatches": [],
+      "mismatch_count": 0,
+      "status": "match"
+    },
+    {
+      "run_id": "objectionable-sublimate",
+      "url": "https://wc.bearhive.duckdns.org/weppcloud/runs/objectionable-sublimate/disturbed9002_wbt/",
+      "local_root": "/wc1/runs/ob/objectionable-sublimate",
+      "synthetic_single_ofe_adaptation": true,
+      "baseline_file_count": 60,
+      "concurrent_file_count": 60,
+      "missing_in_baseline": [],
+      "missing_in_concurrent": [],
+      "content_mismatch_count": 0,
+      "content_mismatches": [],
+      "mismatch_count": 0,
+      "status": "match"
+    },
+    {
+      "run_id": "cochlear-beriberi",
+      "url": "https://wc.bearhive.duckdns.org/weppcloud/runs/cochlear-beriberi/disturbed9002-mofe/",
+      "local_root": "/wc1/runs/co/cochlear-beriberi",
+      "synthetic_single_ofe_adaptation": false,
+      "baseline_file_count": 520,
+      "concurrent_file_count": 520,
+      "missing_in_baseline": [],
+      "missing_in_concurrent": [],
+      "content_mismatch_count": 0,
+      "content_mismatches": [],
+      "mismatch_count": 0,
+      "status": "match"
+    },
+    {
+      "run_id": "ordained-incentive",
+      "url": "https://wc.bearhive.duckdns.org/weppcloud/runs/ordained-incentive/disturbed9002-wbt-mofe/",
+      "local_root": "/wc1/runs/or/ordained-incentive",
+      "synthetic_single_ofe_adaptation": false,
+      "baseline_file_count": 333,
+      "concurrent_file_count": 333,
+      "missing_in_baseline": [],
+      "missing_in_concurrent": [],
+      "content_mismatch_count": 0,
+      "content_mismatches": [],
+      "mismatch_count": 0,
+      "status": "match"
+    },
+    {
+      "run_id": "uninsured-deformation",
+      "url": "https://wc.bearhive.duckdns.org/weppcloud/runs/uninsured-deformation/disturbed9002-wbt-mofe/",
+      "local_root": "/wc1/runs/un/uninsured-deformation",
+      "synthetic_single_ofe_adaptation": false,
+      "baseline_file_count": 104,
+      "concurrent_file_count": 104,
+      "missing_in_baseline": [],
+      "missing_in_concurrent": [],
+      "content_mismatch_count": 0,
+      "content_mismatches": [],
+      "mismatch_count": 0,
+      "status": "match"
+    }
+  ]
+}

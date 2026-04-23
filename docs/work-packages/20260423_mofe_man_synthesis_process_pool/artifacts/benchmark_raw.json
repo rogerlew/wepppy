@@ -1,0 +1,123 @@
+{
+  "generated_at_utc": "2026-04-23T18:30:33+00:00",
+  "iterations_per_mode": 3,
+  "baseline_cpu_count": 1,
+  "parallel_cpu_count": 4,
+  "runs": [
+    {
+      "run_id": "moth-eaten-blackhead",
+      "url": "https://wc.bearhive.duckdns.org/weppcloud/runs/moth-eaten-blackhead/disturbed9002-wbt-mofe/",
+      "local_root": "/wc1/runs/mo/moth-eaten-blackhead",
+      "synthetic_single_ofe_adaptation": false,
+      "hillslope_count": 209,
+      "output_file_count": 209,
+      "baseline_samples_s": [
+        2.3227449618279934,
+        2.121972451917827,
+        2.1249696440063417
+      ],
+      "baseline_mean_s": 2.1898956859173873,
+      "baseline_std_s": 0.11506060738838075,
+      "concurrent_samples_s": [
+        5.210304125677794,
+        5.588798483368009,
+        5.176807368174195
+      ],
+      "concurrent_mean_s": 5.325303325739999,
+      "concurrent_std_s": 0.22880730268256516,
+      "delta_pct": 143.1761183870789
+    },
+    {
+      "run_id": "objectionable-sublimate",
+      "url": "https://wc.bearhive.duckdns.org/weppcloud/runs/objectionable-sublimate/disturbed9002_wbt/",
+      "local_root": "/wc1/runs/ob/objectionable-sublimate",
+      "synthetic_single_ofe_adaptation": true,
+      "hillslope_count": 60,
+      "output_file_count": 60,
+      "baseline_samples_s": [
+        0.8727377629838884,
+        0.8786143781617284,
+        0.8730881959199905
+      ],
+      "baseline_mean_s": 0.8748134456885358,
+      "baseline_std_s": 0.0032963641425066913,
+      "concurrent_samples_s": [
+        4.8005306189879775,
+        4.7424023216590285,
+        4.721213493961841
+      ],
+      "concurrent_mean_s": 4.754715478202949,
+      "concurrent_std_s": 0.04106716387406447,
+      "delta_pct": 443.5119340742042
+    },
+    {
+      "run_id": "cochlear-beriberi",
+      "url": "https://wc.bearhive.duckdns.org/weppcloud/runs/cochlear-beriberi/disturbed9002-mofe/",
+      "local_root": "/wc1/runs/co/cochlear-beriberi",
+      "synthetic_single_ofe_adaptation": false,
+      "hillslope_count": 520,
+      "output_file_count": 520,
+      "baseline_samples_s": [
+        4.586287533398718,
+        4.27510953694582,
+        3.994764151982963
+      ],
+      "baseline_mean_s": 4.285387074109167,
+      "baseline_std_s": 0.29589558718911313,
+      "concurrent_samples_s": [
+        5.864043228793889,
+        5.831677470821887,
+        5.537513480056077
+      ],
+      "concurrent_mean_s": 5.744411393223952,
+      "concurrent_std_s": 0.1799081583119326,
+      "delta_pct": 34.04650020834074
+    },
+    {
+      "run_id": "ordained-incentive",
+      "url": "https://wc.bearhive.duckdns.org/weppcloud/runs/ordained-incentive/disturbed9002-wbt-mofe/",
+      "local_root": "/wc1/runs/or/ordained-incentive",
+      "synthetic_single_ofe_adaptation": false,
+      "hillslope_count": 333,
+      "output_file_count": 333,
+      "baseline_samples_s": [
+        3.373426167294383,
+        3.4230054700747132,
+        3.4576454856432974
+      ],
+      "baseline_mean_s": 3.418025707670798,
+      "baseline_std_s": 0.04232991756415943,
+      "concurrent_samples_s": [
+        5.731741468422115,
+        5.521305338013917,
+        5.520325921010226
+      ],
+      "concurrent_mean_s": 5.591124242482086,
+      "concurrent_std_s": 0.12177907450674198,
+      "delta_pct": 63.57759480668559
+    },
+    {
+      "run_id": "uninsured-deformation",
+      "url": "https://wc.bearhive.duckdns.org/weppcloud/runs/uninsured-deformation/disturbed9002-wbt-mofe/",
+      "local_root": "/wc1/runs/un/uninsured-deformation",
+      "synthetic_single_ofe_adaptation": false,
+      "hillslope_count": 104,
+      "output_file_count": 104,
+      "baseline_samples_s": [
+        1.2033620630390942,
+        1.283647419884801,
+        1.2317356131970882
+      ],
+      "baseline_mean_s": 1.2395816987069945,
+      "baseline_std_s": 0.04071370069561579,
+      "concurrent_samples_s": [
+        4.73662139615044,
+        4.669709049165249,
+        4.960778949782252
+      ],
+      "concurrent_mean_s": 4.789036465032647,
+      "concurrent_std_s": 0.15244975023181556,
+      "delta_pct": 286.34294698187966
+    }
+  ]
+}

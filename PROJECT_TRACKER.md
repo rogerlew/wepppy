@@ -2,7 +2,7 @@
 > Kanban board for wepppy work packages and vision items
 
 **Last Updated**: 2026-04-23  
-**Active Packages**: 4  
+**Active Packages**: 3  
 **Quick Links**: [Work Packages Directory](docs/work-packages/) | [God-Tier Prompting Strategy](docs/god-tier-prompting-strategy.md)
 
 ## Purpose
@@ -37,7 +37,7 @@ This tracker makes all work visible at a glance, helping agents coordinate and a
 ### 2. Limit Work in Progress
 **Target**: 2-4 active packages maximum to maintain focus and ensure packages complete rather than stall.
 
-**Current WIP**: 4 packages ✅ **Within target range**
+**Current WIP**: 3 packages ✅ **Within target range**
 
 If WIP exceeds 4, prioritize completing existing packages before starting new ones. This prevents context switching overhead and ensures clean handoffs.
 
@@ -271,6 +271,11 @@ Currently active work packages. Limit to 2-4 packages to maintain focus.
 ## ✅ Done
 
 Recently completed work packages. Archived immediately upon completion.
+
+### MOFE `.mofe.man` Synthesis Process-Pool Migration (2026-04-23)
+**Status**: ✅ **COMPLETE**  
+**Link**: [docs/work-packages/20260423_mofe_man_synthesis_process_pool/](docs/work-packages/20260423_mofe_man_synthesis_process_pool/)  
+**Summary**: Closed end-to-end with canonical `.mofe.man` synthesis orchestration in `wepppy/nodb/core/landuse.py::_build_multiple_ofe()`: spawn-first `createProcessPoolExecutor`, `BrokenProcessPool` fork retry, bounded sequential fallback, explicit non-pool exception raising, deterministic `hill_<topaz_id>.mofe.man` basename validation, and bounded batched worker fan-out (`max_workers <= 4`). Added targeted landuse tests for success/retry/fallback/non-pool-failure/parity behavior (`10 passed`) and regenerated required benchmark/parity artifacts on isolated temp copies of the five benchmark runs. Parity matched on all runs (`0` mismatches); benchmark deltas on this host remained positive (`+143.18%`, `+443.51%`, `+34.05%`, `+63.58%`, `+286.34%`), so the package closes on explicit contract/parity evidence rather than a speedup claim. Review artifacts closed with no unresolved medium/high findings; ExecPlan archived under `prompts/completed/`.
 
 ### Multi-OFE Landuse Pair-Count Optimization via wepppyo3 Raster Characteristics (2026-04-23)
 **Status**: ✅ **COMPLETE**  

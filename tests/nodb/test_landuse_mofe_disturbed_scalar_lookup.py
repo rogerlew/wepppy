@@ -12,6 +12,17 @@ from wepppy.nodb.core.landuse import Landuse
 pytestmark = pytest.mark.unit
 
 
+class _LoggerStub:
+    def info(self, *_args, **_kwargs) -> None:
+        return None
+
+    def warning(self, *_args, **_kwargs) -> None:
+        return None
+
+    def error(self, *_args, **_kwargs) -> None:
+        return None
+
+
 class _ManagementStub:
     def __init__(self) -> None:
         self.rdmax_values: list[float] = []
@@ -63,7 +74,7 @@ def test_build_multiple_ofe_accepts_extended_rdmax_xmxlai_keys(
         )
     }
     landuse.locked = lambda: nullcontext()
-    landuse.logger = SimpleNamespace(info=lambda *_args, **_kwargs: None)
+    landuse.logger = _LoggerStub()
 
     watershed = SimpleNamespace(
         _subs_summary={"101": {}},
@@ -137,7 +148,7 @@ def test_build_multiple_ofe_rap_cancov_overrides_lookup_ini_cancov(
         )
     }
     landuse.locked = lambda: nullcontext()
-    landuse.logger = SimpleNamespace(info=lambda *_args, **_kwargs: None)
+    landuse.logger = _LoggerStub()
 
     watershed = SimpleNamespace(
         _subs_summary={"101": {}},
