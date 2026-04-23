@@ -259,3 +259,54 @@ def test_segmented_multiple_ofe_promotes_zero_rounding_case_to_one_ofe(tmp_path:
 
     lines = [line.strip() for line in dst.read_text(encoding="utf-8").splitlines() if line.strip()]
     assert int(lines[1]) == 1
+
+
+@pytest.mark.parametrize(
+    ("apply_buffer", "target_length", "buffer_length", "max_ofes"),
+    [
+        (False, 25.0, 15.0, 19),
+        (True, 25.0, 15.0, 3),
+    ],
+)
+def test_segmented_multiple_ofe_wepppyo3_matches_legacy_python_output(
+    tmp_path: Path,
+    apply_buffer: bool,
+    target_length: float,
+    buffer_length: float,
+    max_ofes: int,
+) -> None:
+    src = tmp_path / "hill_17.slp"
+    rust_dst = tmp_path / "hill_17.rust.mofe.slp"
+    legacy_dst = tmp_path / "hill_17.legacy.mofe.slp"
+    _write_single_ofe_slope(
+        src,
+        length=120.0,
+        points=[
+            (0.0, 0.9),
+            (0.125, 0.8),
+            (0.25001, 0.1),
+            (0.5, 0.6),
+            (0.75001, 0.5),
+            (1.0, 0.4),
+        ],
+    )
+
+    slope = SlopeFile(str(src))
+    n_rust = slope.segmented_multiple_ofe(
+        dst_fn=str(rust_dst),
+        target_length=target_length,
+        apply_buffer=apply_buffer,
+        buffer_length=buffer_length,
+        max_ofes=max_ofes,
+    )
+    with pytest.warns(DeprecationWarning):
+        n_legacy = slope.segmented_multiple_ofe_legacy(
+            dst_fn=str(legacy_dst),
+            target_length=target_length,
+            apply_buffer=apply_buffer,
+            buffer_length=buffer_length,
+            max_ofes=max_ofes,
+        )
+
+    assert n_rust == n_legacy
+    assert rust_dst.read_text(encoding="utf-8") == legacy_dst.read_text(encoding="utf-8")

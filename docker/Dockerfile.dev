@@ -68,6 +68,8 @@ RUN set -eux; \
     rm -rf /var/lib/apt/lists/*
 
 ARG DOCKER_CLI_VERSION=26.1.4
+ARG WEPPPYO3_REPO=https://github.com/wepp-in-the-woods/wepppyo3.git
+ARG WEPPPYO3_REF=main
 RUN curl -fsSL "https://download.docker.com/linux/static/stable/x86_64/docker-${DOCKER_CLI_VERSION}.tgz" -o /tmp/docker.tgz && \
     tar -xzf /tmp/docker.tgz -C /tmp && \
     mv /tmp/docker/docker /usr/local/bin/docker && \
@@ -99,6 +101,22 @@ RUN /opt/venv/bin/python -c "import duckdb; \
                con.execute('LOAD spatial;'); \
                con.close()"
 
+# Vendor wepppyo3 as a fallback so dev startup does not depend solely on bind mounts.
+RUN set -eux; \
+    mkdir -p /opt/vendor; \
+    if git clone --depth=1 --branch "${WEPPPYO3_REF}" "${WEPPPYO3_REPO}" /opt/vendor/wepppyo3; then \
+        :; \
+    else \
+        git clone --depth=1 "${WEPPPYO3_REPO}" /opt/vendor/wepppyo3; \
+        cd /opt/vendor/wepppyo3; \
+        git fetch --depth=1 origin "${WEPPPYO3_REF}"; \
+        git checkout "${WEPPPYO3_REF}"; \
+    fi; \
+    cd /opt/vendor/wepppyo3; \
+    git lfs pull || true; \
+    rm -rf /opt/vendor/wepppyo3/.git; \
+    test -d /opt/vendor/wepppyo3/release/linux/py312/wepppyo3
+
 # Mirror historical conda .pth injections so sibling repos resolve in development.
 RUN SITE_PACKAGES="$(/opt/venv/bin/python -c 'import site, sys; sys.stdout.write(site.getsitepackages()[0])')" && \
     printf '/workdir/wepppy/\n' > "${SITE_PACKAGES}/wepppy.pth" && \
@@ -106,7 +124,7 @@ RUN SITE_PACKAGES="$(/opt/venv/bin/python -c 'import site, sys; sys.stdout.write
     printf '/workdir/weppcloud2/\n' > "${SITE_PACKAGES}/weppcloud2.pth" && \
     printf '/workdir/weppcloud-wbt/WBT/\n' > "${SITE_PACKAGES}/wbt.pth" && \
     printf '/workdir/f-esri/\n' > "${SITE_PACKAGES}/f_esri.pth" && \
-    printf '/workdir/wepppyo3/release/linux/py312/\n' > "${SITE_PACKAGES}/wepppyo3.pth"
+    printf '/workdir/wepppyo3/release/linux/py312/\n/opt/vendor/wepppyo3/release/linux/py312/\n' > "${SITE_PACKAGES}/wepppyo3.pth"
     
 # Vendor Rosetta directly from GitHub into site-packages, including LFS assets.
 RUN SITE_PACKAGES="$(/opt/venv/bin/python -c 'import site, sys; sys.stdout.write(site.getsitepackages()[0])')" && \

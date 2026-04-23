@@ -8,6 +8,7 @@ TestClient = pytest.importorskip("fastapi.testclient").TestClient
 
 import wepppy.microservices.rq_engine as rq_engine
 from wepppy.microservices.rq_engine import geneva_routes
+from wepppy.nodb.base import NoDbAlreadyLockedError
 from wepppy.nodb.mods.geneva.errors import GenevaValidationError
 
 
@@ -230,6 +231,51 @@ def test_run_workflow_enqueues_chained_jobs_with_forced_rebuild(
             "Geneva workflow queued. Preparing HRUs, building frequency panel, then running Geneva batch.",
         )
     ]
+
+
+def test_run_workflow_returns_accepted_when_mark_job_queued_is_lock_contended(
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    _stub_auth(monkeypatch)
+    captured = _stub_queue(
+        monkeypatch,
+        job_ids=["geneva-prepare-1", "geneva-panel-2", "geneva-batch-3"],
+    )
+    monkeypatch.setattr(geneva_routes, "GENEVA_STATE_LOCK_RETRY_ATTEMPTS", 2)
+    monkeypatch.setattr(geneva_routes, "GENEVA_STATE_LOCK_RETRY_SECONDS", 0.0)
+
+    class _LockBusyGenevaStub(_GenevaRouteStub):
+        def __init__(self) -> None:
+            super().__init__()
+            self.mark_attempts = 0
+
+        def mark_job_queued(self, job_id: str, *, status_message: str) -> None:
+            self.mark_attempts += 1
+            raise NoDbAlreadyLockedError("lock() called on an already locked nodb")
+
+    stub = _LockBusyGenevaStub()
+    monkeypatch.setattr(geneva_routes, "_ensure_geneva_controller", lambda runid, config: stub)
+
+    with TestClient(rq_engine.app) as client:
+        response = client.post(
+            "/api/runs/run-1/cfg/geneva/run-workflow",
+            json={
+                "schema_version": 1,
+                "prepare": {"schema_version": 1, "force_rebuild": True},
+                "panel": {"schema_version": 1, "durations_minutes": [30], "ari_years": [10], "rebuild": True},
+                "run_batch": {
+                    "schema_version": 1,
+                    "event_filter": {"datasource_ids": ["cligen_freq"]},
+                    "hyetograph": {"distribution_type": "neh4_type_b", "time_step_minutes": 1.0},
+                    "runoff_model": {"lambda_mode": "0.20", "uh_method": "scs_triangular", "timing_method": "kent"},
+                },
+            },
+        )
+
+    assert response.status_code == 202
+    assert response.json()["job_id"] == "geneva-prepare-1"
+    assert len(captured["calls"]) == 3
+    assert stub.mark_attempts == 2
 
 
 def test_state_route_returns_revisioned_geneva_snapshot(monkeypatch: pytest.MonkeyPatch) -> None:

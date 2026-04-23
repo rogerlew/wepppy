@@ -1,6 +1,8 @@
 from __future__ import annotations
 
 import logging
+from concurrent.futures import Future
+from concurrent.futures.process import BrokenProcessPool
 from contextlib import nullcontext
 from pathlib import Path
 
@@ -183,3 +185,89 @@ def test_build_multiple_ofe_handles_non_finite_configured_max_ofes(
 
     assert recorded["max_ofes"] == 19
     assert watershed.mofe_nsegments == {"171": 19}
+
+
+@pytest.mark.unit
+def test_build_multiple_ofe_retries_spawn_pool_then_fork_pool(
+    monkeypatch: pytest.MonkeyPatch, tmp_path: Path
+) -> None:
+    watershed = _DummyWatershed(tmp_path)
+    watershed._subs_summary = {"171": {"fname": "hill_171.slp"}, "172": {"fname": "hill_172.slp"}}
+    subwta = np.array([[171, 171, 172, 172]], dtype=np.int32)
+    pool_calls: list[bool] = []
+
+    monkeypatch.setattr(
+        watershed_mixins_module,
+        "read_raster",
+        lambda _path, dtype=np.int32: (subwta, None, None),  # noqa: ARG005
+    )
+    monkeypatch.setattr(watershed, "_build_mofe_map", lambda: None)
+    monkeypatch.setattr(watershed_mixins_module.os, "cpu_count", lambda: 4)
+    monkeypatch.setattr(
+        watershed_mixins_module,
+        "_segment_hillslope_mofe_task",
+        lambda args: (args[0], int(args[5]), 0.01),
+    )
+
+    class _ImmediateExecutor:
+        def __enter__(self):
+            return self
+
+        def __exit__(self, exc_type, exc, tb):
+            return None
+
+        def submit(self, fn, args):
+            fut: Future[tuple[str, int, float]] = Future()
+            fut.set_result(fn(args))
+            return fut
+
+    def _fake_create_pool(max_workers: int, logger=None, prefer_spawn: bool = True):  # noqa: ARG001
+        pool_calls.append(prefer_spawn)
+        if prefer_spawn:
+            raise BrokenProcessPool("spawn failed")
+        return _ImmediateExecutor()
+
+    monkeypatch.setattr(watershed_mixins_module, "createProcessPoolExecutor", _fake_create_pool)
+
+    watershed._build_multiple_ofe()
+
+    assert pool_calls == [True, False]
+    assert watershed.mofe_nsegments == {"171": 2, "172": 2}
+
+
+@pytest.mark.unit
+def test_build_multiple_ofe_raises_non_pool_task_failure(
+    monkeypatch: pytest.MonkeyPatch, tmp_path: Path
+) -> None:
+    watershed = _DummyWatershed(tmp_path)
+    watershed._subs_summary = {"171": {"fname": "hill_171.slp"}, "172": {"fname": "hill_172.slp"}}
+    subwta = np.array([[171, 171, 172, 172]], dtype=np.int32)
+
+    monkeypatch.setattr(
+        watershed_mixins_module,
+        "read_raster",
+        lambda _path, dtype=np.int32: (subwta, None, None),  # noqa: ARG005
+    )
+    monkeypatch.setattr(watershed, "_build_mofe_map", lambda: None)
+    monkeypatch.setattr(watershed_mixins_module.os, "cpu_count", lambda: 4)
+
+    class _FailingExecutor:
+        def __enter__(self):
+            return self
+
+        def __exit__(self, exc_type, exc, tb):
+            return None
+
+        def submit(self, fn, args):  # noqa: ARG002
+            fut: Future[tuple[str, int, float]] = Future()
+            fut.set_exception(ValueError("segmentation boom"))
+            return fut
+
+    monkeypatch.setattr(
+        watershed_mixins_module,
+        "createProcessPoolExecutor",
+        lambda max_workers, logger=None, prefer_spawn=True: _FailingExecutor(),  # noqa: ARG005
+    )
+
+    with pytest.raises(ValueError, match="segmentation boom"):
+        watershed._build_multiple_ofe()

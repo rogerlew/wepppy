@@ -1,0 +1,86 @@
+{
+  "run_root": "/wc1/runs/po/pointy-toed-fluff/watershed/slope_files/hillslopes",
+  "files_processed_per_sample": 3345,
+  "target_length": 60.0,
+  "buffer_length": 30.0,
+  "max_ofes": 19,
+  "samples": [
+    {
+      "sample": 1,
+      "mode": "old",
+      "elapsed_s": 2.1865749759599566,
+      "files_processed": 3345,
+      "temp_dir": "/tmp/mofe-bench-old-01-h1m0oqnm"
+    },
+    {
+      "sample": 2,
+      "mode": "new",
+      "elapsed_s": 0.9670186908915639,
+      "files_processed": 3345,
+      "temp_dir": "/tmp/mofe-bench-new-02-ac7ud8cq"
+    },
+    {
+      "sample": 3,
+      "mode": "old",
+      "elapsed_s": 2.136803728993982,
+      "files_processed": 3345,
+      "temp_dir": "/tmp/mofe-bench-old-03-y2eskg9e"
+    },
+    {
+      "sample": 4,
+      "mode": "new",
+      "elapsed_s": 0.9375040619634092,
+      "files_processed": 3345,
+      "temp_dir": "/tmp/mofe-bench-new-04-mufzg0qo"
+    },
+    {
+      "sample": 5,
+      "mode": "old",
+      "elapsed_s": 2.1525594238191843,
+      "files_processed": 3345,
+      "temp_dir": "/tmp/mofe-bench-old-05-d786dfxm"
+    },
+    {
+      "sample": 6,
+      "mode": "new",
+      "elapsed_s": 0.9525675349868834,
+      "files_processed": 3345,
+      "temp_dir": "/tmp/mofe-bench-new-06-9m0ahsq2"
+    },
+    {
+      "sample": 7,
+      "mode": "old",
+      "elapsed_s": 2.1620805831626058,
+      "files_processed": 3345,
+      "temp_dir": "/tmp/mofe-bench-old-07-i30z4r1l"
+    },
+    {
+      "sample": 8,
+      "mode": "new",
+      "elapsed_s": 0.9341869377531111,
+      "files_processed": 3345,
+      "temp_dir": "/tmp/mofe-bench-new-08-5bs8syus"
+    },
+    {
+      "sample": 9,
+      "mode": "old",
+      "elapsed_s": 2.1044859657995403,
+      "files_processed": 3345,
+      "temp_dir": "/tmp/mofe-bench-old-09-rapv8wkg"
+    },
+    {
+      "sample": 10,
+      "mode": "new",
+      "elapsed_s": 0.9005960859358311,
+      "files_processed": 3345,
+      "temp_dir": "/tmp/mofe-bench-new-10-1i1seqpz"
+    }
+  ],
+  "summary": {
+    "old_mean_s": 2.148500935547054,
+    "old_stddev_s": 0.030514967281650082,
+    "new_mean_s": 0.9383746623061597,
+    "new_stddev_s": 0.024836635354806222,
+    "percent_delta_new_vs_old": -56.32421439615386
+  }
+}

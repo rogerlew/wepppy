@@ -58,9 +58,10 @@ class WeppRunService:
         climate = wepp.climate_instance
         landuse = wepp.landuse_instance
         runs_dir = os.path.abspath(wepp.runs_dir)
-        wepp_bin = wepp.wepp_bin
+        # Preserve the configured binary for the entire run; do not mutate it per hillslope.
+        configured_wepp_bin = wepp.wepp_bin
 
-        wepp.logger.info(f"    wepp_bin:{wepp_bin}")
+        wepp.logger.info(f"    wepp_bin:{configured_wepp_bin}")
 
         sub_n = watershed.sub_n
 
@@ -73,9 +74,9 @@ class WeppRunService:
 
                     dom = landuse.domlc_d[topaz_id]
                     man = landuse.managements[dom]
-                    if man.disturbed_class in ["agriculture crops"]:
-                        wepp_bin = "wepp_dcc52a6"
-                    wepp.logger.info(f"  using {wepp_bin} for {topaz_id} ({man.disturbed_class})")
+                    wepp.logger.info(
+                        f"  using {configured_wepp_bin} for {topaz_id} ({man.disturbed_class})"
+                    )
 
                     for d in climate.ss_batch_storms:
                         ss_batch_id = d["ss_batch_id"]
@@ -85,7 +86,7 @@ class WeppRunService:
                                 run_ss_batch_hillslope,
                                 wepp_id=wepp_id,
                                 runs_dir=runs_dir,
-                                wepp_bin=wepp_bin,
+                                wepp_bin=configured_wepp_bin,
                                 ss_batch_id=ss_batch_id,
                                 man_relpath=man_relpath,
                                 cli_relpath=cli_relpath,
@@ -101,9 +102,9 @@ class WeppRunService:
 
                     dom = landuse.domlc_d[topaz_id]
                     man = landuse.managements[dom]
-                    if man.disturbed_class in ["agriculture crops"]:
-                        wepp_bin = "wepp_dcc52a6"
-                    wepp.logger.info(f"  using {wepp_bin} for {topaz_id} ({man.disturbed_class})")
+                    wepp.logger.info(
+                        f"  using {configured_wepp_bin} for {topaz_id} ({man.disturbed_class})"
+                    )
 
                     wepp_id = translator.wepp(top=int(topaz_id))
                     futures.append(
@@ -111,7 +112,7 @@ class WeppRunService:
                             run_hillslope,
                             wepp_id=wepp_id,
                             runs_dir=runs_dir,
-                            wepp_bin=wepp_bin,
+                            wepp_bin=configured_wepp_bin,
                             man_relpath=man_relpath,
                             cli_relpath=cli_relpath,
                             slp_relpath=slp_relpath,
@@ -190,10 +191,7 @@ class WeppRunService:
             return
         wd = wepp.wd
         climate = wepp.climate_instance
-        wepp_bin = wepp.wepp_bin
-
-        if "wepp_50k" in wepp_bin:
-            wepp_bin = "wepp_dcc52a6"
+        configured_wepp_bin = wepp.wepp_bin
 
         wepp.logger.info(f"Running Watershed wepp_bin:{wepp.wepp_bin}")
         wepp.logger.info(f"    climate_mode:{climate.climate_mode.name}")
@@ -207,7 +205,7 @@ class WeppRunService:
                 for d in climate.ss_batch_storms:
                     ss_batch_key = d["ss_batch_key"]
                     ss_batch_id = d["ss_batch_id"]
-                    run_ss_batch_watershed(runs_dir, wepp_bin, ss_batch_id)
+                    run_ss_batch_watershed(runs_dir, configured_wepp_bin, ss_batch_id)
 
                     wepp.logger.info("    moving .out files...")
                     for fn in glob(_join(wepp.runs_dir, "*.out")):
@@ -217,7 +215,7 @@ class WeppRunService:
         else:
             with wepp.timed("  Running watershed run"):
                 assert wepp_module.run_watershed(
-                    runs_dir, wepp_bin=wepp_bin, status_channel=wepp._status_channel
+                    runs_dir, wepp_bin=configured_wepp_bin, status_channel=wepp._status_channel
                 )
 
                 wepp.logger.info("    moving .out files...")

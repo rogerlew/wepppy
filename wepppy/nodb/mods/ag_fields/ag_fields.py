@@ -1043,5 +1043,5 @@ def run_wepp_subfield(
     logger.info(f'  Created WEPP run file: {run_path}')
     run_hillslope(sub_field_id, 
                   ag_field_wepp_runs_dir,
-                  wepp_bin='wepp_dcc52a6',
+                  wepp_bin=self.wepp_instance.wepp_bin,
                   no_file_checks=True)

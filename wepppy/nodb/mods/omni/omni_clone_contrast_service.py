@@ -107,7 +107,7 @@ class OmniCloneContrastService:
         runid: str,
         control_scenario_key: str,
         contrast_scenario_key: str,
-        wepp_bin: str = "wepp_dcc52a6",
+        wepp_bin: Optional[str] = None,
         output_options: Optional[Dict[str, bool]] = None,
     ) -> str:
         from wepppy.nodb.core import Wepp
@@ -212,7 +212,10 @@ class OmniCloneContrastService:
                 os.fsync(fp.fileno())
 
         wepp = Wepp.getInstance(new_wd)
-        wepp.wepp_bin = wepp_bin
+        if wepp_bin is not None:
+            wepp.wepp_bin = wepp_bin
+        else:
+            wepp.wepp_bin = self.wepp_instance.wepp_bin,
         wepp.clean()
 
         og_runs_dir = _join(wd, "wepp", "runs/")

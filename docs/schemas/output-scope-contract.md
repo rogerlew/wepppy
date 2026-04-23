@@ -39,6 +39,12 @@ Examples:
 - `wepp/output/interchange/H.wat.parquet` + `roads` -> `wepp/roads/output/interchange/H.wat.parquet`
 - `watershed/hillslopes.parquet` + `roads` -> unchanged
 
+Watershed-table schema note:
+- `output_scope` rewrites do not alter watershed table schemas.
+- `watershed/hillslopes.parquet` may include additive Peridot provenance columns such as
+  `length_estimate_mode`, `length_area_over_channel`, and `length_edge_median`; scoped
+  path behavior remains unchanged.
+
 Implementation references:
 - `wepppy/wepp/reports/output_scope.py::resolve_output_scope_paths`
 - `wepppy/wepp/reports/output_scope.py::scoped_dataset_path`

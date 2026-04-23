@@ -39,3 +39,12 @@ class SlopeFile:
         min_length: float = ...,
         max_ofes: int = ...,
     ) -> int: ...
+    def segmented_multiple_ofe_legacy(
+        self,
+        dst_fn: str | None = ...,
+        target_length: float = ...,
+        apply_buffer: bool = ...,
+        buffer_length: float = ...,
+        min_length: float = ...,
+        max_ofes: int = ...,
+    ) -> int: ...

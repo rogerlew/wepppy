@@ -1,0 +1,9 @@
+{
+  "run_root": "/wc1/runs/po/pointy-toed-fluff/watershed/slope_files/hillslopes",
+  "files_checked": 3345,
+  "target_length": 60.0,
+  "buffer_length": 30.0,
+  "max_ofes": 19,
+  "mismatch_count": 0,
+  "mismatches": []
+}

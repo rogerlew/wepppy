@@ -175,7 +175,7 @@ When resuming Kubernetes work:
 
 Currently active work packages. Limit to 2-4 packages to maintain focus.
 
-**Current WIP Count**: 4 packages
+**Current WIP Count**: 3 packages
 
 ---
 
@@ -198,26 +198,6 @@ Currently active work packages. Limit to 2-4 packages to maintain focus.
 **Next Steps**:
 1. Fix unrelated Geneva worktree failure (`KeyError: 'severity'` in `test_geneva_wp09_end_to_end.py`).
 2. Re-run `wctl run-pytest tests --maxfail=1` and close package after global gate clears.
-
----
-
-### Peridot Side-Hillslope Length Capping + Provenance Mode
-**Started**: 2026-04-22  
-**Status**: Discovery/Planning complete; ExecPlan authored, implementation pending  
-**Size**: Medium (2-4 focused sessions)  
-**Owner**: Codex  
-**Link**: [docs/work-packages/20260422_peridot_side_hillslope_length_capping/](docs/work-packages/20260422_peridot_side_hillslope_length_capping/)  
-**Description**: Stabilize side hillslope length estimation by capping `area/channel_length` with edge/source median flowpath length for side hillslopes (`topaz_id % 10 in {2,3}`), preserve area via width recomputation, and add additive length-estimation provenance fields to hillslope outputs.
-
-**Current Status**:
-- Package scaffolded with `package.md`, `tracker.md`, and active ExecPlan.
-- Scope bounded to side hillslopes; top/source hillslope logic remains unchanged in this package.
-- Output contract plan is additive (`length` retained, provenance mode field(s) added).
-
-**Next Steps**:
-1. Implement side-hillslope cap logic in Peridot non-representative and representative paths.
-2. Add output provenance field(s) and update manifest/schema docs.
-3. Add targeted regression coverage for cap activation, fallback, and area-preservation invariants.
 
 ---
 
@@ -291,6 +271,16 @@ Currently active work packages. Limit to 2-4 packages to maintain focus.
 ## ✅ Done
 
 Recently completed work packages. Archived immediately upon completion.
+
+### Segmented MOFE Migration to wepppyo3 + Process-Pool Refactor (2026-04-23)
+**Status**: ✅ **COMPLETE**  
+**Link**: [docs/work-packages/20260422_segmented_multiple_ofe_wepppyo3_pool/](docs/work-packages/20260422_segmented_multiple_ofe_wepppyo3_pool/)  
+**Summary**: Closed end-to-end with MOFE segmentation production behavior moved to wepppyo3 (`wepp_interchange.segment_single_ofe_slope`), WEPPpy `SlopeFile.segmented_multiple_ofe` hard-switched to Rust path, and legacy Python segmentation retained only behind explicit deprecation (`segmented_multiple_ofe_legacy`). Refactored `WatershedOperationsMixin._build_multiple_ofe` to canonical spawn-first process-pool orchestration with fork retry on `BrokenProcessPool`, bounded sequential fallback, and explicit non-pool failure raising. Validation artifacts captured on `/wc1/runs/po/pointy-toed-fluff`: parity (`3345` files checked, `0` mismatches) and alternating benchmark (old mean `2.148501s`, new mean `0.938375s`, `-56.32%`). Targeted test suites passed (`wepppyo3`: `8 passed`; WEPPpy: `17 passed` via direct local pytest while `wctl` execution was blocked by stopped `weppcloud` compose service). ExecPlan archived under `prompts/completed/` with outcome note.
+
+### Peridot Side-Hillslope Length Capping + Provenance Mode (2026-04-23)
+**Status**: ✅ **COMPLETE**  
+**Link**: [docs/work-packages/20260422_peridot_side_hillslope_length_capping/](docs/work-packages/20260422_peridot_side_hillslope_length_capping/)  
+**Summary**: Closed with side-hillslope length capping delivered in both Peridot abstraction paths (`L_final = min(L_area, L_edge)` for side hillslopes), area-preserving width recomputation, unchanged top/source behavior, and additive hillslope provenance fields (`length_estimate_mode`, `length_area_over_channel`, `length_edge_median`). Peridot tests and schema/manifest checks passed, WEPPpy contract docs were updated, and ExecPlan artifacts were archived under `prompts/completed/`.
 
 ### Disturbed MOFE 9002 Soil Support Parity (2026-04-22)
 **Status**: ✅ **COMPLETE**  

@@ -14,7 +14,7 @@
 ## Target Datasets
 | Dataset | Writer(s) | Required changes | Key consumers to audit |
 | --- | --- | --- | --- |
-| `watershed/hillslopes.parquet` | Peridot `abstract_watershed` / `wbt_abstract_watershed` + `peridot_runner.post_abstract_watershed` normalization | Peridot writes base parquet directly; WEPPpy post-step enforces `wepp_id`, `topaz_id` Int32 and drops uppercase legacy variants | `duckdb_agents.get_watershed_*`, reports (`loss_hill_report`, `average_annuals`), query engine fixtures |
+| `watershed/hillslopes.parquet` | Peridot `abstract_watershed` / `wbt_abstract_watershed` + `peridot_runner.post_abstract_watershed` normalization | Peridot writes base parquet directly; WEPPpy post-step enforces `wepp_id`, `topaz_id` Int32 and drops uppercase legacy variants. Contract now includes additive side-length provenance fields: `length_estimate_mode`, `length_area_over_channel`, `length_edge_median`. | `duckdb_agents.get_watershed_*`, reports (`loss_hill_report`, `average_annuals`), query engine fixtures |
 | `watershed/channels.parquet` | same as above | Peridot writes base parquet directly; WEPPpy post-step enforces `wepp_id`, `topaz_id`, `chn_enum` Int32 | hydrology exports, Omni mods, query engine |
 | `watershed/flowpaths.parquet` | same as above | Peridot writes flowpaths parquet when enabled; WEPPpy normalizes `topaz_id`, `fp_id` Int32 when present | `Watershed.fps_summary`, consumers of legacy flowpath metadata |
 | `ag_fields/sub_fields/*.parquet` | `post_abstract_sub_fields` | emit Int32 ids | landuse editing tools, agronomic summaries |
@@ -36,6 +36,11 @@
 - `post_abstract_watershed()` is parquet-first for new runs and uses an explicit legacy CSV fallback path only when a required parquet file is missing.
 - After WEPPpy post-processing adds canonical derived columns, `post_abstract_watershed()` refreshes `watershed/README.md` manifest/schema sections so documented contract matches final on-disk parquet outputs.
 - Legacy migration for historical runs with only `watershed/*.csv` remains supported via `migrate_watershed_outputs()` / `migrate_watersheds()`.
+- Side hillslopes (`topaz_id % 10 in {2,3}`) now cap length using `min(area/channel_length, median edge/source length)` and preserve area by recomputing width; hillslope rows expose mode/candidate provenance through additive fields (`length_estimate_mode`, `length_area_over_channel`, `length_edge_median`).
+- Length provenance semantics:
+  - `length_estimate_mode` is stable and currently emits: `top_edge_median`, `top_representative_flowpath`, `side_edge_median_capped`, `side_area_over_channel`, `side_area_over_channel_no_edge`.
+  - `length_area_over_channel` records the side candidate `L_area`; top/source rows emit NaN.
+  - `length_edge_median` records the edge/source median candidate when available; unavailable paths emit NaN.
 
 ## Testing & Docs
 - Update unit/integration tests to assert int32 schemas. Regenerate fixtures referencing legacy casing.  

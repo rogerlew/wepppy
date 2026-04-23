@@ -1,4 +1,8 @@
 
+import importlib
+import warnings
+from functools import lru_cache
+
 import numpy as np
 from scipy.interpolate import KroghInterpolator
 
@@ -46,6 +50,24 @@ def mofe_distance_fractions(fname):
         tot_length += length
 
     return np.cumsum(lengths) / tot_length
+
+
+@lru_cache(maxsize=1)
+def _load_wepppyo3_mofe_segmenter():
+    try:
+        module = importlib.import_module("wepppyo3.wepp_interchange")
+    except Exception as exc:
+        raise RuntimeError(
+            "MOFE segmentation requires `wepppyo3.wepp_interchange`; install/update wepppyo3 to continue."
+        ) from exc
+
+    segmenter = getattr(module, "segment_single_ofe_slope", None)
+    if not callable(segmenter):
+        raise RuntimeError(
+            "MOFE segmentation requires `wepppyo3.wepp_interchange.segment_single_ofe_slope`."
+        )
+
+    return segmenter
 
 
 class SlopeFile(object):
@@ -115,7 +137,48 @@ class SlopeFile(object):
         buffer_length=15,
         min_length=10,
         max_ofes=19):
+        segmenter = _load_wepppyo3_mofe_segmenter()
+        return int(
+            segmenter(
+                self.fname,
+                dst_fn=dst_fn,
+                target_length=float(target_length),
+                apply_buffer=bool(apply_buffer),
+                buffer_length=float(buffer_length),
+                min_length=float(min_length),
+                max_ofes=int(max_ofes),
+            )
+        )
 
+    def segmented_multiple_ofe_legacy(self,
+        dst_fn=None,
+        target_length=50,
+        apply_buffer=False,
+        buffer_length=15,
+        min_length=10,
+        max_ofes=19):
+        warnings.warn(
+            "SlopeFile.segmented_multiple_ofe_legacy is deprecated and kept only for parity/benchmark validation; "
+            "use the default wepppyo3-backed segmented_multiple_ofe production path.",
+            DeprecationWarning,
+            stacklevel=2,
+        )
+        return self._segmented_multiple_ofe_python(
+            dst_fn=dst_fn,
+            target_length=target_length,
+            apply_buffer=apply_buffer,
+            buffer_length=buffer_length,
+            min_length=min_length,
+            max_ofes=max_ofes,
+        )
+
+    def _segmented_multiple_ofe_python(self,
+        dst_fn=None,
+        target_length=50,
+        apply_buffer=False,
+        buffer_length=15,
+        min_length=10,
+        max_ofes=19):
         max_ofes = int(max_ofes)
 
         length = self.length

@@ -4,6 +4,7 @@ import hashlib
 import json
 import logging
 import os
+import time
 from typing import Any, Mapping
 
 import redis
@@ -12,6 +13,7 @@ from fastapi.responses import JSONResponse
 from rq import Queue
 
 from wepppy.config.redis_settings import RedisDB, redis_connection_kwargs
+from wepppy.nodb.base import NoDbAlreadyLockedError
 from wepppy.nodb.mods.geneva import Geneva, GenevaNoDbError, GenevaValidationError
 from wepppy.rq.geneva_rq import (
     GENEVA_RQ_TIMEOUT,
@@ -37,6 +39,8 @@ DEPLOYMENT_REVISION_ENV = "RQ_ENGINE_DEPLOYMENT_REVISION"
 GENEVA_READ_ALLOWED_SCOPES = frozenset({"rq:read", "rq:status"})
 GENEVA_ENQUEUE_SCOPES = ("rq:enqueue",)
 GENEVA_STATE_DOMAIN = "orchestration"
+GENEVA_STATE_LOCK_RETRY_ATTEMPTS = 3
+GENEVA_STATE_LOCK_RETRY_SECONDS = 0.2
 
 
 def _deployment_revision() -> str:
@@ -196,6 +200,38 @@ def _normalize_workflow_request(geneva: Geneva, payload: Mapping[str, Any]) -> d
     }
 
 
+def _best_effort_mark_job_queued(
+    *,
+    geneva: Geneva,
+    runid: str,
+    config: str,
+    job_id: str,
+    status_message: str,
+    action_name: str,
+) -> None:
+    for attempt in range(1, GENEVA_STATE_LOCK_RETRY_ATTEMPTS + 1):
+        try:
+            geneva.mark_job_queued(job_id, status_message=status_message)
+            return
+        except NoDbAlreadyLockedError as exc:
+            if attempt >= GENEVA_STATE_LOCK_RETRY_ATTEMPTS:
+                logger.warning(
+                    "rq-engine Geneva queued-state update skipped after lock retries: %s (%s)",
+                    action_name,
+                    exc,
+                    extra={"runid": runid, "config": config, "job_id": job_id},
+                )
+                return
+            logger.info(
+                "rq-engine Geneva state lock busy while queuing %s; retrying (%d/%d)",
+                action_name,
+                attempt,
+                GENEVA_STATE_LOCK_RETRY_ATTEMPTS,
+                extra={"runid": runid, "config": config, "job_id": job_id},
+            )
+            time.sleep(GENEVA_STATE_LOCK_RETRY_SECONDS)
+
+
 def _enqueue_geneva_job(
     *,
     runid: str,
@@ -214,7 +250,14 @@ def _enqueue_geneva_job(
         )
 
     job_id = str(job.id)
-    geneva.mark_job_queued(job_id, status_message=queued_status_message)
+    _best_effort_mark_job_queued(
+        geneva=geneva,
+        runid=runid,
+        config=config,
+        job_id=job_id,
+        status_message=queued_status_message,
+        action_name=getattr(func, "__name__", "geneva_enqueue"),
+    )
     return {
         "job_id": job_id,
         "status_url": f"/rq-engine/api/jobstatus/{job_id}",
@@ -256,12 +299,16 @@ def _enqueue_geneva_workflow_jobs(
     prepare_job_id = str(prepare_job.id)
     panel_job_id = str(panel_job.id)
     run_batch_job_id = str(run_batch_job.id)
-    geneva.mark_job_queued(
-        prepare_job_id,
+    _best_effort_mark_job_queued(
+        geneva=geneva,
+        runid=runid,
+        config=config,
+        job_id=prepare_job_id,
         status_message=(
             "Geneva workflow queued. Preparing HRUs, building frequency panel, "
             "then running Geneva batch."
         ),
+        action_name="run_geneva_workflow",
     )
     return {
         "job_id": prepare_job_id,

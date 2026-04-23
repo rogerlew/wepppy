@@ -819,10 +819,13 @@ class Disturbed(NoDbBase):
             ds = None  # Dereference to make sure all data is written
 
             try:
-                self.sbs_mode = 1
-                self.uniform_severity = value
-            except Exception:
-                # Fallback to direct assignment if setters are unavailable during init
+                with self.locked():
+                    # Persist both state fields in one transaction to avoid
+                    # split writes across independent setter dumps.
+                    self._sbs_mode = 1
+                    self._uniform_severity = int(value)
+            except AttributeError:
+                # Support detached test doubles that intentionally bypass NoDb wiring.
                 self._sbs_mode = 1
                 self._uniform_severity = int(value)
 

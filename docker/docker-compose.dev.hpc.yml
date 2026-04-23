@@ -51,6 +51,7 @@ services:
   weppcloud:
     <<: *wepppy-service
     container_name: weppcloud
+    restart: unless-stopped
     shm_size: "1g"
     secrets:
       - redis_password

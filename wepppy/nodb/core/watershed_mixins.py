@@ -20,6 +20,8 @@ import os
 import inspect
 import math
 import sys
+from concurrent.futures import FIRST_COMPLETED, wait
+from concurrent.futures.process import BrokenProcessPool
 
 from os.path import join as _join
 from os.path import exists as _exists
@@ -53,6 +55,7 @@ from wepppy.topo.watershed_abstraction.support import (
 )
 from wepppy.topo.watershed_abstraction.slope_file import mofe_distance_fractions
 from wepppy.topo.wbt import WhiteboxToolsTopazEmulator
+from wepppy.all_your_base import NCPU
 from wepppy.all_your_base.geo import read_raster
 from wepppy.all_your_base.geo.vrt import build_windowed_vrt_from_window
 from wepppy.nodb.duckdb_agents import get_watershed_chns_summary
@@ -60,7 +63,7 @@ from wepppy.nodb.duckdb_agents import get_watershed_chns_summary
 from wepppy.runtime_paths.parquet_sidecars import (
     pick_existing_parquet_path as _default_pick_existing_parquet_path,
 )
-from wepppy.nodb.base import nodb_setter
+from wepppy.nodb.base import createProcessPoolExecutor, nodb_setter
 from wepppy.nodb.redis_prep import RedisPrep, TaskEnum
 
 from wepppy.nodb.duckdb_agents import (
@@ -153,6 +156,23 @@ def _assign_mofe_ids_by_discharge_rank(discha_vals: np.ndarray, d_fractions: np.
         raise ValueError(f"MOFE rank assignment mismatch: assigned={start}, n_cells={n_cells}")
 
     return labels
+
+
+def _segment_hillslope_mofe_task(
+    task_args: Tuple[str, str, float, bool, float, int]
+) -> Tuple[str, int, float]:
+    """Run MOFE slope segmentation for a single hillslope."""
+    topaz_id, slp_fn, target_length, apply_buffer, buffer_length, max_ofes = task_args
+    started = time.time()
+    slope_file = SlopeFile(slp_fn)
+    n_segments = slope_file.segmented_multiple_ofe(
+        target_length=target_length,
+        apply_buffer=apply_buffer,
+        buffer_length=buffer_length,
+        max_ofes=max_ofes,
+    )
+    elapsed = round(time.time() - started, 3)
+    return topaz_id, int(n_segments), elapsed
 
 
 class WatershedOperationsMixin:
@@ -562,7 +582,6 @@ class WatershedOperationsMixin:
     def _build_multiple_ofe(self) -> None:
         func_name = inspect.currentframe().f_code.co_name  # type: ignore
         self.logger.info(f'{self.class_name}.{func_name}()')
-        _mofe_nsegments: Dict[str, int] = {}
         subwta, _, _ = read_raster(self.subwta, dtype=np.int32)
         sub_ids, sub_counts = np.unique(subwta, return_counts=True)
         hillslope_cell_counts = {
@@ -571,7 +590,9 @@ class WatershedOperationsMixin:
             if int(_id) > 0
         }
 
+        task_args_list: List[Tuple[str, str, float, bool, float, int]] = []
         for topaz_id, wat_ss in self.subs_summary.items():
+            topaz_id_s = str(topaz_id)
             not_top = not str(topaz_id).endswith("1")
             topaz_cell_count = hillslope_cell_counts.get(str(topaz_id), 0)
             if topaz_cell_count <= 0:
@@ -594,13 +615,152 @@ class WatershedOperationsMixin:
                 # Handle dict case
                 slp_fn = _join(self.wat_dir, wat_ss.get('slp_rel_path', wat_ss.get('fname', '')))
 
-            slp = SlopeFile(slp_fn)
-            _mofe_nsegments[topaz_id] = slp.segmented_multiple_ofe(
-                target_length=self.mofe_target_length,
-                apply_buffer=self.mofe_buffer and not_top,
-                buffer_length=self.mofe_buffer_length,
-                max_ofes=max_ofes,
+            task_args_list.append(
+                (
+                    topaz_id_s,
+                    slp_fn,
+                    float(self.mofe_target_length),
+                    bool(self.mofe_buffer and not_top),
+                    float(self.mofe_buffer_length),
+                    int(max_ofes),
+                )
             )
+
+        if not task_args_list:
+            self.logger.info("No hillslopes available for MOFE segmentation.")
+            with self.locked():
+                self._mofe_nsegments = {}
+            self._build_mofe_map()
+            return
+
+        cpu_count = os.cpu_count() or 1
+        ncpu_override = os.getenv("WEPPPY_NCPU")
+        max_workers = NCPU if ncpu_override else cpu_count
+        if max_workers < 1:
+            max_workers = 1
+        if ncpu_override:
+            if max_workers > NCPU:
+                max_workers = NCPU
+        elif max_workers > max(cpu_count, 20):
+            max_workers = max(cpu_count, 20)
+        max_workers = min(max_workers, len(task_args_list))
+
+        def _run_mofe_pool(
+            prefer_spawn: bool,
+        ) -> Tuple[bool, Optional[Exception], Dict[str, int]]:
+            try:
+                with createProcessPoolExecutor(
+                    max_workers=max_workers,
+                    logger=self.logger,
+                    prefer_spawn=prefer_spawn,
+                ) as executor:
+                    futures = [executor.submit(_segment_hillslope_mofe_task, args) for args in task_args_list]
+                    futures_n = len(futures)
+                    count = 0
+                    pending_futures = set(futures)
+                    last_progress_time = time.time()
+                    nsegments: Dict[str, int] = {}
+
+                    while pending_futures:
+                        done, pending_futures = wait(
+                            pending_futures, timeout=5, return_when=FIRST_COMPLETED
+                        )
+
+                        if not done:
+                            since_progress = time.time() - last_progress_time
+                            pending_count = len(pending_futures)
+                            if since_progress >= 60:
+                                self.logger.error(
+                                    "  MOFE segmentation tasks still pending after %.1fs; %s tasks waiting.",
+                                    round(since_progress, 1),
+                                    pending_count,
+                                )
+                            else:
+                                self.logger.info(
+                                    "  Waiting on MOFE segmentation tasks (pending=%s, %.1fs since last completion).",
+                                    pending_count,
+                                    round(since_progress, 1),
+                                )
+                            continue
+
+                        for future in done:
+                            try:
+                                topaz_id_s, n_segments, elapsed = future.result()
+                                count += 1
+                                nsegments[topaz_id_s] = int(n_segments)
+                                self.logger.info(
+                                    "  (%s/%s) Completed MOFE slope segmentation for topaz_id=%s in %ss",
+                                    count,
+                                    futures_n,
+                                    topaz_id_s,
+                                    elapsed,
+                                )
+                                last_progress_time = time.time()
+                            except BrokenProcessPool as exc:
+                                self.logger.error(
+                                    "  MOFE process pool terminated unexpectedly: %s",
+                                    exc,
+                                )
+                                for pending_future in pending_futures:
+                                    pending_future.cancel()
+                                return False, exc, {}
+                            except Exception as exc:
+                                self.logger.error(
+                                    "  A MOFE segmentation task failed with an error: %s",
+                                    exc,
+                                )
+                                for pending_future in pending_futures:
+                                    pending_future.cancel()
+                                return False, exc, {}
+
+                    return True, None, nsegments
+            except BrokenProcessPool as exc:
+                self.logger.error("  Failed to initialize MOFE process pool: %s", exc)
+                return False, exc, {}
+            except Exception as exc:
+                self.logger.error("  Unexpected error during MOFE process pool execution: %s", exc)
+                return False, exc, {}
+
+        def _run_mofe_sequential() -> Dict[str, int]:
+            total = len(task_args_list)
+            self.logger.warning("  Running MOFE segmentation sequentially")
+            nsegments: Dict[str, int] = {}
+            for idx, task_args in enumerate(task_args_list, start=1):
+                topaz_id_s, n_segments, elapsed = _segment_hillslope_mofe_task(task_args)
+                nsegments[topaz_id_s] = int(n_segments)
+                self.logger.info(
+                    "  (%s/%s) Completed MOFE slope segmentation for topaz_id=%s in %ss [sequential]",
+                    idx,
+                    total,
+                    topaz_id_s,
+                    elapsed,
+                )
+            return nsegments
+
+        run_concurrent = max_workers > 1 and len(task_args_list) > 1
+        if run_concurrent:
+            self.logger.info("  Submitting MOFE segmentation tasks to ProcessPoolExecutor")
+            success, failure_exc, _mofe_nsegments = _run_mofe_pool(prefer_spawn=True)
+            if not success and isinstance(failure_exc, BrokenProcessPool):
+                self.logger.warning(
+                    "  Retrying MOFE segmentation with fork-based executor after spawn failure"
+                )
+                success, failure_exc, _mofe_nsegments = _run_mofe_pool(prefer_spawn=False)
+
+            if not success:
+                if isinstance(failure_exc, BrokenProcessPool):
+                    self.logger.warning(
+                        "  Falling back to sequential MOFE segmentation after process pool failures"
+                    )
+                    _mofe_nsegments = _run_mofe_sequential()
+                else:
+                    if failure_exc is None:
+                        raise RuntimeError(
+                            "MOFE segmentation process pool failed without an exception payload."
+                        )
+                    raise failure_exc
+        else:
+            _mofe_nsegments = _run_mofe_sequential()
 
         with self.locked():
             self._mofe_nsegments = _mofe_nsegments
