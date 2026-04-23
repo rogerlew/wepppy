@@ -1,5 +1,6 @@
 import importlib
 import json
+import tempfile
 import zipfile
 from pathlib import Path
 from typing import Any, Callable, Optional
@@ -22,6 +23,177 @@ pytestmark = pytest.mark.microservice
 PAYLOAD_ZIP = Path(
     "tests/culverts/test_payloads/santee_10m_no_hydroenforcement/payload.zip"
 )
+FALLBACK_PAYLOAD_NAME = "santee_10m_no_hydroenforcement.payload.zip"
+FALLBACK_CRS = "EPSG:32611"
+FALLBACK_METADATA_PROJ4 = "+proj=utm +zone=11 +datum=WGS84 +units=m +no_defs"
+_FALLBACK_PAYLOAD_ZIP: Optional[Path] = None
+
+
+def _resolve_payload_zip() -> Path:
+    global _FALLBACK_PAYLOAD_ZIP
+    if PAYLOAD_ZIP.is_file():
+        return PAYLOAD_ZIP
+
+    if _FALLBACK_PAYLOAD_ZIP is None:
+        fallback_dir = Path(tempfile.gettempdir()) / "wepppy-test-payloads"
+        fallback_dir.mkdir(parents=True, exist_ok=True)
+        _FALLBACK_PAYLOAD_ZIP = fallback_dir / FALLBACK_PAYLOAD_NAME
+
+    if not _FALLBACK_PAYLOAD_ZIP.is_file():
+        _build_minimal_payload_zip(_FALLBACK_PAYLOAD_ZIP)
+
+    return _FALLBACK_PAYLOAD_ZIP
+
+
+def _build_minimal_payload_zip(dest: Path) -> Path:
+    rasterio = pytest.importorskip("rasterio")
+    import numpy as np
+    from rasterio.transform import from_origin
+
+    with tempfile.TemporaryDirectory(prefix="culvert-payload-") as tmp_dir:
+        payload_root = Path(tmp_dir)
+        topo_dir = payload_root / "topo"
+        culverts_dir = payload_root / "culverts"
+        topo_dir.mkdir(parents=True, exist_ok=True)
+        culverts_dir.mkdir(parents=True, exist_ok=True)
+
+        transform = from_origin(500000.0, 4100000.0, 10.0, 10.0)
+        dem_data = np.arange(9, dtype=np.float32).reshape((3, 3))
+        streams_data = np.zeros((3, 3), dtype=np.uint8)
+        streams_data[1, 1] = 1
+
+        _write_test_raster(
+            rasterio,
+            topo_dir / "breached_filled_DEM_UTM.tif",
+            dem_data,
+            transform,
+            FALLBACK_CRS,
+            nodata=0,
+        )
+        _write_test_raster(
+            rasterio,
+            topo_dir / "streams.tif",
+            streams_data,
+            transform,
+            FALLBACK_CRS,
+            nodata=0,
+        )
+
+        culvert_points = {
+            "type": "FeatureCollection",
+            "crs": {"type": "name", "properties": {"name": FALLBACK_CRS}},
+            "features": [
+                {
+                    "type": "Feature",
+                    "properties": {"Point_ID": "1"},
+                    "geometry": {"type": "Point", "coordinates": [500010.0, 4099990.0]},
+                },
+                {
+                    "type": "Feature",
+                    "properties": {"Point_ID": "2"},
+                    "geometry": {"type": "Point", "coordinates": [500020.0, 4099990.0]},
+                },
+            ],
+        }
+        watersheds = {
+            "type": "FeatureCollection",
+            "crs": {"type": "name", "properties": {"name": FALLBACK_CRS}},
+            "features": [
+                {
+                    "type": "Feature",
+                    "properties": {"Point_ID": "1"},
+                    "geometry": {
+                        "type": "Polygon",
+                        "coordinates": [
+                            [
+                                [500000.0, 4099980.0],
+                                [500020.0, 4099980.0],
+                                [500020.0, 4100000.0],
+                                [500000.0, 4100000.0],
+                                [500000.0, 4099980.0],
+                            ]
+                        ],
+                    },
+                },
+                {
+                    "type": "Feature",
+                    "properties": {"Point_ID": "2"},
+                    "geometry": {
+                        "type": "Polygon",
+                        "coordinates": [
+                            [
+                                [500010.0, 4099980.0],
+                                [500030.0, 4099980.0],
+                                [500030.0, 4100000.0],
+                                [500010.0, 4100000.0],
+                                [500010.0, 4099980.0],
+                            ]
+                        ],
+                    },
+                },
+            ],
+        }
+        metadata = {
+            "schema_version": "culvert-metadata-v1",
+            "crs": {"proj4": FALLBACK_METADATA_PROJ4},
+            "dem": {"path": "topo/breached_filled_DEM_UTM.tif"},
+            "streams": {"path": "topo/streams.tif"},
+            "culvert_points": {
+                "path": "culverts/culvert_points.geojson",
+                "point_id_field": "Point_ID",
+                "feature_count": 2,
+            },
+            "watersheds": {
+                "path": "culverts/watersheds.geojson",
+                "point_id_field": "Point_ID",
+            },
+            "culvert_count": 2,
+        }
+        model_parameters = {"schema_version": "culvert-model-params-v1"}
+
+        (culverts_dir / "culvert_points.geojson").write_text(
+            json.dumps(culvert_points), encoding="utf-8"
+        )
+        (culverts_dir / "watersheds.geojson").write_text(
+            json.dumps(watersheds), encoding="utf-8"
+        )
+        (payload_root / "metadata.json").write_text(json.dumps(metadata), encoding="utf-8")
+        (payload_root / "model-parameters.json").write_text(
+            json.dumps(model_parameters), encoding="utf-8"
+        )
+
+        dest.parent.mkdir(parents=True, exist_ok=True)
+        with zipfile.ZipFile(dest, "w", compression=zipfile.ZIP_DEFLATED) as archive:
+            for file_path in sorted(payload_root.rglob("*")):
+                if file_path.is_file():
+                    archive.write(file_path, file_path.relative_to(payload_root).as_posix())
+
+    return dest
+
+
+def _write_test_raster(
+    rasterio_module: Any,
+    path: Path,
+    data: Any,
+    transform: Any,
+    crs: str,
+    *,
+    nodata: int | float,
+) -> None:
+    height, width = data.shape
+    with rasterio_module.open(
+        path,
+        "w",
+        driver="GTiff",
+        height=height,
+        width=width,
+        count=1,
+        dtype=data.dtype,
+        crs=crs,
+        transform=transform,
+        nodata=nodata,
+    ) as dst:
+        dst.write(data, 1)
 
 
 def _issue_culvert_token(
@@ -118,7 +290,7 @@ def test_culvert_ingest_success(tmp_path: Path, monkeypatch: pytest.MonkeyPatch)
 
     monkeypatch.setattr(culvert_routes, "_enqueue_culvert_batch_job", fake_enqueue)
 
-    with PAYLOAD_ZIP.open("rb") as handle:
+    with _resolve_payload_zip().open("rb") as handle:
         with TestClient(rq_engine.app) as client:
             response = client.post(
                 "/api/culverts-wepp-batch/",
@@ -158,7 +330,7 @@ def test_culvert_submit_browse_token_downloads_batch_skeleton_zip(
 
     monkeypatch.setattr(culvert_routes, "_enqueue_culvert_batch_job", lambda _batch_uuid: "job-zip")
 
-    with PAYLOAD_ZIP.open("rb") as handle:
+    with _resolve_payload_zip().open("rb") as handle:
         with TestClient(rq_engine.app) as rq_client:
             submit_response = rq_client.post(
                 "/api/culverts-wepp-batch/",
@@ -532,7 +704,7 @@ def test_culvert_ingest_zip_sha256_mismatch_returns_400(
     monkeypatch.setenv("CULVERTS_ROOT", str(culverts_root))
     auth_headers = _auth_headers(monkeypatch)
 
-    with PAYLOAD_ZIP.open("rb") as handle:
+    with _resolve_payload_zip().open("rb") as handle:
         with TestClient(rq_engine.app) as client:
             response = client.post(
                 "/api/culverts-wepp-batch/",
@@ -552,9 +724,9 @@ def test_culvert_ingest_total_bytes_mismatch_returns_400(
     culverts_root = tmp_path / "culverts"
     monkeypatch.setenv("CULVERTS_ROOT", str(culverts_root))
     auth_headers = _auth_headers(monkeypatch)
-    total_bytes = PAYLOAD_ZIP.stat().st_size
+    total_bytes = _resolve_payload_zip().stat().st_size
 
-    with PAYLOAD_ZIP.open("rb") as handle:
+    with _resolve_payload_zip().open("rb") as handle:
         with TestClient(rq_engine.app) as client:
             response = client.post(
                 "/api/culverts-wepp-batch/",
@@ -599,7 +771,7 @@ def test_culvert_ingest_rejects_encrypted_zip_entries(
     monkeypatch.setenv("CULVERTS_ROOT", str(culverts_root))
     auth_headers = _auth_headers(monkeypatch)
     encrypted_zip = tmp_path / "encrypted.zip"
-    encrypted_zip.write_bytes(mark_zip_as_encrypted(PAYLOAD_ZIP.read_bytes()))
+    encrypted_zip.write_bytes(mark_zip_as_encrypted(_resolve_payload_zip().read_bytes()))
 
     with encrypted_zip.open("rb") as handle:
         with TestClient(rq_engine.app) as client:
@@ -647,7 +819,7 @@ def test_culvert_ingest_rejects_unsupported_compression(
     auth_headers = _auth_headers(monkeypatch)
     bad_zip = tmp_path / "unsupported-compression.zip"
 
-    with zipfile.ZipFile(PAYLOAD_ZIP) as src, zipfile.ZipFile(bad_zip, "w") as dst:
+    with zipfile.ZipFile(_resolve_payload_zip()) as src, zipfile.ZipFile(bad_zip, "w") as dst:
         for info in src.infolist():
             if info.is_dir():
                 continue
@@ -705,7 +877,7 @@ def test_culvert_ingest_rejects_archive_quota_abuse_with_413(
         ),
     )
 
-    with PAYLOAD_ZIP.open("rb") as handle:
+    with _resolve_payload_zip().open("rb") as handle:
         with TestClient(rq_engine.app) as client:
             response = client.post(
                 "/api/culverts-wepp-batch/",
@@ -729,7 +901,7 @@ def test_culvert_ingest_raster_mismatch_returns_400(
     rasterio = pytest.importorskip("rasterio")
     import numpy as np
 
-    with zipfile.ZipFile(PAYLOAD_ZIP) as src:
+    with zipfile.ZipFile(_resolve_payload_zip()) as src:
         streams_bytes = src.read("topo/streams.tif")
 
     with rasterio.io.MemoryFile(streams_bytes) as mem:
@@ -778,7 +950,7 @@ def _rewrite_payload_zip(
     tmp_path: Path, mutate: Callable[[str, bytes], Optional[bytes]]
 ) -> Path:
     dest = tmp_path / "payload.zip"
-    with zipfile.ZipFile(PAYLOAD_ZIP) as src, zipfile.ZipFile(dest, "w") as dst:
+    with zipfile.ZipFile(_resolve_payload_zip()) as src, zipfile.ZipFile(dest, "w") as dst:
         for info in src.infolist():
             if info.is_dir():
                 continue
@@ -794,7 +966,7 @@ def _rewrite_payload_zip_with_member(
     tmp_path: Path, member_name: str, payload: bytes
 ) -> Path:
     dest = tmp_path / "payload.zip"
-    with zipfile.ZipFile(PAYLOAD_ZIP) as src, zipfile.ZipFile(dest, "w") as dst:
+    with zipfile.ZipFile(_resolve_payload_zip()) as src, zipfile.ZipFile(dest, "w") as dst:
         for info in src.infolist():
             if info.is_dir():
                 continue
