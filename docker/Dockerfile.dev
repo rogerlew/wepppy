@@ -68,6 +68,8 @@ RUN set -eux; \
     rm -rf /var/lib/apt/lists/*
 
 ARG DOCKER_CLI_VERSION=26.1.4
+ARG WBT_REPO=https://github.com/rogerlew/weppcloud-wbt.git
+ARG WBT_REF=master
 ARG WEPPPYO3_REPO=https://github.com/wepp-in-the-woods/wepppyo3.git
 ARG WEPPPYO3_REF=main
 RUN curl -fsSL "https://download.docker.com/linux/static/stable/x86_64/docker-${DOCKER_CLI_VERSION}.tgz" -o /tmp/docker.tgz && \
@@ -104,6 +106,18 @@ RUN /opt/venv/bin/python -c "import duckdb; \
 # Vendor wepppyo3 as a fallback so dev startup does not depend solely on bind mounts.
 RUN set -eux; \
     mkdir -p /opt/vendor; \
+    if git clone --depth=1 --branch "${WBT_REF}" "${WBT_REPO}" /opt/vendor/weppcloud-wbt; then \
+        :; \
+    else \
+        git clone --depth=1 "${WBT_REPO}" /opt/vendor/weppcloud-wbt; \
+        cd /opt/vendor/weppcloud-wbt; \
+        git fetch --depth=1 origin "${WBT_REF}"; \
+        git checkout "${WBT_REF}"; \
+    fi; \
+    cd /opt/vendor/weppcloud-wbt; \
+    git lfs pull || true; \
+    rm -rf /opt/vendor/weppcloud-wbt/.git; \
+    test -f /opt/vendor/weppcloud-wbt/WBT/whitebox_tools.py; \
     if git clone --depth=1 --branch "${WEPPPYO3_REF}" "${WEPPPYO3_REPO}" /opt/vendor/wepppyo3; then \
         :; \
     else \
@@ -122,7 +136,7 @@ RUN SITE_PACKAGES="$(/opt/venv/bin/python -c 'import site, sys; sys.stdout.write
     printf '/workdir/wepppy/\n' > "${SITE_PACKAGES}/wepppy.pth" && \
     printf '/workdir/wepppy/services/cao/src/\n' > "${SITE_PACKAGES}/cao.pth" && \
     printf '/workdir/weppcloud2/\n' > "${SITE_PACKAGES}/weppcloud2.pth" && \
-    printf '/workdir/weppcloud-wbt/WBT/\n' > "${SITE_PACKAGES}/wbt.pth" && \
+    printf '/workdir/weppcloud-wbt/WBT/\n/opt/vendor/weppcloud-wbt/WBT/\n' > "${SITE_PACKAGES}/wbt.pth" && \
     printf '/workdir/f-esri/\n' > "${SITE_PACKAGES}/f_esri.pth" && \
     printf '/workdir/wepppyo3/release/linux/py312/\n/opt/vendor/wepppyo3/release/linux/py312/\n' > "${SITE_PACKAGES}/wepppyo3.pth"
     
