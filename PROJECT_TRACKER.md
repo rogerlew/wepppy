@@ -2,7 +2,7 @@
 > Kanban board for wepppy work packages and vision items
 
 **Last Updated**: 2026-04-23  
-**Active Packages**: 3  
+**Active Packages**: 4  
 **Quick Links**: [Work Packages Directory](docs/work-packages/) | [God-Tier Prompting Strategy](docs/god-tier-prompting-strategy.md)
 
 ## Purpose
@@ -37,7 +37,7 @@ This tracker makes all work visible at a glance, helping agents coordinate and a
 ### 2. Limit Work in Progress
 **Target**: 2-4 active packages maximum to maintain focus and ensure packages complete rather than stall.
 
-**Current WIP**: 3 packages ✅ **Within target range**
+**Current WIP**: 4 packages ✅ **Within target range**
 
 If WIP exceeds 4, prioritize completing existing packages before starting new ones. This prevents context switching overhead and ensures clean handoffs.
 
@@ -271,6 +271,11 @@ Currently active work packages. Limit to 2-4 packages to maintain focus.
 ## ✅ Done
 
 Recently completed work packages. Archived immediately upon completion.
+
+### Multi-OFE Landuse Pair-Count Optimization via wepppyo3 Raster Characteristics (2026-04-23)
+**Status**: ✅ **COMPLETE**  
+**Link**: [docs/work-packages/20260423_mofe_landuse_pair_counts_wepppyo3/](docs/work-packages/20260423_mofe_landuse_pair_counts_wepppyo3/)  
+**Summary**: Closed end-to-end with new production API `wepppyo3.raster_characteristics.count_intersecting_raster_key_pairs` (explicit read/shape failure contracts), canonical release export update (`release/linux/py312`), and WEPPpy `Landuse.build_managements()` multi-OFE area path cut over from repeated pairwise `np.where` scans to Rust one-pass pair counts while preserving area/pct semantics and failure propagation. Validation passed in both repos (`cargo test -p raster_characteristics_rust`: `2 passed`; wepppyo3 raster-characteristics pytest: `5 passed`; targeted WEPPpy gates: `9 passed` across landuse/daymet/omni suites). Benchmark/parity artifacts were captured on the required five-run matrix in isolated temp dirs: parity `match` on all runs; timing deltas were `-88.67%`, `+144.42%`, `-96.34%`, `-95.41%`, `-67.56%` (the positive delta is the required non-MOFE run `objectionable-sublimate`, executed with documented synthetic isolated MOFE map + derived single-segment pairing due missing source MOFE inputs).
 
 ### MOFE Map Migration to wepppyo3 (Topaz Pre-Index + One-Pass Rank Assignment) (2026-04-23)
 **Status**: ✅ **COMPLETE**  

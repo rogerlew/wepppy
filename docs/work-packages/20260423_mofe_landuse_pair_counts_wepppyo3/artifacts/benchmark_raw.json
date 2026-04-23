@@ -1,0 +1,166 @@
+{
+  "generated_at_utc": "2026-04-23T17:21:44+00:00",
+  "iterations_per_method": 6,
+  "runs": [
+    {
+      "run_id": "moth-eaten-blackhead",
+      "url": "https://wc.bearhive.duckdns.org/weppcloud/runs/moth-eaten-blackhead/disturbed9002-wbt-mofe/",
+      "local_root": "/wc1/runs/mo/moth-eaten-blackhead",
+      "temp_root": "/tmp/moth-eaten-blackhead-pair-count-jj20i2ux",
+      "synthesized_mofe_map": false,
+      "derived_domlc_pairs": false,
+      "iterations": 6,
+      "pair_count": 955,
+      "management_count": 4,
+      "baseline_samples_s": [
+        0.3514974741265178,
+        0.3456969237886369,
+        0.36295056669041514,
+        0.34794875234365463,
+        0.36544681526720524,
+        0.36107415379956365
+      ],
+      "baseline_mean_s": 0.3557691143359989,
+      "baseline_std_s": 0.008416989855471239,
+      "rust_samples_s": [
+        0.05804923130199313,
+        0.035340712405741215,
+        0.03752184100449085,
+        0.03520846227183938,
+        0.04015264241024852,
+        0.03560079541057348
+      ],
+      "rust_mean_s": 0.04031228080081443,
+      "rust_std_s": 0.008892412521019997,
+      "delta_pct": -88.66897682333877
+    },
+    {
+      "run_id": "objectionable-sublimate",
+      "url": "https://wc.bearhive.duckdns.org/weppcloud/runs/objectionable-sublimate/disturbed9002_wbt/",
+      "local_root": "/wc1/runs/ob/objectionable-sublimate",
+      "temp_root": "/tmp/objectionable-sublimate-pair-count-w_0aplui",
+      "synthesized_mofe_map": true,
+      "derived_domlc_pairs": true,
+      "iterations": 6,
+      "pair_count": 60,
+      "management_count": 2,
+      "baseline_samples_s": [
+        0.013310275971889496,
+        0.013246454298496246,
+        0.013220176100730896,
+        0.01324725616723299,
+        0.013081884942948818,
+        0.013045473024249077
+      ],
+      "baseline_mean_s": 0.013191920084257921,
+      "baseline_std_s": 0.00010430441497246657,
+      "rust_samples_s": [
+        0.03187796287238598,
+        0.03235854720696807,
+        0.03212505020201206,
+        0.03284810297191143,
+        0.03228610381484032,
+        0.031967838760465384
+      ],
+      "rust_mean_s": 0.032243934304763876,
+      "rust_std_s": 0.00034762952466093033,
+      "delta_pct": 144.42184381666286
+    },
+    {
+      "run_id": "cochlear-beriberi",
+      "url": "https://wc.bearhive.duckdns.org/weppcloud/runs/cochlear-beriberi/disturbed9002-mofe/",
+      "local_root": "/wc1/runs/co/cochlear-beriberi",
+      "temp_root": "/tmp/cochlear-beriberi-pair-count-ju8oqvld",
+      "synthesized_mofe_map": false,
+      "derived_domlc_pairs": false,
+      "iterations": 6,
+      "pair_count": 2391,
+      "management_count": 6,
+      "baseline_samples_s": [
+        1.3272789092734456,
+        1.2785426923073828,
+        1.274386233650148,
+        1.3095490471459925,
+        1.2893439582549036,
+        1.286577438004315
+      ],
+      "baseline_mean_s": 1.2942797131060313,
+      "baseline_std_s": 0.020244458875905327,
+      "rust_samples_s": [
+        0.049031730741262436,
+        0.045724187046289444,
+        0.048384256195276976,
+        0.04621837427839637,
+        0.04924776731058955,
+        0.04574762098491192
+      ],
+      "rust_mean_s": 0.04739232275945445,
+      "rust_std_s": 0.0016721328102249418,
+      "delta_pct": -96.33832453065948
+    },
+    {
+      "run_id": "ordained-incentive",
+      "url": "https://wc.bearhive.duckdns.org/weppcloud/runs/ordained-incentive/disturbed9002-wbt-mofe/",
+      "local_root": "/wc1/runs/or/ordained-incentive",
+      "temp_root": "/tmp/ordained-incentive-pair-count-jm2titap",
+      "synthesized_mofe_map": false,
+      "derived_domlc_pairs": false,
+      "iterations": 6,
+      "pair_count": 1037,
+      "management_count": 8,
+      "baseline_samples_s": [
+        1.1233710190281272,
+        1.120065152645111,
+        1.115190960932523,
+        1.1021652361378074,
+        1.101230887696147,
+        1.1193868210539222
+      ],
+      "baseline_mean_s": 1.1135683462489396,
+      "baseline_std_s": 0.00956067171469913,
+      "rust_samples_s": [
+        0.05208600591868162,
+        0.04964475613087416,
+        0.05272328108549118,
+        0.049486407078802586,
+        0.05201239371672273,
+        0.05068458104506135
+      ],
+      "rust_mean_s": 0.051106237495938935,
+      "rust_std_s": 0.001366269940565134,
+      "delta_pct": -95.41058816299058
+    },
+    {
+      "run_id": "uninsured-deformation",
+      "url": "https://wc.bearhive.duckdns.org/weppcloud/runs/uninsured-deformation/disturbed9002-wbt-mofe/",
+      "local_root": "/wc1/runs/un/uninsured-deformation",
+      "temp_root": "/tmp/uninsured-deformation-pair-count-dpdsl68m",
+      "synthesized_mofe_map": false,
+      "derived_domlc_pairs": false,
+      "iterations": 6,
+      "pair_count": 284,
+      "management_count": 1,
+      "baseline_samples_s": [
+        0.1119095329195261,
+        0.11765608284622431,
+        0.1098942388780415,
+        0.10918173333629966,
+        0.11274300003424287,
+        0.11287709977477789
+      ],
+      "baseline_mean_s": 0.11237694796485205,
+      "baseline_std_s": 0.0029948331774255,
+      "rust_samples_s": [
+        0.03675863612443209,
+        0.035031395964324474,
+        0.03534829709678888,
+        0.03464688826352358,
+        0.04052252694964409,
+        0.03644478786736727
+      ],
+      "rust_mean_s": 0.03645875537768006,
+      "rust_std_s": 0.0021521011997848154,
+      "delta_pct": -67.55673112862684
+    }
+  ]
+}

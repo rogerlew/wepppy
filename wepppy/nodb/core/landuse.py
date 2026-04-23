@@ -112,6 +112,7 @@ __all__ = [
 import wepppyo3
 from wepppyo3.raster_characteristics import identify_mode_single_raster_key
 from wepppyo3.raster_characteristics import identify_mode_intersecting_raster_keys
+from wepppyo3.raster_characteristics import count_intersecting_raster_key_pairs
 
 _GDAL_OPEN_PROBE: Optional[Callable[[str], bool]] = None
 _GDAL_OPEN_PROBE_INIT = False
@@ -1313,11 +1314,6 @@ class Landuse(NoDbBase):
             cell2 = ron.cellsize ** 2
             domlc_d = self.domlc_d
 
-            subwta, transform, proj = read_raster(watershed.subwta, dtype=np.int32)
-            if self.multi_ofe:
-                mofe_map, transform_m, proj_m = \
-                    read_raster(watershed.mofe_map, dtype=np.int32)
-
             # create a dictionary of management keys and
             # wepppy.landcover.ManagementSummary values
 
@@ -1352,12 +1348,19 @@ class Landuse(NoDbBase):
                 self.domlc_mofe_d = None
 
             if self.multi_ofe and self.domlc_mofe_d is not None:
+                pair_counts = count_intersecting_raster_key_pairs(
+                    key_fn=watershed.subwta,
+                    key2_fn=watershed.mofe_map,
+                    ignore_channels=False,
+                    ignore_keys=None,
+                    ignore_keys2=None,
+                )
                 total_area = 0.0
                 for topaz_id in self.domlc_mofe_d:
+                    topaz_pair_counts = pair_counts.get(str(topaz_id), {})
                     for _id, k in self.domlc_mofe_d[topaz_id].items():
-                        area = len(np.where((subwta == int(topaz_id)) &
-                                            (mofe_map == int(_id)))[0])
-                        area *= cell2 / 10000
+                        area_cells = topaz_pair_counts.get(str(_id), 0)
+                        area = float(area_cells) * cell2 / 10000
 
                         if k not in managements:
                             man = get_management_summary(k, _map)

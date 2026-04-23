@@ -2675,6 +2675,7 @@ def test_stream_order_contrast_limit_enforced(tmp_path, omni_module, monkeypatch
     _ensure_package("wepppyo3", tmp_path)
     rc_stub = types.ModuleType("wepppyo3.raster_characteristics")
     rc_stub.identify_mode_single_raster_key = lambda **kwargs: {"10": 1}
+    rc_stub.count_intersecting_raster_key_pairs = lambda **kwargs: {}
     monkeypatch.setitem(sys.modules, "wepppyo3.raster_characteristics", rc_stub)
     sys.modules["wepppyo3"].raster_characteristics = rc_stub
 
@@ -2751,6 +2752,7 @@ def test_stream_order_contrasts_grouping_and_skip(tmp_path, omni_module, monkeyp
     _ensure_package("wepppyo3", tmp_path)
     rc_stub = types.ModuleType("wepppyo3.raster_characteristics")
     rc_stub.identify_mode_single_raster_key = lambda **kwargs: {"10": 2, "20": 1, "30": 1}
+    rc_stub.count_intersecting_raster_key_pairs = lambda **kwargs: {}
     monkeypatch.setitem(sys.modules, "wepppyo3.raster_characteristics", rc_stub)
     sys.modules["wepppyo3"].raster_characteristics = rc_stub
 
@@ -2890,6 +2892,7 @@ def test_build_contrasts_stream_order_stale_rebuild_decisions(
     _ensure_package("wepppyo3", tmp_path)
     rc_stub = types.ModuleType("wepppyo3.raster_characteristics")
     rc_stub.identify_mode_single_raster_key = lambda **kwargs: {"10": 1}
+    rc_stub.count_intersecting_raster_key_pairs = lambda **kwargs: {}
     monkeypatch.setitem(sys.modules, "wepppyo3.raster_characteristics", rc_stub)
     sys.modules["wepppyo3"].raster_characteristics = rc_stub
 

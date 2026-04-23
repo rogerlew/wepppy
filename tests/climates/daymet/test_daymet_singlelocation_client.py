@@ -323,6 +323,8 @@ if not wepppyo3_available:
         raster_characteristics_module.identify_median_single_raster_key = lambda *args, **kwargs: None
     if not hasattr(raster_characteristics_module, "identify_median_intersecting_raster_keys"):
         raster_characteristics_module.identify_median_intersecting_raster_keys = lambda *args, **kwargs: None
+    if not hasattr(raster_characteristics_module, "count_intersecting_raster_key_pairs"):
+        raster_characteristics_module.count_intersecting_raster_key_pairs = lambda *args, **kwargs: None
 
     if "wepppyo3.wepp_viz" not in sys.modules:
         wepp_viz_module = types.ModuleType("wepppyo3.wepp_viz")
