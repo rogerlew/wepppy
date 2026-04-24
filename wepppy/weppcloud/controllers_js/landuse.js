@@ -345,6 +345,15 @@ var Landuse = (function () {
                     landuseEvents.emit("landuse:mapping:completed", payload || {});
                 }
             }
+            if (normalized === "JOB:ERROR" && landuse.poll_completion_event === LANDUSE_MAPPING_COMPLETION_EVENT) {
+                var failedJobId = parseTriggerJobId(payload);
+                var expectedMappingJobId = landuse._mapping_job_id || null;
+                if (expectedMappingJobId && failedJobId && failedJobId !== expectedMappingJobId) {
+                    return baseTriggerEvent(eventName, payload);
+                }
+                landuse.disconnect_status_stream(landuse);
+                landuse.report();
+            }
 
             return baseTriggerEvent(eventName, payload);
         };

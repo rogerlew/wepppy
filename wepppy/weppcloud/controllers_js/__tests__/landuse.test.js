@@ -593,6 +593,35 @@ describe("Landuse controller", () => {
         expect(landuse.report).toHaveBeenCalledTimes(1);
     });
 
+    test("mapping job failure refreshes report for the active mapping job", () => {
+        jest.spyOn(landuse, "report").mockImplementation(() => {});
+        landuse.poll_completion_event = "LANDUSE_MODIFY_MAPPING_TASK_COMPLETED";
+        landuse._mapping_job_id = "job-map";
+
+        landuse.triggerEvent("job:error", {
+            job_id: "job-map",
+            status: "failed",
+            source: "poll"
+        });
+
+        expect(baseInstance.disconnect_status_stream).toHaveBeenCalledWith(landuse);
+        expect(landuse.report).toHaveBeenCalledTimes(1);
+    });
+
+    test("mapping job failure ignores stale job ids when a newer mapping job is active", () => {
+        jest.spyOn(landuse, "report").mockImplementation(() => {});
+        landuse.poll_completion_event = "LANDUSE_MODIFY_MAPPING_TASK_COMPLETED";
+        landuse._mapping_job_id = "job-new";
+
+        landuse.triggerEvent("job:error", {
+            job_id: "job-old",
+            status: "failed",
+            source: "poll"
+        });
+
+        expect(landuse.report).not.toHaveBeenCalled();
+    });
+
     test("out-of-order mapping enqueue responses keep latest job id", async () => {
         const deferred = () => {
             let resolve;
