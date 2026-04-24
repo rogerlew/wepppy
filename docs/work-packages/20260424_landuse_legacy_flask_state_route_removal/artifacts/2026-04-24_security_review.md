@@ -53,6 +53,7 @@
 - **Post-closure custom-map description integrity remediation gate**: PASS (2026-04-24 08:00 UTC)
 - **Post-closure title-row runid-link parity gate**: PASS (2026-04-24 08:08 UTC)
 - **Post-closure cross-package review disposition gate**: PASS (2026-04-24 08:53 UTC)
+- **Post-closure map-description edit/save parity gate**: PASS (2026-04-24 16:56 UTC)
 
 ## Findings
 
@@ -72,6 +73,7 @@
 | SEC-23 | High | Unknown token-class authorization | Landuse read routes and run-access checks did not default-deny unknown token classes. | Enforce token-class allowlist for read claims and default-deny unknown classes in `authorize_run_access`; add regressions. | Closed |
 | SEC-24 | Medium | Error payload information disclosure | Mapping failures could expose filesystem path details (`map_path`) in error responses. | Redact `map_path` from details and normalize map-load error messages on Flask/rq-engine surfaces; add regressions. | Closed |
 | SEC-25 | Medium | Contract parity drift | `landuse-map/save` OpenAPI/schema descriptors lagged runtime precondition behavior (`428`, header/body hash), and `set-landuse-mode` required field list drifted from handler behavior. | Update route metadata + schema defaults + contract rules and add parity tests. | Closed |
+| SEC-26 | Medium | Map description data integrity | `/landuse-map` row description edits were not persisted by save payloads, causing stale/misleading labels in summary/report outputs. | Extend save contract for optional row `description`, validate and persist edits, include description in lookup hash, and add regressions. | Closed |
 
 ## Surface Checks
 
@@ -93,6 +95,7 @@
 - [x] Render-time landuse reads no longer create unrecoverable project-load failures for stale system map state.
 - [x] Stale-system-map read recovery no longer performs unlocked writeback that can trigger stale-write hard failures.
 - [x] Custom-map changed-key descriptions no longer retain stale base-map labels that mask applied management overrides.
+- [x] Landuse-map edited row descriptions now persist through save/reload with optimistic-concurrency preconditions covering description content.
 
 ### 5) Agentic Tooling and Discovery Surfaces
 - [x] Docs/schemas accurately reflect final route ownership.
@@ -101,7 +104,7 @@
 ## Validation Evidence
 
 Executed command evidence:
-- `wctl run-pytest tests/weppcloud/routes/test_landuse_bp.py --maxfail=1` -> `21 passed`.
+- `wctl run-pytest tests/weppcloud/routes/test_landuse_bp.py --maxfail=1` -> `22 passed`.
 - `wctl run-pytest tests/weppcloud/routes/test_pure_controls_render.py --maxfail=1` -> `46 passed`.
 - `wctl run-pytest tests/microservices/test_rq_engine_landuse_routes.py --maxfail=1` -> `50 passed`.
 - `wctl run-pytest tests/microservices/test_rq_engine_schema_defaults_routes.py --maxfail=1` -> `54 passed`.
@@ -133,8 +136,9 @@ Caller audit evidence:
 - Run-page recoverability risk is closed by `run_0` stale-system-map recovery wrappers for landuse read paths with route-level regression coverage.
 - Stale-write race risk is closed by in-memory-only unlocked stale cleanup and route-level stale-write retry coverage at the `run_0` boundary.
 - Custom-map description integrity risk is closed by changed-key description normalization in map-save and build-time relabeling for legacy stale custom-map description drift.
+- Map-description edit/save parity risk is closed by explicit row-description persistence in rq-engine save contract plus UI/rq-engine regression coverage.
 
 ## Sign-off
 
 - **Security reviewer**: Codex
-- **Sign-off date**: 2026-04-24 08:53 UTC
+- **Sign-off date**: 2026-04-24 16:56 UTC

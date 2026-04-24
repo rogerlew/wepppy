@@ -3079,6 +3079,7 @@ def _build_run_operations(runtime: RuntimeState) -> dict[str, dict[str, Any]]:
                                 "properties": {
                                     "key": {"type": "string"},
                                     "management_file": {"type": "string"},
+                                    "description": {"type": "string"},
                                 },
                                 "required": ["key", "management_file"],
                                 "additional_properties": True,

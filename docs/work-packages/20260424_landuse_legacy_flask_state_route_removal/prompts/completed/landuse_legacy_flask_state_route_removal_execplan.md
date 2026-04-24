@@ -27,6 +27,7 @@ After this package, deprecated Flask landuse state/mutator compatibility routes 
 - [x] (2026-04-24 08:00 UTC) Applied custom-map description integrity follow-on: changed map assignments now normalize labels (example key `43` -> `Moderate Severity Fire`) and legacy stale custom-map descriptions are relabeled during build summary generation.
 - [x] (2026-04-24 08:08 UTC) Applied post-closure control-shell polish: added run-home `runid` link to the left of `wc-control__title` on `/landuse-user-defined` and `/landuse-map` using shared title-meta styling patterns, with render regression coverage.
 - [x] (2026-04-24 08:53 UTC) Disposed cross-package review findings with rq-engine auth/input hardening (mapping-selection allowlist, unknown token-class denial), mapping error path redaction, schema/OpenAPI parity fixes (`428` + precondition header/body), and added regressions (including landuse map inline save-header coverage).
+- [x] (2026-04-24 16:56 UTC) Applied post-closure landuse-map description edit/save parity remediation: map rows now submit/persist editable `Description` values, optimistic-concurrency hash includes descriptions, and schema/contract/tests were updated with full required validation rerun.
 
 ## Surprises & Discoveries
 
@@ -59,6 +60,9 @@ After this package, deprecated Flask landuse state/mutator compatibility routes 
 
 - Observation: Cross-package review surfaced additional hardening gaps not covered by prior closure matrix: `build-landuse` mapping selection accepted path-like values, read routes accepted unknown token classes, and mapping error details could expose filesystem `map_path`.
   Evidence: code/QA/security review findings disposition run on 2026-04-24.
+
+- Observation: Landuse map page rendered `Description` as static text and save payload omitted description values, so operator edits were lost and summary/report labels reverted to stale text.
+  Evidence: operator smoke report (`save descriptions resets the description to before the edited version`) and template/save payload inspection in `landuse_map.htm` + rq-engine `landuse-map/save`.
 
 ## Decision Log
 
@@ -118,6 +122,10 @@ After this package, deprecated Flask landuse state/mutator compatibility routes 
   Rationale: Findings were localized to the already-touched landuse rq-engine/flask surfaces and could be resolved with targeted contract-safe patches and immediate regression coverage.
   Date/Author: 2026-04-24 / Codex.
 
+- Decision: Allow `landuse-map/save` rows to carry optional edited `description` values and persist them explicitly for unchanged/changed management-file rows (while preserving strict validation and no fallback behavior).
+  Rationale: Keeps report/summary labels operator-controlled and stable, resolves edit-loss regression, and preserves optimistic concurrency semantics by hashing description content in lookup fingerprint.
+  Date/Author: 2026-04-24 / Codex.
+
 ## Outcomes & Retrospective
 
 Final removed Flask compatibility routes:
@@ -139,9 +147,9 @@ Caller-audit disposition:
 - `tests/weppcloud/routes/test_landuse_bp.py` intentionally keeps negative assertions that removed routes return `404`.
 
 Validation evidence:
-- `tests/weppcloud/routes/test_landuse_bp.py`: `21 passed`
+- `tests/weppcloud/routes/test_landuse_bp.py`: `22 passed`
 - `tests/weppcloud/routes/test_pure_controls_render.py`: `46 passed`
-- `tests/microservices/test_rq_engine_landuse_routes.py`: `50 passed` (includes mapping-selection hardening, row validation, redaction, read token-class, and header-precondition regressions)
+- `tests/microservices/test_rq_engine_landuse_routes.py`: `50 passed` (includes mapping-selection hardening, row validation, description-edit persistence, redaction, read token-class, and header-precondition regressions)
 - `tests/microservices/test_rq_engine_schema_defaults_routes.py`: `54 passed`
 - `tests/microservices/test_rq_engine_openapi_contract.py`: `10 passed`
 - `tests/microservices/test_rq_engine_auth.py`: `32 passed`
@@ -264,3 +272,4 @@ Package is accepted only when:
 - 2026-04-24 / Codex: Added custom-map description integrity closure notes (changed-key map-save normalization + build-time stale-description relabeling).
 - 2026-04-24 / Codex: Added runid-link title-meta parity polish for landuse catalog/map pages with render regression coverage.
 - 2026-04-24 / Codex: Added cross-package review findings disposition updates (auth/input hardening, redaction, schema/openapi parity, and regression evidence).
+- 2026-04-24 / Codex: Added post-closure map-description edit/save parity updates (template/editability, rq-engine persistence, schema/contract sync, and validation evidence refresh).

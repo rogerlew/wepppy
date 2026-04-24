@@ -60,6 +60,7 @@ _LANDUSE_ZIP_UPLOAD_MAX_BYTES = 50 * 1024 * 1024
 _LANDUSE_ZIP_EXTRACTED_MAX_BYTES = 250 * 1024 * 1024
 _LANDUSE_ZIP_MEMBER_LIMIT = 500
 _LANDUSE_MANAGEMENT_FILE_KEY_MAX_LENGTH = 512
+_LANDUSE_MAP_DESCRIPTION_MAX_LENGTH = 512
 _LANDUSE_MAP_MISSING_CODE = "LANDUSE_CUSTOM_MAP_MISSING"
 _LANDUSE_MAP_INVALID_CODE = "LANDUSE_CUSTOM_MAP_INVALID"
 _MACOS_ARCHIVE_METADATA_DIR = "__MACOSX"
@@ -446,6 +447,7 @@ def _build_landuse_map_snapshot_payload(landuse: Landuse, wd: str) -> dict[str, 
             {
                 "key": row_key,
                 "management_file": management_file,
+                "description": row["description"],
             }
         )
 

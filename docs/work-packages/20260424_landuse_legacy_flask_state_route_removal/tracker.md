@@ -6,8 +6,8 @@
 
 **Timezone**: UTC  
 **Started**: 2026-04-24 06:14 UTC  
-**Current phase**: Complete / Closure (post-closure smoke + UX/state-integrity + load-path + stale-write + custom-map description integrity + cross-package review disposition remediations applied)  
-**Last updated**: 2026-04-24 08:53 UTC  
+**Current phase**: Complete / Closure (post-closure smoke + UX/state-integrity + load-path + stale-write + custom-map description integrity + cross-package review disposition + map-description edit/save parity remediations applied)  
+**Last updated**: 2026-04-24 16:56 UTC  
 **Next milestone**: None (package closed).  
 **Security impact**: `high`  
 **Dedicated security review**: `yes`  
@@ -47,6 +47,7 @@
 - [x] Applied post-closure custom-map description integrity remediation so changed map assignments persist/compute management labels (for example key `43` -> `Moderate Severity Fire`) instead of stale base-map descriptions (2026-04-24 08:00 UTC).
 - [x] Applied post-closure runid-link title parity remediation so `/landuse-user-defined` and `/landuse-map` render a run-home `runid` link to the left of `wc-control__title`, matching existing editor pages (2026-04-24 08:08 UTC).
 - [x] Dispatched cross-package code/QA/security reviews for the four landuse packages and disposed findings with rq-engine auth/input hardening, redaction, schema-contract parity, and added regressions (2026-04-24 08:53 UTC).
+- [x] Applied post-closure map-description edit/save parity remediation so `/landuse-map` descriptions are editable and persist through save/reload/report paths via rq-engine `landuse-map/save`, with schema/contract updates and full required validation rerun (2026-04-24 16:56 UTC).
 
 ## Timeline
 
@@ -66,6 +67,7 @@
 - **2026-04-24 08:00 UTC** - Closed custom-map description integrity follow-on: map-save now updates changed-key descriptions from selected management labels and build-time summaries relabel legacy stale custom-map descriptions against base-map drift.
 - **2026-04-24 08:08 UTC** - Closed title-row parity follow-on: landuse catalog/map pages now include run-home `runid` link in the shared control meta slot and ship render regression coverage.
 - **2026-04-24 08:53 UTC** - Closed cross-package review disposition findings: path-like mapping-selection rejection, unknown token-class default-deny for read paths and run access, map-path redaction in mapping errors, OpenAPI/schema parity for `428` + `if_match` header/body contract, and added regression coverage (including map inline save-header behavior).
+- **2026-04-24 16:56 UTC** - Closed map-description edit/save parity follow-on: `/landuse-map` now submits/persists editable row descriptions, lookup hash includes description content for stale-write detection, and schema/contract docs plus regressions were updated.
 
 ## Decisions Log
 
@@ -236,6 +238,19 @@
 
 **Impact**: Removes identified auth/input exposure gaps, restores route/schema contract parity, and keeps the security artifact at no unresolved medium/high findings.
 
+---
+
+### 2026-04-24 16:56 UTC: Persist editable `/landuse-map` descriptions in save contract
+**Context**: Operator edits to `Description` in landuse map UI were not persisted; save/reset behavior reverted labels and made summary/report interpretation misleading.
+
+**Options considered**:
+1. Keep description as derived/static text and only persist management-file changes.
+2. Extend `landuse-map/save` rows to accept optional edited descriptions, persist explicit edits, and include description in optimistic-concurrency hash.
+
+**Decision**: Option 2.
+
+**Impact**: Restores operator-controlled description integrity across save/reload/report surfaces while preserving explicit validation, precondition checks, and rq-engine mutator ownership.
+
 ## Risks and Issues
 
 | Risk | Severity | Likelihood | Mitigation | Status |
@@ -254,6 +269,7 @@
 | Landuse read routes could accept unknown token classes | High | Medium | Enforce token-class allowlist on read claims and default-deny unknown classes in `authorize_run_access`; add regressions | Closed (`tests/microservices/test_rq_engine_landuse_routes.py`, `tests/microservices/test_rq_engine_auth.py` + validation rerun passed) |
 | Mapping error payloads could leak filesystem paths (`map_path`) | Medium | Medium | Redact `map_path` details and normalize map-load error messaging on Flask/rq-engine surfaces; add regressions | Closed (`tests/weppcloud/routes/test_landuse_bp.py`, `tests/microservices/test_rq_engine_landuse_routes.py` + validation rerun passed) |
 | `landuse-map/save` schema/OpenAPI parity drift for precondition contract (`428`, header/body) | Medium | Medium | Update route responses, schema defaults, and contract rules; add header-precondition regression | Closed (`tests/microservices/test_rq_engine_schema_defaults_routes.py`, `tests/microservices/test_rq_engine_openapi_contract.py`, `tests/microservices/test_rq_engine_landuse_routes.py` + validation rerun passed) |
+| `/landuse-map` description edits could be lost on save, leaving stale summary/report labels | Medium | High | Submit optional row `description`, validate/persist explicit edits, include description in lookup hash, and add UI+rq-engine regressions | Closed (`wepppy/weppcloud/controllers_js/__tests__/landuse_map_inline.test.js`, `tests/microservices/test_rq_engine_landuse_routes.py` + full required matrix rerun passed) |
 
 ## Verification Checklist
 
@@ -273,6 +289,7 @@
 - [x] Landuse read routes + run-access checks reject unknown token classes with explicit `403 forbidden`.
 - [x] Mapping-load error responses redact filesystem `map_path` details on both Flask and rq-engine surfaces.
 - [x] `landuse-map/save` route/schema/OpenAPI precondition contracts are aligned (`428` + header/body hash support).
+- [x] `/landuse-map` `Description` cells are editable and saved descriptions persist through `landuse-map/save` for unchanged/changed management-file rows.
 
 ### Caller and Contract Integrity
 - [x] In-repo caller audit confirms no production references to removed endpoints.
@@ -349,6 +366,7 @@
 - `wctl run-pytest tests/microservices/test_rq_engine_openapi_contract.py --maxfail=1` -> `10 passed`.
 - `wctl run-npm test -- --runTestsByPath wepppy/weppcloud/controllers_js/__tests__/landuse.test.js` -> `20 passed`.
 - `wctl run-npm test -- --runTestsByPath wepppy/weppcloud/controllers_js/__tests__/landuse_modify_gl.test.js` -> `3 passed`.
+- `wctl run-npm test -- wepppy/weppcloud/controllers_js/__tests__/landuse_map_inline.test.js` -> `2 passed`.
 - `wctl doc-lint --path docs/work-packages/20260424_landuse_legacy_flask_state_route_removal --path wepppy/weppcloud/routes/nodb_api/README.md --path docs/schemas/rq-engine-agent-api-contract.md --path docs/schemas/rq-response-contract.md --path docs/schemas/weppcloud-csrf-contract.md --path PROJECT_TRACKER.md` -> `10 files validated, 0 errors, 0 warnings`.
 
 ### 2026-04-24 06:54 UTC: Post-closure smoke remediation (Finder ZIP sidecars)
@@ -562,6 +580,31 @@
 - `wctl run-npm test -- wepppy/weppcloud/controllers_js/__tests__/landuse_map_inline.test.js` -> `2 passed`.
 - `wctl doc-lint --path docs/work-packages/20260424_landuse_legacy_flask_state_route_removal --path wepppy/weppcloud/routes/nodb_api/README.md --path docs/schemas/rq-engine-agent-api-contract.md --path docs/schemas/rq-response-contract.md --path docs/schemas/weppcloud-csrf-contract.md --path PROJECT_TRACKER.md` -> `10 files validated, 0 errors, 0 warnings`.
 
+### 2026-04-24 16:56 UTC: Post-closure map-description edit/save parity remediation
+**Agent/Contributor**: Codex
+
+**Work completed**:
+- Updated `wepppy/weppcloud/templates/controls/landuse_map.htm` to render editable per-row `Description` inputs and include `description` values in save payload rows.
+- Updated rq-engine `landuse-map/save` in `wepppy/microservices/rq_engine/landuse_routes.py` to parse optional row descriptions, enforce max-length validation, and persist explicit edits without fallback mutation paths.
+- Updated `wepppy/weppcloud/routes/nodb_api/landuse_bp.py` lookup fingerprint generation to include description content so stale-write preconditions cover description edits.
+- Updated schema/contract docs (`wepppy/microservices/rq_engine/schema_defaults_routes.py`, `docs/schemas/rq-engine-agent-api-contract.md`) and regression coverage (`tests/microservices/test_rq_engine_landuse_routes.py`, `wepppy/weppcloud/controllers_js/__tests__/landuse_map_inline.test.js`).
+
+**Blockers encountered**:
+- None.
+
+**Next steps**:
+- None (post-closure map-description parity item complete).
+
+**Test results**:
+- `wctl run-pytest tests/weppcloud/routes/test_landuse_bp.py --maxfail=1` -> `22 passed`.
+- `wctl run-pytest tests/weppcloud/routes/test_pure_controls_render.py --maxfail=1` -> `46 passed`.
+- `wctl run-pytest tests/microservices/test_rq_engine_landuse_routes.py --maxfail=1` -> `50 passed`.
+- `wctl run-pytest tests/microservices/test_rq_engine_schema_defaults_routes.py --maxfail=1` -> `54 passed`.
+- `wctl run-pytest tests/microservices/test_rq_engine_openapi_contract.py --maxfail=1` -> `10 passed`.
+- `wctl run-npm test -- --runTestsByPath wepppy/weppcloud/controllers_js/__tests__/landuse.test.js` -> `20 passed`.
+- `wctl run-npm test -- --runTestsByPath wepppy/weppcloud/controllers_js/__tests__/landuse_modify_gl.test.js` -> `3 passed`.
+- `wctl doc-lint --path docs/work-packages/20260424_landuse_legacy_flask_state_route_removal --path wepppy/weppcloud/routes/nodb_api/README.md --path docs/schemas/rq-engine-agent-api-contract.md --path docs/schemas/rq-response-contract.md --path docs/schemas/weppcloud-csrf-contract.md --path PROJECT_TRACKER.md` -> `10 files validated, 0 errors, 0 warnings`.
+
 ## Communication Log
 
 ### 2026-04-24 06:14 UTC: User request
@@ -613,3 +656,8 @@
 **Participants**: User, Codex  
 **Question/Topic**: Commit the landuse feature set and dispatch code/QA/security reviews across four landuse work packages, then disposition findings.  
 **Outcome**: Reviews dispatched and findings disposition completed with auth/input hardening, schema/openapi parity updates, redaction fixes, new regressions, and full required validation rerun.
+
+### 2026-04-24 16:56 UTC: User map-description edit/save parity request
+**Participants**: User, Codex  
+**Question/Topic**: `/landuse-map` description field must be editable and saved so summary/report tables do not retain misleading stale labels.  
+**Outcome**: Shipped editable description inputs + rq-engine save persistence + lookup-hash coverage for description edits, updated schema/contract docs, and re-ran the required validation/doc-lint matrix.

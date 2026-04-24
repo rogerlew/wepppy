@@ -1239,7 +1239,7 @@ async def get_landuse_map_snapshot(runid: str, config: str, request: Request) ->
     summary="Save run-scoped landuse map override",
     description=(
         "Requires JWT Bearer scope `rq:enqueue` and run access via `authorize_run_access`. "
-        "Validates and atomically saves mapping assignments with optimistic concurrency checks. "
+        "Validates and atomically saves mapping assignments/descriptions with optimistic concurrency checks. "
         "Precondition hash may be sent via `X-If-Match-Sha256` header or `if_match_sha256` body field."
     ),
     tags=["rq-engine", "runs"],
@@ -1349,7 +1349,7 @@ async def save_landuse_map(runid: str, config: str, request: Request) -> JSONRes
             )
 
             expected_keys = {str(key) for key in current_map.keys()}
-            submitted: dict[str, str] = {}
+            submitted: dict[str, dict[str, str | None]] = {}
             for idx, raw_row in enumerate(rows):
                 if not isinstance(raw_row, dict):
                     raise ValueError(f"rows[{idx}] must be an object")
@@ -1361,6 +1361,19 @@ async def save_landuse_map(runid: str, config: str, request: Request) -> JSONRes
 
                 key = str(raw_key).strip()
                 management_file = str(raw_management_file).strip()
+                description: str | None = None
+                if "description" in raw_row:
+                    description = str(raw_row.get("description") or "").strip()
+                    if (
+                        description
+                        and len(description) > landuse_flask._LANDUSE_MAP_DESCRIPTION_MAX_LENGTH
+                    ):
+                        raise ValueError(
+                            f"rows[{idx}].description exceeds "
+                            f"{landuse_flask._LANDUSE_MAP_DESCRIPTION_MAX_LENGTH} characters"
+                        )
+                    if not description:
+                        description = None
                 if not key:
                     raise ValueError(f"rows[{idx}].key must be non-empty")
                 if not management_file:
@@ -1372,7 +1385,7 @@ async def save_landuse_map(runid: str, config: str, request: Request) -> JSONRes
                     )
                 if key in submitted:
                     raise ValueError(f"rows includes duplicate key '{key}'")
-                submitted[key] = management_file
+                submitted[key] = {"management_file": management_file, "description": description}
 
             missing_keys = sorted(expected_keys.difference(submitted.keys()))
             extra_keys = sorted(submitted.keys() - expected_keys)
@@ -1383,7 +1396,9 @@ async def save_landuse_map(runid: str, config: str, request: Request) -> JSONRes
                 )
 
             updated_map = copy.deepcopy(current_map)
-            for key, management_file in submitted.items():
+            for key, payload_row in submitted.items():
+                management_file = str(payload_row["management_file"] or "").strip()
+                submitted_description = payload_row["description"]
                 if management_file not in management_index:
                     raise ValueError(f"Unknown management_file '{management_file}' for key '{key}'")
 
@@ -1398,7 +1413,9 @@ async def save_landuse_map(runid: str, config: str, request: Request) -> JSONRes
                 else:
                     entry["SoilFile"] = str(soil_file)
 
-                if management_file != previous_management_file:
+                if submitted_description is not None:
+                    entry["Description"] = submitted_description
+                elif management_file != previous_management_file:
                     description = str(metadata.get("description") or "").strip()
                     if not description or str(metadata.get("source") or "").strip().lower() == "mapping":
                         description = landuse_flask._catalog_default_description(management_file)

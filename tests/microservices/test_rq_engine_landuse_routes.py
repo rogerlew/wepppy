@@ -1333,7 +1333,11 @@ def test_landuse_phase3_map_snapshot_and_save(
                 "if_match_sha256": snapshot_payload["lookup_sha256"],
                 "rows": [
                     {"key": "21", "management_file": "Developed_Moderate_Intensity.man"},
-                    {"key": "22", "management_file": "Developed_Moderate_Intensity.man"},
+                    {
+                        "key": "22",
+                        "management_file": "Developed_Moderate_Intensity.man",
+                        "description": "High Intensity Residential (Edited)",
+                    },
                 ],
             },
         )
@@ -1348,6 +1352,7 @@ def test_landuse_phase3_map_snapshot_and_save(
     assert override_payload["21"]["ManagementFile"] == "Developed_Moderate_Intensity.man"
     assert override_payload["21"]["Description"] == "Developed Moderate Intensity"
     assert override_payload["22"]["ManagementFile"] == "Developed_Moderate_Intensity.man"
+    assert override_payload["22"]["Description"] == "High Intensity Residential (Edited)"
 
 
 def test_landuse_phase3_map_save_requires_precondition(
@@ -1614,6 +1619,25 @@ def test_landuse_phase3_map_save_rejects_missing_extra_and_unknown_management_ro
         assert unknown.status_code == 400
         assert unknown.json()["error"]["code"] == "invalid_rows_payload"
         assert "Unknown management_file 'Unknown_File.man'" in unknown.json()["error"]["message"]
+
+        too_long_description = "x" * (landuse_routes.landuse_flask._LANDUSE_MAP_DESCRIPTION_MAX_LENGTH + 1)
+        invalid_description = client.post(
+            "/api/runs/run-1/cfg/landuse-map/save",
+            json={
+                "if_match_sha256": lookup_sha,
+                "rows": [
+                    {
+                        "key": "21",
+                        "management_file": "Developed_Low_Intensity.man",
+                        "description": too_long_description,
+                    },
+                    {"key": "22", "management_file": "Developed_Moderate_Intensity.man"},
+                ],
+            },
+        )
+        assert invalid_description.status_code == 400
+        assert invalid_description.json()["error"]["code"] == "invalid_rows_payload"
+        assert "rows[0].description exceeds" in invalid_description.json()["error"]["message"]
 
 
 def test_landuse_phase3_clear_override_clears_path_and_file(

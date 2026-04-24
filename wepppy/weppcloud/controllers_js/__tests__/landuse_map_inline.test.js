@@ -101,7 +101,11 @@ describe("landuse_map inline script", () => {
                 expect(options.headers["X-If-Match-Sha256"]).toBe("sha-before-save");
                 const payload = JSON.parse(options.body);
                 expect(payload.rows).toEqual([
-                    { key: "21", management_file: "Developed_Moderate_Intensity.man" },
+                    {
+                        key: "21",
+                        management_file: "Developed_Moderate_Intensity.man",
+                        description: "Moderate Severity Fire",
+                    },
                 ]);
                 return Promise.resolve(makeJsonResponse({ message: "Landuse map saved", lookup_sha256: "sha-after-save" }));
             }
@@ -139,7 +143,9 @@ describe("landuse_map inline script", () => {
         window.eval(scriptSource);
 
         const select = document.querySelector("[data-row-key='21']");
+        const descriptionInput = document.querySelector("[data-row-description='21']");
         select.value = "Developed_Moderate_Intensity.man";
+        descriptionInput.value = "Moderate Severity Fire";
         document.getElementById("landuse-map-save").click();
         await flushPromises();
 

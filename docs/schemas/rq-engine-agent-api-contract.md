@@ -118,6 +118,8 @@ Request contract clarifications:
   hash supplied in either:
   - `X-If-Match-Sha256` request header, or
   - `if_match_sha256` request body field.
+  Each row requires `key` and `management_file`; optional `description`
+  persists a custom summary/report label for that key.
   Missing precondition hash returns `428 PRECONDITION_REQUIRED`.
 - `build-landuse` `landuse_management_mapping_selection` must be a supported
   mapping key; path-like or unknown selections are rejected with

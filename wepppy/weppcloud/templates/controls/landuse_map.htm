@@ -77,6 +77,10 @@
       white-space: nowrap;
     }
 
+    .lu-map__description-input {
+      min-width: 20rem;
+    }
+
     .lu-map__empty {
       padding: var(--wc-space-md);
       color: var(--wc-color-text-muted);
@@ -282,6 +286,7 @@
 
     state.rows.forEach(function (row) {
       var tr = document.createElement("tr");
+      tr.setAttribute("data-map-row-key", String(row.key || ""));
       var keyCell = document.createElement("td");
       var keyCode = document.createElement("code");
       keyCode.textContent = String(row.key || "");
@@ -289,7 +294,12 @@
       tr.appendChild(keyCell);
 
       var descriptionCell = document.createElement("td");
-      descriptionCell.textContent = String(row.description || "");
+      var descriptionInput = document.createElement("input");
+      descriptionInput.type = "text";
+      descriptionInput.className = "pure-input-1 lu-map__description-input";
+      descriptionInput.value = String(row.description || "");
+      descriptionInput.setAttribute("data-row-description", String(row.key || ""));
+      descriptionCell.appendChild(descriptionInput);
       tr.appendChild(descriptionCell);
 
       var disturbedCell = document.createElement("td");
@@ -324,20 +334,30 @@
   }
 
   function collectRows() {
-    var selections = document.querySelectorAll("[data-row-key]");
+    var tableRows = document.querySelectorAll("[data-map-row-key]");
     var rows = [];
-    Array.prototype.forEach.call(selections, function (selectNode) {
+    Array.prototype.forEach.call(tableRows, function (rowNode) {
+      if (!(rowNode instanceof HTMLTableRowElement)) {
+        return;
+      }
+      var key = String(rowNode.getAttribute("data-map-row-key") || "").trim();
+      var selectNode = rowNode.querySelector("[data-row-key]");
+      var descriptionNode = rowNode.querySelector("[data-row-description]");
       if (!(selectNode instanceof HTMLSelectElement)) {
         return;
       }
-      var key = String(selectNode.dataset.rowKey || "").trim();
       var managementFile = String(selectNode.value || "").trim();
+      var description = "";
+      if (descriptionNode instanceof HTMLInputElement) {
+        description = String(descriptionNode.value || "").trim();
+      }
       if (!key || !managementFile) {
         return;
       }
       rows.push({
         key: key,
-        management_file: managementFile
+        management_file: managementFile,
+        description: description
       });
     });
     return rows;
