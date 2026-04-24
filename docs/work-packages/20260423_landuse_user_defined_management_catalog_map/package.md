@@ -107,6 +107,10 @@ This package covers end-to-end run-scoped management cataloging and mapping over
   - If configured mapping is missing/invalid, fail explicitly with a typed validation error (no silent fallback).
 - **Backward compatibility**:
   - Existing built-in mapping selection flow remains unchanged when no run-scoped override is configured.
+- **Landuse options filtering semantics (post-closeout adjustment, 2026-04-24)**:
+  - Exclude only entries whose `ManagementFile` is exactly `UnDisturbed/null.man`.
+  - Deduplicate landuse option rows by `ManagementFile` (first canonical record in `disturbed.json` order wins).
+  - Do not exclude options solely because `IsTreatment` is true.
 
 ## Validation Summary
 - `.venv/bin/pytest tests/wepp/management/test_management_map_loading.py tests/nodb/test_landuse_custom_mapping.py tests/microservices/test_rq_engine_landuse_routes.py tests/weppcloud/routes/test_landuse_bp.py tests/weppcloud/routes/test_pure_controls_render.py -q` (`86 passed`)

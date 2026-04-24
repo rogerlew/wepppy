@@ -75,6 +75,9 @@ _LANDCOVER_LOCALE_PRIORITY: Tuple[Tuple[str, ...], ...] = (
 )
 
 
+_EXCLUDED_MANAGEMENT_FILES: Tuple[str, ...] = ("UnDisturbed/null.man",)
+
+
 def _resolve_landcover_datasets(locales: Iterable[str]) -> List[Tuple[str, str]]:
     """Return the landcover dataset list for the provided locales."""
     locales_lower = {str(locale).lower() for locale in locales}
@@ -116,14 +119,20 @@ def _load_catalog(mapping: Optional[str]) -> Tuple[LanduseDataset, ...]:
     """Load and cache the underlying management map as dataset descriptors."""
     records = load_map(mapping)
     datasets: List[LanduseDataset] = []
+    seen_management_files = set()
 
     for record in records.values():
-        if record.get("IsTreatment"):
+        management_file = record.get("ManagementFile", "") or ""
+        if management_file in _EXCLUDED_MANAGEMENT_FILES:
             continue
+
+        if management_file and management_file in seen_management_files:
+            continue
+        if management_file:
+            seen_management_files.add(management_file)
 
         key = str(record.get("Key"))
         description = record.get("Description", "") or ""
-        management_file = record.get("ManagementFile", "") or ""
         datasets.append(
             LanduseDataset(
                 key=key,

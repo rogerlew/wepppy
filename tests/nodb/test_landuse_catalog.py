@@ -2,7 +2,15 @@ import pytest
 
 pytest.importorskip("rasterio", reason="rasterio required to load landuse catalog module")
 
+import wepppy.nodb.locales.landuse_catalog as landuse_catalog_module
 from wepppy.nodb.locales.landuse_catalog import available_landuse_datasets
+
+
+@pytest.fixture(autouse=True)
+def _clear_landuse_catalog_cache():
+    landuse_catalog_module._load_catalog.cache_clear()
+    yield
+    landuse_catalog_module._load_catalog.cache_clear()
 
 
 def _landcover_keys(locales):
@@ -37,3 +45,42 @@ def test_landcover_datasets_earth_locale():
         "locales/earth/C3Slandcover/2018",
     ]
     assert keys[-1] == "locales/earth/C3Slandcover/1992"
+
+
+def test_management_catalog_excludes_null_and_dedups_by_management_file(monkeypatch):
+    def _fake_load_map(_mapping):
+        return {
+            "100": {
+                "Key": "100",
+                "Description": "Open Water",
+                "ManagementFile": "GeoWEPP/grass.man",
+            },
+            "101": {
+                "Key": "101",
+                "Description": "Open Water Duplicate",
+                "ManagementFile": "GeoWEPP/grass.man",
+            },
+            "110": {
+                "Key": "110",
+                "Description": "Prescribed Fire",
+                "ManagementFile": "UnDisturbed/Prescribed_Fire.man",
+                "IsTreatment": True,
+            },
+            "142": {
+                "Key": "142",
+                "Description": "Treatment Sentinel",
+                "ManagementFile": "UnDisturbed/null.man",
+                "IsTreatment": True,
+            },
+        }
+
+    monkeypatch.setattr(landuse_catalog_module, "load_map", _fake_load_map)
+
+    datasets = available_landuse_datasets(None, [], [])
+    mapping_datasets = [dataset for dataset in datasets if dataset.kind == "mapping"]
+
+    assert [dataset.key for dataset in mapping_datasets] == ["100", "110"]
+    assert [dataset.management_file for dataset in mapping_datasets] == [
+        "GeoWEPP/grass.man",
+        "UnDisturbed/Prescribed_Fire.man",
+    ]

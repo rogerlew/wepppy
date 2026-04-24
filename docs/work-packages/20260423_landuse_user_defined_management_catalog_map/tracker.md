@@ -7,7 +7,7 @@
 **Timezone**: UTC  
 **Started**: 2026-04-24 02:32 UTC  
 **Current phase**: Complete  
-**Last updated**: 2026-04-24 07:47 UTC  
+**Last updated**: 2026-04-24 23:03 UTC  
 **Next milestone**: Archived (ExecPlan moved to `prompts/completed/`).  
 **Security impact**: `high`  
 **Dedicated security review**: `yes`  
@@ -42,6 +42,7 @@
 - [x] Attempted pre-handoff full-suite sanity (`wctl run-pytest tests --maxfail=1` / local `.venv` full-suite); blocked by environment prerequisites (`wctl` exit `137`, local missing `SECRET_KEY`) (2026-04-24 08:09 UTC).
 - [x] Closed dedicated security findings with no unresolved medium/high items (2026-04-24 07:47 UTC).
 - [x] Archived ExecPlan to `prompts/completed/landuse_user_defined_management_catalog_map_execplan.md` (2026-04-24 07:47 UTC).
+- [x] Post-closeout contract adjustment: `landuseopts` now excludes only `UnDisturbed/null.man` and deduplicates by `ManagementFile` (does not exclude solely on `IsTreatment`) with regression coverage in `tests/nodb/test_landuse_catalog.py` (2026-04-24 23:03 UTC).
 
 ## Timeline
 
@@ -54,6 +55,7 @@
 - **2026-04-24 07:44 UTC** - Regression tests expanded across touched modules.
 - **2026-04-24 07:48 UTC** - Validation, RQ graph sanity check, security closeout, and package closure updates completed.
 - **2026-04-24 08:09 UTC** - Full-suite sanity attempt documented as environment-blocked (`SECRET_KEY` requirement in local `.venv`; `wctl` run exited `137`).
+- **2026-04-24 23:03 UTC** - Post-closeout `landuseopts` filtering semantics revised to canonical `ManagementFile` rules (`UnDisturbed/null.man` exclusion + dedup) with targeted regression tests.
 
 ## Decisions Log
 
@@ -107,6 +109,19 @@
 **Decision**: Option 2.
 
 **Impact**: Landuse options/report derive from the same persisted run-local source used by prep.
+
+---
+
+### 2026-04-24 23:03 UTC: Align `landuseopts` exclusion semantics to `ManagementFile` contract
+**Context**: Treatment-tagged mappings such as `UnDisturbed/Prescribed_Fire.man` must remain selectable when they are canonical disturbed map entries; only sentinel `UnDisturbed/null.man` should be hidden.
+
+**Options considered**:
+1. Continue excluding options via `IsTreatment`.
+2. Exclude only `UnDisturbed/null.man` and deduplicate options by `ManagementFile`.
+
+**Decision**: Option 2.
+
+**Impact**: Keeps `disturbed.json` as canonical mapping source while preventing sentinel/null pseudo-management rows from leaking into user-facing options.
 
 ## Risks and Issues
 
@@ -195,6 +210,31 @@
 - `wctl run-pytest tests --maxfail=1` (`exit 137` after startup in containerized environment)
 - `.venv/bin/pytest tests --maxfail=1` (`collection error: SECRET_KEY or SECRET_KEY_FILE must be configured`)
 
+### 2026-04-24 23:03 UTC: Post-closeout `landuseopts` contract correction
+**Agent/Contributor**: Codex
+
+**Work completed**:
+- Updated `wepppy/nodb/locales/landuse_catalog.py` to:
+  - exclude only `ManagementFile == UnDisturbed/null.man`,
+  - deduplicate mapping datasets by `ManagementFile`,
+  - stop filtering by `IsTreatment`.
+- Added regression coverage in `tests/nodb/test_landuse_catalog.py` for null sentinel exclusion, dedup behavior, and retention of non-null treatment-tagged management files.
+- Ran targeted validation:
+  - `wctl run-pytest tests/nodb/test_landuse_catalog.py --maxfail=1`
+  - `wctl run-pytest tests/weppcloud/routes/test_landuse_bp.py --maxfail=1`
+  - `wctl run-pytest tests/weppcloud/routes/test_pure_controls_render.py --maxfail=1`
+
+**Blockers encountered**:
+- None.
+
+**Next steps**:
+1. Follow-up package can reconcile broader option-consistency semantics across templates/routes if desired.
+
+**Test results**:
+- `tests/nodb/test_landuse_catalog.py` -> `4 passed`
+- `tests/weppcloud/routes/test_landuse_bp.py` -> `22 passed`
+- `tests/weppcloud/routes/test_pure_controls_render.py` -> `46 passed`
+
 ## Communication Log
 
 ### 2026-04-24 02:32 UTC: Work-package request
@@ -206,3 +246,8 @@
 **Participants**: User, Codex  
 **Question/Topic**: Carry package execution through full implementation and closeout.  
 **Outcome**: Scope implemented and validated; security findings closed; ExecPlan archived.
+
+### 2026-04-24 23:03 UTC: Post-closeout behavior clarification
+**Participants**: User, Codex  
+**Question/Topic**: Clarify why `Prescribed Fire` appears in options and align exclusion semantics.  
+**Outcome**: Confirmed canonical source behavior and shipped contract correction (`UnDisturbed/null.man` exclusion + `ManagementFile` dedup, no `IsTreatment` exclusion).
