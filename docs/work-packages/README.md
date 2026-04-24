@@ -8,6 +8,7 @@ This directory groups long-running initiatives into self-contained "work package
 - [`PROJECT_TRACKER.md`](../../PROJECT_TRACKER.md) (root) — Kanban board showing active/backlog/completed packages
 - [`docs/prompt_templates/`](../prompt_templates/) — Templates for package.md, tracker.md, and prompts
 - [`docs/prompt_templates/security_review_template.md`](../prompt_templates/security_review_template.md) — Dedicated security review checklist and artifact template
+- [`docs/standards/hardening-lifecycle-standard.md`](../standards/hardening-lifecycle-standard.md) — Incident hardening and callus-softening lifecycle standard
 - [`docs/god-tier-prompting-strategy.md`](../god-tier-prompting-strategy.md) — Guide to writing effective prompts for work packages
 
 ## Naming convention
@@ -44,6 +45,17 @@ Feel free to omit `notes/` or `artifacts/` if the package stays simple.
 8. When the initiative ends, update `package.md` with the closure date and highlight deliverables or follow-ups.
 
 Keeping everything inside one folder makes handoffs easier and lets us archive the package without losing the history.
+
+## Hardening and Softening Expectations
+
+When a package is incident-driven or primarily remediation hardening:
+
+1. Follow `docs/standards/hardening-lifecycle-standard.md`.
+2. Capture explicit failure signatures and impact in `package.md`.
+3. Link related prior hardening efforts (from `PROJECT_TRACKER.md`, `docs/work-packages/`, and `docs/mini-work-packages/`).
+4. Document health signals, danger signals, and observation window.
+5. If temporary mitigations are added, record sunset criteria and an owner.
+6. For mitigation retirement (callus softening), require hypothesis, test plan, and review gates before removal.
 
 ## Agent Communication Protocol
 

@@ -55,6 +55,7 @@
 - Do not add speculative abstractions for unsupported or hypothetical cases.
 - Match existing data and API contracts first; call out contract changes before implementation.
 - Prefer the smallest fix that resolves the confirmed failing path.
+- For incident-driven hardening and mitigation-retirement work, follow `docs/standards/hardening-lifecycle-standard.md`.
 - State assumptions explicitly in change notes before broadening behavior.
 - Assume model memory is unreliable for requirements: do not rely on chat history as the only source of truth.
 - When user conversation establishes or changes behavior/UX/data contracts, update the authoritative spec/work-package doc in the same change.
@@ -115,6 +116,7 @@
 - Full work package process: `docs/work-packages/README.md`
 - Mini packages: `docs/mini-work-packages/`
 - Prompt/template catalog: `docs/prompt_templates/AGENTS.md`
+- Hardening lifecycle standard (including callus softening): `docs/standards/hardening-lifecycle-standard.md`
 - NoDb facade/collaborator implementation standard: `docs/standards/nodb-facade-collaborator-pattern.md`
 - Vulture dead-code gate standard: `docs/standards/vulture-dead-code-gate-standard.md`
 - WBT release cutover reference (includes canonical `weppcloud-wbt` runbook link): `docs/dev-notes/weppcloud-wbt-release-cutover.md`

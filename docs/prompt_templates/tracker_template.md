@@ -72,6 +72,20 @@ Track potential problems and their mitigation strategies.
 | [Risk description] | High/Med/Low | High/Med/Low | [How we'll handle it] | Open/Mitigated/Closed |
 | Example: Breaking changes to API | Medium | Low | Comprehensive test coverage + gradual rollout | Open |
 
+## Hardening Signal Log (Required for incident/remediation packages)
+
+Track signal trends and mitigation lifecycle outcomes.
+
+- **Baseline health signals**: [Before remediation]
+- **Post-change health signals**: [After remediation]
+- **Danger signals observed**: [Complexity/operability regressions, if any]
+- **Temporary callus register**:
+  - [callus], owner, introduced date, sunset/review date, status
+- **Softening experiments**:
+  - Hypothesis: [statement]
+  - Gate results: [tests/reviews]
+  - Decision: keep/reduce/remove
+
 ## Verification Checklist
 
 Pre-closure validation steps. Check these off as the package nears completion.

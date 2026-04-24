@@ -71,6 +71,17 @@
 
 Use `docs/prompt_templates/security_review_template.md` for the security artifact format and by-surface checks.
 
+## Hardening and Callus Softening (Required for incident/remediation packages)
+[Complete this section when the package is primarily reliability hardening, defensive mitigation, or mitigation retirement.]
+
+- **Failure signature(s)**: [Exact error text, route/job id patterns, impact scope]
+- **Related prior hardening efforts**: [Links to prior packages/mini-packages/standards]
+- **Health signals**: [What should improve if remediation is effective]
+- **Danger signals**: [What indicates harmful complexity or ineffective hardening]
+- **Observation window**: [e.g., 14-30 days]
+- **Temporary calluses introduced**: [List + owner + sunset criteria]
+- **Callus softening hypothesis (if applicable)**: [What can be reduced/removed, under what test/review gates]
+
 ## References
 [Links to relevant documentation, designs, or context]
 - `path/to/relevant/file.py` - [Brief description]
