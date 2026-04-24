@@ -534,6 +534,14 @@
     return (Date.now() / 1000) < (rqEngineTokenExpiresAt - 30);
   }
 
+  function prefixedUrl(path) {
+    const prefix = typeof sitePrefix === "string" ? sitePrefix.trim() : "";
+    if (!prefix || prefix === "/") {
+      return path;
+    }
+    return `${prefix.replace(/\/+$/, "")}${path}`;
+  }
+
   async function fetchSessionToken() {
     if (hasValidSessionToken()) {
       return sessionToken;
@@ -579,7 +587,7 @@
       return rqEngineTokenPromise;
     }
 
-    rqEngineTokenPromise = fetch("/api/auth/rq-engine-token", {
+    rqEngineTokenPromise = fetch(prefixedUrl("/api/auth/rq-engine-token"), {
       method: "POST",
       credentials: "same-origin"
     })

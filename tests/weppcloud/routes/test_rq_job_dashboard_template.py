@@ -29,7 +29,7 @@ def test_cancel_job_uses_rq_engine_token_fallback_when_runid_missing() -> None:
     assert 'errors.push("Run ID unavailable for session token");' in template
     assert "return await fetchSessionToken();" in template
     assert "return await fetchRqEngineToken();" in template
-    assert 'fetch("/api/auth/rq-engine-token"' in template
+    assert "prefixedUrl(\"/api/auth/rq-engine-token\")" in template
 
 
 def test_cancel_job_surfaces_response_message_and_refreshes_dashboard() -> None:

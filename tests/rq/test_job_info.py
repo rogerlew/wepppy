@@ -17,6 +17,7 @@ pytestmark = pytest.mark.unit
 class _FakeJob:
     id: str = "job-1"
     meta: dict[str, Any] = field(default_factory=dict)
+    args: tuple[Any, ...] = ()
     status: str = "failed"
     result: Any = None
     started_at: datetime | None = None
@@ -54,6 +55,15 @@ def test_recursive_job_details_exc_info_none_when_missing() -> None:
     payload = recursive_get_job_details(job, redis_conn=object(), now=now)  # type: ignore[arg-type]
 
     assert payload["exc_info"] is None
+
+
+def test_recursive_job_details_falls_back_to_runid_from_first_arg() -> None:
+    now = datetime.now(timezone.utc)
+    job = _FakeJob(meta={}, args=("run-from-arg", "other"))
+
+    payload = recursive_get_job_details(job, redis_conn=object(), now=now)  # type: ignore[arg-type]
+
+    assert payload["runid"] == "run-from-arg"
 
 
 def test_get_job_status_progress_updated_at_uses_stable_unknown_when_no_timestamps(

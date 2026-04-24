@@ -20,6 +20,21 @@ REDIS_HOST: str = redis_host()
 RQ_DB: int = int(RedisDB.RQ)
 UNKNOWN_PROGRESS_UPDATED_AT = "1970-01-01T00:00:00Z"
 
+
+def _resolve_runid(job: Job) -> str | None:
+    meta = job.meta if isinstance(job.meta, dict) else {}
+    runid = meta.get("runid")
+    if runid:
+        return str(runid)
+
+    args = list(getattr(job, "args", None) or [])
+    if args and isinstance(args[0], str):
+        candidate = args[0].strip()
+        if candidate:
+            return candidate
+    return None
+
+
 def _extract_exc_info(job: Job) -> str | None:
     meta = job.meta if isinstance(job.meta, dict) else {}
     exc_info = meta.get("exc_string")
@@ -45,7 +60,7 @@ def recursive_get_job_details(job: Job, redis_conn: redis.Redis, now: datetime) 
     auth_actor = job.meta.get("auth_actor") if isinstance(job.meta, dict) else None
     job_info: Dict[str, Any] = {
         "job_id": job.id,
-        "runid": job.meta.get('runid'),
+        "runid": _resolve_runid(job),
         "status": job.get_status(),
         "result": job.result,
         "started_at": str(job.started_at) if job.started_at else None,
@@ -239,7 +254,7 @@ def get_wepppy_rq_job_status(job_id: str) -> Dict[str, Any]:
 
         return {
             "job_id": job.id,
-            "runid": job.meta.get("runid"),
+            "runid": _resolve_runid(job),
             "status": aggregated_status,
             "started_at": str(job.started_at) if job.started_at else None,
             "ended_at": last_ended_at,
