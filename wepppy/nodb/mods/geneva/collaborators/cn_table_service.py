@@ -3,6 +3,7 @@ from __future__ import annotations
 import csv
 import hashlib
 import json
+import math
 import os
 import tempfile
 from datetime import datetime, timezone
@@ -147,6 +148,29 @@ class GenevaCnTableService:
             "rows_count": meta.get("rows"),
             "columns_count": meta.get("columns"),
             "schema_version": meta.get("schema_version"),
+        }
+
+    def runtime_lookup(self, geneva: "Geneva") -> dict[str, Any]:
+        self.ensure_initialized(geneva, reason="runtime_lookup")
+        table_path = self._table_path(geneva)
+        fieldnames, rows = self._read_rows(table_path)
+        normalized_rows, _, _ = self._normalize_existing_rows(fieldnames, rows)
+
+        lookup: dict[tuple[str, str, str, str], dict[str, Any]] = {}
+        for index, row in enumerate(normalized_rows, start=1):
+            key = self._row_key(row, index=index)
+            lookup[key] = {
+                "cn_arc_ii": self._parse_cn_arc_ii(row.get("cn_arc_ii", ""), index=index),
+                "antecedent_condition_source": self._stringify(
+                    row.get("antecedent_condition_source", "")
+                ).strip(),
+                "source": self._stringify(row.get("source", "")).strip(),
+                "notes": self._stringify(row.get("notes", "")).strip(),
+            }
+
+        return {
+            "meta": self._with_aliases(self._snapshot_for_path(table_path)),
+            "lookup": lookup,
         }
 
     def modify(
@@ -455,6 +479,49 @@ class GenevaCnTableService:
                 )
             key_values.append(value)
         return tuple(key_values)  # type: ignore[return-value]
+
+    def _parse_cn_arc_ii(self, value: Any, *, index: int) -> float:
+        raw_value = self._stringify(value).strip()
+        if not raw_value:
+            raise GenevaValidationError(
+                "Geneva CN table row is missing cn_arc_ii.",
+                code="invalid_cn_table_schema",
+                details={
+                    "path": CN_TABLE_CONTRACT_PATH,
+                    "row_index": index,
+                    "column": "cn_arc_ii",
+                },
+                status_code=409,
+            )
+        try:
+            cn_arc_ii = float(raw_value)
+        except ValueError as exc:
+            raise GenevaValidationError(
+                "Geneva CN table row has non-numeric cn_arc_ii.",
+                code="invalid_cn_table_schema",
+                details={
+                    "path": CN_TABLE_CONTRACT_PATH,
+                    "row_index": index,
+                    "column": "cn_arc_ii",
+                    "value": raw_value,
+                },
+                status_code=409,
+            ) from exc
+
+        if not math.isfinite(cn_arc_ii) or cn_arc_ii <= 0.0 or cn_arc_ii > 100.0:
+            raise GenevaValidationError(
+                "Geneva CN table row has out-of-range cn_arc_ii.",
+                code="invalid_cn_table_schema",
+                details={
+                    "path": CN_TABLE_CONTRACT_PATH,
+                    "row_index": index,
+                    "column": "cn_arc_ii",
+                    "value": raw_value,
+                    "allowed_range": "(0, 100]",
+                },
+                status_code=409,
+            )
+        return cn_arc_ii
 
     def _snapshot_for_path(self, path: Path) -> dict[str, Any]:
         snapshot: dict[str, Any] = {

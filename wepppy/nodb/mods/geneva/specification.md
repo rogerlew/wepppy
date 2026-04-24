@@ -1,7 +1,7 @@
 # Geneva NoDb Mod Specification
 
 Status: Implemented Baseline (WP-00..WP-10 complete; WP-11 follow-on backlog)  
-Last Updated: 2026-04-22  
+Last Updated: 2026-04-23  
 Owner: WEPPpy NoDb hydrology stack  
 Scope: Event runoff hydrograph modeling for BAER-style post-fire workflows using RMRS-GTR-334-aligned Curve Number (CN) plus unit hydrograph methods.
 
@@ -20,7 +20,7 @@ Geneva provides a run-scoped NoDb workflow for event rainfall-runoff analysis wi
 
 This document now records the **current shipped behavior**. Historical design intent is retained in deferred sections for future implementation work.
 
-## 2. Implementation Snapshot (2026-04-22)
+## 2. Implementation Snapshot (2026-04-23)
 
 | Area | Current State | Notes |
 | --- | --- | --- |
@@ -30,7 +30,7 @@ This document now records the **current shipped behavior**. Historical design in
 | WBT-only guardrail | Implemented | Hard fail with `unsupported_backend` |
 | US-only guardrail | Implemented | Broad US envelope + NLCD/SSURGO compatibility checks |
 | Run-scoped CN-table lifecycle | Implemented | Init/reset/modify/audit with optimistic concurrency |
-| CN-table consumption in HRU CN assignment | **Not implemented** | Current HRU CN assignment uses kernel proxy estimator |
+| CN-table consumption in HRU CN assignment | Implemented | `prepare_hrus` resolves persisted HRU CN fields from run-scoped `geneva/data/cn_table.csv` before writing `hru_table.parquet`; missing exact rows fall back explicitly |
 | Frequency panel matrix + unavailable reasons | Implemented | CLIGEN always attempted; NOAA optional |
 | Runtime batch hyetograph distribution | **Uniform (interim)** | `run_batch` currently builds linear cumulative rainfall from depth/duration |
 | NEH4 Type B hyetograph kernel module | Implemented in Rust | Not yet wired into Python `run_batch` orchestration path |
@@ -77,7 +77,7 @@ Conformance posture:
 | DEV-002 | CN seeding | Non-forest/non-shrub burn CN rows remain static in seed defaults | Implemented (table workflow) |
 | DEV-003 | Frequency panel | Duration interpolation disabled for panel materialization | Implemented |
 | DEV-004 | Climate sourcing | Dual-source panel strategy (CLIGEN always attempted; NOAA optional) | Implemented |
-| DEV-005 | CN resolution | Runtime HRU CN currently uses kernel proxy estimator, not run-scoped `cn_table.csv` lookup | Active gap |
+| DEV-005 | CN resolution | Runtime HRU CN now resolves from run-scoped `cn_table.csv` at `prepare_hrus` persistence time; missing exact lookup rows fall back explicitly to the kernel proxy estimator | Implemented behavior |
 | DEV-006 | Storm construction | Python `run_batch` currently builds uniform hyetograph from depth/duration | Active gap |
 | DEV-007 | Default HSG derivation | Dominant-soil derivation path is not implemented; only explicit `default_hsg_code` is used | Active gap |
 | DEV-008 | Enable/disable semantics | `enabled` remains effectively true when mod is present (membership-driven) | Implemented behavior |
@@ -245,12 +245,21 @@ Modify behavior constraints:
 - payload must include all existing keys (row deletions rejected),
 - accepts body token and/or `X-If-Match-Sha256` header token.
 
-### 8.3 Current CN-table limitation
+### 8.3 Runtime CN-table consumption
 
-`cn_table.csv` is currently **not consumed** by runtime HRU CN assignment or batch CN computations.
+`cn_table.csv` is the active runtime source for persisted HRU CN values.
 
-- HRU CN values are currently produced in kernel (`estimate_cn_arc_ii` path, `cn_source="geneva_proxy_cn_v1"`).
-- CN-table lifecycle/audit is fully implemented and exposed via UI/API, but runtime lookup wiring remains deferred.
+- `GenevaHruPreparationService` resolves HRU `cn_arc_ii` by exact lookup on:
+  - `nlcd_class`
+  - `hsg`
+  - `burn_severity`
+  - `hydrophobic`
+- The resolved CN is written into `geneva/hru_table.parquet`, and downstream `run_batch` uses that persisted parquet.
+- Editing `geneva/data/cn_table.csv` does not retroactively mutate an existing `hru_table.parquet`; rerun `prepare_hrus` to regenerate the artifact.
+- `prepare_hrus` now invalidates its cached summary when the CN-table hash changes, so rerunning the task after a CN-table edit refreshes `hru_table.parquet` even when `force_rebuild=false`.
+- When an exact CN-table row is missing, Geneva keeps the kernel-estimated CN for that HRU and marks the persisted row with:
+  - `cn_source = "geneva_proxy_cn_v1_fallback_missing_row"`
+  - warning `cn_table_missing_exact_row`
 
 ## 9. HRU Preparation Contract (Current)
 
@@ -334,9 +343,16 @@ Current no-recipient behavior:
 - donor HRU is retained (warning `collapse_no_compatible_recipient`),
 - run does not fail solely because no compatible recipient exists.
 
-### 9.5 Current runtime CN assignment in HRU kernel
+### 9.5 Runtime CN resolution path
 
-Current interim CN estimator in kernel:
+Current runtime path:
+
+- kernel still computes a provisional CN via `estimate_cn_arc_ii(...)`,
+- Python `prepare_hrus` replaces persisted HRU CN fields from the run-scoped CN table when an exact lookup row exists,
+- persisted table-backed rows use `cn_source = "geneva_cn_table_csv_v1"`,
+- persisted fallback rows use `cn_source = "geneva_proxy_cn_v1_fallback_missing_row"`.
+
+Current provisional kernel estimator:
 
 - base CN by NLCD class (`11=100`, `41-43=55`, `52=65`, `71=68`, `81=74`, `82=78`, else `75`)
 - HSG adjustment (`A=0`, `B=+7`, `C=+14`, `D=+21`)
@@ -374,7 +390,7 @@ Persisted columns:
 Persisted summary:
 
 - `geneva/hru_prepare_summary.json`
-- current summary includes `hru_count`, `hru_area_total_m2`, `hru_area_total_acres`, `hsg_provenance_counts`, warnings, refs, artifact relpaths.
+- current summary includes `hru_count`, `hru_area_total_m2`, `hru_area_total_acres`, `hsg_provenance_counts`, warnings, refs, artifact relpaths, and CN-table lookup metadata (`lookup_sha256`, runtime source, fallback count).
 
 ## 10. Frequency Panel Contract (Current)
 

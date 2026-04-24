@@ -2,6 +2,7 @@ from __future__ import annotations
 
 from typing import TYPE_CHECKING, Any, Mapping
 
+from wepppy.nodb.mods.geneva.collaborators.cn_table_service import CN_TABLE_CONTRACT_PATH
 from wepppy.nodb.mods.geneva.errors import GenevaKernelError
 
 if TYPE_CHECKING:
@@ -27,6 +28,11 @@ _HRU_TABLE_COLUMNS = [
     "warnings",
 ]
 
+_FLOAT_TOLERANCE = 1e-9
+_TABLE_CN_SOURCE = "geneva_cn_table_csv_v1"
+_TABLE_FALLBACK_CN_SOURCE = "geneva_proxy_cn_v1_fallback_missing_row"
+_TABLE_FALLBACK_WARNING = "cn_table_missing_exact_row"
+
 
 class GenevaHruPreparationService:
     """Orchestrate HRU preparation kernel calls and artifact persistence."""
@@ -39,8 +45,17 @@ class GenevaHruPreparationService:
         input_refs: Mapping[str, Any] | None = None,
     ) -> dict[str, Any]:
         artifact_io = geneva.artifact_io
+        cn_runtime_lookup = geneva.cn_table_service.runtime_lookup(geneva)
+        cn_lookup_meta = dict(cn_runtime_lookup.get("meta", {}) or {})
         if not force_rebuild and artifact_io.exists(geneva.wd, "hru_prepare_summary.json"):
-            return artifact_io.read_json(geneva.wd, "hru_prepare_summary.json")
+            cached_summary = artifact_io.read_json(geneva.wd, "hru_prepare_summary.json")
+            if self._is_cached_summary_current(
+                artifact_io=artifact_io,
+                geneva=geneva,
+                cached_summary=cached_summary,
+                cn_lookup_meta=cn_lookup_meta,
+            ):
+                return cached_summary
 
         resolved_refs = geneva.hsg_assignment_service.resolve_prepare_input_refs(
             geneva,
@@ -89,6 +104,14 @@ class GenevaHruPreparationService:
         if not isinstance(warnings, list):
             warnings = []
 
+        hru_rows = self._apply_runtime_cn_table(
+            hru_rows,
+            cn_lookup=cn_runtime_lookup.get("lookup", {}),
+        )
+        fallback_hru_count = sum(
+            1 for row in hru_rows if row.get("cn_source") == _TABLE_FALLBACK_CN_SOURCE
+        )
+
         hru_table_relpath = artifact_io.write_records_parquet(
             geneva.wd,
             "hru_table.parquet",
@@ -106,13 +129,132 @@ class GenevaHruPreparationService:
             "hsg_provenance_counts": diagnostics.get("hsg_provenance_counts", {}),
             "warnings": warnings,
             "input_refs": resolved_refs,
+            "cn_table": {
+                "path": CN_TABLE_CONTRACT_PATH,
+                "lookup_sha256": cn_lookup_meta.get("lookup_sha256"),
+                "runtime_source": _TABLE_CN_SOURCE,
+                "fallback_source": _TABLE_FALLBACK_CN_SOURCE,
+                "fallback_hru_count": fallback_hru_count,
+            },
             "artifacts": {
                 "hru_table_relpath": hru_table_relpath,
                 "hru_prepare_summary_relpath": "hru_prepare_summary.json",
+                "cn_table_relpath": CN_TABLE_CONTRACT_PATH,
             },
         }
         artifact_io.write_json(geneva.wd, "hru_prepare_summary.json", summary)
         return summary
+
+    def _is_cached_summary_current(
+        self,
+        *,
+        artifact_io: Any,
+        geneva: "Geneva",
+        cached_summary: Mapping[str, Any],
+        cn_lookup_meta: Mapping[str, Any],
+    ) -> bool:
+        if not artifact_io.exists(geneva.wd, "hru_table.parquet"):
+            return False
+
+        cached_cn = cached_summary.get("cn_table")
+        if not isinstance(cached_cn, Mapping):
+            return False
+
+        cached_sha = cached_cn.get("lookup_sha256")
+        current_sha = cn_lookup_meta.get("lookup_sha256")
+        return isinstance(cached_sha, str) and cached_sha == current_sha
+
+    def _apply_runtime_cn_table(
+        self,
+        hru_rows: list[Any],
+        *,
+        cn_lookup: Mapping[tuple[str, str, str, str], Mapping[str, Any]],
+    ) -> list[dict[str, Any]]:
+        resolved_rows: list[dict[str, Any]] = []
+        for index, row in enumerate(hru_rows, start=1):
+            if not isinstance(row, Mapping):
+                raise GenevaKernelError(
+                    "geneva_prepare_hrus returned invalid HRU row payload.",
+                    code="contract_violation",
+                    details={"row_index": index},
+                )
+
+            resolved = dict(row)
+            key = self._row_lookup_key(resolved, index=index)
+            lookup_row = cn_lookup.get(key)
+
+            if lookup_row is None:
+                resolved["cn_source"] = _TABLE_FALLBACK_CN_SOURCE
+                resolved["warnings"] = self._append_warning(
+                    resolved.get("warnings"),
+                    _TABLE_FALLBACK_WARNING,
+                )
+                resolved_rows.append(resolved)
+                continue
+
+            cn_arc_ii = float(lookup_row["cn_arc_ii"])
+            resolved["cn_arc_ii"] = cn_arc_ii
+            resolved["cn_lambda_020"] = cn_arc_ii
+            resolved["cn_lambda_005"] = self._derive_cn_lambda_005(cn_arc_ii)
+            resolved["antecedent_condition_source"] = lookup_row["antecedent_condition_source"]
+            resolved["cn_source"] = _TABLE_CN_SOURCE
+            resolved_rows.append(resolved)
+
+        return resolved_rows
+
+    def _row_lookup_key(self, row: Mapping[str, Any], *, index: int) -> tuple[str, str, str, str]:
+        try:
+            landuse_class = str(int(row["landuse_class"]))
+        except (KeyError, TypeError, ValueError) as exc:
+            raise GenevaKernelError(
+                "geneva_prepare_hrus returned invalid landuse_class in HRU row.",
+                code="contract_violation",
+                details={"row_index": index},
+            ) from exc
+
+        try:
+            hsg_group = str(row["hsg_group"]).strip()
+            burn_severity = str(row["burn_severity_class"]).strip()
+            hydrophobic_class = self._bool_to_cn_key(row["hydrophobic_class"])
+        except (KeyError, TypeError, ValueError) as exc:
+            raise GenevaKernelError(
+                "geneva_prepare_hrus returned invalid HRU lookup dimensions.",
+                code="contract_violation",
+                details={"row_index": index},
+            ) from exc
+
+        if not hsg_group or not burn_severity:
+            raise GenevaKernelError(
+                "geneva_prepare_hrus returned blank HRU lookup dimensions.",
+                code="contract_violation",
+                details={"row_index": index},
+            )
+        return (landuse_class, hsg_group, burn_severity, hydrophobic_class)
+
+    def _bool_to_cn_key(self, value: Any) -> str:
+        if isinstance(value, bool):
+            return "true" if value else "false"
+
+        text = str(value).strip().lower()
+        if text in {"true", "false"}:
+            return text
+        raise ValueError(f"Unsupported hydrophobic_class value: {value!r}")
+
+    def _append_warning(self, warnings: Any, warning: str) -> list[Any]:
+        warning_list = list(warnings) if isinstance(warnings, list) else []
+        if warning not in warning_list:
+            warning_list.append(warning)
+        return warning_list
+
+    def _derive_cn_lambda_005(self, cn_arc_ii: float) -> float:
+        if cn_arc_ii >= (100.0 - _FLOAT_TOLERANCE):
+            return 100.0
+        if cn_arc_ii > 98.5:
+            return min(max(cn_arc_ii, 0.0), 100.0)
+
+        term = (100.0 / cn_arc_ii) - 1.0
+        denominator = (1.879 * (term**1.15)) + 1.0
+        return min(max(100.0 / denominator, 0.0), 100.0)
 
 
 __all__ = ["GenevaHruPreparationService"]
