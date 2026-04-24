@@ -61,7 +61,7 @@
             data-landuse-role="mapping-select"
             data-landuse-dom="{{ row.key }}">
             {% for opt in sorted_landuseoptions %}
-            <option value="{{ opt['Key'] }}" {% if startswith(row.key, opt['Key']) %}selected{% endif %}>
+            <option value="{{ opt['Key'] }}" {% if row.key|string == opt['Key']|string %}selected{% endif %}>
               {{ opt["Description"] }} ({{ opt["ManagementFile"] }})
             </option>
             {% endfor %}

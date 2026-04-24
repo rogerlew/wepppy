@@ -1,5 +1,6 @@
 from __future__ import annotations
 
+import re
 from contextlib import contextmanager
 from pathlib import Path
 from typing import Any, Dict, List
@@ -319,6 +320,47 @@ def test_landuse_template_renders_disturbed_preview_links_conditionally() -> Non
 
     assert "view/management_effective/42/clay/" not in html_without_disturbed
     assert "view/management_effective/42/clay/" in html_with_disturbed
+
+
+def test_landuse_template_mapping_select_uses_exact_key_match() -> None:
+    template_dir = Path(__file__).resolve().parents[3] / "wepppy" / "weppcloud" / "templates"
+    app = Flask(__name__, template_folder=str(template_dir))
+    app.config["TESTING"] = True
+
+    row = {
+        "key": "118",
+        "pct_coverage": 49.8,
+        "cancov": 0.6,
+        "inrcov": 0.6,
+        "rilcov": 0.6,
+        "cancov_override": None,
+        "inrcov_override": None,
+        "rilcov_override": None,
+    }
+    landuse = SimpleNamespace(mods=("disturbed",))
+    landuseoptions = [
+        {"Key": "11", "Description": "Open Water", "ManagementFile": "GeoWEPP/grass.man"},
+        {
+            "Key": "118",
+            "Description": "Moderate Severity Fire",
+            "ManagementFile": "UnDisturbed/Moderate_Severity_Fire.man",
+        },
+    ]
+
+    with app.app_context():
+        html = render_template(
+            "reports/landuse.htm",
+            report=[row],
+            landuse=landuse,
+            landuseoptions=landuseoptions,
+            coverage_percentages=[],
+            disturbed_preview_available=True,
+            disturbed_preview_textures=(("clay", "Clay"),),
+        )
+
+    selected_values = re.findall(r'<option value="([^"]+)" selected>', html)
+    assert selected_values == ["118"]
+    assert 'option value="11" selected' not in html
 
 
 @pytest.mark.parametrize(
