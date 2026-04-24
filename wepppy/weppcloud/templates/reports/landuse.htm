@@ -1,4 +1,5 @@
 {% set coverage_values = coverage_percentages if coverage_percentages is defined else [] %}
+{% set sorted_landuseoptions = landuseoptions | sort(attribute='ManagementFile') | sort(attribute='Description') %}
 
 <div class="wc-landuse-report">
   <div class="wc-landuse-report__controls">
@@ -59,7 +60,7 @@
             class="wc-landuse-report__select disable-readonly"
             data-landuse-role="mapping-select"
             data-landuse-dom="{{ row.key }}">
-            {% for opt in landuseoptions %}
+            {% for opt in sorted_landuseoptions %}
             <option value="{{ opt['Key'] }}" {% if startswith(row.key, opt['Key']) %}selected{% endif %}>
               {{ opt["Description"] }} ({{ opt["ManagementFile"] }})
             </option>
