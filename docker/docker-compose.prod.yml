@@ -481,7 +481,7 @@ services:
     <<: *wepppy-service
     depends_on:
       redis:
-        condition: service_started
+        condition: service_healthy
       postgres:
         condition: service_healthy
       f-esri:
@@ -511,6 +511,11 @@ services:
       POSTGRES_PASSWORD_FILE: /run/secrets/postgres_password
       OPENTOPOGRAPHY_API_KEY_FILE: /run/secrets/opentopography_api_key
       CLIMATE_ENGINE_API_KEY_FILE: /run/secrets/climate_engine_api_key
+      RQ_REDIS_WAIT_TIMEOUT_SECONDS: ${RQ_REDIS_WAIT_TIMEOUT_SECONDS:-300}
+      RQ_REDIS_WAIT_INTERVAL_SECONDS: ${RQ_REDIS_WAIT_INTERVAL_SECONDS:-1}
+      RQ_REDIS_PROBE_CONNECT_TIMEOUT_SECONDS: ${RQ_REDIS_PROBE_CONNECT_TIMEOUT_SECONDS:-5}
+      RQ_REDIS_PROBE_SOCKET_TIMEOUT_SECONDS: ${RQ_REDIS_PROBE_SOCKET_TIMEOUT_SECONDS:-5}
+      RQ_WORKER_STARTUP_DELAY_SECONDS: ${RQ_WORKER_STARTUP_DELAY_SECONDS:-5}
     volumes:
       - /wc1:/wc1
       - /wc1/geodata:/geodata
@@ -519,15 +524,13 @@ services:
       - bash
       - -lc
       - |
-        set -euo pipefail
-        redis_url="$$(python -c 'from wepppy.config.redis_settings import redis_url, RedisDB; print(redis_url(RedisDB.RQ))')"
-        exec /opt/venv/bin/rq worker-pool -n "6" -u "$$redis_url" --logging-level INFO --worker-class wepppy.rq.WepppyRqWorker default
+        exec /workdir/wepppy/docker/rq-worker-startup.sh 6 default
 
   rq-worker-batch:
     <<: *wepppy-service
     depends_on:
       redis:
-        condition: service_started
+        condition: service_healthy
       postgres:
         condition: service_healthy
       f-esri:
@@ -559,6 +562,11 @@ services:
       POSTGRES_PASSWORD_FILE: /run/secrets/postgres_password
       OPENTOPOGRAPHY_API_KEY_FILE: /run/secrets/opentopography_api_key
       CLIMATE_ENGINE_API_KEY_FILE: /run/secrets/climate_engine_api_key
+      RQ_REDIS_WAIT_TIMEOUT_SECONDS: ${RQ_REDIS_WAIT_TIMEOUT_SECONDS:-300}
+      RQ_REDIS_WAIT_INTERVAL_SECONDS: ${RQ_REDIS_WAIT_INTERVAL_SECONDS:-1}
+      RQ_REDIS_PROBE_CONNECT_TIMEOUT_SECONDS: ${RQ_REDIS_PROBE_CONNECT_TIMEOUT_SECONDS:-5}
+      RQ_REDIS_PROBE_SOCKET_TIMEOUT_SECONDS: ${RQ_REDIS_PROBE_SOCKET_TIMEOUT_SECONDS:-5}
+      RQ_WORKER_STARTUP_DELAY_SECONDS: ${RQ_WORKER_STARTUP_DELAY_SECONDS:-5}
     volumes:
       - /wc1:/wc1
       - /wc1/geodata:/geodata
@@ -567,9 +575,7 @@ services:
       - bash
       - -lc
       - |
-        set -euo pipefail
-        redis_url="$$(python -c 'from wepppy.config.redis_settings import redis_url, RedisDB; print(redis_url(RedisDB.RQ))')"
-        exec /opt/venv/bin/rq worker-pool -n "4" -u "$$redis_url" --logging-level INFO --worker-class wepppy.rq.WepppyRqWorker batch
+        exec /workdir/wepppy/docker/rq-worker-startup.sh 4 batch
 
   status:
     image: ${WEPPCLOUD_STATUS_IMAGE:-wepppy-status:latest}
@@ -716,7 +722,7 @@ services:
     ports:
       - "${REDIS_PORT:-6379}:6379"
     healthcheck:
-      test: ["CMD-SHELL", "redis-cli -a \"$(cat /run/secrets/redis_password)\" -h 127.0.0.1 -p 6379 ping"]
+      test: ["CMD-SHELL", "redis-cli -a \"$(cat /run/secrets/redis_password)\" -h 127.0.0.1 -p 6379 ping | grep -qx PONG"]
       interval: 10s
       timeout: 5s
       retries: 5

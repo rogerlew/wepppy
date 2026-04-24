@@ -37,10 +37,11 @@ Worker-only stacks (no Flask/Caddy/Redis/Postgres) use:
 - Guide: `docker/prod-worker-deploy-guide.md`
 
 Key requirements for `docker-compose.prod.worker.yml`:
-- `RQ_REDIS_URL` must point at a reachable Redis (DB 9). If unset, the compose default falls back to `redis:6379`, which only works when a `redis` service exists on the same Compose network.
+- `RQ_REDIS_URL` must point at a reachable Redis (DB 9). The worker compose now fails fast when this variable is unset.
 - `DISCORD_BOT_TOKEN_FILE` should point to a token file (for example `./secrets/discord_bot_token`) if worker jobs can emit Discord notifications.
 - Worker secret files `docker/secrets/flask_secret_key`, `docker/secrets/flask_security_password_salt`, and `docker/secrets/postgres_password` must exist on the worker host so run-sync jobs can import Flask config and write migration rows.
 - `WC1_DIR` and `GEODATA_DIR` must match the host mount points (shared run storage + geodata).
+- `rq-worker` and `rq-worker-batch` wait for `weppcloudr` health before startup; if you customize the report service port, keep `WEPPCLOUDR_PORT` aligned with the container port.
 - `WEPPPY_ENV_FILE` controls the `env_file:` path for services. `wctl` sets it automatically; if running raw `docker compose`, set `WEPPPY_ENV_FILE=.env` and run from `docker/` to avoid `docker/docker/.env` path resolution failures.
 
 Recommended: pin `wctl` on worker hosts and use it for ops (it generates a temporary env file and sets `WEPPPY_ENV_FILE` so `env_file:` paths resolve correctly).
@@ -52,12 +53,7 @@ wctl up -d rq-worker rq-worker-batch
 wctl rq-info
 ```
 
-Optional: keep `weppcloudr` behind a profile (so `wctl up -d` doesn’t start it unless requested):
-
-```bash
-export WCTL_COMPOSE_FILE_EXTRAS=docker/docker-compose.prod.worker.override.yml
-wctl up -d rq-worker rq-worker-batch
-```
+`rq-worker` and `rq-worker-batch` now depend on `weppcloudr` health, so profile-based disabling of `weppcloudr` is not compatible with the default worker compose contract.
 
 ### Development (Local)
 
@@ -246,7 +242,8 @@ mv /tmp/wepppy-rq-worker-batch.env docker/wepppy-rq-worker-batch.env
 
 Start a second batch worker pool:
 ```bash
-# docker/wepppy-rq-worker-batch.env should include non-secret env only (no passwords/tokens).
+# docker/wepppy-rq-worker-batch.env should include non-secret env only (no passwords/tokens),
+# including RQ_REDIS_URL=redis://<reachable-host>:6379/9.
 docker run -d \
   --name wepppy-rq-worker-batch-2 \
   --network wepppy-net \
@@ -265,7 +262,7 @@ docker run -d \
   -e SECURITY_PASSWORD_SALT_FILE=/run/secrets/flask_security_password_salt \
   --volumes-from wepppy-rq-worker-batch \
   --init wepppy-dev \
-  bash -lc 'set -euo pipefail; REDIS_PASSWORD="$(cat /run/secrets/redis_password)"; exec rq worker-pool -n "4" -u "redis://:${REDIS_PASSWORD}@redis:6379/9" --logging-level INFO --worker-class wepppy.rq.WepppyRqWorker batch'
+  bash -lc 'exec /workdir/wepppy/docker/rq-worker-startup.sh 4 batch'
 ```
 
 Inspect and stop:
@@ -338,7 +335,13 @@ If you want shells inside the containers to show `www-data@...` instead of `I ha
 - **Redis connection errors on startup** — the microservices depend on Redis; ensure `redis` comes up cleanly, that keyspace notifications include `Kh`, or restart dependent containers (`docker compose ... restart status preflight browse`).
 - **`ModuleNotFoundError: No module named 'wepppyo3'` at weppcloud boot** — dev images now vendor a fallback `wepppyo3` release at `/opt/vendor/wepppyo3/release/linux/py312` and the `weppcloud` entrypoint logs the active import path. If logs show the fallback path, the bind mount (`../../wepppyo3:/workdir/wepppyo3`) is missing or incomplete; restore that repo path and restart.
 - **`ModuleNotFoundError: No module named 'whitebox_tools'` at weppcloud boot** — dev images now vendor a fallback WBT module at `/opt/vendor/weppcloud-wbt/WBT/whitebox_tools.py` and the `weppcloud` entrypoint logs the active import path. If logs show the fallback path, the bind mount (`../../weppcloud-wbt:/workdir/weppcloud-wbt`) is missing or incomplete; restore that repo path and restart.
-- **Worker pools crash trying to connect to `redis:6379`** — `docker-compose.prod.worker.yml` does not run a `redis` service. If your worker stack is still env-based (pre-secrets migration), set `RQ_REDIS_URL=redis://:<password>@<redis_host>:6379/9` in `docker/.env`. If the secrets-as-files contract is enabled on the worker host, set `RQ_REDIS_URL=redis://<redis_host>:6379/9` and provide `docker/secrets/redis_password`. Use `wctl rq-info` to confirm workers registered.
+- **Worker pools crash trying to connect to `redis:6379`** — `docker-compose.prod.worker.yml` does not run a `redis` service. Prefer the secrets-as-files contract: set `RQ_REDIS_URL=redis://<redis_host>:6379/9` and provide `docker/secrets/redis_password`. Use inline-password URLs in `docker/.env` only as a legacy fallback for pre-secrets stacks. Use `wctl rq-info` to confirm workers registered.
+- **Workers fail during Redis AOF/RDB load windows** — `rq-worker` and `rq-worker-batch` now gate startup on Redis `PING` readiness and then sleep for `RQ_WORKER_STARTUP_DELAY_SECONDS` (default `5`). Tune with:
+  - `RQ_REDIS_WAIT_TIMEOUT_SECONDS` (default `300`)
+  - `RQ_REDIS_WAIT_INTERVAL_SECONDS` (default `1`)
+  - `RQ_REDIS_PROBE_CONNECT_TIMEOUT_SECONDS` (default `5`)
+  - `RQ_REDIS_PROBE_SOCKET_TIMEOUT_SECONDS` (default `5`)
+  - `RQ_WORKER_STARTUP_DELAY_SECONDS` (default `5`)
 - **Worker pools crash with `...discord_bot/.bot_token` missing** — set `DISCORD_BOT_TOKEN_FILE` to a readable token file (for example `./secrets/discord_bot_token`) and recreate workers. The compose default mounts `/dev/null` to satisfy import-time token file reads when Discord notifications are disabled.
 - **`run-sync` jobs fail with `SECRET_KEY (or SECRET_KEY_FILE) must be configured` or Postgres auth errors** — ensure worker hosts provide `docker/secrets/flask_secret_key`, `docker/secrets/flask_security_password_salt`, and `docker/secrets/postgres_password`, then recreate `rq-worker` (and `rq-worker-batch` if needed).
 - **`wctl rq-info` shows unknown hostnames** — `rq-info` worker hostnames are usually Docker container IDs, not machine FQDNs. Use `docker ps --format '{{.ID}} {{.Names}}'` on each host to map IDs to the owning host/services.

@@ -419,10 +419,12 @@ def _ensure_redis_lock_client() -> redis.StrictRedis:
             decode_responses=True,
             extra={"max_connections": 50},
         )
-        redis_lock_pool = redis.ConnectionPool(**pool_kwargs)
-        redis_lock_client = redis.StrictRedis(connection_pool=redis_lock_pool)
-        redis_lock_client.ping()
+        pool = redis.ConnectionPool(**pool_kwargs)
+        client = redis.StrictRedis(connection_pool=pool)
+        client.ping()
     except (redis.exceptions.RedisError, OSError, ValueError) as exc:
+        redis_lock_pool = None
+        redis_lock_client = None
         logging.critical(
             "Error reconnecting to Redis (LOCK): %s",
             exc,
@@ -430,7 +432,43 @@ def _ensure_redis_lock_client() -> redis.StrictRedis:
         )
         raise RuntimeError('Redis lock client is unavailable') from exc
 
+    redis_lock_pool = pool
+    redis_lock_client = client
+
     return redis_lock_client
+
+
+def _ensure_redis_nodb_cache_client() -> redis.StrictRedis:
+    """Return a NoDb cache Redis client, reconnecting once if startup init failed."""
+
+    global redis_nodb_cache_client, redis_nodb_cache_pool
+
+    if redis_nodb_cache_client is not None:
+        return redis_nodb_cache_client
+
+    try:
+        pool_kwargs = redis_connection_kwargs(
+            RedisDB.NODB_CACHE,
+            decode_responses=True,
+            extra={"max_connections": 50},
+        )
+        pool = redis.ConnectionPool(**pool_kwargs)
+        client = redis.StrictRedis(connection_pool=pool)
+        client.ping()
+    except (redis.exceptions.RedisError, OSError, ValueError) as exc:
+        redis_nodb_cache_pool = None
+        redis_nodb_cache_client = None
+        logging.critical(
+            "Error reconnecting to Redis (NODB_CACHE): %s",
+            exc,
+            exc_info=True,
+        )
+        raise RuntimeError('Redis NoDb cache client is unavailable') from exc
+
+    redis_nodb_cache_pool = pool
+    redis_nodb_cache_client = client
+
+    return redis_nodb_cache_client
 
 
 class LogLevel(IntEnum):
@@ -1421,7 +1459,14 @@ class NoDbBase(object):
                 extra={"runid": getattr(self, "runid", None), "nodb": getattr(self, "_nodb", None)},
                 exc_info=True,
             )
-            self.unlock()
+            try:
+                self.unlock()
+            except RuntimeError:
+                getattr(self, "logger", logging.getLogger(__name__)).warning(
+                    "NoDbBase.locked: lock ownership changed while handling exception; leaving lock untouched",
+                    extra={"runid": getattr(self, "runid", None), "nodb": getattr(self, "_nodb", None)},
+                    exc_info=True,
+                )
             raise
         try:
             self.dump_and_unlock(validate=validate_on_success)
@@ -1436,7 +1481,11 @@ class NoDbBase(object):
             try:
                 self.unlock()
             except RuntimeError:
-                self.unlock(flag="-f")
+                getattr(self, "logger", logging.getLogger(__name__)).warning(
+                    "NoDbBase.locked: dump_and_unlock failed and lock ownership changed; leaving lock untouched",
+                    extra={"runid": getattr(self, "runid", None), "nodb": getattr(self, "_nodb", None)},
+                    exc_info=True,
+                )
             raise
 
     def dump_and_unlock(self, validate: bool = True) -> None:
@@ -1460,11 +1509,30 @@ class NoDbBase(object):
         # hook for subclasses needing to mutate the decoded instance
         return instance
 
+    def _assert_lock_owned_for_dump(self) -> None:
+        """Fail when this instance no longer owns the distributed lock."""
+
+        lock_client = _ensure_redis_lock_client()
+        lock_key = self._distributed_lock_key
+        stored_payload = lock_client.get(lock_key)
+        if stored_payload is None:
+            # Keep legacy compatibility hash fields aligned with distributed lock truth.
+            lock_client.hset(self.runid, self._file_lock_key, 'false')
+            _set_local_lock_token(self, None)
+            raise RuntimeError("cannot dump to unlocked db")
+
+        local_token = _get_local_lock_token(self)
+        if local_token is None:
+            raise RuntimeError("cannot dump without owning the lock")
+
+        stored_token = _extract_token(stored_payload)
+        if stored_token is not None and stored_token != local_token:
+            raise RuntimeError("cannot dump with non-matching lock token")
+
     def dump(self) -> None:
         global redis_nodb_cache_client, REDIS_NODB_EXPIRY
 
-        if not self.islocked():
-            raise RuntimeError("cannot dump to unlocked db")
+        self._assert_lock_owned_for_dump()
 
         expected_mtime = getattr(self, "_nodb_mtime", None)
         expected_size = getattr(self, "_nodb_size", None)
@@ -2361,8 +2429,7 @@ def lock_statuses(runid: str) -> defaultdict[str, bool]:
 
 def clear_nodb_file_cache(runid: str, pup_relpath: Optional[str] = None) -> list[Path]:
     """Clear Redis cache entries for `.nodb` files under a run (optionally scoped)."""
-    if redis_nodb_cache_client is None:
-        raise RuntimeError('Redis NoDb cache client is unavailable')
+    redis_cache_client = _ensure_redis_nodb_cache_client()
 
     from wepppy.weppcloud.utils.helpers import get_wd
 
@@ -2405,7 +2472,7 @@ def clear_nodb_file_cache(runid: str, pup_relpath: Optional[str] = None) -> list
         patterns = [prefix, f"{prefix}{os.sep}*"]
         for pattern in patterns:
             try:
-                for key in redis_nodb_cache_client.scan_iter(match=f"{pattern}"):
+                for key in redis_cache_client.scan_iter(match=f"{pattern}"):
                     if isinstance(key, bytes):
                         key = key.decode('utf-8')
                     raw_keys.add(key)
@@ -2453,7 +2520,7 @@ def clear_nodb_file_cache(runid: str, pup_relpath: Optional[str] = None) -> list
     for nodb_path in sorted(nodb_paths):
         cache_key = str(nodb_path)
         try:
-            removed = redis_nodb_cache_client.delete(cache_key)
+            removed = redis_cache_client.delete(cache_key)
         except redis.exceptions.RedisError as exc:
             logging.error(f'Error clearing NoDb cache for {cache_key}: {exc}')
             continue

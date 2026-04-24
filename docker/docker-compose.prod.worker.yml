@@ -13,9 +13,10 @@ x-worker-env: &worker-env
   PYTHONUNBUFFERED: "1"
   MPLCONFIGDIR: /tmp/matplotlib
   # Base Redis URL without credentials; password is supplied via REDIS_PASSWORD_FILE.
-  # Prefer setting RQ_REDIS_URL to a reachable host (DB is normalized in the worker command).
-  RQ_REDIS_URL: ${RQ_REDIS_URL:-redis://redis:6379/9}
-  REDIS_URL: ${RQ_REDIS_URL:-redis://redis:6379/9}
+  # Required for worker-only hosts because this stack does not define a redis service.
+  # DB selection is normalized by the worker command.
+  RQ_REDIS_URL: ${RQ_REDIS_URL:?Set RQ_REDIS_URL to a reachable Redis URL for worker stacks}
+  REDIS_URL: ${RQ_REDIS_URL:?Set RQ_REDIS_URL to a reachable Redis URL for worker stacks}
   REDIS_PASSWORD_FILE: /run/secrets/redis_password
   SECRET_KEY_FILE: /run/secrets/flask_secret_key
   SECURITY_PASSWORD_SALT_FILE: /run/secrets/flask_security_password_salt
@@ -28,6 +29,11 @@ x-worker-env: &worker-env
   LOGLEVEL: INFO
   RQ_LOGGING_LEVEL: INFO
   WEPPCLOUDR_CONTAINER: ${WEPPCLOUDR_CONTAINER:-weppcloudr}
+  RQ_REDIS_WAIT_TIMEOUT_SECONDS: ${RQ_REDIS_WAIT_TIMEOUT_SECONDS:-300}
+  RQ_REDIS_WAIT_INTERVAL_SECONDS: ${RQ_REDIS_WAIT_INTERVAL_SECONDS:-1}
+  RQ_REDIS_PROBE_CONNECT_TIMEOUT_SECONDS: ${RQ_REDIS_PROBE_CONNECT_TIMEOUT_SECONDS:-5}
+  RQ_REDIS_PROBE_SOCKET_TIMEOUT_SECONDS: ${RQ_REDIS_PROBE_SOCKET_TIMEOUT_SECONDS:-5}
+  RQ_WORKER_STARTUP_DELAY_SECONDS: ${RQ_WORKER_STARTUP_DELAY_SECONDS:-5}
 
 x-discord-bot-token-secret: &discord-bot-token-secret
   source: discord_bot_token
@@ -64,6 +70,8 @@ services:
     depends_on:
       f-esri:
         condition: service_started
+      weppcloudr:
+        condition: service_healthy
     cpuset: "${RQ_WORKER_CPUSET:-0-47}"
     ulimits:
       nofile:
@@ -83,15 +91,15 @@ services:
       - bash
       - -lc
       - |
-        set -euo pipefail
-        redis_url="$$(python -c 'from wepppy.config.redis_settings import redis_url, RedisDB; print(redis_url(RedisDB.RQ))')"
-        exec /opt/venv/bin/rq worker-pool -n "6" -u "$$redis_url" --logging-level INFO --worker-class wepppy.rq.WepppyRqWorker default
+        exec /workdir/wepppy/docker/rq-worker-startup.sh 6 default
 
   rq-worker-batch:
     <<: *worker-service
     depends_on:
       f-esri:
         condition: service_started
+      weppcloudr:
+        condition: service_healthy
     cpuset: "${RQ_WORKER_CPUSET:-0-47}"
     ulimits:
       nofile:
@@ -113,9 +121,7 @@ services:
       - bash
       - -lc
       - |
-        set -euo pipefail
-        redis_url="$$(python -c 'from wepppy.config.redis_settings import redis_url, RedisDB; print(redis_url(RedisDB.RQ))')"
-        exec /opt/venv/bin/rq worker-pool -n "4" -u "$$redis_url" --logging-level INFO --worker-class wepppy.rq.WepppyRqWorker batch
+        exec /workdir/wepppy/docker/rq-worker-startup.sh 4 batch
 
   weppcloudr:
     image: ${WEPPCLOUDR_IMAGE:-weppcloudr:latest}
@@ -135,6 +141,13 @@ services:
       - weppcloudr-renv-cache:/opt/weppcloudr/renv/cache
     ports:
       - "${WEPPCLOUDR_PORT:-8050}:${WEPPCLOUDR_PORT:-8050}"
+    healthcheck:
+      test:
+        - CMD-SHELL
+        - curl -fsS "http://localhost:${WEPPCLOUDR_PORT:-8050}/healthz" >/dev/null || exit 1
+      interval: 30s
+      timeout: 5s
+      retries: 10
 
 volumes:
   weppcloudr-renv-cache:

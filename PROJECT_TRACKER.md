@@ -79,6 +79,30 @@ Feedback mechanisms:
 
 Work packages that are scoped but not yet started. Dependencies and prerequisites should be noted.
 
+### Controllers-GL Cache Hardening Rollout
+**Proposed**: 2026-04-24  
+**Size**: Small-Medium (1-2 focused sessions)  
+**Priority**: High  
+**Description**: Standardize all WEPPcloud template includes for `controllers-gl.js` to `static_url(...)` cache-busted links and ensure every page that loads `controllers-gl.js` also loads `controllers_gl_stale_check.js` immediately after it.
+
+**Scope**:
+- Inventory all WEPPcloud templates that include `controllers-gl.js`
+- Replace remaining `url_for('static', filename='js/controllers-gl.js')` includes with `static_url('js/controllers-gl.js')`
+- Add missing stale-check script includes on templates that load `controllers-gl.js`
+- Add/adjust regression coverage for include invariants
+- Complete explicit code review + QA review artifacts before closure
+
+**Strategic Value**:
+- Prevents silent stale-client drift on deploy/rebuild boundaries
+- Makes frontend cache-busting behavior consistent across template families
+- Improves incident resilience for run-control pages and related tooling
+
+**Dependencies**: Existing stale-check + build-id infrastructure (`controllers_gl_stale_check.js`, context processors).
+
+**Next Steps**: Execute `docs/work-packages/20260424_controllers_gl_cache_hardening/prompts/active/controllers_gl_cache_hardening_execplan.md`.
+
+---
+
 ### Deprecate and Remove TauDEM Backend
 **Proposed**: 2025-10-27  
 **Size**: Medium (3-5 days)  
@@ -271,6 +295,12 @@ Currently active work packages. Limit to 2-4 packages to maintain focus.
 ## ✅ Done
 
 Recently completed work packages. Archived immediately upon completion.
+
+### RQ Worker Startup and NoDb Redis Cache Hardening (Retroactive) (2026-04-24)
+**Status**: ✅ **COMPLETE**  
+**Link**: [docs/work-packages/20260424_rq_worker_nodb_cache_hardening/](docs/work-packages/20260424_rq_worker_nodb_cache_hardening/)  
+**Lifecycle**: Retroactive capture -> Done (2026-04-24)  
+**Summary**: Captures completed incident-response hardening for repeated `Redis NoDb cache client is unavailable` failures impacting landuse mapping jobs. Closed scope includes: safe reconnect semantics for NoDb lock/cache Redis clients, lock-token ownership enforcement before `dump()` persistence, removal of foreign-lock force-unlock fallback, worker startup gating via `docker/rq-worker-startup.sh` (readiness probe + configurable delay), compose hardening for prod and worker-only stacks (`RQ_REDIS_URL` fail-fast contract, `REDIS_URL` alignment, `weppcloudr` health dependency), and regression/doc updates. Two review rounds were executed with code/QA/security artifacts; all medium/high findings were dispositioned and targeted validation passed (`61` pytest tests, compose config checks, doc-lint clean).
 
 ### Landuse Legacy Flask State Route Removal (Post Gate 3) (2026-04-24)
 **Status**: ✅ **COMPLETE**  

@@ -278,6 +278,70 @@ def test_unlock_requires_matching_token(controller: DummyController) -> None:
         controller.unlock(flag="-f")
 
 
+def test_dump_requires_matching_token(
+    controller: DummyController,
+    redis_env: SimpleNamespace,
+) -> None:
+    """Rejects persistence when the distributed lock token no longer matches."""
+    controller.lock()
+    try:
+        redis_env.lock.set(
+            controller._distributed_lock_key,
+            base._serialize_lock_payload("foreign-token", ttl=60),
+        )
+        with pytest.raises(RuntimeError, match="non-matching lock token"):
+            controller.dump()
+    finally:
+        controller.unlock(flag="-f")
+
+
+def test_dump_rejects_when_distributed_lock_missing(
+    controller: DummyController,
+    redis_env: SimpleNamespace,
+) -> None:
+    """Clears stale local lock state when the distributed lock no longer exists."""
+    controller.lock()
+    try:
+        redis_env.lock.delete(controller._distributed_lock_key)
+        with pytest.raises(RuntimeError, match="cannot dump to unlocked db"):
+            controller.dump()
+        assert base._get_local_lock_token(controller) is None
+        assert redis_env.lock.hget(controller.runid, controller._file_lock_key) == "false"
+    finally:
+        controller.unlock(flag="-f")
+
+
+def test_dump_rejects_when_local_token_missing(
+    controller: DummyController,
+    redis_env: SimpleNamespace,
+) -> None:
+    """Requires a local ownership token before persisting."""
+    controller.lock()
+    try:
+        base._set_local_lock_token(controller, None)
+        with pytest.raises(RuntimeError, match="cannot dump without owning the lock"):
+            controller.dump()
+        assert redis_env.lock.get(controller._distributed_lock_key) is not None
+    finally:
+        controller.unlock(flag="-f")
+
+
+def test_locked_context_preserves_foreign_lock_when_dump_fails(
+    controller: DummyController,
+    redis_env: SimpleNamespace,
+) -> None:
+    """Never force-unlocks a distributed lock owned by another token."""
+    foreign_payload = base._serialize_lock_payload("foreign-token", ttl=60)
+
+    with pytest.raises(RuntimeError, match="non-matching lock token"):
+        with controller.locked():
+            controller.values["answer"] = 42
+            redis_env.lock.set(controller._distributed_lock_key, foreign_payload)
+
+    assert redis_env.lock.get(controller._distributed_lock_key) == foreign_payload
+    assert redis_env.lock.hget(controller.runid, controller._file_lock_key) == "true"
+
+
 def test_clear_locks_resets_state(controller: DummyController, redis_env: SimpleNamespace) -> None:
     """Confirms clear_locks releases distributed keys and reset flags."""
     controller.lock()
@@ -348,6 +412,52 @@ def test_clear_nodb_file_cache_scoped_to_pup(
     assert Path("_pups/child/dummy.nodb") in cleared
     assert top_key in redis_env.cache.store
     assert str(child_path) not in redis_env.cache.store
+
+
+def test_clear_nodb_file_cache_reconnects_when_client_missing(
+    controller: DummyController,
+    redis_env: SimpleNamespace,
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    """Reconnects Redis cache client when startup left the global client unset."""
+    runid = controller.runid
+    _patch_get_wd(monkeypatch, runid, Path(controller.wd))
+
+    nodb_path = Path(controller._nodb)
+    nodb_path.write_text("{}", encoding="ascii")
+    cache_key = str(nodb_path)
+    redis_env.cache.set(cache_key, "cached-json")
+    assert cache_key in redis_env.cache.store
+
+    calls = {"count": 0}
+
+    def _fake_ensure_cache_client() -> FakeRedis:
+        calls["count"] += 1
+        return redis_env.cache
+
+    monkeypatch.setattr(base, "redis_nodb_cache_client", None, raising=False)
+    monkeypatch.setattr(base, "_ensure_redis_nodb_cache_client", _fake_ensure_cache_client)
+
+    cleared = clear_nodb_file_cache(runid)
+    assert calls["count"] == 1
+    assert Path("dummy.nodb") in cleared
+    assert cache_key not in redis_env.cache.store
+
+
+def test_clear_nodb_file_cache_raises_when_reconnect_fails(
+    controller: DummyController,
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    """Preserves canonical RuntimeError when reconnect cannot establish Redis."""
+
+    def _raise_unavailable() -> FakeRedis:  # pragma: no cover - always raises
+        raise RuntimeError("Redis NoDb cache client is unavailable")
+
+    monkeypatch.setattr(base, "redis_nodb_cache_client", None, raising=False)
+    monkeypatch.setattr(base, "_ensure_redis_nodb_cache_client", _raise_unavailable)
+
+    with pytest.raises(RuntimeError, match="Redis NoDb cache client is unavailable"):
+        clear_nodb_file_cache(controller.runid)
 
 
 def test_init_logging_sets_up_queue_listener(

@@ -264,6 +264,37 @@ def test_ensure_redis_lock_client_reconnects_when_unset(monkeypatch):
     assert pool_calls
 
 
+def test_ensure_redis_lock_client_retries_after_failed_ping(monkeypatch):
+    class _StubRedisClient:
+        def __init__(self, connection_pool):
+            self.connection_pool = connection_pool
+            self.ping_calls = 0
+
+        def ping(self):
+            self.ping_calls += 1
+            raise base.redis.exceptions.RedisError("redis down")
+
+    pool_calls = []
+
+    def _fake_pool(**kwargs):
+        pool_calls.append(kwargs)
+        return {"kwargs": kwargs}
+
+    monkeypatch.setattr(base, "redis_lock_client", None, raising=False)
+    monkeypatch.setattr(base, "redis_lock_pool", None, raising=False)
+    monkeypatch.setattr(base.redis, "ConnectionPool", _fake_pool)
+    monkeypatch.setattr(base.redis, "StrictRedis", _StubRedisClient)
+
+    with pytest.raises(RuntimeError, match="Redis lock client is unavailable"):
+        base._ensure_redis_lock_client()
+    with pytest.raises(RuntimeError, match="Redis lock client is unavailable"):
+        base._ensure_redis_lock_client()
+
+    assert base.redis_lock_client is None
+    assert base.redis_lock_pool is None
+    assert len(pool_calls) == 2
+
+
 def test_ensure_redis_lock_client_raises_when_reconnect_fails(monkeypatch):
     monkeypatch.setattr(base, "redis_lock_client", None, raising=False)
 
@@ -274,6 +305,66 @@ def test_ensure_redis_lock_client_raises_when_reconnect_fails(monkeypatch):
 
     with pytest.raises(RuntimeError, match="Redis lock client is unavailable"):
         base._ensure_redis_lock_client()
+
+
+def test_ensure_redis_nodb_cache_client_reconnects_when_unset(monkeypatch):
+    class _StubRedisClient:
+        def __init__(self, connection_pool):
+            self.connection_pool = connection_pool
+            self.ping_calls = 0
+
+        def ping(self):
+            self.ping_calls += 1
+            return True
+
+    pool_calls = []
+
+    def _fake_pool(**kwargs):
+        pool_calls.append(kwargs)
+        return {"kwargs": kwargs}
+
+    monkeypatch.setattr(base, "redis_nodb_cache_client", None, raising=False)
+    monkeypatch.setattr(base, "redis_nodb_cache_pool", None, raising=False)
+    monkeypatch.setattr(base.redis, "ConnectionPool", _fake_pool)
+    monkeypatch.setattr(base.redis, "StrictRedis", _StubRedisClient)
+
+    client = base._ensure_redis_nodb_cache_client()
+
+    assert isinstance(client, _StubRedisClient)
+    assert client.ping_calls == 1
+    assert base.redis_nodb_cache_client is client
+    assert pool_calls
+
+
+def test_ensure_redis_nodb_cache_client_retries_after_failed_ping(monkeypatch):
+    class _StubRedisClient:
+        def __init__(self, connection_pool):
+            self.connection_pool = connection_pool
+            self.ping_calls = 0
+
+        def ping(self):
+            self.ping_calls += 1
+            raise base.redis.exceptions.RedisError("redis down")
+
+    pool_calls = []
+
+    def _fake_pool(**kwargs):
+        pool_calls.append(kwargs)
+        return {"kwargs": kwargs}
+
+    monkeypatch.setattr(base, "redis_nodb_cache_client", None, raising=False)
+    monkeypatch.setattr(base, "redis_nodb_cache_pool", None, raising=False)
+    monkeypatch.setattr(base.redis, "ConnectionPool", _fake_pool)
+    monkeypatch.setattr(base.redis, "StrictRedis", _StubRedisClient)
+
+    with pytest.raises(RuntimeError, match="Redis NoDb cache client is unavailable"):
+        base._ensure_redis_nodb_cache_client()
+    with pytest.raises(RuntimeError, match="Redis NoDb cache client is unavailable"):
+        base._ensure_redis_nodb_cache_client()
+
+    assert base.redis_nodb_cache_client is None
+    assert base.redis_nodb_cache_pool is None
+    assert len(pool_calls) == 2
 
 
 def test_try_redis_get_log_level_missing_value_returns_default(monkeypatch):
