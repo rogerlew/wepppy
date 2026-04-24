@@ -354,7 +354,8 @@
 {% endblock %}
 
 {% block script_extras %}
-<script src="{{ url_for('static', filename='js/controllers-gl.js') }}" defer></script>
+<script src="{{ static_url('js/controllers-gl.js') }}" defer></script>
+<script src="{{ static_url('js/controllers_gl_stale_check.js') }}" defer></script>
 <script>
 const runid = '{{ runid }}';
 const config = '{{ config }}';

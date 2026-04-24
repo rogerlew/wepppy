@@ -16,7 +16,8 @@
         {% block content %}{% endblock %}
     </main>
 
-    <script src="{{ site_prefix }}/static/js/controllers-gl.js"></script>
+    <script src="{{ static_url('js/controllers-gl.js') }}"></script>
+    <script src="{{ static_url('js/controllers_gl_stale_check.js') }}"></script>
     {% block scripts %}{% endblock %}
 </body>
 </html>

@@ -208,6 +208,7 @@
 
 {% block script_extras %}
 <script src="{{ static_url('js/controllers-gl.js') }}"></script>
+<script src="{{ static_url('js/controllers_gl_stale_check.js') }}"></script>
 <script src="{{ static_url('js/qrcode.js') }}"></script>
 <script>
   const jobId = {{ job_id | tojson }};

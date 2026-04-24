@@ -891,7 +891,8 @@
     window.runid = window.runid || "ui-demo";
     window.config = window.config || "cfg";
   </script>
-  <script src="{{ url_for('static', filename='js/controllers-gl.js') }}"></script>
+  <script src="{{ static_url('js/controllers-gl.js') }}"></script>
+  <script src="{{ static_url('js/controllers_gl_stale_check.js') }}"></script>
   <script>
     (function () {
       "use strict";

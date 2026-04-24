@@ -223,7 +223,8 @@ a.disabled {
     <script async src="https://www.googletagmanager.com/gtag/js?id=UA-116992009-1"></script>
 {% include("_analytics.htm") %}
 {% if not current_user.is_authenticated %}
-    <script src="{{ url_for('static', filename='js/controllers-gl.js') }}" defer></script>
+    <script src="{{ static_url('js/controllers-gl.js') }}" defer></script>
+    <script src="{{ static_url('js/controllers_gl_stale_check.js') }}" defer></script>
     <script>
       window.CAP_CUSTOM_WASM_URL = "{{ cap_asset_base_url }}/cap_wasm.js";
     </script>

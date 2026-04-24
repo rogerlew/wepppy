@@ -6,7 +6,8 @@
 {% block header_container_class %}wc-container wc-container--fluid{% endblock %}
 
 {% block head_extras %}
-<script src="{{ url_for('static', filename='js/controllers-gl.js') }}" defer></script>
+<script src="{{ static_url('js/controllers-gl.js') }}" defer></script>
+<script src="{{ static_url('js/controllers_gl_stale_check.js') }}" defer></script>
 {% endblock %}
 
 {% from "shared/console_macros.htm" import console_page, console_header %}
