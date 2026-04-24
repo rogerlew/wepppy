@@ -9,11 +9,13 @@ emitting status updates for the front-end while coordinating NoDb controllers.
 """
 
 import errno
+import copy
 from contextlib import ExitStack
 import inspect
 import logging
 import json
 import os
+import re
 import shutil
 import socket
 import time
@@ -71,6 +73,9 @@ TIMEOUT: int = 43_200
 DEFAULT_ZOOM: int = 12
 DIRECTORY_ROOT_LOCK_RETRY_ATTEMPTS: int = 5
 DIRECTORY_ROOT_LOCK_RETRY_SECONDS: float = 1.0
+LANDUSE_MAPPING_BATCH_MAX_EDITS: int = 500
+LANDUSE_MAPPING_MAX_KEY_LENGTH: int = 128
+LANDUSE_MAPPING_CONTROL_CHAR_RE = re.compile(r"[\x00-\x1f\x7f]")
 
 _clean_env_for_system_tools = _fork_helpers._clean_env_for_system_tools
 _build_fork_rsync_cmd = _fork_helpers._build_fork_rsync_cmd
@@ -1065,15 +1070,72 @@ def build_landuse_rq(runid: str) -> None:
         raise
 
 
+def _normalize_landuse_mapping_batch(
+    mapping_edits: Sequence[Mapping[str, Any]] | Mapping[str, Any] | str,
+    *,
+    newdom: str | None = None,
+) -> list[dict[str, str]]:
+    if isinstance(mapping_edits, str):
+        if newdom is None:
+            raise ValueError("newdom must be provided when mapping_edits is a dom string")
+        raw_edits: list[Mapping[str, Any]] = [{"dom": mapping_edits, "newdom": newdom}]
+    elif isinstance(mapping_edits, Mapping):
+        raw_edits = [mapping_edits]
+    elif isinstance(mapping_edits, Sequence):
+        raw_edits = list(mapping_edits)
+    else:
+        raise ValueError("mapping_edits must be a sequence of mapping objects")
+
+    if len(raw_edits) == 0:
+        raise ValueError("mapping_edits must include at least one edit")
+    if len(raw_edits) > LANDUSE_MAPPING_BATCH_MAX_EDITS:
+        raise ValueError(f"mapping_edits exceeds {LANDUSE_MAPPING_BATCH_MAX_EDITS} edits")
+
+    collapsed: dict[str, dict[str, str]] = {}
+    order: list[str] = []
+    for idx, edit in enumerate(raw_edits):
+        if not isinstance(edit, Mapping):
+            raise ValueError(f"mapping_edits[{idx}] must be an object")
+        dom_raw = edit.get("dom")
+        newdom_raw = edit.get("newdom")
+        if dom_raw is None or newdom_raw is None:
+            raise ValueError(f"mapping_edits[{idx}] must include dom and newdom")
+
+        dom_value = str(dom_raw).strip()
+        newdom_value = str(newdom_raw).strip()
+        if not dom_value or not newdom_value:
+            raise ValueError(f"mapping_edits[{idx}] contains a blank dom or newdom")
+        if len(dom_value) > LANDUSE_MAPPING_MAX_KEY_LENGTH:
+            raise ValueError(f"mapping_edits[{idx}].dom exceeds {LANDUSE_MAPPING_MAX_KEY_LENGTH} characters")
+        if len(newdom_value) > LANDUSE_MAPPING_MAX_KEY_LENGTH:
+            raise ValueError(f"mapping_edits[{idx}].newdom exceeds {LANDUSE_MAPPING_MAX_KEY_LENGTH} characters")
+        if LANDUSE_MAPPING_CONTROL_CHAR_RE.search(dom_value):
+            raise ValueError(f"mapping_edits[{idx}].dom contains unsupported control characters")
+        if LANDUSE_MAPPING_CONTROL_CHAR_RE.search(newdom_value):
+            raise ValueError(f"mapping_edits[{idx}].newdom contains unsupported control characters")
+
+        if dom_value not in collapsed:
+            order.append(dom_value)
+        collapsed[dom_value] = {"dom": dom_value, "newdom": newdom_value}
+
+    return [collapsed[dom] for dom in order]
+
+
 @with_exception_logging
-def modify_landuse_mapping_rq(runid: str, dom: str, newdom: str) -> None:
-    """Remap a landuse domain assignment asynchronously and rebuild managements."""
+def modify_landuse_mapping_rq(
+    runid: str,
+    mapping_edits: Sequence[Mapping[str, Any]] | Mapping[str, Any] | str,
+    newdom: str | None = None,
+) -> None:
+    """Remap one or more landuse domain assignments asynchronously and rebuild managements."""
     try:
         job = get_current_job()
         wd = get_wd(runid)
         func_name = inspect.currentframe().f_code.co_name
         status_channel = f"{runid}:landuse"
         StatusMessenger.publish(status_channel, f"rq:{job.id} STARTED {func_name}({runid})")
+
+        normalized_edits = _normalize_landuse_mapping_batch(mapping_edits, newdom=newdom)
 
         prep = RedisPrep.getInstance(wd)
         latest_mapping_job_id = prep.get_rq_job_id("modify_landuse_mapping_rq")
@@ -1084,20 +1146,81 @@ def modify_landuse_mapping_rq(runid: str, dom: str, newdom: str) -> None:
             )
             return
 
-        def _modify_mapping() -> None:
+        def _modify_mapping_batch() -> bool:
+            latest_mapping_job_id_locked = prep.get_rq_job_id("modify_landuse_mapping_rq")
+            if latest_mapping_job_id_locked and latest_mapping_job_id_locked != job.id:
+                StatusMessenger.publish(
+                    status_channel,
+                    (
+                        f"rq:{job.id} SKIPPED {func_name}({runid}) "
+                        f"stale job superseded by rq:{latest_mapping_job_id_locked} (lock gate)"
+                    ),
+                )
+                return False
+
             # Mutation jobs must not hydrate from the detached Redis cache:
             # cached payloads preserve the controller's pre-write file signature,
             # which makes the subsequent dump fail the stale-write guard.
             clear_nodb_file_cache(runid, pup_relpath="landuse.nodb")
             landuse = Landuse.getInstance(wd, ignore_lock=True)
-            landuse.modify_mapping(str(dom), str(newdom))
+            original_domlc_d = dict(landuse.domlc_d)
+            domlc_mofe_d = getattr(landuse, "domlc_mofe_d", None)
+            original_domlc_mofe_d = copy.deepcopy(domlc_mofe_d) if isinstance(domlc_mofe_d, dict) else None
+            try:
+                original_managements = copy.deepcopy(landuse.managements)
+            except Exception:
+                original_managements = None
 
-        _run_with_directory_root_lock(
+            with landuse.locked():
+                missing_sources = sorted({
+                    edit["dom"] for edit in normalized_edits if edit["dom"] not in landuse.managements
+                })
+                if missing_sources:
+                    missing_csv = ", ".join(missing_sources)
+                    raise ValueError(f"Unknown mapping dom value(s): {missing_csv}")
+
+                updated_domlc_d = dict(landuse.domlc_d)
+                updated_domlc_mofe_d = copy.deepcopy(domlc_mofe_d) if isinstance(domlc_mofe_d, dict) else None
+
+                for edit in normalized_edits:
+                    source_dom = edit["dom"]
+                    target_dom = edit["newdom"]
+                    for topazid, current_dom in updated_domlc_d.items():
+                        if str(current_dom) == source_dom:
+                            updated_domlc_d[topazid] = target_dom
+
+                    if isinstance(updated_domlc_mofe_d, dict):
+                        for _topaz_id, ofe_map in updated_domlc_mofe_d.items():
+                            if not isinstance(ofe_map, dict):
+                                continue
+                            for ofe_id, current_dom in ofe_map.items():
+                                if str(current_dom) == source_dom:
+                                    ofe_map[ofe_id] = target_dom
+
+                landuse.domlc_d = updated_domlc_d
+                if updated_domlc_mofe_d is not None:
+                    landuse.domlc_mofe_d = updated_domlc_mofe_d
+
+            try:
+                landuse.build_managements()
+            except Exception:
+                with landuse.locked():
+                    landuse.domlc_d = original_domlc_d
+                    if original_domlc_mofe_d is not None:
+                        landuse.domlc_mofe_d = original_domlc_mofe_d
+                    if original_managements is not None:
+                        landuse.managements = original_managements
+                raise
+            return True
+
+        did_apply = _run_with_directory_root_lock(
             wd,
             "landuse",
-            _modify_mapping,
+            _modify_mapping_batch,
             purpose="modify-landuse-mapping-rq",
         )
+        if did_apply is False:
+            return
 
         StatusMessenger.publish(status_channel, f"rq:{job.id} COMPLETED {func_name}({runid})")
         StatusMessenger.publish(
@@ -1107,7 +1230,7 @@ def modify_landuse_mapping_rq(runid: str, dom: str, newdom: str) -> None:
     except Exception:
         # Boundary catch: preserve contract behavior while logging unexpected failures.
         __import__("logging").getLogger(__name__).exception("Boundary exception at wepppy/rq/project_rq.py:859", extra={"runid": locals().get("runid"), "config": locals().get("config"), "job_id": locals().get("job_id")})
-        StatusMessenger.publish(status_channel, f"rq:{job.id} EXCEPTION {func_name}({runid}, {dom}, {newdom})")
+        StatusMessenger.publish(status_channel, f"rq:{job.id} EXCEPTION {func_name}({runid})")
         raise
 
 

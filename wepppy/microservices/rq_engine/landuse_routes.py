@@ -40,6 +40,7 @@ RQ_ENQUEUE_SCOPES = ["rq:enqueue"]
 LANDUSE_USER_DEFINED_ALLOWED_EXTENSIONS = ("tif", "tiff", "img", "vrt")
 LANDUSE_USER_DEFINED_MAX_BYTES = 500 * 1024 * 1024
 LANDUSE_MAPPING_MAX_KEY_LENGTH = 128
+LANDUSE_MAPPING_BATCH_MAX_EDITS = 500
 LANDUSE_MAPPING_CONTROL_CHAR_RE = re.compile(r"[\x00-\x1f\x7f]")
 
 
@@ -94,6 +95,8 @@ def _upload_status_from_message(message: str) -> int:
 
 
 def _normalize_landuse_mapping_key(value: Any, *, field: str) -> str:
+    if value is None:
+        raise ValueError(f"{field} must be provided")
     normalized = str(value).strip()
     if not normalized:
         raise ValueError("dom and newdom must be provided")
@@ -102,6 +105,44 @@ def _normalize_landuse_mapping_key(value: Any, *, field: str) -> str:
     if LANDUSE_MAPPING_CONTROL_CHAR_RE.search(normalized):
         raise ValueError(f"{field} contains unsupported control characters")
     return normalized
+
+
+def _normalize_landuse_mapping_edits(payload: dict[str, Any]) -> list[dict[str, str]]:
+    raw_mappings = payload.get("mappings")
+    if raw_mappings is None:
+        dom = payload.get("dom")
+        newdom = payload.get("newdom")
+        if dom is None or newdom is None:
+            raise ValueError("mappings or dom/newdom must be provided")
+        raw_mappings = [{"dom": dom, "newdom": newdom}]
+    elif isinstance(raw_mappings, dict):
+        # `parse_request_payload` collapses single-item lists to scalar values.
+        raw_mappings = [raw_mappings]
+
+    if not isinstance(raw_mappings, list):
+        raise ValueError("mappings must be a list of objects")
+    if len(raw_mappings) == 0:
+        raise ValueError("mappings must include at least one edit")
+    if len(raw_mappings) > LANDUSE_MAPPING_BATCH_MAX_EDITS:
+        raise ValueError(f"mappings exceeds {LANDUSE_MAPPING_BATCH_MAX_EDITS} edits")
+
+    collapsed: dict[str, dict[str, str]] = {}
+    order: list[str] = []
+
+    for idx, raw_edit in enumerate(raw_mappings):
+        if not isinstance(raw_edit, dict):
+            raise ValueError(f"mappings[{idx}] must be an object")
+        if "dom" not in raw_edit or "newdom" not in raw_edit:
+            raise ValueError(f"mappings[{idx}] must include dom and newdom")
+
+        dom_value = _normalize_landuse_mapping_key(raw_edit.get("dom"), field=f"mappings[{idx}].dom")
+        newdom_value = _normalize_landuse_mapping_key(raw_edit.get("newdom"), field=f"mappings[{idx}].newdom")
+
+        if dom_value not in collapsed:
+            order.append(dom_value)
+        collapsed[dom_value] = {"dom": dom_value, "newdom": newdom_value}
+
+    return [collapsed[dom] for dom in order]
 
 
 @router.post(
@@ -275,14 +316,14 @@ async def build_landuse(runid: str, config: str, request: Request) -> JSONRespon
     summary="Queue a landuse mapping update",
     description=(
         "Requires JWT Bearer scope `rq:enqueue` and run access via `authorize_run_access`. "
-        "Enqueues a run-scoped mapping mutation so long-running MOFE remaps do not block web workers."
+        "Enqueues one run-scoped mapping batch mutation so long-running MOFE remaps do not block web workers."
     ),
     tags=["rq-engine", "runs"],
     operation_id=rq_operation_id("modify_landuse_mapping"),
     responses=agent_route_responses(
         success_code=200,
-        success_description="Mapping update accepted; returns enqueued `job_id`.",
-        extra={400: "Validation error for required `dom`/`newdom` payload fields."},
+        success_description="Mapping update accepted; returns enqueued `job_id` and `mapping_count`.",
+        extra={400: "Validation error for required mapping payload fields."},
     ),
 )
 async def modify_landuse_mapping(runid: str, config: str, request: Request) -> JSONResponse:
@@ -297,14 +338,8 @@ async def modify_landuse_mapping(runid: str, config: str, request: Request) -> J
 
     try:
         payload = await parse_request_payload(request)
-        dom = payload.get("dom")
-        newdom = payload.get("newdom")
-        if dom is None or newdom is None:
-            return error_response("dom and newdom must be provided", status_code=400)
-
         try:
-            dom_value = _normalize_landuse_mapping_key(dom, field="dom")
-            newdom_value = _normalize_landuse_mapping_key(newdom, field="newdom")
+            mapping_edits = _normalize_landuse_mapping_edits(payload)
         except ValueError as exc:
             return error_response(str(exc), status_code=400)
 
@@ -315,19 +350,14 @@ async def modify_landuse_mapping(runid: str, config: str, request: Request) -> J
         conn_kwargs = redis_connection_kwargs(RedisDB.RQ)
         with redis.Redis(**conn_kwargs) as redis_conn:
             q = Queue(connection=redis_conn)
-            previous_job = None
-            previous_job_id = prep.get_rq_job_id("modify_landuse_mapping_rq")
-            if previous_job_id:
-                previous_job = q.fetch_job(previous_job_id)
             job = q.enqueue_call(
                 modify_landuse_mapping_rq,
-                (runid, dom_value, newdom_value),
+                (runid, mapping_edits),
                 timeout=RQ_TIMEOUT,
-                depends_on=previous_job,
             )
             prep.set_rq_job_id("modify_landuse_mapping_rq", job.id)
 
-        return JSONResponse({"job_id": job.id})
+        return JSONResponse({"job_id": job.id, "mapping_count": len(mapping_edits)})
     except Exception as exc:  # broad-except: boundary contract
         nodir_response = _maybe_nodir_error_response(exc)
         if nodir_response is not None:

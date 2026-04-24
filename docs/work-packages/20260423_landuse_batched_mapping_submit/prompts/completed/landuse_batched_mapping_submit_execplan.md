@@ -11,17 +11,20 @@ After this change, a user can adjust one or many landuse mapping selects in the 
 ## Progress
 
 - [x] (2026-04-24 00:27 UTC) Work-package scaffold, tracker, and initial ExecPlan created.
-- [ ] Define and document canonical batch mapping API contract (payload, validation, response, and failure semantics).
-- [ ] Implement staged mapping edit UX and explicit submit control in landuse report/controller.
-- [ ] Implement batch mapping enqueue path in rq-engine route without mapping `depends_on`.
-- [ ] Implement batch mapping worker behavior under one lock window and one completion trigger.
-- [ ] Update controller JS, microservice route, and RQ mutation-guard tests.
-- [ ] Run targeted validations and record outcomes in package docs.
-- [ ] Move ExecPlan to `prompts/completed/` with closure outcome notes.
+- [x] (2026-04-24 00:45 UTC) Defined canonical batch mapping API contract (payload, validation, response, and failure semantics).
+- [x] (2026-04-24 00:48 UTC) Implemented staged mapping edit UX and explicit submit control in landuse report/controller.
+- [x] (2026-04-24 00:49 UTC) Implemented batch mapping enqueue path in rq-engine route without mapping `depends_on`.
+- [x] (2026-04-24 00:51 UTC) Implemented batch mapping worker behavior under one lock window and one completion trigger.
+- [x] (2026-04-24 00:52 UTC) Updated controller JS, microservice route, and RQ mutation-guard tests.
+- [x] (2026-04-24 00:54 UTC) Ran targeted validations and recorded outcomes in package docs.
+- [x] (2026-04-24 00:54 UTC) Move ExecPlan to `prompts/completed/` with closure outcome notes.
+- [x] (2026-04-24 01:31 UTC) Dispatched code/QA reviews and dispositioned findings with additional guardrail fixes/tests.
 
 ## Surprises & Discoveries
 
-- None yet. Update this section as implementation work reveals non-obvious behavior.
+- `parse_request_payload()` normalizes single-element lists into scalars, which means a JSON payload like `{"mappings":[{...}]}` can appear as `{"mappings": {...}}` after parsing. The route now treats object-form `mappings` as a single edit for robust compatibility.
+- Existing `modify_landuse_mapping_rq` stale-job skip logic remains useful after removing enqueue chaining: if multiple submissions race, only the latest queued mapping job mutates landuse state.
+- Lock-gate stale jobs initially returned from the lock callback but still emitted outer completion/trigger messages; a post-review fix made lock-gate skip return `False` so completion short-circuits correctly.
 
 ## Decision Log
 
@@ -33,12 +36,43 @@ After this change, a user can adjust one or many landuse mapping selects in the 
   Rationale: Chained failures can strand descendants in deferred state; one-submit/one-job semantics are simpler and more reliable for this UX.
   Date/Author: 2026-04-24 / Codex.
 
+- Decision: Canonical mapping submit payload is `{"mappings": [{"dom": "<source>", "newdom": "<target>"}, ...]}` with a hard limit of 500 edits per request.
+  Rationale: Explicit list payload supports staged multi-edit submit while bounding validation and mutation cost.
+  Date/Author: 2026-04-24 / Codex.
+
+- Decision: Duplicate source-domain edits collapse to last-write-wins per `dom`; normalized edits execute in first-seen `dom` order, so chained mappings have deterministic cascade behavior.
+  Rationale: This yields stable behavior across retries and aligns with staged UI semantics where the latest per-row selection is authoritative.
+  Date/Author: 2026-04-24 / Codex.
+
+- Decision: Apply semantics are all-or-nothing for validated edits.
+  Rationale: Route-level payload validation occurs before enqueue, and worker-level source-domain validation occurs before mutation; on downstream build failure, in-memory mapping snapshots are restored before raising.
+  Date/Author: 2026-04-24 / Codex.
+
+- Decision: Preserve backward compatibility for legacy clients posting top-level `dom`/`newdom`.
+  Rationale: Existing callers continue to work while new controller flow uses batched `mappings[]`.
+  Date/Author: 2026-04-24 / Codex.
+
 ## Outcomes & Retrospective
 
-Not complete yet. Populate at milestone and package closure with:
-- implemented behavior vs plan,
-- test/validation evidence,
-- residual gaps/follow-up.
+Implemented outcomes:
+- Landuse mapping select changes are now staged locally and no longer submit immediately.
+- Report template includes a dedicated secondary mapping-submit control with live staged-count feedback.
+- Single and Multi-OFE mapping rows share the same staged-submit interaction path in `landuse.js`.
+- RQ-engine mapping route accepts batch payloads, supports legacy single-edit payloads, deduplicates duplicates deterministically, and enqueues one mapping job without `depends_on`.
+- RQ worker consumes one normalized mapping batch, validates before mutation, applies under one root lock window, and emits one completion trigger.
+- Post-review hardening closed code/QA findings around `None` payload validation, lock-gate stale completion behavior, readonly submit disabling, inflight staging race prevention, and `project_rq.pyi` parity.
+
+Validation evidence:
+- `wctl run-pytest tests/microservices/test_rq_engine_landuse_routes.py --maxfail=1` (`19 passed`)
+- `wctl run-pytest tests/rq/test_project_rq_mutation_guards.py --maxfail=1` (`23 passed`)
+- `wctl run-npm test -- --runTestsByPath wepppy/weppcloud/controllers_js/__tests__/landuse.test.js` (`20 passed`)
+- `wctl doc-lint --path docs/work-packages/20260423_landuse_batched_mapping_submit` (`4 files validated, 0 errors`)
+- `wctl check-rq-graph` (`RQ dependency graph artifacts are up to date`)
+- `wctl exec weppcloud python - <<'PY' ... Queue(...).job_ids ... PY` (`default_queue_jobs=0`; no live queue sample available)
+- Manual UX smoke (user-reported): `greenlight`, `job_id=3082d0f1-acd4-41e0-b897-abda94b31c1f`
+
+Residual follow-up:
+- Optional future UX package can apply the same staged-submit pattern to coverage overrides if desired.
 
 ## Context and Orientation
 
@@ -132,3 +166,5 @@ Dependencies:
 ## Revision Notes
 
 - 2026-04-24 / Codex: Initial ExecPlan created from user-approved direction to move from per-change submit to staged batch submit and remove mapping dependency chaining.
+- 2026-04-24 / Codex: Completed implementation, validation, and closure updates for staged/batched mapping submit UX and queue wiring.
+- 2026-04-24 / Codex: Dispatched code + QA reviews, dispositioned findings, and refreshed validation evidence.

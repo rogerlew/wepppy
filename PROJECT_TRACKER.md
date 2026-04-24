@@ -1,7 +1,7 @@
 # PROJECT_TRACKER.md
 > Kanban board for wepppy work packages and vision items
 
-**Last Updated**: 2026-04-23  
+**Last Updated**: 2026-04-24  
 **Active Packages**: 3  
 **Quick Links**: [Work Packages Directory](docs/work-packages/) | [God-Tier Prompting Strategy](docs/god-tier-prompting-strategy.md)
 
@@ -78,31 +78,6 @@ Feedback mechanisms:
 ## 📋 Backlog
 
 Work packages that are scoped but not yet started. Dependencies and prerequisites should be noted.
-
-### Landuse Batched Mapping Submit UX (Single + Multi-OFE)
-**Proposed**: 2026-04-23  
-**Size**: Medium (2-4 focused sessions)  
-**Priority**: High  
-**Description**: Replace immediate per-select landuse mapping submits with staged mapping edits and one explicit submit action that sends one request containing one or more mapping updates. Unify this interaction for single-OFE and Multi-OFE flows and remove mapping `depends_on` chaining to reduce lock contention and deferred-job stranding.
-
-**Scope**:
-- Stage mapping edits in landuse summary UI and submit with a secondary action button.
-- Update rq-engine mapping route to accept batch payloads and enqueue one job per submit.
-- Update RQ mapping worker path to apply mapping batches under one lock window.
-- Remove mapping enqueue dependency chaining (`depends_on`) for this path.
-- Add targeted JS/microservice/RQ regression coverage for batch semantics and failure behavior.
-
-**Strategic Value**:
-- Reduces queue fan-out and landuse lock contention during interactive edits.
-- Removes known deferred-state failure mode caused by failed predecessor chaining.
-- Improves UX clarity with explicit "pending edits" and "apply edits" flow.
-- Makes single and Multi-OFE mapping workflows consistent.
-
-**Dependencies**: None beyond current landuse controller/route baseline.
-
-**Next Steps**: Execute [docs/work-packages/20260423_landuse_batched_mapping_submit/](docs/work-packages/20260423_landuse_batched_mapping_submit/) with the active ExecPlan.
-
----
 
 ### Deprecate and Remove TauDEM Backend
 **Proposed**: 2025-10-27  
@@ -296,6 +271,11 @@ Currently active work packages. Limit to 2-4 packages to maintain focus.
 ## ✅ Done
 
 Recently completed work packages. Archived immediately upon completion.
+
+### Landuse Batched Mapping Submit UX (Single + Multi-OFE) (2026-04-24)
+**Status**: ✅ **COMPLETE**  
+**Link**: [docs/work-packages/20260423_landuse_batched_mapping_submit/](docs/work-packages/20260423_landuse_batched_mapping_submit/)  
+**Summary**: Closed end-to-end with staged landuse mapping submit UX and batched backend processing. Landuse report mapping selects now stage edits locally with a dedicated secondary apply button and live staged-count messaging; one submit posts canonical `mappings[]` payload to `/rq-engine/api/runs/{runid}/{config}/modify-landuse-mapping`. rq-engine now validates + normalizes batch edits (including legacy `dom/newdom` compatibility), removes mapping `depends_on` chaining, and enqueues a single mapping job. `modify_landuse_mapping_rq` now applies normalized batches deterministically under one landuse maintenance-lock window with one completion trigger and pre-mutation validation/rollback safeguards. Post-review disposition closed actionable code/QA findings (lock-gate stale completion short-circuit, null-key validation, readonly/inflight UI guards, and stub parity). Targeted validations passed: microservice route tests (`19 passed`), RQ mutation-guard tests (`23 passed`), controller Jest suite (`20 passed`), and package doc-lint (`0 errors`).
 
 ### Landuse Multi-OFE Build Optimization (Lookup/Pass/IO/Logging) (2026-04-23)
 **Status**: ✅ **COMPLETE**  

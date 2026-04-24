@@ -156,7 +156,7 @@
     "notes": [],
     "queue_name": "default",
     "source_function": "_enqueue_geneva_job",
-    "source_lineno": 210,
+    "source_lineno": 246,
     "source_module": "wepppy/microservices/rq_engine/geneva_routes.py"
   },
   {
@@ -166,7 +166,7 @@
     "notes": [],
     "queue_name": "default",
     "source_function": "_enqueue_geneva_workflow_jobs",
-    "source_lineno": 238,
+    "source_lineno": 281,
     "source_module": "wepppy/microservices/rq_engine/geneva_routes.py"
   },
   {
@@ -178,7 +178,7 @@
     "notes": [],
     "queue_name": "default",
     "source_function": "_enqueue_geneva_workflow_jobs",
-    "source_lineno": 243,
+    "source_lineno": 286,
     "source_module": "wepppy/microservices/rq_engine/geneva_routes.py"
   },
   {
@@ -190,7 +190,7 @@
     "notes": [],
     "queue_name": "default",
     "source_function": "_enqueue_geneva_workflow_jobs",
-    "source_lineno": 249,
+    "source_lineno": 292,
     "source_module": "wepppy/microservices/rq_engine/geneva_routes.py"
   },
   {
@@ -200,19 +200,17 @@
     "notes": [],
     "queue_name": "default",
     "source_function": "build_landuse",
-    "source_lineno": 257,
+    "source_lineno": 298,
     "source_module": "wepppy/microservices/rq_engine/landuse_routes.py"
   },
   {
-    "depends_on": [
-      "previous_job"
-    ],
+    "depends_on": [],
     "enqueue_target": "modify_landuse_mapping_rq",
     "job_meta_stage": null,
     "notes": [],
     "queue_name": "default",
     "source_function": "modify_landuse_mapping",
-    "source_lineno": 322,
+    "source_lineno": 353,
     "source_module": "wepppy/microservices/rq_engine/landuse_routes.py"
   },
   {
@@ -546,7 +544,7 @@
     "notes": [],
     "queue_name": "default",
     "source_function": "build_subcatchments_and_abstract_watershed_rq",
-    "source_lineno": 916,
+    "source_lineno": 989,
     "source_module": "wepppy/rq/project_rq.py"
   },
   {
@@ -558,7 +556,7 @@
     "notes": [],
     "queue_name": "default",
     "source_function": "build_subcatchments_and_abstract_watershed_rq",
-    "source_lineno": 924,
+    "source_lineno": 997,
     "source_module": "wepppy/rq/project_rq.py"
   },
   {
@@ -568,7 +566,7 @@
     "notes": [],
     "queue_name": "default",
     "source_function": "fetch_dem_and_build_channels_rq",
-    "source_lineno": 725,
+    "source_lineno": 766,
     "source_module": "wepppy/rq/project_rq.py"
   },
   {
@@ -578,7 +576,7 @@
     "notes": [],
     "queue_name": "default",
     "source_function": "fetch_dem_and_build_channels_rq",
-    "source_lineno": 739,
+    "source_lineno": 780,
     "source_module": "wepppy/rq/project_rq.py"
   },
   {
@@ -590,7 +588,7 @@
     "notes": [],
     "queue_name": "default",
     "source_function": "fetch_dem_and_build_channels_rq",
-    "source_lineno": 743,
+    "source_lineno": 784,
     "source_module": "wepppy/rq/project_rq.py"
   },
   {
@@ -602,7 +600,7 @@
     "notes": [],
     "queue_name": "default",
     "source_function": "fork_rq",
-    "source_lineno": 1399,
+    "source_lineno": 1592,
     "source_module": "wepppy/rq/project_rq.py"
   },
   {

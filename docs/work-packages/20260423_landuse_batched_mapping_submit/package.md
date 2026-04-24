@@ -1,6 +1,6 @@
 # Landuse Batched Mapping Submit (Single + Multi-OFE UX Unification)
 
-**Status**: Open (2026-04-23)
+**Status**: Complete (2026-04-24)
 **Timezone**: UTC
 
 ## Overview
@@ -42,13 +42,13 @@ This package covers end-to-end mapping UX, API, queue wiring, and RQ execution c
 - **Informed**: Operators monitoring RQ lock contention and job lifecycle issues.
 
 ## Success Criteria
-- [ ] Changing a mapping select in landuse report no longer enqueues a mapping RQ job immediately.
-- [ ] User can stage one or more mapping changes and submit them with one explicit action.
-- [ ] Single-OFE and Multi-OFE use the same mapping interaction pattern.
-- [ ] Mapping submit enqueues one job without `depends_on` chaining to previous mapping jobs.
-- [ ] Batch worker applies edits deterministically and emits one completion trigger for the submitted job.
-- [ ] Lock contention and queue fan-out are reduced in repeated mapping-edit sessions.
-- [ ] Targeted JS + microservice + RQ tests pass with new batch semantics.
+- [x] Changing a mapping select in landuse report no longer enqueues a mapping RQ job immediately.
+- [x] User can stage one or more mapping changes and submit them with one explicit action.
+- [x] Single-OFE and Multi-OFE use the same mapping interaction pattern.
+- [x] Mapping submit enqueues one job without `depends_on` chaining to previous mapping jobs.
+- [x] Batch worker applies edits deterministically and emits one completion trigger for the submitted job.
+- [x] Lock contention and queue fan-out are reduced in repeated mapping-edit sessions.
+- [x] Targeted JS + microservice + RQ tests pass with new batch semantics.
 
 ## Dependencies
 
@@ -89,6 +89,25 @@ This package covers end-to-end mapping UX, API, queue wiring, and RQ execution c
 - Mapping RQ execution path updated to process a batch in one job/lock scope.
 - Removed mapping `depends_on` chaining logic.
 - Updated targeted automated tests and package artifacts.
+
+## Implemented Contract Decisions
+- **Batch payload shape and limits**: canonical payload is `{"mappings":[{"dom":"...","newdom":"..."}, ...]}` with max 500 edits; response is `{"job_id":"...", "mapping_count": <int>}`.
+- **Duplicate/chained edit semantics**: duplicate source `dom` entries collapse to last-write-wins; normalized edits execute in deterministic first-seen source-domain order.
+- **All-or-nothing semantics**: route validates request before enqueue; worker validates all source doms before mutation; unknown source dom aborts without mutation; mapping state snapshots restore on downstream build exception.
+- **Backward compatibility**: legacy top-level `{"dom":"...","newdom":"..."}` remains accepted and is normalized to a one-item `mappings` batch.
+
+## Validation Summary
+- `wctl run-pytest tests/microservices/test_rq_engine_landuse_routes.py --maxfail=1` (`19 passed`)
+- `wctl run-pytest tests/rq/test_project_rq_mutation_guards.py --maxfail=1` (`23 passed`)
+- `wctl run-npm test -- --runTestsByPath wepppy/weppcloud/controllers_js/__tests__/landuse.test.js` (`20 passed`)
+- `wctl doc-lint --path docs/work-packages/20260423_landuse_batched_mapping_submit` (`4 files validated, 0 errors`)
+- `wctl check-rq-graph` (`RQ dependency graph artifacts are up to date`)
+- `wctl exec weppcloud python - <<'PY' ... Queue(...).job_ids ... PY` (`default_queue_jobs=0`; no live tree sample available for job-info inspection)
+- Manual UX smoke (user-reported): `greenlight`, `job_id=3082d0f1-acd4-41e0-b897-abda94b31c1f`
+
+## Post-Review Disposition
+- Dispatched code + QA review pass and dispositioned all actionable findings in this package.
+- Added guardrails for lock-gate stale completion short-circuiting, explicit `null` mapping-key validation, readonly submit disabling, inflight staging protection, and `project_rq.pyi` parity.
 
 ## Follow-up Work
 - Evaluate whether staged-submit pattern should be applied to coverage overrides after mapping rollout stabilizes.

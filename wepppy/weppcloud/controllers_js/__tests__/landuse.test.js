@@ -163,6 +163,7 @@ describe("Landuse controller", () => {
         delete global.url_for_run;
         delete global.WCEvents;
         delete global.UnitizerClient;
+        delete global.Project;
         if (global.WCDom) {
             delete global.WCDom;
         }
@@ -230,7 +231,7 @@ describe("Landuse controller", () => {
             })
         );
         const options = httpRequestMock.mock.calls.find((call) => call[0] === "/rq-engine/api/runs/test/cfg/modify-landuse-mapping")[1];
-        expect(JSON.parse(options.body)).toEqual({ dom: "100", newdom: "200" });
+        expect(JSON.parse(options.body)).toEqual({ mappings: [{ dom: "100", newdom: "200" }] });
         expect(baseInstance.connect_status_stream).toHaveBeenCalledWith(expect.any(Object));
         expect(baseInstance.set_rq_job_id).toHaveBeenCalledWith(landuse, "job-map-1");
         expect(baseInstance.append_status_message).toHaveBeenCalledWith(
@@ -257,18 +258,46 @@ describe("Landuse controller", () => {
         expect(baseInstance.disconnect_status_stream).toHaveBeenCalledWith(landuse);
     });
 
-    test("mapping select delegate posts updates", async () => {
+    test("mapping select delegate stages updates until submit", async () => {
         landuse.infoElement.innerHTML = `
-            <select data-landuse-role="mapping-select" data-landuse-dom="5">
-                <option value="alpha" selected>Alpha</option>
-            </select>
+            <div class="wc-landuse-report__controls">
+                <button type="button" data-landuse-action="submit-mapping" disabled aria-disabled="true">Apply Mapping Edits</button>
+                <span data-landuse-role="mapping-pending-status">No pending mapping edits.</span>
+            </div>
+            <table>
+                <tbody>
+                    <tr data-landuse-row="5">
+                        <td>
+                            <select data-landuse-role="mapping-select" data-landuse-dom="5">
+                                <option value="alpha" selected>Alpha</option>
+                                <option value="beta">Beta</option>
+                            </select>
+                        </td>
+                    </tr>
+                </tbody>
+            </table>
         `;
         landuse.bindReportEvents();
         jest.spyOn(landuse, "report").mockImplementation(() => {});
         httpRequestMock.mockClear();
 
         const select = landuse.infoElement.querySelector("select");
+        const submitButton = landuse.infoElement.querySelector("[data-landuse-action=\"submit-mapping\"]");
+        const pendingStatus = landuse.infoElement.querySelector("[data-landuse-role=\"mapping-pending-status\"]");
+        const row = landuse.infoElement.querySelector("[data-landuse-row=\"5\"]");
+
+        select.value = "beta";
         select.dispatchEvent(new Event("change", { bubbles: true }));
+        await flushPromises();
+        await flushPromises();
+
+        expect(httpRequestMock).not.toHaveBeenCalled();
+        expect(submitButton.disabled).toBe(false);
+        expect(submitButton.textContent).toContain("Apply 1 Mapping Edit");
+        expect(pendingStatus.textContent).toContain("1 mapping edit staged.");
+        expect(row.getAttribute("data-landuse-mapping-pending")).toBe("true");
+
+        submitButton.dispatchEvent(new Event("click", { bubbles: true }));
         await flushPromises();
         await flushPromises();
 
@@ -280,7 +309,189 @@ describe("Landuse controller", () => {
             })
         );
         const requestOptions = httpRequestMock.mock.calls[0][1];
-        expect(JSON.parse(requestOptions.body)).toEqual({ dom: "5", newdom: "alpha" });
+        expect(JSON.parse(requestOptions.body)).toEqual({ mappings: [{ dom: "5", newdom: "beta" }] });
+    });
+
+    test("staged multi-edit submit posts one batch request", async () => {
+        landuse.infoElement.innerHTML = `
+            <div class="wc-landuse-report__controls">
+                <button type="button" data-landuse-action="submit-mapping" disabled aria-disabled="true">Apply Mapping Edits</button>
+                <span data-landuse-role="mapping-pending-status">No pending mapping edits.</span>
+            </div>
+            <table>
+                <tbody>
+                    <tr data-landuse-row="44">
+                        <td>
+                            <select data-landuse-role="mapping-select" data-landuse-dom="44">
+                                <option value="71" selected>Forest</option>
+                                <option value="42">Range</option>
+                            </select>
+                        </td>
+                    </tr>
+                    <tr data-landuse-row="55">
+                        <td>
+                            <select data-landuse-role="mapping-select" data-landuse-dom="55">
+                                <option value="91" selected>Urban</option>
+                                <option value="11">Water</option>
+                            </select>
+                        </td>
+                    </tr>
+                </tbody>
+            </table>
+        `;
+        landuse.bindReportEvents();
+        httpRequestMock.mockClear();
+
+        const selects = Array.from(landuse.infoElement.querySelectorAll("select"));
+        const submitButton = landuse.infoElement.querySelector("[data-landuse-action=\"submit-mapping\"]");
+        const pendingStatus = landuse.infoElement.querySelector("[data-landuse-role=\"mapping-pending-status\"]");
+
+        selects[0].value = "42";
+        selects[0].dispatchEvent(new Event("change", { bubbles: true }));
+        selects[1].value = "11";
+        selects[1].dispatchEvent(new Event("change", { bubbles: true }));
+        await flushPromises();
+
+        expect(httpRequestMock).not.toHaveBeenCalled();
+        expect(submitButton.disabled).toBe(false);
+        expect(submitButton.textContent).toContain("Apply 2 Mapping Edits");
+        expect(pendingStatus.textContent).toContain("2 mapping edits staged.");
+
+        submitButton.dispatchEvent(new Event("click", { bubbles: true }));
+        await flushPromises();
+        await flushPromises();
+
+        expect(httpRequestMock).toHaveBeenCalledTimes(1);
+        expect(httpRequestMock).toHaveBeenCalledWith(
+            "/rq-engine/api/runs/test/cfg/modify-landuse-mapping",
+            expect.objectContaining({
+                method: "POST",
+                headers: expect.objectContaining({ "Content-Type": "application/json" }),
+            })
+        );
+        const requestOptions = httpRequestMock.mock.calls[0][1];
+        expect(JSON.parse(requestOptions.body)).toEqual({
+            mappings: [
+                { dom: "44", newdom: "42" },
+                { dom: "55", newdom: "11" },
+            ],
+        });
+    });
+
+    test("staged submit remains disabled in readonly mode", async () => {
+        global.Project = {
+            getInstance: jest.fn(() => ({ state: { readonly: true } })),
+        };
+        landuse.infoElement.innerHTML = `
+            <div class="wc-landuse-report__controls">
+                <button type="button" data-landuse-action="submit-mapping" disabled aria-disabled="true">Apply Mapping Edits</button>
+                <span data-landuse-role="mapping-pending-status">No pending mapping edits.</span>
+            </div>
+            <table>
+                <tbody>
+                    <tr data-landuse-row="5">
+                        <td>
+                            <select data-landuse-role="mapping-select" data-landuse-dom="5">
+                                <option value="alpha" selected>Alpha</option>
+                                <option value="beta">Beta</option>
+                            </select>
+                        </td>
+                    </tr>
+                </tbody>
+            </table>
+        `;
+        landuse.bindReportEvents();
+
+        const select = landuse.infoElement.querySelector("select");
+        const submitButton = landuse.infoElement.querySelector("[data-landuse-action=\"submit-mapping\"]");
+        select.value = "beta";
+        select.dispatchEvent(new Event("change", { bubbles: true }));
+        await flushPromises();
+
+        expect(submitButton.disabled).toBe(true);
+        expect(submitButton.getAttribute("aria-disabled")).toBe("true");
+    });
+
+    test("mapping submit inflight disables selects and ignores additional staging", async () => {
+        const deferred = () => {
+            let resolve;
+            let reject;
+            const promise = new Promise((res, rej) => {
+                resolve = res;
+                reject = rej;
+            });
+            return { promise, resolve, reject };
+        };
+
+        const mappingRequest = deferred();
+        httpRequestMock.mockImplementation((url) => {
+            if (url === "/rq-engine/api/runs/test/cfg/modify-landuse-mapping") {
+                return mappingRequest.promise;
+            }
+            if (url === "/rq-engine/api/runs/test/cfg/build-landuse") {
+                return Promise.resolve({ body: { job_id: "job-1" } });
+            }
+            if (url === "report/landuse/") {
+                return Promise.resolve({ body: "<div>report</div>" });
+            }
+            return Promise.resolve({ body: {} });
+        });
+
+        landuse.infoElement.innerHTML = `
+            <div class="wc-landuse-report__controls">
+                <button type="button" data-landuse-action="submit-mapping" disabled aria-disabled="true">Apply Mapping Edits</button>
+                <span data-landuse-role="mapping-pending-status">No pending mapping edits.</span>
+            </div>
+            <table>
+                <tbody>
+                    <tr data-landuse-row="5">
+                        <td>
+                            <select data-landuse-role="mapping-select" data-landuse-dom="5">
+                                <option value="alpha" selected>Alpha</option>
+                                <option value="beta">Beta</option>
+                            </select>
+                        </td>
+                    </tr>
+                </tbody>
+            </table>
+        `;
+        landuse.bindReportEvents();
+
+        const select = landuse.infoElement.querySelector("select");
+        const submitButton = landuse.infoElement.querySelector("[data-landuse-action=\"submit-mapping\"]");
+        const pendingStatus = landuse.infoElement.querySelector("[data-landuse-role=\"mapping-pending-status\"]");
+
+        select.value = "beta";
+        select.dispatchEvent(new Event("change", { bubbles: true }));
+        await flushPromises();
+        await flushPromises();
+
+        submitButton.dispatchEvent(new Event("click", { bubbles: true }));
+        await flushPromises();
+        await flushPromises();
+
+        expect(httpRequestMock).toHaveBeenCalledTimes(1);
+        expect(submitButton.disabled).toBe(true);
+        expect(submitButton.textContent).toContain("Applying Mapping Edits...");
+        expect(select.disabled).toBe(true);
+        expect(pendingStatus.textContent).toContain("Submitting mapping edits...");
+
+        select.value = "alpha";
+        select.dispatchEvent(new Event("change", { bubbles: true }));
+        await flushPromises();
+        await flushPromises();
+
+        expect(httpRequestMock).toHaveBeenCalledTimes(1);
+        expect(submitButton.textContent).toContain("Applying Mapping Edits...");
+
+        mappingRequest.resolve({ body: { job_id: "job-map-1" } });
+        await flushPromises();
+        await flushPromises();
+
+        expect(select.disabled).toBe(false);
+        expect(submitButton.disabled).toBe(true);
+        expect(submitButton.textContent).toContain("Apply Mapping Edits");
+        expect(pendingStatus.textContent).toContain("No pending mapping edits.");
     });
 
     test("toggle button expands details panel", () => {

@@ -7,6 +7,9 @@ REDIS_HOST: str
 RQ_DB: int
 TIMEOUT: int
 DEFAULT_ZOOM: int
+LANDUSE_MAPPING_BATCH_MAX_EDITS: int
+LANDUSE_MAPPING_MAX_KEY_LENGTH: int
+LANDUSE_MAPPING_CONTROL_CHAR_RE: Any
 
 def test_run_rq(runid: str) -> tuple[str, ...]: ...
 
@@ -90,7 +93,11 @@ def build_rangeland_cover_rq(
 ) -> None: ...
 
 def build_landuse_rq(runid: str) -> None: ...
-def modify_landuse_mapping_rq(runid: str, dom: str, newdom: str) -> None: ...
+def modify_landuse_mapping_rq(
+    runid: str,
+    mapping_edits: Sequence[Mapping[str, Any]] | Mapping[str, Any] | str,
+    newdom: str | None = ...,
+) -> None: ...
 
 def build_soils_rq(runid: str) -> None: ...
 

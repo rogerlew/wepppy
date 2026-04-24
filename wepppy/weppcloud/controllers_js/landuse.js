@@ -173,6 +173,38 @@ var Landuse = (function () {
         return normalized || null;
     }
 
+    function normalizeMappingEdit(edit) {
+        if (!edit || typeof edit !== "object") {
+            return null;
+        }
+        if (edit.dom === undefined || edit.dom === null || edit.newdom === undefined || edit.newdom === null) {
+            return null;
+        }
+        var domValue = String(edit.dom).trim();
+        var newDomValue = String(edit.newdom).trim();
+        if (!domValue || !newDomValue) {
+            return null;
+        }
+        return {
+            dom: domValue,
+            newdom: newDomValue
+        };
+    }
+
+    function isReadonlyModeEnabled() {
+        try {
+            if (window.Project && typeof window.Project.getInstance === "function") {
+                var project = window.Project.getInstance();
+                if (project && project.state && project.state.readonly !== undefined) {
+                    return Boolean(project.state.readonly);
+                }
+            }
+        } catch (error) {
+            return false;
+        }
+        return false;
+    }
+
     function createInstance() {
         var helpers = ensureHelpers();
         var dom = helpers.dom;
@@ -249,9 +281,16 @@ var Landuse = (function () {
             landuse._mapping_job_id = null;
         }
 
+        function resetStagedMappingState() {
+            landuse._staged_mapping_seq = 0;
+            landuse._staged_mappings = {};
+            landuse._mapping_submit_inflight = false;
+        }
+
         landuse.poll_completion_event = LANDUSE_BUILD_COMPLETION_EVENT;
         resetBuildCompletionSeen();
         resetMappingCompletionSeen();
+        resetStagedMappingState();
 
         var modePanels = [
             dom.qs("#landuse_mode0_controls"),
@@ -377,7 +416,12 @@ var Landuse = (function () {
                 if (domId === undefined || domId === null || value === undefined) {
                     return;
                 }
-                landuse.modify_mapping(String(domId), value);
+                landuse.stage_mapping(String(domId), value, this);
+            }));
+
+            landuse._reportDelegates.push(dom.delegate(landuse.infoElement, "click", "[data-landuse-action=\"submit-mapping\"]", function (event) {
+                event.preventDefault();
+                landuse.submit_staged_mappings();
             }));
 
             landuse._reportDelegates.push(dom.delegate(landuse.infoElement, "change", "[data-landuse-role=\"coverage-select\"]", function () {
@@ -393,6 +437,7 @@ var Landuse = (function () {
 
         landuse.bindReportEvents = function () {
             ensureReportDelegates();
+            landuse.sync_staged_mapping_ui();
         };
 
         function ensureFormDelegates() {
@@ -470,15 +515,183 @@ var Landuse = (function () {
                 .catch(handleError);
         };
 
-        landuse.modify_mapping = function (domId, newDom) {
-            var taskMsg = "Updating landuse mapping";
+        landuse.sync_staged_mapping_ui = function () {
+            if (!landuse.infoElement) {
+                return;
+            }
+            resetStagedMappingState();
+            var mappingSelects = landuse.infoElement.querySelectorAll("[data-landuse-role=\"mapping-select\"]");
+            mappingSelects.forEach(function (select) {
+                var currentValue = select.value === undefined || select.value === null ? "" : String(select.value);
+                select.setAttribute("data-landuse-current", currentValue);
+                var row = typeof select.closest === "function" ? select.closest("[data-landuse-row]") : null;
+                if (row) {
+                    row.removeAttribute("data-landuse-mapping-pending");
+                }
+            });
+            landuse.update_staged_mapping_status();
+        };
+
+        landuse.get_staged_mapping_edits = function () {
+            var staged = landuse._staged_mappings || {};
+            return Object.keys(staged)
+                .map(function (key) {
+                    return staged[key];
+                })
+                .sort(function (a, b) {
+                    return a.seq - b.seq;
+                })
+                .map(function (entry) {
+                    return {
+                        dom: entry.dom,
+                        newdom: entry.newdom
+                    };
+                });
+        };
+
+        landuse.update_staged_mapping_status = function () {
+            if (!landuse.infoElement) {
+                return;
+            }
+            var button = landuse.infoElement.querySelector("[data-landuse-action=\"submit-mapping\"]");
+            var status = landuse.infoElement.querySelector("[data-landuse-role=\"mapping-pending-status\"]");
+            var editCount = landuse.get_staged_mapping_edits().length;
+            var inflight = !!landuse._mapping_submit_inflight;
+            var readonly = isReadonlyModeEnabled();
+            var mappingSelects = landuse.infoElement.querySelectorAll("[data-landuse-role=\"mapping-select\"]");
+
+            mappingSelects.forEach(function (select) {
+                if (inflight) {
+                    if (!select.disabled) {
+                        select.disabled = true;
+                        select.setAttribute("data-landuse-inflight-disabled", "true");
+                    }
+                    return;
+                }
+                if (select.getAttribute("data-landuse-inflight-disabled") === "true") {
+                    if (!readonly) {
+                        select.disabled = false;
+                    }
+                    select.removeAttribute("data-landuse-inflight-disabled");
+                }
+            });
+
+            if (status) {
+                if (inflight) {
+                    status.textContent = "Submitting mapping edits...";
+                } else if (editCount === 0) {
+                    status.textContent = "No pending mapping edits.";
+                } else if (editCount === 1) {
+                    status.textContent = "1 mapping edit staged.";
+                } else {
+                    status.textContent = editCount + " mapping edits staged.";
+                }
+            }
+
+            if (button) {
+                var disableSubmit = inflight || editCount === 0 || readonly;
+                button.disabled = disableSubmit;
+                button.setAttribute("aria-disabled", disableSubmit ? "true" : "false");
+                if (inflight) {
+                    button.textContent = "Applying Mapping Edits...";
+                } else if (editCount === 0) {
+                    button.textContent = "Apply Mapping Edits";
+                } else if (editCount === 1) {
+                    button.textContent = "Apply 1 Mapping Edit";
+                } else {
+                    button.textContent = "Apply " + editCount + " Mapping Edits";
+                }
+            }
+        };
+
+        landuse.stage_mapping = function (domId, newDom, selectElement) {
+            if (landuse._mapping_submit_inflight) {
+                return;
+            }
+            var normalizedDom = String(domId).trim();
+            if (!normalizedDom) {
+                return;
+            }
+            var normalizedNewDom = String(newDom).trim();
+            if (!normalizedNewDom) {
+                return;
+            }
+
+            var baseline = "";
+            if (selectElement) {
+                baseline = selectElement.getAttribute("data-landuse-current");
+                if (baseline === null || baseline === undefined || baseline === "") {
+                    baseline = selectElement.value === undefined || selectElement.value === null
+                        ? ""
+                        : String(selectElement.value);
+                    selectElement.setAttribute("data-landuse-current", baseline);
+                }
+            }
+
+            if (baseline && normalizedNewDom === baseline) {
+                delete landuse._staged_mappings[normalizedDom];
+            } else {
+                var existing = landuse._staged_mappings[normalizedDom];
+                if (existing) {
+                    existing.newdom = normalizedNewDom;
+                } else {
+                    landuse._staged_mapping_seq += 1;
+                    landuse._staged_mappings[normalizedDom] = {
+                        dom: normalizedDom,
+                        newdom: normalizedNewDom,
+                        seq: landuse._staged_mapping_seq
+                    };
+                }
+            }
+
+            if (selectElement && typeof selectElement.closest === "function") {
+                var row = selectElement.closest("[data-landuse-row]");
+                if (row) {
+                    if (Object.prototype.hasOwnProperty.call(landuse._staged_mappings, normalizedDom)) {
+                        row.setAttribute("data-landuse-mapping-pending", "true");
+                    } else {
+                        row.removeAttribute("data-landuse-mapping-pending");
+                    }
+                }
+            }
+
+            landuse.update_staged_mapping_status();
+        };
+
+        landuse.submit_staged_mappings = function () {
+            if (landuse._mapping_submit_inflight) {
+                return;
+            }
+            var stagedEdits = landuse.get_staged_mapping_edits();
+            if (stagedEdits.length === 0) {
+                landuse.update_staged_mapping_status();
+                return;
+            }
+            landuse.submit_mapping_batch(stagedEdits, { clear_staged: true });
+        };
+
+        landuse.submit_mapping_batch = function (edits, options) {
+            var normalizedEdits = Array.isArray(edits)
+                ? edits.map(normalizeMappingEdit).filter(function (entry) {
+                    return !!entry;
+                })
+                : [];
+            if (normalizedEdits.length === 0) {
+                return;
+            }
+            var taskMsg = normalizedEdits.length === 1
+                ? "Updating landuse mapping"
+                : "Updating landuse mapping (" + normalizedEdits.length + " edits)";
             var payload = {
-                dom: domId,
-                newdom: newDom
+                mappings: normalizedEdits
             };
+            var shouldClearStaged = options && options.clear_staged === true;
+
             landuse._mapping_request_seq = (landuse._mapping_request_seq || 0) + 1;
             var requestSeq = landuse._mapping_request_seq;
 
+            landuse._mapping_submit_inflight = true;
+            landuse.update_staged_mapping_status();
             resetStatus(taskMsg);
             resetMappingCompletionSeen();
             landuse.connect_status_stream(landuse);
@@ -505,20 +718,37 @@ var Landuse = (function () {
                         landuse.poll_completion_event = LANDUSE_MAPPING_COMPLETION_EVENT;
                         landuse._mapping_job_id = response.job_id;
                         landuse.set_rq_job_id(landuse, response.job_id);
+                        if (shouldClearStaged) {
+                            landuse.sync_staged_mapping_ui();
+                        }
+                        landuse._mapping_submit_inflight = false;
+                        landuse.update_staged_mapping_status();
                         return;
                     }
                     if (response) {
                         landuse.pushResponseStacktrace(landuse, response);
                     }
                     landuse.disconnect_status_stream(landuse);
+                    landuse._mapping_submit_inflight = false;
+                    landuse.update_staged_mapping_status();
                 })
                 .catch(function (error) {
                     if (requestSeq !== landuse._mapping_request_seq) {
                         return;
                     }
                     landuse.disconnect_status_stream(landuse);
+                    landuse._mapping_submit_inflight = false;
+                    landuse.update_staged_mapping_status();
                     handleError(error);
                 });
+        };
+
+        landuse.modify_mapping = function (domId, newDom) {
+            var normalizedEdit = normalizeMappingEdit({ dom: domId, newdom: newDom });
+            if (!normalizedEdit) {
+                return;
+            }
+            landuse.submit_mapping_batch([normalizedEdit], { clear_staged: false });
         };
 
         landuse.report = function () {

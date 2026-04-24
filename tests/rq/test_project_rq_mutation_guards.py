@@ -108,7 +108,7 @@ def test_modify_landuse_mapping_rq_rejects_archive_form_root(
     monkeypatch.setattr(project_rq.RedisPrep, "getInstance", lambda _wd: DummyPrep())
 
     with pytest.raises(NoDirError) as exc_info:
-        project_rq.modify_landuse_mapping_rq("demo", "44", "71")
+        project_rq.modify_landuse_mapping_rq("demo", [{"dom": "44", "newdom": "71"}])
 
     assert exc_info.value.code == "NODIR_ARCHIVE_RETIRED"
     assert call_roots == ["landuse"]
@@ -141,10 +141,22 @@ def test_modify_landuse_mapping_rq_publishes_trigger_and_mutates_landuse(
 
     class DummyLanduse:
         def __init__(self):
-            self.calls: list[tuple[str, str]] = []
+            self.managements: dict[str, object] = {
+                "44": object(),
+                "55": object(),
+                "71": object(),
+                "42": object(),
+            }
+            self.domlc_d = {"100": "44", "200": "55", "300": "71"}
+            self.domlc_mofe_d = {"100": {"1": "44", "2": "71"}}
+            self.build_managements_calls = 0
 
-        def modify_mapping(self, dom: str, newdom: str) -> None:
-            self.calls.append((dom, newdom))
+        @contextmanager
+        def locked(self):
+            yield
+
+        def build_managements(self) -> None:
+            self.build_managements_calls += 1
 
     landuse = DummyLanduse()
 
@@ -166,10 +178,19 @@ def test_modify_landuse_mapping_rq_publishes_trigger_and_mutates_landuse(
         ),
     )
 
-    project_rq.modify_landuse_mapping_rq("demo", "44", "71")
+    project_rq.modify_landuse_mapping_rq(
+        "demo",
+        [
+            {"dom": "44", "newdom": "71"},
+            {"dom": "71", "newdom": "42"},
+            {"dom": "44", "newdom": "55"},
+        ],
+    )
 
     assert cleared_cache == [("demo", "landuse.nodb")]
-    assert landuse.calls == [("44", "71")]
+    assert landuse.domlc_d == {"100": "55", "200": "55", "300": "42"}
+    assert landuse.domlc_mofe_d == {"100": {"1": "55", "2": "42"}}
+    assert landuse.build_managements_calls == 1
     assert call_roots == ["landuse", "landuse"]
     assert any("LANDUSE_MODIFY_MAPPING_TASK_COMPLETED" in message for _channel, message in published)
 
@@ -200,11 +221,217 @@ def test_modify_landuse_mapping_rq_skips_stale_job_without_mutation(
         ),
     )
 
-    project_rq.modify_landuse_mapping_rq("demo", "44", "71")
+    project_rq.modify_landuse_mapping_rq("demo", [{"dom": "44", "newdom": "71"}])
 
     assert call_roots == []
     assert any("SKIPPED" in message for _channel, message in published)
     assert all("LANDUSE_MODIFY_MAPPING_TASK_COMPLETED" not in message for _channel, message in published)
+
+
+def test_modify_landuse_mapping_rq_skips_stale_job_at_lock_gate(
+    monkeypatch: pytest.MonkeyPatch,
+    tmp_path: Path,
+) -> None:
+    _run_wd, _set_archive_roots, call_roots = _stub_rq_context(monkeypatch, tmp_path)
+    published: list[tuple[str, str]] = []
+    monkeypatch.setattr(
+        project_rq.StatusMessenger,
+        "publish",
+        lambda channel, message: published.append((channel, message)),
+    )
+    monkeypatch.setattr(project_rq, "get_current_job", lambda: SimpleNamespace(id="job-latest"))
+    cleared_cache: list[tuple[str, str | None]] = []
+    monkeypatch.setattr(
+        project_rq,
+        "clear_nodb_file_cache",
+        lambda runid, pup_relpath=None: cleared_cache.append((runid, pup_relpath)),
+    )
+
+    class DummyPrep:
+        def __init__(self):
+            self._calls = 0
+
+        def get_rq_job_id(self, key: str):
+            self._calls += 1
+            if self._calls == 1:
+                return "job-latest"
+            return "job-newer"
+
+    monkeypatch.setattr(project_rq.RedisPrep, "getInstance", lambda _wd: DummyPrep())
+    monkeypatch.setattr(
+        project_rq.Landuse,
+        "getInstance",
+        lambda _wd, ignore_lock=False: (_ for _ in ()).throw(
+            AssertionError("Lock-gate stale jobs should not mutate landuse")
+        ),
+    )
+
+    project_rq.modify_landuse_mapping_rq("demo", [{"dom": "44", "newdom": "71"}])
+
+    assert call_roots == ["landuse", "landuse"]
+    assert cleared_cache == []
+    assert any("SKIPPED" in message and "lock gate" in message for _channel, message in published)
+    assert all("LANDUSE_MODIFY_MAPPING_TASK_COMPLETED" not in message for _channel, message in published)
+
+
+def test_modify_landuse_mapping_rq_rejects_unknown_dom_without_partial_apply(
+    monkeypatch: pytest.MonkeyPatch,
+    tmp_path: Path,
+) -> None:
+    _run_wd, _set_archive_roots, call_roots = _stub_rq_context(monkeypatch, tmp_path)
+    published: list[tuple[str, str]] = []
+    monkeypatch.setattr(
+        project_rq.StatusMessenger,
+        "publish",
+        lambda channel, message: published.append((channel, message)),
+    )
+    monkeypatch.setattr(project_rq, "get_current_job", lambda: SimpleNamespace(id="job-latest"))
+
+    class DummyPrep:
+        def get_rq_job_id(self, key: str):
+            return "job-latest"
+
+    monkeypatch.setattr(project_rq.RedisPrep, "getInstance", lambda _wd: DummyPrep())
+    monkeypatch.setattr(project_rq, "clear_nodb_file_cache", lambda *_args, **_kwargs: None)
+
+    class DummyLanduse:
+        def __init__(self):
+            self.managements: dict[str, object] = {"44": object(), "55": object()}
+            self.domlc_d = {"100": "44", "200": "55"}
+            self.domlc_mofe_d = {"100": {"1": "44"}}
+            self.build_managements_calls = 0
+
+        @contextmanager
+        def locked(self):
+            yield
+
+        def build_managements(self) -> None:
+            self.build_managements_calls += 1
+
+    landuse = DummyLanduse()
+    monkeypatch.setattr(
+        project_rq.Landuse,
+        "getInstance",
+        lambda _wd, ignore_lock=False: landuse,
+    )
+
+    with pytest.raises(ValueError) as exc_info:
+        project_rq.modify_landuse_mapping_rq(
+            "demo",
+            [
+                {"dom": "44", "newdom": "71"},
+                {"dom": "999", "newdom": "55"},
+            ],
+        )
+
+    assert "Unknown mapping dom value(s)" in str(exc_info.value)
+    assert landuse.domlc_d == {"100": "44", "200": "55"}
+    assert landuse.domlc_mofe_d == {"100": {"1": "44"}}
+    assert landuse.build_managements_calls == 0
+    assert call_roots == ["landuse", "landuse"]
+    assert all("LANDUSE_MODIFY_MAPPING_TASK_COMPLETED" not in message for _channel, message in published)
+
+
+def test_modify_landuse_mapping_rq_rolls_back_state_when_build_managements_fails(
+    monkeypatch: pytest.MonkeyPatch,
+    tmp_path: Path,
+) -> None:
+    _run_wd, _set_archive_roots, call_roots = _stub_rq_context(monkeypatch, tmp_path)
+    published: list[tuple[str, str]] = []
+    monkeypatch.setattr(
+        project_rq.StatusMessenger,
+        "publish",
+        lambda channel, message: published.append((channel, message)),
+    )
+    monkeypatch.setattr(project_rq, "get_current_job", lambda: SimpleNamespace(id="job-latest"))
+
+    class DummyPrep:
+        def get_rq_job_id(self, key: str):
+            return "job-latest"
+
+    monkeypatch.setattr(project_rq.RedisPrep, "getInstance", lambda _wd: DummyPrep())
+    monkeypatch.setattr(project_rq, "clear_nodb_file_cache", lambda *_args, **_kwargs: None)
+
+    class DummyLanduse:
+        def __init__(self):
+            self.managements: dict[str, dict[str, str]] = {
+                "44": {"name": "source"},
+                "71": {"name": "target"},
+            }
+            self.domlc_d = {"100": "44"}
+            self.domlc_mofe_d = {"100": {"1": "44"}}
+            self.build_managements_calls = 0
+
+        @contextmanager
+        def locked(self):
+            yield
+
+        def build_managements(self) -> None:
+            self.build_managements_calls += 1
+            self.managements = {"mutated": {"name": "bad"}}
+            raise RuntimeError("management rebuild failed")
+
+    landuse = DummyLanduse()
+    original_managements = dict(landuse.managements)
+    monkeypatch.setattr(
+        project_rq.Landuse,
+        "getInstance",
+        lambda _wd, ignore_lock=False: landuse,
+    )
+
+    with pytest.raises(RuntimeError) as exc_info:
+        project_rq.modify_landuse_mapping_rq("demo", [{"dom": "44", "newdom": "71"}])
+
+    assert str(exc_info.value) == "management rebuild failed"
+    assert landuse.domlc_d == {"100": "44"}
+    assert landuse.domlc_mofe_d == {"100": {"1": "44"}}
+    assert landuse.managements == original_managements
+    assert landuse.build_managements_calls == 1
+    assert call_roots == ["landuse", "landuse"]
+    assert all("LANDUSE_MODIFY_MAPPING_TASK_COMPLETED" not in message for _channel, message in published)
+
+
+def test_modify_landuse_mapping_rq_accepts_legacy_three_argument_signature(
+    monkeypatch: pytest.MonkeyPatch,
+    tmp_path: Path,
+) -> None:
+    _run_wd, _set_archive_roots, call_roots = _stub_rq_context(monkeypatch, tmp_path)
+    monkeypatch.setattr(project_rq.StatusMessenger, "publish", lambda *_args, **_kwargs: None)
+    monkeypatch.setattr(project_rq, "get_current_job", lambda: SimpleNamespace(id="job-latest"))
+
+    class DummyPrep:
+        def get_rq_job_id(self, key: str):
+            return "job-latest"
+
+    monkeypatch.setattr(project_rq.RedisPrep, "getInstance", lambda _wd: DummyPrep())
+    monkeypatch.setattr(project_rq, "clear_nodb_file_cache", lambda *_args, **_kwargs: None)
+
+    class DummyLanduse:
+        def __init__(self):
+            self.managements: dict[str, object] = {"44": object(), "71": object()}
+            self.domlc_d = {"100": "44", "200": "71"}
+            self.domlc_mofe_d = {}
+            self.build_managements_calls = 0
+
+        @contextmanager
+        def locked(self):
+            yield
+
+        def build_managements(self) -> None:
+            self.build_managements_calls += 1
+
+    landuse = DummyLanduse()
+    monkeypatch.setattr(
+        project_rq.Landuse,
+        "getInstance",
+        lambda _wd, ignore_lock=False: landuse,
+    )
+
+    project_rq.modify_landuse_mapping_rq("demo", "44", "71")
+
+    assert landuse.domlc_d == {"100": "71", "200": "71"}
+    assert landuse.build_managements_calls == 1
+    assert call_roots == ["landuse", "landuse"]
 
 
 def test_build_treatments_rq_rejects_archive_form_roots(

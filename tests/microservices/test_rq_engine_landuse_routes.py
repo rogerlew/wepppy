@@ -103,14 +103,94 @@ def test_modify_landuse_mapping_enqueues_job(monkeypatch: pytest.MonkeyPatch) ->
         def __init__(self, *args, **kwargs) -> None:
             pass
 
-        def fetch_job(self, job_id):
-            return None
-
         def enqueue_call(self, func, args, timeout=None, **kwargs):
             captured["func"] = func
             captured["args"] = args
             captured["timeout"] = timeout
-            captured["depends_on"] = kwargs.get("depends_on")
+            captured["kwargs"] = kwargs
+            return DummyJob()
+
+    class DummyRedis:
+        def __enter__(self):
+            return self
+
+        def __exit__(self, exc_type, exc, tb):
+            return False
+
+    monkeypatch.setattr(landuse_routes, "Queue", DummyQueue)
+    monkeypatch.setattr(landuse_routes.redis, "Redis", lambda **kwargs: DummyRedis())
+
+    with TestClient(rq_engine.app) as client:
+        response = client.post(
+            "/api/runs/run-1/cfg/modify-landuse-mapping",
+            json={"mappings": [{"dom": "44", "newdom": "71"}]},
+        )
+
+    assert response.status_code == 200
+    assert response.json()["job_id"] == "job-map-42"
+    assert response.json()["mapping_count"] == 1
+    assert captured["func"] is landuse_routes.modify_landuse_mapping_rq
+    assert captured["args"] == ("run-1", [{"dom": "44", "newdom": "71"}])
+    assert "depends_on" not in captured["kwargs"]
+
+
+def test_modify_landuse_mapping_requires_payload_fields(monkeypatch: pytest.MonkeyPatch) -> None:
+    _stub_auth(monkeypatch)
+    monkeypatch.setattr(landuse_routes, "get_wd", lambda runid: "/tmp/run")
+
+    with TestClient(rq_engine.app) as client:
+        response = client.post(
+            "/api/runs/run-1/cfg/modify-landuse-mapping",
+            json={"dom": "44"},
+        )
+
+    assert response.status_code == 400
+    payload = response.json()
+    assert payload["error"]["message"] == "mappings or dom/newdom must be provided"
+
+
+@pytest.mark.parametrize(
+    ("payload", "message"),
+    [
+        ({"mappings": [{"dom": None, "newdom": "71"}]}, "mappings[0].dom must be provided"),
+        ({"mappings": [{"dom": "44", "newdom": None}]}, "mappings[0].newdom must be provided"),
+    ],
+)
+def test_modify_landuse_mapping_rejects_null_mapping_keys(
+    monkeypatch: pytest.MonkeyPatch,
+    payload: dict[str, object],
+    message: str,
+) -> None:
+    _stub_auth(monkeypatch)
+    monkeypatch.setattr(landuse_routes, "get_wd", lambda runid: "/tmp/run")
+
+    with TestClient(rq_engine.app) as client:
+        response = client.post(
+            "/api/runs/run-1/cfg/modify-landuse-mapping",
+            json=payload,
+        )
+
+    assert response.status_code == 400
+    assert response.json()["error"]["message"] == message
+
+
+def test_modify_landuse_mapping_accepts_legacy_dom_newdom_payload(monkeypatch: pytest.MonkeyPatch) -> None:
+    _stub_auth(monkeypatch)
+    _stub_prep(monkeypatch)
+    monkeypatch.setattr(landuse_routes, "get_wd", lambda runid: "/tmp/run")
+
+    captured: dict[str, object] = {}
+
+    class DummyJob:
+        id = "job-map-legacy"
+
+    class DummyQueue:
+        def __init__(self, *args, **kwargs) -> None:
+            pass
+
+        def enqueue_call(self, func, args, timeout=None, **kwargs):
+            captured["func"] = func
+            captured["args"] = args
             return DummyJob()
 
     class DummyRedis:
@@ -130,24 +210,10 @@ def test_modify_landuse_mapping_enqueues_job(monkeypatch: pytest.MonkeyPatch) ->
         )
 
     assert response.status_code == 200
-    assert response.json()["job_id"] == "job-map-42"
+    assert response.json()["job_id"] == "job-map-legacy"
+    assert response.json()["mapping_count"] == 1
     assert captured["func"] is landuse_routes.modify_landuse_mapping_rq
-    assert captured["args"] == ("run-1", "44", "71")
-
-
-def test_modify_landuse_mapping_requires_payload_fields(monkeypatch: pytest.MonkeyPatch) -> None:
-    _stub_auth(monkeypatch)
-    monkeypatch.setattr(landuse_routes, "get_wd", lambda runid: "/tmp/run")
-
-    with TestClient(rq_engine.app) as client:
-        response = client.post(
-            "/api/runs/run-1/cfg/modify-landuse-mapping",
-            json={"dom": "44"},
-        )
-
-    assert response.status_code == 400
-    payload = response.json()
-    assert payload["error"]["message"] == "dom and newdom must be provided"
+    assert captured["args"] == ("run-1", [{"dom": "44", "newdom": "71"}])
 
 
 def test_modify_landuse_mapping_rejects_blank_keys(monkeypatch: pytest.MonkeyPatch) -> None:
@@ -157,7 +223,7 @@ def test_modify_landuse_mapping_rejects_blank_keys(monkeypatch: pytest.MonkeyPat
     with TestClient(rq_engine.app) as client:
         response = client.post(
             "/api/runs/run-1/cfg/modify-landuse-mapping",
-            json={"dom": "   ", "newdom": "  "},
+            json={"mappings": [{"dom": "   ", "newdom": "  "}]},
         )
 
     assert response.status_code == 400
@@ -172,12 +238,89 @@ def test_modify_landuse_mapping_rejects_control_chars(monkeypatch: pytest.Monkey
     with TestClient(rq_engine.app) as client:
         response = client.post(
             "/api/runs/run-1/cfg/modify-landuse-mapping",
-            json={"dom": "4\t4", "newdom": "71"},
+            json={"mappings": [{"dom": "4\t4", "newdom": "71"}]},
         )
 
     assert response.status_code == 400
     payload = response.json()
-    assert payload["error"]["message"] == "dom contains unsupported control characters"
+    assert payload["error"]["message"] == "mappings[0].dom contains unsupported control characters"
+
+
+def test_modify_landuse_mapping_deduplicates_dom_updates_last_write_wins(
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    _stub_auth(monkeypatch)
+    _stub_prep(monkeypatch)
+    monkeypatch.setattr(landuse_routes, "get_wd", lambda runid: "/tmp/run")
+
+    captured: dict[str, object] = {}
+
+    class DummyJob:
+        id = "job-map-dedupe"
+
+    class DummyQueue:
+        def __init__(self, *args, **kwargs) -> None:
+            pass
+
+        def enqueue_call(self, func, args, timeout=None, **kwargs):
+            captured["func"] = func
+            captured["args"] = args
+            return DummyJob()
+
+    class DummyRedis:
+        def __enter__(self):
+            return self
+
+        def __exit__(self, exc_type, exc, tb):
+            return False
+
+    monkeypatch.setattr(landuse_routes, "Queue", DummyQueue)
+    monkeypatch.setattr(landuse_routes.redis, "Redis", lambda **kwargs: DummyRedis())
+
+    with TestClient(rq_engine.app) as client:
+        response = client.post(
+            "/api/runs/run-1/cfg/modify-landuse-mapping",
+            json={
+                "mappings": [
+                    {"dom": "44", "newdom": "71"},
+                    {"dom": "55", "newdom": "91"},
+                    {"dom": "44", "newdom": "42"},
+                ]
+            },
+        )
+
+    assert response.status_code == 200
+    assert response.json()["mapping_count"] == 2
+    assert captured["func"] is landuse_routes.modify_landuse_mapping_rq
+    assert captured["args"] == (
+        "run-1",
+        [
+            {"dom": "44", "newdom": "42"},
+            {"dom": "55", "newdom": "91"},
+        ],
+    )
+
+
+def test_modify_landuse_mapping_enforces_batch_limit(monkeypatch: pytest.MonkeyPatch) -> None:
+    _stub_auth(monkeypatch)
+    monkeypatch.setattr(landuse_routes, "get_wd", lambda runid: "/tmp/run")
+
+    edits = [
+        {"dom": str(idx), "newdom": "71"}
+        for idx in range(landuse_routes.LANDUSE_MAPPING_BATCH_MAX_EDITS + 1)
+    ]
+
+    with TestClient(rq_engine.app) as client:
+        response = client.post(
+            "/api/runs/run-1/cfg/modify-landuse-mapping",
+            json={"mappings": edits},
+        )
+
+    assert response.status_code == 400
+    payload = response.json()
+    assert payload["error"]["message"] == (
+        f"mappings exceeds {landuse_routes.LANDUSE_MAPPING_BATCH_MAX_EDITS} edits"
+    )
 
 
 def test_modify_landuse_mapping_propagates_nodir_preflight_errors(monkeypatch: pytest.MonkeyPatch) -> None:
@@ -192,7 +335,7 @@ def test_modify_landuse_mapping_propagates_nodir_preflight_errors(monkeypatch: p
     with TestClient(rq_engine.app) as client:
         response = client.post(
             "/api/runs/run-1/cfg/modify-landuse-mapping",
-            json={"dom": "44", "newdom": "71"},
+            json={"mappings": [{"dom": "44", "newdom": "71"}]},
         )
 
     assert response.status_code == 409
@@ -210,9 +353,6 @@ def test_modify_landuse_mapping_returns_500_when_enqueue_fails(
         def __init__(self, *args, **kwargs) -> None:
             pass
 
-        def fetch_job(self, job_id):
-            return None
-
         def enqueue_call(self, *args, **kwargs):
             raise RuntimeError("queue down")
 
@@ -229,7 +369,7 @@ def test_modify_landuse_mapping_returns_500_when_enqueue_fails(
     with TestClient(rq_engine.app) as client:
         response = client.post(
             "/api/runs/run-1/cfg/modify-landuse-mapping",
-            json={"dom": "44", "newdom": "71"},
+            json={"mappings": [{"dom": "44", "newdom": "71"}]},
         )
 
     assert response.status_code == 500

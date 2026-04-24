@@ -1,6 +1,22 @@
 {% set coverage_values = coverage_percentages if coverage_percentages is defined else [] %}
 
 <div class="wc-landuse-report">
+  <div class="wc-landuse-report__controls">
+    <button
+      type="button"
+      class="pure-button pure-button-secondary disable-readonly"
+      data-landuse-action="submit-mapping"
+      disabled
+      aria-disabled="true">
+      Apply Mapping Edits
+    </button>
+    <span
+      class="wc-landuse-report__value wc-text-muted"
+      data-landuse-role="mapping-pending-status"
+      aria-live="polite">
+      No pending mapping edits.
+    </span>
+  </div>
   <table class="wc-table wc-landuse-report__table">
     <thead>
       <tr>
