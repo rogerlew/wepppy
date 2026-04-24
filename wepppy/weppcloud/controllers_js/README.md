@@ -230,7 +230,7 @@ Keep this document updated when the bundling flow or controller contract changes
 ### Landuse Modify Controller Reference (2025 helper migration)
 - **DOM contract**: `modify_landuse.htm` now exposes `data-landuse-modify-action="toggle-selection|submit"` and `data-landuse-modify-field="topaz-ids|landuse-code"`. Selection mode wiring runs through `WCDom.delegate`, and map interactions continue to depend on `MapController`/Leaflet—use the existing hooks rather than reintroducing inline handlers when the UI grows.
 - **Event surface**: `LanduseModify.getInstance().events = WCEvents.useEventMap(['landuse:modify:started', 'landuse:modify:completed', 'landuse:modify:error', 'landuse:selection:changed', 'job:started', 'job:completed', 'job:error'])`. Consumers should subscribe to these signals instead of scraping textarea values or controller internals.
-- **Transport**: modification requests post JSON (`{ topaz_ids: [...], landuse: '<code>' }`) to `tasks/modify_landuse/`. Rectangle selections post JSON extents to `tasks/sub_intersection/`, and the backend normalizes payloads via `_coerce_topaz_ids`/`_coerce_landuse_code` before calling `Landuse.modify`. Successful runs refresh dependent controllers (`Landuse`, `SubcatchmentDelineation`) via the emitter/`controlBase` lifecycle events.
+- **Transport**: modification requests post JSON (`{ topaz_ids: [...], landuse: '<code>' }`) to `url_for_run("modify-landuse", { prefix: "/rq-engine/api" })` via `WCHttp.requestWithSessionToken`. Rectangle selections post JSON extents to `tasks/sub_intersection/`. Successful runs refresh dependent controllers (`Landuse`, `SubcatchmentDelineation`) via the emitter/`controlBase` lifecycle events.
 - **Testing**: Jest coverage lives in `controllers_js/__tests__/landuse_modify.test.js` (selection toggles, event emission, error handling). Backend expectations sit in `tests/weppcloud/routes/test_landuse_bp.py`; include both in your `wctl run-npm test` and targeted `wctl run-pytest` runs whenever payload contracts change.
 
 ### Omni Controller Reference (2024 helper migration)
@@ -352,7 +352,7 @@ Key behaviors:
 ```javascript
 // ✅ Correct - run-scoped endpoints (slug-resolved)
 http.postJsonWithSessionToken(url_for_run("build-climate", { prefix: "/rq-engine/api" }), payload, { form: formElement })
-http.request(url_for_run("tasks/set_landuse_db"), { method: "POST", body: params })
+http.requestWithSessionToken(url_for_run("set-landuse-db", { prefix: "/rq-engine/api" }), { method: "POST", body: params })
 http.get(url_for_run("query/delineation_pass"))
 http.get(url_for_run("resources/subcatchments.json"))
 

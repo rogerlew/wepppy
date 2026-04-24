@@ -1,5 +1,5 @@
 from .climate import Climate as Climate, ClimateMode as ClimateMode, ClimateModeIsUndefinedError as ClimateModeIsUndefinedError, ClimateSpatialMode as ClimateSpatialMode, NoClimateStationSelectedError as NoClimateStationSelectedError
-from .landuse import Landuse as Landuse, LanduseMode as LanduseMode
+from .landuse import Landuse as Landuse, LanduseCustomMappingError as LanduseCustomMappingError, LanduseMode as LanduseMode
 from .ron import Map as Map, Ron as Ron
 from .soils import Soils as Soils, SoilsMode as SoilsMode
 from .topaz import Topaz as Topaz
@@ -7,4 +7,4 @@ from wepppy.topo.topaz import MinimumChannelLengthTooShortError as MinimumChanne
 from .watershed import Watershed as Watershed, WatershedNotAbstractedError as WatershedNotAbstractedError
 from .wepp import Wepp as Wepp
 
-__all__ = ['Climate', 'ClimateMode', 'ClimateSpatialMode', 'NoClimateStationSelectedError', 'ClimateModeIsUndefinedError', 'Landuse', 'LanduseMode', 'Map', 'Ron', 'Soils', 'SoilsMode', 'Topaz', 'WatershedBoundaryTouchesEdgeError', 'MinimumChannelLengthTooShortError', 'Watershed', 'WatershedNotAbstractedError', 'Wepp']
+__all__ = ['Climate', 'ClimateMode', 'ClimateSpatialMode', 'NoClimateStationSelectedError', 'ClimateModeIsUndefinedError', 'Landuse', 'LanduseCustomMappingError', 'LanduseMode', 'Map', 'Ron', 'Soils', 'SoilsMode', 'Topaz', 'WatershedBoundaryTouchesEdgeError', 'MinimumChannelLengthTooShortError', 'Watershed', 'WatershedNotAbstractedError', 'Wepp']

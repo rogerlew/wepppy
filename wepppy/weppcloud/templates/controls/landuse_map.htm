@@ -1,0 +1,423 @@
+{% extends "base_pure.htm" %}
+{% import "controls/_pure_macros.html" as ui %}
+
+{% block title %}Landuse Map Editor{% endblock %}
+
+{% block head_extras %}
+  <style>
+    .lu-map-page {
+      padding-block: var(--wc-space-md);
+    }
+
+    .lu-map-page .wc-control__meta {
+      order: -1;
+      display: inline-flex;
+      align-items: baseline;
+      margin-right: var(--wc-space-sm);
+    }
+
+    .lu-map__run-link {
+      font-size: 1.5rem;
+      line-height: 1.2;
+      font-weight: 600;
+      color: var(--wc-color-text-muted);
+      text-decoration: none;
+      letter-spacing: 0.01em;
+    }
+
+    .lu-map__run-link:hover,
+    .lu-map__run-link:focus-visible {
+      color: var(--wc-color-text);
+      text-decoration: underline;
+    }
+
+    .lu-map {
+      display: grid;
+      gap: var(--wc-space-md);
+    }
+
+    .lu-map__status {
+      margin: 0;
+    }
+
+    .lu-map__toolbar {
+      display: flex;
+      flex-wrap: wrap;
+      gap: var(--wc-space-xs);
+    }
+
+    .lu-map__table-wrap {
+      overflow-x: auto;
+      border: 1px solid var(--wc-color-border);
+      border-radius: var(--wc-radius-sm);
+      background: var(--wc-color-surface);
+    }
+
+    .lu-map__table {
+      width: 100%;
+      border-collapse: collapse;
+      min-width: 64rem;
+    }
+
+    .lu-map__table th,
+    .lu-map__table td {
+      padding: var(--wc-space-xs) var(--wc-space-sm);
+      border-bottom: 1px solid var(--wc-color-border);
+      text-align: left;
+      vertical-align: top;
+    }
+
+    .lu-map__table th {
+      background: var(--wc-color-surface-alt);
+      color: var(--wc-color-text-muted);
+      font-weight: 600;
+    }
+
+    .lu-map__table code {
+      white-space: nowrap;
+    }
+
+    .lu-map__empty {
+      padding: var(--wc-space-md);
+      color: var(--wc-color-text-muted);
+    }
+  </style>
+{% endblock %}
+
+{% block body_container %}
+  <div id="landuse-map-config"
+       data-snapshot-url="{{ snapshot_url }}"
+       data-save-url="{{ save_url }}"
+       data-clear-override-url="{{ clear_override_url }}"
+       data-session-token-url="{{ session_token_url }}"></div>
+  <script id="landuse-map-seed" type="application/json">{{ snapshot | tojson }}</script>
+
+  {% set map_description %}
+    <p class="wc-text-muted">Assign a management file for each landuse key/disturbed class pair and save the run-scoped map override atomically.</p>
+  {% endset %}
+
+  {% set map_meta %}
+    {% if runid is defined and runid and config is defined and config %}
+      {% set run_home_href = (
+        url_for_run('run_0.runs0', runid=runid, config=config)
+        if url_for_run is defined
+        else '/runs/' ~ runid ~ '/' ~ config
+      ) %}
+      <a class="lu-map__run-link" href="{{ run_home_href }}">{{ runid }}</a>
+    {% endif %}
+  {% endset %}
+
+  <div class="wc-container wc-container--fluid lu-map-page">
+  {% call ui.card_shell(
+       title="Landuse Map Editor",
+       description=map_description,
+       meta=map_meta,
+       collapsible=False,
+       body_class="wc-stack lu-map"
+     ) %}
+    <div id="landuse-map-status" class="wc-alert wc-alert--info lu-map__status" role="status" aria-live="polite">
+      <p class="wc-alert__body">Map snapshot loaded.</p>
+    </div>
+
+    <div class="lu-map__toolbar">
+      <button id="landuse-map-save" class="pure-button pure-button-primary" type="button">Save Map</button>
+      <button id="landuse-map-refresh" class="pure-button pure-button-secondary" type="button">Reload Current Snapshot</button>
+      <button id="landuse-map-clear" class="pure-button pure-button-secondary" type="button">Clear Override</button>
+    </div>
+
+    <div class="lu-map__table-wrap">
+      <table class="lu-map__table">
+        <thead>
+          <tr>
+            <th>Key</th>
+            <th>Description</th>
+            <th>Disturbed Class</th>
+            <th>Management File</th>
+          </tr>
+        </thead>
+        <tbody id="landuse-map-rows"></tbody>
+      </table>
+      <div id="landuse-map-empty" class="lu-map__empty" hidden>No rows available.</div>
+    </div>
+  {% endcall %}
+  </div>
+{% endblock %}
+
+{% block script_extras %}
+<script>
+(function () {
+  "use strict";
+
+  var configNode = document.getElementById("landuse-map-config");
+  if (!configNode) {
+    return;
+  }
+
+  var seedNode = document.getElementById("landuse-map-seed");
+  var state = {
+    rows: [],
+    options: [],
+    lookupSha256: null
+  };
+  if (seedNode && seedNode.textContent) {
+    try {
+      var payload = JSON.parse(seedNode.textContent) || {};
+      state.rows = Array.isArray(payload.rows) ? payload.rows : [];
+      state.options = Array.isArray(payload.management_options) ? payload.management_options : [];
+      state.lookupSha256 = payload.lookup_sha256 || null;
+    } catch (_error) {
+      state.rows = [];
+      state.options = [];
+      state.lookupSha256 = null;
+    }
+  }
+
+  function csrfToken() {
+    var node = document.querySelector('meta[name="csrf-token"]');
+    if (!node) {
+      return "";
+    }
+    return String(node.getAttribute("content") || "").trim();
+  }
+
+  function setStatus(level, message) {
+    var root = document.getElementById("landuse-map-status");
+    if (!root) {
+      return;
+    }
+    var body = root.querySelector(".wc-alert__body");
+    var className = {
+      info: "wc-alert--info",
+      success: "wc-alert--success",
+      warning: "wc-alert--warning",
+      error: "wc-alert--error"
+    }[level] || "wc-alert--info";
+    root.className = "wc-alert lu-map__status " + className;
+    if (body) {
+      body.textContent = message;
+    } else {
+      root.textContent = message;
+    }
+  }
+
+  function responseToPayload(response) {
+    return response.text().then(function (text) {
+      var payload = {};
+      if (text) {
+        try {
+          payload = JSON.parse(text);
+        } catch (_error) {
+          payload = {};
+        }
+      }
+      if (response.ok) {
+        return payload;
+      }
+      var message = "Request failed";
+      if (payload && payload.error && payload.error.message) {
+        message = payload.error.message;
+      }
+      throw new Error(message);
+    });
+  }
+
+  var sessionToken = null;
+
+  function getSessionToken(forceRefresh) {
+    if (!forceRefresh && sessionToken) {
+      return Promise.resolve(sessionToken);
+    }
+    return fetch(configNode.dataset.sessionTokenUrl, {
+      method: "POST",
+      credentials: "same-origin",
+      headers: {
+        "X-CSRFToken": csrfToken()
+      }
+    }).then(responseToPayload).then(function (payload) {
+      if (!payload || !payload.token) {
+        throw new Error("Session token missing from response.");
+      }
+      sessionToken = String(payload.token);
+      return sessionToken;
+    });
+  }
+
+  function requestWithSessionToken(url, options, retry) {
+    return getSessionToken(Boolean(retry)).then(function (token) {
+      var requestOptions = Object.assign({ method: "GET" }, options || {});
+      var headers = Object.assign({}, requestOptions.headers || {});
+      headers.Authorization = "Bearer " + token;
+      requestOptions.headers = headers;
+      return fetch(url, requestOptions).then(function (response) {
+        if (!retry && (response.status === 401 || response.status === 403)) {
+          sessionToken = null;
+          return requestWithSessionToken(url, options, true);
+        }
+        return responseToPayload(response);
+      });
+    });
+  }
+
+  function apiRequest(url, options) {
+    return requestWithSessionToken(url, options);
+  }
+
+  function renderRows() {
+    var rowsHost = document.getElementById("landuse-map-rows");
+    var empty = document.getElementById("landuse-map-empty");
+    if (!rowsHost || !empty) {
+      return;
+    }
+    rowsHost.innerHTML = "";
+    if (!Array.isArray(state.rows) || state.rows.length === 0) {
+      empty.hidden = false;
+      return;
+    }
+    empty.hidden = true;
+
+    var optionsByFile = {};
+    state.options.forEach(function (option) {
+      optionsByFile[option.management_file] = option;
+    });
+
+    state.rows.forEach(function (row) {
+      var tr = document.createElement("tr");
+      var keyCell = document.createElement("td");
+      var keyCode = document.createElement("code");
+      keyCode.textContent = String(row.key || "");
+      keyCell.appendChild(keyCode);
+      tr.appendChild(keyCell);
+
+      var descriptionCell = document.createElement("td");
+      descriptionCell.textContent = String(row.description || "");
+      tr.appendChild(descriptionCell);
+
+      var disturbedCell = document.createElement("td");
+      disturbedCell.textContent = String(row.disturbed_class || "");
+      tr.appendChild(disturbedCell);
+
+      var selectCell = document.createElement("td");
+      var select = document.createElement("select");
+      select.className = "pure-input-1";
+      select.setAttribute("data-row-key", String(row.key || ""));
+
+      state.options.forEach(function (option) {
+        var optionNode = document.createElement("option");
+        optionNode.value = String(option.management_file || "");
+        var label = optionNode.value;
+        if (option.description) {
+          label += " - " + option.description;
+        }
+        if (option.source === "user_defined") {
+          label += " (user-defined)";
+        }
+        optionNode.textContent = label;
+        if (optionNode.value === String(row.management_file || "")) {
+          optionNode.selected = true;
+        }
+        select.appendChild(optionNode);
+      });
+      selectCell.appendChild(select);
+      tr.appendChild(selectCell);
+      rowsHost.appendChild(tr);
+    });
+  }
+
+  function collectRows() {
+    var selections = document.querySelectorAll("[data-row-key]");
+    var rows = [];
+    Array.prototype.forEach.call(selections, function (selectNode) {
+      if (!(selectNode instanceof HTMLSelectElement)) {
+        return;
+      }
+      var key = String(selectNode.dataset.rowKey || "").trim();
+      var managementFile = String(selectNode.value || "").trim();
+      if (!key || !managementFile) {
+        return;
+      }
+      rows.push({
+        key: key,
+        management_file: managementFile
+      });
+    });
+    return rows;
+  }
+
+  function applySnapshotPayload(payload) {
+    var content = payload && payload.Content ? payload.Content : payload;
+    state.rows = Array.isArray(content.rows) ? content.rows : [];
+    state.options = Array.isArray(content.management_options) ? content.management_options : [];
+    state.lookupSha256 = content.lookup_sha256 || null;
+    renderRows();
+  }
+
+  function refreshSnapshot() {
+    setStatus("info", "Loading current map snapshot...");
+    return apiRequest(configNode.dataset.snapshotUrl).then(function (payload) {
+      applySnapshotPayload(payload);
+      setStatus("success", "Map snapshot refreshed.");
+    }).catch(function (error) {
+      setStatus("error", error.message);
+    });
+  }
+
+  var saveButton = document.getElementById("landuse-map-save");
+  if (saveButton) {
+    saveButton.addEventListener("click", function () {
+      if (!state.lookupSha256) {
+        setStatus("warning", "Snapshot hash unavailable. Reload the table first.");
+        return;
+      }
+      var rows = collectRows();
+      if (!rows.length) {
+        setStatus("warning", "No rows to save.");
+        return;
+      }
+      setStatus("info", "Saving landuse map...");
+      apiRequest(configNode.dataset.saveUrl, {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          "X-If-Match-Sha256": state.lookupSha256
+        },
+        body: JSON.stringify({ rows: rows })
+      }).then(function () {
+        setStatus("success", "Landuse map saved.");
+        return refreshSnapshot();
+      }).catch(function (error) {
+        setStatus("error", error.message);
+      });
+    });
+  }
+
+  var refreshButton = document.getElementById("landuse-map-refresh");
+  if (refreshButton) {
+    refreshButton.addEventListener("click", function () {
+      refreshSnapshot();
+    });
+  }
+
+  var clearButton = document.getElementById("landuse-map-clear");
+  if (clearButton) {
+    clearButton.addEventListener("click", function () {
+      if (!window.confirm("Clear the run-scoped map override and return to built-in mapping?")) {
+        return;
+      }
+      setStatus("info", "Clearing map override...");
+      apiRequest(configNode.dataset.clearOverrideUrl, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({})
+      }).then(function () {
+        setStatus("success", "Map override cleared.");
+        return refreshSnapshot();
+      }).catch(function (error) {
+        setStatus("error", error.message);
+      });
+    });
+  }
+
+  renderRows();
+})();
+</script>
+{% endblock %}

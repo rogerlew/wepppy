@@ -7,6 +7,7 @@ const createControlBaseStub = require("./helpers/control_base_stub");
 describe("LanduseModify GL controller", () => {
     let httpPostJsonMock;
     let httpGetJsonMock;
+    let httpRequestWithSessionTokenMock;
     let baseInstance;
     let mapStub;
     let landuseModify;
@@ -72,9 +73,6 @@ describe("LanduseModify GL controller", () => {
             if (url === "tasks/sub_intersection/") {
                 return Promise.resolve({ body: ["5", "6"] });
             }
-            if (url === "tasks/modify_landuse/") {
-                return Promise.resolve({ body: {} });
-            }
             return Promise.resolve({ body: {} });
         });
         httpGetJsonMock = jest.fn(() => Promise.resolve({
@@ -87,11 +85,13 @@ describe("LanduseModify GL controller", () => {
                 }
             ]
         }));
+        httpRequestWithSessionTokenMock = jest.fn(() => Promise.resolve({ body: {} }));
 
         global.WCHttp = {
             request: jest.fn(),
             postJson: httpPostJsonMock,
             getJson: httpGetJsonMock,
+            requestWithSessionToken: httpRequestWithSessionTokenMock,
             isHttpError: jest.fn().mockReturnValue(false)
         };
 
@@ -123,7 +123,12 @@ describe("LanduseModify GL controller", () => {
         }
         global.deck = { GeoJsonLayer };
 
-        global.url_for_run = jest.fn((path) => path);
+        global.url_for_run = jest.fn((path, options) => {
+            if (options && options.prefix) {
+                return `${options.prefix}/runs/test/cfg/${path}`;
+            }
+            return path;
+        });
 
         await import("../landuse_modify_gl.js");
         landuseModify = window.LanduseModify.getInstance();
@@ -219,11 +224,14 @@ describe("LanduseModify GL controller", () => {
         button.dispatchEvent(new MouseEvent("click", { bubbles: true }));
         await flushPromises();
 
-        expect(global.WCHttp.postJson).toHaveBeenCalledWith(
-            "tasks/modify_landuse/",
-            { topaz_ids: ["4", "7"], landuse: "202" },
+        expect(global.WCHttp.requestWithSessionToken).toHaveBeenCalledWith(
+            "/rq-engine/api/runs/test/cfg/modify-landuse",
             expect.objectContaining({ form: formContainer })
         );
+        const options = global.WCHttp.requestWithSessionToken.mock.calls[0][1];
+        expect(options.method).toBe("POST");
+        expect(options.headers["Content-Type"]).toBe("application/json");
+        expect(JSON.parse(options.body)).toEqual({ topaz_ids: ["4", "7"], landuse: "202" });
         expect(statusEl.textContent).toContain("Success");
         expect(checkboxEl.checked).toBe(false);
         expect(landuseModify.selected.size).toBe(0);

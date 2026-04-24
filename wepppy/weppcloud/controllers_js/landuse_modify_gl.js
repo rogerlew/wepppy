@@ -58,6 +58,9 @@ var LanduseModify = (function () {
         if (!http || typeof http.request !== "function") {
             throw new Error("LanduseModify GL requires WCHttp helpers.");
         }
+        if (typeof http.requestWithSessionToken !== "function") {
+            throw new Error("LanduseModify GL requires WCHttp.requestWithSessionToken.");
+        }
         if (!events || typeof events.createEmitter !== "function") {
             throw new Error("LanduseModify GL requires WCEvents helpers.");
         }
@@ -663,10 +666,15 @@ var LanduseModify = (function () {
                 payload: { topazIds: ids.slice(), landuse: landuseValue }
             });
 
-            http.postJson(url_for_run("tasks/modify_landuse/"), {
-                topaz_ids: ids,
-                landuse: landuseValue
-            }, { form: formElement }).then(function (response) {
+            http.requestWithSessionToken(url_for_run("modify-landuse", { prefix: "/rq-engine/api" }), {
+                method: "POST",
+                headers: { "Content-Type": "application/json" },
+                body: JSON.stringify({
+                    topaz_ids: ids,
+                    landuse: landuseValue
+                }),
+                form: formElement
+            }).then(function (response) {
                 var payload = response.body || {};
                 if (!payload.error && !payload.errors) {
                     applySelection([], { source: "modify", silent: true });

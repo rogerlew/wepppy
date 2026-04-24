@@ -27,6 +27,7 @@
 | Flask mutating routes (`POST`, `PUT`, `PATCH`, `DELETE`) using browser session cookies | Flask session cookie | MUST require CSRF protection (token validation or explicit same-origin gate for approved boundary endpoints). |
 | Flask safe routes (`GET`, `HEAD`, `OPTIONS`) | Any | CSRF token not required. |
 | rq-engine run APIs called with bearer token | `Authorization: Bearer` | CSRF token MUST NOT be required. |
+| WEPPcloud browser callers invoking rq-engine mutators via `requestWithSessionToken` | Session bootstrap -> bearer token -> rq-engine | CSRF applies to the token bridge endpoint, not the rq-engine mutator call itself. |
 | rq-engine session-token endpoint via cookie path | Flask session cookie fallback | MUST enforce same-origin checks and reject requests with no `Origin` and no `Referer`. |
 | browse/query-engine API calls using bearer token | `Authorization: Bearer` | CSRF token MUST NOT be required. |
 
@@ -51,6 +52,17 @@
 - Bearer-token routes MUST remain CSRF-agnostic so non-browser clients are not coupled to CSRF tokens.
 - Cookie-auth support on `POST /rq-engine/api/runs/{runid}/{config}/session-token` is a browser bridge and MUST remain same-origin guarded.
 - Forwarded-origin aliases (`X-Forwarded-Proto`, `X-Forwarded-Host`) for rq-engine cookie-path same-origin checks MUST remain opt-in via `RQ_ENGINE_TRUST_FORWARDED_ORIGIN_HEADERS=true`.
+- Landuse Phase 1 moved browser mutators (`set-landuse-mode`, `set-landuse-db`,
+  `modify-landuse-coverage`) MUST use bearer transport via
+  `requestWithSessionToken` and MUST NOT introduce cookie-mutation fallback on
+  rq-engine route handlers.
+- Landuse Phase 3 moved browser surfaces (`landuse-user-defined/*`,
+  `landuse-map/*`, `modify-landuse`) MUST use the same session-token bridge
+  bearer pattern from WEPPcloud render pages and MUST NOT reintroduce direct
+  cookie mutation handling on rq-engine mutators.
+- Legacy Flask landuse compatibility machine/state endpoints were removed on
+  `2026-04-24`; browser callers MUST NOT regress to direct Flask mutation paths
+  for these operations.
 
 ## Current Baseline Controls (Do Not Regress)
 - Global Flask CSRF middleware is enabled in WEPPcloud (`flask_wtf.csrf.CSRFProtect`).

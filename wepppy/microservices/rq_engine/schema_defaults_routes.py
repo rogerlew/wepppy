@@ -1787,6 +1787,21 @@ def _build_run_operations(runtime: RuntimeState) -> dict[str, dict[str, Any]]:
     build_subcatchments_and_abstract_watershed_id = rq_operation_id(
         "build_subcatchments_and_abstract_watershed"
     )
+    get_landuse_state_id = rq_operation_id("get_landuse_state")
+    set_landuse_mode_id = rq_operation_id("set_landuse_mode")
+    set_landuse_db_id = rq_operation_id("set_landuse_db")
+    modify_landuse_coverage_id = rq_operation_id("modify_landuse_coverage")
+    modify_landuse_mapping_id = rq_operation_id("modify_landuse_mapping")
+    get_landuse_user_defined_catalog_id = rq_operation_id("get_landuse_user_defined_catalog")
+    upload_landuse_user_defined_managements_id = rq_operation_id("upload_landuse_user_defined_managements")
+    delete_landuse_user_defined_management_id = rq_operation_id("delete_landuse_user_defined_management")
+    update_landuse_user_defined_management_description_id = rq_operation_id(
+        "update_landuse_user_defined_management_description"
+    )
+    get_landuse_map_snapshot_id = rq_operation_id("get_landuse_map_snapshot")
+    save_landuse_map_id = rq_operation_id("save_landuse_map")
+    clear_landuse_map_override_id = rq_operation_id("clear_landuse_map_override")
+    modify_landuse_id = rq_operation_id("modify_landuse")
     build_climate_id = rq_operation_id("build_climate")
     build_landuse_id = rq_operation_id("build_landuse")
     build_soils_id = rq_operation_id("build_soils")
@@ -1828,6 +1843,44 @@ def _build_run_operations(runtime: RuntimeState) -> dict[str, dict[str, Any]]:
                 "resolved_defaults": {},
                 "defaults_context": {
                     "controller_count": len(_controller_names(runtime)),
+                    **_defaults_context(runtime),
+                },
+            },
+        },
+        get_landuse_state_id: {
+            "descriptor": _base_run_read_descriptor(
+                runtime=runtime,
+                operation_id=get_landuse_state_id,
+                path="/api/runs/{runid}/{config}/controllers/landuse/state",
+                required_fields=[
+                    "controller",
+                    "state",
+                    "run_state_domain",
+                    "run_state_vector",
+                    "run_state_revision",
+                ],
+            ),
+            "schema": {
+                "schema_version": 1,
+                "request": _empty_request_schema(),
+                "responses": {
+                    "success": {
+                        "required": [
+                            "controller",
+                            "state",
+                            "run_state_domain",
+                            "run_state_vector",
+                            "run_state_revision",
+                        ]
+                    }
+                },
+            },
+            "defaults": {
+                "resolved_defaults": {
+                    "controller": "landuse",
+                    "state": _controller_defaults("landuse", runtime),
+                },
+                "defaults_context": {
                     **_defaults_context(runtime),
                 },
             },
@@ -2620,6 +2673,498 @@ def _build_run_operations(runtime: RuntimeState) -> dict[str, dict[str, Any]]:
                         "required": ["job_id"],
                     }
                 },
+            },
+            "defaults": {
+                "resolved_defaults": {},
+                "defaults_context": _defaults_context(runtime),
+            },
+        },
+        set_landuse_mode_id: {
+            "descriptor": _base_run_mutation_descriptor(
+                runtime=runtime,
+                operation_id=set_landuse_mode_id,
+                path="/api/runs/{runid}/{config}/set-landuse-mode",
+                execution_mode="sync",
+                returns_job=False,
+                job_key=None,
+                required_fields=["message"],
+                estimated_duration_bucket="fast",
+                estimated_duration_seconds=2,
+                mutates_controllers=["landuse"],
+                invalidates_steps=["build-landuse", "run-wepp", "run-wepp-watershed"],
+                batch_mode_behavior="sync_update_no_queue",
+                auth_requirements={
+                    "bearer_jwt": {
+                        "required_scope": ["rq:enqueue"],
+                        "token_classes": ["user", "session", "service", "mcp"],
+                    }
+                },
+            ),
+            "schema": {
+                "schema_version": 1,
+                "request": {
+                    "type": "object",
+                    "properties": {
+                        "mode": {
+                            "type": "integer",
+                            "constraint_mode": "static",
+                        },
+                        "landuse_single_selection": {
+                            "type": "string",
+                            "constraint_mode": "static",
+                        },
+                    },
+                    "required": ["mode", "landuse_single_selection"],
+                    "additional_properties": True,
+                },
+                "responses": {"success": {"required": ["message"]}},
+            },
+            "defaults": {
+                "resolved_defaults": {},
+                "defaults_context": _defaults_context(runtime),
+            },
+        },
+        set_landuse_db_id: {
+            "descriptor": _base_run_mutation_descriptor(
+                runtime=runtime,
+                operation_id=set_landuse_db_id,
+                path="/api/runs/{runid}/{config}/set-landuse-db",
+                execution_mode="sync",
+                returns_job=False,
+                job_key=None,
+                required_fields=["message"],
+                estimated_duration_bucket="fast",
+                estimated_duration_seconds=2,
+                mutates_controllers=["landuse"],
+                invalidates_steps=["build-landuse", "run-wepp", "run-wepp-watershed"],
+                batch_mode_behavior="sync_update_no_queue",
+                auth_requirements={
+                    "bearer_jwt": {
+                        "required_scope": ["rq:enqueue"],
+                        "token_classes": ["user", "session", "service", "mcp"],
+                    }
+                },
+            ),
+            "schema": {
+                "schema_version": 1,
+                "request": {
+                    "type": "object",
+                    "properties": {
+                        "landuse_db": {
+                            "type": "string",
+                            "constraint_mode": "static",
+                        },
+                    },
+                    "required": ["landuse_db"],
+                    "additional_properties": True,
+                },
+                "responses": {"success": {"required": ["message"]}},
+            },
+            "defaults": {
+                "resolved_defaults": {},
+                "defaults_context": _defaults_context(runtime),
+            },
+        },
+        modify_landuse_coverage_id: {
+            "descriptor": _base_run_mutation_descriptor(
+                runtime=runtime,
+                operation_id=modify_landuse_coverage_id,
+                path="/api/runs/{runid}/{config}/modify-landuse-coverage",
+                execution_mode="sync",
+                returns_job=False,
+                job_key=None,
+                required_fields=["message"],
+                estimated_duration_bucket="fast",
+                estimated_duration_seconds=3,
+                mutates_controllers=["landuse"],
+                invalidates_steps=["build-landuse", "run-wepp", "run-wepp-watershed"],
+                batch_mode_behavior="sync_update_no_queue",
+                auth_requirements={
+                    "bearer_jwt": {
+                        "required_scope": ["rq:enqueue"],
+                        "token_classes": ["user", "session", "service", "mcp"],
+                    }
+                },
+            ),
+            "schema": {
+                "schema_version": 1,
+                "request": {
+                    "type": "object",
+                    "properties": {
+                        "dom": {
+                            "type": "string",
+                            "constraint_mode": "static",
+                        },
+                        "cover": {
+                            "type": "string",
+                            "constraint_mode": "static",
+                        },
+                        "value": {
+                            "type": "number",
+                            "constraint_mode": "static",
+                        },
+                    },
+                    "required": ["dom", "cover", "value"],
+                    "additional_properties": True,
+                },
+                "responses": {"success": {"required": ["message"]}},
+            },
+            "defaults": {
+                "resolved_defaults": {},
+                "defaults_context": _defaults_context(runtime),
+            },
+        },
+        modify_landuse_mapping_id: {
+            "descriptor": _base_run_mutation_descriptor(
+                runtime=runtime,
+                operation_id=modify_landuse_mapping_id,
+                path="/api/runs/{runid}/{config}/modify-landuse-mapping",
+                execution_mode="async",
+                returns_job=True,
+                job_key="modify_landuse_mapping_rq",
+                required_fields=["job_id", "mapping_count"],
+                estimated_duration_bucket="medium",
+                estimated_duration_seconds=45,
+                mutates_controllers=["landuse"],
+                invalidates_steps=["build-landuse", "run-wepp", "run-wepp-watershed"],
+                batch_mode_behavior="queue_job",
+                auth_requirements={
+                    "bearer_jwt": {
+                        "required_scope": ["rq:enqueue"],
+                        "token_classes": ["user", "session", "service", "mcp"],
+                    }
+                },
+            ),
+            "schema": {
+                "schema_version": 1,
+                "request": {
+                    "type": "object",
+                    "properties": {
+                        "mappings": {
+                            "type": "array",
+                            "constraint_mode": "static",
+                            "items": {
+                                "type": "object",
+                                "properties": {
+                                    "dom": {"type": "string"},
+                                    "newdom": {"type": "string"},
+                                },
+                                "required": ["dom", "newdom"],
+                                "additional_properties": False,
+                            },
+                        },
+                        "dom": {
+                            "type": "string",
+                            "constraint_mode": "static",
+                        },
+                        "newdom": {
+                            "type": "string",
+                            "constraint_mode": "static",
+                        },
+                    },
+                    "additional_properties": True,
+                },
+                "responses": {"success": {"required": ["job_id", "mapping_count"]}},
+            },
+            "defaults": {
+                "resolved_defaults": {},
+                "defaults_context": _defaults_context(runtime),
+            },
+        },
+        get_landuse_user_defined_catalog_id: {
+            "descriptor": _base_run_read_descriptor(
+                runtime=runtime,
+                operation_id=get_landuse_user_defined_catalog_id,
+                path="/api/runs/{runid}/{config}/landuse-user-defined/catalog",
+                required_fields=["items", "lookup_sha256"],
+            ),
+            "schema": {
+                "schema_version": 1,
+                "request": _empty_request_schema(),
+                "responses": {"success": {"required": ["items", "lookup_sha256"]}},
+            },
+            "defaults": {
+                "resolved_defaults": {},
+                "defaults_context": _defaults_context(runtime),
+            },
+        },
+        upload_landuse_user_defined_managements_id: {
+            "descriptor": _base_run_mutation_descriptor(
+                runtime=runtime,
+                operation_id=upload_landuse_user_defined_managements_id,
+                path="/api/runs/{runid}/{config}/landuse-user-defined/upload",
+                execution_mode="sync",
+                returns_job=False,
+                job_key=None,
+                required_fields=["message", "imported_files", "catalog_count", "items", "replace"],
+                estimated_duration_bucket="fast",
+                estimated_duration_seconds=5,
+                mutates_controllers=["landuse"],
+                invalidates_steps=["build-landuse", "run-wepp", "run-wepp-watershed"],
+                batch_mode_behavior="sync_update_no_queue",
+                auth_requirements={
+                    "bearer_jwt": {
+                        "required_scope": ["rq:enqueue"],
+                        "token_classes": ["user", "session", "service", "mcp"],
+                    }
+                },
+            ),
+            "schema": {
+                "schema_version": 1,
+                "request": {
+                    "type": "object",
+                    "properties": {
+                        "replace": {
+                            "type": "boolean",
+                            "constraint_mode": "static",
+                        },
+                        "management_upload": {
+                            "type": "string",
+                            "format": "binary",
+                            "constraint_mode": "static",
+                        },
+                    },
+                    "required": ["management_upload"],
+                    "additional_properties": True,
+                },
+                "responses": {
+                    "success": {
+                        "required": ["message", "imported_files", "catalog_count", "items", "replace"],
+                    }
+                },
+            },
+            "defaults": {
+                "resolved_defaults": {"replace": False},
+                "defaults_context": _defaults_context(runtime),
+            },
+        },
+        delete_landuse_user_defined_management_id: {
+            "descriptor": _base_run_mutation_descriptor(
+                runtime=runtime,
+                operation_id=delete_landuse_user_defined_management_id,
+                path="/api/runs/{runid}/{config}/landuse-user-defined/delete",
+                execution_mode="sync",
+                returns_job=False,
+                job_key=None,
+                required_fields=["message", "deleted", "catalog_count", "items"],
+                estimated_duration_bucket="fast",
+                estimated_duration_seconds=2,
+                mutates_controllers=["landuse"],
+                invalidates_steps=["build-landuse", "run-wepp", "run-wepp-watershed"],
+                batch_mode_behavior="sync_update_no_queue",
+                auth_requirements={
+                    "bearer_jwt": {
+                        "required_scope": ["rq:enqueue"],
+                        "token_classes": ["user", "session", "service", "mcp"],
+                    }
+                },
+            ),
+            "schema": {
+                "schema_version": 1,
+                "request": {
+                    "type": "object",
+                    "properties": {
+                        "filename": {
+                            "type": "string",
+                            "constraint_mode": "static",
+                        },
+                    },
+                    "required": ["filename"],
+                    "additional_properties": True,
+                },
+                "responses": {"success": {"required": ["message", "deleted", "catalog_count", "items"]}},
+            },
+            "defaults": {
+                "resolved_defaults": {},
+                "defaults_context": _defaults_context(runtime),
+            },
+        },
+        update_landuse_user_defined_management_description_id: {
+            "descriptor": _base_run_mutation_descriptor(
+                runtime=runtime,
+                operation_id=update_landuse_user_defined_management_description_id,
+                path="/api/runs/{runid}/{config}/landuse-user-defined/update-description",
+                execution_mode="sync",
+                returns_job=False,
+                job_key=None,
+                required_fields=["message", "item", "catalog_count", "items"],
+                estimated_duration_bucket="fast",
+                estimated_duration_seconds=2,
+                mutates_controllers=["landuse"],
+                invalidates_steps=["build-landuse", "run-wepp", "run-wepp-watershed"],
+                batch_mode_behavior="sync_update_no_queue",
+                auth_requirements={
+                    "bearer_jwt": {
+                        "required_scope": ["rq:enqueue"],
+                        "token_classes": ["user", "session", "service", "mcp"],
+                    }
+                },
+            ),
+            "schema": {
+                "schema_version": 1,
+                "request": {
+                    "type": "object",
+                    "properties": {
+                        "filename": {
+                            "type": "string",
+                            "constraint_mode": "static",
+                        },
+                        "description": {
+                            "type": "string",
+                            "constraint_mode": "static",
+                        },
+                    },
+                    "required": ["filename", "description"],
+                    "additional_properties": True,
+                },
+                "responses": {"success": {"required": ["message", "item", "catalog_count", "items"]}},
+            },
+            "defaults": {
+                "resolved_defaults": {},
+                "defaults_context": _defaults_context(runtime),
+            },
+        },
+        get_landuse_map_snapshot_id: {
+            "descriptor": _base_run_read_descriptor(
+                runtime=runtime,
+                operation_id=get_landuse_map_snapshot_id,
+                path="/api/runs/{runid}/{config}/landuse-map/snapshot",
+                required_fields=["rows", "management_options", "lookup_sha256"],
+            ),
+            "schema": {
+                "schema_version": 1,
+                "request": _empty_request_schema(),
+                "responses": {"success": {"required": ["rows", "management_options", "lookup_sha256"]}},
+            },
+            "defaults": {
+                "resolved_defaults": {},
+                "defaults_context": _defaults_context(runtime),
+            },
+        },
+        save_landuse_map_id: {
+            "descriptor": _base_run_mutation_descriptor(
+                runtime=runtime,
+                operation_id=save_landuse_map_id,
+                path="/api/runs/{runid}/{config}/landuse-map/save",
+                execution_mode="sync",
+                returns_job=False,
+                job_key=None,
+                required_fields=["message", "lookup_sha256"],
+                estimated_duration_bucket="medium",
+                estimated_duration_seconds=8,
+                mutates_controllers=["landuse"],
+                invalidates_steps=["build-landuse", "run-wepp", "run-wepp-watershed"],
+                batch_mode_behavior="sync_update_no_queue",
+                auth_requirements={
+                    "bearer_jwt": {
+                        "required_scope": ["rq:enqueue"],
+                        "token_classes": ["user", "session", "service", "mcp"],
+                    }
+                },
+            ),
+            "schema": {
+                "schema_version": 1,
+                "request": {
+                    "type": "object",
+                    "properties": {
+                        "if_match_sha256": {
+                            "type": "string",
+                            "constraint_mode": "static",
+                        },
+                        "rows": {
+                            "type": "array",
+                            "constraint_mode": "static",
+                            "items": {
+                                "type": "object",
+                                "properties": {
+                                    "key": {"type": "string"},
+                                    "management_file": {"type": "string"},
+                                },
+                                "required": ["key", "management_file"],
+                                "additional_properties": True,
+                            },
+                        },
+                    },
+                    "required": ["if_match_sha256", "rows"],
+                    "additional_properties": True,
+                },
+                "responses": {"success": {"required": ["message", "lookup_sha256"]}},
+            },
+            "defaults": {
+                "resolved_defaults": {},
+                "defaults_context": _defaults_context(runtime),
+            },
+        },
+        clear_landuse_map_override_id: {
+            "descriptor": _base_run_mutation_descriptor(
+                runtime=runtime,
+                operation_id=clear_landuse_map_override_id,
+                path="/api/runs/{runid}/{config}/landuse-map/clear-override",
+                execution_mode="sync",
+                returns_job=False,
+                job_key=None,
+                required_fields=["message"],
+                estimated_duration_bucket="fast",
+                estimated_duration_seconds=3,
+                mutates_controllers=["landuse"],
+                invalidates_steps=["build-landuse", "run-wepp", "run-wepp-watershed"],
+                batch_mode_behavior="sync_update_no_queue",
+                auth_requirements={
+                    "bearer_jwt": {
+                        "required_scope": ["rq:enqueue"],
+                        "token_classes": ["user", "session", "service", "mcp"],
+                    }
+                },
+            ),
+            "schema": {
+                "schema_version": 1,
+                "request": _empty_request_schema(),
+                "responses": {"success": {"required": ["message"]}},
+            },
+            "defaults": {
+                "resolved_defaults": {},
+                "defaults_context": _defaults_context(runtime),
+            },
+        },
+        modify_landuse_id: {
+            "descriptor": _base_run_mutation_descriptor(
+                runtime=runtime,
+                operation_id=modify_landuse_id,
+                path="/api/runs/{runid}/{config}/modify-landuse",
+                execution_mode="sync",
+                returns_job=False,
+                job_key=None,
+                required_fields=["message", "topaz_count"],
+                estimated_duration_bucket="fast",
+                estimated_duration_seconds=3,
+                mutates_controllers=["landuse"],
+                invalidates_steps=["build-landuse", "run-wepp", "run-wepp-watershed"],
+                batch_mode_behavior="sync_update_no_queue",
+                auth_requirements={
+                    "bearer_jwt": {
+                        "required_scope": ["rq:enqueue"],
+                        "token_classes": ["user", "session", "service", "mcp"],
+                    }
+                },
+            ),
+            "schema": {
+                "schema_version": 1,
+                "request": {
+                    "type": "object",
+                    "properties": {
+                        "topaz_ids": {
+                            "type": ["array", "string"],
+                            "constraint_mode": "static",
+                        },
+                        "landuse": {
+                            "type": ["integer", "string"],
+                            "constraint_mode": "static",
+                        },
+                    },
+                    "required": ["topaz_ids", "landuse"],
+                    "additional_properties": True,
+                },
+                "responses": {"success": {"required": ["message", "topaz_count"]}},
             },
             "defaults": {
                 "resolved_defaults": {},

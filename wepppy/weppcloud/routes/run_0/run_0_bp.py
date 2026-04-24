@@ -30,7 +30,7 @@ import wepppy
 from wepppy.all_your_base import isint
 from wepppy.config.secrets import get_secret
 from wepppy.config.redis_settings import RedisDB, redis_connection_kwargs
-from wepppy.nodb.base import get_configs
+from wepppy.nodb.base import NoDbStaleWriteError, get_configs
 from wepppy.nodb.core import * 
 from wepppy.nodb.unitizer import Unitizer
 from wepppy.nodb.mods.observed import Observed
@@ -82,6 +82,7 @@ SESSION_TOKEN_SCOPES = ["rq:status", "rq:enqueue", "rq:export"]
 DEFAULT_BROWSE_JWT_COOKIE_NAME = "wepp_browse_jwt"
 BROWSE_JWT_COOKIE_NAME_ENV = "WEPP_BROWSE_JWT_COOKIE_NAME"
 DEFAULT_SITE_PREFIX = "/weppcloud"
+_SYSTEM_LANDUSE_CUSTOM_MAPPING_RELPATH = "landuse/landuse_user_defined_mapping.json"
 
 VAPID_PUBLIC_KEY = ''
 _VAPID_PATH = pathlib.Path('/workdir/weppcloud2/microservices/wepppush/vapid.json')
@@ -141,6 +142,89 @@ def _current_user_has_role(role: str) -> bool:
 
 def _openet_admin_enabled(*, playwright_load_all: bool) -> bool:
     return bool(playwright_load_all) or _current_user_has_role("Admin")
+
+
+def _normalize_landuse_custom_mapping_relpath(value: object) -> str | None:
+    token = str(value or "").strip()
+    if not token:
+        return None
+
+    normalized = token.replace("\\", "/").lstrip("/")
+    while normalized.startswith("./"):
+        normalized = normalized[2:]
+    normalized = normalized.strip().lower()
+    return normalized or None
+
+
+def _recover_stale_system_landuse_custom_mapping_reference(
+    landuse: object,
+    exc: Exception | None = None,
+) -> bool:
+    relpath = None
+    details = getattr(exc, "details", None)
+    if isinstance(details, dict):
+        relpath = details.get("custom_mapping_relpath")
+    if relpath in (None, ""):
+        relpath = getattr(landuse, "custom_mapping_relpath", None)
+
+    normalized_relpath = _normalize_landuse_custom_mapping_relpath(relpath)
+    if normalized_relpath != _SYSTEM_LANDUSE_CUSTOM_MAPPING_RELPATH:
+        return False
+
+    raw_relpath = str(relpath).strip() if relpath not in (None, "") else _SYSTEM_LANDUSE_CUSTOM_MAPPING_RELPATH
+    current_app.logger.warning(
+        "Recovering stale system landuse custom mapping reference during run load: %s",
+        raw_relpath,
+    )
+
+    clear_stale = getattr(landuse, "_clear_stale_system_custom_mapping_reference", None)
+    if callable(clear_stale):
+        try:
+            return bool(clear_stale(raw_relpath))
+        except Exception:
+            current_app.logger.exception(
+                "Failed stale system custom map cleanup via Landuse helper",
+                extra={"custom_mapping_relpath": raw_relpath},
+            )
+
+    # Recovery boundary fallback: keep run pages loadable even if helper wiring
+    # drifts on legacy instances.
+    try:
+        setattr(landuse, "_custom_mapping_relpath", None)
+        islocked = getattr(landuse, "islocked", None)
+        if callable(islocked) and islocked():
+            return True
+        locked = getattr(landuse, "locked", None)
+        if callable(locked):
+            try:
+                with locked():
+                    setattr(landuse, "_custom_mapping_relpath", None)
+            except Exception:
+                current_app.logger.exception(
+                    "Failed to persist stale custom map cleanup during run load; "
+                    "continuing with in-memory recovery",
+                    extra={"custom_mapping_relpath": raw_relpath},
+                )
+        return True
+    except Exception:
+        current_app.logger.exception(
+            "Failed stale custom map recovery during run load",
+            extra={"custom_mapping_relpath": raw_relpath},
+        )
+        return False
+
+
+def _call_landuse_with_stale_mapping_recovery(landuse: object, producer):
+    try:
+        return producer()
+    except LanduseCustomMappingError as exc:
+        if not _recover_stale_system_landuse_custom_mapping_reference(landuse, exc):
+            raise
+        return producer()
+    except NoDbStaleWriteError:
+        if not _recover_stale_system_landuse_custom_mapping_reference(landuse):
+            raise
+        return producer()
 
 MOD_UI_DEFINITIONS = OrderedDict([
     ('rap_ts', {
@@ -1702,8 +1786,14 @@ def _build_runs0_context(runid, config, playwright_load_all):
     else:
         rq_job_ids = {}
 
-    landuseoptions = landuse.landuseoptions
-    landuse_report_context = build_landuse_report_context(landuse)
+    landuseoptions = _call_landuse_with_stale_mapping_recovery(
+        landuse,
+        lambda: landuse.landuseoptions,
+    )
+    landuse_report_context = _call_landuse_with_stale_mapping_recovery(
+        landuse,
+        lambda: build_landuse_report_context(landuse),
+    )
     soildboptions = soilsdb.load_db()
 
     critical_shear_options = management.load_channel_d50_cs()

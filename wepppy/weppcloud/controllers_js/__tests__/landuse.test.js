@@ -659,11 +659,18 @@ describe("Landuse controller", () => {
         modeOne.dispatchEvent(new Event("change", { bubbles: true }));
         await Promise.resolve();
 
-        expect(httpPostJsonMock).toHaveBeenCalledWith(
-            "tasks/set_landuse_mode/",
-            { mode: 1, landuse_single_selection: "101" },
-            expect.objectContaining({ form: expect.any(HTMLFormElement) })
+        expect(httpRequestMock).toHaveBeenCalledWith(
+            "/rq-engine/api/runs/test/cfg/set-landuse-mode",
+            expect.objectContaining({
+                method: "POST",
+                headers: expect.objectContaining({ "Content-Type": "application/json" }),
+                form: expect.any(HTMLFormElement),
+            })
         );
+        const requestOptions = httpRequestMock.mock.calls.find(
+            (call) => call[0] === "/rq-engine/api/runs/test/cfg/set-landuse-mode"
+        )[1];
+        expect(JSON.parse(requestOptions.body)).toEqual({ mode: 1, landuse_single_selection: "101" });
         expect(listener).toHaveBeenCalledWith(expect.objectContaining({ mode: 1 }));
     });
 

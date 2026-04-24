@@ -1,0 +1,481 @@
+{% extends "base_pure.htm" %}
+{% import "controls/_pure_macros.html" as ui %}
+
+{% block title %}User-Defined Landuse Catalog{% endblock %}
+
+{% block head_extras %}
+  <style>
+    .lu-catalog-page {
+      padding-block: var(--wc-space-md);
+    }
+
+    .lu-catalog-page .wc-control__meta {
+      order: -1;
+      display: inline-flex;
+      align-items: baseline;
+      margin-right: var(--wc-space-sm);
+    }
+
+    .lu-catalog__run-link {
+      font-size: 1.5rem;
+      line-height: 1.2;
+      font-weight: 600;
+      color: var(--wc-color-text-muted);
+      text-decoration: none;
+      letter-spacing: 0.01em;
+    }
+
+    .lu-catalog__run-link:hover,
+    .lu-catalog__run-link:focus-visible {
+      color: var(--wc-color-text);
+      text-decoration: underline;
+    }
+
+    .lu-catalog {
+      display: grid;
+      gap: var(--wc-space-md);
+    }
+
+    .lu-catalog__grid {
+      display: grid;
+      gap: var(--wc-space-md);
+      grid-template-columns: 1fr;
+    }
+
+    .lu-catalog__table-wrap {
+      overflow-x: auto;
+      border: 1px solid var(--wc-color-border);
+      border-radius: var(--wc-radius-sm);
+      background: var(--wc-color-surface);
+    }
+
+    .lu-catalog__table {
+      width: 100%;
+      border-collapse: collapse;
+      min-width: 62rem;
+    }
+
+    .lu-catalog__table th,
+    .lu-catalog__table td {
+      padding: var(--wc-space-xs) var(--wc-space-sm);
+      border-bottom: 1px solid var(--wc-color-border);
+      vertical-align: top;
+      text-align: left;
+    }
+
+    .lu-catalog__table th {
+      background: var(--wc-color-surface-alt);
+      color: var(--wc-color-text-muted);
+      font-weight: 600;
+    }
+
+    .lu-catalog__status {
+      margin: 0;
+    }
+
+    .lu-catalog__description {
+      width: 100%;
+      min-width: 14rem;
+    }
+
+    .lu-catalog__actions {
+      display: flex;
+      gap: var(--wc-space-xs);
+      flex-wrap: wrap;
+    }
+
+    .lu-catalog__empty {
+      padding: var(--wc-space-md);
+      color: var(--wc-color-text-muted);
+    }
+  </style>
+{% endblock %}
+
+{% block body_container %}
+  <div id="landuse-user-defined-config"
+       data-list-url="{{ list_url }}"
+       data-upload-url="{{ upload_url }}"
+       data-delete-url="{{ delete_url }}"
+       data-update-description-url="{{ update_description_url }}"
+       data-session-token-url="{{ session_token_url }}"></div>
+  <script id="landuse-user-defined-seed" type="application/json">{{ catalog_items | tojson }}</script>
+
+  {% set catalog_description %}
+    <p class="wc-text-muted">Upload `.man` files (or `.zip` archives of `.man` files), edit descriptions, and manage run-scoped catalog entries.</p>
+  {% endset %}
+
+  {% set catalog_meta %}
+    {% if runid is defined and runid and config is defined and config %}
+      {% set run_home_href = (
+        url_for_run('run_0.runs0', runid=runid, config=config)
+        if url_for_run is defined
+        else '/runs/' ~ runid ~ '/' ~ config
+      ) %}
+      <a class="lu-catalog__run-link" href="{{ run_home_href }}">{{ runid }}</a>
+    {% endif %}
+  {% endset %}
+
+  <div class="wc-container wc-container--fluid lu-catalog-page">
+  {% call ui.card_shell(
+       title="User-Defined Landuse Catalog",
+       description=catalog_description,
+       meta=catalog_meta,
+       collapsible=False,
+       body_class="wc-stack lu-catalog"
+     ) %}
+    <div id="catalog-status" class="wc-alert wc-alert--info lu-catalog__status" role="status" aria-live="polite">
+      <p class="wc-alert__body">Catalog ready.</p>
+    </div>
+
+    <form id="catalog-upload-form" class="pure-form pure-form-stacked">
+      <fieldset class="lu-catalog__grid">
+        <label for="catalog-upload-input">Upload management file</label>
+        <input id="catalog-upload-input" name="management_upload" type="file" accept=".man,.zip" required />
+        <label class="pure-checkbox" for="catalog-upload-replace">
+          <input id="catalog-upload-replace" name="replace" type="checkbox" value="true" />
+          Replace matching filenames when they already exist
+        </label>
+        <div>
+          <button type="submit" class="pure-button pure-button-primary">Upload</button>
+          <button id="catalog-refresh" type="button" class="pure-button pure-button-secondary">Refresh</button>
+        </div>
+      </fieldset>
+    </form>
+
+    <div class="lu-catalog__table-wrap">
+      <table class="lu-catalog__table">
+        <thead>
+          <tr>
+            <th>Filename</th>
+            <th>Description</th>
+            <th>Uploaded</th>
+            <th>Size (bytes)</th>
+            <th>SHA256</th>
+            <th>Actions</th>
+          </tr>
+        </thead>
+        <tbody id="catalog-rows"></tbody>
+      </table>
+      <div id="catalog-empty" class="lu-catalog__empty" hidden>No user-defined management files uploaded yet.</div>
+    </div>
+  {% endcall %}
+  </div>
+{% endblock %}
+
+{% block script_extras %}
+<script>
+(function () {
+  "use strict";
+
+  var configNode = document.getElementById("landuse-user-defined-config");
+  if (!configNode) {
+    return;
+  }
+
+  var seedNode = document.getElementById("landuse-user-defined-seed");
+  var state = {
+    items: []
+  };
+  if (seedNode && seedNode.textContent) {
+    try {
+      state.items = JSON.parse(seedNode.textContent) || [];
+    } catch (_error) {
+      state.items = [];
+    }
+  }
+
+  function csrfToken() {
+    var node = document.querySelector('meta[name="csrf-token"]');
+    if (!node) {
+      return "";
+    }
+    return String(node.getAttribute("content") || "").trim();
+  }
+
+  function escapeForAttributeSelector(value) {
+    if (window.CSS && typeof window.CSS.escape === "function") {
+      return window.CSS.escape(value);
+    }
+    return String(value).replace(/["'\\]/g, "\\$&");
+  }
+
+  function setStatus(level, message) {
+    var root = document.getElementById("catalog-status");
+    if (!root) {
+      return;
+    }
+    var body = root.querySelector(".wc-alert__body");
+    var levelClass = {
+      info: "wc-alert--info",
+      success: "wc-alert--success",
+      warning: "wc-alert--warning",
+      error: "wc-alert--error"
+    }[level] || "wc-alert--info";
+    root.className = "wc-alert lu-catalog__status " + levelClass;
+    if (body) {
+      body.textContent = message;
+    } else {
+      root.textContent = message;
+    }
+  }
+
+  function handleResponse(response) {
+    return response.text().then(function (text) {
+      var payload = {};
+      if (text) {
+        try {
+          payload = JSON.parse(text);
+        } catch (_error) {
+          payload = {};
+        }
+      }
+      if (response.ok) {
+        return payload;
+      }
+      var message = "Request failed";
+      if (payload && payload.error && payload.error.message) {
+        message = payload.error.message;
+      }
+      throw new Error(message);
+    });
+  }
+
+  function extractCatalogItems(payload) {
+    if (!payload || typeof payload !== "object") {
+      return null;
+    }
+    if (Array.isArray(payload.items)) {
+      return payload.items;
+    }
+    if (payload.Content && Array.isArray(payload.Content.items)) {
+      return payload.Content.items;
+    }
+    return null;
+  }
+
+  function applyCatalogItems(payload) {
+    var items = extractCatalogItems(payload);
+    if (!items) {
+      return false;
+    }
+    state.items = items;
+    renderRows();
+    return true;
+  }
+
+  var sessionToken = null;
+
+  function getSessionToken(forceRefresh) {
+    if (!forceRefresh && sessionToken) {
+      return Promise.resolve(sessionToken);
+    }
+    return fetch(configNode.dataset.sessionTokenUrl, {
+      method: "POST",
+      credentials: "same-origin",
+      headers: {
+        "X-CSRFToken": csrfToken()
+      }
+    }).then(handleResponse).then(function (payload) {
+      if (!payload || !payload.token) {
+        throw new Error("Session token missing from response.");
+      }
+      sessionToken = String(payload.token);
+      return sessionToken;
+    });
+  }
+
+  function requestWithSessionToken(url, options, retry) {
+    return getSessionToken(Boolean(retry)).then(function (token) {
+      var requestOptions = Object.assign({ method: "GET" }, options || {});
+      var headers = Object.assign({}, requestOptions.headers || {});
+      headers.Authorization = "Bearer " + token;
+      requestOptions.headers = headers;
+      return fetch(url, requestOptions).then(function (response) {
+        if (!retry && (response.status === 401 || response.status === 403)) {
+          sessionToken = null;
+          return requestWithSessionToken(url, options, true);
+        }
+        return handleResponse(response);
+      });
+    });
+  }
+
+  function apiRequest(url, options) {
+    return requestWithSessionToken(url, options);
+  }
+
+  function renderRows() {
+    var tbody = document.getElementById("catalog-rows");
+    var empty = document.getElementById("catalog-empty");
+    if (!tbody || !empty) {
+      return;
+    }
+
+    tbody.innerHTML = "";
+    if (!Array.isArray(state.items) || state.items.length === 0) {
+      empty.hidden = false;
+      return;
+    }
+
+    empty.hidden = true;
+    state.items.forEach(function (item) {
+      var row = document.createElement("tr");
+
+      var filenameCell = document.createElement("td");
+      var filenameCode = document.createElement("code");
+      filenameCode.textContent = String(item.filename || "");
+      filenameCell.appendChild(filenameCode);
+      row.appendChild(filenameCell);
+
+      var descriptionCell = document.createElement("td");
+      var descriptionInput = document.createElement("input");
+      descriptionInput.className = "lu-catalog__description pure-input-1";
+      descriptionInput.setAttribute("data-description-for", String(item.filename || ""));
+      descriptionInput.value = String(item.description || "");
+      descriptionCell.appendChild(descriptionInput);
+      row.appendChild(descriptionCell);
+
+      var uploadedCell = document.createElement("td");
+      uploadedCell.textContent = String(item.uploaded_at || "");
+      row.appendChild(uploadedCell);
+
+      var sizeCell = document.createElement("td");
+      sizeCell.textContent = String(item.size_bytes || 0);
+      row.appendChild(sizeCell);
+
+      var shaCell = document.createElement("td");
+      var shaCode = document.createElement("code");
+      shaCode.textContent = String(item.sha256 || "");
+      shaCell.appendChild(shaCode);
+      row.appendChild(shaCell);
+
+      var actionsCell = document.createElement("td");
+      var actions = document.createElement("div");
+      actions.className = "lu-catalog__actions";
+
+      var saveButton = document.createElement("button");
+      saveButton.type = "button";
+      saveButton.className = "pure-button pure-button-secondary";
+      saveButton.setAttribute("data-action", "save-description");
+      saveButton.setAttribute("data-filename", String(item.filename || ""));
+      saveButton.textContent = "Save Description";
+      actions.appendChild(saveButton);
+
+      var deleteButton = document.createElement("button");
+      deleteButton.type = "button";
+      deleteButton.className = "pure-button pure-button-danger";
+      deleteButton.setAttribute("data-action", "delete");
+      deleteButton.setAttribute("data-filename", String(item.filename || ""));
+      deleteButton.textContent = "Delete";
+      actions.appendChild(deleteButton);
+
+      actionsCell.appendChild(actions);
+      row.appendChild(actionsCell);
+      tbody.appendChild(row);
+    });
+  }
+
+  function refreshCatalog() {
+    setStatus("info", "Refreshing catalog...");
+    return apiRequest(configNode.dataset.listUrl).then(function (payload) {
+      if (!applyCatalogItems(payload)) {
+        throw new Error("Catalog response missing items.");
+      }
+      setStatus("success", "Catalog refreshed.");
+    }).catch(function (error) {
+      setStatus("error", error.message);
+    });
+  }
+
+  var uploadForm = document.getElementById("catalog-upload-form");
+  if (uploadForm) {
+    uploadForm.addEventListener("submit", function (event) {
+      event.preventDefault();
+      var formData = new FormData(uploadForm);
+      setStatus("info", "Uploading management file...");
+      apiRequest(configNode.dataset.uploadUrl, {
+        method: "POST",
+        body: formData
+      }).then(function (payload) {
+        uploadForm.reset();
+        if (!applyCatalogItems(payload)) {
+          return refreshCatalog();
+        }
+        setStatus("success", "Upload completed.");
+      }).catch(function (error) {
+        setStatus("error", error.message);
+      });
+    });
+  }
+
+  var refreshButton = document.getElementById("catalog-refresh");
+  if (refreshButton) {
+    refreshButton.addEventListener("click", function () {
+      refreshCatalog();
+    });
+  }
+
+  var rowsHost = document.getElementById("catalog-rows");
+  if (rowsHost) {
+    rowsHost.addEventListener("click", function (event) {
+      var target = event.target;
+      if (!(target instanceof HTMLElement)) {
+        return;
+      }
+      var actionNode = target.closest("[data-action][data-filename]");
+      if (!(actionNode instanceof HTMLElement)) {
+        return;
+      }
+      var action = actionNode.dataset.action;
+      var filename = actionNode.dataset.filename;
+      if (!action || !filename) {
+        return;
+      }
+
+      if (action === "save-description") {
+        var input = document.querySelector("[data-description-for='" + escapeForAttributeSelector(filename) + "']");
+        var description = "";
+        if (input instanceof HTMLInputElement) {
+          description = input.value;
+        }
+        setStatus("info", "Saving description for " + filename + "...");
+        apiRequest(configNode.dataset.updateDescriptionUrl, {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ filename: filename, description: description })
+        }).then(function (payload) {
+          if (!applyCatalogItems(payload)) {
+            return refreshCatalog();
+          }
+          setStatus("success", "Description updated.");
+        }).catch(function (error) {
+          setStatus("error", error.message);
+        });
+        return;
+      }
+
+      if (action === "delete") {
+        if (!window.confirm("Delete " + filename + "?")) {
+          return;
+        }
+        setStatus("info", "Deleting " + filename + "...");
+        apiRequest(configNode.dataset.deleteUrl, {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ filename: filename })
+        }).then(function (payload) {
+          if (!applyCatalogItems(payload)) {
+            return refreshCatalog();
+          }
+          setStatus("success", "Management file deleted.");
+        }).catch(function (error) {
+          setStatus("error", error.message);
+        });
+      }
+    });
+  }
+
+  renderRows();
+})();
+</script>
+{% endblock %}

@@ -1,5 +1,6 @@
 from __future__ import annotations
 
+from contextlib import contextmanager
 from pathlib import Path
 from typing import Any, Dict, List
 from types import SimpleNamespace
@@ -13,6 +14,7 @@ import wepppy.weppcloud.routes.nodb_api.landuse_bp as landuse_module
 
 RUN_ID = "test-run"
 CONFIG = "cfg"
+pytestmark = pytest.mark.routes
 
 
 @pytest.fixture()
@@ -31,6 +33,11 @@ def landuse_client(monkeypatch: pytest.MonkeyPatch, tmp_path):
         return str(run_dir)
 
     monkeypatch.setattr(landuse_module, "get_wd", fake_get_wd)
+    monkeypatch.setattr(
+        landuse_module,
+        "load_run_context",
+        lambda runid, config: SimpleNamespace(active_root=Path(fake_get_wd(runid)), runid=runid, config=config),
+    )
 
     class DummyLanduse:
         _instances: Dict[str, "DummyLanduse"] = {}
@@ -38,12 +45,6 @@ def landuse_client(monkeypatch: pytest.MonkeyPatch, tmp_path):
 
         def __init__(self, wd: str) -> None:
             self.wd = wd
-            self.mode = landuse_module.LanduseMode.Vanilla
-            self.single_selection: str | None = None
-            self.nlcd_db: str | None = None
-            self.cover_changes: List[tuple[Any, Any, Any]] = []
-            self.mapping_changes: List[tuple[Any, Any]] = []
-            self.modify_calls: List[tuple[List[str], str]] = []
             self.landuseoptions = {"options": []}
             self.report = {"rows": []}
             self.domlc_d = {"1": "Forest"}
@@ -51,6 +52,8 @@ def landuse_client(monkeypatch: pytest.MonkeyPatch, tmp_path):
             self.chns_summary = [{"topaz_id": 2}]
             self.hillslope_cancovs = {"1": {"cover": 45}}
             self.mods = tuple(type(self)._mods)
+            self.mapping = "disturbed"
+            self._custom_mapping_relpath: str | None = None
 
         @classmethod
         def getInstance(cls, wd: str) -> "DummyLanduse":
@@ -69,14 +72,20 @@ def landuse_client(monkeypatch: pytest.MonkeyPatch, tmp_path):
             _ = allow_nonexistent
             return cls.getInstance(wd)
 
-        def modify_coverage(self, dom, cover, value) -> None:
-            self.cover_changes.append((dom, cover, value))
+        @contextmanager
+        def locked(self):
+            yield
 
-        def modify_mapping(self, dom, newdom) -> None:
-            self.mapping_changes.append((dom, newdom))
+        def _resolve_effective_mapping_reference(self, mapping_reference: str | None = None):
+            return mapping_reference
 
-        def modify(self, topaz_ids: List[str], lccode: str) -> None:
-            self.modify_calls.append((topaz_ids, lccode))
+        @property
+        def custom_mapping_relpath(self) -> str | None:
+            return self._custom_mapping_relpath
+
+        @custom_mapping_relpath.setter
+        def custom_mapping_relpath(self, value: str | None) -> None:
+            self._custom_mapping_relpath = value
 
     monkeypatch.setattr(landuse_module, "Landuse", DummyLanduse)
 
@@ -112,70 +121,26 @@ def landuse_client(monkeypatch: pytest.MonkeyPatch, tmp_path):
     DummyRon._instances.clear()
 
 
-def test_set_landuse_mode_updates_controller(landuse_client):
-    client, DummyLanduse, _, run_dir = landuse_client
+def test_query_landuse_routes_remain_available(landuse_client) -> None:
+    client, _DummyLanduse, _captured, _run_dir = landuse_client
 
-    response = client.post(
-        f"/runs/{RUN_ID}/{CONFIG}/tasks/set_landuse_mode/",
-        data={"mode": str(int(landuse_module.LanduseMode.UserDefined)), "landuse_single_selection": "forest"},
-    )
+    landuse = client.get(f"/runs/{RUN_ID}/{CONFIG}/query/landuse/")
+    subcatchments = client.get(f"/runs/{RUN_ID}/{CONFIG}/query/landuse/subcatchments/")
+    channels = client.get(f"/runs/{RUN_ID}/{CONFIG}/query/landuse/channels/")
+    covers = client.get(f"/runs/{RUN_ID}/{CONFIG}/query/landuse/cover/subcatchments/")
 
-    assert response.status_code == 200
-    payload = response.get_json()
-    assert payload == {}
-
-    controller = DummyLanduse.getInstance(run_dir)
-    assert controller.mode == landuse_module.LanduseMode.UserDefined
-    assert controller.single_selection == "forest"
-
-
-def test_modify_landuse_coverage_records_change(landuse_client):
-    client, DummyLanduse, _, run_dir = landuse_client
-
-    response = client.post(
-        f"/runs/{RUN_ID}/{CONFIG}/tasks/modify_landuse_coverage",
-        json={"dom": "1", "cover": "forest", "value": 75},
-    )
-    assert response.status_code == 200
-    assert response.get_json() == {}
-
-    controller = DummyLanduse.getInstance(run_dir)
-    assert controller.cover_changes == [("1", "forest", 75.0)]
+    assert landuse.status_code == 200
+    assert landuse.get_json() == {"1": "Forest"}
+    assert subcatchments.status_code == 200
+    assert subcatchments.get_json() == [{"topaz_id": 1}]
+    assert channels.status_code == 200
+    assert channels.get_json() == [{"topaz_id": 2}]
+    assert covers.status_code == 200
+    assert covers.get_json() == {"1": {"cover": 45}}
 
 
-def test_task_modify_landuse_mapping_prefers_detached_snapshot(
-    landuse_client,
-    monkeypatch: pytest.MonkeyPatch,
-):
-    client, DummyLanduse, _, run_dir = landuse_client
-    stale = DummyLanduse.getInstance(run_dir)
-    fresh = DummyLanduse(run_dir)
-
-    def fake_get_instance(cls, wd: str):
-        _ = wd
-        return stale
-
-    def fake_load_detached(cls, wd: str, allow_nonexistent: bool = False):
-        _ = wd
-        _ = allow_nonexistent
-        return fresh
-
-    monkeypatch.setattr(DummyLanduse, "getInstance", classmethod(fake_get_instance))
-    monkeypatch.setattr(DummyLanduse, "load_detached", classmethod(fake_load_detached))
-
-    response = client.post(
-        f"/runs/{RUN_ID}/{CONFIG}/tasks/modify_landuse_mapping/",
-        json={"dom": "21", "newdom": "42"},
-    )
-
-    assert response.status_code == 200
-    assert response.get_json() == {}
-    assert fresh.mapping_changes == [("21", "42")]
-    assert stale.mapping_changes == []
-
-
-def test_report_landuse_renders_template(landuse_client):
-    client, DummyLanduse, captured, _ = landuse_client
+def test_report_landuse_renders_template(landuse_client) -> None:
+    client, _DummyLanduse, captured, _run_dir = landuse_client
 
     response = client.get(f"/runs/{RUN_ID}/{CONFIG}/report/landuse/")
 
@@ -193,7 +158,7 @@ def test_report_landuse_renders_template(landuse_client):
 def test_report_landuse_prefers_detached_snapshot(
     landuse_client,
     monkeypatch: pytest.MonkeyPatch,
-):
+) -> None:
     client, DummyLanduse, captured, run_dir = landuse_client
     stale = DummyLanduse.getInstance(run_dir)
     fresh = DummyLanduse(run_dir)
@@ -217,8 +182,8 @@ def test_report_landuse_prefers_detached_snapshot(
     assert captured["context"]["landuse"] is fresh
 
 
-def test_report_landuse_enables_disturbed_preview_context(landuse_client):
-    client, DummyLanduse, captured, _ = landuse_client
+def test_report_landuse_enables_disturbed_preview_context(landuse_client) -> None:
+    client, DummyLanduse, captured, _run_dir = landuse_client
     DummyLanduse._mods = ("disturbed",)
     try:
         response = client.get(f"/runs/{RUN_ID}/{CONFIG}/report/landuse/")
@@ -233,6 +198,58 @@ def test_report_landuse_enables_disturbed_preview_context(landuse_client):
         )
     finally:
         DummyLanduse._mods = ()
+
+
+def test_view_landuse_user_defined_renders_rq_engine_routes(landuse_client) -> None:
+    client, _DummyLanduse, captured, _run_dir = landuse_client
+
+    response = client.get(f"/runs/{RUN_ID}/{CONFIG}/landuse-user-defined")
+
+    assert response.status_code == 200
+    assert response.get_data(as_text=True) == "rendered"
+    assert captured["template"] == "controls/landuse_user_defined.htm"
+    context = captured["context"]
+    assert context["list_url"] == f"/rq-engine/api/runs/{RUN_ID}/{CONFIG}/landuse-user-defined/catalog"
+    assert context["upload_url"] == f"/rq-engine/api/runs/{RUN_ID}/{CONFIG}/landuse-user-defined/upload"
+    assert context["delete_url"] == f"/rq-engine/api/runs/{RUN_ID}/{CONFIG}/landuse-user-defined/delete"
+    assert context["update_description_url"] == (
+        f"/rq-engine/api/runs/{RUN_ID}/{CONFIG}/landuse-user-defined/update-description"
+    )
+    assert context["session_token_url"] == f"/rq-engine/api/runs/{RUN_ID}/{CONFIG}/session-token"
+    assert response.headers["Cache-Control"] == "no-store, no-cache, must-revalidate, max-age=0"
+
+
+def test_view_landuse_map_renders_rq_engine_routes(
+    landuse_client,
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    client, _DummyLanduse, captured, _run_dir = landuse_client
+
+    monkeypatch.setattr(
+        landuse_module,
+        "load_map",
+        lambda _mapping: {
+            "21": {
+                "Key": 21,
+                "Description": "Low Intensity Residential",
+                "DisturbedClass": "developed low intensity",
+                "ManagementFile": "Developed_Low_Intensity.man",
+                "ManagementDir": "/maps",
+            }
+        },
+    )
+
+    response = client.get(f"/runs/{RUN_ID}/{CONFIG}/landuse-map")
+
+    assert response.status_code == 200
+    assert response.get_data(as_text=True) == "rendered"
+    assert captured["template"] == "controls/landuse_map.htm"
+    context = captured["context"]
+    assert context["snapshot_url"] == f"/rq-engine/api/runs/{RUN_ID}/{CONFIG}/landuse-map/snapshot"
+    assert context["save_url"] == f"/rq-engine/api/runs/{RUN_ID}/{CONFIG}/landuse-map/save"
+    assert context["clear_override_url"] == f"/rq-engine/api/runs/{RUN_ID}/{CONFIG}/landuse-map/clear-override"
+    assert context["session_token_url"] == f"/rq-engine/api/runs/{RUN_ID}/{CONFIG}/session-token"
+    assert response.headers["Cache-Control"] == "no-store, no-cache, must-revalidate, max-age=0"
 
 
 def test_landuse_template_renders_disturbed_preview_links_conditionally() -> None:
@@ -279,79 +296,31 @@ def test_landuse_template_renders_disturbed_preview_links_conditionally() -> Non
     assert "view/management_effective/42/clay/" in html_with_disturbed
 
 
-def test_task_modify_landuse_parses_ids(landuse_client):
-    client, DummyLanduse, _, run_dir = landuse_client
+@pytest.mark.parametrize(
+    ("method", "path"),
+    [
+        ("post", f"/runs/{RUN_ID}/{CONFIG}/tasks/set_landuse_mode/"),
+        ("post", f"/runs/{RUN_ID}/{CONFIG}/tasks/set_landuse_db/"),
+        ("post", f"/runs/{RUN_ID}/{CONFIG}/tasks/modify_landuse_coverage"),
+        ("post", f"/runs/{RUN_ID}/{CONFIG}/tasks/modify_landuse_coverage/"),
+        ("post", f"/runs/{RUN_ID}/{CONFIG}/tasks/modify_landuse_mapping/"),
+        ("get", f"/runs/{RUN_ID}/{CONFIG}/api/landuse/user_defined/catalog"),
+        ("post", f"/runs/{RUN_ID}/{CONFIG}/tasks/landuse/user_defined/upload"),
+        ("post", f"/runs/{RUN_ID}/{CONFIG}/tasks/landuse/user_defined/delete"),
+        ("post", f"/runs/{RUN_ID}/{CONFIG}/tasks/landuse/user_defined/update-description"),
+        ("get", f"/runs/{RUN_ID}/{CONFIG}/api/landuse/map_snapshot"),
+        ("post", f"/runs/{RUN_ID}/{CONFIG}/tasks/landuse/map/save"),
+        ("post", f"/runs/{RUN_ID}/{CONFIG}/tasks/landuse/map/clear-override"),
+        ("post", f"/runs/{RUN_ID}/{CONFIG}/tasks/modify_landuse/"),
+    ],
+)
+def test_removed_legacy_landuse_compatibility_routes_return_not_found(
+    landuse_client,
+    method: str,
+    path: str,
+) -> None:
+    client, _DummyLanduse, _captured, _run_dir = landuse_client
 
-    response = client.post(
-        f"/runs/{RUN_ID}/{CONFIG}/tasks/modify_landuse/",
-        data={"topaz_ids": "1,2,3", "landuse": "5"},
-    )
+    response = getattr(client, method)(path)
 
-    assert response.status_code == 200
-    assert response.get_json() == {}
-
-    controller = DummyLanduse.getInstance(run_dir)
-    assert controller.modify_calls == [(['1', '2', '3'], '5')]
-
-
-def test_set_landuse_mode_accepts_json_payload(landuse_client):
-    client, DummyLanduse, _, run_dir = landuse_client
-
-    response = client.post(
-        f"/runs/{RUN_ID}/{CONFIG}/tasks/set_landuse_mode/",
-        json={"mode": int(landuse_module.LanduseMode.UserDefined), "landuse_single_selection": "riparian"},
-    )
-
-    assert response.status_code == 200
-    assert response.get_json() == {}
-
-    controller = DummyLanduse.getInstance(run_dir)
-    assert controller.mode == landuse_module.LanduseMode.UserDefined
-    assert controller.single_selection == "riparian"
-
-
-def test_task_modify_landuse_accepts_list_payload(landuse_client):
-    client, DummyLanduse, _, run_dir = landuse_client
-
-    response = client.post(
-        f"/runs/{RUN_ID}/{CONFIG}/tasks/modify_landuse/",
-        json={"topaz_ids": [1, "2", " 3 "], "landuse": 7},
-    )
-
-    assert response.status_code == 200
-    assert response.get_json() == {}
-
-    controller = DummyLanduse.getInstance(run_dir)
-    assert controller.modify_calls == [(['1', '2', '3'], '7')]
-
-
-def test_task_modify_landuse_rejects_invalid_ids(landuse_client):
-    client, DummyLanduse, _, run_dir = landuse_client
-
-    response = client.post(
-        f"/runs/{RUN_ID}/{CONFIG}/tasks/modify_landuse/",
-        json={"topaz_ids": ["abc"], "landuse": 7},
-    )
-
-    assert response.status_code == 500
-    payload = response.get_json()
-    assert "invalid topaz id" in payload["error"]["message"].lower()
-
-    controller = DummyLanduse.getInstance(run_dir)
-    assert controller.modify_calls == []
-
-
-def test_task_modify_landuse_requires_landuse_code(landuse_client):
-    client, DummyLanduse, _, run_dir = landuse_client
-
-    response = client.post(
-        f"/runs/{RUN_ID}/{CONFIG}/tasks/modify_landuse/",
-        json={"topaz_ids": [1]},
-    )
-
-    assert response.status_code == 500
-    payload = response.get_json()
-    assert "landuse" in payload["error"]["message"].lower()
-
-    controller = DummyLanduse.getInstance(run_dir)
-    assert controller.modify_calls == []
+    assert response.status_code == 404

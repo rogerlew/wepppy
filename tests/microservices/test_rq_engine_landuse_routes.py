@@ -1,5 +1,11 @@
-import pytest
+import copy
+from contextlib import contextmanager
+import json
+from io import BytesIO
 from pathlib import Path
+import zipfile
+
+import pytest
 
 TestClient = pytest.importorskip("fastapi.testclient").TestClient
 
@@ -12,7 +18,11 @@ pytestmark = pytest.mark.microservice
 
 
 def _stub_auth(monkeypatch: pytest.MonkeyPatch) -> None:
-    monkeypatch.setattr(landuse_routes, "require_jwt", lambda request, required_scopes=None: {})
+    monkeypatch.setattr(
+        landuse_routes,
+        "require_jwt",
+        lambda request, required_scopes=None: {"token_class": "service", "scope": "rq:enqueue rq:read"},
+    )
     monkeypatch.setattr(landuse_routes, "authorize_run_access", lambda claims, runid: None)
 
 
@@ -87,6 +97,247 @@ def test_build_landuse_enqueues_job(monkeypatch: pytest.MonkeyPatch) -> None:
 
     assert response.status_code == 200
     assert response.json()["job_id"] == "job-42"
+
+
+def test_build_landuse_rejects_invalid_custom_mapping(monkeypatch: pytest.MonkeyPatch) -> None:
+    _stub_auth(monkeypatch)
+    _stub_queue(monkeypatch, job_id="job-42")
+    _stub_prep(monkeypatch)
+    monkeypatch.setattr(landuse_routes, "get_wd", lambda runid: "/tmp/run")
+
+    class DummyLanduse:
+        run_group = "default"
+        mods: set[str] = set()
+        mode = landuse_routes.LanduseMode.Gridded
+        lc_dir = "/tmp"
+        lc_fn = "/tmp/lc.tif"
+
+        def parse_inputs(self, payload) -> None:
+            return None
+
+        def get_mapping_dict(self):
+            raise landuse_routes.LanduseCustomMappingError(
+                "Configured landuse custom mapping file is missing: landuse/landuse_user_defined_mapping.json",
+                code="LANDUSE_CUSTOM_MAP_MISSING",
+                details={"custom_mapping_relpath": "landuse/landuse_user_defined_mapping.json"},
+            )
+
+    monkeypatch.setattr(
+        landuse_routes.Landuse,
+        "getInstance",
+        lambda wd: DummyLanduse(),
+    )
+    monkeypatch.setattr(
+        landuse_routes.Watershed,
+        "getInstance",
+        lambda wd: object(),
+    )
+
+    with TestClient(rq_engine.app) as client:
+        response = client.post("/api/runs/run-1/cfg/build-landuse", json={})
+
+    assert response.status_code == 400
+    payload = response.json()
+    assert payload["error"]["code"] == "LANDUSE_CUSTOM_MAP_MISSING"
+    assert "custom mapping file is missing" in payload["error"]["message"].lower()
+
+
+def test_set_landuse_mode_updates_controller(monkeypatch: pytest.MonkeyPatch) -> None:
+    _stub_auth(monkeypatch)
+    monkeypatch.setattr(landuse_routes, "get_wd", lambda runid, prefer_active=False: "/tmp/run")
+    monkeypatch.setattr(landuse_routes, "_preflight_landuse_mutation_root", lambda wd: None)
+
+    class DummyLanduse:
+        def __init__(self) -> None:
+            self.mode = landuse_routes.LanduseMode.Gridded
+            self.single_selection = None
+
+    controller = DummyLanduse()
+    monkeypatch.setattr(landuse_routes.Landuse, "getInstance", lambda wd: controller)
+
+    with TestClient(rq_engine.app) as client:
+        response = client.post(
+            "/api/runs/run-1/cfg/set-landuse-mode",
+            json={"mode": int(landuse_routes.LanduseMode.UserDefined), "landuse_single_selection": "forest"},
+        )
+
+    assert response.status_code == 200
+    assert response.json()["message"] == "Landuse mode updated"
+    assert controller.mode == landuse_routes.LanduseMode.UserDefined
+    assert controller.single_selection == "forest"
+
+
+def test_set_landuse_mode_requires_mode(monkeypatch: pytest.MonkeyPatch) -> None:
+    _stub_auth(monkeypatch)
+    monkeypatch.setattr(landuse_routes, "get_wd", lambda runid, prefer_active=False: "/tmp/run")
+    monkeypatch.setattr(landuse_routes, "_preflight_landuse_mutation_root", lambda wd: None)
+    monkeypatch.setattr(landuse_routes.Landuse, "getInstance", lambda wd: object())
+
+    with TestClient(rq_engine.app) as client:
+        response = client.post(
+            "/api/runs/run-1/cfg/set-landuse-mode",
+            json={"landuse_single_selection": "forest"},
+        )
+
+    assert response.status_code == 400
+    assert response.json()["error"]["message"] == "mode and landuse_single_selection must be provided"
+
+
+def test_set_landuse_db_updates_controller(monkeypatch: pytest.MonkeyPatch) -> None:
+    _stub_auth(monkeypatch)
+    monkeypatch.setattr(landuse_routes, "get_wd", lambda runid, prefer_active=False: "/tmp/run")
+    monkeypatch.setattr(landuse_routes, "_preflight_landuse_mutation_root", lambda wd: None)
+
+    class DummyLanduse:
+        nlcd_db = None
+
+    controller = DummyLanduse()
+    monkeypatch.setattr(landuse_routes.Landuse, "getInstance", lambda wd: controller)
+
+    with TestClient(rq_engine.app) as client:
+        response = client.post(
+            "/api/runs/run-1/cfg/set-landuse-db",
+            json={"landuse_db": "nlcd"},
+        )
+
+    assert response.status_code == 200
+    assert response.json()["message"] == "Landuse database updated"
+    assert controller.nlcd_db == "nlcd"
+
+
+def test_set_landuse_db_resolves_pup_root(monkeypatch: pytest.MonkeyPatch, tmp_path: Path) -> None:
+    _stub_auth(monkeypatch)
+    run_root = tmp_path / "run-1"
+    pup_root = run_root / "_pups" / "scenario-a"
+    pup_root.mkdir(parents=True, exist_ok=True)
+
+    monkeypatch.setattr(
+        landuse_routes,
+        "get_wd",
+        lambda runid, prefer_active=False: str(run_root),
+    )
+    monkeypatch.setattr(landuse_routes, "_preflight_landuse_mutation_root", lambda wd: None)
+
+    captured: dict[str, str] = {}
+
+    class DummyLanduse:
+        nlcd_db = None
+
+    def _get_instance(wd: str) -> DummyLanduse:
+        captured["wd"] = wd
+        return DummyLanduse()
+
+    monkeypatch.setattr(landuse_routes.Landuse, "getInstance", _get_instance)
+
+    with TestClient(rq_engine.app) as client:
+        response = client.post(
+            "/api/runs/run-1/cfg/set-landuse-db?pup=scenario-a",
+            json={"landuse_db": "nlcd"},
+        )
+
+    assert response.status_code == 200
+    assert captured["wd"] == str(pup_root.resolve())
+
+
+def test_modify_landuse_coverage_updates_controller(monkeypatch: pytest.MonkeyPatch) -> None:
+    _stub_auth(monkeypatch)
+    monkeypatch.setattr(landuse_routes, "get_wd", lambda runid, prefer_active=False: "/tmp/run")
+    monkeypatch.setattr(landuse_routes, "_preflight_landuse_mutation_root", lambda wd: None)
+
+    class DummyLanduse:
+        def __init__(self) -> None:
+            self.calls: list[tuple[str, str, float]] = []
+
+        def modify_coverage(self, dom: str, cover: str, value: float) -> None:
+            self.calls.append((dom, cover, value))
+
+    controller = DummyLanduse()
+    monkeypatch.setattr(landuse_routes.Landuse, "getInstance", lambda wd: controller)
+
+    with TestClient(rq_engine.app) as client:
+        response = client.post(
+            "/api/runs/run-1/cfg/modify-landuse-coverage",
+            json={"dom": "1", "cover": "forest", "value": "75"},
+        )
+
+    assert response.status_code == 200
+    assert response.json()["message"] == "Landuse coverage updated"
+    assert controller.calls == [("1", "forest", 75.0)]
+
+
+def test_landuse_state_rejects_missing_read_scope(monkeypatch: pytest.MonkeyPatch) -> None:
+    monkeypatch.setattr(
+        landuse_routes,
+        "require_jwt",
+        lambda request: {"token_class": "service", "scope": "rq:enqueue"},
+    )
+    monkeypatch.setattr(landuse_routes, "authorize_run_access", lambda claims, runid: None)
+    monkeypatch.setattr(landuse_routes, "get_wd", lambda runid, prefer_active=False: "/tmp/run")
+    monkeypatch.setattr(landuse_routes.Landuse, "getInstance", lambda wd: object())
+
+    with TestClient(rq_engine.app) as client:
+        response = client.get("/api/runs/run-1/cfg/controllers/landuse/state")
+
+    assert response.status_code == 403
+    payload = response.json()
+    assert payload["error"]["code"] == "forbidden"
+    assert "rq:read" in payload["error"]["message"]
+    assert "rq:status" in payload["error"]["message"]
+
+
+def test_landuse_state_returns_controller_payload(monkeypatch: pytest.MonkeyPatch) -> None:
+    monkeypatch.setattr(
+        landuse_routes,
+        "require_jwt",
+        lambda request: {"token_class": "service", "scope": "rq:read"},
+    )
+    monkeypatch.setattr(landuse_routes, "authorize_run_access", lambda claims, runid: None)
+    monkeypatch.setattr(landuse_routes, "get_wd", lambda runid, prefer_active=False: "/tmp/run")
+
+    class DummyLanduse:
+        mode = landuse_routes.LanduseMode.Gridded
+        single_selection = "101"
+        nlcd_db = "nlcd"
+        mapping = "disturbed"
+        custom_mapping_relpath = None
+        has_landuse = True
+        domlc_d = {"1": "42", "2": "91"}
+
+    monkeypatch.setattr(landuse_routes.Landuse, "getInstance", lambda wd: DummyLanduse())
+
+    with TestClient(rq_engine.app) as client:
+        response = client.get("/api/runs/run-1/cfg/controllers/landuse/state")
+
+    assert response.status_code == 200
+    payload = response.json()
+    assert payload["controller"] == "landuse"
+    assert payload["runid"] == "run-1"
+    assert payload["config"] == "cfg"
+    assert payload["run_state_domain"] == "metadata"
+    assert payload["state"]["mode_name"] == "gridded"
+    assert payload["state"]["dominant_landcover_count"] == 2
+    assert payload["state"]["landuse_db"] == "nlcd"
+
+
+def test_phase1_mutators_reject_unknown_token_class(monkeypatch: pytest.MonkeyPatch) -> None:
+    monkeypatch.setattr(
+        landuse_routes,
+        "require_jwt",
+        lambda request, required_scopes=None: {"token_class": "unknown", "scope": "rq:enqueue"},
+    )
+    monkeypatch.setattr(landuse_routes, "authorize_run_access", lambda claims, runid: None)
+    monkeypatch.setattr(landuse_routes, "get_wd", lambda runid, prefer_active=False: "/tmp/run")
+    monkeypatch.setattr(landuse_routes, "_preflight_landuse_mutation_root", lambda wd: None)
+    monkeypatch.setattr(landuse_routes.Landuse, "getInstance", lambda wd: object())
+
+    with TestClient(rq_engine.app) as client:
+        response = client.post(
+            "/api/runs/run-1/cfg/set-landuse-db",
+            json={"landuse_db": "nlcd"},
+        )
+
+    assert response.status_code == 403
+    assert response.json()["error"]["code"] == "forbidden"
 
 
 def test_modify_landuse_mapping_enqueues_job(monkeypatch: pytest.MonkeyPatch) -> None:
@@ -659,3 +910,559 @@ def test_build_landuse_user_defined_requires_upload_when_no_existing_file(
     assert payload["error"]["details"] == payload["error"]["message"]
     assert payload["error"]["code"] == "validation_error"
     assert payload["error_id"]
+
+
+class _DummyLandusePhase3:
+    def __init__(self, wd: str) -> None:
+        self.wd = wd
+        self.mapping = "disturbed"
+        self._custom_mapping_relpath: str | None = None
+        self.build_managements_calls = 0
+        self.modify_calls: list[tuple[list[str], str]] = []
+        self.raise_on_build = False
+
+    @contextmanager
+    def locked(self):
+        yield
+
+    def _resolve_effective_mapping_reference(self, mapping_reference: str | None = None):
+        return mapping_reference
+
+    @property
+    def custom_mapping_relpath(self) -> str | None:
+        return self._custom_mapping_relpath
+
+    @custom_mapping_relpath.setter
+    def custom_mapping_relpath(self, value: str | None) -> None:
+        self._custom_mapping_relpath = value
+
+    def build_managements(self) -> None:
+        self.build_managements_calls += 1
+        if self.raise_on_build:
+            raise RuntimeError("boom")
+
+    def modify(self, topaz_ids: list[str], lccode: str) -> None:
+        self.modify_calls.append((topaz_ids, lccode))
+
+
+def _stub_landuse_phase3_common(
+    monkeypatch: pytest.MonkeyPatch,
+    run_root: Path,
+    landuse: _DummyLandusePhase3,
+) -> None:
+    _stub_auth(monkeypatch)
+    monkeypatch.setattr(landuse_routes, "get_wd", lambda runid, prefer_active=False: str(run_root))
+    monkeypatch.setattr(landuse_routes.Landuse, "getInstance", lambda wd: landuse)
+    monkeypatch.setattr(
+        landuse_routes.landuse_flask.Landuse,
+        "getInstance",
+        lambda wd: landuse,
+    )
+
+
+def test_landuse_phase3_catalog_upload_update_delete_via_rq_engine(
+    monkeypatch: pytest.MonkeyPatch,
+    tmp_path: Path,
+) -> None:
+    run_root = tmp_path / "run-1"
+    run_root.mkdir(parents=True, exist_ok=True)
+    landuse = _DummyLandusePhase3(str(run_root))
+    _stub_landuse_phase3_common(monkeypatch, run_root, landuse)
+
+    source_man = Path("wepppy/wepp/management/data/Tahoe/Tahoe_Old_Forest.man")
+    assert source_man.exists()
+
+    with TestClient(rq_engine.app) as client:
+        with source_man.open("rb") as handle:
+            upload = client.post(
+                "/api/runs/run-1/cfg/landuse-user-defined/upload",
+                files={"management_upload": ("custom_entry.man", handle.read())},
+            )
+        assert upload.status_code == 200
+        assert upload.json()["imported_files"] == ["custom_entry.man"]
+
+        listed = client.get("/api/runs/run-1/cfg/landuse-user-defined/catalog")
+        assert listed.status_code == 200
+        items = listed.json()["items"]
+        assert [item["filename"] for item in items] == ["custom_entry.man"]
+        assert listed.headers["Cache-Control"] == "no-store, no-cache, must-revalidate, max-age=0"
+
+        updated = client.post(
+            "/api/runs/run-1/cfg/landuse-user-defined/update-description",
+            json={"filename": "custom_entry.man", "description": "Custom Forest"},
+        )
+        assert updated.status_code == 200
+        item = next(entry for entry in updated.json()["items"] if entry["filename"] == "custom_entry.man")
+        assert item["description"] == "Custom Forest"
+
+        deleted = client.post(
+            "/api/runs/run-1/cfg/landuse-user-defined/delete",
+            json={"filename": "custom_entry.man"},
+        )
+        assert deleted.status_code == 200
+        assert deleted.json()["items"] == []
+
+    assert not (run_root / "landuse" / "user-defined" / "custom_entry.man").exists()
+
+
+def test_landuse_phase3_upload_rejects_zip_with_non_man_members(
+    monkeypatch: pytest.MonkeyPatch,
+    tmp_path: Path,
+) -> None:
+    run_root = tmp_path / "run-1"
+    run_root.mkdir(parents=True, exist_ok=True)
+    landuse = _DummyLandusePhase3(str(run_root))
+    _stub_landuse_phase3_common(monkeypatch, run_root, landuse)
+
+    archive_buffer = BytesIO()
+    with zipfile.ZipFile(archive_buffer, "w") as archive:
+        archive.writestr("bad.txt", "not a management file")
+    archive_buffer.seek(0)
+
+    with TestClient(rq_engine.app) as client:
+        response = client.post(
+            "/api/runs/run-1/cfg/landuse-user-defined/upload",
+            files={"management_upload": ("invalid.zip", archive_buffer.read())},
+        )
+
+    assert response.status_code == 400
+    payload = response.json()
+    assert ".man extension" in payload["error"]["message"].lower()
+
+
+def test_landuse_phase3_upload_accepts_zip_with_finder_metadata_sidecars(
+    monkeypatch: pytest.MonkeyPatch,
+    tmp_path: Path,
+) -> None:
+    run_root = tmp_path / "run-1"
+    run_root.mkdir(parents=True, exist_ok=True)
+    landuse = _DummyLandusePhase3(str(run_root))
+    _stub_landuse_phase3_common(monkeypatch, run_root, landuse)
+
+    source_man = Path("wepppy/wepp/management/data/Tahoe/Tahoe_Old_Forest.man")
+    with source_man.open("rb") as handle:
+        man_payload = handle.read()
+
+    archive_buffer = BytesIO()
+    with zipfile.ZipFile(archive_buffer, "w") as archive:
+        archive.writestr("custom_entry.man", man_payload)
+        archive.writestr("__MACOSX/._custom_entry.man", b"resource-fork")
+        archive.writestr(".DS_Store", b"finder-metadata")
+    archive_buffer.seek(0)
+
+    with TestClient(rq_engine.app) as client:
+        response = client.post(
+            "/api/runs/run-1/cfg/landuse-user-defined/upload",
+            files={"management_upload": ("finder.zip", archive_buffer.read())},
+        )
+
+    assert response.status_code == 200
+    assert response.json()["imported_files"] == ["custom_entry.man"]
+
+
+def test_landuse_phase3_upload_rejects_zip_with_nested_man_members(
+    monkeypatch: pytest.MonkeyPatch,
+    tmp_path: Path,
+) -> None:
+    run_root = tmp_path / "run-1"
+    run_root.mkdir(parents=True, exist_ok=True)
+    landuse = _DummyLandusePhase3(str(run_root))
+    _stub_landuse_phase3_common(monkeypatch, run_root, landuse)
+
+    source_man = Path("wepppy/wepp/management/data/Tahoe/Tahoe_Old_Forest.man")
+    with source_man.open("rb") as handle:
+        man_payload = handle.read()
+
+    archive_buffer = BytesIO()
+    with zipfile.ZipFile(archive_buffer, "w") as archive:
+        archive.writestr("nested/custom_entry.man", man_payload)
+    archive_buffer.seek(0)
+
+    with TestClient(rq_engine.app) as client:
+        response = client.post(
+            "/api/runs/run-1/cfg/landuse-user-defined/upload",
+            files={"management_upload": ("nested.zip", archive_buffer.read())},
+        )
+
+    assert response.status_code == 400
+    assert response.json()["error"]["message"] == "Archive members must be at the archive root."
+
+
+def test_landuse_phase3_upload_rejects_symlink_escape(
+    monkeypatch: pytest.MonkeyPatch,
+    tmp_path: Path,
+) -> None:
+    run_root = tmp_path / "run-1"
+    run_root.mkdir(parents=True, exist_ok=True)
+    landuse = _DummyLandusePhase3(str(run_root))
+    _stub_landuse_phase3_common(monkeypatch, run_root, landuse)
+
+    escaped_target = tmp_path / "escaped-target"
+    escaped_target.mkdir(parents=True, exist_ok=True)
+    catalog_link = run_root / "landuse" / "user-defined"
+    catalog_link.parent.mkdir(parents=True, exist_ok=True)
+    catalog_link.symlink_to(escaped_target, target_is_directory=True)
+
+    source_man = Path("wepppy/wepp/management/data/Tahoe/Tahoe_Old_Forest.man")
+    with source_man.open("rb") as handle:
+        payload_bytes = handle.read()
+
+    with TestClient(rq_engine.app) as client:
+        response = client.post(
+            "/api/runs/run-1/cfg/landuse-user-defined/upload",
+            files={"management_upload": ("custom_entry.man", payload_bytes)},
+        )
+
+    assert response.status_code == 400
+    assert response.json()["error"]["code"] == "INVALID_RUN_PATH"
+
+
+def test_landuse_phase3_upload_enforces_max_bytes_and_conflict_contract(
+    monkeypatch: pytest.MonkeyPatch,
+    tmp_path: Path,
+) -> None:
+    run_root = tmp_path / "run-1"
+    run_root.mkdir(parents=True, exist_ok=True)
+    landuse = _DummyLandusePhase3(str(run_root))
+    _stub_landuse_phase3_common(monkeypatch, run_root, landuse)
+    monkeypatch.setattr(landuse_routes.landuse_flask, "_LANDUSE_MAN_UPLOAD_MAX_BYTES", 4)
+
+    with TestClient(rq_engine.app) as client:
+        oversize = client.post(
+            "/api/runs/run-1/cfg/landuse-user-defined/upload",
+            files={"management_upload": ("custom_entry.man", b"abcdef")},
+        )
+        assert oversize.status_code == 413
+
+    monkeypatch.setattr(landuse_routes.landuse_flask, "_LANDUSE_MAN_UPLOAD_MAX_BYTES", 5 * 1024 * 1024)
+    source_man = Path("wepppy/wepp/management/data/Tahoe/Tahoe_Old_Forest.man")
+    with source_man.open("rb") as handle:
+        payload_bytes = handle.read()
+
+    with TestClient(rq_engine.app) as client:
+        first = client.post(
+            "/api/runs/run-1/cfg/landuse-user-defined/upload",
+            files={"management_upload": ("custom_entry.man", payload_bytes)},
+        )
+        assert first.status_code == 200
+
+        conflict = client.post(
+            "/api/runs/run-1/cfg/landuse-user-defined/upload",
+            files={"management_upload": ("custom_entry.man", payload_bytes)},
+        )
+        assert conflict.status_code == 409
+        assert conflict.json()["error"]["code"] == "CATALOG_CONFLICT"
+
+
+def test_landuse_phase3_map_snapshot_and_save(
+    monkeypatch: pytest.MonkeyPatch,
+    tmp_path: Path,
+) -> None:
+    run_root = tmp_path / "run-1"
+    run_root.mkdir(parents=True, exist_ok=True)
+    landuse = _DummyLandusePhase3(str(run_root))
+    _stub_landuse_phase3_common(monkeypatch, run_root, landuse)
+
+    mapping_payload = {
+        "21": {
+            "Key": 21,
+            "Description": "Low Intensity Residential",
+            "DisturbedClass": "developed low intensity",
+            "ManagementFile": "Developed_Low_Intensity.man",
+            "ManagementDir": "/maps",
+            "SoilFile": "Developed_Low_Intensity.sol",
+            "Color": [221, 201, 201, 255],
+        },
+        "22": {
+            "Key": 22,
+            "Description": "High Intensity Residential",
+            "DisturbedClass": "developed moderate intensity",
+            "ManagementFile": "Developed_Moderate_Intensity.man",
+            "ManagementDir": "/maps",
+            "SoilFile": "Developed_Moderate_Intensity.sol",
+            "Color": [216, 147, 130, 255],
+        },
+    }
+    monkeypatch.setattr(landuse_routes.landuse_flask, "load_map", lambda _mapping: copy.deepcopy(mapping_payload))
+
+    class DummyPrep:
+        def timestamp(self, _task: object) -> None:
+            return None
+
+    monkeypatch.setattr(landuse_routes.RedisPrep, "getInstance", lambda _wd: DummyPrep())
+
+    with TestClient(rq_engine.app) as client:
+        snapshot = client.get("/api/runs/run-1/cfg/landuse-map/snapshot")
+        assert snapshot.status_code == 200
+        assert snapshot.headers["Cache-Control"] == "no-store, no-cache, must-revalidate, max-age=0"
+        snapshot_payload = snapshot.json()
+        assert len(snapshot_payload["rows"]) == 2
+        assert snapshot_payload["lookup_sha256"]
+
+        save = client.post(
+            "/api/runs/run-1/cfg/landuse-map/save",
+            json={
+                "if_match_sha256": snapshot_payload["lookup_sha256"],
+                "rows": [
+                    {"key": "21", "management_file": "Developed_Moderate_Intensity.man"},
+                    {"key": "22", "management_file": "Developed_Moderate_Intensity.man"},
+                ],
+            },
+        )
+        assert save.status_code == 200
+        assert save.json()["message"] == "Landuse map saved"
+
+    assert landuse.build_managements_calls == 1
+    assert landuse.custom_mapping_relpath == "landuse/landuse_user_defined_mapping.json"
+    override_path = run_root / "landuse" / "landuse_user_defined_mapping.json"
+    assert override_path.exists()
+    override_payload = json.loads(override_path.read_text(encoding="utf-8"))
+    assert override_payload["21"]["ManagementFile"] == "Developed_Moderate_Intensity.man"
+    assert override_payload["21"]["Description"] == "Developed Moderate Intensity"
+    assert override_payload["22"]["ManagementFile"] == "Developed_Moderate_Intensity.man"
+
+
+def test_landuse_phase3_map_save_requires_precondition(
+    monkeypatch: pytest.MonkeyPatch,
+    tmp_path: Path,
+) -> None:
+    run_root = tmp_path / "run-1"
+    run_root.mkdir(parents=True, exist_ok=True)
+    landuse = _DummyLandusePhase3(str(run_root))
+    _stub_landuse_phase3_common(monkeypatch, run_root, landuse)
+    monkeypatch.setattr(
+        landuse_routes.landuse_flask,
+        "load_map",
+        lambda _mapping: {
+            "21": {
+                "Key": 21,
+                "Description": "Low Intensity Residential",
+                "DisturbedClass": "developed low intensity",
+                "ManagementFile": "Developed_Low_Intensity.man",
+                "ManagementDir": "/maps",
+            }
+        },
+    )
+
+    with TestClient(rq_engine.app) as client:
+        response = client.post(
+            "/api/runs/run-1/cfg/landuse-map/save",
+            json={"rows": [{"key": "21", "management_file": "Developed_Low_Intensity.man"}]},
+        )
+
+    assert response.status_code == 428
+    assert response.json()["error"]["code"] == "PRECONDITION_REQUIRED"
+
+
+def test_landuse_phase3_map_save_rejects_stale_hash(
+    monkeypatch: pytest.MonkeyPatch,
+    tmp_path: Path,
+) -> None:
+    run_root = tmp_path / "run-1"
+    run_root.mkdir(parents=True, exist_ok=True)
+    landuse = _DummyLandusePhase3(str(run_root))
+    _stub_landuse_phase3_common(monkeypatch, run_root, landuse)
+
+    initial_mapping = {
+        "21": {
+            "Key": 21,
+            "Description": "Low Intensity Residential",
+            "DisturbedClass": "developed low intensity",
+            "ManagementFile": "Developed_Low_Intensity.man",
+            "ManagementDir": "/maps",
+            "Color": [221, 201, 201, 255],
+        }
+    }
+    updated_mapping = copy.deepcopy(initial_mapping)
+    updated_mapping["21"]["ManagementFile"] = "Developed_Moderate_Intensity.man"
+
+    monkeypatch.setattr(landuse_routes.landuse_flask, "load_map", lambda _mapping: copy.deepcopy(initial_mapping))
+
+    with TestClient(rq_engine.app) as client:
+        snapshot = client.get("/api/runs/run-1/cfg/landuse-map/snapshot")
+        assert snapshot.status_code == 200
+        stale_sha = snapshot.json()["lookup_sha256"]
+
+        monkeypatch.setattr(landuse_routes.landuse_flask, "load_map", lambda _mapping: copy.deepcopy(updated_mapping))
+        save = client.post(
+            "/api/runs/run-1/cfg/landuse-map/save",
+            json={
+                "if_match_sha256": stale_sha,
+                "rows": [{"key": "21", "management_file": "Developed_Moderate_Intensity.man"}],
+            },
+        )
+
+    assert save.status_code == 409
+    payload = save.json()
+    assert payload["error"]["code"] == "STALE_LOOKUP"
+    assert payload["error"]["details"]["expected_sha256"] == stale_sha
+
+
+def test_landuse_phase3_map_save_validates_rows_and_rolls_back_on_failure(
+    monkeypatch: pytest.MonkeyPatch,
+    tmp_path: Path,
+) -> None:
+    run_root = tmp_path / "run-1"
+    run_root.mkdir(parents=True, exist_ok=True)
+    landuse = _DummyLandusePhase3(str(run_root))
+    _stub_landuse_phase3_common(monkeypatch, run_root, landuse)
+
+    mapping_payload = {
+        "21": {
+            "Key": 21,
+            "Description": "Low Intensity Residential",
+            "DisturbedClass": "developed low intensity",
+            "ManagementFile": "Developed_Low_Intensity.man",
+            "ManagementDir": "/maps",
+            "Color": [221, 201, 201, 255],
+        },
+        "22": {
+            "Key": 22,
+            "Description": "High Intensity Residential",
+            "DisturbedClass": "developed moderate intensity",
+            "ManagementFile": "Developed_Moderate_Intensity.man",
+            "ManagementDir": "/maps",
+            "Color": [216, 147, 130, 255],
+        },
+    }
+    monkeypatch.setattr(landuse_routes.landuse_flask, "load_map", lambda _mapping: copy.deepcopy(mapping_payload))
+
+    override_path = run_root / "landuse" / "landuse_user_defined_mapping.json"
+    override_path.parent.mkdir(parents=True, exist_ok=True)
+    prior_payload = {"21": {"ManagementFile": "Developed_Low_Intensity.man"}}
+    override_path.write_text(json.dumps(prior_payload), encoding="utf-8")
+    landuse.custom_mapping_relpath = "landuse/landuse_user_defined_mapping.json"
+
+    class DummyPrep:
+        def timestamp(self, _task: object) -> None:
+            return None
+
+    monkeypatch.setattr(landuse_routes.RedisPrep, "getInstance", lambda _wd: DummyPrep())
+
+    with TestClient(rq_engine.app) as client:
+        snapshot = client.get("/api/runs/run-1/cfg/landuse-map/snapshot")
+        assert snapshot.status_code == 200
+        lookup_sha = snapshot.json()["lookup_sha256"]
+
+        invalid = client.post(
+            "/api/runs/run-1/cfg/landuse-map/save",
+            json={
+                "if_match_sha256": lookup_sha,
+                "rows": [
+                    {"key": "21", "management_file": "Developed_Low_Intensity.man"},
+                    {"key": "21", "management_file": "Developed_Moderate_Intensity.man"},
+                ],
+            },
+        )
+        assert invalid.status_code == 400
+        assert invalid.json()["error"]["code"] == "invalid_rows_payload"
+
+        landuse.raise_on_build = True
+        rollback = client.post(
+            "/api/runs/run-1/cfg/landuse-map/save",
+            json={
+                "if_match_sha256": lookup_sha,
+                "rows": [
+                    {"key": "21", "management_file": "Developed_Low_Intensity.man"},
+                    {"key": "22", "management_file": "Developed_Moderate_Intensity.man"},
+                ],
+            },
+        )
+
+    assert rollback.status_code == 500
+    assert rollback.json()["error"]["message"] == "Failed to save landuse map"
+    restored_payload = json.loads(override_path.read_text(encoding="utf-8"))
+    assert restored_payload == prior_payload
+    assert landuse.custom_mapping_relpath == "landuse/landuse_user_defined_mapping.json"
+
+
+def test_landuse_phase3_clear_override_clears_path_and_file(
+    monkeypatch: pytest.MonkeyPatch,
+    tmp_path: Path,
+) -> None:
+    run_root = tmp_path / "run-1"
+    run_root.mkdir(parents=True, exist_ok=True)
+    landuse = _DummyLandusePhase3(str(run_root))
+    landuse.custom_mapping_relpath = "landuse/landuse_user_defined_mapping.json"
+    _stub_landuse_phase3_common(monkeypatch, run_root, landuse)
+
+    override_path = run_root / "landuse" / "landuse_user_defined_mapping.json"
+    override_path.parent.mkdir(parents=True, exist_ok=True)
+    override_path.write_text("{}", encoding="utf-8")
+
+    class DummyPrep:
+        def timestamp(self, _task: object) -> None:
+            return None
+
+    monkeypatch.setattr(landuse_routes.RedisPrep, "getInstance", lambda _wd: DummyPrep())
+
+    with TestClient(rq_engine.app) as client:
+        response = client.post("/api/runs/run-1/cfg/landuse-map/clear-override", json={})
+
+    assert response.status_code == 200
+    assert response.json()["message"] == "Landuse map override cleared"
+    assert landuse.custom_mapping_relpath is None
+    assert landuse.build_managements_calls == 1
+    assert not override_path.exists()
+
+
+def test_landuse_phase3_modify_landuse_strict_input_and_auth(
+    monkeypatch: pytest.MonkeyPatch,
+    tmp_path: Path,
+) -> None:
+    run_root = tmp_path / "run-1"
+    run_root.mkdir(parents=True, exist_ok=True)
+    landuse = _DummyLandusePhase3(str(run_root))
+    _stub_landuse_phase3_common(monkeypatch, run_root, landuse)
+
+    with TestClient(rq_engine.app) as client:
+        success = client.post(
+            "/api/runs/run-1/cfg/modify-landuse",
+            json={"topaz_ids": [1, "2", " 3 "], "landuse": 7},
+        )
+        assert success.status_code == 200
+        assert success.json()["topaz_count"] == 3
+        assert landuse.modify_calls == [(["1", "2", "3"], "7")]
+
+        invalid = client.post(
+            "/api/runs/run-1/cfg/modify-landuse",
+            json={"topaz_ids": ["abc"], "landuse": 7},
+        )
+        assert invalid.status_code == 400
+        assert invalid.json()["error"]["code"] == "validation_error"
+
+    monkeypatch.setattr(
+        landuse_routes,
+        "require_jwt",
+        lambda request, required_scopes=None: {"token_class": "unknown", "scope": "rq:enqueue"},
+    )
+    monkeypatch.setattr(landuse_routes, "authorize_run_access", lambda claims, runid: None)
+    with TestClient(rq_engine.app) as client:
+        forbidden = client.post(
+            "/api/runs/run-1/cfg/landuse-user-defined/delete",
+            json={"filename": "x.man"},
+        )
+
+    assert forbidden.status_code == 403
+    assert forbidden.json()["error"]["code"] == "forbidden"
+
+
+def test_landuse_phase3_read_routes_require_read_scope(monkeypatch: pytest.MonkeyPatch, tmp_path: Path) -> None:
+    run_root = tmp_path / "run-1"
+    run_root.mkdir(parents=True, exist_ok=True)
+    landuse = _DummyLandusePhase3(str(run_root))
+    monkeypatch.setattr(
+        landuse_routes,
+        "require_jwt",
+        lambda request: {"token_class": "service", "scope": "rq:enqueue"},
+    )
+    monkeypatch.setattr(landuse_routes, "authorize_run_access", lambda claims, runid: None)
+    monkeypatch.setattr(landuse_routes, "get_wd", lambda runid, prefer_active=False: str(run_root))
+    monkeypatch.setattr(landuse_routes.Landuse, "getInstance", lambda wd: landuse)
+
+    with TestClient(rq_engine.app) as client:
+        catalog = client.get("/api/runs/run-1/cfg/landuse-user-defined/catalog")
+        snapshot = client.get("/api/runs/run-1/cfg/landuse-map/snapshot")
+
+    assert catalog.status_code == 403
+    assert snapshot.status_code == 403

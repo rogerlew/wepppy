@@ -31,6 +31,7 @@ import os
 from os.path import join as _join
 from os.path import exists as _exists
 from os.path import split as _split
+from pathlib import Path
 
 import json
 from copy import deepcopy
@@ -109,6 +110,7 @@ __all__ = [
     'ManagementSummary',
     'Management',
     'merge_managements',
+    'ManagementMapLoadError',
     'load_map',
     'InvalidManagementKey',
     'get_management_summary',
@@ -2788,12 +2790,56 @@ landuse_management_mapping_options = [
     dict(Key='revegetation', Description='Revegetation')
 ]
 
+
+class ManagementMapLoadError(ValueError):
+    """Raised when an explicit management map path is missing or invalid."""
+
+    def __init__(self, message: str, *, code: str, map_path: str | None = None) -> None:
+        super().__init__(message)
+        self.code = code
+        self.map_path = map_path
+
+
+def _looks_like_map_path(value: str) -> bool:
+    token = value.strip()
+    if not token:
+        return False
+    if token.lower().endswith(".json"):
+        return True
+    return "/" in token or "\\" in token
+
+
 def load_map(_map: Optional[str] = None) -> Dict[str, Dict[str, Any]]:
     """Load the management mapping table identified by ``_map``."""
 
+    map_label = str(_map) if _map is not None else "default"
+
+    explicit_map_path: Path | None = None
     if _map is None:
         with open(_map_fn) as fp:
             d = json.load(fp)
+    elif _looks_like_map_path(_map):
+        explicit_map_path = Path(_map).expanduser()
+        if not explicit_map_path.is_absolute():
+            explicit_map_path = explicit_map_path.resolve()
+
+        if not explicit_map_path.exists() or not explicit_map_path.is_file():
+            raise ManagementMapLoadError(
+                f"Management map file does not exist: {explicit_map_path}",
+                code="management_map_missing",
+                map_path=str(explicit_map_path),
+            )
+
+        try:
+            with explicit_map_path.open() as fp:
+                d = json.load(fp)
+        except json.JSONDecodeError as exc:
+            raise ManagementMapLoadError(
+                f"Management map file is not valid JSON: {explicit_map_path}",
+                code="management_map_invalid_json",
+                map_path=str(explicit_map_path),
+            ) from exc
+        map_label = str(explicit_map_path)
     elif 'rred' in _map.lower():
         with open(_rred_map_fn) as fp:
             d = json.load(fp)
@@ -2837,8 +2883,59 @@ def load_map(_map: Optional[str] = None) -> Dict[str, Dict[str, Any]]:
         with open(_map_fn) as fp:
             d = json.load(fp)
 
-    for k, v in d.items():
-        assert k == str(v['Key'])
+    if not isinstance(d, dict):
+        raise ManagementMapLoadError(
+            f"Management map must be a JSON object keyed by management key: {map_label}",
+            code="management_map_invalid_shape",
+            map_path=map_label,
+        )
+
+    if explicit_map_path is not None:
+        map_dir = explicit_map_path.parent
+        for key, record in d.items():
+            if not isinstance(record, dict):
+                raise ManagementMapLoadError(
+                    f"Management map entry '{key}' must be an object",
+                    code="management_map_invalid_shape",
+                    map_path=map_label,
+                )
+            raw_dir = record.get("ManagementDir")
+            if not raw_dir:
+                continue
+            token = str(raw_dir).strip()
+            if not token:
+                continue
+            candidate_dir = Path(token).expanduser()
+            if candidate_dir.is_absolute():
+                continue
+            resolved_dir = (map_dir / candidate_dir).resolve()
+            if resolved_dir != map_dir and map_dir not in resolved_dir.parents:
+                raise ManagementMapLoadError(
+                    f"ManagementDir for key '{key}' escapes map directory: {token}",
+                    code="management_map_invalid_shape",
+                    map_path=map_label,
+                )
+            record["ManagementDir"] = str(resolved_dir)
+
+    for key, record in d.items():
+        if not isinstance(record, dict):
+            raise ManagementMapLoadError(
+                f"Management map entry '{key}' must be an object",
+                code="management_map_invalid_shape",
+                map_path=map_label,
+            )
+        if "Key" not in record:
+            raise ManagementMapLoadError(
+                f"Management map entry '{key}' is missing required field 'Key'",
+                code="management_map_invalid_shape",
+                map_path=map_label,
+            )
+        if str(key) != str(record["Key"]):
+            raise ManagementMapLoadError(
+                f"Management map key '{key}' does not match record Key '{record['Key']}'",
+                code="management_map_invalid_shape",
+                map_path=map_label,
+            )
 
     return d
 

@@ -7,7 +7,7 @@ Guarded by:
 - `tools/check_route_contract_checklist.py` (checklist row parity + non-empty contract fields)
 - `tests/microservices/test_rq_engine_openapi_contract.py` (OpenAPI metadata/response contract + oversize budgets)
 
-- Total frozen routes covered: **83**
+- Total frozen routes covered: **89**
 
 Cutover reconciliation note (2026-04-11):
 - Row-8 contract cutover package
@@ -50,6 +50,11 @@ Cutover reconciliation note (2026-04-11):
 | `POST` | `/api/runs/{runid}/{config}/geneva/build-frequency-panel` | JWT Bearer | rq:enqueue | mutating | async enqueue | `202, 400, 401, 403, 500` | `tests/microservices/test_rq_engine_openapi_contract.py`<br>`tests/microservices/test_rq_engine_geneva_routes.py` |
 | `POST` | `/api/runs/{runid}/{config}/build-rusle` | JWT Bearer | rq:enqueue | mutating | async enqueue | `200, 401, 403, 500` | `tests/microservices/test_rq_engine_openapi_contract.py` |
 | `POST` | `/api/runs/{runid}/{config}/build-landuse` | JWT Bearer | rq:enqueue | mutating | async enqueue | `200, 400, 401, 403, 500` | `tests/microservices/test_rq_engine_openapi_contract.py` |
+| `POST` | `/api/runs/{runid}/{config}/set-landuse-mode` | JWT Bearer | rq:enqueue | mutating | sync no queue | `200, 401, 403, 500` | `tests/microservices/test_rq_engine_openapi_contract.py`<br>`tests/microservices/test_rq_engine_landuse_routes.py` |
+| `POST` | `/api/runs/{runid}/{config}/set-landuse-db` | JWT Bearer | rq:enqueue | mutating | sync no queue | `200, 401, 403, 500` | `tests/microservices/test_rq_engine_openapi_contract.py`<br>`tests/microservices/test_rq_engine_landuse_routes.py` |
+| `POST` | `/api/runs/{runid}/{config}/modify-landuse-coverage` | JWT Bearer | rq:enqueue | mutating | sync no queue | `200, 401, 403, 500` | `tests/microservices/test_rq_engine_openapi_contract.py`<br>`tests/microservices/test_rq_engine_landuse_routes.py` |
+| `GET` | `/api/runs/{runid}/{config}/controllers/landuse/state` | JWT Bearer | rq:status or rq:read | read-only | sync | `200, 401, 403, 500` | `tests/microservices/test_rq_engine_openapi_contract.py`<br>`tests/microservices/test_rq_engine_landuse_routes.py` |
+| `POST` | `/api/runs/{runid}/{config}/modify-landuse-mapping` | JWT Bearer | rq:enqueue | mutating | async enqueue | `200, 401, 403, 500` | `tests/microservices/test_rq_engine_openapi_contract.py`<br>`tests/microservices/test_rq_engine_landuse_routes.py` |
 | `POST` | `/api/runs/{runid}/{config}/build-soils` | JWT Bearer | rq:enqueue | mutating | async enqueue | `200, 400, 401, 403, 500` | `tests/microservices/test_rq_engine_openapi_contract.py` |
 | `POST` | `/api/runs/{runid}/{config}/build-subcatchments-and-abstract-watershed` | JWT Bearer | rq:enqueue | mutating | async enqueue | `200, 400, 401, 403, 500` | `tests/microservices/test_rq_engine_openapi_contract.py` |
 | `POST` | `/api/runs/{runid}/{config}/build-treatments` | JWT Bearer | rq:enqueue | mutating | async enqueue | `200, 400, 401, 403, 500` | `tests/microservices/test_rq_engine_openapi_contract.py` |
@@ -86,6 +91,7 @@ Cutover reconciliation note (2026-04-11):
 | `POST` | `/api/runs/{runid}/{config}/geneva/prepare-hrus` | JWT Bearer | rq:enqueue | mutating | async enqueue | `202, 400, 401, 403, 500` | `tests/microservices/test_rq_engine_openapi_contract.py`<br>`tests/microservices/test_rq_engine_geneva_routes.py` |
 | `POST` | `/api/runs/{runid}/{config}/prepare-roads` | JWT Bearer | rq:enqueue | mutating | async enqueue | `200, 401, 403, 500` | `tests/microservices/test_rq_engine_openapi_contract.py`<br>`tests/microservices/test_rq_engine_roads_routes.py` |
 | `POST` | `/api/runs/{runid}/{config}/geneva/run-batch` | JWT Bearer | rq:enqueue | mutating | async enqueue | `202, 400, 401, 403, 500` | `tests/microservices/test_rq_engine_openapi_contract.py`<br>`tests/microservices/test_rq_engine_geneva_routes.py` |
+| `POST` | `/api/runs/{runid}/{config}/geneva/run-workflow` | JWT Bearer | rq:enqueue | mutating | async enqueue | `202, 400, 401, 403, 500` | `tests/microservices/test_rq_engine_openapi_contract.py`<br>`tests/microservices/test_rq_engine_geneva_routes.py` |
 | `POST` | `/api/runs/{runid}/{config}/run-rhem` | JWT Bearer | rq:enqueue | mutating | async enqueue | `200, 401, 403, 500` | `tests/microservices/test_rq_engine_openapi_contract.py` |
 | `POST` | `/api/runs/{runid}/{config}/run-roads` | JWT Bearer | rq:enqueue | mutating | async enqueue | `200, 401, 403, 500` | `tests/microservices/test_rq_engine_openapi_contract.py`<br>`tests/microservices/test_rq_engine_roads_routes.py` |
 | `POST` | `/api/runs/{runid}/{config}/run-swat` | JWT Bearer | rq:enqueue | mutating | async enqueue | `200, 401, 403, 500` | `tests/microservices/test_rq_engine_openapi_contract.py` |

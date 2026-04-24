@@ -9,6 +9,7 @@ from wepppy.nodb.locales import LanduseDataset
 
 __all__ = [
     'LanduseNoDbLockedException',
+    'LanduseCustomMappingError',
     'LanduseMode',
     'read_cover_defaults',
     'Landuse',
@@ -16,6 +17,18 @@ __all__ = [
 
 
 class LanduseNoDbLockedException(Exception): ...
+
+
+class LanduseCustomMappingError(ValueError):
+    code: str
+    details: Dict[str, Any]
+    def __init__(
+        self,
+        message: str,
+        *,
+        code: str,
+        details: Dict[str, Any] | None = ...,
+    ) -> None: ...
 
 
 class LanduseMode(IntEnum):
@@ -44,6 +57,12 @@ class Landuse(NoDbBase):
     def mapping(self) -> str | None: ...
     @mapping.setter
     def mapping(self, value: str) -> None: ...
+    @property
+    def custom_mapping_relpath(self) -> str | None: ...
+    @custom_mapping_relpath.setter
+    def custom_mapping_relpath(self, value: str | None) -> None: ...
+    @property
+    def custom_mapping_path(self) -> str | None: ...
     def get_mapping_dict(self) -> Dict[str, Dict]: ...
     @property
     def mode(self) -> LanduseMode: ...

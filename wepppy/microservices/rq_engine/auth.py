@@ -28,6 +28,33 @@ class AuthError(Exception):
         self.code = code
 
 
+def token_class(claims: Mapping[str, Any]) -> str:
+    return str(claims.get("token_class") or "").strip().lower()
+
+
+def require_token_class(
+    claims: Mapping[str, Any],
+    allowed: Sequence[str],
+) -> str:
+    normalized_allowed = {str(value).strip().lower() for value in allowed if str(value).strip()}
+    current = token_class(claims)
+    if not current:
+        allowed_text = ", ".join(sorted(normalized_allowed))
+        raise AuthError(
+            f"Token class is required (allowed: {allowed_text})",
+            status_code=403,
+            code="forbidden",
+        )
+    if current not in normalized_allowed:
+        allowed_text = ", ".join(sorted(normalized_allowed))
+        raise AuthError(
+            f"Token class '{current}' is not allowed for this route (allowed: {allowed_text})",
+            status_code=403,
+            code="forbidden",
+        )
+    return current
+
+
 def _extract_bearer_token(request: Request) -> str:
     header = request.headers.get("Authorization")
     if not header:
@@ -236,16 +263,16 @@ def authorize_run_access(claims: Mapping[str, Any], runid: str) -> None:
     if not runid:
         return
 
-    token_class = str(claims.get("token_class") or "").strip().lower()
-    if token_class == "session":
+    normalized_token_class = token_class(claims)
+    if normalized_token_class == "session":
         require_session_marker(claims, runid)
         return
-    if token_class == "user":
+    if normalized_token_class == "user":
         _authorize_user_claims(claims, runid)
         return
 
     run_claims = _normalize_list(claims.get("runs") or claims.get("runid"))
-    if token_class in {"service", "mcp"} and not run_claims:
+    if normalized_token_class in {"service", "mcp"} and not run_claims:
         raise AuthError("Token missing run scope", status_code=403, code="forbidden")
     if run_claims and str(runid) not in run_claims:
         raise AuthError("Token not authorized for run", status_code=403, code="forbidden")
@@ -291,7 +318,9 @@ def require_jwt(
 __all__ = [
     "AuthError",
     "authorize_run_access",
+    "require_token_class",
     "require_jwt",
     "require_roles",
     "require_session_marker",
+    "token_class",
 ]

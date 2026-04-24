@@ -74,7 +74,11 @@ from deprecated import deprecated
 
 from wepppy.landcover import LandcoverMap
 from wepppy.query_engine import update_catalog_entry
-from wepppy.wepp.management import get_management_summary
+from wepppy.wepp.management import (
+    ManagementMapLoadError,
+    get_management_summary,
+    load_map,
+)
 from wepppy.topo.watershed_abstraction.support import is_channel
 from wepppy.all_your_base import NCPU, isfloat
 from wepppy.all_your_base.geo.webclients import wmesque_retrieve
@@ -93,6 +97,7 @@ from wepppy.nodb.duckdb_agents import (
     get_landuse_sub_summary
 )
 from wepppy.runtime_paths.parquet_sidecars import pick_existing_parquet_path
+from wepppy.runtime_paths.paths import normalize_relpath
 
 from wepppy.nodb.redis_prep import RedisPrep, TaskEnum
 from wepppy.nodb.core.management_overrides import (
@@ -107,6 +112,7 @@ from wepppy.io_wait import get_peridot_input_wait_s, get_peridot_input_poll_s
 
 __all__ = [
     'LanduseNoDbLockedException',
+    'LanduseCustomMappingError',
     'LanduseMode',
     'read_cover_defaults',
     'Landuse',
@@ -120,6 +126,9 @@ from wepppyo3.raster_characteristics import count_intersecting_raster_key_pairs
 _GDAL_OPEN_PROBE: Optional[Callable[[str], bool]] = None
 _GDAL_OPEN_PROBE_INIT = False
 _MOFE_MAN_SYNTH_MAX_WORKERS = 4
+_AUTO_CLEARABLE_CUSTOM_MAPPING_RELPATHS = frozenset(
+    {"landuse/landuse_user_defined_mapping.json"}
+)
 
 
 def _materialize_mofe_management_segment(segment_plan: Mapping[str, Any]) -> Any:
@@ -344,6 +353,21 @@ class LanduseNoDbLockedException(Exception):
     pass
 
 
+class LanduseCustomMappingError(ValueError):
+    """Raised when a configured run-scoped custom mapping is invalid."""
+
+    def __init__(
+        self,
+        message: str,
+        *,
+        code: str,
+        details: Optional[Dict[str, Any]] = None,
+    ) -> None:
+        super().__init__(message)
+        self.code = code
+        self.details = details or {}
+
+
 class LanduseMode(IntEnum):
     Undefined = -1
     Gridded = 0
@@ -356,10 +380,78 @@ class LanduseMode(IntEnum):
 
 
 _COVERAGE_PERCENTAGES: Tuple[float, ...] = tuple(i / 100.0 for i in range(0, 103))
+_CUSTOM_MAPPING_RELPATH_PREFIX = "landuse/"
 
 
-def _clear_directory_preserving_symlink_mount(path: str) -> None:
+def _management_description_from_filename(management_file: Any) -> str:
+    token = str(management_file or "").strip()
+    if not token:
+        return ""
+    stem = os.path.splitext(os.path.basename(token))[0]
+    normalized = stem.replace("_", " ").replace("-", " ").strip()
+    return normalized or token
+
+
+def _relabel_summary_for_stale_custom_mapping_description(
+    summary: Any,
+    *,
+    dom: str,
+    effective_map: Mapping[str, Mapping[str, Any]],
+    base_map: Optional[Mapping[str, Mapping[str, Any]]] = None,
+) -> None:
+    if base_map is None:
+        return
+
+    entry = effective_map.get(str(dom))
+    base_entry = base_map.get(str(dom))
+    if not isinstance(entry, Mapping) or not isinstance(base_entry, Mapping):
+        return
+
+    management_file = str(entry.get("ManagementFile") or "").strip()
+    base_management_file = str(base_entry.get("ManagementFile") or "").strip()
+    if not management_file or management_file == base_management_file:
+        return
+
+    current_description = str(entry.get("Description") or "").strip()
+    base_description = str(base_entry.get("Description") or "").strip()
+    if current_description and current_description != base_description:
+        return
+
+    normalized_description = _management_description_from_filename(management_file)
+    if normalized_description:
+        summary.desc = normalized_description
+
+
+def _normalize_custom_mapping_relpath_for_comparison(value: Any) -> Optional[str]:
+    token = str(value or "").strip()
+    if not token:
+        return None
+
+    normalized_token = token.replace("\\", "/").lstrip("/")
+    while normalized_token.startswith("./"):
+        normalized_token = normalized_token[2:]
+    if not normalized_token:
+        return None
+
+    try:
+        normalized_token = normalize_relpath(normalized_token)
+    except ValueError:
+        # Preserve existing explicit validation behavior in setters; this helper
+        # is comparison-only for stale-path recovery.
+        pass
+
+    lowered = str(normalized_token).strip().lower()
+    return lowered or None
+
+
+def _clear_directory_preserving_symlink_mount(
+    path: str,
+    *,
+    preserve_names: Optional[set[str]] = None,
+) -> None:
     """Clear directory contents without deleting an active NoDir projection symlink."""
+    preserved = set(preserve_names or set())
+
     if not os.path.lexists(path):
         return
 
@@ -389,6 +481,8 @@ def _clear_directory_preserving_symlink_mount(path: str) -> None:
             return
 
         for name in os.listdir(resolved):
+            if name in preserved:
+                continue
             candidate = os.path.join(resolved, name)
             if os.path.isdir(candidate) and not os.path.islink(candidate):
                 shutil.rmtree(candidate)
@@ -397,7 +491,19 @@ def _clear_directory_preserving_symlink_mount(path: str) -> None:
         return
 
     if os.path.isdir(path):
-        shutil.rmtree(path)
+        if not preserved:
+            shutil.rmtree(path)
+            return
+
+        for name in os.listdir(path):
+            if name in preserved:
+                continue
+            candidate = os.path.join(path, name)
+            if os.path.isdir(candidate) and not os.path.islink(candidate):
+                shutil.rmtree(candidate)
+            else:
+                os.unlink(candidate)
+        return
     else:
         os.unlink(path)
 
@@ -444,6 +550,7 @@ class Landuse(NoDbBase):
                 self.cover_defaults_d = None
 
             self._mapping = self.config_get_str('landuse', 'mapping')
+            self._custom_mapping_relpath = None
             self._nlcd_db = self.config_get_path('landuse', 'nlcd_db')
             self._landuse_is_vrt = False
 
@@ -491,11 +598,14 @@ class Landuse(NoDbBase):
             return self._mapping
 
         _mapping = None
-        if self._mode in [LanduseMode.RRED_Unburned, LanduseMode.RRED_Burned]:
+        mode = getattr(self, "_mode", None)
+        locales = getattr(self, "_locales", []) or []
+
+        if mode in [LanduseMode.RRED_Unburned, LanduseMode.RRED_Burned]:
             _mapping = 'rred'
-        elif self._mode == LanduseMode.Gridded and 'eu' in self.locales:
+        elif mode == LanduseMode.Gridded and 'eu' in locales:
             _mapping = 'esdac'
-        elif self._mode == LanduseMode.Gridded and 'au' in self.locales:
+        elif mode == LanduseMode.Gridded and 'au' in locales:
             _mapping = 'lu10v5ua'
 
         return _mapping
@@ -541,14 +651,111 @@ class Landuse(NoDbBase):
     def mapping(self, value: str):
         self._mapping = value
 
+    @property
+    def custom_mapping_relpath(self) -> Optional[str]:
+        value = getattr(self, "_custom_mapping_relpath", None)
+        if value in (None, ""):
+            return None
+        token = str(value).strip()
+        return token or None
+
+    @custom_mapping_relpath.setter
+    @nodb_setter
+    def custom_mapping_relpath(self, value: Optional[str]) -> None:
+        if value in (None, ""):
+            self._custom_mapping_relpath = None
+            return
+
+        token = str(value).strip()
+        if not token:
+            self._custom_mapping_relpath = None
+            return
+
+        normalized = normalize_relpath(token)
+        if normalized == ".":
+            raise ValueError("custom mapping path must reference a JSON file under landuse/")
+        if not normalized.startswith(_CUSTOM_MAPPING_RELPATH_PREFIX):
+            raise ValueError("custom mapping path must be under landuse/")
+        if not normalized.lower().endswith(".json"):
+            raise ValueError("custom mapping path must use .json extension")
+
+        self._custom_mapping_relpath = normalized
+
+    @property
+    def custom_mapping_path(self) -> Optional[str]:
+        relpath = self.custom_mapping_relpath
+        if relpath is None:
+            return None
+        return _join(self.wd, relpath)
+
+    def _clear_stale_system_custom_mapping_reference(self, custom_relpath: str) -> bool:
+        normalized_relpath = _normalize_custom_mapping_relpath_for_comparison(custom_relpath)
+        if normalized_relpath not in _AUTO_CLEARABLE_CUSTOM_MAPPING_RELPATHS:
+            return False
+
+        logger = getattr(self, "logger", logging.getLogger(__name__))
+        logger.warning(
+            "Clearing stale system landuse custom mapping reference: %s",
+            custom_relpath,
+        )
+
+        # Always clear in-memory first so read-path callers can recover even if
+        # lock persistence is temporarily unavailable.
+        self._custom_mapping_relpath = None
+
+        islocked = getattr(self, "islocked", None)
+        if callable(islocked) and islocked():
+            return True
+
+        # Unlocked callers are commonly read paths (for example run-page render).
+        # Avoid lock acquisition here to prevent stale-write races from turning a
+        # recoverable stale-system-map condition into a hard failure.
+        return True
+
+    def _resolve_effective_mapping_reference(
+        self,
+        mapping_reference: Optional[str] = None,
+    ) -> Optional[str]:
+        custom_relpath = self.custom_mapping_relpath
+        if custom_relpath:
+            custom_path = _join(self.wd, custom_relpath)
+            if not _exists(custom_path):
+                if self._clear_stale_system_custom_mapping_reference(custom_relpath):
+                    return mapping_reference
+                raise LanduseCustomMappingError(
+                    f"Configured landuse custom mapping file is missing: {custom_relpath}",
+                    code="LANDUSE_CUSTOM_MAP_MISSING",
+                    details={"custom_mapping_relpath": custom_relpath},
+                )
+            return custom_path
+        return mapping_reference
+
+    def _coerce_custom_mapping_load_error(self, exc: ManagementMapLoadError) -> LanduseCustomMappingError:
+        custom_relpath = self.custom_mapping_relpath
+        details: Dict[str, Any] = {}
+        if custom_relpath:
+            details["custom_mapping_relpath"] = custom_relpath
+        if getattr(exc, "map_path", None):
+            details["map_path"] = str(exc.map_path)
+        if str(exc):
+            details["error"] = str(exc)
+        return LanduseCustomMappingError(
+            str(exc),
+            code=getattr(exc, "code", "LANDUSE_CUSTOM_MAP_INVALID"),
+            details=details,
+        )
+
     def get_mapping_dict(self) -> dict[str, dict]:
         """
         Returns the management mapping dictionary
         """
-        from wepppy.wepp.management import load_map
-        mapping = self.mapping
-        assert mapping is not None
-        return load_map(mapping)
+        mapping = self._resolve_effective_mapping_reference(self.mapping)
+        try:
+            return load_map(mapping)
+        except ManagementMapLoadError as exc:
+            if self.custom_mapping_relpath:
+                raise self._coerce_custom_mapping_load_error(exc) from exc
+            raise
 
     @property
     def mode(self) -> LanduseMode:
@@ -576,7 +783,8 @@ class Landuse(NoDbBase):
     def single_selection(self, landuse_single_selection: int) -> None:
         k = landuse_single_selection
         self._single_selection = k
-        self._single_man = get_management_summary(k)
+        mapping_reference = self._resolve_effective_mapping_reference(self.mapping)
+        self._single_man = get_management_summary(k, mapping_reference)
 
     @property
     def single_man(self) -> Optional[Any]:
@@ -628,7 +836,8 @@ class Landuse(NoDbBase):
                 raise ValueError('mofe_buffer_selection must be an integer') from exc
 
         self._mofe_buffer_selection = parsed
-        self._buffer_man = get_management_summary(parsed)
+        mapping_reference = self._resolve_effective_mapping_reference(self.mapping)
+        self._buffer_man = get_management_summary(parsed, mapping_reference)
 
     def parse_inputs(self, payload: Mapping[str, Any]) -> None:
         """
@@ -671,7 +880,10 @@ class Landuse(NoDbBase):
     def clean(self) -> None:
 
         lc_dir = self.lc_dir
-        _clear_directory_preserving_symlink_mount(lc_dir)
+        _clear_directory_preserving_symlink_mount(
+            lc_dir,
+            preserve_names={"user-defined", "landuse_user_defined_mapping.json"},
+        )
         os.makedirs(lc_dir, exist_ok=True)
         self._landuse_is_vrt = False
         if not self.islocked():
@@ -874,8 +1086,9 @@ class Landuse(NoDbBase):
         doms = sorted(doms)
 
         managements = {}
+        mapping_reference = self._resolve_effective_mapping_reference(self.mapping)
         for dom in doms:
-            man = managements[dom] = get_management_summary(dom, self.mapping)
+            man = managements[dom] = get_management_summary(dom, mapping_reference)
 
             # copy the management file to landuse directory
             shutil.copyfile(_join(man.man_dir, man.man_fn), _join(self.lc_dir, _split(man.man_fn)[-1]))
@@ -1101,6 +1314,7 @@ class Landuse(NoDbBase):
                 for k2 in sorted(v.keys()):
                     domlc_d[k][k2] = str(v[k2])
 
+        mapping_reference = self._resolve_effective_mapping_reference(self.mapping)
         managements = self.managements
         if managements is None:
             managements = {}
@@ -1139,7 +1353,7 @@ class Landuse(NoDbBase):
                     for mofe_id, val in hill_sbs_d.items():
                         dom = domlc_d[topaz_id][mofe_id]
                         if dom not in managements:
-                            managements[dom] = get_management_summary(dom, self.mapping)
+                            managements[dom] = get_management_summary(dom, mapping_reference)
                         man = managements[dom]
 
                         burn_class = class_pixel_map[val]
@@ -1210,7 +1424,7 @@ class Landuse(NoDbBase):
                 mofe_id = str(i + 1)
 
                 if dom not in managements:
-                    managements[dom] = get_management_summary(dom, self.mapping)
+                    managements[dom] = get_management_summary(dom, mapping_reference)
 
                 summary = managements[dom]
                 disturbed_class = summary.disturbed_class
@@ -1562,7 +1776,13 @@ class Landuse(NoDbBase):
 
     @property
     def available_datasets(self) -> List[LanduseDataset]:
-        return available_landuse_datasets(self.mapping, self.mods, self.locales)
+        mapping = self._resolve_effective_mapping_reference(self.mapping)
+        try:
+            return available_landuse_datasets(mapping, self.mods, self.locales)
+        except ManagementMapLoadError as exc:
+            if self.custom_mapping_relpath:
+                raise self._coerce_custom_mapping_load_error(exc) from exc
+            raise
 
     @property
     def landcover_datasets(self) -> List[LanduseDataset]:
@@ -1574,7 +1794,19 @@ class Landuse(NoDbBase):
 
     def build_managements(self, _map: Optional[str] = None) -> None:
         if _map is None:
-            _map = self.mapping
+            _map = self._resolve_effective_mapping_reference(self.mapping)
+
+        effective_map: Optional[dict[str, dict[str, Any]]] = None
+        base_map: Optional[dict[str, dict[str, Any]]] = None
+        if self.custom_mapping_relpath:
+            try:
+                effective_map = load_map(_map)
+            except ManagementMapLoadError as exc:
+                raise self._coerce_custom_mapping_load_error(exc) from exc
+            try:
+                base_map = load_map(self.mapping)
+            except ManagementMapLoadError:
+                base_map = None
 
         with self.locked(): 
             watershed = self.watershed_instance
@@ -1585,13 +1817,9 @@ class Landuse(NoDbBase):
             # create a dictionary of management keys and
             # wepppy.landcover.ManagementSummary values
 
-            managements = getattr(self, 'managements', {})
-
-            if managements is None:
-                managements = {}
-
-            for k in managements:
-                managements[k].area = 0.0
+            # Always rebuild summaries from the active map reference so
+            # management metadata changes are not masked by stale cached objects.
+            managements: Dict[str, Any] = {}
 
             # while we are at it we will calculate the pct coverage
             # for the landcover types in the watershed
@@ -1602,6 +1830,13 @@ class Landuse(NoDbBase):
                 if k not in managements:
                     assert not k.endswith('-mulch_15') and not k.endswith('-mulch_30') and not k.endswith('-mulch_60'), k
                     man = get_management_summary(k, _map)
+                    if effective_map is not None:
+                        _relabel_summary_for_stale_custom_mapping_description(
+                            man,
+                            dom=k,
+                            effective_map=effective_map,
+                            base_map=base_map,
+                        )
                     man.area = area
                     managements[k] = man
                 else:
@@ -1632,6 +1867,13 @@ class Landuse(NoDbBase):
 
                         if k not in managements:
                             man = get_management_summary(k, _map)
+                            if effective_map is not None:
+                                _relabel_summary_for_stale_custom_mapping_description(
+                                    man,
+                                    dom=k,
+                                    effective_map=effective_map,
+                                    base_map=base_map,
+                                )
                             man.area = area
                             managements[k] = man
                         else:

@@ -508,7 +508,15 @@ var Landuse = (function () {
                 value: value
             };
 
-            http.postJson(url_for_run("tasks/modify_landuse_coverage/"), payload, { form: formElement })
+            http.requestWithSessionToken(
+                url_for_run("modify-landuse-coverage", { prefix: "/rq-engine/api" }),
+                {
+                    method: "POST",
+                    headers: { "Content-Type": "application/json" },
+                    body: JSON.stringify(payload),
+                    form: formElement
+                }
+            )
                 .then(function (result) {
                     return result;
                 })
@@ -820,10 +828,18 @@ var Landuse = (function () {
             var taskMsg = "Setting Mode to " + mode + " (" + (singleSelection || "") + ")";
             resetStatus(taskMsg);
 
-            http.postJson(url_for_run("tasks/set_landuse_mode/"), {
-                mode: mode,
-                landuse_single_selection: singleSelection
-            }, { form: formElement }).then(function (result) {
+            http.requestWithSessionToken(
+                url_for_run("set-landuse-mode", { prefix: "/rq-engine/api" }),
+                {
+                    method: "POST",
+                    headers: { "Content-Type": "application/json" },
+                    body: JSON.stringify({
+                        mode: mode,
+                        landuse_single_selection: singleSelection
+                    }),
+                    form: formElement
+                }
+            ).then(function (result) {
                 landuse.append_status_message(landuse, taskMsg + "... Success");
             }).catch(handleError);
 
@@ -856,7 +872,15 @@ var Landuse = (function () {
             var taskMsg = "Setting Landuse Db to " + value;
             resetStatus(taskMsg);
 
-            http.postJson(url_for_run("tasks/set_landuse_db/"), { landuse_db: value }, { form: formElement })
+            http.requestWithSessionToken(
+                url_for_run("set-landuse-db", { prefix: "/rq-engine/api" }),
+                {
+                    method: "POST",
+                    headers: { "Content-Type": "application/json" },
+                    body: JSON.stringify({ landuse_db: value }),
+                    form: formElement
+                }
+            )
                 .then(function (result) {
                     landuse.append_status_message(landuse, taskMsg + "... Success");
                 })

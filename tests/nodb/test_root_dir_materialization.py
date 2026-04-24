@@ -147,6 +147,41 @@ def test_landuse_clean_preserves_managed_projection_symlink_mount(tmp_path: Path
     assert landuse._landuse_is_vrt is False
 
 
+def test_landuse_clean_preserves_user_defined_catalog_and_override(tmp_path: Path) -> None:
+    wd = tmp_path / "run"
+    wd.mkdir(parents=True, exist_ok=True)
+
+    landuse_root = wd / "landuse"
+    landuse_root.mkdir(parents=True, exist_ok=True)
+    (landuse_root / "old.man").write_text("legacy", encoding="utf-8")
+    (landuse_root / "nlcd.tif").write_text("legacy", encoding="utf-8")
+
+    user_defined_dir = landuse_root / "user-defined"
+    user_defined_dir.mkdir(parents=True, exist_ok=True)
+    (user_defined_dir / "custom_entry.man").write_text("management", encoding="utf-8")
+    (user_defined_dir / "management_catalog.json").write_text(
+        '{"schema_version": 1, "items": []}',
+        encoding="utf-8",
+    )
+
+    override_path = landuse_root / "landuse_user_defined_mapping.json"
+    override_path.write_text('{"21": {"ManagementFile": "custom_entry.man"}}', encoding="utf-8")
+
+    landuse = Landuse.__new__(Landuse)
+    landuse.wd = str(wd)
+    landuse._landuse_is_vrt = True
+    landuse.islocked = lambda: True
+
+    landuse.clean()
+
+    assert not (landuse_root / "old.man").exists()
+    assert not (landuse_root / "nlcd.tif").exists()
+    assert (user_defined_dir / "custom_entry.man").exists()
+    assert (user_defined_dir / "management_catalog.json").exists()
+    assert override_path.exists()
+    assert landuse._landuse_is_vrt is False
+
+
 def test_landuse_clean_unlinks_unmanaged_symlink_without_deleting_target(tmp_path: Path) -> None:
     wd = tmp_path / "run"
     wd.mkdir(parents=True, exist_ok=True)

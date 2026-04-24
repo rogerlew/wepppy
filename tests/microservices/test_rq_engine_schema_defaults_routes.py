@@ -364,6 +364,7 @@ def test_list_run_endpoints_payload_contract(monkeypatch: pytest.MonkeyPatch) ->
     operation_ids = {operation["operation_id"] for operation in operations}
     assert {
         "rq_engine_list_controllers",
+        "rq_engine_get_landuse_state",
         "rq_engine_get_controller_schema",
         "rq_engine_get_controller_hints",
         "rq_engine_get_controller_templates",
@@ -374,6 +375,19 @@ def test_list_run_endpoints_payload_contract(monkeypatch: pytest.MonkeyPatch) ->
         "rq_engine_set_outlet",
         "rq_engine_build_subcatchments_and_abstract_watershed",
         "rq_engine_build_climate",
+        "rq_engine_build_landuse",
+        "rq_engine_set_landuse_mode",
+        "rq_engine_set_landuse_db",
+        "rq_engine_modify_landuse_coverage",
+        "rq_engine_modify_landuse_mapping",
+        "rq_engine_get_landuse_user_defined_catalog",
+        "rq_engine_upload_landuse_user_defined_managements",
+        "rq_engine_delete_landuse_user_defined_management",
+        "rq_engine_update_landuse_user_defined_management_description",
+        "rq_engine_get_landuse_map_snapshot",
+        "rq_engine_save_landuse_map",
+        "rq_engine_clear_landuse_map_override",
+        "rq_engine_modify_landuse",
         "rq_engine_build_rusle",
         "rq_engine_fork_project",
         "rq_engine_run_wepp",
@@ -479,6 +493,47 @@ def test_watershed_mutation_operations_are_discoverable_with_schema_and_defaults
             defaults_payload = defaults_response.json()
             assert defaults_payload["operation_id"] == operation_id
             assert defaults_payload["defaults_context"]["config"] == CONFIG
+
+
+def test_landuse_operations_are_discoverable_with_schema_and_defaults(
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    _stub_auth(monkeypatch, "rq:status")
+    monkeypatch.setattr(schema_defaults_routes, "_load_runtime_state", lambda runid, config: _sample_runtime())
+
+    operation_ids = (
+        "rq_engine_get_landuse_state",
+        "rq_engine_build_landuse",
+        "rq_engine_set_landuse_mode",
+        "rq_engine_set_landuse_db",
+        "rq_engine_modify_landuse_coverage",
+        "rq_engine_modify_landuse_mapping",
+        "rq_engine_get_landuse_user_defined_catalog",
+        "rq_engine_upload_landuse_user_defined_managements",
+        "rq_engine_delete_landuse_user_defined_management",
+        "rq_engine_update_landuse_user_defined_management_description",
+        "rq_engine_get_landuse_map_snapshot",
+        "rq_engine_save_landuse_map",
+        "rq_engine_clear_landuse_map_override",
+        "rq_engine_modify_landuse",
+    )
+
+    with TestClient(rq_engine.app) as client:
+        endpoints_response = client.get(RUN_ENDPOINTS_PATH)
+        assert endpoints_response.status_code == 200
+        listed_ids = {operation["operation_id"] for operation in endpoints_response.json()["operations"]}
+        for operation_id in operation_ids:
+            assert operation_id in listed_ids
+
+            schema_response = client.get(f"/api/runs/{RUNID}/{CONFIG}/endpoints/{operation_id}/schema")
+            assert schema_response.status_code == 200
+            schema_payload = schema_response.json()
+            assert schema_payload["operation_id"] == operation_id
+
+            defaults_response = client.get(f"/api/runs/{RUNID}/{CONFIG}/endpoints/{operation_id}/defaults")
+            assert defaults_response.status_code == 200
+            defaults_payload = defaults_response.json()
+            assert defaults_payload["operation_id"] == operation_id
 
 
 def test_fetch_dem_and_build_channels_schema_marks_bounds_required_for_modes_0_1(

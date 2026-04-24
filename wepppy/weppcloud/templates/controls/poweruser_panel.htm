@@ -269,6 +269,20 @@
               Storm Event Analyzer
             </a>
             {% endif %}
+            <a class="pure-button pure-button-secondary"
+               href="{{ url_for_run('landuse.view_landuse_user_defined', runid=runid, config=config) }}"
+               target="_blank"
+               rel="noopener"
+               data-open-tab-pref>
+              Landuse User-Defined
+            </a>
+            <a class="pure-button pure-button-secondary"
+               href="{{ url_for_run('landuse.view_landuse_map', runid=runid, config=config) }}"
+               target="_blank"
+               rel="noopener"
+               data-open-tab-pref>
+              Landuse Map
+            </a>
             <button type="button"
                     class="pure-button pure-button-secondary"
                     data-project-action="clear-locks">

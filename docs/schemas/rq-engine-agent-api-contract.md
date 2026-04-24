@@ -86,6 +86,66 @@ Bootstrap routes do not accept `rq:enqueue` as a substitute for `bootstrap:*`.
   compatibility. Treat this as an accepted residual/design risk until a
   follow-on policy package updates route + descriptor + contract together.
 
+## Landuse First-Class Route Contract (2026-04-24)
+
+Phase 1 + Phase 2 + Phase 3 migration adds canonical rq-engine landuse interfaces:
+
+- `POST /api/runs/{runid}/{config}/set-landuse-mode`
+- `POST /api/runs/{runid}/{config}/set-landuse-db`
+- `POST /api/runs/{runid}/{config}/modify-landuse-coverage`
+- `GET /api/runs/{runid}/{config}/controllers/landuse/state`
+- `GET /api/runs/{runid}/{config}/landuse-user-defined/catalog`
+- `POST /api/runs/{runid}/{config}/landuse-user-defined/upload`
+- `POST /api/runs/{runid}/{config}/landuse-user-defined/delete`
+- `POST /api/runs/{runid}/{config}/landuse-user-defined/update-description`
+- `GET /api/runs/{runid}/{config}/landuse-map/snapshot`
+- `POST /api/runs/{runid}/{config}/landuse-map/save`
+- `POST /api/runs/{runid}/{config}/landuse-map/clear-override`
+- `POST /api/runs/{runid}/{config}/modify-landuse`
+
+Auth and scope requirements:
+- Landuse mutators require `rq:enqueue`, run access, and token class in
+  `{user, session, service, mcp}`.
+- Landuse read state requires run access plus one of `{rq:read, rq:status}`.
+- Phase 3 read routes (`landuse-user-defined/catalog`, `landuse-map/snapshot`)
+  require run access plus one of `{rq:read, rq:status}`.
+
+Run-root targeting policy for migrated landuse routes:
+- Optional query parameter `pup` is supported for non-composite runids.
+- `pup` resolves only under run `_pups/` with containment checks.
+- Composite runids (`;;`) ignore `pup` and use runid-encoded context.
+
+`landuse-user-defined/upload` archive policy:
+- Real management payload files MUST be `.man` members at archive root.
+- Known macOS metadata sidecars (`__MACOSX/*`, `.DS_Store`, `._*`) are ignored.
+- Nested non-sidecar members are rejected with canonical `invalid_archive` errors.
+
+Browser transport policy for moved UI callers:
+- Browser callers use `requestWithSessionToken` to invoke `/rq-engine/api/...`.
+- No cookie-mutation fallback is introduced for migrated rq-engine mutators.
+- WEPPcloud render routes remain in WEPPcloud and only their machine/state APIs
+  moved:
+  - `/runs/{runid}/{config}/report/landuse`
+  - `/runs/{runid}/{config}/landuse-user-defined`
+  - `/runs/{runid}/{config}/landuse-map`
+
+Compatibility/deprecation policy:
+- Legacy Flask landuse compatibility machine/state routes were removed on
+  **2026-04-24** via package
+  `docs/work-packages/20260424_landuse_legacy_flask_state_route_removal/`.
+- Removed Flask compatibility endpoints:
+  - `/runs/{runid}/{config}/tasks/set_landuse_mode/`
+  - `/runs/{runid}/{config}/tasks/set_landuse_db/`
+  - `/runs/{runid}/{config}/tasks/modify_landuse_coverage[/]`
+  - `/runs/{runid}/{config}/tasks/modify_landuse_mapping/`
+  - `/runs/{runid}/{config}/api/landuse/user_defined/catalog`
+  - `/runs/{runid}/{config}/tasks/landuse/user_defined/upload|delete|update-description`
+  - `/runs/{runid}/{config}/api/landuse/map_snapshot`
+  - `/runs/{runid}/{config}/tasks/landuse/map/save|clear-override`
+  - `/runs/{runid}/{config}/tasks/modify_landuse/`
+- Agents and browser callers MUST use rq-engine routes for these operations;
+  removed Flask endpoints now return routing-level not-found behavior.
+
 ## Response Contract
 rq-engine responses must follow `docs/schemas/rq-response-contract.md`.
 

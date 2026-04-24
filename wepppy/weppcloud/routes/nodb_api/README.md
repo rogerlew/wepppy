@@ -149,20 +149,18 @@ Each blueprint section below documents:
 ### Landuse (`wepppy.weppcloud.routes.nodb_api.landuse_bp`)
 - **NoDb singletons**: [Landuse](../../../nodb/core/landuse.py), [Ron](../../../nodb/core/ron.py)
 - **Controller docs**: [Landuse Modify Controller Reference (2025 helper migration)](../../controllers_js/README.md#landuse-modify-controller-reference-2025-helper-migration)
-- **Helper stack**: `parse_request_payload`, `get_wd`, `jsonify`, `render_template`, `success_factory`, `exception_factory`
-- **Testing**: [tests/weppcloud/routes/test_landuse_bp.py](../../../../tests/weppcloud/routes/test_landuse_bp.py) — covers coercion helpers and JSON payload handling.
+- **Helper stack**: `authorize`, `load_run_context`, `get_wd`, `jsonify`, `render_template`, `error_factory`, `exception_factory`
+- **Testing**: [tests/weppcloud/routes/test_landuse_bp.py](../../../../tests/weppcloud/routes/test_landuse_bp.py) — covers render/query behavior and verifies removed legacy compatibility endpoints return `404`.
+- **Ownership note (2026-04-24)**: Flask compatibility state/mutator routes were removed; rq-engine (`wepppy/microservices/rq_engine/landuse_routes.py`) is the canonical machine/state API surface for these operations.
 
 | Route | Methods | NoDb interactions | Notes |
 | --- | --- | --- | --- |
-| `/runs/<string:runid>/<config>/tasks/set_landuse_mode[/]` | `POST` | Landuse.mode (set), Landuse.single_selection (set) | — |
-| `/runs/<string:runid>/<config>/tasks/set_landuse_db[/]` | `POST` | Landuse.nlcd_db (set) | — |
-| `/runs/<string:runid>/<config>/tasks/modify_landuse_coverage[/]` | `POST` | Landuse.modify_coverage, Landuse.modify_coverage() | Normalizes domain/cover IDs then writes via `Landuse.modify_coverage()` |
-| `/runs/<string:runid>/<config>/tasks/modify_landuse_mapping[/]` | `POST` | Landuse.modify_mapping | Uses `_coerce_topaz_ids` to keep legacy form inputs compatible |
 | `/runs/<string:runid>/<config>/query/landuse[/]` | `GET` | Landuse.domlc_d | — |
 | `/runs/<string:runid>/<config>/query/landuse/subcatchments[/]` | `GET` | Landuse.subs_summary | — |
 | `/runs/<string:runid>/<config>/query/landuse/channels[/]` | `GET` | Landuse.chns_summary | — |
 | `/runs/<string:runid>/<config>/report/landuse[/]` | `GET` | Landuse.landuseoptions | Builds template context via `build_landuse_report_context()` |
-| `/runs/<string:runid>/<config>/tasks/modify_landuse[/]` | `POST` | Landuse.modify | Accepts comma-separated Topaz IDs, coerces landuse code, then calls `Landuse.modify()` |
+| `/runs/<string:runid>/<config>/landuse-user-defined` | `GET` | Landuse (read-only context), run-scoped `landuse/user-defined/` catalog metadata | Renders catalog page; machine state/mutations are rq-engine-only. |
+| `/runs/<string:runid>/<config>/landuse-map` | `GET` | Landuse.custom_mapping_relpath (read), mapping snapshot from `load_map` | Renders map editor page; snapshot/save/clear APIs are rq-engine-only. |
 | `/runs/<string:runid>/<config>/query/landuse/cover/subcatchments[/]` | `GET` | Landuse.hillslope_cancovs | — |
 
 ### Observed (`wepppy.weppcloud.routes.nodb_api.observed_bp`)

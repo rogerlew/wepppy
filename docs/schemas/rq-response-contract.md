@@ -60,6 +60,37 @@ Example (sync update):
 }
 ```
 
+Landuse first-class route notes (2026-04-24):
+- Phase 1 synchronous mutators
+  (`set-landuse-mode`, `set-landuse-db`, `modify-landuse-coverage`) return
+  HTTP `200` with canonical `{"message": ...}` on success and canonical error
+  payloads on failure.
+- Phase 2 read endpoint
+  (`GET /api/runs/{runid}/{config}/controllers/landuse/state`) returns
+  controller-state metadata including:
+  - `controller`
+  - `state`
+  - `run_state_domain`
+  - `run_state_vector`
+  - `run_state_revision`
+  - optional weak `etag` for client cache/coherency signaling.
+- Legacy Flask landuse compatibility machine/state routes were removed on
+  `2026-04-24`; callers should expect routing-level `404` from removed Flask
+  endpoints and use rq-engine routes as the canonical contract surface.
+- Phase 3 catalog/map mutators return HTTP `200` with explicit message-bearing
+  payloads and route-specific result fields:
+  - catalog upload/delete/update-description: `message`, `items`,
+    `catalog_count` (+ route-specific fields such as `imported_files` or
+    `deleted`)
+  - map save/clear-override: `message` (+ `lookup_sha256` on save)
+  - modify-landuse: `message`, `topaz_count`
+- Phase 3 hardening error contracts are explicit:
+  - `PRECONDITION_REQUIRED` (`428`) for missing map save preconditions
+  - `STALE_LOOKUP` (`409`) for stale optimistic-concurrency hashes
+  - `CATALOG_CONFLICT` (`409`) for conflicting user-defined filename uploads
+  - `validation_error` / route-specific explicit `400` payloads for invalid row
+    schemas or input coercion failures.
+
 ## Job polling responses
 - Job status (jobstatus):
   - `{job_id, runid, status, started_at, ended_at}`

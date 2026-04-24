@@ -288,6 +288,12 @@ def merge_managements(mans: Sequence[Management]) -> Management: ...
 landuse_management_mapping_options: List[Dict[str, str]]
 
 
+class ManagementMapLoadError(ValueError):
+    code: str
+    map_path: str | None
+    def __init__(self, message: str, *, code: str, map_path: str | None = ...) -> None: ...
+
+
 def load_map(_map: Optional[str] = ...) -> Dict[str, Dict[str, Any]]: ...
 
 

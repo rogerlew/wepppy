@@ -130,6 +130,42 @@ def test_pure_control_renders(template_name: str, jinja_env: Environment) -> Non
     template.render()
 
 
+@pytest.mark.parametrize(
+    ("template_name", "title_text", "run_link_class"),
+    [
+        ("controls/landuse_user_defined.htm", "User-Defined Landuse Catalog", "lu-catalog__run-link"),
+        ("controls/landuse_map.htm", "Landuse Map Editor", "lu-map__run-link"),
+    ],
+)
+def test_landuse_editor_templates_render_run_link_in_title_meta(
+    template_name: str,
+    title_text: str,
+    run_link_class: str,
+    jinja_env: Environment,
+) -> None:
+    template = jinja_env.get_template(template_name)
+    rendered = template.render(
+        runid="demo-run",
+        config="demo-config",
+        url_for_run=lambda endpoint, **kwargs: f"/runs/{kwargs['runid']}/{kwargs['config']}",
+        list_url="/rq-engine/api/runs/demo-run/demo-config/landuse-user-defined/catalog",
+        upload_url="/rq-engine/api/runs/demo-run/demo-config/landuse-user-defined/upload",
+        delete_url="/rq-engine/api/runs/demo-run/demo-config/landuse-user-defined/delete",
+        update_description_url="/rq-engine/api/runs/demo-run/demo-config/landuse-user-defined/update-description",
+        snapshot_url="/rq-engine/api/runs/demo-run/demo-config/landuse-map/snapshot",
+        save_url="/rq-engine/api/runs/demo-run/demo-config/landuse-map/save",
+        clear_override_url="/rq-engine/api/runs/demo-run/demo-config/landuse-map/clear-override",
+        session_token_url="/rq-engine/api/runs/demo-run/demo-config/session-token",
+        catalog_items=[],
+        snapshot={"rows": [], "management_options": [], "lookup_sha256": None},
+    )
+
+    assert title_text in rendered
+    assert f'class="{run_link_class}"' in rendered
+    assert ">demo-run</a>" in rendered
+    assert 'href="/runs/demo-run/demo-config"' in rendered
+
+
 def test_roads_template_uses_standard_control_shell_layout(jinja_env: Environment) -> None:
     template = jinja_env.get_template("controls/roads_pure.htm")
     rendered = template.render()
@@ -409,6 +445,24 @@ def test_poweruser_panel_hides_run_token_controls_for_non_admin(jinja_env: Envir
     assert "Mint Run Token" not in rendered
     assert 'data-run-token-root' not in rendered
     assert 'data-run-token-action="mint"' not in rendered
+
+
+def test_poweruser_panel_renders_landuse_catalog_and_map_links(jinja_env: Environment) -> None:
+    template = jinja_env.get_template("controls/poweruser_panel.htm")
+
+    def _url_for_run(endpoint: str, **values) -> str:
+        return f"/runs/{values.get('runid', 'test-run')}/{values.get('config', 'test-config')}/{endpoint}"
+
+    rendered = template.render(
+        runid="test-run",
+        config="test-config",
+        url_for_run=_url_for_run,
+    )
+
+    assert "Landuse User-Defined" in rendered
+    assert "Landuse Map" in rendered
+    assert "/runs/test-run/test-config/landuse.view_landuse_user_defined" in rendered
+    assert "/runs/test-run/test-config/landuse.view_landuse_map" in rendered
 
 
 def test_poweruser_panel_shows_run_token_controls_for_admin(jinja_env: Environment) -> None:

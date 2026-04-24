@@ -116,6 +116,19 @@ def test_require_roles_rejects_when_required_role_missing() -> None:
     assert "required role" in exc_info.value.message.lower()
 
 
+def test_require_token_class_accepts_allowed_class() -> None:
+    assert auth.require_token_class({"token_class": "Service"}, ("user", "service")) == "service"
+
+
+def test_require_token_class_rejects_disallowed_class() -> None:
+    with pytest.raises(auth.AuthError) as exc_info:
+        auth.require_token_class({"token_class": "mcp"}, ("user", "service"))
+
+    assert exc_info.value.status_code == 403
+    assert exc_info.value.code == "forbidden"
+    assert "not allowed" in exc_info.value.message.lower()
+
+
 def test_authorize_user_claims_allows_admin_without_owner_lookup(monkeypatch: pytest.MonkeyPatch) -> None:
     monkeypatch.setattr(auth, "get_wd", lambda *_args, **_kwargs: (_ for _ in ()).throw(AssertionError("unused")))
     monkeypatch.setattr(auth, "get_run_owners_lazy", lambda _runid: (_ for _ in ()).throw(AssertionError("unused")))

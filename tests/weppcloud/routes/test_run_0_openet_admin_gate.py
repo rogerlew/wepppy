@@ -117,6 +117,105 @@ def _extract_mod_flag(js_text: str, flag_name: str) -> str:
     return match.group(1)
 
 
+def test_call_landuse_with_stale_mapping_recovery_retries_once(run0_template_app, run0_module) -> None:
+    class DummyLanduse:
+        def __init__(self) -> None:
+            self.custom_mapping_relpath = "landuse/landuse_user_defined_mapping.json"
+
+        def _clear_stale_system_custom_mapping_reference(self, relpath: str) -> bool:
+            assert relpath == "landuse/landuse_user_defined_mapping.json"
+            self.custom_mapping_relpath = None
+            return True
+
+    landuse = DummyLanduse()
+    attempts = {"count": 0}
+
+    def producer():
+        attempts["count"] += 1
+        if attempts["count"] == 1:
+            raise run0_module.LanduseCustomMappingError(
+                "Configured landuse custom mapping file is missing: landuse/landuse_user_defined_mapping.json",
+                code="LANDUSE_CUSTOM_MAP_MISSING",
+                details={"custom_mapping_relpath": "landuse/landuse_user_defined_mapping.json"},
+            )
+        return {"options": []}
+
+    with run0_template_app.app_context():
+        payload = run0_module._call_landuse_with_stale_mapping_recovery(landuse, producer)
+
+    assert payload == {"options": []}
+    assert attempts["count"] == 2
+    assert landuse.custom_mapping_relpath is None
+
+
+def test_call_landuse_with_stale_mapping_recovery_raises_non_system_paths(
+    run0_template_app,
+    run0_module,
+) -> None:
+    class DummyLanduse:
+        custom_mapping_relpath = "landuse/custom-map.json"
+
+    landuse = DummyLanduse()
+
+    def producer():
+        raise run0_module.LanduseCustomMappingError(
+            "Configured landuse custom mapping file is missing: landuse/custom-map.json",
+            code="LANDUSE_CUSTOM_MAP_MISSING",
+            details={"custom_mapping_relpath": "landuse/custom-map.json"},
+        )
+
+    with run0_template_app.app_context():
+        with pytest.raises(run0_module.LanduseCustomMappingError):
+            run0_module._call_landuse_with_stale_mapping_recovery(landuse, producer)
+
+
+def test_call_landuse_with_stale_mapping_recovery_retries_on_stale_write_for_system_path(
+    run0_template_app,
+    run0_module,
+) -> None:
+    class DummyLanduse:
+        def __init__(self) -> None:
+            self.custom_mapping_relpath = "landuse/landuse_user_defined_mapping.json"
+
+        def _clear_stale_system_custom_mapping_reference(self, relpath: str) -> bool:
+            assert relpath == "landuse/landuse_user_defined_mapping.json"
+            self.custom_mapping_relpath = None
+            return True
+
+    landuse = DummyLanduse()
+    attempts = {"count": 0}
+
+    def producer():
+        attempts["count"] += 1
+        if attempts["count"] == 1:
+            raise run0_module.NoDbStaleWriteError("stale NoDb write rejected")
+        return {"options": []}
+
+    with run0_template_app.app_context():
+        payload = run0_module._call_landuse_with_stale_mapping_recovery(landuse, producer)
+
+    assert payload == {"options": []}
+    assert attempts["count"] == 2
+    assert landuse.custom_mapping_relpath is None
+
+
+def test_call_landuse_with_stale_mapping_recovery_raises_stale_write_for_non_system_path(
+    run0_template_app,
+    run0_module,
+) -> None:
+    class DummyLanduse:
+        custom_mapping_relpath = "landuse/custom-map.json"
+
+    landuse = DummyLanduse()
+
+    def producer():
+        raise run0_module.NoDbStaleWriteError("stale NoDb write rejected")
+
+    with run0_template_app.app_context():
+        with pytest.raises(run0_module.NoDbStaleWriteError):
+            run0_module._call_landuse_with_stale_mapping_recovery(landuse, producer)
+
+
 def test_view_mod_section_openet_denied_for_non_admin(
     run0_client,
     monkeypatch: pytest.MonkeyPatch,

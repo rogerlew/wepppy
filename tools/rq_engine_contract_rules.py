@@ -7,6 +7,7 @@ SUCCESS_STATUS_OVERRIDES: dict[tuple[str, str], int] = {
     ("POST", "/api/runs/{runid}/{config}/geneva/build-frequency-panel"): 202,
     ("POST", "/api/runs/{runid}/{config}/geneva/prepare-hrus"): 202,
     ("POST", "/api/runs/{runid}/{config}/geneva/run-batch"): 202,
+    ("POST", "/api/runs/{runid}/{config}/geneva/run-workflow"): 202,
     ("POST", "/create/"): 303,
 }
 
@@ -32,6 +33,7 @@ PATHS_REQUIRING_400 = {
     "/api/runs/{runid}/{config}/geneva/build-frequency-panel",
     "/api/runs/{runid}/{config}/geneva/prepare-hrus",
     "/api/runs/{runid}/{config}/geneva/run-batch",
+    "/api/runs/{runid}/{config}/geneva/run-workflow",
     "/api/runs/{runid}/{config}/post-dss-export-rq",
     "/api/runs/{runid}/{config}/prep-wepp-watershed",
     "/api/runs/{runid}/{config}/restore-archive",

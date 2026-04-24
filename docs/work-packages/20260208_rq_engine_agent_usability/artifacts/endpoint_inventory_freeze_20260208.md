@@ -5,9 +5,9 @@ Source-of-truth inventory captured directly from:
 - `wepppy/weppcloud/routes/bootstrap.py`
 
 Snapshot summary:
-- Total endpoints inventoried: **108**
-- Classification counts: **agent-facing 85**, **internal 17**, **ui-only 6**
-- Canonical owner counts: **rq-engine 105**, **Flask wrapper 3**
+- Total endpoints inventoried: **112**
+- Classification counts: **agent-facing 89**, **internal 17**, **ui-only 6**
+- Canonical owner counts: **rq-engine 109**, **Flask wrapper 3**
 
 Cutover reconciliation note (2026-04-11):
 - Row-8 contract cutover package
@@ -61,6 +61,10 @@ Cutover reconciliation note (2026-04-11):
 | POST | `/api/runs/{runid}/{config}/geneva/build-frequency-panel` | `wepppy/microservices/rq_engine/geneva_routes.py` | `build_frequency_panel` | agent-facing | rq-engine | JWT Bearer | `rq:enqueue` | mutating | Run access check: `authorize_run_access`. Validates Geneva panel request and enqueues async job; returns canonical submission envelope with `job_id` and `status_url`. |
 | POST | `/api/runs/{runid}/{config}/build-rusle` | `wepppy/microservices/rq_engine/rusle_routes.py` | `build_rusle` | agent-facing | rq-engine | JWT Bearer | `rq:enqueue` | mutating | Run access check: `authorize_run_access`. Async enqueue; response includes `job_id` (with `status_url`/`message` where implemented). |
 | POST | `/api/runs/{runid}/{config}/build-landuse` | `wepppy/microservices/rq_engine/landuse_routes.py` | `build_landuse` | agent-facing | rq-engine | JWT Bearer | `rq:enqueue` | mutating | Run access check: `authorize_run_access`. Async enqueue; response includes `job_id` (with `status_url`/`message` where implemented). |
+| POST | `/api/runs/{runid}/{config}/set-landuse-mode` | `wepppy/microservices/rq_engine/landuse_routes.py` | `set_landuse_mode` | agent-facing | rq-engine | JWT Bearer | `rq:enqueue` | mutating | Run access check: `authorize_run_access`. Synchronous landuse mode metadata mutation; no queue. |
+| POST | `/api/runs/{runid}/{config}/set-landuse-db` | `wepppy/microservices/rq_engine/landuse_routes.py` | `set_landuse_db` | agent-facing | rq-engine | JWT Bearer | `rq:enqueue` | mutating | Run access check: `authorize_run_access`. Synchronous landuse database metadata mutation; no queue. |
+| POST | `/api/runs/{runid}/{config}/modify-landuse-coverage` | `wepppy/microservices/rq_engine/landuse_routes.py` | `modify_landuse_coverage` | agent-facing | rq-engine | JWT Bearer | `rq:enqueue` | mutating | Run access check: `authorize_run_access`. Synchronous landuse coverage mutation; no queue. |
+| GET | `/api/runs/{runid}/{config}/controllers/landuse/state` | `wepppy/microservices/rq_engine/landuse_routes.py` | `get_landuse_state` | agent-facing | rq-engine | JWT Bearer | `rq:status or rq:read` | read-only | Run access check: `authorize_run_access`. Read-only landuse controller state snapshot; no queue enqueue. |
 | POST | `/api/runs/{runid}/{config}/modify-landuse-mapping` | `wepppy/microservices/rq_engine/landuse_routes.py` | `modify_landuse_mapping` | agent-facing | rq-engine | JWT Bearer | `rq:enqueue` | mutating | Run access check: `authorize_run_access`. Validates `dom`/`newdom` payload fields and enqueues serialized landuse mapping mutation; returns `job_id`. |
 | POST | `/api/runs/{runid}/{config}/build-soils` | `wepppy/microservices/rq_engine/soils_routes.py` | `build_soils` | agent-facing | rq-engine | JWT Bearer | `rq:enqueue` | mutating | Run access check: `authorize_run_access`. Async enqueue; response includes `job_id` (with `status_url`/`message` where implemented). |
 | POST | `/api/runs/{runid}/{config}/build-subcatchments-and-abstract-watershed` | `wepppy/microservices/rq_engine/watershed_routes.py` | `build_subcatchments_and_abstract_watershed` | agent-facing | rq-engine | JWT Bearer | `rq:enqueue` | mutating | Run access check: `authorize_run_access`. Async enqueue; response includes `job_id` (with `status_url`/`message` where implemented). |
