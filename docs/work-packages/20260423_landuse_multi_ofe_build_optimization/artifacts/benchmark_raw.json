@@ -1,0 +1,91 @@
+{
+  "generated_at_utc": "2026-04-23T19:50:22+00:00",
+  "iterations_per_mode": 1,
+  "runs": [
+    {
+      "run_id": "moth-eaten-blackhead",
+      "url": "https://wc.bearhive.duckdns.org/weppcloud/runs/moth-eaten-blackhead/disturbed9002-wbt-mofe/",
+      "local_root": "/wc1/runs/mo/moth-eaten-blackhead",
+      "iterations": 1,
+      "baseline_samples_s": [
+        5.126638217829168
+      ],
+      "baseline_mean_s": 5.126638217829168,
+      "baseline_std_s": 0.0,
+      "optimized_samples_s": [
+        5.137337965425104
+      ],
+      "optimized_mean_s": 5.137337965425104,
+      "optimized_std_s": 0.0,
+      "delta_pct": 0.208708848592534
+    },
+    {
+      "run_id": "objectionable-sublimate",
+      "url": "https://wc.bearhive.duckdns.org/weppcloud/runs/objectionable-sublimate/disturbed9002_wbt/",
+      "local_root": "/wc1/runs/ob/objectionable-sublimate",
+      "iterations": 1,
+      "baseline_samples_s": [
+        4.74197541968897
+      ],
+      "baseline_mean_s": 4.74197541968897,
+      "baseline_std_s": 0.0,
+      "optimized_samples_s": [
+        4.694615234155208
+      ],
+      "optimized_mean_s": 4.694615234155208,
+      "optimized_std_s": 0.0,
+      "delta_pct": -0.9987438006768153
+    },
+    {
+      "run_id": "cochlear-beriberi",
+      "url": "https://wc.bearhive.duckdns.org/weppcloud/runs/cochlear-beriberi/disturbed9002-mofe/",
+      "local_root": "/wc1/runs/co/cochlear-beriberi",
+      "iterations": 1,
+      "baseline_samples_s": [
+        5.835570370778441
+      ],
+      "baseline_mean_s": 5.835570370778441,
+      "baseline_std_s": 0.0,
+      "optimized_samples_s": [
+        5.649574387818575
+      ],
+      "optimized_mean_s": 5.649574387818575,
+      "optimized_std_s": 0.0,
+      "delta_pct": -3.1872802681163694
+    },
+    {
+      "run_id": "ordained-incentive",
+      "url": "https://wc.bearhive.duckdns.org/weppcloud/runs/ordained-incentive/disturbed9002-wbt-mofe/",
+      "local_root": "/wc1/runs/or/ordained-incentive",
+      "iterations": 1,
+      "baseline_samples_s": [
+        5.826086301822215
+      ],
+      "baseline_mean_s": 5.826086301822215,
+      "baseline_std_s": 0.0,
+      "optimized_samples_s": [
+        5.4019724116660655
+      ],
+      "optimized_mean_s": 5.4019724116660655,
+      "optimized_std_s": 0.0,
+      "delta_pct": -7.279567589369565
+    },
+    {
+      "run_id": "uninsured-deformation",
+      "url": "https://wc.bearhive.duckdns.org/weppcloud/runs/uninsured-deformation/disturbed9002-wbt-mofe/",
+      "local_root": "/wc1/runs/un/uninsured-deformation",
+      "iterations": 1,
+      "baseline_samples_s": [
+        4.778201061766595
+      ],
+      "baseline_mean_s": 4.778201061766595,
+      "baseline_std_s": 0.0,
+      "optimized_samples_s": [
+        4.731372902635485
+      ],
+      "optimized_mean_s": 4.731372902635485,
+      "optimized_std_s": 0.0,
+      "delta_pct": -0.9800374351303758
+    }
+  ]
+}

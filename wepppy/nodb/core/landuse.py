@@ -923,8 +923,13 @@ class Landuse(NoDbBase):
                 self._build_single_selection()
             elif self._mode == LanduseMode.Undefined:
                 raise Exception('LanduseMode is not set')
+            if self.multi_ofe:
+                # MOFE assignments are produced later by _build_multiple_ofe(); clear
+                # stale values now so pre-build passes cannot run pair-count work.
+                self.domlc_mofe_d = None
 
-        self.build_managements()
+        if not self.multi_ofe:
+            self.build_managements()
 
         if 'rap' in self.mods:
             from wepppy.nodb.mods.rap import RAP
@@ -962,7 +967,12 @@ class Landuse(NoDbBase):
 
                 # rhem has rap but no disturbed class
                 disturbed_class = getattr(man_summary, 'disturbed_class', None)
-                self.logger.info(f'topaz_id: {topaz_id}\t dom:{dom}\t disturbed_class: {disturbed_class}')
+                self.logger.debug(
+                    'RAP cover lookup topaz_id=%s dom=%s disturbed_class=%s',
+                    topaz_id,
+                    dom,
+                    disturbed_class,
+                )
 
                 if disturbed_class is None or disturbed_class == '':
                     continue
@@ -977,6 +987,7 @@ class Landuse(NoDbBase):
                 cancov_d[topaz_id] = max(cancov, 0.05)
 
 #            self.logger.info(f"cancov: {cancov_d}")
+            self.logger.info('Calculated RAP covers for %s disturbed hillslopes', len(cancov_d))
 
             if cancov_d:
                 self.hillslope_cancovs = cancov_d
@@ -1090,6 +1101,10 @@ class Landuse(NoDbBase):
                 for k2 in sorted(v.keys()):
                     domlc_d[k][k2] = str(v[k2])
 
+        managements = self.managements
+        if managements is None:
+            managements = {}
+
         if disturbed is not None:
             disturbed_key_lookup = disturbed.get_disturbed_key_lookup()
             burn_shrubs = disturbed.burn_shrubs
@@ -1123,7 +1138,9 @@ class Landuse(NoDbBase):
 
                     for mofe_id, val in hill_sbs_d.items():
                         dom = domlc_d[topaz_id][mofe_id]
-                        man = man = get_management_summary(dom, self.mapping)
+                        if dom not in managements:
+                            managements[dom] = get_management_summary(dom, self.mapping)
+                        man = managements[dom]
 
                         burn_class = class_pixel_map[val]
 
@@ -1144,8 +1161,14 @@ class Landuse(NoDbBase):
                                                             '133': disturbed_key_lookup['grass_high_sev_fire']}[burn_class]
 
                         meta[topaz_id] = dict(burn_class=burn_class, disturbed_class=man.disturbed_class)
-        
-        self.logger.info(f'domlc_d = {domlc_d}')
+
+        total_mofe_segments = sum(len(hill_sbs_d) for hill_sbs_d in domlc_d.values())
+        self.logger.info(
+            'Prepared multi-OFE landuse assignments for %s hillslopes (%s OFE segments)',
+            len(domlc_d),
+            total_mofe_segments,
+        )
+        self.logger.debug('domlc_d = %s', domlc_d)
 
         if 'rap' in self.mods:
             self.logger.info(f'acquiring rap')
@@ -1157,7 +1180,6 @@ class Landuse(NoDbBase):
 
 
         lc_dir = self.lc_dir
-        managements = self.managements
         task_args_list: List[Tuple[str, str, int, List[Dict[str, Any]]]] = []
 
         watershed = self.watershed_instance
@@ -1166,7 +1188,7 @@ class Landuse(NoDbBase):
             if rap is not None:
                 cancov_d[topaz_id] = {}
 
-            self.logger.info(f'building management for hillslope: {topaz_id}')
+            self.logger.debug('building management for hillslope: %s', topaz_id)
 
             nsegments = int(watershed.mofe_nsegments[str(topaz_id)])
             mofe_lc_fn = _join(lc_dir, f'hill_{topaz_id}.mofe.man')
@@ -1258,7 +1280,11 @@ class Landuse(NoDbBase):
             assert len(segment_plans) == nsegments, (topaz_id, len(segment_plans),  nsegments)
 
             if len(segment_plans) > 1:
-                self.logger.info(f"building management for hillslope: {topaz_id} with doms {doms}")
+                self.logger.debug(
+                    'building management for hillslope: %s with doms %s',
+                    topaz_id,
+                    doms,
+                )
             task_args_list.append((str(topaz_id), mofe_lc_fn, nsegments, segment_plans))
 
         cpu_count = os.cpu_count() or 1
@@ -1589,7 +1615,7 @@ class Landuse(NoDbBase):
             if not hasattr(self, 'domlc_mofe_d'):
                 self.domlc_mofe_d = None
 
-            if self.multi_ofe and self.domlc_mofe_d is not None:
+            if self.multi_ofe and isinstance(self.domlc_mofe_d, dict) and self.domlc_mofe_d:
                 pair_counts = count_intersecting_raster_key_pairs(
                     key_fn=watershed.subwta,
                     key2_fn=watershed.mofe_map,

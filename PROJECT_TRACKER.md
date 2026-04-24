@@ -79,6 +79,31 @@ Feedback mechanisms:
 
 Work packages that are scoped but not yet started. Dependencies and prerequisites should be noted.
 
+### Landuse Batched Mapping Submit UX (Single + Multi-OFE)
+**Proposed**: 2026-04-23  
+**Size**: Medium (2-4 focused sessions)  
+**Priority**: High  
+**Description**: Replace immediate per-select landuse mapping submits with staged mapping edits and one explicit submit action that sends one request containing one or more mapping updates. Unify this interaction for single-OFE and Multi-OFE flows and remove mapping `depends_on` chaining to reduce lock contention and deferred-job stranding.
+
+**Scope**:
+- Stage mapping edits in landuse summary UI and submit with a secondary action button.
+- Update rq-engine mapping route to accept batch payloads and enqueue one job per submit.
+- Update RQ mapping worker path to apply mapping batches under one lock window.
+- Remove mapping enqueue dependency chaining (`depends_on`) for this path.
+- Add targeted JS/microservice/RQ regression coverage for batch semantics and failure behavior.
+
+**Strategic Value**:
+- Reduces queue fan-out and landuse lock contention during interactive edits.
+- Removes known deferred-state failure mode caused by failed predecessor chaining.
+- Improves UX clarity with explicit "pending edits" and "apply edits" flow.
+- Makes single and Multi-OFE mapping workflows consistent.
+
+**Dependencies**: None beyond current landuse controller/route baseline.
+
+**Next Steps**: Execute [docs/work-packages/20260423_landuse_batched_mapping_submit/](docs/work-packages/20260423_landuse_batched_mapping_submit/) with the active ExecPlan.
+
+---
+
 ### Deprecate and Remove TauDEM Backend
 **Proposed**: 2025-10-27  
 **Size**: Medium (3-5 days)  
@@ -271,6 +296,11 @@ Currently active work packages. Limit to 2-4 packages to maintain focus.
 ## ✅ Done
 
 Recently completed work packages. Archived immediately upon completion.
+
+### Landuse Multi-OFE Build Optimization (Lookup/Pass/IO/Logging) (2026-04-23)
+**Status**: ✅ **COMPLETE**  
+**Link**: [docs/work-packages/20260423_landuse_multi_ofe_build_optimization/](docs/work-packages/20260423_landuse_multi_ofe_build_optimization/)  
+**Summary**: Closed end-to-end with multi-OFE landuse optimization in `wepppy/nodb/core/landuse.py`: SBS burn-remap management-summary reuse, duplicate-pass collapse in `Landuse.build()` multi-OFE path, explicit first-pass guard behavior (`domlc_mofe_d` cleared pre-build and MOFE pair-count work skipped when assignment map is missing/empty), and reduced high-volume info logging via compact summaries/debug placement. Added targeted regression coverage for SBS remap parity + lookup reuse, build/event contract preservation, first-pass no-op guard behavior, and logging behavior (`14 passed` across touched landuse suites). Required benchmark/parity artifacts were regenerated on isolated temp copies for all five required runs; contract parity status is `match` on all runs.
 
 ### MOFE `.mofe.man` Synthesis Process-Pool Migration (2026-04-23)
 **Status**: ✅ **COMPLETE**  

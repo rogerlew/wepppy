@@ -16,6 +16,9 @@ class _LoggerStub:
     def info(self, *_args, **_kwargs) -> None:
         return None
 
+    def debug(self, *_args, **_kwargs) -> None:
+        return None
+
     def warning(self, *_args, **_kwargs) -> None:
         return None
 
@@ -54,6 +57,30 @@ class _ManagementSummaryStub:
 
     def get_management(self) -> _ManagementStub:
         return self._management
+
+
+class _RecordingLogger:
+    def __init__(self) -> None:
+        self.info_messages: list[str] = []
+        self.debug_messages: list[str] = []
+
+    @staticmethod
+    def _format(message: str, *args: object) -> str:
+        if args:
+            return message % args
+        return str(message)
+
+    def info(self, message: str, *args: object, **_kwargs: object) -> None:
+        self.info_messages.append(self._format(message, *args))
+
+    def debug(self, message: str, *args: object, **_kwargs: object) -> None:
+        self.debug_messages.append(self._format(message, *args))
+
+    def warning(self, *_args: object, **_kwargs: object) -> None:
+        return None
+
+    def error(self, *_args: object, **_kwargs: object) -> None:
+        return None
 
 
 def test_build_multiple_ofe_accepts_extended_rdmax_xmxlai_keys(
@@ -214,3 +241,110 @@ def test_build_multiple_ofe_rap_cancov_overrides_lookup_ini_cancov(
     assert management.overrides["ini.data.cancov"] == pytest.approx(1.0)
     assert management.rdmax_values == [0.33]
     assert management.xmxlai_values == [5.7]
+
+
+def test_build_multiple_ofe_sbs_remap_reuses_existing_management_summaries(
+    tmp_path: Path,
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    run_dir = tmp_path / "run"
+    (run_dir / "landuse").mkdir(parents=True, exist_ok=True)
+
+    landuse = Landuse.__new__(Landuse)
+    landuse.wd = str(run_dir)
+    landuse._mods = []
+    landuse._mapping = "mock-map"
+    landuse.locked = lambda: nullcontext()
+    logger = _RecordingLogger()
+    landuse.logger = logger
+
+    landuse.managements = {
+        "forest-dom": _ManagementSummaryStub(_ManagementStub(), "forest"),
+        "forest-low": _ManagementSummaryStub(_ManagementStub(), "forest low sev fire"),
+        "forest-mod": _ManagementSummaryStub(_ManagementStub(), "forest moderate sev fire"),
+    }
+
+    watershed = SimpleNamespace(
+        _subs_summary={"101": {}, "102": {}},
+        mofe_nsegments={"101": "1", "102": "1"},
+        mofe_buffer=False,
+        subwta=str(run_dir / "watershed" / "subwta.tif"),
+        mofe_map=str(run_dir / "watershed" / "mofe_map.tif"),
+    )
+    monkeypatch.setattr(
+        Landuse,
+        "watershed_instance",
+        property(lambda _self: watershed),
+    )
+    monkeypatch.setattr(landuse_module, "wepppyo3", None)
+
+    class _LandcoverMapStub:
+        def __init__(self, _lc_fn: str) -> None:
+            pass
+
+        def build_lcgrid(self, _subwta: str, _mofe_map: str) -> dict[str, dict[str, str]]:
+            return {"101": {"1": "forest-dom"}, "102": {"1": "forest-dom"}}
+
+    monkeypatch.setattr(landuse_module, "LandcoverMap", _LandcoverMapStub)
+    monkeypatch.setattr(
+        landuse_module,
+        "identify_mode_intersecting_raster_keys",
+        lambda **_kwargs: {"101": {"1": "11"}, "102": {"1": "12"}},
+    )
+    monkeypatch.setattr(
+        landuse_module,
+        "_wait_for_gdal_openable_raster",
+        lambda *_args, **_kwargs: None,
+    )
+    monkeypatch.setattr(landuse_module.os, "cpu_count", lambda: 1)
+
+    class _SbsStub:
+        class_pixel_map = {"11": "131", "12": "132"}
+
+    class _DisturbedStub:
+        burn_shrubs = False
+        burn_grass = False
+        land_soil_replacements_d = None
+        disturbed_cropped = str(run_dir / "disturbed" / "disturbed_cropped.tif")
+
+        def get_disturbed_key_lookup(self) -> dict[str, str]:
+            return {
+                "forest_low_sev_fire": "forest-low",
+                "forest_moderate_sev_fire": "forest-mod",
+                "forest_high_sev_fire": "forest-high",
+                "shrub_low_sev_fire": "shrub-low",
+                "shrub_moderate_sev_fire": "shrub-mod",
+                "shrub_high_sev_fire": "shrub-high",
+                "grass_low_sev_fire": "grass-low",
+                "grass_moderate_sev_fire": "grass-mod",
+                "grass_high_sev_fire": "grass-high",
+            }
+
+        def get_sbs(self) -> _SbsStub:
+            return _SbsStub()
+
+    monkeypatch.setattr(
+        "wepppy.nodb.mods.disturbed.Disturbed.tryGetInstance",
+        lambda _wd: _DisturbedStub(),
+    )
+
+    summary_lookup_calls: list[str] = []
+    monkeypatch.setattr(
+        landuse_module,
+        "get_management_summary",
+        lambda dom, _map=None: summary_lookup_calls.append(str(dom)),
+    )
+
+    landuse._build_multiple_ofe()
+
+    assert summary_lookup_calls == []
+    assert landuse.domlc_mofe_d == {
+        "101": {"1": "forest-low"},
+        "102": {"1": "forest-mod"},
+    }
+    assert any(
+        message.startswith("Prepared multi-OFE landuse assignments")
+        for message in logger.info_messages
+    )
+    assert all("domlc_d =" not in message for message in logger.info_messages)
+    assert any("domlc_d =" in message for message in logger.debug_messages)

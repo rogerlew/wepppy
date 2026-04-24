@@ -236,3 +236,66 @@ def test_build_managements_multi_ofe_propagates_pair_count_failures(
 
     with pytest.raises(ValueError, match="Raster shape mismatch"):
         landuse.build_managements()
+
+
+def test_build_managements_multi_ofe_skips_pair_counts_without_domlc_assignments(
+    tmp_path: Path,
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    wd = tmp_path / "run"
+    wd.mkdir(parents=True, exist_ok=True)
+
+    landuse = Landuse.__new__(Landuse)
+    landuse.wd = str(wd)
+    landuse._mapping = "test-mapping"
+    landuse.domlc_d = {"11": "forest", "12": "range"}
+    landuse.domlc_mofe_d = None
+    landuse.managements = None
+    landuse.locked = lambda: nullcontext()
+    landuse.dump_landuse_parquet = lambda: None
+    landuse.trigger = lambda *_args, **_kwargs: None
+
+    monkeypatch.setattr(
+        Landuse,
+        "ron_instance",
+        property(lambda _self: SimpleNamespace(cellsize=30.0)),
+    )
+    monkeypatch.setattr(
+        Landuse,
+        "watershed_instance",
+        property(
+            lambda _self: SimpleNamespace(
+                subwta=str(wd / "watershed" / "subwta.tif"),
+                mofe_map=str(wd / "watershed" / "mofe.tif"),
+                hillslope_area=lambda topaz_id: {"11": 6.0, "12": 4.0}[str(topaz_id)],
+            )
+        ),
+    )
+    monkeypatch.setattr(
+        Landuse,
+        "wepp_instance",
+        property(lambda _self: SimpleNamespace(_multi_ofe=True)),
+    )
+
+    class _ManagementSummaryStub:
+        def __init__(self) -> None:
+            self.area = 0.0
+            self.pct_coverage = 0.0
+
+    monkeypatch.setattr(
+        "wepppy.nodb.core.landuse.get_management_summary",
+        lambda *_args, **_kwargs: _ManagementSummaryStub(),
+    )
+    monkeypatch.setattr(
+        "wepppy.nodb.core.landuse.count_intersecting_raster_key_pairs",
+        lambda **_kwargs: (_ for _ in ()).throw(
+            AssertionError("pair counts should not run before domlc_mofe_d is populated")
+        ),
+    )
+
+    landuse.build_managements()
+
+    assert landuse.managements["forest"].area == pytest.approx(0.0)
+    assert landuse.managements["range"].area == pytest.approx(0.0)
+    assert landuse.managements["forest"].pct_coverage == pytest.approx(0.0)
+    assert landuse.managements["range"].pct_coverage == pytest.approx(0.0)
