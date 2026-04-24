@@ -10,8 +10,11 @@
 - **Scope reviewed**:
   - `wepppy/weppcloud/routes/nodb_api/landuse_bp.py`
   - `wepppy/microservices/rq_engine/landuse_routes.py`
+  - `wepppy/microservices/rq_engine/auth.py`
+  - `wepppy/microservices/rq_engine/schema_defaults_routes.py`
   - `wepppy/nodb/core/landuse.py`
   - `wepppy/weppcloud/routes/run_0/run_0_bp.py`
+  - `tools/rq_engine_contract_rules.py`
   - `wepppy/weppcloud/routes/nodb_api/README.md`
   - `docs/schemas/rq-engine-agent-api-contract.md`
   - `wepppy/weppcloud/controllers_js/landuse.js`
@@ -21,6 +24,8 @@
   - `tests/weppcloud/routes/test_landuse_bp.py`
   - `tests/weppcloud/routes/test_pure_controls_render.py`
   - `tests/microservices/test_rq_engine_landuse_routes.py`
+  - `tests/microservices/test_rq_engine_auth.py`
+  - `wepppy/weppcloud/controllers_js/__tests__/landuse_map_inline.test.js`
   - `tests/nodb/test_root_dir_materialization.py`
   - `tests/nodb/test_landuse_custom_mapping.py`
   - `tests/weppcloud/routes/test_run_0_openet_admin_gate.py`
@@ -47,6 +52,7 @@
 - **Post-closure stale-write recoverability remediation gate**: PASS (2026-04-24 07:50 UTC)
 - **Post-closure custom-map description integrity remediation gate**: PASS (2026-04-24 08:00 UTC)
 - **Post-closure title-row runid-link parity gate**: PASS (2026-04-24 08:08 UTC)
+- **Post-closure cross-package review disposition gate**: PASS (2026-04-24 08:53 UTC)
 
 ## Findings
 
@@ -62,6 +68,10 @@
 | SEC-19 | High | Run-page recoverability | Stale missing system custom-map references could bubble through `run_0` render reads as unrecoverable `500` project-load failures. | Add explicit render-path stale-system-map recovery boundary with regressions; keep strict errors for non-system custom-map paths. | Closed |
 | SEC-20 | High | Stale-write race on render recovery | Stale-system-map cleanup writeback on unlocked render reads could raise `NoDbStaleWriteError`, reintroducing run-page `500` failures. | Keep unlocked stale cleanup in-memory-only and add `NoDbStaleWriteError` retry recovery at `run_0` boundary with regressions. | Closed |
 | SEC-21 | Medium | Custom-map description integrity | Changed custom-map assignments could retain stale base-map descriptions (for example key `43` still `Mixed Forest`), masking applied management overrides and severity labeling. | Normalize changed-key descriptions in map-save and relabel legacy stale custom-map descriptions during build summary creation. | Closed |
+| SEC-22 | High | Mapping selection input validation | `build-landuse` accepted arbitrary/path-like `landuse_management_mapping_selection` values that could bypass expected mapping-key contract. | Enforce supported-key allowlist, reject path-like/unknown values, and add regressions. | Closed |
+| SEC-23 | High | Unknown token-class authorization | Landuse read routes and run-access checks did not default-deny unknown token classes. | Enforce token-class allowlist for read claims and default-deny unknown classes in `authorize_run_access`; add regressions. | Closed |
+| SEC-24 | Medium | Error payload information disclosure | Mapping failures could expose filesystem path details (`map_path`) in error responses. | Redact `map_path` from details and normalize map-load error messages on Flask/rq-engine surfaces; add regressions. | Closed |
+| SEC-25 | Medium | Contract parity drift | `landuse-map/save` OpenAPI/schema descriptors lagged runtime precondition behavior (`428`, header/body hash), and `set-landuse-mode` required field list drifted from handler behavior. | Update route metadata + schema defaults + contract rules and add parity tests. | Closed |
 
 ## Surface Checks
 
@@ -91,16 +101,18 @@
 ## Validation Evidence
 
 Executed command evidence:
-- `wctl run-pytest tests/weppcloud/routes/test_landuse_bp.py --maxfail=1` -> `20 passed`.
+- `wctl run-pytest tests/weppcloud/routes/test_landuse_bp.py --maxfail=1` -> `21 passed`.
 - `wctl run-pytest tests/weppcloud/routes/test_pure_controls_render.py --maxfail=1` -> `46 passed`.
-- `wctl run-pytest tests/microservices/test_rq_engine_landuse_routes.py --maxfail=1` -> `41 passed`.
+- `wctl run-pytest tests/microservices/test_rq_engine_landuse_routes.py --maxfail=1` -> `50 passed`.
 - `wctl run-pytest tests/microservices/test_rq_engine_schema_defaults_routes.py --maxfail=1` -> `54 passed`.
 - `wctl run-pytest tests/microservices/test_rq_engine_openapi_contract.py --maxfail=1` -> `10 passed`.
+- `wctl run-pytest tests/microservices/test_rq_engine_auth.py --maxfail=1` -> `32 passed`.
 - `wctl run-pytest tests/nodb/test_root_dir_materialization.py --maxfail=1` -> `7 passed`.
 - `wctl run-pytest tests/nodb/test_landuse_custom_mapping.py --maxfail=1` -> `10 passed`.
 - `wctl run-pytest tests/weppcloud/routes/test_run_0_openet_admin_gate.py --maxfail=1` -> `29 passed`.
 - `wctl run-npm test -- --runTestsByPath wepppy/weppcloud/controllers_js/__tests__/landuse.test.js` -> `20 passed`.
 - `wctl run-npm test -- --runTestsByPath wepppy/weppcloud/controllers_js/__tests__/landuse_modify_gl.test.js` -> `3 passed`.
+- `wctl run-npm test -- wepppy/weppcloud/controllers_js/__tests__/landuse_map_inline.test.js` -> `2 passed`.
 - `wctl doc-lint --path docs/work-packages/20260424_landuse_legacy_flask_state_route_removal --path wepppy/weppcloud/routes/nodb_api/README.md --path docs/schemas/rq-engine-agent-api-contract.md --path docs/schemas/rq-response-contract.md --path docs/schemas/weppcloud-csrf-contract.md --path PROJECT_TRACKER.md` -> `10 files validated, 0 errors, 0 warnings`.
 
 Caller audit evidence:
@@ -125,4 +137,4 @@ Caller audit evidence:
 ## Sign-off
 
 - **Security reviewer**: Codex
-- **Sign-off date**: 2026-04-24 08:08 UTC
+- **Sign-off date**: 2026-04-24 08:53 UTC

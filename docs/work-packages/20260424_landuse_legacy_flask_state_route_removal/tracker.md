@@ -6,8 +6,8 @@
 
 **Timezone**: UTC  
 **Started**: 2026-04-24 06:14 UTC  
-**Current phase**: Complete / Closure (post-closure smoke + UX/state-integrity + load-path + stale-write + custom-map description integrity remediations applied)  
-**Last updated**: 2026-04-24 08:08 UTC  
+**Current phase**: Complete / Closure (post-closure smoke + UX/state-integrity + load-path + stale-write + custom-map description integrity + cross-package review disposition remediations applied)  
+**Last updated**: 2026-04-24 08:53 UTC  
 **Next milestone**: None (package closed).  
 **Security impact**: `high`  
 **Dedicated security review**: `yes`  
@@ -46,6 +46,7 @@
 - [x] Applied post-closure stale-write race remediation so stale system-map recovery never acquires a new lock on unlocked read paths and `run_0` retries on stale-write recoverable boundary errors (2026-04-24 07:50 UTC).
 - [x] Applied post-closure custom-map description integrity remediation so changed map assignments persist/compute management labels (for example key `43` -> `Moderate Severity Fire`) instead of stale base-map descriptions (2026-04-24 08:00 UTC).
 - [x] Applied post-closure runid-link title parity remediation so `/landuse-user-defined` and `/landuse-map` render a run-home `runid` link to the left of `wc-control__title`, matching existing editor pages (2026-04-24 08:08 UTC).
+- [x] Dispatched cross-package code/QA/security reviews for the four landuse packages and disposed findings with rq-engine auth/input hardening, redaction, schema-contract parity, and added regressions (2026-04-24 08:53 UTC).
 
 ## Timeline
 
@@ -64,6 +65,7 @@
 - **2026-04-24 07:50 UTC** - Closed stale-write race follow-on: stale-system-map cleanup no longer acquires lock/write on unlocked read paths, and `run_0` recovery now also retries recoverable `NoDbStaleWriteError` cases.
 - **2026-04-24 08:00 UTC** - Closed custom-map description integrity follow-on: map-save now updates changed-key descriptions from selected management labels and build-time summaries relabel legacy stale custom-map descriptions against base-map drift.
 - **2026-04-24 08:08 UTC** - Closed title-row parity follow-on: landuse catalog/map pages now include run-home `runid` link in the shared control meta slot and ship render regression coverage.
+- **2026-04-24 08:53 UTC** - Closed cross-package review disposition findings: path-like mapping-selection rejection, unknown token-class default-deny for read paths and run access, map-path redaction in mapping errors, OpenAPI/schema parity for `428` + `if_match` header/body contract, and added regression coverage (including map inline save-header behavior).
 
 ## Decisions Log
 
@@ -221,6 +223,19 @@
 
 **Impact**: Maintains shared shell consistency and eliminates one-off title-row drift while restoring expected navigation affordance.
 
+---
+
+### 2026-04-24 08:53 UTC: Enforce strict rq-engine input/auth contracts from cross-package review findings
+**Context**: Cross-package code/QA/security reviews identified actionable findings on mapping-selection input hardening, read-route token-class checks, mapping-path information redaction, and OpenAPI/schema precondition parity.
+
+**Options considered**:
+1. Keep current behavior and defer hardening to a future package.
+2. Disposition all actionable findings now in a single post-closure remediation pass with regression coverage and validation reruns.
+
+**Decision**: Option 2.
+
+**Impact**: Removes identified auth/input exposure gaps, restores route/schema contract parity, and keeps the security artifact at no unresolved medium/high findings.
+
 ## Risks and Issues
 
 | Risk | Severity | Likelihood | Mitigation | Status |
@@ -235,6 +250,10 @@
 | Stale system custom-map state causes run-page render `500` (project unloadable) | High | Medium | Add run_0 stale-map recovery wrapper for landuse read calls; keep strict failure for non-system custom-map paths | Closed (`tests/weppcloud/routes/test_run_0_openet_admin_gate.py` coverage + full matrix rerun passed) |
 | Stale-system-map cleanup writeback can trigger `NoDbStaleWriteError` during render reads | High | Medium | Avoid lock acquisition/writeback in unlocked stale cleanup; add `run_0` stale-write retry recovery and regressions | Closed (`tests/nodb/test_landuse_custom_mapping.py`, `tests/weppcloud/routes/test_run_0_openet_admin_gate.py` + full required matrix rerun passed) |
 | Changed custom-map assignments can retain stale base-map descriptions (example key `43` still `Mixed Forest`) and mask applied management overrides | Medium | Medium | Update map-save to refresh changed-key description labels and relabel legacy stale descriptions during build-time custom-map summary construction | Closed (`tests/nodb/test_landuse_custom_mapping.py`, `tests/microservices/test_rq_engine_landuse_routes.py` + full required matrix rerun passed) |
+| `build-landuse` mapping selection accepted arbitrary/path-like tokens | High | Medium | Allowlist against supported mapping keys and reject path-like/unknown values with `invalid_mapping_selection`; add regressions | Closed (`tests/microservices/test_rq_engine_landuse_routes.py` coverage + full required matrix rerun passed) |
+| Landuse read routes could accept unknown token classes | High | Medium | Enforce token-class allowlist on read claims and default-deny unknown classes in `authorize_run_access`; add regressions | Closed (`tests/microservices/test_rq_engine_landuse_routes.py`, `tests/microservices/test_rq_engine_auth.py` + validation rerun passed) |
+| Mapping error payloads could leak filesystem paths (`map_path`) | Medium | Medium | Redact `map_path` details and normalize map-load error messaging on Flask/rq-engine surfaces; add regressions | Closed (`tests/weppcloud/routes/test_landuse_bp.py`, `tests/microservices/test_rq_engine_landuse_routes.py` + validation rerun passed) |
+| `landuse-map/save` schema/OpenAPI parity drift for precondition contract (`428`, header/body) | Medium | Medium | Update route responses, schema defaults, and contract rules; add header-precondition regression | Closed (`tests/microservices/test_rq_engine_schema_defaults_routes.py`, `tests/microservices/test_rq_engine_openapi_contract.py`, `tests/microservices/test_rq_engine_landuse_routes.py` + validation rerun passed) |
 
 ## Verification Checklist
 
@@ -250,6 +269,10 @@
 - [x] Changed custom-map assignments no longer keep stale base-map descriptions in saved overrides, and legacy stale descriptions are relabeled during build summary generation.
 - [x] `/landuse-user-defined` and `/landuse-map` titles use shared WEPPcloud shell styling (`ui.card_shell`) instead of one-off heading markup.
 - [x] `/landuse-user-defined` and `/landuse-map` title rows include run-home `runid` links positioned to the left of `wc-control__title` using shared control-meta styling patterns.
+- [x] `build-landuse` rejects path-like/unknown `landuse_management_mapping_selection` values against an explicit mapping-key allowlist.
+- [x] Landuse read routes + run-access checks reject unknown token classes with explicit `403 forbidden`.
+- [x] Mapping-load error responses redact filesystem `map_path` details on both Flask and rq-engine surfaces.
+- [x] `landuse-map/save` route/schema/OpenAPI precondition contracts are aligned (`428` + header/body hash support).
 
 ### Caller and Contract Integrity
 - [x] In-repo caller audit confirms no production references to removed endpoints.
@@ -504,6 +527,41 @@
 - `wctl run-pytest tests/weppcloud/routes/test_landuse_bp.py --maxfail=1` -> `20 passed`.
 - `wctl run-pytest tests/weppcloud/routes/test_pure_controls_render.py --maxfail=1` -> `46 passed`.
 
+### 2026-04-24 08:53 UTC: Cross-package code/QA/security review disposition
+**Agent/Contributor**: Codex
+
+**Work completed**:
+- Dispatched independent code, QA, and security review passes covering work packages:
+  - `20260424_landuse_legacy_flask_state_route_removal`
+  - `20260424_landuse_phase3_hardening_parity_tests`
+  - `20260423_landuse_first_class_agent_interface_migration`
+  - `20260423_landuse_user_defined_management_catalog_map`
+- Disposed actionable findings in rq-engine/flask surfaces:
+  - mapping-selection allowlist + path-like rejection in `build-landuse`
+  - unknown token-class default-deny in run-access + read-route token-class enforcement
+  - mapping path redaction and normalized map-load error messaging
+  - schema/OpenAPI parity for `landuse-map/save` `428` and header/body precondition contract
+  - schema parity for optional `set-landuse-mode.landuse_single_selection`
+- Added regression coverage for each finding cluster, including new inline map-save header behavior Jest coverage.
+
+**Blockers encountered**:
+- One interim import-path error (`landuse_management_mapping_options`) and one stale test fixture key (`default`) after allowlist hardening; both corrected before final validation sweep.
+
+**Next steps**:
+- None (findings disposition complete; package remains closed).
+
+**Test results**:
+- `wctl run-pytest tests/weppcloud/routes/test_landuse_bp.py --maxfail=1` -> `21 passed`.
+- `wctl run-pytest tests/weppcloud/routes/test_pure_controls_render.py --maxfail=1` -> `46 passed`.
+- `wctl run-pytest tests/microservices/test_rq_engine_landuse_routes.py --maxfail=1` -> `50 passed`.
+- `wctl run-pytest tests/microservices/test_rq_engine_schema_defaults_routes.py --maxfail=1` -> `54 passed`.
+- `wctl run-pytest tests/microservices/test_rq_engine_openapi_contract.py --maxfail=1` -> `10 passed`.
+- `wctl run-pytest tests/microservices/test_rq_engine_auth.py --maxfail=1` -> `32 passed`.
+- `wctl run-npm test -- --runTestsByPath wepppy/weppcloud/controllers_js/__tests__/landuse.test.js` -> `20 passed`.
+- `wctl run-npm test -- --runTestsByPath wepppy/weppcloud/controllers_js/__tests__/landuse_modify_gl.test.js` -> `3 passed`.
+- `wctl run-npm test -- wepppy/weppcloud/controllers_js/__tests__/landuse_map_inline.test.js` -> `2 passed`.
+- `wctl doc-lint --path docs/work-packages/20260424_landuse_legacy_flask_state_route_removal --path wepppy/weppcloud/routes/nodb_api/README.md --path docs/schemas/rq-engine-agent-api-contract.md --path docs/schemas/rq-response-contract.md --path docs/schemas/weppcloud-csrf-contract.md --path PROJECT_TRACKER.md` -> `10 files validated, 0 errors, 0 warnings`.
+
 ## Communication Log
 
 ### 2026-04-24 06:14 UTC: User request
@@ -550,3 +608,8 @@
 **Participants**: User, Codex  
 **Question/Topic**: Add run-home `runid` link to the left of `wc-control__title` on both landuse editor pages to match existing README/editor page treatment.  
 **Outcome**: Added shared control-meta run link markup/style to `/landuse-user-defined` and `/landuse-map`, added render regression coverage, and updated package/security/tracker artifacts.
+
+### 2026-04-24 08:53 UTC: User review-disposition execution request
+**Participants**: User, Codex  
+**Question/Topic**: Commit the landuse feature set and dispatch code/QA/security reviews across four landuse work packages, then disposition findings.  
+**Outcome**: Reviews dispatched and findings disposition completed with auth/input hardening, schema/openapi parity updates, redaction fixes, new regressions, and full required validation rerun.

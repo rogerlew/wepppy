@@ -117,6 +117,10 @@ PATHS_REQUIRING_415 = {
     "/api/runs/{runid}/{config}/export/features/profile/resolve",
 }
 
+PATHS_REQUIRING_428 = {
+    "/api/runs/{runid}/{config}/landuse-map/save",
+}
+
 
 def required_response_codes(method: str, path: str) -> set[int]:
     success_code = SUCCESS_STATUS_OVERRIDES.get((method, path), 200)
@@ -134,6 +138,8 @@ def required_response_codes(method: str, path: str) -> set[int]:
         required.add(202)
     if path in PATHS_REQUIRING_415:
         required.add(415)
+    if path in PATHS_REQUIRING_428:
+        required.add(428)
 
     return required
 

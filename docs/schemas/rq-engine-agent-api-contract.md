@@ -108,7 +108,20 @@ Auth and scope requirements:
   `{user, session, service, mcp}`.
 - Landuse read state requires run access plus one of `{rq:read, rq:status}`.
 - Phase 3 read routes (`landuse-user-defined/catalog`, `landuse-map/snapshot`)
-  require run access plus one of `{rq:read, rq:status}`.
+  require run access plus one of `{rq:read, rq:status}` and token class in
+  `{user, session, service, mcp}`.
+
+Request contract clarifications:
+- `set-landuse-mode` requires `mode`; `landuse_single_selection` remains an
+  optional field.
+- `landuse-map/save` requires `rows` and an optimistic-concurrency precondition
+  hash supplied in either:
+  - `X-If-Match-Sha256` request header, or
+  - `if_match_sha256` request body field.
+  Missing precondition hash returns `428 PRECONDITION_REQUIRED`.
+- `build-landuse` `landuse_management_mapping_selection` must be a supported
+  mapping key; path-like or unknown selections are rejected with
+  `invalid_mapping_selection`.
 
 Run-root targeting policy for migrated landuse routes:
 - Optional query parameter `pup` is supported for non-composite runids.

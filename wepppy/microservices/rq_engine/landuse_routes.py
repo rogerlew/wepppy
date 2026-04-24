@@ -34,6 +34,7 @@ from wepppy.runtime_paths.fs import resolve as _nodir_resolve
 from wepppy.runtime_paths.thaw_freeze import maintenance_lock as nodir_maintenance_lock
 from wepppy.rq.project_rq import build_landuse_rq, modify_landuse_mapping_rq
 from wepppy.wepp.management import ManagementMapLoadError
+from wepppy.wepp.management.managements import landuse_management_mapping_options
 from wepppy.microservices.upload_boundary import UploadBoundaryError
 import wepppy.weppcloud.routes.nodb_api.landuse_bp as landuse_flask
 from wepppy.weppcloud.utils.auth_tokens import get_jwt_config
@@ -59,6 +60,11 @@ RQ_TIMEOUT = int(os.getenv("RQ_ENGINE_RQ_TIMEOUT", "216000"))
 RQ_ENQUEUE_SCOPES = ["rq:enqueue"]
 RQ_READ_ALLOWED_SCOPES = frozenset({"rq:read", "rq:status"})
 LANDUSE_MUTATION_ALLOWED_TOKEN_CLASSES = ("user", "session", "service", "mcp")
+LANDUSE_ALLOWED_MAPPING_SELECTIONS = frozenset(
+    str(option.get("Key") or "").strip()
+    for option in landuse_management_mapping_options
+    if str(option.get("Key") or "").strip()
+)
 LANDUSE_USER_DEFINED_ALLOWED_EXTENSIONS = ("tif", "tiff", "img", "vrt")
 LANDUSE_USER_DEFINED_MAX_BYTES = 500 * 1024 * 1024
 LANDUSE_MAPPING_MAX_KEY_LENGTH = 128
@@ -137,24 +143,54 @@ def _set_no_store_headers(response: JSONResponse) -> JSONResponse:
     return response
 
 
+def _landuse_mapping_error_message(exc: LanduseCustomMappingError | ManagementMapLoadError) -> str:
+    if isinstance(exc, ManagementMapLoadError):
+        code = str(getattr(exc, "code", "") or "").strip().lower()
+        if code == "management_map_missing":
+            return "Management map file does not exist"
+        if code == "management_map_invalid_json":
+            return "Management map file is not valid JSON"
+        if code == "management_map_invalid_shape":
+            return "Management map payload is invalid"
+        return "Failed to load management map"
+    return str(exc)
+
+
 def _landuse_mapping_error_response(exc: LanduseCustomMappingError | ManagementMapLoadError) -> JSONResponse:
     code = getattr(exc, "code", landuse_flask._LANDUSE_MAP_INVALID_CODE)
     details: dict[str, Any] = {}
     raw_details = getattr(exc, "details", None)
     if isinstance(raw_details, dict):
         details.update(raw_details)
-    map_path = getattr(exc, "map_path", None)
-    if map_path:
-        details["map_path"] = str(map_path)
-    return error_response(str(exc), status_code=400, code=code, details=details or None)
+    details.pop("map_path", None)
+    return error_response(
+        _landuse_mapping_error_message(exc),
+        status_code=400,
+        code=code,
+        details=details or None,
+    )
 
 
 def _extract_scopes(claims: Mapping[str, Any]) -> set[str]:
     return _normalize_scopes(claims.get("scope"), get_jwt_config().scope_separator)
 
 
+def _normalize_landuse_mapping_selection(value: Any) -> str | None:
+    if value is None:
+        return None
+    token = str(value).strip()
+    if not token:
+        return None
+    if token.lower().endswith(".json") or "/" in token or "\\" in token:
+        raise ValueError("landuse_management_mapping_selection must be one of the supported mapping keys")
+    if token not in LANDUSE_ALLOWED_MAPPING_SELECTIONS:
+        raise ValueError(f"Unknown landuse_management_mapping_selection '{token}'")
+    return token
+
+
 def _require_landuse_read_claims(request: Request, runid: str) -> Mapping[str, Any]:
     claims = require_jwt(request)
+    require_token_class(claims, LANDUSE_MUTATION_ALLOWED_TOKEN_CLASSES)
     scopes = _extract_scopes(claims)
     if not scopes.intersection(RQ_READ_ALLOWED_SCOPES):
         required_text = ", ".join(sorted(RQ_READ_ALLOWED_SCOPES))
@@ -401,9 +437,10 @@ async def build_landuse(runid: str, config: str, request: Request) -> JSONRespon
                 burn_grass_value = payload.get("burn_grass")
             disturbed.burn_grass = bool(burn_grass_value)
 
-        mapping = _first(payload.get("landuse_management_mapping_selection"))
-        if isinstance(mapping, str):
-            mapping = mapping.strip() or None
+        try:
+            mapping = _normalize_landuse_mapping_selection(_first(payload.get("landuse_management_mapping_selection")))
+        except ValueError as exc:
+            return error_response(str(exc), status_code=400, code="invalid_mapping_selection")
 
         if landuse.mode == LanduseMode.UserDefined:
             from wepppy.all_your_base.geo import raster_stacker
@@ -1202,14 +1239,19 @@ async def get_landuse_map_snapshot(runid: str, config: str, request: Request) ->
     summary="Save run-scoped landuse map override",
     description=(
         "Requires JWT Bearer scope `rq:enqueue` and run access via `authorize_run_access`. "
-        "Validates and atomically saves mapping assignments with optimistic concurrency checks."
+        "Validates and atomically saves mapping assignments with optimistic concurrency checks. "
+        "Precondition hash may be sent via `X-If-Match-Sha256` header or `if_match_sha256` body field."
     ),
     tags=["rq-engine", "runs"],
     operation_id=rq_operation_id("save_landuse_map"),
     responses=agent_route_responses(
         success_code=200,
         success_description="Map override saved and lookup hash rotated.",
-        extra={400: "Invalid row payload.", 409: "Stale lookup precondition mismatch."},
+        extra={
+            400: "Invalid row payload.",
+            409: "Stale lookup precondition mismatch.",
+            428: "Missing precondition hash (`if_match_sha256`).",
+        },
     ),
 )
 async def save_landuse_map(runid: str, config: str, request: Request) -> JSONResponse:

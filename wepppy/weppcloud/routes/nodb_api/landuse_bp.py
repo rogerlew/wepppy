@@ -479,16 +479,27 @@ def _snapshot_payload_for_client(snapshot: Mapping[str, Any]) -> dict[str, Any]:
     return response_payload
 
 
+def _landuse_mapping_error_message(exc: LanduseCustomMappingError | ManagementMapLoadError) -> str:
+    if isinstance(exc, ManagementMapLoadError):
+        code = str(getattr(exc, "code", "") or "").strip().lower()
+        if code == "management_map_missing":
+            return "Management map file does not exist"
+        if code == "management_map_invalid_json":
+            return "Management map file is not valid JSON"
+        if code == "management_map_invalid_shape":
+            return "Management map payload is invalid"
+        return "Failed to load management map"
+    return str(exc)
+
+
 def _landuse_mapping_error_response(exc: LanduseCustomMappingError | ManagementMapLoadError) -> Response:
     code = getattr(exc, "code", _LANDUSE_MAP_INVALID_CODE)
     details: dict[str, Any] = {}
     raw_details = getattr(exc, "details", None)
     if isinstance(raw_details, dict):
         details.update(raw_details)
-    map_path = getattr(exc, "map_path", None)
-    if map_path:
-        details["map_path"] = str(map_path)
-    return error_factory(str(exc), status_code=400, code=code, details=details or None)
+    details.pop("map_path", None)
+    return error_factory(_landuse_mapping_error_message(exc), status_code=400, code=code, details=details or None)
 
 
 def _restore_landuse_map_override_state(

@@ -26,6 +26,7 @@ After this package, deprecated Flask landuse state/mutator compatibility routes 
 - [x] (2026-04-24 07:50 UTC) Applied stale-write follow-on remediation: stale system-map cleanup on unlocked read paths is now in-memory-only, and `run_0` recovery now retries recoverable `NoDbStaleWriteError` boundary failures.
 - [x] (2026-04-24 08:00 UTC) Applied custom-map description integrity follow-on: changed map assignments now normalize labels (example key `43` -> `Moderate Severity Fire`) and legacy stale custom-map descriptions are relabeled during build summary generation.
 - [x] (2026-04-24 08:08 UTC) Applied post-closure control-shell polish: added run-home `runid` link to the left of `wc-control__title` on `/landuse-user-defined` and `/landuse-map` using shared title-meta styling patterns, with render regression coverage.
+- [x] (2026-04-24 08:53 UTC) Disposed cross-package review findings with rq-engine auth/input hardening (mapping-selection allowlist, unknown token-class denial), mapping error path redaction, schema/OpenAPI parity fixes (`428` + precondition header/body), and added regressions (including landuse map inline save-header coverage).
 
 ## Surprises & Discoveries
 
@@ -55,6 +56,9 @@ After this package, deprecated Flask landuse state/mutator compatibility routes 
 
 - Observation: After migrating landuse catalog/map pages to shared `ui.card_shell`, the run-home `runid` link still was not surfaced in the title row, creating a small style/navigation parity gap versus existing editor pages.
   Evidence: operator UX report and page inspection showed no run-link element to the left of `wc-control__title`.
+
+- Observation: Cross-package review surfaced additional hardening gaps not covered by prior closure matrix: `build-landuse` mapping selection accepted path-like values, read routes accepted unknown token classes, and mapping error details could expose filesystem `map_path`.
+  Evidence: code/QA/security review findings disposition run on 2026-04-24.
 
 ## Decision Log
 
@@ -110,6 +114,10 @@ After this package, deprecated Flask landuse state/mutator compatibility routes 
   Rationale: Matches established editor-page title treatment while keeping both pages on the canonical shared control shell.
   Date/Author: 2026-04-24 / Codex.
 
+- Decision: Disposition cross-package review findings in this package closure pass rather than opening a separate follow-up package.
+  Rationale: Findings were localized to the already-touched landuse rq-engine/flask surfaces and could be resolved with targeted contract-safe patches and immediate regression coverage.
+  Date/Author: 2026-04-24 / Codex.
+
 ## Outcomes & Retrospective
 
 Final removed Flask compatibility routes:
@@ -131,16 +139,18 @@ Caller-audit disposition:
 - `tests/weppcloud/routes/test_landuse_bp.py` intentionally keeps negative assertions that removed routes return `404`.
 
 Validation evidence:
-- `tests/weppcloud/routes/test_landuse_bp.py`: `20 passed`
+- `tests/weppcloud/routes/test_landuse_bp.py`: `21 passed`
 - `tests/weppcloud/routes/test_pure_controls_render.py`: `46 passed`
-- `tests/microservices/test_rq_engine_landuse_routes.py`: `41 passed` (includes Finder-sidecar acceptance + nested-member rejection regression coverage)
+- `tests/microservices/test_rq_engine_landuse_routes.py`: `50 passed` (includes mapping-selection hardening, row validation, redaction, read token-class, and header-precondition regressions)
 - `tests/microservices/test_rq_engine_schema_defaults_routes.py`: `54 passed`
 - `tests/microservices/test_rq_engine_openapi_contract.py`: `10 passed`
+- `tests/microservices/test_rq_engine_auth.py`: `32 passed`
 - `tests/nodb/test_landuse_custom_mapping.py`: `10 passed` (includes stale system override auto-clear + unlocked cleanup no-lock + stale custom-map description relabeling regression)
 - `tests/nodb/test_root_dir_materialization.py`: `7 passed` (includes clean-path preservation regression)
 - `tests/weppcloud/routes/test_run_0_openet_admin_gate.py`: `29 passed` (includes run_0 stale mapping + stale-write recovery regressions)
 - `wepppy/weppcloud/controllers_js/__tests__/landuse.test.js`: `20 passed`
 - `wepppy/weppcloud/controllers_js/__tests__/landuse_modify_gl.test.js`: `3 passed`
+- `wepppy/weppcloud/controllers_js/__tests__/landuse_map_inline.test.js`: `2 passed`
 - `wctl doc-lint ...`: `10 files validated, 0 errors, 0 warnings`
 
 Residual risk disposition:
@@ -253,3 +263,4 @@ Package is accepted only when:
 - 2026-04-24 / Codex: Added stale-write race closure notes (in-memory unlocked stale cleanup + `run_0` stale-write retry regressions).
 - 2026-04-24 / Codex: Added custom-map description integrity closure notes (changed-key map-save normalization + build-time stale-description relabeling).
 - 2026-04-24 / Codex: Added runid-link title-meta parity polish for landuse catalog/map pages with render regression coverage.
+- 2026-04-24 / Codex: Added cross-package review findings disposition updates (auth/input hardening, redaction, schema/openapi parity, and regression evidence).

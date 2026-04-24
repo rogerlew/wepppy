@@ -252,6 +252,31 @@ def test_view_landuse_map_renders_rq_engine_routes(
     assert response.headers["Cache-Control"] == "no-store, no-cache, must-revalidate, max-age=0"
 
 
+def test_view_landuse_map_redacts_mapping_path_errors(
+    landuse_client,
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    client, _DummyLanduse, _captured, _run_dir = landuse_client
+
+    def _raise_mapping_error(_landuse: object, _wd: str):
+        raise landuse_module.ManagementMapLoadError(
+            "Management map file does not exist: /tmp/run-1/landuse/custom-map.json",
+            code="management_map_missing",
+            map_path="/tmp/run-1/landuse/custom-map.json",
+        )
+
+    monkeypatch.setattr(landuse_module, "_build_landuse_map_snapshot_payload", _raise_mapping_error)
+
+    response = client.get(f"/runs/{RUN_ID}/{CONFIG}/landuse-map")
+
+    assert response.status_code == 400
+    payload = response.get_json()
+    assert payload["error"]["code"] == "management_map_missing"
+    assert payload["error"]["message"] == "Management map file does not exist"
+    details = payload["error"].get("details")
+    assert not details or "map_path" not in details
+
+
 def test_landuse_template_renders_disturbed_preview_links_conditionally() -> None:
     template_dir = Path(__file__).resolve().parents[3] / "wepppy" / "weppcloud" / "templates"
     app = Flask(__name__, template_folder=str(template_dir))

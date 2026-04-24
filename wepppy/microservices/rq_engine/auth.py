@@ -264,6 +264,12 @@ def authorize_run_access(claims: Mapping[str, Any], runid: str) -> None:
         return
 
     normalized_token_class = token_class(claims)
+    if normalized_token_class not in {"user", "session", "service", "mcp"}:
+        raise AuthError(
+            f"Token class '{normalized_token_class}' is not allowed",
+            status_code=403,
+            code="forbidden",
+        )
     if normalized_token_class == "session":
         require_session_marker(claims, runid)
         return

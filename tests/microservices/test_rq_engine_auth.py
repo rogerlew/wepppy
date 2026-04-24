@@ -21,6 +21,15 @@ def test_authorize_run_access_rejects_service_without_run_scope() -> None:
     assert "run scope" in exc_info.value.message.lower()
 
 
+def test_authorize_run_access_rejects_unknown_token_class() -> None:
+    with pytest.raises(auth.AuthError) as exc_info:
+        auth.authorize_run_access({"token_class": "robot"}, "run-1")
+
+    assert exc_info.value.status_code == 403
+    assert exc_info.value.code == "forbidden"
+    assert "not allowed" in exc_info.value.message.lower()
+
+
 def test_rq_engine_health_emits_correlation_id_header() -> None:
     testclient = pytest.importorskip("fastapi.testclient")
     from wepppy.microservices import rq_engine
