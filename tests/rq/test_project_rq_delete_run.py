@@ -451,3 +451,124 @@ def test_index_usersum_docs_rq_syncs_vendor_docs_when_write_index_disabled(
     assert result["vendors_synced"] == 1
     assert result["vendors_skipped"] == 0
     assert any("COMPLETED index_usersum_docs_rq" in message for _, message in published)
+
+
+def test_index_usersum_docs_rq_postgres_sync_is_readonly_on_repo_paths(
+    monkeypatch: pytest.MonkeyPatch,
+    tmp_path: Path,
+) -> None:
+    repo_root = tmp_path / "repo"
+    usersum_dir = repo_root / "wepppy" / "weppcloud" / "routes" / "usersum"
+    usersum_dir.mkdir(parents=True, exist_ok=True)
+
+    markdown_path = usersum_dir / "weppcloud" / "example.md"
+    markdown_path.parent.mkdir(parents=True, exist_ok=True)
+    markdown_path.write_text("# Example\n\nSearchable content.\n", encoding="utf-8")
+
+    (usersum_dir / "docs_manifest.yaml").write_text(
+        "\n".join(
+            [
+                "version: 1",
+                "docs:",
+                "  - doc_id: usersum.weppcloud.example",
+                "    source: local",
+                "    rel_path: wepppy/weppcloud/routes/usersum/weppcloud/example.md",
+                "    title: Example Doc",
+                "    min_role: user",
+                "    category: weppcloud",
+                "    audience_tags: []",
+                "    status: active",
+                "    nav_key: usersum.weppcloud.example",
+                "",
+            ]
+        ),
+        encoding="utf-8",
+    )
+    (usersum_dir / "nav_tree.yaml").write_text(
+        "\n".join(
+            [
+                "version: 1",
+                "roots:",
+                "  - key: usersum.weppcloud.section",
+                "    title: WEPPcloud",
+                "    collapsible: true",
+                "    children:",
+                "      - key: usersum.weppcloud.example",
+                "        doc_id: usersum.weppcloud.example",
+                "",
+            ]
+        ),
+        encoding="utf-8",
+    )
+    (usersum_dir / "vendors.yaml").write_text(
+        "\n".join(
+            [
+                "version: 1",
+                "vendors:",
+                "  - vendor_id: wepp-forest",
+                f"    source_repo_path: {tmp_path / 'wepp-forest'}",
+                "    source_ref: main",
+                "    include_globs: [\"change-log.md\"]",
+                "    exclude_globs: [\"**/.git/**\"]",
+                "    target_root: wepppy/weppcloud/routes/usersum/vendor/wepp-forest",
+                "    route_prefix: /usersum/vendor/wepp-forest",
+                "",
+            ]
+        ),
+        encoding="utf-8",
+    )
+
+    vendor_sync_module = __import__(
+        "wepppy.weppcloud.usersum_docs.vendor_sync",
+        fromlist=["sync_vendor_docs"],
+    )
+    sync_called: list[bool] = []
+
+    def _fake_sync_vendor_docs(*args, **kwargs):
+        sync_called.append(True)
+        return []
+
+    monkeypatch.setattr(vendor_sync_module, "sync_vendor_docs", _fake_sync_vendor_docs)
+
+    pg_search_module = __import__(
+        "wepppy.weppcloud.usersum_docs.pg_search",
+        fromlist=["PostgresUsersumSearchBackend"],
+    )
+    synced_docs: list[object] = []
+
+    class _FakePostgresUsersumSearchBackend:
+        def __init__(self, _db_url: str) -> None:
+            pass
+
+        def ensure_synced(self, docs) -> None:
+            synced_docs.append(docs)
+
+    monkeypatch.setattr(
+        pg_search_module,
+        "PostgresUsersumSearchBackend",
+        _FakePostgresUsersumSearchBackend,
+    )
+
+    published: list[tuple[str, str]] = []
+    monkeypatch.setattr(
+        project_rq.StatusMessenger,
+        "publish",
+        lambda channel, message: published.append((channel, message)),
+    )
+
+    result = project_rq.index_usersum_docs_rq(
+        usersum_base_dir=str(usersum_dir),
+        repo_root=str(repo_root),
+        write_index=False,
+        require_vendor_files=False,
+        sync_postgres=True,
+        db_url="postgresql://example.invalid/usersum",
+    )
+
+    assert sync_called == []
+    assert len(synced_docs) == 1
+    assert len(synced_docs[0]) == 1
+    assert not (usersum_dir / "generated" / "docs_index.json").exists()
+    assert result["index_written"] is False
+    assert result["postgres_synced"] is True
+    assert any("COMPLETED index_usersum_docs_rq" in message for _, message in published)

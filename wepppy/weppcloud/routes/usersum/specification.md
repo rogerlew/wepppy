@@ -346,6 +346,16 @@ Usersum indexing is also available as scheduled maintenance RQ work:
   - queue: `batch`
   - `job_timeout`: `3600`
   - `result_ttl`: `86400`
+  - scheduled kwargs:
+    - `write_index: false`
+    - `require_vendor_files: false`
+    - `sync_postgres: true`
+
+Immutable-runtime note:
+
+- Scheduled indexing is intended to be read-only on repository paths in production containers.
+- The scheduler run updates PostgreSQL search state, but does not rewrite vendored markdown or `generated/docs_index.json` on disk.
+- In this scheduled mode, vendor source sync is skipped; search sync uses repo-tracked usersum markdown as-is.
 
 Scheduler runtime wiring:
 

@@ -443,15 +443,23 @@ def index_usersum_docs_rq(
             require_local_files=True,
             require_vendor_files=False,
         )
-        # Keep vendored markdown current whenever downstream index/search work depends on it.
-        write_vendors = write_index or require_vendor_files or sync_postgres
-        sync_actions = sync_vendor_docs(
-            contracts_for_sync,
-            repo_root=repo_root_path,
-            write=write_vendors,
-            clean=False,
-            allow_missing_source_repos=True,
-        )
+        # Only mutate vendored files when callers explicitly request on-disk artifacts.
+        write_vendors = write_index or require_vendor_files
+        if write_vendors:
+            sync_actions = sync_vendor_docs(
+                contracts_for_sync,
+                repo_root=repo_root_path,
+                write=write_vendors,
+                clean=False,
+                allow_missing_source_repos=True,
+            )
+        else:
+            # Read-only runs (for example production scheduler maintenance) should not
+            # touch vendor source repos; index from repo-tracked markdown as-is.
+            sync_actions = [
+                ("skip", f"{vendor_id}: vendor sync disabled for read-only run")
+                for vendor_id in sorted(contracts_for_sync.vendors.keys())
+            ]
         contracts = load_and_validate_contracts(
             base_dir=usersum_base_path,
             repo_root=repo_root_path,

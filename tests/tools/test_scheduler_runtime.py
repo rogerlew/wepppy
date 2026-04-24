@@ -149,3 +149,59 @@ def test_monitor_run_locations_freshness_logs_stale_warning(
     scheduler._monitor_run_locations_freshness(run_locations, stale_after_seconds=120)
 
     assert "run-locations stale" in caplog.text
+
+
+def test_run_scheduler_passes_task_kwargs_to_enqueue(monkeypatch: pytest.MonkeyPatch) -> None:
+    config = {
+        "tasks": [
+            {
+                "name": "usersum_docs_index",
+                "func": "wepppy.rq.project_rq.index_usersum_docs_rq",
+                "interval_seconds": 60,
+                "queue": "batch",
+                "kwargs": {
+                    "write_index": False,
+                    "require_vendor_files": False,
+                    "sync_postgres": True,
+                },
+            }
+        ]
+    }
+    enqueue_calls: list[dict[str, object]] = []
+
+    def fake_resolve(_path: str):
+        def _task() -> None:
+            return None
+
+        _task.__name__ = "usersum_docs_index_task"
+        return _task
+
+    class _QueueFactory(_RecordingQueue):
+        def enqueue(self, func, *args, **kwargs) -> None:  # type: ignore[no-untyped-def]
+            enqueue_calls.append(
+                {
+                    "func_name": getattr(func, "__name__", repr(func)),
+                    "args": args,
+                    "kwargs": kwargs,
+                }
+            )
+
+    monotonic_values = iter([100.0, 100.0])
+    monkeypatch.setattr(scheduler, "_load_config", lambda _path: config)
+    monkeypatch.setattr(scheduler, "_resolve_callable", fake_resolve)
+    monkeypatch.setattr(scheduler, "Queue", _QueueFactory)
+    monkeypatch.setattr(scheduler.redis, "Redis", lambda **_kwargs: object())
+    monkeypatch.setattr(scheduler, "redis_connection_kwargs", lambda _db: {})
+    monkeypatch.setattr(scheduler.signal, "signal", lambda *_args, **_kwargs: None)
+    monkeypatch.setattr(scheduler.time, "monotonic", lambda: next(monotonic_values))
+    monkeypatch.setattr(scheduler.time, "time", lambda: 0.0)
+    monkeypatch.setattr(scheduler, "_monitor_run_locations_freshness", lambda *_args, **_kwargs: None)
+
+    scheduler.run_scheduler("ignored.yml", sleep_seconds=1, dry_run=False, run_once=True)
+
+    assert len(enqueue_calls) == 1
+    enqueue_kwargs = enqueue_calls[0]["kwargs"]
+    assert isinstance(enqueue_kwargs, dict)
+    assert enqueue_kwargs["write_index"] is False
+    assert enqueue_kwargs["require_vendor_files"] is False
+    assert enqueue_kwargs["sync_postgres"] is True
