@@ -5,9 +5,9 @@ Source-of-truth inventory captured directly from:
 - `wepppy/weppcloud/routes/bootstrap.py`
 
 Snapshot summary:
-- Total endpoints inventoried: **106**
-- Classification counts: **agent-facing 83**, **internal 17**, **ui-only 6**
-- Canonical owner counts: **rq-engine 103**, **Flask wrapper 3**
+- Total endpoints inventoried: **108**
+- Classification counts: **agent-facing 85**, **internal 17**, **ui-only 6**
+- Canonical owner counts: **rq-engine 105**, **Flask wrapper 3**
 
 Cutover reconciliation note (2026-04-11):
 - Row-8 contract cutover package
@@ -61,6 +61,7 @@ Cutover reconciliation note (2026-04-11):
 | POST | `/api/runs/{runid}/{config}/geneva/build-frequency-panel` | `wepppy/microservices/rq_engine/geneva_routes.py` | `build_frequency_panel` | agent-facing | rq-engine | JWT Bearer | `rq:enqueue` | mutating | Run access check: `authorize_run_access`. Validates Geneva panel request and enqueues async job; returns canonical submission envelope with `job_id` and `status_url`. |
 | POST | `/api/runs/{runid}/{config}/build-rusle` | `wepppy/microservices/rq_engine/rusle_routes.py` | `build_rusle` | agent-facing | rq-engine | JWT Bearer | `rq:enqueue` | mutating | Run access check: `authorize_run_access`. Async enqueue; response includes `job_id` (with `status_url`/`message` where implemented). |
 | POST | `/api/runs/{runid}/{config}/build-landuse` | `wepppy/microservices/rq_engine/landuse_routes.py` | `build_landuse` | agent-facing | rq-engine | JWT Bearer | `rq:enqueue` | mutating | Run access check: `authorize_run_access`. Async enqueue; response includes `job_id` (with `status_url`/`message` where implemented). |
+| POST | `/api/runs/{runid}/{config}/modify-landuse-mapping` | `wepppy/microservices/rq_engine/landuse_routes.py` | `modify_landuse_mapping` | agent-facing | rq-engine | JWT Bearer | `rq:enqueue` | mutating | Run access check: `authorize_run_access`. Validates `dom`/`newdom` payload fields and enqueues serialized landuse mapping mutation; returns `job_id`. |
 | POST | `/api/runs/{runid}/{config}/build-soils` | `wepppy/microservices/rq_engine/soils_routes.py` | `build_soils` | agent-facing | rq-engine | JWT Bearer | `rq:enqueue` | mutating | Run access check: `authorize_run_access`. Async enqueue; response includes `job_id` (with `status_url`/`message` where implemented). |
 | POST | `/api/runs/{runid}/{config}/build-subcatchments-and-abstract-watershed` | `wepppy/microservices/rq_engine/watershed_routes.py` | `build_subcatchments_and_abstract_watershed` | agent-facing | rq-engine | JWT Bearer | `rq:enqueue` | mutating | Run access check: `authorize_run_access`. Async enqueue; response includes `job_id` (with `status_url`/`message` where implemented). |
 | POST | `/api/runs/{runid}/{config}/build-treatments` | `wepppy/microservices/rq_engine/treatments_routes.py` | `build_treatments` | agent-facing | rq-engine | JWT Bearer | `rq:enqueue` | mutating | Run access check: `authorize_run_access`. Async enqueue; response includes `job_id` (with `status_url`/`message` where implemented). |
@@ -100,6 +101,7 @@ Cutover reconciliation note (2026-04-11):
 | POST | `/api/runs/{runid}/{config}/geneva/prepare-hrus` | `wepppy/microservices/rq_engine/geneva_routes.py` | `prepare_hrus` | agent-facing | rq-engine | JWT Bearer | `rq:enqueue` | mutating | Run access check: `authorize_run_access`. Validates Geneva prepare payload and enqueues async job; returns canonical submission envelope with `job_id` and `status_url`. |
 | POST | `/api/runs/{runid}/{config}/prepare-roads` | `wepppy/microservices/rq_engine/roads_routes.py` | `prepare_roads` | agent-facing | rq-engine | JWT Bearer | `rq:enqueue` | mutating | Run access check: `authorize_run_access`. Async enqueue; clears stale `run_roads` timestamp and returns `job_id`. |
 | POST | `/api/runs/{runid}/{config}/geneva/run-batch` | `wepppy/microservices/rq_engine/geneva_routes.py` | `run_batch` | agent-facing | rq-engine | JWT Bearer | `rq:enqueue` | mutating | Run access check: `authorize_run_access`. Validates Geneva run request and enqueues async job; returns canonical submission envelope with `job_id` and `status_url`. |
+| POST | `/api/runs/{runid}/{config}/geneva/run-workflow` | `wepppy/microservices/rq_engine/geneva_routes.py` | `run_workflow` | agent-facing | rq-engine | JWT Bearer | `rq:enqueue` | mutating | Run access check: `authorize_run_access`. Validates normalized chained request (prepare -> panel -> batch), enqueues workflow jobs, and returns `job_id`/`job_ids`. |
 | POST | `/api/runs/{runid}/{config}/run-rhem` | `wepppy/microservices/rq_engine/rhem_routes.py` | `run_rhem` | agent-facing | rq-engine | JWT Bearer | `rq:enqueue` | mutating | Run access check: `authorize_run_access`. Async enqueue; response includes `job_id` (with `status_url`/`message` where implemented). |
 | POST | `/api/runs/{runid}/{config}/run-roads` | `wepppy/microservices/rq_engine/roads_routes.py` | `run_roads` | agent-facing | rq-engine | JWT Bearer | `rq:enqueue` | mutating | Run access check: `authorize_run_access`. Async enqueue; clears stale `run_roads` timestamp and returns `job_id`. |
 | POST | `/api/runs/{runid}/{config}/run-swat` | `wepppy/microservices/rq_engine/swat_routes.py` | `run_swat` | agent-facing | rq-engine | JWT Bearer | `rq:enqueue` | mutating | Run access check: `authorize_run_access`. Async enqueue; response includes `job_id` (with `status_url`/`message` where implemented). |

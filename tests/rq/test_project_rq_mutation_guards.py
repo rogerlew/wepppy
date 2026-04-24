@@ -95,8 +95,8 @@ def test_modify_landuse_mapping_rq_rejects_archive_form_root(
     set_archive_roots("landuse")
     monkeypatch.setattr(
         project_rq.Landuse,
-        "load_detached",
-        lambda _wd, allow_nonexistent=True: (_ for _ in ()).throw(
+        "getInstance",
+        lambda _wd, ignore_lock=False: (_ for _ in ()).throw(
             AssertionError("Landuse should not be loaded when root is archive-backed")
         ),
     )
@@ -132,6 +132,12 @@ def test_modify_landuse_mapping_rq_publishes_trigger_and_mutates_landuse(
             return "job-latest"
 
     monkeypatch.setattr(project_rq.RedisPrep, "getInstance", lambda _wd: DummyPrep())
+    cleared_cache: list[tuple[str, str | None]] = []
+    monkeypatch.setattr(
+        project_rq,
+        "clear_nodb_file_cache",
+        lambda runid, pup_relpath=None: cleared_cache.append((runid, pup_relpath)),
+    )
 
     class DummyLanduse:
         def __init__(self):
@@ -141,15 +147,28 @@ def test_modify_landuse_mapping_rq_publishes_trigger_and_mutates_landuse(
             self.calls.append((dom, newdom))
 
     landuse = DummyLanduse()
-    monkeypatch.setattr(project_rq.Landuse, "load_detached", lambda _wd, allow_nonexistent=True: landuse)
+
+    def _get_landuse(_wd: str, ignore_lock: bool = False):
+        assert ignore_lock is True
+        assert cleared_cache == [("demo", "landuse.nodb")]
+        return landuse
+
     monkeypatch.setattr(
         project_rq.Landuse,
         "getInstance",
-        lambda _wd: (_ for _ in ()).throw(AssertionError("Detached landuse should be used")),
+        _get_landuse,
+    )
+    monkeypatch.setattr(
+        project_rq.Landuse,
+        "load_detached",
+        lambda _wd, allow_nonexistent=True: (_ for _ in ()).throw(
+            AssertionError("modify_landuse_mapping_rq should not use load_detached")
+        ),
     )
 
     project_rq.modify_landuse_mapping_rq("demo", "44", "71")
 
+    assert cleared_cache == [("demo", "landuse.nodb")]
     assert landuse.calls == [("44", "71")]
     assert call_roots == ["landuse", "landuse"]
     assert any("LANDUSE_MODIFY_MAPPING_TASK_COMPLETED" in message for _channel, message in published)
@@ -175,8 +194,8 @@ def test_modify_landuse_mapping_rq_skips_stale_job_without_mutation(
     monkeypatch.setattr(project_rq.RedisPrep, "getInstance", lambda _wd: DummyPrep())
     monkeypatch.setattr(
         project_rq.Landuse,
-        "load_detached",
-        lambda _wd, allow_nonexistent=True: (_ for _ in ()).throw(
+        "getInstance",
+        lambda _wd, ignore_lock=False: (_ for _ in ()).throw(
             AssertionError("Stale jobs should not mutate landuse")
         ),
     )

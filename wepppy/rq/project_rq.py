@@ -1085,9 +1085,11 @@ def modify_landuse_mapping_rq(runid: str, dom: str, newdom: str) -> None:
             return
 
         def _modify_mapping() -> None:
-            landuse = Landuse.load_detached(wd, allow_nonexistent=True)
-            if landuse is None:
-                landuse = Landuse.getInstance(wd)
+            # Mutation jobs must not hydrate from the detached Redis cache:
+            # cached payloads preserve the controller's pre-write file signature,
+            # which makes the subsequent dump fail the stale-write guard.
+            clear_nodb_file_cache(runid, pup_relpath="landuse.nodb")
+            landuse = Landuse.getInstance(wd, ignore_lock=True)
             landuse.modify_mapping(str(dom), str(newdom))
 
         _run_with_directory_root_lock(
