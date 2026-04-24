@@ -217,6 +217,9 @@
   let sessionToken = null;
   let sessionTokenExpiresAt = 0;
   let sessionTokenPromise = null;
+  let rqEngineToken = null;
+  let rqEngineTokenExpiresAt = 0;
+  let rqEngineTokenPromise = null;
   let queryCount = 0;
   let jobCount = 0;
   let allFinishedCount = 0;
@@ -472,6 +475,19 @@
     return openNodes;
   }
 
+  async function parseJsonResponse(response) {
+    let payload = {};
+    let parseFailed = false;
+    try {
+      const text = await response.text();
+      payload = text ? JSON.parse(text) : {};
+    } catch (err) {
+      payload = { error: { message: "Invalid JSON response" } };
+      parseFailed = true;
+    }
+    return { payload, parseFailed };
+  }
+
   async function requestJson(url) {
     let response;
     try {
@@ -482,15 +498,7 @@
       throw error;
     }
 
-    let payload = {};
-    let parseFailed = false;
-    try {
-      const text = await response.text();
-      payload = text ? JSON.parse(text) : {};
-    } catch (err) {
-      payload = { error: { message: "Invalid JSON response" } };
-      parseFailed = true;
-    }
+    const { payload, parseFailed } = await parseJsonResponse(response);
 
     const normalizedStatus = payload && typeof payload === "object"
       ? String(payload.status || "").toLowerCase()
@@ -517,6 +525,13 @@
       return false;
     }
     return (Date.now() / 1000) < (sessionTokenExpiresAt - 30);
+  }
+
+  function hasValidRqEngineToken() {
+    if (!rqEngineToken || !rqEngineTokenExpiresAt) {
+      return false;
+    }
+    return (Date.now() / 1000) < (rqEngineTokenExpiresAt - 30);
   }
 
   async function fetchSessionToken() {
@@ -554,6 +569,68 @@
         sessionTokenPromise = null;
       });
     return sessionTokenPromise;
+  }
+
+  async function fetchRqEngineToken() {
+    if (hasValidRqEngineToken()) {
+      return rqEngineToken;
+    }
+    if (rqEngineTokenPromise) {
+      return rqEngineTokenPromise;
+    }
+
+    rqEngineTokenPromise = fetch("/api/auth/rq-engine-token", {
+      method: "POST",
+      credentials: "same-origin"
+    })
+      .then(async (response) => {
+        const { payload, parseFailed } = await parseJsonResponse(response);
+        if (!response.ok || parseFailed) {
+          const message = resolveErrorMessage(
+            payload,
+            parseFailed ? "Invalid JSON response" : "Failed to issue rq-engine token"
+          );
+          throw new Error(message || "Failed to issue rq-engine token");
+        }
+        if (!payload || !payload.token) {
+          throw new Error("RQ-engine token missing from response");
+        }
+        rqEngineToken = payload.token;
+        rqEngineTokenExpiresAt = Number(payload.expires_at || 0);
+        if (!rqEngineTokenExpiresAt) {
+          rqEngineTokenExpiresAt = (Date.now() / 1000) + 600;
+        }
+        return rqEngineToken;
+      })
+      .finally(() => {
+        rqEngineTokenPromise = null;
+      });
+    return rqEngineTokenPromise;
+  }
+
+  async function getCancelAuthToken() {
+    const errors = [];
+
+    if (runid) {
+      try {
+        return await fetchSessionToken();
+      } catch (err) {
+        const message = err && err.message ? String(err.message) : "Session token request failed";
+        errors.push(message);
+      }
+    } else {
+      errors.push("Run ID unavailable for session token");
+    }
+
+    try {
+      return await fetchRqEngineToken();
+    } catch (err) {
+      const message = err && err.message ? String(err.message) : "RQ-engine token request failed";
+      errors.push(message);
+    }
+
+    const summary = errors.filter(Boolean).join(" | ");
+    throw new Error(summary || "Unable to acquire authorization token");
   }
 
   async function fetchJobStatus() {
@@ -911,8 +988,13 @@
   }
 
   async function cancelJob() {
+    const cancelButton = document.getElementById("cancel-job");
+    if (cancelButton) {
+      cancelButton.disabled = true;
+    }
+
     try {
-      const token = await fetchSessionToken();
+      const token = await getCancelAuthToken();
       const response = await fetch(
         `/rq-engine/api/canceljob/${encodeURIComponent(jobId)}`,
         {
@@ -923,12 +1005,23 @@
           },
         }
       );
-      if (!response.ok) {
-        throw new Error("Request failed");
+      const { payload, parseFailed } = await parseJsonResponse(response);
+      if (!response.ok || parseFailed) {
+        const message = resolveErrorMessage(
+          payload,
+          parseFailed ? "Invalid JSON response" : `Request failed (${response.status})`
+        );
+        throw new Error(message || "Request failed");
       }
       alert("Job canceled");
+      fetchJobStatus();
     } catch (err) {
-      alert("Failed to cancel job");
+      const message = err && err.message ? String(err.message) : "Failed to cancel job";
+      alert(message);
+    } finally {
+      if (cancelButton) {
+        cancelButton.disabled = false;
+      }
     }
   }
 
