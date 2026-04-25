@@ -13,9 +13,11 @@ _LAZY_SUBMODULES = {
     "rq",
     "climates",
     "mcp",
+    "microservices",
     "nodb",
     "profile_recorder",
     "locales",
+    "wepp",
     "weppcloud",
 }
 
