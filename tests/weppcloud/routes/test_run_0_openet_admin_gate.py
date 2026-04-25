@@ -23,6 +23,12 @@ class _RoleUser:
         return role in self._roles
 
 
+class _BrokenAshRon(SimpleNamespace):
+    @property
+    def has_ash_results(self) -> bool:  # pragma: no cover - should never be touched
+        raise FileNotFoundError("ash.nodb missing for stale ash mod")
+
+
 @pytest.fixture()
 def run0_module():
     return importlib.reload(importlib.import_module("wepppy.weppcloud.routes.run_0.run_0_bp"))
@@ -350,6 +356,30 @@ def test_run_page_bootstrap_rusle_flag_false_for_topaz_backend(run0_template_app
         js = render_template("run_page_bootstrap.js.j2", **context)
 
     assert _extract_mod_flag(js, "rusle") == "false"
+
+
+def test_run_page_bootstrap_ash_flag_false_when_show_ash_context_false(run0_template_app) -> None:
+    context = _bootstrap_context(set())
+    context["ron"].mods = ["ash"]
+    context["show_ash"] = False
+    with run0_template_app.app_context():
+        js = render_template("run_page_bootstrap.js.j2", **context)
+
+    assert _extract_mod_flag(js, "ash") == "false"
+
+
+def test_run_page_bootstrap_ash_missing_nodb_does_not_raise(run0_template_app) -> None:
+    context = _bootstrap_context(set())
+    ron_payload = dict(vars(context["ron"]))
+    ron_payload.pop("has_ash_results", None)
+    ron_payload["mods"] = ["ash"]
+    context["ron"] = _BrokenAshRon(**ron_payload)
+    context["ash"] = None
+
+    with run0_template_app.app_context():
+        js = render_template("run_page_bootstrap.js.j2", **context)
+
+    assert _extract_mod_flag(js, "ash") == "false"
 
 
 def test_run_page_bootstrap_roads_flag_true_when_enabled(run0_template_app) -> None:

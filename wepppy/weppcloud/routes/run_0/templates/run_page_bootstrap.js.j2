@@ -43,10 +43,11 @@
         {% set rhem_has_run = rhem.has_run %}
     {% endif %}
 
+    {% set ash_enabled = show_ash if show_ash is defined else ((('ash' in mods_list) and (ash is defined) and (ash is not none)) or playwright_load_all) %}
     {% set ash_has_results = False %}
     {% set ash_depth_mode = None %}
-    {% if 'ash' in mods_list %}
-        {% set ash_has_results = ron.has_ash_results %}
+    {% if ash_enabled and ash is defined and ash is not none %}
+        {% set ash_has_results = ash.has_ash_results %}
         {% set ash_depth_mode = ash.ash_depth_mode %}
     {% endif %}
 
@@ -92,7 +93,7 @@
                 "baer": 'baer' in mods_list,
                 "disturbed": 'disturbed' in mods_list,
                 "rangeland_cover": 'rangeland_cover' in mods_list,
-                "ash": 'ash' in mods_list,
+                "ash": ash_enabled,
                 "omni": 'omni' in mods_list,
                 "rhem": 'rhem' in mods_list,
                 "dss_export": 'dss_export' in mods_list,

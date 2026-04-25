@@ -1816,7 +1816,7 @@ def _build_runs0_context(runid, config, playwright_load_all):
 
     show_rap_ts = 'rap_ts' in mods_list or playwright_load_all
     show_treatments = 'treatments' in mods_list or playwright_load_all
-    show_ash = 'ash' in mods_list or playwright_load_all
+    show_ash = (('ash' in mods_list) and (ash is not None)) or playwright_load_all
     is_omni_child = is_omni_child_run(runid, wd=wd, pup_relpath=ctx.pup_relpath)
     show_omni = (
         (('omni' in mods_list) or playwright_load_all)

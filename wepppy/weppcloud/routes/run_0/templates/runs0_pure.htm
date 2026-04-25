@@ -18,7 +18,7 @@
 {% set openet_admin_enabled = user.has_role('Admin') or playwright_load_all %}
 {% set show_openet_ts = openet_admin_enabled and ('openet_ts' in mods_list or playwright_load_all) %}
 {% set show_treatments = 'treatments' in mods_list or playwright_load_all %}
-{% set show_ash = 'ash' in mods_list or playwright_load_all %}
+{% set show_ash = show_ash if show_ash is defined else ((('ash' in mods_list) and (ash is defined) and (ash is not none)) or playwright_load_all) %}
 {% set show_rhem = 'rhem' in mods_list or playwright_load_all %}
 {% set show_observed = 'observed' in mods_list or playwright_load_all %}
 {% set allow_debris_flow = user.has_role('PowerUser') or (config is mapping and config.get('TEST_SUPPORT_ENABLED')) or playwright_load_all %}
