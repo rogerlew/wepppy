@@ -905,26 +905,6 @@ async def build_subcatchments_and_abstract_watershed(
             return bool(value)
         return default
 
-    def _apply_watershed_updates(target: Watershed, updates: dict[str, Any]) -> None:
-        if not updates:
-            return
-        if "clip_hillslopes" in updates:
-            target.clip_hillslopes = bool(updates["clip_hillslopes"])
-        if "walk_flowpaths" in updates:
-            target.walk_flowpaths = bool(updates["walk_flowpaths"])
-        if "clip_hillslope_length" in updates:
-            target.clip_hillslope_length = float(updates["clip_hillslope_length"])
-        if "mofe_target_length" in updates:
-            target.mofe_target_length = float(updates["mofe_target_length"])
-        if "mofe_buffer" in updates:
-            target.mofe_buffer = bool(updates["mofe_buffer"])
-        if "mofe_buffer_length" in updates:
-            target.mofe_buffer_length = float(updates["mofe_buffer_length"])
-        if "mofe_max_ofes" in updates:
-            target.mofe_max_ofes = min(19, max(1, int(updates["mofe_max_ofes"])))
-        if "bieger2015_widths" in updates:
-            target.bieger2015_widths = bool(updates["bieger2015_widths"])
-
     try:
         wd = get_wd(runid)
         _preflight_watershed_mutation_root(wd)
@@ -971,11 +951,10 @@ async def build_subcatchments_and_abstract_watershed(
             if value is not None:
                 updates["bieger2015_widths"] = value
 
-        if watershed.run_group == "batch" or _is_base_project_context(runid, config):
-            _apply_watershed_updates(watershed, updates)
-            return JSONResponse({"message": "Set subcatchment inputs for batch processing"})
+        watershed.apply_build_subcatchment_updates(**updates)
 
-        _apply_watershed_updates(watershed, updates)
+        if watershed.run_group == "batch" or _is_base_project_context(runid, config):
+            return JSONResponse({"message": "Set subcatchment inputs for batch processing"})
 
         prep = RedisPrep.getInstance(wd)
         prep.remove_timestamp(TaskEnum.abstract_watershed)

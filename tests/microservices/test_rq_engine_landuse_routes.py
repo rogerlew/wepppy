@@ -142,6 +142,93 @@ def test_build_landuse_rejects_invalid_custom_mapping(monkeypatch: pytest.Monkey
     assert "custom mapping file is missing" in payload["error"]["message"].lower()
 
 
+def test_build_landuse_disturbed_uses_grouped_updates(monkeypatch: pytest.MonkeyPatch) -> None:
+    _stub_auth(monkeypatch)
+    monkeypatch.setattr(landuse_routes, "get_wd", lambda runid: "/tmp/run")
+
+    class DummyLanduse:
+        run_group = "batch"
+        mods = {"disturbed"}
+        mode = landuse_routes.LanduseMode.Gridded
+        lc_dir = "/tmp"
+        lc_fn = "/tmp/lc.tif"
+
+        def parse_inputs(self, payload) -> None:
+            return None
+
+    class DummyDisturbed:
+        def __init__(self) -> None:
+            self.grouped_update_calls: list[dict[str, bool]] = []
+
+        @property
+        def burn_shrubs(self) -> bool:
+            return True
+
+        @burn_shrubs.setter
+        def burn_shrubs(self, _value: bool) -> None:
+            raise AssertionError("build-landuse should not set burn_shrubs directly")
+
+        @property
+        def burn_grass(self) -> bool:
+            return False
+
+        @burn_grass.setter
+        def burn_grass(self, _value: bool) -> None:
+            raise AssertionError("build-landuse should not set burn_grass directly")
+
+        def apply_build_landuse_updates(self, **kwargs) -> None:
+            self.grouped_update_calls.append(kwargs)
+
+    disturbed = DummyDisturbed()
+    monkeypatch.setattr(landuse_routes.Landuse, "getInstance", lambda wd: DummyLanduse())
+    monkeypatch.setattr(landuse_routes.Disturbed, "getInstance", lambda wd: disturbed)
+
+    with TestClient(rq_engine.app) as client:
+        response = client.post(
+            "/api/runs/run-1/cfg/build-landuse",
+            json={"checkbox_burn_shrubs": True, "checkbox_burn_grass": False},
+        )
+
+    assert response.status_code == 200
+    assert response.json()["message"] == "Set landuse inputs for batch processing"
+    assert disturbed.grouped_update_calls == [{"burn_shrubs": True, "burn_grass": False}]
+
+
+def test_build_landuse_disturbed_omitted_burn_fields_forwards_false_kwargs(
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    _stub_auth(monkeypatch)
+    monkeypatch.setattr(landuse_routes, "get_wd", lambda runid: "/tmp/run")
+
+    class DummyLanduse:
+        run_group = "batch"
+        mods = {"disturbed"}
+        mode = landuse_routes.LanduseMode.Gridded
+        lc_dir = "/tmp"
+        lc_fn = "/tmp/lc.tif"
+
+        def parse_inputs(self, payload) -> None:
+            return None
+
+    class DummyDisturbed:
+        def __init__(self) -> None:
+            self.grouped_update_calls: list[dict[str, bool]] = []
+
+        def apply_build_landuse_updates(self, **kwargs) -> None:
+            self.grouped_update_calls.append(kwargs)
+
+    disturbed = DummyDisturbed()
+    monkeypatch.setattr(landuse_routes.Landuse, "getInstance", lambda wd: DummyLanduse())
+    monkeypatch.setattr(landuse_routes.Disturbed, "getInstance", lambda wd: disturbed)
+
+    with TestClient(rq_engine.app) as client:
+        response = client.post("/api/runs/run-1/cfg/build-landuse", json={})
+
+    assert response.status_code == 200
+    assert response.json() == {"message": "Set landuse inputs for batch processing"}
+    assert disturbed.grouped_update_calls == [{"burn_shrubs": False, "burn_grass": False}]
+
+
 def test_set_landuse_mode_updates_controller(monkeypatch: pytest.MonkeyPatch) -> None:
     _stub_auth(monkeypatch)
     monkeypatch.setattr(landuse_routes, "get_wd", lambda runid, prefer_active=False: "/tmp/run")
@@ -151,6 +238,12 @@ def test_set_landuse_mode_updates_controller(monkeypatch: pytest.MonkeyPatch) ->
         def __init__(self) -> None:
             self.mode = landuse_routes.LanduseMode.Gridded
             self.single_selection = None
+            self.grouped_update_calls: list[dict[str, object]] = []
+
+        def apply_set_landuse_mode_updates(self, **kwargs) -> None:
+            self.grouped_update_calls.append(kwargs)
+            self.mode = kwargs["mode"]
+            self.single_selection = kwargs["single_selection"]
 
     controller = DummyLanduse()
     monkeypatch.setattr(landuse_routes.Landuse, "getInstance", lambda wd: controller)
@@ -163,6 +256,9 @@ def test_set_landuse_mode_updates_controller(monkeypatch: pytest.MonkeyPatch) ->
 
     assert response.status_code == 200
     assert response.json()["message"] == "Landuse mode updated"
+    assert controller.grouped_update_calls == [
+        {"mode": landuse_routes.LanduseMode.UserDefined, "single_selection": "forest"}
+    ]
     assert controller.mode == landuse_routes.LanduseMode.UserDefined
     assert controller.single_selection == "forest"
 
@@ -181,6 +277,32 @@ def test_set_landuse_mode_requires_mode(monkeypatch: pytest.MonkeyPatch) -> None
 
     assert response.status_code == 400
     assert response.json()["error"]["message"] == "mode and landuse_single_selection must be provided"
+
+
+def test_set_landuse_mode_noops_when_single_selection_missing(monkeypatch: pytest.MonkeyPatch) -> None:
+    _stub_auth(monkeypatch)
+    monkeypatch.setattr(landuse_routes, "get_wd", lambda runid, prefer_active=False: "/tmp/run")
+    monkeypatch.setattr(landuse_routes, "_preflight_landuse_mutation_root", lambda wd: None)
+
+    class DummyLanduse:
+        def __init__(self) -> None:
+            self.grouped_update_calls: list[dict[str, object]] = []
+
+        def apply_set_landuse_mode_updates(self, **kwargs) -> None:
+            self.grouped_update_calls.append(kwargs)
+
+    controller = DummyLanduse()
+    monkeypatch.setattr(landuse_routes.Landuse, "getInstance", lambda wd: controller)
+
+    with TestClient(rq_engine.app) as client:
+        response = client.post(
+            "/api/runs/run-1/cfg/set-landuse-mode",
+            json={"mode": int(landuse_routes.LanduseMode.UserDefined)},
+        )
+
+    assert response.status_code == 200
+    assert response.json()["message"] == "No landuse changes applied"
+    assert controller.grouped_update_calls == []
 
 
 def test_set_landuse_db_updates_controller(monkeypatch: pytest.MonkeyPatch) -> None:

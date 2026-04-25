@@ -771,16 +771,19 @@ class Landuse(NoDbBase):
     @property
     def mode(self) -> LanduseMode:
         return self._mode
-    
-    @mode.setter
-    @nodb_setter
-    def mode(self, value: Any) -> None:
+
+    def _set_mode_value(self, value: Any) -> None:
         if isinstance(value, LanduseMode):
             self._mode = value
         elif isinstance(value, int):
             self._mode = LanduseMode(value)
         else:
             raise ValueError('most be LanduseMode or int')
+    
+    @mode.setter
+    @nodb_setter
+    def mode(self, value: Any) -> None:
+        self._set_mode_value(value)
 
     @property
     def single_selection(self) -> int:
@@ -789,13 +792,33 @@ class Landuse(NoDbBase):
         """
         return self._single_selection
 
-    @single_selection.setter
-    @nodb_setter
-    def single_selection(self, landuse_single_selection: int) -> None:
+    def _set_single_selection_value(self, landuse_single_selection: int) -> None:
         k = landuse_single_selection
         self._single_selection = k
         mapping_reference = self._resolve_effective_mapping_reference(self.mapping)
         self._single_man = get_management_summary(k, mapping_reference)
+
+    @single_selection.setter
+    @nodb_setter
+    def single_selection(self, landuse_single_selection: int) -> None:
+        self._set_single_selection_value(landuse_single_selection)
+
+    def apply_set_landuse_mode_updates(
+        self,
+        *,
+        mode: Optional[Any] = None,
+        single_selection: Optional[Any] = None,
+    ) -> None:
+        """Apply set-landuse-mode route updates in one lock scope."""
+
+        if mode is None and single_selection is None:
+            return
+
+        with self.locked():
+            if mode is not None:
+                self._set_mode_value(mode)
+            if single_selection is not None:
+                self._set_single_selection_value(single_selection)
 
     @property
     def single_man(self) -> Optional[Any]:

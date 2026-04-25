@@ -430,12 +430,14 @@ async def build_landuse(runid: str, config: str, request: Request) -> JSONRespon
             burn_shrubs_value = payload.get("checkbox_burn_shrubs")
             if burn_shrubs_value is None:
                 burn_shrubs_value = payload.get("burn_shrubs")
-            disturbed.burn_shrubs = bool(burn_shrubs_value)
 
             burn_grass_value = payload.get("checkbox_burn_grass")
             if burn_grass_value is None:
                 burn_grass_value = payload.get("burn_grass")
-            disturbed.burn_grass = bool(burn_grass_value)
+            disturbed.apply_build_landuse_updates(
+                burn_shrubs=bool(burn_shrubs_value),
+                burn_grass=bool(burn_grass_value),
+            )
 
         try:
             mapping = _normalize_landuse_mapping_selection(_first(payload.get("landuse_management_mapping_selection")))
@@ -591,8 +593,10 @@ async def set_landuse_mode(runid: str, config: str, request: Request) -> JSONRes
         wd = _resolve_run_root_for_request(runid, request)
         _preflight_landuse_mutation_root(wd)
         landuse = Landuse.getInstance(wd)
-        landuse.mode = mode
-        landuse.single_selection = str(single_selection)
+        landuse.apply_set_landuse_mode_updates(
+            mode=mode,
+            single_selection=str(single_selection),
+        )
         return JSONResponse({"message": "Landuse mode updated"})
     except RunContextResolutionError as exc:
         return error_response(exc.message, status_code=exc.status_code, code=exc.code)

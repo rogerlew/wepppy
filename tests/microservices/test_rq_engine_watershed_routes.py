@@ -657,7 +657,13 @@ def test_build_subcatchments_enqueues_job_and_caps_mofe_max_ofes(monkeypatch: py
         run_group = "default"
 
         def __init__(self) -> None:
+            self.grouped_update_calls = []
             self.mofe_max_ofes = None
+
+        def apply_build_subcatchment_updates(self, **kwargs) -> None:
+            self.grouped_update_calls.append(kwargs)
+            if "mofe_max_ofes" in kwargs:
+                self.mofe_max_ofes = min(19, max(1, int(kwargs["mofe_max_ofes"])))
 
     dummy_watershed = DummyWatershed()
 
@@ -675,7 +681,66 @@ def test_build_subcatchments_enqueues_job_and_caps_mofe_max_ofes(monkeypatch: py
 
     assert response.status_code == 200
     assert response.json()["job_id"] == "job-77"
+    assert len(dummy_watershed.grouped_update_calls) == 1
+    assert dummy_watershed.grouped_update_calls[0]["clip_hillslopes"] is True
+    assert dummy_watershed.grouped_update_calls[0]["mofe_max_ofes"] == 42
     assert dummy_watershed.mofe_max_ofes == 19
+
+
+def test_build_subcatchments_forwards_all_grouped_update_fields_with_coercion(
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    _stub_auth(monkeypatch)
+    _stub_queue(monkeypatch, job_id="job-grouped-fields")
+    _stub_prep(monkeypatch)
+    monkeypatch.setattr(watershed_routes, "get_wd", lambda runid: "/tmp/run")
+
+    class DummyWatershed:
+        run_group = "default"
+
+        def __init__(self) -> None:
+            self.grouped_update_calls = []
+
+        def apply_build_subcatchment_updates(self, **kwargs) -> None:
+            self.grouped_update_calls.append(kwargs)
+
+    dummy_watershed = DummyWatershed()
+
+    monkeypatch.setattr(
+        watershed_routes.Watershed,
+        "getInstance",
+        lambda wd: dummy_watershed,
+    )
+
+    payload = {
+        "clip_hillslopes": "true",
+        "walk_flowpaths": 0,
+        "clip_hillslope_length": "125.5",
+        "mofe_target_length": 80,
+        "mofe_buffer": "off",
+        "mofe_buffer_length": "35.25",
+        "mofe_max_ofes": "9",
+        "bieger2015_widths": 1,
+    }
+
+    with TestClient(rq_engine.app) as client:
+        response = client.post(
+            "/api/runs/run-1/cfg/build-subcatchments-and-abstract-watershed",
+            json=payload,
+        )
+
+    assert response.status_code == 200
+    assert response.json()["job_id"] == "job-grouped-fields"
+    assert len(dummy_watershed.grouped_update_calls) == 1
+    grouped_updates = dummy_watershed.grouped_update_calls[0]
+    assert grouped_updates["clip_hillslopes"] is True
+    assert grouped_updates["walk_flowpaths"] is False
+    assert grouped_updates["clip_hillslope_length"] == pytest.approx(125.5)
+    assert grouped_updates["mofe_target_length"] == pytest.approx(80.0)
+    assert grouped_updates["mofe_buffer"] is False
+    assert grouped_updates["mofe_buffer_length"] == pytest.approx(35.25)
+    assert grouped_updates["mofe_max_ofes"] == 9
+    assert grouped_updates["bieger2015_widths"] is True
 
 
 def test_build_subcatchments_caps_mofe_max_ofes_floor_to_1(monkeypatch: pytest.MonkeyPatch) -> None:
@@ -688,7 +753,13 @@ def test_build_subcatchments_caps_mofe_max_ofes_floor_to_1(monkeypatch: pytest.M
         run_group = "default"
 
         def __init__(self) -> None:
+            self.grouped_update_calls = []
             self.mofe_max_ofes = None
+
+        def apply_build_subcatchment_updates(self, **kwargs) -> None:
+            self.grouped_update_calls.append(kwargs)
+            if "mofe_max_ofes" in kwargs:
+                self.mofe_max_ofes = min(19, max(1, int(kwargs["mofe_max_ofes"])))
 
     dummy_watershed = DummyWatershed()
 
@@ -706,6 +777,8 @@ def test_build_subcatchments_caps_mofe_max_ofes_floor_to_1(monkeypatch: pytest.M
 
     assert response.status_code == 200
     assert response.json()["job_id"] == "job-78"
+    assert len(dummy_watershed.grouped_update_calls) == 1
+    assert dummy_watershed.grouped_update_calls[0]["mofe_max_ofes"] == 0
     assert dummy_watershed.mofe_max_ofes == 1
 
 
@@ -719,7 +792,13 @@ def test_build_subcatchments_ignores_non_finite_mofe_max_ofes(monkeypatch: pytes
         run_group = "default"
 
         def __init__(self) -> None:
+            self.grouped_update_calls = []
             self.mofe_max_ofes = 7
+
+        def apply_build_subcatchment_updates(self, **kwargs) -> None:
+            self.grouped_update_calls.append(kwargs)
+            if "mofe_max_ofes" in kwargs:
+                self.mofe_max_ofes = min(19, max(1, int(kwargs["mofe_max_ofes"])))
 
     dummy_watershed = DummyWatershed()
 
@@ -738,6 +817,8 @@ def test_build_subcatchments_ignores_non_finite_mofe_max_ofes(monkeypatch: pytes
 
     assert response.status_code == 200
     assert response.json()["job_id"] == "job-79"
+    assert len(dummy_watershed.grouped_update_calls) == 1
+    assert "mofe_max_ofes" not in dummy_watershed.grouped_update_calls[0]
     assert dummy_watershed.mofe_max_ofes == 7
 
 
@@ -766,12 +847,20 @@ def test_build_subcatchments_batch_returns_input_message_without_enqueue(
     class DummyWatershed:
         run_group = "batch"
 
+        def __init__(self) -> None:
+            self.grouped_update_calls = []
+
+        def apply_build_subcatchment_updates(self, **kwargs) -> None:
+            self.grouped_update_calls.append(kwargs)
+
+    dummy_watershed = DummyWatershed()
+
     monkeypatch.setattr(watershed_routes, "Queue", DummyQueue)
     monkeypatch.setattr(watershed_routes.redis, "Redis", lambda **kwargs: DummyRedis())
     monkeypatch.setattr(
         watershed_routes.Watershed,
         "getInstance",
-        lambda wd: DummyWatershed(),
+        lambda wd: dummy_watershed,
     )
 
     with TestClient(rq_engine.app) as client:
@@ -783,6 +872,8 @@ def test_build_subcatchments_batch_returns_input_message_without_enqueue(
     assert response.status_code == 200
     assert response.json()["message"] == "Set subcatchment inputs for batch processing"
     assert queue_called["called"] is False
+    assert len(dummy_watershed.grouped_update_calls) == 1
+    assert dummy_watershed.grouped_update_calls[0]["clip_hillslopes"] is True
 
 
 def test_fetch_dem_batch_returns_input_message_without_enqueue(
@@ -1038,12 +1129,20 @@ def test_build_subcatchments_base_project_context_returns_input_message_without_
     class DummyWatershed:
         run_group = ""
 
+        def __init__(self) -> None:
+            self.grouped_update_calls = []
+
+        def apply_build_subcatchment_updates(self, **kwargs) -> None:
+            self.grouped_update_calls.append(kwargs)
+
+    dummy_watershed = DummyWatershed()
+
     monkeypatch.setattr(watershed_routes, "Queue", DummyQueue)
     monkeypatch.setattr(watershed_routes.redis, "Redis", lambda **kwargs: DummyRedis())
     monkeypatch.setattr(
         watershed_routes.Watershed,
         "getInstance",
-        lambda wd: DummyWatershed(),
+        lambda wd: dummy_watershed,
     )
 
     with TestClient(rq_engine.app) as client:
@@ -1055,6 +1154,8 @@ def test_build_subcatchments_base_project_context_returns_input_message_without_
     assert response.status_code == 200
     assert response.json()["message"] == "Set subcatchment inputs for batch processing"
     assert queue_called["called"] is False
+    assert len(dummy_watershed.grouped_update_calls) == 1
+    assert dummy_watershed.grouped_update_calls[0]["clip_hillslopes"] is True
 
 
 def test_build_subcatchments_returns_400_for_boundary_touches_edge_exception(
@@ -1080,6 +1181,9 @@ def test_build_subcatchments_returns_400_for_boundary_touches_edge_exception(
 
     class DummyWatershed:
         run_group = "default"
+
+        def apply_build_subcatchment_updates(self, **kwargs) -> None:
+            return None
 
     monkeypatch.setattr(watershed_routes, "Queue", DummyQueue)
     monkeypatch.setattr(watershed_routes.redis, "Redis", lambda **kwargs: DummyRedis())

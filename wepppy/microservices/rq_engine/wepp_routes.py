@@ -45,8 +45,7 @@ RQ_ENQUEUE_SCOPES = ["rq:enqueue"]
 def _persist_wepp_job_hint(wepp: Wepp, *, job_id: str, job_key: str) -> None:
     """Persist a last-known WEPP controller job hint without failing enqueue."""
     try:
-        wepp.job_id = job_id
-        wepp.job_key = job_key
+        wepp.persist_job_hint(job_id=job_id, job_key=job_key)
     except RuntimeError:
         # Boundary catch: enqueue already succeeded; keep response stable even
         # if NoDb hint persistence fails.

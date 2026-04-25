@@ -801,6 +801,8 @@ class WeppNoDbLockedException(Exception):
 
 
 class Wepp(NoDbBase):
+    _JOB_HINT_UNSET = object()
+
     __name__ = 'Wepp'
 
     filename = 'wepp.nodb'
@@ -1007,41 +1009,51 @@ class Wepp(NoDbBase):
 
     @property
     def job_id(self) -> Optional[str]:
-        raw_value = getattr(self, "_job_id", None)
-        if raw_value is None:
-            return None
-        normalized = str(raw_value).strip()
-        if not normalized:
-            return None
-        return normalized
+        return self._normalize_job_hint_value(getattr(self, "_job_id", None))
 
     @job_id.setter
     @nodb_setter
     def job_id(self, value: Optional[str]) -> None:
-        if value is None:
-            self._job_id = None
-            return
-        normalized = str(value).strip()
-        self._job_id = normalized if normalized else None
+        self._set_job_hint_values(job_id=value)
 
     @property
     def job_key(self) -> Optional[str]:
-        raw_value = getattr(self, "_job_key", None)
-        if raw_value is None:
-            return None
-        normalized = str(raw_value).strip()
-        if not normalized:
-            return None
-        return normalized
+        return self._normalize_job_hint_value(getattr(self, "_job_key", None))
 
     @job_key.setter
     @nodb_setter
     def job_key(self, value: Optional[str]) -> None:
+        self._set_job_hint_values(job_key=value)
+
+    @staticmethod
+    def _normalize_job_hint_value(value: Optional[str]) -> Optional[str]:
         if value is None:
-            self._job_key = None
-            return
+            return None
         normalized = str(value).strip()
-        self._job_key = normalized if normalized else None
+        return normalized if normalized else None
+
+    def _set_job_hint_values(
+        self,
+        *,
+        job_id: Any = _JOB_HINT_UNSET,
+        job_key: Any = _JOB_HINT_UNSET,
+    ) -> None:
+        if job_id is not self._JOB_HINT_UNSET:
+            self._job_id = self._normalize_job_hint_value(job_id)
+        if job_key is not self._JOB_HINT_UNSET:
+            self._job_key = self._normalize_job_hint_value(job_key)
+
+    def persist_job_hint(
+        self,
+        *,
+        job_id: Any = _JOB_HINT_UNSET,
+        job_key: Any = _JOB_HINT_UNSET,
+    ) -> None:
+        if job_id is self._JOB_HINT_UNSET and job_key is self._JOB_HINT_UNSET:
+            return
+
+        with self.locked():
+            self._set_job_hint_values(job_id=job_id, job_key=job_key)
 
     def init_bootstrap(self) -> None:
         _WEPP_BOOTSTRAP_SERVICE.init_bootstrap(self)

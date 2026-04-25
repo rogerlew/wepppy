@@ -566,6 +566,67 @@ class Watershed(WatershedOperationsMixin, WatershedLookupMixin, NoDbBase):
     def clip_hillslope_length(self, value: float) -> None:
         self._clip_hillslope_length = value
 
+    def apply_wepp_run_payload_updates(
+        self,
+        *,
+        clip_hillslopes: Optional[bool] = None,
+        clip_hillslope_length: Optional[float] = None,
+    ) -> None:
+        """Apply WEPP payload watershed mutations in a single lock scope."""
+
+        if clip_hillslopes is None and clip_hillslope_length is None:
+            return
+
+        with self.locked():
+            if clip_hillslopes is not None:
+                self._clip_hillslopes = bool(clip_hillslopes)
+            if clip_hillslope_length is not None:
+                self._clip_hillslope_length = clip_hillslope_length
+
+    def apply_build_subcatchment_updates(
+        self,
+        *,
+        clip_hillslopes: Optional[bool] = None,
+        walk_flowpaths: Optional[bool] = None,
+        clip_hillslope_length: Optional[float] = None,
+        mofe_target_length: Optional[float] = None,
+        mofe_buffer: Optional[bool] = None,
+        mofe_buffer_length: Optional[float] = None,
+        mofe_max_ofes: Optional[int] = None,
+        bieger2015_widths: Optional[bool] = None,
+    ) -> None:
+        """Apply build-subcatchments updates in one lock/dump cycle."""
+
+        if (
+            clip_hillslopes is None
+            and walk_flowpaths is None
+            and clip_hillslope_length is None
+            and mofe_target_length is None
+            and mofe_buffer is None
+            and mofe_buffer_length is None
+            and mofe_max_ofes is None
+            and bieger2015_widths is None
+        ):
+            return
+
+        with self.locked():
+            if clip_hillslopes is not None:
+                self._clip_hillslopes = bool(clip_hillslopes)
+            if walk_flowpaths is not None:
+                self._walk_flowpaths = bool(walk_flowpaths)
+            if clip_hillslope_length is not None:
+                self._clip_hillslope_length = float(clip_hillslope_length)
+            if mofe_target_length is not None:
+                self._mofe_target_length = float(mofe_target_length)
+            if mofe_buffer is not None:
+                self._mofe_buffer = bool(mofe_buffer)
+            if mofe_buffer_length is not None:
+                self._mofe_buffer_length = float(mofe_buffer_length)
+            if mofe_max_ofes is not None:
+                self._mofe_max_ofes = min(19, max(1, int(mofe_max_ofes)))
+            if bieger2015_widths is not None:
+                self._bieger2015_widths = bool(bieger2015_widths)
+
     @property
     def bieger2015_widths(self) -> bool:
         return getattr(self, "_bieger2015_widths", False)

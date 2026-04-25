@@ -369,12 +369,10 @@ async def upload_sbs_map(batch_name: str, request: Request) -> JSONResponse:
         metadata["uploaded_by"] = str(uploader)
 
     try:
-        batch_runner.sbs_map = relative_path
-        batch_runner.sbs_map_metadata = metadata
+        batch_runner.apply_sbs_resource_update(sbs_map=relative_path, metadata=metadata)
     except NoDbAlreadyLockedError:
         clear_locks(batch_runner.runid)
-        batch_runner.sbs_map = relative_path
-        batch_runner.sbs_map_metadata = metadata
+        batch_runner.apply_sbs_resource_update(sbs_map=relative_path, metadata=metadata)
 
     snapshot = _build_batch_runner_snapshot(batch_runner)
     resource_payload = snapshot.get("resources", {}).get("sbs_map")

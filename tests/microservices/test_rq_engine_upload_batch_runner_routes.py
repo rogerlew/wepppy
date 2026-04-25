@@ -6,6 +6,7 @@ TestClient = pytest.importorskip("fastapi.testclient").TestClient
 
 import wepppy.microservices.rq_engine as rq_engine
 from wepppy.microservices.rq_engine import upload_batch_runner_routes
+from wepppy.nodb.base import NoDbAlreadyLockedError
 
 
 pytestmark = pytest.mark.microservice
@@ -15,12 +16,14 @@ class DummyBatchRunner:
     def __init__(self, wd: Path) -> None:
         self.batch_name = "demo"
         self.base_config = "cfg"
+        self.runid = "batch;;demo"
         self.wd = str(wd)
         self.resources_dir = str(wd / "resources")
         self.run_directives = {}
         self.geojson_state = None
         self.runid_template_state = None
         self._sbs_resource = None
+        self.sbs_grouped_update_calls: list[tuple[str | None, dict | None]] = []
 
     def sbs_resource_state(self):
         return self._sbs_resource
@@ -28,13 +31,20 @@ class DummyBatchRunner:
     def register_geojson(self, collection, metadata=None) -> None:
         self.geojson_state = collection.analysis_results
 
+    def apply_sbs_resource_update(self, *, sbs_map: str | None = None, metadata: dict | None = None) -> None:
+        self.sbs_grouped_update_calls.append((sbs_map, metadata))
+        resource = dict(metadata or {})
+        if sbs_map is not None:
+            resource["relative_path"] = sbs_map
+        self._sbs_resource = resource
+
     @property
     def sbs_map(self) -> str | None:
         return None
 
     @sbs_map.setter
     def sbs_map(self, value: str) -> None:
-        self._sbs_resource = {"relative_path": value}
+        raise AssertionError("Legacy sbs_map setter path should not be used")
 
     @property
     def sbs_map_metadata(self) -> dict | None:
@@ -42,7 +52,7 @@ class DummyBatchRunner:
 
     @sbs_map_metadata.setter
     def sbs_map_metadata(self, value: dict) -> None:
-        return None
+        raise AssertionError("Legacy sbs_map_metadata setter path should not be used")
 
 
 class DummyCollection:
@@ -184,6 +194,67 @@ def test_upload_sbs_map_succeeds(monkeypatch: pytest.MonkeyPatch, tmp_path: Path
     assert response.status_code == 200
     payload = response.json()
     assert payload["message"] == "SBS map uploaded successfully."
+    assert len(batch_runner.sbs_grouped_update_calls) == 1
+    update_path, update_metadata = batch_runner.sbs_grouped_update_calls[0]
+    assert update_path == "resources/map.tif"
+    assert update_metadata is not None
+    assert update_metadata["resource_type"] == "sbs_map"
+    assert update_metadata["filename"] == "map.tif"
+    assert payload["resource"]["relative_path"] == "resources/map.tif"
+
+
+def test_upload_sbs_map_retries_grouped_update_after_lock_clear(
+    monkeypatch: pytest.MonkeyPatch,
+    tmp_path: Path,
+) -> None:
+    batch_runner = DummyBatchRunner(tmp_path)
+
+    monkeypatch.setattr(
+        upload_batch_runner_routes,
+        "require_jwt",
+        lambda request, required_scopes=None: {"roles": ["Admin"]},
+    )
+    monkeypatch.setattr(upload_batch_runner_routes, "_batch_runner_feature_enabled", lambda: True)
+    monkeypatch.setattr(
+        upload_batch_runner_routes.BatchRunner,
+        "getInstanceFromBatchName",
+        lambda batch_name: batch_runner,
+    )
+    monkeypatch.setattr(upload_batch_runner_routes, "sbs_map_sanity_check", lambda path: (0, ""))
+    monkeypatch.setattr(upload_batch_runner_routes, "secure_filename", lambda name: name)
+
+    clear_calls: list[str] = []
+    monkeypatch.setattr(
+        upload_batch_runner_routes,
+        "clear_locks",
+        lambda runid: clear_calls.append(runid),
+    )
+
+    grouped_call_count = {"count": 0}
+    original_update = batch_runner.apply_sbs_resource_update
+
+    def flaky_grouped_update(*, sbs_map: str | None = None, metadata: dict | None = None) -> None:
+        grouped_call_count["count"] += 1
+        if grouped_call_count["count"] == 1:
+            raise NoDbAlreadyLockedError()
+        original_update(sbs_map=sbs_map, metadata=metadata)
+
+    monkeypatch.setattr(batch_runner, "apply_sbs_resource_update", flaky_grouped_update)
+
+    with TestClient(rq_engine.app) as client:
+        response = client.post(
+            "/api/batch/_/demo/upload-sbs-map",
+            files={"sbs_map": ("map.tif", b"data")},
+            headers={"Authorization": "Bearer token"},
+        )
+
+    assert response.status_code == 200
+    payload = response.json()
+    assert payload["message"] == "SBS map uploaded successfully."
+    assert payload["resource"]["relative_path"] == "resources/map.tif"
+    assert payload["resource"]["resource_type"] == "sbs_map"
+    assert grouped_call_count["count"] == 2
+    assert clear_calls == [batch_runner.runid]
 
 
 def test_upload_sbs_map_rejects_oversize_payload(

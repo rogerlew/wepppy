@@ -75,6 +75,34 @@ def _stub_prep(monkeypatch: pytest.MonkeyPatch, tasks: list[TaskEnum]) -> None:
     monkeypatch.setattr(bootstrap_routes.RedisPrep, "getInstance", lambda wd: DummyPrep())
 
 
+def _make_dummy_bootstrap_wepp(*, bootstrap_enabled: bool = True, persist_error: bool = False):
+    class DummyWepp:
+        def __init__(self) -> None:
+            self.bootstrap_enabled = bootstrap_enabled
+            self._job_id = None
+            self._job_key = None
+            self.persist_job_hint_calls: list[dict[str, str]] = []
+
+        @property
+        def job_id(self):
+            return self._job_id
+
+        @property
+        def job_key(self):
+            return self._job_key
+
+        def persist_job_hint(self, *, job_id: str, job_key: str) -> None:
+            if persist_error:
+                raise RuntimeError("nodb write failed")
+            self.persist_job_hint_calls.append({"job_id": job_id, "job_key": job_key})
+            normalized_job_id = str(job_id).strip()
+            normalized_job_key = str(job_key).strip()
+            self._job_id = normalized_job_id if normalized_job_id else None
+            self._job_key = normalized_job_key if normalized_job_key else None
+
+    return DummyWepp()
+
+
 def _issue_rq_token(
     monkeypatch: pytest.MonkeyPatch,
     *,
@@ -389,7 +417,7 @@ def test_bootstrap_run_wepp_npprep_enqueues(monkeypatch: pytest.MonkeyPatch) -> 
     tasks: list[TaskEnum] = []
     _stub_prep(monkeypatch, tasks)
 
-    dummy_wepp = type("W", (), {"bootstrap_enabled": True, "job_id": None, "job_key": None})()
+    dummy_wepp = _make_dummy_bootstrap_wepp()
     monkeypatch.setattr(bootstrap_routes.Wepp, "getInstance", lambda wd: dummy_wepp)
     monkeypatch.setattr(bootstrap_routes, "get_wd", lambda runid, prefer_active=False: "/tmp/run")
 
@@ -406,6 +434,9 @@ def test_bootstrap_run_wepp_npprep_enqueues(monkeypatch: pytest.MonkeyPatch) -> 
     }
     assert dummy_wepp.job_id == "job-77"
     assert dummy_wepp.job_key == "run_wepp_noprep_rq"
+    assert dummy_wepp.persist_job_hint_calls == [
+        {"job_id": "job-77", "job_key": "run_wepp_noprep_rq"}
+    ]
 
 
 @pytest.mark.parametrize(
@@ -426,7 +457,7 @@ def test_bootstrap_wepp_noprep_persists_job_id_to_wepp_nodb(
     tasks: list[TaskEnum] = []
     _stub_prep(monkeypatch, tasks)
 
-    dummy_wepp = type("W", (), {"bootstrap_enabled": True, "job_id": None, "job_key": None})()
+    dummy_wepp = _make_dummy_bootstrap_wepp()
     monkeypatch.setattr(bootstrap_routes.Wepp, "getInstance", lambda wd: dummy_wepp)
     monkeypatch.setattr(bootstrap_routes, "get_wd", lambda runid, prefer_active=False: "/tmp/run")
 
@@ -437,6 +468,7 @@ def test_bootstrap_wepp_noprep_persists_job_id_to_wepp_nodb(
     assert response.json()["job_id"] == job_id
     assert dummy_wepp.job_id == job_id
     assert dummy_wepp.job_key == job_key
+    assert dummy_wepp.persist_job_hint_calls == [{"job_id": job_id, "job_key": job_key}]
 
 
 def test_bootstrap_run_swat_noprep_persists_job_hint_to_wepp_nodb(
@@ -446,7 +478,7 @@ def test_bootstrap_run_swat_noprep_persists_job_hint_to_wepp_nodb(
     _stub_queue(monkeypatch, job_id="job-swat-501")
     _stub_prep(monkeypatch, [])
 
-    dummy_wepp = type("W", (), {"bootstrap_enabled": True, "job_id": None, "job_key": None})()
+    dummy_wepp = _make_dummy_bootstrap_wepp()
     monkeypatch.setattr(bootstrap_routes.Wepp, "getInstance", lambda wd: dummy_wepp)
     monkeypatch.setattr(bootstrap_routes, "get_wd", lambda runid, prefer_active=False: "/tmp/run")
 
@@ -457,6 +489,9 @@ def test_bootstrap_run_swat_noprep_persists_job_hint_to_wepp_nodb(
     assert response.json() == {"job_id": "job-swat-501"}
     assert dummy_wepp.job_id == "job-swat-501"
     assert dummy_wepp.job_key == "run_swat_noprep_rq"
+    assert dummy_wepp.persist_job_hint_calls == [
+        {"job_id": "job-swat-501", "job_key": "run_swat_noprep_rq"}
+    ]
 
 
 def test_bootstrap_run_wepp_noprep_job_hint_persist_failure_after_enqueue_returns_job_id(
@@ -466,26 +501,27 @@ def test_bootstrap_run_wepp_noprep_job_hint_persist_failure_after_enqueue_return
     _stub_queue(monkeypatch, job_id="job-bootstrap-hint-failed")
     _stub_prep(monkeypatch, [])
 
-    class DummyWepp:
-        bootstrap_enabled = True
-        job_key = None
-
-        @property
-        def job_id(self):
-            return None
-
-        @job_id.setter
-        def job_id(self, value):
-            raise RuntimeError("nodb write failed")
-
-    monkeypatch.setattr(bootstrap_routes.Wepp, "getInstance", lambda wd: DummyWepp())
+    monkeypatch.setattr(
+        bootstrap_routes.Wepp,
+        "getInstance",
+        lambda wd: _make_dummy_bootstrap_wepp(persist_error=True),
+    )
     monkeypatch.setattr(bootstrap_routes, "get_wd", lambda runid, prefer_active=False: "/tmp/run")
+    exception_calls: list[tuple[tuple[object, ...], dict[str, object]]] = []
+    monkeypatch.setattr(
+        bootstrap_routes.logger,
+        "exception",
+        lambda *args, **kwargs: exception_calls.append((args, kwargs)),
+    )
 
     with TestClient(rq_engine.app) as client:
         response = client.post("/api/runs/run-1/cfg/run-wepp-npprep", json={})
 
     assert response.status_code == 200
     assert response.json() == {"job_id": "job-bootstrap-hint-failed"}
+    assert len(exception_calls) == 1
+    args, _kwargs = exception_calls[0]
+    assert args == ("rq-engine bootstrap enqueue failed to persist NoDb WEPP job hint",)
 
 
 def test_bootstrap_run_wepp_npprep_sparse_payload_preserves_existing_booleans(
@@ -498,24 +534,98 @@ def test_bootstrap_run_wepp_npprep_sparse_payload_preserves_existing_booleans(
     _stub_prep(monkeypatch, tasks)
 
     class DummySoils:
-        clip_soils = True
-        clip_soils_depth = 300
-        clip_soils_minimum = True
-        clip_soils_minimum_depth = 120.0
-        rosetta_wc_fc_from_disturbed_bd_override = True
-        initial_sat = None
+        def __init__(self) -> None:
+            self.clip_soils = True
+            self.clip_soils_depth = 300
+            self.clip_soils_minimum = True
+            self.clip_soils_minimum_depth = 120.0
+            self.rosetta_wc_fc_from_disturbed_bd_override = True
+            self.initial_sat = None
+            self.grouped_update_calls: list[dict[str, object | None]] = []
+
+        def apply_wepp_run_payload_updates(
+            self,
+            *,
+            clip_soils=None,
+            clip_soils_depth=None,
+            clip_soils_minimum=None,
+            clip_soils_minimum_depth=None,
+            rosetta_wc_fc_from_disturbed_bd_override=None,
+            initial_sat=None,
+        ) -> None:
+            has_updates = any(
+                value is not None
+                for value in (
+                    clip_soils,
+                    clip_soils_depth,
+                    clip_soils_minimum,
+                    clip_soils_minimum_depth,
+                    rosetta_wc_fc_from_disturbed_bd_override,
+                    initial_sat,
+                )
+            )
+            if not has_updates:
+                return
+            self.grouped_update_calls.append(
+                {
+                    "clip_soils": clip_soils,
+                    "clip_soils_depth": clip_soils_depth,
+                    "clip_soils_minimum": clip_soils_minimum,
+                    "clip_soils_minimum_depth": clip_soils_minimum_depth,
+                    "rosetta_wc_fc_from_disturbed_bd_override": rosetta_wc_fc_from_disturbed_bd_override,
+                    "initial_sat": initial_sat,
+                }
+            )
+            if clip_soils is not None:
+                self.clip_soils = bool(clip_soils)
+            if clip_soils_depth is not None:
+                self.clip_soils_depth = clip_soils_depth
+            if clip_soils_minimum is not None:
+                self.clip_soils_minimum = bool(clip_soils_minimum)
+            if clip_soils_minimum_depth is not None:
+                self.clip_soils_minimum_depth = clip_soils_minimum_depth
+            if rosetta_wc_fc_from_disturbed_bd_override is not None:
+                self.rosetta_wc_fc_from_disturbed_bd_override = bool(
+                    rosetta_wc_fc_from_disturbed_bd_override
+                )
+            if initial_sat is not None:
+                self.initial_sat = initial_sat
 
     class DummyWatershed:
-        clip_hillslopes = True
-        clip_hillslope_length = 222
+        def __init__(self) -> None:
+            self.clip_hillslopes = True
+            self.clip_hillslope_length = 222
+            self.grouped_update_calls: list[dict[str, object | None]] = []
+
+        def apply_wepp_run_payload_updates(
+            self,
+            *,
+            clip_hillslopes=None,
+            clip_hillslope_length=None,
+        ) -> None:
+            if clip_hillslopes is None and clip_hillslope_length is None:
+                return
+            self.grouped_update_calls.append(
+                {
+                    "clip_hillslopes": clip_hillslopes,
+                    "clip_hillslope_length": clip_hillslope_length,
+                }
+            )
+            if clip_hillslopes is not None:
+                self.clip_hillslopes = bool(clip_hillslopes)
+            if clip_hillslope_length is not None:
+                self.clip_hillslope_length = clip_hillslope_length
 
     class DummyWepp:
-        bootstrap_enabled = True
-        dss_excluded_channel_orders = [1, 2]
-        _prep_details_on_run_completion = True
-        _arc_export_on_run_completion = True
-        _legacy_arc_export_on_run_completion = True
-        _dss_export_on_run_completion = True
+        def __init__(self) -> None:
+            self.bootstrap_enabled = True
+            self.dss_excluded_channel_orders = [1, 2]
+            self._prep_details_on_run_completion = True
+            self._arc_export_on_run_completion = True
+            self._legacy_arc_export_on_run_completion = True
+            self._dss_export_on_run_completion = True
+            self._job_id = None
+            self._job_key = None
 
         def parse_inputs(self, payload) -> None:
             return None
@@ -523,6 +633,20 @@ def test_bootstrap_run_wepp_npprep_sparse_payload_preserves_existing_booleans(
         @contextlib.contextmanager
         def locked(self):
             yield self
+
+        @property
+        def job_id(self):
+            return self._job_id
+
+        @property
+        def job_key(self):
+            return self._job_key
+
+        def persist_job_hint(self, *, job_id: str, job_key: str) -> None:
+            normalized_job_id = str(job_id).strip()
+            normalized_job_key = str(job_key).strip()
+            self._job_id = normalized_job_id if normalized_job_id else None
+            self._job_key = normalized_job_key if normalized_job_key else None
 
     dummy_soils = DummySoils()
     dummy_watershed = DummyWatershed()
@@ -590,6 +714,30 @@ def test_bootstrap_run_wepp_npprep_sparse_payload_preserves_existing_booleans(
     assert dummy_wepp._arc_export_on_run_completion is False
     assert dummy_wepp._legacy_arc_export_on_run_completion is False
     assert dummy_wepp._dss_export_on_run_completion is False
+    assert dummy_soils.grouped_update_calls == [
+        {
+            "clip_soils": None,
+            "clip_soils_depth": None,
+            "clip_soils_minimum": None,
+            "clip_soils_minimum_depth": None,
+            "rosetta_wc_fc_from_disturbed_bd_override": None,
+            "initial_sat": 0.2,
+        },
+        {
+            "clip_soils": False,
+            "clip_soils_depth": None,
+            "clip_soils_minimum": False,
+            "clip_soils_minimum_depth": None,
+            "rosetta_wc_fc_from_disturbed_bd_override": False,
+            "initial_sat": None,
+        },
+    ]
+    assert dummy_watershed.grouped_update_calls == [
+        {
+            "clip_hillslopes": False,
+            "clip_hillslope_length": None,
+        }
+    ]
 
 
 def test_bootstrap_run_swat_noprep_rejects_when_disabled(monkeypatch: pytest.MonkeyPatch) -> None:
@@ -622,7 +770,7 @@ def test_bootstrap_wepp_noprep_returns_409_when_singleflight_conflict(
     tasks: list[TaskEnum] = []
     _stub_prep(monkeypatch, tasks)
 
-    monkeypatch.setattr(bootstrap_routes.Wepp, "getInstance", lambda wd: type("W", (), {"bootstrap_enabled": True})())
+    monkeypatch.setattr(bootstrap_routes.Wepp, "getInstance", lambda wd: _make_dummy_bootstrap_wepp())
     monkeypatch.setattr(bootstrap_routes, "get_wd", lambda runid, prefer_active=False: "/tmp/run")
     monkeypatch.setattr(bootstrap_routes, "acquire_wepp_submit_lock", lambda _runid, _owner: True)
     monkeypatch.setattr(bootstrap_routes, "release_wepp_submit_lock", lambda _runid, _owner: None)
@@ -659,7 +807,7 @@ def test_bootstrap_wepp_noprep_returns_409_when_submit_lock_busy(
     tasks: list[TaskEnum] = []
     _stub_prep(monkeypatch, tasks)
 
-    monkeypatch.setattr(bootstrap_routes.Wepp, "getInstance", lambda wd: type("W", (), {"bootstrap_enabled": True})())
+    monkeypatch.setattr(bootstrap_routes.Wepp, "getInstance", lambda wd: _make_dummy_bootstrap_wepp())
     monkeypatch.setattr(bootstrap_routes, "get_wd", lambda runid, prefer_active=False: "/tmp/run")
     monkeypatch.setattr(bootstrap_routes, "acquire_wepp_submit_lock", lambda _runid, _owner: False)
 
@@ -680,7 +828,7 @@ def test_bootstrap_noprep_release_lock_failure_after_enqueue_returns_job_id(
     tasks: list[TaskEnum] = []
     _stub_prep(monkeypatch, tasks)
 
-    monkeypatch.setattr(bootstrap_routes.Wepp, "getInstance", lambda wd: type("W", (), {"bootstrap_enabled": True})())
+    monkeypatch.setattr(bootstrap_routes.Wepp, "getInstance", lambda wd: _make_dummy_bootstrap_wepp())
     monkeypatch.setattr(bootstrap_routes, "get_wd", lambda runid, prefer_active=False: "/tmp/run")
     monkeypatch.setattr(
         bootstrap_routes,

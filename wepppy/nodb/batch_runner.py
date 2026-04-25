@@ -46,6 +46,8 @@ __all__ = [
     'BatchRunner',
 ]
 
+_SBS_UPDATE_UNSET = object()
+
 
 def _coerce_bool(value: Any) -> bool:
     if isinstance(value, bool):
@@ -648,6 +650,22 @@ class BatchRunner(NoDbBase):
     @nodb_setter
     def sbs_map_metadata(self, value: Optional[Dict[str, Any]]) -> None:
         self._sbs_map_metadata = deepcopy(value) if value is not None else None
+
+    def apply_sbs_resource_update(
+        self,
+        *,
+        sbs_map: Any = _SBS_UPDATE_UNSET,
+        metadata: Any = _SBS_UPDATE_UNSET,
+    ) -> None:
+        """Apply SBS map path + metadata in one lock scope."""
+        if sbs_map is _SBS_UPDATE_UNSET and metadata is _SBS_UPDATE_UNSET:
+            return
+
+        with self.locked():
+            if sbs_map is not _SBS_UPDATE_UNSET:
+                self._sbs_map = sbs_map
+            if metadata is not _SBS_UPDATE_UNSET:
+                self._sbs_map_metadata = deepcopy(metadata) if metadata is not None else None
 
     @property
     def base_wd(self) -> str:

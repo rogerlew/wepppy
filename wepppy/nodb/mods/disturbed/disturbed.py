@@ -629,20 +629,43 @@ class Disturbed(NoDbBase):
     @property
     def burn_shrubs(self) -> bool:
         return getattr(self, '_burn_shrubs', True)
+
+    def _set_burn_shrubs_value(self, value: bool) -> None:
+        self._burn_shrubs = bool(value)
     
     @burn_shrubs.setter
     @nodb_setter
     def burn_shrubs(self, value: bool) -> None:
-        self._burn_shrubs = bool(value)
+        self._set_burn_shrubs_value(value)
 
     @property
     def burn_grass(self) -> bool:
         return getattr(self, '_burn_grass', False)
+
+    def _set_burn_grass_value(self, value: bool) -> None:
+        self._burn_grass = bool(value)
     
     @burn_grass.setter
     @nodb_setter
     def burn_grass(self, value: bool) -> None:
-        self._burn_grass = bool(value)
+        self._set_burn_grass_value(value)
+
+    def apply_build_landuse_updates(
+        self,
+        *,
+        burn_shrubs: Optional[bool] = None,
+        burn_grass: Optional[bool] = None,
+    ) -> None:
+        """Apply build-landuse route updates in one lock scope."""
+
+        if burn_shrubs is None and burn_grass is None:
+            return
+
+        with self.locked():
+            if burn_shrubs is not None:
+                self._set_burn_shrubs_value(burn_shrubs)
+            if burn_grass is not None:
+                self._set_burn_grass_value(burn_grass)
 
     @property
     def fire_date(self) -> Optional[str]:

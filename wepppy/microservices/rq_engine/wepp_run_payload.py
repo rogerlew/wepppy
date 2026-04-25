@@ -123,7 +123,7 @@ def _pop_scalar(mapping: dict[str, Any], key: str, default: Any = None) -> Any:
 
 
 def _parse_int(value: Any) -> int | None:
-    if value in (None, "", False):
+    if isinstance(value, bool) or value in (None, ""):
         return None
     try:
         return int(value)
@@ -132,7 +132,7 @@ def _parse_int(value: Any) -> int | None:
 
 
 def _parse_float(value: Any) -> float | None:
-    if value in (None, "", False):
+    if isinstance(value, bool) or value in (None, ""):
         return None
     try:
         return float(value)
@@ -170,31 +170,48 @@ def apply_wepp_run_payload(
     soils = soils_cls.getInstance(wd)
     watershed = watershed_cls.getInstance(wd)
 
+    clip_soils_update: bool | None = None
+    clip_soils_depth_update: int | None = None
+    clip_soils_minimum_update: bool | None = None
+    clip_soils_minimum_depth_update: float | None = None
+    rosetta_wc_fc_from_disturbed_bd_override_update: bool | None = None
+    initial_sat_update: float | None = None
+    clip_hillslopes_update: bool | None = None
+    clip_hillslope_length_update: int | None = None
+
     clip_soils = bool(getattr(soils, "clip_soils", False))
     if "clip_soils" in controller_payload:
         clip_soils = bool(_pop_scalar(controller_payload, "clip_soils", False))
-        soils.clip_soils = clip_soils
+        clip_soils_update = clip_soils
     if "rosetta_wc_fc_from_disturbed_bd_override" in controller_payload:
-        soils.rosetta_wc_fc_from_disturbed_bd_override = bool(
+        rosetta_wc_fc_from_disturbed_bd_override_update = bool(
             _pop_scalar(controller_payload, "rosetta_wc_fc_from_disturbed_bd_override", False)
         )
 
     clip_soils_depth = _parse_int(_pop_scalar(controller_payload, "clip_soils_depth"))
     if clip_soils_depth is not None:
-        soils.clip_soils_depth = clip_soils_depth
+        clip_soils_depth_update = clip_soils_depth
 
     clip_soils_minimum = bool(getattr(soils, "clip_soils_minimum", False))
     if "clip_soils_minimum" in controller_payload:
         clip_soils_minimum = bool(_pop_scalar(controller_payload, "clip_soils_minimum", False))
-        soils.clip_soils_minimum = clip_soils_minimum
+        clip_soils_minimum_update = clip_soils_minimum
 
     clip_soils_minimum_depth = _parse_float(_pop_scalar(controller_payload, "clip_soils_minimum_depth"))
     if clip_soils_minimum_depth is not None:
-        soils.clip_soils_minimum_depth = clip_soils_minimum_depth
+        clip_soils_minimum_depth_update = clip_soils_minimum_depth
 
     if clip_soils and clip_soils_minimum:
-        max_depth = float(soils.clip_soils_depth)
-        min_depth = float(soils.clip_soils_minimum_depth)
+        max_depth = float(
+            clip_soils_depth_update
+            if clip_soils_depth_update is not None
+            else soils.clip_soils_depth
+        )
+        min_depth = float(
+            clip_soils_minimum_depth_update
+            if clip_soils_minimum_depth_update is not None
+            else soils.clip_soils_minimum_depth
+        )
         if min_depth > max_depth:
             raise WeppRunPayloadValidationError(
                 "Invalid soil depth clipping range",
@@ -206,7 +223,7 @@ def apply_wepp_run_payload(
             )
 
     if "clip_hillslopes" in controller_payload:
-        watershed.clip_hillslopes = bool(_pop_scalar(controller_payload, "clip_hillslopes", False))
+        clip_hillslopes_update = bool(_pop_scalar(controller_payload, "clip_hillslopes", False))
 
     # UI currently submits `hillslope_clip_length`; accept the historical
     # `clip_hillslope_length` key for backward compatibility.
@@ -216,7 +233,7 @@ def apply_wepp_run_payload(
 
     clip_hillslope_length = _parse_int(clip_hillslope_length_raw)
     if clip_hillslope_length is not None:
-        watershed.clip_hillslope_length = clip_hillslope_length
+        clip_hillslope_length_update = clip_hillslope_length
 
     routine_overrides: dict[str, bool] = {}
     for payload_key, attr_name in _ROUTINE_CHECKBOX_ATTRS.items():
@@ -228,16 +245,11 @@ def apply_wepp_run_payload(
 
     initial_sat = _parse_float(_pop_scalar(controller_payload, "initial_sat"))
     if initial_sat is not None:
-        soils.initial_sat = initial_sat
+        initial_sat_update = initial_sat
 
     reveg_scenario = _pop_scalar(controller_payload, "reveg_scenario", None)
     if isinstance(reveg_scenario, str):
         reveg_scenario = reveg_scenario.strip()
-    if reveg_scenario is not None:
-        from wepppy.nodb.mods.revegetation import Revegetation
-
-        reveg = Revegetation.getInstance(wd)
-        reveg.load_cover_transform(reveg_scenario)
 
     prep_details_on_run_completion = bool(
         getattr(
@@ -302,6 +314,24 @@ def apply_wepp_run_payload(
         controller_payload,
         ron_cls=ron_cls,
         swat_cls=swat_cls,
+    )
+    if reveg_scenario is not None:
+        from wepppy.nodb.mods.revegetation import Revegetation
+
+        reveg = Revegetation.getInstance(wd)
+        reveg.load_cover_transform(reveg_scenario)
+
+    soils.apply_wepp_run_payload_updates(
+        clip_soils=clip_soils_update,
+        clip_soils_depth=clip_soils_depth_update,
+        clip_soils_minimum=clip_soils_minimum_update,
+        clip_soils_minimum_depth=clip_soils_minimum_depth_update,
+        rosetta_wc_fc_from_disturbed_bd_override=rosetta_wc_fc_from_disturbed_bd_override_update,
+        initial_sat=initial_sat_update,
+    )
+    watershed.apply_wepp_run_payload_updates(
+        clip_hillslopes=clip_hillslopes_update,
+        clip_hillslope_length=clip_hillslope_length_update,
     )
 
     with wepp.locked():

@@ -79,6 +79,31 @@ Feedback mechanisms:
 
 Work packages that are scoped but not yet started. Dependencies and prerequisites should be noted.
 
+### NoDb Atomicity + Observability Follow-Ups (RQ Engine)
+**Proposed**: 2026-04-25  
+**Size**: Medium-High (2-4 focused sessions)  
+**Priority**: High  
+**Owner**: Codex  
+**Link**: [docs/work-packages/20260425_nodb_atomicity_observability_followups_a/](docs/work-packages/20260425_nodb_atomicity_observability_followups_a/)  
+**Description**: Follow-up package to close remaining post-refactor gaps: cross-controller failure atomicity, queue-graph baseline drift, WEPP hint persistence concurrency/error boundary hardening, lock/dump-efficiency observability guardrails, and test maintainability cleanup.
+
+**Scope**:
+- Implement scoped cross-controller failure-atomicity strategy for grouped rq-engine mutation flows
+- Resolve `wctl check-rq-graph` drift baseline and restore clean signal
+- Harden and test post-enqueue WEPP job-hint persistence fault paths
+- Add lock/dump-efficiency observability guards for scoped paths
+- Reduce test maintenance debt in touched rq-engine suites
+
+**Dependencies**:
+- Completed package: `20260425_nodb_lock_dump_efficiency_refactor`
+
+**Next Steps**:
+1. Execute Milestone 1 atomicity design/implementation.
+2. Close queue-graph baseline drift and validate.
+3. Complete guard + maintainability milestones and package closure gates.
+
+---
+
 ### Deprecate and Remove TauDEM Backend
 **Proposed**: 2025-10-27  
 **Size**: Medium (3-5 days)  
@@ -271,6 +296,12 @@ Currently active work packages. Limit to 2-4 packages to maintain focus.
 ## ✅ Done
 
 Recently completed work packages. Archived immediately upon completion.
+
+### NoDb Lock/Dump Efficiency Refactor (RQ Engine) (2026-04-25)
+**Status**: ✅ **COMPLETE**  
+**Link**: [docs/work-packages/20260425_nodb_lock_dump_efficiency_refactor/](docs/work-packages/20260425_nodb_lock_dump_efficiency_refactor/)  
+**Lifecycle**: Backlog -> In Progress -> Done (2026-04-25)  
+**Summary**: Closed end-to-end with all scoped rq-engine lock/dump hotspots converted to grouped single-lock mutation flows: `wepp_run_payload.py`, `watershed_routes.py`, `landuse_routes.py`, `upload_batch_runner_routes.py`, `wepp_routes.py`, and `bootstrap_routes.py`, with required NoDb helper additions in `Soils`, `Watershed`, `Landuse`, `Disturbed`, `BatchRunner`, and `Wepp.persist_job_hint(...)`. Per-milestone `reviewer`/`qa_reviewer`/`security_reviewer` loops were executed and all Medium findings were remediated before progression; remaining findings are Low-only residual notes. Targeted validation passed across scoped suites (`198 passed`), and `wctl check-rq-graph` was executed with documented pre-existing drift while no queue-wiring files were changed in this package. ExecPlan was archived under `prompts/completed/`.
 
 ### Landuse/Disturbed MOFE Pipeline Optimization (`apprehensive-caw`) (2026-04-25)
 **Status**: ✅ **COMPLETE**  
