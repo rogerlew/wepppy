@@ -511,6 +511,58 @@ def test_build_climate_rq_applies_enqueued_payload_before_build(
     assert observed_calls[1] == ("build", None)
 
 
+def test_build_climate_rq_warns_when_observed_start_year_is_emptied(
+    monkeypatch: pytest.MonkeyPatch,
+    tmp_path: Path,
+) -> None:
+    _run_wd, _set_archive_roots, _call_roots = _stub_rq_context(monkeypatch, tmp_path)
+    warning_calls: list[tuple[str, object]] = []
+
+    class DummyClimate:
+        _observed_start_year = ""
+        _climate_mode = 9
+
+        def parse_inputs(self, _payload) -> None:
+            # Reproduce the original fault signature: payload is non-empty
+            # but climate state still contains an empty observed start year.
+            self._observed_start_year = ""
+
+        def build(self) -> None:
+            return None
+
+    monkeypatch.setattr(project_rq.Climate, "getInstance", lambda _wd: DummyClimate())
+    monkeypatch.setattr(
+        project_rq,
+        "get_current_job",
+        lambda: SimpleNamespace(
+            id="job-warn",
+            meta={
+                "build_payload": {
+                    "climate_mode": 9,
+                    "observed_start_year": "1985",
+                    "observed_end_year": "2024",
+                }
+            },
+        ),
+    )
+
+    def _capture_warning(message: str, *args, **kwargs) -> None:
+        warning_calls.append((message, kwargs.get("extra")))
+
+    monkeypatch.setattr(project_rq._logger, "warning", _capture_warning)
+
+    project_rq.build_climate_rq("demo")
+
+    assert warning_calls
+    message, extra = warning_calls[0]
+    assert message == "build_climate_rq: observed_start_year emptied after payload replay"
+    assert isinstance(extra, dict)
+    assert extra["runid"] == "demo"
+    assert extra["job_id"] == "job-warn"
+    assert extra["payload_observed_start_year"] == "1985"
+    assert extra["climate_observed_start_year"] == ""
+
+
 def test_build_soils_rq_rejects_archive_form_root(
     monkeypatch: pytest.MonkeyPatch,
     tmp_path: Path,

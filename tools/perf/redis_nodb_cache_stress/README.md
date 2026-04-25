@@ -166,3 +166,33 @@ Outcome:
 - `throughput_ops_per_sec=1200.202`
 - Latency: `p50=2.668ms`, `p95=27.954ms`, `p99=42.194ms`
 - Highest p95 operation: `mutate_seq` (`41.874ms`)
+
+## Wepp1/Wepp2 No-Restart Statistics
+
+Measured on `2026-04-25` using live `rq-worker` containers with no compose restart.
+
+Execution mode:
+- Harness directory copied into running containers at `/tmp/redis_nodb_cache_stress` via `wctl docker compose cp`.
+- Harness executed with `/opt/venv/bin/python` inside each `rq-worker` container.
+- Workload profile: `threads=8`, `duration=12s`, `runid_count=80`, `get=30,set=20,mutate=20,mutate_seq=20,delete=5,scan=5`, `mutate_hot_key_fraction=0.15`, `mutate_seq_burst_length=7`.
+
+`wepp1` result (run timestamp `2026-04-25T16:30:29Z`):
+- Report: `/tmp/redis_nodb_cache_stress/results/redis_nodb_cache_stress_20260425T163029Z.json`
+- Redis target: `redis://<redacted>@redis:6379/13`
+- `ops_total=19923`
+- `ops_failure=0` (`failure_rate=0.0`)
+- `throughput_ops_per_sec=1659.698`
+- Latency: `p50=2.252ms`, `p95=17.499ms`, `p99=22.69ms`
+- Highest p95 operation: `mutate_seq` (`22.618ms`)
+
+`wepp2` result (run timestamp `2026-04-25T16:31:17Z`):
+- Report: `/tmp/redis_nodb_cache_stress/results/redis_nodb_cache_stress_20260425T163117Z.json`
+- Redis target: `redis://<redacted>@192.168.100.237:6379/13`
+- `ops_total=21982`
+- `ops_failure=0` (`failure_rate=0.0`)
+- `throughput_ops_per_sec=1831.066`
+- Latency: `p50=2.084ms`, `p95=15.95ms`, `p99=20.208ms`
+- Highest p95 operation: `mutate_seq` (`20.208ms`)
+
+Cross-host Redis confirmation for `wepp2` run:
+- `wepp2` `RQ_REDIS_URL` host resolved to `192.168.100.237` (db `/9`), which is `wepp1`.

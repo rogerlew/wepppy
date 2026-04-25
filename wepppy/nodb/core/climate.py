@@ -1104,135 +1104,144 @@ class Climate(NoDbBase):
 
     def set_observed_pars(self, **kwds: Any) -> None:
         with self.locked():
-            start_year = kwds['start_year']
-            end_year = kwds['end_year']
+            self._set_observed_pars_without_lock(**kwds)
 
-            try:
-                start_year = int(start_year)
-                end_year = int(end_year)
-            except (TypeError, ValueError) as e:
-                pass
+    def _set_observed_pars_without_lock(self, **kwds: Any) -> None:
+        start_year = kwds['start_year']
+        end_year = kwds['end_year']
 
-            if self.climate_mode in (
-                ClimateMode.Observed,
-                ClimateMode.ObservedPRISM,
-                ClimateMode.GridMetPRISM,
-                ClimateMode.DepNexrad,
-            ):
-                assert isint(start_year)
-                assert start_year >= 1980
-                #assert start_year <= 2017
+        try:
+            start_year = int(start_year)
+            end_year = int(end_year)
+        except (TypeError, ValueError):
+            pass
 
-                assert isint(end_year)
-                assert end_year >= 1980
-                #assert end_year <= 2017
+        if self.climate_mode in (
+            ClimateMode.Observed,
+            ClimateMode.ObservedPRISM,
+            ClimateMode.GridMetPRISM,
+            ClimateMode.DepNexrad,
+        ):
+            assert isint(start_year)
+            assert start_year >= 1980
+            #assert start_year <= 2017
 
-                assert end_year >= start_year
-                assert end_year - start_year <= CLIMATE_MAX_YEARS
-                self._input_years = end_year - start_year + 1
+            assert isint(end_year)
+            assert end_year >= 1980
+            #assert end_year <= 2017
 
-            self._observed_start_year = start_year
-            self._observed_end_year = end_year
+            assert end_year >= start_year
+            assert end_year - start_year <= CLIMATE_MAX_YEARS
+            self._input_years = end_year - start_year + 1
 
-    def set_future_pars(self,  **kwds: Any) -> None:
+        self._observed_start_year = start_year
+        self._observed_end_year = end_year
+
+    def set_future_pars(self, **kwds: Any) -> None:
         with self.locked():
-            start_year = kwds['start_year']
-            end_year = kwds['end_year']
+            self._set_future_pars_without_lock(**kwds)
 
-            try:
-                start_year = int(start_year)
-                end_year = int(end_year)
-            except (TypeError, ValueError) as e:
-                pass
+    def _set_future_pars_without_lock(self, **kwds: Any) -> None:
+        start_year = kwds['start_year']
+        end_year = kwds['end_year']
 
-            if self.climate_mode == ClimateMode.Future:
-                assert isint(start_year)
-                assert start_year >= 2006
-                assert start_year <= 2099
+        try:
+            start_year = int(start_year)
+            end_year = int(end_year)
+        except (TypeError, ValueError):
+            pass
 
-                assert isint(end_year)
-                assert end_year >= 2006
-                assert end_year <= 2099
+        if self.climate_mode == ClimateMode.Future:
+            assert isint(start_year)
+            assert start_year >= 2006
+            assert start_year <= 2099
 
-                assert end_year >= start_year
-                assert end_year - start_year <= CLIMATE_MAX_YEARS
-                self._input_years = end_year - start_year + 1
+            assert isint(end_year)
+            assert end_year >= 2006
+            assert end_year <= 2099
 
-            self._future_start_year = start_year
-            self._future_end_year = end_year
+            assert end_year >= start_year
+            assert end_year - start_year <= CLIMATE_MAX_YEARS
+            self._input_years = end_year - start_year + 1
+
+        self._future_start_year = start_year
+        self._future_end_year = end_year
 
     def set_single_storm_pars(self, **kwds: Any) -> None:
         with self.locked():
-            ss_storm_date = kwds['ss_storm_date']
+            self._set_single_storm_pars_without_lock(**kwds)
+
+    def _set_single_storm_pars_without_lock(self, **kwds: Any) -> None:
+        ss_storm_date = kwds['ss_storm_date']
+        ss_design_storm_amount_inches = \
+            kwds['ss_design_storm_amount_inches']
+        ss_duration_of_storm_in_hours = \
+            kwds['ss_duration_of_storm_in_hours']
+        ss_max_intensity_inches_per_hour = \
+            kwds['ss_max_intensity_inches_per_hour']
+        ss_time_to_peak_intensity_pct = \
+            kwds['ss_time_to_peak_intensity_pct']
+
+        ss_batch = kwds['ss_batch']
+
+        # Some sort of versioning annoyance. On VM these are strings
+        # on wepp1 they are lists
+        if isinstance(ss_storm_date, list):
+            ss_storm_date = ss_storm_date[0]
+
+        if isinstance(ss_design_storm_amount_inches, list):
+            ss_design_storm_amount_inches = ss_design_storm_amount_inches[0]
+
+        if isinstance(ss_duration_of_storm_in_hours, list):
+            ss_duration_of_storm_in_hours = ss_duration_of_storm_in_hours[0]
+
+        if isinstance(ss_max_intensity_inches_per_hour, list):
+            ss_max_intensity_inches_per_hour = ss_max_intensity_inches_per_hour[0]
+
+        if isinstance(ss_time_to_peak_intensity_pct, list):
+            ss_time_to_peak_intensity_pct = ss_time_to_peak_intensity_pct[0]
+
+        try:
             ss_design_storm_amount_inches = \
-                kwds['ss_design_storm_amount_inches']
+                float(ss_design_storm_amount_inches)
             ss_duration_of_storm_in_hours = \
-                kwds['ss_duration_of_storm_in_hours']
+                float(ss_duration_of_storm_in_hours)
             ss_max_intensity_inches_per_hour = \
-                kwds['ss_max_intensity_inches_per_hour']
+                float(ss_max_intensity_inches_per_hour)
             ss_time_to_peak_intensity_pct = \
-                kwds['ss_time_to_peak_intensity_pct']
+                float(ss_time_to_peak_intensity_pct)
+        except (TypeError, ValueError):
+            pass
 
-            ss_batch = kwds['ss_batch']
+        if self.is_single_storm:
+            ss_storm_date = ss_storm_date.split()
+            assert len(ss_storm_date) == 3, ss_storm_date
+            assert all([isint(token) for token in ss_storm_date])
+            ss_storm_date = ' '.join(ss_storm_date)
 
-            # Some sort of versioning annoyance. On VM these are strings
-            # on wepp1 they are lists
-            if isinstance(ss_storm_date, list):
-                ss_storm_date = ss_storm_date[0]
+            assert isfloat(ss_design_storm_amount_inches), ss_design_storm_amount_inches
+            assert ss_design_storm_amount_inches > 0
 
-            if isinstance(ss_design_storm_amount_inches, list):
-                ss_design_storm_amount_inches = ss_design_storm_amount_inches[0]
+            assert isfloat(ss_duration_of_storm_in_hours), ss_duration_of_storm_in_hours
+            assert ss_duration_of_storm_in_hours > 0
 
-            if isinstance(ss_duration_of_storm_in_hours, list):
-                ss_duration_of_storm_in_hours = ss_duration_of_storm_in_hours[0]
+            assert isfloat(ss_max_intensity_inches_per_hour), ss_max_intensity_inches_per_hour
+            assert ss_max_intensity_inches_per_hour > 0
 
-            if isinstance(ss_max_intensity_inches_per_hour, list):
-                ss_max_intensity_inches_per_hour = ss_max_intensity_inches_per_hour[0]
+            assert isfloat(ss_time_to_peak_intensity_pct)
+            assert ss_time_to_peak_intensity_pct > 0.0
+            assert ss_time_to_peak_intensity_pct < 100.0
 
-            if isinstance(ss_time_to_peak_intensity_pct, list):
-                ss_time_to_peak_intensity_pct = ss_time_to_peak_intensity_pct[0]
-
-            try:
-                ss_design_storm_amount_inches = \
-                    float(ss_design_storm_amount_inches)
-                ss_duration_of_storm_in_hours = \
-                    float(ss_duration_of_storm_in_hours)
-                ss_max_intensity_inches_per_hour = \
-                    float(ss_max_intensity_inches_per_hour)
-                ss_time_to_peak_intensity_pct = \
-                    float(ss_time_to_peak_intensity_pct)
-            except (TypeError, ValueError) as e:
-                pass
-
-            if self.is_single_storm:
-                ss_storm_date = ss_storm_date.split()
-                assert len(ss_storm_date) == 3, ss_storm_date
-                assert all([isint(token) for token in ss_storm_date])
-                ss_storm_date = ' '.join(ss_storm_date)
-
-                assert isfloat(ss_design_storm_amount_inches), ss_design_storm_amount_inches
-                assert ss_design_storm_amount_inches > 0
-
-                assert isfloat(ss_duration_of_storm_in_hours), ss_duration_of_storm_in_hours
-                assert ss_duration_of_storm_in_hours > 0
-
-                assert isfloat(ss_max_intensity_inches_per_hour), ss_max_intensity_inches_per_hour
-                assert ss_max_intensity_inches_per_hour > 0
-
-                assert isfloat(ss_time_to_peak_intensity_pct)
-                assert ss_time_to_peak_intensity_pct > 0.0
-                assert ss_time_to_peak_intensity_pct < 100.0
-
-            self._ss_storm_date = ss_storm_date
-            self._ss_design_storm_amount_inches = \
-                ss_design_storm_amount_inches
-            self._ss_duration_of_storm_in_hours = \
-                ss_duration_of_storm_in_hours
-            self._ss_max_intensity_inches_per_hour = \
-                ss_max_intensity_inches_per_hour
-            self._ss_time_to_peak_intensity_pct = \
-                ss_time_to_peak_intensity_pct
-            self._ss_batch = ss_batch
+        self._ss_storm_date = ss_storm_date
+        self._ss_design_storm_amount_inches = \
+            ss_design_storm_amount_inches
+        self._ss_duration_of_storm_in_hours = \
+            ss_duration_of_storm_in_hours
+        self._ss_max_intensity_inches_per_hour = \
+            ss_max_intensity_inches_per_hour
+        self._ss_time_to_peak_intensity_pct = \
+            ss_time_to_peak_intensity_pct
+        self._ss_batch = ss_batch
 
     def build(self, verbose: bool = False, attrs: Optional[Dict[str, Any]] = None) -> None:
         _CLIMATE_BUILD_ROUTER.build(self, verbose=verbose, attrs=attrs)

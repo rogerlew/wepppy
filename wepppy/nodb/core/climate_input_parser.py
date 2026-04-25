@@ -13,8 +13,11 @@ class ClimateInputParsingService:
     """Parse and validate incoming climate payloads for the ``Climate`` facade."""
 
     def parse_inputs(self, climate: "Climate", kwds: dict[str, Any]) -> None:
-        climate_mode = self._parse_core_inputs(climate, kwds)
-        self._parse_mode_specific_inputs(climate, kwds, climate_mode)
+        # Keep parsing and state mutation under one lock scope so NoDb persists
+        # once per parse_inputs() call.
+        with climate.locked():
+            climate_mode = self._parse_core_inputs(climate, kwds)
+            self._parse_mode_specific_inputs(climate, kwds, climate_mode)
 
     def _parse_core_inputs(self, climate: "Climate", kwds: dict[str, Any]) -> Any:
         from wepppy.nodb.core.climate import (
@@ -25,96 +28,95 @@ class ClimateInputParsingService:
             _assert_supported_climate_mode,
         )
 
-        with climate.locked():
-            raw_climate_mode = kwds.get("climate_mode")
-            catalog_id = kwds.get("climate_catalog_id") or kwds.get("catalog_id")
-            catalog_dataset = None
-            if catalog_id:
-                catalog_dataset = climate._resolve_catalog_dataset(str(catalog_id))
-                if catalog_dataset is None:
-                    raise ValueError(f"Unknown or unavailable climate catalog id: {catalog_id}")
-                climate_mode = ClimateMode(int(catalog_dataset.climate_mode))
-                climate._catalog_id = catalog_dataset.catalog_id
-            else:
-                if raw_climate_mode is None:
-                    raise ValueError("climate_mode not provided")
-                climate_mode = ClimateMode(int(raw_climate_mode))
-                climate._catalog_id = None
-            _assert_supported_climate_mode(climate_mode)
+        raw_climate_mode = kwds.get("climate_mode")
+        catalog_id = kwds.get("climate_catalog_id") or kwds.get("catalog_id")
+        catalog_dataset = None
+        if catalog_id:
+            catalog_dataset = climate._resolve_catalog_dataset(str(catalog_id))
+            if catalog_dataset is None:
+                raise ValueError(f"Unknown or unavailable climate catalog id: {catalog_id}")
+            climate_mode = ClimateMode(int(catalog_dataset.climate_mode))
+            climate._catalog_id = catalog_dataset.catalog_id
+        else:
+            if raw_climate_mode is None:
+                raise ValueError("climate_mode not provided")
+            climate_mode = ClimateMode(int(raw_climate_mode))
+            climate._catalog_id = None
+        _assert_supported_climate_mode(climate_mode)
 
-            climate_spatialmode = kwds.get("climate_spatialmode", ClimateSpatialMode.Single)
-            if catalog_dataset is not None:
-                if climate_spatialmode in (None, "", "None"):
-                    climate_spatialmode = catalog_dataset.default_spatial_mode
-                spatialmode_value = int(climate_spatialmode)
-                if catalog_dataset.spatial_modes and spatialmode_value not in catalog_dataset.spatial_modes:
-                    raise ValueError(
-                        f"Unsupported spatial mode {spatialmode_value} for catalog dataset {catalog_dataset.catalog_id}"
-                    )
-                climate_spatialmode = ClimateSpatialMode(spatialmode_value)
-            else:
-                climate_spatialmode = ClimateSpatialMode(int(climate_spatialmode))
-
-            if climate_mode == ClimateMode.SingleStorm:
-                climate_spatialmode = ClimateSpatialMode.Single
-
-            input_years = kwds.get("input_years", None)
-            if isint(input_years):
-                input_years = int(input_years)
-
-            if climate_mode in [ClimateMode.Vanilla]:
-                assert isint(input_years)
-                assert input_years > 0
-                assert input_years <= CLIMATE_MAX_YEARS
-
-            if climate_mode in [ClimateMode.ObservedDb, ClimateMode.FutureDb]:
-                if climate_mode == ClimateMode.ObservedDb:
-                    cli_path = kwds["climate_observed_selection"]
-                else:
-                    cli_path = kwds["climate_future_selection"]
-                assert _exists(cli_path)
-                climate._orig_cli_fn = cli_path
-
-            validator = getattr(climate, "_validate_station_catalog_constraints", None)
-            if callable(validator):
-                validator(
-                    climate_mode=climate_mode,
-                    climate_spatialmode=climate_spatialmode,
+        climate_spatialmode = kwds.get("climate_spatialmode", ClimateSpatialMode.Single)
+        if catalog_dataset is not None:
+            if climate_spatialmode in (None, "", "None"):
+                climate_spatialmode = catalog_dataset.default_spatial_mode
+            spatialmode_value = int(climate_spatialmode)
+            if catalog_dataset.spatial_modes and spatialmode_value not in catalog_dataset.spatial_modes:
+                raise ValueError(
+                    f"Unsupported spatial mode {spatialmode_value} for catalog dataset {catalog_dataset.catalog_id}"
                 )
+            climate_spatialmode = ClimateSpatialMode(spatialmode_value)
+        else:
+            climate_spatialmode = ClimateSpatialMode(int(climate_spatialmode))
 
-            climate._climate_mode = climate_mode
-            climate._climate_spatialmode = climate_spatialmode
-            climate._input_years = input_years
+        if climate_mode == ClimateMode.SingleStorm:
+            climate_spatialmode = ClimateSpatialMode.Single
 
-            climate._climate_daily_temp_ds = kwds.get("climate_daily_temp_ds", None)
+        input_years = kwds.get("input_years", None)
+        if isint(input_years):
+            input_years = int(input_years)
 
-            if kwds.get("precip_scaling_mode", None) is not None:
-                climate._precip_scaling_mode = ClimatePrecipScalingMode(int(kwds["precip_scaling_mode"]))
+        if climate_mode in [ClimateMode.Vanilla]:
+            assert isint(input_years)
+            assert input_years > 0
+            assert input_years <= CLIMATE_MAX_YEARS
 
-            if kwds.get("precip_scale_factor", None) is not None:
-                if isfloat(kwds["precip_scale_factor"]):
-                    climate._precip_scale_factor = float(kwds["precip_scale_factor"])
+        if climate_mode in [ClimateMode.ObservedDb, ClimateMode.FutureDb]:
+            if climate_mode == ClimateMode.ObservedDb:
+                cli_path = kwds["climate_observed_selection"]
+            else:
+                cli_path = kwds["climate_future_selection"]
+            assert _exists(cli_path)
+            climate._orig_cli_fn = cli_path
 
-            if kwds.get("precip_monthly_scale_factors_7", None) is not None:
-                precip_monthly_scale_factors = []
-                for i in range(12):
-                    v = None
-                    try:
-                        v = float(kwds.get(f"precip_monthly_scale_factors_{i}"))
-                        if v < 0.0:
-                            v = 0.0
-                    except ValueError:
-                        pass
-                    if v is not None:
-                        precip_monthly_scale_factors.append(float(v))
+        validator = getattr(climate, "_validate_station_catalog_constraints", None)
+        if callable(validator):
+            validator(
+                climate_mode=climate_mode,
+                climate_spatialmode=climate_spatialmode,
+            )
 
-                climate._precip_monthly_scale_factors = precip_monthly_scale_factors
+        climate._climate_mode = climate_mode
+        climate._climate_spatialmode = climate_spatialmode
+        climate._input_years = input_years
 
-            if kwds.get("precip_scale_reference", None) is not None:
-                climate._precip_scaling_reference = kwds["precip_scale_reference"]
+        climate._climate_daily_temp_ds = kwds.get("climate_daily_temp_ds", None)
 
-            if kwds.get("precip_scale_factor_map", None) is not None:
-                climate._precip_scale_factor_map = kwds["precip_scale_factor_map"]
+        if kwds.get("precip_scaling_mode", None) is not None:
+            climate._precip_scaling_mode = ClimatePrecipScalingMode(int(kwds["precip_scaling_mode"]))
+
+        if kwds.get("precip_scale_factor", None) is not None:
+            if isfloat(kwds["precip_scale_factor"]):
+                climate._precip_scale_factor = float(kwds["precip_scale_factor"])
+
+        if kwds.get("precip_monthly_scale_factors_7", None) is not None:
+            precip_monthly_scale_factors = []
+            for i in range(12):
+                v = None
+                try:
+                    v = float(kwds.get(f"precip_monthly_scale_factors_{i}"))
+                    if v < 0.0:
+                        v = 0.0
+                except ValueError:
+                    pass
+                if v is not None:
+                    precip_monthly_scale_factors.append(float(v))
+
+            climate._precip_monthly_scale_factors = precip_monthly_scale_factors
+
+        if kwds.get("precip_scale_reference", None) is not None:
+            climate._precip_scaling_reference = kwds["precip_scale_reference"]
+
+        if kwds.get("precip_scale_factor_map", None) is not None:
+            climate._precip_scale_factor_map = kwds["precip_scale_factor_map"]
 
         return climate_mode
 
@@ -143,12 +145,12 @@ class ClimateInputParsingService:
                 end_key="future_end_year",
                 required=True,
             )
+            climate._set_future_pars_without_lock(**future_pars)
             self._clear_year_bounds(
                 climate=climate,
                 start_attr="_observed_start_year",
                 end_attr="_observed_end_year",
             )
-            climate.set_future_pars(**future_pars)
         else:
             observed_pars = self._resolve_year_bounds(
                 kwds=kwds,
@@ -157,7 +159,7 @@ class ClimateInputParsingService:
                 required=climate_mode in observed_required_modes,
             )
             if observed_pars is not None:
-                climate.set_observed_pars(**observed_pars)
+                climate._set_observed_pars_without_lock(**observed_pars)
             else:
                 self._clear_year_bounds(
                     climate=climate,
@@ -193,7 +195,7 @@ class ClimateInputParsingService:
                 )
             single_storm_payload = dict(kwds)
             single_storm_payload.setdefault("ss_batch", "")
-            climate.set_single_storm_pars(**single_storm_payload)
+            climate._set_single_storm_pars_without_lock(**single_storm_payload)
 
     @staticmethod
     def _resolve_year_bounds(
@@ -230,6 +232,5 @@ class ClimateInputParsingService:
         start_attr: str,
         end_attr: str,
     ) -> None:
-        with climate.locked():
-            setattr(climate, start_attr, "")
-            setattr(climate, end_attr, "")
+        setattr(climate, start_attr, "")
+        setattr(climate, end_attr, "")

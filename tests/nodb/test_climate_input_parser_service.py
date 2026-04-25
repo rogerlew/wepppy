@@ -34,19 +34,23 @@ class _DummyClimate:
     @contextmanager
     def locked(self):
         self.events.append("lock-enter")
-        yield
-        self.events.append("lock-exit")
+        try:
+            yield
+        finally:
+            self.events.append("lock-exit")
 
     def _resolve_catalog_dataset(self, catalog_id: str):
         return self._catalog.get(catalog_id)
 
-    def set_observed_pars(self, **kwds):
+    def _set_observed_pars_without_lock(self, **kwds):
         self.events.append(("observed", kwds))
 
-    def set_future_pars(self, **kwds):
+    def _set_future_pars_without_lock(self, **kwds):
         self.events.append(("future", kwds))
+        start_year = kwds["start_year"]
+        int(start_year)
 
-    def set_single_storm_pars(self, **kwds):
+    def _set_single_storm_pars_without_lock(self, **kwds):
         self.events.append(("single-storm", kwds["ss_storm_date"]))
 
 
@@ -133,7 +137,7 @@ def test_parse_inputs_rejects_deprecated_single_storm_modes() -> None:
         parser.parse_inputs(climate, payload)
 
 
-def test_parse_inputs_keeps_lock_scope_around_core_parsing_only() -> None:
+def test_parse_inputs_uses_single_lock_scope_for_full_parse() -> None:
     parser = ClimateInputParsingService()
     climate = _DummyClimate()
     payload = _payload()
@@ -141,9 +145,11 @@ def test_parse_inputs_keeps_lock_scope_around_core_parsing_only() -> None:
 
     parser.parse_inputs(climate, payload)
 
+    assert climate.events.count("lock-enter") == 1
+    assert climate.events.count("lock-exit") == 1
     assert climate.events[0] == "lock-enter"
-    assert climate.events[1] == "lock-exit"
-    assert climate.events[2][0] == "observed"
+    assert climate.events[-1] == "lock-exit"
+    assert climate.events[1][0] == "observed"
     assert all(not (isinstance(event, tuple) and event[0] == "future") for event in climate.events)
 
 
@@ -189,6 +195,25 @@ def test_parse_inputs_future_mode_validation_failure_does_not_mutate_observed_ye
 
     assert climate._observed_start_year == 1995
     assert climate._observed_end_year == 2005
+
+
+def test_parse_inputs_future_mode_invalid_start_year_does_not_clear_observed_bounds() -> None:
+    parser = ClimateInputParsingService()
+    climate = _DummyClimate()
+    climate._observed_start_year = 1995
+    climate._observed_end_year = 2005
+
+    payload = _payload()
+    payload["climate_mode"] = str(int(ClimateMode.Future))
+    payload["future_start_year"] = "bad-year"
+
+    with pytest.raises(ValueError, match="invalid literal for int"):
+        parser.parse_inputs(climate, payload)
+
+    assert climate._observed_start_year == 1995
+    assert climate._observed_end_year == 2005
+    assert climate.events.count("lock-enter") == 1
+    assert climate.events.count("lock-exit") == 1
 
 
 def test_parse_inputs_future_mode_clears_stale_observed_year_bounds() -> None:

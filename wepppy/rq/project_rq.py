@@ -1326,6 +1326,19 @@ def build_climate_rq(runid: str) -> None:
                 # Re-apply the enqueue-time payload so late state writes cannot
                 # clobber the exact climate configuration this job was created for.
                 climate.parse_inputs(payload_for_build)
+                payload_observed_start_year = payload_for_build.get("observed_start_year")
+                climate_observed_start_year = getattr(climate, "_observed_start_year", None)
+                if payload_observed_start_year not in (None, "") and climate_observed_start_year == "":
+                    _logger.warning(
+                        "build_climate_rq: observed_start_year emptied after payload replay",
+                        extra={
+                            "runid": runid,
+                            "job_id": job.id,
+                            "payload_observed_start_year": payload_observed_start_year,
+                            "climate_observed_start_year": climate_observed_start_year,
+                            "climate_mode": getattr(climate, "_climate_mode", None),
+                        },
+                    )
             climate.build()
 
         _run_with_directory_root_lock(

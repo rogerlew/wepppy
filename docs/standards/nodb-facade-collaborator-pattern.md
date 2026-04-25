@@ -55,6 +55,23 @@ Each step should be independently testable and reversible.
 5. Keep shared enums/contracts where callers already import them unless
    migration is explicitly planned.
 
+## Lock/Dump Efficiency Rule (Required)
+
+1. Treat each logical facade mutation as one lock cycle whenever feasible.
+   For parse/update entrypoints, prefer a single outer `with self.locked():`
+   scope that covers validation plus all state mutation.
+2. Do not nest additional `with self.locked():` calls inside collaborator
+   methods invoked by that entrypoint, unless a package explicitly documents why
+   multiple persistence boundaries are required.
+3. When existing public helpers also support standalone usage, add an internal
+   lock-aware path (for example `lock_held=True`) so parser/orchestrator flows
+   can reuse validation logic without extra `dump_and_unlock()` cycles.
+4. Add regression coverage that asserts lock scope remains consolidated for the
+   entrypoint being refactored.
+5. For consolidated parse/update lock scopes, treat persistence as transactional
+   at the `dump_and_unlock()` boundary: validation failures must leave on-disk
+   state unchanged unless a package explicitly approves intermediate persistence.
+
 ## Exception and Logging Rules
 
 1. No bare `except:` and no broad `except Exception` in production flow unless
