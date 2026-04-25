@@ -112,6 +112,140 @@ capture_wctl_with_retry() {
     return "${exit_code}"
 }
 
+print_limited_list() {
+    local header="$1"
+    local items="$2"
+    local limit="${3:-20}"
+    local count
+
+    count=$(printf "%s\n" "${items}" | sed '/^$/d' | wc -l | tr -d ' ')
+    if [ "${count}" -eq 0 ]; then
+        return 0
+    fi
+
+    echo "${header}"
+    printf "%s\n" "${items}" | sed '/^$/d' | sed -n "1,${limit}p" | sed 's/^/    /'
+    if [ "${count}" -gt "${limit}" ]; then
+        echo "    ... (${count} total; showing first ${limit})"
+    fi
+}
+
+validate_git_credential_helpers() {
+    local helper
+    local missing=0
+    local needs_gh_auth=0
+
+    while IFS= read -r helper; do
+        [ -z "${helper}" ] && continue
+        case "${helper}" in
+            gh)
+                needs_gh_auth=1
+                if ! command -v git-credential-gh >/dev/null 2>&1; then
+                    echo "✗ Git credential helper 'gh' is configured but git-credential-gh is not installed/found on PATH." >&2
+                    echo "  Remediation: run 'gh auth setup-git' (or fix credential.helper) before deploying." >&2
+                    missing=1
+                fi
+                ;;
+        esac
+    done < <(git config --get-all credential.helper 2>/dev/null || true)
+
+    if [ "${needs_gh_auth}" -eq 1 ]; then
+        if ! command -v gh >/dev/null 2>&1; then
+            echo "✗ Git credential helper 'gh' is configured but GitHub CLI 'gh' is not installed/found on PATH." >&2
+            echo "  Remediation: install gh and run 'gh auth login' + 'gh auth setup-git' before deploying." >&2
+            missing=1
+        elif ! gh auth status --hostname github.com >/dev/null 2>&1; then
+            echo "✗ GitHub CLI auth check failed for github.com." >&2
+            echo "  Remediation: re-authenticate with 'gh auth login' (and optionally rerun 'gh auth setup-git')." >&2
+            missing=1
+        fi
+    fi
+
+    if [ "${missing}" -ne 0 ]; then
+        return 1
+    fi
+    return 0
+}
+
+ensure_git_worktree_clean() {
+    local tracked_changes=""
+    local untracked_files=""
+
+    tracked_changes="$(git status --porcelain=v1 --untracked-files=no || true)"
+    if [ -n "${tracked_changes}" ]; then
+        echo "✗ Refusing deployment pull: tracked git changes are present in working tree/index." >&2
+        print_limited_list "  Tracked changes:" "${tracked_changes}" 30 >&2
+        echo "  Commit/stash/discard tracked changes or rerun with --skip-pull." >&2
+        return 1
+    fi
+
+    untracked_files="$(git ls-files --others --exclude-standard || true)"
+    if [ -n "${untracked_files}" ]; then
+        echo "✗ Refusing deployment pull: untracked files are present and may block fast-forward update." >&2
+        print_limited_list "  Untracked files:" "${untracked_files}" 30 >&2
+        echo "  Remediation options:" >&2
+        echo "    - stash with untracked: git stash push --include-untracked" >&2
+        echo "    - or clean untracked: git clean -fd" >&2
+        echo "    - or rerun deploy with --skip-pull if repo is already updated" >&2
+        return 1
+    fi
+
+    return 0
+}
+
+safe_git_fast_forward_pull() {
+    local original_head=""
+    local current_branch=""
+    local upstream_ref=""
+    local remote_name=""
+    local remote_branch=""
+    local fetched_head=""
+
+    current_branch="$(git rev-parse --abbrev-ref HEAD)"
+    if [ "${current_branch}" = "HEAD" ]; then
+        echo "✗ Refusing deployment pull from detached HEAD." >&2
+        return 1
+    fi
+
+    original_head="$(git rev-parse HEAD)"
+    upstream_ref="$(git rev-parse --abbrev-ref --symbolic-full-name @{u} 2>/dev/null || true)"
+    if [ -z "${upstream_ref}" ]; then
+        upstream_ref="origin/${current_branch}"
+    fi
+
+    remote_name="${upstream_ref%%/*}"
+    remote_branch="${upstream_ref#*/}"
+
+    validate_git_credential_helpers
+    ensure_git_worktree_clean
+
+    echo "    Fetching ${upstream_ref}..."
+    git fetch --prune "${remote_name}" "${remote_branch}"
+    fetched_head="$(git rev-parse FETCH_HEAD)"
+
+    if [ "${fetched_head}" = "${original_head}" ]; then
+        echo "    Already up to date."
+        return 0
+    fi
+
+    if ! git merge-base --is-ancestor "${original_head}" "${fetched_head}"; then
+        echo "✗ Refusing deployment pull: local HEAD is not an ancestor of ${upstream_ref} (non-fast-forward)." >&2
+        echo "  Local HEAD : ${original_head}" >&2
+        echo "  Upstream   : ${fetched_head}" >&2
+        echo "  Resolve branch divergence manually, then rerun deployment." >&2
+        return 1
+    fi
+
+    echo "    Fast-forwarding ${current_branch} to ${fetched_head}..."
+    if ! git merge --ff-only "${fetched_head}"; then
+        echo "✗ Fast-forward apply failed; rolling repository back to ${original_head}." >&2
+        git reset --hard "${original_head}" >/dev/null 2>&1 || true
+        return 1
+    fi
+
+    return 0
+}
+
 # Parse arguments
 SKIP_PULL=false
 SKIP_BUILD=false
@@ -207,7 +341,7 @@ echo ""
 # Git pull
 if [ "${SKIP_PULL}" = false ]; then
     echo ">>> Step 1: Pulling latest changes from git..."
-    git pull
+    safe_git_fast_forward_pull
     echo ""
 else
     echo ">>> Step 1: Skipping git pull (--skip-pull)"
