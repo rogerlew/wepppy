@@ -191,9 +191,13 @@ Errors:
     "message": "Human-readable summary",
     "code": "optional_code",
     "details": "error detail or traceback"
-  }
+  },
+  "error_id": "required-for-5xx"
 }
 ```
+- 5xx responses must include `error_id` for response/log correlation.
+- 5xx observability requirement: return traceback details in `error.details`, or
+  return a stable `error_id` that maps to server-side traceback/error logs.
 
 Common route-level status requirements are enforced by
 `tests/microservices/test_rq_engine_openapi_contract.py`.

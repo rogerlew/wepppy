@@ -388,14 +388,10 @@ def issue_rq_engine_token():
         token = _issue_rq_engine_token()
     except auth_tokens.JWTConfigurationError as exc:
         current_app.logger.exception("Failed to issue rq-engine token via API")
-        response = error_factory(f"JWT configuration error: {exc}")
-        response.status_code = 500
-        return response
+        return error_factory(f"JWT configuration error: {exc}", status_code=500)
     except Exception:
         current_app.logger.exception("Failed to issue rq-engine token via API")
-        response = error_factory("Failed to issue rq-engine token.")
-        response.status_code = 500
-        return response
+        return error_factory("Failed to issue rq-engine token.", status_code=500)
 
     return jsonify({"token": token})
 
@@ -428,9 +424,7 @@ def issue_rq_engine_operator_token():
             requested_scopes=[],
             granted_scopes=[],
         )
-        response = error_factory(f"JWT configuration error: {exc}")
-        response.status_code = 500
-        return response
+        return error_factory(f"JWT configuration error: {exc}", status_code=500)
     except auth_tokens.JWTDecodeError:
         _audit_operator_token_event(
             outcome="unauthorized",
@@ -679,9 +673,7 @@ def issue_rq_engine_operator_token():
             requested_scopes=requested_scopes,
             granted_scopes=[],
         )
-        response = error_factory(f"JWT configuration error: {exc}")
-        response.status_code = 500
-        return response
+        return error_factory(f"JWT configuration error: {exc}", status_code=500)
     except Exception:
         current_app.logger.exception("rq-engine operator token bootstrap issuance failure")
         _audit_operator_token_event(
@@ -692,9 +684,7 @@ def issue_rq_engine_operator_token():
             requested_scopes=requested_scopes,
             granted_scopes=[],
         )
-        response = error_factory("Failed to issue operator token.")
-        response.status_code = 500
-        return response
+        return error_factory("Failed to issue operator token.", status_code=500)
 
     issued_claims = token_payload.get("claims", {})
     response = jsonify(

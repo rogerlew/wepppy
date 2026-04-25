@@ -231,9 +231,9 @@ def clear_nodb_cache(runid, config):
     try:
         cleared = clear_nodb_file_cache(runid)
     except FileNotFoundError as exc:
-        return error_factory(str(exc)), 404
+        return error_factory(str(exc), status_code=404)
     except RuntimeError as exc:
-        return error_factory(str(exc)), 503
+        return error_factory(str(exc), status_code=503)
     cleared_entries = [str(path) for path in cleared]
     return success_factory({'cleared_entries': cleared_entries})
 

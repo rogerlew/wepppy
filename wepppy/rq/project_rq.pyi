@@ -7,6 +7,8 @@ REDIS_HOST: str
 RQ_DB: int
 TIMEOUT: int
 DEFAULT_ZOOM: int
+DIRECTORY_ROOT_LOCK_RETRY_ATTEMPTS: int
+DIRECTORY_ROOT_LOCK_RETRY_SECONDS: float
 LANDUSE_MAPPING_BATCH_MAX_EDITS: int
 LANDUSE_MAPPING_MAX_KEY_LENGTH: int
 LANDUSE_MAPPING_CONTROL_CHAR_RE: Any
@@ -101,7 +103,9 @@ def modify_landuse_mapping_rq(
 
 def build_soils_rq(runid: str) -> None: ...
 
-def build_climate_rq(runid: str) -> None: ...
+def build_climate_rq(
+    runid: str,
+) -> None: ...
 
 def run_ash_rq(
     runid: str,

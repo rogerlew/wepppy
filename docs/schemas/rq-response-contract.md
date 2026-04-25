@@ -3,7 +3,9 @@
 > **See also:** `docs/schemas/weppcloud-session-contract.md` for browser/session lifecycle rules.
 
 ## Scope
-- Applies to rq-engine (FastAPI). Legacy weppcloud rq/api routes are removed.
+- Applies to rq-engine (FastAPI) and WEPPcloud JSON error helpers that emit the
+  canonical error envelope (`wepppy/weppcloud/utils/helpers.py`).
+- Legacy weppcloud rq/api routes are removed.
 - Defines canonical keys, error shapes, and job submission/polling payloads.
 - Clients (controllers_js, static, profile_recorder) must normalize to this contract.
 
@@ -113,8 +115,13 @@ Landuse first-class route notes (2026-04-24):
   "error_id": "optional-correlation-id"
 }
 ```
-- `error.details` is required for error responses; include a stacktrace (string) for exception-driven failures and a human-readable summary for validation errors (structured details belong in `errors`).
-- `error_id` is optional for generic rq-engine surfaces but **required** for upload-facing errors (see `docs/schemas/upload-endpoint-contract.md`) and should be used to correlate API responses to server logs.
+- `error.details` is required for 4xx responses; include a human-readable summary for validation/auth/access failures (structured details belong in `errors`).
+- For 5xx responses, include traceback text in `error.details` when available. When traceback details are intentionally omitted from the client response, return `error_id` and ensure logs preserve traceback/error context for that identifier.
+- `error_id` is **required for all HTTP 5xx responses** so operators can correlate client-visible failures to server logs and failure sites.
+- For 5xx responses, observability requirements are:
+  - return a stacktrace in `error.details`, or
+  - return a stable `error_id` and ensure the server logs contain traceback/error context tagged with that same `error_id`.
+- `error_id` is optional for generic 4xx responses, but **required** for upload-facing errors (see `docs/schemas/upload-endpoint-contract.md`).
 - Job polling not-found:
   - `/rq-engine/api/jobstatus/<job_id>` and `/rq-engine/api/jobinfo/<job_id>` return HTTP 404 with the canonical error payload and `error.code="not_found"`.
 - Validation error list:

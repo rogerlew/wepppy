@@ -226,6 +226,25 @@ def test_set_readonly_enqueues_background_job(project_client):
     assert queue_call.timeout == 42
 
 
+def test_clear_nodb_cache_runtime_error_returns_error_id(
+    project_client,
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    client, _, _, _, _ = project_client
+
+    def _raise_runtime_error(_runid: str) -> list[Path]:
+        raise RuntimeError("cache unavailable")
+
+    monkeypatch.setattr(project_module, "clear_nodb_file_cache", _raise_runtime_error)
+
+    response = client.get(f"/runs/{RUN_ID}/{CONFIG}/tasks/clear_nodb_cache")
+
+    assert response.status_code == 503
+    payload = response.get_json()
+    assert payload["error"]["message"] == "cache unavailable"
+    assert payload["error_id"]
+
+
 def test_set_public_requires_authenticated_user(project_client):
     client, RonStub, dispatched, run_dir, _ = project_client
     dispatched["current_user"].is_authenticated = False
@@ -598,6 +617,7 @@ def test_set_mod_returns_stacktrace_details_on_unexpected_error(
     assert response.status_code == 500
     payload = response.get_json()
     assert payload["error"]["message"] == "Error updating module state"
+    assert payload["error_id"]
     details = payload["error"]["details"]
     assert "Traceback (most recent call last):" in details
     assert "RuntimeError: boom" in details

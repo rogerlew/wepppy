@@ -510,6 +510,7 @@ def error_factory(
     code: Optional[str] = None,
     details: Any | None = None,
     errors: Optional[list[Any]] = None,
+    error_id: Optional[str] = None,
 ) -> Response:
     """Return a consistent JSON error payload for lightweight failures.
 
@@ -525,9 +526,26 @@ def error_factory(
     """
     message = _ensure_text(msg)
     stacktrace_text = ''.join(traceback.format_stack())
+    resolved_error_id = error_id
+    if resolved_error_id is None and status_code is not None and status_code >= 500:
+        resolved_error_id = uuid.uuid4().hex
+    resolved_code = code
+    if resolved_code is None and status_code is not None:
+        resolved_code = _default_error_code(status_code)
 
     status_label = f' ({status_code})' if status_code is not None else ''
-    logger.warning('Error handling request%s: %s\n%s', status_label, message, stacktrace_text)
+    logger.warning(
+        'Error handling request%s [error_id=%s]: %s\n%s',
+        status_label,
+        resolved_error_id or "-",
+        message,
+        stacktrace_text,
+        extra={
+            "error_id": resolved_error_id,
+            "error_code": resolved_code,
+            "status_code": status_code,
+        },
+    )
 
     error_payload = {'message': message}
     if code:
@@ -538,6 +556,8 @@ def error_factory(
     payload = {
         'error': error_payload,
     }
+    if resolved_error_id is not None:
+        payload['error_id'] = resolved_error_id
     if errors is not None:
         payload['errors'] = errors
 
@@ -657,6 +677,7 @@ def exception_factory(
     status_code: int = 500,
     code: Optional[str] = None,
     details: Any | None = None,
+    error_id: Optional[str] = None,
 ) -> Response:
     """Log an exception and return the standard error payload.
 
@@ -673,16 +694,31 @@ def exception_factory(
 
     message = _format_error_message(msg)
     stacktrace_text = stacktrace if isinstance(stacktrace, str) else _ensure_text(stacktrace)
+    resolved_error_id = error_id
+    if resolved_error_id is None and status_code >= 500:
+        resolved_error_id = uuid.uuid4().hex
 
     log_suffix = f' for run {runid}' if runid else ''
-    logger.error('Exception handling request%s: %s\n%s', log_suffix, message, stacktrace_text)
+    logger.error(
+        'Exception handling request%s [error_id=%s]: %s\n%s',
+        log_suffix,
+        resolved_error_id or "-",
+        message,
+        stacktrace_text,
+        extra={
+            "error_id": resolved_error_id,
+            "error_code": code or _default_error_code(status_code),
+            "status_code": status_code,
+        },
+    )
 
     if runid is not None:
         wd = get_wd(runid)
         if _exists(wd):
             try:
                 with open(_join(wd, 'exception_factory.log'), 'a') as fp:
-                    fp.write(f'[{datetime.now()}]\n')
+                    error_id_fragment = f' error_id={resolved_error_id}' if resolved_error_id else ''
+                    fp.write(f'[{datetime.now()}{error_id_fragment}]\n')
                     fp.write(stacktrace_text)
                     fp.write('\n\n')
             except OSError as log_error:
@@ -697,6 +733,8 @@ def exception_factory(
     payload = {
         'error': error_payload,
     }
+    if resolved_error_id is not None:
+        payload['error_id'] = resolved_error_id
 
     try:
         return make_response(jsonify(payload), status_code)

@@ -472,6 +472,45 @@ def test_build_climate_rq_rejects_archive_form_root(
     assert call_roots == ["climate"]
 
 
+def test_build_climate_rq_applies_enqueued_payload_before_build(
+    monkeypatch: pytest.MonkeyPatch,
+    tmp_path: Path,
+) -> None:
+    _run_wd, _set_archive_roots, call_roots = _stub_rq_context(monkeypatch, tmp_path)
+    observed_calls: list[tuple[str, object]] = []
+
+    class DummyClimate:
+        def parse_inputs(self, payload) -> None:
+            observed_calls.append(("parse_inputs", payload))
+
+        def build(self) -> None:
+            observed_calls.append(("build", None))
+
+    monkeypatch.setattr(project_rq.Climate, "getInstance", lambda _wd: DummyClimate())
+
+    payload = {
+        "climate_mode": 9,
+        "observed_start_year": "1985",
+        "observed_end_year": "2024",
+        "metadata": {"source": "ui"},
+    }
+    monkeypatch.setattr(
+        project_rq,
+        "get_current_job",
+        lambda: SimpleNamespace(id="job-guard", meta={"build_payload": payload}),
+    )
+    project_rq.build_climate_rq("demo")
+
+    assert call_roots
+    assert all(root == "climate" for root in call_roots)
+    assert observed_calls[0][0] == "parse_inputs"
+    parsed_payload = observed_calls[0][1]
+    assert parsed_payload == payload
+    assert parsed_payload is not payload
+    assert parsed_payload["metadata"] is not payload["metadata"]
+    assert observed_calls[1] == ("build", None)
+
+
 def test_build_soils_rq_rejects_archive_form_root(
     monkeypatch: pytest.MonkeyPatch,
     tmp_path: Path,

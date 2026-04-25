@@ -15,9 +15,19 @@ redis_wd_cache_pool: Optional[ConnectionPool]
 pool_kwargs: dict[str, Any]
 REDIS_HOST: str
 REDIS_WD_CACHE_DB: int
+PRIMARY_RUNS_ROOT: str
+LEGACY_RUNS_ROOT: str
 
 
 def _playback_path(env_var: str, subdir: str) -> str: ...
+
+
+def is_omni_child_run(
+    runid: str,
+    *,
+    wd: Optional[str] = ...,
+    pup_relpath: Optional[str] = ...,
+) -> bool: ...
 
 
 def get_wd(runid: str, *, prefer_active: bool = ...) -> str: ...
@@ -48,6 +58,28 @@ def error_factory(
     code: Optional[str] = ...,
     details: Any | None = ...,
     errors: Optional[list[Any]] = ...,
+    error_id: Optional[str] = ...,
+) -> Response: ...
+
+
+def upload_error_factory(
+    msg: str = ...,
+    *,
+    status_code: int = ...,
+    code: Optional[str] = ...,
+    details: Any | None = ...,
+    errors: Optional[list[Any]] = ...,
+    error_id: Optional[str] = ...,
+) -> Response: ...
+
+
+def upload_exception_factory(
+    msg: BaseException | str = ...,
+    *,
+    status_code: int = ...,
+    code: Optional[str] = ...,
+    details: Any | None = ...,
+    errors: Optional[list[Any]] = ...,
 ) -> Response: ...
 
 
@@ -59,6 +91,7 @@ def exception_factory(
     status_code: int = ...,
     code: Optional[str] = ...,
     details: Any | None = ...,
+    error_id: Optional[str] = ...,
 ) -> Response: ...
 
 

@@ -223,6 +223,37 @@ def test_issue_rq_engine_token_handles_jwt_config_error(monkeypatch: pytest.Monk
     assert response.status_code == 500
     payload = response.get_json()
     assert payload["error"]["message"] == "JWT configuration error: missing secret"
+    assert payload["error_id"]
+
+
+def test_issue_rq_engine_token_handles_unexpected_error(monkeypatch: pytest.MonkeyPatch) -> None:
+    app = _build_app()
+    monkeypatch.setattr(
+        weppcloud_site_module,
+        "current_user",
+        SimpleNamespace(is_anonymous=False, is_authenticated=True),
+        raising=False,
+    )
+
+    def _raise_unexpected_error():
+        raise RuntimeError("boom")
+
+    monkeypatch.setattr(
+        weppcloud_site_module,
+        "_issue_rq_engine_token",
+        _raise_unexpected_error,
+    )
+
+    with app.test_client() as client:
+        response = client.post(
+            "/weppcloud/api/auth/rq-engine-token",
+            headers={"Origin": "http://localhost"},
+        )
+
+    assert response.status_code == 500
+    payload = response.get_json()
+    assert payload["error"]["message"] == "Failed to issue rq-engine token."
+    assert payload["error_id"]
 
 
 def test_issue_rq_engine_operator_token_requires_bearer_auth() -> None:
@@ -235,6 +266,33 @@ def test_issue_rq_engine_operator_token_requires_bearer_auth() -> None:
     assert response.status_code == 401
     payload = response.get_json()
     assert payload["error"]["message"] == "Bearer token required."
+
+
+def test_issue_rq_engine_operator_token_handles_jwt_config_error(
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    app = _build_app()
+    _reset_operator_rate_limit_state()
+
+    def _raise_config_error(_token: str, audience: str | None = None):
+        raise auth_tokens.JWTConfigurationError("missing secret")
+
+    monkeypatch.setattr(
+        weppcloud_site_module.auth_tokens,
+        "decode_token",
+        _raise_config_error,
+    )
+
+    with app.test_client() as client:
+        response = client.post(
+            "/weppcloud/api/auth/rq-engine-operator-token",
+            headers={"Authorization": "Bearer source-token"},
+        )
+
+    assert response.status_code == 500
+    payload = response.get_json()
+    assert payload["error"]["message"] == "JWT configuration error: missing secret"
+    assert payload["error_id"]
 
 
 def test_issue_rq_engine_operator_token_rejects_missing_subject(monkeypatch: pytest.MonkeyPatch) -> None:

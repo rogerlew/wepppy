@@ -50,8 +50,8 @@ Shared helper functions used across blueprints:
 | `load_run_context()` | Load run metadata and user permissions |
 | `parse_request_payload()` | Parse and normalize JSON/form payloads with type coercion |
 | `success_factory()` | Generate standardized success responses |
-| `exception_factory()` | Generate standardized error responses |
-| `error_factory()` | Generate error responses without exception objects |
+| `exception_factory()` | Generate standardized error responses (`error_id` is emitted on 5xx responses for log correlation) |
+| `error_factory()` | Generate error responses without exception objects (`error_id` is emitted on 5xx responses for log correlation) |
 | `save_run_file()` | Persist uploaded files to run directory |
 | `upload_success()` / `upload_failure()` | File upload response helpers |
 

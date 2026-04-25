@@ -1314,10 +1314,24 @@ def build_climate_rq(runid: str) -> None:
         func_name = inspect.currentframe().f_code.co_name
         status_channel = f'{runid}:climate'
         StatusMessenger.publish(status_channel, f'rq:{job.id} STARTED {func_name}({runid})')
+        payload_for_build: Optional[dict[str, Any]] = None
+        if isinstance(getattr(job, "meta", None), Mapping):
+            raw_payload = job.meta.get("build_payload")
+            if isinstance(raw_payload, Mapping):
+                payload_for_build = copy.deepcopy(dict(raw_payload))
+
+        def _build_climate() -> None:
+            climate = Climate.getInstance(wd)
+            if payload_for_build is not None:
+                # Re-apply the enqueue-time payload so late state writes cannot
+                # clobber the exact climate configuration this job was created for.
+                climate.parse_inputs(payload_for_build)
+            climate.build()
+
         _run_with_directory_root_lock(
             wd,
             "climate",
-            lambda: Climate.getInstance(wd).build(),
+            _build_climate,
             purpose="build-climate-rq",
         )
         StatusMessenger.publish(status_channel, f'rq:{job.id} COMPLETED {func_name}({runid})')
