@@ -145,6 +145,8 @@ describe("landuse_map inline script", () => {
         const select = document.querySelector("[data-row-key='21']");
         const descriptionInput = document.querySelector("[data-row-description='21']");
         select.value = "Developed_Moderate_Intensity.man";
+        select.dispatchEvent(new Event("change"));
+        expect(descriptionInput.value).toBe("Moderate");
         descriptionInput.value = "Moderate Severity Fire";
         document.getElementById("landuse-map-save").click();
         await flushPromises();

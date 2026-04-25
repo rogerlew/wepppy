@@ -108,7 +108,7 @@ This package covers end-to-end run-scoped management cataloging and mapping over
 - **Backward compatibility**:
   - Existing built-in mapping selection flow remains unchanged when no run-scoped override is configured.
 - **Landuse options filtering semantics (post-closeout adjustment, 2026-04-24)**:
-  - Exclude only entries whose `ManagementFile` is exactly `UnDisturbed/null.man`.
+  - Exclude only entries whose `ManagementFile` is exactly `UnDisturbed/null.man` to allow inclusion of thinning treatments at the request of Mariana.
   - Deduplicate landuse option rows by `ManagementFile` (first canonical record in `disturbed.json` order wins).
   - Do not exclude options solely because `IsTreatment` is true.
 

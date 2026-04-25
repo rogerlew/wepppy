@@ -7,11 +7,13 @@ from ._common import (
     Blueprint,
     Response,
     authorize_and_handle_with_exception_factory,
+    json,
     jsonify,
     request,
     current_app,
     current_user,
     login_required,
+    parse_request_payload,
 )
 from wepppy.profile_recorder import get_profile_recorder
 from wepppy.nodb.core.ron import Ron
@@ -29,9 +31,15 @@ def _normalise_events(payload: Dict[str, Any]) -> List[Dict[str, Any]]:
 @recorder_bp.route("/runs/<runid>/<config>/recorder/events", methods=["POST"])
 @authorize_and_handle_with_exception_factory
 def recorder_events(runid: str, config: str) -> Response:
-    payload = request.get_json(silent=True)
+    payload = parse_request_payload(request, trim_strings=False)
     if not isinstance(payload, dict):
         return jsonify({"error": "Expected JSON object payload"}), 400
+
+    if isinstance(payload.get("events"), str):
+        try:
+            payload["events"] = json.loads(payload["events"])
+        except (TypeError, ValueError):
+            return jsonify({"error": "events must be a JSON array"}), 400
 
     events = _normalise_events(payload)
     if not events:

@@ -103,9 +103,53 @@
             }
         }
 
+        function resolveCsrfToken() {
+            if (http && typeof http.getCsrfToken === "function") {
+                try {
+                    var token = http.getCsrfToken();
+                    if (typeof token === "string" && token.trim()) {
+                        return token.trim();
+                    }
+                } catch (err) {
+                    /* noop */
+                }
+            }
+            if (typeof global.__csrfToken === "string" && global.__csrfToken.trim()) {
+                return global.__csrfToken.trim();
+            }
+            return "";
+        }
+
+        function buildBeaconPayload(payload) {
+            if (typeof global.FormData !== "function") {
+                return null;
+            }
+            var csrfToken = resolveCsrfToken();
+            if (!csrfToken) {
+                return null;
+            }
+            try {
+                var formData = new global.FormData();
+                formData.append("csrf_token", csrfToken);
+                formData.append("events", payload);
+                return formData;
+            } catch (err) {
+                return null;
+            }
+        }
+
         function send(payload) {
             if (typeof navigator !== "undefined" && navigator.sendBeacon) {
-                return navigator.sendBeacon(getEndpoint(), normaliseBlob(payload));
+                var beaconPayload = buildBeaconPayload(payload);
+                if (beaconPayload) {
+                    try {
+                        if (navigator.sendBeacon(getEndpoint(), beaconPayload)) {
+                            return;
+                        }
+                    } catch (err) {
+                        /* noop */
+                    }
+                }
             }
 
             if (typeof global.fetch === "function") {

@@ -314,6 +314,10 @@
       state.options.forEach(function (option) {
         var optionNode = document.createElement("option");
         optionNode.value = String(option.management_file || "");
+        optionNode.setAttribute(
+          "data-default-description",
+          String(option.description || "")
+        );
         var label = optionNode.value;
         if (option.description) {
           label += " - " + option.description;
@@ -326,6 +330,15 @@
           optionNode.selected = true;
         }
         select.appendChild(optionNode);
+      });
+      select.addEventListener("change", function () {
+        if (!(descriptionInput instanceof HTMLInputElement)) {
+          return;
+        }
+        var optionMeta = optionsByFile[String(select.value || "")];
+        descriptionInput.value = String(
+          (optionMeta && optionMeta.description) || ""
+        );
       });
       selectCell.appendChild(select);
       tr.appendChild(selectCell);

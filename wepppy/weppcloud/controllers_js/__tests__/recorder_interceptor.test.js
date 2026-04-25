@@ -30,7 +30,8 @@ describe("recorder interceptor", () => {
     function setupInterceptor(configOverrides, requestImpl) {
         const request = requestImpl || jest.fn(() => Promise.resolve({ status: 200, ok: true, url: "/resolved/url" }));
         global.WCHttp = {
-            request: request
+            request: request,
+            getCsrfToken: jest.fn(() => "csrf-token-test")
         };
         global.__WEPP_RECORDER_CONFIG = Object.assign({
             endpoint: "recorder/events",
@@ -53,6 +54,22 @@ describe("recorder interceptor", () => {
             return [];
         }
         return JSON.parse(body).events || [];
+    }
+
+    function parseBeaconFormEntries(callIndex = 0) {
+        const call = global.navigator && global.navigator.sendBeacon && global.navigator.sendBeacon.mock.calls[callIndex];
+        if (!call) {
+            return {};
+        }
+        const payload = call[1];
+        if (!payload || !Array.isArray(payload._entries)) {
+            return {};
+        }
+        const out = {};
+        payload._entries.forEach(([key, value]) => {
+            out[key] = value;
+        });
+        return out;
     }
 
     beforeEach(() => {
@@ -315,6 +332,33 @@ describe("recorder interceptor", () => {
         const events = parseEvents(0);
         expect(events).toHaveLength(2);
         expect(global.WCRecorder._queueSize()).toBe(0);
+    });
+
+    it("uses sendBeacon with form csrf_token payload when available", async () => {
+        global.navigator = {
+            sendBeacon: jest.fn(() => true)
+        };
+        const wrappedFetch = jest.fn(() => Promise.resolve({}));
+        global.fetch = wrappedFetch;
+
+        const originalRequest = jest.fn(() => Promise.resolve({ status: 202, ok: true, url: "/runs/test/beacon" }));
+        setupInterceptor({ batchSize: 1 }, originalRequest);
+
+        await global.WCHttp.request("tasks/run", {
+            method: "post",
+            json: { demo: true }
+        });
+
+        expect(global.navigator.sendBeacon).toHaveBeenCalledTimes(2);
+        expect(wrappedFetch).not.toHaveBeenCalled();
+
+        const endpoint = global.navigator.sendBeacon.mock.calls[0][0];
+        expect(endpoint).toContain("recorder/events");
+
+        const firstPayload = parseBeaconFormEntries(0);
+        expect(firstPayload.csrf_token).toBe("csrf-token-test");
+        expect(typeof firstPayload.events).toBe("string");
+        expect(JSON.parse(firstPayload.events).events[0].stage).toBe("request");
     });
 
     it("flushes queued events after the configured interval", () => {
