@@ -221,6 +221,14 @@ REDIS_STATUS_DB = int(RedisDB.STATUS)
 REDIS_LOCK_DB = int(RedisDB.LOCK)
 REDIS_NODB_EXPIRY = 72 * 3600  # 72 hours
 REDIS_LOG_LEVEL_DB = int(RedisDB.LOG_LEVEL)
+NODB_CACHE_POOL_EXTRA_KWARGS = {
+    "max_connections": 50,
+    "socket_timeout": 5,
+    "socket_connect_timeout": 5,
+    "socket_keepalive": True,
+    "health_check_interval": 30,
+    "retry_on_timeout": True,
+}
 
 
 def _default_lock_ttl() -> int:
@@ -336,7 +344,7 @@ try:
     pool_kwargs = redis_connection_kwargs(
         RedisDB.NODB_CACHE,
         decode_responses=True,
-        extra={"max_connections": 50},
+        extra=NODB_CACHE_POOL_EXTRA_KWARGS,
     )
     redis_nodb_cache_pool = redis.ConnectionPool(**pool_kwargs)
     redis_nodb_cache_client = redis.StrictRedis(connection_pool=redis_nodb_cache_pool)
@@ -450,7 +458,7 @@ def _ensure_redis_nodb_cache_client() -> redis.StrictRedis:
         pool_kwargs = redis_connection_kwargs(
             RedisDB.NODB_CACHE,
             decode_responses=True,
-            extra={"max_connections": 50},
+            extra=NODB_CACHE_POOL_EXTRA_KWARGS,
         )
         pool = redis.ConnectionPool(**pool_kwargs)
         client = redis.StrictRedis(connection_pool=pool)
@@ -1577,7 +1585,7 @@ class NoDbBase(object):
                 redis_nodb_cache_client.set(self._nodb, js, ex=REDIS_NODB_EXPIRY) 
             except Exception:
                 # Cache mirror writes are best-effort and must not block dump/unlock.
-                logging.getLogger(__name__).debug(
+                logging.getLogger(__name__).warning(
                     "NoDbBase.dump: cache mirror write failed for %s",
                     self._nodb,
                     exc_info=True,

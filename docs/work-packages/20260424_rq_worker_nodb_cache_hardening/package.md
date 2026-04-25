@@ -6,6 +6,76 @@
 ## Overview
 This retroactive package captures the incident-response hardening completed after repeated `modify_landuse_mapping_rq` failures with `RuntimeError: Redis NoDb cache client is unavailable`. The completed work tightens NoDb lock/cache safety, makes worker startup resilient during Redis AOF load windows, and closes review findings found during two independent review rounds.
 
+## Trigger and Scope Freeze
+- **Primary incident timestamp**: 2026-04-24 17:01 UTC.
+- **Confirmed failing job**: `fceb9433-598e-499f-ae2b-24d38407399f`.
+- **Route/job surface**: `modify_landuse_mapping_rq` path during landuse mutation flow.
+- **Incident signature**: `RuntimeError: Redis NoDb cache client is unavailable`.
+- **Operator-visible impact**: repeated mapping-job failures, manual retries, and queue/operator toil during Redis readiness windows.
+- **Scope boundary**: Fix confirmed Redis NoDb cache/lock availability and worker-startup timing paths without broad queue-topology or landuse business-logic refactors.
+
+## Precedent Discovery (Required)
+Primary discovery sources used:
+- `PROJECT_TRACKER.md` (`Done` entries for related hardening work).
+- `docs/work-packages/20260411_rq_operator_experience_hardening/`.
+- `docs/work-packages/20260424_landuse_legacy_flask_state_route_removal/`.
+- `docs/standards/hardening-lifecycle-standard.md`.
+
+Reuse vs intentional difference:
+- **Reused**: explicit failure contracts (no silent fallback), targeted regression-first hardening, and independent code/QA/security review closure discipline.
+- **Reused**: worker/operator ergonomics pattern of fail-fast config validation before runtime work.
+- **Intentionally different**: this package focused on Redis client lifecycle + lock ownership + startup readiness contracts, not API surface migration/cutover policy.
+- **Intentionally different**: this package accepted temporary startup-readiness calluses with explicit sunset review dates, instead of permanent behavior expansion.
+
+## Hardening Hypotheses and Signals
+Observation window for production signals: **2026-04-24 to 2026-05-24** (30 days).
+
+| ID | Hypothesis | Primary health signal(s) | Guardrail signal(s) |
+| --- | --- | --- | --- |
+| H1 | If NoDb Redis reconnect helpers clear stale globals and reconnect deterministically, `Redis NoDb cache client is unavailable` runtime failures should stop recurring on normal worker startup paths. | Count of incident-signature failures in RQ job traces trends to `0` over the observation window. | No increase in lock/cache client initialization crash loops; queue startup remains successful on both default and batch workers. |
+| H2 | If `dump()` requires matching distributed lock ownership, cross-owner stale writes and force-unlock corruption risks are eliminated. | No new lock-ownership corruption incidents; no regressions in lock-related NoDb tests. | No material increase in false-positive persistence failures under normal lock ownership. |
+| H3 | If worker startup waits for Redis readiness (plus optional delay), startup/AOF timing failures reduce without introducing sustained queue latency. | Startup-time worker failures during Redis warm-up windows trend to `0`. | Worker start latency remains within acceptable operator envelope; startup timeout events stay rare/absent. |
+
+## Redis NoDb Cache Connection Configuration Strategy (Post-Incident)
+Strategy intent: keep Redis NoDb cache writes fail-fast and observable across local-Redis (`wepp1`) and external-Redis worker hosts (`wepp2`).
+
+Current wiring points:
+- NoDb cache pool instantiation: `wepppy/nodb/base.py` (`RedisDB.NODB_CACHE` pool kwargs).
+- Shared Redis kwargs builder: `wepppy/config/redis_settings.py::redis_connection_kwargs`.
+- Runtime library behavior baseline: redis-py `6.2.0` in the container runtime.
+
+Recommended connection posture for `RedisDB.NODB_CACHE` pool:
+
+```python
+pool_kwargs = redis_connection_kwargs(
+    RedisDB.NODB_CACHE,
+    decode_responses=True,
+    extra={
+        "max_connections": 50,
+        "socket_timeout": 5,
+        "socket_connect_timeout": 5,
+        "socket_keepalive": True,
+        "health_check_interval": 30,
+        "retry_on_timeout": True,
+    },
+)
+```
+
+Rationale:
+- `socket_connect_timeout`/`socket_timeout` bound dead/stale path waits and prevent multi-minute hangs.
+- `health_check_interval` enables pre-command connection health checks instead of discovering stale sockets only on critical writes.
+- `socket_keepalive=True` enables TCP keepalive at socket level; this helps long-lived idle pooled connections.
+- `retry_on_timeout=True` in redis-py 6.2.0 yields one bounded retry path for timeout-class failures; treat this as transitional because client-level `retry_on_timeout` is deprecated in newer docs and should eventually move to explicit retry policy configuration.
+
+Host-level keepalive alignment:
+- Current Linux defaults (`tcp_keepalive_time=7200`, `tcp_keepalive_intvl=75`, `tcp_keepalive_probes=9`) are too slow for short idle-NAT failure detection.
+- Follow-up should tune either host sysctls or per-socket `socket_keepalive_options` (Linux constants) for worker hosts that traverse external network paths.
+
+Validation plan for this strategy:
+- Add/extend unit tests to assert pool kwargs include timeout/health-check/keepalive settings for `RedisDB.NODB_CACHE`.
+- Run targeted NoDb regression suite (`tests/nodb/test_base_misc.py`, `tests/nodb/test_base_unit.py`) and worker startup contract tests.
+- Capture post-deploy evidence on `wepp1`/`wepp2` worker logs showing stable startup and absence of recurring signature.
+
 ## Objectives
 - Prevent stale or unavailable Redis clients from poisoning NoDb cache/lock behavior.
 - Ensure NoDb persistence only occurs while the current process still owns the distributed lock token.
@@ -83,6 +153,10 @@ This retroactive package captures the incident-response hardening completed afte
 - `docker/docker-compose.prod.worker.yml`
 - `tests/docker/unit/test_rq_worker_startup_contract.py`
 - `docker/README.md`
+- `docs/standards/hardening-lifecycle-standard.md`
+- `https://redis.readthedocs.io/en/v6.2.0/connections.html`
+- `https://redis.readthedocs.io/en/v6.2.0/_modules/redis/connection.html`
+- `https://redis.readthedocs.io/en/v6.2.0/_modules/redis/client.html`
 
 ## Deliverables
 - NoDb lock/cache reconnect and ownership hardening with targeted regression coverage.
@@ -94,6 +168,18 @@ This retroactive package captures the incident-response hardening completed afte
 ## Follow-up Work
 - Collect post-deploy live evidence from wepp1/wepp2 (`rq-worker`, `rq-worker-batch`) showing healthy startup and no recurring NoDb cache-unavailable failures.
 - Add targeted runtime alerting for recurring `Redis NoDb cache client is unavailable` signatures if incident frequency increases.
+- Execute the Redis NoDb cache connection configuration strategy above (timeouts/health-check/keepalive posture) with targeted regression and rollout evidence.
+
+## Callus Register and Sunset Criteria
+
+| Callus | Type | Status | Owner | Sunset criteria | Review date |
+| --- | --- | --- | --- | --- | --- |
+| `RQ_WORKER_STARTUP_DELAY_SECONDS` optional delay | Startup delay | Active | RQ operators + NoDb maintainers | If no Redis warm-up startup incidents are observed during the 30-day window, reduce default delay pressure (prefer readiness-only) and document any retained non-zero default with explicit rationale. | 2026-05-25 |
+| Redis readiness poll loop (`RQ_REDIS_WAIT_*`) | Readiness wrapper | Active | RQ operators | If startup failure rate remains `0` and measured startup latency is stable, evaluate reducing timeout budget or simplifying probe cadence while preserving fail-fast diagnostics. | 2026-05-25 |
+| `retry_on_timeout=True` in NoDb cache pool strategy | Retry callus | Proposed follow-up | NoDb maintainers | Replace with explicit retry policy wiring (or documented keep) once pool-level retry semantics are validated and tested for redis-py runtime version in production containers. | 2026-06-30 |
+
+Sunset enforcement:
+- If review dates pass without disposition, open a follow-up mini package documenting keep/reduce/remove decision and current signal evidence.
 
 ## Closure Notes
 

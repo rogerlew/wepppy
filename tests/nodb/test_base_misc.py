@@ -428,7 +428,14 @@ def test_ensure_redis_nodb_cache_client_reconnects_when_unset(monkeypatch):
     assert isinstance(client, _StubRedisClient)
     assert client.ping_calls == 1
     assert base.redis_nodb_cache_client is client
-    assert pool_calls
+    assert len(pool_calls) == 1
+    pool_kwargs = pool_calls[0]
+    assert pool_kwargs["max_connections"] == 50
+    assert pool_kwargs["socket_timeout"] == 5
+    assert pool_kwargs["socket_connect_timeout"] == 5
+    assert pool_kwargs["socket_keepalive"] is True
+    assert pool_kwargs["health_check_interval"] == 30
+    assert pool_kwargs["retry_on_timeout"] is True
 
 
 def test_ensure_redis_nodb_cache_client_retries_after_failed_ping(monkeypatch):
@@ -460,6 +467,13 @@ def test_ensure_redis_nodb_cache_client_retries_after_failed_ping(monkeypatch):
     assert base.redis_nodb_cache_client is None
     assert base.redis_nodb_cache_pool is None
     assert len(pool_calls) == 2
+    for pool_kwargs in pool_calls:
+        assert pool_kwargs["max_connections"] == 50
+        assert pool_kwargs["socket_timeout"] == 5
+        assert pool_kwargs["socket_connect_timeout"] == 5
+        assert pool_kwargs["socket_keepalive"] is True
+        assert pool_kwargs["health_check_interval"] == 30
+        assert pool_kwargs["retry_on_timeout"] is True
 
 
 def test_try_redis_get_log_level_missing_value_returns_default(monkeypatch):

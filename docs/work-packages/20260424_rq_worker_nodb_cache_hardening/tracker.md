@@ -6,9 +6,9 @@
 
 **Timezone**: UTC  
 **Started**: 2026-04-24 17:01 UTC  
-**Current phase**: Complete (retroactive capture closed)  
-**Last updated**: 2026-04-24 18:07 UTC  
-**Next milestone**: None (package complete).  
+**Current phase**: Complete (retroactive capture closed; in post-close observation window)  
+**Last updated**: 2026-04-25 (lifecycle alignment update)  
+**Next milestone**: Callus softening review checkpoint on 2026-05-25.  
 **Security impact**: `high`  
 **Dedicated security review**: `yes`  
 **Security artifact**: `docs/work-packages/20260424_rq_worker_nodb_cache_hardening/artifacts/2026-04-24_security_review.md`
@@ -33,6 +33,7 @@
 - [x] Expanded regression coverage for NoDb lock/cache edge cases and startup contract assertions (2026-04-24 17:48 UTC).
 - [x] Completed two independent review rounds and dispositioned all medium/high findings (2026-04-24 18:03 UTC).
 - [x] Retroactive work-package documentation completed and linked in project tracker (2026-04-24 18:07 UTC).
+- [x] Lifecycle-standard alignment update added (hypotheses/signals/callus sunset criteria/config strategy) (2026-04-25).
 
 ## Timeline
 
@@ -42,6 +43,18 @@
 - **2026-04-24 17:48 UTC** - First targeted validation pass green.
 - **2026-04-24 18:03 UTC** - Second-round review findings dispositioned; post-fix validation green.
 - **2026-04-24 18:07 UTC** - Retroactive package finalized and marked complete.
+- **2026-04-25** - Package/tracker updated to fully align with `docs/standards/hardening-lifecycle-standard.md` and add explicit callus review checkpoints.
+
+## Signal Snapshots (Baseline vs Post-Change)
+
+Observation window for production recurrence metrics: **2026-04-24 to 2026-05-24**.
+
+| Signal | Baseline (pre-hardening) | Immediate post-change evidence | Current status |
+| --- | --- | --- | --- |
+| Incident signature recurrence (`RuntimeError: Redis NoDb cache client is unavailable`) | Repeated failures during incident window; at least one confirmed failing job (`fceb9433-598e-499f-ae2b-24d38407399f`). | No recurrence observed in targeted validation runs; code path hardened with reconnect + startup gating. | Production recurrence monitoring active; 30-day window not yet complete. |
+| Lock ownership safety around `dump()` | Guard branch gaps and foreign-lock force-unlock risk identified in review. | Ownership guard + no-force-unlock behavior implemented; regression coverage expanded; targeted tests green. | Stable in test evidence; production incident watch remains active. |
+| Worker startup readiness contract | Worker startup could race Redis readiness/AOF windows. | Startup wrapper readiness probe + delay controls + compose env fail-fast contracts implemented and validated. | Stable in config/test evidence; post-deploy host evidence collection remains a follow-up. |
+| Review findings closure | Medium/high findings present across code/QA/security rounds. | All medium/high findings dispositioned in second-round closure artifacts. | Closed (`0` unresolved medium/high findings). |
 
 ## Decisions Log
 
@@ -97,12 +110,39 @@
 
 ## Risks and Issues
 
-| Risk | Severity | Likelihood | Mitigation | Status |
-|------|----------|------------|------------|--------|
-| Redis startup timing causes transient worker failures | High | Medium | Readiness polling + configurable startup delay | Closed |
-| NoDb writes under foreign lock ownership | High | Low-Medium | Token ownership check in `dump()` and no force unlock fallback | Closed |
-| Worker host misconfiguration (`RQ_REDIS_URL`) points to wrong Redis | Medium | Medium | Required env contract and startup URL validation | Closed |
-| Compose/docs drift after hardening edits | Medium | Medium | Contract tests + doc updates + second-round review | Closed |
+| Risk | Severity | Likelihood | Mitigation | Owner | Next review | Status |
+|------|----------|------------|------------|-------|-------------|--------|
+| Redis startup timing causes transient worker failures | High | Medium | Readiness polling + configurable startup delay | RQ operators | 2026-05-25 | Closed (monitoring) |
+| NoDb writes under foreign lock ownership | High | Low-Medium | Token ownership check in `dump()` and no force unlock fallback | NoDb maintainers | 2026-05-25 | Closed (monitoring) |
+| Worker host misconfiguration (`RQ_REDIS_URL`) points to wrong Redis | Medium | Medium | Required env contract and startup URL validation | Platform maintainers | 2026-05-25 | Closed (monitoring) |
+| Compose/docs drift after hardening edits | Medium | Medium | Contract tests + doc updates + second-round review | Package owner | 2026-05-25 | Closed |
+| 30-day observation window not yet complete for recurrence-rate confidence | Medium | Medium | Collect wepp1/wepp2 recurrence and worker startup evidence before softening decisions | RQ operators + package owner | 2026-05-25 | Open |
+
+## Callus Softening Plan (Required Follow-up)
+
+Target calluses:
+- `RQ_WORKER_STARTUP_DELAY_SECONDS` optional delay pressure.
+- Startup readiness timeout/interval envelope (`RQ_REDIS_WAIT_*`).
+- Proposed NoDb cache pool retry callus (`retry_on_timeout=True`) once implemented.
+
+Eligibility gate (planned check on 2026-05-25):
+- Incident signature recurrence remains at `0` during observation window.
+- No medium/high open findings from follow-up review.
+- Rollback path documented and low-risk.
+
+Softening hypothesis:
+- If startup delay pressure is reduced while retaining readiness checks, startup latency and config complexity should improve without reintroducing Redis-startup failures.
+
+Guardrails:
+- No increase in startup-time worker failures.
+- No increase in incident-signature recurrence.
+- No growth in manual operator retry burden.
+
+Rollback trigger:
+- Any reappearance of the incident signature or sustained startup timeout events after softening changes.
+
+Owner:
+- RQ operators (execution) with NoDb maintainers (code/config review) and package owner (documentation and tracker closure).
 
 ## Verification Checklist
 
