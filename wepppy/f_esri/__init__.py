@@ -10,7 +10,7 @@ class FEsriError(RuntimeError):
 
 
 DEFAULT_CONTAINER_NAME = os.getenv("F_ESRI_CONTAINER", "wepppy-f-esri")
-DEFAULT_TIMEOUT = int(os.getenv("F_ESRI_COMMAND_TIMEOUT", "600"))
+DEFAULT_TIMEOUT = int(os.getenv("F_ESRI_COMMAND_TIMEOUT", "1800"))
 OGR2OGR_BINARY = os.getenv("F_ESRI_OGR2OGR_BINARY", "ogr2ogr")
 
 
