@@ -170,29 +170,12 @@ async def build_climate(runid: str, config: str, request: Request) -> JSONRespon
         conn_kwargs = redis_connection_kwargs(RedisDB.RQ)
         with redis.Redis(**conn_kwargs) as redis_conn:
             q = Queue(connection=redis_conn)
-            job = q.enqueue_call(build_climate_rq, (runid,), timeout=RQ_TIMEOUT)
-            try:
-                if not isinstance(getattr(job, "meta", None), dict):
-                    job.meta = {}
-                job.meta["build_payload"] = copy.deepcopy(payload)
-                save_meta = getattr(job, "save_meta", None)
-                if callable(save_meta):
-                    save_meta()
-            except Exception as exc:
-                logger.exception(
-                    "rq-engine build-climate failed to persist payload snapshot",
-                    extra={"runid": runid, "config": config, "job_id": getattr(job, "id", None)},
-                )
-                delete = getattr(job, "delete", None)
-                if callable(delete):
-                    try:
-                        delete()
-                    except Exception:  # broad-except: best-effort cleanup after failed snapshot persistence
-                        logger.exception(
-                            "rq-engine build-climate failed to delete queued job after payload snapshot error",
-                            extra={"runid": runid, "config": config, "job_id": getattr(job, "id", None)},
-                        )
-                raise RuntimeError("Failed to persist build payload snapshot") from exc
+            job = q.enqueue_call(
+                build_climate_rq,
+                (runid,),
+                timeout=RQ_TIMEOUT,
+                meta={"build_payload": copy.deepcopy(payload)},
+            )
             prep.set_rq_job_id("build_climate_rq", job.id)
         return JSONResponse({"job_id": job.id})
     except (

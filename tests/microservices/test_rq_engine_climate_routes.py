@@ -22,7 +22,6 @@ def _stub_queue(
     monkeypatch: pytest.MonkeyPatch,
     *,
     job_id: str = "job-123",
-    fail_save_meta: bool = False,
 ) -> dict[str, list[object]]:
     state: dict[str, list[object]] = {"calls": [], "jobs": []}
 
@@ -30,16 +29,6 @@ def _stub_queue(
         def __init__(self) -> None:
             self.id = job_id
             self.meta: dict[str, object] = {}
-            self.save_meta_calls = 0
-            self.delete_calls = 0
-
-        def save_meta(self) -> None:
-            if fail_save_meta:
-                raise RuntimeError("save_meta failed")
-            self.save_meta_calls += 1
-
-        def delete(self) -> None:
-            self.delete_calls = getattr(self, "delete_calls", 0) + 1
 
     class DummyQueue:
         def __init__(self, *args, **kwargs) -> None:
@@ -48,6 +37,8 @@ def _stub_queue(
         def enqueue_call(self, *args, **kwargs):
             state["calls"].append((args, kwargs))
             job = DummyJob()
+            if isinstance(kwargs.get("meta"), dict):
+                job.meta = dict(kwargs["meta"])
             state["jobs"].append(job)
             return job
 
@@ -174,44 +165,9 @@ def test_build_climate_enqueues_job(monkeypatch: pytest.MonkeyPatch) -> None:
     assert enqueue_args[0] is climate_routes.build_climate_rq
     assert enqueue_args[1] == ("run-1",)
     assert "kwargs" not in enqueue_kwargs
+    assert enqueue_kwargs["meta"] == {"build_payload": request_payload}
     queued_job = queue_state["jobs"][0]
     assert getattr(queued_job, "meta") == {"build_payload": request_payload}
-    assert getattr(queued_job, "save_meta_calls") == 1
-
-
-def test_build_climate_payload_snapshot_failure_returns_error(
-    monkeypatch: pytest.MonkeyPatch,
-) -> None:
-    _stub_auth(monkeypatch)
-    queue_state = _stub_queue(monkeypatch, job_id="job-err", fail_save_meta=True)
-    prep_state = _stub_prep(monkeypatch)
-    monkeypatch.setattr(climate_routes, "get_wd", lambda runid: "/tmp/run")
-
-    class DummyClimate:
-        run_group = "default"
-
-        def parse_inputs(self, payload) -> None:
-            return None
-
-    monkeypatch.setattr(
-        climate_routes.Climate,
-        "getInstance",
-        lambda wd: DummyClimate(),
-    )
-
-    request_payload = {
-        "climate_mode": "9",
-        "observed_start_year": "1985",
-        "observed_end_year": "2024",
-    }
-    with TestClient(rq_engine.app) as client:
-        response = client.post("/api/runs/run-1/cfg/build-climate", json=request_payload)
-
-    assert response.status_code == 500
-    assert response.json()["error"]["message"] == "Error building climate"
-    assert prep_state["jobs"] == []
-    queued_job = queue_state["jobs"][0]
-    assert getattr(queued_job, "delete_calls") == 1
 
 
 def test_build_climate_propagates_nodir_preflight_errors(monkeypatch: pytest.MonkeyPatch) -> None:
