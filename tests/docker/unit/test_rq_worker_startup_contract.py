@@ -101,3 +101,6 @@ def test_rq_worker_startup_script_uses_url_based_probe() -> None:
     assert "Invalid worker Redis URL" in script_text
     assert "RQ_REDIS_PROBE_CONNECT_TIMEOUT_SECONDS" in script_text
     assert "RQ_REDIS_PROBE_SOCKET_TIMEOUT_SECONDS" in script_text
+    assert "/opt/venv/bin/python - <<'PY'" in script_text
+    assert '/opt/venv/bin/python - "$redis_url"' in script_text
+    assert '/opt/venv/bin/python - "$startup_delay"' in script_text

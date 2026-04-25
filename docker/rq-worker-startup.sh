@@ -17,7 +17,7 @@ probe_connect_timeout="${RQ_REDIS_PROBE_CONNECT_TIMEOUT_SECONDS:-5}"
 probe_socket_timeout="${RQ_REDIS_PROBE_SOCKET_TIMEOUT_SECONDS:-5}"
 
 redis_url="$(
-  python - <<'PY'
+  /opt/venv/bin/python - <<'PY'
 import os
 import sys
 from urllib.parse import urlparse
@@ -37,7 +37,7 @@ print(redis_url(RedisDB.RQ))
 PY
 )"
 
-python - "$redis_url" "$wait_timeout" "$wait_interval" "$probe_connect_timeout" "$probe_socket_timeout" <<'PY'
+/opt/venv/bin/python - "$redis_url" "$wait_timeout" "$wait_interval" "$probe_connect_timeout" "$probe_socket_timeout" <<'PY'
 import sys
 import time
 
@@ -78,7 +78,7 @@ else:
     raise SystemExit(1)
 PY
 
-python - "$startup_delay" <<'PY'
+/opt/venv/bin/python - "$startup_delay" <<'PY'
 import sys
 import time
 
