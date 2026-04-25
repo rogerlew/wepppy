@@ -1,0 +1,46 @@
+{
+  "name": "watershed_profile_like",
+  "relative_path": "watershed.nodb",
+  "payload": {
+    "py/object": "wepppy.nodb.core.watershed.Watershed",
+    "py/state": {
+      "wd": "/wc1/runs/st/stresscache-000001",
+      "_config": "disturbed-wbt-profile.cfg",
+      "_mods": ["ash", "disturbed", "debris_flow"],
+      "commit_hash": "unknown",
+      "_subs_summary": {
+        "21": {"area": 31812.4, "channels": 2},
+        "22": {"area": 45110.9, "channels": 3},
+        "23": {"area": 50733.1, "channels": 2}
+      },
+      "_chns_summary": {
+        "24": {"length": 1330.4, "slope": 0.041}
+      },
+      "_wsarea": 127656.4,
+      "_impoundment_n": 0,
+      "_centroid": {"py/tuple": [-116.6146, 45.2211]},
+      "_outlet_top_id": null,
+      "_set_extent_mode": "auto",
+      "_map_bounds_text": "-116.66,45.19,-116.58,45.25",
+      "_wepp_chn_type": "parabolic",
+      "_clip_hillslope_length": 300.0,
+      "_clip_hillslopes": false,
+      "_bieger2015_widths": true,
+      "_walk_flowpaths": true,
+      "_max_points": 200000,
+      "_delineation_backend": "wbt",
+      "_abstraction_backend": "peridot",
+      "_mofe_nsegments": 0,
+      "_mofe_target_length": 250.0,
+      "_mofe_buffer": false,
+      "_mofe_buffer_length": 0.0,
+      "_mofe_max_ofes": 12,
+      "_nodb_mtime": 1713916240.119,
+      "_csa": 0.01,
+      "_mcl": 0.0,
+      "_sub_area": 0.0,
+      "_chn_area": 0.0,
+      "_edge_hillslopes": []
+    }
+  }
+}

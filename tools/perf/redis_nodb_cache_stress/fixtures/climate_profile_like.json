@@ -1,0 +1,47 @@
+{
+  "name": "climate_profile_like",
+  "relative_path": "climate.nodb",
+  "payload": {
+    "py/object": "wepppy.nodb.core.climate.Climate",
+    "py/state": {
+      "wd": "/wc1/runs/st/stresscache-000001",
+      "_config": "disturbed-wbt-profile.cfg",
+      "_mods": ["ash", "disturbed", "debris_flow", "observed"],
+      "commit_hash": "unknown",
+      "_input_years": 6,
+      "_climatestation_mode": {"py/reduce": [{"py/type": "wepppy.nodb.core.climate.ClimatestationMode"}, {"py/tuple": [2]}]},
+      "_climatestation": "id106152",
+      "_climate_mode": {"py/reduce": [{"py/type": "wepppy.nodb.core.climate.ClimateMode"}, {"py/tuple": [1]}]},
+      "_climate_spatialmode": {"py/reduce": [{"py/type": "wepppy.nodb.core.climate.ClimateSpatialMode"}, {"py/tuple": [1]}]},
+      "_cligen_seed": null,
+      "_observed_start_year": 2000,
+      "_observed_end_year": 2005,
+      "_future_start_year": 2030,
+      "_future_end_year": 2035,
+      "_ss_batch": false,
+      "_ss_batch_storms": [],
+      "_precip_scaling_mode": "none",
+      "_precip_scale_factor": 1.0,
+      "_precip_scale_factor_map": {},
+      "_precip_scaling_reference": "daily",
+      "_precip_monthly_scale_factors": [1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0],
+      "_orig_cli_fn": "/wc1/runs/st/stresscache-000001/climate/observed.cli",
+      "monthlies": {
+        "precip_mm": [98.2, 74.3, 68.1, 57.4, 44.1, 29.2, 12.4, 13.8, 25.5, 51.9, 92.0, 108.1],
+        "tmax_c": [2.2, 5.1, 8.9, 12.8, 17.2, 22.4, 28.8, 28.2, 22.0, 14.1, 7.1, 2.9],
+        "tmin_c": [-4.8, -2.4, -0.7, 1.9, 4.4, 8.2, 11.7, 11.2, 7.9, 3.1, -0.9, -3.7]
+      },
+      "par_fn": "/wc1/runs/st/stresscache-000001/climate/observed.par",
+      "cli_fn": "/wc1/runs/st/stresscache-000001/climate/observed.cli",
+      "sub_par_fns": {},
+      "sub_cli_fns": {},
+      "_closest_stations": ["id106152", "id106111", "id106304"],
+      "_heuristic_stations": ["id106152"],
+      "_cligen_db": "daymet/v4",
+      "_observed_clis_wc": [],
+      "_future_clis_wc": [],
+      "_use_gridmet_wind_when_applicable": true,
+      "_catalog_id": "daymet-v4-conus"
+    }
+  }
+}
