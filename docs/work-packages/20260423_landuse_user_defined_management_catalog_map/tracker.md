@@ -7,7 +7,7 @@
 **Timezone**: UTC  
 **Started**: 2026-04-24 02:32 UTC  
 **Current phase**: Complete  
-**Last updated**: 2026-04-24 23:03 UTC  
+**Last updated**: 2026-04-25 06:24 UTC  
 **Next milestone**: Archived (ExecPlan moved to `prompts/completed/`).  
 **Security impact**: `high`  
 **Dedicated security review**: `yes`  
@@ -43,6 +43,7 @@
 - [x] Closed dedicated security findings with no unresolved medium/high items (2026-04-24 07:47 UTC).
 - [x] Archived ExecPlan to `prompts/completed/landuse_user_defined_management_catalog_map_execplan.md` (2026-04-24 07:47 UTC).
 - [x] Post-closeout contract adjustment: `landuseopts` now excludes only `UnDisturbed/null.man` and deduplicates by `ManagementFile` (does not exclude solely on `IsTreatment`) with regression coverage in `tests/nodb/test_landuse_catalog.py` (2026-04-24 23:03 UTC).
+- [x] Post-closeout contract refinement: `landuseopts` dedupe relaxed to unique `(Description, ManagementFile)` pairs so distinct descriptions sharing the same management file remain available (2026-04-25 06:24 UTC).
 
 ## Timeline
 
@@ -56,6 +57,7 @@
 - **2026-04-24 07:48 UTC** - Validation, RQ graph sanity check, security closeout, and package closure updates completed.
 - **2026-04-24 08:09 UTC** - Full-suite sanity attempt documented as environment-blocked (`SECRET_KEY` requirement in local `.venv`; `wctl` run exited `137`).
 - **2026-04-24 23:03 UTC** - Post-closeout `landuseopts` filtering semantics revised to canonical `ManagementFile` rules (`UnDisturbed/null.man` exclusion + dedup) with targeted regression tests.
+- **2026-04-25 06:24 UTC** - Post-closeout `landuseopts` dedupe refined to unique `(Description, ManagementFile)` pairs to preserve distinct option labels that share a management file.
 
 ## Decisions Log
 
@@ -122,6 +124,19 @@
 **Decision**: Option 2.
 
 **Impact**: Keeps `disturbed.json` as canonical mapping source while preventing sentinel/null pseudo-management rows from leaking into user-facing options.
+
+---
+
+### 2026-04-25 06:24 UTC: Relax `landuseopts` dedupe to preserve distinct labels
+**Context**: Dedupe by `ManagementFile` alone removed semantically distinct options that intentionally share the same management file.
+
+**Options considered**:
+1. Keep dedupe strictly on `ManagementFile`.
+2. Deduplicate by unique `(Description, ManagementFile)` pairs.
+
+**Decision**: Option 2.
+
+**Impact**: Prevents duplicate spam while preserving user-visible label distinctions and keeping `disturbed.json` canonical.
 
 ## Risks and Issues
 
@@ -235,6 +250,28 @@
 - `tests/weppcloud/routes/test_landuse_bp.py` -> `22 passed`
 - `tests/weppcloud/routes/test_pure_controls_render.py` -> `46 passed`
 
+### 2026-04-25 06:24 UTC: Post-closeout `landuseopts` dedupe refinement
+**Agent/Contributor**: Codex
+
+**Work completed**:
+- Updated `wepppy/nodb/locales/landuse_catalog.py` dedupe key from `ManagementFile` to `(Description, ManagementFile)`.
+- Updated `tests/nodb/test_landuse_catalog.py` to assert:
+  - exact duplicate description/file rows are deduped,
+  - distinct descriptions that share a file remain present,
+  - `UnDisturbed/null.man` remains excluded.
+- Updated package contract language to match the refined dedupe rule.
+
+**Blockers encountered**:
+- None.
+
+**Next steps**:
+1. None required unless broader cross-template option-normalization is requested.
+
+**Test results**:
+- `wctl run-pytest tests/nodb/test_landuse_catalog.py --maxfail=1` -> `4 passed`
+- `wctl run-pytest tests/weppcloud/routes/test_landuse_bp.py --maxfail=1` -> `22 passed`
+- `wctl run-pytest tests/weppcloud/routes/test_pure_controls_render.py --maxfail=1` -> `46 passed`
+
 ## Communication Log
 
 ### 2026-04-24 02:32 UTC: Work-package request
@@ -251,3 +288,8 @@
 **Participants**: User, Codex  
 **Question/Topic**: Clarify why `Prescribed Fire` appears in options and align exclusion semantics.  
 **Outcome**: Confirmed canonical source behavior and shipped contract correction (`UnDisturbed/null.man` exclusion + `ManagementFile` dedup, no `IsTreatment` exclusion).
+
+### 2026-04-25 06:24 UTC: Post-closeout dedupe adjustment
+**Participants**: User, Codex  
+**Question/Topic**: Relax dedupe strictness so distinct descriptions sharing one management file are retained.  
+**Outcome**: Shipped `(Description, ManagementFile)` pair-based dedupe with updated regression coverage and docs.

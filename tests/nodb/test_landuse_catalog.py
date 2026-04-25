@@ -47,7 +47,7 @@ def test_landcover_datasets_earth_locale():
     assert keys[-1] == "locales/earth/C3Slandcover/1992"
 
 
-def test_management_catalog_excludes_null_and_dedups_by_management_file(monkeypatch):
+def test_management_catalog_excludes_null_and_dedups_by_description_management_pair(monkeypatch):
     def _fake_load_map(_mapping):
         return {
             "100": {
@@ -58,6 +58,11 @@ def test_management_catalog_excludes_null_and_dedups_by_management_file(monkeypa
             "101": {
                 "Key": "101",
                 "Description": "Open Water Duplicate",
+                "ManagementFile": "GeoWEPP/grass.man",
+            },
+            "102": {
+                "Key": "102",
+                "Description": "Open Water",
                 "ManagementFile": "GeoWEPP/grass.man",
             },
             "110": {
@@ -79,8 +84,14 @@ def test_management_catalog_excludes_null_and_dedups_by_management_file(monkeypa
     datasets = available_landuse_datasets(None, [], [])
     mapping_datasets = [dataset for dataset in datasets if dataset.kind == "mapping"]
 
-    assert [dataset.key for dataset in mapping_datasets] == ["100", "110"]
+    assert [dataset.key for dataset in mapping_datasets] == ["100", "101", "110"]
+    assert [dataset.description for dataset in mapping_datasets] == [
+        "Open Water",
+        "Open Water Duplicate",
+        "Prescribed Fire",
+    ]
     assert [dataset.management_file for dataset in mapping_datasets] == [
+        "GeoWEPP/grass.man",
         "GeoWEPP/grass.man",
         "UnDisturbed/Prescribed_Fire.man",
     ]

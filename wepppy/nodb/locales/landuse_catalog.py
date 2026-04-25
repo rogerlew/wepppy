@@ -119,20 +119,19 @@ def _load_catalog(mapping: Optional[str]) -> Tuple[LanduseDataset, ...]:
     """Load and cache the underlying management map as dataset descriptors."""
     records = load_map(mapping)
     datasets: List[LanduseDataset] = []
-    seen_management_files = set()
+    seen_description_management_pairs = set()
 
     for record in records.values():
         management_file = record.get("ManagementFile", "") or ""
         if management_file in _EXCLUDED_MANAGEMENT_FILES:
             continue
 
-        if management_file and management_file in seen_management_files:
-            continue
-        if management_file:
-            seen_management_files.add(management_file)
-
         key = str(record.get("Key"))
         description = record.get("Description", "") or ""
+        description_management_pair = (description, management_file)
+        if description_management_pair in seen_description_management_pairs:
+            continue
+        seen_description_management_pairs.add(description_management_pair)
         datasets.append(
             LanduseDataset(
                 key=key,
