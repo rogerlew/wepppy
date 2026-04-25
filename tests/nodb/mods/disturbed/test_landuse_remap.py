@@ -15,8 +15,29 @@ class _NoopLogger:
     def info(self, *_args: object, **_kwargs: object) -> None:
         return
 
+    def debug(self, *_args: object, **_kwargs: object) -> None:
+        return
+
     def warning(self, *_args: object, **_kwargs: object) -> None:
         return
+
+
+class _RecordingLogger(_NoopLogger):
+    def __init__(self) -> None:
+        self.info_messages: list[str] = []
+        self.debug_messages: list[str] = []
+
+    @staticmethod
+    def _format(message: str, *args: object) -> str:
+        if args:
+            return message % args
+        return str(message)
+
+    def info(self, message: str, *args: object, **_kwargs: object) -> None:
+        self.info_messages.append(self._format(message, *args))
+
+    def debug(self, message: str, *args: object, **_kwargs: object) -> None:
+        self.debug_messages.append(self._format(message, *args))
 
 
 class _ManagementSummary:
@@ -27,11 +48,11 @@ class _ManagementSummary:
 class _FakeLanduse:
     _instance: "_FakeLanduse | None" = None
 
-    def __init__(self, domlc_d, managements, domlc_mofe_d=None) -> None:
+    def __init__(self, domlc_d, managements, domlc_mofe_d=None, logger=None) -> None:
         self.domlc_d = domlc_d
         self.managements = managements
         self.domlc_mofe_d = domlc_mofe_d or {}
-        self.logger = _NoopLogger()
+        self.logger = logger or _NoopLogger()
         self.build_managements_calls = 0
 
     @classmethod
@@ -108,6 +129,67 @@ def test_remap_landuse_applies_burn_classes_and_respects_flags(
     assert landuse.build_managements_calls == 1
 
 
+def test_remap_landuse_defers_rebuild_when_requested_and_compacts_info_logging(
+    disturbed_factory,
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    disturbed, _ = disturbed_factory("remap-landuse-deferred")
+    disturbed._burn_shrubs = True
+    disturbed._burn_grass = False
+    logger = _RecordingLogger()
+
+    landuse = _FakeLanduse(
+        domlc_d={"101": "forest-dom", "102": "shrub-dom", "103": "grass-dom"},
+        managements={
+            "forest-dom": _ManagementSummary("forest"),
+            "shrub-dom": _ManagementSummary("shrub"),
+            "grass-dom": _ManagementSummary("tall grass"),
+        },
+        logger=logger,
+    )
+    _FakeLanduse._instance = landuse
+
+    monkeypatch.setattr(Disturbed, "landuse_instance", property(lambda self: landuse))
+    monkeypatch.setattr(
+        Disturbed,
+        "get_disturbed_key_lookup",
+        lambda self: {
+            "forest_low_sev_fire": "forest-low",
+            "forest_moderate_sev_fire": "forest-mod",
+            "forest_high_sev_fire": "forest-high",
+            "shrub_low_sev_fire": "shrub-low",
+            "shrub_moderate_sev_fire": "shrub-mod",
+            "shrub_high_sev_fire": "shrub-high",
+            "grass_low_sev_fire": "grass-low",
+            "grass_moderate_sev_fire": "grass-mod",
+            "grass_high_sev_fire": "grass-high",
+        },
+    )
+    monkeypatch.setattr(
+        disturbed_module,
+        "identify_mode_single_raster_key",
+        lambda **_kwargs: {"101": 1, "102": 2, "103": 3},
+    )
+    monkeypatch.setattr(
+        disturbed_module,
+        "Watershed",
+        SimpleNamespace(getInstance=lambda _wd: SimpleNamespace(subwta="subwta.tif")),
+    )
+    monkeypatch.setattr(Disturbed, "_calc_sbs_coverage", lambda self, _sbs: None)
+    monkeypatch.setattr(
+        Disturbed,
+        "get_sbs",
+        lambda self: SimpleNamespace(class_pixel_map={"1": "131", "2": "132", "3": "133"}),
+    )
+
+    disturbed.remap_landuse(rebuild_managements=False)
+
+    assert landuse.build_managements_calls == 0
+    assert any("Disturbed remap summary:" in message for message in logger.info_messages)
+    assert not any("topaz_id=" in message for message in logger.info_messages)
+    assert any("topaz_id=" in message for message in logger.debug_messages)
+
+
 def test_remap_mofe_landuse_maps_burned_classes(
     disturbed_factory,
     monkeypatch: pytest.MonkeyPatch,
@@ -148,6 +230,49 @@ def test_remap_mofe_landuse_maps_burned_classes(
     assert landuse.domlc_mofe_d["101"]["2"] == "120"
     assert landuse.domlc_mofe_d["101"]["3"] == "129"
     assert landuse.build_managements_calls == 1
+
+
+def test_remap_mofe_landuse_defers_rebuild_when_requested(
+    disturbed_factory,
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    disturbed, _ = disturbed_factory("remap-mofe-deferred")
+    logger = _RecordingLogger()
+
+    landuse = _FakeLanduse(
+        domlc_d={},
+        managements={
+            "forest-dom": _ManagementSummary("forest"),
+            "shrub-dom": _ManagementSummary("shrub"),
+            "grass-dom": _ManagementSummary("tall grass"),
+        },
+        domlc_mofe_d={"101": {"1": "forest-dom", "2": "shrub-dom", "3": "grass-dom"}},
+        logger=logger,
+    )
+    _FakeLanduse._instance = landuse
+
+    monkeypatch.setattr(Disturbed, "landuse_instance", property(lambda self: landuse))
+    monkeypatch.setattr(
+        disturbed_module,
+        "Watershed",
+        SimpleNamespace(
+            getInstance=lambda _wd: SimpleNamespace(subwta="subwta.tif", mofe_map="mofe.map")
+        ),
+    )
+    monkeypatch.setattr(Disturbed, "_calc_sbs_coverage", lambda self, _sbs: None)
+    monkeypatch.setattr(
+        Disturbed,
+        "get_sbs",
+        lambda self: SimpleNamespace(
+            build_lcgrid=lambda _subwta, _mofe_map: {"101": {"1": "131", "2": "132", "3": "133"}}
+        ),
+    )
+
+    disturbed.remap_mofe_landuse(rebuild_managements=False)
+
+    assert landuse.build_managements_calls == 0
+    assert any("Disturbed MOFE remap summary:" in message for message in logger.info_messages)
+    assert any("mofe topaz_id=" in message for message in logger.debug_messages)
 
 
 def test_remap_landuse_returns_early_without_sbs(

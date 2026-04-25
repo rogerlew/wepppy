@@ -1,0 +1,118 @@
+{
+  "generated_at_utc": "2026-04-25T01:08:03+00:00",
+  "iterations_per_mode": 5,
+  "lanes": [
+    {
+      "lane_id": "lane1_build_managements_consolidation",
+      "run_id": "apprehensive-caw-simulated",
+      "url": "https://wc.bearhive.duckdns.org/weppcloud/runs/apprehensive-caw/disturbed9002-10-mofe/",
+      "local_root": "/tmp/simulated/apprehensive-caw",
+      "iterations": 5,
+      "baseline_mode": "Legacy duplicate rebuild chain emulation",
+      "optimized_mode": "Deferred remap rebuilds + one final build",
+      "baseline_samples_s": [
+        0.09053348889574409,
+        0.09057640610262752,
+        0.09061523340642452,
+        0.09040825208649039,
+        0.09035164304077625
+      ],
+      "baseline_mean_s": 0.09049700470641256,
+      "baseline_std_s": 0.00011249527176529672,
+      "optimized_samples_s": [
+        0.030242559034377337,
+        0.03039425890892744,
+        0.030329310800880194,
+        0.030238615348935127,
+        0.030228260904550552
+      ],
+      "optimized_mean_s": 0.03028660099953413,
+      "optimized_std_s": 7.256072737185927e-05,
+      "delta_pct": -66.53303488022732,
+      "baseline_metrics": {
+        "build_managements_calls": 3
+      },
+      "optimized_metrics": {
+        "build_managements_calls": 1
+      },
+      "parity_baseline_elapsed_s": 0.09043091302737594,
+      "parity_optimized_elapsed_s": 0.03017073916271329
+    },
+    {
+      "lane_id": "lane2_logging_compaction",
+      "run_id": "apprehensive-caw-simulated",
+      "url": "https://wc.bearhive.duckdns.org/weppcloud/runs/apprehensive-caw/disturbed9002-10-mofe/",
+      "local_root": "/tmp/simulated/apprehensive-caw",
+      "iterations": 5,
+      "baseline_mode": "Verbose-info emulation (debug routed to info)",
+      "optimized_mode": "Compact INFO summaries with DEBUG detail",
+      "baseline_samples_s": [
+        0.018186363857239485,
+        0.12495526019483805,
+        0.01560526667162776,
+        0.015407685656100512,
+        0.014443685300648212
+      ],
+      "baseline_mean_s": 0.0377196523360908,
+      "baseline_std_s": 0.048785861653669105,
+      "optimized_samples_s": [
+        0.016119884327054024,
+        0.015275395940989256,
+        0.015178762841969728,
+        0.013785931281745434,
+        0.01408972917124629
+      ],
+      "optimized_mean_s": 0.014889940712600946,
+      "optimized_std_s": 0.0009492010567543117,
+      "delta_pct": -60.5247138018979,
+      "baseline_metrics": {
+        "build_managements_calls": 3,
+        "info_log_count": 12008,
+        "debug_log_count": 0
+      },
+      "optimized_metrics": {
+        "build_managements_calls": 1,
+        "info_log_count": 6,
+        "debug_log_count": 12004
+      },
+      "parity_baseline_elapsed_s": 0.01420939201489091,
+      "parity_optimized_elapsed_s": 0.014699378982186317
+    },
+    {
+      "lane_id": "lane3_pair_count_reuse_guard",
+      "run_id": "apprehensive-caw-simulated",
+      "url": "https://wc.bearhive.duckdns.org/weppcloud/runs/apprehensive-caw/disturbed9002-10-mofe/",
+      "local_root": "/tmp/simulated/apprehensive-caw",
+      "iterations": 5,
+      "baseline_mode": "Forced pair-count miss between consecutive passes",
+      "optimized_mode": "Guarded same-cycle reuse",
+      "baseline_samples_s": [
+        0.04057830199599266,
+        0.040474374778568745,
+        0.04059199383482337,
+        0.040873152669519186,
+        0.040974325966089964
+      ],
+      "baseline_mean_s": 0.04069842984899878,
+      "baseline_std_s": 0.00021366254480103332,
+      "optimized_samples_s": [
+        0.02034725621342659,
+        0.02047618106007576,
+        0.020706620067358017,
+        0.020749338902533054,
+        0.020779307931661606
+      ],
+      "optimized_mean_s": 0.020611740835011005,
+      "optimized_std_s": 0.00018996223074049356,
+      "delta_pct": -49.35494830762354,
+      "baseline_metrics": {
+        "pair_count_call_count": 2
+      },
+      "optimized_metrics": {
+        "pair_count_call_count": 1
+      },
+      "parity_baseline_elapsed_s": 0.04097353108227253,
+      "parity_optimized_elapsed_s": 0.020719274878501892
+    }
+  ]
+}

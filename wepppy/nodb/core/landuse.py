@@ -51,6 +51,7 @@ Warning:
 
 # standard library
 import csv
+import hashlib
 import json
 from concurrent.futures import FIRST_COMPLETED, wait
 from concurrent.futures.process import BrokenProcessPool
@@ -573,6 +574,9 @@ class Landuse(NoDbBase):
 
             self._hillslope_cancovs = None
             self._hillslope_mofe_cancovs = None
+            self._defer_disturbed_management_rebuild = False
+            self._mofe_pair_count_cache = None
+            self._mofe_pair_count_cache_signature = None
 
     @classmethod
     def _post_instance_loaded(cls, instance: 'Landuse') -> 'Landuse':
@@ -589,6 +593,13 @@ class Landuse(NoDbBase):
                         dom = str(dom)
                     mofe_d[_id] = dom
                 instance.domlc_mofe_d[topaz_id] = mofe_d
+
+        if not hasattr(instance, '_defer_disturbed_management_rebuild'):
+            instance._defer_disturbed_management_rebuild = False
+        if not hasattr(instance, '_mofe_pair_count_cache'):
+            instance._mofe_pair_count_cache = None
+        if not hasattr(instance, '_mofe_pair_count_cache_signature'):
+            instance._mofe_pair_count_cache_signature = None
 
         return instance
 
@@ -1140,6 +1151,7 @@ class Landuse(NoDbBase):
                 # MOFE assignments are produced later by _build_multiple_ofe(); clear
                 # stale values now so pre-build passes cannot run pair-count work.
                 self.domlc_mofe_d = None
+                self._invalidate_mofe_pair_count_cache(reason='landuse_build_cycle_reset')
 
         if not self.multi_ofe:
             self.build_managements()
@@ -1158,10 +1170,16 @@ class Landuse(NoDbBase):
             self._build_multiple_ofe()
 
         self = Landuse.getInstance(wd)
-        self.trigger(TriggerEvents.LANDUSE_DOMLC_COMPLETE)
-
-        self = Landuse.getInstance(wd)
-        self.build_managements()
+        with self.locked():
+            self._defer_disturbed_management_rebuild = True
+        try:
+            self.trigger(TriggerEvents.LANDUSE_DOMLC_COMPLETE)
+            self = Landuse.getInstance(wd)
+            self.build_managements()
+        finally:
+            self = Landuse.getInstance(wd)
+            with self.locked():
+                self._defer_disturbed_management_rebuild = False
 
         self.set_cover_defaults()
         if rap:
@@ -1792,6 +1810,57 @@ class Landuse(NoDbBase):
     def coverage_percentages(self) -> Tuple[float, ...]:
         return _COVERAGE_PERCENTAGES
 
+    @staticmethod
+    def _mofe_pair_count_file_signature(path: str) -> Tuple[str, bool, Optional[int], Optional[int]]:
+        path_s = str(path)
+        if not _exists(path_s):
+            return path_s, False, None, None
+
+        try:
+            stat = os.stat(path_s)
+        except OSError:
+            return path_s, False, None, None
+
+        return path_s, True, int(stat.st_size), int(stat.st_mtime_ns)
+
+    @staticmethod
+    def _mofe_structure_signature(domlc_mofe_d: Mapping[str, Mapping[str, Any]]) -> str:
+        digest = hashlib.sha256()
+        for topaz_id in sorted(domlc_mofe_d.keys(), key=lambda value: str(value)):
+            digest.update(str(topaz_id).encode('utf-8'))
+            digest.update(b':')
+            ofe_map = domlc_mofe_d[topaz_id]
+            if isinstance(ofe_map, Mapping):
+                for ofe_id in sorted(ofe_map.keys(), key=lambda value: str(value)):
+                    digest.update(str(ofe_id).encode('utf-8'))
+                    digest.update(b',')
+            digest.update(b';')
+        return digest.hexdigest()
+
+    def _build_mofe_pair_count_signature(
+        self,
+        *,
+        subwta_fn: str,
+        mofe_map_fn: str,
+        domlc_mofe_d: Mapping[str, Mapping[str, Any]],
+    ) -> Tuple[
+        Tuple[str, bool, Optional[int], Optional[int]],
+        Tuple[str, bool, Optional[int], Optional[int]],
+        str,
+    ]:
+        return (
+            self._mofe_pair_count_file_signature(subwta_fn),
+            self._mofe_pair_count_file_signature(mofe_map_fn),
+            self._mofe_structure_signature(domlc_mofe_d),
+        )
+
+    def _invalidate_mofe_pair_count_cache(self, *, reason: str) -> None:
+        had_cache = getattr(self, '_mofe_pair_count_cache', None) is not None
+        self._mofe_pair_count_cache = None
+        self._mofe_pair_count_cache_signature = None
+        if had_cache:
+            self.logger.debug('Invalidated MOFE pair-count cache (%s)', reason)
+
     def build_managements(self, _map: Optional[str] = None) -> None:
         if _map is None:
             _map = self._resolve_effective_mapping_reference(self.mapping)
@@ -1851,13 +1920,31 @@ class Landuse(NoDbBase):
                 self.domlc_mofe_d = None
 
             if self.multi_ofe and isinstance(self.domlc_mofe_d, dict) and self.domlc_mofe_d:
-                pair_counts = count_intersecting_raster_key_pairs(
-                    key_fn=watershed.subwta,
-                    key2_fn=watershed.mofe_map,
-                    ignore_channels=False,
-                    ignore_keys=None,
-                    ignore_keys2=None,
+                pair_count_signature = self._build_mofe_pair_count_signature(
+                    subwta_fn=watershed.subwta,
+                    mofe_map_fn=watershed.mofe_map,
+                    domlc_mofe_d=self.domlc_mofe_d,
                 )
+                cached_signature = getattr(self, '_mofe_pair_count_cache_signature', None)
+                pair_counts = getattr(self, '_mofe_pair_count_cache', None)
+                if pair_counts is not None and cached_signature == pair_count_signature:
+                    self.logger.debug(
+                        'Reusing MOFE pair-count cache for unchanged same-cycle inputs'
+                    )
+                else:
+                    if pair_counts is not None:
+                        self._invalidate_mofe_pair_count_cache(
+                            reason='pair_count_input_signature_changed'
+                        )
+                    pair_counts = count_intersecting_raster_key_pairs(
+                        key_fn=watershed.subwta,
+                        key2_fn=watershed.mofe_map,
+                        ignore_channels=False,
+                        ignore_keys=None,
+                        ignore_keys2=None,
+                    )
+                    self._mofe_pair_count_cache = pair_counts
+                    self._mofe_pair_count_cache_signature = pair_count_signature
                 total_area = 0.0
                 for topaz_id in self.domlc_mofe_d:
                     topaz_pair_counts = pair_counts.get(str(topaz_id), {})

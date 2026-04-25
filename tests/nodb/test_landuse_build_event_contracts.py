@@ -56,7 +56,11 @@ def test_build_multi_ofe_runs_single_management_pass_after_domlc_trigger(
     landuse.build_managements = lambda: call_log.append("build_managements")
     landuse.set_cover_defaults = lambda: call_log.append("set_cover_defaults")
     landuse._build_fractionals = lambda: call_log.append("build_fractionals")
-    landuse.trigger = lambda event: call_log.append(f"trigger:{event.name}")
+    landuse.trigger = (
+        lambda event: call_log.append(
+            f"trigger:{event.name}:defer={getattr(landuse, '_defer_disturbed_management_rebuild', False)}"
+        )
+    )
 
     monkeypatch.setattr(
         Landuse,
@@ -83,12 +87,13 @@ def test_build_multi_ofe_runs_single_management_pass_after_domlc_trigger(
     assert call_log == [
         "build_single_selection",
         "build_multiple_ofe:domlc_mofe_d=None",
-        "trigger:LANDUSE_DOMLC_COMPLETE",
+        "trigger:LANDUSE_DOMLC_COMPLETE:defer=True",
         "build_managements",
         "set_cover_defaults",
         "build_fractionals",
     ]
-    assert get_instance_calls == [str(run_dir), str(run_dir)]
+    assert get_instance_calls == [str(run_dir), str(run_dir), str(run_dir)]
+    assert landuse._defer_disturbed_management_rebuild is False
 
 
 def test_build_single_ofe_keeps_management_build_before_and_after_domlc_trigger(
@@ -117,7 +122,11 @@ def test_build_single_ofe_keeps_management_build_before_and_after_domlc_trigger(
     landuse.build_managements = lambda: call_log.append("build_managements")
     landuse.set_cover_defaults = lambda: call_log.append("set_cover_defaults")
     landuse._build_fractionals = lambda: call_log.append("build_fractionals")
-    landuse.trigger = lambda event: call_log.append(f"trigger:{event.name}")
+    landuse.trigger = (
+        lambda event: call_log.append(
+            f"trigger:{event.name}:defer={getattr(landuse, '_defer_disturbed_management_rebuild', False)}"
+        )
+    )
 
     monkeypatch.setattr(
         Landuse,
@@ -144,9 +153,10 @@ def test_build_single_ofe_keeps_management_build_before_and_after_domlc_trigger(
     assert call_log == [
         "build_single_selection",
         "build_managements",
-        "trigger:LANDUSE_DOMLC_COMPLETE",
+        "trigger:LANDUSE_DOMLC_COMPLETE:defer=True",
         "build_managements",
         "set_cover_defaults",
         "build_fractionals",
     ]
-    assert get_instance_calls == [str(run_dir), str(run_dir)]
+    assert get_instance_calls == [str(run_dir), str(run_dir), str(run_dir)]
+    assert landuse._defer_disturbed_management_rebuild is False

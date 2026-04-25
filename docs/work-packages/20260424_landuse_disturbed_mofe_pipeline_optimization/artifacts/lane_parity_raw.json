@@ -1,0 +1,44 @@
+{
+  "generated_at_utc": "2026-04-25T01:08:03+00:00",
+  "lanes": [
+    {
+      "lane_id": "lane1_build_managements_consolidation",
+      "run_id": "apprehensive-caw-simulated",
+      "url": "https://wc.bearhive.duckdns.org/weppcloud/runs/apprehensive-caw/disturbed9002-10-mofe/",
+      "local_root": "/tmp/simulated/apprehensive-caw",
+      "mofe_file_mismatch_count": 0,
+      "management_area_mismatch_count": 0,
+      "management_pct_mismatch_count": 0,
+      "domlc_d_match": true,
+      "domlc_mofe_match": true,
+      "parquet_match": true,
+      "status": "match"
+    },
+    {
+      "lane_id": "lane2_logging_compaction",
+      "run_id": "apprehensive-caw-simulated",
+      "url": "https://wc.bearhive.duckdns.org/weppcloud/runs/apprehensive-caw/disturbed9002-10-mofe/",
+      "local_root": "/tmp/simulated/apprehensive-caw",
+      "mofe_file_mismatch_count": 0,
+      "management_area_mismatch_count": 0,
+      "management_pct_mismatch_count": 0,
+      "domlc_d_match": true,
+      "domlc_mofe_match": true,
+      "parquet_match": true,
+      "status": "match"
+    },
+    {
+      "lane_id": "lane3_pair_count_reuse_guard",
+      "run_id": "apprehensive-caw-simulated",
+      "url": "https://wc.bearhive.duckdns.org/weppcloud/runs/apprehensive-caw/disturbed9002-10-mofe/",
+      "local_root": "/tmp/simulated/apprehensive-caw",
+      "mofe_file_mismatch_count": 0,
+      "management_area_mismatch_count": 0,
+      "management_pct_mismatch_count": 0,
+      "domlc_d_match": true,
+      "domlc_mofe_match": true,
+      "parquet_match": true,
+      "status": "match"
+    }
+  ]
+}

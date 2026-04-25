@@ -12,6 +12,11 @@ from wepppy.nodb.core.landuse import Landuse
 pytestmark = pytest.mark.unit
 
 
+class _LoggerStub:
+    def debug(self, *_args, **_kwargs) -> None:
+        return None
+
+
 def test_build_managements_uses_watershed_hillslope_area_for_coverage(
     tmp_path: Path,
     monkeypatch: pytest.MonkeyPatch,
@@ -299,3 +304,173 @@ def test_build_managements_multi_ofe_skips_pair_counts_without_domlc_assignments
     assert landuse.managements["range"].area == pytest.approx(0.0)
     assert landuse.managements["forest"].pct_coverage == pytest.approx(0.0)
     assert landuse.managements["range"].pct_coverage == pytest.approx(0.0)
+
+
+def test_build_managements_multi_ofe_reuses_pair_counts_for_same_cycle_inputs(
+    tmp_path: Path,
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    wd = tmp_path / "run"
+    wd.mkdir(parents=True, exist_ok=True)
+
+    landuse = Landuse.__new__(Landuse)
+    landuse.wd = str(wd)
+    landuse._mapping = "test-mapping"
+    landuse.domlc_d = {"11": "forest", "12": "range"}
+    landuse.domlc_mofe_d = {
+        "11": {"1": "forest", "2": "range"},
+        "12": {"1": "range", "2": "forest"},
+    }
+    landuse.managements = None
+    landuse.locked = lambda: nullcontext()
+    landuse.dump_landuse_parquet = lambda: None
+    landuse.trigger = lambda *_args, **_kwargs: None
+    landuse.logger = _LoggerStub()
+
+    monkeypatch.setattr(
+        Landuse,
+        "ron_instance",
+        property(lambda _self: SimpleNamespace(cellsize=30.0)),
+    )
+    monkeypatch.setattr(
+        Landuse,
+        "watershed_instance",
+        property(
+            lambda _self: SimpleNamespace(
+                subwta=str(wd / "watershed" / "subwta.tif"),
+                mofe_map=str(wd / "watershed" / "mofe.tif"),
+                hillslope_area=lambda topaz_id: {"11": 6.0, "12": 4.0}[str(topaz_id)],
+            )
+        ),
+    )
+    monkeypatch.setattr(
+        Landuse,
+        "wepp_instance",
+        property(lambda _self: SimpleNamespace(_multi_ofe=True)),
+    )
+
+    pair_count_calls: list[dict[str, object]] = []
+
+    def _fake_pair_counts(**kwargs: object) -> dict[str, dict[str, int]]:
+        pair_count_calls.append(kwargs)
+        return {
+            "11": {"1": 2, "2": 3},
+            "12": {"1": 4},
+        }
+
+    class _ManagementSummaryStub:
+        def __init__(self) -> None:
+            self.area = 0.0
+            self.pct_coverage = 0.0
+
+    monkeypatch.setattr(
+        "wepppy.nodb.core.landuse.get_management_summary",
+        lambda *_args, **_kwargs: _ManagementSummaryStub(),
+    )
+    monkeypatch.setattr(
+        "wepppy.nodb.core.landuse.count_intersecting_raster_key_pairs",
+        _fake_pair_counts,
+    )
+
+    landuse.build_managements()
+    first_snapshot = {
+        key: (summary.area, summary.pct_coverage)
+        for key, summary in landuse.managements.items()
+    }
+    landuse.build_managements()
+    second_snapshot = {
+        key: (summary.area, summary.pct_coverage)
+        for key, summary in landuse.managements.items()
+    }
+
+    assert len(pair_count_calls) == 1
+    assert first_snapshot == second_snapshot
+
+
+def test_build_managements_multi_ofe_pair_count_cache_miss_on_signature_drift(
+    tmp_path: Path,
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    wd = tmp_path / "run"
+    wd.mkdir(parents=True, exist_ok=True)
+
+    landuse = Landuse.__new__(Landuse)
+    landuse.wd = str(wd)
+    landuse._mapping = "test-mapping"
+    landuse.domlc_d = {"11": "forest"}
+    landuse.domlc_mofe_d = {"11": {"1": "forest"}}
+    landuse.managements = None
+    landuse.locked = lambda: nullcontext()
+    landuse.dump_landuse_parquet = lambda: None
+    landuse.trigger = lambda *_args, **_kwargs: None
+    landuse.logger = _LoggerStub()
+
+    class _WatershedStub:
+        subwta = str(wd / "watershed" / "subwta.tif")
+        mofe_map = str(wd / "watershed" / "mofe_a.tif")
+
+        @staticmethod
+        def hillslope_area(_topaz_id: str) -> float:
+            return 1.0
+
+    monkeypatch.setattr(
+        Landuse,
+        "ron_instance",
+        property(lambda _self: SimpleNamespace(cellsize=30.0)),
+    )
+    monkeypatch.setattr(
+        Landuse,
+        "watershed_instance",
+        property(lambda _self: _WatershedStub()),
+    )
+    monkeypatch.setattr(
+        Landuse,
+        "wepp_instance",
+        property(lambda _self: SimpleNamespace(_multi_ofe=True)),
+    )
+
+    pair_count_calls: list[str] = []
+
+    def _fake_pair_counts(**kwargs: object) -> dict[str, dict[str, int]]:
+        pair_count_calls.append(str(kwargs["key2_fn"]))
+        return {"11": {"1": 2}}
+
+    class _ManagementSummaryStub:
+        def __init__(self) -> None:
+            self.area = 0.0
+            self.pct_coverage = 0.0
+
+    monkeypatch.setattr(
+        "wepppy.nodb.core.landuse.get_management_summary",
+        lambda *_args, **_kwargs: _ManagementSummaryStub(),
+    )
+    monkeypatch.setattr(
+        "wepppy.nodb.core.landuse.count_intersecting_raster_key_pairs",
+        _fake_pair_counts,
+    )
+    monkeypatch.setattr(
+        Landuse,
+        "_mofe_pair_count_file_signature",
+        staticmethod(lambda path: (str(path), True, 10, 100 if str(path).endswith("a.tif") else 200)),
+    )
+
+    landuse.build_managements()
+    _WatershedStub.mofe_map = str(wd / "watershed" / "mofe_b.tif")
+    landuse.build_managements()
+
+    assert pair_count_calls == [
+        str(wd / "watershed" / "mofe_a.tif"),
+        str(wd / "watershed" / "mofe_b.tif"),
+    ]
+
+
+def test_invalidate_mofe_pair_count_cache_clears_cached_state() -> None:
+    landuse = Landuse.__new__(Landuse)
+    landuse.logger = _LoggerStub()
+    landuse._mofe_pair_count_cache = {"11": {"1": 2}}
+    landuse._mofe_pair_count_cache_signature = ("sig",)
+
+    landuse._invalidate_mofe_pair_count_cache(reason="unit-test")
+
+    assert landuse._mofe_pair_count_cache is None
+    assert landuse._mofe_pair_count_cache_signature is None

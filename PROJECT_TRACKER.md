@@ -1,7 +1,7 @@
 # PROJECT_TRACKER.md
 > Kanban board for wepppy work packages and vision items
 
-**Last Updated**: 2026-04-24  
+**Last Updated**: 2026-04-25  
 **Active Packages**: 3  
 **Quick Links**: [Work Packages Directory](docs/work-packages/) | [God-Tier Prompting Strategy](docs/god-tier-prompting-strategy.md)
 
@@ -271,6 +271,12 @@ Currently active work packages. Limit to 2-4 packages to maintain focus.
 ## ✅ Done
 
 Recently completed work packages. Archived immediately upon completion.
+
+### Landuse/Disturbed MOFE Pipeline Optimization (`apprehensive-caw`) (2026-04-25)
+**Status**: ✅ **COMPLETE**  
+**Link**: [docs/work-packages/20260424_landuse_disturbed_mofe_pipeline_optimization/](docs/work-packages/20260424_landuse_disturbed_mofe_pipeline_optimization/)  
+**Lifecycle**: Backlog -> In Progress -> Done (2026-04-25)  
+**Summary**: Closed end-to-end with all three prioritized lanes implemented and validated. Lane 1 consolidated duplicate heavy `build_managements()` work in the DOMLC landuse/disturbed chain via explicit deferred-rebuild contract (`Landuse.build()` scoped deferral); Lane 2 compacted remap/MOFE hot-loop INFO logging to summary lines while preserving warning/error diagnostics and DEBUG detail; Lane 3 added guarded same-cycle MOFE pair-count reuse with explicit signature checks and invalidation (`build-cycle reset` + `signature drift`). Targeted lane regression suites passed (`42 passed`) across touched landuse/disturbed modules. Required benchmark/parity artifacts were regenerated using isolated temp directories with no source-run mutation under `/wc1/runs/ap/apprehensive-caw/`; parity status is `match` for all lanes and benchmark summary includes per-lane baseline/optimized mean/stddev and percent deltas. Code/QA/security review artifacts are closed with no unresolved medium/high findings, and the ExecPlan is archived under `prompts/completed/`.
 
 ### Controllers-GL Cache Hardening Rollout (2026-04-24)
 **Status**: ✅ **COMPLETE**  

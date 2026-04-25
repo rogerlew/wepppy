@@ -1,0 +1,516 @@
+{
+  "run_id": "apprehensive-caw",
+  "config": "disturbed9002-10-mofe",
+  "generated_at_local": "2026-04-24 12:09:03.183505",
+  "log_files": {
+    "landuse_log": "/wc1/runs/ap/apprehensive-caw/landuse.log",
+    "disturbed_log": "/wc1/runs/ap/apprehensive-caw/disturbed.log",
+    "rq_log": "/wc1/runs/ap/apprehensive-caw/rq.log"
+  },
+  "landuse_item_segments": [
+    {
+      "start_ts": "2026-04-24 00:01:11",
+      "start_line": 10,
+      "first_idx": 1,
+      "last_idx": 4892,
+      "end_ts": "2026-04-24 00:01:12",
+      "end_line": 4901,
+      "items": 4892,
+      "total": 4892,
+      "sum_elapsed_s": 17.739000000000026,
+      "max_elapsed_s": 0.133,
+      "wall_s": 1.0,
+      "avg_item_elapsed_s": 0.003626124284546203,
+      "submit_to_first_completion_s": 13.0,
+      "submit_to_last_completion_s": 14.0
+    },
+    {
+      "start_ts": "2026-04-24 05:09:05",
+      "start_line": 24334,
+      "first_idx": 1,
+      "last_idx": 4892,
+      "end_ts": "2026-04-24 05:09:06",
+      "end_line": 29225,
+      "items": 4892,
+      "total": 4892,
+      "sum_elapsed_s": 17.773999999999845,
+      "max_elapsed_s": 0.164,
+      "wall_s": 1.0,
+      "avg_item_elapsed_s": 0.0036332788225674254,
+      "submit_to_first_completion_s": 14.0,
+      "submit_to_last_completion_s": 15.0
+    }
+  ],
+  "disturbed_soil_task_segments": [
+    {
+      "start_ts": "2026-04-24 00:38:24",
+      "end_ts": "2026-04-24 00:38:31",
+      "start_line": 4924,
+      "end_line": 5094,
+      "first_idx": 1,
+      "last_idx": 171,
+      "items": 171,
+      "total": 171,
+      "sum_elapsed_s": 83.43200000000009,
+      "max_elapsed_s": 0.77,
+      "wall_s": 7.0,
+      "avg_item_elapsed_s": 0.4879064327485385
+    }
+  ],
+  "disturbed_soil_file_segments": [
+    {
+      "start_ts": "2026-04-24 00:38:32",
+      "end_ts": "2026-04-24 00:38:48",
+      "start_line": 5097,
+      "end_line": 19770,
+      "first_idx": 1,
+      "last_idx": 4892,
+      "items": 4892,
+      "total": 4892,
+      "wall_s": 16.0
+    }
+  ],
+  "key_events": {
+    "landuse": {
+      "build_start": [
+        {
+          "line": 3,
+          "ts": "2026-04-24 00:00:45",
+          "msg": "wepppy.run.apprehensive-caw.landuse: Building landuse",
+          "groups": []
+        },
+        {
+          "line": 24327,
+          "ts": "2026-04-24 05:08:40",
+          "msg": "wepppy.run.apprehensive-caw.landuse: Building landuse",
+          "groups": []
+        }
+      ],
+      "grid_start": [
+        {
+          "line": 4,
+          "ts": "2026-04-24 00:00:46",
+          "msg": "wepppy.run.apprehensive-caw.landuse: Building landcover grid from NLCD raster using wepppyo3 identify_mode_single_raster_key",
+          "groups": []
+        },
+        {
+          "line": 24328,
+          "ts": "2026-04-24 05:08:43",
+          "msg": "wepppy.run.apprehensive-caw.landuse: Building landcover grid from NLCD raster using wepppyo3 identify_mode_single_raster_key",
+          "groups": []
+        }
+      ],
+      "apply_mofe_start": [
+        {
+          "line": 5,
+          "ts": "2026-04-24 00:00:56",
+          "msg": "wepppy.run.apprehensive-caw.landuse: Applying burn severities to landuse by multiple OFE",
+          "groups": []
+        },
+        {
+          "line": 24329,
+          "ts": "2026-04-24 05:08:50",
+          "msg": "wepppy.run.apprehensive-caw.landuse: Applying burn severities to landuse by multiple OFE",
+          "groups": []
+        }
+      ],
+      "prepare_mofe": [
+        {
+          "line": 6,
+          "ts": "2026-04-24 00:00:57",
+          "msg": "wepppy.run.apprehensive-caw.landuse: Prepared multi-OFE landuse assignments for 4892 hillslopes (9766 OFE segments)",
+          "groups": [
+            "4892",
+            "9766"
+          ]
+        },
+        {
+          "line": 24330,
+          "ts": "2026-04-24 05:08:51",
+          "msg": "wepppy.run.apprehensive-caw.landuse: Prepared multi-OFE landuse assignments for 4892 hillslopes (9766 OFE segments)",
+          "groups": [
+            "4892",
+            "9766"
+          ]
+        }
+      ],
+      "submit_mofe": [
+        {
+          "line": 7,
+          "ts": "2026-04-24 00:00:58",
+          "msg": "wepppy.run.apprehensive-caw.landuse:   Submitting MOFE management synthesis tasks to ProcessPoolExecutor",
+          "groups": []
+        },
+        {
+          "line": 24331,
+          "ts": "2026-04-24 05:08:51",
+          "msg": "wepppy.run.apprehensive-caw.landuse:   Submitting MOFE management synthesis tasks to ProcessPoolExecutor",
+          "groups": []
+        }
+      ],
+      "wait_mofe": [
+        {
+          "line": 8,
+          "ts": "2026-04-24 00:01:03",
+          "msg": "wepppy.run.apprehensive-caw.landuse:   Waiting on MOFE management synthesis tasks (pending=4, 5.0s since last completion).",
+          "groups": [
+            "4",
+            "5.0"
+          ]
+        },
+        {
+          "line": 9,
+          "ts": "2026-04-24 00:01:08",
+          "msg": "wepppy.run.apprehensive-caw.landuse:   Waiting on MOFE management synthesis tasks (pending=4, 10.0s since last completion).",
+          "groups": [
+            "4",
+            "10.0"
+          ]
+        },
+        {
+          "line": 24332,
+          "ts": "2026-04-24 05:08:57",
+          "msg": "wepppy.run.apprehensive-caw.landuse:   Waiting on MOFE management synthesis tasks (pending=4, 5.0s since last completion).",
+          "groups": [
+            "4",
+            "5.0"
+          ]
+        },
+        {
+          "line": 24333,
+          "ts": "2026-04-24 05:09:02",
+          "msg": "wepppy.run.apprehensive-caw.landuse:   Waiting on MOFE management synthesis tasks (pending=4, 10.0s since last completion).",
+          "groups": [
+            "4",
+            "10.0"
+          ]
+        }
+      ],
+      "disturbed_hook": [
+        {
+          "line": 4902,
+          "ts": "2026-04-24 00:01:12",
+          "msg": "wepppy.run.apprehensive-caw.landuse: Disturbed::on TriggerEvents.LANDUSE_DOMLC_COMPLETE",
+          "groups": []
+        },
+        {
+          "line": 29226,
+          "ts": "2026-04-24 05:09:06",
+          "msg": "wepppy.run.apprehensive-caw.landuse: Disturbed::on TriggerEvents.LANDUSE_DOMLC_COMPLETE",
+          "groups": []
+        }
+      ],
+      "disturbed_modify_mofe_soils": [
+        {
+          "line": 24325,
+          "ts": "2026-04-24 00:01:17",
+          "msg": "wepppy.run.apprehensive-caw.landuse:   Disturbed::Modifying MOFE soils",
+          "groups": []
+        },
+        {
+          "line": 48649,
+          "ts": "2026-04-24 05:09:11",
+          "msg": "wepppy.run.apprehensive-caw.landuse:   Disturbed::Modifying MOFE soils",
+          "groups": []
+        }
+      ]
+    },
+    "disturbed": {
+      "burn_shrubs": [
+        {
+          "line": 5,
+          "ts": "2026-04-24 00:00:43",
+          "msg": "wepppy.run.apprehensive-caw.disturbed: disturbed.burn_shrubs -> True",
+          "groups": [
+            "True"
+          ]
+        },
+        {
+          "line": 19775,
+          "ts": "2026-04-24 05:08:38",
+          "msg": "wepppy.run.apprehensive-caw.disturbed: disturbed.burn_shrubs -> True",
+          "groups": [
+            "True"
+          ]
+        }
+      ],
+      "burn_grass": [
+        {
+          "line": 6,
+          "ts": "2026-04-24 00:00:43",
+          "msg": "wepppy.run.apprehensive-caw.disturbed: disturbed.burn_grass -> False",
+          "groups": [
+            "False"
+          ]
+        },
+        {
+          "line": 19776,
+          "ts": "2026-04-24 05:08:38",
+          "msg": "wepppy.run.apprehensive-caw.disturbed: disturbed.burn_grass -> False",
+          "groups": [
+            "False"
+          ]
+        }
+      ],
+      "evt_domlc": [
+        {
+          "line": 7,
+          "ts": "2026-04-24 00:01:12",
+          "msg": "wepppy.run.apprehensive-caw.disturbed: disturbed.on(TriggerEvents.LANDUSE_DOMLC_COMPLETE)",
+          "groups": []
+        },
+        {
+          "line": 19777,
+          "ts": "2026-04-24 05:09:06",
+          "msg": "wepppy.run.apprehensive-caw.disturbed: disturbed.on(TriggerEvents.LANDUSE_DOMLC_COMPLETE)",
+          "groups": []
+        }
+      ],
+      "evt_build": [
+        {
+          "line": 12,
+          "ts": "2026-04-24 00:01:17",
+          "msg": "wepppy.run.apprehensive-caw.disturbed: disturbed.on(TriggerEvents.LANDUSE_BUILD_COMPLETE)",
+          "groups": []
+        },
+        {
+          "line": 20,
+          "ts": "2026-04-24 00:06:39",
+          "msg": "wepppy.run.apprehensive-caw.disturbed: disturbed.on(TriggerEvents.LANDUSE_BUILD_COMPLETE)",
+          "groups": []
+        },
+        {
+          "line": 21,
+          "ts": "2026-04-24 00:06:40",
+          "msg": "wepppy.run.apprehensive-caw.disturbed: disturbed.on(TriggerEvents.LANDUSE_BUILD_COMPLETE)",
+          "groups": []
+        },
+        {
+          "line": 19774,
+          "ts": "2026-04-24 01:11:45",
+          "msg": "wepppy.run.apprehensive-caw.disturbed: disturbed.on(TriggerEvents.LANDUSE_BUILD_COMPLETE)",
+          "groups": []
+        },
+        {
+          "line": 19782,
+          "ts": "2026-04-24 05:09:11",
+          "msg": "wepppy.run.apprehensive-caw.disturbed: disturbed.on(TriggerEvents.LANDUSE_BUILD_COMPLETE)",
+          "groups": []
+        },
+        {
+          "line": 19790,
+          "ts": "2026-04-24 05:15:02",
+          "msg": "wepppy.run.apprehensive-caw.disturbed: disturbed.on(TriggerEvents.LANDUSE_BUILD_COMPLETE)",
+          "groups": []
+        },
+        {
+          "line": 19791,
+          "ts": "2026-04-24 05:15:03",
+          "msg": "wepppy.run.apprehensive-caw.disturbed: disturbed.on(TriggerEvents.LANDUSE_BUILD_COMPLETE)",
+          "groups": []
+        }
+      ],
+      "evt_soils": [
+        {
+          "line": 23,
+          "ts": "2026-04-24 00:38:04",
+          "msg": "wepppy.run.apprehensive-caw.disturbed: disturbed.on(TriggerEvents.SOILS_BUILD_COMPLETE)",
+          "groups": []
+        }
+      ],
+      "remap_start": [
+        {
+          "line": 9,
+          "ts": "2026-04-24 00:01:12",
+          "msg": "wepppy.run.apprehensive-caw.disturbed:   Remapping landuse...",
+          "groups": []
+        },
+        {
+          "line": 19779,
+          "ts": "2026-04-24 05:09:06",
+          "msg": "wepppy.run.apprehensive-caw.disturbed:   Remapping landuse...",
+          "groups": []
+        }
+      ],
+      "remap_done": [
+        {
+          "line": 13,
+          "ts": "2026-04-24 00:01:17",
+          "msg": "wepppy.run.apprehensive-caw.disturbed:   Remapping landuse... done. (4.65s)",
+          "groups": [
+            "4.65"
+          ]
+        },
+        {
+          "line": 19783,
+          "ts": "2026-04-24 05:09:11",
+          "msg": "wepppy.run.apprehensive-caw.disturbed:   Remapping landuse... done. (5.17s)",
+          "groups": [
+            "5.17"
+          ]
+        }
+      ],
+      "remap_mofe_call": [
+        {
+          "line": 18,
+          "ts": "2026-04-24 00:01:17",
+          "msg": "wepppy.run.apprehensive-caw.disturbed: disturbed.remap_mofe_landuse()",
+          "groups": []
+        },
+        {
+          "line": 19788,
+          "ts": "2026-04-24 05:09:11",
+          "msg": "wepppy.run.apprehensive-caw.disturbed: disturbed.remap_mofe_landuse()",
+          "groups": []
+        }
+      ],
+      "modify_mofe_start": [
+        {
+          "line": 25,
+          "ts": "2026-04-24 00:38:04",
+          "msg": "wepppy.run.apprehensive-caw.disturbed:   Modifying MOFE soils...",
+          "groups": []
+        }
+      ],
+      "modify_mofe_call": [
+        {
+          "line": 26,
+          "ts": "2026-04-24 00:38:04",
+          "msg": "wepppy.run.apprehensive-caw.disturbed: disturbed.modify_mofe_soils()",
+          "groups": []
+        }
+      ],
+      "prepare_soil_tasks": [
+        {
+          "line": 4919,
+          "ts": "2026-04-24 00:38:06",
+          "msg": "wepppy.run.apprehensive-caw.disturbed:   Prepared 171 MOFE disturbed soil generation task(s) with max_workers=48",
+          "groups": [
+            "171",
+            "48"
+          ]
+        }
+      ],
+      "submit_soil_tasks": [
+        {
+          "line": 4920,
+          "ts": "2026-04-24 00:38:06",
+          "msg": "wepppy.run.apprehensive-caw.disturbed:   Submitting MOFE disturbed soil tasks to ProcessPoolExecutor",
+          "groups": []
+        }
+      ],
+      "wait_soil_tasks": [
+        {
+          "line": 4921,
+          "ts": "2026-04-24 00:38:11",
+          "msg": "wepppy.run.apprehensive-caw.disturbed:   Waiting on MOFE disturbed soil tasks (pending=171, 5.0s since last completion).",
+          "groups": [
+            "171",
+            "5.0"
+          ]
+        },
+        {
+          "line": 4922,
+          "ts": "2026-04-24 00:38:16",
+          "msg": "wepppy.run.apprehensive-caw.disturbed:   Waiting on MOFE disturbed soil tasks (pending=171, 10.0s since last completion).",
+          "groups": [
+            "171",
+            "10.0"
+          ]
+        },
+        {
+          "line": 4923,
+          "ts": "2026-04-24 00:38:21",
+          "msg": "wepppy.run.apprehensive-caw.disturbed:   Waiting on MOFE disturbed soil tasks (pending=171, 15.0s since last completion).",
+          "groups": [
+            "171",
+            "15.0"
+          ]
+        }
+      ],
+      "modify_mofe_done": [
+        {
+          "line": 19773,
+          "ts": "2026-04-24 00:38:58",
+          "msg": "wepppy.run.apprehensive-caw.disturbed:   Modifying MOFE soils... done. (53.57s)",
+          "groups": [
+            "53.57"
+          ]
+        }
+      ]
+    }
+  },
+  "derived_intervals": [
+    {
+      "cycle": 1,
+      "name": "disturbed_remap_landuse",
+      "start": "2026-04-24 00:01:12",
+      "end": "2026-04-24 00:01:17",
+      "wall_s": 5.0
+    },
+    {
+      "cycle": 2,
+      "name": "disturbed_remap_landuse",
+      "start": "2026-04-24 05:09:06",
+      "end": "2026-04-24 05:09:11",
+      "wall_s": 5.0
+    },
+    {
+      "name": "cycle1_build_complete_burst_span",
+      "start": "2026-04-24 00:01:17",
+      "end": "2026-04-24 00:06:40",
+      "wall_s": 323.0
+    },
+    {
+      "name": "cycle2_build_complete_burst_span",
+      "start": "2026-04-24 05:09:11",
+      "end": "2026-04-24 05:15:03",
+      "wall_s": 352.0
+    }
+  ],
+  "warning_error_counts": {
+    "landuse": {
+      "WARN": 0,
+      "ERROR": 0
+    },
+    "disturbed": {
+      "WARN": 0,
+      "ERROR": 0
+    }
+  },
+  "counts": {
+    "landuse_done_items": 9784,
+    "disturbed_done_soil_tasks": 171,
+    "disturbed_done_soil_files": 4892,
+    "disturbed_landuse_build_events": 7,
+    "disturbed_landuse_domlc_events": 2,
+    "disturbed_soils_complete_events": 1
+  },
+  "log_line_counts": {
+    "landuse_log_lines": 48649,
+    "disturbed_log_lines": 19791,
+    "rq_log_lines": 22
+  },
+  "pattern_counts": {
+    "landuse_completed_mofe_mgmt_lines": 9784,
+    "landuse_topaz_detail_lines": 9784,
+    "landuse_burning_detail_lines": 9630,
+    "disturbed_topaz_detail_lines": 4892,
+    "disturbed_completed_mofe_soil_task_lines": 171,
+    "disturbed_generated_mofe_file_lines": 4892
+  },
+  "window_line_counts": {
+    "cycle1_remap_window": {
+      "landuse_lines": 10937,
+      "disturbed_lines": 12,
+      "landuse_topaz_lines": 4892,
+      "landuse_burning_lines": 4815
+    },
+    "cycle2_remap_window": {
+      "landuse_lines": 10317,
+      "disturbed_lines": 12,
+      "landuse_topaz_lines": 4892,
+      "landuse_burning_lines": 4815
+    }
+  }
+}

@@ -1094,11 +1094,14 @@ class Disturbed(NoDbBase):
         if evt == TriggerEvents.LANDUSE_DOMLC_COMPLETE:
             self.logger.info(f'  Routing to LANDUSE_DOMLC_COMPLETE')
             landuse = self.landuse_instance
+            defer_management_rebuild = bool(
+                getattr(landuse, "_defer_disturbed_management_rebuild", False)
+            )
             
             landuse.logger.info(f'Disturbed::on {evt}')
             with self.timed('  Remapping landuse'):
                 landuse.logger.info(f'  Disturbed::Modifying landuse')
-                self.remap_landuse()
+                self.remap_landuse(rebuild_managements=not defer_management_rebuild)
             
             with self.timed('  Calling spatialize_treecanopy hook'):
                 ran_spatialize = self.spatialize_treecanopy()
@@ -1107,7 +1110,7 @@ class Disturbed(NoDbBase):
 
             if multi_ofe:
                 landuse.logger.info(f'  Disturbed::Modifying MOFE soils')
-                self.remap_mofe_landuse()
+                self.remap_mofe_landuse(rebuild_managements=not defer_management_rebuild)
 
         elif evt == TriggerEvents.SOILS_BUILD_COMPLETE:
             self.logger.info(f'  Routing to SOILS_BUILD_COMPLETE')
@@ -1200,7 +1203,7 @@ class Disturbed(NoDbBase):
 
         return d
 
-    def remap_landuse(self) -> None:
+    def remap_landuse(self, *, rebuild_managements: bool = True) -> None:
         func_name = inspect.currentframe().f_code.co_name
         self.logger.info(f'{self.class_name}.{func_name}()')
 
@@ -1209,7 +1212,7 @@ class Disturbed(NoDbBase):
         landuse = self.landuse_instance
 
         disturbed_key_lookup = self.get_disturbed_key_lookup()
-        landuse.logger.info(f'  disturbed_key_lookup keys: {list(disturbed_key_lookup.keys())}\n')
+        landuse.logger.debug('  disturbed_key_lookup keys: %s', sorted(disturbed_key_lookup.keys()))
         #assert landuse.mode != LanduseMode.Single
 
         burn_shrubs = self.burn_shrubs
@@ -1223,55 +1226,85 @@ class Disturbed(NoDbBase):
         if sbs is None:
             return
 
+        evaluated_hillslopes = 0
+        channel_skips = 0
+        burned_counts: Counter[str] = Counter()
+
         with landuse.locked():
             self._calc_sbs_coverage(sbs)
 
-            landuse.logger.info(f'  running identify_mode_single_raster_key on {self.disturbed_cropped}\n')
+            landuse.logger.info('  Running burn-severity remap identify on %s', self.disturbed_cropped)
             sbs_lc_d = identify_mode_single_raster_key(
                 key_fn=watershed.subwta, parameter_fn=self.disturbed_cropped, ignore_channels=True, ignore_keys=set())
-            landuse.logger.info('done')
+            landuse.logger.info('  Completed burn-severity remap identify')
             sbs_lc_d = {k: str(v) for k, v in sbs_lc_d.items()}
            
             class_pixel_map = sbs.class_pixel_map
 
-            landuse.logger.info(f'  iterating over sbs_lc_d\n')
+            landuse.logger.debug('  Iterating over %s remap hillslopes', len(sbs_lc_d))
             for topaz_id, val in sbs_lc_d.items():
                 if (int(topaz_id) - 4) % 10 == 0:
+                    channel_skips += 1
                     continue
 
+                evaluated_hillslopes += 1
                 dom = landuse.domlc_d[topaz_id]
                 man = landuse.managements[dom]
 
                 burn_class = class_pixel_map[val]
-
-                landuse.logger.info(f'    topaz_id: {topaz_id}, sbs_lc: {val}, dom: {dom}, man.disturbed_class: {man.disturbed_class}, burn_class: {burn_class}\n')
+                landuse.logger.debug(
+                    '    topaz_id=%s sbs_lc=%s dom=%s disturbed_class=%s burn_class=%s',
+                    topaz_id,
+                    val,
+                    dom,
+                    man.disturbed_class,
+                    burn_class,
+                )
                 # topaz_id: 8632, sbs_lc: 2, dom: 42, man.disturbed_class: forest, burn_class: 255
                 if burn_class in ['131', '132', '133']:
                     if man.disturbed_class in ['forest', 'young forest']:
-                        landuse.logger.info(f'     burning {topaz_id} forest\n')
+                        landuse.logger.debug('     burning topaz_id=%s bucket=forest', topaz_id)
                         landuse.domlc_d[topaz_id] = {'131': disturbed_key_lookup['forest_low_sev_fire'], 
                                                      '132': disturbed_key_lookup['forest_moderate_sev_fire'], 
                                                      '133': disturbed_key_lookup['forest_high_sev_fire']}[burn_class]
+                        burned_counts['forest'] += 1
 
                     elif man.disturbed_class == 'shrub' and burn_shrubs:
-                        landuse.logger.info(f'     burning {topaz_id} shrub\n')
+                        landuse.logger.debug('     burning topaz_id=%s bucket=shrub', topaz_id)
                         landuse.domlc_d[topaz_id] = {'131': disturbed_key_lookup['shrub_low_sev_fire'], 
                                                      '132': disturbed_key_lookup['shrub_moderate_sev_fire'], 
                                                      '133': disturbed_key_lookup['shrub_high_sev_fire']}[burn_class]
+                        burned_counts['shrub'] += 1
                         
                     elif man.disturbed_class in ['tall grass'] and burn_grass:
-                        landuse.logger.info(f'     burning {topaz_id} grass\n')
+                        landuse.logger.debug('     burning topaz_id=%s bucket=grass', topaz_id)
                         landuse.domlc_d[topaz_id] = {'131': disturbed_key_lookup['grass_low_sev_fire'], 
                                                      '132': disturbed_key_lookup['grass_moderate_sev_fire'], 
                                                      '133': disturbed_key_lookup['grass_high_sev_fire']}[burn_class]
+                        burned_counts['grass'] += 1
 
                 meta[topaz_id] = dict(burn_class=burn_class, disturbed_class=man.disturbed_class)
+
+        total_burned = int(sum(burned_counts.values()))
+        landuse.logger.info(
+            '  Disturbed remap summary: evaluated=%s burned=%s (forest=%s shrub=%s grass=%s) unchanged=%s skipped_channels=%s',
+            evaluated_hillslopes,
+            total_burned,
+            burned_counts.get('forest', 0),
+            burned_counts.get('shrub', 0),
+            burned_counts.get('grass', 0),
+            max(evaluated_hillslopes - total_burned, 0),
+            channel_skips,
+        )
 
         with self.locked():
             self._meta = meta
 
-        landuse = landuse.getInstance(wd)
-        landuse.build_managements()
+        if rebuild_managements:
+            landuse = landuse.getInstance(wd)
+            landuse.build_managements()
+        else:
+            landuse.logger.debug('  Skipping immediate landuse.build_managements() due to deferred rebuild contract')
 
     @property
     def meta(self) -> Dict[str, Dict[str, str]]:
@@ -1415,7 +1448,7 @@ class Disturbed(NoDbBase):
         os.close(fd)
         return path
 
-    def remap_mofe_landuse(self) -> None:
+    def remap_mofe_landuse(self, *, rebuild_managements: bool = True) -> None:
         func_name = inspect.currentframe().f_code.co_name
         self.logger.info(f'{self.class_name}.{func_name}()')
 
@@ -1430,6 +1463,9 @@ class Disturbed(NoDbBase):
         if sbs is None:
             return
 
+        evaluated_segments = 0
+        burned_counts: Counter[str] = Counter()
+
         with landuse.locked():
             self._calc_sbs_coverage(sbs)
 
@@ -1437,23 +1473,49 @@ class Disturbed(NoDbBase):
 
             for topaz_id in landuse.domlc_mofe_d:
                 for _id in landuse.domlc_mofe_d[topaz_id]:
+                    evaluated_segments += 1
                     burn_class = str(sbs_lc_d[topaz_id][_id])
                     dom = landuse.domlc_mofe_d[topaz_id][_id]
                     man = landuse.managements[dom]
+                    landuse.logger.debug(
+                        '    mofe topaz_id=%s ofe=%s dom=%s disturbed_class=%s burn_class=%s',
+                        topaz_id,
+                        _id,
+                        dom,
+                        man.disturbed_class,
+                        burn_class,
+                    )
 
                     # TODO: probably a better way to do this based on the disturbed_class
                     if burn_class in ['131', '132', '133']:
                         if man.disturbed_class in ['forest', 'young forest']:
                             landuse.domlc_mofe_d[topaz_id][_id] = {'131': '106', '132': '118', '133': '105'}[burn_class]
+                            burned_counts['forest'] += 1
 
                         elif man.disturbed_class == 'shrub':
                             landuse.domlc_mofe_d[topaz_id][_id] = {'131': '121', '132': '120', '133': '119'}[burn_class]
+                            burned_counts['shrub'] += 1
 
                         elif man.disturbed_class in ['short grass', 'tall grass']:
                             landuse.domlc_mofe_d[topaz_id][_id] = {'131': '131', '132': '130', '133': '129'}[burn_class]
+                            burned_counts['grass'] += 1
 
-        landuse = landuse.getInstance(wd)
-        landuse.build_managements()
+        total_burned = int(sum(burned_counts.values()))
+        landuse.logger.info(
+            '  Disturbed MOFE remap summary: evaluated=%s burned=%s (forest=%s shrub=%s grass=%s) unchanged=%s',
+            evaluated_segments,
+            total_burned,
+            burned_counts.get('forest', 0),
+            burned_counts.get('shrub', 0),
+            burned_counts.get('grass', 0),
+            max(evaluated_segments - total_burned, 0),
+        )
+
+        if rebuild_managements:
+            landuse = landuse.getInstance(wd)
+            landuse.build_managements()
+        else:
+            landuse.logger.debug('  Skipping immediate landuse.build_managements() due to deferred rebuild contract')
 
     @property
     def lookup_fn(self) -> str:
@@ -1680,6 +1742,8 @@ class Disturbed(NoDbBase):
 
         generation_tasks: List[Dict[str, Any]] = []
         hillslope_plans: List[Dict[str, Any]] = []
+        processed_hillslopes = 0
+        processed_segments = 0
 
         with soils.locked():
             planned_soil_keys = set(soils.soils.keys())
@@ -1688,8 +1752,9 @@ class Disturbed(NoDbBase):
                 if str(topaz_id).endswith('4'):
                     continue
 
-                self.logger.info(f'  topaz_id: {topaz_id}, mukey: {mukey}')
-                soils.logger.info(f'  topaz_id: {topaz_id}, mukey: {mukey}')
+                processed_hillslopes += 1
+                self.logger.debug('  topaz_id=%s mukey=%s', topaz_id, mukey)
+                soils.logger.debug('  topaz_id=%s mukey=%s', topaz_id, mukey)
 
                 stack: List[str] = []
                 desc: List[str] = []
@@ -1714,6 +1779,7 @@ class Disturbed(NoDbBase):
 
                 for _id in sorted([int(_id) for _id in landuse.domlc_mofe_d[topaz_id]]):
                     _id = str(_id)
+                    processed_segments += 1
                     
                     dom = landuse.domlc_mofe_d[topaz_id][_id]
                     man = landuse.managements[dom]
@@ -1780,6 +1846,13 @@ class Disturbed(NoDbBase):
                     )
                 )
 
+        self.logger.info(
+            '  Prepared MOFE soil modification plans: hillslopes=%s segments=%s generation_tasks=%s',
+            processed_hillslopes,
+            processed_segments,
+            len(generation_tasks),
+        )
+
         cpu_count = os.cpu_count() or 1
         ncpu_override = os.getenv('WEPPPY_NCPU')
         max_workers = NCPU if ncpu_override else cpu_count
@@ -1834,7 +1907,7 @@ class Disturbed(NoDbBase):
                         try:
                             disturbed_mukey, elapsed_time = future.result()
                             count += 1
-                            self.logger.info(
+                            self.logger.debug(
                                 '  (%s/%s) Completed MOFE disturbed soil build for %s in %ss',
                                 count,
                                 futures_n,
@@ -1860,7 +1933,7 @@ class Disturbed(NoDbBase):
             self.logger.warning('  Running MOFE disturbed soil generation sequentially')
             for idx, task in enumerate(generation_tasks, start=1):
                 disturbed_mukey, elapsed_time = _build_disturbed_mofe_soil(task)
-                self.logger.info(
+                self.logger.debug(
                     '  (%s/%s) Completed MOFE disturbed soil build for %s in %ss [sequential]',
                     idx,
                     total,
@@ -1902,12 +1975,18 @@ class Disturbed(NoDbBase):
                 mofe_synth = SoilMultipleOfeSynth(stack=hillslope_plan['stack'])
                 mofe_synth.write(_join(soils.soils_dir, hillslope_plan['sol_fn']))
 
-            self.logger.info(
+            self.logger.debug(
                 '  (%s/%s) Generated MOFE soil file for topaz_id=%s',
                 idx,
                 len(hillslope_plans),
                 hillslope_plan['topaz_id'],
             )
+
+        self.logger.info(
+            '  Completed MOFE soil generation: regenerated_soils=%s hillslope_files=%s',
+            len(generation_tasks),
+            len(hillslope_plans),
+        )
 
         with soils.locked():
             for task in generation_tasks:

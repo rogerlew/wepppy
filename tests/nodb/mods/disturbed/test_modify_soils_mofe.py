@@ -17,8 +17,29 @@ class _NoopLogger:
     def info(self, *_args: object, **_kwargs: object) -> None:
         return
 
+    def debug(self, *_args: object, **_kwargs: object) -> None:
+        return
+
     def warning(self, *_args: object, **_kwargs: object) -> None:
         return
+
+
+class _RecordingLogger(_NoopLogger):
+    def __init__(self) -> None:
+        self.info_messages: list[str] = []
+        self.debug_messages: list[str] = []
+
+    @staticmethod
+    def _format(message: str, *args: object) -> str:
+        if args:
+            return message % args
+        return str(message)
+
+    def info(self, message: str, *args: object, **_kwargs: object) -> None:
+        self.info_messages.append(self._format(message, *args))
+
+    def debug(self, message: str, *args: object, **_kwargs: object) -> None:
+        self.debug_messages.append(self._format(message, *args))
 
 
 class _ManagementSummary:
@@ -44,11 +65,11 @@ class _FakeLanduse:
 
 
 class _FakeSoils:
-    def __init__(self, *, domsoil_d, soils, soils_dir: str) -> None:
+    def __init__(self, *, domsoil_d, soils, soils_dir: str, logger=None) -> None:
         self.domsoil_d = domsoil_d
         self.soils = soils
         self.soils_dir = soils_dir
-        self.logger = _NoopLogger()
+        self.logger = logger or _NoopLogger()
 
     @contextmanager
     def locked(self):
@@ -1054,3 +1075,75 @@ def test_modify_mofe_soils_propagates_non_broken_pool_task_failure(
         disturbed.modify_mofe_soils()
 
     assert prefer_spawn_calls == [True]
+
+
+def test_modify_mofe_soils_compacts_info_logging_and_keeps_debug_detail(
+    disturbed_factory,
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    disturbed, run_dir = disturbed_factory("modify-mofe-logging")
+    disturbed._sol_ver = 9005.0
+    (run_dir / "soils" / "src.sol").write_text("soil", encoding="utf-8")
+
+    recording_logger = _RecordingLogger()
+    disturbed.logger = recording_logger
+
+    soils = _FakeSoils(
+        domsoil_d={"101": "m1"},
+        soils={"m1": _SoilStub(clay=30.0, sand=40.0, fname="src.sol")},
+        soils_dir=str(run_dir / "soils"),
+        logger=recording_logger,
+    )
+    landuse = _FakeLanduse(
+        domlc_mofe_d={"101": {"1": "dom-1"}},
+        managements={"dom-1": _ManagementSummary("forest high sev fire")},
+    )
+    watershed = _FakeWatershed({"101": 1.0})
+
+    class _FakeWeppSoilUtil:
+        def __init__(self, source_path: str) -> None:
+            self.source_path = source_path
+            self.clay = 30.0
+            self.sand = 40.0
+
+        def to_over9000(
+            self,
+            replacements,
+            h0_max_om=None,
+            recompute_wp_fc_using_rosetta_on_bd_override=False,
+            version=None,
+        ):
+            return _FakeWriter([])
+
+    class _FakeMofeSynth:
+        def __init__(self, stack):
+            self.stack = stack
+
+        def write(self, path: str) -> None:
+            return
+
+    monkeypatch.setattr(disturbed_module, "Ron", SimpleNamespace(getInstance=lambda _wd: object()))
+    monkeypatch.setattr(Disturbed, "soils_instance", property(lambda self: soils))
+    monkeypatch.setattr(Disturbed, "landuse_instance", property(lambda self: landuse))
+    monkeypatch.setattr(Disturbed, "watershed_instance", property(lambda self: watershed))
+    monkeypatch.setattr(disturbed_module, "simple_texture", lambda clay, sand: "mock-texture")
+    monkeypatch.setattr(disturbed_module, "WeppSoilUtil", _FakeWeppSoilUtil)
+    monkeypatch.setattr(disturbed_module, "SoilMultipleOfeSynth", _FakeMofeSynth)
+    monkeypatch.setattr(
+        Disturbed,
+        "land_soil_replacements_d",
+        property(lambda self: {("mock-texture", "forest high sev fire"): {"ki": "1"}}),
+    )
+
+    disturbed.modify_mofe_soils()
+
+    assert any(
+        "Prepared MOFE soil modification plans:" in message
+        for message in recording_logger.info_messages
+    )
+    assert any(
+        "Completed MOFE soil generation:" in message
+        for message in recording_logger.info_messages
+    )
+    assert not any("topaz_id=" in message for message in recording_logger.info_messages)
+    assert any("topaz_id=" in message for message in recording_logger.debug_messages)
