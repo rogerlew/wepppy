@@ -1344,7 +1344,7 @@ def test_landuse_phase3_map_snapshot_and_save(
         assert save.status_code == 200
         assert save.json()["message"] == "Landuse map saved"
 
-    assert landuse.build_managements_calls == 1
+    assert landuse.build_managements_calls == 0
     assert landuse.custom_mapping_relpath == "landuse/landuse_user_defined_mapping.json"
     override_path = run_root / "landuse" / "landuse_user_defined_mapping.json"
     assert override_path.exists()
@@ -1468,7 +1468,7 @@ def test_landuse_phase3_map_save_rejects_stale_hash(
     assert payload["error"]["details"]["expected_sha256"] == stale_sha
 
 
-def test_landuse_phase3_map_save_validates_rows_and_rolls_back_on_failure(
+def test_landuse_phase3_map_save_validates_rows_and_saves_without_building_managements(
     monkeypatch: pytest.MonkeyPatch,
     tmp_path: Path,
 ) -> None:
@@ -1527,8 +1527,7 @@ def test_landuse_phase3_map_save_validates_rows_and_rolls_back_on_failure(
         assert invalid.status_code == 400
         assert invalid.json()["error"]["code"] == "invalid_rows_payload"
 
-        landuse.raise_on_build = True
-        rollback = client.post(
+        save = client.post(
             "/api/runs/run-1/cfg/landuse-map/save",
             json={
                 "if_match_sha256": lookup_sha,
@@ -1539,11 +1538,12 @@ def test_landuse_phase3_map_save_validates_rows_and_rolls_back_on_failure(
             },
         )
 
-    assert rollback.status_code == 500
-    assert rollback.json()["error"]["message"] == "Failed to save landuse map"
-    restored_payload = json.loads(override_path.read_text(encoding="utf-8"))
-    assert restored_payload == prior_payload
+    assert save.status_code == 200
+    saved_payload = json.loads(override_path.read_text(encoding="utf-8"))
+    assert saved_payload["21"]["ManagementFile"] == "Developed_Low_Intensity.man"
+    assert saved_payload["22"]["ManagementFile"] == "Developed_Moderate_Intensity.man"
     assert landuse.custom_mapping_relpath == "landuse/landuse_user_defined_mapping.json"
+    assert landuse.build_managements_calls == 0
 
 
 def test_landuse_phase3_map_save_rejects_missing_extra_and_unknown_management_rows(

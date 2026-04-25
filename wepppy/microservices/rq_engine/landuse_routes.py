@@ -1313,9 +1313,6 @@ async def save_landuse_map(runid: str, config: str, request: Request) -> JSONRes
     except ValueError as exc:
         return error_response(str(exc), status_code=400, code="INVALID_RUN_PATH")
 
-    previous_relpath = landuse.custom_mapping_relpath
-    previous_override_bytes = override_path.read_bytes() if override_path.exists() else None
-
     try:
         with landuse.locked():
             try:
@@ -1436,26 +1433,7 @@ async def save_landuse_map(runid: str, config: str, request: Request) -> JSONRes
         logger.exception("rq-engine landuse-map save validation failed")
         return error_response("Failed to save landuse map", status_code=500)
 
-    try:
-        landuse.build_managements()
-    except (LanduseCustomMappingError, ManagementMapLoadError) as exc:
-        landuse_flask._restore_landuse_map_override_state(
-            landuse=landuse,
-            wd=wd,
-            previous_relpath=previous_relpath,
-            previous_override_bytes=previous_override_bytes,
-        )
-        return _landuse_mapping_error_response(exc)
-    except Exception as exc:  # broad-except: boundary rollback contract
-        landuse_flask._restore_landuse_map_override_state(
-            landuse=landuse,
-            wd=wd,
-            previous_relpath=previous_relpath,
-            previous_override_bytes=previous_override_bytes,
-        )
-        logger.exception("rq-engine landuse-map save build_managements failed")
-        return error_response("Failed to save landuse map", status_code=500)
-
+    # Map save only persists the override snapshot; full management rebuild stays in build-landuse/clear-override flows.
     prep = RedisPrep.getInstance(wd)
     prep.timestamp(TaskEnum.landuse_map)
     snapshot = landuse_flask._build_landuse_map_snapshot_payload(landuse, wd)
