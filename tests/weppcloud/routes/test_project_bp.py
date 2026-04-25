@@ -577,3 +577,27 @@ def test_set_mod_imports_missing_mod_class(project_client, monkeypatch: pytest.M
     assert calls["imported"] == 1
     assert created["called"] is True
     assert Path(run_dir).joinpath("debris_flow.nodb").exists()
+
+
+def test_set_mod_returns_stacktrace_details_on_unexpected_error(
+    project_client,
+    monkeypatch: pytest.MonkeyPatch,
+):
+    client, _, _, _, _ = project_client
+
+    def _boom(*_args, **_kwargs):
+        raise RuntimeError("boom")
+
+    monkeypatch.setattr(project_module, "set_project_mod_state", _boom)
+
+    response = client.post(
+        f"/runs/{RUN_ID}/{CONFIG}/tasks/set_mod",
+        json={"mod": "rap_ts", "enabled": True},
+    )
+
+    assert response.status_code == 500
+    payload = response.get_json()
+    assert payload["error"]["message"] == "Error updating module state"
+    details = payload["error"]["details"]
+    assert "Traceback (most recent call last):" in details
+    assert "RuntimeError: boom" in details

@@ -2328,8 +2328,7 @@ def iter_nodb_mods_subclasses() -> Iterator[tuple[str, type['NoDbBase']]]:
 def clear_locks(runid: str, pup_relpath: Optional[str] = None) -> list[str]:
     """Clear Redis-backed locks for ``runid`` (optionally scoped to ``pup_relpath``)."""
 
-    if redis_lock_client is None:
-        raise RuntimeError('Redis lock client is unavailable')
+    lock_client = _ensure_redis_lock_client()
 
     cleared: list[str] = []
     seen: set[str] = set()
@@ -2346,7 +2345,7 @@ def clear_locks(runid: str, pup_relpath: Optional[str] = None) -> list[str]:
         if scope == '.':
             scope = None
 
-    hashmap = redis_lock_client.hgetall(runid)
+    hashmap = lock_client.hgetall(runid)
 
     for lock_key, v in hashmap.items():
         if not lock_key.startswith('locked:'):
@@ -2357,18 +2356,18 @@ def clear_locks(runid: str, pup_relpath: Optional[str] = None) -> list[str]:
             continue
 
         if v != 'false':
-            redis_lock_client.hset(runid, lock_key, 'false')
-        redis_lock_client.delete(_lock_key_for(runid, rel_path))
+            lock_client.hset(runid, lock_key, 'false')
+        lock_client.delete(_lock_key_for(runid, rel_path))
         _record(rel_path)
 
     pattern = f'{LOCK_KEY_PREFIX}:{runid}:*'
-    for distributed_key in redis_lock_client.scan_iter(match=pattern):
+    for distributed_key in lock_client.scan_iter(match=pattern):
         rel_path = _relpath_from_lock_key(runid, distributed_key)
         if not _matches_scope(rel_path, scope):
             continue
-        redis_lock_client.delete(distributed_key)
+        lock_client.delete(distributed_key)
         field = f'locked:{rel_path}'
-        redis_lock_client.hset(runid, field, 'false')
+        lock_client.hset(runid, field, 'false')
         _record(rel_path)
 
     return cleared
@@ -2380,21 +2379,20 @@ def lock_statuses(runid: str) -> defaultdict[str, bool]:
     Distributed locks (SETNX keys) are considered the source of truth; legacy
     `locked:*` hash fields are normalized as needed for compatibility.
     """
-    if redis_lock_client is None:
-        raise RuntimeError('Redis lock client is unavailable')
+    lock_client = _ensure_redis_lock_client()
 
     statuses = defaultdict(bool)
 
     # distributed locks are authoritative
     active_norm_paths: dict[str, str] = {}
     pattern = f'{LOCK_KEY_PREFIX}:{runid}:*'
-    for distributed_key in redis_lock_client.scan_iter(match=pattern):
+    for distributed_key in lock_client.scan_iter(match=pattern):
         rel_path = _relpath_from_lock_key(runid, distributed_key)
         statuses[rel_path] = True
         active_norm_paths[_normalize_lock_relpath(rel_path)] = rel_path
 
     # legacy hash flags are kept for UI compatibility
-    hashmap = redis_lock_client.hgetall(runid)
+    hashmap = lock_client.hgetall(runid)
     for lock_key, v in hashmap.items():
         if lock_key.startswith('locked:'):
             filename = lock_key.split('locked:')[1]
@@ -2419,7 +2417,7 @@ def lock_statuses(runid: str) -> defaultdict[str, bool]:
             if locked:
                 # Mirror authoritative state; if distributed lock is gone, clear stale flag.
                 if norm not in active_norm_paths:
-                    redis_lock_client.hset(runid, lock_key, 'false')
+                    lock_client.hset(runid, lock_key, 'false')
                     locked = False
 
             statuses[filename] = locked

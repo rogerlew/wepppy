@@ -3,6 +3,7 @@
 from datetime import datetime
 from subprocess import PIPE, Popen
 import os
+import traceback
 import redis
 from rq import Queue
 from wepppy.config.redis_settings import (
@@ -656,6 +657,12 @@ def task_set_mod(runid, config):
     except Exception:  # broad-except: boundary contract
         # Boundary catch: preserve contract behavior while logging unexpected failures.
         __import__("logging").getLogger(__name__).exception("Boundary exception at wepppy/weppcloud/routes/nodb_api/project_bp.py:583", extra={"runid": locals().get("runid"), "config": locals().get("config"), "job_id": locals().get("job_id")})
-        return exception_factory('Error updating module state', runid=runid)
+        stacktrace = traceback.format_exc()
+        return exception_factory(
+            'Error updating module state',
+            stacktrace=stacktrace,
+            runid=runid,
+            details=stacktrace,
+        )
 
     return success_factory(state)

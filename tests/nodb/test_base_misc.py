@@ -307,6 +307,101 @@ def test_ensure_redis_lock_client_raises_when_reconnect_fails(monkeypatch):
         base._ensure_redis_lock_client()
 
 
+def test_clear_locks_reconnects_lock_client_when_unset(monkeypatch):
+    calls = {
+        "hgetall": [],
+        "scan_iter": [],
+        "hset": [],
+        "delete": [],
+    }
+
+    class _StubLockClient:
+        def hgetall(self, runid):
+            calls["hgetall"].append(runid)
+            return {
+                "locked:foo.nodb": "true",
+                "locked:bar.nodb": "false",
+                "last_modified": "123",
+            }
+
+        def scan_iter(self, match):
+            calls["scan_iter"].append(match)
+            return iter([f"{base.LOCK_KEY_PREFIX}:run-123:baz.nodb"])
+
+        def hset(self, runid, key, value):
+            calls["hset"].append((runid, key, value))
+            return 1
+
+        def delete(self, key):
+            calls["delete"].append(key)
+            return 1
+
+    ensure_calls = []
+    client = _StubLockClient()
+
+    def _fake_ensure():
+        ensure_calls.append(True)
+        return client
+
+    monkeypatch.setattr(base, "redis_lock_client", None, raising=False)
+    monkeypatch.setattr(base, "_ensure_redis_lock_client", _fake_ensure)
+
+    cleared = base.clear_locks("run-123")
+
+    assert len(ensure_calls) == 1
+    assert calls["hgetall"] == ["run-123"]
+    assert calls["scan_iter"] == [f"{base.LOCK_KEY_PREFIX}:run-123:*"]
+    assert calls["hset"] == [
+        ("run-123", "locked:foo.nodb", "false"),
+        ("run-123", "locked:baz.nodb", "false"),
+    ]
+    assert set(calls["delete"]) == {
+        base._lock_key_for("run-123", "foo.nodb"),
+        base._lock_key_for("run-123", "bar.nodb"),
+        f"{base.LOCK_KEY_PREFIX}:run-123:baz.nodb",
+    }
+    assert set(cleared) == {"locked:foo.nodb", "locked:bar.nodb", "locked:baz.nodb"}
+
+
+def test_lock_statuses_reconnects_lock_client_when_unset(monkeypatch):
+    calls = {
+        "scan_iter": [],
+        "hgetall": [],
+        "hset": [],
+    }
+
+    class _StubLockClient:
+        def scan_iter(self, match):
+            calls["scan_iter"].append(match)
+            return iter(())
+
+        def hgetall(self, runid):
+            calls["hgetall"].append(runid)
+            return {"locked:stale.nodb": "true"}
+
+        def hset(self, runid, key, value):
+            calls["hset"].append((runid, key, value))
+            return 1
+
+    ensure_calls = []
+    client = _StubLockClient()
+
+    def _fake_ensure():
+        ensure_calls.append(True)
+        return client
+
+    monkeypatch.setattr(base, "redis_lock_client", None, raising=False)
+    monkeypatch.setattr(base, "_ensure_redis_lock_client", _fake_ensure)
+
+    statuses = base.lock_statuses("run-456")
+
+    assert dict(statuses) == {"stale.nodb": False}
+    assert len(ensure_calls) == 1
+    assert calls["scan_iter"] == [f"{base.LOCK_KEY_PREFIX}:run-456:*"]
+    assert calls["hgetall"] == ["run-456"]
+    assert calls["hset"] == [("run-456", "locked:stale.nodb", "false")]
+
+
 def test_ensure_redis_nodb_cache_client_reconnects_when_unset(monkeypatch):
     class _StubRedisClient:
         def __init__(self, connection_pool):

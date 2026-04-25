@@ -226,7 +226,7 @@ Each blueprint section below documents:
 | `/runs/<string:runid>/<config>/tasks/setscenario[/]` | `POST` | Ron.scenario (set) | — |
 | `/runs/<string:runid>/<config>/tasks/set_public` | `POST` | Ron.public (set) | — |
 | `/runs/<string:runid>/<config>/tasks/set_readonly` | `POST` | — | Enqueues `set_run_readonly_rq`; payload coerced via `parse_request_payload(boolean_fields={...})` |
-| `/runs/<string:runid>/<config>/tasks/set_mod[/]` | `POST` | Ron.mods (set/remove), Ron.remove_mod | Toggles optional modules, enforces dependencies, and instantiates controllers when available |
+| `/runs/<string:runid>/<config>/tasks/set_mod[/]` | `POST` | Ron.mods (set/remove), Ron.remove_mod | Toggles optional modules, enforces dependencies, and instantiates controllers when available. Unexpected failures return HTTP 500 with `error.details` containing the traceback text. |
 
 ### Rangeland Cover (`wepppy.weppcloud.routes.nodb_api.rangeland_bp`)
 - **NoDb singletons**: [RangelandCover](../../../nodb/mods/rangeland_cover.py), [Ron](../../../nodb/core/ron.py)
