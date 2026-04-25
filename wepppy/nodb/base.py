@@ -221,6 +221,8 @@ REDIS_STATUS_DB = int(RedisDB.STATUS)
 REDIS_LOCK_DB = int(RedisDB.LOCK)
 REDIS_NODB_EXPIRY = 72 * 3600  # 72 hours
 REDIS_LOG_LEVEL_DB = int(RedisDB.LOG_LEVEL)
+# See docs/work-packages/20260424_rq_worker_nodb_cache_hardening/package.md
+# section "## Redis NoDb Cache Connection Configuration Strategy".
 NODB_CACHE_POOL_EXTRA_KWARGS = {
     "max_connections": 50,
     "socket_timeout": 5,
