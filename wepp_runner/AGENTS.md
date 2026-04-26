@@ -32,6 +32,7 @@ From `/workdir/wepp-forest`:
 ```bash
 tools/smoke_wepp_binary_host.sh /workdir/wepp-forest/src/wepp
 tools/smoke_wepp_binary_host.sh /workdir/wepp-forest/src/wepp_hill
+python tools/run_hillslope_watchlist.py --binary /workdir/wepp-forest/src/wepp_hill
 pytest
 ```
 
