@@ -231,6 +231,7 @@ NODB_CACHE_POOL_EXTRA_KWARGS = {
     "health_check_interval": 30,
     "retry_on_timeout": True,
 }
+_CACHE_SIGNATURE_MTIME_EPSILON_SECONDS = 1e-6
 
 
 def _default_lock_ttl() -> int:
@@ -1050,6 +1051,73 @@ class NoDbBase(object):
                 exc_info=True,
             )
 
+    @staticmethod
+    def _signature_from_stat_result(stat_result: Any) -> Optional[tuple[float, int]]:
+        """Return ``(mtime_seconds, size)`` for a stat-like object when available."""
+
+        if stat_result is None:
+            return None
+
+        st_size = getattr(stat_result, "st_size", None)
+        if st_size is None:
+            return None
+
+        st_mtime = getattr(stat_result, "st_mtime", None)
+        if st_mtime is None:
+            st_mtime_ns = getattr(stat_result, "st_mtime_ns", None)
+            if st_mtime_ns is None:
+                return None
+            st_mtime = float(st_mtime_ns) / 1_000_000_000.0
+
+        return (float(st_mtime), int(st_size))
+
+    @staticmethod
+    def _signature_from_instance(instance: Any) -> Optional[tuple[float, int]]:
+        """Return ``(mtime_seconds, size)`` tracked on a cached NoDb instance."""
+
+        cached_mtime = getattr(instance, "_nodb_mtime", None)
+        cached_size = getattr(instance, "_nodb_size", None)
+        if cached_mtime is None or cached_size is None:
+            return None
+
+        try:
+            mtime = float(cached_mtime)
+            size = int(cached_size)
+        except (TypeError, ValueError):
+            return None
+
+        return (mtime, size)
+
+    @classmethod
+    def _cache_instance_matches_file_signature(
+        cls,
+        *,
+        instance: Any,
+        filepath: str,
+    ) -> tuple[bool, Any]:
+        """Validate that a cached instance signature matches ``filepath``."""
+
+        try:
+            stat_result = os.stat(filepath)
+        except OSError:
+            return (False, None)
+
+        file_signature = cls._signature_from_stat_result(stat_result)
+        cache_signature = cls._signature_from_instance(instance)
+        if file_signature is None or cache_signature is None:
+            return (False, stat_result)
+
+        file_mtime, file_size = file_signature
+        cache_mtime, cache_size = cache_signature
+
+        if cache_size != file_size:
+            return (False, stat_result)
+
+        return (
+            abs(cache_mtime - file_mtime) <= _CACHE_SIGNATURE_MTIME_EPSILON_SECONDS,
+            stat_result,
+        )
+
     @classmethod
     def _hydrate_instance(
         cls,
@@ -1075,23 +1143,27 @@ class NoDbBase(object):
                     if isinstance(db, cls):
                         db = cls._post_instance_loaded(db)
                         db.wd = abs_wd
-                        db._init_logging()
-                        db._nodb_mtime = None
-                        db._nodb_size = None
-                        try:
-                            stat_result = os.stat(filepath)
-                        except OSError:
-                            stat_result = None
-                        if stat_result is not None:
+                        cache_matches, stat_result = cls._cache_instance_matches_file_signature(
+                            instance=db,
+                            filepath=filepath,
+                        )
+                        if cache_matches and stat_result is not None:
                             db._nodb_mtime = stat_result.st_mtime
                             db._nodb_size = stat_result.st_size
-                        db.logger.debug(
-                            'Loaded NoDb instance from redis://%s/%s%s',
-                            REDIS_HOST,
-                            REDIS_NODB_CACHE_DB,
-                            filepath,
+                            db._init_logging()
+                            cache_logger = getattr(db, "logger", logging.getLogger(__name__))
+                            cache_logger.debug(
+                                'Loaded NoDb instance from redis://%s/%s%s',
+                                REDIS_HOST,
+                                REDIS_NODB_CACHE_DB,
+                                filepath,
+                            )
+                            return db
+
+                        logging.getLogger(__name__).debug(
+                            "Ignoring stale NoDb Redis cache entry due signature mismatch",
+                            extra={"filepath": filepath},
                         )
-                        return db
                 except Exception:
                     # Cache boundary: corrupt Redis payloads must not block loading from disk.
                     logging.getLogger(__name__).warning(
@@ -1119,27 +1191,6 @@ class NoDbBase(object):
         json_text = cls._preprocess_json_for_decode(json_text)
         cls._ensure_legacy_module_imports(json_text)
         db = cls._decode_jsonpickle(json_text)
-
-        if redis_nodb_cache_client:
-            try:
-                encoded = jsonpickle.encode(db)
-            except (TypeError, ValueError):
-                # Cache boundary: Redis cache updates are best-effort; never block instance hydration.
-                logging.getLogger(__name__).debug(
-                    "Could not encode NoDb instance for Redis cache",
-                    extra={"filepath": filepath},
-                    exc_info=True,
-                )
-            else:
-                try:
-                    redis_nodb_cache_client.set(filepath, encoded, ex=REDIS_NODB_EXPIRY)
-                except Exception:
-                    # Cache boundary: Redis cache updates are best-effort; never block instance hydration.
-                    logging.getLogger(__name__).debug(
-                        "Warning: Could not update Redis cache for NoDb instance",
-                        extra={"filepath": filepath},
-                        exc_info=True,
-                    )
 
         if not isinstance(db, cls):
             decoded_type = type(db)
@@ -1186,6 +1237,27 @@ class NoDbBase(object):
         if stat_result is not None:
             db._nodb_mtime = stat_result.st_mtime
             db._nodb_size = stat_result.st_size
+
+        if redis_nodb_cache_client:
+            try:
+                encoded = jsonpickle.encode(db)
+            except (TypeError, ValueError):
+                # Cache boundary: Redis cache updates are best-effort; never block instance hydration.
+                logging.getLogger(__name__).debug(
+                    "Could not encode NoDb instance for Redis cache",
+                    extra={"filepath": filepath},
+                    exc_info=True,
+                )
+            else:
+                try:
+                    redis_nodb_cache_client.set(filepath, encoded, ex=REDIS_NODB_EXPIRY)
+                except Exception:
+                    # Cache boundary: Redis cache updates are best-effort; never block instance hydration.
+                    logging.getLogger(__name__).debug(
+                        "Warning: Could not update Redis cache for NoDb instance",
+                        extra={"filepath": filepath},
+                        exc_info=True,
+                    )
         return db
 
     @classmethod
@@ -1277,7 +1349,19 @@ class NoDbBase(object):
                     if isinstance(db, cls):
                         db = cls._post_instance_loaded(db)
                         db.wd = abs_wd
-                        return db
+                        cache_matches, stat_result = cls._cache_instance_matches_file_signature(
+                            instance=db,
+                            filepath=filepath,
+                        )
+                        if cache_matches and stat_result is not None:
+                            db._nodb_mtime = stat_result.st_mtime
+                            db._nodb_size = stat_result.st_size
+                            return db
+
+                        logging.getLogger(__name__).debug(
+                            "Ignoring stale NoDb Redis cache entry in load_detached due signature mismatch",
+                            extra={"filepath": filepath},
+                        )
                 except Exception:
                     # Cache boundary: corrupt Redis payloads must not block loading from disk.
                     logging.getLogger(__name__).debug(
@@ -1649,7 +1733,10 @@ class NoDbBase(object):
 
         if redis_nodb_cache_client is not None:
             try:
-                redis_nodb_cache_client.set(self._nodb, js, ex=REDIS_NODB_EXPIRY) 
+                # Re-encode after final signature updates so Redis mirrors the
+                # exact post-write state (including _nodb_mtime/_nodb_size).
+                cache_payload = jsonpickle.encode(self)
+                redis_nodb_cache_client.set(self._nodb, cache_payload, ex=REDIS_NODB_EXPIRY)
             except Exception:
                 # Cache mirror writes are best-effort and must not block dump/unlock.
                 logging.getLogger(__name__).warning(

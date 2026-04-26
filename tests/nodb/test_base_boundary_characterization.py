@@ -219,6 +219,190 @@ def test_load_detached_drops_corrupt_cache_payload_and_loads_from_disk(
     assert cache.deleted == [os.fspath(tmp_path / nodb.filename)]
 
 
+def test_getinstance_ignores_stale_cache_signature_and_rehydrates_from_disk(
+    tmp_path: Path,
+    redis_lock_stub: _RedisStub,
+    disable_redis_cache: None,
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    nodb = _DummyNoDb(str(tmp_path))
+    nodb.lock()
+    try:
+        nodb.value = 17
+        nodb.dump()
+    finally:
+        nodb.unlock(flag="-f")
+
+    nodb_path = tmp_path / nodb.filename
+    disk_stat = nodb_path.stat()
+
+    stale_cached = _DummyNoDb.load_detached(str(tmp_path))
+    assert stale_cached is not None
+    stale_cached.value = 99
+    stale_cached._nodb_mtime = disk_stat.st_mtime - 30
+    stale_cached._nodb_size = disk_stat.st_size
+
+    class _StaleCache:
+        def __init__(self, payload: str) -> None:
+            self.payload = payload
+            self.set_calls: list[str] = []
+
+        def get(self, _key: str):
+            return self.payload
+
+        def set(self, _key: str, value: str, *, ex=None, nx: bool = False):
+            self.payload = value
+            self.set_calls.append(value)
+            return True
+
+        def delete(self, _key: str):
+            return 1
+
+    stale_cache = _StaleCache(base.jsonpickle.encode(stale_cached))
+    monkeypatch.setattr(base, "redis_nodb_cache_client", stale_cache, raising=False)
+
+    _DummyNoDb.cleanup_run_instances(str(tmp_path))
+    loaded = _DummyNoDb.getInstance(str(tmp_path))
+
+    assert loaded.value == 17
+    assert stale_cache.set_calls, "expected disk rehydrate path to refresh Redis cache"
+    refreshed_cached = base.jsonpickle.decode(stale_cache.payload)
+    assert refreshed_cached.value == 17
+
+
+def test_load_detached_ignores_stale_cache_signature_and_rehydrates_from_disk(
+    tmp_path: Path,
+    redis_lock_stub: _RedisStub,
+    disable_redis_cache: None,
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    nodb = _DummyNoDb(str(tmp_path))
+    nodb.lock()
+    try:
+        nodb.value = 23
+        nodb.dump()
+    finally:
+        nodb.unlock(flag="-f")
+
+    nodb_path = tmp_path / nodb.filename
+    disk_stat = nodb_path.stat()
+
+    stale_cached = _DummyNoDb.load_detached(str(tmp_path))
+    assert stale_cached is not None
+    stale_cached.value = 404
+    stale_cached._nodb_mtime = disk_stat.st_mtime - 30
+    stale_cached._nodb_size = disk_stat.st_size
+
+    class _ReadOnlyStaleCache:
+        def __init__(self, payload: str) -> None:
+            self.payload = payload
+
+        def get(self, _key: str):
+            return self.payload
+
+        def delete(self, _key: str):
+            return 1
+
+    monkeypatch.setattr(
+        base,
+        "redis_nodb_cache_client",
+        _ReadOnlyStaleCache(base.jsonpickle.encode(stale_cached)),
+        raising=False,
+    )
+
+    loaded = _DummyNoDb.load_detached(str(tmp_path))
+    assert loaded is not None
+    assert loaded.value == 23
+
+
+def test_getinstance_accepts_fresh_cache_signature_without_disk_rehydrate(
+    tmp_path: Path,
+    redis_lock_stub: _RedisStub,
+    disable_redis_cache: None,
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    nodb = _DummyNoDb(str(tmp_path))
+    nodb.lock()
+    try:
+        nodb.value = 31
+        nodb.dump()
+    finally:
+        nodb.unlock(flag="-f")
+
+    cached = _DummyNoDb.load_detached(str(tmp_path))
+    assert cached is not None
+
+    class _FreshCache:
+        def __init__(self, payload: str) -> None:
+            self.payload = payload
+            self.set_calls: list[str] = []
+
+        def get(self, _key: str):
+            return self.payload
+
+        def set(self, _key: str, value: str, *, ex=None, nx: bool = False):
+            self.payload = value
+            self.set_calls.append(value)
+            return True
+
+        def delete(self, _key: str):
+            return 1
+
+    cache = _FreshCache(base.jsonpickle.encode(cached))
+    monkeypatch.setattr(base, "redis_nodb_cache_client", cache, raising=False)
+
+    _DummyNoDb.cleanup_run_instances(str(tmp_path))
+    loaded = _DummyNoDb.getInstance(str(tmp_path))
+
+    assert loaded.value == 31
+    assert not cache.set_calls, "fresh cache hit should not force disk rehydrate"
+
+
+def test_getinstance_disk_hydrate_populates_cache_with_reusable_signature(
+    tmp_path: Path,
+    redis_lock_stub: _RedisStub,
+    disable_redis_cache: None,
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    nodb = _DummyNoDb(str(tmp_path))
+    nodb.lock()
+    try:
+        nodb.value = 47
+        nodb.dump()
+    finally:
+        nodb.unlock(flag="-f")
+
+    class _CountingCache:
+        def __init__(self) -> None:
+            self.store: dict[str, str] = {}
+            self.set_count = 0
+
+        def get(self, key: str):
+            return self.store.get(key)
+
+        def set(self, key: str, value: str, *, ex=None, nx: bool = False):
+            self.store[key] = value
+            self.set_count += 1
+            return True
+
+        def delete(self, key: str):
+            self.store.pop(key, None)
+            return 1
+
+    cache = _CountingCache()
+    monkeypatch.setattr(base, "redis_nodb_cache_client", cache, raising=False)
+
+    _DummyNoDb.cleanup_run_instances(str(tmp_path))
+    first = _DummyNoDb.getInstance(str(tmp_path))
+    assert first.value == 47
+    assert cache.set_count == 1, "first load should hydrate disk and populate cache"
+
+    _DummyNoDb.cleanup_run_instances(str(tmp_path))
+    second = _DummyNoDb.getInstance(str(tmp_path))
+    assert second.value == 47
+    assert cache.set_count == 1, "second load should accept cache without disk rehydrate"
+
+
 def test_locked_releases_lock_when_dump_fails_after_successful_context_body(
     tmp_path: Path,
     redis_lock_stub: _RedisStub,
@@ -446,3 +630,58 @@ def test_dump_forces_monotonic_signature_after_second_same_size_rewrite(
             stale_writer.dump()
     finally:
         stale_writer.unlock(flag="-f")
+
+
+def test_dump_cache_mirror_uses_post_write_signature(
+    tmp_path: Path,
+    redis_lock_stub: _RedisStub,
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    _install_db_api_stub(monkeypatch, update_last_modified=lambda *_args, **_kwargs: None)
+
+    class _CacheRecorder:
+        def __init__(self) -> None:
+            self.payloads: list[str] = []
+
+        def set(self, _key: str, value: str, *, ex=None, nx: bool = False):
+            self.payloads.append(value)
+            return True
+
+    cache = _CacheRecorder()
+    monkeypatch.setattr(base, "redis_nodb_cache_client", cache, raising=False)
+
+    writer = _DummyNoDb(str(tmp_path))
+    _prime_stable_dummy_payload_signature(writer, value="A")
+
+    expected_mtime = writer._nodb_mtime
+    expected_size = writer._nodb_size
+    assert expected_mtime is not None
+    assert expected_size is not None
+
+    real_fstat = base.os.fstat
+    forced_signature_once = {"done": False}
+
+    def _fstat_with_stale_signature(fd: int):
+        stat_result = real_fstat(fd)
+        if not forced_signature_once["done"]:
+            forced_signature_once["done"] = True
+            return types.SimpleNamespace(
+                st_mtime=expected_mtime,
+                st_size=expected_size,
+                st_atime_ns=getattr(stat_result, "st_atime_ns", int(expected_mtime * 1_000_000_000)),
+            )
+        return stat_result
+
+    monkeypatch.setattr(base.os, "fstat", _fstat_with_stale_signature)
+
+    writer.lock()
+    try:
+        writer.value = "A"
+        writer.dump()
+    finally:
+        writer.unlock(flag="-f")
+
+    assert cache.payloads, "expected Redis cache mirror writes"
+    cached = base.jsonpickle.decode(cache.payloads[-1])
+    assert cached._nodb_mtime == writer._nodb_mtime
+    assert cached._nodb_size == writer._nodb_size
