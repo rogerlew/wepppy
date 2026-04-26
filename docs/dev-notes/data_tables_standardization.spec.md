@@ -32,6 +32,10 @@
 3. Add validation to run activation/build steps to confirm new parquet assets comply.
 
 ## Peridot Watershed Contract (Current)
+- Canonical direct Peridot output behavior is maintained in the
+  [Peridot watershed output contract](https://github.com/wepp-in-the-woods/peridot/blob/main/docs/contracts/watershed-output-contract.md).
+  This section describes WEPPpy post-processing expectations layered on top of
+  direct Peridot CLI outputs.
 - Peridot now emits watershed parquet outputs directly (`hillslopes.parquet`, `channels.parquet`, optional `flowpaths.parquet`) and generates `watershed/README.md` with run flags, file manifest, and schema summary.
 - `post_abstract_watershed()` is parquet-first for new runs and uses an explicit legacy CSV fallback path only when a required parquet file is missing.
 - After WEPPpy post-processing adds canonical derived columns, `post_abstract_watershed()` refreshes `watershed/README.md` manifest/schema sections so documented contract matches final on-disk parquet outputs.

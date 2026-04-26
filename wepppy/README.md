@@ -142,7 +142,9 @@ topaz.delineate_hillslopes()
 
 **Acceleration:**
 - Rust bindings via `wepppyo3` for climate interpolation and raster lookups
-- `peridot` for watershed abstraction (3-10x faster than Python)
+- `peridot` for graph-first watershed abstraction; see the canonical
+  [output contract](https://github.com/wepp-in-the-woods/peridot/blob/main/docs/contracts/watershed-output-contract.md)
+  and [benchmark discipline](https://github.com/wepp-in-the-woods/peridot/blob/main/docs/benchmarks.md)
 - Custom `whitebox-tools` fork with TOPAZ-compatible hillslope delineation
 
 ### 4. Climate Data Integration
@@ -505,7 +507,6 @@ from wepppy.nodb.core import Wepp
 
 ### Architecture and Design
 - [ARCHITECTURE.md](../ARCHITECTURE.md) - System design and component diagrams
-- [API_REFERENCE.md](../API_REFERENCE.md) - Quick reference for key APIs
 - [AGENTS.md](../AGENTS.md) - Comprehensive coding conventions and workflows
 
 ### Detailed Documentation
@@ -522,7 +523,10 @@ from wepppy.nodb.core import Wepp
 
 ### External Projects
 - [wepppyo3](https://github.com/wepp-in-the-woods/wepppyo3) - Rust Python bindings for geospatial acceleration
-- [peridot](https://github.com/wepp-in-the-woods/peridot) - Rust watershed abstraction engine
+- [peridot](https://github.com/wepp-in-the-woods/peridot) - Rust watershed abstraction engine; canonical docs:
+  [contract](https://github.com/wepp-in-the-woods/peridot/blob/main/docs/contracts/watershed-output-contract.md),
+  [migration](https://github.com/wepp-in-the-woods/peridot/blob/main/docs/migration/prepwepp-to-peridot.md),
+  [operations](https://github.com/wepp-in-the-woods/peridot/blob/main/docs/operations.md)
 - [weppcloud-wbt](https://github.com/rogerlew/weppcloud-wbt) - Custom fork of whitebox-tools with TOPAZ compatibility
 
 ## Credits

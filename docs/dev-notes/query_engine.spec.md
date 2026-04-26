@@ -51,6 +51,10 @@ Goal: provide near real-time access to geo-spatial-temporal data from WEPPcloud 
 - `wepp/output/interchange/*.parquet`: hillslope & watershed interchange exports (PASS, WAT, EBE, channel summaries, etc.).
 - `disturbed/disturbed_land_soil_lookup.csv`: disturbance lookup table for cross-walking soils/landuse adjustments.
 
+Direct Peridot watershed output behavior, including optional flowpath export and manifest semantics,
+is maintained in the
+[Peridot watershed output contract](https://github.com/wepp-in-the-woods/peridot/blob/main/docs/contracts/watershed-output-contract.md).
+
 ## Query Planner Architecture (current state)
 ```
 Client payload (QueryRequest)

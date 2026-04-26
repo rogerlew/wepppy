@@ -272,6 +272,15 @@ Currently active work packages. Limit to 2-4 packages to maintain focus.
 
 Recently completed work packages. Archived immediately upon completion.
 
+### Peridot Documentation Repositioning and Adoption Visibility (2026-04-26)
+**Status**: ✅ **COMPLETE**
+
+**Link**: [docs/work-packages/20260426_peridot_documentation_repositioning/](docs/work-packages/20260426_peridot_documentation_repositioning/)
+
+**Lifecycle**: Backlog -> In Progress -> Done (2026-04-26)
+
+**Summary**: Closed cross-repo documentation repositioning for Peridot. `/home/workdir/peridot/README.md` now frames Peridot as an explicit graph abstraction shift rather than a simple TOPAZ/TOP2WEPP modernization, with replacement boundaries, canonical docs, and communication kit. New Peridot docs cover the watershed output contract, benchmark/claim discipline, prepwepp/TOPAZ migration, and operations validation. WEPPpy references now point to canonical Peridot docs and avoid unqualified speedup claims. Package artifacts record claim provenance, validation, and follow-up runtime/schema gaps.
+
 ### NoDb Atomicity + Observability Follow-Ups (RQ Engine) (2026-04-26)
 **Status**: ✅ **COMPLETE**  
 **Link**: [docs/work-packages/20260425_nodb_atomicity_observability_followups_a/](docs/work-packages/20260425_nodb_atomicity_observability_followups_a/)  

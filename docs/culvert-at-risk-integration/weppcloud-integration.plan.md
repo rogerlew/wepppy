@@ -269,6 +269,7 @@ Notes:
 - Scope: reduce memory footprint of `wbt_abstract_watershed` (Peridot) to prevent memory-watchdog kills during parallel culvert batch processing; integrate `--skip-flowpaths` flag to eliminate unnecessary flowpath output generation.
 - Problem: initial Hubbard Brook batch (7 watersheds) with 4 concurrent workers peaked at 101GB used / 24GB available, triggering the memory-watchdog kill threshold (25GB available). Per-process memory was 15-21GB each.
 - Dependencies: optimized Peridot binary with reduced raster footprint and `--skip-flowpaths` CLI flag.
+- Historical contract note (2026-04-26): this completed implementation note uses CSV-era wording from the original culvert package. Current direct Peridot watershed output behavior is Parquet-first and is documented in the [Peridot watershed output contract](https://github.com/wepp-in-the-woods/peridot/blob/main/docs/contracts/watershed-output-contract.md). In current contract terms, `--skip-flowpaths` omits `flowpaths.parquet` and `slope_files/flowpaths/` outputs.
 
 ### Peridot optimizations (Rust binary)
 - Raster footprint reduced: `f32` for relief/fvslop/taspec (was `f64`).
@@ -337,6 +338,7 @@ Notes:
 - Status: complete.
 - Scope: replace the O(pixels) per-hillslope flowpath walking in `wbt_abstract_watershed` with a single representative flowpath per hillslope, dramatically reducing abstraction time for 1.0m DEM culvert batches.
 - Problem: `wbt_abstract_watershed` was the bottleneck for high-resolution (1.0m) culvert batches. Run 184 (78 hillslopes, 3.5M cells) took **4409 seconds** (~73 minutes) for abstraction alone, walking 2.4M flowpath indices.
+- Historical contract note (2026-04-26): this completed implementation note uses CSV-era wording from the original culvert package. Current direct Peridot watershed output behavior is Parquet-first and is documented in the [Peridot watershed output contract](https://github.com/wepp-in-the-woods/peridot/blob/main/docs/contracts/watershed-output-contract.md). In current contract terms, representative-flowpath mode forces omission of `flowpaths.parquet` and `slope_files/flowpaths/` outputs.
 
 ### Peridot optimizations (Rust binary)
 - New `--representative-flowpath` flag for `wbt_abstract_watershed` (WBT-only).

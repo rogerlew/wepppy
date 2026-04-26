@@ -176,7 +176,11 @@ Over that time, the team has moved multiple hot paths out of Python and into own
 - A production microservices topology split across Starlette services (`query-engine`, `browse`), FastAPI services (`rq-engine`), and Go services (`status2`, `preflight2`), with tunable Gunicorn/Uvicorn process counts and RQ worker-pool sizing to absorb interactive and batch load spikes
 
 - Rust `make_rhem_storm_file` in `wepppyo3`, which delivered a documented **400x speedup** for RHEM storm-file generation
-- `peridot` watershed abstraction, documented in the codebase as **3x to 10x faster than Python**, with representative-flowpath mode reducing hillslope abstraction time by **10x to 100x** for large batch workflows
+- `peridot` watershed abstraction, now documented as a graph-first abstraction layer rather
+  than a simple TOPAZ/TOP2WEPP modernization. Its canonical benchmark notes define how to
+  substantiate speedup claims for specific datasets, hardware, and modes; historical `3x to
+  10x` and representative-flowpath `10x to 100x` statements should be treated as
+  workload-specific benchmark claims, not universal St. Joe end-to-end guarantees.
 - `weppcloud-wbt` VRT/windowed GeoTIFF support, which avoids full in-memory raster loads for cropped DEM inputs and reduces memory pressure during terrain preprocessing
 - WEPP interchange plus the DuckDB-backed query stack, which converts large raw WEPP text outputs into compressed Parquet tables, supports cleanup of selected raw text artifacts after successful conversion to reduce disk footprint and inode pressure, and enables interactive real-time querying of multi-GB Parquet datasets
 

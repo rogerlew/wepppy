@@ -43,7 +43,8 @@ Watershed-table schema note:
 - `output_scope` rewrites do not alter watershed table schemas.
 - `watershed/hillslopes.parquet` may include additive Peridot provenance columns such as
   `length_estimate_mode`, `length_area_over_channel`, and `length_edge_median`; scoped
-  path behavior remains unchanged.
+  path behavior remains unchanged. Direct Peridot output behavior is documented in the
+  [Peridot watershed output contract](https://github.com/wepp-in-the-woods/peridot/blob/main/docs/contracts/watershed-output-contract.md).
 
 Implementation references:
 - `wepppy/wepp/reports/output_scope.py::resolve_output_scope_paths`

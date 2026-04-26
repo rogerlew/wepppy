@@ -328,9 +328,13 @@ valid erosion estimates based on the terrain and land cover even without explici
 
 ### Watershed Abstraction with Representative Flowpaths
 
-For culvert batch processing, wepp.cloud uses **representative flowpath mode** to dramatically reduce
-hillslope delineation time. This is implemented in [peridot](https://github.com/wepp-in-the-woods/peridot),
-a Rust-based watershed abstraction tool.
+For culvert batch processing, wepp.cloud uses **representative flowpath mode** to reduce
+full per-pixel hillslope abstraction work and output volume. This is implemented in
+[peridot](https://github.com/wepp-in-the-woods/peridot), a Rust-based explicit graph
+watershed abstraction tool. Direct output behavior is documented in the
+[Peridot output contract](https://github.com/wepp-in-the-woods/peridot/blob/main/docs/contracts/watershed-output-contract.md),
+and speedup claims should follow the
+[Peridot benchmark discipline](https://github.com/wepp-in-the-woods/peridot/blob/main/docs/benchmarks.md).
 
 **Standard mode** (used for interactive WEPPcloud runs):
 - Traces a flowpath from every pixel in the hillslope boundary
@@ -344,10 +348,11 @@ a Rust-based watershed abstraction tool.
 - Builds the hillslope slope profile from that single representative path
 - Skips per-pixel flowpath generation entirely
 
-This reduces hillslope abstraction time by 10-100x depending on watershed size, making batch
-processing of hundreds of culverts feasible. The representative flowpath approach preserves
-erosion modeling accuracy by selecting flowpaths that approximate median hillslope length,
-avoiding bias toward longest or shortest paths.
+This can reduce hillslope abstraction cost for large culvert batches by avoiding full flowpath
+materialization. Any numeric speedup claim should be tied to a recorded dataset, host, command,
+and Peridot version. The representative flowpath approach is designed to avoid bias toward
+longest or shortest paths by selecting source cells near median distance-to-channel behavior;
+workflow-specific erosion parity still requires validation evidence.
 
 ## Building Payloads with `build_payload.py`
 
