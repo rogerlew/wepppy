@@ -312,6 +312,86 @@ class Soils(NoDbBase):
     def rosetta_wc_fc_from_disturbed_bd_override(self, value: bool) -> None:
         self._rosetta_wc_fc_from_disturbed_bd_override = bool(value)
 
+    def snapshot_wepp_run_payload_updates(self) -> dict[str, Any]:
+        """Capture mutable WEPP payload fields for rollback handling."""
+
+        return {
+            "_clip_soils": getattr(self, "_clip_soils", False),
+            "_clip_soils_depth": getattr(self, "_clip_soils_depth", 1000),
+            "_clip_soils_minimum": getattr(self, "_clip_soils_minimum", False),
+            "_clip_soils_minimum_depth": getattr(self, "_clip_soils_minimum_depth", 0),
+            "_rosetta_wc_fc_from_disturbed_bd_override": bool(
+                getattr(self, "_rosetta_wc_fc_from_disturbed_bd_override", False)
+            ),
+            "_initial_sat": getattr(self, "_initial_sat", 0.75),
+        }
+
+    def restore_wepp_run_payload_updates(self, snapshot: dict[str, Any]) -> None:
+        """Restore WEPP payload fields from a prior snapshot."""
+
+        self._clip_soils = bool(snapshot["_clip_soils"])
+        self._clip_soils_depth = snapshot["_clip_soils_depth"]
+        self._clip_soils_minimum = bool(snapshot["_clip_soils_minimum"])
+        self._clip_soils_minimum_depth = snapshot["_clip_soils_minimum_depth"]
+        self._rosetta_wc_fc_from_disturbed_bd_override = bool(
+            snapshot["_rosetta_wc_fc_from_disturbed_bd_override"]
+        )
+        self._initial_sat = snapshot["_initial_sat"]
+
+    def stage_wepp_run_payload_updates(
+        self,
+        *,
+        clip_soils: Optional[bool] = None,
+        clip_soils_depth: Optional[float] = None,
+        clip_soils_minimum: Optional[bool] = None,
+        clip_soils_minimum_depth: Optional[float] = None,
+        rosetta_wc_fc_from_disturbed_bd_override: Optional[bool] = None,
+        initial_sat: Optional[float] = None,
+    ) -> bool:
+        """Apply WEPP payload fields in-memory without locking or persistence."""
+
+        has_updates = any(
+            value is not None
+            for value in (
+                clip_soils,
+                clip_soils_depth,
+                clip_soils_minimum,
+                clip_soils_minimum_depth,
+                rosetta_wc_fc_from_disturbed_bd_override,
+                initial_sat,
+            )
+        )
+        if not has_updates:
+            return False
+
+        if clip_soils is not None:
+            self._clip_soils = bool(clip_soils)
+        if clip_soils_depth is not None:
+            self._clip_soils_depth = clip_soils_depth
+        if clip_soils_minimum is not None:
+            self._clip_soils_minimum = bool(clip_soils_minimum)
+        if clip_soils_minimum_depth is not None:
+            self._clip_soils_minimum_depth = clip_soils_minimum_depth
+        if rosetta_wc_fc_from_disturbed_bd_override is not None:
+            self._rosetta_wc_fc_from_disturbed_bd_override = bool(
+                rosetta_wc_fc_from_disturbed_bd_override
+            )
+        if initial_sat is not None:
+            self._initial_sat = initial_sat
+        return True
+
+    def finalize_grouped_wepp_run_payload_updates(self) -> None:
+        """Persist grouped WEPP payload updates while lock ownership is external."""
+
+        self.dump()
+
+    def post_finalize_grouped_wepp_run_payload_updates(self, *, validate: bool = True) -> None:
+        """Run post-dump semantics after grouped dump/unlock completes."""
+
+        if validate:
+            type(self).getInstance(self.wd)
+        type(self)._post_dump_and_unlock(self)
+
     def apply_wepp_run_payload_updates(
         self,
         *,
@@ -323,7 +403,6 @@ class Soils(NoDbBase):
         initial_sat: Optional[float] = None,
     ) -> None:
         """Apply WEPP payload soil mutations in a single lock scope."""
-
         has_updates = any(
             value is not None
             for value in (
@@ -339,20 +418,14 @@ class Soils(NoDbBase):
             return
 
         with self.locked():
-            if clip_soils is not None:
-                self._clip_soils = bool(clip_soils)
-            if clip_soils_depth is not None:
-                self._clip_soils_depth = clip_soils_depth
-            if clip_soils_minimum is not None:
-                self._clip_soils_minimum = bool(clip_soils_minimum)
-            if clip_soils_minimum_depth is not None:
-                self._clip_soils_minimum_depth = clip_soils_minimum_depth
-            if rosetta_wc_fc_from_disturbed_bd_override is not None:
-                self._rosetta_wc_fc_from_disturbed_bd_override = bool(
-                    rosetta_wc_fc_from_disturbed_bd_override
-                )
-            if initial_sat is not None:
-                self._initial_sat = initial_sat
+            self.stage_wepp_run_payload_updates(
+                clip_soils=clip_soils,
+                clip_soils_depth=clip_soils_depth,
+                clip_soils_minimum=clip_soils_minimum,
+                clip_soils_minimum_depth=clip_soils_minimum_depth,
+                rosetta_wc_fc_from_disturbed_bd_override=rosetta_wc_fc_from_disturbed_bd_override,
+                initial_sat=initial_sat,
+            )
 
     @property
     def ksflag(self) -> bool:

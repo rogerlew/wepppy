@@ -11,17 +11,19 @@ After this package, scoped rq-engine mutation flows should be safer under failur
 ## Progress
 
 - [x] (2026-04-25 23:06 UTC) Package scaffold created and scope locked to follow-ups `1,2,3,4,6`.
-- [ ] Milestone 1: design and implement scoped cross-controller failure-atomicity strategy.
-- [ ] Milestone 2: resolve `wctl check-rq-graph` drift baseline.
-- [ ] Milestone 3: harden and validate WEPP job-hint post-enqueue failure/concurrency boundaries.
-- [ ] Milestone 4: add lock/dump-efficiency observability guard.
-- [ ] Milestone 5: perform test maintainability cleanup for scoped rq-engine suites.
-- [ ] Milestone 6: final validations, docs closure, and ExecPlan archive move.
+- [x] (2026-04-26 00:36 UTC) Milestone 1 complete: scoped cross-controller failure-atomicity strategy implemented with closure review triad and no remaining High/Medium findings.
+- [x] (2026-04-26 00:43 UTC) Milestone 2 complete: `wctl check-rq-graph` drift resolved by canonical artifact regeneration; triad review found no High/Medium issues.
+- [x] (2026-04-26 01:08 UTC) Milestone 3 complete: WEPP/bootstrap post-enqueue hint persistence boundary hardening landed; closure triad reported no remaining High/Medium findings.
+- [x] (2026-04-26 01:34 UTC) Milestone 4 complete: lock/dump-efficiency AST guard added; landuse grouped-update rollback gap remediated and re-reviewed clean.
+- [x] (2026-04-26 01:50 UTC) Milestone 5 complete: scoped test maintainability cleanup landed (shared WEPP payload doubles + reduced brittle assertions) with closure triad and no remaining High/Medium findings.
+- [x] (2026-04-26 01:50 UTC) Milestone 6 complete: package-wide scoped validation and closure gates passed; docs and tracker synchronized.
 
 ## Surprises & Discoveries
 
 - Observation: `wctl check-rq-graph` currently reports drift in graph/catalog artifacts despite no queue-wiring edits in the prior package.
   Evidence: prior package closure notes and tracker timeline for `20260425_nodb_lock_dump_efficiency_refactor`.
+- Observation: grouped lock preflight + later reacquire introduced a TOCTOU race where WEPP parse could persist before grouped lock conflict surfaced; required single-acquisition lock lifecycle across parse + grouped commit.
+  Evidence: Milestone 1 closure re-review findings and final remediation notes in package tracker.
 
 ## Decision Log
 
@@ -33,9 +35,24 @@ After this package, scoped rq-engine mutation flows should be safer under failur
   Rationale: correctness and contract safety should stabilize before maintainability refactors.
   Date/Author: 2026-04-25 / Codex.
 
+- Decision: sanitize lock-conflict client payloads while preserving full lock details in server logs.
+  Rationale: avoid exposing lock owner/token metadata in API error messages.
+  Date/Author: 2026-04-26 / Codex.
+
+- Decision: hold grouped soils/watershed locks across WEPP parse + grouped stage/commit instead of preflight unlock/reacquire.
+  Rationale: remove TOCTOU window and ensure grouped lock conflicts fail before WEPP parse persistence.
+  Date/Author: 2026-04-26 / Codex.
+
 ## Outcomes & Retrospective
 
-Pending implementation.
+- Achieved scoped atomicity/boundary hardening goals without expanding into legacy Flask routes.
+- Added a repeatable observability guard test to detect grouped-helper regression patterns in scoped rq-engine routes/helpers.
+- Maintained contract-safe behavior for enqueue success on post-enqueue hint persistence faults while redacting lock metadata from client-visible paths.
+- Package-wide scoped validation and enforcement gates passed at closure:
+  - `wctl run-pytest` scoped sweep: `228 passed`, `0 failed`
+  - `wctl check-rq-graph`: clean
+  - `check_broad_exceptions --enforce-changed`: PASS
+- Residual risk accepted as Low: AST guard is structural and should continue to be paired with runtime behavioral suites.
 
 ## Context and Orientation
 

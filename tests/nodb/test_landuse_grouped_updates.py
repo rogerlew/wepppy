@@ -162,6 +162,64 @@ def test_landuse_apply_set_landuse_mode_updates_preserves_mode_validation_contra
     assert lock.exits == 1
 
 
+def test_landuse_apply_set_landuse_mode_updates_rolls_back_state_on_selection_failure() -> None:
+    landuse = object.__new__(Landuse)
+    landuse._mode = LanduseMode.Gridded
+    landuse._single_selection = "101"
+    landuse._single_man = {"dom": "101"}
+
+    lock = _LockRecorder()
+    landuse.locked = lock.locked
+
+    def failing_set_single_selection(_selection) -> None:
+        assert landuse._mode == LanduseMode.UserDefined
+        raise ValueError("selection update failed")
+
+    landuse._set_single_selection_value = failing_set_single_selection
+
+    with pytest.raises(ValueError, match="selection update failed"):
+        landuse.apply_set_landuse_mode_updates(
+            mode=int(LanduseMode.UserDefined),
+            single_selection="forest",
+        )
+
+    assert lock.calls == 1
+    assert lock.enters == 1
+    assert lock.exits == 1
+    assert landuse._mode == LanduseMode.Gridded
+    assert landuse._single_selection == "101"
+    assert landuse._single_man == {"dom": "101"}
+
+
+def test_landuse_apply_set_landuse_mode_updates_rolls_back_with_missing_single_man(
+) -> None:
+    landuse = object.__new__(Landuse)
+    landuse._mode = LanduseMode.Gridded
+    landuse._single_selection = "101"
+
+    lock = _LockRecorder()
+    landuse.locked = lock.locked
+
+    def failing_set_single_selection(_selection) -> None:
+        assert landuse._mode == LanduseMode.UserDefined
+        raise ValueError("selection update failed")
+
+    landuse._set_single_selection_value = failing_set_single_selection
+
+    with pytest.raises(ValueError, match="selection update failed"):
+        landuse.apply_set_landuse_mode_updates(
+            mode=int(LanduseMode.UserDefined),
+            single_selection="forest",
+        )
+
+    assert lock.calls == 1
+    assert lock.enters == 1
+    assert lock.exits == 1
+    assert landuse._mode == LanduseMode.Gridded
+    assert landuse._single_selection == "101"
+    assert not hasattr(landuse, "_single_man")
+
+
 def test_disturbed_apply_build_landuse_updates_noop_skips_lock_and_mutation() -> None:
     disturbed = object.__new__(Disturbed)
     disturbed._burn_shrubs = True

@@ -1,6 +1,6 @@
 # NoDb Atomicity, RQ Graph Baseline, and Observability Follow-Ups
 
-**Status**: Open (2026-04-25 23:06 UTC)
+**Status**: Closed (2026-04-26 01:50 UTC)
 **Timezone**: UTC
 
 ## Overview
@@ -37,12 +37,12 @@ This package is scoped to rq-engine + required NoDb helpers + test/tooling/docs 
 - **Informed**: maintainers of queue wiring and NoDb hardening standards.
 
 ## Success Criteria
-- [ ] Scoped cross-controller atomicity strategy is implemented with explicit contract docs and regression coverage for failure paths.
-- [ ] `wctl check-rq-graph` is clean (or drift source is corrected and documented with updated canonical artifacts).
-- [ ] Post-enqueue WEPP job-hint persistence fault-path behavior is validated for non-`RuntimeError` classes and lock-contention scenarios per decided contract.
-- [ ] Lock/dump-efficiency observability guard exists and passes for scoped routes/helpers.
-- [ ] Test maintainability cleanup is completed for scoped suites (shared helpers/fixtures, reduced brittle assertions) without behavior regression.
-- [ ] Targeted validation suite passes and package docs (`package.md`, `tracker.md`, ExecPlan, `PROJECT_TRACKER.md`) are current.
+- [x] Scoped cross-controller atomicity strategy is implemented with explicit contract docs and regression coverage for failure paths.
+- [x] `wctl check-rq-graph` is clean (or drift source is corrected and documented with updated canonical artifacts).
+- [x] Post-enqueue WEPP job-hint persistence fault-path behavior is validated for non-`RuntimeError` classes and lock-contention scenarios per decided contract.
+- [x] Lock/dump-efficiency observability guard exists and passes for scoped routes/helpers.
+- [x] Test maintainability cleanup is completed for scoped suites (shared helpers/fixtures, reduced brittle assertions) without behavior regression.
+- [x] Targeted validation suite passes and package docs (`package.md`, `tracker.md`, ExecPlan, `PROJECT_TRACKER.md`) are current.
 
 ## Dependencies
 
@@ -109,13 +109,30 @@ This package is scoped to rq-engine + required NoDb helpers + test/tooling/docs 
 - `docs/schemas/rq-response-contract.md`
 
 ## Deliverables
-- Open (to be filled at closure).
+- Scoped grouped-update atomicity hardening in rq-engine WEPP payload flows with regression coverage and review closure.
+- WEPP/bootstrap post-enqueue hint persistence boundary hardening (lock-contention + unexpected exception classes) with contract-safe behavior.
+- New observability guard suite for lock/dump-efficiency regression detection:
+  - `tests/microservices/test_rq_engine_lock_dump_efficiency_guard.py`
+- Maintainability cleanup in scoped rq-engine WEPP/bootstrap tests:
+  - shared doubles helper `tests/microservices/_wepp_payload_doubles.py`
+  - reduced brittle logging assertions
+- Queue-graph canonical artifacts regenerated and clean at close:
+  - `wepppy/rq/job-dependency-graph.static.json`
+  - `wepppy/rq/job-dependencies-catalog.md`
+- Broad-exception changed-file enforcement restored to clean via explicit boundary allowlist entries:
+  - `docs/standards/broad-exception-boundary-allowlist.md`
 
 ## Follow-up Work
-- Open (to be filled at closure).
+- Optional: deepen observability guard semantics beyond AST pattern checks (behavioral helper-indirection detection).
+- Optional: further consolidate grouped controller dummy/fault-injection scaffolding between nodb and microservice suites.
 
 ## Closure Notes
-- Open (to be filled at closure).
+- Package closed after milestone-by-milestone implementation, required triad reviews, and Medium/High finding remediation.
+- Final scoped package validation:
+  - `wctl run-pytest ...` across 9 touched suites -> `228 passed`, `0 failed`.
+  - `wctl check-rq-graph` -> clean after closure regeneration.
+  - `python3 tools/check_broad_exceptions.py --enforce-changed --base-ref origin/master` -> PASS.
+- Scope remained strict to rq-engine + required nodb helpers/tests; no legacy Flask route edits under `wepppy/weppcloud/routes/nodb_api/**`.
 
 ## Kickoff Prompt
-- Active ExecPlan: `docs/work-packages/20260425_nodb_atomicity_observability_followups_a/prompts/active/nodb_atomicity_observability_followups_execplan.md`
+- Completed ExecPlan: `docs/work-packages/20260425_nodb_atomicity_observability_followups_a/prompts/completed/nodb_atomicity_observability_followups_execplan.md`

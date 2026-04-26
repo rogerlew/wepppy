@@ -11,6 +11,7 @@ from fastapi.responses import JSONResponse
 from rq import Queue
 
 from wepppy.config.redis_settings import RedisDB, redis_connection_kwargs
+from wepppy.nodb.base import NoDbAlreadyLockedError
 from wepppy.nodb.core import Ron, Soils, Watershed, Wepp
 from wepppy.nodb.redis_prep import RedisPrep, TaskEnum
 from wepppy.rq.wepp_rq import (
@@ -40,22 +41,38 @@ router = APIRouter()
 
 RQ_TIMEOUT = int(os.getenv("RQ_ENGINE_RQ_TIMEOUT", "216000"))
 RQ_ENQUEUE_SCOPES = ["rq:enqueue"]
+NODB_LOCK_CONFLICT_CLIENT_MESSAGE = "Run inputs are currently locked; retry shortly."
 
 
 def _persist_wepp_job_hint(wepp: Wepp, *, job_id: str, job_key: str) -> None:
     """Persist a last-known WEPP controller job hint without failing enqueue."""
     try:
         wepp.persist_job_hint(job_id=job_id, job_key=job_key)
+    except NoDbAlreadyLockedError:
+        logger.warning("rq-engine run-wepp hint persistence lock contention after enqueue")
     except RuntimeError:
         # Boundary catch: enqueue already succeeded; keep response stable even
         # if NoDb hint persistence fails.
         logger.exception("rq-engine run-wepp failed to persist NoDb WEPP job hint")
+    except Exception:
+        # Boundary catch: enqueue already succeeded; keep response stable even
+        # for unexpected post-enqueue persistence faults.
+        logger.exception("rq-engine run-wepp failed to persist NoDb WEPP job hint (unexpected)")
 
 
 def _is_base_project_context(runid: str, config: str) -> bool:
     runid_leaf = runid.split(";;")[-1].strip().lower() if runid else ""
     config_token = str(config).strip().lower() if config is not None else ""
     return runid_leaf == "_base" or config_token == "_base"
+
+
+def _nodb_lock_conflict_response(*, route_label: str) -> JSONResponse:
+    logger.warning("rq-engine %s payload apply lock conflict", route_label)
+    return error_response(
+        NODB_LOCK_CONFLICT_CLIENT_MESSAGE,
+        status_code=409,
+        code="conflict",
+    )
 
 
 async def _handle_run_wepp_request(
@@ -90,6 +107,8 @@ async def _handle_run_wepp_request(
         )
     except ValueError as exc:
         return error_response(str(exc), status_code=400)
+    except NoDbAlreadyLockedError:
+        return _nodb_lock_conflict_response(route_label=job_key)
     except RuntimeError:
         logger.exception("rq-engine run-wepp parse failed")
         return error_response_with_traceback("Error preparing WEPP run request")
@@ -151,7 +170,10 @@ async def _handle_run_wepp_request(
         success_description="WEPP inputs accepted; returns batch update message or enqueued `job_id`.",
         extra={
             400: "WEPP payload validation failed. Returns the canonical error payload.",
-            409: "WEPP single-flight lock contention; another WEPP job is already active.",
+            409: (
+                "WEPP lock contention (single-flight submit lock or payload-input lock). "
+                "Returns the canonical error payload."
+            ),
         },
     ),
 )
@@ -191,7 +213,10 @@ async def run_wepp(runid: str, config: str, request: Request) -> JSONResponse:
         ),
         extra={
             400: "WEPP payload validation failed. Returns the canonical error payload.",
-            409: "WEPP single-flight lock contention; another WEPP job is already active.",
+            409: (
+                "WEPP lock contention (single-flight submit lock or payload-input lock). "
+                "Returns the canonical error payload."
+            ),
         },
     ),
 )
@@ -231,7 +256,10 @@ async def run_wepp_watershed(runid: str, config: str, request: Request) -> JSONR
         ),
         extra={
             400: "WEPP payload validation failed. Returns the canonical error payload.",
-            409: "WEPP single-flight lock contention; another WEPP job is already active.",
+            409: (
+                "WEPP lock contention (single-flight submit lock or payload-input lock). "
+                "Returns the canonical error payload."
+            ),
         },
     ),
 )

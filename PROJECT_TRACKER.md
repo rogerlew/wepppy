@@ -1,7 +1,7 @@
 # PROJECT_TRACKER.md
 > Kanban board for wepppy work packages and vision items
 
-**Last Updated**: 2026-04-25  
+**Last Updated**: 2026-04-26  
 **Active Packages**: 3  
 **Quick Links**: [Work Packages Directory](docs/work-packages/) | [God-Tier Prompting Strategy](docs/god-tier-prompting-strategy.md)
 
@@ -78,31 +78,6 @@ Feedback mechanisms:
 ## 📋 Backlog
 
 Work packages that are scoped but not yet started. Dependencies and prerequisites should be noted.
-
-### NoDb Atomicity + Observability Follow-Ups (RQ Engine)
-**Proposed**: 2026-04-25  
-**Size**: Medium-High (2-4 focused sessions)  
-**Priority**: High  
-**Owner**: Codex  
-**Link**: [docs/work-packages/20260425_nodb_atomicity_observability_followups_a/](docs/work-packages/20260425_nodb_atomicity_observability_followups_a/)  
-**Description**: Follow-up package to close remaining post-refactor gaps: cross-controller failure atomicity, queue-graph baseline drift, WEPP hint persistence concurrency/error boundary hardening, lock/dump-efficiency observability guardrails, and test maintainability cleanup.
-
-**Scope**:
-- Implement scoped cross-controller failure-atomicity strategy for grouped rq-engine mutation flows
-- Resolve `wctl check-rq-graph` drift baseline and restore clean signal
-- Harden and test post-enqueue WEPP job-hint persistence fault paths
-- Add lock/dump-efficiency observability guards for scoped paths
-- Reduce test maintenance debt in touched rq-engine suites
-
-**Dependencies**:
-- Completed package: `20260425_nodb_lock_dump_efficiency_refactor`
-
-**Next Steps**:
-1. Execute Milestone 1 atomicity design/implementation.
-2. Close queue-graph baseline drift and validate.
-3. Complete guard + maintainability milestones and package closure gates.
-
----
 
 ### Deprecate and Remove TauDEM Backend
 **Proposed**: 2025-10-27  
@@ -296,6 +271,12 @@ Currently active work packages. Limit to 2-4 packages to maintain focus.
 ## ✅ Done
 
 Recently completed work packages. Archived immediately upon completion.
+
+### NoDb Atomicity + Observability Follow-Ups (RQ Engine) (2026-04-26)
+**Status**: ✅ **COMPLETE**  
+**Link**: [docs/work-packages/20260425_nodb_atomicity_observability_followups_a/](docs/work-packages/20260425_nodb_atomicity_observability_followups_a/)  
+**Lifecycle**: Backlog -> In Progress -> Done (2026-04-26)  
+**Summary**: Closed end-to-end across six milestones. Delivered scoped cross-controller grouped-update atomicity hardening, queue-graph baseline cleanup (`wctl check-rq-graph` clean with regenerated canonical artifacts), post-enqueue WEPP hint persistence boundary hardening (including lock-contention and non-`RuntimeError` fault paths with contract-safe behavior), lock/dump-efficiency observability guard coverage, and scoped test maintainability cleanup (shared WEPP payload doubles + less brittle assertions). Required `reviewer`/`qa_reviewer`/`security_reviewer` triad reviews were run after each milestone; all Medium/High findings were remediated before progression. Closure validation passed (`228 passed`, `0 failed`) and enforcement gates were clean (`wctl check-rq-graph`, `check_broad_exceptions --enforce-changed`).
 
 ### NoDb Lock/Dump Efficiency Refactor (RQ Engine) (2026-04-25)
 **Status**: ✅ **COMPLETE**  

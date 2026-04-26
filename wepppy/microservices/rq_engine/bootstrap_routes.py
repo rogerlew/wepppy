@@ -13,6 +13,7 @@ from fastapi.responses import JSONResponse
 from rq import Queue
 
 from wepppy.config.redis_settings import RedisDB, redis_connection_kwargs
+from wepppy.nodb.base import NoDbAlreadyLockedError
 from wepppy.nodb.core import Wepp
 from wepppy.nodb.redis_prep import RedisPrep, TaskEnum
 from wepppy.rq.swat_rq import run_swat_noprep_rq
@@ -56,16 +57,25 @@ BOOTSTRAP_ENABLE_SCOPE = "bootstrap:enable"
 BOOTSTRAP_TOKEN_MINT_SCOPE = "bootstrap:token:mint"
 BOOTSTRAP_READ_SCOPE = "bootstrap:read"
 BOOTSTRAP_CHECKOUT_SCOPE = "bootstrap:checkout"
+NODB_LOCK_CONFLICT_CLIENT_MESSAGE = "Run inputs are currently locked; retry shortly."
 
 
 def _persist_wepp_job_hint(wepp: Wepp, *, job_id: str, job_key: str) -> None:
     """Persist a last-known WEPP/SWAT job hint without failing enqueue."""
     try:
         wepp.persist_job_hint(job_id=job_id, job_key=job_key)
+    except NoDbAlreadyLockedError:
+        logger.warning("rq-engine bootstrap hint persistence lock contention after enqueue")
     except RuntimeError:
         # Boundary catch: enqueue already succeeded; keep response stable even
         # if NoDb hint persistence fails.
         logger.exception("rq-engine bootstrap enqueue failed to persist NoDb WEPP job hint")
+    except Exception:
+        # Boundary catch: enqueue already succeeded; keep response stable even
+        # for unexpected post-enqueue persistence faults.
+        logger.exception(
+            "rq-engine bootstrap enqueue failed to persist NoDb WEPP job hint (unexpected)"
+        )
 
 
 def _extract_scopes(claims: Mapping[str, Any]) -> set[str]:
@@ -129,6 +139,15 @@ def _resolve_bootstrap_actor(claims: Mapping[str, Any]) -> str:
     if subject:
         return subject
     return "unknown"
+
+
+def _nodb_lock_conflict_response(*, route_label: str) -> JSONResponse:
+    logger.warning("rq-engine %s payload apply lock conflict", route_label)
+    return error_response(
+        NODB_LOCK_CONFLICT_CLIENT_MESSAGE,
+        status_code=409,
+        code="conflict",
+    )
 
 
 async def _safe_json(request: Request) -> dict[str, Any]:
@@ -398,7 +417,10 @@ async def bootstrap_checkout(runid: str, config: str, request: Request) -> JSONR
         success_description="No-prep WEPP job accepted and `job_id` returned.",
         extra={
             400: "Bootstrap preconditions failed (for example bootstrap disabled). Returns the canonical error payload.",
-            409: "WEPP single-flight lock contention; another WEPP job is already active.",
+            409: (
+                "WEPP lock contention (single-flight submit lock or payload-input lock). "
+                "Returns the canonical error payload."
+            ),
         },
     ),
 )
@@ -433,6 +455,8 @@ async def run_wepp_npprep(runid: str, config: str, request: Request) -> JSONResp
         return error_response(str(exc), status_code=400, code=exc.code, details=exc.details)
     except ValueError as exc:
         return error_response(str(exc), status_code=400)
+    except NoDbAlreadyLockedError:
+        return _nodb_lock_conflict_response(route_label="run-wepp-npprep")
     except RuntimeError:
         logger.exception("rq-engine run-wepp-npprep payload apply failed")
         return error_response("Error preparing WEPP no-prep request", status_code=500)
@@ -478,7 +502,10 @@ async def run_wepp_npprep(runid: str, config: str, request: Request) -> JSONResp
         success_description="No-prep watershed WEPP job accepted and `job_id` returned.",
         extra={
             400: "Bootstrap preconditions failed (for example bootstrap disabled). Returns the canonical error payload.",
-            409: "WEPP single-flight lock contention; another WEPP job is already active.",
+            409: (
+                "WEPP lock contention (single-flight submit lock or payload-input lock). "
+                "Returns the canonical error payload."
+            ),
         },
     ),
 )
@@ -513,6 +540,8 @@ async def run_wepp_watershed_noprep(runid: str, config: str, request: Request) -
         return error_response(str(exc), status_code=400, code=exc.code, details=exc.details)
     except ValueError as exc:
         return error_response(str(exc), status_code=400)
+    except NoDbAlreadyLockedError:
+        return _nodb_lock_conflict_response(route_label="run-wepp-watershed-no-prep")
     except RuntimeError:
         logger.exception("rq-engine run-wepp-watershed-no-prep payload apply failed")
         return error_response("Error preparing WEPP no-prep request", status_code=500)

@@ -815,10 +815,35 @@ class Landuse(NoDbBase):
             return
 
         with self.locked():
-            if mode is not None:
-                self._set_mode_value(mode)
-            if single_selection is not None:
-                self._set_single_selection_value(single_selection)
+            missing = object()
+            snapshot_mode = getattr(self, "_mode", missing)
+            snapshot_single_selection = getattr(self, "_single_selection", missing)
+            snapshot_single_man = getattr(self, "_single_man", missing)
+            try:
+                if mode is not None:
+                    self._set_mode_value(mode)
+                if single_selection is not None:
+                    self._set_single_selection_value(single_selection)
+            except Exception:
+                # Grouped update boundary: restore prior in-memory state on failure.
+                if snapshot_mode is missing:
+                    if hasattr(self, "_mode"):
+                        delattr(self, "_mode")
+                else:
+                    self._mode = snapshot_mode
+
+                if snapshot_single_selection is missing:
+                    if hasattr(self, "_single_selection"):
+                        delattr(self, "_single_selection")
+                else:
+                    self._single_selection = snapshot_single_selection
+
+                if snapshot_single_man is missing:
+                    if hasattr(self, "_single_man"):
+                        delattr(self, "_single_man")
+                else:
+                    self._single_man = snapshot_single_man
+                raise
 
     @property
     def single_man(self) -> Optional[Any]:

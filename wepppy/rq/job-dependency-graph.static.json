@@ -36,7 +36,7 @@
     "notes": [],
     "queue_name": "default",
     "source_function": "_enqueue_no_prep_job",
-    "source_lineno": 177,
+    "source_lineno": 195,
     "source_module": "wepppy/microservices/rq_engine/bootstrap_routes.py"
   },
   {
@@ -46,7 +46,7 @@
     "notes": [],
     "queue_name": "default",
     "source_function": "build_climate",
-    "source_lineno": 174,
+    "source_lineno": 173,
     "source_module": "wepppy/microservices/rq_engine/climate_routes.py"
   },
   {
@@ -200,7 +200,7 @@
     "notes": [],
     "queue_name": "default",
     "source_function": "build_landuse",
-    "source_lineno": 531,
+    "source_lineno": 533,
     "source_module": "wepppy/microservices/rq_engine/landuse_routes.py"
   },
   {
@@ -210,7 +210,7 @@
     "notes": [],
     "queue_name": "default",
     "source_function": "modify_landuse_mapping",
-    "source_lineno": 788,
+    "source_lineno": 792,
     "source_module": "wepppy/microservices/rq_engine/landuse_routes.py"
   },
   {
@@ -392,7 +392,7 @@
     "notes": [],
     "queue_name": "default",
     "source_function": "build_subcatchments_and_abstract_watershed",
-    "source_lineno": 987,
+    "source_lineno": 966,
     "source_module": "wepppy/microservices/rq_engine/watershed_routes.py"
   },
   {
@@ -422,7 +422,7 @@
     "notes": [],
     "queue_name": "default",
     "source_function": "_handle_run_wepp_request",
-    "source_lineno": 117,
+    "source_lineno": 135,
     "source_module": "wepppy/microservices/rq_engine/wepp_routes.py"
   },
   {
@@ -600,7 +600,7 @@
     "notes": [],
     "queue_name": "default",
     "source_function": "fork_rq",
-    "source_lineno": 1600,
+    "source_lineno": 1619,
     "source_module": "wepppy/rq/project_rq.py"
   },
   {

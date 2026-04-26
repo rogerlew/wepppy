@@ -566,6 +566,49 @@ class Watershed(WatershedOperationsMixin, WatershedLookupMixin, NoDbBase):
     def clip_hillslope_length(self, value: float) -> None:
         self._clip_hillslope_length = value
 
+    def snapshot_wepp_run_payload_updates(self) -> dict[str, Any]:
+        """Capture mutable WEPP payload watershed fields for rollback handling."""
+
+        return {
+            "_clip_hillslopes": getattr(self, "_clip_hillslopes", False),
+            "_clip_hillslope_length": getattr(self, "_clip_hillslope_length", 300.0),
+        }
+
+    def restore_wepp_run_payload_updates(self, snapshot: dict[str, Any]) -> None:
+        """Restore WEPP payload watershed fields from a prior snapshot."""
+
+        self._clip_hillslopes = bool(snapshot["_clip_hillslopes"])
+        self._clip_hillslope_length = snapshot["_clip_hillslope_length"]
+
+    def stage_wepp_run_payload_updates(
+        self,
+        *,
+        clip_hillslopes: Optional[bool] = None,
+        clip_hillslope_length: Optional[float] = None,
+    ) -> bool:
+        """Apply WEPP payload watershed fields in-memory without persistence."""
+
+        if clip_hillslopes is None and clip_hillslope_length is None:
+            return False
+
+        if clip_hillslopes is not None:
+            self._clip_hillslopes = bool(clip_hillslopes)
+        if clip_hillslope_length is not None:
+            self._clip_hillslope_length = clip_hillslope_length
+        return True
+
+    def finalize_grouped_wepp_run_payload_updates(self) -> None:
+        """Persist grouped WEPP payload updates while lock ownership is external."""
+
+        self.dump()
+
+    def post_finalize_grouped_wepp_run_payload_updates(self, *, validate: bool = True) -> None:
+        """Run post-dump semantics after grouped dump/unlock completes."""
+
+        if validate:
+            type(self).getInstance(self.wd)
+        type(self)._post_dump_and_unlock(self)
+
     def apply_wepp_run_payload_updates(
         self,
         *,
@@ -578,10 +621,10 @@ class Watershed(WatershedOperationsMixin, WatershedLookupMixin, NoDbBase):
             return
 
         with self.locked():
-            if clip_hillslopes is not None:
-                self._clip_hillslopes = bool(clip_hillslopes)
-            if clip_hillslope_length is not None:
-                self._clip_hillslope_length = clip_hillslope_length
+            self.stage_wepp_run_payload_updates(
+                clip_hillslopes=clip_hillslopes,
+                clip_hillslope_length=clip_hillslope_length,
+            )
 
     def apply_build_subcatchment_updates(
         self,

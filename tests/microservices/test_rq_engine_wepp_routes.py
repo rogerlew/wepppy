@@ -4,8 +4,10 @@ import pytest
 
 TestClient = pytest.importorskip("fastapi.testclient").TestClient
 
+from tests.microservices._wepp_payload_doubles import GroupedSoilsDummy, GroupedWatershedDummy
 import wepppy.microservices.rq_engine as rq_engine
 from wepppy.microservices.rq_engine import wepp_routes, wepp_run_payload
+from wepppy.nodb.base import NoDbAlreadyLockedError
 
 
 pytestmark = pytest.mark.microservice
@@ -57,94 +59,11 @@ def _stub_wepp_stack(
     *,
     parse_error: bool = False,
     run_group: str = "",
-    persist_job_hint_error: bool = False,
+    persist_job_hint_exception: Exception | None = None,
     capture: dict[str, object] | None = None,
 ) -> None:
     class DummyRon:
         mods = []
-
-    class DummySoils:
-        def __init__(self) -> None:
-            self.clip_soils = False
-            self.clip_soils_depth = None
-            self.clip_soils_minimum = False
-            self.clip_soils_minimum_depth = 0.0
-            self.rosetta_wc_fc_from_disturbed_bd_override = False
-            self.initial_sat = None
-            self.grouped_update_calls: list[dict[str, object | None]] = []
-
-        def apply_wepp_run_payload_updates(
-            self,
-            *,
-            clip_soils=None,
-            clip_soils_depth=None,
-            clip_soils_minimum=None,
-            clip_soils_minimum_depth=None,
-            rosetta_wc_fc_from_disturbed_bd_override=None,
-            initial_sat=None,
-        ) -> None:
-            has_updates = any(
-                value is not None
-                for value in (
-                    clip_soils,
-                    clip_soils_depth,
-                    clip_soils_minimum,
-                    clip_soils_minimum_depth,
-                    rosetta_wc_fc_from_disturbed_bd_override,
-                    initial_sat,
-                )
-            )
-            if not has_updates:
-                return
-            self.grouped_update_calls.append(
-                {
-                    "clip_soils": clip_soils,
-                    "clip_soils_depth": clip_soils_depth,
-                    "clip_soils_minimum": clip_soils_minimum,
-                    "clip_soils_minimum_depth": clip_soils_minimum_depth,
-                    "rosetta_wc_fc_from_disturbed_bd_override": rosetta_wc_fc_from_disturbed_bd_override,
-                    "initial_sat": initial_sat,
-                }
-            )
-            if clip_soils is not None:
-                self.clip_soils = bool(clip_soils)
-            if clip_soils_depth is not None:
-                self.clip_soils_depth = clip_soils_depth
-            if clip_soils_minimum is not None:
-                self.clip_soils_minimum = bool(clip_soils_minimum)
-            if clip_soils_minimum_depth is not None:
-                self.clip_soils_minimum_depth = clip_soils_minimum_depth
-            if rosetta_wc_fc_from_disturbed_bd_override is not None:
-                self.rosetta_wc_fc_from_disturbed_bd_override = bool(
-                    rosetta_wc_fc_from_disturbed_bd_override
-                )
-            if initial_sat is not None:
-                self.initial_sat = initial_sat
-
-    class DummyWatershed:
-        def __init__(self) -> None:
-            self.clip_hillslopes = False
-            self.clip_hillslope_length = None
-            self.grouped_update_calls: list[dict[str, object | None]] = []
-
-        def apply_wepp_run_payload_updates(
-            self,
-            *,
-            clip_hillslopes=None,
-            clip_hillslope_length=None,
-        ) -> None:
-            if clip_hillslopes is None and clip_hillslope_length is None:
-                return
-            self.grouped_update_calls.append(
-                {
-                    "clip_hillslopes": clip_hillslopes,
-                    "clip_hillslope_length": clip_hillslope_length,
-                }
-            )
-            if clip_hillslopes is not None:
-                self.clip_hillslopes = bool(clip_hillslopes)
-            if clip_hillslope_length is not None:
-                self.clip_hillslope_length = clip_hillslope_length
 
     class DummyWepp:
         run_group = ""
@@ -170,8 +89,8 @@ def _stub_wepp_stack(
             return self._job_key
 
         def persist_job_hint(self, *, job_id: str, job_key: str) -> None:
-            if persist_job_hint_error:
-                raise RuntimeError("nodb write failed")
+            if persist_job_hint_exception is not None:
+                raise persist_job_hint_exception
             self.persist_job_hint_calls.append({"job_id": job_id, "job_key": job_key})
             normalized_job_id = str(job_id).strip()
             normalized_job_key = str(job_key).strip()
@@ -190,8 +109,8 @@ def _stub_wepp_stack(
         def locked(self):
             yield self
 
-    dummy_soils = DummySoils()
-    dummy_watershed = DummyWatershed()
+    dummy_soils = GroupedSoilsDummy()
+    dummy_watershed = GroupedWatershedDummy()
     dummy_wepp = DummyWepp()
     dummy_wepp.run_group = run_group
 
@@ -260,7 +179,7 @@ def test_run_wepp_job_hint_persist_failure_after_enqueue_returns_job_id(
     _stub_auth(monkeypatch)
     _stub_queue(monkeypatch, job_id="job-hint-failed")
     _stub_prep(monkeypatch)
-    _stub_wepp_stack(monkeypatch, persist_job_hint_error=True)
+    _stub_wepp_stack(monkeypatch, persist_job_hint_exception=RuntimeError("nodb write failed"))
     monkeypatch.setattr(wepp_routes, "get_wd", lambda runid: "/tmp/run")
     exception_calls: list[tuple[tuple[object, ...], dict[str, object]]] = []
     monkeypatch.setattr(
@@ -276,7 +195,81 @@ def test_run_wepp_job_hint_persist_failure_after_enqueue_returns_job_id(
     assert response.json() == {"job_id": "job-hint-failed"}
     assert len(exception_calls) == 1
     args, _kwargs = exception_calls[0]
-    assert args == ("rq-engine run-wepp failed to persist NoDb WEPP job hint",)
+    assert "failed to persist NoDb WEPP job hint" in str(args[0])
+    assert "unexpected" not in str(args[0])
+
+
+def test_run_wepp_job_hint_persist_lock_contention_after_enqueue_returns_job_id(
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    _stub_auth(monkeypatch)
+    _stub_queue(monkeypatch, job_id="job-hint-lock")
+    _stub_prep(monkeypatch)
+    _stub_wepp_stack(
+        monkeypatch,
+        persist_job_hint_exception=NoDbAlreadyLockedError(
+            "already locked owner=alice token=secret-token"
+        ),
+    )
+    monkeypatch.setattr(wepp_routes, "get_wd", lambda runid: "/tmp/run")
+    warning_calls: list[tuple[tuple[object, ...], dict[str, object]]] = []
+    exception_calls: list[tuple[tuple[object, ...], dict[str, object]]] = []
+    monkeypatch.setattr(
+        wepp_routes.logger,
+        "warning",
+        lambda *args, **kwargs: warning_calls.append((args, kwargs)),
+    )
+    monkeypatch.setattr(
+        wepp_routes.logger,
+        "exception",
+        lambda *args, **kwargs: exception_calls.append((args, kwargs)),
+    )
+
+    with TestClient(rq_engine.app) as client:
+        response = client.post("/api/runs/run-1/cfg/run-wepp", json={})
+
+    assert response.status_code == 200
+    assert response.json() == {"job_id": "job-hint-lock"}
+    assert len(warning_calls) == 1
+    args, _kwargs = warning_calls[0]
+    assert "hint persistence lock contention after enqueue" in str(args[0])
+    warning_args_text = " ".join(str(arg) for arg in args)
+    assert "owner=" not in warning_args_text
+    assert "token=" not in warning_args_text
+    assert exception_calls == []
+
+
+def test_run_wepp_job_hint_persist_unexpected_failure_after_enqueue_returns_job_id(
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    _stub_auth(monkeypatch)
+    _stub_queue(monkeypatch, job_id="job-hint-unexpected")
+    _stub_prep(monkeypatch)
+    _stub_wepp_stack(monkeypatch, persist_job_hint_exception=ValueError("unexpected nodb value"))
+    monkeypatch.setattr(wepp_routes, "get_wd", lambda runid: "/tmp/run")
+    warning_calls: list[tuple[tuple[object, ...], dict[str, object]]] = []
+    exception_calls: list[tuple[tuple[object, ...], dict[str, object]]] = []
+    monkeypatch.setattr(
+        wepp_routes.logger,
+        "warning",
+        lambda *args, **kwargs: warning_calls.append((args, kwargs)),
+    )
+    monkeypatch.setattr(
+        wepp_routes.logger,
+        "exception",
+        lambda *args, **kwargs: exception_calls.append((args, kwargs)),
+    )
+
+    with TestClient(rq_engine.app) as client:
+        response = client.post("/api/runs/run-1/cfg/run-wepp", json={})
+
+    assert response.status_code == 200
+    assert response.json() == {"job_id": "job-hint-unexpected"}
+    assert warning_calls == []
+    assert len(exception_calls) == 1
+    args, _kwargs = exception_calls[0]
+    assert "failed to persist NoDb WEPP job hint" in str(args[0])
+    assert "unexpected" in str(args[0])
 
 
 def test_run_wepp_persists_minimum_clip_fields(monkeypatch: pytest.MonkeyPatch) -> None:
@@ -317,6 +310,8 @@ def test_run_wepp_persists_minimum_clip_fields(monkeypatch: pytest.MonkeyPatch) 
             "initial_sat": None,
         }
     ]
+    assert len(soils.dump_calls) == 1
+    assert capture["watershed"].dump_calls == []
 
 
 def test_run_wepp_persists_zero_initial_sat_in_grouped_soils_update(
@@ -348,6 +343,29 @@ def test_run_wepp_persists_zero_initial_sat_in_grouped_soils_update(
             "initial_sat": 0.0,
         }
     ]
+    assert len(soils.dump_calls) == 1
+    assert capture["watershed"].dump_calls == []
+
+
+def test_run_wepp_grouped_updates_persist_both_soils_and_watershed_once(
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    _stub_auth(monkeypatch)
+    _stub_queue(monkeypatch, job_id="job-grouped-both")
+    _stub_prep(monkeypatch)
+    capture: dict[str, object] = {}
+    _stub_wepp_stack(monkeypatch, capture=capture)
+    monkeypatch.setattr(wepp_routes, "get_wd", lambda runid: "/tmp/run")
+
+    with TestClient(rq_engine.app) as client:
+        response = client.post(
+            "/api/runs/run-1/cfg/run-wepp",
+            json={"clip_soils": True, "clip_hillslopes": True},
+        )
+
+    assert response.status_code == 200
+    assert len(capture["soils"].dump_calls) == 1
+    assert len(capture["watershed"].dump_calls) == 1
 
 
 def test_run_wepp_propagates_channel_advanced_options_to_wepp_parser(
@@ -739,7 +757,8 @@ def test_wepp_endpoints_reject_invalid_minimum_maximum_depth_range(
     endpoint: str,
 ) -> None:
     _stub_auth(monkeypatch)
-    _stub_wepp_stack(monkeypatch)
+    capture: dict[str, object] = {}
+    _stub_wepp_stack(monkeypatch, capture=capture)
     monkeypatch.setattr(wepp_routes, "get_wd", lambda runid: "/tmp/run")
 
     with TestClient(rq_engine.app) as client:
@@ -758,6 +777,8 @@ def test_wepp_endpoints_reject_invalid_minimum_maximum_depth_range(
     assert payload["error"]["message"] == "Invalid soil depth clipping range"
     assert payload["error"]["code"] == "invalid_soil_depth_range"
     assert "clip_soils_minimum_depth" in payload["error"]["details"]
+    assert capture["soils"].dump_calls == []
+    assert capture["watershed"].dump_calls == []
 
 
 def test_run_wepp_parse_error(monkeypatch: pytest.MonkeyPatch) -> None:
@@ -784,6 +805,53 @@ def test_run_wepp_parse_error(monkeypatch: pytest.MonkeyPatch) -> None:
     watershed = capture["watershed"]
     assert soils.grouped_update_calls == []
     assert watershed.grouped_update_calls == []
+    assert soils.dump_calls == []
+    assert watershed.dump_calls == []
+
+
+@pytest.mark.parametrize(
+    "endpoint",
+    [
+        "/api/runs/run-1/cfg/run-wepp",
+        "/api/runs/run-1/cfg/run-wepp-watershed",
+        "/api/runs/run-1/cfg/prep-wepp-watershed",
+    ],
+)
+def test_wepp_endpoints_map_nodb_lock_conflict_from_payload_apply(
+    monkeypatch: pytest.MonkeyPatch,
+    endpoint: str,
+) -> None:
+    _stub_auth(monkeypatch)
+    monkeypatch.setattr(wepp_routes, "get_wd", lambda runid: "/tmp/run")
+    monkeypatch.setattr(
+        wepp_routes,
+        "apply_wepp_run_payload",
+        lambda *args, **kwargs: (
+            _ for _ in ()
+        ).throw(NoDbAlreadyLockedError("already locked owner=alice token=secret-token")),
+    )
+    warning_calls: list[tuple[tuple[object, ...], dict[str, object]]] = []
+    monkeypatch.setattr(
+        wepp_routes.logger,
+        "warning",
+        lambda *args, **kwargs: warning_calls.append((args, kwargs)),
+    )
+
+    with TestClient(rq_engine.app) as client:
+        response = client.post(endpoint, json={"clip_soils": True})
+
+    assert response.status_code == 409
+    payload = response.json()
+    assert payload["error"]["code"] == "conflict"
+    assert payload["error"]["message"] == wepp_routes.NODB_LOCK_CONFLICT_CLIENT_MESSAGE
+    assert "owner=alice" not in payload["error"]["message"]
+    assert "secret-token" not in payload["error"]["message"]
+    assert len(warning_calls) == 1
+    warning_args, _warning_kwargs = warning_calls[0]
+    assert "payload apply lock conflict" in str(warning_args[0])
+    warning_args_text = " ".join(str(arg) for arg in warning_args)
+    assert "owner=" not in warning_args_text
+    assert "token=" not in warning_args_text
 
 
 def test_run_wepp_watershed_enqueues_job(monkeypatch: pytest.MonkeyPatch) -> None:
@@ -1240,12 +1308,28 @@ def test_run_wepp_setup_failure_returns_canonical_error_payload(
     monkeypatch.setattr(wepp_routes, "get_wd", lambda runid: "/tmp/run")
 
     class ExplodingSoils:
+        class_name = "soils"
         clip_soils = False
         clip_soils_depth = 300
         clip_soils_minimum = False
         clip_soils_minimum_depth = 0.0
 
-        def apply_wepp_run_payload_updates(self, **kwargs):
+        def lock(self) -> None:
+            return None
+
+        def unlock(self) -> None:
+            return None
+
+        def dump(self) -> None:
+            return None
+
+        def snapshot_wepp_run_payload_updates(self) -> dict[str, object]:
+            return {}
+
+        def restore_wepp_run_payload_updates(self, snapshot: dict[str, object]) -> None:
+            return None
+
+        def stage_wepp_run_payload_updates(self, **kwargs) -> bool:
             raise RuntimeError("soil write failed")
 
     monkeypatch.setattr(wepp_routes.Soils, "getInstance", lambda wd: ExplodingSoils())
