@@ -1,6 +1,6 @@
 # Stakeholder Brief: Modernizing the WEPP Build — What Changed, Why, and What to Expect
 
-Date: 2026-04-14 (revised 2026-04-20)
+Date: 2026-04-14 (revised 2026-04-25)
 Audience: Hydrologists, land managers, program staff, and analysts who use WEPP results
 
 ## The short version
@@ -148,9 +148,122 @@ A sibling-arithmetic audit was performed across every divide and power site in t
 
 Impact: the originally failing hillslope completes its full simulation cleanly. A broader screen across the run-archive flagged seven additional hillslopes in the same run that exhibited the identical fault chain; all eight resolve under the same one-line guard with no further changes. Parity against the canonical `wepp_dcc52a6` reference shows aggregate drift on the patched run on the order of one part per million for water-balance and erosion totals, with sparse local exceedances explained by output-shape additions in the modern build (new `TSMF`, `QRain`, `QSnow` columns) and a stable parameter offset (`Kr` 0.13 vs 0.12) that pre-dates this guard.
 
-### 11. Built-in observability for future incidents
+### 11. Zero-duration runoff event in time-of-concentration (`wshpas.for` — srivas42-combatant-ionosphere incident)
+
+This is a second, distinct guard in the same routine as fix #7, at a completely different expression. Where fix #7 handled the rise-time ratio in zero-flow years, this one handles the per-event time-of-concentration calculation when an individual runoff event has a recorded duration of zero but a non-zero runoff volume — a pairing the legacy compiler tolerated but that is mathematically a divide-by-zero.
+
+The time-of-concentration formula raises the runoff intensity (volume divided by duration) to a fractional power and multiplies by a slope term to a different fractional power. When a runoff event arrives with `dur = 0` and non-zero runoff (the failure boundary observed in the incident was the very first routed event of the simulation), the intensity term is undefined and the modern build raises SIGFPE the moment it is evaluated.
+
+The patch adds four narrow guards in the affected event block:
+
+- **Zero-duration intensity guard.** If the event duration is at or below a small numeric floor while runoff is non-zero, the intensity term is treated as zero rather than evaluating the divide. This matches the routine's pre-existing convention of clamping near-zero denominators with the same floor.
+- **Non-positive slope guard.** A defensive guard on the slope term used in the same expression, in case it ever arrives at or below zero. The marker did not fire on the originating run; it is held in place as same-expression sibling protection.
+- **Composite-denominator guard.** The combined denominator that feeds the time-of-concentration is also floor-protected. As above, the marker did not fire on the originating run; held as sibling protection.
+- **Downstream zero-volume guard.** A subsequent expression in the same block divides by total runoff volume; that site receives the same floor treatment with an `oalpha = tcs / 24.0` fallback that the routine already used elsewhere for the analogous condition.
+
+The guarded expression is the only site in this block that fired on the originating run; the other three are belt-and-suspenders for arithmetically equivalent siblings identified by an audit recorded in the incident folder.
+
+Impact: the originally failing hillslope completes its full simulation cleanly. A control hillslope from the same run that did not exhibit the fault remains byte-identical against the pre-guard build (7 of 7 output files), confirming the guards activate only on the failing condition and do not perturb normal events.
+
+### 12. Hourly water-balance hydraulic calibration (`watbal_hourly.for` — twenty-two-fratricide / unveiled-grinder incident)
+
+This is a second failure in the hillslope binary (following fix #10), surfacing in a different routine than the inter-layer seepage guard. The trap was raised inside the hourly water-balance routine during hydraulic initialization, in the expression `hk = -2.655 / alog10(fc/ul)` — a calibration formula that derives a per-layer hydraulic adjustment from the ratio of field capacity to saturated water content. When a soil layer has a field capacity of zero while saturated water content is positive, the ratio `fc/ul` evaluates to zero, and `alog10(0.0)` is mathematically undefined. The legacy compiler silently propagated the result; the modern build raises SIGFPE the moment the logarithm is evaluated.
+
+The diagnostic observability lane confirmed the exact boundary before any patch was applied: the last marker before the trap recorded `fc = 0`, `ul > 0`, `ratio = 0.0` at the hk initialization site in `watbal_hourly`. A narrow guard now tests `fc/ul` before the logarithm: when the ratio is zero or negative — meaning no physically meaningful positive ratio exists for the calibration expression — `hk` is set to zero rather than evaluating the undefined logarithm. All layers with positive field capacity continue through the original formula unchanged. The guard emits an observability marker on activation so the condition remains visible in future diagnostic runs.
+
+A compiler-provenance check was performed alongside the guard: the prior release binary was linked against a Homebrew-supplied interpreter rather than the system loader. The guarded binary was rebuilt with the pinned system compiler (`/usr/bin/gfortran`) and confirmed to preserve the same fix behavior under both compiler targets. All binary gates passed — readelf interpreter, smoke, reconciled-condenser replay, and the full pytest suite (43 passed) — before promotion.
+
+Impact: both originally failing hillslopes (`twenty-two-fratricide:p258`, `unveiled-grinder:p1319`) complete their full simulations cleanly. The guard activates only on layers with zero or negative field capacity; well-conditioned inputs are unaffected. Release target is `wepp_260425` and `wepp_260425_hill`, built with the pinned system compiler.
+
+### 13. Built-in observability for future incidents
 
 We added an optional, off-by-default diagnostic log that records exactly which phase of the simulation was executing when a run fails. This is how we were able to localize the fixes above to specific channel elements, hillslopes, days, and years within long simulations. It has no effect on results when it is off.
+
+## Going on offense: generative input testing
+
+The twelve fixes above came out of **reactive** work — real production runs crashed, and we followed each crash back to its cause. That is necessary but not sufficient. The same discipline we use to investigate a known failure can be turned around and used to *hunt for the next one* before a user ever sees it.
+
+This is the purpose of our **generative input fuzzing** program. "Fuzzing" is a software-engineering term for a stress test: the model is run, at scale, on thousands of plausible-but-deliberately-pressured input sets, each one designed to probe a specific class of numerical edge case. Any case that produces a crash, an invalid number, or a nonsensical output is captured, minimized into a minimum reproducing example, and fed into the same ablation discipline used for real incidents. The goal is to find and close the next boundary defect while it is still cheap to fix, instead of waiting for it to surface in a production watershed.
+
+### What "single-OFE" means and why we started there
+
+A WEPP hillslope is represented as one or more **Overland Flow Elements** (OFEs) — independent strips of land that share a slope profile, a soil profile, and a management profile. A **single-OFE** run is the simplest valid configuration: one strip, one soil, one management, one climate. A **multi-OFE** run stacks several strips in series so water, sediment, and cover state pass from the upslope element to the next.
+
+We deliberately scoped the first full year of generative testing to single-OFE runs only. The reasoning is the same reasoning that drives ablation testing: change one variable at a time. A single-OFE run has every ingredient that can trigger a numerical edge case — soil physics, management events, climate events, slope response, water balance — but none of the cross-element interactions that make a multi-OFE failure hard to attribute. If we can prove the model is stable on the simplest executable configuration, any remaining multi-OFE failure we later find is provably a property of the coupling between elements, not of the elements themselves. That is a much cleaner investigation than trying to untangle a ten-element hillslope crash from scratch.
+
+The scope is mechanical, not philosophical: of roughly seventy-one thousand real run signatures discovered in our production archive, about sixty-nine thousand were structurally single-OFE and eligible for the campaign; the rest were explicitly quarantined for a later multi-OFE pilot.
+
+### How the campaign works
+
+The program is built in three layers, each feeding the next:
+
+1. **Wrapper contract checks.** Before any WEPP binary is called, every piece of Python code that *writes* a WEPP input file is tested to guarantee it round-trips cleanly, serializes deterministically, and fails loudly on malformed input. Without this layer, a binary crash could be blamed on a bad input writer rather than on the model itself. These checks eliminate that ambiguity.
+2. **Constrained input generators.** Real production inputs are used as **seeds** — we do not fabricate soils or management files from scratch. The generators mutate real seeds along carefully chosen dimensions (soil texture, conductivity, layer density, event duration, slope response), producing inputs that are *plausible* but deliberately pushed toward known numerical edges. Aggressive pre-filtering is intentionally avoided: if a combination is physically unusual but the parser accepts it, the model should survive it.
+3. **Trap-enabled binary campaigns.** Every generated input set is executed against the modern, strict WEPP binary — the same build that raises SIGFPE on undefined math — and the result is parsed, classified, and clustered. Crashes are binned by the routine they originated in; outputs are scanned for invalid numbers even when the process exited cleanly.
+
+### Coverage: climate and slope stratification
+
+A single-OFE campaign that only sampled wet, gentle-sloped hillslopes would tell us nothing about dry, steep ones. To force real coverage, every campaign allocates a mandatory quota of cases across a **three-by-three grid** of climate regime (dry, mesic, wet — split on annual precipitation terciles) and slope regime (gradual, moderate, steep — split on slope terciles). A minimum number of cases must complete in every one of the nine bins before a campaign is allowed to report a result. This is how we avoid over-confident "no failures" claims that are really "no failures *in the half of the grid we sampled*."
+
+### Pressure profiles: where we push
+
+Random perturbation of soil and management inputs produces mostly uninteresting runs. To concentrate pressure on the parts of the model most likely to behave badly, each case is additionally tagged with one of five **mutation-pressure profiles**, each targeting a different failure mechanism:
+
+- **P1 — denominator-edge stress.** Push scalar inputs toward near-zero regions where any dividing expression can overflow or go undefined.
+- **P2 — event-edge stress.** Bias management and event timing toward short, spiky, or degenerate events (for example, a zero-duration runoff event) to stress transition logic.
+- **P3 — conductivity/saturation contrast.** Pair extreme conductivity values with extreme saturation values in the same soil layer to stress water-balance transitions.
+- **P4 — texture/density discontinuity.** Put abrupt contrasts between adjacent soil layers to stress interpolation and transition logic.
+- **P5 — slope-response amplification.** Bias seed selection toward upper-slope tails within each slope bin to increase exposure of slope-coupled paths.
+
+Cases that fire multiple warnings from the input-quality checks, or whose lineage has produced novel signatures in prior runs, are **adaptively oversampled** on subsequent runs so finite compute budget is spent where the signal is.
+
+### Two guardrails: are we actually sensitive?
+
+A campaign that always reports "no failures found" is worthless if we cannot verify that it would detect a failure if one existed. Two independent guardrails are mandatory on every run:
+
+- **Positive controls.** A small set of known historical failures (the same ones documented in the ablation incident folders) is injected into every campaign. If any injected failure is not classified correctly, the campaign fails its sensitivity gate and no results are reported. In every run of record to date, all five required controls were detected.
+- **Second-opinion output oracle.** Independent of whether the process crashed, every output file from every completed run is scanned for invalid numeric tokens (`NaN`, `Inf`), impossible-for-the-field negative values, and unparseable rows. A run that exits cleanly but produced a NaN somewhere in its output is flagged just as loudly as a crash. This is critical: the old compiler's chief failure mode was producing a plausible-looking number that was actually corrupt. The output oracle is the defense against the same pattern reappearing at a new site.
+
+### What the campaigns found, and what we patched
+
+The campaign scaled in four stages. The first two rounds (108 cases at baseline, 216 cases under amplified pressure) returned clean — every case passed. The third round, now scaled to 1,008 cases and fitted with the output oracle, surfaced 140 cases where the model completed but its outputs contained `NaN` tokens in channels used by downstream analysis (`.wat.dat`, `.element.dat`, and occasionally `.soil.dat`). All 140 were triaged to **true numeric instability** rather than cosmetic log-text artifacts, and clustered into nine **priority slices** — specific intersections of a climate bin, a slope bin, and a pressure profile that concentrated the failures.
+
+The nine open slices, and their closure outcomes, are:
+
+| Slice | Pre-patch | After targeted patches | Final status |
+|---|---|---|---|
+| `wet / moderate / P5 slope amplification` | 61 / 200 | 24 / 200 | **accepted upstream** |
+| `wet / steep / P5 slope amplification` | 76 / 200 | 22 / 200 | **accepted upstream** |
+| `dry / steep / P5 slope amplification` | 30 / 200 | 0 / 200 | **patched** |
+| `wet / gradual / P5 slope amplification` | 45 / 200 | 8 / 200 | **accepted upstream** |
+| `mesic / gradual / P5 slope amplification` | 45 / 200 | 0 / 200 | **patched** |
+| `dry / moderate / P2 event edge` | 20 / 200 | 0 / 200 | **patched** |
+| `wet / moderate / P2 event edge` | 70 / 200 | 20 / 200 | **accepted upstream** |
+| `wet / steep / P4 texture/density discontinuity` | 72 / 200 | 31 / 200 | **accepted upstream** |
+| `dry / steep / P4 texture/density discontinuity` | 38 / 200 | 0 / 200 | **patched** |
+
+Four slices reached the frozen closure criterion — **two consecutive two-hundred-case reruns with zero non-pass outcomes** — and are marked **patched**. Five remained symptomatic after a bounded patch attempt and are marked **accepted upstream**: the symptom was materially reduced, the reproducer is deterministic and preserved, and the remaining cases will be addressed by a deeper investigation (likely a narrow Fortran-side guard, in the same ablation discipline used for the twelve fixes earlier in this brief) rather than by further input-wrapper clamping.
+
+Across the full 1,008-case calibrated rerun after patches landed, the composite non-pass rate fell from **134 cases to 41 cases** — a **70 percent reduction** — with the positive-control sensitivity gate still passing at 5 of 5. The three pressured profiles dropped as follows: slope amplification 60 → 11, event-edge 33 → 4, texture/density discontinuity 34 → 8.
+
+### What the patches actually are (and what they are not)
+
+It is important to be precise about *where* the Milestone 7 patches live. Unlike the twelve fixes earlier in this brief — each of which is a defensive guard inside a specific Fortran routine — **the fuzzing-driven patches landed so far are in the Python input-generation layer**, not in the WEPP binary. Specifically:
+
+- The **slope-response amplification** patch constrains the mutation generator so saturation, texture fractions, and bulk density cannot co-amplify past ranges that produce unphysical soil profiles under extreme slope bias.
+- The **event-edge** patch constrains management-mutation windows so generated events stay within safe temporal bounds (no zero-duration, non-zero-intensity pairings of the kind that caused the `wshpas` time-of-concentration crash in the ablation work).
+- The **texture/density discontinuity** patch bounds the sum of adjacent-layer texture perturbations so generated profiles remain structurally coherent.
+
+Each patch has a dedicated regression test that locks in the clamp behavior. None of them alter the WEPP model; they alter the fuzzer so it stops generating inputs that are outside the documented contract of the model in the first place. Where the fuzzer's clamp is not enough — the five **accepted-upstream** slices — the remaining failures are being promoted into the ablation track for Fortran-side investigation on the next cycle.
+
+That promotion has begun. A dedicated ablation campaign targeting the three wet-climate P5 slope-response slices (`wet/gradual`, `wet/moderate`, `wet/steep`) completed on 2026-04-22. Four hypothesized Fortran-side mechanisms were tested one at a time in isolated lanes against a matched 120-seed subset — the `route` routine's denominator boundary, the `irdgdx` denominator paths in `sloss`, the kinematic-wave slope-coupled arithmetic in `unifor`, and the Manning-path arithmetic in `mann`. Every behavioral lane produced a result numerically identical to the observability-only baseline. None of the four candidate mechanisms attributed the failure, and all four candidate edits were rolled back rather than merged. The empty patch set is the correct outcome when no lane demonstrates measurable causal attribution under matched seeds — it is the same keep-or-roll-back discipline applied to the twelve Fortran fixes earlier in this brief, running in the direction of *negative* evidence. The investigation did surface a new lead: a runtime-error signature repeatedly mapping to an end-of-file read path (`stmget.for` line 122), which will be the next cycle's first hypothesis. The remaining two accepted-upstream slices — the wet/moderate P2 event-edge slice and the wet/steep P4 texture/density slice — have not yet had their own ablation packages and are next in the queue under the same one-mechanism-per-lane protocol.
+
+### Why this matters for stakeholders
+
+- **Proactive coverage.** Every campaign is a structured attempt to find the next crash before a user does. The program has already surfaced, clustered, and minimized 140 silent-NaN cases that would otherwise have been invisible.
+- **Scope discipline.** No multi-OFE fuzzing will start until single-OFE closure criteria are met. That rule is enforced by the test runner, not by convention. The five remaining accepted-upstream slices are the explicit watchlist for the first multi-OFE pilot.
+- **Evidence symmetry.** Every slice has the same artifacts an ablation incident has: deterministic reproducer, minimized input, patch lineage, regression test, and a closure-gate record. A reviewer can walk the entire campaign from raw classifier output to the final closure memo without trusting our summary of it.
+- **Limits, stated openly.** Fuzzing cannot prove the model is bug-free. It can only prove the model survived the conditions we chose to press on. The stratification grid, the pressure profiles, and the oracle checks are all published so a reviewer can propose a new dimension to press on and reason about whether the current campaigns would catch it.
 
 ## Why you may see slightly different numbers
 
@@ -191,8 +304,22 @@ Each fix has a corresponding ablation record under [docs/ablation/](ablation/):
 - [pw0 SIGFPE — operational-berry (frost-layer indexing)](ablation/20260419_operational-berry_pw0_sigfpe-locate-frostn/incident.md)
 - [pw0 SIGFPE — primitive-hug (frost-season soil-water arithmetic)](ablation/20260420_primitive-hug_pw0_sigfpe-saxfun-watdst/incident.md)
 - [p14 SIGFPE — exorbitant-affidavit (hourly inter-layer seepage at an impermeable boundary)](ablation/20260420_exorbitant-affidavit_p14_sigfpe-perc-purk-watbal/incident.md)
+- [p24 SIGFPE — srivas42-combatant-ionosphere (zero-duration runoff event in time-of-concentration)](ablation/20260421_srivas42-combatant-ionosphere_p24_sigfpe-wshpas/incident.md)
+- [p258 + p1319 SIGFPE — twenty-two-fratricide / unveiled-grinder (watbal_hourly log10 domain)](ablation/20260425_p258-p1319_hillslope_sigfpe-watbal-log10/incident.md)
 - [IFX vs Linux parity report](ablation/20260419_operational-berry_pw0_sigfpe-locate-frostn/20260420-ifx-linux-parity-report.md)
 - [Ablation protocol](ablation/protocol.md) and [ablation standard](ablation/README.md)
+
+Generative input fuzzing program (single-OFE tranche, Milestones 0–7):
+
+- [Program overview and strategy](../generative-inputs-fuzzing/README.md)
+- [Milestone 1 — wrapper property contracts](work-packages/20260421-generative-fuzzing-milestone1-wrapper-properties/package.md)
+- [Milestone 2 — seeded soil/landuse generators](work-packages/20260421-generative-fuzzing-milestone2-seeded-soil-landuse-generators/package.md)
+- [Milestone 3 — single-OFE stratified campaign](work-packages/20260421-generative-fuzzing-milestone3-single-ofe-stratified-campaign/package.md)
+- [Milestone 4 — single-OFE boundary amplification](work-packages/20260421-generative-fuzzing-milestone4-single-ofe-boundary-amplification/package.md)
+- [Milestone 5 — single-OFE sensitivity calibration](work-packages/20260421-generative-fuzzing-milestone5-single-ofe-sensitivity-calibration/package.md)
+- [Milestone 6 — single-OFE boundary patch closure](work-packages/20260422-generative-fuzzing-milestone6-single-ofe-boundary-patch-closure/package.md)
+- [Milestone 7 — single-OFE open-slice closure memo](work-packages/20260422-generative-fuzzing-milestone7-single-ofe-open-slice-closure/artifacts/closure_memo_contract.md)
+- [Milestone 8 — P5 hydraulic ablation (negative-result closeout)](work-packages/20260422-generative-fuzzing-milestone8-p5-hydraulic-ablation/artifacts/closure_memo.md)
 
 ## Running log of stakeholder-visible changes
 
@@ -222,6 +349,23 @@ A second frost-season SIGFPE was reproduced on the `primitive-hug` watershed run
 
 ### 2026-04-20 — Closeout hardening for the dry-watershed fix
 Four closeout deliverables accompanied the `wshpas` guard: (1) a compact standing regression that replays the original failing watershed and verifies both pre-guard failure and guarded success; (2) a five-watershed non-desert parity panel (humid warm, humid very wet, snow-dominant, seasonal marine, mixed mountain) where the guard never activated and outputs are byte-identical to the pre-guard modern build — confirming the fix is specific to the dry-flow condition and does not perturb wet-climate results; (3) a systematic audit of other division sites in the watershed routing code for the same fault pattern, with every candidate either already guarded or structurally not-at-risk; and (4) a tightened binary-provenance gate that automatically rejects builds linked against non-system loaders, non-system libraries, or Intel-compiler fingerprints before any binary can be vendored.
+
+### 2026-04-21 — Zero-duration runoff event in the time-of-concentration calculation
+A second guard was added to the same routine that hosted the dry-watershed fix, but at a completely different expression. A hillslope run was crashing on its very first routed runoff event because the recorded event duration was zero while the runoff volume was non-zero — a pairing that makes the per-event runoff intensity (volume divided by duration) mathematically undefined. The legacy compiler tolerated it; the modern build raised SIGFPE the moment the time-of-concentration formula evaluated the intensity term. A narrow guard now floors the duration term before the divide and substitutes the routine's already-existing zero-intensity sentinel. Three additional belt-and-suspenders guards were placed on arithmetically equivalent siblings in the same expression block (slope term, composite denominator, downstream zero-volume site); none of those three fired on the originating run, but they are recorded in the incident's sibling-arithmetic audit so the same fault pattern cannot recur silently. A control hillslope from the same run that did not exhibit the fault remains byte-identical to the pre-guard build, confirming the new guards do not perturb normal events.
+
+### 2026-04-22 — P5 hydraulic ablation campaign closed with no patch (Milestone 8)
+The three wet-climate P5 slope-response slices that exited Milestone 7 as `accepted_upstream` were the first to be promoted into a Fortran-side ablation campaign under the same protocol used for the twelve fixes earlier in this brief. Four hypothesized mechanisms were tested, each in its own isolated lane against a matched 120-seed subset: the `route` routine's denominator boundary (`route.for`), the `irdgdx` denominator paths in `sloss.for`, the kinematic-wave slope-coupled arithmetic in `unifor.for`, and the Manning-path arithmetic in `mann.for`. Every behavioral lane returned the same non-pass count as the observability-only baseline, to the case. None of the four mechanisms attributed the failure, and per protocol all four candidate edits were rolled back rather than merged — the accepted patch set is empty. Two consecutive 200-case targeted reruns on each of the three slices confirmed the symptom remains deterministic and reproducible (non-pass in the 22–32 range on each rerun), so each slice retains its `accepted_upstream` status unchanged. A new lead surfaced during lane execution: a runtime-error signature repeatedly localizing to an end-of-file read path in `stmget.for` line 122, which is the first hypothesis for the next cycle.
+
+Two caveats were recorded alongside the memo. First, the 1,008-case calibrated rerun of the post-M8 campaign (with all lanes rolled back, so functionally equivalent to the M7 post-patch code state) showed composite non-pass at 91 rather than the 41 reported after Milestone 7. The delta is not a regression introduced by M8 — no patches landed — but a campaign-to-campaign drift observation that tells us the closure gate itself needs explicit variance characterization before small absolute deltas can be attributed. The matched-seed lane design used inside M8 is specifically immune to this drift, and that is the gate the investigation relied on. Second, a binary-release risk distinct from the ablation work was captured in the same memo (the production `src/wepp` ELF loader target) so it is visible to release review.
+
+No speculative patch landed. The discipline that refuses to merge a guard without measurable, matched-seed causal attribution is the same discipline that produced the twelve trustworthy fixes earlier in this brief; the only difference is that in this cycle it ran in the direction of a negative result. A separate P2 event-edge and P4 texture/density ablation package is slated next.
+
+### 2026-04-25 — Hourly water-balance hydraulic calibration crash resolved (hillslope binary)
+
+Two hillslopes in separate watershed runs (`twenty-two-fratricide:p258`, `unveiled-grinder:p1319`) were crashing inside the hourly water-balance routine during hydraulic initialization. The observability lane localized the failure to `hk = -2.655 / alog10(fc/ul)`: when a soil layer has zero field capacity, the ratio evaluates to zero and `log10(0)` is undefined. A narrow guard now sets `hk = 0` when the ratio is non-positive — the bounded fallback for a degenerate layer — instead of evaluating the logarithm. Both incident seeds complete cleanly. A compiler-provenance issue was also surfaced and resolved: the prior release binary was linked against a Homebrew interpreter rather than the system loader; the fix was rebuilt and validated under the pinned system compiler, and a readelf gate now enforces this requirement before any binary can be vendored. Release targets are `wepp_260425` and `wepp_260425_hill`.
+
+### 2026-04-22 — Generative input fuzzing program closeout (single-OFE tranche, Milestones 0–7)
+The first full tranche of generative input fuzzing closed today. Across seven milestones, the program built a reproducible campaign pipeline — wrapper contract tests, seeded soil/management/climate generators, climate-by-slope stratified sampling, five mutation-pressure profiles, and an output oracle that flags silent `NaN`/`Inf` results even when a run exits cleanly — and then drove it at scale (1,008 cases per run) against the modern trap-enabled binary. Two independent guardrails enforce campaign validity on every run: a five-case positive-control set (all five must be detected as failures) and the per-case output oracle. The scaled campaigns surfaced 140 silent-NaN cases concentrated in nine priority slices; four of those slices were closed under the frozen two-rerun, two-hundred-case, zero-non-pass criterion, and five were classified as **accepted upstream** — reproducer preserved, patch attempt reduced the symptom materially, residual failures promoted into the Fortran-side ablation track rather than papered over with a broader input clamp. Net effect on the full calibrated rerun: composite non-pass dropped from 134 to 41 (a 70 percent reduction) with the sensitivity gate still passing 5/5. All patches landed in the input-generation layer, not in the WEPP binary, and carry dedicated regression tests. Multi-OFE fuzzing is gated on this tranche's closure memo and will begin with the five accepted-upstream slices as explicit watchlist items.
 
 ## Bottom line
 
