@@ -812,7 +812,7 @@ async def modify_landuse_mapping(runid: str, config: str, request: Request) -> J
     summary="Read run-scoped landuse user-defined catalog",
     description=(
         "Requires JWT Bearer auth plus run access. Supports `rq:read` or `rq:status` and "
-        "returns run-scoped user-defined management catalog metadata."
+        "returns read-only run-scoped user-defined management catalog metadata with no queue enqueue."
     ),
     tags=["rq-engine", "runs"],
     operation_id=rq_operation_id("get_landuse_user_defined_catalog"),
@@ -1198,7 +1198,7 @@ async def update_landuse_user_defined_management_description(
     summary="Read run-scoped landuse map snapshot",
     description=(
         "Requires JWT Bearer auth plus run access. Supports `rq:read` or `rq:status` and "
-        "returns map rows/options plus optimistic-concurrency hash."
+        "returns read-only map rows/options plus optimistic-concurrency hash with no queue enqueue."
     ),
     tags=["rq-engine", "runs"],
     operation_id=rq_operation_id("get_landuse_map_snapshot"),

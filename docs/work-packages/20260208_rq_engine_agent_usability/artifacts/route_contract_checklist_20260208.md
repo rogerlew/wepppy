@@ -7,7 +7,7 @@ Guarded by:
 - `tools/check_route_contract_checklist.py` (checklist row parity + non-empty contract fields)
 - `tests/microservices/test_rq_engine_openapi_contract.py` (OpenAPI metadata/response contract + oversize budgets)
 
-- Total frozen routes covered: **89**
+- Total frozen routes covered: **97**
 
 Cutover reconciliation note (2026-04-11):
 - Row-8 contract cutover package
@@ -15,6 +15,8 @@ Cutover reconciliation note (2026-04-11):
   the frozen contract baseline for agent-facing rq-engine routes.
 - No checklist-row additions/removals were required at cutover closure; guard
   checks continue to enforce checklist parity and response-code contracts.
+- Post-cutover parity refresh (2026-04-25) added eight landuse user-defined/map
+  routes already present in the frozen endpoint inventory.
 
 ## Contract Matrix
 
@@ -55,6 +57,14 @@ Cutover reconciliation note (2026-04-11):
 | `POST` | `/api/runs/{runid}/{config}/modify-landuse-coverage` | JWT Bearer | rq:enqueue | mutating | sync no queue | `200, 401, 403, 500` | `tests/microservices/test_rq_engine_openapi_contract.py`<br>`tests/microservices/test_rq_engine_landuse_routes.py` |
 | `GET` | `/api/runs/{runid}/{config}/controllers/landuse/state` | JWT Bearer | rq:status or rq:read | read-only | sync | `200, 401, 403, 500` | `tests/microservices/test_rq_engine_openapi_contract.py`<br>`tests/microservices/test_rq_engine_landuse_routes.py` |
 | `POST` | `/api/runs/{runid}/{config}/modify-landuse-mapping` | JWT Bearer | rq:enqueue | mutating | async enqueue | `200, 401, 403, 500` | `tests/microservices/test_rq_engine_openapi_contract.py`<br>`tests/microservices/test_rq_engine_landuse_routes.py` |
+| `POST` | `/api/runs/{runid}/{config}/modify-landuse` | JWT Bearer | rq:enqueue | mutating | sync no queue | `200, 401, 403, 500` | `tests/microservices/test_rq_engine_openapi_contract.py`<br>`tests/microservices/test_rq_engine_landuse_routes.py` |
+| `GET` | `/api/runs/{runid}/{config}/landuse-user-defined/catalog` | JWT Bearer | rq:status or rq:read | read-only | sync | `200, 401, 403, 500` | `tests/microservices/test_rq_engine_openapi_contract.py`<br>`tests/microservices/test_rq_engine_landuse_routes.py` |
+| `POST` | `/api/runs/{runid}/{config}/landuse-user-defined/upload` | JWT Bearer | rq:enqueue | mutating | sync no queue | `200, 401, 403, 500` | `tests/microservices/test_rq_engine_openapi_contract.py`<br>`tests/microservices/test_rq_engine_landuse_routes.py` |
+| `POST` | `/api/runs/{runid}/{config}/landuse-user-defined/delete` | JWT Bearer | rq:enqueue | mutating | sync no queue | `200, 401, 403, 500` | `tests/microservices/test_rq_engine_openapi_contract.py`<br>`tests/microservices/test_rq_engine_landuse_routes.py` |
+| `POST` | `/api/runs/{runid}/{config}/landuse-user-defined/update-description` | JWT Bearer | rq:enqueue | mutating | sync no queue | `200, 401, 403, 500` | `tests/microservices/test_rq_engine_openapi_contract.py`<br>`tests/microservices/test_rq_engine_landuse_routes.py` |
+| `GET` | `/api/runs/{runid}/{config}/landuse-map/snapshot` | JWT Bearer | rq:status or rq:read | read-only | sync | `200, 401, 403, 500` | `tests/microservices/test_rq_engine_openapi_contract.py`<br>`tests/microservices/test_rq_engine_landuse_routes.py` |
+| `POST` | `/api/runs/{runid}/{config}/landuse-map/save` | JWT Bearer | rq:enqueue | mutating | sync no queue | `200, 401, 403, 428, 500` | `tests/microservices/test_rq_engine_openapi_contract.py`<br>`tests/microservices/test_rq_engine_landuse_routes.py` |
+| `POST` | `/api/runs/{runid}/{config}/landuse-map/clear-override` | JWT Bearer | rq:enqueue | mutating | sync no queue | `200, 401, 403, 500` | `tests/microservices/test_rq_engine_openapi_contract.py`<br>`tests/microservices/test_rq_engine_landuse_routes.py` |
 | `POST` | `/api/runs/{runid}/{config}/build-soils` | JWT Bearer | rq:enqueue | mutating | async enqueue | `200, 400, 401, 403, 500` | `tests/microservices/test_rq_engine_openapi_contract.py` |
 | `POST` | `/api/runs/{runid}/{config}/build-subcatchments-and-abstract-watershed` | JWT Bearer | rq:enqueue | mutating | async enqueue | `200, 400, 401, 403, 500` | `tests/microservices/test_rq_engine_openapi_contract.py` |
 | `POST` | `/api/runs/{runid}/{config}/build-treatments` | JWT Bearer | rq:enqueue | mutating | async enqueue | `200, 400, 401, 403, 500` | `tests/microservices/test_rq_engine_openapi_contract.py` |
