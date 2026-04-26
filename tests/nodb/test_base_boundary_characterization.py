@@ -256,3 +256,67 @@ def test_dump_rejects_stale_overwrite_when_on_disk_payload_changed(
         nodb.unlock(flag="-f")
 
     assert nodb_path.read_text(encoding="utf-8") == '{"external":"newer"}'
+
+
+def test_dump_forces_mtime_advance_on_unchanged_signature_then_rejects_stale_writer(
+    tmp_path: Path,
+    redis_lock_stub: _RedisStub,
+    disable_redis_cache: None,
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    _install_db_api_stub(monkeypatch, update_last_modified=lambda *_args, **_kwargs: None)
+
+    writer = _DummyNoDb(str(tmp_path))
+    writer.lock()
+    try:
+        writer.value = "A"
+        writer.dump()
+    finally:
+        writer.unlock(flag="-f")
+
+    stale_writer = _DummyNoDb.load_detached(str(tmp_path))
+    assert stale_writer is not None
+    stale_expected_mtime = stale_writer._nodb_mtime
+    stale_expected_size = stale_writer._nodb_size
+    assert stale_expected_mtime is not None
+    assert stale_expected_size is not None
+
+    real_fstat = base.os.fstat
+    forced_signature_once = {"done": False}
+    utime_calls: list[tuple[int, int]] = []
+
+    def _fstat_with_stale_signature(fd: int):
+        stat_result = real_fstat(fd)
+        if not forced_signature_once["done"]:
+            forced_signature_once["done"] = True
+            return types.SimpleNamespace(
+                st_mtime=stale_expected_mtime,
+                st_size=stale_expected_size,
+                st_atime_ns=getattr(stat_result, "st_atime_ns", int(stale_expected_mtime * 1_000_000_000)),
+            )
+        return stat_result
+
+    def _recording_utime(path, *, ns):  # noqa: ANN001 - signature matches os.utime usage
+        utime_calls.append((int(ns[0]), int(ns[1])))
+        return real_utime(path, ns=ns)
+
+    real_utime = base.os.utime
+    monkeypatch.setattr(base.os, "fstat", _fstat_with_stale_signature)
+    monkeypatch.setattr(base.os, "utime", _recording_utime)
+
+    writer.lock()
+    try:
+        writer.value = "B"
+        writer.dump()
+    finally:
+        writer.unlock(flag="-f")
+
+    assert utime_calls, "dump() should force an mtime advance when signature appears unchanged"
+
+    stale_writer.value = "C"
+    stale_writer.lock()
+    try:
+        with pytest.raises(base.NoDbStaleWriteError):
+            stale_writer.dump()
+    finally:
+        stale_writer.unlock(flag="-f")

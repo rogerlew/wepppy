@@ -126,7 +126,7 @@ __all__ = [
 ]
 
 import ast
-from time import time
+from time import time, time_ns
 from enum import Enum, IntEnum
 from glob import glob
 from contextlib import contextmanager
@@ -1579,6 +1579,36 @@ class NoDbBase(object):
             except OSError:
                 self._nodb_mtime = None
                 self._nodb_size = None
+
+        # Some filesystems can report unchanged mtime/size across rapid rewrites
+        # of same-sized payloads. Force an mtime advance so cached instances in
+        # other processes reliably detect the updated file.
+        if (
+            expected_mtime is not None
+            and expected_size is not None
+            and self._nodb_mtime == expected_mtime
+            and self._nodb_size == expected_size
+        ):
+            try:
+                current_stat = os.stat(self._nodb)
+                expected_mtime_ns = int(round(expected_mtime * 1_000_000_000))
+                forced_mtime_ns = max(time_ns(), expected_mtime_ns + 1_000_000_000)
+                os.utime(
+                    self._nodb,
+                    ns=(
+                        getattr(current_stat, "st_atime_ns", forced_mtime_ns),
+                        forced_mtime_ns,
+                    ),
+                )
+                refreshed_stat = os.stat(self._nodb)
+                self._nodb_mtime = refreshed_stat.st_mtime
+                self._nodb_size = refreshed_stat.st_size
+            except OSError:
+                logging.getLogger(__name__).debug(
+                    "NoDbBase.dump: mtime advance fallback failed for %s",
+                    self._nodb,
+                    exc_info=True,
+                )
 
         write_version(self.wd, CURRENT_VERSION)
 
