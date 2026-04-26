@@ -51,6 +51,18 @@ class _DummyNoDb(base.NoDbBase):
         self.value = 0
 
 
+def _prime_stable_dummy_payload_signature(controller: _DummyNoDb, value: str = "A") -> None:
+    """Warm up dummy payload serialization so subsequent writes are size-stable."""
+
+    for _ in range(3):
+        controller.lock()
+        try:
+            controller.value = value
+            controller.dump()
+        finally:
+            controller.unlock(flag="-f")
+
+
 @pytest.fixture()
 def redis_lock_stub(monkeypatch: pytest.MonkeyPatch) -> _RedisStub:
     stub = _RedisStub()
@@ -266,13 +278,9 @@ def test_dump_forces_mtime_advance_on_unchanged_signature_then_rejects_stale_wri
 ) -> None:
     _install_db_api_stub(monkeypatch, update_last_modified=lambda *_args, **_kwargs: None)
 
+    nodb_path = tmp_path / _DummyNoDb.filename
     writer = _DummyNoDb(str(tmp_path))
-    writer.lock()
-    try:
-        writer.value = "A"
-        writer.dump()
-    finally:
-        writer.unlock(flag="-f")
+    _prime_stable_dummy_payload_signature(writer, value="A")
 
     stale_writer = _DummyNoDb.load_detached(str(tmp_path))
     assert stale_writer is not None
@@ -283,7 +291,6 @@ def test_dump_forces_mtime_advance_on_unchanged_signature_then_rejects_stale_wri
 
     real_fstat = base.os.fstat
     forced_signature_once = {"done": False}
-    utime_calls: list[tuple[int, int]] = []
 
     def _fstat_with_stale_signature(fd: int):
         stat_result = real_fstat(fd)
@@ -296,24 +303,143 @@ def test_dump_forces_mtime_advance_on_unchanged_signature_then_rejects_stale_wri
             )
         return stat_result
 
-    def _recording_utime(path, *, ns):  # noqa: ANN001 - signature matches os.utime usage
-        utime_calls.append((int(ns[0]), int(ns[1])))
-        return real_utime(path, ns=ns)
-
-    real_utime = base.os.utime
     monkeypatch.setattr(base.os, "fstat", _fstat_with_stale_signature)
-    monkeypatch.setattr(base.os, "utime", _recording_utime)
 
     writer.lock()
     try:
-        writer.value = "B"
+        writer.value = "A"
         writer.dump()
     finally:
         writer.unlock(flag="-f")
 
-    assert utime_calls, "dump() should force an mtime advance when signature appears unchanged"
+    refreshed_stat = nodb_path.stat()
+    assert refreshed_stat.st_size == stale_expected_size
+    assert refreshed_stat.st_mtime > stale_expected_mtime
 
     stale_writer.value = "C"
+    stale_writer.lock()
+    try:
+        with pytest.raises(base.NoDbStaleWriteError):
+            stale_writer.dump()
+    finally:
+        stale_writer.unlock(flag="-f")
+
+
+def test_dump_raises_when_mtime_advance_attempt_fails(
+    tmp_path: Path,
+    redis_lock_stub: _RedisStub,
+    disable_redis_cache: None,
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    _install_db_api_stub(monkeypatch, update_last_modified=lambda *_args, **_kwargs: None)
+
+    writer = _DummyNoDb(str(tmp_path))
+    _prime_stable_dummy_payload_signature(writer, value="A")
+
+    expected_mtime = writer._nodb_mtime
+    expected_size = writer._nodb_size
+    assert expected_mtime is not None
+    assert expected_size is not None
+
+    real_fstat = base.os.fstat
+    forced_signature_once = {"done": False}
+
+    def _fstat_with_stale_signature(fd: int):
+        stat_result = real_fstat(fd)
+        if not forced_signature_once["done"]:
+            forced_signature_once["done"] = True
+            return types.SimpleNamespace(
+                st_mtime=expected_mtime,
+                st_size=expected_size,
+                st_atime_ns=getattr(stat_result, "st_atime_ns", int(expected_mtime * 1_000_000_000)),
+            )
+        return stat_result
+
+    def _raising_utime(_path, *, ns, follow_symlinks=True):  # noqa: ANN001 - signature matches os.utime usage
+        raise OSError("utime unavailable")
+
+    monkeypatch.setattr(base.os, "fstat", _fstat_with_stale_signature)
+    monkeypatch.setattr(base.os, "utime", _raising_utime)
+
+    writer.lock()
+    try:
+        writer.value = "A"
+        with pytest.raises(base.NoDbStaleWriteError, match="deterministic mtime advance failed"):
+            writer.dump()
+    finally:
+        writer.unlock(flag="-f")
+
+
+def test_dump_forces_monotonic_signature_after_second_same_size_rewrite(
+    tmp_path: Path,
+    redis_lock_stub: _RedisStub,
+    disable_redis_cache: None,
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    _install_db_api_stub(monkeypatch, update_last_modified=lambda *_args, **_kwargs: None)
+
+    nodb_path = tmp_path / _DummyNoDb.filename
+    writer = _DummyNoDb(str(tmp_path))
+    _prime_stable_dummy_payload_signature(writer, value="A")
+
+    stale_writer = _DummyNoDb.load_detached(str(tmp_path))
+    assert stale_writer is not None
+    stale_expected_mtime = stale_writer._nodb_mtime
+    stale_expected_size = stale_writer._nodb_size
+    assert stale_expected_mtime is not None
+    assert stale_expected_size is not None
+
+    real_fstat = base.os.fstat
+
+    def _fstat_with_signature_once(signature_mtime: float, signature_size: int):
+        state = {"done": False}
+
+        def _inner(fd: int):
+            stat_result = real_fstat(fd)
+            if not state["done"]:
+                state["done"] = True
+                return types.SimpleNamespace(
+                    st_mtime=signature_mtime,
+                    st_size=signature_size,
+                    st_atime_ns=getattr(stat_result, "st_atime_ns", int(signature_mtime * 1_000_000_000)),
+                )
+            return stat_result
+
+        return _inner
+
+    monkeypatch.setattr(
+        base.os,
+        "fstat",
+        _fstat_with_signature_once(stale_expected_mtime, stale_expected_size),
+    )
+    writer.lock()
+    try:
+        writer.value = "A"
+        writer.dump()
+    finally:
+        writer.unlock(flag="-f")
+
+    first_rewrite_mtime = writer._nodb_mtime
+    assert first_rewrite_mtime is not None
+
+    monkeypatch.setattr(
+        base.os,
+        "fstat",
+        _fstat_with_signature_once(stale_expected_mtime, stale_expected_size),
+    )
+    writer.lock()
+    try:
+        writer.value = "A"
+        writer.dump()
+    finally:
+        writer.unlock(flag="-f")
+
+    refreshed_stat = nodb_path.stat()
+    assert refreshed_stat.st_size == stale_expected_size
+    assert writer._nodb_mtime is not None
+    assert writer._nodb_mtime > first_rewrite_mtime
+
+    stale_writer.value = "D"
     stale_writer.lock()
     try:
         with pytest.raises(base.NoDbStaleWriteError):
