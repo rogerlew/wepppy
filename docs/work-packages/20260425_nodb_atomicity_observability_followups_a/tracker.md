@@ -6,9 +6,9 @@
 
 **Timezone**: UTC  
 **Started**: 2026-04-25 23:06 UTC  
-**Current phase**: Closure (Milestone 6 complete)  
-**Last updated**: 2026-04-26 02:14 UTC  
-**Next milestone**: None (package ready for closeout handoff).  
+**Current phase**: Closed (post-close regression addendum documented)  
+**Last updated**: 2026-04-26 09:19 UTC  
+**Next milestone**: None (package closed).  
 **Security impact**: `low`  
 **Dedicated security review**: `no`  
 **Security artifact**: `N/A`
@@ -34,6 +34,7 @@
 - [x] Milestone 4: Added lock/dump-efficiency observability guard (`test_rq_engine_lock_dump_efficiency_guard.py`) plus remediation for landuse grouped-update failure-atomicity; closed with no remaining High/Medium findings (2026-04-26 01:34 UTC).
 - [x] Milestone 5: Completed scoped test maintainability cleanup (shared grouped test doubles + less brittle logger assertions) and closed with no remaining High/Medium findings (2026-04-26 01:50 UTC).
 - [x] Milestone 6: Ran package-wide validation and closure gates; docs and tracker updated; ExecPlan archived to completed (2026-04-26 01:50 UTC).
+- [x] Captured post-close `_wepp_bin` regression mechanics and fix rationale in package closure docs (`tracker.md`, completed ExecPlan, `PROJECT_TRACKER.md`) (2026-04-26 09:19 UTC).
 
 ## Timeline
 
@@ -68,6 +69,10 @@
 - **2026-04-26 01:50 UTC** - Queue graph drift reappeared as line-number churn after route edits; regenerated via `python tools/check_rq_dependency_graph.py --write`, then `wctl check-rq-graph` passed clean.
 - **2026-04-26 01:55 UTC** - Closure docs finalized: package moved to `Done` in `PROJECT_TRACKER.md` with WIP metadata refresh; final doc-lint passed (`5 files validated, 0 errors, 0 warnings`).
 - **2026-04-26 02:14 UTC** - Post-closure follow-up review integration: simplified grouped-update handoff branch in `apply_wepp_run_payload` to reduce dead-branch confusion while preserving lock-transfer/fallback semantics; revalidation queued.
+- **2026-04-26 07:28 UTC** - Same-signature NoDb rewrite hardening landed in `wepppy/nodb/base.py` (`ef22c188c`); later incident showed Redis mirror payload/signature behavior still allowed stale cache state to overwrite selected WEPP exec.
+- **2026-04-26 08:55 UTC** - Regression fix landed in `wepppy/nodb/base.py` (`ada260d79`): cache/file signature parity validation for Redis cache hits (`getInstance` + `load_detached`) and post-write cache mirror re-encode after final signature updates.
+- **2026-04-26 09:16 UTC** - Post-close regression mechanics documented in this tracker, completed ExecPlan, and `PROJECT_TRACKER.md`.
+- **2026-04-26 09:19 UTC** - Package doc-lint revalidated after addendum updates (`4 files validated, 0 errors, 0 warnings`).
 
 ## Decisions Log
 
@@ -148,6 +153,39 @@
 
 **Impact**: Preserves explicit boundary behavior while restoring enforcement-gate cleanliness (`Net delta +0`) and auditability.
 
+---
+
+### 2026-04-26 08:55 UTC: Treat Redis NoDb cache as a strict signature mirror of on-disk state
+**Context**: Production regression showed `wepp.nodb` could briefly hold the selected `_wepp_bin` value and then revert to an older value before hillslope execution.
+
+**Options considered**:
+1. Keep Redis cache acceptance permissive and rely on lock discipline alone.
+2. Accept Redis cache entries only when cached `_nodb_mtime/_nodb_size` match current file signature and ensure cache writes occur after final post-write signature updates.
+
+**Decision**: Option 2.
+
+**Impact**: Prevents stale cache payloads from being rehydrated and re-dumped over newer disk state (observed as `_wepp_bin` rollback), while preserving cache best-effort behavior on Redis failures.
+
+## Post-Close Regression Mechanics Addendum (`_wepp_bin` reversion)
+
+### Symptom
+- During `Run WEPP`, `wepp.nodb` persisted the selected WEPP binary (for example `wepp_260425`) and then reverted to a prior value (`wepp_260421b`) before worker-stage hillslope execution.
+
+### Root Cause Chain
+1. `ef22c188c` introduced forced mtime advancement for same-size NoDb rewrites.
+2. `dump()` still mirrored Redis cache from a pre-advance serialized payload (`js`), so cached `_nodb_mtime/_nodb_size` could lag the final file signature.
+3. Redis cache hydration paths could accept that stale payload and skip disk rehydrate.
+4. A later dump from the stale hydrated instance overwrote newer on-disk fields, including `_wepp_bin`.
+
+### Remediation Mechanics
+1. Added `_cache_instance_matches_file_signature(...)` and applied it to Redis cache reads in both `getInstance` and `load_detached`.
+2. Reordered disk-hydrate cache population so cached signatures always reflect stat-backed post-load state.
+3. Changed `dump()` cache mirror writes to re-encode from the final in-memory object after mtime/size updates.
+4. Added focused regressions in `tests/nodb/test_base_boundary_characterization.py` for stale-cache rejection and cache-signature parity after forced mtime-advance rewrites.
+
+### Residual Risk
+- Low: signature equality depends on filesystem timestamp precision; the new epsilon-based signature check and same-size rewrite regressions cover the known boundary path.
+
 ## Risks and Issues
 
 | Risk | Severity | Likelihood | Mitigation | Status |
@@ -155,6 +193,7 @@
 | Atomicity implementation introduces response-contract drift | High | Medium | Contract-preserving tests across WEPP/Bootstrap/NoDb grouped-update paths and review triad closure on each milestone | Closed |
 | Queue-graph drift fix accidentally hides real queue wiring issues | Medium | Medium | Root-cause inspection + canonical regeneration + repeated `wctl check-rq-graph` verification after later edits | Closed |
 | Broad exception handling weakens debugging by swallowing unexpected errors | Medium | Medium | Boundary comments + allowlist entries with rationale/expiry + `check_broad_exceptions --enforce-changed` gate pass | Closed |
+| Redis NoDb cache signature drift can rehydrate stale controller state and overwrite newer persisted fields | High | Medium | Cache/file signature parity checks on Redis reads + cache mirror re-encode from final post-write state + boundary regressions in `test_base_boundary_characterization.py` | Closed |
 | Observability guard becomes brittle/noisy | Low | Medium | Keep AST guard narrowly scoped and pair with runtime behavioral suites; document residual guard limits | Monitoring |
 | Test helper extraction causes accidental behavior loss in route tests | Low | Medium | Introduce shared doubles incrementally and re-run scoped route+nodb regression suites after each step | Closed |
 
@@ -508,9 +547,31 @@
 **Validation results**:
 - `wctl run-pytest tests/nodb/test_wepp_run_payload_grouped_updates.py tests/microservices/test_rq_engine_wepp_routes.py tests/microservices/test_rq_engine_bootstrap_routes.py --maxfail=1` -> `111 passed`, `0 failed`.
 
+### 2026-04-26 09:19 UTC: Post-close regression mechanics documentation sync
+**Agent/Contributor**: Codex (orchestrator)
+
+**Work completed**:
+- Added explicit post-close `_wepp_bin` rollback mechanics to package closure docs:
+  - `tracker.md` (timeline, decision log, risk register, and dedicated mechanics addendum),
+  - completed ExecPlan outcomes/surprises,
+  - `PROJECT_TRACKER.md` done-summary addendum,
+  - `package.md` closure-note pointer to tracker addendum.
+- Captured root-cause chain and remediation mechanics from the production regression:
+  - stale cache payload acceptance after signature drift,
+  - post-write cache mirror serialization ordering,
+  - signature parity enforcement and post-write re-encode fix.
+
+**Validation results**:
+- `wctl doc-lint --path docs/work-packages/20260425_nodb_atomicity_observability_followups_a/package.md --path docs/work-packages/20260425_nodb_atomicity_observability_followups_a/tracker.md --path docs/work-packages/20260425_nodb_atomicity_observability_followups_a/prompts/completed/nodb_atomicity_observability_followups_execplan.md --path PROJECT_TRACKER.md` -> `4 files validated, 0 errors, 0 warnings`.
+
 ## Communication Log
 
 ### 2026-04-25 23:06 UTC: Follow-up package request
 **Participants**: User, Codex  
 **Question/Topic**: Prepare package for follow-ups 1, 2, 3, 4, 6 from prior closure recommendations.  
 **Outcome**: New follow-up package created with explicit scope and milestone plan initialized.
+
+### 2026-04-26 09:19 UTC: Documentation mechanics request
+**Participants**: User, Codex  
+**Question/Topic**: Ensure regression/fix mechanics are explicitly captured in package documentation.  
+**Outcome**: Added tracker addendum, ExecPlan outcome note, package closure pointer, and `PROJECT_TRACKER.md` done-summary update.

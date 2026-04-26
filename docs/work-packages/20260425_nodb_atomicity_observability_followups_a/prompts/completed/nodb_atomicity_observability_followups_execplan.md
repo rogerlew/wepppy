@@ -17,6 +17,7 @@ After this package, scoped rq-engine mutation flows should be safer under failur
 - [x] (2026-04-26 01:34 UTC) Milestone 4 complete: lock/dump-efficiency AST guard added; landuse grouped-update rollback gap remediated and re-reviewed clean.
 - [x] (2026-04-26 01:50 UTC) Milestone 5 complete: scoped test maintainability cleanup landed (shared WEPP payload doubles + reduced brittle assertions) with closure triad and no remaining High/Medium findings.
 - [x] (2026-04-26 01:50 UTC) Milestone 6 complete: package-wide scoped validation and closure gates passed; docs and tracker synchronized.
+- [x] (2026-04-26 09:19 UTC) Post-close regression mechanics documented across tracker/ExecPlan/`PROJECT_TRACKER.md` after `_wepp_bin` rollback incident remediation.
 
 ## Surprises & Discoveries
 
@@ -24,6 +25,8 @@ After this package, scoped rq-engine mutation flows should be safer under failur
   Evidence: prior package closure notes and tracker timeline for `20260425_nodb_lock_dump_efficiency_refactor`.
 - Observation: grouped lock preflight + later reacquire introduced a TOCTOU race where WEPP parse could persist before grouped lock conflict surfaced; required single-acquisition lock lifecycle across parse + grouped commit.
   Evidence: Milestone 1 closure re-review findings and final remediation notes in package tracker.
+- Observation: post-close production incident showed `_wepp_bin` reversion caused by stale Redis NoDb cache signature acceptance after same-size rewrite hardening.
+  Evidence: follow-up commits `ef22c188c` (initial same-signature rewrite hardening) and `ada260d79` (cache-signature parity + post-write cache mirror fix), plus tracker addendum.
 
 ## Decision Log
 
@@ -53,6 +56,7 @@ After this package, scoped rq-engine mutation flows should be safer under failur
   - `wctl check-rq-graph`: clean
   - `check_broad_exceptions --enforce-changed`: PASS
 - Residual risk accepted as Low: AST guard is structural and should continue to be paired with runtime behavioral suites.
+- Post-close regression remediation captured and landed: Redis NoDb cache now enforces file-signature parity on cache reads and writes post-final-signature payloads, preventing stale cache replay from rolling back newer fields such as `_wepp_bin`.
 
 ## Context and Orientation
 

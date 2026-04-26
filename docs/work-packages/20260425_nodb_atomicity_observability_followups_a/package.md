@@ -133,6 +133,7 @@ This package is scoped to rq-engine + required NoDb helpers + test/tooling/docs 
   - `wctl check-rq-graph` -> clean after closure regeneration.
   - `python3 tools/check_broad_exceptions.py --enforce-changed --base-ref origin/master` -> PASS.
 - Scope remained strict to rq-engine + required nodb helpers/tests; no legacy Flask route edits under `wepppy/weppcloud/routes/nodb_api/**`.
+- Post-close addendum: `_wepp_bin` rollback regression mechanics and remediation are recorded in [`tracker.md`](tracker.md) under `Post-Close Regression Mechanics Addendum`.
 
 ## Kickoff Prompt
 - Completed ExecPlan: `docs/work-packages/20260425_nodb_atomicity_observability_followups_a/prompts/completed/nodb_atomicity_observability_followups_execplan.md`
