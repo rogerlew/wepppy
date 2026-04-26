@@ -1,7 +1,7 @@
 from __future__ import annotations
 
-from datetime import datetime, timezone
-from typing import Any, Sequence
+from datetime import datetime, timedelta, timezone
+from typing import Any, Mapping, Sequence
 
 import redis
 
@@ -19,6 +19,7 @@ from ..._common import *  # noqa: F401,F403
 
 
 rq_info_details_bp = Blueprint("rq_info_details", __name__, template_folder="templates")
+FAILED_JOBS_LOOKBACK_SECONDS = 24 * 60 * 60
 
 
 def _utc_iso_now() -> str:
@@ -103,6 +104,46 @@ def _hydrate_submitter(job: dict[str, Any], *, user_cache: dict[int, Any], run_o
             job["submitter"] = actor_text
 
 
+def _is_failed_job(job: Mapping[str, Any]) -> bool:
+    status = str(job.get("status") or "").strip().lower()
+    registry = str(job.get("registry") or "").strip().lower()
+    return status == "failed" or registry == "failed"
+
+
+def _filter_failed_jobs(jobs: Sequence[dict[str, Any]]) -> list[dict[str, Any]]:
+    return [job for job in jobs if _is_failed_job(job)]
+
+
+def _parse_ended_at_iso(raw_ended_at: Any) -> datetime | None:
+    if not isinstance(raw_ended_at, str):
+        return None
+    token = raw_ended_at.strip()
+    if not token:
+        return None
+    normalized = token.replace("Z", "+00:00")
+    try:
+        ended_at = datetime.fromisoformat(normalized)
+    except ValueError:
+        return None
+    if ended_at.tzinfo is None:
+        ended_at = ended_at.replace(tzinfo=timezone.utc)
+    return ended_at.astimezone(timezone.utc)
+
+
+def _filter_jobs_within_lookback(
+    jobs: Sequence[dict[str, Any]],
+    *,
+    lookback_seconds: int,
+) -> list[dict[str, Any]]:
+    cutoff = datetime.now(timezone.utc) - timedelta(seconds=int(lookback_seconds))
+    filtered: list[dict[str, Any]] = []
+    for job in jobs:
+        ended_at = _parse_ended_at_iso(job.get("ended_at"))
+        if ended_at is not None and ended_at >= cutoff:
+            filtered.append(job)
+    return filtered
+
+
 @rq_info_details_bp.route("/rq/info-details", strict_slashes=False)
 @login_required
 @roles_accepted("Admin", "Root")
@@ -110,19 +151,24 @@ def rq_info_details():
     try:
         queue_names = _parse_queues(request.args.get("queues"))
         lookback_seconds = DEFAULT_RECENT_LOOKBACK_SECONDS
+        failed_lookback_seconds = FAILED_JOBS_LOOKBACK_SECONDS
 
         conn_kwargs = redis_connection_kwargs(RedisDB.RQ)
         with redis.Redis(**conn_kwargs) as redis_conn:
-            recent_jobs = list_recently_completed_jobs(
+            completed_jobs = list_recently_completed_jobs(
                 redis_conn,
                 queue_names=queue_names,
-                lookback_seconds=lookback_seconds,
+                lookback_seconds=failed_lookback_seconds,
             )
             active_jobs = list_active_jobs(redis_conn, queue_names=queue_names)
+        recent_jobs = _filter_jobs_within_lookback(completed_jobs, lookback_seconds=lookback_seconds)
+        failed_jobs = _filter_failed_jobs(completed_jobs)
 
         user_cache: dict[int, Any] = {}
         run_owner_cache: dict[str, Any] = {}
         for job in recent_jobs:
+            _hydrate_submitter(job, user_cache=user_cache, run_owner_cache=run_owner_cache)
+        for job in failed_jobs:
             _hydrate_submitter(job, user_cache=user_cache, run_owner_cache=run_owner_cache)
         for job in active_jobs:
             _hydrate_submitter(job, user_cache=user_cache, run_owner_cache=run_owner_cache)
@@ -138,7 +184,8 @@ def rq_info_details():
 
         subtitle = (
             f"Static snapshot (no polling). Generated { _utc_iso_now() }. "
-            f"Recently completed lookback: {lookback_seconds // 3600}h."
+            f"Recently completed lookback: {lookback_seconds // 3600}h. "
+            f"Failed jobs lookback: {failed_lookback_seconds // 3600}h."
         )
 
         return render_template(
@@ -147,7 +194,9 @@ def rq_info_details():
             subtitle=subtitle,
             queues=list(queue_names),
             lookback_seconds=lookback_seconds,
+            failed_lookback_seconds=failed_lookback_seconds,
             recent_jobs=recent_jobs,
+            failed_jobs=failed_jobs,
             active_jobs=active_jobs,
         )
     except Exception:
