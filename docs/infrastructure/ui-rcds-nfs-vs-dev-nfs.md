@@ -94,6 +94,27 @@ Ratios (production time ÷ wepp2 time):
 - Treat `sync_s` as a “system dirtiness / background IO” indicator, not a per-path metric.
 - For a heavier profile, bump `--files-per-dir` and/or `--dir-depth` (expect NFS to degrade faster than local FS).
 
+## Production Incident: Stale NFS Handle During WEPP Watershed Close (2026-04-27)
+
+On `wepp1`, run `mercuric-subcontract` failed twice in `run_watershed_rq` while closing the WEPP watershed stderr log under the NAS-backed NFS run tree:
+
+- Run path: `/geodata/wc1/runs/me/mercuric-subcontract` (container view: `/wc1/runs/me/mercuric-subcontract`)
+- Jobs:
+  - `b38b79f9-9c58-46f5-afbd-88b62556d1aa`, ended `2026-04-27T03:41:44.805222Z`
+  - `11b73429-1a89-4806-b473-12bf76b42b68`, ended `2026-04-27T03:54:37.268268Z`
+- Worker for both failures: `a2290e07bf15407c9ad5c12b558a94f6`
+- Traceback endpoint: `wepp_runner/wepp_runner.py:958`, `_log.close()`
+- Error: `OSError: [Errno 116] Stale file handle`
+
+The first failed job's `pw0.err` existed and ended with `WEPP COMPLETED WATERSHED SIMULATION SUCCESSFULLY`, so the immediate failure signature was filesystem/log-close related, not a WEPP model computation failure. Kernel logs in the same window showed NFS write anomalies:
+
+```text
+Apr 26 20:41:24 wepp1 kernel: NFS: Server wrote zero bytes, expected 65536.
+Apr 26 20:51:28 wepp1 kernel: NFS: Server wrote zero bytes, expected 65536.
+```
+
+Operational takeaway: classify this signature as an infrastructure/NFS interruption unless additional model evidence says otherwise. Check Redis/RQ `exc_info` or `meta["exc_string"]`, run-scoped `exceptions.log` and `rq.log`, and host kernel logs before requeueing. In this run, a later post-processing job (`8617c691-8e7b-4707-8dcf-2e298370e35b`) failed separately because `/wc1/runs/me/mercuric-subcontract/dem/wbt/subwta.tif` was missing, so post-processing requeue would need the missing WBT raster restored or regenerated first.
+
 ## Small-File Read/Write/Delete + Metadata Microbench (2026-02-10)
 
 This is a lightweight microbench intended to approximate UI pain on metadata-heavy paths (many small files).
