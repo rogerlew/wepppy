@@ -272,6 +272,15 @@ Currently active work packages. Limit to 2-4 packages to maintain focus.
 
 Recently completed work packages. Archived immediately upon completion.
 
+### WEPP Runner Traceability Hardening (Hillslope + Watershed) (2026-04-27)
+**Status**: ✅ **COMPLETE**
+
+**Link**: [docs/work-packages/20260427_wepp_runner_traceability_hardening/](docs/work-packages/20260427_wepp_runner_traceability_hardening/)
+
+**Lifecycle**: Backlog -> In Progress -> Done (2026-04-27)
+
+**Summary**: Closed the single-rollout traceability package for continuous `run_hillslope` and `run_watershed` only. `run_watershed` now emits startup context parity (`runs_dir`, `run_file`, `err_file`, `cmd`, `attempt=1/1`), both in-scope methods log cached binary identity fields (`binary_path`, SHA256, size, mtime, status/error fallback), and both start a Linux best-effort bounded D-state watchdog controlled by documented env vars. Watershed close-path I/O failures now emit classified `close_path_failure` diagnostics, including `classification=stale_file_handle` for the production NFS signature. Targeted tests cover startup parity, binary identity/fallback, watchdog emit/no-emit behavior, and close diagnostics. Post-closure operator addendum executed in-package: built/vendored `wepp_260427` + `wepp_260427_hill` (provenance recorded as `6bb872ca (dirty tree)`), preserved `-g/-fbacktrace` makefile traceability defaults, synced vendored changelog, and documented dirty-cycle guidance for `pmxelm.inc`/`pmxhil.inc`/`pmxpln.inc`/`pntype.inc`. The ExecPlan is archived under `prompts/completed/`.
+
 ### Peridot vs WEPPpy Python Abstraction Benchmark (2026-04-27)
 **Status**: ✅ **COMPLETE**
 

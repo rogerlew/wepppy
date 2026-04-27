@@ -86,6 +86,26 @@ Notes:
 - `wepp_observe.on` is an opt-in runtime flag; no flag means no phase log.
 - Logging adds overhead; keep it off for performance or parity timing checks.
 
+## Runner Traceability Fields
+Continuous `run_hillslope` and `run_watershed` stderr logs begin with runner context for incident triage.
+
+- `run_hillslope`: `wepp_id`, `runs_dir`, `run_file`, `err_file`, `cmd`, `timeout`, and `timeout_retries`.
+- `run_watershed`: `runs_dir`, `run_file`, `err_file`, `cmd`, and `attempt=1/1`.
+- Both in-scope runners emit `binary_identity` with `binary_path`, `binary_sha256`, `binary_size_bytes`, `binary_mtime_ns`, `binary_identity_status`, and `binary_identity_error`.
+- `binary_identity_status=unavailable` means the run continued but the hash or file metadata could not be read; inspect `binary_identity_error`.
+- Watershed close-path I/O failures emit `close_path_failure` with `stream`, `path`, `classification`, `errno`, and `error`. `classification=stale_file_handle` identifies the NFS stale-handle signature.
+
+## D-State Watchdog Telemetry
+`run_hillslope` and `run_watershed` start a Linux best-effort watchdog for prolonged uninterruptible sleep (`D`) process state. It only writes telemetry and never signals or kills the WEPP process.
+
+Environment controls:
+- `WEPP_RUNNER_DSTATE_WATCHDOG_ENABLED`: default enabled on Linux when `/proc` exists; set `0`, `false`, `no`, or `off` to disable.
+- `WEPP_RUNNER_DSTATE_WATCHDOG_INTERVAL_S`: poll interval, default `30.0`, minimum `0.1`.
+- `WEPP_RUNNER_DSTATE_WATCHDOG_THRESHOLD_S`: continuous D-state duration before logging, default `180.0`.
+- `WEPP_RUNNER_DSTATE_WATCHDOG_MAX_EVENTS`: maximum log lines per process, default `3`; set `0` to suppress emissions.
+
+Watchdog lines look like `[run_watershed] dstate_watchdog ...` and include `pid`, `duration`, `threshold`, `interval`, run paths, and command text.
+
 ## Debug/Parity Tools
 Use these tools from `/workdir/wepp-forest` when triaging binary behavior:
 

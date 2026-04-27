@@ -43,12 +43,16 @@ with the wepp_id included (without the .pass.dat).
 """
 
 import os
+import errno
+import hashlib
 from os.path import join as _join
 from os.path import exists as _exists
 from os.path import split as _split
 import random
 import math
 import re
+import sys
+import threading
 
 from glob import glob
 
@@ -109,6 +113,16 @@ _BANNED_RUNTIME_PATHS_PATTERN = re.compile(
 )
 _SKIP_RUNTIME_CHECK_ENV_VAR = "WEPP_RUNNER_SKIP_BINARY_PROVENANCE_CHECK"
 _PROVENANCE_OK_BINARY_PATHS = set()
+_BINARY_IDENTITY_CACHE = {}
+_BINARY_IDENTITY_CHUNK_BYTES = 1024 * 1024
+
+_DSTATE_WATCHDOG_ENABLED_ENV = "WEPP_RUNNER_DSTATE_WATCHDOG_ENABLED"
+_DSTATE_WATCHDOG_INTERVAL_ENV = "WEPP_RUNNER_DSTATE_WATCHDOG_INTERVAL_S"
+_DSTATE_WATCHDOG_THRESHOLD_ENV = "WEPP_RUNNER_DSTATE_WATCHDOG_THRESHOLD_S"
+_DSTATE_WATCHDOG_MAX_EVENTS_ENV = "WEPP_RUNNER_DSTATE_WATCHDOG_MAX_EVENTS"
+_DSTATE_WATCHDOG_INTERVAL_S_DEFAULT = 30.0
+_DSTATE_WATCHDOG_THRESHOLD_S_DEFAULT = 180.0
+_DSTATE_WATCHDOG_MAX_EVENTS_DEFAULT = 3
 
 
 def get_linux_wepp_bin_opts():
@@ -118,6 +132,123 @@ def get_linux_wepp_bin_opts():
 
 def _run_text_command(args):
     return subprocess.run(args, capture_output=True, text=True, check=False)
+
+
+def _env_bool_or_default(name, default):
+    raw = os.getenv(name)
+    if raw in (None, ""):
+        return default
+    normalized = raw.strip().lower()
+    if normalized in {"1", "true", "yes", "on"}:
+        return True
+    if normalized in {"0", "false", "no", "off"}:
+        return False
+    return default
+
+
+def _env_int_or_default(name, default, *, min_value=None):
+    raw = os.getenv(name)
+    if raw in (None, ""):
+        return default
+    try:
+        value = int(raw)
+    except ValueError:
+        return default
+    if min_value is not None and value < min_value:
+        return default
+    return value
+
+
+def _trace_quote(value):
+    text = str(value)
+    text = text.replace("\\", "\\\\").replace('"', '\\"').replace("\n", "\\n")
+    return f'"{text}"'
+
+
+def _cmd_text(cmd):
+    return " ".join(str(arg) for arg in cmd)
+
+
+def _collect_binary_identity(binary_path):
+    requested_path = os.path.abspath(binary_path)
+    resolved_path = os.path.realpath(requested_path)
+    try:
+        stat_result = os.stat(resolved_path)
+    except OSError as exc:
+        return {
+            "binary_path": resolved_path,
+            "binary_sha256": "<unavailable>",
+            "binary_size_bytes": "<unavailable>",
+            "binary_mtime_ns": "<unavailable>",
+            "binary_identity_status": "unavailable",
+            "binary_identity_error": (
+                f"{exc.__class__.__name__}:errno={exc.errno}:strerror={exc.strerror}"
+            ),
+        }
+
+    cache_key = (
+        stat_result.st_dev,
+        stat_result.st_ino,
+        stat_result.st_size,
+        stat_result.st_mtime_ns,
+    )
+    cached = _BINARY_IDENTITY_CACHE.get(resolved_path)
+    if cached is not None and cached.get("cache_key") == cache_key:
+        return dict(cached["identity"])
+
+    identity = {
+        "binary_path": resolved_path,
+        "binary_sha256": "<unavailable>",
+        "binary_size_bytes": "<unavailable>",
+        "binary_mtime_ns": "<unavailable>",
+        "binary_identity_status": "unavailable",
+        "binary_identity_error": "",
+    }
+
+    try:
+        digest = hashlib.sha256()
+        with open(resolved_path, "rb") as fp:
+            while True:
+                chunk = fp.read(_BINARY_IDENTITY_CHUNK_BYTES)
+                if not chunk:
+                    break
+                digest.update(chunk)
+    except OSError as exc:
+        identity["binary_identity_error"] = (
+            f"{exc.__class__.__name__}:errno={exc.errno}:strerror={exc.strerror}"
+        )
+    else:
+        identity.update(
+            {
+                "binary_sha256": digest.hexdigest(),
+                "binary_size_bytes": stat_result.st_size,
+                "binary_mtime_ns": stat_result.st_mtime_ns,
+                "binary_identity_status": "ok",
+            }
+        )
+        _BINARY_IDENTITY_CACHE[resolved_path] = {
+            "cache_key": cache_key,
+            "identity": dict(identity),
+        }
+
+    return dict(identity)
+
+
+def _format_binary_identity_fields(identity):
+    return (
+        f'binary_path={_trace_quote(identity["binary_path"])} '
+        f'binary_sha256={identity["binary_sha256"]} '
+        f'binary_size_bytes={identity["binary_size_bytes"]} '
+        f'binary_mtime_ns={identity["binary_mtime_ns"]} '
+        f'binary_identity_status={identity["binary_identity_status"]} '
+        f'binary_identity_error={_trace_quote(identity["binary_identity_error"])}'
+    )
+
+
+def _write_binary_identity_trace(log, runner_name, binary_path):
+    identity = _collect_binary_identity(binary_path)
+    log.write(f'[{runner_name}] binary_identity {_format_binary_identity_fields(identity)}\n')
+    log.flush()
 
 
 def _binary_provenance_error(binary_path, reason):
@@ -289,6 +420,235 @@ def _env_float_or_default(name, default, *, min_value=None):
     if min_value is not None and value < min_value:
         return default
     return value
+
+
+def _linux_proc_available():
+    return not _IS_WINDOWS and _exists("/proc")
+
+
+def _read_linux_process_state(pid):
+    with open(f"/proc/{pid}/status", encoding="ascii") as fp:
+        for line in fp:
+            if line.startswith("State:"):
+                fields = line.split()
+                if len(fields) >= 2:
+                    return fields[1]
+                return ""
+    return ""
+
+
+def _dstate_watchdog_config():
+    default_enabled = _linux_proc_available()
+    enabled = _env_bool_or_default(_DSTATE_WATCHDOG_ENABLED_ENV, default_enabled)
+    if not enabled or not default_enabled:
+        return {
+            "enabled": False,
+            "interval_s": _DSTATE_WATCHDOG_INTERVAL_S_DEFAULT,
+            "threshold_s": _DSTATE_WATCHDOG_THRESHOLD_S_DEFAULT,
+            "max_events": _DSTATE_WATCHDOG_MAX_EVENTS_DEFAULT,
+        }
+
+    return {
+        "enabled": True,
+        "interval_s": _env_float_or_default(
+            _DSTATE_WATCHDOG_INTERVAL_ENV,
+            _DSTATE_WATCHDOG_INTERVAL_S_DEFAULT,
+            min_value=0.1,
+        ),
+        "threshold_s": _env_float_or_default(
+            _DSTATE_WATCHDOG_THRESHOLD_ENV,
+            _DSTATE_WATCHDOG_THRESHOLD_S_DEFAULT,
+            min_value=0.0,
+        ),
+        "max_events": _env_int_or_default(
+            _DSTATE_WATCHDOG_MAX_EVENTS_ENV,
+            _DSTATE_WATCHDOG_MAX_EVENTS_DEFAULT,
+            min_value=0,
+        ),
+    }
+
+
+class _DStateWatchdog:
+    def __init__(
+        self,
+        *,
+        runner_name,
+        pid,
+        log,
+        runs_dir,
+        run_file,
+        err_file,
+        cmd_text,
+        interval_s,
+        threshold_s,
+        max_events,
+        state_reader=_read_linux_process_state,
+        clock=monotonic,
+    ):
+        self.runner_name = runner_name
+        self.pid = pid
+        self.log = log
+        self.runs_dir = runs_dir
+        self.run_file = run_file
+        self.err_file = err_file
+        self.cmd_text = cmd_text
+        self.interval_s = interval_s
+        self.threshold_s = threshold_s
+        self.max_events = max_events
+        self.state_reader = state_reader
+        self.clock = clock
+        self.dstate_started_at = None
+        self.last_emit_at = None
+        self.event_count = 0
+        self.disabled = max_events == 0
+        self._stop_event = threading.Event()
+        self._thread = None
+
+    def start(self):
+        if self.disabled:
+            return self
+        self._thread = threading.Thread(
+            target=self._run,
+            name=f"wepp-runner-dstate-watchdog-{self.pid}",
+            daemon=True,
+        )
+        self._thread.start()
+        return self
+
+    def stop(self):
+        self._stop_event.set()
+        if self._thread is not None:
+            self._thread.join(timeout=min(max(self.interval_s, 0.1), 1.0))
+
+    def _run(self):
+        while not self._stop_event.wait(self.interval_s):
+            self.poll_once()
+
+    def poll_once(self, now=None):
+        if self.disabled:
+            return False
+
+        now = self.clock() if now is None else now
+        try:
+            state = self.state_reader(self.pid)
+        except OSError:
+            # /proc entries can disappear as the child exits; the watchdog is advisory only.
+            self.disabled = True
+            return False
+
+        if state != "D":
+            self.dstate_started_at = None
+            return False
+
+        if self.dstate_started_at is None:
+            self.dstate_started_at = now
+            return False
+
+        duration_s = now - self.dstate_started_at
+        if duration_s < self.threshold_s:
+            return False
+        if self.event_count >= self.max_events:
+            return False
+        if self.last_emit_at is not None and now - self.last_emit_at < self.threshold_s:
+            return False
+
+        self.event_count += 1
+        self.last_emit_at = now
+        line = (
+            f'[{self.runner_name}] dstate_watchdog pid={self.pid} state=D '
+            f'duration={duration_s:.2f}s threshold={self.threshold_s:.2f}s '
+            f'interval={self.interval_s:.2f}s event={self.event_count}/{self.max_events} '
+            f'runs_dir={_trace_quote(self.runs_dir)} run_file={_trace_quote(self.run_file)} '
+            f'err_file={_trace_quote(self.err_file)} cmd={_trace_quote(self.cmd_text)}'
+        )
+        try:
+            self.log.write(line + "\n")
+            self.log.flush()
+        except OSError:
+            self.disabled = True
+            return False
+        return True
+
+
+class _DisabledDStateWatchdog:
+    def start(self):
+        return self
+
+    def stop(self):
+        return None
+
+
+def _start_dstate_watchdog(runner_name, process, log, *, runs_dir, run_file, err_file, cmd_text):
+    pid = getattr(process, "pid", None)
+    if pid is None:
+        return _DisabledDStateWatchdog()
+
+    config = _dstate_watchdog_config()
+    if not config["enabled"]:
+        return _DisabledDStateWatchdog()
+
+    return _DStateWatchdog(
+        runner_name=runner_name,
+        pid=pid,
+        log=log,
+        runs_dir=runs_dir,
+        run_file=run_file,
+        err_file=err_file,
+        cmd_text=cmd_text,
+        interval_s=config["interval_s"],
+        threshold_s=config["threshold_s"],
+        max_events=config["max_events"],
+    ).start()
+
+
+def _classify_close_path_error(exc):
+    if isinstance(exc, OSError):
+        stale_errno = getattr(errno, "ESTALE", 116)
+        if exc.errno == stale_errno:
+            return "stale_file_handle"
+        if exc.errno is not None:
+            return f"os_error_errno_{exc.errno}"
+        return "os_error"
+    return exc.__class__.__name__
+
+
+def _emit_close_path_failure(runner_name, *, stream_name, path, exc, log=None):
+    classification = _classify_close_path_error(exc)
+    errno_value = getattr(exc, "errno", None)
+    line = (
+        f'[{runner_name}] close_path_failure stream={stream_name} '
+        f'path={_trace_quote(path)} classification={classification} '
+        f'errno={errno_value} error={_trace_quote(exc)}'
+    )
+    if log is not None and not getattr(log, "closed", False):
+        try:
+            log.write(line + "\n")
+            log.flush()
+        except OSError:
+            # Keep the original close-path failure as the canonical exception.
+            pass
+    try:
+        sys.stderr.write(line + "\n")
+        sys.stderr.flush()
+    except OSError:
+        # There is no safer fallback sink from this cleanup boundary.
+        pass
+
+
+def _close_stream_with_diagnostics(stream, runner_name, *, stream_name, path, log=None):
+    if stream is None:
+        return
+    try:
+        stream.close()
+    except OSError as exc:
+        _emit_close_path_failure(
+            runner_name,
+            stream_name=stream_name,
+            path=path,
+            exc=exc,
+            log=log,
+        )
+        raise
 
 
 def _wait_for_required_files(paths, *, timeout_s, poll_s):
@@ -610,7 +970,7 @@ def run_hillslope(wepp_id, runs_dir, wepp_bin=None, status_channel=None,
     timeout_attempts = []
     last_returncode = None
     runs_dir_abs = os.path.abspath(runs_dir)
-    cmd_text = " ".join(cmd)
+    cmd_text = _cmd_text(cmd)
     backoff_base_seconds = 0.5
     backoff_cap_seconds = 5.0
 
@@ -639,6 +999,7 @@ def run_hillslope(wepp_id, runs_dir, wepp_bin=None, status_channel=None,
             f'err_file={_stderr_fn} cmd="{cmd_text}" timeout={timeout}s '
             f'timeout_retries={timeout_retries}\n'
         )
+        _write_binary_identity_trace(_log, "run_hillslope", cmd[0])
         _log.flush()
 
         for attempt in range(1, total_attempts + 1):
@@ -659,6 +1020,15 @@ def run_hillslope(wepp_id, runs_dir, wepp_bin=None, status_channel=None,
                 timed_out = False
                 timeout_exc = None
                 stdout_data = ""
+                watchdog = _start_dstate_watchdog(
+                    "run_hillslope",
+                    p,
+                    _log,
+                    runs_dir=runs_dir_abs,
+                    run_file=_run_fn,
+                    err_file=_stderr_fn,
+                    cmd_text=cmd_text,
+                )
                 try:
                     stdout_data, _ = p.communicate(timeout=timeout)
                 except subprocess.TimeoutExpired as exc:
@@ -666,6 +1036,8 @@ def run_hillslope(wepp_id, runs_dir, wepp_bin=None, status_channel=None,
                     timeout_exc = exc
                     p.kill()
                     stdout_data, _ = p.communicate()
+                finally:
+                    watchdog.stop()
 
             last_returncode = p.returncode
             output_lines = []
@@ -932,41 +1304,94 @@ def run_watershed(runs_dir, wepp_bin=None, status_channel=None):
     t0 = time()
 
     cmd = _resolve_wepp_cmd(wepp_bin, prefer_hill=False)
-
-    _run = open(os.path.join(runs_dir, 'pw0.run'))
+    cmd_text = _cmd_text(cmd)
+    runs_dir_abs = os.path.abspath(runs_dir)
+    _run_fn = os.path.join(runs_dir, 'pw0.run')
     _stderr_fn = os.path.join(runs_dir, 'pw0.err')
-    _log = open(_stderr_fn, 'w')
-
-    # for python3.7+ universal_newlines=True -> text=True
-    p = subprocess.Popen(cmd, stdin=_run, stdout=subprocess.PIPE, stderr=subprocess.STDOUT,
-                         cwd=runs_dir, universal_newlines=True)
-
-    # Streaming the output to _log and, if provided, to the status channel
+    _run = None
+    _log = None
+    watchdog = _DisabledDStateWatchdog()
     success = False
-    while p.poll() is None:
-        output = p.stdout.readline()
-        output = output.strip()
 
-        if output != '':
-            if 'WEPP COMPLETED WATERSHED SIMULATION SUCCESSFULLY' in output:
-                success = True
-            _log.write(output + '\n')
-            if status_channel:
-                StatusMessenger.publish(status_channel, output)
+    try:
+        _run = open(_run_fn)
+        _log = open(_stderr_fn, 'w')
+        _log.write(
+            f'[run_watershed] runs_dir={runs_dir_abs} run_file={_run_fn} '
+            f'err_file={_stderr_fn} cmd="{cmd_text}" attempt=1/1\n'
+        )
+        _write_binary_identity_trace(_log, "run_watershed", cmd[0])
 
-    _run.close()
-    _log.close()
+        # for python3.7+ universal_newlines=True -> text=True
+        p = subprocess.Popen(cmd, stdin=_run, stdout=subprocess.PIPE, stderr=subprocess.STDOUT,
+                             cwd=runs_dir, universal_newlines=True)
+        watchdog = _start_dstate_watchdog(
+            "run_watershed",
+            p,
+            _log,
+            runs_dir=runs_dir_abs,
+            run_file=_run_fn,
+            err_file=_stderr_fn,
+            cmd_text=cmd_text,
+        )
+
+        # Streaming the output to _log and, if provided, to the status channel
+        while True:
+            output = p.stdout.readline()
+            if output == '' and p.poll() is not None:
+                break
+
+            output = output.strip()
+
+            if output != '':
+                if 'WEPP COMPLETED WATERSHED SIMULATION SUCCESSFULLY' in output:
+                    success = True
+                _log.write(output + '\n')
+                _log.flush()
+                if status_channel:
+                    StatusMessenger.publish(status_channel, output)
+
+        p.wait()
+    finally:
+        active_exc = sys.exc_info()[1]
+        watchdog.stop()
+        close_error = None
+        close_traceback = None
+        try:
+            _close_stream_with_diagnostics(
+                _run,
+                "run_watershed",
+                stream_name="run_file",
+                path=_run_fn,
+                log=_log,
+            )
+        except OSError as exc:
+            close_error = exc
+            close_traceback = exc.__traceback__
+        try:
+            _close_stream_with_diagnostics(
+                _log,
+                "run_watershed",
+                stream_name="err_file",
+                path=_stderr_fn,
+                log=_log,
+            )
+        except OSError as exc:
+            if close_error is None:
+                close_error = exc
+                close_traceback = exc.__traceback__
+        if close_error is not None and active_exc is None:
+            raise close_error.with_traceback(close_traceback)
 
     if success:
         return True, time() - t0
 
     # need to identify if _pup project to set the correct browse link
-    runs_dir = os.path.abspath(runs_dir)
-    _runs_dir = runs_dir.split(os.sep)
+    _runs_dir = runs_dir_abs.split(os.sep)
     try:
         rel_path = _runs_dir[_runs_dir.index('_pups'):]
         href = 'browse/' + '/'.join(rel_path) + '/pw0.err'
-    except:
+    except ValueError:
         href = 'browse/wepp/runs/pw0.err'
     raise Exception(f'Error running wepp for watershed \nSee <a href="{href}">{_stderr_fn}</a>')
 
