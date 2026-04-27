@@ -79,6 +79,25 @@ Feedback mechanisms:
 
 Work packages that are scoped but not yet started. Dependencies and prerequisites should be noted.
 
+### RQ WEPP Subwta Precondition Contract Enforcement
+**Proposed**: 2026-04-27
+**Size**: Small-Medium (1-2 focused sessions)
+**Priority**: High
+**Link**: [docs/work-packages/20260427_rq_subwta_precondition_contract/](docs/work-packages/20260427_rq_subwta_precondition_contract/)
+**Description**: Close deferred RQ findings by enforcing a strict pre-enqueue abstraction contract: `watershed.subwta` is always required for `run-wepp` and `run-wepp-watershed` because missing `subwta.tif` invalidates hillslope/watershed integrity.
+
+**Scope**:
+- Enforce strict `subwta` gate ordering in `wepp_routes.py` for both run endpoints.
+- Ensure `checkbox_wepp_watershed` and batch/base contexts cannot bypass abstraction checks.
+- Align `docs/schemas/rq-response-contract.md` and `schema_defaults_routes.py` metadata with runtime behavior.
+- Add targeted regression coverage in microservice route/schema tests.
+
+**Dependencies**: None external; executes against current RQ route + schema defaults implementation.
+
+**Next Steps**: Implement route/doc/test contract updates and run targeted microservice + doc-lint gates.
+
+---
+
 ### Deprecate and Remove TauDEM Backend
 **Proposed**: 2025-10-27  
 **Size**: Medium (3-5 days)  
