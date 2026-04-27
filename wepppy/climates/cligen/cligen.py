@@ -21,7 +21,7 @@ from os.path import join as _join
 from os.path import exists as _exists
 from os.path import split as _split
 
-import os, shlex, signal, time
+import os, random, shlex, signal, time
 import subprocess
 from subprocess import Popen, PIPE, TimeoutExpired
 
@@ -2145,6 +2145,8 @@ class Cligen:
         cli_fn: str = 'wepp.cli',
         verbose: bool = False,
         adjust_mx_pt5: bool = False,
+        timeout: int = 20,
+        timeout_retries: int = 3,
     ) -> None:
         """Replay observed `.prn` data to produce a `.cli`.
 
@@ -2155,6 +2157,8 @@ class Cligen:
             adjust_mx_pt5: When True, scale `MX .5 P` using observed monthly
                 precipitation ratios derived from the `.prn` file and write an
                 adjusted `.par` copy for CLIGEN.
+            timeout: Seconds to wait for each CLIGEN attempt.
+            timeout_retries: Number of timeout-only retries before failing.
         """
 
         if verbose:
@@ -2254,26 +2258,98 @@ class Cligen:
         if verbose:
             print(cmd)
 
+        if timeout <= 0:
+            raise ValueError(f"timeout must be > 0 (received {timeout})")
+        if timeout_retries < 0:
+            raise ValueError(f"timeout_retries must be >= 0 (received {timeout_retries})")
+
         # run cligen
         cli_path = _join(cli_dir, cli_fn)
         _log = open(_join(cli_dir, "cligen_{}.log".format(_split(cli_fn)[-1][:-4])), "w")
-        p = subprocess.Popen(cmd, stdin=subprocess.PIPE, stdout=_log, stderr=_log, cwd=cli_dir)
+        total_attempts = timeout_retries + 1
+        timeout_attempts = []
+        backoff_base_seconds = 0.5
+        backoff_cap_seconds = 5.0
+
         try:
-            p.wait(timeout=5)
-        except TimeoutExpired as exc:
-            _log.write("cligen run_observed timed out; attempting to terminate/kill.\n")
-            p.terminate()
-            try:
-                p.wait(timeout=2)
-            except TimeoutExpired:
-                _log.write("cligen run_observed terminate timed out; killing.\n")
-                p.kill()
+            _log.write(
+                f"cligen run_observed timeout={timeout}s timeout_retries={timeout_retries}\n"
+            )
+            for attempt in range(1, total_attempts + 1):
+                if _exists(cli_path):
+                    os.remove(cli_path)
+
+                _log.write(f"cligen run_observed attempt {attempt}/{total_attempts} start\n")
+                _log.flush()
+
+                p = subprocess.Popen(cmd, stdin=subprocess.PIPE, stdout=_log, stderr=_log, cwd=cli_dir)
                 try:
-                    p.wait(timeout=2)
-                except TimeoutExpired:
-                    _log.write("cligen run_observed kill timed out; process may linger.\n")
-            if not (_exists(cli_path) and os.path.getsize(cli_path) > 0):
-                raise AssertionError(f'Failed to create {cli_fn}') from exc
+                    p.wait(timeout=timeout)
+                except TimeoutExpired as exc:
+                    process_lingered = False
+                    timeout_attempts.append(attempt)
+                    _log.write(
+                        f"cligen run_observed timeout attempt={attempt}/{total_attempts} "
+                        f"timeout={timeout}s; attempting to terminate/kill.\n"
+                    )
+                    p.terminate()
+                    try:
+                        p.wait(timeout=2)
+                    except TimeoutExpired:
+                        _log.write("cligen run_observed terminate timed out; killing.\n")
+                        p.kill()
+                        try:
+                            p.wait(timeout=2)
+                        except TimeoutExpired:
+                            _log.write("cligen run_observed kill timed out; process may linger.\n")
+                            process_lingered = True
+
+                    if _exists(cli_path):
+                        os.remove(cli_path)
+
+                    if process_lingered or attempt == total_attempts:
+                        timeout_summary = ",".join(str(item) for item in timeout_attempts)
+                        raise TimeoutError(
+                            f"cligen run_observed timed out; cli_fn={cli_fn}; "
+                            f"prn_fn={prn_fn}; timeout={timeout}s; attempts={total_attempts}; "
+                            f"timeout_attempts=[{timeout_summary}]"
+                        ) from exc
+
+                    backoff_seconds = min(
+                        backoff_cap_seconds,
+                        backoff_base_seconds * (2 ** (attempt - 1)),
+                    )
+                    jitter_seconds = random.uniform(0.0, backoff_base_seconds)
+                    delay_seconds = backoff_seconds + jitter_seconds
+                    _log.write(
+                        f"cligen run_observed retrying after timeout "
+                        f"(next_attempt={attempt + 1}/{total_attempts}) "
+                        f"backoff={delay_seconds:.2f}s "
+                        f"(base={backoff_seconds:.2f}s jitter={jitter_seconds:.2f}s)\n"
+                    )
+                    _log.flush()
+                    time.sleep(delay_seconds)
+                    continue
+
+                if p.returncode != 0:
+                    if _exists(cli_path):
+                        os.remove(cli_path)
+                    raise RuntimeError(
+                        f"cligen run_observed exited {p.returncode}; "
+                        f"cli_fn={cli_fn}; prn_fn={prn_fn}"
+                    )
+
+                if not (_exists(cli_path) and os.path.getsize(cli_path) > 0):
+                    raise AssertionError(f'Failed to create {cli_fn}')
+
+                if timeout_attempts:
+                    _log.write(
+                        f"cligen run_observed flake_detected "
+                        f"timeout_attempts={len(timeout_attempts)} "
+                        f"success_attempt={attempt}/{total_attempts}\n"
+                    )
+                    _log.flush()
+                break
         finally:
             _log.close()
 
