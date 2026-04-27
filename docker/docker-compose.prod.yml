@@ -160,6 +160,7 @@ services:
       REDIS_URL: ${BROWSE_REDIS_URL:-redis://redis:6379/0}
       WEPP_AUTH_JWT_SECRETS_FILE: /run/secrets/wepp_auth_jwt_secrets
       DTALE_INTERNAL_TOKEN_FILE: /run/secrets/dtale_internal_token
+      BROWSE_PARQUET_FILTERS_ENABLED: "1"
     command:
       - gunicorn
       - --workers
@@ -192,6 +193,7 @@ services:
       <<: *wepppy-env
       DTALE_BASE_URL: http://dtale:9010
       DTALE_INTERNAL_TOKEN_FILE: /run/secrets/dtale_internal_token
+      BROWSE_PARQUET_FILTERS_ENABLED: "1"
     command:
       - gunicorn
       - --workers
