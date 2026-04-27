@@ -79,30 +79,6 @@ Feedback mechanisms:
 
 Work packages that are scoped but not yet started. Dependencies and prerequisites should be noted.
 
-### Peridot vs WEPPpy Python Abstraction Benchmark
-**Proposed**: 2026-04-26
-**Size**: Medium-high (2-4 focused sessions)
-**Priority**: High
-**Description**: Establish an evidence-backed benchmark attempt comparing Peridot watershed abstraction against the legacy WEPPpy Python-based abstraction path, which has not been used recently and must be rediscovered before timing claims are valid.
-
-**Scope**:
-- Rediscover and smoke-test the WEPPpy Python abstraction comparator path.
-- Select safe in-repo or copied fixtures without mutating canonical run directories.
-- Compare Peridot and Python outputs for required files, schemas, row counts, topaz/wepp IDs, and slope-file presence before measuring runtime.
-- Record wall-clock/runtime context and classify claims as `confirmed`, `inference`, or `hypothesis`.
-
-**Strategic Value**:
-- Produces disciplined evidence for future Peridot benchmark claims.
-- De-risks stale Python comparator assumptions before using it as a baseline.
-- Creates a reusable benchmark/parity workflow for future abstraction work.
-
-**Dependencies**:
-- Peridot runtime contract hardening closed and Peridot full `cargo test` passes after commit `e09f54c`.
-
-**Next Steps**: Execute active ExecPlan at `docs/work-packages/20260426_peridot_python_abstraction_benchmark/prompts/active/peridot_python_abstraction_benchmark_execplan.md`.
-
----
-
 ### Deprecate and Remove TauDEM Backend
 **Proposed**: 2025-10-27  
 **Size**: Medium (3-5 days)  
@@ -295,6 +271,15 @@ Currently active work packages. Limit to 2-4 packages to maintain focus.
 ## ✅ Done
 
 Recently completed work packages. Archived immediately upon completion.
+
+### Peridot vs WEPPpy Python Abstraction Benchmark (2026-04-27)
+**Status**: ✅ **COMPLETE**
+
+**Link**: [docs/work-packages/20260426_peridot_python_abstraction_benchmark/](docs/work-packages/20260426_peridot_python_abstraction_benchmark/)
+
+**Lifecycle**: Backlog -> In Progress -> Done (2026-04-27)
+
+**Summary**: Closed as a valid comparator-failure benchmark attempt, then updated with a post-close rough benchmark addendum. The package rediscovered the legacy Python comparator as `WatershedAbstraction(topaz_wd, wat_dir)` and the NoDb wrapper path `_topaz_abstract_watershed()`, selected the in-repo `wepppy/_tests/feverish-lamp` TOPAZ fixture, and copied inputs into isolated scratch directories. Initial Python execution failed with a NumPy casting error in `wepppy/topo/watershed_abstraction/support.py::cummnorm_distance()`. The post-close remediation fixed that failure plus legacy channel GeoJSON serialization, then collected rough smoke numbers with exact parity explicitly out of scope: Python mean `2.368s`, Peridot mean `0.162s`, about `14.6x` faster for Peridot on this tiny fixture and command path. The ExecPlan is archived under `prompts/completed/`. Follow-up work remains scoped to fixture curation, parity cleanup, and binary provenance before publication-grade benchmark claims.
 
 ### Peridot Runtime Contract Hardening (2026-04-26)
 **Status**: ✅ **COMPLETE**

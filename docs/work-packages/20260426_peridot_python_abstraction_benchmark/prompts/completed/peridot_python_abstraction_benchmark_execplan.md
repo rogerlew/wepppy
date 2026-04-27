@@ -12,13 +12,15 @@ A maintainer can see the work succeed by running the recorded benchmark command 
 
 ## Progress
 
-- [x] (2026-04-27 01:26 UTC) Package scaffold created with package brief, tracker, active ExecPlan, benchmark scope artifact, and package validation artifact.
-- [ ] Rediscover the exact WEPPpy Python abstraction entrypoint and invocation settings.
-- [ ] Select safe benchmark fixture inputs and document provenance.
-- [ ] Build or document an isolated benchmark harness for Python and Peridot runs.
-- [ ] Run smoke and parity checks before timing comparisons.
-- [ ] Collect timing/resource measurements and classify claims.
-- [ ] Update package artifacts, tracker, and root `PROJECT_TRACKER.md` with outcomes.
+- [x] (2026-04-27 01:26 UTC) Package scaffold created with package brief, tracker, ExecPlan, benchmark scope artifact, and package validation artifact.
+- [x] (2026-04-27 01:35 UTC) Package lifecycle moved from Backlog to In Progress in `package.md`, `tracker.md`, and `PROJECT_TRACKER.md`.
+- [x] (2026-04-27 01:39 UTC) Rediscovered the exact WEPPpy Python abstraction entrypoint and invocation settings.
+- [x] (2026-04-27 01:39 UTC) Selected safe benchmark fixture inputs and documented provenance.
+- [x] (2026-04-27 01:39 UTC) Documented isolated command transcripts for Python and Peridot runs.
+- [x] (2026-04-27 01:39 UTC) Ran smoke and parity checks before timing comparisons.
+- [x] (2026-04-27 01:39 UTC) Closed timing collection as invalid because Python failed before parity; smoke resource measurements were recorded only as health evidence.
+- [x] (2026-04-27 01:39 UTC) Updated package artifacts, tracker, and root `PROJECT_TRACKER.md` with outcomes.
+- [x] (2026-04-27 02:21 UTC) Remediated the two stale Python comparator blockers needed for rough timing and recorded 5-rep smoke benchmark results with exact parity out of scope.
 
 ## Surprises & Discoveries
 
@@ -27,6 +29,18 @@ A maintainer can see the work succeed by running the recorded benchmark command 
 
 - Observation: Peridot full-suite regressions are closed before benchmark package execution starts.
   Evidence: `/home/workdir/peridot` commit `e09f54c` is present locally and `cargo test` passes across library, CLI-wrapper, integration, and doctest suites.
+
+- Observation: The lower-level Python comparator fails on the copied in-repo TOPAZ fixture before complete output generation.
+  Evidence: `/usr/bin/time -v .venv/bin/python -` against `/tmp/peridot-python-benchmark-20260427-0138/python-smoke-fail` exited `1` with `numpy.core._exceptions._UFuncOutputCastingError` in `wepppy/topo/watershed_abstraction/support.py::cummnorm_distance()`.
+
+- Observation: Peridot completes the same copied fixture and writes current watershed outputs.
+  Evidence: `./wepppy/topo/peridot/bin/abstract_watershed /tmp/peridot-python-benchmark-20260427-0138/peridot-smoke-log --ncpu 4` exited `0` and produced `hillslopes.parquet`, `channels.parquet`, `flowpaths.parquet`, `network.txt`, and slope bundles.
+
+- Observation: After narrow Python comparator remediation, both command paths complete the copied smoke fixture.
+  Evidence: `artifacts/2026-04-27_rough_benchmark_after_cummnorm_remediation.md` records 5 Python repetitions and 5 Peridot repetitions, all exit `0`, on fresh copied fixtures.
+
+- Observation: The smoke timing gap is large on the selected fixture.
+  Evidence: The rough benchmark artifact records Python mean wall time `2.368s` and Peridot mean wall time `0.162s`, about `14.6x` faster for Peridot on this command path.
 
 ## Decision Log
 
@@ -42,9 +56,21 @@ A maintainer can see the work succeed by running the recorded benchmark command 
   Rationale: The abstraction paths write files into working directories. Running them in live run roots would risk mutating historical or operator-owned data.
   Date/Author: 2026-04-27 / Codex.
 
+- Decision: Use the lower-level `WatershedAbstraction(topaz_wd, wat_dir)` comparator for smoke discovery.
+  Rationale: This exercises the stale Python abstraction implementation directly without relying on deprecated NoDb state mutation, and the package allowed either NoDb-level or lower-level invocation discovery.
+  Date/Author: 2026-04-27 / Codex.
+
+- Decision: Close the benchmark package without timing claims after the Python comparator failure.
+  Rationale: Output parity is a gate before timing claims. The Python comparator produced only partial slope output, so Peridot smoke timing cannot be compared to Python as a benchmark result.
+  Date/Author: 2026-04-27 / Codex.
+
+- Decision: Add a post-close rough benchmark after the user relaxed exact parity requirements.
+  Rationale: The benchmark target is unused Python code versus the Rust hot path. For this purpose, rough completion timing on the same copied fixture is useful even though the output formats are not exact parity.
+  Date/Author: 2026-04-27 / Codex.
+
 ## Outcomes & Retrospective
 
-Not started. This section must be updated after each benchmark milestone. If the Python comparator cannot run, record that as an outcome with the exact failure signature and a follow-up remediation package recommendation.
+Closed on 2026-04-27. The package rediscovered the Python comparator path, selected an in-repo TOPAZ fixture, copied inputs into isolated scratch directories, and ran both smoke commands. The initial Python comparator failed with a NumPy casting error in `support.py::cummnorm_distance()`, while Peridot completed and produced current watershed table and slope outputs. A post-close addendum remediated that Python failure plus a channel GeoJSON serialization blocker, then collected rough 5-rep timing on fresh copied fixtures. The rough result was Python mean `2.368s` versus Peridot mean `0.162s`, about `14.6x` faster for Peridot on this tiny fixture and command path. Exact parity remains out of scope for this package.
 
 ## Context and Orientation
 
@@ -133,7 +159,8 @@ Required artifacts during execution:
 - `artifacts/<date>_python_comparator_discovery.md`
 - `artifacts/<date>_fixture_selection.md`
 - `artifacts/<date>_output_parity.md`
-- `artifacts/<date>_benchmark_results.md`
+- `artifacts/<date>_benchmark_results.md` only if timing is valid; this package did not create one during initial closure because parity failed.
+- `artifacts/2026-04-27_rough_benchmark_after_cummnorm_remediation.md` records the post-close rough timing addendum.
 - `artifacts/<date>_validation_summary.md`
 
 The initial scope and hypotheses are recorded in `artifacts/2026-04-27_benchmark_scope_and_hypotheses.md`.
@@ -158,3 +185,7 @@ Benchmark artifacts must preserve claim discipline. Use `confirmed` only for mea
 ## Revision Notes
 
 - 2026-04-27 / Codex: Initial ExecPlan authored for benchmarking Peridot against the stale WEPPpy Python abstraction comparator.
+- 2026-04-27 / Codex: Began execution and recorded lifecycle transition before comparator rediscovery.
+- 2026-04-27 / Codex: Closed execution with comparator-failure evidence, smoke artifacts, and no timing claim because parity was not adequate.
+- 2026-04-27 / Codex: Archived the completed ExecPlan under `prompts/completed/` per package closure policy.
+- 2026-04-27 / Codex: Added post-close remediation and rough timing outcome after the user clarified that exact parity is unnecessary for this comparison.

@@ -79,7 +79,7 @@ def cummnorm_distance(distance: List[float]) -> np.array:
             raise ValueError("Expecting distance[0] to equal 0.0")
         return np.array([0.0, 1.0])
 
-    distance_p = np.cumsum(distance)
+    distance_p = np.cumsum(np.asarray(distance, dtype=np.float64), dtype=np.float64)
     distance_p -= distance_p[0]
     distance_p /= distance_p[-1]
     return distance_p

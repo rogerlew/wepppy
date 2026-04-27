@@ -56,7 +56,11 @@ def transform_px_to_wgs(args):
     transformer = GeoTransformer(src_proj4=utm_proj, dst_proj4=wgs84_proj4)
     e = transform[0] + transform[1] * indx
     n = transform[3] + transform[5] * indy
-    coordinates = transformer.transform(e, n)
+    lngs, lats = transformer.transform(e, n)
+    coordinates = [
+        [float(lng), float(lat)]
+        for lng, lat in zip(np.asarray(lngs).ravel(), np.asarray(lats).ravel())
+    ]
     return properties, coordinates
 
 

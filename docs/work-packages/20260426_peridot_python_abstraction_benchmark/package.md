@@ -1,6 +1,6 @@
 # Peridot vs WEPPpy Python Abstraction Benchmark
 
-**Status**: Backlog
+**Status**: Closed 2026-04-27
 **Timezone**: UTC
 
 ## Overview
@@ -23,7 +23,7 @@ The goal is not to prove a predetermined speedup. The goal is to produce a repro
 
 ### Included
 
-- WEPPpy benchmark package documentation, tracker, active ExecPlan, and artifacts.
+- WEPPpy benchmark package documentation, tracker, completed ExecPlan, and artifacts.
 - Discovery of the legacy Python abstraction entrypoints, currently expected around:
   - `/workdir/wepppy/wepppy/topo/watershed_abstraction/watershed_abstraction.py`
   - `/workdir/wepppy/wepppy/nodb/core/watershed.py::_topaz_abstract_watershed`
@@ -55,14 +55,14 @@ The goal is not to prove a predetermined speedup. The goal is to produce a repro
 
 ## Success Criteria
 
-- [ ] The package identifies the exact legacy Python abstraction invocation path and records whether it currently runs.
-- [ ] If the Python path fails, the failure is captured with command, fixture, traceback, and a scoped remediation recommendation.
-- [ ] At least one small smoke fixture runs through both Peridot and Python abstraction paths, or the package records why no safe fixture was available.
-- [ ] Benchmark inputs are copied into isolated temporary or artifact directories; source run directories are not mutated.
-- [ ] Output parity checks compare required file presence, table schemas, key row counts, topaz/wepp IDs, and slope-file presence.
-- [ ] Runtime measurements include enough environment context to be reproducible: command, repo commit, CPU count, thread settings, and input size summary.
-- [ ] Benchmark artifacts classify each claim as `confirmed`, `inference`, or `hypothesis`.
-- [ ] WEPPpy package docs pass `wctl doc-lint`.
+- [x] The package identifies the exact legacy Python abstraction invocation path and records whether it currently runs.
+- [x] If the Python path fails, the failure is captured with command, fixture, traceback, and a scoped remediation recommendation.
+- [x] At least one small smoke fixture runs through both Peridot and Python abstraction paths, or the package records why no safe fixture was available.
+- [x] Benchmark inputs are copied into isolated temporary or artifact directories; source run directories are not mutated.
+- [x] Output parity checks compare required file presence, table schemas, key row counts, topaz/wepp IDs, and slope-file presence.
+- [x] Runtime/resource measurements include enough environment context to be reproducible; rough post-remediation timing was collected with exact parity explicitly out of scope.
+- [x] Benchmark artifacts classify each claim as `confirmed`, `inference`, or `hypothesis`.
+- [x] WEPPpy package docs pass `wctl doc-lint`.
 
 ## Benchmark Framing
 
@@ -122,15 +122,22 @@ No package output should claim universal Peridot speedups. Acceptable wording is
 
 ## Deliverables
 
-- Benchmark discovery artifact identifying the Python comparator path and health status.
-- Reproducible benchmark harness or command transcript.
-- Output parity artifact for each workload.
-- Runtime/resource summary artifact with claim labels.
-- Updated package tracker and ExecPlan progress notes.
-- Follow-up package recommendations if the Python comparator fails or needs remediation before meaningful benchmarking.
+- Benchmark discovery artifact identifying the Python comparator path and health status: `artifacts/2026-04-27_python_comparator_discovery.md`.
+- Reproducible command transcript and fixture provenance: `artifacts/2026-04-27_fixture_selection.md`.
+- Output parity artifact for the smoke workload: `artifacts/2026-04-27_output_parity.md`.
+- Runtime/resource smoke summary and validation record with claim labels: `artifacts/2026-04-27_validation_summary.md`.
+- Rough post-remediation timing artifact: `artifacts/2026-04-27_rough_benchmark_after_cummnorm_remediation.md`.
+- Updated package tracker, archived ExecPlan, and root `PROJECT_TRACKER.md` lifecycle state.
+- Follow-up recommendations for fixture curation, binary provenance, and optional legacy Python cleanup.
+
+## Closure Notes
+
+Closed on 2026-04-27 with a valid comparator-failure outcome. The lower-level Python comparator path `WatershedAbstraction(topaz_wd, wat_dir)` failed on an isolated copy of the in-repo `wepppy/_tests/feverish-lamp` TOPAZ fixture with a NumPy casting error in `support.py::cummnorm_distance()`. Peridot completed on the same copied fixture, but output parity was blocked because the Python comparator produced only partial slope files and no complete table/network outputs. No valid Peridot-vs-Python timing claims were produced.
+
+Post-close addendum: after the user clarified that exact parity is not required for this comparison, `cummnorm_distance()` and legacy channel GeoJSON serialization were remediated. The rough smoke benchmark artifact `artifacts/2026-04-27_rough_benchmark_after_cummnorm_remediation.md` records 5 successful repetitions for each comparator on copied fixtures. The observed mean wall times were Python `2.368s` and Peridot `0.162s`, with the result explicitly scoped to rough smoke evidence rather than publication-grade parity.
 
 ## Follow-up Work
 
-- If the Python abstraction fails due to code drift, prepare a remediation package scoped to comparator revival before publishing benchmark claims.
-- If representative in-repo fixtures are insufficient, prepare a fixture-curation package to add small, license-safe TOPAZ/WBT abstraction fixtures to the repository.
-- If Peridot benchmark results depend on release binary provenance, prepare a deployment/provenance package for binary rebuild and version stamping.
+- Prepare a fixture-curation package to add small, license-safe TOPAZ abstraction fixtures with expected Python and Peridot output contracts.
+- Prepare a binary provenance package if future benchmark claims need publication-grade Peridot release binary version stamping.
+- If the legacy Python comparator will remain supported beyond rough benchmarking, prepare a focused cleanup package for broader output contract alignment and additional stale-path regression coverage.
