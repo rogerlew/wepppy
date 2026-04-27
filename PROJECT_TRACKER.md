@@ -79,25 +79,6 @@ Feedback mechanisms:
 
 Work packages that are scoped but not yet started. Dependencies and prerequisites should be noted.
 
-### RQ WEPP Subwta Precondition Contract Enforcement
-**Proposed**: 2026-04-27
-**Size**: Small-Medium (1-2 focused sessions)
-**Priority**: High
-**Link**: [docs/work-packages/20260427_rq_subwta_precondition_contract/](docs/work-packages/20260427_rq_subwta_precondition_contract/)
-**Description**: Close deferred RQ findings by enforcing a strict pre-enqueue abstraction contract: `watershed.subwta` is always required for `run-wepp` and `run-wepp-watershed` because missing `subwta.tif` invalidates hillslope/watershed integrity.
-
-**Scope**:
-- Enforce strict `subwta` gate ordering in `wepp_routes.py` for both run endpoints.
-- Ensure `checkbox_wepp_watershed` and batch/base contexts cannot bypass abstraction checks.
-- Align `docs/schemas/rq-response-contract.md` and `schema_defaults_routes.py` metadata with runtime behavior.
-- Add targeted regression coverage in microservice route/schema tests.
-
-**Dependencies**: None external; executes against current RQ route + schema defaults implementation.
-
-**Next Steps**: Implement route/doc/test contract updates and run targeted microservice + doc-lint gates.
-
----
-
 ### Deprecate and Remove TauDEM Backend
 **Proposed**: 2025-10-27  
 **Size**: Medium (3-5 days)  
@@ -290,6 +271,15 @@ Currently active work packages. Limit to 2-4 packages to maintain focus.
 ## ✅ Done
 
 Recently completed work packages. Archived immediately upon completion.
+
+### RQ WEPP Subwta Precondition Contract Enforcement (2026-04-27)
+**Status**: ✅ **COMPLETE**
+
+**Link**: [docs/work-packages/20260427_rq_subwta_precondition_contract/](docs/work-packages/20260427_rq_subwta_precondition_contract/)
+
+**Lifecycle**: Backlog -> In Progress -> Done (2026-04-27)
+
+**Summary**: Closed strict RQ `subwta` precondition enforcement for `run-wepp` and `run-wepp-watershed`. Missing `watershed.subwta` now returns canonical HTTP `409` with `error.code="invalid_watershed_abstraction_state"` before payload mutation, batch/base acknowledgement, or enqueue. Regression coverage locks normal, batch, `_base`, and `checkbox_wepp_watershed=false` behavior for both run endpoints, while `prep-wepp-watershed` keeps its existing missing-`subwta` prep path. Canonical response docs and schema-default error metadata now include the strict contract and recovery notes; required reviewer/QA findings were dispositioned before closure. The ExecPlan is archived under `prompts/completed/`.
 
 ### WEPP Runner Traceability Hardening (Hillslope + Watershed) (2026-04-27)
 **Status**: ✅ **COMPLETE**

@@ -42,6 +42,8 @@ router = APIRouter()
 RQ_TIMEOUT = int(os.getenv("RQ_ENGINE_RQ_TIMEOUT", "216000"))
 RQ_ENQUEUE_SCOPES = ["rq:enqueue"]
 NODB_LOCK_CONFLICT_CLIENT_MESSAGE = "Run inputs are currently locked; retry shortly."
+WATERSHED_ABSTRACTION_INVALID_MESSAGE = "Watershed Abstraction is not in Valid state"
+WATERSHED_ABSTRACTION_INVALID_CODE = "invalid_watershed_abstraction_state"
 
 
 def _persist_wepp_job_hint(wepp: Wepp, *, job_id: str, job_key: str) -> None:
@@ -75,6 +77,18 @@ def _nodb_lock_conflict_response(*, route_label: str) -> JSONResponse:
     )
 
 
+def _watershed_abstraction_state_response(wd: str, *, route_label: str) -> JSONResponse | None:
+    watershed = Watershed.getInstance(wd)
+    if bool(getattr(watershed, "has_subcatchments", False)):
+        return None
+    logger.warning("rq-engine %s rejected because watershed.subwta is missing", route_label)
+    return error_response(
+        WATERSHED_ABSTRACTION_INVALID_MESSAGE,
+        status_code=409,
+        code=WATERSHED_ABSTRACTION_INVALID_CODE,
+    )
+
+
 async def _handle_run_wepp_request(
     runid: str,
     config: str,
@@ -82,11 +96,23 @@ async def _handle_run_wepp_request(
     *,
     job_fn,
     job_key: str,
+    require_watershed_abstraction: bool = False,
 ) -> JSONResponse:
     try:
         wd = get_wd(runid)
     except ValueError as exc:
         return error_response(str(exc), status_code=400)
+
+    if require_watershed_abstraction:
+        try:
+            invalid_abstraction_response = _watershed_abstraction_state_response(
+                wd, route_label=job_key
+            )
+        except RuntimeError:
+            logger.exception("rq-engine %s watershed abstraction state check failed", job_key)
+            return error_response_with_traceback("Error preparing WEPP run request")
+        if invalid_abstraction_response is not None:
+            return invalid_abstraction_response
 
     payload = await parse_request_payload(request, boolean_fields=WEPP_BOOLEAN_FIELDS)
     try:
@@ -171,7 +197,8 @@ async def _handle_run_wepp_request(
         extra={
             400: "WEPP payload validation failed. Returns the canonical error payload.",
             409: (
-                "WEPP lock contention (single-flight submit lock or payload-input lock). "
+                "WEPP lock contention, payload-input lock contention, or invalid watershed "
+                "abstraction state. "
                 "Returns the canonical error payload."
             ),
         },
@@ -193,6 +220,7 @@ async def run_wepp(runid: str, config: str, request: Request) -> JSONResponse:
         request,
         job_fn=run_wepp_rq,
         job_key="run_wepp_rq",
+        require_watershed_abstraction=True,
     )
 
 
@@ -214,7 +242,8 @@ async def run_wepp(runid: str, config: str, request: Request) -> JSONResponse:
         extra={
             400: "WEPP payload validation failed. Returns the canonical error payload.",
             409: (
-                "WEPP lock contention (single-flight submit lock or payload-input lock). "
+                "WEPP lock contention, payload-input lock contention, or invalid watershed "
+                "abstraction state. "
                 "Returns the canonical error payload."
             ),
         },
@@ -236,6 +265,7 @@ async def run_wepp_watershed(runid: str, config: str, request: Request) -> JSONR
         request,
         job_fn=run_wepp_watershed_rq,
         job_key="run_wepp_watershed_rq",
+        require_watershed_abstraction=True,
     )
 
 

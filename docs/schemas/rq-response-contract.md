@@ -104,6 +104,17 @@ Landuse first-class route notes (2026-04-24):
 - Use status-code-first semantics:
   - 4xx for validation/input errors.
   - 5xx for server errors.
+- `run-wepp` and `run-wepp-watershed` MUST fast-fail before enqueue when
+  `watershed.subwta` is missing. This precondition applies in normal mode,
+  batch mode, `_base` context, and payloads with
+  `checkbox_wepp_watershed=false`; there is no bypass because missing
+  `subwta.tif` invalidates hillslope/watershed integrity. The response is HTTP
+  `409` with `error.code="invalid_watershed_abstraction_state"` and
+  `error.message="Watershed Abstraction is not in Valid state"`; clients should
+  route normal-mode recovery to `build-subcatchments-and-abstract-watershed`.
+  That recovery action inherits its existing batch/`_base` no-queue behavior, so
+  batch/`_base` callers must materialize `watershed.subwta` through their normal
+  setup flow before retrying `run-wepp` endpoints.
 - Canonical error payload:
 ```json
 {

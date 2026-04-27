@@ -60,6 +60,7 @@ def _stub_wepp_stack(
     parse_error: bool = False,
     run_group: str = "",
     persist_job_hint_exception: Exception | None = None,
+    watershed_has_subcatchments: bool = True,
     capture: dict[str, object] | None = None,
 ) -> None:
     class DummyRon:
@@ -110,7 +111,7 @@ def _stub_wepp_stack(
             yield self
 
     dummy_soils = GroupedSoilsDummy()
-    dummy_watershed = GroupedWatershedDummy()
+    dummy_watershed = GroupedWatershedDummy(has_subcatchments=watershed_has_subcatchments)
     dummy_wepp = DummyWepp()
     dummy_wepp.run_group = run_group
 
@@ -123,6 +124,15 @@ def _stub_wepp_stack(
     monkeypatch.setattr(wepp_routes.Watershed, "getInstance", lambda wd: dummy_watershed)
     monkeypatch.setattr(wepp_routes.Wepp, "getInstance", lambda wd: dummy_wepp)
     monkeypatch.setattr(wepp_routes.Ron, "getInstance", lambda wd: DummyRon())
+
+
+def _assert_invalid_watershed_abstraction_response(response) -> None:
+    assert response.status_code == 409
+    payload = response.json()
+    assert payload["error"]["message"] == wepp_routes.WATERSHED_ABSTRACTION_INVALID_MESSAGE
+    assert payload["error"]["details"] == wepp_routes.WATERSHED_ABSTRACTION_INVALID_MESSAGE
+    assert payload["error"]["code"] == wepp_routes.WATERSHED_ABSTRACTION_INVALID_CODE
+    assert "job_id" not in payload
 
 
 def test_run_wepp_enqueues_job(monkeypatch: pytest.MonkeyPatch) -> None:
@@ -140,6 +150,165 @@ def test_run_wepp_enqueues_job(monkeypatch: pytest.MonkeyPatch) -> None:
 
     assert response.status_code == 200
     assert response.json()["job_id"] == "job-77"
+
+
+@pytest.mark.parametrize(
+    "endpoint",
+    [
+        "/api/runs/run-1/cfg/run-wepp",
+        "/api/runs/run-1/cfg/run-wepp-watershed",
+    ],
+)
+def test_wepp_run_endpoints_fast_fail_when_watershed_abstraction_invalid(
+    monkeypatch: pytest.MonkeyPatch,
+    endpoint: str,
+) -> None:
+    _stub_auth(monkeypatch)
+    capture: dict[str, object] = {}
+    _stub_wepp_stack(
+        monkeypatch,
+        watershed_has_subcatchments=False,
+        capture=capture,
+    )
+    monkeypatch.setattr(wepp_routes, "get_wd", lambda runid: "/tmp/run")
+
+    class UnexpectedQueue:
+        def __init__(self, *args, **kwargs) -> None:
+            raise AssertionError("Queue should not be used")
+
+    monkeypatch.setattr(wepp_routes, "Queue", UnexpectedQueue)
+
+    with TestClient(rq_engine.app) as client:
+        response = client.post(
+            endpoint,
+            json={"clip_soils": True, "clip_hillslopes": True},
+        )
+
+    _assert_invalid_watershed_abstraction_response(response)
+    assert capture["soils"].grouped_update_calls == []
+    assert capture["watershed"].grouped_update_calls == []
+    assert not hasattr(capture["wepp"], "last_parse_payload")
+
+
+@pytest.mark.parametrize(
+    "endpoint",
+    [
+        "/api/runs/run-1/cfg/run-wepp",
+        "/api/runs/run-1/cfg/run-wepp-watershed",
+    ],
+)
+def test_wepp_run_endpoints_batch_mode_reject_missing_subwta_before_batch_message(
+    monkeypatch: pytest.MonkeyPatch,
+    endpoint: str,
+) -> None:
+    _stub_auth(monkeypatch)
+    _stub_wepp_stack(
+        monkeypatch,
+        run_group="batch",
+        watershed_has_subcatchments=False,
+    )
+    monkeypatch.setattr(wepp_routes, "get_wd", lambda runid: "/tmp/run")
+
+    queue_called = {"called": False}
+
+    class DummyQueue:
+        def __init__(self, *args, **kwargs) -> None:
+            queue_called["called"] = True
+
+        def enqueue_call(self, *args, **kwargs):
+            raise AssertionError("Queue should not be used for invalid watershed state")
+
+    monkeypatch.setattr(wepp_routes, "Queue", DummyQueue)
+
+    with TestClient(rq_engine.app) as client:
+        response = client.post(
+            endpoint,
+            json={"clip_hillslopes": True, "initial_sat": 0.3},
+        )
+
+    _assert_invalid_watershed_abstraction_response(response)
+    assert queue_called["called"] is False
+
+
+@pytest.mark.parametrize(
+    "endpoint",
+    [
+        "/api/runs/run-1/_base/run-wepp",
+        "/api/runs/run-1/_base/run-wepp-watershed",
+        "/api/runs/batch%3B%3Bdemo_batch%3B%3B_base/cfg/run-wepp",
+        "/api/runs/batch%3B%3Bdemo_batch%3B%3B_base/cfg/run-wepp-watershed",
+    ],
+)
+def test_wepp_run_endpoints_base_context_reject_missing_subwta_before_base_message(
+    monkeypatch: pytest.MonkeyPatch,
+    endpoint: str,
+) -> None:
+    _stub_auth(monkeypatch)
+    _stub_wepp_stack(monkeypatch, watershed_has_subcatchments=False)
+    monkeypatch.setattr(wepp_routes, "get_wd", lambda runid: "/tmp/run")
+
+    queue_called = {"called": False}
+
+    class DummyQueue:
+        def __init__(self, *args, **kwargs) -> None:
+            queue_called["called"] = True
+
+        def enqueue_call(self, *args, **kwargs):
+            raise AssertionError("Queue should not be used for invalid watershed state")
+
+    monkeypatch.setattr(wepp_routes, "Queue", DummyQueue)
+
+    with TestClient(rq_engine.app) as client:
+        response = client.post(
+            endpoint,
+            json={"clip_hillslopes": True, "initial_sat": 0.3},
+        )
+
+    _assert_invalid_watershed_abstraction_response(response)
+    assert queue_called["called"] is False
+
+
+@pytest.mark.parametrize(
+    "endpoint",
+    [
+        "/api/runs/run-1/cfg/run-wepp",
+        "/api/runs/run-1/cfg/run-wepp-watershed",
+    ],
+)
+def test_wepp_run_endpoints_reject_missing_subwta_before_applying_watershed_checkbox(
+    monkeypatch: pytest.MonkeyPatch,
+    endpoint: str,
+) -> None:
+    _stub_auth(monkeypatch)
+    capture: dict[str, object] = {}
+    _stub_wepp_stack(
+        monkeypatch,
+        watershed_has_subcatchments=False,
+        capture=capture,
+    )
+    monkeypatch.setattr(wepp_routes, "get_wd", lambda runid: "/tmp/run")
+
+    queue_called = {"called": False}
+
+    class DummyQueue:
+        def __init__(self, *args, **kwargs) -> None:
+            queue_called["called"] = True
+
+        def enqueue_call(self, *args, **kwargs):
+            raise AssertionError("Queue should not be used for invalid watershed state")
+
+    monkeypatch.setattr(wepp_routes, "Queue", DummyQueue)
+
+    with TestClient(rq_engine.app) as client:
+        response = client.post(
+            endpoint,
+            json={"checkbox_wepp_watershed": False},
+        )
+
+    _assert_invalid_watershed_abstraction_response(response)
+    assert capture["wepp"]._run_wepp_watershed is True
+    assert not hasattr(capture["wepp"], "last_parse_payload")
+    assert queue_called["called"] is False
 
 
 @pytest.mark.parametrize(
@@ -822,6 +991,7 @@ def test_wepp_endpoints_map_nodb_lock_conflict_from_payload_apply(
     endpoint: str,
 ) -> None:
     _stub_auth(monkeypatch)
+    _stub_wepp_stack(monkeypatch)
     monkeypatch.setattr(wepp_routes, "get_wd", lambda runid: "/tmp/run")
     monkeypatch.setattr(
         wepp_routes,
@@ -886,6 +1056,25 @@ def test_prep_wepp_watershed_enqueues_job(monkeypatch: pytest.MonkeyPatch) -> No
 
     assert response.status_code == 200
     assert response.json()["job_id"] == "job-99"
+
+
+def test_prep_wepp_watershed_allows_missing_subwta_to_rebuild_inputs(
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    _stub_auth(monkeypatch)
+    _stub_queue(monkeypatch, job_id="job-rebuild-subwta")
+    _stub_prep(monkeypatch)
+    _stub_wepp_stack(monkeypatch, watershed_has_subcatchments=False)
+    monkeypatch.setattr(wepp_routes, "get_wd", lambda runid: "/tmp/run")
+
+    with TestClient(rq_engine.app) as client:
+        response = client.post(
+            "/api/runs/run-1/cfg/prep-wepp-watershed",
+            json={"clip_soils": True, "clip_hillslopes": True, "initial_sat": 0.2},
+        )
+
+    assert response.status_code == 200
+    assert response.json()["job_id"] == "job-rebuild-subwta"
 
 
 @pytest.mark.parametrize(

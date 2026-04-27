@@ -1,6 +1,6 @@
 # RQ WEPP Subwta Precondition Contract Enforcement
 
-**Status**: Open (2026-04-27)
+**Status**: Closed (2026-04-27)
 **Timezone**: UTC
 
 ## Overview
@@ -37,10 +37,10 @@ This package closes deferred RQ contract findings around watershed abstraction p
 
 ## Success Criteria
 
-- [ ] `run-wepp` and `run-wepp-watershed` return canonical `409 invalid_watershed_abstraction_state` whenever `watershed.subwta` is missing.
-- [ ] Batch/base mode and `checkbox_wepp_watershed` do not bypass the abstraction-state check.
-- [ ] Canonical response contract and schema-defaults error metadata match runtime behavior exactly.
-- [ ] Targeted microservice regression tests pass for strict precondition cases.
+- [x] `run-wepp` and `run-wepp-watershed` return canonical `409 invalid_watershed_abstraction_state` whenever `watershed.subwta` is missing.
+- [x] Batch/base mode and `checkbox_wepp_watershed` do not bypass the abstraction-state check.
+- [x] Canonical response contract and schema-defaults error metadata match runtime behavior exactly.
+- [x] Targeted microservice regression tests pass for strict precondition cases.
 
 ## Dependencies
 
@@ -85,3 +85,18 @@ This package closes deferred RQ contract findings around watershed abstraction p
 - Updated route logic enforcing strict `subwta` precondition contract.
 - Updated contract docs and schema-defaults metadata.
 - Regression tests covering strict precondition behavior in all relevant contexts.
+
+## Closure Notes
+
+**Closed**: 2026-04-27 20:43 UTC
+
+**Summary**: Completed strict `watershed.subwta` precondition enforcement for `run-wepp` and `run-wepp-watershed`. Missing `subwta.tif` now returns HTTP `409` with `error.code="invalid_watershed_abstraction_state"` and `error.message="Watershed Abstraction is not in Valid state"` before payload mutation, batch/base acknowledgement, or enqueue. `prep-wepp-watershed` remains able to enqueue with missing `subwta` so existing prep behavior is preserved.
+
+**Validation**:
+- `wctl run-pytest tests/microservices/test_rq_engine_wepp_routes.py tests/microservices/test_rq_engine_schema_defaults_routes.py --maxfail=1` passed with `118 passed`.
+- `wctl doc-lint --path docs/schemas/rq-response-contract.md --path docs/work-packages/20260427_rq_subwta_precondition_contract --path PROJECT_TRACKER.md` passed with `5 files validated, 0 errors, 0 warnings`.
+- `git diff --check` passed.
+
+**Review disposition**: Required `reviewer` and `qa_reviewer` passes were completed. Medium findings were remediated in code/docs; the low stale-tracker finding was resolved in package lifecycle docs.
+
+**Archive Status**: Active ExecPlan archived under `prompts/completed/`.

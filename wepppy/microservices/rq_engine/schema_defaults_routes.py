@@ -1255,6 +1255,32 @@ def _build_operation_error_catalog(
             ]
         )
 
+    if operation_id in {
+        rq_operation_id("run_wepp"),
+        rq_operation_id("run_wepp_watershed"),
+    }:
+        errors.append(
+            {
+                "error_code": "invalid_watershed_abstraction_state",
+                "recoverable": True,
+                "http_statuses": [409],
+                "recovery_actions": [
+                    {
+                        "operation_id": rq_operation_id(
+                            "build_subcatchments_and_abstract_watershed"
+                        ),
+                        "required_fields": [],
+                    }
+                ],
+                "recovery_notes": [
+                    "This recovery action enqueues subcatchment rebuild work only "
+                    "outside batch/_base contexts. Batch/_base callers must "
+                    "materialize watershed.subwta through their normal setup flow "
+                    "before retrying run-wepp endpoints."
+                ],
+            }
+        )
+
     return errors
 
 

@@ -466,7 +466,11 @@ def test_watershed_mutation_operations_are_discoverable_with_schema_and_defaults
     monkeypatch: pytest.MonkeyPatch,
 ) -> None:
     _stub_auth(monkeypatch, "rq:status")
-    monkeypatch.setattr(schema_defaults_routes, "_load_runtime_state", lambda runid, config: _sample_runtime())
+    monkeypatch.setattr(
+        schema_defaults_routes,
+        "_load_runtime_state",
+        lambda runid, config: _sample_runtime(),
+    )
 
     operation_ids = (
         "rq_engine_fetch_dem_and_build_channels",
@@ -499,7 +503,11 @@ def test_landuse_operations_are_discoverable_with_schema_and_defaults(
     monkeypatch: pytest.MonkeyPatch,
 ) -> None:
     _stub_auth(monkeypatch, "rq:status")
-    monkeypatch.setattr(schema_defaults_routes, "_load_runtime_state", lambda runid, config: _sample_runtime())
+    monkeypatch.setattr(
+        schema_defaults_routes,
+        "_load_runtime_state",
+        lambda runid, config: _sample_runtime(),
+    )
 
     operation_ids = (
         "rq_engine_get_landuse_state",
@@ -869,6 +877,56 @@ def test_run_endpoint_errors_exist_for_each_listed_operation(
             payload = errors_response.json()
             assert payload["operation_id"] == operation_id
             assert isinstance(payload["errors"], list)
+
+
+@pytest.mark.parametrize(
+    "operation_id",
+    [
+        "rq_engine_run_wepp",
+        "rq_engine_run_wepp_watershed",
+    ],
+)
+def test_wepp_run_endpoint_errors_include_invalid_abstraction_recovery(
+    monkeypatch: pytest.MonkeyPatch,
+    operation_id: str,
+) -> None:
+    _stub_auth(monkeypatch, "rq:status")
+    monkeypatch.setattr(
+        schema_defaults_routes,
+        "_load_runtime_state",
+        lambda runid, config: _sample_runtime(),
+    )
+
+    with TestClient(rq_engine.app) as client:
+        response = client.get(
+            f"/api/runs/{RUNID}/{CONFIG}/endpoints/{operation_id}/errors"
+        )
+
+    assert response.status_code == 200
+    invalid_state_errors = [
+        error
+        for error in response.json()["errors"]
+        if error["error_code"] == "invalid_watershed_abstraction_state"
+    ]
+    assert invalid_state_errors == [
+        {
+            "error_code": "invalid_watershed_abstraction_state",
+            "recoverable": True,
+            "http_statuses": [409],
+            "recovery_actions": [
+                {
+                    "operation_id": "rq_engine_build_subcatchments_and_abstract_watershed",
+                    "required_fields": [],
+                }
+            ],
+            "recovery_notes": [
+                "This recovery action enqueues subcatchment rebuild work only "
+                "outside batch/_base contexts. Batch/_base callers must "
+                "materialize watershed.subwta through their normal setup flow "
+                "before retrying run-wepp endpoints."
+            ],
+        }
+    ]
 
 
 def test_readiness_ready_operations_are_discoverable_in_run_endpoints(

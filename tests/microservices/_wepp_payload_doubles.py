@@ -140,9 +140,11 @@ class GroupedWatershedDummy:
         *,
         clip_hillslopes: bool = False,
         clip_hillslope_length: object | None = None,
+        has_subcatchments: bool = True,
     ) -> None:
         self.clip_hillslopes = clip_hillslopes
         self.clip_hillslope_length = clip_hillslope_length
+        self.has_subcatchments = has_subcatchments
         self.grouped_update_calls: list[dict[str, object | None]] = []
         self.dump_calls: list[dict[str, object | None]] = []
         self._locked = False
