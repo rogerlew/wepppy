@@ -47,6 +47,7 @@ Typical sequence (some steps are optional depending on the UI/route calling into
 | `ag_fields/rotation_schedule.parquet` | `validate_field_boundary_geojson` | Field attribute table extracted from the GeoJSON (used to read crop columns per year) |
 | `ag_fields/field_boundaries.tif` | `rasterize_field_boundaries_geojson` | Field ID raster aligned to the project DEM grid |
 | `ag_fields/sub_fields/fields.parquet` | `periodot_abstract_sub_fields` | Sub-field metadata (field/topaz/wepp/sub_field IDs, geometry stats, etc.) |
+| `ag_fields/sub_fields/field_flowpaths.parquet` | `periodot_abstract_sub_fields` | Sub-field flowpath metadata with parent `topaz_id`, canonical `flowpath_topaz_id`, and `fp_id` |
 | `ag_fields/sub_fields/sub_field_id_map.tif` | Peridot | Sub-field ID raster (intersection of hydrology + fields) |
 | `ag_fields/sub_fields/sub_fields.geojson` | `polygonize_sub_fields` | Polygonized sub-fields with `field_id`, `topaz_id`, `wepp_id`, `sub_field_id` |
 | `wepp/ag_fields/runs/p<sub_field_id>.*` | `run_wepp_ag_fields` | Per-sub-field WEPP inputs (`.run`, `.man`, `.slp`) |
@@ -119,6 +120,7 @@ Forest	weppcloud	42
   - must declare a CRS; rasterization requires it and will reproject to the DEM CRS when needed
   - features must overlap the project DEM extent, or rasterization fails fast
 - **Peridot prerequisites**: Peridot’s sub-field abstraction asserts `wd/dem/wbt/flovec.tif` and `wd/ag_fields/field_boundaries.tif` exist.
+- **Sub-field flowpath schema**: Peridot writes `field_flowpaths.csv` with parent `topaz_id` and flowpath-record `flowpath_topaz_id`. WEPPpy normalizes that table to `ag_fields/sub_fields/field_flowpaths.parquet` and keeps compatibility for historical CSVs where pandas read the old duplicate header as `topaz_id.1`.
 - **Concurrency**: `run_wepp_ag_fields()` runs sub-fields in a `ThreadPoolExecutor`; use `max_workers` to control parallelism.
 
 ## Further reading

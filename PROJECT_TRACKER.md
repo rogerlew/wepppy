@@ -1,7 +1,7 @@
 # PROJECT_TRACKER.md
 > Kanban board for wepppy work packages and vision items
 
-**Last Updated**: 2026-04-26  
+**Last Updated**: 2026-04-27
 **Active Packages**: 3  
 **Quick Links**: [Work Packages Directory](docs/work-packages/) | [God-Tier Prompting Strategy](docs/god-tier-prompting-strategy.md)
 
@@ -78,6 +78,30 @@ Feedback mechanisms:
 ## 📋 Backlog
 
 Work packages that are scoped but not yet started. Dependencies and prerequisites should be noted.
+
+### Peridot vs WEPPpy Python Abstraction Benchmark
+**Proposed**: 2026-04-26
+**Size**: Medium-high (2-4 focused sessions)
+**Priority**: High
+**Description**: Establish an evidence-backed benchmark attempt comparing Peridot watershed abstraction against the legacy WEPPpy Python-based abstraction path, which has not been used recently and must be rediscovered before timing claims are valid.
+
+**Scope**:
+- Rediscover and smoke-test the WEPPpy Python abstraction comparator path.
+- Select safe in-repo or copied fixtures without mutating canonical run directories.
+- Compare Peridot and Python outputs for required files, schemas, row counts, topaz/wepp IDs, and slope-file presence before measuring runtime.
+- Record wall-clock/runtime context and classify claims as `confirmed`, `inference`, or `hypothesis`.
+
+**Strategic Value**:
+- Produces disciplined evidence for future Peridot benchmark claims.
+- De-risks stale Python comparator assumptions before using it as a baseline.
+- Creates a reusable benchmark/parity workflow for future abstraction work.
+
+**Dependencies**:
+- Peridot runtime contract hardening closed and Peridot full `cargo test` passes after commit `e09f54c`.
+
+**Next Steps**: Execute active ExecPlan at `docs/work-packages/20260426_peridot_python_abstraction_benchmark/prompts/active/peridot_python_abstraction_benchmark_execplan.md`.
+
+---
 
 ### Deprecate and Remove TauDEM Backend
 **Proposed**: 2025-10-27  
@@ -271,6 +295,15 @@ Currently active work packages. Limit to 2-4 packages to maintain focus.
 ## ✅ Done
 
 Recently completed work packages. Archived immediately upon completion.
+
+### Peridot Runtime Contract Hardening (2026-04-26)
+**Status**: ✅ **COMPLETE**
+
+**Link**: [docs/work-packages/20260426_peridot_runtime_contract_hardening/](docs/work-packages/20260426_peridot_runtime_contract_hardening/)
+
+**Lifecycle**: Backlog -> Done (2026-04-26)
+
+**Summary**: Closed cross-repo runtime/schema hardening for Peridot and WEPPpy. Peridot CLI entrypoints now propagate underlying abstraction `io::Result<()>` errors so `abstract_watershed` and `wbt_abstract_watershed` return non-zero on propagated write-stage failures. Peridot `field_flowpaths.csv` now uses unique headers with parent `topaz_id` and flowpath-record `flowpath_topaz_id`. WEPPpy post-processing normalizes new `flowpath_topaz_id` and historical pandas-mangled `topaz_id.1` schemas to canonical `field_flowpaths.parquet` while rejecting ambiguous mixed inputs. Canonical Peridot/WEPPpy docs and package validation artifacts were updated. Follow-up Peridot commit `e09f54c` closed the initially observed support/raster full-suite failures, and local `cargo test` is now clean.
 
 ### Peridot Documentation Repositioning and Adoption Visibility (2026-04-26)
 **Status**: ✅ **COMPLETE**

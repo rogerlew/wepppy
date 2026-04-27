@@ -17,7 +17,7 @@
 | `watershed/hillslopes.parquet` | Peridot `abstract_watershed` / `wbt_abstract_watershed` + `peridot_runner.post_abstract_watershed` normalization | Peridot writes base parquet directly; WEPPpy post-step enforces `wepp_id`, `topaz_id` Int32 and drops uppercase legacy variants. Contract now includes additive side-length provenance fields: `length_estimate_mode`, `length_area_over_channel`, `length_edge_median`. | `duckdb_agents.get_watershed_*`, reports (`loss_hill_report`, `average_annuals`), query engine fixtures |
 | `watershed/channels.parquet` | same as above | Peridot writes base parquet directly; WEPPpy post-step enforces `wepp_id`, `topaz_id`, `chn_enum` Int32 | hydrology exports, Omni mods, query engine |
 | `watershed/flowpaths.parquet` | same as above | Peridot writes flowpaths parquet when enabled; WEPPpy normalizes `topaz_id`, `fp_id` Int32 when present | `Watershed.fps_summary`, consumers of legacy flowpath metadata |
-| `ag_fields/sub_fields/*.parquet` | `post_abstract_sub_fields` | emit Int32 ids | landuse editing tools, agronomic summaries |
+| `ag_fields/sub_fields/*.parquet` | `post_abstract_sub_fields` | emit Int32 ids; normalize `field_flowpaths.parquet` to parent `topaz_id` plus `flowpath_topaz_id` | landuse editing tools, agronomic summaries |
 | `landuse/landuse.parquet` | `Landuse.dump_landuse_parquet` | output `topaz_id`, `wepp_id` Int32 | query presets, reports, DuckDB agents, R tooling |
 | `soils/soils.parquet` | `Soils.dump_soils_parquet` | same as above | same consumers as landuse |
 | RAP/ancillary tables | dataset-specific writers | audit/cast numeric ids | RAP analytics, dashboards |

@@ -592,13 +592,15 @@ def post_abstract_sub_fields(wd: str, verbose: bool = True):
 
     translator = Watershed.getInstance(wd).translator_factory()
     get_wepp_id = lambda topaz_id: translator.wepp(topaz_id)
-    field_df['topaz_id'] = pd.to_numeric(field_df['topaz_id'], errors='raise').astype('Int32')
+    for column in ('field_id', 'topaz_id', 'sub_field_id'):
+        if column in field_df.columns:
+            field_df[column] = _extract_int32_column(field_df, column, ())
     field_df['wepp_id'] = field_df['topaz_id'].apply(lambda top: get_wepp_id(int(top))).astype('Int32')
     field_df.to_parquet(_join(wd, 'ag_fields/sub_fields/fields.parquet'), index=False)
 
-    fps_df = pd.read_csv(_join(wd, 'ag_fields/sub_fields/field_flowpaths.csv'))
-    fps_df['topaz_id'] = pd.to_numeric(fps_df['topaz_id'], errors='raise').astype('Int32')
-    fps_df['fp_id'] = pd.to_numeric(fps_df['fp_id'], errors='raise').astype('Int32')
+    fps_df = _normalize_field_flowpaths_dataframe(
+        pd.read_csv(_join(wd, 'ag_fields/sub_fields/field_flowpaths.csv'))
+    )
     fps_df.to_parquet(_join(wd, 'ag_fields/sub_fields/field_flowpaths.parquet'), index=False)
 
     os.remove(_join(wd, 'ag_fields/sub_fields/field_flowpaths.csv'))
@@ -611,6 +613,41 @@ def post_abstract_sub_fields(wd: str, verbose: bool = True):
             LOGGER.warning("Failed to refresh catalog for ag_fields/sub_fields in %s", wd, exc_info=True)
 
     return len(field_df), len(fps_df)
+
+
+def _normalize_field_flowpaths_dataframe(fps_df: pd.DataFrame) -> pd.DataFrame:
+    """
+    Normalize Peridot sub-field flowpath metadata to the canonical schema.
+
+    Historical CSVs had duplicate ``topaz_id`` headers; pandas reads the second
+    duplicate as ``topaz_id.1``. New Peridot outputs use ``flowpath_topaz_id``.
+    """
+    canonical = 'flowpath_topaz_id'
+    legacy_mangled = 'topaz_id.1'
+    has_canonical = canonical in fps_df.columns
+    has_legacy = legacy_mangled in fps_df.columns
+
+    if has_canonical and has_legacy:
+        raise ValueError(
+            "Ambiguous field_flowpaths schema: both 'flowpath_topaz_id' and "
+            "'topaz_id.1' are present"
+        )
+
+    normalized = fps_df.copy()
+    if has_legacy:
+        normalized.rename(columns={legacy_mangled: canonical}, inplace=True)
+
+    if canonical not in normalized.columns:
+        raise KeyError(
+            "field_flowpaths.csv is missing 'flowpath_topaz_id' "
+            "(historical duplicate-header input should appear as 'topaz_id.1')"
+        )
+
+    for column in ('field_id', 'topaz_id', 'sub_field_id', canonical, 'fp_id'):
+        if column in normalized.columns:
+            normalized[column] = _extract_int32_column(normalized, column, ())
+
+    return normalized
 
 
 def _load_watershed_table(watershed_dir, stem: str):
