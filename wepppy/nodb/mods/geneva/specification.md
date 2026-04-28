@@ -403,7 +403,7 @@ Entry: `geneva_build_frequency_panel`.
 
 Defaults:
 
-- durations: `[5,10,30,60,120,180,360,720,1440]`
+- durations: `[5,10,15,30,60,120,180,360,720,1440]`
 - ARI years: `[1,2,5,10,25,50,100]`
 - `distribution_type = neh4_type_b`
 - `allow_duration_interpolation = false`
@@ -413,10 +413,18 @@ Sources:
 - CLIGEN default: `climate/wepp_cli_pds_mean_metric.csv`
 - NOAA default: `climate/atlas14_intensity_pds_mean_metric.csv`
 
+CLIGEN materialization:
+
+- `Storm depth (mm)` + `Storm duration (hours)` rows produce the duration/ARI cells they describe.
+- Available CLIGEN intensity rows such as `10-min intensity (mm/hour)`, `15-min intensity (mm/hour)`, `30-min intensity (mm/hour)`, and `60-min intensity (mm/hour)` also produce duration/ARI cells.
+- Intensity-derived cell depth is `intensity_mm_per_hr * duration_minutes / 60`.
+- Existing depth/duration cells take precedence if an intensity row would duplicate the same `(duration_minutes, ari_years)` key.
+
 CLIGEN normalization shim (current implementation detail):
 
 - if CLIGEN file uses `Precipitation depth (mm):` row label, service writes normalized copy with `Storm depth (mm):` to:
   - `geneva/normalized_sources/wepp_cli_pds_mean_metric_kernel.csv`
+- normalization preserves CLIGEN intensity rows so they remain available to the kernel.
 
 Output invariants:
 

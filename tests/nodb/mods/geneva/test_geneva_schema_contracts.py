@@ -7,7 +7,10 @@ from wepppy.nodb.mods.geneva.schemas import (
     normalize_frequency_panel_payload,
     parse_run_batch_request,
 )
-from wepppy.nodb.mods.geneva.collaborators.frequency_panel_service import _normalize_cligen_text_for_kernel
+from wepppy.nodb.mods.geneva.collaborators.frequency_panel_service import (
+    GenevaFrequencyPanelService,
+    _normalize_cligen_text_for_kernel,
+)
 
 
 pytestmark = pytest.mark.unit
@@ -73,11 +76,15 @@ def test_cligen_normalization_maps_precipitation_depth_label_for_kernel() -> Non
         "by metric for ARI (years):, 1,2,5\n"
         "Precipitation depth (mm):, 12.1,15.0,20.2\n"
         "Storm duration (hours):, 0.5,1.0,2.0\n"
+        "10-min intensity (mm/hour):, 20.0,30.0,40.0\n"
+        "15-min intensity (mm/hour):, 18.0,28.0,38.0\n"
     )
     normalized = _normalize_cligen_text_for_kernel(source_text)
     assert normalized is not None
     assert "Storm depth (mm):, 12.1,15.0,20.2" in normalized
     assert "Precipitation depth (mm):" not in normalized
+    assert "10-min intensity (mm/hour):, 20.0,30.0,40.0" in normalized
+    assert "15-min intensity (mm/hour):, 18.0,28.0,38.0" in normalized
 
 
 def test_cligen_normalization_noops_when_kernel_row_already_present() -> None:
@@ -89,6 +96,13 @@ def test_cligen_normalization_noops_when_kernel_row_already_present() -> None:
     )
     assert _normalize_cligen_text_for_kernel(source_text) is None
 
+
+def test_frequency_panel_default_durations_include_cligen_15_minute_intensity() -> None:
+    request = GenevaFrequencyPanelService().normalize_request({})
+    assert request["durations_minutes"] == [5, 10, 15, 30, 60, 120, 180, 360, 720, 1440]
+
+
+def test_frequency_panel_schema_rejects_string_null_reason_code() -> None:
     with pytest.raises(ValueError, match='reason_code must be null, not string \"null\"'):
         normalize_frequency_panel_payload(
             {

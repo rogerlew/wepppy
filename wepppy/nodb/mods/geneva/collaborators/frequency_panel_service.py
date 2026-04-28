@@ -9,7 +9,7 @@ from wepppy.nodb.mods.geneva.schemas import normalize_frequency_panel_payload
 if TYPE_CHECKING:
     from wepppy.nodb.mods.geneva.geneva import Geneva
 
-_DEFAULT_DURATIONS = (5, 10, 30, 60, 120, 180, 360, 720, 1440)
+_DEFAULT_DURATIONS = (5, 10, 15, 30, 60, 120, 180, 360, 720, 1440)
 _DEFAULT_ARI = (1, 2, 5, 10, 25, 50, 100)
 _DEFAULT_CLIGEN_PATH = "climate/wepp_cli_pds_mean_metric.csv"
 _DEFAULT_NOAA_PATH = "climate/atlas14_intensity_pds_mean_metric.csv"
@@ -231,41 +231,34 @@ class GenevaFrequencyPanelService:
 
 
 def _normalize_cligen_text_for_kernel(text: str) -> str | None:
-    ari_values: list[str] = []
-    storm_depth_values: list[str] = []
-    duration_values: list[str] = []
+    normalized_lines: list[str] = []
+    has_ari_row = False
     has_storm_depth_row = False
+    has_precipitation_depth_row = False
+    has_duration_row = False
 
     for raw_line in text.splitlines():
         line = raw_line.strip()
-        if not line:
-            continue
         lower = line.lower()
         if lower.startswith("by metric for ari (years):"):
-            ari_values = _extract_row_values(line)
+            has_ari_row = True
         elif lower.startswith("storm depth (mm):"):
             has_storm_depth_row = True
         elif lower.startswith("precipitation depth (mm):"):
-            storm_depth_values = _extract_row_values(line)
+            has_precipitation_depth_row = True
+            indent = raw_line[: len(raw_line) - len(raw_line.lstrip())]
+            _, separator, rest = raw_line.partition(":")
+            raw_line = f"{indent}Storm depth (mm){separator}{rest}"
         elif lower.startswith("storm duration (hours):"):
-            duration_values = _extract_row_values(line)
+            has_duration_row = True
+        normalized_lines.append(raw_line)
 
     if has_storm_depth_row:
         return None
-    if not ari_values or not storm_depth_values or not duration_values:
+    if not has_precipitation_depth_row or not has_ari_row or not has_duration_row:
         return None
 
-    return (
-        "PRECIPITATION FREQUENCY ESTIMATES\n"
-        f"by metric for ARI (years):, {','.join(ari_values)}\n"
-        f"Storm depth (mm):, {','.join(storm_depth_values)}\n"
-        f"Storm duration (hours):, {','.join(duration_values)}\n"
-    )
-
-
-def _extract_row_values(line: str) -> list[str]:
-    values = [value.strip() for value in line.split(",")[1:]]
-    return [value for value in values if value]
+    return "\n".join(normalized_lines) + "\n"
 
 
 __all__ = ["GenevaFrequencyPanelService"]

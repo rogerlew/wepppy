@@ -144,7 +144,6 @@ var GenevaSummaryReport = (function () {
         this.noaaNote = document.querySelector("[data-geneva-summary-noaa-note]");
         this.chartNode = document.querySelector("[data-geneva-summary-chart]");
         this.chartEmpty = document.querySelector("[data-geneva-summary-chart-empty]");
-        this.legendBody = document.querySelector("[data-geneva-summary-marker-legend]");
         this.tableBody = document.querySelector("[data-geneva-summary-event-body]");
         this.eventsEmpty = document.querySelector("[data-geneva-summary-events-empty]");
         this.messages = document.querySelector("[data-geneva-summary-messages]");
@@ -259,7 +258,6 @@ var GenevaSummaryReport = (function () {
 
         this.payload = payload;
         this.renderControls(payload);
-        this.renderLegend(payload);
         this.renderTable(payload);
         this.renderChart(payload);
         this.renderMessages(payload);
@@ -353,27 +351,6 @@ var GenevaSummaryReport = (function () {
             }
             select.appendChild(option);
         });
-    };
-
-    GenevaSummaryReportController.prototype.renderLegend = function renderLegend(payload) {
-        if (!this.legendBody) {
-            return;
-        }
-        this.legendBody.innerHTML = "";
-        var options = payload.filter_options || {};
-        var durations = Array.isArray(options.duration_minutes) ? options.duration_minutes : [];
-        durations.forEach(function (duration) {
-            var tr = document.createElement("tr");
-            var durationCell = document.createElement("th");
-            durationCell.scope = "row";
-            durationCell.textContent = durationLabel(duration);
-            tr.appendChild(durationCell);
-
-            var markerCell = document.createElement("td");
-            markerCell.textContent = durationLabel(duration);
-            tr.appendChild(markerCell);
-            this.legendBody.appendChild(tr);
-        }.bind(this));
     };
 
     GenevaSummaryReportController.prototype.renderTable = function renderTable(payload) {

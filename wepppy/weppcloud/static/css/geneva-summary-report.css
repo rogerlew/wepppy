@@ -190,10 +190,6 @@
   background: color-mix(in srgb, var(--wc-color-attention-soft) 70%, var(--wc-color-surface));
 }
 
-.geneva-summary__legend-table {
-  margin-top: var(--wc-space-sm);
-}
-
 @media (max-width: 1080px) {
   .geneva-summary__filters {
     grid-template-columns: repeat(2, minmax(0, 1fr));

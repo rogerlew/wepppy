@@ -100,7 +100,6 @@ describe("Geneva summary report interactions", () => {
             <p data-geneva-summary-noaa-note hidden></p>
             <div data-geneva-summary-chart></div>
             <p data-geneva-summary-chart-empty hidden></p>
-            <table><tbody data-geneva-summary-marker-legend></tbody></table>
             <table><tbody data-geneva-summary-event-body></tbody></table>
             <p data-geneva-summary-events-empty hidden></p>
             <section data-geneva-summary-messages hidden>
