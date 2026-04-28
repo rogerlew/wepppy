@@ -20,6 +20,7 @@ This package covers the completed Geneva interactive summary report flow and imm
 - Report rendering contract for `/report/geneva/summary` including single embedded JSON payload node.
 - Geneva report client/controller implementation and style assets.
 - Marker-click/keyboard interaction linking chart and event table selection/focus.
+- Event table presentation contract: unavailable events are hidden, status is omitted from the table, numeric/report-value columns are sortable, and marker selection centers the focused row in view.
 - Route/template shell-context hardening for `_base_report.htm` dependencies (`ron`, `current_ron`, `unitizer_nodb`, `precisions`).
 - Security/QA hardening items: no-store headers, message sanitization, stale-summary suppression.
 - Regression test updates in Geneva route/unit and JS suites.
@@ -39,6 +40,7 @@ This package covers the completed Geneva interactive summary report flow and imm
 - [x] `/query/geneva/summary` returns interactive payload content (not scaffold-only) with `schema_version`, `filters`, `filter_options`, chart metadata, selected storm, and event rows.
 - [x] `/report/geneva/summary` embeds exactly one `geneva-summary-payload` JSON node and renders report controls/layout via Pure patterns.
 - [x] Report JS supports datasource/ARI/measure filtering and marker→table selection/focus synchronization.
+- [x] Event table hides unavailable events, omits the Status column, supports sortable headers, and keeps selected rows visibly centered after chart-marker selection.
 - [x] Review findings are dispositioned with code/test updates or explicit rationale.
 - [x] Required JS gates run cleanly (`wctl run-npm lint`, `wctl run-npm test`, controller bundle rebuild).
 - [ ] Full requested Python `wctl run-pytest` gates executed in compose container (blocked: `weppcloud` service not running in this environment).

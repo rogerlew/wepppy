@@ -87,6 +87,22 @@ describe("Geneva summary report interactions", () => {
                       "runoff_depth": { "value": 5.0, "unit": "mm" },
                       "warning_count": 0,
                       "error_count": 0
+                    },
+                    {
+                      "storm_id": "cligen_120m_10y",
+                      "status": "unavailable",
+                      "datasource_id": "cligen_freq",
+                      "duration_minutes": 120,
+                      "ari_years": 10,
+                      "depth_mm": null,
+                      "intensity_mm_per_hr": null,
+                      "distribution_type": "",
+                      "peak_discharge": null,
+                      "time_to_peak_minutes": null,
+                      "runoff_volume": null,
+                      "runoff_depth": null,
+                      "warning_count": 0,
+                      "error_count": 0
                     }
                   ],
                   "warnings": [],
@@ -110,6 +126,9 @@ describe("Geneva summary report interactions", () => {
     });
 
     test("marker click selects and focuses matching event table row", async () => {
+        const scrollIntoView = jest.fn();
+        Element.prototype.scrollIntoView = scrollIntoView;
+
         await import("../geneva_summary_report.js");
         window.GenevaSummaryReport.getInstance().init();
 
@@ -119,6 +138,7 @@ describe("Geneva summary report interactions", () => {
 
         const rows = document.querySelectorAll('[data-geneva-summary-event-body] tr[data-storm-id]');
         expect(rows).toHaveLength(2);
+        expect(document.querySelector('[data-geneva-summary-event-body] tr[data-storm-id="cligen_120m_10y"]')).toBeNull();
 
         const selectedRow = document.querySelector('[data-geneva-summary-event-body] tr[data-storm-id="noaa14_60m_10y"]');
         const unselectedRow = document.querySelector('[data-geneva-summary-event-body] tr[data-storm-id="cligen_30m_10y"]');
@@ -128,8 +148,22 @@ describe("Geneva summary report interactions", () => {
         expect(unselectedRow.classList.contains("is-selected")).toBe(false);
         expect(selectedMarker.getAttribute("aria-pressed")).toBe("true");
         expect(document.activeElement).toBe(selectedRow);
+        expect(scrollIntoView).toHaveBeenCalledWith({ block: "center", inline: "nearest" });
+        expect(selectedRow.cells[6].getAttribute("sorttable_customkey")).toBe("50");
+        expect(selectedRow.cells[8].getAttribute("sorttable_customkey")).toBe("1.5");
 
         const payload = JSON.parse(document.getElementById("geneva-summary-payload").textContent);
         expect(payload.selected_storm_id).toBe("noaa14_60m_10y");
+    });
+
+    test("unavailable selected storm falls back to the first visible completed event", async () => {
+        await import("../geneva_summary_report.js");
+        window.GenevaSummaryReport.getInstance().init();
+
+        window.GenevaSummaryReport.getInstance().syncSelection("cligen_120m_10y", { focusSelection: false });
+
+        const payload = JSON.parse(document.getElementById("geneva-summary-payload").textContent);
+        expect(payload.selected_storm_id).toBe("cligen_30m_10y");
+        expect(document.querySelector('[data-geneva-summary-event-body] tr[data-storm-id="cligen_30m_10y"]').classList.contains("is-selected")).toBe(true);
     });
 });

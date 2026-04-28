@@ -83,15 +83,6 @@ var GenevaSummaryReport = (function () {
         return labels[datasourceId] || asString(datasourceId);
     }
 
-    function statusLabel(status) {
-        var labels = {
-            completed: "Completed",
-            failed: "Failed",
-            unavailable: "Unavailable"
-        };
-        return labels[status] || asString(status);
-    }
-
     function durationLabel(durationMinutes) {
         var value = Number(durationMinutes);
         if (!Number.isFinite(value) || value <= 0) {
@@ -119,6 +110,22 @@ var GenevaSummaryReport = (function () {
             return value.toFixed(2);
         }
         return value.toFixed(2) + " " + unit.replace(/_/g, "/");
+    }
+
+    function metricCellValue(metric) {
+        if (!metric || typeof metric !== "object") {
+            return null;
+        }
+        return asNumber(metric.value);
+    }
+
+    function isAvailableEventRow(row) {
+        return asString(row && row.status).toLowerCase() !== "unavailable";
+    }
+
+    function displayEventRows(payload) {
+        var rows = Array.isArray(payload && payload.event_table) ? payload.event_table : [];
+        return rows.filter(isAvailableEventRow);
     }
 
     function appendSvg(parent, tagName, attrs) {
@@ -358,7 +365,7 @@ var GenevaSummaryReport = (function () {
             return;
         }
         this.tableBody.innerHTML = "";
-        var rows = Array.isArray(payload.event_table) ? payload.event_table : [];
+        var rows = displayEventRows(payload);
         if (this.eventsEmpty) {
             this.eventsEmpty.hidden = rows.length > 0;
         }
@@ -371,19 +378,18 @@ var GenevaSummaryReport = (function () {
 
             this.appendSelectCell(tr, row);
             this.appendTextCell(tr, row.storm_id);
-            this.appendStatusCell(tr, row.status);
             this.appendTextCell(tr, datasourceLabel(row.datasource_id));
-            this.appendTextCell(tr, formatNumber(row.duration_minutes, 0), "wc-text-right");
-            this.appendTextCell(tr, formatNumber(row.ari_years, 0), "wc-text-right");
-            this.appendTextCell(tr, formatNumber(row.depth_mm, 2), "wc-text-right");
-            this.appendTextCell(tr, formatNumber(row.intensity_mm_per_hr, 2), "wc-text-right");
+            this.appendNumberCell(tr, row.duration_minutes, 0);
+            this.appendNumberCell(tr, row.ari_years, 0);
+            this.appendNumberCell(tr, row.depth_mm, 2);
+            this.appendNumberCell(tr, row.intensity_mm_per_hr, 2);
             this.appendTextCell(tr, row.distribution_type);
-            this.appendTextCell(tr, metricCellDisplay(row.peak_discharge), "wc-text-right");
-            this.appendTextCell(tr, formatNumber(row.time_to_peak_minutes, 2), "wc-text-right");
-            this.appendTextCell(tr, metricCellDisplay(row.runoff_volume), "wc-text-right");
-            this.appendTextCell(tr, metricCellDisplay(row.runoff_depth), "wc-text-right");
-            this.appendTextCell(tr, formatNumber(row.warning_count, 0), "wc-text-right");
-            this.appendTextCell(tr, formatNumber(row.error_count, 0), "wc-text-right");
+            this.appendMetricCell(tr, row.peak_discharge);
+            this.appendNumberCell(tr, row.time_to_peak_minutes, 2);
+            this.appendMetricCell(tr, row.runoff_volume);
+            this.appendMetricCell(tr, row.runoff_depth);
+            this.appendNumberCell(tr, row.warning_count, 0);
+            this.appendNumberCell(tr, row.error_count, 0);
 
             tr.addEventListener("click", function (event) {
                 var target = event.target;
@@ -420,23 +426,37 @@ var GenevaSummaryReport = (function () {
         tr.appendChild(td);
     };
 
-    GenevaSummaryReportController.prototype.appendStatusCell = function appendStatusCell(tr, status) {
-        var td = document.createElement("td");
-        var span = document.createElement("span");
-        span.className = "geneva-summary__status-pill";
-        span.setAttribute("data-status", asString(status));
-        span.textContent = statusLabel(status);
-        td.appendChild(span);
-        tr.appendChild(td);
-    };
-
-    GenevaSummaryReportController.prototype.appendTextCell = function appendTextCell(tr, value, className) {
+    GenevaSummaryReportController.prototype.appendTextCell = function appendTextCell(tr, value, className, sortKey) {
         var td = document.createElement("td");
         if (className) {
             td.className = className;
         }
+        if (sortKey !== undefined && sortKey !== null && sortKey !== "") {
+            td.setAttribute("sorttable_customkey", asString(sortKey));
+        }
         td.innerHTML = escapeHtml(value === undefined || value === null ? "\u2014" : value);
         tr.appendChild(td);
+        return td;
+    };
+
+    GenevaSummaryReportController.prototype.appendNumberCell = function appendNumberCell(tr, value, decimals) {
+        var parsed = asNumber(value);
+        this.appendTextCell(
+            tr,
+            formatNumber(value, decimals),
+            "wc-text-right",
+            parsed === null ? null : parsed
+        );
+    };
+
+    GenevaSummaryReportController.prototype.appendMetricCell = function appendMetricCell(tr, metric) {
+        var parsed = metricCellValue(metric);
+        this.appendTextCell(
+            tr,
+            metricCellDisplay(metric),
+            "wc-text-right",
+            parsed === null ? null : parsed
+        );
     };
 
     GenevaSummaryReportController.prototype.renderChart = function renderChart(payload) {
@@ -734,7 +754,7 @@ var GenevaSummaryReport = (function () {
         if (!this.payload) {
             return;
         }
-        var rows = Array.isArray(this.payload.event_table) ? this.payload.event_table : [];
+        var rows = displayEventRows(this.payload);
         var normalized = asString(stormId).trim();
         var selected = null;
 
@@ -783,9 +803,9 @@ var GenevaSummaryReport = (function () {
         });
 
         if (options.focusSelection && selectedRow) {
-            selectedRow.focus();
+            selectedRow.focus({ preventScroll: true });
             if (typeof selectedRow.scrollIntoView === "function") {
-                selectedRow.scrollIntoView({ block: "nearest", inline: "nearest" });
+                selectedRow.scrollIntoView({ block: "center", inline: "nearest" });
             }
         }
     };

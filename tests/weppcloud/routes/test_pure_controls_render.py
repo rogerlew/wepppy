@@ -273,6 +273,10 @@ def test_geneva_summary_report_template_embeds_single_json_payload(jinja_env: En
     assert 'class="wc-panel wc-stack"' in rendered
     assert 'data-geneva-summary-chart' in rendered
     assert 'data-geneva-summary-event-body' in rendered
+    assert 'class="wc-table wc-table--dense sortable"' in rendered
+    assert '<th scope="col">Status</th>' not in rendered
+    assert 'data-sort-type="numeric">Intensity (mm/hr)</th>' in rendered
+    assert 'data-sort-type="numeric">Peak Discharge</th>' in rendered
 
 
 def test_roads_summary_report_template_renders_with_base_layout(jinja_env: Environment) -> None:

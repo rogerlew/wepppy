@@ -100,24 +100,23 @@
       <p class="wc-text-muted">Selected chart marker and selected table row stay synchronized.</p>
     </header>
     <div class="wc-table-wrapper">
-      <table class="wc-table wc-table--dense" id="geneva-summary-event-table">
+      <table class="wc-table wc-table--dense sortable" id="geneva-summary-event-table">
         <thead>
           <tr>
             <th scope="col" class="sorttable_nosort">Select</th>
             <th scope="col">Storm ID</th>
-            <th scope="col">Status</th>
             <th scope="col">Datasource</th>
-            <th scope="col" class="wc-text-right">Duration (min)</th>
-            <th scope="col" class="wc-text-right">ARI (years)</th>
-            <th scope="col" class="wc-text-right">Depth (mm)</th>
-            <th scope="col" class="wc-text-right">Intensity (mm/hr)</th>
+            <th scope="col" class="wc-text-right" data-sort-type="numeric">Duration (min)</th>
+            <th scope="col" class="wc-text-right" data-sort-type="numeric">ARI (years)</th>
+            <th scope="col" class="wc-text-right" data-sort-type="numeric">Depth (mm)</th>
+            <th scope="col" class="wc-text-right" data-sort-type="numeric">Intensity (mm/hr)</th>
             <th scope="col">Distribution</th>
-            <th scope="col" class="wc-text-right">Peak Discharge</th>
-            <th scope="col" class="wc-text-right">Time to Peak (min)</th>
-            <th scope="col" class="wc-text-right">Runoff Volume</th>
-            <th scope="col" class="wc-text-right">Runoff Depth</th>
-            <th scope="col" class="wc-text-right">Warnings</th>
-            <th scope="col" class="wc-text-right">Errors</th>
+            <th scope="col" class="wc-text-right" data-sort-type="numeric">Peak Discharge</th>
+            <th scope="col" class="wc-text-right" data-sort-type="numeric">Time to Peak (min)</th>
+            <th scope="col" class="wc-text-right" data-sort-type="numeric">Runoff Volume</th>
+            <th scope="col" class="wc-text-right" data-sort-type="numeric">Runoff Depth</th>
+            <th scope="col" class="wc-text-right" data-sort-type="numeric">Warnings</th>
+            <th scope="col" class="wc-text-right" data-sort-type="numeric">Errors</th>
           </tr>
         </thead>
         <tbody data-geneva-summary-event-body></tbody>
