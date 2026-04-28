@@ -1,6 +1,8 @@
 from __future__ import annotations
 
 import json
+import sys
+import types
 from pathlib import Path
 from types import SimpleNamespace
 
@@ -10,6 +12,8 @@ from wepppy.nodb.mods.geneva.collaborators.artifact_io import GenevaArtifactIO
 from wepppy.nodb.mods.geneva.collaborators.batch_run_service import GenevaBatchRunService
 from wepppy.nodb.mods.geneva.collaborators.cn_table_service import GenevaCnTableService
 from wepppy.nodb.mods.geneva.collaborators.config_service import GenevaConfigService
+from wepppy.nodb.mods.geneva.collaborators import hsg_assignment_service as hsg_assignment_module
+from wepppy.nodb.mods.geneva.collaborators.hsg_assignment_service import GenevaHsgAssignmentService
 from wepppy.nodb.mods.geneva.collaborators.hru_preparation_service import GenevaHruPreparationService
 from wepppy.nodb.mods.geneva.collaborators.kernel_gateway import GenevaKernelGateway
 from wepppy.nodb.mods.geneva.errors import GenevaKernelError, GenevaValidationError
@@ -389,6 +393,89 @@ def test_hru_preparation_service_rejects_invalid_runtime_cn_rows(tmp_path: Path)
         service.prepare_hrus(geneva, force_rebuild=True)
 
     assert exc_info.value.code == "invalid_cn_table_schema"
+
+
+def test_hsg_assignment_aligns_auto_discovered_sbs_4class_to_geneva_grid(
+    tmp_path: Path,
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    run_dir = tmp_path / "run"
+    bound = run_dir / "dem" / "wbt" / "bound.tif"
+    landuse = run_dir / "landuse" / "nlcd.tif"
+    hydgrpdcd = run_dir / "soils" / "hydgrpdcd.tif"
+    sbs_4class = run_dir / "disturbed" / "sbs_4class.tif"
+    for path in (bound, landuse, hydgrpdcd, sbs_4class):
+        path.parent.mkdir(parents=True, exist_ok=True)
+        path.write_text("raster", encoding="utf-8")
+
+    fake_disturbed = SimpleNamespace(
+        sbs_4class_path=str(sbs_4class),
+        disturbed_cropped=None,
+    )
+    disturbed_module = types.ModuleType("wepppy.nodb.mods.disturbed")
+    disturbed_module.Disturbed = SimpleNamespace(
+        tryGetInstance=staticmethod(lambda _wd: fake_disturbed),
+    )
+    monkeypatch.setitem(sys.modules, "wepppy.nodb.mods.disturbed", disturbed_module)
+
+    stacker_calls: list[tuple[str, str, str, str]] = []
+
+    def _fake_raster_stacker(source, match, target, *, resample):
+        Path(target).write_text("aligned", encoding="utf-8")
+        stacker_calls.append((str(source), str(match), str(target), str(resample)))
+
+    monkeypatch.setattr(hsg_assignment_module, "raster_stacker", _fake_raster_stacker)
+
+    service = GenevaHsgAssignmentService()
+    geneva = SimpleNamespace(
+        wd=str(run_dir),
+        artifact_io=GenevaArtifactIO(),
+        watershed_instance=SimpleNamespace(bound=str(bound)),
+        landuse_instance=SimpleNamespace(lc_fn=str(landuse)),
+        soils_instance=SimpleNamespace(ssurgo_fn=str(hydgrpdcd)),
+    )
+
+    refs = service.resolve_prepare_input_refs(geneva)
+
+    expected_burn_path = run_dir / "geneva" / "inputs" / "burn_severity_4class.tif"
+    assert refs["burn_severity_tif"] == str(expected_burn_path)
+    assert expected_burn_path.read_text(encoding="utf-8") == "aligned"
+    assert stacker_calls == [(str(sbs_4class), str(bound), str(expected_burn_path), "near")]
+
+
+def test_hsg_assignment_preserves_explicit_burn_override_without_auto_alignment(
+    tmp_path: Path,
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    run_dir = tmp_path / "run"
+    bound = run_dir / "dem" / "wbt" / "bound.tif"
+    landuse = run_dir / "landuse" / "nlcd.tif"
+    hydgrpdcd = run_dir / "soils" / "hydgrpdcd.tif"
+    burn_override = run_dir / "inputs" / "burn_override.tif"
+    for path in (bound, landuse, hydgrpdcd, burn_override):
+        path.parent.mkdir(parents=True, exist_ok=True)
+        path.write_text("raster", encoding="utf-8")
+
+    def _unexpected_raster_stacker(*_args, **_kwargs):
+        raise AssertionError("explicit burn overrides should not be auto-aligned")
+
+    monkeypatch.setattr(hsg_assignment_module, "raster_stacker", _unexpected_raster_stacker)
+
+    service = GenevaHsgAssignmentService()
+    geneva = SimpleNamespace(
+        wd=str(run_dir),
+        artifact_io=GenevaArtifactIO(),
+        watershed_instance=SimpleNamespace(bound=str(bound)),
+        landuse_instance=SimpleNamespace(lc_fn=str(landuse)),
+        soils_instance=SimpleNamespace(ssurgo_fn=str(hydgrpdcd)),
+    )
+
+    refs = service.resolve_prepare_input_refs(
+        geneva,
+        overrides={"burn_severity_tif": str(burn_override)},
+    )
+
+    assert refs["burn_severity_tif"] == str(burn_override)
 
 
 def test_kernel_gateway_falls_back_to_cli_revision_rust_when_nested_module_lacks_api(

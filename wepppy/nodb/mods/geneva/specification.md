@@ -209,6 +209,11 @@ Current source resolution behavior:
 
 - required refs default from watershed/landuse/soils NoDb objects,
 - optional burn ref can be auto-discovered from `Disturbed` (`sbs_4class_path`, then `disturbed_cropped`),
+- auto-discovered Disturbed burn refs are materialized as
+  `geneva/inputs/burn_severity_4class.tif` on the canonical `bound.tif`
+  grid with nearest-neighbor reprojection before the kernel request,
+- explicit `burn_severity_tif` overrides are passed through unchanged so
+  callers can supply a deliberate raster contract,
 - required paths must exist or request fails,
 - missing optional burn path is dropped silently (optional-only behavior).
 

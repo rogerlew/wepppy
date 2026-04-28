@@ -3,10 +3,15 @@ from __future__ import annotations
 from pathlib import Path
 from typing import TYPE_CHECKING, Any, Mapping
 
+from rasterio.errors import RasterioError
+
+from wepppy.all_your_base.geo import raster_stacker
 from wepppy.nodb.mods.geneva.errors import GenevaGuardrailError, GenevaValidationError
 
 if TYPE_CHECKING:
     from wepppy.nodb.mods.geneva.geneva import Geneva
+
+_AUTO_ALIGNED_BURN_SEVERITY_RELPATH = "inputs/burn_severity_4class.tif"
 
 
 class GenevaHsgAssignmentService:
@@ -62,14 +67,6 @@ class GenevaHsgAssignmentService:
             "hydgrpdcd_tif": str(values.get("hydgrpdcd_tif") or getattr(soils, "ssurgo_fn", "") or ""),
         }
 
-        burn_override = values.get("burn_severity_tif")
-        if burn_override not in (None, ""):
-            resolved["burn_severity_tif"] = str(burn_override)
-        else:
-            discovered_burn = self._discover_burn_severity_path(geneva)
-            if discovered_burn is not None:
-                resolved["burn_severity_tif"] = discovered_burn
-
         missing = [
             name
             for name, path in resolved.items()
@@ -90,9 +87,19 @@ class GenevaHsgAssignmentService:
                     details={"missing_path_key": key, "path": resolved[key]},
                 )
 
-        if "burn_severity_tif" in resolved and not Path(resolved["burn_severity_tif"]).exists():
-            # Burn severity is optional; drop unavailable path without masking required inputs.
-            resolved.pop("burn_severity_tif")
+        burn_override = values.get("burn_severity_tif")
+        if burn_override not in (None, ""):
+            burn_override_path = str(burn_override)
+            if Path(burn_override_path).exists():
+                resolved["burn_severity_tif"] = burn_override_path
+        else:
+            discovered_burn = self._discover_burn_severity_path(geneva)
+            if discovered_burn is not None:
+                resolved["burn_severity_tif"] = self._materialize_auto_burn_severity(
+                    geneva,
+                    source_path=discovered_burn,
+                    bound_tif=resolved["bound_tif"],
+                )
 
         return resolved
 
@@ -123,6 +130,41 @@ class GenevaHsgAssignmentService:
             if Path(candidate_text).exists():
                 return candidate_text
         return None
+
+    def _materialize_auto_burn_severity(
+        self,
+        geneva: "Geneva",
+        *,
+        source_path: str,
+        bound_tif: str,
+    ) -> str:
+        artifact_io = geneva.artifact_io
+        target_path = artifact_io.resolve_path(geneva.wd, _AUTO_ALIGNED_BURN_SEVERITY_RELPATH)
+        source = Path(source_path)
+        bound = Path(bound_tif)
+
+        if _is_current_auto_burn_artifact(
+            target_path=target_path,
+            source_path=source,
+            bound_tif=bound,
+        ):
+            return str(target_path)
+
+        target_path.parent.mkdir(parents=True, exist_ok=True)
+        try:
+            raster_stacker(source, bound, target_path, resample="near")
+        except (OSError, RasterioError, ValueError) as exc:
+            raise GenevaValidationError(
+                "Failed to align auto-discovered burn-severity raster to the Geneva canonical grid.",
+                code="invalid_input",
+                details={
+                    "source_path": str(source),
+                    "bound_tif": str(bound),
+                    "target_path": str(target_path),
+                    "error": str(exc),
+                },
+            ) from exc
+        return str(target_path)
 
     def _extract_lnglat(self, watershed: Any) -> tuple[float, float] | None:
         outlet = getattr(watershed, "outlet", None)
@@ -157,6 +199,19 @@ def _is_hsg_compatible(soils: Any) -> bool:
         or "ssurgo" in raster_path
         or "hydgrpdcd" in raster_path
     )
+
+
+def _is_current_auto_burn_artifact(
+    *,
+    target_path: Path,
+    source_path: Path,
+    bound_tif: Path,
+) -> bool:
+    if not target_path.exists():
+        return False
+
+    target_mtime = target_path.stat().st_mtime
+    return target_mtime >= source_path.stat().st_mtime and target_mtime >= bound_tif.stat().st_mtime
 
 
 __all__ = ["GenevaHsgAssignmentService"]
