@@ -1,4 +1,5 @@
 import os
+import stat
 import shutil
 import subprocess
 from pathlib import Path
@@ -12,6 +13,8 @@ class FEsriError(RuntimeError):
 DEFAULT_CONTAINER_NAME = os.getenv("F_ESRI_CONTAINER", "wepppy-f-esri")
 DEFAULT_TIMEOUT = int(os.getenv("F_ESRI_COMMAND_TIMEOUT", "1800"))
 OGR2OGR_BINARY = os.getenv("F_ESRI_OGR2OGR_BINARY", "ogr2ogr")
+_FILE_PERMISSION_BITS = stat.S_IRUSR | stat.S_IWUSR | stat.S_IRGRP | stat.S_IWGRP
+_DIR_PERMISSION_BITS = _FILE_PERMISSION_BITS | stat.S_IXUSR | stat.S_IXGRP
 
 
 def _run_docker_command(args: Iterable[str], *, timeout: Optional[int] = None) -> subprocess.CompletedProcess:
@@ -44,14 +47,64 @@ def has_f_esri(container_name: str = DEFAULT_CONTAINER_NAME) -> bool:
     return bool(result.stdout.strip())
 
 
-def _docker_exec(container_name: str, exec_args: Iterable[str], *, timeout: Optional[int] = None) -> subprocess.CompletedProcess:
+def _docker_exec(
+    container_name: str,
+    exec_args: Iterable[str],
+    *,
+    timeout: Optional[int] = None,
+    user: Optional[str] = None,
+) -> subprocess.CompletedProcess:
     """
     Execute a command inside the specified container.
     """
     if not has_f_esri(container_name):
         raise FEsriError(f"f-esri container '{container_name}' is not running.")
 
-    return _run_docker_command(["exec", container_name, *exec_args], timeout=timeout)
+    docker_exec_args = ["exec"]
+    if user:
+        docker_exec_args.extend(["--user", user])
+    docker_exec_args.extend([container_name, *exec_args])
+    return _run_docker_command(docker_exec_args, timeout=timeout)
+
+
+def _resolve_current_user_spec() -> Optional[str]:
+    if hasattr(os, "getuid") and hasattr(os, "getgid"):
+        return f"{os.getuid()}:{os.getgid()}"
+    return None
+
+
+def _ensure_mode_bits(path: Path, *, required_bits: int) -> None:
+    try:
+        mode = path.lstat().st_mode
+    except FileNotFoundError:
+        return
+
+    if stat.S_ISLNK(mode):
+        return
+
+    desired_mode = mode | required_bits
+    if desired_mode != mode:
+        os.chmod(path, desired_mode)
+
+
+def _set_gdb_tree_permissions(gdb_path: Path) -> None:
+    if not gdb_path.exists():
+        return
+
+    _ensure_mode_bits(gdb_path.parent, required_bits=_DIR_PERMISSION_BITS)
+
+    if gdb_path.is_dir():
+        for root, dirs, files in os.walk(gdb_path):
+            root_path = Path(root)
+            _ensure_mode_bits(root_path, required_bits=_DIR_PERMISSION_BITS)
+            for dirname in dirs:
+                _ensure_mode_bits(root_path / dirname, required_bits=_DIR_PERMISSION_BITS)
+            for filename in files:
+                _ensure_mode_bits(root_path / filename, required_bits=_FILE_PERMISSION_BITS)
+        _ensure_mode_bits(gdb_path, required_bits=_DIR_PERMISSION_BITS)
+        return
+
+    _ensure_mode_bits(gdb_path, required_bits=_FILE_PERMISSION_BITS)
 
 
 def c2c_gpkg_to_gdb(
@@ -92,12 +145,19 @@ def c2c_gpkg_to_gdb(
     if verbose:
         print("docker exec", container_name, " ".join(exec_cmd))
 
-    result = _docker_exec(container_name, exec_cmd, timeout=timeout)
+    result = _docker_exec(
+        container_name,
+        exec_cmd,
+        timeout=timeout,
+        user=_resolve_current_user_spec(),
+    )
     if result.returncode != 0:
         raise FEsriError(
             "Failed to convert GeoPackage to FileGDB via f-esri container:\n"
             f"STDOUT:\n{result.stdout}\nSTDERR:\n{result.stderr}"
         )
+
+    _set_gdb_tree_permissions(gdb_path)
 
     if verbose and result.stdout:
         print(result.stdout)
@@ -107,6 +167,7 @@ def c2c_gpkg_to_gdb(
         if zip_target.exists():
             zip_target.unlink()
         shutil.make_archive(str(gdb_path), "zip", str(gdb_path))
+        _set_gdb_tree_permissions(zip_target)
 
     return str(gdb_path)
 

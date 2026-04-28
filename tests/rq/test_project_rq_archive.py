@@ -200,6 +200,42 @@ def test_restore_archive_rq_checks_disk_headroom_before_removing_existing_files(
     assert prep_by_run["demo"].cleared == 1
 
 
+def test_restore_archive_rq_retries_directory_cleanup_after_permission_error(
+    archive_rq_environment,
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    project, tmp_path, _published, prep_by_run = archive_rq_environment
+    run_dir = tmp_path / "demo"
+    archives_dir = run_dir / "archives"
+    archives_dir.mkdir(parents=True)
+
+    stale_export_dir = run_dir / "export" / "features" / "artifacts" / "artifact-1"
+    stale_export_dir.mkdir(parents=True)
+    (stale_export_dir / "features_export.gdb").write_text("stale", encoding="utf-8")
+
+    archive_path = archives_dir / "demo.20260218T000000Z.zip"
+    with zipfile.ZipFile(archive_path, mode="w") as zf:
+        zf.writestr("restored.txt", "value")
+
+    real_rmtree = project._archive_helpers.shutil.rmtree
+    raised_once = {"value": False}
+
+    def _flaky_rmtree(path: str | Path, *args: object, **kwargs: object) -> None:
+        if Path(path) == run_dir / "export" and not raised_once["value"]:
+            raised_once["value"] = True
+            raise PermissionError(errno.EACCES, "permission denied", str(path))
+        real_rmtree(path, *args, **kwargs)
+
+    monkeypatch.setattr(project._archive_helpers.shutil, "rmtree", _flaky_rmtree)
+
+    project.restore_archive_rq("demo", archive_path.name)
+
+    assert raised_once["value"]
+    assert not (run_dir / "export").exists()
+    assert (run_dir / "restored.txt").read_text(encoding="utf-8") == "value"
+    assert prep_by_run["demo"].cleared == 1
+
+
 def test_restore_archive_rq_fails_when_nodb_cache_clear_fails(
     archive_rq_environment,
     monkeypatch: pytest.MonkeyPatch,

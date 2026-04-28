@@ -3,6 +3,7 @@ from __future__ import annotations
 import errno
 import os
 import shutil
+import stat
 import zipfile
 from dataclasses import dataclass
 from datetime import datetime
@@ -140,6 +141,84 @@ def _collect_restore_members(
         members.append((member, target_path, relative_target))
 
     return members, total_bytes, file_count
+
+
+def _grant_owner_cleanup_perms(path: Path) -> None:
+    try:
+        mode = path.lstat().st_mode
+    except (FileNotFoundError, OSError):
+        return
+
+    if stat.S_ISLNK(mode):
+        return
+
+    desired_mode = mode | stat.S_IRUSR | stat.S_IWUSR
+    if stat.S_ISDIR(mode):
+        desired_mode |= stat.S_IXUSR
+
+    if desired_mode == mode:
+        return
+
+    try:
+        os.chmod(path, desired_mode)
+    except OSError:
+        return
+
+
+def _prepare_cleanup_retry(path: Path) -> None:
+    _grant_owner_cleanup_perms(path.parent)
+
+    try:
+        is_dir = path.is_dir()
+        is_symlink = path.is_symlink()
+    except OSError:
+        return
+
+    if is_symlink or not is_dir:
+        _grant_owner_cleanup_perms(path)
+        return
+
+    for root, dirs, files in os.walk(path, topdown=False, followlinks=False):
+        root_path = Path(root)
+        _grant_owner_cleanup_perms(root_path)
+
+        for filename in files:
+            _grant_owner_cleanup_perms(root_path / filename)
+
+        for dirname in dirs:
+            child = root_path / dirname
+            try:
+                if child.is_symlink():
+                    continue
+            except OSError:
+                continue
+            _grant_owner_cleanup_perms(child)
+
+    _grant_owner_cleanup_perms(path)
+
+
+def _remove_restore_directory(path: Path) -> None:
+    try:
+        shutil.rmtree(path)
+        return
+    except FileNotFoundError:
+        return
+    except PermissionError:
+        _prepare_cleanup_retry(path)
+
+    shutil.rmtree(path)
+
+
+def _remove_restore_file(path: Path) -> None:
+    try:
+        path.unlink()
+        return
+    except FileNotFoundError:
+        return
+    except PermissionError:
+        _prepare_cleanup_retry(path)
+
+    path.unlink()
 
 
 def _clear_archive_job_id(runtime: ArchiveRuntime, prep: Any | None, runid: str) -> None:
@@ -300,10 +379,10 @@ def restore_archive_rq(runid: str, archive_name: str, *, runtime: ArchiveRuntime
                 try:
                     if entry.is_dir() and not entry.is_symlink():
                         runtime.publish_status(status_channel, f"Removing directory {entry.relative_to(wd)}")
-                        shutil.rmtree(entry)
+                        _remove_restore_directory(entry)
                     else:
                         runtime.publish_status(status_channel, f"Removing file {entry.relative_to(wd)}")
-                        entry.unlink()
+                        _remove_restore_file(entry)
                 except FileNotFoundError:
                     continue
 
