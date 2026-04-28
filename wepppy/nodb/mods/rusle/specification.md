@@ -278,6 +278,7 @@ hard-coded moderate regime.
   intentionally supplied
 - Define `ls_stop_mask` as the union of:
   - channel mask
+  - outside-watershed boundary mask (cells outside `dem/wbt/bound.tif`)
   - non-hillslope land masks used by the `Rusle` controller (`NLCD` water,
     urban, wetlands by default)
   - optional explicit `blocking_mask`

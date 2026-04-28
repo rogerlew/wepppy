@@ -52,9 +52,10 @@ pipeline:
    climatology R from the vendored Momm 2025 county dataset or canonical
    official RUSLE2 polygon dataset; broadcast as `rusle/r.tif`
 2. **LS** — Invoke the WBT `RusleLsFactor` tool on the conditioned DEM
-   (prefers `dem/wbt/relief.tif`, falls back to `watershed.relief`),
-   producing `ls.tif`, `l.tif`, `s.tif`, `sca.tif`, and
-   `effective_slope_length.tif`
+   (prefers `dem/wbt/relief.tif`, falls back to `watershed.relief`), passing
+   `netful` as the channel stop mask and a generated blocking mask for cells
+   outside the watershed boundary, producing `ls.tif`, `l.tif`, `s.tif`,
+   `sca.tif`, and `effective_slope_length.tif`
 3. **K** — Load POLARIS near-surface soil layers, compute depth-weighted
    averages, and derive K rasters via one or both estimators
    (`k_polaris_nomograph.tif`, `k_polaris_epic.tif`)
@@ -149,8 +150,10 @@ caching.
 Masking behavior varies by factor and C mode in the current implementation:
 
 - **LS** — The `channel_mask` (`netful`) is passed as a stop mask to WBT
-  `RusleLsFactor`, terminating slope-length growth at channel cells. NLCD
-  and user stop masks are not currently wired into the LS call.
+  `RusleLsFactor`, terminating slope-length growth at channel cells. The
+  controller also passes a generated blocking mask that stops routing outside
+  the watershed boundary. NLCD and user stop masks are not currently wired
+  into the LS call.
 - **C (`observed_rap`)** — No NLCD-family masking is applied; validity is
   determined by RAP-band finite-value masks after DEM alignment.
 - **C (`scenario_sbs`)** — NLCD-family masking is applied via the disturbed
