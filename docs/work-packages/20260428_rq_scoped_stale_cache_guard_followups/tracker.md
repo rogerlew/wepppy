@@ -6,9 +6,9 @@
 
 **Timezone**: UTC  
 **Started**: 2026-04-28 16:01 UTC  
-**Current phase**: Discovery / Scoping Complete  
-**Last updated**: 2026-04-28 16:01 UTC  
-**Next milestone**: Execute Priority 0 guards and regression coverage  
+**Current phase**: Complete
+**Last updated**: 2026-04-28 16:42 UTC
+**Next milestone**: Closed; split Priority 2 module-family follow-ups when capacity is available
 **Security impact**: `low`  
 **Dedicated security review**: `no`  
 **Security artifact**: `N/A`
@@ -16,11 +16,7 @@
 ## Task Board
 
 ### Ready / Backlog
-- [ ] Guard Priority 0 project-prep call sites listed in `package.md`.
-- [ ] Audit and implement or disposition Priority 1 mod call sites.
-- [ ] Audit and disposition Priority 2 orchestration/module-family call sites.
-- [ ] Add targeted regression coverage for guard scope and ordering.
-- [ ] Run targeted pytest, docs lint, and `git diff --check`.
+- [ ] Split Priority 2 module families into dedicated packages when scheduled.
 
 ### In Progress
 - None.
@@ -32,12 +28,22 @@
 - [x] Identified candidate RQ mutation call sites after closing the `build_soils_rq` guard package (2026-04-28 16:01 UTC).
 - [x] Created follow-up package scaffold (`package.md`, `tracker.md`, `prompts/active/`) (2026-04-28 16:01 UTC).
 - [x] Added package to `PROJECT_TRACKER.md` Backlog for visibility (2026-04-28 16:01 UTC).
+- [x] Codified canonical contract in `docs/standards/rq-scoped-nodb-mutation-cache-guard-standard.md` and referenced it from package docs (2026-04-28 16:22 UTC).
+- [x] Applied reviewer audit corrections to package candidate matrix (scope fixes, false-positive removals, missed-site additions) (2026-04-28 16:22 UTC).
+- [x] Synced `PROJECT_TRACKER.md` candidate scope with the audited matrix and tightened standard wording for multi-scope clear semantics (2026-04-28 16:32 UTC).
+- [x] Implemented Priority 0 and simple Priority 1 guards in `wepppy/rq/project_rq.py` (2026-04-28 16:42 UTC).
+- [x] Added targeted regression coverage for guard scopes, ordering, archive rejection, and representative status/timestamp/enqueue preservation (2026-04-28 16:42 UTC).
+- [x] Recorded split/defer disposition for Priority 2 module families in `package.md` (2026-04-28 16:42 UTC).
+- [x] Ran required targeted pytest, docs lint, and `git diff --check` validation (2026-04-28 16:42 UTC).
 
 ## Timeline
 
 - **2026-04-28 15:58 UTC** - `build_soils_rq` stale-cache guard package closed and pushed.
 - **2026-04-28 16:01 UTC** - Adjacent `_rq` call-site scan completed; candidates grouped by priority.
 - **2026-04-28 16:01 UTC** - Follow-up package and active ExecPlan drafted.
+- **2026-04-28 16:22 UTC** - Canonical standard added and package matrix corrected from independent reviewer audit.
+- **2026-04-28 16:32 UTC** - Backlog scope and standard wording tightened for execution clarity (`rhem` removed, multi-controller clear semantics explicit).
+- **2026-04-28 16:42 UTC** - Priority 0 and simple Priority 1 `project_rq.py` guards implemented, tests expanded, Priority 2 families split/deferred, and validation passed.
 
 ## Decisions Log
 
@@ -59,34 +65,48 @@
 
 **Impact**: Existing archive-root rejection behavior remains observable and tests can assert cache clearing is not reached on rejected archive-backed roots.
 
+### 2026-04-28 16:22 UTC: Classify this package as contract conformance, not hardening
+**Context**: User direction requested formalizing scoped stale-cache guards as canonical write-path behavior under explicit conditions.
+
+**Decision**: Adopt `docs/standards/rq-scoped-nodb-mutation-cache-guard-standard.md` as the governing contract for this package and align candidate selection to that standard.
+
+**Impact**: The rollout is evaluated as standards conformance (required/defer/not-applicable classification), not as callus-style hardening.
+
+### 2026-04-28 16:42 UTC: Implement `project_rq.py` Priority 1 paths, split Priority 2
+**Context**: Priority 1 candidates in `wepppy/rq/project_rq.py` had clear mutable controller boundaries and could be covered in the existing mutation-guard suite. Priority 2 candidates span orchestration modules with queue pipelines, clone/deletion semantics, single-flight locks, or new-runid fork behavior.
+
+**Decision**: Implement all Priority 0 and simple Priority 1 `project_rq.py` guards in this package; split/defer non-`project_rq.py` Priority 2 families to dedicated follow-ups.
+
+**Impact**: This package closes the direct stale-cache risk shapes without broadening scope into untested orchestration behavior.
+
 ## Risks and Issues
 
 | Risk | Severity | Likelihood | Mitigation | Status |
 |------|----------|------------|------------|--------|
-| Guarding too broadly disrupts unrelated cached controllers | Medium | Medium | Use scoped `pup_relpath` only and add tests asserting exact scope | Open |
-| Guard inserted before archive-root rejection changes failure ordering | Medium | Low | Mirror soils guard test pattern on lock-root paths | Open |
-| Priority 2 orchestration paths become too large for one package | Medium | Medium | Require explicit split/defer disposition before implementation proceeds | Open |
-| Missing a mutating mod path leaves stale-write recurrence possible | Medium | Medium | Keep candidate matrix current and add audit notes before closure | Open |
+| Guarding too broadly disrupts unrelated cached controllers | Medium | Medium | Use scoped `pup_relpath` only and add tests asserting exact scope | Mitigated |
+| Guard inserted before archive-root rejection changes failure ordering | Medium | Low | Mirror soils guard test pattern on lock-root paths | Mitigated |
+| Priority 2 orchestration paths become too large for one package | Medium | Medium | Require explicit split/defer disposition before implementation proceeds | Split/deferred |
+| Missing a mutating mod path leaves stale-write recurrence possible | Medium | Medium | Keep candidate matrix current and add audit notes before closure | Residual follow-up |
 
 ## Verification Checklist
 
 ### Code Quality
-- [ ] `wctl run-pytest tests/rq/test_project_rq_mutation_guards.py --maxfail=1`
-- [ ] Additional targeted pytest suites for any non-`project_rq.py` module touched.
-- [ ] `git diff --check`
+- [x] `wctl run-pytest tests/rq/test_project_rq_mutation_guards.py --maxfail=1` (`44 passed, 15 warnings`)
+- [x] Additional targeted pytest suites for any non-`project_rq.py` module touched (`N/A`; no non-`project_rq.py` implementation files touched)
+- [x] `git diff --check`
 
 ### Documentation
-- [ ] Package docs updated with implementation/disposition evidence.
-- [ ] `PROJECT_TRACKER.md` updated at package start and closure.
-- [ ] `wctl doc-lint --path docs/work-packages/20260428_rq_scoped_stale_cache_guard_followups --path PROJECT_TRACKER.md`
+- [x] Package docs updated with implementation/disposition evidence.
+- [x] `PROJECT_TRACKER.md` updated at package start and closure.
+- [x] `wctl doc-lint --path docs/work-packages/20260428_rq_scoped_stale_cache_guard_followups --path PROJECT_TRACKER.md`
 
 ### Testing
-- [ ] Regression coverage asserts exact `pup_relpath` values for guarded paths.
-- [ ] Regression coverage asserts cache clear happens after root/archive checks where applicable.
-- [ ] Existing status/timestamp/enqueue behavior remains covered or explicitly unchanged.
+- [x] Regression coverage asserts exact `pup_relpath` values for guarded paths.
+- [x] Regression coverage asserts cache clear happens after root/archive checks where applicable.
+- [x] Existing status/timestamp/enqueue behavior remains covered or explicitly unchanged.
 
 ### Deployment
-- [ ] No deployment changes required unless implementation discovers operational runbook impact.
+- [x] No deployment changes required.
 
 ## Progress Notes
 
@@ -98,6 +118,9 @@
 - Recorded Priority 0 direct project-prep mutation paths and Priority 1/2 audit candidates in `package.md`.
 - Created package lifecycle docs and active execution prompt/ExecPlan.
 - Added a Backlog entry in `PROJECT_TRACKER.md`.
+- Codified canonical scoped-guard contract in `docs/standards/rq-scoped-nodb-mutation-cache-guard-standard.md`.
+- Updated `package.md` to reference the standard and corrected candidate rows per reviewer audit.
+- Synchronized `PROJECT_TRACKER.md` scope to the audited matrix and clarified per-file multi-controller clear semantics in the standard.
 
 **Blockers encountered**:
 - None.
@@ -109,3 +132,25 @@
 
 **Test results**:
 - Not run in this step; docs-only package setup.
+
+### 2026-04-28 16:42 UTC: Implementation and closure
+**Agent/Contributor**: Codex
+
+**Work completed**:
+- Added scoped guards to Priority 0 project-prep paths in `wepppy/rq/project_rq.py`: SBS mod map initialization, DEM fetch, watershed metadata/channel/outlet/subcatchment/abstraction, landuse build, climate build, and CLI upload.
+- Added scoped guards to simple Priority 1 `project_rq.py` paths: rangeland cover, treatments, ash, debris flow, RAP TS, OpenET TS, POLARIS, and RUSLE.
+- Kept root-locked guards inside existing lock callbacks so archive/root rejection remains before cache clearing.
+- Added regression coverage for exact scopes, guard ordering, archive rejection, and representative status/timestamp/enqueue behavior.
+- Recorded Priority 2 split/defer disposition in `package.md`.
+
+**Blockers encountered**:
+- None. Priority 2 was intentionally split/deferred because module-specific orchestration tests are required.
+
+**Next steps**:
+1. Create follow-up packages for Priority 2 module families when scheduled.
+2. Keep using `docs/standards/rq-scoped-nodb-mutation-cache-guard-standard.md` for future hydrate-then-mutate RQ paths.
+
+**Test results**:
+- `wctl run-pytest tests/rq/test_project_rq_mutation_guards.py --maxfail=1` -> `44 passed, 15 warnings`.
+- `wctl doc-lint --path docs/work-packages/20260428_rq_scoped_stale_cache_guard_followups --path PROJECT_TRACKER.md` -> passed.
+- `git diff --check` -> passed.

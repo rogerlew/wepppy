@@ -585,6 +585,8 @@ def init_sbs_map_rq(runid: str, sbs_map: str) -> None:
         StatusMessenger.publish(status_channel, f'rq:{job.id} STARTED {func_name}({runid})')
             
         ron = Ron.getInstance(wd)
+        sbs_scope = "baer.nodb" if "baer" in (ron.mods or ()) else "disturbed.nodb"
+        clear_nodb_file_cache(runid, pup_relpath=sbs_scope)
         ron.init_sbs_map(sbs_map, ron.disturbed)
         
         prep = RedisPrep.getInstance(wd)
@@ -624,6 +626,7 @@ def fetch_dem_rq(
         status_channel = f'{runid}:channel_delineation'
         StatusMessenger.publish(status_channel, f'rq:{job.id} STARTED {func_name}({runid})')
 
+        clear_nodb_file_cache(runid, pup_relpath="ron.nodb")
         ron = Ron.getInstance(wd)
         if map_object is not None:
             ron.set_map_object(map_object)
@@ -679,7 +682,10 @@ def build_channels_rq(
         status_channel = f'{runid}:channel_delineation'
         StatusMessenger.publish(status_channel, f'rq:{job.id} STARTED {func_name}({runid})')
         def _mutate_watershed() -> None:
+            clear_nodb_file_cache(runid, pup_relpath="watershed.nodb")
             watershed = Watershed.getInstance(wd)
+            if watershed.delineation_backend_is_topaz:
+                clear_nodb_file_cache(runid, pup_relpath="topaz.nodb")
             if watershed.delineation_backend_is_wbt:
                 if stream_pruning_method is not None:
                     StatusMessenger.publish(
@@ -755,7 +761,9 @@ def fetch_dem_and_build_channels_rq(
         status_channel = f'{runid}:channel_delineation'
         StatusMessenger.publish(status_channel, f'rq:{job.id} STARTED {func_name}({runid})')
 
-        watershed = Watershed.getInstance(get_wd(runid))
+        wd = get_wd(runid)
+        clear_nodb_file_cache(runid, pup_relpath="watershed.nodb")
+        watershed = Watershed.getInstance(wd)
         watershed.set_extent_mode = int(set_extent_mode)
         watershed.map_bounds_text = map_bounds_text
 
@@ -822,10 +830,17 @@ def set_outlet_rq(runid: str, outlet_lng: float, outlet_lat: float) -> None:
         func_name = inspect.currentframe().f_code.co_name
         status_channel = f'{runid}:outlet'
         StatusMessenger.publish(status_channel, f'rq:{job.id} STARTED {func_name}({runid})')
+        def _set_outlet() -> None:
+            clear_nodb_file_cache(runid, pup_relpath="watershed.nodb")
+            watershed = Watershed.getInstance(wd)
+            if watershed.delineation_backend_is_topaz:
+                clear_nodb_file_cache(runid, pup_relpath="topaz.nodb")
+            watershed.set_outlet(outlet_lng, outlet_lat)
+
         _run_with_directory_root_lock(
             wd,
             "watershed",
-            lambda: Watershed.getInstance(wd).set_outlet(outlet_lng, outlet_lat),
+            _set_outlet,
             purpose="set-outlet-rq",
         )
         StatusMessenger.publish(status_channel, f'rq:{job.id} COMPLETED {func_name}({runid})')
@@ -857,7 +872,10 @@ def build_subcatchments_rq(runid: str, updates: dict[str, Any] | None = None) ->
         status_channel = f'{runid}:subcatchment_delineation'
         StatusMessenger.publish(status_channel, f'rq:{job.id} STARTED {func_name}({runid})')
         def _mutate_watershed() -> None:
+            clear_nodb_file_cache(runid, pup_relpath="watershed.nodb")
             watershed = Watershed.getInstance(wd)
+            if watershed.delineation_backend_is_topaz:
+                clear_nodb_file_cache(runid, pup_relpath="topaz.nodb")
             if updates:
                 with watershed.locked():
                     if 'clip_hillslopes' in updates:
@@ -909,6 +927,7 @@ def abstract_watershed_rq(runid: str) -> None:
         status_channel = f'{runid}:subcatchment_delineation'
         StatusMessenger.publish(status_channel, f'rq:{job.id} STARTED {func_name}({runid})')
         def _mutate_watershed() -> None:
+            clear_nodb_file_cache(runid, pup_relpath="watershed.nodb")
             watershed = Watershed.getInstance(wd)
             wait_for_path(watershed.subwta, logger=watershed.logger)
             watershed.abstract_watershed()
@@ -1021,6 +1040,7 @@ def build_rangeland_cover_rq(
         status_channel = f'{runid}:rangeland_cover'
         StatusMessenger.publish(status_channel, f'rq:{job.id} STARTED {func_name}({runid})')
 
+        clear_nodb_file_cache(runid, pup_relpath="rangeland_cover.nodb")
         rangeland_cover = RangelandCover.getInstance(wd)
         rangeland_cover.build(rap_year=rap_year, default_covers=default_covers)
 
@@ -1052,10 +1072,14 @@ def build_landuse_rq(runid: str) -> None:
         func_name = inspect.currentframe().f_code.co_name
         status_channel = f'{runid}:landuse'
         StatusMessenger.publish(status_channel, f'rq:{job.id} STARTED {func_name}({runid})')
+        def _build_landuse() -> None:
+            clear_nodb_file_cache(runid, pup_relpath="landuse.nodb")
+            Landuse.getInstance(wd).build()
+
         _run_with_directory_root_lock(
             wd,
             "landuse",
-            lambda: Landuse.getInstance(wd).build(),
+            _build_landuse,
             purpose="build-landuse-rq",
         )
         StatusMessenger.publish(status_channel, f'rq:{job.id} COMPLETED {func_name}({runid})')
@@ -1243,10 +1267,15 @@ def build_treatments_rq(runid: str) -> None:
         func_name = inspect.currentframe().f_code.co_name
         status_channel = f'{runid}:treatments'
         StatusMessenger.publish(status_channel, f'rq:{job.id} STARTED {func_name}({runid})')
+        def _build_treatments() -> None:
+            clear_nodb_file_cache(runid, pup_relpath="landuse.nodb")
+            clear_nodb_file_cache(runid, pup_relpath="soils.nodb")
+            Treatments.getInstance(wd).build_treatments()
+
         _run_with_directory_roots_lock(
             wd,
             ("landuse", "soils"),
-            lambda: Treatments.getInstance(wd).build_treatments(),
+            _build_treatments,
             purpose="build-treatments-rq",
         )
         StatusMessenger.publish(status_channel, f'rq:{job.id} COMPLETED {func_name}({runid})')
@@ -1326,6 +1355,7 @@ def build_climate_rq(runid: str) -> None:
                 payload_for_build = copy.deepcopy(dict(raw_payload))
 
         def _build_climate() -> None:
+            clear_nodb_file_cache(runid, pup_relpath="climate.nodb")
             climate = Climate.getInstance(wd)
             if payload_for_build is not None:
                 # Re-apply the enqueue-time payload so late state writes cannot
@@ -1373,10 +1403,14 @@ def upload_cli_rq(runid: str, cli_filename: str) -> None:
         func_name = inspect.currentframe().f_code.co_name
         status_channel = f'{runid}:climate'
         StatusMessenger.publish(status_channel, f'rq:{job.id} STARTED {func_name}({runid})')
+        def _set_user_defined_cli() -> None:
+            clear_nodb_file_cache(runid, pup_relpath="climate.nodb")
+            Climate.getInstance(wd).set_user_defined_cli(cli_filename)
+
         _run_with_directory_root_lock(
             wd,
             "climate",
-            lambda: Climate.getInstance(wd).set_user_defined_cli(cli_filename),
+            _set_user_defined_cli,
             purpose="upload-cli-rq",
         )
         StatusMessenger.publish(status_channel, f'rq:{job.id} COMPLETED {func_name}({runid})')
@@ -1416,11 +1450,15 @@ def run_ash_rq(
         status_channel = f'{runid}:ash'
         StatusMessenger.publish(status_channel, f'rq:{job.id} STARTED {func_name}({runid})')
 
-        ash = Ash.getInstance(wd)
+        def _run_ash() -> None:
+            clear_nodb_file_cache(runid, pup_relpath="ash.nodb")
+            ash = Ash.getInstance(wd)
+            ash.run_ash(fire_date, ini_white_ash_depth_mm, ini_black_ash_depth_mm)
+
         _run_with_directory_roots_lock(
             wd,
             ("climate", "watershed", "landuse"),
-            lambda: ash.run_ash(fire_date, ini_white_ash_depth_mm, ini_black_ash_depth_mm),
+            _run_ash,
             purpose="run-ash-rq",
         )
 
@@ -1461,17 +1499,20 @@ def run_debris_flow_rq(runid: str, *, payload: Optional[Mapping[str, Any]] = Non
         status_channel = f'{runid}:debris_flow'
         StatusMessenger.publish(status_channel, f'rq:{job.id} STARTED {func_name}({runid})')
 
-        debris = DebrisFlow.getInstance(wd)
-
         options = payload or {}
         cc = options.get("clay_pct")
         ll = options.get("liquid_limit")
         req_datasource = options.get("datasource")
 
+        def _run_debris_flow() -> None:
+            clear_nodb_file_cache(runid, pup_relpath="debris_flow.nodb")
+            debris = DebrisFlow.getInstance(wd)
+            debris.run_debris_flow(cc=cc, ll=ll, req_datasource=req_datasource)
+
         _run_with_directory_roots_lock(
             wd,
             ("watershed", "soils"),
-            lambda: debris.run_debris_flow(cc=cc, ll=ll, req_datasource=req_datasource),
+            _run_debris_flow,
             purpose="run-debris-flow-rq",
         )
 
@@ -1673,6 +1714,7 @@ def fetch_and_analyze_rap_ts_rq(runid: str, payload: Mapping[str, Any] | None = 
         assert climate.observed_start_year is not None
         assert climate.observed_end_year is not None
 
+        clear_nodb_file_cache(runid, pup_relpath="rap_ts.nodb")
         rap_ts = RAP_TS.getInstance(wd)
         if options:
             try:
@@ -1716,6 +1758,7 @@ def fetch_and_analyze_openet_ts_rq(runid: str, payload: Mapping[str, Any] | None
         assert climate.observed_start_year is not None
         assert climate.observed_end_year is not None
 
+        clear_nodb_file_cache(runid, pup_relpath="openet_ts.nodb")
         openet_ts = OpenET_TS.getInstance(wd)
         if options:
             try:
@@ -1767,6 +1810,7 @@ def fetch_and_align_polaris_rq(runid: str, payload: Mapping[str, Any] | None = N
 
     options = dict(payload) if payload else {}
 
+    clear_nodb_file_cache(runid, pup_relpath="polaris.nodb")
     polaris = Polaris.getInstance(wd)
     if options:
         try:
@@ -1793,6 +1837,7 @@ def build_rusle_rq(runid: str, payload: Mapping[str, Any] | None = None) -> None
     StatusMessenger.publish(status_channel, f"rq:{job.id} STARTED {func_name}({runid})")
 
     options = dict(payload) if payload else {}
+    clear_nodb_file_cache(runid, pup_relpath="rusle.nodb")
     rusle = Rusle.getInstance(wd)
     if options:
         try:

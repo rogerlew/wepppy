@@ -39,7 +39,181 @@ def _stub_rq_context(
         return SimpleNamespace(form="dir")
 
     monkeypatch.setattr(project_rq, "nodir_resolve", _resolve)
+
+    @contextmanager
+    def _lock(_wd: str, _root: str, *, purpose: str):
+        yield
+
+    monkeypatch.setattr(project_rq, "nodir_maintenance_lock", _lock)
     return run_wd, _set_archive_roots, call_roots
+
+
+def _record_cache_clears(monkeypatch: pytest.MonkeyPatch, events: list[tuple]) -> None:
+    def _clear(runid: str, pup_relpath: str | None = None) -> None:
+        events.append(("clear", runid, pup_relpath))
+
+    monkeypatch.setattr(project_rq, "clear_nodb_file_cache", _clear)
+
+
+def _record_prep_timestamps(monkeypatch: pytest.MonkeyPatch, events: list[tuple]) -> None:
+    class DummyPrep:
+        def timestamp(self, task) -> None:
+            events.append(("timestamp", task))
+
+        def get_rq_job_id(self, _key: str):
+            return "job-guard"
+
+    monkeypatch.setattr(project_rq.RedisPrep, "getInstance", lambda _wd: DummyPrep())
+
+
+@pytest.mark.parametrize(
+    ("mods", "expected_scope"),
+    [
+        (["disturbed"], "disturbed.nodb"),
+        (["baer"], "baer.nodb"),
+    ],
+)
+def test_init_sbs_map_rq_clears_sbs_mod_cache_before_mod_hydration(
+    monkeypatch: pytest.MonkeyPatch,
+    tmp_path: Path,
+    mods: list[str],
+    expected_scope: str,
+) -> None:
+    run_wd, _set_archive_roots, _call_roots = _stub_rq_context(monkeypatch, tmp_path)
+    events: list[tuple] = []
+    _record_cache_clears(monkeypatch, events)
+    _record_prep_timestamps(monkeypatch, events)
+
+    class DummyRon:
+        def __init__(self) -> None:
+            self.mods = mods
+            self._sbs_controller = object()
+
+        @property
+        def disturbed(self):
+            assert events[-1] == ("clear", "demo", expected_scope)
+            events.append(("hydrate_sbs_mod", expected_scope))
+            return self._sbs_controller
+
+        def init_sbs_map(self, sbs_map: str, controller) -> None:
+            assert controller is self._sbs_controller
+            events.append(("init_sbs_map", sbs_map))
+
+    def _get_ron(wd: str) -> DummyRon:
+        events.append(("hydrate_ron", wd))
+        return DummyRon()
+
+    monkeypatch.setattr(project_rq.Ron, "getInstance", _get_ron)
+
+    project_rq.init_sbs_map_rq("demo", "sbs-map.tif")
+
+    assert events == [
+        ("hydrate_ron", str(run_wd)),
+        ("clear", "demo", expected_scope),
+        ("hydrate_sbs_mod", expected_scope),
+        ("init_sbs_map", "sbs-map.tif"),
+        ("timestamp", project_rq.TaskEnum.init_sbs_map),
+    ]
+
+
+def test_fetch_dem_rq_clears_ron_cache_before_hydration_and_fetch(
+    monkeypatch: pytest.MonkeyPatch,
+    tmp_path: Path,
+) -> None:
+    run_wd, _set_archive_roots, _call_roots = _stub_rq_context(monkeypatch, tmp_path)
+    events: list[tuple] = []
+    _record_cache_clears(monkeypatch, events)
+
+    class DummyRon:
+        max_map_dimension_px = 10_000
+
+        def set_map(self, extent, center, zoom) -> None:
+            events.append(("set_map", tuple(extent), tuple(center), zoom))
+            self.map = SimpleNamespace(num_cols=128, num_rows=64)
+
+        def fetch_dem(self) -> None:
+            events.append(("fetch_dem", None))
+
+    def _get_ron(wd: str) -> DummyRon:
+        assert events == [("clear", "demo", "ron.nodb")]
+        events.append(("hydrate_ron", wd))
+        return DummyRon()
+
+    monkeypatch.setattr(project_rq.Ron, "getInstance", _get_ron)
+
+    project_rq.fetch_dem_rq("demo", [0.0, 2.0, 10.0, 12.0], None, None)
+
+    assert events == [
+        ("clear", "demo", "ron.nodb"),
+        ("hydrate_ron", str(run_wd)),
+        ("set_map", (0.0, 2.0, 10.0, 12.0), (5.0, 7.0), project_rq.DEFAULT_ZOOM),
+        ("fetch_dem", None),
+    ]
+
+
+def test_fetch_dem_and_build_channels_rq_clears_watershed_cache_before_enqueue(
+    monkeypatch: pytest.MonkeyPatch,
+    tmp_path: Path,
+) -> None:
+    run_wd, _set_archive_roots, _call_roots = _stub_rq_context(monkeypatch, tmp_path)
+    events: list[tuple] = []
+    _record_cache_clears(monkeypatch, events)
+
+    class DummyWatershed:
+        pass
+
+    def _get_watershed(wd: str) -> DummyWatershed:
+        assert events == [("clear", "demo", "watershed.nodb")]
+        events.append(("hydrate_watershed", wd))
+        return DummyWatershed()
+
+    monkeypatch.setattr(project_rq.Watershed, "getInstance", _get_watershed)
+
+    class DummyRedis:
+        def __init__(self, **_kwargs) -> None:
+            pass
+
+        def __enter__(self):
+            return self
+
+        def __exit__(self, *_args) -> None:
+            return None
+
+    class DummyQueue:
+        def __init__(self, connection) -> None:
+            self.connection = connection
+
+        def enqueue_call(self, func, args, depends_on=None, timeout=None):
+            child_id = f"child-{len([event for event in events if event[0] == 'enqueue'])}"
+            events.append(("enqueue", func.__name__, args, getattr(depends_on, "id", None), timeout))
+            return SimpleNamespace(id=child_id)
+
+    current_job = SimpleNamespace(id="job-guard", meta={}, save=lambda: events.append(("save", dict(current_job.meta))))
+    monkeypatch.setattr(project_rq, "get_current_job", lambda: current_job)
+    monkeypatch.setattr(project_rq.redis, "Redis", DummyRedis)
+    monkeypatch.setattr(project_rq, "Queue", DummyQueue)
+
+    project_rq.fetch_dem_and_build_channels_rq(
+        "demo",
+        [0.0, 0.0, 1.0, 1.0],
+        None,
+        None,
+        csa=10.0,
+        mcl=50.0,
+        stream_pruning_method=None,
+        wbt_fill_or_breach=None,
+        wbt_blc_dist=None,
+        set_extent_mode=1,
+        map_bounds_text="bounds",
+    )
+
+    assert events[:2] == [
+        ("clear", "demo", "watershed.nodb"),
+        ("hydrate_watershed", str(run_wd)),
+    ]
+    assert [event[0] for event in events if event[0] == "enqueue"] == ["enqueue", "enqueue"]
+    assert current_job.meta["jobs:0,func:fetch_dem_rq"] == "child-0"
+    assert current_job.meta["jobs:1,func:build_channels_rq"] == "child-1"
 
 
 def test_build_channels_rq_rejects_archive_form_root(
@@ -48,6 +222,13 @@ def test_build_channels_rq_rejects_archive_form_root(
 ) -> None:
     _run_wd, set_archive_roots, call_roots = _stub_rq_context(monkeypatch, tmp_path)
     set_archive_roots("watershed")
+    monkeypatch.setattr(
+        project_rq,
+        "clear_nodb_file_cache",
+        lambda *_args, **_kwargs: (_ for _ in ()).throw(
+            AssertionError("Archive-backed watershed roots should be rejected before cache clear")
+        ),
+    )
     monkeypatch.setattr(
         project_rq.Watershed,
         "getInstance",
@@ -75,6 +256,13 @@ def test_build_landuse_rq_rejects_archive_form_root(
     _run_wd, set_archive_roots, call_roots = _stub_rq_context(monkeypatch, tmp_path)
     set_archive_roots("landuse")
     monkeypatch.setattr(
+        project_rq,
+        "clear_nodb_file_cache",
+        lambda *_args, **_kwargs: (_ for _ in ()).throw(
+            AssertionError("Archive-backed landuse roots should be rejected before cache clear")
+        ),
+    )
+    monkeypatch.setattr(
         project_rq.Landuse,
         "getInstance",
         lambda _wd: (_ for _ in ()).throw(AssertionError("Landuse should not be instantiated")),
@@ -85,6 +273,37 @@ def test_build_landuse_rq_rejects_archive_form_root(
 
     assert exc_info.value.code == "NODIR_ARCHIVE_RETIRED"
     assert call_roots == ["landuse"]
+
+
+def test_build_landuse_rq_clears_scoped_cache_before_hydration_and_build(
+    monkeypatch: pytest.MonkeyPatch,
+    tmp_path: Path,
+) -> None:
+    run_wd, _set_archive_roots, call_roots = _stub_rq_context(monkeypatch, tmp_path)
+    events: list[tuple] = []
+    _record_cache_clears(monkeypatch, events)
+    _record_prep_timestamps(monkeypatch, events)
+
+    class DummyLanduse:
+        def build(self) -> None:
+            events.append(("build", None))
+
+    def _get_landuse(wd: str) -> DummyLanduse:
+        assert events == [("clear", "demo", "landuse.nodb")]
+        events.append(("hydrate_landuse", wd))
+        return DummyLanduse()
+
+    monkeypatch.setattr(project_rq.Landuse, "getInstance", _get_landuse)
+
+    project_rq.build_landuse_rq("demo")
+
+    assert call_roots == ["landuse", "landuse"]
+    assert events == [
+        ("clear", "demo", "landuse.nodb"),
+        ("hydrate_landuse", str(run_wd)),
+        ("build", None),
+        ("timestamp", project_rq.TaskEnum.build_landuse),
+    ]
 
 
 def test_modify_landuse_mapping_rq_rejects_archive_form_root(
@@ -118,7 +337,7 @@ def test_modify_landuse_mapping_rq_publishes_trigger_and_mutates_landuse(
     monkeypatch: pytest.MonkeyPatch,
     tmp_path: Path,
 ) -> None:
-    _run_wd, _set_archive_roots, call_roots = _stub_rq_context(monkeypatch, tmp_path)
+    run_wd, _set_archive_roots, call_roots = _stub_rq_context(monkeypatch, tmp_path)
     published: list[tuple[str, str]] = []
     monkeypatch.setattr(
         project_rq.StatusMessenger,
@@ -199,7 +418,7 @@ def test_modify_landuse_mapping_rq_skips_stale_job_without_mutation(
     monkeypatch: pytest.MonkeyPatch,
     tmp_path: Path,
 ) -> None:
-    _run_wd, _set_archive_roots, call_roots = _stub_rq_context(monkeypatch, tmp_path)
+    run_wd, _set_archive_roots, call_roots = _stub_rq_context(monkeypatch, tmp_path)
     published: list[tuple[str, str]] = []
     monkeypatch.setattr(
         project_rq.StatusMessenger,
@@ -232,7 +451,7 @@ def test_modify_landuse_mapping_rq_skips_stale_job_at_lock_gate(
     monkeypatch: pytest.MonkeyPatch,
     tmp_path: Path,
 ) -> None:
-    _run_wd, _set_archive_roots, call_roots = _stub_rq_context(monkeypatch, tmp_path)
+    run_wd, _set_archive_roots, call_roots = _stub_rq_context(monkeypatch, tmp_path)
     published: list[tuple[str, str]] = []
     monkeypatch.setattr(
         project_rq.StatusMessenger,
@@ -441,6 +660,13 @@ def test_build_treatments_rq_rejects_archive_form_roots(
     _run_wd, set_archive_roots, call_roots = _stub_rq_context(monkeypatch, tmp_path)
     set_archive_roots("landuse", "soils")
     monkeypatch.setattr(
+        project_rq,
+        "clear_nodb_file_cache",
+        lambda *_args, **_kwargs: (_ for _ in ()).throw(
+            AssertionError("Archive-backed treatment roots should be rejected before cache clear")
+        ),
+    )
+    monkeypatch.setattr(
         project_rq.Treatments,
         "getInstance",
         lambda _wd: (_ for _ in ()).throw(AssertionError("Treatments should not be instantiated")),
@@ -453,12 +679,54 @@ def test_build_treatments_rq_rejects_archive_form_roots(
     assert call_roots == ["landuse"]
 
 
+def test_build_treatments_rq_clears_landuse_and_soils_before_hydration(
+    monkeypatch: pytest.MonkeyPatch,
+    tmp_path: Path,
+) -> None:
+    run_wd, _set_archive_roots, call_roots = _stub_rq_context(monkeypatch, tmp_path)
+    events: list[tuple] = []
+    _record_cache_clears(monkeypatch, events)
+    _record_prep_timestamps(monkeypatch, events)
+
+    class DummyTreatments:
+        def build_treatments(self) -> None:
+            events.append(("build_treatments", None))
+
+    def _get_treatments(wd: str) -> DummyTreatments:
+        assert events[:2] == [
+            ("clear", "demo", "landuse.nodb"),
+            ("clear", "demo", "soils.nodb"),
+        ]
+        events.append(("hydrate_treatments", wd))
+        return DummyTreatments()
+
+    monkeypatch.setattr(project_rq.Treatments, "getInstance", _get_treatments)
+
+    project_rq.build_treatments_rq("demo")
+
+    assert call_roots == ["landuse", "soils", "landuse", "soils"]
+    assert events == [
+        ("clear", "demo", "landuse.nodb"),
+        ("clear", "demo", "soils.nodb"),
+        ("hydrate_treatments", str(run_wd)),
+        ("build_treatments", None),
+        ("timestamp", project_rq.TaskEnum.build_treatments),
+    ]
+
+
 def test_build_climate_rq_rejects_archive_form_root(
     monkeypatch: pytest.MonkeyPatch,
     tmp_path: Path,
 ) -> None:
     _run_wd, set_archive_roots, call_roots = _stub_rq_context(monkeypatch, tmp_path)
     set_archive_roots("climate")
+    monkeypatch.setattr(
+        project_rq,
+        "clear_nodb_file_cache",
+        lambda *_args, **_kwargs: (_ for _ in ()).throw(
+            AssertionError("Archive-backed climate roots should be rejected before cache clear")
+        ),
+    )
     monkeypatch.setattr(
         project_rq.Climate,
         "getInstance",
@@ -476,8 +744,10 @@ def test_build_climate_rq_applies_enqueued_payload_before_build(
     monkeypatch: pytest.MonkeyPatch,
     tmp_path: Path,
 ) -> None:
-    _run_wd, _set_archive_roots, call_roots = _stub_rq_context(monkeypatch, tmp_path)
+    run_wd, _set_archive_roots, call_roots = _stub_rq_context(monkeypatch, tmp_path)
     observed_calls: list[tuple[str, object]] = []
+    events: list[tuple] = []
+    _record_cache_clears(monkeypatch, events)
 
     class DummyClimate:
         def parse_inputs(self, payload) -> None:
@@ -486,7 +756,12 @@ def test_build_climate_rq_applies_enqueued_payload_before_build(
         def build(self) -> None:
             observed_calls.append(("build", None))
 
-    monkeypatch.setattr(project_rq.Climate, "getInstance", lambda _wd: DummyClimate())
+    def _get_climate(wd: str) -> DummyClimate:
+        assert events == [("clear", "demo", "climate.nodb")]
+        events.append(("hydrate_climate", wd))
+        return DummyClimate()
+
+    monkeypatch.setattr(project_rq.Climate, "getInstance", _get_climate)
 
     payload = {
         "climate_mode": 9,
@@ -503,6 +778,10 @@ def test_build_climate_rq_applies_enqueued_payload_before_build(
 
     assert call_roots
     assert all(root == "climate" for root in call_roots)
+    assert events == [
+        ("clear", "demo", "climate.nodb"),
+        ("hydrate_climate", str(run_wd)),
+    ]
     assert observed_calls[0][0] == "parse_inputs"
     parsed_payload = observed_calls[0][1]
     assert parsed_payload == payload
@@ -516,6 +795,7 @@ def test_build_climate_rq_warns_when_observed_start_year_is_emptied(
     tmp_path: Path,
 ) -> None:
     _run_wd, _set_archive_roots, _call_roots = _stub_rq_context(monkeypatch, tmp_path)
+    monkeypatch.setattr(project_rq, "clear_nodb_file_cache", lambda *_args, **_kwargs: None)
     warning_calls: list[tuple[str, object]] = []
 
     class DummyClimate:
@@ -646,6 +926,13 @@ def test_set_outlet_rq_rejects_archive_form_root(
     _run_wd, set_archive_roots, call_roots = _stub_rq_context(monkeypatch, tmp_path)
     set_archive_roots("watershed")
     monkeypatch.setattr(
+        project_rq,
+        "clear_nodb_file_cache",
+        lambda *_args, **_kwargs: (_ for _ in ()).throw(
+            AssertionError("Archive-backed watershed roots should be rejected before cache clear")
+        ),
+    )
+    monkeypatch.setattr(
         project_rq.Watershed,
         "getInstance",
         lambda _wd: (_ for _ in ()).throw(AssertionError("Watershed should not be instantiated")),
@@ -664,6 +951,13 @@ def test_build_subcatchments_rq_rejects_archive_form_root(
 ) -> None:
     _run_wd, set_archive_roots, call_roots = _stub_rq_context(monkeypatch, tmp_path)
     set_archive_roots("watershed")
+    monkeypatch.setattr(
+        project_rq,
+        "clear_nodb_file_cache",
+        lambda *_args, **_kwargs: (_ for _ in ()).throw(
+            AssertionError("Archive-backed watershed roots should be rejected before cache clear")
+        ),
+    )
     monkeypatch.setattr(
         project_rq.Watershed,
         "getInstance",
@@ -684,6 +978,13 @@ def test_abstract_watershed_rq_rejects_archive_form_root(
     _run_wd, set_archive_roots, call_roots = _stub_rq_context(monkeypatch, tmp_path)
     set_archive_roots("watershed")
     monkeypatch.setattr(
+        project_rq,
+        "clear_nodb_file_cache",
+        lambda *_args, **_kwargs: (_ for _ in ()).throw(
+            AssertionError("Archive-backed watershed roots should be rejected before cache clear")
+        ),
+    )
+    monkeypatch.setattr(
         project_rq.Watershed,
         "getInstance",
         lambda _wd: (_ for _ in ()).throw(AssertionError("Watershed should not be instantiated")),
@@ -696,11 +997,109 @@ def test_abstract_watershed_rq_rejects_archive_form_root(
     assert call_roots == ["watershed"]
 
 
+@pytest.mark.parametrize(
+    ("operation", "expected_method", "expects_topaz_scope"),
+    [
+        ("build_channels", "build_channels", True),
+        ("set_outlet", "set_outlet", True),
+        ("build_subcatchments", "build_subcatchments", True),
+        ("abstract_watershed", "abstract_watershed", False),
+    ],
+)
+def test_watershed_mutation_rqs_clear_scoped_cache_before_hydration(
+    monkeypatch: pytest.MonkeyPatch,
+    tmp_path: Path,
+    operation: str,
+    expected_method: str,
+    expects_topaz_scope: bool,
+) -> None:
+    run_wd, _set_archive_roots, call_roots = _stub_rq_context(monkeypatch, tmp_path)
+    events: list[tuple] = []
+    _record_cache_clears(monkeypatch, events)
+    _record_prep_timestamps(monkeypatch, events)
+    monkeypatch.setattr(project_rq, "wait_for_path", lambda *_args, **_kwargs: events.append(("wait_for_path", None)))
+
+    @contextmanager
+    def _lock(_wd: str, root: str, *, purpose: str):
+        events.append(("lock_enter", root, purpose))
+        yield
+        events.append(("lock_exit", root, purpose))
+
+    monkeypatch.setattr(project_rq, "nodir_maintenance_lock", _lock)
+
+    class DummyWatershed:
+        delineation_backend_is_topaz = True
+        delineation_backend_is_wbt = False
+        subwta = "watershed/SUBWTA.ARC"
+        logger = SimpleNamespace(warning=lambda *_args, **_kwargs: None)
+
+        @contextmanager
+        def locked(self):
+            events.append(("locked", "enter"))
+            yield
+            events.append(("locked", "exit"))
+
+        def build_channels(self, csa: float, mcl: float) -> None:
+            events.append(("build_channels", csa, mcl))
+
+        def set_outlet(self, outlet_lng: float, outlet_lat: float) -> None:
+            events.append(("set_outlet", outlet_lng, outlet_lat))
+
+        def build_subcatchments(self) -> None:
+            events.append(("build_subcatchments", None))
+
+        def abstract_watershed(self) -> None:
+            events.append(("abstract_watershed", None))
+
+        def require_centroid(self):
+            events.append(("require_centroid", None))
+            return (-116.2, 43.6)
+
+    watershed = DummyWatershed()
+
+    def _get_watershed(wd: str) -> DummyWatershed:
+        events.append(("hydrate_watershed", wd))
+        return watershed
+
+    monkeypatch.setattr(project_rq.Watershed, "getInstance", _get_watershed)
+    monkeypatch.setattr(
+        project_rq.Watershed,
+        "load_detached",
+        lambda _wd, allow_nonexistent=True: SimpleNamespace(centroid=(-116.2, 43.6)),
+    )
+
+    if operation == "build_channels":
+        project_rq.build_channels_rq(
+            "demo",
+            csa=10.0,
+            mcl=50.0,
+            stream_pruning_method=None,
+            wbt_fill_or_breach=None,
+            wbt_blc_dist=None,
+        )
+    elif operation == "set_outlet":
+        project_rq.set_outlet_rq("demo", outlet_lng=-112.0, outlet_lat=44.0)
+    elif operation == "build_subcatchments":
+        project_rq.build_subcatchments_rq("demo")
+    else:
+        project_rq.abstract_watershed_rq("demo")
+
+    assert call_roots == ["watershed", "watershed"]
+    watershed_clear_index = events.index(("clear", "demo", "watershed.nodb"))
+    hydrate_index = events.index(("hydrate_watershed", str(run_wd)))
+    method_index = next(idx for idx, event in enumerate(events) if event[0] == expected_method)
+    assert watershed_clear_index < hydrate_index < method_index
+    if expects_topaz_scope:
+        topaz_clear_index = events.index(("clear", "demo", "topaz.nodb"))
+        assert hydrate_index < topaz_clear_index < method_index
+
+
 def test_abstract_watershed_rq_repairs_missing_persisted_centroid_once(
     monkeypatch: pytest.MonkeyPatch,
     tmp_path: Path,
 ) -> None:
     _run_wd, _set_archive_roots, _call_roots = _stub_rq_context(monkeypatch, tmp_path)
+    monkeypatch.setattr(project_rq, "clear_nodb_file_cache", lambda *_args, **_kwargs: None)
     monkeypatch.setattr(project_rq, "wait_for_path", lambda *_args, **_kwargs: None)
 
     class _WatershedStub:
@@ -750,6 +1149,7 @@ def test_abstract_watershed_rq_fails_when_centroid_still_missing_after_repair(
     tmp_path: Path,
 ) -> None:
     _run_wd, _set_archive_roots, _call_roots = _stub_rq_context(monkeypatch, tmp_path)
+    monkeypatch.setattr(project_rq, "clear_nodb_file_cache", lambda *_args, **_kwargs: None)
     monkeypatch.setattr(project_rq, "wait_for_path", lambda *_args, **_kwargs: None)
 
     class _WatershedStub:
@@ -788,6 +1188,13 @@ def test_upload_cli_rq_rejects_archive_form_root(
     _run_wd, set_archive_roots, call_roots = _stub_rq_context(monkeypatch, tmp_path)
     set_archive_roots("climate")
     monkeypatch.setattr(
+        project_rq,
+        "clear_nodb_file_cache",
+        lambda *_args, **_kwargs: (_ for _ in ()).throw(
+            AssertionError("Archive-backed climate roots should be rejected before cache clear")
+        ),
+    )
+    monkeypatch.setattr(
         project_rq.Climate,
         "getInstance",
         lambda _wd: (_ for _ in ()).throw(AssertionError("Climate should not be instantiated")),
@@ -798,6 +1205,259 @@ def test_upload_cli_rq_rejects_archive_form_root(
 
     assert exc_info.value.code == "NODIR_ARCHIVE_RETIRED"
     assert call_roots == ["climate"]
+
+
+def test_upload_cli_rq_clears_climate_cache_before_hydration(
+    monkeypatch: pytest.MonkeyPatch,
+    tmp_path: Path,
+) -> None:
+    run_wd, _set_archive_roots, call_roots = _stub_rq_context(monkeypatch, tmp_path)
+    events: list[tuple] = []
+    _record_cache_clears(monkeypatch, events)
+    _record_prep_timestamps(monkeypatch, events)
+
+    class DummyClimate:
+        def set_user_defined_cli(self, cli_filename: str) -> None:
+            events.append(("set_user_defined_cli", cli_filename))
+
+    def _get_climate(wd: str) -> DummyClimate:
+        assert events == [("clear", "demo", "climate.nodb")]
+        events.append(("hydrate_climate", wd))
+        return DummyClimate()
+
+    monkeypatch.setattr(project_rq.Climate, "getInstance", _get_climate)
+
+    project_rq.upload_cli_rq("demo", "user.cli")
+
+    assert call_roots == ["climate", "climate"]
+    assert events == [
+        ("clear", "demo", "climate.nodb"),
+        ("hydrate_climate", str(run_wd)),
+        ("set_user_defined_cli", "user.cli"),
+        ("timestamp", project_rq.TaskEnum.build_climate),
+    ]
+
+
+@pytest.mark.parametrize(
+    ("rq_name", "controller_name", "scope", "method_name", "task"),
+    [
+        (
+            "build_rangeland_cover_rq",
+            "RangelandCover",
+            "rangeland_cover.nodb",
+            "build",
+            project_rq.TaskEnum.build_rangeland_cover,
+        ),
+        (
+            "fetch_and_align_polaris_rq",
+            "Polaris",
+            "polaris.nodb",
+            "acquire_and_align",
+            project_rq.TaskEnum.fetch_polaris,
+        ),
+        (
+            "build_rusle_rq",
+            "Rusle",
+            "rusle.nodb",
+            "build",
+            project_rq.TaskEnum.build_rusle,
+        ),
+    ],
+)
+def test_priority1_direct_mod_rqs_clear_scoped_cache_before_hydration(
+    monkeypatch: pytest.MonkeyPatch,
+    tmp_path: Path,
+    rq_name: str,
+    controller_name: str,
+    scope: str,
+    method_name: str,
+    task,
+) -> None:
+    run_wd, _set_archive_roots, _call_roots = _stub_rq_context(monkeypatch, tmp_path)
+    events: list[tuple] = []
+    _record_cache_clears(monkeypatch, events)
+    _record_prep_timestamps(monkeypatch, events)
+
+    def _target_method(self, *args, **kwargs):
+        events.append(("method", controller_name, method_name, args, kwargs))
+        return {"ok": True}
+
+    dummy_cls = type(
+        "DummyController",
+        (),
+        {
+            method_name: _target_method,
+            "logger": SimpleNamespace(info=lambda *_args, **_kwargs: None),
+        },
+    )
+
+    def _get_controller(wd: str):
+        assert events == [("clear", "demo", scope)]
+        events.append(("hydrate", controller_name, wd))
+        return dummy_cls()
+
+    monkeypatch.setattr(getattr(project_rq, controller_name), "getInstance", _get_controller)
+
+    if rq_name == "build_rangeland_cover_rq":
+        project_rq.build_rangeland_cover_rq("demo", rap_year=2020, default_covers={"bunchgrass": 1.0})
+    elif rq_name == "fetch_and_align_polaris_rq":
+        project_rq.fetch_and_align_polaris_rq("demo", payload={"force_refresh": True})
+    else:
+        project_rq.build_rusle_rq("demo", payload={"force_polaris_refresh": True})
+
+    assert events[0:2] == [
+        ("clear", "demo", scope),
+        ("hydrate", controller_name, str(run_wd)),
+    ]
+    method_index = next(idx for idx, event in enumerate(events) if event[0] == "method")
+    timestamp_index = events.index(("timestamp", task))
+    assert method_index < timestamp_index
+
+
+@pytest.mark.parametrize(
+    ("rq_name", "controller_name", "scope", "first_method"),
+    [
+        ("fetch_and_analyze_rap_ts_rq", "RAP_TS", "rap_ts.nodb", "acquire_rasters"),
+        ("fetch_and_analyze_openet_ts_rq", "OpenET_TS", "openet_ts.nodb", "acquire_timeseries"),
+    ],
+)
+def test_priority1_time_series_rqs_clear_scoped_cache_before_series_hydration(
+    monkeypatch: pytest.MonkeyPatch,
+    tmp_path: Path,
+    rq_name: str,
+    controller_name: str,
+    scope: str,
+    first_method: str,
+) -> None:
+    run_wd, _set_archive_roots, _call_roots = _stub_rq_context(monkeypatch, tmp_path)
+    events: list[tuple] = []
+    _record_cache_clears(monkeypatch, events)
+    _record_prep_timestamps(monkeypatch, events)
+
+    class DummyClimate:
+        observed_start_year = 2001
+        observed_end_year = 2003
+
+    monkeypatch.setattr(
+        project_rq.Climate,
+        "getInstance",
+        lambda wd: events.append(("hydrate_climate", wd)) or DummyClimate(),
+    )
+
+    class DummySeries:
+        logger = SimpleNamespace(info=lambda *_args, **_kwargs: None)
+
+        def acquire_rasters(self, **kwargs) -> None:
+            events.append(("acquire_rasters", kwargs))
+
+        def acquire_timeseries(self, **kwargs) -> None:
+            events.append(("acquire_timeseries", kwargs))
+
+        def analyze(self) -> None:
+            events.append(("analyze", None))
+
+    def _get_series(wd: str) -> DummySeries:
+        events.append(("hydrate_series", controller_name, wd))
+        return DummySeries()
+
+    monkeypatch.setattr(getattr(project_rq, controller_name), "getInstance", _get_series)
+
+    if rq_name == "fetch_and_analyze_rap_ts_rq":
+        project_rq.fetch_and_analyze_rap_ts_rq("demo", payload={"note": "unit"})
+    else:
+        project_rq.fetch_and_analyze_openet_ts_rq("demo", payload={"force_refresh": True})
+
+    assert events[0] == ("hydrate_climate", str(run_wd))
+    clear_index = events.index(("clear", "demo", scope))
+    hydrate_index = events.index(("hydrate_series", controller_name, str(run_wd)))
+    method_index = next(idx for idx, event in enumerate(events) if event[0] == first_method)
+    assert clear_index < hydrate_index < method_index
+
+
+@pytest.mark.parametrize(
+    ("rq_name", "controller_name", "scope", "method_name", "roots"),
+    [
+        (
+            "run_ash_rq",
+            "Ash",
+            "ash.nodb",
+            "run_ash",
+            ("climate", "landuse", "watershed"),
+        ),
+        (
+            "run_debris_flow_rq",
+            "DebrisFlow",
+            "debris_flow.nodb",
+            "run_debris_flow",
+            ("soils", "watershed"),
+        ),
+    ],
+)
+def test_priority1_root_checked_mod_rqs_clear_after_root_checks_before_hydration(
+    monkeypatch: pytest.MonkeyPatch,
+    tmp_path: Path,
+    rq_name: str,
+    controller_name: str,
+    scope: str,
+    method_name: str,
+    roots: tuple[str, ...],
+) -> None:
+    run_wd, _set_archive_roots, _call_roots = _stub_rq_context(monkeypatch, tmp_path)
+    events: list[tuple] = []
+    _record_cache_clears(monkeypatch, events)
+    _record_prep_timestamps(monkeypatch, events)
+
+    def _resolve(_wd: str, root: str, view: str = "effective"):
+        events.append(("root", root, view))
+        return SimpleNamespace(form="dir")
+
+    @contextmanager
+    def _lock(_wd: str, root: str, *, purpose: str):
+        events.append(("lock_enter", root, purpose))
+        yield
+        events.append(("lock_exit", root, purpose))
+
+    monkeypatch.setattr(project_rq, "nodir_resolve", _resolve)
+    monkeypatch.setattr(project_rq, "nodir_maintenance_lock", _lock)
+
+    def _target_method(self, *args, **kwargs):
+        events.append(("method", controller_name, method_name, args, kwargs))
+
+    dummy_cls = type("DummyController", (), {method_name: _target_method})
+
+    def _get_controller(wd: str):
+        events.append(("hydrate", controller_name, wd))
+        return dummy_cls()
+
+    monkeypatch.setattr(getattr(project_rq, controller_name), "getInstance", _get_controller)
+
+    class DummyWepp:
+        wepp_interchange_dir = "wepp/interchange"
+        baseflow_opts = {"enabled": False}
+
+    monkeypatch.setattr(project_rq.Wepp, "getInstance", lambda wd: events.append(("hydrate_wepp", wd)) or DummyWepp())
+    monkeypatch.setattr(
+        project_rq,
+        "run_totalwatsed3",
+        lambda interchange_dir, baseflow_opts: events.append(("run_totalwatsed3", interchange_dir, baseflow_opts)),
+    )
+
+    if rq_name == "run_ash_rq":
+        project_rq.run_ash_rq("demo", "8/4", 3.0, 5.0)
+    else:
+        project_rq.run_debris_flow_rq(
+            "demo",
+            payload={"clay_pct": 30.0, "liquid_limit": 40.0, "datasource": "NOAA"},
+        )
+
+    root_events_before_clear = [event for event in events if event[0] == "root"]
+    assert [event[1] for event in root_events_before_clear[: len(roots)]] == list(roots)
+    assert [event[1] for event in root_events_before_clear[len(roots): len(roots) * 2]] == list(roots)
+    clear_index = events.index(("clear", "demo", scope))
+    hydrate_index = events.index(("hydrate", controller_name, str(run_wd)))
+    method_index = next(idx for idx, event in enumerate(events) if event[0] == "method")
+    assert len([event for event in events[:clear_index] if event[0] == "root"]) == len(roots) * 2
+    assert clear_index < hydrate_index < method_index
 
 
 def test_run_with_directory_root_lock_executes_callback_for_directory_root(

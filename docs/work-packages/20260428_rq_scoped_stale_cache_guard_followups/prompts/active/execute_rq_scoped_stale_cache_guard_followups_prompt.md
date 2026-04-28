@@ -3,7 +3,7 @@
 Execute the active work package end-to-end:
 
 - Package: `/workdir/wepppy/docs/work-packages/20260428_rq_scoped_stale_cache_guard_followups/`
-- Active ExecPlan: `/workdir/wepppy/docs/work-packages/20260428_rq_scoped_stale_cache_guard_followups/prompts/active/rq_scoped_stale_cache_guard_followups_execplan.md`
+- Completed ExecPlan: `/workdir/wepppy/docs/work-packages/20260428_rq_scoped_stale_cache_guard_followups/prompts/completed/rq_scoped_stale_cache_guard_followups_execplan.md`
 
 Required outcomes:
 1. Priority 0 RQ mutation paths clear scoped NoDb cache before mutable controller hydration.
@@ -30,6 +30,7 @@ Implementation scope:
   - `PROJECT_TRACKER.md`
 
 Execution constraints:
+- Treat this package as conformance to `docs/standards/rq-scoped-nodb-mutation-cache-guard-standard.md`, not hardening.
 - Keep scope narrow to confirmed stale-cache risk shapes.
 - Prefer exact `pup_relpath` values; do not replace scoped guards with broad run-wide cache clears.
 - Do not add fallback wrappers that silently mask missing Redis cache dependencies.

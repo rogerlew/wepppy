@@ -117,6 +117,7 @@
 - Mini packages: `docs/mini-work-packages/`
 - Prompt/template catalog: `docs/prompt_templates/AGENTS.md`
 - Hardening lifecycle standard (including callus softening): `docs/standards/hardening-lifecycle-standard.md`
+- RQ scoped NoDb mutation cache-guard standard: `docs/standards/rq-scoped-nodb-mutation-cache-guard-standard.md`
 - NoDb facade/collaborator implementation standard: `docs/standards/nodb-facade-collaborator-pattern.md`
 - Vulture dead-code gate standard: `docs/standards/vulture-dead-code-gate-standard.md`
 - WBT release cutover reference (includes canonical `weppcloud-wbt` runbook link): `docs/dev-notes/weppcloud-wbt-release-cutover.md`
