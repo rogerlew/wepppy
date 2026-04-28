@@ -23,6 +23,7 @@ from wepppy.config.redis_settings import (
 from wepppy.weppcloud.utils.helpers import get_wd
 from wepppy.rq.exception_logging import with_exception_logging
 
+from wepppy.nodb.base import clear_nodb_file_cache
 from wepppy.nodb.core import Wepp
 from wepppy.nodb.mods.omni import Omni, OmniScenario
 from wepppy.nodb.mods.omni.omni import (
@@ -335,6 +336,7 @@ def run_omni_scenario_rq(
         StatusMessenger.publish(status_channel, f'rq:{job.id} STARTED {func_name}({runid})')
         start_ts = time.time()
 
+        clear_nodb_file_cache(runid, pup_relpath="omni.nodb")
         omni = Omni.getInstance(wd)
 
         scenario_payload = _scenario_payload_for_job(scenario)
@@ -422,6 +424,7 @@ def run_omni_contrast_rq(
         StatusMessenger.publish(status_channel, f'rq:{job.id} STARTED {func_name}({runid})')
         start_ts = time.time()
 
+        clear_nodb_file_cache(runid, pup_relpath="omni.nodb")
         omni = Omni.getInstance(wd)
         contrast_names = omni.contrast_names or []
         if contrast_id < 1 or contrast_id > len(contrast_names):
@@ -472,6 +475,7 @@ def run_omni_scenarios_rq(runid: str) -> Optional[Job]:
         for root in ('climate', 'watershed', 'landuse', 'soils'):
             nodir_resolve(wd, root, view='effective')
 
+        clear_nodb_file_cache(runid, pup_relpath="omni.nodb")
         omni = Omni.getInstance(wd)
 
         if not omni.use_rq_job_pool_concurrency:
@@ -725,6 +729,7 @@ def run_omni_contrasts_rq(runid: str) -> Optional[Job]:
                 f"Recovered mixed NoDir roots before {func_name}({runid}): {recovered_txt}",
             )
 
+        clear_nodb_file_cache(runid, pup_relpath="omni.nodb")
         omni = Omni.getInstance(wd)
         contrast_names: List[Optional[str]] = omni.contrast_names or []
         if not contrast_names:
@@ -892,6 +897,7 @@ def delete_omni_contrasts_rq(runid: str) -> None:
         status_channel = f'{runid}:omni_contrasts'
         StatusMessenger.publish(status_channel, f'rq:{job.id} STARTED {func_name}({runid})')
 
+        clear_nodb_file_cache(runid, pup_relpath="omni.nodb")
         omni = Omni.getInstance(wd)
         omni.clear_contrasts()
 

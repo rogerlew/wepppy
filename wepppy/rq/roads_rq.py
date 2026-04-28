@@ -12,6 +12,7 @@ from rq.exceptions import NoSuchJobError
 from rq.job import Job
 
 from wepppy.config.redis_settings import RedisDB, redis_connection_kwargs
+from wepppy.nodb.base import clear_nodb_file_cache
 from wepppy.nodb.core import Ron
 from wepppy.nodb.mods.roads import Roads
 from wepppy.nodb.redis_prep import RedisPrep, TaskEnum
@@ -156,6 +157,7 @@ def run_roads_prepare_rq(runid: str) -> Dict[str, Any]:
         if not lock_acquired:
             raise RoadsSingleFlightConflict("Roads job already running for this run.")
 
+        clear_nodb_file_cache(runid, pup_relpath="roads.nodb")
         roads = _sync_roads_enabled_state(wd)
         if not roads.enabled:
             raise ValueError("Roads module is not enabled for this run.")
@@ -202,6 +204,7 @@ def run_roads_rq(runid: str) -> Dict[str, Any]:
         if not lock_acquired:
             raise RoadsSingleFlightConflict("Roads job already running for this run.")
 
+        clear_nodb_file_cache(runid, pup_relpath="roads.nodb")
         roads = _sync_roads_enabled_state(wd)
         if not roads.enabled:
             raise ValueError("Roads module is not enabled for this run.")

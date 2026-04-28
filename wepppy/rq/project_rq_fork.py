@@ -178,6 +178,7 @@ def prepare_fork_run(
     initialize_ttl: Callable[[str], None] | None,
     format_ttl_failure: Callable[[Exception], str] | None = None,
     mutate_root_fn: Callable[..., Any] | None = None,
+    clear_nodb_cache_fn: Callable[..., Any] | None = None,
     build_rsync_cmd: Callable[[str, bool], list[str]] = (
         lambda run_right, undisturbify: _build_fork_rsync_cmd(
             run_right,
@@ -188,6 +189,8 @@ def prepare_fork_run(
 ) -> str:
     if mutate_root_fn is None:
         from wepppy.runtime_paths.mutations import mutate_root as mutate_root_fn
+    if clear_nodb_cache_fn is None:
+        from wepppy.nodb.base import clear_nodb_file_cache as clear_nodb_cache_fn
 
     # 1. Verify rsync exists
     rsync_path = shutil.which("rsync")
@@ -310,15 +313,18 @@ def prepare_fork_run(
         )
 
         publish_status(status_channel, "Undisturbifying Project...\n")
+        clear_nodb_cache_fn(new_runid, pup_relpath="ron.nodb")
         ron = ron_cls.getInstance(new_wd)
         ron.scenario = "Undisturbed"
 
         publish_status(status_channel, "Removing SBS...\n")
+        clear_nodb_cache_fn(new_runid, pup_relpath="disturbed.nodb")
         disturbed = disturbed_cls.getInstance(new_wd)
         disturbed.remove_sbs()
         publish_status(status_channel, "Removing SBS... done.\n")
 
         publish_status(status_channel, "Rebuilding Landuse...\n")
+        clear_nodb_cache_fn(new_runid, pup_relpath="landuse.nodb")
         landuse = landuse_cls.getInstance(new_wd)
         mutate_root_fn(
             new_wd,
@@ -329,6 +335,7 @@ def prepare_fork_run(
         publish_status(status_channel, "Rebuilding Landuse... done.\n")
 
         publish_status(status_channel, "Rebuilding Soils...\n")
+        clear_nodb_cache_fn(new_runid, pup_relpath="soils.nodb")
         soils = soils_cls.getInstance(new_wd)
         mutate_root_fn(
             new_wd,

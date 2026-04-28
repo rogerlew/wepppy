@@ -128,10 +128,29 @@ def test_run_path_cost_effective_rq_preflights_omni_roots(
     published, base_path = path_ce_rq_environment
 
     preflight_calls: list[tuple[str, str, str]] = []
+    call_order: list[str] = []
 
     def _resolve(wd: str, root: str, view: str = "effective"):
         preflight_calls.append((wd, root, view))
 
+    original_path_get = PathCeStub.getInstance.__func__
+    original_omni_get = OmniStub.getInstance.__func__
+
+    def _path_get_instance(cls, wd: str) -> PathCeStub:
+        call_order.append("get:path_ce")
+        return original_path_get(cls, wd)
+
+    def _omni_get_instance(cls, wd: str) -> OmniStub:
+        call_order.append("get:omni")
+        return original_omni_get(cls, wd)
+
+    monkeypatch.setattr(PathCeStub, "getInstance", classmethod(_path_get_instance))
+    monkeypatch.setattr(OmniStub, "getInstance", classmethod(_omni_get_instance))
+    monkeypatch.setattr(
+        path_ce_rq,
+        "clear_nodb_file_cache",
+        lambda runid, *, pup_relpath: call_order.append(f"clear:{pup_relpath}"),
+    )
     monkeypatch.setattr(path_ce_rq, "nodir_resolve", _resolve)
 
     result = path_ce_rq.run_path_cost_effective_rq("demo")
@@ -149,6 +168,8 @@ def test_run_path_cost_effective_rq_preflights_omni_roots(
     prep = RedisPrepStub.tryGetInstance(run_wd)
 
     assert result == {"status": "ok"}
+    assert call_order.index("clear:path_ce.nodb") < call_order.index("get:path_ce")
+    assert call_order.index("clear:omni.nodb") < call_order.index("get:omni")
     assert omni.parse_calls == [["merged-scenarios"]]
     assert omni.run_calls == 1
     assert controller.run_calls == 1

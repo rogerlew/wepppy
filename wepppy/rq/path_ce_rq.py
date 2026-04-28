@@ -10,6 +10,7 @@ from typing import Any, Dict, Iterable, List, Tuple
 import redis
 from rq import get_current_job
 
+from wepppy.nodb.base import clear_nodb_file_cache
 from wepppy.nodb.mods.omni.omni import Omni, OmniScenario, _scenario_name_from_scenario_definition
 from wepppy.nodb.mods.path_ce import PathCostEffective
 from wepppy.nodb.mods.path_ce.presets import PATH_CE_BASELINE_SCENARIO, build_path_omni_scenarios
@@ -100,12 +101,14 @@ def run_path_cost_effective_rq(runid: str) -> Dict[str, Any]:
                 exc,
             )
 
+    clear_nodb_file_cache(runid, pup_relpath="path_ce.nodb")
     controller = PathCostEffective.getInstance(wd)
 
     try:
         for root in ("climate", "watershed", "landuse", "soils"):
             nodir_resolve(wd, root, view="effective")
 
+        clear_nodb_file_cache(runid, pup_relpath="omni.nodb")
         omni = Omni.getInstance(wd)
 
         StatusMessenger.publish(status_channel, f"rq:{job.id} STATUS Provisioning Omni scenarios for PATH")

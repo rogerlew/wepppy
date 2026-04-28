@@ -8,6 +8,7 @@ from typing import Any, Mapping
 
 from rq import get_current_job
 
+from wepppy.nodb.base import clear_nodb_file_cache
 from wepppy.nodb.base import NoDbAlreadyLockedError
 from wepppy.nodb.mods.geneva import Geneva
 from wepppy.rq.exception_logging import with_exception_logging
@@ -68,6 +69,7 @@ def run_geneva_prepare_hrus_rq(
     payload: Mapping[str, Any] | None = None,
 ) -> dict[str, Any]:
     wd = get_wd(runid)
+    clear_nodb_file_cache(runid, pup_relpath="geneva.nodb")
     geneva = _ensure_geneva_controller(wd, f"{config}.cfg")
 
     request_payload = dict(payload or {})
@@ -101,6 +103,7 @@ def run_geneva_build_frequency_panel_rq(
     payload: Mapping[str, Any] | None = None,
 ) -> dict[str, Any]:
     wd = get_wd(runid)
+    clear_nodb_file_cache(runid, pup_relpath="geneva.nodb")
     geneva = _ensure_geneva_controller(wd, f"{config}.cfg")
 
     request_payload = geneva.frequency_panel_service.normalize_request(payload or {})
@@ -136,6 +139,7 @@ def run_geneva_run_batch_rq(
     payload: Mapping[str, Any] | None = None,
 ) -> dict[str, Any]:
     wd = get_wd(runid)
+    clear_nodb_file_cache(runid, pup_relpath="geneva.nodb")
     geneva = _ensure_geneva_controller(wd, f"{config}.cfg")
 
     request_payload = dict(payload or {})

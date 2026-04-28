@@ -410,6 +410,106 @@ def test_run_wepp_rq_locked_run_publishes_exception_status(monkeypatch: pytest.M
     )
 
 
+def test_run_wepp_rq_clears_scoped_cache_before_wepp_hydration(monkeypatch: pytest.MonkeyPatch) -> None:
+    call_order: list[tuple[str, str]] = []
+
+    monkeypatch.setattr(wepp_rq, "WEPP_LOCK_RETRY_ATTEMPTS", 0)
+    monkeypatch.setattr(wepp_rq, "WEPP_LOCK_RETRY_DELAY_SECONDS", 0.0)
+    monkeypatch.setattr(wepp_rq, "get_current_job", _make_parent_job)
+    monkeypatch.setattr(wepp_rq.StatusMessenger, "publish", lambda channel, message: None)
+    monkeypatch.setattr(wepp_rq, "get_wd", lambda runid: "/tmp/run")
+    monkeypatch.setattr(wepp_rq, "_recover_mixed_nodir_roots", lambda _wd: ())
+    monkeypatch.setattr(
+        wepp_rq,
+        "clear_nodb_file_cache",
+        lambda runid, *, pup_relpath: call_order.append(("clear", str(pup_relpath))),
+    )
+    monkeypatch.setattr(
+        wepp_rq.Wepp,
+        "getInstance",
+        lambda _wd: call_order.append(("get_instance", "wepp.nodb")) or SimpleNamespace(
+            islocked=lambda: True,
+            logger=SimpleNamespace(
+                info=lambda *args, **kwargs: None,
+                warning=lambda *args, **kwargs: None,
+            ),
+        ),
+    )
+
+    with pytest.raises(RuntimeError, match="ab-run is locked"):
+        wepp_rq.run_wepp_rq("ab-run")
+
+    assert call_order == [("clear", "wepp.nodb"), ("get_instance", "wepp.nodb")]
+
+
+def test_run_wepp_watershed_rq_clears_scoped_cache_before_wepp_hydration(
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    call_order: list[tuple[str, str]] = []
+
+    monkeypatch.setattr(wepp_rq, "WEPP_LOCK_RETRY_ATTEMPTS", 0)
+    monkeypatch.setattr(wepp_rq, "WEPP_LOCK_RETRY_DELAY_SECONDS", 0.0)
+    monkeypatch.setattr(wepp_rq, "get_current_job", _make_parent_job)
+    monkeypatch.setattr(wepp_rq.StatusMessenger, "publish", lambda channel, message: None)
+    monkeypatch.setattr(wepp_rq, "get_wd", lambda runid: "/tmp/run")
+    monkeypatch.setattr(wepp_rq, "_recover_mixed_nodir_roots", lambda _wd, roots=("watershed",): ())
+    monkeypatch.setattr(
+        wepp_rq,
+        "clear_nodb_file_cache",
+        lambda runid, *, pup_relpath: call_order.append(("clear", str(pup_relpath))),
+    )
+    monkeypatch.setattr(
+        wepp_rq.Wepp,
+        "getInstance",
+        lambda _wd: call_order.append(("get_instance", "wepp.nodb")) or SimpleNamespace(
+            islocked=lambda: True,
+            logger=SimpleNamespace(
+                info=lambda *args, **kwargs: None,
+                warning=lambda *args, **kwargs: None,
+            ),
+        ),
+    )
+
+    with pytest.raises(RuntimeError, match="ab-run is locked"):
+        wepp_rq.run_wepp_watershed_rq("ab-run")
+
+    assert call_order == [("clear", "wepp.nodb"), ("get_instance", "wepp.nodb")]
+
+
+def test_prep_wepp_watershed_rq_clears_scoped_cache_before_wepp_hydration(
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    call_order: list[tuple[str, str]] = []
+
+    monkeypatch.setattr(wepp_rq, "WEPP_LOCK_RETRY_ATTEMPTS", 0)
+    monkeypatch.setattr(wepp_rq, "WEPP_LOCK_RETRY_DELAY_SECONDS", 0.0)
+    monkeypatch.setattr(wepp_rq, "get_current_job", _make_parent_job)
+    monkeypatch.setattr(wepp_rq.StatusMessenger, "publish", lambda channel, message: None)
+    monkeypatch.setattr(wepp_rq, "get_wd", lambda runid: "/tmp/run")
+    monkeypatch.setattr(wepp_rq, "_recover_mixed_nodir_roots", lambda _wd, roots=(): ())
+    monkeypatch.setattr(
+        wepp_rq,
+        "clear_nodb_file_cache",
+        lambda runid, *, pup_relpath: call_order.append(("clear", str(pup_relpath))),
+    )
+    monkeypatch.setattr(
+        wepp_rq.Wepp,
+        "getInstance",
+        lambda _wd: call_order.append(("get_instance", "wepp.nodb")) or SimpleNamespace(
+            islocked=lambda: True,
+            logger=SimpleNamespace(
+                info=lambda *args, **kwargs: None,
+                warning=lambda *args, **kwargs: None,
+            ),
+        ),
+    )
+
+    with pytest.raises(RuntimeError, match="ab-run is locked"):
+        wepp_rq.prep_wepp_watershed_rq("ab-run")
+
+    assert call_order == [("clear", "wepp.nodb"), ("get_instance", "wepp.nodb")]
+
+
 def test_wait_for_wepp_unlock_allows_transient_lock(monkeypatch: pytest.MonkeyPatch) -> None:
     monkeypatch.setattr(wepp_rq, "WEPP_LOCK_RETRY_ATTEMPTS", 3)
     monkeypatch.setattr(wepp_rq, "WEPP_LOCK_RETRY_DELAY_SECONDS", 0.0)
@@ -450,6 +550,7 @@ def test_build_swat_inputs_autocommits(monkeypatch: pytest.MonkeyPatch) -> None:
 
     built: list[str] = []
     commit_stages: list[str] = []
+    call_order: list[tuple[str, str]] = []
 
     swat_module = ModuleType("wepppy.nodb.mods.swat")
 
@@ -460,10 +561,16 @@ def test_build_swat_inputs_autocommits(monkeypatch: pytest.MonkeyPatch) -> None:
     class DummySwat:
         @staticmethod
         def getInstance(wd: str) -> DummySwatController:
+            call_order.append(("get_instance", "swat.nodb"))
             return DummySwatController()
 
     swat_module.Swat = DummySwat  # type: ignore[attr-defined]
     monkeypatch.setitem(sys.modules, "wepppy.nodb.mods.swat", swat_module)
+    monkeypatch.setattr(
+        swat_rq,
+        "clear_nodb_file_cache",
+        lambda runid, *, pup_relpath: call_order.append(("clear", str(pup_relpath))),
+    )
     released_tokens: list[str] = []
     monkeypatch.setattr(
         swat_rq.Wepp,
@@ -491,3 +598,74 @@ def test_build_swat_inputs_autocommits(monkeypatch: pytest.MonkeyPatch) -> None:
     assert built == ["built"]
     assert commit_stages == ["SWAT inputs"]
     assert released_tokens == ["lock-1"]
+    assert call_order[:2] == [("clear", "swat.nodb"), ("get_instance", "swat.nodb")]
+
+
+def test_run_swat_rq_clears_scoped_cache_before_hydration(monkeypatch: pytest.MonkeyPatch) -> None:
+    monkeypatch.setattr(swat_rq.StatusMessenger, "publish", lambda channel, message: None)
+    monkeypatch.setattr(swat_rq, "get_current_job", lambda: SimpleNamespace(id="job-3"))
+    monkeypatch.setattr(swat_rq, "get_wd", lambda runid: "/tmp/run")
+
+    call_order: list[tuple[str, str]] = []
+    run_calls: list[str] = []
+
+    swat_module = ModuleType("wepppy.nodb.mods.swat")
+
+    class DummySwatController:
+        def run_swat(self) -> None:
+            run_calls.append("run")
+
+    class DummySwat:
+        @staticmethod
+        def getInstance(wd: str) -> DummySwatController:
+            call_order.append(("get_instance", "swat.nodb"))
+            return DummySwatController()
+
+    swat_module.Swat = DummySwat  # type: ignore[attr-defined]
+    monkeypatch.setitem(sys.modules, "wepppy.nodb.mods.swat", swat_module)
+    monkeypatch.setattr(
+        swat_rq,
+        "clear_nodb_file_cache",
+        lambda runid, *, pup_relpath: call_order.append(("clear", str(pup_relpath))),
+    )
+
+    swat_rq._run_swat_rq("ab-run")
+
+    assert run_calls == ["run"]
+    assert call_order == [("clear", "swat.nodb"), ("get_instance", "swat.nodb")]
+
+
+def test_run_swat_interchange_rq_clears_scoped_cache_before_hydration(
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    monkeypatch.setattr(swat_rq.StatusMessenger, "publish", lambda channel, message: None)
+    monkeypatch.setattr(swat_rq, "get_current_job", lambda: SimpleNamespace(id="job-4"))
+    monkeypatch.setattr(swat_rq, "get_wd", lambda runid: "/tmp/run")
+
+    call_order: list[tuple[str, str]] = []
+    interchange_calls: list[str] = []
+
+    swat_module = ModuleType("wepppy.nodb.mods.swat")
+
+    class DummySwatController:
+        def run_swat_interchange(self, *, status_channel: str) -> None:
+            interchange_calls.append(status_channel)
+
+    class DummySwat:
+        @staticmethod
+        def getInstance(wd: str) -> DummySwatController:
+            call_order.append(("get_instance", "swat.nodb"))
+            return DummySwatController()
+
+    swat_module.Swat = DummySwat  # type: ignore[attr-defined]
+    monkeypatch.setitem(sys.modules, "wepppy.nodb.mods.swat", swat_module)
+    monkeypatch.setattr(
+        swat_rq,
+        "clear_nodb_file_cache",
+        lambda runid, *, pup_relpath: call_order.append(("clear", str(pup_relpath))),
+    )
+
+    swat_rq.run_swat_interchange_rq("ab-run")
+
+    assert interchange_calls == ["ab-run:swat"]
+    assert call_order == [("clear", "swat.nodb"), ("get_instance", "swat.nodb")]

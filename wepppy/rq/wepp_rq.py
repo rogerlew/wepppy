@@ -40,6 +40,7 @@ from wepppy.io_wait import wait_for_path, wait_for_paths
 from wepppy.runtime_paths.errors import nodir_mixed_state
 from wepppy.runtime_paths.fs import resolve
 from wepppy.runtime_paths.projections import with_root_projection
+from wepppy.nodb.base import clear_nodb_file_cache
 from wepppy.query_engine.activate import activate_query_engine
 from wepppy.wepp.interchange import (
     cleanup_hillslope_sources_for_completed_interchange,
@@ -541,6 +542,7 @@ def bootstrap_enable_rq(runid: str, actor: str | None = None, lock_token: str | 
     try:
         StatusMessenger.publish(status_channel, f"rq:{job_id} STARTED bootstrap_enable_rq({runid})")
         wd = get_wd(runid)
+        clear_nodb_file_cache(runid, pup_relpath="wepp.nodb")
         wepp = Wepp.getInstance(wd)
 
         if not wepp.bootstrap_enabled:
@@ -595,6 +597,7 @@ def run_wepp_rq(runid: str) -> Job:
         StatusMessenger.publish(status_channel, f"rq:{job_id} STARTED {operation}")
 
         wd = get_wd(runid)
+        clear_nodb_file_cache(runid, pup_relpath="wepp.nodb")
         wepp = Wepp.getInstance(wd)
 
         recovered_roots = _recover_mixed_nodir_roots(wd)
@@ -668,6 +671,7 @@ def run_wepp_noprep_rq(runid: str) -> Job:
         StatusMessenger.publish(status_channel, f"rq:{job_id} STARTED {operation}")
 
         wd = get_wd(runid)
+        clear_nodb_file_cache(runid, pup_relpath="wepp.nodb")
         wepp = Wepp.getInstance(wd)
 
         recovered_roots = _recover_mixed_nodir_roots(wd, roots=("watershed",))
@@ -747,6 +751,7 @@ def run_wepp_watershed_rq(runid: str) -> Job:
         StatusMessenger.publish(status_channel, f"rq:{job_id} STARTED {operation}")
 
         wd = get_wd(runid)
+        clear_nodb_file_cache(runid, pup_relpath="wepp.nodb")
         wepp = Wepp.getInstance(wd)
 
         recovered_roots = _recover_mixed_nodir_roots(wd, roots=("watershed",))
@@ -836,6 +841,7 @@ def prep_wepp_watershed_rq(runid: str) -> Job:
         StatusMessenger.publish(status_channel, f"rq:{job_id} STARTED {operation}")
 
         wd = get_wd(runid)
+        clear_nodb_file_cache(runid, pup_relpath="wepp.nodb")
         wepp = Wepp.getInstance(wd)
 
         recovered_roots = _recover_mixed_nodir_roots(wd)

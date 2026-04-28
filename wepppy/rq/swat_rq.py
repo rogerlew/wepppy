@@ -7,6 +7,7 @@ from rq import Queue, get_current_job
 from rq.job import Job
 
 from wepppy.config.redis_settings import RedisDB, redis_connection_kwargs, redis_host
+from wepppy.nodb.base import clear_nodb_file_cache
 from wepppy.nodb.core import Wepp
 from wepppy.nodb.status_messenger import StatusMessenger
 from wepppy.rq.exception_logging import with_exception_logging
@@ -143,6 +144,7 @@ def _build_swat_inputs_rq(runid: str) -> None:
 
         from wepppy.nodb.mods.swat import Swat
 
+        clear_nodb_file_cache(runid, pup_relpath="swat.nodb")
         swat = Swat.getInstance(wd)
         swat.build_inputs()
         wepp = Wepp.getInstance(wd)
@@ -177,6 +179,7 @@ def _run_swat_rq(runid: str) -> None:
 
         from wepppy.nodb.mods.swat import Swat
 
+        clear_nodb_file_cache(runid, pup_relpath="swat.nodb")
         swat = Swat.getInstance(wd)
         swat.run_swat()
 
@@ -200,6 +203,7 @@ def run_swat_interchange_rq(runid: str) -> None:
 
         from wepppy.nodb.mods.swat import Swat
 
+        clear_nodb_file_cache(runid, pup_relpath="swat.nodb")
         swat = Swat.getInstance(wd)
         swat.run_swat_interchange(status_channel=status_channel)
 

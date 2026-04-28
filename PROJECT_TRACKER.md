@@ -79,6 +79,30 @@ Feedback mechanisms:
 
 Work packages that are scoped but not yet started. Dependencies and prerequisites should be noted.
 
+### wepppyo3 Native Substrate Repositioning
+**Proposed**: 2026-04-28
+**Size**: Medium (1-2 focused documentation sessions)
+**Priority**: High documentation/strategy
+**Link**: [docs/work-packages/20260428_wepppyo3_repositioning/](docs/work-packages/20260428_wepppyo3_repositioning/)
+**Description**: Reposition `/workdir/wepppyo3` as WEPPpy's native kernel and interchange substrate rather than a miscellaneous set of Rust/PyO3 accelerators.
+
+**Scope**:
+- Rewrite `wepppyo3` README front matter around the native-substrate posture.
+- Add canonical module registry, architecture/boundary, release/provenance, and claim-discipline docs.
+- Distinguish production-critical contracts from optional/fallback and incubating modules.
+- Align relevant WEPPpy references after canonical docs exist.
+
+**Strategic Value**:
+- Makes future Rust hot-path work easier to route between `wepppyo3`, Peridot, `weppcloud-wbt`, and Python.
+- Reduces duplicate Python implementations by clarifying owned native contracts.
+- Improves release/provenance discipline for shared-object artifacts that production WEPPpy imports.
+
+**Dependencies**: Initial posture review captured in `artifacts/2026-04-28_codebase_posture_review.md`.
+
+**Next Steps**: Execute active ExecPlan at `docs/work-packages/20260428_wepppyo3_repositioning/prompts/active/wepppyo3_repositioning_execplan.md`.
+
+---
+
 ### Deprecate and Remove TauDEM Backend
 **Proposed**: 2025-10-27  
 **Size**: Medium (3-5 days)  
@@ -271,6 +295,15 @@ Currently active work packages. Limit to 2-4 packages to maintain focus.
 ## ✅ Done
 
 Recently completed work packages. Archived immediately upon completion.
+
+### RQ Scoped Stale NoDb Cache Guard Priority 2 (2026-04-28)
+**Status**: ✅ **COMPLETE**
+
+**Link**: [docs/work-packages/20260428_rq_scoped_stale_cache_guard_priority2/](docs/work-packages/20260428_rq_scoped_stale_cache_guard_priority2/)
+
+**Lifecycle**: Backlog -> Done (2026-04-28)
+
+**Summary**: Closed Priority 2 scoped stale-cache guard conformance across deferred RQ module families. Implemented exact pre-hydration guards for WEPP orchestration (`wepp.nodb`), SWAT build/run/interchange (`swat.nodb`), Omni scenario/contrast orchestration and contrast deletion (`omni.nodb`), PATH CE orchestration (`path_ce.nodb` + `omni.nodb`), Roads prepare/run (`roads.nodb`), Geneva prepare/panel/batch (`geneva.nodb`), and fork undisturbify destination-run mutations (`new_runid` scopes: `ron.nodb`, `disturbed.nodb`, `landuse.nodb`, `soils.nodb`). Targeted tests assert scoped `pup_relpath` values and guard-before-hydration ordering while preserving existing lock/archive/status/timestamp/enqueue/clone/delete/autocommit/runtime-lock behavior. All required focused pytest suites, package doc-lint, and `git diff --check` passed; ExecPlan archived under `prompts/completed/`.
 
 ### RQ Scoped Stale NoDb Cache Guard Follow-Ups (2026-04-28)
 **Status**: ✅ **COMPLETE**

@@ -76,6 +76,45 @@ def test_bootstrap_enable_rq_initializes_and_releases_lock(monkeypatch: pytest.M
     assert bootstrap_enable_job_key("ab-run") not in store
 
 
+def test_bootstrap_enable_rq_clears_scoped_cache_before_wepp_hydration(
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    store = {
+        bootstrap_git_lock_key("ab-run"): json.dumps({"token": "lock-1"}),
+        bootstrap_enable_job_key("ab-run"): "job-1",
+    }
+    call_order: list[tuple[str, str, str]] = []
+
+    class DummyWepp:
+        bootstrap_enabled = True
+
+        def init_bootstrap(self) -> None:
+            raise AssertionError("init_bootstrap should not run when bootstrap is already enabled")
+
+    def _clear_cache(runid: str, *, pup_relpath: str) -> None:
+        call_order.append(("clear", runid, pup_relpath))
+
+    def _get_instance(_wd: str) -> DummyWepp:
+        call_order.append(("get_instance", "ab-run", "wepp.nodb"))
+        return DummyWepp()
+
+    monkeypatch.setattr(wepp_rq, "get_current_job", lambda: SimpleNamespace(id="job-1"))
+    monkeypatch.setattr(wepp_rq.StatusMessenger, "publish", lambda channel, message: None)
+    monkeypatch.setattr(wepp_rq, "get_wd", lambda runid: "/tmp/run")
+    monkeypatch.setattr(wepp_rq, "clear_nodb_file_cache", _clear_cache)
+    monkeypatch.setattr(wepp_rq.Wepp, "getInstance", _get_instance)
+    monkeypatch.setattr(wepp_rq, "redis_connection_kwargs", lambda _db: {})
+    monkeypatch.setattr(wepp_rq.redis, "Redis", lambda **kwargs: DummyRedis(store))
+
+    result = wepp_rq.bootstrap_enable_rq("ab-run", actor="user:1", lock_token="lock-1")
+
+    assert result == {"enabled": True, "runid": "ab-run"}
+    assert call_order == [
+        ("clear", "ab-run", "wepp.nodb"),
+        ("get_instance", "ab-run", "wepp.nodb"),
+    ]
+
+
 def test_bootstrap_enable_rq_skips_init_when_already_enabled(monkeypatch: pytest.MonkeyPatch) -> None:
     store = {
         bootstrap_git_lock_key("ab-run"): json.dumps({"token": "lock-2"}),

@@ -53,10 +53,17 @@ def test_run_omni_scenarios_rq_preflights_roots_before_execution(
     redis_cls, omni_cls, published, base_path = omni_rq_environment
 
     preflight_calls = []
+    event_log: list[str] = []
 
     def _resolve(wd: str, root: str, view: str = "effective"):
+        event_log.append(root)
         preflight_calls.append((wd, root, view))
 
+    monkeypatch.setattr(
+        omni_rq,
+        "clear_nodb_file_cache",
+        lambda runid, *, pup_relpath: event_log.append(f"clear:{pup_relpath}"),
+    )
     monkeypatch.setattr(omni_rq, "nodir_resolve", _resolve)
 
     result = omni_rq.run_omni_scenarios_rq("demo")
@@ -69,6 +76,13 @@ def test_run_omni_scenarios_rq_preflights_roots_before_execution(
         (run_wd, "watershed", "effective"),
         (run_wd, "landuse", "effective"),
         (run_wd, "soils", "effective"),
+    ]
+    assert event_log == [
+        "climate",
+        "watershed",
+        "landuse",
+        "soils",
+        "clear:omni.nodb",
     ]
 
     omni_instance = omni_cls.getInstance(run_wd)
@@ -278,6 +292,12 @@ def test_run_omni_scenario_rq_updates_dependency_state_with_supplied_metadata(
     monkeypatch.setattr(omni_rq, "get_current_job", lambda: SimpleNamespace(id="job-41"))
     monkeypatch.setattr(omni_rq, "get_wd", lambda runid: str(tmp_path / runid))
     monkeypatch.setattr(omni_rq, "_hash_file_sha1", lambda path: "sha-new")
+    call_order: list[str] = []
+    monkeypatch.setattr(
+        omni_rq,
+        "clear_nodb_file_cache",
+        lambda runid, *, pup_relpath: call_order.append(f"clear:{pup_relpath}"),
+    )
 
     update_calls: list[tuple[dict, dict]] = []
     monkeypatch.setattr(
@@ -297,6 +317,7 @@ def test_run_omni_scenario_rq_updates_dependency_state_with_supplied_metadata(
 
         @classmethod
         def getInstance(cls, wd: str) -> "OmniStub":
+            call_order.append("get_instance")
             instance = cls._instances.get(wd)
             if instance is None:
                 instance = cls(wd)
@@ -321,6 +342,7 @@ def test_run_omni_scenario_rq_updates_dependency_state_with_supplied_metadata(
 
     assert status is True
     assert elapsed >= 0.0
+    assert call_order[:2] == ["clear:omni.nodb", "get_instance"]
     assert omni.run_payloads[0]["type"] == omni_rq.OmniScenario.UniformLow
     assert update_calls
     dependency_entry, run_state_entry = update_calls[0]
@@ -419,6 +441,12 @@ def test_run_omni_contrast_rq_emits_trigger_and_passes_job_id(
     monkeypatch.setattr(omni_rq.StatusMessenger, "publish", lambda channel, message: published.append((channel, message)))
     monkeypatch.setattr(omni_rq, "get_current_job", lambda: SimpleNamespace(id="job-52"))
     monkeypatch.setattr(omni_rq, "get_wd", lambda runid: str(tmp_path / runid))
+    call_order: list[str] = []
+    monkeypatch.setattr(
+        omni_rq,
+        "clear_nodb_file_cache",
+        lambda runid, *, pup_relpath: call_order.append(f"clear:{pup_relpath}"),
+    )
 
     class OmniStub:
         _instances: dict[str, "OmniStub"] = {}
@@ -430,6 +458,7 @@ def test_run_omni_contrast_rq_emits_trigger_and_passes_job_id(
 
         @classmethod
         def getInstance(cls, wd: str) -> "OmniStub":
+            call_order.append("get_instance")
             instance = cls._instances.get(wd)
             if instance is None:
                 instance = cls(wd)
@@ -447,6 +476,7 @@ def test_run_omni_contrast_rq_emits_trigger_and_passes_job_id(
     omni = OmniStub.getInstance(run_wd)
     assert status is True
     assert elapsed >= 0.0
+    assert call_order[:2] == ["clear:omni.nodb", "get_instance"]
     assert omni.calls == [(1, "job-52")]
     assert any("TRIGGER omni_contrasts OMNI_CONTRAST_RUN_TASK_COMPLETED" in message for _, message in published)
 
@@ -459,6 +489,12 @@ def test_run_omni_contrasts_rq_clears_dependency_tree_when_no_contrasts(
     monkeypatch.setattr(omni_rq.StatusMessenger, "publish", lambda channel, message: published.append((channel, message)))
     monkeypatch.setattr(omni_rq, "get_current_job", lambda: SimpleNamespace(id="job-61", meta={}, save=lambda: None))
     monkeypatch.setattr(omni_rq, "get_wd", lambda runid: str(tmp_path / runid))
+    call_order: list[str] = []
+    monkeypatch.setattr(
+        omni_rq,
+        "clear_nodb_file_cache",
+        lambda runid, *, pup_relpath: call_order.append(f"clear:{pup_relpath}"),
+    )
 
     class OmniStub:
         _instances: dict[str, "OmniStub"] = {}
@@ -472,6 +508,7 @@ def test_run_omni_contrasts_rq_clears_dependency_tree_when_no_contrasts(
 
         @classmethod
         def getInstance(cls, wd: str) -> "OmniStub":
+            call_order.append("get_instance")
             instance = cls._instances.get(wd)
             if instance is None:
                 instance = cls(wd)
@@ -489,8 +526,60 @@ def test_run_omni_contrasts_rq_clears_dependency_tree_when_no_contrasts(
     omni = OmniStub.getInstance(run_wd)
 
     assert result is None
+    assert call_order[:2] == ["clear:omni.nodb", "get_instance"]
     assert omni.contrast_dependency_tree == {}
     assert omni.cleaned_ids == [[]]
+    assert any("TRIGGER omni_contrasts END_BROADCAST" in message for _, message in published)
+
+
+def test_delete_omni_contrasts_rq_clears_scoped_cache_before_hydration(
+    monkeypatch: pytest.MonkeyPatch,
+    tmp_path: Path,
+) -> None:
+    published: list[tuple[str, str]] = []
+    call_order: list[str] = []
+
+    monkeypatch.setattr(omni_rq.StatusMessenger, "publish", lambda channel, message: published.append((channel, message)))
+    monkeypatch.setattr(omni_rq, "get_current_job", lambda: SimpleNamespace(id="job-65"))
+    monkeypatch.setattr(omni_rq, "get_wd", lambda runid: str(tmp_path / runid))
+    monkeypatch.setattr(
+        omni_rq,
+        "clear_nodb_file_cache",
+        lambda runid, *, pup_relpath: call_order.append(f"clear:{pup_relpath}"),
+    )
+
+    class OmniStub:
+        _instances: dict[str, "OmniStub"] = {}
+
+        def __init__(self, wd: str) -> None:
+            self.wd = wd
+            self.clear_calls = 0
+
+        @classmethod
+        def getInstance(cls, wd: str) -> "OmniStub":
+            call_order.append("get_instance")
+            instance = cls._instances.get(wd)
+            if instance is None:
+                instance = cls(wd)
+                cls._instances[wd] = instance
+            return instance
+
+        def clear_contrasts(self) -> None:
+            self.clear_calls += 1
+
+    monkeypatch.setattr(omni_rq, "Omni", OmniStub)
+    monkeypatch.setattr(
+        omni_rq.RedisPrep,
+        "getInstance",
+        lambda _wd: SimpleNamespace(remove_timestamp=lambda _task: None),
+    )
+
+    omni_rq.delete_omni_contrasts_rq("demo")
+
+    run_wd = str(tmp_path / "demo")
+    omni = OmniStub.getInstance(run_wd)
+    assert call_order[:2] == ["clear:omni.nodb", "get_instance"]
+    assert omni.clear_calls == 1
     assert any("TRIGGER omni_contrasts END_BROADCAST" in message for _, message in published)
 
 

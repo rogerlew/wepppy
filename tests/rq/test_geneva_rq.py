@@ -30,6 +30,8 @@ class _GenevaStub:
         self.started_calls = 0
         self.finished_calls = 0
         self.build_calls = 0
+        self.prepare_calls = 0
+        self.run_batch_calls = 0
         self.started_failures_remaining = 0
         self.finished_failures_remaining = 0
         self.last_started_status: str | None = None
@@ -64,23 +66,49 @@ class _GenevaStub:
             "sources": sources,
         }
 
+    def prepare_hrus(
+        self,
+        *,
+        force_rebuild: bool = False,
+        input_refs: dict[str, Any] | None = None,
+    ) -> dict[str, Any]:
+        self.prepare_calls += 1
+        return {
+            "status": "ok",
+            "force_rebuild": bool(force_rebuild),
+            "input_refs": input_refs,
+        }
+
+    def run_batch(self, payload: dict[str, Any]) -> dict[str, Any]:
+        self.run_batch_calls += 1
+        return {"status": "ok", "payload": dict(payload)}
+
 
 @pytest.fixture()
 def geneva_rq_env(monkeypatch: pytest.MonkeyPatch):
     geneva = _GenevaStub()
+    clear_calls: list[tuple[str, str]] = []
 
-    monkeypatch.setattr(geneva_rq, "_ensure_geneva_controller", lambda wd, cfg_fn: geneva)
+    def _clear_cache(runid: str, *, pup_relpath: str) -> None:
+        clear_calls.append((runid, str(pup_relpath)))
+
+    def _ensure_controller(wd: str, cfg_fn: str) -> _GenevaStub:
+        assert clear_calls, "cache clear should occur before Geneva controller hydration"
+        return geneva
+
+    monkeypatch.setattr(geneva_rq, "clear_nodb_file_cache", _clear_cache)
+    monkeypatch.setattr(geneva_rq, "_ensure_geneva_controller", _ensure_controller)
     monkeypatch.setattr(geneva_rq, "get_wd", lambda runid: f"/tmp/{runid}")
     monkeypatch.setattr(geneva_rq, "get_current_job", lambda: SimpleNamespace(id="job-123"))
     monkeypatch.setattr(geneva_rq, "GENEVA_STATE_LOCK_RETRY_SECONDS", 0.0)
 
-    return geneva
+    return geneva, clear_calls
 
 
 def test_build_frequency_panel_retries_started_state_lock_and_runs_job(
     geneva_rq_env: _GenevaStub,
 ) -> None:
-    geneva = geneva_rq_env
+    geneva, clear_calls = geneva_rq_env
     geneva.started_failures_remaining = 1
 
     result = geneva_rq.run_geneva_build_frequency_panel_rq(
@@ -93,6 +121,7 @@ def test_build_frequency_panel_retries_started_state_lock_and_runs_job(
     assert geneva.build_calls == 1
     assert geneva.started_calls == 2
     assert geneva.finished_calls == 1
+    assert clear_calls == [("run-1", "geneva.nodb")]
     assert geneva.last_started_status == "Building Geneva frequency panel..."
 
 
@@ -100,7 +129,7 @@ def test_build_frequency_panel_continues_when_started_state_lock_never_available
     geneva_rq_env: _GenevaStub,
     monkeypatch: pytest.MonkeyPatch,
 ) -> None:
-    geneva = geneva_rq_env
+    geneva, clear_calls = geneva_rq_env
     geneva.started_failures_remaining = 99
     monkeypatch.setattr(geneva_rq, "GENEVA_STATE_LOCK_RETRY_ATTEMPTS", 3)
 
@@ -110,13 +139,14 @@ def test_build_frequency_panel_continues_when_started_state_lock_never_available
     assert geneva.build_calls == 1
     assert geneva.started_calls == 3
     assert geneva.finished_calls == 1
+    assert clear_calls == [("run-1", "geneva.nodb")]
 
 
 def test_build_frequency_panel_continues_when_finished_state_lock_busy(
     geneva_rq_env: _GenevaStub,
     monkeypatch: pytest.MonkeyPatch,
 ) -> None:
-    geneva = geneva_rq_env
+    geneva, clear_calls = geneva_rq_env
     geneva.finished_failures_remaining = 99
     monkeypatch.setattr(geneva_rq, "GENEVA_STATE_LOCK_RETRY_ATTEMPTS", 2)
 
@@ -126,3 +156,36 @@ def test_build_frequency_panel_continues_when_finished_state_lock_busy(
     assert geneva.build_calls == 1
     assert geneva.started_calls == 1
     assert geneva.finished_calls == 2
+    assert clear_calls == [("run-1", "geneva.nodb")]
+
+
+def test_prepare_hrus_clears_cache_and_runs(
+    geneva_rq_env: tuple[_GenevaStub, list[tuple[str, str]]],
+) -> None:
+    geneva, clear_calls = geneva_rq_env
+
+    result = geneva_rq.run_geneva_prepare_hrus_rq(
+        "run-2",
+        "cfg",
+        {"force_rebuild": True, "input_refs": {"dem": "abc"}},
+    )
+
+    assert result["status"] == "ok"
+    assert result["force_rebuild"] is True
+    assert result["input_refs"] == {"dem": "abc"}
+    assert geneva.prepare_calls == 1
+    assert clear_calls == [("run-2", "geneva.nodb")]
+
+
+def test_run_batch_clears_cache_and_runs(
+    geneva_rq_env: tuple[_GenevaStub, list[tuple[str, str]]],
+) -> None:
+    geneva, clear_calls = geneva_rq_env
+
+    payload = {"durations_minutes": [15], "note": "batch"}
+    result = geneva_rq.run_geneva_run_batch_rq("run-3", "cfg", payload)
+
+    assert result["status"] == "ok"
+    assert result["payload"] == payload
+    assert geneva.run_batch_calls == 1
+    assert clear_calls == [("run-3", "geneva.nodb")]

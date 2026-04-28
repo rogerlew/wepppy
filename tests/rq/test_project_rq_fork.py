@@ -1,5 +1,6 @@
 from __future__ import annotations
 
+import shutil
 import sys
 import types
 from pathlib import Path
@@ -286,3 +287,166 @@ def test_clear_query_engine_catalog_cache_reports_missing_artifacts(tmp_path: Pa
 
     assert "Clearing query engine catalog cache...\n" in published
     assert "No query engine catalog cache artifacts to clear.\n" in published
+
+
+def test_prepare_fork_run_undisturbify_clears_new_run_scoped_nodb_cache(
+    tmp_path: Path,
+) -> None:
+    import wepppy.rq.project_rq_fork as fork_helpers
+
+    source_wd = tmp_path / "source-run"
+    target_wd = tmp_path / "target-run"
+    source_wd.mkdir(parents=True, exist_ok=True)
+
+    for nodb_name in ("ron.nodb", "wepp.nodb", "landuse.nodb", "soils.nodb", "disturbed.nodb"):
+        (source_wd / nodb_name).write_text(
+            f"wd={source_wd}\nrunid=source-run\n",
+            encoding="ascii",
+        )
+
+    cache_dir = source_wd / "wepp" / "reports" / "cache"
+    cache_dir.mkdir(parents=True, exist_ok=True)
+    (cache_dir / "stale.bin").write_text("stale", encoding="ascii")
+    (source_wd / "export").mkdir(parents=True, exist_ok=True)
+    (source_wd / "export" / "stale.txt").write_text("stale", encoding="ascii")
+    query_cache = source_wd / "_query_engine" / "cache"
+    query_cache.mkdir(parents=True, exist_ok=True)
+    (query_cache / "stale.bin").write_text("stale", encoding="ascii")
+    (source_wd / "_query_engine" / "catalog.json").write_text("{}", encoding="ascii")
+
+    class RonStub:
+        _instances: dict[str, "RonStub"] = {}
+
+        def __init__(self, wd: str) -> None:
+            self.wd = wd
+            self.scenario = "Disturbed"
+
+        @classmethod
+        def getInstance(cls, wd: str) -> "RonStub":
+            instance = cls._instances.get(wd)
+            if instance is None:
+                instance = cls(wd)
+                cls._instances[wd] = instance
+            return instance
+
+    class DisturbedStub:
+        _instances: dict[str, "DisturbedStub"] = {}
+
+        def __init__(self, wd: str) -> None:
+            self.wd = wd
+            self.remove_calls = 0
+
+        @classmethod
+        def getInstance(cls, wd: str) -> "DisturbedStub":
+            instance = cls._instances.get(wd)
+            if instance is None:
+                instance = cls(wd)
+                cls._instances[wd] = instance
+            return instance
+
+        def remove_sbs(self) -> None:
+            self.remove_calls += 1
+
+    class LanduseStub:
+        _instances: dict[str, "LanduseStub"] = {}
+
+        def __init__(self, wd: str) -> None:
+            self.wd = wd
+            self.build_calls = 0
+
+        @classmethod
+        def getInstance(cls, wd: str) -> "LanduseStub":
+            instance = cls._instances.get(wd)
+            if instance is None:
+                instance = cls(wd)
+                cls._instances[wd] = instance
+            return instance
+
+        def build(self) -> None:
+            self.build_calls += 1
+
+    class SoilsStub:
+        _instances: dict[str, "SoilsStub"] = {}
+
+        def __init__(self, wd: str) -> None:
+            self.wd = wd
+            self.build_calls = 0
+
+        @classmethod
+        def getInstance(cls, wd: str) -> "SoilsStub":
+            instance = cls._instances.get(wd)
+            if instance is None:
+                instance = cls(wd)
+                cls._instances[wd] = instance
+            return instance
+
+        def build(self) -> None:
+            self.build_calls += 1
+
+    published: list[str] = []
+    clear_calls: list[tuple[str, str]] = []
+    mutate_calls: list[tuple[str, str]] = []
+
+    def _fake_rsync(**kwargs) -> None:
+        cmd = kwargs["cmd"]
+        run_left = Path(kwargs["run_left"].rstrip("/"))
+        run_right = Path(cmd[-1].rstrip("/"))
+        run_right.mkdir(parents=True, exist_ok=True)
+        for child in run_left.iterdir():
+            destination = run_right / child.name
+            if child.is_dir():
+                shutil.copytree(child, destination, dirs_exist_ok=True)
+            else:
+                shutil.copy2(child, destination)
+
+    def _mutate_root(
+        _wd: str,
+        _root: str,
+        callback,
+        *,
+        purpose: str,
+    ):
+        mutate_calls.append((_root, purpose))
+        return callback()
+
+    new_wd = fork_helpers.prepare_fork_run(
+        "source-run",
+        "new-run",
+        undisturbify=True,
+        status_channel="run:fork",
+        publish_status=lambda _channel, message: published.append(message),
+        get_wd=lambda _runid: str(source_wd),
+        get_primary_wd=lambda _runid: str(target_wd),
+        wait_for_paths=lambda _paths, timeout_s=60.0: None,
+        ron_cls=RonStub,
+        disturbed_cls=DisturbedStub,
+        landuse_cls=LanduseStub,
+        soils_cls=SoilsStub,
+        initialize_ttl=None,
+        mutate_root_fn=_mutate_root,
+        clear_nodb_cache_fn=lambda runid, *, pup_relpath: clear_calls.append((runid, str(pup_relpath))),
+        clean_env_for_system_tools=lambda: {"PATH": "/usr/bin:/bin", "LANG": "C.UTF-8", "LC_ALL": "C.UTF-8"},
+    )
+
+    assert new_wd == str(target_wd)
+    assert clear_calls == [
+        ("new-run", "ron.nodb"),
+        ("new-run", "disturbed.nodb"),
+        ("new-run", "landuse.nodb"),
+        ("new-run", "soils.nodb"),
+    ]
+
+    ron = RonStub.getInstance(str(target_wd))
+    disturbed = DisturbedStub.getInstance(str(target_wd))
+    landuse = LanduseStub.getInstance(str(target_wd))
+    soils = SoilsStub.getInstance(str(target_wd))
+
+    assert ron.scenario == "Undisturbed"
+    assert disturbed.remove_calls == 1
+    assert landuse.build_calls == 1
+    assert soils.build_calls == 1
+    assert mutate_calls == [
+        ("landuse", "fork-undisturbify-build-landuse"),
+        ("soils", "fork-undisturbify-build-soils"),
+    ]
+    assert any("Undisturbifying Project..." in message for message in published)
