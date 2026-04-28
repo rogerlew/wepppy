@@ -79,6 +79,28 @@ Feedback mechanisms:
 
 Work packages that are scoped but not yet started. Dependencies and prerequisites should be noted.
 
+### RQ Scoped Stale NoDb Cache Guard Follow-Ups
+**Proposed**: 2026-04-28
+**Size**: Medium (1-3 focused sessions)
+**Priority**: High (adjacent production stale-write risk after confirmed `build_soils_rq` incident)
+**Description**: Extend the scoped NoDb stale-cache guard pattern from `build_soils_rq` to adjacent RQ hydrate-then-mutate paths so workers do not persist from stale cached `.nodb` payload signatures.
+
+**Scope**:
+- Guard Priority 0 project-prep RQ paths in `wepppy/rq/project_rq.py` (`ron.nodb`, `watershed.nodb`, `landuse.nodb`, `climate.nodb` groups).
+- Audit and implement or explicitly disposition mod/orchestration candidates (`rangeland_cover`, `treatments`, `ash`, `debris_flow`, `rhem`, `rap_ts`, `openet_ts`, `polaris`, `rusle`, `wepp`, `swat`, `omni`, `path_ce`, `roads`, `geneva`, fork undisturbify).
+- Add targeted regression coverage for guard scope and ordering without changing lock/archive/status/timestamp contracts.
+
+**Strategic Value**:
+- Reduces recurrence risk for the same stale NoDb write failure class across RQ mutation paths.
+- Converts a one-off incident fix into an explicit, testable worker mutation contract.
+- Keeps cache clearing scoped to one controller at a time, avoiding broad cache churn.
+
+**Dependencies**: Completed [docs/work-packages/20260428_build_soils_rq_stale_cache_guard/](docs/work-packages/20260428_build_soils_rq_stale_cache_guard/) package and existing `clear_nodb_file_cache(..., pup_relpath=...)` support.
+
+**Next Steps**: Execute [docs/work-packages/20260428_rq_scoped_stale_cache_guard_followups/](docs/work-packages/20260428_rq_scoped_stale_cache_guard_followups/) active ExecPlan.
+
+---
+
 ### Deprecate and Remove TauDEM Backend
 **Proposed**: 2025-10-27  
 **Size**: Medium (3-5 days)  
