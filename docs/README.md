@@ -9,6 +9,7 @@ This directory holds top-level documentation that supports the codebase. Use the
 - `standards/` — Cross-cutting implementation standards that should stay stable across modules (for example, NoDb facade/collaborator extraction rules).
 - `ablation/` — Canonical investigation package structure and templates for ablation testing (`incident.md`, `notes.md`, `matrix.csv`, artifacts manifest) across dev (`forest`) and prod (`wepp1`/`wepp2`) environments.
 - `dev-notes/` — Deep dives, design investigations, and subsystem notes that should live close to—but outside—the source tree.
+- `tech-transfer/` — IP, licensing, disclosure, and commercialization strategy notes for WEPP.cloud assets.
 - `ui-docs/` — Front-end documentation: control behaviors, style guidance, and UI-focused how-tos.
 - `prompt_templates/` — Prompt scaffolds for recurring agent tasks (documentation workflows, code migrations, etc.).
 
