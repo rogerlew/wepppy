@@ -79,6 +79,31 @@ Feedback mechanisms:
 
 Work packages that are scoped but not yet started. Dependencies and prerequisites should be noted.
 
+### Geneva Storm Shape Control
+**Proposed**: 2026-04-28
+**Size**: Large (3-5 focused sessions)
+**Priority**: High
+**Link**: [docs/work-packages/20260428_geneva_storm_shape_control/](docs/work-packages/20260428_geneva_storm_shape_control/)
+**Description**: Add Geneva user control for `Storm Shape` with Uniform, NEH-4 B, Type I, Type IA, Type II, and Type III options, and carry the selected shape through UI payloads, Python schemas/services, Rust hyetograph generation, batch execution artifacts, reports, and Geneva science docs.
+
+**Current Implementation Assessment**:
+- Geneva UI currently has no storm-shape selector; `controllers_js/geneva.js` hard-codes `hyetograph.distribution_type = "neh4_type_b"`.
+- Python/Rust validators currently accept only `neh4_type_b`, while Python batch execution still builds uniform rainfall via `_build_uniform_hyetograph(...)`.
+- Existing Geneva docs already identify this as an active gap: Type B exists in Rust, but batch runtime has not been wired to use it.
+
+**Scope**:
+- Add closed storm-shape enum and UI select for the six requested shapes.
+- Implement/dispatch Rust hyetograph distributions for Uniform, NEH-4 B, Type I, Type IA, Type II, and Type III.
+- Replace unconditional uniform Python storm construction with selected-shape kernel output.
+- Update `wepppy/nodb/mods/geneva/specification.md` and `wepppy/nodb/mods/geneva/culvert-cn-comparison.md`.
+- Require code-review (`reviewer`) and QA-review (`qa_reviewer`) sub-agent gates before closure.
+
+**Dependencies**: Generate the WinTR-20-derived Type I/IA/II/III raw output, normalized 24-hour ordinate source table, and metadata, then coordinate `/workdir/wepppyo3` Rust changes with WEPPpy Python/UI changes.
+
+**Next Steps**: Create the raw WinTR-20 source artifact, normalized CSV, and metadata; validate embedded-duration ratios; then implement shared enum/schema and Rust hyetograph dispatch before UI/report wiring.
+
+---
+
 ### Deprecate and Remove TauDEM Backend
 **Proposed**: 2025-10-27  
 **Size**: Medium (3-5 days)  

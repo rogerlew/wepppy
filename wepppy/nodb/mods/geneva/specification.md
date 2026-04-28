@@ -523,6 +523,61 @@ Warning payload includes:
 - threshold details
 - `arf_method=constant_1.0`, `arf_value=1.0`, `uniform_rainfall_assumed=true`
 
+### 11.6 Planned storm-shape implementation contract
+
+Status: specified for `docs/work-packages/20260428_geneva_storm_shape_control/`; not yet implemented in runtime.
+
+The planned Geneva `Storm Shape` control has six closed enum values:
+
+| ID | Label | Implementation source |
+| --- | --- | --- |
+| `uniform` | Uniform | Linear cumulative event rainfall. |
+| `neh4_type_b` | NEH-4 B | Existing Geneva Rust normalized Type B ordinates. |
+| `type_i` | Type I | NRCS legacy 24-hour cumulative mass curve generated from WinTR-20 output. |
+| `type_ia` | Type IA | NRCS legacy 24-hour cumulative mass curve generated from WinTR-20 output. |
+| `type_ii` | Type II | NRCS legacy 24-hour cumulative mass curve generated from WinTR-20 output. |
+| `type_iii` | Type III | NRCS legacy 24-hour cumulative mass curve generated from WinTR-20 output. |
+
+Type I/IA/II/III source and provenance requirements:
+
+- Authoritative technical basis: NRCS Title 210, National Engineering Handbook, Part 630, Chapter 4, "Storm Rainfall Depth and Distribution" (Aug 2019).
+- Implementation source of truth: checked-in WinTR-20-derived artifacts under `/workdir/wepppyo3/geneva_core/resources/`:
+  - raw WinTR-20 distribution output: `nrcs_legacy_24h_distributions.wintr20_raw.txt`
+  - normalized 24-hour cumulative ordinate table: `nrcs_legacy_24h_distributions.csv`
+  - provenance metadata: `nrcs_legacy_24h_distributions.metadata.json`
+- Required metadata fields: WinTR-20 version, generation date, `raw_output_filename`, `raw_output_sha256`, `export_mode`, `time_increment_hours`, `decimal_precision`, `rounding_policy`, `post_processing_steps`, `normalized_csv_sha256`, row count, and monotonic endpoint checks.
+- Source table time increment must be recorded. A 0.1-hour source increment is acceptable only if validation against NEH Chapter 4 Figure 4-31 passes; otherwise regenerate/export a finer source table before implementation.
+- Type II embedded-duration ratios must match NEH Chapter 4 Figure 4-31 within absolute fraction tolerance `<= 0.003`. Tolerance relaxation requires a review artifact explaining why the source export, interpolation, and validation target are still authoritative.
+- Secondary web tables are not authoritative implementation sources. They may be used only for sanity checks.
+
+Type I/IA/II/III event-duration algorithm:
+
+1. Treat the 24-hour table as a piecewise-linear cumulative mass curve `F(t)` over `0 <= t <= 24` hours.
+2. Validate `0 < duration_minutes <= 1440`, `depth_mm > 0`, and `time_step_minutes > 0`.
+3. Convert event duration to hours, `d = duration_minutes / 60`.
+4. For `d == 24`, use the full source curve.
+5. For `d < 24`, find the window start `a` in `[0, 24 - d]` that maximizes `F(a + d) - F(a)`.
+6. Candidate starts must include source table times and source table times minus `d`, clipped to `[0, 24 - d]`.
+7. If candidates tie within tolerance, choose the candidate closest to `12 - d / 2`; if still tied, choose the earliest.
+8. Let `r = F(a + d) - F(a)`. Fail if `r <= 0`.
+9. Build the output time vector with `0` and exact `duration_minutes` endpoints. Intermediate points are regular `time_step_minutes` multiples strictly inside the duration; if `time_step_minutes >= duration_minutes`, output only the two endpoints. If duration is not evenly divisible by the step, the final interval is shorter.
+10. For output time `t` in the event, compute `event_fraction(t) = (F(a + t_hours) - F(a)) / r`.
+11. Force the first and final output points to `0.0` and `1.0`, enforce monotonicity within tolerance, and set `cumulative_rainfall_mm = event_fraction(t) * depth_mm`.
+
+This is intentionally an embedded-window extraction, not full-curve compression. Geneva frequency-panel cells provide depth for the selected duration; for example, a 60-minute event uses the selected 60-minute depth. The Type II 60-minute hyetograph therefore comes from the maximum embedded 60-minute window of the 24-hour Type II curve, normalized to the selected 60-minute depth.
+
+Type I/IA/II/III output metadata must include:
+
+- `source_distribution_type`
+- `source_curve_duration_hours=24`
+- `extraction_start_hours`
+- `extraction_end_hours`
+- `extraction_ratio_to_24h`
+- `event_depth_is_duration_depth=true`
+- `source_table_sha256`
+
+NRCS cautions that legacy Type I/IA/II/III regional distributions can be inconsistent with NOAA Atlas 14 site-specific ratios. Geneva must therefore expose these shapes as explicit user-selected assumptions, not as an automatic regional recommendation.
+
 ## 12. State, Results, Query, and Report Contracts (Current)
 
 ### 12.1 Geneva lifecycle states
