@@ -137,11 +137,63 @@ var GenevaSummaryReport = (function () {
         if (value === null) {
             return "\u2014";
         }
-        var unit = asString(metric.unit);
-        if (!unit) {
-            return value.toFixed(2);
+        return value.toFixed(2);
+    }
+
+    function canonicalUnitKey(unitKey) {
+        var raw = asString(unitKey).trim();
+        if (!raw) {
+            return "";
         }
-        return value.toFixed(2) + " " + unit.replace(/_/g, "/");
+        var aliases = {
+            m3_s: "m^3/s",
+            m3: "m^3",
+            mm_hr: "mm/hour",
+            mm_per_hr: "mm/hour",
+            mm_hour: "mm/hour",
+            mm_h: "mm/hour",
+            mm: "mm"
+        };
+        return aliases[raw] || raw;
+    }
+
+    function getUnitizerClientSync() {
+        var unitizer = (typeof window !== "undefined" && window.UnitizerClient)
+            ? window.UnitizerClient
+            : null;
+        return unitizer && typeof unitizer.getClientSync === "function"
+            ? unitizer.getClientSync()
+            : null;
+    }
+
+    function unitizedValueHtml(value, unitKey, decimals) {
+        var parsed = asNumber(value);
+        var canonicalUnit = canonicalUnitKey(unitKey);
+        if (parsed === null) {
+            return "\u2014";
+        }
+        if (!canonicalUnit) {
+            return escapeHtml(formatNumber(parsed, decimals));
+        }
+
+        var client = getUnitizerClientSync();
+        if (client && typeof client.renderValue === "function") {
+            return client.renderValue(parsed, canonicalUnit, { includeUnits: false });
+        }
+        return escapeHtml(formatNumber(parsed, decimals));
+    }
+
+    function unitizedUnitHtml(unitKey, fallbackLabel) {
+        var canonicalUnit = canonicalUnitKey(unitKey);
+        if (!canonicalUnit) {
+            return escapeHtml(asString(fallbackLabel || ""));
+        }
+
+        var client = getUnitizerClientSync();
+        if (client && typeof client.renderUnits === "function") {
+            return client.renderUnits(canonicalUnit, { parentheses: false });
+        }
+        return escapeHtml(asString(fallbackLabel || canonicalUnit));
     }
 
     function metricCellValue(metric) {
@@ -202,6 +254,27 @@ var GenevaSummaryReport = (function () {
         }
         this.bindEvents();
         this.applyPayload(parseJsonNode(this.payloadNode), { focusSelection: false });
+        this.ensureUnitizerHydration();
+    };
+
+    GenevaSummaryReportController.prototype.ensureUnitizerHydration = function ensureUnitizerHydration() {
+        var unitizer = (typeof window !== "undefined" && window.UnitizerClient)
+            ? window.UnitizerClient
+            : null;
+        if (!unitizer || typeof unitizer.ready !== "function") {
+            return;
+        }
+        unitizer.ready()
+            .then(function () {
+                if (!this.payload) {
+                    return;
+                }
+                this.renderTable(this.payload);
+                this.syncSelection(this.payload.selected_storm_id, { focusSelection: false });
+            }.bind(this))
+            .catch(function (error) {
+                console.warn("[GenevaSummaryReport] Unitizer hydration failed.", error);
+            });
     };
 
     GenevaSummaryReportController.prototype.bindEvents = function bindEvents() {
@@ -478,6 +551,9 @@ var GenevaSummaryReport = (function () {
         if (this.eventsEmpty) {
             this.eventsEmpty.hidden = rows.length > 0;
         }
+        if (rows.length > 0) {
+            this.appendUnitsRow();
+        }
 
         rows.forEach(function (row) {
             var tr = document.createElement("tr");
@@ -490,8 +566,8 @@ var GenevaSummaryReport = (function () {
             this.appendTextCell(tr, datasourceLabel(row.datasource_id));
             this.appendNumberCell(tr, row.duration_minutes, 0);
             this.appendNumberCell(tr, row.ari_years, 0);
-            this.appendNumberCell(tr, row.depth_mm, 2);
-            this.appendNumberCell(tr, row.intensity_mm_per_hr, 2);
+            this.appendNumberCell(tr, row.depth_mm, 2, "mm");
+            this.appendNumberCell(tr, row.intensity_mm_per_hr, 2, "mm/hour");
             this.appendTextCell(tr, row.distribution_type);
             this.appendMetricCell(tr, row.peak_discharge);
             this.appendNumberCell(tr, row.time_to_peak_minutes, 2);
@@ -519,6 +595,47 @@ var GenevaSummaryReport = (function () {
         }.bind(this));
     };
 
+    GenevaSummaryReportController.prototype.appendUnitsRow = function appendUnitsRow() {
+        var tr = document.createElement("tr");
+        tr.className = "geneva-summary__units-row";
+        tr.setAttribute("data-sort-position", "top");
+
+        this.appendTextCell(tr, "", "wc-text-muted");
+        this.appendTextCell(tr, "", "wc-text-muted");
+        this.appendTextCell(tr, "", "wc-text-muted");
+        this.appendTextCell(tr, "min", "wc-text-right wc-text-muted");
+        this.appendTextCell(tr, "years", "wc-text-right wc-text-muted");
+        this.appendTextCell(tr, unitizedUnitHtml("mm", "mm"), "wc-text-right wc-text-muted", null, true);
+        this.appendTextCell(
+            tr,
+            unitizedUnitHtml("mm/hour", "mm/hour"),
+            "wc-text-right wc-text-muted",
+            null,
+            true
+        );
+        this.appendTextCell(tr, "", "wc-text-muted");
+        this.appendTextCell(
+            tr,
+            unitizedUnitHtml("m^3/s", "m^3/s"),
+            "wc-text-right wc-text-muted",
+            null,
+            true
+        );
+        this.appendTextCell(tr, "min", "wc-text-right wc-text-muted");
+        this.appendTextCell(
+            tr,
+            unitizedUnitHtml("m^3", "m^3"),
+            "wc-text-right wc-text-muted",
+            null,
+            true
+        );
+        this.appendTextCell(tr, unitizedUnitHtml("mm", "mm"), "wc-text-right wc-text-muted", null, true);
+        this.appendTextCell(tr, "", "wc-text-right wc-text-muted");
+        this.appendTextCell(tr, "", "wc-text-right wc-text-muted");
+
+        this.tableBody.appendChild(tr);
+    };
+
     GenevaSummaryReportController.prototype.appendSelectCell = function appendSelectCell(tr, row) {
         var td = document.createElement("td");
         var button = document.createElement("button");
@@ -535,7 +652,13 @@ var GenevaSummaryReport = (function () {
         tr.appendChild(td);
     };
 
-    GenevaSummaryReportController.prototype.appendTextCell = function appendTextCell(tr, value, className, sortKey) {
+    GenevaSummaryReportController.prototype.appendTextCell = function appendTextCell(
+        tr,
+        value,
+        className,
+        sortKey,
+        allowHtml
+    ) {
         var td = document.createElement("td");
         if (className) {
             td.className = className;
@@ -543,28 +666,43 @@ var GenevaSummaryReport = (function () {
         if (sortKey !== undefined && sortKey !== null && sortKey !== "") {
             td.setAttribute("sorttable_customkey", asString(sortKey));
         }
-        td.innerHTML = escapeHtml(value === undefined || value === null ? "\u2014" : value);
+        if (allowHtml) {
+            td.innerHTML = value === undefined || value === null ? "\u2014" : asString(value);
+        } else {
+            td.innerHTML = escapeHtml(value === undefined || value === null ? "\u2014" : value);
+        }
         tr.appendChild(td);
         return td;
     };
 
-    GenevaSummaryReportController.prototype.appendNumberCell = function appendNumberCell(tr, value, decimals) {
+    GenevaSummaryReportController.prototype.appendNumberCell = function appendNumberCell(tr, value, decimals, unitKey) {
         var parsed = asNumber(value);
+        var display = unitKey
+            ? unitizedValueHtml(value, unitKey, decimals)
+            : formatNumber(value, decimals);
         this.appendTextCell(
             tr,
-            formatNumber(value, decimals),
+            display,
             "wc-text-right",
-            parsed === null ? null : parsed
+            parsed === null ? null : parsed,
+            Boolean(unitKey)
         );
     };
 
     GenevaSummaryReportController.prototype.appendMetricCell = function appendMetricCell(tr, metric) {
         var parsed = metricCellValue(metric);
+        var display;
+        if (metric && typeof metric === "object") {
+            display = unitizedValueHtml(metric.value, metric.unit, 2);
+        } else {
+            display = metricCellDisplay(metric);
+        }
         this.appendTextCell(
             tr,
-            metricCellDisplay(metric),
+            display,
             "wc-text-right",
-            parsed === null ? null : parsed
+            parsed === null ? null : parsed,
+            true
         );
     };
 

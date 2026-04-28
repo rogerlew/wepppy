@@ -3,6 +3,10 @@
  */
 
 describe("Geneva summary report interactions", () => {
+    afterEach(() => {
+        delete global.UnitizerClient;
+    });
+
     beforeEach(() => {
         jest.resetModules();
         document.body.innerHTML = `
@@ -125,7 +129,27 @@ describe("Geneva summary report interactions", () => {
             <div data-geneva-summary-chart></div>
             <p data-geneva-summary-chart-empty hidden></p>
             <table><tbody data-geneva-summary-params-body></tbody></table>
-            <table><tbody data-geneva-summary-event-body></tbody></table>
+            <table id="geneva-summary-event-table">
+              <thead>
+                <tr>
+                  <th scope="col" class="sorttable_nosort">Select</th>
+                  <th scope="col">Storm ID</th>
+                  <th scope="col">Datasource</th>
+                  <th scope="col" class="wc-text-right" data-sort-type="numeric">Duration</th>
+                  <th scope="col" class="wc-text-right" data-sort-type="numeric">ARI</th>
+                  <th scope="col" class="wc-text-right" data-sort-type="numeric">Depth</th>
+                  <th scope="col" class="wc-text-right" data-sort-type="numeric">Intensity</th>
+                  <th scope="col">Distribution</th>
+                  <th scope="col" class="wc-text-right" data-sort-type="numeric">Peak Discharge</th>
+                  <th scope="col" class="wc-text-right" data-sort-type="numeric">Time to Peak</th>
+                  <th scope="col" class="wc-text-right" data-sort-type="numeric">Runoff Volume</th>
+                  <th scope="col" class="wc-text-right" data-sort-type="numeric">Runoff Depth</th>
+                  <th scope="col" class="wc-text-right" data-sort-type="numeric">Warnings</th>
+                  <th scope="col" class="wc-text-right" data-sort-type="numeric">Errors</th>
+                </tr>
+              </thead>
+              <tbody data-geneva-summary-event-body></tbody>
+            </table>
             <p data-geneva-summary-events-empty hidden></p>
             <section data-geneva-summary-messages hidden>
               <div data-geneva-summary-warnings hidden><p data-geneva-summary-warnings-body></p></div>
@@ -191,5 +215,53 @@ describe("Geneva summary report interactions", () => {
         expect(rows[3].cells[1].textContent).toBe("SCS Triangular");
         expect(rows[4].cells[1].textContent).toBe("Kirpich");
         expect(rows[5].cells[1].textContent).toBe("—");
+    });
+
+    test("renders pinned unit labels row and unit-free data cells when unitizer client is available", async () => {
+        const renderValue = jest.fn((value, unit, options) => {
+            const suffix = options && options.includeUnits ? ` ${unit}` : "";
+            return `<div class="unitizer-wrapper"><div class="unitizer">${value}${suffix}</div></div>`;
+        });
+        const renderUnits = jest.fn((unit) =>
+            `<div class="unitizer-wrapper"><div class="unitizer">${unit}</div></div>`
+        );
+        global.UnitizerClient = {
+            getClientSync: jest.fn(() => ({
+                renderValue,
+                renderUnits
+            })),
+            ready: jest.fn(() => Promise.resolve())
+        };
+
+        await import("../geneva_summary_report.js");
+        window.GenevaSummaryReport.getInstance().init();
+        await Promise.resolve();
+
+        const row = document.querySelector('[data-geneva-summary-event-body] tr[data-storm-id="cligen_30m_10y"]');
+        expect(row).toBeTruthy();
+        const unitsRow = document.querySelector("[data-geneva-summary-event-body] tr[data-sort-position='top']");
+        expect(unitsRow).toBeTruthy();
+        expect(unitsRow.cells[5].querySelector(".unitizer-wrapper")).toBeTruthy(); // depth unit
+        expect(unitsRow.cells[6].querySelector(".unitizer-wrapper")).toBeTruthy(); // intensity unit
+        expect(unitsRow.cells[8].querySelector(".unitizer-wrapper")).toBeTruthy(); // peak discharge unit
+        expect(unitsRow.cells[10].querySelector(".unitizer-wrapper")).toBeTruthy(); // runoff volume unit
+        expect(unitsRow.cells[11].querySelector(".unitizer-wrapper")).toBeTruthy(); // runoff depth unit
+
+        expect(row.cells[5].querySelector(".unitizer-wrapper")).toBeTruthy(); // depth
+        expect(row.cells[6].querySelector(".unitizer-wrapper")).toBeTruthy(); // intensity
+        expect(row.cells[8].querySelector(".unitizer-wrapper")).toBeTruthy(); // peak discharge
+        expect(row.cells[10].querySelector(".unitizer-wrapper")).toBeTruthy(); // runoff volume
+        expect(row.cells[11].querySelector(".unitizer-wrapper")).toBeTruthy(); // runoff depth
+        expect(row.cells[5].textContent).toBe("20");
+        expect(row.cells[6].textContent).toBe("40");
+        expect(row.cells[8].textContent).toBe("1.2");
+        expect(renderValue.mock.calls.length).toBeGreaterThan(0);
+        renderValue.mock.calls.forEach((call) => {
+            expect(call[2]).toMatchObject({ includeUnits: false });
+        });
+        expect(renderUnits).toHaveBeenCalledWith("mm", { parentheses: false });
+        expect(renderUnits).toHaveBeenCalledWith("mm/hour", { parentheses: false });
+        expect(renderUnits).toHaveBeenCalledWith("m^3/s", { parentheses: false });
+        expect(renderUnits).toHaveBeenCalledWith("m^3", { parentheses: false });
     });
 });
