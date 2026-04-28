@@ -1,7 +1,7 @@
 # PROJECT_TRACKER.md
 > Kanban board for wepppy work packages and vision items
 
-**Last Updated**: 2026-04-27
+**Last Updated**: 2026-04-28
 **Active Packages**: 3  
 **Quick Links**: [Work Packages Directory](docs/work-packages/) | [God-Tier Prompting Strategy](docs/god-tier-prompting-strategy.md)
 
@@ -271,6 +271,15 @@ Currently active work packages. Limit to 2-4 packages to maintain focus.
 ## ✅ Done
 
 Recently completed work packages. Archived immediately upon completion.
+
+### `build_soils_rq` Stale NoDb Cache Guard (2026-04-28)
+**Status**: ✅ **COMPLETE**
+
+**Link**: [docs/work-packages/20260428_build_soils_rq_stale_cache_guard/](docs/work-packages/20260428_build_soils_rq_stale_cache_guard/)
+
+**Lifecycle**: Backlog -> Done (2026-04-28)
+
+**Summary**: Closed the scoped soils RQ stale-cache guard package. `build_soils_rq` now clears only `soils.nodb` cache inside the existing soils directory-root lock callback and immediately before `Soils.getInstance(wd).build()`. Targeted regression coverage asserts cache-clear ordering, scoped key usage, unchanged archive-root rejection before cache clear/hydration, and unchanged success-path status/timestamp order. Required targeted pytest suites, package doc-lint, and `git diff --check` passed; the ExecPlan is archived under `prompts/completed/`.
 
 ### RQ WEPP Subwta Precondition Contract Enforcement (2026-04-27)
 **Status**: ✅ **COMPLETE**

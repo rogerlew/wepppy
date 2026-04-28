@@ -1280,10 +1280,15 @@ def build_soils_rq(runid: str) -> None:
         func_name = inspect.currentframe().f_code.co_name
         status_channel = f'{runid}:soils'
         StatusMessenger.publish(status_channel, f'rq:{job.id} STARTED {func_name}({runid})')
+
+        def _build_soils() -> None:
+            clear_nodb_file_cache(runid, pup_relpath="soils.nodb")
+            Soils.getInstance(wd).build()
+
         _run_with_directory_root_lock(
             wd,
             "soils",
-            lambda: Soils.getInstance(wd).build(),
+            _build_soils,
             purpose="build-soils-rq",
         )
         StatusMessenger.publish(status_channel, f'rq:{job.id} COMPLETED {func_name}({runid})')

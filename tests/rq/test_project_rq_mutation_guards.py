@@ -570,6 +570,13 @@ def test_build_soils_rq_rejects_archive_form_root(
     _run_wd, set_archive_roots, call_roots = _stub_rq_context(monkeypatch, tmp_path)
     set_archive_roots("soils")
     monkeypatch.setattr(
+        project_rq,
+        "clear_nodb_file_cache",
+        lambda *_args, **_kwargs: (_ for _ in ()).throw(
+            AssertionError("Archive-backed soils roots should be rejected before cache clear")
+        ),
+    )
+    monkeypatch.setattr(
         project_rq.Soils,
         "getInstance",
         lambda _wd: (_ for _ in ()).throw(AssertionError("Soils should not be instantiated")),
@@ -580,6 +587,56 @@ def test_build_soils_rq_rejects_archive_form_root(
 
     assert exc_info.value.code == "NODIR_ARCHIVE_RETIRED"
     assert call_roots == ["soils"]
+
+
+def test_build_soils_rq_clears_scoped_cache_before_hydration_and_build(
+    monkeypatch: pytest.MonkeyPatch,
+    tmp_path: Path,
+) -> None:
+    run_wd, _set_archive_roots, call_roots = _stub_rq_context(monkeypatch, tmp_path)
+    events: list[tuple[str, object]] = []
+    published: list[tuple[str, str]] = []
+    monkeypatch.setattr(
+        project_rq.StatusMessenger,
+        "publish",
+        lambda channel, message: published.append((channel, message)),
+    )
+
+    def _clear_cache(runid: str, pup_relpath: str | None = None) -> None:
+        events.append(("clear", runid, pup_relpath))
+
+    monkeypatch.setattr(project_rq, "clear_nodb_file_cache", _clear_cache)
+
+    class DummySoils:
+        def build(self) -> None:
+            events.append(("build", None))
+
+    def _get_soils(wd: str) -> DummySoils:
+        events.append(("hydrate", wd))
+        return DummySoils()
+
+    monkeypatch.setattr(project_rq.Soils, "getInstance", _get_soils)
+
+    class DummyPrep:
+        def timestamp(self, task) -> None:
+            events.append(("timestamp", task))
+
+    monkeypatch.setattr(project_rq.RedisPrep, "getInstance", lambda _wd: DummyPrep())
+
+    project_rq.build_soils_rq("demo")
+
+    assert call_roots == ["soils", "soils"]
+    assert events == [
+        ("clear", "demo", "soils.nodb"),
+        ("hydrate", str(run_wd)),
+        ("build", None),
+        ("timestamp", project_rq.TaskEnum.build_soils),
+    ]
+    assert published == [
+        ("demo:soils", "rq:job-guard STARTED build_soils_rq(demo)"),
+        ("demo:soils", "rq:job-guard COMPLETED build_soils_rq(demo)"),
+        ("demo:soils", "rq:job-guard TRIGGER   soils SOILS_BUILD_TASK_COMPLETED"),
+    ]
 
 
 def test_set_outlet_rq_rejects_archive_form_root(
