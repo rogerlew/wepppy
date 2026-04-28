@@ -37,4 +37,4 @@ def test_default_lookup_contains_required_static_matrix() -> None:
     assert lookup[("tall_grass", "low")].resolved_c() == pytest.approx(0.09071795328941253)
     assert lookup[("bare", "unburned")].resolved_c() == pytest.approx(1.0)
     assert lookup[("short_grass", "unburned")].resolved_c() == pytest.approx(0.20189651799465538)
-
+    assert lookup[("agriculture_crops", "unburned")].resolved_c() == pytest.approx(0.02732372244729257)

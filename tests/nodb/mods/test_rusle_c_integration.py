@@ -74,7 +74,15 @@ def _write_default_rap_dataset(path: Path, *, bare_ground: np.ndarray, invalid_b
 
 def _write_lookup_without_agriculture(path: Path) -> None:
     src = Path(c_integration.DEFAULT_LOOKUP_PATH)
-    path.write_text(src.read_text(encoding="utf-8"), encoding="utf-8")
+    with src.open("r", encoding="utf-8", newline="") as stream:
+        rows = list(csv.DictReader(stream))
+        fieldnames = list(rows[0].keys()) if rows else []
+
+    filtered = [row for row in rows if row.get("disturbed_class") != "agriculture_crops"]
+    with path.open("w", encoding="utf-8", newline="") as stream:
+        writer = csv.DictWriter(stream, fieldnames=fieldnames)
+        writer.writeheader()
+        writer.writerows(filtered)
 
 
 def _write_disturbed_mapping(path: Path, mapping: dict[int, dict[str, object]]) -> None:
@@ -318,6 +326,33 @@ def test_scenario_sbs_requires_explicit_lookup_row_for_agriculture(tmp_path: Pat
             disturbed_mapping_path=str(mapping_path),
             lookup_path=str(lookup_path),
         )
+
+
+def test_scenario_sbs_default_lookup_supports_agriculture_unburned(tmp_path: Path) -> None:
+    dem_path = tmp_path / "dem.tif"
+    landuse_path = tmp_path / "landuse.tif"
+    sbs_path = tmp_path / "sbs.tif"
+    mapping_path = tmp_path / "disturbed.json"
+
+    _write_raster(dem_path, np.ones((1, 1), dtype=np.float32), dtype="float32", nodata=-9999.0)
+    _write_raster(landuse_path, np.asarray([[81]], dtype=np.uint8), dtype="uint8", nodata=0)
+    _write_raster(sbs_path, np.asarray([[0]], dtype=np.uint8), dtype="uint8", nodata=255)
+    _write_disturbed_mapping(mapping_path, {81: {"DisturbedClass": "agriculture crops"}})
+
+    result = c_integration.run_rusle_c_factor(
+        wd=str(tmp_path),
+        dem=str(dem_path),
+        c_mode="scenario_sbs",
+        landuse=str(landuse_path),
+        sbs=str(sbs_path),
+        sbs_is_4class=True,
+        disturbed_mapping_path=str(mapping_path),
+    )
+
+    c_data, c_nodata = _read_single_band(result.c)
+    value = float(c_data[0, 0])
+    assert value != c_nodata
+    assert value == pytest.approx(0.02732372244729257)
 
 
 def test_scenario_sbs_uses_unburned_short_grass_row_even_when_sbs_is_burned(tmp_path: Path) -> None:

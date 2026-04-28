@@ -18,6 +18,7 @@ REQUIRED_BURNABLE_SBS_CLASSES: tuple[str, str, str, str] = ("unburned", "low", "
 REQUIRED_STATIC_ROWS: tuple[tuple[str, str], ...] = (
     ("bare", "unburned"),
     ("short_grass", "unburned"),
+    ("agriculture_crops", "unburned"),
 )
 
 MASKED_FAMILY_NAMES = frozenset({"water", "developed", "wetlands", "ice_snow"})
@@ -241,4 +242,3 @@ def resolve_lookup_row(
             f"Missing RUSLE C lookup row for disturbed_class={key[0]!r}, sbs_class={key[1]!r}"
         )
     return row
-

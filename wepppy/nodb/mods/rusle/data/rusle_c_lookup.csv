@@ -13,3 +13,4 @@ tall_grass,moderate,"71,72",0.00,0.35,,,,,"Derived from Grass_Moderate_Severity_
 tall_grass,high,"71,72",0.00,0.10,,,,,"Derived from Grass_High_Severity_Fire ground-cover defaults"
 bare,unburned,31,0.00,0.00,,,,,"Static no-burn row; yields C=1.0 from fg=0"
 short_grass,unburned,"73,74",0.00,0.40,,,,,"Static no-burn row; yields C≈0.2019 from fg=40"
+agriculture_crops,unburned,"81,82",0.00,0.90,,,,,"Static no-burn row; aligns with disturbed agriculture ground-cover default; no SBS severity variants in v1"
