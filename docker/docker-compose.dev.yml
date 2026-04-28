@@ -498,6 +498,8 @@ services:
       POSTGRES_PASSWORD_FILE: /run/secrets/postgres_password
       WEPP_AUTH_JWT_SECRETS_FILE: /run/secrets/wepp_auth_jwt_secrets
       CAP_SECRET_FILE: /run/secrets/cap_secret
+      RQ_ENGINE_POLL_RATE_LIMIT_COUNT: ${RQ_ENGINE_POLL_RATE_LIMIT_COUNT:-1200}
+      RQ_ENGINE_POLL_RATE_LIMIT_WINDOW_SECONDS: ${RQ_ENGINE_POLL_RATE_LIMIT_WINDOW_SECONDS:-60}
     command:
       - uvicorn
       - wepppy.microservices.rq_engine:app

@@ -2,6 +2,7 @@ from __future__ import annotations
 
 import json
 import logging
+import math
 import os
 import threading
 import time
@@ -143,7 +144,9 @@ def _authorize_cancel_request(request: Request) -> Mapping[str, Any]:
     )
 
 
-def _is_poll_rate_limited(endpoint: str, *, request: Request, claims: Mapping[str, Any] | None) -> tuple[bool, int, int]:
+def _is_poll_rate_limited(
+    endpoint: str, *, request: Request, claims: Mapping[str, Any] | None
+) -> tuple[bool, int, int, int]:
     limit_count = _poll_rate_limit_count()
     window_seconds = _poll_rate_limit_window_seconds()
     caller = _poll_caller(claims)
@@ -159,10 +162,12 @@ def _is_poll_rate_limited(endpoint: str, *, request: Request, claims: Mapping[st
             bucket.popleft()
 
         if len(bucket) >= limit_count:
-            return True, limit_count, window_seconds
+            oldest_request = bucket[0]
+            retry_after_seconds = max(1, int(math.ceil((oldest_request + float(window_seconds)) - now)))
+            return True, limit_count, window_seconds, retry_after_seconds
 
         bucket.append(now)
-        return False, limit_count, window_seconds
+        return False, limit_count, window_seconds, 0
 
 
 async def _safe_json(request: Request) -> Any:
@@ -191,7 +196,9 @@ def _polling_guard(
         )
         return None, error_response(exc.message, status_code=exc.status_code, code=exc.code)
 
-    limited, limit_count, window_seconds = _is_poll_rate_limited(endpoint, request=request, claims=claims)
+    limited, limit_count, window_seconds, retry_after_seconds = _is_poll_rate_limited(
+        endpoint, request=request, claims=claims
+    )
     if limited:
         details = f"Rate limit exceeded: {limit_count} requests per {window_seconds} seconds."
         _audit_polling_request(
@@ -203,13 +210,15 @@ def _polling_guard(
             success=False,
             reason="rate_limited",
         )
-        return None, error_response(
+        rate_limited_response = error_response(
             "Too many polling requests",
             status_code=429,
             code="rate_limited",
             details=details,
         )
-
+        if retry_after_seconds > 0:
+            rate_limited_response.headers["Retry-After"] = str(retry_after_seconds)
+        return None, rate_limited_response
     return claims, None
 
 

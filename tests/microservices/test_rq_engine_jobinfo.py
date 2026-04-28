@@ -231,6 +231,9 @@ def test_jobstatus_rate_limit_returns_429(monkeypatch: pytest.MonkeyPatch) -> No
     payload = second.json()
     assert payload["error"]["code"] == "rate_limited"
     assert "Rate limit exceeded" in payload["error"]["details"]
+    retry_after = int(second.headers["Retry-After"])
+    assert retry_after >= 1
+    assert retry_after <= 60
 
 
 def test_jobstatus_audit_logging_includes_job_id_and_ip(
