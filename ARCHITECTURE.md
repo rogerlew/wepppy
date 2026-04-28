@@ -51,14 +51,14 @@ Go services
 | Microservices | `wepppy/microservices/` | Starlette/FastAPI | Lightweight services (`elevationquery`, `browse`, support helpers) |
 | Webservices | `wepppy/webservices/` | Flask/FastAPI | Dataset and raster services (`metquery`, `wmesque2`, `dtale`) |
 | Telemetry proxies | `services/status2`, `services/preflight2` | Go | Redis pub/sub to WebSocket fan-out |
-| Rust acceleration | `/workdir/wepppyo3`, `/workdir/peridot`, `/workdir/weppcloud-wbt` | Rust/PyO3 | Raster ops, watershed abstraction, delineation performance |
+| Native geospatial/model substrate | `/workdir/wepppyo3`, `/workdir/peridot`, `/workdir/weppcloud-wbt` | Rust/PyO3/CLI | WEPPpy native kernels, watershed abstraction, delineation performance |
 | Model binaries | `/workdir/wepp-forest`, `/workdir/wepp-forest-revegetation`, `/workdir/wepppy2` | Fortran + wrappers | Core WEPP simulation executables and runner integration |
 
-### Design Rationale: Rust Acceleration Layer
+### Design Rationale: Native Rust Substrate
 
-The Rust acceleration layer exists because Python-only alternatives underperformed on production-style WEPPpy workloads. Recent evaluations (including the raster_tools crosswalk benchmark package) measured Python paths from 8x to 323x slower on overlapping tasks, with substantial memory/I/O penalties in key flows.
+The native Rust substrate exists because Python-only alternatives underperformed on production-style WEPPpy workloads and because some parser, raster, and interchange contracts need owned implementations. `wepppyo3` is the Python-callable native kernel and interchange substrate for WEPPpy workflows; Peridot owns standalone watershed graph abstraction; `weppcloud-wbt` owns WBT/TOPAZ-style delineation tools.
 
-For geospatial/raster/hydrology tooling decisions, benchmark proposals against the current owned components (`weppcloud-wbt`, `wepppyo3`, `oxidized-rasterstats`, `peridot`) rather than against the Python libraries those components replaced. Evaluation gates and precedent registry live in `docs/standards/dependency-evaluation-standard.md`.
+For geospatial/raster/hydrology tooling decisions, benchmark proposals against the current owned components (`weppcloud-wbt`, `wepppyo3`, `oxidized-rasterstats`, `peridot`) rather than against the Python libraries those components replaced. Evaluation gates and precedent registry live in `docs/standards/dependency-evaluation-standard.md`. The canonical `wepppyo3` posture docs live in `/workdir/wepppyo3/docs/`, especially `module-registry.md`, `architecture-and-boundaries.md`, `release-provenance.md`, and `claim-discipline.md`.
 
 ## State Model
 

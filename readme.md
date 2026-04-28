@@ -8,7 +8,7 @@
 
 ## Overview
 
-wepppy is the core library powering **WEPPcloud**, automating Water Erosion Prediction Project (WEPP) simulations, wildfire response analytics, and watershed-scale geospatial preprocessing. The system glues together legacy FORTRAN 77 executables, modern Python services, and Rust-accelerated tooling to deliver repeatable, high-throughput erosion and hydrology simulations for fire teams, land managers, and research scientists.
+wepppy is the core library powering **WEPPcloud**, automating Water Erosion Prediction Project (WEPP) simulations, wildfire response analytics, and watershed-scale geospatial preprocessing. The system glues together legacy FORTRAN 77 executables, modern Python services, and owned Rust-native substrate components to deliver repeatable, high-throughput erosion and hydrology simulations for fire teams, land managers, and research scientists.
 
 **Core Problem Solved**: WEPP model workflows require orchestrating dozens of geospatial preprocessing steps (DEM processing, climate data, soil/landuse databases), managing long-running simulations (10+ minutes per watershed), and transforming text-based outputs into queryable analytics—all while supporting concurrent users across distributed infrastructure. Traditional database-backed approaches create tight coupling, complex migrations, and single points of failure.
 
@@ -24,7 +24,7 @@ wepppy is the core library powering **WEPPcloud**, automating Water Erosion Pred
 - **Automated WEPP workflows**: DEM → hillslope delineation → climate/soil/landuse → WEPP simulation → analytics pipeline
 - **NoDb state management**: File-backed, Redis-cached controllers with distributed locking (no PostgreSQL required for run state)
 - **Real-time telemetry**: Redis pub/sub → Go WebSocket services → browser dashboards with sub-second latency
-- **Rust-accelerated geospatial**: Climate interpolation, raster queries, watershed abstraction via PyO3 bindings
+- **Owned native substrate**: `wepppyo3` Python-callable Rust kernels, Peridot watershed graph abstraction, and `weppcloud-wbt` delineation tools
 - **Modular extensions**: NoDb mods for ash transport (WATAR), disturbed soils (BAER), rangeland cover (RAP), phosphorus, etc.
 - **Query engine**: DuckDB-backed SQL API over Parquet interchange for instant loss reports and timeseries
 - **Multi-format exports**: HEC-DSS, NetCDF, GeoJSON, Excel for integration with external hydrologic models and GIS
@@ -165,7 +165,7 @@ See `docs/weppcloud-bootstrap-spec.md` for implementation and deployment details
 | **Go Microservices** (`services/`) | WebSocket telemetry | Go 1.21+, gorilla/websocket |
 | **Query Engine** (`wepppy/query_engine`) | SQL analytics API | FastAPI, DuckDB, PyArrow |
 | **Interchange** (`wepppy/wepp/interchange`) | WEPP output → Parquet | PyArrow, parallel parsing |
-| **Rust Bindings** (`wepppyo3`, `peridot`) | Geospatial acceleration | Rust, PyO3, GDAL |
+| **Native Substrate** (`wepppyo3`, `peridot`, `weppcloud-wbt`) | Native kernels, watershed abstraction, delineation tooling | Rust, PyO3, GDAL |
 
 ### Redis Database Allocation
 
@@ -207,7 +207,7 @@ Traditional erosion modeling stacks accumulate technical debt because maintenanc
 
 **1. Own the Stack (Minimize Dependencies)**
 - **Controlled FORTRAN**: `wepp-forest` (36k LOC), `topaz`, `cligen` (forks maintained in-house)
-- **Rust acceleration**: `wepppyo3`, `peridot`, `weppcloud-wbt` (custom geospatial kernels)
+- **Native Rust substrate**: `wepppyo3`, `peridot`, `weppcloud-wbt` (WEPPpy native kernels, watershed graph abstraction, and delineation tooling)
 - **Vanilla JavaScript**: No React/Vue/Angular churn—Pure CSS + event-driven controllers
 - **NoDb philosophy**: File-backed state, not ORM complexity—agents understand serialization patterns
 
@@ -235,7 +235,7 @@ Traditional erosion modeling stacks accumulate technical debt because maintenanc
 
 **Human strengths**:
 - Domain expertise (hydrology, erosion physics, wildfire response)
-- Strategic architecture (NoDb philosophy, Redis allocation, Rust acceleration)
+- Strategic architecture (NoDb philosophy, Redis allocation, native Rust substrate)
 - Risk assessment (BAER workflow constraints, field team requirements)
 
 **Agent strengths**:
@@ -374,7 +374,7 @@ print(result)
 
 - **Redis-backed NoDb singletons** hydrate run state on demand, cache hot JSON payloads (72-hour TTL in DB 13), and enforce distributed locks (DB 0) without requiring a relational database
 - **Queue-driven logging pipeline** streams structured status updates from background workers to browsers via Redis pub/sub (DB 2) → Go WebSocket services → JavaScript controllers (sub-second latency)
-- **Rust-accelerated geospatial** offloads heavy math to SIMD-optimized crates (`wepppyo3` for climate interpolation, `peridot` for watershed abstraction, WhiteboxTools for hillslope delineation) while Python orchestrates
+- **Native Rust substrate** keeps Python orchestration in WEPPpy while selected hot paths move into owned Rust components (`wepppyo3` for Python-callable kernels/interchange, Peridot for watershed graph abstraction, `weppcloud-wbt` for WBT/TOPAZ-style delineation)
 - **Automatic controller bundling** via Gunicorn `on_starting` hook regenerates JavaScript bundles from source, keeping UI and backend in lockstep without manual builds
 - **Process pool parallelization** for hillslope processing, climate interpolation, and interchange parsing (respects `NCPU`, uses `/dev/shm` for temp files)
 - **Schema-versioned Parquet interchange** transforms FORTRAN text reports → analytics-ready tables with unit metadata, enabling instant DuckDB queries over multi-GB datasets
@@ -412,8 +412,8 @@ NoDb subclass logger
 - If a refactor moves or renames a module, update the redirect map by ensuring the file still lives under `wepppy/nodb/` (the scanner picks up new paths automatically). For one-off overrides, call `NoDbBase._import_mod_module('mod_name')` to pre-load the replacement prior to deserialization
 - Best practice: keep module-level side effects lightweight, prefer absolute imports (`from wepppy.nodb.core.climate import Climate`), and treat anything underscored as private so it stays out of `__all__`
 
-## Rust-Powered Geospatial Acceleration
-- [`wepppyo3`](https://github.com/wepp-in-the-woods/wepppyo3) exposes Rust bindings for climate interpolation, raster mode lookups, and soil loss grids. Python falls back gracefully when the crate is absent, but production boxes pin the wheel for SIMD speedups.
+## Native Rust Substrate
+- [`wepppyo3`](https://github.com/wepp-in-the-woods/wepppyo3) is WEPPpy's Python-callable native kernel and interchange substrate. Canonical docs: [module registry](https://github.com/wepp-in-the-woods/wepppyo3/blob/main/docs/module-registry.md), [architecture boundaries](https://github.com/wepp-in-the-woods/wepppyo3/blob/main/docs/architecture-and-boundaries.md), [release provenance](https://github.com/wepp-in-the-woods/wepppyo3/blob/main/docs/release-provenance.md), and [claim discipline](https://github.com/wepp-in-the-woods/wepppyo3/blob/main/docs/claim-discipline.md).
 - Hillslope delineation can be configured to use TOPAZ or a custom tool implemented in Rust [`hillslopes_topaz.rs`](https://github.com/rogerlew/weppcloud-wbt/blob/master/whitebox-tools-app/src/tools/hydro_analysis/hillslopes_topaz.rs). This routine is part of [`weppcloud-wbt`](https://github.com/rogerlew/weppcloud-wbt), a hard fork of WhiteboxTools with additional WEPPcloud-specific tools including:
   - `HillslopesTopaz` - TOPAZ-style stream and hillslope identifiers with performance optimizations
   - `FindOutlet` - Single stream outlet pour point derivation with diagnostic metadata
@@ -436,7 +436,7 @@ for the WEPPpy-side verification flow and the canonical
 `weppcloud-wbt` build/install runbook link.
 
 - The watershed abstraction is delegated to [`peridot`](https://github.com/wepp-in-the-woods/peridot), a Rust-powered watershed abstraction engine.
-- Raster-heavy routines (NLCD landcover, soils, RAP) all try `wepppyo3.raster_characteristics` first, using Python fallbacks only when the Rust extension is missing.
+- Raster-heavy routines (NLCD landcover, soils, RAP), climate helpers, WEPP/SWAT interchanges, MOFE helpers, SBS helpers, roads helpers, and visualization grids route selected hot paths through `wepppyo3`; fallback behavior is module-specific and documented as part of the contract.
 
 ## Front-End Controls & Build Automation
 - Controllers live under `wepppy/weppcloud/controllers_js/` and export singletons (`ControllerName.getInstance()`) so WebSocket connections and DOM bindings are never duplicated.

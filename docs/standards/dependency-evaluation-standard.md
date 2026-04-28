@@ -15,7 +15,7 @@ These components exist because measured Python-only alternatives were inadequate
 | Component | Language | What it replaces | Measured advantage |
 |-----------|----------|------------------|--------------------|
 | weppcloud-wbt | Rust | WhiteboxTools upstream | Custom hydrology algorithms, VRT windowed reads (17.5x faster, 32x less memory) |
-| wepppyo3 | Rust+PyO3 | Pure Python raster classification | Raster key classification, climate interpolation, SBS mapping |
+| wepppyo3 | Rust+PyO3 | Selected Python hot paths and file-interchange loops | WEPPpy native kernel and interchange substrate; see `/workdir/wepppyo3/docs/module-registry.md` and `/workdir/wepppyo3/docs/claim-discipline.md` |
 | oxidized-rasterstats | Rust | python-rasterstats | 8-17x faster zonal/point stats, 127 tests, 11 regression denylists |
 | peridot | Rust | Python watershed abstraction | Explicit graph watershed abstraction; benchmark claims must follow the canonical Peridot benchmark discipline |
 

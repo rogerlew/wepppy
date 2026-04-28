@@ -79,30 +79,6 @@ Feedback mechanisms:
 
 Work packages that are scoped but not yet started. Dependencies and prerequisites should be noted.
 
-### wepppyo3 Native Substrate Repositioning
-**Proposed**: 2026-04-28
-**Size**: Medium (1-2 focused documentation sessions)
-**Priority**: High documentation/strategy
-**Link**: [docs/work-packages/20260428_wepppyo3_repositioning/](docs/work-packages/20260428_wepppyo3_repositioning/)
-**Description**: Reposition `/workdir/wepppyo3` as WEPPpy's native kernel and interchange substrate rather than a miscellaneous set of Rust/PyO3 accelerators.
-
-**Scope**:
-- Rewrite `wepppyo3` README front matter around the native-substrate posture.
-- Add canonical module registry, architecture/boundary, release/provenance, and claim-discipline docs.
-- Distinguish production-critical contracts from optional/fallback and incubating modules.
-- Align relevant WEPPpy references after canonical docs exist.
-
-**Strategic Value**:
-- Makes future Rust hot-path work easier to route between `wepppyo3`, Peridot, `weppcloud-wbt`, and Python.
-- Reduces duplicate Python implementations by clarifying owned native contracts.
-- Improves release/provenance discipline for shared-object artifacts that production WEPPpy imports.
-
-**Dependencies**: Initial posture review captured in `artifacts/2026-04-28_codebase_posture_review.md`.
-
-**Next Steps**: Execute active ExecPlan at `docs/work-packages/20260428_wepppyo3_repositioning/prompts/active/wepppyo3_repositioning_execplan.md`.
-
----
-
 ### Deprecate and Remove TauDEM Backend
 **Proposed**: 2025-10-27  
 **Size**: Medium (3-5 days)  
@@ -295,6 +271,15 @@ Currently active work packages. Limit to 2-4 packages to maintain focus.
 ## ✅ Done
 
 Recently completed work packages. Archived immediately upon completion.
+
+### wepppyo3 Native Substrate Repositioning (2026-04-28)
+**Status**: ✅ **COMPLETE**
+
+**Link**: [docs/work-packages/20260428_wepppyo3_repositioning/](docs/work-packages/20260428_wepppyo3_repositioning/)
+
+**Lifecycle**: Backlog -> In Progress -> Done (2026-04-28)
+
+**Summary**: Closed the docs-first `wepppyo3` repositioning package. `/workdir/wepppyo3/README.md` now positions the repo as WEPPpy's native kernel and interchange substrate, and new canonical docs define the module registry, architecture boundaries, release provenance, and claim discipline. WEPPpy architecture, package README, root README, and dependency-standard references now point to this posture instead of describing `wepppyo3` as a generic accelerator bundle. Validation passed with scoped WEPPpy doc-lint, `git diff --check` in both repos, `uk2us` preview for changed Markdown, and manual `wepppyo3` relative-link validation. Runtime behavior and release binaries were not changed; the ExecPlan is archived under `prompts/completed/`.
 
 ### RQ Scoped Stale NoDb Cache Guard Priority 2 (2026-04-28)
 **Status**: ✅ **COMPLETE**

@@ -1,6 +1,6 @@
 # wepppy Package
 
-> Core Python library for erosion modeling, watershed analysis, and WEPP orchestration with Redis-backed state management and Rust-accelerated geospatial processing.
+> Core Python library for erosion modeling, watershed analysis, and WEPP orchestration with Redis-backed state management and owned Rust-native substrate components.
 
 > **See also:** [AGENTS.md](../AGENTS.md) for comprehensive coding conventions, architecture patterns, and development workflows.
 
@@ -17,7 +17,7 @@ The `wepppy` package is the computational heart of WEPPcloud, providing:
 - **Background job orchestration** - Redis Queue (RQ) task management and status streaming
 - **Microservices** - FastAPI and Starlette services for elevation queries and raster serving
 
-This package is designed for watershed-scale erosion modeling, wildfire response analytics, and agricultural runoff prediction. It glues together legacy Fortran executables, modern Python services, and Rust-accelerated tooling to deliver repeatable, high-throughput simulations.
+This package is designed for watershed-scale erosion modeling, wildfire response analytics, and agricultural runoff prediction. It glues together legacy Fortran executables, modern Python services, and owned Rust-native substrate components to deliver repeatable, high-throughput simulations.
 
 ## Package Structure
 
@@ -140,8 +140,11 @@ topaz = Topaz.getInstance(wd)
 topaz.delineate_hillslopes()
 ```
 
-**Acceleration:**
-- Rust bindings via `wepppyo3` for climate interpolation and raster lookups
+**Native substrate:**
+- `wepppyo3` for Python-callable native kernels and interchanges; see canonical docs:
+  [module registry](https://github.com/wepp-in-the-woods/wepppyo3/blob/main/docs/module-registry.md),
+  [architecture boundaries](https://github.com/wepp-in-the-woods/wepppyo3/blob/main/docs/architecture-and-boundaries.md),
+  [release provenance](https://github.com/wepp-in-the-woods/wepppyo3/blob/main/docs/release-provenance.md)
 - `peridot` for graph-first watershed abstraction; see the canonical
   [output contract](https://github.com/wepp-in-the-woods/peridot/blob/main/docs/contracts/watershed-output-contract.md)
   and [benchmark discipline](https://github.com/wepp-in-the-woods/peridot/blob/main/docs/benchmarks.md)
@@ -249,7 +252,7 @@ pip install -e .
 - Redis 7.0+
 - GDAL 3.8+
 - PostgreSQL 16+ (for user management)
-- Optional: `wepppyo3` for Rust acceleration
+- Native: `wepppyo3` for selected Rust kernel/interchange paths
 
 ## Configuration
 
@@ -441,7 +444,7 @@ wctl run-stubtest wepppy.nodb.core
 | Climate file generation | 5-60s | Provider and date range dependent |
 
 **Optimization tips:**
-- Use `wepppyo3` Rust bindings for raster-heavy operations
+- Use `wepppyo3` native kernels for raster-heavy, climate, interchange, and visualization operations where the module registry marks the path production-used or production-critical
 - Enable Redis caching for hot NoDb instances
 - Run WEPP hillslopes in parallel via RQ workers
 - Use DuckDB for analytics instead of loading full CSVs
@@ -522,7 +525,11 @@ from wepppy.nodb.core import Wepp
 - [docker/README.md](../docker/README.md) - Docker development stack
 
 ### External Projects
-- [wepppyo3](https://github.com/wepp-in-the-woods/wepppyo3) - Rust Python bindings for geospatial acceleration
+- [wepppyo3](https://github.com/wepp-in-the-woods/wepppyo3) - WEPPpy native kernel and interchange substrate; canonical docs:
+  [module registry](https://github.com/wepp-in-the-woods/wepppyo3/blob/main/docs/module-registry.md),
+  [architecture boundaries](https://github.com/wepp-in-the-woods/wepppyo3/blob/main/docs/architecture-and-boundaries.md),
+  [release provenance](https://github.com/wepp-in-the-woods/wepppyo3/blob/main/docs/release-provenance.md),
+  [claim discipline](https://github.com/wepp-in-the-woods/wepppyo3/blob/main/docs/claim-discipline.md)
 - [peridot](https://github.com/wepp-in-the-woods/peridot) - Rust watershed abstraction engine; canonical docs:
   [contract](https://github.com/wepp-in-the-woods/peridot/blob/main/docs/contracts/watershed-output-contract.md),
   [migration](https://github.com/wepp-in-the-woods/peridot/blob/main/docs/migration/prepwepp-to-peridot.md),
