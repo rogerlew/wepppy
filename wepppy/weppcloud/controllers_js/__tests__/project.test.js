@@ -5,6 +5,8 @@
 describe("Project controller", () => {
     let project;
     let postJsonMock;
+    let requestMock;
+    let getJsonMock;
     let unitizerClient;
     let delegateTeardowns;
     let commandBar;
@@ -115,10 +117,12 @@ describe("Project controller", () => {
             return Promise.resolve({ body: {} });
         });
 
+        requestMock = jest.fn(() => Promise.resolve({ body: {} }));
+        getJsonMock = jest.fn(() => Promise.resolve({ body: {} }));
         global.WCHttp = {
             postJson: postJsonMock,
-            request: jest.fn(() => Promise.resolve({ body: {} })),
-            getJson: jest.fn(() => Promise.resolve({ body: {} })),
+            request: requestMock,
+            getJson: getJsonMock,
             isHttpError: jest.fn(() => false)
         };
 
@@ -164,6 +168,8 @@ describe("Project controller", () => {
         delete global.initializeCommandBar;
         delete global.url_for_run;
         delete global.setGlobalUnitizerPreference;
+        delete window.Geneva;
+        delete window.runContext;
 
         document.body.innerHTML = "";
         document.title = "";
@@ -272,5 +278,58 @@ describe("Project controller", () => {
         await global.setGlobalUnitizerPreference(0);
         expect(spy).toHaveBeenCalledWith(0);
         spy.mockRestore();
+    });
+
+    test("set_mod bootstraps Geneva after rendering the dynamic section", async () => {
+        window.runContext = { mods: { list: [], flags: {} } };
+        document.getElementById("project-fixture").insertAdjacentHTML("beforeend", `
+            <li data-mod-nav="geneva" hidden></li>
+            <div data-mod-section="geneva" hidden></div>
+            <input type="checkbox" data-project-mod="geneva">
+        `);
+
+        const workflowClickHandler = jest.fn();
+        const bootstrap = jest.fn(() => {
+            document
+                .querySelector('[data-geneva-action="run-workflow"]')
+                .addEventListener("click", workflowClickHandler);
+        });
+        window.Geneva = {
+            getInstance: jest.fn(() => ({ bootstrap }))
+        };
+        requestMock.mockResolvedValueOnce({ body: { Content: { label: "Geneva" } } });
+        getJsonMock.mockResolvedValueOnce({
+            Content: {
+                html: '<section id="geneva"><form id="geneva_form"><button type="button" data-geneva-action="run-workflow">Run Geneva Workflow</button></form></section>'
+            }
+        });
+
+        const input = document.querySelector('[data-project-mod="geneva"]');
+        input.checked = true;
+        const resultPromise = project.set_mod("geneva", true, { input, notify: false });
+
+        await flushPromises();
+        await flushPromises();
+        await new Promise((resolve) => {
+            setTimeout(resolve, 0);
+        });
+        await resultPromise;
+
+        expect(requestMock).toHaveBeenCalledWith("tasks/set_mod", {
+            method: "POST",
+            json: { mod: "geneva", enabled: true }
+        });
+        expect(getJsonMock).toHaveBeenCalledWith("view/mod/geneva");
+        expect(document.querySelector('[data-mod-nav="geneva"]').hidden).toBe(false);
+        expect(document.querySelector('[data-mod-section="geneva"]').hidden).toBe(false);
+        expect(input.checked).toBe(true);
+        expect(input.disabled).toBe(false);
+        expect(window.runContext.mods.list).toContain("geneva");
+        expect(window.runContext.mods.flags.geneva).toBe(true);
+        expect(window.Geneva.getInstance).toHaveBeenCalled();
+        expect(bootstrap).toHaveBeenCalledWith(window.runContext);
+
+        document.querySelector('[data-geneva-action="run-workflow"]').click();
+        expect(workflowClickHandler).toHaveBeenCalled();
     });
 });
