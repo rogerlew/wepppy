@@ -75,6 +75,10 @@ Guidelines:
 - For optional metadata (job IDs, timestamps), log and skip after retries.
 - For critical state changes, bubble the exception so the caller can fail fast.
 
+## WEPP Hillslope Timeout Policy
+
+Continuous hillslope runs use the default 60-second `wepp_runner.run_hillslope` timeout for single-OFE projects. MOFE projects route continuous hillslope execution through `WeppRunService` with a 300-second timeout because each WEPP invocation can route many OFEs for one hillslope. The timeout appears in the service log line as `Running Hillslopes with max_workers=..., timeout=...s` and is passed unchanged to the runner so timeout errors continue to report the command, run file, error file, attempts, and last observed WEPP output.
+
 ## Path Placeholders in Configs
 
 NoDb configs reference large, location-specific datasets through placeholders that

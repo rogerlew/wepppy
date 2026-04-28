@@ -25,6 +25,17 @@ if TYPE_CHECKING:
     from wepppy.nodb.core.wepp import Wepp
 
 
+_CONTINUOUS_HILLSLOPE_TIMEOUT_S = 60
+_MOFE_CONTINUOUS_HILLSLOPE_TIMEOUT_S = 300
+
+
+def _continuous_hillslope_timeout_s(*, multi_ofe: bool) -> int:
+    if multi_ofe:
+        return _MOFE_CONTINUOUS_HILLSLOPE_TIMEOUT_S
+
+    return _CONTINUOUS_HILLSLOPE_TIMEOUT_S
+
+
 class WeppRunService:
     def run_hillslopes(
         self,
@@ -52,7 +63,6 @@ class WeppRunService:
         elif max_workers > max(cpu_count, 16):
             max_workers = max(cpu_count, 16)
 
-        wepp.logger.info(f"Running Hillslopes with max_workers={max_workers}")
         watershed = wepp.watershed_instance
         translator = watershed.translator_factory()
         climate = wepp.climate_instance
@@ -64,10 +74,13 @@ class WeppRunService:
         wepp.logger.info(f"    wepp_bin:{configured_wepp_bin}")
 
         sub_n = watershed.sub_n
+        multi_ofe = bool(getattr(wepp, "multi_ofe", False))
+        hillslope_timeout_s = _continuous_hillslope_timeout_s(multi_ofe=multi_ofe)
 
         with ThreadPoolExecutor(max_workers=max_workers) as pool:
             futures = []
             if climate.climate_mode == wepp_module.ClimateMode.SingleStormBatch:
+                wepp.logger.info(f"Running Hillslopes with max_workers={max_workers}")
                 wepp.logger.info(f"  Submitting {sub_n} hillslope runs to ThreadPoolExecutor - SS batch")
                 for i, topaz_id in enumerate(watershed._subs_summary):
                     wepp.logger.info(f"  submitting {topaz_id} to executor")
@@ -96,6 +109,9 @@ class WeppRunService:
                         )
 
             else:
+                wepp.logger.info(
+                    f"Running Hillslopes with max_workers={max_workers}, timeout={hillslope_timeout_s}s"
+                )
                 wepp.logger.info(f"  Submitting {sub_n} hillslope runs to ThreadPoolExecutor - no SS batch")
                 for i, topaz_id in enumerate(watershed._subs_summary):
                     wepp.logger.info(f"  submitting {topaz_id} to executor")
@@ -117,6 +133,7 @@ class WeppRunService:
                             cli_relpath=cli_relpath,
                             slp_relpath=slp_relpath,
                             sol_relpath=sol_relpath,
+                            timeout=hillslope_timeout_s,
                         )
                     )
 

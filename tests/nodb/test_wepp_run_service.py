@@ -79,6 +79,52 @@ def test_run_hillslopes_keeps_configured_bin_for_agriculture_crops(
     assert captured_bins == ["wepp_260421b", "wepp_260421b"]
 
 
+@pytest.mark.parametrize(
+    ("multi_ofe", "expected_timeout_s"),
+    [
+        (False, 60),
+        (True, 300),
+    ],
+)
+def test_run_hillslopes_uses_mofe_timeout_for_continuous_hillslopes(
+    tmp_path: Path,
+    monkeypatch: pytest.MonkeyPatch,
+    multi_ofe: bool,
+    expected_timeout_s: int,
+) -> None:
+    topaz_ids = ["627"]
+    landuse = _build_landuse(topaz_ids, disturbed_class="agriculture crops")
+    climate = SimpleNamespace(climate_mode=ClimateMode.Observed, ss_batch_storms=[])
+    wepp = SimpleNamespace(
+        class_name="Wepp",
+        logger=logging.getLogger("tests.nodb.wepp_run_service.hillslope_timeout"),
+        watershed_instance=_DummyWatershed(topaz_ids),
+        climate_instance=climate,
+        landuse_instance=landuse,
+        multi_ofe=multi_ofe,
+        runs_dir=str(tmp_path / "runs"),
+        wepp_bin="wepp_260426_hill",
+        wd=str(tmp_path),
+    )
+
+    captured_timeouts: list[int] = []
+
+    def _fake_run_hillslope(**kwargs):
+        captured_timeouts.append(kwargs["timeout"])
+        return True, kwargs["wepp_id"], 0.01
+
+    monkeypatch.setattr("wepppy.nodb.core.wepp_run_service.run_hillslope", _fake_run_hillslope)
+    monkeypatch.setattr(
+        wepp_module.RedisPrep,
+        "getInstance",
+        lambda _wd: (_ for _ in ()).throw(FileNotFoundError()),
+    )
+
+    WeppRunService().run_hillslopes(wepp)
+
+    assert captured_timeouts == [expected_timeout_s]
+
+
 def test_run_hillslopes_ss_batch_keeps_configured_bin_for_agriculture_crops(
     tmp_path: Path,
     monkeypatch: pytest.MonkeyPatch,
