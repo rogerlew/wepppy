@@ -1,5 +1,6 @@
 from __future__ import annotations
 
+from importlib import import_module
 from pathlib import Path
 from types import SimpleNamespace
 
@@ -8,7 +9,7 @@ import pytest
 pytest.importorskip("flask")
 from flask import Flask
 
-import wepppy.weppcloud.routes.test_bp as test_bp_module
+test_bp_module = import_module("wepppy.weppcloud.routes.test_bp")
 
 pytestmark = pytest.mark.routes
 
