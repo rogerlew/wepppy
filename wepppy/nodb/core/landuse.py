@@ -127,6 +127,9 @@ from wepppyo3.raster_characteristics import count_intersecting_raster_key_pairs
 _GDAL_OPEN_PROBE: Optional[Callable[[str], bool]] = None
 _GDAL_OPEN_PROBE_INIT = False
 _MOFE_MAN_SYNTH_MAX_WORKERS = 4
+MOFE_SINGLE_LANDUSE_MESSAGE = (
+    "MOFE projects require a gridded landuse map; Single landuse for watershed is disabled."
+)
 _AUTO_CLEARABLE_CUSTOM_MAPPING_RELPATHS = frozenset(
     {"landuse/landuse_user_defined_mapping.json"}
 )
@@ -821,6 +824,7 @@ class Landuse(NoDbBase):
             snapshot_single_man = getattr(self, "_single_man", missing)
             try:
                 if mode is not None:
+                    self.validate_landuse_mode_for_mofe(mode)
                     self._set_mode_value(mode)
                 if single_selection is not None:
                     self._set_single_selection_value(single_selection)
@@ -948,6 +952,22 @@ class Landuse(NoDbBase):
         if not self.islocked():
             with self.locked():
                 self._landuse_is_vrt = False
+
+    def validate_landuse_mode_for_mofe(self, mode: Optional[Any] = None) -> None:
+        if mode is None:
+            effective_mode = self._mode
+        elif isinstance(mode, LanduseMode):
+            effective_mode = mode
+        elif isinstance(mode, int):
+            effective_mode = LanduseMode(mode)
+        else:
+            raise ValueError('most be LanduseMode or int')
+
+        if effective_mode != LanduseMode.Single:
+            return
+
+        if self.multi_ofe:
+            raise ValueError(MOFE_SINGLE_LANDUSE_MESSAGE)
 
     def symlink_landuse_map(
         self,
@@ -1172,6 +1192,8 @@ class Landuse(NoDbBase):
         if not watershed.is_abstracted:
             from wepppy.nodb.core.watershed import WatershedNotAbstractedError
             raise WatershedNotAbstractedError()
+
+        self.validate_landuse_mode_for_mofe()
 
         if self._mode in [LanduseMode.RRED_Burned, LanduseMode.RRED_Unburned]:
             from wepppy.nodb.mods.rred import Rred

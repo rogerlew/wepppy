@@ -42,6 +42,9 @@ class LanduseMode(IntEnum):
     SpatialAPI = 9
 
 
+MOFE_SINGLE_LANDUSE_MESSAGE: str
+
+
 def read_cover_defaults(fn: str) -> Dict[str, Dict]: ...
 
 
@@ -96,6 +99,7 @@ class Landuse(NoDbBase):
     @user_defined_landcover_fn.setter
     def user_defined_landcover_fn(self, value: str | None) -> None: ...
     def clean(self) -> None: ...
+    def validate_landuse_mode_for_mofe(self, mode: Any | None = None) -> None: ...
     def symlink_landuse_map(
         self,
         landuse_fn: str,

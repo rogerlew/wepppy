@@ -99,6 +99,41 @@ def test_build_landuse_enqueues_job(monkeypatch: pytest.MonkeyPatch) -> None:
     assert response.json()["job_id"] == "job-42"
 
 
+def test_build_landuse_rejects_single_mode_for_mofe(monkeypatch: pytest.MonkeyPatch) -> None:
+    _stub_auth(monkeypatch)
+    monkeypatch.setattr(landuse_routes, "get_wd", lambda runid: "/tmp/run")
+
+    class DummyLanduse:
+        run_group = "default"
+        mods: set[str] = set()
+        mode = landuse_routes.LanduseMode.Single
+        multi_ofe = True
+        lc_dir = "/tmp"
+        lc_fn = "/tmp/lc.tif"
+
+        def __init__(self) -> None:
+            self.parse_inputs_calls: list[object] = []
+
+        def parse_inputs(self, payload) -> None:
+            self.parse_inputs_calls.append(payload)
+
+    controller = DummyLanduse()
+    monkeypatch.setattr(
+        landuse_routes.Landuse,
+        "getInstance",
+        lambda wd: controller,
+    )
+
+    with TestClient(rq_engine.app) as client:
+        response = client.post("/api/runs/run-1/cfg/build-landuse", json={})
+
+    assert response.status_code == 400
+    payload = response.json()
+    assert payload["error"]["code"] == "invalid_landuse_mode"
+    assert "MOFE projects require a gridded landuse map" in payload["error"]["message"]
+    assert controller.parse_inputs_calls == []
+
+
 def test_build_landuse_rejects_invalid_custom_mapping(monkeypatch: pytest.MonkeyPatch) -> None:
     _stub_auth(monkeypatch)
     _stub_queue(monkeypatch, job_id="job-42")
@@ -263,6 +298,43 @@ def test_set_landuse_mode_updates_controller(monkeypatch: pytest.MonkeyPatch) ->
     assert controller.single_selection == "forest"
 
 
+@pytest.mark.parametrize("include_selection", [False, True])
+def test_set_landuse_mode_rejects_single_mode_for_mofe(
+    monkeypatch: pytest.MonkeyPatch,
+    include_selection: bool,
+) -> None:
+    _stub_auth(monkeypatch)
+    monkeypatch.setattr(landuse_routes, "get_wd", lambda runid, prefer_active=False: "/tmp/run")
+    monkeypatch.setattr(landuse_routes, "_preflight_landuse_mutation_root", lambda wd: None)
+
+    class DummyLanduse:
+        multi_ofe = True
+
+        def __init__(self) -> None:
+            self.grouped_update_calls: list[dict[str, object]] = []
+
+        def apply_set_landuse_mode_updates(self, **kwargs) -> None:
+            self.grouped_update_calls.append(kwargs)
+
+    controller = DummyLanduse()
+    monkeypatch.setattr(landuse_routes.Landuse, "getInstance", lambda wd: controller)
+
+    with TestClient(rq_engine.app) as client:
+        body = {"mode": int(landuse_routes.LanduseMode.Single)}
+        if include_selection:
+            body["landuse_single_selection"] = "42"
+        response = client.post(
+            "/api/runs/run-1/cfg/set-landuse-mode",
+            json=body,
+        )
+
+    assert response.status_code == 400
+    payload = response.json()
+    assert payload["error"]["code"] == "invalid_landuse_mode"
+    assert "MOFE projects require a gridded landuse map" in payload["error"]["message"]
+    assert controller.grouped_update_calls == []
+
+
 def test_set_landuse_mode_requires_mode(monkeypatch: pytest.MonkeyPatch) -> None:
     _stub_auth(monkeypatch)
     monkeypatch.setattr(landuse_routes, "get_wd", lambda runid, prefer_active=False: "/tmp/run")
@@ -279,7 +351,7 @@ def test_set_landuse_mode_requires_mode(monkeypatch: pytest.MonkeyPatch) -> None
     assert response.json()["error"]["message"] == "mode and landuse_single_selection must be provided"
 
 
-def test_set_landuse_mode_noops_when_single_selection_missing(monkeypatch: pytest.MonkeyPatch) -> None:
+def test_set_landuse_mode_updates_non_single_mode_when_selection_missing(monkeypatch: pytest.MonkeyPatch) -> None:
     _stub_auth(monkeypatch)
     monkeypatch.setattr(landuse_routes, "get_wd", lambda runid, prefer_active=False: "/tmp/run")
     monkeypatch.setattr(landuse_routes, "_preflight_landuse_mutation_root", lambda wd: None)
@@ -301,7 +373,37 @@ def test_set_landuse_mode_noops_when_single_selection_missing(monkeypatch: pytes
         )
 
     assert response.status_code == 200
-    assert response.json()["message"] == "No landuse changes applied"
+    assert response.json()["message"] == "Landuse mode updated"
+    assert controller.grouped_update_calls == [
+        {"mode": landuse_routes.LanduseMode.UserDefined, "single_selection": None}
+    ]
+
+
+def test_set_landuse_mode_requires_selection_for_single_mode(monkeypatch: pytest.MonkeyPatch) -> None:
+    _stub_auth(monkeypatch)
+    monkeypatch.setattr(landuse_routes, "get_wd", lambda runid, prefer_active=False: "/tmp/run")
+    monkeypatch.setattr(landuse_routes, "_preflight_landuse_mutation_root", lambda wd: None)
+
+    class DummyLanduse:
+        multi_ofe = False
+
+        def __init__(self) -> None:
+            self.grouped_update_calls: list[dict[str, object]] = []
+
+        def apply_set_landuse_mode_updates(self, **kwargs) -> None:
+            self.grouped_update_calls.append(kwargs)
+
+    controller = DummyLanduse()
+    monkeypatch.setattr(landuse_routes.Landuse, "getInstance", lambda wd: controller)
+
+    with TestClient(rq_engine.app) as client:
+        response = client.post(
+            "/api/runs/run-1/cfg/set-landuse-mode",
+            json={"mode": int(landuse_routes.LanduseMode.Single)},
+        )
+
+    assert response.status_code == 400
+    assert response.json()["error"]["message"] == "mode and landuse_single_selection must be provided"
     assert controller.grouped_update_calls == []
 
 

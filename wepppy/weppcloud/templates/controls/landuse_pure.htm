@@ -2,6 +2,8 @@
 {% from "shared/console_macros.htm" import button_row %}
 
 {% set current_mode = landuse.mode.value if landuse.mode is not none else 0 %}
+{% set single_landuse_disabled = wepp.multi_ofe %}
+{% set mofe_landuse_description = "MOFE projects require a gridded landuse map; Single landuse for watershed is disabled." if single_landuse_disabled else none %}
 
 {% set mode_options = [
   {
@@ -16,6 +18,8 @@
     "label": "Single landuse for watershed",
     "value": "1",
     "selected": current_mode == 1,
+    "disabled": single_landuse_disabled,
+    "description": "MOFE requires a gridded landuse map." if single_landuse_disabled else none,
     "attrs": {"class": "disable-readonly", "data-landuse-mode": "1", "data-landuse-role": "mode"}
   }
 ] %}
@@ -72,6 +76,7 @@
 {% call ui.control_shell(
      form_id="landuse_form",
      title="Landuse Options",
+     description=mofe_landuse_description,
      collapsible=True,
      status_panel_options={"id": "landuse_status_panel"},
      stacktrace_panel_options={"panel_id": "landuse_stacktrace_panel", "body_id": "stacktrace"}
@@ -105,7 +110,11 @@
          single_ns.options,
          selected=landuse.single_selection,
          help="Assign the chosen management class to the entire watershed.",
-         attrs={"data-landuse-role": "single-selection"},
+         attrs=(
+           {"data-landuse-role": "single-selection", "disabled": true}
+           if single_landuse_disabled
+           else {"data-landuse-role": "single-selection"}
+         ),
          extra_control_class="disable-readonly"
        ) }}
   </div>

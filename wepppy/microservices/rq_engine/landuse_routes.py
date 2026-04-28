@@ -27,6 +27,7 @@ from wepppy.nodb.core import (
     Watershed,
     WatershedNotAbstractedError,
 )
+from wepppy.nodb.core.landuse import MOFE_SINGLE_LANDUSE_MESSAGE
 from wepppy.nodb.mods.disturbed import Disturbed
 from wepppy.nodb.redis_prep import RedisPrep, TaskEnum
 from wepppy.runtime_paths.errors import NoDirError
@@ -372,6 +373,21 @@ def _validate_effective_mapping(landuse: Landuse) -> JSONResponse | None:
     return None
 
 
+def _validate_mofe_landuse_mode_for_build(landuse: Any) -> JSONResponse | None:
+    validator = getattr(landuse, "validate_landuse_mode_for_mofe", None)
+    try:
+        if callable(validator):
+            validator()
+        elif (
+            getattr(landuse, "mode", None) == LanduseMode.Single
+            and bool(getattr(landuse, "multi_ofe", False))
+        ):
+            raise ValueError(MOFE_SINGLE_LANDUSE_MESSAGE)
+    except ValueError as exc:
+        return error_response(str(exc), status_code=400, code="invalid_landuse_mode")
+    return None
+
+
 @router.post(
     "/runs/{runid}/{config}/build-landuse",
     summary="Build landuse inputs",
@@ -419,6 +435,10 @@ async def build_landuse(runid: str, config: str, request: Request) -> JSONRespon
             if isinstance(value, (list, tuple)):
                 return value[0] if value else None
             return value
+
+        mode_error = _validate_mofe_landuse_mode_for_build(landuse)
+        if mode_error is not None:
+            return mode_error
 
         try:
             landuse.parse_inputs(payload)
@@ -586,16 +606,16 @@ async def set_landuse_mode(runid: str, config: str, request: Request) -> JSONRes
         except (TypeError, ValueError):
             return error_response("mode and landuse_single_selection must be provided", status_code=400)
 
-        if single_selection is None:
-            # Legacy Flask parity: no-op when mode payload omits selection.
-            return JSONResponse({"message": "No landuse changes applied"})
-
         wd = _resolve_run_root_for_request(runid, request)
         _preflight_landuse_mutation_root(wd)
         landuse = Landuse.getInstance(wd)
+        if mode == LanduseMode.Single and bool(getattr(landuse, "multi_ofe", False)):
+            return error_response(MOFE_SINGLE_LANDUSE_MESSAGE, status_code=400, code="invalid_landuse_mode")
+        if mode == LanduseMode.Single and single_selection is None:
+            return error_response("mode and landuse_single_selection must be provided", status_code=400)
         landuse.apply_set_landuse_mode_updates(
             mode=mode,
-            single_selection=str(single_selection),
+            single_selection=str(single_selection) if single_selection is not None else None,
         )
         return JSONResponse({"message": "Landuse mode updated"})
     except RunContextResolutionError as exc:

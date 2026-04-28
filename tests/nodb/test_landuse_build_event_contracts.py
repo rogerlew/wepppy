@@ -25,7 +25,7 @@ class _LoggerStub:
         return None
 
 
-def test_build_multi_ofe_runs_single_management_pass_after_domlc_trigger(
+def test_build_multi_ofe_rejects_single_landuse_mode(
     tmp_path: Path,
     monkeypatch: pytest.MonkeyPatch,
 ) -> None:
@@ -41,7 +41,6 @@ def test_build_multi_ofe_runs_single_management_pass_after_domlc_trigger(
     landuse.islocked = lambda: False
 
     call_log: list[str] = []
-    get_instance_calls: list[str] = []
 
     def _build_single_selection() -> None:
         call_log.append("build_single_selection")
@@ -73,27 +72,14 @@ def test_build_multi_ofe_runs_single_management_pass_after_domlc_trigger(
         property(lambda _self: SimpleNamespace(_multi_ofe=True)),
     )
     monkeypatch.setattr(
-        Landuse,
-        "getInstance",
-        classmethod(lambda cls, wd: get_instance_calls.append(str(wd)) or landuse),
-    )
-    monkeypatch.setattr(
         "wepppy.nodb.core.landuse.RedisPrep.getInstance",
         lambda _wd: (_ for _ in ()).throw(FileNotFoundError()),
     )
 
-    landuse.build(retrieve_nlcd=False)
+    with pytest.raises(ValueError, match="MOFE projects require a gridded landuse map"):
+        landuse.build(retrieve_nlcd=False)
 
-    assert call_log == [
-        "build_single_selection",
-        "build_multiple_ofe:domlc_mofe_d=None",
-        "trigger:LANDUSE_DOMLC_COMPLETE:defer=True",
-        "build_managements",
-        "set_cover_defaults",
-        "build_fractionals",
-    ]
-    assert get_instance_calls == [str(run_dir), str(run_dir), str(run_dir)]
-    assert landuse._defer_disturbed_management_rebuild is False
+    assert call_log == []
 
 
 def test_build_single_ofe_keeps_management_build_before_and_after_domlc_trigger(

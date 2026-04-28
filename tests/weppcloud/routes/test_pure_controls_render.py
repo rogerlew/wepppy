@@ -313,6 +313,38 @@ def test_omni_contrasts_template_shows_user_defined_limit_hint(jinja_env: Enviro
     assert "capped at 200 total contrast runs (contrast pairs x groups)." in rendered
 
 
+def test_landuse_template_disables_single_mode_for_mofe(jinja_env: Environment) -> None:
+    template = jinja_env.get_template("controls/landuse_pure.htm")
+    rendered = template.render(
+        landuse=SimpleNamespace(
+            mode=SimpleNamespace(value=1),
+            nlcd_db="nlcd/2024",
+            single_selection="42",
+            mofe_buffer_selection="42",
+            user_defined_landcover_fn=None,
+            mapping="disturbed",
+        ),
+        landuseoptions=[{"Key": "42", "Description": "Forest"}],
+        landuse_management_mapping_options=[{"Key": "disturbed", "Description": "Disturbed"}],
+        wepp=SimpleNamespace(multi_ofe=True),
+        ron=SimpleNamespace(mods=set()),
+    )
+
+    assert 'class="wc-control__description"' in rendered
+    assert "MOFE projects require a gridded landuse map; Single landuse for watershed is disabled." in rendered
+    assert "MOFE requires a gridded landuse map." in rendered
+
+    single_radio = re.search(r'id="landuse_mode1"[^>]*>', rendered)
+    assert single_radio is not None
+    assert "checked" in single_radio.group(0)
+    assert "disabled" in single_radio.group(0)
+    assert 'aria-disabled="true"' in single_radio.group(0)
+
+    single_select = re.search(r'id="landuse_single_selection"[^>]*>', rendered)
+    assert single_select is not None
+    assert "disabled" in single_select.group(0)
+
+
 def test_frost_advanced_template_renders_wepp_variable_labels(jinja_env: Environment) -> None:
     template = jinja_env.get_template("controls/wepp_pure_advanced_options/frost.htm")
     wepp = SimpleNamespace(

@@ -108,6 +108,32 @@ def test_landuse_apply_set_landuse_mode_updates_mode_only_preserves_single_selec
     assert landuse._single_man == {"dom": "101"}
 
 
+def test_landuse_apply_set_landuse_mode_updates_rejects_single_mode_for_mofe(
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    landuse = object.__new__(Landuse)
+    landuse._mode = LanduseMode.Gridded
+    landuse._single_selection = "101"
+    landuse._single_man = {"dom": "101"}
+
+    lock = _LockRecorder()
+    landuse.locked = lock.locked
+    monkeypatch.setattr(Landuse, "multi_ofe", property(lambda _self: True))
+
+    with pytest.raises(ValueError, match="MOFE projects require a gridded landuse map"):
+        landuse.apply_set_landuse_mode_updates(
+            mode=int(LanduseMode.Single),
+            single_selection="42",
+        )
+
+    assert lock.calls == 1
+    assert lock.enters == 1
+    assert lock.exits == 1
+    assert landuse._mode == LanduseMode.Gridded
+    assert landuse._single_selection == "101"
+    assert landuse._single_man == {"dom": "101"}
+
+
 def test_landuse_apply_set_landuse_mode_updates_selection_only_preserves_mode(
     monkeypatch: pytest.MonkeyPatch,
 ) -> None:
