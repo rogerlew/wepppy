@@ -572,7 +572,7 @@ Recently completed work packages. Archived immediately upon completion.
 - [docs/work-packages/20260327_roads_point_source_outslope_rutted/](docs/work-packages/20260327_roads_point_source_outslope_rutted/) — Completed (2026-04-07)
 - [docs/work-packages/20260327_roads_outslope_unrutted_mofe_replacement/](docs/work-packages/20260327_roads_outslope_unrutted_mofe_replacement/) — Complete (2026-04-08)
 - [docs/work-packages/20260325_rusle_momm2025_r_mode/](docs/work-packages/20260325_rusle_momm2025_r_mode/) — Complete (2026-03-26)
-- [docs/work-packages/20260403_roads_map_drilldown/](docs/work-packages/20260403_roads_map_drilldown/) — Handoff Ready (2026-04-04)
+- [docs/work-packages/20260403_roads_map_drilldown/](docs/work-packages/20260403_roads_map_drilldown/) — Complete; ExecPlan archived (implementation completed 2026-04-04, lifecycle verified 2026-04-28)
 - [docs/work-packages/20260327_roads_peridot_trace_core/](docs/work-packages/20260327_roads_peridot_trace_core/) — Complete - Handoff Ready (2026-03-27)
 - [docs/work-packages/20260323_roads_wepp_reports_regen/](docs/work-packages/20260323_roads_wepp_reports_regen/) — Completed (Milestones 1-10 closed, 2026-03-24)
 - [docs/work-packages/20260124_sbs_map_refactor/](docs/work-packages/20260124_sbs_map_refactor/) — Closed (2026-01-24)

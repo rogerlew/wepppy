@@ -18,8 +18,7 @@
 - `??` in prompt means provide critical analysis only; do not implement code.
 - Ask for human clarification when requirements or debug context are ambiguous.
 - Keep docs terse: Codex loads context in bulk and does not compress verbose guidance.
-- Do not add fallback wrappers that silently mask missing required dependencies.
-- Prefer explicit failures over hidden recovery paths for easier debugging.
+- Do not add fallback wrappers that silently mask missing required dependencies; prefer explicit failures over hidden recovery paths.
 - Do not create or switch to a new git branch unless the user explicitly asks for it.
 - Always ignore `wepppy/weppcloud/routes/usersum/generated/docs_index.json` when it is dirty unless explicitly asked to modify it.
 
@@ -44,7 +43,7 @@
 - Standard location for active ExecPlans is `docs/work-packages/*/prompts/active/`.
 - Ad hoc ExecPlans may live under `docs/mini-work-packages/*.md` when explicitly designated by the user.
 - Current ad hoc active ExecPlan: `none`.
-- Current work-package active ExecPlan: `docs/work-packages/20260403_roads_map_drilldown/prompts/active/roads_map_drilldown_execplan.md`
+- Current work-package active ExecPlan: `none`
 - Before authoring or revising an ExecPlan, read `docs/prompt_templates/codex_exec_plans.md`.
 - Active plans are living documents: keep `Progress`, `Surprises & Discoveries`, `Decision Log`, and `Outcomes & Retrospective` current.
 - When asked to run a plan end-to-end, proceed milestone by milestone without pausing for extra confirmation unless blocked by an external dependency.
@@ -158,5 +157,4 @@
 ## Root Size Policy
 - Keep this file within roughly 100-160 lines.
 - If a section grows beyond quick onboarding value, move detail to a canonical doc and leave a pointer.
-- Prefer stable links over copied prose when updating this file.
-- Re-check line count after major edits to avoid onboarding bloat.
+- Prefer stable links over copied prose; re-check line count after major edits.

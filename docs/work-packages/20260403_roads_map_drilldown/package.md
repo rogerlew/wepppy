@@ -1,6 +1,6 @@
 # Roads Map Visualization and Drilldown Parity
 
-**Status**: Open (2026-04-03)
+**Status**: Closed (2026-04-28; implementation completed 2026-04-04)
 
 ## Overview
 This work package delivers Roads map visibility and road-segment drilldown in WEPPcloud after Roads prepare completes. The implementation must match the existing Channels/Subcatchments interaction model so users get familiar toggle, hover, and click behavior with no new UX paradigm.
@@ -33,13 +33,17 @@ This package includes map/controller wiring, route/controller payload extensions
 - **Informed**: QA maintainers for routes + frontend controller test suites.
 
 ## Success Criteria
-- [ ] Roads overlay is available after prepare artifacts exist and renders magenta paths.
-- [ ] Road Labels overlay is available/toggleable and readable.
-- [ ] Hover interaction highlights a road segment and exposes compact hover details.
-- [ ] Clicking a road segment opens DrillDown with required segment fields/metrics.
-- [ ] Targeted backend/frontend tests for layer visibility, labels, hover, and click drilldown pass.
-- [ ] Requested validation commands run and outcomes are recorded.
-- [ ] Mandatory `reviewer` and `qa_reviewer` subagent reviews are executed and dispositioned.
+- [x] Roads overlay is available after prepare artifacts exist and renders magenta paths.
+- [x] Road Labels overlay is available/toggleable and readable.
+- [x] Hover interaction highlights a road segment and exposes compact hover details.
+- [x] Clicking a road segment opens DrillDown with required segment fields/metrics.
+- [x] Targeted backend/frontend tests for layer visibility, labels, hover, and click drilldown pass.
+- [x] Requested validation commands run and outcomes are recorded.
+- [x] Mandatory `reviewer` and `qa_reviewer` subagent reviews are executed and dispositioned.
+
+## Closure Summary
+
+Implementation completed on 2026-04-04 and lifecycle documentation was reconciled on 2026-04-28. Roads map resources and per-segment drilldown endpoints are implemented, the frontend Roads/Road Labels overlays are wired into the map controller, hover and click-to-drilldown behavior is covered by tests, and reviewer/QA findings were resolved or explicitly dispositioned in the tracker and completed ExecPlan.
 
 ## Dependencies
 
@@ -67,7 +71,7 @@ This package includes map/controller wiring, route/controller payload extensions
 - `wepppy/nodb/mods/roads/roads.py` - Roads prepare artifacts and summary fields.
 
 ## Deliverables
-- `docs/work-packages/20260403_roads_map_drilldown/prompts/active/roads_map_drilldown_execplan.md`
+- `docs/work-packages/20260403_roads_map_drilldown/prompts/completed/roads_map_drilldown_execplan.md`
 - `docs/work-packages/20260403_roads_map_drilldown/tracker.md`
 - Backend + frontend implementation for Roads map layers and drilldown details.
 - Test additions and validation evidence.

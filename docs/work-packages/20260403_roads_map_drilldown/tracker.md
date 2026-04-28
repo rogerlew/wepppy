@@ -5,10 +5,11 @@
 ## Quick Status
 
 **Started**: 2026-04-03  
-**Current phase**: Handoff Ready  
-**Last updated**: 2026-04-04  
-**Active ExecPlan**: `prompts/active/roads_map_drilldown_execplan.md`  
-**Next milestone**: Final user handoff
+**Current phase**: Complete
+**Last updated**: 2026-04-28
+**Active ExecPlan**: `none`
+**Completed ExecPlan**: `prompts/completed/roads_map_drilldown_execplan.md`
+**Next milestone**: None; package closed
 
 ## Task Board
 
@@ -31,6 +32,7 @@
 - [x] Performed manual endpoint validation on `/wc1/runs/cl/clogging-starch` (`resources/roads.json`, segment query, segment report) (2026-04-04).
 - [x] Completed `reviewer` and `qa_reviewer` subagent reviews; resolved correctness findings and documented QA follow-ups (2026-04-04).
 - [x] Applied post-review fixes: CAP gating parity, deterministic unique fallback segment IDs, and hover refresh cleanup/rebuild guard (2026-04-04).
+- [x] Verified completion state, archived the ExecPlan under `prompts/completed/`, and cleared root `AGENTS.md` active-plan pointer (2026-04-28).
 
 ## Timeline
 
@@ -38,6 +40,7 @@
 - **2026-04-03** - Implementation started.
 - **2026-04-04** - Backend + frontend implementation completed; validation commands passed; manual endpoint validation recorded.
 - **2026-04-04** - Reviewer findings resolved, QA suggestions dispositioned, and full validation rerun completed.
+- **2026-04-28** - Completion metadata reconciled; active ExecPlan archived and root active-plan pointer cleared.
 
 ## Decisions
 
@@ -150,3 +153,24 @@
 - `wctl run-npm lint` (pass)
 - `wctl run-npm test` (74 suites passed, 495 tests passed)
 - `wctl run-pytest tests --maxfail=1` (3016 passed, 36 skipped)
+
+### 2026-04-28: Completion verification and lifecycle cleanup
+**Agent/Contributor**: Codex
+
+**Work completed**:
+- Verified the ExecPlan progress, outcomes, validation summary, and review dispositions all show package completion.
+- Moved the ExecPlan from `prompts/active/` to `prompts/completed/`.
+- Updated this tracker, `package.md`, `PROJECT_TRACKER.md`, and root `AGENTS.md` so the package is documented as complete and no active ExecPlan remains.
+
+**Blockers encountered**:
+- None.
+
+**Next steps**:
+- None; package is closed.
+
+**Test results**:
+- `wctl run-pytest tests/nodb/mods/test_roads_controller.py tests/weppcloud/routes/test_roads_bp.py --maxfail=1` (66 passed)
+- `wctl run-npm test -- roads_gl map_gl` (2 suites passed, 43 tests passed)
+- `wctl doc-lint --path AGENTS.md --path PROJECT_TRACKER.md --path docs/work-packages/20260403_roads_map_drilldown` (pass)
+- `tools/check_agents_size.sh AGENTS.md` (pass, 160 lines)
+- `git diff --check` (pass)

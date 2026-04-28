@@ -52,6 +52,7 @@ The behavior is observable on the run page for `clogging-starch` (or equivalent 
 - Subagent review outcomes:
   - `reviewer`: 3 findings (CAP parity, segment ID collision risk, hover churn) all resolved in code and regression tests.
   - `qa_reviewer`: Coverage/maintainability suggestions mostly addressed (completion-event refresh, layer-toggle hover cleanup, refresh-clears-hover coverage); remaining deeper branch/ordering coverage deferred with low residual risk.
+- Lifecycle cleanup: On 2026-04-28, completion was re-verified from this ExecPlan and the package tracker, this file was archived from `prompts/active/` to `prompts/completed/`, and root `AGENTS.md` was updated so no active work-package ExecPlan points at this completed package.
 
 ## Context and Orientation
 
@@ -131,3 +132,5 @@ Dependencies are existing in-repo map helpers (`WCDom`, `WCHttp`, `MapController
 
 ---
 Revision Note (2026-04-03 / Codex): Initial active ExecPlan authored at package kickoff, with milestones for backend payloads, frontend overlay/drilldown parity, and required validation + review gates.
+
+Revision Note (2026-04-28 / Codex): Completion state verified and ExecPlan archived under `prompts/completed/`; package tracker, package summary, project tracker, and root `AGENTS.md` now reflect closure.
