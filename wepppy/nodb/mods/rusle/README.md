@@ -106,6 +106,60 @@ See [docs/README.md](docs/README.md) for the full inventory.
 
 ## Key Concepts
 
+### R-Factor Modes
+
+Rainfall erosivity (`R`) is a long-term annual erosivity index, not annual
+precipitation, storm depth, or a design-storm intensity. In `USLE`/`RUSLE`/
+`RUSLE2` science, `R` is built from storm `EI30`: storm kinetic energy times
+maximum 30-minute intensity, summed by year and averaged over a climate
+record. This mod currently materializes every supported `r_mode` as one
+run-constant scalar broadcast into `rusle/r.tif`; select the mode by the
+scientific question, not by which value is larger.
+
+**`cligen_static`** (default) — Computes mean annual `R` from the run WEPP
+`.cli` climate record using reconstructed WEPP hyetographs. This is the
+recommended mode for normal WEPPcloud products, comparisons against WEPP
+outputs, and disturbed-scenario maps where the question is "what does this
+modeled run imply?" It is the most internally consistent choice because the
+same generated climate record drives both WEPP and the RUSLE visualization.
+Do not describe it as an official RUSLE2 planning climatology; it inherits the
+run's CLIGEN station, scenario, and simulation-record choices.
+
+**`canonical_rusle2`** — Selects the vendored official RUSLE2 climate database
+and climate-zone polygon at the watershed centroid, then converts official
+English-unit `R` to the SI units used by this mod. Prefer this mode when the
+product needs NRCS/RUSLE2 planning comparability, official climate-zone
+semantics, or a baseline that should be interpretable outside the WEPP run.
+It is not a replay of the run's WEPP storm record, and v1 supports only
+polygon-backed official records with deterministic centroid selection.
+
+**`momm2025_county_region`** — Selects the published Momm et al. (2025)
+monthly RUSLE2 erosivity climatology by watershed-centroid county, resolving
+split-county `REGION` rows with localized annual precipitation. Prefer this
+mode for CONUS planning and sensitivity checks where the desired reference is
+the newer reproducible RUSLE2 isoerodent workflow rather than the legacy
+official climate database or the run-specific WEPP climate. It is not a
+sub-county gridded erosivity surface, does not cover Alaska or Hawaii, and can
+still change abruptly at county or public `REGION` boundaries.
+
+Opinionated selection rule:
+
+- Start with `cligen_static` for run-specific WEPPcloud interpretation.
+- Use `canonical_rusle2` when official RUSLE2 planning comparability matters
+  more than matching the run's generated weather.
+- Use `momm2025_county_region` for CONUS work when the purpose is an updated,
+  published planning-climatology reference or a sensitivity comparison against
+  `canonical_rusle2`.
+- Do not substitute PRISM, NOAA Atlas 14, or a 30-minute design-storm raster
+  for these long-term annual `R` modes. Those sources may be valid upstream
+  climate inputs or separate event/design-storm products, but they are not the
+  same contract as canonical annual `RUSLE R`.
+
+See [specification.md § R](specification.md#r),
+[data/rusle2/README.md](data/rusle2/README.md), and
+[data/momm2025/README.md](data/momm2025/README.md) for the full scientific
+basis, source data, and runtime selection contracts.
+
 ### C-Factor Modes
 
 **`observed_rap`** (default) — Uses observed RAP (Rangeland Analysis Platform)
