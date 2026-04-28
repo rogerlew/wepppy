@@ -70,6 +70,7 @@ class GenevaReportPayloadService:
         )
         chart = self._build_chart(filtered_rows, measure_id, selected_storm)
         filter_options = self._build_filter_options(panel=panel, event_rows=event_table_all)
+        storm_parameters = self._build_storm_parameters(geneva=geneva, panel=panel)
         assumptions = self._build_assumptions(panel=panel, event_rows=event_table_all)
         warnings = self._build_warning_list(geneva=geneva, panel=panel)
         if assumptions.get("legacy_uniform_interim_artifact_count"):
@@ -92,12 +93,52 @@ class GenevaReportPayloadService:
                 "measure": measure_id,
             },
             "filter_options": filter_options,
+            "storm_parameters": storm_parameters,
             "assumptions": assumptions,
             "chart": chart,
             "selected_storm_id": selected_storm,
             "event_table": filtered_rows,
             "warnings": self._sanitize_message_entries(warnings),
             "errors": self._sanitize_message_entries(errors),
+        }
+
+    def _build_storm_parameters(
+        self,
+        *,
+        geneva: "Geneva",
+        panel: dict[str, Any],
+    ) -> dict[str, Any]:
+        artifact_io = geneva.artifact_io
+        storm_inputs: dict[str, Any] = {}
+        if artifact_io.exists(geneva.wd, "storm_inputs.json"):
+            raw_inputs = artifact_io.read_json(geneva.wd, "storm_inputs.json")
+            if isinstance(raw_inputs, dict):
+                storm_inputs = dict(raw_inputs)
+
+        hyetograph = dict(storm_inputs.get("hyetograph", {}) or {})
+        runoff_model = dict(storm_inputs.get("runoff_model", {}) or {})
+        config = dict(getattr(geneva, "_config", {}) or {})
+
+        storm_shape = (
+            str(
+                hyetograph.get("distribution_type")
+                or panel.get("distribution_type")
+                or "neh4_type_b"
+            ).strip()
+            or "neh4_type_b"
+        )
+
+        return {
+            "hyetograph_time_step_minutes": self._to_float(hyetograph.get("time_step_minutes")),
+            "storm_shape": storm_shape,
+            "lambda_mode_override": self._text_or_none(
+                runoff_model.get("lambda_mode")
+            ) or self._text_or_none(config.get("lambda_mode")),
+            "unit_hydrograph_override": self._text_or_none(
+                runoff_model.get("uh_method")
+            ) or self._text_or_none(config.get("uh_method")),
+            "timing_method": self._text_or_none(runoff_model.get("timing_method")),
+            "tc_override_hours": self._to_float(runoff_model.get("tc_hours")),
         }
 
     def _build_event_table(self, geneva: "Geneva", panel: dict[str, Any]) -> list[dict[str, Any]]:
@@ -502,6 +543,10 @@ class GenevaReportPayloadService:
             return float(value)
         except (TypeError, ValueError):
             return None
+
+    def _text_or_none(self, value: Any) -> str | None:
+        text = str(value or "").strip()
+        return text or None
 
     def _sanitize_message_entries(self, rows: Any) -> list[dict[str, Any]]:
         if not isinstance(rows, list):

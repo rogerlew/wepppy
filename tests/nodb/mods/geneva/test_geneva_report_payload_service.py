@@ -116,6 +116,22 @@ def test_build_summary_payload_shapes_chart_and_event_table(tmp_path: Path) -> N
         runoff_volume=220.0,
         runoff_depth=7.5,
     )
+    artifact_io.write_json(
+        wd,
+        "storm_inputs.json",
+        {
+            "hyetograph": {
+                "distribution_type": "neh4_type_b",
+                "time_step_minutes": 1.0,
+            },
+            "runoff_model": {
+                "lambda_mode": "0.20",
+                "uh_method": "scs_triangular",
+                "timing_method": "kirpich",
+                "tc_hours": None,
+            },
+        },
+    )
 
     geneva_stub = SimpleNamespace(
         wd=wd,
@@ -142,6 +158,14 @@ def test_build_summary_payload_shapes_chart_and_event_table(tmp_path: Path) -> N
     assert payload["selected_storm_id"] == "cligen_30m_10y"
     assert payload["assumptions"]["storm_distribution_assumption"] == "neh4_type_b"
     assert payload["assumptions"]["uniform_rainfall_assumed"] is False
+    assert payload["storm_parameters"] == {
+        "hyetograph_time_step_minutes": 1.0,
+        "storm_shape": "neh4_type_b",
+        "lambda_mode_override": "0.20",
+        "unit_hydrograph_override": "scs_triangular",
+        "timing_method": "kirpich",
+        "tc_override_hours": None,
+    }
     assert payload["chart"]["x_axis"] == "intensity_mm_per_hr"
     assert payload["chart"]["y_axis"] == "selected_measure"
     assert payload["chart"]["series_grouping"] == "ari_years"

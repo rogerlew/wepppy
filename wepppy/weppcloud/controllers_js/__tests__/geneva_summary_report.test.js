@@ -23,6 +23,14 @@ describe("Geneva summary report interactions", () => {
                     "storm_distribution_assumption": "neh4_type_b",
                     "uniform_rainfall_assumed": true
                   },
+                  "storm_parameters": {
+                    "hyetograph_time_step_minutes": 1.0,
+                    "storm_shape": "neh4_type_b",
+                    "lambda_mode_override": "0.20",
+                    "unit_hydrograph_override": "scs_triangular",
+                    "timing_method": "kirpich",
+                    "tc_override_hours": null
+                  },
                   "chart": {
                     "x_axis": "intensity_mm_per_hr",
                     "y_axis": "selected_measure",
@@ -116,6 +124,7 @@ describe("Geneva summary report interactions", () => {
             <p data-geneva-summary-noaa-note hidden></p>
             <div data-geneva-summary-chart></div>
             <p data-geneva-summary-chart-empty hidden></p>
+            <table><tbody data-geneva-summary-params-body></tbody></table>
             <table><tbody data-geneva-summary-event-body></tbody></table>
             <p data-geneva-summary-events-empty hidden></p>
             <section data-geneva-summary-messages hidden>
@@ -165,5 +174,22 @@ describe("Geneva summary report interactions", () => {
         const payload = JSON.parse(document.getElementById("geneva-summary-payload").textContent);
         expect(payload.selected_storm_id).toBe("cligen_30m_10y");
         expect(document.querySelector('[data-geneva-summary-event-body] tr[data-storm-id="cligen_30m_10y"]').classList.contains("is-selected")).toBe(true);
+    });
+
+    test("renders storm parameter table from summary payload", async () => {
+        await import("../geneva_summary_report.js");
+        window.GenevaSummaryReport.getInstance().init();
+
+        const rows = document.querySelectorAll("[data-geneva-summary-params-body] tr");
+        expect(rows).toHaveLength(6);
+
+        expect(rows[0].cells[0].textContent).toBe("Hyetograph time step");
+        expect(rows[0].cells[1].textContent).toBe("1.00 min");
+        expect(rows[1].cells[0].textContent).toBe("Storm Shape");
+        expect(rows[1].cells[1].textContent).toBe("NEH-4 B");
+        expect(rows[2].cells[1].textContent).toBe("0.20");
+        expect(rows[3].cells[1].textContent).toBe("SCS Triangular");
+        expect(rows[4].cells[1].textContent).toBe("Kirpich");
+        expect(rows[5].cells[1].textContent).toBe("—");
     });
 });

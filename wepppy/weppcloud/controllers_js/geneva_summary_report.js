@@ -83,6 +83,38 @@ var GenevaSummaryReport = (function () {
         return labels[datasourceId] || asString(datasourceId);
     }
 
+    function stormShapeLabel(stormShape) {
+        var labels = {
+            uniform: "Uniform",
+            neh4_type_b: "NEH-4 B",
+            type_i: "Type I",
+            type_ia: "Type IA",
+            type_ii: "Type II",
+            type_iii: "Type III"
+        };
+        var key = asString(stormShape).trim();
+        return labels[key] || key || "\u2014";
+    }
+
+    function unitHydrographLabel(methodId) {
+        var labels = {
+            scs_triangular: "SCS Triangular",
+            scs_curvilinear: "SCS Curvilinear"
+        };
+        var key = asString(methodId).trim();
+        return labels[key] || key || "\u2014";
+    }
+
+    function timingMethodLabel(methodId) {
+        var labels = {
+            kirpich: "Kirpich",
+            kent: "Kent",
+            simas: "Simas"
+        };
+        var key = asString(methodId).trim().toLowerCase();
+        return labels[key] || (key ? key : "\u2014");
+    }
+
     function durationLabel(durationMinutes) {
         var value = Number(durationMinutes);
         if (!Number.isFinite(value) || value <= 0) {
@@ -151,6 +183,7 @@ var GenevaSummaryReport = (function () {
         this.noaaNote = document.querySelector("[data-geneva-summary-noaa-note]");
         this.chartNode = document.querySelector("[data-geneva-summary-chart]");
         this.chartEmpty = document.querySelector("[data-geneva-summary-chart-empty]");
+        this.paramsBody = document.querySelector("[data-geneva-summary-params-body]");
         this.tableBody = document.querySelector("[data-geneva-summary-event-body]");
         this.eventsEmpty = document.querySelector("[data-geneva-summary-events-empty]");
         this.messages = document.querySelector("[data-geneva-summary-messages]");
@@ -265,6 +298,7 @@ var GenevaSummaryReport = (function () {
 
         this.payload = payload;
         this.renderControls(payload);
+        this.renderStormParameters(payload);
         this.renderTable(payload);
         this.renderChart(payload);
         this.renderMessages(payload);
@@ -358,6 +392,81 @@ var GenevaSummaryReport = (function () {
             }
             select.appendChild(option);
         });
+    };
+
+    GenevaSummaryReportController.prototype.renderStormParameters = function renderStormParameters(payload) {
+        if (!this.paramsBody) {
+            return;
+        }
+        this.paramsBody.innerHTML = "";
+
+        var parameters = payload && typeof payload === "object" ? (payload.storm_parameters || {}) : {};
+        var rows = [
+            {
+                label: "Hyetograph time step",
+                value: this.formatStormParameterValue("hyetograph_time_step_minutes", parameters.hyetograph_time_step_minutes)
+            },
+            {
+                label: "Storm Shape",
+                value: this.formatStormParameterValue("storm_shape", parameters.storm_shape)
+            },
+            {
+                label: "Lambda mode override",
+                value: this.formatStormParameterValue("lambda_mode_override", parameters.lambda_mode_override)
+            },
+            {
+                label: "Unit hydrograph override",
+                value: this.formatStormParameterValue(
+                    "unit_hydrograph_override",
+                    parameters.unit_hydrograph_override
+                )
+            },
+            {
+                label: "Timing method",
+                value: this.formatStormParameterValue("timing_method", parameters.timing_method)
+            },
+            {
+                label: "tc override",
+                value: this.formatStormParameterValue("tc_override_hours", parameters.tc_override_hours)
+            }
+        ];
+
+        rows.forEach(function (entry) {
+            var tr = document.createElement("tr");
+            var labelCell = document.createElement("th");
+            var valueCell = document.createElement("td");
+            labelCell.scope = "row";
+            labelCell.textContent = entry.label;
+            valueCell.textContent = entry.value;
+            tr.appendChild(labelCell);
+            tr.appendChild(valueCell);
+            this.paramsBody.appendChild(tr);
+        }.bind(this));
+    };
+
+    GenevaSummaryReportController.prototype.formatStormParameterValue = function formatStormParameterValue(
+        parameterId,
+        rawValue
+    ) {
+        if (parameterId === "storm_shape") {
+            return stormShapeLabel(rawValue);
+        }
+        if (parameterId === "unit_hydrograph_override") {
+            return unitHydrographLabel(rawValue);
+        }
+        if (parameterId === "timing_method") {
+            return timingMethodLabel(rawValue);
+        }
+        if (parameterId === "hyetograph_time_step_minutes") {
+            var timeStep = asNumber(rawValue);
+            return timeStep === null ? "\u2014" : formatNumber(timeStep, 2) + " min";
+        }
+        if (parameterId === "tc_override_hours") {
+            var tcHours = asNumber(rawValue);
+            return tcHours === null ? "\u2014" : formatNumber(tcHours, 3) + " hr";
+        }
+        var text = asString(rawValue).trim();
+        return text || "\u2014";
     };
 
     GenevaSummaryReportController.prototype.renderTable = function renderTable(payload) {
