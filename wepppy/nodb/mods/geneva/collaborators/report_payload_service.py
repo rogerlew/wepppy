@@ -70,7 +70,18 @@ class GenevaReportPayloadService:
         )
         chart = self._build_chart(filtered_rows, measure_id, selected_storm)
         filter_options = self._build_filter_options(panel=panel, event_rows=event_table_all)
+        assumptions = self._build_assumptions(panel=panel, event_rows=event_table_all)
         warnings = self._build_warning_list(geneva=geneva, panel=panel)
+        if assumptions.get("legacy_uniform_interim_artifact_count"):
+            warnings.append(
+                {
+                    "code": "legacy_uniform_interim_artifacts",
+                    "message": assumptions.get("stale_artifact_policy"),
+                    "legacy_uniform_interim_artifact_count": assumptions.get(
+                        "legacy_uniform_interim_artifact_count"
+                    ),
+                }
+            )
         errors = list(getattr(geneva, "_errors", []) or [])
 
         return {
@@ -81,11 +92,7 @@ class GenevaReportPayloadService:
                 "measure": measure_id,
             },
             "filter_options": filter_options,
-            "assumptions": {
-                "arc_condition": "arc_ii",
-                "storm_distribution_assumption": "neh4_type_b",
-                "uniform_rainfall_assumed": True,
-            },
+            "assumptions": assumptions,
             "chart": chart,
             "selected_storm_id": selected_storm,
             "event_table": filtered_rows,
@@ -118,19 +125,53 @@ class GenevaReportPayloadService:
             storm_id = str(cell.get("storm_id", "")).strip()
             if not storm_id:
                 continue
+            cell_distribution = str(
+                cell.get("distribution_type")
+                or panel.get("distribution_type")
+                or "neh4_type_b"
+            ).strip()
 
             summary_relpath = f"storms/{storm_id}/summary.json"
             summary_exists = artifact_io.exists(wd, summary_relpath)
             summary = artifact_io.read_json(wd, summary_relpath) if summary_exists else {}
+            summary_assumptions = dict(summary.get("assumptions", {}) or {})
+            summary_distribution = str(
+                summary_assumptions.get("distribution_type")
+                or summary_assumptions.get("storm_distribution_assumption")
+                or ""
+            ).strip()
+            summary_matches_distribution = (
+                not summary_distribution
+                or summary_distribution == cell_distribution
+            )
             status = self._resolve_row_status(
                 cell=cell,
                 summary=summary,
                 failed_storm_ids=failed_storm_ids,
                 completed_storm_ids=completed_storm_ids,
+                summary_matches_distribution=summary_matches_distribution,
             )
             metrics = dict(summary.get("summary_metrics", {}) or {}) if status == "completed" else {}
             summary_warnings = list(summary.get("warnings", []) or []) if status == "completed" else []
             summary_errors = list(summary.get("errors", []) or []) if status == "completed" else []
+            distribution_type = (
+                summary_distribution
+                if summary_matches_distribution and summary_distribution
+                else cell_distribution
+            )
+            uniform_assumed = bool(
+                summary_assumptions.get(
+                    "uniform_rainfall_assumed",
+                    distribution_type == "uniform",
+                )
+            ) if summary_matches_distribution else distribution_type == "uniform"
+            legacy_uniform_interim = (
+                summary_matches_distribution
+                and
+                distribution_type == "neh4_type_b"
+                and uniform_assumed
+                and not isinstance(summary.get("hyetograph"), dict)
+            )
 
             rows.append(
                 {
@@ -140,10 +181,10 @@ class GenevaReportPayloadService:
                     "duration_minutes": int(cell.get("duration_minutes", 0) or 0),
                     "depth_mm": self._to_float(cell.get("depth_mm")),
                     "intensity_mm_per_hr": self._to_float(cell.get("intensity_mm_per_hr")),
-                    "distribution_type": str(
-                        cell.get("distribution_type")
-                        or summary.get("assumptions", {}).get("storm_distribution_assumption")
-                        or "neh4_type_b"
+                    "distribution_type": distribution_type,
+                    "uniform_rainfall_assumed": uniform_assumed,
+                    "hyetograph_artifact_status": (
+                        "legacy_uniform_interim" if legacy_uniform_interim else "current"
                     ),
                     "ari_years": int(cell.get("ari_years", 0) or 0),
                     "peak_discharge": {
@@ -173,6 +214,46 @@ class GenevaReportPayloadService:
             )
         )
         return rows
+
+    def _build_assumptions(
+        self,
+        *,
+        panel: dict[str, Any],
+        event_rows: list[dict[str, Any]],
+    ) -> dict[str, Any]:
+        completed_rows = [row for row in event_rows if row.get("status") == "completed"]
+        source_rows = completed_rows or event_rows
+        distribution_values = {
+            str(row.get("distribution_type") or "").strip()
+            for row in source_rows
+            if str(row.get("distribution_type") or "").strip()
+        }
+        if not distribution_values:
+            distribution_values = {str(panel.get("distribution_type") or "neh4_type_b")}
+
+        if len(distribution_values) == 1:
+            distribution_type = next(iter(distribution_values))
+        else:
+            distribution_type = "mixed"
+
+        stale_count = sum(
+            1
+            for row in source_rows
+            if row.get("hyetograph_artifact_status") == "legacy_uniform_interim"
+        )
+        assumptions = {
+            "arc_condition": "arc_ii",
+            "storm_distribution_assumption": distribution_type,
+            "distribution_type": distribution_type,
+            "uniform_rainfall_assumed": distribution_type == "uniform",
+        }
+        if stale_count:
+            assumptions["legacy_uniform_interim_artifact_count"] = stale_count
+            assumptions["stale_artifact_policy"] = (
+                "Existing summaries that claim neh4_type_b while marking uniform rainfall are "
+                "treated as legacy interim artifacts and should be regenerated before comparison."
+            )
+        return assumptions
 
     def _build_chart(
         self,
@@ -289,10 +370,13 @@ class GenevaReportPayloadService:
         summary: dict[str, Any],
         failed_storm_ids: set[str],
         completed_storm_ids: set[str],
+        summary_matches_distribution: bool,
     ) -> str:
         availability = str(cell.get("availability", "unavailable")).strip()
         storm_id = str(cell.get("storm_id", "")).strip()
         if availability != "available":
+            return "unavailable"
+        if not summary_matches_distribution:
             return "unavailable"
 
         if storm_id and storm_id in failed_storm_ids:
@@ -440,6 +524,9 @@ class GenevaReportPayloadService:
             "arf_method",
             "arf_value",
             "uniform_rainfall_assumed",
+            "distribution_type",
+            "legacy_uniform_interim_artifact_count",
+            "stale_artifact_policy",
         )
         sanitized: list[dict[str, Any]] = []
         for row in rows:

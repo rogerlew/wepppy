@@ -2,7 +2,7 @@
 > Kanban board for wepppy work packages and vision items
 
 **Last Updated**: 2026-04-28
-**Active Packages**: 3  
+**Active Packages**: 4
 **Quick Links**: [Work Packages Directory](docs/work-packages/) | [God-Tier Prompting Strategy](docs/god-tier-prompting-strategy.md)
 
 ## Purpose
@@ -37,7 +37,7 @@ This tracker makes all work visible at a glance, helping agents coordinate and a
 ### 2. Limit Work in Progress
 **Target**: 2-4 active packages maximum to maintain focus and ensure packages complete rather than stall.
 
-**Current WIP**: 3 packages ✅ **Within target range**
+**Current WIP**: 4 packages ✅ **Within target range**
 
 If WIP exceeds 4, prioritize completing existing packages before starting new ones. This prevents context switching overhead and ensures clean handoffs.
 
@@ -78,31 +78,6 @@ Feedback mechanisms:
 ## 📋 Backlog
 
 Work packages that are scoped but not yet started. Dependencies and prerequisites should be noted.
-
-### Geneva Storm Shape Control
-**Proposed**: 2026-04-28
-**Size**: Large (3-5 focused sessions)
-**Priority**: High
-**Link**: [docs/work-packages/20260428_geneva_storm_shape_control/](docs/work-packages/20260428_geneva_storm_shape_control/)
-**Description**: Add Geneva user control for `Storm Shape` with Uniform, NEH-4 B, Type I, Type IA, Type II, and Type III options, and carry the selected shape through UI payloads, Python schemas/services, Rust hyetograph generation, batch execution artifacts, reports, and Geneva science docs.
-
-**Current Implementation Assessment**:
-- Geneva UI currently has no storm-shape selector; `controllers_js/geneva.js` hard-codes `hyetograph.distribution_type = "neh4_type_b"`.
-- Python/Rust validators currently accept only `neh4_type_b`, while Python batch execution still builds uniform rainfall via `_build_uniform_hyetograph(...)`.
-- Existing Geneva docs already identify this as an active gap: Type B exists in Rust, but batch runtime has not been wired to use it.
-
-**Scope**:
-- Add closed storm-shape enum and UI select for the six requested shapes.
-- Implement/dispatch Rust hyetograph distributions for Uniform, NEH-4 B, Type I, Type IA, Type II, and Type III.
-- Replace unconditional uniform Python storm construction with selected-shape kernel output.
-- Update `wepppy/nodb/mods/geneva/specification.md` and `wepppy/nodb/mods/geneva/culvert-cn-comparison.md`.
-- Require code-review (`reviewer`) and QA-review (`qa_reviewer`) sub-agent gates before closure.
-
-**Dependencies**: Generate the WinTR-20-derived Type I/IA/II/III raw output, normalized 24-hour ordinate source table, and metadata, then coordinate `/workdir/wepppyo3` Rust changes with WEPPpy Python/UI changes.
-
-**Next Steps**: Create the raw WinTR-20 source artifact, normalized CSV, and metadata; validate embedded-duration ratios; then implement shared enum/schema and Rust hyetograph dispatch before UI/report wiring.
-
----
 
 ### Deprecate and Remove TauDEM Backend
 **Proposed**: 2025-10-27  
@@ -296,6 +271,15 @@ Currently active work packages. Limit to 2-4 packages to maintain focus.
 ## ✅ Done
 
 Recently completed work packages. Archived immediately upon completion.
+
+### Geneva Storm Shape Control (2026-04-28)
+**Status**: ✅ **COMPLETE**
+
+**Link**: [docs/work-packages/20260428_geneva_storm_shape_control/](docs/work-packages/20260428_geneva_storm_shape_control/)
+
+**Lifecycle**: Backlog -> In Progress -> Done (2026-04-28)
+
+**Summary**: Closed the Geneva storm-shape package end to end across `/workdir/wepppy` and `/workdir/wepppyo3`. Added closed-enum `Storm Shape` support (`uniform`, `neh4_type_b`, `type_i`, `type_ia`, `type_ii`, `type_iii`) through UI, controller payloads, Python schemas/services/reports, and Rust kernel hyetograph dispatch. Source gating requirements were satisfied first with checked-in raw WinTR-20 table payload, normalized CSV, and metadata under `geneva_core/resources/`, including Type II embedded-duration validation within `<= 0.003` absolute tolerance. Package closure also addressed reviewer/QA findings: kernel callable availability, panel/run-batch distribution consistency, non-divisible timestep rejection, stale-summary suppression, positive-depth contract alignment, and explicit legacy-uniform warning surfacing. Required validation commands passed except an unrelated pre-existing JS lint issue in `controllers_js/__tests__/landuse_map_inline.test.js`; reviewer, QA, and validation artifacts are recorded under the package `artifacts/` directory.
 
 ### wepppyo3 Native Substrate Repositioning (2026-04-28)
 **Status**: ✅ **COMPLETE**

@@ -17,8 +17,10 @@ class _FrequencyPanelServiceStub:
     def normalize_request(payload: dict[str, Any]) -> dict[str, Any]:
         data = dict(payload or {})
         return {
+            "schema_version": 1,
             "durations_minutes": data.get("durations_minutes", [30]),
             "ari_years": data.get("ari_years", [10]),
+            "distribution_type": data.get("distribution_type", "neh4_type_b"),
             "rebuild": bool(data.get("rebuild", False)),
             "sources": data.get("sources"),
         }
@@ -54,6 +56,7 @@ class _GenevaStub:
         *,
         durations_minutes: list[int] | None = None,
         ari_years: list[int] | None = None,
+        distribution_type: str = "neh4_type_b",
         rebuild: bool = False,
         sources: dict[str, str] | None = None,
     ) -> dict[str, Any]:
@@ -62,6 +65,7 @@ class _GenevaStub:
             "status": "ok",
             "durations_minutes": list(durations_minutes or []),
             "ari_years": list(ari_years or []),
+            "distribution_type": distribution_type,
             "rebuild": bool(rebuild),
             "sources": sources,
         }

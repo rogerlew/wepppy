@@ -197,6 +197,35 @@ class _ScenarioKernelGateway:
             }
         if api_name == "geneva_build_frequency_panel":
             return self._panel_payload
+        if api_name == "geneva_build_hyetograph":
+            duration = float(payload["duration_minutes"])
+            depth = float(payload["depth_mm"])
+            distribution = str(payload.get("distribution_type") or "neh4_type_b")
+            cumulative = [0.0, depth * (0.35 if distribution != "uniform" else 0.5), depth]
+            return {
+                "status": "ok",
+                "phase": "build_hyetograph",
+                "kernel_schema_version": 1,
+                "distribution_type": distribution,
+                "duration_minutes": duration,
+                "depth_mm": depth,
+                "time_step_minutes": float(payload["time_step_minutes"]),
+                "time_minutes": [0.0, duration / 2.0, duration],
+                "cumulative_rainfall_mm": cumulative,
+                "incremental_rainfall_mm": [
+                    cumulative[0],
+                    cumulative[1] - cumulative[0],
+                    cumulative[2] - cumulative[1],
+                ],
+                "intensity_mm_per_hr": [0.0, 0.0, 0.0],
+                "warnings": [],
+                "source_metadata": None,
+                "diagnostics": {
+                    "closure_error_mm": 0.0,
+                    "closure_tolerance_mm": 0.01,
+                    "cumulative_monotonic": True,
+                },
+            }
         if api_name == "geneva_run_batch":
             self.run_batch_payloads.append(dict(payload))
             return _build_run_batch_response(payload, self._summary_metrics)
@@ -502,7 +531,7 @@ def test_wp09_watershed_warning_thresholds_propagate_to_results_query_report(
     )
     assert warning["severity"] == expected_severity
     assert warning["wsarea_km2"] > warning["threshold_km2"]
-    assert warning["uniform_rainfall_assumed"] is True
+    assert warning["uniform_rainfall_assumed"] is False
 
     query_payload = geneva.query_summary_payload(datasource_id="all")
     report_payload = geneva.report_payload_service.build_summary_payload(geneva, datasource_id="all")

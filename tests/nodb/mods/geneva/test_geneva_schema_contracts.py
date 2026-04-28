@@ -3,6 +3,7 @@ from __future__ import annotations
 import pytest
 
 from wepppy.nodb.mods.geneva.schemas import (
+    GENEVA_DISTRIBUTION_IDS,
     config_from_mapping,
     normalize_frequency_panel_payload,
     parse_run_batch_request,
@@ -45,6 +46,55 @@ def test_run_batch_schema_rejects_unknown_datasource_id() -> None:
         )
 
 
+def test_run_batch_schema_accepts_all_closed_storm_shapes_and_defaults_missing() -> None:
+    for distribution_type in GENEVA_DISTRIBUTION_IDS:
+        request = parse_run_batch_request(
+            {
+                "schema_version": 1,
+                "hyetograph": {
+                    "distribution_type": distribution_type,
+                    "time_step_minutes": 1.0,
+                },
+                "runoff_model": {
+                    "timing_method": "kirpich",
+                },
+            },
+            default_lambda_mode="0.20",
+            default_uh_method="scs_triangular",
+        )
+        assert request.hyetograph.distribution_type == distribution_type
+
+    defaulted = parse_run_batch_request(
+        {
+            "schema_version": 1,
+            "runoff_model": {
+                "timing_method": "kirpich",
+            },
+        },
+        default_lambda_mode="0.20",
+        default_uh_method="scs_triangular",
+    )
+    assert defaulted.hyetograph.distribution_type == "neh4_type_b"
+
+
+def test_run_batch_schema_rejects_unsupported_storm_shape() -> None:
+    with pytest.raises(ValueError, match="distribution_type must be one of"):
+        parse_run_batch_request(
+            {
+                "schema_version": 1,
+                "hyetograph": {
+                    "distribution_type": "custom_breakpoint",
+                    "time_step_minutes": 1.0,
+                },
+                "runoff_model": {
+                    "timing_method": "kirpich",
+                },
+            },
+            default_lambda_mode="0.20",
+            default_uh_method="scs_triangular",
+        )
+
+
 def test_frequency_panel_schema_enforces_reason_code_invariants() -> None:
     with pytest.raises(ValueError, match="reason_code must be null when availability=available"):
         normalize_frequency_panel_payload(
@@ -64,6 +114,34 @@ def test_frequency_panel_schema_enforces_reason_code_invariants() -> None:
                         "intensity_mm_per_hr": 40.0,
                         "availability": "available",
                         "reason_code": "source_missing",
+                    }
+                ],
+            }
+        )
+
+
+def test_frequency_panel_schema_rejects_non_positive_available_depth_and_intensity() -> None:
+    with pytest.raises(
+        ValueError,
+        match="available cells must include positive depth_mm and intensity_mm_per_hr",
+    ):
+        normalize_frequency_panel_payload(
+            {
+                "schema_version": 1,
+                "datasource_ids": ["cligen_freq"],
+                "durations_minutes": [30],
+                "ari_years": [10],
+                "distribution_type": "neh4_type_b",
+                "cells": [
+                    {
+                        "storm_id": "cligen_30m_10y",
+                        "datasource_id": "cligen_freq",
+                        "duration_minutes": 30,
+                        "ari_years": 10,
+                        "depth_mm": 0.0,
+                        "intensity_mm_per_hr": 0.0,
+                        "availability": "available",
+                        "reason_code": None,
                     }
                 ],
             }

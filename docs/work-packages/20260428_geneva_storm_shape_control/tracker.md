@@ -6,9 +6,9 @@
 
 **Timezone**: UTC
 **Started**: 2026-04-28 20:52 UTC
-**Current phase**: Pre-implementation specification validation
-**Last updated**: 2026-04-28 21:26 UTC
-**Next milestone**: Generate WinTR-20-derived raw output, normalized ordinate table, and metadata
+**Current phase**: Validation complete, closure-ready
+**Last updated**: 2026-04-28 22:42 UTC
+**Next milestone**: Final package handoff
 **Security impact**: `low`
 **Dedicated security review**: `no`
 **Security artifact**: `N/A`
@@ -17,23 +17,15 @@
 
 ### Ready / Backlog
 
-- [ ] Generate WinTR-20-derived Type I, Type IA, Type II, and Type III raw output, normalized ordinate source table, and metadata.
-- [ ] Define canonical storm-shape enum in Python and Rust.
-- [ ] Implement Rust hyetograph dispatch for all six storm shapes.
-- [ ] Wire selected storm shape through Python batch execution and report assumptions.
-- [ ] Add Geneva UI `Storm Shape` selector and JavaScript payload tests.
-- [ ] Update `specification.md` and `culvert-cn-comparison.md`.
-- [ ] Add targeted Python/Rust/JavaScript regression coverage.
-- [ ] Run required code-review sub-agent (`reviewer`) and record findings/dispositions.
-- [ ] Run required QA-review sub-agent (`qa_reviewer`) and record findings/dispositions.
+None.
 
 ### In Progress
 
-- [ ] None.
+None.
 
 ### Blocked
 
-- [ ] Type I/IA/II/III implementation is blocked until the WinTR-20-derived raw output, normalized source table, and metadata are checked into `/workdir/wepppyo3/geneva_core/resources/`.
+None.
 
 ### Done
 
@@ -44,10 +36,21 @@
 - [x] Researched and specified Type I/IA/II/III embedded-window implementation contract before implementation start (2026-04-28 21:18 UTC).
 - [x] Dispatched QA sub-agent validation of the Type I/IA/II/III specification and dispositioned findings (2026-04-28 21:22 UTC).
 - [x] Added active execution prompt for package implementation handoff (2026-04-28 21:26 UTC).
+- [x] Created active ExecPlan and moved package into `PROJECT_TRACKER.md` In Progress (2026-04-28 21:35 UTC).
+- [x] Generated WinTR-20-derived Type I, Type IA, Type II, and Type III source artifacts and cleared the Type II embedded-ratio gate (2026-04-28 21:46 UTC).
+- [x] Implemented closed storm-shape enum across UI, Python schemas/services/reports, and Rust Geneva hyetograph dispatch; preserved default `neh4_type_b` and kept custom uploaded distributions out of scope (2026-04-28 22:20 UTC).
+- [x] Added stale-artifact safeguards, panel/run-batch distribution matching, non-divisible timestep rejection, and legacy warning surfacing with regression coverage (2026-04-28 22:32 UTC).
+- [x] Completed required `reviewer` and `qa_reviewer` gates and dispositioned all Medium/High findings (2026-04-28 22:35 UTC).
+- [x] Completed required validation command set and recorded results in `artifacts/2026-04-28_validation_summary.md` (2026-04-28 22:34 UTC).
+- [x] Re-ran the full required validation command set after reconnect; artifact refreshed with post-reconnect confirmation timestamp (2026-04-28 22:42 UTC).
 
 ## Timeline
 
 - **2026-04-28 20:52 UTC** - Package created after current implementation assessment.
+- **2026-04-28 21:35 UTC** - End-to-end execution started with live ExecPlan.
+- **2026-04-28 22:35 UTC** - Reviewer + QA gates completed; all Medium/High findings dispositioned.
+- **2026-04-28 22:38 UTC** - Package reached closure-ready state with full validation summary artifact.
+- **2026-04-28 22:42 UTC** - Post-reconnect validation rerun completed; all required gates remained green (same unrelated lint blocker).
 
 ## Decisions Log
 
@@ -81,55 +84,55 @@
 
 | Risk | Severity | Likelihood | Mitigation | Status |
 |------|----------|------------|------------|--------|
-| Type I/IA/II/III ordinate tables are implemented from an unclear or incompatible source | High | Medium | Require raw WinTR-20 output, normalized CSV, metadata, hashes, export mode, precision/rounding, and post-processing steps before coding | Open |
-| Type I/IA/II/III curves are incorrectly compressed from 24 hours to short events | High | Medium | Use specified embedded-window extraction from the 24-hour cumulative curve | Open |
-| Source resolution is too coarse for short-duration validation | Medium | Medium | Validate Type II Figure 4-31 ratios within `<= 0.003`; regenerate/export a finer source table before tolerance relaxation | Open |
-| Existing completed Geneva artifacts claim Type B but were generated with uniform rainfall | High | High | Add stale-artifact/regeneration policy and do not silently relabel old outputs | Open |
-| Frequency-panel and run-batch distribution semantics drift | Medium | Medium | Define whether shape affects panel materialization, batch execution, or both; persist selected ID consistently | Open |
-| Scientific output changes surprise users | Medium | Medium | Update docs, report assumptions, and release notes; highlight that runtime now honors selected shape | Open |
-| Cross-repo WEPPpy/`wepppyo3` changes fall out of sync | Medium | Medium | Update Rust and Python tests in the same change set; record release/install requirement | Open |
+| Type I/IA/II/III ordinate tables are implemented from an unclear or incompatible source | High | Medium | Require raw WinTR-20 output, normalized CSV, metadata, hashes, export mode, precision/rounding, and post-processing steps before coding | Mitigated by checked-in WinTR-20 installer table payload and metadata |
+| Type I/IA/II/III curves are incorrectly compressed from 24 hours to short events | High | Medium | Use specified embedded-window extraction from the 24-hour cumulative curve | Closed via Rust anti-compression tests for all four legacy distributions |
+| Source resolution is too coarse for short-duration validation | Medium | Medium | Validate Type II Figure 4-31 ratios within `<= 0.003`; regenerate/export a finer source table before tolerance relaxation | Closed; maximum observed difference `0.00050333` |
+| Existing completed Geneva artifacts claim Type B but were generated with uniform rainfall | High | High | Add stale-artifact/regeneration policy and do not silently relabel old outputs | Mitigated: stale mismatch suppression + explicit legacy warning (`legacy_uniform_interim_artifacts`) |
+| Frequency-panel and run-batch distribution semantics drift | Medium | Medium | Define whether shape affects panel materialization, batch execution, or both; persist selected ID consistently | Closed: panel cache shape check + hard run-batch distribution match validation |
+| Scientific output changes surprise users | Medium | Medium | Update docs, report assumptions, and release notes; highlight that runtime now honors selected shape | Mitigated via updated spec/report assumptions and compatibility warnings |
+| Cross-repo WEPPpy/`wepppyo3` changes fall out of sync | Medium | Medium | Update Rust and Python tests in the same change set; record release/install requirement | Mitigated via shared-object rebuild/sync, runtime smoke import, and cross-repo validation suite |
 
 ## Verification Checklist
 
 ### Code Quality
 
-- [ ] Rust Geneva tests pass (`cd /workdir/wepppyo3 && cargo test -p geneva_core`).
-- [ ] Geneva Python tests pass with targeted `wctl run-pytest`.
-- [ ] Geneva JavaScript tests pass.
-- [ ] Frontend lint is clean or unrelated failures are documented.
-- [ ] Controller bundle rebuild passes.
+- [x] Rust Geneva tests pass (`cd /workdir/wepppyo3 && cargo test -p geneva_core`).
+- [x] Geneva Python tests pass with targeted `wctl run-pytest`.
+- [x] Geneva JavaScript tests pass.
+- [x] Frontend lint is clean or unrelated failures are documented.
+- [x] Controller bundle rebuild passes.
 
 ### Review Gates
 
-- [ ] Code-review sub-agent (`reviewer`) review artifact is complete.
-- [ ] QA-review sub-agent (`qa_reviewer`) review artifact is complete.
-- [ ] All Medium/High code-review findings are closed or explicitly accepted with written rationale.
-- [ ] All Medium/High QA-review findings are closed or explicitly accepted with written rationale.
+- [x] Code-review sub-agent (`reviewer`) review artifact is complete.
+- [x] QA-review sub-agent (`qa_reviewer`) review artifact is complete.
+- [x] All Medium/High code-review findings are closed or explicitly accepted with written rationale.
+- [x] All Medium/High QA-review findings are closed or explicitly accepted with written rationale.
 
 ### Security
 
 - [x] Security impact triage recorded as `low`.
 - [x] Dedicated security artifact not required for closed-enum implementation.
-- [ ] Re-triage if custom/uploaded distributions, arbitrary ordinate paths, or new egress enter scope.
+- [x] Re-triage not required; scope remained closed-enum with no uploaded distributions or new egress.
 
 ### Documentation
 
 - [x] Package and current-status artifact created.
-- [x] `wepppy/nodb/mods/geneva/specification.md` updated with pre-implementation Type I/IA/II/III contract.
+- [x] `wepppy/nodb/mods/geneva/specification.md` updated with implemented runtime contract and closure notes.
 - [x] Type I/IA/II/III research and pre-start QA validation artifacts added.
-- [ ] `wepppy/nodb/mods/geneva/culvert-cn-comparison.md` updated.
-- [ ] Validation/closure artifact added.
+- [x] `wepppy/nodb/mods/geneva/culvert-cn-comparison.md` updated.
+- [x] Validation/closure artifact added.
 
 ### Testing
 
-- [ ] Schema tests cover all six accepted IDs and unsupported-ID rejection.
-- [ ] Rust tests cover each hyetograph distribution.
-- [ ] Rust tests verify Type II embedded ratios from NEH Figure 4-31 within absolute fraction tolerance `<= 0.003`.
-- [ ] Rust tests prove every Type I/IA/II/III short event uses embedded-window normalization, not full-curve compression.
-- [ ] Rust tests cover output time-vector endpoints, non-divisible timestep durations, and `time_step_minutes >= duration_minutes`.
-- [ ] Python batch tests prove non-uniform selection changes generated hyetograph artifacts.
-- [ ] Report tests prove storm-shape assumptions are displayed consistently.
-- [ ] Backward-compatibility tests cover missing `distribution_type`.
+- [x] Schema tests cover all six accepted IDs and unsupported-ID rejection.
+- [x] Rust tests cover each hyetograph distribution.
+- [x] Rust tests verify Type II embedded ratios from NEH Figure 4-31 within absolute fraction tolerance `<= 0.003`.
+- [x] Rust tests prove every Type I/IA/II/III short event uses embedded-window normalization, not full-curve compression.
+- [x] Rust tests cover output time-vector endpoints, non-divisible timestep durations, and `time_step_minutes >= duration_minutes`.
+- [x] Python batch tests prove non-uniform selection changes generated hyetograph artifacts.
+- [x] Report tests prove storm-shape assumptions are displayed consistently.
+- [x] Backward-compatibility tests cover missing `distribution_type`.
 
 ## Progress Notes
 
@@ -234,12 +237,99 @@
 **Test results**:
 - Documentation validation pending after this edit.
 
+### 2026-04-28 21:35 UTC: End-to-end execution started
+
+**Agent/Contributor**: Codex
+
+**Work completed**:
+- Read the required package, tracker, current-status/research/QA artifacts, active execution prompt, and `specification.md` section 11.6 before coding.
+- Created active ExecPlan at `prompts/active/geneva_storm_shape_control_execplan.md`.
+- Moved the package from `PROJECT_TRACKER.md` Backlog to In Progress.
+
+**Blockers encountered**:
+- Type I/IA/II/III runtime implementation remains blocked until the WinTR-20-derived raw output, normalized source CSV, and metadata are present under `/workdir/wepppyo3/geneva_core/resources/` and the Type II embedded-duration ratio validation passes within `<= 0.003`.
+
+**Next steps**:
+1. Inspect both worktrees and local subsystem `AGENTS.md` files.
+2. Generate and validate the required source artifacts.
+3. Start Rust runtime implementation only after the source gate clears.
+
+**Test results**:
+- Not run yet; implementation setup and lifecycle documentation only.
+
+### 2026-04-28 21:46 UTC: Source-artifact gate cleared
+
+**Agent/Contributor**: Codex
+
+**Work completed**:
+- Inspected both worktrees and found only package documentation plus the new `geneva_core/resources/` files dirty.
+- Extracted the official NRCS WinTR-20 3.30.1 installer's built-in `type_i.tbl`, `type_ia.tbl`, `type_ii.tbl`, and `type_iii.tbl` rainfall distribution payloads.
+- Added `/workdir/wepppyo3/geneva_core/resources/nrcs_legacy_24h_distributions.wintr20_raw.txt`, `.csv`, and `.metadata.json`.
+- Validated Type II embedded-duration ratios for 5, 10, 15, 30, 60, 120, 180, 360, 720, and 1440 minutes with maximum absolute difference `0.00050333`, below the required `<= 0.003` tolerance.
+
+**Blockers encountered**:
+- None. Type I/IA/II/III runtime implementation is now unblocked.
+
+**Next steps**:
+1. Add the closed storm-shape enum and Rust hyetograph dispatch.
+2. Wire the selected distribution through Python, report payloads, and WEPPcloud UI.
+3. Add regression coverage and review-gate artifacts.
+
+**Test results**:
+- Source validation script passed for Type II embedded-duration ratios. Package validation commands remain pending.
+
+### 2026-04-28 22:38 UTC: Implementation + review-gate closure complete
+
+**Agent/Contributor**: Codex
+
+**Work completed**:
+- Implemented closed storm-shape enum propagation across WEPPcloud UI, Python schemas/services/reports, RQ routes, and Rust `geneva_core` hyetograph/frequency-panel dispatch.
+- Preserved default `neh4_type_b`, blocked custom uploaded distributions, and added additive artifact/report metadata.
+- Closed reviewer/QA findings with additional contract hardening: kernel callable import fallback regression, non-divisible timestep rejection, panel/run-batch distribution mismatch rejection, panel cache shape rebuild behavior, stale summary suppression on distribution drift, positive-depth contract alignment, and legacy uniform warning surfacing.
+- Added required review artifacts:
+  - `artifacts/2026-04-28_reviewer_gate.md`
+  - `artifacts/2026-04-28_qa_reviewer_gate.md`
+- Added required validation artifact:
+  - `artifacts/2026-04-28_validation_summary.md`
+
+**Blockers encountered**:
+- `wctl run-npm lint` fails on pre-existing unrelated `wepppy/weppcloud/controllers_js/__tests__/landuse_map_inline.test.js` (`jest/no-conditional-expect`, 4 errors); accepted as external blocker outside this package diff.
+
+**Next steps**:
+1. User review and merge orchestration across `/workdir/wepppy` and `/workdir/wepppyo3`.
+
+**Test results**:
+- Required package validation command set complete; pass/fail details recorded in `artifacts/2026-04-28_validation_summary.md`.
+
+### 2026-04-28 22:42 UTC: Post-reconnect validation rerun
+
+**Agent/Contributor**: Codex
+
+**Work completed**:
+- Re-ran every required validation command from the active execution prompt after user-reported VS Code remote disconnect.
+- Refreshed `artifacts/2026-04-28_validation_summary.md` with post-reconnect rerun timestamp and updated doc-lint file-count output.
+
+**Blockers encountered**:
+- Same unrelated lint blocker persisted in `wepppy/weppcloud/controllers_js/__tests__/landuse_map_inline.test.js` (`jest/no-conditional-expect`); unchanged by this package.
+
+**Next steps**:
+1. User review and merge orchestration across `/workdir/wepppy` and `/workdir/wepppyo3`.
+
+**Test results**:
+- `wctl run-npm test -- geneva`: pass (`10` tests)
+- `wctl run-npm lint`: known unrelated failure (`landuse_map_inline.test.js`)
+- `python3 wepppy/weppcloud/controllers_js/build_controllers_js.py`: pass
+- targeted Geneva pytest command: pass (`91 passed`)
+- `wctl doc-lint ...`: pass (`13 files validated`)
+- `git diff --check` in both repos: pass
+- `cargo test -p geneva_core`: pass (`64 passed`)
+
 ## Watch List
 
 - **Default semantics**: Keep default `neh4_type_b` unless explicitly changed by product decision.
 - **Old artifacts**: Existing completed Geneva runs may need warnings or regeneration because their summaries can claim Type B while the hyetograph was built uniformly.
-- **Rust release sync**: WEPPpy must consume the updated `wepppyo3` Geneva core after Rust implementation.
-- **Report clarity**: Summary reports must avoid implying that depth/intensity source rows are themselves storm-shape-specific when only batch hyetograph construction uses the shape.
+- **Rust release sync**: Updated shared objects are synced in both repos; keep release/install choreography explicit when promoting beyond local worktrees.
+- **Known unrelated lint debt**: `landuse_map_inline.test.js` still fails `jest/no-conditional-expect`; out of package scope.
 
 ## Communication Log
 

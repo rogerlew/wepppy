@@ -20,6 +20,14 @@
 {% set timing_method_options = [("kirpich", "Kirpich"), ("kent", "Kent"), ("simas", "Simas")] %}
 {% set override_lambda_options = [("", "Use saved config"), ("0.20", "0.20"), ("0.05", "0.05")] %}
 {% set override_uh_options = [("", "Use saved config"), ("scs_triangular", "SCS triangular"), ("scs_curvilinear", "SCS curvilinear")] %}
+{% set storm_shape_options = [
+  ("uniform", "Uniform"),
+  ("neh4_type_b", "NEH-4 B"),
+  ("type_i", "Type I"),
+  ("type_ia", "Type IA"),
+  ("type_ii", "Type II"),
+  ("type_iii", "Type III")
+] %}
 
 {% set description %}
   <p class="wc-text-muted">
@@ -227,10 +235,20 @@
            unit_label="minutes",
            precision="0.1",
            min="0.1",
-           help="Time-step used when expanding the NEH-4 Type B hyetograph.",
+           help="Time-step used when expanding the selected storm-shape hyetograph.",
            attrs={"data-geneva-field": "run_time_step_minutes"},
            extra_control_class="disable-readonly",
            max_width="22rem"
+         ) }}
+      {{ ui.select_field(
+           "geneva_storm_shape",
+           "Storm Shape",
+           storm_shape_options,
+           selected="neh4_type_b",
+           help="Select the hyetograph distribution used for Geneva runtime rainfall expansion.",
+           attrs={"data-geneva-field": "run_storm_shape"},
+           extra_control_class="disable-readonly",
+           max_width=None
          ) }}
       {{ ui.select_field(
            "geneva_run_lambda_mode",

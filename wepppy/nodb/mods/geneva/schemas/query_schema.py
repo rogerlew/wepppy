@@ -3,7 +3,15 @@ from __future__ import annotations
 from typing import Any, Mapping, Sequence
 
 GENEVA_DATASOURCE_IDS: tuple[str, ...] = ("cligen_freq", "noaa14_pds")
-GENEVA_DISTRIBUTION_IDS: tuple[str, ...] = ("neh4_type_b",)
+DEFAULT_GENEVA_DISTRIBUTION_ID = "neh4_type_b"
+GENEVA_DISTRIBUTION_IDS: tuple[str, ...] = (
+    DEFAULT_GENEVA_DISTRIBUTION_ID,
+    "uniform",
+    "type_i",
+    "type_ia",
+    "type_ii",
+    "type_iii",
+)
 GENEVA_MEASURE_IDS: tuple[str, ...] = ("peak_discharge", "runoff_depth", "runoff_volume")
 GENEVA_AVAILABILITY_IDS: tuple[str, ...] = ("available", "unavailable")
 GENEVA_UNAVAILABLE_REASON_CODES: tuple[str, ...] = (
@@ -31,19 +39,24 @@ def validate_measure_id(value: str) -> str:
     return normalized
 
 
+def validate_distribution_type(value: str | None) -> str:
+    normalized = str(value or DEFAULT_GENEVA_DISTRIBUTION_ID).strip()
+    if not normalized:
+        normalized = DEFAULT_GENEVA_DISTRIBUTION_ID
+    if normalized not in GENEVA_DISTRIBUTION_IDS:
+        raise ValueError(
+            f"distribution_type must be one of: {', '.join(GENEVA_DISTRIBUTION_IDS)}"
+        )
+    return normalized
+
+
 def normalize_frequency_panel_payload(payload: Mapping[str, Any]) -> dict[str, Any]:
     schema_version = int(
         payload.get("schema_version")
         or payload.get("kernel_schema_version")
         or 1
     )
-    distribution_type = str(
-        payload.get("distribution_type") or GENEVA_DISTRIBUTION_IDS[0]
-    ).strip()
-    if distribution_type not in GENEVA_DISTRIBUTION_IDS:
-        raise ValueError(
-            f"distribution_type must be one of: {', '.join(GENEVA_DISTRIBUTION_IDS)}"
-        )
+    distribution_type = validate_distribution_type(payload.get("distribution_type"))
 
     datasource_ids = _normalize_datasource_ids(payload.get("datasource_ids"))
     durations_minutes = _normalize_positive_int_list(
@@ -90,12 +103,15 @@ def normalize_frequency_panel_payload(payload: Mapping[str, Any]) -> dict[str, A
 
         if availability == "available" and (depth_mm is None or intensity_mm_per_hr is None):
             raise ValueError("available cells must include depth_mm and intensity_mm_per_hr")
-
-        cell_distribution = str(raw.get("distribution_type") or distribution_type).strip()
-        if cell_distribution not in GENEVA_DISTRIBUTION_IDS:
+        if availability == "available" and (
+            depth_mm is not None and depth_mm <= 0.0
+            or intensity_mm_per_hr is not None and intensity_mm_per_hr <= 0.0
+        ):
             raise ValueError(
-                f"cell distribution_type must be one of: {', '.join(GENEVA_DISTRIBUTION_IDS)}"
+                "available cells must include positive depth_mm and intensity_mm_per_hr"
             )
+
+        cell_distribution = validate_distribution_type(raw.get("distribution_type") or distribution_type)
 
         cells.append(
             {
@@ -189,11 +205,13 @@ def _normalize_reason_code(value: Any) -> str | None:
 
 __all__ = [
     "GENEVA_DATASOURCE_IDS",
+    "DEFAULT_GENEVA_DISTRIBUTION_ID",
     "GENEVA_DISTRIBUTION_IDS",
     "GENEVA_MEASURE_IDS",
     "GENEVA_AVAILABILITY_IDS",
     "GENEVA_UNAVAILABLE_REASON_CODES",
     "validate_datasource_id",
+    "validate_distribution_type",
     "validate_measure_id",
     "normalize_frequency_panel_payload",
 ]

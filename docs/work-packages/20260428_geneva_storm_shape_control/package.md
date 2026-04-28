@@ -1,6 +1,6 @@
 # Geneva Storm Shape Control
 
-**Status**: Open (2026-04-28)
+**Status**: Complete (2026-04-28)
 **Timezone**: UTC
 
 ## Overview
@@ -148,19 +148,19 @@ Default behavior should remain `neh4_type_b` for new schema-default payloads unl
 
 ## Success Criteria
 
-- [ ] Geneva UI exposes `Storm Shape` with Uniform, NEH-4 B, Type I, Type IA, Type II, and Type III choices.
-- [ ] Payload schemas and RQ/route workflows accept only the six canonical IDs and default missing values to `neh4_type_b`.
-- [ ] Rust Geneva hyetograph generation supports all six distributions with tests for monotonicity, closure, invalid input, and representative shape differences.
-- [ ] Raw WinTR-20 output, normalized CSV, and metadata for Type I/IA/II/III are checked in and reproducible.
-- [ ] Type I/IA/II/III use embedded-window extraction from a WinTR-20-derived 24-hour source curve, not full-curve compression.
-- [ ] Type I/IA/II/III short-duration anti-compression tests cover every legacy distribution, not only Type II.
-- [ ] Python batch execution calls the selected hyetograph implementation and no longer uses unconditional uniform rainfall.
-- [ ] `storm_inputs.json`, per-storm summaries, batch summary, query payload, and report UI agree on selected storm shape.
-- [ ] `uniform_rainfall_assumed` is true only for Uniform storms.
-- [ ] Existing runs without `distribution_type` remain readable and use a documented default.
-- [ ] `specification.md` and `culvert-cn-comparison.md` are updated with the new contract, source/provenance notes, and removed "uniform interim" statements where no longer true.
-- [ ] Code-review and QA-review sub-agent passes are complete, recorded as artifacts, and all Medium/High findings are closed or explicitly accepted with rationale.
-- [ ] Targeted Python, JavaScript, and Rust validation gates pass or have documented environment blockers.
+- [x] Geneva UI exposes `Storm Shape` with Uniform, NEH-4 B, Type I, Type IA, Type II, and Type III choices.
+- [x] Payload schemas and RQ/route workflows accept only the six canonical IDs and default missing values to `neh4_type_b`.
+- [x] Rust Geneva hyetograph generation supports all six distributions with tests for monotonicity, closure, invalid input, and representative shape differences.
+- [x] Raw WinTR-20 output, normalized CSV, and metadata for Type I/IA/II/III are checked in and reproducible.
+- [x] Type I/IA/II/III use embedded-window extraction from a WinTR-20-derived 24-hour source curve, not full-curve compression.
+- [x] Type I/IA/II/III short-duration anti-compression tests cover every legacy distribution, not only Type II.
+- [x] Python batch execution calls the selected hyetograph implementation and no longer uses unconditional uniform rainfall.
+- [x] `storm_inputs.json`, per-storm summaries, batch summary, query payload, and report UI agree on selected storm shape.
+- [x] `uniform_rainfall_assumed` is true only for Uniform storms.
+- [x] Existing runs without `distribution_type` remain readable and use a documented default.
+- [x] `specification.md` and `culvert-cn-comparison.md` are updated with the new contract, source/provenance notes, and removed "uniform interim" statements where no longer true.
+- [x] Code-review and QA-review sub-agent passes are complete, recorded as artifacts, and all Medium/High findings are closed or explicitly accepted with rationale.
+- [x] Targeted Python, JavaScript, and Rust validation gates pass or have documented environment blockers.
 
 ## Dependencies
 

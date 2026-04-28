@@ -23,6 +23,7 @@ class _GenevaRouteStub:
                 "schema_version": 1,
                 "durations_minutes": [30],
                 "ari_years": [10],
+                "distribution_type": payload.get("distribution_type", "neh4_type_b"),
                 "rebuild": bool(payload.get("rebuild", False)),
             }
         )
@@ -209,7 +210,13 @@ def test_run_workflow_enqueues_chained_jobs_with_forced_rebuild(
     assert panel_call["args"] == (
         "run-1",
         "cfg",
-        {"schema_version": 1, "durations_minutes": [30], "ari_years": [10], "rebuild": True},
+        {
+            "schema_version": 1,
+            "durations_minutes": [30],
+            "ari_years": [10],
+            "distribution_type": "neh4_type_b",
+            "rebuild": True,
+        },
     )
 
     run_call = calls[2]["kwargs"]

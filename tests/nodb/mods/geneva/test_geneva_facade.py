@@ -86,12 +86,13 @@ class _FakeKernelGateway:
             }
 
         if api_name == "geneva_build_frequency_panel":
+            distribution = str(payload.get("distribution_type") or "neh4_type_b")
             return {
                 "status": "ok",
                 "phase": "build_frequency_panel",
                 "kernel_schema_version": 1,
                 "datasource_ids": ["cligen_freq", "noaa14_pds"],
-                "distribution_type": "neh4_type_b",
+                "distribution_type": distribution,
                 "durations_minutes": [30],
                 "ari_years": [10],
                 "cells": [
@@ -102,7 +103,7 @@ class _FakeKernelGateway:
                         "ari_years": 10,
                         "depth_mm": 20.0,
                         "intensity_mm_per_hr": 40.0,
-                        "distribution_type": "neh4_type_b",
+                        "distribution_type": distribution,
                         "availability": "available",
                         "reason_code": None,
                     },
@@ -113,12 +114,42 @@ class _FakeKernelGateway:
                         "ari_years": 10,
                         "depth_mm": None,
                         "intensity_mm_per_hr": None,
-                        "distribution_type": "neh4_type_b",
+                        "distribution_type": distribution,
                         "availability": "unavailable",
                         "reason_code": "source_missing",
                     },
                 ],
                 "warnings": [],
+            }
+
+        if api_name == "geneva_build_hyetograph":
+            duration = float(payload["duration_minutes"])
+            depth = float(payload["depth_mm"])
+            distribution = str(payload.get("distribution_type") or "neh4_type_b")
+            cumulative = [0.0, depth * (0.35 if distribution != "uniform" else 0.5), depth]
+            return {
+                "status": "ok",
+                "phase": "build_hyetograph",
+                "kernel_schema_version": 1,
+                "distribution_type": distribution,
+                "duration_minutes": duration,
+                "depth_mm": depth,
+                "time_step_minutes": float(payload["time_step_minutes"]),
+                "time_minutes": [0.0, duration / 2.0, duration],
+                "cumulative_rainfall_mm": cumulative,
+                "incremental_rainfall_mm": [
+                    cumulative[0],
+                    cumulative[1] - cumulative[0],
+                    cumulative[2] - cumulative[1],
+                ],
+                "intensity_mm_per_hr": [0.0, 0.0, 0.0],
+                "warnings": [],
+                "source_metadata": None,
+                "diagnostics": {
+                    "closure_error_mm": 0.0,
+                    "closure_tolerance_mm": 0.01,
+                    "cumulative_monotonic": True,
+                },
             }
 
         if api_name == "geneva_run_batch":
@@ -307,6 +338,46 @@ def test_geneva_lifecycle_transitions_and_persistence_roundtrip(
     reloaded = Geneva.getInstance(str(tmp_path))
     assert reloaded.status_payload()["status"] == "completed_with_gaps"
     assert reloaded.results_payload()["last_run_summary"]["storm_count_total"] == 2
+
+
+def test_build_frequency_panel_shape_change_rebuilds_cache_and_clears_run_summary(
+    tmp_path: Path,
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    fixture_paths = _fixture_paths()
+    fake_hsg = _FakeHsgService(fixture_paths)
+    fake_kernel = _FakeKernelGateway()
+
+    monkeypatch.setattr(geneva_module, "_GENEVA_HSG_ASSIGNMENT_SERVICE", fake_hsg)
+    monkeypatch.setattr(geneva_module, "_GENEVA_KERNEL_GATEWAY", fake_kernel)
+
+    geneva = Geneva(str(tmp_path), "0.cfg")
+    geneva.set_enabled(True)
+    geneva.prepare_hrus(force_rebuild=True)
+
+    panel_type_b = geneva.build_frequency_panel(rebuild=True, distribution_type="neh4_type_b")
+    assert panel_type_b["distribution_type"] == "neh4_type_b"
+
+    run_summary = geneva.run_batch(
+        {
+            "schema_version": 1,
+            "runoff_model": {
+                "tc_hours": 1.1,
+            },
+        }
+    )
+    assert run_summary["storm_count_completed"] == 1
+    assert geneva.results_payload()["last_run_summary"]["storm_count_completed"] == 1
+
+    panel_type_ii = geneva.build_frequency_panel(
+        rebuild=False,
+        distribution_type="type_ii",
+    )
+    assert panel_type_ii["distribution_type"] == "type_ii"
+
+    frequency_panel_calls = [api_name for api_name, _payload in fake_kernel.calls if api_name == "geneva_build_frequency_panel"]
+    assert len(frequency_panel_calls) == 2
+    assert geneva.results_payload()["last_run_summary"] == {}
 
 
 def test_prepare_kernel_failure_sets_failed_state_and_error_payload(

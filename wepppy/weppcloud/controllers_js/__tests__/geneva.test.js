@@ -92,6 +92,14 @@ describe("Geneva controller", () => {
                 <input id="geneva_run_durations_minutes" name="geneva_run_durations_minutes" value="30, 60">
                 <input id="geneva_run_ari_years" name="geneva_run_ari_years" value="10, 25">
                 <input id="geneva_run_time_step_minutes" name="geneva_run_time_step_minutes" value="1.5">
+                <select id="geneva_storm_shape" name="geneva_storm_shape">
+                    <option value="uniform">Uniform</option>
+                    <option value="neh4_type_b" selected>NEH-4 B</option>
+                    <option value="type_i">Type I</option>
+                    <option value="type_ia">Type IA</option>
+                    <option value="type_ii">Type II</option>
+                    <option value="type_iii">Type III</option>
+                </select>
                 <select id="geneva_run_lambda_mode" name="geneva_run_lambda_mode">
                     <option value="">Use saved</option>
                     <option value="0.20">0.20</option>
@@ -298,6 +306,7 @@ describe("Geneva controller", () => {
         document.getElementById("geneva_run_uh_method").value = "scs_triangular";
         document.getElementById("geneva_run_timing_method").value = "kent";
         document.getElementById("geneva_run_tc_hours").value = "3.5";
+        document.getElementById("geneva_storm_shape").value = "type_ii";
 
         httpMock.requestWithSessionToken.mockResolvedValueOnce({
             body: buildStatePayload({
@@ -315,12 +324,14 @@ describe("Geneva controller", () => {
                 schema_version: 1,
                 prepare: {
                     schema_version: 1,
-                    force_rebuild: true
+                    force_rebuild: true,
+                    distribution_type: "type_ii"
                 },
                 panel: {
                     schema_version: 1,
                     durations_minutes: [5, 30],
                     ari_years: [2, 10],
+                    distribution_type: "type_ii",
                     rebuild: true
                 },
                 run_batch: {
@@ -332,7 +343,7 @@ describe("Geneva controller", () => {
                         ari_years: [10, 25]
                     },
                     hyetograph: {
-                        distribution_type: "neh4_type_b",
+                        distribution_type: "type_ii",
                         time_step_minutes: 1.5
                     },
                     runoff_model: {

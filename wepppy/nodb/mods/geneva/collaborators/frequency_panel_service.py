@@ -4,7 +4,11 @@ from pathlib import Path
 from typing import TYPE_CHECKING, Any, Mapping
 
 from wepppy.nodb.mods.geneva.errors import GenevaKernelError, GenevaValidationError
-from wepppy.nodb.mods.geneva.schemas import normalize_frequency_panel_payload
+from wepppy.nodb.mods.geneva.schemas import (
+    GENEVA_DISTRIBUTION_IDS,
+    normalize_frequency_panel_payload,
+    validate_distribution_type,
+)
 
 if TYPE_CHECKING:
     from wepppy.nodb.mods.geneva.geneva import Geneva
@@ -39,18 +43,18 @@ class GenevaFrequencyPanelService:
                 status_code=400,
             )
 
-        distribution_type = data.get("distribution_type", "neh4_type_b")
-        if distribution_type not in {"neh4_type_b"}:
+        try:
+            distribution_type = validate_distribution_type(data.get("distribution_type"))
+        except ValueError as exc:
             raise GenevaValidationError(
-                "hyetograph.distribution_type is unsupported in v1; expected neh4_type_b",
+                str(exc),
                 code="invalid_input",
                 details={
-                    "distribution_type": distribution_type,
-                    "supported_distribution_types": ["neh4_type_b"],
-                    "reserved_distribution_types": ["uniform", "custom_breakpoint"],
+                    "distribution_type": data.get("distribution_type"),
+                    "supported_distribution_types": list(GENEVA_DISTRIBUTION_IDS),
                 },
                 status_code=400,
-            )
+            ) from exc
 
         durations_raw = data.get("durations_minutes")
         ari_raw = data.get("ari_years")
@@ -135,6 +139,7 @@ class GenevaFrequencyPanelService:
             "schema_version": 1,
             "durations_minutes": durations_minutes,
             "ari_years": ari_years,
+            "distribution_type": distribution_type,
             "rebuild": rebuild_raw,
             "sources": normalized_sources,
         }
@@ -147,11 +152,16 @@ class GenevaFrequencyPanelService:
         ari_years: list[int] | tuple[int, ...] | None = None,
         rebuild: bool = False,
         sources: Mapping[str, str | None] | None = None,
+        distribution_type: str = "neh4_type_b",
     ) -> dict[str, Any]:
         artifact_io = geneva.artifact_io
+        requested_distribution = validate_distribution_type(distribution_type)
         if not rebuild and artifact_io.exists(geneva.wd, "frequency_panel.json"):
             payload = artifact_io.read_json(geneva.wd, "frequency_panel.json")
-            return normalize_frequency_panel_payload(payload)
+            normalized_cached = normalize_frequency_panel_payload(payload)
+            cached_distribution = validate_distribution_type(normalized_cached.get("distribution_type"))
+            if cached_distribution == requested_distribution:
+                return normalized_cached
 
         payload_sources = {
             "cligen_freq": _DEFAULT_CLIGEN_PATH,
@@ -170,7 +180,7 @@ class GenevaFrequencyPanelService:
             "kernel_schema_version": 1,
             "durations_minutes": [int(value) for value in (durations_minutes or _DEFAULT_DURATIONS)],
             "ari_years": [int(value) for value in (ari_years or _DEFAULT_ARI)],
-            "distribution_type": "neh4_type_b",
+            "distribution_type": requested_distribution,
             "allow_duration_interpolation": False,
             "source_root": geneva.wd,
             "sources": {

@@ -346,18 +346,18 @@ def test_task_routes_return_canonical_rq_submission_envelope(geneva_wp08_client:
     assert call.args[2] == {"schema_version": 1, "force_rebuild": True}
 
 
-def test_build_frequency_panel_rejects_reserved_distribution_id(geneva_wp08_client: Any) -> None:
+def test_build_frequency_panel_rejects_unsupported_distribution_id(geneva_wp08_client: Any) -> None:
     client, _, _, _ = geneva_wp08_client
 
     response = client.post(
         f"/runs/{RUN_ID}/{CONFIG}/tasks/geneva/build_frequency_panel",
-        json={"schema_version": 1, "distribution_type": "uniform"},
+        json={"schema_version": 1, "distribution_type": "custom_breakpoint"},
     )
 
     assert response.status_code == 400
     payload = response.get_json()
     assert payload["error"]["code"] == "invalid_input"
-    assert "unsupported in v1" in payload["error"]["message"]
+    assert "distribution_type must be one of" in payload["error"]["message"]
 
 
 def test_build_frequency_panel_rejects_non_integer_schema_version(geneva_wp08_client: Any) -> None:

@@ -22,24 +22,32 @@ def _write_storm_summary(
     time_to_peak: float,
     runoff_volume: float,
     runoff_depth: float,
+    distribution_type: str = "neh4_type_b",
+    uniform_rainfall_assumed: bool | None = None,
+    include_hyetograph_section: bool = True,
 ) -> None:
-    artifact_io.write_json(
-        wd,
-        f"storms/{storm_id}/summary.json",
-        {
-            "storm_id": storm_id,
-            "status": "completed",
-            "summary_metrics": {
-                "peak_discharge": peak_discharge,
-                "time_to_peak": time_to_peak,
-                "runoff_volume": runoff_volume,
-                "runoff_depth": runoff_depth,
-            },
-            "assumptions": {
-                "storm_distribution_assumption": "neh4_type_b",
-            },
+    assumptions = {
+        "storm_distribution_assumption": distribution_type,
+        "distribution_type": distribution_type,
+    }
+    if uniform_rainfall_assumed is not None:
+        assumptions["uniform_rainfall_assumed"] = uniform_rainfall_assumed
+
+    payload = {
+        "storm_id": storm_id,
+        "status": "completed",
+        "summary_metrics": {
+            "peak_discharge": peak_discharge,
+            "time_to_peak": time_to_peak,
+            "runoff_volume": runoff_volume,
+            "runoff_depth": runoff_depth,
         },
-    )
+        "assumptions": assumptions,
+    }
+    if include_hyetograph_section:
+        payload["hyetograph"] = {"distribution_type": distribution_type}
+
+    artifact_io.write_json(wd, f"storms/{storm_id}/summary.json", payload)
 
 
 def test_build_summary_payload_shapes_chart_and_event_table(tmp_path: Path) -> None:
@@ -133,6 +141,7 @@ def test_build_summary_payload_shapes_chart_and_event_table(tmp_path: Path) -> N
     assert payload["filter_options"]["duration_minutes"] == [30, 60]
     assert payload["selected_storm_id"] == "cligen_30m_10y"
     assert payload["assumptions"]["storm_distribution_assumption"] == "neh4_type_b"
+    assert payload["assumptions"]["uniform_rainfall_assumed"] is False
     assert payload["chart"]["x_axis"] == "intensity_mm_per_hr"
     assert payload["chart"]["y_axis"] == "selected_measure"
     assert payload["chart"]["series_grouping"] == "ari_years"
@@ -307,6 +316,67 @@ def test_build_summary_payload_uses_run_summary_status_over_stale_summary_artifa
     assert payload["errors"] == [{"code": "batch_error"}]
 
 
+def test_build_summary_payload_ignores_completed_summary_when_shape_mismatches_panel(
+    tmp_path: Path,
+) -> None:
+    artifact_io = GenevaArtifactIO()
+    wd = str(tmp_path)
+    panel_payload = {
+        "schema_version": 1,
+        "datasource_ids": ["cligen_freq"],
+        "durations_minutes": [60],
+        "ari_years": [10],
+        "distribution_type": "uniform",
+        "cells": [
+            {
+                "storm_id": "cligen_60m_10y",
+                "datasource_id": "cligen_freq",
+                "duration_minutes": 60,
+                "ari_years": 10,
+                "depth_mm": 20.0,
+                "intensity_mm_per_hr": 20.0,
+                "distribution_type": "uniform",
+                "availability": "available",
+                "reason_code": None,
+            }
+        ],
+        "warnings": [],
+    }
+
+    _write_storm_summary(
+        artifact_io,
+        wd,
+        "cligen_60m_10y",
+        peak_discharge=9.9,
+        time_to_peak=11.0,
+        runoff_volume=999.0,
+        runoff_depth=12.0,
+        distribution_type="type_ii",
+    )
+
+    geneva_stub = SimpleNamespace(
+        wd=wd,
+        artifact_io=artifact_io,
+        frequency_panel_service=SimpleNamespace(get_frequency_panel=lambda _geneva: panel_payload),
+        _run_summary={
+            "completed_storm_ids": ["cligen_60m_10y"],
+            "failed_storm_ids": [],
+            "warnings": [],
+            "errors": [],
+        },
+        _warnings=[],
+        _errors=[],
+    )
+
+    service = GenevaReportPayloadService()
+    payload = service.build_summary_payload(geneva_stub)
+
+    row = payload["event_table"][0]
+    assert row["status"] == "unavailable"
+    assert row["distribution_type"] == "uniform"
+    assert row["peak_discharge"] == {"value": None, "unit": "m3_s"}
+
+
 def test_build_summary_payload_preserves_watershed_warning_severity_fields(tmp_path: Path) -> None:
     artifact_io = GenevaArtifactIO()
     wd = str(tmp_path)
@@ -354,5 +424,63 @@ def test_build_summary_payload_preserves_watershed_warning_severity_fields(tmp_p
             "arf_method": "constant_1.0",
             "arf_value": 1.0,
             "uniform_rainfall_assumed": True,
+        }
+    ]
+
+
+def test_build_summary_payload_surfaces_legacy_uniform_interim_warning(tmp_path: Path) -> None:
+    artifact_io = GenevaArtifactIO()
+    wd = str(tmp_path)
+    panel_payload = {
+        "schema_version": 1,
+        "datasource_ids": ["cligen_freq"],
+        "durations_minutes": [30],
+        "ari_years": [10],
+        "distribution_type": "neh4_type_b",
+        "cells": [
+            {
+                "storm_id": "cligen_30m_10y",
+                "datasource_id": "cligen_freq",
+                "duration_minutes": 30,
+                "ari_years": 10,
+                "depth_mm": 20.0,
+                "intensity_mm_per_hr": 40.0,
+                "distribution_type": "neh4_type_b",
+                "availability": "available",
+                "reason_code": None,
+            }
+        ],
+        "warnings": [],
+    }
+
+    _write_storm_summary(
+        artifact_io,
+        wd,
+        "cligen_30m_10y",
+        peak_discharge=1.2,
+        time_to_peak=5.0,
+        runoff_volume=100.0,
+        runoff_depth=4.0,
+        distribution_type="neh4_type_b",
+        uniform_rainfall_assumed=True,
+        include_hyetograph_section=False,
+    )
+
+    geneva_stub = SimpleNamespace(
+        wd=wd,
+        artifact_io=artifact_io,
+        frequency_panel_service=SimpleNamespace(get_frequency_panel=lambda _geneva: panel_payload),
+        _warnings=[],
+        _errors=[],
+    )
+
+    payload = GenevaReportPayloadService().build_summary_payload(geneva_stub)
+    assert payload["assumptions"]["legacy_uniform_interim_artifact_count"] == 1
+    assert "stale_artifact_policy" in payload["assumptions"]
+    assert payload["warnings"] == [
+        {
+            "code": "legacy_uniform_interim_artifacts",
+            "message": payload["assumptions"]["stale_artifact_policy"],
+            "legacy_uniform_interim_artifact_count": 1,
         }
     ]

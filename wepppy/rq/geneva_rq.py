@@ -123,6 +123,7 @@ def run_geneva_build_frequency_panel_rq(
             ari_years=request_payload.get("ari_years"),
             rebuild=bool(request_payload.get("rebuild", False)),
             sources=request_payload.get("sources"),
+            distribution_type=str(request_payload.get("distribution_type") or "neh4_type_b"),
         )
     finally:
         _best_effort_state_update(

@@ -14,6 +14,7 @@ from wepppy.nodb.mods.geneva.collaborators.cn_table_service import GenevaCnTable
 from wepppy.nodb.mods.geneva.collaborators.config_service import GenevaConfigService
 from wepppy.nodb.mods.geneva.collaborators import hsg_assignment_service as hsg_assignment_module
 from wepppy.nodb.mods.geneva.collaborators.hsg_assignment_service import GenevaHsgAssignmentService
+from wepppy.nodb.mods.geneva.collaborators.frequency_panel_service import GenevaFrequencyPanelService
 from wepppy.nodb.mods.geneva.collaborators.hru_preparation_service import GenevaHruPreparationService
 from wepppy.nodb.mods.geneva.collaborators.kernel_gateway import GenevaKernelGateway
 from wepppy.nodb.mods.geneva.errors import GenevaKernelError, GenevaValidationError
@@ -87,6 +88,7 @@ class _RecordingKernelGateway:
     def __init__(self, *, prepare_rows: list[dict[str, object]]) -> None:
         self.prepare_rows = [dict(row) for row in prepare_rows]
         self.prepare_calls = 0
+        self.hyetograph_payloads: list[dict[str, object]] = []
         self.run_batch_payloads: list[dict[str, object]] = []
 
     def call_json_api(self, api_name: str, payload: dict[str, object]) -> dict[str, object]:
@@ -102,6 +104,41 @@ class _RecordingKernelGateway:
                     "hsg_provenance_counts": {"coded_lookup": 1},
                 },
                 "warnings": [],
+            }
+
+        if api_name == "geneva_build_hyetograph":
+            self.hyetograph_payloads.append(json.loads(json.dumps(payload)))
+            duration = float(payload["duration_minutes"])
+            depth = float(payload["depth_mm"])
+            distribution = str(payload.get("distribution_type") or "neh4_type_b")
+            cumulative = [0.0, depth * (0.35 if distribution != "uniform" else 0.5), depth]
+            return {
+                "status": "ok",
+                "phase": "build_hyetograph",
+                "kernel_schema_version": 1,
+                "distribution_type": distribution,
+                "duration_minutes": duration,
+                "depth_mm": depth,
+                "time_step_minutes": float(payload["time_step_minutes"]),
+                "time_minutes": [0.0, duration / 2.0, duration],
+                "cumulative_rainfall_mm": cumulative,
+                "incremental_rainfall_mm": [cumulative[0], cumulative[1] - cumulative[0], cumulative[2] - cumulative[1]],
+                "intensity_mm_per_hr": [0.0, 0.0, 0.0],
+                "warnings": [],
+                "source_metadata": (
+                    {
+                        "source_distribution_type": distribution,
+                        "source_curve_duration_hours": 24.0,
+                        "extraction_start_hours": 11.4,
+                        "extraction_end_hours": 12.4,
+                        "extraction_ratio_to_24h": 0.45368,
+                        "event_depth_is_duration_depth": True,
+                        "source_table_sha256": "test-sha",
+                    }
+                    if distribution.startswith("type_")
+                    else None
+                ),
+                "diagnostics": {"closure_error_mm": 0.0, "closure_tolerance_mm": 0.01, "cumulative_monotonic": True},
             }
 
         if api_name == "geneva_run_batch":
@@ -256,6 +293,81 @@ def test_kernel_gateway_maps_typed_value_errors(monkeypatch: pytest.MonkeyPatch)
     assert "malformed payload" in json.dumps(exc_info.value.details)
 
 
+def test_frequency_panel_service_rebuilds_cached_panel_when_requested_shape_changes(
+    tmp_path: Path,
+) -> None:
+    class _EchoPanelGateway:
+        def __init__(self) -> None:
+            self.calls = 0
+
+        def call_json_api(self, api_name: str, payload: dict[str, object]) -> dict[str, object]:
+            assert api_name == "geneva_build_frequency_panel"
+            self.calls += 1
+            distribution = str(payload.get("distribution_type") or "neh4_type_b")
+            return {
+                "status": "ok",
+                "phase": "build_frequency_panel",
+                "kernel_schema_version": 1,
+                "datasource_ids": ["cligen_freq", "noaa14_pds"],
+                "distribution_type": distribution,
+                "durations_minutes": [30],
+                "ari_years": [10],
+                "cells": [
+                    {
+                        "storm_id": "cligen_30m_10y",
+                        "datasource_id": "cligen_freq",
+                        "duration_minutes": 30,
+                        "ari_years": 10,
+                        "depth_mm": 20.0,
+                        "intensity_mm_per_hr": 40.0,
+                        "distribution_type": distribution,
+                        "availability": "available",
+                        "reason_code": None,
+                    },
+                    {
+                        "storm_id": "noaa14_30m_10y",
+                        "datasource_id": "noaa14_pds",
+                        "duration_minutes": 30,
+                        "ari_years": 10,
+                        "depth_mm": None,
+                        "intensity_mm_per_hr": None,
+                        "distribution_type": distribution,
+                        "availability": "unavailable",
+                        "reason_code": "source_missing",
+                    },
+                ],
+                "warnings": [],
+            }
+
+    gateway = _EchoPanelGateway()
+    service = GenevaFrequencyPanelService()
+    geneva = SimpleNamespace(
+        wd=str(tmp_path),
+        artifact_io=GenevaArtifactIO(),
+        kernel_gateway=gateway,
+    )
+
+    panel_type_b = service.build_frequency_panel(
+        geneva,
+        durations_minutes=[30],
+        ari_years=[10],
+        rebuild=True,
+        distribution_type="neh4_type_b",
+    )
+    assert panel_type_b["distribution_type"] == "neh4_type_b"
+    assert gateway.calls == 1
+
+    panel_type_ii = service.build_frequency_panel(
+        geneva,
+        durations_minutes=[30],
+        ari_years=[10],
+        rebuild=False,
+        distribution_type="type_ii",
+    )
+    assert panel_type_ii["distribution_type"] == "type_ii"
+    assert gateway.calls == 2
+
+
 def test_hru_preparation_service_persists_hru_artifacts(tmp_path: Path) -> None:
     service = GenevaHruPreparationService()
     kernel_gateway = _RecordingKernelGateway(prepare_rows=[_kernel_hru_row()])
@@ -348,6 +460,143 @@ def test_batch_run_uses_updated_cn_values_from_hru_table_parquet(tmp_path: Path)
     assert kernel_gateway.run_batch_payloads
     batch_hru_row = kernel_gateway.run_batch_payloads[0]["hru_rows"][0]
     assert batch_hru_row["cn_lambda_020"] == 89.0
+
+
+def test_batch_run_uses_selected_storm_shape_and_persists_metadata(tmp_path: Path) -> None:
+    prepare_service = GenevaHruPreparationService()
+    batch_service = GenevaBatchRunService()
+    kernel_gateway = _RecordingKernelGateway(prepare_rows=[_kernel_hru_row()])
+    geneva = _geneva_stub(tmp_path, kernel_gateway=kernel_gateway)
+    prepare_service.prepare_hrus(geneva, force_rebuild=True)
+
+    geneva.artifact_io.write_json(
+        geneva.wd,
+        "frequency_panel.json",
+        {
+            "schema_version": 1,
+            "distribution_type": "type_ii",
+            "cells": [
+                {
+                    "storm_id": "cligen_60m_10y",
+                    "datasource_id": "cligen_freq",
+                    "duration_minutes": 60,
+                    "ari_years": 10,
+                    "depth_mm": 20.0,
+                    "intensity_mm_per_hr": 20.0,
+                    "distribution_type": "type_ii",
+                    "availability": "available",
+                    "reason_code": None,
+                }
+            ],
+        },
+    )
+
+    result = batch_service.run_batch(
+        geneva,
+        {
+            "schema_version": 1,
+            "hyetograph": {"distribution_type": "type_ii", "time_step_minutes": 5.0},
+            "runoff_model": {"tc_hours": 1.0},
+        },
+    )
+
+    assert kernel_gateway.hyetograph_payloads[0]["distribution_type"] == "type_ii"
+    assert kernel_gateway.run_batch_payloads[0]["cumulative_rainfall_mm"][1] == 7.0
+    storm_summary = geneva.artifact_io.read_json(geneva.wd, "storms/cligen_60m_10y/summary.json")
+    assert storm_summary["assumptions"]["storm_distribution_assumption"] == "type_ii"
+    assert storm_summary["assumptions"]["uniform_rainfall_assumed"] is False
+    assert storm_summary["hyetograph"]["source_metadata"]["source_distribution_type"] == "type_ii"
+    storm_inputs = geneva.artifact_io.read_json(geneva.wd, "storm_inputs.json")
+    assert storm_inputs["hyetograph"]["distribution_type"] == "type_ii"
+    assert result["storm_results"][0]["assumptions"]["distribution_type"] == "type_ii"
+
+
+def test_batch_run_rejects_non_divisible_duration_time_step(tmp_path: Path) -> None:
+    prepare_service = GenevaHruPreparationService()
+    batch_service = GenevaBatchRunService()
+    kernel_gateway = _RecordingKernelGateway(prepare_rows=[_kernel_hru_row()])
+    geneva = _geneva_stub(tmp_path, kernel_gateway=kernel_gateway)
+    prepare_service.prepare_hrus(geneva, force_rebuild=True)
+
+    geneva.artifact_io.write_json(
+        geneva.wd,
+        "frequency_panel.json",
+        {
+            "schema_version": 1,
+            "distribution_type": "type_ii",
+            "cells": [
+                {
+                    "storm_id": "cligen_60m_10y",
+                    "datasource_id": "cligen_freq",
+                    "duration_minutes": 60,
+                    "ari_years": 10,
+                    "depth_mm": 20.0,
+                    "intensity_mm_per_hr": 20.0,
+                    "distribution_type": "type_ii",
+                    "availability": "available",
+                    "reason_code": None,
+                }
+            ],
+        },
+    )
+
+    with pytest.raises(GenevaValidationError) as exc_info:
+        batch_service.run_batch(
+            geneva,
+            {
+                "schema_version": 1,
+                "hyetograph": {"distribution_type": "type_ii", "time_step_minutes": 7.0},
+                "runoff_model": {"tc_hours": 1.0},
+            },
+        )
+    assert exc_info.value.code == "invalid_input"
+    assert "evenly divide selected duration_minutes" in str(exc_info.value)
+    assert kernel_gateway.hyetograph_payloads == []
+    assert kernel_gateway.run_batch_payloads == []
+
+
+def test_batch_run_rejects_distribution_type_mismatch_with_frequency_panel(tmp_path: Path) -> None:
+    prepare_service = GenevaHruPreparationService()
+    batch_service = GenevaBatchRunService()
+    kernel_gateway = _RecordingKernelGateway(prepare_rows=[_kernel_hru_row()])
+    geneva = _geneva_stub(tmp_path, kernel_gateway=kernel_gateway)
+    prepare_service.prepare_hrus(geneva, force_rebuild=True)
+
+    geneva.artifact_io.write_json(
+        geneva.wd,
+        "frequency_panel.json",
+        {
+            "schema_version": 1,
+            "distribution_type": "neh4_type_b",
+            "cells": [
+                {
+                    "storm_id": "cligen_60m_10y",
+                    "datasource_id": "cligen_freq",
+                    "duration_minutes": 60,
+                    "ari_years": 10,
+                    "depth_mm": 20.0,
+                    "intensity_mm_per_hr": 20.0,
+                    "distribution_type": "neh4_type_b",
+                    "availability": "available",
+                    "reason_code": None,
+                }
+            ],
+        },
+    )
+
+    with pytest.raises(GenevaValidationError) as exc_info:
+        batch_service.run_batch(
+            geneva,
+            {
+                "schema_version": 1,
+                "hyetograph": {"distribution_type": "type_ii", "time_step_minutes": 5.0},
+                "runoff_model": {"tc_hours": 1.0},
+            },
+        )
+    assert exc_info.value.code == "invalid_input"
+    assert "must match frequency panel distribution_type" in str(exc_info.value)
+    assert kernel_gateway.hyetograph_payloads == []
+    assert kernel_gateway.run_batch_payloads == []
 
 
 def test_hru_preparation_service_marks_missing_cn_table_rows_with_explicit_fallback(
@@ -502,3 +751,46 @@ def test_kernel_gateway_falls_back_to_cli_revision_rust_when_nested_module_lacks
     payload = gateway.call_json_api("geneva_prepare_hrus", {"kernel_schema_version": 1})
     assert payload["status"] == "ok"
     assert payload["phase"] == "prepare_hrus"
+
+
+def test_kernel_gateway_falls_back_to_cli_revision_rust_for_hyetograph_api(
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    class _LegacyModule:
+        pass
+
+    class _FallbackModule:
+        @staticmethod
+        def geneva_build_hyetograph(_payload_json: str) -> str:
+            return (
+                '{"status":"ok","phase":"build_hyetograph","kernel_schema_version":1,'
+                '"distribution_type":"neh4_type_b","duration_minutes":60.0,"depth_mm":10.0,'
+                '"time_step_minutes":5.0,"time_minutes":[0.0,60.0],'
+                '"cumulative_rainfall_mm":[0.0,10.0],"incremental_rainfall_mm":[0.0,10.0],'
+                '"intensity_mm_per_hr":[0.0,10.0],"warnings":[],'
+                '"diagnostics":{"closure_error_mm":0.0,"closure_tolerance_mm":0.01,'
+                '"cumulative_monotonic":true}}'
+            )
+
+    def _import_module(name: str):
+        if name == "wepppyo3.climate.cli_revision_rust":
+            return _LegacyModule
+        if name == "cli_revision_rust":
+            return _FallbackModule
+        raise ImportError(name)
+
+    monkeypatch.setattr("importlib.import_module", _import_module)
+
+    gateway = GenevaKernelGateway()
+    payload = gateway.call_json_api(
+        "geneva_build_hyetograph",
+        {
+            "kernel_schema_version": 1,
+            "duration_minutes": 60.0,
+            "depth_mm": 10.0,
+            "time_step_minutes": 5.0,
+            "distribution_type": "neh4_type_b",
+        },
+    )
+    assert payload["status"] == "ok"
+    assert payload["phase"] == "build_hyetograph"

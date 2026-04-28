@@ -782,9 +782,13 @@ var Geneva = (function () {
         };
 
         controller.buildPreparePayload = function () {
+            var raw = readFormSnapshot(controller);
             return {
                 schema_version: 1,
-                force_rebuild: true
+                force_rebuild: true,
+                distribution_type: raw.geneva_storm_shape
+                    ? String(raw.geneva_storm_shape).trim()
+                    : "neh4_type_b"
             };
         };
 
@@ -794,6 +798,9 @@ var Geneva = (function () {
                 schema_version: 1,
                 durations_minutes: parsePositiveIntegers(raw.geneva_panel_durations_minutes),
                 ari_years: parsePositiveIntegers(raw.geneva_panel_ari_years),
+                distribution_type: raw.geneva_storm_shape
+                    ? String(raw.geneva_storm_shape).trim()
+                    : "neh4_type_b",
                 rebuild: true
             };
             var sources = {};
@@ -835,7 +842,9 @@ var Geneva = (function () {
                     ari_years: parsePositiveIntegers(raw.geneva_run_ari_years)
                 },
                 hyetograph: {
-                    distribution_type: "neh4_type_b",
+                    distribution_type: raw.geneva_storm_shape
+                        ? String(raw.geneva_storm_shape).trim()
+                        : "neh4_type_b",
                     time_step_minutes: parseFloat(raw.geneva_run_time_step_minutes || "1.0")
                 },
                 runoff_model: runoffModel

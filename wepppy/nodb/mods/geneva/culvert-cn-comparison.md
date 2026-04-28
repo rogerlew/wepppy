@@ -1,7 +1,7 @@
 # Geneva vs Culvert CN Implementation Comparison
 
 Status: Working comparison note  
-Last Updated: 2026-04-23  
+Last Updated: 2026-04-28
 Scope: Compare the current Geneva CN implementation in `wepppy`/`wepppyo3` against the CN implementation in `/workdir/Culvert_web_app`, and interpret the differences using guidance from `resources/Wildcat5/rmrs_gtr334.pdf`.
 
 ## 1. Bottom Line
@@ -84,7 +84,7 @@ Implication for this comparison:
 | `Ia/S` options | Supports `0.20` and `0.05` | Fixed at `0.20` | Geneva clearly stronger |
 | Runoff generation | Timestep CN excess with closure checks | Lumped TR-55 style runoff depth from one CN | Geneva stronger |
 | Hydrograph generation | Unit hydrograph convolution with explicit kernel outputs | TR-55 graphical peak discharge workflow | Geneva stronger for distributed event modeling; Culvert simpler for screening |
-| Storm distribution handling | Rust Type B exists, but Python batch path currently uses uniform rainfall | Uses TR-55 rainfall-type peak-discharge routine rather than a distributed interval storm path | Mixed: Geneva architecture stronger, current orchestration gap remains |
+| Storm distribution handling | Closed storm-shape enum is wired end-to-end; batch runtime dispatches `uniform`, `neh4_type_b`, `type_i`, `type_ia`, `type_ii`, `type_iii` through Rust hyetograph kernels | Uses TR-55 rainfall-type peak-discharge routine rather than a distributed interval storm path | Geneva stronger |
 | Validation and diagnostics | Strong schemas, warnings, closure checks, and dedicated tests | Much lighter contract/test posture | Geneva clearly stronger |
 
 ## 5. Confirmed Implementation Differences
@@ -177,16 +177,16 @@ The narrower point is now about lookup breadth and fallback policy:
 
 That is a difference in runtime CN-resolution mechanism, not a statement that Geneva is less configurable overall.
 
-### 5.4 Geneva is currently weaker than intended on storm distribution wiring
+### 5.4 Geneva storm distribution wiring is now implemented end-to-end
 
-Wildcat5 explicitly says storm distribution affects flood peak, especially with CN-based interval excess. Geneva's Rust kernel includes NEH4 Type B storm generation, but the current Python `run_batch` path still builds a uniform hyetograph.
+Wildcat5 explicitly says storm distribution affects flood peak, especially with CN-based interval excess. Geneva now executes selected storm shape in runtime batch orchestration via Rust hyetograph dispatch (`uniform`, `neh4_type_b`, `type_i`, `type_ia`, `type_ii`, `type_iii`), including embedded-window extraction for legacy Type I/IA/II/III short-duration events.
 
 Scientific implication:
 
-- Geneva's current batch orchestration likely under-represents peak-flow sensitivity compared to its intended design.
-- This is a real weakness in Geneva today.
+- Geneva no longer forces uniform rainfall in Python batch orchestration.
+- Peak-flow sensitivity now follows the selected storm-shape assumption at run time.
 
-Culvert does not solve this problem better in a distributed sense. It uses a simpler TR-55 style graphical peak-discharge path rather than a timestep-distributed storm-excess-hydrograph workflow.
+Culvert still uses a simpler TR-55 style graphical peak-discharge path rather than a timestep-distributed storm-excess-hydrograph workflow.
 
 ### 5.5 Culvert's CN aggregation is weaker than it looks
 
@@ -209,13 +209,14 @@ Scientific implication:
 - More configurable post-fire inputs than Culvert, including optional burn severity and hydrophobicity controls.
 - Includes burn severity and hydrophobicity effects.
 - Supports both `lambda=0.20` and `lambda=0.05`.
+- Selected storm-shape runtime dispatch is implemented and persisted in run artifacts/report assumptions.
 - Provides stronger diagnostics, closure checks, and regression coverage.
 - Better matches Wildcat5's post-fire modeling structure.
 
 ### 6.2 Geneva shortcomings
 
 - The seed CN table does not yet contain exact rows for every possible `NLCD x HSG x burn severity x hydrophobicity` combination, so some persisted HRUs still use explicit estimator fallback.
-- Current Python batch orchestration uses a uniform storm even though a Type B kernel already exists.
+- Existing legacy Geneva artifacts created before storm-shape runtime dispatch can still show `neh4_type_b` assumptions with uniform-interim hyetograph behavior and should be regenerated before scientific comparison.
 - Post-fire CN adjustments are not yet expressed as an explicit Wildcat-style empirical table set.
 
 ### 6.3 Culvert strengths
@@ -251,7 +252,7 @@ Rationale:
 Main reasons it is not higher:
 
 - runtime CN mapping is still proxy-based,
-- Type B storm generation is not yet wired into the Python batch path.
+- some legacy outputs predate selected storm-shape runtime dispatch and require explicit stale-artifact handling/regeneration before like-for-like comparisons.
 
 ### 7.2 Culvert
 
@@ -278,7 +279,7 @@ The most important reasons are:
 The most important remaining Geneva follow-on work is:
 
 1. replace or calibrate the current proxy CN estimator with an explicit, documented post-fire CN mapping source,
-2. wire the existing NEH4 Type B storm kernel into the Python `run_batch` orchestration path,
+2. strengthen operator-facing stale-artifact detection/regeneration workflows for legacy uniform-interim outputs,
 3. retain the current HRU-based distributed response and diagnostics as non-negotiable strengths.
 
 ## 9. Implementation Pointers
@@ -287,8 +288,8 @@ Geneva implementation points:
 
 - HRU preparation and HSG handling: `wepppyo3/geneva_core/src/hru.rs`
 - CN runoff kernel: `wepppyo3/geneva_core/src/cn.rs`
-- Type B hyetograph kernel: `wepppyo3/geneva_core/src/hyetograph.rs`
-- current Python storm orchestration: `wepppy/nodb/mods/geneva/collaborators/batch_run_service.py`
+- storm-shape hyetograph dispatch: `wepppyo3/geneva_core/src/hyetograph.rs`, `wepppyo3/geneva_core/src/storm_shape.rs`
+- Python storm orchestration: `wepppy/nodb/mods/geneva/collaborators/batch_run_service.py`
 - run-scoped CN table lifecycle: `wepppy/nodb/mods/geneva/collaborators/cn_table_service.py`
 
 Culvert implementation points:

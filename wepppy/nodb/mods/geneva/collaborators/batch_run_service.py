@@ -3,8 +3,12 @@ from __future__ import annotations
 import math
 from typing import TYPE_CHECKING, Any, Mapping
 
-from wepppy.nodb.mods.geneva.errors import GenevaNoDbError, GenevaValidationError
-from wepppy.nodb.mods.geneva.schemas import GenevaRunBatchRequest, parse_run_batch_request
+from wepppy.nodb.mods.geneva.errors import GenevaKernelError, GenevaNoDbError, GenevaValidationError
+from wepppy.nodb.mods.geneva.schemas import (
+    GenevaRunBatchRequest,
+    parse_run_batch_request,
+    validate_distribution_type,
+)
 
 if TYPE_CHECKING:
     from wepppy.nodb.mods.geneva.geneva import Geneva
@@ -62,6 +66,20 @@ class GenevaBatchRunService:
             )
 
         frequency_panel = artifact_io.read_json(geneva.wd, "frequency_panel.json")
+        panel_distribution = validate_distribution_type(
+            frequency_panel.get("distribution_type")
+        )
+        if request.hyetograph.distribution_type != panel_distribution:
+            raise GenevaValidationError(
+                "hyetograph.distribution_type must match frequency panel distribution_type. Rebuild frequency panel with the selected storm shape before run_batch.",
+                code="invalid_input",
+                details={
+                    "run_batch_distribution_type": request.hyetograph.distribution_type,
+                    "frequency_panel_distribution_type": panel_distribution,
+                },
+                status_code=400,
+            )
+
         hru_rows = artifact_io.read_records_parquet(geneva.wd, "hru_table.parquet")
         if not hru_rows:
             raise GenevaValidationError(
@@ -71,6 +89,20 @@ class GenevaBatchRunService:
             )
 
         available_cells, unavailable_cells = _select_cells(frequency_panel, request.event_filter)
+        incompatible_durations = _non_uniform_duration_minutes(
+            available_cells,
+            request.hyetograph.time_step_minutes,
+        )
+        if incompatible_durations:
+            raise GenevaValidationError(
+                "hyetograph.time_step_minutes must evenly divide selected duration_minutes for Geneva run_batch.",
+                code="invalid_input",
+                details={
+                    "time_step_minutes": request.hyetograph.time_step_minutes,
+                    "incompatible_durations_minutes": incompatible_durations,
+                },
+                status_code=400,
+            )
 
         storm_inputs = {
             "schema_version": 1,
@@ -84,7 +116,8 @@ class GenevaBatchRunService:
             "hyetograph": {
                 "distribution_type": request.hyetograph.distribution_type,
                 "time_step_minutes": request.hyetograph.time_step_minutes,
-                "assumption": "uniform_rainfall",
+                "assumption": "selected_storm_shape",
+                "uniform_rainfall_assumed": request.hyetograph.distribution_type == "uniform",
             },
             "selected_storm_ids": [str(cell["storm_id"]) for cell in available_cells],
             "source_artifact_hashes": {
@@ -102,11 +135,17 @@ class GenevaBatchRunService:
             duration_minutes = int(cell["duration_minutes"])
             depth_mm = float(cell["depth_mm"])
             tc_hours = _resolve_tc_hours(geneva, request.runoff_model.tc_hours, request.runoff_model.timing_method)
-            time_minutes, cumulative_rainfall_mm = _build_uniform_hyetograph(
+            hyetograph_response = _build_selected_hyetograph(
+                geneva,
                 duration_minutes=duration_minutes,
                 depth_mm=depth_mm,
                 time_step_minutes=request.hyetograph.time_step_minutes,
+                distribution_type=request.hyetograph.distribution_type,
             )
+            time_minutes = [float(value) for value in hyetograph_response["time_minutes"]]
+            cumulative_rainfall_mm = [
+                float(value) for value in hyetograph_response["cumulative_rainfall_mm"]
+            ]
 
             kernel_request = {
                 "kernel_schema_version": 1,
@@ -135,8 +174,7 @@ class GenevaBatchRunService:
                     geneva,
                     storm_id=storm_id,
                     cell=cell,
-                    time_minutes=time_minutes,
-                    cumulative_rainfall_mm=cumulative_rainfall_mm,
+                    hyetograph_response=hyetograph_response,
                     kernel_response=kernel_response,
                 )
                 storm_results.append(storm_result)
@@ -153,7 +191,7 @@ class GenevaBatchRunService:
                     }
                 )
 
-        run_warnings = _watershed_area_warnings(geneva)
+        run_warnings = _watershed_area_warnings(geneva, request.hyetograph.distribution_type)
 
         return {
             "schema_version": 1,
@@ -175,14 +213,27 @@ class GenevaBatchRunService:
         *,
         storm_id: str,
         cell: Mapping[str, Any],
-        time_minutes: list[float],
-        cumulative_rainfall_mm: list[float],
+        hyetograph_response: Mapping[str, Any],
         kernel_response: Mapping[str, Any],
     ) -> dict[str, Any]:
         artifact_io = geneva.artifact_io
 
-        incremental_rainfall_mm = _incremental_from_cumulative(cumulative_rainfall_mm)
-        intensity_mm_per_hr = _intensity_series(time_minutes, incremental_rainfall_mm)
+        distribution_type = str(hyetograph_response.get("distribution_type") or "neh4_type_b")
+        source_metadata = dict(hyetograph_response.get("source_metadata") or {})
+        time_minutes = [float(value) for value in hyetograph_response.get("time_minutes", [])]
+        cumulative_rainfall_mm = [
+            float(value) for value in hyetograph_response.get("cumulative_rainfall_mm", [])
+        ]
+        incremental_rainfall_mm = [
+            float(value) for value in hyetograph_response.get("incremental_rainfall_mm", [])
+        ]
+        if len(incremental_rainfall_mm) != len(cumulative_rainfall_mm):
+            incremental_rainfall_mm = _incremental_from_cumulative(cumulative_rainfall_mm)
+        intensity_mm_per_hr = [
+            float(value) for value in hyetograph_response.get("intensity_mm_per_hr", [])
+        ]
+        if len(intensity_mm_per_hr) != len(cumulative_rainfall_mm):
+            intensity_mm_per_hr = _intensity_series(time_minutes, incremental_rainfall_mm)
 
         hyetograph_records = [
             {
@@ -190,6 +241,11 @@ class GenevaBatchRunService:
                 "p_cum_mm": float(p_cum),
                 "p_inc_mm": float(p_inc),
                 "intensity_mm_per_hr": float(intensity),
+                "distribution_type": distribution_type,
+                "source_distribution_type": source_metadata.get("source_distribution_type"),
+                "extraction_start_hours": source_metadata.get("extraction_start_hours"),
+                "extraction_end_hours": source_metadata.get("extraction_end_hours"),
+                "extraction_ratio_to_24h": source_metadata.get("extraction_ratio_to_24h"),
             }
             for t, p_cum, p_inc, intensity in zip(
                 time_minutes,
@@ -215,7 +271,17 @@ class GenevaBatchRunService:
             geneva.wd,
             f"{storm_prefix}/hyetograph.parquet",
             hyetograph_records,
-            columns=["t_minutes", "p_cum_mm", "p_inc_mm", "intensity_mm_per_hr"],
+            columns=[
+                "t_minutes",
+                "p_cum_mm",
+                "p_inc_mm",
+                "intensity_mm_per_hr",
+                "distribution_type",
+                "source_distribution_type",
+                "extraction_start_hours",
+                "extraction_end_hours",
+                "extraction_ratio_to_24h",
+            ],
         )
         excess_relpath = artifact_io.write_records_parquet(
             geneva.wd,
@@ -262,10 +328,21 @@ class GenevaBatchRunService:
             "warnings": list(kernel_response.get("warnings", []) or []),
             "assumptions": {
                 "arc_condition": "arc_ii",
-                "storm_distribution_assumption": "neh4_type_b",
-                "uniform_rainfall_assumed": True,
+                "storm_distribution_assumption": distribution_type,
+                "distribution_type": distribution_type,
+                "uniform_rainfall_assumed": distribution_type == "uniform",
                 "arf_method": "constant_1.0",
                 "arf_value": 1.0,
+                "hyetograph_source_metadata": source_metadata,
+            },
+            "hyetograph": {
+                "distribution_type": distribution_type,
+                "time_step_minutes": hyetograph_response.get("time_step_minutes"),
+                "duration_minutes": hyetograph_response.get("duration_minutes"),
+                "depth_mm": hyetograph_response.get("depth_mm"),
+                "source_metadata": source_metadata,
+                "diagnostics": dict(hyetograph_response.get("diagnostics") or {}),
+                "warnings": list(hyetograph_response.get("warnings", []) or []),
             },
             "artifacts": {
                 "hyetograph_relpath": hyetograph_relpath,
@@ -318,6 +395,7 @@ def _select_cells(
             "ari_years": ari,
             "depth_mm": raw.get("depth_mm"),
             "intensity_mm_per_hr": raw.get("intensity_mm_per_hr"),
+            "distribution_type": raw.get("distribution_type") or panel_payload.get("distribution_type"),
             "reason_code": raw.get("reason_code"),
         }
 
@@ -329,6 +407,22 @@ def _select_cells(
     available.sort(key=_storm_sort_key)
     unavailable.sort(key=_storm_sort_key)
     return available, unavailable
+
+
+def _non_uniform_duration_minutes(
+    available_cells: list[dict[str, Any]],
+    time_step_minutes: float,
+) -> list[int]:
+    incompatible: set[int] = set()
+    for cell in available_cells:
+        duration_minutes = int(cell.get("duration_minutes", 0) or 0)
+        if duration_minutes <= 0:
+            continue
+        ratio = float(duration_minutes) / float(time_step_minutes)
+        nearest = round(ratio)
+        if abs(ratio - float(nearest)) > 1e-9:
+            incompatible.add(duration_minutes)
+    return sorted(incompatible)
 
 
 def _storm_sort_key(cell: Mapping[str, Any]) -> tuple[Any, ...]:
@@ -362,33 +456,52 @@ def _resolve_tc_hours(geneva: "Geneva", tc_hours: float | None, timing_method: s
     )
 
 
-def _build_uniform_hyetograph(
+def _build_selected_hyetograph(
+    geneva: "Geneva",
     *,
     duration_minutes: int,
     depth_mm: float,
     time_step_minutes: float,
-) -> tuple[list[float], list[float]]:
+    distribution_type: str,
+) -> dict[str, Any]:
     if duration_minutes <= 0:
         raise GenevaValidationError(
             "duration_minutes must be > 0.",
             code="invalid_input",
             details={"duration_minutes": duration_minutes},
         )
-    if depth_mm < 0.0:
+    if depth_mm <= 0.0:
         raise GenevaValidationError(
-            "depth_mm must be >= 0.",
+            "depth_mm must be > 0.",
             code="invalid_input",
             details={"depth_mm": depth_mm},
         )
 
-    duration = float(duration_minutes)
-    step = max(float(time_step_minutes), 1e-6)
-    steps = max(1, int(math.ceil(duration / step)))
+    payload = {
+        "kernel_schema_version": 1,
+        "duration_minutes": float(duration_minutes),
+        "depth_mm": float(depth_mm),
+        "time_step_minutes": float(time_step_minutes),
+        "distribution_type": distribution_type,
+    }
+    response = geneva.kernel_gateway.call_json_api("geneva_build_hyetograph", payload)
+    if str(response.get("status")) != "ok":
+        raise GenevaKernelError(
+            "geneva_build_hyetograph returned non-ok status.",
+            code="contract_violation",
+            details=response,
+            status_code=500,
+        )
+    for field in ("time_minutes", "cumulative_rainfall_mm"):
+        if not isinstance(response.get(field), list) or not response[field]:
+            raise GenevaKernelError(
+                "geneva_build_hyetograph returned invalid hyetograph series.",
+                code="contract_violation",
+                details={"field": field},
+                status_code=500,
+            )
 
-    times = [round((index * duration) / steps, 6) for index in range(steps + 1)]
-    cumulative = [round(depth_mm * (time / duration), 6) for time in times]
-    cumulative[-1] = float(depth_mm)
-    return times, cumulative
+    return response
 
 
 def _incremental_from_cumulative(cumulative: list[float]) -> list[float]:
@@ -412,7 +525,7 @@ def _intensity_series(time_minutes: list[float], incremental_mm: list[float]) ->
     return intensities
 
 
-def _watershed_area_warnings(geneva: "Geneva") -> list[dict[str, Any]]:
+def _watershed_area_warnings(geneva: "Geneva", distribution_type: str) -> list[dict[str, Any]]:
     try:
         watershed = geneva.watershed_instance
     except FileNotFoundError:
@@ -454,7 +567,7 @@ def _watershed_area_warnings(geneva: "Geneva") -> list[dict[str, Any]]:
             },
             "arf_method": "constant_1.0",
             "arf_value": 1.0,
-            "uniform_rainfall_assumed": True,
+            "uniform_rainfall_assumed": distribution_type == "uniform",
         }
     ]
 

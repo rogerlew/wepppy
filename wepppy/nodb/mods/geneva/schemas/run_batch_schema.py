@@ -3,10 +3,9 @@ from __future__ import annotations
 from dataclasses import dataclass
 from typing import Any, Mapping
 
-from .query_schema import validate_datasource_id
+from .query_schema import DEFAULT_GENEVA_DISTRIBUTION_ID, validate_datasource_id, validate_distribution_type
 
 RUN_BATCH_SCHEMA_VERSION = 1
-_ALLOWED_DISTRIBUTION_TYPES = {"neh4_type_b"}
 _ALLOWED_TIMING_METHODS = {"kirpich", "kent", "simas"}
 _ALLOWED_LAMBDA_MODES = {"0.20", "0.05"}
 _ALLOWED_UH_METHODS = {"scs_triangular", "scs_curvilinear"}
@@ -21,7 +20,7 @@ class GenevaEventFilter:
 
 @dataclass(frozen=True)
 class GenevaHyetographConfig:
-    distribution_type: str = "neh4_type_b"
+    distribution_type: str = DEFAULT_GENEVA_DISTRIBUTION_ID
     time_step_minutes: float = 1.0
 
 
@@ -61,16 +60,12 @@ def parse_run_batch_request(
 
     hyetograph_payload = payload.get("hyetograph") or {}
     hyetograph = GenevaHyetographConfig(
-        distribution_type=str(hyetograph_payload.get("distribution_type", "neh4_type_b")),
+        distribution_type=validate_distribution_type(hyetograph_payload.get("distribution_type")),
         time_step_minutes=_coerce_float(
             hyetograph_payload.get("time_step_minutes", 1.0),
             field="hyetograph.time_step_minutes",
         ),
     )
-    if hyetograph.distribution_type not in _ALLOWED_DISTRIBUTION_TYPES:
-        raise ValueError(
-            "hyetograph.distribution_type is unsupported in v1; expected neh4_type_b"
-        )
     if hyetograph.time_step_minutes <= 0.0:
         raise ValueError("hyetograph.time_step_minutes must be > 0")
 

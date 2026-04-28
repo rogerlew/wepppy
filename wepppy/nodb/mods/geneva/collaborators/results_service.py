@@ -60,6 +60,22 @@ class GenevaResultsService:
         elif storm_count_unavailable > 0:
             status = "completed_with_gaps"
 
+        distribution_types = sorted(
+            {
+                str(
+                    entry.get("assumptions", {}).get("distribution_type")
+                    or entry.get("assumptions", {}).get("storm_distribution_assumption")
+                    or ""
+                )
+                for entry in completed
+                if str(
+                    entry.get("assumptions", {}).get("distribution_type")
+                    or entry.get("assumptions", {}).get("storm_distribution_assumption")
+                    or ""
+                ).strip()
+            }
+        )
+
         run_summary = {
             "batch_id": batch_result.get("batch_id"),
             "datasource_ids": sorted(
@@ -79,6 +95,11 @@ class GenevaResultsService:
                 if str(storm_id).strip()
             ],
             "failed_storm_ids": [str(item.get("storm_id", "")) for item in failed],
+            "distribution_types": distribution_types,
+            "storm_distribution_assumption": (
+                distribution_types[0] if len(distribution_types) == 1 else "mixed"
+            ) if distribution_types else None,
+            "uniform_rainfall_assumed": distribution_types == ["uniform"],
             "warnings": warnings,
             "errors": errors,
             "artifacts": {

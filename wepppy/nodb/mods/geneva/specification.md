@@ -1,7 +1,7 @@
 # Geneva NoDb Mod Specification
 
-Status: Implemented Baseline (WP-00..WP-10 complete; WP-11 follow-on backlog)  
-Last Updated: 2026-04-23  
+Status: Implemented Baseline (WP-00..WP-10 complete; WP-11 follow-on backlog; WP-12 storm-shape control complete)
+Last Updated: 2026-04-28
 Owner: WEPPpy NoDb hydrology stack  
 Scope: Event runoff hydrograph modeling for BAER-style post-fire workflows using RMRS-GTR-334-aligned Curve Number (CN) plus unit hydrograph methods.
 
@@ -20,7 +20,7 @@ Geneva provides a run-scoped NoDb workflow for event rainfall-runoff analysis wi
 
 This document now records the **current shipped behavior**. Historical design intent is retained in deferred sections for future implementation work.
 
-## 2. Implementation Snapshot (2026-04-23)
+## 2. Implementation Snapshot (2026-04-28)
 
 | Area | Current State | Notes |
 | --- | --- | --- |
@@ -32,8 +32,8 @@ This document now records the **current shipped behavior**. Historical design in
 | Run-scoped CN-table lifecycle | Implemented | Init/reset/modify/audit with optimistic concurrency |
 | CN-table consumption in HRU CN assignment | Implemented | `prepare_hrus` resolves persisted HRU CN fields from run-scoped `geneva/data/cn_table.csv` before writing `hru_table.parquet`; missing exact rows fall back explicitly |
 | Frequency panel matrix + unavailable reasons | Implemented | CLIGEN always attempted; NOAA optional |
-| Runtime batch hyetograph distribution | **Uniform (interim)** | `run_batch` currently builds linear cumulative rainfall from depth/duration |
-| NEH4 Type B hyetograph kernel module | Implemented in Rust | Not yet wired into Python `run_batch` orchestration path |
+| Runtime batch hyetograph distribution | Implemented | `run_batch` dispatches selected closed storm shape (`uniform`, `neh4_type_b`, `type_i`, `type_ia`, `type_ii`, `type_iii`) through Rust `geneva_build_hyetograph` |
+| Storm-shape kernel dispatch module | Implemented in Rust | Shared closed enum + dispatch in `geneva_core` (`storm_shape.rs`, `hyetograph.rs`) |
 | Flask routes + RQ tasks | Implemented | Single `geneva_bp.py` module |
 | rq-engine Geneva API/state | Implemented | Includes chained `run-workflow` endpoint and revisioned state payload |
 | Interactive summary query/report payload | Implemented | Marker/table selection contract live |
@@ -78,7 +78,7 @@ Conformance posture:
 | DEV-003 | Frequency panel | Duration interpolation disabled for panel materialization | Implemented |
 | DEV-004 | Climate sourcing | Dual-source panel strategy (CLIGEN always attempted; NOAA optional) | Implemented |
 | DEV-005 | CN resolution | Runtime HRU CN now resolves from run-scoped `cn_table.csv` at `prepare_hrus` persistence time; missing exact lookup rows fall back explicitly to the kernel proxy estimator | Implemented behavior |
-| DEV-006 | Storm construction | Python `run_batch` currently builds uniform hyetograph from depth/duration | Active gap |
+| DEV-006 | Storm construction | Batch storm-shape dispatch is now selected at runtime via closed enum with legacy-artifact compatibility warnings for old uniform-interim outputs | Implemented behavior |
 | DEV-007 | Default HSG derivation | Dominant-soil derivation path is not implemented; only explicit `default_hsg_code` is used | Active gap |
 | DEV-008 | Enable/disable semantics | `enabled` remains effectively true when mod is present (membership-driven) | Implemented behavior |
 | DEV-009 | Collapse failure policy | No compatible recipient does not fail run; donor HRU is retained with warning | Implemented behavior |
@@ -123,6 +123,7 @@ PyO3 adapter entrypoints:
 
 - `geneva_prepare_hrus`
 - `geneva_build_frequency_panel`
+- `geneva_build_hyetograph`
 - `geneva_run_batch`
 - `geneva_validate_uh` (stub)
 
@@ -133,7 +134,8 @@ Core crate modules:
 - `cn.rs`
 - `uh.rs`
 - `convolution.rs`
-- `hyetograph.rs` (implemented but not currently wired from Python `run_batch`)
+- `hyetograph.rs` (selected storm-shape dispatch wired from Python `run_batch`)
+- `storm_shape.rs` (shared storm-shape enum and validation)
 
 ## 6. Guardrails (Hard Requirements)
 
@@ -429,6 +431,7 @@ CLIGEN normalization shim (current implementation detail):
 Output invariants:
 
 - persisted to `geneva/frequency_panel.json`
+- service cache reuse is distribution-aware: cached panel is reused only when requested `distribution_type` matches persisted panel distribution; otherwise panel is rebuilt
 - cell `availability` is `available|unavailable`
 - `reason_code` must be null when available
 - unavailable reason codes are:
@@ -448,8 +451,16 @@ Entry: `geneva_run_batch` (Python orchestrates per-storm kernel calls).
 - `event_filter.datasource_ids` optional list of `cligen_freq|noaa14_pds`
 - `event_filter.durations_minutes` optional positive int list
 - `event_filter.ari_years` optional positive int list
-- `hyetograph.distribution_type` must be `neh4_type_b`
+- `hyetograph.distribution_type` must be one of:
+  - `uniform`
+  - `neh4_type_b`
+  - `type_i`
+  - `type_ia`
+  - `type_ii`
+  - `type_iii`
 - `hyetograph.time_step_minutes > 0`
+- `hyetograph.time_step_minutes` must evenly divide each selected storm duration for runtime CN/hydrograph convolution (non-divisible combinations are rejected as `invalid_input` before kernel run-batch execution)
+- `hyetograph.distribution_type` must match the persisted frequency-panel `distribution_type`; callers must rebuild panel first when switching storm shape
 - exactly one of:
   - `runoff_model.tc_hours`, or
   - `runoff_model.timing_method` (`kirpich|kent|simas`)
@@ -461,11 +472,19 @@ Prerequisites:
 
 ### 11.2 Current storm construction in Python
 
-Current runtime behavior uses **uniform cumulative rainfall** per storm cell:
+Current runtime behavior uses Rust `geneva_build_hyetograph` per selected panel cell:
 
 - uses selected cell `duration_minutes` and `depth_mm`
-- builds linear cumulative series from `0` to `depth_mm`
-- uses configured `time_step_minutes`
+- uses request `hyetograph.distribution_type` + `time_step_minutes`
+- dispatches by closed storm-shape enum:
+  - `uniform`: linear cumulative rainfall from `0` to duration depth
+  - `neh4_type_b`: legacy Geneva Type B curve
+  - `type_i|type_ia|type_ii|type_iii`: embedded-window extraction from checked-in 24-hour WinTR-20 source curves
+- persists selected distribution and source metadata in:
+  - `geneva/storm_inputs.json`
+  - `geneva/storms/<storm_id>/hyetograph.parquet`
+  - `geneva/storms/<storm_id>/summary.json`
+  - `geneva/batch_summary.json`
 
 Timing fallback when `timing_method` is used:
 
@@ -523,11 +542,11 @@ Warning payload includes:
 - threshold details
 - `arf_method=constant_1.0`, `arf_value=1.0`, `uniform_rainfall_assumed=true`
 
-### 11.6 Planned storm-shape implementation contract
+### 11.6 Implemented storm-shape runtime contract
 
-Status: specified for `docs/work-packages/20260428_geneva_storm_shape_control/`; not yet implemented in runtime.
+Status: implemented by `docs/work-packages/20260428_geneva_storm_shape_control/`.
 
-The planned Geneva `Storm Shape` control has six closed enum values:
+Geneva `Storm Shape` has six closed enum values:
 
 | ID | Label | Implementation source |
 | --- | --- | --- |
@@ -800,10 +819,9 @@ Primary suites:
 
 The following are intentionally tracked for follow-on implementation:
 
-- wire run-scoped `cn_table.csv` into runtime HRU CN lookup/resolution,
-- wire NEH4 Type B hyetograph generation into batch execution path (replace uniform interim builder),
 - implement dominant-soil derivation for `default_hsg_code` when user override is absent,
 - implement non-stub `geneva_validate_uh` API,
+- evaluate whether operator tooling should auto-flag/regenerate legacy Geneva summaries that still show `storm_distribution_assumption=neh4_type_b` with `uniform_rainfall_assumed=true` and no modern `hyetograph` summary block,
 - evaluate refine/cleanup of route module structure (currently single `geneva_bp.py`),
 - address rq-engine generic payload normalization behavior that can collapse single-item arrays to scalars.
 

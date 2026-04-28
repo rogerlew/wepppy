@@ -219,6 +219,7 @@ class Geneva(NoDbBase):
         ari_years: list[int] | tuple[int, ...] | None = None,
         rebuild: bool = False,
         sources: Mapping[str, str | None] | None = None,
+        distribution_type: str = "neh4_type_b",
     ) -> dict[str, Any]:
         self._require_enabled()
         self.hsg_assignment_service.enforce_wbt_backend(self)
@@ -231,17 +232,38 @@ class Geneva(NoDbBase):
                 ari_years=ari_years,
                 rebuild=rebuild,
                 sources=sources,
+                distribution_type=distribution_type,
             )
         except GenevaNoDbError as exc:
             self._record_failure(exc)
             raise
 
         with self.locked():
+            previous_distribution = str(
+                (
+                    (self._storm_batch.get("frequency_panel", {}) or {})
+                    if isinstance(self._storm_batch, dict)
+                    else {}
+                ).get("distribution_type")
+                or ""
+            )
+            next_distribution = str(panel.get("distribution_type") or "neh4_type_b")
+            if (
+                previous_distribution
+                and previous_distribution != next_distribution
+            ):
+                self._run_summary = {}
+                self._errors = []
+                if self._status in {"completed", "completed_with_gaps", "failed"}:
+                    self._status = "prepared"
+                    self._progress = empty_progress_payload()
+
             self._storm_batch = {
                 "frequency_panel": {
                     "datasource_ids": list(panel.get("datasource_ids", []) or []),
                     "durations_minutes": list(panel.get("durations_minutes", []) or []),
                     "ari_years": list(panel.get("ari_years", []) or []),
+                    "distribution_type": next_distribution,
                 }
             }
             self._warnings = list(panel.get("warnings", []) or [])
