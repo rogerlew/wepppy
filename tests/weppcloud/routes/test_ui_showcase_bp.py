@@ -102,3 +102,48 @@ def test_component_gallery_registers_jexcel_theme_lab_target(
     assert 'id="theme_lab_jexcel_selected_cell"' in template_source
     assert 'id="theme_lab_jexcel_row_index"' in template_source
     assert 'id="theme_lab_jexcel_regular_cell"' in template_source
+
+
+def test_component_gallery_registers_geneva_marker_theme_lab_target(
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    captured: dict[str, object] = {}
+
+    def fake_render_template(template_name: str, **context: object) -> str:
+        captured["template_name"] = template_name
+        captured["context"] = context
+        return "rendered"
+
+    monkeypatch.setattr(ui_showcase_module, "render_template", fake_render_template)
+
+    app = Flask(__name__)
+    app.config["CAP_BASE_URL"] = "/cap"
+    app.config["CAP_SITE_KEY"] = "demo"
+
+    with app.app_context():
+        result = ui_showcase_module.component_gallery()
+
+    assert result == "rendered"
+    assert captured["template_name"] == "ui_showcase/component_gallery.htm"
+
+    context = captured["context"]
+    assert isinstance(context, dict)
+    marker_combinations = context["geneva_marker_combinations"]
+    assert isinstance(marker_combinations, list)
+    assert len(marker_combinations) == 60
+
+    theme_targets = context["theme_contrast_targets"]
+    assert isinstance(theme_targets, list)
+    target = next((entry for entry in theme_targets if entry.get("id") == "geneva_summary_marker_labels"), None)
+    assert target is not None
+    assert len(target["pairs"]) == 60
+    assert {pair["name"] for pair in target["pairs"]} == {
+        marker["id"] for marker in marker_combinations
+    }
+    assert all(pair["foreground_mode"] == "fill" for pair in target["pairs"])
+    assert all(pair["background_mode"] == "fill" for pair in target["pairs"])
+
+    template_source = COMPONENT_GALLERY_TEMPLATE.read_text(encoding="utf-8")
+    assert 'data-contrast-id="geneva-summary-marker-labels"' in template_source
+    assert "theme_lab_geneva_marker_{{ marker.id }}_circle" in template_source
+    assert "theme_lab_geneva_marker_{{ marker.id }}_label" in template_source

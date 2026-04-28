@@ -10,6 +10,7 @@
 
 {% block head_extras %}
   {{ super() }}
+  <link rel="stylesheet" href="{{ static_url('css/geneva-summary-report.css') }}">
   <style>
     .wc-cap-prompt {
       display: grid;
@@ -182,6 +183,14 @@
     .wc-theme-lab__jexcel table.jexcel > tbody > tr > td.highlight-bottom,
     .wc-theme-lab__jexcel table.jexcel > tbody > tr > td.highlight-left {
       border-color: var(--wc-color-accent);
+    }
+
+    .wc-theme-lab__geneva-marker-frame {
+      overflow-x: auto;
+    }
+
+    .wc-theme-lab__geneva-marker-grid {
+      min-width: 590px;
     }
   </style>
 {% endblock %}
@@ -669,6 +678,33 @@
             <p id="theme_lab_job_hint" class="wc-job-hint wc-field__help">
               Job hint sample: <code>rq-landuse-1329</code>
             </p>
+          </div>
+        </article>
+      </div>
+      <div class="pure-u-1">
+        <article class="wc-card wc-theme-lab__card" data-contrast-id="geneva-summary-marker-labels">
+          <header class="wc-card__header">
+            <h3 class="wc-card__title">Geneva chart markers</h3>
+            <p class="wc-card__description">All Storm Measure vs Intensity marker series and duration labels.</p>
+          </header>
+          <div class="wc-card__body">
+            <div class="geneva-summary__chart-frame wc-theme-lab__geneva-marker-frame">
+              <svg class="geneva-summary__chart-svg wc-theme-lab__geneva-marker-grid"
+                   viewBox="0 0 590 286"
+                   role="img"
+                   aria-label="Geneva marker label contrast specimens">
+                {% for marker in geneva_marker_combinations %}
+                  <g class="geneva-summary__marker-group"
+                     transform="translate({{ marker.x }} {{ marker.y }})">
+                    <circle id="theme_lab_geneva_marker_{{ marker.id }}_circle"
+                            r="14"
+                            class="geneva-summary__marker-circle {{ marker.marker_class }}"></circle>
+                    <text id="theme_lab_geneva_marker_{{ marker.id }}_label"
+                          class="geneva-summary__marker-label">{{ marker.label }}</text>
+                  </g>
+                {% endfor %}
+              </svg>
+            </div>
           </div>
         </article>
       </div>

@@ -155,6 +155,9 @@ async function samplePairColors(page, pair) {
       const parseColorString = (value) => {
         if (!value) return null;
         const normalized = value.trim().toLowerCase();
+        if (normalized === 'none' || normalized === 'currentcolor') {
+          return null;
+        }
         if (normalized === 'transparent') {
           return { r: 0, g: 0, b: 0, a: 0 };
         }
@@ -278,7 +281,26 @@ async function samplePairColors(page, pair) {
         return Math.max(0, Math.min(1, Number(value)));
       };
 
-      const resolveBackground = (element, pseudo) => {
+      const resolvePaint = (element, mode, pseudo) => {
+        if (!element || !mode) return null;
+        const style = pseudo ? getComputedStyle(element, pseudo) : getComputedStyle(element);
+        let value = null;
+        if (mode === 'fill') {
+          value = style.fill;
+        } else if (mode === 'stroke') {
+          value = style.stroke;
+        } else if (mode === 'border') {
+          value = style.borderTopColor;
+        }
+        const parsed = parseColorString(value);
+        return parsed && parsed.a > 0 ? parsed : null;
+      };
+
+      const resolveBackground = (element, pseudo, mode) => {
+        const paintColor = resolvePaint(element, mode, pseudo);
+        if (paintColor) {
+          return paintColor;
+        }
         if (element && pseudo) {
           const pseudoStyle = getComputedStyle(element, pseudo);
           const pseudoColor = parseColorString(pseudoStyle.backgroundColor);
@@ -304,6 +326,10 @@ async function samplePairColors(page, pair) {
 
       const resolveForeground = (element, mode, pseudo) => {
         if (!element) return null;
+        const paintColor = resolvePaint(element, mode, pseudo);
+        if (paintColor) {
+          return paintColor;
+        }
         const style = pseudo ? getComputedStyle(element, pseudo) : getComputedStyle(element);
         const borderColor = parseColorString(style.borderTopColor);
         if (mode === 'border') {
@@ -342,10 +368,11 @@ async function samplePairColors(page, pair) {
       const foregroundMode = descriptor.foreground_mode || descriptor.foregroundMode || null;
       const foregroundPseudo = descriptor.foreground_pseudo || descriptor.foregroundPseudo || null;
       const backgroundPseudo = descriptor.background_pseudo || descriptor.backgroundPseudo || null;
+      const backgroundMode = descriptor.background_mode || descriptor.backgroundMode || null;
 
       return {
         foreground: resolveForeground(foregroundEl, foregroundMode, foregroundPseudo),
-        background: resolveBackground(backgroundEl || foregroundEl, backgroundPseudo),
+        background: resolveBackground(backgroundEl || foregroundEl, backgroundPseudo, backgroundMode),
         typography: resolveTypography(foregroundEl, foregroundPseudo),
         missingForeground: !foregroundEl,
         missingBackground: Boolean(descriptor.background && !backgroundEl),

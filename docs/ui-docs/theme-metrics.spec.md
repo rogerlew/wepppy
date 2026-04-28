@@ -19,6 +19,7 @@
   - Representative form fields with `.wc-field__help`, `.wc-text-muted`, `.wc-field__message`, hint text, and error state.
   - Radio/checkbox groups (including the `sub_cmap_radio_*` set) wired through the same macros as production.
   - Leaflet zoom controls rendered via a lightweight stub container (no map tiles) so `.leaflet-control-zoom-in/out` exist.
+  - Geneva Storm Measure vs Intensity SVG marker specimens covering every series marker class and every duration label used by the report chart.
 - Each specimen uses Pure macros so markup stays in sync with `control-components.md`.
 
 ### 2.2 Target Metadata
@@ -58,6 +59,7 @@
 3. For each target:
    - Locate the element(s); skip gracefully if missing (feature flagged off).
    - Use `getComputedStyle` to capture `color`, `backgroundColor`, `borderColor`, and (when transparent) walk ancestors until a solid background is found.
+   - For SVG specimens, capture `fill`/`stroke` paint when a target declares `foreground_mode` or `background_mode`.
    - For radio/checkbox `accent-color`, read via `getComputedStyle(input).accentColor` with a fallback to CSS variables when browsers do not expose it.
    - Compute WCAG contrast ratio `ratio = (Lmax + 0.05) / (Lmin + 0.05)` using sRGB → linear conversions.
    - Store `{ theme, targetId, pairName, ratio, threshold }`.
@@ -81,7 +83,7 @@
   - Raw JSON metrics (`theme-contrast.json`).
   - Markdown table summarizing ratios (<threshold flagged).
   - Optional trend CSV appended to `docs/ui-docs/theme-metrics-history.csv`; also embed the latest snapshot back into the gallery tab so humans can review within `/ui/components/`.
-- **Pass/Fail:** Job always succeeds; it only fails when Playwright errors. Contrast thresholds are informational (use `status-warning` annotations when ratios < 1.0 or < target to draw attention without blocking).
+- **Pass/Fail:** AA-validated themes fail on non-exempt text/non-text contrast regressions. Geneva marker label pairs are stricter: every marker/label pair must pass AA in every catalog theme because the chart uses the same SVG label rendering across theme preferences. Non-enforced theme failures outside those pairs remain informational.
 - **Alerting:** If any ratio < 1.0, open/update an issue tagged `theme-contrast` so agents can adjust `theme-mapping.json` overrides.
 
 ## 5. Agent Workflow
@@ -128,4 +130,3 @@
 - `test-results/<custom-subdir>/` ✅ (used by this suite)
 - Project root or separate output directories ✅
 - `playwright-report/` or its subdirectories ❌ (cleaned by HTML reporter)
-

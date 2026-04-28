@@ -86,37 +86,39 @@
 }
 
 .geneva-summary__marker-circle {
-  stroke: var(--wc-color-surface);
-  stroke-width: 1.5;
+  fill: #111827;
+  stroke: var(--wc-color-text);
+  stroke-width: 2.4;
 }
 
 .geneva-summary__marker-circle--0 {
-  fill: var(--wc-color-accent);
+  stroke: var(--wc-color-accent);
 }
 
 .geneva-summary__marker-circle--1 {
-  fill: var(--wc-color-link);
+  stroke: var(--wc-color-link);
 }
 
 .geneva-summary__marker-circle--2 {
-  fill: var(--wc-color-positive);
+  stroke: var(--wc-color-positive);
 }
 
 .geneva-summary__marker-circle--3 {
-  fill: var(--wc-color-attention);
+  stroke: var(--wc-color-attention);
 }
 
 .geneva-summary__marker-circle--4 {
-  fill: var(--wc-color-critical);
+  stroke: var(--wc-color-critical);
 }
 
 .geneva-summary__marker-circle--fallback {
-  fill: color-mix(in srgb, var(--wc-color-link) 55%, var(--wc-color-text) 45%);
+  stroke: color-mix(in srgb, var(--wc-color-link) 55%, var(--wc-color-text) 45%);
 }
 
 .geneva-summary__marker-label {
-  fill: var(--wc-color-text);
+  fill: #ffffff;
   font-size: 0.73rem;
+  font-weight: var(--wc-font-weight-semibold);
   text-anchor: middle;
   dominant-baseline: central;
   font-variant-numeric: tabular-nums;
@@ -124,14 +126,11 @@
 }
 
 .geneva-summary__marker-group:focus-visible .geneva-summary__marker-circle {
-  stroke: var(--wc-color-accent);
-  stroke-width: 3;
+  stroke-width: 3.4;
 }
 
 .geneva-summary__marker-group.is-selected .geneva-summary__marker-circle {
-  stroke: var(--wc-color-accent);
-  stroke-width: 2.8;
-  fill: color-mix(in srgb, var(--wc-color-accent-soft) 65%, var(--wc-color-surface));
+  stroke-width: 3.4;
 }
 
 .geneva-summary__marker-group.is-selected .geneva-summary__marker-label {

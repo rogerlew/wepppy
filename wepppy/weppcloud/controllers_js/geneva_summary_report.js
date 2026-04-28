@@ -665,7 +665,7 @@ var GenevaSummaryReport = (function () {
                 });
 
                 appendSvg(group, "circle", {
-                    r: "11",
+                    r: "14",
                     class: "geneva-summary__marker-circle " + markerClass
                 });
                 appendSvg(group, "text", {

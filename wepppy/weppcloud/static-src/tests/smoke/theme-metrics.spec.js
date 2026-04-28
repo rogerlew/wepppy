@@ -21,6 +21,30 @@ const JEXCEL_REQUIRED_PAIR_NAMES = [
   'tbody_row_index_text_vs_background',
   'tbody_regular_text_vs_background',
 ];
+const GENEVA_MARKER_TARGET_ID = 'geneva_summary_marker_labels';
+const GENEVA_MARKER_SERIES_IDS = [
+  'series_0',
+  'series_1',
+  'series_2',
+  'series_3',
+  'series_4',
+  'series_fallback',
+];
+const GENEVA_MARKER_LABEL_IDS = [
+  'label_5m',
+  'label_10m',
+  'label_15m',
+  'label_30m',
+  'label_1h',
+  'label_2h',
+  'label_3h',
+  'label_6h',
+  'label_12h',
+  'label_24h',
+];
+const GENEVA_MARKER_PAIR_NAMES = GENEVA_MARKER_SERIES_IDS.flatMap((seriesId) =>
+  GENEVA_MARKER_LABEL_IDS.map((labelId) => `${seriesId}_${labelId}`)
+);
 
 const KNOWN_LIGHT_THEMES = new Set([
   'default',
@@ -202,6 +226,36 @@ test.describe('theme contrast metrics', () => {
           (entry) =>
             `- [${entry.theme}] ${entry.targetLabel || entry.targetId} :: ${entry.pairName || '(default)'} `
             + `(ratio=${entry.ratio}, threshold=${entry.threshold}, font=${entry.typography?.fontSize || 'n/a'}/${entry.typography?.fontWeight || 'n/a'})`
+        )
+        .join('\n')}`
+    ).toEqual([]);
+
+    const genevaMarkerResults = results.filter((entry) => entry.targetId === GENEVA_MARKER_TARGET_ID);
+    const missingGenevaMarkerPairs = [];
+    for (const themeId of themeIds) {
+      for (const pairName of GENEVA_MARKER_PAIR_NAMES) {
+        const entry = genevaMarkerResults.find(
+          (item) => item.theme === themeId && item.pairName === pairName
+        );
+        if (!entry) {
+          missingGenevaMarkerPairs.push(`${themeId}:${pairName}`);
+        }
+      }
+    }
+    expect(
+      missingGenevaMarkerPairs,
+      `Missing Geneva summary marker theme-metrics pairs: ${missingGenevaMarkerPairs.join(', ')}`
+    ).toEqual([]);
+
+    const genevaMarkerFailures = genevaMarkerResults.filter((entry) => entry.passed !== true);
+    expect(
+      genevaMarkerFailures,
+      `Geneva summary marker label AA failures across all themes:\n${genevaMarkerFailures
+        .slice(0, 40)
+        .map(
+          (entry) =>
+            `- [${entry.theme}] ${entry.pairName || '(default)'} `
+            + `(ratio=${entry.ratio}, threshold=${entry.threshold}, fg=${entry.foreground?.hex || 'n/a'}, bg=${entry.background?.hex || 'n/a'})`
         )
         .join('\n')}`
     ).toEqual([]);

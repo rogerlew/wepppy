@@ -155,6 +155,38 @@ def component_gallery() -> str:
         },
     ]
 
+    geneva_marker_series = [
+        {"id": "series_0", "marker_class": "geneva-summary__marker-circle--0"},
+        {"id": "series_1", "marker_class": "geneva-summary__marker-circle--1"},
+        {"id": "series_2", "marker_class": "geneva-summary__marker-circle--2"},
+        {"id": "series_3", "marker_class": "geneva-summary__marker-circle--3"},
+        {"id": "series_4", "marker_class": "geneva-summary__marker-circle--4"},
+        {"id": "series_fallback", "marker_class": "geneva-summary__marker-circle--fallback"},
+    ]
+    geneva_marker_labels = [
+        {"id": "label_5m", "text": "5m"},
+        {"id": "label_10m", "text": "10m"},
+        {"id": "label_15m", "text": "15m"},
+        {"id": "label_30m", "text": "30m"},
+        {"id": "label_1h", "text": "1h"},
+        {"id": "label_2h", "text": "2h"},
+        {"id": "label_3h", "text": "3h"},
+        {"id": "label_6h", "text": "6h"},
+        {"id": "label_12h", "text": "12h"},
+        {"id": "label_24h", "text": "24h"},
+    ]
+    geneva_marker_combinations = [
+        {
+            "id": f"{series['id']}_{label['id']}",
+            "label": label["text"],
+            "marker_class": series["marker_class"],
+            "x": 42 + label_index * 54,
+            "y": 34 + series_index * 44,
+        }
+        for series_index, series in enumerate(geneva_marker_series)
+        for label_index, label in enumerate(geneva_marker_labels)
+    ]
+
     theme_contrast_targets = [
         {
             "id": "pure_button_primary",
@@ -270,6 +302,20 @@ def component_gallery() -> str:
                     "foreground": "#theme_lab_return_period_measure_value",
                     "background": "#theme_lab_return_period_measure_value",
                 },
+            ],
+        },
+        {
+            "id": "geneva_summary_marker_labels",
+            "label": "Geneva summary marker labels",
+            "pairs": [
+                {
+                    "name": marker["id"],
+                    "foreground": f"#theme_lab_geneva_marker_{marker['id']}_label",
+                    "foreground_mode": "fill",
+                    "background": f"#theme_lab_geneva_marker_{marker['id']}_circle",
+                    "background_mode": "fill",
+                }
+                for marker in geneva_marker_combinations
             ],
         },
         {
@@ -519,6 +565,7 @@ def component_gallery() -> str:
         unitizer_map=map_data,
         theme_options=THEME_OPTIONS,
         theme_lab_sub_cmap_options=theme_lab_sub_cmap_options,
+        geneva_marker_combinations=geneva_marker_combinations,
         theme_contrast_targets=theme_contrast_targets,
         cap_base_url=cap_base_url,
         cap_site_key=cap_site_key,
