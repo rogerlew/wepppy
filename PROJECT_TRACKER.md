@@ -79,30 +79,6 @@ Feedback mechanisms:
 
 Work packages that are scoped but not yet started. Dependencies and prerequisites should be noted.
 
-### Geneva Interactive Summary HRU Choropleth Series
-**Proposed**: 2026-04-28
-**Size**: Medium-High (4 focused packages)
-**Priority**: High
-**Description**: Add an event-selected HRU spatial choropleth map to Geneva Interactive Summary using deck.gl vector rendering, query-engine-style data access, and gl-dashboard-like themed map controls.
-
-**Scope**:
-- Execute package series tracked in [docs/work-packages/20260428_geneva_hru_choropleth_series/](docs/work-packages/20260428_geneva_hru_choropleth_series/).
-- Update Geneva specification/contracts first (WP01), including explicit watershed-only `peak_discharge` policy.
-- Implement query-engine HRU event-measure data access contract (WP02).
-- Implement deck.gl map panel and themed controls aligned to gl-dashboard look and API patterns (WP03).
-- Run end-to-end validation and closure docs (WP04).
-
-**Strategic Value**:
-- Delivers crisp vector map analysis for Geneva event exploration.
-- Aligns Geneva map behavior with existing gl-dashboard architecture and visual language.
-- Preserves current watershed-level `peak_discharge` semantics while adding HRU map capability for selected measures.
-
-**Dependencies**: Current-state Geneva summary/report contracts from 20260418 + 20260428 Geneva packages.
-
-**Next Steps**: Start WP01 from the orchestration board, then execute WP02 → WP03 → WP04 in sequence.
-
----
-
 ### Deprecate and Remove TauDEM Backend
 **Proposed**: 2025-10-27  
 **Size**: Medium (3-5 days)  
@@ -295,6 +271,15 @@ Currently active work packages. Limit to 2-4 packages to maintain focus.
 ## ✅ Done
 
 Recently completed work packages. Archived immediately upon completion.
+
+### Geneva Interactive Summary HRU Choropleth Series (2026-04-29)
+**Status**: ✅ **COMPLETE**
+
+**Link**: [docs/work-packages/20260428_geneva_hru_choropleth_series/](docs/work-packages/20260428_geneva_hru_choropleth_series/)
+
+**Lifecycle**: Backlog -> In Progress -> Done (2026-04-29)
+
+**Summary**: Closed WP01-WP04 end to end. WP01 finalized contracts and preserved watershed-only `peak_discharge`; WP02 added HRU event-measure artifact/query support and enforced map-scope validation; WP03 delivered Geneva deck.gl HRU choropleth UI with themed controls and runoff `winter` palette; WP04 executed validation/docs/release closure. Required scoped pytest, targeted Geneva JS tests, docs lint, and `git diff --check` passed. Known unrelated `wctl run-npm lint` baseline in `wepppy/weppcloud/controllers_js/__tests__/landuse_map_inline.test.js` was reproduced and documented as external to this series.
 
 ### Geneva Preflight Checklist Freshness Integration (2026-04-29)
 **Status**: ✅ **COMPLETE**

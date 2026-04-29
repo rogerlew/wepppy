@@ -6,9 +6,9 @@
 
 **Timezone**: UTC  
 **Started**: 2026-04-29 06:34 UTC  
-**Current phase**: WP04 ready for execution (preflight synchronized)
-**Last updated**: 2026-04-29 17:19 UTC
-**Next milestone**: Execute WP04 validation/docs closure and series finalization
+**Current phase**: Closed
+**Last updated**: 2026-04-29 17:32 UTC
+**Next milestone**: None (series complete)
 **Security impact**: `low`  
 **Dedicated security review**: `no`  
 **Security artifact**: `N/A`
@@ -16,7 +16,7 @@
 ## Task Board
 
 ### Ready / Backlog
-- [ ] Execute WP04: validation, docs closure, and rollout evidence.
+- [ ] None.
 
 ### In Progress
 - [ ] None.
@@ -36,6 +36,7 @@
 - [x] Applied post-review WP02 hygiene fixes: blank `storm_id` now returns `400 invalid_input`; package/tracker status docs synchronized (2026-04-29 07:39 UTC).
 - [x] Executed WP03 end-to-end: deck.gl HRU choropleth map, themed controls, query-driven map data flow, and winter-palette runoff coloring (2026-04-29 08:09 UTC).
 - [x] Completed WP04 preflight synchronization: removed stale WP04 blocked state, refreshed readiness timestamps, and recorded known pre-existing lint caveat for closure disposition (2026-04-29 17:19 UTC).
+- [x] Executed WP04 validation/docs/release closure and finalized lifecycle synchronization across package trackers, series board, and `PROJECT_TRACKER.md` (2026-04-29 17:32 UTC).
 
 ## Timeline
 
@@ -46,6 +47,7 @@
 - **2026-04-29 07:11 UTC** - WP02 runtime/query integration completed; WP03 unblocked.
 - **2026-04-29 08:09 UTC** - WP03 UI/runtime integration completed; WP04 unblocked.
 - **2026-04-29 17:19 UTC** - WP04 preflight readiness sync completed across package and series trackers.
+- **2026-04-29 17:32 UTC** - WP04 validation closure completed; series lifecycle closed.
 
 ## Decisions Log
 
@@ -99,10 +101,10 @@
 
 | Risk | Severity | Likelihood | Mitigation | Status |
 |------|----------|------------|------------|--------|
-| HRU identifiers may not align cleanly with vector geometry join keys | High | Medium | Require explicit join-key contract in WP01 and contract tests in WP02 | Open |
-| Large event+HRU payloads may degrade report interaction latency | Medium | Medium | Use query-engine filters/limits and add range/stat prequeries; validate in WP04 | Open |
+| HRU identifiers may not align cleanly with vector geometry join keys | High | Medium | Explicit join-key contract in WP01 with WP02/WP04 contract-test validation | Mitigated |
+| Large event+HRU payloads may degrade report interaction latency | Medium | Medium | Query-engine filtering in place; monitor production interaction telemetry and open follow-up tuning package if needed (owner: Geneva/query-engine maintainers) | Monitoring |
 | Map controls diverge from gl-dashboard look-and-feel | Medium | Medium | Reuse gl-dashboard color/theme conventions and document style tokens in WP03 | Mitigated |
-| Scope creep into non-map Geneva report redesign | Medium | Medium | Keep package boundaries strict and enforce orchestration board gates | Open |
+| Scope creep into non-map Geneva report redesign | Medium | Medium | Package boundaries enforced through WP01-WP04 gate sequence | Mitigated |
 
 ## Verification Checklist
 
@@ -113,6 +115,7 @@
 - [x] Execution progress reflected for WP01.
 - [x] Execution progress reflected for WP02.
 - [x] Execution progress reflected for WP03.
+- [x] Execution progress reflected for WP04 and series closure.
 
 ### Governance
 - [x] `peak_discharge` watershed-level policy captured.
@@ -205,3 +208,25 @@
 - `wctl run-pytest tests/weppcloud/routes/test_geneva_bp.py --maxfail=1` passed.
 - `wctl run-npm test -- geneva_summary_report` passed.
 - `python3 wepppy/weppcloud/controllers_js/build_controllers_js.py` passed.
+
+### 2026-04-29 17:32 UTC: WP04 execution and series closure
+**Agent/Contributor**: Codex
+
+**Work completed**:
+- Ran WP04 required validation commands and captured results in WP04 docs.
+- Confirmed contract alignment for watershed-only `peak_discharge`, HRU map scope (`runoff_depth|runoff_volume`), and canonical availability/error envelopes.
+- Closed WP04 package docs, series tracker/board/package docs, and moved the series record in `PROJECT_TRACKER.md` from Backlog to Done.
+- Archived WP04 execution prompt under `prompts/completed/` with closure outcomes.
+
+**Blockers encountered**:
+- `wctl run-npm lint` still reports the known pre-existing external baseline in `wepppy/weppcloud/controllers_js/__tests__/landuse_map_inline.test.js`.
+
+**Next steps**:
+1. Optional: frontend maintainers can clear the unrelated lint baseline in a dedicated package.
+
+**Test results**:
+- `wctl run-pytest tests/nodb/mods/geneva tests/query_engine tests/weppcloud/routes/test_geneva_bp.py --maxfail=1` passed (`202 passed`).
+- `wctl run-npm lint` failed on known external baseline (`landuse_map_inline.test.js`).
+- `wctl run-npm test -- geneva_summary_report` passed (`1 suite, 6 tests`).
+- `wctl doc-lint ...` passed (`17 files validated, 0 errors, 0 warnings`).
+- `git diff --check` passed.

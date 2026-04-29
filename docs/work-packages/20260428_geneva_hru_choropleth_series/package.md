@@ -1,6 +1,6 @@
 # Geneva HRU Choropleth Series
 
-**Status**: Open (2026-04-28)
+**Status**: Closed (2026-04-29 17:32 UTC)
 **Timezone**: UTC
 
 ## Overview
@@ -35,11 +35,11 @@ Current Geneva runtime writes storm-level summaries and hydrograph artifacts, bu
 - **Informed**: gl-dashboard/map maintainers and operators supporting Geneva runs.
 
 ## Success Criteria
-- [ ] Work-package orchestration board tracks all scoped packages with status and dependency flow.
-- [ ] Spec/contract package lands first and defines HRU measure scope + watershed-only `peak_discharge` policy.
-- [ ] Query-engine package exposes/validates HRU event-measure retrieval contract used by UI.
-- [ ] UI package ships deck.gl choropleth map + controls with gl-dashboard-like theme support.
-- [ ] Validation package closes tests/docs/review gates and publishes rollout notes.
+- [x] Work-package orchestration board tracks all scoped packages with status and dependency flow.
+- [x] Spec/contract package lands first and defines HRU measure scope + watershed-only `peak_discharge` policy.
+- [x] Query-engine package exposes/validates HRU event-measure retrieval contract used by UI.
+- [x] UI package ships deck.gl choropleth map + controls with gl-dashboard-like theme support.
+- [x] Validation package closes tests/docs/review gates and publishes rollout notes.
 
 ## Dependencies
 
@@ -80,7 +80,7 @@ Current Geneva runtime writes storm-level summaries and hydrograph artifacts, bu
 ## Deliverables
 - Series package docs: `package.md`, `tracker.md`, `orchestration_board.md`.
 - Four child work-package directories with package/tracker scaffolding and execution prompts.
-- `PROJECT_TRACKER.md` backlog entry for the series.
+- `PROJECT_TRACKER.md` Done entry for the closed series.
 
 ## Follow-up Work
 - Decide whether additional HRU measures beyond runoff-focused metrics should be included in map mode.

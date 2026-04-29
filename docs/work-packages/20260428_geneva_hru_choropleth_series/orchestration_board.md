@@ -24,7 +24,7 @@ Reference implementation evidence:
 | [WP01 Spec + Contracts](../20260428_geneva_hru_choropleth_wp01_spec_and_contract_updates/package.md) | Done (2026-04-29 06:43 UTC) | Define HRU measure contract, watershed-only `peak_discharge`, artifact/query/report schema updates | None | WP02, WP03, WP04 |
 | [WP02 Query Engine Data API](../20260428_geneva_hru_choropleth_wp02_query_engine_hru_data_api/package.md) | Done (2026-04-29 07:11 UTC) | Persist/read HRU event-measure tables and expose query-engine retrieval contract | WP01 | WP03, WP04 |
 | [WP03 Deck.gl Map UI + Controls](../20260428_geneva_hru_choropleth_wp03_deckgl_map_ui_controls/package.md) | Done (2026-04-29 08:09 UTC) | Geneva summary deck.gl vector choropleth + themed controls + event selection integration | WP01, WP02 | WP04 |
-| [WP04 Validation + Release Docs](../20260428_geneva_hru_choropleth_wp04_validation_docs_release/package.md) | Ready | End-to-end validation, docs finalization, rollout notes, residual risk disposition | WP01, WP02, WP03 | Series closure |
+| [WP04 Validation + Release Docs](../20260428_geneva_hru_choropleth_wp04_validation_docs_release/package.md) | Done (2026-04-29 17:32 UTC) | End-to-end validation, docs finalization, rollout notes, residual risk disposition | WP01, WP02, WP03 | Series closure |
 
 ## Exit Gates by Package
 
@@ -64,15 +64,16 @@ WP03 gate note (2026-04-29 08:09 UTC):
 - Specification, package trackers, and rollout notes are synchronized.
 - Residual risks and follow-ups are recorded with owners.
 
-WP04 preflight note (2026-04-29 17:19 UTC):
-- Dependency gates are satisfied (WP01-WP03 complete) and WP04 tracker has been synchronized to execution-ready.
-- Known validation caveat to disposition during WP04: pre-existing unrelated `wctl run-npm lint` failures in `wepppy/weppcloud/controllers_js/__tests__/landuse_map_inline.test.js`.
+WP04 closure note (2026-04-29 17:32 UTC):
+- Required validation suite executed: scoped pytest + targeted Geneva JS tests + docs lint + `git diff --check`.
+- `peak_discharge` remained watershed-only and HRU map scope stayed `runoff_depth|runoff_volume`; availability/error contracts matched WP01-WP03.
+- Known unrelated `wctl run-npm lint` baseline persists in `wepppy/weppcloud/controllers_js/__tests__/landuse_map_inline.test.js` and is documented as external to this series.
 
 ## Sequencing
 1. Execute WP01. (Completed 2026-04-29 06:43 UTC)
 2. Execute WP02. (Completed 2026-04-29 07:11 UTC)
 3. Execute WP03. (Completed 2026-04-29 08:09 UTC)
-4. Execute WP04 and close series.
+4. Execute WP04 and close series. (Completed 2026-04-29 17:32 UTC)
 
 ## Reporting Protocol
 - Update each child `tracker.md` at every milestone.

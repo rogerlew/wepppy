@@ -22,3 +22,20 @@ Validation commands (minimum):
 Lifecycle updates required:
 - Close WP04 and series `package.md`/`tracker.md` docs.
 - Move finished prompts from `prompts/active/` to `prompts/completed/` with outcomes.
+
+## Outcome (2026-04-29 17:32 UTC)
+- Status: Completed.
+- Validation results:
+  - `wctl run-pytest tests/nodb/mods/geneva tests/query_engine tests/weppcloud/routes/test_geneva_bp.py --maxfail=1` -> pass (`202 passed`).
+  - `wctl run-npm lint` -> external baseline failure in `wepppy/weppcloud/controllers_js/__tests__/landuse_map_inline.test.js` (`jest/no-conditional-expect`, 4 errors).
+  - `wctl run-npm test -- geneva_summary_report` -> pass (`1 suite, 6 tests`).
+  - `wctl doc-lint ...` -> pass (`17 files validated, 0 errors, 0 warnings`).
+  - `git diff --check` -> pass.
+- Contract confirmation:
+  - `peak_discharge` remains watershed-only and rejected for HRU map row queries (`unsupported_measure_scope`).
+  - HRU map measure scope remains `runoff_depth|runoff_volume`.
+  - Availability/error behavior for missing legacy artifacts remains canonical (`legacy_hru_event_measures_missing` and unavailable envelopes).
+- Lifecycle closure completed:
+  - WP04 `package.md` and `tracker.md` marked complete.
+  - Series `package.md`, `tracker.md`, and `orchestration_board.md` closed.
+  - `PROJECT_TRACKER.md` updated: series moved from Backlog to Done.
