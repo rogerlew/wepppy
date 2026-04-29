@@ -520,6 +520,24 @@ def query_geneva_hru_map_rows(runid: str, config: str) -> Response:
     return _set_no_store_headers(jsonify(response_payload))
 
 
+@geneva_bp.route("/runs/<string:runid>/<config>/query/geneva/hru_map_features", methods=["POST"])
+@authorize_and_handle_with_exception_factory
+def query_geneva_hru_map_features(runid: str, config: str) -> Response:
+    ctx = load_run_context(runid, config)
+    wd = str(ctx.active_root)
+
+    payload = _json_object_payload()
+    _require_schema_version(payload)
+
+    geneva = _ensure_geneva_controller(wd, f"{config}.cfg")
+    try:
+        response_payload = geneva.query_hru_map_features_payload()
+    except GenevaNoDbError as exc:
+        return _geneva_error_response(exc)
+
+    return _set_no_store_headers(jsonify(response_payload))
+
+
 @geneva_bp.route("/runs/<string:runid>/<config>/report/geneva/summary")
 @authorize_and_handle_with_exception_factory
 def report_geneva_summary(runid: str, config: str) -> Response:

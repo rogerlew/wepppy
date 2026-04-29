@@ -12,6 +12,67 @@
   margin: 0;
 }
 
+.geneva-summary__map-panel {
+  gap: var(--wc-space-md);
+}
+
+.geneva-summary__map-controls-row {
+  margin-bottom: 0;
+}
+
+.geneva-summary__map-measure {
+  display: inline-grid;
+  gap: var(--wc-space-xs);
+  min-width: 14rem;
+}
+
+.geneva-summary__map-measure-label {
+  color: var(--wc-color-text-muted);
+  font-size: 0.8rem;
+  font-weight: var(--wc-font-weight-semibold);
+  text-transform: uppercase;
+  letter-spacing: 0.02em;
+}
+
+.geneva-summary__map {
+  min-height: 360px;
+  aspect-ratio: 16 / 10;
+}
+
+.geneva-summary__map-status {
+  margin: 0;
+}
+
+.geneva-summary__map-legend {
+  padding: var(--wc-space-sm);
+  border: 1px solid var(--wc-color-border);
+  border-radius: var(--wc-radius-sm);
+  background: color-mix(in srgb, var(--wc-color-surface) 92%, var(--wc-color-surface-alt));
+}
+
+.geneva-summary__map-legend-title {
+  margin: 0;
+  color: var(--wc-color-text);
+  font-size: 0.85rem;
+  font-weight: var(--wc-font-weight-semibold);
+}
+
+.geneva-summary__map-legend-gradient {
+  width: 100%;
+  height: 12px;
+  border-radius: 999px;
+  border: 1px solid color-mix(in srgb, var(--wc-color-border) 80%, transparent);
+  background: linear-gradient(90deg, rgb(0 0 255) 0%, rgb(0 255 128) 100%);
+}
+
+.geneva-summary__map-legend-labels {
+  display: flex;
+  justify-content: space-between;
+  font-variant-numeric: tabular-nums;
+  color: var(--wc-color-text-muted);
+  font-size: 0.82rem;
+}
+
 .geneva-summary__chart-frame {
   border: 1px solid var(--wc-color-border);
   border-radius: var(--wc-radius-sm);
@@ -168,6 +229,15 @@
 @media (max-width: 760px) {
   .geneva-summary__filters {
     grid-template-columns: minmax(0, 1fr);
+  }
+
+  .geneva-summary__map {
+    min-height: 300px;
+  }
+
+  .geneva-summary__map-measure {
+    min-width: 0;
+    width: 100%;
   }
 
   .geneva-summary__chart {

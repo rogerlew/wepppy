@@ -20,6 +20,7 @@ var GenevaSummaryReport = (function () {
         "geneva-summary__series-line--3",
         "geneva-summary__series-line--4"
     ];
+    var MAP_MEASURE_IDS = ["runoff_depth", "runoff_volume"];
 
     function byId(id) {
         return document.getElementById(id);
@@ -76,6 +77,10 @@ var GenevaSummaryReport = (function () {
             runoff_volume: "Runoff Volume"
         };
         return labels[measure] || asString(measure);
+    }
+
+    function mapValueDecimals(measureId) {
+        return asString(measureId) === "runoff_volume" ? 1 : 2;
     }
 
     function datasourceLabel(datasourceId) {
@@ -314,13 +319,43 @@ var GenevaSummaryReport = (function () {
         return asNumber(metric.value);
     }
 
-    function isAvailableEventRow(row) {
-        return asString(row && row.status).toLowerCase() !== "unavailable";
+    function normalizeUnitForDisplay(value) {
+        return normalizeUnitLabel(asString(value));
+    }
+
+    function winterColorFromNormalized(value) {
+        var normalized = Math.max(0, Math.min(1, Number(value)));
+        if (!Number.isFinite(normalized)) {
+            return [0, 0, 0, 0];
+        }
+        return [
+            0,
+            Math.round(normalized * 255),
+            Math.round(255 - normalized * 127),
+            230
+        ];
+    }
+
+    function normalizeToRange(value, min, max) {
+        if (!Number.isFinite(value)) {
+            return null;
+        }
+        if (!Number.isFinite(min) || !Number.isFinite(max)) {
+            return null;
+        }
+        if (max <= min) {
+            return 0.5;
+        }
+        return (value - min) / (max - min);
+    }
+
+    function isCompletedEventRow(row) {
+        return asString(row && row.status).toLowerCase() === "completed";
     }
 
     function displayEventRows(payload) {
         var rows = Array.isArray(payload && payload.event_table) ? payload.event_table : [];
-        return rows.filter(isAvailableEventRow);
+        return rows.filter(isCompletedEventRow);
     }
 
     function appendSvg(parent, tagName, attrs) {
@@ -354,9 +389,28 @@ var GenevaSummaryReport = (function () {
         this.warningBody = document.querySelector("[data-geneva-summary-warnings-body]");
         this.errorBox = document.querySelector("[data-geneva-summary-errors]");
         this.errorBody = document.querySelector("[data-geneva-summary-errors-body]");
+        this.mapEventSelect = byId("geneva-summary-map-event");
+        this.mapMeasureSelect = byId("geneva-summary-map-measure");
+        this.mapCanvas = byId("geneva-summary-map-canvas");
+        this.mapStatus = document.querySelector("[data-geneva-summary-map-status]");
+        this.mapLegend = document.querySelector("[data-geneva-summary-map-legend]");
+        this.mapLegendTitle = document.querySelector("[data-geneva-summary-map-legend-title]");
+        this.mapLegendMin = document.querySelector("[data-geneva-summary-map-legend-min]");
+        this.mapLegendMax = document.querySelector("[data-geneva-summary-map-legend-max]");
+        this.mapEmptyBox = document.querySelector("[data-geneva-summary-map-empty]");
+        this.mapEmptyBody = document.querySelector("[data-geneva-summary-map-empty-body]");
+        this.mapErrorBox = document.querySelector("[data-geneva-summary-map-error]");
+        this.mapErrorBody = document.querySelector("[data-geneva-summary-map-error-body]");
+        this.mapRefreshButton = document.querySelector("[data-geneva-summary-map-refresh]");
         this.payload = null;
         this.selectedStormId = null;
         this.requestOrdinal = 0;
+        this.mapRequestOrdinal = 0;
+        this.mapGeometryPromise = null;
+        this.mapFeaturesPayload = null;
+        this.mapRowsPayload = null;
+        this.deckInstance = null;
+        this.lastMapQueryKey = null;
         this.boundUnitizerPreferenceHandler = this.handleUnitizerPreferenceChange.bind(this);
     }
 
@@ -424,6 +478,21 @@ var GenevaSummaryReport = (function () {
         if (this.measureSelect) {
             this.measureSelect.addEventListener("change", function () {
                 controller.refreshFromQuery();
+            });
+        }
+        if (this.mapEventSelect) {
+            this.mapEventSelect.addEventListener("change", function () {
+                controller.syncSelection(controller.mapEventSelect.value, { focusSelection: false });
+            });
+        }
+        if (this.mapMeasureSelect) {
+            this.mapMeasureSelect.addEventListener("change", function () {
+                controller.refreshMapRows({ force: true });
+            });
+        }
+        if (this.mapRefreshButton) {
+            this.mapRefreshButton.addEventListener("click", function () {
+                controller.refreshMapRows({ force: true });
             });
         }
     };
@@ -507,6 +576,7 @@ var GenevaSummaryReport = (function () {
         this.renderTable(payload);
         this.renderChart(payload);
         this.renderMessages(payload);
+        this.renderMapControls(payload);
         this.syncSelection(payload.selected_storm_id, options || {});
     };
 
@@ -1208,6 +1278,8 @@ var GenevaSummaryReport = (function () {
         }
 
         this.updateSelectionStyles(options || {});
+        this.updateMapEventSelection();
+        this.refreshMapRows();
     };
 
     GenevaSummaryReportController.prototype.updateSelectionStyles = function updateSelectionStyles(options) {
@@ -1236,6 +1308,531 @@ var GenevaSummaryReport = (function () {
                 selectedRow.scrollIntoView({ block: "center", inline: "nearest" });
             }
         }
+    };
+
+    GenevaSummaryReportController.prototype.renderMapControls = function renderMapControls(payload) {
+        if (!this.mapEventSelect && !this.mapMeasureSelect) {
+            return;
+        }
+
+        if (this.mapMeasureSelect) {
+            var selectedMeasure = asString(this.mapMeasureSelect.value).trim();
+            if (MAP_MEASURE_IDS.indexOf(selectedMeasure) === -1) {
+                selectedMeasure = asString(payload && payload.filters ? payload.filters.measure : "").trim();
+                if (MAP_MEASURE_IDS.indexOf(selectedMeasure) === -1) {
+                    selectedMeasure = MAP_MEASURE_IDS[0];
+                }
+            }
+            this.replaceSelectOptions(this.mapMeasureSelect, MAP_MEASURE_IDS, selectedMeasure, measureLabel);
+        }
+
+        if (this.mapEventSelect) {
+            var rows = displayEventRows(payload);
+            var stormIds = [];
+            var labelByStorm = {};
+            rows.forEach(function (row) {
+                var stormId = asString(row.storm_id).trim();
+                if (!stormId) {
+                    return;
+                }
+                stormIds.push(stormId);
+                labelByStorm[stormId] = stormId
+                    + " | " + datasourceLabel(row.datasource_id)
+                    + " | " + durationLabel(row.duration_minutes)
+                    + " | ARI " + asString(row.ari_years);
+            });
+
+            this.replaceSelectOptions(
+                this.mapEventSelect,
+                stormIds,
+                this.selectedStormId,
+                function (stormId) { return labelByStorm[stormId] || stormId; }
+            );
+
+            if (!this.mapEventSelect.options.length) {
+                var option = document.createElement("option");
+                option.value = "";
+                option.textContent = "No completed events available";
+                option.disabled = true;
+                option.selected = true;
+                this.mapEventSelect.appendChild(option);
+            }
+        }
+
+        this.updateMapEventSelection();
+    };
+
+    GenevaSummaryReportController.prototype.updateMapEventSelection = function updateMapEventSelection() {
+        if (!this.mapEventSelect) {
+            return;
+        }
+        var selected = asString(this.selectedStormId).trim();
+        if (!selected) {
+            return;
+        }
+        var hasOption = Array.from(this.mapEventSelect.options || []).some(function (option) {
+            return asString(option.value) === selected;
+        });
+        if (hasOption) {
+            this.mapEventSelect.value = selected;
+        }
+    };
+
+    GenevaSummaryReportController.prototype.currentMapMeasureId = function currentMapMeasureId() {
+        var selected = this.mapMeasureSelect ? asString(this.mapMeasureSelect.value).trim() : "";
+        return MAP_MEASURE_IDS.indexOf(selected) >= 0 ? selected : MAP_MEASURE_IDS[0];
+    };
+
+    GenevaSummaryReportController.prototype.currentMapStormId = function currentMapStormId() {
+        if (this.selectedStormId) {
+            return asString(this.selectedStormId).trim();
+        }
+        if (this.mapEventSelect) {
+            return asString(this.mapEventSelect.value).trim();
+        }
+        return "";
+    };
+
+    GenevaSummaryReportController.prototype.mapFeaturesUrl = function mapFeaturesUrl() {
+        return this.root ? asString(this.root.getAttribute("data-map-features-url")).trim() : "";
+    };
+
+    GenevaSummaryReportController.prototype.mapRowsUrl = function mapRowsUrl() {
+        return this.root ? asString(this.root.getAttribute("data-map-rows-url")).trim() : "";
+    };
+
+    GenevaSummaryReportController.prototype.setMapStatus = function setMapStatus(message) {
+        if (!this.mapStatus) {
+            return;
+        }
+        this.mapStatus.textContent = asString(message || "");
+    };
+
+    GenevaSummaryReportController.prototype.setMapEmptyState = function setMapEmptyState(message) {
+        if (this.mapEmptyBox && this.mapEmptyBody) {
+            this.mapEmptyBody.textContent = asString(message || "");
+            this.mapEmptyBox.hidden = !message;
+        }
+    };
+
+    GenevaSummaryReportController.prototype.setMapErrorState = function setMapErrorState(message) {
+        if (this.mapErrorBox && this.mapErrorBody) {
+            this.mapErrorBody.textContent = asString(message || "");
+            this.mapErrorBox.hidden = !message;
+        }
+    };
+
+    GenevaSummaryReportController.prototype.setMapLegend = function setMapLegend(details) {
+        if (!this.mapLegend || !this.mapLegendTitle || !this.mapLegendMin || !this.mapLegendMax) {
+            return;
+        }
+        if (!details) {
+            this.mapLegend.hidden = true;
+            return;
+        }
+        this.mapLegend.hidden = false;
+        this.mapLegendTitle.textContent = details.title;
+        this.mapLegendMin.textContent = details.minLabel;
+        this.mapLegendMax.textContent = details.maxLabel;
+    };
+
+    GenevaSummaryReportController.prototype.fetchJson = function fetchJson(url, options) {
+        var opts = options || {};
+        var method = opts.method || "GET";
+        var body = opts.body;
+        var headers = {
+            Accept: "application/json"
+        };
+        if (body !== undefined && body !== null) {
+            headers["Content-Type"] = "application/json";
+        }
+
+        return fetch(url, {
+            method: method,
+            headers: headers,
+            body: body !== undefined && body !== null ? JSON.stringify(body) : undefined
+        }).then(function (response) {
+            return response.json()
+                .catch(function () { return {}; })
+                .then(function (payload) {
+                    if (!response.ok) {
+                        var serverMessage = payload
+                            && payload.error
+                            && asString(payload.error.message).trim();
+                        var message = serverMessage || ("Request failed (" + String(response.status) + ").");
+                        var error = new Error(message);
+                        error.payload = payload;
+                        throw error;
+                    }
+                    return payload;
+                });
+        });
+    };
+
+    GenevaSummaryReportController.prototype.ensureMapGeometryLoaded = function ensureMapGeometryLoaded() {
+        if (!this.mapCanvas) {
+            return Promise.resolve(null);
+        }
+        if (this.mapFeaturesPayload) {
+            return Promise.resolve(this.mapFeaturesPayload);
+        }
+        if (this.mapGeometryPromise) {
+            return this.mapGeometryPromise;
+        }
+
+        var url = this.mapFeaturesUrl();
+        if (!url) {
+            return Promise.resolve(null);
+        }
+
+        this.mapGeometryPromise = this.fetchJson(url, {
+            method: "POST",
+            body: { schema_version: 1 }
+        }).then(function (payload) {
+            this.mapFeaturesPayload = payload;
+            return payload;
+        }.bind(this)).catch(function (error) {
+            this.mapGeometryPromise = null;
+            throw error;
+        }.bind(this));
+
+        return this.mapGeometryPromise;
+    };
+
+    GenevaSummaryReportController.prototype.refreshMapRows = function refreshMapRows(options) {
+        if (!this.mapCanvas || !this.payload) {
+            return;
+        }
+
+        var stormId = this.currentMapStormId();
+        var measureId = this.currentMapMeasureId();
+        if (!stormId) {
+            this.clearMapLayer();
+            this.setMapLegend(null);
+            this.setMapEmptyState("Select a completed storm event to render HRU values.");
+            this.setMapErrorState(null);
+            this.setMapStatus("No event selected.");
+            return;
+        }
+
+        var queryKey = stormId + "|" + measureId;
+        var force = Boolean(options && options.force);
+        if (!force && this.lastMapQueryKey === queryKey) {
+            return;
+        }
+        this.lastMapQueryKey = queryKey;
+
+        var rowsUrl = this.mapRowsUrl();
+        if (!rowsUrl) {
+            this.setMapErrorState("HRU map rows endpoint is not configured for this report.");
+            this.setMapStatus("Map rows endpoint unavailable.");
+            return;
+        }
+
+        var requestId = this.mapRequestOrdinal + 1;
+        this.mapRequestOrdinal = requestId;
+        this.setMapEmptyState(null);
+        this.setMapErrorState(null);
+        this.setMapStatus("Loading HRU map values...");
+
+        Promise.all([
+            this.ensureMapGeometryLoaded(),
+            this.fetchJson(rowsUrl, {
+                method: "POST",
+                body: {
+                    schema_version: 1,
+                    storm_id: stormId,
+                    measure_id: measureId,
+                    include_schema: false
+                }
+            })
+        ]).then(function (results) {
+            if (requestId !== this.mapRequestOrdinal) {
+                return;
+            }
+            var geometryPayload = results[0];
+            var rowsPayload = results[1];
+            this.mapRowsPayload = rowsPayload;
+            this.renderMapLayer(geometryPayload, rowsPayload, stormId, measureId);
+        }.bind(this)).catch(function (error) {
+            if (requestId !== this.mapRequestOrdinal) {
+                return;
+            }
+            console.error("[GenevaSummaryReport] Map rows refresh failed.", error);
+            this.clearMapLayer();
+            this.setMapLegend(null);
+            this.setMapEmptyState(null);
+            this.setMapErrorState(asString(error.message || "Unable to load HRU map data."));
+            this.setMapStatus("Failed to load HRU map values.");
+        }.bind(this));
+    };
+
+    GenevaSummaryReportController.prototype.renderMapLayer = function renderMapLayer(
+        geometryPayload,
+        rowsPayload,
+        stormId,
+        measureId
+    ) {
+        var geometryAvailability = geometryPayload && geometryPayload.availability
+            ? geometryPayload.availability
+            : {};
+        if (asString(geometryAvailability.status) !== "available") {
+            this.clearMapLayer();
+            this.setMapLegend(null);
+            this.setMapErrorState(null);
+            this.setMapEmptyState("HRU map geometry is unavailable for this run.");
+            this.setMapStatus("HRU map geometry unavailable.");
+            return;
+        }
+
+        var rowsAvailability = rowsPayload && rowsPayload.availability ? rowsPayload.availability : {};
+        if (asString(rowsAvailability.status) !== "available") {
+            var reasonCode = asString(rowsAvailability.reason_code);
+            this.clearMapLayer();
+            this.setMapLegend(null);
+            this.setMapErrorState(null);
+            this.setMapEmptyState(
+                reasonCode === "legacy_hru_event_measures_missing"
+                    ? "This run does not include Geneva HRU event-measure rows (legacy artifact missing)."
+                    : "HRU map rows are unavailable for the selected event."
+            );
+            this.setMapStatus("HRU map rows unavailable for " + stormId + ".");
+            return;
+        }
+
+        var featureCollection = geometryPayload.feature_collection || {};
+        var baseFeatures = Array.isArray(featureCollection.features) ? featureCollection.features : [];
+        if (!baseFeatures.length) {
+            this.clearMapLayer();
+            this.setMapLegend(null);
+            this.setMapErrorState(null);
+            this.setMapEmptyState("No HRU map polygons were returned for this run.");
+            this.setMapStatus("No HRU map polygons available.");
+            return;
+        }
+
+        var records = Array.isArray(rowsPayload.records) ? rowsPayload.records : [];
+        if (!records.length) {
+            this.clearMapLayer();
+            this.setMapLegend(null);
+            this.setMapErrorState(null);
+            this.setMapEmptyState(
+                "No HRU values were returned for storm "
+                + stormId
+                + " with "
+                + measureLabel(measureId)
+                + "."
+            );
+            this.setMapStatus("No HRU values for selected event.");
+            return;
+        }
+
+        var valueByHruValue = new Map();
+        var unitLabel = "";
+        records.forEach(function (record) {
+            var hruValue = asNumber(record.hru_value);
+            var value = asNumber(record.value);
+            if (hruValue === null || value === null) {
+                return;
+            }
+            unitLabel = unitLabel || asString(record.unit);
+            valueByHruValue.set(String(Math.trunc(hruValue)), value);
+        });
+
+        var joinedFeatures = baseFeatures.map(function (feature) {
+            var props = feature && feature.properties ? Object.assign({}, feature.properties) : {};
+            var hruValue = asNumber(props.hru_value);
+            var lookupKey = hruValue === null ? "" : String(Math.trunc(hruValue));
+            var value = valueByHruValue.has(lookupKey) ? valueByHruValue.get(lookupKey) : null;
+            props.geneva_value = Number.isFinite(value) ? value : null;
+            props.geneva_measure_id = measureId;
+            props.geneva_unit = unitLabel;
+            return {
+                type: "Feature",
+                properties: props,
+                geometry: feature.geometry
+            };
+        });
+
+        var populatedValues = joinedFeatures
+            .map(function (feature) { return asNumber(feature.properties.geneva_value); })
+            .filter(function (value) { return value !== null; });
+        if (!populatedValues.length) {
+            this.clearMapLayer();
+            this.setMapLegend(null);
+            this.setMapErrorState(null);
+            this.setMapEmptyState("No HRU polygons matched the returned value rows for this event.");
+            this.setMapStatus("No HRU polygon/value matches for selected event.");
+            return;
+        }
+
+        var range = this.computeMapValueRange(populatedValues);
+        var mapCollection = {
+            type: "FeatureCollection",
+            features: joinedFeatures
+        };
+        var deck = this.ensureDeckInstance(geometryPayload.bounds_wgs84 || featureCollection.bbox || null);
+        if (!deck || !window.deck || typeof window.deck.GeoJsonLayer !== "function") {
+            this.setMapErrorState("Deck.gl is unavailable; map layer could not be rendered.");
+            this.setMapStatus("Deck.gl unavailable.");
+            return;
+        }
+
+        var layer = new window.deck.GeoJsonLayer({
+            id: "geneva-summary-hru-choropleth",
+            data: mapCollection,
+            pickable: true,
+            stroked: true,
+            filled: true,
+            lineWidthMinPixels: 0.7,
+            getLineColor: [25, 39, 52, 180],
+            getFillColor: function (feature) {
+                var value = asNumber(feature && feature.properties ? feature.properties.geneva_value : null);
+                if (value === null) {
+                    return [0, 0, 0, 0];
+                }
+                var normalized = normalizeToRange(value, range.min, range.max);
+                return winterColorFromNormalized(normalized);
+            },
+            autoHighlight: true,
+            highlightColor: [255, 255, 255, 96]
+        });
+
+        deck.setProps({ layers: [layer] });
+        this.fitDeckToBounds(geometryPayload.bounds_wgs84 || featureCollection.bbox || null);
+        this.setMapErrorState(null);
+        this.setMapEmptyState(null);
+        this.setMapStatus(
+            "Rendered "
+            + String(populatedValues.length)
+            + " HRU value(s) for "
+            + stormId
+            + " ("
+            + measureLabel(measureId)
+            + ")."
+        );
+
+        this.setMapLegend({
+            title: measureLabel(measureId) + (unitLabel ? " (" + normalizeUnitForDisplay(unitLabel) + ")" : ""),
+            minLabel: formatNumber(range.min, mapValueDecimals(measureId)),
+            maxLabel: formatNumber(range.max, mapValueDecimals(measureId))
+        });
+    };
+
+    GenevaSummaryReportController.prototype.ensureDeckInstance = function ensureDeckInstance(bounds) {
+        if (this.deckInstance) {
+            if (bounds) {
+                this.fitDeckToBounds(bounds);
+            }
+            return this.deckInstance;
+        }
+        if (!this.mapCanvas || !window.deck || typeof window.deck.Deck !== "function") {
+            return null;
+        }
+
+        var props = {
+            parent: this.mapCanvas,
+            controller: true,
+            layers: [],
+            initialViewState: {
+                longitude: 0,
+                latitude: 0,
+                zoom: 2,
+                pitch: 0,
+                bearing: 0
+            },
+            getTooltip: this.buildMapTooltip.bind(this)
+        };
+        if (typeof window.deck.MapView === "function") {
+            props.views = new window.deck.MapView({ repeat: false });
+        }
+        this.deckInstance = new window.deck.Deck(props);
+        this._mapBoundsFitted = false;
+        if (bounds) {
+            this.fitDeckToBounds(bounds);
+        }
+        return this.deckInstance;
+    };
+
+    GenevaSummaryReportController.prototype.clearMapLayer = function clearMapLayer() {
+        if (this.deckInstance && typeof this.deckInstance.setProps === "function") {
+            this.deckInstance.setProps({ layers: [] });
+        }
+    };
+
+    GenevaSummaryReportController.prototype.fitDeckToBounds = function fitDeckToBounds(bounds) {
+        if (!this.deckInstance || !window.deck || typeof window.deck.WebMercatorViewport !== "function") {
+            return;
+        }
+        if (!Array.isArray(bounds) || bounds.length !== 4) {
+            return;
+        }
+        var minX = Number(bounds[0]);
+        var minY = Number(bounds[1]);
+        var maxX = Number(bounds[2]);
+        var maxY = Number(bounds[3]);
+        if (!Number.isFinite(minX) || !Number.isFinite(minY) || !Number.isFinite(maxX) || !Number.isFinite(maxY)) {
+            return;
+        }
+        if (maxX <= minX || maxY <= minY) {
+            return;
+        }
+        if (this._mapBoundsFitted) {
+            return;
+        }
+
+        try {
+            var width = Math.max(1, this.mapCanvas ? this.mapCanvas.clientWidth : 640);
+            var height = Math.max(1, this.mapCanvas ? this.mapCanvas.clientHeight : 420);
+            var viewport = new window.deck.WebMercatorViewport({
+                width: width,
+                height: height
+            });
+            var viewState = viewport.fitBounds(
+                [ [minX, minY], [maxX, maxY] ],
+                { padding: 28 }
+            );
+            viewState.pitch = 0;
+            viewState.bearing = 0;
+            this.deckInstance.setProps({
+                initialViewState: viewState
+            });
+            this._mapBoundsFitted = true;
+        } catch (error) {
+            console.warn("[GenevaSummaryReport] Failed to fit map bounds.", error);
+        }
+    };
+
+    GenevaSummaryReportController.prototype.buildMapTooltip = function buildMapTooltip(context) {
+        var feature = context && context.object;
+        if (!feature || !feature.properties) {
+            return null;
+        }
+        var props = feature.properties;
+        var value = asNumber(props.geneva_value);
+        if (value === null) {
+            return {
+                text: "HRU " + asString(props.hru_id || props.hru_value || "") + "\nNo value for selected event."
+            };
+        }
+        var measureId = asString(props.geneva_measure_id).trim();
+        var unitLabel = normalizeUnitForDisplay(props.geneva_unit);
+        return {
+            text:
+                "HRU " + asString(props.hru_id || props.hru_value || "")
+                + "\n" + measureLabel(measureId)
+                + ": " + formatNumber(value, mapValueDecimals(measureId))
+                + (unitLabel ? " " + unitLabel : "")
+        };
+    };
+
+    GenevaSummaryReportController.prototype.computeMapValueRange = function computeMapValueRange(values) {
+        var min = Math.min.apply(null, values);
+        var max = Math.max.apply(null, values);
+        if (!Number.isFinite(min) || !Number.isFinite(max)) {
+            return { min: 0, max: 1 };
+        }
+        return { min: min, max: max };
     };
 
     function getInstance() {

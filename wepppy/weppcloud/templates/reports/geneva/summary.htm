@@ -5,6 +5,7 @@
 
 {% block head_extras %}
 {{ super() }}
+<script src="https://unpkg.com/deck.gl@^9.0.0/dist.min.js" defer></script>
 <link rel="stylesheet" href="{{ static_url('css/geneva-summary-report.css') }}">
 {% endblock %}
 
@@ -35,7 +36,9 @@
 
 <section class="wc-stack geneva-summary"
          data-geneva-summary-root
-         data-query-url="{{ run_base ~ '/query/geneva/summary' }}">
+         data-query-url="{{ run_base ~ '/query/geneva/summary' }}"
+         data-map-features-url="{{ run_base ~ '/query/geneva/hru_map_features' }}"
+         data-map-rows-url="{{ run_base ~ '/query/geneva/hru_map_rows' }}">
   <script id="geneva-summary-payload" type="application/json">{{ summary_payload | tojson }}</script>
 
   <header class="wc-stack-sm">
@@ -110,6 +113,67 @@
       <div class="geneva-summary__chart" data-geneva-summary-chart></div>
     </div>
     <p class="wc-text-muted" data-geneva-summary-chart-empty hidden>No completed storms match the selected filters.</p>
+  </section>
+
+  <section class="wc-panel wc-stack geneva-summary__map-panel">
+    <header class="wc-stack-sm">
+      <h2 class="wc-heading__subtitle">HRU Choropleth Map</h2>
+      <p class="wc-text-muted">Deck.gl HRU map for the selected event and runoff measure (`winter` palette).</p>
+    </header>
+
+    <div class="wc-map-controls">
+      <div class="wc-map-controls__row wc-map-controls__row--inputs geneva-summary__map-controls-row">
+        <label class="wc-map-controls__label" for="geneva-summary-map-event">Event</label>
+        <div class="wc-map-controls__input">
+          <select id="geneva-summary-map-event"
+                  class="wc-map-controls__input-field wc-field__control"
+                  data-geneva-summary-map-field="event"></select>
+        </div>
+        <div class="wc-map-controls__actions">
+          <label class="geneva-summary__map-measure" for="geneva-summary-map-measure">
+            <span class="geneva-summary__map-measure-label">Measure</span>
+            <select id="geneva-summary-map-measure"
+                    class="wc-field__control"
+                    data-geneva-summary-map-field="measure">
+              <option value="runoff_depth">Runoff Depth</option>
+              <option value="runoff_volume">Runoff Volume</option>
+            </select>
+          </label>
+        </div>
+        <div class="wc-map-controls__go">
+          <button type="button"
+                  class="pure-button pure-button-primary"
+                  data-geneva-summary-map-refresh>Refresh</button>
+        </div>
+      </div>
+    </div>
+
+    <div class="wc-map-layout geneva-summary__map-layout">
+      <div class="wc-map-layout__canvas">
+        <div class="wc-map geneva-summary__map">
+          <div id="geneva-summary-map-canvas" class="wc-map__canvas" aria-label="Geneva HRU choropleth map viewport"></div>
+        </div>
+        <p class="wc-text-muted geneva-summary__map-status" data-geneva-summary-map-status>
+          Select an event to render HRU map values.
+        </p>
+      </div>
+      <div class="wc-map-layout__inspector">
+        <div class="wc-map-legend geneva-summary__map-legend" data-geneva-summary-map-legend hidden>
+          <p class="geneva-summary__map-legend-title" data-geneva-summary-map-legend-title>Runoff Depth</p>
+          <div class="geneva-summary__map-legend-gradient" aria-hidden="true"></div>
+          <div class="geneva-summary__map-legend-labels">
+            <span data-geneva-summary-map-legend-min>0</span>
+            <span data-geneva-summary-map-legend-max>0</span>
+          </div>
+        </div>
+        <div class="wc-alert wc-alert--warning" role="alert" data-geneva-summary-map-empty hidden>
+          <p class="wc-alert__body" data-geneva-summary-map-empty-body></p>
+        </div>
+        <div class="wc-alert wc-alert--error" role="alert" data-geneva-summary-map-error hidden>
+          <p class="wc-alert__body" data-geneva-summary-map-error-body></p>
+        </div>
+      </div>
+    </div>
   </section>
 
   <section class="wc-panel wc-stack">

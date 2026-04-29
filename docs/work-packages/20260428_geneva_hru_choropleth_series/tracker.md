@@ -6,9 +6,9 @@
 
 **Timezone**: UTC  
 **Started**: 2026-04-29 06:34 UTC  
-**Current phase**: WP02 implementation complete; WP03 unblocked
-**Last updated**: 2026-04-29 07:39 UTC
-**Next milestone**: Execute WP03 deck.gl map UI + controls
+**Current phase**: WP04 ready for execution (preflight synchronized)
+**Last updated**: 2026-04-29 17:19 UTC
+**Next milestone**: Execute WP04 validation/docs closure and series finalization
 **Security impact**: `low`  
 **Dedicated security review**: `no`  
 **Security artifact**: `N/A`
@@ -16,7 +16,6 @@
 ## Task Board
 
 ### Ready / Backlog
-- [ ] Execute WP03: deck.gl map UI and themed controls.
 - [ ] Execute WP04: validation, docs closure, and rollout evidence.
 
 ### In Progress
@@ -35,6 +34,8 @@
 - [x] Executed WP02 end-to-end: HRU event-measure artifact materialization, query-engine-style HRU row retrieval, measure-scope enforcement, legacy unavailable behavior, and join-key integrity checks (2026-04-29 07:11 UTC).
 - [x] WP02 lifecycle/docs validation completed (`doc-lint`, `git diff --check`) and orchestration gates synchronized (2026-04-29 07:13 UTC).
 - [x] Applied post-review WP02 hygiene fixes: blank `storm_id` now returns `400 invalid_input`; package/tracker status docs synchronized (2026-04-29 07:39 UTC).
+- [x] Executed WP03 end-to-end: deck.gl HRU choropleth map, themed controls, query-driven map data flow, and winter-palette runoff coloring (2026-04-29 08:09 UTC).
+- [x] Completed WP04 preflight synchronization: removed stale WP04 blocked state, refreshed readiness timestamps, and recorded known pre-existing lint caveat for closure disposition (2026-04-29 17:19 UTC).
 
 ## Timeline
 
@@ -43,6 +44,8 @@
 - **2026-04-29 06:34 UTC** - Series orchestration docs and child packages created.
 - **2026-04-29 06:43 UTC** - WP01 specification and contract updates completed; WP02/WP03 unblocked.
 - **2026-04-29 07:11 UTC** - WP02 runtime/query integration completed; WP03 unblocked.
+- **2026-04-29 08:09 UTC** - WP03 UI/runtime integration completed; WP04 unblocked.
+- **2026-04-29 17:19 UTC** - WP04 preflight readiness sync completed across package and series trackers.
 
 ## Decisions Log
 
@@ -98,7 +101,7 @@
 |------|----------|------------|------------|--------|
 | HRU identifiers may not align cleanly with vector geometry join keys | High | Medium | Require explicit join-key contract in WP01 and contract tests in WP02 | Open |
 | Large event+HRU payloads may degrade report interaction latency | Medium | Medium | Use query-engine filters/limits and add range/stat prequeries; validate in WP04 | Open |
-| Map controls diverge from gl-dashboard look-and-feel | Medium | Medium | Reuse gl-dashboard color/theme conventions and document style tokens in WP03 | Open |
+| Map controls diverge from gl-dashboard look-and-feel | Medium | Medium | Reuse gl-dashboard color/theme conventions and document style tokens in WP03 | Mitigated |
 | Scope creep into non-map Geneva report redesign | Medium | Medium | Keep package boundaries strict and enforce orchestration board gates | Open |
 
 ## Verification Checklist
@@ -109,6 +112,7 @@
 - [x] Orchestration board created and linked.
 - [x] Execution progress reflected for WP01.
 - [x] Execution progress reflected for WP02.
+- [x] Execution progress reflected for WP03.
 
 ### Governance
 - [x] `peak_discharge` watershed-level policy captured.
@@ -177,3 +181,27 @@
 - `wctl run-pytest tests/nodb/mods/geneva --maxfail=1` passed.
 - `wctl run-pytest tests/query_engine --maxfail=1` passed.
 - `wctl run-pytest tests/weppcloud/routes/test_geneva_bp.py --maxfail=1` passed.
+
+### 2026-04-29 08:09 UTC: WP03 execution closure
+**Agent/Contributor**: Codex
+
+**Work completed**:
+- Added `POST /query/geneva/hru_map_features` contract surface with availability envelope and join-key metadata.
+- Added run-scoped cached HRU polygon artifact generation (`geneva/hru_map_features.wgs.geojson`) from `hru_map.tif` + legend crosswalk.
+- Implemented Geneva summary report deck.gl HRU choropleth map panel with themed controls and map legend/status behavior.
+- Wired map row retrieval to existing WP02 `POST /query/geneva/hru_map_rows` endpoint using schema-versioned POST payloads and explicit unavailable/empty handling.
+- Enforced runoff `winter` palette behavior for HRU choropleth measures.
+- Added JS regression coverage for map fetch/render flow.
+
+**Blockers encountered**:
+- `wctl run-npm lint` failed on pre-existing unrelated lint errors in `controllers_js/__tests__/landuse_map_inline.test.js`.
+
+**Next steps**:
+1. Execute WP04 closure validation and release-doc synchronization.
+2. Capture WP03/WP04 residual risks (payload size and map performance) with explicit disposition.
+
+**Test results**:
+- `wctl run-pytest tests/nodb/mods/geneva/test_geneva_hru_map_geometry_service.py --maxfail=1` passed.
+- `wctl run-pytest tests/weppcloud/routes/test_geneva_bp.py --maxfail=1` passed.
+- `wctl run-npm test -- geneva_summary_report` passed.
+- `python3 wepppy/weppcloud/controllers_js/build_controllers_js.py` passed.

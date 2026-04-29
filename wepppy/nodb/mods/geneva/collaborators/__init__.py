@@ -7,6 +7,7 @@ from .config_service import GenevaConfigService
 from .frequency_panel_service import GenevaFrequencyPanelService
 from .hru_preparation_service import GenevaHruPreparationService
 from .hru_event_measure_service import GenevaHruEventMeasureService
+from .hru_map_geometry_service import GenevaHruMapGeometryService
 from .hsg_assignment_service import GenevaHsgAssignmentService
 from .kernel_gateway import GenevaKernelGateway
 from .report_payload_service import GenevaReportPayloadService
@@ -20,6 +21,7 @@ __all__ = [
     "GenevaFrequencyPanelService",
     "GenevaHruPreparationService",
     "GenevaHruEventMeasureService",
+    "GenevaHruMapGeometryService",
     "GenevaHsgAssignmentService",
     "GenevaKernelGateway",
     "GenevaReportPayloadService",

@@ -1,6 +1,6 @@
 # Geneva HRU Choropleth WP04 - Validation, Docs Closure, and Release Notes
 
-**Status**: Open (2026-04-28)
+**Status**: Ready (2026-04-29 17:19 UTC)
 **Timezone**: UTC
 
 ## Overview
@@ -35,6 +35,10 @@ WP04 closes the series by validating backend/query/UI behavior end-to-end, final
 - [ ] Spec/docs and runtime behavior are consistent.
 - [ ] Series board and trackers reflect final status and evidence.
 - [ ] Follow-up items are clearly scoped and linked.
+
+## Preflight Notes
+- WP01-WP03 dependencies are complete and WP04 is unblocked.
+- Known baseline caveat before execution: `wctl run-npm lint` currently fails on unrelated pre-existing lint issues in `wepppy/weppcloud/controllers_js/__tests__/landuse_map_inline.test.js`; WP04 must either document this as an external blocker or close it in-scope.
 
 ## Dependencies
 

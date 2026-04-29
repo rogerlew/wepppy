@@ -537,6 +537,67 @@ def test_query_geneva_hru_map_rows_returns_legacy_unavailable_payload(
     assert payload["row_count"] == 0
 
 
+def test_query_geneva_hru_map_features_returns_unavailable_payload(
+    geneva_client: Any,
+) -> None:
+    client, _, _ = geneva_client
+
+    response = client.post(
+        f"/runs/{RUN_ID}/{CONFIG}/query/geneva/hru_map_features",
+        json={"schema_version": 1},
+    )
+
+    assert response.status_code == 200
+    assert response.headers["Cache-Control"] == "no-store, no-cache, must-revalidate, max-age=0"
+    payload = response.get_json()
+    assert payload["schema_version"] == 1
+    assert payload["availability"]["status"] == "unavailable"
+    assert payload["availability"]["reason_code"] == "hru_map_missing"
+    assert payload["feature_collection"] == {"type": "FeatureCollection", "features": []}
+    assert payload["feature_count"] == 0
+
+
+def test_query_geneva_hru_map_features_forwards_controller_payload(
+    geneva_client: Any,
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    client, _, _ = geneva_client
+    calls: list[dict[str, Any]] = []
+
+    class _MapFeaturesStub:
+        def query_hru_map_features_payload(self) -> dict[str, Any]:
+            calls.append({"called": True})
+            return {
+                "schema_version": 1,
+                "availability": {
+                    "status": "available",
+                    "reason_code": None,
+                    "artifact_path": "geneva/hru_map_features.wgs.geojson",
+                },
+                "join_keys": {"primary": "hru_value", "secondary": "hru_id"},
+                "feature_collection": {
+                    "type": "FeatureCollection",
+                    "features": [],
+                },
+                "feature_count": 0,
+                "bounds_wgs84": None,
+                "warnings": [],
+                "errors": [],
+            }
+
+    monkeypatch.setattr(geneva_module, "_ensure_geneva_controller", lambda _wd, _cfg: _MapFeaturesStub())
+
+    response = client.post(
+        f"/runs/{RUN_ID}/{CONFIG}/query/geneva/hru_map_features",
+        json={"schema_version": 1},
+    )
+
+    assert response.status_code == 200
+    assert calls == [{"called": True}]
+    payload = response.get_json()
+    assert payload["availability"]["status"] == "available"
+
+
 def test_query_geneva_hru_map_rows_rejects_peak_discharge_scope(
     geneva_client: Any,
 ) -> None:

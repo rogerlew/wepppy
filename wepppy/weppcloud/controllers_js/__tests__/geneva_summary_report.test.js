@@ -5,6 +5,10 @@
 describe("Geneva summary report interactions", () => {
     afterEach(() => {
         delete global.UnitizerClient;
+        delete global.fetch;
+        delete global.deck;
+        delete window.fetch;
+        delete window.deck;
     });
 
     beforeEach(() => {
@@ -101,6 +105,22 @@ describe("Geneva summary report interactions", () => {
                       "error_count": 0
                     },
                     {
+                      "storm_id": "cligen_90m_10y",
+                      "status": "failed",
+                      "datasource_id": "cligen_freq",
+                      "duration_minutes": 90,
+                      "ari_years": 10,
+                      "depth_mm": null,
+                      "intensity_mm_per_hr": null,
+                      "distribution_type": "",
+                      "peak_discharge": null,
+                      "time_to_peak_minutes": null,
+                      "runoff_volume": null,
+                      "runoff_depth": null,
+                      "warning_count": 1,
+                      "error_count": 1
+                    },
+                    {
                       "storm_id": "cligen_120m_10y",
                       "status": "unavailable",
                       "datasource_id": "cligen_freq",
@@ -171,6 +191,7 @@ describe("Geneva summary report interactions", () => {
 
         const rows = document.querySelectorAll('[data-geneva-summary-event-body] tr[data-storm-id]');
         expect(rows).toHaveLength(2);
+        expect(document.querySelector('[data-geneva-summary-event-body] tr[data-storm-id="cligen_90m_10y"]')).toBeNull();
         expect(document.querySelector('[data-geneva-summary-event-body] tr[data-storm-id="cligen_120m_10y"]')).toBeNull();
 
         const selectedRow = document.querySelector('[data-geneva-summary-event-body] tr[data-storm-id="noaa14_60m_10y"]');
@@ -344,5 +365,136 @@ describe("Geneva summary report interactions", () => {
         expect(axisLabels).toContain("Peak Discharge (ft^3/s)");
         expect(convert).toHaveBeenCalledWith(40, "mm/hour", "in/hour");
         expect(convert).toHaveBeenCalledWith(1.2, "m^3/s", "ft^3/s");
+    });
+
+    test("loads HRU map geometry + rows and renders deck layer with winter legend", async () => {
+        const root = document.querySelector("[data-geneva-summary-root]");
+        root.setAttribute("data-map-features-url", "/runs/demo/cfg/query/geneva/hru_map_features");
+        root.setAttribute("data-map-rows-url", "/runs/demo/cfg/query/geneva/hru_map_rows");
+
+        document.body.insertAdjacentHTML(
+            "beforeend",
+            `
+            <select id="geneva-summary-map-event" data-geneva-summary-map-field="event"></select>
+            <select id="geneva-summary-map-measure" data-geneva-summary-map-field="measure">
+              <option value="runoff_depth" selected>Runoff Depth</option>
+              <option value="runoff_volume">Runoff Volume</option>
+            </select>
+            <button type="button" data-geneva-summary-map-refresh>Refresh</button>
+            <div id="geneva-summary-map-canvas"></div>
+            <p data-geneva-summary-map-status></p>
+            <div data-geneva-summary-map-legend hidden>
+              <p data-geneva-summary-map-legend-title></p>
+              <span data-geneva-summary-map-legend-min></span>
+              <span data-geneva-summary-map-legend-max></span>
+            </div>
+            <div data-geneva-summary-map-empty hidden><p data-geneva-summary-map-empty-body></p></div>
+            <div data-geneva-summary-map-error hidden><p data-geneva-summary-map-error-body></p></div>
+            `
+        );
+
+        const mapSetProps = jest.fn();
+        class Deck {
+            constructor() {
+                this.setProps = mapSetProps;
+            }
+        }
+        function GeoJsonLayer(props) {
+            this.props = props;
+        }
+        class WebMercatorViewport {
+            fitBounds() {
+                return {
+                    longitude: -116.45,
+                    latitude: 45.25,
+                    zoom: 11,
+                    pitch: 0,
+                    bearing: 0
+                };
+            }
+        }
+        function MapView(props) {
+            this.props = props;
+        }
+        global.deck = {
+            Deck,
+            GeoJsonLayer,
+            WebMercatorViewport,
+            MapView
+        };
+        window.deck = global.deck;
+
+        global.fetch = jest.fn((url) => {
+            if (url.indexOf("hru_map_features") >= 0) {
+                return Promise.resolve({
+                    ok: true,
+                    json: () => Promise.resolve({
+                        schema_version: 1,
+                        availability: { status: "available", reason_code: null },
+                        feature_collection: {
+                            type: "FeatureCollection",
+                            bbox: [-116.5, 45.2, -116.4, 45.3],
+                            features: [
+                                {
+                                    type: "Feature",
+                                    properties: { hru_value: 7, hru_id: "hru_7" },
+                                    geometry: {
+                                        type: "Polygon",
+                                        coordinates: [[[-116.5, 45.2], [-116.4, 45.2], [-116.4, 45.3], [-116.5, 45.3], [-116.5, 45.2]]]
+                                    }
+                                }
+                            ]
+                        }
+                    })
+                });
+            }
+            if (url.indexOf("hru_map_rows") >= 0) {
+                return Promise.resolve({
+                    ok: true,
+                    json: () => Promise.resolve({
+                        schema_version: 1,
+                        availability: { status: "available", reason_code: null },
+                        records: [
+                            {
+                                storm_id: "cligen_30m_10y",
+                                hru_id: "hru_7",
+                                hru_value: 7,
+                                measure_id: "runoff_depth",
+                                value: 4.0,
+                                unit: "mm"
+                            }
+                        ]
+                    })
+                });
+            }
+            return Promise.reject(new Error("unexpected fetch URL: " + url));
+        });
+
+        await import("../geneva_summary_report.js");
+        window.GenevaSummaryReport.getInstance().init();
+        await new Promise((resolve) => setTimeout(resolve, 0));
+        await new Promise((resolve) => setTimeout(resolve, 0));
+
+        expect(global.fetch).toHaveBeenCalled();
+        expect(mapSetProps.mock.calls.length).toBeGreaterThan(0);
+
+        const layerCall = mapSetProps.mock.calls.find((call) => call[0] && Array.isArray(call[0].layers));
+        expect(layerCall).toBeTruthy();
+        expect(layerCall[0].layers).toHaveLength(1);
+        expect(layerCall[0].layers[0].props.id).toBe("geneva-summary-hru-choropleth");
+        const eventOptions = Array.from(
+            document.querySelectorAll("#geneva-summary-map-event option")
+        ).map((option) => option.value);
+        expect(eventOptions).toEqual(["cligen_30m_10y", "noaa14_60m_10y"]);
+
+        const boundsFitCall = mapSetProps.mock.calls.find((call) => call[0] && call[0].initialViewState);
+        expect(boundsFitCall).toBeTruthy();
+        expect(boundsFitCall[0]).not.toHaveProperty("viewState");
+
+        const legend = document.querySelector("[data-geneva-summary-map-legend]");
+        expect(legend.hidden).toBe(false);
+        expect(document.querySelector("[data-geneva-summary-map-legend-title]").textContent).toContain("Runoff Depth");
+        expect(document.querySelector("[data-geneva-summary-map-status]").textContent).toContain("Rendered");
+        expect(document.querySelector("[data-geneva-summary-map-error]").hidden).toBe(true);
     });
 });

@@ -12,6 +12,7 @@ from wepppy.nodb.mods.geneva.collaborators import (
     GenevaConfigService,
     GenevaFrequencyPanelService,
     GenevaHruEventMeasureService,
+    GenevaHruMapGeometryService,
     GenevaHruPreparationService,
     GenevaHsgAssignmentService,
     GenevaKernelGateway,
@@ -39,6 +40,7 @@ _GENEVA_HRU_PREPARATION_SERVICE = GenevaHruPreparationService()
 _GENEVA_FREQUENCY_PANEL_SERVICE = GenevaFrequencyPanelService()
 _GENEVA_BATCH_RUN_SERVICE = GenevaBatchRunService()
 _GENEVA_HRU_EVENT_MEASURE_SERVICE = GenevaHruEventMeasureService()
+_GENEVA_HRU_MAP_GEOMETRY_SERVICE = GenevaHruMapGeometryService()
 _GENEVA_RESULTS_SERVICE = GenevaResultsService()
 _GENEVA_REPORT_PAYLOAD_SERVICE = GenevaReportPayloadService()
 
@@ -116,6 +118,10 @@ class Geneva(NoDbBase):
     @property
     def hru_event_measure_service(self) -> GenevaHruEventMeasureService:
         return _GENEVA_HRU_EVENT_MEASURE_SERVICE
+
+    @property
+    def hru_map_geometry_service(self) -> GenevaHruMapGeometryService:
+        return _GENEVA_HRU_MAP_GEOMETRY_SERVICE
 
     @property
     def results_service(self) -> GenevaResultsService:
@@ -359,6 +365,9 @@ class Geneva(NoDbBase):
             include_schema=include_schema,
             limit=limit,
         )
+
+    def query_hru_map_features_payload(self) -> dict[str, Any]:
+        return self.hru_map_geometry_service.query_feature_collection(self)
 
     def assert_task_guardrails(self) -> None:
         self._require_enabled()

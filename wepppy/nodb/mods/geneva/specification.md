@@ -777,6 +777,33 @@ Error behavior:
 - legacy-missing-artifact is represented as `availability.status=unavailable`
   with HTTP 200 and empty row set.
 
+#### 12.4.6 Query response envelope for HRU map geometry (WP03)
+
+HRU map geometry queries return an additive contract envelope:
+
+- route: `POST /runs/<runid>/<config>/query/geneva/hru_map_features`
+- `schema_version` (current `1`)
+- `availability`:
+  - `status = available | unavailable`
+  - `reason_code`:
+    - `hru_map_missing` when `geneva/hru_map.tif` is absent
+    - `hru_map_legend_missing` when `geneva/hru_map_legend.json` is absent
+  - `artifact_path`
+- `join_keys`:
+  - `primary = hru_value`
+  - `secondary = hru_id`
+- `feature_collection` (GeoJSON `FeatureCollection`, WGS84)
+- `feature_count`
+- `bounds_wgs84` (`[min_x, min_y, max_x, max_y]` or `null`)
+- `warnings`, `errors`
+
+Geometry feature properties include:
+
+- `hru_value` (primary join key for map rows),
+- `hru_id` (secondary join key),
+- and legend-derived metadata fields (`landuse_class`, `hsg_group`,
+  `burn_severity_class`, `hydrophobic_class`, `is_water`) when present.
+
 ## 13. API Surface (Current)
 
 ### 13.1 Flask WEPPcloud routes (`geneva_bp.py`)
@@ -796,6 +823,7 @@ Status/results/query/report:
 - `GET /runs/<runid>/<config>/api/geneva/frequency_panel`
 - `GET /runs/<runid>/<config>/query/geneva/summary`
 - `POST /runs/<runid>/<config>/query/geneva/hru_map_rows`
+- `POST /runs/<runid>/<config>/query/geneva/hru_map_features`
 - `GET /runs/<runid>/<config>/report/geneva/summary`
 
 CN-table routes:
@@ -811,6 +839,8 @@ Response-shape note:
 - most Geneva Flask endpoints return raw JSON payloads (`jsonify(payload)`),
 - `POST /query/geneva/hru_map_rows` returns top-level
   `availability + filters + records` payload (not wrapped),
+- `POST /query/geneva/hru_map_features` returns top-level
+  `availability + feature_collection` payload (not wrapped),
 - CN-table meta/snapshot/reset use `success_factory`, so payload is wrapped under `{"Content": ...}`.
 
 ### 13.2 rq-engine Geneva routes (`microservices/rq_engine/geneva_routes.py`)

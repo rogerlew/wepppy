@@ -1,6 +1,6 @@
 # Geneva HRU Choropleth WP03 - Deck.gl Map UI and Themed Controls
 
-**Status**: Open (2026-04-28)
+**Status**: Done (2026-04-29 08:09 UTC)
 **Timezone**: UTC
 
 ## Overview
@@ -32,11 +32,11 @@ WP03 adds the Geneva Interactive Summary map panel that renders event-selected H
 - **Informed**: WP04 validation and release docs owners.
 
 ## Success Criteria
-- [ ] Deck.gl vector choropleth renders selected event HRU measure data.
-- [ ] Controls support theming and visually align with gl-dashboard conventions.
-- [ ] Water/runoff measures use `winter` colormap policy.
-- [ ] API calls follow query-engine pattern compatible with existing map data utilities.
-- [ ] JS tests cover selection flow and map rendering state transitions.
+- [x] Deck.gl vector choropleth renders selected event HRU measure data.
+- [x] Controls support theming and visually align with gl-dashboard conventions.
+- [x] Water/runoff measures use `winter` colormap policy.
+- [x] API calls follow query-engine pattern compatible with existing map data utilities.
+- [x] JS tests cover selection flow and map rendering state transitions.
 
 ## Dependencies
 

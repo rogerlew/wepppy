@@ -2,6 +2,10 @@
 
 Execute after WP01-WP03 are complete.
 
+Preflight context:
+- WP01-WP03 are complete and WP04 is unblocked.
+- There is a known pre-existing unrelated frontend lint baseline in `wepppy/weppcloud/controllers_js/__tests__/landuse_map_inline.test.js`; if it still reproduces during WP04, document it explicitly as external to this series unless remediated in-scope.
+
 Required outcomes:
 1. Run required test/lint/documentation validation commands and capture results.
 2. Verify specification and implementation behavior match (including watershed-only `peak_discharge`).
