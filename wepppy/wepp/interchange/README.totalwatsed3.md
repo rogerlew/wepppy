@@ -4,7 +4,8 @@
 ## Overview
 `totalwatsed3.parquet` is produced by `wepppy.wepp.interchange.totalwatsed3.run_totalwatsed3`. The helper reads the per-hillslope interchange artifacts emitted by WEPP (`H.pass.parquet`, `H.wat.parquet`) and, when present, the WEPP–Ash Transport summaries under `<run>/ash`. The rows are grouped by simulation date (`year`, `julian`, `sim_day_index`, etc.) so that each record represents the watershed-wide totals for a given day:
 
-- Volumes (m³) from `H.wat` are summed, then converted back to depths (mm) via watershed area.
+- Most hydrologic volumes (m³) are summed from `H.wat`, then converted back to depths (mm) via watershed area.
+- `Runoff` depth is computed from `H.pass` runoff volume (`runvol`) over aggregated watershed area.
 - Sediment masses are derived from the pass file (`H.pass`) and converted to both kg (`seddep_*`) and a dimensionless volumetric concentration (`sed_vol_conc`).
 - Optional ash metrics are joined by date and scaled using either supplied area hints or the Watershed controller (per-ash-type mass totals plus volumetric concentration/black fraction when bulk densities are known).
 
@@ -28,8 +29,9 @@ Key output columns (see `SCHEMA` in `totalwatsed3.py` for the complete list):
 - `seddep_1`–`seddep_5`: total mass per sediment class (kg) computed as `Σ sedcon_i * runvol`.
 - `sed_del`: total daily sediment delivery (kg), computed as `Σ seddep_i`.
 - `sed_vol_conc`: watershed-wide volumetric sediment concentration (m³ of solids per m³ of runoff).
-- `Area`, `P`, `RM`, `Q`, `Dp`, `latqcc`, … : volumetric sums from `H.wat`, later converted to depths (`Precipitation`, `Runoff`, etc.).
+- `Area`, `P`, `RM`, `Q`, `Dp`, `latqcc`, … : volumetric sums from `H.wat`, later converted to depths (`Precipitation`, `Lateral Flow`, etc.).
 - MOFE lateral flow rule: when multiple OFEs are present for a hillslope/day, `latqcc` uses only the outlet-facing (last) OFE. This avoids counting internal lateral-routing transfers multiple times.
+- MOFE runoff rule: `Runoff` uses PASS `runvol` volume divided by aggregated watershed area (not summed `QOFE`), avoiding OFE-count scaling bias.
 - Ash transport columns when the ash directory is available:
   - Totals and per-area masses: `wind_transport`, `water_transport`, `ash_transport`, `transportable_ash` (+ `_per_ha`).
   - Per-ash-type masses: `{wind,water,ash}_transport_{black,white}` (+ `_per_ha` via per-type area).

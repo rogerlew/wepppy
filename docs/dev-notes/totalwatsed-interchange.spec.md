@@ -55,7 +55,7 @@ if `wepp_ids` is None aggregate all the wepp_ids, otherwise filter to only inclu
 | Rain+Melt | double | mm | Rainfall+Irrigation+Snowmelt | RM / Area * 1000 |
 | Percolation | double | mm | Deep percolation | Dp / Area * 1000 |
 | Lateral Flow | double | mm  | Lateral subsurface flow | latqcc / Area * 1000 |
-| Runoff | double | mm  | Daily runoff scaled to single OFE | QOFE / Area * 1000 |
+| Runoff | double | mm  | Daily runoff depth from PASS runoff volume | runvol / Area * 1000 |
 | Transpiration | double | mm | Plant transpiration (Ep depth normalized) | Ep / Area * 1000 |
 | Evaporation | double | mm | Soil (Es) + Residue (Er) evaporation (depth normalized) | (Es+Er) / Area * 1000 |
 | ET | double | mm | Total ET (depth normalized Ep+Es+Er)  | (Ep+Es+Er) / Area * 1000 |

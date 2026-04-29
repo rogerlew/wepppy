@@ -218,6 +218,7 @@ def test_run_totalwatsed3_merges_ash_metrics(tmp_path):
     assert data["sed_del"][0] == pytest.approx(sum(data[f"seddep_{idx}"][0] for idx in range(1, 6)))
     assert "sed_vol_conc" in data
     assert data["sed_vol_conc"][0] == pytest.approx(1.159943960651508e-4)
+    assert data["Runoff"][0] == pytest.approx(0.1)  # runvol depth over Area (1 m^3 over 10,000 m^2)
 
     # Missing ash directory should still produce rows with zeroed ash metrics.
     run_totalwatsed3(
@@ -250,3 +251,4 @@ def test_run_totalwatsed3_uses_last_ofe_for_lateral_flow(tmp_path):
     data = _read_parquet_dict(output_path)
     assert data["latqcc"][0] == pytest.approx(2.0)  # m^3 from last OFE only (20 mm over 100 m^2)
     assert data["Lateral Flow"][0] == pytest.approx(10.0)  # depth over total aggregated Area (200 m^2)
+    assert data["Runoff"][0] == pytest.approx(5.0)  # runvol depth over aggregated Area (1 m^3 over 200 m^2)

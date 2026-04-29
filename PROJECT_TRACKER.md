@@ -272,6 +272,15 @@ Currently active work packages. Limit to 2-4 packages to maintain focus.
 
 Recently completed work packages. Archived immediately upon completion.
 
+### Uncapped-Spectacular totalwatsed3 Runoff Reconciliation (2026-04-29)
+**Status**: ✅ **COMPLETE**
+
+**Link**: [docs/work-packages/20260429_uncapped_spectacular_totalwatsed3_runoff_reconciliation/](docs/work-packages/20260429_uncapped_spectacular_totalwatsed3_runoff_reconciliation/)
+
+**Lifecycle**: Backlog -> In Progress -> Done (2026-04-29)
+
+**Summary**: Closed a production runoff-depth reconciliation package for `uncapped-spectacular`. Corrected `totalwatsed3` runoff derivation to use `runvol/Area*1000` (instead of `QOFE` depth basis), added regression coverage, and introduced a repeatable CLI audit (`tools/totalwatsed3_daily_closure_audit.py`) with unit tests. Performed a no-restart `wepp1` runtime hotfix and regenerated `/geodata/wc1/runs/un/uncapped-spectacular/wepp/output/interchange/totalwatsed3.parquet`; container uptime remained unchanged. Post-refresh verification confirmed `max(abs(Runoff - runvol/Area*1000)) = 0.0`, and closure-audit outputs were captured under both wepp1 run artifacts and package artifacts.
+
 ### Geneva Interactive Summary HRU Choropleth Series (2026-04-29)
 **Status**: ✅ **COMPLETE**
 

@@ -103,7 +103,7 @@ SCHEMA = schema_with_version(
             pa_field("Rain+Melt", pa.float64(), units="mm", description="Rainfall+Irrigation+Snowmelt depth"),
             pa_field("Percolation", pa.float64(), units="mm", description="Deep percolation depth"),
             pa_field("Lateral Flow", pa.float64(), units="mm", description="Lateral subsurface flow depth"),
-            pa_field("Runoff", pa.float64(), units="mm", description="Daily runoff scaled to single OFE depth"),
+            pa_field("Runoff", pa.float64(), units="mm", description="Daily runoff depth from PASS runoff volume"),
             pa_field("Transpiration", pa.float64(), units="mm", description="Plant transpiration depth"),
             pa_field("Evaporation", pa.float64(), units="mm", description="Soil + residue evaporation depth"),
             pa_field("ET", pa.float64(), units="mm", description="Total evapotranspiration depth"),
@@ -778,7 +778,7 @@ def run_totalwatsed3(
     merged["Rain+Melt"] = _safe_depth(merged["RM"].to_numpy(dtype=np.float64, copy=False), area)
     merged["Percolation"] = _safe_depth(merged["Dp"].to_numpy(dtype=np.float64, copy=False), area)
     merged["Lateral Flow"] = _safe_depth(merged["latqcc"].to_numpy(dtype=np.float64, copy=False), area)
-    merged["Runoff"] = _safe_depth(merged["QOFE"].to_numpy(dtype=np.float64, copy=False), area)
+    merged["Runoff"] = _safe_depth(merged["runvol"].to_numpy(dtype=np.float64, copy=False), area)
 
     merged["Transpiration"] = _safe_depth(merged["Ep"].to_numpy(dtype=np.float64, copy=False), area)
     evaporation_volume = merged["Es"].to_numpy(dtype=np.float64, copy=False) + merged["Er"].to_numpy(dtype=np.float64, copy=False)

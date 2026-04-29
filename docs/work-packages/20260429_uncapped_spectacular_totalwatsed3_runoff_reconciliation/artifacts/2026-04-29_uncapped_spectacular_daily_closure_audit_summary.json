@@ -1,0 +1,52 @@
+{
+  "closure_reconstructed_with_storage_mm": {
+    "max_abs": 541.6002047684726,
+    "p50": 0.007254301657068751,
+    "p90": 0.20740349181638604,
+    "p95": 2.077281783184874,
+    "p99": 9.756166416607046
+  },
+  "closure_reported_with_storage_mm": {
+    "max_abs": 541.6002047684726,
+    "p50": 0.007254301657068751,
+    "p90": 0.20740349181638604,
+    "p95": 2.077281783184874,
+    "p99": 9.756166416607046
+  },
+  "date_max": {
+    "day_of_month": 31,
+    "julian": 366,
+    "month": 12,
+    "year": 2020
+  },
+  "date_min": {
+    "day_of_month": 1,
+    "julian": 1,
+    "month": 1,
+    "year": 1987
+  },
+  "max_reconstructed_runoff_mm": 722.4103546234194,
+  "max_reported_runoff_day": {
+    "day_of_month": 6,
+    "julian": 37,
+    "month": 2,
+    "precip_reported_mm": 118.9678771850119,
+    "rain_melt_reported_mm": 170.91910181414124,
+    "reconstructed_runoff_mm": 722.4103546234194,
+    "reported_runoff_mm": 722.4103546234194,
+    "runoff_consistency_mm": 0.0,
+    "year": 1996
+  },
+  "max_reported_runoff_mm": 722.4103546234194,
+  "max_runoff_to_precip_reconstructed_pct": 79413.84253448747,
+  "max_runoff_to_precip_reported_pct": 79413.84253448747,
+  "rows": 12419,
+  "runoff_consistency_mm": {
+    "max_abs": 0.0,
+    "p50": 0.0,
+    "p90": 0.0,
+    "p95": 0.0,
+    "p99": 0.0
+  },
+  "source": "/geodata/wc1/runs/un/uncapped-spectacular/wepp/output/interchange/totalwatsed3.parquet"
+}
