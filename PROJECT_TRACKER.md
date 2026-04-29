@@ -1,8 +1,8 @@
 # PROJECT_TRACKER.md
 > Kanban board for wepppy work packages and vision items
 
-**Last Updated**: 2026-04-28
-**Active Packages**: 4
+**Last Updated**: 2026-04-29
+**Active Packages**: 3
 **Quick Links**: [Work Packages Directory](docs/work-packages/) | [God-Tier Prompting Strategy](docs/god-tier-prompting-strategy.md)
 
 ## Purpose
@@ -37,7 +37,7 @@ This tracker makes all work visible at a glance, helping agents coordinate and a
 ### 2. Limit Work in Progress
 **Target**: 2-4 active packages maximum to maintain focus and ensure packages complete rather than stall.
 
-**Current WIP**: 4 packages ✅ **Within target range**
+**Current WIP**: 3 packages ✅ **Within target range**
 
 If WIP exceeds 4, prioritize completing existing packages before starting new ones. This prevents context switching overhead and ensures clean handoffs.
 
@@ -271,6 +271,15 @@ Currently active work packages. Limit to 2-4 packages to maintain focus.
 ## ✅ Done
 
 Recently completed work packages. Archived immediately upon completion.
+
+### WEPP Interchange Dependency Race Guard (2026-04-29)
+**Status**: ✅ **COMPLETE**
+
+**Link**: [docs/work-packages/20260428_wepp_interchange_dependency_race_guard/](docs/work-packages/20260428_wepp_interchange_dependency_race_guard/)
+
+**Lifecycle**: Backlog -> In Progress -> Done (2026-04-29)
+
+**Summary**: Closed the WEPP interchange race-hardening package end to end. Queue wiring now enforces deterministic ordering so `_post_watershed_interchange_rq` cannot start before `_build_hillslope_interchange_rq` in `enqueue_wepp_pipeline` and `enqueue_wepp_noprep_pipeline`, removing the known `H.wat.parquet.tmp` commit race window. Regression coverage was expanded in `tests/rq/test_wepp_rq_pipeline.py` to assert dependency identity across all helpers that enqueue `_post_watershed_interchange_rq`, including watershed-only paths that remain cleanup-only by design. Queue dependency artifacts (`wepppy/rq/job-dependency-graph.static.json`, `wepppy/rq/job-dependencies-catalog.md`) were synchronized and validated (`wctl check-rq-graph` up to date). Independent `reviewer` and `qa_reviewer` artifacts were completed, the one medium QA finding was resolved in-package, and the dedicated security review gate passed with no unresolved medium/high findings.
 
 ### Geneva Storm Shape Control (2026-04-28)
 **Status**: ✅ **COMPLETE**

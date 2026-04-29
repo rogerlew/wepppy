@@ -353,7 +353,7 @@ def enqueue_wepp_pipeline(
             func=tasks._post_watershed_interchange_rq,
             args=(runid,),
             timeout=timeout,
-            depends_on=job_post_run_cleanup_out,
+            depends_on=[job_post_run_cleanup_out, job2_hillslope_interchange],
         )
         jobs4_post.append(job_post_watershed_interchange)
 
@@ -673,7 +673,7 @@ def enqueue_wepp_noprep_pipeline(
             func=tasks._post_watershed_interchange_rq,
             args=(runid,),
             timeout=timeout,
-            depends_on=job_post_run_cleanup_out,
+            depends_on=[job_post_run_cleanup_out, job2_hillslope_interchange],
         )
         jobs4_post.append(job_post_watershed_interchange)
 

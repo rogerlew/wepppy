@@ -260,6 +260,228 @@ def test_enqueue_wepp_pipeline_runs_swat_before_interchange_when_wepp_delete_ena
     assert interchange_dependencies[1].id == swat_build_call["job"].id
 
 
+def test_enqueue_wepp_pipeline_post_watershed_interchange_waits_for_cleanup_and_hillslope() -> None:
+    q = _DummyQueue()
+    parent_job = _make_parent_job()
+    tasks = SimpleNamespace(
+        _prep_multi_ofe_rq=object(),
+        _prep_slopes_rq=object(),
+        _prep_managements_rq=object(),
+        _prep_soils_rq=object(),
+        _prep_climates_rq=object(),
+        _prep_remaining_rq=object(),
+        _run_hillslopes_rq=object(),
+        _prep_watershed_rq=object(),
+        _build_swat_inputs_rq=object(),
+        _run_swat_rq=object(),
+        _build_hillslope_interchange_rq=object(),
+        _build_totalwatsed3_rq=object(),
+        run_ss_batch_watershed_rq=object(),
+        run_watershed_rq=object(),
+        _post_run_cleanup_out_rq=object(),
+        _post_prep_details_rq=object(),
+        _run_hillslope_watbal_rq=object(),
+        _post_make_loss_grid_rq=object(),
+        _post_watershed_interchange_rq=object(),
+        _analyze_return_periods_rq=object(),
+        post_dss_export_rq=object(),
+        _post_legacy_arc_export_rq=object(),
+        _post_gpkg_export_rq=object(),
+        _log_complete_rq=object(),
+        ClimateMode=SimpleNamespace(SingleStormBatch="single_storm_batch"),
+    )
+    wepp = SimpleNamespace(
+        multi_ofe=True,
+        run_wepp_watershed=True,
+        mods=[],
+        delete_after_interchange=False,
+        wepp_bin="wepp_bin",
+        prep_details_on_run_completion=False,
+        dss_export_on_run_completion=False,
+        legacy_arc_export_on_run_completion=False,
+        arc_export_on_run_completion=False,
+    )
+    climate = SimpleNamespace(
+        is_single_storm=False,
+        climate_mode="continuous",
+        ss_batch_storms=[],
+    )
+
+    pipeline.enqueue_wepp_pipeline(
+        q,
+        parent_job,
+        "run-4",
+        wepp=wepp,
+        climate=climate,
+        tasks=tasks,
+        timeout=43_200,
+    )
+
+    cleanup_call = next(call for call in q.calls if call["func"] is tasks._post_run_cleanup_out_rq)
+    hillslope_interchange_call = next(
+        call for call in q.calls if call["func"] is tasks._build_hillslope_interchange_rq
+    )
+    post_watershed_interchange_call = next(
+        call for call in q.calls if call["func"] is tasks._post_watershed_interchange_rq
+    )
+
+    post_dependencies = post_watershed_interchange_call["depends_on"]
+    assert isinstance(post_dependencies, list)
+    assert len(post_dependencies) == 2
+    assert post_dependencies[0].id == cleanup_call["job"].id
+    assert post_dependencies[1].id == hillslope_interchange_call["job"].id
+
+
+def test_enqueue_watershed_pipeline_post_watershed_interchange_waits_for_cleanup() -> None:
+    q = _DummyQueue()
+    parent_job = _make_parent_job()
+    tasks = SimpleNamespace(
+        ClimateMode=SimpleNamespace(SingleStormBatch="single_storm_batch"),
+        run_ss_batch_watershed_rq=object(),
+        run_watershed_rq=object(),
+        _post_run_cleanup_out_rq=object(),
+        _post_prep_details_rq=object(),
+        _post_make_loss_grid_rq=object(),
+        _post_watershed_interchange_rq=object(),
+        _post_legacy_arc_export_rq=object(),
+        _log_complete_rq=object(),
+        _prep_watershed_rq=object(),
+    )
+    wepp = SimpleNamespace(
+        wepp_bin="wepp_bin",
+        prep_details_on_run_completion=False,
+        multi_ofe=True,
+        legacy_arc_export_on_run_completion=False,
+    )
+    climate = SimpleNamespace(
+        climate_mode="continuous",
+        ss_batch_storms=[],
+    )
+
+    pipeline.enqueue_watershed_pipeline(
+        q,
+        parent_job,
+        "run-5",
+        wepp=wepp,
+        climate=climate,
+        tasks=tasks,
+        timeout=43_200,
+        has_hillslope_outputs=False,
+    )
+
+    cleanup_call = next(call for call in q.calls if call["func"] is tasks._post_run_cleanup_out_rq)
+    post_watershed_interchange_call = next(
+        call for call in q.calls if call["func"] is tasks._post_watershed_interchange_rq
+    )
+
+    assert post_watershed_interchange_call["depends_on"].id == cleanup_call["job"].id
+
+
+def test_enqueue_wepp_noprep_pipeline_post_watershed_interchange_waits_for_cleanup_and_hillslope() -> None:
+    q = _DummyQueue()
+    parent_job = _make_parent_job()
+    tasks = SimpleNamespace(
+        _run_hillslopes_rq=object(),
+        _build_hillslope_interchange_rq=object(),
+        _build_totalwatsed3_rq=object(),
+        run_ss_batch_watershed_rq=object(),
+        run_watershed_rq=object(),
+        _post_run_cleanup_out_rq=object(),
+        _post_prep_details_rq=object(),
+        _run_hillslope_watbal_rq=object(),
+        _post_make_loss_grid_rq=object(),
+        _post_watershed_interchange_rq=object(),
+        _analyze_return_periods_rq=object(),
+        post_dss_export_rq=object(),
+        _post_legacy_arc_export_rq=object(),
+        _post_gpkg_export_rq=object(),
+        _log_complete_rq=object(),
+        ClimateMode=SimpleNamespace(SingleStormBatch="single_storm_batch"),
+    )
+    wepp = SimpleNamespace(
+        run_wepp_watershed=True,
+        multi_ofe=True,
+        wepp_bin="wepp_bin",
+        prep_details_on_run_completion=False,
+        dss_export_on_run_completion=False,
+        legacy_arc_export_on_run_completion=False,
+        arc_export_on_run_completion=False,
+    )
+    climate = SimpleNamespace(
+        is_single_storm=False,
+        climate_mode="continuous",
+        ss_batch_storms=[],
+    )
+
+    pipeline.enqueue_wepp_noprep_pipeline(
+        q,
+        parent_job,
+        "run-5",
+        wepp=wepp,
+        climate=climate,
+        tasks=tasks,
+        timeout=43_200,
+    )
+
+    cleanup_call = next(call for call in q.calls if call["func"] is tasks._post_run_cleanup_out_rq)
+    hillslope_interchange_call = next(
+        call for call in q.calls if call["func"] is tasks._build_hillslope_interchange_rq
+    )
+    post_watershed_interchange_call = next(
+        call for call in q.calls if call["func"] is tasks._post_watershed_interchange_rq
+    )
+
+    post_dependencies = post_watershed_interchange_call["depends_on"]
+    assert isinstance(post_dependencies, list)
+    assert len(post_dependencies) == 2
+    assert post_dependencies[0].id == cleanup_call["job"].id
+    assert post_dependencies[1].id == hillslope_interchange_call["job"].id
+
+
+def test_enqueue_watershed_noprep_pipeline_post_watershed_interchange_waits_for_cleanup() -> None:
+    q = _DummyQueue()
+    parent_job = _make_parent_job()
+    tasks = SimpleNamespace(
+        ClimateMode=SimpleNamespace(SingleStormBatch="single_storm_batch"),
+        run_ss_batch_watershed_rq=object(),
+        run_watershed_rq=object(),
+        _post_run_cleanup_out_rq=object(),
+        _post_prep_details_rq=object(),
+        _post_make_loss_grid_rq=object(),
+        _post_watershed_interchange_rq=object(),
+        _post_legacy_arc_export_rq=object(),
+        _log_complete_rq=object(),
+    )
+    wepp = SimpleNamespace(
+        wepp_bin="wepp_bin",
+        prep_details_on_run_completion=False,
+        multi_ofe=True,
+        legacy_arc_export_on_run_completion=False,
+    )
+    climate = SimpleNamespace(
+        climate_mode="continuous",
+        ss_batch_storms=[],
+    )
+
+    pipeline.enqueue_watershed_noprep_pipeline(
+        q,
+        parent_job,
+        "run-6",
+        wepp=wepp,
+        climate=climate,
+        tasks=tasks,
+        timeout=43_200,
+        has_hillslope_outputs=False,
+    )
+
+    cleanup_call = next(call for call in q.calls if call["func"] is tasks._post_run_cleanup_out_rq)
+    post_watershed_interchange_call = next(
+        call for call in q.calls if call["func"] is tasks._post_watershed_interchange_rq
+    )
+
+    assert post_watershed_interchange_call["depends_on"].id == cleanup_call["job"].id
+
+
 def test_enqueue_wepp_prep_only_pipeline_skips_run_and_postrun_jobs() -> None:
     q = _DummyQueue()
     parent_job = _make_parent_job()
