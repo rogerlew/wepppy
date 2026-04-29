@@ -78,6 +78,19 @@ _bin_dir = _join(_thisdir, 'bin')
 
 _LOGGER = logging.getLogger(__name__)
 
+_RUN_OBSERVED_QUALITY_FAILURE_MARKERS: tuple[str, ...] = (
+    "failed sn sd test",
+    "could not produce desired level of quality",
+    "fortran runtime error",
+    "error termination.",
+)
+
+
+def _run_observed_quality_failure_markers(log_text: str) -> list[str]:
+    """Return matched quality-failure markers found in CLIGEN observed logs."""
+    lowered = log_text.lower()
+    return [marker for marker in _RUN_OBSERVED_QUALITY_FAILURE_MARKERS if marker in lowered]
+
 
 _rowfmt = lambda x: '\t'.join(['%0.2f' % v for v in x])
 
@@ -2386,6 +2399,20 @@ class Cligen:
 
         if not (_exists(cli_path) and os.path.getsize(cli_path) > 0):
             raise AssertionError(f'Failed to create {cli_fn}')
+
+        log_path = _join(cli_dir, "cligen_{}.log".format(_split(cli_fn)[-1][:-4]))
+        with open(log_path, encoding="utf-8", errors="replace") as _log_read:
+            log_text = _log_read.read()
+
+        quality_markers = _run_observed_quality_failure_markers(log_text)
+        if quality_markers:
+            if _exists(cli_path):
+                os.remove(cli_path)
+            raise RuntimeError(
+                f"cligen run_observed quality guard tripped; "
+                f"cli_fn={cli_fn}; prn_fn={prn_fn}; markers={quality_markers}; "
+                f"log_tail={_tail(log_text, 12)!r}"
+            )
 
 
 def _tail(s: str, n: int = 80) -> str:
