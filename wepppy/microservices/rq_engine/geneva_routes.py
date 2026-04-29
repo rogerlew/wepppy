@@ -15,6 +15,7 @@ from rq import Queue
 from wepppy.config.redis_settings import RedisDB, redis_connection_kwargs
 from wepppy.nodb.base import NoDbAlreadyLockedError
 from wepppy.nodb.mods.geneva import Geneva, GenevaNoDbError, GenevaValidationError
+from wepppy.nodb.redis_prep import RedisPrep, TaskEnum
 from wepppy.rq.geneva_rq import (
     GENEVA_RQ_TIMEOUT,
     run_geneva_build_frequency_panel_rq,
@@ -61,6 +62,11 @@ def _ensure_geneva_controller(runid: str, config: str) -> Geneva:
     if controller is None:
         controller = Geneva(wd, f"{config}.cfg")
     return controller
+
+
+def _invalidate_geneva_preflight_timestamp(runid: str) -> None:
+    wd = get_wd(runid)
+    RedisPrep.getInstance(wd).remove_timestamp(TaskEnum.run_geneva)
 
 
 def _extract_scopes(claims: Mapping[str, Any]) -> set[str]:
@@ -427,6 +433,7 @@ async def prepare_hrus(runid: str, config: str, request: Request) -> JSONRespons
         normalized_payload = _normalize_prepare_request(payload)
         geneva = _ensure_geneva_controller(runid, config)
         geneva.assert_task_guardrails()
+        _invalidate_geneva_preflight_timestamp(runid)
         submission = _enqueue_geneva_job(
             runid=runid,
             config=config,
@@ -483,6 +490,7 @@ async def build_frequency_panel(runid: str, config: str, request: Request) -> JS
         geneva = _ensure_geneva_controller(runid, config)
         normalized_payload = geneva.frequency_panel_service.normalize_request(payload)
         geneva.assert_task_guardrails()
+        _invalidate_geneva_preflight_timestamp(runid)
         submission = _enqueue_geneva_job(
             runid=runid,
             config=config,
@@ -598,6 +606,7 @@ async def run_workflow(runid: str, config: str, request: Request) -> JSONRespons
         geneva = _ensure_geneva_controller(runid, config)
         normalized_payload = _normalize_workflow_request(geneva, payload)
         geneva.assert_task_guardrails()
+        _invalidate_geneva_preflight_timestamp(runid)
         submission = _enqueue_geneva_workflow_jobs(
             runid=runid,
             config=config,

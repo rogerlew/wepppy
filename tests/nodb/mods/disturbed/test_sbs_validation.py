@@ -114,6 +114,66 @@ def test_validate_exports_sbs_4class_with_source_dimensions(
     out_ds = None
 
 
+class _PrepRecorder:
+    def __init__(self) -> None:
+        self.timestamps: list[object] = []
+        self.has_sbs: bool | None = None
+
+    def timestamp(self, task: object) -> None:
+        self.timestamps.append(task)
+
+
+@pytest.mark.unit
+def test_validate_updates_landuse_and_sbs_prep_timestamps(
+    tmp_path: Path,
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    run_dir = tmp_path / "run"
+    disturbed_dir = run_dir / "disturbed"
+    disturbed_dir.mkdir(parents=True)
+
+    source = disturbed_dir / "source.tif"
+    source_values = np.array(
+        [
+            [0, 1, 2, 3, 255],
+            [3, 2, 1, 0, 255],
+            [1, 2, 3, 0, 255],
+        ],
+        dtype=np.uint8,
+    )
+    _write_uint8_tif(source, source_values)
+
+    disturbed = _disturbed_stub(run_dir)
+    prep = _PrepRecorder()
+
+    monkeypatch.setattr(Disturbed, "locked", lambda self, validate_on_success=True: _null_context())
+    monkeypatch.setattr(Disturbed, "timed", lambda self, task_name, level=20: _null_context())
+    monkeypatch.setattr(disturbed_module, "validate_srs", lambda _path: True)
+    monkeypatch.setattr(
+        disturbed_module.SoilBurnSeverityMap,
+        "export_wgs_map",
+        lambda self, fn: [[0.0, 0.0], [1.0, 1.0]],
+    )
+    monkeypatch.setattr(
+        disturbed_module.SoilBurnSeverityMap,
+        "export_rgb_map",
+        lambda self, wgs_fn, fn, rgb_png: None,
+    )
+    monkeypatch.setattr(
+        disturbed_module.RedisPrep,
+        "getInstance",
+        staticmethod(lambda _wd: prep),
+    )
+
+    disturbed.validate("source.tif", mode=0)
+
+    assert prep.timestamps == [
+        disturbed_module.TaskEnum.landuse_map,
+        disturbed_module.TaskEnum.init_sbs_map,
+    ]
+    assert prep.has_sbs is True
+
+
 # Uses an existing integration run when available.
 TEST_RUN_DIR = "/wc1/runs/le/legato-alkalinity"
 

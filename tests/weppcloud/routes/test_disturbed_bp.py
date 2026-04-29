@@ -1080,7 +1080,7 @@ def test_task_baer_modify_class_parses_integers(disturbed_client):
     controller = BaerStub.getInstance(run_dir)
     assert controller.burn_class_updates[-1] == ([1, 2, 3, 4], "999")
     prep = disturbed_module.RedisPrep.getInstance(run_dir)
-    assert prep.removed[-1] == TaskEnum.build_rusle
+    assert prep.removed[-2:] == [TaskEnum.build_rusle, TaskEnum.run_geneva]
 
 
 def test_task_baer_modify_class_requires_four_values(disturbed_client):
@@ -1137,7 +1137,7 @@ def test_task_remove_sbs_calls_baer(disturbed_client):
     controller = BaerStub.getInstance(run_dir)
     assert controller.sbs_removed == 1
     prep = disturbed_module.RedisPrep.getInstance(run_dir)
-    assert prep.removed[-1] == TaskEnum.build_rusle
+    assert prep.removed[-2:] == [TaskEnum.build_rusle, TaskEnum.run_geneva]
 
 
 def test_task_build_uniform_sbs_runs_validation(disturbed_client):
@@ -1158,7 +1158,7 @@ def test_task_build_uniform_sbs_runs_validation(disturbed_client):
     assert baer_controller.sbs_mode == 1
     assert baer_controller.uniform_severity == 7
     prep = disturbed_module.RedisPrep.getInstance(run_dir)
-    assert prep.removed[-1] == TaskEnum.build_rusle
+    assert prep.removed[-2:] == [TaskEnum.build_rusle, TaskEnum.run_geneva]
 
 
 def test_task_build_uniform_sbs_accepts_path_value(disturbed_client):
@@ -1176,4 +1176,4 @@ def test_task_build_uniform_sbs_accepts_path_value(disturbed_client):
     assert baer_controller.sbs_mode == 1
     assert baer_controller.uniform_severity == 9
     prep = disturbed_module.RedisPrep.getInstance(run_dir)
-    assert prep.removed[-1] == TaskEnum.build_rusle
+    assert prep.removed[-2:] == [TaskEnum.build_rusle, TaskEnum.run_geneva]

@@ -41,6 +41,7 @@ func Evaluate(prep map[string]string) (map[string]bool, map[string]bool) {
 		"roads":           false,
 		"watar":           false,
 		"rusle":           false,
+		"geneva":          false,
 		"dss_export":      false,
 		"run_path_ce":     false,
 	}
@@ -124,6 +125,14 @@ func Evaluate(prep map[string]string) (map[string]bool, map[string]bool) {
 
 	runPathCe := prep["timestamps:run_path_ce"]
 	check["run_path_ce"] = safeGT(runPathCe, runWepp)
+
+	runGeneva := prep["timestamps:run_geneva"]
+	check["geneva"] = safeGT(runGeneva, prep["timestamps:build_landuse"]) &&
+		safeGT(runGeneva, prep["timestamps:build_soils"]) &&
+		safeGT(runGeneva, prep["timestamps:build_climate"])
+	if prep["attrs:has_sbs"] == "true" {
+		check["geneva"] = check["geneva"] && safeGT(runGeneva, prep["timestamps:init_sbs_map"])
+	}
 
 	check["rhem"] = prep["timestamps:run_rhem"] != ""
 

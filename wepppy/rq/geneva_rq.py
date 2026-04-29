@@ -11,6 +11,7 @@ from rq import get_current_job
 from wepppy.nodb.base import clear_nodb_file_cache
 from wepppy.nodb.base import NoDbAlreadyLockedError
 from wepppy.nodb.mods.geneva import Geneva
+from wepppy.nodb.redis_prep import RedisPrep, TaskEnum
 from wepppy.rq.exception_logging import with_exception_logging
 from wepppy.weppcloud.utils.helpers import get_wd
 
@@ -60,6 +61,28 @@ def _best_effort_state_update(
                 GENEVA_STATE_LOCK_RETRY_ATTEMPTS,
             )
             time.sleep(GENEVA_STATE_LOCK_RETRY_SECONDS)
+
+
+def _backfill_legacy_init_sbs_timestamp(prep: RedisPrep) -> None:
+    """Ensure legacy runs with SBS enabled have an init_sbs_map timestamp.
+
+    Older runs may have attrs:has_sbs=true but no timestamps:init_sbs_map.
+    Geneva preflight freshness requires that timestamp when SBS is present.
+    """
+    if not prep.has_sbs:
+        return
+    if prep[TaskEnum.init_sbs_map] is not None:
+        return
+
+    fallback_ts = prep[TaskEnum.landuse_map]
+    if fallback_ts is None:
+        fallback_ts = prep[TaskEnum.build_landuse]
+
+    if fallback_ts is None:
+        prep.timestamp(TaskEnum.init_sbs_map)
+        return
+
+    prep[TaskEnum.init_sbs_map.value] = int(fallback_ts)
 
 
 @with_exception_logging
@@ -152,7 +175,11 @@ def run_geneva_run_batch_rq(
         callback=lambda: geneva.mark_job_started(job_id, status_message="Running Geneva storm batch..."),
     )
     try:
-        return geneva.run_batch(request_payload)
+        result = geneva.run_batch(request_payload)
+        prep = RedisPrep.getInstance(wd)
+        _backfill_legacy_init_sbs_timestamp(prep)
+        prep.timestamp(TaskEnum.run_geneva)
+        return result
     finally:
         _best_effort_state_update(
             geneva,

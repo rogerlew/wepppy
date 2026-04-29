@@ -95,6 +95,7 @@ async def build_soils(runid: str, config: str, request: Request) -> JSONResponse
 
         prep = RedisPrep.getInstance(wd)
         prep.remove_timestamp(TaskEnum.build_soils)
+        prep.remove_timestamp(TaskEnum.run_geneva)
 
         payload = await parse_request_payload(request)
         try:

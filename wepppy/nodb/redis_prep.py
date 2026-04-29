@@ -38,6 +38,7 @@ class TaskEnum(Enum):
     run_debris = 'run_debris'
     run_roads = 'run_roads'
     run_watar = 'run_watar'
+    run_geneva = 'run_geneva'
     run_rhem = 'run_rhem'
     fetch_dem = 'fetch_dem'
     landuse_map = 'landuse_map'
@@ -78,6 +79,7 @@ class TaskEnum(Enum):
             TaskEnum.run_debris: 'Run Debris',
             TaskEnum.run_roads: 'Run Roads',
             TaskEnum.run_watar: 'Run WATAR',
+            TaskEnum.run_geneva: 'Run Geneva',
             TaskEnum.run_rhem: 'Run RHEM',
             TaskEnum.fetch_dem: 'Fetch DEM',
             TaskEnum.landuse_map: 'Landuse Map',
@@ -116,6 +118,7 @@ class TaskEnum(Enum):
             TaskEnum.run_debris: '🪨',
             TaskEnum.run_roads: '🚗',
             TaskEnum.run_watar: '🌋',
+            TaskEnum.run_geneva: '🐈',
             TaskEnum.run_rhem: '🌵',
             TaskEnum.fetch_dem: '🌍',
             TaskEnum.landuse_map: '🗺️',

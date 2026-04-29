@@ -272,6 +272,15 @@ Currently active work packages. Limit to 2-4 packages to maintain focus.
 
 Recently completed work packages. Archived immediately upon completion.
 
+### Geneva Preflight Checklist Freshness Integration (2026-04-29)
+**Status**: ✅ **COMPLETE**
+
+**Link**: [docs/mini-work-packages/20260429_geneva_preflight_checklist_execplan.md](docs/mini-work-packages/20260429_geneva_preflight_checklist_execplan.md)
+
+**Lifecycle**: Backlog -> In Progress -> Done (2026-04-29)
+
+**Summary**: Closed the Geneva preflight checklist freshness package end to end. Added dedicated `TaskEnum.run_geneva` (`🐈`) ownership, stamped completion on successful Geneva batch runs, and wired Geneva into TOC emoji mapping (`#geneva`) plus preflight checklist payloads (`checklist.geneva`). `preflight2` now evaluates Geneva freshness against `build_landuse`, `build_soils`, `build_climate`, and conditionally `init_sbs_map` when `attrs:has_sbs == "true"`. Stale invalidators now clear `timestamps:run_geneva` at documented boundaries: Geneva config diffs, Geneva CN-table modify/reset, Geneva prepare/panel/workflow enqueue paths, SBS upload/remove/uniform/class edits, and climate/landuse/soils enqueue paths. Follow-up hardening stamped `TaskEnum.init_sbs_map` on Disturbed/BAER SBS mutation paths that set `attrs:has_sbs=true`, added Geneva-run legacy backfill for historical `has_sbs=true` runs missing `timestamps:init_sbs_map`, and completed a one-time Redis sweep backfilling `99` legacy SBS runs. Authenticated smoke on `onshore-xenophobia/disturbed9002_wbt` confirmed websocket `checklist.geneva=true` and Geneva TOC emoji metadata present in run-page bootstrap. Queue dependency artifacts were synchronized (`job-dependency-graph.static.json` + `job-dependencies-catalog.md`) and `wctl check-rq-graph` is green. Targeted validation gates passed; optional full-suite confidence gate still fails on unrelated existing `tests/nodb/test_base_boundary_characterization.py::test_dump_forces_monotonic_signature_after_second_same_size_rewrite`.
+
 ### WEPP Interchange Dependency Race Guard (2026-04-29)
 **Status**: ✅ **COMPLETE**
 

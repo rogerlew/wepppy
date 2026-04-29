@@ -92,6 +92,8 @@ class _GenevaStub:
 def geneva_rq_env(monkeypatch: pytest.MonkeyPatch):
     geneva = _GenevaStub()
     clear_calls: list[tuple[str, str]] = []
+    timestamp_calls: list[tuple[str, object]] = []
+    setitem_calls: list[tuple[str, str, int]] = []
 
     def _clear_cache(runid: str, *, pup_relpath: str) -> None:
         clear_calls.append((runid, str(pup_relpath)))
@@ -100,19 +102,37 @@ def geneva_rq_env(monkeypatch: pytest.MonkeyPatch):
         assert clear_calls, "cache clear should occur before Geneva controller hydration"
         return geneva
 
+    class _PrepStub:
+        def __init__(self, wd: str) -> None:
+            self._wd = wd
+            self.has_sbs = False
+            self._timestamps: dict[str, int] = {}
+
+        def timestamp(self, task: object) -> None:
+            timestamp_calls.append((self._wd, task))
+            self._timestamps[str(task)] = int(self._timestamps.get(str(task), 0))
+
+        def __getitem__(self, key: object) -> int | None:
+            return self._timestamps.get(str(key))
+
+        def __setitem__(self, key: str, value: int) -> None:
+            self._timestamps[str(key)] = int(value)
+            setitem_calls.append((self._wd, str(key), int(value)))
+
     monkeypatch.setattr(geneva_rq, "clear_nodb_file_cache", _clear_cache)
     monkeypatch.setattr(geneva_rq, "_ensure_geneva_controller", _ensure_controller)
+    monkeypatch.setattr(geneva_rq.RedisPrep, "getInstance", lambda wd: _PrepStub(wd))
     monkeypatch.setattr(geneva_rq, "get_wd", lambda runid: f"/tmp/{runid}")
     monkeypatch.setattr(geneva_rq, "get_current_job", lambda: SimpleNamespace(id="job-123"))
     monkeypatch.setattr(geneva_rq, "GENEVA_STATE_LOCK_RETRY_SECONDS", 0.0)
 
-    return geneva, clear_calls
+    return geneva, clear_calls, timestamp_calls, setitem_calls
 
 
 def test_build_frequency_panel_retries_started_state_lock_and_runs_job(
-    geneva_rq_env: _GenevaStub,
+    geneva_rq_env: tuple[_GenevaStub, list[tuple[str, str]], list[tuple[str, object]], list[tuple[str, str, int]]],
 ) -> None:
-    geneva, clear_calls = geneva_rq_env
+    geneva, clear_calls, _, _ = geneva_rq_env
     geneva.started_failures_remaining = 1
 
     result = geneva_rq.run_geneva_build_frequency_panel_rq(
@@ -130,10 +150,10 @@ def test_build_frequency_panel_retries_started_state_lock_and_runs_job(
 
 
 def test_build_frequency_panel_continues_when_started_state_lock_never_available(
-    geneva_rq_env: _GenevaStub,
+    geneva_rq_env: tuple[_GenevaStub, list[tuple[str, str]], list[tuple[str, object]], list[tuple[str, str, int]]],
     monkeypatch: pytest.MonkeyPatch,
 ) -> None:
-    geneva, clear_calls = geneva_rq_env
+    geneva, clear_calls, _, _ = geneva_rq_env
     geneva.started_failures_remaining = 99
     monkeypatch.setattr(geneva_rq, "GENEVA_STATE_LOCK_RETRY_ATTEMPTS", 3)
 
@@ -147,10 +167,10 @@ def test_build_frequency_panel_continues_when_started_state_lock_never_available
 
 
 def test_build_frequency_panel_continues_when_finished_state_lock_busy(
-    geneva_rq_env: _GenevaStub,
+    geneva_rq_env: tuple[_GenevaStub, list[tuple[str, str]], list[tuple[str, object]], list[tuple[str, str, int]]],
     monkeypatch: pytest.MonkeyPatch,
 ) -> None:
-    geneva, clear_calls = geneva_rq_env
+    geneva, clear_calls, _, _ = geneva_rq_env
     geneva.finished_failures_remaining = 99
     monkeypatch.setattr(geneva_rq, "GENEVA_STATE_LOCK_RETRY_ATTEMPTS", 2)
 
@@ -164,9 +184,9 @@ def test_build_frequency_panel_continues_when_finished_state_lock_busy(
 
 
 def test_prepare_hrus_clears_cache_and_runs(
-    geneva_rq_env: tuple[_GenevaStub, list[tuple[str, str]]],
+    geneva_rq_env: tuple[_GenevaStub, list[tuple[str, str]], list[tuple[str, object]], list[tuple[str, str, int]]],
 ) -> None:
-    geneva, clear_calls = geneva_rq_env
+    geneva, clear_calls, _, _ = geneva_rq_env
 
     result = geneva_rq.run_geneva_prepare_hrus_rq(
         "run-2",
@@ -182,9 +202,9 @@ def test_prepare_hrus_clears_cache_and_runs(
 
 
 def test_run_batch_clears_cache_and_runs(
-    geneva_rq_env: tuple[_GenevaStub, list[tuple[str, str]]],
+    geneva_rq_env: tuple[_GenevaStub, list[tuple[str, str]], list[tuple[str, object]], list[tuple[str, str, int]]],
 ) -> None:
-    geneva, clear_calls = geneva_rq_env
+    geneva, clear_calls, timestamp_calls, _ = geneva_rq_env
 
     payload = {"durations_minutes": [15], "note": "batch"}
     result = geneva_rq.run_geneva_run_batch_rq("run-3", "cfg", payload)
@@ -193,3 +213,40 @@ def test_run_batch_clears_cache_and_runs(
     assert result["payload"] == payload
     assert geneva.run_batch_calls == 1
     assert clear_calls == [("run-3", "geneva.nodb")]
+    assert timestamp_calls == [("/tmp/run-3", geneva_rq.TaskEnum.run_geneva)]
+
+
+def test_run_batch_backfills_init_sbs_timestamp_for_legacy_sbs_runs(
+    geneva_rq_env: tuple[_GenevaStub, list[tuple[str, str]], list[tuple[str, object]], list[tuple[str, str, int]]],
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    geneva, _clear_calls, timestamp_calls, setitem_calls = geneva_rq_env
+
+    prep_holder: dict[str, Any] = {}
+
+    class _PrepStubWithLegacy:
+        def __init__(self, wd: str) -> None:
+            self._wd = wd
+            self.has_sbs = True
+            self._timestamps = {
+                str(geneva_rq.TaskEnum.landuse_map): 1234,
+            }
+            prep_holder["prep"] = self
+
+        def timestamp(self, task: object) -> None:
+            timestamp_calls.append((self._wd, task))
+
+        def __getitem__(self, key: object) -> int | None:
+            return self._timestamps.get(str(key))
+
+        def __setitem__(self, key: str, value: int) -> None:
+            self._timestamps[str(key)] = int(value)
+            setitem_calls.append((self._wd, str(key), int(value)))
+
+    monkeypatch.setattr(geneva_rq.RedisPrep, "getInstance", lambda wd: _PrepStubWithLegacy(wd))
+
+    result = geneva_rq.run_geneva_run_batch_rq("run-legacy", "cfg", {"k": "v"})
+
+    assert result["status"] == "ok"
+    assert setitem_calls == [("/tmp/run-legacy", geneva_rq.TaskEnum.init_sbs_map.value, 1234)]
+    assert timestamp_calls == [("/tmp/run-legacy", geneva_rq.TaskEnum.run_geneva)]

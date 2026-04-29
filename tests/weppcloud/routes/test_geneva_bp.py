@@ -40,10 +40,18 @@ def geneva_client(
     monkeypatch.setattr(helpers, "authorize", lambda runid, config, require_owner=False: None)
 
     captured: Dict[str, Any] = {}
+    prep_state: Dict[str, Any] = {"removed": []}
+
+    class DummyPrep:
+        def remove_timestamp(self, task: Any) -> None:
+            prep_state["removed"].append(task)
+
+    monkeypatch.setattr(geneva_module.RedisPrep, "getInstance", lambda wd: DummyPrep())
 
     def fake_render_template(template: str, **context: Any) -> str:
         captured["template"] = template
         captured["template_context"] = context
+        captured["prep_state"] = prep_state
         return "rendered"
 
     monkeypatch.setattr(geneva_module, "render_template", fake_render_template)

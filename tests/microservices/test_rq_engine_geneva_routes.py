@@ -10,6 +10,7 @@ import wepppy.microservices.rq_engine as rq_engine
 from wepppy.microservices.rq_engine import geneva_routes
 from wepppy.nodb.base import NoDbAlreadyLockedError
 from wepppy.nodb.mods.geneva.errors import GenevaValidationError
+from wepppy.nodb.redis_prep import TaskEnum
 
 
 pytestmark = pytest.mark.microservice
@@ -126,11 +127,24 @@ def _stub_queue(
     return captured
 
 
+def _stub_prep(monkeypatch: pytest.MonkeyPatch) -> dict[str, list[object]]:
+    state: dict[str, list[object]] = {"removed": []}
+
+    class DummyPrep:
+        def remove_timestamp(self, task: object) -> None:
+            state["removed"].append(task)
+
+    monkeypatch.setattr(geneva_routes, "get_wd", lambda runid: f"/tmp/{runid}")
+    monkeypatch.setattr(geneva_routes.RedisPrep, "getInstance", lambda wd: DummyPrep())
+    return state
+
+
 def test_prepare_hrus_enqueues_job_with_canonical_submission_envelope(
     monkeypatch: pytest.MonkeyPatch,
 ) -> None:
     _stub_auth(monkeypatch)
     captured = _stub_queue(monkeypatch, job_id="geneva-prepare-9")
+    prep_state = _stub_prep(monkeypatch)
     stub = _GenevaRouteStub()
     monkeypatch.setattr(geneva_routes, "_ensure_geneva_controller", lambda runid, config: stub)
 
@@ -153,6 +167,28 @@ def test_prepare_hrus_enqueues_job_with_canonical_submission_envelope(
         {"schema_version": 1, "force_rebuild": True},
     )
     assert stub.queued == [("geneva-prepare-9", "Geneva HRU preparation queued.")]
+    assert prep_state["removed"] == [TaskEnum.run_geneva]
+
+
+def test_build_frequency_panel_enqueues_job_and_invalidates_geneva_timestamp(
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    _stub_auth(monkeypatch)
+    captured = _stub_queue(monkeypatch, job_id="geneva-panel-9")
+    prep_state = _stub_prep(monkeypatch)
+    stub = _GenevaRouteStub()
+    monkeypatch.setattr(geneva_routes, "_ensure_geneva_controller", lambda runid, config: stub)
+
+    with TestClient(rq_engine.app) as client:
+        response = client.post(
+            "/api/runs/run-1/cfg/geneva/build-frequency-panel",
+            json={"schema_version": 1, "durations_minutes": [30], "ari_years": [10], "rebuild": True},
+        )
+
+    assert response.status_code == 202
+    assert response.json()["job_id"] == "geneva-panel-9"
+    assert captured["kwargs"]["func"] is geneva_routes.run_geneva_build_frequency_panel_rq
+    assert prep_state["removed"] == [TaskEnum.run_geneva]
 
 
 def test_run_workflow_enqueues_chained_jobs_with_forced_rebuild(
@@ -163,6 +199,7 @@ def test_run_workflow_enqueues_chained_jobs_with_forced_rebuild(
         monkeypatch,
         job_ids=["geneva-prepare-1", "geneva-panel-2", "geneva-batch-3"],
     )
+    prep_state = _stub_prep(monkeypatch)
     stub = _GenevaRouteStub()
     monkeypatch.setattr(geneva_routes, "_ensure_geneva_controller", lambda runid, config: stub)
 
@@ -238,6 +275,7 @@ def test_run_workflow_enqueues_chained_jobs_with_forced_rebuild(
             "Geneva workflow queued. Preparing HRUs, building frequency panel, then running Geneva batch.",
         )
     ]
+    assert prep_state["removed"] == [TaskEnum.run_geneva]
 
 
 def test_run_workflow_returns_accepted_when_mark_job_queued_is_lock_contended(
@@ -248,6 +286,7 @@ def test_run_workflow_returns_accepted_when_mark_job_queued_is_lock_contended(
         monkeypatch,
         job_ids=["geneva-prepare-1", "geneva-panel-2", "geneva-batch-3"],
     )
+    prep_state = _stub_prep(monkeypatch)
     monkeypatch.setattr(geneva_routes, "GENEVA_STATE_LOCK_RETRY_ATTEMPTS", 2)
     monkeypatch.setattr(geneva_routes, "GENEVA_STATE_LOCK_RETRY_SECONDS", 0.0)
 
@@ -283,6 +322,7 @@ def test_run_workflow_returns_accepted_when_mark_job_queued_is_lock_contended(
     assert response.json()["job_id"] == "geneva-prepare-1"
     assert len(captured["calls"]) == 3
     assert stub.mark_attempts == 2
+    assert prep_state["removed"] == [TaskEnum.run_geneva]
 
 
 def test_state_route_returns_revisioned_geneva_snapshot(monkeypatch: pytest.MonkeyPatch) -> None:

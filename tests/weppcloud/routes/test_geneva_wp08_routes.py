@@ -282,6 +282,7 @@ def geneva_wp08_client(
     redis_conn_factory = rq_environment.redis_conn_factory(label="geneva-rq-redis")
     monkeypatch.setattr(geneva_module.redis, "Redis", lambda **kwargs: redis_conn_factory())
     monkeypatch.setattr(geneva_module, "Queue", rq_environment.queue_class(default_job_id="rq-geneva-1"))
+    monkeypatch.setattr(geneva_module, "RedisPrep", rq_environment.redis_prep_class, raising=False)
 
     with app.test_client() as client:
         yield client, stub, captured, rq_environment

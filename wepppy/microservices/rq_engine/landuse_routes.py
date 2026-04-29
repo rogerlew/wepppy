@@ -546,6 +546,7 @@ async def build_landuse(runid: str, config: str, request: Request) -> JSONRespon
 
         prep = RedisPrep.getInstance(wd)
         prep.remove_timestamp(TaskEnum.build_landuse)
+        prep.remove_timestamp(TaskEnum.run_geneva)
 
         conn_kwargs = redis_connection_kwargs(RedisDB.RQ)
         with redis.Redis(**conn_kwargs) as redis_conn:

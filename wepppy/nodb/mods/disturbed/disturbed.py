@@ -970,6 +970,7 @@ class Disturbed(NoDbBase):
         try:
             prep = RedisPrep.getInstance(self.wd)
             prep.timestamp(TaskEnum.landuse_map)
+            prep.timestamp(TaskEnum.init_sbs_map)
             prep.has_sbs = True
         except FileNotFoundError:
             pass
@@ -983,6 +984,7 @@ class Disturbed(NoDbBase):
         try:
             prep = RedisPrep.getInstance(self.wd)
             prep.timestamp(TaskEnum.landuse_map)
+            prep.timestamp(TaskEnum.init_sbs_map)
             prep.has_sbs = True
         except FileNotFoundError:
             pass
@@ -1104,6 +1106,7 @@ class Disturbed(NoDbBase):
         try:
             prep = RedisPrep.getInstance(self.wd)
             prep.timestamp(TaskEnum.landuse_map)
+            prep.timestamp(TaskEnum.init_sbs_map)
             prep.has_sbs = True
         except FileNotFoundError:
             pass

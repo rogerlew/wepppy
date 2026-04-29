@@ -1,6 +1,6 @@
 # Preflight Behavior Documentation
 
-> **Last Updated:** October 27, 2025  
+> **Last Updated:** April 29, 2026
 > **Related Files:**
 > - `/workdir/wepppy/wepppy/weppcloud/static/js/preflight.js`
 > - `/workdir/wepppy/wepppy/weppcloud/routes/run_0/templates/run_page_bootstrap.js.j2`
@@ -90,6 +90,7 @@ Controllers (e.g., subcatchment_delineation.js)
 | `climate` | Climate data built | `TaskEnum.build_climate` |
 | `debris` | Debris flow analysis run | `TaskEnum.run_debris` |
 | `dss_export` | DSS export complete | `TaskEnum.dss_export` |
+| `geneva` | Geneva workflow run completed and still fresh | `TaskEnum.run_geneva` (`🐈`) |
 | `landuse` | Landuse data built | `TaskEnum.build_landuse` |
 | `observed` | Observed data processed | `TaskEnum.run_observed` |
 | `outlet` | Outlet set | `TaskEnum.set_outlet` |
@@ -133,23 +134,48 @@ When adding a new module, update the header list, append metadata in `MOD_UI_DEF
 drop a `data-mod-section` wrapper in `runs0_pure.htm`, and optionally register a bootstrap
 handler so the controller self-initializes after dynamic inserts.
 
-### Planned `Rusle` integration
+### Geneva Preflight Integration
 
-For the planned `Rusle` NoDb/UI work:
+Current behavior:
 
-- `Rusle` should be an optional disturbed-only module toggled from the header
-  `Mods` menu
-- the run-page control should appear after `WEPP`
-- preflight should gain a dedicated checklist key for `Rusle`
-- `TaskEnum` should gain a dedicated `Rusle` build task using emoji `🔱`
-- the TOC/preflight anchor should point to the `Rusle` control section
-- the `Rusle` build should run through RQ, not inline
-- initial stale invalidators should include:
-  - climate rebuild
-  - SBS map removal
-  - SBS map replacement or modification
-- when `Rusle` becomes stale, preflight should clear its completion state until
-  the user rebuilds
+- Geneva is already a mod (`MOD_UI_DEFINITIONS['geneva']`) and has a TOC anchor
+  (`#geneva`) in `runs0_pure.htm`.
+- preflight emits a dedicated `geneva` checklist key.
+- `TaskEnum.run_geneva` is the Geneva completion timestamp task and owns emoji `🐈`.
+
+Checklist contract:
+
+- TOC/preflight mapping targets the Geneva control section (`a[href="#geneva"]`).
+- `geneva` should evaluate `true` only when the Geneva completion timestamp is newer
+  than its upstream dependencies.
+
+Geneva dependency rules (freshness):
+
+- Required freshness dependencies:
+  - `build_landuse`
+  - `build_soils`
+  - `build_climate`
+- Conditional disturbed dependency:
+  - when `attrs:has_sbs == true`, Geneva must also be newer than `init_sbs_map`
+- SBS timestamp ownership:
+  - Disturbed/BAER SBS mutation paths that persist `attrs:has_sbs = true` also stamp
+    `TaskEnum.init_sbs_map` so the conditional freshness comparison has a concrete
+    mutation boundary.
+  - Geneva batch completion backfills missing `init_sbs_map` for legacy
+    `has_sbs=true` runs (using `landuse_map`/`build_landuse` fallback) before
+    stamping `run_geneva`.
+- Practical stale invalidators (timestamp clear points):
+  - Geneva config writes (only when the persisted config payload changes)
+  - Geneva CN-table modify/reset
+  - Geneva `prepare_hrus` enqueue
+  - Geneva `build_frequency_panel` enqueue
+  - disturbed SBS upload/remove/uniform/class-edit flows
+  - climate/landuse/soils enqueue paths
+
+Operational intent:
+
+- Geneva completion should turn off immediately when prerequisites are mutated,
+  then turn on only after a fresh Geneva run completes.
 
 ---
 
@@ -522,6 +548,7 @@ document.addEventListener('preflight:update', function(event) {
 | `debris` | `#debris-flow` | `run_debris` | 🪨 |
 | `watar` | `#ash` | `run_watar` | 🌋 |
 | `dss_export` | `#dss-export` | `dss_export` | 📤 |
+| `geneva` | `#geneva` | `run_geneva` | 🐈 |
 
 **Note:** Controls without checklist keys (for example, `#map` and `#team`) will not flip their TOC emoji state until `preflight2` emits a matching checklist key. Treatments now maps to `TaskEnum.build_treatments` (💊) in `run_0_bp.py`.
 

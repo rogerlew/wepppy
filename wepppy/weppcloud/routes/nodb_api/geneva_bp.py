@@ -15,6 +15,7 @@ from wepppy.config.redis_settings import RedisDB, redis_connection_kwargs
 from wepppy.nodb.core import Ron
 from wepppy.nodb.core.ron import RonViewModel
 from wepppy.nodb.mods.geneva import Geneva, GenevaNoDbError, GenevaValidationError
+from wepppy.nodb.redis_prep import RedisPrep, TaskEnum
 from wepppy.nodb.unitizer import Unitizer
 from wepppy.nodb.unitizer import precisions as UNITIZER_PRECISIONS
 from wepppy.nodb.mods.geneva.collaborators.cn_table_service import (
@@ -58,6 +59,10 @@ def _set_no_store_headers(response: Response) -> Response:
     response.headers["Pragma"] = "no-cache"
     response.headers["Expires"] = "0"
     return response
+
+
+def _invalidate_geneva_preflight_timestamp(wd: str) -> None:
+    RedisPrep.getInstance(wd).remove_timestamp(TaskEnum.run_geneva)
 
 
 def _geneva_error_response(exc: GenevaNoDbError) -> Response:
@@ -250,6 +255,7 @@ def geneva_set_config(runid: str, config: str) -> Response:
     geneva = _ensure_geneva_controller(wd, f"{config}.cfg")
 
     try:
+        config_before = geneva.get_config()
         enabled = payload.pop("enabled", None)
         if enabled is not None:
             if not isinstance(enabled, bool):
@@ -264,7 +270,10 @@ def geneva_set_config(runid: str, config: str) -> Response:
         if payload:
             geneva.update_config(payload)
 
-        return jsonify(geneva.get_config())
+        config_after = geneva.get_config()
+        if config_after != config_before:
+            _invalidate_geneva_preflight_timestamp(wd)
+        return jsonify(config_after)
     except GenevaNoDbError as exc:
         return _geneva_error_response(exc)
 
@@ -311,6 +320,7 @@ def task_geneva_prepare_hrus(runid: str, config: str) -> Response:
     geneva = _ensure_geneva_controller(wd, f"{config}.cfg")
     try:
         geneva.assert_task_guardrails()
+        _invalidate_geneva_preflight_timestamp(wd)
         submission = _enqueue_geneva_job(
             runid=runid,
             config=config,
@@ -339,6 +349,7 @@ def task_geneva_build_frequency_panel(runid: str, config: str) -> Response:
     try:
         normalized_payload = geneva.frequency_panel_service.normalize_request(payload)
         geneva.assert_task_guardrails()
+        _invalidate_geneva_preflight_timestamp(wd)
         submission = _enqueue_geneva_job(
             runid=runid,
             config=config,
@@ -639,6 +650,7 @@ def task_modify_geneva_cn_table(runid: str, config: str) -> Response:
             pruned_rows,
             if_match_sha256=if_match_sha256,
         )
+        _invalidate_geneva_preflight_timestamp(wd)
     except GenevaNoDbError as exc:
         return _geneva_error_response(exc)
 
@@ -669,6 +681,7 @@ def task_reset_geneva_cn_table(runid: str, config: str) -> Response:
     geneva = _ensure_geneva_controller(wd, f"{config}.cfg")
     try:
         reset_meta = geneva.reset_cn_table(reason="manual")
+        _invalidate_geneva_preflight_timestamp(wd)
     except GenevaNoDbError as exc:
         return _geneva_error_response(exc)
 

@@ -117,7 +117,9 @@ async def upload_sbs(runid: str, config: str, request: Request) -> JSONResponse:
             logger.exception("rq-engine upload-sbs validation failed")
             reason = _validation_reason(exc)
             return error_response(f"SBS validation failed: {reason}", status_code=400)
-        RedisPrep.getInstance(wd).remove_timestamp(TaskEnum.build_rusle)
+        prep = RedisPrep.getInstance(wd)
+        prep.remove_timestamp(TaskEnum.build_rusle)
+        prep.remove_timestamp(TaskEnum.run_geneva)
         return upload_success(result={"disturbed_fn": baer.disturbed_fn})
     except UploadError as exc:
         return upload_failure(str(exc), status=_upload_status_from_message(str(exc)))

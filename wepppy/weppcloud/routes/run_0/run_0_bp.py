@@ -117,6 +117,7 @@ TOC_TASK_ANCHOR_TO_TASK = {
     '#observed': TaskEnum.run_observed,
     '#debris-flow': TaskEnum.run_debris,
     '#roads': TaskEnum.run_roads,
+    '#geneva': TaskEnum.run_geneva,
     '#features-export': TaskEnum.run_features_export,
     '#dss-export': TaskEnum.dss_export,
     '#path-cost-effective': TaskEnum.run_path_cost_effective,

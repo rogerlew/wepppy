@@ -58,7 +58,7 @@ def test_upload_sbs_returns_disturbed_fn(monkeypatch: pytest.MonkeyPatch, tmp_pa
     assert response.status_code == 200
     payload = response.json()
     assert payload["result"]["disturbed_fn"] == "disturbed.txt"
-    assert prep_state["removed"] == [TaskEnum.build_rusle]
+    assert prep_state["removed"] == [TaskEnum.build_rusle, TaskEnum.run_geneva]
 
 
 def test_upload_cover_transform_returns_result(

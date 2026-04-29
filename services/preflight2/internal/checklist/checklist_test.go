@@ -110,3 +110,59 @@ func TestEvaluateRoadsStaysFalseWithoutRunWepp(t *testing.T) {
 		t.Fatalf("expected roads checklist entry to be false when WEPP timestamp is missing")
 	}
 }
+
+func TestEvaluateGenevaRequiresFreshCoreDependencies(t *testing.T) {
+	check, _ := Evaluate(map[string]string{
+		"timestamps:run_geneva":    "400",
+		"timestamps:build_landuse": "100",
+		"timestamps:build_soils":   "200",
+		"timestamps:build_climate": "300",
+	})
+
+	if !check["geneva"] {
+		t.Fatalf("expected geneva checklist entry to be true when run_geneva is fresher than prerequisites")
+	}
+}
+
+func TestEvaluateGenevaStaleWhenClimateIsNewer(t *testing.T) {
+	check, _ := Evaluate(map[string]string{
+		"timestamps:run_geneva":    "250",
+		"timestamps:build_landuse": "100",
+		"timestamps:build_soils":   "200",
+		"timestamps:build_climate": "300",
+	})
+
+	if check["geneva"] {
+		t.Fatalf("expected geneva checklist entry to be false when climate timestamp is newer")
+	}
+}
+
+func TestEvaluateGenevaRequiresInitSbsMapWhenSbsEnabled(t *testing.T) {
+	check, _ := Evaluate(map[string]string{
+		"attrs:has_sbs":            "true",
+		"timestamps:run_geneva":    "350",
+		"timestamps:build_landuse": "100",
+		"timestamps:build_soils":   "200",
+		"timestamps:build_climate": "300",
+		"timestamps:init_sbs_map":  "360",
+	})
+
+	if check["geneva"] {
+		t.Fatalf("expected geneva checklist entry to be false when SBS map is newer than run_geneva")
+	}
+}
+
+func TestEvaluateGenevaIgnoresInitSbsMapWhenSbsDisabled(t *testing.T) {
+	check, _ := Evaluate(map[string]string{
+		"attrs:has_sbs":            "false",
+		"timestamps:run_geneva":    "350",
+		"timestamps:build_landuse": "100",
+		"timestamps:build_soils":   "200",
+		"timestamps:build_climate": "300",
+		"timestamps:init_sbs_map":  "360",
+	})
+
+	if !check["geneva"] {
+		t.Fatalf("expected geneva checklist entry to stay true when SBS dependency is inactive")
+	}
+}

@@ -159,6 +159,7 @@ def test_build_climate_enqueues_job(monkeypatch: pytest.MonkeyPatch) -> None:
     assert prep_state["removed"] == [
         climate_routes.TaskEnum.build_climate,
         climate_routes.TaskEnum.build_rusle,
+        climate_routes.TaskEnum.run_geneva,
     ]
     assert prep_state["jobs"] == [("build_climate_rq", "job-88")]
     enqueue_args, enqueue_kwargs = queue_state["calls"][0]

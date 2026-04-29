@@ -51,24 +51,27 @@ def _stub_queue(monkeypatch: pytest.MonkeyPatch, *, job_id: str = "job-123") -> 
     monkeypatch.setattr(landuse_routes.redis, "Redis", lambda **kwargs: DummyRedis())
 
 
-def _stub_prep(monkeypatch: pytest.MonkeyPatch) -> None:
-    class DummyPrep:
-        def remove_timestamp(self, *args, **kwargs) -> None:
-            return None
+def _stub_prep(monkeypatch: pytest.MonkeyPatch) -> dict[str, list[object]]:
+    state: dict[str, list[object]] = {"removed": [], "jobs": []}
 
-        def set_rq_job_id(self, *args, **kwargs) -> None:
-            return None
+    class DummyPrep:
+        def remove_timestamp(self, task, *args, **kwargs) -> None:
+            state["removed"].append(task)
+
+        def set_rq_job_id(self, key, job_id, *args, **kwargs) -> None:
+            state["jobs"].append((key, job_id))
 
         def get_rq_job_id(self, *args, **kwargs):
             return None
 
     monkeypatch.setattr(landuse_routes.RedisPrep, "getInstance", lambda wd: DummyPrep())
+    return state
 
 
 def test_build_landuse_enqueues_job(monkeypatch: pytest.MonkeyPatch) -> None:
     _stub_auth(monkeypatch)
     _stub_queue(monkeypatch, job_id="job-42")
-    _stub_prep(monkeypatch)
+    prep_state = _stub_prep(monkeypatch)
     monkeypatch.setattr(landuse_routes, "get_wd", lambda runid: "/tmp/run")
 
     class DummyLanduse:
@@ -97,6 +100,11 @@ def test_build_landuse_enqueues_job(monkeypatch: pytest.MonkeyPatch) -> None:
 
     assert response.status_code == 200
     assert response.json()["job_id"] == "job-42"
+    assert prep_state["removed"] == [
+        landuse_routes.TaskEnum.build_landuse,
+        landuse_routes.TaskEnum.run_geneva,
+    ]
+    assert prep_state["jobs"] == [("build_landuse_rq", "job-42")]
 
 
 def test_build_landuse_rejects_single_mode_for_mofe(monkeypatch: pytest.MonkeyPatch) -> None:

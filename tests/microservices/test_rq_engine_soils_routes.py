@@ -37,15 +37,18 @@ def _stub_queue(monkeypatch: pytest.MonkeyPatch, *, job_id: str = "job-123") -> 
     monkeypatch.setattr(soils_routes.redis, "Redis", lambda **kwargs: DummyRedis())
 
 
-def _stub_prep(monkeypatch: pytest.MonkeyPatch) -> None:
-    class DummyPrep:
-        def remove_timestamp(self, *args, **kwargs) -> None:
-            return None
+def _stub_prep(monkeypatch: pytest.MonkeyPatch) -> dict[str, list[object]]:
+    state: dict[str, list[object]] = {"removed": [], "jobs": []}
 
-        def set_rq_job_id(self, *args, **kwargs) -> None:
-            return None
+    class DummyPrep:
+        def remove_timestamp(self, task, *args, **kwargs) -> None:
+            state["removed"].append(task)
+
+        def set_rq_job_id(self, key, job_id, *args, **kwargs) -> None:
+            state["jobs"].append((key, job_id))
 
     monkeypatch.setattr(soils_routes.RedisPrep, "getInstance", lambda wd: DummyPrep())
+    return state
 
 
 def test_build_soils_requires_initial_sat(monkeypatch: pytest.MonkeyPatch) -> None:
@@ -63,7 +66,7 @@ def test_build_soils_requires_initial_sat(monkeypatch: pytest.MonkeyPatch) -> No
 def test_build_soils_enqueues_job(monkeypatch: pytest.MonkeyPatch) -> None:
     _stub_auth(monkeypatch)
     _stub_queue(monkeypatch, job_id="job-77")
-    _stub_prep(monkeypatch)
+    prep_state = _stub_prep(monkeypatch)
     monkeypatch.setattr(soils_routes, "get_wd", lambda runid: "/tmp/run")
 
     class DummySoils:
@@ -85,6 +88,11 @@ def test_build_soils_enqueues_job(monkeypatch: pytest.MonkeyPatch) -> None:
 
     assert response.status_code == 200
     assert response.json()["job_id"] == "job-77"
+    assert prep_state["removed"] == [
+        soils_routes.TaskEnum.build_soils,
+        soils_routes.TaskEnum.run_geneva,
+    ]
+    assert prep_state["jobs"] == [("build_soils_rq", "job-77")]
 
 
 def test_build_soils_propagates_nodir_preflight_errors(monkeypatch: pytest.MonkeyPatch) -> None:
