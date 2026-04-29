@@ -12,7 +12,9 @@ from wepppy.wepp.fuzzing.single_ofe_stratified_campaign import (
     EligibleRecord,
     OversamplingWeights,
     POSITIVE_CONTROL_CASE_PREFIX,
+    QuarantineRecord,
     SeedSignal,
+    _build_preflight_producer_obligation_rows,
     _ensure_rosetta3_available,
     _evaluate_secondary_oracle,
     _load_positive_controls,
@@ -66,6 +68,70 @@ def test_preflight_quarantines_multi_ofe_and_keeps_single_ofe() -> None:
     assert "SOIL_MULTI_OFE" in quarantined[0].reason_codes
     assert quarantined[0].soil_ofe_count is not None
     assert quarantined[0].soil_ofe_count > 1
+
+
+def test_preflight_producer_obligation_rows_map_known_reason_codes() -> None:
+    quarantined = [
+        QuarantineRecord(
+            seed_id="seed-a",
+            run_id="aa/bb",
+            stem="p1",
+            reason_codes=("MISSING_RUN_FILE", "CLI_PARSE_ERROR"),
+            details=("missing_run=/tmp/p1.run", "climate parse failed"),
+            soil_ofe_count=None,
+            seed_lineage={},
+        )
+    ]
+
+    rows = _build_preflight_producer_obligation_rows(quarantined, strict_policy=False)
+    assert [row["reason_code"] for row in rows] == ["MISSING_RUN_FILE", "CLI_PARSE_ERROR"]
+
+    by_reason = {row["reason_code"]: row for row in rows}
+    assert by_reason["MISSING_RUN_FILE"]["contract_ref"] == "SC-PASS-001#INV-PASS-002"
+    assert by_reason["MISSING_RUN_FILE"]["channel_class"] == "CONF_PARSE"
+    assert by_reason["MISSING_RUN_FILE"]["boundary_disposition"] == "invalid_input"
+    assert by_reason["CLI_PARSE_ERROR"]["contract_ref"] == "SC-EVAP-001#INV-EVAP-002"
+    assert by_reason["CLI_PARSE_ERROR"]["channel_class"] == "CONF_PARSE"
+    assert by_reason["CLI_PARSE_ERROR"]["mapping_status"] == "mapped"
+
+
+def test_preflight_producer_obligation_rows_allow_unknown_reason_in_compat_mode() -> None:
+    quarantined = [
+        QuarantineRecord(
+            seed_id="seed-b",
+            run_id="aa/cc",
+            stem="p2",
+            reason_codes=("UNDECLARED_REASON_CODE",),
+            details=("legacy cache reason",),
+            soil_ofe_count=None,
+            seed_lineage={},
+        )
+    ]
+
+    rows = _build_preflight_producer_obligation_rows(quarantined, strict_policy=False)
+    assert len(rows) == 1
+    assert rows[0]["reason_code"] == "UNDECLARED_REASON_CODE"
+    assert rows[0]["contract_ref"] == ""
+    assert rows[0]["channel_class"] == "MIXED"
+    assert rows[0]["boundary_disposition"] == "requires_scientific_review"
+    assert rows[0]["mapping_status"] == "unmapped_reason_code"
+
+
+def test_preflight_producer_obligation_rows_reject_unknown_reason_in_strict_mode() -> None:
+    quarantined = [
+        QuarantineRecord(
+            seed_id="seed-c",
+            run_id="aa/dd",
+            stem="p3",
+            reason_codes=("UNKNOWN_REASON",),
+            details=("strict mode test",),
+            soil_ofe_count=None,
+            seed_lineage={},
+        )
+    ]
+
+    with pytest.raises(ValueError, match="Unmapped preflight reason code"):
+        _build_preflight_producer_obligation_rows(quarantined, strict_policy=True)
 
 
 def test_stratify_assigns_expected_three_bins() -> None:

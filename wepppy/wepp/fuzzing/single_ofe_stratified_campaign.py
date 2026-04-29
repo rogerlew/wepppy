@@ -71,6 +71,195 @@ class QuarantineRecord:
 
 
 @dataclass(frozen=True, slots=True)
+class PreflightContractMapping:
+    obligation_id: str
+    contract_ref: str
+    channel_class: str
+    boundary_disposition: str
+    strict_policy_required: bool
+    rationale_token: str
+
+    def as_dict(self) -> dict[str, Any]:
+        return asdict(self)
+
+
+PREFLIGHT_CHANNEL_CLASSES: set[str] = {"NUM", "CONF_PARSE", "MIXED"}
+PREFLIGHT_BOUNDARY_DISPOSITIONS: set[str] = {
+    "invalid_input",
+    "inactive_process",
+    "valid_extreme",
+    "neutral_branch",
+    "bounded_transition",
+    "model_gap",
+    "requires_scientific_review",
+}
+PREFLIGHT_REASON_CODE_CONTRACT_MAP: dict[str, PreflightContractMapping] = {
+    "MISSING_REQUIRED_INPUT": PreflightContractMapping(
+        obligation_id="PO-PASS-001",
+        contract_ref="SC-PASS-001#INV-PASS-002",
+        channel_class="CONF_PARSE",
+        boundary_disposition="invalid_input",
+        strict_policy_required=False,
+        rationale_token="producer_input_path_missing",
+    ),
+    "MISSING_RUN_FILE": PreflightContractMapping(
+        obligation_id="PO-PASS-001",
+        contract_ref="SC-PASS-001#INV-PASS-002",
+        channel_class="CONF_PARSE",
+        boundary_disposition="invalid_input",
+        strict_policy_required=False,
+        rationale_token="producer_run_context_missing",
+    ),
+    "SOIL_PARSE_ERROR": PreflightContractMapping(
+        obligation_id="PO-SOIL-001",
+        contract_ref="SC-SOIL-001#INV-SOIL-001",
+        channel_class="CONF_PARSE",
+        boundary_disposition="invalid_input",
+        strict_policy_required=False,
+        rationale_token="soil_parse_boundary",
+    ),
+    "SOIL_MULTI_OFE": PreflightContractMapping(
+        obligation_id="PO-SOIL-001",
+        contract_ref="SC-SOIL-001#INV-SOIL-002",
+        channel_class="MIXED",
+        boundary_disposition="neutral_branch",
+        strict_policy_required=False,
+        rationale_token="single_ofe_campaign_scope_boundary",
+    ),
+    "MAN_PARSE_ERROR": PreflightContractMapping(
+        obligation_id="PO-WATBAL-001",
+        contract_ref="SC-WATBAL-001#INV-WATBAL-002",
+        channel_class="CONF_PARSE",
+        boundary_disposition="requires_scientific_review",
+        strict_policy_required=False,
+        rationale_token="management_parse_boundary",
+    ),
+    "SLP_PARSE_ERROR": PreflightContractMapping(
+        obligation_id="PO-PERC-001",
+        contract_ref="SC-PERC-001#INV-PERC-001",
+        channel_class="CONF_PARSE",
+        boundary_disposition="requires_scientific_review",
+        strict_policy_required=False,
+        rationale_token="slope_parse_boundary",
+    ),
+    "SLP_MULTI_OFE": PreflightContractMapping(
+        obligation_id="PO-PERC-001",
+        contract_ref="SC-PERC-001#INV-PERC-002",
+        channel_class="MIXED",
+        boundary_disposition="model_gap",
+        strict_policy_required=False,
+        rationale_token="single_ofe_slope_structure_boundary",
+    ),
+    "CLI_PARSE_ERROR": PreflightContractMapping(
+        obligation_id="PO-EVAP-001",
+        contract_ref="SC-EVAP-001#INV-EVAP-002",
+        channel_class="CONF_PARSE",
+        boundary_disposition="requires_scientific_review",
+        strict_policy_required=False,
+        rationale_token="climate_parse_boundary",
+    ),
+    "ROSETTA3_UNAVAILABLE": PreflightContractMapping(
+        obligation_id="PO-WATBAL-001",
+        contract_ref="SC-WATBAL-001#INV-WATBAL-002",
+        channel_class="MIXED",
+        boundary_disposition="requires_scientific_review",
+        strict_policy_required=True,
+        rationale_token="producer_dependency_unavailable",
+    ),
+}
+UNMAPPED_REASON_CODE_MAPPING = PreflightContractMapping(
+    obligation_id="PO-UNMAPPED-001",
+    contract_ref="",
+    channel_class="MIXED",
+    boundary_disposition="requires_scientific_review",
+    strict_policy_required=True,
+    rationale_token="unmapped_reason_code",
+)
+
+
+def _validate_preflight_contract_map() -> None:
+    for reason_code, mapping in PREFLIGHT_REASON_CODE_CONTRACT_MAP.items():
+        if mapping.channel_class not in PREFLIGHT_CHANNEL_CLASSES:
+            raise ValueError(
+                f"Invalid channel_class={mapping.channel_class!r} for reason_code={reason_code}"
+            )
+        if mapping.boundary_disposition not in PREFLIGHT_BOUNDARY_DISPOSITIONS:
+            raise ValueError(
+                "Invalid boundary_disposition="
+                f"{mapping.boundary_disposition!r} for reason_code={reason_code}"
+            )
+    if UNMAPPED_REASON_CODE_MAPPING.channel_class not in PREFLIGHT_CHANNEL_CLASSES:
+        raise ValueError("Invalid channel_class in UNMAPPED_REASON_CODE_MAPPING")
+    if (
+        UNMAPPED_REASON_CODE_MAPPING.boundary_disposition
+        not in PREFLIGHT_BOUNDARY_DISPOSITIONS
+    ):
+        raise ValueError("Invalid boundary_disposition in UNMAPPED_REASON_CODE_MAPPING")
+
+
+def _build_preflight_producer_obligation_rows(
+    quarantined: Sequence[QuarantineRecord],
+    *,
+    strict_policy: bool,
+) -> list[dict[str, Any]]:
+    rows: list[dict[str, Any]] = []
+    for quarantined_row in quarantined:
+        details = " | ".join(quarantined_row.details)
+        for reason_code in quarantined_row.reason_codes:
+            mapping = PREFLIGHT_REASON_CODE_CONTRACT_MAP.get(reason_code)
+            mapping_status = "mapped"
+            if mapping is None:
+                if strict_policy:
+                    raise ValueError(
+                        "Unmapped preflight reason code under strict policy mode: "
+                        f"{reason_code}"
+                    )
+                mapping = UNMAPPED_REASON_CODE_MAPPING
+                mapping_status = "unmapped_reason_code"
+            rows.append(
+                {
+                    "seed_id": quarantined_row.seed_id,
+                    "run_id": quarantined_row.run_id,
+                    "stem": quarantined_row.stem,
+                    "reason_code": reason_code,
+                    "obligation_id": mapping.obligation_id,
+                    "contract_ref": mapping.contract_ref,
+                    "channel_class": mapping.channel_class,
+                    "boundary_disposition": mapping.boundary_disposition,
+                    "strict_policy_required": mapping.strict_policy_required,
+                    "mapping_status": mapping_status,
+                    "rationale_token": mapping.rationale_token,
+                    "details": details,
+                }
+            )
+    return rows
+
+
+_validate_preflight_contract_map()
+
+
+def _summarize_preflight_producer_obligation_rows(
+    rows: Sequence[dict[str, Any]],
+) -> dict[str, Any]:
+    return {
+        "row_count": len(rows),
+        "reason_code_counts": dict(sorted(Counter(row["reason_code"] for row in rows).items())),
+        "contract_ref_counts": dict(
+            sorted(Counter((row["contract_ref"] or "UNMAPPED") for row in rows).items())
+        ),
+        "channel_class_counts": dict(
+            sorted(Counter(row["channel_class"] for row in rows).items())
+        ),
+        "disposition_counts": dict(
+            sorted(Counter(row["boundary_disposition"] for row in rows).items())
+        ),
+        "unmapped_reason_code_count": sum(
+            1 for row in rows if row["mapping_status"] != "mapped"
+        ),
+    }
+
+
+@dataclass(frozen=True, slots=True)
 class EligibleRecord:
     seed: SeedTuple
     soil_ofe_count: int
@@ -1091,17 +1280,29 @@ def run_campaign(args: argparse.Namespace) -> dict[str, Any]:
     selected_by_seed_id = {record.seed.seed_id: record for record in selected}
     selected_by_bin_counter = Counter((r.climate_bin, r.slope_bin) for r in selected)
     seed_by_bin_counter = Counter((r.climate_bin, r.slope_bin) for r in stratified)
+    producer_obligation_rows = _build_preflight_producer_obligation_rows(
+        quarantined,
+        strict_policy=bool(args.policy_era_producer_obligation_strict),
+    )
+    producer_obligation_summary = _summarize_preflight_producer_obligation_rows(
+        producer_obligation_rows
+    )
 
     preflight_payload = {
         "total_discovered": discovered_total,
         "eligible_single_ofe": len(eligible),
         "quarantined": len(quarantined),
+        "policy_era_producer_obligation_strict": bool(
+            args.policy_era_producer_obligation_strict
+        ),
         "preflight_cache_json": str(cached_preflight_path) if cached_preflight_path else "",
         "quarantine_reason_counts": dict(
             sorted(
                 Counter(reason for row in quarantined for reason in row.reason_codes).items()
             )
         ),
+        "producer_obligation_summary": producer_obligation_summary,
+        "producer_obligation_records": producer_obligation_rows,
         "quarantined_records": [row.as_dict() for row in quarantined],
         "eligible_records": [row.as_dict() for row in stratified],
     }
@@ -1128,6 +1329,24 @@ def run_campaign(args: argparse.Namespace) -> dict[str, Any]:
             "reason_codes",
             "details",
             "soil_ofe_count",
+        ],
+    )
+    _write_csv(
+        output_root / "preflight_contract_obligations.csv",
+        rows=producer_obligation_rows,
+        fieldnames=[
+            "seed_id",
+            "run_id",
+            "stem",
+            "reason_code",
+            "obligation_id",
+            "contract_ref",
+            "channel_class",
+            "boundary_disposition",
+            "strict_policy_required",
+            "mapping_status",
+            "rationale_token",
+            "details",
         ],
     )
 
@@ -1451,6 +1670,22 @@ def run_campaign(args: argparse.Namespace) -> dict[str, Any]:
             "eligible_single_ofe": len(eligible),
             "quarantined": len(quarantined),
             "quarantine_reason_counts": preflight_payload["quarantine_reason_counts"],
+            "policy_era_producer_obligation_strict": bool(
+                args.policy_era_producer_obligation_strict
+            ),
+            "producer_obligation_row_count": producer_obligation_summary["row_count"],
+            "producer_obligation_unmapped_count": producer_obligation_summary[
+                "unmapped_reason_code_count"
+            ],
+            "producer_obligation_channel_counts": producer_obligation_summary[
+                "channel_class_counts"
+            ],
+            "producer_obligation_contract_counts": producer_obligation_summary[
+                "contract_ref_counts"
+            ],
+            "producer_obligation_manifest_csv": str(
+                output_root / "preflight_contract_obligations.csv"
+            ),
         },
         "positive_controls": {
             "controls_expected": len(positive_controls),
@@ -2044,6 +2279,14 @@ def _build_parser() -> argparse.ArgumentParser:
     run_parser.add_argument("--profile-weight-p4", type=float, default=1.0)
     run_parser.add_argument("--profile-weight-p5", type=float, default=1.15)
     run_parser.add_argument("--profile-floor-count", type=int, default=6)
+    run_parser.add_argument(
+        "--policy-era-producer-obligation-strict",
+        action="store_true",
+        help=(
+            "Fail preflight manifest generation when quarantine reason codes cannot be "
+            "mapped to deterministic producer-obligation contract rows."
+        ),
+    )
     run_parser.add_argument("--wepp-binary", default="/workdir/wepppy/wepp_runner/bin/latest")
     run_parser.add_argument("--execution-timeout-seconds", type=int, default=180)
 
