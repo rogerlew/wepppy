@@ -370,9 +370,16 @@ Current provisional kernel estimator:
 
 ### 9.6 HRU outputs and persisted artifacts
 
-Persisted artifact:
+Persisted artifacts:
 
 - `geneva/hru_table.parquet`
+- `geneva/hru_map.tif` (HRU raster index map; `int32`, `nodata=0`)
+- `geneva/hru_map_legend.json` (map value-to-HRU legend and mapping diagnostics)
+
+Current generation path:
+
+- `geneva_prepare_hrus` (wepppyo3) now generates the HRU map and legend in the Rust hot path.
+- Python `GenevaHruPreparationService` passes kernel output paths (`hru_map_output_tif`, `hru_map_legend_output_json`) and validates artifact materialization plus returned `hru_map` summary metadata.
 
 Persisted columns:
 
@@ -398,6 +405,14 @@ Persisted summary:
 
 - `geneva/hru_prepare_summary.json`
 - current summary includes `hru_count`, `hru_area_total_m2`, `hru_area_total_acres`, `hsg_provenance_counts`, warnings, refs, artifact relpaths, and CN-table lookup metadata (`lookup_sha256`, runtime source, fallback count).
+- current summary `artifacts` include `hru_map_relpath` and `hru_map_legend_relpath`.
+- current summary `hru_map` block includes:
+  - `nodata_value`
+  - `hru_value_count`
+  - `fallback_id_match_count`
+  - `mapping_status` (`complete|partial`)
+  - `active_cell_count`, `mapped_cell_count`, `unmapped_cell_count`
+  - `unresolved_component_count` and bounded `unresolved_component_samples`.
 
 ## 10. Frequency Panel Contract (Current)
 
@@ -628,7 +643,7 @@ NRCS cautions that legacy Type I/IA/II/III regional distributions can be inconsi
 - `state_version=1`
 - `enabled`
 - `config_snapshot`
-- artifact readiness flags (`hru_table_ready`, `frequency_panel_ready`, `batch_summary_ready`)
+- artifact readiness flags (`hru_table_ready`, `hru_map_ready`, `hru_map_legend_ready`, `frequency_panel_ready`, `batch_summary_ready`)
 - `updated_at`
 
 ### 12.3 Query/report summary payload

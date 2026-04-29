@@ -156,6 +156,8 @@ class GenevaResultsService:
             "errors": results["errors"],
             "artifacts": {
                 "hru_table_ready": bool(geneva.artifact_io.exists(geneva.wd, "hru_table.parquet")),
+                "hru_map_ready": bool(geneva.artifact_io.exists(geneva.wd, "hru_map.tif")),
+                "hru_map_legend_ready": bool(geneva.artifact_io.exists(geneva.wd, "hru_map_legend.json")),
                 "frequency_panel_ready": bool(geneva.artifact_io.exists(geneva.wd, "frequency_panel.json")),
                 "batch_summary_ready": bool(geneva.artifact_io.exists(geneva.wd, "batch_summary.json")),
             },

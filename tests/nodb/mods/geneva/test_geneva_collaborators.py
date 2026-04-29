@@ -94,6 +94,7 @@ class _RecordingKernelGateway:
     def call_json_api(self, api_name: str, payload: dict[str, object]) -> dict[str, object]:
         if api_name == "geneva_prepare_hrus":
             self.prepare_calls += 1
+            self._materialize_hru_map_artifacts(payload)
             return {
                 "status": "ok",
                 "phase": "prepare_hrus",
@@ -102,6 +103,17 @@ class _RecordingKernelGateway:
                 "diagnostics": {
                     "hru_area_total_m2": 900.0,
                     "hsg_provenance_counts": {"coded_lookup": 1},
+                },
+                "hru_map": {
+                    "nodata_value": 0,
+                    "hru_value_count": 1,
+                    "fallback_id_match_count": 0,
+                    "mapping_status": "complete",
+                    "active_cell_count": 1,
+                    "mapped_cell_count": 1,
+                    "unmapped_cell_count": 0,
+                    "unresolved_component_count": 0,
+                    "unresolved_component_samples": [],
                 },
                 "warnings": [],
             }
@@ -172,6 +184,37 @@ class _RecordingKernelGateway:
             }
 
         raise AssertionError(f"Unexpected API call: {api_name}")
+
+    def _materialize_hru_map_artifacts(self, payload: dict[str, object]) -> None:
+        map_path = str(payload.get("hru_map_output_tif") or "").strip()
+        legend_path = str(payload.get("hru_map_legend_output_json") or "").strip()
+        if map_path:
+            path = Path(map_path)
+            path.parent.mkdir(parents=True, exist_ok=True)
+            path.write_bytes(b"fake-geotiff")
+        if legend_path:
+            path = Path(legend_path)
+            path.parent.mkdir(parents=True, exist_ok=True)
+            path.write_text(
+                json.dumps(
+                    {
+                        "schema_version": 1,
+                        "hru_map_relpath": "hru_map.tif",
+                        "nodata_value": 0,
+                        "mapping_status": "complete",
+                        "active_cell_count": 1,
+                        "mapped_cell_count": 1,
+                        "unmapped_cell_count": 0,
+                        "unresolved_component_count": 0,
+                        "unresolved_component_samples": [],
+                        "rows": [],
+                    },
+                    indent=2,
+                    sort_keys=True,
+                )
+                + "\n",
+                encoding="utf-8",
+            )
 
 
 def _geneva_stub(
@@ -376,9 +419,19 @@ def test_hru_preparation_service_persists_hru_artifacts(tmp_path: Path) -> None:
     summary = service.prepare_hrus(geneva, force_rebuild=True)
     assert summary["hru_count"] == 1
     assert summary["artifacts"]["hru_table_relpath"] == "hru_table.parquet"
+    assert summary["artifacts"]["hru_map_relpath"] == "hru_map.tif"
+    assert summary["artifacts"]["hru_map_legend_relpath"] == "hru_map_legend.json"
+    assert summary["hru_map"]["nodata_value"] == 0
     assert summary["cn_table"]["runtime_source"] == "geneva_cn_table_csv_v1"
     assert (tmp_path / "geneva" / "hru_table.parquet").exists()
+    assert (tmp_path / "geneva" / "hru_map.tif").exists()
+    assert (tmp_path / "geneva" / "hru_map_legend.json").exists()
     assert (tmp_path / "geneva" / "hru_prepare_summary.json").exists()
+    legend = geneva.artifact_io.read_json(geneva.wd, "hru_map_legend.json")
+    assert legend["schema_version"] == 1
+    assert legend["hru_map_relpath"] == "hru_map.tif"
+    assert legend["nodata_value"] == 0
+    assert legend["mapping_status"] in {"complete", "partial"}
 
 
 def test_hru_preparation_service_rebuilds_when_cn_table_changes_and_persists_runtime_cn(
@@ -412,6 +465,22 @@ def test_hru_preparation_service_rebuilds_when_cn_table_changes_and_persists_run
     assert rebuilt_rows[0]["antecedent_condition_source"] == "user_override"
     assert rebuilt_rows[0]["cn_source"] == "geneva_cn_table_csv_v1"
     assert rebuilt_summary["cn_table"]["lookup_sha256"] == modify_result["sha256"]
+
+
+def test_hru_preparation_service_rebuilds_when_hru_map_artifact_missing(
+    tmp_path: Path,
+) -> None:
+    service = GenevaHruPreparationService()
+    kernel_gateway = _RecordingKernelGateway(prepare_rows=[_kernel_hru_row()])
+    geneva = _geneva_stub(tmp_path, kernel_gateway=kernel_gateway)
+
+    service.prepare_hrus(geneva, force_rebuild=True)
+    assert kernel_gateway.prepare_calls == 1
+
+    (tmp_path / "geneva" / "hru_map.tif").unlink()
+
+    service.prepare_hrus(geneva, force_rebuild=False)
+    assert kernel_gateway.prepare_calls == 2
 
 
 def test_batch_run_uses_updated_cn_values_from_hru_table_parquet(tmp_path: Path) -> None:

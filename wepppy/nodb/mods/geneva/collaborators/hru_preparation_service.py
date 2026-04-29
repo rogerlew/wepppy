@@ -32,6 +32,8 @@ _FLOAT_TOLERANCE = 1e-9
 _TABLE_CN_SOURCE = "geneva_cn_table_csv_v1"
 _TABLE_FALLBACK_CN_SOURCE = "geneva_proxy_cn_v1_fallback_missing_row"
 _TABLE_FALLBACK_WARNING = "cn_table_missing_exact_row"
+_HRU_MAP_RELPATH = "hru_map.tif"
+_HRU_MAP_LEGEND_RELPATH = "hru_map_legend.json"
 
 
 class GenevaHruPreparationService:
@@ -79,6 +81,10 @@ class GenevaHruPreparationService:
             "hydrophobic_forest_moderate": bool(config["hydrophobic_forest_moderate"]),
             "hydrophobic_shrub_high": bool(config["hydrophobic_shrub_high"]),
             "hydrophobic_shrub_moderate": bool(config["hydrophobic_shrub_moderate"]),
+            "hru_map_output_tif": str(artifact_io.resolve_path(geneva.wd, _HRU_MAP_RELPATH)),
+            "hru_map_legend_output_json": str(
+                artifact_io.resolve_path(geneva.wd, _HRU_MAP_LEGEND_RELPATH)
+            ),
         }
         if "burn_severity_tif" in resolved_refs:
             payload["burn_severity_tif"] = resolved_refs["burn_severity_tif"]
@@ -118,6 +124,11 @@ class GenevaHruPreparationService:
             hru_rows,
             columns=_HRU_TABLE_COLUMNS,
         )
+        map_summary = self._resolve_kernel_hru_map_summary(
+            response=response,
+            artifact_io=artifact_io,
+            geneva=geneva,
+        )
 
         summary: dict[str, Any] = {
             "status": "ok",
@@ -140,7 +151,10 @@ class GenevaHruPreparationService:
                 "hru_table_relpath": hru_table_relpath,
                 "hru_prepare_summary_relpath": "hru_prepare_summary.json",
                 "cn_table_relpath": CN_TABLE_CONTRACT_PATH,
+                "hru_map_relpath": map_summary["hru_map_relpath"],
+                "hru_map_legend_relpath": map_summary["hru_map_legend_relpath"],
             },
+            "hru_map": map_summary["hru_map"],
         }
         artifact_io.write_json(geneva.wd, "hru_prepare_summary.json", summary)
         return summary
@@ -155,9 +169,20 @@ class GenevaHruPreparationService:
     ) -> bool:
         if not artifact_io.exists(geneva.wd, "hru_table.parquet"):
             return False
+        if not artifact_io.exists(geneva.wd, _HRU_MAP_RELPATH):
+            return False
+        if not artifact_io.exists(geneva.wd, _HRU_MAP_LEGEND_RELPATH):
+            return False
 
         cached_cn = cached_summary.get("cn_table")
         if not isinstance(cached_cn, Mapping):
+            return False
+        cached_artifacts = cached_summary.get("artifacts")
+        if not isinstance(cached_artifacts, Mapping):
+            return False
+        if cached_artifacts.get("hru_map_relpath") != _HRU_MAP_RELPATH:
+            return False
+        if cached_artifacts.get("hru_map_legend_relpath") != _HRU_MAP_LEGEND_RELPATH:
             return False
 
         cached_sha = cached_cn.get("lookup_sha256")
@@ -255,6 +280,60 @@ class GenevaHruPreparationService:
         term = (100.0 / cn_arc_ii) - 1.0
         denominator = (1.879 * (term**1.15)) + 1.0
         return min(max(100.0 / denominator, 0.0), 100.0)
+
+    def _resolve_kernel_hru_map_summary(
+        self,
+        *,
+        response: Mapping[str, Any],
+        artifact_io: Any,
+        geneva: "Geneva",
+    ) -> dict[str, Any]:
+        kernel_summary = response.get("hru_map")
+        if not isinstance(kernel_summary, Mapping):
+            raise GenevaKernelError(
+                "geneva_prepare_hrus returned invalid hru_map payload.",
+                code="contract_violation",
+            )
+
+        if not artifact_io.exists(geneva.wd, _HRU_MAP_RELPATH):
+            raise GenevaKernelError(
+                "geneva_prepare_hrus did not materialize hru_map.tif.",
+                code="contract_violation",
+            )
+        if not artifact_io.exists(geneva.wd, _HRU_MAP_LEGEND_RELPATH):
+            raise GenevaKernelError(
+                "geneva_prepare_hrus did not materialize hru_map_legend.json.",
+                code="contract_violation",
+            )
+
+        unresolved_samples = kernel_summary.get("unresolved_component_samples", [])
+        if not isinstance(unresolved_samples, list):
+            unresolved_samples = []
+        normalized_unresolved_samples = [
+            str(sample).strip()
+            for sample in unresolved_samples
+            if str(sample).strip()
+        ]
+
+        return {
+            "hru_map_relpath": _HRU_MAP_RELPATH,
+            "hru_map_legend_relpath": _HRU_MAP_LEGEND_RELPATH,
+            "hru_map": {
+                "nodata_value": int(kernel_summary.get("nodata_value", 0) or 0),
+                "hru_value_count": int(kernel_summary.get("hru_value_count", 0) or 0),
+                "fallback_id_match_count": int(
+                    kernel_summary.get("fallback_id_match_count", 0) or 0
+                ),
+                "mapping_status": str(kernel_summary.get("mapping_status", "complete") or "complete"),
+                "active_cell_count": int(kernel_summary.get("active_cell_count", 0) or 0),
+                "mapped_cell_count": int(kernel_summary.get("mapped_cell_count", 0) or 0),
+                "unmapped_cell_count": int(kernel_summary.get("unmapped_cell_count", 0) or 0),
+                "unresolved_component_count": int(
+                    kernel_summary.get("unresolved_component_count", 0) or 0
+                ),
+                "unresolved_component_samples": normalized_unresolved_samples,
+            },
+        }
 
 
 __all__ = ["GenevaHruPreparationService"]

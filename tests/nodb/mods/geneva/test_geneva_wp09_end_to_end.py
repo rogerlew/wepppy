@@ -1,6 +1,7 @@
 from __future__ import annotations
 
 from dataclasses import dataclass
+import json
 from pathlib import Path
 from time import perf_counter
 from types import SimpleNamespace
@@ -145,6 +146,7 @@ class _ScenarioKernelGateway:
     def call_json_api(self, api_name: str, payload: dict[str, Any]) -> dict[str, Any]:
         if api_name == "geneva_prepare_hrus":
             self.prepare_payloads.append(dict(payload))
+            self._materialize_hru_map_artifacts(payload)
             return {
                 "status": "ok",
                 "phase": "prepare_hrus",
@@ -193,6 +195,17 @@ class _ScenarioKernelGateway:
                     "hru_area_total_m2": 20_000.0,
                     "hsg_provenance_counts": {"coded_lookup": 2},
                 },
+                "hru_map": {
+                    "nodata_value": 0,
+                    "hru_value_count": 2,
+                    "fallback_id_match_count": 0,
+                    "mapping_status": "complete",
+                    "active_cell_count": 2,
+                    "mapped_cell_count": 2,
+                    "unmapped_cell_count": 0,
+                    "unresolved_component_count": 0,
+                    "unresolved_component_samples": [],
+                },
                 "warnings": [],
             }
         if api_name == "geneva_build_frequency_panel":
@@ -230,6 +243,37 @@ class _ScenarioKernelGateway:
             self.run_batch_payloads.append(dict(payload))
             return _build_run_batch_response(payload, self._summary_metrics)
         raise AssertionError(f"Unexpected API call: {api_name}")
+
+    def _materialize_hru_map_artifacts(self, payload: dict[str, Any]) -> None:
+        map_path = str(payload.get("hru_map_output_tif") or "").strip()
+        legend_path = str(payload.get("hru_map_legend_output_json") or "").strip()
+        if map_path:
+            path = Path(map_path)
+            path.parent.mkdir(parents=True, exist_ok=True)
+            path.write_bytes(b"fake-geotiff")
+        if legend_path:
+            path = Path(legend_path)
+            path.parent.mkdir(parents=True, exist_ok=True)
+            path.write_text(
+                json.dumps(
+                    {
+                        "schema_version": 1,
+                        "hru_map_relpath": "hru_map.tif",
+                        "nodata_value": 0,
+                        "mapping_status": "complete",
+                        "active_cell_count": 2,
+                        "mapped_cell_count": 2,
+                        "unmapped_cell_count": 0,
+                        "unresolved_component_count": 0,
+                        "unresolved_component_samples": [],
+                        "rows": [],
+                    },
+                    indent=2,
+                    sort_keys=True,
+                )
+                + "\n",
+                encoding="utf-8",
+            )
 
 
 @dataclass(frozen=True)

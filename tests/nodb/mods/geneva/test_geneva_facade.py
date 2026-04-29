@@ -1,5 +1,6 @@
 from __future__ import annotations
 
+import json
 from pathlib import Path
 from typing import Any
 
@@ -53,6 +54,7 @@ class _FakeKernelGateway:
         self.calls.append((api_name, dict(payload)))
 
         if api_name == "geneva_prepare_hrus":
+            self._materialize_hru_map_artifacts(payload)
             return {
                 "status": "ok",
                 "phase": "prepare_hrus",
@@ -81,6 +83,17 @@ class _FakeKernelGateway:
                 "diagnostics": {
                     "hru_area_total_m2": 900.0,
                     "hsg_provenance_counts": {"coded_lookup": 1},
+                },
+                "hru_map": {
+                    "nodata_value": 0,
+                    "hru_value_count": 1,
+                    "fallback_id_match_count": 0,
+                    "mapping_status": "complete",
+                    "active_cell_count": 1,
+                    "mapped_cell_count": 1,
+                    "unmapped_cell_count": 0,
+                    "unresolved_component_count": 0,
+                    "unresolved_component_samples": [],
                 },
                 "warnings": [],
             }
@@ -224,6 +237,37 @@ class _FakeKernelGateway:
 
         raise AssertionError(f"Unexpected API call: {api_name}")
 
+    def _materialize_hru_map_artifacts(self, payload: dict[str, Any]) -> None:
+        map_path = str(payload.get("hru_map_output_tif") or "").strip()
+        legend_path = str(payload.get("hru_map_legend_output_json") or "").strip()
+        if map_path:
+            path = Path(map_path)
+            path.parent.mkdir(parents=True, exist_ok=True)
+            path.write_bytes(b"fake-geotiff")
+        if legend_path:
+            path = Path(legend_path)
+            path.parent.mkdir(parents=True, exist_ok=True)
+            path.write_text(
+                json.dumps(
+                    {
+                        "schema_version": 1,
+                        "hru_map_relpath": "hru_map.tif",
+                        "nodata_value": 0,
+                        "mapping_status": "complete",
+                        "active_cell_count": 1,
+                        "mapped_cell_count": 1,
+                        "unmapped_cell_count": 0,
+                        "unresolved_component_count": 0,
+                        "unresolved_component_samples": [],
+                        "rows": [],
+                    },
+                    indent=2,
+                    sort_keys=True,
+                )
+                + "\n",
+                encoding="utf-8",
+            )
+
 
 class _FailingPrepareKernelGateway(_FakeKernelGateway):
     def call_json_api(self, api_name: str, payload: dict[str, Any]) -> dict[str, Any]:
@@ -279,6 +323,8 @@ def test_prepare_hrus_facade_delegates_to_collaborator(
                 "artifacts": {
                     "hru_table_relpath": "hru_table.parquet",
                     "hru_prepare_summary_relpath": "hru_prepare_summary.json",
+                    "hru_map_relpath": "hru_map.tif",
+                    "hru_map_legend_relpath": "hru_map_legend.json",
                 },
             }
 
@@ -312,6 +358,10 @@ def test_geneva_lifecycle_transitions_and_persistence_roundtrip(
     geneva.set_enabled(True)
     geneva.prepare_hrus(force_rebuild=True)
     assert geneva.status_payload()["status"] == "prepared"
+    state_after_prepare = geneva.state_payload()
+    assert state_after_prepare["artifacts"]["hru_table_ready"] is True
+    assert state_after_prepare["artifacts"]["hru_map_ready"] is True
+    assert state_after_prepare["artifacts"]["hru_map_legend_ready"] is True
 
     panel = geneva.build_frequency_panel(rebuild=True)
     assert len(panel["cells"]) == 2
