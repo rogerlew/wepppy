@@ -129,6 +129,21 @@ describe("controlBase job status error handling", () => {
         expect(base.fetch_job_status).toHaveBeenCalledTimes(1);
     });
 
+    test("set_rq_job_id does not re-dispatch completion for the same finished job id", () => {
+        base.poll_completion_event = "JOB_DONE_EVENT";
+        base.triggerEvent = jest.fn();
+        base.should_continue_polling = jest.fn(() => false);
+        base.fetch_job_status = jest.fn((self) => {
+            self.handle_job_status_response(self, { status: "finished" });
+        });
+
+        base.set_rq_job_id(base, "job-finished-1");
+        base.set_rq_job_id(base, "job-finished-1");
+
+        const completionEvents = base.triggerEvent.mock.calls.filter((call) => call[0] === "JOB_DONE_EVENT");
+        expect(completionEvents).toHaveLength(1);
+    });
+
     test("retries polling with session token after 401 and reuses auth mode", async () => {
         const unauthenticatedError = {
             name: "HttpError",

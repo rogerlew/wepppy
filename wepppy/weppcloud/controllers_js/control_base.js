@@ -1136,12 +1136,10 @@ function controlBase() {
             const normalizedJobId = normalizeJobId(job_id);
             self.job_id = normalizedJobId;
 
-            self._job_completion_dispatched = false;
-            self._job_failure_dispatched = false;
-            self._job_status_stacktrace_from_poll = false;
-            self._job_status_error_parts = null;
-
             if (normalizedJobId === self.rq_job_id) {
+                // Keep completion/failure dispatch guards when the tracked job id
+                // is unchanged so repeated state hydration does not re-emit
+                // terminal completion events for the same finished job.
                 if (!normalizedJobId) {
                     self.render_job_status(self);
                     self.render_job_hint(self);
@@ -1153,6 +1151,11 @@ function controlBase() {
                 }
                 return;
             }
+
+            self._job_completion_dispatched = false;
+            self._job_failure_dispatched = false;
+            self._job_status_stacktrace_from_poll = false;
+            self._job_status_error_parts = null;
 
             self.rq_job_id = normalizedJobId;
             self.rq_job_status = null;
