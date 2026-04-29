@@ -375,7 +375,6 @@ describe("Geneva summary report interactions", () => {
         document.body.insertAdjacentHTML(
             "beforeend",
             `
-            <select id="geneva-summary-map-event" data-geneva-summary-map-field="event"></select>
             <select id="geneva-summary-map-measure" data-geneva-summary-map-field="measure">
               <option value="runoff_depth" selected>Runoff Depth</option>
               <option value="runoff_volume">Runoff Volume</option>
@@ -399,18 +398,24 @@ describe("Geneva summary report interactions", () => {
                 this.setProps = mapSetProps;
             }
         }
+        function TileLayer(props) {
+            this.props = props;
+        }
+        function BitmapLayer(props, overrides) {
+            this.props = Object.assign({}, props, overrides || {});
+        }
         function GeoJsonLayer(props) {
             this.props = props;
         }
         class WebMercatorViewport {
             fitBounds() {
-                return {
+                return Object.freeze({
                     longitude: -116.45,
                     latitude: 45.25,
                     zoom: 11,
                     pitch: 0,
                     bearing: 0
-                };
+                });
             }
         }
         function MapView(props) {
@@ -418,13 +423,15 @@ describe("Geneva summary report interactions", () => {
         }
         global.deck = {
             Deck,
+            TileLayer,
+            BitmapLayer,
             GeoJsonLayer,
             WebMercatorViewport,
             MapView
         };
         window.deck = global.deck;
 
-        global.fetch = jest.fn((url) => {
+        global.fetch = jest.fn((url, options) => {
             if (url.indexOf("hru_map_features") >= 0) {
                 return Promise.resolve({
                     ok: true,
@@ -449,6 +456,9 @@ describe("Geneva summary report interactions", () => {
                 });
             }
             if (url.indexOf("hru_map_rows") >= 0) {
+                const requestBody = JSON.parse((options && options.body) || "{}");
+                const stormId = requestBody.storm_id || "cligen_30m_10y";
+                const rowValue = stormId === "noaa14_60m_10y" ? 5.0 : 4.0;
                 return Promise.resolve({
                     ok: true,
                     json: () => Promise.resolve({
@@ -456,11 +466,11 @@ describe("Geneva summary report interactions", () => {
                         availability: { status: "available", reason_code: null },
                         records: [
                             {
-                                storm_id: "cligen_30m_10y",
+                                storm_id: stormId,
                                 hru_id: "hru_7",
                                 hru_value: 7,
                                 measure_id: "runoff_depth",
-                                value: 4.0,
+                                value: rowValue,
                                 unit: "mm"
                             }
                         ]
@@ -475,17 +485,54 @@ describe("Geneva summary report interactions", () => {
         await new Promise((resolve) => setTimeout(resolve, 0));
         await new Promise((resolve) => setTimeout(resolve, 0));
 
+        const mapCanvas = document.getElementById("geneva-summary-map-canvas");
+        expect(mapCanvas).toBeTruthy();
+        const wheelBubbleHandler = jest.fn();
+        document.body.addEventListener("wheel", wheelBubbleHandler);
+
+        const wheelWithoutCtrl = new Event("wheel", { bubbles: true, cancelable: true });
+        Object.defineProperty(wheelWithoutCtrl, "ctrlKey", { value: false });
+        mapCanvas.dispatchEvent(wheelWithoutCtrl);
+        expect(wheelBubbleHandler).not.toHaveBeenCalled();
+
+        const wheelWithCtrl = new Event("wheel", { bubbles: true, cancelable: true });
+        Object.defineProperty(wheelWithCtrl, "ctrlKey", { value: true });
+        mapCanvas.dispatchEvent(wheelWithCtrl);
+        expect(wheelBubbleHandler).toHaveBeenCalledTimes(1);
+        document.body.removeEventListener("wheel", wheelBubbleHandler);
+
         expect(global.fetch).toHaveBeenCalled();
         expect(mapSetProps.mock.calls.length).toBeGreaterThan(0);
 
-        const layerCall = mapSetProps.mock.calls.find((call) => call[0] && Array.isArray(call[0].layers));
+        const layerCall = mapSetProps.mock.calls.find((call) => {
+            if (!call[0] || !Array.isArray(call[0].layers)) {
+                return false;
+            }
+            return call[0].layers.some((layerInstance) =>
+                layerInstance
+                && layerInstance.props
+                && layerInstance.props.id === "geneva-summary-hru-choropleth"
+            );
+        });
         expect(layerCall).toBeTruthy();
-        expect(layerCall[0].layers).toHaveLength(1);
-        expect(layerCall[0].layers[0].props.id).toBe("geneva-summary-hru-choropleth");
-        const eventOptions = Array.from(
-            document.querySelectorAll("#geneva-summary-map-event option")
-        ).map((option) => option.value);
-        expect(eventOptions).toEqual(["cligen_30m_10y", "noaa14_60m_10y"]);
+        expect(layerCall[0].layers).toHaveLength(2);
+        expect(layerCall[0].layers[0].props.id).toBe("geneva-summary-base-google-terrain");
+        expect(layerCall[0].layers[1].props.id).toBe("geneva-summary-hru-choropleth");
+
+        const initialRowsRequest = global.fetch.mock.calls.find((call) => call[0].indexOf("hru_map_rows") >= 0);
+        expect(initialRowsRequest).toBeTruthy();
+        expect(JSON.parse(initialRowsRequest[1].body).storm_id).toBe("cligen_30m_10y");
+
+        const marker = document.querySelector('[data-geneva-summary-chart] [data-storm-id="noaa14_60m_10y"]');
+        expect(marker).toBeTruthy();
+        marker.dispatchEvent(new MouseEvent("click", { bubbles: true }));
+        await new Promise((resolve) => setTimeout(resolve, 0));
+        await new Promise((resolve) => setTimeout(resolve, 0));
+
+        const rowsRequests = global.fetch.mock.calls
+            .filter((call) => call[0].indexOf("hru_map_rows") >= 0);
+        const latestRowsRequest = rowsRequests[rowsRequests.length - 1];
+        expect(JSON.parse(latestRowsRequest[1].body).storm_id).toBe("noaa14_60m_10y");
 
         const boundsFitCall = mapSetProps.mock.calls.find((call) => call[0] && call[0].initialViewState);
         expect(boundsFitCall).toBeTruthy();
@@ -494,7 +541,7 @@ describe("Geneva summary report interactions", () => {
         const legend = document.querySelector("[data-geneva-summary-map-legend]");
         expect(legend.hidden).toBe(false);
         expect(document.querySelector("[data-geneva-summary-map-legend-title]").textContent).toContain("Runoff Depth");
-        expect(document.querySelector("[data-geneva-summary-map-status]").textContent).toContain("Rendered");
+        expect(document.querySelector("[data-geneva-summary-map-status]").textContent).toContain("noaa14_60m_10y");
         expect(document.querySelector("[data-geneva-summary-map-error]").hidden).toBe(true);
     });
 });

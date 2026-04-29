@@ -20,6 +20,11 @@
   margin-bottom: 0;
 }
 
+.geneva-summary__map-event-follow-label {
+  margin: 0;
+  align-self: center;
+}
+
 .geneva-summary__map-measure {
   display: inline-grid;
   gap: var(--wc-space-xs);
@@ -39,15 +44,32 @@
   aspect-ratio: 16 / 10;
 }
 
+.geneva-summary__map-layout .wc-map-layout__canvas {
+  justify-items: stretch;
+}
+
+@media (min-width: 960px) {
+  .geneva-summary__map-layout {
+    grid-template-columns: minmax(0, 1fr);
+  }
+}
+
 .geneva-summary__map-status {
   margin: 0;
 }
 
 .geneva-summary__map-legend {
+  position: absolute;
+  top: var(--wc-space-sm);
+  left: var(--wc-space-sm);
+  z-index: 10;
+  margin: 0;
+  width: min(22rem, calc(100% - (var(--wc-space-sm) * 2)));
   padding: var(--wc-space-sm);
   border: 1px solid var(--wc-color-border);
   border-radius: var(--wc-radius-sm);
   background: color-mix(in srgb, var(--wc-color-surface) 92%, var(--wc-color-surface-alt));
+  box-shadow: var(--wc-shadow-sm);
 }
 
 .geneva-summary__map-legend-title {
@@ -71,6 +93,44 @@
   font-variant-numeric: tabular-nums;
   color: var(--wc-color-text-muted);
   font-size: 0.82rem;
+}
+
+.geneva-summary__map-zoom-tip {
+  position: absolute;
+  right: var(--wc-space-sm);
+  bottom: var(--wc-space-sm);
+  z-index: 10;
+  margin: 0;
+  padding: 0.38rem 0.62rem;
+  border: 1px solid color-mix(in srgb, var(--wc-color-border) 80%, transparent);
+  border-radius: var(--wc-radius-sm);
+  background: color-mix(in srgb, var(--wc-color-surface) 88%, transparent);
+  color: var(--wc-color-text-muted);
+  font-size: 0.78rem;
+  line-height: 1.3;
+}
+
+.geneva-summary__map-zoom-tip-key {
+  color: var(--wc-color-text);
+  font-weight: var(--wc-font-weight-semibold);
+}
+
+.geneva-summary__map-feedback {
+  display: grid;
+  gap: var(--wc-space-sm);
+}
+
+.geneva-summary .deck-tooltip {
+  max-width: 18rem;
+  padding: 0.45rem 0.62rem;
+  border: 1px solid color-mix(in srgb, var(--wc-color-border-strong) 65%, transparent);
+  border-radius: var(--wc-radius-sm);
+  background: color-mix(in srgb, #020617 92%, transparent);
+  color: #e2e8f0;
+  box-shadow: var(--wc-shadow-md);
+  font-size: 0.78rem;
+  line-height: 1.35;
+  white-space: pre-line;
 }
 
 .geneva-summary__chart-frame {

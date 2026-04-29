@@ -21,6 +21,9 @@ var GenevaSummaryReport = (function () {
         "geneva-summary__series-line--4"
     ];
     var MAP_MEASURE_IDS = ["runoff_depth", "runoff_volume"];
+    var MAP_BASE_TERRAIN_TEMPLATE = "https://{s}.google.com/vt/lyrs=p&x={x}&y={y}&z={z}";
+    var MAP_BASE_TERRAIN_SUBDOMAINS = ["mt0", "mt1", "mt2", "mt3"];
+    var MAP_BASE_LAYER_ID = "geneva-summary-base-google-terrain";
 
     function byId(id) {
         return document.getElementById(id);
@@ -349,6 +352,18 @@ var GenevaSummaryReport = (function () {
         return (value - min) / (max - min);
     }
 
+    function buildMapTileUrl(template, subdomains, x, y, z) {
+        var domainList = Array.isArray(subdomains) ? subdomains : [];
+        var subdomain = domainList.length
+            ? domainList[(x + y + z) % domainList.length]
+            : "";
+        return template
+            .replace("{s}", subdomain)
+            .replace("{x}", x)
+            .replace("{y}", y)
+            .replace("{z}", z);
+    }
+
     function isCompletedEventRow(row) {
         return asString(row && row.status).toLowerCase() === "completed";
     }
@@ -389,7 +404,6 @@ var GenevaSummaryReport = (function () {
         this.warningBody = document.querySelector("[data-geneva-summary-warnings-body]");
         this.errorBox = document.querySelector("[data-geneva-summary-errors]");
         this.errorBody = document.querySelector("[data-geneva-summary-errors-body]");
-        this.mapEventSelect = byId("geneva-summary-map-event");
         this.mapMeasureSelect = byId("geneva-summary-map-measure");
         this.mapCanvas = byId("geneva-summary-map-canvas");
         this.mapStatus = document.querySelector("[data-geneva-summary-map-status]");
@@ -410,8 +424,11 @@ var GenevaSummaryReport = (function () {
         this.mapFeaturesPayload = null;
         this.mapRowsPayload = null;
         this.deckInstance = null;
+        this.mapBaseLayer = null;
+        this._mapWheelCaptureBound = false;
         this.lastMapQueryKey = null;
         this.boundUnitizerPreferenceHandler = this.handleUnitizerPreferenceChange.bind(this);
+        this.boundMapWheelCaptureHandler = this.handleMapWheelCapture.bind(this);
     }
 
     GenevaSummaryReportController.prototype.init = function init() {
@@ -480,11 +497,6 @@ var GenevaSummaryReport = (function () {
                 controller.refreshFromQuery();
             });
         }
-        if (this.mapEventSelect) {
-            this.mapEventSelect.addEventListener("change", function () {
-                controller.syncSelection(controller.mapEventSelect.value, { focusSelection: false });
-            });
-        }
         if (this.mapMeasureSelect) {
             this.mapMeasureSelect.addEventListener("change", function () {
                 controller.refreshMapRows({ force: true });
@@ -494,6 +506,13 @@ var GenevaSummaryReport = (function () {
             this.mapRefreshButton.addEventListener("click", function () {
                 controller.refreshMapRows({ force: true });
             });
+        }
+        if (this.mapCanvas && !this._mapWheelCaptureBound) {
+            this.mapCanvas.addEventListener("wheel", this.boundMapWheelCaptureHandler, {
+                capture: true,
+                passive: true
+            });
+            this._mapWheelCaptureBound = true;
         }
     };
 
@@ -1278,7 +1297,6 @@ var GenevaSummaryReport = (function () {
         }
 
         this.updateSelectionStyles(options || {});
-        this.updateMapEventSelection();
         this.refreshMapRows();
     };
 
@@ -1310,8 +1328,17 @@ var GenevaSummaryReport = (function () {
         }
     };
 
+    GenevaSummaryReportController.prototype.handleMapWheelCapture = function handleMapWheelCapture(event) {
+        if (!event || event.ctrlKey) {
+            return;
+        }
+        if (typeof event.stopPropagation === "function") {
+            event.stopPropagation();
+        }
+    };
+
     GenevaSummaryReportController.prototype.renderMapControls = function renderMapControls(payload) {
-        if (!this.mapEventSelect && !this.mapMeasureSelect) {
+        if (!this.mapMeasureSelect) {
             return;
         }
 
@@ -1326,56 +1353,6 @@ var GenevaSummaryReport = (function () {
             this.replaceSelectOptions(this.mapMeasureSelect, MAP_MEASURE_IDS, selectedMeasure, measureLabel);
         }
 
-        if (this.mapEventSelect) {
-            var rows = displayEventRows(payload);
-            var stormIds = [];
-            var labelByStorm = {};
-            rows.forEach(function (row) {
-                var stormId = asString(row.storm_id).trim();
-                if (!stormId) {
-                    return;
-                }
-                stormIds.push(stormId);
-                labelByStorm[stormId] = stormId
-                    + " | " + datasourceLabel(row.datasource_id)
-                    + " | " + durationLabel(row.duration_minutes)
-                    + " | ARI " + asString(row.ari_years);
-            });
-
-            this.replaceSelectOptions(
-                this.mapEventSelect,
-                stormIds,
-                this.selectedStormId,
-                function (stormId) { return labelByStorm[stormId] || stormId; }
-            );
-
-            if (!this.mapEventSelect.options.length) {
-                var option = document.createElement("option");
-                option.value = "";
-                option.textContent = "No completed events available";
-                option.disabled = true;
-                option.selected = true;
-                this.mapEventSelect.appendChild(option);
-            }
-        }
-
-        this.updateMapEventSelection();
-    };
-
-    GenevaSummaryReportController.prototype.updateMapEventSelection = function updateMapEventSelection() {
-        if (!this.mapEventSelect) {
-            return;
-        }
-        var selected = asString(this.selectedStormId).trim();
-        if (!selected) {
-            return;
-        }
-        var hasOption = Array.from(this.mapEventSelect.options || []).some(function (option) {
-            return asString(option.value) === selected;
-        });
-        if (hasOption) {
-            this.mapEventSelect.value = selected;
-        }
     };
 
     GenevaSummaryReportController.prototype.currentMapMeasureId = function currentMapMeasureId() {
@@ -1384,13 +1361,7 @@ var GenevaSummaryReport = (function () {
     };
 
     GenevaSummaryReportController.prototype.currentMapStormId = function currentMapStormId() {
-        if (this.selectedStormId) {
-            return asString(this.selectedStormId).trim();
-        }
-        if (this.mapEventSelect) {
-            return asString(this.mapEventSelect.value).trim();
-        }
-        return "";
+        return this.selectedStormId ? asString(this.selectedStormId).trim() : "";
     };
 
     GenevaSummaryReportController.prototype.mapFeaturesUrl = function mapFeaturesUrl() {
@@ -1697,8 +1668,8 @@ var GenevaSummaryReport = (function () {
             autoHighlight: true,
             highlightColor: [255, 255, 255, 96]
         });
-
-        deck.setProps({ layers: [layer] });
+        var layers = this.buildDeckLayers(layer);
+        deck.setProps({ layers: layers });
         this.fitDeckToBounds(geometryPayload.bounds_wgs84 || featureCollection.bbox || null);
         this.setMapErrorState(null);
         this.setMapEmptyState(null);
@@ -1730,10 +1701,12 @@ var GenevaSummaryReport = (function () {
             return null;
         }
 
+        this.ensureMapBaseLayer();
+
         var props = {
             parent: this.mapCanvas,
             controller: true,
-            layers: [],
+            layers: this.buildDeckLayers(),
             initialViewState: {
                 longitude: 0,
                 latitude: 0,
@@ -1756,8 +1729,96 @@ var GenevaSummaryReport = (function () {
 
     GenevaSummaryReportController.prototype.clearMapLayer = function clearMapLayer() {
         if (this.deckInstance && typeof this.deckInstance.setProps === "function") {
-            this.deckInstance.setProps({ layers: [] });
+            this.deckInstance.setProps({ layers: this.buildDeckLayers() });
         }
+    };
+
+    GenevaSummaryReportController.prototype.ensureMapBaseLayer = function ensureMapBaseLayer() {
+        if (this.mapBaseLayer) {
+            return this.mapBaseLayer;
+        }
+        if (
+            !window.deck
+            || typeof window.deck.TileLayer !== "function"
+            || typeof window.deck.BitmapLayer !== "function"
+        ) {
+            return null;
+        }
+
+        this.mapBaseLayer = new window.deck.TileLayer({
+            id: MAP_BASE_LAYER_ID,
+            data: MAP_BASE_TERRAIN_TEMPLATE,
+            minZoom: 0,
+            maxZoom: 19,
+            tileSize: 256,
+            maxRequests: 8,
+            getTileData: function (params) {
+                var tileIndex = params && params.index ? params.index : {};
+                var x = tileIndex.x;
+                var y = tileIndex.y;
+                var z = tileIndex.z;
+                if (![x, y, z].every(Number.isFinite)) {
+                    throw new Error("Tile coords missing: x=" + x + " y=" + y + " z=" + z);
+                }
+
+                var tileUrl = buildMapTileUrl(
+                    MAP_BASE_TERRAIN_TEMPLATE,
+                    MAP_BASE_TERRAIN_SUBDOMAINS,
+                    x,
+                    y,
+                    z
+                );
+                return fetch(tileUrl, { signal: params.signal, mode: "cors" })
+                    .then(function (response) {
+                        if (!response.ok) {
+                            throw new Error("Tile fetch failed " + response.status + ": " + tileUrl);
+                        }
+                        return response.blob();
+                    })
+                    .then(function (blob) {
+                        return createImageBitmap(blob);
+                    });
+            },
+            onTileError: function (error) {
+                console.warn("[GenevaSummaryReport] Terrain tile error.", error);
+            },
+            renderSubLayers: function (props) {
+                var tile = props.tile;
+                if (!tile || !props.data || !tile.bbox) {
+                    return null;
+                }
+                var west = Number(tile.bbox.west);
+                var south = Number(tile.bbox.south);
+                var east = Number(tile.bbox.east);
+                var north = Number(tile.bbox.north);
+                if (![west, south, east, north].every(Number.isFinite)) {
+                    return null;
+                }
+
+                return new window.deck.BitmapLayer(props, {
+                    id: props.id + "-" + tile.id,
+                    data: null,
+                    image: props.data,
+                    bounds: [west, south, east, north],
+                    pickable: false,
+                    opacity: 1
+                });
+            }
+        });
+
+        return this.mapBaseLayer;
+    };
+
+    GenevaSummaryReportController.prototype.buildDeckLayers = function buildDeckLayers(overlayLayer) {
+        var layers = [];
+        var baseLayer = this.ensureMapBaseLayer();
+        if (baseLayer) {
+            layers.push(baseLayer);
+        }
+        if (overlayLayer) {
+            layers.push(overlayLayer);
+        }
+        return layers;
     };
 
     GenevaSummaryReportController.prototype.fitDeckToBounds = function fitDeckToBounds(bounds) {
@@ -1788,12 +1849,14 @@ var GenevaSummaryReport = (function () {
                 width: width,
                 height: height
             });
-            var viewState = viewport.fitBounds(
+            var fittedViewState = viewport.fitBounds(
                 [ [minX, minY], [maxX, maxY] ],
                 { padding: 28 }
             );
-            viewState.pitch = 0;
-            viewState.bearing = 0;
+            var viewState = Object.assign({}, fittedViewState, {
+                pitch: 0,
+                bearing: 0
+            });
             this.deckInstance.setProps({
                 initialViewState: viewState
             });

@@ -123,12 +123,9 @@
 
     <div class="wc-map-controls">
       <div class="wc-map-controls__row wc-map-controls__row--inputs geneva-summary__map-controls-row">
-        <label class="wc-map-controls__label" for="geneva-summary-map-event">Event</label>
-        <div class="wc-map-controls__input">
-          <select id="geneva-summary-map-event"
-                  class="wc-map-controls__input-field wc-field__control"
-                  data-geneva-summary-map-field="event"></select>
-        </div>
+        <p class="wc-map-controls__label geneva-summary__map-event-follow-label">
+          Event follows chart/table selection
+        </p>
         <div class="wc-map-controls__actions">
           <label class="geneva-summary__map-measure" for="geneva-summary-map-measure">
             <span class="geneva-summary__map-measure-label">Measure</span>
@@ -152,25 +149,28 @@
       <div class="wc-map-layout__canvas">
         <div class="wc-map geneva-summary__map">
           <div id="geneva-summary-map-canvas" class="wc-map__canvas" aria-label="Geneva HRU choropleth map viewport"></div>
+          <div class="wc-map-legend geneva-summary__map-legend" data-geneva-summary-map-legend hidden>
+            <p class="geneva-summary__map-legend-title" data-geneva-summary-map-legend-title>Runoff Depth</p>
+            <div class="geneva-summary__map-legend-gradient" aria-hidden="true"></div>
+            <div class="geneva-summary__map-legend-labels">
+              <span data-geneva-summary-map-legend-min>0</span>
+              <span data-geneva-summary-map-legend-max>0</span>
+            </div>
+          </div>
+          <div class="geneva-summary__map-zoom-tip" aria-hidden="true">
+            Tip: Hold <span class="geneva-summary__map-zoom-tip-key">Ctrl</span> while scrolling to zoom the map.
+          </div>
         </div>
         <p class="wc-text-muted geneva-summary__map-status" data-geneva-summary-map-status>
           Select an event to render HRU map values.
         </p>
-      </div>
-      <div class="wc-map-layout__inspector">
-        <div class="wc-map-legend geneva-summary__map-legend" data-geneva-summary-map-legend hidden>
-          <p class="geneva-summary__map-legend-title" data-geneva-summary-map-legend-title>Runoff Depth</p>
-          <div class="geneva-summary__map-legend-gradient" aria-hidden="true"></div>
-          <div class="geneva-summary__map-legend-labels">
-            <span data-geneva-summary-map-legend-min>0</span>
-            <span data-geneva-summary-map-legend-max>0</span>
+        <div class="geneva-summary__map-feedback">
+          <div class="wc-alert wc-alert--warning" role="alert" data-geneva-summary-map-empty hidden>
+            <p class="wc-alert__body" data-geneva-summary-map-empty-body></p>
           </div>
-        </div>
-        <div class="wc-alert wc-alert--warning" role="alert" data-geneva-summary-map-empty hidden>
-          <p class="wc-alert__body" data-geneva-summary-map-empty-body></p>
-        </div>
-        <div class="wc-alert wc-alert--error" role="alert" data-geneva-summary-map-error hidden>
-          <p class="wc-alert__body" data-geneva-summary-map-error-body></p>
+          <div class="wc-alert wc-alert--error" role="alert" data-geneva-summary-map-error hidden>
+            <p class="wc-alert__body" data-geneva-summary-map-error-body></p>
+          </div>
         </div>
       </div>
     </div>
