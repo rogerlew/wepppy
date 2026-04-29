@@ -106,6 +106,14 @@ class GenevaResultsService:
                 "batch_summary_relpath": "geneva/batch_summary.json",
                 "frequency_panel_relpath": "geneva/frequency_panel.json",
                 "storm_inputs_relpath": f"geneva/{batch_result.get('storm_inputs_relpath', 'storm_inputs.json')}",
+                "hru_event_measure_relpath": str(
+                    (
+                        batch_result.get("hru_event_measure_artifact", {})
+                        if isinstance(batch_result.get("hru_event_measure_artifact", {}), Mapping)
+                        else {}
+                    ).get("path")
+                    or "geneva/hru_event_measure_rows.parquet"
+                ),
             },
             "status": status,
         }
@@ -158,6 +166,9 @@ class GenevaResultsService:
                 "hru_table_ready": bool(geneva.artifact_io.exists(geneva.wd, "hru_table.parquet")),
                 "hru_map_ready": bool(geneva.artifact_io.exists(geneva.wd, "hru_map.tif")),
                 "hru_map_legend_ready": bool(geneva.artifact_io.exists(geneva.wd, "hru_map_legend.json")),
+                "hru_event_measure_rows_ready": bool(
+                    geneva.artifact_io.exists(geneva.wd, "hru_event_measure_rows.parquet")
+                ),
                 "frequency_panel_ready": bool(geneva.artifact_io.exists(geneva.wd, "frequency_panel.json")),
                 "batch_summary_ready": bool(geneva.artifact_io.exists(geneva.wd, "batch_summary.json")),
             },

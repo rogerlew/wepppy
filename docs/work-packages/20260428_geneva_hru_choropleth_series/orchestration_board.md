@@ -22,7 +22,7 @@ Reference implementation evidence:
 | Package | Status | Primary Scope | Depends On | Blocks |
 |---|---|---|---|---|
 | [WP01 Spec + Contracts](../20260428_geneva_hru_choropleth_wp01_spec_and_contract_updates/package.md) | Done (2026-04-29 06:43 UTC) | Define HRU measure contract, watershed-only `peak_discharge`, artifact/query/report schema updates | None | WP02, WP03, WP04 |
-| [WP02 Query Engine Data API](../20260428_geneva_hru_choropleth_wp02_query_engine_hru_data_api/package.md) | Ready | Persist/read HRU event-measure tables and expose query-engine retrieval contract | WP01 | WP03, WP04 |
+| [WP02 Query Engine Data API](../20260428_geneva_hru_choropleth_wp02_query_engine_hru_data_api/package.md) | Done (2026-04-29 07:11 UTC) | Persist/read HRU event-measure tables and expose query-engine retrieval contract | WP01 | WP03, WP04 |
 | [WP03 Deck.gl Map UI + Controls](../20260428_geneva_hru_choropleth_wp03_deckgl_map_ui_controls/package.md) | Ready | Geneva summary deck.gl vector choropleth + themed controls + event selection integration | WP01, WP02 | WP04 |
 | [WP04 Validation + Release Docs](../20260428_geneva_hru_choropleth_wp04_validation_docs_release/package.md) | Ready | End-to-end validation, docs finalization, rollout notes, residual risk disposition | WP01, WP02, WP03 | Series closure |
 
@@ -43,6 +43,11 @@ WP01 gate note (2026-04-29 06:43 UTC):
 - Join-key contract between HRU metric rows and vector geometry is validated.
 - Contract tests cover unavailable/missing event-measure data paths.
 
+WP02 gate note (2026-04-29 07:11 UTC):
+- Implemented `hru_event_measure_rows.parquet` production during `run_batch`.
+- Added `POST /runs/<runid>/<config>/query/geneva/hru_map_rows` with event+measure filters, scope enforcement, and legacy unavailable behavior (`reason_code=legacy_hru_event_measures_missing`).
+- Added join-integrity checks for `storm_id`, `hru_id`, and legend crosswalk `hru_value <-> hru_id`.
+
 ### WP03 Exit Gate
 - Geneva summary report renders deck.gl vector choropleth for selected event.
 - Controls support theming and visually align with gl-dashboard map controls.
@@ -55,7 +60,7 @@ WP01 gate note (2026-04-29 06:43 UTC):
 
 ## Sequencing
 1. Execute WP01. (Completed 2026-04-29 06:43 UTC)
-2. Execute WP02.
+2. Execute WP02. (Completed 2026-04-29 07:11 UTC)
 3. Execute WP03.
 4. Execute WP04 and close series.
 

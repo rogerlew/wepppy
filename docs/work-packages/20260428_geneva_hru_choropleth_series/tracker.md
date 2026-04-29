@@ -6,9 +6,9 @@
 
 **Timezone**: UTC  
 **Started**: 2026-04-29 06:34 UTC  
-**Current phase**: WP01 complete; WP02 unblocked  
-**Last updated**: 2026-04-29 06:43 UTC  
-**Next milestone**: Start WP02 query-engine HRU event-measure data API implementation  
+**Current phase**: WP02 implementation complete; WP03 unblocked
+**Last updated**: 2026-04-29 07:39 UTC
+**Next milestone**: Execute WP03 deck.gl map UI + controls
 **Security impact**: `low`  
 **Dedicated security review**: `no`  
 **Security artifact**: `N/A`
@@ -16,7 +16,6 @@
 ## Task Board
 
 ### Ready / Backlog
-- [ ] Execute WP02: query-engine HRU event data access.
 - [ ] Execute WP03: deck.gl map UI and themed controls.
 - [ ] Execute WP04: validation, docs closure, and rollout evidence.
 
@@ -33,6 +32,9 @@
 - [x] Authored series package, child package scaffolds, and orchestration board doc (2026-04-29 06:34 UTC).
 - [x] Added series entry to `PROJECT_TRACKER.md` backlog (2026-04-29 06:34 UTC).
 - [x] Executed WP01 end-to-end (docs/contracts only): measure-scope matrix, watershed-only `peak_discharge` rationale, canonical keys/units, and legacy-run compatibility policy (2026-04-29 06:43 UTC).
+- [x] Executed WP02 end-to-end: HRU event-measure artifact materialization, query-engine-style HRU row retrieval, measure-scope enforcement, legacy unavailable behavior, and join-key integrity checks (2026-04-29 07:11 UTC).
+- [x] WP02 lifecycle/docs validation completed (`doc-lint`, `git diff --check`) and orchestration gates synchronized (2026-04-29 07:13 UTC).
+- [x] Applied post-review WP02 hygiene fixes: blank `storm_id` now returns `400 invalid_input`; package/tracker status docs synchronized (2026-04-29 07:39 UTC).
 
 ## Timeline
 
@@ -40,6 +42,7 @@
 - **2026-04-29 06:25 UTC** - Colormap/theming baseline captured from gl-dashboard sources.
 - **2026-04-29 06:34 UTC** - Series orchestration docs and child packages created.
 - **2026-04-29 06:43 UTC** - WP01 specification and contract updates completed; WP02/WP03 unblocked.
+- **2026-04-29 07:11 UTC** - WP02 runtime/query integration completed; WP03 unblocked.
 
 ## Decisions Log
 
@@ -80,6 +83,15 @@
 
 **Impact**: Removes ambiguity for WP02 implementation and map renderer wiring while keeping legacy runs backward compatible.
 
+---
+
+### 2026-04-29 07:08 UTC: Produce HRU event-measure artifact during `run_batch`
+**Context**: WP02 required new run-scoped data for event+measure map queries.
+
+**Decision**: Materialize `geneva/hru_event_measure_rows.parquet` during `run_batch` from completed storm `hru_excess` rows + frequency-panel event dimensions.
+
+**Impact**: Keeps provenance with existing batch artifacts and avoids post-run orchestration steps.
+
 ## Risks and Issues
 
 | Risk | Severity | Likelihood | Mitigation | Status |
@@ -96,6 +108,7 @@
 - [x] Child package docs created.
 - [x] Orchestration board created and linked.
 - [x] Execution progress reflected for WP01.
+- [x] Execution progress reflected for WP02.
 
 ### Governance
 - [x] `peak_discharge` watershed-level policy captured.
@@ -142,3 +155,25 @@
 
 **Test results**:
 - `wctl doc-lint` and `git diff --check` run in WP01 closure phase (see WP01 handoff).
+
+### 2026-04-29 07:11 UTC: WP02 execution closure
+**Agent/Contributor**: Codex
+
+**Work completed**:
+- Implemented `run_batch` materialization for `geneva/hru_event_measure_rows.parquet`.
+- Added Geneva HRU map query surface with query-engine-style retrieval and canonical availability envelope.
+- Enforced HRU map measure scope (`runoff_depth|runoff_volume`) and explicit rejection for `peak_discharge`.
+- Added legacy compatibility (`legacy_hru_event_measures_missing`) and join-crosswalk integrity validation.
+- Updated WP02 tracker and orchestration board gate notes.
+
+**Blockers encountered**:
+- None.
+
+**Next steps**:
+1. Execute WP03 deck.gl integration using the finalized WP02 query contract.
+2. Validate UI joins against `hru_id` and legend `hru_value` crosswalk assumptions.
+
+**Test results**:
+- `wctl run-pytest tests/nodb/mods/geneva --maxfail=1` passed.
+- `wctl run-pytest tests/query_engine --maxfail=1` passed.
+- `wctl run-pytest tests/weppcloud/routes/test_geneva_bp.py --maxfail=1` passed.

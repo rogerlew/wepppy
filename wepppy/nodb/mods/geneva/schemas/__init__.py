@@ -20,11 +20,13 @@ from .query_schema import (
     GENEVA_AVAILABILITY_IDS,
     GENEVA_DATASOURCE_IDS,
     GENEVA_DISTRIBUTION_IDS,
+    GENEVA_HRU_MAP_MEASURE_IDS,
     GENEVA_MEASURE_IDS,
     GENEVA_UNAVAILABLE_REASON_CODES,
     normalize_frequency_panel_payload,
     validate_datasource_id,
     validate_distribution_type,
+    validate_hru_map_measure_id,
     validate_measure_id,
 )
 from .run_batch_schema import (
@@ -43,6 +45,7 @@ __all__ = [
     "GENEVA_DATASOURCE_IDS",
     "DEFAULT_GENEVA_DISTRIBUTION_ID",
     "GENEVA_DISTRIBUTION_IDS",
+    "GENEVA_HRU_MAP_MEASURE_IDS",
     "GENEVA_MEASURE_IDS",
     "GENEVA_AVAILABILITY_IDS",
     "GENEVA_UNAVAILABLE_REASON_CODES",
@@ -62,6 +65,7 @@ __all__ = [
     "utc_now_iso",
     "validate_datasource_id",
     "validate_distribution_type",
+    "validate_hru_map_measure_id",
     "validate_lifecycle_state",
     "validate_measure_id",
 ]

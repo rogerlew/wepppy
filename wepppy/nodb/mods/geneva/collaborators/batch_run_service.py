@@ -123,6 +123,9 @@ class GenevaBatchRunService:
             "source_artifact_hashes": {
                 "frequency_panel_sha256": artifact_io.sha256(geneva.wd, "frequency_panel.json"),
                 "hru_table_sha256": artifact_io.sha256(geneva.wd, "hru_table.parquet"),
+                "hru_map_legend_sha256": artifact_io.sha256(geneva.wd, "hru_map_legend.json")
+                if artifact_io.exists(geneva.wd, "hru_map_legend.json")
+                else None,
             },
         }
         storm_inputs_relpath = artifact_io.write_json(geneva.wd, "storm_inputs.json", storm_inputs)
@@ -177,6 +180,7 @@ class GenevaBatchRunService:
                     hyetograph_response=hyetograph_response,
                     kernel_response=kernel_response,
                 )
+                storm_result["hru_excess"] = list(kernel_response.get("hru_excess", []) or [])
                 storm_results.append(storm_result)
             except GenevaNoDbError as exc:
                 failed_storm_ids.append(storm_id)
@@ -191,6 +195,12 @@ class GenevaBatchRunService:
                     }
                 )
 
+        hru_event_measure_artifact = geneva.hru_event_measure_service.materialize_from_batch(
+            geneva,
+            available_cells=available_cells,
+            storm_results=storm_results,
+        )
+
         run_warnings = _watershed_area_warnings(geneva, request.hyetograph.distribution_type)
 
         return {
@@ -202,6 +212,7 @@ class GenevaBatchRunService:
             "unavailable_cells": unavailable_cells,
             "failed_storm_ids": failed_storm_ids,
             "run_warnings": run_warnings,
+            "hru_event_measure_artifact": hru_event_measure_artifact,
             "completed_storm_ids": [
                 result["storm_id"] for result in storm_results if result.get("status") == "completed"
             ],

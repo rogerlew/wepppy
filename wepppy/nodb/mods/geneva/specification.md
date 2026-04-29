@@ -670,10 +670,10 @@ Current row status resolution precedence:
 
 Chart includes completed storms only.
 
-### 12.4 HRU Choropleth Measure Contract (WP01 Additive)
+### 12.4 HRU Choropleth Measure Contract (WP01/WP02)
 
-Status: normative contract for WP02/WP03 implementation.
-WP01 is documentation-only; runtime behavior is unchanged in this package.
+Status: normative contract defined in WP01 and implemented in WP02 runtime paths
+(`run_batch` materialization + HRU-map query surface).
 
 #### 12.4.1 Measure-scope matrix
 
@@ -754,6 +754,29 @@ Required compatibility behavior:
 - HRU choropleth requests with `measure_id=peak_discharge` must fail validation
   with explicit scope error code `unsupported_measure_scope`.
 
+#### 12.4.5 Query response envelope for HRU map rows (WP02)
+
+HRU map row queries return an additive contract envelope:
+
+- `schema_version` (current `1`)
+- `filters` (`storm_id`, `measure_id`)
+- `availability`:
+  - `status = available | unavailable`
+  - `reason_code` (`legacy_hru_event_measures_missing` when unavailable)
+  - `artifact_path` (canonical `geneva/hru_event_measure_rows.parquet`)
+- `query` (query-engine style payload used for retrieval)
+- `records` (row list; empty when unavailable)
+- `schema` (present when `include_schema=true`; otherwise `null`)
+- `row_count`
+- `warnings`, `errors`
+
+Error behavior:
+
+- validation failures (for example unsupported measure scope) return the Geneva
+  error envelope with code `unsupported_measure_scope`;
+- legacy-missing-artifact is represented as `availability.status=unavailable`
+  with HTTP 200 and empty row set.
+
 ## 13. API Surface (Current)
 
 ### 13.1 Flask WEPPcloud routes (`geneva_bp.py`)
@@ -772,6 +795,7 @@ Status/results/query/report:
 - `GET /runs/<runid>/<config>/api/geneva/results`
 - `GET /runs/<runid>/<config>/api/geneva/frequency_panel`
 - `GET /runs/<runid>/<config>/query/geneva/summary`
+- `POST /runs/<runid>/<config>/query/geneva/hru_map_rows`
 - `GET /runs/<runid>/<config>/report/geneva/summary`
 
 CN-table routes:
@@ -785,6 +809,8 @@ CN-table routes:
 Response-shape note:
 
 - most Geneva Flask endpoints return raw JSON payloads (`jsonify(payload)`),
+- `POST /query/geneva/hru_map_rows` returns top-level
+  `availability + filters + records` payload (not wrapped),
 - CN-table meta/snapshot/reset use `success_factory`, so payload is wrapped under `{"Content": ...}`.
 
 ### 13.2 rq-engine Geneva routes (`microservices/rq_engine/geneva_routes.py`)
@@ -885,6 +911,7 @@ Under `<run>/geneva/`:
 - `frequency_panel.json`
 - `storm_inputs.json`
 - `batch_summary.json`
+- `hru_event_measure_rows.parquet`
 - `storms/<storm_id>/hyetograph.parquet`
 - `storms/<storm_id>/excess_hyetograph.parquet`
 - `storms/<storm_id>/hydrograph.parquet`
@@ -892,10 +919,13 @@ Under `<run>/geneva/`:
 - optional normalization artifact:
   - `normalized_sources/wepp_cli_pds_mean_metric_kernel.csv`
 
-WP01 additive artifact contract (materialized in WP02):
+WP02 production note:
 
-- `hru_event_measure_rows.parquet` (run-scoped HRU event-measure table keyed by
-  `storm_id`, `hru_id`, `measure_id`; not required on legacy runs)
+- `hru_event_measure_rows.parquet` is materialized during `run_batch` from
+  completed storm `hru_excess` rows and frequency-panel event dimensions.
+- Legacy runs created before WP02 may not include this artifact; HRU map
+  queries must return an unavailable response with
+  `reason_code=legacy_hru_event_measures_missing`.
 
 ## 16. Current Test/Validation Baseline
 

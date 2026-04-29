@@ -15,6 +15,7 @@ from wepppy.nodb.mods.geneva.collaborators.config_service import GenevaConfigSer
 from wepppy.nodb.mods.geneva.collaborators import hsg_assignment_service as hsg_assignment_module
 from wepppy.nodb.mods.geneva.collaborators.hsg_assignment_service import GenevaHsgAssignmentService
 from wepppy.nodb.mods.geneva.collaborators.frequency_panel_service import GenevaFrequencyPanelService
+from wepppy.nodb.mods.geneva.collaborators.hru_event_measure_service import GenevaHruEventMeasureService
 from wepppy.nodb.mods.geneva.collaborators.hru_preparation_service import GenevaHruPreparationService
 from wepppy.nodb.mods.geneva.collaborators.kernel_gateway import GenevaKernelGateway
 from wepppy.nodb.mods.geneva.errors import GenevaKernelError, GenevaValidationError
@@ -180,6 +181,20 @@ class _RecordingKernelGateway:
                     "runoff_cum_mm": cumulative_excess_mm,
                     "runoff_volume_m3": [0.0, 40.0],
                 },
+                "hru_excess": [
+                    {
+                        "hru_id": "hru_1",
+                        "area_m2": 900.0,
+                        "area_fraction": 1.0,
+                        "cn_lambda_020": 74.0,
+                        "cn_lambda_005": 86.0,
+                        "selected_cn": 74.0,
+                        "storage_mm": 89.0,
+                        "initial_abstraction_mm": 17.8,
+                        "cumulative_excess_mm": cumulative_excess_mm,
+                        "incremental_excess_mm": [0.0, 4.0],
+                    }
+                ],
                 "warnings": [],
             }
 
@@ -207,7 +222,18 @@ class _RecordingKernelGateway:
                         "unmapped_cell_count": 0,
                         "unresolved_component_count": 0,
                         "unresolved_component_samples": [],
-                        "rows": [],
+                        "rows": [
+                            {
+                                "hru_value": 1,
+                                "hru_id": "hru_1",
+                                "landuse_class": 42,
+                                "hsg_group": "B",
+                                "burn_severity_class": "unburned",
+                                "hydrophobic_class": False,
+                                "is_water": False,
+                                "collapsed_from_hru_ids": [],
+                            }
+                        ],
                     },
                     indent=2,
                     sort_keys=True,
@@ -226,6 +252,7 @@ def _geneva_stub(
         wd=str(tmp_path),
         artifact_io=GenevaArtifactIO(),
         cn_table_service=GenevaCnTableService(),
+        hru_event_measure_service=GenevaHruEventMeasureService(),
         hsg_assignment_service=_FakeHsgService(_fixture_paths()),
         kernel_gateway=kernel_gateway,
         watershed_instance=SimpleNamespace(wsarea=1_000_000.0),
@@ -529,6 +556,16 @@ def test_batch_run_uses_updated_cn_values_from_hru_table_parquet(tmp_path: Path)
     assert kernel_gateway.run_batch_payloads
     batch_hru_row = kernel_gateway.run_batch_payloads[0]["hru_rows"][0]
     assert batch_hru_row["cn_lambda_020"] == 89.0
+    hru_event_rows = geneva.artifact_io.read_records_parquet(
+        geneva.wd,
+        "hru_event_measure_rows.parquet",
+    )
+    assert len(hru_event_rows) == 2
+    measure_ids = sorted(str(row["measure_id"]) for row in hru_event_rows)
+    assert measure_ids == ["runoff_depth", "runoff_volume"]
+    assert all(str(row["storm_id"]) == "cligen_30m_10y" for row in hru_event_rows)
+    assert all(str(row["hru_id"]) == "hru_1" for row in hru_event_rows)
+    assert all(int(row["hru_value"]) == 1 for row in hru_event_rows)
 
 
 def test_batch_run_uses_selected_storm_shape_and_persists_metadata(tmp_path: Path) -> None:

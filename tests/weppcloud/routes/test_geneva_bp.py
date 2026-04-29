@@ -507,3 +507,89 @@ def test_query_geneva_summary_normalizes_comma_separated_ari_filter(
             "selected_storm_id": None,
         }
     ]
+
+
+def test_query_geneva_hru_map_rows_returns_legacy_unavailable_payload(
+    geneva_client: Any,
+) -> None:
+    client, _, _ = geneva_client
+
+    response = client.post(
+        f"/runs/{RUN_ID}/{CONFIG}/query/geneva/hru_map_rows",
+        json={
+            "schema_version": 1,
+            "storm_id": "cligen_30m_10y",
+            "measure_id": "runoff_depth",
+        },
+    )
+
+    assert response.status_code == 200
+    assert response.headers["Cache-Control"] == "no-store, no-cache, must-revalidate, max-age=0"
+    payload = response.get_json()
+    assert payload["schema_version"] == 1
+    assert payload["availability"]["status"] == "unavailable"
+    assert payload["availability"]["reason_code"] == "legacy_hru_event_measures_missing"
+    assert payload["filters"] == {
+        "storm_id": "cligen_30m_10y",
+        "measure_id": "runoff_depth",
+    }
+    assert payload["records"] == []
+    assert payload["row_count"] == 0
+
+
+def test_query_geneva_hru_map_rows_rejects_peak_discharge_scope(
+    geneva_client: Any,
+) -> None:
+    client, _, _ = geneva_client
+
+    response = client.post(
+        f"/runs/{RUN_ID}/{CONFIG}/query/geneva/hru_map_rows",
+        json={
+            "schema_version": 1,
+            "storm_id": "cligen_30m_10y",
+            "measure_id": "peak_discharge",
+        },
+    )
+
+    assert response.status_code == 400
+    payload = response.get_json()
+    assert payload["error"]["code"] == "unsupported_measure_scope"
+
+
+def test_query_geneva_hru_map_rows_rejects_blank_storm_id(
+    geneva_client: Any,
+) -> None:
+    client, _, _ = geneva_client
+
+    response = client.post(
+        f"/runs/{RUN_ID}/{CONFIG}/query/geneva/hru_map_rows",
+        json={
+            "schema_version": 1,
+            "storm_id": "   ",
+            "measure_id": "runoff_depth",
+        },
+    )
+
+    assert response.status_code == 400
+    payload = response.get_json()
+    assert payload["error"]["code"] == "invalid_input"
+
+
+def test_query_geneva_hru_map_rows_rejects_non_boolean_include_schema(
+    geneva_client: Any,
+) -> None:
+    client, _, _ = geneva_client
+
+    response = client.post(
+        f"/runs/{RUN_ID}/{CONFIG}/query/geneva/hru_map_rows",
+        json={
+            "schema_version": 1,
+            "storm_id": "cligen_30m_10y",
+            "measure_id": "runoff_depth",
+            "include_schema": "yes",
+        },
+    )
+
+    assert response.status_code == 400
+    payload = response.get_json()
+    assert payload["error"]["code"] == "invalid_input"

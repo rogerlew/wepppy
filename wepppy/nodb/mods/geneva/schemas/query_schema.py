@@ -13,6 +13,7 @@ GENEVA_DISTRIBUTION_IDS: tuple[str, ...] = (
     "type_iii",
 )
 GENEVA_MEASURE_IDS: tuple[str, ...] = ("peak_discharge", "runoff_depth", "runoff_volume")
+GENEVA_HRU_MAP_MEASURE_IDS: tuple[str, ...] = ("runoff_depth", "runoff_volume")
 GENEVA_AVAILABILITY_IDS: tuple[str, ...] = ("available", "unavailable")
 GENEVA_UNAVAILABLE_REASON_CODES: tuple[str, ...] = (
     "duration_unavailable",
@@ -35,6 +36,15 @@ def validate_measure_id(value: str) -> str:
     if normalized not in GENEVA_MEASURE_IDS:
         raise ValueError(
             f"measure must be one of: {', '.join(GENEVA_MEASURE_IDS)}"
+        )
+    return normalized
+
+
+def validate_hru_map_measure_id(value: str) -> str:
+    normalized = str(value).strip()
+    if normalized not in GENEVA_HRU_MAP_MEASURE_IDS:
+        raise ValueError(
+            f"measure_id must be one of: {', '.join(GENEVA_HRU_MAP_MEASURE_IDS)}"
         )
     return normalized
 
@@ -208,10 +218,12 @@ __all__ = [
     "DEFAULT_GENEVA_DISTRIBUTION_ID",
     "GENEVA_DISTRIBUTION_IDS",
     "GENEVA_MEASURE_IDS",
+    "GENEVA_HRU_MAP_MEASURE_IDS",
     "GENEVA_AVAILABILITY_IDS",
     "GENEVA_UNAVAILABLE_REASON_CODES",
     "validate_datasource_id",
     "validate_distribution_type",
     "validate_measure_id",
+    "validate_hru_map_measure_id",
     "normalize_frequency_panel_payload",
 ]

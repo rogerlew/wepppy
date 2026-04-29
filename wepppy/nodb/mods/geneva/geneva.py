@@ -11,6 +11,7 @@ from wepppy.nodb.mods.geneva.collaborators import (
     GenevaCnTableService,
     GenevaConfigService,
     GenevaFrequencyPanelService,
+    GenevaHruEventMeasureService,
     GenevaHruPreparationService,
     GenevaHsgAssignmentService,
     GenevaKernelGateway,
@@ -37,6 +38,7 @@ _GENEVA_KERNEL_GATEWAY = GenevaKernelGateway()
 _GENEVA_HRU_PREPARATION_SERVICE = GenevaHruPreparationService()
 _GENEVA_FREQUENCY_PANEL_SERVICE = GenevaFrequencyPanelService()
 _GENEVA_BATCH_RUN_SERVICE = GenevaBatchRunService()
+_GENEVA_HRU_EVENT_MEASURE_SERVICE = GenevaHruEventMeasureService()
 _GENEVA_RESULTS_SERVICE = GenevaResultsService()
 _GENEVA_REPORT_PAYLOAD_SERVICE = GenevaReportPayloadService()
 
@@ -110,6 +112,10 @@ class Geneva(NoDbBase):
     @property
     def batch_run_service(self) -> GenevaBatchRunService:
         return _GENEVA_BATCH_RUN_SERVICE
+
+    @property
+    def hru_event_measure_service(self) -> GenevaHruEventMeasureService:
+        return _GENEVA_HRU_EVENT_MEASURE_SERVICE
 
     @property
     def results_service(self) -> GenevaResultsService:
@@ -336,6 +342,22 @@ class Geneva(NoDbBase):
             ari_years=ari_years,
             measure=measure,
             selected_storm_id=selected_storm_id,
+        )
+
+    def query_hru_map_rows_payload(
+        self,
+        *,
+        storm_id: str,
+        measure_id: str,
+        include_schema: bool = True,
+        limit: int | None = None,
+    ) -> dict[str, Any]:
+        return self.hru_event_measure_service.query_rows(
+            self,
+            storm_id=storm_id,
+            measure_id=measure_id,
+            include_schema=include_schema,
+            limit=limit,
         )
 
     def assert_task_guardrails(self) -> None:

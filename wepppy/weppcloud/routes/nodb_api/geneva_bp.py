@@ -176,6 +176,41 @@ def _parse_optional_ari_years_filter() -> list[int] | None:
     return sorted(set(parsed))
 
 
+def _parse_include_schema_flag(value: Any) -> bool:
+    if value is None:
+        return True
+    if isinstance(value, bool):
+        return value
+    raise GenevaValidationError(
+        "include_schema must be boolean when provided",
+        code="invalid_input",
+        details="include_schema must be boolean when provided",
+        status_code=400,
+    )
+
+
+def _parse_optional_positive_limit(value: Any) -> int | None:
+    if value in (None, ""):
+        return None
+    try:
+        parsed = int(value)
+    except (TypeError, ValueError) as exc:
+        raise GenevaValidationError(
+            "limit must be a positive integer when provided",
+            code="invalid_input",
+            details="limit must be a positive integer when provided",
+            status_code=400,
+        ) from exc
+    if parsed <= 0:
+        raise GenevaValidationError(
+            "limit must be a positive integer when provided",
+            code="invalid_input",
+            details="limit must be a positive integer when provided",
+            status_code=400,
+        )
+    return parsed
+
+
 def _enqueue_geneva_job(
     *,
     runid: str,
@@ -453,6 +488,36 @@ def query_geneva_summary(runid: str, config: str) -> Response:
     except GenevaNoDbError as exc:
         return _geneva_error_response(exc)
     return _set_no_store_headers(jsonify(payload))
+
+
+@geneva_bp.route("/runs/<string:runid>/<config>/query/geneva/hru_map_rows", methods=["POST"])
+@authorize_and_handle_with_exception_factory
+def query_geneva_hru_map_rows(runid: str, config: str) -> Response:
+    ctx = load_run_context(runid, config)
+    wd = str(ctx.active_root)
+
+    payload = _json_object_payload()
+    _require_schema_version(payload)
+    storm_id = str(payload.get("storm_id", "") or "").strip()
+    measure_id = str(payload.get("measure_id") or payload.get("measure") or "").strip()
+    try:
+        include_schema = _parse_include_schema_flag(payload.get("include_schema"))
+        limit = _parse_optional_positive_limit(payload.get("limit"))
+    except GenevaNoDbError as exc:
+        return _geneva_error_response(exc)
+
+    geneva = _ensure_geneva_controller(wd, f"{config}.cfg")
+    try:
+        response_payload = geneva.query_hru_map_rows_payload(
+            storm_id=storm_id,
+            measure_id=measure_id,
+            include_schema=include_schema,
+            limit=limit,
+        )
+    except GenevaNoDbError as exc:
+        return _geneva_error_response(exc)
+
+    return _set_no_store_headers(jsonify(response_payload))
 
 
 @geneva_bp.route("/runs/<string:runid>/<config>/report/geneva/summary")

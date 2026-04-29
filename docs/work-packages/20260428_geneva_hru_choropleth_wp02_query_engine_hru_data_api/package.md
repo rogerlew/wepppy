@@ -1,6 +1,6 @@
 # Geneva HRU Choropleth WP02 - Query Engine HRU Data API
 
-**Status**: Open (2026-04-28)
+**Status**: Completed (2026-04-29)
 **Timezone**: UTC
 
 ## Overview
@@ -32,11 +32,11 @@ WP02 implements the data-access layer for Geneva HRU choropleth rendering using 
 - **Informed**: WP03 UI implementers.
 
 ## Success Criteria
-- [ ] HRU event-measure dataset contract is implemented and queryable.
-- [ ] Query-engine request pattern for Geneva map mode is documented and tested.
-- [ ] Join-key mapping between metric rows and vector features is validated.
-- [ ] Mapable measure set excludes `peak_discharge`.
-- [ ] Tests cover happy path, missing event, missing measure, and legacy-no-artifact behavior.
+- [x] HRU event-measure dataset contract is implemented and queryable.
+- [x] Query-engine request pattern for Geneva map mode is documented and tested.
+- [x] Join-key mapping between metric rows and vector features is validated.
+- [x] Mapable measure set excludes `peak_discharge`.
+- [x] Tests cover happy path, missing event, missing measure, and legacy-no-artifact behavior.
 
 ## Dependencies
 

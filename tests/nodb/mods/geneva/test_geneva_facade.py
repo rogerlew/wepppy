@@ -192,7 +192,20 @@ class _FakeKernelGateway:
                 "time_minutes": time_minutes,
                 "cumulative_rainfall_mm": rainfall,
                 "incremental_rainfall_mm": incremental_rainfall,
-                "hru_excess": [],
+                "hru_excess": [
+                    {
+                        "hru_id": "hru_1",
+                        "area_m2": 900.0,
+                        "area_fraction": 1.0,
+                        "cn_lambda_020": 74.0,
+                        "cn_lambda_005": 86.0,
+                        "selected_cn": 74.0,
+                        "storage_mm": 89.0,
+                        "initial_abstraction_mm": 17.8,
+                        "cumulative_excess_mm": cumulative_excess,
+                        "incremental_excess_mm": incremental_excess,
+                    }
+                ],
                 "composite_excess": {
                     "cumulative_excess_mm": cumulative_excess,
                     "incremental_excess_mm": incremental_excess,
@@ -259,7 +272,18 @@ class _FakeKernelGateway:
                         "unmapped_cell_count": 0,
                         "unresolved_component_count": 0,
                         "unresolved_component_samples": [],
-                        "rows": [],
+                        "rows": [
+                            {
+                                "hru_value": 1,
+                                "hru_id": "hru_1",
+                                "landuse_class": 42,
+                                "hsg_group": "B",
+                                "burn_severity_class": "unburned",
+                                "hydrophobic_class": False,
+                                "is_water": False,
+                                "collapsed_from_hru_ids": [],
+                            }
+                        ],
                     },
                     indent=2,
                     sort_keys=True,
@@ -362,6 +386,7 @@ def test_geneva_lifecycle_transitions_and_persistence_roundtrip(
     assert state_after_prepare["artifacts"]["hru_table_ready"] is True
     assert state_after_prepare["artifacts"]["hru_map_ready"] is True
     assert state_after_prepare["artifacts"]["hru_map_legend_ready"] is True
+    assert state_after_prepare["artifacts"]["hru_event_measure_rows_ready"] is False
 
     panel = geneva.build_frequency_panel(rebuild=True)
     assert len(panel["cells"]) == 2
@@ -380,8 +405,10 @@ def test_geneva_lifecycle_transitions_and_persistence_roundtrip(
     assert status_payload["status"] == "completed_with_gaps"
     assert status_payload["progress"]["completed"] == 1
     assert status_payload["progress"]["total"] == 2
+    assert run_summary["artifacts"]["hru_event_measure_relpath"] == "geneva/hru_event_measure_rows.parquet"
 
     assert (tmp_path / "geneva" / "batch_summary.json").exists()
+    assert (tmp_path / "geneva" / "hru_event_measure_rows.parquet").exists()
     assert (tmp_path / "geneva" / "storms" / "cligen_30m_10y" / "summary.json").exists()
 
     Geneva.cleanup_all_instances()
