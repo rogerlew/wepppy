@@ -1058,7 +1058,38 @@ class ClimateFile(object):
         supports the post processing of wepp files generated from
         daily observed or future data
         """
+        def _value_has_nan(value):
+            if value is None:
+                return False
+
+            if isinstance(value, bytes):
+                value = value.decode('utf-8', errors='ignore')
+
+            if isinstance(value, str):
+                text = value.strip().lower()
+                if text in {'nan', '+nan', '-nan'}:
+                    return True
+                return False
+
+            marker = pd.isna(value)
+            if isinstance(marker, np.ndarray):
+                return bool(np.any(marker))
+            return bool(marker)
+
         breakpoint = self.breakpoint
+
+        dates = list(dates)
+        values = list(values)
+
+        for idx, value in enumerate(values):
+            if not _value_has_nan(value):
+                continue
+
+            date = dates[idx] if idx < len(dates) else None
+            raise ValueError(
+                f"replace_var received NaN value for colname='{colname}' "
+                f"at index={idx} date={date!r}; aborting update."
+            )
 
         colnames = self.colnames
         data0line = self.data0line

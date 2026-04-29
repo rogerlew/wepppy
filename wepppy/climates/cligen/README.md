@@ -32,6 +32,7 @@
   - When an LFS asset is unavailable the manager falls back to `tests/neverland_.par` so developers still have something to interact with.
 - **ClimateFile & Prn helpers**
   - `ClimateFile` opens a CLIGEN `.cli`, standardizes headers, reports metadata (`lat`, `lng`, `elevation`), and offers utilities such as `clip`, `transform_precip`, `replace_var`, `make_storm_file`, `as_dataframe`, and `calc_monthlies`.
+  - `ClimateFile.replace_var` is a strict mutation path: if any replacement value is `NaN`/missing (`np.nan`, `pd.NA`, or `"nan"`-like strings), it now raises `ValueError` before touching any rows. This prevents writing literal `nan` tokens into `.cli` files and guarantees all-or-nothing updates.
   - `Prn` wraps the fixed-width `.prn` format, replaces IQR outliers, and re-emits sanitized precipitation/temperature series. `df_to_prn()` converts a pandas DataFrame into a `.prn`, padding to the end of the year when needed.
   - `wepp_peak_intensities_from_hyetograph()` builds WEPP's 5-minute double-exponential hyetograph and applies sliding windows for peak intensities (10/15/30/60-min). `cli2pat()` remains as a legacy alias; `_make_clinp()` emits the CLIGEN input files consumed by the binaries.
 - **Cligen runner**
@@ -162,6 +163,7 @@ print(result.monthlies)  # Calculated from the generated CLI (may be None on fai
 - **Binaries on macOS/Windows?** The shipped CLIGEN executables are Linux-only. Use Docker (`wctl run ...`) or copy the appropriate binaries into `bin/` before running `Cligen`.
 - **Timeout diagnostics.** `_run_cligen_posix` records stdout/stderr tails when CLIGEN hangs; check `cligen_*.log` in the working directory plus the captured `_tail()` output in raised exceptions.
 - **Localization safeguards.** `par_mod` clamps wet days between 0.1 and `days_in_month - 0.25` and bounds adjustments to [50%, 200%] of the source values to keep CLIGEN stable. When extending localization logic, honor the same constraints.
+- **NaN handling in revision paths.** `ClimateFile.replace_var` fails fast on missing values and does not partially rewrite the file. Sanitize revision inputs (`tdew`, `rad`, wind fields, etc.) before calling it.
 - **Station heuristics.** `get_stations_heuristic_search`, `get_stations_eu_heuristic_search`, and `get_stations_au_heuristic_search` weight latitude distance, elevation, precipitation, and temperature with `[1, 1, 3, 1.5, 1.5]`. If you tweak these weights, update both the U.S. and EU/AU variants so downstream expectations stay aligned.
 
 ## Next Steps When Extending The Module

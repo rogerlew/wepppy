@@ -325,6 +325,8 @@ Many workflows start with a **stochastic CLIGEN climate** and then **revise** it
 5. Replace wind with GridMET (optional)
 ```
 
+`ClimateFile.replace_var` now enforces strict input quality in this revision stage: any `NaN`/missing replacement value raises `ValueError` before file mutation, so callers must sanitize revision timeseries before patching `.cli` rows.
+
 This is implemented in:
 - `wepppy.climates.prism.prism_mod()` - Adjust CLIGEN .par file, regenerate
 - `wepppy.climates.prism.prism_revision()` - Post-process existing `.cli` file
