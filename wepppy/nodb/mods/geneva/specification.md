@@ -1,7 +1,7 @@
 # Geneva NoDb Mod Specification
 
 Status: Implemented Baseline (WP-00..WP-10 complete; WP-11 follow-on backlog; WP-12 storm-shape control complete)
-Last Updated: 2026-04-28
+Last Updated: 2026-04-29
 Owner: WEPPpy NoDb hydrology stack  
 Scope: Event runoff hydrograph modeling for BAER-style post-fire workflows using RMRS-GTR-334-aligned Curve Number (CN) plus unit hydrograph methods.
 
@@ -670,6 +670,90 @@ Current row status resolution precedence:
 
 Chart includes completed storms only.
 
+### 12.4 HRU Choropleth Measure Contract (WP01 Additive)
+
+Status: normative contract for WP02/WP03 implementation.
+WP01 is documentation-only; runtime behavior is unchanged in this package.
+
+#### 12.4.1 Measure-scope matrix
+
+| Measure ID | Watershed event table/query summary | HRU choropleth map | Canonical unit | Scope rationale |
+| --- | --- | --- | --- | --- |
+| `peak_discharge` | Yes | No | `m3_s` | `peak_discharge` is computed from the watershed-composite hydrograph and remains a watershed summary metric. HRU-level mapping would imply a non-canonical disaggregation and is intentionally disallowed. |
+| `runoff_depth` | Yes | Yes | `mm` | Depth is valid as both watershed summary and per-HRU map metric. |
+| `runoff_volume` | Yes | Yes | `m3` | Volume is additive across HRUs and valid for map display. |
+
+`query_summary_payload.filter_options.measures` remains
+`[peak_discharge, runoff_depth, runoff_volume]` for watershed summary exploration.
+HRU choropleth consumers must treat the HRU-mapable subset as
+`[runoff_depth, runoff_volume]` only.
+
+#### 12.4.2 Canonical keys and joins
+
+Event identity contract:
+
+- primary event key: `storm_id`
+- required event dimensions: `datasource_id`, `duration_minutes`, `ari_years`, `distribution_type`
+- canonical event row source: frequency panel cell plus `storms/<storm_id>/summary.json`
+
+HRU identity contract:
+
+- primary HRU key: `hru_id` from `hru_table.parquet`
+- raster-value join key: `hru_value` from `hru_map_legend.json` `rows[*].hru_value`
+- canonical crosswalk: `hru_map_legend.json` `rows[*]` where
+  `rows[*].hru_id <-> rows[*].hru_value`
+
+Required join behavior for query/report consumers:
+
+1. Join event rows to HRU measure rows on `storm_id`.
+2. Join HRU measure rows to HRU attributes/geometry on `hru_id`.
+3. If a geometry payload is keyed by raster value, resolve through
+   `hru_map_legend.json` (`hru_value -> hru_id`) before joining measure rows.
+
+#### 12.4.3 Canonical HRU event-measure row contract
+
+Additive artifact contract (materialized in WP02):
+
+- path: `geneva/hru_event_measure_rows.parquet`
+- schema version field: `schema_version` (initial value `1`)
+- row granularity: one row per `(storm_id, hru_id, measure_id)`
+
+Canonical columns:
+
+| Column | Type | Contract |
+| --- | --- | --- |
+| `schema_version` | integer | Must be `1` for first release. |
+| `storm_id` | string | Non-empty; joins to event-table `storm_id`. |
+| `datasource_id` | string enum | `cligen_freq | noaa14_pds`; copied from panel cell. |
+| `duration_minutes` | integer | Positive; copied from panel cell. |
+| `ari_years` | integer | Positive; copied from panel cell. |
+| `distribution_type` | string enum | Must match storm summary assumptions for the stored event. |
+| `hru_id` | string | Non-empty; joins to `hru_table.parquet` `hru_id`. |
+| `hru_value` | integer | Positive; joins to `hru_map_legend.json` `rows[*].hru_value`. |
+| `measure_id` | string enum | `runoff_depth | runoff_volume` only. |
+| `value` | float | Numeric measure value. |
+| `unit` | string enum | `mm` when `measure_id=runoff_depth`; `m3` when `measure_id=runoff_volume`. |
+
+HRU choropleth row-set uniqueness must hold on:
+`(storm_id, hru_id, measure_id)`.
+
+#### 12.4.4 Backward-compatible behavior for legacy runs
+
+Legacy runs created before WP02 may not contain
+`geneva/hru_event_measure_rows.parquet`.
+
+Required compatibility behavior:
+
+- watershed summary query/report (`query_summary_payload`) remains available and
+  unchanged.
+- HRU choropleth data requests against runs missing the artifact must return a
+  contract-compliant unavailable response (`rows=[]`) rather than raising
+  unhandled exceptions.
+- unavailable responses for this case must include
+  `reason_code=legacy_hru_event_measures_missing`.
+- HRU choropleth requests with `measure_id=peak_discharge` must fail validation
+  with explicit scope error code `unsupported_measure_scope`.
+
 ## 13. API Surface (Current)
 
 ### 13.1 Flask WEPPcloud routes (`geneva_bp.py`)
@@ -807,6 +891,11 @@ Under `<run>/geneva/`:
 - `storms/<storm_id>/summary.json`
 - optional normalization artifact:
   - `normalized_sources/wepp_cli_pds_mean_metric_kernel.csv`
+
+WP01 additive artifact contract (materialized in WP02):
+
+- `hru_event_measure_rows.parquet` (run-scoped HRU event-measure table keyed by
+  `storm_id`, `hru_id`, `measure_id`; not required on legacy runs)
 
 ## 16. Current Test/Validation Baseline
 
