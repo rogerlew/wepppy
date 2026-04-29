@@ -9,6 +9,10 @@ var GenevaSummaryReport = (function () {
     var SVG_NS = "http://www.w3.org/2000/svg";
     var CHART_WIDTH = 960;
     var CHART_HEIGHT = 420;
+    var CHART_MARGIN = { top: 20, right: 24, bottom: 62, left: 108 };
+    var Y_AXIS_LABEL_OFFSET = 92;
+    var UNITIZER_EVENT = "unitizer:preferences-changed";
+    var UNITIZER_LISTENER_KEY = "__genevaSummaryUnitizerListener";
     var SERIES_CLASS_NAMES = [
         "geneva-summary__series-line--0",
         "geneva-summary__series-line--1",
@@ -196,6 +200,113 @@ var GenevaSummaryReport = (function () {
         return escapeHtml(asString(fallbackLabel || canonicalUnit));
     }
 
+    function stripHtml(value) {
+        return asString(value).replace(/<[^>]*>/g, "");
+    }
+
+    function normalizeUnitLabel(value) {
+        return asString(value).trim().replace(/\/hour\b/g, "/hr");
+    }
+
+    function resolvePreferredUnitInfo(unitKey) {
+        var canonicalUnit = canonicalUnitKey(unitKey);
+        var fallback = normalizeUnitLabel(canonicalUnit);
+        var info = {
+            baseUnit: canonicalUnit,
+            activeUnit: canonicalUnit,
+            label: fallback
+        };
+
+        if (!canonicalUnit) {
+            return info;
+        }
+
+        var client = getUnitizerClientSync();
+        if (!client || typeof client.getPreferencePayload !== "function" || typeof client.getCategory !== "function") {
+            return info;
+        }
+
+        var preferences = client.getPreferencePayload() || {};
+        var categoryKeys = Object.keys(preferences);
+        var index;
+
+        for (index = 0; index < categoryKeys.length; index += 1) {
+            var categoryKey = categoryKeys[index];
+            var category = client.getCategory(categoryKey);
+            if (!category || !Array.isArray(category.units)) {
+                continue;
+            }
+
+            var hasCanonical = category.units.some(function (unit) {
+                return unit && unit.key === canonicalUnit;
+            });
+            if (!hasCanonical) {
+                continue;
+            }
+
+            var preferredKey = asString(preferences[categoryKey]).trim() || canonicalUnit;
+            var preferredUnit = category.units.find(function (unit) {
+                return unit && unit.key === preferredKey;
+            });
+            var preferredLabel = preferredUnit
+                ? asString(preferredUnit.label || preferredUnit.htmlLabel || preferredUnit.key)
+                : preferredKey;
+
+            info.activeUnit = preferredKey;
+            info.label = normalizeUnitLabel(stripHtml(preferredLabel || preferredKey));
+            return info;
+        }
+
+        return info;
+    }
+
+    function convertToPreferredUnit(value, unitInfo) {
+        var parsed = asNumber(value);
+        if (parsed === null) {
+            return null;
+        }
+        if (!unitInfo || !unitInfo.baseUnit || !unitInfo.activeUnit || unitInfo.baseUnit === unitInfo.activeUnit) {
+            return parsed;
+        }
+
+        var client = getUnitizerClientSync();
+        if (!client || typeof client.convert !== "function") {
+            return parsed;
+        }
+
+        try {
+            return client.convert(parsed, unitInfo.baseUnit, unitInfo.activeUnit);
+        } catch (error) {
+            console.warn("[GenevaSummaryReport] Unit conversion failed.", error);
+            return parsed;
+        }
+    }
+
+    function measureBaseUnitKey(measure) {
+        var map = {
+            peak_discharge: "m^3/s",
+            runoff_depth: "mm",
+            runoff_volume: "m^3"
+        };
+        return map[asString(measure)] || "";
+    }
+
+    function chartXAxisBaseUnitKey(axisId) {
+        return asString(axisId) === "intensity_mm_per_hr" ? "mm/hour" : "";
+    }
+
+    function labelWithParentheticalUnit(baseLabel, unitInfo) {
+        var label = asString(baseLabel).trim();
+        if (!label) {
+            return "";
+        }
+        var unitLabel = unitInfo && unitInfo.label ? asString(unitInfo.label).trim() : "";
+        if (!unitLabel) {
+            return label;
+        }
+        return label + " (" + unitLabel + ")";
+    }
+
     function metricCellValue(metric) {
         if (!metric || typeof metric !== "object") {
             return null;
@@ -246,6 +357,7 @@ var GenevaSummaryReport = (function () {
         this.payload = null;
         this.selectedStormId = null;
         this.requestOrdinal = 0;
+        this.boundUnitizerPreferenceHandler = this.handleUnitizerPreferenceChange.bind(this);
     }
 
     GenevaSummaryReportController.prototype.init = function init() {
@@ -254,7 +366,28 @@ var GenevaSummaryReport = (function () {
         }
         this.bindEvents();
         this.applyPayload(parseJsonNode(this.payloadNode), { focusSelection: false });
+        this.bindUnitizerPreferenceEvents();
         this.ensureUnitizerHydration();
+    };
+
+    GenevaSummaryReportController.prototype.bindUnitizerPreferenceEvents = function bindUnitizerPreferenceEvents() {
+        if (typeof document === "undefined" || !document.addEventListener) {
+            return;
+        }
+        if (document[UNITIZER_LISTENER_KEY]) {
+            document.removeEventListener(UNITIZER_EVENT, document[UNITIZER_LISTENER_KEY]);
+        }
+        document.addEventListener(UNITIZER_EVENT, this.boundUnitizerPreferenceHandler);
+        document[UNITIZER_LISTENER_KEY] = this.boundUnitizerPreferenceHandler;
+    };
+
+    GenevaSummaryReportController.prototype.handleUnitizerPreferenceChange = function handleUnitizerPreferenceChange() {
+        if (!this.payload) {
+            return;
+        }
+        this.renderTable(this.payload);
+        this.renderChart(this.payload);
+        this.syncSelection(this.payload.selected_storm_id, { focusSelection: false });
     };
 
     GenevaSummaryReportController.prototype.ensureUnitizerHydration = function ensureUnitizerHydration() {
@@ -269,8 +402,7 @@ var GenevaSummaryReport = (function () {
                 if (!this.payload) {
                     return;
                 }
-                this.renderTable(this.payload);
-                this.syncSelection(this.payload.selected_storm_id, { focusSelection: false });
+                this.handleUnitizerPreferenceChange();
             }.bind(this))
             .catch(function (error) {
                 console.warn("[GenevaSummaryReport] Unitizer hydration failed.", error);
@@ -714,13 +846,17 @@ var GenevaSummaryReport = (function () {
 
         var chart = payload.chart || {};
         var series = Array.isArray(chart.series) ? chart.series : [];
+        var measure = payload && payload.filters ? payload.filters.measure : "";
+        var xUnitInfo = resolvePreferredUnitInfo(chartXAxisBaseUnitKey(chart.x_axis));
+        var yUnitInfo = resolvePreferredUnitInfo(measureBaseUnitKey(measure));
+        var chartSeries = this.buildChartSeries(series, xUnitInfo, yUnitInfo);
         var points = [];
 
-        series.forEach(function (entry, seriesIndex) {
+        chartSeries.forEach(function (entry, seriesIndex) {
             var rowPoints = Array.isArray(entry.points) ? entry.points : [];
             rowPoints.forEach(function (point) {
-                var x = asNumber(point.intensity_mm_per_hr);
-                var y = asNumber(point.measure_value);
+                var x = asNumber(point.x);
+                var y = asNumber(point.y);
                 if (x === null || y === null) {
                     return;
                 }
@@ -744,7 +880,7 @@ var GenevaSummaryReport = (function () {
             return;
         }
 
-        var margin = { top: 20, right: 24, bottom: 62, left: 76 };
+        var margin = CHART_MARGIN;
         var plotWidth = CHART_WIDTH - margin.left - margin.right;
         var plotHeight = CHART_HEIGHT - margin.top - margin.bottom;
         var xDomain = this.expandDomain(points.map(function (point) { return point.x; }));
@@ -762,9 +898,50 @@ var GenevaSummaryReport = (function () {
         });
         var layer = appendSvg(svg, "g", { class: "geneva-summary__plot-layer" });
 
-        this.renderAxes(layer, margin, plotWidth, plotHeight, xDomain, yDomain, xScale, yScale, payload);
-        this.renderSeriesLines(layer, series, xScale, yScale);
-        this.renderMarkers(layer, series, xScale, yScale);
+        this.renderAxes(
+            layer,
+            margin,
+            plotWidth,
+            plotHeight,
+            xDomain,
+            yDomain,
+            xScale,
+            yScale,
+            payload,
+            xUnitInfo,
+            yUnitInfo
+        );
+        this.renderSeriesLines(layer, chartSeries, xScale, yScale);
+        this.renderMarkers(layer, chartSeries, xScale, yScale);
+    };
+
+    GenevaSummaryReportController.prototype.buildChartSeries = function buildChartSeries(
+        series,
+        xUnitInfo,
+        yUnitInfo
+    ) {
+        return (Array.isArray(series) ? series : []).map(function (entry) {
+            var rowPoints = Array.isArray(entry.points) ? entry.points : [];
+            return {
+                series_id: asString(entry.series_id),
+                series_label: asString(entry.series_label),
+                ari_years: asNumber(entry.ari_years),
+                points: rowPoints.map(function (point) {
+                    var convertedX = convertToPreferredUnit(point.intensity_mm_per_hr, xUnitInfo);
+                    var convertedY = convertToPreferredUnit(point.measure_value, yUnitInfo);
+                    return {
+                        x: convertedX,
+                        y: convertedY,
+                        storm_id: asString(point.storm_id),
+                        marker_label: asString(point.marker_label || durationLabel(point.duration_minutes)),
+                        duration_minutes: asNumber(point.duration_minutes),
+                        datasource_id: asString(point.datasource_id)
+                    };
+                }).filter(function (point) {
+                    return point.x !== null && point.y !== null;
+                })
+            };
+        });
     };
 
     GenevaSummaryReportController.prototype.expandDomain = function expandDomain(values) {
@@ -790,7 +967,9 @@ var GenevaSummaryReport = (function () {
         yDomain,
         xScale,
         yScale,
-        payload
+        payload,
+        xUnitInfo,
+        yUnitInfo
     ) {
         var chart = payload.chart || {};
         var measure = payload.filters ? payload.filters.measure : "";
@@ -858,15 +1037,17 @@ var GenevaSummaryReport = (function () {
             x: margin.left + plotWidth / 2,
             y: margin.top + plotHeight + 48,
             "text-anchor": "middle"
-        }).textContent = chart.x_axis === "intensity_mm_per_hr" ? "Intensity (mm/hr)" : "Intensity";
+        }).textContent = chart.x_axis === "intensity_mm_per_hr"
+            ? labelWithParentheticalUnit("Intensity", xUnitInfo)
+            : "Intensity";
 
         appendSvg(layer, "text", {
             class: "geneva-summary__axis-label",
-            x: margin.left - 58,
+            x: margin.left - Y_AXIS_LABEL_OFFSET,
             y: margin.top + plotHeight / 2,
-            transform: "rotate(-90 " + String(margin.left - 58) + " " + String(margin.top + plotHeight / 2) + ")",
+            transform: "rotate(-90 " + String(margin.left - Y_AXIS_LABEL_OFFSET) + " " + String(margin.top + plotHeight / 2) + ")",
             "text-anchor": "middle"
-        }).textContent = measureLabel(measure);
+        }).textContent = labelWithParentheticalUnit(measureLabel(measure), yUnitInfo);
     };
 
     GenevaSummaryReportController.prototype.renderSeriesLines = function renderSeriesLines(layer, series, xScale, yScale) {
@@ -875,8 +1056,8 @@ var GenevaSummaryReport = (function () {
             points = points
                 .map(function (point) {
                     return {
-                        x: asNumber(point.intensity_mm_per_hr),
-                        y: asNumber(point.measure_value)
+                        x: asNumber(point.x),
+                        y: asNumber(point.y)
                     };
                 })
                 .filter(function (point) {
@@ -914,8 +1095,8 @@ var GenevaSummaryReport = (function () {
             var markerClass = className.replace("geneva-summary__series-line", "geneva-summary__marker-circle");
             var points = Array.isArray(entry.points) ? entry.points : [];
             points.forEach(function (point) {
-                var x = asNumber(point.intensity_mm_per_hr);
-                var y = asNumber(point.measure_value);
+                var x = asNumber(point.x);
+                var y = asNumber(point.y);
                 var stormId = asString(point.storm_id);
                 if (x === null || y === null || !stormId) {
                     return;

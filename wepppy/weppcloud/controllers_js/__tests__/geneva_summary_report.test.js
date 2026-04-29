@@ -259,9 +259,90 @@ describe("Geneva summary report interactions", () => {
         renderValue.mock.calls.forEach((call) => {
             expect(call[2]).toMatchObject({ includeUnits: false });
         });
+        const axisLabels = Array.from(
+            document.querySelectorAll("[data-geneva-summary-chart] .geneva-summary__axis-label")
+        ).map((node) => node.textContent);
+        expect(axisLabels).toContain("Intensity (mm/hr)");
+        expect(axisLabels).toContain("Peak Discharge (m^3/s)");
         expect(renderUnits).toHaveBeenCalledWith("mm", { parentheses: false });
         expect(renderUnits).toHaveBeenCalledWith("mm/hour", { parentheses: false });
         expect(renderUnits).toHaveBeenCalledWith("m^3/s", { parentheses: false });
         expect(renderUnits).toHaveBeenCalledWith("m^3", { parentheses: false });
+    });
+
+    test("redraws chart with converted axis units when unitizer preferences change", async () => {
+        const preferences = {
+            flow: "m^3/s",
+            "xs-distance-rate": "mm/hour",
+            "xs-distance": "mm",
+            volume: "m^3"
+        };
+        const categories = {
+            flow: {
+                units: [
+                    { key: "m^3/s", label: "m^3/s" },
+                    { key: "ft^3/s", label: "ft^3/s" }
+                ]
+            },
+            "xs-distance-rate": {
+                units: [
+                    { key: "mm/hour", label: "mm/hour" },
+                    { key: "in/hour", label: "in/hour" }
+                ]
+            },
+            "xs-distance": {
+                units: [
+                    { key: "mm", label: "mm" },
+                    { key: "in", label: "in" }
+                ]
+            },
+            volume: {
+                units: [
+                    { key: "m^3", label: "m^3" },
+                    { key: "ft^3", label: "ft^3" }
+                ]
+            }
+        };
+        const convert = jest.fn((value, fromUnit, toUnit) => {
+            if (fromUnit === "mm/hour" && toUnit === "in/hour") {
+                return Number(value) / 25.4;
+            }
+            if (fromUnit === "m^3/s" && toUnit === "ft^3/s") {
+                return Number(value) * 35.3147;
+            }
+            return Number(value);
+        });
+        global.UnitizerClient = {
+            getClientSync: jest.fn(() => ({
+                convert,
+                getPreferencePayload: jest.fn(() => ({ ...preferences })),
+                getCategory: jest.fn((categoryKey) => categories[categoryKey] || null),
+                renderValue: jest.fn((value) => `<div class="unitizer-wrapper"><div class="unitizer">${value}</div></div>`),
+                renderUnits: jest.fn((unit) => `<div class="unitizer-wrapper"><div class="unitizer">${unit}</div></div>`)
+            })),
+            ready: jest.fn(() => Promise.resolve())
+        };
+
+        await import("../geneva_summary_report.js");
+        window.GenevaSummaryReport.getInstance().init();
+        await Promise.resolve();
+
+        let axisLabels = Array.from(
+            document.querySelectorAll("[data-geneva-summary-chart] .geneva-summary__axis-label")
+        ).map((node) => node.textContent);
+        expect(axisLabels).toContain("Intensity (mm/hr)");
+        expect(axisLabels).toContain("Peak Discharge (m^3/s)");
+
+        preferences.flow = "ft^3/s";
+        preferences["xs-distance-rate"] = "in/hour";
+        document.dispatchEvent(new CustomEvent("unitizer:preferences-changed", { detail: { preferences } }));
+
+        axisLabels = Array.from(
+            document.querySelectorAll("[data-geneva-summary-chart] .geneva-summary__axis-label")
+        ).map((node) => node.textContent);
+        expect(axisLabels).toContain("Intensity (in/hr)");
+        expect(axisLabels).toContain("Peak Discharge (ft^3/s)");
+        expect(convert).toHaveBeenCalledWith(40, "mm/hour", "in/hour");
+        expect(convert).toHaveBeenCalledWith(1.2, "m^3/s", "ft^3/s");
     });
 });
