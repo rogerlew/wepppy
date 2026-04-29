@@ -120,11 +120,24 @@ jobs:
     - name: Remove redis data directory
       run: |
         set -euo pipefail
-        if [ -d "${GITHUB_WORKSPACE}/.docker-data/redis" ]; then
-          echo "Removing ${GITHUB_WORKSPACE}/.docker-data/redis"
-          sudo rm -rf "${GITHUB_WORKSPACE}/.docker-data/redis"
-        else
+        REDIS_DIR="${GITHUB_WORKSPACE}/.docker-data/redis"
+        if [ ! -d "${REDIS_DIR}" ]; then
           echo "Redis data directory not present; nothing to remove."
+          exit 0
         fi
+
+        echo "Removing ${REDIS_DIR}"
+        if rm -rf "${REDIS_DIR}" 2>/dev/null; then
+          echo "Removed redis data directory without sudo."
+          exit 0
+        fi
+
+        if command -v sudo >/dev/null 2>&1 && sudo -n true >/dev/null 2>&1; then
+          sudo -n rm -rf "${REDIS_DIR}"
+          echo "Removed redis data directory with passwordless sudo."
+          exit 0
+        fi
+
+        echo "Warning: unable to remove ${REDIS_DIR} without interactive sudo; continuing." >&2
     env:
       RUNNER_DOCKER_ENV: /workdir/wepppy/docker/.env
