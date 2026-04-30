@@ -1,0 +1,14 @@
+relative_path,bytes
+source_wepp1/output/H2637.ebe.dat,803651
+source_wepp1/output/H2637.element.dat,31190773
+source_wepp1/output/H2637.loss.dat,55203
+source_wepp1/output/H2637.pass.dat,3139400
+source_wepp1/output/H2637.plot.dat,64673
+source_wepp1/output/H2637.soil.dat,24540395
+source_wepp1/output/H2637.wat.dat,55688697
+source_wepp1/runs/p2637.cli,870330
+source_wepp1/runs/p2637.err,770882
+source_wepp1/runs/p2637.man,80552
+source_wepp1/runs/p2637.run,277
+source_wepp1/runs/p2637.slp,1037
+source_wepp1/runs/p2637.sol,13682

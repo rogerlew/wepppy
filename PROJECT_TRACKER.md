@@ -2,7 +2,7 @@
 > Kanban board for wepppy work packages and vision items
 
 **Last Updated**: 2026-04-30
-**Active Packages**: 3
+**Active Packages**: 4
 **Quick Links**: [Work Packages Directory](docs/work-packages/) | [God-Tier Prompting Strategy](docs/god-tier-prompting-strategy.md)
 
 ## Purpose
@@ -37,9 +37,7 @@ This tracker makes all work visible at a glance, helping agents coordinate and a
 ### 2. Limit Work in Progress
 **Target**: 2-4 active packages maximum to maintain focus and ensure packages complete rather than stall.
 
-**Current WIP**: 3 packages ✅ **Within target range**
-
-If WIP exceeds 4, prioritize completing existing packages before starting new ones. This prevents context switching overhead and ensures clean handoffs.
+**Current WIP**: 4 packages ✅ **Within target range**
 
 ### 3. Manage Flow
 Monitor how long packages spend in each column:
@@ -199,7 +197,28 @@ When resuming Kubernetes work:
 
 Currently active work packages. Limit to 2-4 packages to maintain focus.
 
-**Current WIP Count**: 3 packages
+**Current WIP Count**: 4 packages
+
+---
+
+### Hillslope MOFE Daily Closure Audit + Contract Definition
+**Started**: 2026-04-30  
+**Status**: Milestones 1-3 complete; full-physics closure rework implemented and validated in tool tests  
+**Size**: Medium-High (2-4 focused sessions)  
+**Owner**: Codex  
+**Link**: [docs/work-packages/20260430_hillslope_mofe_daily_closure_audit/](docs/work-packages/20260430_hillslope_mofe_daily_closure_audit/)  
+**Description**: Define a source-backed MOFE water-balance contract from `/workdir/wepp-forest` and implement a dedicated `hillslope_mofe_daily_closure_audit` tool with tests and run evidence, now explicitly reporting full-physics exported-term closure residuals plus implied unresolved terms.
+
+**Current Status**:
+- Contract milestone and required subagent gate are complete (`artifacts/20260430_contract_review_disposition.md`).
+- Tool implementation now includes full-physics closure diagnostics (`RM + UpStrmQ + SubRIn` inputs; `QOFE + latqcc + Dp + ET + Tile + ΔStorage` outputs) and MOFE chain transfer checks.
+- Regression test suite for the new tool passes (`tests/tools/test_hillslope_mofe_daily_closure_audit.py`).
+- Remaining lifecycle work: evaluation artifact refresh and independent implementation-review disposition artifact.
+
+**Next Steps**:
+1. Re-run required closure-audit regression guard suites.
+2. Refresh evaluation summary/artifacts under package `artifacts/`.
+3. Complete and record implementation review disposition artifact.
 
 ---
 
@@ -295,6 +314,15 @@ Currently active work packages. Limit to 2-4 packages to maintain focus.
 ## ✅ Done
 
 Recently completed work packages. Archived immediately upon completion.
+
+### Uncapped-Spectacular H2637 Ablation Campaign (2026-04-30)
+**Status**: ✅ **COMPLETE**
+
+**Link**: [docs/work-packages/20260430_uncapped_spectacular_h2637_ablation_campaign/](docs/work-packages/20260430_uncapped_spectacular_h2637_ablation_campaign/)
+
+**Lifecycle**: Backlog -> In Progress -> Done (2026-04-30)
+
+**Summary**: Completed end-to-end attribution campaign for `uncapped-spectacular` hillslope `H2637`, including required Windows comparator execution on `blarhg` with `C:\\src\\wepppy-win-bootstrap\\bin\\wepppy-win-bootstrap.exe`. Incident package `20260430_uncapped-spectacular_h2637_hillslope_closure-spike` was executed/finalized in `/workdir/wepp-forest/docs/ablation/` with lane matrix `C000` (production binary replay), `C010` (historical comparator), and `C020` (Windows comparator). Day-44 legacy closure spike was reproduced in source + `C000` and not reproduced in comparator lanes; day-45 remained near zero. Package artifacts now include `artifacts/evaluation_summary.md` and `artifacts/incident_snapshot/` with matrix, notes, summaries, and integrity records.
 
 ### Hillslope Daily Closure Audit Tool (MOFE + Single OFE) (2026-04-30)
 **Status**: ✅ **COMPLETE**

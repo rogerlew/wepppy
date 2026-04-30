@@ -1,0 +1,6 @@
+Linux blarhg 6.6.87.2-microsoft-standard-WSL2 #1 SMP PREEMPT_DYNAMIC Thu Jun  5 18:30:46 UTC 2025 x86_64 x86_64 x86_64 GNU/Linux
+roger
+/mnt/c/Users/roger
+UTC_NOW=2026-04-30T19:31:02Z
+07d348d5f9ebff607b6f8e15bea8647410a080c8451b9017f74a9475f39c569d  /mnt/c/src/wepppy-win-bootstrap/bin/wepppy-win-bootstrap.exe
+SIZE=2013696 MTIME=2026-04-17 19:41:59.966056400 -0700 PATH=/mnt/c/src/wepppy-win-bootstrap/bin/wepppy-win-bootstrap.exe

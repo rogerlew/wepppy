@@ -1,0 +1,5 @@
+lane,first_gt1_year_ge40,first_gt1_julian_ge40,first_gt1_ofe_ge40,first_gt1_mm_ge40
+source_wepp1,1987,44,19,-180.45899999999995
+C000_baseline,1987,44,19,-180.45899999999995
+C010_dcc52a6,1987,53,1,-11.620000000000026
+C020_winbootstrap,1987,53,1,-11.610000000000035
