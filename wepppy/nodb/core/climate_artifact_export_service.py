@@ -1,5 +1,7 @@
 from __future__ import annotations
 
+import math
+import os
 import time
 from datetime import datetime
 from pathlib import Path
@@ -13,6 +15,42 @@ from wepppy.climates.cligen import ClimateFile
 
 if TYPE_CHECKING:
     from wepppy.nodb.core.climate import Climate
+
+
+NOAA_ATLAS14_TIMEOUT_SECONDS_DEFAULT = 30
+NOAA_ATLAS14_TOTAL_ATTEMPTS_DEFAULT = 3
+NOAA_ATLAS14_RETRY_BASE_SECONDS_DEFAULT = 1.0
+NOAA_ATLAS14_RETRY_CAP_SECONDS_DEFAULT = 8.0
+
+
+def _parse_int_env(name: str, default: int, *, minimum: int) -> int:
+    raw = os.getenv(name)
+    if raw is None:
+        return default
+    try:
+        parsed = int(raw.strip())
+    except ValueError:
+        return default
+    return max(minimum, parsed)
+
+
+def _parse_float_env(name: str, default: float, *, minimum: float) -> float:
+    raw = os.getenv(name)
+    if raw is None:
+        return default
+    try:
+        parsed = float(raw.strip())
+    except ValueError:
+        return default
+    if not math.isfinite(parsed):
+        return default
+    return max(minimum, parsed)
+
+
+def _retry_backoff_seconds(*, attempt_index: int, base_seconds: float, cap_seconds: float) -> float:
+    if attempt_index < 0:
+        return base_seconds
+    return min(cap_seconds, base_seconds * (2**attempt_index))
 
 
 class ClimateArtifactExportService:
@@ -364,40 +402,97 @@ class ClimateArtifactExportService:
             climate.logger.exception("Failed importing pfdf NOAA Atlas 14 client")
             return None
 
-        try:
-            result = atlas14.download(
-                lat=float(lat),
-                lon=float(lng),
-                parent=str(output_path.parent),
-                name=output_path.name,
-                statistic="mean",
-                data="intensity",
-                series="pds",
-                units="metric",
-                timeout=30,
-                overwrite=True,
-            )
-            if result is None:
-                return None
-            result_path = Path(result)
-            if result_path.exists():
-                climate.logger.info(
-                    "Downloaded NOAA Atlas 14 intensity data",
-                    extra={"csv": str(result_path)},
+        timeout_seconds = _parse_int_env(
+            "WEPPPY_NOAA_ATLAS14_TIMEOUT_SECONDS",
+            NOAA_ATLAS14_TIMEOUT_SECONDS_DEFAULT,
+            minimum=1,
+        )
+        total_attempts = _parse_int_env(
+            "WEPPPY_NOAA_ATLAS14_TOTAL_ATTEMPTS",
+            NOAA_ATLAS14_TOTAL_ATTEMPTS_DEFAULT,
+            minimum=1,
+        )
+        backoff_base_seconds = _parse_float_env(
+            "WEPPPY_NOAA_ATLAS14_RETRY_BASE_SECONDS",
+            NOAA_ATLAS14_RETRY_BASE_SECONDS_DEFAULT,
+            minimum=0.0,
+        )
+        backoff_cap_seconds = _parse_float_env(
+            "WEPPPY_NOAA_ATLAS14_RETRY_CAP_SECONDS",
+            NOAA_ATLAS14_RETRY_CAP_SECONDS_DEFAULT,
+            minimum=0.0,
+        )
+        if backoff_cap_seconds < backoff_base_seconds:
+            backoff_cap_seconds = backoff_base_seconds
+
+        for attempt in range(1, total_attempts + 1):
+            try:
+                result = atlas14.download(
+                    lat=float(lat),
+                    lon=float(lng),
+                    parent=str(output_path.parent),
+                    name=output_path.name,
+                    statistic="mean",
+                    data="intensity",
+                    series="pds",
+                    units="metric",
+                    timeout=timeout_seconds,
+                    overwrite=True,
                 )
-                return result_path
-        except ValueError as exc:
-            climate.logger.info(
-                "NOAA Atlas 14 data unavailable for location",
-                extra={"error": str(exc), "lat": lat, "lon": lng},
-            )
-            return None
-        # Network/client boundary: remote/API issues should not fail climate build completion.
-        except (ConnectionError, OSError, RuntimeError, TimeoutError):
-            climate.logger.exception(
-                "Failed downloading NOAA Atlas 14 intensity data",
-                extra={"lat": lat, "lon": lng},
-            )
-            return None
+                if result is None:
+                    climate.logger.info(
+                        "NOAA Atlas 14 download returned no file",
+                        extra={"attempt": attempt, "attempts": total_attempts, "lat": lat, "lon": lng},
+                    )
+                    return None
+                result_path = Path(result)
+                if result_path.exists():
+                    climate.logger.info(
+                        "Downloaded NOAA Atlas 14 intensity data",
+                        extra={"csv": str(result_path), "attempt": attempt, "attempts": total_attempts},
+                    )
+                    return result_path
+                climate.logger.warning(
+                    "NOAA Atlas 14 download did not produce expected file",
+                    extra={
+                        "attempt": attempt,
+                        "attempts": total_attempts,
+                        "result": str(result_path),
+                        "lat": lat,
+                        "lon": lng,
+                    },
+                )
+                return None
+            except ValueError as exc:
+                climate.logger.info(
+                    "NOAA Atlas 14 data unavailable for location",
+                    extra={"error": str(exc), "lat": lat, "lon": lng, "attempt": attempt},
+                )
+                return None
+            # Network/client boundary: remote/API issues should not fail climate build completion.
+            except (ConnectionError, OSError, RuntimeError, TimeoutError):
+                if attempt >= total_attempts:
+                    climate.logger.exception(
+                        "Failed downloading NOAA Atlas 14 intensity data after retries",
+                        extra={"lat": lat, "lon": lng, "attempts": total_attempts, "timeout_seconds": timeout_seconds},
+                    )
+                    return None
+                backoff_seconds = _retry_backoff_seconds(
+                    attempt_index=attempt - 1,
+                    base_seconds=backoff_base_seconds,
+                    cap_seconds=backoff_cap_seconds,
+                )
+                climate.logger.warning(
+                    "NOAA Atlas 14 transient download failure; retrying",
+                    extra={
+                        "attempt": attempt,
+                        "attempts": total_attempts,
+                        "backoff_seconds": backoff_seconds,
+                        "lat": lat,
+                        "lon": lng,
+                    },
+                    exc_info=True,
+                )
+                time.sleep(backoff_seconds)
 
         return None

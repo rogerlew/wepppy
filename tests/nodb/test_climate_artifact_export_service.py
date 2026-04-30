@@ -273,16 +273,37 @@ def _install_fake_atlas14(monkeypatch: pytest.MonkeyPatch, atlas14_obj: object) 
     monkeypatch.setitem(sys.modules, "pfdf.data.noaa", noaa_mod)
 
 
+def _configure_noaa_retry_env(
+    monkeypatch: pytest.MonkeyPatch,
+    sleeps: list[float],
+    *,
+    total_attempts: str = "3",
+    base_seconds: str = "1.0",
+    cap_seconds: str = "8.0",
+    timeout_seconds: str | None = None,
+) -> None:
+    monkeypatch.setattr("wepppy.nodb.core.climate_artifact_export_service.time.sleep", lambda v: sleeps.append(v))
+    monkeypatch.setenv("WEPPPY_NOAA_ATLAS14_TOTAL_ATTEMPTS", total_attempts)
+    monkeypatch.setenv("WEPPPY_NOAA_ATLAS14_RETRY_BASE_SECONDS", base_seconds)
+    monkeypatch.setenv("WEPPPY_NOAA_ATLAS14_RETRY_CAP_SECONDS", cap_seconds)
+    if timeout_seconds is None:
+        monkeypatch.delenv("WEPPPY_NOAA_ATLAS14_TIMEOUT_SECONDS", raising=False)
+        return
+    monkeypatch.setenv("WEPPPY_NOAA_ATLAS14_TIMEOUT_SECONDS", timeout_seconds)
+
+
 def test_download_noaa_atlas14_intensity_returns_path_on_success(
     tmp_path: Path,
     monkeypatch: pytest.MonkeyPatch,
 ) -> None:
     service = ClimateArtifactExportService()
     output_path = tmp_path / "atlas14_intensity_pds_mean_metric.csv"
+    kwargs_calls: list[dict[str, object]] = []
 
     class _Atlas14:
         @staticmethod
         def download(**_kwargs):
+            kwargs_calls.append(_kwargs)
             output_path.write_text("atlas14")
             return str(output_path)
 
@@ -299,49 +320,179 @@ def test_download_noaa_atlas14_intensity_returns_path_on_success(
 
     assert result == output_path
     assert output_path.exists()
+    assert kwargs_calls[-1]["timeout"] == 30
 
 
-def test_download_noaa_atlas14_intensity_returns_none_on_no_coverage(
+def test_download_noaa_atlas14_intensity_transient_failure_then_success(
     tmp_path: Path,
     monkeypatch: pytest.MonkeyPatch,
 ) -> None:
     service = ClimateArtifactExportService()
+    output_path = tmp_path / "atlas14_intensity_pds_mean_metric.csv"
+    attempts: list[int] = []
+    sleeps: list[float] = []
+    kwargs_calls: list[dict[str, object]] = []
 
     class _Atlas14:
         @staticmethod
         def download(**_kwargs):
-            raise ValueError("no coverage")
+            kwargs_calls.append(_kwargs)
+            attempts.append(len(attempts) + 1)
+            if len(attempts) == 1:
+                raise RuntimeError("temporary upstream failure")
+            output_path.write_text("atlas14")
+            return str(output_path)
 
     _install_fake_atlas14(monkeypatch, _Atlas14)
+    _configure_noaa_retry_env(monkeypatch, sleeps)
 
     climate = SimpleNamespace(
         cligen_db="legacy",
         cli_dir=str(tmp_path),
-        logger=logging.getLogger("tests.nodb.climate.artifacts.atlas.nocoverage"),
+        logger=logging.getLogger("tests.nodb.climate.artifacts.atlas.transient"),
         watershed_instance=SimpleNamespace(centroid=(-116.2, 43.6)),
     )
 
-    assert service.download_noaa_atlas14_intensity(climate) is None
+    result = service.download_noaa_atlas14_intensity(climate)
+
+    assert result == output_path
+    assert attempts == [1, 2]
+    assert sleeps == [1.0]
+    assert kwargs_calls[0]["timeout"] == 30
+    assert kwargs_calls[1]["timeout"] == 30
 
 
-def test_download_noaa_atlas14_intensity_returns_none_on_download_failure(
+def test_download_noaa_atlas14_intensity_retry_exhaustion_returns_none(
     tmp_path: Path,
     monkeypatch: pytest.MonkeyPatch,
 ) -> None:
     service = ClimateArtifactExportService()
+    attempts: list[int] = []
+    sleeps: list[float] = []
 
     class _Atlas14:
         @staticmethod
         def download(**_kwargs):
+            attempts.append(len(attempts) + 1)
             raise RuntimeError("network down")
 
     _install_fake_atlas14(monkeypatch, _Atlas14)
+    _configure_noaa_retry_env(monkeypatch, sleeps)
 
     climate = SimpleNamespace(
         cligen_db="legacy",
         cli_dir=str(tmp_path),
-        logger=logging.getLogger("tests.nodb.climate.artifacts.atlas.failure"),
+        logger=logging.getLogger("tests.nodb.climate.artifacts.atlas.exhausted"),
         watershed_instance=SimpleNamespace(centroid=(-116.2, 43.6)),
     )
 
     assert service.download_noaa_atlas14_intensity(climate) is None
+    assert attempts == [1, 2, 3]
+    assert sleeps == [1.0, 2.0]
+
+
+def test_download_noaa_atlas14_intensity_no_coverage_is_non_retryable(
+    tmp_path: Path,
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    service = ClimateArtifactExportService()
+    attempts: list[int] = []
+    sleeps: list[float] = []
+
+    class _Atlas14:
+        @staticmethod
+        def download(**_kwargs):
+            attempts.append(len(attempts) + 1)
+            raise ValueError("no coverage")
+
+    _install_fake_atlas14(monkeypatch, _Atlas14)
+    _configure_noaa_retry_env(monkeypatch, sleeps)
+
+    climate = SimpleNamespace(
+        cligen_db="legacy",
+        cli_dir=str(tmp_path),
+        logger=logging.getLogger("tests.nodb.climate.artifacts.atlas.no_coverage"),
+        watershed_instance=SimpleNamespace(centroid=(-116.2, 43.6)),
+    )
+
+    assert service.download_noaa_atlas14_intensity(climate) is None
+    assert attempts == [1]
+    assert sleeps == []
+
+
+def test_download_noaa_atlas14_intensity_applies_timeout_cap_and_attempt_env(
+    tmp_path: Path,
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    service = ClimateArtifactExportService()
+    attempts: list[int] = []
+    sleeps: list[float] = []
+    kwargs_calls: list[dict[str, object]] = []
+
+    class _Atlas14:
+        @staticmethod
+        def download(**_kwargs):
+            kwargs_calls.append(_kwargs)
+            attempts.append(len(attempts) + 1)
+            raise RuntimeError("network down")
+
+    _install_fake_atlas14(monkeypatch, _Atlas14)
+    _configure_noaa_retry_env(
+        monkeypatch,
+        sleeps,
+        total_attempts="4",
+        base_seconds="4.0",
+        cap_seconds="5.0",
+        timeout_seconds="17",
+    )
+
+    climate = SimpleNamespace(
+        cligen_db="legacy",
+        cli_dir=str(tmp_path),
+        logger=logging.getLogger("tests.nodb.climate.artifacts.atlas.env_override"),
+        watershed_instance=SimpleNamespace(centroid=(-116.2, 43.6)),
+    )
+
+    assert service.download_noaa_atlas14_intensity(climate) is None
+    assert attempts == [1, 2, 3, 4]
+    assert sleeps == [4.0, 5.0, 5.0]
+    assert [call["timeout"] for call in kwargs_calls] == [17, 17, 17, 17]
+
+
+def test_download_noaa_atlas14_intensity_invalid_env_uses_defaults(
+    tmp_path: Path,
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    service = ClimateArtifactExportService()
+    attempts: list[int] = []
+    sleeps: list[float] = []
+    kwargs_calls: list[dict[str, object]] = []
+
+    class _Atlas14:
+        @staticmethod
+        def download(**_kwargs):
+            kwargs_calls.append(_kwargs)
+            attempts.append(len(attempts) + 1)
+            raise RuntimeError("network down")
+
+    _install_fake_atlas14(monkeypatch, _Atlas14)
+    _configure_noaa_retry_env(
+        monkeypatch,
+        sleeps,
+        total_attempts="invalid",
+        base_seconds="NaN",
+        cap_seconds="invalid",
+        timeout_seconds="invalid",
+    )
+
+    climate = SimpleNamespace(
+        cligen_db="legacy",
+        cli_dir=str(tmp_path),
+        logger=logging.getLogger("tests.nodb.climate.artifacts.atlas.invalid_env"),
+        watershed_instance=SimpleNamespace(centroid=(-116.2, 43.6)),
+    )
+
+    assert service.download_noaa_atlas14_intensity(climate) is None
+    assert attempts == [1, 2, 3]
+    assert sleeps == [1.0, 2.0]
+    assert [call["timeout"] for call in kwargs_calls] == [30, 30, 30]

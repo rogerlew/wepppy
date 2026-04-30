@@ -1,7 +1,7 @@
 # PROJECT_TRACKER.md
 > Kanban board for wepppy work packages and vision items
 
-**Last Updated**: 2026-04-29
+**Last Updated**: 2026-04-30
 **Active Packages**: 3
 **Quick Links**: [Work Packages Directory](docs/work-packages/) | [God-Tier Prompting Strategy](docs/god-tier-prompting-strategy.md)
 
@@ -78,30 +78,6 @@ Feedback mechanisms:
 ## 📋 Backlog
 
 Work packages that are scoped but not yet started. Dependencies and prerequisites should be noted.
-
-### NOAA Atlas 14 Retry Backoff Hardening for Climate Artifact Export
-**Proposed**: 2026-04-29  
-**Size**: Medium (1-2 focused sessions)  
-**Priority**: Medium-High  
-**Link**: [docs/work-packages/20260429_noaa_atlas14_retry_backoff/](docs/work-packages/20260429_noaa_atlas14_retry_backoff/)  
-**Description**: Add bounded exponential retry/backoff for NOAA Atlas 14 artifact export in climate builds so transient NOAA PFDS outages do not frequently suppress `atlas14_intensity_pds_mean_metric.csv`.
-
-**Scope**:
-- Implement retry-on-transient-failure in `download_noaa_atlas14_intensity`.
-- Keep NOAA artifact optional (non-fatal on exhaustion/no-coverage).
-- Add deterministic regression tests for retry success and retry exhaustion.
-- Capture parameterization rationale from existing local retry implementations.
-
-**Strategic Value**:
-- Improves reliability of NOAA-vs-WEPP frequency comparison artifacts without changing core climate completion contract.
-- Reduces operator/user confusion when NOAA output is missing due only to brief upstream instability.
-- Aligns climate outbound-call resilience with existing repository retry conventions.
-
-**Dependencies**: None.
-
-**Next Steps**: Execute package milestones in the active ExecPlan, run targeted tests, and record validation evidence.
-
----
 
 ### totalwatsed3 Storage and Optional Terms Contract Hardening
 **Proposed**: 2026-04-29
@@ -319,6 +295,15 @@ Currently active work packages. Limit to 2-4 packages to maintain focus.
 ## ✅ Done
 
 Recently completed work packages. Archived immediately upon completion.
+
+### NOAA Atlas 14 Retry Backoff Hardening for Climate Artifact Export (2026-04-30)
+**Status**: ✅ **COMPLETE**
+
+**Link**: [docs/work-packages/20260429_noaa_atlas14_retry_backoff/](docs/work-packages/20260429_noaa_atlas14_retry_backoff/)
+
+**Lifecycle**: Backlog -> In Progress -> Done (2026-04-30)
+
+**Summary**: Completed bounded exponential retry/backoff hardening for optional NOAA Atlas 14 climate artifact export. `download_noaa_atlas14_intensity` now applies parameterized retries (`timeout=30s`, `attempts=3`, `base=1.0s`, `cap=8.0s`; env-overridable via `WEPPPY_NOAA_ATLAS14_*`) and logs attempt/backoff/exhaustion context while preserving non-fatal exhaustion behavior. `ValueError` no-coverage remains immediate non-retryable. Deterministic regressions cover transient failure then success, bounded retry exhaustion, no-coverage immediate return, timeout propagation, cap-hit backoff, and invalid-env fallback. Targeted validation passed: `wctl run-pytest tests/nodb/test_climate_artifact_export_service.py --maxfail=1` (`12 passed`).
 
 ### Uncapped-Spectacular totalwatsed3 Runoff Reconciliation (2026-04-29)
 **Status**: ✅ **COMPLETE**
