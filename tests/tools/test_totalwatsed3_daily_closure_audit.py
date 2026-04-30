@@ -125,7 +125,18 @@ def test_compute_daily_audit_detects_runoff_consistency_and_closure(tmp_path: Pa
     assert whole["enriched_storage_change_mm"] == pytest.approx(-6.0)
     assert whole["closure_reconstructed_with_enriched_storage_total_mm"] == pytest.approx(0.5)
     assert whole["closure_reconstructed_with_enriched_storage_pct_of_rain_melt"] == pytest.approx(5.0)
+    assert whole["soilwater_total_available"] is True
+    assert whole["soilwatertotal_vs_legacy_max_abs_mm"] == pytest.approx(1.0)
+    assert whole["profile_terms_available"] is True
+    assert whole["profile_order_fc_gt_porosity_days"] == 0
+    assert whole["profile_order_wp_gt_fc_days"] == 0
+    assert whole["soilwater_gt_porositycap_days"] == 0
+    assert whole["soilwater_lt_wpstore_days"] == 2
     assert summary["closure_reconstructed_with_enriched_storage_mm"]["max_abs"] == pytest.approx(1.0)
+    assert summary["soilwatertotal_vs_legacy_storage_mm"]["max_abs"] == pytest.approx(1.0)
+    assert summary["soilwater_to_porosity_fraction"]["max_abs"] == pytest.approx(0.2)
+    assert summary["soilwater_minus_fc_mm"]["max_abs"] == pytest.approx(206.0)
+    assert summary["soilwater_minus_wp_mm"]["max_abs"] == pytest.approx(26.0)
 
 
 def test_main_writes_outputs(tmp_path: Path, monkeypatch: pytest.MonkeyPatch) -> None:

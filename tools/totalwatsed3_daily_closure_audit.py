@@ -68,6 +68,10 @@ def _optional_columns() -> tuple[str, ...]:
     )
 
 
+def _has_non_null(frame: pd.DataFrame, column: str) -> bool:
+    return column in frame.columns and frame[column].notna().any()
+
+
 def load_dataset(path: Path) -> pd.DataFrame:
     frame = pd.read_parquet(path)
     missing = [name for name in _required_columns() if name not in frame.columns]
@@ -111,7 +115,7 @@ def compute_daily_audit(df: pd.DataFrame) -> pd.DataFrame:
         + audit["Snow-Water"].to_numpy(dtype=np.float64, copy=False)
     )
     storage_delta_mm = np.diff(storage_mm, prepend=storage_mm[0])
-    if "SoilWaterTotal" in audit and audit["SoilWaterTotal"].notna().any():
+    if _has_non_null(audit, "SoilWaterTotal"):
         enriched_storage_mm = (
             audit["SoilWaterTotal"].to_numpy(dtype=np.float64, copy=False)
             + audit["Snow-Water"].to_numpy(dtype=np.float64, copy=False)
@@ -157,6 +161,73 @@ def compute_daily_audit(df: pd.DataFrame) -> pd.DataFrame:
     audit["audit_storage_delta_mm"] = storage_delta_mm
     audit["audit_enriched_storage_mm"] = enriched_storage_mm
     audit["audit_enriched_storage_delta_mm"] = enriched_storage_delta_mm
+    if _has_non_null(audit, "SoilWaterTotal"):
+        audit["audit_soilwatertotal_vs_legacy_storage_mm"] = (
+            audit["SoilWaterTotal"].to_numpy(dtype=np.float64, copy=False)
+            - (
+                audit["Total-Soil Water"].to_numpy(dtype=np.float64, copy=False)
+                + audit["frozwt"].to_numpy(dtype=np.float64, copy=False)
+            )
+        )
+    else:
+        audit["audit_soilwatertotal_vs_legacy_storage_mm"] = np.full(audit.shape[0], np.nan, dtype=np.float64)
+
+    if _has_non_null(audit, "SoilWaterTotal") and _has_non_null(audit, "ProfilePorosityCap"):
+        soilwater_total = audit["SoilWaterTotal"].to_numpy(dtype=np.float64, copy=False)
+        profile_porosity_cap = audit["ProfilePorosityCap"].to_numpy(dtype=np.float64, copy=False)
+        audit["audit_soilwater_to_porosity_fraction"] = _safe_divide(soilwater_total, profile_porosity_cap)
+        audit["audit_soilwater_minus_porositycap_mm"] = soilwater_total - profile_porosity_cap
+    else:
+        audit["audit_soilwater_to_porosity_fraction"] = np.full(audit.shape[0], np.nan, dtype=np.float64)
+        audit["audit_soilwater_minus_porositycap_mm"] = np.full(audit.shape[0], np.nan, dtype=np.float64)
+
+    if _has_non_null(audit, "SoilWaterTotal") and _has_non_null(audit, "ProfileFCStore"):
+        audit["audit_soilwater_minus_fc_mm"] = (
+            audit["SoilWaterTotal"].to_numpy(dtype=np.float64, copy=False)
+            - audit["ProfileFCStore"].to_numpy(dtype=np.float64, copy=False)
+        )
+    else:
+        audit["audit_soilwater_minus_fc_mm"] = np.full(audit.shape[0], np.nan, dtype=np.float64)
+
+    if _has_non_null(audit, "SoilWaterTotal") and _has_non_null(audit, "ProfileWPStore"):
+        audit["audit_soilwater_minus_wp_mm"] = (
+            audit["SoilWaterTotal"].to_numpy(dtype=np.float64, copy=False)
+            - audit["ProfileWPStore"].to_numpy(dtype=np.float64, copy=False)
+        )
+    else:
+        audit["audit_soilwater_minus_wp_mm"] = np.full(audit.shape[0], np.nan, dtype=np.float64)
+
+    if _has_non_null(audit, "ProfilePorosityCap") and _has_non_null(audit, "ProfileFCStore"):
+        audit["audit_profile_order_fc_gt_porosity"] = (
+            audit["ProfileFCStore"].to_numpy(dtype=np.float64, copy=False)
+            > audit["ProfilePorosityCap"].to_numpy(dtype=np.float64, copy=False)
+        )
+    else:
+        audit["audit_profile_order_fc_gt_porosity"] = np.full(audit.shape[0], False, dtype=bool)
+
+    if _has_non_null(audit, "ProfileFCStore") and _has_non_null(audit, "ProfileWPStore"):
+        audit["audit_profile_order_wp_gt_fc"] = (
+            audit["ProfileWPStore"].to_numpy(dtype=np.float64, copy=False)
+            > audit["ProfileFCStore"].to_numpy(dtype=np.float64, copy=False)
+        )
+    else:
+        audit["audit_profile_order_wp_gt_fc"] = np.full(audit.shape[0], False, dtype=bool)
+
+    if _has_non_null(audit, "SoilWaterTotal") and _has_non_null(audit, "ProfilePorosityCap"):
+        audit["audit_soilwater_gt_porositycap"] = (
+            audit["SoilWaterTotal"].to_numpy(dtype=np.float64, copy=False)
+            > (audit["ProfilePorosityCap"].to_numpy(dtype=np.float64, copy=False) + 1.0e-9)
+        )
+    else:
+        audit["audit_soilwater_gt_porositycap"] = np.full(audit.shape[0], False, dtype=bool)
+
+    if _has_non_null(audit, "SoilWaterTotal") and _has_non_null(audit, "ProfileWPStore"):
+        audit["audit_soilwater_lt_wpstore"] = (
+            audit["SoilWaterTotal"].to_numpy(dtype=np.float64, copy=False)
+            < (audit["ProfileWPStore"].to_numpy(dtype=np.float64, copy=False) - 1.0e-9)
+        )
+    else:
+        audit["audit_soilwater_lt_wpstore"] = np.full(audit.shape[0], False, dtype=bool)
 
     audit["audit_runoff_consistency_mm"] = runoff_reported_mm - runoff_calc_mm
     audit["audit_lateral_consistency_mm"] = lateral_reported_mm - lateral_calc_mm
@@ -242,6 +313,17 @@ def _build_whole_run_closure(audit: pd.DataFrame) -> dict[str, float]:
         closure_reconstructed_with_enriched_storage_total_mm = _nan_sum(
             audit["audit_closure_reconstructed_with_enriched_storage_mm"]
         )
+    soilwater_total_available = bool(audit["audit_soilwatertotal_vs_legacy_storage_mm"].notna().any())
+    soilwater_total_vs_legacy_max_abs_mm = float("nan")
+    if soilwater_total_available:
+        soilwater_total_vs_legacy_max_abs_mm = float(
+            np.nanmax(np.abs(audit["audit_soilwatertotal_vs_legacy_storage_mm"].to_numpy(dtype=np.float64, copy=False)))
+        )
+    profile_terms_available = bool(audit["audit_soilwater_to_porosity_fraction"].notna().any())
+    profile_order_fc_gt_porosity_days = int(audit["audit_profile_order_fc_gt_porosity"].sum())
+    profile_order_wp_gt_fc_days = int(audit["audit_profile_order_wp_gt_fc"].sum())
+    soilwater_gt_porositycap_days = int(audit["audit_soilwater_gt_porositycap"].sum())
+    soilwater_lt_wpstore_days = int(audit["audit_soilwater_lt_wpstore"].sum())
     row_count = float(audit.shape[0])
 
     return {
@@ -262,6 +344,13 @@ def _build_whole_run_closure(audit: pd.DataFrame) -> dict[str, float]:
         "closure_reconstructed_with_storage_total_mm": closure_reconstructed_with_storage_total_mm,
         "enriched_storage_available": enriched_storage_available,
         "enriched_storage_change_mm": _optional_float(enriched_storage_change_mm),
+        "soilwater_total_available": soilwater_total_available,
+        "soilwatertotal_vs_legacy_max_abs_mm": _optional_float(soilwater_total_vs_legacy_max_abs_mm),
+        "profile_terms_available": profile_terms_available,
+        "profile_order_fc_gt_porosity_days": profile_order_fc_gt_porosity_days,
+        "profile_order_wp_gt_fc_days": profile_order_wp_gt_fc_days,
+        "soilwater_gt_porositycap_days": soilwater_gt_porositycap_days,
+        "soilwater_lt_wpstore_days": soilwater_lt_wpstore_days,
         "closure_reported_with_enriched_storage_total_mm": _optional_float(
             closure_reported_with_enriched_storage_total_mm
         ),
@@ -309,6 +398,10 @@ def build_summary(audit: pd.DataFrame, source_path: Path) -> dict[str, Any]:
     closure_reported = audit["audit_closure_reported_with_storage_mm"].to_numpy(dtype=np.float64, copy=False)
     closure_reconstructed = audit["audit_closure_reconstructed_with_storage_mm"].to_numpy(dtype=np.float64, copy=False)
     closure_enriched = audit["audit_closure_reconstructed_with_enriched_storage_mm"].to_numpy(dtype=np.float64, copy=False)
+    storage_delta = audit["audit_soilwatertotal_vs_legacy_storage_mm"].to_numpy(dtype=np.float64, copy=False)
+    soilwater_to_porosity = audit["audit_soilwater_to_porosity_fraction"].to_numpy(dtype=np.float64, copy=False)
+    soilwater_minus_fc = audit["audit_soilwater_minus_fc_mm"].to_numpy(dtype=np.float64, copy=False)
+    soilwater_minus_wp = audit["audit_soilwater_minus_wp_mm"].to_numpy(dtype=np.float64, copy=False)
     runoff_consistency = audit["audit_runoff_consistency_mm"].to_numpy(dtype=np.float64, copy=False)
 
     top_runoff = audit.iloc[int(np.argmax(audit["audit_runoff_reported_mm"].to_numpy(dtype=np.float64, copy=False)))]
@@ -337,6 +430,18 @@ def build_summary(audit: pd.DataFrame, source_path: Path) -> dict[str, Any]:
         "closure_reconstructed_with_storage_mm": _quantiles(closure_reconstructed),
         "closure_reconstructed_with_enriched_storage_mm": (
             None if np.isnan(closure_enriched).all() else _quantiles(closure_enriched[~np.isnan(closure_enriched)])
+        ),
+        "soilwatertotal_vs_legacy_storage_mm": (
+            None if np.isnan(storage_delta).all() else _quantiles(storage_delta[~np.isnan(storage_delta)])
+        ),
+        "soilwater_to_porosity_fraction": (
+            None if np.isnan(soilwater_to_porosity).all() else _quantiles(soilwater_to_porosity[~np.isnan(soilwater_to_porosity)])
+        ),
+        "soilwater_minus_fc_mm": (
+            None if np.isnan(soilwater_minus_fc).all() else _quantiles(soilwater_minus_fc[~np.isnan(soilwater_minus_fc)])
+        ),
+        "soilwater_minus_wp_mm": (
+            None if np.isnan(soilwater_minus_wp).all() else _quantiles(soilwater_minus_wp[~np.isnan(soilwater_minus_wp)])
         ),
         "whole_run_closure": _build_whole_run_closure(audit),
         "max_reported_runoff_day": {
@@ -384,6 +489,14 @@ def _top_anomalies(audit: pd.DataFrame, top_n: int) -> pd.DataFrame:
             "audit_closure_reconstructed_with_storage_mm",
             "audit_closure_reported_with_enriched_storage_mm",
             "audit_closure_reconstructed_with_enriched_storage_mm",
+            "audit_soilwatertotal_vs_legacy_storage_mm",
+            "audit_soilwater_to_porosity_fraction",
+            "audit_soilwater_minus_fc_mm",
+            "audit_soilwater_minus_wp_mm",
+            "audit_profile_order_fc_gt_porosity",
+            "audit_profile_order_wp_gt_fc",
+            "audit_soilwater_gt_porositycap",
+            "audit_soilwater_lt_wpstore",
             "audit_runoff_to_precip_reported_pct",
             "audit_runoff_to_precip_reconstructed_pct",
         ]
@@ -443,6 +556,27 @@ def main() -> int:
     print(
         "closure_reconstructed_with_storage_pct_of_rain_melt="
         f"{summary['whole_run_closure']['closure_reconstructed_with_storage_pct_of_rain_melt']:.6f}"
+    )
+    if summary["whole_run_closure"]["enriched_storage_available"]:
+        print(
+            "closure_reconstructed_with_enriched_storage_total_mm="
+            f"{summary['whole_run_closure']['closure_reconstructed_with_enriched_storage_total_mm']:.6f}"
+        )
+        print(
+            "closure_reconstructed_with_enriched_storage_pct_of_rain_melt="
+            f"{summary['whole_run_closure']['closure_reconstructed_with_enriched_storage_pct_of_rain_melt']:.6f}"
+        )
+    if summary["whole_run_closure"]["soilwater_total_available"]:
+        print(
+            "soilwatertotal_vs_legacy_max_abs_mm="
+            f"{summary['whole_run_closure']['soilwatertotal_vs_legacy_max_abs_mm']:.6f}"
+        )
+    print(
+        "profile_violations_days="
+        f"fc_gt_porosity:{summary['whole_run_closure']['profile_order_fc_gt_porosity_days']},"
+        f"wp_gt_fc:{summary['whole_run_closure']['profile_order_wp_gt_fc_days']},"
+        f"soilwater_gt_porosity:{summary['whole_run_closure']['soilwater_gt_porositycap_days']},"
+        f"soilwater_lt_wp:{summary['whole_run_closure']['soilwater_lt_wpstore_days']}"
     )
     print(f"summary_json={summary_path}")
     print(f"top_days_csv={top_path}")
