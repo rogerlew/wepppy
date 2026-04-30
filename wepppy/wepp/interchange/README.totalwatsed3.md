@@ -2,7 +2,7 @@
 > Fuses WEPP hillslope water, sediment, and ash-transport outputs into a single daily table served as `totalwatsed3.parquet`.
 
 ## Overview
-`totalwatsed3.parquet` is produced by `wepppy.wepp.interchange.totalwatsed3.run_totalwatsed3`. The helper reads the per-hillslope interchange artifacts emitted by WEPP (`H.pass.parquet`, `H.wat.parquet`) and, when present, the WEPP–Ash Transport summaries under `<run>/ash`. The rows are grouped by simulation date (`year`, `julian`, `sim_day_index`, etc.) so that each record represents the watershed-wide totals for a given day:
+`totalwatsed3.parquet` is produced by `wepppy.wepp.interchange.totalwatsed3.run_totalwatsed3`. The helper reads the per-hillslope interchange artifacts emitted by WEPP (`H.pass.parquet`, `H.wat.parquet`) and, when present, optional soil/element diagnostics (`H.soil.parquet`, `H.element.parquet`) plus WEPP–Ash Transport summaries under `<run>/ash`. The rows are grouped by simulation date (`year`, `julian`, `sim_day_index`, etc.) so that each record represents the watershed-wide totals for a given day:
 
 - Most hydrologic volumes (m³) are summed from `H.wat`, then converted back to depths (mm) via watershed area.
 - `Runoff` depth is computed from `H.pass` runoff volume (`runvol`) over aggregated watershed area.
@@ -17,6 +17,8 @@ The resulting table is written to `<run>/wepp/output/interchange/totalwatsed3.pa
 | --- | --- | --- |
 | Hillslope PASS | `H.pass.parquet` | Event-scale runoff, detachment, and sediment concentration (`sedcon_*`) for every WEPP hillslope. |
 | Hillslope WAT | `H.wat.parquet` | Daily hydrology terms (`Area`, `Q`, `Ep`, …) per hillslope/OFE combination. |
+| Hillslope SOIL (optional) | `H.soil.parquet` | Daily soil profile state; `TSMF` is used for full-profile true moisture fraction when present. |
+| Hillslope ELEMENT (optional) | `H.element.parquet` | Daily event partitioning; `QRain` and `QSnow` are area-weighted into watershed-scale depths when present. |
 | Ash Transport (optional) | `<run>/ash/H{wepp_id}_ash.parquet` | Daily ash water/wind transport statistics per hillslope, merged when present. |
 
 Only the PASS file includes per-particle sediment concentrations (`sedcon_1`-`sedcon_5`, kg m⁻³). Those values are multiplied by the per-event runoff volume (`runvol`, m³) to recover per-class sediment mass in kilograms. The water-balance terms come from `H.wat` where inputs are expressed as depths (mm); the aggregator multiplies each depth by the contributing area to recover volumes, performs any needed sums, and finally divides by area again to restore depths.
@@ -30,6 +32,9 @@ Key output columns (see `SCHEMA` in `totalwatsed3.py` for the complete list):
 - `sed_del`: total daily sediment delivery (kg), computed as `Σ seddep_i`.
 - `sed_vol_conc`: watershed-wide volumetric sediment concentration (m³ of solids per m³ of runoff).
 - `Area`, `P`, `RM`, `Q`, `Dp`, `latqcc`, … : volumetric sums from `H.wat`, later converted to depths (`Precipitation`, `Lateral Flow`, etc.).
+- `SoilWaterTotal`, `ProfileDepth`, `ProfilePorosityCap`, `ProfileFCStore`, `ProfileWPStore`: optional producer-authoritative storage/capacity terms from `H.wat` in mm. They are null for legacy WEPP executables that do not emit the additive columns.
+- `TSMF`: area-weighted true soil moisture fraction from `H.soil` when available (null when absent).
+- `QRain`, `QSnow`: area-weighted runoff-partition depths from `H.element` when available (null when absent).
 - MOFE lateral flow rule: when multiple OFEs are present for a hillslope/day, `latqcc` uses only the outlet-facing (last) OFE. This avoids counting internal lateral-routing transfers multiple times.
 - MOFE runoff rule: `Runoff` uses PASS `runvol` volume divided by aggregated watershed area (not summed `QOFE`), avoiding OFE-count scaling bias.
 - Ash transport columns when the ash directory is available:
@@ -38,6 +43,12 @@ Key output columns (see `SCHEMA` in `totalwatsed3.py` for the complete list):
   - Ash volumetrics: `ash_vol_conc` (ash solids volume / runoff), `sed+ash_vol_conc` (sediment + ash solids volume / runoff), `ash_black_pct_by_vol` (% of ash solids volume that is black ash).
 
 Nulls from missing PASS or ash rows are filled with zeros before the final Arrow table is materialised.
+
+## Storage Terms
+
+`Total-Soil Water` in `H.wat` is WEPP's unfrozen profile-water term. It is not interchangeable with `TSW` in `H.soil`, which is a top-layer diagnostic. When available, prefer `SoilWaterTotal` for full-profile storage closure because WEPP emits it as `watcon + frozwt`.
+
+The optional `H.wat` capacity terms are direct WEPP outputs in mm: `ProfileDepth = solthk(nsl)`, `ProfilePorosityCap = sum(por * dg)`, `ProfileFCStore = sum(thetfc * dg)`, and `ProfileWPStore = sum(thetdr * dg)`. `totalwatsed3` area-weights these fields when present and preserves nulls when parsing legacy layouts.
 
 ## Volumetric Concentration Details
 

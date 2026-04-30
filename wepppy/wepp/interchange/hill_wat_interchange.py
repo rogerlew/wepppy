@@ -37,7 +37,7 @@ RAW_HEADER_SUBSTITUTIONS = (
 
 LOGGER = logging.getLogger(__name__)
 
-WAT_COLUMN_NAMES = [
+WAT_BASE_COLUMN_NAMES = [
     "OFE",
     "J",
     "Y",
@@ -60,6 +60,16 @@ WAT_COLUMN_NAMES = [
     "Area",
 ]
 
+WAT_OPTIONAL_COLUMN_NAMES = [
+    "SoilWaterTotal",
+    "ProfileDepth",
+    "ProfilePorosityCap",
+    "ProfileFCStore",
+    "ProfileWPStore",
+]
+
+WAT_COLUMN_NAMES = WAT_BASE_COLUMN_NAMES + WAT_OPTIONAL_COLUMN_NAMES
+
 HEADER_ALIASES = {
     "OFE (#)": "OFE",
     "OFE": "OFE",
@@ -80,6 +90,11 @@ HEADER_ALIASES = {
     "Tile (mm)": "Tile",
     "Irr (mm)": "Irr",
     "Area (m^2)": "Area",
+    "SoilWaterTotal (mm)": "SoilWaterTotal",
+    "ProfileDepth (mm)": "ProfileDepth",
+    "ProfilePorosityCap (mm)": "ProfilePorosityCap",
+    "ProfileFCStore (mm)": "ProfileFCStore",
+    "ProfileWPStore (mm)": "ProfileWPStore",
 }
 
 SCHEMA = schema_with_version(
@@ -111,6 +126,36 @@ SCHEMA = schema_with_version(
             pa_field("Tile", pa.float64(), units="mm", description="Tile drainage"),
             pa_field("Irr", pa.float64(), units="mm", description="Irrigation"),
             pa_field("Area", pa.float64(), units="m^2", description="Area that depths apply over"),
+            pa_field(
+                "SoilWaterTotal",
+                pa.float64(),
+                units="mm",
+                description="Full-profile soil water depth (watcon + frozwt), optional producer-authoritative term",
+            ),
+            pa_field(
+                "ProfileDepth",
+                pa.float64(),
+                units="mm",
+                description="Full soil profile depth (solthk(nsl)), optional producer-authoritative term",
+            ),
+            pa_field(
+                "ProfilePorosityCap",
+                pa.float64(),
+                units="mm",
+                description="Full-profile porosity storage capacity (sum(por * dg)), optional producer-authoritative term",
+            ),
+            pa_field(
+                "ProfileFCStore",
+                pa.float64(),
+                units="mm",
+                description="Full-profile field-capacity storage (sum(thetfc * dg)), optional producer-authoritative term",
+            ),
+            pa_field(
+                "ProfileWPStore",
+                pa.float64(),
+                units="mm",
+                description="Full-profile wilting-point storage (sum(thetdr * dg)), optional producer-authoritative term",
+            ),
         ]
     )
 )
@@ -143,6 +188,11 @@ CANONICAL_COLUMN_ALIASES = {
     "QOFE": ("QOFE", "QOFE (mm)"),
     "Tile": ("Tile", "Tile (mm)"),
     "Irr": ("Irr", "Irr (mm)"),
+    "SoilWaterTotal": ("SoilWaterTotal", "SoilWaterTotal (mm)"),
+    "ProfileDepth": ("ProfileDepth", "ProfileDepth (mm)"),
+    "ProfilePorosityCap": ("ProfilePorosityCap", "ProfilePorosityCap (mm)"),
+    "ProfileFCStore": ("ProfileFCStore", "ProfileFCStore (mm)"),
+    "ProfileWPStore": ("ProfileWPStore", "ProfileWPStore (mm)"),
 }
 
 PANDAS_TYPE_MAP: Dict[str, np.dtype] = {
@@ -167,6 +217,7 @@ DAILY_MM_COLUMNS: Tuple[str, ...] = (
     "QOFE",
     "Tile",
     "Irr",
+    *WAT_OPTIONAL_COLUMN_NAMES,
 )
 
 
@@ -177,10 +228,10 @@ def _empty_wat_dataframe() -> pd.DataFrame:
     return pd.DataFrame(data)[SCHEMA.names]
 
 
-def _resolve_column_aliases(path: Path) -> Dict[str, str]:
+def _resolve_column_aliases(path: Path) -> Dict[str, str | None]:
     schema = pq.read_schema(path)
     available = set(schema.names)
-    resolved: Dict[str, str] = {}
+    resolved: Dict[str, str | None] = {}
     for canonical in SCHEMA.names:
         candidates = CANONICAL_COLUMN_ALIASES.get(canonical, (canonical,))
         for candidate in candidates:
@@ -190,6 +241,8 @@ def _resolve_column_aliases(path: Path) -> Dict[str, str]:
         else:
             if canonical in available:
                 resolved[canonical] = canonical
+            elif canonical in WAT_OPTIONAL_COLUMN_NAMES:
+                resolved[canonical] = None
             else:
                 raise KeyError(f"Column '{canonical}' not found in {path}")
     return resolved
@@ -242,8 +295,17 @@ def _extract_header(lines: List[str]) -> tuple[List[str], int]:
 
     canonical_header: List[str] = [HEADER_ALIASES.get(value, value) for value in header]
 
-    if canonical_header != WAT_COLUMN_NAMES:
+    base_len = len(WAT_BASE_COLUMN_NAMES)
+    if canonical_header[:base_len] != WAT_BASE_COLUMN_NAMES:
         raise ValueError(f"Unexpected WAT column layout: {header}")
+
+    optional_header = canonical_header[base_len:]
+    expected_optional = WAT_OPTIONAL_COLUMN_NAMES[: len(optional_header)]
+    if optional_header != expected_optional:
+        raise ValueError(
+            "Unexpected WAT column layout: "
+            f"{header}; optional columns must be trailing approved terms {WAT_OPTIONAL_COLUMN_NAMES}"
+        )
 
     return canonical_header, header_end + 2
 
@@ -299,9 +361,15 @@ def _parse_wat_file(path: Path, *, calendar_lookup: dict[int, list[tuple[int, in
             "OFE": ofe_id,
         }
 
-        for name in WAT_COLUMN_NAMES[3:]:
+        for name in WAT_BASE_COLUMN_NAMES[3:]:
             token = tokens[column_positions[name]]
             row[name] = _parse_float(token)
+        for name in WAT_OPTIONAL_COLUMN_NAMES:
+            if name in column_positions:
+                token = tokens[column_positions[name]]
+                row[name] = _parse_float(token)
+            else:
+                row[name] = None
 
         _append_row(out, row)
 
@@ -344,6 +412,19 @@ def _recompute_sim_day_index(
     return table.set_column(sim_col_index, "sim_day_index", pa.array(sim_day, type=pa.int32()))
 
 
+def _normalize_rust_optional_columns(columns: dict) -> dict:
+    missing = [name for name in WAT_OPTIONAL_COLUMN_NAMES if name not in columns]
+    if not missing:
+        return columns
+    row_count = 0
+    if columns:
+        first_values = next(iter(columns.values()))
+        row_count = len(first_values)
+    for name in missing:
+        columns[name] = [None] * row_count
+    return columns
+
+
 def _parse_wat_file_rust(
     path: Path,
     *,
@@ -367,6 +448,7 @@ def _parse_wat_file_rust(
             minor,
             cli_calendar_path=cli_calendar_path,
         )
+        columns = _normalize_rust_optional_columns(columns)
         table = pa.table(columns, schema=SCHEMA)
         return _recompute_sim_day_index(table, calendar_lookup=calendar_lookup)
     except Exception as exc:
@@ -465,7 +547,7 @@ def load_hill_wat_dataframe(
     try:
         if normalized_collapse is None:
             select_list = [
-                f'"{alias_map[name]}" AS "{name}"'
+                f'"{alias_map[name]}" AS "{name}"' if alias_map[name] is not None else f'NULL AS "{name}"'
                 for name in SCHEMA.names
             ]
             query = f"""
@@ -482,8 +564,12 @@ def load_hill_wat_dataframe(
                 frame = _coerce_wat_dtypes(frame)
         else:
             area_column = alias_map["Area"]
+            if area_column is None:
+                raise KeyError(f"Column 'Area' not found in {wat_path}")
             mm_volume_expr = ",\n                    ".join(
                 f'SUM("{alias_map[column]}" * 0.001 * "{area_column}") AS "{column}_volume"'
+                if alias_map[column] is not None
+                else f'CAST(NULL AS DOUBLE) AS "{column}_volume"'
                 for column in DAILY_MM_COLUMNS
             )
             query = f"""

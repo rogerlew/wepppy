@@ -1,5 +1,6 @@
 from __future__ import annotations
 
+import json
 from pathlib import Path
 import runpy
 
@@ -37,6 +38,11 @@ def _write_totalwatsed3(path: Path) -> None:
             "Total-Soil Water": 100.0,
             "frozwt": 0.0,
             "Snow-Water": 0.0,
+            "SoilWaterTotal": 100.0,
+            "ProfileDepth": 1000.0,
+            "ProfilePorosityCap": 500.0,
+            "ProfileFCStore": 300.0,
+            "ProfileWPStore": 120.0,
             "Precipitation": 5.0,
             "Rain+Melt": 5.0,
             "Runoff": 20.0,
@@ -63,6 +69,11 @@ def _write_totalwatsed3(path: Path) -> None:
             "Total-Soil Water": 95.0,
             "frozwt": 0.0,
             "Snow-Water": 0.0,
+            "SoilWaterTotal": 94.0,
+            "ProfileDepth": 1000.0,
+            "ProfilePorosityCap": 500.0,
+            "ProfileFCStore": 300.0,
+            "ProfileWPStore": 120.0,
             "Precipitation": 5.0,
             "Rain+Melt": 5.0,
             "Runoff": 40.0,
@@ -93,6 +104,8 @@ def test_compute_daily_audit_detects_runoff_consistency_and_closure(tmp_path: Pa
 
     # Day 2 reconstructed closure with storage: 5 - (4+2+3+1) - (-5) = 0.
     assert audit.loc[1, "audit_closure_reconstructed_with_storage_mm"] == pytest.approx(0.0)
+    # Enriched storage uses producer-authoritative SoilWaterTotal, so day 2 delta is -6.
+    assert audit.loc[1, "audit_closure_reconstructed_with_enriched_storage_mm"] == pytest.approx(1.0)
     # Reported closure remains strongly negative due inflated reported runoff.
     assert audit.loc[1, "audit_closure_reported_with_storage_mm"] == pytest.approx(-36.0)
 
@@ -100,6 +113,19 @@ def test_compute_daily_audit_detects_runoff_consistency_and_closure(tmp_path: Pa
     assert summary["max_reported_runoff_mm"] == pytest.approx(40.0)
     assert summary["max_reconstructed_runoff_mm"] == pytest.approx(4.0)
     assert summary["max_runoff_to_precip_reconstructed_pct"] == pytest.approx(80.0)
+    whole = summary["whole_run_closure"]
+    assert whole["rain_melt_total_mm"] == pytest.approx(10.0)
+    assert whole["runoff_reported_total_mm"] == pytest.approx(60.0)
+    assert whole["runoff_reconstructed_total_mm"] == pytest.approx(7.0)
+    assert whole["storage_change_mm"] == pytest.approx(-5.0)
+    assert whole["closure_reported_with_storage_total_mm"] == pytest.approx(-53.5)
+    assert whole["closure_reconstructed_with_storage_total_mm"] == pytest.approx(-0.5)
+    assert whole["closure_reconstructed_with_storage_pct_of_rain_melt"] == pytest.approx(-5.0)
+    assert whole["enriched_storage_available"] is True
+    assert whole["enriched_storage_change_mm"] == pytest.approx(-6.0)
+    assert whole["closure_reconstructed_with_enriched_storage_total_mm"] == pytest.approx(0.5)
+    assert whole["closure_reconstructed_with_enriched_storage_pct_of_rain_melt"] == pytest.approx(5.0)
+    assert summary["closure_reconstructed_with_enriched_storage_mm"]["max_abs"] == pytest.approx(1.0)
 
 
 def test_main_writes_outputs(tmp_path: Path, monkeypatch: pytest.MonkeyPatch) -> None:
@@ -124,5 +150,9 @@ def test_main_writes_outputs(tmp_path: Path, monkeypatch: pytest.MonkeyPatch) ->
 
     result = main()
     assert result == 0
-    assert (out_dir / "daily_closure_audit_summary.json").exists()
+    summary_path = out_dir / "daily_closure_audit_summary.json"
+    assert summary_path.exists()
     assert (out_dir / "daily_closure_audit_top_days.csv").exists()
+
+    summary = json.loads(summary_path.read_text(encoding="utf-8"))
+    assert "whole_run_closure" in summary

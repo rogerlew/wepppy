@@ -79,6 +79,54 @@ Feedback mechanisms:
 
 Work packages that are scoped but not yet started. Dependencies and prerequisites should be noted.
 
+### NOAA Atlas 14 Retry Backoff Hardening for Climate Artifact Export
+**Proposed**: 2026-04-29  
+**Size**: Medium (1-2 focused sessions)  
+**Priority**: Medium-High  
+**Link**: [docs/work-packages/20260429_noaa_atlas14_retry_backoff/](docs/work-packages/20260429_noaa_atlas14_retry_backoff/)  
+**Description**: Add bounded exponential retry/backoff for NOAA Atlas 14 artifact export in climate builds so transient NOAA PFDS outages do not frequently suppress `atlas14_intensity_pds_mean_metric.csv`.
+
+**Scope**:
+- Implement retry-on-transient-failure in `download_noaa_atlas14_intensity`.
+- Keep NOAA artifact optional (non-fatal on exhaustion/no-coverage).
+- Add deterministic regression tests for retry success and retry exhaustion.
+- Capture parameterization rationale from existing local retry implementations.
+
+**Strategic Value**:
+- Improves reliability of NOAA-vs-WEPP frequency comparison artifacts without changing core climate completion contract.
+- Reduces operator/user confusion when NOAA output is missing due only to brief upstream instability.
+- Aligns climate outbound-call resilience with existing repository retry conventions.
+
+**Dependencies**: None.
+
+**Next Steps**: Execute package milestones in the active ExecPlan, run targeted tests, and record validation evidence.
+
+---
+
+### totalwatsed3 Storage and Optional Terms Contract Hardening
+**Proposed**: 2026-04-29
+**Size**: Medium-High (2-4 focused sessions)
+**Priority**: High
+**Link**: [docs/work-packages/20260429_totalwatsed3_storage_optional_terms/](docs/work-packages/20260429_totalwatsed3_storage_optional_terms/)
+**Description**: Define and implement additive optional storage/capacity and runoff-partition terms across WEPP-forest outputs and WEPPpy interchange/`totalwatsed3` so water-balance closure interpretation is explicit and backward-compatible.
+
+**Scope**:
+- Finalize optional-term contract (names, units, formulas, null semantics) in `totalwatsed` spec/docs.
+- Harden WEPPpy hillslope parsers for legacy + enriched output layouts.
+- Wire optional terms into `totalwatsed3` and closure-audit tooling with regression coverage.
+- Regenerate and re-audit `uncapped-spectacular` artifact after rollout.
+
+**Strategic Value**:
+- Reduces repeated analyst/operator confusion around storage semantics (`TSW` vs `Total-Soil Water`).
+- Preserves legacy compatibility while enabling richer closure diagnostics.
+- Creates a durable, documented cross-repo contract for future WEPP output evolution.
+
+**Dependencies**: Production validation was completed on wepp1 because the run directory is not mounted in the local workspace.
+
+**Next Steps**: Create a follow-up investigation package if the large H2637/H2809 closure residuals need root-cause analysis beyond this schema/contract work.
+
+---
+
 ### Deprecate and Remove TauDEM Backend
 **Proposed**: 2025-10-27  
 **Size**: Medium (3-5 days)  

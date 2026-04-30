@@ -1,0 +1,4 @@
+from .test_element_interchange import (
+    test_element_interchange_mixed_legacy_and_qrain_files as test_hill_element_interchange_mixed_legacy_and_qrain_files,
+    test_element_interchange_parses_qrain_qsnow_columns as test_hill_element_interchange_parses_qrain_qsnow_columns,
+)

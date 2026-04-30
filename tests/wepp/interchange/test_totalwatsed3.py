@@ -1,5 +1,6 @@
 from __future__ import annotations
 
+import math
 from pathlib import Path
 
 import duckdb
@@ -26,6 +27,10 @@ class _BaseflowOpts:
         self.gwstorage = gwstorage
         self.dscoeff = dscoeff
         self.bfcoeff = bfcoeff
+
+
+def _is_nullish(value: object) -> bool:
+    return value is None or (isinstance(value, float) and math.isnan(value))
 
 
 def _read_parquet_dict(path: Path) -> dict[str, list]:
@@ -99,6 +104,80 @@ def _write_wat(path: Path, area_m2: float) -> None:
     """
     with duckdb.connect() as con:
         con.execute(query, [float(area_m2)])
+
+
+def _write_wat_with_storage_terms(path: Path) -> None:
+    path.parent.mkdir(parents=True, exist_ok=True)
+    safe = str(path).replace("'", "''")
+    query = f"""
+    COPY (
+        SELECT
+            1 AS wepp_id,
+            1 AS ofe_id,
+            2020 AS year,
+            1 AS sim_day_index,
+            1 AS julian,
+            1 AS month,
+            1 AS day_of_month,
+            2020 AS water_year,
+            100.0 AS Area,
+            5.0 AS P,
+            6.0 AS RM,
+            1.0 AS Q,
+            0.5 AS Dp,
+            0.4 AS latqcc,
+            0.3 AS QOFE,
+            0.2 AS Ep,
+            0.1 AS Es,
+            0.05 AS Er,
+            0.0 AS UpStrmQ,
+            0.0 AS SubRIn,
+            90.0 AS "Total-Soil Water",
+            3.0 AS frozwt,
+            0.0 AS "Snow-Water",
+            0.0 AS Tile,
+            0.0 AS Irr,
+            93.0 AS SoilWaterTotal,
+            1000.0 AS ProfileDepth,
+            510.0 AS ProfilePorosityCap,
+            310.0 AS ProfileFCStore,
+            130.0 AS ProfileWPStore
+        UNION ALL
+        SELECT
+            1 AS wepp_id,
+            2 AS ofe_id,
+            2020 AS year,
+            1 AS sim_day_index,
+            1 AS julian,
+            1 AS month,
+            1 AS day_of_month,
+            2020 AS water_year,
+            300.0 AS Area,
+            5.0 AS P,
+            6.0 AS RM,
+            1.0 AS Q,
+            0.5 AS Dp,
+            0.4 AS latqcc,
+            0.3 AS QOFE,
+            0.2 AS Ep,
+            0.1 AS Es,
+            0.05 AS Er,
+            0.0 AS UpStrmQ,
+            0.0 AS SubRIn,
+            120.0 AS "Total-Soil Water",
+            6.0 AS frozwt,
+            0.0 AS "Snow-Water",
+            0.0 AS Tile,
+            0.0 AS Irr,
+            126.0 AS SoilWaterTotal,
+            1200.0 AS ProfileDepth,
+            600.0 AS ProfilePorosityCap,
+            350.0 AS ProfileFCStore,
+            150.0 AS ProfileWPStore
+    ) TO '{safe}' (FORMAT PARQUET)
+    """
+    with duckdb.connect() as con:
+        con.execute(query)
 
 
 def _write_wat_multi_ofe(path: Path) -> None:
@@ -189,6 +268,49 @@ def _write_ash(path: Path) -> None:
         con.execute(query)
 
 
+def _write_soil(path: Path, *, tsmf: float) -> None:
+    path.parent.mkdir(parents=True, exist_ok=True)
+    safe = str(path).replace("'", "''")
+    query = f"""
+    COPY (
+        SELECT
+            1 AS wepp_id,
+            1 AS ofe_id,
+            2020 AS year,
+            1 AS sim_day_index,
+            1 AS julian,
+            1 AS month,
+            1 AS day_of_month,
+            2020 AS water_year,
+            ? AS TSMF
+    ) TO '{safe}' (FORMAT PARQUET)
+    """
+    with duckdb.connect() as con:
+        con.execute(query, [float(tsmf)])
+
+
+def _write_element(path: Path, *, qrain: float, qsnow: float) -> None:
+    path.parent.mkdir(parents=True, exist_ok=True)
+    safe = str(path).replace("'", "''")
+    query = f"""
+    COPY (
+        SELECT
+            1 AS wepp_id,
+            1 AS ofe_id,
+            2020 AS year,
+            1 AS sim_day_index,
+            1 AS julian,
+            1 AS month,
+            1 AS day_of_month,
+            2020 AS water_year,
+            ? AS QRain,
+            ? AS QSnow
+    ) TO '{safe}' (FORMAT PARQUET)
+    """
+    with duckdb.connect() as con:
+        con.execute(query, [float(qrain), float(qsnow)])
+
+
 def test_run_totalwatsed3_merges_ash_metrics(tmp_path):
     run_dir = tmp_path / "run"
     interchange_dir = run_dir / "wepp" / "output" / "interchange"
@@ -219,6 +341,11 @@ def test_run_totalwatsed3_merges_ash_metrics(tmp_path):
     assert "sed_vol_conc" in data
     assert data["sed_vol_conc"][0] == pytest.approx(1.159943960651508e-4)
     assert data["Runoff"][0] == pytest.approx(0.1)  # runvol depth over Area (1 m^3 over 10,000 m^2)
+    assert _is_nullish(data["TSMF"][0])
+    assert _is_nullish(data["QRain"][0])
+    assert _is_nullish(data["QSnow"][0])
+    for column in ("SoilWaterTotal", "ProfileDepth", "ProfilePorosityCap", "ProfileFCStore", "ProfileWPStore"):
+        assert _is_nullish(data[column][0])
 
     # Missing ash directory should still produce rows with zeroed ash metrics.
     run_totalwatsed3(
@@ -231,6 +358,48 @@ def test_run_totalwatsed3_merges_ash_metrics(tmp_path):
     filtered = _read_parquet_dict(output_path)
     for column in ASH_METRIC_COLUMNS:
         assert all(value == 0.0 for value in filtered.get(column, []))
+
+
+def test_run_totalwatsed3_merges_tsmf_qrain_qsnow_when_available(tmp_path):
+    run_dir = tmp_path / "run"
+    interchange_dir = run_dir / "wepp" / "output" / "interchange"
+    _write_pass(interchange_dir / "H.pass.parquet")
+    _write_wat(interchange_dir / "H.wat.parquet", area_m2=10_000.0)
+    _write_soil(interchange_dir / "H.soil.parquet", tsmf=0.62)
+    _write_element(interchange_dir / "H.element.parquet", qrain=1.25, qsnow=0.5)
+
+    output_path = run_totalwatsed3(
+        interchange_dir,
+        _BaseflowOpts(gwstorage=0.0, dscoeff=0.0, bfcoeff=0.0),
+        wepp_ids=[1],
+        ash_dir=run_dir / "ash_missing",
+    )
+
+    data = _read_parquet_dict(output_path)
+    assert data["TSMF"][0] == pytest.approx(0.62)
+    assert data["QRain"][0] == pytest.approx(1.25)
+    assert data["QSnow"][0] == pytest.approx(0.5)
+
+
+def test_run_totalwatsed3_exposes_optional_wat_storage_terms(tmp_path):
+    run_dir = tmp_path / "run"
+    interchange_dir = run_dir / "wepp" / "output" / "interchange"
+    _write_pass(interchange_dir / "H.pass.parquet")
+    _write_wat_with_storage_terms(interchange_dir / "H.wat.parquet")
+
+    output_path = run_totalwatsed3(
+        interchange_dir,
+        _BaseflowOpts(gwstorage=0.0, dscoeff=0.0, bfcoeff=0.0),
+        wepp_ids=[1],
+        ash_dir=run_dir / "ash_missing",
+    )
+
+    data = _read_parquet_dict(output_path)
+    assert data["SoilWaterTotal"][0] == pytest.approx(117.75)
+    assert data["ProfileDepth"][0] == pytest.approx(1150.0)
+    assert data["ProfilePorosityCap"][0] == pytest.approx(577.5)
+    assert data["ProfileFCStore"][0] == pytest.approx(340.0)
+    assert data["ProfileWPStore"][0] == pytest.approx(145.0)
 
 
 def test_run_totalwatsed3_uses_last_ofe_for_lateral_flow(tmp_path):

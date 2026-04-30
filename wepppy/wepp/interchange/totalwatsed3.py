@@ -44,6 +44,16 @@ PASS_METRIC_COLUMNS = (
     SEDIMENT_VOLUME_COLUMN,
 )
 
+SOIL_OPTIONAL_COLUMNS = ("TSMF",)
+ELEMENT_OPTIONAL_COLUMNS = ("QRain", "QSnow")
+WAT_OPTIONAL_COLUMNS = (
+    "SoilWaterTotal",
+    "ProfileDepth",
+    "ProfilePorosityCap",
+    "ProfileFCStore",
+    "ProfileWPStore",
+)
+
 # Ash columns are unitless in names; units live in schema metadata
 ASH_TYPES = ("black", "white")
 ASH_METRIC_BASES = ("wind_transport", "water_transport", "ash_transport", "transportable_ash")
@@ -95,8 +105,16 @@ SCHEMA = schema_with_version(
             pa_field("UpStrmQ", pa.float64(), units="mm", description="Runon added to OFE depth"),
             pa_field("SubRIn", pa.float64(), units="mm", description="Subsurface runon added to OFE depth"),
             pa_field("Total-Soil Water", pa.float64(), units="mm", description="Unfrozen water in soil profile depth"),
+            pa_field("SoilWaterTotal", pa.float64(), units="mm", description="Area-weighted full-profile soil water depth (watcon + frozwt)"),
+            pa_field("ProfileDepth", pa.float64(), units="mm", description="Area-weighted full soil profile depth (solthk(nsl))"),
+            pa_field("ProfilePorosityCap", pa.float64(), units="mm", description="Area-weighted full-profile porosity storage capacity (sum(por * dg))"),
+            pa_field("ProfileFCStore", pa.float64(), units="mm", description="Area-weighted full-profile field-capacity storage (sum(thetfc * dg))"),
+            pa_field("ProfileWPStore", pa.float64(), units="mm", description="Area-weighted full-profile wilting-point storage (sum(thetdr * dg))"),
+            pa_field("TSMF", pa.float64(), units="frac", description="Area-weighted true soil moisture fraction (full profile)"),
             pa_field("frozwt", pa.float64(), units="mm", description="Frozen water in soil profile depth"),
             pa_field("Snow-Water", pa.float64(), units="mm", description="Water in surface snow depth"),
+            pa_field("QRain", pa.float64(), units="mm", description="Area-weighted rain-generated runoff depth from element partitioning"),
+            pa_field("QSnow", pa.float64(), units="mm", description="Area-weighted snow-generated runoff depth from element partitioning"),
             pa_field("Tile", pa.float64(), units="mm", description="Tile drainage depth"),
             pa_field("Irr", pa.float64(), units="mm", description="Irrigation depth"),
             pa_field("Precipitation", pa.float64(), units="mm", description="Precipitation depth"),
@@ -150,6 +168,8 @@ EMPTY_TABLE = pa.table({field.name: pa.array([], type=field.type) for field in S
 class _QueryTargets:
     pass_path: Path
     wat_path: Path
+    soil_path: Path | None
+    element_path: Path | None
     output_path: Path
 
 
@@ -529,6 +549,15 @@ def _build_where_clause(wepp_ids: list[int] | None) -> str:
     return f"WHERE wepp_id IN ({id_list})"
 
 
+def _build_where_clause_for_alias(wepp_ids: list[int] | None, alias: str) -> str:
+    if wepp_ids is None:
+        return ""
+    if not wepp_ids:
+        return "WHERE FALSE"
+    id_list = ",".join(str(wepp_id) for wepp_id in wepp_ids)
+    return f"WHERE {alias}.wepp_id IN ({id_list})"
+
+
 def _resolve_sim_day_column(path: Path) -> str:
     schema = pq.read_schema(path)
     if "sim_day_index" in schema.names:
@@ -580,7 +609,15 @@ def _aggregate_pass(con: duckdb.DuckDBPyConnection, pass_path: Path, where_claus
 def _aggregate_wat(con: duckdb.DuckDBPyConnection, wat_path: Path, where_clause: str) -> pd.DataFrame:
     day_column = _resolve_sim_day_column(wat_path)
     ofe_column = _resolve_ofe_column(wat_path)
+    schema_names = set(pq.read_schema(wat_path).names)
     path_sql = wat_path.as_posix()
+    optional_exprs = []
+    for column in WAT_OPTIONAL_COLUMNS:
+        if column in schema_names:
+            optional_exprs.append(f'SUM("{column}" * 0.001 * Area) AS "{column}_volume"')
+        else:
+            optional_exprs.append(f'CAST(NULL AS DOUBLE) AS "{column}_volume"')
+    optional_sql = ",\n            ".join(optional_exprs)
 
     if ofe_column is None:
         source_clause = f"FROM read_parquet('{path_sql}')\n        {where_clause}"
@@ -623,6 +660,7 @@ def _aggregate_wat(con: duckdb.DuckDBPyConnection, wat_path: Path, where_clause:
             SUM(UpStrmQ * 0.001 * Area) AS UpStrmQ_volume,
             SUM(SubRIn * 0.001 * Area) AS SubRIn_volume,
             SUM("Total-Soil Water" * 0.001 * Area) AS Total_Soil_Water_volume,
+            {optional_sql},
             SUM(frozwt * 0.001 * Area) AS frozwt_volume,
             SUM("Snow-Water" * 0.001 * Area) AS Snow_Water_volume,
             SUM(Tile * 0.001 * Area) AS Tile_volume,
@@ -632,6 +670,138 @@ def _aggregate_wat(con: duckdb.DuckDBPyConnection, wat_path: Path, where_clause:
         ORDER BY year, julian, "{day_column}"
     """
     return con.execute(query).df()
+
+
+def _aggregate_soil_tsmf(
+    con: duckdb.DuckDBPyConnection,
+    soil_path: Path,
+    wat_path: Path,
+    wepp_ids: list[int] | None,
+) -> pd.DataFrame | None:
+    schema_names = set(pq.read_schema(soil_path).names)
+    if "TSMF" not in schema_names:
+        return None
+
+    soil_day_column = _resolve_sim_day_column(soil_path)
+    wat_day_column = _resolve_sim_day_column(wat_path)
+    soil_ofe_column = _resolve_ofe_column(soil_path)
+    wat_ofe_column = _resolve_ofe_column(wat_path)
+    if soil_ofe_column is None or wat_ofe_column is None:
+        return None
+
+    where_clause = _build_where_clause_for_alias(wepp_ids, alias="soil")
+    query = f"""
+        SELECT
+            soil.year AS year,
+            soil."{soil_day_column}" AS sim_day_index,
+            soil.julian AS julian,
+            soil.month AS month,
+            soil.day_of_month AS day_of_month,
+            soil.water_year AS water_year,
+            SUM(CASE WHEN soil.TSMF IS NOT NULL THEN soil.TSMF * wat.Area ELSE 0 END) AS tsmf_weighted_sum,
+            SUM(CASE WHEN soil.TSMF IS NOT NULL THEN wat.Area ELSE 0 END) AS tsmf_area
+        FROM read_parquet('{soil_path.as_posix()}') AS soil
+        INNER JOIN read_parquet('{wat_path.as_posix()}') AS wat
+            ON soil.wepp_id = wat.wepp_id
+            AND soil."{soil_ofe_column}" = wat."{wat_ofe_column}"
+            AND soil.year = wat.year
+            AND soil."{soil_day_column}" = wat."{wat_day_column}"
+        {where_clause}
+        GROUP BY
+            soil.year,
+            soil."{soil_day_column}",
+            soil.julian,
+            soil.month,
+            soil.day_of_month,
+            soil.water_year
+        ORDER BY
+            soil.year,
+            soil.julian,
+            soil."{soil_day_column}"
+    """
+    df = con.execute(query).df()
+    if df.empty:
+        return None
+
+    weighted_sum = df["tsmf_weighted_sum"].to_numpy(dtype=np.float64, copy=False)
+    weights = df["tsmf_area"].to_numpy(dtype=np.float64, copy=False)
+    tsmf = np.full(df.shape[0], np.nan, dtype=np.float64)
+    np.divide(weighted_sum, weights, out=tsmf, where=weights > 0.0)
+    df["TSMF"] = tsmf
+    return df[list(DATE_COLUMNS) + ["TSMF"]]
+
+
+def _aggregate_element_partitions(
+    con: duckdb.DuckDBPyConnection,
+    element_path: Path,
+    wat_path: Path,
+    wepp_ids: list[int] | None,
+) -> pd.DataFrame | None:
+    schema_names = set(pq.read_schema(element_path).names)
+    available_columns = [column for column in ELEMENT_OPTIONAL_COLUMNS if column in schema_names]
+    if not available_columns:
+        return None
+
+    wat_day_column = _resolve_sim_day_column(wat_path)
+    element_ofe_column = _resolve_ofe_column(element_path)
+    wat_ofe_column = _resolve_ofe_column(wat_path)
+    if element_ofe_column is None or wat_ofe_column is None:
+        return None
+
+    where_clause = _build_where_clause_for_alias(wepp_ids, alias="elem")
+    metric_exprs: list[str] = []
+    for column in available_columns:
+        metric_exprs.append(
+            f'SUM(CASE WHEN elem."{column}" IS NOT NULL THEN elem."{column}" * 0.001 * wat.Area ELSE 0 END) AS "{column}_volume"'
+        )
+        metric_exprs.append(
+            f'SUM(CASE WHEN elem."{column}" IS NOT NULL THEN wat.Area ELSE 0 END) AS "{column}_area"'
+        )
+    metrics_sql = ",\n            ".join(metric_exprs)
+    query = f"""
+        SELECT
+            elem.year AS year,
+            wat."{wat_day_column}" AS sim_day_index,
+            elem.julian AS julian,
+            elem.month AS month,
+            elem.day_of_month AS day_of_month,
+            elem.water_year AS water_year,
+            {metrics_sql}
+        FROM read_parquet('{element_path.as_posix()}') AS elem
+        INNER JOIN read_parquet('{wat_path.as_posix()}') AS wat
+            ON elem.wepp_id = wat.wepp_id
+            AND elem."{element_ofe_column}" = wat."{wat_ofe_column}"
+            AND elem.year = wat.year
+            AND elem.julian = wat.julian
+            AND elem.month = wat.month
+            AND elem.day_of_month = wat.day_of_month
+            AND elem.water_year = wat.water_year
+        {where_clause}
+        GROUP BY
+            elem.year,
+            wat."{wat_day_column}",
+            elem.julian,
+            elem.month,
+            elem.day_of_month,
+            elem.water_year
+        ORDER BY
+            elem.year,
+            elem.julian,
+            wat."{wat_day_column}"
+    """
+    df = con.execute(query).df()
+    if df.empty:
+        return None
+
+    result = df[list(DATE_COLUMNS)].copy()
+    for column in available_columns:
+        volume = df[f"{column}_volume"].to_numpy(dtype=np.float64, copy=False)
+        area = df[f"{column}_area"].to_numpy(dtype=np.float64, copy=False)
+        depth = np.full(df.shape[0], np.nan, dtype=np.float64)
+        np.divide(volume, area, out=depth, where=area > 0.0)
+        depth *= 1000.0
+        result[column] = depth
+    return result
 
 
 def _safe_depth(volume: np.ndarray, area: np.ndarray) -> np.ndarray:
@@ -666,13 +836,21 @@ def _prepare_paths(interchange_dir: Path | str) -> _QueryTargets:
     base = Path(interchange_dir)
     pass_path = base / "H.pass.parquet"
     wat_path = base / "H.wat.parquet"
+    soil_path = base / "H.soil.parquet"
+    element_path = base / "H.element.parquet"
     output_path = base / "totalwatsed3.parquet"
     if not pass_path.exists():
         raise FileNotFoundError(pass_path)
     if not wat_path.exists():
         raise FileNotFoundError(wat_path)
     base.mkdir(parents=True, exist_ok=True)
-    return _QueryTargets(pass_path=pass_path, wat_path=wat_path, output_path=output_path)
+    return _QueryTargets(
+        pass_path=pass_path,
+        wat_path=wat_path,
+        soil_path=soil_path if soil_path.exists() else None,
+        element_path=element_path if element_path.exists() else None,
+        output_path=output_path,
+    )
 
 
 def _finalise_table(df: pd.DataFrame) -> pa.Table:
@@ -737,6 +915,12 @@ def run_totalwatsed3(
     with duckdb.connect() as con:
         pass_df = _aggregate_pass(con, targets.pass_path, where_clause)
         wat_df = _aggregate_wat(con, targets.wat_path, where_clause)
+        soil_df = None
+        if targets.soil_path is not None:
+            soil_df = _aggregate_soil_tsmf(con, targets.soil_path, targets.wat_path, wepp_ids_normalized)
+        element_df = None
+        if targets.element_path is not None:
+            element_df = _aggregate_element_partitions(con, targets.element_path, targets.wat_path, wepp_ids_normalized)
 
     if wat_df.empty:
         table = EMPTY_TABLE
@@ -769,6 +953,22 @@ def run_totalwatsed3(
     merged["UpStrmQ"] = _safe_depth(merged.pop("UpStrmQ_volume").to_numpy(dtype=np.float64, copy=False), area)
     merged["SubRIn"] = _safe_depth(merged.pop("SubRIn_volume").to_numpy(dtype=np.float64, copy=False), area)
     merged["Total-Soil Water"] = _safe_depth(merged.pop("Total_Soil_Water_volume").to_numpy(dtype=np.float64, copy=False), area)
+    for column in WAT_OPTIONAL_COLUMNS:
+        volume_col = f"{column}_volume"
+        if volume_col in merged and not merged[volume_col].isna().all():
+            merged[column] = _safe_depth(merged.pop(volume_col).to_numpy(dtype=np.float64, copy=False), area)
+        else:
+            merged.drop(columns=[volume_col], inplace=True, errors="ignore")
+            merged[column] = np.nan
+    if soil_df is not None:
+        merged = merged.merge(soil_df, on=list(DATE_COLUMNS), how="left", validate="one_to_one")
+    else:
+        merged["TSMF"] = np.nan
+    if element_df is not None:
+        merged = merged.merge(element_df, on=list(DATE_COLUMNS), how="left", validate="one_to_one")
+    for column in ELEMENT_OPTIONAL_COLUMNS:
+        if column not in merged:
+            merged[column] = np.nan
     merged["frozwt"] = _safe_depth(merged.pop("frozwt_volume").to_numpy(dtype=np.float64, copy=False), area)
     merged["Snow-Water"] = _safe_depth(merged.pop("Snow_Water_volume").to_numpy(dtype=np.float64, copy=False), area)
     merged["Tile"] = _safe_depth(merged.pop("Tile_volume").to_numpy(dtype=np.float64, copy=False), area)

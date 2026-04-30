@@ -1,4 +1,4 @@
-# Daily combined output over hillslope `H.wat.parquet` and `H.pass.parquet` interchange outputs
+# Daily combined output over hillslope interchange outputs (`H.wat`, `H.pass`, optional `H.soil` and `H.element`)
 
 > **See also:** [AGENTS.md](../../AGENTS.md) for WEPP model integration and [wepp_interchange.spec.md](wepp_interchange.spec.md) for overall interchange architecture.
 
@@ -11,9 +11,30 @@ Kitchen sink of daily (`sim_day_index` is the 1-indexed simulation day) measures
 if `wepp_ids` is None aggregate all the wepp_ids, otherwise filter to only include wepp_ids
 
 ## Specification
-- H.wat.parquet -> wat
+- H.wat.parquet -> wat (optional columns: `SoilWaterTotal`, `ProfileDepth`, `ProfilePorosityCap`, `ProfileFCStore`, `ProfileWPStore`)
 - H.pass.parquet -> pass
+- H.soil.parquet -> soil (optional `TSMF` full-profile moisture fraction)
+- H.element.parquet -> element (optional runoff partition columns `QRain` and `QSnow`)
 - ash/H{wepp_id}_ash.parquet -> first-year ash transport metrics (optional)
+
+### Optional H.wat storage/capacity contract (authoritative from WEPP when present)
+- `SoilWaterTotal (mm)` = `watcon + frozwt`
+- `ProfileDepth (mm)` = `solthk(nsl)`
+- `ProfilePorosityCap (mm)` = `sum(por * dg)`
+- `ProfileFCStore (mm)` = `sum(thetfc * dg)`
+- `ProfileWPStore (mm)` = `sum(thetdr * dg)`
+
+These terms are producer-authoritative values emitted by WEPP into `H.wat`
+when available. `wepppy` should parse/pass through these columns and avoid
+re-deriving them if present.
+
+### Legacy executable compatibility
+- Legacy binaries (for example `wepp_dcc52a6`) may not emit these optional
+  `H.wat` columns.
+- Missing optional columns are expected for legacy producers and must not cause
+  parse failures.
+- `wepppy` must default missing optional terms to `null` at interchange and
+  `totalwatsed3` aggregation stages.
 
 ## Schema for totalwatsed3, use `schema_utils.pa_field`
 
@@ -47,8 +68,16 @@ if `wepp_ids` is None aggregate all the wepp_ids, otherwise filter to only inclu
 | UpStrmQ | double | mm  | Runon added to OFE | sum(wat.UpStrmQ * 0.001 *  wat.Area) / Area * 1000 |
 | SubRIn | double | mm  | Subsurface runon added to OFE | sum(wat.SubRIn * 0.001 *  wat.Area) / Area * 1000 |
 | Total-Soil Water | double | mm  | Unfrozen water in soil profile | sum(wat.Total-Soil Water * 0.001 *  wat.Area) / Area * 1000 |
+| SoilWaterTotal | double | mm | Area-weighted full-profile soil water (`watcon + frozwt`) from WEPP | sum(wat.SoilWaterTotal * 0.001 * wat.Area) / Area * 1000 when available, else null |
+| ProfileDepth | double | mm | Area-weighted full soil profile depth (`solthk(nsl)`) | sum(wat.ProfileDepth * 0.001 * wat.Area) / Area * 1000 when available, else null |
+| ProfilePorosityCap | double | mm | Area-weighted full-profile porosity storage capacity (`sum(por*dg)`) | sum(wat.ProfilePorosityCap * 0.001 * wat.Area) / Area * 1000 when available, else null |
+| ProfileFCStore | double | mm | Area-weighted full-profile field-capacity storage (`sum(thetfc*dg)`) | sum(wat.ProfileFCStore * 0.001 * wat.Area) / Area * 1000 when available, else null |
+| ProfileWPStore | double | mm | Area-weighted full-profile wilting-point storage (`sum(thetdr*dg)`) | sum(wat.ProfileWPStore * 0.001 * wat.Area) / Area * 1000 when available, else null |
+| TSMF | double | frac | Area-weighted true soil moisture fraction (full profile) | sum(soil.TSMF * wat.Area) / sum(wat.Area) when TSMF available, else null |
 | frozwt | double | mm  | Frozen water in soil profile | sum(wat.frozwt * 0.001 *  wat.Area) / Area * 1000 |
 | Snow-Water | double | mm  | Water in surface snow | sum(wat.Snow-Water * 0.001 *  wat.Area) / Area * 1000 |
+| QRain | double | mm | Area-weighted rain-generated runoff partition | sum(element.QRain * 0.001 * wat.Area) / sum(wat.Area) * 1000 when QRain available, else null |
+| QSnow | double | mm | Area-weighted snow-generated runoff partition | sum(element.QSnow * 0.001 * wat.Area) / sum(wat.Area) * 1000 when QSnow available, else null |
 | Tile | double | mm  | Tile drainage | sum(wat.Tile * 0.001 *  wat.Area) / Area * 1000 |
 | Irr | double | mm  | Irrigation | sum(wat.Irr * 0.001 *  wat.Area) / Area * 1000 |
 | Precipitation | double | mm | Precipitation | P / Area * 1000 |
@@ -174,3 +203,8 @@ Hillslope water balance per OFE; aligns with wat.out content.
 | Tile | double | mm | Tile drainage |
 | Irr | double | mm | Irrigation |
 | Area | double | m^2 | Area that depths apply over |
+| SoilWaterTotal | double | mm | Full-profile soil water (`watcon + frozwt`); optional additive term |
+| ProfileDepth | double | mm | Full-profile depth (`solthk(nsl)`); optional additive term |
+| ProfilePorosityCap | double | mm | Full-profile porosity capacity (`sum(por*dg)`); optional additive term |
+| ProfileFCStore | double | mm | Full-profile field-capacity storage (`sum(thetfc*dg)`); optional additive term |
+| ProfileWPStore | double | mm | Full-profile wilting-point storage (`sum(thetdr*dg)`); optional additive term |

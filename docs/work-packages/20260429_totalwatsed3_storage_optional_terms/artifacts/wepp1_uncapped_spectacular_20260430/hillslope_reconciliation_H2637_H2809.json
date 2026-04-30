@@ -1,0 +1,89 @@
+{
+  "hillslopes": [
+    {
+      "closure_with_storage_pct_of_rain_melt": -114.00789967122891,
+      "closure_with_storage_total_mm": -119246.6544674832,
+      "date_max": {
+        "day_of_month": 31,
+        "julian": 366,
+        "month": 12,
+        "year": 2020
+      },
+      "date_min": {
+        "day_of_month": 1,
+        "julian": 1,
+        "month": 1,
+        "year": 1987
+      },
+      "enriched_storage_available": false,
+      "et_total_mm": 22917.927368421057,
+      "lateral_total_mm": 24381.336842105273,
+      "mean_abs_daily_closure_with_storage_mm": 10.859043927674904,
+      "percolation_total_mm": 242.96263157894757,
+      "qrain_plus_qsnow_total_mm": 41567.18210526317,
+      "qrain_total_mm": 18041.345578947374,
+      "qsnow_total_mm": 23525.836526315794,
+      "rain_melt_total_mm": 104595.0805263158,
+      "rows": 12419,
+      "runoff_total_mm": 175989.2386780095,
+      "storage_change_mm": 310.26947368421054,
+      "top_abs_closure_day": {
+        "closure_with_storage_mm": -2433.1170725502116,
+        "day_of_month": 6,
+        "et_mm": 1.4931578947368416,
+        "julian": 37,
+        "lateral_mm": 2.289473684210527,
+        "month": 2,
+        "percolation_mm": 0.020000000000000014,
+        "rain_melt_mm": 202.0426315789474,
+        "runoff_mm": 2669.0107567607383,
+        "storage_delta_mm": -37.65368421052631,
+        "year": 1996
+      },
+      "wepp_id": 2637
+    },
+    {
+      "closure_with_storage_pct_of_rain_melt": -278.295505932211,
+      "closure_with_storage_total_mm": -297116.71888119786,
+      "date_max": {
+        "day_of_month": 31,
+        "julian": 366,
+        "month": 12,
+        "year": 2020
+      },
+      "date_min": {
+        "day_of_month": 1,
+        "julian": 1,
+        "month": 1,
+        "year": 1987
+      },
+      "enriched_storage_available": false,
+      "et_total_mm": 24007.43473684211,
+      "lateral_total_mm": 17997.680000000008,
+      "mean_abs_daily_closure_with_storage_mm": 25.264905412364012,
+      "percolation_total_mm": 245.5884210526317,
+      "qrain_plus_qsnow_total_mm": 101941.88373684214,
+      "qrain_total_mm": 46615.11936842106,
+      "qsnow_total_mm": 55326.76436842107,
+      "rain_melt_total_mm": 106763.03157894741,
+      "rows": 12419,
+      "runoff_total_mm": 361292.3967759347,
+      "storage_change_mm": 336.65052631578965,
+      "top_abs_closure_day": {
+        "closure_with_storage_mm": -2851.188677044482,
+        "day_of_month": 6,
+        "et_mm": 1.3631578947368423,
+        "julian": 37,
+        "lateral_mm": 1.5726315789473688,
+        "month": 2,
+        "percolation_mm": 0.020000000000000004,
+        "rain_melt_mm": 206.1489473684211,
+        "runoff_mm": 3100.191308623429,
+        "storage_delta_mm": -45.80947368421039,
+        "year": 1996
+      },
+      "wepp_id": 2809
+    }
+  ],
+  "interchange_dir": "/wc1/runs/un/uncapped-spectacular/wepp/output/interchange"
+}
