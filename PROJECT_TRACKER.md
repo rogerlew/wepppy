@@ -296,6 +296,24 @@ Currently active work packages. Limit to 2-4 packages to maintain focus.
 
 Recently completed work packages. Archived immediately upon completion.
 
+### Hillslope Daily Closure Audit Tool (MOFE + Single OFE) (2026-04-30)
+**Status**: ✅ **COMPLETE**
+
+**Link**: [docs/work-packages/20260430_hillslope_daily_closure_audit/](docs/work-packages/20260430_hillslope_daily_closure_audit/)
+
+**Lifecycle**: Backlog -> In Progress -> Done (2026-04-30)
+
+**Summary**: Closed with a new repeatable hillslope closure audit CLI (`tools/hillslope_daily_closure_audit.py`) that operates directly on interchange artifacts (`H.wat`, `H.pass`, optional `H.soil`/`H.element`) for one hillslope selected by `--wepp-id` or `--topaz-id`. The tool preserves MOFE accounting by using outlet-OFE-only `latqcc` and PASS `runvol` for runoff depth. Regression coverage (`tests/tools/test_hillslope_daily_closure_audit.py`) validates single-OFE closure arithmetic, MOFE outlet/runoff behavior, selector paths, and invalid selector rejection; existing watershed closure-audit tests remained green. Real-run artifacts were generated for six exemplars (`uninsured-deformation` H78/H43/H97 and `bovine-clipboard` H1/H2/H3), plus a topaz-selector verification run, with consolidated stats in `artifacts/evaluation_summary.{md,csv}`. Independent review findings were dispositioned in `artifacts/20260430_code_review_disposition.md`.
+
+### WEPP Gregorian Leap-Year Contract and Centurial Tolerance (2026-04-30)
+**Status**: ✅ **COMPLETE**
+
+**Link**: [docs/work-packages/20260430_wepp_gregorian_leap_tolerance/](docs/work-packages/20260430_wepp_gregorian_leap_tolerance/)
+
+**Lifecycle**: Backlog -> In Progress -> Done (2026-04-30)
+
+**Summary**: Completed leap-year contract correction and compatibility preservation across WEPP source and vendored artifacts. Updated active runtime leap call sites in `/workdir/wepp-forest/src` (`stmget.for`, `wshpas.for`, `contin.for`, `wshdrv.for`) to Gregorian classification (`/4` except `/100` unless `/400`) while retaining non-400 centurial day-366 tolerance in day-count/loop branches. Rebuilt binaries, validated required `wepp-forest` gates (smoke for `wepp` and `wepp_hill`, hillslope watchlist `12/12`, ablation artifact policy, full `pytest -q` with `79 passed, 2 warnings`), and captured centurial controls (`year100/365` false warning removed, `year100/366` tolerated success, `year2000/366` leap success). Released/vendored `wepp_260430` and `wepp_260430_hill`, synced changelog copy into `wepppy`, and passed post-vendor provenance/smoke/focused regressions (`8 passed`).
+
 ### Geneva HRU Peak Runoff and Event Erosion Enablement (2026-04-30)
 **Status**: ✅ **COMPLETE**
 
