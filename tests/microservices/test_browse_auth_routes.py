@@ -915,6 +915,40 @@ def test_aria2c_public_run_allows_anonymous_access(
     assert "report.txt" in response.text
 
 
+def test_aria2c_spec_uses_forwarded_proto_without_forwarded_host(
+    tmp_path: Path,
+    load_secure_browse,
+) -> None:
+    runid = "run-aria2c-forwarded-proto"
+    config = "cfg"
+    run_root = tmp_path / runid
+    _touch(run_root / "PUBLIC", "")
+    _touch(run_root / "report.txt", "hello")
+    browse = load_secure_browse(
+        {runid: run_root},
+        SITE_PREFIX="/weppcloud",
+        EXTERNAL_HOST_FILE="",
+        EXTERNAL_HOST="wepp.cloud",
+    )
+    app = browse.create_app()
+
+    with TestClient(app) as client:
+        response = client.get(
+            f"/weppcloud/runs/{runid}/{config}/aria2c.spec",
+            headers={
+                "Host": "wepp.cloud",
+                "X-Forwarded-Proto": "https",
+            },
+        )
+
+    assert response.status_code == 200
+    assert (
+        f"https://wepp.cloud/weppcloud/runs/{runid}/{config}/download/report.txt"
+        in response.text
+    )
+    assert "http://wepp.cloud" not in response.text
+
+
 def test_aria2c_root_only_entries_visible_only_to_root(
     tmp_path: Path,
     load_secure_browse,

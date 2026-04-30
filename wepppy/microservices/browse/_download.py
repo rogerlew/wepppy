@@ -88,7 +88,18 @@ def _normalize_prefix(prefix: str | None) -> str:
 def _resolve_external_origin(request: Request) -> str:
     """Return the externally reachable origin (scheme://host[:port])."""
 
-    scheme = (os.getenv("OAUTH_REDIRECT_SCHEME") or request.url.scheme or "https").strip().lower()
+    forwarded_proto = (
+        (request.headers.get("X-Forwarded-Proto") or "")
+        .split(",")[0]
+        .strip()
+        .lower()
+    )
+    scheme = (
+        os.getenv("OAUTH_REDIRECT_SCHEME")
+        or forwarded_proto
+        or request.url.scheme
+        or "https"
+    ).strip().lower()
     if not scheme:
         scheme = "https"
 
@@ -112,11 +123,9 @@ def _resolve_external_origin(request: Request) -> str:
 
     forwarded_host = (request.headers.get("X-Forwarded-Host") or "").split(",")[0].strip()
     if forwarded_host:
-        forwarded_proto = (request.headers.get("X-Forwarded-Proto") or "").split(",")[0].strip().lower()
-        proto = forwarded_proto or scheme
-        return f"{proto}://{forwarded_host}"
+        return f"{scheme}://{forwarded_host}"
 
-    return f"{request.url.scheme}://{request.url.netloc}"
+    return f"{scheme}://{request.url.netloc}"
 
 
 def _resolve_aria2c_base_url(request: Request, runid: str, config: str) -> str:

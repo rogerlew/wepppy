@@ -248,6 +248,10 @@ wepp.cloud {
         @browse_proxy path_regexp browse_proxy ^/weppcloud/runs/[^/]+/[^/]+/(?:browse(?:/.*)?|schema(?:/.*)?|dtale(?:/.*)?|download(?:/.*)?|files(?:/.*)?|aria2c\.spec|gdalinfo/.*)$
         handle @browse_proxy {
             reverse_proxy browse:9009 {
+                header_up X-Forwarded-Prefix /weppcloud
+                header_up X-Forwarded-Proto {scheme}
+                header_up X-Forwarded-Host {host}
+                header_up Host {host}
                 transport http {
                     read_timeout 10m
                 }
@@ -257,6 +261,10 @@ wepp.cloud {
         @culvert_browse_proxy path_regexp culvert_browse_proxy ^/weppcloud/culverts/[^/]+/(?:browse(?:/.*)?|schema(?:/.*)?|download(?:/.*)?|dtale(?:/.*)?|gdalinfo/.*)$
         handle @culvert_browse_proxy {
             reverse_proxy browse:9009 {
+                header_up X-Forwarded-Prefix /weppcloud
+                header_up X-Forwarded-Proto {scheme}
+                header_up X-Forwarded-Host {host}
+                header_up Host {host}
                 transport http {
                     read_timeout 3m
                 }
@@ -266,6 +274,10 @@ wepp.cloud {
         @batch_browse_proxy path_regexp batch_browse_proxy ^/weppcloud/batch/[^/]+/(?:browse(?:/.*)?|schema(?:/.*)?|download(?:/.*)?|dtale(?:/.*)?|gdalinfo/.*)$
         handle @batch_browse_proxy {
             reverse_proxy browse:9009 {
+                header_up X-Forwarded-Prefix /weppcloud
+                header_up X-Forwarded-Proto {scheme}
+                header_up X-Forwarded-Host {host}
+                header_up Host {host}
                 transport http {
                     read_timeout 3m
                 }
