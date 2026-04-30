@@ -117,6 +117,34 @@ class Watershed(NoDbBase):
     def clip_hillslope_length(self) -> float: ...
     @clip_hillslope_length.setter
     def clip_hillslope_length(self, value: float) -> None: ...
+    def snapshot_wepp_run_payload_updates(self) -> dict[str, Any]: ...
+    def restore_wepp_run_payload_updates(self, snapshot: dict[str, Any]) -> None: ...
+    def stage_wepp_run_payload_updates(
+        self,
+        *,
+        clip_hillslopes: bool | None = None,
+        clip_hillslope_length: float | None = None,
+    ) -> bool: ...
+    def finalize_grouped_wepp_run_payload_updates(self) -> None: ...
+    def post_finalize_grouped_wepp_run_payload_updates(self, *, validate: bool = True) -> None: ...
+    def apply_wepp_run_payload_updates(
+        self,
+        *,
+        clip_hillslopes: bool | None = None,
+        clip_hillslope_length: float | None = None,
+    ) -> None: ...
+    def apply_build_subcatchment_updates(
+        self,
+        *,
+        clip_hillslopes: bool | None = None,
+        walk_flowpaths: bool | None = None,
+        clip_hillslope_length: float | None = None,
+        mofe_target_length: float | None = None,
+        mofe_buffer: bool | None = None,
+        mofe_buffer_length: float | None = None,
+        mofe_max_ofes: int | None = None,
+        bieger2015_widths: bool | None = None,
+    ) -> None: ...
     @property
     def bieger2015_widths(self) -> bool: ...
     @bieger2015_widths.setter

@@ -54,6 +54,30 @@ class Soils(NoDbBase):
     def rosetta_wc_fc_from_disturbed_bd_override(self) -> bool: ...
     @rosetta_wc_fc_from_disturbed_bd_override.setter
     def rosetta_wc_fc_from_disturbed_bd_override(self, value: bool) -> None: ...
+    def snapshot_wepp_run_payload_updates(self) -> dict[str, Any]: ...
+    def restore_wepp_run_payload_updates(self, snapshot: dict[str, Any]) -> None: ...
+    def stage_wepp_run_payload_updates(
+        self,
+        *,
+        clip_soils: bool | None = None,
+        clip_soils_depth: float | None = None,
+        clip_soils_minimum: bool | None = None,
+        clip_soils_minimum_depth: float | None = None,
+        rosetta_wc_fc_from_disturbed_bd_override: bool | None = None,
+        initial_sat: float | None = None,
+    ) -> bool: ...
+    def finalize_grouped_wepp_run_payload_updates(self) -> None: ...
+    def post_finalize_grouped_wepp_run_payload_updates(self, *, validate: bool = True) -> None: ...
+    def apply_wepp_run_payload_updates(
+        self,
+        *,
+        clip_soils: bool | None = None,
+        clip_soils_depth: float | None = None,
+        clip_soils_minimum: bool | None = None,
+        clip_soils_minimum_depth: float | None = None,
+        rosetta_wc_fc_from_disturbed_bd_override: bool | None = None,
+        initial_sat: float | None = None,
+    ) -> None: ...
     @property
     def ksflag(self) -> bool: ...
     @ksflag.setter
