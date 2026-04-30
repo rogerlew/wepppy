@@ -296,6 +296,15 @@ Currently active work packages. Limit to 2-4 packages to maintain focus.
 
 Recently completed work packages. Archived immediately upon completion.
 
+### Geneva HRU Peak Runoff and Event Erosion Enablement (2026-04-30)
+**Status**: ✅ **COMPLETE**
+
+**Link**: [docs/work-packages/20260429_geneva_hru_peak_event_erosion/](docs/work-packages/20260429_geneva_hru_peak_event_erosion/)
+
+**Lifecycle**: Backlog -> In Progress -> Done (2026-04-30)
+
+**Summary**: Closed the Geneva HRU-local peak runoff substrate package end to end. Rust `geneva_core` `run_batch` now emits per-HRU `peak_runoff_m3_s` and `time_to_peak_minutes` using per-HRU incremental excess + HRU area through the existing Geneva unit-hydrograph convolution path (no watershed area-splitting). PyO3 bridge tests were updated, `cli_revision_rust` release artifacts were rebuilt/synced to both runtime locations, and matching SHA-256 provenance was recorded. WEPPpy now materializes `measure_id=hru_peak_runoff` (`unit=m3_s`) in `geneva/hru_event_measure_rows.parquet`, HRU-map measure validation accepts `hru_peak_runoff` while still rejecting watershed-only `peak_discharge`, and Geneva Interactive Summary HRU Choropleth controls now expose `HRU peak runoff`. Section 12.4/12.5 specification updates, validation summary, code review, QA review, and dedicated security review artifacts are complete. Required gates passed except known unrelated frontend lint baseline in `controllers_js/__tests__/landuse_map_inline.test.js`, which is documented in the package validation artifact.
+
 ### NOAA Atlas 14 Retry Backoff Hardening for Climate Artifact Export (2026-04-30)
 **Status**: ✅ **COMPLETE**
 

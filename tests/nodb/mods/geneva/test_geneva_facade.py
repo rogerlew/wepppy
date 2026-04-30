@@ -204,6 +204,8 @@ class _FakeKernelGateway:
                         "initial_abstraction_mm": 17.8,
                         "cumulative_excess_mm": cumulative_excess,
                         "incremental_excess_mm": incremental_excess,
+                        "peak_runoff_m3_s": max(q_cms),
+                        "time_to_peak_minutes": time_minutes[q_cms.index(max(q_cms))],
                     }
                 ],
                 "composite_excess": {

@@ -20,7 +20,7 @@ var GenevaSummaryReport = (function () {
         "geneva-summary__series-line--3",
         "geneva-summary__series-line--4"
     ];
-    var MAP_MEASURE_IDS = ["runoff_depth", "runoff_volume"];
+    var MAP_MEASURE_IDS = ["runoff_depth", "runoff_volume", "hru_peak_runoff"];
     var MAP_BASE_TERRAIN_TEMPLATE = "https://{s}.google.com/vt/lyrs=p&x={x}&y={y}&z={z}";
     var MAP_BASE_TERRAIN_SUBDOMAINS = ["mt0", "mt1", "mt2", "mt3"];
     var MAP_BASE_LAYER_ID = "geneva-summary-base-google-terrain";
@@ -77,7 +77,8 @@ var GenevaSummaryReport = (function () {
         var labels = {
             peak_discharge: "Peak Discharge",
             runoff_depth: "Runoff Depth",
-            runoff_volume: "Runoff Volume"
+            runoff_volume: "Runoff Volume",
+            hru_peak_runoff: "HRU peak runoff"
         };
         return labels[measure] || asString(measure);
     }
@@ -294,7 +295,8 @@ var GenevaSummaryReport = (function () {
         var map = {
             peak_discharge: "m^3/s",
             runoff_depth: "mm",
-            runoff_volume: "m^3"
+            runoff_volume: "m^3",
+            hru_peak_runoff: "m^3/s"
         };
         return map[asString(measure)] || "";
     }

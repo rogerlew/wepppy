@@ -13,7 +13,7 @@ GENEVA_DISTRIBUTION_IDS: tuple[str, ...] = (
     "type_iii",
 )
 GENEVA_MEASURE_IDS: tuple[str, ...] = ("peak_discharge", "runoff_depth", "runoff_volume")
-GENEVA_HRU_MAP_MEASURE_IDS: tuple[str, ...] = ("runoff_depth", "runoff_volume")
+GENEVA_HRU_MAP_MEASURE_IDS: tuple[str, ...] = ("runoff_depth", "runoff_volume", "hru_peak_runoff")
 GENEVA_AVAILABILITY_IDS: tuple[str, ...] = ("available", "unavailable")
 GENEVA_UNAVAILABLE_REASON_CODES: tuple[str, ...] = (
     "duration_unavailable",

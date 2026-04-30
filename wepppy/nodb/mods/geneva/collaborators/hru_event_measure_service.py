@@ -19,6 +19,7 @@ if TYPE_CHECKING:
 HRU_EVENT_MEASURE_SCHEMA_VERSION = 1
 HRU_EVENT_MEASURE_ARTIFACT_RELPATH = "hru_event_measure_rows.parquet"
 HRU_EVENT_MEASURE_DATASET_PATH = f"geneva/{HRU_EVENT_MEASURE_ARTIFACT_RELPATH}"
+HRU_EVENT_MEASURE_IDS = ["runoff_depth", "runoff_volume", "hru_peak_runoff"]
 HRU_EVENT_MEASURE_COLUMNS = [
     "schema_version",
     "storm_id",
@@ -64,7 +65,7 @@ class GenevaHruEventMeasureService:
                 "path": f"geneva/{relpath}",
                 "row_count": 0,
                 "storm_count": 0,
-                "measure_ids": ["runoff_depth", "runoff_volume"],
+                "measure_ids": list(HRU_EVENT_MEASURE_IDS),
             }
 
         hru_value_by_id = self._load_hru_value_by_id(geneva)
@@ -129,6 +130,10 @@ class GenevaHruEventMeasureService:
                     field="hru_excess[].cumulative_excess_mm[-1]",
                 )
                 runoff_volume_m3 = (runoff_depth_mm / 1000.0) * area_m2
+                peak_runoff_m3_s = self._non_negative_float(
+                    hru_row.get("peak_runoff_m3_s"),
+                    field="hru_excess[].peak_runoff_m3_s",
+                )
 
                 base_row = {
                     "schema_version": HRU_EVENT_MEASURE_SCHEMA_VERSION,
@@ -157,6 +162,14 @@ class GenevaHruEventMeasureService:
                     value=runoff_volume_m3,
                     unit="m3",
                 )
+                self._append_measure_row(
+                    rows,
+                    seen_keys,
+                    base_row=base_row,
+                    measure_id="hru_peak_runoff",
+                    value=peak_runoff_m3_s,
+                    unit="m3_s",
+                )
 
         relpath = artifact_io.write_records_parquet(
             geneva.wd,
@@ -170,7 +183,7 @@ class GenevaHruEventMeasureService:
             "path": f"geneva/{relpath}",
             "row_count": len(rows),
             "storm_count": len(completed_rows),
-            "measure_ids": ["runoff_depth", "runoff_volume"],
+            "measure_ids": list(HRU_EVENT_MEASURE_IDS),
         }
 
     def query_rows(

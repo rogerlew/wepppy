@@ -378,6 +378,7 @@ describe("Geneva summary report interactions", () => {
             <select id="geneva-summary-map-measure" data-geneva-summary-map-field="measure">
               <option value="runoff_depth" selected>Runoff Depth</option>
               <option value="runoff_volume">Runoff Volume</option>
+              <option value="hru_peak_runoff">HRU peak runoff</option>
             </select>
             <button type="button" data-geneva-summary-map-refresh>Refresh</button>
             <div id="geneva-summary-map-canvas"></div>
@@ -458,7 +459,9 @@ describe("Geneva summary report interactions", () => {
             if (url.indexOf("hru_map_rows") >= 0) {
                 const requestBody = JSON.parse((options && options.body) || "{}");
                 const stormId = requestBody.storm_id || "cligen_30m_10y";
+                const measureId = requestBody.measure_id || "runoff_depth";
                 const rowValue = stormId === "noaa14_60m_10y" ? 5.0 : 4.0;
+                const unit = measureId === "hru_peak_runoff" ? "m3_s" : "mm";
                 return Promise.resolve({
                     ok: true,
                     json: () => Promise.resolve({
@@ -469,9 +472,9 @@ describe("Geneva summary report interactions", () => {
                                 storm_id: stormId,
                                 hru_id: "hru_7",
                                 hru_value: 7,
-                                measure_id: "runoff_depth",
+                                measure_id: measureId,
                                 value: rowValue,
-                                unit: "mm"
+                                unit
                             }
                         ]
                     })
@@ -522,6 +525,7 @@ describe("Geneva summary report interactions", () => {
         const initialRowsRequest = global.fetch.mock.calls.find((call) => call[0].indexOf("hru_map_rows") >= 0);
         expect(initialRowsRequest).toBeTruthy();
         expect(JSON.parse(initialRowsRequest[1].body).storm_id).toBe("cligen_30m_10y");
+        expect(JSON.parse(initialRowsRequest[1].body).measure_id).toBe("runoff_depth");
 
         const marker = document.querySelector('[data-geneva-summary-chart] [data-storm-id="noaa14_60m_10y"]');
         expect(marker).toBeTruthy();
@@ -534,13 +538,24 @@ describe("Geneva summary report interactions", () => {
         const latestRowsRequest = rowsRequests[rowsRequests.length - 1];
         expect(JSON.parse(latestRowsRequest[1].body).storm_id).toBe("noaa14_60m_10y");
 
+        const mapMeasureSelect = document.getElementById("geneva-summary-map-measure");
+        mapMeasureSelect.value = "hru_peak_runoff";
+        mapMeasureSelect.dispatchEvent(new Event("change", { bubbles: true }));
+        await new Promise((resolve) => setTimeout(resolve, 0));
+        await new Promise((resolve) => setTimeout(resolve, 0));
+
+        const rowsRequestsAfterMeasureChange = global.fetch.mock.calls
+            .filter((call) => call[0].indexOf("hru_map_rows") >= 0);
+        const latestAfterMeasureChange = rowsRequestsAfterMeasureChange[rowsRequestsAfterMeasureChange.length - 1];
+        expect(JSON.parse(latestAfterMeasureChange[1].body).measure_id).toBe("hru_peak_runoff");
+
         const boundsFitCall = mapSetProps.mock.calls.find((call) => call[0] && call[0].initialViewState);
         expect(boundsFitCall).toBeTruthy();
         expect(boundsFitCall[0]).not.toHaveProperty("viewState");
 
         const legend = document.querySelector("[data-geneva-summary-map-legend]");
         expect(legend.hidden).toBe(false);
-        expect(document.querySelector("[data-geneva-summary-map-legend-title]").textContent).toContain("Runoff Depth");
+        expect(document.querySelector("[data-geneva-summary-map-legend-title]").textContent).toContain("HRU peak runoff");
         expect(document.querySelector("[data-geneva-summary-map-status]").textContent).toContain("noaa14_60m_10y");
         expect(document.querySelector("[data-geneva-summary-map-error]").hidden).toBe(true);
     });

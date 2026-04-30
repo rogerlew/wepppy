@@ -193,6 +193,8 @@ class _RecordingKernelGateway:
                         "initial_abstraction_mm": 17.8,
                         "cumulative_excess_mm": cumulative_excess_mm,
                         "incremental_excess_mm": [0.0, 4.0],
+                        "peak_runoff_m3_s": 1.2,
+                        "time_to_peak_minutes": 30.0,
                     }
                 ],
                 "warnings": [],
@@ -560,9 +562,9 @@ def test_batch_run_uses_updated_cn_values_from_hru_table_parquet(tmp_path: Path)
         geneva.wd,
         "hru_event_measure_rows.parquet",
     )
-    assert len(hru_event_rows) == 2
+    assert len(hru_event_rows) == 3
     measure_ids = sorted(str(row["measure_id"]) for row in hru_event_rows)
-    assert measure_ids == ["runoff_depth", "runoff_volume"]
+    assert measure_ids == ["hru_peak_runoff", "runoff_depth", "runoff_volume"]
     assert all(str(row["storm_id"]) == "cligen_30m_10y" for row in hru_event_rows)
     assert all(str(row["hru_id"]) == "hru_1" for row in hru_event_rows)
     assert all(int(row["hru_value"]) == 1 for row in hru_event_rows)

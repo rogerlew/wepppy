@@ -682,11 +682,12 @@ Status: normative contract defined in WP01 and implemented in WP02 runtime paths
 | `peak_discharge` | Yes | No | `m3_s` | `peak_discharge` is computed from the watershed-composite hydrograph and remains a watershed summary metric. HRU-level mapping would imply a non-canonical disaggregation and is intentionally disallowed. |
 | `runoff_depth` | Yes | Yes | `mm` | Depth is valid as both watershed summary and per-HRU map metric. |
 | `runoff_volume` | Yes | Yes | `m3` | Volume is additive across HRUs and valid for map display. |
+| `hru_peak_runoff` | No | Yes | `m3_s` | HRU-local hydrograph peak derived from each HRU's own excess series, HRU area, selected `uh_method`, and selected `tc_hours`. It is not a watershed metric. |
 
 `query_summary_payload.filter_options.measures` remains
 `[peak_discharge, runoff_depth, runoff_volume]` for watershed summary exploration.
 HRU choropleth consumers must treat the HRU-mapable subset as
-`[runoff_depth, runoff_volume]` only.
+`[runoff_depth, runoff_volume, hru_peak_runoff]` only.
 
 #### 12.4.2 Canonical keys and joins
 
@@ -730,12 +731,20 @@ Canonical columns:
 | `distribution_type` | string enum | Must match storm summary assumptions for the stored event. |
 | `hru_id` | string | Non-empty; joins to `hru_table.parquet` `hru_id`. |
 | `hru_value` | integer | Positive; joins to `hru_map_legend.json` `rows[*].hru_value`. |
-| `measure_id` | string enum | `runoff_depth | runoff_volume` only. |
+| `measure_id` | string enum | `runoff_depth | runoff_volume | hru_peak_runoff` only. |
 | `value` | float | Numeric measure value. |
-| `unit` | string enum | `mm` when `measure_id=runoff_depth`; `m3` when `measure_id=runoff_volume`. |
+| `unit` | string enum | `mm` when `measure_id=runoff_depth`; `m3` when `measure_id=runoff_volume`; `m3_s` when `measure_id=hru_peak_runoff`. |
 
 HRU choropleth row-set uniqueness must hold on:
 `(storm_id, hru_id, measure_id)`.
+
+`hru_peak_runoff` derivation contract:
+
+- source field: `run_batch` `hru_excess[].peak_runoff_m3_s`
+- computation path: per-HRU `incremental_excess_mm` convolved with the selected
+  Geneva unit hydrograph and that HRU's `area_m2`
+- prohibited shortcut: do not area-split watershed `summary_metrics.peak_discharge`
+  to infer HRU peaks.
 
 #### 12.4.4 Backward-compatible behavior for legacy runs
 
@@ -803,6 +812,214 @@ Geometry feature properties include:
 - `hru_id` (secondary join key),
 - and legend-derived metadata fields (`landuse_class`, `hsg_group`,
   `burn_severity_class`, `hydrophobic_class`, `is_water`) when present.
+
+### 12.5 Per-Storm HRU Erosion Extension (Design Specification)
+
+Status: design contract only; not implemented in the current baseline.
+
+Scientific posture:
+
+- Per-storm erosion is an event sediment-generation estimate, not a reuse of
+  the long-term annual `RUSLE A` raster.
+- The defensible near-term bridge is an opt-in Modified Universal Soil Loss
+  Equation family calculation that uses Geneva event runoff plus RUSLE factor
+  rasters.
+- The output is a hillslope/HRU sediment generation screening product. It is
+  not channel delivery, not deposition, not gully erosion, and not a calibrated
+  post-fire WEPP replacement.
+- The reason to keep this in the Geneva/Wildcat lineage is predictability:
+  results should be traceable to a small set of event rainfall, runoff, HRU,
+  and factor inputs that can be conceptually audited without requiring a full
+  diagnosis of WEPP model state dynamics.
+- WEPP single-storm and continuous simulations remain important comparison
+  tools, but they are not automatically a better answer for this use case.
+  Local review experience, including Scott Sheppard's single-storm
+  investigation, found peak-flow behavior and single-storm interpretation can
+  depend strongly on `kslast` and related state/parameter choices.
+- Geneva event erosion is intended to support transparent relative comparison
+  when WEPP continuous or single-storm results are hard to interpret because
+  land-cover, soil-storage, burn-severity parameterization, or return-period
+  T-statistic randomness dominates the analysis.
+
+Reviewed model options:
+
+| Option | Fit for Geneva | Decision |
+| --- | --- | --- |
+| `MUSLE` / SWAT-style HRU event sediment yield | Strongest small extension because it replaces annual rainfall erosivity with event runoff volume and peak runoff rate while retaining `K`, `LS`, `C`, and `P` factors. | Adopt as the v1 design path under `musle_hru_event_v1`. |
+| HEC-HMS `Modified USLE` event method | Useful independent engineering precedent for the same runoff-volume/peak-rate family. | Use as terminology and QA precedent, not a separate formula contract. |
+| AnnAGNPS/HUSLE delivery-ratio methods | More suitable when estimating sediment delivered to a reach or watershed point. | Defer; this requires routing and delivery semantics beyond Geneva v1 HRU maps. |
+| WEPP single-storm or watershed erosion | Process-based comparison path, but not a clean default for Geneva event erosion because single-storm outputs can be highly sensitive to `kslast`, antecedent/storage state, land-cover and burn-severity parameterization, and return-period storm sampling choices. | Keep as an external comparison/validation path; do not make it the required or preferred basis for Geneva per-storm HRU estimates. |
+| Design-storm `RUSLE R` surrogates from precipitation-frequency intensity | Useful precedent for separate design-storm visualization, but mixes single-event assumptions with an annual `R` factor contract. | Do not use for Geneva per-storm erosion. |
+
+Normative v1 model ID: `musle_hru_event_v1`.
+
+Formula contract:
+
+```text
+sed_t = 11.8 * (Qsurf_mm * qpeak_m3_s * area_ha)^0.56
+        * factor_product * cfrg_factor
+
+factor_product = area_weighted_mean(K * LS * C * P) over valid RUSLE cells in the HRU
+```
+
+Field definitions:
+
+- `sed_t`: estimated event sediment generation for one HRU, metric tons.
+- `Qsurf_mm`: Geneva HRU event runoff depth from the final
+  `hru_excess[].cumulative_excess_mm` value.
+- `qpeak_m3_s`: HRU-local event peak runoff rate, not watershed peak discharge
+  apportioned by area.
+- `area_ha`: valid HRU source area in hectares used for the event estimate.
+- `K`, `LS`, `C`, and `P`: gridded RUSLE factor rasters from the same project.
+- `cfrg_factor`: coarse-fragment factor; fixed to `1.0` in v1 unless a
+  separately documented coarse-fragment raster/contract is implemented.
+
+Required inputs when a project has both `rusle` and `geneva`:
+
+- Geneva artifacts:
+  - `geneva/hru_table.parquet`
+  - `geneva/hru_map.tif`
+  - `geneva/hru_map_legend.json`
+  - `geneva/hru_event_measure_rows.parquet`
+  - `geneva/batch_summary.json`
+  - completed per-storm `hru_excess` rows, or an equivalent persisted HRU
+    excess series artifact
+- RUSLE artifacts:
+  - `rusle/manifest.json`
+  - selected `rusle/k_<mode>.tif`
+  - selected `rusle/c_<mode>.tif`
+  - `rusle/ls.tif`
+  - `rusle/p.tif`
+
+Explicit non-inputs:
+
+- Do not use `rusle/r.tif`; annual rainfall erosivity is replaced by event
+  runoff volume and peak runoff rate.
+- Do not use `rusle/a_<c_mode>_<k_mode>.tif`; that raster is an annual
+  long-term product and cannot be repartitioned into event loss.
+- Do not estimate `qpeak_m3_s` by multiplying watershed peak discharge by HRU
+  area fraction; that creates a false precision and breaks the event-flow
+  contract.
+
+Grid and aggregation requirements:
+
+- `hru_map.tif`, `ls.tif`, selected `k`, selected `c`, and `p` must be on the
+  same grid in v1: identical CRS, transform, shape, and pixel alignment.
+- If grids are not identical, the erosion extension must return unavailable
+  with `reason_code=rusle_geneva_grid_mismatch`; it must not silently resample
+  factor rasters.
+- Aggregate RUSLE factors by HRU using only cells with finite values in every
+  selected factor raster and matching the HRU raster value.
+- Compute and persist `factor_product` as the area-weighted mean of
+  `K * LS * C * P`, not as `mean(K) * mean(LS) * mean(C) * mean(P)`, so
+  within-HRU spatial covariation is preserved.
+- Persist component means (`k_factor_mean`, `ls_factor_mean`, `c_factor_mean`,
+  `p_factor_mean`) for audit and QA, but use `factor_product` in the equation.
+- Persist `valid_factor_area_fraction`; HRUs below a configured validity
+  threshold are unavailable with `reason_code=insufficient_valid_factor_area`.
+- Water/out-of-domain HRUs are unavailable with
+  `reason_code=out_of_domain_hru`, not silently converted to zero erosion.
+
+HRU peak-runoff substrate status:
+
+- Implemented runtime substrate:
+  - Rust `run_batch` emits `hru_excess[].peak_runoff_m3_s` and
+    `hru_excess[].time_to_peak_minutes`.
+  - `peak_runoff_m3_s` is computed by applying the selected Geneva
+    unit-hydrograph family to each HRU's own incremental excess series and
+    HRU area.
+  - `geneva/hru_event_measure_rows.parquet` materializes this as
+    `measure_id=hru_peak_runoff`, `unit=m3_s`.
+- Erosion extension requirement:
+  - Treat this HRU-local value as `qpeak_m3_s` input for
+    `musle_hru_event_v1`; do not derive it by watershed peak area apportionment.
+  - The HRU hydrograph implied by this value is local hillslope/HRU response
+    before channel routing and must stay labeled as local response metadata.
+  - If a completed storm/HRU row lacks a valid local peak, that erosion row
+    must be unavailable with `reason_code=hru_peak_runoff_unavailable`.
+
+Output artifact contract:
+
+- Batch-level row set: `geneva/hru_event_erosion_rows.parquet`
+- Schema version: `1`
+- Row granularity: one row per available `(storm_id, hru_id,
+  erosion_model_id)`.
+
+Canonical columns:
+
+| Column | Type | Contract |
+| --- | --- | --- |
+| `schema_version` | integer | Must be `1` for this design. |
+| `storm_id` | string | Joins to the Geneva event-table storm key. |
+| `datasource_id` | string enum | `cligen_freq | noaa14_pds`; copied from the panel cell. |
+| `duration_minutes` | integer | Positive; copied from the panel cell. |
+| `ari_years` | integer | Positive; copied from the panel cell. |
+| `distribution_type` | string enum | Must match the storm hyetograph assumptions. |
+| `hru_id` | string | Joins to `hru_table.parquet`. |
+| `hru_value` | integer | Joins to `hru_map_legend.json`. |
+| `erosion_model_id` | string enum | Must be `musle_hru_event_v1` for v1. |
+| `runoff_depth_mm` | float | Final HRU cumulative excess depth. |
+| `runoff_volume_m3` | float | HRU runoff volume used for QA. |
+| `peak_runoff_m3_s` | float | HRU-local peak runoff rate. |
+| `area_ha` | float | Valid source area used in the MUSLE term. |
+| `k_factor_mean` | float | HRU area-weighted mean selected K factor. |
+| `ls_factor_mean` | float | HRU area-weighted mean LS factor. |
+| `c_factor_mean` | float | HRU area-weighted mean selected C factor. |
+| `p_factor_mean` | float | HRU area-weighted mean P factor. |
+| `factor_product` | float | Area-weighted mean of `K * LS * C * P`. |
+| `cfrg_factor` | float | `1.0` in v1 unless a coarse-fragment contract is added. |
+| `valid_factor_area_fraction` | float | Fraction of HRU area with finite factor inputs. |
+| `erosion_mass_t` | float | Estimated sediment generation for the storm/HRU. |
+| `erosion_yield_t_ha` | float | `erosion_mass_t / area_ha`. |
+
+Uniqueness must hold on `(storm_id, hru_id, erosion_model_id)`.
+
+Unavailable diagnostics are not written as numeric rows in v1. They are
+summarized in `geneva/hru_event_erosion_summary.json` with counts by
+`reason_code`, representative samples, source artifact hashes, selected RUSLE
+modes, and the configured `valid_factor_area_fraction` threshold.
+
+Cache and invalidation requirements:
+
+- Recompute erosion rows whenever any of these source hashes change:
+  - `geneva/hru_table.parquet`
+  - `geneva/hru_map.tif`
+  - `geneva/hru_map_legend.json`
+  - `geneva/hru_event_measure_rows.parquet`
+  - `geneva/batch_summary.json`
+  - `rusle/manifest.json`
+  - selected RUSLE `K`, `LS`, `C`, or `P` rasters
+- Persist those hashes in `geneva/hru_event_erosion_summary.json`.
+- If RUSLE is missing or stale, return unavailable with
+  `reason_code=rusle_factors_missing_or_stale`; do not fall back to constants.
+
+Interpretation and UI wording:
+
+- Preferred label: `Estimated event sediment generation (MUSLE)`.
+- Required qualifier: `Screening estimate for relative event comparison; not
+  routed sediment delivery and not a calibrated WEPP replacement.`
+- Map units may be `t/ha` for intensity-style choropleths and `t` for total
+  HRU mass tables.
+- Default UI state should hide this layer unless both Geneva and RUSLE
+  artifacts are ready and the user explicitly selects the erosion estimate.
+
+Validation plan before implementation:
+
+- Unit-test equation evaluation, zero-runoff behavior, unavailable diagnostics,
+  factor-product aggregation, and source-hash invalidation.
+- Build a synthetic HRU raster/factor-grid fixture where the expected
+  area-weighted `K * LS * C * P` product is hand-computable.
+- Compare HRU-local peak-flow derivation against the existing watershed
+  hydrograph path for a one-HRU run; the HRU and watershed peaks should match
+  within numeric tolerance when there is exactly one HRU.
+- Validate multi-HRU behavior with a fixture where watershed peak
+  disaggregation would produce a different result, proving that the
+  implementation uses HRU-local hydrographs.
+- For scientific QA, compare event-rank ordering and magnitude against
+  independent observations where available and against WEPP continuous or
+  single-storm outputs only as sensitivity/comparison evidence. QA notes must
+  document `kslast`, land-cover, soil-storage, burn-severity, and return-period
+  storm assumptions when WEPP is used as a comparator.
 
 ## 13. API Surface (Current)
 
@@ -957,6 +1174,14 @@ WP02 production note:
   queries must return an unavailable response with
   `reason_code=legacy_hru_event_measures_missing`.
 
+Future event-erosion design artifacts from Section 12.5:
+
+- `hru_event_erosion_rows.parquet`
+- `hru_event_erosion_summary.json`
+
+These artifacts are not part of the current baseline and must not be assumed
+present by existing Geneva query/report routes.
+
 ## 16. Current Test/Validation Baseline
 
 Geneva coverage currently includes:
@@ -985,6 +1210,9 @@ The following are intentionally tracked for follow-on implementation:
 
 - implement dominant-soil derivation for `default_hsg_code` when user override is absent,
 - implement non-stub `geneva_validate_uh` API,
+- implement the opt-in Section 12.5 `musle_hru_event_v1` extension only after adding
+  HRU-local peak-runoff derivation and RUSLE/Geneva same-grid factor
+  aggregation tests,
 - evaluate whether operator tooling should auto-flag/regenerate legacy Geneva summaries that still show `storm_distribution_assumption=neh4_type_b` with `uniform_rainfall_assumed=true` and no modern `hyetograph` summary block,
 - evaluate refine/cleanup of route module structure (currently single `geneva_bp.py`),
 - address rq-engine generic payload normalization behavior that can collapse single-item arrays to scalars.
@@ -995,6 +1223,8 @@ The following are intentionally tracked for follow-on implementation:
 - Should dual-HSG drainage policy (`A/D`, `B/D`, `C/D`) be handled in Geneva or remain upstream-only?
 - When should reservoir routing enter scope (v2 vs external workflow)?
 - Should we add curated panel presets beyond the full matrix (`5m..24h` x `1..100`)?
+- What validation threshold is required before the Section 12.5 event-erosion layer
+  can be described as more than a screening estimate for post-fire basins?
 
 ## 19. Wildcat5 Macro Reuse Assessment (Retained)
 
@@ -1018,3 +1248,15 @@ Not runtime-usable:
 - USDA NRCS. National Engineering Handbook, Part 630 (Hydrology).
 - USDA SCS. NEH Section 4 and TR-55 hydrology references.
 - USDA NRCS. 2016. Hydrology Technical Note 210-4, *Hydrologic Analyses of Post-Wildfire Conditions*.
+- Williams, J. R. 1975/1995. Modified Universal Soil Loss Equation family as
+  implemented in SWAT/SWAT+ theoretical documentation.
+- U.S. Army Corps of Engineers HEC-HMS Technical Reference Manual, Modified
+  USLE erosion method.
+- USDA NRCS. RUSLE2 Handbook, application limits for annual RUSLE2 and
+  individual-storm interpretation.
+- USDA ARS. AnnAGNPS technical documentation, HUSLE sheet-and-rill delivery
+  ratio procedure.
+- USDA ARS / Forest Service WEPP documentation, process-based event runoff,
+  detachment, transport, and deposition scope.
+- Local WEPP single-storm review experience, including Scott Sheppard's
+  investigation of `kslast` sensitivity and peak-flow interpretability.

@@ -80,6 +80,7 @@ def test_materialize_from_batch_writes_contract_rows(tmp_path: Path) -> None:
                         "hru_id": "hru_1",
                         "area_m2": 900.0,
                         "cumulative_excess_mm": [0.0, 4.0],
+                        "peak_runoff_m3_s": 1.8,
                     }
                 ],
             }
@@ -87,13 +88,13 @@ def test_materialize_from_batch_writes_contract_rows(tmp_path: Path) -> None:
     )
 
     assert meta["path"] == "geneva/hru_event_measure_rows.parquet"
-    assert meta["row_count"] == 2
+    assert meta["row_count"] == 3
 
     rows = geneva.artifact_io.read_records_parquet(geneva.wd, HRU_EVENT_MEASURE_ARTIFACT_RELPATH)
-    assert len(rows) == 2
+    assert len(rows) == 3
     measure_ids = sorted(str(row["measure_id"]) for row in rows)
-    assert measure_ids == ["runoff_depth", "runoff_volume"]
-    assert {str(row["unit"]) for row in rows} == {"mm", "m3"}
+    assert measure_ids == ["hru_peak_runoff", "runoff_depth", "runoff_volume"]
+    assert {str(row["unit"]) for row in rows} == {"mm", "m3", "m3_s"}
     assert all(str(row["storm_id"]) == "cligen_30m_10y" for row in rows)
     assert all(str(row["hru_id"]) == "hru_1" for row in rows)
     assert all(int(row["hru_value"]) == 1 for row in rows)
@@ -125,6 +126,7 @@ def test_materialize_from_batch_validates_hru_crosswalk(tmp_path: Path) -> None:
                             "hru_id": "hru_1",
                             "area_m2": 900.0,
                             "cumulative_excess_mm": [0.0, 4.0],
+                            "peak_runoff_m3_s": 1.8,
                         }
                     ],
                 }
@@ -148,6 +150,20 @@ def test_query_rows_returns_legacy_unavailable_when_artifact_missing(tmp_path: P
     assert payload["availability"]["reason_code"] == "legacy_hru_event_measures_missing"
     assert payload["records"] == []
     assert payload["row_count"] == 0
+
+
+def test_query_rows_accepts_hru_peak_runoff_measure_id(tmp_path: Path) -> None:
+    service = GenevaHruEventMeasureService()
+    geneva = _geneva_stub(tmp_path)
+
+    payload = service.query_rows(
+        geneva,
+        storm_id="cligen_30m_10y",
+        measure_id="hru_peak_runoff",
+    )
+
+    assert payload["availability"]["status"] == "unavailable"
+    assert payload["filters"]["measure_id"] == "hru_peak_runoff"
 
 
 def test_query_rows_rejects_peak_discharge_scope(tmp_path: Path) -> None:

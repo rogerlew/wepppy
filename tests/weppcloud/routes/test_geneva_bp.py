@@ -537,6 +537,88 @@ def test_query_geneva_hru_map_rows_returns_legacy_unavailable_payload(
     assert payload["row_count"] == 0
 
 
+def test_query_geneva_hru_map_rows_accepts_hru_peak_runoff_measure(
+    geneva_client: Any,
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    client, _, _ = geneva_client
+    calls: list[dict[str, Any]] = []
+
+    class _HruRowsStub:
+        def query_hru_map_rows_payload(
+            self,
+            *,
+            storm_id: str,
+            measure_id: str,
+            include_schema: bool = True,
+            limit: int | None = None,
+        ) -> dict[str, Any]:
+            calls.append(
+                {
+                    "storm_id": storm_id,
+                    "measure_id": measure_id,
+                    "include_schema": include_schema,
+                    "limit": limit,
+                }
+            )
+            return {
+                "schema_version": 1,
+                "filters": {"storm_id": storm_id, "measure_id": measure_id},
+                "availability": {
+                    "status": "available",
+                    "reason_code": None,
+                    "artifact_path": "geneva/hru_event_measure_rows.parquet",
+                },
+                "query": {},
+                "records": [
+                    {
+                        "schema_version": 1,
+                        "storm_id": storm_id,
+                        "datasource_id": "cligen_freq",
+                        "duration_minutes": 30,
+                        "ari_years": 10,
+                        "distribution_type": "neh4_type_b",
+                        "hru_id": "hru_1",
+                        "hru_value": 1,
+                        "measure_id": "hru_peak_runoff",
+                        "value": 2.75,
+                        "unit": "m3_s",
+                    }
+                ],
+                "schema": None,
+                "row_count": 1,
+                "warnings": [],
+                "errors": [],
+            }
+
+    monkeypatch.setattr(geneva_module, "_ensure_geneva_controller", lambda _wd, _cfg: _HruRowsStub())
+
+    response = client.post(
+        f"/runs/{RUN_ID}/{CONFIG}/query/geneva/hru_map_rows",
+        json={
+            "schema_version": 1,
+            "storm_id": "cligen_30m_10y",
+            "measure_id": "hru_peak_runoff",
+            "include_schema": False,
+            "limit": 25,
+        },
+    )
+
+    assert response.status_code == 200
+    payload = response.get_json()
+    assert payload["availability"]["status"] == "available"
+    assert payload["records"][0]["measure_id"] == "hru_peak_runoff"
+    assert payload["records"][0]["unit"] == "m3_s"
+    assert calls == [
+        {
+            "storm_id": "cligen_30m_10y",
+            "measure_id": "hru_peak_runoff",
+            "include_schema": False,
+            "limit": 25,
+        }
+    ]
+
+
 def test_query_geneva_hru_map_features_returns_unavailable_payload(
     geneva_client: Any,
 ) -> None:
