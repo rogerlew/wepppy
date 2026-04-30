@@ -125,20 +125,39 @@ def compute_daily_audit(df: pd.DataFrame) -> pd.DataFrame:
         enriched_storage_mm = np.full(audit.shape[0], np.nan, dtype=np.float64)
         enriched_storage_delta_mm = np.full(audit.shape[0], np.nan, dtype=np.float64)
 
-    closure_reported_basic_mm = rain_melt_reported_mm - (
+    # Primary closure accounting uses total precipitation (P/Precipitation), so
+    # snowfall water is counted on the input side when Snow-Water is in storage.
+    closure_reported_basic_mm = precip_reported_mm - (
         runoff_reported_mm + lateral_reported_mm + et_reported_mm + percolation_reported_mm
     )
-    closure_reconstructed_basic_mm = rain_melt_reported_mm - (
+    closure_reconstructed_basic_mm = precip_reported_mm - (
         runoff_calc_mm + lateral_calc_mm + et_calc_mm + percolation_calc_mm
     )
     closure_reported_with_storage_mm = closure_reported_basic_mm - storage_delta_mm
     closure_reconstructed_with_storage_mm = closure_reconstructed_basic_mm - storage_delta_mm
+
+    # Keep Rain+Melt-based closure as a diagnostic to highlight snowpack timing.
+    closure_reported_with_storage_rain_melt_mm = rain_melt_reported_mm - (
+        runoff_reported_mm + lateral_reported_mm + et_reported_mm + percolation_reported_mm
+    ) - storage_delta_mm
+    closure_reconstructed_with_storage_rain_melt_mm = rain_melt_reported_mm - (
+        runoff_calc_mm + lateral_calc_mm + et_calc_mm + percolation_calc_mm
+    ) - storage_delta_mm
+
     if np.isnan(enriched_storage_delta_mm).all():
         closure_reported_with_enriched_storage_mm = np.full(audit.shape[0], np.nan, dtype=np.float64)
         closure_reconstructed_with_enriched_storage_mm = np.full(audit.shape[0], np.nan, dtype=np.float64)
+        closure_reported_with_enriched_storage_rain_melt_mm = np.full(audit.shape[0], np.nan, dtype=np.float64)
+        closure_reconstructed_with_enriched_storage_rain_melt_mm = np.full(audit.shape[0], np.nan, dtype=np.float64)
     else:
         closure_reported_with_enriched_storage_mm = closure_reported_basic_mm - enriched_storage_delta_mm
         closure_reconstructed_with_enriched_storage_mm = closure_reconstructed_basic_mm - enriched_storage_delta_mm
+        closure_reported_with_enriched_storage_rain_melt_mm = rain_melt_reported_mm - (
+            runoff_reported_mm + lateral_reported_mm + et_reported_mm + percolation_reported_mm
+        ) - enriched_storage_delta_mm
+        closure_reconstructed_with_enriched_storage_rain_melt_mm = rain_melt_reported_mm - (
+            runoff_calc_mm + lateral_calc_mm + et_calc_mm + percolation_calc_mm
+        ) - enriched_storage_delta_mm
 
     runoff_to_precip_reported_pct = _safe_divide(runoff_reported_mm, precip_reported_mm) * 100.0
     runoff_to_precip_reconstructed_pct = _safe_divide(runoff_calc_mm, precip_reported_mm) * 100.0
@@ -240,6 +259,14 @@ def compute_daily_audit(df: pd.DataFrame) -> pd.DataFrame:
     audit["audit_closure_reconstructed_with_storage_mm"] = closure_reconstructed_with_storage_mm
     audit["audit_closure_reported_with_enriched_storage_mm"] = closure_reported_with_enriched_storage_mm
     audit["audit_closure_reconstructed_with_enriched_storage_mm"] = closure_reconstructed_with_enriched_storage_mm
+    audit["audit_closure_reported_with_storage_rain_melt_mm"] = closure_reported_with_storage_rain_melt_mm
+    audit["audit_closure_reconstructed_with_storage_rain_melt_mm"] = closure_reconstructed_with_storage_rain_melt_mm
+    audit["audit_closure_reported_with_enriched_storage_rain_melt_mm"] = (
+        closure_reported_with_enriched_storage_rain_melt_mm
+    )
+    audit["audit_closure_reconstructed_with_enriched_storage_rain_melt_mm"] = (
+        closure_reconstructed_with_enriched_storage_rain_melt_mm
+    )
 
     audit["audit_runoff_to_precip_reported_pct"] = runoff_to_precip_reported_pct
     audit["audit_runoff_to_precip_reconstructed_pct"] = runoff_to_precip_reconstructed_pct
@@ -299,10 +326,18 @@ def _build_whole_run_closure(audit: pd.DataFrame) -> dict[str, float]:
     closure_reconstructed_basic_total_mm = float(audit["audit_closure_reconstructed_basic_mm"].sum())
     closure_reported_with_storage_total_mm = float(audit["audit_closure_reported_with_storage_mm"].sum())
     closure_reconstructed_with_storage_total_mm = float(audit["audit_closure_reconstructed_with_storage_mm"].sum())
+    closure_reported_with_storage_rain_melt_total_mm = float(
+        audit["audit_closure_reported_with_storage_rain_melt_mm"].sum()
+    )
+    closure_reconstructed_with_storage_rain_melt_total_mm = float(
+        audit["audit_closure_reconstructed_with_storage_rain_melt_mm"].sum()
+    )
     enriched_storage_available = bool(audit["audit_enriched_storage_mm"].notna().any())
     enriched_storage_change_mm = float("nan")
     closure_reported_with_enriched_storage_total_mm = float("nan")
     closure_reconstructed_with_enriched_storage_total_mm = float("nan")
+    closure_reported_with_enriched_storage_rain_melt_total_mm = float("nan")
+    closure_reconstructed_with_enriched_storage_rain_melt_total_mm = float("nan")
     if enriched_storage_available:
         first_enriched = audit["audit_enriched_storage_mm"].dropna().iloc[0]
         last_enriched = audit["audit_enriched_storage_mm"].dropna().iloc[-1]
@@ -312,6 +347,12 @@ def _build_whole_run_closure(audit: pd.DataFrame) -> dict[str, float]:
         )
         closure_reconstructed_with_enriched_storage_total_mm = _nan_sum(
             audit["audit_closure_reconstructed_with_enriched_storage_mm"]
+        )
+        closure_reported_with_enriched_storage_rain_melt_total_mm = _nan_sum(
+            audit["audit_closure_reported_with_enriched_storage_rain_melt_mm"]
+        )
+        closure_reconstructed_with_enriched_storage_rain_melt_total_mm = _nan_sum(
+            audit["audit_closure_reconstructed_with_enriched_storage_rain_melt_mm"]
         )
     soilwater_total_available = bool(audit["audit_soilwatertotal_vs_legacy_storage_mm"].notna().any())
     soilwater_total_vs_legacy_max_abs_mm = float("nan")
@@ -327,6 +368,8 @@ def _build_whole_run_closure(audit: pd.DataFrame) -> dict[str, float]:
     row_count = float(audit.shape[0])
 
     return {
+        "closure_basis_primary": "precipitation",
+        "closure_basis_diagnostic": "rain_melt",
         "precip_total_mm": precip_total_mm,
         "rain_melt_total_mm": rain_melt_total_mm,
         "runoff_reported_total_mm": runoff_reported_total_mm,
@@ -342,6 +385,8 @@ def _build_whole_run_closure(audit: pd.DataFrame) -> dict[str, float]:
         "closure_reconstructed_basic_total_mm": closure_reconstructed_basic_total_mm,
         "closure_reported_with_storage_total_mm": closure_reported_with_storage_total_mm,
         "closure_reconstructed_with_storage_total_mm": closure_reconstructed_with_storage_total_mm,
+        "closure_reported_with_storage_rain_melt_total_mm": closure_reported_with_storage_rain_melt_total_mm,
+        "closure_reconstructed_with_storage_rain_melt_total_mm": closure_reconstructed_with_storage_rain_melt_total_mm,
         "enriched_storage_available": enriched_storage_available,
         "enriched_storage_change_mm": _optional_float(enriched_storage_change_mm),
         "soilwater_total_available": soilwater_total_available,
@@ -357,19 +402,61 @@ def _build_whole_run_closure(audit: pd.DataFrame) -> dict[str, float]:
         "closure_reconstructed_with_enriched_storage_total_mm": _optional_float(
             closure_reconstructed_with_enriched_storage_total_mm
         ),
-        "closure_reported_with_storage_pct_of_rain_melt": _safe_ratio_scalar(
+        "closure_reported_with_enriched_storage_rain_melt_total_mm": _optional_float(
+            closure_reported_with_enriched_storage_rain_melt_total_mm
+        ),
+        "closure_reconstructed_with_enriched_storage_rain_melt_total_mm": _optional_float(
+            closure_reconstructed_with_enriched_storage_rain_melt_total_mm
+        ),
+        "closure_reported_with_storage_pct_of_precip": _safe_ratio_scalar(
             closure_reported_with_storage_total_mm * 100.0,
+            precip_total_mm,
+        ),
+        "closure_reconstructed_with_storage_pct_of_precip": _safe_ratio_scalar(
+            closure_reconstructed_with_storage_total_mm * 100.0,
+            precip_total_mm,
+        ),
+        "closure_reported_with_enriched_storage_pct_of_precip": _optional_float(
+            _safe_ratio_scalar(closure_reported_with_enriched_storage_total_mm * 100.0, precip_total_mm)
+        ),
+        "closure_reconstructed_with_enriched_storage_pct_of_precip": _optional_float(
+            _safe_ratio_scalar(closure_reconstructed_with_enriched_storage_total_mm * 100.0, precip_total_mm)
+        ),
+        "closure_reported_with_storage_rain_melt_pct_of_rain_melt": _safe_ratio_scalar(
+            closure_reported_with_storage_rain_melt_total_mm * 100.0,
+            rain_melt_total_mm,
+        ),
+        "closure_reconstructed_with_storage_rain_melt_pct_of_rain_melt": _safe_ratio_scalar(
+            closure_reconstructed_with_storage_rain_melt_total_mm * 100.0,
+            rain_melt_total_mm,
+        ),
+        "closure_reported_with_enriched_storage_rain_melt_pct_of_rain_melt": _optional_float(
+            _safe_ratio_scalar(closure_reported_with_enriched_storage_rain_melt_total_mm * 100.0, rain_melt_total_mm)
+        ),
+        "closure_reconstructed_with_enriched_storage_rain_melt_pct_of_rain_melt": _optional_float(
+            _safe_ratio_scalar(
+                closure_reconstructed_with_enriched_storage_rain_melt_total_mm * 100.0,
+                rain_melt_total_mm,
+            )
+        ),
+        # Backward compatibility aliases: these names historically represented
+        # Rain+Melt closure percentages.
+        "closure_reported_with_storage_pct_of_rain_melt": _safe_ratio_scalar(
+            closure_reported_with_storage_rain_melt_total_mm * 100.0,
             rain_melt_total_mm,
         ),
         "closure_reconstructed_with_storage_pct_of_rain_melt": _safe_ratio_scalar(
-            closure_reconstructed_with_storage_total_mm * 100.0,
+            closure_reconstructed_with_storage_rain_melt_total_mm * 100.0,
             rain_melt_total_mm,
         ),
         "closure_reported_with_enriched_storage_pct_of_rain_melt": _optional_float(
-            _safe_ratio_scalar(closure_reported_with_enriched_storage_total_mm * 100.0, rain_melt_total_mm)
+            _safe_ratio_scalar(closure_reported_with_enriched_storage_rain_melt_total_mm * 100.0, rain_melt_total_mm)
         ),
         "closure_reconstructed_with_enriched_storage_pct_of_rain_melt": _optional_float(
-            _safe_ratio_scalar(closure_reconstructed_with_enriched_storage_total_mm * 100.0, rain_melt_total_mm)
+            _safe_ratio_scalar(
+                closure_reconstructed_with_enriched_storage_rain_melt_total_mm * 100.0,
+                rain_melt_total_mm,
+            )
         ),
         "mean_daily_closure_reported_with_storage_mm": _safe_ratio_scalar(
             closure_reported_with_storage_total_mm,
@@ -391,6 +478,20 @@ def _build_whole_run_closure(audit: pd.DataFrame) -> dict[str, float]:
         "mean_abs_daily_closure_reconstructed_with_enriched_storage_mm": _optional_float(
             _nan_mean_abs(audit["audit_closure_reconstructed_with_enriched_storage_mm"])
         ),
+        "mean_abs_daily_closure_reported_with_storage_rain_melt_mm": float(
+            np.abs(audit["audit_closure_reported_with_storage_rain_melt_mm"].to_numpy(dtype=np.float64, copy=False)).mean()
+        ),
+        "mean_abs_daily_closure_reconstructed_with_storage_rain_melt_mm": float(
+            np.abs(
+                audit["audit_closure_reconstructed_with_storage_rain_melt_mm"].to_numpy(dtype=np.float64, copy=False)
+            ).mean()
+        ),
+        "mean_abs_daily_closure_reported_with_enriched_storage_rain_melt_mm": _optional_float(
+            _nan_mean_abs(audit["audit_closure_reported_with_enriched_storage_rain_melt_mm"])
+        ),
+        "mean_abs_daily_closure_reconstructed_with_enriched_storage_rain_melt_mm": _optional_float(
+            _nan_mean_abs(audit["audit_closure_reconstructed_with_enriched_storage_rain_melt_mm"])
+        ),
     }
 
 
@@ -398,6 +499,15 @@ def build_summary(audit: pd.DataFrame, source_path: Path) -> dict[str, Any]:
     closure_reported = audit["audit_closure_reported_with_storage_mm"].to_numpy(dtype=np.float64, copy=False)
     closure_reconstructed = audit["audit_closure_reconstructed_with_storage_mm"].to_numpy(dtype=np.float64, copy=False)
     closure_enriched = audit["audit_closure_reconstructed_with_enriched_storage_mm"].to_numpy(dtype=np.float64, copy=False)
+    closure_reported_rain_melt = audit["audit_closure_reported_with_storage_rain_melt_mm"].to_numpy(
+        dtype=np.float64, copy=False
+    )
+    closure_reconstructed_rain_melt = audit["audit_closure_reconstructed_with_storage_rain_melt_mm"].to_numpy(
+        dtype=np.float64, copy=False
+    )
+    closure_enriched_rain_melt = audit["audit_closure_reconstructed_with_enriched_storage_rain_melt_mm"].to_numpy(
+        dtype=np.float64, copy=False
+    )
     storage_delta = audit["audit_soilwatertotal_vs_legacy_storage_mm"].to_numpy(dtype=np.float64, copy=False)
     soilwater_to_porosity = audit["audit_soilwater_to_porosity_fraction"].to_numpy(dtype=np.float64, copy=False)
     soilwater_minus_fc = audit["audit_soilwater_minus_fc_mm"].to_numpy(dtype=np.float64, copy=False)
@@ -430,6 +540,13 @@ def build_summary(audit: pd.DataFrame, source_path: Path) -> dict[str, Any]:
         "closure_reconstructed_with_storage_mm": _quantiles(closure_reconstructed),
         "closure_reconstructed_with_enriched_storage_mm": (
             None if np.isnan(closure_enriched).all() else _quantiles(closure_enriched[~np.isnan(closure_enriched)])
+        ),
+        "closure_reported_with_storage_rain_melt_mm": _quantiles(closure_reported_rain_melt),
+        "closure_reconstructed_with_storage_rain_melt_mm": _quantiles(closure_reconstructed_rain_melt),
+        "closure_reconstructed_with_enriched_storage_rain_melt_mm": (
+            None
+            if np.isnan(closure_enriched_rain_melt).all()
+            else _quantiles(closure_enriched_rain_melt[~np.isnan(closure_enriched_rain_melt)])
         ),
         "soilwatertotal_vs_legacy_storage_mm": (
             None if np.isnan(storage_delta).all() else _quantiles(storage_delta[~np.isnan(storage_delta)])
@@ -489,6 +606,10 @@ def _top_anomalies(audit: pd.DataFrame, top_n: int) -> pd.DataFrame:
             "audit_closure_reconstructed_with_storage_mm",
             "audit_closure_reported_with_enriched_storage_mm",
             "audit_closure_reconstructed_with_enriched_storage_mm",
+            "audit_closure_reported_with_storage_rain_melt_mm",
+            "audit_closure_reconstructed_with_storage_rain_melt_mm",
+            "audit_closure_reported_with_enriched_storage_rain_melt_mm",
+            "audit_closure_reconstructed_with_enriched_storage_rain_melt_mm",
             "audit_soilwatertotal_vs_legacy_storage_mm",
             "audit_soilwater_to_porosity_fraction",
             "audit_soilwater_minus_fc_mm",
@@ -554,8 +675,12 @@ def main() -> int:
         f"{summary['whole_run_closure']['closure_reconstructed_with_storage_total_mm']:.6f}"
     )
     print(
-        "closure_reconstructed_with_storage_pct_of_rain_melt="
-        f"{summary['whole_run_closure']['closure_reconstructed_with_storage_pct_of_rain_melt']:.6f}"
+        "closure_reconstructed_with_storage_pct_of_precip="
+        f"{summary['whole_run_closure']['closure_reconstructed_with_storage_pct_of_precip']:.6f}"
+    )
+    print(
+        "closure_reconstructed_with_storage_rain_melt_pct_of_rain_melt="
+        f"{summary['whole_run_closure']['closure_reconstructed_with_storage_rain_melt_pct_of_rain_melt']:.6f}"
     )
     if summary["whole_run_closure"]["enriched_storage_available"]:
         print(
@@ -563,8 +688,12 @@ def main() -> int:
             f"{summary['whole_run_closure']['closure_reconstructed_with_enriched_storage_total_mm']:.6f}"
         )
         print(
-            "closure_reconstructed_with_enriched_storage_pct_of_rain_melt="
-            f"{summary['whole_run_closure']['closure_reconstructed_with_enriched_storage_pct_of_rain_melt']:.6f}"
+            "closure_reconstructed_with_enriched_storage_pct_of_precip="
+            f"{summary['whole_run_closure']['closure_reconstructed_with_enriched_storage_pct_of_precip']:.6f}"
+        )
+        print(
+            "closure_reconstructed_with_enriched_storage_rain_melt_pct_of_rain_melt="
+            f"{summary['whole_run_closure']['closure_reconstructed_with_enriched_storage_rain_melt_pct_of_rain_melt']:.6f}"
         )
     if summary["whole_run_closure"]["soilwater_total_available"]:
         print(

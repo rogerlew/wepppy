@@ -115,15 +115,25 @@ def test_compute_daily_audit_detects_runoff_consistency_and_closure(tmp_path: Pa
     assert summary["max_runoff_to_precip_reconstructed_pct"] == pytest.approx(80.0)
     whole = summary["whole_run_closure"]
     assert whole["rain_melt_total_mm"] == pytest.approx(10.0)
+    assert whole["precip_total_mm"] == pytest.approx(10.0)
     assert whole["runoff_reported_total_mm"] == pytest.approx(60.0)
     assert whole["runoff_reconstructed_total_mm"] == pytest.approx(7.0)
     assert whole["storage_change_mm"] == pytest.approx(-5.0)
+    assert whole["closure_basis_primary"] == "precipitation"
+    assert whole["closure_basis_diagnostic"] == "rain_melt"
     assert whole["closure_reported_with_storage_total_mm"] == pytest.approx(-53.5)
     assert whole["closure_reconstructed_with_storage_total_mm"] == pytest.approx(-0.5)
-    assert whole["closure_reconstructed_with_storage_pct_of_rain_melt"] == pytest.approx(-5.0)
+    assert whole["closure_reconstructed_with_storage_pct_of_precip"] == pytest.approx(-5.0)
+    assert whole["closure_reconstructed_with_storage_rain_melt_total_mm"] == pytest.approx(-0.5)
+    assert whole["closure_reconstructed_with_storage_rain_melt_pct_of_rain_melt"] == pytest.approx(-5.0)
     assert whole["enriched_storage_available"] is True
     assert whole["enriched_storage_change_mm"] == pytest.approx(-6.0)
     assert whole["closure_reconstructed_with_enriched_storage_total_mm"] == pytest.approx(0.5)
+    assert whole["closure_reconstructed_with_enriched_storage_pct_of_precip"] == pytest.approx(5.0)
+    assert whole["closure_reconstructed_with_enriched_storage_rain_melt_total_mm"] == pytest.approx(0.5)
+    assert whole["closure_reconstructed_with_enriched_storage_rain_melt_pct_of_rain_melt"] == pytest.approx(5.0)
+    # Backward compatibility aliases should continue to expose Rain+Melt-normalized diagnostic closure.
+    assert whole["closure_reconstructed_with_storage_pct_of_rain_melt"] == pytest.approx(-5.0)
     assert whole["closure_reconstructed_with_enriched_storage_pct_of_rain_melt"] == pytest.approx(5.0)
     assert whole["soilwater_total_available"] is True
     assert whole["soilwatertotal_vs_legacy_max_abs_mm"] == pytest.approx(1.0)
@@ -133,10 +143,65 @@ def test_compute_daily_audit_detects_runoff_consistency_and_closure(tmp_path: Pa
     assert whole["soilwater_gt_porositycap_days"] == 0
     assert whole["soilwater_lt_wpstore_days"] == 2
     assert summary["closure_reconstructed_with_enriched_storage_mm"]["max_abs"] == pytest.approx(1.0)
+    assert summary["closure_reconstructed_with_storage_rain_melt_mm"]["max_abs"] == pytest.approx(0.5)
+    assert summary["closure_reconstructed_with_enriched_storage_rain_melt_mm"]["max_abs"] == pytest.approx(1.0)
     assert summary["soilwatertotal_vs_legacy_storage_mm"]["max_abs"] == pytest.approx(1.0)
     assert summary["soilwater_to_porosity_fraction"]["max_abs"] == pytest.approx(0.2)
     assert summary["soilwater_minus_fc_mm"]["max_abs"] == pytest.approx(206.0)
     assert summary["soilwater_minus_wp_mm"]["max_abs"] == pytest.approx(26.0)
+
+
+def test_precipitation_based_closure_handles_snow_storage_days(tmp_path: Path) -> None:
+    module = _module()
+    compute_daily_audit = module["compute_daily_audit"]
+    load_dataset = module["load_dataset"]
+    build_summary = module["build_summary"]
+
+    dataset = tmp_path / "totalwatsed3.parquet"
+    records = [
+        {
+            "year": 1987,
+            "sim_day_index": 1,
+            "julian": 44,
+            "month": 2,
+            "day_of_month": 13,
+            "water_year": 1987,
+            "Area": 100.0,
+            "P": 10.0,  # 100 mm
+            "RM": 2.0,  # 20 mm
+            "runvol": 0.0,
+            "latqcc": 0.0,
+            "Dp": 0.0,
+            "Ep": 0.0,
+            "Es": 0.0,
+            "Er": 0.0,
+            "Total-Soil Water": 100.0,
+            "frozwt": 0.0,
+            "Snow-Water": 0.0,
+            "Precipitation": 100.0,
+            "Rain+Melt": 20.0,
+            "Runoff": 0.0,
+            "Lateral Flow": 0.0,
+            "Percolation": 0.0,
+            "ET": 0.0,
+        }
+    ]
+    pd.DataFrame.from_records(records).to_parquet(dataset, index=False)
+
+    audit = compute_daily_audit(load_dataset(dataset))
+    summary = build_summary(audit, dataset)
+
+    # Canonical closure is precipitation-based.
+    assert audit.loc[0, "audit_closure_reconstructed_with_storage_mm"] == pytest.approx(100.0)
+    assert summary["whole_run_closure"]["closure_reconstructed_with_storage_total_mm"] == pytest.approx(100.0)
+    assert summary["whole_run_closure"]["closure_reconstructed_with_storage_pct_of_precip"] == pytest.approx(100.0)
+
+    # Rain+Melt closure is retained as diagnostic and differs on snow days.
+    assert audit.loc[0, "audit_closure_reconstructed_with_storage_rain_melt_mm"] == pytest.approx(20.0)
+    assert summary["whole_run_closure"]["closure_reconstructed_with_storage_rain_melt_total_mm"] == pytest.approx(20.0)
+    assert summary["whole_run_closure"]["closure_reconstructed_with_storage_rain_melt_pct_of_rain_melt"] == pytest.approx(
+        100.0
+    )
 
 
 def test_main_writes_outputs(tmp_path: Path, monkeypatch: pytest.MonkeyPatch) -> None:
