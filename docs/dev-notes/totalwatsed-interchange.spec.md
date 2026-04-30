@@ -36,6 +36,48 @@ re-deriving them if present.
 - `wepppy` must default missing optional terms to `null` at interchange and
   `totalwatsed3` aggregation stages.
 
+## Water Balance Contract
+
+`totalwatsed3` water-balance auditing is contractually defined by
+`tools/totalwatsed3_daily_closure_audit.py`.
+
+Daily water-balance terms (mm):
+- Primary input: `Precipitation`.
+- Diagnostic input: `Rain+Melt`.
+- Outflows: `Runoff`, `Lateral Flow`, `Percolation`, `ET`.
+- Legacy storage state: `S_legacy = Total-Soil Water + frozwt + Snow-Water`.
+- Enriched storage state (optional): `S_enriched = SoilWaterTotal + Snow-Water`.
+
+Daily storage delta:
+- `ΔS_legacy(t) = S_legacy(t) - S_legacy(t-1)`.
+- `ΔS_enriched(t) = S_enriched(t) - S_enriched(t-1)` when `SoilWaterTotal` is available.
+- For the first day, audit uses zero delta (`np.diff(..., prepend=first_value)`).
+
+Daily closure definitions (mm):
+- Primary reported closure:
+  `C_reported_precip = Precipitation - (Runoff + Lateral Flow + ET + Percolation) - ΔS_legacy`.
+- Primary reconstructed closure:
+  `C_reconstructed_precip = Precipitation - (runvol/Area*1000 + latqcc/Area*1000 + (Ep+Es+Er)/Area*1000 + Dp/Area*1000) - ΔS_legacy`.
+- Diagnostic rain/melt closure (reported/reconstructed) uses `Rain+Melt` in place of `Precipitation`.
+- Enriched variants replace `ΔS_legacy` with `ΔS_enriched` when available.
+
+Whole-run closure definitions:
+- Totals are sums of daily closures over all rows.
+- Primary percentages normalize by `precip_total_mm`.
+- Diagnostic rain/melt percentages normalize by `rain_melt_total_mm`.
+- Summary contract includes:
+  - `whole_run_closure.closure_basis_primary = "precipitation"`
+  - `whole_run_closure.closure_basis_diagnostic = "rain_melt"`
+  - backward-compatible aliases `closure_*_pct_of_rain_melt` that map to diagnostic rain/melt closure percentages.
+
+Availability and fallback contract:
+- When optional reported depth columns are absent, audit reconstructs from volume columns (`P`, `RM`, `runvol`, `latqcc`, `Dp`, `Ep`, `Es`, `Er`) and `Area`.
+- `SoilWaterTotal`/profile-capacity diagnostics are optional and remain null/unavailable for legacy producers.
+- Output artifacts are:
+  - `daily_closure_audit_summary.json`
+  - `daily_closure_audit_top_days.csv`
+  under the audit output directory (default sibling `audit_totalwatsed3_daily_closure`).
+
 ## Schema for totalwatsed3, use `schema_utils.pa_field`
 
 | Column | Type | Units | Description | Calculation |
@@ -55,12 +97,14 @@ re-deriving them if present.
 | seddep_3 | double | kg | Sediment Class 3 deposition | sum(pass.sedcon_3 * pass.runvol) |
 | seddep_4 | double | kg | Sediment Class 4 deposition | sum(pass.sedcon_4 * pass.runvol) |
 | seddep_5 | double | kg | Sediment Class 5 deposition | sum(pass.sedcon_5 * pass.runvol) |
+| sed_del | double | kg | Total sediment delivery | seddep_1 + seddep_2 + seddep_3 + seddep_4 + seddep_5 |
+| sed_vol_conc | double | m^3/m^3 | Volumetric sediment concentration | sum(seddep_i / rho_i) / runvol where rho_i is class density |
 | Area | double | m^2 | Area that depths apply over | sum(wat.Area) |
 | P | double | m^3 | Precipitation | sum(wat.P * 0.001 *  wat.Area) |
 | RM | double | m^3 | Rainfall+Irrigation+Snowmelt | sum(wat.RM * 0.001 *  wat.Area) |
 | Q | double | m^3 | Daily runoff over eff length | sum(wat.Q * 0.001 *  wat.Area) |
 | Dp | double | m^3 | Deep percolation | sum(wat.Dp * 0.001 *  wat.Area) |
-| latqcc | double | m^3  | Lateral subsurface flow | sum(wat.latqcc * 0.001 *  wat.Area) |
+| latqcc | double | m^3  | Lateral subsurface flow | MOFE: sum(case when ofe_id=last_ofe then wat.latqcc*0.001*wat.Area else 0 end); single OFE: sum(wat.latqcc*0.001*wat.Area) |
 | QOFE | double | m^3  | Daily runoff scaled to single OFE | sum(wat.QOFE * 0.001 *  wat.Area) |
 | Ep | double | m^3 | Plant transpiration | sum(wat.Ep * 0.001 *  wat.Area) |
 | Es | double | m^3 | Soil evaporation | sum(wat.Es * 0.001 *  wat.Area) |
@@ -73,11 +117,11 @@ re-deriving them if present.
 | ProfilePorosityCap | double | mm | Area-weighted full-profile porosity storage capacity (`sum(por*dg)`) | sum(wat.ProfilePorosityCap * 0.001 * wat.Area) / Area * 1000 when available, else null |
 | ProfileFCStore | double | mm | Area-weighted full-profile field-capacity storage (`sum(thetfc*dg)`) | sum(wat.ProfileFCStore * 0.001 * wat.Area) / Area * 1000 when available, else null |
 | ProfileWPStore | double | mm | Area-weighted full-profile wilting-point storage (`sum(thetdr*dg)`) | sum(wat.ProfileWPStore * 0.001 * wat.Area) / Area * 1000 when available, else null |
-| TSMF | double | frac | Area-weighted true soil moisture fraction (full profile) | sum(soil.TSMF * wat.Area) / sum(wat.Area) when TSMF available, else null |
+| TSMF | double | frac | Area-weighted true soil moisture fraction (full profile) | sum(soil.TSMF * wat.Area where soil.TSMF not null) / sum(wat.Area where soil.TSMF not null) |
 | frozwt | double | mm  | Frozen water in soil profile | sum(wat.frozwt * 0.001 *  wat.Area) / Area * 1000 |
 | Snow-Water | double | mm  | Water in surface snow | sum(wat.Snow-Water * 0.001 *  wat.Area) / Area * 1000 |
-| QRain | double | mm | Area-weighted rain-generated runoff partition | sum(element.QRain * 0.001 * wat.Area) / sum(wat.Area) * 1000 when QRain available, else null |
-| QSnow | double | mm | Area-weighted snow-generated runoff partition | sum(element.QSnow * 0.001 * wat.Area) / sum(wat.Area) * 1000 when QSnow available, else null |
+| QRain | double | mm | Area-weighted rain-generated runoff partition | sum(element.QRain * 0.001 * wat.Area where element.QRain not null) / sum(wat.Area where element.QRain not null) * 1000 |
+| QSnow | double | mm | Area-weighted snow-generated runoff partition | sum(element.QSnow * 0.001 * wat.Area where element.QSnow not null) / sum(wat.Area where element.QSnow not null) * 1000 |
 | Tile | double | mm  | Tile drainage | sum(wat.Tile * 0.001 *  wat.Area) / Area * 1000 |
 | Irr | double | mm  | Irrigation | sum(wat.Irr * 0.001 *  wat.Area) / Area * 1000 |
 | Precipitation | double | mm | Precipitation | P / Area * 1000 |
@@ -92,22 +136,44 @@ re-deriving them if present.
 | Aquifer losses | double | mm | Aquifer losses | reimplement running calc from totalwatsed.py provided below |
 | Reservoir Volume | double | mm | Reservoir Volume | reimplement running calc from totalwatsed.py provided below |
 | Streamflow | double | mm | Streamflow | Runoff + Lateral Flow + Baseflow |
-| wind_transport (tonne) | double | tonne | Ash transported by wind | Aggregated mass from first-year ash hillslope outputs |
-| wind_transport (tonne/ha) | double | tonne/ha | Ash transported by wind per unit area | wind_transport (tonne) / contributing area |
-| water_transport (tonne) | double | tonne | Ash transported by water | Aggregated mass from first-year ash hillslope outputs |
-| water_transport (tonne/ha) | double | tonne/ha | Ash transported by water per unit area | water_transport (tonne) / contributing area |
-| ash_transport (tonne) | double | tonne | Total ash transported (wind + water) | Aggregated mass from first-year ash hillslope outputs |
-| ash_transport (tonne/ha) | double | tonne/ha | Total ash transported (wind + water) per unit area | ash_transport (tonne) / contributing area |
-| transportable_ash (tonne) | double | tonne | Ash mass still available for transport | Aggregated transportable ash mass after daily updates |
-| transportable_ash (tonne/ha) | double | tonne/ha | Ash mass still available per unit area | transportable_ash (tonne) / contributing area |
+| wind_transport | double | tonne | Ash transported by wind | Aggregated mass from first-year ash hillslope outputs |
+| wind_transport_per_ha | double | tonne/ha | Ash transported by wind per unit area | wind_transport / contributing area_ha |
+| wind_transport_black | double | tonne | Black ash transported by wind | Aggregated black-ash mass from first-year ash outputs |
+| wind_transport_black_per_ha | double | tonne/ha | Black ash transported by wind per black-ash area | wind_transport_black / black_ash_area_ha |
+| wind_transport_white | double | tonne | White ash transported by wind | Aggregated white-ash mass from first-year ash outputs |
+| wind_transport_white_per_ha | double | tonne/ha | White ash transported by wind per white-ash area | wind_transport_white / white_ash_area_ha |
+| water_transport | double | tonne | Ash transported by water | Aggregated mass from first-year ash hillslope outputs |
+| water_transport_per_ha | double | tonne/ha | Ash transported by water per unit area | water_transport / contributing area_ha |
+| water_transport_black | double | tonne | Black ash transported by water | Aggregated black-ash mass from first-year ash outputs |
+| water_transport_black_per_ha | double | tonne/ha | Black ash transported by water per black-ash area | water_transport_black / black_ash_area_ha |
+| water_transport_white | double | tonne | White ash transported by water | Aggregated white-ash mass from first-year ash outputs |
+| water_transport_white_per_ha | double | tonne/ha | White ash transported by water per white-ash area | water_transport_white / white_ash_area_ha |
+| ash_transport | double | tonne | Total ash transported (wind + water) | Aggregated mass from first-year ash hillslope outputs |
+| ash_transport_per_ha | double | tonne/ha | Total ash transported per unit area | ash_transport / contributing area_ha |
+| ash_transport_black | double | tonne | Black ash transported (wind + water) | Aggregated black-ash mass from first-year ash outputs |
+| ash_transport_black_per_ha | double | tonne/ha | Black ash transported per black-ash area | ash_transport_black / black_ash_area_ha |
+| ash_transport_white | double | tonne | White ash transported (wind + water) | Aggregated white-ash mass from first-year ash outputs |
+| ash_transport_white_per_ha | double | tonne/ha | White ash transported per white-ash area | ash_transport_white / white_ash_area_ha |
+| transportable_ash | double | tonne | Ash mass still available for transport | Aggregated transportable ash mass after daily updates |
+| transportable_ash_per_ha | double | tonne/ha | Ash mass still available per unit area | transportable_ash / contributing area_ha |
+| ash_vol_conc | double | m^3/m^3 | Volumetric ash concentration | ash_solids_volume / runvol |
+| sed+ash_vol_conc | double | m^3/m^3 | Combined sediment + ash volumetric concentration | (sed_solids_volume + ash_solids_volume) / runvol |
+| ash_black_pct_by_vol | double | percent | Black ash fraction by solids volume | 100 * ash_black_solids_volume / ash_solids_volume |
 
 Ash metrics are harvested from the per-hillslope ash transport parquet files under
 ``ash/H{wepp_id}_ash.parquet``. Each file is loaded with `read_hillslope_out_fn`,
 filtered to the first fire year (``year0 == year``), and converted from
 tonne-per-hectare to total tonnes using the watershed hillslope area. The
 aggregator respects the optional ``wepp_ids`` filter so channel-level exports
-receive localized totals, and it recomputes the per-area ratios after summing to
-match the watershed area represented in `totalwatsed3`.
+receive localized totals, recomputes per-area ratios after summing, and derives
+`ash_vol_conc`, `sed+ash_vol_conc`, and `ash_black_pct_by_vol` from ash solids
+volume using ash-type bulk densities (from `Ash.meta` when available, else
+defaults).
+
+Division guard semantics follow implementation behavior in `totalwatsed3.py`:
+- Depth conversions from volume use safe division by `Area`; zero/absent area yields `0.0`.
+- `*_per_ha` ash ratios and volumetric concentration fields use safe division; zero denominator yields `0.0`.
+- Null-aware weighted optional terms (`TSMF`, `QRain`, `QSnow`) remain `null` when no valid contributing area is available.
 
 
 totalwatsed.py
