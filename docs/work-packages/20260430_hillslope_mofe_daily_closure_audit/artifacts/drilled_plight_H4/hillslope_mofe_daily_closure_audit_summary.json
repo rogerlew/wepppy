@@ -1,0 +1,269 @@
+{
+  "closure_reconstructed_with_enriched_storage_mm": {
+    "max_abs": 2.4500000000000006,
+    "p50": 6.394884621840902e-14,
+    "p90": 0.010000000000086384,
+    "p95": 0.010000000000231556,
+    "p99": 0.12999999999986747
+  },
+  "closure_reconstructed_with_enriched_storage_rain_melt_mm": {
+    "max_abs": 78.08999999999997,
+    "p50": 5.906386491005833e-14,
+    "p90": 0.01000000000014456,
+    "p95": 0.10000000000007246,
+    "p99": 12.233900000000084
+  },
+  "closure_reconstructed_with_storage_mm": {
+    "max_abs": 2.4500000000000006,
+    "p50": 6.394884621840902e-14,
+    "p90": 0.010000000000091047,
+    "p95": 0.010000000000303455,
+    "p99": 0.12999999999986747
+  },
+  "closure_reconstructed_with_storage_rain_melt_mm": {
+    "max_abs": 78.08999999999997,
+    "p50": 5.950795411990839e-14,
+    "p90": 0.010000000000149622,
+    "p95": 0.10000000000004935,
+    "p99": 12.23390000000004
+  },
+  "closure_reported_with_storage_mm": {
+    "max_abs": 2.4500000000000006,
+    "p50": 6.394884621840902e-14,
+    "p90": 0.010000000000091047,
+    "p95": 0.010000000000303455,
+    "p99": 0.12999999999986747
+  },
+  "closure_reported_with_storage_rain_melt_mm": {
+    "max_abs": 78.08999999999997,
+    "p50": 5.950795411990839e-14,
+    "p90": 0.010000000000149622,
+    "p95": 0.10000000000004935,
+    "p99": 12.23390000000004
+  },
+  "date_max": {
+    "day_of_month": 31,
+    "julian": 365,
+    "month": 12,
+    "year": 50
+  },
+  "date_min": {
+    "day_of_month": 1,
+    "julian": 1,
+    "month": 1,
+    "year": 1
+  },
+  "full_physical_closure": {
+    "closure_residual_mm": {
+      "max_abs": 78.08999999999989,
+      "p50": 5.931397707946532e-14,
+      "p90": 0.010000000000124167,
+      "p95": 0.09999999999992182,
+      "p99": 12.23390000000001
+    },
+    "closure_residual_pct_of_rm_total": 0.15759117108146198,
+    "closure_residual_total_mm": 92.17042702600021,
+    "implied_unresolved_term_interpretation": "positive_values_indicate_missing_sink_in_exported_terms_(for_example_interception_or_unexported_storage_terms)",
+    "implied_unresolved_term_mm": {
+      "max_abs": 78.08999999999989,
+      "p50": 5.931397707946532e-14,
+      "p90": 0.010000000000124167,
+      "p95": 0.09999999999992182,
+      "p99": 12.23390000000001
+    },
+    "known_inputs_mm": {
+      "max_abs": 191.5,
+      "p50": 0.0,
+      "p90": 10.400000000000002,
+      "p95": 19.197500000000037,
+      "p99": 40.83899999999994
+    },
+    "known_outputs_mm": {
+      "max_abs": 131.5074,
+      "p50": 2.9699999999999998,
+      "p90": 5.0,
+      "p95": 5.539610950000005,
+      "p99": 7.638145149999987
+    },
+    "max_abs_day": {
+      "audit_full_physical_closure_residual_mm": -78.08999999999989,
+      "day_of_month": 24,
+      "julian": 55,
+      "month": 2,
+      "year": 3
+    },
+    "max_abs_ofe_closure_residual_mm": {
+      "max_abs": 78.08999999999997,
+      "p50": 0.009999999999926956,
+      "p90": 0.04999999999999698,
+      "p95": 3.6017755500000534,
+      "p99": 18.89119999999991
+    },
+    "rows": 18262,
+    "soilwatertotal_missing_rows": 0,
+    "storage_basis": "SoilWaterTotal_plus_SnowWater",
+    "storage_delta_mm": {
+      "max_abs": 105.25999999999996,
+      "p50": -2.05,
+      "p90": 6.600000000000063,
+      "p95": 15.240000000000096,
+      "p99": 36.139500000000055
+    },
+    "uses_soilwatertotal": true
+  },
+  "max_reconstructed_runoff_mm": 129.11684104020077,
+  "max_reported_runoff_day": {
+    "day_of_month": 7,
+    "julian": 280,
+    "month": 10,
+    "precip_reported_mm": 191.5,
+    "rain_melt_reported_mm": 191.5,
+    "reconstructed_runoff_mm": 129.11684104020077,
+    "reported_runoff_mm": 129.11684104020077,
+    "runoff_consistency_mm": 0.0,
+    "sbrunv_calc_mm": 0.807728498319315,
+    "year": 42
+  },
+  "max_reported_runoff_mm": 129.11684104020077,
+  "max_runoff_to_precip_reconstructed_pct": 3505.1489867664495,
+  "max_runoff_to_precip_reported_pct": 3505.1489867664495,
+  "mofe_chain": {
+    "adjacent_chain_checks_interpretation": "diagnostic_when_applicability_unknown",
+    "days": 18262,
+    "first_ofe_nonzero_subrin_days": 0,
+    "first_ofe_nonzero_upstrmq_days": 0,
+    "first_ofe_subrin_mm": {
+      "max_abs": 0.0,
+      "p50": 0.0,
+      "p90": 0.0,
+      "p95": 0.0,
+      "p99": 0.0
+    },
+    "first_ofe_upstrmq_mm": {
+      "max_abs": 0.0,
+      "p50": 0.0,
+      "p90": 0.0,
+      "p95": 0.0,
+      "p99": 0.0
+    },
+    "max_abs_subsurface_transfer_day": null,
+    "max_abs_surface_transfer_day": null,
+    "rows": 0,
+    "runoff_pass_vs_outlet_qofe_residual_m3": {
+      "max_abs": 391.72882689836104,
+      "p50": 0.0,
+      "p90": 0.0,
+      "p95": 0.0,
+      "p99": 0.0
+    },
+    "strict_chain_invariants_applicability": "unknown_from_interchange",
+    "strict_chain_invariants_applicable": null,
+    "strict_chain_invariants_contract_scope": "non-channel_non-contour_only",
+    "subsurface_transfer_residual_m3": null,
+    "surface_transfer_residual_m3_geometry_sensitive": null
+  },
+  "n_ofe_max": 1,
+  "n_ofe_min": 1,
+  "rows": 18262,
+  "runoff_consistency_mm": {
+    "max_abs": 0.0,
+    "p50": 0.0,
+    "p90": 0.0,
+    "p95": 0.0,
+    "p99": 0.0
+  },
+  "soilwater_minus_fc_mm": {
+    "max_abs": 290.26,
+    "p50": 122.36999999999995,
+    "p90": 225.50900000000001,
+    "p95": 247.36500000000018,
+    "p99": 278.2539
+  },
+  "soilwater_minus_wp_mm": {
+    "max_abs": 546.55,
+    "p50": 378.65999999999985,
+    "p90": 481.7989999999999,
+    "p95": 503.6550000000001,
+    "p99": 534.5439
+  },
+  "soilwater_to_porosity_fraction": {
+    "max_abs": 0.9993657968474337,
+    "p50": 0.8057724017849934,
+    "p90": 0.9247016362441335,
+    "p95": 0.9499037164304742,
+    "p99": 0.9855216032655696
+  },
+  "soilwatertotal_vs_legacy_storage_mm": {
+    "max_abs": 0.010000000000331966,
+    "p50": 0.0,
+    "p90": 0.0,
+    "p95": 0.0,
+    "p99": 0.009999999999990905
+  },
+  "source": "/wc1/runs/dr/drilled-plight/wepp/output/interchange",
+  "sources": {
+    "element": "/wc1/runs/dr/drilled-plight/wepp/output/interchange/H.element.parquet",
+    "interchange_dir": "/wc1/runs/dr/drilled-plight/wepp/output/interchange",
+    "pass": "/wc1/runs/dr/drilled-plight/wepp/output/interchange/H.pass.parquet",
+    "soil": "/wc1/runs/dr/drilled-plight/wepp/output/interchange/H.soil.parquet",
+    "wat": "/wc1/runs/dr/drilled-plight/wepp/output/interchange/H.wat.parquet"
+  },
+  "topaz_id": null,
+  "wepp_id": 4,
+  "whole_run_closure": {
+    "closure_basis_diagnostic": "rain_melt",
+    "closure_basis_primary": "precipitation",
+    "closure_reconstructed_basic_total_mm": 423.16723852139285,
+    "closure_reconstructed_with_enriched_storage_pct_of_precip": 0.17158896596062895,
+    "closure_reconstructed_with_enriched_storage_pct_of_rain_melt": 0.17167430828088082,
+    "closure_reconstructed_with_enriched_storage_rain_melt_pct_of_rain_melt": 0.17167430828088082,
+    "closure_reconstructed_with_enriched_storage_rain_melt_total_mm": 100.4072385213929,
+    "closure_reconstructed_with_enriched_storage_total_mm": 100.35723852139304,
+    "closure_reconstructed_with_storage_pct_of_precip": 0.17158896596062895,
+    "closure_reconstructed_with_storage_pct_of_rain_melt": 0.17167430828088082,
+    "closure_reconstructed_with_storage_rain_melt_pct_of_rain_melt": 0.17167430828088082,
+    "closure_reconstructed_with_storage_rain_melt_total_mm": 100.4072385213929,
+    "closure_reconstructed_with_storage_total_mm": 100.35723852139304,
+    "closure_reported_basic_total_mm": 423.16723852139285,
+    "closure_reported_with_enriched_storage_pct_of_precip": 0.17158896596062895,
+    "closure_reported_with_enriched_storage_pct_of_rain_melt": 0.17167430828088082,
+    "closure_reported_with_enriched_storage_rain_melt_pct_of_rain_melt": 0.17167430828088082,
+    "closure_reported_with_enriched_storage_rain_melt_total_mm": 100.4072385213929,
+    "closure_reported_with_enriched_storage_total_mm": 100.35723852139304,
+    "closure_reported_with_storage_pct_of_precip": 0.17158896596062895,
+    "closure_reported_with_storage_pct_of_rain_melt": 0.17167430828088082,
+    "closure_reported_with_storage_rain_melt_pct_of_rain_melt": 0.17167430828088082,
+    "closure_reported_with_storage_rain_melt_total_mm": 100.4072385213929,
+    "closure_reported_with_storage_total_mm": 100.35723852139304,
+    "enriched_storage_available": true,
+    "enriched_storage_change_mm": 322.81000000000006,
+    "et_reconstructed_total_mm": 45099.62,
+    "et_reported_total_mm": 45099.62,
+    "lateral_reconstructed_total_mm": 5889.9800000000005,
+    "lateral_reported_total_mm": 5889.9800000000005,
+    "mean_abs_daily_closure_reconstructed_with_enriched_storage_mm": 0.008115605852953005,
+    "mean_abs_daily_closure_reconstructed_with_enriched_storage_rain_melt_mm": 0.7062498620997737,
+    "mean_abs_daily_closure_reconstructed_with_storage_mm": 0.008213506898275382,
+    "mean_abs_daily_closure_reconstructed_with_storage_rain_melt_mm": 0.7063400793330842,
+    "mean_abs_daily_closure_reported_with_enriched_storage_mm": 0.008115605852953005,
+    "mean_abs_daily_closure_reported_with_enriched_storage_rain_melt_mm": 0.7062498620997737,
+    "mean_abs_daily_closure_reported_with_storage_mm": 0.008213506898275382,
+    "mean_abs_daily_closure_reported_with_storage_rain_melt_mm": 0.7063400793330842,
+    "mean_daily_closure_reconstructed_with_storage_mm": 0.005495413345821544,
+    "mean_daily_closure_reported_with_storage_mm": 0.005495413345821544,
+    "percolation_reconstructed_total_mm": 4348.9000000000015,
+    "percolation_reported_total_mm": 4348.9000000000015,
+    "precip_total_mm": 58487.0,
+    "profile_order_fc_gt_porosity_days": 0,
+    "profile_order_wp_gt_fc_days": 0,
+    "profile_terms_available": true,
+    "rain_melt_total_mm": 58487.05,
+    "runoff_reconstructed_total_mm": 2725.3327614786062,
+    "runoff_reported_total_mm": 2725.3327614786062,
+    "soilwater_gt_porositycap_days": 0,
+    "soilwater_lt_wpstore_days": 0,
+    "soilwater_total_available": true,
+    "soilwatertotal_vs_legacy_max_abs_mm": 0.010000000000331966,
+    "storage_change_mm": 322.81000000000006
+  }
+}

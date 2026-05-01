@@ -59,7 +59,7 @@
 - Routine-level source-cause isolation remains a follow-up package in `wepp-forest`.
 
 ## Related Packages
-- **Related**: [20260430_hillslope_mofe_daily_closure_audit](../20260430_hillslope_mofe_daily_closure_audit/package.md)
+- **Related**: [20260430_hillslope_daily_closure_audit](../20260430_hillslope_daily_closure_audit/package.md)
 - **Related**: [20260429_uncapped_spectacular_totalwatsed3_runoff_reconciliation](../20260429_uncapped_spectacular_totalwatsed3_runoff_reconciliation/package.md)
 - **Related**: [20260422_jagged_hyperpigmentation_hillslope_ablation_queue](../20260422_jagged_hyperpigmentation_hillslope_ablation_queue/package.md)
 
