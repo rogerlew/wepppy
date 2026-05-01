@@ -188,10 +188,11 @@ def test_gridmet_multiple_build_delegates_to_service(
         *,
         build_observed_gridmet_interpolated_fn,
         ncpu: int,
-    ) -> None:
+    ) -> bool:
         captured["instance"] = instance
         captured["build_fn"] = build_observed_gridmet_interpolated_fn
         captured["ncpu"] = ncpu
+        return False
 
     climate.locked = types.MethodType(_noop_locked, climate)
     climate.set_attrs = _set_attrs
@@ -253,8 +254,19 @@ def test_gridmet_single_build_uses_normalized_observed_year_bounds(
         cli_fn: str,
         *,
         adjust_mx_pt5: bool,
+        silent_pass_observed_quality_guard: bool,
     ) -> None:
-        captured["build_args"] = (ws_lng, ws_lat, start_year, end_year, cli_dir, prn_fn, cli_fn, adjust_mx_pt5)
+        captured["build_args"] = (
+            ws_lng,
+            ws_lat,
+            start_year,
+            end_year,
+            cli_dir,
+            prn_fn,
+            cli_fn,
+            adjust_mx_pt5,
+            silent_pass_observed_quality_guard,
+        )
 
     climate.locked = types.MethodType(_noop_locked, climate)
     climate.set_attrs = _set_attrs
@@ -283,10 +295,124 @@ def test_gridmet_single_build_uses_normalized_observed_year_bounds(
 
     assert captured["attrs"] == {"mode": "gridmet"}
     assert captured["year_bounds_called"] is True
-    assert captured["build_args"] == (-116.2, 43.6, 1999, 2000, str(tmp_path), "ws.prn", "wepp.cli", False)
+    assert captured["build_args"] == (
+        -116.2,
+        43.6,
+        1999,
+        2000,
+        str(tmp_path),
+        "ws.prn",
+        "wepp.cli",
+        False,
+        True,
+    )
     assert climate.par_fn == "station.par"
     assert climate.cli_fn == "wepp.cli"
     assert climate.monthlies == [2.0] * 12
+
+
+def test_future_build_does_not_apply_observed_silent_pass_flag(
+    tmp_path: Path,
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    climate = _new_detached_climate(tmp_path, "tests.nodb.climate.facade.future_build")
+    captured: dict[str, object] = {}
+
+    @contextlib.contextmanager
+    def _noop_locked(_self):
+        yield
+
+    def _set_attrs(attrs):
+        captured["attrs"] = attrs
+
+    class _StationManager:
+        def __init__(self, version: str):
+            captured["station_db"] = version
+
+        def get_station_fromid(self, station_id: str):
+            captured["station_id"] = station_id
+            return types.SimpleNamespace(
+                par="station.par",
+                desc="Station",
+                longitude=-116.2,
+                latitude=43.6,
+            )
+
+    class _Cligen:
+        def __init__(self, _station_meta, wd: str):
+            captured["cligen_wd"] = wd
+
+    class _ClimateFile:
+        def __init__(self, path: str):
+            captured["climate_file_path"] = path
+
+        def calc_monthlies(self):
+            return [3.0] * 12
+
+    def _fake_build_future(
+        _cligen,
+        ws_lng: float,
+        ws_lat: float,
+        start_year: int,
+        end_year: int,
+        cli_dir: str,
+        prn_fn: str,
+        cli_fn: str,
+        *,
+        adjust_mx_pt5: bool,
+    ) -> None:
+        captured["build_args"] = (
+            ws_lng,
+            ws_lat,
+            start_year,
+            end_year,
+            cli_dir,
+            prn_fn,
+            cli_fn,
+            adjust_mx_pt5,
+        )
+
+    climate.locked = types.MethodType(_noop_locked, climate)
+    climate.set_attrs = _set_attrs
+    monkeypatch.setattr(
+        climate_module.Climate,
+        "watershed_instance",
+        property(
+            lambda _self: types.SimpleNamespace(
+                centroid=(-116.2, 43.6),
+                require_centroid=lambda: (-116.2, 43.6),
+            )
+        ),
+    )
+    monkeypatch.setattr(climate_module.Climate, "cli_dir", property(lambda _self: str(tmp_path)))
+    monkeypatch.setattr(climate_module.Climate, "cligen_db", property(lambda _self: "2015_stations.db"))
+    climate._climatestation = "STA-1"
+    climate._adjust_mx_pt5 = True
+    climate._silent_pass_observed_quality_guard = True
+    climate._future_start_year = 2030
+    climate._future_end_year = 2031
+
+    monkeypatch.setattr(climate_module, "CligenStationsManager", _StationManager)
+    monkeypatch.setattr(climate_module, "Cligen", _Cligen)
+    monkeypatch.setattr(climate_module, "ClimateFile", _ClimateFile)
+    monkeypatch.setattr(climate_module, "build_future", _fake_build_future)
+
+    climate._build_climate_future(attrs={"mode": "future"})
+
+    assert captured["attrs"] == {"mode": "future"}
+    assert captured["build_args"] == (
+        -116.2,
+        43.6,
+        2030,
+        2031,
+        str(tmp_path),
+        "ws.prn",
+        "wepp.cli",
+        True,
+    )
+    assert climate.par_fn == "station.par"
+    assert climate.cli_fn == "wepp.cli"
+    assert climate.monthlies == [3.0] * 12
 
 
 def test_depnexrad_build_delegates_to_helper(
@@ -368,10 +494,11 @@ def test_daymet_multiple_build_delegates_to_helper(
     climate = _new_detached_climate(tmp_path, "tests.nodb.climate.facade.daymet_multiple")
     captured: dict[str, object] = {}
 
-    def _fake_run(instance: Climate, *, verbose: bool = False, attrs=None) -> None:
+    def _fake_run(instance: Climate, *, verbose: bool = False, attrs=None) -> bool:
         captured["instance"] = instance
         captured["verbose"] = verbose
         captured["attrs"] = attrs
+        return False
 
     monkeypatch.setattr(climate_module, "run_observed_daymet_multiple_build", _fake_run)
 
@@ -382,3 +509,79 @@ def test_daymet_multiple_build_delegates_to_helper(
         "verbose": True,
         "attrs": {"mode": "daymet"},
     }
+
+
+def test_daymet_multiple_build_publishes_warning_state_from_helper(
+    tmp_path: Path,
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    climate = _new_detached_climate(tmp_path, "tests.nodb.climate.facade.daymet_multiple.warning")
+    published: list[bool] = []
+
+    monkeypatch.setattr(
+        climate_module,
+        "run_observed_daymet_multiple_build",
+        lambda *_args, **_kwargs: True,
+    )
+    climate._publish_quality_guard_bypass_warning_if_needed = lambda *_args, **kwargs: published.append(  # type: ignore[method-assign]
+        bool(kwargs.get("quality_guard_bypassed"))
+    )
+
+    climate._build_climate_observed_daymet_multiple(verbose=True, attrs={"mode": "daymet"})
+    assert published == [True]
+
+
+def test_gridmet_multiple_build_publishes_warning_state_from_service(
+    tmp_path: Path,
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    climate = _new_detached_climate(tmp_path, "tests.nodb.climate.facade.gridmet_multiple.warning")
+    captured: dict[str, object] = {}
+    published: list[bool] = []
+
+    @contextlib.contextmanager
+    def _noop_locked(_self):
+        yield
+
+    def _set_attrs(attrs):
+        captured["attrs"] = attrs
+
+    def _fake_build(*_args, **_kwargs) -> bool:
+        return True
+
+    climate.locked = types.MethodType(_noop_locked, climate)
+    climate.set_attrs = _set_attrs
+    climate._publish_quality_guard_bypass_warning_if_needed = lambda *_args, **kwargs: published.append(  # type: ignore[method-assign]
+        bool(kwargs.get("quality_guard_bypassed"))
+    )
+    monkeypatch.setattr(climate_module._CLIMATE_GRIDMET_MULTIPLE_BUILD_SERVICE, "build", _fake_build)
+
+    climate._build_climate_observed_gridmet_multiple(attrs={"mode": "gridmet"})
+    assert captured["attrs"] == {"mode": "gridmet"}
+    assert published == [True]
+
+
+def test_publish_quality_guard_bypass_warning_when_silent_pass_enabled(
+    tmp_path: Path,
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    climate = _new_detached_climate(tmp_path, "tests.nodb.climate.facade.quality_guard_warning")
+    climate._silent_pass_observed_quality_guard = True
+    expected_channel = f"{climate.runid}:climate"
+
+    logged_messages: list[str] = []
+    published: list[tuple[str, str]] = []
+
+    climate.logger.warning = lambda message: logged_messages.append(str(message))  # type: ignore[assignment]
+    monkeypatch.setattr(
+        climate_module.StatusMessenger,
+        "publish",
+        lambda channel, message: published.append((channel, message)),
+    )
+
+    cligen = types.SimpleNamespace(_last_observed_quality_guard_bypassed=True)
+    climate._publish_quality_guard_bypass_warning_if_needed(cligen)  # type: ignore[arg-type]
+
+    assert logged_messages
+    assert "CLIGEN failed to converge" in logged_messages[0]
+    assert published == [(expected_channel, logged_messages[0])]

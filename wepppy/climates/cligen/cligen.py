@@ -2189,9 +2189,10 @@ class Cligen:
         cli_fn: str = 'wepp.cli',
         verbose: bool = False,
         adjust_mx_pt5: bool = False,
+        silently_pass_quality_guard: bool = False,
         timeout: int = 20,
         timeout_retries: int = 3,
-    ) -> None:
+    ) -> bool:
         """Replay observed `.prn` data to produce a `.cli`.
 
         Args:
@@ -2201,12 +2202,21 @@ class Cligen:
             adjust_mx_pt5: When True, scale `MX .5 P` using observed monthly
                 precipitation ratios derived from the `.prn` file and write an
                 adjusted `.par` copy for CLIGEN.
+            silently_pass_quality_guard: When True, do not fail if the CLIGEN
+                log contains known convergence-quality guard markers. The
+                generated CLI is preserved and downstream callers decide whether
+                to continue.
             timeout: Seconds to wait for each CLIGEN attempt.
             timeout_retries: Number of timeout-only retries before failing.
+
+        Returns:
+            ``True`` if quality-guard markers were detected and bypassed due to
+            ``silently_pass_quality_guard=True``; otherwise ``False``.
         """
 
         if verbose:
             print("running observed")
+        quality_guard_bypassed = False
 
         if self.cliver not in ['5.2', '5.3', '5.3.2']:
             raise NotImplementedError('Cligen version must be greater than 5')
@@ -2406,13 +2416,24 @@ class Cligen:
 
         quality_markers = _run_observed_quality_failure_markers(log_text)
         if quality_markers:
-            if _exists(cli_path):
-                os.remove(cli_path)
-            raise RuntimeError(
-                f"cligen run_observed quality guard tripped; "
-                f"cli_fn={cli_fn}; prn_fn={prn_fn}; markers={quality_markers}; "
-                f"log_tail={_tail(log_text, 12)!r}"
-            )
+            if silently_pass_quality_guard:
+                quality_guard_bypassed = True
+                _LOGGER.warning(
+                    "cligen run_observed quality guard bypassed; cli_fn=%s prn_fn=%s markers=%s log_tail=%r",
+                    cli_fn,
+                    prn_fn,
+                    quality_markers,
+                    _tail(log_text, 12),
+                )
+            else:
+                if _exists(cli_path):
+                    os.remove(cli_path)
+                raise RuntimeError(
+                    f"cligen run_observed quality guard tripped; "
+                    f"cli_fn={cli_fn}; prn_fn={prn_fn}; markers={quality_markers}; "
+                    f"log_tail={_tail(log_text, 12)!r}"
+                )
+        return quality_guard_bypassed
 
 
 def _tail(s: str, n: int = 80) -> str:

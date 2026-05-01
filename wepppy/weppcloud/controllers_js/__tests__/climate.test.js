@@ -128,6 +128,7 @@ describe("Climate controller", () => {
 
                 <input id="checkbox_use_gridmet_wind_when_applicable" type="checkbox" data-climate-action="gridmet-wind">
                 <input id="checkbox_adjust_mx_pt5" type="checkbox" data-climate-action="adjust-mx-pt5">
+                <input id="checkbox_silent_pass_observed_quality_guard" type="checkbox" data-climate-action="silent-pass-observed-quality-guard">
                 <input id="observed_start_year" name="observed_start_year" type="text" value="">
                 <input id="observed_end_year" name="observed_end_year" type="text" value="">
                 <input id="future_start_year" name="future_start_year" type="text" value="">
@@ -463,6 +464,25 @@ describe("Climate controller", () => {
 
         expect(postJsonMock).toHaveBeenCalledWith(
             "tasks/set_adjust_mx_pt5/",
+            expect.objectContaining({ state: true }),
+            expect.objectContaining({ form: expect.any(HTMLFormElement) })
+        );
+        expect(handler).toHaveBeenCalledWith({ state: true });
+    });
+
+    test("silent-pass checkbox posts JSON and emits event", async () => {
+        const handler = jest.fn();
+        climate.events.on("climate:silent-pass-observed-quality-guard:updated", handler);
+
+        const checkbox = document.getElementById("checkbox_silent_pass_observed_quality_guard");
+        checkbox.checked = true;
+        checkbox.dispatchEvent(new Event("change", { bubbles: true }));
+
+        await Promise.resolve();
+        await Promise.resolve();
+
+        expect(postJsonMock).toHaveBeenCalledWith(
+            "tasks/set_silent_pass_observed_quality_guard/",
             expect.objectContaining({ state: true }),
             expect.objectContaining({ form: expect.any(HTMLFormElement) })
         );

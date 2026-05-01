@@ -117,6 +117,7 @@ from pyproj import Proj
 from wepppy.nodb.base import NoDbBase, TriggerEvents, nodb_setter
 from wepppy.nodb.locales.climate_catalog import DAYMET_LAST_AVAILABLE_YEAR
 from wepppy.nodb.redis_prep import RedisPrep, TaskEnum
+from wepppy.nodb.status_messenger import StatusMessenger
 
 import wepppyo3
 from wepppyo3.climate import cli_revision as pyo3_cli_revision
@@ -213,6 +214,11 @@ _CLIMATE_BUILD_ROUTER = ClimateBuildRouter(
     mode_build_services=_CLIMATE_MODE_BUILD_SERVICES,
     scaling_service=_CLIMATE_SCALING_SERVICE,
     artifact_export_service=_CLIMATE_ARTIFACT_EXPORT_SERVICE,
+)
+
+_CLIGEN_QUALITY_GUARD_WARNING_MESSAGE = (
+    "CLIGEN failed to converge, continuing because silent-pass is enabled. "
+    "Try selecting different station or setting Adjust MX .5 P Values"
 )
 
 class ClimateSummary(object):
@@ -485,6 +491,11 @@ class Climate(NoDbBase):
                 'use_gridmet_wind_when_applicable',
             )
             self._adjust_mx_pt5 = self.config_get_bool('climate', 'adjust_mx_pt5', False)
+            self._silent_pass_observed_quality_guard = self.config_get_bool(
+                'climate',
+                'silent_pass_observed_quality_guard',
+                True,
+            )
             self._catalog_id = None
             self._user_station_meta = None
 
@@ -499,6 +510,10 @@ class Climate(NoDbBase):
     @property
     def adjust_mx_pt5(self) -> bool:
         return getattr(self, '_adjust_mx_pt5', False)
+
+    @property
+    def silent_pass_observed_quality_guard(self) -> bool:
+        return getattr(self, '_silent_pass_observed_quality_guard', True)
 
     @property
     def catalog_id(self) -> Optional[str]:
@@ -518,6 +533,11 @@ class Climate(NoDbBase):
     @nodb_setter
     def adjust_mx_pt5(self, value: bool) -> None:
         self._adjust_mx_pt5 = value
+
+    @silent_pass_observed_quality_guard.setter
+    @nodb_setter
+    def silent_pass_observed_quality_guard(self, value: bool) -> None:
+        self._silent_pass_observed_quality_guard = value
 
     @property
     def precip_scale_reference(self) -> Optional[str]:
@@ -705,6 +725,35 @@ class Climate(NoDbBase):
         self._observed_start_year = start_year
         self._observed_end_year = end_year
         return start_year, end_year
+
+    def _publish_quality_guard_bypass_warning_if_needed(
+        self,
+        cligen: Optional[Cligen] = None,
+        *,
+        quality_guard_bypassed: Optional[bool] = None,
+    ) -> None:
+        if not self.silent_pass_observed_quality_guard:
+            return
+        if quality_guard_bypassed is None:
+            if cligen is None:
+                return
+            quality_guard_bypassed = bool(
+                getattr(cligen, "_last_observed_quality_guard_bypassed", False)
+            )
+        if not quality_guard_bypassed:
+            return
+
+        self.logger.warning(_CLIGEN_QUALITY_GUARD_WARNING_MESSAGE)
+        try:
+            StatusMessenger.publish(f"{self.runid}:climate", _CLIGEN_QUALITY_GUARD_WARNING_MESSAGE)
+        except Exception:
+            # Boundary-only telemetry safeguard: keep climate generation successful
+            # even when Redis status publishing is transiently unavailable.
+            self.logger.debug(
+                "Unable to publish climate warning status message",
+                extra={"runid": self.runid},
+                exc_info=True,
+            )
 
     @property
     def future_start_year(self) -> Union[str, int]:
@@ -1415,7 +1464,9 @@ class Climate(NoDbBase):
             
             build_observed_daymet(cligen, ws_lng, ws_lat, start_year, end_year, cli_dir, prn_fn, cli_fn,
                                   gridmet_wind=self.use_gridmet_wind_when_applicable,
-                                  adjust_mx_pt5=self.adjust_mx_pt5)
+                                  adjust_mx_pt5=self.adjust_mx_pt5,
+                                  silent_pass_observed_quality_guard=self.silent_pass_observed_quality_guard)
+            self._publish_quality_guard_bypass_warning_if_needed(cligen)
 
             climate = ClimateFile(_join(cli_dir, cli_fn))
             self.monthlies = climate.calc_monthlies()
@@ -1426,14 +1477,22 @@ class Climate(NoDbBase):
         with self.locked():
             self.set_attrs(attrs)
             self.logger.info('  running _build_climate_observed_gridmet_multiple')
-            _CLIMATE_GRIDMET_MULTIPLE_BUILD_SERVICE.build(
+            quality_guard_bypassed = _CLIMATE_GRIDMET_MULTIPLE_BUILD_SERVICE.build(
                 self,
                 build_observed_gridmet_interpolated_fn=build_observed_gridmet_interpolated,
                 ncpu=NCPU,
             )
+            self._publish_quality_guard_bypass_warning_if_needed(
+                quality_guard_bypassed=quality_guard_bypassed
+            )
 
     def _build_climate_observed_daymet_multiple(self, verbose: bool = False, attrs: Optional[Dict[str, Any]] = None) -> None:
-        run_observed_daymet_multiple_build(self, verbose=verbose, attrs=attrs)
+        quality_guard_bypassed = run_observed_daymet_multiple_build(
+            self, verbose=verbose, attrs=attrs
+        )
+        self._publish_quality_guard_bypass_warning_if_needed(
+            quality_guard_bypassed=quality_guard_bypassed
+        )
 
     def _build_climate_observed_gridmet(self, verbose: bool = False, attrs: Optional[Dict[str, Any]] = None) -> None:
         with self.locked():
@@ -1462,7 +1521,9 @@ class Climate(NoDbBase):
             build_observed_gridmet(
                 cligen, ws_lng, ws_lat, start_year, end_year, cli_dir, prn_fn, cli_fn,
                 adjust_mx_pt5=self.adjust_mx_pt5,
+                silent_pass_observed_quality_guard=self.silent_pass_observed_quality_guard,
             )
+            self._publish_quality_guard_bypass_warning_if_needed(cligen)
 
             climate = ClimateFile(_join(cli_dir, cli_fn))
             self.monthlies = climate.calc_monthlies()

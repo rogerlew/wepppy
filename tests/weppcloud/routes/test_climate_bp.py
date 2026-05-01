@@ -63,6 +63,7 @@ def climate_client(monkeypatch: pytest.MonkeyPatch, tmp_path: Path):
             self.set_cli_calls = 0
             self.use_gridmet_wind_when_applicable = False
             self.adjust_mx_pt5 = False
+            self.silent_pass_observed_quality_guard = False
             self.climatestation_par_contents = "PAR DATA"
             self.climate_mode = ClimateMode.Vanilla
             self.catalog_id = "dataset_a"
@@ -225,3 +226,18 @@ def test_task_set_adjust_mx_pt5_updates_flag(climate_client):
     controller = climate_cls.getInstance(str(run_dir))
     assert controller.adjust_mx_pt5 is True
 
+
+def test_task_set_silent_pass_observed_quality_guard_updates_flag(climate_client):
+    client, climate_cls, run_dir = climate_client
+
+    response = client.post(
+        f"/runs/{RUN_ID}/{CONFIG}/tasks/set_silent_pass_observed_quality_guard/",
+        json={"state": True},
+    )
+
+    assert response.status_code == 200
+    payload = response.get_json()
+    assert payload == {}
+
+    controller = climate_cls.getInstance(str(run_dir))
+    assert controller.silent_pass_observed_quality_guard is True

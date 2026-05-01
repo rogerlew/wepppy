@@ -22,7 +22,8 @@ var Climate = (function () {
         "climate:upload:completed",
         "climate:upload:failed",
         "climate:gridmet:updated",
-        "climate:mxpt5:updated"
+        "climate:mxpt5:updated",
+        "climate:silent-pass-observed-quality-guard:updated"
     ];
 
     function ensureHelpers() {
@@ -300,6 +301,7 @@ var Climate = (function () {
         climate.buildModeRadios = dom.qsa("input[name=\"climate_build_mode\"]", formElement);
         climate.gridmetCheckbox = dom.qs("#checkbox_use_gridmet_wind_when_applicable");
         climate.adjustMxPt5Checkbox = dom.qs("#checkbox_adjust_mx_pt5");
+        climate.silentPassQualityGuardCheckbox = dom.qs("#checkbox_silent_pass_observed_quality_guard");
 
         climate.sectionNodes = dom.qsa("[data-climate-section]", formElement);
         climate.precipSections = dom.qsa("[data-precip-section]", formElement);
@@ -1174,6 +1176,23 @@ var Climate = (function () {
                 });
         };
 
+        climate.set_silent_pass_observed_quality_guard = function (state) {
+            var normalizedState = Boolean(state);
+            statusAdapter.html("Setting silent_pass_observed_quality_guard (" + normalizedState + ")...");
+            stacktraceAdapter.text("");
+
+            http.postJson(url_for_run("tasks/set_silent_pass_observed_quality_guard/"), { state: normalizedState }, { form: formElement })
+                .then(function () {
+                    var message = "silent_pass_observed_quality_guard updated.";
+                    statusAdapter.html(message);
+                    climate.appendStatus(message);
+                    climate.events.emit("climate:silent-pass-observed-quality-guard:updated", { state: normalizedState });
+                })
+                .catch(function (error) {
+                    handleError(error);
+                });
+        };
+
         climate.setBuildMode = function (mode, options) {
             var opts = options || {};
             var parsedMode = parseInteger(mode, 0);
@@ -1299,6 +1318,12 @@ var Climate = (function () {
                 event.preventDefault();
                 var checked = matched ? matched.checked : false;
                 climate.set_adjust_mx_pt5(checked);
+            }));
+
+            climate._delegates.push(dom.delegate(formElement, "change", "[data-climate-action=\"silent-pass-observed-quality-guard\"]", function (event, matched) {
+                event.preventDefault();
+                var checked = matched ? matched.checked : false;
+                climate.set_silent_pass_observed_quality_guard(checked);
             }));
 
             climate._delegates.push(dom.delegate(formElement, "change", "[data-climate-action=\"build-mode\"]", function (event, matched) {

@@ -424,6 +424,23 @@ Advanced options are visible for non-Tenerife station-catalog workflows.
 **Important behavior details**
 - Scaling is constrained in code (clamped to a bounded factor range).
 - Very low-precipitation months can be skipped by adjustment logic.
+- If CLIGEN still fails to converge, the run surfaces: `CLIGEN failed to converge, try selecting different station or setting Adjust MX .5 P Values`.
+
+## Silent-pass observed quality guard
+
+**Function**
+- Toggles `silent_pass_observed_quality_guard` for observed CLIGEN build paths.
+
+**Purpose**
+- When enabled, WEPPcloud keeps the generated `.cli` even if CLIGEN logs quality-guard convergence markers.
+
+**Recommended use cases**
+- Advanced troubleshooting when you need a run to continue and can review warning context in the status panel.
+
+**Important behavior details**
+- Default is enabled (`true`), so climate build continues when CLIGEN quality-guard markers are detected.
+- When this bypass occurs, WEPPcloud publishes a warning to the climate status stream.
+- Disable this option if you want quality-guard failures to stop the build with a user-facing convergence message.
 
 ## Post-CLIGEN precipitation scaling modes
 

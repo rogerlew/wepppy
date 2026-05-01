@@ -41,6 +41,7 @@ cligen_db = "2015_stations.db"
 daymet_observed  = "daymet/v4"
 use_gridmet_wind_when_applicable = true
 adjust_mx_pt5 = false
+silent_pass_observed_quality_guard = true
 
 [disturbed]
 sol_ver=7778

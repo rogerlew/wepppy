@@ -21,9 +21,9 @@ class ClimateGridmetMultipleBuildService:
         self,
         climate: "Climate",
         *,
-        build_observed_gridmet_interpolated_fn: Callable[..., str],
+        build_observed_gridmet_interpolated_fn: Callable[..., tuple[str, bool]],
         ncpu: int,
-    ) -> None:
+    ) -> bool:
         (
             measure_enum,
             retrieve_nc,
@@ -85,7 +85,7 @@ class ClimateGridmetMultipleBuildService:
             ncpu=ncpu,
         )
 
-        sub_par_fns, sub_cli_fns, cli_fn = self._build_interpolated_cli_files(
+        sub_par_fns, sub_cli_fns, cli_fn, any_quality_guard_bypassed = self._build_interpolated_cli_files(
             climate=climate,
             watershed=watershed,
             cligen=cligen,
@@ -104,6 +104,7 @@ class ClimateGridmetMultipleBuildService:
         climate.par_fn = par_fn
         climate.sub_par_fns = sub_par_fns
         climate.sub_cli_fns = sub_cli_fns
+        return any_quality_guard_bypassed
 
     @staticmethod
     def _load_gridmet_client_functions() -> tuple[Any, Any, Any, Any, Any]:
@@ -311,12 +312,13 @@ class ClimateGridmetMultipleBuildService:
         start_year: int,
         end_year: int,
         cli_dir: str,
-        build_observed_gridmet_interpolated_fn: Callable[..., str],
+        build_observed_gridmet_interpolated_fn: Callable[..., tuple[str, bool]],
         ncpu: int,
-    ) -> tuple[dict[Any, str], dict[Any, str], str]:
+    ) -> tuple[dict[Any, str], dict[Any, str], str, bool]:
         sub_par_fns: dict[Any, str] = {}
         sub_cli_fns: dict[Any, str] = {}
         cli_fn = "wepp.cli"
+        any_quality_guard_bypassed = False
 
         with ProcessPoolExecutor(max_workers=ncpu) as executor:
             futures = []
@@ -339,6 +341,7 @@ class ClimateGridmetMultipleBuildService:
                         _cli_fn,
                         _prn_fn,
                         adjust_mx_pt5=climate.adjust_mx_pt5,
+                        silent_pass_observed_quality_guard=climate.silent_pass_observed_quality_guard,
                     )
                 )
 
@@ -360,10 +363,15 @@ class ClimateGridmetMultipleBuildService:
                     cli_fn,
                     ws_prn_fn,
                     adjust_mx_pt5=climate.adjust_mx_pt5,
+                    silent_pass_observed_quality_guard=climate.silent_pass_observed_quality_guard,
                 )
             )
 
-            def _on_done(completed_topaz: Any) -> None:
+            def _on_done(result: Any) -> None:
+                nonlocal any_quality_guard_bypassed
+                completed_topaz, bypassed = self._normalize_interpolated_build_result(result)
+                if bypassed:
+                    any_quality_guard_bypassed = True
                 climate.logger.info(f"  climate for {completed_topaz} done.")
 
             self._wait_for_futures(
@@ -375,7 +383,14 @@ class ClimateGridmetMultipleBuildService:
                 executor=executor,
             )
 
-        return sub_par_fns, sub_cli_fns, cli_fn
+        return sub_par_fns, sub_cli_fns, cli_fn, any_quality_guard_bypassed
+
+    @staticmethod
+    def _normalize_interpolated_build_result(result: Any) -> tuple[Any, bool]:
+        if isinstance(result, tuple) and len(result) == 2:
+            topaz_id, bypassed = result
+            return topaz_id, bool(bypassed)
+        return result, False
 
     @staticmethod
     def _wait_for_futures(

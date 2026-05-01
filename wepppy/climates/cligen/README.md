@@ -38,6 +38,7 @@
 - **Cligen runner**
   - `Cligen` ties everything together. Given a `StationMeta` and working directory it copies or localizes the `.par`, feeds CLIGEN 4.3/5.2/5.3/5.3.2 binaries (bundled under `bin/`), enforces timeouts (`_run_cligen_posix`), and produces `.cli` files for multi-year or observed runs.
   - `Cligen.run_observed()` can optionally rescale `MX .5 P` using monthly means inferred from the `.prn` (see the `adjust_mx_pt5` section below). When enabled, it writes a dedicated adjusted `.par` and uses that file for the CLIGEN run.
+  - `Cligen.run_observed()` also supports `silently_pass_quality_guard=True` for callers that need to keep generated `.cli` output even when the CLIGEN log contains known quality-failure markers.
   - `par_mod()` is the high-level localization workflow: pull monthly means from PRISM/EOBS/AGDC, recompute wet-day probabilities (optionally Daymet-driven), optionally scale `MX .5 P` by the monthly precipitation ratio, rewrite the `.par`, and run CLIGEN in-place. It returns the simulated monthlies for quick QA.
 - **NullStation utility**
   - Provides a sentinel `StationMeta` when no catalog entry exists so calling code can still render UI elements without null checks.
@@ -73,6 +74,7 @@ This optional adjustment rescales `MX .5 P` to better match localized/observed m
 **Developer guidance**
 - `par_mod()` (`wepppy/climates/cligen/cligen.py`) applies the scaling when building localized PRISM/EOBS/AGDC climates. It uses the ratio of localized monthly totals to station monthly totals and rewrites the `.par` in-place.
 - `Cligen.run_observed()` computes monthly means from the `.prn` and writes a **new** adjusted `.par` named `{station}_mxpt5_{cli_stem}.par` in the working directory. The original `.par` is left untouched; the adjusted copy is passed to CLIGEN.
+- When `silently_pass_quality_guard=False` (default), `run_observed()` deletes the generated `.cli` and raises `RuntimeError` if known convergence-quality markers are detected in `cligen_*.log`. Setting `silently_pass_quality_guard=True` keeps the `.cli` and logs a warning instead.
 - The adjustment only affects the `MX .5 P` line. It does **not** recompute `MEAN P` because observed runs derive daily precipitation directly from the `.prn`; keeping the original means avoids unintended metadata churn. If you want `MEAN P` aligned for reporting, update line 3 in the `.par` as a follow-on step.
 
 ## Single-Storm Builder (`single_storm.py`)

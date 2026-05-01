@@ -442,6 +442,13 @@
            help="Scales monthly MX .5 P values using localized precipitation totals.",
            attrs={"class": "disable-readonly", "data-climate-action": "adjust-mx-pt5"}
          ) }}
+      {{ ui.checkbox_field(
+           "checkbox_silent_pass_observed_quality_guard",
+           "Silent-pass observed quality guard",
+           checked=climate.silent_pass_observed_quality_guard,
+           help="Keeps the generated CLI when CLIGEN quality checks fail and surfaces a warning in the status panel.",
+           attrs={"class": "disable-readonly", "data-climate-action": "silent-pass-observed-quality-guard"}
+         ) }}
     </section>
 
     {% set precip_mode = climate.precip_scaling_mode.value %}

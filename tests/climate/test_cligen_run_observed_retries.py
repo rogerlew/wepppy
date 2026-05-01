@@ -262,3 +262,26 @@ def test_run_observed_exit_zero_with_quality_errors_fails(monkeypatch, tmp_path)
     assert "failed sn sd test" in message
     assert "could not produce desired level of quality" in message
     assert not cli_path.exists()
+
+
+def test_run_observed_exit_zero_with_quality_errors_can_silently_pass(monkeypatch, tmp_path):
+    cligen = _make_cligen(tmp_path, monkeypatch)
+    cli_path = tmp_path / "observed.cli"
+
+    def _fake_popen(*args, **kwargs):
+        log_fp = kwargs["stdout"]
+        log_fp.write("Failed SN SD test.\n")
+        log_fp.write("*** ERROR *** Could not produce desired level of quality in\n")
+        log_fp.flush()
+        return _FakeObservedProcess({"returncode": 0, "cli_text": "complete\n"}, cli_path)
+
+    monkeypatch.setattr(cligen_module.subprocess, "Popen", _fake_popen)
+
+    bypassed = cligen.run_observed(
+        "observed.prn",
+        cli_fn="observed.cli",
+        silently_pass_quality_guard=True,
+    )
+
+    assert bypassed is True
+    assert cli_path.exists()

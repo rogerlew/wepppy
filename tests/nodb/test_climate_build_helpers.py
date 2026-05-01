@@ -49,6 +49,7 @@ class _ClimateStub:
         self._input_years = 0
         self._cligen_seed = None
         self.adjust_mx_pt5 = False
+        self.silent_pass_observed_quality_guard = False
         self.use_gridmet_wind_when_applicable = False
         self.monthlies = None
         self.par_fn = None
@@ -115,6 +116,59 @@ class _ExecutorStub:
 
     def shutdown(self, *, wait: bool, cancel_futures: bool) -> None:
         self.shutdown_args = (wait, cancel_futures)
+
+
+class _ObservedRunCligenStub:
+    def __init__(self, *, raises: Exception | None = None, bypassed: bool = False) -> None:
+        self.raises = raises
+        self.bypassed = bypassed
+        self.calls: list[tuple[str, str, bool, bool]] = []
+
+    def run_observed(
+        self,
+        prn_fn: str,
+        *,
+        cli_fn: str,
+        adjust_mx_pt5: bool,
+        silently_pass_quality_guard: bool,
+    ) -> bool:
+        self.calls.append((prn_fn, cli_fn, adjust_mx_pt5, silently_pass_quality_guard))
+        if self.raises is not None:
+            raise self.raises
+        return self.bypassed
+
+
+def test_run_observed_with_quality_guard_handling_translates_failure_message() -> None:
+    cligen = _ObservedRunCligenStub(
+        raises=RuntimeError(
+            "cligen run_observed quality guard tripped; markers=['failed sn sd test']"
+        )
+    )
+
+    with pytest.raises(RuntimeError, match="CLIGEN failed to converge"):
+        helper_module._run_observed_with_quality_guard_handling(
+            cligen,
+            "ws.prn",
+            "wepp.cli",
+            adjust_mx_pt5=False,
+            silent_pass_observed_quality_guard=False,
+        )
+
+
+def test_run_observed_with_quality_guard_handling_passes_silent_flag_and_records_bypass() -> None:
+    cligen = _ObservedRunCligenStub(bypassed=True)
+
+    bypassed = helper_module._run_observed_with_quality_guard_handling(
+        cligen,
+        "ws.prn",
+        "wepp.cli",
+        adjust_mx_pt5=True,
+        silent_pass_observed_quality_guard=True,
+    )
+
+    assert bypassed is True
+    assert cligen.calls == [("ws.prn", "wepp.cli", True, True)]
+    assert getattr(cligen, "_last_observed_quality_guard_bypassed") is True
 
 
 def test_cap_ncpu_limits_to_24() -> None:
@@ -301,6 +355,23 @@ def test_wait_for_daymet_futures_cancels_and_shutdowns_on_error(
     assert executor.shutdown_args == (False, True)
 
 
+def test_wait_for_daymet_futures_tracks_quality_guard_bypass(
+    tmp_path: Path,
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    climate = _ClimateStub(tmp_path)
+    done1 = _FutureStub(value=("1", False), done=True)
+    done2 = _FutureStub(value=("ws", True), done=True)
+
+    def _fake_wait(pending, *_args, **_kwargs):
+        return set(pending), set()
+
+    monkeypatch.setattr(helper_module, "wait", _fake_wait)
+
+    bypassed = helper_module._wait_for_daymet_futures(climate, [done1, done2], _ExecutorStub())
+    assert bypassed is True
+
+
 def test_run_observed_daymet_multiple_build_sets_final_outputs(
     tmp_path: Path,
     monkeypatch: pytest.MonkeyPatch,
@@ -344,12 +415,13 @@ def test_run_observed_daymet_multiple_build_sets_final_outputs(
         "_submit_daymet_futures",
         lambda *_args, **_kwargs: ([], {"1": "a.prn"}, {"1": "a.cli"}, "wepp.cli"),
     )
-    monkeypatch.setattr(helper_module, "_wait_for_daymet_futures", lambda *_args, **_kwargs: None)
+    monkeypatch.setattr(helper_module, "_wait_for_daymet_futures", lambda *_args, **_kwargs: True)
     monkeypatch.setattr(helper_module, "ClimateFile", _MonthliesClimateFile)
 
-    helper_module.run_observed_daymet_multiple_build(climate, attrs={"mode": "daymet"})
+    bypassed = helper_module.run_observed_daymet_multiple_build(climate, attrs={"mode": "daymet"})
 
     assert captured_executor_workers == [7]
+    assert bypassed is True
     assert climate.attrs_seen == [{"mode": "daymet"}]
     assert climate.monthlies == [1.0] * 12
     assert climate.cli_fn == "wepp.cli"

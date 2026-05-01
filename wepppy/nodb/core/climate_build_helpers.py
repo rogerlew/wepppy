@@ -51,6 +51,44 @@ def _cap_ncpu(raw_ncpu: int) -> int:
 NCPU = _cap_ncpu(NCPU)
 
 
+CLIGEN_OBSERVED_QUALITY_GUARD_USER_MESSAGE = (
+    "CLIGEN failed to converge, try selecting different station or setting Adjust MX .5 P Values"
+)
+
+
+def _is_cligen_observed_quality_guard_error(exc: RuntimeError) -> bool:
+    return "cligen run_observed quality guard tripped" in str(exc).lower()
+
+
+def _run_observed_with_quality_guard_handling(
+    cligen: "Cligen",
+    prn_fn: str,
+    cli_fn: str,
+    *,
+    adjust_mx_pt5: bool,
+    silent_pass_observed_quality_guard: bool,
+) -> bool:
+    try:
+        quality_guard_bypassed = bool(
+            cligen.run_observed(
+            prn_fn,
+            cli_fn=cli_fn,
+            adjust_mx_pt5=adjust_mx_pt5,
+            silently_pass_quality_guard=silent_pass_observed_quality_guard,
+            )
+        )
+        setattr(cligen, "_last_observed_quality_guard_bypassed", quality_guard_bypassed)
+        return quality_guard_bypassed
+    except RuntimeError as exc:
+        setattr(cligen, "_last_observed_quality_guard_bypassed", False)
+        if (
+            not silent_pass_observed_quality_guard
+            and _is_cligen_observed_quality_guard_error(exc)
+        ):
+            raise RuntimeError(CLIGEN_OBSERVED_QUALITY_GUARD_USER_MESSAGE) from exc
+        raise
+
+
 def lng_lat_to_pixel_center(
     lng: float,
     lat: float,
@@ -140,6 +178,7 @@ def build_observed_prism(
     cli_fn: str,
     gridmet_wind: bool = True,
     adjust_mx_pt5: bool = False,
+    silent_pass_observed_quality_guard: bool = False,
 ) -> None:
     df = prism_retrieve_historical_timeseries(lng, lat, start_year, end_year, gridmet_wind=gridmet_wind)
     df_to_prn(df, _join(cli_dir, prn_fn), "ppt(mm)", "tmax(degc)", "tmin(degc)")
@@ -147,7 +186,13 @@ def build_observed_prism(
     max_retries = 3
     for retry in range(max_retries):
         try:
-            cligen.run_observed(prn_fn, cli_fn=cli_fn, adjust_mx_pt5=adjust_mx_pt5)
+            _run_observed_with_quality_guard_handling(
+                cligen,
+                prn_fn,
+                cli_fn,
+                adjust_mx_pt5=adjust_mx_pt5,
+                silent_pass_observed_quality_guard=silent_pass_observed_quality_guard,
+            )
             break
         except AssertionError:
             if retry == max_retries - 1:
@@ -188,6 +233,7 @@ def build_observed_daymet(
     cli_fn: str,
     gridmet_wind: bool = True,
     adjust_mx_pt5: bool = False,
+    silent_pass_observed_quality_guard: bool = False,
 ) -> None:
     from wepppy.climates.daymet import retrieve_historical_timeseries as daymet_retrieve_historical_timeseries
 
@@ -198,7 +244,13 @@ def build_observed_daymet(
     max_retries = 3
     for retry in range(max_retries):
         try:
-            cligen.run_observed(prn_fn, cli_fn=cli_fn, adjust_mx_pt5=adjust_mx_pt5)
+            _run_observed_with_quality_guard_handling(
+                cligen,
+                prn_fn,
+                cli_fn,
+                adjust_mx_pt5=adjust_mx_pt5,
+                silent_pass_observed_quality_guard=silent_pass_observed_quality_guard,
+            )
             break
         except AssertionError:
             if retry == max_retries - 1:
@@ -233,14 +285,22 @@ def build_observed_daymet_interpolated(
     wind_vs: Optional[Any] = None,
     wind_dir: Optional[Any] = None,
     adjust_mx_pt5: bool = False,
-) -> str:
+    silent_pass_observed_quality_guard: bool = False,
+) -> tuple[str, bool]:
     _parquet_fn = f"daymet_observed_{topaz_id}_{start_year}-{end_year}.parquet"
     df = pd.read_parquet(_join(cli_dir, _parquet_fn))
 
     attempts = 3
+    quality_guard_bypassed = False
     for attempt in range(attempts):
         try:
-            cligen.run_observed(prn_fn, cli_fn=cli_fn, adjust_mx_pt5=adjust_mx_pt5)
+            quality_guard_bypassed = _run_observed_with_quality_guard_handling(
+                cligen,
+                prn_fn,
+                cli_fn,
+                adjust_mx_pt5=adjust_mx_pt5,
+                silent_pass_observed_quality_guard=silent_pass_observed_quality_guard,
+            )
             break
         except AssertionError:
             if attempt == attempts - 1:
@@ -260,7 +320,7 @@ def build_observed_daymet_interpolated(
         climate.replace_var("w-dir", dates, wind_dir)
 
     climate.write(cli_path)
-    return topaz_id
+    return topaz_id, bool(quality_guard_bypassed)
 
 
 def build_observed_snotel(
@@ -275,6 +335,7 @@ def build_observed_snotel(
     cli_fn: str,
     gridmet_supplement: bool = True,
     adjust_mx_pt5: bool = False,
+    silent_pass_observed_quality_guard: bool = False,
 ) -> None:
     snotel_data_dir = "/workdir/wepppy/wepppy/climates/snotel/processed"
     df = pd.read_csv(_join(snotel_data_dir, f"{snotel_id}.csv"), parse_dates=[0], na_values=["", " "])
@@ -293,7 +354,13 @@ def build_observed_snotel(
 
     df.to_parquet(_join(cli_dir, f"snotel_{start_year}-{end_year}.parquet"))
     df_to_prn(df.set_index("Date"), _join(cli_dir, prn_fn), "prcp(mm/day)", "tmax(degc)", "tmin(degc)")
-    cligen.run_observed(prn_fn, cli_fn=cli_fn, adjust_mx_pt5=adjust_mx_pt5)
+    _run_observed_with_quality_guard_handling(
+        cligen,
+        prn_fn,
+        cli_fn,
+        adjust_mx_pt5=adjust_mx_pt5,
+        silent_pass_observed_quality_guard=silent_pass_observed_quality_guard,
+    )
 
     cli_path = _join(cli_dir, cli_fn)
     climate = ClimateFile(cli_path)
@@ -335,6 +402,7 @@ def build_observed_gridmet(
     prn_fn: str,
     cli_fn: str,
     adjust_mx_pt5: bool = False,
+    silent_pass_observed_quality_guard: bool = False,
 ) -> None:
     df = gridmet_retrieve_historical_timeseries(lng, lat, start_year, end_year)
     df.to_parquet(_join(cli_dir, f"gridmet_{start_year}-{end_year}.parquet"))
@@ -343,7 +411,13 @@ def build_observed_gridmet(
     max_retries = 3
     for retry in range(max_retries):
         try:
-            cligen.run_observed(prn_fn, cli_fn=cli_fn, adjust_mx_pt5=adjust_mx_pt5)
+            _run_observed_with_quality_guard_handling(
+                cligen,
+                prn_fn,
+                cli_fn,
+                adjust_mx_pt5=adjust_mx_pt5,
+                silent_pass_observed_quality_guard=silent_pass_observed_quality_guard,
+            )
             break
         except AssertionError:
             if retry == max_retries - 1:
@@ -373,14 +447,22 @@ def build_observed_gridmet_interpolated(
     cli_fn: str,
     prn_fn: str,
     adjust_mx_pt5: bool = False,
-) -> str:
+    silent_pass_observed_quality_guard: bool = False,
+) -> tuple[str, bool]:
     _parquet_fn = f"gridmet_observed_{topaz_id}_{start_year}-{end_year}.parquet"
     df = pd.read_parquet(_join(cli_dir, _parquet_fn))
 
     max_retries = 3
+    quality_guard_bypassed = False
     for retry in range(max_retries):
         try:
-            cligen.run_observed(prn_fn, cli_fn=cli_fn, adjust_mx_pt5=adjust_mx_pt5)
+            quality_guard_bypassed = _run_observed_with_quality_guard_handling(
+                cligen,
+                prn_fn,
+                cli_fn,
+                adjust_mx_pt5=adjust_mx_pt5,
+                silent_pass_observed_quality_guard=silent_pass_observed_quality_guard,
+            )
             break
         except AssertionError:
             if retry == max_retries - 1:
@@ -397,7 +479,7 @@ def build_observed_gridmet_interpolated(
     climate.replace_var("w-dir", dates, df["th(DegreesClockwisefromnorth)"])
 
     climate.write(cli_path)
-    return topaz_id
+    return topaz_id, bool(quality_guard_bypassed)
 
 
 def build_future(
@@ -413,7 +495,13 @@ def build_future(
 ) -> None:
     df = retrieve_rcp85_timeseries(lng, lat, datetime(start_year, 1, 1), datetime(end_year, 12, 31))
     df_to_prn(df, _join(cli_dir, prn_fn), "pr(mm)", "tasmax(degc)", "tasmin(degc)")
-    cligen.run_observed(prn_fn, cli_fn=cli_fn, adjust_mx_pt5=adjust_mx_pt5)
+    _run_observed_with_quality_guard_handling(
+        cligen,
+        prn_fn,
+        cli_fn,
+        adjust_mx_pt5=adjust_mx_pt5,
+        silent_pass_observed_quality_guard=False,
+    )
 
     cli_path = _join(cli_dir, cli_fn)
     climate = ClimateFile(cli_path)
@@ -1053,6 +1141,7 @@ def _submit_daymet_futures(
                 wind_vs=wind_vs,
                 wind_dir=wind_dir,
                 adjust_mx_pt5=climate.adjust_mx_pt5,
+                silent_pass_observed_quality_guard=climate.silent_pass_observed_quality_guard,
             )
         )
         sub_par_fns[topaz_id] = prn_fn
@@ -1076,13 +1165,22 @@ def _submit_daymet_futures(
             wind_vs=wind_vs,
             wind_dir=wind_dir,
             adjust_mx_pt5=climate.adjust_mx_pt5,
+            silent_pass_observed_quality_guard=climate.silent_pass_observed_quality_guard,
         )
     )
 
     return futures, sub_par_fns, sub_cli_fns, ws_cli_fn
 
 
-def _wait_for_daymet_futures(climate: "Climate", futures: list[Any], executor: ProcessPoolExecutor) -> None:
+def _wait_for_daymet_futures(climate: "Climate", futures: list[Any], executor: ProcessPoolExecutor) -> bool:
+    any_quality_guard_bypassed = False
+
+    def _normalize_result(result: Any) -> tuple[Any, bool]:
+        if isinstance(result, tuple) and len(result) == 2:
+            topaz_id, bypassed = result
+            return topaz_id, bool(bypassed)
+        return result, False
+
     pending = set(futures)
     try:
         while pending:
@@ -1093,8 +1191,11 @@ def _wait_for_daymet_futures(climate: "Climate", futures: list[Any], executor: P
                 continue
 
             for future in done:
-                completed_topaz = future.result()
+                completed_topaz, bypassed = _normalize_result(future.result())
+                if bypassed:
+                    any_quality_guard_bypassed = True
                 climate.logger.info(f"  climate for {completed_topaz} done.")
+        return any_quality_guard_bypassed
     except Exception:
         # Deliberate concurrency boundary: cancel remaining worker tasks before surfacing failure.
         for pending_future in futures:
@@ -1124,7 +1225,7 @@ def run_observed_daymet_multiple_build(
     climate: "Climate",
     verbose: bool = False,
     attrs: Optional[dict[str, Any]] = None,
-) -> None:
+) -> bool:
     with climate.locked():
         climate.set_attrs(attrs)
         climate.logger.info("  running _build_climate_observed_daymet_multiple")
@@ -1157,7 +1258,7 @@ def run_observed_daymet_multiple_build(
                 wind_vs,
                 wind_dir,
             )
-            _wait_for_daymet_futures(climate, futures, executor)
+            any_quality_guard_bypassed = _wait_for_daymet_futures(climate, futures, executor)
 
         _finalize_daymet_multiple_build(
             climate,
@@ -1167,3 +1268,4 @@ def run_observed_daymet_multiple_build(
             sub_par_fns,
             sub_cli_fns,
         )
+        return any_quality_guard_bypassed
