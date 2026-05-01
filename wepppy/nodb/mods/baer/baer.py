@@ -556,6 +556,29 @@ class Baer(NoDbBase):
 
             if landuse.mode != LanduseMode.Single:
                 domlc_d = sbs.build_lcgrid(watershed.subwta, None)
+                domlc_d = {str(topaz_id): str(dom) for topaz_id, dom in domlc_d.items()}
+
+                # SoilBurnSeverityMap.build_lcgrid() includes all positive TOPAZ IDs,
+                # including channels. Landuse.build_managements() expects hillslope-only
+                # IDs because it computes area via watershed.hillslope_area().
+                valid_hillslope_ids = set(watershed.subs_summary.keys())
+                if not valid_hillslope_ids:
+                    valid_hillslope_ids = {str(topaz_id) for topaz_id in landuse.domlc_d.keys()}
+                if valid_hillslope_ids:
+                    dropped_ids = sorted(
+                        topaz_id for topaz_id in domlc_d if topaz_id not in valid_hillslope_ids
+                    )
+                    if dropped_ids:
+                        logger = getattr(self, "logger", None)
+                        if logger is not None:
+                            logger.debug(
+                                "Dropping %s non-hillslope TOPAZ IDs from BAER remap: %s",
+                                len(dropped_ids),
+                                ", ".join(dropped_ids[:10]) + (" ..." if len(dropped_ids) > 10 else ""),
+                            )
+                    domlc_d = {
+                        topaz_id: dom for topaz_id, dom in domlc_d.items() if topaz_id in valid_hillslope_ids
+                    }
 
                 ron = Ron.getInstance(wd)
                 if 'lt' in ron.mods or 'portland' in ron.mods or 'seattle' in ron.mods or 'general' in ron.mods:
@@ -580,8 +603,11 @@ class Baer(NoDbBase):
                 else:
                     landuse.domlc_d = domlc_d
 
-            landuse = landuse.getInstance(wd)
-            landuse.build_managements(_map='default')
+        # Rebuild management summaries after releasing the domlc mutation lock.
+        # build_managements() acquires its own lock and must not be called while
+        # landuse.locked() is still active.
+        landuse = Landuse.getInstance(wd)
+        landuse.build_managements(_map='default')
 
     def _assign_eu_soils(self) -> None:
 
