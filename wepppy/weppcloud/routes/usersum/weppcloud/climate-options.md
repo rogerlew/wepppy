@@ -435,11 +435,11 @@ Advanced options are visible for non-Tenerife station-catalog workflows.
 - When enabled, WEPPcloud keeps the generated `.cli` even if CLIGEN logs quality-guard convergence markers.
 
 **Recommended use cases**
-- Advanced troubleshooting when you need a run to continue and can review warning context in the status panel.
+- Advanced troubleshooting when you need a run to continue and can review warning context in the climate report summary and status panel.
 
 **Important behavior details**
 - Default is enabled (`true`), so climate build continues when CLIGEN quality-guard markers are detected.
-- When this bypass occurs, WEPPcloud publishes a warning to the climate status stream.
+- When this bypass occurs, WEPPcloud shows a warning in the climate report summary and publishes the same warning to the climate status stream.
 - Disable this option if you want quality-guard failures to stop the build with a user-facing convergence message.
 
 ## Post-CLIGEN precipitation scaling modes

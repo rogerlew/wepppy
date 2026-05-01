@@ -24,6 +24,7 @@ Observed climate builds can fail when CLIGEN reports convergence-quality markers
 - [x] (2026-05-01 22:20Z) Restricted silent-pass handling to observed climate paths; removed silent-pass plumbing from future-mode build invocation.
 - [x] (2026-05-01 23:05Z) Switched default contract to `silent_pass_observed_quality_guard=true` across runtime fallback and config defaults, and updated usersum guidance.
 - [x] (2026-05-01 23:20Z) Re-ran targeted climate/no-db/routes tests and doc lint with passing results.
+- [x] (2026-05-02 01:05Z) Persisted silent-pass quality-guard warning in Climate NoDb, surfaced it in climate report summary UI, and added regression coverage for helper/router/template behavior.
 
 ## Surprises & Discoveries
 
@@ -44,13 +45,17 @@ Observed climate builds can fail when CLIGEN reports convergence-quality markers
   Rationale: Preserve visibility of degraded quality while allowing run continuation.
   Date/Author: 2026-05-01 / Codex.
 
+- Decision: Persist bypass warning text on Climate and render it in the climate report summary.
+  Rationale: Status stream notifications are transient; summary persistence ensures users still see the warning after build completion and page reload.
+  Date/Author: 2026-05-02 / Codex.
+
 - Decision: Apply `silent_pass_observed_quality_guard` only to observed climate build modes.
   Rationale: The option name and user contract are observed-specific; future-mode behavior should remain independent.
   Date/Author: 2026-05-01 / Codex.
 
 ## Outcomes & Retrospective
 
-The feature set is implemented end-to-end across CLIGEN execution, NoDb orchestration, run configuration, climate API/controller wiring, UI advanced options, and usersum documentation. The observed multiple/interpolated workflows now publish warning status when bypass occurs, and future-mode invocation no longer consumes the observed-only silent-pass flag. Targeted Python and JS tests pass, and docs lint passes for the updated end-user climate options page.
+The feature set is implemented end-to-end across CLIGEN execution, NoDb orchestration, run configuration, climate API/controller wiring, UI advanced options, and usersum documentation. The observed multiple/interpolated workflows now publish warning status when bypass occurs, future-mode invocation no longer consumes the observed-only silent-pass flag, and bypass warnings now persist to the climate report summary. Targeted Python and JS tests pass, and docs lint passes for the updated end-user climate options page.
 
 Residual follow-up (optional): if operators want this new advanced toggle called out in other user-facing indices or release notes, add those references in a separate docs-only change.
 
@@ -84,7 +89,7 @@ Acceptance criteria:
 
 - Observed CLIGEN quality-guard failures show the user-facing convergence error when silent-pass is disabled.
 - Silent-pass can be toggled from Climate Advanced options and persists through Climate NoDb setter.
-- When silent-pass is enabled and quality guard is tripped, climate build continues and warning text is published to the climate status channel.
+- When silent-pass is enabled and quality guard is tripped, climate build continues and warning text is surfaced in the climate report summary and published to the climate status channel.
 - Config defaults to silent-pass enabled unless explicitly disabled.
 - Targeted Python tests, JS controller tests, and end-user doc lint pass.
 
@@ -111,3 +116,4 @@ No new external dependencies were added. The implementation reuses existing Stat
 Revision note (2026-05-01 20:45Z, Codex): Created and completed this mini work-package ExecPlan as the user-requested work-package artifact for the silent-pass quality-guard change set.
 Revision note (2026-05-02 00:00Z, Codex): Updated default-state contract to `silent_pass_observed_quality_guard=true` and aligned acceptance text with the observed-mode warning-first behavior.
 Revision note (2026-05-02 00:20Z, Codex): Closed out with observed-mode-only enforcement, multi/interpolated warning propagation coverage, and final validation evidence.
+Revision note (2026-05-02 01:05Z, Codex): Added persisted summary-warning behavior for silent-pass quality-guard bypass and updated tests/docs accordingly.

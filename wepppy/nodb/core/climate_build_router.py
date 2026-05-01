@@ -92,6 +92,7 @@ class ClimateBuildRouter:
             climate.par_fn = None
             climate.sub_cli_fns = None
             climate.sub_par_fns = None
+            climate._observed_quality_guard_summary_warning = None
 
         watershed = climate.watershed_instance
         if not watershed.is_abstracted:

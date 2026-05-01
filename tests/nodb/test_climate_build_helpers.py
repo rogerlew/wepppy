@@ -60,6 +60,7 @@ class _ClimateStub:
         self.attrs_seen: list[object] = []
         self.dump_called = False
         self.year_bounds_calls = 0
+        self.quality_guard_bypass_published: list[bool] = []
 
     @contextlib.contextmanager
     def locked(self):
@@ -78,6 +79,15 @@ class _ClimateStub:
 
     def dump(self) -> None:
         self.dump_called = True
+
+    def _publish_quality_guard_bypass_warning_if_needed(self, *args, **kwargs) -> None:
+        if "quality_guard_bypassed" in kwargs:
+            self.quality_guard_bypass_published.append(bool(kwargs["quality_guard_bypassed"]))
+            return
+        if args:
+            self.quality_guard_bypass_published.append(bool(args[0]))
+            return
+        self.quality_guard_bypass_published.append(False)
 
 
 class _MonthliesClimateFile:
@@ -428,3 +438,4 @@ def test_run_observed_daymet_multiple_build_sets_final_outputs(
     assert climate.par_fn == "ws.par"
     assert climate.sub_par_fns == {"1": "a.prn"}
     assert climate.sub_cli_fns == {"1": "a.cli"}
+    assert climate.quality_guard_bypass_published == [True]

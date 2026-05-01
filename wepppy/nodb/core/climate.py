@@ -496,6 +496,7 @@ class Climate(NoDbBase):
                 'silent_pass_observed_quality_guard',
                 True,
             )
+            self._observed_quality_guard_summary_warning = None
             self._catalog_id = None
             self._user_station_meta = None
 
@@ -514,6 +515,10 @@ class Climate(NoDbBase):
     @property
     def silent_pass_observed_quality_guard(self) -> bool:
         return getattr(self, '_silent_pass_observed_quality_guard', True)
+
+    @property
+    def observed_quality_guard_summary_warning(self) -> Optional[str]:
+        return getattr(self, "_observed_quality_guard_summary_warning", None)
 
     @property
     def catalog_id(self) -> Optional[str]:
@@ -743,6 +748,9 @@ class Climate(NoDbBase):
         if not quality_guard_bypassed:
             return
 
+        self._observed_quality_guard_summary_warning = (
+            _CLIGEN_QUALITY_GUARD_WARNING_MESSAGE
+        )
         self.logger.warning(_CLIGEN_QUALITY_GUARD_WARNING_MESSAGE)
         try:
             StatusMessenger.publish(f"{self.runid}:climate", _CLIGEN_QUALITY_GUARD_WARNING_MESSAGE)
@@ -1487,11 +1495,8 @@ class Climate(NoDbBase):
             )
 
     def _build_climate_observed_daymet_multiple(self, verbose: bool = False, attrs: Optional[Dict[str, Any]] = None) -> None:
-        quality_guard_bypassed = run_observed_daymet_multiple_build(
+        run_observed_daymet_multiple_build(
             self, verbose=verbose, attrs=attrs
-        )
-        self._publish_quality_guard_bypass_warning_if_needed(
-            quality_guard_bypassed=quality_guard_bypassed
         )
 
     def _build_climate_observed_gridmet(self, verbose: bool = False, attrs: Optional[Dict[str, Any]] = None) -> None:

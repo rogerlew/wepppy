@@ -1268,4 +1268,7 @@ def run_observed_daymet_multiple_build(
             sub_par_fns,
             sub_cli_fns,
         )
+        climate._publish_quality_guard_bypass_warning_if_needed(
+            quality_guard_bypassed=any_quality_guard_bypassed
+        )
         return any_quality_guard_bypassed

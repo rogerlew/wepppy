@@ -33,6 +33,7 @@ class _DummyClimate:
         self.par_fn = "old.par"
         self.sub_cli_fns = {"1": "a.cli"}
         self.sub_par_fns = {"1": "a.par"}
+        self._observed_quality_guard_summary_warning = "stale warning"
 
         self.watershed_instance = _DummyWatershed(is_abstracted=True)
         self.climatestation = "STA-1"
@@ -130,6 +131,7 @@ def test_build_router_runs_orchestration_and_timestamps(
     assert artifact_service.calls == 1
     assert prep.calls == 1
     assert climate.triggers, "expected CLIMATE_BUILD_COMPLETE trigger"
+    assert climate._observed_quality_guard_summary_warning is None
 
 
 def test_build_router_raises_for_undefined_mode(tmp_path: Path) -> None:

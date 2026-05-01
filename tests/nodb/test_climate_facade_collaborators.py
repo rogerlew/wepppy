@@ -511,7 +511,7 @@ def test_daymet_multiple_build_delegates_to_helper(
     }
 
 
-def test_daymet_multiple_build_publishes_warning_state_from_helper(
+def test_daymet_multiple_build_does_not_publish_warning_state_directly(
     tmp_path: Path,
     monkeypatch: pytest.MonkeyPatch,
 ) -> None:
@@ -528,7 +528,7 @@ def test_daymet_multiple_build_publishes_warning_state_from_helper(
     )
 
     climate._build_climate_observed_daymet_multiple(verbose=True, attrs={"mode": "daymet"})
-    assert published == [True]
+    assert published == []
 
 
 def test_gridmet_multiple_build_publishes_warning_state_from_service(
@@ -585,3 +585,4 @@ def test_publish_quality_guard_bypass_warning_when_silent_pass_enabled(
     assert logged_messages
     assert "CLIGEN failed to converge" in logged_messages[0]
     assert published == [(expected_channel, logged_messages[0])]
+    assert climate.observed_quality_guard_summary_warning == logged_messages[0]
