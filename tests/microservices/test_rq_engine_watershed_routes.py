@@ -902,16 +902,21 @@ def test_fetch_dem_batch_returns_input_message_without_enqueue(
         run_group = "batch"
         delineation_backend_is_wbt = False
 
+        def __init__(self) -> None:
+            self._uploaded_dem_filename = "uploaded.tif"
+
         @contextlib.contextmanager
         def locked(self):
             yield self
+
+    dummy_watershed = DummyWatershed()
 
     monkeypatch.setattr(watershed_routes, "Queue", DummyQueue)
     monkeypatch.setattr(watershed_routes.redis, "Redis", lambda **kwargs: DummyRedis())
     monkeypatch.setattr(
         watershed_routes.Watershed,
         "getInstance",
-        lambda wd: DummyWatershed(),
+        lambda wd: dummy_watershed,
     )
 
     payload = {
@@ -932,6 +937,74 @@ def test_fetch_dem_batch_returns_input_message_without_enqueue(
     assert response.status_code == 200
     assert response.json()["message"] == "Set watershed inputs for batch processing"
     assert queue_called["called"] is False
+    assert dummy_watershed._uploaded_dem_filename is None
+
+
+def test_fetch_dem_batch_upload_mode_preserves_uploaded_dem_filename(
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    _stub_auth(monkeypatch)
+    monkeypatch.setattr(watershed_routes, "get_wd", lambda runid: "/tmp/run")
+
+    queue_called = {"called": False}
+
+    class DummyQueue:
+        def __init__(self, *args, **kwargs) -> None:
+            queue_called["called"] = True
+
+        def enqueue_call(self, *args, **kwargs):
+            raise AssertionError("Queue should not be used for batch runs")
+
+    class DummyRedis:
+        def __enter__(self):
+            return self
+
+        def __exit__(self, exc_type, exc, tb):
+            return False
+
+    class DummyWatershed:
+        run_group = "batch"
+        delineation_backend_is_wbt = False
+
+        def __init__(self) -> None:
+            self._uploaded_dem_filename = "uploaded.tif"
+
+        @contextlib.contextmanager
+        def locked(self):
+            yield self
+
+    class DummyRon:
+        map = object()
+        has_dem = True
+        dem_fn = "/tmp/run/dem/dem.vrt"
+
+    dummy_watershed = DummyWatershed()
+
+    monkeypatch.setattr(watershed_routes, "Queue", DummyQueue)
+    monkeypatch.setattr(watershed_routes.redis, "Redis", lambda **kwargs: DummyRedis())
+    monkeypatch.setattr(
+        watershed_routes.Watershed,
+        "getInstance",
+        lambda wd: dummy_watershed,
+    )
+    monkeypatch.setattr(watershed_routes.Ron, "getInstance", lambda wd: DummyRon())
+
+    payload = {
+        "mcl": 60,
+        "csa": 5,
+        "set_extent_mode": 3,
+    }
+
+    with TestClient(rq_engine.app) as client:
+        response = client.post(
+            "/api/runs/run-1/cfg/fetch-dem-and-build-channels",
+            json=payload,
+        )
+
+    assert response.status_code == 200
+    assert response.json()["message"] == "Set watershed inputs for batch processing"
+    assert queue_called["called"] is False
+    assert dummy_watershed._uploaded_dem_filename == "uploaded.tif"
 
 
 def test_fetch_dem_base_project_context_returns_input_message_without_enqueue(

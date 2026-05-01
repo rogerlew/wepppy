@@ -160,12 +160,15 @@ def test_fetch_dem_and_build_channels_rq_clears_watershed_cache_before_enqueue(
     _record_cache_clears(monkeypatch, events)
 
     class DummyWatershed:
-        pass
+        def __init__(self) -> None:
+            self.uploaded_dem_filename = "uploaded.tif"
+
+    dummy_watershed = DummyWatershed()
 
     def _get_watershed(wd: str) -> DummyWatershed:
         assert events == [("clear", "demo", "watershed.nodb")]
         events.append(("hydrate_watershed", wd))
-        return DummyWatershed()
+        return dummy_watershed
 
     monkeypatch.setattr(project_rq.Watershed, "getInstance", _get_watershed)
 
@@ -214,6 +217,75 @@ def test_fetch_dem_and_build_channels_rq_clears_watershed_cache_before_enqueue(
     assert [event[0] for event in events if event[0] == "enqueue"] == ["enqueue", "enqueue"]
     assert current_job.meta["jobs:0,func:fetch_dem_rq"] == "child-0"
     assert current_job.meta["jobs:1,func:build_channels_rq"] == "child-1"
+    assert dummy_watershed.uploaded_dem_filename is None
+
+
+def test_fetch_dem_and_build_channels_rq_preserves_uploaded_dem_for_upload_mode(
+    monkeypatch: pytest.MonkeyPatch,
+    tmp_path: Path,
+) -> None:
+    run_wd, _set_archive_roots, _call_roots = _stub_rq_context(monkeypatch, tmp_path)
+    events: list[tuple] = []
+    _record_cache_clears(monkeypatch, events)
+
+    class DummyWatershed:
+        def __init__(self) -> None:
+            self.uploaded_dem_filename = "uploaded.tif"
+
+    dummy_watershed = DummyWatershed()
+
+    def _get_watershed(wd: str) -> DummyWatershed:
+        assert events == [("clear", "demo", "watershed.nodb")]
+        events.append(("hydrate_watershed", wd))
+        return dummy_watershed
+
+    monkeypatch.setattr(project_rq.Watershed, "getInstance", _get_watershed)
+
+    class DummyRedis:
+        def __init__(self, **_kwargs) -> None:
+            pass
+
+        def __enter__(self):
+            return self
+
+        def __exit__(self, *_args) -> None:
+            return None
+
+    class DummyQueue:
+        def __init__(self, connection) -> None:
+            self.connection = connection
+
+        def enqueue_call(self, func, args, depends_on=None, timeout=None):
+            child_id = f"child-{len([event for event in events if event[0] == 'enqueue'])}"
+            events.append(("enqueue", func.__name__, args, getattr(depends_on, "id", None), timeout))
+            return SimpleNamespace(id=child_id)
+
+    current_job = SimpleNamespace(id="job-guard", meta={}, save=lambda: events.append(("save", dict(current_job.meta))))
+    monkeypatch.setattr(project_rq, "get_current_job", lambda: current_job)
+    monkeypatch.setattr(project_rq.redis, "Redis", DummyRedis)
+    monkeypatch.setattr(project_rq, "Queue", DummyQueue)
+
+    project_rq.fetch_dem_and_build_channels_rq(
+        "demo",
+        None,
+        None,
+        None,
+        csa=10.0,
+        mcl=50.0,
+        stream_pruning_method=None,
+        wbt_fill_or_breach=None,
+        wbt_blc_dist=None,
+        set_extent_mode=3,
+        map_bounds_text="bounds",
+    )
+
+    assert events[:2] == [
+        ("clear", "demo", "watershed.nodb"),
+        ("hydrate_watershed", str(run_wd)),
+    ]
+    assert [event[0] for event in events if event[0] == "enqueue"] == ["enqueue"]
+    assert current_job.meta["jobs:0,func:build_channels_rq"] == "child-0"
+    assert dummy_watershed.uploaded_dem_filename == "uploaded.tif"
 
 
 def test_build_channels_rq_rejects_archive_form_root(

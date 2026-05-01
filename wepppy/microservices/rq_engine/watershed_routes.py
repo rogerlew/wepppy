@@ -684,6 +684,8 @@ async def fetch_dem_and_build_channels(
                 watershed._csa = csa
                 watershed._set_extent_mode = int(set_extent_mode)
                 watershed._map_bounds_text = map_bounds_text
+                if int(set_extent_mode) != 3:
+                    watershed._uploaded_dem_filename = None
                 if watershed.delineation_backend_is_wbt:
                     watershed._stream_pruning_method = stream_pruning_method
                     if wbt_fill_or_breach is not None:

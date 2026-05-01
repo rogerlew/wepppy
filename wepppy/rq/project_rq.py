@@ -766,6 +766,8 @@ def fetch_dem_and_build_channels_rq(
         watershed = Watershed.getInstance(wd)
         watershed.set_extent_mode = int(set_extent_mode)
         watershed.map_bounds_text = map_bounds_text
+        if int(set_extent_mode) != 3:
+            watershed.uploaded_dem_filename = None
 
         conn_kwargs = redis_connection_kwargs(RedisDB.RQ)
         with redis.Redis(**conn_kwargs) as redis_conn:
