@@ -1,0 +1,108 @@
+{
+  "calibration_log": [
+    {
+      "counts": {
+        "D1": 13,
+        "D2b": 99,
+        "D3": 7,
+        "D4": 2,
+        "D6a": 2,
+        "D6b": 3,
+        "D6c": 6
+      },
+      "stage": "baseline",
+      "thresholds": {
+        "d1_magnitude": 1000.0,
+        "d2a_chain_p99": 0.001,
+        "d2b_runoff_mismatch": 1.0,
+        "d3_porosity_fraction": 0.99,
+        "d4_magnitude": 500.0,
+        "d5_day_lower": 30.0,
+        "d5_magnitude_lower": 100.0,
+        "d5_magnitude_upper": 500.0,
+        "d6a_day_upper": 3.0,
+        "d6a_magnitude_lower": 100.0,
+        "d6a_magnitude_upper": 500.0,
+        "d6b_day_lower": 4.0,
+        "d6b_day_upper": 29.0,
+        "d6b_magnitude_lower": 100.0,
+        "d6c_day_lower": 30.0,
+        "d6c_magnitude_lower": 500.0
+      }
+    },
+    {
+      "actions": [
+        {
+          "from_family": "D6a",
+          "row_count": 2,
+          "to_family": "D6b"
+        }
+      ],
+      "counts": {
+        "D1": 13,
+        "D2b": 99,
+        "D3": 7,
+        "D4": 2,
+        "D6b": 5,
+        "D6c": 6
+      },
+      "stage": "sparse_family_merge"
+    }
+  ],
+  "cluster_algorithm": "hdbscan(min_cluster_size=5)",
+  "counts_v2": {
+    "D1": 13,
+    "D2b": 99,
+    "D3": 7,
+    "D4": 2,
+    "D6b": 5,
+    "D6c": 6
+  },
+  "d_unclassified_count": 0,
+  "disagreement_count": 9,
+  "generated_utc": "2026-05-02T17:11:18.981814+00:00",
+  "missing_seed_context_alerts": [],
+  "no_cluster": false,
+  "no_sensitivity": false,
+  "profile_meta": {
+    "day_bands": {
+      "4-29": 57,
+      "<=3": 52,
+      ">=30": 5
+    },
+    "population": 114,
+    "topology": {
+      "first": 0,
+      "interior": 1,
+      "null": 0,
+      "outlet": 113
+    }
+  },
+  "row_count_flagged": 132,
+  "rule_gap_meta": {
+    "band_4_29": 57,
+    "coverage_pct_estimate": 100.0,
+    "d2_nontrivial_unclassified": 104,
+    "d3_nonzero_flagged": 0,
+    "d5_excluded_rows": 5
+  },
+  "sensitivity_rows": 40,
+  "thresholds": {
+    "d1_magnitude": 1000.0,
+    "d2a_chain_p99": 0.001,
+    "d2b_runoff_mismatch": 1.0,
+    "d3_porosity_fraction": 0.99,
+    "d4_magnitude": 500.0,
+    "d5_day_lower": 30.0,
+    "d5_magnitude_lower": 100.0,
+    "d5_magnitude_upper": 500.0,
+    "d6a_day_upper": 3.0,
+    "d6a_magnitude_lower": 100.0,
+    "d6a_magnitude_upper": 500.0,
+    "d6b_day_lower": 4.0,
+    "d6b_day_upper": 29.0,
+    "d6b_magnitude_lower": 100.0,
+    "d6c_day_lower": 30.0,
+    "d6c_magnitude_lower": 500.0
+  }
+}

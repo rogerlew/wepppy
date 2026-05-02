@@ -22,13 +22,13 @@ After this work, a contributor can open `campaign_matrix_v2.csv` and see the 114
 ## Progress
 
 - [x] (2026-05-02) ExecPlan drafted; v1 D_UNCLASSIFIED feature distribution profiled by Claude Code and load-bearing findings recorded under `Surprises & Discoveries`.
-- [ ] M1. Emit `unclassified_profile.md` reproducing and extending the v1-output profile (statistics + per-axis distributions).
-- [ ] M2. Emit `rule_gap_analysis.md` enumerating exactly why each v1 rule (D2, D3, D5) failed to capture the visible signal in D_UNCLASSIFIED.
-- [ ] M3. Author and freeze the refined taxonomy (D1, D2a, D2b, D3, D4, D5, D6a, D6b, D6c) in `tools/refine_mofe_taxonomy.py`, emit `taxonomy_assignments_v2.csv`, and assert the D_UNCLASSIFIED population dropped below the 5% gate.
-- [ ] M4. Run the cluster cross-check on the v2 labels and emit `taxonomy_disagreements_v2.csv`. Disposition every disagreement in the Decision Log.
-- [ ] M5. Re-select representative seeds for every populated v2 family and emit `representative_seeds_v2.csv` with full staged-input manifests.
-- [ ] M6. Emit `campaign_matrix_v2.csv`, `defect_families_v2.md`, and `taxonomy_evolution.md` (v1→v2 lineage). Run threshold sensitivity sweep and emit `threshold_sensitivity.csv`.
-- [ ] M7. Closeout: update v1 `package.md` `Follow-up Work` section to note the v2 outputs, update tracker, mark this ExecPlan complete.
+- [x] (2026-05-02) M1. Emitted `unclassified_profile.md` with full 12-column quantile table, topology counts, day-band counts, and required summary.
+- [x] (2026-05-02) M2. Emitted `rule_gap_analysis.md` with quantified D2/D3/D5/4-29-band gaps and row-level persistent-severe table.
+- [x] (2026-05-02) M3. Authored `tools/refine_mofe_taxonomy.py`, emitted `taxonomy_assignments_v2.csv`, and met gate: `D_UNCLASSIFIED=0` (<=7 required).
+- [x] (2026-05-02) M4. Ran HDBSCAN cross-check; emitted `taxonomy_disagreements_v2.csv` and dispositioned all disagreement rows.
+- [x] (2026-05-02) M5. Emitted `representative_seeds_v2.csv` with complete staged-input manifests; worst/median rows have no missing shared context.
+- [x] (2026-05-02) M6. Emitted `campaign_matrix_v2.csv`, `defect_families_v2.md`, `taxonomy_evolution.md`, and `threshold_sensitivity.csv`.
+- [x] (2026-05-02) M7. Updated `package.md` follow-up note, updated `tracker.md` timeline/status, and completed this ExecPlan closeout sections.
 
 ## Surprises & Discoveries
 
@@ -42,6 +42,16 @@ After this work, a contributor can open `campaign_matrix_v2.csv` and see the 114
   Evidence: same profile run.
 - Observation: D_UNCLASSIFIED days-of-flag distribution is bimodal-with-tail. 52 rows ≤ 3 days, 57 rows in 4–29 days, 5 rows ≥ 30 days. The 4–29 day band is a real gap in the v1 ruleset — neither D4 (single-day extreme) nor D5 (persistent moderate) covers it.
   Evidence: same profile run.
+- Observation: v2 eliminated the sink completely (`D_UNCLASSIFIED=0`) without threshold escalation; coverage closure came from D2b + D3 + D6b + D6c and a sparse-family merge.
+  Evidence: `taxonomy_assignments_v2.csv` counts: `D2b=99`, `D1=13`, `D3=7`, `D6c=6`, `D6b=5`, `D4=2`, `D_UNCLASSIFIED=0`.
+- Observation: D2b captured exactly 75.0% of flagged rows (`99/132`) at the baseline threshold (`T_D2b=1.0`). The calibration ladder trigger is strict `>75%`, so no threshold increase was mandated by contract.
+  Evidence: `refine_mofe_taxonomy_metadata.json` baseline counts + calibration log.
+- Observation: D6a initially populated at 2 rows and failed the family-size gate (`<3`, D4 exempt only). Automatic sparse-family merge moved those rows to D6b.
+  Evidence: `refine_mofe_taxonomy_metadata.json` `sparse_family_merge` action `D6a -> D6b (2 rows)`.
+- Observation: M4 disagreements increased from v1 (4 rows) to v2 (9 rows), but remain concentrated in a mixed severe/moderate cluster context and are explainable by rule predicates.
+  Evidence: `taxonomy_disagreements_v2.csv`.
+- Observation: Threshold sensitivity flagged 11 unstable perturbations (Jaccard < 0.7), concentrated on D1 magnitude, D3 porosity, D4 magnitude, and D6c day-lower thresholds.
+  Evidence: `threshold_sensitivity.csv` (`40` rows total, `11` unstable).
 
 ## Decision Log
 
@@ -54,10 +64,53 @@ After this work, a contributor can open `campaign_matrix_v2.csv` and see the 114
 - Decision: Threshold sensitivity sweep is M6 (after the campaign matrix), not pre-M3.
   Rationale: A sweep is cheap once the rules are coded; running it before the rules exist is busywork. The acceptance gate is "D_UNCLASSIFIED ≤ 5%" — if the proposed thresholds fail that, M3 iterates within the milestone before M4 runs.
   Date/Author: 2026-05-02 / Claude Code.
+- Decision: Implement M1-M6 in a single reproducible CLI, `tools/refine_mofe_taxonomy.py`, with optional `--no-cluster` and `--no-sensitivity` flags.
+  Rationale: One deterministic pipeline preserves lineage between calibration, clustering, seeds, matrix generation, and sensitivity outputs while allowing milestone-local iteration when needed.
+  Date/Author: 2026-05-02 / Codex.
+- Decision: Keep `D2b` threshold at `T_D2b=1.0`.
+  Rationale: Baseline capture was exactly 75.0% (`99/132`), and the calibration contract escalates only when `D2b > 75%`. No guardrail breach occurred.
+  Date/Author: 2026-05-02 / Codex.
+- Decision: Keep `D3` threshold at `0.99` (do not tighten to `0.995`).
+  Rationale: D3 captured `7/132` (5.3%), well below the `>50%` tightening trigger.
+  Date/Author: 2026-05-02 / Codex.
+- Decision: Merge sparse `D6a` family into `D6b`.
+  Rationale: `D6a` had 2 rows and failed the M3 populated-family gate (`>=3`, D4 exempt). `D6b` is the nearest persistence/magnitude sibling family.
+  Date/Author: 2026-05-02 / Codex.
+- Decision: No D0 demotions applied.
+  Rationale: No populated v2 family satisfied all D0 criteria simultaneously (concentration/size/feature-delta gates).
+  Date/Author: 2026-05-02 / Codex.
+- Decision: Use HDBSCAN (`min_cluster_size=5`) for M4.
+  Rationale: `hdbscan` was available and is the preferred clustering backend in this plan.
+  Date/Author: 2026-05-02 / Codex.
+- Decision: Accept disagreements without relabeling or threshold retune for all 9 rows:
+  Rationale: Each row satisfies its rule predicate; disagreements arise from mixed clusters rather than broken rule logic.
+  Date/Author: 2026-05-02 / Codex.
+  Rows:
+  `cochlear-beriberi/H67 (D6b)`, `cochlear-beriberi/H80 (D6c)`, `cochlear-beriberi/H84 (D4)`, `cochlear-beriberi/H146 (D1)`, `cochlear-beriberi/H150 (D3)`, `cochlear-beriberi/H154 (D3)`, `cochlear-beriberi/H202 (D1)`, `cochlear-beriberi/H431 (D1)`, `ordained-incentive/H289 (D6b)`.
 
 ## Outcomes & Retrospective
 
-Pending execution. To be written at M7 closeout. Compare realized v2 prevalence against the proposed family ranges in M3, list any threshold change made during M3 calibration, and note whether sensitivity sweep flagged any unstable thresholds (Jaccard < 0.7 within ±25% perturbation).
+Execution completed on 2026-05-02. v2 prevalence resolved the v1 ambiguity:
+
+- v1 baseline: `D_UNCLASSIFIED=114/132` (86.4%).
+- v2 final: `D_UNCLASSIFIED=0/132` with populations `D2b=99`, `D1=13`, `D3=7`, `D6c=6`, `D6b=5`, `D4=2`.
+
+Calibration outcome:
+
+- No D2b threshold raise was required (`99/132` = exactly 75.0%, trigger is strictly `>75%`).
+- No D3 threshold tightening was required (`7/132`).
+- One structural adjustment occurred: sparse-family merge `D6a -> D6b` (2 rows) to satisfy the populated-family gate.
+- No D0 demotion triggered.
+
+Sensitivity outcome:
+
+- `threshold_sensitivity.csv` emitted 40 perturbation rows and flagged 11 unstable perturbations (Jaccard < 0.7), mostly around D1/D3/D4/D6c thresholds.
+- D2b perturbations remained stable, indicating the dominant coverage family is comparatively calibration-robust within the tested ±10/±25 windows.
+
+Net result:
+
+- The taxonomy is operational for campaign design (`campaign_matrix_v2.csv` has no sink row).
+- The main residual risk is threshold brittleness on smaller/sentinel families (D3, D4, D6c), which should be treated as sensitivity hotspots during downstream ablation interpretation.
 
 ## Context and Orientation
 

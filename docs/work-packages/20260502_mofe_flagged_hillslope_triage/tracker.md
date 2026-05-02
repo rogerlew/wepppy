@@ -1,14 +1,14 @@
 # Tracker - MOFE Flagged Hillslope Triage for Ablation Campaigns
 
-> Living execution log for triaging MOFE closure-audit flagged hillslopes into ablation-ready defect families.
+> Living execution log for v1 triage, v2 refinement, and v3 D2b split closeout.
 
 ## Quick Status
 
 **Timezone**: UTC  
 **Started**: 2026-05-02 15:54 UTC  
-**Current phase**: Ready for follow-on v2 taxonomy execution  
-**Last updated**: 2026-05-02 16:53 UTC  
-**Next milestone**: Execute `mofe_flagged_hillslope_taxonomy_refinement_execplan.md` M1  
+**Current phase**: v3 complete; ready for ablation package spawn  
+**Last updated**: 2026-05-02 19:19 UTC  
+**Next milestone**: open downstream ablation execution package(s) from `campaign_matrix_v3.csv`  
 **Security impact**: `low`  
 **Dedicated security review**: `no`  
 **Security artifact**: `N/A`
@@ -16,7 +16,7 @@
 ## Task Board
 
 ### Ready / Backlog
-- [ ] Follow-on: execute `prompts/active/mofe_flagged_hillslope_taxonomy_refinement_execplan.md` (M1-M7).
+- [ ] Open ablation execution package(s) from `campaign_matrix_v3.csv`.
 
 ### In Progress
 - [ ] None.
@@ -25,108 +25,91 @@
 - [ ] None.
 
 ### Done
-- [x] Created full work-package scaffold (`package.md`, `tracker.md`, `prompts/active`, `prompts/completed`, `artifacts`, `notes`) (2026-05-02 15:54 UTC).
-- [x] Migrated active ExecPlan from mini-work-package to `prompts/active/mofe_flagged_hillslope_triage_execplan.md` (2026-05-02 15:54 UTC).
-- [x] Ran precondition checks (`/workdir/wepp-forest` protocol/tool, `/wc1/runs`, Python deps) (2026-05-02 16:01 UTC).
-- [x] Implemented `tools/build_mofe_triage_table.py` and generated `triage_table_runs.csv`, `triage_table_hillslopes.csv`, `triage_table_hillslopes_all.csv` (2026-05-02 16:06 UTC).
-- [x] Implemented `tools/triage_pipeline.py` and generated M2-M6 outputs (2026-05-02 16:20 UTC).
-- [x] Updated active ExecPlan (`Progress`, `Surprises & Discoveries`, `Decision Log`, `Outcomes & Retrospective`) with final decisions and outcomes (2026-05-02 16:30 UTC).
-- [x] Reviewed and hardened v2 follow-up ExecPlan for execution readiness (dependency fallback contract, D5/D6 consistency, M3 calibration guardrails, D4 sentinel carve-out) (2026-05-02 16:53 UTC).
+- [x] v1 ExecPlan (`mofe_flagged_hillslope_triage_execplan.md`) completed with M1-M6 artifacts (2026-05-02 16:30 UTC).
+- [x] v2 refinement ExecPlan (`mofe_flagged_hillslope_taxonomy_refinement_execplan.md`) completed with M1-M7 artifacts and closeout (2026-05-02 17:25 UTC).
+- [x] v3 split ExecPlan (`mofe_flagged_hillslope_d2b_split_execplan.md`) executed end-to-end with M1-M5 closeout (2026-05-02 19:19 UTC).
+- [x] `package.md` follow-up section updated to reference v3 outputs (2026-05-02 19:19 UTC).
 
 ## Timeline
 
-- **2026-05-02 15:54 UTC** - Work-package scaffold created and active ExecPlan migrated.
-- **2026-05-02 16:01 UTC** - Preconditions validated (`PRECONDITIONS_OK`).
-- **2026-05-02 16:06 UTC** - M1 complete; triage-table builder executed with expected counts (`4` runs, `132` flagged, `1166` total).
-- **2026-05-02 16:20 UTC** - M2-M6 artifacts generated via `tools/triage_pipeline.py`.
-- **2026-05-02 16:22 UTC** - Cluster disagreement review completed (`4` disagreements, all accepted; no threshold retune).
-- **2026-05-02 16:30 UTC** - ExecPlan/Tracker closeout complete.
-- **2026-05-02 16:53 UTC** - Follow-on v2 ExecPlan reviewed and prepared for execution.
+- **2026-05-02 15:54 UTC** - Work-package scaffold created and active v1 ExecPlan migrated.
+- **2026-05-02 16:01 UTC** - Preconditions validated (`PRECONDITIONS_OK`) for v1 execution.
+- **2026-05-02 16:06 UTC** - v1 M1 complete (`triage_table_*` outputs validated).
+- **2026-05-02 16:20 UTC** - v1 M2-M6 artifacts generated via `tools/triage_pipeline.py`.
+- **2026-05-02 16:30 UTC** - v1 ExecPlan closeout complete.
+- **2026-05-02 17:06 UTC** - v2 preconditions validated (`hdbscan_available=True`, `sklearn_extra_available=True`).
+- **2026-05-02 17:10 UTC** - v2 M1-M3 pass complete via `tools/refine_mofe_taxonomy.py --no-cluster --no-sensitivity` (`D_UNCLASSIFIED=0`).
+- **2026-05-02 17:15 UTC** - v2 full pass complete via `tools/refine_mofe_taxonomy.py` (cluster + sensitivity outputs emitted).
+- **2026-05-02 17:25 UTC** - v2 ExecPlan, tracker, and package closeout updates complete.
+- **2026-05-02 19:08 UTC** - v3 ExecPlan execution-readiness pass completed.
+- **2026-05-02 19:12 UTC** - v3 preconditions validated and `tools/split_d2b_taxonomy.py` executed.
+- **2026-05-02 19:17 UTC** - v3 full artifact set emitted (`taxonomy_assignments_v3.csv`, `taxonomy_disagreements_v3.csv`, `representative_seeds_v3.csv`, `campaign_matrix_v3.csv`, `defect_families_v3.md`, `taxonomy_evolution_v3.md`, `threshold_sensitivity_v3.csv`).
+- **2026-05-02 19:19 UTC** - v3 ExecPlan, tracker, and package closeout updates completed.
 
 ## Decisions Log
 
-### 2026-05-02 16:06 UTC: Build M1 as standalone reproducible CLI
-**Context**: M1 required exact schema, fallback behavior, and deterministic CSV outputs.
+### 2026-05-02 16:20 UTC: v1 used deterministic pipeline implementation
+**Decision**: Implement v1 M2-M6 in `tools/triage_pipeline.py`.  
+**Impact**: Reproducible v1 outputs and baseline lineage for refinement.
 
-**Options considered**:
-1. One-off notebook extraction.
-2. Repository tool (`tools/build_mofe_triage_table.py`) with no-arg defaults and explicit flags.
+### 2026-05-02 17:10 UTC: v2 kept baseline D2b and D3 thresholds
+**Decision**: Keep `D2b` threshold at `1.0` and `D3` threshold at `0.99`.  
+**Impact**: D2b coverage remained high (`99/132`) without violating v2 guardrails; D3 remained a focused minority family (`7/132`).
 
-**Decision**: Option 2.
+### 2026-05-02 17:10 UTC: v2 sparse-family merge applied
+**Decision**: Merge sparse `D6a` (2 rows) into `D6b`.  
+**Impact**: Satisfied v2 family-size gate (`>=3`, D4 exempt) while preserving mechanistic continuity.
 
-**Impact**: M1 is now rerunnable and idempotent from repository root.
+### 2026-05-02 19:17 UTC: v3 split accepted without threshold retune
+**Decision**: Keep v3 D2b split thresholds unchanged after M2 disagreement review.  
+**Impact**: Retired `D2b`, produced balanced split (`41/5/13/17/23`), and kept deterministic severity×persistence boundaries stable for downstream operations.
 
-### 2026-05-02 16:20 UTC: Execute M2-M6 with single pipeline script
-**Context**: Milestones share joins/features and benefit from one deterministic orchestration path.
-
-**Options considered**:
-1. Multiple ad hoc shell/python snippets.
-2. Reproducible pipeline (`tools/triage_pipeline.py`) with fixed rule/cluster/seed/crosswalk logic.
-
-**Decision**: Option 2.
-
-**Impact**: Entire triage campaign is reproducible from M1 outputs.
-
-### 2026-05-02 16:22 UTC: Keep D1/D4 labels on 4 cluster disagreements
-**Context**: HDBSCAN yielded four disagreement rows (`H84`, `H146`, `H202`, `H431`).
-
-**Options considered**:
-1. Retune thresholds and rerun M2.
-2. Relabel disagreement rows.
-3. Accept disagreements with rationale.
-
-**Decision**: Option 3.
-
-**Impact**: Rule taxonomy preserved; disagreements documented without threshold churn.
+### 2026-05-02 19:17 UTC: v3 D2b2 recommendation linked to H2637 precedent
+**Decision**: Set D2b2 recommendation to `extend_20260430_uncapped-spectacular_h2637_hillslope_closure-spike`.  
+**Impact**: Preserves precedent continuity for the D4-adjacent single-day moderate band while keeping other split families as `new_incident`.
 
 ## Risks and Issues
 
 | Risk | Severity | Likelihood | Mitigation | Status |
 |------|----------|------------|------------|--------|
-| High `D_UNCLASSIFIED` prevalence weakens immediate family-level ablation granularity | Medium | High | Follow-on taxonomy refinement pass before broad campaign expansion | Open |
-| D0 demotion criteria may be too strict for this dataset | Low | Medium | Revisit once `D_UNCLASSIFIED` is decomposed and features are expanded | Open |
+| Threshold brittleness near split boundaries (`severity_split_300`, `severity_split_500`, `persistence_split_3`) | Medium | Medium | Use `threshold_sensitivity_v3.csv` unstable rows to prioritize robust first ablation lanes; revisit split thresholds only if lane evidence contradicts taxonomy | Open |
+| Cluster disagreement concentration in dominant run/config may hide alternate mechanisms | Medium | Medium | Treat `taxonomy_disagreements_v3.csv` cohorts as secondary prioritization signal when selecting initial incident scope | Open |
 
 ## Verification Checklist
 
 ### Documentation
-- [x] `package.md` created and scoped.
-- [x] `tracker.md` updated at closeout.
-- [x] Active ExecPlan maintained and finalized under `prompts/active/`.
+- [x] `package.md` includes v3 follow-up outputs and matrix status.
+- [x] v1, v2, and v3 active ExecPlans updated through retrospective closeout.
+- [x] tracker updated with full v1-v3 timeline.
 
 ### Execution
-- [x] M1-M6 outputs generated in package `artifacts/`.
-- [x] ExecPlan `Progress`, `Decision Log`, and `Outcomes & Retrospective` fully updated.
-- [x] Row-count acceptance checks met (`133`, `1167`, `5` lines for flagged/all/runs CSVs).
-- [x] Taxonomy completeness checks met (`132` rows, non-null `family_primary`, non-empty rationale).
-- [x] Representative seed acceptance checks met (worst/median seeds have no missing shared context).
+- [x] v1 artifact set complete.
+- [x] v2 artifact set complete.
+- [x] v3 artifact set complete:
+  - `taxonomy_assignments_v3.csv`
+  - `taxonomy_disagreements_v3.csv`
+  - `representative_seeds_v3.csv`
+  - `campaign_matrix_v3.csv`
+  - `defect_families_v3.md`
+  - `taxonomy_evolution_v3.md`
+  - `threshold_sensitivity_v3.csv`
+  - `split_d2b_taxonomy_metadata.json`
+- [x] v3 acceptance gate met: `D2b=0`, `D_UNRESOLVED_D2B_SPLIT=0`, `D_UNCLASSIFIED=0`, largest family `41 <= 53`.
+- [x] v3 representative-seed gate met: split-family worst/median rows have `missing_shared_context == ""`.
 
 ## Progress Notes
 
-### 2026-05-02 16:30 UTC: End-to-end execution closeout
+### 2026-05-02 19:19 UTC: v3 end-to-end closeout
 **Agent/Contributor**: Codex
 
 **Work completed**:
-- Implemented and ran M1 (`tools/build_mofe_triage_table.py`).
-- Implemented and ran M2-M6 (`tools/triage_pipeline.py`).
-- Produced all required artifacts:
-  - `triage_table_runs.csv`
-  - `triage_table_hillslopes.csv`
-  - `triage_table_hillslopes_all.csv`
-  - `taxonomy_assignments.csv`
-  - `taxonomy_disagreements.csv`
-  - `representative_seeds.csv`
-  - `precedent_crosswalk.md`
-  - `campaign_matrix.csv`
-  - `defect_families.md`
+- Authored `tools/split_d2b_taxonomy.py`.
+- Executed v3 M1-M4 outputs and M5 documentation updates.
+- Validated strict v3 gates, disagreement export, seed manifests, matrix row count, and six-threshold sensitivity coverage.
 
 **Blockers encountered**:
 - None.
 
 **Next steps**:
-1. Review `D_UNCLASSIFIED` population and define follow-on deterministic families.
-2. Decide whether D4 should extend `20260430_uncapped-spectacular_h2637_hillslope_closure-spike` now or spawn a sibling incident.
-
-**Test results**:
-- `PRECONDITIONS_OK`
-- `triage_table built: 4 runs, 132 flagged hillslopes, 1166 total hillslopes`
-- `triage_pipeline complete: 132 taxonomy rows, 4 disagreements, 9 representative seeds, families=D1,D2,D4,D_UNCLASSIFIED`
+1. Open ablation execution package(s) from `campaign_matrix_v3.csv`.
+2. Prioritize D2b2 extension lane against H2637 precedent, then stage new incidents for D2b1/D2b3/D2b4/D2b5.

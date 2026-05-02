@@ -65,7 +65,8 @@ This package operationalizes triage of MOFE closure-audit flagged hillslopes fro
 - **Security review artifact**: `N/A`
 
 ## References
-- `docs/work-packages/20260502_mofe_flagged_hillslope_triage/prompts/active/mofe_flagged_hillslope_triage_execplan.md` - Active execution plan.
+- `docs/work-packages/20260502_mofe_flagged_hillslope_triage/prompts/active/mofe_flagged_hillslope_d2b_split_execplan.md` - Active execution plan (v3 D2b split).
+- `docs/work-packages/20260502_mofe_flagged_hillslope_triage/prompts/active/mofe_flagged_hillslope_taxonomy_refinement_execplan.md` - Prior v2 refinement closure-of-record.
 - `docs/mini-work-packages/20260502_rq_replay_mofe_260501_validation/artifacts/` - Source validation evidence.
 - `/workdir/wepp-forest/docs/ablation/protocol.md` - Ablation lane/incident contract.
 
@@ -74,4 +75,7 @@ This package operationalizes triage of MOFE closure-audit flagged hillslopes fro
 - Updated tracker and ExecPlan with execution record and closeout.
 
 ## Follow-up Work
+- v2 taxonomy refinement outputs are now in place (`taxonomy_assignments_v2.csv`, `representative_seeds_v2.csv`, `campaign_matrix_v2.csv`, `defect_families_v2.md`, `taxonomy_evolution.md`, `threshold_sensitivity.csv`) and supersede v1 for campaign design.
+- v3 D2b split execution is complete. Operational outputs are in place: `taxonomy_assignments_v3.csv`, `taxonomy_disagreements_v3.csv`, `representative_seeds_v3.csv`, `campaign_matrix_v3.csv`, `defect_families_v3.md`, `taxonomy_evolution_v3.md`, and `threshold_sensitivity_v3.csv`.
+- `campaign_matrix_v3.csv` is the active matrix for downstream incident selection; it retires parent `D2b`, defines `D2b1`-`D2b5` lanes, and preserves the H2637 extension recommendation for `D2b2`.
 - Open one or more ablation execution packages by defect family once campaign matrix is accepted.

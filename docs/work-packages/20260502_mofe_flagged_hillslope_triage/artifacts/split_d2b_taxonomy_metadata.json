@@ -1,0 +1,40 @@
+{
+  "carried_forward": 33,
+  "cluster_algorithm": "hdbscan(min_cluster_size=5)",
+  "d2b2_recommendation": "extend_20260430_uncapped-spectacular_h2637_hillslope_closure-spike",
+  "disagreement_count": 38,
+  "family_counts_v3": {
+    "D1": 13,
+    "D2b1": 41,
+    "D2b2": 5,
+    "D2b3": 13,
+    "D2b4": 17,
+    "D2b5": 23,
+    "D3": 7,
+    "D4": 2,
+    "D6b": 5,
+    "D6c": 6
+  },
+  "generated_utc": "2026-05-02T19:19:10.821227+00:00",
+  "missing_seed_context_alerts": [],
+  "no_cluster": false,
+  "no_sensitivity": false,
+  "sensitivity_rows": 120,
+  "split_counts": {
+    "D2b1": 41,
+    "D2b2": 5,
+    "D2b3": 13,
+    "D2b4": 17,
+    "D2b5": 23
+  },
+  "split_thresholds": {
+    "persistence_split_29": 29.0,
+    "persistence_split_3": 3.0,
+    "severity_lower_100": 100.0,
+    "severity_split_300": 300.0,
+    "severity_split_500": 500.0,
+    "severity_upper_1000": 1000.0
+  },
+  "unresolved_rows": [],
+  "v2_d2b_count": 99
+}

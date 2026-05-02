@@ -1,0 +1,133 @@
+runid,config,wepp_id,family_primary,family_secondary,family_tertiary,family_rationale,storage_saturation_observed,cluster_label,rule_cluster_agreement
+cochlear-beriberi,disturbed9002-mofe,1,D1,D6c,D3,"D1: outlier_is_outlet_ofe=True, late_max_abs_ofe_closure_residual_mm_max_abs=1049.162>1000.000, late_max_qofe_to_q_ratio_max_abs>=n_ofe_max-0.01.",True,-1,noise
+cochlear-beriberi,disturbed9002-mofe,3,D2b4,,,"D2b4: cell (M2,T2) with severity=457.277 in [300,500) and requires_scientific_review_days=9 in [4,29].",False,2,agree
+cochlear-beriberi,disturbed9002-mofe,13,D2b2,,,"D2b2: cell (M2,T1) with severity=473.083 in [300,500) and requires_scientific_review_days=1<=3.",False,2,agree
+cochlear-beriberi,disturbed9002-mofe,22,D1,D6c,D3,"D1: outlier_is_outlet_ofe=True, late_max_abs_ofe_closure_residual_mm_max_abs=2833.143>1000.000, late_max_qofe_to_q_ratio_max_abs>=n_ofe_max-0.01.",True,-1,noise
+cochlear-beriberi,disturbed9002-mofe,25,D6c,D2b,D3,D6c: requires_scientific_review_days=110>=30 and late_max_abs_ofe_closure_residual_mm_max_abs=887.803>500.000.,True,-1,noise
+cochlear-beriberi,disturbed9002-mofe,32,D2b1,,,"D2b1: cell (M1,T1) with severity=126.534 in [100,300) and requires_scientific_review_days=1<=3.",False,2,disagree
+cochlear-beriberi,disturbed9002-mofe,34,D2b4,,,"D2b4: cell (M2,T2) with severity=493.572 in [300,500) and requires_scientific_review_days=17 in [4,29].",False,2,agree
+cochlear-beriberi,disturbed9002-mofe,35,D1,D6c,D3,"D1: outlier_is_outlet_ofe=True, late_max_abs_ofe_closure_residual_mm_max_abs=1346.371>1000.000, late_max_qofe_to_q_ratio_max_abs>=n_ofe_max-0.01.",True,-1,noise
+cochlear-beriberi,disturbed9002-mofe,38,D2b3,,,"D2b3: cell (M1,T2) with severity=279.575 in [100,300) and requires_scientific_review_days=17 in [4,29].",False,2,disagree
+cochlear-beriberi,disturbed9002-mofe,42,D2b5,,,"D2b5: cell (M3,T2) with severity=735.305 in [500,1000] and requires_scientific_review_days=20 in [4,29].",False,2,agree
+cochlear-beriberi,disturbed9002-mofe,63,D2b5,,,"D2b5: cell (M3,T2) with severity=641.445 in [500,1000] and requires_scientific_review_days=26 in [4,29].",True,2,agree
+cochlear-beriberi,disturbed9002-mofe,65,D2b5,,,"D2b5: cell (M3,T2) with severity=544.008 in [500,1000] and requires_scientific_review_days=5 in [4,29].",True,2,agree
+cochlear-beriberi,disturbed9002-mofe,67,D6b,D6a,,"D6a: requires_scientific_review_days=1<=3 and late_max_abs_ofe_closure_residual_mm_max_abs in [100.000,500.000). Sparse-family merge: D6a population<3; reassigned to D6b.",False,2,disagree
+cochlear-beriberi,disturbed9002-mofe,68,D2b5,,,"D2b5: cell (M3,T2) with severity=695.557 in [500,1000] and requires_scientific_review_days=4 in [4,29].",True,2,agree
+cochlear-beriberi,disturbed9002-mofe,71,D2b2,,,"D2b2: cell (M2,T1) with severity=442.733 in [300,500) and requires_scientific_review_days=3<=3.",True,2,agree
+cochlear-beriberi,disturbed9002-mofe,80,D6c,D2b,D3,D6c: requires_scientific_review_days=42>=30 and late_max_abs_ofe_closure_residual_mm_max_abs=976.967>500.000.,True,2,disagree
+cochlear-beriberi,disturbed9002-mofe,84,D4,D2b,D3,D4: requires_scientific_review_days=2<=3 and late_max_abs_ofe_closure_residual_mm_max_abs=506.304>=500.000.,True,2,disagree
+cochlear-beriberi,disturbed9002-mofe,94,D1,D6c,D3,"D1: outlier_is_outlet_ofe=True, late_max_abs_ofe_closure_residual_mm_max_abs=2391.639>1000.000, late_max_qofe_to_q_ratio_max_abs>=n_ofe_max-0.01.",True,-1,noise
+cochlear-beriberi,disturbed9002-mofe,99,D2b5,,,"D2b5: cell (M3,T2) with severity=524.281 in [500,1000] and requires_scientific_review_days=6 in [4,29].",True,2,agree
+cochlear-beriberi,disturbed9002-mofe,105,D2b5,,,"D2b5: cell (M3,T2) with severity=518.177 in [500,1000] and requires_scientific_review_days=8 in [4,29].",False,2,agree
+cochlear-beriberi,disturbed9002-mofe,106,D2b1,,,"D2b1: cell (M1,T1) with severity=107.003 in [100,300) and requires_scientific_review_days=1<=3.",False,2,disagree
+cochlear-beriberi,disturbed9002-mofe,107,D2b5,,,"D2b5: cell (M3,T2) with severity=962.321 in [500,1000] and requires_scientific_review_days=15 in [4,29].",False,-1,noise
+cochlear-beriberi,disturbed9002-mofe,111,D2b4,,,"D2b4: cell (M2,T2) with severity=363.462 in [300,500) and requires_scientific_review_days=5 in [4,29].",False,2,agree
+cochlear-beriberi,disturbed9002-mofe,112,D2b1,,,"D2b1: cell (M1,T1) with severity=103.046 in [100,300) and requires_scientific_review_days=1<=3.",False,2,disagree
+cochlear-beriberi,disturbed9002-mofe,120,D2b1,,,"D2b1: cell (M1,T1) with severity=204.786 in [100,300) and requires_scientific_review_days=2<=3.",True,2,disagree
+cochlear-beriberi,disturbed9002-mofe,125,D2b3,,,"D2b3: cell (M1,T2) with severity=291.110 in [100,300) and requires_scientific_review_days=10 in [4,29].",True,2,disagree
+cochlear-beriberi,disturbed9002-mofe,131,D2b4,,,"D2b4: cell (M2,T2) with severity=452.240 in [300,500) and requires_scientific_review_days=15 in [4,29].",False,2,agree
+cochlear-beriberi,disturbed9002-mofe,136,D2b5,,,"D2b5: cell (M3,T2) with severity=790.369 in [500,1000] and requires_scientific_review_days=14 in [4,29].",True,2,agree
+cochlear-beriberi,disturbed9002-mofe,141,D2b1,,,"D2b1: cell (M1,T1) with severity=114.996 in [100,300) and requires_scientific_review_days=1<=3.",True,2,disagree
+cochlear-beriberi,disturbed9002-mofe,146,D1,D3,D6b,"D1: outlier_is_outlet_ofe=True, late_max_abs_ofe_closure_residual_mm_max_abs=1247.790>1000.000, late_max_qofe_to_q_ratio_max_abs>=n_ofe_max-0.01.",True,2,disagree
+cochlear-beriberi,disturbed9002-mofe,148,D2b1,,,"D2b1: cell (M1,T1) with severity=208.871 in [100,300) and requires_scientific_review_days=2<=3.",True,2,disagree
+cochlear-beriberi,disturbed9002-mofe,150,D3,D6b,,D3: soilwater_to_porosity_fraction_p99=0.994>=0.990.,True,2,disagree
+cochlear-beriberi,disturbed9002-mofe,152,D2b3,,,"D2b3: cell (M1,T2) with severity=254.250 in [100,300) and requires_scientific_review_days=6 in [4,29].",True,2,disagree
+cochlear-beriberi,disturbed9002-mofe,154,D3,D6b,,D3: soilwater_to_porosity_fraction_p99=0.995>=0.990.,True,2,disagree
+cochlear-beriberi,disturbed9002-mofe,191,D2b4,,,"D2b4: cell (M2,T2) with severity=398.025 in [300,500) and requires_scientific_review_days=6 in [4,29].",False,-1,noise
+cochlear-beriberi,disturbed9002-mofe,196,D1,D6b,,"D1: outlier_is_outlet_ofe=True, late_max_abs_ofe_closure_residual_mm_max_abs=1480.736>1000.000, late_max_qofe_to_q_ratio_max_abs>=n_ofe_max-0.01.",False,-1,noise
+cochlear-beriberi,disturbed9002-mofe,199,D2b4,,,"D2b4: cell (M2,T2) with severity=335.295 in [300,500) and requires_scientific_review_days=4 in [4,29].",False,2,agree
+cochlear-beriberi,disturbed9002-mofe,202,D1,D6b,,"D1: outlier_is_outlet_ofe=True, late_max_abs_ofe_closure_residual_mm_max_abs=1207.166>1000.000, late_max_qofe_to_q_ratio_max_abs>=n_ofe_max-0.01.",False,2,disagree
+cochlear-beriberi,disturbed9002-mofe,215,D2b3,,,"D2b3: cell (M1,T2) with severity=252.474 in [100,300) and requires_scientific_review_days=4 in [4,29].",False,2,disagree
+cochlear-beriberi,disturbed9002-mofe,218,D2b1,,,"D2b1: cell (M1,T1) with severity=267.856 in [100,300) and requires_scientific_review_days=1<=3.",False,2,disagree
+cochlear-beriberi,disturbed9002-mofe,228,D2b5,,,"D2b5: cell (M3,T2) with severity=504.018 in [500,1000] and requires_scientific_review_days=9 in [4,29].",False,-1,noise
+cochlear-beriberi,disturbed9002-mofe,239,D2b1,,,"D2b1: cell (M1,T1) with severity=186.482 in [100,300) and requires_scientific_review_days=2<=3.",False,2,disagree
+cochlear-beriberi,disturbed9002-mofe,246,D2b4,,,"D2b4: cell (M2,T2) with severity=476.619 in [300,500) and requires_scientific_review_days=9 in [4,29].",False,2,agree
+cochlear-beriberi,disturbed9002-mofe,251,D2b5,,,"D2b5: cell (M3,T2) with severity=916.658 in [500,1000] and requires_scientific_review_days=23 in [4,29].",False,-1,noise
+cochlear-beriberi,disturbed9002-mofe,254,D2b1,,,"D2b1: cell (M1,T1) with severity=272.863 in [100,300) and requires_scientific_review_days=2<=3.",False,1,agree
+cochlear-beriberi,disturbed9002-mofe,255,D2b3,,,"D2b3: cell (M1,T2) with severity=244.053 in [100,300) and requires_scientific_review_days=13 in [4,29].",False,1,disagree
+cochlear-beriberi,disturbed9002-mofe,259,D2b3,,,"D2b3: cell (M1,T2) with severity=195.575 in [100,300) and requires_scientific_review_days=20 in [4,29].",False,-1,noise
+cochlear-beriberi,disturbed9002-mofe,265,D2b3,,,"D2b3: cell (M1,T2) with severity=178.444 in [100,300) and requires_scientific_review_days=4 in [4,29].",False,-1,noise
+cochlear-beriberi,disturbed9002-mofe,267,D6c,D2b,,D6c: requires_scientific_review_days=47>=30 and late_max_abs_ofe_closure_residual_mm_max_abs=708.911>500.000.,False,-1,noise
+cochlear-beriberi,disturbed9002-mofe,268,D2b1,,,"D2b1: cell (M1,T1) with severity=126.169 in [100,300) and requires_scientific_review_days=1<=3.",False,2,disagree
+cochlear-beriberi,disturbed9002-mofe,273,D2b2,,,"D2b2: cell (M2,T1) with severity=389.756 in [300,500) and requires_scientific_review_days=2<=3.",True,2,agree
+cochlear-beriberi,disturbed9002-mofe,275,D2b5,,,"D2b5: cell (M3,T2) with severity=516.299 in [500,1000] and requires_scientific_review_days=4 in [4,29].",False,-1,noise
+cochlear-beriberi,disturbed9002-mofe,278,D2b5,,,"D2b5: cell (M3,T2) with severity=619.128 in [500,1000] and requires_scientific_review_days=7 in [4,29].",False,-1,noise
+cochlear-beriberi,disturbed9002-mofe,282,D2b4,,,"D2b4: cell (M2,T2) with severity=495.976 in [300,500) and requires_scientific_review_days=5 in [4,29].",False,2,agree
+cochlear-beriberi,disturbed9002-mofe,285,D4,D2b,,D4: requires_scientific_review_days=3<=3 and late_max_abs_ofe_closure_residual_mm_max_abs=828.175>=500.000.,False,-1,noise
+cochlear-beriberi,disturbed9002-mofe,295,D2b1,,,"D2b1: cell (M1,T1) with severity=116.084 in [100,300) and requires_scientific_review_days=1<=3.",False,1,agree
+cochlear-beriberi,disturbed9002-mofe,305,D2b5,,,"D2b5: cell (M3,T2) with severity=968.365 in [500,1000] and requires_scientific_review_days=14 in [4,29].",False,-1,noise
+cochlear-beriberi,disturbed9002-mofe,312,D6b,,,"D6b: requires_scientific_review_days in [4,29] and late_max_abs_ofe_closure_residual_mm_max_abs>=100.000.",False,-1,noise
+cochlear-beriberi,disturbed9002-mofe,317,D2b1,,,"D2b1: cell (M1,T1) with severity=163.874 in [100,300) and requires_scientific_review_days=1<=3.",False,2,disagree
+cochlear-beriberi,disturbed9002-mofe,333,D6b,,,"D6b: requires_scientific_review_days in [4,29] and late_max_abs_ofe_closure_residual_mm_max_abs>=100.000.",False,-1,noise
+cochlear-beriberi,disturbed9002-mofe,339,D2b1,,,"D2b1: cell (M1,T1) with severity=178.242 in [100,300) and requires_scientific_review_days=1<=3.",False,1,agree
+cochlear-beriberi,disturbed9002-mofe,346,D2b3,,,"D2b3: cell (M1,T2) with severity=287.117 in [100,300) and requires_scientific_review_days=11 in [4,29].",False,-1,noise
+cochlear-beriberi,disturbed9002-mofe,349,D6c,,,D6c: requires_scientific_review_days=47>=30 and late_max_abs_ofe_closure_residual_mm_max_abs=949.839>500.000.,False,-1,noise
+cochlear-beriberi,disturbed9002-mofe,351,D2b1,,,"D2b1: cell (M1,T1) with severity=184.689 in [100,300) and requires_scientific_review_days=2<=3.",False,1,agree
+cochlear-beriberi,disturbed9002-mofe,354,D2b4,,,"D2b4: cell (M2,T2) with severity=448.218 in [300,500) and requires_scientific_review_days=8 in [4,29].",False,-1,noise
+cochlear-beriberi,disturbed9002-mofe,360,D6b,,,"D6b: requires_scientific_review_days in [4,29] and late_max_abs_ofe_closure_residual_mm_max_abs>=100.000.",False,-1,noise
+cochlear-beriberi,disturbed9002-mofe,378,D2b3,,,"D2b3: cell (M1,T2) with severity=255.983 in [100,300) and requires_scientific_review_days=5 in [4,29].",False,1,disagree
+cochlear-beriberi,disturbed9002-mofe,399,D2b2,,,"D2b2: cell (M2,T1) with severity=319.464 in [300,500) and requires_scientific_review_days=3<=3.",False,2,agree
+cochlear-beriberi,disturbed9002-mofe,400,D2b5,,,"D2b5: cell (M3,T2) with severity=850.314 in [500,1000] and requires_scientific_review_days=22 in [4,29].",True,2,agree
+cochlear-beriberi,disturbed9002-mofe,403,D2b5,,,"D2b5: cell (M3,T2) with severity=500.749 in [500,1000] and requires_scientific_review_days=9 in [4,29].",True,2,agree
+cochlear-beriberi,disturbed9002-mofe,409,D2b1,,,"D2b1: cell (M1,T1) with severity=238.158 in [100,300) and requires_scientific_review_days=1<=3.",False,2,disagree
+cochlear-beriberi,disturbed9002-mofe,412,D2b5,,,"D2b5: cell (M3,T2) with severity=781.627 in [500,1000] and requires_scientific_review_days=8 in [4,29].",True,2,agree
+cochlear-beriberi,disturbed9002-mofe,422,D2b1,,,"D2b1: cell (M1,T1) with severity=124.177 in [100,300) and requires_scientific_review_days=1<=3.",False,2,disagree
+cochlear-beriberi,disturbed9002-mofe,428,D2b4,,,"D2b4: cell (M2,T2) with severity=327.229 in [300,500) and requires_scientific_review_days=10 in [4,29].",False,2,agree
+cochlear-beriberi,disturbed9002-mofe,431,D1,D3,D6b,"D1: outlier_is_outlet_ofe=True, late_max_abs_ofe_closure_residual_mm_max_abs=1153.171>1000.000, late_max_qofe_to_q_ratio_max_abs>=n_ofe_max-0.01.",True,2,disagree
+cochlear-beriberi,disturbed9002-mofe,434,D1,D6c,D3,"D1: outlier_is_outlet_ofe=True, late_max_abs_ofe_closure_residual_mm_max_abs=2423.214>1000.000, late_max_qofe_to_q_ratio_max_abs>=n_ofe_max-0.01.",True,-1,noise
+cochlear-beriberi,disturbed9002-mofe,440,D2b4,,,"D2b4: cell (M2,T2) with severity=496.101 in [300,500) and requires_scientific_review_days=7 in [4,29].",False,2,agree
+cochlear-beriberi,disturbed9002-mofe,448,D2b4,,,"D2b4: cell (M2,T2) with severity=495.317 in [300,500) and requires_scientific_review_days=8 in [4,29].",True,2,agree
+cochlear-beriberi,disturbed9002-mofe,457,D2b5,,,"D2b5: cell (M3,T2) with severity=595.907 in [500,1000] and requires_scientific_review_days=9 in [4,29].",False,-1,noise
+cochlear-beriberi,disturbed9002-mofe,461,D1,D6c,D3,"D1: outlier_is_outlet_ofe=True, late_max_abs_ofe_closure_residual_mm_max_abs=2926.688>1000.000, late_max_qofe_to_q_ratio_max_abs>=n_ofe_max-0.01.",True,-1,noise
+cochlear-beriberi,disturbed9002-mofe,463,D2b5,,,"D2b5: cell (M3,T2) with severity=656.994 in [500,1000] and requires_scientific_review_days=14 in [4,29].",True,2,agree
+cochlear-beriberi,disturbed9002-mofe,465,D2b5,,,"D2b5: cell (M3,T2) with severity=971.189 in [500,1000] and requires_scientific_review_days=10 in [4,29].",False,-1,noise
+cochlear-beriberi,disturbed9002-mofe,468,D2b5,,,"D2b5: cell (M3,T2) with severity=733.238 in [500,1000] and requires_scientific_review_days=12 in [4,29].",False,2,agree
+cochlear-beriberi,disturbed9002-mofe,472,D2b1,,,"D2b1: cell (M1,T1) with severity=195.186 in [100,300) and requires_scientific_review_days=2<=3.",False,2,disagree
+cochlear-beriberi,disturbed9002-mofe,474,D1,D6b,,"D1: outlier_is_outlet_ofe=True, late_max_abs_ofe_closure_residual_mm_max_abs=1211.234>1000.000, late_max_qofe_to_q_ratio_max_abs>=n_ofe_max-0.01.",False,-1,noise
+cochlear-beriberi,disturbed9002-mofe,475,D1,D6b,,"D1: outlier_is_outlet_ofe=True, late_max_abs_ofe_closure_residual_mm_max_abs=1002.609>1000.000, late_max_qofe_to_q_ratio_max_abs>=n_ofe_max-0.01.",False,-1,noise
+cochlear-beriberi,disturbed9002-mofe,476,D2b1,,,"D2b1: cell (M1,T1) with severity=193.382 in [100,300) and requires_scientific_review_days=1<=3.",False,2,disagree
+cochlear-beriberi,disturbed9002-mofe,488,D2b2,,,"D2b2: cell (M2,T1) with severity=426.453 in [300,500) and requires_scientific_review_days=1<=3.",False,2,agree
+cochlear-beriberi,disturbed9002-mofe,492,D2b3,,,"D2b3: cell (M1,T2) with severity=295.982 in [100,300) and requires_scientific_review_days=7 in [4,29].",False,2,disagree
+cochlear-beriberi,disturbed9002-mofe,495,D2b1,,,"D2b1: cell (M1,T1) with severity=288.450 in [100,300) and requires_scientific_review_days=2<=3.",True,2,disagree
+cochlear-beriberi,disturbed9002-mofe,498,D2b4,,,"D2b4: cell (M2,T2) with severity=483.217 in [300,500) and requires_scientific_review_days=7 in [4,29].",False,2,agree
+cochlear-beriberi,disturbed9002-mofe,501,D2b4,,,"D2b4: cell (M2,T2) with severity=350.964 in [300,500) and requires_scientific_review_days=7 in [4,29].",False,2,agree
+cochlear-beriberi,disturbed9002-mofe,504,D2b1,,,"D2b1: cell (M1,T1) with severity=189.294 in [100,300) and requires_scientific_review_days=1<=3.",False,2,disagree
+cochlear-beriberi,disturbed9002-mofe,507,D1,D6c,,"D1: outlier_is_outlet_ofe=True, late_max_abs_ofe_closure_residual_mm_max_abs=1875.858>1000.000, late_max_qofe_to_q_ratio_max_abs>=n_ofe_max-0.01.",False,-1,noise
+cochlear-beriberi,disturbed9002-mofe,513,D2b5,,,"D2b5: cell (M3,T2) with severity=519.136 in [500,1000] and requires_scientific_review_days=6 in [4,29].",False,2,agree
+cochlear-beriberi,disturbed9002-mofe,516,D2b5,,,"D2b5: cell (M3,T2) with severity=729.421 in [500,1000] and requires_scientific_review_days=6 in [4,29].",False,2,agree
+ordained-incentive,disturbed9002-wbt-mofe,17,D2b1,,,"D2b1: cell (M1,T1) with severity=137.786 in [100,300) and requires_scientific_review_days=1<=3.",True,0,agree
+ordained-incentive,disturbed9002-wbt-mofe,20,D3,D6a,,D3: soilwater_to_porosity_fraction_p99=0.999>=0.990.,True,-1,noise
+ordained-incentive,disturbed9002-wbt-mofe,33,D3,D6a,,D3: soilwater_to_porosity_fraction_p99=1.000>=0.990.,True,0,agree
+ordained-incentive,disturbed9002-wbt-mofe,52,D2b1,,,"D2b1: cell (M1,T1) with severity=195.398 in [100,300) and requires_scientific_review_days=3<=3.",True,0,agree
+ordained-incentive,disturbed9002-wbt-mofe,61,D2b1,,,"D2b1: cell (M1,T1) with severity=129.960 in [100,300) and requires_scientific_review_days=1<=3.",True,0,agree
+ordained-incentive,disturbed9002-wbt-mofe,66,D2b3,,,"D2b3: cell (M1,T2) with severity=231.940 in [100,300) and requires_scientific_review_days=14 in [4,29].",True,0,disagree
+ordained-incentive,disturbed9002-wbt-mofe,71,D2b1,,,"D2b1: cell (M1,T1) with severity=108.227 in [100,300) and requires_scientific_review_days=1<=3.",True,0,agree
+ordained-incentive,disturbed9002-wbt-mofe,80,D2b5,,,"D2b5: cell (M3,T2) with severity=631.286 in [500,1000] and requires_scientific_review_days=28 in [4,29].",True,-1,noise
+ordained-incentive,disturbed9002-wbt-mofe,81,D6c,D2b,D3,D6c: requires_scientific_review_days=57>=30 and late_max_abs_ofe_closure_residual_mm_max_abs=912.469>500.000.,True,-1,noise
+ordained-incentive,disturbed9002-wbt-mofe,93,D6c,D2b,D3,D6c: requires_scientific_review_days=44>=30 and late_max_abs_ofe_closure_residual_mm_max_abs=580.683>500.000.,True,-1,noise
+ordained-incentive,disturbed9002-wbt-mofe,95,D2b4,,,"D2b4: cell (M2,T2) with severity=469.059 in [300,500) and requires_scientific_review_days=8 in [4,29].",False,0,disagree
+ordained-incentive,disturbed9002-wbt-mofe,96,D2b1,,,"D2b1: cell (M1,T1) with severity=140.327 in [100,300) and requires_scientific_review_days=2<=3.",True,0,agree
+ordained-incentive,disturbed9002-wbt-mofe,104,D2b1,,,"D2b1: cell (M1,T1) with severity=222.693 in [100,300) and requires_scientific_review_days=1<=3.",False,0,agree
+ordained-incentive,disturbed9002-wbt-mofe,110,D2b1,,,"D2b1: cell (M1,T1) with severity=138.684 in [100,300) and requires_scientific_review_days=1<=3.",True,0,agree
+ordained-incentive,disturbed9002-wbt-mofe,138,D2b1,,,"D2b1: cell (M1,T1) with severity=158.990 in [100,300) and requires_scientific_review_days=3<=3.",True,0,agree
+ordained-incentive,disturbed9002-wbt-mofe,141,D2b4,,,"D2b4: cell (M2,T2) with severity=471.171 in [300,500) and requires_scientific_review_days=19 in [4,29].",True,0,disagree
+ordained-incentive,disturbed9002-wbt-mofe,151,D2b1,,,"D2b1: cell (M1,T1) with severity=145.321 in [100,300) and requires_scientific_review_days=2<=3.",True,0,agree
+ordained-incentive,disturbed9002-wbt-mofe,154,D2b1,,,"D2b1: cell (M1,T1) with severity=128.412 in [100,300) and requires_scientific_review_days=2<=3.",True,0,agree
+ordained-incentive,disturbed9002-wbt-mofe,157,D2b1,,,"D2b1: cell (M1,T1) with severity=146.554 in [100,300) and requires_scientific_review_days=2<=3.",True,0,agree
+ordained-incentive,disturbed9002-wbt-mofe,161,D3,D6a,,D3: soilwater_to_porosity_fraction_p99=1.000>=0.990.,True,0,agree
+ordained-incentive,disturbed9002-wbt-mofe,174,D2b1,,,"D2b1: cell (M1,T1) with severity=127.817 in [100,300) and requires_scientific_review_days=2<=3.",True,0,agree
+ordained-incentive,disturbed9002-wbt-mofe,195,D2b1,,,"D2b1: cell (M1,T1) with severity=141.174 in [100,300) and requires_scientific_review_days=3<=3.",True,0,agree
+ordained-incentive,disturbed9002-wbt-mofe,198,D2b3,,,"D2b3: cell (M1,T2) with severity=177.905 in [100,300) and requires_scientific_review_days=6 in [4,29].",True,0,disagree
+ordained-incentive,disturbed9002-wbt-mofe,201,D2b1,,,"D2b1: cell (M1,T1) with severity=134.104 in [100,300) and requires_scientific_review_days=2<=3.",True,0,agree
+ordained-incentive,disturbed9002-wbt-mofe,204,D2b1,,,"D2b1: cell (M1,T1) with severity=235.744 in [100,300) and requires_scientific_review_days=3<=3.",True,0,agree
+ordained-incentive,disturbed9002-wbt-mofe,213,D2b1,,,"D2b1: cell (M1,T1) with severity=140.170 in [100,300) and requires_scientific_review_days=1<=3.",True,0,agree
+ordained-incentive,disturbed9002-wbt-mofe,219,D3,D6a,,D3: soilwater_to_porosity_fraction_p99=0.999>=0.990.,True,0,agree
+ordained-incentive,disturbed9002-wbt-mofe,221,D2b1,,,"D2b1: cell (M1,T1) with severity=113.828 in [100,300) and requires_scientific_review_days=1<=3.",True,0,agree
+ordained-incentive,disturbed9002-wbt-mofe,224,D2b1,,,"D2b1: cell (M1,T1) with severity=137.248 in [100,300) and requires_scientific_review_days=3<=3.",False,0,agree
+ordained-incentive,disturbed9002-wbt-mofe,249,D2b4,,,"D2b4: cell (M2,T2) with severity=307.619 in [300,500) and requires_scientific_review_days=12 in [4,29].",True,0,disagree
+ordained-incentive,disturbed9002-wbt-mofe,257,D2b1,,,"D2b1: cell (M1,T1) with severity=130.047 in [100,300) and requires_scientific_review_days=3<=3.",False,0,agree
+ordained-incentive,disturbed9002-wbt-mofe,273,D3,D6a,,D3: soilwater_to_porosity_fraction_p99=0.999>=0.990.,True,0,agree
+ordained-incentive,disturbed9002-wbt-mofe,276,D2b3,,,"D2b3: cell (M1,T2) with severity=216.713 in [100,300) and requires_scientific_review_days=6 in [4,29].",True,0,disagree
+ordained-incentive,disturbed9002-wbt-mofe,284,D2b1,,,"D2b1: cell (M1,T1) with severity=138.918 in [100,300) and requires_scientific_review_days=1<=3.",False,0,agree
+ordained-incentive,disturbed9002-wbt-mofe,288,D2b1,,,"D2b1: cell (M1,T1) with severity=232.150 in [100,300) and requires_scientific_review_days=2<=3.",False,0,agree
+ordained-incentive,disturbed9002-wbt-mofe,289,D6b,D6a,,"D6a: requires_scientific_review_days=3<=3 and late_max_abs_ofe_closure_residual_mm_max_abs in [100.000,500.000). Sparse-family merge: D6a population<3; reassigned to D6b.",False,0,disagree
