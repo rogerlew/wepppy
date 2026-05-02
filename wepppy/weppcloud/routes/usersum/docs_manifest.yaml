@@ -407,6 +407,16 @@ docs:
     audience_tags: [user, operator]
     status: active
     nav_key: usersum.weppcloud.wepp_forest_compiler_fragility_brief
+  - doc_id: usersum.weppcloud.wepp_forest_multi_segment_water_balance_brief
+    source: vendor
+    vendor_id: wepp-forest
+    rel_path: wepppy/weppcloud/routes/usersum/vendor/wepp-forest/docs/20260501-stakeholder-brief-multi-segment-water-balance.md
+    title: "Stakeholder Brief: Multi-Segment Hillslope Water-Balance Correction"
+    min_role: user
+    category: weppcloud
+    audience_tags: [user, operator]
+    status: active
+    nav_key: usersum.weppcloud.wepp_forest_multi_segment_water_balance_brief
   - doc_id: usersum.weppcloud.wepp_run_results
     source: local
     rel_path: wepppy/weppcloud/routes/usersum/weppcloud/wepp-run-results.md

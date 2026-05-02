@@ -1,6 +1,6 @@
 # Stakeholder Brief: Modernizing the WEPP Build — What Changed, Why, and What to Expect
 
-Date: 2026-04-14 (revised 2026-04-28)
+Date: 2026-04-14 (revised 2026-04-26)
 Audience: Hydrologists, land managers, program staff, and analysts who use WEPP results
 
 ## The short version
@@ -185,29 +185,25 @@ The patch applies an identical guard to the non-hourly path: when `fc/ul <= 0`, 
 
 Impact: the `taken-brainstem:p1408` hillslope completes its full simulation cleanly. The guard activates only on layers with non-positive `fc/ul`; well-conditioned inputs continue through the original formula unchanged.
 
-### 14. Penman-Monteith crop water-stress denominator (`evappm.for` — unveiled-grinder incident)
+### 14. Crop water-stress denominator in the Penman-Monteith ET routine (`evappm.for` — unveiled-grinder:pw0 incident)
 
-The evapotranspiration routine in the watershed binary computes crop water-stress efficiency (`etks`) as `wftrp / (TAW − RAW)`, where `TAW` is total available water and `RAW` is readily available water. In dry or partially-stressed soil states, `RAW` can legitimately equal `TAW`, driving the denominator to zero. Core analysis from a production crash confirmed the exact state: simulation year 55, hillslope 1126, `wftrp = −10.9`, `RAW = 0`, `rawpaj = 1`, `rtd = 0` — an inactive root-zone state in which the water-stress path is reached even though the resulting crop transpiration contribution is already nulled out by `kcbcon = 0`. The modern build raised SIGFPE the instant the divide was evaluated; the legacy binary propagated an undefined result silently.
+This is a failure in the **watershed binary**, inside the Penman-Monteith evapotranspiration routine. The call chain that leads to the trap is `evappm` (the ET routine) → `watbal_hourly` (the hourly water balance) → `wshdrv` (the watershed driver). The trap was raised at `evappm.for:357`, the expression `etks = wftrp/(TAW - RAW)`, which computes the crop water-stress factor from the ratio of available root-zone transpiration demand to the root-zone available-water capacity.
 
-The patch guards the denominator: if `TAW − RAW` is non-positive, `etks` is set to 1.0 — the water-stress ceiling that indicates no deficit — instead of evaluating the undefined division. Two independent full 100-year durability lanes on the originating run confirmed the guard prevents the crash without altering simulation results on normally-conditioned years.
+When a watershed plane has an inactive crop and root state — root depth `rtd = 0`, leaf area index `lai = 0`, basal crop coefficient `kcbcon = 0` — the root-zone water capacity collapses to zero, driving both TAW and RAW to zero. Although the inactive crop coefficient would make the resulting evapotranspiration term inert downstream, the code evaluates the division before applying the coefficient. The denominator `TAW - RAW` is zero, the expression is mathematically undefined, and the modern build raises SIGFPE at that instruction.
 
-Impact: the `unveiled-grinder/pw0` watershed run, which was crashing reproducibly at year 55 in both the 2026-04-25 and 2026-04-26 release binaries after roughly three hours of compute, now completes its full 100-year simulation. Broader regression gate pending before release promotion.
+A GDB core analysis (lane C205) confirmed the exact state at the trap: simulation year 55, day 26, watershed plane 1126, with `wftrp = -10.9115524`, `RAW = 0`, `rawpaj = 1`, `rtd = 0`, and the denominator register `xmm7 = 0.0`. The guard adds a denominator test before the divide: when `TAW - RAW` is zero or non-positive, `etks` is set to 1.0 — the neutral no-stress value, which is the physically correct answer for an inactive crop with no root zone — instead of evaluating the undefined expression. All planes with a positive root-zone denominator continue through the original formula unchanged. The guard emits an observability marker on activation.
 
-### 15. Watershed pass-file read hardening (`wshpas.for` — taken-brainstem watershed incident)
+Two decisive full 100-year durability runs on the production host (`G1`, 15 403 s; `G1R`, 13 630 s) both reached simulation year 100 and exited with the watershed completion marker and empty stderr. Broader watershed regression and watchlist gates are pending before binary promotion.
 
-The watershed binary reads each hillslope's simulation summary from a `.pass.dat` file before routing. When that file is zero-length or absent — which occurs when the corresponding hillslope binary failed or was never run — the legacy binary crashed with a raw Fortran runtime EOF trap and no indication of which hillslope or file was at fault. A guard in `wshpas` now detects the EOF condition at read time and issues an explicit diagnostic stop, reporting the hillslope identifier, the file path, and the OS-level error code, instead of crashing.
+Impact: the `unveiled-grinder:pw0` watershed run, which crashed reproducibly at simulation year 55 under the current release binary (`wepp_260426`), completes its full 100-year simulation cleanly under the guarded candidate. This is the first fix in this brief to address a failure in the Penman-Monteith evapotranspiration pathway, and it is distinct from fix #12 (which addressed the hillslope binary for `unveiled-grinder:p1319`).
 
-This fix addresses robustness rather than physics. A zero-length pass file still stops the watershed run — the pass data is required for routing — but the stop now carries enough context for an operator to identify the upstream cause (typically a hillslope run that failed or timed out before producing output).
-
-Impact: the `taken-brainstem/pw0` watershed run, which was aborting silently due to a zero-length `H1408.pass.dat`, now reports a clear operator-facing error instead of a raw runtime trap.
-
-### 16. Built-in observability for future incidents
+### 15. Built-in observability for future incidents
 
 We added an optional, off-by-default diagnostic log that records exactly which phase of the simulation was executing when a run fails. This is how we were able to localize the fixes above to specific channel elements, hillslopes, days, and years within long simulations. It has no effect on results when it is off.
 
 ## Going on offense: generative input testing
 
-The fixes above came out of **reactive** work — real production runs crashed, and we followed each crash back to its cause. That is necessary but not sufficient. The same discipline we use to investigate a known failure can be turned around and used to *hunt for the next one* before a user ever sees it.
+The fourteen fixes above came out of **reactive** work — real production runs crashed, and we followed each crash back to its cause. That is necessary but not sufficient. The same discipline we use to investigate a known failure can be turned around and used to *hunt for the next one* before a user ever sees it.
 
 This is the purpose of our **generative input fuzzing** program. "Fuzzing" is a software-engineering term for a stress test: the model is run, at scale, on thousands of plausible-but-deliberately-pressured input sets, each one designed to probe a specific class of numerical edge case. Any case that produces a crash, an invalid number, or a nonsensical output is captured, minimized into a minimum reproducing example, and fed into the same ablation discipline used for real incidents. The goal is to find and close the next boundary defect while it is still cheap to fix, instead of waiting for it to surface in a production watershed.
 
@@ -268,13 +264,13 @@ The nine open slices, and their closure outcomes, are:
 | `wet / steep / P4 texture/density discontinuity` | 72 / 200 | 31 / 200 | **accepted upstream** |
 | `dry / steep / P4 texture/density discontinuity` | 38 / 200 | 0 / 200 | **patched** |
 
-Four slices reached the frozen closure criterion — **two consecutive two-hundred-case reruns with zero non-pass outcomes** — and are marked **patched**. Five remained symptomatic after a bounded patch attempt and are marked **accepted upstream**: the symptom was materially reduced, the reproducer is deterministic and preserved, and the remaining cases will be addressed by a deeper investigation (likely a narrow Fortran-side guard, in the same ablation discipline used for the thirteen fixes earlier in this brief) rather than by further input-wrapper clamping.
+Four slices reached the frozen closure criterion — **two consecutive two-hundred-case reruns with zero non-pass outcomes** — and are marked **patched**. Five remained symptomatic after a bounded patch attempt and are marked **accepted upstream**: the symptom was materially reduced, the reproducer is deterministic and preserved, and the remaining cases will be addressed by a deeper investigation (likely a narrow Fortran-side guard, in the same ablation discipline used for the fourteen fixes earlier in this brief) rather than by further input-wrapper clamping.
 
 Across the full 1,008-case calibrated rerun after patches landed, the composite non-pass rate fell from **134 cases to 41 cases** — a **70 percent reduction** — with the positive-control sensitivity gate still passing at 5 of 5. The three pressured profiles dropped as follows: slope amplification 60 → 11, event-edge 33 → 4, texture/density discontinuity 34 → 8.
 
 ### What the patches actually are (and what they are not)
 
-It is important to be precise about *where* the Milestone 7 patches live. Unlike the thirteen fixes earlier in this brief — each of which is a defensive guard inside a specific Fortran routine — **the fuzzing-driven patches landed so far are in the Python input-generation layer**, not in the WEPP binary. Specifically:
+It is important to be precise about *where* the Milestone 7 patches live. Unlike the fourteen fixes earlier in this brief — each of which is a defensive guard inside a specific Fortran routine — **the fuzzing-driven patches landed so far are in the Python input-generation layer**, not in the WEPP binary. Specifically:
 
 - The **slope-response amplification** patch constrains the mutation generator so saturation, texture fractions, and bulk density cannot co-amplify past ranges that produce unphysical soil profiles under extreme slope bias.
 - The **event-edge** patch constrains management-mutation windows so generated events stay within safe temporal bounds (no zero-duration, non-zero-intensity pairings of the kind that caused the `wshpas` time-of-concentration crash in the ablation work).
@@ -282,62 +278,7 @@ It is important to be precise about *where* the Milestone 7 patches live. Unlike
 
 Each patch has a dedicated regression test that locks in the clamp behavior. None of them alter the WEPP model; they alter the fuzzer so it stops generating inputs that are outside the documented contract of the model in the first place. Where the fuzzer's clamp is not enough — the five **accepted-upstream** slices — the remaining failures are being promoted into the ablation track for Fortran-side investigation on the next cycle.
 
-That promotion began immediately. A dedicated ablation campaign targeting the three wet-climate P5 slope-response slices (`wet/gradual`, `wet/moderate`, `wet/steep`) completed on 2026-04-22. Four hypothesized Fortran-side mechanisms were tested one at a time in isolated lanes against a matched 120-seed subset — the `route` routine's denominator boundary, the `irdgdx` denominator paths in `sloss`, the kinematic-wave slope-coupled arithmetic in `unifor`, and the Manning-path arithmetic in `mann`. Every behavioral lane produced a result numerically identical to the observability-only baseline. None of the four candidate mechanisms attributed the failure, and all four candidate edits were rolled back rather than merged. The empty patch set is the correct outcome when no lane demonstrates measurable causal attribution under matched seeds — it is the same keep-or-roll-back discipline applied to the Fortran fixes earlier in this brief, running in the direction of *negative* evidence. The investigation surfaced a new lead: a runtime-error signature repeatedly mapping to an end-of-file read path (`stmget.for` line 122).
-
-### Milestones 9–12: evaluation hardening and stop-rule
-
-The P2 event-edge and P4 texture/density slices followed with their own dedicated ablation campaigns (Milestones 9 and 10), each running multiple lanes against matched 120-seed subsets.
-
-**Milestone 9 (P2 sibling-divide ablation)** targeted `wet:moderate:P2_EVENT_EDGE` (pre-patch 200/24). Four lanes covering `wshpas`-family sibling arithmetic and an `stmget.for:122` observability probe each returned the same non-pass count as the observability-only baseline. The `stmget.for` signature recurred across multiple lanes — confirming its presence in the P2 failure class but without providing attribution to a testable guard site. All lanes were rolled back. Baseline reconciliation runs also revealed a previously uncharacterized campaign-to-campaign drift: two back-to-back identical 1,008-case full campaigns returned `119` and `101` respectively, a natural spread of 18 cases. That spread matters because it means small absolute deltas in lane comparisons cannot be attributed with confidence — the evaluation framework itself needed hardening before the ablation track could produce trustworthy decisions.
-
-**Milestone 10 (P4 sibling-arithmetic ablation)** targeted `wet:steep:P4_TEXTURE_DENSITY_DISCONTINUITY` (pre-patch 200/28). Five lanes around `saxfun` and `perc` arithmetic surfaces each returned no matched-seed improvement. One lane (L4) shifted a single matched-seed outcome but worsened the full-campaign P4 profile (`P4 +10` regression when evaluated on all 1,008 cases), disqualifying it under the keep-or-roll-back rule. All lanes were rolled back. Slice remains `accepted_upstream`.
-
-**Milestone 11** was inserted before further ablation to harden the evaluation framework itself. A paired A/B protocol was defined requiring identical seeds, stratification, and shard assignments between baseline and candidate runs. A tuning/holdout split was enforced so that candidate iteration cannot be informed by holdout data. Objective promotion thresholds were codified: composite non-pass must improve by at least 15 cases (`overall delta ≤ −15`), non-target profile deltas must stay within ±2, and the sensitivity gate must pass 5/5. Baseline variability was measured at roughly 10 cases of natural run-to-run spread, placing the threshold at 1.5× the noise floor. A null-baseline candidate (C0) confirmed the gate correctly rejects no-effect changes (observed delta = 0).
-
-**Milestone 12** resumed ablation under those gates with two candidates:
-
-- **C1 (stmget chunk iostat failfast)**: regressed severely on the tuning split (`overall +205`). Rejected.
-- **C2 (perc stz hk base clamp)**: neutral on the tuning split (`overall 0`), failing the improvement threshold. Rejected.
-
-With three consecutive failed candidates (C0, C1, C2), the configured stop rule triggered. Local patch iteration against the five remaining accepted-upstream slices is now frozen. No speculative guard was retained; the failure to produce a promotable candidate under rigorous matched-seed evaluation is the correct outcome when attribution is not established.
-
-### Milestone 13: freeze and upstream handoff
-
-Milestone 13 converted the M8-M12 evidence into a formal upstream handoff. The deliverables are a deterministic evidence bundle indexing every campaign root and outcome, a strategy brief ranking next-start options, an upstream issue draft with reproducible command anchors for each open slice, and explicit re-entry criteria specifying the conditions under which local patching can resume. The five slices remain frozen:
-
-| Slice | Accepted in |
-|---|---|
-| `wet / gradual / P5 slope amplification` | Milestone 8 |
-| `wet / moderate / P5 slope amplification` | Milestone 8 |
-| `wet / steep / P5 slope amplification` | Milestone 8 |
-| `wet / moderate / P2 event edge` | Milestone 9 |
-| `wet / steep / P4 texture/density discontinuity` | Milestone 10 |
-
-Re-entry from the freeze requires one of: (a) upstream guidance that includes a routine-prioritized review order mapped to deterministic repro anchors; (b) a new attribution candidate with credible tuning potential (`overall delta ≤ −15`) under unchanged M11 thresholds; or (c) a formally revised evaluation contract.
-
-### Milestones 14–15: science contract framework
-
-The boundary between "the model should be hardened against this edge case" and "this input is outside the documented contract and should be rejected upstream" has not been formally defined anywhere in the project. Every fix in this brief was judged case by case. As the incidents accumulate — spanning soil hydraulics, water balance, percolation, evapotranspiration, routing, and climate-file completeness — that ad-hoc posture becomes increasingly fragile.
-
-Milestones 14 and 15 address this by establishing a **science contract framework** under `docs/science-contracts/`. The framework defines:
-
-- A vocabulary of boundary dispositions (`invalid_input`, `inactive_process`, `valid_extreme`, `neutral_branch`, `bounded_transition`, `model_gap`, `requires_scientific_review`) for classifying every edge case a guard touches.
-- Stable contract and invariant identifiers that ablation incidents, fuzzing oracle output, and future upstream mutations can cite without depending on the narrative of any single incident.
-- Separated producer obligations (`wepppy` input-generation layer) and WEPP consumer obligations (Fortran routines), so that a future fix does not conflate a missing input-layer clamp with a missing model-layer guard.
-- A promotion gate for future upstream source mutations: any candidate that cites a contract must also demonstrate that its boundary disposition is classified and that the existing regression evidence supports the guard's activation boundary.
-
-Milestone 15 drafts six proposed contracts:
-
-| Contract | Scope |
-|---|---|
-| SC-SOIL-001 | Soil Hydraulic State |
-| SC-WATBAL-001 | Water Balance Domain |
-| SC-PERC-001 | Percolation Horizon Transition |
-| SC-EVAP-001 | Evapotranspiration Stress |
-| SC-ROUTE-001 | Routing Hydraulic Boundary |
-| SC-PASS-001 | WEPP Passfile State |
-
-All six are marked `proposed`, not `active`. They provide a stable citation target for future incidents without asserting premature scientific closure. The framework is the infrastructure for the next phase of the program — whether that begins with upstream guidance from WEPP maintainers or a narrower re-entry into local ablation work under the freeze re-entry criteria.
+That promotion has begun. A dedicated ablation campaign targeting the three wet-climate P5 slope-response slices (`wet/gradual`, `wet/moderate`, `wet/steep`) completed on 2026-04-22. Four hypothesized Fortran-side mechanisms were tested one at a time in isolated lanes against a matched 120-seed subset — the `route` routine's denominator boundary, the `irdgdx` denominator paths in `sloss`, the kinematic-wave slope-coupled arithmetic in `unifor`, and the Manning-path arithmetic in `mann`. Every behavioral lane produced a result numerically identical to the observability-only baseline. None of the four candidate mechanisms attributed the failure, and all four candidate edits were rolled back rather than merged. The empty patch set is the correct outcome when no lane demonstrates measurable causal attribution under matched seeds — it is the same keep-or-roll-back discipline applied to the fourteen Fortran fixes earlier in this brief, running in the direction of *negative* evidence. The investigation did surface a new lead: a runtime-error signature repeatedly mapping to an end-of-file read path (`stmget.for` line 122), which will be the next cycle's first hypothesis. The remaining two accepted-upstream slices — the wet/moderate P2 event-edge slice and the wet/steep P4 texture/density slice — have not yet had their own ablation packages and are next in the queue under the same one-mechanism-per-lane protocol.
 
 ### Why this matters for stakeholders
 
@@ -387,14 +328,12 @@ Each fix has a corresponding ablation record under [docs/ablation/](ablation/):
 - [p14 SIGFPE — exorbitant-affidavit (hourly inter-layer seepage at an impermeable boundary)](ablation/20260420_exorbitant-affidavit_p14_sigfpe-perc-purk-watbal/incident.md)
 - [p24 SIGFPE — srivas42-combatant-ionosphere (zero-duration runoff event in time-of-concentration)](ablation/20260421_srivas42-combatant-ionosphere_p24_sigfpe-wshpas/incident.md)
 - [p258 + p1319 SIGFPE — twenty-two-fratricide / unveiled-grinder (watbal_hourly log10 domain)](ablation/20260425_p258-p1319_hillslope_sigfpe-watbal-log10/incident.md)
-- [p1408 SIGFPE — taken-brainstem hillslope (watbal non-hourly log10 domain)](ablation/20260426_taken-brainstem_p1408_hillslope_sigfpe-watbal-log10/incident.md)
-- [taken-brainstem pw0 watershed EOF — wshpas pass-file read hardening](ablation/20260426_taken-brainstem_pw0_watershed_eof-wshpas-h1408/incident.md)
-- [intriguing-kingmaker p980 EOF — stmget climate-file truncation (wepppy CLIGEN)](ablation/20260427_intriguing-kingmaker_p980_hillslope_eof-stmget/incident.md)
-- [unveiled-grinder pw0 year-55 SIGFPE — evappm crop water-stress denominator](ablation/20260427_unveiled-grinder_pw0_watershed_sigfpe-evappm-watbal-hourly/incident.md)
+- [p1408 SIGFPE — taken-brainstem (watbal non-hourly log10 domain)](ablation/20260426_taken-brainstem_p1408_hillslope_sigfpe-watbal-log10/incident.md)
+- [pw0 SIGFPE — unveiled-grinder:pw0 (crop water-stress denominator, evappm)](ablation/20260427_unveiled-grinder_pw0_watershed_sigfpe-evappm-watbal-hourly/incident.md)
 - [IFX vs Linux parity report](ablation/20260419_operational-berry_pw0_sigfpe-locate-frostn/20260420-ifx-linux-parity-report.md)
 - [Ablation protocol](ablation/protocol.md) and [ablation standard](ablation/README.md)
 
-Generative input fuzzing program (single-OFE tranche, Milestones 0–15):
+Generative input fuzzing program (single-OFE tranche, Milestones 0–7):
 
 - [Program overview and strategy](../generative-inputs-fuzzing/README.md)
 - [Milestone 1 — wrapper property contracts](work-packages/20260421-generative-fuzzing-milestone1-wrapper-properties/package.md)
@@ -405,19 +344,6 @@ Generative input fuzzing program (single-OFE tranche, Milestones 0–15):
 - [Milestone 6 — single-OFE boundary patch closure](work-packages/20260422-generative-fuzzing-milestone6-single-ofe-boundary-patch-closure/package.md)
 - [Milestone 7 — single-OFE open-slice closure memo](work-packages/20260422-generative-fuzzing-milestone7-single-ofe-open-slice-closure/artifacts/closure_memo_contract.md)
 - [Milestone 8 — P5 hydraulic ablation (negative-result closeout)](work-packages/20260422-generative-fuzzing-milestone8-p5-hydraulic-ablation/artifacts/closure_memo.md)
-- [Milestone 9 — P2 sibling-divide ablation (accepted-upstream closeout)](work-packages/20260422-generative-fuzzing-milestone9-p2-sibling-divide-ablation/artifacts/closure_memo.md)
-- [Milestone 10 — P4 sibling-arithmetic ablation (accepted-upstream closeout)](work-packages/20260423-generative-fuzzing-milestone10-p4-sibling-arithmetic-ablation/artifacts/closure_memo.md)
-- [Milestone 11 — evaluation hardening and non-regression gates](work-packages/20260423-generative-fuzzing-milestone11-evaluation-hardening-nonregression/package.md)
-- [Milestone 12 — gated ablation resumption (stop-rule freeze)](work-packages/20260423-generative-fuzzing-milestone12-gated-ablation-resumption/artifacts/accepted_upstream_freeze_memo.md)
-- [Milestone 13 — upstream hypothesis handoff (freeze confirmation and re-entry criteria)](work-packages/20260424-generative-fuzzing-milestone13-upstream-hypothesis-handoff/artifacts/freeze_confirmation.md)
-- [Milestone 14 — science contract framework](work-packages/20260428-generative-fuzzing-milestone14-science-contract-framework/package.md)
-- [Milestone 15 — core science contract spec set](work-packages/20260428-generative-fuzzing-milestone15-core-science-contract-spec-set/package.md)
-
-Science contracts (proposed, not yet active):
-
-- [Science contracts overview](../science-contracts/README.md)
-- [Schema and identifier conventions](../science-contracts/schema.md)
-- [Contract index](../science-contracts/index.md)
 
 ## Running log of stakeholder-visible changes
 
@@ -452,14 +378,11 @@ Four closeout deliverables accompanied the `wshpas` guard: (1) a compact standin
 A second guard was added to the same routine that hosted the dry-watershed fix, but at a completely different expression. A hillslope run was crashing on its very first routed runoff event because the recorded event duration was zero while the runoff volume was non-zero — a pairing that makes the per-event runoff intensity (volume divided by duration) mathematically undefined. The legacy compiler tolerated it; the modern build raised SIGFPE the moment the time-of-concentration formula evaluated the intensity term. A narrow guard now floors the duration term before the divide and substitutes the routine's already-existing zero-intensity sentinel. Three additional belt-and-suspenders guards were placed on arithmetically equivalent siblings in the same expression block (slope term, composite denominator, downstream zero-volume site); none of those three fired on the originating run, but they are recorded in the incident's sibling-arithmetic audit so the same fault pattern cannot recur silently. A control hillslope from the same run that did not exhibit the fault remains byte-identical to the pre-guard build, confirming the new guards do not perturb normal events.
 
 ### 2026-04-22 — P5 hydraulic ablation campaign closed with no patch (Milestone 8)
-The three wet-climate P5 slope-response slices that exited Milestone 7 as `accepted_upstream` were the first to be promoted into a Fortran-side ablation campaign under the same protocol used for the thirteen fixes earlier in this brief. Four hypothesized mechanisms were tested, each in its own isolated lane against a matched 120-seed subset: the `route` routine's denominator boundary (`route.for`), the `irdgdx` denominator paths in `sloss.for`, the kinematic-wave slope-coupled arithmetic in `unifor.for`, and the Manning-path arithmetic in `mann.for`. Every behavioral lane returned the same non-pass count as the observability-only baseline, to the case. None of the four mechanisms attributed the failure, and per protocol all four candidate edits were rolled back rather than merged — the accepted patch set is empty. Two consecutive 200-case targeted reruns on each of the three slices confirmed the symptom remains deterministic and reproducible (non-pass in the 22–32 range on each rerun), so each slice retains its `accepted_upstream` status unchanged. A new lead surfaced during lane execution: a runtime-error signature repeatedly localizing to an end-of-file read path in `stmget.for` line 122, which is the first hypothesis for the next cycle.
+The three wet-climate P5 slope-response slices that exited Milestone 7 as `accepted_upstream` were the first to be promoted into a Fortran-side ablation campaign under the same protocol used for the fourteen fixes earlier in this brief. Four hypothesized mechanisms were tested, each in its own isolated lane against a matched 120-seed subset: the `route` routine's denominator boundary (`route.for`), the `irdgdx` denominator paths in `sloss.for`, the kinematic-wave slope-coupled arithmetic in `unifor.for`, and the Manning-path arithmetic in `mann.for`. Every behavioral lane returned the same non-pass count as the observability-only baseline, to the case. None of the four mechanisms attributed the failure, and per protocol all four candidate edits were rolled back rather than merged — the accepted patch set is empty. Two consecutive 200-case targeted reruns on each of the three slices confirmed the symptom remains deterministic and reproducible (non-pass in the 22–32 range on each rerun), so each slice retains its `accepted_upstream` status unchanged. A new lead surfaced during lane execution: a runtime-error signature repeatedly localizing to an end-of-file read path in `stmget.for` line 122, which is the first hypothesis for the next cycle.
 
 Two caveats were recorded alongside the memo. First, the 1,008-case calibrated rerun of the post-M8 campaign (with all lanes rolled back, so functionally equivalent to the M7 post-patch code state) showed composite non-pass at 91 rather than the 41 reported after Milestone 7. The delta is not a regression introduced by M8 — no patches landed — but a campaign-to-campaign drift observation that tells us the closure gate itself needs explicit variance characterization before small absolute deltas can be attributed. The matched-seed lane design used inside M8 is specifically immune to this drift, and that is the gate the investigation relied on. Second, a binary-release risk distinct from the ablation work was captured in the same memo (the production `src/wepp` ELF loader target) so it is visible to release review.
 
-No speculative patch landed. The discipline that refuses to merge a guard without measurable, matched-seed causal attribution is the same discipline that produced the Fortran fixes documented in this brief; the only difference is that in this cycle it ran in the direction of a negative result.
-
-### 2026-04-22 — Generative input fuzzing program closeout (single-OFE tranche, Milestones 0–7)
-The first full tranche of generative input fuzzing closed today. Across seven milestones, the program built a reproducible campaign pipeline — wrapper contract tests, seeded soil/management/climate generators, climate-by-slope stratified sampling, five mutation-pressure profiles, and an output oracle that flags silent `NaN`/`Inf` results even when a run exits cleanly — and then drove it at scale (1,008 cases per run) against the modern trap-enabled binary. Two independent guardrails enforce campaign validity on every run: a five-case positive-control set (all five must be detected as failures) and the per-case output oracle. The scaled campaigns surfaced 140 silent-NaN cases concentrated in nine priority slices; four of those slices were closed under the frozen two-rerun, two-hundred-case, zero-non-pass criterion, and five were classified as **accepted upstream** — reproducer preserved, patch attempt reduced the symptom materially, residual failures promoted into the Fortran-side ablation track rather than papered over with a broader input clamp. Net effect on the full calibrated rerun: composite non-pass dropped from 134 to 41 (a 70 percent reduction) with the sensitivity gate still passing 5/5. All patches landed in the input-generation layer, not in the WEPP binary, and carry dedicated regression tests. Multi-OFE fuzzing is gated on this tranche's closure memo and will begin with the five accepted-upstream slices as explicit watchlist items.
+No speculative patch landed. The discipline that refuses to merge a guard without measurable, matched-seed causal attribution is the same discipline that produced the fourteen trustworthy fixes earlier in this brief; the only difference is that in this cycle it ran in the direction of a negative result. A separate P2 event-edge and P4 texture/density ablation package is slated next.
 
 ### 2026-04-25 — Hourly water-balance hydraulic calibration crash resolved (hillslope binary)
 
@@ -471,21 +394,12 @@ The same `hk = -2.655 / alog10(fc/ul)` expression guarded in `watbal_hourly` by 
 
 The release closeout for this incident also replaced the first `wepp_260426` artifacts with a rebuilt `wepp_260426`/`wepp_260426_hill` pair from the pinned system compiler (`/usr/bin/gfortran`) after the earlier cut was judged non-viable. Pre-vendor gates were rerun and passed on the replacement build: host smoke checks, permanent hillslope watchlist replay (including `p1408`, `p258`, and `p1319`), full pytest, reconciled-condenser watershed replay success marker, and ELF interpreter compatibility (`/lib64/ld-linux-x86-64.so.2`).
 
-### 2026-04-26 — Watershed pass-file read hardening (taken-brainstem pw0 watershed)
+### 2026-04-28 — Watershed evapotranspiration denominator crash resolved (unveiled-grinder:pw0 candidate)
 
-A separate failure surfaced in the `taken-brainstem` *watershed* run (distinct from the p1408 hillslope fix above). When the watershed binary attempted to route simulation results, it crashed with a raw Fortran EOF trap because the pass file for hillslope 1408 (`H1408.pass.dat`) was zero-length — a consequence of the hillslope binary having failed before writing its summary output. A targeted guard in `wshpas.for` now converts this raw runtime trap into an explicit diagnostic stop, reporting the hillslope identifier, the pass-file path, and the OS error code. The watershed still aborts — the routing data is required — but the failure mode is now deterministic, non-crashing, and immediately actionable by an operator. The corrective path is to repair or re-run the affected hillslope (addressed by fix #13) and then replay the watershed.
+The `unveiled-grinder:pw0` watershed run was crashing reproducibly at simulation year 55 inside the Penman-Monteith evapotranspiration routine (`evappm`), called through the hourly water-balance path during watershed-level routing. GDB core analysis with `wepp_260427` debug symbols confirmed the trap at `evappm.for:357`, the expression `etks = wftrp / (TAW - RAW)`: when a watershed plane has an inactive crop and zero root depth (`rtd = 0`, `kcbcon = 0`, `lai = 0`), both TAW and RAW collapse to zero, making the denominator zero and causing SIGFPE in the modern build. The legacy compiler silently propagated the result through downstream equations. A narrow guard now tests the denominator before the divide: when `TAW - RAW` is non-positive, `etks` is set to 1.0 — the neutral no-stress value, the physically correct answer for a plane with no active root zone — instead of evaluating the undefined expression. Two decisive full 100-year runs on the production host (`G1`, 15 403 s; `G1R`, 13 630 s) both completed with the watershed success marker and no SIGFPE. Broader regression gates are pending before binary promotion. Note: this is a separate incident from fix #12 (`unveiled-grinder:p1319`), which addressed the hillslope binary; this fix addresses the watershed binary (`pw0`) for the same run.
 
-### 2026-04-27 — CLIGEN timeout produces incomplete climate file (intriguing-kingmaker p980)
-
-A production hillslope run (`intriguing-kingmaker`, hillslope p980) failed inside `stmget.for` with an EOF read error on the climate file `p980.cli`. Ablation confirmed the root cause is upstream of the WEPP binary: the CLIGEN climate generator was killed mid-run due to a timeout, but `wepppy`'s `Cligen.run_observed` path treated any non-empty output file as a success — allowing a partial 523-line climate file (covering only through May 1981) to propagate into a 12-year simulation that required data through 1991. The WEPP binary behaved correctly by reporting EOF at line 122 of `stmget.for` when the file ran out; the defect is the acceptance of incomplete output in the climate generation layer. No WEPP binary change was made. The required fix is in `wepppy/climates/cligen/cligen.py`: validate that observed-mode CLI output spans the requested simulation period before accepting it as a successful climate product. Guidance for production: regenerate the affected climate file for the `intriguing-kingmaker` run and resubmit only the failed hillslope.
-
-### 2026-04-28 — Penman-Monteith crop water-stress denominator resolved (unveiled-grinder pw0 year-55)
-
-A production watershed run (`unveiled-grinder/pw0`) that previously completed under the legacy binary began crashing at simulation year 55 in both the 2026-04-25 and 2026-04-26 release binaries — each time after roughly three hours of compute. The failure signature traced to `evappm.for`: the Penman-Monteith crop water-stress term divides by `TAW − RAW`, which reaches zero in an inactive root-zone state. A core dump from the full-period production crash confirmed the exact operands (`wftrp = −10.9`, `RAW = 0`, `rawpaj = 1`, `rtd = 0`). A minimal guard sets the stress term to its physical ceiling (1.0, no deficit) when the denominator is non-positive. Two independent full 100-year durability lanes on the full staged watershed both completed with the success marker and no SIGFPE. Candidate binary `wepp_260428_unveiled_g1` is staged for production; broader regression/watchlist gate is pending before release promotion.
-
-### 2026-04-28 — Science contract framework established (Milestones 14–15)
-
-After the M12 stop-rule freeze and M13 upstream handoff, work shifted from local patch iteration to governance infrastructure. Milestone 14 established a formal science contract framework under `docs/science-contracts/` defining a shared vocabulary for boundary dispositions, stable contract identifiers, and promotion gates that any future upstream source mutation must satisfy. Milestone 15 drafted the first six proposed contracts covering soil hydraulic state, water balance domain, percolation horizon transition, evapotranspiration stress, routing hydraulic boundary, and WEPP passfile state. These contracts map known incidents and fuzzing evidence to specific process boundaries without asserting premature scientific closure. They are the citation infrastructure that future ablation campaigns and upstream discussions will reference.
+### 2026-04-22 — Generative input fuzzing program closeout (single-OFE tranche, Milestones 0–7)
+The first full tranche of generative input fuzzing closed today. Across seven milestones, the program built a reproducible campaign pipeline — wrapper contract tests, seeded soil/management/climate generators, climate-by-slope stratified sampling, five mutation-pressure profiles, and an output oracle that flags silent `NaN`/`Inf` results even when a run exits cleanly — and then drove it at scale (1,008 cases per run) against the modern trap-enabled binary. Two independent guardrails enforce campaign validity on every run: a five-case positive-control set (all five must be detected as failures) and the per-case output oracle. The scaled campaigns surfaced 140 silent-NaN cases concentrated in nine priority slices; four of those slices were closed under the frozen two-rerun, two-hundred-case, zero-non-pass criterion, and five were classified as **accepted upstream** — reproducer preserved, patch attempt reduced the symptom materially, residual failures promoted into the Fortran-side ablation track rather than papered over with a broader input clamp. Net effect on the full calibrated rerun: composite non-pass dropped from 134 to 41 (a 70 percent reduction) with the sensitivity gate still passing 5/5. All patches landed in the input-generation layer, not in the WEPP binary, and carry dedicated regression tests. Multi-OFE fuzzing is gated on this tranche's closure memo and will begin with the five accepted-upstream slices as explicit watchlist items.
 
 ## Bottom line
 

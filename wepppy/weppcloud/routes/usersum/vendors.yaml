@@ -18,6 +18,7 @@ vendors:
     include_globs:
       - change-log.md
       - docs/20260414-stakeholder-brief-compiler-fragility.md
+      - docs/20260501-stakeholder-brief-multi-segment-water-balance.md
     exclude_globs:
       - "**/.git/**"
     target_root: wepppy/weppcloud/routes/usersum/vendor/wepp-forest

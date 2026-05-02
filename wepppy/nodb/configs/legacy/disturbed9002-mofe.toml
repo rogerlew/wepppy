@@ -38,7 +38,7 @@ clip_hillslopes=false
 
 [wepp]
 wepp_ui = true
-bin = "wepp_580097"
+bin = "wepp_260501"
 snow=true
 multi_ofe=true
 
