@@ -1,0 +1,133 @@
+runid,config,wepp_id,family_primary,family_secondary,family_tertiary,family_rationale,cluster_label,rule_cluster_agreement
+cochlear-beriberi,disturbed9002-mofe,1,D1,,,"D1 by outlier_is_outlet_ofe=True, late_max_abs_ofe_closure_residual_mm_max_abs=1049.162>1000, late_max_qofe_to_q_ratio_max_abs=18.000>=(n_ofe_max-0.01)=17.990.",-1,noise
+cochlear-beriberi,disturbed9002-mofe,3,D_UNCLASSIFIED,,,No D1-D5 rule matched from topology/chain/storage/persistence thresholds.,2,agree
+cochlear-beriberi,disturbed9002-mofe,13,D_UNCLASSIFIED,,,No D1-D5 rule matched from topology/chain/storage/persistence thresholds.,2,agree
+cochlear-beriberi,disturbed9002-mofe,22,D1,,,"D1 by outlier_is_outlet_ofe=True, late_max_abs_ofe_closure_residual_mm_max_abs=2833.143>1000, late_max_qofe_to_q_ratio_max_abs=15.000>=(n_ofe_max-0.01)=14.990.",-1,noise
+cochlear-beriberi,disturbed9002-mofe,25,D_UNCLASSIFIED,,,No D1-D5 rule matched from topology/chain/storage/persistence thresholds.,-1,noise
+cochlear-beriberi,disturbed9002-mofe,32,D_UNCLASSIFIED,,,No D1-D5 rule matched from topology/chain/storage/persistence thresholds.,2,agree
+cochlear-beriberi,disturbed9002-mofe,34,D_UNCLASSIFIED,,,No D1-D5 rule matched from topology/chain/storage/persistence thresholds.,2,agree
+cochlear-beriberi,disturbed9002-mofe,35,D1,,,"D1 by outlier_is_outlet_ofe=True, late_max_abs_ofe_closure_residual_mm_max_abs=1346.371>1000, late_max_qofe_to_q_ratio_max_abs=12.000>=(n_ofe_max-0.01)=11.990.",-1,noise
+cochlear-beriberi,disturbed9002-mofe,38,D_UNCLASSIFIED,,,No D1-D5 rule matched from topology/chain/storage/persistence thresholds.,2,agree
+cochlear-beriberi,disturbed9002-mofe,42,D_UNCLASSIFIED,,,No D1-D5 rule matched from topology/chain/storage/persistence thresholds.,2,agree
+cochlear-beriberi,disturbed9002-mofe,63,D_UNCLASSIFIED,,,No D1-D5 rule matched from topology/chain/storage/persistence thresholds.,2,agree
+cochlear-beriberi,disturbed9002-mofe,65,D_UNCLASSIFIED,,,No D1-D5 rule matched from topology/chain/storage/persistence thresholds.,2,agree
+cochlear-beriberi,disturbed9002-mofe,67,D_UNCLASSIFIED,,,No D1-D5 rule matched from topology/chain/storage/persistence thresholds.,2,agree
+cochlear-beriberi,disturbed9002-mofe,68,D_UNCLASSIFIED,,,No D1-D5 rule matched from topology/chain/storage/persistence thresholds.,2,agree
+cochlear-beriberi,disturbed9002-mofe,71,D_UNCLASSIFIED,,,No D1-D5 rule matched from topology/chain/storage/persistence thresholds.,2,agree
+cochlear-beriberi,disturbed9002-mofe,80,D_UNCLASSIFIED,,,No D1-D5 rule matched from topology/chain/storage/persistence thresholds.,2,agree
+cochlear-beriberi,disturbed9002-mofe,84,D4,,,D4 by requires_scientific_review_days=2<=3 and late_max_abs_ofe_closure_residual_mm_max_abs=506.304>=500.,2,disagree
+cochlear-beriberi,disturbed9002-mofe,94,D1,,,"D1 by outlier_is_outlet_ofe=True, late_max_abs_ofe_closure_residual_mm_max_abs=2391.639>1000, late_max_qofe_to_q_ratio_max_abs=19.000>=(n_ofe_max-0.01)=18.990.",-1,noise
+cochlear-beriberi,disturbed9002-mofe,99,D_UNCLASSIFIED,,,No D1-D5 rule matched from topology/chain/storage/persistence thresholds.,2,agree
+cochlear-beriberi,disturbed9002-mofe,105,D_UNCLASSIFIED,,,No D1-D5 rule matched from topology/chain/storage/persistence thresholds.,2,agree
+cochlear-beriberi,disturbed9002-mofe,106,D_UNCLASSIFIED,,,No D1-D5 rule matched from topology/chain/storage/persistence thresholds.,2,agree
+cochlear-beriberi,disturbed9002-mofe,107,D_UNCLASSIFIED,,,No D1-D5 rule matched from topology/chain/storage/persistence thresholds.,-1,noise
+cochlear-beriberi,disturbed9002-mofe,111,D_UNCLASSIFIED,,,No D1-D5 rule matched from topology/chain/storage/persistence thresholds.,2,agree
+cochlear-beriberi,disturbed9002-mofe,112,D_UNCLASSIFIED,,,No D1-D5 rule matched from topology/chain/storage/persistence thresholds.,2,agree
+cochlear-beriberi,disturbed9002-mofe,120,D_UNCLASSIFIED,,,No D1-D5 rule matched from topology/chain/storage/persistence thresholds.,2,agree
+cochlear-beriberi,disturbed9002-mofe,125,D_UNCLASSIFIED,,,No D1-D5 rule matched from topology/chain/storage/persistence thresholds.,2,agree
+cochlear-beriberi,disturbed9002-mofe,131,D_UNCLASSIFIED,,,No D1-D5 rule matched from topology/chain/storage/persistence thresholds.,2,agree
+cochlear-beriberi,disturbed9002-mofe,136,D_UNCLASSIFIED,,,No D1-D5 rule matched from topology/chain/storage/persistence thresholds.,2,agree
+cochlear-beriberi,disturbed9002-mofe,141,D_UNCLASSIFIED,,,No D1-D5 rule matched from topology/chain/storage/persistence thresholds.,2,agree
+cochlear-beriberi,disturbed9002-mofe,146,D1,,,"D1 by outlier_is_outlet_ofe=True, late_max_abs_ofe_closure_residual_mm_max_abs=1247.790>1000, late_max_qofe_to_q_ratio_max_abs=11.000>=(n_ofe_max-0.01)=10.990.",2,disagree
+cochlear-beriberi,disturbed9002-mofe,148,D_UNCLASSIFIED,,,No D1-D5 rule matched from topology/chain/storage/persistence thresholds.,2,agree
+cochlear-beriberi,disturbed9002-mofe,150,D_UNCLASSIFIED,,,No D1-D5 rule matched from topology/chain/storage/persistence thresholds.,2,agree
+cochlear-beriberi,disturbed9002-mofe,152,D_UNCLASSIFIED,,,No D1-D5 rule matched from topology/chain/storage/persistence thresholds.,2,agree
+cochlear-beriberi,disturbed9002-mofe,154,D_UNCLASSIFIED,,,No D1-D5 rule matched from topology/chain/storage/persistence thresholds.,2,agree
+cochlear-beriberi,disturbed9002-mofe,191,D_UNCLASSIFIED,,,No D1-D5 rule matched from topology/chain/storage/persistence thresholds.,-1,noise
+cochlear-beriberi,disturbed9002-mofe,196,D1,,,"D1 by outlier_is_outlet_ofe=True, late_max_abs_ofe_closure_residual_mm_max_abs=1480.736>1000, late_max_qofe_to_q_ratio_max_abs=15.000>=(n_ofe_max-0.01)=14.990.",-1,noise
+cochlear-beriberi,disturbed9002-mofe,199,D_UNCLASSIFIED,,,No D1-D5 rule matched from topology/chain/storage/persistence thresholds.,2,agree
+cochlear-beriberi,disturbed9002-mofe,202,D1,,,"D1 by outlier_is_outlet_ofe=True, late_max_abs_ofe_closure_residual_mm_max_abs=1207.166>1000, late_max_qofe_to_q_ratio_max_abs=12.000>=(n_ofe_max-0.01)=11.990.",2,disagree
+cochlear-beriberi,disturbed9002-mofe,215,D_UNCLASSIFIED,,,No D1-D5 rule matched from topology/chain/storage/persistence thresholds.,2,agree
+cochlear-beriberi,disturbed9002-mofe,218,D_UNCLASSIFIED,,,No D1-D5 rule matched from topology/chain/storage/persistence thresholds.,2,agree
+cochlear-beriberi,disturbed9002-mofe,228,D_UNCLASSIFIED,,,No D1-D5 rule matched from topology/chain/storage/persistence thresholds.,-1,noise
+cochlear-beriberi,disturbed9002-mofe,239,D_UNCLASSIFIED,,,No D1-D5 rule matched from topology/chain/storage/persistence thresholds.,2,agree
+cochlear-beriberi,disturbed9002-mofe,246,D_UNCLASSIFIED,,,No D1-D5 rule matched from topology/chain/storage/persistence thresholds.,2,agree
+cochlear-beriberi,disturbed9002-mofe,251,D_UNCLASSIFIED,,,No D1-D5 rule matched from topology/chain/storage/persistence thresholds.,-1,noise
+cochlear-beriberi,disturbed9002-mofe,254,D_UNCLASSIFIED,,,No D1-D5 rule matched from topology/chain/storage/persistence thresholds.,1,agree
+cochlear-beriberi,disturbed9002-mofe,255,D_UNCLASSIFIED,,,No D1-D5 rule matched from topology/chain/storage/persistence thresholds.,1,agree
+cochlear-beriberi,disturbed9002-mofe,259,D_UNCLASSIFIED,,,No D1-D5 rule matched from topology/chain/storage/persistence thresholds.,-1,noise
+cochlear-beriberi,disturbed9002-mofe,265,D_UNCLASSIFIED,,,No D1-D5 rule matched from topology/chain/storage/persistence thresholds.,-1,noise
+cochlear-beriberi,disturbed9002-mofe,267,D_UNCLASSIFIED,,,No D1-D5 rule matched from topology/chain/storage/persistence thresholds.,-1,noise
+cochlear-beriberi,disturbed9002-mofe,268,D_UNCLASSIFIED,,,No D1-D5 rule matched from topology/chain/storage/persistence thresholds.,2,agree
+cochlear-beriberi,disturbed9002-mofe,273,D_UNCLASSIFIED,,,No D1-D5 rule matched from topology/chain/storage/persistence thresholds.,2,agree
+cochlear-beriberi,disturbed9002-mofe,275,D_UNCLASSIFIED,,,No D1-D5 rule matched from topology/chain/storage/persistence thresholds.,-1,noise
+cochlear-beriberi,disturbed9002-mofe,278,D_UNCLASSIFIED,,,No D1-D5 rule matched from topology/chain/storage/persistence thresholds.,-1,noise
+cochlear-beriberi,disturbed9002-mofe,282,D_UNCLASSIFIED,,,No D1-D5 rule matched from topology/chain/storage/persistence thresholds.,2,agree
+cochlear-beriberi,disturbed9002-mofe,285,D4,,,D4 by requires_scientific_review_days=3<=3 and late_max_abs_ofe_closure_residual_mm_max_abs=828.175>=500.,-1,noise
+cochlear-beriberi,disturbed9002-mofe,295,D_UNCLASSIFIED,,,No D1-D5 rule matched from topology/chain/storage/persistence thresholds.,1,agree
+cochlear-beriberi,disturbed9002-mofe,305,D_UNCLASSIFIED,,,No D1-D5 rule matched from topology/chain/storage/persistence thresholds.,-1,noise
+cochlear-beriberi,disturbed9002-mofe,312,D_UNCLASSIFIED,,,No D1-D5 rule matched from topology/chain/storage/persistence thresholds.,-1,noise
+cochlear-beriberi,disturbed9002-mofe,317,D_UNCLASSIFIED,,,No D1-D5 rule matched from topology/chain/storage/persistence thresholds.,2,agree
+cochlear-beriberi,disturbed9002-mofe,333,D2,,,D2 by outlier_is_interior_ofe=True and runoff_pass_vs_outlet_qofe_residual_m3_max_abs>1.0.,-1,noise
+cochlear-beriberi,disturbed9002-mofe,339,D_UNCLASSIFIED,,,No D1-D5 rule matched from topology/chain/storage/persistence thresholds.,1,agree
+cochlear-beriberi,disturbed9002-mofe,346,D_UNCLASSIFIED,,,No D1-D5 rule matched from topology/chain/storage/persistence thresholds.,-1,noise
+cochlear-beriberi,disturbed9002-mofe,349,D2,,,D2 by outlier_is_interior_ofe=True and runoff_pass_vs_outlet_qofe_residual_m3_max_abs>1.0.,-1,noise
+cochlear-beriberi,disturbed9002-mofe,351,D_UNCLASSIFIED,,,No D1-D5 rule matched from topology/chain/storage/persistence thresholds.,1,agree
+cochlear-beriberi,disturbed9002-mofe,354,D_UNCLASSIFIED,,,No D1-D5 rule matched from topology/chain/storage/persistence thresholds.,-1,noise
+cochlear-beriberi,disturbed9002-mofe,360,D_UNCLASSIFIED,,,No D1-D5 rule matched from topology/chain/storage/persistence thresholds.,-1,noise
+cochlear-beriberi,disturbed9002-mofe,378,D_UNCLASSIFIED,,,No D1-D5 rule matched from topology/chain/storage/persistence thresholds.,1,agree
+cochlear-beriberi,disturbed9002-mofe,399,D_UNCLASSIFIED,,,No D1-D5 rule matched from topology/chain/storage/persistence thresholds.,2,agree
+cochlear-beriberi,disturbed9002-mofe,400,D_UNCLASSIFIED,,,No D1-D5 rule matched from topology/chain/storage/persistence thresholds.,2,agree
+cochlear-beriberi,disturbed9002-mofe,403,D_UNCLASSIFIED,,,No D1-D5 rule matched from topology/chain/storage/persistence thresholds.,2,agree
+cochlear-beriberi,disturbed9002-mofe,409,D_UNCLASSIFIED,,,No D1-D5 rule matched from topology/chain/storage/persistence thresholds.,2,agree
+cochlear-beriberi,disturbed9002-mofe,412,D_UNCLASSIFIED,,,No D1-D5 rule matched from topology/chain/storage/persistence thresholds.,2,agree
+cochlear-beriberi,disturbed9002-mofe,422,D_UNCLASSIFIED,,,No D1-D5 rule matched from topology/chain/storage/persistence thresholds.,2,agree
+cochlear-beriberi,disturbed9002-mofe,428,D_UNCLASSIFIED,,,No D1-D5 rule matched from topology/chain/storage/persistence thresholds.,2,agree
+cochlear-beriberi,disturbed9002-mofe,431,D1,,,"D1 by outlier_is_outlet_ofe=True, late_max_abs_ofe_closure_residual_mm_max_abs=1153.171>1000, late_max_qofe_to_q_ratio_max_abs=11.000>=(n_ofe_max-0.01)=10.990.",2,disagree
+cochlear-beriberi,disturbed9002-mofe,434,D1,,,"D1 by outlier_is_outlet_ofe=True, late_max_abs_ofe_closure_residual_mm_max_abs=2423.214>1000, late_max_qofe_to_q_ratio_max_abs=15.000>=(n_ofe_max-0.01)=14.990.",-1,noise
+cochlear-beriberi,disturbed9002-mofe,440,D_UNCLASSIFIED,,,No D1-D5 rule matched from topology/chain/storage/persistence thresholds.,2,agree
+cochlear-beriberi,disturbed9002-mofe,448,D_UNCLASSIFIED,,,No D1-D5 rule matched from topology/chain/storage/persistence thresholds.,2,agree
+cochlear-beriberi,disturbed9002-mofe,457,D_UNCLASSIFIED,,,No D1-D5 rule matched from topology/chain/storage/persistence thresholds.,-1,noise
+cochlear-beriberi,disturbed9002-mofe,461,D1,,,"D1 by outlier_is_outlet_ofe=True, late_max_abs_ofe_closure_residual_mm_max_abs=2926.688>1000, late_max_qofe_to_q_ratio_max_abs=16.000>=(n_ofe_max-0.01)=15.990.",-1,noise
+cochlear-beriberi,disturbed9002-mofe,463,D_UNCLASSIFIED,,,No D1-D5 rule matched from topology/chain/storage/persistence thresholds.,2,agree
+cochlear-beriberi,disturbed9002-mofe,465,D_UNCLASSIFIED,,,No D1-D5 rule matched from topology/chain/storage/persistence thresholds.,-1,noise
+cochlear-beriberi,disturbed9002-mofe,468,D_UNCLASSIFIED,,,No D1-D5 rule matched from topology/chain/storage/persistence thresholds.,2,agree
+cochlear-beriberi,disturbed9002-mofe,472,D_UNCLASSIFIED,,,No D1-D5 rule matched from topology/chain/storage/persistence thresholds.,2,agree
+cochlear-beriberi,disturbed9002-mofe,474,D1,,,"D1 by outlier_is_outlet_ofe=True, late_max_abs_ofe_closure_residual_mm_max_abs=1211.234>1000, late_max_qofe_to_q_ratio_max_abs=12.000>=(n_ofe_max-0.01)=11.990.",-1,noise
+cochlear-beriberi,disturbed9002-mofe,475,D1,,,"D1 by outlier_is_outlet_ofe=True, late_max_abs_ofe_closure_residual_mm_max_abs=1002.609>1000, late_max_qofe_to_q_ratio_max_abs=11.000>=(n_ofe_max-0.01)=10.990.",-1,noise
+cochlear-beriberi,disturbed9002-mofe,476,D_UNCLASSIFIED,,,No D1-D5 rule matched from topology/chain/storage/persistence thresholds.,2,agree
+cochlear-beriberi,disturbed9002-mofe,488,D_UNCLASSIFIED,,,No D1-D5 rule matched from topology/chain/storage/persistence thresholds.,2,agree
+cochlear-beriberi,disturbed9002-mofe,492,D_UNCLASSIFIED,,,No D1-D5 rule matched from topology/chain/storage/persistence thresholds.,2,agree
+cochlear-beriberi,disturbed9002-mofe,495,D_UNCLASSIFIED,,,No D1-D5 rule matched from topology/chain/storage/persistence thresholds.,2,agree
+cochlear-beriberi,disturbed9002-mofe,498,D_UNCLASSIFIED,,,No D1-D5 rule matched from topology/chain/storage/persistence thresholds.,2,agree
+cochlear-beriberi,disturbed9002-mofe,501,D_UNCLASSIFIED,,,No D1-D5 rule matched from topology/chain/storage/persistence thresholds.,2,agree
+cochlear-beriberi,disturbed9002-mofe,504,D_UNCLASSIFIED,,,No D1-D5 rule matched from topology/chain/storage/persistence thresholds.,2,agree
+cochlear-beriberi,disturbed9002-mofe,507,D1,,,"D1 by outlier_is_outlet_ofe=True, late_max_abs_ofe_closure_residual_mm_max_abs=1875.858>1000, late_max_qofe_to_q_ratio_max_abs=13.000>=(n_ofe_max-0.01)=12.990.",-1,noise
+cochlear-beriberi,disturbed9002-mofe,513,D_UNCLASSIFIED,,,No D1-D5 rule matched from topology/chain/storage/persistence thresholds.,2,agree
+cochlear-beriberi,disturbed9002-mofe,516,D_UNCLASSIFIED,,,No D1-D5 rule matched from topology/chain/storage/persistence thresholds.,2,agree
+ordained-incentive,disturbed9002-wbt-mofe,17,D_UNCLASSIFIED,,,No D1-D5 rule matched from topology/chain/storage/persistence thresholds.,0,agree
+ordained-incentive,disturbed9002-wbt-mofe,20,D2,,,D2 by outlier_is_interior_ofe=True and runoff_pass_vs_outlet_qofe_residual_m3_max_abs>1.0.,-1,noise
+ordained-incentive,disturbed9002-wbt-mofe,33,D_UNCLASSIFIED,,,No D1-D5 rule matched from topology/chain/storage/persistence thresholds.,0,agree
+ordained-incentive,disturbed9002-wbt-mofe,52,D_UNCLASSIFIED,,,No D1-D5 rule matched from topology/chain/storage/persistence thresholds.,0,agree
+ordained-incentive,disturbed9002-wbt-mofe,61,D_UNCLASSIFIED,,,No D1-D5 rule matched from topology/chain/storage/persistence thresholds.,0,agree
+ordained-incentive,disturbed9002-wbt-mofe,66,D_UNCLASSIFIED,,,No D1-D5 rule matched from topology/chain/storage/persistence thresholds.,0,agree
+ordained-incentive,disturbed9002-wbt-mofe,71,D_UNCLASSIFIED,,,No D1-D5 rule matched from topology/chain/storage/persistence thresholds.,0,agree
+ordained-incentive,disturbed9002-wbt-mofe,80,D_UNCLASSIFIED,,,No D1-D5 rule matched from topology/chain/storage/persistence thresholds.,-1,noise
+ordained-incentive,disturbed9002-wbt-mofe,81,D_UNCLASSIFIED,,,No D1-D5 rule matched from topology/chain/storage/persistence thresholds.,-1,noise
+ordained-incentive,disturbed9002-wbt-mofe,93,D_UNCLASSIFIED,,,No D1-D5 rule matched from topology/chain/storage/persistence thresholds.,-1,noise
+ordained-incentive,disturbed9002-wbt-mofe,95,D_UNCLASSIFIED,,,No D1-D5 rule matched from topology/chain/storage/persistence thresholds.,0,agree
+ordained-incentive,disturbed9002-wbt-mofe,96,D_UNCLASSIFIED,,,No D1-D5 rule matched from topology/chain/storage/persistence thresholds.,0,agree
+ordained-incentive,disturbed9002-wbt-mofe,104,D_UNCLASSIFIED,,,No D1-D5 rule matched from topology/chain/storage/persistence thresholds.,0,agree
+ordained-incentive,disturbed9002-wbt-mofe,110,D_UNCLASSIFIED,,,No D1-D5 rule matched from topology/chain/storage/persistence thresholds.,0,agree
+ordained-incentive,disturbed9002-wbt-mofe,138,D_UNCLASSIFIED,,,No D1-D5 rule matched from topology/chain/storage/persistence thresholds.,0,agree
+ordained-incentive,disturbed9002-wbt-mofe,141,D_UNCLASSIFIED,,,No D1-D5 rule matched from topology/chain/storage/persistence thresholds.,0,agree
+ordained-incentive,disturbed9002-wbt-mofe,151,D_UNCLASSIFIED,,,No D1-D5 rule matched from topology/chain/storage/persistence thresholds.,0,agree
+ordained-incentive,disturbed9002-wbt-mofe,154,D_UNCLASSIFIED,,,No D1-D5 rule matched from topology/chain/storage/persistence thresholds.,0,agree
+ordained-incentive,disturbed9002-wbt-mofe,157,D_UNCLASSIFIED,,,No D1-D5 rule matched from topology/chain/storage/persistence thresholds.,0,agree
+ordained-incentive,disturbed9002-wbt-mofe,161,D_UNCLASSIFIED,,,No D1-D5 rule matched from topology/chain/storage/persistence thresholds.,0,agree
+ordained-incentive,disturbed9002-wbt-mofe,174,D_UNCLASSIFIED,,,No D1-D5 rule matched from topology/chain/storage/persistence thresholds.,0,agree
+ordained-incentive,disturbed9002-wbt-mofe,195,D_UNCLASSIFIED,,,No D1-D5 rule matched from topology/chain/storage/persistence thresholds.,0,agree
+ordained-incentive,disturbed9002-wbt-mofe,198,D_UNCLASSIFIED,,,No D1-D5 rule matched from topology/chain/storage/persistence thresholds.,0,agree
+ordained-incentive,disturbed9002-wbt-mofe,201,D_UNCLASSIFIED,,,No D1-D5 rule matched from topology/chain/storage/persistence thresholds.,0,agree
+ordained-incentive,disturbed9002-wbt-mofe,204,D_UNCLASSIFIED,,,No D1-D5 rule matched from topology/chain/storage/persistence thresholds.,0,agree
+ordained-incentive,disturbed9002-wbt-mofe,213,D_UNCLASSIFIED,,,No D1-D5 rule matched from topology/chain/storage/persistence thresholds.,0,agree
+ordained-incentive,disturbed9002-wbt-mofe,219,D_UNCLASSIFIED,,,No D1-D5 rule matched from topology/chain/storage/persistence thresholds.,0,agree
+ordained-incentive,disturbed9002-wbt-mofe,221,D_UNCLASSIFIED,,,No D1-D5 rule matched from topology/chain/storage/persistence thresholds.,0,agree
+ordained-incentive,disturbed9002-wbt-mofe,224,D_UNCLASSIFIED,,,No D1-D5 rule matched from topology/chain/storage/persistence thresholds.,0,agree
+ordained-incentive,disturbed9002-wbt-mofe,249,D_UNCLASSIFIED,,,No D1-D5 rule matched from topology/chain/storage/persistence thresholds.,0,agree
+ordained-incentive,disturbed9002-wbt-mofe,257,D_UNCLASSIFIED,,,No D1-D5 rule matched from topology/chain/storage/persistence thresholds.,0,agree
+ordained-incentive,disturbed9002-wbt-mofe,273,D_UNCLASSIFIED,,,No D1-D5 rule matched from topology/chain/storage/persistence thresholds.,0,agree
+ordained-incentive,disturbed9002-wbt-mofe,276,D_UNCLASSIFIED,,,No D1-D5 rule matched from topology/chain/storage/persistence thresholds.,0,agree
+ordained-incentive,disturbed9002-wbt-mofe,284,D_UNCLASSIFIED,,,No D1-D5 rule matched from topology/chain/storage/persistence thresholds.,0,agree
+ordained-incentive,disturbed9002-wbt-mofe,288,D_UNCLASSIFIED,,,No D1-D5 rule matched from topology/chain/storage/persistence thresholds.,0,agree
+ordained-incentive,disturbed9002-wbt-mofe,289,D_UNCLASSIFIED,,,No D1-D5 rule matched from topology/chain/storage/persistence thresholds.,0,agree

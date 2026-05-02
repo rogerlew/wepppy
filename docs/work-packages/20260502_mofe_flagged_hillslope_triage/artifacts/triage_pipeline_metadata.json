@@ -1,0 +1,20 @@
+{
+  "cluster_algorithm": "hdbscan(min_cluster_size=5)",
+  "demotions": [],
+  "disagreement_rows": 4,
+  "flagged_rows": 132,
+  "generated_utc": "2026-05-02T16:21:26.789338+00:00",
+  "missing_context_alerts": [],
+  "populated_families": [
+    "D1",
+    "D2",
+    "D4",
+    "D_UNCLASSIFIED"
+  ],
+  "taxonomy_counts": {
+    "D1": 13,
+    "D2": 3,
+    "D4": 2,
+    "D_UNCLASSIFIED": 114
+  }
+}

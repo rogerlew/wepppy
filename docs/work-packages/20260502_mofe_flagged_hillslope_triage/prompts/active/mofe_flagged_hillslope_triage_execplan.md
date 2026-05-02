@@ -23,12 +23,12 @@ The deliverable is data + analysis, not model surgery. No WEPP simulations are l
 
 - [x] (2026-05-02) Work-package created.
 - [x] (2026-05-02) ExecPlan rewritten to PLANS.md contract; Phase 1 schema and selectors pre-defined.
-- [ ] M1. Build `triage_table_runs.csv` and `triage_table_hillslopes.csv` from the validation artifacts. (completed: schema frozen; remaining: implement `tools/build_mofe_triage_table.py`, run, validate row counts.)
-- [ ] M2. Apply the deterministic D0–D5 taxonomy and emit `taxonomy_assignments.csv`.
-- [ ] M3. Run an unsupervised cluster check (HDBSCAN or k-medoids) and record agreement vs. rules in `taxonomy_disagreements.csv`. Manually triage disagreements.
-- [ ] M4. Select representative seeds per family with staged-input manifests; emit `representative_seeds.csv`.
-- [ ] M5. Cross-walk against existing ablation incidents (especially `20260430_uncapped-spectacular_h2637_hillslope_closure-spike`) and emit `precedent_crosswalk.md`.
-- [ ] M6. Emit `campaign_matrix.csv` and `defect_families.md`. Close out work-package.
+- [x] (2026-05-02) M1. Built `tools/build_mofe_triage_table.py` and emitted `triage_table_runs.csv`, `triage_table_hillslopes.csv`, `triage_table_hillslopes_all.csv`; acceptance checks passed (`4` runs, `132` flagged, `1166` total).
+- [x] (2026-05-02) M2. Applied deterministic D1-D5 rules and emitted `taxonomy_assignments.csv` with complete `family_primary` + non-empty rationale on all 132 flagged rows.
+- [x] (2026-05-02) M3. Ran cluster cross-check with HDBSCAN (`min_cluster_size=5`), added `cluster_label` + `rule_cluster_agreement`, emitted `taxonomy_disagreements.csv`, and dispositioned all disagreements.
+- [x] (2026-05-02) M4. Emitted `representative_seeds.csv` with worst/median/contrast seeds for populated D-families; staged-input manifests resolved and worst/median seeds have no missing shared-context files.
+- [x] (2026-05-02) M5. Emitted `precedent_crosswalk.md` covering all incident directories matching `*_hillslope_*` and family coverage for `D0`–`D5` (plus `D_UNCLASSIFIED`).
+- [x] (2026-05-02) M6. Emitted `campaign_matrix.csv` + `defect_families.md`; closeout analysis and retrospective completed.
 
 ## Surprises & Discoveries
 
@@ -36,6 +36,12 @@ The deliverable is data + analysis, not model surgery. No WEPP simulations are l
   Evidence: `defect_summary.md` reports 96/520, 36/333, 0/209, 0/104 across the four runs.
 - Observation: `late_max_qofe_to_q_ratio` saturates at `n_ofe_max` (≈16) across percentiles. The protocol's `>= 2.0` ratio threshold is functionally redundant for 16-OFE hillslopes; the flag is driven by the closure-mm and pulse-mm thresholds.
   Evidence: `cochlear-beriberi/H461` summary JSON, `full_physical_closure.late_max_qofe_to_q_ratio.{p50, p99}` both ≈ 16.0.
+- Observation: Deterministic D1-D5 rules leave a large residual class: `114/132` flagged hillslopes classify as `D_UNCLASSIFIED`, concentrated in two runs.
+  Evidence: `taxonomy_assignments.csv` family counts: `D_UNCLASSIFIED=114`, `D1=13`, `D2=3`, `D4=2`.
+- Observation: Named `D_UNCLASSIFIED` hillslopes were explicitly carried forward (not dropped) for future taxonomy expansion.
+  Evidence: `cochlear-beriberi` = `H3,H13,H25,H32,H34,H38,H42,H63,H65,H67,H68,H71,H80,H99,H105,H106,H107,H111,H112,H120,H125,H131,H136,H141,H148,H150,H152,H154,H191,H199,H215,H218,H228,H239,H246,H251,H254,H255,H259,H265,H267,H268,H273,H275,H278,H282,H295,H305,H312,H317,H339,H346,H351,H354,H360,H378,H399,H400,H403,H409,H412,H422,H428,H440,H448,H457,H463,H465,H468,H472,H476,H488,H492,H495,H498,H501,H504,H513,H516`; `ordained-incentive` = `H17,H33,H52,H61,H66,H71,H80,H81,H93,H95,H96,H104,H110,H138,H141,H151,H154,H157,H161,H174,H195,H198,H201,H204,H213,H219,H221,H224,H249,H257,H273,H276,H284,H288,H289`.
+- Observation: HDBSCAN disagreements are sparse and localized (`4/132`), all within `cochlear-beriberi` cluster label `2`.
+  Evidence: `taxonomy_disagreements.csv` rows: `H84 (D4)`, `H146 (D1)`, `H202 (D1)`, `H431 (D1)`.
 
 ## Decision Log
 
@@ -48,10 +54,62 @@ The deliverable is data + analysis, not model surgery. No WEPP simulations are l
 - Decision: Read run-context fields (`_wepp_bin`, `_mods`, `_multi_ofe`, `wd`) from `/wc1/runs/<prefix>/<runid>/wepp.nodb` directly rather than re-parsing the JSON snippets in `defect_summary.md`.
   Rationale: `/wc1` is mounted in the working environment; `wepp.nodb` is the source of truth and the snippet in `defect_summary.md` is a frozen archival copy. Reading the live file keeps run-context fields trustworthy if the validation set is regenerated. Fall back to `defect_summary.md` parsing only if the file is unreadable.
   Date/Author: 2026-05-02 / Claude Code.
+- Decision: Implement M2-M6 as a reproducible script pipeline (`tools/triage_pipeline.py`) rather than manual one-off notebook steps.
+  Rationale: Keeps deterministic rule assignment, clustering, seed selection, and reporting rerunnable from M1 outputs with a single command and no hidden state.
+  Date/Author: 2026-05-02 / Codex.
+- Decision: Use HDBSCAN (`min_cluster_size=5`) for M3 clustering; no fallback was required.
+  Rationale: `hdbscan` was available in the environment and produced stable cluster/noise partitioning with only 4 disagreements against rules.
+  Date/Author: 2026-05-02 / Codex.
+- Decision: Do not retune D1-D5 thresholds during M3; accept disagreements for `H84`, `H146`, `H202`, and `H431`.
+  Rationale: Disagreements are minority points in a mixed cluster (`cluster_label=2`) dominated by `D_UNCLASSIFIED`; D1/D4 primary-rule predicates still hold strongly for those rows (`outlier_is_outlet_ofe=True` with severe late residuals and D4 day-count condition).
+  Date/Author: 2026-05-02 / Codex.
+- Decision: Keep `cochlear-beriberi/H84` as `D4` (not relabeled).
+  Rationale: Rule predicate remains exact (`requires_scientific_review_days=2`, `late_max_abs_ofe_closure_residual_mm_max_abs=506.304>=500`); disagreement is cluster-context, not rule failure.
+  Date/Author: 2026-05-02 / Codex.
+- Decision: Keep `cochlear-beriberi/H146` as `D1` (not relabeled).
+  Rationale: Rule predicate remains exact (`outlier_is_outlet_ofe=True`, `late_max_abs_ofe_closure_residual_mm_max_abs=1247.79>1000`, ratio saturation true).
+  Date/Author: 2026-05-02 / Codex.
+- Decision: Keep `cochlear-beriberi/H202` as `D1` (not relabeled).
+  Rationale: Rule predicate remains exact (`outlier_is_outlet_ofe=True`, `late_max_abs_ofe_closure_residual_mm_max_abs=1207.166>1000`, ratio saturation true).
+  Date/Author: 2026-05-02 / Codex.
+- Decision: Keep `cochlear-beriberi/H431` as `D1` (not relabeled).
+  Rationale: Rule predicate remains exact (`outlier_is_outlet_ofe=True`, `late_max_abs_ofe_closure_residual_mm_max_abs=1153.171>1000`, ratio saturation true).
+  Date/Author: 2026-05-02 / Codex.
+- Decision: Do not apply D0 demotion.
+  Rationale: No D1-D5 family satisfied all D0 demotion criteria simultaneously (no qualifying family had 5-of-6 standardized deltas `<=0.35` with max delta `<=0.75` at required concentration/size thresholds).
+  Date/Author: 2026-05-02 / Codex.
+- Decision: Exclude `D_UNCLASSIFIED` from M4 representative-seed triplets.
+  Rationale: M4 contract is “per populated D-family”; `D_UNCLASSIFIED` is retained as a taxonomy-gap sink and is not a mechanistic D-family for direct ablation package bootstrapping.
+  Date/Author: 2026-05-02 / Codex.
 
 ## Outcomes & Retrospective
 
-Pending execution. To be written at M6 closeout. Compare the realized D0–D5 prevalence against the initial assumption that D0 (config-correlated background) dominates; record whether any flagged hillslope failed to fit the taxonomy and how it was reclassified.
+Execution completed on 2026-05-02. Realized prevalence did not match the initial expectation that D0 would dominate:
+
+- `D0`: `0`
+- `D1`: `13`
+- `D2`: `3`
+- `D3`: `0`
+- `D4`: `2`
+- `D5`: `0`
+- `D_UNCLASSIFIED`: `114`
+
+Interpretation:
+- The deterministic D1-D5 rules identify a small set of high-signal mechanistic spikes (`D1`, `D2`, `D4`) but leave most flagged hillslopes outside the current rule envelope.
+- No flagged hillslopes were dropped; unmatched rows were explicitly classified as `D_UNCLASSIFIED` with rationales and named in `Surprises & Discoveries`.
+- The cluster check found only 4 disagreements and did not justify threshold retuning in this pass.
+
+Closeout artifacts:
+- `triage_table_runs.csv`, `triage_table_hillslopes.csv`, `triage_table_hillslopes_all.csv`
+- `taxonomy_assignments.csv`, `taxonomy_disagreements.csv`
+- `representative_seeds.csv`
+- `precedent_crosswalk.md`
+- `campaign_matrix.csv`
+- `defect_families.md`
+
+Open science-maintainer questions:
+1. Should `D_UNCLASSIFIED` be split by additional dimensions (for example lower-amplitude persistent regimes or mixed outlet/interior behavior) before launching broad ablation campaigns?
+2. Should D2 chain thresholds be lowered for this campaign because observed residual magnitudes are near-zero in many flagged rows despite interior anomalies?
 
 ## Context and Orientation
 
