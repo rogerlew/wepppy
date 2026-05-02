@@ -1,0 +1,5 @@
+runid,config,submit_job_id,terminal_status,runtime_seconds,binary_verification,interchange_dir
+moth-eaten-blackhead,disturbed9002-wbt-mofe,cda9f32a-afe8-4e65-8722-b58266d23434,stopped,180.578,PASS,/wc1/runs/mo/moth-eaten-blackhead/wepp/output/interchange
+cochlear-beriberi,disturbed9002-mofe,b6fa67aa-be85-491b-a2e3-795dd4deefc1,stopped,481.562,PASS,/wc1/runs/co/cochlear-beriberi/wepp/output/interchange
+ordained-incentive,disturbed9002-wbt-mofe,ccae766f-30ce-4ae0-917a-c6a005c07ad2,stopped,180.582,PASS,/wc1/runs/or/ordained-incentive/wepp/output/interchange
+uninsured-deformation,disturbed9002-wbt-mofe,27aa2b17-52e0-41d6-9ad4-6823d63806b2,failed,150.644,PASS,/wc1/runs/un/uninsured-deformation/wepp/output/interchange

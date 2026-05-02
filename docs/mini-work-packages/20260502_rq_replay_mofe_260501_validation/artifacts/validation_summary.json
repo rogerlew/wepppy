@@ -1,0 +1,15 @@
+{
+  "generated_utc": "2026-05-02T06:50:36Z",
+  "base_host": "https://wc.bearhive.duckdns.org",
+  "rq_base": "https://wc.bearhive.duckdns.org/rq-engine/api",
+  "auth_mode": "login session + CSRF POST /weppcloud/profile/mint-token (bearer user token)",
+  "all_reruns_success": false,
+  "all_binary_pass": true,
+  "all_hillslope_audits_completed": true,
+  "expected_hillslopes": 1166,
+  "audited_hillslopes": 1166,
+  "final_verdict": "FAIL",
+  "verdict_reasons": [
+    "At least one rerun did not reach terminal finished status."
+  ]
+}
