@@ -335,6 +335,15 @@ Currently active work packages. Limit to 2-4 packages to maintain focus.
 
 Recently completed work packages. Archived immediately upon completion.
 
+### Ablation Protocol Tooling Port (2026-05-02)
+**Status**: ✅ **COMPLETE**
+
+**Link**: [docs/work-packages/20260502_ablation_protocol_tooling/](docs/work-packages/20260502_ablation_protocol_tooling/)
+
+**Lifecycle**: Backlog -> In Progress -> Done (2026-05-02)
+
+**Summary**: Closed with a local port of `tools/ablation_protocol.py` and a targeted regression suite at `tests/tools/test_ablation_protocol.py`, aligned to the established `wepp-forest` behavior contract. Added local `docs/ablation/TEMPLATE_*` files plus `docs/ablation/README.md` so `init` works against the default root in this repo. Validation passed via `wctl run-pytest tests/tools/test_ablation_protocol.py` (`17 passed, 2 warnings`), and code-review disposition was captured in `docs/work-packages/20260502_ablation_protocol_tooling/artifacts/20260502_code_review.md`.
+
 ### Uncapped-Spectacular H2637 Ablation Campaign (2026-04-30)
 **Status**: ✅ **COMPLETE**
 
