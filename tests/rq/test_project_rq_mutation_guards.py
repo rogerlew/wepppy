@@ -215,6 +215,11 @@ def test_fetch_dem_and_build_channels_rq_clears_watershed_cache_before_enqueue(
         ("hydrate_watershed", str(run_wd)),
     ]
     assert [event[0] for event in events if event[0] == "enqueue"] == ["enqueue", "enqueue"]
+    enqueue_events = [event for event in events if event[0] == "enqueue"]
+    assert [event[4] for event in enqueue_events] == [
+        project_rq.FETCH_DEM_AND_BUILD_CHANNELS_CHILD_TIMEOUT,
+        project_rq.FETCH_DEM_AND_BUILD_CHANNELS_CHILD_TIMEOUT,
+    ]
     assert current_job.meta["jobs:0,func:fetch_dem_rq"] == "child-0"
     assert current_job.meta["jobs:1,func:build_channels_rq"] == "child-1"
     assert dummy_watershed.uploaded_dem_filename is None
@@ -284,6 +289,8 @@ def test_fetch_dem_and_build_channels_rq_preserves_uploaded_dem_for_upload_mode(
         ("hydrate_watershed", str(run_wd)),
     ]
     assert [event[0] for event in events if event[0] == "enqueue"] == ["enqueue"]
+    enqueue_event = next(event for event in events if event[0] == "enqueue")
+    assert enqueue_event[4] == project_rq.FETCH_DEM_AND_BUILD_CHANNELS_CHILD_TIMEOUT
     assert current_job.meta["jobs:0,func:build_channels_rq"] == "child-0"
     assert dummy_watershed.uploaded_dem_filename == "uploaded.tif"
 

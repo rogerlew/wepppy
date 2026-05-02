@@ -70,6 +70,9 @@ REDIS_HOST: str = redis_host()
 RQ_DB: int = int(RedisDB.RQ)
 
 TIMEOUT: int = 43_200
+FETCH_DEM_AND_BUILD_CHANNELS_CHILD_TIMEOUT: int = int(
+    os.getenv("RQ_ENGINE_FETCH_DEM_BUILD_CHANNELS_TIMEOUT", "600")
+)
 DEFAULT_ZOOM: int = 12
 DIRECTORY_ROOT_LOCK_RETRY_ATTEMPTS: int = 5
 DIRECTORY_ROOT_LOCK_RETRY_SECONDS: float = 1.0
@@ -783,11 +786,16 @@ def fetch_dem_and_build_channels_rq(
                         wbt_fill_or_breach,
                         wbt_blc_dist,
                     ),
+                    timeout=FETCH_DEM_AND_BUILD_CHANNELS_CHILD_TIMEOUT,
                 )
                 job.meta['jobs:0,func:build_channels_rq'] = bjob.id
                 job.save()
             else:
-                ajob = q.enqueue_call(fetch_dem_rq, (runid, extent, center, zoom, map_object))
+                ajob = q.enqueue_call(
+                    fetch_dem_rq,
+                    (runid, extent, center, zoom, map_object),
+                    timeout=FETCH_DEM_AND_BUILD_CHANNELS_CHILD_TIMEOUT,
+                )
                 job.meta['jobs:0,func:fetch_dem_rq'] = ajob.id
                 job.save()
 
@@ -801,6 +809,7 @@ def fetch_dem_and_build_channels_rq(
                         wbt_fill_or_breach,
                         wbt_blc_dist,
                     ),
+                    timeout=FETCH_DEM_AND_BUILD_CHANNELS_CHILD_TIMEOUT,
                     depends_on=ajob,
                 )
                 job.meta['jobs:1,func:build_channels_rq'] = bjob.id
