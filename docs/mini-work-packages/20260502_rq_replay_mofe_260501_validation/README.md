@@ -60,4 +60,4 @@ Given this follow-up evidence, `uninsured-deformation` failure from the initial 
 
 ## Follow-Up Work-Package
 See:
-`docs/mini-work-packages/20260502_mofe_flagged_hillslope_triage_execplan.md`
+`docs/work-packages/20260502_mofe_flagged_hillslope_triage/package.md`

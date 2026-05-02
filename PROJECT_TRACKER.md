@@ -1,8 +1,8 @@
 # PROJECT_TRACKER.md
 > Kanban board for wepppy work packages and vision items
 
-**Last Updated**: 2026-04-30
-**Active Packages**: 4
+**Last Updated**: 2026-05-02
+**Active Packages**: 5
 **Quick Links**: [Work Packages Directory](docs/work-packages/) | [God-Tier Prompting Strategy](docs/god-tier-prompting-strategy.md)
 
 ## Purpose
@@ -37,7 +37,7 @@ This tracker makes all work visible at a glance, helping agents coordinate and a
 ### 2. Limit Work in Progress
 **Target**: 2-4 active packages maximum to maintain focus and ensure packages complete rather than stall.
 
-**Current WIP**: 4 packages ✅ **Within target range**
+**Current WIP**: 5 packages (above target range)
 
 ### 3. Manage Flow
 Monitor how long packages spend in each column:
@@ -197,7 +197,27 @@ When resuming Kubernetes work:
 
 Currently active work packages. Limit to 2-4 packages to maintain focus.
 
-**Current WIP Count**: 4 packages
+**Current WIP Count**: 5 packages
+
+---
+
+### MOFE Flagged Hillslope Triage for Ablation Campaigns
+**Started**: 2026-05-02  
+**Status**: Package scaffolded and ExecPlan migrated; M1 pending implementation  
+**Size**: Medium (2-4 focused sessions)  
+**Owner**: Codex  
+**Link**: [docs/work-packages/20260502_mofe_flagged_hillslope_triage/](docs/work-packages/20260502_mofe_flagged_hillslope_triage/)  
+**Description**: Convert the MOFE flagged hillslope follow-up into a full work package, then execute deterministic D0-D5 triage, clustering cross-check, representative seed selection, and campaign matrix generation for ablation planning.
+
+**Current Status**:
+- Full package scaffold created with `package.md`, `tracker.md`, `prompts/active`, and `artifacts/`.
+- Active ExecPlan now lives at `prompts/active/mofe_flagged_hillslope_triage_execplan.md`.
+- Preconditions and autonomous-execution friction updates are documented; output home is package-local `artifacts/`.
+
+**Next Steps**:
+1. Implement `tools/build_mofe_triage_table.py` and generate `triage_table_runs.csv`, `triage_table_hillslopes.csv`, and `triage_table_hillslopes_all.csv`.
+2. Execute M2-M6 outputs (taxonomy assignment, disagreement review, representative seeds, precedent crosswalk, campaign matrix).
+3. Close out package docs and hand off ablation-incident recommendations.
 
 ---
 
@@ -1768,9 +1788,9 @@ Track how long packages take from start to completion:
 - **Current average**: [Calculate from recent completions]
 
 ### Work in Progress
-- **Current**: 3 packages
+- **Current**: 5 packages
 - **Target**: 2-4 packages
-- **Status**: ✅ **Within target**
+- **Status**: above target (additive package load; prioritize closure sequencing)
 
 ### Throughput
 Packages completed per month:
