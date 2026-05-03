@@ -17,6 +17,7 @@ import redis
 
 from flask import Response, abort, Blueprint, current_app, request, render_template, url_for
 from flask_security import current_user
+from werkzeug.exceptions import HTTPException
 
 from rq import Queue
 from rq.exceptions import NoSuchJobError
@@ -26,7 +27,7 @@ from wepppy.config.redis_settings import RedisDB, redis_connection_kwargs
 from wepppy.nodb.redis_prep import RedisPrep
 from wepppy.rq.weppcloudr_rq import render_deval_details_rq
 
-from wepppy.weppcloud.utils.helpers import get_wd, exception_factory, url_for_run
+from wepppy.weppcloud.utils.helpers import authorize, get_wd, exception_factory, url_for_run
 from wepppy.weppcloud.utils.cap_guard import requires_cap
 
 from wepppy.nodb.core import Ron, Wepp, Watershed
@@ -37,6 +38,16 @@ from ._run_context import RunContext, load_run_context
 VIZ_RSCRIPT_DIR = '/workdir/viz-weppcloud/scripts/R/'
 VIZ_RMARKDOWN_DIR = '/workdir/viz-weppcloud/scripts/Rmd'
 WEPPCLOUDR_DIR = '/workdir/WEPPcloudR/scripts'
+R_PROXY_RMD_RENDER_EXPR = (
+    'args <- commandArgs(TRUE); '
+    'if (length(args) != 4) stop("expected 4 args"); '
+    'input_file <- args[1]; '
+    'ws_json <- args[2]; '
+    'output_file <- args[3]; '
+    'output_dir <- args[4]; '
+    'ws <- jsonlite::fromJSON(ws_json, simplifyVector = FALSE); '
+    'rmarkdown::render(input_file, params=list(ws=ws), output_file=output_file, output_dir=output_dir)'
+)
 
 
 weppcloudr_bp = Blueprint('weppcloud', __name__)
@@ -99,7 +110,7 @@ def viz_r(runid, config, r_format, routine):
         with io.open(rpt_fn, encoding='utf8') as fp:
             return fp.read()
 
-    except Exception:
+    except Exception:  # broad-except: boundary contract
         current_app.logger.exception(
             "viz_r failed runid=%s config=%s r_format=%s routine=%s",
             runid,
@@ -150,6 +161,20 @@ def _weppcloudr_script_locator(routine, user=None):
     except ValueError:
         raise ValueError("Routine path escapes WEPPcloudR directory")
     return str(resolved)
+
+
+def _parse_proxy_runids(values: list[str]) -> list[str]:
+    runids: list[str] = []
+    for value in values:
+        for token in str(value).replace(',', ' ').split():
+            runid = token.strip()
+            if runid.endswith('/'):
+                runid = runid[:-1]
+            if runid:
+                runids.append(runid)
+    if not runids:
+        raise ValueError("runids query parameter is required and must be non-empty")
+    return runids
 
 
 @weppcloudr_bp.route('/runs/<string:runid>/<config>/WEPPcloudR/<routine>')
@@ -262,7 +287,7 @@ def weppcloudr_runner(runid, config, routine, user, ctx: Optional[RunContext] = 
         with io.open(rpt_fn, encoding='utf8') as fp:
             return fp.read()
 
-    except Exception:
+    except Exception:  # broad-except: boundary contract
         current_app.logger.exception(
             "weppcloudr_runner failed runid=%s config=%s routine=%s user=%s",
             runid,
@@ -277,7 +302,7 @@ def _ensure_interchange(ctx: RunContext) -> None:
     wd = str(ctx.active_root)
     try:
         activate_query_engine(wd, run_interchange=True)
-    except Exception:
+    except Exception:  # broad-except: boundary contract
         current_app.logger.exception("Interchange activation failed for %s", wd)
         raise
 
@@ -328,7 +353,7 @@ def _clear_tracked_job(prep: RedisPrep, job_key: str) -> None:
     try:
         prep.redis.hdel(prep.run_id, f"rq:{job_key}")
         prep.dump()
-    except Exception:
+    except Exception:  # broad-except: boundary contract
         # Boundary catch: preserve contract behavior while logging unexpected failures.
         __import__("logging").getLogger(__name__).exception("Boundary exception at wepppy/weppcloud/routes/weppcloudr.py:331", extra={"runid": locals().get("runid"), "config": locals().get("config"), "job_id": locals().get("job_id")})
         # Clearing the cached metadata is best-effort; failures shouldn't break the request flow.
@@ -353,7 +378,7 @@ def _enqueue_deval_job(
         if prep:
             try:
                 existing_job_id = prep.get_rq_job_id(job_key)
-            except Exception:
+            except Exception:  # broad-except: boundary contract
                 # Boundary catch: preserve contract behavior while logging unexpected failures.
                 __import__("logging").getLogger(__name__).exception("Boundary exception at wepppy/weppcloud/routes/weppcloudr.py:354", extra={"runid": locals().get("runid"), "config": locals().get("config"), "job_id": locals().get("job_id")})
                 existing_job_id = None
@@ -389,7 +414,7 @@ def _enqueue_deval_job(
         if prep:
             try:
                 prep.set_rq_job_id(job_key, job.id)
-            except Exception:
+            except Exception:  # broad-except: boundary contract
                 # Boundary catch: preserve contract behavior while logging unexpected failures.
                 __import__("logging").getLogger(__name__).exception("Boundary exception at wepppy/weppcloud/routes/weppcloudr.py:388", extra={"runid": locals().get("runid"), "config": locals().get("config"), "job_id": locals().get("job_id")})
                 # Persisting job metadata is best-effort.
@@ -416,7 +441,7 @@ def _determine_job(
         if prep:
             try:
                 job_id = prep.get_rq_job_id(job_key)
-            except Exception:
+            except Exception:  # broad-except: boundary contract
                 # Boundary catch: preserve contract behavior while logging unexpected failures.
                 __import__("logging").getLogger(__name__).exception("Boundary exception at wepppy/weppcloud/routes/weppcloudr.py:413", extra={"runid": locals().get("runid"), "config": locals().get("config"), "job_id": locals().get("job_id")})
                 job_id = None
@@ -466,7 +491,7 @@ def deval_details(runid, config):
     ctx = load_run_context(runid, config)
     try:
         _ensure_interchange(ctx)
-    except Exception:
+    except Exception:  # broad-except: boundary contract
         # Boundary catch: preserve contract behavior while logging unexpected failures.
         __import__("logging").getLogger(__name__).exception("Boundary exception at wepppy/weppcloud/routes/weppcloudr.py:461", extra={"runid": locals().get("runid"), "config": locals().get("config"), "job_id": locals().get("job_id")})
         return exception_factory('Error preparing interchange assets', runid=runid)
@@ -506,29 +531,34 @@ def deval_details(runid, config):
 @weppcloudr_bp.route('/WEPPcloudR/proxy/<routine>', methods=['GET', 'POST'])
 @weppcloudr_bp.route('/WEPPcloudR/proxy/<routine>/', methods=['GET', 'POST'])
 def weppcloudr_proxy(routine):
-    from wepppy.weppcloud.app import user_datastore
+    if not current_user.is_authenticated:
+        abort(401, description="Authentication required")
 
-    if current_user.is_authenticated:
-        if not current_user.roles:
-            user_datastore.add_role_to_user(current_user.email, 'User')
+    runids_raw = request.args.getlist('runids')
+    try:
+        runids = _parse_proxy_runids(runids_raw)
+    except ValueError as exc:
+        abort(400, description=str(exc))
+
+    for runid in runids:
+        authorize(runid, '__weppcloudr_proxy__')
+
+    from wepppy.weppcloud.app import user_datastore
+    if not current_user.roles:
+        user_datastore.add_role_to_user(current_user.email, 'User')
 
     user = request.args.get('user', None)
-    runids = request.args.get('runids', '')
-    runids = runids.replace(',', ' ').split()
 
     try:
 
         ws = []
-        for i, runid in enumerate(runids):
-            if runid.endswith('/'):
-                runid = runid[:-1]
-
+        for runid in runids:
             wd = get_wd(runid)
             try:
                 ron = Ron.getInstance(wd)
                 wepp = Wepp.getInstance(wd)
                 watershed = Watershed.getInstance(wd)
-            except Exception as exc:
+            except Exception as exc:  # broad-except: boundary contract
                 # Boundary catch: preserve contract behavior while logging unexpected failures.
                 __import__("logging").getLogger(__name__).exception("Boundary exception at wepppy/weppcloud/routes/weppcloudr.py:521", extra={"runid": locals().get("runid"), "config": locals().get("config"), "job_id": locals().get("job_id")})
                 raise RuntimeError(f"Error acquiring nodb instances from {wd}") from exc
@@ -541,7 +571,9 @@ def weppcloudr_proxy(routine):
         
         js = json.dumps(ws)
 
-    except Exception:
+    except HTTPException:
+        raise
+    except Exception:  # broad-except: boundary contract
         current_app.logger.exception(
             "weppcloudr_proxy setup failed routine=%s user=%s runids=%s",
             routine,
@@ -568,7 +600,16 @@ def weppcloudr_proxy(routine):
         if r_format.lower() == 'r':
             cmd = ['Rscript', rscript, runid]
         elif r_format.lower() == "rmd":
-            cmd = ['R', '-e', f'''library("rmarkdown"); rmarkdown::render("{rscript}", params=list(ws='{js}'), output_file="{rpt_fn}", output_dir="{viz_export_dir}")''']
+            cmd = [
+                'R',
+                '-e',
+                R_PROXY_RMD_RENDER_EXPR,
+                '--args',
+                rscript,
+                js,
+                rpt_fn,
+                viz_export_dir,
+            ]
 
         p = Popen(cmd, stdout=PIPE, stderr=PIPE)
         output, errors = p.communicate()
@@ -581,7 +622,9 @@ def weppcloudr_proxy(routine):
         with io.open(rpt_fn, encoding='utf8') as fp:
             return fp.read()
 
-    except Exception:
+    except HTTPException:
+        raise
+    except Exception:  # broad-except: boundary contract
         current_app.logger.exception(
             "weppcloudr_proxy request failed routine=%s user=%s runids=%s",
             routine,
