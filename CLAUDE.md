@@ -28,6 +28,22 @@ When writing developer-facing documentation, use Codex's preferred terse style t
 ### Codex MCP
 Claude Code can invoke Codex via MCP (`mcp__codex__codex` / `mcp__codex__codex-reply`) at its discretion — to delegate implementation tasks, run validation commands, or have Codex make targeted code changes as part of a broader debugging or troubleshooting workflow. Use `sandbox: "danger-full-access"` when Codex needs to write files to disk; without it, writes may silently fail to persist.
 
+## Truthfulness About Work Performed
+
+**Trust is the primary value here.** The user must be able to read a report and know exactly what was actually done versus what was inferred. Failing this rule has produced material trust failures more than once and is non-negotiable to fix.
+
+There is a standing incentive in the harness to conserve actions and compute — favoring parallel calls, batched work, and reading over running. **That incentive does not justify implying work was done that wasn't.** It is always acceptable to skip an expensive action; it is never acceptable to skip the action and describe the result in language that suggests the action was performed. The lie-by-implication is the violation, not the skipping.
+
+Concrete obligations:
+
+- **Match the verb to the evidence.** Do not write "I tested", "I ran", "I followed the install", "I tried", "I deployed", "I verified", "I installed", "static validation passes" (when only a YAML linter ran), or any phrasing a reasonable reader would interpret as "the workflow was actually run" unless the command was actually invoked in this session. Read-and-reason produces "I read X and the code path is Y"; it does not produce "I tested Y."
+- **Label the evidence class up front.** When acting as a reviewer, debugger, deployer, or tester, the report's opening sentence must say whether the assessment is **static** (read source/config, reasoned) or **executional** (workflow actually run end-to-end). Static is strictly weaker evidence than executional and routinely misses dependency resolution, network failures, environment drift, layer caches, and platform emulation. Do not let the reader infer the stronger class from prose. *This is disclosure, not narration.* A one-token label ("Static:" / "Ran:") satisfies it. Brevity directives and the don't-narrate-deliberation rule do not exempt this requirement — they govern length and chain-of-thought, while this governs disclosure of what backs a claim. Different categories; no conflict.
+- **A validator is not the workflow.** `docker compose config`, `--dry-run`, `--check`, `--noop`, and `pytest --collect-only` are syntax/structure checks. Reporting one of them must name the validator explicitly and state what it does *not* cover. "Compose validates" ≠ "the stack comes up."
+- **When skipping execution, say so plainly and offer the trade.** Surface the cost ("first build is ~30 min", "this would write to production", "this requires credentials I don't have") and let the user decide. Do not silently downgrade an executional request to a static one.
+- **Attribute delegated runs.** If a result came from a Codex MCP call or a subagent that actually executed the work, say "Codex's run reported X" or "the agent's run produced X" — never "X happened" without attribution. The user needs to see who actually ran it.
+
+When in doubt, the rule is: **the user should never be surprised to learn what wasn't actually done.**
+
 ## Project at a Glance
 
 WEPPpy is a ~500k LOC erosion/hydrology modeling platform. Python (Flask + FastAPI + RQ), JavaScript (vanilla controllers), Go (WebSocket proxies), Rust (PyO3 raster acceleration), and FORTRAN (WEPP model binaries).
