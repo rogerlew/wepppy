@@ -11,6 +11,13 @@
 - `POST /weppcloud/api/auth/rq-engine-token` (Flask `weppcloud_site`) mints
   browser fallback JWTs for transparent rq-engine renewal. It must remain
   authenticated-session only (`401` for anonymous), same-origin, and CSRF-protected.
+- Combined watershed generator/viewer flows now require referenced runs to be
+  public only:
+  - `GET|POST /combined_ws_viewer/url_generator` rejects non-public/invalid
+    run IDs from `runids` input.
+  - `GET /combined_ws_viewer`, `GET /combined_ws_viewer2`, and
+    `GET /bounds_ws_viewer` reject malformed `ws` payloads and reject any
+    `ws` run list containing non-public runs.
 - `wepppy/weppcloud/routes/diff.py:20,25`, `gdalinfo.py:19,24`, `jsoncrack.py:82,87`, `pivottable.py:166,171`, `wepprepr.py:19,24` – stream run outputs (diffs, JSON/CSV, management files) without ensuring ownership.
 - `wepppy/weppcloud/routes/weppcloudr.py:196,209` – run exports and `/WEPPcloudR/proxy/<routine>` execute heavy processing and leak metadata with no auth.
 - `wepppy/weppcloud/routes/rq/job_dashboard/routes.py:18` now uses `requires_cap`, but rq-engine `jobstatus`/`jobinfo` endpoints remain intentionally public for read-only polling.
