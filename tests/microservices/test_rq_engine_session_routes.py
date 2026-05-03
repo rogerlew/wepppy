@@ -1,4 +1,6 @@
 import hashlib
+import os
+import pickle
 
 import pytest
 
@@ -24,6 +26,60 @@ def _issue_token(monkeypatch: pytest.MonkeyPatch, *, runs: list[str] | None = No
         extra_claims={"jti": "test-jti", "token_class": "user"},
     )
     return payload["token"]
+
+
+class _DummyRedisSessionPayloadClient:
+    def __init__(self, raw_value: bytes | None) -> None:
+        self._raw_value = raw_value
+        self.closed = False
+        self.seen_keys: list[str] = []
+
+    def get(self, key: str) -> bytes | None:
+        self.seen_keys.append(key)
+        return self._raw_value
+
+    def close(self) -> None:
+        self.closed = True
+
+
+def test_session_payload_accepts_benign_pickled_mapping(monkeypatch: pytest.MonkeyPatch) -> None:
+    expected_payload = {"_user_id": "42", "_roles_mask": ["User"], "_fresh": True}
+    redis_client = _DummyRedisSessionPayloadClient(pickle.dumps(expected_payload))
+    monkeypatch.setattr(session_routes.redis, "Redis", lambda **kwargs: redis_client)
+
+    payload = session_routes._session_payload("sid-1")
+
+    assert payload == expected_payload
+    assert redis_client.seen_keys == [f"{session_routes.SESSION_KEY_PREFIX}sid-1"]
+    assert redis_client.closed is True
+
+
+def test_session_payload_rejects_malicious_pickled_global(monkeypatch: pytest.MonkeyPatch) -> None:
+    class MaliciousPayload:
+        def __reduce__(self) -> tuple[object, tuple[str]]:
+            return (os.system, ("echo exploit",))
+
+    redis_client = _DummyRedisSessionPayloadClient(pickle.dumps(MaliciousPayload()))
+    monkeypatch.setattr(session_routes.redis, "Redis", lambda **kwargs: redis_client)
+
+    with pytest.raises(session_routes.AuthError) as exc_info:
+        session_routes._session_payload("sid-1")
+
+    assert exc_info.value.status_code == 401
+    assert exc_info.value.message == "Invalid session payload"
+    assert redis_client.closed is True
+
+
+def test_session_payload_rejects_pickled_non_mapping(monkeypatch: pytest.MonkeyPatch) -> None:
+    redis_client = _DummyRedisSessionPayloadClient(pickle.dumps(["not", "a", "mapping"]))
+    monkeypatch.setattr(session_routes.redis, "Redis", lambda **kwargs: redis_client)
+
+    with pytest.raises(session_routes.AuthError) as exc_info:
+        session_routes._session_payload("sid-1")
+
+    assert exc_info.value.status_code == 401
+    assert exc_info.value.message == "Invalid session payload"
+    assert redis_client.closed is True
 
 
 def test_session_token_issues_with_bearer(monkeypatch: pytest.MonkeyPatch) -> None:

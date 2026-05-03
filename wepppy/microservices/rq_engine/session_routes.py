@@ -1,6 +1,8 @@
 from __future__ import annotations
 
+import builtins
 import hashlib
+import io
 import json
 import logging
 import os
@@ -47,6 +49,33 @@ IDEMPOTENCY_REPLAY_REJECTED_CODE = "idempotency_replay_rejected"
 IDEMPOTENCY_MISMATCH_CODE = "idempotency_key_conflict"
 STALE_RUN_STATE_CODE = "stale_run_state"
 DEFAULT_IDEMPOTENCY_TTL_SECONDS = 24 * 60 * 60
+_ALLOWED_SESSION_PAYLOAD_BUILTINS = frozenset(
+    {
+        "dict",
+        "list",
+        "tuple",
+        "set",
+        "frozenset",
+        "str",
+        "bytes",
+        "bytearray",
+        "int",
+        "float",
+        "bool",
+        "complex",
+    }
+)
+
+
+class _RestrictedSessionPayloadUnpickler(pickle.Unpickler):
+    def find_class(self, module: str, name: str) -> Any:
+        if module == "builtins" and name in _ALLOWED_SESSION_PAYLOAD_BUILTINS:
+            return getattr(builtins, name)
+        raise pickle.UnpicklingError(f"Forbidden pickle global '{module}.{name}'")
+
+
+def _restricted_session_payload_loads(raw_value: bytes) -> Any:
+    return _RestrictedSessionPayloadUnpickler(io.BytesIO(raw_value)).load()
 
 
 def _bool_env(name: str, *, default: bool) -> bool:
@@ -129,11 +158,26 @@ def _session_payload(session_id: str) -> Mapping[str, Any]:
     if raw_value is None:
         raise AuthError("Session expired or invalid", status_code=401)
     try:
-        payload = pickle.loads(raw_value)
-    except (AttributeError, EOFError, ImportError, IndexError, ValueError, pickle.UnpicklingError) as exc:
-        logger.exception("rq-engine invalid session payload", extra={"session_id": session_id})
+        payload = _restricted_session_payload_loads(raw_value)
+    except (
+        AttributeError,
+        EOFError,
+        ImportError,
+        IndexError,
+        TypeError,
+        ValueError,
+        pickle.UnpicklingError,
+    ) as exc:
+        logger.warning(
+            "rq-engine invalid session payload",
+            extra={"session_id": session_id, "error_type": type(exc).__name__},
+        )
         raise AuthError("Invalid session payload", status_code=401) from exc
     if not isinstance(payload, Mapping):
+        logger.warning(
+            "rq-engine invalid session payload type",
+            extra={"session_id": session_id, "payload_type": type(payload).__name__},
+        )
         raise AuthError("Invalid session payload", status_code=401)
     return payload
 
