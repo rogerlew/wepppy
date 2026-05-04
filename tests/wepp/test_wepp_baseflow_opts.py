@@ -6,7 +6,8 @@ from pathlib import Path
 
 import pytest
 
-from wepppy.nodb.core.wepp import BaseflowOpts, Wepp
+import wepppy.nodb.core.wepp as wepp_module
+from wepppy.nodb.core.wepp import BaseflowOpts, FrostOpts, Wepp
 
 pytestmark = pytest.mark.unit
 
@@ -75,3 +76,35 @@ def test_set_baseflow_opts_applies_baseflow_coefficient_bounds(tmp_path: Path) -
     wepp.set_baseflow_opts(bfcoeff=0.11)
 
     assert wepp.baseflow_opts.bfcoeff == pytest.approx(0.04)
+
+
+def test_post_instance_loaded_guards_legacy_baseflow_without_initialized_logger(
+    tmp_path: Path,
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    wepp = Wepp.__new__(Wepp)
+    wepp.wd = str(tmp_path)
+    wepp._dss_excluded_channel_orders = [1, 2]
+    wepp._bootstrap_enabled = False
+    wepp._job_id = None
+    wepp._job_key = None
+    wepp._delete_after_interchange = False
+    wepp.frost_opts = FrostOpts()
+    wepp.baseflow_opts = BaseflowOpts(bfcoeff=0.11)
+    wepp.config_get_int = lambda _section, _option, default=None: default  # type: ignore[assignment]
+    wepp.config_get_float = lambda _section, _option, default=None: default  # type: ignore[assignment]
+    wepp.config_get_bool = lambda _section, _option, default=False: default  # type: ignore[assignment]
+    wepp.config_get_list = lambda _section, _option, default=None: default  # type: ignore[assignment]
+
+    monkeypatch.setattr(
+        wepp_module.NoDbBase,
+        "_post_instance_loaded",
+        classmethod(lambda cls, instance: instance),
+    )
+
+    assert not hasattr(wepp, "logger")
+
+    loaded = Wepp._post_instance_loaded(wepp)
+
+    assert loaded.baseflow_opts.bfcoeff == pytest.approx(0.04)
+    assert not hasattr(loaded, "logger")

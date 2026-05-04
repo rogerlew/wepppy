@@ -1383,11 +1383,15 @@ class Wepp(NoDbBase):
             return fallback
         return value_float
 
+    @property
+    def _guard_logger(self) -> logging.Logger:
+        return getattr(self, 'logger', logging.getLogger(__name__))
+
     def _guard_unitized_value(self, section: str, option: str, value: Optional[float],
                               min_value: float, max_value: float, fallback: float) -> float:
         default_value = self._resolve_unitized_default(section, option, fallback, min_value, max_value)
         if not isfloat(value):
-            self.logger.warning(
+            self._guard_logger.warning(
                 'Resetting %s.%s from %s to %s (bounds %s..%s)',
                 section,
                 option,
@@ -1399,7 +1403,7 @@ class Wepp(NoDbBase):
             return default_value
         value_float = float(value)
         if isnan(value_float) or isinf(value_float) or value_float < min_value or value_float > max_value:
-            self.logger.warning(
+            self._guard_logger.warning(
                 'Resetting %s.%s from %s to %s (bounds %s..%s)',
                 section,
                 option,
@@ -1423,7 +1427,7 @@ class Wepp(NoDbBase):
     def _guard_positive_value(self, section: str, option: str, value: Optional[float], max_value: float, fallback: float) -> float:
         default_value = self._resolve_positive_default(section, option, fallback, max_value)
         if not isfloat(value):
-            self.logger.warning(
+            self._guard_logger.warning(
                 'Resetting %s.%s from %s to %s (bounds >0..%s)',
                 section,
                 option,
@@ -1434,7 +1438,7 @@ class Wepp(NoDbBase):
             return default_value
         value_float = float(value)
         if isnan(value_float) or isinf(value_float) or value_float <= 0.0 or value_float > max_value:
-            self.logger.warning(
+            self._guard_logger.warning(
                 'Resetting %s.%s from %s to %s (bounds >0..%s)',
                 section,
                 option,
@@ -1464,7 +1468,7 @@ class Wepp(NoDbBase):
                 if not isnan(value_float) and not isinf(value_float) and value_float.is_integer():
                     value = int(value_float)
                 else:
-                    self.logger.warning(
+                    self._guard_logger.warning(
                         'Resetting %s.%s from %s to %s (bounds %s..%s)',
                         section,
                         option,
@@ -1475,7 +1479,7 @@ class Wepp(NoDbBase):
                     )
                     return default_value
             else:
-                self.logger.warning(
+                self._guard_logger.warning(
                     'Resetting %s.%s from %s to %s (bounds %s..%s)',
                     section,
                     option,
@@ -1487,7 +1491,7 @@ class Wepp(NoDbBase):
                 return default_value
         value_int = int(value)
         if value_int < min_value or value_int > max_value:
-            self.logger.warning(
+            self._guard_logger.warning(
                 'Resetting %s.%s from %s to %s (bounds %s..%s)',
                 section,
                 option,

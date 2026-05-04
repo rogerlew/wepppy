@@ -823,7 +823,18 @@ class SoilSummary(object):
         fn = getattr(self, "_meta_fn", None)
         if fn is None:
             return fn
-        return fn
+        if os.path.isabs(fn) or _exists(fn):
+            return fn
+
+        parts = [part for part in fn.split(os.sep) if part]
+        if len(parts) < 3 or parts[1] != "soils":
+            return fn
+
+        from wepppy.weppcloud.utils.helpers import get_wd
+
+        runid = parts[0]
+        rest = os.sep.join(parts[1:])
+        return _join(get_wd(runid), rest)
 
     @property
     def meta(self):

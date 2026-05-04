@@ -342,6 +342,55 @@ def test_soil_summary_path_skips_runid_resolution_for_absolute_soils_dir(
     assert summary.path == str(absolute_soils_dir / "123.sol")
 
 
+def test_soil_summary_meta_fn_resolves_legacy_runid_relative_path(
+    tmp_path: Path,
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    from wepppy.soils.ssurgo import SoilSummary
+
+    run_root = tmp_path / "legacy-run"
+    meta_path = run_root / "soils" / "123.json"
+    summary = SoilSummary(
+        mukey="123",
+        fname="123.sol",
+        soils_dir=str(run_root / "soils"),
+        build_date="2026-02-18",
+        desc="legacy",
+        meta_fn="legacy-run/soils/123.json",
+    )
+
+    def _fake_get_wd(runid: str) -> str:
+        assert runid == "legacy-run"
+        return str(run_root)
+
+    monkeypatch.setattr("wepppy.weppcloud.utils.helpers.get_wd", _fake_get_wd)
+
+    assert summary.meta_fn == str(meta_path)
+
+
+def test_soil_summary_meta_fn_keeps_non_runid_relative_path(
+    tmp_path: Path,
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    from wepppy.soils.ssurgo import SoilSummary
+
+    summary = SoilSummary(
+        mukey="123",
+        fname="123.sol",
+        soils_dir=str(tmp_path / "soils"),
+        build_date="2026-02-18",
+        desc="relative",
+        meta_fn="soils/123.json",
+    )
+
+    def _unexpected_get_wd(_runid: str) -> str:
+        raise AssertionError("get_wd should only be used for runid/soils metadata paths")
+
+    monkeypatch.setattr("wepppy.weppcloud.utils.helpers.get_wd", _unexpected_get_wd)
+
+    assert summary.meta_fn == "soils/123.json"
+
+
 def test_init_reads_depth_config_keys_with_expected_names(
     tmp_path: Path,
     monkeypatch: pytest.MonkeyPatch,
