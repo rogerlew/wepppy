@@ -141,7 +141,8 @@ def _write_wat_with_storage_terms(path: Path) -> None:
             1000.0 AS ProfileDepth,
             510.0 AS ProfilePorosityCap,
             310.0 AS ProfileFCStore,
-            130.0 AS ProfileWPStore
+            130.0 AS ProfileWPStore,
+            4.0 AS InterceptionStorage
         UNION ALL
         SELECT
             1 AS wepp_id,
@@ -173,7 +174,8 @@ def _write_wat_with_storage_terms(path: Path) -> None:
             1200.0 AS ProfileDepth,
             600.0 AS ProfilePorosityCap,
             350.0 AS ProfileFCStore,
-            150.0 AS ProfileWPStore
+            150.0 AS ProfileWPStore,
+            10.0 AS InterceptionStorage
     ) TO '{safe}' (FORMAT PARQUET)
     """
     with duckdb.connect() as con:
@@ -344,7 +346,14 @@ def test_run_totalwatsed3_merges_ash_metrics(tmp_path):
     assert _is_nullish(data["TSMF"][0])
     assert _is_nullish(data["QRain"][0])
     assert _is_nullish(data["QSnow"][0])
-    for column in ("SoilWaterTotal", "ProfileDepth", "ProfilePorosityCap", "ProfileFCStore", "ProfileWPStore"):
+    for column in (
+        "SoilWaterTotal",
+        "ProfileDepth",
+        "ProfilePorosityCap",
+        "ProfileFCStore",
+        "ProfileWPStore",
+        "InterceptionStorage",
+    ):
         assert _is_nullish(data[column][0])
 
     # Missing ash directory should still produce rows with zeroed ash metrics.
@@ -400,6 +409,7 @@ def test_run_totalwatsed3_exposes_optional_wat_storage_terms(tmp_path):
     assert data["ProfilePorosityCap"][0] == pytest.approx(577.5)
     assert data["ProfileFCStore"][0] == pytest.approx(340.0)
     assert data["ProfileWPStore"][0] == pytest.approx(145.0)
+    assert data["InterceptionStorage"][0] == pytest.approx(8.5)
 
 
 def test_run_totalwatsed3_uses_last_ofe_for_lateral_flow(tmp_path):

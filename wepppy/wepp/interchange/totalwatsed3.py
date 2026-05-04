@@ -52,6 +52,7 @@ WAT_OPTIONAL_COLUMNS = (
     "ProfilePorosityCap",
     "ProfileFCStore",
     "ProfileWPStore",
+    "InterceptionStorage",
 )
 
 # Ash columns are unitless in names; units live in schema metadata
@@ -110,6 +111,7 @@ SCHEMA = schema_with_version(
             pa_field("ProfilePorosityCap", pa.float64(), units="mm", description="Area-weighted full-profile porosity storage capacity (sum(por * dg))"),
             pa_field("ProfileFCStore", pa.float64(), units="mm", description="Area-weighted full-profile field-capacity storage (sum(thetfc * dg))"),
             pa_field("ProfileWPStore", pa.float64(), units="mm", description="Area-weighted full-profile wilting-point storage (sum(thetdr * dg))"),
+            pa_field("InterceptionStorage", pa.float64(), units="mm", description="Area-weighted plant/residue interception carryover storage depth (pintlv + resint)"),
             pa_field("TSMF", pa.float64(), units="frac", description="Area-weighted true soil moisture fraction (full profile)"),
             pa_field("frozwt", pa.float64(), units="mm", description="Frozen water in soil profile depth"),
             pa_field("Snow-Water", pa.float64(), units="mm", description="Water in surface snow depth"),

@@ -66,6 +66,7 @@ WAT_OPTIONAL_COLUMN_NAMES = [
     "ProfilePorosityCap",
     "ProfileFCStore",
     "ProfileWPStore",
+    "InterceptionStorage",
 ]
 
 WAT_COLUMN_NAMES = WAT_BASE_COLUMN_NAMES + WAT_OPTIONAL_COLUMN_NAMES
@@ -95,6 +96,7 @@ HEADER_ALIASES = {
     "ProfilePorosityCap (mm)": "ProfilePorosityCap",
     "ProfileFCStore (mm)": "ProfileFCStore",
     "ProfileWPStore (mm)": "ProfileWPStore",
+    "InterceptionStorage (mm)": "InterceptionStorage",
 }
 
 SCHEMA = schema_with_version(
@@ -156,6 +158,12 @@ SCHEMA = schema_with_version(
                 units="mm",
                 description="Full-profile wilting-point storage (sum(thetdr * dg)), optional producer-authoritative term",
             ),
+            pa_field(
+                "InterceptionStorage",
+                pa.float64(),
+                units="mm",
+                description="Plant/residue interception carryover storage (pintlv + resint), optional producer-authoritative term",
+            ),
         ]
     )
 )
@@ -193,6 +201,7 @@ CANONICAL_COLUMN_ALIASES = {
     "ProfilePorosityCap": ("ProfilePorosityCap", "ProfilePorosityCap (mm)"),
     "ProfileFCStore": ("ProfileFCStore", "ProfileFCStore (mm)"),
     "ProfileWPStore": ("ProfileWPStore", "ProfileWPStore (mm)"),
+    "InterceptionStorage": ("InterceptionStorage", "InterceptionStorage (mm)"),
 }
 
 PANDAS_TYPE_MAP: Dict[str, np.dtype] = {

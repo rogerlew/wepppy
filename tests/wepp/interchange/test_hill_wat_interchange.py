@@ -24,9 +24,16 @@ _HEADER_BASE = """ -------------------------------------------------------------
 """
 
 _HEADER_ENRICHED = """ ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+  OFE    J    Y      P      RM     Q                Ep      Es      Er     Dp       UpStrmQ   SubRIn    latqcc Total-Soil frozwt Snow-Water QOFE            Tile    Irr        Area SoilWaterTotal ProfileDepth ProfilePorosityCap ProfileFCStore ProfileWPStore InterceptionStorage
+  #      -    -      mm     mm     mm               mm      mm      mm       mm      mm           mm      mm   Water(mm)   mm        mm      mm             mm      mm         m^2             mm           mm                 mm             mm             mm                  mm
+ ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+
+"""
+
+_HEADER_ENRICHED_NO_INTERCEPTION = """ ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
   OFE    J    Y      P      RM     Q                Ep      Es      Er     Dp       UpStrmQ   SubRIn    latqcc Total-Soil frozwt Snow-Water QOFE            Tile    Irr        Area SoilWaterTotal ProfileDepth ProfilePorosityCap ProfileFCStore ProfileWPStore
   #      -    -      mm     mm     mm               mm      mm      mm       mm      mm           mm      mm   Water(mm)   mm        mm      mm             mm      mm         m^2             mm           mm                 mm             mm             mm
- ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+ ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
 
 """
 
@@ -60,6 +67,26 @@ def test_hill_wat_interchange_parses_enriched_storage_terms(tmp_path: Path) -> N
     _write_wat(
         workdir / "H1.wat.dat",
         _HEADER_ENRICHED,
+        "     1    1 2000   10.00   10.00   0.0000000E+00    0.10    0.20    0.30    0.40   0.0000000E+00    0.00    0.50  100.00    1.25    0.00    0.0000000E+00    0.00    0.00      50.00         101.25      1000.00             510.00         310.00         130.00               0.45",
+    )
+
+    target = wat_module.run_wepp_hillslope_wat_interchange(workdir)
+    df = pq.read_table(target).to_pandas()
+
+    assert df.loc[0, "SoilWaterTotal"] == pytest.approx(101.25)
+    assert df.loc[0, "ProfileDepth"] == pytest.approx(1000.0)
+    assert df.loc[0, "ProfilePorosityCap"] == pytest.approx(510.0)
+    assert df.loc[0, "ProfileFCStore"] == pytest.approx(310.0)
+    assert df.loc[0, "ProfileWPStore"] == pytest.approx(130.0)
+    assert df.loc[0, "InterceptionStorage"] == pytest.approx(0.45)
+
+
+def test_hill_wat_interchange_parses_enriched_layout_without_interception(tmp_path: Path) -> None:
+    workdir = tmp_path / "output"
+    workdir.mkdir()
+    _write_wat(
+        workdir / "H1.wat.dat",
+        _HEADER_ENRICHED_NO_INTERCEPTION,
         "     1    1 2000   10.00   10.00   0.0000000E+00    0.10    0.20    0.30    0.40   0.0000000E+00    0.00    0.50  100.00    1.25    0.00    0.0000000E+00    0.00    0.00      50.00         101.25      1000.00             510.00         310.00         130.00",
     )
 
@@ -71,6 +98,7 @@ def test_hill_wat_interchange_parses_enriched_storage_terms(tmp_path: Path) -> N
     assert df.loc[0, "ProfilePorosityCap"] == pytest.approx(510.0)
     assert df.loc[0, "ProfileFCStore"] == pytest.approx(310.0)
     assert df.loc[0, "ProfileWPStore"] == pytest.approx(130.0)
+    assert df["InterceptionStorage"].isna().all()
 
 
 def test_hill_wat_interchange_rejects_unknown_extra_columns(tmp_path: Path) -> None:
@@ -78,7 +106,7 @@ def test_hill_wat_interchange_rejects_unknown_extra_columns(tmp_path: Path) -> N
     _write_wat(
         source,
         _HEADER_ENRICHED.replace("ProfileWPStore", "UnexpectedExtra"),
-        "     1    1 2000   10.00   10.00   0.0000000E+00    0.10    0.20    0.30    0.40   0.0000000E+00    0.00    0.50  100.00    1.25    0.00    0.0000000E+00    0.00    0.00      50.00         101.25      1000.00             510.00         310.00         130.00",
+        "     1    1 2000   10.00   10.00   0.0000000E+00    0.10    0.20    0.30    0.40   0.0000000E+00    0.00    0.50  100.00    1.25    0.00    0.0000000E+00    0.00    0.00      50.00         101.25      1000.00             510.00         310.00         130.00               0.45",
     )
 
     with pytest.raises(ValueError, match="Unexpected WAT column layout"):
