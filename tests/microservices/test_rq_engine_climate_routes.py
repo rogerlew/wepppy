@@ -122,7 +122,7 @@ def test_build_climate_parse_missing_field_key_error_returns_structured_validati
         {
             "field": "future_start_year",
             "code": "missing_required_field",
-            "message": "Missing required field: future_start_year",
+            "message": "Future start year is required.",
         }
     ]
 
@@ -253,4 +253,92 @@ def test_build_climate_observed_year_bounds_validation_failure_returns_structure
     assert response.status_code == 400
     payload = response.json()
     assert payload["error"]["code"] == "validation_error"
-    assert payload["errors"][0]["code"] == "invalid_request"
+    assert payload["errors"] == [
+        {
+            "field": "observed_start_year",
+            "code": "missing_required_field",
+            "message": "Observed start year is required.",
+        }
+    ]
+
+
+def test_build_climate_observed_year_assertion_failure_returns_year_specific_error(
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    _stub_auth(monkeypatch)
+    monkeypatch.setattr(climate_routes, "get_wd", lambda runid: "/tmp/run")
+
+    class DummyClimate:
+        run_group = "default"
+        climate_mode = climate_routes.ClimateMode.ObservedPRISM
+
+        def parse_inputs(self, payload) -> None:
+            raise AssertionError()
+
+    monkeypatch.setattr(
+        climate_routes.Climate,
+        "getInstance",
+        lambda wd: DummyClimate(),
+    )
+
+    with TestClient(rq_engine.app) as client:
+        response = client.post(
+            "/api/runs/run-1/cfg/build-climate",
+            json={
+                "climate_mode": str(climate_routes.ClimateMode.ObservedPRISM.value),
+                "observed_start_year": "1980",
+                "observed_end_year": "1944",
+            },
+        )
+
+    assert response.status_code == 400
+    payload = response.json()
+    assert payload["error"]["code"] == "validation_error"
+    assert payload["errors"] == [
+        {
+            "field": "observed_end_year",
+            "code": "year_out_of_range",
+            "message": "Observed end year must be 1980 or later.",
+        }
+    ]
+
+
+def test_build_climate_observed_year_order_failure_returns_comparison_message(
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    _stub_auth(monkeypatch)
+    monkeypatch.setattr(climate_routes, "get_wd", lambda runid: "/tmp/run")
+
+    class DummyClimate:
+        run_group = "default"
+        climate_mode = climate_routes.ClimateMode.ObservedPRISM
+
+        def parse_inputs(self, payload) -> None:
+            raise AssertionError()
+
+    monkeypatch.setattr(
+        climate_routes.Climate,
+        "getInstance",
+        lambda wd: DummyClimate(),
+    )
+
+    with TestClient(rq_engine.app) as client:
+        response = client.post(
+            "/api/runs/run-1/cfg/build-climate",
+            json={
+                "climate_mode": str(climate_routes.ClimateMode.ObservedPRISM.value),
+                "observed_start_year": "1981",
+                "observed_end_year": "1980",
+            },
+        )
+
+    assert response.status_code == 400
+    payload = response.json()
+    assert payload["error"]["code"] == "validation_error"
+    assert payload["errors"] == [
+        {
+            "field": "observed_end_year",
+            "code": "year_order",
+            "message": "Observed end year must be greater than or equal to observed start year (received 1980 < 1981).",
+        }
+    ]

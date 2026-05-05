@@ -3,6 +3,7 @@ from __future__ import annotations
 import copy
 import logging
 import os
+import re
 
 import redis
 from fastapi import APIRouter, Request
@@ -42,6 +43,24 @@ _OBSERVED_YEAR_REQUIRED_MODES = frozenset(
         ClimateMode.DepNexrad,
     )
 )
+_FUTURE_YEAR_REQUIRED_MODES = frozenset((ClimateMode.Future,))
+_CLIMATE_YEAR_MAX_SPAN = 1000
+_OBSERVED_YEAR_MIN = 1980
+_FUTURE_YEAR_MIN = 2006
+_FUTURE_YEAR_MAX = 2099
+_CLIMATE_FIELD_LABELS = {
+    "observed_start_year": "Observed start year",
+    "observed_end_year": "Observed end year",
+    "future_start_year": "Future start year",
+    "future_end_year": "Future end year",
+}
+_OBSERVED_INTEGER_YEAR_MESSAGE_RE = re.compile(
+    r"^(observed_(?:start|end)_year) must be an integer year, got (?P<raw>.+)$"
+)
+_OBSERVED_ORDER_MESSAGE_RE = re.compile(
+    r"^observed_end_year must be greater than or equal to observed_start_year "
+    r"\((?P<end>-?\d+) < (?P<start>-?\d+)\)$"
+)
 
 
 def _maybe_nodir_error_response(exc: Exception):
@@ -64,7 +83,11 @@ def _require_directory_root(wd: str, root: str) -> None:
         )
 
 
-def _build_climate_validation_errors(exc: Exception) -> list[dict[str, str]]:
+def _build_climate_validation_errors(
+    exc: Exception,
+    *,
+    payload: dict[str, object] | None = None,
+) -> list[dict[str, str]]:
     message = str(exc).strip()
 
     if isinstance(exc, KeyError):
@@ -74,7 +97,7 @@ def _build_climate_validation_errors(exc: Exception) -> list[dict[str, str]]:
                 {
                     "field": missing_field,
                     "code": "missing_required_field",
-                    "message": f"Missing required field: {missing_field}",
+                    "message": f"{_field_label(missing_field)} is required.",
                 }
             ]
 
@@ -87,10 +110,46 @@ def _build_climate_validation_errors(exc: Exception) -> list[dict[str, str]]:
                 {
                     "field": field,
                     "code": "missing_required_field",
-                    "message": f"Missing required field: {field}",
+                    "message": f"{_field_label(field)} is required.",
                 }
                 for field in fields
             ]
+
+    observed_integer_match = _OBSERVED_INTEGER_YEAR_MESSAGE_RE.match(message)
+    if observed_integer_match:
+        field = observed_integer_match.group(1)
+        raw_value = observed_integer_match.group("raw")
+        if raw_value == "empty string":
+            return [_validation_issue(field=field, code="missing_required_field", message=f"{_field_label(field)} is required.")]
+        return [
+            _validation_issue(
+                field=field,
+                code="invalid_year",
+                message=(
+                    f"{_field_label(field)} must be a whole-number year "
+                    f"(received {raw_value})."
+                ),
+            )
+        ]
+
+    observed_order_match = _OBSERVED_ORDER_MESSAGE_RE.match(message)
+    if observed_order_match:
+        received_end = observed_order_match.group("end")
+        received_start = observed_order_match.group("start")
+        return [
+            _validation_issue(
+                field="observed_end_year",
+                code="year_order",
+                message=(
+                    "Observed end year must be greater than or equal to observed start year "
+                    f"(received {received_end} < {received_start})."
+                ),
+            )
+        ]
+
+    inferred_errors = _infer_year_validation_errors_from_payload(payload=payload)
+    if inferred_errors:
+        return inferred_errors
 
     return [
         {
@@ -98,6 +157,214 @@ def _build_climate_validation_errors(exc: Exception) -> list[dict[str, str]]:
             "message": "Invalid climate field values.",
         }
     ]
+
+
+def _field_label(field_name: str) -> str:
+    return _CLIMATE_FIELD_LABELS.get(field_name, field_name.replace("_", " ").capitalize())
+
+
+def _validation_issue(*, code: str, message: str, field: str | None = None) -> dict[str, str]:
+    issue: dict[str, str] = {"code": code, "message": message}
+    if field:
+        issue["field"] = field
+    return issue
+
+
+def _payload_value(payload: dict[str, object], field_name: str) -> object:
+    value = payload.get(field_name)
+    if isinstance(value, (list, tuple)):
+        if not value:
+            return ""
+        return value[-1]
+    return value
+
+
+def _is_blank(value: object) -> bool:
+    if value is None:
+        return True
+    if isinstance(value, str):
+        return value.strip() == ""
+    return False
+
+
+def _has_value(value: object) -> bool:
+    return not _is_blank(value)
+
+
+def _parse_payload_year(value: object, *, field_name: str) -> tuple[int | None, dict[str, str] | None]:
+    label = _field_label(field_name)
+    if _is_blank(value):
+        return None, _validation_issue(field=field_name, code="missing_required_field", message=f"{label} is required.")
+    if isinstance(value, bool):
+        return (
+            None,
+            _validation_issue(
+                field=field_name,
+                code="invalid_year",
+                message=f"{label} must be a whole-number year (received {value!r}).",
+            ),
+        )
+    try:
+        return int(value), None
+    except (TypeError, ValueError):
+        return (
+            None,
+            _validation_issue(
+                field=field_name,
+                code="invalid_year",
+                message=f"{label} must be a whole-number year (received {value!r}).",
+            ),
+        )
+
+
+def _validate_year_pair_from_payload(
+    payload: dict[str, object],
+    *,
+    start_field: str,
+    end_field: str,
+    min_year: int,
+    max_year: int | None,
+) -> list[dict[str, str]]:
+    start_raw = _payload_value(payload, start_field)
+    end_raw = _payload_value(payload, end_field)
+    start_label = _field_label(start_field)
+    end_label = _field_label(end_field)
+
+    if _is_blank(start_raw) and _is_blank(end_raw):
+        return []
+
+    if _is_blank(start_raw) and _has_value(end_raw):
+        return [
+            _validation_issue(
+                field=start_field,
+                code="missing_required_field",
+                message=f"{start_label} is required when {end_label} is provided.",
+            )
+        ]
+    if _is_blank(end_raw) and _has_value(start_raw):
+        return [
+            _validation_issue(
+                field=end_field,
+                code="missing_required_field",
+                message=f"{end_label} is required when {start_label} is provided.",
+            )
+        ]
+
+    start_year, start_issue = _parse_payload_year(start_raw, field_name=start_field)
+    end_year, end_issue = _parse_payload_year(end_raw, field_name=end_field)
+    issues = [issue for issue in (start_issue, end_issue) if issue is not None]
+    if issues:
+        return issues
+    assert start_year is not None and end_year is not None
+
+    if start_year < min_year:
+        return [
+            _validation_issue(
+                field=start_field,
+                code="year_out_of_range",
+                message=f"{start_label} must be {min_year} or later.",
+            )
+        ]
+    if max_year is not None and start_year > max_year:
+        return [
+            _validation_issue(
+                field=start_field,
+                code="year_out_of_range",
+                message=f"{start_label} must be between {min_year} and {max_year}.",
+            )
+        ]
+    if end_year < min_year:
+        return [
+            _validation_issue(
+                field=end_field,
+                code="year_out_of_range",
+                message=f"{end_label} must be {min_year} or later.",
+            )
+        ]
+    if max_year is not None and end_year > max_year:
+        return [
+            _validation_issue(
+                field=end_field,
+                code="year_out_of_range",
+                message=f"{end_label} must be between {min_year} and {max_year}.",
+            )
+        ]
+    if end_year < start_year:
+        return [
+            _validation_issue(
+                field=end_field,
+                code="year_order",
+                message=(
+                    f"{end_label} must be greater than or equal to {start_label.lower()} "
+                    f"(received {end_year} < {start_year})."
+                ),
+            )
+        ]
+    if end_year - start_year > _CLIMATE_YEAR_MAX_SPAN:
+        return [
+            _validation_issue(
+                field=end_field,
+                code="year_range_too_large",
+                message=(
+                    f"The selected year range is too large. "
+                    f"Maximum span is {_CLIMATE_YEAR_MAX_SPAN} years."
+                ),
+            )
+        ]
+    return []
+
+
+def _extract_climate_mode(payload: dict[str, object]) -> ClimateMode | None:
+    if not payload:
+        return None
+    raw_value = _payload_value(payload, "climate_mode")
+    if _is_blank(raw_value):
+        return None
+    try:
+        return ClimateMode(int(raw_value))
+    except (TypeError, ValueError):
+        return None
+
+
+def _infer_year_validation_errors_from_payload(*, payload: dict[str, object] | None) -> list[dict[str, str]]:
+    if not isinstance(payload, dict):
+        return []
+
+    climate_mode = _extract_climate_mode(payload)
+
+    validate_observed = (
+        climate_mode in _OBSERVED_YEAR_REQUIRED_MODES
+        or _has_value(_payload_value(payload, "observed_start_year"))
+        or _has_value(_payload_value(payload, "observed_end_year"))
+    )
+    if validate_observed:
+        observed_issues = _validate_year_pair_from_payload(
+            payload,
+            start_field="observed_start_year",
+            end_field="observed_end_year",
+            min_year=_OBSERVED_YEAR_MIN,
+            max_year=None,
+        )
+        if observed_issues:
+            return observed_issues
+
+    validate_future = (
+        climate_mode in _FUTURE_YEAR_REQUIRED_MODES
+        or _has_value(_payload_value(payload, "future_start_year"))
+        or _has_value(_payload_value(payload, "future_end_year"))
+    )
+    if validate_future:
+        future_issues = _validate_year_pair_from_payload(
+            payload,
+            start_field="future_start_year",
+            end_field="future_end_year",
+            min_year=_FUTURE_YEAR_MIN,
+            max_year=_FUTURE_YEAR_MAX,
+        )
+        if future_issues:
+            return future_issues
+
+    return []
 
 
 def _validate_observed_year_bounds_before_enqueue(climate: Climate) -> None:
@@ -136,6 +403,7 @@ async def build_climate(runid: str, config: str, request: Request) -> JSONRespon
         return error_response_with_traceback("Failed to authorize request", status_code=401)
 
     wd = get_wd(runid)
+    payload: dict[str, object] = {}
 
     try:
         _require_directory_root(wd, "climate")
@@ -151,7 +419,7 @@ async def build_climate(runid: str, config: str, request: Request) -> JSONRespon
             "rq-engine build-climate validation failed",
             extra={"runid": runid, "config": config, "error": str(exc)},
         )
-        return validation_error_response(_build_climate_validation_errors(exc))
+        return validation_error_response(_build_climate_validation_errors(exc, payload=payload))
     except Exception as exc:  # broad-except: boundary contract
         nodir_response = _maybe_nodir_error_response(exc)
         if nodir_response is not None:
