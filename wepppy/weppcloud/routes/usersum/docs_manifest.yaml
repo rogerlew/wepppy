@@ -407,6 +407,16 @@ docs:
     audience_tags: [user, operator]
     status: active
     nav_key: usersum.weppcloud.wepp_forest_compiler_fragility_brief
+  - doc_id: usersum.weppcloud.wepp_forest_modernizing_water_balance_brief
+    source: vendor
+    vendor_id: wepp-forest
+    rel_path: wepppy/weppcloud/routes/usersum/vendor/wepp-forest/docs/20260504-stakeholder-watbalance.md
+    title: "Stakeholder Brief: Modernizing the WEPP Water Balance"
+    min_role: user
+    category: weppcloud
+    audience_tags: [user, operator]
+    status: active
+    nav_key: usersum.weppcloud.wepp_forest_modernizing_water_balance_brief
   - doc_id: usersum.weppcloud.wepp_forest_multi_segment_water_balance_brief
     source: vendor
     vendor_id: wepp-forest
