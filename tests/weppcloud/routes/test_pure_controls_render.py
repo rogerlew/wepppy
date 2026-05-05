@@ -1,6 +1,5 @@
 from __future__ import annotations
 
-from collections import Counter
 import json
 import re
 from pathlib import Path
@@ -624,8 +623,6 @@ def test_interfaces_template_shows_login_bypass_banner_for_anonymous_user(jinja_
         user=anon_user,
         current_user=anon_user,
         url_for=_url_for,
-        runs_counter=Counter(),
-        commafy=lambda value: f"{value:,}",
         cap_base_url="/cap",
         cap_asset_base_url="/cap/assets",
         cap_site_key="test-site-key",
@@ -652,8 +649,6 @@ def test_interfaces_template_hides_login_bypass_banner_for_authenticated_user(ji
         user=auth_user,
         current_user=auth_user,
         url_for=_url_for,
-        runs_counter=Counter(),
-        commafy=lambda value: f"{value:,}",
         rq_engine_token="token",
     )
 
@@ -675,8 +670,6 @@ def test_interfaces_template_renders_earth_launch_card(jinja_env: Environment) -
         user=auth_user,
         current_user=auth_user,
         url_for=_url_for,
-        runs_counter=Counter(),
-        commafy=lambda value: f"{value:,}",
         rq_engine_token="token",
     )
 

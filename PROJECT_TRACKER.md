@@ -1,7 +1,7 @@
 # PROJECT_TRACKER.md
 > Kanban board for wepppy work packages and vision items
 
-**Last Updated**: 2026-05-02
+**Last Updated**: 2026-05-05
 **Active Packages**: 5
 **Quick Links**: [Work Packages Directory](docs/work-packages/) | [God-Tier Prompting Strategy](docs/god-tier-prompting-strategy.md)
 
@@ -76,6 +76,31 @@ Feedback mechanisms:
 ## 📋 Backlog
 
 Work packages that are scoped but not yet started. Dependencies and prerequisites should be noted.
+
+### Run Statistics Ledger
+**Proposed**: 2026-05-05
+**Size**: Medium-High (2-4 focused sessions)
+**Priority**: High
+**Link**: [docs/work-packages/20260505_run_statistics_ledger/](docs/work-packages/20260505_run_statistics_ledger/)
+**Description**: Replace WEPPcloud usage counters derived from active run-directory file counts with a durable PostgreSQL statistics ledger for project counts by config, repeated WEPP hillslope run counts, and WATAR ash run counts.
+
+**Scope**:
+- Add a PostgreSQL statistics event ledger so historical execution counts survive 90-day TTL deletion and concurrent writers are transaction-safe.
+- Keep PostgreSQL as the source-of-truth ledger; Redis may be used only as an optional summary cache/materialization layer.
+- Count repeated WEPP hillslope and WATAR ash executions from runtime events rather than `.slp` or `*ash.csv` file counts.
+- Backfill project metadata from dot access logs and legacy artifact minimum counts without inventing unknown pre-ledger reruns.
+- Preserve existing `/stats`, `/stats/<key>`, `/access-by-year`, and `/access-by-month` response shapes while richer summary artifacts are introduced.
+
+**Strategic Value**:
+- Prevents public/operator statistics from mixing active project inventory with historical execution counts.
+- Makes WATAR reporting defensible by counting completed ash tasks, not legacy artifacts.
+- Creates a documented source-quality model for runtime-observed, artifact-inferred, and unknown historical data.
+
+**Dependencies**: Initial spec and active ExecPlan are created; implementation is pending.
+
+**Next Steps**: Implement the ledger module and focused writer/backfill tests before wiring WEPP, WATAR, and TTL runtime hooks.
+
+---
 
 ### totalwatsed3 Storage and Optional Terms Contract Hardening
 **Proposed**: 2026-04-29

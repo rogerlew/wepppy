@@ -1,4 +1,4 @@
-from collections import Counter, deque
+from collections import deque
 from collections.abc import Mapping, Sequence
 import os
 import threading
@@ -1017,16 +1017,6 @@ def index():
 
 @weppcloud_site_bp.route('/interfaces/', strict_slashes=False)
 def interfaces():
-    runs_counter = Counter()
-    try:
-        if _exists('/geodata/weppcloud_runs/runs_counter.json'):
-            with open('/geodata/weppcloud_runs/runs_counter.json') as fp:
-                runs_counter = Counter(json.load(fp))
-    except (OSError, json.JSONDecodeError) as exc:
-        current_app.logger.debug("Failed to load runs_counter.json for interfaces: %s", exc)
-    except Exception:
-        current_app.logger.exception("Unexpected error loading runs_counter.json for interfaces")
-
     try:
         cap_base_url = (current_app.config.get('CAP_BASE_URL') or os.getenv('CAP_BASE_URL', '/cap')).rstrip('/')
         cap_asset_base_url = (
@@ -1037,7 +1027,6 @@ def interfaces():
         return render_template(
             'interfaces.htm',
             user=current_user,
-            runs_counter=runs_counter,
             cap_base_url=cap_base_url,
             cap_asset_base_url=cap_asset_base_url,
             cap_site_key=cap_site_key,
