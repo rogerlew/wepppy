@@ -31,3 +31,29 @@ This supports mix and matching the hillslope outputs from different sibling and 
 watershed simulations. The `wepp_path_ids` is a list of relative paths to the hillslope pass files
 with the wepp_id included (without the .pass.dat). 
   e.g. ['H1', '../../<scenario>/wepp/output/H2', 'H3', 'H4', ...]
+
+### Watershed Prompt Contracts (Legacy vs Modern Binaries)
+`wepp_runner` must generate `pw0.run` watershed-tail prompts differently for
+legacy and modern WEPP binaries.
+
+Legacy contract (default when sidecar is absent):
+- consumes an initial-condition filename slot even when initial-condition output
+  is `No`;
+- does not prompt for impoundment output;
+- does not prompt for impoundment data file (`pw0.imp`).
+
+Modern contract (HBP-capable release sidecar with
+`features.hbp_supported=true`):
+- does not consume an initial-condition filename placeholder;
+- prompts for impoundment output;
+- prompts for impoundment data file (`pw0.imp`).
+
+Selection rule:
+- `wepp_runner` determines prompt contract from the selected watershed binary
+  sidecar (`<binary>.json`).
+- sidecar absence implies legacy contract by default.
+
+Implementation note:
+- this is implemented with one watershed template plus conditional placeholders
+  in `wepp_runner.py`; do not split into separate static templates unless a new
+  contract divergence requires it.

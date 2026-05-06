@@ -131,3 +131,8 @@ python3 /workdir/wepp-forest/tools/compare_wepp_raw_outputs.py \
 - `wepp_runner.wepp_runner.get_linux_wepp_bin_opts()` auto-discovers `wepp_*` files in `wepp_runner/bin`.
 - `_hill` variants are invoked automatically for hillslope/flowpath runs when present.
 - Prefer explicit failures to silent fallback behavior in binary selection and process execution paths.
+- Watershed run-file tail prompts are binary-contract aware:
+  - legacy contract (no sidecar): includes initial-condition filename placeholder and omits impoundment output/data prompts.
+  - modern contract (`features.hbp_supported=true` sidecar): omits initial-condition placeholder and includes impoundment output/data prompts (`pw0.imp`).
+- Prompt-contract selection is sidecar-driven and must remain deterministic:
+  sidecar absence defaults to legacy behavior.
