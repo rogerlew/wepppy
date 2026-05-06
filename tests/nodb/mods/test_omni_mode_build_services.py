@@ -562,6 +562,8 @@ def test_run_omni_scenario_delegates_mode_specific_branch(
         def __init__(self, wd: str) -> None:
             self.runs_dir = str(Path(wd) / "wepp" / "runs")
             self.output_dir = str(Path(wd) / "wepp" / "output")
+            self.pass_family = "legacy_ascii"
+            self.run_wepp_watershed = True
 
         def prep_hillslopes(self, **kwargs) -> None:
             return None

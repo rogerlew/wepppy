@@ -28,6 +28,8 @@ GEO_SCHEMA_EXTENSIONS: tuple[str, ...] = (
 )
 
 READONLY_SENTINEL = "READONLY"
+PASS_FAMILY_LEGACY_ASCII = "legacy_ascii"
+PASS_FAMILY_HBP = "hbp"
 
 
 def _raise_if_retired_root_resources(base: Path) -> None:
@@ -173,6 +175,7 @@ def activate_query_engine(
     if run_interchange:
         start_year = None
         is_single_storm = False
+        pass_family = PASS_FAMILY_LEGACY_ASCII
         try:
             from wepppy.nodb.core.climate import Climate  # local import to avoid heavy deps during import
 
@@ -185,7 +188,25 @@ def activate_query_engine(
                 base,
                 exc_info=True,
             )
-        _ensure_interchange(base, start_year=start_year, is_single_storm=is_single_storm)
+        try:
+            from wepppy.nodb.core.wepp import Wepp  # local import to avoid heavy deps during import
+
+            wepp = Wepp.getInstance(str(base))
+            pass_family = _normalize_pass_family(getattr(wepp, "pass_family", PASS_FAMILY_LEGACY_ASCII))
+        except ValueError:
+            raise
+        except Exception:  # pragma: no cover - best effort
+            LOGGER.debug(
+                "Unable to infer pass_family from wepp for %s; defaulting to legacy_ascii",
+                base,
+                exc_info=True,
+            )
+        _ensure_interchange(
+            base,
+            pass_family=pass_family,
+            start_year=start_year,
+            is_single_storm=is_single_storm,
+        )
 
     catalog_entries = _build_catalog(base)
 
@@ -281,7 +302,13 @@ def update_catalog_entry(
     return updated_entry
 
 
-def _ensure_interchange(base: Path, *, start_year: int | None, is_single_storm: bool = False) -> None:
+def _ensure_interchange(
+    base: Path,
+    *,
+    pass_family: str,
+    start_year: int | None,
+    is_single_storm: bool = False,
+) -> None:
     """Generate WEPP interchange outputs when missing.
 
     Args:
@@ -316,25 +343,30 @@ def _ensure_interchange(base: Path, *, start_year: int | None, is_single_storm: 
             remove_incompatible_interchange(interchange_dir)
 
         LOGGER.info("Generating interchange outputs for %s", output_dir)
-        try:
-            # Single storm runs don't produce .loss.dat, .soil.dat, or .wat.dat hillslope files
-            run_wepp_hillslope_interchange(
-                output_dir,
-                start_year=start_year,
-                run_loss_interchange=not is_single_storm,
-                run_soil_interchange=not is_single_storm,
-                run_wat_interchange=not is_single_storm,
-            )
-            run_wepp_watershed_interchange(
-                output_dir,
-                start_year=start_year,
-                run_soil_interchange=not is_single_storm,
-                run_chnwb_interchange=not is_single_storm,
-            )
-            generate_interchange_documentation(interchange_dir)
-        except Exception as exc:  # pragma: no cover - defensive logging
-            LOGGER.warning("Failed to generate interchange products for %s", output_dir)
-            pass
+        # Single storm runs don't produce .loss.dat, .soil.dat, or .wat.dat hillslope files
+        run_wepp_hillslope_interchange(
+            output_dir,
+            pass_family=pass_family,
+            start_year=start_year,
+            run_loss_interchange=not is_single_storm,
+            run_soil_interchange=not is_single_storm,
+            run_wat_interchange=not is_single_storm,
+        )
+        run_wepp_watershed_interchange(
+            output_dir,
+            pass_family=pass_family,
+            start_year=start_year,
+            run_soil_interchange=not is_single_storm,
+            run_chnwb_interchange=not is_single_storm,
+        )
+        generate_interchange_documentation(interchange_dir)
+
+
+def _normalize_pass_family(value: str) -> str:
+    normalized = str(value).strip().lower()
+    if normalized in {PASS_FAMILY_LEGACY_ASCII, PASS_FAMILY_HBP}:
+        return normalized
+    raise ValueError("pass_family must be 'legacy_ascii' or 'hbp'")
 
 
 def _build_catalog(base: Path) -> list[dict[str, object]]:

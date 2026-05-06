@@ -57,10 +57,12 @@ def _unlink_source_with_gzip(path: Path) -> None:
 
 
 def _normalize_pass_family(pass_family: str | None) -> str:
-    normalized = (pass_family or "").strip().lower()
+    normalized = (pass_family or PASS_FAMILY_LEGACY_ASCII).strip().lower()
     if normalized == PASS_FAMILY_HBP:
         return PASS_FAMILY_HBP
-    return PASS_FAMILY_LEGACY_ASCII
+    if normalized == PASS_FAMILY_LEGACY_ASCII:
+        return PASS_FAMILY_LEGACY_ASCII
+    raise ValueError("pass_family must be 'legacy_ascii' or 'hbp'")
 
 
 def _write_pass_status(interchange_dir: Path, *, status: str, reason: str, pass_family: str) -> None:

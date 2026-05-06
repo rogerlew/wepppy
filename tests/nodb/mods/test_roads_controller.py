@@ -1046,6 +1046,7 @@ def test_run_roads_wepp_maps_hillslopes_and_runs_watershed(
         output_dir=str(baseline_output_dir),
         climate_instance=SimpleNamespace(input_years=25),
         wepp_bin="wepp_dcc52a6",
+        pass_family="legacy_ascii",
     )
 
     monkeypatch.setattr(
@@ -1143,10 +1144,19 @@ def test_run_roads_wepp_maps_hillslopes_and_runs_watershed(
 
     captured_make: dict[str, object] = {}
 
-    def _fake_make(years: int, wepp_id_paths, runs_dir: str) -> None:
+    def _fake_make(
+        years: int,
+        wepp_id_paths,
+        runs_dir: str,
+        *,
+        pass_family: str,
+        wepp_bin: str | None = None,
+    ) -> None:
         captured_make["years"] = years
         captured_make["wepp_id_paths"] = list(wepp_id_paths)
         captured_make["runs_dir"] = runs_dir
+        captured_make["pass_family"] = pass_family
+        captured_make["wepp_bin"] = wepp_bin
 
     monkeypatch.setattr(roads_module, "make_watershed_omni_contrasts_run", _fake_make)
     monkeypatch.setattr(roads_module, "run_watershed", lambda runs_dir: None)
@@ -1229,6 +1239,7 @@ def test_run_roads_wepp_routes_non_channel_routable_segments_with_trace_contract
         output_dir=str(baseline_output_dir),
         climate_instance=SimpleNamespace(input_years=25),
         wepp_bin="wepp_dcc52a6",
+        pass_family="legacy_ascii",
     )
 
     relief_path = str(tmp_path / "dem" / "relief.tif")
@@ -1451,6 +1462,7 @@ def test_run_roads_wepp_runs_outslope_rutted_channel_associated_with_fill_defaul
         output_dir=str(baseline_output_dir),
         climate_instance=SimpleNamespace(input_years=25),
         wepp_bin="wepp_dcc52a6",
+        pass_family="legacy_ascii",
     )
 
     monkeypatch.setattr(
@@ -1600,6 +1612,7 @@ def test_run_roads_wepp_routes_outslope_rutted_non_channel_with_three_ofe_contra
         output_dir=str(baseline_output_dir),
         climate_instance=SimpleNamespace(input_years=25),
         wepp_bin="wepp_dcc52a6",
+        pass_family="legacy_ascii",
     )
 
     relief_path = str(tmp_path / "dem" / "relief.tif")
@@ -1814,6 +1827,7 @@ def test_run_roads_wepp_skips_non_channel_routable_segment_when_trace_does_not_r
         output_dir=str(baseline_output_dir),
         climate_instance=SimpleNamespace(input_years=25),
         wepp_bin="wepp_dcc52a6",
+        pass_family="legacy_ascii",
     )
 
     relief_path = str(tmp_path / "dem" / "relief.tif")
@@ -1995,6 +2009,7 @@ def test_run_roads_wepp_persists_failed_summary_on_watershed_failure(
         output_dir=str(baseline_output_dir),
         climate_instance=SimpleNamespace(input_years=25),
         wepp_bin="wepp_dcc52a6",
+        pass_family="legacy_ascii",
     )
 
     monkeypatch.setattr(
@@ -2143,6 +2158,7 @@ def test_run_roads_wepp_fails_when_segment_execution_fails(
         output_dir=str(baseline_output_dir),
         climate_instance=SimpleNamespace(input_years=25),
         wepp_bin="wepp_dcc52a6",
+        pass_family="legacy_ascii",
     )
 
     monkeypatch.setattr(
@@ -2241,6 +2257,7 @@ def test_regenerate_roads_report_resources_uses_roads_scope_outputs(
         climate_instance=climate,
         baseflow_opts=SimpleNamespace(gwstorage=0.0, bfcoeff=0.0, dscoeff=0.0, bfthreshold=0.0),
         output_dir=str(tmp_path / "wepp" / "output"),
+        pass_family="legacy_ascii",
     )
     monkeypatch.setattr(Roads, "wepp_instance", property(lambda self: wepp_instance))
 
@@ -2283,6 +2300,10 @@ def test_regenerate_roads_report_resources_uses_roads_scope_outputs(
     monkeypatch.setattr(interchange_module, "run_totalwatsed3", _fake_totalwatsed3)
     monkeypatch.setattr(interchange_module, "run_wepp_watershed_interchange", _fake_watershed)
     monkeypatch.setattr(interchange_module, "generate_interchange_documentation", _fake_docs)
+    monkeypatch.setattr("wepppy.wepp.interchange.run_wepp_hillslope_interchange", _fake_hillslope)
+    monkeypatch.setattr("wepppy.wepp.interchange.run_totalwatsed3", _fake_totalwatsed3)
+    monkeypatch.setattr("wepppy.wepp.interchange.run_wepp_watershed_interchange", _fake_watershed)
+    monkeypatch.setattr("wepppy.wepp.interchange.generate_interchange_documentation", _fake_docs)
     monkeypatch.setattr(post_utils_module, "activate_query_engine_for_run", _fake_activate)
     monkeypatch.setattr(Roads, "_build_roads_segment_loss_summary_parquet", _fake_segment_summary)
 
@@ -2311,6 +2332,7 @@ def test_regenerate_roads_report_resources_fails_when_segment_summary_generation
         climate_instance=climate,
         baseflow_opts=SimpleNamespace(gwstorage=0.0, bfcoeff=0.0, dscoeff=0.0, bfthreshold=0.0),
         output_dir=str(tmp_path / "wepp" / "output"),
+        pass_family="legacy_ascii",
     )
     monkeypatch.setattr(Roads, "wepp_instance", property(lambda self: wepp_instance))
 
@@ -2346,6 +2368,10 @@ def test_regenerate_roads_report_resources_fails_when_segment_summary_generation
     monkeypatch.setattr(interchange_module, "run_totalwatsed3", _fake_totalwatsed3)
     monkeypatch.setattr(interchange_module, "run_wepp_watershed_interchange", _fake_watershed)
     monkeypatch.setattr(interchange_module, "generate_interchange_documentation", _fake_docs)
+    monkeypatch.setattr("wepppy.wepp.interchange.run_wepp_hillslope_interchange", _fake_hillslope)
+    monkeypatch.setattr("wepppy.wepp.interchange.run_totalwatsed3", _fake_totalwatsed3)
+    monkeypatch.setattr("wepppy.wepp.interchange.run_wepp_watershed_interchange", _fake_watershed)
+    monkeypatch.setattr("wepppy.wepp.interchange.generate_interchange_documentation", _fake_docs)
     monkeypatch.setattr(post_utils_module, "activate_query_engine_for_run", lambda _wepp_obj: None)
     monkeypatch.setattr(Roads, "_build_roads_segment_loss_summary_parquet", _fake_segment_summary)
 
@@ -2996,6 +3022,7 @@ def test_run_roads_wepp_stages_outslope_unrutted_replacement_pass(
         output_dir=str(baseline_output_dir),
         climate_instance=SimpleNamespace(input_years=25),
         wepp_bin="wepp",
+        pass_family="legacy_ascii",
     )
 
     monkeypatch.setattr(Roads, "watershed_instance", property(lambda self: watershed_instance))
@@ -3223,6 +3250,7 @@ def test_run_roads_wepp_outslope_unrutted_replacement_combines_phase4(
         output_dir=str(baseline_output_dir),
         climate_instance=SimpleNamespace(input_years=25),
         wepp_bin="wepp",
+        pass_family="legacy_ascii",
     )
 
     monkeypatch.setattr(Roads, "watershed_instance", property(lambda self: watershed_instance))
@@ -3477,6 +3505,7 @@ def test_run_roads_wepp_outslope_unrutted_missing_discha_with_no_selected_candid
         output_dir=str(baseline_output_dir),
         climate_instance=SimpleNamespace(input_years=25),
         wepp_bin="wepp",
+        pass_family="legacy_ascii",
     )
 
     monkeypatch.setattr(Roads, "watershed_instance", property(lambda self: watershed_instance))

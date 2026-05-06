@@ -7,6 +7,15 @@ from pathlib import Path
 from typing import Tuple
 
 __all__ = ["migrate_interchange", "refresh_query_catalog"]
+PASS_FAMILY_LEGACY_ASCII = "legacy_ascii"
+PASS_FAMILY_HBP = "hbp"
+
+
+def _normalize_pass_family(value: object) -> str:
+    normalized = str(value or PASS_FAMILY_LEGACY_ASCII).strip().lower()
+    if normalized in {PASS_FAMILY_LEGACY_ASCII, PASS_FAMILY_HBP}:
+        return normalized
+    raise ValueError("pass_family must be 'legacy_ascii' or 'hbp'")
 
 
 def migrate_interchange(wd: str, *, force: bool = False, dry_run: bool = False) -> Tuple[bool, str]:
@@ -79,23 +88,17 @@ def migrate_interchange(wd: str, *, force: bool = False, dry_run: bool = False) 
         baseflow_opts = wepp.baseflow_opts
         is_single_storm = climate.is_single_storm
         delete_after_interchange = wepp.delete_after_interchange
+        pass_family = _normalize_pass_family(getattr(wepp, "pass_family", PASS_FAMILY_LEGACY_ASCII))
     except Exception as exc:
         return False, f"Failed to load run configuration: {exc}"
 
     # Check for watershed outputs
-    # Single storm runs don't have soil_pw0.txt or chnwb.txt
-    if is_single_storm:
-        required_files = ["pass_pw0.txt", "chan.out", "chanwb.out", "ebe_pw0.txt", "loss_pw0.txt"]
-    else:
-        required_files = [
-            "pass_pw0.txt",
-            "chan.out",
-            "chanwb.out",
-            "chnwb.txt",
-            "ebe_pw0.txt",
-            "soil_pw0.txt",
-            "loss_pw0.txt",
-        ]
+    # Single storm runs don't have soil_pw0.txt or chnwb.txt.
+    required_files = ["chan.out", "chanwb.out", "ebe_pw0.txt", "loss_pw0.txt"]
+    if pass_family == PASS_FAMILY_LEGACY_ASCII:
+        required_files.append("pass_pw0.txt")
+    if not is_single_storm:
+        required_files.extend(["chnwb.txt", "soil_pw0.txt"])
     has_watershed = all(
         (wepp_output_dir / f).exists() or (wepp_output_dir / f"{f}.gz").exists()
         for f in required_files
@@ -115,6 +118,7 @@ def migrate_interchange(wd: str, *, force: bool = False, dry_run: bool = False) 
     try:
         run_wepp_hillslope_interchange(
             wepp_output_dir,
+            pass_family=pass_family,
             start_year=start_year,
             run_loss_interchange=not is_single_storm,
             run_soil_interchange=not is_single_storm,
@@ -131,28 +135,30 @@ def migrate_interchange(wd: str, *, force: bool = False, dry_run: bool = False) 
             # Single storm runs don't have soil/chnwb outputs
             run_wepp_watershed_interchange(
                 wepp_output_dir,
+                pass_family=pass_family,
                 start_year=start_year,
                 run_soil_interchange=not is_single_storm,
                 run_chnwb_interchange=not is_single_storm,
                 delete_after_interchange=delete_after_interchange,
             )
             generated.append("watershed")
-        except Exception:
-            pass  # Non-fatal
+        except Exception as exc:
+            return False, f"Watershed interchange failed: {exc}"
 
     # Generate totalwatsed3
-    try:
-        run_totalwatsed3(interchange_dir, baseflow_opts=baseflow_opts)
-        generated.append("totalwatsed3")
-    except Exception:
-        pass  # Non-fatal
+    if not is_single_storm:
+        try:
+            run_totalwatsed3(interchange_dir, baseflow_opts=baseflow_opts)
+            generated.append("totalwatsed3")
+        except Exception as exc:
+            return False, f"totalwatsed3 interchange failed: {exc}"
 
     # Generate documentation
     try:
         generate_interchange_documentation(interchange_dir)
         generated.append("docs")
-    except Exception:
-        pass  # Non-fatal
+    except Exception as exc:
+        return False, f"Interchange documentation failed: {exc}"
 
     return True, f"Generated interchange: {', '.join(generated)}"
 

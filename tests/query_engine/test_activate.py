@@ -3,6 +3,7 @@ from __future__ import annotations
 import json
 import time
 from pathlib import Path
+from types import SimpleNamespace
 
 import pyarrow as pa
 import pyarrow.parquet as pq
@@ -191,3 +192,98 @@ def test_activate_query_engine_reuses_existing_catalog(tmp_path: Path) -> None:
     time.sleep(1)
     activate_query_engine(tmp_path, run_interchange=False, force_refresh=True)
     assert catalog_path.stat().st_mtime > initial_mtime
+
+
+def test_activate_query_engine_run_interchange_propagates_pass_family(
+    tmp_path: Path,
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    output_dir = tmp_path / "wepp" / "output"
+    output_dir.mkdir(parents=True, exist_ok=True)
+
+    calls: list[tuple[str, str]] = []
+
+    monkeypatch.setattr(
+        "wepppy.nodb.core.climate.Climate.getInstance",
+        lambda _wd: SimpleNamespace(calendar_start_year=2007, is_single_storm=False),
+    )
+    monkeypatch.setattr(
+        "wepppy.nodb.core.wepp.Wepp.getInstance",
+        lambda _wd: SimpleNamespace(pass_family="hbp"),
+    )
+    monkeypatch.setattr(
+        "wepppy.wepp.interchange.run_wepp_hillslope_interchange",
+        lambda _path, **kwargs: calls.append(("hill", kwargs["pass_family"])),
+    )
+    monkeypatch.setattr(
+        "wepppy.wepp.interchange.run_wepp_watershed_interchange",
+        lambda _path, **kwargs: calls.append(("watershed", kwargs["pass_family"])),
+    )
+    monkeypatch.setattr(
+        "wepppy.wepp.interchange.generate_interchange_documentation",
+        lambda _path: None,
+    )
+    monkeypatch.setattr(
+        "wepppy.wepp.interchange.needs_major_refresh",
+        lambda _path: True,
+    )
+    monkeypatch.setattr(
+        "wepppy.wepp.interchange.remove_incompatible_interchange",
+        lambda _path: None,
+    )
+
+    activate_query_engine(tmp_path, run_interchange=True, force_refresh=True)
+
+    assert calls == [("hill", "hbp"), ("watershed", "hbp")]
+
+
+def test_activate_query_engine_run_interchange_does_not_suppress_failures(
+    tmp_path: Path,
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    output_dir = tmp_path / "wepp" / "output"
+    output_dir.mkdir(parents=True, exist_ok=True)
+
+    monkeypatch.setattr(
+        "wepppy.nodb.core.climate.Climate.getInstance",
+        lambda _wd: SimpleNamespace(calendar_start_year=2007, is_single_storm=False),
+    )
+    monkeypatch.setattr(
+        "wepppy.nodb.core.wepp.Wepp.getInstance",
+        lambda _wd: SimpleNamespace(pass_family="legacy_ascii"),
+    )
+    monkeypatch.setattr(
+        "wepppy.wepp.interchange.run_wepp_hillslope_interchange",
+        lambda *_args, **_kwargs: (_ for _ in ()).throw(RuntimeError("deterministic failure")),
+    )
+    monkeypatch.setattr(
+        "wepppy.wepp.interchange.needs_major_refresh",
+        lambda _path: True,
+    )
+    monkeypatch.setattr(
+        "wepppy.wepp.interchange.remove_incompatible_interchange",
+        lambda _path: None,
+    )
+
+    with pytest.raises(RuntimeError, match="deterministic failure"):
+        activate_query_engine(tmp_path, run_interchange=True, force_refresh=True)
+
+
+def test_activate_query_engine_rejects_unsupported_pass_family(
+    tmp_path: Path,
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    output_dir = tmp_path / "wepp" / "output"
+    output_dir.mkdir(parents=True, exist_ok=True)
+
+    monkeypatch.setattr(
+        "wepppy.nodb.core.climate.Climate.getInstance",
+        lambda _wd: SimpleNamespace(calendar_start_year=2007, is_single_storm=False),
+    )
+    monkeypatch.setattr(
+        "wepppy.nodb.core.wepp.Wepp.getInstance",
+        lambda _wd: SimpleNamespace(pass_family="auto"),
+    )
+
+    with pytest.raises(ValueError, match="pass_family must be 'legacy_ascii' or 'hbp'"):
+        activate_query_engine(tmp_path, run_interchange=True, force_refresh=True)

@@ -244,7 +244,9 @@ def _expected_hillslopes(output_dir: Path) -> int | None:
 
 
 def _normalize_pass_family(pass_family: str | None) -> str:
-    normalized = (pass_family or "").strip().lower()
+    normalized = (pass_family or "legacy_ascii").strip().lower()
     if normalized == PASS_FAMILY_HBP:
         return PASS_FAMILY_HBP
-    return "legacy_ascii"
+    if normalized == "legacy_ascii":
+        return "legacy_ascii"
+    raise ValueError("pass_family must be 'legacy_ascii' or 'hbp'")

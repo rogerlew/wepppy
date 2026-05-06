@@ -134,3 +134,18 @@ def test_run_watershed_interchange_legacy_runs_pass_task(
 
     assert "pass" in calls
     assert not (output_dir / "interchange" / watershed_interchange_module.PASS_STATUS_FILENAME).exists()
+
+
+def test_run_watershed_interchange_rejects_invalid_pass_family(
+    tmp_path: Path, monkeypatch: pytest.MonkeyPatch
+) -> None:
+    output_dir = tmp_path / "output"
+    output_dir.mkdir()
+    calls: list[str] = []
+    _install_stubbed_tasks(monkeypatch, calls=calls)
+
+    with pytest.raises(ValueError, match="pass_family must be 'legacy_ascii' or 'hbp'"):
+        watershed_interchange_module.run_wepp_watershed_interchange(
+            output_dir,
+            pass_family="auto",
+        )

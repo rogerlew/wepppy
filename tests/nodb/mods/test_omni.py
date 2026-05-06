@@ -480,6 +480,8 @@ def test_run_omni_scenario_undisturbed_allows_base_without_sbs(
         def __init__(self, wd: str) -> None:
             self.runs_dir = str(Path(wd) / "wepp" / "runs")
             self.output_dir = str(Path(wd) / "wepp" / "output")
+            self.pass_family = "legacy_ascii"
+            self.run_wepp_watershed = True
 
         def prep_hillslopes(self, **kwargs) -> None:
             return None
@@ -3129,6 +3131,7 @@ def test_run_contrast_skips_archive_landuse_and_soils(tmp_path: Path, omni_modul
             self.baseflow_opts = object()
             self.wepp_interchange_dir = str(Path(run_wd) / "wepp" / "output" / "interchange")
             self.wepp_bin = None
+            self.pass_family = "legacy_ascii"
 
         def clean(self):
             Path(self.runs_dir).mkdir(parents=True, exist_ok=True)
@@ -3205,6 +3208,7 @@ def test_run_contrast_copies_directory_landuse_and_soils(tmp_path: Path, omni_mo
             self.baseflow_opts = object()
             self.wepp_interchange_dir = str(Path(run_wd) / "wepp" / "output" / "interchange")
             self.wepp_bin = None
+            self.pass_family = "legacy_ascii"
 
         def clean(self):
             Path(self.runs_dir).mkdir(parents=True, exist_ok=True)
@@ -3286,6 +3290,7 @@ def test_run_contrast_rewrites_legacy_omni_prefix_when_pass_dat_exists(
             self.runs_dir = str(Path(run_wd) / "wepp" / "runs")
             self.output_dir = str(Path(run_wd) / "wepp" / "output")
             self.wepp_bin = None
+            self.pass_family = "legacy_ascii"
 
         def clean(self):
             Path(self.runs_dir).mkdir(parents=True, exist_ok=True)
@@ -3370,6 +3375,7 @@ def test_run_contrast_skips_projection_lock_retry_in_directory_only_mode(
             self.baseflow_opts = object()
             self.wepp_interchange_dir = str(Path(run_wd) / "wepp" / "output" / "interchange")
             self.wepp_bin = None
+            self.pass_family = "legacy_ascii"
 
         def clean(self):
             Path(self.runs_dir).mkdir(parents=True, exist_ok=True)

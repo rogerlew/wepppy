@@ -22,6 +22,9 @@ __all__ = [
     "ensure_watershed_interchange",
 ]
 
+PASS_FAMILY_LEGACY_ASCII = "legacy_ascii"
+PASS_FAMILY_HBP = "hbp"
+
 
 def _log(logger: Optional[logging.Logger], message: str) -> None:
     if logger is not None:
@@ -33,6 +36,41 @@ def _delete_after_interchange_enabled(*, wepp: Wepp, climate: Climate) -> bool:
     if value is None:
         value = getattr(climate, "delete_after_interchange", False)
     return bool(value)
+
+
+def _normalize_pass_family(value: str | None) -> str:
+    normalized = (value or PASS_FAMILY_LEGACY_ASCII).strip().lower()
+    if normalized in {PASS_FAMILY_LEGACY_ASCII, PASS_FAMILY_HBP}:
+        return normalized
+    raise ValueError("pass_family must be 'legacy_ascii' or 'hbp'")
+
+
+def _watershed_interchange_complete(
+    *,
+    interchange_dir: Path,
+    pass_family: str,
+    run_soil_interchange: bool,
+    run_chnwb_interchange: bool,
+) -> bool:
+    required_files = {
+        "ebe_pw0.parquet",
+        "chanwb.out.parquet",
+        "chan_peak.out.parquet",
+        "loss_pw0.hill.parquet",
+        "loss_pw0.out.parquet",
+        "loss_pw0.chn.parquet",
+        "loss_pw0.class_data.parquet",
+    }
+    if run_soil_interchange:
+        required_files.add("soil_pw0.parquet")
+    if run_chnwb_interchange:
+        required_files.add("chnwb.parquet")
+    if pass_family == PASS_FAMILY_LEGACY_ASCII:
+        required_files.update({"pass_pw0.events.parquet", "pass_pw0.metadata.parquet"})
+    else:
+        required_files.add("pass_pw0.status.json")
+
+    return all((interchange_dir / filename).exists() for filename in required_files)
 
 
 def ensure_hillslope_interchange(
@@ -93,21 +131,26 @@ def ensure_watershed_interchange(
     cleanup_deferred_hillslope_sources: bool = True,
 ) -> None:
     interchange_dir = Path(wepp.wepp_interchange_dir)
-    pass_events = interchange_dir / "pass_pw0.events.parquet"
-    pass_status = interchange_dir / "pass_pw0.status.json"
-    pass_family = getattr(wepp, "pass_family", "legacy_ascii")
+    pass_family = _normalize_pass_family(getattr(wepp, "pass_family", PASS_FAMILY_LEGACY_ASCII))
     delete_after_interchange = _delete_after_interchange_enabled(wepp=wepp, climate=climate)
+    run_soil_interchange = not climate.is_single_storm
+    run_chnwb_interchange = not climate.is_single_storm
 
-    if pass_events.exists() or (pass_family == "hbp" and pass_status.exists()):
+    if _watershed_interchange_complete(
+        interchange_dir=interchange_dir,
+        pass_family=pass_family,
+        run_soil_interchange=run_soil_interchange,
+        run_chnwb_interchange=run_chnwb_interchange,
+    ):
         _log(logger, "watershed interchange outputs already exist; skipping rebuild")
     else:
         _log(logger, "building watershed interchange outputs")
         run_wepp_watershed_interchange(
             Path(wepp.output_dir),
-            pass_family=wepp.pass_family,
+            pass_family=pass_family,
             start_year=climate.calendar_start_year,
-            run_soil_interchange=not climate.is_single_storm,
-            run_chnwb_interchange=not climate.is_single_storm,
+            run_soil_interchange=run_soil_interchange,
+            run_chnwb_interchange=run_chnwb_interchange,
             delete_after_interchange=delete_after_interchange,
         )
         generate_interchange_documentation(wepp.wepp_interchange_dir)
@@ -116,9 +159,9 @@ def ensure_watershed_interchange(
         _log(logger, "cleaning deferred hillslope sources after watershed interchange")
         cleanup_hillslope_sources_for_completed_interchange(
             Path(wepp.output_dir),
-            pass_family=wepp.pass_family,
+            pass_family=pass_family,
             run_loss_interchange=not climate.is_single_storm,
-            run_soil_interchange=not climate.is_single_storm,
+            run_soil_interchange=run_soil_interchange,
             run_wat_interchange=not climate.is_single_storm,
         )
 

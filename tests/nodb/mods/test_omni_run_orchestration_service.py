@@ -283,6 +283,7 @@ def test_run_omni_scenario_defers_hillslope_source_deletion_until_after_watershe
             self.output_dir = str(scenario_wd / "wepp" / "output")
             self.runs_dir = str(scenario_wd / "wepp" / "runs")
             self.run_wepp_watershed = run_wepp_watershed
+            self.pass_family = "legacy_ascii"
             self.calls: list[str] = []
 
         def prep_hillslopes(self, **_kwargs) -> None:
@@ -302,7 +303,7 @@ def test_run_omni_scenario_defers_hillslope_source_deletion_until_after_watershe
     disturbed_stub = object()
     soils_stub = object()
     climate_stub = types.SimpleNamespace(observed_start_year=None, future_start_year=None)
-    interchange_calls: list[tuple[Path, int | None, bool]] = []
+    interchange_calls: list[tuple[Path, str, int | None, bool]] = []
     cleanup_calls: list[_WeppStub] = []
     mode_calls: list[tuple[str, str]] = []
 
@@ -370,8 +371,8 @@ def test_run_omni_scenario_defers_hillslope_source_deletion_until_after_watershe
     )
     omni_module._hillslope_input_relpath_to_base_runs = _hillslope_relpath_stub
     omni_module.run_wepp_hillslope_interchange = (
-        lambda path, *, start_year, delete_after_interchange: interchange_calls.append(
-            (Path(path), start_year, delete_after_interchange)
+        lambda path, *, pass_family, start_year, delete_after_interchange: interchange_calls.append(
+            (Path(path), pass_family, start_year, delete_after_interchange)
         )
     )
     monkeypatch.setitem(sys.modules, "wepppy.nodb.mods.omni.omni", omni_module)
@@ -383,7 +384,12 @@ def test_run_omni_scenario_defers_hillslope_source_deletion_until_after_watershe
     assert scenario_name == "uniform_low"
     assert mode_calls == [("uniform_low", str(scenario_wd))]
     assert interchange_calls == [
-        (scenario_wd / "wepp" / "output", None, expected_delete_after_interchange)
+        (
+            scenario_wd / "wepp" / "output",
+            "legacy_ascii",
+            None,
+            expected_delete_after_interchange,
+        )
     ]
     assert wepp_stub.calls[:3] == ["prep_hillslopes", "run_hillslopes", "prep_watershed"]
     assert wepp_stub.calls[-1] == "run_watershed"

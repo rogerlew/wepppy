@@ -131,3 +131,41 @@ def test_cleanup_hillslope_sources_for_completed_interchange_only_removes_comple
     assert not (tmp_path / "H1.loss.dat").exists()
     assert (tmp_path / "H1.soil.dat").exists()
     assert (tmp_path / "H1.wat.dat").exists()
+
+
+def test_cleanup_hillslope_sources_rejects_invalid_pass_family(
+    tmp_path: Path,
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    nodb_pkg = types.ModuleType("wepppy.nodb")
+    nodb_pkg.__path__ = []
+    core_pkg = types.ModuleType("wepppy.nodb.core")
+    core_pkg.__path__ = []
+    watershed_stub = types.ModuleType("wepppy.nodb.core.watershed")
+
+    class _Watershed:
+        @staticmethod
+        def getInstance(_wd: str):
+            raise RuntimeError("stub")
+
+    watershed_stub.Watershed = _Watershed
+
+    monkeypatch.setitem(sys.modules, "wepppy.nodb", nodb_pkg)
+    monkeypatch.setitem(sys.modules, "wepppy.nodb.core", core_pkg)
+    monkeypatch.setitem(sys.modules, "wepppy.nodb.core.watershed", watershed_stub)
+
+    hill_interchange = load_module(
+        "wepppy.wepp.interchange.hill_interchange",
+        "wepppy/wepp/interchange/hill_interchange.py",
+    )
+    cleanup_hillslope_sources = hill_interchange._cleanup_hillslope_sources
+
+    with pytest.raises(ValueError, match="pass_family must be 'legacy_ascii' or 'hbp'"):
+        cleanup_hillslope_sources(
+            tmp_path,
+            pass_family="auto",
+            run_loss_interchange=False,
+            run_soil_interchange=False,
+            run_wat_interchange=False,
+        )
+    cleanup_import_state()
