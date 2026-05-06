@@ -172,6 +172,102 @@ def test_run_hillslopes_ss_batch_keeps_configured_bin_for_agriculture_crops(
     ]
 
 
+def test_run_hillslopes_removes_stale_hillslope_outputs_before_rerun(
+    tmp_path: Path,
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    topaz_ids = ["1271"]
+    landuse = _build_landuse(topaz_ids, disturbed_class="agriculture crops")
+    climate = SimpleNamespace(climate_mode=ClimateMode.Observed, ss_batch_storms=[])
+    output_dir = tmp_path / "output"
+    output_dir.mkdir(parents=True, exist_ok=True)
+    stale_files = [
+        output_dir / "H1.hbp",
+        output_dir / "H1.pass.dat",
+        output_dir / "H1.ebe.dat",
+        output_dir / "H1.element.dat",
+        output_dir / "H1.loss.dat",
+        output_dir / "H1.soil.dat",
+        output_dir / "H1.wat.dat",
+    ]
+    for stale_file in stale_files:
+        stale_file.write_text("stale\n", encoding="ascii")
+    keep_file = output_dir / "pass_pw0.txt"
+    keep_file.write_text("retain\n", encoding="ascii")
+
+    wepp = SimpleNamespace(
+        class_name="Wepp",
+        logger=logging.getLogger("tests.nodb.wepp_run_service.stale_cleanup"),
+        watershed_instance=_DummyWatershed(topaz_ids),
+        climate_instance=climate,
+        landuse_instance=landuse,
+        runs_dir=str(tmp_path / "runs"),
+        output_dir=str(output_dir),
+        wepp_bin="wepp_260506fc2",
+        wd=str(tmp_path),
+    )
+
+    def _fake_run_hillslope(**kwargs):
+        for stale_file in stale_files:
+            assert not stale_file.exists()
+        assert keep_file.exists()
+        return True, kwargs["wepp_id"], 0.01
+
+    monkeypatch.setattr("wepppy.nodb.core.wepp_run_service.run_hillslope", _fake_run_hillslope)
+    monkeypatch.setattr(
+        wepp_module.RedisPrep,
+        "getInstance",
+        lambda _wd: (_ for _ in ()).throw(FileNotFoundError()),
+    )
+
+    WeppRunService().run_hillslopes(wepp)
+
+
+def test_run_hillslopes_ss_batch_removes_stale_outputs_in_batch_subdirs(
+    tmp_path: Path,
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    topaz_ids = ["1271"]
+    landuse = _build_landuse(topaz_ids, disturbed_class="agriculture crops")
+    climate = SimpleNamespace(
+        climate_mode=ClimateMode.SingleStormBatch,
+        ss_batch_storms=[{"ss_batch_id": "ss1", "ss_batch_key": "storm_ss1"}],
+    )
+    output_dir = tmp_path / "output"
+    batch_dir = output_dir / "storm_ss1"
+    batch_dir.mkdir(parents=True, exist_ok=True)
+    stale_file = batch_dir / "H1.hbp"
+    stale_file.write_text("stale\n", encoding="ascii")
+
+    wepp = SimpleNamespace(
+        class_name="Wepp",
+        logger=logging.getLogger("tests.nodb.wepp_run_service.stale_cleanup_ss_batch"),
+        watershed_instance=_DummyWatershed(topaz_ids),
+        climate_instance=climate,
+        landuse_instance=landuse,
+        runs_dir=str(tmp_path / "runs"),
+        output_dir=str(output_dir),
+        wepp_bin="wepp_260506fc2",
+        wd=str(tmp_path),
+    )
+
+    def _fake_run_ss_batch_hillslope(**kwargs):
+        assert not stale_file.exists()
+        return True, kwargs["wepp_id"], 0.01
+
+    monkeypatch.setattr(
+        "wepppy.nodb.core.wepp_run_service.run_ss_batch_hillslope",
+        _fake_run_ss_batch_hillslope,
+    )
+    monkeypatch.setattr(
+        wepp_module.RedisPrep,
+        "getInstance",
+        lambda _wd: (_ for _ in ()).throw(FileNotFoundError()),
+    )
+
+    WeppRunService().run_hillslopes(wepp)
+
+
 def test_run_watershed_does_not_rewrite_wepp_50k_bin(
     tmp_path: Path,
     monkeypatch: pytest.MonkeyPatch,
@@ -195,6 +291,7 @@ def test_run_watershed_does_not_rewrite_wepp_50k_bin(
         wd=str(tmp_path),
         climate_instance=climate,
         wepp_bin="wepp_50k_ifx",
+        pass_family="legacy_ascii",
         output_dir=str(output_dir),
         runs_dir=str(runs_dir),
         timed=_noop_timed,

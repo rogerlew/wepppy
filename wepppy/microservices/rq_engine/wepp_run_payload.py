@@ -88,6 +88,7 @@ SUPPORTED_WEPP_RUN_FORM_FIELDS: set[str] = {
     "clip_hillslope_length",
     # WEPP runtime and export controls
     "wepp_bin",
+    "pass_family",
     "kslast",
     "dtchr_override",
     "ichout_override",

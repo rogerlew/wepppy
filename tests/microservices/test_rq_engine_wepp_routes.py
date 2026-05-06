@@ -577,6 +577,7 @@ def test_run_wepp_propagates_channel_advanced_options_to_wepp_parser(
         "pmet_rawp": 0.8,
         "kslast": "",
         "wepp_bin": "wepp_260324",
+        "pass_family": "hbp",
         "dtchr_override": 120,
         "ichout_override": 3,
         "chn_topaz_ids_of_interest": "24 34 44",
@@ -605,6 +606,7 @@ def test_run_wepp_propagates_channel_advanced_options_to_wepp_parser(
     assert parsed_payload["frost_opts_wintRed"] == 1
     assert parsed_payload["pmet_kcb"] == 0.95
     assert parsed_payload["wepp_bin"] == "wepp_260324"
+    assert parsed_payload["pass_family"] == "hbp"
     assert parsed_payload["dtchr_override"] == 120
     assert parsed_payload["ichout_override"] == 3
     assert parsed_payload["delete_after_interchange"] is True

@@ -23,6 +23,8 @@ class _DummyWepp:
         self.snow_opts = _DummyOpts()
         self.frost_opts = _DummyOpts()
         self._delete_after_interchange = delete_after_interchange
+        self._pass_family = "legacy_ascii"
+        self._wepp_bin: str | None = None
         self._dtchr_override: int | None = None
         self._ichout_override: int | None = None
         self._chn_topaz_ids_of_interest: list[int] = []
@@ -53,6 +55,8 @@ class _GuardedDeleteSetterWepp(_DummyWepp):
 
 def _extract_parser_state(wepp: _DummyWepp) -> dict[str, object]:
     return {
+        "pass_family": wepp._pass_family,
+        "wepp_bin": wepp._wepp_bin,
         "dtchr_override": wepp._dtchr_override,
         "ichout_override": wepp._ichout_override,
         "chn_topaz_ids_of_interest": list(wepp._chn_topaz_ids_of_interest),
@@ -64,6 +68,9 @@ def _serialize_parser_state(state: dict[str, object]) -> dict[str, object]:
     payload: dict[str, object] = {
         "delete_after_interchange": "true" if bool(state["delete_after_interchange"]) else "false",
     }
+    payload["pass_family"] = str(state["pass_family"])
+    if state["wepp_bin"] is not None:
+        payload["wepp_bin"] = str(state["wepp_bin"])
 
     dtchr_override = state["dtchr_override"]
     if dtchr_override is not None:
@@ -124,6 +131,67 @@ def test_parse_sets_delete_after_interchange_from_boolean_payload() -> None:
 
     assert wepp.delete_after_interchange is True
     assert wepp.guard_calls == 1
+
+
+@pytest.mark.parametrize("pass_family", ["legacy_ascii", "LEGACY_ASCII", "hbp", "HBP"])
+def test_parse_sets_pass_family_from_payload(pass_family: str) -> None:
+    parser = WeppInputParser()
+    wepp = _DummyWepp()
+
+    parser.parse(wepp, {"pass_family": pass_family})
+
+    assert wepp._pass_family == pass_family.lower()
+
+
+def test_parse_rejects_invalid_pass_family_payload() -> None:
+    parser = WeppInputParser()
+    wepp = _DummyWepp()
+
+    with pytest.raises(ValueError, match="pass_family must be 'legacy_ascii' or 'hbp'"):
+        parser.parse(wepp, {"pass_family": "auto"})
+
+
+def test_parse_infers_pass_family_from_wepp_bin_when_omitted(monkeypatch: pytest.MonkeyPatch) -> None:
+    parser = WeppInputParser()
+    wepp = _DummyWepp()
+    captured_wepp_bins: list[object] = []
+
+    monkeypatch.setattr(
+        "wepppy.nodb.core.wepp_input_parser.infer_pass_family_for_wepp_bin",
+        lambda wepp_bin: captured_wepp_bins.append(wepp_bin) or "hbp",
+    )
+
+    parser.parse(wepp, {"wepp_bin": "wepp_260506fc2"})
+
+    assert captured_wepp_bins == ["wepp_260506fc2"]
+    assert wepp._wepp_bin == "wepp_260506fc2"
+    assert wepp._pass_family == "hbp"
+
+
+def test_parse_prefers_explicit_pass_family_over_inferred_wepp_bin_family(
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    parser = WeppInputParser()
+    wepp = _DummyWepp()
+
+    def _unexpected_inference(_wepp_bin: object) -> str:
+        raise AssertionError("pass-family inference should not run when pass_family is explicit")
+
+    monkeypatch.setattr(
+        "wepppy.nodb.core.wepp_input_parser.infer_pass_family_for_wepp_bin",
+        _unexpected_inference,
+    )
+
+    parser.parse(
+        wepp,
+        {
+            "wepp_bin": "wepp_260506fc2",
+            "pass_family": "legacy_ascii",
+        },
+    )
+
+    assert wepp._wepp_bin == "wepp_260506fc2"
+    assert wepp._pass_family == "legacy_ascii"
 
 
 @pytest.mark.parametrize(

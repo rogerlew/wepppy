@@ -65,6 +65,51 @@ def _skip_runtime_provenance_guard(monkeypatch: pytest.MonkeyPatch) -> None:
     monkeypatch.setenv("WEPP_RUNNER_SKIP_BINARY_PROVENANCE_CHECK", "1")
 
 
+def test_infer_pass_family_defaults_legacy_when_sidecars_missing(
+    tmp_path: Path, monkeypatch: pytest.MonkeyPatch
+) -> None:
+    bin_dir = tmp_path / "bin"
+    bin_dir.mkdir()
+    _write_binary(bin_dir / "wepp_test")
+    _write_binary(bin_dir / "wepp_test_hill")
+    monkeypatch.setattr(wepp_runner_module, "wepp_bin_dir", str(bin_dir))
+
+    assert wepp_runner_module.infer_pass_family_for_wepp_bin("wepp_test") == "legacy_ascii"
+
+
+def test_infer_pass_family_returns_hbp_when_both_sidecars_declare_support(
+    tmp_path: Path, monkeypatch: pytest.MonkeyPatch
+) -> None:
+    bin_dir = tmp_path / "bin"
+    bin_dir.mkdir()
+    watershed_bin = bin_dir / "wepp_test"
+    hillslope_bin = bin_dir / "wepp_test_hill"
+    _write_binary(watershed_bin)
+    _write_binary(hillslope_bin)
+    _write_sidecar(watershed_bin, hbp_supported=True)
+    _write_sidecar(hillslope_bin, hbp_supported=True)
+    monkeypatch.setattr(wepp_runner_module, "wepp_bin_dir", str(bin_dir))
+
+    assert wepp_runner_module.infer_pass_family_for_wepp_bin("wepp_test") == "hbp"
+
+
+def test_infer_pass_family_rejects_mixed_binary_support_flags(
+    tmp_path: Path, monkeypatch: pytest.MonkeyPatch
+) -> None:
+    bin_dir = tmp_path / "bin"
+    bin_dir.mkdir()
+    watershed_bin = bin_dir / "wepp_test"
+    hillslope_bin = bin_dir / "wepp_test_hill"
+    _write_binary(watershed_bin)
+    _write_binary(hillslope_bin)
+    _write_sidecar(watershed_bin, hbp_supported=True)
+    _write_sidecar(hillslope_bin, hbp_supported=False)
+    monkeypatch.setattr(wepp_runner_module, "wepp_bin_dir", str(bin_dir))
+
+    with pytest.raises(RuntimeError, match="must agree on features.hbp_supported"):
+        wepp_runner_module.infer_pass_family_for_wepp_bin("wepp_test")
+
+
 def test_make_watershed_omni_contrasts_run_legacy_ascii_default(tmp_path: Path) -> None:
     runs_dir = tmp_path / "runs"
     runs_dir.mkdir()

@@ -3,6 +3,7 @@ from __future__ import annotations
 from typing import TYPE_CHECKING, Any
 
 from wepppy.all_your_base import isfloat, isint
+from wepp_runner.wepp_runner import infer_pass_family_for_wepp_bin
 
 if TYPE_CHECKING:
     from wepppy.nodb.core.wepp import Wepp
@@ -94,8 +95,22 @@ class WeppInputParser:
                 wepp._kslast = None
 
         _wepp_bin = kwds.get("wepp_bin", None)
+        if isinstance(_wepp_bin, (list, tuple, set)):
+            _wepp_bin = next((item for item in _wepp_bin if item not in (None, "")), None)
         if _wepp_bin is not None:
             wepp._wepp_bin = _wepp_bin
+
+        _pass_family = kwds.get("pass_family", None)
+        if isinstance(_pass_family, (list, tuple, set)):
+            _pass_family = next((item for item in _pass_family if item not in (None, "")), None)
+
+        if _pass_family not in (None, ""):
+            normalized_pass_family = str(_pass_family).strip().lower()
+            if normalized_pass_family not in {"legacy_ascii", "hbp"}:
+                raise ValueError("pass_family must be 'legacy_ascii' or 'hbp'")
+            wepp._pass_family = normalized_pass_family
+        elif _wepp_bin is not None:
+            wepp._pass_family = infer_pass_family_for_wepp_bin(_wepp_bin)
 
         _dtchr_override = kwds.get("dtchr_override", None)
         if isfloat(_dtchr_override):

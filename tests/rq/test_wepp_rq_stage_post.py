@@ -6,7 +6,6 @@ from types import SimpleNamespace
 import pytest
 
 import wepppy.rq.wepp_rq_stage_post as stage_post
-import wepppy.wepp.interchange as interchange_module
 
 pytestmark = pytest.mark.unit
 
@@ -119,14 +118,14 @@ def test_post_watershed_interchange_accepts_gzip_outputs(
     monkeypatch.setattr(
         stage_post,
         "run_wepp_watershed_interchange",
-        lambda path, *, start_year, run_soil_interchange, run_chnwb_interchange, delete_after_interchange: interchange_calls.append(
+        lambda path, *, pass_family, start_year, run_soil_interchange, run_chnwb_interchange, delete_after_interchange: interchange_calls.append(
             (Path(path), start_year, run_soil_interchange, run_chnwb_interchange, delete_after_interchange)
         ),
     )
     monkeypatch.setattr(
         stage_post,
         "cleanup_hillslope_sources_for_completed_interchange",
-        lambda path, *, run_loss_interchange, run_soil_interchange, run_wat_interchange: deferred_cleanup_calls.append(
+        lambda path, *, pass_family, run_loss_interchange, run_soil_interchange, run_wat_interchange: deferred_cleanup_calls.append(
             (Path(path), run_loss_interchange, run_soil_interchange, run_wat_interchange)
         ),
     )
@@ -180,12 +179,16 @@ def test_build_hillslope_interchange_prefers_wepp_delete_flag(
     monkeypatch.setattr(
         stage_post.Wepp,
         "getInstance",
-        lambda _wd: SimpleNamespace(delete_after_interchange=False, run_wepp_watershed=False),
+        lambda _wd: SimpleNamespace(
+            delete_after_interchange=False,
+            run_wepp_watershed=False,
+            pass_family="legacy_ascii",
+        ),
     )
     monkeypatch.setattr(
         stage_post,
         "run_wepp_hillslope_interchange",
-        lambda path, *, start_year, run_loss_interchange, run_soil_interchange, run_wat_interchange, delete_after_interchange: interchange_calls.append(
+        lambda path, *, pass_family, start_year, run_loss_interchange, run_soil_interchange, run_wat_interchange, delete_after_interchange: interchange_calls.append(
             (
                 Path(path),
                 start_year,
@@ -239,12 +242,13 @@ def test_build_hillslope_interchange_defers_delete_until_post_watershed(
         lambda _wd: SimpleNamespace(
             delete_after_interchange=True,
             run_wepp_watershed=run_wepp_watershed,
+            pass_family="legacy_ascii",
         ),
     )
     monkeypatch.setattr(
         stage_post,
         "run_wepp_hillslope_interchange",
-        lambda path, *, start_year, run_loss_interchange, run_soil_interchange, run_wat_interchange, delete_after_interchange: interchange_calls.append(
+        lambda path, *, pass_family, start_year, run_loss_interchange, run_soil_interchange, run_wat_interchange, delete_after_interchange: interchange_calls.append(
             (
                 Path(path),
                 start_year,
@@ -312,14 +316,14 @@ def test_post_watershed_interchange_runs_deferred_hillslope_cleanup_when_delete_
     monkeypatch.setattr(
         stage_post,
         "run_wepp_watershed_interchange",
-        lambda path, *, start_year, run_soil_interchange, run_chnwb_interchange, delete_after_interchange: interchange_calls.append(
+        lambda path, *, pass_family, start_year, run_soil_interchange, run_chnwb_interchange, delete_after_interchange: interchange_calls.append(
             (Path(path), start_year, run_soil_interchange, run_chnwb_interchange, delete_after_interchange)
         ),
     )
     monkeypatch.setattr(
         stage_post,
         "cleanup_hillslope_sources_for_completed_interchange",
-        lambda path, *, run_loss_interchange, run_soil_interchange, run_wat_interchange: cleanup_calls.append(
+        lambda path, *, pass_family, run_loss_interchange, run_soil_interchange, run_wat_interchange: cleanup_calls.append(
             (Path(path), run_loss_interchange, run_soil_interchange, run_wat_interchange)
         ),
     )
@@ -452,24 +456,21 @@ def test_post_dss_export_runs_full_artifact_and_timestamp_flow(
         lambda _wd, status_channel=None: _touch(dss_export_dir / "README.dss_export.md"),
     )
     monkeypatch.setattr(
-        interchange_module,
-        "totalwatsed_partitioned_dss_export",
+        "wepppy.wepp.interchange.watershed_totalwatsed_export.totalwatsed_partitioned_dss_export",
         lambda wd_path, channel_filter, status_channel=None, start_date=None, end_date=None: partitioned_calls.append(
             (wd_path, channel_filter, start_date, end_date)
         )
         or _touch(dss_export_dir / "totalwatsed3_chan_42.dss"),
     )
     monkeypatch.setattr(
-        interchange_module,
-        "chanout_dss_export",
+        "wepppy.wepp.interchange.watershed_chan_peak_interchange.chanout_dss_export",
         lambda wd_path, status_channel=None, start_date=None, end_date=None: chanout_calls.append(
             (wd_path, start_date, end_date)
         )
         or _touch(dss_export_dir / "peak_chan_42.dss"),
     )
     monkeypatch.setattr(
-        interchange_module,
-        "archive_dss_export_zip",
+        "wepppy.wepp.interchange.watershed_totalwatsed_export.archive_dss_export_zip",
         lambda wd_path, status_channel=None: _touch(Path(wd_path) / "export" / "dss.zip"),
     )
 
@@ -539,22 +540,19 @@ def test_post_dss_export_logs_when_redisprep_is_missing(
         lambda _wd, status_channel=None: _touch(dss_export_dir / "README.dss_export.md"),
     )
     monkeypatch.setattr(
-        interchange_module,
-        "totalwatsed_partitioned_dss_export",
+        "wepppy.wepp.interchange.watershed_totalwatsed_export.totalwatsed_partitioned_dss_export",
         lambda _wd, _channel_filter, status_channel=None, start_date=None, end_date=None: _touch(
             dss_export_dir / "totalwatsed3_chan_42.dss"
         ),
     )
     monkeypatch.setattr(
-        interchange_module,
-        "chanout_dss_export",
+        "wepppy.wepp.interchange.watershed_chan_peak_interchange.chanout_dss_export",
         lambda _wd, status_channel=None, start_date=None, end_date=None: _touch(
             dss_export_dir / "peak_chan_42.dss"
         ),
     )
     monkeypatch.setattr(
-        interchange_module,
-        "archive_dss_export_zip",
+        "wepppy.wepp.interchange.watershed_totalwatsed_export.archive_dss_export_zip",
         lambda wd_path, status_channel=None: _touch(Path(wd_path) / "export" / "dss.zip"),
     )
 

@@ -27,6 +27,15 @@ if TYPE_CHECKING:
 
 _CONTINUOUS_HILLSLOPE_TIMEOUT_S = 60
 _MOFE_CONTINUOUS_HILLSLOPE_TIMEOUT_S = 300
+_STALE_HILLSLOPE_OUTPUT_PATTERNS = (
+    "H*.hbp",
+    "H*.pass.dat",
+    "H*.ebe.dat",
+    "H*.element.dat",
+    "H*.loss.dat",
+    "H*.soil.dat",
+    "H*.wat.dat",
+)
 
 
 def _continuous_hillslope_timeout_s(*, multi_ofe: bool) -> int:
@@ -34,6 +43,42 @@ def _continuous_hillslope_timeout_s(*, multi_ofe: bool) -> int:
         return _MOFE_CONTINUOUS_HILLSLOPE_TIMEOUT_S
 
     return _CONTINUOUS_HILLSLOPE_TIMEOUT_S
+
+
+def _hillslope_output_dirs(output_dir: Path, climate: object) -> list[Path]:
+    targets: list[Path] = [output_dir]
+    climate_mode = getattr(climate, "climate_mode", None)
+    if getattr(climate_mode, "name", None) == "SingleStormBatch":
+        for storm in getattr(climate, "ss_batch_storms", []) or []:
+            if not isinstance(storm, dict):
+                continue
+            ss_batch_key = storm.get("ss_batch_key")
+            if isinstance(ss_batch_key, str) and ss_batch_key.strip():
+                targets.append(output_dir / ss_batch_key)
+    return targets
+
+
+def _remove_stale_hillslope_outputs(
+    *,
+    output_dir: Path,
+    climate: object,
+    logger: object,
+) -> int:
+    removed = 0
+    for target_dir in _hillslope_output_dirs(output_dir, climate):
+        if not target_dir.exists():
+            continue
+        for pattern in _STALE_HILLSLOPE_OUTPUT_PATTERNS:
+            for stale_file in target_dir.glob(pattern):
+                try:
+                    stale_file.unlink()
+                except FileNotFoundError:
+                    continue
+                removed += 1
+
+    if removed:
+        logger.info("Removed %s stale hillslope output files before rerun.", removed)
+    return removed
 
 
 class WeppRunService:
@@ -70,6 +115,14 @@ class WeppRunService:
         runs_dir = os.path.abspath(wepp.runs_dir)
         # Preserve the configured binary for the entire run; do not mutate it per hillslope.
         configured_wepp_bin = wepp.wepp_bin
+
+        output_dir_raw = getattr(wepp, "output_dir", None)
+        if output_dir_raw:
+            _remove_stale_hillslope_outputs(
+                output_dir=Path(str(output_dir_raw)),
+                climate=climate,
+                logger=wepp.logger,
+            )
 
         wepp.logger.info(f"    wepp_bin:{configured_wepp_bin}")
 

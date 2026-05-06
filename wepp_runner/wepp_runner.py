@@ -69,6 +69,7 @@ __all__ = [
     "wepp_bin_dir",
     "linux_wepp_bin_opts",
     "get_linux_wepp_bin_opts",
+    "infer_pass_family_for_wepp_bin",
     "make_flowpath_run",
     "make_ss_flowpath_run",
     "make_hillslope_run",
@@ -137,6 +138,32 @@ _DSTATE_WATCHDOG_MAX_EVENTS_DEFAULT = 3
 def get_linux_wepp_bin_opts():
     """Return the current linux WEPP binaries available on disk."""
     return _compute_linux_wepp_bin_opts()
+
+
+def infer_pass_family_for_wepp_bin(wepp_bin=None):
+    """
+    Infer the default pass-family contract from WEPP release sidecars.
+
+    Sidecar absence remains legacy/no-HBP by default. If only one role declares
+    HBP support, treat that as a release packaging contract error.
+    """
+    watershed_binary = _resolve_binary_for_role(wepp_bin, prefer_hill=False)
+    hillslope_binary = _resolve_binary_for_role(wepp_bin, prefer_hill=True)
+
+    watershed_metadata = _load_binary_release_metadata(watershed_binary)
+    hillslope_metadata = _load_binary_release_metadata(hillslope_binary)
+    watershed_hbp = watershed_metadata is not None and _sidecar_hbp_supported(watershed_metadata)
+    hillslope_hbp = hillslope_metadata is not None and _sidecar_hbp_supported(hillslope_metadata)
+
+    if watershed_hbp != hillslope_hbp:
+        raise RuntimeError(
+            "Inconsistent WEPP release metadata: watershed and hillslope binaries must "
+            "agree on features.hbp_supported."
+        )
+
+    if watershed_hbp:
+        return PASS_FAMILY_HBP
+    return PASS_FAMILY_LEGACY_ASCII
 
 
 def _normalize_pass_family(pass_family):
