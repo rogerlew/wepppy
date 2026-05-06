@@ -117,12 +117,14 @@ _PROVENANCE_OK_BINARY_PATHS = set()
 _BINARY_IDENTITY_CACHE = {}
 _BINARY_IDENTITY_CHUNK_BYTES = 1024 * 1024
 _BINARY_RELEASE_METADATA_CACHE = {}
+_BINARY_PROMPT_CONTRACT_CACHE = {}
 
 PASS_FAMILY_LEGACY_ASCII = "legacy_ascii"
 PASS_FAMILY_HBP = "hbp"
 PASS_FAMILY_CHOICES = {PASS_FAMILY_LEGACY_ASCII, PASS_FAMILY_HBP}
 _HBP_METADATA_SCHEMA = "wepp-binary-release-metadata-v1"
 _INVALID_PROCESS_HBP_SUFFIXES = (".pass.hbp", ".pass.dat.hbp")
+_SKIP_TEMPLATE_LINE = "__WEPP_RUNNER_SKIP_LINE__"
 
 _DSTATE_WATCHDOG_ENABLED_ENV = "WEPP_RUNNER_DSTATE_WATCHDOG_ENABLED"
 _DSTATE_WATCHDOG_INTERVAL_ENV = "WEPP_RUNNER_DSTATE_WATCHDOG_INTERVAL_S"
@@ -266,6 +268,44 @@ def _assert_pass_family_release_support(pass_family, *, wepp_bin):
     for path, role in checked.items():
         _assert_hbp_supported_binary(path, role=role)
     return normalized
+
+
+def _uses_modern_watershed_prompt_contract(*, wepp_bin):
+    watershed_binary = _resolve_binary_for_role(wepp_bin, prefer_hill=False)
+    cache_key = os.path.abspath(watershed_binary)
+    if cache_key in _BINARY_PROMPT_CONTRACT_CACHE:
+        return _BINARY_PROMPT_CONTRACT_CACHE[cache_key]
+
+    metadata = _load_binary_release_metadata(watershed_binary)
+    modern = bool(metadata and _sidecar_hbp_supported(metadata))
+    _BINARY_PROMPT_CONTRACT_CACHE[cache_key] = modern
+    return modern
+
+
+def _watershed_prompt_contract_lines(*, wepp_bin):
+    if _uses_modern_watershed_prompt_contract(wepp_bin=wepp_bin):
+        return {
+            "initial_condition_output_file": _SKIP_TEMPLATE_LINE,
+            "impoundment_output": "No",
+            "impoundment_data_file": "pw0.imp",
+        }
+
+    # Legacy binaries consume an initial-condition filename slot even when
+    # scenario output is disabled and do not prompt for impoundment output/data.
+    return {
+        "initial_condition_output_file": "../output/initcond_pw0.txt",
+        "impoundment_output": _SKIP_TEMPLATE_LINE,
+        "impoundment_data_file": _SKIP_TEMPLATE_LINE,
+    }
+
+
+def _drop_template_skip_lines(text):
+    lines = []
+    for line in text.splitlines():
+        if line.strip() == _SKIP_TEMPLATE_LINE:
+            continue
+        lines.append(line)
+    return "\n".join(lines)
 
 
 def _run_text_command(args):
@@ -1372,6 +1412,7 @@ def make_watershed_omni_contrasts_run(
     plot_output = _normalize_yes_no(_resolve_output_flag(output_options, "plot_pw0", False))
     event_output = _normalize_yes_no(_resolve_output_flag(output_options, "ebe_pw0", True))
     loss_output_option = 1
+    contract_lines = _watershed_prompt_contract_lines(wepp_bin=wepp_bin)
 
     s = _watershed_template.format(sub_n=len(wepp_path_ids),
                                    hillslopes_block=block,
@@ -1380,7 +1421,11 @@ def make_watershed_omni_contrasts_run(
                                    water_balance_output=water_balance_output,
                                    soil_output=soil_output,
                                    plot_output=plot_output,
-                                   event_output=event_output)
+                                   event_output=event_output,
+                                   initial_condition_output_file=contract_lines["initial_condition_output_file"],
+                                   impoundment_output=contract_lines["impoundment_output"],
+                                   impoundment_data_file=contract_lines["impoundment_data_file"])
+    s = _drop_template_skip_lines(s)
 
     disabled_outputs = set()
     if water_balance_output == "No":
@@ -1428,6 +1473,7 @@ def make_watershed_run(
     plot_output = _normalize_yes_no(True)
     event_output = _normalize_yes_no(True)
     loss_output_option = 1
+    contract_lines = _watershed_prompt_contract_lines(wepp_bin=wepp_bin)
 
     s = _watershed_template.format(sub_n=len(wepp_ids),
                                    hillslopes_block=block,
@@ -1436,7 +1482,11 @@ def make_watershed_run(
                                    water_balance_output=water_balance_output,
                                    soil_output=soil_output,
                                    plot_output=plot_output,
-                                   event_output=event_output)
+                                   event_output=event_output,
+                                   initial_condition_output_file=contract_lines["initial_condition_output_file"],
+                                   impoundment_output=contract_lines["impoundment_output"],
+                                   impoundment_data_file=contract_lines["impoundment_data_file"])
+    s = _drop_template_skip_lines(s)
 
     fn = _join(runs_dir, 'pw0.run')
     with open(fn, 'w') as fp:

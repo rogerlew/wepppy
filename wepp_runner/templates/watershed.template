@@ -6,6 +6,7 @@ Yes                             # Y: Batch mode, N: Shell mode
 {sub_n}{hillslopes_block}       # number of hillslopes, English or Metric, Y: Use existing pass file, name of pass file
 Yes                             # Do you wish to model impoundments on the watershed
 No                              # Do you want initial condition scenario output
+{initial_condition_output_file} # Legacy prompt-contract placeholder; skipped for modern binaries
 {soil_loss_output_option}       # Soil loss output options, 1: yearly for watershed
 ../output/loss_pw0.txt          #
 {water_balance_output}          # Water balance output
@@ -21,10 +22,10 @@ No                              # Large watershed graphics output
 No                              # Final Summary output (not implemented?)
 No                              # Daily Winter output
 No                              # Plant yield output
-No                              # Impoundment output
+{impoundment_output}            # Modern prompt-contract placeholder; skipped for legacy binaries
 pw0.str                         # Watershed structure file
 pw0.chn                         # Watershed channel data
-pw0.imp                         # Impoundment data
+{impoundment_data_file}         # Modern prompt-contract placeholder; skipped for legacy binaries
 pw0.man                         # Management data
 pw0.slp                         # Slope data
 pw0.cli                         # Climate
