@@ -33,8 +33,9 @@ with the wepp_id included (without the .pass.dat).
   e.g. ['H1', '../../<scenario>/wepp/output/H2', 'H3', 'H4', ...]
 
 ### Watershed Prompt Contracts (Legacy vs Modern Binaries)
-`wepp_runner` must generate `pw0.run` watershed-tail prompts differently for
-legacy and modern WEPP binaries.
+`wepp_runner` must generate watershed-tail prompts differently for legacy and
+modern WEPP binaries across continuous and single-storm watershed runfile
+builders.
 
 Legacy contract (default when sidecar is absent):
 - includes the legacy mode-2 master-pass prompt line (`../output/pass_pw0.txt`);

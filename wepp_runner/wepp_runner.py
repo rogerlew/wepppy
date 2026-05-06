@@ -117,7 +117,6 @@ _PROVENANCE_OK_BINARY_PATHS = set()
 _BINARY_IDENTITY_CACHE = {}
 _BINARY_IDENTITY_CHUNK_BYTES = 1024 * 1024
 _BINARY_RELEASE_METADATA_CACHE = {}
-_BINARY_PROMPT_CONTRACT_CACHE = {}
 
 PASS_FAMILY_LEGACY_ASCII = "legacy_ascii"
 PASS_FAMILY_HBP = "hbp"
@@ -240,16 +239,22 @@ def _sidecar_hbp_supported(metadata):
     return features.get("hbp_supported") is True
 
 
-def _mode2_master_pass_prompt_required(metadata):
+def _mode2_master_pass_prompt_required(metadata, *, sidecar_path):
     if not isinstance(metadata, dict):
         return True
     features = metadata.get("features")
     if not isinstance(features, dict):
         return True
+    if "mode2_master_pass_prompt_required" not in features:
+        return True
+
     value = features.get("mode2_master_pass_prompt_required")
     if isinstance(value, bool):
         return value
-    return True
+    raise RuntimeError(
+        f'Invalid WEPP release metadata sidecar "{sidecar_path}": '
+        "expected features.mode2_master_pass_prompt_required to be boolean when present"
+    )
 
 
 def _assert_hbp_supported_binary(binary_path, *, role):
@@ -282,24 +287,13 @@ def _assert_pass_family_release_support(pass_family, *, wepp_bin):
     return normalized
 
 
-def _uses_modern_watershed_prompt_contract(*, wepp_bin):
-    watershed_binary = _resolve_binary_for_role(wepp_bin, prefer_hill=False)
-    cache_key = os.path.abspath(watershed_binary)
-    if cache_key in _BINARY_PROMPT_CONTRACT_CACHE:
-        return _BINARY_PROMPT_CONTRACT_CACHE[cache_key]
-
-    metadata = _load_binary_release_metadata(watershed_binary)
-    modern = bool(metadata and _sidecar_hbp_supported(metadata))
-    _BINARY_PROMPT_CONTRACT_CACHE[cache_key] = modern
-    return modern
-
-
 def _watershed_prompt_contract_lines(*, wepp_bin):
     watershed_binary = _resolve_binary_for_role(wepp_bin, prefer_hill=False)
+    sidecar_path = _binary_sidecar_path(watershed_binary)
     metadata = _load_binary_release_metadata(watershed_binary)
 
     master_pass_file = "../output/pass_pw0.txt"
-    if not _mode2_master_pass_prompt_required(metadata):
+    if not _mode2_master_pass_prompt_required(metadata, sidecar_path=sidecar_path):
         master_pass_file = _SKIP_TEMPLATE_LINE
 
     if metadata and _sidecar_hbp_supported(metadata):
@@ -1530,9 +1524,12 @@ def make_ss_watershed_run(
     block = ''.join(block)
 
     _watershed_template = _ss_watershed_template_loader()
+    contract_lines = _watershed_prompt_contract_lines(wepp_bin=wepp_bin)
 
     s = _watershed_template.format(sub_n=len(wepp_ids),
-                                   hillslopes_block=block)
+                                   hillslopes_block=block,
+                                   master_pass_file=contract_lines["master_pass_file"])
+    s = _drop_template_skip_lines(s)
 
     fn = _join(runs_dir, 'pw0.run')
     with open(fn, 'w') as fp:
@@ -1561,11 +1558,17 @@ def make_ss_batch_watershed_run(
     block = ''.join(block)
 
     _watershed_template = _ss_batch_watershed_template_loader()
+    contract_lines = _watershed_prompt_contract_lines(wepp_bin=wepp_bin)
+    master_pass_file = _SKIP_TEMPLATE_LINE
+    if contract_lines["master_pass_file"] != _SKIP_TEMPLATE_LINE:
+        master_pass_file = f"../output/{ss_batch_key}/pass_pw0.txt"
 
     s = _watershed_template.format(sub_n=len(wepp_ids),
                                    hillslopes_block=block,
                                    ss_batch_id=ss_batch_id,
-                                   ss_batch_key=ss_batch_key)
+                                   ss_batch_key=ss_batch_key,
+                                   master_pass_file=master_pass_file)
+    s = _drop_template_skip_lines(s)
 
     fn = _join(runs_dir, f'pw0.{ss_batch_id}.run')
     with open(fn, 'w') as fp:

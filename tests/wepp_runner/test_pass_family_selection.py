@@ -6,6 +6,7 @@ import pytest
 from wepp_runner import wepp_runner as wepp_runner_module
 
 pytestmark = pytest.mark.unit
+_UNSET = object()
 
 
 def _write_binary(path: Path) -> None:
@@ -13,8 +14,24 @@ def _write_binary(path: Path) -> None:
 
 
 def _write_sidecar(
-    path: Path, *, hbp_supported: bool, mode2_master_pass_prompt_required: bool = True
+    path: Path,
+    *,
+    hbp_supported: bool,
+    mode2_master_pass_prompt_required: object = True,
 ) -> None:
+    features = {
+        "hbp_supported": hbp_supported,
+        "hbp_schema_major": 1,
+        "hbp_schema_minor": 0,
+        "hbp_pass_family": "H*.hbp",
+        "legacy_ascii_pass_family": "H*.pass.dat",
+        "process_mode_pass_pw0_required": False,
+        "mode2_direct_hbp_reader": hbp_supported,
+        "mode3_process_pass_reload": False,
+    }
+    if mode2_master_pass_prompt_required is not _UNSET:
+        features["mode2_master_pass_prompt_required"] = mode2_master_pass_prompt_required
+
     payload = {
         "schema": "wepp-binary-release-metadata-v1",
         "binary_name": path.name,
@@ -25,17 +42,7 @@ def _write_sidecar(
         "built_utc": "2026-05-06T00:00:00Z",
         "sha256": "test",
         "wepp_banner_version": "2020.500",
-        "features": {
-            "hbp_supported": hbp_supported,
-            "hbp_schema_major": 1,
-            "hbp_schema_minor": 0,
-            "hbp_pass_family": "H*.hbp",
-            "legacy_ascii_pass_family": "H*.pass.dat",
-            "process_mode_pass_pw0_required": False,
-            "mode2_direct_hbp_reader": hbp_supported,
-            "mode2_master_pass_prompt_required": mode2_master_pass_prompt_required,
-            "mode3_process_pass_reload": False,
-        },
+        "features": features,
         "validation": {
             "host_smoke": "pass",
             "ps05_reader": "pass",
@@ -49,10 +56,8 @@ def _write_sidecar(
 @pytest.fixture(autouse=True)
 def _reset_release_metadata_cache() -> None:
     wepp_runner_module._BINARY_RELEASE_METADATA_CACHE.clear()
-    wepp_runner_module._BINARY_PROMPT_CONTRACT_CACHE.clear()
     yield
     wepp_runner_module._BINARY_RELEASE_METADATA_CACHE.clear()
-    wepp_runner_module._BINARY_PROMPT_CONTRACT_CACHE.clear()
 
 
 @pytest.fixture(autouse=True)
@@ -216,6 +221,75 @@ def test_watershed_prompt_contract_modern_binary_without_master_pass_prompt(
     assert "pw0.imp" in lines
 
 
+def test_watershed_prompt_contract_modern_binary_missing_master_pass_flag_defaults_true(
+    tmp_path: Path, monkeypatch: pytest.MonkeyPatch
+) -> None:
+    runs_dir = tmp_path / "runs"
+    runs_dir.mkdir()
+    bin_dir = tmp_path / "bin"
+    bin_dir.mkdir()
+
+    watershed_bin = bin_dir / "wepp_test"
+    hillslope_bin = bin_dir / "wepp_test_hill"
+    _write_binary(watershed_bin)
+    _write_binary(hillslope_bin)
+    _write_sidecar(
+        watershed_bin,
+        hbp_supported=True,
+        mode2_master_pass_prompt_required=_UNSET,
+    )
+    _write_sidecar(
+        hillslope_bin,
+        hbp_supported=True,
+        mode2_master_pass_prompt_required=_UNSET,
+    )
+    monkeypatch.setattr(wepp_runner_module, "wepp_bin_dir", str(bin_dir))
+
+    wepp_runner_module.make_watershed_omni_contrasts_run(
+        3,
+        ["H1"],
+        str(runs_dir),
+        wepp_bin="wepp_test",
+    )
+
+    lines = [line.strip() for line in (runs_dir / "pw0.run").read_text(encoding="ascii").splitlines()]
+    assert "../output/pass_pw0.txt" in lines
+    assert "pw0.imp" in lines
+
+
+def test_watershed_prompt_contract_modern_binary_rejects_non_boolean_master_pass_flag(
+    tmp_path: Path, monkeypatch: pytest.MonkeyPatch
+) -> None:
+    runs_dir = tmp_path / "runs"
+    runs_dir.mkdir()
+    bin_dir = tmp_path / "bin"
+    bin_dir.mkdir()
+
+    watershed_bin = bin_dir / "wepp_test"
+    hillslope_bin = bin_dir / "wepp_test_hill"
+    _write_binary(watershed_bin)
+    _write_binary(hillslope_bin)
+    _write_sidecar(
+        watershed_bin,
+        hbp_supported=True,
+        mode2_master_pass_prompt_required="false",
+    )
+    _write_sidecar(
+        hillslope_bin,
+        hbp_supported=True,
+        mode2_master_pass_prompt_required="false",
+    )
+    monkeypatch.setattr(wepp_runner_module, "wepp_bin_dir", str(bin_dir))
+
+    with pytest.raises(RuntimeError, match="mode2_master_pass_prompt_required"):
+        wepp_runner_module.make_watershed_omni_contrasts_run(
+            3,
+            ["H1"],
+            str(runs_dir),
+            wepp_bin="wepp_test",
+        )
+
+
 def test_watershed_prompt_contract_legacy_binary_uses_initial_condition_placeholder(
     tmp_path: Path, monkeypatch: pytest.MonkeyPatch
 ) -> None:
@@ -239,6 +313,113 @@ def test_watershed_prompt_contract_legacy_binary_uses_initial_condition_placehol
     assert "../output/pass_pw0.txt" in lines
     assert "../output/initcond_pw0.txt" in lines
     assert "pw0.imp" not in lines
+
+
+def test_make_watershed_run_modern_binary_without_master_pass_prompt(
+    tmp_path: Path, monkeypatch: pytest.MonkeyPatch
+) -> None:
+    runs_dir = tmp_path / "runs"
+    runs_dir.mkdir()
+    bin_dir = tmp_path / "bin"
+    bin_dir.mkdir()
+
+    watershed_bin = bin_dir / "wepp_test"
+    hillslope_bin = bin_dir / "wepp_test_hill"
+    _write_binary(watershed_bin)
+    _write_binary(hillslope_bin)
+    _write_sidecar(
+        watershed_bin,
+        hbp_supported=True,
+        mode2_master_pass_prompt_required=False,
+    )
+    _write_sidecar(
+        hillslope_bin,
+        hbp_supported=True,
+        mode2_master_pass_prompt_required=False,
+    )
+    monkeypatch.setattr(wepp_runner_module, "wepp_bin_dir", str(bin_dir))
+
+    wepp_runner_module.make_watershed_run(
+        3,
+        ["H1"],
+        str(runs_dir),
+        wepp_bin="wepp_test",
+    )
+
+    lines = [line.strip() for line in (runs_dir / "pw0.run").read_text(encoding="ascii").splitlines()]
+    assert "../output/pass_pw0.txt" not in lines
+    assert "pw0.imp" in lines
+
+
+def test_make_ss_watershed_run_modern_binary_without_master_pass_prompt(
+    tmp_path: Path, monkeypatch: pytest.MonkeyPatch
+) -> None:
+    runs_dir = tmp_path / "runs"
+    runs_dir.mkdir()
+    bin_dir = tmp_path / "bin"
+    bin_dir.mkdir()
+
+    watershed_bin = bin_dir / "wepp_test"
+    hillslope_bin = bin_dir / "wepp_test_hill"
+    _write_binary(watershed_bin)
+    _write_binary(hillslope_bin)
+    _write_sidecar(
+        watershed_bin,
+        hbp_supported=True,
+        mode2_master_pass_prompt_required=False,
+    )
+    _write_sidecar(
+        hillslope_bin,
+        hbp_supported=True,
+        mode2_master_pass_prompt_required=False,
+    )
+    monkeypatch.setattr(wepp_runner_module, "wepp_bin_dir", str(bin_dir))
+
+    wepp_runner_module.make_ss_watershed_run(
+        ["H1"],
+        str(runs_dir),
+        wepp_bin="wepp_test",
+    )
+
+    lines = [line.strip() for line in (runs_dir / "pw0.run").read_text(encoding="ascii").splitlines()]
+    assert "../output/pass_pw0.txt" not in lines
+
+
+def test_make_ss_batch_watershed_run_modern_binary_without_master_pass_prompt(
+    tmp_path: Path, monkeypatch: pytest.MonkeyPatch
+) -> None:
+    runs_dir = tmp_path / "runs"
+    runs_dir.mkdir()
+    bin_dir = tmp_path / "bin"
+    bin_dir.mkdir()
+
+    watershed_bin = bin_dir / "wepp_test"
+    hillslope_bin = bin_dir / "wepp_test_hill"
+    _write_binary(watershed_bin)
+    _write_binary(hillslope_bin)
+    _write_sidecar(
+        watershed_bin,
+        hbp_supported=True,
+        mode2_master_pass_prompt_required=False,
+    )
+    _write_sidecar(
+        hillslope_bin,
+        hbp_supported=True,
+        mode2_master_pass_prompt_required=False,
+    )
+    monkeypatch.setattr(wepp_runner_module, "wepp_bin_dir", str(bin_dir))
+
+    wepp_runner_module.make_ss_batch_watershed_run(
+        ["H1"],
+        str(runs_dir),
+        "batch",
+        7,
+        wepp_bin="wepp_test",
+    )
+
+    run_path = runs_dir / "pw0.7.run"
+    lines = [line.strip() for line in run_path.read_text(encoding="ascii").splitlines()]
+    assert "../output/batch/pass_pw0.txt" not in lines
 
 
 @pytest.mark.parametrize("path_id", ["H1.pass", "H1.pass.hbp", "H1.pass.dat.hbp"])
