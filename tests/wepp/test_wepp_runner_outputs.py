@@ -30,8 +30,7 @@ def test_make_watershed_omni_contrasts_run_output_options(tmp_path):
     lines = [line.strip() for line in run_path.read_text(encoding="ascii").splitlines()]
 
     pass_idx = lines.index("H1.pass.dat")
-    assert lines[pass_idx + 1] == ""
-    assert lines[pass_idx + 2] == "Yes"
+    assert lines[pass_idx + 1] == "Yes"
     assert _line_before(lines, "../output/loss_pw0.txt") == "1"
     assert _line_before(lines, "../output/chnwb.txt") == "Yes"
     assert _line_before(lines, "../output/plot_pw0.txt") == "Yes"
