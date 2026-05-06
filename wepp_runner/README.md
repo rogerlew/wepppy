@@ -37,6 +37,7 @@ with the wepp_id included (without the .pass.dat).
 legacy and modern WEPP binaries.
 
 Legacy contract (default when sidecar is absent):
+- includes the legacy mode-2 master-pass prompt line (`../output/pass_pw0.txt`);
 - consumes an initial-condition filename slot even when initial-condition output
   is `No`;
 - does not prompt for impoundment output;
@@ -44,6 +45,8 @@ Legacy contract (default when sidecar is absent):
 
 Modern contract (HBP-capable release sidecar with
 `features.hbp_supported=true`):
+- may include or skip the legacy mode-2 master-pass prompt line based on
+  `features.mode2_master_pass_prompt_required`;
 - does not consume an initial-condition filename placeholder;
 - prompts for impoundment output;
 - prompts for impoundment data file (`pw0.imp`).

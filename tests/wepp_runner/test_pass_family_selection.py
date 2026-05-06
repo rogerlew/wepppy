@@ -12,7 +12,9 @@ def _write_binary(path: Path) -> None:
     path.write_text("binary-stub\n", encoding="ascii")
 
 
-def _write_sidecar(path: Path, *, hbp_supported: bool) -> None:
+def _write_sidecar(
+    path: Path, *, hbp_supported: bool, mode2_master_pass_prompt_required: bool = True
+) -> None:
     payload = {
         "schema": "wepp-binary-release-metadata-v1",
         "binary_name": path.name,
@@ -31,6 +33,7 @@ def _write_sidecar(path: Path, *, hbp_supported: bool) -> None:
             "legacy_ascii_pass_family": "H*.pass.dat",
             "process_mode_pass_pw0_required": False,
             "mode2_direct_hbp_reader": hbp_supported,
+            "mode2_master_pass_prompt_required": mode2_master_pass_prompt_required,
             "mode3_process_pass_reload": False,
         },
         "validation": {
@@ -171,9 +174,46 @@ def test_watershed_prompt_contract_modern_binary_includes_impoundment_prompt(
     )
 
     lines = [line.strip() for line in (runs_dir / "pw0.run").read_text(encoding="ascii").splitlines()]
+    assert "../output/pass_pw0.txt" in lines
     assert "../output/initcond_pw0.txt" not in lines
     assert "pw0.imp" in lines
     assert "No" in lines
+
+
+def test_watershed_prompt_contract_modern_binary_without_master_pass_prompt(
+    tmp_path: Path, monkeypatch: pytest.MonkeyPatch
+) -> None:
+    runs_dir = tmp_path / "runs"
+    runs_dir.mkdir()
+    bin_dir = tmp_path / "bin"
+    bin_dir.mkdir()
+
+    watershed_bin = bin_dir / "wepp_test"
+    hillslope_bin = bin_dir / "wepp_test_hill"
+    _write_binary(watershed_bin)
+    _write_binary(hillslope_bin)
+    _write_sidecar(
+        watershed_bin,
+        hbp_supported=True,
+        mode2_master_pass_prompt_required=False,
+    )
+    _write_sidecar(
+        hillslope_bin,
+        hbp_supported=True,
+        mode2_master_pass_prompt_required=False,
+    )
+    monkeypatch.setattr(wepp_runner_module, "wepp_bin_dir", str(bin_dir))
+
+    wepp_runner_module.make_watershed_omni_contrasts_run(
+        3,
+        ["H1"],
+        str(runs_dir),
+        wepp_bin="wepp_test",
+    )
+
+    lines = [line.strip() for line in (runs_dir / "pw0.run").read_text(encoding="ascii").splitlines()]
+    assert "../output/pass_pw0.txt" not in lines
+    assert "pw0.imp" in lines
 
 
 def test_watershed_prompt_contract_legacy_binary_uses_initial_condition_placeholder(
@@ -196,6 +236,7 @@ def test_watershed_prompt_contract_legacy_binary_uses_initial_condition_placehol
     )
 
     lines = [line.strip() for line in (runs_dir / "pw0.run").read_text(encoding="ascii").splitlines()]
+    assert "../output/pass_pw0.txt" in lines
     assert "../output/initcond_pw0.txt" in lines
     assert "pw0.imp" not in lines
 

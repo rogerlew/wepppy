@@ -240,6 +240,18 @@ def _sidecar_hbp_supported(metadata):
     return features.get("hbp_supported") is True
 
 
+def _mode2_master_pass_prompt_required(metadata):
+    if not isinstance(metadata, dict):
+        return True
+    features = metadata.get("features")
+    if not isinstance(features, dict):
+        return True
+    value = features.get("mode2_master_pass_prompt_required")
+    if isinstance(value, bool):
+        return value
+    return True
+
+
 def _assert_hbp_supported_binary(binary_path, *, role):
     metadata = _load_binary_release_metadata(binary_path)
     sidecar_path = _binary_sidecar_path(binary_path)
@@ -283,8 +295,16 @@ def _uses_modern_watershed_prompt_contract(*, wepp_bin):
 
 
 def _watershed_prompt_contract_lines(*, wepp_bin):
-    if _uses_modern_watershed_prompt_contract(wepp_bin=wepp_bin):
+    watershed_binary = _resolve_binary_for_role(wepp_bin, prefer_hill=False)
+    metadata = _load_binary_release_metadata(watershed_binary)
+
+    master_pass_file = "../output/pass_pw0.txt"
+    if not _mode2_master_pass_prompt_required(metadata):
+        master_pass_file = _SKIP_TEMPLATE_LINE
+
+    if metadata and _sidecar_hbp_supported(metadata):
         return {
+            "master_pass_file": master_pass_file,
             "initial_condition_output_file": _SKIP_TEMPLATE_LINE,
             "impoundment_output": "No",
             "impoundment_data_file": "pw0.imp",
@@ -293,6 +313,7 @@ def _watershed_prompt_contract_lines(*, wepp_bin):
     # Legacy binaries consume an initial-condition filename slot even when
     # scenario output is disabled and do not prompt for impoundment output/data.
     return {
+        "master_pass_file": master_pass_file,
         "initial_condition_output_file": "../output/initcond_pw0.txt",
         "impoundment_output": _SKIP_TEMPLATE_LINE,
         "impoundment_data_file": _SKIP_TEMPLATE_LINE,
@@ -1418,6 +1439,7 @@ def make_watershed_omni_contrasts_run(
                                    hillslopes_block=block,
                                    sim_years=sim_years,
                                    soil_loss_output_option=loss_output_option,
+                                   master_pass_file=contract_lines["master_pass_file"],
                                    water_balance_output=water_balance_output,
                                    soil_output=soil_output,
                                    plot_output=plot_output,
@@ -1479,6 +1501,7 @@ def make_watershed_run(
                                    hillslopes_block=block,
                                    sim_years=sim_years,
                                    soil_loss_output_option=loss_output_option,
+                                   master_pass_file=contract_lines["master_pass_file"],
                                    water_balance_output=water_balance_output,
                                    soil_output=soil_output,
                                    plot_output=plot_output,
