@@ -1629,7 +1629,12 @@ def _finish_fork_rq(runid: str) -> None:
 
 
 @with_exception_logging
-def fork_rq(runid: str, new_runid: str, undisturbify: bool = False) -> None:
+def fork_rq(
+    runid: str,
+    new_runid: str,
+    undisturbify: bool = False,
+    skip_wepp_runs_output: bool = False,
+) -> None:
     job = get_current_job()
     func_name = inspect.currentframe().f_code.co_name
     status_channel = f'{runid}:fork'
@@ -1639,6 +1644,7 @@ def fork_rq(runid: str, new_runid: str, undisturbify: bool = False) -> None:
             status_channel, f'rq:{job.id} STARTED {func_name}({runid})'
         )
         StatusMessenger.publish(status_channel, f'undisturbify: {undisturbify}')
+        StatusMessenger.publish(status_channel, f'skip_wepp_runs_output: {skip_wepp_runs_output}')
 
         def _initialize_ttl(wd: str) -> None:
             from wepppy.weppcloud.utils.run_ttl import initialize_ttl
@@ -1648,6 +1654,7 @@ def fork_rq(runid: str, new_runid: str, undisturbify: bool = False) -> None:
             runid,
             new_runid,
             undisturbify=undisturbify,
+            skip_wepp_runs_output=skip_wepp_runs_output,
             status_channel=status_channel,
             publish_status=StatusMessenger.publish,
             get_wd=get_wd,
@@ -1659,9 +1666,10 @@ def fork_rq(runid: str, new_runid: str, undisturbify: bool = False) -> None:
             soils_cls=Soils,
             initialize_ttl=_initialize_ttl,
             format_ttl_failure=lambda exc: f'rq:{job.id} STATUS TTL initialization failed ({exc})',
-            build_rsync_cmd=lambda run_right, _undisturbify: _build_fork_rsync_cmd(
+            build_rsync_cmd=lambda run_right, _undisturbify, _skip_wepp_runs_output: _build_fork_rsync_cmd(
                 run_right,
                 undisturbify=_undisturbify,
+                skip_wepp_runs_output=_skip_wepp_runs_output,
             ),
             clean_env_for_system_tools=_clean_env_for_system_tools,
         )

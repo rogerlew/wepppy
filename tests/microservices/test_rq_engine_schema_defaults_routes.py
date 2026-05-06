@@ -24,6 +24,8 @@ RUN_ENDPOINT_SCHEMA_PATH = f"/api/runs/{RUNID}/{CONFIG}/endpoints/rq_engine_run_
 RUN_ENDPOINT_DEFAULTS_PATH = f"/api/runs/{RUNID}/{CONFIG}/endpoints/rq_engine_run_wepp/defaults"
 BUILD_SOILS_SCHEMA_PATH = f"/api/runs/{RUNID}/{CONFIG}/endpoints/rq_engine_build_soils/schema"
 BUILD_SOILS_DEFAULTS_PATH = f"/api/runs/{RUNID}/{CONFIG}/endpoints/rq_engine_build_soils/defaults"
+FORK_SCHEMA_PATH = f"/api/runs/{RUNID}/{CONFIG}/endpoints/rq_engine_fork_project/schema"
+FORK_DEFAULTS_PATH = f"/api/runs/{RUNID}/{CONFIG}/endpoints/rq_engine_fork_project/defaults"
 
 UTC_TIMESTAMP_RE = re.compile(r"^\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}Z$")
 
@@ -37,6 +39,8 @@ SCHEMA_DEFAULT_PATHS = (
     RUN_ENDPOINT_DEFAULTS_PATH,
     BUILD_SOILS_SCHEMA_PATH,
     BUILD_SOILS_DEFAULTS_PATH,
+    FORK_SCHEMA_PATH,
+    FORK_DEFAULTS_PATH,
 )
 
 
@@ -835,6 +839,29 @@ def test_run_endpoints_include_upload_sbs_for_baer_mod(monkeypatch: pytest.Monke
     operation_ids = {operation["operation_id"] for operation in response.json()["operations"]}
     assert "rq_engine_upload_sbs" in operation_ids
     assert "rq_engine_build_rusle" in operation_ids
+
+
+def test_fork_endpoint_schema_and_defaults_include_skip_wepp_runs_output(
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    _stub_auth(monkeypatch, "rq:status")
+    monkeypatch.setattr(schema_defaults_routes, "_load_runtime_state", lambda runid, config: _sample_runtime())
+
+    with TestClient(rq_engine.app) as client:
+        schema_response = client.get(FORK_SCHEMA_PATH)
+        defaults_response = client.get(FORK_DEFAULTS_PATH)
+
+    assert schema_response.status_code == 200
+    schema_payload = schema_response.json()
+    request_properties = schema_payload["request"]["properties"]
+    assert request_properties["skip_wepp_runs_output"]["type"] == "boolean"
+    assert request_properties["skip_wepp_runs_output"]["constraint_mode"] == "static"
+    assert "skip_wepp_runs_output" in schema_payload["responses"]["success"]["required"]
+
+    assert defaults_response.status_code == 200
+    defaults_payload = defaults_response.json()
+    assert defaults_payload["resolved_defaults"]["undisturbify"] is False
+    assert defaults_payload["resolved_defaults"]["skip_wepp_runs_output"] is False
 
 
 def test_run_endpoints_omit_upload_sbs_when_fire_mods_absent(monkeypatch: pytest.MonkeyPatch) -> None:

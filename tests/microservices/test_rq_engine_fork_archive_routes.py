@@ -14,7 +14,12 @@ from wepppy.weppcloud.utils import runid as runid_utils
 pytestmark = pytest.mark.microservice
 
 
-def _stub_queue(monkeypatch: pytest.MonkeyPatch, *, job_id: str = "job-123") -> None:
+def _stub_queue(
+    monkeypatch: pytest.MonkeyPatch,
+    *,
+    job_id: str = "job-123",
+    enqueue_calls: list[tuple[tuple[object, ...], dict[str, object]]] | None = None,
+) -> None:
     class DummyJob:
         id = job_id
 
@@ -23,6 +28,8 @@ def _stub_queue(monkeypatch: pytest.MonkeyPatch, *, job_id: str = "job-123") -> 
             pass
 
         def enqueue_call(self, *args, **kwargs):
+            if enqueue_calls is not None:
+                enqueue_calls.append((args, kwargs))
             return DummyJob()
 
     class DummyRedis:
@@ -216,14 +223,15 @@ def test_fork_enqueues_job(monkeypatch: pytest.MonkeyPatch, tmp_path) -> None:
         lambda claims: (user, user_datastore, DummyApp()),
     )
 
-    _stub_queue(monkeypatch, job_id="job-42")
+    enqueue_calls: list[tuple[tuple[object, ...], dict[str, object]]] = []
+    _stub_queue(monkeypatch, job_id="job-42", enqueue_calls=enqueue_calls)
     _stub_prep(monkeypatch)
 
     with TestClient(rq_engine.app) as client:
         response = client.post(
             "/api/runs/run-1/cfg/fork",
             headers={"Authorization": "Bearer token"},
-            data={"undisturbify": "true"},
+            data={"undisturbify": "true", "skip_wepp_runs_output": "true"},
         )
 
     assert response.status_code == 200
@@ -231,6 +239,97 @@ def test_fork_enqueues_job(monkeypatch: pytest.MonkeyPatch, tmp_path) -> None:
     assert payload["job_id"] == "job-42"
     assert payload["new_runid"] == "new-run"
     assert payload["undisturbify"] is True
+    assert payload["skip_wepp_runs_output"] is True
+    assert len(enqueue_calls) == 1
+    enqueue_args, enqueue_kwargs = enqueue_calls[0]
+    assert enqueue_args[0] is fork_archive_routes.fork_rq
+    assert enqueue_args[1] == ("run-1", "new-run", True, True)
+    assert "timeout" in enqueue_kwargs
+
+
+@pytest.mark.parametrize(
+    "skip_field",
+    [
+        {},
+        {"skip_wepp_runs_output": "false"},
+    ],
+)
+def test_fork_skip_wepp_runs_output_defaults_false(
+    monkeypatch: pytest.MonkeyPatch,
+    tmp_path,
+    skip_field: dict[str, str],
+) -> None:
+    run_dir = tmp_path / "run"
+    run_dir.mkdir()
+    new_dir = tmp_path / "new"
+
+    monkeypatch.setattr(fork_archive_routes, "_resolve_bearer_claims", lambda request: {"token_class": "user"})
+    monkeypatch.setattr(fork_archive_routes, "authorize_run_access", lambda claims, runid: None)
+    monkeypatch.setattr(fork_archive_routes, "get_wd", lambda runid: str(run_dir))
+    monkeypatch.setattr(fork_archive_routes, "get_primary_wd", lambda runid: str(new_dir))
+    monkeypatch.setattr(fork_archive_routes, "has_archive", lambda runid: False)
+    monkeypatch.setattr(
+        fork_archive_routes,
+        "_exists",
+        lambda path: True if str(path) == str(run_dir) else False,
+    )
+    monkeypatch.setattr(fork_archive_routes, "get_run_owners_lazy", lambda runid: [])
+
+    class DummyRon:
+        config_stem = "cfg"
+
+    monkeypatch.setattr(fork_archive_routes.Ron, "getInstance", lambda wd: DummyRon())
+    monkeypatch.setattr(fork_archive_routes, "generate_runid", lambda email=None: "new-run")
+
+    class DummyUserDatastore:
+        def create_run(self, *args, **kwargs) -> None:
+            return None
+
+    class DummyUser:
+        def __init__(self) -> None:
+            self.id = 10
+            self.email = "user@example.com"
+            self.runs: list[object] = []
+
+    class DummyApp:
+        @contextlib.contextmanager
+        def app_context(self):
+            yield
+
+    user = DummyUser()
+    user_datastore = DummyUserDatastore()
+    _patch_user_model_lookup(monkeypatch, user, user_datastore)
+
+    monkeypatch.setattr(
+        fork_archive_routes,
+        "_resolve_user_from_claims",
+        lambda claims: (user, user_datastore, DummyApp()),
+    )
+
+    enqueue_calls: list[tuple[tuple[object, ...], dict[str, object]]] = []
+    _stub_queue(monkeypatch, job_id="job-default-skip", enqueue_calls=enqueue_calls)
+    _stub_prep(monkeypatch)
+
+    request_data = {"undisturbify": "false"}
+    request_data.update(skip_field)
+
+    with TestClient(rq_engine.app) as client:
+        response = client.post(
+            "/api/runs/run-1/cfg/fork",
+            headers={"Authorization": "Bearer token"},
+            data=request_data,
+        )
+
+    assert response.status_code == 200
+    payload = response.json()
+    assert payload["job_id"] == "job-default-skip"
+    assert payload["new_runid"] == "new-run"
+    assert payload["undisturbify"] is False
+    assert payload["skip_wepp_runs_output"] is False
+    assert len(enqueue_calls) == 1
+    enqueue_args, _enqueue_kwargs = enqueue_calls[0]
+    assert enqueue_args[0] is fork_archive_routes.fork_rq
+    assert enqueue_args[1] == ("run-1", "new-run", False, False)
 
 
 def test_fork_user_mdobre_email_generates_mdobre_prefix(

@@ -11,7 +11,7 @@ Template: `wepppy/weppcloud/routes/fork_console/templates/rq-fork-console.htm`
 Control: `wepppy/weppcloud/templates/controls/fork_console_control.htm`
 
 - Uses `control_shell` with a console-style status panel and stacktrace panel.
-- Shows source run ID (read-only), an undisturbify checkbox, and submit/cancel controls.
+- Shows source run ID (read-only), an undisturbify checkbox, a `Skip wepp/runs and wepp/output` checkbox, and submit/cancel controls.
 - Emits live status updates via the `<runid>:fork` StatusStream channel.
 - Renders job status plus start/end timestamps in the status panel (`#rq_job`) via polling fallback.
 
@@ -19,7 +19,7 @@ Control: `wepppy/weppcloud/templates/controls/fork_console_control.htm`
 Script: `wepppy/weppcloud/static/js/fork_console.js`
 
 - Reads run context from `data-fork-console-config` and the form.
-- Submits the fork request with `fetch` to `/rq-engine/api/runs/<runid>/<config>/fork` (form-encoded `undisturbify`).
+- Submits the fork request with `fetch` to `/rq-engine/api/runs/<runid>/<config>/fork` (form-encoded `undisturbify` + `skip_wepp_runs_output`).
 - Starts StatusStream on channel `fork` and uses `controlBase` polling to keep job status fresh:
   - `set_rq_job_id(...)` polls `/rq-engine/api/jobstatus/<job_id>` for status/started/ended timestamps.
   - Polling failures fetch `/rq-engine/api/jobinfo/<job_id>` to populate stacktraces.
@@ -33,24 +33,25 @@ Module: `wepppy/weppcloud/routes/fork_console/fork_console.py`
 
 - Blueprint name: `fork`.
 - Route:
-  - `rq_fork_console`: renders the console template, parses optional `undisturbify` query param, and authorizes the run.
+  - `rq_fork_console`: renders the console template, parses optional `undisturbify` and `skip_wepp_runs_output` query params, and authorizes the run.
 
 ## RQ API
 Module: `wepppy/microservices/rq_engine/fork_archive_routes.py`
 
 - `fork` (POST): queues `fork_rq` for the source run.
-  - Payload: form fields `undisturbify` and optional `target_runid`.
+  - Payload: form fields `undisturbify`, `skip_wepp_runs_output`, and optional `target_runid`.
   - Validates permissions (run owners, admin users, public runs, or ownerless runs).
   - Session tokens that cannot resolve to an authenticated user are treated as anonymous requests (public-run checks + CAPTCHA required).
   - Allocates a new run ID via `awesome_codename` when no target is supplied.
   - Registers the new run in the user database when owner/user context is available (authenticated `user` and authenticated `session` token classes).
-  - Responds with `{ job_id, new_runid, undisturbify }`.
+  - Responds with `{ job_id, new_runid, undisturbify, skip_wepp_runs_output }`.
 
 ## RQ Jobs
 Module: `wepppy/rq/project_rq.py`
 
-- `fork_rq(runid, new_runid, undisturbify)`:
+- `fork_rq(runid, new_runid, undisturbify, skip_wepp_runs_output)`:
   - Uses `rsync` to clone the run directory and streams rsync output to `<runid>:fork`.
+  - When `skip_wepp_runs_output=True` (or when `undisturbify=True`), excludes `wepp/runs` and `wepp/output` from content copy, then creates those directories in the destination run.
   - Rewrites `.nodb` paths and clears locks, `READONLY`, and `PUBLIC` markers.
   - When `undisturbify=True`, removes SBS artifacts, rebuilds landuse/soils, and enqueues WEPP; completion is emitted by `_finish_fork_rq` after WEPP finishes.
   - Emits `FORK_COMPLETE` on success and `FORK_FAILED` on failure.

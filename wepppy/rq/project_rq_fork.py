@@ -19,13 +19,24 @@ def _clean_env_for_system_tools() -> dict[str, str]:
     }
 
 
-def _build_fork_rsync_cmd(run_right: str, *, undisturbify: bool) -> list[str]:
+def _build_fork_rsync_cmd(
+    run_right: str,
+    *,
+    undisturbify: bool,
+    skip_wepp_runs_output: bool = False,
+) -> list[str]:
     cmd = ["rsync", "-av", "--progress"]
+    skip_wepp_copy = undisturbify or skip_wepp_runs_output
     # Archive staging artifacts are ephemeral and should not be synced into forked runs.
-    if undisturbify:
+    if skip_wepp_copy:
         cmd.extend(["--exclude", "wepp/runs", "--exclude", "wepp/output"])
     cmd.extend([".", run_right])
     return cmd
+
+
+def _ensure_wepp_run_and_output_dirs(new_wd: str) -> None:
+    os.makedirs(os.path.join(new_wd, "wepp", "runs"), exist_ok=True)
+    os.makedirs(os.path.join(new_wd, "wepp", "output"), exist_ok=True)
 
 
 def _clear_reports_cache(
@@ -166,6 +177,7 @@ def prepare_fork_run(
     new_runid: str,
     *,
     undisturbify: bool,
+    skip_wepp_runs_output: bool = False,
     status_channel: str,
     publish_status: Callable[[str, str], None],
     get_wd: Callable[[str], str],
@@ -179,10 +191,11 @@ def prepare_fork_run(
     format_ttl_failure: Callable[[Exception], str] | None = None,
     mutate_root_fn: Callable[..., Any] | None = None,
     clear_nodb_cache_fn: Callable[..., Any] | None = None,
-    build_rsync_cmd: Callable[[str, bool], list[str]] = (
-        lambda run_right, undisturbify: _build_fork_rsync_cmd(
+    build_rsync_cmd: Callable[[str, bool, bool], list[str]] = (
+        lambda run_right, undisturbify, skip_wepp_runs_output: _build_fork_rsync_cmd(
             run_right,
             undisturbify=undisturbify,
+            skip_wepp_runs_output=skip_wepp_runs_output,
         )
     ),
     clean_env_for_system_tools: Callable[[], dict[str, str]] = _clean_env_for_system_tools,
@@ -221,7 +234,8 @@ def prepare_fork_run(
         publish_status(status_channel, error_msg)
         raise FileNotFoundError(error_msg)
 
-    cmd = build_rsync_cmd(run_right, undisturbify)
+    skip_wepp_copy = undisturbify or skip_wepp_runs_output
+    cmd = build_rsync_cmd(run_right, undisturbify, skip_wepp_runs_output)
 
     _cmd = " ".join(cmd)
     publish_status(status_channel, f"Running cmd: {_cmd}")
@@ -235,6 +249,13 @@ def prepare_fork_run(
         publish_status=publish_status,
         env=env,
     )
+
+    if skip_wepp_copy:
+        _ensure_wepp_run_and_output_dirs(new_wd)
+        publish_status(
+            status_channel,
+            "Ensured empty directories exist: wepp/runs and wepp/output.\n",
+        )
 
     publish_status(status_channel, "rsync successful. Setting wd in .nodbs...\n")
 

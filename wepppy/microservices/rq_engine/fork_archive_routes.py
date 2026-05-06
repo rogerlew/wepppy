@@ -262,8 +262,12 @@ async def fork_project(runid: str, config: str, request: Request) -> JSONRespons
         if claims is None or is_anonymous_session:
             _ensure_anonymous_access(runid, wd)
 
-        payload = await parse_request_payload(request, boolean_fields={"undisturbify"})
+        payload = await parse_request_payload(
+            request,
+            boolean_fields={"undisturbify", "skip_wepp_runs_output"},
+        )
         undisturbify = bool(payload.get("undisturbify", False))
+        skip_wepp_runs_output = bool(payload.get("skip_wepp_runs_output", False))
         requested_runid = payload.get("target_runid")
         if isinstance(requested_runid, list):
             requested_runid = requested_runid[0] if requested_runid else None
@@ -412,7 +416,11 @@ async def fork_project(runid: str, config: str, request: Request) -> JSONRespons
         conn_kwargs = redis_connection_kwargs(RedisDB.RQ)
         with redis.Redis(**conn_kwargs) as redis_conn:
             q = Queue(connection=redis_conn)
-            job = q.enqueue_call(fork_rq, (runid, new_runid, undisturbify), timeout=RQ_TIMEOUT)
+            job = q.enqueue_call(
+                fork_rq,
+                (runid, new_runid, undisturbify, skip_wepp_runs_output),
+                timeout=RQ_TIMEOUT,
+            )
             prep.set_rq_job_id("fork_rq", job.id)
     except AuthError as exc:
         return error_response(exc.message, status_code=exc.status_code, code=exc.code)
@@ -421,7 +429,12 @@ async def fork_project(runid: str, config: str, request: Request) -> JSONRespons
         return error_response_with_traceback("Error forking project", status_code=500)
 
     return JSONResponse(
-        {"job_id": job.id, "new_runid": new_runid, "undisturbify": undisturbify}
+        {
+            "job_id": job.id,
+            "new_runid": new_runid,
+            "undisturbify": undisturbify,
+            "skip_wepp_runs_output": skip_wepp_runs_output,
+        }
     )
 
 

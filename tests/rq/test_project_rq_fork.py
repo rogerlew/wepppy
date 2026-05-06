@@ -1,5 +1,6 @@
 from __future__ import annotations
 
+import os
 import shutil
 import sys
 import types
@@ -31,6 +32,22 @@ def test_build_fork_rsync_cmd_adds_undisturbify_excludes() -> None:
     import wepppy.rq.project_rq as project
 
     cmd = project._build_fork_rsync_cmd("/tmp/target/", undisturbify=True)
+    excludes = _extract_excludes(cmd)
+
+    assert ".nodir/cache/***" not in excludes
+    assert "wepp/runs" in excludes
+    assert "wepp/output" in excludes
+    assert cmd[-2:] == [".", "/tmp/target/"]
+
+
+def test_build_fork_rsync_cmd_adds_skip_wepp_runs_output_excludes() -> None:
+    import wepppy.rq.project_rq as project
+
+    cmd = project._build_fork_rsync_cmd(
+        "/tmp/target/",
+        undisturbify=False,
+        skip_wepp_runs_output=True,
+    )
     excludes = _extract_excludes(cmd)
 
     assert ".nodir/cache/***" not in excludes
@@ -146,22 +163,27 @@ def test_fork_rq_uses_wrapper_helper_aliases(monkeypatch: pytest.MonkeyPatch) ->
     monkeypatch.setattr(
         project,
         "_build_fork_rsync_cmd",
-        lambda run_right, undisturbify=False: ["patched-rsync", run_right, undisturbify],
+        lambda run_right, undisturbify=False, skip_wepp_runs_output=False: [
+            "patched-rsync",
+            run_right,
+            undisturbify,
+            skip_wepp_runs_output,
+        ],
     )
     monkeypatch.setattr(project, "_clean_env_for_system_tools", lambda: {"PATH": "patched"})
 
     captured: dict[str, object] = {}
 
     def _prepare(*_args, **kwargs):
-        captured["cmd"] = kwargs["build_rsync_cmd"]("/tmp/target/", False)
+        captured["cmd"] = kwargs["build_rsync_cmd"]("/tmp/target/", False, True)
         captured["env"] = kwargs["clean_env_for_system_tools"]()
         return "/tmp/forked-run"
 
     monkeypatch.setattr(project._fork_helpers, "prepare_fork_run", _prepare)
 
-    project.fork_rq("source-run", "new-run", undisturbify=False)
+    project.fork_rq("source-run", "new-run", undisturbify=False, skip_wepp_runs_output=True)
 
-    assert captured["cmd"] == ["patched-rsync", "/tmp/target/", False]
+    assert captured["cmd"] == ["patched-rsync", "/tmp/target/", False, True]
     assert captured["env"] == {"PATH": "patched"}
 
 
@@ -450,3 +472,80 @@ def test_prepare_fork_run_undisturbify_clears_new_run_scoped_nodb_cache(
         ("soils", "fork-undisturbify-build-soils"),
     ]
     assert any("Undisturbifying Project..." in message for message in published)
+
+
+def test_prepare_fork_run_skip_wepp_copy_ensures_output_dirs(
+    tmp_path: Path,
+) -> None:
+    import wepppy.rq.project_rq_fork as fork_helpers
+
+    source_wd = tmp_path / "source-run"
+    target_wd = tmp_path / "target-run"
+    source_wd.mkdir(parents=True, exist_ok=True)
+    (source_wd / "ron.nodb").write_text(
+        f"wd={source_wd}\nrunid=source-run\n",
+        encoding="ascii",
+    )
+    source_runs_dir = source_wd / "wepp" / "runs"
+    source_runs_dir.mkdir(parents=True, exist_ok=True)
+    (source_runs_dir / "source-only.run").write_text("run", encoding="ascii")
+    source_output_dir = source_wd / "wepp" / "output"
+    source_output_dir.mkdir(parents=True, exist_ok=True)
+    (source_output_dir / "source-only.txt").write_text("output", encoding="ascii")
+
+    captured_cmd: list[str] = []
+
+    def _fake_rsync(**kwargs) -> None:
+        run_left = Path(kwargs["run_left"].rstrip("/"))
+        cmd = kwargs["cmd"]
+        captured_cmd.extend(cmd)
+        run_right = Path(cmd[-1].rstrip("/"))
+        excludes = _extract_excludes(cmd)
+
+        def _ignore(path: str, names: list[str]) -> set[str]:
+            rel_root = os.path.relpath(path, run_left)
+            rel_root = "" if rel_root == "." else rel_root.replace(os.sep, "/")
+            ignored: set[str] = set()
+            for name in names:
+                rel_path = name if not rel_root else f"{rel_root}/{name}"
+                if any(
+                    rel_path == excluded or rel_path.startswith(f"{excluded}/")
+                    for excluded in excludes
+                ):
+                    ignored.add(name)
+            return ignored
+
+        shutil.copytree(run_left, run_right, dirs_exist_ok=True, ignore=_ignore)
+
+    published: list[str] = []
+    original_rsync_runner = fork_helpers._run_rsync_with_live_output
+    fork_helpers._run_rsync_with_live_output = _fake_rsync
+    try:
+        new_wd = fork_helpers.prepare_fork_run(
+            "source-run",
+            "new-run",
+            undisturbify=False,
+            skip_wepp_runs_output=True,
+            status_channel="run:fork",
+            publish_status=lambda _channel, message: published.append(message),
+            get_wd=lambda _runid: str(source_wd),
+            get_primary_wd=lambda _runid: str(target_wd),
+            wait_for_paths=lambda _paths, timeout_s=60.0: None,
+            ron_cls=object(),
+            disturbed_cls=object(),
+            landuse_cls=object(),
+            soils_cls=object(),
+            initialize_ttl=None,
+            clean_env_for_system_tools=lambda: {"PATH": "/usr/bin:/bin", "LANG": "C.UTF-8", "LC_ALL": "C.UTF-8"},
+        )
+    finally:
+        fork_helpers._run_rsync_with_live_output = original_rsync_runner
+
+    assert new_wd == str(target_wd)
+    assert (target_wd / "wepp" / "runs").is_dir()
+    assert (target_wd / "wepp" / "output").is_dir()
+    assert "wepp/runs" in _extract_excludes(captured_cmd)
+    assert "wepp/output" in _extract_excludes(captured_cmd)
+    assert not (target_wd / "wepp" / "runs" / "source-only.run").exists()
+    assert not (target_wd / "wepp" / "output" / "source-only.txt").exists()
+    assert any("Ensured empty directories exist: wepp/runs and wepp/output." in message for message in published)

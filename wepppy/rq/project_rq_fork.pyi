@@ -5,13 +5,19 @@ from typing import Any, Callable
 
 def _clean_env_for_system_tools() -> dict[str, str]: ...
 
-def _build_fork_rsync_cmd(run_right: str, *, undisturbify: bool) -> list[str]: ...
+def _build_fork_rsync_cmd(
+    run_right: str,
+    *,
+    undisturbify: bool,
+    skip_wepp_runs_output: bool = ...,
+) -> list[str]: ...
 
 def prepare_fork_run(
     runid: str,
     new_runid: str,
     *,
     undisturbify: bool,
+    skip_wepp_runs_output: bool = ...,
     status_channel: str,
     publish_status: Callable[[str, str], None],
     get_wd: Callable[[str], str],
@@ -23,6 +29,6 @@ def prepare_fork_run(
     soils_cls: Any,
     initialize_ttl: Callable[[str], None] | None,
     format_ttl_failure: Callable[[Exception], str] | None = ...,
-    build_rsync_cmd: Callable[[str, bool], list[str]] = ...,
+    build_rsync_cmd: Callable[[str, bool, bool], list[str]] = ...,
     clean_env_for_system_tools: Callable[[], dict[str, str]] = ...,
 ) -> str: ...

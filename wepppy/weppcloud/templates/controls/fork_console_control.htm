@@ -12,6 +12,7 @@
        data-runid="{{ runid }}"
        data-config="{{ config }}"
        data-undisturbify="{{ 'true' if undisturbify is sameas true else 'false' }}"
+       data-skip-wepp-runs-output="{{ 'true' if skip_wepp_runs_output is sameas true else 'false' }}"
        data-cap-required="{{ 'true' if not current_user.is_authenticated else 'false' }}"
        data-rq-engine-token="{{ rq_engine_token | default('', true) | e }}"
        data-cap-section="fork"
@@ -48,6 +49,11 @@
            'undisturbify_checkbox',
            'Undisturbify output (optional)',
            checked=undisturbify is sameas true
+         ) }}
+      {{ ui.checkbox_field(
+           'skip_wepp_runs_output_checkbox',
+           'Skip wepp/runs and wepp/output',
+           checked=skip_wepp_runs_output is sameas true
          ) }}
       {% if not current_user.is_authenticated %}
       {{ cap_macros.cap_prompt("fork", "cap-fork", cap_base_url, cap_site_key, status_text="Complete verification to enable forking.") }}

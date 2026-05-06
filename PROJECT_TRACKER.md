@@ -1,8 +1,8 @@
 # PROJECT_TRACKER.md
 > Kanban board for wepppy work packages and vision items
 
-**Last Updated**: 2026-05-05
-**Active Packages**: 5
+**Last Updated**: 2026-05-06
+**Active Packages**: 6
 **Quick Links**: [Work Packages Directory](docs/work-packages/) | [God-Tier Prompting Strategy](docs/god-tier-prompting-strategy.md)
 
 ## Purpose
@@ -222,7 +222,26 @@ When resuming Kubernetes work:
 
 Currently active work packages. Limit to 2-4 packages to maintain focus.
 
-**Current WIP Count**: 5 packages
+**Current WIP Count**: 6 packages
+
+---
+
+### Fork Copy Optimization for `wepp/runs` and `wepp/output`
+**Started**: 2026-05-06  
+**Status**: Package scaffolded; implementation in progress  
+**Size**: Medium (1 focused session)  
+**Owner**: Codex  
+**Link**: [docs/work-packages/20260506_fork_skip_wepp_copy/](docs/work-packages/20260506_fork_skip_wepp_copy/)  
+**Description**: Add a fork-console option to skip copying `wepp/runs` and `wepp/output` contents while still creating those directories in the target run, and ensure undisturbify keeps using the same copy optimization path.
+
+**Current Status**:
+- New work package, tracker, and active ExecPlan created under `docs/work-packages/20260506_fork_skip_wepp_copy/`.
+- Implementation scope locked to fork UI, rq-engine route payload wiring, fork worker copy behavior, and focused regressions.
+
+**Next Steps**:
+1. Implement UI -> API -> worker flag wiring and rsync exclusion behavior.
+2. Guarantee directory creation for skipped `wepp/runs` and `wepp/output` trees.
+3. Run targeted tests and subagent review with disposition artifact.
 
 ---
 

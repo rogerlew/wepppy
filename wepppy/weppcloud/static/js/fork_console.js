@@ -180,16 +180,24 @@
     var capSection = dataset.capSection || "";
     var rqEngineToken = (dataset.rqEngineToken || "").trim();
     var undisturbifyRaw = dataset.undisturbify;
+    var skipWeppRunsOutputRaw = dataset.skipWeppRunsOutput;
     var initialUndisturbify = false;
+    var initialSkipWeppRunsOutput = false;
     if (typeof undisturbifyRaw === "string") {
       initialUndisturbify = undisturbifyRaw.toLowerCase() === "true";
     } else if (typeof undisturbifyRaw !== "undefined") {
       initialUndisturbify = Boolean(undisturbifyRaw);
     }
+    if (typeof skipWeppRunsOutputRaw === "string") {
+      initialSkipWeppRunsOutput = skipWeppRunsOutputRaw.toLowerCase() === "true";
+    } else if (typeof skipWeppRunsOutputRaw !== "undefined") {
+      initialSkipWeppRunsOutput = Boolean(skipWeppRunsOutputRaw);
+    }
 
     var form = container.querySelector("#fork_form");
     var runIdInput = container.querySelector("#runid_input");
     var undisturbifyCheckbox = container.querySelector("#undisturbify_checkbox");
+    var skipWeppRunsOutputCheckbox = container.querySelector("#skip_wepp_runs_output_checkbox");
     var submitButton = container.querySelector("#submit_button");
     var cancelButton = container.querySelector("#cancel_button");
     var consoleBlock = container.querySelector("#the_console");
@@ -677,6 +685,7 @@
 
       runId = submittedRunId;
       var undisturbify = undisturbifyCheckbox ? !!undisturbifyCheckbox.checked : false;
+      var skipWeppRunsOutput = skipWeppRunsOutputCheckbox ? !!skipWeppRunsOutputCheckbox.checked : false;
 
       if (capRequired) {
         var capToken = getCapToken();
@@ -698,7 +707,10 @@
       appendStatus("Submitting fork job...");
 
       var forkUrl = origin + "/rq-engine/api/runs/" + runId + "/" + config + "/fork";
-      var payload = new URLSearchParams({ undisturbify: undisturbify ? "true" : "false" });
+      var payload = new URLSearchParams({
+        undisturbify: undisturbify ? "true" : "false",
+        skip_wepp_runs_output: skipWeppRunsOutput ? "true" : "false"
+      });
       if (capRequired) {
         var verifiedToken = getCapToken();
         if (verifiedToken) {
@@ -773,6 +785,7 @@
           newRunId = body.new_runid || "";
           jobId = body.job_id || "";
           var undisturbifyFlag = body.undisturbify;
+          var skipWeppRunsOutputFlag = body.skip_wepp_runs_output;
 
           if (consoleBlock) {
             var jobDashboard = origin + "/weppcloud/rq/job-dashboard/" + jobId;
@@ -780,7 +793,8 @@
             consoleBlock.dataset.state = "attention";
             consoleBlock.innerHTML = [
               'New runid: <a href="' + newRunLink + '" target="_blank" rel="noopener">' + newRunId + "</a>",
-              "Undisturbify: " + undisturbifyFlag
+              "Undisturbify: " + undisturbifyFlag,
+              "Skip wepp/runs + wepp/output: " + skipWeppRunsOutputFlag
             ].join("<br>");
           }
 
@@ -914,6 +928,9 @@
     }
     if (undisturbifyCheckbox) {
       undisturbifyCheckbox.checked = initialUndisturbify;
+    }
+    if (skipWeppRunsOutputCheckbox) {
+      skipWeppRunsOutputCheckbox.checked = initialSkipWeppRunsOutput;
     }
     if (form) {
       form.addEventListener("submit", forkProject);

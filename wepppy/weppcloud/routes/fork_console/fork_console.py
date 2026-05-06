@@ -17,9 +17,13 @@ def _issue_rq_engine_token() -> str | None:
 def rq_fork_console(runid, config):
     authorize(runid, config)
     undisturbify_arg = request.args.get('undisturbify')
+    skip_wepp_runs_output_arg = request.args.get('skip_wepp_runs_output')
     undisturbify = False
+    skip_wepp_runs_output = False
     if isinstance(undisturbify_arg, str):
         undisturbify = undisturbify_arg.strip().lower() in ('true', '1', 'yes', 'on')
+    if isinstance(skip_wepp_runs_output_arg, str):
+        skip_wepp_runs_output = skip_wepp_runs_output_arg.strip().lower() in ('true', '1', 'yes', 'on')
 
     cap_base_url = (current_app.config.get('CAP_BASE_URL') or os.getenv('CAP_BASE_URL', '/cap')).rstrip('/')
     cap_asset_base_url = (
@@ -39,6 +43,7 @@ def rq_fork_console(runid, config):
         runid=runid,
         config=config,
         undisturbify=undisturbify,
+        skip_wepp_runs_output=skip_wepp_runs_output,
         cap_base_url=cap_base_url,
         cap_asset_base_url=cap_asset_base_url,
         cap_site_key=cap_site_key,
