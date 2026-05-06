@@ -96,6 +96,7 @@ def run_interchange_migration(runid: str, wepp_output_subpath: Optional[str] = N
             return False
 
         climate = Climate.getInstance(wd)
+        wepp = Wepp.getInstance(wd)
         is_single_storm = climate.is_single_storm
         start_year: Optional[int] = climate.calendar_start_year
 
@@ -105,6 +106,8 @@ def run_interchange_migration(runid: str, wepp_output_subpath: Optional[str] = N
             if is_single_storm
             else _REQUIRED_WATERSHED_OUTPUTS
         )
+        if wepp.pass_family == "hbp":
+            required_outputs = tuple(name for name in required_outputs if name != "pass_pw0.txt")
         missing = _missing_wepp_outputs(wepp_output_dir, required_outputs)
 
         if not wepp_output_subpath and missing:
@@ -117,6 +120,7 @@ def run_interchange_migration(runid: str, wepp_output_subpath: Optional[str] = N
         # Single storm runs don't produce .loss.dat, .soil.dat, or .wat.dat hillslope files
         interchange_dir = run_wepp_hillslope_interchange(
             wepp_output_dir,
+            pass_family=wepp.pass_family,
             start_year=start_year,
             run_loss_interchange=not is_single_storm,
             run_soil_interchange=not is_single_storm,
@@ -126,12 +130,12 @@ def run_interchange_migration(runid: str, wepp_output_subpath: Optional[str] = N
         if not missing:
             run_wepp_watershed_interchange(
                 wepp_output_dir,
+                pass_family=wepp.pass_family,
                 start_year=start_year,
                 run_soil_interchange=not is_single_storm,
                 run_chnwb_interchange=not is_single_storm,
             )
 
-        wepp = Wepp.getInstance(wd)
         run_totalwatsed3(interchange_dir, baseflow_opts=wepp.baseflow_opts)
         generate_interchange_documentation(interchange_dir)
 

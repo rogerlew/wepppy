@@ -45,6 +45,7 @@ with the wepp_id included (without the .pass.dat).
 import os
 import errno
 import hashlib
+import json
 from os.path import join as _join
 from os.path import exists as _exists
 from os.path import split as _split
@@ -115,6 +116,13 @@ _SKIP_RUNTIME_CHECK_ENV_VAR = "WEPP_RUNNER_SKIP_BINARY_PROVENANCE_CHECK"
 _PROVENANCE_OK_BINARY_PATHS = set()
 _BINARY_IDENTITY_CACHE = {}
 _BINARY_IDENTITY_CHUNK_BYTES = 1024 * 1024
+_BINARY_RELEASE_METADATA_CACHE = {}
+
+PASS_FAMILY_LEGACY_ASCII = "legacy_ascii"
+PASS_FAMILY_HBP = "hbp"
+PASS_FAMILY_CHOICES = {PASS_FAMILY_LEGACY_ASCII, PASS_FAMILY_HBP}
+_HBP_METADATA_SCHEMA = "wepp-binary-release-metadata-v1"
+_INVALID_PROCESS_HBP_SUFFIXES = (".pass.hbp", ".pass.dat.hbp")
 
 _DSTATE_WATCHDOG_ENABLED_ENV = "WEPP_RUNNER_DSTATE_WATCHDOG_ENABLED"
 _DSTATE_WATCHDOG_INTERVAL_ENV = "WEPP_RUNNER_DSTATE_WATCHDOG_INTERVAL_S"
@@ -128,6 +136,136 @@ _DSTATE_WATCHDOG_MAX_EVENTS_DEFAULT = 3
 def get_linux_wepp_bin_opts():
     """Return the current linux WEPP binaries available on disk."""
     return _compute_linux_wepp_bin_opts()
+
+
+def _normalize_pass_family(pass_family):
+    if pass_family is None:
+        return PASS_FAMILY_LEGACY_ASCII
+    normalized = str(pass_family).strip().lower()
+    if normalized not in PASS_FAMILY_CHOICES:
+        options = ", ".join(sorted(PASS_FAMILY_CHOICES))
+        raise ValueError(f"Unsupported pass_family '{pass_family}'. Expected one of: {options}")
+    return normalized
+
+
+def _pass_suffix(pass_family):
+    normalized = _normalize_pass_family(pass_family)
+    if normalized == PASS_FAMILY_HBP:
+        return ".hbp"
+    return ".pass.dat"
+
+
+def _is_invalid_process_hbp_name(path_text):
+    lowered = str(path_text).lower()
+    return any(lowered.endswith(suffix) for suffix in _INVALID_PROCESS_HBP_SUFFIXES)
+
+
+def _coerce_omni_pass_path(wepp_id_path, pass_family):
+    normalized_family = _normalize_pass_family(pass_family)
+    path_text = str(wepp_id_path)
+    lowered = path_text.lower()
+
+    if normalized_family == PASS_FAMILY_LEGACY_ASCII:
+        if lowered.endswith(".pass.dat"):
+            return path_text
+        if lowered.endswith(".hbp"):
+            if _is_invalid_process_hbp_name(path_text):
+                raise ValueError(
+                    "Invalid process HBP name. Use H*.hbp and reject H*.pass.hbp / H*.pass.dat.hbp."
+                )
+            raise ValueError("legacy_ascii pass_family requires H*.pass.dat pass paths.")
+        return f"{path_text}.pass.dat"
+
+    if _is_invalid_process_hbp_name(path_text):
+        raise ValueError(
+            "Invalid process HBP name. Use H*.hbp and reject H*.pass.hbp / H*.pass.dat.hbp."
+        )
+    if lowered.endswith(".pass"):
+        raise ValueError(
+            "Invalid process HBP name. Use H*.hbp and reject H*.pass.hbp / H*.pass.dat.hbp."
+        )
+    if lowered.endswith(".hbp"):
+        return path_text
+    if lowered.endswith(".pass.dat"):
+        return f"{path_text[:-len('.pass.dat')]}.hbp"
+    return f"{path_text}.hbp"
+
+
+def _resolve_binary_for_role(wepp_bin, *, prefer_hill):
+    cmd = _resolve_wepp_cmd(wepp_bin, prefer_hill=prefer_hill)
+    if isinstance(cmd, (list, tuple)):
+        return os.path.abspath(cmd[0])
+    return os.path.abspath(cmd)
+
+
+def _binary_sidecar_path(binary_path):
+    return f"{binary_path}.json"
+
+
+def _load_binary_release_metadata(binary_path):
+    sidecar_path = _binary_sidecar_path(os.path.abspath(binary_path))
+    if sidecar_path in _BINARY_RELEASE_METADATA_CACHE:
+        return _BINARY_RELEASE_METADATA_CACHE[sidecar_path]
+
+    if not _exists(sidecar_path):
+        _BINARY_RELEASE_METADATA_CACHE[sidecar_path] = None
+        return None
+
+    try:
+        with open(sidecar_path, encoding="utf-8") as fp:
+            data = json.load(fp)
+    except (OSError, json.JSONDecodeError) as exc:
+        raise RuntimeError(
+            f'Invalid WEPP release metadata sidecar "{sidecar_path}": {exc}'
+        ) from exc
+
+    if not isinstance(data, dict):
+        raise RuntimeError(f'Invalid WEPP release metadata sidecar "{sidecar_path}": expected JSON object')
+    if data.get("schema") != _HBP_METADATA_SCHEMA:
+        raise RuntimeError(
+            f'Invalid WEPP release metadata sidecar "{sidecar_path}": '
+            f'expected schema "{_HBP_METADATA_SCHEMA}"'
+        )
+
+    _BINARY_RELEASE_METADATA_CACHE[sidecar_path] = data
+    return data
+
+
+def _sidecar_hbp_supported(metadata):
+    features = metadata.get("features")
+    if not isinstance(features, dict):
+        return False
+    return features.get("hbp_supported") is True
+
+
+def _assert_hbp_supported_binary(binary_path, *, role):
+    metadata = _load_binary_release_metadata(binary_path)
+    sidecar_path = _binary_sidecar_path(binary_path)
+    if metadata is None:
+        raise RuntimeError(
+            f'HBP pass_family requested but {role} WEPP binary sidecar is missing: {sidecar_path}. '
+            "Sidecar absence defaults to legacy/no-HBP."
+        )
+    if not _sidecar_hbp_supported(metadata):
+        raise RuntimeError(
+            f'HBP pass_family requested but {role} WEPP binary sidecar does not declare '
+            f"features.hbp_supported=true: {sidecar_path}"
+        )
+
+
+def _assert_pass_family_release_support(pass_family, *, wepp_bin):
+    normalized = _normalize_pass_family(pass_family)
+    if normalized != PASS_FAMILY_HBP:
+        return normalized
+
+    watershed_binary = _resolve_binary_for_role(wepp_bin, prefer_hill=False)
+    hillslope_binary = _resolve_binary_for_role(wepp_bin, prefer_hill=True)
+    checked = {}
+    checked[watershed_binary] = "watershed"
+    checked[hillslope_binary] = "hillslope"
+    for path, role in checked.items():
+        _assert_hbp_supported_binary(path, role=role)
+    return normalized
 
 
 def _run_text_command(args):
@@ -732,24 +870,28 @@ def _resolve_output_flag(options, key, default):
 
 
 
-def _hillstub_omni_contrasts_template_loader():
-    return """
+def _hillstub_omni_contrasts_template_loader(wepp_id_path, *, pass_family):
+    pass_path = _coerce_omni_pass_path(wepp_id_path, pass_family)
+    return f"""
 M
 Y
-{wepp_id_path}.pass.dat"""
+{pass_path}"""
 
-def _hillstub_template_loader():
-    return """
+
+def _hillstub_template_loader(wepp_id, *, pass_family):
+    suffix = _pass_suffix(pass_family)
+    return f"""
 M
 Y
-../output/H{wepp_id}.pass.dat"""
+../output/H{wepp_id}{suffix}"""
 
 
-def _hillstub_ss_batch_template_loader():
-    return """
+def _hillstub_ss_batch_template_loader(wepp_id, ss_batch_key, *, pass_family):
+    suffix = _pass_suffix(pass_family)
+    return f"""
 M
 Y
-../output/{ss_batch_key}/H{wepp_id}.pass.dat"""
+../output/{ss_batch_key}/H{wepp_id}{suffix}"""
 
 
 def make_flowpath_run(fp, wepp_id, sim_years, fp_runs_dir):
@@ -775,7 +917,8 @@ def make_ss_flowpath_run(fp, wepp_id, runs_dir):
 
 
 def make_hillslope_run(wepp_id, sim_years, runs_dir, reveg=True,
-                       man_relpath='', cli_relpath='', slp_relpath='', sol_relpath=''):
+                       man_relpath='', cli_relpath='', slp_relpath='', sol_relpath='',
+                       pass_family=PASS_FAMILY_LEGACY_ASCII, wepp_bin=None):
     
     if man_relpath != '':
         assert man_relpath.endswith('/'), man_relpath
@@ -786,13 +929,17 @@ def make_hillslope_run(wepp_id, sim_years, runs_dir, reveg=True,
     if sol_relpath != '':
         assert sol_relpath.endswith('/'), sol_relpath
     
+    normalized_pass_family = _assert_pass_family_release_support(pass_family, wepp_bin=wepp_bin)
+
     if reveg:
         _hill_template = _reveg_hill_template_loader()
     else:
         _hill_template = _hill_template_loader()
 
+    pass_file = f"../output/H{wepp_id}{_pass_suffix(normalized_pass_family)}"
     s = _hill_template.format(wepp_id=wepp_id,
                               sim_years=sim_years,
+                              pass_file=pass_file,
                               man_relpath=man_relpath,
                               cli_relpath=cli_relpath,
                               slp_relpath=slp_relpath,
@@ -804,7 +951,8 @@ def make_hillslope_run(wepp_id, sim_years, runs_dir, reveg=True,
 
 
 def make_ss_hillslope_run(wepp_id, runs_dir,
-                       man_relpath='', cli_relpath='', slp_relpath='', sol_relpath=''):
+                       man_relpath='', cli_relpath='', slp_relpath='', sol_relpath='',
+                       pass_family=PASS_FAMILY_LEGACY_ASCII, wepp_bin=None):
     if man_relpath != '':
         assert man_relpath.endswith('/'), man_relpath
     if cli_relpath != '':
@@ -814,9 +962,12 @@ def make_ss_hillslope_run(wepp_id, runs_dir,
     if sol_relpath != '':
         assert sol_relpath.endswith('/'), sol_relpath
 
+    normalized_pass_family = _assert_pass_family_release_support(pass_family, wepp_bin=wepp_bin)
     _hill_template = _ss_hill_template_loader()
 
+    pass_file = f"../output/H{wepp_id}{_pass_suffix(normalized_pass_family)}"
     s = _hill_template.format(wepp_id=wepp_id, 
+                              pass_file=pass_file,
                               man_relpath=man_relpath,
                               cli_relpath=cli_relpath,
                               slp_relpath=slp_relpath,
@@ -828,7 +979,8 @@ def make_ss_hillslope_run(wepp_id, runs_dir,
 
 
 def make_ss_batch_hillslope_run(wepp_id, runs_dir, ss_batch_key, ss_batch_id,
-                       man_relpath='', cli_relpath='', slp_relpath='', sol_relpath=''):
+                       man_relpath='', cli_relpath='', slp_relpath='', sol_relpath='',
+                       pass_family=PASS_FAMILY_LEGACY_ASCII, wepp_bin=None):
     if man_relpath != '':
         assert man_relpath.endswith('/'), man_relpath
     if cli_relpath != '':
@@ -838,11 +990,14 @@ def make_ss_batch_hillslope_run(wepp_id, runs_dir, ss_batch_key, ss_batch_id,
     if sol_relpath != '':
         assert sol_relpath.endswith('/'), sol_relpath
 
+    normalized_pass_family = _assert_pass_family_release_support(pass_family, wepp_bin=wepp_bin)
     _hill_template = _ss_batch_hill_template_loader()
 
+    pass_file = f"../output/{ss_batch_key}/H{wepp_id}{_pass_suffix(normalized_pass_family)}"
     s = _hill_template.format(wepp_id=wepp_id,
                               ss_batch_id=ss_batch_id,
                               ss_batch_key=ss_batch_key,
+                              pass_file=pass_file,
                               man_relpath=man_relpath,
                               cli_relpath=cli_relpath,
                               slp_relpath=slp_relpath,
@@ -1189,11 +1344,25 @@ def run_flowpath(fp_id, wepp_id, runs_dir, fp_runs_dir, wepp_bin=None, status_ch
     raise Exception(f'Error running wepp for {fp_id}\nSee {_stderr_fn}')
 
 
-def make_watershed_omni_contrasts_run(sim_years, wepp_path_ids, runs_dir, *, output_options=None):
+def make_watershed_omni_contrasts_run(
+    sim_years,
+    wepp_path_ids,
+    runs_dir,
+    *,
+    output_options=None,
+    pass_family=PASS_FAMILY_LEGACY_ASCII,
+    wepp_bin=None,
+):
+    normalized_pass_family = _assert_pass_family_release_support(pass_family, wepp_bin=wepp_bin)
 
     block = []
     for wepp_path_id in wepp_path_ids:
-        block.append(_hillstub_omni_contrasts_template_loader().format(wepp_id_path=wepp_path_id))
+        block.append(
+            _hillstub_omni_contrasts_template_loader(
+                wepp_path_id,
+                pass_family=normalized_pass_family,
+            )
+        )
     block = ''.join(block)
 
     _watershed_template = _watershed_template_loader()
@@ -1237,11 +1406,19 @@ def make_watershed_omni_contrasts_run(sim_years, wepp_path_ids, runs_dir, *, out
 
     
 
-def make_watershed_run(sim_years, wepp_ids, runs_dir):
+def make_watershed_run(
+    sim_years,
+    wepp_ids,
+    runs_dir,
+    *,
+    pass_family=PASS_FAMILY_LEGACY_ASCII,
+    wepp_bin=None,
+):
+    normalized_pass_family = _assert_pass_family_release_support(pass_family, wepp_bin=wepp_bin)
 
     block = []
     for wepp_id in wepp_ids:
-        block.append(_hillstub_template_loader().format(wepp_id=wepp_id))
+        block.append(_hillstub_template_loader(wepp_id, pass_family=normalized_pass_family))
     block = ''.join(block)
 
     _watershed_template = _watershed_template_loader()
@@ -1266,10 +1443,17 @@ def make_watershed_run(sim_years, wepp_ids, runs_dir):
         fp.write(s)
 
 
-def make_ss_watershed_run(wepp_ids, runs_dir):
+def make_ss_watershed_run(
+    wepp_ids,
+    runs_dir,
+    *,
+    pass_family=PASS_FAMILY_LEGACY_ASCII,
+    wepp_bin=None,
+):
+    normalized_pass_family = _assert_pass_family_release_support(pass_family, wepp_bin=wepp_bin)
     block = []
     for wepp_id in wepp_ids:
-        block.append(_hillstub_template_loader().format(wepp_id=wepp_id))
+        block.append(_hillstub_template_loader(wepp_id, pass_family=normalized_pass_family))
     block = ''.join(block)
 
     _watershed_template = _ss_watershed_template_loader()
@@ -1282,10 +1466,25 @@ def make_ss_watershed_run(wepp_ids, runs_dir):
         fp.write(s)
 
 
-def make_ss_batch_watershed_run(wepp_ids, runs_dir, ss_batch_key, ss_batch_id):
+def make_ss_batch_watershed_run(
+    wepp_ids,
+    runs_dir,
+    ss_batch_key,
+    ss_batch_id,
+    *,
+    pass_family=PASS_FAMILY_LEGACY_ASCII,
+    wepp_bin=None,
+):
+    normalized_pass_family = _assert_pass_family_release_support(pass_family, wepp_bin=wepp_bin)
     block = []
     for wepp_id in wepp_ids:
-        block.append(_hillstub_ss_batch_template_loader().format(wepp_id=wepp_id, ss_batch_key=ss_batch_key))
+        block.append(
+            _hillstub_ss_batch_template_loader(
+                wepp_id,
+                ss_batch_key,
+                pass_family=normalized_pass_family,
+            )
+        )
     block = ''.join(block)
 
     _watershed_template = _ss_batch_watershed_template_loader()

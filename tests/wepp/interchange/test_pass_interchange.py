@@ -129,3 +129,30 @@ def test_hill_pass_interchange_handles_missing_files(tmp_path: Path) -> None:
     table = pq.read_table(target)
     assert table.schema == SCHEMA
     assert table.num_rows == 0
+
+
+def test_hill_pass_interchange_rejects_mixed_pass_families(tmp_path: Path) -> None:
+    workdir = tmp_path / "output"
+    workdir.mkdir()
+    (workdir / "H1.pass.dat").write_text("legacy\n", encoding="ascii")
+    (workdir / "H1.hbp").write_bytes(b"WFPHBP01")
+
+    with pytest.raises(ValueError, match="Ambiguous hillslope pass families"):
+        run_wepp_hillslope_pass_interchange(workdir, pass_family="auto")
+
+
+def test_hill_pass_interchange_rejects_invalid_hbp_name(tmp_path: Path) -> None:
+    workdir = tmp_path / "output"
+    workdir.mkdir()
+    (workdir / "H1.pass.hbp").write_bytes(b"WFPHBP01")
+
+    with pytest.raises(ValueError, match="Invalid process HBP name"):
+        run_wepp_hillslope_pass_interchange(workdir, pass_family="hbp")
+
+
+def test_hill_pass_interchange_hbp_requires_hbp_files(tmp_path: Path) -> None:
+    workdir = tmp_path / "output"
+    workdir.mkdir()
+
+    with pytest.raises(FileNotFoundError, match="pass_family=hbp"):
+        run_wepp_hillslope_pass_interchange(workdir, pass_family="hbp")

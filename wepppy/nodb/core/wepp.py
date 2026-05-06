@@ -899,6 +899,7 @@ class Wepp(NoDbBase):
             self._run_baseflow = self.config_get_bool('wepp', 'baseflow')
             self._run_snow = self.config_get_bool('wepp', 'snow')
             self._wepp_bin = self.config_get_str('wepp', 'bin')
+            self._pass_family = self.config_get_str('wepp', 'pass_family', 'legacy_ascii')
             self._delete_after_interchange = self.config_get_bool(
                 'interchange', 'delete_after_interchange', False
             )
@@ -957,6 +958,8 @@ class Wepp(NoDbBase):
                 "delete_after_interchange",
                 False,
             )
+        if not hasattr(instance, "_pass_family"):
+            instance._pass_family = instance.config_get_str("wepp", "pass_family", "legacy_ascii")
         if not hasattr(instance, 'frost_opts') or instance.frost_opts is None:
             instance.frost_opts = FrostOpts(
                 wintRed=instance.config_get_int('frost_opts', 'wintRed'),
@@ -1279,6 +1282,21 @@ class Wepp(NoDbBase):
     @nodb_setter
     def wepp_bin(self, value: str) -> None:
         self._wepp_bin = value
+
+    @property
+    def pass_family(self) -> str:
+        value = getattr(self, "_pass_family", self.config_get_str("wepp", "pass_family", "legacy_ascii"))
+        if value is None:
+            return "legacy_ascii"
+        return str(value).strip().lower() or "legacy_ascii"
+
+    @pass_family.setter
+    @nodb_setter
+    def pass_family(self, value: str) -> None:
+        normalized = str(value).strip().lower()
+        if normalized not in {"legacy_ascii", "hbp"}:
+            raise ValueError("pass_family must be 'legacy_ascii' or 'hbp'")
+        self._pass_family = normalized
 
 
     @property
@@ -2699,16 +2717,41 @@ class Wepp(NoDbBase):
         if wepp_id_paths is not None:
             if output_options is None:
                 output_options = getattr(self, "_contrast_output_options", None)
-            make_watershed_omni_contrasts_run(years, wepp_id_paths, runs_dir, output_options=output_options)
+            make_watershed_omni_contrasts_run(
+                years,
+                wepp_id_paths,
+                runs_dir,
+                output_options=output_options,
+                pass_family=self.pass_family,
+                wepp_bin=self.wepp_bin,
+            )
         elif climate.climate_mode in [ClimateMode.SingleStorm, ClimateMode.UserDefinedSingleStorm]:
-            make_ss_watershed_run(wepp_ids, runs_dir)
+            make_ss_watershed_run(
+                wepp_ids,
+                runs_dir,
+                pass_family=self.pass_family,
+                wepp_bin=self.wepp_bin,
+            )
         elif climate.climate_mode == ClimateMode.SingleStormBatch:
             for d in climate.ss_batch_storms:
                 ss_batch_id = d['ss_batch_id']
                 ss_batch_key = d['ss_batch_key']
-                make_ss_batch_watershed_run(wepp_ids, runs_dir, ss_batch_id=ss_batch_id, ss_batch_key=ss_batch_key)
+                make_ss_batch_watershed_run(
+                    wepp_ids,
+                    runs_dir,
+                    ss_batch_id=ss_batch_id,
+                    ss_batch_key=ss_batch_key,
+                    pass_family=self.pass_family,
+                    wepp_bin=self.wepp_bin,
+                )
         else:
-            make_watershed_run(years, wepp_ids, runs_dir)
+            make_watershed_run(
+                years,
+                wepp_ids,
+                runs_dir,
+                pass_family=self.pass_family,
+                wepp_bin=self.wepp_bin,
+            )
 
     def run_watershed(self) -> None:
         _WEPP_RUN_SERVICE.run_watershed(self)

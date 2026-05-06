@@ -684,6 +684,8 @@ class WeppPrepService:
                     cli_relpath=cli_relpath,
                     slp_relpath=slp_relpath,
                     sol_relpath=sol_relpath,
+                    pass_family=wepp.pass_family,
+                    wepp_bin=wepp.wepp_bin,
                 )
 
         elif climate.climate_mode == wepp_module.ClimateMode.SingleStormBatch:
@@ -702,6 +704,8 @@ class WeppPrepService:
                         cli_relpath=cli_relpath,
                         slp_relpath=slp_relpath,
                         sol_relpath=sol_relpath,
+                        pass_family=wepp.pass_family,
+                        wepp_bin=wepp.wepp_bin,
                     )
         else:
             for topaz_id in watershed._subs_summary:
@@ -715,6 +719,8 @@ class WeppPrepService:
                     cli_relpath=cli_relpath,
                     slp_relpath=slp_relpath,
                     sol_relpath=sol_relpath,
+                    pass_family=wepp.pass_family,
+                    wepp_bin=wepp.wepp_bin,
                 )
 
     def prep_watershed(

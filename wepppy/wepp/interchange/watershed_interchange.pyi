@@ -10,6 +10,7 @@ _update_catalog_entry: Optional[object]
 def run_wepp_watershed_interchange(
     wepp_output_dir: Path | str,
     *,
+    pass_family: Optional[str] = ...,
     start_year: Optional[int] = ...,
     run_ebe_interchange: bool = ...,
     run_chan_out_interchange: bool = ...,

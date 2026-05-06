@@ -183,6 +183,7 @@ def _build_hillslope_interchange_rq(runid: str) -> None:
         # Single storm runs don't produce .loss.dat, .soil.dat, or .wat.dat files
         run_wepp_hillslope_interchange(
             _join(wd, 'wepp/output'),
+            pass_family=wepp.pass_family,
             start_year=start_year,
             run_loss_interchange=not is_single_storm,
             run_soil_interchange=not is_single_storm,
@@ -290,6 +291,7 @@ def _post_watershed_interchange_rq(runid: str) -> None:
         start_year = climate.calendar_start_year
         run_soil_interchange = not climate.is_single_storm
         run_chnwb_interchange = not climate.is_single_storm
+        pass_family = getattr(wepp, "pass_family", "legacy_ascii")
         output_dir = Path(wepp.output_dir)
         timeout_s = 60.0
         poll_s = 0.5
@@ -327,7 +329,8 @@ def _post_watershed_interchange_rq(runid: str) -> None:
                     )
                 time.sleep(poll_s)
 
-        _wait_for_output("pass_pw0.txt", allow_gzip=True)
+        if pass_family != "hbp":
+            _wait_for_output("pass_pw0.txt", allow_gzip=True)
         _wait_for_output("ebe_pw0.txt")
         _wait_for_output("loss_pw0.txt")
         _wait_for_output("chan.out")
@@ -338,6 +341,7 @@ def _post_watershed_interchange_rq(runid: str) -> None:
             _wait_for_output("soil_pw0.txt", allow_gzip=True)
         run_wepp_watershed_interchange(
             output_dir,
+            pass_family=pass_family,
             start_year=start_year,
             run_soil_interchange=run_soil_interchange,
             run_chnwb_interchange=run_chnwb_interchange,
@@ -346,6 +350,7 @@ def _post_watershed_interchange_rq(runid: str) -> None:
         if delete_after_interchange:
             cleanup_hillslope_sources_for_completed_interchange(
                 output_dir,
+                pass_family=pass_family,
                 run_loss_interchange=not climate.is_single_storm,
                 run_soil_interchange=run_soil_interchange,
                 run_wat_interchange=not climate.is_single_storm,

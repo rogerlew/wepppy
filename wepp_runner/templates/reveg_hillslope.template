@@ -3,7 +3,7 @@ Yes                             # not watershed option
 1                               # storm option, 1=abbreviated annual soil loss output option for continuous simulation
 1                               # hillslope version
 Yes                             # pass file output
-../output/H{wepp_id}.pass.dat   #
+{pass_file}   #
 1                               # abbreviated annual soil loss output option for continuous simulation
 No                              # initial condition scenario output
 ../output/H{wepp_id}.loss.dat   #

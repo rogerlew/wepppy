@@ -56,6 +56,7 @@ def ensure_hillslope_interchange(
     _log(logger, "building hillslope interchange outputs")
     run_wepp_hillslope_interchange(
         Path(wepp.output_dir),
+        pass_family=wepp.pass_family,
         start_year=climate.calendar_start_year,
         run_loss_interchange=not climate.is_single_storm,
         run_soil_interchange=not climate.is_single_storm,
@@ -93,14 +94,17 @@ def ensure_watershed_interchange(
 ) -> None:
     interchange_dir = Path(wepp.wepp_interchange_dir)
     pass_events = interchange_dir / "pass_pw0.events.parquet"
+    pass_status = interchange_dir / "pass_pw0.status.json"
+    pass_family = getattr(wepp, "pass_family", "legacy_ascii")
     delete_after_interchange = _delete_after_interchange_enabled(wepp=wepp, climate=climate)
 
-    if pass_events.exists():
+    if pass_events.exists() or (pass_family == "hbp" and pass_status.exists()):
         _log(logger, "watershed interchange outputs already exist; skipping rebuild")
     else:
         _log(logger, "building watershed interchange outputs")
         run_wepp_watershed_interchange(
             Path(wepp.output_dir),
+            pass_family=wepp.pass_family,
             start_year=climate.calendar_start_year,
             run_soil_interchange=not climate.is_single_storm,
             run_chnwb_interchange=not climate.is_single_storm,
@@ -112,6 +116,7 @@ def ensure_watershed_interchange(
         _log(logger, "cleaning deferred hillslope sources after watershed interchange")
         cleanup_hillslope_sources_for_completed_interchange(
             Path(wepp.output_dir),
+            pass_family=wepp.pass_family,
             run_loss_interchange=not climate.is_single_storm,
             run_soil_interchange=not climate.is_single_storm,
             run_wat_interchange=not climate.is_single_storm,

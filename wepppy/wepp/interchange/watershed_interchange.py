@@ -1,4 +1,5 @@
 import logging
+import json
 from datetime import datetime, timezone
 import os
 from concurrent.futures import ThreadPoolExecutor, as_completed
@@ -21,6 +22,9 @@ except Exception:  # pragma: no cover - optional dependency
     _update_catalog_entry = None
 
 LOGGER = logging.getLogger(__name__)
+PASS_FAMILY_LEGACY_ASCII = "legacy_ascii"
+PASS_FAMILY_HBP = "hbp"
+PASS_STATUS_FILENAME = "pass_pw0.status.json"
 
 def _audit_log(log_path: Path, message: str) -> None:
     try:
@@ -52,9 +56,29 @@ def _unlink_source_with_gzip(path: Path) -> None:
     _unlink_source(gz_path)
 
 
+def _normalize_pass_family(pass_family: str | None) -> str:
+    normalized = (pass_family or "").strip().lower()
+    if normalized == PASS_FAMILY_HBP:
+        return PASS_FAMILY_HBP
+    return PASS_FAMILY_LEGACY_ASCII
+
+
+def _write_pass_status(interchange_dir: Path, *, status: str, reason: str, pass_family: str) -> None:
+    interchange_dir.mkdir(parents=True, exist_ok=True)
+    payload = {
+        "artifact": "pass_pw0.txt",
+        "status": status,
+        "pass_family": pass_family,
+        "reason": reason,
+    }
+    status_path = interchange_dir / PASS_STATUS_FILENAME
+    status_path.write_text(json.dumps(payload, indent=2, sort_keys=True) + "\n", encoding="utf-8")
+
+
 def run_wepp_watershed_interchange(
     wepp_output_dir: Path | str,
     *,
+    pass_family: str | None = None,
     start_year: int | None = None,
     run_ebe_interchange: bool = True,
     run_chan_out_interchange: bool = True,
@@ -76,9 +100,22 @@ def run_wepp_watershed_interchange(
 
     start_year_kwargs = {"start_year": start_year} if start_year is not None else {}
 
-    tasks = [
-        (run_wepp_watershed_pass_interchange, {}),
-    ]
+    selected_pass_family = _normalize_pass_family(pass_family)
+
+    tasks = []
+    if selected_pass_family == PASS_FAMILY_HBP:
+        pass_exists = (base / "pass_pw0.txt").exists() or (base / "pass_pw0.txt.gz").exists()
+        _write_pass_status(
+            interchange_dir,
+            status="ignored" if pass_exists else "not_present",
+            reason=(
+                "pass_family=hbp treats pass_pw0.txt as optional and non-authoritative process input"
+            ),
+            pass_family=selected_pass_family,
+        )
+    else:
+        tasks.append((run_wepp_watershed_pass_interchange, {}))
+
     if run_ebe_interchange:
         tasks.append((run_wepp_watershed_ebe_interchange, dict(start_year_kwargs)))
     if run_chan_out_interchange:

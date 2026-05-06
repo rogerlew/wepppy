@@ -3616,7 +3616,14 @@ class Roads(NoDbBase):
         if single_ofe_slope_path.resolve() != segment_slp_path.resolve():
             shutil.copy2(single_ofe_slope_path, segment_slp_path)
 
-        make_hillslope_run(segment_run_id, sim_years, str(runs_dir), reveg=False)
+        make_hillslope_run(
+            segment_run_id,
+            sim_years,
+            str(runs_dir),
+            reveg=False,
+            pass_family=self.wepp_instance.pass_family,
+            wepp_bin=wepp_bin,
+        )
         run_hillslope(segment_run_id, str(runs_dir), wepp_bin=wepp_bin)
 
     def _build_roads_segment_loss_summary_parquet(self, *, interchange_dir: Path) -> str:
@@ -3956,6 +3963,7 @@ class Roads(NoDbBase):
 
         run_wepp_hillslope_interchange(
             output_dir,
+            pass_family=self.wepp_instance.pass_family,
             start_year=start_year,
             run_loss_interchange=not is_single_storm,
             run_soil_interchange=run_hillslope_soil_interchange,
@@ -3983,6 +3991,7 @@ class Roads(NoDbBase):
 
         run_wepp_watershed_interchange(
             output_dir,
+            pass_family=self.wepp_instance.pass_family,
             start_year=start_year,
             run_chan_out_interchange=run_chan_out_interchange,
             run_soil_interchange=run_watershed_soil_interchange,
@@ -6117,7 +6126,13 @@ class Roads(NoDbBase):
                         "watershed_run_relpath": run_summary_base["watershed_run_relpath"],
                     },
                 )
-                make_watershed_omni_contrasts_run(years, wepp_id_paths, self.roads_runs_dir)
+                make_watershed_omni_contrasts_run(
+                    years,
+                    wepp_id_paths,
+                    self.roads_runs_dir,
+                    pass_family=self.wepp_instance.pass_family,
+                    wepp_bin=self.wepp_instance.wepp_bin,
+                )
                 run_watershed(self.roads_runs_dir)
             except Exception as exc:
                 failed_run_summary = {

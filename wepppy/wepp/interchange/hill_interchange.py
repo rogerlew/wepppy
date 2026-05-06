@@ -17,6 +17,7 @@ except Exception:  # pragma: no cover - optional dependency
     _update_catalog_entry = None
 
 LOGGER = logging.getLogger(__name__)
+PASS_FAMILY_HBP = "hbp"
 
 __all__ = [
     "cleanup_hillslope_sources_for_completed_interchange",
@@ -59,13 +60,16 @@ def _unlink_sources(paths, *, log_path: Path) -> None:
 def _cleanup_hillslope_sources(
     base: Path,
     *,
+    pass_family: str | None = None,
     run_loss_interchange: bool,
     run_soil_interchange: bool,
     run_wat_interchange: bool,
 ) -> None:
     log_path = base / "interchange.log"
     _audit_log(log_path, "delete_after_interchange enabled for hillslope outputs")
-    patterns = ["H*.pass.dat", "H*.ebe.dat", "H*.element.dat"]
+    normalized_pass_family = _normalize_pass_family(pass_family)
+    pass_pattern = "H*.hbp" if normalized_pass_family == PASS_FAMILY_HBP else "H*.pass.dat"
+    patterns = [pass_pattern, "H*.ebe.dat", "H*.element.dat"]
     if run_loss_interchange:
         patterns.append("H*.loss.dat")
     if run_soil_interchange:
@@ -80,6 +84,7 @@ def _cleanup_hillslope_sources(
 def cleanup_hillslope_sources_for_completed_interchange(
     wepp_output_dir: Path | str,
     *,
+    pass_family: str | None = None,
     run_loss_interchange: bool = True,
     run_soil_interchange: bool = True,
     run_wat_interchange: bool = True,
@@ -96,7 +101,10 @@ def cleanup_hillslope_sources_for_completed_interchange(
 
     log_path = base / "interchange.log"
     interchange_dir = base / "interchange"
+    normalized_pass_family = _normalize_pass_family(pass_family)
+    pass_pattern = "H*.hbp" if normalized_pass_family == PASS_FAMILY_HBP else "H*.pass.dat"
     enabled_targets = list(_CORE_HILLSLOPE_INTERCHANGE_TARGETS)
+    enabled_targets[0] = ("pass", pass_pattern, "H.pass.parquet")
     if run_loss_interchange:
         enabled_targets.append(_OPTIONAL_HILLSLOPE_INTERCHANGE_TARGETS[0])
     if run_soil_interchange:
@@ -126,6 +134,7 @@ def cleanup_hillslope_sources_for_completed_interchange(
 def run_wepp_hillslope_interchange(
     wepp_output_dir: Path | str,
     *,
+    pass_family: str | None = None,
     start_year: int | None = None,
     run_loss_interchange: bool = True,
     run_soil_interchange: bool = True,
@@ -168,7 +177,11 @@ def run_wepp_hillslope_interchange(
 
     # Core outputs that exist for all run types
     results = {
-        "pass": run_wepp_hillslope_pass_interchange(base, expected_hillslopes=expected_hillslopes),
+        "pass": run_wepp_hillslope_pass_interchange(
+            base,
+            expected_hillslopes=expected_hillslopes,
+            pass_family=pass_family,
+        ),
         "ebe": run_wepp_hillslope_ebe_interchange(base, start_year=start_year, expected_hillslopes=expected_hillslopes),
         "element": run_wepp_hillslope_element_interchange(base, start_year=start_year, expected_hillslopes=expected_hillslopes),
     }
@@ -205,6 +218,7 @@ def run_wepp_hillslope_interchange(
     if delete_after_interchange:
         _cleanup_hillslope_sources(
             base,
+            pass_family=pass_family,
             run_loss_interchange=run_loss_interchange,
             run_soil_interchange=run_soil_interchange,
             run_wat_interchange=run_wat_interchange,
@@ -227,3 +241,10 @@ def _expected_hillslopes(output_dir: Path) -> int | None:
         return int(watershed.sub_n)
     except Exception:
         return None
+
+
+def _normalize_pass_family(pass_family: str | None) -> str:
+    normalized = (pass_family or "").strip().lower()
+    if normalized == PASS_FAMILY_HBP:
+        return PASS_FAMILY_HBP
+    return "legacy_ascii"

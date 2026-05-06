@@ -23,5 +23,10 @@ def _append_row(store: Dict[str, List[object]], row: Dict[str, object]) -> None:
 
 def _parse_pass_file(path: Path, *, calendar_lookup: Dict[int, List[Tuple[int, int]]] | None = ...) -> Any: ...
 
-def run_wepp_hillslope_pass_interchange(wepp_output_dir: Path | str, *, expected_hillslopes: int | None = ...) -> Path: ...
+def run_wepp_hillslope_pass_interchange(
+    wepp_output_dir: Path | str,
+    *,
+    expected_hillslopes: int | None = ...,
+    pass_family: str | None = ...,
+) -> Path: ...
 PASS_FILE_RE: Any

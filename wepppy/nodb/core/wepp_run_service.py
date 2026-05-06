@@ -302,6 +302,7 @@ class WeppRunService:
 
         run_wepp_watershed_interchange(
             wepp.output_dir,
+            pass_family=wepp.pass_family,
             start_year=start_year,
             run_ebe_interchange=run_ebe_interchange,
             run_chan_out_interchange=run_chan_out_interchange,

@@ -8,6 +8,7 @@ from typing import Dict, List
 import re
 
 import pyarrow as pa
+import pyarrow.parquet as pq
 
 from wepppy.all_your_base.hydro import determine_wateryear
 from .concurrency import write_parquet_with_pool
@@ -112,6 +113,15 @@ def _append_row(store: Dict[str, List], row: Dict[str, object]) -> None:
 
 
 PASS_FILE_RE = re.compile(r"H(?P<wepp_id>\d+)", re.IGNORECASE)
+PASS_FAMILY_AUTO = "auto"
+PASS_FAMILY_LEGACY_ASCII = "legacy_ascii"
+PASS_FAMILY_HBP = "hbp"
+PASS_FAMILY_CHOICES = {
+    PASS_FAMILY_AUTO,
+    PASS_FAMILY_LEGACY_ASCII,
+    PASS_FAMILY_HBP,
+}
+INVALID_PROCESS_HBP_SUFFIXES = (".pass.hbp", ".pass.dat.hbp")
 
 
 def _parse_pass_file(path: Path, *, calendar_lookup: dict[int, list[tuple[int, int]]] | None = None) -> pa.Table:
@@ -281,6 +291,7 @@ def _parse_pass_file_rust(
     cli_calendar_path: str | None,
     version: tuple[int, int],
     calendar_lookup: dict[int, list[tuple[int, int]]] | None,
+    pass_family: str,
 ) -> pa.Table:
     rust_mod, rust_err = load_rust_interchange()
     if rust_mod is None:
@@ -297,9 +308,14 @@ def _parse_pass_file_rust(
             major,
             minor,
             cli_calendar_path=cli_calendar_path,
+            pass_family=pass_family,
         )
         return pa.table(columns, schema=SCHEMA)
     except Exception as exc:
+        if pass_family == PASS_FAMILY_HBP:
+            raise RuntimeError(
+                f"HBP hillslope parsing failed in Rust for {path}: {exc}"
+            ) from exc
         LOGGER.warning(
             "wepp interchange: Rust hillslope PASS failed; falling back to Python (%s)",
             exc,
@@ -309,18 +325,34 @@ def _parse_pass_file_rust(
 
 
 def run_wepp_hillslope_pass_interchange(
-    wepp_output_dir: Path | str, *, expected_hillslopes: int | None = None
+    wepp_output_dir: Path | str,
+    *,
+    expected_hillslopes: int | None = None,
+    pass_family: str | None = None,
 ) -> Path:
-    """Convert all `H*.pass.dat` files into a consolidated parquet dataset."""
+    """Convert hillslope pass files into a consolidated parquet dataset."""
     base = Path(wepp_output_dir)
     if not base.exists():
         raise FileNotFoundError(base)
 
-    pass_files = sorted(base.glob("H*.pass.dat"))
+    selected_pass_family = _normalize_pass_family(pass_family)
+    pass_files, selected_pass_family = _select_pass_files(base, selected_pass_family)
     if expected_hillslopes is not None and len(pass_files) != expected_hillslopes:
         raise FileNotFoundError(
             f"Expected {expected_hillslopes} hillslope pass files but found {len(pass_files)} in {base}"
         )
+
+    if not pass_files:
+        if selected_pass_family == PASS_FAMILY_HBP:
+            raise FileNotFoundError(
+                f"No hillslope pass files found for pass_family={selected_pass_family} in {base}"
+            )
+        interchange_dir = base / "interchange"
+        interchange_dir.mkdir(parents=True, exist_ok=True)
+        target_path = interchange_dir / "H.pass.parquet"
+        pq.write_table(EMPTY_TABLE, target_path, compression="snappy")
+        return target_path
+
     interchange_dir = base / "interchange"
     interchange_dir.mkdir(parents=True, exist_ok=True)
     target_path = interchange_dir / "H.pass.parquet"
@@ -335,9 +367,18 @@ def run_wepp_hillslope_pass_interchange(
             cli_calendar_path=str(cli_calendar_path) if cli_calendar_path else None,
             version=(major, minor),
             calendar_lookup=calendar_lookup,
+            pass_family=selected_pass_family,
         )
-        LOGGER.info("wepp interchange: hillslope PASS via Rust")
+        LOGGER.info(
+            "wepp interchange: hillslope PASS via Rust (pass_family=%s)",
+            selected_pass_family,
+        )
     else:
+        if selected_pass_family == PASS_FAMILY_HBP:
+            raise RuntimeError(
+                "HBP hillslope interchange requires the Rust wepp_interchange module; "
+                "Python fallback only supports legacy ASCII H*.pass.dat files."
+            )
         LOGGER.warning(
             "wepp interchange: Rust module unavailable for hillslope PASS; falling back to Python (%s)",
             rust_err,
@@ -346,3 +387,59 @@ def run_wepp_hillslope_pass_interchange(
 
     write_parquet_with_pool(pass_files, parser, SCHEMA, target_path, empty_table=EMPTY_TABLE)
     return target_path
+
+
+def _normalize_pass_family(pass_family: str | None) -> str:
+    if pass_family is None:
+        return PASS_FAMILY_AUTO
+    normalized = str(pass_family).strip().lower()
+    if not normalized:
+        return PASS_FAMILY_AUTO
+    if normalized not in PASS_FAMILY_CHOICES:
+        options = ", ".join(sorted(PASS_FAMILY_CHOICES))
+        raise ValueError(
+            f"Unsupported pass_family '{pass_family}'. Expected one of: {options}"
+        )
+    return normalized
+
+
+def _collect_invalid_hbp_names(base: Path) -> list[Path]:
+    invalid = []
+    for candidate in base.glob("H*.hbp"):
+        lower = candidate.name.lower()
+        if lower.endswith(INVALID_PROCESS_HBP_SUFFIXES):
+            invalid.append(candidate)
+    return sorted(invalid)
+
+
+def _select_pass_files(base: Path, pass_family: str) -> tuple[list[Path], str]:
+    invalid_hbp_names = _collect_invalid_hbp_names(base)
+
+    if pass_family == PASS_FAMILY_LEGACY_ASCII:
+        return sorted(base.glob("H*.pass.dat")), PASS_FAMILY_LEGACY_ASCII
+
+    if pass_family == PASS_FAMILY_HBP:
+        if invalid_hbp_names:
+            invalid_display = ", ".join(path.name for path in invalid_hbp_names)
+            raise ValueError(
+                "Invalid process HBP name(s) detected. "
+                f"Use H*.hbp and reject H*.pass.hbp / H*.pass.dat.hbp: {invalid_display}"
+            )
+        return sorted(base.glob("H*.hbp")), PASS_FAMILY_HBP
+
+    legacy_files = sorted(base.glob("H*.pass.dat"))
+    hbp_files = sorted(base.glob("H*.hbp"))
+    if invalid_hbp_names:
+        invalid_display = ", ".join(path.name for path in invalid_hbp_names)
+        raise ValueError(
+            "Invalid process HBP name(s) detected. "
+            f"Use H*.hbp and reject H*.pass.hbp / H*.pass.dat.hbp: {invalid_display}"
+        )
+    if legacy_files and hbp_files:
+        raise ValueError(
+            "Ambiguous hillslope pass families in output directory: both H*.pass.dat and H*.hbp "
+            "are present. Set pass_family explicitly to 'legacy_ascii' or 'hbp'."
+        )
+    if hbp_files:
+        return hbp_files, PASS_FAMILY_HBP
+    return legacy_files, PASS_FAMILY_LEGACY_ASCII

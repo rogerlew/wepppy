@@ -10,6 +10,7 @@ _update_catalog_entry: Optional[object]
 def cleanup_hillslope_sources_for_completed_interchange(
     wepp_output_dir: Path | str,
     *,
+    pass_family: str | None = ...,
     run_loss_interchange: bool = ...,
     run_soil_interchange: bool = ...,
     run_wat_interchange: bool = ...,
@@ -18,6 +19,7 @@ def cleanup_hillslope_sources_for_completed_interchange(
 def run_wepp_hillslope_interchange(
     wepp_output_dir: Path | str,
     *,
+    pass_family: str | None = ...,
     start_year: Optional[int] = ...,
     run_loss_interchange: bool = ...,
     run_soil_interchange: bool = ...,
