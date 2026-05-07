@@ -140,7 +140,6 @@ def test_build_scenario_sbs_without_sbs_writes_mode_specific_outputs(
     wd = tmp_path
     dem_path = wd / "dem.tif"
     relief_path = wd / "dem" / "wbt" / "relief.tif"
-    bound_path = wd / "dem" / "wbt" / "bound.tif"
     cli_path = wd / "climate.cli"
     landuse_path = wd / "landuse.tif"
     rusle_dir = wd / "rusle"
@@ -149,17 +148,6 @@ def test_build_scenario_sbs_without_sbs_writes_mode_specific_outputs(
 
     _write_raster(dem_path, np.ones((2, 2), dtype=np.float32))
     _write_raster(relief_path, np.ones((2, 2), dtype=np.float32))
-    _write_raster(
-        bound_path,
-        np.array(
-            [
-                [1.0, -32768.0],
-                [1.0, 1.0],
-            ],
-            dtype=np.float32,
-        ),
-        nodata=-32768.0,
-    )
     _write_raster(landuse_path, np.ones((2, 2), dtype=np.float32))
     cli_path.write_text("cli", encoding="utf-8")
 
@@ -187,7 +175,6 @@ def test_build_scenario_sbs_without_sbs_writes_mode_specific_outputs(
         "getInstance",
         lambda _wd: SimpleNamespace(
             netful=None,
-            bound=str(bound_path),
             delineation_backend_is_wbt=True,
             relief=str(relief_path),
         ),
@@ -341,15 +328,7 @@ def test_build_scenario_sbs_without_sbs_writes_mode_specific_outputs(
         "sbs": None,
     }
     assert ls_call["max_slope_length_m"] == pytest.approx(304.8)
-    assert ls_call["blocking_mask"] is not None
-    blocking_mask_path = Path(str(ls_call["blocking_mask"]))
-    assert blocking_mask_path.exists()
-    with rasterio.open(blocking_mask_path) as dataset:
-        blocking_mask = dataset.read(1)
-        blocking_nodata = dataset.nodata
-    assert blocking_nodata == 255
-    assert blocking_mask[0, 0] == 0
-    assert blocking_mask[0, 1] == 1
+    assert ls_call["blocking_mask"] is None
 
     artifacts = summary["artifacts"]
     assert artifacts["c_relpath"] == "rusle/c_scenario_sbs.tif"

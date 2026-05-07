@@ -590,36 +590,6 @@ class Rusle(NoDbBase):
             "Run channel delineation with WBT before building RUSLE."
         )
 
-    def _resolve_ls_blocking_mask_path(self, *, watershed: Watershed) -> str | None:
-        """Return an LS blocking mask that stops routing outside the watershed boundary."""
-        bound_path = getattr(watershed, "bound", None)
-        if not isinstance(bound_path, str) or not bound_path or not _exists(bound_path):
-            return None
-
-        with rasterio.open(bound_path) as dataset:
-            boundary = dataset.read(1).astype(np.float64)
-            nodata = dataset.nodata
-            profile = dict(dataset.profile)
-
-        if nodata is None:
-            return None
-
-        outside = np.isclose(boundary, float(nodata), equal_nan=True)
-        blocking = np.where(outside, 1, 0).astype(np.uint8)
-        mask_path = _join(self.rusle_dir, "ls_blocking_mask_outside_watershed.tif")
-        profile.update(
-            {
-                "driver": "GTiff",
-                "dtype": "uint8",
-                "count": 1,
-                "nodata": 255,
-                "compress": "deflate",
-            }
-        )
-        with rasterio.open(mask_path, "w", **profile) as dataset:
-            dataset.write(blocking, 1)
-        return mask_path
-
     def _write_final_a(
         self,
         *,
@@ -874,12 +844,10 @@ class Rusle(NoDbBase):
         update_catalog_entry(self.wd, _relative_path(self.wd, r_path))
 
         channel_mask = watershed.netful if watershed.netful and _exists(watershed.netful) else None
-        blocking_mask = self._resolve_ls_blocking_mask_path(watershed=watershed)
         ls_result: RusleLsResult = run_rusle_ls_factor(
             self.wd,
             ls_dem_path,
             channel_mask=channel_mask,
-            blocking_mask=blocking_mask,
             max_slope_length_m=float(options["max_slope_length_m"]),
         )
         for path in asdict(ls_result).values():

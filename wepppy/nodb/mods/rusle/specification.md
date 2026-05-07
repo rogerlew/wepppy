@@ -258,10 +258,19 @@ hard-coded moderate regime.
 - Default routing mode: `DInf`
 - Default flow input: specific catchment area from a hydrologically
   conditioned DEM
-- The `RusleLsFactor` tool should assume the DEM is already hydrologically
-  sound upstream; it should not silently fill or breach pits inside the tool
-- The tool should fail fast with an explicit, actionable error when interior
-  no-flow artifacts indicate a likely unconditioned DEM
+- The `RusleLsFactor` tool assumes the DEM is hydrologically corrected
+  upstream, but may apply a conservative bounded fallback for small residual
+  interior no-flow defects when deriving `DInf` SCA.
+- Fallback policy for v1:
+  - evaluate interior no-flow cells on the derived-flow DEM grid
+  - allow fallback only when defect count is within both:
+    - `interior_no_flow_count <= 64`
+    - `interior_no_flow_count <= ceil(0.001 * eligible_interior_cells)`
+  - conservative correction method: `BreachSingleCellPits`
+  - rerun no-flow validation after correction and continue only when
+    interior no-flow cells are fully cleared
+- If defect counts exceed the fallback bounds, or remain after fallback, fail
+  fast with an explicit actionable error requiring upstream DEM conditioning
 - If `sca` is supplied, it must already be a same-grid specific catchment area
   raster in `m^2/m`
 - If `slope_deg` is supplied, it must already be a same-grid local slope raster
@@ -272,16 +281,14 @@ hard-coded moderate regime.
 ##### Slope-Length Termination and Masking
 
 - Stop slope-length growth at channel cells
-- Stop slope-length growth at masked `NLCD` water, urban, and wetland cells
 - Stop slope-length growth at explicit `blocking_mask` cells such as roads,
   skid trails, treatment breaks, or other known barriers when those inputs are
   intentionally supplied
 - Define `ls_stop_mask` as the union of:
   - channel mask
-  - outside-watershed boundary mask (cells outside `dem/wbt/bound.tif`)
-  - non-hillslope land masks used by the `Rusle` controller (`NLCD` water,
-    urban, wetlands by default)
   - optional explicit `blocking_mask`
+- Do not auto-generate an outside-watershed stop mask in `Rusle` orchestration;
+  default LS application is full-map extent over the conditioned DEM grid.
 - `blocking_mask` raster semantics are fixed for v1:
   - same extent, resolution, and grid alignment as `dem`
   - value `> 0` means stop cell
@@ -330,6 +337,12 @@ hard-coded moderate regime.
   - `stop_mask_routing_behavior = terminal_sink_no_renormalization`
   - `sca_source = derived | input`
   - `slope_source = derived | input`
+  - `interior_noflow_fallback = not_checked | none | breach_single_cell_pits`
+  - `interior_noflow_cells_initial`
+  - `interior_noflow_cells_post_fallback`
+  - `interior_noflow_cells_eligible`
+  - `interior_noflow_fallback_max_count = 64`
+  - `interior_noflow_fallback_max_fraction = 0.001`
 - Required v1 metadata typing and enum spellings (for Rust/Python parity):
   - `tool` and `tool_version`: string
   - `l_method`: enum, must be `desmet_govers_1996`
@@ -341,13 +354,19 @@ hard-coded moderate regime.
   - `max_slope_length_m`: float (`304.8` default)
   - `max_slope_length_basis`: enum, must be `rusle2_handbook_1000ft`
   - `stop_mask_components`: string list subset of
-    `channel_mask`, `nlcd_water`, `nlcd_urban`, `nlcd_wetlands`,
-    `blocking_mask`
+    `channel_mask`, `blocking_mask`
   - `stop_mask_routing_behavior`: enum, must be
     `terminal_sink_no_renormalization`
   - `sca_source`: enum, one of `derived`, `input`
   - `slope_source`: enum, one of `derived`, `input`
   - `blocking_mask_source`: enum, one of `none`, `input_raster`
+  - `interior_noflow_fallback`: enum, one of
+    `not_checked`, `none`, `breach_single_cell_pits`
+  - `interior_noflow_cells_initial`: integer
+  - `interior_noflow_cells_post_fallback`: integer
+  - `interior_noflow_cells_eligible`: integer
+  - `interior_noflow_fallback_max_count`: integer
+  - `interior_noflow_fallback_max_fraction`: float
 - The target interpretation is broad hillslope pattern and relative detachment
   potential at the run cell size, not microtopographic truth
 - `SedimentTransportIndex` may still be exported as an auxiliary comparison

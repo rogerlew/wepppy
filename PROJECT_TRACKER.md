@@ -1,7 +1,7 @@
 # PROJECT_TRACKER.md
 > Kanban board for wepppy work packages and vision items
 
-**Last Updated**: 2026-05-06
+**Last Updated**: 2026-05-07
 **Active Packages**: 6
 **Quick Links**: [Work Packages Directory](docs/work-packages/) | [God-Tier Prompting Strategy](docs/god-tier-prompting-strategy.md)
 
@@ -37,7 +37,7 @@ This tracker makes all work visible at a glance, helping agents coordinate and a
 ### 2. Limit Work in Progress
 **Target**: 2-4 active packages maximum to maintain focus and ensure packages complete rather than stall.
 
-**Current WIP**: 5 packages (above target range)
+**Current WIP**: 6 packages (above target range)
 
 ### 3. Manage Flow
 Monitor how long packages spend in each column:
@@ -378,6 +378,15 @@ Currently active work packages. Limit to 2-4 packages to maintain focus.
 ## ✅ Done
 
 Recently completed work packages. Archived immediately upon completion.
+
+### RUSLE LS Full-Extent Routing + Conservative Small-Defect Fallback (2026-05-07)
+**Status**: ✅ **COMPLETE**
+
+**Link**: [docs/work-packages/20260507_rusle_ls_extent_fallback/](docs/work-packages/20260507_rusle_ls_extent_fallback/)
+
+**Lifecycle**: Backlog -> In Progress -> Done (2026-05-07)
+
+**Summary**: Removed the `wepppy`-generated outside-watershed LS blocking mask path so `RusleLsFactor` now runs over full DEM/map extent by default unless explicit stop masks are provided. Hardened `/workdir/weppcloud-wbt` `RusleLsFactor` DInf-derived SCA behavior with bounded conservative fallback for small interior no-flow defects (`BreachSingleCellPits`), retained fail-fast behavior for larger/unresolved defects, and added metadata fields documenting no-flow guard state and thresholds. Updated wrapper and spec documentation, with QA evidence recorded in `docs/work-packages/20260507_rusle_ls_extent_fallback/artifacts/20260507_qa_review.md`.
 
 ### Ablation Protocol Tooling Port (2026-05-02)
 **Status**: ✅ **COMPLETE**
