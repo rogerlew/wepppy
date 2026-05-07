@@ -106,6 +106,44 @@
     height: auto;
   }
 
+  .wc-usersum-shell .markdown-body[data-doc-id="usersum.weppcloud.wepp_forest_change_log"] table {
+    table-layout: fixed;
+  }
+
+  .wc-usersum-shell .markdown-body[data-doc-id="usersum.weppcloud.wepp_forest_change_log"] table th,
+  .wc-usersum-shell .markdown-body[data-doc-id="usersum.weppcloud.wepp_forest_change_log"] table td {
+    word-break: normal;
+    overflow-wrap: break-word;
+  }
+
+  .wc-usersum-shell .markdown-body[data-doc-id="usersum.weppcloud.wepp_forest_change_log"] table th:nth-child(1),
+  .wc-usersum-shell .markdown-body[data-doc-id="usersum.weppcloud.wepp_forest_change_log"] table td:nth-child(1) {
+    width: 7%;
+    white-space: nowrap;
+  }
+
+  .wc-usersum-shell .markdown-body[data-doc-id="usersum.weppcloud.wepp_forest_change_log"] table th:nth-child(2),
+  .wc-usersum-shell .markdown-body[data-doc-id="usersum.weppcloud.wepp_forest_change_log"] table td:nth-child(2) {
+    width: 18%;
+  }
+
+  .wc-usersum-shell .markdown-body[data-doc-id="usersum.weppcloud.wepp_forest_change_log"] table th:nth-child(3),
+  .wc-usersum-shell .markdown-body[data-doc-id="usersum.weppcloud.wepp_forest_change_log"] table td:nth-child(3) {
+    width: 9%;
+    white-space: nowrap;
+  }
+
+  .wc-usersum-shell .markdown-body[data-doc-id="usersum.weppcloud.wepp_forest_change_log"] table th:nth-child(4),
+  .wc-usersum-shell .markdown-body[data-doc-id="usersum.weppcloud.wepp_forest_change_log"] table td:nth-child(4) {
+    width: 11%;
+    white-space: nowrap;
+  }
+
+  .wc-usersum-shell .markdown-body[data-doc-id="usersum.weppcloud.wepp_forest_change_log"] table th:nth-child(5),
+  .wc-usersum-shell .markdown-body[data-doc-id="usersum.weppcloud.wepp_forest_change_log"] table td:nth-child(5) {
+    width: 55%;
+  }
+
   .wc-usersum-nav-title {
     font-size: 0.75rem;
     text-transform: uppercase;
@@ -384,7 +422,7 @@
     {{ render_nav(nav_tree) }}
   </aside>
   <main class="wc-usersum-main">
-    <article class="markdown-body">
+    <article class="markdown-body" {% if active_doc %}data-doc-id="{{ active_doc.doc_id }}"{% endif %}>
       {% block body_content %}{% endblock %}
     </article>
   </main>
