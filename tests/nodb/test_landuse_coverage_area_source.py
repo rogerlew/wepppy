@@ -8,6 +8,7 @@ import numpy as np
 import pytest
 
 from wepppy.nodb.core.landuse import Landuse
+from wepppy.wepp.management import InvalidManagementKey
 
 pytestmark = pytest.mark.unit
 
@@ -87,6 +88,63 @@ def test_build_managements_uses_watershed_hillslope_area_for_coverage(
     assert landuse.managements["range"].area == pytest.approx(4.0)
     assert landuse.managements["forest"].pct_coverage == pytest.approx(60.0)
     assert landuse.managements["range"].pct_coverage == pytest.approx(40.0)
+
+
+def test_build_managements_reuses_runtime_generated_management_keys(
+    tmp_path: Path,
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    wd = tmp_path / "run"
+    wd.mkdir(parents=True, exist_ok=True)
+
+    class _SummaryStub:
+        def __init__(self) -> None:
+            self.marker = "generated"
+            self.area = 0.0
+            self.pct_coverage = 0.0
+
+    landuse = Landuse.__new__(Landuse)
+    landuse.wd = str(wd)
+    landuse._mapping = "disturbed"
+    landuse._custom_mapping_relpath = None
+    landuse.domlc_d = {"63": "118060"}
+    landuse.managements = {"118060": _SummaryStub()}
+    landuse.locked = lambda: nullcontext()
+    landuse.dump_landuse_parquet = lambda: None
+    landuse.trigger = lambda *_args, **_kwargs: None
+
+    monkeypatch.setattr(
+        Landuse,
+        "ron_instance",
+        property(lambda _self: SimpleNamespace(cellsize=30.0)),
+    )
+    monkeypatch.setattr(
+        Landuse,
+        "watershed_instance",
+        property(
+            lambda _self: SimpleNamespace(
+                hillslope_area=lambda _topaz_id: 5.0,
+                subwta=str(wd / "watershed" / "subwta.tif"),
+                mofe_map=str(wd / "watershed" / "mofe.tif"),
+            )
+        ),
+    )
+    monkeypatch.setattr(
+        Landuse,
+        "wepp_instance",
+        property(lambda _self: SimpleNamespace(_multi_ofe=False)),
+    )
+
+    def _fail_lookup(dom: int, _map: str | None = None):
+        raise InvalidManagementKey(str(dom))
+
+    monkeypatch.setattr("wepppy.nodb.core.landuse.get_management_summary", _fail_lookup)
+
+    landuse.build_managements()
+
+    assert landuse.managements["118060"].marker == "generated"
+    assert landuse.managements["118060"].area == pytest.approx(5.0)
+    assert landuse.managements["118060"].pct_coverage == pytest.approx(100.0)
 
 
 def test_build_managements_multi_ofe_uses_rust_pair_counts(

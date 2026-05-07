@@ -348,11 +348,32 @@ wepppy/weppcloud/templates/controls/
 ### Scenario Execution Flow
 
 1. **Definition**: User selects scenarios via UI or programmatically (`omni.parse_scenarios([...])`)
-2. **Cloning**: `_omni_clone()` creates `_pups/omni/scenarios/<scenario_name>`, symlinks shared directory inputs, copies mutable state
-3. **Treatment Application**: For thinning/mulching/prescribed fire, `Treatments.getInstance(scenario_wd)` modifies landuse/soils
-4. **WEPP Execution**: Scenario workspace calls `Wepp.prep_hillslopes()`, `Wepp.run_hillslopes()`, `Wepp.run_watershed()`
-5. **Reporting**: `Omni.scenarios_report()` concatenates per-scenario output files into a unified DataFrame
-6. **Dependency Updates**: SHA1 hashes of dependency outputs are stored; subsequent runs skip unchanged scenarios
+2. **Job dispatch**: `run_omni_scenarios_rq()` enqueues one `run_omni_scenario_rq(runid, scenario_def)` job per active scenario (dependency-aware ordering for mulch/base pairs)
+3. **Per-scenario clone**: `_omni_clone()` creates `_pups/omni/scenarios/<scenario_name>`; if the scenario declares a non-base dependency, `_omni_clone_sibling()` replaces mutable NoDb state (`disturbed/landuse/soils`) from that sibling
+4. **Scenario-mode build**: `OmniModeBuildServices.apply_scenario_mode()` applies disturbance/treatment logic and rebuilds `landuse` and `soils` for the scenario workspace
+5. **Management rebuild**: `landuse.build_managements()` recalculates per-key area/coverage and refreshes management summaries for the scenario's `domlc_d`
+6. **WEPP execution**: Scenario workspace calls `Wepp.prep_hillslopes()`, `Wepp.run_hillslopes()`, interchange generation, `Wepp.prep_watershed()`, and `Wepp.run_watershed()`
+7. **Reporting**: `Omni.scenarios_report()` concatenates per-scenario output files into a unified DataFrame
+8. **Dependency updates**: SHA1 hashes of dependency outputs are stored; subsequent runs skip unchanged scenarios
+
+### Treatment Build + WEPP Prep Workflow (Per Scenario)
+
+1. `run_omni_scenario_rq()` loads `Omni` and calls `omni.run_omni_scenario(scenario_def)`.
+2. `OmniRunOrchestrationService.run_omni_scenario()` clones the scenario workspace and resolves sibling copy behavior for dependent scenarios.
+3. `OmniModeBuildServices.apply_scenario_mode()` executes one branch:
+   - `uniform_*` and `sbs_map`: build/validate SBS, then rebuild landuse and soils.
+   - `mulch`: derive `treatments_domlc_d` from fire-classified hillslopes, call `Treatments.build_treatments()`, then rebuild soils.
+   - `thinning` and `prescribed_fire`: apply treatment mapping by disturbed class, then rebuild landuse/soils in undisturbed clone context.
+4. `Treatments.build_treatments()` mutates scenario `landuse.domlc_d`, writes scenario-local `.man` files under `landuse/`, and applies matching soil adjustments.
+5. `landuse.build_managements()` finalizes management summaries from the scenario state immediately before WEPP input preparation.
+6. WEPP preparation/execution order is fixed:
+   - `Wepp.prep_hillslopes()`
+   - `Wepp.run_hillslopes()`
+   - `run_wepp_hillslope_interchange(...)`
+   - `Wepp.prep_watershed()`
+   - `Wepp.run_watershed()`
+
+This sequence is the canonical path for diagnosing scenario treatment failures, management-key mismatches, or WEPP prep regressions.
 
 ### Contrast Execution Flow
 

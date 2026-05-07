@@ -76,6 +76,7 @@ from deprecated import deprecated
 from wepppy.landcover import LandcoverMap
 from wepppy.query_engine import update_catalog_entry
 from wepppy.wepp.management import (
+    InvalidManagementKey,
     ManagementMapLoadError,
     get_management_summary,
     load_map,
@@ -1952,6 +1953,28 @@ class Landuse(NoDbBase):
             ron = self.ron_instance
             cell2 = ron.cellsize ** 2
             domlc_d = self.domlc_d
+            existing_managements: Dict[str, Any] = dict(getattr(self, "managements", {}) or {})
+
+            def _resolve_management_summary(dom_key: str) -> Any:
+                try:
+                    man = get_management_summary(dom_key, _map)
+                except InvalidManagementKey:
+                    # Runtime-generated treatment keys (for example mulch_15/30/60 variants)
+                    # are persisted in landuse.managements but intentionally absent from
+                    # static mapping tables. Reuse the generated summary when rebuilding.
+                    cached = existing_managements.get(str(dom_key))
+                    if cached is None:
+                        raise
+                    return cached
+
+                if effective_map is not None:
+                    _relabel_summary_for_stale_custom_mapping_description(
+                        man,
+                        dom=dom_key,
+                        effective_map=effective_map,
+                        base_map=base_map,
+                    )
+                return man
 
             # create a dictionary of management keys and
             # wepppy.landcover.ManagementSummary values
@@ -1968,14 +1991,7 @@ class Landuse(NoDbBase):
 
                 if k not in managements:
                     assert not k.endswith('-mulch_15') and not k.endswith('-mulch_30') and not k.endswith('-mulch_60'), k
-                    man = get_management_summary(k, _map)
-                    if effective_map is not None:
-                        _relabel_summary_for_stale_custom_mapping_description(
-                            man,
-                            dom=k,
-                            effective_map=effective_map,
-                            base_map=base_map,
-                        )
+                    man = _resolve_management_summary(k)
                     man.area = area
                     managements[k] = man
                 else:
@@ -2023,14 +2039,7 @@ class Landuse(NoDbBase):
                         area = float(area_cells) * cell2 / 10000
 
                         if k not in managements:
-                            man = get_management_summary(k, _map)
-                            if effective_map is not None:
-                                _relabel_summary_for_stale_custom_mapping_description(
-                                    man,
-                                    dom=k,
-                                    effective_map=effective_map,
-                                    base_map=base_map,
-                                )
+                            man = _resolve_management_summary(k)
                             man.area = area
                             managements[k] = man
                         else:
