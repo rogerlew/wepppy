@@ -50,6 +50,54 @@ def _write_polaris_layers(wd: Path) -> None:
         _write_test_raster(polaris_dir / f"{layer_id}.tif", data)
 
 
+def _write_polaris_layers_with_nodata(
+    wd: Path,
+    *,
+    shape: tuple[int, int],
+    nodata_mask: np.ndarray,
+) -> None:
+    polaris_dir = wd / "polaris"
+    polaris_dir.mkdir(parents=True, exist_ok=True)
+
+    rows, cols = shape
+    yy, xx = np.indices((rows, cols), dtype=np.float64)
+    sand_top = 40.0 + 0.5 * xx + 0.2 * yy
+    sand_sub = sand_top - 2.0
+    silt_top = 35.0 + 0.3 * yy
+    silt_sub = silt_top + 2.0
+    clay_top = 18.0 + 0.1 * xx
+    clay_sub = clay_top + 0.5
+    om_top = np.log10(2.5 + 0.05 * yy)
+    om_sub = np.log10(2.0 + 0.04 * yy)
+    ksat_top = np.log10(3.0 + 0.1 * xx)
+    ksat_sub = np.log10(2.5 + 0.08 * xx)
+
+    layers = {
+        "sand_mean_0_5": sand_top,
+        "sand_mean_5_15": sand_sub,
+        "silt_mean_0_5": silt_top,
+        "silt_mean_5_15": silt_sub,
+        "clay_mean_0_5": clay_top,
+        "clay_mean_5_15": clay_sub,
+        "om_mean_0_5": om_top,
+        "om_mean_5_15": om_sub,
+        "ksat_mean_0_5": ksat_top,
+        "ksat_mean_5_15": ksat_sub,
+    }
+
+    for layer_id, data in layers.items():
+        writable = np.asarray(data, dtype=np.float64).copy()
+        writable[nodata_mask] = -9999.0
+        _write_test_raster(polaris_dir / f"{layer_id}.tif", writable)
+
+
+def _read_raster_with_nodata(path: Path) -> tuple[np.ndarray, float | None]:
+    with rasterio.open(path) as dataset:
+        data = dataset.read(1).astype(np.float64)
+        nodata = dataset.nodata
+    return data, nodata
+
+
 def test_run_rusle_k_factors_writes_artifacts_manifest_and_comparison(
     tmp_path: Path,
     monkeypatch: pytest.MonkeyPatch,
@@ -134,3 +182,48 @@ def test_run_rusle_k_factors_writes_only_selected_mode_outputs(
     default_path = tmp_path / "rusle" / "k.tif"
     assert not epic_path.exists()
     assert not default_path.exists()
+
+
+def test_run_rusle_k_factors_fills_small_interior_holes_and_reports_manifest(
+    tmp_path: Path,
+) -> None:
+    nodata_mask = np.zeros((5, 5), dtype=bool)
+    nodata_mask[2, 2] = True
+    _write_polaris_layers_with_nodata(tmp_path, shape=(5, 5), nodata_mask=nodata_mask)
+
+    result = k_integration.run_rusle_k_factors(str(tmp_path))
+
+    nomograph_data, nomograph_nodata = _read_raster_with_nodata(Path(result.nomograph or ""))
+    assert nomograph_nodata is not None
+    center = nomograph_data[2, 2]
+    assert not np.isclose(center, float(nomograph_nodata))
+
+    with open(result.manifest, "r", encoding="utf-8") as stream:
+        manifest = json.load(stream)
+    gap_fill = manifest["k"]["gap_fill_summary"]["sand"]["top"]
+    assert gap_fill["fill_applied"] is True
+    assert int(gap_fill["filled_pixels"]) >= 1
+    assert int(gap_fill["nodata_pixels_in"]) == 1
+    assert int(gap_fill["nodata_pixels_out"]) == 0
+
+
+def test_run_rusle_k_factors_skips_fill_when_candidate_fraction_too_high(
+    tmp_path: Path,
+) -> None:
+    nodata_mask = np.zeros((10, 10), dtype=bool)
+    nodata_mask[1:9, 1:9] = (np.indices((8, 8)).sum(axis=0) % 2 == 0)
+    _write_polaris_layers_with_nodata(tmp_path, shape=(10, 10), nodata_mask=nodata_mask)
+
+    result = k_integration.run_rusle_k_factors(str(tmp_path))
+
+    nomograph_data, nomograph_nodata = _read_raster_with_nodata(Path(result.nomograph or ""))
+    assert nomograph_nodata is not None
+    valid_nodata = np.isclose(nomograph_data, float(nomograph_nodata))
+    # Candidate fraction is intentionally high (>= 10%), so holes should remain.
+    assert int(np.count_nonzero(valid_nodata)) >= 30
+
+    with open(result.manifest, "r", encoding="utf-8") as stream:
+        manifest = json.load(stream)
+    gap_fill = manifest["k"]["gap_fill_summary"]["sand"]["top"]
+    assert gap_fill["reason"] == "candidate_fraction_above_threshold"
+    assert gap_fill["fill_applied"] is False

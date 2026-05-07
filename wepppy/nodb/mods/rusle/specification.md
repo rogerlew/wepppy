@@ -931,6 +931,17 @@ on `0_5`. Both `polaris_nomograph` and `polaris_epic` should use the same
 thickness-weighted near-surface aggregation so comparisons are about the
 equation family, not mismatched horizons.
 
+For run-scoped robustness, small interior `POLARIS` `NoData` holes should be
+filled conservatively before near-surface aggregation using an inverse-distance
+kernel with bounded search radius.
+
+- Fill only interior `NoData` components with size `<= 64` pixels
+- Do not fill edge-connected `NoData` regions
+- Skip automatic filling when candidate small-hole coverage exceeds `10%` of
+  eligible grid cells
+- Record fill policy and per-property fill outcomes in `rusle/manifest.json`
+  under `k.gap_fill_policy` and `k.gap_fill_summary`
+
 #### Locked Assumptions by Mode
 
 ##### `polaris_nomograph`
@@ -1499,6 +1510,9 @@ in the first release:
 - this remains idempotent:
   - if the required aligned layers already exist and satisfy the request,
     `Rusle` reuses them without re-fetching
+- after aligned layer acquisition, `run_rusle_k_factors` applies conservative
+  small-hole interpolation to each required `POLARIS` layer before computing
+  near-surface property aggregates for `K` equations
 
 ### Build Scope Contract
 
@@ -1712,6 +1726,9 @@ Longer term, the mod should be checked against:
   finite values, while `C` and `K` use fixed validated ranges
 - `gl-dashboard` raster NoData cells render transparent for `RUSLE`
   overlays
+- `K` derivation applies conservative small-hole `POLARIS` `NoData`
+  interpolation (`IDW`, interior components only, bounded thresholds) and logs
+  policy/results in the `k` manifest section
 
 ## Initial Milestones
 

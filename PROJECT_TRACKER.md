@@ -379,6 +379,15 @@ Currently active work packages. Limit to 2-4 packages to maintain focus.
 
 Recently completed work packages. Archived immediately upon completion.
 
+### RUSLE POLARIS K Conservative Small-Hole Fill (2026-05-07)
+**Status**: ✅ **COMPLETE**
+
+**Link**: [docs/work-packages/20260507_rusle_k_polaris_gap_fill/](docs/work-packages/20260507_rusle_k_polaris_gap_fill/)
+
+**Lifecycle**: Backlog -> In Progress -> Done (2026-05-07)
+
+**Summary**: Added conservative run-scoped interpolation for small interior POLARIS `NoData` defects before RUSLE `K` derivation in `wepppy/nodb/mods/rusle/k_integration.py`. The policy fills only interior holes up to `64` pixels with an inverse-distance kernel (`max_search_distance=6 px`, no smoothing), skips edge-connected gaps, and skips automated fill when candidate small-hole coverage exceeds `10%` of eligible cells. Manifest reporting now includes `k.gap_fill_policy` and per-property `k.gap_fill_summary` outcomes. Targeted K/RUSLE tests passed (`5 passed`, then `26 passed`); full suite `tests --maxfail=1` surfaced an unrelated baseline failure in `tests/nodb/test_base_boundary_characterization.py::test_dump_forces_monotonic_signature_after_second_same_size_rewrite`. QA and finding dispositions are recorded under `docs/work-packages/20260507_rusle_k_polaris_gap_fill/artifacts/`.
+
 ### RUSLE LS Full-Extent Routing + Conservative Small-Defect Fallback (2026-05-07)
 **Status**: ✅ **COMPLETE**
 
