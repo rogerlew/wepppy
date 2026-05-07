@@ -379,6 +379,15 @@ Currently active work packages. Limit to 2-4 packages to maintain focus.
 
 Recently completed work packages. Archived immediately upon completion.
 
+### RUSLE K CFVO Profile-Fragment Adjustment Integration (2026-05-07)
+**Status**: ✅ **COMPLETE**
+
+**Link**: [docs/work-packages/20260507_rusle_k_cfvo_integration/](docs/work-packages/20260507_rusle_k_cfvo_integration/)
+
+**Lifecycle**: Backlog -> In Progress -> Done (2026-05-07)
+
+**Summary**: Closed the deferred `cfvo` path for RUSLE `K`. `k_integration` now supports optional run-scoped profile-fragment adjustment for `polaris_nomograph` by discovering aligned `cfvo` layers, aligning SoilGrids `soils/cfvo_*_Q0.5.tif` depth rasters when present, converting SoilGrids `cfvo` from per-mille to `vol%`, applying conservative permeability-class shifts (`<25`: 0, `25-<60`: +1, `>=60`: +2, clamped to class 6), and writing explicit applied/skipped metadata in `rusle/manifest.json`. Added regression coverage for applied, no-change, malformed-input optional skip, aligned-layer reuse, and invalid-mode no-side-effect behavior. Targeted validation passed (`10 passed`, then `31 passed`), doc lint passed, and full-suite gate still stops on unrelated NoDb baseline failure (`tests/nodb/test_base_boundary_characterization.py::test_dump_forces_mtime_advance_on_unchanged_signature_then_rejects_stale_writer`). Review and QA findings were fully dispositioned under `docs/work-packages/20260507_rusle_k_cfvo_integration/artifacts/`.
+
 ### RUSLE POLARIS K Conservative Small-Hole Fill (2026-05-07)
 **Status**: ✅ **COMPLETE**
 

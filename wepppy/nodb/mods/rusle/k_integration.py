@@ -12,14 +12,16 @@ from typing import Any, Iterable, Mapping, Sequence
 
 import numpy as np
 import rasterio
+from rasterio.errors import RasterioError
 from rasterio.fill import fillnodata
 
+from wepppy.all_your_base.geo import raster_stacker
 from wepppy.query_engine.activate import update_catalog_entry
 
 from .k_compare import ComparisonThresholds, compare_k_modes_to_reference, write_comparison_summary_json
 from .k_epic import OM_TO_OC_FACTOR, compute_polaris_epic_k
 from .k_manifest import update_k_manifest
-from .k_nomograph import compute_polaris_nomograph_k
+from .k_nomograph import compute_polaris_nomograph_k, infer_permeability_class
 from .k_reference import (
     DEFAULT_REFERENCE_MODE_PRECEDENCE,
     ReferencePoint,
@@ -35,6 +37,8 @@ GAP_FILL_MAX_HOLE_PIXELS = 64
 GAP_FILL_MAX_TOTAL_FRACTION = 0.10
 GAP_FILL_MAX_SEARCH_DISTANCE_PX = 6.0
 GAP_FILL_SMOOTHING_ITERATIONS = 0
+CFVO_SOILSGRIDS_DEPTH_LABELS: tuple[str, str] = ("0-5cm", "5-15cm")
+CFVO_SCALE_DIVISOR_IF_PERMILLE = 10.0
 
 
 __all__ = ["RusleKResult", "run_rusle_k_factors"]
@@ -362,6 +366,218 @@ def _validate_depth_weights(depth_weights_cm: Mapping[str, float]) -> dict[str, 
     return validated
 
 
+def _resolve_optional_cfvo_layer_paths(
+    wd: str,
+    *,
+    statistic: str,
+) -> tuple[tuple[str, str] | None, dict[str, Any]]:
+    """Resolve optional CFVO depth-layer paths for RUSLE K adjustment.
+
+    Resolution order:
+    1. Reuse pre-aligned run-scoped layers at `polaris/cfvo_<stat>_<depth>.tif`.
+    2. If present, align SoilGrids ISRIC cache layers from `soils/` to the
+       POLARIS grid and write aligned outputs under `polaris/`.
+    3. Otherwise return unavailable.
+    """
+    aligned_top = _layer_path(
+        wd, property_name="cfvo", statistic=statistic, depth=NEAR_SURFACE_DEPTHS[0]
+    )
+    aligned_sub = _layer_path(
+        wd, property_name="cfvo", statistic=statistic, depth=NEAR_SURFACE_DEPTHS[1]
+    )
+    if _exists(aligned_top) and _exists(aligned_sub):
+        return (aligned_top, aligned_sub), {
+            "status": "available",
+            "source_kind": "aligned_polaris_existing",
+            "top_path": aligned_top,
+            "sub_path": aligned_sub,
+            "aligned_created": False,
+        }
+
+    soils_dir = _join(wd, "soils")
+    raw_top = _join(soils_dir, f"cfvo_{CFVO_SOILSGRIDS_DEPTH_LABELS[0]}_Q0.5.tif")
+    raw_sub = _join(soils_dir, f"cfvo_{CFVO_SOILSGRIDS_DEPTH_LABELS[1]}_Q0.5.tif")
+    if not (_exists(raw_top) and _exists(raw_sub)):
+        return None, {
+            "status": "unavailable",
+            "reason": "missing_aligned_and_soils_cfvo_layers",
+            "expected_paths": [aligned_top, aligned_sub, raw_top, raw_sub],
+        }
+
+    match_top = _layer_path(
+        wd, property_name="sand", statistic=statistic, depth=NEAR_SURFACE_DEPTHS[0]
+    )
+    match_sub = _layer_path(
+        wd, property_name="sand", statistic=statistic, depth=NEAR_SURFACE_DEPTHS[1]
+    )
+    if not (_exists(match_top) and _exists(match_sub)):
+        return None, {
+            "status": "unavailable",
+            "reason": "missing_match_grid_for_cfvo_alignment",
+            "required_match_paths": [match_top, match_sub],
+        }
+
+    os.makedirs(_join(wd, "polaris"), exist_ok=True)
+    raster_stacker(raw_top, match_top, aligned_top, resample="bilinear")
+    raster_stacker(raw_sub, match_sub, aligned_sub, resample="bilinear")
+    update_catalog_entry(wd, _relative_path(wd, aligned_top))
+    update_catalog_entry(wd, _relative_path(wd, aligned_sub))
+
+    return (aligned_top, aligned_sub), {
+        "status": "available",
+        "source_kind": "aligned_from_soils_cfvo_q0_5",
+        "top_path": aligned_top,
+        "sub_path": aligned_sub,
+        "source_top_path": raw_top,
+        "source_sub_path": raw_sub,
+        "aligned_created": True,
+    }
+
+
+def _normalize_cfvo_to_volpct(
+    data: np.ndarray,
+    *,
+    assume_soilgrids_per_mille: bool,
+) -> tuple[np.ndarray, dict[str, Any]]:
+    valid = np.isfinite(data)
+    if not np.any(valid):
+        return np.asarray(data, dtype=np.float64), {
+            "status": "no_finite_values",
+            "scale_divisor": 1.0,
+            "policy": (
+                "always_divide_by_10_soilgrids_per_mille"
+                if assume_soilgrids_per_mille
+                else "divide_by_10_when_max_gt_100"
+            ),
+        }
+
+    finite_vals = np.asarray(data[valid], dtype=np.float64)
+    raw_min = float(np.min(finite_vals))
+    raw_max = float(np.max(finite_vals))
+    if assume_soilgrids_per_mille:
+        scale_divisor = CFVO_SCALE_DIVISOR_IF_PERMILLE
+        policy = "always_divide_by_10_soilgrids_per_mille"
+    else:
+        scale_divisor = CFVO_SCALE_DIVISOR_IF_PERMILLE if raw_max > 100.0 else 1.0
+        policy = "divide_by_10_when_max_gt_100"
+
+    normalized = np.asarray(data, dtype=np.float64).copy()
+    if scale_divisor != 1.0:
+        normalized[valid] = normalized[valid] / scale_divisor
+    normalized[valid] = np.clip(normalized[valid], 0.0, 100.0)
+
+    return normalized, {
+        "status": "normalized",
+        "scale_divisor": float(scale_divisor),
+        "raw_min": raw_min,
+        "raw_max": raw_max,
+        "policy": policy,
+    }
+
+
+def _load_optional_cfvo_near_surface(
+    wd: str,
+    *,
+    statistic: str,
+    depth_weights_cm: Mapping[str, float],
+) -> tuple[np.ndarray | None, dict[str, Any]]:
+    try:
+        layer_paths, source_report = _resolve_optional_cfvo_layer_paths(
+            wd, statistic=statistic
+        )
+        if layer_paths is None:
+            return None, {
+                "status": "not_applied",
+                "reason": "cfvo_layers_unavailable",
+                "source": source_report,
+            }
+
+        top_path, sub_path = layer_paths
+        top_raw, _ = _read_layer(top_path, is_log10=False)
+        sub_raw, _ = _read_layer(sub_path, is_log10=False)
+
+        top_filled, top_gap_fill = _apply_conservative_gap_fill(top_raw)
+        sub_filled, sub_gap_fill = _apply_conservative_gap_fill(sub_raw)
+
+        source_kind = str(source_report.get("source_kind", ""))
+        assume_soilgrids_per_mille = source_kind in {
+            "aligned_polaris_existing",
+            "aligned_from_soils_cfvo_q0_5",
+        }
+        top_volpct, top_norm = _normalize_cfvo_to_volpct(
+            top_filled,
+            assume_soilgrids_per_mille=assume_soilgrids_per_mille,
+        )
+        sub_volpct, sub_norm = _normalize_cfvo_to_volpct(
+            sub_filled,
+            assume_soilgrids_per_mille=assume_soilgrids_per_mille,
+        )
+    except (RasterioError, OSError, ValueError) as exc:
+        return None, {
+            # Optional boundary: retain K build behavior if CFVO layers are
+            # malformed/unreadable and record explicit skip reason.
+            "status": "not_applied",
+            "reason": "cfvo_layer_processing_failed",
+            "error": str(exc),
+        }
+
+    averaged = _weighted_depth_average(
+        top_volpct,
+        sub_volpct,
+        top_weight_cm=float(depth_weights_cm[NEAR_SURFACE_DEPTHS[0]]),
+        sub_weight_cm=float(depth_weights_cm[NEAR_SURFACE_DEPTHS[1]]),
+    )
+    return averaged, {
+        "status": "available",
+        "source": source_report,
+        "top": {
+            "gap_fill": top_gap_fill,
+            "normalization": top_norm,
+        },
+        "sub": {
+            "gap_fill": sub_gap_fill,
+            "normalization": sub_norm,
+        },
+        "averaged_nodata_pixels": int(np.count_nonzero(~np.isfinite(averaged))),
+    }
+
+
+def _apply_cfvo_permeability_adjustment(
+    *,
+    ksat_cm_hr: np.ndarray,
+    cfvo_volpct: np.ndarray,
+) -> tuple[np.ndarray, dict[str, Any]]:
+    base_permeability = infer_permeability_class(ksat_cm_hr)
+    cfvo = np.clip(np.asarray(cfvo_volpct, dtype=np.float64), 0.0, 100.0)
+
+    finite_overlap = np.isfinite(base_permeability) & np.isfinite(cfvo)
+    delta = np.zeros_like(base_permeability, dtype=np.float64)
+    delta = np.where(finite_overlap & (cfvo >= 25.0) & (cfvo < 60.0), 1.0, delta)
+    delta = np.where(finite_overlap & (cfvo >= 60.0), 2.0, delta)
+
+    adjusted = np.asarray(base_permeability, dtype=np.float64).copy()
+    adjusted = np.where(
+        finite_overlap,
+        np.minimum(6.0, base_permeability + delta),
+        adjusted,
+    )
+    changed_mask = finite_overlap & (adjusted > base_permeability + 1e-12)
+
+    status = "applied" if bool(np.count_nonzero(changed_mask)) else "available_no_change"
+    return adjusted, {
+        "status": status,
+        "policy": {
+            "lt_25_volpct_class_shift": 0,
+            "gte_25_lt_60_volpct_class_shift": 1,
+            "gte_60_volpct_class_shift": 2,
+            "clamp_max_permeability_class": 6,
+        },
+        "finite_overlap_cells": int(np.count_nonzero(finite_overlap)),
+        "changed_cells": int(np.count_nonzero(changed_mask)),
+        "max_class_shift_applied": float(np.max(delta[finite_overlap])) if np.any(finite_overlap) else 0.0,
+    }
+
+
 def run_rusle_k_factors(
     wd: str,
     *,
@@ -418,12 +634,44 @@ def run_rusle_k_factors(
         is_log10=True,
     )
 
+    supported_modes: tuple[str, str] = ("polaris_nomograph", "polaris_epic")
+    selected = [str(mode).strip() for mode in (selected_modes or supported_modes)]
+    selected_modes_normalized = list(dict.fromkeys(mode for mode in selected if mode))
+    if not selected_modes_normalized:
+        raise ValueError("selected_modes must include at least one mode")
+    invalid_modes = [mode for mode in selected_modes_normalized if mode not in supported_modes]
+    if invalid_modes:
+        raise ValueError(f"Unsupported K mode(s): {invalid_modes}")
+
+    default_mode = str(default_k_mode).strip()
+    if default_mode not in supported_modes:
+        raise ValueError(f"default_k_mode must be one of {supported_modes}, got {default_k_mode!r}")
+    if write_default_k and default_mode not in selected_modes_normalized:
+        raise ValueError("default_k_mode must be included in selected_modes when write_default_k=True")
+
+    cfvo_volpct, cfvo_report = _load_optional_cfvo_near_surface(
+        wd,
+        statistic=statistic,
+        depth_weights_cm=weights,
+    )
+    permeability_override: np.ndarray | None = None
+    cfvo_adjustment_report: dict[str, Any] = {
+        "status": "not_applied",
+        "reason": "cfvo_layers_unavailable",
+    }
+    if cfvo_volpct is not None:
+        permeability_override, cfvo_adjustment_report = _apply_cfvo_permeability_adjustment(
+            ksat_cm_hr=ksat_cm_hr,
+            cfvo_volpct=cfvo_volpct,
+        )
+
     nomograph = compute_polaris_nomograph_k(
         sand_pct=sand,
         silt_pct=silt,
         clay_pct=clay,
         om_pct=om,
         ksat_cm_hr=ksat_cm_hr,
+        permeability_class_override=permeability_override,
     )
     epic = compute_polaris_epic_k(
         sand_pct=sand,
@@ -446,21 +694,6 @@ def run_rusle_k_factors(
         "polaris_nomograph": nomograph_path,
         "polaris_epic": epic_path,
     }
-
-    selected = [str(mode).strip() for mode in (selected_modes or ("polaris_nomograph", "polaris_epic"))]
-    selected_modes_normalized = list(dict.fromkeys(mode for mode in selected if mode))
-    if not selected_modes_normalized:
-        raise ValueError("selected_modes must include at least one mode")
-
-    invalid_modes = [mode for mode in selected_modes_normalized if mode not in mode_arrays]
-    if invalid_modes:
-        raise ValueError(f"Unsupported K mode(s): {invalid_modes}")
-
-    default_mode = str(default_k_mode).strip()
-    if default_mode not in mode_arrays:
-        raise ValueError(f"default_k_mode must be one of {tuple(mode_arrays)}, got {default_k_mode!r}")
-    if write_default_k and default_mode not in selected_modes_normalized:
-        raise ValueError("default_k_mode must be included in selected_modes when write_default_k=True")
 
     wrote_nomograph = "polaris_nomograph" in selected_modes_normalized
     wrote_epic = "polaris_epic" in selected_modes_normalized
@@ -563,14 +796,43 @@ def run_rusle_k_factors(
                 "vfs_source": "rusle2_estimated_from_sand",
                 "structure_class_mapping": "modeled_texture_proxy_v1",
                 "permeability_class_mapping": "modeled_ksat_proxy_v1",
+                "cfvo_profile_fragment_adjustment": {
+                    "applies_to_mode": "polaris_nomograph",
+                    "status": cfvo_adjustment_report.get("status"),
+                    "source_status": cfvo_report.get("status"),
+                    "source_reason": cfvo_report.get("reason"),
+                    "source_kind": (
+                        cfvo_report.get("source", {}).get("source_kind")
+                        if isinstance(cfvo_report.get("source"), Mapping)
+                        else None
+                    ),
+                    "source_top_path": (
+                        _relative_path(wd, str(cfvo_report.get("source", {}).get("top_path")))
+                        if isinstance(cfvo_report.get("source"), Mapping)
+                        and isinstance(cfvo_report.get("source", {}).get("top_path"), str)
+                        else None
+                    ),
+                    "source_sub_path": (
+                        _relative_path(wd, str(cfvo_report.get("source", {}).get("sub_path")))
+                        if isinstance(cfvo_report.get("source"), Mapping)
+                        and isinstance(cfvo_report.get("source", {}).get("sub_path"), str)
+                        else None
+                    ),
+                    "normalization_policy": "soilgrids_cfvo_divide_by_10_then_clip_0_100",
+                    "permeability_shift_policy": cfvo_adjustment_report.get("policy"),
+                    "finite_overlap_cells": cfvo_adjustment_report.get("finite_overlap_cells"),
+                    "changed_cells": cfvo_adjustment_report.get("changed_cells"),
+                    "max_class_shift_applied": cfvo_adjustment_report.get("max_class_shift_applied"),
+                },
             },
             "polaris_epic": {
                 "oc_conversion_factor": OM_TO_OC_FACTOR,
                 "om_clamp_pct": [0.0, 20.0],
             },
             "benchmark_precedence": list(reference_precedence),
-            "cfvo_scope": "deferred",
+            "cfvo_scope": "optional_implemented",
         },
+        "cfvo_summary": cfvo_report,
         "comparison_thresholds": {
             "abs_error_warn": thresholds.abs_error_warn,
             "rel_error_warn": thresholds.rel_error_warn,

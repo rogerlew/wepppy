@@ -70,6 +70,7 @@ def compute_polaris_nomograph_k(
     clay_pct: Any,
     om_pct: Any,
     ksat_cm_hr: Any,
+    permeability_class_override: Any | None = None,
 ) -> np.ndarray:
     """Compute a nomograph-like K estimate from POLARIS-like gridded inputs.
 
@@ -84,7 +85,11 @@ def compute_polaris_nomograph_k(
 
     vfs = estimate_vfs_pct(sand)
     structure = infer_structure_code(clay, sand)
-    permeability = infer_permeability_class(ksat)
+    if permeability_class_override is None:
+        permeability = infer_permeability_class(ksat)
+    else:
+        permeability = np.clip(_as_float_array(permeability_class_override), 1.0, 6.0)
+        permeability = np.where(~np.isfinite(permeability), np.nan, permeability)
 
     texture_term = (silt + vfs) * (100.0 - clay)
     texture_term = np.clip(texture_term, 0.0, None)

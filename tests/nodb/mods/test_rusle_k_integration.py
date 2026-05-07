@@ -91,6 +91,18 @@ def _write_polaris_layers_with_nodata(
         _write_test_raster(polaris_dir / f"{layer_id}.tif", writable)
 
 
+def _write_soils_cfvo_layers(
+    wd: Path,
+    *,
+    top_data: np.ndarray,
+    sub_data: np.ndarray,
+) -> None:
+    soils_dir = wd / "soils"
+    soils_dir.mkdir(parents=True, exist_ok=True)
+    _write_test_raster(soils_dir / "cfvo_0-5cm_Q0.5.tif", np.asarray(top_data, dtype=np.float64))
+    _write_test_raster(soils_dir / "cfvo_5-15cm_Q0.5.tif", np.asarray(sub_data, dtype=np.float64))
+
+
 def _read_raster_with_nodata(path: Path) -> tuple[np.ndarray, float | None]:
     with rasterio.open(path) as dataset:
         data = dataset.read(1).astype(np.float64)
@@ -134,7 +146,11 @@ def test_run_rusle_k_factors_writes_artifacts_manifest_and_comparison(
 
     k_manifest = manifest["k"]
     assert k_manifest["default_k_mode"] == "polaris_nomograph"
-    assert k_manifest["mode_contract"]["cfvo_scope"] == "deferred"
+    assert k_manifest["mode_contract"]["cfvo_scope"] == "optional_implemented"
+    assert (
+        k_manifest["mode_contract"]["polaris_nomograph"]["cfvo_profile_fragment_adjustment"]["status"]
+        == "not_applied"
+    )
     assert k_manifest["mode_contract"]["polaris_epic"]["oc_conversion_factor"] == pytest.approx(1.724)
 
     assert "rusle/k_polaris_nomograph.tif" in catalog_updates
@@ -227,3 +243,117 @@ def test_run_rusle_k_factors_skips_fill_when_candidate_fraction_too_high(
     gap_fill = manifest["k"]["gap_fill_summary"]["sand"]["top"]
     assert gap_fill["reason"] == "candidate_fraction_above_threshold"
     assert gap_fill["fill_applied"] is False
+
+
+def test_run_rusle_k_factors_applies_cfvo_profile_fragment_adjustment(
+    tmp_path: Path,
+) -> None:
+    base_wd = tmp_path / "base"
+    cfvo_wd = tmp_path / "cfvo"
+    _write_polaris_layers(base_wd)
+    _write_polaris_layers(cfvo_wd)
+    _write_soils_cfvo_layers(
+        cfvo_wd,
+        top_data=np.asarray([[10.0, 350.0], [700.0, 5.0]], dtype=np.float64),
+        sub_data=np.asarray([[10.0, 300.0], [650.0, 5.0]], dtype=np.float64),
+    )
+
+    base_result = k_integration.run_rusle_k_factors(str(base_wd))
+    cfvo_result = k_integration.run_rusle_k_factors(str(cfvo_wd))
+
+    base_nomograph, _ = _read_raster_with_nodata(Path(base_result.nomograph or ""))
+    cfvo_nomograph, _ = _read_raster_with_nodata(Path(cfvo_result.nomograph or ""))
+
+    finite = np.isfinite(base_nomograph) & np.isfinite(cfvo_nomograph)
+    assert np.any(finite)
+    # Cells with strong coarse-fragment signal should shift to less permeable
+    # classes and therefore increase nomograph K under this approximation.
+    assert float(np.nanmax(cfvo_nomograph - base_nomograph)) > 0.0
+
+    with open(cfvo_result.manifest, "r", encoding="utf-8") as stream:
+        manifest = json.load(stream)
+    cfvo_contract = manifest["k"]["mode_contract"]["polaris_nomograph"]["cfvo_profile_fragment_adjustment"]
+    assert cfvo_contract["status"] == "applied"
+    assert int(cfvo_contract["changed_cells"]) >= 1
+    assert cfvo_contract["source_kind"] == "aligned_from_soils_cfvo_q0_5"
+    assert manifest["k"]["cfvo_summary"]["status"] == "available"
+
+
+def test_run_rusle_k_factors_cfvo_permille_values_below_100_do_not_shift_classes(
+    tmp_path: Path,
+) -> None:
+    base_wd = tmp_path / "base_low"
+    cfvo_wd = tmp_path / "cfvo_low"
+    _write_polaris_layers(base_wd)
+    _write_polaris_layers(cfvo_wd)
+    _write_soils_cfvo_layers(
+        cfvo_wd,
+        top_data=np.asarray([[80.0, 70.0], [60.0, 50.0]], dtype=np.float64),
+        sub_data=np.asarray([[70.0, 60.0], [50.0, 40.0]], dtype=np.float64),
+    )
+
+    base_result = k_integration.run_rusle_k_factors(str(base_wd))
+    cfvo_result = k_integration.run_rusle_k_factors(str(cfvo_wd))
+
+    base_nomograph, _ = _read_raster_with_nodata(Path(base_result.nomograph or ""))
+    cfvo_nomograph, _ = _read_raster_with_nodata(Path(cfvo_result.nomograph or ""))
+    finite = np.isfinite(base_nomograph) & np.isfinite(cfvo_nomograph)
+    assert np.any(finite)
+    assert float(np.nanmax(np.abs(cfvo_nomograph - base_nomograph))) < 1e-6
+
+    with open(cfvo_result.manifest, "r", encoding="utf-8") as stream:
+        manifest = json.load(stream)
+    cfvo_contract = manifest["k"]["mode_contract"]["polaris_nomograph"]["cfvo_profile_fragment_adjustment"]
+    assert cfvo_contract["status"] == "available_no_change"
+
+
+def test_run_rusle_k_factors_invalid_mode_does_not_stage_cfvo_side_effects(
+    tmp_path: Path,
+) -> None:
+    _write_polaris_layers(tmp_path)
+    _write_soils_cfvo_layers(
+        tmp_path,
+        top_data=np.asarray([[350.0, 350.0], [350.0, 350.0]], dtype=np.float64),
+        sub_data=np.asarray([[300.0, 300.0], [300.0, 300.0]], dtype=np.float64),
+    )
+
+    with pytest.raises(ValueError, match="Unsupported K mode"):
+        k_integration.run_rusle_k_factors(
+            str(tmp_path),
+            selected_modes=["unsupported_mode"],
+        )
+
+    assert not (tmp_path / "polaris" / "cfvo_mean_0_5.tif").exists()
+    assert not (tmp_path / "polaris" / "cfvo_mean_5_15.tif").exists()
+
+
+def test_run_rusle_k_factors_cfvo_processing_failure_is_optional_skip(
+    tmp_path: Path,
+) -> None:
+    _write_polaris_layers(tmp_path)
+    soils_dir = tmp_path / "soils"
+    soils_dir.mkdir(parents=True, exist_ok=True)
+    (soils_dir / "cfvo_0-5cm_Q0.5.tif").write_text("not-a-raster", encoding="utf-8")
+    (soils_dir / "cfvo_5-15cm_Q0.5.tif").write_text("not-a-raster", encoding="utf-8")
+
+    result = k_integration.run_rusle_k_factors(str(tmp_path))
+
+    with open(result.manifest, "r", encoding="utf-8") as stream:
+        manifest = json.load(stream)
+    assert manifest["k"]["cfvo_summary"]["status"] == "not_applied"
+    assert manifest["k"]["cfvo_summary"]["reason"] == "cfvo_layer_processing_failed"
+
+
+def test_run_rusle_k_factors_reuses_aligned_cfvo_layers_when_present(
+    tmp_path: Path,
+) -> None:
+    _write_polaris_layers(tmp_path)
+    polaris_dir = tmp_path / "polaris"
+    _write_test_raster(polaris_dir / "cfvo_mean_0_5.tif", np.asarray([[350.0, 350.0], [350.0, 350.0]]))
+    _write_test_raster(polaris_dir / "cfvo_mean_5_15.tif", np.asarray([[300.0, 300.0], [300.0, 300.0]]))
+
+    result = k_integration.run_rusle_k_factors(str(tmp_path))
+    with open(result.manifest, "r", encoding="utf-8") as stream:
+        manifest = json.load(stream)
+    cfvo_contract = manifest["k"]["mode_contract"]["polaris_nomograph"]["cfvo_profile_fragment_adjustment"]
+    assert cfvo_contract["source_kind"] == "aligned_polaris_existing"

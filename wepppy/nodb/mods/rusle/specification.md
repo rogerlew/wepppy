@@ -1004,8 +1004,8 @@ kernel with bounded search radius.
   silently distort the high-resolution texture signal
 - Treat surface rock as a cover effect, not as a direct replacement for soil
   erodibility
-- For v1, the optional profile coarse-fragment ancillary should be the ISRIC
-  SoilGrids `cfvo` layer
+- The shipped profile coarse-fragment ancillary path uses ISRIC SoilGrids
+  `cfvo` depth layers when run-scoped layers are available
 - That recommendation is pragmatic rather than perfect:
   - `POLARIS` does not provide a directly observed coarse-fragment raster
   - SoilGrids `cfvo` is a documented coarse-fragment property with standard
@@ -1038,6 +1038,27 @@ kernel with bounded search radius.
     onto the same near-surface support as the `POLARIS` inputs
 - Metadata should retain the native SoilGrids resolution and note that the
   aligned `cfvo` layer is an upscaled ancillary, not a true 30 m observation
+- Runtime contract for the shipped approximation:
+  - apply `cfvo` adjustment only to `polaris_nomograph`, not to `polaris_epic`
+  - derive a fine-earth nomograph estimate first, then adjust permeability
+    class conservatively from depth-aggregated `cfvo` (`vol%`)
+  - class-shift policy:
+    - `cfvo < 25 vol%`: no permeability-class shift
+    - `25 <= cfvo < 60 vol%`: shift permeability class by `+1`
+      (less permeable)
+    - `cfvo >= 60 vol%`: shift permeability class by `+2`
+      (less permeable)
+  - clamp adjusted permeability class to the nomograph range `[1, 6]`
+  - keep the approximation explicit in manifest metadata; do not claim literal
+    `kwfact` reproduction
+- Runtime discovery order for `cfvo` layers:
+  - reuse aligned run-scoped `polaris/cfvo_mean_0_5.tif` and
+    `polaris/cfvo_mean_5_15.tif` when present
+  - else, if `soils/cfvo_0-5cm_Q0.5.tif` and `soils/cfvo_5-15cm_Q0.5.tif`
+    exist, align them to the POLARIS grid and stage aligned copies under
+    `polaris/`
+  - else, skip `cfvo` adjustment and record `not_applied` with reason in
+    manifest metadata
 - Comparisons should be matched accordingly:
   - compare fine-earth `POLARIS` estimates to `kffact` where available
   - compare `cfvo`-adjusted estimates to `kwfact` where available, while
@@ -1049,8 +1070,8 @@ kernel with bounded search radius.
 
 Likely ancillary needs beyond the current Polaris request:
 
-- optional ISRIC SoilGrids `cfvo` profile coarse-fragment fraction, aligned to
-  the `POLARIS` grid before use
+- direct on-demand SoilGrids `cfvo` retrieval path for runs that do not
+  already have staged `cfvo` layers in run scope
 - a defensible structure-class mapping
 - a defensible permeability-class mapping derived from `ksat` and profile
   conditions
@@ -1729,6 +1750,9 @@ Longer term, the mod should be checked against:
 - `K` derivation applies conservative small-hole `POLARIS` `NoData`
   interpolation (`IDW`, interior components only, bounded thresholds) and logs
   policy/results in the `k` manifest section
+- `K` derivation includes optional `cfvo` profile-fragment adjustment for
+  `polaris_nomograph` when run-scoped `cfvo` depth layers are available,
+  including explicit manifest status for applied vs skipped cases
 
 ## Initial Milestones
 

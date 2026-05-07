@@ -182,7 +182,10 @@ derivation, static matrix values, and non-burnable class policy.
 **`polaris_nomograph`** (default) — Nomograph-like RUSLE-facing emulation
 using POLARIS sand, silt, clay, OM, and Ksat. Very fine sand is estimated via
 the RUSLE2 User Reference Guide fallback equation. Closest to canonical
-NRCS K semantics.
+NRCS K semantics. When run-scoped `cfvo` depth layers are available, this mode
+also applies a conservative profile-fragment permeability-class adjustment
+(`cfvo <25%`: no shift, `25-<60%`: +1 class, `>=60%`: +2 classes; clamped to
+class `6`).
 
 **`polaris_epic`** — Williams (1995) EPIC alternative using only texture and
 organic carbon. Lower input burden but less directly comparable to NRCS K.
@@ -190,6 +193,15 @@ Best fit as a sensitivity or reproducibility path.
 
 See [specification.md § K](specification.md#k) for locked assumptions,
 rock-fragment handling, and comparison guidance.
+
+`cfvo` layer discovery is run-scoped and optional:
+
+- reuse aligned `polaris/cfvo_mean_0_5.tif` and `polaris/cfvo_mean_5_15.tif`
+  when present;
+- otherwise, if `soils/cfvo_0-5cm_Q0.5.tif` and
+  `soils/cfvo_5-15cm_Q0.5.tif` exist, align them to the POLARIS grid and stage
+  aligned copies under `polaris/`;
+- otherwise, skip `cfvo` adjustment and record explicit `not_applied` metadata.
 
 ### POLARIS Soil Layers
 
@@ -205,9 +217,9 @@ Masking behavior varies by factor and C mode in the current implementation:
 
 - **LS** — The `channel_mask` (`netful`) is passed as a stop mask to WBT
   `RusleLsFactor`, terminating slope-length growth at channel cells. The
-  controller also passes a generated blocking mask that stops routing outside
-  the watershed boundary. NLCD and user stop masks are not currently wired
-  into the LS call.
+  controller does not auto-generate an outside-watershed blocking mask; LS
+  applies across the full conditioned DEM/map extent by default unless an
+  explicit blocking mask is supplied by caller wiring.
 - **C (`observed_rap`)** — No NLCD-family masking is applied; validity is
   determined by RAP-band finite-value masks after DEM alignment.
 - **C (`scenario_sbs`)** — NLCD-family masking is applied via the disturbed
