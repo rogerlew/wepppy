@@ -236,6 +236,104 @@ describe('gl-dashboard layer renderer', () => {
     expect(Number(refreshedInput.value)).toBeCloseTo(30, 5);
   });
 
+  it('uses yearly ranges for WEPP Yearly legends when yearly and non-yearly modes overlap', () => {
+    const legendsContentEl = document.createElement('div');
+    const legendEmptyEl = document.createElement('p');
+    legendEmptyEl.id = 'gl-legend-empty';
+    legendsContentEl.appendChild(legendEmptyEl);
+
+    const state = {
+      comparisonMode: false,
+      currentScenarioPath: '',
+      landuseLayers: [],
+      soilsLayers: [],
+      hillslopesLayers: [],
+      channelsLayers: [],
+      weppLayers: [{ key: 'wepp-sed-yield', label: 'Sediment Yield (t/ha)', mode: 'sediment_yield', visible: false }],
+      weppChannelLayers: [],
+      weppYearlyLayers: [
+        {
+          key: 'wepp-yearly-sed-yield',
+          label: 'Sediment Yield (tonnes/ha)',
+          mode: 'sediment_yield',
+          visible: true,
+        },
+      ],
+      weppYearlyChannelLayers: [],
+      weppEventLayers: [],
+      watarLayers: [],
+      rapLayers: [],
+      openetLayers: [],
+      detectedLayers: [],
+      weppRanges: { sediment_yield: { min: 0, max: 122 } },
+      weppYearlyRanges: { sediment_yield: { min: 0, max: 85 } },
+      rapCumulativeMode: false,
+      weppStatistic: 'mean',
+    };
+
+    const setValue = jest.fn((key, value) => {
+      state[key] = value;
+    });
+    const applyLayers = jest.fn();
+
+    const renderer = createLayerRenderer({
+      getState: () => state,
+      setValue,
+      layerUtils: {
+        getActiveLayersForLegend: () => [{ ...state.weppYearlyLayers[0], category: 'WEPP Yearly' }],
+      },
+      domRefs: {
+        layerListEl: document.createElement('ul'),
+        layerEmptyEl: document.createElement('div'),
+        legendsContentEl,
+        legendEmptyEl,
+      },
+      yearSlider: { setRange: jest.fn() },
+      deselectAllSubcatchmentOverlays: jest.fn(),
+      activateWeppYearlyLayer: jest.fn(),
+      activateWeppYearlyChannelLayer: jest.fn(),
+      refreshWeppStatisticData: jest.fn(),
+      refreshRapData: jest.fn(),
+      refreshOpenetData: jest.fn(),
+      refreshWeppEventData: jest.fn(),
+      loadRapTimeseriesData: jest.fn(),
+      loadWeppYearlyTimeseriesData: jest.fn(),
+      loadOpenetTimeseriesData: jest.fn(),
+      applyLayers,
+      syncGraphLayout: jest.fn(),
+      clearGraphModeOverride: jest.fn(),
+      setGraphFocus: jest.fn(),
+      setGraphCollapsed: jest.fn(),
+      pickActiveWeppEventLayer: jest.fn(),
+      soilColorForValue: jest.fn(),
+      constants: {
+        COMPARISON_MEASURES: [],
+        WATER_MEASURES: [],
+        SOIL_MEASURES: ['sediment_yield'],
+      },
+    });
+
+    renderer.updateLegendsPanel();
+    const maxInput = legendsContentEl.querySelector('.gl-legend-range-input[data-range-kind="continuous"]');
+    expect(maxInput).not.toBeNull();
+    expect(Number(maxInput.value)).toBeCloseTo(85, 5);
+
+    maxInput.value = '60';
+    maxInput.dispatchEvent(new Event('change', { bubbles: true }));
+
+    expect(state.weppYearlyRanges.sediment_yield).toEqual({ min: 0, max: 60 });
+    expect(state.weppRanges.sediment_yield).toEqual({ min: 0, max: 122 });
+    expect(setValue).toHaveBeenCalledWith(
+      'weppYearlyRanges',
+      expect.objectContaining({ sediment_yield: { min: 0, max: 60 } }),
+    );
+    expect(applyLayers).toHaveBeenCalled();
+
+    const refreshedInput = legendsContentEl.querySelector('.gl-legend-range-input[data-range-kind="continuous"]');
+    expect(refreshedInput).not.toBeNull();
+    expect(Number(refreshedInput.value)).toBeCloseTo(60, 5);
+  });
+
   it('allows editing diverging legend max and enforces symmetric min/max', () => {
     const legendsContentEl = document.createElement('div');
     const legendEmptyEl = document.createElement('p');

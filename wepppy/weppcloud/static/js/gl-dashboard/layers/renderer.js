@@ -1585,22 +1585,26 @@ export function createLayerRenderer({
     } else if (mode === 'aspect' && state.hillslopesSummary) {
       section.appendChild(renderAspectLegend());
       return section;
-    } else if (state.watarRanges && state.watarRanges[mode]) {
+    } else if (layer.category === 'WATAR' && state.watarRanges && state.watarRanges[mode]) {
       minVal = state.watarRanges[mode].min;
       maxVal = state.watarRanges[mode].max;
-    } else if (state.weppRanges && state.weppRanges[mode]) {
-      minVal = state.weppRanges[mode].min;
-      maxVal = state.weppRanges[mode].max;
-    } else if (layer.category === 'WEPP Yearly Channels' && state.weppYearlyChannelRanges && state.weppYearlyChannelRanges[mode]) {
-      minVal = state.weppYearlyChannelRanges[mode].min;
-      maxVal = state.weppYearlyChannelRanges[mode].max;
-    } else if (state.weppChannelRanges && state.weppChannelRanges[mode]) {
-      minVal = state.weppChannelRanges[mode].min;
-      maxVal = state.weppChannelRanges[mode].max;
-    } else if (state.weppYearlyRanges && state.weppYearlyRanges[mode]) {
+    } else if (layer.category === 'WEPP Yearly' && state.weppYearlyRanges && state.weppYearlyRanges[mode]) {
       minVal = state.weppYearlyRanges[mode].min;
       maxVal = state.weppYearlyRanges[mode].max;
-    } else if (state.weppEventRanges && state.weppEventRanges[mode]) {
+    } else if (
+      layer.category === 'WEPP Yearly Channels' &&
+      state.weppYearlyChannelRanges &&
+      state.weppYearlyChannelRanges[mode]
+    ) {
+      minVal = state.weppYearlyChannelRanges[mode].min;
+      maxVal = state.weppYearlyChannelRanges[mode].max;
+    } else if (layer.category === 'WEPP Channels' && state.weppChannelRanges && state.weppChannelRanges[mode]) {
+      minVal = state.weppChannelRanges[mode].min;
+      maxVal = state.weppChannelRanges[mode].max;
+    } else if (layer.category === 'WEPP' && state.weppRanges && state.weppRanges[mode]) {
+      minVal = state.weppRanges[mode].min;
+      maxVal = state.weppRanges[mode].max;
+    } else if (layer.category === 'WEPP Event' && state.weppEventRanges && state.weppEventRanges[mode]) {
       minVal = state.weppEventRanges[mode].min;
       maxVal = state.weppEventRanges[mode].max;
       unit = LAYER_UNITS[mode] || '';
