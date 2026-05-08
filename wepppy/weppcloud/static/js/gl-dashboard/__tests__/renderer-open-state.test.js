@@ -267,6 +267,7 @@ describe('gl-dashboard layer renderer', () => {
       detectedLayers: [],
       weppRanges: { sediment_yield: { min: 0, max: 122 } },
       weppYearlyRanges: { sediment_yield: { min: 0, max: 85 } },
+      weppYearlyRangeOverrides: {},
       rapCumulativeMode: false,
       weppStatistic: 'mean',
     };
@@ -322,9 +323,14 @@ describe('gl-dashboard layer renderer', () => {
     maxInput.dispatchEvent(new Event('change', { bubbles: true }));
 
     expect(state.weppYearlyRanges.sediment_yield).toEqual({ min: 0, max: 60 });
+    expect(state.weppYearlyRangeOverrides.sediment_yield).toEqual({ min: 0, max: 60 });
     expect(state.weppRanges.sediment_yield).toEqual({ min: 0, max: 122 });
     expect(setValue).toHaveBeenCalledWith(
       'weppYearlyRanges',
+      expect.objectContaining({ sediment_yield: { min: 0, max: 60 } }),
+    );
+    expect(setValue).toHaveBeenCalledWith(
+      'weppYearlyRangeOverrides',
       expect.objectContaining({ sediment_yield: { min: 0, max: 60 } }),
     );
     expect(applyLayers).toHaveBeenCalled();

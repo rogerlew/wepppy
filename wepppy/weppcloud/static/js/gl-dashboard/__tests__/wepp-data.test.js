@@ -54,6 +54,7 @@ describe('gl-dashboard wepp-data ranges', () => {
       comparisonDiffRanges: {},
       weppYearlyDiffRanges: {},
       weppYearlyRanges: {},
+      weppYearlyRangeOverrides: {},
       weppRanges: {},
       weppEventRanges: {},
     };
@@ -99,6 +100,18 @@ describe('gl-dashboard wepp-data ranges', () => {
     expect(ranges.sediment_yield).toEqual({ min: 0, max: 1 });
     expect(state.weppYearlyRanges).toEqual(ranges);
     expect(setState).toHaveBeenCalledWith({ weppYearlyRanges: ranges });
+  });
+
+  it('preserves user yearly range overrides when recomputing yearly ranges', () => {
+    state.weppYearlyRangeOverrides = {
+      sediment_yield: { min: 0, max: 122 },
+    };
+
+    const ranges = manager.computeWeppYearlyRanges();
+
+    expect(ranges.runoff_volume).toEqual({ min: 0, max: 1 });
+    expect(ranges.sediment_yield).toEqual({ min: 0, max: 122 });
+    expect(state.weppYearlyRanges).toEqual(ranges);
   });
 
   it('computes yearly diff ranges with robust bounds', () => {
@@ -245,6 +258,94 @@ describe('gl-dashboard wepp-data path wiring', () => {
           expect.objectContaining({ path: 'wepp/roads/output/interchange/H.pass.parquet', alias: 'pass' }),
         ]),
       })
+    );
+  });
+});
+
+describe('gl-dashboard wepp-data yearly override persistence', () => {
+  it('keeps WEPP Yearly range overrides across year refreshes', async () => {
+    const state = {
+      weppYearlySelectedYear: 2021,
+      weppYearlySummary: null,
+      weppYearlyCache: {},
+      weppYearlyRanges: {},
+      weppYearlyRangeOverrides: {
+        sediment_yield: { min: 0, max: 122 },
+      },
+      weppYearlyDiffRanges: {},
+      baseWeppYearlyCache: {},
+      comparisonMode: false,
+      currentScenarioPath: '',
+    };
+
+    const setValue = jest.fn((key, value) => {
+      state[key] = value;
+    });
+    const setState = jest.fn((updates) => {
+      Object.assign(state, updates);
+    });
+    const postQueryEngine = jest
+      .fn()
+      .mockResolvedValueOnce({
+        records: [
+          {
+            topaz_id: 1,
+            runoff_volume: 10,
+            subrunoff_volume: 5,
+            baseflow_volume: 1,
+            soil_loss: 2,
+            sediment_deposition: 3,
+            sediment_yield: 4,
+          },
+        ],
+      })
+      .mockResolvedValueOnce({
+        records: [
+          {
+            topaz_id: 1,
+            runoff_volume: 20,
+            subrunoff_volume: 6,
+            baseflow_volume: 2,
+            soil_loss: 4,
+            sediment_deposition: 6,
+            sediment_yield: 8,
+          },
+        ],
+      });
+
+    const manager = createWeppDataManager({
+      ctx: { sitePrefix: '/site', runid: 'run1', config: 'cfg1' },
+      getState: () => state,
+      setValue,
+      setState,
+      postQueryEngine,
+      postBaseQueryEngine: async () => null,
+      pickActiveWeppEventLayer: () => ({ mode: 'event_P' }),
+      WEPP_YEARLY_PATH: 'wepp/output/interchange/H.parquet',
+      WEPP_LOSS_PATH: 'wepp/output/loss.parquet',
+    });
+
+    const firstChanged = await manager.refreshWeppYearlyData();
+    expect(firstChanged).toBe(true);
+    expect(state.weppYearlyRanges.sediment_yield).toEqual({ min: 0, max: 122 });
+
+    state.weppYearlySelectedYear = 2022;
+    const secondChanged = await manager.refreshWeppYearlyData();
+    expect(secondChanged).toBe(true);
+    expect(state.weppYearlyRanges.sediment_yield).toEqual({ min: 0, max: 122 });
+
+    expect(postQueryEngine).toHaveBeenCalledTimes(2);
+    expect(postQueryEngine).toHaveBeenNthCalledWith(
+      1,
+      expect.objectContaining({
+        filters: [{ column: 'loss.year', op: '=', value: 2021 }],
+      }),
+    );
+    expect(postQueryEngine).toHaveBeenNthCalledWith(
+      2,
+      expect.objectContaining({
+        filters: [{ column: 'loss.year', op: '=', value: 2022 }],
+      }),
     );
   });
 });

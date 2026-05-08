@@ -250,6 +250,24 @@ export function createLayerRenderer({
     }
     const stateKey = EDITABLE_CONTINUOUS_RANGE_STATE_KEYS[layer.category];
     if (!stateKey || !mode) return null;
+    if (layer.category === 'WEPP Yearly') {
+      const currentState = getState();
+      setValue('weppYearlyRanges', {
+        ...(currentState.weppYearlyRanges || {}),
+        [mode]: {
+          min: normalized.min,
+          max: normalized.max,
+        },
+      });
+      setValue('weppYearlyRangeOverrides', {
+        ...(currentState.weppYearlyRangeOverrides || {}),
+        [mode]: {
+          min: normalized.min,
+          max: normalized.max,
+        },
+      });
+      return normalized;
+    }
     updateModeRangeState(stateKey, mode, normalized);
     return normalized;
   }

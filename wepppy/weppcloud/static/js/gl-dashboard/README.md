@@ -40,6 +40,7 @@
 - Omni scenarios use the same watershed delineation as base (subcatchments/channels/topaz + WEPP IDs); scenario switches reuse existing geometry instead of redrawing hillslopes.
 - Channel overlays (Channel Order + WEPP channels + WEPP Yearly channels) share the `wepp-channel-overlay` radio group and must clear each other.
 - Channel layers require `channelsVisible`; channel labels require both `channelsVisible` + `channelLabelsVisible`.
+- WEPP Yearly legend max edits are user overrides by mode and must persist across year slider changes until the user changes them again.
 - D8 Direction overlay is WBT-only: it consumes `dem/wbt/flovec.wgs.tif` (EPSG:4326) plus `WEPP_CELL_SIZE_M` metadata for meter sizing. The pointer mapping follows the WhiteboxTools grid (`64 128 1 / 32 0 2 / 16 8 4`).
 
 ## Module Contracts (injection signatures)

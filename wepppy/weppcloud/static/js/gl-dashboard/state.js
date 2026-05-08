@@ -64,6 +64,7 @@ const defaultState = {
   weppYearlySelectedYear: null,
   weppYearlySummary: null,
   weppYearlyRanges: {},
+  weppYearlyRangeOverrides: {},
   weppYearlyDiffRanges: {},
   weppYearlyCache: {},
   baseWeppYearlyCache: {},

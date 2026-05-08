@@ -251,6 +251,20 @@ export function createWeppDataManager({
     return ranges;
   }
 
+  function applyWeppYearlyRangeOverrides(ranges, overrides) {
+    const nextRanges = { ...(ranges || {}) };
+    const overrideMap = overrides && typeof overrides === 'object' ? overrides : {};
+    for (const mode of Object.keys(overrideMap)) {
+      const candidate = overrideMap[mode];
+      if (!candidate || typeof candidate !== 'object') continue;
+      const min = Number(candidate.min);
+      const max = Number(candidate.max);
+      if (!Number.isFinite(min) || !Number.isFinite(max) || max <= min) continue;
+      nextRanges[mode] = { min, max };
+    }
+    return nextRanges;
+  }
+
   async function refreshWeppStatisticData() {
     const state = getState();
     const hasActiveWepp = (state.weppLayers || []).some((l) => l.visible);
@@ -366,8 +380,9 @@ export function createWeppDataManager({
       if (max <= min) max = min + 1;
       ranges[mode] = { min, max };
     }
-    setState({ weppYearlyRanges: ranges });
-    return ranges;
+    const mergedRanges = applyWeppYearlyRangeOverrides(ranges, getState().weppYearlyRangeOverrides);
+    setState({ weppYearlyRanges: mergedRanges });
+    return mergedRanges;
   }
 
   function computeWeppYearlyDiffRanges(year) {
@@ -500,7 +515,9 @@ export function createWeppDataManager({
       }
     }
 
-    const ranges = summary ? computeWeppYearlyRanges(summary) || {} : {};
+    const ranges = summary
+      ? computeWeppYearlyRanges(summary) || {}
+      : applyWeppYearlyRangeOverrides({}, state.weppYearlyRangeOverrides);
     let diffRanges = {};
     if (state.comparisonMode && state.currentScenarioPath) {
       await loadBaseWeppYearlyData(year);
