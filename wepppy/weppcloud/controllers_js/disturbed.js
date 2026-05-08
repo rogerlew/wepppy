@@ -849,6 +849,17 @@ var Disturbed = (function () {
                 });
         }
 
+        function confirmLoadExtendedLandSoilLookup() {
+            var message = "This will create a second landsoil lookup table with additional plant parameters. This is only recommended for advanced users.";
+            if (typeof window !== "undefined" && typeof window.confirm === "function") {
+                if (!window.confirm(message)) {
+                    setLookupStatus("Extended lookup load canceled.", "warning");
+                    return Promise.resolve({ canceled: true });
+                }
+            }
+            return loadExtendedLandSoilLookup();
+        }
+
         function deleteExtendedLandSoilLookup() {
             var taskMsg = "Deleting extended disturbed lookup";
             setLookupStatus("Deleting extended disturbed parameters...", "pending");
@@ -1254,6 +1265,10 @@ var Disturbed = (function () {
                     return;
                 }
                 if (action === "load-extended-lookup") {
+                    confirmLoadExtendedLandSoilLookup();
+                    return;
+                }
+                if (action === "confirm-load-extended-lookup") {
                     loadExtendedLandSoilLookup();
                     return;
                 }
@@ -1293,6 +1308,7 @@ var Disturbed = (function () {
 
         disturbed.reset_land_soil_lookup = resetLandSoilLookup;
         disturbed.load_extended_land_soil_lookup = loadExtendedLandSoilLookup;
+        disturbed.confirm_load_extended_land_soil_lookup = confirmLoadExtendedLandSoilLookup;
         disturbed.delete_extended_land_soil_lookup = deleteExtendedLandSoilLookup;
         disturbed.sync_base_to_extended_land_soil_lookup = syncBaseToExtendedLandSoilLookup;
         disturbed.upload_sbs = uploadSbs;

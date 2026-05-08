@@ -9,6 +9,7 @@ describe("Disturbed controller", () => {
     let controlBaseInstance;
     let statusStreamMock;
     let emitter;
+    let originalConfirm;
 
     beforeEach(async () => {
         jest.resetModules();
@@ -71,6 +72,8 @@ describe("Disturbed controller", () => {
         global.controlBase = jest.fn(() => Object.assign({}, controlBaseInstance));
 
         global.url_for_run = jest.fn((path) => path);
+        originalConfirm = window.confirm;
+        window.confirm = jest.fn(() => true);
 
         await import("../disturbed.js");
     });
@@ -83,6 +86,7 @@ describe("Disturbed controller", () => {
         delete global.controlBase;
         delete global.WCEvents;
         delete global.url_for_run;
+        window.confirm = originalConfirm;
         if (global.WCDom) {
             delete global.WCDom;
         }
@@ -173,6 +177,42 @@ describe("Disturbed controller", () => {
         const controller = getController();
         await controller.delete_extended_land_soil_lookup();
         expect(emitter.emit).toHaveBeenCalledWith("disturbed:lookup:deleted", {});
+    });
+
+    test("load-extended-lookup action posts to task endpoint after confirmation", async () => {
+        httpRequestMock.mockImplementation((url, options) => {
+            if (url === "tasks/load_extended_land_soil_lookup") {
+                expect(options.method).toBe("POST");
+                return Promise.resolve({ body: {} });
+            }
+            return Promise.resolve({ body: { Content: {} } });
+        });
+
+        getController();
+        const loadButton = document.querySelector('[data-disturbed-action="load-extended-lookup"]');
+        loadButton.dispatchEvent(new MouseEvent("click", { bubbles: true }));
+        await Promise.resolve();
+        await Promise.resolve();
+
+        expect(window.confirm).toHaveBeenCalled();
+        expect(httpRequestMock).toHaveBeenCalledWith(
+            "tasks/load_extended_land_soil_lookup",
+            expect.objectContaining({ method: "POST" }),
+        );
+    });
+
+    test("load-extended-lookup action does not post when confirmation is canceled", async () => {
+        window.confirm.mockReturnValue(false);
+        getController();
+        const loadButton = document.querySelector('[data-disturbed-action="load-extended-lookup"]');
+        loadButton.dispatchEvent(new MouseEvent("click", { bubbles: true }));
+        await Promise.resolve();
+
+        expect(window.confirm).toHaveBeenCalled();
+        expect(httpRequestMock).not.toHaveBeenCalledWith(
+            "tasks/load_extended_land_soil_lookup",
+            expect.any(Object),
+        );
     });
 
     test("sync_base_to_extended_land_soil_lookup posts to task endpoint", async () => {
