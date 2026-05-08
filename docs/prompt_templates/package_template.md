@@ -25,6 +25,14 @@
 - Tempting extensions that would expand scope
 - Other systems that won't be modified
 
+## Implementation Fidelity and Evidence (Required for modernization/migrations)
+[Use this section when work modernizes legacy behavior or migrates execution paths.]
+
+- **Fidelity target**: `faithful extraction | scaffold/surrogate`
+- **Authoritative source path(s)**: [Exact legacy modules/routines being preserved or replaced]
+- **Cutover proof required**: [How you will prove production path is wired, not only implemented]
+- **Acceptance evidence type**: `generated-output | fixture-only | both` (default `generated-output` for implementation closeout)
+
 ## Stakeholders
 [Who cares about this work? Who needs to review or approve?]
 - **Primary**: [Team or role that will use/maintain this]

@@ -37,6 +37,20 @@ When discussing an executable specification (ExecPlan), record decisions in a lo
 
 When researching a design with challenging requirements or significant unknowns, use milestones to implement proof of concepts, "toy implementations", etc., that allow validating whether the user's proposal is feasible. Read the source code of libraries by finding or acquiring them, research deeply, and include prototypes to guide a fuller implementation.
 
+## Anti-Ambiguity Addendum for Modernization Packages
+
+When the plan modernizes legacy production logic, include explicit language that:
+
+- defines whether the package goal is **faithful extraction** or
+  **scaffold/surrogate** discovery;
+- distinguishes **implemented** from **wired** completion;
+- states whether acceptance requires **generated-output evidence** from the
+  current rebuilt binary path.
+
+If a plan intentionally stages scaffolding first, it must mark that stage as
+non-closeable implementation scope and name the follow-up milestone/package
+that delivers faithful wired behavior.
+
 ## Requirements
 
 NON-NEGOTIABLE REQUIREMENTS:
