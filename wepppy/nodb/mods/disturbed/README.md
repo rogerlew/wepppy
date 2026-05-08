@@ -43,7 +43,7 @@ The Disturbed module supports two lookup table schemes:
 | Lookup variant | Runtime file | Key columns | Scalar plant keys | Notes |
 |-----------|-----------|-----------|-----------|-----------|
 | Base lookup | `disturbed/disturbed_land_soil_lookup.csv` | `luse`, `stext` | `rdmax`, `xmxlai` | Canonical calibration table for soil and PMET values. Also carries static override fields like `plant.data.decfct` and `plant.data.dropfc`. |
-| Extended lookup | `disturbed/disturbed_land_soil_lookup_extended.csv` | `disturbed_class`, `stext` (plus `landuse`, `sev_enum`) | `plant.data.rdmax`, `plant.data.xmxlai` | Derived table that merges base lookup values with management-file fields (`ini.data.*`, `plant.data.*`). |
+| Extended lookup | `disturbed/disturbed_land_soil_lookup_extended.csv` | `luse`, `stext` (plus `disturbed_class`, `landuse`, `sev_enum`) | `plant.data.rdmax`, `plant.data.xmxlai` | Derived table that merges base lookup values with management-file fields (`ini.data.*`, `plant.data.*`). |
 
 Scalar normalization contract:
 

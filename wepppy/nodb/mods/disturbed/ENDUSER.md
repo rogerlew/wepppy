@@ -66,7 +66,7 @@ The disturbed workflow can operate on either a base lookup table or an extended 
 | Lookup variant | Runtime file | Row identity fields | Plant scalar fields |
 | --- | --- | --- | --- |
 | Base | `disturbed/disturbed_land_soil_lookup.csv` | `luse`, `stext` | `rdmax`, `xmxlai` |
-| Extended | `disturbed/disturbed_land_soil_lookup_extended.csv` | `disturbed_class`, `stext` (plus helper fields `landuse`, `sev_enum`) | `plant.data.rdmax`, `plant.data.xmxlai` |
+| Extended | `disturbed/disturbed_land_soil_lookup_extended.csv` | `luse`, `stext` (plus helper fields `disturbed_class`, `landuse`, `sev_enum`) | `plant.data.rdmax`, `plant.data.xmxlai` |
 
 When the extended table is generated, WEPPcloud normalizes the scalar plant keys from base (`rdmax`, `xmxlai`) into extended namespaced fields (`plant.data.rdmax`, `plant.data.xmxlai`).
 

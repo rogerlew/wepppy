@@ -720,7 +720,10 @@ def test_build_extended_lookup_writes_separate_extended_csv(
         management_module,
         "load_map",
         lambda _mapping: {
-            "42": {"ManagementFile": "forest.man", "DisturbedClass": "forest"}
+            "42": {
+                "ManagementFile": "high-severity-forest.man",
+                "DisturbedClass": "forest high sev fire",
+            }
         },
     )
     monkeypatch.setattr(
@@ -734,8 +737,8 @@ def test_build_extended_lookup_writes_separate_extended_csv(
         "land_soil_replacements_d",
         property(
             lambda self: {
-                ("loam", "forest"): {
-                    "luse": "forest",
+                ("loam", "forest high sev fire"): {
+                    "luse": "",
                     "stext": "loam",
                     "rdmax": "0.6",
                     "xmxlai": "3.2",
@@ -753,6 +756,13 @@ def test_build_extended_lookup_writes_separate_extended_csv(
     assert editable_lookup.read_text() == "user,edited\n"
     extended_lookup = Path(disturbed.extended_lookup_fn)
     assert extended_lookup.exists()
-    extended_text = extended_lookup.read_text()
-    assert "disturbed_class" in extended_text
-    assert "forest" in extended_text
+    with extended_lookup.open() as fp:
+        reader = csv.DictReader(fp)
+        rows = list(reader)
+
+    assert rows
+    row = rows[0]
+    assert row["disturbed_class"] == "forest high sev fire"
+    assert row["luse"] == "forest high sev fire"
+    assert row["landuse"] == "forest"
+    assert row["sev_enum"] == "4"

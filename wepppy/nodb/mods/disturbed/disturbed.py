@@ -1413,7 +1413,11 @@ class Disturbed(NoDbBase):
                     _d.update(man_row)
 
                     sev_enum = 0
-                    luse_value = _d.get('luse', disturbed_class)
+                    raw_luse_value = _d.get('luse')
+                    if raw_luse_value is None or str(raw_luse_value).strip() == '':
+                        luse_value = disturbed_class
+                    else:
+                        luse_value = raw_luse_value
                     if 'high sev' in disturbed_class:
                         sev_enum = 4
                     elif 'moderate sev' in disturbed_class:
@@ -1432,10 +1436,10 @@ class Disturbed(NoDbBase):
                     elif 'shrub' in luse:
                         luse = 'shrub'
 
-                    if 'luse' in _d:
-                        del _d['luse']
-
                     _d = {'sev_enum': sev_enum,  'landuse': luse, 'disturbed_class': disturbed_class, **_d}
+                    # Preserve base-table lookup key naming in extended exports so
+                    # downstream artifact labels keep the expected disturbed class.
+                    _d['luse'] = f'{luse_value}'
                     # Keep canonical disturbed class from lookup key for downstream
                     # soil replacement lookups (for example, ("silt loam", "thinning")).
                     _d['disturbed_class'] = disturbed_class
