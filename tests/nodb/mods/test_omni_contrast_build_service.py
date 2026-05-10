@@ -369,6 +369,163 @@ def test_collect_stream_order_group_assignments_tie_break_prefers_value_when_glo
     assert sorted(int(v) for v in unique_values.tolist()) == [1, 2]
 
 
+def test_build_stream_order_group_map_skips_legacy_pass_when_pair_counts_complete(
+    tmp_path: Path,
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    service = OmniContrastBuildService()
+    source_paths = {"subwta": tmp_path / "subwta.tif"}
+    generated_paths = {"subwta_pruned": tmp_path / "subwta_pruned.tif"}
+    source_paths["subwta"].write_text("", encoding="ascii")
+    generated_paths["subwta_pruned"].write_text("", encoding="ascii")
+
+    class DummyDataset:
+        def __enter__(self):
+            return self
+
+        def __exit__(self, exc_type, exc, tb):
+            return False
+
+        def read(self, *args, **kwargs):
+            return np.ma.array([[1, 2, 3]], mask=False)
+
+    rasterio_stub = sys.modules.get("rasterio")
+    if rasterio_stub is None:
+        rasterio_stub = types.ModuleType("rasterio")
+        sys.modules["rasterio"] = rasterio_stub
+    monkeypatch.setattr(rasterio_stub, "open", lambda *args, **kwargs: DummyDataset())
+
+    _ensure_package("wepppyo3", tmp_path)
+    rc_stub = types.ModuleType("wepppyo3.raster_characteristics")
+    rc_stub.count_intersecting_raster_key_pairs = lambda **kwargs: {
+        "10": {"2": 5},
+        "20": {"1": 4},
+        "30": {"1": 3},
+    }
+    rc_stub.identify_mode_single_raster_key = lambda **kwargs: (_ for _ in ()).throw(
+        AssertionError("legacy fallback should not run when pair-count assignments are complete")
+    )
+    monkeypatch.setitem(sys.modules, "wepppyo3.raster_characteristics", rc_stub)
+    sys.modules["wepppyo3"].raster_characteristics = rc_stub
+
+    class DummyTranslator:
+        top2wepp = {"10": "1", "20": "2", "30": "3"}
+
+    class DummyWatershed:
+        def translator_factory(self):
+            return DummyTranslator()
+
+    group_map, top2wepp = service._build_stream_order_group_map(
+        watershed=DummyWatershed(),
+        source_paths=source_paths,
+        generated_paths=generated_paths,
+    )
+
+    assert top2wepp == {"10": "1", "20": "2", "30": "3"}
+    assert group_map == {10: ["20", "30"], 20: ["10"], 30: []}
+
+
+def test_build_stream_order_group_map_merges_pair_counts_and_legacy_without_overrides(
+    tmp_path: Path,
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    service = OmniContrastBuildService()
+    source_paths = {"subwta": tmp_path / "subwta.tif"}
+    generated_paths = {"subwta_pruned": tmp_path / "subwta_pruned.tif"}
+    source_paths["subwta"].write_text("", encoding="ascii")
+    generated_paths["subwta_pruned"].write_text("", encoding="ascii")
+
+    class DummyDataset:
+        def __enter__(self):
+            return self
+
+        def __exit__(self, exc_type, exc, tb):
+            return False
+
+        def read(self, *args, **kwargs):
+            return np.ma.array([[1, 2, 3]], mask=False)
+
+    rasterio_stub = sys.modules.get("rasterio")
+    if rasterio_stub is None:
+        rasterio_stub = types.ModuleType("rasterio")
+        sys.modules["rasterio"] = rasterio_stub
+    monkeypatch.setattr(rasterio_stub, "open", lambda *args, **kwargs: DummyDataset())
+
+    _ensure_package("wepppyo3", tmp_path)
+    rc_stub = types.ModuleType("wepppyo3.raster_characteristics")
+    # Only topaz 10 has pair-count coverage; 20/30 must come from legacy fallback.
+    rc_stub.count_intersecting_raster_key_pairs = lambda **kwargs: {"10": {"2": 5}}
+    # Legacy says 10->1, but pair-count assignment for 10 must win and remain 2.
+    rc_stub.identify_mode_single_raster_key = lambda **kwargs: {"10": 1, "20": 1, "30": 1}
+    monkeypatch.setitem(sys.modules, "wepppyo3.raster_characteristics", rc_stub)
+    sys.modules["wepppyo3"].raster_characteristics = rc_stub
+
+    class DummyTranslator:
+        top2wepp = {"10": "1", "20": "2", "30": "3"}
+
+    class DummyWatershed:
+        def translator_factory(self):
+            return DummyTranslator()
+
+    group_map, _top2wepp = service._build_stream_order_group_map(
+        watershed=DummyWatershed(),
+        source_paths=source_paths,
+        generated_paths=generated_paths,
+    )
+
+    assert group_map == {10: ["20", "30"], 20: ["10"], 30: []}
+
+
+def test_build_stream_order_group_map_ignores_non_integer_legacy_assignments(
+    tmp_path: Path,
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    service = OmniContrastBuildService()
+    source_paths = {"subwta": tmp_path / "subwta.tif"}
+    generated_paths = {"subwta_pruned": tmp_path / "subwta_pruned.tif"}
+    source_paths["subwta"].write_text("", encoding="ascii")
+    generated_paths["subwta_pruned"].write_text("", encoding="ascii")
+
+    class DummyDataset:
+        def __enter__(self):
+            return self
+
+        def __exit__(self, exc_type, exc, tb):
+            return False
+
+        def read(self, *args, **kwargs):
+            return np.ma.array([[1, 2, 3]], mask=False)
+
+    rasterio_stub = sys.modules.get("rasterio")
+    if rasterio_stub is None:
+        rasterio_stub = types.ModuleType("rasterio")
+        sys.modules["rasterio"] = rasterio_stub
+    monkeypatch.setattr(rasterio_stub, "open", lambda *args, **kwargs: DummyDataset())
+
+    _ensure_package("wepppyo3", tmp_path)
+    rc_stub = types.ModuleType("wepppyo3.raster_characteristics")
+    rc_stub.count_intersecting_raster_key_pairs = lambda **kwargs: {"10": {"2": 5}}
+    rc_stub.identify_mode_single_raster_key = lambda **kwargs: {"20": "bad", "30": 1}
+    monkeypatch.setitem(sys.modules, "wepppyo3.raster_characteristics", rc_stub)
+    sys.modules["wepppyo3"].raster_characteristics = rc_stub
+
+    class DummyTranslator:
+        top2wepp = {"10": "1", "20": "2", "30": "3"}
+
+    class DummyWatershed:
+        def translator_factory(self):
+            return DummyTranslator()
+
+    group_map, _top2wepp = service._build_stream_order_group_map(
+        watershed=DummyWatershed(),
+        source_paths=source_paths,
+        generated_paths=generated_paths,
+    )
+
+    # 20's malformed legacy value is dropped; 30 still receives legacy assignment.
+    assert group_map == {10: ["30"], 20: ["10"], 30: []}
+
+
 def test_build_contrasts_user_defined_areas_service_builds_sidecars(
     tmp_path: Path,
     monkeypatch: pytest.MonkeyPatch,
