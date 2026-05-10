@@ -220,6 +220,86 @@ def test_validate_map_uses_valid_pixels_only_without_global_mode_fallback(
 
 
 @pytest.mark.unit
+def test_validate_map_tie_break_prefers_larger_value_after_local_and_global_ties(
+    monkeypatch: pytest.MonkeyPatch,
+    tmp_path: Path,
+) -> None:
+    treatments_dir = tmp_path / "treatments"
+    treatments_dir.mkdir(parents=True)
+    source_map = treatments_dir / "source.tif"
+    source_map.write_text("placeholder", encoding="ascii")
+
+    subwta_path = tmp_path / "subwta.tif"
+    subwta_path.write_text("placeholder", encoding="ascii")
+
+    class _DummyDs:
+        @staticmethod
+        def GetProjection() -> str:
+            return "EPSG:32611"
+
+    class _DummyLanduse:
+        @staticmethod
+        def getInstance(_wd):
+            return _DummyLanduse()
+
+        @staticmethod
+        def get_mapping_dict():
+            return {
+                "140": {"DisturbedClass": "thinning_40_75", "IsTreatment": True},
+                "141": {"DisturbedClass": "thinning_20_40", "IsTreatment": True},
+            }
+
+    class _DummyWatershed:
+        def __init__(self, subwta: str) -> None:
+            self.subwta = subwta
+
+    monkeypatch.setattr(treatments_module.gdal, "Open", lambda _path: _DummyDs())
+    monkeypatch.setattr(treatments_module, "validate_srs", lambda _srs: True)
+    monkeypatch.setattr(
+        treatments_module,
+        "raster_stacker",
+        lambda _src, _subwta, dst: Path(dst).write_text("stacked", encoding="ascii"),
+    )
+    monkeypatch.setattr(
+        treatments_module,
+        "count_intersecting_raster_key_pairs",
+        lambda **_kwargs: {
+            # local tie (140 == 141)
+            "101": {"140": 5, "141": 5},
+            # force global tie too (both totals end at 6)
+            "102": {"140": 1},
+            "103": {"141": 1},
+        },
+    )
+    monkeypatch.setattr(
+        treatments_module,
+        "Watershed",
+        type(
+            "_WatershedProxy",
+            (),
+            {"getInstance": staticmethod(lambda _wd: _DummyWatershed(str(subwta_path)))},
+        ),
+    )
+    monkeypatch.setattr(treatments_module, "Landuse", _DummyLanduse)
+    monkeypatch.setattr(
+        treatments_module.RedisPrep,
+        "getInstance",
+        staticmethod(lambda _wd: (_ for _ in ()).throw(FileNotFoundError())),
+    )
+
+    treatments = treatments_module.Treatments.__new__(treatments_module.Treatments)
+    treatments.wd = str(tmp_path)
+    treatments.logger = logging.getLogger("test.treatments.validate.tie_break")
+    treatments._treatments_domlc_d = {}
+    treatments._treatments = {}
+
+    treatments.validate(str(source_map))
+
+    # local tie + global tie falls through to value tie-break => larger value wins.
+    assert treatments.treatments_domlc_d["101"] == "141"
+
+
+@pytest.mark.unit
 def test_modify_soil_does_not_strip_isric_composite_mukey(tmp_path):
     class DummySoil:
         def __init__(self, clay: float, sand: float):

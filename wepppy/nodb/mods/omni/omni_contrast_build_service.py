@@ -308,7 +308,10 @@ class OmniContrastBuildService:
     ) -> Tuple[Dict[str, Any], Iterable[Any]]:
         from collections import Counter
 
-        from wepppyo3.raster_characteristics import count_intersecting_raster_key_pairs
+        from wepppyo3.raster_characteristics import (
+            count_intersecting_raster_key_pairs,
+            identify_mode_single_raster_key,
+        )
         import numpy as np
         import rasterio
 
@@ -337,6 +340,23 @@ class OmniContrastBuildService:
                 ),
             )[0]
             group_assignments[str(key)] = mode_value
+
+        # Preserve legacy stream-order behavior for keys that had no valid
+        # pair-count intersections so contrast grouping does not collapse.
+        legacy_assignments = identify_mode_single_raster_key(
+            key_fn=str(source_paths["subwta"]),
+            parameter_fn=str(generated_paths["subwta_pruned"]),
+            ignore_channels=True,
+            ignore_keys=set(),
+        )
+        for key, value in legacy_assignments.items():
+            key_str = str(key)
+            if key_str in group_assignments:
+                continue
+            try:
+                group_assignments[key_str] = int(value)
+            except (TypeError, ValueError):
+                continue
 
         with rasterio.open(generated_paths["subwta_pruned"]) as dataset:
             data = dataset.read(1, masked=True)

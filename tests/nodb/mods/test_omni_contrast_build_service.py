@@ -242,6 +242,133 @@ def test_build_contrasts_stream_order_service_groups_hillslopes(tmp_path: Path, 
     assert omni.contrast_names[4:] == [None, None]
 
 
+def test_build_contrasts_stream_order_service_uses_legacy_assignments_when_pair_counts_empty(
+    tmp_path: Path,
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    service = OmniContrastBuildService()
+    wbt_dir = tmp_path / "dem" / "wbt"
+    wbt_dir.mkdir(parents=True)
+
+    for stem in ("flovec", "netful", "relief", "chnjnt", "bound", "subwta"):
+        (wbt_dir / f"{stem}.tif").write_text("", encoding="ascii")
+    (wbt_dir / "outlet.geojson").write_text("{}", encoding="ascii")
+    (wbt_dir / "netful.strahler.tif").write_text("", encoding="ascii")
+    (wbt_dir / "netful.pruned_1.tif").write_text("", encoding="ascii")
+    (wbt_dir / "netful.strahler_pruned_1.tif").write_text("", encoding="ascii")
+    (wbt_dir / "chnjnt.strahler_pruned_1.tif").write_text("", encoding="ascii")
+    (wbt_dir / "subwta.strahler_pruned_1.tif").write_text("", encoding="ascii")
+    (wbt_dir / "netw.strahler_pruned_1.tsv").write_text("", encoding="ascii")
+
+    class DummyDataset:
+        def __enter__(self):
+            return self
+
+        def __exit__(self, exc_type, exc, tb):
+            return False
+
+        def read(self, *args, **kwargs):
+            return np.ma.array([[1, 2, 3]], mask=False)
+
+    rasterio_stub = sys.modules.get("rasterio")
+    if rasterio_stub is None:
+        rasterio_stub = types.ModuleType("rasterio")
+        sys.modules["rasterio"] = rasterio_stub
+    monkeypatch.setattr(rasterio_stub, "open", lambda *args, **kwargs: DummyDataset())
+
+    _ensure_package("wepppyo3", tmp_path)
+    rc_stub = types.ModuleType("wepppyo3.raster_characteristics")
+    rc_stub.identify_mode_single_raster_key = lambda **kwargs: {"10": 2, "20": 1, "30": 1}
+    rc_stub.count_intersecting_raster_key_pairs = lambda **kwargs: {}
+    monkeypatch.setitem(sys.modules, "wepppyo3.raster_characteristics", rc_stub)
+    sys.modules["wepppyo3"].raster_characteristics = rc_stub
+
+    class DummyTranslator:
+        top2wepp = {"10": "1", "20": "2", "30": "3"}
+
+    class DummyWatershed:
+        delineation_backend_is_wbt = True
+        wbt_wd = str(wbt_dir)
+
+        def translator_factory(self):
+            return DummyTranslator()
+
+    monkeypatch.setattr(omni_module.Watershed, "getInstance", lambda wd: DummyWatershed())
+    monkeypatch.setattr(
+        omni_module.Omni,
+        "base_scenario",
+        property(lambda self: omni_module.OmniScenario.Undisturbed),
+        raising=False,
+    )
+
+    omni = omni_module.Omni.__new__(omni_module.Omni)
+    omni.wd = str(tmp_path)
+    omni.locked = _noop_lock
+    omni.logger = logging.getLogger("tests.omni.contrast_build_service.stream_order.empty_pairs")
+    omni._contrast_pairs = [
+        {"control_scenario": "uniform_low", "contrast_scenario": "mulch"},
+        {"control_scenario": "uniform_low", "contrast_scenario": "thinning"},
+    ]
+    omni._contrast_order_reduction_passes = 1
+
+    service.build_contrasts_stream_order(omni)
+
+    assert omni.contrast_names[:4] == [
+        "uniform_low,1__to__mulch",
+        "uniform_low,2__to__thinning",
+        "uniform_low,3__to__mulch",
+        "uniform_low,4__to__thinning",
+    ]
+    assert omni.contrast_names[4:] == [None, None]
+
+
+def test_collect_stream_order_group_assignments_tie_break_prefers_value_when_global_counts_tie(
+    tmp_path: Path,
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    service = OmniContrastBuildService()
+    source_paths = {"subwta": tmp_path / "subwta.tif"}
+    generated_paths = {"subwta_pruned": tmp_path / "subwta_pruned.tif"}
+    source_paths["subwta"].write_text("", encoding="ascii")
+    generated_paths["subwta_pruned"].write_text("", encoding="ascii")
+
+    class DummyDataset:
+        def __enter__(self):
+            return self
+
+        def __exit__(self, exc_type, exc, tb):
+            return False
+
+        def read(self, *args, **kwargs):
+            return np.ma.array([[1, 2]], mask=False)
+
+    rasterio_stub = sys.modules.get("rasterio")
+    if rasterio_stub is None:
+        rasterio_stub = types.ModuleType("rasterio")
+        sys.modules["rasterio"] = rasterio_stub
+    monkeypatch.setattr(rasterio_stub, "open", lambda *args, **kwargs: DummyDataset())
+
+    _ensure_package("wepppyo3", tmp_path)
+    rc_stub = types.ModuleType("wepppyo3.raster_characteristics")
+    rc_stub.count_intersecting_raster_key_pairs = lambda **kwargs: {
+        "10": {"1": 5, "2": 5},
+        "20": {"1": 1},
+        "30": {"2": 1},
+    }
+    rc_stub.identify_mode_single_raster_key = lambda **kwargs: {"10": 1, "20": 1, "30": 2}
+    monkeypatch.setitem(sys.modules, "wepppyo3.raster_characteristics", rc_stub)
+    sys.modules["wepppyo3"].raster_characteristics = rc_stub
+
+    assignments, unique_values = service._collect_stream_order_group_assignments(
+        source_paths=source_paths,
+        generated_paths=generated_paths,
+    )
+
+    # For key 10: local counts tie (5/5), global counts tie (6/6), so larger value wins.
+    assert assignments["10"] == 2
+    assert sorted(int(v) for v in unique_values.tolist()) == [1, 2]
+
+
 def test_build_contrasts_user_defined_areas_service_builds_sidecars(
     tmp_path: Path,
     monkeypatch: pytest.MonkeyPatch,
