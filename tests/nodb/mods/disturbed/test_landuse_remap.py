@@ -105,8 +105,13 @@ def test_remap_landuse_applies_burn_classes_and_respects_flags(
     )
     monkeypatch.setattr(
         disturbed_module,
-        "identify_mode_single_raster_key",
-        lambda **_kwargs: {"101": 1, "102": 2, "103": 3, "104": 1},
+        "count_intersecting_raster_key_pairs",
+        lambda **_kwargs: {
+            "101": {"1": 10},
+            "102": {"2": 10},
+            "103": {"3": 10},
+            "104": {"1": 10},
+        },
     )
     monkeypatch.setattr(
         disturbed_module,
@@ -167,8 +172,12 @@ def test_remap_landuse_defers_rebuild_when_requested_and_compacts_info_logging(
     )
     monkeypatch.setattr(
         disturbed_module,
-        "identify_mode_single_raster_key",
-        lambda **_kwargs: {"101": 1, "102": 2, "103": 3},
+        "count_intersecting_raster_key_pairs",
+        lambda **_kwargs: {
+            "101": {"1": 12},
+            "102": {"2": 9},
+            "103": {"3": 7},
+        },
     )
     monkeypatch.setattr(
         disturbed_module,
@@ -188,6 +197,64 @@ def test_remap_landuse_defers_rebuild_when_requested_and_compacts_info_logging(
     assert any("Disturbed remap summary:" in message for message in logger.info_messages)
     assert not any("topaz_id=" in message for message in logger.info_messages)
     assert any("topaz_id=" in message for message in logger.debug_messages)
+
+
+def test_remap_landuse_treats_nodata_only_hillslopes_as_no_burn(
+    disturbed_factory,
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    disturbed, _ = disturbed_factory("remap-landuse-nodata-fallback")
+    disturbed._burn_shrubs = True
+    disturbed._burn_grass = False
+
+    landuse = _FakeLanduse(
+        domlc_d={"101": "forest-dom", "102": "shrub-dom"},
+        managements={
+            "forest-dom": _ManagementSummary("forest"),
+            "shrub-dom": _ManagementSummary("shrub"),
+        },
+    )
+    _FakeLanduse._instance = landuse
+
+    monkeypatch.setattr(Disturbed, "landuse_instance", property(lambda self: landuse))
+    monkeypatch.setattr(
+        Disturbed,
+        "get_disturbed_key_lookup",
+        lambda self: {
+            "forest_low_sev_fire": "forest-low",
+            "forest_moderate_sev_fire": "forest-mod",
+            "forest_high_sev_fire": "forest-high",
+            "shrub_low_sev_fire": "shrub-low",
+            "shrub_moderate_sev_fire": "shrub-mod",
+            "shrub_high_sev_fire": "shrub-high",
+            "grass_low_sev_fire": "grass-low",
+            "grass_moderate_sev_fire": "grass-mod",
+            "grass_high_sev_fire": "grass-high",
+        },
+    )
+    monkeypatch.setattr(
+        disturbed_module,
+        "count_intersecting_raster_key_pairs",
+        lambda **_kwargs: {"101": {"3": 4}},
+    )
+    monkeypatch.setattr(
+        disturbed_module,
+        "Watershed",
+        SimpleNamespace(getInstance=lambda _wd: SimpleNamespace(subwta="subwta.tif")),
+    )
+    monkeypatch.setattr(Disturbed, "_calc_sbs_coverage", lambda self, _sbs: None)
+    monkeypatch.setattr(
+        Disturbed,
+        "get_sbs",
+        lambda self: SimpleNamespace(class_pixel_map={"3": "132"}),
+    )
+
+    disturbed.remap_landuse()
+
+    assert landuse.domlc_d["101"] == "forest-mod"
+    # Key 102 has no valid SBS cells; it must remain unburned instead of inheriting global mode.
+    assert landuse.domlc_d["102"] == "shrub-dom"
+    assert disturbed.meta["102"]["burn_class"] == "130"
 
 
 def test_remap_mofe_landuse_maps_burned_classes(

@@ -75,7 +75,7 @@ from ...base import NoDbBase, TriggerEvents, createProcessPoolExecutor, nodb_set
 from ..baer.sbs_map import SoilBurnSeverityMap
 from .. import MODS_DIR, EXTENDED_MODS_DATA
 
-from wepppyo3.raster_characteristics import identify_mode_single_raster_key
+from wepppyo3.raster_characteristics import count_intersecting_raster_key_pairs
 
 __all__ = [
     'disturbed_class_aliases',
@@ -1260,16 +1260,40 @@ class Disturbed(NoDbBase):
             self._calc_sbs_coverage(sbs)
 
             landuse.logger.info('  Running burn-severity remap identify on %s', self.disturbed_cropped)
-            sbs_lc_d = identify_mode_single_raster_key(
-                key_fn=watershed.subwta, parameter_fn=self.disturbed_cropped, ignore_channels=True, ignore_keys=set())
+            key_value_counts = count_intersecting_raster_key_pairs(
+                key_fn=watershed.subwta,
+                key2_fn=self.disturbed_cropped,
+                ignore_channels=True,
+                ignore_keys=set(),
+                ignore_keys2=set(),
+            )
+            global_value_counts: Counter[int] = Counter()
+            for per_key_counts in key_value_counts.values():
+                for raw_val, raw_count in per_key_counts.items():
+                    global_value_counts[int(raw_val)] += int(raw_count)
+
+            sbs_lc_d: Dict[str, str] = {}
+            for key, per_key_counts in key_value_counts.items():
+                if not per_key_counts:
+                    continue
+                mode_val = max(
+                    ((int(raw_val), int(raw_count)) for raw_val, raw_count in per_key_counts.items()),
+                    key=lambda item: (
+                        item[1],
+                        global_value_counts.get(item[0], 0),
+                        item[0],
+                    ),
+                )[0]
+                sbs_lc_d[str(key)] = str(mode_val)
             landuse.logger.info('  Completed burn-severity remap identify')
-            sbs_lc_d = {k: str(v) for k, v in sbs_lc_d.items()}
            
             class_pixel_map = sbs.class_pixel_map
+            nodata_only_keys = 0
 
-            landuse.logger.debug('  Iterating over %s remap hillslopes', len(sbs_lc_d))
-            for topaz_id, val in sbs_lc_d.items():
-                if (int(topaz_id) - 4) % 10 == 0:
+            landuse.logger.debug('  Iterating over %s remap hillslopes', len(landuse.domlc_d))
+            for topaz_id in landuse.domlc_d:
+                topaz_key = str(topaz_id)
+                if (int(topaz_key) - 4) % 10 == 0:
                     channel_skips += 1
                     continue
 
@@ -1277,10 +1301,15 @@ class Disturbed(NoDbBase):
                 dom = landuse.domlc_d[topaz_id]
                 man = landuse.managements[dom]
 
-                burn_class = class_pixel_map[val]
+                val = sbs_lc_d.get(topaz_key)
+                if val is None:
+                    burn_class = '130'
+                    nodata_only_keys += 1
+                else:
+                    burn_class = class_pixel_map[val]
                 landuse.logger.debug(
                     '    topaz_id=%s sbs_lc=%s dom=%s disturbed_class=%s burn_class=%s',
-                    topaz_id,
+                    topaz_key,
                     val,
                     dom,
                     man.disturbed_class,
@@ -1289,36 +1318,37 @@ class Disturbed(NoDbBase):
                 # topaz_id: 8632, sbs_lc: 2, dom: 42, man.disturbed_class: forest, burn_class: 255
                 if burn_class in ['131', '132', '133']:
                     if man.disturbed_class in ['forest', 'young forest']:
-                        landuse.logger.debug('     burning topaz_id=%s bucket=forest', topaz_id)
+                        landuse.logger.debug('     burning topaz_id=%s bucket=forest', topaz_key)
                         landuse.domlc_d[topaz_id] = {'131': disturbed_key_lookup['forest_low_sev_fire'], 
                                                      '132': disturbed_key_lookup['forest_moderate_sev_fire'], 
                                                      '133': disturbed_key_lookup['forest_high_sev_fire']}[burn_class]
                         burned_counts['forest'] += 1
 
                     elif man.disturbed_class == 'shrub' and burn_shrubs:
-                        landuse.logger.debug('     burning topaz_id=%s bucket=shrub', topaz_id)
+                        landuse.logger.debug('     burning topaz_id=%s bucket=shrub', topaz_key)
                         landuse.domlc_d[topaz_id] = {'131': disturbed_key_lookup['shrub_low_sev_fire'], 
                                                      '132': disturbed_key_lookup['shrub_moderate_sev_fire'], 
                                                      '133': disturbed_key_lookup['shrub_high_sev_fire']}[burn_class]
                         burned_counts['shrub'] += 1
                         
                     elif man.disturbed_class in ['tall grass'] and burn_grass:
-                        landuse.logger.debug('     burning topaz_id=%s bucket=grass', topaz_id)
+                        landuse.logger.debug('     burning topaz_id=%s bucket=grass', topaz_key)
                         landuse.domlc_d[topaz_id] = {'131': disturbed_key_lookup['grass_low_sev_fire'], 
                                                      '132': disturbed_key_lookup['grass_moderate_sev_fire'], 
                                                      '133': disturbed_key_lookup['grass_high_sev_fire']}[burn_class]
                         burned_counts['grass'] += 1
 
-                meta[topaz_id] = dict(burn_class=burn_class, disturbed_class=man.disturbed_class)
+                meta[topaz_key] = dict(burn_class=burn_class, disturbed_class=man.disturbed_class)
 
         total_burned = int(sum(burned_counts.values()))
         landuse.logger.info(
-            '  Disturbed remap summary: evaluated=%s burned=%s (forest=%s shrub=%s grass=%s) unchanged=%s skipped_channels=%s',
+            '  Disturbed remap summary: evaluated=%s burned=%s (forest=%s shrub=%s grass=%s) nodata_only=%s unchanged=%s skipped_channels=%s',
             evaluated_hillslopes,
             total_burned,
             burned_counts.get('forest', 0),
             burned_counts.get('shrub', 0),
             burned_counts.get('grass', 0),
+            nodata_only_keys,
             max(evaluated_hillslopes - total_burned, 0),
             channel_skips,
         )
