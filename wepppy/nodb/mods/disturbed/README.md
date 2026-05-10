@@ -34,6 +34,16 @@ The primary input. Users either:
 
 The module reprojects the raster to match the watershed DEM, classifies pixels into four severity classes (unburned=130, low=131, moderate=132, high=133), and computes per-hillslope dominant severity.
 
+### NoData/Off-Map Fallback Contract
+
+Burn-severity remapping is based only on valid SBS pixels that intersect each hillslope.
+
+- If a hillslope has at least one valid SBS pixel, the hillslope uses the dominant class from those valid pixels.
+- If a hillslope has no valid SBS pixels (for example, outside raster footprint or SBS nodata-only), the hillslope must default to `130` (`No Burn` / unburned).
+- Disturbed mapping must not use global-mode fallback for nodata-only hillslopes.
+
+Rationale: global-mode fallback can propagate a burned class (often moderate) into hillslopes with no burn evidence, which overstates burned area and produces incorrect management/soil assignment.
+
 ### Disturbed Land Soil Lookup Table
 
 A CSV lookup that maps disturbed class and soil texture to WEPP parameters. Each project gets a run-scoped copy that can be edited through the PowerUser panel.
@@ -229,6 +239,7 @@ disturbed.modify_soils()
 ## Developer Notes
 
 - `remap_landuse()` and `remap_mofe_landuse()` map SBS classes 131/132/133 to low/mod/high severity management keys using `wepppy/wepp/management/data/disturbed.json`.
+- `remap_landuse()` treats nodata-only/off-map hillslopes as unburned (`130`) by contract; this is an intentional safety rule and not configurable to global-mode fallback.
 - If a management entry defines `SoilFile`/`sol_path`, the controller copies that soil directly instead of regenerating from the lookup table.
 - For treatment suffixes (`-mulch_15`, `-thinning`, etc.), `lookup_disturbed_class()` strips the suffix so soils are keyed by burn severity, not treatment type.
 - For MOFE runs, each OFE gets its own disturbed soil file, reassembled into a `.mofe.sol` via `SoilMultipleOfeSynth`.

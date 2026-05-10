@@ -56,6 +56,7 @@ If you are uploading an SBS raster, the safest input is a single-band integer Ge
 | Dominant hillslope severity | The severity class that occupies the largest area on a modeled hillslope in standard single-OFE workflows | One class per hillslope | WEPP inputs are usually assigned at the hillslope scale, so sub-hillslope mosaics are simplified unless a workflow preserves multiple OFEs |
 | `burn_shrubs` | Whether shrub hillslopes are remapped to burned shrub classes | `True` or `False` | Affects how shrub-dominated hillslopes respond in advanced or platform-level configurations |
 | `burn_grass` | Whether grass hillslopes are remapped to burned grass classes | `True` or `False` | Affects how grass-dominated hillslopes respond in advanced or platform-level configurations; the current default is off |
+| NoData/off-map fallback | Rule used when a hillslope has no valid SBS pixels | `No Burn` (`130`) | Prevents unobserved areas from inheriting a burned class; nodata/off-map hillslopes stay unburned |
 | Disturbed land-soil lookup table | The per-project table of disturbed soil and vegetation parameters | User-editable CSV | Controls erodibility, effective hydraulic conductivity, hydrophobicity, and plant parameters, and also serves as a global calibration harness |
 | Hydrophobicity | Water repellency after fire, represented through lookup-table soil parameters | Usually strongest in high-severity fire classes | Stronger hydrophobicity generally means less infiltration and more surface runoff |
 
@@ -145,6 +146,7 @@ The lookup table can also be used as a calibration harness. When that table is e
 ## Assumptions and Limits
 
 - In standard single-OFE workflows, the module assigns one dominant severity class per modeled hillslope. Fine-scale burn mosaics inside a hillslope are simplified.
+- If a hillslope has no valid SBS pixels (for example, nodata-only or outside map footprint), the hillslope defaults to unburned (`130`), not to a watershed-wide mode class.
 - Multi-OFE workflows can preserve more within-hillslope variation, but they still use lookup-based disturbed classes rather than direct measurement of every soil property.
 - The current empirical basis for the default parameterization is strongest in Rocky Mountain and Pacific Northwest coniferous forest settings. Results may be less reasonable in ecosystems with very different vegetation, soils, fuels, or post-fire hydrologic response.
 - Output quality depends on the quality of the SBS map, the watershed delineation, the baseline soils, and the baseline land-cover classification.
@@ -160,6 +162,7 @@ The lookup table can also be used as a calibration harness. When that table is e
 | Problem | What it usually means | What to check |
 | --- | --- | --- |
 | The map fails validation | The SBS raster is missing projection metadata, uses non-integer values, has too many classes, or has an unrecognized color table | Reproject to a valid projected coordinate system, export as a single-band integer GeoTIFF, and review [SBS Map Utilities](../baer/README.sbs_map.md) |
+| Burn appears in areas that should be outside the mapped footprint | Hillslopes with no valid SBS pixels should remain unburned; if burned classes appear broadly, verify the SBS coverage/extent and nodata handling | Confirm the normalized SBS map footprint and class coverage. Nodata/off-map hillslopes are expected to map to `No Burn` (`130`) |
 | Results do not change much after applying disturbance | The watershed may be mostly unburned, the dominant class may still be unburned on many hillslopes, shrub/grass burning may be disabled, or the watershed may still infiltrate enough water to limit large runoff and erosion changes even under burned parameterization | Check the normalized SBS map, hillslope coverage, the shrub/grass settings, and whether local soils and slopes are likely to remain infiltration-dominated |
 | Results change too much | High-severity area may be overrepresented or the lookup table may have been edited aggressively | Review the disturbed land-soil lookup table and compare against project defaults |
 | A local calibration does not match field observations | The default lookup table is generalized and may not represent local soils, fuels, or recovery conditions exactly | Use field evidence carefully, document any lookup-table changes, and compare against the baseline run |
