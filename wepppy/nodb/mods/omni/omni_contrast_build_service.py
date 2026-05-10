@@ -306,15 +306,37 @@ class OmniContrastBuildService:
         source_paths: Dict[str, Path],
         generated_paths: Dict[str, Path],
     ) -> Tuple[Dict[str, Any], Iterable[Any]]:
-        from wepppyo3.raster_characteristics import identify_mode_single_raster_key
+        from collections import Counter
+
+        from wepppyo3.raster_characteristics import count_intersecting_raster_key_pairs
         import numpy as np
         import rasterio
 
-        group_assignments = identify_mode_single_raster_key(
+        key_value_counts = count_intersecting_raster_key_pairs(
             key_fn=str(source_paths["subwta"]),
-            parameter_fn=str(generated_paths["subwta_pruned"]),
+            key2_fn=str(generated_paths["subwta_pruned"]),
             ignore_channels=True,
+            ignore_keys=set(),
+            ignore_keys2=set(),
         )
+        global_value_counts: Counter[int] = Counter()
+        for per_key_counts in key_value_counts.values():
+            for raw_value, raw_count in per_key_counts.items():
+                global_value_counts[int(raw_value)] += int(raw_count)
+
+        group_assignments: Dict[str, int] = {}
+        for key, per_key_counts in key_value_counts.items():
+            if not per_key_counts:
+                continue
+            mode_value = max(
+                ((int(raw_value), int(raw_count)) for raw_value, raw_count in per_key_counts.items()),
+                key=lambda item: (
+                    item[1],
+                    global_value_counts.get(item[0], 0),
+                    item[0],
+                ),
+            )[0]
+            group_assignments[str(key)] = mode_value
 
         with rasterio.open(generated_paths["subwta_pruned"]) as dataset:
             data = dataset.read(1, masked=True)

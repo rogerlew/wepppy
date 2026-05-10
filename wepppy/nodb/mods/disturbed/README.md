@@ -42,7 +42,10 @@ Burn-severity remapping is based only on valid SBS pixels that intersect each hi
 - If a hillslope has no valid SBS pixels (for example, outside raster footprint or SBS nodata-only), the hillslope must default to `130` (`No Burn` / unburned).
 - Disturbed mapping must not use global-mode fallback for nodata-only hillslopes.
 
-Rationale: global-mode fallback can propagate a burned class (often moderate) into hillslopes with no burn evidence, which overstates burned area and produces incorrect management/soil assignment.
+Rationale:
+- Global-mode fallback can propagate a burned class (often moderate) into hillslopes with no burn evidence, which overstates burned area and produces incorrect management/soil assignment.
+- The global-mode behavior in `identify_mode_*` exists for some legacy baseline NLCD/SSURGO assignment paths that require full key coverage, but disturbed burn remapping is a different contract and must stay evidence-based.
+- Disturbed burn remapping therefore uses valid-pixel zonal dominance and explicit unburned fallback (`130`) for no-data intersections.
 
 ### Disturbed Land Soil Lookup Table
 

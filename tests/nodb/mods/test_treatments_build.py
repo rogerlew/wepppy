@@ -1,5 +1,6 @@
 import logging
 from contextlib import contextmanager
+from pathlib import Path
 
 import pytest
 
@@ -140,6 +141,82 @@ def test_build_treatments_updates_domlc_and_dumps_parquet(monkeypatch, tmp_path)
     assert landuse.dump_called is True
     assert apply_calls == [("101", "thinning_40_75", "forest")]
     assert modify_calls == ["101"]
+
+
+@pytest.mark.unit
+def test_validate_map_uses_valid_pixels_only_without_global_mode_fallback(
+    monkeypatch: pytest.MonkeyPatch,
+    tmp_path: Path,
+) -> None:
+    treatments_dir = tmp_path / "treatments"
+    treatments_dir.mkdir(parents=True)
+    source_map = treatments_dir / "source.tif"
+    source_map.write_text("placeholder", encoding="ascii")
+
+    subwta_path = tmp_path / "subwta.tif"
+    subwta_path.write_text("placeholder", encoding="ascii")
+
+    class _DummyDs:
+        @staticmethod
+        def GetProjection() -> str:
+            return "EPSG:32611"
+
+    class _DummyLanduse:
+        @staticmethod
+        def getInstance(_wd):
+            return _DummyLanduse()
+
+        @staticmethod
+        def get_mapping_dict():
+            return {
+                "140": {"DisturbedClass": "thinning_40_75", "IsTreatment": True},
+                "41": {"DisturbedClass": "forest", "IsTreatment": False},
+            }
+
+    class _DummyWatershed:
+        def __init__(self, subwta: str) -> None:
+            self.subwta = subwta
+
+    monkeypatch.setattr(treatments_module.gdal, "Open", lambda _path: _DummyDs())
+    monkeypatch.setattr(treatments_module, "validate_srs", lambda _srs: True)
+    monkeypatch.setattr(
+        treatments_module,
+        "raster_stacker",
+        lambda _src, _subwta, dst: Path(dst).write_text("stacked", encoding="ascii"),
+    )
+    monkeypatch.setattr(
+        treatments_module,
+        "count_intersecting_raster_key_pairs",
+        # 101 has valid treatment pixels, 102 is intentionally absent (nodata-only/off-map).
+        lambda **_kwargs: {"101": {"140": 12}},
+    )
+    monkeypatch.setattr(
+        treatments_module,
+        "Watershed",
+        type(
+            "_WatershedProxy",
+            (),
+            {"getInstance": staticmethod(lambda _wd: _DummyWatershed(str(subwta_path)))},
+        ),
+    )
+    monkeypatch.setattr(treatments_module, "Landuse", _DummyLanduse)
+    monkeypatch.setattr(
+        treatments_module.RedisPrep,
+        "getInstance",
+        staticmethod(lambda _wd: (_ for _ in ()).throw(FileNotFoundError())),
+    )
+
+    treatments = treatments_module.Treatments.__new__(treatments_module.Treatments)
+    treatments.wd = str(tmp_path)
+    treatments.logger = logging.getLogger("test.treatments.validate")
+    treatments._treatments_domlc_d = {}
+    treatments._treatments = {}
+
+    treatments.validate(str(source_map))
+
+    assert treatments.treatments_domlc_d == {"101": "140"}
+    # Key 102 had no valid treatment pixels and must remain unassigned.
+    assert "102" not in treatments.treatments_domlc_d
 
 
 @pytest.mark.unit

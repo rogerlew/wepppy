@@ -288,11 +288,6 @@ def test_build_multiple_ofe_sbs_remap_reuses_existing_management_summaries(
     monkeypatch.setattr(landuse_module, "LandcoverMap", _LandcoverMapStub)
     monkeypatch.setattr(
         landuse_module,
-        "identify_mode_intersecting_raster_keys",
-        lambda **_kwargs: {"101": {"1": "11"}, "102": {"1": "12"}},
-    )
-    monkeypatch.setattr(
-        landuse_module,
         "_wait_for_gdal_openable_raster",
         lambda *_args, **_kwargs: None,
     )
@@ -300,6 +295,10 @@ def test_build_multiple_ofe_sbs_remap_reuses_existing_management_summaries(
 
     class _SbsStub:
         class_pixel_map = {"11": "131", "12": "132"}
+
+        @staticmethod
+        def build_lcgrid(_subwta: str, _mofe_map: str) -> dict[str, dict[str, str]]:
+            return {"101": {"1": "11"}, "102": {"1": "12"}}
 
     class _DisturbedStub:
         burn_shrubs = False
@@ -348,3 +347,92 @@ def test_build_multiple_ofe_sbs_remap_reuses_existing_management_summaries(
     )
     assert all("domlc_d =" not in message for message in logger.info_messages)
     assert any("domlc_d =" in message for message in logger.debug_messages)
+
+@pytest.mark.unit
+def test_build_multiple_ofe_sbs_nodata_segment_stays_unburned(
+    tmp_path: Path,
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    run_dir = tmp_path / "run"
+    (run_dir / "landuse").mkdir(parents=True, exist_ok=True)
+
+    landuse = Landuse.__new__(Landuse)
+    landuse.wd = str(run_dir)
+    landuse._mods = []
+    landuse._mapping = "mock-map"
+    landuse.locked = lambda: nullcontext()
+    landuse.logger = _LoggerStub()
+
+    landuse.managements = {
+        "forest-dom": _ManagementSummaryStub(_ManagementStub(), "forest"),
+        "forest-low": _ManagementSummaryStub(_ManagementStub(), "forest low sev fire"),
+    }
+
+    watershed = SimpleNamespace(
+        _subs_summary={"101": {}},
+        mofe_nsegments={"101": "1"},
+        mofe_buffer=False,
+        subwta=str(run_dir / "watershed" / "subwta.tif"),
+        mofe_map=str(run_dir / "watershed" / "mofe_map.tif"),
+    )
+    monkeypatch.setattr(
+        Landuse,
+        "watershed_instance",
+        property(lambda _self: watershed),
+    )
+    monkeypatch.setattr(landuse_module, "wepppyo3", None)
+
+    class _LandcoverMapStub:
+        def __init__(self, _lc_fn: str) -> None:
+            pass
+
+        def build_lcgrid(self, _subwta: str, _mofe_map: str) -> dict[str, dict[str, str]]:
+            return {"101": {"1": "forest-dom"}}
+
+    monkeypatch.setattr(landuse_module, "LandcoverMap", _LandcoverMapStub)
+    monkeypatch.setattr(
+        landuse_module,
+        "_wait_for_gdal_openable_raster",
+        lambda *_args, **_kwargs: None,
+    )
+    monkeypatch.setattr(landuse_module.os, "cpu_count", lambda: 1)
+
+    class _SbsStub:
+        class_pixel_map = {"255": "130"}
+
+        @staticmethod
+        def build_lcgrid(_subwta: str, _mofe_map: str) -> dict[str, dict[str, str]]:
+            # Nodata-only segment from SBS crop/off-footprint.
+            return {"101": {"1": "255"}}
+
+    class _DisturbedStub:
+        burn_shrubs = False
+        burn_grass = False
+        land_soil_replacements_d = None
+        disturbed_cropped = str(run_dir / "disturbed" / "disturbed_cropped.tif")
+
+        def get_disturbed_key_lookup(self) -> dict[str, str]:
+            return {
+                "forest_low_sev_fire": "forest-low",
+                "forest_moderate_sev_fire": "forest-mod",
+                "forest_high_sev_fire": "forest-high",
+                "shrub_low_sev_fire": "shrub-low",
+                "shrub_moderate_sev_fire": "shrub-mod",
+                "shrub_high_sev_fire": "shrub-high",
+                "grass_low_sev_fire": "grass-low",
+                "grass_moderate_sev_fire": "grass-mod",
+                "grass_high_sev_fire": "grass-high",
+            }
+
+        def get_sbs(self) -> _SbsStub:
+            return _SbsStub()
+
+    monkeypatch.setattr(
+        "wepppy.nodb.mods.disturbed.Disturbed.tryGetInstance",
+        lambda _wd: _DisturbedStub(),
+    )
+
+    landuse._build_multiple_ofe()
+
+    # Nodata/off-map MOFE segment must stay baseline (unburned), not remap via global mode.
+    assert landuse.domlc_mofe_d == {"101": {"1": "forest-dom"}}

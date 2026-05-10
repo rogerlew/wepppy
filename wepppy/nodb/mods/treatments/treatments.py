@@ -11,7 +11,6 @@ from os.path import join as _join
 from os.path import exists as _exists
 from os.path import split as _split
 from copy import deepcopy
-from collections import Counter
 
 import math
 import numpy as np
@@ -36,7 +35,7 @@ from wepppy.nodb.mods.disturbed import Disturbed
 
 from .mulch_application import ground_cover_change as mulch_ground_cover_change
 
-from wepppyo3.raster_characteristics import identify_mode_single_raster_key
+from wepppyo3.raster_characteristics import count_intersecting_raster_key_pairs
 
 __all__ = [
     'TreatmentsNoDbLockedException',
@@ -167,14 +166,34 @@ class Treatments(NoDbBase):
 
         raster_stacker(treatment_path, subwta_fn, self.treatments_map)
 
-        # identify treatments from map
-        domlc_d = identify_mode_single_raster_key(
+        # Identify treatments from valid intersecting pixels only.
+        # Hillslopes with no valid treatment pixels are left unassigned.
+        key_value_counts = count_intersecting_raster_key_pairs(
             key_fn=subwta_fn,
-            parameter_fn=self.treatments_map,
+            key2_fn=self.treatments_map,
             ignore_channels=True,
             ignore_keys=set(),
+            ignore_keys2=set(),
         )
-        domlc_d = {str(k): str(v) for k, v in domlc_d.items()}
+        global_value_counts: Counter[int] = Counter()
+        for per_key_counts in key_value_counts.values():
+            for raw_value, raw_count in per_key_counts.items():
+                global_value_counts[int(raw_value)] += int(raw_count)
+
+        domlc_d: Dict[str, str] = {}
+        for key, per_key_counts in key_value_counts.items():
+            if not per_key_counts:
+                continue
+
+            mode_value = max(
+                ((int(raw_value), int(raw_count)) for raw_value, raw_count in per_key_counts.items()),
+                key=lambda item: (
+                    item[1],
+                    global_value_counts.get(item[0], 0),
+                    item[0],
+                ),
+            )[0]
+            domlc_d[str(key)] = str(mode_value)
 
         # filter out non treatment keys
         valid_keys = set(self.get_valid_treatment_keys())

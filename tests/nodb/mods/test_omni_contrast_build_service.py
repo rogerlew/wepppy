@@ -195,7 +195,11 @@ def test_build_contrasts_stream_order_service_groups_hillslopes(tmp_path: Path, 
     _ensure_package("wepppyo3", tmp_path)
     rc_stub = types.ModuleType("wepppyo3.raster_characteristics")
     rc_stub.identify_mode_single_raster_key = lambda **kwargs: {"10": 2, "20": 1, "30": 1}
-    rc_stub.count_intersecting_raster_key_pairs = lambda **kwargs: {}
+    rc_stub.count_intersecting_raster_key_pairs = lambda **kwargs: {
+        "10": {"2": 5},
+        "20": {"1": 4},
+        "30": {"1": 3},
+    }
     monkeypatch.setitem(sys.modules, "wepppyo3.raster_characteristics", rc_stub)
     sys.modules["wepppyo3"].raster_characteristics = rc_stub
 

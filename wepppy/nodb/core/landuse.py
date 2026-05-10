@@ -1422,11 +1422,9 @@ class Landuse(NoDbBase):
                 _wait_for_gdal_openable_raster(watershed.subwta, timeout_s=wait_s, poll_s=poll_s, logger=self.logger)
                 _wait_for_gdal_openable_raster(watershed.mofe_map, timeout_s=wait_s, poll_s=poll_s, logger=self.logger)
                 _wait_for_gdal_openable_raster(disturbed.disturbed_cropped, timeout_s=wait_s, poll_s=poll_s, logger=self.logger)
-                sbs_lc_d = identify_mode_intersecting_raster_keys(
-                    key_fn=watershed.subwta,
-                    key2_fn=watershed.mofe_map,
-                    parameter_fn=disturbed.disturbed_cropped
-                )
+                # Use direct zonal dominance over the SBS raster instead of global-mode fallback.
+                # Nodata/off-map OFE segments remain unburned (class 130 via class_pixel_map[255]).
+                sbs_lc_d = sbs.build_lcgrid(watershed.subwta, watershed.mofe_map)
                 
                 for k, v in sbs_lc_d.items():
                     for k2, v2 in v.items():
@@ -1445,7 +1443,7 @@ class Landuse(NoDbBase):
                             managements[dom] = get_management_summary(dom, mapping_reference)
                         man = managements[dom]
 
-                        burn_class = class_pixel_map[val]
+                        burn_class = class_pixel_map.get(val, '130')
 
                         if burn_class in ['131', '132', '133']:
                             if man.disturbed_class in ['forest', 'young forest']:
