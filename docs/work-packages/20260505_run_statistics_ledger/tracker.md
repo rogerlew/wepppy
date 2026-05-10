@@ -21,7 +21,7 @@
 - [ ] Implement deterministic backfill from dot files and legacy artifacts.
 - [ ] Add WEPP hillslope runtime event hook.
 - [ ] Add WATAR ash runtime event hook.
-- [ ] Add TTL deletion event hook.
+- [ ] Add TTL deletion audit-event hook (must not decrement historical totals).
 - [ ] Generate canonical rollups and compatibility `runs_counter.json`.
 - [ ] Update `/stats`, `/stats/<key>`, `/access-by-year`, and `/access-by-month` to Postgres-backed rollups.
 

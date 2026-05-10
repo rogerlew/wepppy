@@ -182,6 +182,7 @@ gl-dashboard.js (main)
   weppYearlyMetadata: { years: [...], minYear, maxYear },
   weppYearlySelectedYear: 2023,
   weppYearlySummary: { [topaz_id]: { runoff, sedyld, ... } },
+  weppYearlyRangeOverrides: { [mode]: { min, max } }, // user-edited legend max values persisted across years
   weppYearlyLayers: [{ key, label, mode, visible, ... }],
   weppYearlyChannelSummary: { [topaz_id]: { channel_discharge_volume, channel_soil_loss, ... } },
   weppYearlyChannelRanges: { channel_discharge_volume: { min, max }, channel_soil_loss: { min, max } },
@@ -722,6 +723,7 @@ Graph minimized (controls disabled; slider hidden)
 
 **Editable Range Controls:**
 - Continuous legends expose an editable max input for `OpenET`, `WATAR`, `WEPP`, `WEPP Channels`, `WEPP Yearly`, `WEPP Yearly Channels`, and `WEPP Event`.
+- For `WEPP Yearly`, committed edits are stored as per-mode overrides and persist when the year slider changes.
 - Diverging legends expose an editable absolute max in comparison mode; entering `X` stores `min=-X` and `max=+X`.
 - On `input`: map colors update immediately via `applyLayers({ skipLegendUpdate: true, skipGraphSync: true })` so the map redraws while focus stays in the input.
 - On `change` or `Enter`: the value is committed and the legends panel is rebuilt.
@@ -868,6 +870,7 @@ User edits `.gl-legend-range-input`
 input handler parses candidate value
   ↓
 Update range state (`weppRanges`, `watarRanges`, `openetRanges`, etc.)
+  - WEPP Yearly writes both `weppYearlyRanges` and `weppYearlyRangeOverrides` so the user range sticks across years.
   ↓
 applyLayers({ skipLegendUpdate: true, skipGraphSync: true })
   ↓

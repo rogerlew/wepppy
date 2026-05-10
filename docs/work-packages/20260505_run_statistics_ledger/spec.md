@@ -32,6 +32,7 @@ The replacement system must separate active-project inventory from historical ex
 ## Non-Negotiable Requirements
 
 - The primary execution ledger must be PostgreSQL-backed with transactional inserts and uniqueness constraints so concurrent writers cannot corrupt counts.
+- `project_deleted` is an audit event only and must never decrement historical WEPP/WATAR totals.
 - Runtime hooks must append only after successful model completion. Failed runs must not increment completed execution counts.
 - Repeated successful runs inside one project must create additional execution events and increase totals.
 - Backfill must be idempotent. Running it twice must not duplicate historical events.
@@ -150,7 +151,7 @@ If implementation captures skipped hillslopes, record them as `skipped_hillslope
 
 ### Project Deletion
 
-Append `project_deleted` from `wepppy/rq/project_rq_delete.py` before the run directory is removed by TTL GC or explicit delete. This event is a historical audit event. Active project counts must still be derived from current active inventory, not by subtracting deletion events alone.
+Append `project_deleted` from `wepppy/rq/project_rq_delete.py` before the run directory is removed by TTL GC or explicit delete. This event is historical audit metadata only. It does not subtract from historical execution totals. Active project counts must still be derived from current active inventory, not by subtracting deletion events.
 
 ## Backfill
 

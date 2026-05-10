@@ -18,7 +18,7 @@ This plan implements the contract in `docs/work-packages/20260505_run_statistics
 - [ ] Implement the Postgres statistics ledger module and unit tests.
 - [ ] Add deterministic backfill and rollup generation tests.
 - [ ] Add WEPP hillslope and WATAR runtime hooks.
-- [ ] Add TTL deletion event hook.
+- [ ] Add TTL deletion audit-event hook (must not decrement historical totals).
 - [ ] Preserve compatibility stats outputs and migrate `/stats` endpoints to database-backed rollups with route tests.
 - [ ] Run targeted validation and update package closeout notes.
 
@@ -78,7 +78,7 @@ Milestone 2 adds rollup and backfill logic. Refactor `compile_dot_logs.py` caref
 
 Milestone 3 wires runtime events. In `WeppRunService.run_hillslopes()`, append `wepp_hillslopes_completed` after all futures complete and before or after the existing Redis timestamp. In `Ash.run_ash()`, append `watar_hillslopes_completed` after successful ash post-processing. Treat append failures as logged observability failures that do not fail completed model work, unless the implementation team deliberately chooses fail-closed behavior and documents it in this plan.
 
-Milestone 4 wires deletion events. In `delete_run_rq()` or the GC path, append `project_deleted` before removing the run directory. Keep active counts based on active inventory rather than trying to subtract deletion events from the full history.
+Milestone 4 wires deletion events. In `delete_run_rq()` or the GC path, append `project_deleted` before removing the run directory. This is audit metadata only and must never decrement historical totals. Keep active counts based on active inventory rather than trying to subtract deletion events from the full history.
 
 Milestone 5 preserves compatibility and migrates routes. Generate `run_statistics_summary.json` and `run_statistics_by_config.csv`, keep writing `runs_counter.json` with legacy keys, and update `wepppy/weppcloud/routes/stats.py` to read database-backed rollups while keeping response shapes stable for `/stats`, `/stats/<key>`, `/access-by-year`, and `/access-by-month`. Leave `/getloadavg` unchanged.
 

@@ -3,6 +3,8 @@ import os
 import zipfile
 from pathlib import Path
 
+import pyarrow as pa
+import pyarrow.parquet as pq
 import pytest
 
 TestClient = pytest.importorskip("starlette.testclient").TestClient
@@ -438,6 +440,47 @@ def test_download_blocks_recorder_log_paths(tmp_path: Path, monkeypatch, load_br
 
     assert response.status_code == 403
     assert "recorder log artifacts" in response.text
+
+
+def test_download_watershed_parquet_as_csv_converts_for_nodir_root(
+    tmp_path: Path,
+    monkeypatch,
+    load_browse,
+):
+    runid = "run-nodir-csv"
+    config = "disturbed9002_wbt"
+    run_root = tmp_path / "run"
+    run_root.mkdir()
+
+    watershed_dir = run_root / "watershed"
+    watershed_dir.mkdir(parents=True, exist_ok=True)
+    table = pa.Table.from_pylist(
+        [
+            {"topaz_id": 101, "chn_enum": 1},
+            {"topaz_id": 102, "chn_enum": 2},
+        ]
+    )
+    pq.write_table(table, watershed_dir / "channels.parquet")
+
+    browse = load_browse(SITE_PREFIX="/weppcloud")
+    monkeypatch.setattr(browse, "get_wd", lambda _runid: str(run_root))
+    import wepppy.microservices.browse._download as download_mod
+    monkeypatch.setattr(download_mod, "get_wd", lambda _runid, prefer_active=False: str(run_root))
+    app = browse.create_app()
+
+    with TestClient(app) as client:
+        response = client.get(
+            f"/weppcloud/runs/{runid}/{config}/download/watershed/channels.parquet?as_csv=1"
+        )
+
+    assert response.status_code == 200
+    assert response.headers.get("content-type", "").startswith("text/csv")
+    assert 'filename="channels.csv"' in response.headers.get("content-disposition", "")
+    csv_text = response.text
+    assert "topaz_id" in csv_text
+    assert "chn_enum" in csv_text
+    assert "101,1" in csv_text
+    assert "102,2" in csv_text
 
 
 def test_aria2c_spec_excludes_hidden_and_recorder_artifacts(tmp_path: Path, monkeypatch, load_browse):

@@ -46,6 +46,15 @@ Feel free to omit `notes/` or `artifacts/` if the package stays simple.
 
 Keeping everything inside one folder makes handoffs easier and lets us archive the package without losing the history.
 
+## Modernization Scope Clarity
+
+For modernization/migration packages, avoid ambiguous completion claims:
+
+1. Declare the package target as `faithful extraction` or `scaffold/surrogate`.
+2. Treat `implemented` and `wired` as separate states in trackers/disposition notes.
+3. Require generated-output evidence from current build/path for implementation closeout unless explicitly waived.
+4. If scaffold-first is intentional, mark the package as non-closeable implementation scope and name the successor package.
+
 ## Hardening and Softening Expectations
 
 When a package is incident-driven or primarily remediation hardening:

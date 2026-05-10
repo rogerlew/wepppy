@@ -287,13 +287,32 @@ async def download_with_subpath(request: Request) -> Response:
             raise HTTPException(status_code=404)
         if entry.is_dir:
             raise HTTPException(status_code=404)
+        filename = entry.name
+        ext = os.path.splitext(filename)[1].lower()
+        as_csv = request.query_params.get("as_csv")
+        if as_csv and ext in {".parquet", ".geoparquet", ".pq"}:
+            try:
+                fp = nodir_open_read(nodir_target)
+            except FileNotFoundError:
+                raise HTTPException(status_code=404)
+            except NoDirError as err:
+                _raise_nodir_error(err)
+            try:
+                df = await asyncio.to_thread(_parquet_fp_to_dataframe_with_units, fp)
+            finally:
+                fp.close()
+            csv_bytes = await asyncio.to_thread(_df_to_csv_bytes, df)
+            csv_name = os.path.splitext(filename)[0] + ".csv"
+            headers = {
+                "Content-Disposition": f'attachment; filename="{csv_name}"'
+            }
+            return Response(csv_bytes, media_type="text/csv", headers=headers)
         try:
             fp = nodir_open_read(nodir_target)
         except FileNotFoundError:
             raise HTTPException(status_code=404)
         except NoDirError as err:
             _raise_nodir_error(err)
-        filename = entry.name
         return _stream_binary_download(fp, filename)
 
     if nodir_root is not None and nodir_view == "archive":
@@ -444,12 +463,22 @@ def _df_to_csv_bytes(df: pd.DataFrame) -> bytes:
 
 def _parquet_to_dataframe_with_units(path: str) -> pd.DataFrame:
     table = pq.read_table(path)
-    return _table_to_dataframe_with_units(table, path)
+    schema = pq.read_schema(path)
+    return _table_to_dataframe_with_schema(table, schema)
 
 
 def _table_to_dataframe_with_units(table: pa.Table, source_path: str) -> pd.DataFrame:
-    df = table.to_pandas()
     schema = pq.read_schema(source_path)
+    return _table_to_dataframe_with_schema(table, schema)
+
+
+def _parquet_fp_to_dataframe_with_units(fp: BinaryIO) -> pd.DataFrame:
+    table = pq.read_table(fp)
+    return _table_to_dataframe_with_schema(table, table.schema)
+
+
+def _table_to_dataframe_with_schema(table: pa.Table, schema: pa.Schema) -> pd.DataFrame:
+    df = table.to_pandas()
     # Only generate column names for actual DataFrame columns (not index columns)
     labels_by_name = {
         field.name: _field_label_with_units(field)
