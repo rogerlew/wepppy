@@ -235,9 +235,15 @@ def _render_column_and_unit_summary(
         metadata = _mapping_value(output_layer_metadata.get(output_layer_id))
         selected_columns = _string_list(metadata.get("selected_columns"))
         unit_mapping = _mapping_value(metadata.get("unit_mapping"))
+        description_mapping = _mapping_value(metadata.get("description_mapping"))
         source_layer_ids = _string_list(metadata.get("source_layer_ids"))
 
-        if not selected_columns and not unit_mapping and not source_layer_ids:
+        if (
+            not selected_columns
+            and not unit_mapping
+            and not description_mapping
+            and not source_layer_ids
+        ):
             continue
 
         rendered_any = True
@@ -257,10 +263,11 @@ def _render_column_and_unit_summary(
             (
                 column_name,
                 _string_or_fallback(unit_mapping.get(column_name), fallback="(unspecified)"),
+                _string_or_fallback(description_mapping.get(column_name), fallback="(unspecified)"),
             )
             for column_name in ordered_columns
         ]
-        lines.extend(_render_table(("Column", "Unit"), rows))
+        lines.extend(_render_table(("Column", "Unit", "Description"), rows))
         lines.append("")
 
     if not rendered_any:

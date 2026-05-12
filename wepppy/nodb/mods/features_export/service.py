@@ -40,6 +40,7 @@ from .cache_key import (
 )
 from .catalog_loader import LayerCatalog, load_layer_catalog
 from .column_selection import (
+    column_metadata_by_id as _column_metadata_by_id_helper,
     dedupe_identity_selected_columns as _dedupe_identity_selected_columns_helper,
     infer_display_unit_for_column as _infer_display_unit_for_column_helper,
     required_identity_columns as _required_identity_columns_helper,
@@ -1383,10 +1384,17 @@ def _build_key_first_materialized_layer_payload(
         row_count = int(len(table_frame.index))
         feature_count = row_count
 
+        description_mapping = _column_description_mapping_for_selected_columns(
+            selected_columns=selected_columns,
+            unit_mapping=unit_mapping,
+            catalog_layer_raws=tuple(result.catalog_layer_raw for result in source_results),
+        )
+
         column_metadata = build_output_layer_column_metadata(
             source_layer_ids=carrier_core.source_layer_ids,
             selected_columns=selected_columns,
             unit_mapping=unit_mapping,
+            description_mapping=description_mapping,
             materialization={
                 "strategy": "key_first_tabular_no_geometry",
                 "carrier_layer": layer.carrier_layer,
@@ -1521,10 +1529,17 @@ def _build_key_first_materialized_layer_payload(
         scope_class=layer.scope_class,
     )
 
+    description_mapping = _column_description_mapping_for_selected_columns(
+        selected_columns=selected_columns,
+        unit_mapping=unit_mapping,
+        catalog_layer_raws=tuple(result.catalog_layer_raw for result in source_results),
+    )
+
     column_metadata = build_output_layer_column_metadata(
         source_layer_ids=carrier_core.source_layer_ids,
         selected_columns=selected_columns,
         unit_mapping=unit_mapping,
+        description_mapping=description_mapping,
         materialization={
             "strategy": "key_first_geometry_last",
             "carrier_layer": layer.carrier_layer,
@@ -2271,14 +2286,20 @@ def _build_materialized_layer_payload(
         )
         table_frame = None
 
-    column_metadata = {
-        "source_layer_ids": source_layer_ids,
-        "selected_columns": selected_columns,
-        "unit_mapping": {
-            column_name: unit_mapping.get(column_name, "non-unitized")
-            for column_name in selected_columns
-        },
+    resolved_unit_mapping = {
+        column_name: unit_mapping.get(column_name, "non-unitized")
+        for column_name in selected_columns
     }
+    description_mapping = _column_description_mapping_for_selected_columns(
+        selected_columns=selected_columns,
+        unit_mapping=resolved_unit_mapping,
+    )
+    column_metadata = build_output_layer_column_metadata(
+        source_layer_ids=source_layer_ids,
+        selected_columns=selected_columns,
+        unit_mapping=resolved_unit_mapping,
+        description_mapping=description_mapping,
+    )
     return (
         PreparedLayerPayload(
             output_layer_id=layer.output_layer_id,
@@ -2421,6 +2442,63 @@ def _resolve_selected_columns(
         discovered_units=discovered_units,
         consolidated_join_key_column=_CONSOLIDATED_JOIN_KEY_COLUMN,
     )
+
+
+def _column_description_mapping_for_selected_columns(
+    *,
+    selected_columns: cabc.Sequence[str],
+    unit_mapping: cabc.Mapping[str, str],
+    catalog_layer_raws: cabc.Sequence[cabc.Mapping[str, object]] = (),
+) -> dict[str, str]:
+    descriptions: dict[str, str] = {}
+
+    for catalog_layer_raw in catalog_layer_raws:
+        catalog_column_meta = _column_metadata_by_id_helper(catalog_layer_raw)
+        for column_name in selected_columns:
+            token = _as_string(column_name)
+            if not token or token in descriptions:
+                continue
+            description_value = _as_string(
+                _as_mapping(catalog_column_meta.get(token)).get("description")
+            )
+            if description_value:
+                descriptions[token] = description_value
+
+    for column_name in selected_columns:
+        token = _as_string(column_name)
+        if not token or token in descriptions:
+            continue
+        descriptions[token] = _default_column_description(
+            token,
+            unit_mapping.get(token),
+        )
+
+    return descriptions
+
+
+def _default_column_description(column_name: str, unit_value: object) -> str:
+    humanized = re.sub(r"([a-z0-9])([A-Z])", r"\1 \2", column_name.replace("_", " "))
+    humanized = re.sub(r"\s+", " ", humanized).strip()
+    if not humanized:
+        return "Exported column value."
+
+    normalized = humanized.split(" ")
+    normalized_tokens: list[str] = []
+    for token in normalized:
+        if token.lower() == "id":
+            normalized_tokens.append("ID")
+        elif token.lower() == "wepp":
+            normalized_tokens.append("WEPP")
+        else:
+            normalized_tokens.append(token)
+    sentence = " ".join(normalized_tokens)
+    if sentence:
+        sentence = f"{sentence[0].upper()}{sentence[1:]}"
+
+    unit_token = _as_string(unit_value)
+    if unit_token and unit_token != "non-unitized":
+        return f"{sentence} ({unit_token})."
+    return f"{sentence}."
 
 
 def _required_identity_columns(catalog_layer_raw: cabc.Mapping[str, object]) -> set[str]:

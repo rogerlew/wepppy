@@ -640,7 +640,7 @@ Metadata already available today (no new science/data-source contracts required)
 - Layer-level context:
   - `layer_id`, `output_layer_id`, `family`, `scope_class`, `scope`, `context`, `selector_id`, `carrier_layer`, `temporal_mode`
   - `row_count`, `feature_count`, `artifact_relpath`
-  - output column metadata (`source_layer_ids`, `selected_columns`, `unit_mapping`, materialization strategy metadata)
+  - output column metadata (`source_layer_ids`, `selected_columns`, `unit_mapping`, `description_mapping`, materialization strategy metadata)
 - CRS/projection context:
   - `crs.requested_crs`, `crs.resolved_crs`, `crs.resolved_epsg` (when available)
 - Dependency and lineage context:
@@ -672,7 +672,7 @@ README minimum sections:
 - Layer inventory table:
   - output layer id, source layer id(s), context/scope, row count, feature count, artifact member path.
 - Column and unit summary:
-  - selected columns and resolved unit mapping per output layer.
+  - selected columns, resolved unit mapping, and column descriptions per output layer.
 - Dependency lineage summary:
   - dependency fingerprint, catalog signature, and grouped dependency entries by role.
 - Warning summary:

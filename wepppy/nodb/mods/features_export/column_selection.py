@@ -202,6 +202,7 @@ def column_metadata_by_id(catalog_layer_raw: cabc.Mapping[str, object]) -> dict[
                 or infer_display_unit_for_column(column_id)
             ),
             "default_selected": bool(entry.get("default_selected", False)),
+            "description": _as_string(entry.get("description")),
         }
 
     return metadata_by_id

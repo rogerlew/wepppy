@@ -473,6 +473,10 @@ def test_build_materialized_layer_payload_tabular_skips_feature_collection_seria
     assert payload.row_count == 2
     assert payload.feature_count == 2
     assert column_metadata["selected_columns"] == ["TopazID", "metric"]
+    assert column_metadata["description_mapping"] == {
+        "TopazID": "Topaz ID.",
+        "metric": "Metric (mm).",
+    }
 
 
 def test_key_first_tabular_payload_does_not_touch_geometry_carrier(
@@ -541,6 +545,86 @@ def test_key_first_tabular_payload_does_not_touch_geometry_carrier(
     assert payload.payload == b""
     assert column_metadata["materialization"]["strategy"] == "key_first_tabular_no_geometry"
     assert column_metadata["selected_columns"][:2] == ["topaz_id", "wepp_id"]
+    assert column_metadata["description_mapping"]["topaz_id"] == "Topaz ID."
+    assert column_metadata["description_mapping"]["wepp_id"] == "WEPP ID."
+
+
+def test_key_first_tabular_payload_populates_channel_descriptions(tmp_path: Path) -> None:
+    layer = ResolvedLayerPlan(
+        layer_id="wepp.summary.channels",
+        family="wepp_summary",
+        scope_class="scope_aware",
+        scope="baseline",
+        output_layer_id="run-1-chan_map-channels",
+        context="base",
+        carrier_layer="chan_map-channels",
+    )
+    source_layer = ResolvedLayerPlan(
+        layer_id="wepp.summary.channels",
+        family="wepp_summary",
+        scope_class="scope_aware",
+        scope="baseline",
+        output_layer_id="baseline__wepp.summary.channels",
+        context="base",
+        carrier_layer="chan_map-channels",
+    )
+    source_result = service._LayerCoreResult(
+        layer=source_layer,
+        frame=pd.DataFrame(
+            {
+                service._CONSOLIDATED_JOIN_KEY_COLUMN: ["101"],
+                "topaz_id": [1],
+                "wepp_id": [101],
+                "discharge_mm": [12.5],
+                "sediment_delivery_kg_ha": [3.2],
+            }
+        ),
+        selected_columns=("topaz_id", "wepp_id", "discharge_mm", "sediment_delivery_kg_ha"),
+        unit_mapping={
+            "topaz_id": "non-unitized",
+            "wepp_id": "non-unitized",
+            "discharge_mm": "mm",
+            "sediment_delivery_kg_ha": "kg/ha",
+        },
+        warnings=(),
+        catalog_layer_raw={
+            "join": {"primary_key": "wepp_id"},
+            "geometry": {"feature_id_keys": ["topaz_id", "wepp_id"]},
+            "columns": [
+                {
+                    "column_id": "discharge_mm",
+                    "description": "Average annual channel discharge depth.",
+                    "unit": {"display_unit": "mm"},
+                },
+                {
+                    "column_id": "sediment_delivery_kg_ha",
+                    "description": "Average annual sediment delivery per channel area.",
+                    "unit": {"display_unit": "kg/ha"},
+                },
+            ],
+        },
+    )
+
+    payload, column_metadata = service._build_key_first_materialized_layer_payload(
+        wd=tmp_path,
+        layer=layer,
+        source_layers=(source_layer,),
+        source_results=(source_result,),
+        entries_by_output_layer_id={},
+        use_tabular_payload=True,
+        use_tabular_long_layout=False,
+        tabular_event_selector=None,
+        watershed_identity_lookup_cache={},
+        units_mode="si",
+    )
+
+    assert payload.tabular_frame is not None
+    assert column_metadata["description_mapping"]["discharge_mm"] == (
+        "Average annual channel discharge depth."
+    )
+    assert column_metadata["description_mapping"]["sediment_delivery_kg_ha"] == (
+        "Average annual sediment delivery per channel area."
+    )
 
 
 def test_key_first_tabular_payload_backfills_topaz_id_from_watershed_parquet(tmp_path: Path) -> None:
@@ -2320,6 +2404,7 @@ def test_build_export_readme_is_deterministic_and_redacts_absolute_paths() -> No
                     "source_layer_ids": ["watershed.subcatchments"],
                     "selected_columns": ["TopazID"],
                     "unit_mapping": {"TopazID": "non-unitized"},
+                    "description_mapping": {"TopazID": "Unique hillslope identifier."},
                 }
             }
         },
@@ -2346,6 +2431,8 @@ def test_build_export_readme_is_deterministic_and_redacts_absolute_paths() -> No
 
     assert rendered_a == rendered_b
     assert "## Layer inventory" in rendered_a
+    assert "| Column | Unit | Description |" in rendered_a
+    assert "| TopazID | non-unitized | Unique hillslope identifier. |" in rendered_a
     assert "## Dependency lineage summary" in rendered_a
     assert "[redacted-absolute-path]" in rendered_a
     assert "/wc1/runs/run-1/private/path.parquet" not in rendered_a
