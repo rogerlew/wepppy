@@ -8,6 +8,7 @@ from pathlib import Path
 from typing import Dict, List, Optional, Set
 
 import pyarrow as pa
+import pyarrow.compute as pc
 import pyarrow.parquet as pq
 import logging
 
@@ -263,6 +264,60 @@ def _infer_outlet_element_id(base: Path) -> int | None:
 
     return None
 
+
+def _count_positive_chan_peak_rows(chan_path: Path) -> int:
+    if not chan_path.exists():
+        return 0
+
+    data_section = False
+    positive_rows = 0
+    with chan_path.open("r") as stream:
+        for raw_line in stream:
+            stripped = raw_line.strip()
+            if not data_section:
+                if stripped.startswith("Year") and "Elmt_ID" in stripped:
+                    data_section = True
+                continue
+            if not stripped:
+                continue
+            tokens = stripped.split()
+            if len(tokens) != 6:
+                continue
+            try:
+                peak = _parse_float(tokens[5])
+            except ValueError:
+                continue
+            if peak > 0.0:
+                positive_rows += 1
+    return positive_rows
+
+
+def _audit_peak_runoff_consistency(*, ebe_parquet_path: Path, chan_path: Path) -> None:
+    if not chan_path.exists():
+        return
+
+    table = pq.read_table(ebe_parquet_path, columns=["peak_runoff"])
+    total_rows = table.num_rows
+    if total_rows == 0:
+        return
+
+    peak_column = table.column("peak_runoff").combine_chunks()
+    zero_mask = pc.equal(peak_column, 0.0)
+    if zero_mask.null_count:
+        zero_mask = pc.fill_null(zero_mask, False)
+    zero_rows = int(pc.sum(pc.cast(zero_mask, pa.int64())).as_py() or 0)
+
+    if zero_rows != total_rows:
+        return
+
+    chan_positive_rows = _count_positive_chan_peak_rows(chan_path)
+    if chan_positive_rows > 0:
+        raise ValueError(
+            "Detected peak runoff regression signature: ebe_pw0 peak_runoff is all-zero "
+            f"({zero_rows}/{total_rows}) while chan.out has positive peaks "
+            f"({chan_positive_rows} rows)."
+        )
+
 def _run_wepp_watershed_ebe_interchange_python(base: Path, *, start_year: int | None) -> Path:
     ebe_path = base / EBE_FILENAME
     _wait_for_path(ebe_path)
@@ -285,6 +340,7 @@ def _run_wepp_watershed_ebe_interchange_python(base: Path, *, start_year: int | 
         legacy_element_id=outlet_element_id,
         calendar_lookup=calendar_lookup,
     )
+    _audit_peak_runoff_consistency(ebe_parquet_path=target, chan_path=base / "chan.out")
     return target
 
 
@@ -323,6 +379,7 @@ def run_wepp_watershed_ebe_interchange(
                 legacy_element_id=outlet_element_id,
                 chunk_rows=CHUNK_SIZE,
             )
+            _audit_peak_runoff_consistency(ebe_parquet_path=target, chan_path=base / "chan.out")
             LOGGER.info("wepp interchange: EBE via Rust")
             return target
         except Exception as exc:

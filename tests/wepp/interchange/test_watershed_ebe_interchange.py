@@ -84,6 +84,91 @@ def test_watershed_ebe_interchange_writes_parquet(tmp_path: Path) -> None:
     )
 
 
+def test_watershed_ebe_interchange_rejects_all_zero_peaks_when_chan_out_is_positive(
+    tmp_path: Path,
+) -> None:
+    workdir = tmp_path / "output"
+    workdir.mkdir(parents=True)
+
+    (workdir / "ebe_pw0.txt").write_text(
+        "\n".join(
+            [
+                "WATERSHED OUTPUT: DISCHARGE FROM WATERSHED OUTLET",
+                "(Results listed for Runoff Volume > 0.005m^3)",
+                "",
+                "Day          Precip.    Runoff      Peak       Sediment    Solub. React.  Particulate  Total           Elmt",
+                "   Month     Depth      Volume      Runoff     Yield       Phosphorus     Phosphorus   Phosphorus       ID",
+                "       Year  (mm)       (m^3)       (m^3/s)    (kg)        (kg)           (kg)         (kg)              -",
+                "-" * 100,
+                "",
+                "    1    1     1  10.0  100.0  0.00000  1.0  0.0  0.0  0.0  4",
+                "    2    1     1   0.0   90.0  0.00000  1.0  0.0  0.0  0.0  4",
+            ]
+        ),
+        encoding="utf-8",
+    )
+
+    (workdir / "chan.out").write_text(
+        "\n".join(
+            [
+                " Channel Routing Output",
+                "   Muskingum-Cunge method",
+                "",
+                "Peak Flow Time and Rate",
+                "",
+                "  Year    Day   Elmt_ID Chan_ID  Time(s) Peak_Discharge(m^3/s)",
+                "  2000      1      4      1        600.      1.00E-03",
+                "  2000      2      4      1        600.      2.00E-03",
+            ]
+        ),
+        encoding="utf-8",
+    )
+
+    with pytest.raises(ValueError, match="all-zero .* chan.out has positive peaks"):
+        run_wepp_watershed_ebe_interchange(workdir, start_year=2000)
+
+
+def test_watershed_ebe_interchange_keeps_nonzero_peak_signal_for_material_chan_peaks(
+    tmp_path: Path,
+) -> None:
+    src = PROJECT_OUTPUT
+    workdir = tmp_path / "output_alignment"
+    shutil.copytree(src, workdir)
+
+    target = run_wepp_watershed_ebe_interchange(workdir, start_year=2000)
+    df = pq.read_table(target).to_pandas()
+    assert float(df["peak_runoff"].max()) > 0.0
+
+    ebe_lookup = {
+        (int(row.year), int(row.julian), int(row.element_id)): float(row.peak_runoff)
+        for row in df.itertuples(index=False)
+    }
+
+    severe_chan_positive_ebe_zero = []
+    data_section = False
+    with (workdir / "chan.out").open("r", encoding="utf-8") as stream:
+        for raw_line in stream:
+            stripped = raw_line.strip()
+            if not data_section:
+                if stripped.startswith("Year") and "Elmt_ID" in stripped:
+                    data_section = True
+                continue
+            if not stripped:
+                continue
+            tokens = stripped.split()
+            if len(tokens) != 6:
+                continue
+            year = int(tokens[0])
+            julian = int(tokens[1])
+            element_id = int(tokens[2])
+            chan_peak = float(tokens[5])
+            ebe_peak = ebe_lookup.get((year, julian, element_id), 0.0)
+            if chan_peak >= 1.0e-3 and ebe_peak == 0.0:
+                severe_chan_positive_ebe_zero.append((year, julian, element_id, chan_peak))
+
+    assert not severe_chan_positive_ebe_zero
+
+
 def test_watershed_ebe_interchange_supports_legacy_file(tmp_path: Path) -> None:
     src = PROJECT_OUTPUT
     workdir = tmp_path / "legacy_output"
