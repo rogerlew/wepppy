@@ -1,6 +1,6 @@
 # EBE `peak_runoff` Regression Ablation and Repair
 
-**Status**: In Progress - Fix Candidate Validated and Vendored (2026-05-13)  
+**Status**: Completed with Residual Follow-ups (2026-05-13)  
 **Timezone**: UTC
 
 ## Overview
@@ -60,6 +60,18 @@
 - [ ] Minimal fix landed with regression tests that fail pre-fix and pass post-fix.
 - [ ] Three-cohort semantic comparison rerun confirms regression resolved and no new high-magnitude drift.
 - [x] Corrected binary vendored in `wepppy` with SHA256 and provenance docs.
+
+## Closure Disposition (2026-05-13)
+
+Package closeout is accepted with two explicit follow-up residuals:
+
+1. Add targeted regression coverage for the all-zero `ebe_pw0.peak_runoff` failure mode.
+2. Run broader three-cohort recertification beyond the off-run confirmation and baseline semantic comparison.
+
+Closed evidence confirming the primary defect resolution:
+
+- Rerun verification on `/wc1/runs/of/off-the-rack-neoprene` shows `ebe_pw0.peak_runoff` nonzero on all rows and no `chan_peak>0` / `ebe_peak=0` mismatches.
+- Candidate/baseline alignment remains in expected small delta envelope (see `artifacts/post_fix_semantic_compare.json`).
 
 ## Dependencies
 

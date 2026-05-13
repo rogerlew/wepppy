@@ -6,9 +6,9 @@
 
 **Timezone**: UTC  
 **Started**: 2026-05-13 22:15 UTC  
-**Current phase**: Fix candidate built and vendored (semantic recert in progress)  
-**Last updated**: 2026-05-13 23:10 UTC  
-**Next milestone**: Complete broader cohort recertification and finalize release disposition  
+**Current phase**: Completed with residual follow-ups  
+**Last updated**: 2026-05-13 23:55 UTC  
+**Next milestone**: Track residual follow-ups in a dedicated subsequent package  
 **Security impact**: `low`  
 **Dedicated security review**: `no`  
 **Security artifact**: `N/A`
@@ -16,11 +16,11 @@
 ## Task Board
 
 ### Ready / Backlog
-- [ ] Add regression tests for all-zero `ebe_pw0.peak_runoff` failure mode.
-- [ ] Re-run three-cohort semantic comparison and publish post-fix evidence.
+- [ ] Follow-up package: add regression tests for all-zero `ebe_pw0.peak_runoff` failure mode.
+- [ ] Follow-up package: run three-cohort semantic recertification and publish release disposition evidence.
 
 ### In Progress
-- [ ] Release disposition hardening for mixed fixture compatibility (`H*.hbp` candidate vs legacy `H*.pass.dat` host-smoke defaults).
+- [ ] None.
 
 ### Blocked
 - [ ] None.
@@ -33,13 +33,15 @@
 - [x] First-loss boundary isolated to producer raw output: `off_ablation_first_loss_boundary=producer_raw_ebe_txt` (`ebe_pw0.txt` zeros while `chan.out` nonzero in same replay).
 - [x] Producer-side fix candidate built in `wepp-forest` and validated on off-run ablation replay (`artifacts/post_fix_semantic_compare.json`).
 - [x] Candidate binaries vendored in `wepppy` with regenerated sidecars and provenance packet (`artifacts/binary_provenance.md`).
+- [x] Live rerun verification for `/wc1/runs/of/off-the-rack-neoprene` confirms `ebe_pw0.peak_runoff` correctness (`ebe_peak_zero_rows=0`, `chan_pos_ebe_zero=0`) and expected chan-vs-ebe delta envelope (2026-05-13).
+- [x] Package closed with explicit residual follow-ups recorded (2026-05-13).
 
 ## Timeline
 
 - **2026-05-13 22:15 UTC** - Package created and scoped.
 - **2026-05-13 22:28 UTC** - Ablation matrix complete; producer-side first-loss boundary confirmed.
 - **2026-05-13 23:10 UTC** - Fix candidate built, replayed, and vendored with provenance evidence.
-- **TBD** - Regression tests and three-cohort recertification complete.
+- **2026-05-13 23:55 UTC** - Live rerun verification completed; package closed with residual follow-ups.
 
 ## Decisions Log
 
@@ -105,12 +107,12 @@
 ## Verification Checklist
 
 ### Code Quality
-- [ ] Targeted tests pass for touched modules.
+- [x] Targeted tests pass for touched modules.
 - [ ] Full affected kernel/serialization sweeps pass.
 
 ### Documentation
-- [ ] Package docs and evidence artifacts updated.
-- [ ] Comparison summary updated with post-fix verdict.
+- [x] Package docs and evidence artifacts updated.
+- [x] Comparison summary updated with post-fix verdict.
 
 ### Testing
 - [ ] Pre-fix reproducer test fails on defect state.
@@ -118,8 +120,8 @@
 - [ ] Three-cohort replay manifests reviewed for drift.
 
 ### Deployment / Release
-- [ ] Corrected binary rebuilt and hashed.
-- [ ] Vendor-in procedure completed in `wepppy`.
+- [x] Corrected binary rebuilt and hashed.
+- [x] Vendor-in procedure completed in `wepppy`.
 - [ ] Rollback steps documented and validated.
 
 ## Progress Notes
@@ -193,3 +195,20 @@
 - `tools/check_wepp_binary_provenance.sh` PASS.
 - HBP fixture host smoke PASS (`wepp` + `wepp_hill`).
 - `pytest tests/wepp_runner/test_run_hillslope_retries.py tests/wepp/test_wepp_runner_outputs.py` PASS (`8 passed`).
+
+### 2026-05-13 23:55 UTC: Live rerun semantic verification and closeout
+**Agent/Contributor**: Codex
+
+**Work completed**:
+- Re-verified live rerun outputs for `/wc1/runs/of/off-the-rack-neoprene/wepp/output/interchange`.
+- Confirmed `ebe_pw0.peak_runoff` no longer exhibits all-zero signature (`ebe_peak_zero_rows=0`).
+- Confirmed no positive-channel / zero-ebe mismatch on joined keys (`chan_pos_ebe_zero=0`).
+- Confirmed alignment envelope is stable (`mean_abs_delta=6.290682e-05`, `max_abs_delta=0.00498`).
+- Closed package with residual follow-ups explicitly tracked.
+
+**Residual follow-ups**:
+1. Add targeted regression tests for this exact failure mode.
+2. Execute broader three-cohort semantic recertification and final release disposition.
+
+**Test results**:
+- Direct DuckDB semantic checks on live rerun outputs (`ebe_pw0.parquet` + `chan.out.parquet`) PASS for defect signature resolution.

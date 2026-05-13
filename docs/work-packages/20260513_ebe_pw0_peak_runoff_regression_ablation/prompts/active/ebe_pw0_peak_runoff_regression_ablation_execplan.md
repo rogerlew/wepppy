@@ -14,9 +14,9 @@ After this plan, `ebe_pw0.peak_runoff` will correctly preserve nonzero peak runo
 - [x] (2026-05-13 22:28 UTC) Captured reproducible pre-fix evidence bundle and interchange manifest baseline.
 - [x] (2026-05-13 22:28 UTC) Executed stage-by-stage ablation and identified first-loss boundary at producer raw `ebe_pw0.txt`.
 - [x] (2026-05-13 23:10 UTC) Implemented and validated producer-side fix candidate in `wepp-forest/src/wshrun.f90`; off-run replay confirms peak restoration.
-- [ ] Add focused regression tests for the all-zero peak failure mode.
-- [ ] Re-run semantic comparison on SOFE/MOFE Am6/IMP cohorts and publish pass/fail evidence.
 - [x] (2026-05-13 23:10 UTC) Vendored candidate binaries and published provenance (`artifacts/binary_provenance.md`).
+- [x] (2026-05-13 23:55 UTC) Live rerun verification confirmed defect signature resolution on `/wc1/runs/of/off-the-rack-neoprene` (`ebe_peak_zero_rows=0`, `chan_pos_ebe_zero=0`).
+- [x] (2026-05-13 23:55 UTC) Package closed with residual follow-ups explicitly recorded for regression tests + broader cohort recertification.
 
 ## Surprises & Discoveries
 
@@ -50,7 +50,8 @@ After this plan, `ebe_pw0.peak_runoff` will correctly preserve nonzero peak runo
 - Ablation campaign completed and first-loss boundary isolated.
 - Defect classification updated from "candidate" to "confirmed producer-side regression" for `wepp_260513` off-run path.
 - Producer fix candidate built and vendored with documented evidence.
-- Remaining work narrowed to regression test coverage + three-cohort recertification + fixture compatibility disposition.
+- Live rerun verification confirmed semantic correction on the active off-run output.
+- Residual follow-ups explicitly deferred: regression-test hardening and broader three-cohort recertification.
 
 ## Context and Orientation
 
