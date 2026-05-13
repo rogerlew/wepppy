@@ -240,6 +240,13 @@ SUPPORTED_STREAM_PRUNING_METHODS = (
     "remove_short_streams",
 )
 
+OUTLET_LOCATION_OUTSIDE_MAP_EXTENT_MESSAGE = (
+    "Requested Outlet Location must be within map extent"
+)
+OUTLET_LOCATION_CHANNELS_REQUIRED_MESSAGE = (
+    "Channels must be delineated before setting Outlet Location"
+)
+
 
 class Watershed(WatershedOperationsMixin, WatershedLookupMixin, NoDbBase):
     __name__ = "Watershed"
@@ -1112,6 +1119,28 @@ class Watershed(WatershedOperationsMixin, WatershedLookupMixin, NoDbBase):
         if netful_path is None:
             return False
         return _exists(netful_path)
+
+    def validate_outlet_location(self, lng: float, lat: float) -> None:
+        """Validate outlet preconditions before mutating outlet state."""
+        if not self.has_channels:
+            raise ValueError(OUTLET_LOCATION_CHANNELS_REQUIRED_MESSAGE)
+
+        def _raise_extent_error(exc: Exception) -> None:
+            raise ValueError(OUTLET_LOCATION_OUTSIDE_MAP_EXTENT_MESSAGE) from exc
+
+        if self.delineation_backend_is_wbt:
+            wbt = self._ensure_wbt()
+            logger = getattr(self, "logger", None)
+            try:
+                wbt.lnglat_to_pixel(lng, lat, logger=logger)
+            except (AssertionError, TypeError, ValueError) as exc:
+                _raise_extent_error(exc)
+            return
+
+        try:
+            self.ron_instance.lnglat_to_px(lng, lat)
+        except (AssertionError, TypeError, ValueError) as exc:
+            _raise_extent_error(exc)
 
     @property
     def dem_fn(self) -> str:

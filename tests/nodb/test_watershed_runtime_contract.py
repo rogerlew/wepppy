@@ -3,12 +3,17 @@ from __future__ import annotations
 from contextlib import contextmanager
 from pathlib import Path
 from types import SimpleNamespace
+from typing import Optional
 
 import pytest
 
 import wepppy.nodb.core.watershed_mixins as watershed_mixins_module
-from wepppy.nodb.core.watershed import Watershed
-from wepppy.nodb.core.watershed import WatershedCentroidStateError
+from wepppy.nodb.core.watershed import (
+    OUTLET_LOCATION_CHANNELS_REQUIRED_MESSAGE,
+    OUTLET_LOCATION_OUTSIDE_MAP_EXTENT_MESSAGE,
+    Watershed,
+    WatershedCentroidStateError,
+)
 
 
 class _LookupOnlyWatershed(watershed_mixins_module.WatershedLookupMixin):
@@ -113,3 +118,60 @@ def test_require_centroid_raises_typed_error_when_artifacts_missing(
     message = str(exc_info.value)
     assert "runid=missing-artifacts-run" in message
     assert "centroid missing and repair from watershed abstraction artifacts failed" in message
+
+
+@pytest.mark.unit
+def test_validate_outlet_location_requires_delineated_channels(
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    watershed = Watershed.__new__(Watershed)
+
+    monkeypatch.setattr(Watershed, "has_channels", property(lambda _self: False))
+
+    with pytest.raises(ValueError, match=OUTLET_LOCATION_CHANNELS_REQUIRED_MESSAGE):
+        watershed.validate_outlet_location(-117.5, 46.9)
+
+
+@pytest.mark.unit
+def test_validate_outlet_location_rejects_outside_wbt_extent(
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    watershed = Watershed.__new__(Watershed)
+    watershed.logger = None
+
+    monkeypatch.setattr(Watershed, "has_channels", property(lambda _self: True))
+    monkeypatch.setattr(Watershed, "delineation_backend_is_wbt", property(lambda _self: True))
+
+    class DummyWbt:
+        @staticmethod
+        def lnglat_to_pixel(
+            _lng: float,
+            _lat: float,
+            logger: Optional[SimpleNamespace] = None,
+        ) -> tuple[int, int]:
+            raise AssertionError((1.0, 2.0))
+
+    watershed._ensure_wbt = lambda: DummyWbt()  # type: ignore[method-assign]
+
+    with pytest.raises(ValueError, match=OUTLET_LOCATION_OUTSIDE_MAP_EXTENT_MESSAGE):
+        watershed.validate_outlet_location(-117.5, 46.9)
+
+
+@pytest.mark.unit
+def test_validate_outlet_location_rejects_outside_topaz_extent(
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    watershed = Watershed.__new__(Watershed)
+
+    monkeypatch.setattr(Watershed, "has_channels", property(lambda _self: True))
+    monkeypatch.setattr(Watershed, "delineation_backend_is_wbt", property(lambda _self: False))
+
+    class DummyRon:
+        @staticmethod
+        def lnglat_to_px(_lng: float, _lat: float) -> tuple[int, int]:
+            raise ValueError("latitude out of range")
+
+    monkeypatch.setattr(Watershed, "ron_instance", property(lambda _self: DummyRon()))
+
+    with pytest.raises(ValueError, match=OUTLET_LOCATION_OUTSIDE_MAP_EXTENT_MESSAGE):
+        watershed.validate_outlet_location(-117.5, 95.0)

@@ -497,6 +497,17 @@ def test_set_outlet_enqueues_job(monkeypatch: pytest.MonkeyPatch) -> None:
     _stub_prep(monkeypatch)
     monkeypatch.setattr(watershed_routes, "get_wd", lambda runid: "/tmp/run")
 
+    class DummyWatershed:
+        @staticmethod
+        def validate_outlet_location(_lng: float, _lat: float) -> None:
+            return None
+
+    monkeypatch.setattr(
+        watershed_routes.Watershed,
+        "getInstance",
+        lambda _wd: DummyWatershed(),
+    )
+
     with TestClient(rq_engine.app) as client:
         response = client.post(
             "/api/runs/run-1/cfg/set-outlet",
@@ -505,6 +516,62 @@ def test_set_outlet_enqueues_job(monkeypatch: pytest.MonkeyPatch) -> None:
 
     assert response.status_code == 200
     assert response.json()["job_id"] == "job-99"
+
+
+def test_set_outlet_rejects_locations_outside_map_extent(
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    _stub_auth(monkeypatch)
+    monkeypatch.setattr(watershed_routes, "get_wd", lambda runid: "/tmp/run")
+
+    class DummyWatershed:
+        @staticmethod
+        def validate_outlet_location(_lng: float, _lat: float) -> None:
+            raise ValueError("Requested Outlet Location must be within map extent")
+
+    monkeypatch.setattr(
+        watershed_routes.Watershed,
+        "getInstance",
+        lambda _wd: DummyWatershed(),
+    )
+
+    with TestClient(rq_engine.app) as client:
+        response = client.post(
+            "/api/runs/run-1/cfg/set-outlet",
+            json={"latitude": 45.1, "longitude": -120.3},
+        )
+
+    assert response.status_code == 400
+    payload = response.json()
+    assert payload["error"]["message"] == "Requested Outlet Location must be within map extent"
+
+
+def test_set_outlet_requires_channels_before_setting_location(
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    _stub_auth(monkeypatch)
+    monkeypatch.setattr(watershed_routes, "get_wd", lambda runid: "/tmp/run")
+
+    class DummyWatershed:
+        @staticmethod
+        def validate_outlet_location(_lng: float, _lat: float) -> None:
+            raise ValueError("Channels must be delineated before setting Outlet Location")
+
+    monkeypatch.setattr(
+        watershed_routes.Watershed,
+        "getInstance",
+        lambda _wd: DummyWatershed(),
+    )
+
+    with TestClient(rq_engine.app) as client:
+        response = client.post(
+            "/api/runs/run-1/cfg/set-outlet",
+            json={"latitude": 45.1, "longitude": -120.3},
+        )
+
+    assert response.status_code == 400
+    payload = response.json()
+    assert payload["error"]["message"] == "Channels must be delineated before setting Outlet Location"
 
 
 def test_upload_dem_requires_file(monkeypatch: pytest.MonkeyPatch, tmp_path) -> None:

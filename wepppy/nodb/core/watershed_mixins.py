@@ -479,6 +479,7 @@ class WatershedOperationsMixin:
         
         assert float(lng), lng
         assert float(lat), lat
+        self.validate_outlet_location(lng, lat)
 
         if self.delineation_backend_is_topaz:
             self.logger.info(f' delineation_backend_is_topaz')

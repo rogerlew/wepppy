@@ -807,6 +807,12 @@ async def set_outlet(runid: str, config: str, request: Request) -> JSONResponse:
     try:
         wd = get_wd(runid)
         _preflight_watershed_mutation_root(wd)
+        watershed = Watershed.getInstance(wd)
+        try:
+            watershed.validate_outlet_location(outlet_lng, outlet_lat)
+        except ValueError as exc:
+            return error_response(str(exc), status_code=400)
+
         prep = RedisPrep.getInstance(wd)
         prep.remove_timestamp(TaskEnum.set_outlet)
 
