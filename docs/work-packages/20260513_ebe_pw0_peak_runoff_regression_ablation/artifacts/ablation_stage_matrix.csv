@@ -1,0 +1,13 @@
+run,stage,rows,zero_rows,max_peak,mean_peak
+off_current,ebe_parquet,60270,60270,0.0,0.0
+off_current,chan_parquet,60270,0,3.59,0.06511921990045023
+off_ablation,ebe_parquet,60270,60270,0.0,0.0
+off_ablation,chan_parquet,60270,0,3.59,0.06512147309441076
+off_ablation,ebe_raw_txt,60270,60270,0.0,0.0
+off_ablation,chan_raw_txt,60270,0,3.59,0.06512147309441076
+ca_current,ebe_parquet,60270,0,3.54512,0.06416358735689626
+ca_current,chan_parquet,60270,0,3.55,0.06416400462751205
+ca_ablation,ebe_parquet,60270,0,3.54512,0.06416358735689626
+ca_ablation,chan_parquet,60270,0,3.55,0.06416400462751205
+ca_ablation,ebe_raw_txt,60270,0,3.54512,0.06416358735689626
+ca_ablation,chan_raw_txt,60270,0,3.55,0.06416400462751205

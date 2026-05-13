@@ -1,0 +1,63 @@
+{
+  "candidate": {
+    "run": "off-the-rack-neoprene-ablation-ebepeak",
+    "wepp_bin": "patched_from_wepp_forest_src_wepp",
+    "pass_family": "hbp",
+    "raw_ebe_peak": {
+      "rows": 60270,
+      "zero_rows": 0,
+      "max_peak": 3.59151
+    },
+    "ebe_parquet": {
+      "rows": 60270,
+      "zero_rows": 0,
+      "min_peak": 7e-05,
+      "max_peak": 3.59151,
+      "mean_peak": 0.06512294342127285
+    },
+    "chan_parquet": {
+      "rows": 60270,
+      "zero_rows": 0,
+      "min_peak": 7.08e-05,
+      "max_peak": 3.59,
+      "mean_peak": 0.06512147309441076
+    },
+    "chan_vs_ebe_parquet": {
+      "rows": 60270,
+      "chan_pos_ebe_zero": 0,
+      "mean_abs_delta": 6.294266135723335e-05,
+      "max_abs_delta": 0.0050000000000001155
+    }
+  },
+  "baseline": {
+    "run": "carnivorous-adobo",
+    "wepp_bin": "wepp_dcc52a6",
+    "pass_family": "legacy_ascii",
+    "ebe_parquet": {
+      "rows": 60270,
+      "zero_rows": 0,
+      "min_peak": 7e-05,
+      "max_peak": 3.54512,
+      "mean_peak": 0.06416358735689626
+    },
+    "chan_parquet": {
+      "rows": 60270,
+      "zero_rows": 0,
+      "min_peak": 7.43e-05,
+      "max_peak": 3.55,
+      "mean_peak": 0.06416400462751205
+    },
+    "chan_vs_ebe_parquet": {
+      "rows": 60270,
+      "chan_pos_ebe_zero": 0,
+      "mean_abs_delta": 6.223600962336773e-05,
+      "max_abs_delta": 0.004999999999999893
+    }
+  },
+  "verdict": {
+    "ebe_peak_all_zero_regression_resolved": true,
+    "candidate_chan_pos_ebe_zero": 0,
+    "candidate_alignment_mean_abs_delta_m3s": 6.294266135723335e-05,
+    "candidate_alignment_max_abs_delta_m3s": 0.0050000000000001155
+  }
+}

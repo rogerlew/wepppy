@@ -1,0 +1,32 @@
+{
+  "delta::ebe_pw0.pipeline.parquet::ebe_pw0.python.parquet": {
+    "max_abs_delta": 0.0,
+    "mean_abs_delta": 0.0
+  },
+  "delta::ebe_pw0.pipeline.parquet::ebe_pw0.rust.parquet": {
+    "max_abs_delta": 0.0,
+    "mean_abs_delta": 0.0
+  },
+  "delta::ebe_pw0.python.parquet::ebe_pw0.rust.parquet": {
+    "max_abs_delta": 0.0,
+    "mean_abs_delta": 0.0
+  },
+  "ebe_pw0.pipeline.parquet": {
+    "max_peak": 0.0,
+    "mean_peak": 0.0,
+    "rows": 60270,
+    "zero_rows": 60270
+  },
+  "ebe_pw0.python.parquet": {
+    "max_peak": 0.0,
+    "mean_peak": 0.0,
+    "rows": 60270,
+    "zero_rows": 60270
+  },
+  "ebe_pw0.rust.parquet": {
+    "max_peak": 0.0,
+    "mean_peak": 0.0,
+    "rows": 60270,
+    "zero_rows": 60270
+  }
+}

@@ -2,7 +2,7 @@
 > Kanban board for wepppy work packages and vision items
 
 **Last Updated**: 2026-05-13
-**Active Packages**: 6
+**Active Packages**: 7
 **Quick Links**: [Work Packages Directory](docs/work-packages/) | [God-Tier Prompting Strategy](docs/god-tier-prompting-strategy.md)
 
 ## Purpose
@@ -222,7 +222,28 @@ When resuming Kubernetes work:
 
 Currently active work packages. Limit to 2-4 packages to maintain focus.
 
-**Current WIP Count**: 6 packages
+**Current WIP Count**: 7 packages
+
+---
+
+### EBE `peak_runoff` Regression Ablation and Repair
+**Started**: 2026-05-13  
+**Status**: Fix candidate validated and vendored; broader recertification pending  
+**Size**: Medium-High (2-4 focused sessions)  
+**Owner**: Codex  
+**Link**: [docs/work-packages/20260513_ebe_pw0_peak_runoff_regression_ablation/](docs/work-packages/20260513_ebe_pw0_peak_runoff_regression_ablation/)  
+**Description**: Isolate and resolve the `ebe_pw0.parquet.peak_runoff` all-zero regression observed in `off-the-rack-neoprene` (`wepp_260513`) vs `carnivorous-adobo` (`wepp_dcc52a6`) using stage-by-stage ablation, then vendor the corrected binary in `wepppy`.
+
+**Current Status**:
+- Semantic comparison confirms a real contract defect candidate: `chan.out` peaks are nonzero while `ebe_pw0.peak_runoff` is all-zero on matching keys in the candidate run.
+- Stage-ablation execution isolates first-loss boundary to producer raw `ebe_pw0.txt` (`off_ablation_first_loss_boundary=producer_raw_ebe_txt`).
+- Parser/interchange path is non-causal (`pipeline/python/rust` parser-path outputs are identical on the preserved raw source).
+- Producer fix candidate replay restores nonzero `ebe_pw0` peaks and expected chan-vs-ebe alignment (`artifacts/post_fix_semantic_compare.json`).
+- Candidate binaries are vendored in `wepp_runner/bin` with sidecars and provenance evidence (`artifacts/binary_provenance.md`).
+
+**Next Steps**:
+1. Add focused regression coverage for "ebe peak all-zero while channel peaks nonzero".
+2. Re-run broader cohort recertification and finalize release disposition.
 
 ---
 

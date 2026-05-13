@@ -1,0 +1,129 @@
+{
+  "_inference": {
+    "off_ablation_first_loss_boundary": "producer_raw_ebe_txt"
+  },
+  "ca_ablation": {
+    "chan_parquet": {
+      "max_peak": 3.55,
+      "mean_peak": 0.06416400462751205,
+      "min_peak": 7.43e-05,
+      "rows": 60270,
+      "zero_rows": 0
+    },
+    "chan_raw_txt": {
+      "max_peak": 3.55,
+      "mean_peak": 0.06416400462751205,
+      "rows": 60270,
+      "zero_rows": 0
+    },
+    "chan_vs_ebe_parquet": {
+      "chan_pos_ebe_zero": 0,
+      "max_abs_delta": 0.004999999999999893,
+      "mean_abs_delta": 6.223600962336767e-05,
+      "rows": 60270
+    },
+    "ebe_parquet": {
+      "max_peak": 3.54512,
+      "mean_peak": 0.06416358735689626,
+      "min_peak": 7e-05,
+      "rows": 60270,
+      "zero_rows": 0
+    },
+    "ebe_raw_txt": {
+      "max_peak": 3.54512,
+      "mean_peak": 0.06416358735689626,
+      "rows": 60270,
+      "zero_rows": 0
+    }
+  },
+  "ca_current": {
+    "chan_parquet": {
+      "max_peak": 3.55,
+      "mean_peak": 0.06416400462751205,
+      "min_peak": 7.43e-05,
+      "rows": 60270,
+      "zero_rows": 0
+    },
+    "chan_vs_ebe_parquet": {
+      "chan_pos_ebe_zero": 0,
+      "max_abs_delta": 0.004999999999999893,
+      "mean_abs_delta": 6.223600962336767e-05,
+      "rows": 60270
+    },
+    "ebe_parquet": {
+      "max_peak": 3.54512,
+      "mean_peak": 0.06416358735689626,
+      "min_peak": 7e-05,
+      "rows": 60270,
+      "zero_rows": 0
+    }
+  },
+  "off_ablation": {
+    "chan_parquet": {
+      "max_peak": 3.59,
+      "mean_peak": 0.06512147309441076,
+      "min_peak": 7.08e-05,
+      "rows": 60270,
+      "zero_rows": 0
+    },
+    "chan_raw_txt": {
+      "max_peak": 3.59,
+      "mean_peak": 0.06512147309441076,
+      "rows": 60270,
+      "zero_rows": 0
+    },
+    "chan_vs_ebe_parquet": {
+      "chan_pos_ebe_zero": 60270,
+      "max_abs_delta": 3.59,
+      "mean_abs_delta": 0.06512147309441076,
+      "rows": 60270
+    },
+    "ebe_parquet": {
+      "max_peak": 0.0,
+      "mean_peak": 0.0,
+      "min_peak": 0.0,
+      "rows": 60270,
+      "zero_rows": 60270
+    },
+    "ebe_raw_txt": {
+      "max_peak": 0.0,
+      "mean_peak": 0.0,
+      "rows": 60270,
+      "zero_rows": 60270
+    },
+    "pass_status": {
+      "artifact": "pass_pw0.txt",
+      "pass_family": "hbp",
+      "reason": "pass_family=hbp treats pass_pw0.txt as optional and non-authoritative process input",
+      "status": "not_present"
+    }
+  },
+  "off_current": {
+    "chan_parquet": {
+      "max_peak": 3.59,
+      "mean_peak": 0.06511921990045023,
+      "min_peak": 7.08e-05,
+      "rows": 60270,
+      "zero_rows": 0
+    },
+    "chan_vs_ebe_parquet": {
+      "chan_pos_ebe_zero": 60270,
+      "max_abs_delta": 3.59,
+      "mean_abs_delta": 0.06511921990045023,
+      "rows": 60270
+    },
+    "ebe_parquet": {
+      "max_peak": 0.0,
+      "mean_peak": 0.0,
+      "min_peak": 0.0,
+      "rows": 60270,
+      "zero_rows": 60270
+    },
+    "pass_status": {
+      "artifact": "pass_pw0.txt",
+      "pass_family": "hbp",
+      "reason": "pass_family=hbp treats pass_pw0.txt as optional and non-authoritative process input",
+      "status": "not_present"
+    }
+  }
+}
