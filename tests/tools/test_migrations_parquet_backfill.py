@@ -1,6 +1,8 @@
 from __future__ import annotations
 
 import json
+import os
+import stat
 from pathlib import Path
 
 import pandas as pd
@@ -11,7 +13,10 @@ import pytest
 from wepppy.tools.migrations.landuse import migrate_landuse_parquet
 from wepppy.tools.migrations.runner import check_migrations_needed
 from wepppy.tools.migrations.soils import migrate_soils_nodb_meta, migrate_soils_parquet
-from wepppy.tools.migrations.watershed import migrate_watersheds
+from wepppy.tools.migrations.watershed import (
+    migrate_watershed_lookup_caches,
+    migrate_watersheds,
+)
 from wepppy.tools.migrations.parquet_paths import pick_existing_parquet_path
 
 pytestmark = pytest.mark.integration
@@ -237,6 +242,60 @@ def test_watershed_backfill_creates_parquets(tmp_path: Path) -> None:
     assert (run_dir / "watershed" / "hillslopes.parquet").exists()
     assert (run_dir / "watershed" / "channels.parquet").exists()
     assert (run_dir / "watershed" / "flowpaths.parquet").exists()
+
+
+def test_watershed_lookup_cache_migration_removes_transient_fields(tmp_path: Path) -> None:
+    run_dir = tmp_path / "run"
+    run_dir.mkdir()
+    watershed_nodb = run_dir / "watershed.nodb"
+    watershed_nodb.write_text(
+        json.dumps(
+            {
+                "py/state": {
+                    "_sub_area_lookup": {"31": 123.4},
+                    "_chn_length_lookup": {"14": 56.7},
+                    "_structure": [[1, 2]],
+                }
+            }
+        ),
+        encoding="utf-8",
+    )
+
+    applied, message = migrate_watershed_lookup_caches(str(run_dir), dry_run=True)
+    assert applied is True
+    assert "Would remove" in message
+
+    status = check_migrations_needed(str(run_dir))
+    entry = next(item for item in status["migrations"] if item["name"] == "watershed_lookup_caches")
+    assert entry["would_apply"] is True
+
+    applied, message = migrate_watershed_lookup_caches(str(run_dir), dry_run=False)
+    assert applied is True
+    assert "Removed 2 transient watershed lookup cache field(s)" in message
+
+    state = json.loads(watershed_nodb.read_text(encoding="utf-8"))["py/state"]
+    assert "_sub_area_lookup" not in state
+    assert "_chn_length_lookup" not in state
+    assert state["_structure"] == [[1, 2]]
+
+
+def test_watershed_lookup_cache_migration_preserves_file_mode(tmp_path: Path) -> None:
+    run_dir = tmp_path / "run"
+    run_dir.mkdir()
+    watershed_nodb = run_dir / "watershed.nodb"
+    watershed_nodb.write_text(
+        json.dumps({"py/state": {"_sub_area_lookup": {"31": 123.4}}}),
+        encoding="utf-8",
+    )
+
+    os.chmod(watershed_nodb, 0o644)
+    before_mode = stat.S_IMODE(watershed_nodb.stat().st_mode)
+
+    applied, _ = migrate_watershed_lookup_caches(str(run_dir), dry_run=False)
+    assert applied is True
+
+    after_mode = stat.S_IMODE(watershed_nodb.stat().st_mode)
+    assert after_mode == before_mode
 
 
 def test_landuse_parquet_normalizes_canonical_directory_path(tmp_path: Path) -> None:

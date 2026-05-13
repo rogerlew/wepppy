@@ -106,6 +106,7 @@ Available migrations:
   observed_nodb     Migrate observed.nodb module path
   run_paths         Migrate hardcoded paths in .nodb files
   watersheds        Normalize watershed parquet schemas
+  watershed_lookup_caches  Remove transient watershed lookup caches from watershed.nodb
   wbt_geojson       Normalize WBT GeoJSON ID types
   landuse_parquet   Normalize landuse parquet schema
   soils_parquet     Normalize soils parquet schema

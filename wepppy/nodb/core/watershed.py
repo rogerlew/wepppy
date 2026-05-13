@@ -220,7 +220,20 @@ def process_subcatchment(args: Tuple[WatershedAbstraction, int, bool, float, int
     return sub_id, sub_summary, fp_d
 
 
-TRANSIENT_FIELDS = ["_sub_area_lookup", "_sub_length_lookup", "_sub_centroid_lookup"]
+# Keep in sync with wepppy.tools.migrations.watershed.TRANSIENT_LOOKUP_FIELDS
+# so legacy runs can scrub persisted cache fields during migrations.
+WATERSHED_TRANSIENT_FIELDS = [
+    "_sub_area_lookup",
+    "_sub_length_lookup",
+    "_sub_centroid_lookup",
+    "_sub_slope_lookup",
+    "_sub_width_lookup",
+    "_chn_area_lookup",
+    "_chn_length_lookup",
+    "_chn_width_lookup",
+]
+# Backwards-compatible module export used by callers and stubs.
+TRANSIENT_FIELDS = WATERSHED_TRANSIENT_FIELDS
 DEFAULT_STREAM_PRUNING_METHOD = "ifolp"
 SUPPORTED_STREAM_PRUNING_METHODS = (
     DEFAULT_STREAM_PRUNING_METHOD,
@@ -230,6 +243,7 @@ SUPPORTED_STREAM_PRUNING_METHODS = (
 
 class Watershed(WatershedOperationsMixin, WatershedLookupMixin, NoDbBase):
     __name__ = "Watershed"
+    TRANSIENT_FIELDS = tuple(WATERSHED_TRANSIENT_FIELDS)
 
     _js_decode_replacements = (
         (

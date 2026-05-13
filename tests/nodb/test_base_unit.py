@@ -201,6 +201,20 @@ def test_locked_context_round_trip(controller: DummyController, redis_env: Simpl
     assert reloaded.values == {"answer": 42}
 
 
+def test_getstate_removes_declared_transient_fields(
+    controller: DummyController,
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    """NoDbBase honors class-declared TRANSIENT_FIELDS during serialization."""
+    monkeypatch.setattr(DummyController, "TRANSIENT_FIELDS", ("_transient_cache",), raising=False)
+    controller._transient_cache = {"stale": True}
+
+    state = controller.__getstate__()
+
+    assert "_transient_cache" not in state
+    assert "values" in state
+
+
 def test_dump_swallows_last_modified_side_effect_failures(
     controller: DummyController,
     redis_env: SimpleNamespace,

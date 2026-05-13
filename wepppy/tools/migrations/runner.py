@@ -37,6 +37,7 @@ from wepppy.tools.migrations.soils import (
     migrate_soils_parquet,
 )
 from wepppy.tools.migrations.watershed import (
+    migrate_watershed_lookup_caches,
     migrate_watershed_nodb_slim,
     migrate_watersheds,
     migrate_wbt_geojson,
@@ -50,6 +51,7 @@ __all__ = [
     "migrate_run_paths",
     "migrate_interchange",
     "migrate_watersheds",
+    "migrate_watershed_lookup_caches",
     "migrate_watershed_nodb_slim",
     "migrate_wbt_geojson",
     "migrate_landuse_parquet",
@@ -102,6 +104,7 @@ AVAILABLE_MIGRATIONS: List[Tuple[str, Callable[..., Tuple[bool, str]]]] = [
     ("run_paths", migrate_run_paths),
     ("nodb_jsonpickle_format", migrate_nodb_jsonpickle_format),  # After run_paths, before other nodb operations
     ("watersheds", migrate_watersheds),
+    ("watershed_lookup_caches", migrate_watershed_lookup_caches),  # Strip stale lookup caches before controller loads
     ("watershed_nodb_slim", migrate_watershed_nodb_slim),  # After watersheds ensures parquets exist
     ("wbt_geojson", migrate_wbt_geojson),
     ("landuse_parquet", migrate_landuse_parquet),
@@ -120,6 +123,7 @@ MIGRATION_DESCRIPTIONS: Dict[str, str] = {
     "run_paths": "Fix hardcoded paths in .nodb files to match current location",
     "nodb_jsonpickle_format": "Convert old flat jsonpickle format to new py/state format",
     "watersheds": "Generate parquet files for watershed data (hillslopes, channels, flowpaths)",
+    "watershed_lookup_caches": "Remove transient watershed lookup caches persisted in watershed.nodb",
     "watershed_nodb_slim": "Slim watershed.nodb by externalizing structure data (reduces file size)",
     "wbt_geojson": "Normalize GeoJSON identifiers for WhiteboxTools delineation",
     "landuse_parquet": "Generate parquet files for landuse data",

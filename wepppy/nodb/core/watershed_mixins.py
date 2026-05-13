@@ -1146,35 +1146,38 @@ class WatershedLookupMixin:
         return lookup
 
     def hillslope_area(self, topaz_id: Union[str, int]) -> float:
-        if hasattr(self, "_sub_area_lookup"):
-            return self._sub_area_lookup[str(topaz_id)]  # type: ignore[attr-defined]
+        topaz_id_str = str(topaz_id)
+        if hasattr(self, "_sub_area_lookup") and topaz_id_str in self._sub_area_lookup:  # type: ignore[attr-defined]
+            return self._sub_area_lookup[topaz_id_str]  # type: ignore[attr-defined]
 
         parquet_fn = _pick_existing_parquet_path(self.wd, "watershed/hillslopes.parquet")
         if parquet_fn is not None:
             sub_area_lookup = self._load_lookup_from_duckdb("_sub_area_lookup", parquet_fn, source_kind="parquet", value_columns=("area",), value_builder=lambda row: row[1])
-            return sub_area_lookup[str(topaz_id)]
+            return sub_area_lookup[topaz_id_str]
 
         return self._deprecated_area_of(topaz_id)
 
     def hillslope_slope(self, topaz_id: Union[str, int]) -> float:
-        if hasattr(self, "_sub_slope_lookup"):
-            return self._sub_slope_lookup[str(topaz_id)]  # type: ignore[attr-defined]
+        topaz_id_str = str(topaz_id)
+        if hasattr(self, "_sub_slope_lookup") and topaz_id_str in self._sub_slope_lookup:  # type: ignore[attr-defined]
+            return self._sub_slope_lookup[topaz_id_str]  # type: ignore[attr-defined]
 
         parquet_fn = _pick_existing_parquet_path(self.wd, "watershed/hillslopes.parquet")
         if parquet_fn is not None:
             sub_slope_lookup = self._load_lookup_from_duckdb("_sub_slope_lookup", parquet_fn, source_kind="parquet", value_columns=("slope_scalar",), value_builder=lambda row: row[1])
-            return sub_slope_lookup[str(topaz_id)]
+            return sub_slope_lookup[topaz_id_str]
 
         raise Exception('Cannot find slope without hillslope.parquet file')
 
     def channel_area(self, topaz_id: Union[str, int]) -> float:
-        if hasattr(self, "_chn_area_lookup"):
-            return self._chn_area_lookup[str(topaz_id)]  # type: ignore[attr-defined]
+        topaz_id_str = str(topaz_id)
+        if hasattr(self, "_chn_area_lookup") and topaz_id_str in self._chn_area_lookup:  # type: ignore[attr-defined]
+            return self._chn_area_lookup[topaz_id_str]  # type: ignore[attr-defined]
 
         parquet_fn = _pick_existing_parquet_path(self.wd, "watershed/channels.parquet")
         if parquet_fn is not None:
             chn_area_lookup = self._load_lookup_from_duckdb("_chn_area_lookup", parquet_fn, source_kind="parquet", value_columns=("area",), value_builder=lambda row: row[1])
-            return chn_area_lookup[str(topaz_id)]
+            return chn_area_lookup[topaz_id_str]
 
         return self._deprecated_area_of(topaz_id)
 
@@ -1189,13 +1192,14 @@ class WatershedLookupMixin:
             return self._subs_summary[topaz_id_str].area
 
     def hillslope_length(self, topaz_id: Union[str, int]) -> float:
-        if hasattr(self, "_sub_length_lookup"):
-            return self._sub_length_lookup[str(topaz_id)]  # type: ignore[attr-defined]
+        topaz_id_str = str(topaz_id)
+        if hasattr(self, "_sub_length_lookup") and topaz_id_str in self._sub_length_lookup:  # type: ignore[attr-defined]
+            return self._sub_length_lookup[topaz_id_str]  # type: ignore[attr-defined]
 
         parquet_fn = _pick_existing_parquet_path(self.wd, "watershed/hillslopes.parquet")
         if parquet_fn is not None:
             sub_length_lookup = self._load_lookup_from_duckdb("_sub_length_lookup", parquet_fn, source_kind="parquet", value_columns=("length",), value_builder=lambda row: row[1])
-            return sub_length_lookup[str(topaz_id)]
+            return sub_length_lookup[topaz_id_str]
 
         return self._deprecated_length_of(topaz_id)
 
@@ -1267,13 +1271,14 @@ class WatershedLookupMixin:
             dataset = None
 
     def channel_length(self, topaz_id: Union[str, int]) -> float:
-        if hasattr(self, "_chn_length_lookup"):
-            return self._chn_length_lookup[str(topaz_id)]  # type: ignore[attr-defined]
+        topaz_id_str = str(topaz_id)
+        if hasattr(self, "_chn_length_lookup") and topaz_id_str in self._chn_length_lookup:  # type: ignore[attr-defined]
+            return self._chn_length_lookup[topaz_id_str]  # type: ignore[attr-defined]
 
         parquet_fn = _pick_existing_parquet_path(self.wd, "watershed/channels.parquet")
         if parquet_fn is not None:
             chn_length_lookup = self._load_lookup_from_duckdb("_chn_length_lookup", parquet_fn, source_kind="parquet", value_columns=("length",), value_builder=lambda row: row[1])
-            return chn_length_lookup[str(topaz_id)]
+            return chn_length_lookup[topaz_id_str]
 
         return self._deprecated_length_of(topaz_id)
 
@@ -1354,17 +1359,18 @@ class WatershedLookupMixin:
         return self.hillslope_width(topaz_id)
 
     def hillslope_centroid_lnglat(self, topaz_id: Union[str, int]) -> Tuple[float, float]:
-        if hasattr(self, "_sub_centroid_lookup"):
-            return self._sub_centroid_lookup[str(topaz_id)]  # type: ignore[attr-defined]
+        topaz_id_str = str(topaz_id)
+        if hasattr(self, "_sub_centroid_lookup") and topaz_id_str in self._sub_centroid_lookup:  # type: ignore[attr-defined]
+            return self._sub_centroid_lookup[topaz_id_str]  # type: ignore[attr-defined]
 
         parquet_fn = _pick_existing_parquet_path(self.wd, "watershed/hillslopes.parquet")
         if parquet_fn is not None:
             sub_centroid_lookup = self._load_lookup_from_duckdb("_sub_centroid_lookup", parquet_fn, source_kind="parquet", value_columns=("centroid_lon", "centroid_lat"), value_builder=lambda row: (row[1], row[2]))
-            return sub_centroid_lookup[str(topaz_id)]
+            return sub_centroid_lookup[topaz_id_str]
 
         if self._subs_summary is None:
             raise ValueError("subs_summary is None")
-        wat_ss = self._subs_summary[str(topaz_id)]
+        wat_ss = self._subs_summary[topaz_id_str]
         lng, lat = wat_ss.centroid.lnglat
         return lng, lat
 

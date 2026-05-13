@@ -75,6 +75,7 @@ The following migrations are run in order by the unified runner:
 | `observed_nodb` | Migrate `observed.nodb` module path from legacy to new location |
 | `run_paths` | Remap hardcoded paths in `.nodb` files (e.g., `/geodata/wc1/` → `/wc1/`) |
 | `watersheds` | Normalize watershed parquet schemas (Peridot tables) |
+| `watershed_lookup_caches` | Remove stale transient watershed lookup cache dicts from `watershed.nodb` |
 | `wbt_geojson` | Normalize TopazID/WeppID types in WhiteboxTools GeoJSON files |
 | `landuse_parquet` | Normalize landuse parquet schema (`topaz_id`/`wepp_id` as Int32) |
 | `soils_parquet` | Normalize soils parquet schema (`topaz_id`/`wepp_id` as Int32) |

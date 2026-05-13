@@ -3,7 +3,10 @@
 from __future__ import annotations
 
 import json
+import os
 import pickle
+import stat
+import tempfile
 from pathlib import Path
 from typing import Any, Dict, List, Optional, Tuple
 
@@ -12,8 +15,51 @@ from wepppy.tools.migrations.parquet_paths import pick_existing_parquet_path
 __all__ = [
     "migrate_watersheds",
     "migrate_watershed_nodb_slim",
+    "migrate_watershed_lookup_caches",
     "migrate_wbt_geojson",
 ]
+
+# Keep in sync with wepppy.nodb.core.watershed.WATERSHED_TRANSIENT_FIELDS.
+# This duplicate list is intentional so migrations do not import controller modules.
+TRANSIENT_LOOKUP_FIELDS: Tuple[str, ...] = (
+    "_sub_area_lookup",
+    "_sub_length_lookup",
+    "_sub_centroid_lookup",
+    "_sub_slope_lookup",
+    "_sub_width_lookup",
+    "_chn_area_lookup",
+    "_chn_length_lookup",
+    "_chn_width_lookup",
+)
+
+
+def _atomic_write_json(path: Path, payload: Dict[str, Any]) -> None:
+    """Persist JSON atomically to avoid partial files on interruption."""
+    original_mode: Optional[int] = None
+    try:
+        original_mode = stat.S_IMODE(path.stat().st_mode)
+    except OSError:
+        original_mode = None
+
+    fd, tmp_name = tempfile.mkstemp(
+        prefix=f"{path.name}.",
+        suffix=".tmp",
+        dir=str(path.parent),
+    )
+    tmp_path = Path(tmp_name)
+    replaced = False
+    try:
+        with os.fdopen(fd, "w", encoding="utf-8") as f:
+            json.dump(payload, f, indent=2)
+            f.flush()
+            os.fsync(f.fileno())
+        if original_mode is not None:
+            os.chmod(tmp_path, original_mode)
+        tmp_path.replace(path)
+        replaced = True
+    finally:
+        if not replaced and tmp_path.exists():
+            tmp_path.unlink()
 
 
 def _extract_py_tuple(value: Any) -> Optional[Tuple[Any, ...]]:
@@ -219,6 +265,47 @@ def _write_legacy_parquet(
 
     df.to_parquet(target, index=False, engine="pyarrow")
     return True, f"Generated {target.name} from watershed.nodb summaries"
+
+
+def migrate_watershed_lookup_caches(wd: str, *, dry_run: bool = False) -> Tuple[bool, str]:
+    """
+    Remove persisted transient watershed lookup caches from watershed.nodb.
+
+    Lookup dictionaries derived from watershed parquet files are runtime caches;
+    persisting them can leave stale keysets after subcatchment rebuilds.
+    """
+    run_path = Path(wd)
+    watershed_nodb = run_path / "watershed.nodb"
+
+    if not watershed_nodb.exists():
+        return True, "No watershed.nodb (nothing to migrate)"
+
+    try:
+        with open(watershed_nodb, "r", encoding="utf-8") as f:
+            data = json.load(f)
+    except (json.JSONDecodeError, OSError) as exc:
+        return False, f"Failed to read watershed.nodb: {exc}"
+
+    state = data.get("py/state", data)
+    if not isinstance(state, dict):
+        return True, "No watershed state dictionary (nothing to migrate)"
+
+    found_fields = [field for field in TRANSIENT_LOOKUP_FIELDS if field in state]
+    if not found_fields:
+        return True, "No transient watershed lookup caches in watershed.nodb"
+
+    if dry_run:
+        return True, f"Would remove {len(found_fields)} transient watershed lookup cache field(s)"
+
+    for field in found_fields:
+        state.pop(field, None)
+
+    try:
+        _atomic_write_json(watershed_nodb, data)
+    except OSError as exc:
+        return False, f"Failed to write watershed.nodb: {exc}"
+
+    return True, f"Removed {len(found_fields)} transient watershed lookup cache field(s)"
 
 
 def migrate_watersheds(wd: str, *, dry_run: bool = False, keep_csv: bool = False) -> Tuple[bool, str]:

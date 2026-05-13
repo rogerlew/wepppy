@@ -988,6 +988,14 @@ class NoDbBase(object):
             '_console_handler',
         ):
             state.pop(attr, None)
+
+        # Controllers may declare ephemeral caches that must never persist
+        # across run loads (for example lookup dicts derived from parquet).
+        transient_fields = getattr(type(self), "TRANSIENT_FIELDS", ())
+        if isinstance(transient_fields, (list, tuple, set)):
+            for attr in transient_fields:
+                if isinstance(attr, str):
+                    state.pop(attr, None)
         return state
 
     @contextmanager
