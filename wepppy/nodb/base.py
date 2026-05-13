@@ -1728,9 +1728,11 @@ class NoDbBase(object):
                         ) from exc
 
                     if (
-                        self._nodb_size != expected_size
-                        or self._nodb_mtime is None
-                        or self._nodb_mtime <= expected_mtime
+                        self._nodb_size == expected_size
+                        and (
+                            self._nodb_mtime is None
+                            or self._nodb_mtime <= expected_mtime
+                        )
                     ):
                         raise NoDbStaleWriteError(
                             "cannot persist NoDb state because post-write signature did not advance "

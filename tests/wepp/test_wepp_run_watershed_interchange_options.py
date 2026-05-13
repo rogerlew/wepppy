@@ -66,6 +66,7 @@ def test_run_watershed_respects_contrast_output_options(tmp_path, monkeypatch):
     def fake_interchange(
         output_dir,
         *,
+        pass_family,
         start_year,
         run_ebe_interchange,
         run_chan_out_interchange,
@@ -75,6 +76,7 @@ def test_run_watershed_respects_contrast_output_options(tmp_path, monkeypatch):
     ):
         captured["flags"] = {
             "start_year": start_year,
+            "pass_family": pass_family,
             "run_ebe_interchange": run_ebe_interchange,
             "run_chan_out_interchange": run_chan_out_interchange,
             "run_soil_interchange": run_soil_interchange,
@@ -90,6 +92,7 @@ def test_run_watershed_respects_contrast_output_options(tmp_path, monkeypatch):
     wepp.run_watershed()
 
     assert captured["flags"]["start_year"] == 2000
+    assert captured["flags"]["pass_family"] == "legacy_ascii"
     assert captured["flags"]["run_ebe_interchange"] is False
     assert captured["flags"]["run_chan_out_interchange"] is False
     assert captured["flags"]["run_soil_interchange"] is False

@@ -959,7 +959,10 @@ class Wepp(NoDbBase):
                 False,
             )
         if not hasattr(instance, "_pass_family"):
-            instance._pass_family = instance.config_get_str("wepp", "pass_family", "legacy_ascii")
+            if hasattr(instance, "_config"):
+                instance._pass_family = instance.config_get_str("wepp", "pass_family", "legacy_ascii")
+            else:
+                instance._pass_family = "legacy_ascii"
         if not hasattr(instance, 'frost_opts') or instance.frost_opts is None:
             instance.frost_opts = FrostOpts(
                 wintRed=instance.config_get_int('frost_opts', 'wintRed'),
@@ -1285,7 +1288,12 @@ class Wepp(NoDbBase):
 
     @property
     def pass_family(self) -> str:
-        value = getattr(self, "_pass_family", self.config_get_str("wepp", "pass_family", "legacy_ascii"))
+        value = getattr(self, "_pass_family", None)
+        if value is None:
+            if hasattr(self, "_config"):
+                value = self.config_get_str("wepp", "pass_family", "legacy_ascii")
+            else:
+                value = "legacy_ascii"
         if value is None:
             return "legacy_ascii"
         return str(value).strip().lower() or "legacy_ascii"
