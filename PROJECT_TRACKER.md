@@ -1,7 +1,7 @@
 # PROJECT_TRACKER.md
 > Kanban board for wepppy work packages and vision items
 
-**Last Updated**: 2026-05-07
+**Last Updated**: 2026-05-13
 **Active Packages**: 6
 **Quick Links**: [Work Packages Directory](docs/work-packages/) | [God-Tier Prompting Strategy](docs/god-tier-prompting-strategy.md)
 
@@ -378,6 +378,15 @@ Currently active work packages. Limit to 2-4 packages to maintain focus.
 ## ✅ Done
 
 Recently completed work packages. Archived immediately upon completion.
+
+### Deterministic Return Ordering for wepppyo3 Raster Characteristics APIs (2026-05-13)
+**Status**: ✅ **COMPLETE**
+
+**Link**: [docs/work-packages/20260512_wepppyo3_raster_characteristics_deterministic_order/](docs/work-packages/20260512_wepppyo3_raster_characteristics_deterministic_order/)
+
+**Lifecycle**: Backlog -> In Progress -> Done (2026-05-13)
+
+**Summary**: Hardened all public map-returning `wepppyo3.raster_characteristics` APIs to deterministic key order at the Rust API boundary by replacing unordered return maps with `BTreeMap`/nested `BTreeMap` where required. Added repeated-call deterministic-order + semantic-parity regression coverage in `tests/raster_characteristics/test_deterministic_ordering_contract.py` (including negative-path error-contract assertions), refreshed `release/linux/py312/wepppyo3/raster_characteristics/raster_characteristics_rust.so`, captured runtime import and SHA256 evidence (`a2dddb70c3c9670bad8c4103b64d455539896d5ea1be17a99d9c5adc88dccda6`), updated `wepppyo3` documentation (`README.md`, `docs/module-registry.md`, `docs/release-provenance.md`), passed targeted WEPPpy consumer suites (`9 passed` plus optional `85 passed`), and closed independent review with no unresolved high/medium findings.
 
 ### RUSLE K CFVO Profile-Fragment Adjustment Integration (2026-05-07)
 **Status**: ✅ **COMPLETE**
