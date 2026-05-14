@@ -1,7 +1,7 @@
 {
   "binary_name": "wepp_260513",
   "binary_role": "watershed",
-  "built_utc": "2026-05-13T23:01:29Z",
+  "built_utc": "2026-05-14T02:17:04Z",
   "features": {
     "hbp_pass_family": "H*.hbp",
     "hbp_schema_major": 1,
@@ -13,13 +13,13 @@
     "mode3_process_pass_reload": false,
     "process_mode_pass_pw0_required": false
   },
-  "release_tag": "260513-ebepeak-fix",
+  "release_tag": "260513-route06-area-scaled-threshold",
   "schema": "wepp-binary-release-metadata-v1",
-  "sha256": "2670aea4b8960495638ed2eac7999c49478d0e38e74ed1516eb4adf76c498419",
-  "source_commit": "32a2290c3cfcc3709bd1329d4590fc353c49b558",
+  "sha256": "7a12a591dd837a99f805d9a4377e22967922fee7946300490b1c309445ab07bf",
+  "source_commit": "6f70fcf6a662de87baf8267f9e2a313e684e4c9b",
   "source_repo": "wepp-in-the-woods/wepp-forest",
   "validation": {
-    "host_smoke": "not_run",
+    "host_smoke": "failed_wepppy_fixture_contract_mismatch_expected_hbp_received_pass_dat",
     "lane_quarantine": [
       "reconciled-condenser",
       "chinless-half-hour"
@@ -27,5 +27,6 @@
     "ps05_reader": "not_run",
     "ps06_lane": "geodetic-innocence"
   },
-  "wepp_banner_version": "unknown"
+  "wepp_banner_version": "unknown",
+  "source_tree_state": "dirty"
 }
