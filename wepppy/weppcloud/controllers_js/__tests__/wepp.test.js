@@ -491,7 +491,17 @@ describe("Wepp controller", () => {
         expect(container.hidden).toBe(false);
     });
 
-    test("bootstrap assigns job id and triggers report when run complete", () => {
+    test("bootstrap triggers report immediately when prior run exists and no job is active", () => {
+        const reportSpy = jest.spyOn(wepp, "report").mockImplementation(() => {});
+
+        wepp.bootstrap({
+            data: { wepp: { hasRun: true } }
+        });
+
+        expect(reportSpy).toHaveBeenCalledTimes(1);
+    });
+
+    test("bootstrap defers report while tracked WEPP job is active and resolves on 404 poll error", () => {
         const reportSpy = jest.spyOn(wepp, "report").mockImplementation(() => {});
 
         wepp.bootstrap({
@@ -500,7 +510,59 @@ describe("Wepp controller", () => {
         });
 
         expect(controlBaseInstance.set_rq_job_id).toHaveBeenCalledWith(wepp, "wepp-job");
-        expect(reportSpy).toHaveBeenCalled();
+        expect(reportSpy).not.toHaveBeenCalled();
+
+        wepp.handle_job_status_error(wepp, { status: 404, statusText: "Not Found", body: {} });
+
+        expect(reportSpy).toHaveBeenCalledTimes(1);
+    });
+
+    test("bootstrap resolves deferred run summary when not_found arrives via response payload path", () => {
+        const reportSpy = jest.spyOn(wepp, "report").mockImplementation(() => {});
+
+        wepp.bootstrap({
+            jobIds: { run_wepp_rq: "wepp-job" },
+            data: { wepp: { hasRun: true } }
+        });
+
+        expect(reportSpy).not.toHaveBeenCalled();
+
+        wepp.handle_job_status_response(wepp, { status: "not_found" });
+
+        expect(reportSpy).toHaveBeenCalledTimes(1);
+    });
+
+    test("bootstrap keeps prep-only completion from loading run summary", () => {
+        const reportSpy = jest.spyOn(wepp, "report").mockImplementation(() => {});
+
+        wepp.bootstrap({
+            jobIds: { prep_wepp_watershed_rq: "wepp-prep-job" },
+            data: { wepp: { hasRun: true } }
+        });
+
+        expect(controlBaseInstance.set_rq_job_id).toHaveBeenCalledWith(wepp, "wepp-prep-job");
+        expect(reportSpy).not.toHaveBeenCalled();
+
+        wepp.handle_job_status_response(wepp, { status: "finished" });
+        expect(reportSpy).not.toHaveBeenCalled();
+
+        wepp.handle_job_status_error(wepp, { status: 404, statusText: "Not Found", body: {} });
+        expect(reportSpy).not.toHaveBeenCalled();
+    });
+
+    test("bootstrap keeps prep-only first terminal 404 from loading run summary", () => {
+        const reportSpy = jest.spyOn(wepp, "report").mockImplementation(() => {});
+
+        wepp.bootstrap({
+            jobIds: { prep_wepp_watershed_rq: "wepp-prep-job" },
+            data: { wepp: { hasRun: true } }
+        });
+
+        expect(reportSpy).not.toHaveBeenCalled();
+
+        wepp.handle_job_status_error(wepp, { status: 404, statusText: "Not Found", body: {} });
+
+        expect(reportSpy).not.toHaveBeenCalled();
     });
 
     test("bootstrap preserves watershed completion event namespace", () => {

@@ -1323,9 +1323,71 @@ var Wepp = (function () {
         ensureDelegates();
         wepp.handleRevegetationScenarioChange(revegSelect ? revegSelect.value : "");
 
+        var TERMINAL_JOB_STATUSES = {
+            finished: true,
+            failed: true,
+            stopped: true,
+            canceled: true,
+            cancelled: true,
+            not_found: true
+        };
+
         var bootstrapState = {
             modeListenersBound: false,
-            reportTriggered: false
+            reportTriggered: false,
+            pendingReportForTrackedJob: false
+        };
+
+        function isTerminalJobStatus(rawStatus) {
+            var normalized = rawStatus ? String(rawStatus).trim().toLowerCase() : "";
+            if (!normalized) {
+                return false;
+            }
+            return Object.prototype.hasOwnProperty.call(TERMINAL_JOB_STATUSES, normalized);
+        }
+
+        function maybeLoadDeferredBootstrapReport(rawStatus) {
+            if (!bootstrapState.pendingReportForTrackedJob || bootstrapState.reportTriggered) {
+                return;
+            }
+
+            var normalized = rawStatus ? String(rawStatus).trim().toLowerCase() : "";
+            if (!isTerminalJobStatus(normalized)) {
+                return;
+            }
+
+            bootstrapState.pendingReportForTrackedJob = false;
+            if (wepp.poll_completion_event === "WEPP_PREP_TASK_COMPLETED") {
+                return;
+            }
+            if (normalized !== "finished" && typeof wepp.report === "function") {
+                wepp.report();
+                bootstrapState.reportTriggered = true;
+            }
+        }
+
+        var baseHandleJobStatusResponse = wepp.handle_job_status_response.bind(wepp);
+        wepp.handle_job_status_response = function handleJobStatusResponseWithBootstrapReport(self, data) {
+            baseHandleJobStatusResponse(self, data);
+            maybeLoadDeferredBootstrapReport(data && data.status);
+        };
+
+        var baseHandleJobStatusError = wepp.handle_job_status_error.bind(wepp);
+        wepp.handle_job_status_error = function handleJobStatusErrorWithBootstrapReport(self, error) {
+            baseHandleJobStatusError(self, error);
+
+            var statusFromPayload = self && self.rq_job_status ? self.rq_job_status.status : null;
+            if (statusFromPayload) {
+                maybeLoadDeferredBootstrapReport(statusFromPayload);
+                return;
+            }
+
+            var rawErrorStatus = error && Object.prototype.hasOwnProperty.call(error, "status")
+                ? String(error.status).trim()
+                : "";
+            if (rawErrorStatus === "404") {
+                maybeLoadDeferredBootstrapReport("not_found");
+            }
         };
 
         wepp.bootstrap = function bootstrap(context) {
@@ -1461,9 +1523,22 @@ var Wepp = (function () {
             if (hasRun === undefined) {
                 hasRun = weppData.hasRun;
             }
+            var hasTrackedJob = Boolean(jobId);
+            var isActiveWeppJob = hasTrackedJob && (
+                wepp.poll_completion_event === "WEPP_RUN_TASK_COMPLETED" ||
+                wepp.poll_completion_event === "WEPP_PREP_TASK_COMPLETED"
+            );
+
             if (hasRun && !bootstrapState.reportTriggered && typeof wepp.report === "function") {
-                wepp.report();
-                bootstrapState.reportTriggered = true;
+                if (isActiveWeppJob) {
+                    bootstrapState.pendingReportForTrackedJob = true;
+                } else {
+                    bootstrapState.pendingReportForTrackedJob = false;
+                    wepp.report();
+                    bootstrapState.reportTriggered = true;
+                }
+            } else if (!hasRun) {
+                bootstrapState.pendingReportForTrackedJob = false;
             }
 
             return wepp;
