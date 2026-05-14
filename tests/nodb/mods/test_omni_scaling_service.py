@@ -73,6 +73,15 @@ def test_normalize_filter_inputs_parses_slope_and_int_sets() -> None:
     assert burns == {1, 2, 3}
     assert topaz == {10, 20}
 
+    legacy_min, legacy_max, _, _ = service.normalize_filter_inputs(
+        contrast_hill_min_slope="0.3",
+        contrast_hill_max_slope="0.7",
+        contrast_select_burn_severities=None,
+        contrast_select_topaz_ids=None,
+    )
+    assert legacy_min == 0.3
+    assert legacy_max == 0.7
+
     with pytest.raises(ValueError, match="must be <="):
         service.normalize_filter_inputs(
             contrast_hill_min_slope=0.9,
@@ -178,6 +187,14 @@ def test_normalize_filter_inputs_rejects_malformed_numeric_values() -> None:
     with pytest.raises(ValueError, match="must be a number"):
         service.normalize_filter_inputs(
             contrast_hill_min_slope="not-a-number",
+            contrast_hill_max_slope=None,
+            contrast_select_burn_severities=None,
+            contrast_select_topaz_ids=None,
+        )
+
+    with pytest.raises(ValueError, match="integer percentage"):
+        service.normalize_filter_inputs(
+            contrast_hill_min_slope="10.5",
             contrast_hill_max_slope=None,
             contrast_select_burn_severities=None,
             contrast_select_topaz_ids=None,

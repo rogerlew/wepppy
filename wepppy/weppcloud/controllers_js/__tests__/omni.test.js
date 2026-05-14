@@ -203,6 +203,68 @@ describe("Omni controller", () => {
         expect(groundSelect.value).toBe("93%");
     });
 
+    test("scenario filters render only for mulch/thinning/prescribed_fire and start collapsed", () => {
+        const uniformItem = addScenarioAndSelect("uniform_low");
+        expect(uniformItem.querySelector("[data-omni-role='scenario-filters']")).toBeNull();
+
+        const thinningItem = addScenarioAndSelect("thinning");
+        const filters = thinningItem.querySelector("[data-omni-role='scenario-filters']");
+        expect(filters).not.toBeNull();
+        expect(filters.open).toBe(false);
+        expect(thinningItem.querySelector("[data-omni-field='filter_hill_min_slope_pct']")).not.toBeNull();
+        expect(thinningItem.querySelector("[data-omni-field='filter_hill_max_slope_pct']")).not.toBeNull();
+        expect(thinningItem.querySelector("[data-omni-field='filter_burn_severities']")).not.toBeNull();
+    });
+
+    test("serializeScenarios normalizes per-scenario filter fields", () => {
+        const item = addScenarioAndSelect("mulch");
+        item.querySelector("[data-omni-field='ground_cover_increase']").value = "60%";
+        item.querySelector("[data-omni-field='base_scenario']").value = "uniform_low";
+        item.querySelector("[data-omni-field='filter_hill_min_slope_pct']").value = "10";
+        item.querySelector("[data-omni-field='filter_hill_max_slope_pct']").value = "25";
+        item.querySelector("[data-omni-field='filter_burn_severities']").value = "3, 1, 3";
+
+        const payload = omni.serializeScenarios();
+        expect(payload.scenarios).toEqual([
+            {
+                type: "mulch",
+                ground_cover_increase: "60%",
+                base_scenario: "uniform_low",
+                filter_hill_min_slope_pct: 10,
+                filter_hill_max_slope_pct: 25,
+                filter_burn_severities: [1, 3]
+            }
+        ]);
+    });
+
+    test("filtered scenarios produce distinct contrast options", async () => {
+        getJsonMock.mockResolvedValueOnce([
+            {
+                type: "mulch",
+                ground_cover_increase: "60%",
+                base_scenario: "uniform_low",
+                filter_hill_min_slope_pct: 0.1
+            },
+            {
+                type: "mulch",
+                ground_cover_increase: "60%",
+                base_scenario: "uniform_low",
+                filter_hill_min_slope_pct: 20
+            }
+        ]);
+
+        await omni.load_scenarios_from_backend();
+
+        const contrastOptions = Array.from(
+            document.querySelector("[data-omni-contrast-role='contrast-scenario']").querySelectorAll("option")
+        ).map((option) => option.value);
+        const mulchOptions = contrastOptions.filter((value) => value.startsWith("mulch_60_uniform_low"));
+
+        expect(new Set(mulchOptions).size).toBe(2);
+        expect(mulchOptions).toContain("mulch_60_uniform_low__filters_smin10");
+        expect(mulchOptions).toContain("mulch_60_uniform_low__filters_smin20");
+    });
+
     test("run_omni_scenarios validates SBS uploads before posting", async () => {
         addScenarioAndSelect("sbs_map");
 

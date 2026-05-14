@@ -3,6 +3,7 @@ from pathlib import Path
 import pytest
 
 TestClient = pytest.importorskip("fastapi.testclient").TestClient
+FormData = pytest.importorskip("starlette.datastructures").FormData
 
 import wepppy.microservices.rq_engine as rq_engine
 from wepppy.microservices.rq_engine import omni_routes
@@ -94,6 +95,104 @@ def _make_pairs(count: int) -> list[dict[str, str]]:
         {"control_scenario": f"control_{idx}", "contrast_scenario": f"contrast_{idx}"}
         for idx in range(1, count + 1)
     ]
+
+
+def test_prepare_omni_scenarios_normalizes_per_scenario_filter_fields(tmp_path: Path) -> None:
+    wd = tmp_path / "run"
+    wd.mkdir(parents=True, exist_ok=True)
+
+    parsed = omni_routes._prepare_omni_scenarios(
+        payload={
+            "scenarios": [
+                {
+                    "type": "mulch",
+                    "ground_cover_increase": "30",
+                    "base_scenario": "uniform_low",
+                    "filter_hill_min_slope_pct": "10",
+                    "filter_hill_max_slope_pct": "25",
+                    "filter_burn_severities": "3, 1, 3",
+                }
+            ]
+        },
+        raw_json=None,
+        form=FormData({}),
+        runid="run-1",
+        config="cfg",
+        wd=str(wd),
+    )
+
+    assert len(parsed) == 1
+    _, scenario = parsed[0]
+    assert scenario["filter_hill_min_slope_pct"] == 10
+    assert scenario["filter_hill_max_slope_pct"] == 25
+    assert scenario["filter_burn_severities"] == [1, 3]
+
+
+def test_prepare_omni_scenarios_rejects_decimal_filter_slope(tmp_path: Path) -> None:
+    wd = tmp_path / "run"
+    wd.mkdir(parents=True, exist_ok=True)
+
+    with pytest.raises(ValueError, match="filter_hill_min_slope_pct must be an integer percentage"):
+        omni_routes._prepare_omni_scenarios(
+            payload={
+                "scenarios": [
+                    {
+                        "type": "thinning",
+                        "canopy_cover": "70",
+                        "ground_cover": "40",
+                        "filter_hill_min_slope_pct": "10.5",
+                    }
+                ]
+            },
+            raw_json=None,
+            form=FormData({}),
+            runid="run-1",
+            config="cfg",
+            wd=str(wd),
+        )
+
+
+def test_prepare_omni_contrasts_normalizes_integer_slope_percentages(tmp_path: Path) -> None:
+    wd = tmp_path / "run"
+    wd.mkdir(parents=True, exist_ok=True)
+
+    parsed = omni_routes._prepare_omni_contrasts(
+        payload={
+            "omni_contrast_selection_mode": "cumulative",
+            "omni_control_scenario": "uniform_low",
+            "omni_contrast_scenario": "mulch",
+            "omni_contrast_hill_min_slope": "25",
+            "omni_contrast_hill_max_slope": "75",
+        },
+        raw_json=None,
+        form=FormData({}),
+        runid="run-1",
+        config="cfg",
+        wd=str(wd),
+    )
+
+    assert parsed["omni_contrast_hill_min_slope"] == 25
+    assert parsed["omni_contrast_hill_max_slope"] == 75
+
+
+def test_prepare_omni_contrasts_rejects_decimal_slope_percentages(tmp_path: Path) -> None:
+    wd = tmp_path / "run"
+    wd.mkdir(parents=True, exist_ok=True)
+
+    with pytest.raises(ValueError, match="omni_contrast_hill_min_slope must be an integer percentage"):
+        omni_routes._prepare_omni_contrasts(
+            payload={
+                "omni_contrast_selection_mode": "cumulative",
+                "omni_control_scenario": "uniform_low",
+                "omni_contrast_scenario": "mulch",
+                "omni_contrast_hill_min_slope": "25.5",
+            },
+            raw_json=None,
+            form=FormData({}),
+            runid="run-1",
+            config="cfg",
+            wd=str(wd),
+        )
 
 
 def test_preflight_omni_roots_rejects_mixed_soils_root(

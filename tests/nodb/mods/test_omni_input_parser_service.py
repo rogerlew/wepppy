@@ -92,7 +92,14 @@ def test_parse_scenarios_resets_existing_and_requires_mode_specific_fields() -> 
             ("uniform_low", {"type": "uniform_low"}),
             (
                 "thinning",
-                {"type": "thinning", "canopy_cover": "70", "ground_cover": "40"},
+                {
+                    "type": "thinning",
+                    "canopy_cover": "70",
+                    "ground_cover": "40",
+                    "filter_hill_min_slope_pct": 10,
+                    "filter_hill_max_slope_pct": 40,
+                    "filter_burn_severities": [1, 3],
+                },
             ),
             (
                 "mulch",
@@ -100,6 +107,14 @@ def test_parse_scenarios_resets_existing_and_requires_mode_specific_fields() -> 
                     "type": "mulch",
                     "ground_cover_increase": "30",
                     "base_scenario": "uniform_low",
+                    "filter_hill_min_slope_pct": 5,
+                },
+            ),
+            (
+                "prescribed_fire",
+                {
+                    "type": "prescribed_fire",
+                    "filter_burn_severities": [2],
                 },
             ),
         ],
@@ -107,12 +122,21 @@ def test_parse_scenarios_resets_existing_and_requires_mode_specific_fields() -> 
 
     assert omni._scenarios == [
         {"type": "uniform_low"},
-        {"type": "thinning", "canopy_cover": "70", "ground_cover": "40"},
+        {
+            "type": "thinning",
+            "canopy_cover": "70",
+            "ground_cover": "40",
+            "filter_hill_min_slope_pct": 10,
+            "filter_hill_max_slope_pct": 40,
+            "filter_burn_severities": [1, 3],
+        },
         {
             "type": "mulch",
             "ground_cover_increase": "30",
             "base_scenario": "uniform_low",
+            "filter_hill_min_slope_pct": 5,
         },
+        {"type": "prescribed_fire", "filter_burn_severities": [2]},
     ]
 
     with pytest.raises(ValueError, match="Thinning requires canopy_cover and ground_cover"):

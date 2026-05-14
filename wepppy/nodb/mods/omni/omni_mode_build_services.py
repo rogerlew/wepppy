@@ -107,6 +107,139 @@ def _run_with_directory_roots_lock(
 class OmniModeBuildServices:
     """Dispatch Omni scenario/contrast builds by selection and scenario mode."""
 
+    _SCENARIO_FILTER_MIN_SLOPE_FIELD = "filter_hill_min_slope_pct"
+    _SCENARIO_FILTER_MAX_SLOPE_FIELD = "filter_hill_max_slope_pct"
+    _SCENARIO_FILTER_BURN_FIELD = "filter_burn_severities"
+
+    @staticmethod
+    def _parse_optional_int_percent(value: Any) -> Optional[int]:
+        if value in (None, ""):
+            return None
+        raw_token = None
+        if isinstance(value, str):
+            raw_token = value.strip().replace("%", "")
+            if not raw_token:
+                return None
+            numeric_source: Any = raw_token
+        else:
+            numeric_source = value
+
+        try:
+            parsed = float(numeric_source)
+        except (TypeError, ValueError):
+            raise ValueError("Scenario slope filters must be integer percentages")
+
+        if parsed < 0:
+            raise ValueError("Scenario slope filters must be >= 0")
+
+        if parsed <= 1.0:
+            if isinstance(value, float):
+                parsed = parsed * 100.0
+            elif raw_token is not None and "." in raw_token:
+                parsed = parsed * 100.0
+
+        if int(parsed) != parsed:
+            raise ValueError("Scenario slope filters must be integer percentages")
+        return int(parsed)
+
+    @staticmethod
+    def _parse_burn_severity_set(value: Any) -> Optional[Set[int]]:
+        if value in (None, "", []):
+            return None
+        if isinstance(value, str):
+            raw_items = [item.strip() for item in value.split(",")]
+        elif isinstance(value, (list, tuple, set)):
+            raw_items = list(value)
+        else:
+            raw_items = [value]
+
+        parsed: Set[int] = set()
+        for item in raw_items:
+            if item in (None, ""):
+                continue
+            token = str(item).strip()
+            if not token:
+                continue
+            try:
+                burn = int(token)
+            except (TypeError, ValueError) as exc:
+                raise ValueError("Scenario burn filters must be integers in 0-3") from exc
+            if burn not in {0, 1, 2, 3}:
+                raise ValueError("Scenario burn filters must be integers in 0-3")
+            parsed.add(burn)
+        return parsed or None
+
+    @staticmethod
+    def _burn_value(label: Optional[str]) -> int:
+        name = (label or "Unburned").strip().lower()
+        mapping = {
+            "unburned": 0,
+            "low": 1,
+            "moderate": 2,
+            "mod": 2,
+            "high": 3,
+        }
+        if name not in mapping:
+            raise ValueError(f"Unknown burn class '{label}' while applying scenario filters")
+        return mapping[name]
+
+    def _parse_scenario_filter_mask(
+        self,
+        scenario_def: "ScenarioDef",
+    ) -> Tuple[Optional[int], Optional[int], Optional[Set[int]]]:
+        min_slope_pct = self._parse_optional_int_percent(
+            scenario_def.get(self._SCENARIO_FILTER_MIN_SLOPE_FIELD)
+        )
+        max_slope_pct = self._parse_optional_int_percent(
+            scenario_def.get(self._SCENARIO_FILTER_MAX_SLOPE_FIELD)
+        )
+        if (
+            min_slope_pct is not None
+            and max_slope_pct is not None
+            and min_slope_pct > max_slope_pct
+        ):
+            raise ValueError(
+                f"{self._SCENARIO_FILTER_MIN_SLOPE_FIELD} must be <= {self._SCENARIO_FILTER_MAX_SLOPE_FIELD}"
+            )
+        burn_set = self._parse_burn_severity_set(
+            scenario_def.get(self._SCENARIO_FILTER_BURN_FIELD)
+        )
+        return min_slope_pct, max_slope_pct, burn_set
+
+    def _passes_treatment_filter_mask(
+        self,
+        *,
+        topaz_id: Any,
+        watershed: Optional[Any],
+        slope_lookup: Dict[str, float],
+        min_slope_pct: Optional[int],
+        max_slope_pct: Optional[int],
+        burn_set: Optional[Set[int]],
+        burn_landuse: Optional[Any],
+        burn_lookup: Dict[str, int],
+    ) -> bool:
+        topaz_key = str(topaz_id)
+        if watershed is not None and (min_slope_pct is not None or max_slope_pct is not None):
+            slope = slope_lookup.get(topaz_key)
+            if slope is None:
+                slope = watershed.hillslope_slope(topaz_key)
+                slope_lookup[topaz_key] = slope
+            slope_pct = float(slope) * 100.0
+            if min_slope_pct is not None and slope_pct < float(min_slope_pct):
+                return False
+            if max_slope_pct is not None and slope_pct > float(max_slope_pct):
+                return False
+
+        if burn_set is not None and burn_landuse is not None:
+            burn_class = burn_lookup.get(topaz_key)
+            if burn_class is None:
+                burn_class = self._burn_value(burn_landuse.identify_burn_class(topaz_key))
+                burn_lookup[topaz_key] = burn_class
+            if burn_class not in burn_set:
+                return False
+
+        return True
+
     def build_contrasts_for_selection_mode(self, omni: "Omni", selection_mode: str) -> bool:
         if selection_mode == "user_defined_areas":
             omni._build_contrasts_user_defined_areas()
@@ -176,6 +309,18 @@ class OmniModeBuildServices:
         omni_base_scenario_name: Optional[str],
     ) -> None:
         scenario_key = str(scenario)
+        (
+            min_slope_pct,
+            max_slope_pct,
+            burn_filter_set,
+        ) = self._parse_scenario_filter_mask(scenario_def)
+        watershed = None
+        if min_slope_pct is not None or max_slope_pct is not None:
+            from wepppy.nodb.core import Watershed
+
+            watershed = Watershed.getInstance(omni.wd)
+        slope_lookup: Dict[str, float] = {}
+        burn_lookup: Dict[str, int] = {}
 
         def _run_landuse_and_soils(callback: Any) -> None:
             _run_with_directory_roots_lock(
@@ -284,6 +429,17 @@ class OmniModeBuildServices:
                         man_summary = landuse.managements[dom]
                         disturbed_class = getattr(man_summary, "disturbed_class", "")
                         if isinstance(disturbed_class, str) and "fire" in disturbed_class:
+                            if not self._passes_treatment_filter_mask(
+                                topaz_id=topaz_id,
+                                watershed=watershed,
+                                slope_lookup=slope_lookup,
+                                min_slope_pct=min_slope_pct,
+                                max_slope_pct=max_slope_pct,
+                                burn_set=burn_filter_set,
+                                burn_landuse=landuse,
+                                burn_lookup=burn_lookup,
+                            ):
+                                continue
                             treatments_domlc_d[topaz_id] = treatment_key
 
                     treatments.treatments_domlc_d = treatments_domlc_d
@@ -325,6 +481,27 @@ class OmniModeBuildServices:
                             f"Available treatment keys: {available}."
                         )
 
+                    burn_source_landuse = None
+                    if burn_filter_set is not None:
+                        if omni.has_sbs:
+                            from wepppy.nodb.core import Landuse
+
+                            try:
+                                burn_source_landuse = Landuse.getInstance(omni.wd)
+                            except Exception as exc:
+                                omni.logger.info(
+                                    "  %s: unable to load base/project burn classes, "
+                                    "ignoring burn-severity scenario filter (%s)",
+                                    scenario_name,
+                                    exc,
+                                )
+                        else:
+                            omni.logger.info(
+                                "  %s: project/base SBS burn classes unavailable; "
+                                "ignoring burn-severity scenario filter",
+                                scenario_name,
+                            )
+
                     treatments_domlc_d = {}
                     for topaz_id, dom in landuse.domlc_d.items():
                         if str(topaz_id).endswith("4"):
@@ -333,6 +510,17 @@ class OmniModeBuildServices:
                         man_summary = landuse.managements[dom]
                         disturbed_class = getattr(man_summary, "disturbed_class", "")
                         if "forest" in disturbed_class and "young" not in disturbed_class:
+                            if not self._passes_treatment_filter_mask(
+                                topaz_id=topaz_id,
+                                watershed=watershed,
+                                slope_lookup=slope_lookup,
+                                min_slope_pct=min_slope_pct,
+                                max_slope_pct=max_slope_pct,
+                                burn_set=burn_filter_set,
+                                burn_landuse=burn_source_landuse,
+                                burn_lookup=burn_lookup,
+                            ):
+                                continue
                             treatments_domlc_d[topaz_id] = treatment_key
 
                     treatments.treatments_domlc_d = treatments_domlc_d
@@ -359,7 +547,31 @@ class OmniModeBuildServices:
             with omni.timed(f"  {scenario_name}: applying treatments"):
                 def _apply_treatments() -> None:
                     treatments = Treatments.getInstance(new_wd)
-                    treatment_key = treatments.treatments_lookup[scenario_name]
+                    canopy_cover = str(scenario_def.get("canopy_cover", "")).replace("%", "")
+                    ground_cover = str(scenario_def.get("ground_cover", "")).replace("%", "")
+                    treatment_lookup_key = f"thinning_{canopy_cover}_{ground_cover}"
+                    treatment_key = treatments.treatments_lookup[treatment_lookup_key]
+
+                    burn_source_landuse = None
+                    if burn_filter_set is not None:
+                        if omni.has_sbs:
+                            from wepppy.nodb.core import Landuse
+
+                            try:
+                                burn_source_landuse = Landuse.getInstance(omni.wd)
+                            except Exception as exc:
+                                omni.logger.info(
+                                    "  %s: unable to load base/project burn classes, "
+                                    "ignoring burn-severity scenario filter (%s)",
+                                    scenario_name,
+                                    exc,
+                                )
+                        else:
+                            omni.logger.info(
+                                "  %s: project/base SBS burn classes unavailable; "
+                                "ignoring burn-severity scenario filter",
+                                scenario_name,
+                            )
 
                     treatments_domlc_d = {}
                     for topaz_id, dom in landuse.domlc_d.items():
@@ -369,6 +581,17 @@ class OmniModeBuildServices:
                         man_summary = landuse.managements[dom]
                         disturbed_class = getattr(man_summary, "disturbed_class", "")
                         if "forest" in disturbed_class and "young" not in disturbed_class:
+                            if not self._passes_treatment_filter_mask(
+                                topaz_id=topaz_id,
+                                watershed=watershed,
+                                slope_lookup=slope_lookup,
+                                min_slope_pct=min_slope_pct,
+                                max_slope_pct=max_slope_pct,
+                                burn_set=burn_filter_set,
+                                burn_landuse=burn_source_landuse,
+                                burn_lookup=burn_lookup,
+                            ):
+                                continue
                             treatments_domlc_d[topaz_id] = treatment_key
 
                     treatments.treatments_domlc_d = treatments_domlc_d

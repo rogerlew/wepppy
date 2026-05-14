@@ -44,6 +44,9 @@ SBS_MAX_BYTES = 100 * 1024 * 1024
 GEOJSON_ALLOWED_EXTENSIONS = ("geojson", "json")
 GEOJSON_MAX_BYTES = 100 * 1024 * 1024
 CONTRAST_SELECTION_MODE_DEFAULT = "cumulative"
+SCENARIO_FILTER_MIN_SLOPE_FIELD = "filter_hill_min_slope_pct"
+SCENARIO_FILTER_MAX_SLOPE_FIELD = "filter_hill_max_slope_pct"
+SCENARIO_FILTER_BURN_FIELD = "filter_burn_severities"
 
 
 def _maybe_nodir_error_response(exc: Exception):
@@ -201,6 +204,42 @@ def _coerce_optional_int(value: Any, field_name: str) -> int | None:
         raise ValueError(f"{field_name} must be an integer") from exc
 
 
+def _coerce_optional_slope_percent(value: Any, field_name: str) -> int | None:
+    if value is None or value == "":
+        return None
+
+    raw_token = None
+    if isinstance(value, str):
+        raw_token = value.strip()
+        if not raw_token:
+            return None
+        raw_token = raw_token.replace("%", "")
+        numeric_source: Any = raw_token
+    else:
+        numeric_source = value
+
+    try:
+        parsed = float(numeric_source)
+    except (TypeError, ValueError) as exc:
+        raise ValueError(f"{field_name} must be an integer percentage") from exc
+
+    if parsed < 0:
+        raise ValueError(f"{field_name} must be >= 0")
+
+    # Backward-compatible legacy support: historical clients sent fractional
+    # slopes (0..1). Promote those to integer percentages.
+    if parsed <= 1.0:
+        if isinstance(value, float):
+            parsed = parsed * 100.0
+        elif raw_token is not None and "." in raw_token:
+            parsed = parsed * 100.0
+
+    if int(parsed) != parsed:
+        raise ValueError(f"{field_name} must be an integer percentage")
+
+    return int(parsed)
+
+
 def _coerce_optional_int_list(value: Any, field_name: str) -> list[int] | None:
     if value is None or value == "":
         return None
@@ -287,6 +326,51 @@ def _prepare_omni_scenarios(
         scenario_enum = OmniScenario.parse(scenario_type)
         scenario_params: dict[str, Any] = dict(scenario)
         scenario_params["type"] = scenario_type
+
+        if str(scenario_enum) in {"mulch", "thinning", "prescribed_fire"}:
+            min_slope = _coerce_optional_slope_percent(
+                scenario_params.get(SCENARIO_FILTER_MIN_SLOPE_FIELD),
+                SCENARIO_FILTER_MIN_SLOPE_FIELD,
+            )
+            max_slope = _coerce_optional_slope_percent(
+                scenario_params.get(SCENARIO_FILTER_MAX_SLOPE_FIELD),
+                SCENARIO_FILTER_MAX_SLOPE_FIELD,
+            )
+            if min_slope is not None and max_slope is not None and min_slope > max_slope:
+                raise ValueError(
+                    f"{SCENARIO_FILTER_MIN_SLOPE_FIELD} must be <= {SCENARIO_FILTER_MAX_SLOPE_FIELD}"
+                )
+
+            burn_severities = _coerce_optional_int_list(
+                scenario_params.get(SCENARIO_FILTER_BURN_FIELD),
+                SCENARIO_FILTER_BURN_FIELD,
+            )
+            if burn_severities is not None:
+                invalid_burns = sorted({value for value in burn_severities if value not in {0, 1, 2, 3}})
+                if invalid_burns:
+                    raise ValueError(
+                        f"{SCENARIO_FILTER_BURN_FIELD} entries must be integers in 0-3; got {invalid_burns}"
+                    )
+                burn_severities = sorted(set(burn_severities))
+
+            if min_slope is not None:
+                scenario_params[SCENARIO_FILTER_MIN_SLOPE_FIELD] = min_slope
+            else:
+                scenario_params.pop(SCENARIO_FILTER_MIN_SLOPE_FIELD, None)
+
+            if max_slope is not None:
+                scenario_params[SCENARIO_FILTER_MAX_SLOPE_FIELD] = max_slope
+            else:
+                scenario_params.pop(SCENARIO_FILTER_MAX_SLOPE_FIELD, None)
+
+            if burn_severities:
+                scenario_params[SCENARIO_FILTER_BURN_FIELD] = burn_severities
+            else:
+                scenario_params.pop(SCENARIO_FILTER_BURN_FIELD, None)
+        else:
+            scenario_params.pop(SCENARIO_FILTER_MIN_SLOPE_FIELD, None)
+            scenario_params.pop(SCENARIO_FILTER_MAX_SLOPE_FIELD, None)
+            scenario_params.pop(SCENARIO_FILTER_BURN_FIELD, None)
 
         if scenario_enum == OmniScenario.SBSmap:
             file_key = f"scenarios[{idx}][sbs_file]"
@@ -383,11 +467,11 @@ def _prepare_omni_contrasts(
             payload.get("omni_contrast_hillslope_limit"),
             "omni_contrast_hillslope_limit",
         )
-        hill_min_slope = _coerce_optional_float(
+        hill_min_slope = _coerce_optional_slope_percent(
             payload.get("omni_contrast_hill_min_slope"),
             "omni_contrast_hill_min_slope",
         )
-        hill_max_slope = _coerce_optional_float(
+        hill_max_slope = _coerce_optional_slope_percent(
             payload.get("omni_contrast_hill_max_slope"),
             "omni_contrast_hill_max_slope",
         )

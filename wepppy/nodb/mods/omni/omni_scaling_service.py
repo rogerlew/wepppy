@@ -195,12 +195,27 @@ class OmniScalingService:
     def _normalize_slope(self, value: Any, label: str) -> Optional[float]:
         if value is None or value == "":
             return None
+        raw_token = None
+        if isinstance(value, str):
+            raw_token = value.strip().replace("%", "")
+            if raw_token == "":
+                return None
+            numeric_value: Any = raw_token
+        else:
+            numeric_value = value
         try:
-            slope = float(value)
+            slope = float(numeric_value)
         except (TypeError, ValueError) as exc:
             raise ValueError(f"{label} must be a number") from exc
         if slope < 0:
             raise ValueError(f"{label} must be >= 0")
-        if slope > 1.0:
-            slope = slope / 100.0
-        return slope
+        # Backward-compatible legacy support: historical values used fractions
+        # in [0, 1]. Promote those to integer percentages.
+        if slope <= 1.0:
+            if isinstance(value, float):
+                slope = slope * 100.0
+            elif raw_token is not None and "." in raw_token:
+                slope = slope * 100.0
+        if int(slope) != slope:
+            raise ValueError(f"{label} must be an integer percentage")
+        return int(slope) / 100.0

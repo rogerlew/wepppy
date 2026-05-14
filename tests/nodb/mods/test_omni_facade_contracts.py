@@ -92,7 +92,13 @@ def test_parse_scenarios_resets_existing_state_and_keeps_expected_shapes(tmp_pat
             (omni_module.OmniScenario.UniformHigh, {"type": "uniform_high"}),
             (
                 omni_module.OmniScenario.Thinning,
-                {"type": "thinning", "canopy_cover": "70", "ground_cover": "40"},
+                {
+                    "type": "thinning",
+                    "canopy_cover": "70",
+                    "ground_cover": "40",
+                    "filter_hill_min_slope_pct": 10,
+                    "filter_burn_severities": [2],
+                },
             ),
             (
                 omni_module.OmniScenario.Mulch,
@@ -100,19 +106,32 @@ def test_parse_scenarios_resets_existing_state_and_keeps_expected_shapes(tmp_pat
                     "type": "mulch",
                     "ground_cover_increase": "30",
                     "base_scenario": "uniform_low",
+                    "filter_hill_max_slope_pct": 45,
                 },
+            ),
+            (
+                omni_module.OmniScenario.PrescribedFire,
+                {"type": "prescribed_fire", "filter_burn_severities": [1, 3]},
             ),
         ]
     )
 
     assert omni.scenarios == [
         {"type": "uniform_high"},
-        {"type": "thinning", "canopy_cover": "70", "ground_cover": "40"},
+        {
+            "type": "thinning",
+            "canopy_cover": "70",
+            "ground_cover": "40",
+            "filter_hill_min_slope_pct": 10,
+            "filter_burn_severities": [2],
+        },
         {
             "type": "mulch",
             "ground_cover_increase": "30",
             "base_scenario": "uniform_low",
+            "filter_hill_max_slope_pct": 45,
         },
+        {"type": "prescribed_fire", "filter_burn_severities": [1, 3]},
     ]
 
 
@@ -144,6 +163,33 @@ def test_parse_scenarios_rejects_missing_required_fields(tmp_path: Path) -> None
 
     with pytest.raises(ValueError, match="Mulching requires ground_cover_increase and base_scenario"):
         omni.parse_scenarios([(omni_module.OmniScenario.Mulch, {"type": "mulch"})])
+
+
+def test_scenario_name_suffix_is_added_only_for_filterable_scenarios() -> None:
+    assert omni_module._scenario_name_from_scenario_definition({"type": "uniform_low"}) == "uniform_low"
+    assert (
+        omni_module._scenario_name_from_scenario_definition(
+            {
+                "type": "mulch",
+                "ground_cover_increase": "60%",
+                "base_scenario": "uniform_low",
+            }
+        )
+        == "mulch_60_uniform_low"
+    )
+    assert (
+        omni_module._scenario_name_from_scenario_definition(
+            {
+                "type": "mulch",
+                "ground_cover_increase": "60%",
+                "base_scenario": "uniform_low",
+                "filter_hill_min_slope_pct": 10,
+                "filter_hill_max_slope_pct": 25,
+                "filter_burn_severities": [3, 1],
+            }
+        )
+        == "mulch_60_uniform_low__filters_smin10_smax25_burn1-3"
+    )
 
 
 def test_delete_scenarios_prunes_state_and_artifacts(

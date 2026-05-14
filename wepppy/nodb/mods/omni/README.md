@@ -57,7 +57,11 @@ Omni is an optional module that must be added to your project before use:
    - **Thinning**: Pre-fire forest treatment (specify canopy cover and harvest method)
    - **Mulch**: Post-fire ground cover treatment (specify application rate and base scenario)
    - **Prescribed Fire**: Low-intensity burn for mature forests
-3. Click **Run Scenarios** to execute all scenarios
+3. For `mulch`, `thinning`, and `prescribed_fire` rows, expand **Filters** (collapsed by default) to set optional treatment masks:
+   - minimum slope (%), integer
+   - maximum slope (%), integer
+   - burn severities (0–3, comma-separated)
+4. Click **Run Scenarios** to execute all scenarios
 
 ### Understanding Scenario Results
 
@@ -181,6 +185,19 @@ Prescribed fire scenarios require an **undisturbed** clone context (no SBS map).
 - Mulch scenarios depend on a selected base scenario (`uniform_low`, `uniform_moderate`, `uniform_high`, or `sbs_map`) and run in a later pass after base scenarios are processed.
 - Thinning and `prescribed_fire` run in an undisturbed context. If the project base is `sbs_map`, include/run an `undisturbed` Omni scenario so those treatments can clone from it.
 - Scenario list order does not control execution order; Omni resolves dependencies internally.
+- Per-scenario Filters are treatment-application masks for `mulch`, `thinning`, and `prescribed_fire` only.
+  Slope masks always apply when configured.
+  For `thinning`/`prescribed_fire`, burn-severity masks use project/base SBS burn classes when available; otherwise burn masks are ignored without failing the run.
+
+#### Scenario Name Disambiguation for Filters
+
+- Unfiltered scenario names remain unchanged (byte-for-byte) from legacy behavior.
+- Filtered scenarios append a deterministic suffix so otherwise identical treatments can coexist and appear as distinct contrast options.
+- Suffix format: `__filters_...` with ordered parts:
+  - `smin<percent>` for minimum slope
+  - `smax<percent>` for maximum slope
+  - `burn<sorted-severities>` (for example `burn1-3`)
+  - example: `mulch_60_uniform_low__filters_smin10_smax25_burn1-3`
 
 ## Contrast Analysis Modes
 
@@ -193,6 +210,8 @@ Automatically selects hillslopes that contribute the most to your chosen metric 
 3. Each selected hillslope becomes a separate contrast run
 
 This mode answers: *"What happens if I treat the hillslopes responsible for most of my erosion problem?"*
+
+Global cumulative filters (slope and burn severities) retain existing behavior and are applied at contrast-candidate selection time. Slope filter values are integer percentages.
 
 ### User-Defined Areas (GeoJSON)
 

@@ -38,6 +38,14 @@ var Omni = (function () {
         stream_order: "stream_order"
     };
     var CONTRAST_HILLSLOPE_LIMIT_MAX = 100;
+    var FILTERABLE_SCENARIO_TYPES = new Set([
+        "prescribed_fire",
+        "thinning",
+        "mulch"
+    ]);
+    var SCENARIO_FILTER_MIN_SLOPE_FIELD = "filter_hill_min_slope_pct";
+    var SCENARIO_FILTER_MAX_SLOPE_FIELD = "filter_hill_max_slope_pct";
+    var SCENARIO_FILTER_BURN_FIELD = "filter_burn_severities";
 
     var SCENARIO_CATALOG = {
         uniform_low: {
@@ -527,6 +535,222 @@ var Omni = (function () {
         return fieldWrap.field;
     }
 
+    function createScenarioFilterControl(document, scenarioIndex, config) {
+        var field = document.createElement("div");
+        field.className = "wc-field";
+
+        var label = document.createElement("label");
+        label.className = "wc-field__label";
+        label.textContent = config.label;
+        label.htmlFor = config.name + "_" + scenarioIndex;
+        field.appendChild(label);
+
+        var row = document.createElement("div");
+        row.className = "wc-field__input-row";
+        field.appendChild(row);
+
+        var input = document.createElement("input");
+        input.className = "wc-field__control";
+        input.dataset.omniField = config.name;
+        input.name = config.name;
+        input.id = config.name + "_" + scenarioIndex;
+        input.type = config.type || "text";
+        input.placeholder = config.placeholder || "";
+        if (config.min !== undefined) {
+            input.min = String(config.min);
+        }
+        if (config.step !== undefined) {
+            input.step = String(config.step);
+        }
+        if (config.inputMode) {
+            input.inputMode = config.inputMode;
+        }
+        if (config.value !== null && config.value !== undefined && config.value !== "") {
+            input.value = String(config.value);
+        }
+        row.appendChild(input);
+
+        if (config.help) {
+            var help = document.createElement("p");
+            help.className = "wc-field__help";
+            help.textContent = config.help;
+            field.appendChild(help);
+        }
+
+        return field;
+    }
+
+    function createScenarioFiltersElement(document, scenarioIndex, values) {
+        var details = document.createElement("details");
+        details.className = "omni-scenario-filters";
+        details.dataset.omniRole = "scenario-filters";
+
+        var summary = document.createElement("summary");
+        summary.textContent = "Filters";
+        details.appendChild(summary);
+
+        var body = document.createElement("div");
+        body.className = "wc-stack";
+        details.appendChild(body);
+
+        var minValue = values ? values[SCENARIO_FILTER_MIN_SLOPE_FIELD] : null;
+        var maxValue = values ? values[SCENARIO_FILTER_MAX_SLOPE_FIELD] : null;
+        var burnValue = values ? values[SCENARIO_FILTER_BURN_FIELD] : null;
+        if (Array.isArray(burnValue)) {
+            burnValue = burnValue.join(", ");
+        }
+
+        body.appendChild(
+            createScenarioFilterControl(document, scenarioIndex, {
+                type: "number",
+                name: SCENARIO_FILTER_MIN_SLOPE_FIELD,
+                label: "Minimum slope (%)",
+                min: 0,
+                step: 1,
+                inputMode: "numeric",
+                value: minValue,
+                help: "Optional integer percent."
+            })
+        );
+        body.appendChild(
+            createScenarioFilterControl(document, scenarioIndex, {
+                type: "number",
+                name: SCENARIO_FILTER_MAX_SLOPE_FIELD,
+                label: "Maximum slope (%)",
+                min: 0,
+                step: 1,
+                inputMode: "numeric",
+                value: maxValue,
+                help: "Optional integer percent."
+            })
+        );
+        body.appendChild(
+            createScenarioFilterControl(document, scenarioIndex, {
+                type: "text",
+                name: SCENARIO_FILTER_BURN_FIELD,
+                label: "Burn severities (optional)",
+                value: burnValue,
+                placeholder: "1, 2, 3",
+                help: "Comma-separated values (0-3)."
+            })
+        );
+
+        return details;
+    }
+
+    function normalizeScenarioTypeToken(type) {
+        var token = type === undefined || type === null ? "" : String(type).trim().toLowerCase();
+        var typeAlias = {
+            "1": "uniform_low",
+            "2": "uniform_moderate",
+            "3": "uniform_high",
+            "4": "thinning",
+            "5": "mulch",
+            "8": "sbs_map",
+            "9": "undisturbed",
+            "10": "prescribed_fire"
+        };
+        if (typeAlias[token]) {
+            return typeAlias[token];
+        }
+        return token;
+    }
+
+    function parseOptionalIntegerPercent(value) {
+        if (value === undefined || value === null) {
+            return null;
+        }
+        var token = String(value).trim();
+        if (!token) {
+            return null;
+        }
+        token = token.replace(/%/g, "");
+        if (!/^-?\d+(\.\d+)?$/.test(token)) {
+            return null;
+        }
+        var parsed = Number(token);
+        if (!Number.isFinite(parsed) || parsed < 0) {
+            return null;
+        }
+        var rawLooksFractional = token.indexOf(".") >= 0;
+        if (parsed <= 1 && (typeof value === "number" || rawLooksFractional)) {
+            parsed = parsed * 100;
+        }
+        if (Math.floor(parsed) !== parsed) {
+            return null;
+        }
+        return parsed;
+    }
+
+    function normalizeBurnSeverityValues(value) {
+        if (value === undefined || value === null || value === "") {
+            return null;
+        }
+        var rawItems = [];
+        if (Array.isArray(value)) {
+            rawItems = value.slice();
+        } else if (typeof value === "string") {
+            rawItems = value.split(",");
+        } else {
+            rawItems = [value];
+        }
+        var seen = new Set();
+        var parsed = [];
+        for (var i = 0; i < rawItems.length; i += 1) {
+            var item = rawItems[i];
+            if (item === undefined || item === null) {
+                continue;
+            }
+            var token = String(item).trim();
+            if (!token) {
+                continue;
+            }
+            if (!/^-?\d+$/.test(token)) {
+                return null;
+            }
+            var burn = Number(token);
+            if (!Number.isFinite(burn) || Math.floor(burn) !== burn || burn < 0 || burn > 3) {
+                return null;
+            }
+            if (seen.has(burn)) {
+                continue;
+            }
+            seen.add(burn);
+            parsed.push(burn);
+        }
+        if (!parsed.length) {
+            return null;
+        }
+        parsed.sort(function (left, right) { return left - right; });
+        return parsed;
+    }
+
+    function scenarioFilterSuffixFromDefinition(definition, scenarioType) {
+        var normalizedType = scenarioType || normalizeScenarioTypeToken(definition && definition.type);
+        if (!FILTERABLE_SCENARIO_TYPES.has(normalizedType)) {
+            return "";
+        }
+
+        var minSlope = parseOptionalIntegerPercent(definition && definition[SCENARIO_FILTER_MIN_SLOPE_FIELD]);
+        var maxSlope = parseOptionalIntegerPercent(definition && definition[SCENARIO_FILTER_MAX_SLOPE_FIELD]);
+        var burnSeverities = normalizeBurnSeverityValues(definition && definition[SCENARIO_FILTER_BURN_FIELD]);
+
+        var parts = [];
+        if (minSlope !== null) {
+            parts.push("smin" + minSlope);
+        }
+        if (maxSlope !== null) {
+            parts.push("smax" + maxSlope);
+        }
+        if (burnSeverities && burnSeverities.length) {
+            parts.push("burn" + burnSeverities.join("-"));
+        }
+        if (!parts.length) {
+            return "";
+        }
+        return "__filters_" + parts.join("_");
+    }
+
     function readScenarioDefinition(scenarioItem) {
         if (!scenarioItem) {
             return null;
@@ -557,21 +781,7 @@ var Omni = (function () {
         if (!definition || !definition.type) {
             return null;
         }
-        var type = String(definition.type);
-        var normalizedType = type.toLowerCase();
-        var typeAlias = {
-            "1": "uniform_low",
-            "2": "uniform_moderate",
-            "3": "uniform_high",
-            "4": "thinning",
-            "5": "mulch",
-            "8": "sbs_map",
-            "9": "undisturbed",
-            "10": "prescribed_fire"
-        };
-        if (typeAlias[normalizedType]) {
-            normalizedType = typeAlias[normalizedType];
-        }
+        var normalizedType = normalizeScenarioTypeToken(definition.type);
 
         if (normalizedType === "thinning") {
             var canopy = String(definition.canopy_cover || "").replace(/%/g, "");
@@ -579,7 +789,7 @@ var Omni = (function () {
             if (!canopy || !ground) {
                 return null;
             }
-            return normalizedType + "_" + canopy + "_" + ground;
+            return normalizedType + "_" + canopy + "_" + ground + scenarioFilterSuffixFromDefinition(definition, normalizedType);
         }
 
         if (normalizedType === "mulch") {
@@ -588,7 +798,7 @@ var Omni = (function () {
             if (!increase || !base) {
                 return null;
             }
-            return normalizedType + "_" + increase + "_" + base;
+            return normalizedType + "_" + increase + "_" + base + scenarioFilterSuffixFromDefinition(definition, normalizedType);
         }
 
         if (normalizedType === "sbs_map") {
@@ -602,6 +812,10 @@ var Omni = (function () {
             } catch (err) {
                 return normalizedType;
             }
+        }
+
+        if (normalizedType === "prescribed_fire") {
+            return normalizedType + scenarioFilterSuffixFromDefinition(definition, normalizedType);
         }
 
         return normalizedType;
@@ -705,6 +919,12 @@ var Omni = (function () {
             : null;
         var contrastHillslopeLimitInput = contrastFormElement
             ? contrastFormElement.querySelector("input[name='omni_contrast_hillslope_limit']")
+            : null;
+        var contrastMinSlopeInput = contrastFormElement
+            ? contrastFormElement.querySelector("input[name='omni_contrast_hill_min_slope']")
+            : null;
+        var contrastMaxSlopeInput = contrastFormElement
+            ? contrastFormElement.querySelector("input[name='omni_contrast_hill_max_slope']")
             : null;
         var contrastOrderReductionInput = contrastFormElement
             ? contrastFormElement.querySelector("input[name='order_reduction_passes']")
@@ -1137,6 +1357,16 @@ var Omni = (function () {
                 controlsHost.appendChild(controlField);
             });
 
+            if (FILTERABLE_SCENARIO_TYPES.has(select.value)) {
+                controlsHost.appendChild(
+                    createScenarioFiltersElement(
+                        scenarioItem.ownerDocument,
+                        scenarioItem.dataset.index || "0",
+                        values || {}
+                    )
+                );
+            }
+
             syncScenarioSelectionState(scenarioItem, values || readScenarioDefinition(scenarioItem));
         }
 
@@ -1215,6 +1445,69 @@ var Omni = (function () {
             }
         }
 
+        function normalizeScenarioFiltersOrThrow(scenarioDef, scenarioType) {
+            if (!FILTERABLE_SCENARIO_TYPES.has(scenarioType)) {
+                delete scenarioDef[SCENARIO_FILTER_MIN_SLOPE_FIELD];
+                delete scenarioDef[SCENARIO_FILTER_MAX_SLOPE_FIELD];
+                delete scenarioDef[SCENARIO_FILTER_BURN_FIELD];
+                return;
+            }
+
+            var rawMin = scenarioDef[SCENARIO_FILTER_MIN_SLOPE_FIELD];
+            var rawMax = scenarioDef[SCENARIO_FILTER_MAX_SLOPE_FIELD];
+            var rawBurn = scenarioDef[SCENARIO_FILTER_BURN_FIELD];
+
+            var minSlope = parseOptionalIntegerPercent(rawMin);
+            var maxSlope = parseOptionalIntegerPercent(rawMax);
+            if (
+                rawMin !== undefined
+                && rawMin !== null
+                && String(rawMin).trim() !== ""
+                && minSlope === null
+            ) {
+                throw new Error("Scenario minimum slope must be an integer percentage.");
+            }
+            if (
+                rawMax !== undefined
+                && rawMax !== null
+                && String(rawMax).trim() !== ""
+                && maxSlope === null
+            ) {
+                throw new Error("Scenario maximum slope must be an integer percentage.");
+            }
+            if (minSlope !== null && maxSlope !== null && minSlope > maxSlope) {
+                throw new Error("Scenario minimum slope must be less than or equal to scenario maximum slope.");
+            }
+
+            var burns = normalizeBurnSeverityValues(rawBurn);
+            if (
+                rawBurn !== undefined
+                && rawBurn !== null
+                && String(rawBurn).trim() !== ""
+                && burns === null
+            ) {
+                throw new Error("Scenario burn severities must be comma-separated integers from 0 to 3.");
+            }
+
+            if (minSlope === null) {
+                delete scenarioDef[SCENARIO_FILTER_MIN_SLOPE_FIELD];
+            } else {
+                scenarioDef[SCENARIO_FILTER_MIN_SLOPE_FIELD] = minSlope;
+            }
+
+            if (maxSlope === null) {
+                delete scenarioDef[SCENARIO_FILTER_MAX_SLOPE_FIELD];
+            } else {
+                scenarioDef[SCENARIO_FILTER_MAX_SLOPE_FIELD] = maxSlope;
+            }
+
+            if (!burns || !burns.length) {
+                delete scenarioDef[SCENARIO_FILTER_BURN_FIELD];
+            } else {
+                scenarioDef[SCENARIO_FILTER_BURN_FIELD] = burns;
+            }
+        }
+
         function serializeScenarios() {
             var items = scenarioContainer.querySelectorAll("[data-omni-scenario-item='true']");
             var scenarios = [];
@@ -1255,6 +1548,8 @@ var Omni = (function () {
                         scenarioDef[name] = input.value;
                     }
                 });
+
+                normalizeScenarioFiltersOrThrow(scenarioDef, select.value);
 
                 scenarios.push(scenarioDef);
             });
@@ -1375,6 +1670,30 @@ var Omni = (function () {
             if (parsed > CONTRAST_HILLSLOPE_LIMIT_MAX) {
                 contrastHillslopeLimitInput.value = String(CONTRAST_HILLSLOPE_LIMIT_MAX);
                 setContrastStatus("Hillslope limit capped at " + CONTRAST_HILLSLOPE_LIMIT_MAX + " for cumulative mode.");
+            }
+        }
+
+        function normalizeContrastSlopeInputsOrThrow() {
+            var rawMin = contrastMinSlopeInput ? contrastMinSlopeInput.value : null;
+            var rawMax = contrastMaxSlopeInput ? contrastMaxSlopeInput.value : null;
+            var minSlope = parseOptionalIntegerPercent(rawMin);
+            var maxSlope = parseOptionalIntegerPercent(rawMax);
+
+            if (rawMin && rawMin.trim() && minSlope === null) {
+                throw new Error("Cumulative minimum slope must be an integer percentage.");
+            }
+            if (rawMax && rawMax.trim() && maxSlope === null) {
+                throw new Error("Cumulative maximum slope must be an integer percentage.");
+            }
+            if (minSlope !== null && maxSlope !== null && minSlope > maxSlope) {
+                throw new Error("Cumulative minimum slope must be less than or equal to cumulative maximum slope.");
+            }
+
+            if (contrastMinSlopeInput) {
+                contrastMinSlopeInput.value = minSlope === null ? "" : String(minSlope);
+            }
+            if (contrastMaxSlopeInput) {
+                contrastMaxSlopeInput.value = maxSlope === null ? "" : String(maxSlope);
             }
         }
 
@@ -2232,6 +2551,12 @@ var Omni = (function () {
 
             clearContrastSummary();
             clampContrastHillslopeLimit();
+            try {
+                normalizeContrastSlopeInputsOrThrow();
+            } catch (err) {
+                setContrastStatus(err && err.message ? err.message : "Invalid cumulative slope filters.");
+                return;
+            }
             contrastController._completion_seen = false;
             setContrastStatus("Submitting omni contrasts...");
             contrastController.connect_status_stream(contrastController);
@@ -2351,6 +2676,12 @@ var Omni = (function () {
 
             clearContrastSummary();
             clampContrastHillslopeLimit();
+            try {
+                normalizeContrastSlopeInputsOrThrow();
+            } catch (err) {
+                setContrastStatus(err && err.message ? err.message : "Invalid cumulative slope filters.");
+                return;
+            }
             setContrastStatus("Running dry run...");
 
             var formData = new FormData(contrastFormElement);
@@ -2539,6 +2870,38 @@ var Omni = (function () {
                 });
                 contrastHillslopeLimitInput.addEventListener("blur", function () {
                     clampContrastHillslopeLimit();
+                });
+            }
+            if (contrastMinSlopeInput) {
+                contrastMinSlopeInput.addEventListener("change", function () {
+                    try {
+                        normalizeContrastSlopeInputsOrThrow();
+                    } catch (err) {
+                        setContrastStatus(err && err.message ? err.message : "Invalid cumulative slope filters.");
+                    }
+                });
+                contrastMinSlopeInput.addEventListener("blur", function () {
+                    try {
+                        normalizeContrastSlopeInputsOrThrow();
+                    } catch (err) {
+                        setContrastStatus(err && err.message ? err.message : "Invalid cumulative slope filters.");
+                    }
+                });
+            }
+            if (contrastMaxSlopeInput) {
+                contrastMaxSlopeInput.addEventListener("change", function () {
+                    try {
+                        normalizeContrastSlopeInputsOrThrow();
+                    } catch (err) {
+                        setContrastStatus(err && err.message ? err.message : "Invalid cumulative slope filters.");
+                    }
+                });
+                contrastMaxSlopeInput.addEventListener("blur", function () {
+                    try {
+                        normalizeContrastSlopeInputsOrThrow();
+                    } catch (err) {
+                        setContrastStatus(err && err.message ? err.message : "Invalid cumulative slope filters.");
+                    }
                 });
             }
             if (contrastOrderReductionInput) {

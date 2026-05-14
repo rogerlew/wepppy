@@ -537,6 +537,91 @@ def _omni_clone_sibling(new_wd: str, omni_clone_sibling_name: str, runid: str, p
         os.remove(_join(new_wd, 'READONLY'))
 
 
+def _parse_optional_int_percent(value: Any) -> Optional[int]:
+    if value in (None, ""):
+        return None
+    raw_token = None
+    if isinstance(value, str):
+        raw_token = value.strip().replace("%", "")
+        if not raw_token:
+            return None
+        numeric_source: Any = raw_token
+    else:
+        numeric_source = value
+
+    try:
+        parsed = float(numeric_source)
+    except (TypeError, ValueError):
+        return None
+
+    if parsed < 0:
+        return None
+
+    if parsed <= 1.0:
+        if isinstance(value, float):
+            parsed = parsed * 100.0
+        elif raw_token is not None and "." in raw_token:
+            parsed = parsed * 100.0
+
+    if int(parsed) != parsed:
+        return None
+    return int(parsed)
+
+
+def _parse_burn_severity_list(value: Any) -> Optional[List[int]]:
+    if value in (None, "", []):
+        return None
+    if isinstance(value, str):
+        raw_items = [item.strip() for item in value.split(",")]
+    elif isinstance(value, (list, tuple, set)):
+        raw_items = list(value)
+    else:
+        raw_items = [value]
+
+    parsed: Set[int] = set()
+    for item in raw_items:
+        if item in (None, ""):
+            continue
+        token = str(item).strip()
+        if not token:
+            continue
+        try:
+            burn = int(token)
+        except (TypeError, ValueError):
+            return None
+        if burn < 0 or burn > 3:
+            return None
+        parsed.add(burn)
+    if not parsed:
+        return None
+    return sorted(parsed)
+
+
+def _scenario_filter_suffix_from_definition(
+    scenario_def: Dict[str, Any],
+    scenario_enum: Optional["OmniScenario"],
+) -> str:
+    scenario_key = str(scenario_enum) if scenario_enum is not None else ""
+    if scenario_key not in {"prescribed_fire", "thinning", "mulch"}:
+        return ""
+
+    min_slope = _parse_optional_int_percent(scenario_def.get("filter_hill_min_slope_pct"))
+    max_slope = _parse_optional_int_percent(scenario_def.get("filter_hill_max_slope_pct"))
+    burn_values = _parse_burn_severity_list(scenario_def.get("filter_burn_severities"))
+
+    suffix_parts: List[str] = []
+    if min_slope is not None:
+        suffix_parts.append(f"smin{min_slope}")
+    if max_slope is not None:
+        suffix_parts.append(f"smax{max_slope}")
+    if burn_values:
+        suffix_parts.append(f"burn{'-'.join(str(value) for value in burn_values)}")
+
+    if not suffix_parts:
+        return ""
+    return "__filters_" + "_".join(suffix_parts)
+
+
 def _scenario_name_from_scenario_definition(scenario_def: Dict[str, Any]) -> str:
     """
     Get the scenario name from the scenario definition.
@@ -553,11 +638,13 @@ def _scenario_name_from_scenario_definition(scenario_def: Dict[str, Any]) -> str
     if scenario_enum == OmniScenario.Thinning:
         canopy_cover = scenario_def.get('canopy_cover')
         ground_cover = scenario_def.get('ground_cover')
-        return f'{scenario_enum}_{canopy_cover}_{ground_cover}'.replace('%', '')
+        base_name = f'{scenario_enum}_{canopy_cover}_{ground_cover}'.replace('%', '')
+        return base_name + _scenario_filter_suffix_from_definition(scenario_def, scenario_enum)
     elif scenario_enum == OmniScenario.Mulch:
         ground_cover_increase = scenario_def.get('ground_cover_increase')
         base_scenario = scenario_def.get('base_scenario')
-        return f'{scenario_enum}_{ground_cover_increase}_{base_scenario}'.replace('%', '')
+        base_name = f'{scenario_enum}_{ground_cover_increase}_{base_scenario}'.replace('%', '')
+        return base_name + _scenario_filter_suffix_from_definition(scenario_def, scenario_enum)
     elif scenario_enum == OmniScenario.SBSmap:
         sbs_file_path = scenario_def.get('sbs_file_path', None)
         if sbs_file_path is not None:
@@ -565,6 +652,9 @@ def _scenario_name_from_scenario_definition(scenario_def: Dict[str, Any]) -> str
             sbs_hash = base64.b64encode(bytes(sbs_fn, 'utf-8')).decode('utf-8').rstrip('=')
             return f'{scenario_enum}_{sbs_hash}'
         return f'{scenario_enum}'
+    elif scenario_enum == OmniScenario.PrescribedFire:
+        base_name = str(scenario_enum)
+        return base_name + _scenario_filter_suffix_from_definition(scenario_def, scenario_enum)
     else:
         return str(scenario_enum or _scenario)
 

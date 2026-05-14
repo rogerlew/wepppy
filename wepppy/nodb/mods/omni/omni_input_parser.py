@@ -5,6 +5,10 @@ from typing import TYPE_CHECKING, Any, Dict, Iterable, List, Optional, Set, Tupl
 if TYPE_CHECKING:
     from wepppy.nodb.mods.omni.omni import Omni, OmniScenario, ScenarioDef
 
+SCENARIO_FILTER_MIN_SLOPE_FIELD = "filter_hill_min_slope_pct"
+SCENARIO_FILTER_MAX_SLOPE_FIELD = "filter_hill_max_slope_pct"
+SCENARIO_FILTER_BURN_FIELD = "filter_burn_severities"
+
 
 class OmniInputParsingService:
     """Parse and normalize Omni scenario and contrast payloads for the facade."""
@@ -26,26 +30,26 @@ class OmniInputParsingService:
                     ground_cover = params.get("ground_cover")
                     if not canopy_cover or not ground_cover:
                         raise ValueError("Thinning requires canopy_cover and ground_cover")
-                    omni._scenarios.append(
-                        {
-                            "type": scenario_type,
-                            "canopy_cover": canopy_cover,
-                            "ground_cover": ground_cover,
-                        }
-                    )
+                    scenario_payload = {
+                        "type": scenario_type,
+                        "canopy_cover": canopy_cover,
+                        "ground_cover": ground_cover,
+                    }
+                    scenario_payload.update(self._scenario_filter_subset(params))
+                    omni._scenarios.append(scenario_payload)
                 elif scenario_key == "mulch":
                     ground_cover_increase = params.get("ground_cover_increase")
                     base_scenario = params.get("base_scenario")
                     if not ground_cover_increase or not base_scenario:
                         raise ValueError("Mulching requires ground_cover_increase and base_scenario")
 
-                    omni._scenarios.append(
-                        {
-                            "type": scenario_type,
-                            "ground_cover_increase": ground_cover_increase,
-                            "base_scenario": base_scenario,
-                        }
-                    )
+                    scenario_payload = {
+                        "type": scenario_type,
+                        "ground_cover_increase": ground_cover_increase,
+                        "base_scenario": base_scenario,
+                    }
+                    scenario_payload.update(self._scenario_filter_subset(params))
+                    omni._scenarios.append(scenario_payload)
                 elif scenario_key == "sbs_map":
                     sbs_file_path = params.get("sbs_file_path")
                     if not sbs_file_path:
@@ -56,6 +60,10 @@ class OmniInputParsingService:
                             "sbs_file_path": sbs_file_path,
                         }
                     )
+                elif scenario_key == "prescribed_fire":
+                    scenario_payload = {"type": scenario_type}
+                    scenario_payload.update(self._scenario_filter_subset(params))
+                    omni._scenarios.append(scenario_payload)
                 else:
                     omni._scenarios.append({"type": scenario_type})
 
@@ -205,3 +213,15 @@ class OmniInputParsingService:
             if token in {"0", "false", "no", "off"}:
                 return False
         return None
+
+    @staticmethod
+    def _scenario_filter_subset(params: Dict[str, Any]) -> Dict[str, Any]:
+        subset: Dict[str, Any] = {}
+        for key in (
+            SCENARIO_FILTER_MIN_SLOPE_FIELD,
+            SCENARIO_FILTER_MAX_SLOPE_FIELD,
+            SCENARIO_FILTER_BURN_FIELD,
+        ):
+            if key in params and params.get(key) not in (None, "", []):
+                subset[key] = params.get(key)
+        return subset
