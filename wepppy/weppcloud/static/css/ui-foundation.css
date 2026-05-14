@@ -751,6 +751,14 @@ code * {
   white-space: nowrap;
 }
 
+.scenario-item__filters {
+  grid-column: 1 / -1;
+}
+
+.scenario-item__filters:empty {
+  display: none;
+}
+
 .scenario-item__selector {
   display: flex;
   align-items: center;

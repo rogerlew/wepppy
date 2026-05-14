@@ -206,11 +206,16 @@ describe("Omni controller", () => {
     test("scenario filters render only for mulch/thinning/prescribed_fire and start collapsed", () => {
         const uniformItem = addScenarioAndSelect("uniform_low");
         expect(uniformItem.querySelector("[data-omni-role='scenario-filters']")).toBeNull();
+        expect(uniformItem.querySelector("[data-omni-scenario-filters]")).not.toBeNull();
 
         const thinningItem = addScenarioAndSelect("thinning");
+        const controlsHost = thinningItem.querySelector("[data-omni-scenario-controls]");
+        const filtersHost = thinningItem.querySelector("[data-omni-scenario-filters]");
         const filters = thinningItem.querySelector("[data-omni-role='scenario-filters']");
         expect(filters).not.toBeNull();
         expect(filters.open).toBe(false);
+        expect(controlsHost.querySelector("[data-omni-role='scenario-filters']")).toBeNull();
+        expect(filtersHost.querySelector("[data-omni-role='scenario-filters']")).toBe(filters);
         expect(thinningItem.querySelector("[data-omni-field='filter_hill_min_slope_pct']")).not.toBeNull();
         expect(thinningItem.querySelector("[data-omni-field='filter_hill_max_slope_pct']")).not.toBeNull();
         expect(thinningItem.querySelector("[data-omni-field='filter_burn_severities']")).not.toBeNull();

@@ -1333,10 +1333,12 @@ var Omni = (function () {
             }
             var select = scenarioItem.querySelector("[data-omni-role='scenario-select']");
             var controlsHost = scenarioItem.querySelector("[data-omni-scenario-controls]");
-            if (!controlsHost) {
+            var filtersHost = scenarioItem.querySelector("[data-omni-scenario-filters]");
+            if (!controlsHost || !filtersHost) {
                 return;
             }
             controlsHost.innerHTML = "";
+            filtersHost.innerHTML = "";
 
             if (!select || !select.value) {
                 return;
@@ -1358,7 +1360,7 @@ var Omni = (function () {
             });
 
             if (FILTERABLE_SCENARIO_TYPES.has(select.value)) {
-                controlsHost.appendChild(
+                filtersHost.appendChild(
                     createScenarioFiltersElement(
                         scenarioItem.ownerDocument,
                         scenarioItem.dataset.index || "0",
@@ -1401,6 +1403,7 @@ var Omni = (function () {
                 '      Remove',
                 '    </button>',
                 '  </div>',
+                '  <div class="scenario-item__filters" data-omni-scenario-filters></div>',
                 '</div>'
             ].join("\n");
 
