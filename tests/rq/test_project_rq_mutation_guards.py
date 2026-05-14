@@ -385,6 +385,159 @@ def test_build_landuse_rq_clears_scoped_cache_before_hydration_and_build(
     ]
 
 
+def test_build_landuse_rq_preserves_original_exception_when_current_job_missing(
+    monkeypatch: pytest.MonkeyPatch,
+    tmp_path: Path,
+) -> None:
+    _run_wd, _set_archive_roots, _call_roots = _stub_rq_context(monkeypatch, tmp_path)
+    monkeypatch.setattr(project_rq, "get_current_job", lambda: None)
+
+    def _raise_original(*_args, **_kwargs):
+        raise RuntimeError("lock boom")
+
+    monkeypatch.setattr(project_rq, "_run_with_directory_root_lock", _raise_original)
+    published: list[tuple[str, str]] = []
+    monkeypatch.setattr(
+        project_rq.StatusMessenger,
+        "publish",
+        lambda channel, message: published.append((channel, message)),
+    )
+
+    with pytest.raises(RuntimeError, match="lock boom"):
+        project_rq.build_landuse_rq("demo")
+
+    assert published == [
+        ("demo:landuse", "rq:unknown-job STARTED build_landuse_rq(demo)"),
+        ("demo:landuse", "rq:unknown-job EXCEPTION build_landuse_rq(demo)"),
+    ]
+
+
+def test_build_landuse_rq_preserves_original_exception_when_exception_publish_fails(
+    monkeypatch: pytest.MonkeyPatch,
+    tmp_path: Path,
+) -> None:
+    _run_wd, _set_archive_roots, _call_roots = _stub_rq_context(monkeypatch, tmp_path)
+    monkeypatch.setattr(project_rq, "get_current_job", lambda: None)
+
+    def _raise_original(*_args, **_kwargs):
+        raise RuntimeError("lock boom")
+
+    monkeypatch.setattr(project_rq, "_run_with_directory_root_lock", _raise_original)
+    published: list[tuple[str, str]] = []
+
+    def _publish(channel: str, message: str) -> None:
+        published.append((channel, message))
+        if " EXCEPTION " in message:
+            raise RuntimeError("status bus down")
+
+    monkeypatch.setattr(project_rq.StatusMessenger, "publish", _publish)
+
+    with pytest.raises(RuntimeError, match="lock boom"):
+        project_rq.build_landuse_rq("demo")
+
+    assert published == [
+        ("demo:landuse", "rq:unknown-job STARTED build_landuse_rq(demo)"),
+        ("demo:landuse", "rq:unknown-job EXCEPTION build_landuse_rq(demo)"),
+    ]
+
+
+def test_build_landuse_rq_preserves_original_exception_when_job_lookup_and_exception_publish_fail(
+    monkeypatch: pytest.MonkeyPatch,
+    tmp_path: Path,
+) -> None:
+    _run_wd, _set_archive_roots, _call_roots = _stub_rq_context(monkeypatch, tmp_path)
+
+    def _raise_job_lookup() -> None:
+        raise RuntimeError("job lookup boom")
+
+    monkeypatch.setattr(project_rq, "get_current_job", _raise_job_lookup)
+
+    published: list[tuple[str, str]] = []
+
+    def _publish(channel: str, message: str) -> None:
+        published.append((channel, message))
+        raise RuntimeError("status bus down")
+
+    monkeypatch.setattr(project_rq.StatusMessenger, "publish", _publish)
+
+    with pytest.raises(RuntimeError, match="job lookup boom"):
+        project_rq.build_landuse_rq("demo")
+
+    assert published == [
+        ("demo:landuse", "rq:unknown-job EXCEPTION build_landuse_rq(demo)"),
+    ]
+
+
+def test_build_landuse_rq_uses_unknown_job_id_when_current_job_has_no_id_on_success(
+    monkeypatch: pytest.MonkeyPatch,
+    tmp_path: Path,
+) -> None:
+    _run_wd, _set_archive_roots, _call_roots = _stub_rq_context(monkeypatch, tmp_path)
+    monkeypatch.setattr(project_rq, "get_current_job", lambda: object())
+    events: list[tuple] = []
+    _record_cache_clears(monkeypatch, events)
+    _record_prep_timestamps(monkeypatch, events)
+
+    class DummyLanduse:
+        def build(self) -> None:
+            events.append(("build", None))
+
+    monkeypatch.setattr(project_rq.Landuse, "getInstance", lambda _wd: DummyLanduse())
+    published: list[tuple[str, str]] = []
+    monkeypatch.setattr(
+        project_rq.StatusMessenger,
+        "publish",
+        lambda channel, message: published.append((channel, message)),
+    )
+
+    project_rq.build_landuse_rq("demo")
+
+    assert events == [
+        ("clear", "demo", "landuse.nodb"),
+        ("build", None),
+        ("timestamp", project_rq.TaskEnum.build_landuse),
+    ]
+    assert published == [
+        ("demo:landuse", "rq:unknown-job STARTED build_landuse_rq(demo)"),
+        ("demo:landuse", "rq:unknown-job COMPLETED build_landuse_rq(demo)"),
+        ("demo:landuse", "rq:unknown-job TRIGGER   landuse LANDUSE_BUILD_TASK_COMPLETED"),
+    ]
+
+
+def test_build_landuse_rq_logs_when_exception_publish_fails(
+    monkeypatch: pytest.MonkeyPatch,
+    tmp_path: Path,
+) -> None:
+    _run_wd, _set_archive_roots, _call_roots = _stub_rq_context(monkeypatch, tmp_path)
+    monkeypatch.setattr(project_rq, "get_current_job", lambda: None)
+
+    def _raise_original(*_args, **_kwargs):
+        raise RuntimeError("lock boom")
+
+    monkeypatch.setattr(project_rq, "_run_with_directory_root_lock", _raise_original)
+
+    def _publish(channel: str, message: str) -> None:
+        if " EXCEPTION " in message:
+            raise RuntimeError("status bus down")
+
+    monkeypatch.setattr(project_rq.StatusMessenger, "publish", _publish)
+    logged: list[tuple[str, dict[str, object]]] = []
+
+    def _capture_exception(message: str, *args, **kwargs) -> None:
+        logged.append((message, kwargs))
+
+    monkeypatch.setattr(project_rq._logger, "exception", _capture_exception)
+
+    with pytest.raises(RuntimeError, match="lock boom"):
+        project_rq.build_landuse_rq("demo")
+
+    assert any(
+        message == "Failed to publish landuse exception status update"
+        and kwargs.get("extra") == {"runid": "demo", "job_id": "unknown-job"}
+        for message, kwargs in logged
+    )
+
+
 def test_modify_landuse_mapping_rq_rejects_archive_form_root(
     monkeypatch: pytest.MonkeyPatch,
     tmp_path: Path,

@@ -20,6 +20,7 @@ from starlette.datastructures import UploadFile
 from werkzeug.utils import secure_filename
 
 from wepppy.config.redis_settings import RedisDB, redis_connection_kwargs
+from wepppy.nodb.base import NoDbAlreadyLockedError
 from wepppy.nodb.core import (
     Landuse,
     LanduseCustomMappingError,
@@ -71,6 +72,7 @@ LANDUSE_USER_DEFINED_MAX_BYTES = 500 * 1024 * 1024
 LANDUSE_MAPPING_MAX_KEY_LENGTH = 128
 LANDUSE_MAPPING_BATCH_MAX_EDITS = 500
 LANDUSE_MAPPING_CONTROL_CHAR_RE = re.compile(r"[\x00-\x1f\x7f]")
+NODB_LOCK_CONFLICT_CLIENT_MESSAGE = "Run inputs are currently locked; retry shortly."
 
 
 class RunContextResolutionError(Exception):
@@ -90,6 +92,13 @@ class RunContextResolutionError(Exception):
 def _maybe_nodir_error_response(exc: Exception):
     if isinstance(exc, NoDirError):
         return error_response(exc.message, status_code=exc.http_status, code=exc.code)
+    if isinstance(exc, NoDbAlreadyLockedError):
+        logger.warning("rq-engine landuse mutation lock conflict")
+        return error_response(
+            NODB_LOCK_CONFLICT_CLIENT_MESSAGE,
+            status_code=409,
+            code="conflict",
+        )
     return None
 
 

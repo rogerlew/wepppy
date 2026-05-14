@@ -11,6 +11,7 @@ TestClient = pytest.importorskip("fastapi.testclient").TestClient
 
 import wepppy.microservices.rq_engine as rq_engine
 from wepppy.microservices.rq_engine import landuse_routes
+from wepppy.nodb.base import NoDbAlreadyLockedError
 from wepppy.runtime_paths.errors import NoDirError
 
 
@@ -272,6 +273,50 @@ def test_build_landuse_disturbed_omitted_burn_fields_forwards_false_kwargs(
     assert disturbed.grouped_update_calls == [{"burn_shrubs": False, "burn_grass": False}]
 
 
+def test_build_landuse_maps_nodb_lock_conflict_from_parse_inputs(
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    _stub_auth(monkeypatch)
+    monkeypatch.setattr(landuse_routes, "get_wd", lambda runid: "/tmp/run")
+
+    class DummyLanduse:
+        run_group = "default"
+        mods: set[str] = set()
+        mode = landuse_routes.LanduseMode.Gridded
+        lc_dir = "/tmp"
+        lc_fn = "/tmp/lc.tif"
+
+        def parse_inputs(self, payload) -> None:
+            raise NoDbAlreadyLockedError("already locked owner=alice token=secret-token")
+
+    monkeypatch.setattr(landuse_routes.Landuse, "getInstance", lambda wd: DummyLanduse())
+    monkeypatch.setattr(landuse_routes.Watershed, "getInstance", lambda wd: object())
+    warning_calls: list[tuple[tuple[object, ...], dict[str, object]]] = []
+    monkeypatch.setattr(
+        landuse_routes.logger,
+        "warning",
+        lambda *args, **kwargs: warning_calls.append((args, kwargs)),
+    )
+
+    with TestClient(rq_engine.app) as client:
+        response = client.post(
+            "/api/runs/run-1/cfg/build-landuse",
+            json={"mofe_buffer_selection": 42},
+        )
+
+    assert response.status_code == 409
+    payload = response.json()
+    assert payload["error"]["code"] == "conflict"
+    assert payload["error"]["message"] == landuse_routes.NODB_LOCK_CONFLICT_CLIENT_MESSAGE
+    assert "owner=alice" not in payload["error"]["message"]
+    assert "secret-token" not in payload["error"]["message"]
+    assert len(warning_calls) == 1
+    warning_args, _warning_kwargs = warning_calls[0]
+    warning_args_text = " ".join(str(arg) for arg in warning_args)
+    assert "owner=" not in warning_args_text
+    assert "token=" not in warning_args_text
+
+
 def test_set_landuse_mode_updates_controller(monkeypatch: pytest.MonkeyPatch) -> None:
     _stub_auth(monkeypatch)
     monkeypatch.setattr(landuse_routes, "get_wd", lambda runid, prefer_active=False: "/tmp/run")
@@ -435,6 +480,49 @@ def test_set_landuse_db_updates_controller(monkeypatch: pytest.MonkeyPatch) -> N
     assert response.status_code == 200
     assert response.json()["message"] == "Landuse database updated"
     assert controller.nlcd_db == "nlcd"
+
+
+def test_set_landuse_db_maps_nodb_lock_conflict(
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    _stub_auth(monkeypatch)
+    monkeypatch.setattr(landuse_routes, "get_wd", lambda runid, prefer_active=False: "/tmp/run")
+    monkeypatch.setattr(landuse_routes, "_preflight_landuse_mutation_root", lambda wd: None)
+
+    class DummyLanduse:
+        @property
+        def nlcd_db(self):  # pragma: no cover - setter path only
+            return None
+
+        @nlcd_db.setter
+        def nlcd_db(self, _value) -> None:
+            raise NoDbAlreadyLockedError("already locked owner=alice token=secret-token")
+
+    monkeypatch.setattr(landuse_routes.Landuse, "getInstance", lambda wd: DummyLanduse())
+    warning_calls: list[tuple[tuple[object, ...], dict[str, object]]] = []
+    monkeypatch.setattr(
+        landuse_routes.logger,
+        "warning",
+        lambda *args, **kwargs: warning_calls.append((args, kwargs)),
+    )
+
+    with TestClient(rq_engine.app) as client:
+        response = client.post(
+            "/api/runs/run-1/cfg/set-landuse-db",
+            json={"landuse_db": "nlcd"},
+        )
+
+    assert response.status_code == 409
+    payload = response.json()
+    assert payload["error"]["code"] == "conflict"
+    assert payload["error"]["message"] == landuse_routes.NODB_LOCK_CONFLICT_CLIENT_MESSAGE
+    assert "owner=alice" not in payload["error"]["message"]
+    assert "secret-token" not in payload["error"]["message"]
+    assert len(warning_calls) == 1
+    warning_args, _warning_kwargs = warning_calls[0]
+    warning_args_text = " ".join(str(arg) for arg in warning_args)
+    assert "owner=" not in warning_args_text
+    assert "token=" not in warning_args_text
 
 
 def test_set_landuse_db_resolves_pup_root(monkeypatch: pytest.MonkeyPatch, tmp_path: Path) -> None:

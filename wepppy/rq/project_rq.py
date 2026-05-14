@@ -1077,12 +1077,17 @@ def build_landuse_rq(runid: str) -> None:
     Raises:
         Exception: Propagates errors from landuse controller build routines.
     """
+    job_id = "unknown-job"
+    func_name = inspect.currentframe().f_code.co_name
+    status_channel = f'{runid}:landuse'
     try:
         job = get_current_job()
+        if job is not None and getattr(job, "id", None):
+            job_id = str(job.id)
+
         wd = get_wd(runid)
-        func_name = inspect.currentframe().f_code.co_name
-        status_channel = f'{runid}:landuse'
-        StatusMessenger.publish(status_channel, f'rq:{job.id} STARTED {func_name}({runid})')
+        StatusMessenger.publish(status_channel, f'rq:{job_id} STARTED {func_name}({runid})')
+
         def _build_landuse() -> None:
             clear_nodb_file_cache(runid, pup_relpath="landuse.nodb")
             Landuse.getInstance(wd).build()
@@ -1093,15 +1098,23 @@ def build_landuse_rq(runid: str) -> None:
             _build_landuse,
             purpose="build-landuse-rq",
         )
-        StatusMessenger.publish(status_channel, f'rq:{job.id} COMPLETED {func_name}({runid})')
-        StatusMessenger.publish(status_channel, f'rq:{job.id} TRIGGER   landuse LANDUSE_BUILD_TASK_COMPLETED')
-        
+        StatusMessenger.publish(status_channel, f'rq:{job_id} COMPLETED {func_name}({runid})')
+        StatusMessenger.publish(status_channel, f'rq:{job_id} TRIGGER   landuse LANDUSE_BUILD_TASK_COMPLETED')
+
         prep = RedisPrep.getInstance(wd)
         prep.timestamp(TaskEnum.build_landuse)
     except Exception:
         # Boundary catch: preserve contract behavior while logging unexpected failures.
         __import__("logging").getLogger(__name__).exception("Boundary exception at wepppy/rq/project_rq.py:824", extra={"runid": locals().get("runid"), "config": locals().get("config"), "job_id": locals().get("job_id")})
-        StatusMessenger.publish(status_channel, f'rq:{job.id} EXCEPTION {func_name}({runid})')
+        try:
+            StatusMessenger.publish(status_channel, f'rq:{job_id} EXCEPTION {func_name}({runid})')
+        except Exception:
+            # Best-effort telemetry boundary: never mask the original task failure
+            # when status publish infrastructure is unavailable.
+            _logger.exception(
+                "Failed to publish landuse exception status update",
+                extra={"runid": runid, "job_id": job_id},
+            )
         raise
 
 
