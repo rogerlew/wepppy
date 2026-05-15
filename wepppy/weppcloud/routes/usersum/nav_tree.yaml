@@ -153,8 +153,6 @@ roots:
         doc_id: usersum.weppcloud.wepp_forest_compiler_fragility_brief
       - key: usersum.weppcloud.wepp_forest_modernizing_water_balance_brief
         doc_id: usersum.weppcloud.wepp_forest_modernizing_water_balance_brief
-      - key: usersum.weppcloud.wepp_forest_multi_segment_water_balance_brief
-        doc_id: usersum.weppcloud.wepp_forest_multi_segment_water_balance_brief
       - key: usersum.technical_reference.project_files_and_maps
         title: Project Files and Maps
         collapsible: true
