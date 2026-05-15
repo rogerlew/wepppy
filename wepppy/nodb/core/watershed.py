@@ -1138,7 +1138,10 @@ class Watershed(WatershedOperationsMixin, WatershedLookupMixin, NoDbBase):
             return
 
         try:
-            self.ron_instance.lnglat_to_px(lng, lat)
+            ron_map = self.ron_instance.map
+            if ron_map is None:
+                raise ValueError("Run map is not initialized")
+            ron_map.lnglat_to_px(lng, lat)
         except (AssertionError, TypeError, ValueError) as exc:
             _raise_extent_error(exc)
 

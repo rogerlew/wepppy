@@ -16,7 +16,7 @@ try:
 except ImportError:
     GDAL_AVAILABLE = False
 
-from wepppy.nodb.core.ron import Map
+from wepppy.nodb.core.map import Map
 
 
 @pytest.fixture
@@ -189,6 +189,20 @@ def test_raster_intersection_missing_file():
     )
     
     assert result == []
+
+
+@pytest.mark.unit
+def test_map_to_payload_preserves_legacy_object_path():
+    map_obj = Map(
+        extent=[-116.1, 43.9, -116.0, 44.0],
+        center=[-116.05, 43.95],
+        zoom=13,
+        cellsize=30.0,
+    )
+
+    payload = map_obj.to_payload()
+
+    assert payload["py/object"] == "wepppy.nodb.core.ron.Map"
 
 
 @pytest.mark.unit

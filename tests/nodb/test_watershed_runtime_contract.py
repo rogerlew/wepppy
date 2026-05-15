@@ -166,12 +166,41 @@ def test_validate_outlet_location_rejects_outside_topaz_extent(
     monkeypatch.setattr(Watershed, "has_channels", property(lambda _self: True))
     monkeypatch.setattr(Watershed, "delineation_backend_is_wbt", property(lambda _self: False))
 
-    class DummyRon:
+    class DummyMap:
         @staticmethod
         def lnglat_to_px(_lng: float, _lat: float) -> tuple[int, int]:
             raise ValueError("latitude out of range")
+
+    class DummyRon:
+        map = DummyMap()
 
     monkeypatch.setattr(Watershed, "ron_instance", property(lambda _self: DummyRon()))
 
     with pytest.raises(ValueError, match=OUTLET_LOCATION_OUTSIDE_MAP_EXTENT_MESSAGE):
         watershed.validate_outlet_location(-117.5, 95.0)
+
+
+@pytest.mark.unit
+def test_validate_outlet_location_uses_topaz_ron_map_projection(
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    watershed = Watershed.__new__(Watershed)
+    calls = {"map_lnglat_to_px": 0}
+
+    monkeypatch.setattr(Watershed, "has_channels", property(lambda _self: True))
+    monkeypatch.setattr(Watershed, "delineation_backend_is_wbt", property(lambda _self: False))
+
+    class DummyMap:
+        @staticmethod
+        def lnglat_to_px(_lng: float, _lat: float) -> tuple[int, int]:
+            calls["map_lnglat_to_px"] += 1
+            return (1, 1)
+
+    class DummyRon:
+        map = DummyMap()
+
+    monkeypatch.setattr(Watershed, "ron_instance", property(lambda _self: DummyRon()))
+
+    watershed.validate_outlet_location(-117.5, 46.9)
+
+    assert calls["map_lnglat_to_px"] == 1
