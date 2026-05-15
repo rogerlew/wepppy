@@ -17,6 +17,54 @@ if [[ ! -x "${BINARY_PATH}" ]]; then
   exit 1
 fi
 
+infer_pass_family() {
+  local binary_path="$1"
+  local sidecar_path="${binary_path}.json"
+  if [[ ! -f "${sidecar_path}" ]]; then
+    echo "legacy_ascii"
+    return 0
+  fi
+
+  python3 - "$sidecar_path" <<'PY'
+import json
+import sys
+
+path = sys.argv[1]
+with open(path, encoding="utf-8") as fh:
+    payload = json.load(fh)
+
+features = payload.get("features")
+if not isinstance(features, dict):
+    raise SystemExit(f"invalid sidecar: missing features object: {path}")
+hbp_supported = features.get("hbp_supported")
+if not isinstance(hbp_supported, bool):
+    raise SystemExit(f"invalid sidecar: features.hbp_supported must be boolean: {path}")
+mode2_prompt_required = features.get("mode2_master_pass_prompt_required")
+if not isinstance(mode2_prompt_required, bool):
+    raise SystemExit(
+        f"invalid sidecar: features.mode2_master_pass_prompt_required must be boolean: {path}"
+    )
+
+if hbp_supported:
+    print("hbp")
+else:
+    print("legacy_ascii")
+PY
+}
+
+adapt_run_file_for_pass_family() {
+  local run_file="$1"
+  local pass_family="$2"
+  if [[ "${pass_family}" != "hbp" ]]; then
+    return 0
+  fi
+  # HBP-capable releases require process pass names to be H*.hbp.
+  sed -i 's/\.pass\.dat/.hbp/g' "${run_file}"
+}
+
+PASS_FAMILY="$(infer_pass_family "${BINARY_PATH}")"
+echo "pass_family=${PASS_FAMILY} (inferred from ${BINARY_PATH}.json when present)"
+
 IFS=',' read -r -a case_list <<<"${CASES}"
 overall_status=0
 
@@ -78,6 +126,8 @@ for case_id in "${case_list[@]}"; do
   do
     cp "${RUNS_DIR}/${f}" "${work_dir}/runs/"
   done
+
+  adapt_run_file_for_pass_family "${work_dir}/runs/${case_id}.run" "${PASS_FAMILY}"
 
   set +e
   (

@@ -1,7 +1,7 @@
 {
   "binary_name": "wepp_260514_hill",
   "binary_role": "hillslope",
-  "built_utc": "2026-05-15T02:16:37Z",
+  "built_utc": "2026-05-15T07:45:38Z",
   "features": {
     "hbp_pass_family": "H*.hbp",
     "hbp_schema_major": 1,
@@ -15,7 +15,7 @@
   },
   "release_tag": "260514",
   "schema": "wepp-binary-release-metadata-v1",
-  "sha256": "0e91b898a0473b77b0db60fc7fcceef28c11d49522a37c590c6a927d860326bd",
+  "sha256": "0668f52d513a5cc199bf5cc529582388adb3117591c407938ce7c61ab3cf2669",
   "source_commit": "62c2102efffc36f142689dfbffa5296b20780d33",
   "source_repo": "wepp-in-the-woods/wepp-forest",
   "validation": {

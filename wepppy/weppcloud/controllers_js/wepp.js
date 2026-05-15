@@ -1396,25 +1396,59 @@ var Wepp = (function () {
             var controllerContext = helper && typeof helper.getControllerContext === "function"
                 ? helper.getControllerContext(ctx, "wepp")
                 : {};
+            var jobIds = ctx && (ctx.jobIds || ctx.jobs);
 
-            var jobId = helper && typeof helper.resolveJobId === "function"
-                ? helper.resolveJobId(ctx, "run_wepp_rq")
-                : null;
             var completionEvent = null;
-            if (!jobId && helper && typeof helper.resolveJobId === "function") {
-                var prepJobId = helper.resolveJobId(ctx, "prep_wepp_watershed_rq");
-                if (prepJobId) {
-                    jobId = prepJobId;
-                    completionEvent = "WEPP_PREP_TASK_COMPLETED";
-                    setActiveWeppRunEvent("prep_only");
+            var jobId = null;
+
+            if (controllerContext.job_id !== undefined && controllerContext.job_id !== null) {
+                var hintedJobId = String(controllerContext.job_id).trim();
+                if (hintedJobId) {
+                    jobId = hintedJobId;
+                    completionEvent = applyJobKeyCompletionHint(controllerContext.job_key);
                 }
             }
-            if (!jobId && controllerContext.job_id) {
-                jobId = controllerContext.job_id;
-                completionEvent = applyJobKeyCompletionHint(controllerContext.job_key);
+
+            var hintedJobKey = controllerContext.job_key !== undefined && controllerContext.job_key !== null
+                ? String(controllerContext.job_key).trim()
+                : "";
+            if (!jobId && hintedJobKey && helper && typeof helper.resolveJobId === "function") {
+                jobId = helper.resolveJobId(ctx, hintedJobKey);
+                if (jobId) {
+                    completionEvent = applyJobKeyCompletionHint(hintedJobKey);
+                }
             }
+            if (!jobId && hintedJobKey && jobIds && typeof jobIds === "object" && Object.prototype.hasOwnProperty.call(jobIds, hintedJobKey)) {
+                var hintedValue = jobIds[hintedJobKey];
+                if (hintedValue !== undefined && hintedValue !== null) {
+                    jobId = String(hintedValue);
+                    completionEvent = applyJobKeyCompletionHint(hintedJobKey);
+                }
+            }
+
+            var helperJobCandidates = [
+                "prep_wepp_watershed_rq",
+                "run_wepp_watershed_rq",
+                "run_wepp_rq",
+                "run_wepp_watershed_noprep_rq",
+                "run_wepp_noprep_rq",
+                "run_swat_rq",
+                "run_swat_noprep_rq"
+            ];
+            if (!jobId && helper && typeof helper.resolveJobId === "function") {
+                for (var helperIndex = 0; helperIndex < helperJobCandidates.length; helperIndex += 1) {
+                    var helperKey = helperJobCandidates[helperIndex];
+                    var helperResolved = helper.resolveJobId(ctx, helperKey);
+                    if (!helperResolved) {
+                        continue;
+                    }
+                    jobId = helperResolved;
+                    completionEvent = applyJobKeyCompletionHint(helperKey);
+                    break;
+                }
+            }
+
             if (!jobId) {
-                var jobIds = ctx && (ctx.jobIds || ctx.jobs);
                 if (jobIds && typeof jobIds === "object" && Object.prototype.hasOwnProperty.call(jobIds, "prep_wepp_watershed_rq")) {
                     var prepOnlyValue = jobIds.prep_wepp_watershed_rq;
                     if (prepOnlyValue !== undefined && prepOnlyValue !== null) {
@@ -1423,20 +1457,20 @@ var Wepp = (function () {
                         setActiveWeppRunEvent("prep_only");
                     }
                 }
-                if (!jobId && jobIds && typeof jobIds === "object" && Object.prototype.hasOwnProperty.call(jobIds, "run_wepp_rq")) {
-                    var value = jobIds.run_wepp_rq;
-                    if (value !== undefined && value !== null) {
-                        jobId = String(value);
-                        completionEvent = "WEPP_RUN_TASK_COMPLETED";
-                        setActiveWeppRunEvent("run");
-                    }
-                }
                 if (!jobId && jobIds && typeof jobIds === "object" && Object.prototype.hasOwnProperty.call(jobIds, "run_wepp_watershed_rq")) {
                     var watershedValue = jobIds.run_wepp_watershed_rq;
                     if (watershedValue !== undefined && watershedValue !== null) {
                         jobId = String(watershedValue);
                         completionEvent = "WEPP_RUN_TASK_COMPLETED";
                         setActiveWeppRunEvent("run_watershed");
+                    }
+                }
+                if (!jobId && jobIds && typeof jobIds === "object" && Object.prototype.hasOwnProperty.call(jobIds, "run_wepp_rq")) {
+                    var value = jobIds.run_wepp_rq;
+                    if (value !== undefined && value !== null) {
+                        jobId = String(value);
+                        completionEvent = "WEPP_RUN_TASK_COMPLETED";
+                        setActiveWeppRunEvent("run");
                     }
                 }
                 if (!jobId && jobIds && typeof jobIds === "object" && Object.prototype.hasOwnProperty.call(jobIds, "run_wepp_noprep_rq")) {

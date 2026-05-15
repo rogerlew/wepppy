@@ -1,7 +1,7 @@
 {
   "binary_name": "wepp_260514",
   "binary_role": "watershed",
-  "built_utc": "2026-05-15T02:16:37Z",
+  "built_utc": "2026-05-15T07:45:38Z",
   "features": {
     "hbp_pass_family": "H*.hbp",
     "hbp_schema_major": 1,
@@ -15,7 +15,7 @@
   },
   "release_tag": "260514",
   "schema": "wepp-binary-release-metadata-v1",
-  "sha256": "dca53dca585f3a83233c1fcedbf59b5bf2aa9d887061aaaf51268f3fb03faf97",
+  "sha256": "10638de8eb7bbd744ecc8a561de4e0a510ac96f8ecb09b57d0e80fd7c4a35d77",
   "source_commit": "62c2102efffc36f142689dfbffa5296b20780d33",
   "source_repo": "wepp-in-the-woods/wepp-forest",
   "validation": {

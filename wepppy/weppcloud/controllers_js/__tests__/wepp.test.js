@@ -582,6 +582,74 @@ describe("Wepp controller", () => {
         expect(runCompleted).not.toHaveBeenCalled();
     });
 
+    test("bootstrap prefers controller last-submitted hint over stale run_wepp job id", () => {
+        const pollCompletionValues = [];
+        const watershedCompleted = jest.fn();
+        const runCompleted = jest.fn();
+        wepp.events.on("wepp:run_watershed:completed", watershedCompleted);
+        wepp.events.on("wepp:run:completed", runCompleted);
+        controlBaseInstance.set_rq_job_id.mockImplementationOnce((self) => {
+            pollCompletionValues.push(self.poll_completion_event);
+        });
+        window.WCControllerBootstrap = {
+            resolveJobId: jest.fn((ctx, key) => {
+                if (key === "run_wepp_rq") {
+                    return "stale-run-job";
+                }
+                return null;
+            }),
+            getControllerContext: jest.fn(() => ({
+                job_id: "latest-watershed-job",
+                job_key: "run_wepp_watershed_rq"
+            }))
+        };
+
+        wepp.bootstrap({
+            jobIds: {
+                run_wepp_rq: "stale-run-job",
+                run_wepp_watershed_rq: "latest-watershed-job"
+            },
+            data: { wepp: { hasRun: false } }
+        });
+
+        expect(controlBaseInstance.set_rq_job_id).toHaveBeenCalledWith(wepp, "latest-watershed-job");
+        expect(pollCompletionValues).toEqual(["WEPP_RUN_TASK_COMPLETED"]);
+
+        wepp.triggerEvent("WEPP_RUN_TASK_COMPLETED", { source: "status" });
+        expect(watershedCompleted).toHaveBeenCalledWith(expect.objectContaining({ source: "status" }));
+        expect(runCompleted).not.toHaveBeenCalled();
+    });
+
+    test("bootstrap fallback prefers watershed job key over stale run job key when no controller hint exists", () => {
+        const pollCompletionValues = [];
+        controlBaseInstance.set_rq_job_id.mockImplementationOnce((self) => {
+            pollCompletionValues.push(self.poll_completion_event);
+        });
+        window.WCControllerBootstrap = {
+            resolveJobId: jest.fn((ctx, key) => {
+                if (key === "run_wepp_watershed_rq") {
+                    return "watershed-job-newer";
+                }
+                if (key === "run_wepp_rq") {
+                    return "run-job-older";
+                }
+                return null;
+            }),
+            getControllerContext: jest.fn(() => ({}))
+        };
+
+        wepp.bootstrap({
+            jobIds: {
+                run_wepp_rq: "run-job-older",
+                run_wepp_watershed_rq: "watershed-job-newer"
+            },
+            data: { wepp: { hasRun: false } }
+        });
+
+        expect(controlBaseInstance.set_rq_job_id).toHaveBeenCalledWith(wepp, "watershed-job-newer");
+        expect(pollCompletionValues).toEqual(["WEPP_RUN_TASK_COMPLETED"]);
+    });
+
     test("bootstrap restores prep-only completion event namespace", () => {
         const prepCompleted = jest.fn();
         const runCompleted = jest.fn();
