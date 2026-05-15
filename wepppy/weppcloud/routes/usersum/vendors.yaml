@@ -17,6 +17,7 @@ vendors:
     source_ref: main
     include_globs:
       - change-log.md
+      - release/wepp_*_release_notes.md
       - docs/20260414-stakeholder-brief-compiler-fragility.md
       - docs/20260501-stakeholder-brief-multi-segment-water-balance.md
       - docs/20260504-stakeholder-watbalance.md

@@ -165,6 +165,21 @@ def test_usersum_view_legacy_wepp_forest_change_log_alias_renders(usersum_client
     assert "WEPP-Forest Change Log" in body
     assert "Canonical WEPP build/version history for" in body
     assert "wepppy/weppcloud/routes/usersum/vendor/wepp-forest/change-log.md" in body
+    assert (
+        'href="/usersum/src/wepppy/weppcloud/routes/usersum/vendor/wepp-forest/'
+        'release/wepp_260514_release_notes.md"'
+    ) in body
+
+
+def test_usersum_src_route_renders_vendored_wepp_forest_release_notes(usersum_client) -> None:
+    response = usersum_client.get(
+        "/usersum/src/wepppy/weppcloud/routes/usersum/vendor/wepp-forest/release/wepp_260514_release_notes.md"
+    )
+    assert response.status_code == 200
+    body = response.get_data(as_text=True)
+    assert "WEPP Release" in body
+    assert "wepp_260514_hill" in body
+    assert "wepppy/weppcloud/routes/usersum/vendor/wepp-forest/release/wepp_260514_release_notes.md" in body
 
 
 def test_usersum_doc_route_renders_disturbed_enduser_guide(usersum_client) -> None:
