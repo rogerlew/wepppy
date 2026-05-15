@@ -1641,6 +1641,30 @@ def _finish_fork_rq(runid: str) -> None:
         raise
 
 
+def _reset_forked_run_job_markers(new_runid: str, new_wd: str, status_channel: str) -> None:
+    """Clear inherited async job markers from a newly forked run."""
+    StatusMessenger.publish(status_channel, "Clearing inherited job markers...\n")
+
+    clear_nodb_file_cache(new_runid, pup_relpath="wepp.nodb")
+    clear_locks(new_runid, pup_relpath="wepp.nodb")
+    wepp = Wepp.tryGetInstance(new_wd)
+    if wepp is not None:
+        wepp.persist_job_hint(job_id=None, job_key=None)
+
+    prep = RedisPrep.tryGetInstance(new_wd)
+    if prep is not None:
+        queued_job_keys = tuple(prep.get_rq_job_ids().keys())
+        for key in queued_job_keys:
+            prep.redis.hdel(prep.run_id, f"rq:{key}")
+        if queued_job_keys:
+            prep.dump()
+
+        if prep.get_archive_job_id():
+            prep.clear_archive_job_id()
+
+    StatusMessenger.publish(status_channel, "Clearing inherited job markers... done.\n")
+
+
 @with_exception_logging
 def fork_rq(
     runid: str,
@@ -1663,7 +1687,7 @@ def fork_rq(
             from wepppy.weppcloud.utils.run_ttl import initialize_ttl
             initialize_ttl(wd)
 
-        _fork_helpers.prepare_fork_run(
+        new_wd = _fork_helpers.prepare_fork_run(
             runid,
             new_runid,
             undisturbify=undisturbify,
@@ -1686,6 +1710,7 @@ def fork_rq(
             ),
             clean_env_for_system_tools=_clean_env_for_system_tools,
         )
+        _reset_forked_run_job_markers(new_runid, new_wd, status_channel)
 
         if undisturbify:
             StatusMessenger.publish(status_channel, 'Rerunning WEPP...\n')
