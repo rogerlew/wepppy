@@ -26,7 +26,7 @@ from wepppy.all_your_base.geo import raster_stacker
 from wepppy.all_your_base.geo.locationinfo import RasterDatasetInterpolator
 from wepppy.all_your_base.geo.webclients import wmesque_retrieve
 from wepppy.config.redis_settings import RedisDB, redis_connection_kwargs
-from wepppy.nodb.base import NoDbAlreadyLockedError
+from wepppy.nodb.base import NoDbAlreadyLockedError, NoDbStaleWriteError
 from wepppy.nodb.culverts_runner import CulvertsRunner
 from wepppy.nodb.core import Climate, Landuse, Soils, Watershed, Wepp
 from wepppy.nodb.core.watershed import NoOutletFoundError
@@ -385,6 +385,27 @@ def run_culvert_batch_rq(culvert_batch_uuid: str) -> Job:
                         exc,
                     )
                     break
+                time.sleep(1.0)
+            except NoDbStaleWriteError as exc:
+                if attempt + 1 == max_tries:
+                    logger.warning(
+                        "culvert_batch %s: skipping run job_id update after %d retries due stale runner state - %s",
+                        culvert_batch_uuid,
+                        max_tries,
+                        exc,
+                    )
+                    break
+                logger.warning(
+                    "culvert_batch %s: stale runner state while updating run job_id metadata; refreshing and retrying (%d/%d)",
+                    culvert_batch_uuid,
+                    attempt + 1,
+                    max_tries,
+                )
+                refreshed_runner = CulvertsRunner.getInstance(
+                    str(batch_root), allow_nonexistent=True
+                )
+                if refreshed_runner is not None:
+                    runner = refreshed_runner
                 time.sleep(1.0)
             else:
                 break
