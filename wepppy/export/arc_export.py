@@ -14,7 +14,11 @@ from os.path import split as _split
 from deprecated import deprecated
 
 from wepppy.all_your_base import isinf, isnan
-from wepppy.nodb.core import *
+from wepppy.nodb.core import (
+    Ron,
+    Watershed,
+    Wepp,
+)
 from wepppy.nodb.mods.ash_transport import Ash, AshPost
 from wepppy.nodb.mods.rhem import RhemPost
 from wepppy.topo.peridot.flowpath import PeridotChannel, PeridotFlowpath, PeridotHillslope

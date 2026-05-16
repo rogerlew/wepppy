@@ -98,7 +98,7 @@ from wepppy.runtime_paths.parquet_sidecars import pick_existing_parquet_path
 
 from wepppy.query_engine.activate import activate_query_engine, update_catalog_entry
 
-from .map import Map
+from .map_object import Map
 
 DEFAULT_MAP_CENTER = [44.0, -116.0]
 _COPERNICUS_DEFAULT_OPENTOPO_FALLBACK_DATASET = "srtmgl1_e"

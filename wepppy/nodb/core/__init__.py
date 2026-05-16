@@ -1,6 +1,6 @@
 from .climate import Climate, ClimateMode, ClimateSpatialMode, NoClimateStationSelectedError, ClimateModeIsUndefinedError
 from .landuse import Landuse, LanduseCustomMappingError, LanduseMode
-from .map import Map
+from .map_object import Map
 from .ron import Ron
 from .soils import Soils, SoilsMode
 from .topaz import Topaz, WatershedBoundaryTouchesEdgeError, MinimumChannelLengthTooShortError

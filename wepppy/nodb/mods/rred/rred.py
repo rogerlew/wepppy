@@ -24,7 +24,13 @@ from wepppy.nodb.mods.rred import rred_api
 from wepppy.soils.ssurgo import SoilSummary
 from wepppy.wepp.soils.utils import WeppSoilUtil
 
-from wepppy.nodb.core import *
+from wepppy.nodb.core import (
+    Landuse,
+    LanduseMode,
+    Soils,
+    SoilsMode,
+    Watershed,
+)
 from ...base import NoDbBase
 
 __all__ = [

@@ -18,7 +18,11 @@ from os.path import exists as _exists
 
 # from wepppy.all_your_base import RasterDatasetInterpolator
 
-from wepppy.nodb.core import *
+from wepppy.nodb.core import (
+    Landuse,
+    Soils,
+    Watershed,
+)
 from wepppy.wepp.soils.utils import read_lc_file, soil_specialization, soil_is_water
 from wepppy.wepp.soils.utils import WeppSoilUtil
 

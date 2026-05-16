@@ -69,7 +69,11 @@ from wepppy.all_your_base.geo import wgs84_proj4, read_raster, haversine, raster
 from wepppy.soils.ssurgo import SoilSummary
 from wepppy.wepp.soils.utils import simple_texture, WeppSoilUtil, SoilMultipleOfeSynth
 
-from wepppy.nodb.core import *
+from wepppy.nodb.core import (
+    Landuse,
+    Ron,
+    Watershed,
+)
 from ...redis_prep import RedisPrep, TaskEnum
 from ...base import NoDbBase, TriggerEvents, createProcessPoolExecutor, nodb_setter
 from ..baer.sbs_map import SoilBurnSeverityMap
@@ -235,6 +239,11 @@ def _lookup_file_snapshot(fname: str) -> Dict[str, Any]:
         pass
 
     return snapshot
+
+
+def _parse_rgb_key(rgb: str) -> Tuple[int, int, int]:
+    """Convert persisted RGB keys like ``"255_0_0"`` into numeric tuples."""
+    return tuple(int(part) for part in rgb.split('_'))
 
 
 def _lookup_audit_path(lookup_path: str) -> str:
@@ -1000,7 +1009,7 @@ class Disturbed(NoDbBase):
             self.validate(self.disturbed_path, self.breaks, self._nodata_vals)
             color_map = getattr(self, '_color_map', None)
 
-        return {tuple(map(int, rgb.split('_'))): v for rgb, v in color_map.items()}
+        return {_parse_rgb_key(rgb): v for rgb, v in color_map.items()}
 
     @property
     def color_coverage_pcts(self) -> Dict[Tuple[int, int, int], float]:
@@ -1015,7 +1024,7 @@ class Disturbed(NoDbBase):
         if coverage_map is None:
             return {}
 
-        return {tuple(map(int, rgb.split('_'))): float(v) for rgb, v in coverage_map.items()}
+        return {_parse_rgb_key(rgb): float(v) for rgb, v in coverage_map.items()}
 
     def remove_sbs(self) -> None:
         func_name = inspect.currentframe().f_code.co_name

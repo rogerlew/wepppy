@@ -16,8 +16,10 @@ from copy import deepcopy
 from deprecated import deprecated
 
 from ....base import NoDbBase, TriggerEvents, nodb_setter
-from wepppy.nodb.core import *
-
+from wepppy.nodb.core import (
+    Soils,
+    Watershed,
+)
 from wepppy.wepp.soils.utils import modify_kslast
 
 from ..location_mixin import LocationMixin

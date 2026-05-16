@@ -27,7 +27,11 @@ from wepppy.soils.ssurgo import SoilSummary
 from wepppy.wepp.soils.utils import simple_texture, WeppSoilUtil, SoilMultipleOfeSynth
 from wepppy.wepp.management import ManagementSummary, Management, get_management_summary
 
-from wepppy.nodb.core import *
+from wepppy.nodb.core import (
+    Landuse,
+    Soils,
+    Watershed,
+)
 from wepppy.nodb.redis_prep import RedisPrep, TaskEnum
 from wepppy.nodb.base import NoDbBase, TriggerEvents, nodb_setter
 from wepppy.nodb.mods.baer.sbs_map import SoilBurnSeverityMap

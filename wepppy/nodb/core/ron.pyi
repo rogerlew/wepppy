@@ -1,7 +1,7 @@
 from _typeshed import Incomplete
 from typing import Any, ClassVar, Dict, List, Optional, Tuple
 from wepppy.nodb.base import NoDbBase
-from .map import Map
+from .map_object import Map
 
 __all__ = ['Map', 'RonNoDbLockedException', 'Ron', 'RonViewModel']
 

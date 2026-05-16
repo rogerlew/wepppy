@@ -3,6 +3,7 @@ Unit tests for Map class raster_intersection method.
 
 Tests edge cases where small extents cause pixel coordinate rounding issues.
 """
+import json
 import os
 import tempfile
 from typing import List
@@ -16,7 +17,7 @@ try:
 except ImportError:
     GDAL_AVAILABLE = False
 
-from wepppy.nodb.core.map import Map
+from wepppy.nodb.core.map_object import Map
 
 
 @pytest.fixture
@@ -203,6 +204,91 @@ def test_map_to_payload_preserves_legacy_object_path():
     payload = map_obj.to_payload()
 
     assert payload["py/object"] == "wepppy.nodb.core.ron.Map"
+
+
+@pytest.mark.unit
+def test_map_from_payload_accepts_legacy_py_tuple_payload():
+    seed = Map(
+        extent=[-116.1, 43.9, -116.0, 44.0],
+        center=[-116.05, 43.95],
+        zoom=13,
+        cellsize=30.0,
+    ).to_payload()
+
+    payload = {
+        "extent": {"py/tuple": seed["extent"]},
+        "center": {"py/tuple": seed["center"]},
+        "zoom": seed["zoom"],
+        "cellsize": seed["cellsize"],
+        "utm": seed["utm"],
+        "_ul_x": seed["_ul_x"],
+        "_ul_y": seed["_ul_y"],
+        "_lr_x": seed["_lr_x"],
+        "_lr_y": seed["_lr_y"],
+        "_num_cols": seed["_num_cols"],
+        "_num_rows": seed["_num_rows"],
+    }
+
+    hydrated = Map.from_payload(payload)
+
+    assert hydrated.extent == pytest.approx(seed["extent"])
+    assert hydrated.center == pytest.approx(seed["center"])
+    assert hydrated.cellsize == pytest.approx(seed["cellsize"])
+    assert hydrated.utm[0] == pytest.approx(seed["utm"]["py/tuple"][0])
+    assert hydrated.utm[1] == pytest.approx(seed["utm"]["py/tuple"][1])
+    assert hydrated.utm[2] == seed["utm"]["py/tuple"][2]
+    assert hydrated.utm[3] == seed["utm"]["py/tuple"][3]
+    assert hydrated.num_cols == seed["_num_cols"]
+    assert hydrated.num_rows == seed["_num_rows"]
+
+
+@pytest.mark.unit
+def test_map_from_payload_uses_default_cellsize_when_missing():
+    payload = {
+        "extent": [-116.1, 43.9, -116.0, 44.0],
+        "center": [-116.05, 43.95],
+        "zoom": 13,
+        "cellsize": "",
+    }
+
+    hydrated = Map.from_payload(payload, default_cellsize=42.0)
+
+    assert hydrated.cellsize == pytest.approx(42.0)
+
+    payload_text = json.dumps(
+        {
+            "extent": payload["extent"],
+            "center": payload["center"],
+            "zoom": payload["zoom"],
+            "cellsize": 0.0,
+        }
+    )
+    with pytest.raises(ValueError, match="cellsize must be positive"):
+        Map.from_payload(payload_text, default_cellsize=42.0)
+
+
+@pytest.mark.unit
+def test_ron_module_still_exports_map_class():
+    from wepppy.nodb.core.ron import Map as RonMap
+
+    assert RonMap is Map
+
+
+@pytest.mark.unit
+def test_map_jsonpickle_uses_legacy_module_path():
+    import jsonpickle
+
+    encoded = jsonpickle.encode(
+        Map(
+            extent=[-116.1, 43.9, -116.0, 44.0],
+            center=[-116.05, 43.95],
+            zoom=13,
+            cellsize=30.0,
+        )
+    )
+
+    assert "wepppy.nodb.core.map.Map" in encoded
+    assert "wepppy.nodb.core.map_object.Map" not in encoded
 
 
 @pytest.mark.unit

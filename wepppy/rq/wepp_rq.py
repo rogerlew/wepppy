@@ -74,7 +74,13 @@ except (ModuleNotFoundError, ImportError) as exc:  # pragma: no cover - optional
 else:
     _WEPP_RUNNER_IMPORT_ERROR = None
 
-from wepppy.nodb.core import *
+from wepppy.nodb.core import (
+    Climate,
+    ClimateMode,
+    Ron,
+    Watershed,
+    Wepp,
+)
 from wepppy.nodb.mods.disturbed import Disturbed
 from wepppy.nodb.redis_prep import RedisPrep, TaskEnum
 

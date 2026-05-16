@@ -1,6 +1,6 @@
 from .climate import Climate as Climate, ClimateMode as ClimateMode, ClimateModeIsUndefinedError as ClimateModeIsUndefinedError, ClimateSpatialMode as ClimateSpatialMode, NoClimateStationSelectedError as NoClimateStationSelectedError
 from .landuse import Landuse as Landuse, LanduseCustomMappingError as LanduseCustomMappingError, LanduseMode as LanduseMode
-from .map import Map as Map
+from .map_object import Map as Map
 from .ron import Ron as Ron
 from .soils import Soils as Soils, SoilsMode as SoilsMode
 from .topaz import Topaz as Topaz

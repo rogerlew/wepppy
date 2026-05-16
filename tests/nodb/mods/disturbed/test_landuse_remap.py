@@ -257,6 +257,22 @@ def test_remap_landuse_treats_nodata_only_hillslopes_as_no_burn(
     assert disturbed.meta["102"]["burn_class"] == "130"
 
 
+def test_color_maps_do_not_depend_on_builtin_map_symbol(
+    disturbed_factory,
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    disturbed, _ = disturbed_factory("color-map-builtin-shadow")
+    disturbed._ct = object()
+    disturbed._color_map = {"1_2_3": "low", "10_11_12": "high"}
+    disturbed._color_coverage_pcts = {"1_2_3": "25.0", "10_11_12": "75.0"}
+
+    # Simulate namespace collision (e.g., imported `map` module shadowing builtin map()).
+    monkeypatch.setattr(disturbed_module, "map", disturbed_module, raising=False)
+
+    assert disturbed.color_to_severity_map == {(1, 2, 3): "low", (10, 11, 12): "high"}
+    assert disturbed.color_coverage_pcts == {(1, 2, 3): 25.0, (10, 11, 12): 75.0}
+
+
 def test_remap_mofe_landuse_maps_burned_classes(
     disturbed_factory,
     monkeypatch: pytest.MonkeyPatch,
