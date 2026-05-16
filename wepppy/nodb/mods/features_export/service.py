@@ -573,6 +573,11 @@ def co_create_post_wepp_geodatabase_artifact(
             code="artifact_missing",
             details=f"Missing geodatabase archive at {gdb_zip_path}.",
         )
+    if gdb_container_path.exists():
+        if gdb_container_path.is_dir():
+            shutil.rmtree(gdb_container_path)
+        else:
+            gdb_container_path.unlink()
 
     gdb_artifact_relpath = _to_relpath(wd_path, gdb_zip_path)
     geodatabase_request = resolve_published_profile_request("prep-wepp-geodatabase")[1]

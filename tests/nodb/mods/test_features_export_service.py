@@ -3317,6 +3317,7 @@ def test_publish_profile_execution_artifacts_dual_profile_co_creates_geodatabase
     gdb_relpath = str(gdb_entry["artifact_relpath"])
     assert gdb_relpath.endswith("features_export.gdb.zip")
     assert (tmp_path / gdb_relpath).is_file()
+    assert not (artifact_dir / "features_export.gdb").exists()
 
     gdb_cache_entry = service.get_cache_index_entry(
         tmp_path,

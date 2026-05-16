@@ -3,6 +3,8 @@
 from __future__ import annotations
 
 import collections.abc as cabc
+from pathlib import Path
+import shutil
 
 from wepppy import f_esri
 
@@ -25,6 +27,15 @@ GpkgToGdbConverter = cabc.Callable[[str, str], object]
 
 def _default_convert_gpkg_to_gdb(gpkg_path: str, gdb_path: str) -> object:
     return f_esri.c2c_gpkg_to_gdb(gpkg_path, gdb_path, zip_output=True)
+
+
+def _remove_gdb_container(gdb_path: Path) -> None:
+    if not gdb_path.exists():
+        return
+    if gdb_path.is_dir():
+        shutil.rmtree(gdb_path)
+        return
+    gdb_path.unlink()
 
 
 class GeodatabaseExportWriter(ExportWriter):
@@ -66,6 +77,7 @@ class GeodatabaseExportWriter(ExportWriter):
                 "f_esri conversion did not produce expected FileGDB archive: "
                 f"{gdb_zip_path}"
             )
+        _remove_gdb_container(gdb_container_path)
 
         relpath = gdb_zip_path.name
         warnings = merge_warnings(

@@ -24,6 +24,7 @@
   - `migrate_interchange.py` — convert WEPP text outputs to Parquet interchange format.
   - `migrate_observed_nodb.py` — migrate `observed.nodb` module paths from legacy to new location.
   - `migrate_run_paths.py` — remap hardcoded paths in `.nodb` files (e.g., `/geodata/wc1/` → `/wc1/`).
+- `tools/migrate_nodb_map_object_paths.py` — one-off crawler for `/wc1/runs/**.nodb` that rewrites `wepppy.nodb.core.map.Map` to `wepppy.nodb.core.map_object.Map` after the `Map` module rename.
 - **Unified runner:** `wepppy/tools/migrations/runner.py` provides idempotent migrations for a single working directory via `run_all_migrations(wd)`.
 - **CLI tool:** `python -m wepppy.tools.migrations.run_migrations <wd>` runs all migrations with optional `--archive-before` and `--dry-run` flags.
 - **RQ task:** `wepppy/rq/migrations_rq.py::migrations_rq` runs migrations as a background job, optionally chained after sync.

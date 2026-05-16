@@ -56,12 +56,14 @@ def _load_wat_ofe_rows_for_wepp(interchange_dir: Path, wepp_id: int) -> pd.DataF
         ofe_column = base._resolve_ofe_column(columns)
 
         required_terms = (
+            "P",
             "RM",
             "Dp",
             "Ep",
             "Es",
             "Er",
             "Tile",
+            "Irr",
             "UpStrmQ",
             "SubRIn",
             "latqcc",
@@ -76,6 +78,7 @@ def _load_wat_ofe_rows_for_wepp(interchange_dir: Path, wepp_id: int) -> pd.DataF
 
         q_eff_column = base._resolve_column(columns, ("Q",))
         soilwatertotal_column = base._resolve_column(columns, ("SoilWaterTotal",))
+        interception_storage_column = base._resolve_column(columns, ("InterceptionStorage",))
 
         if ofe_column is None:
             ofe_expr = "CAST(1 AS INTEGER) AS ofe_id"
@@ -94,6 +97,11 @@ def _load_wat_ofe_rows_for_wepp(interchange_dir: Path, wepp_id: int) -> pd.DataF
             if q_eff_column is not None
             else "CAST(NULL AS DOUBLE) AS Q_eff"
         )
+        interception_storage_expr = (
+            f'CAST("{interception_storage_column}" AS DOUBLE) AS InterceptionStorage'
+            if interception_storage_column is not None
+            else "CAST(NULL AS DOUBLE) AS InterceptionStorage"
+        )
 
         query = f"""
             SELECT
@@ -105,12 +113,14 @@ def _load_wat_ofe_rows_for_wepp(interchange_dir: Path, wepp_id: int) -> pd.DataF
                 "{water_year_column}" AS water_year,
                 {ofe_expr},
                 CAST("{area_column}" AS DOUBLE) AS Area,
+                CAST("{resolved_required['P']}" AS DOUBLE) AS P,
                 CAST("{resolved_required['RM']}" AS DOUBLE) AS RM,
                 CAST("{resolved_required['Dp']}" AS DOUBLE) AS Dp,
                 CAST("{resolved_required['Ep']}" AS DOUBLE) AS Ep,
                 CAST("{resolved_required['Es']}" AS DOUBLE) AS Es,
                 CAST("{resolved_required['Er']}" AS DOUBLE) AS Er,
                 CAST("{resolved_required['Tile']}" AS DOUBLE) AS Tile,
+                CAST("{resolved_required['Irr']}" AS DOUBLE) AS Irr,
                 CAST("{resolved_required['UpStrmQ']}" AS DOUBLE) AS UpStrmQ,
                 CAST("{resolved_required['SubRIn']}" AS DOUBLE) AS SubRIn,
                 CAST("{resolved_required['latqcc']}" AS DOUBLE) AS latqcc,
@@ -119,7 +129,8 @@ def _load_wat_ofe_rows_for_wepp(interchange_dir: Path, wepp_id: int) -> pd.DataF
                 CAST("{resolved_required['frozwt']}" AS DOUBLE) AS frozwt,
                 CAST("{resolved_required['Snow-Water']}" AS DOUBLE) AS Snow_Water,
                 {q_eff_expr},
-                {soilwatertotal_expr}
+                {soilwatertotal_expr},
+                {interception_storage_expr}
             FROM read_parquet('{_sql_path(targets.wat_path)}')
             WHERE "{wepp_column}" = {int(wepp_id)}
             ORDER BY
@@ -136,12 +147,14 @@ def _load_wat_ofe_rows_for_wepp(interchange_dir: Path, wepp_id: int) -> pd.DataF
     df["ofe_id"] = df["ofe_id"].astype(int)
     numeric_columns = [
         "Area",
+        "P",
         "RM",
         "Dp",
         "Ep",
         "Es",
         "Er",
         "Tile",
+        "Irr",
         "UpStrmQ",
         "SubRIn",
         "latqcc",
@@ -151,6 +164,7 @@ def _load_wat_ofe_rows_for_wepp(interchange_dir: Path, wepp_id: int) -> pd.DataF
         "frozwt",
         "Snow_Water",
         "SoilWaterTotal",
+        "InterceptionStorage",
     ]
     for column in numeric_columns:
         df[column] = df[column].astype(float)
@@ -241,10 +255,24 @@ def _compute_daily_full_physical_closure(ofe_rows: pd.DataFrame) -> tuple[pd.Dat
     else:
         soil_storage_mm = legacy_soil_storage_mm
 
-    storage_basis = "SoilWaterTotal_plus_SnowWater" if has_soilwatertotal_any else "LegacyProfileWater_plus_SnowWater"
+    interception_storage = work["InterceptionStorage"].to_numpy(dtype=np.float64, copy=False)
+    has_interception_storage_any = bool(np.isfinite(interception_storage).any())
+    interception_storage_mm = np.where(np.isfinite(interception_storage), interception_storage, 0.0)
+
+    storage_basis_base = "SoilWaterTotal_plus_SnowWater" if has_soilwatertotal_any else "LegacyProfileWater_plus_SnowWater"
+    storage_basis = (
+        f"{storage_basis_base}_plus_InterceptionStorage"
+        if has_interception_storage_any
+        else storage_basis_base
+    )
 
     work["audit_full_soil_storage_mm_ofe"] = soil_storage_mm
-    work["audit_full_storage_mm_ofe"] = soil_storage_mm + work["Snow_Water"].to_numpy(dtype=np.float64, copy=False)
+    work["audit_full_interception_storage_mm_ofe"] = interception_storage_mm
+    work["audit_full_storage_mm_ofe"] = (
+        soil_storage_mm
+        + work["Snow_Water"].to_numpy(dtype=np.float64, copy=False)
+        + interception_storage_mm
+    )
     work["audit_full_storage_delta_mm_ofe"] = (
         work.groupby("ofe_id", sort=False)["audit_full_storage_mm_ofe"].diff().fillna(0.0)
     )
@@ -255,7 +283,8 @@ def _compute_daily_full_physical_closure(ofe_rows: pd.DataFrame) -> tuple[pd.Dat
     )
 
     work["audit_full_physical_ofe_closure_residual_mm"] = (
-        work["RM"].to_numpy(dtype=np.float64, copy=False)
+        work["P"].to_numpy(dtype=np.float64, copy=False)
+        + work["Irr"].to_numpy(dtype=np.float64, copy=False)
         + work["UpStrmQ"].to_numpy(dtype=np.float64, copy=False)
         + work["SubRIn"].to_numpy(dtype=np.float64, copy=False)
         - work["QOFE"].to_numpy(dtype=np.float64, copy=False)
@@ -276,7 +305,8 @@ def _compute_daily_full_physical_closure(ofe_rows: pd.DataFrame) -> tuple[pd.Dat
     work["audit_surface_pulse_proxy_mm_ofe"] = (
         work["QOFE"].to_numpy(dtype=np.float64, copy=False)
         - work["UpStrmQ"].to_numpy(dtype=np.float64, copy=False)
-        - work["RM"].to_numpy(dtype=np.float64, copy=False)
+        - work["P"].to_numpy(dtype=np.float64, copy=False)
+        - work["Irr"].to_numpy(dtype=np.float64, copy=False)
         - work["SubRIn"].to_numpy(dtype=np.float64, copy=False)
         + work["latqcc"].to_numpy(dtype=np.float64, copy=False)
     )
@@ -286,6 +316,8 @@ def _compute_daily_full_physical_closure(ofe_rows: pd.DataFrame) -> tuple[pd.Dat
     )
 
     for column in (
+        "P",
+        "Irr",
         "RM",
         "UpStrmQ",
         "SubRIn",
@@ -305,6 +337,9 @@ def _compute_daily_full_physical_closure(ofe_rows: pd.DataFrame) -> tuple[pd.Dat
     day_records: list[dict[str, Any]] = []
     for key, day_rows in work.groupby(list(DATE_COLUMNS), sort=False):
         total_area = float(day_rows["Area"].sum())
+        p_v = float(day_rows["P_volume_m3"].sum())
+        irr_v = float(day_rows["Irr_volume_m3"].sum())
+        external_input_v = p_v + irr_v
         rm_v = float(day_rows["RM_volume_m3"].sum())
         upstrmq_v = float(day_rows["UpStrmQ_volume_m3"].sum())
         subrin_v = float(day_rows["SubRIn_volume_m3"].sum())
@@ -362,6 +397,9 @@ def _compute_daily_full_physical_closure(ofe_rows: pd.DataFrame) -> tuple[pd.Dat
                 "water_year": int(key[5]),
                 "n_ofe": int(day_rows["ofe_id"].nunique()),
                 "audit_full_physical_total_area_m2": total_area,
+                "audit_full_p_volume_m3": p_v,
+                "audit_full_irr_volume_m3": irr_v,
+                "audit_full_external_input_volume_m3": external_input_v,
                 "audit_full_rm_volume_m3": rm_v,
                 "audit_full_upstrmq_volume_m3": upstrmq_v,
                 "audit_full_subrin_volume_m3": subrin_v,
@@ -397,7 +435,7 @@ def _compute_daily_full_physical_closure(ofe_rows: pd.DataFrame) -> tuple[pd.Dat
     daily["audit_full_storage_delta_volume_m3"] = storage_delta_volume
 
     known_inputs_volume = (
-        daily["audit_full_rm_volume_m3"].to_numpy(dtype=np.float64, copy=False)
+        daily["audit_full_external_input_volume_m3"].to_numpy(dtype=np.float64, copy=False)
         + daily["audit_full_upstrmq_volume_m3"].to_numpy(dtype=np.float64, copy=False)
         + daily["audit_full_subrin_volume_m3"].to_numpy(dtype=np.float64, copy=False)
     )
@@ -443,6 +481,18 @@ def _compute_daily_full_physical_closure(ofe_rows: pd.DataFrame) -> tuple[pd.Dat
         [_safe_depth_scalar(v, a) for v, a in zip(daily["audit_full_rm_volume_m3"], area)],
         dtype=np.float64,
     )
+    daily["audit_full_p_mm"] = np.array(
+        [_safe_depth_scalar(v, a) for v, a in zip(daily["audit_full_p_volume_m3"], area)],
+        dtype=np.float64,
+    )
+    daily["audit_full_irr_mm"] = np.array(
+        [_safe_depth_scalar(v, a) for v, a in zip(daily["audit_full_irr_volume_m3"], area)],
+        dtype=np.float64,
+    )
+    daily["audit_full_external_input_mm"] = np.array(
+        [_safe_depth_scalar(v, a) for v, a in zip(daily["audit_full_external_input_volume_m3"], area)],
+        dtype=np.float64,
+    )
     daily["audit_full_upstrmq_mm"] = np.array(
         [_safe_depth_scalar(v, a) for v, a in zip(daily["audit_full_upstrmq_volume_m3"], area)],
         dtype=np.float64,
@@ -476,6 +526,8 @@ def _compute_daily_full_physical_closure(ofe_rows: pd.DataFrame) -> tuple[pd.Dat
         "storage_basis": storage_basis,
         "uses_soilwatertotal": has_soilwatertotal_any,
         "soilwatertotal_missing_rows": int(np.count_nonzero(~np.isfinite(soilwatertotal))),
+        "uses_interception_storage": has_interception_storage_any,
+        "interception_storage_missing_rows": int(np.count_nonzero(~np.isfinite(interception_storage))),
     }
 
     keep_columns = [
@@ -487,6 +539,9 @@ def _compute_daily_full_physical_closure(ofe_rows: pd.DataFrame) -> tuple[pd.Dat
         "audit_full_storage_delta_mm",
         "audit_full_physical_closure_residual_mm",
         "audit_full_implied_unresolved_term_mm",
+        "audit_full_p_mm",
+        "audit_full_irr_mm",
+        "audit_full_external_input_mm",
         "audit_full_rm_mm",
         "audit_full_upstrmq_mm",
         "audit_full_subrin_mm",
@@ -625,6 +680,8 @@ def _build_full_physical_summary(daily_full: pd.DataFrame, metadata: dict[str, A
 
     rm = daily_full["audit_full_rm_mm"].to_numpy(dtype=np.float64, copy=False)
     rm_total = float(np.sum(rm))
+    external_input = daily_full["audit_full_external_input_mm"].to_numpy(dtype=np.float64, copy=False)
+    external_input_total = float(np.sum(external_input))
     residual_total = float(np.sum(residual))
 
     scireview_top: dict[str, int | float | str] | None = None
@@ -649,6 +706,9 @@ def _build_full_physical_summary(daily_full: pd.DataFrame, metadata: dict[str, A
         "storage_basis": metadata["storage_basis"],
         "uses_soilwatertotal": bool(metadata["uses_soilwatertotal"]),
         "soilwatertotal_missing_rows": int(metadata["soilwatertotal_missing_rows"]),
+        "uses_interception_storage": bool(metadata["uses_interception_storage"]),
+        "interception_storage_missing_rows": int(metadata["interception_storage_missing_rows"]),
+        "external_input_mm": _quantiles(external_input),
         "known_inputs_mm": _quantiles(daily_full["audit_full_known_inputs_mm"].to_numpy(dtype=np.float64, copy=False)),
         "known_outputs_mm": _quantiles(
             daily_full["audit_full_known_outputs_mm"].to_numpy(dtype=np.float64, copy=False)
@@ -670,6 +730,11 @@ def _build_full_physical_summary(daily_full: pd.DataFrame, metadata: dict[str, A
         },
         "max_requires_scientific_review_day": scireview_top,
         "closure_residual_total_mm": residual_total,
+        "closure_residual_pct_of_external_input_total": (
+            float((residual_total / external_input_total) * 100.0)
+            if external_input_total != 0.0
+            else 0.0
+        ),
         "closure_residual_pct_of_rm_total": float((residual_total / rm_total) * 100.0) if rm_total != 0.0 else 0.0,
         "implied_unresolved_term_interpretation": (
             "positive_values_indicate_missing_sink_in_exported_terms_"

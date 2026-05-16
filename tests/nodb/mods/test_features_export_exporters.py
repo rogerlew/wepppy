@@ -404,6 +404,7 @@ def test_geodatabase_writer_uses_f_esri_conversion_boundary(tmp_path: Path, cata
     assert Path(artifact.artifact_path).exists()
     assert artifact.packaged_member_relpaths == ("features_export.gdb.zip",)
     assert all(output.relpath == "features_export.gdb.zip" for output in artifact.layer_outputs)
+    assert not (tmp_path / "features_export.gdb").exists()
 
 
 def test_geodatabase_writer_staging_gpkg_uses_typed_geometry(tmp_path: Path, catalog) -> None:
@@ -487,6 +488,7 @@ def test_geodatabase_writer_staging_gpkg_uses_typed_geometry(tmp_path: Path, cat
 
     assert artifact.artifact_relpath == "features_export.gdb.zip"
     assert Path(artifact.artifact_path).exists()
+    assert not (tmp_path / "features_export.gdb").exists()
 
 
 def test_geodatabase_writer_fails_explicitly_when_backend_unavailable(

@@ -196,6 +196,91 @@ def _mofe_scireview_wat_rows(wepp_id: int) -> list[dict[str, object]]:
     return rows
 
 
+def test_full_physical_closure_uses_p_plus_irr_and_interception_storage(tmp_path: Path) -> None:
+    module = _module()
+    load_ofe_rows = module["_load_wat_ofe_rows_for_wepp"]
+    compute_full = module["_compute_daily_full_physical_closure"]
+
+    interchange_dir = tmp_path / "run" / "wepp" / "output" / "interchange"
+    _write_interchange(
+        interchange_dir,
+        wat_records=[
+            {
+                "wepp_id": 501,
+                "ofe_id": 1,
+                "year": 1987,
+                "sim_day_index": 1,
+                "julian": 44,
+                "month": 2,
+                "day_of_month": 13,
+                "water_year": 1987,
+                "OFE": 1,
+                "P": 0.0,
+                "RM": 0.0,
+                "Q": 0.0,
+                "Ep": 1.0,
+                "Es": 0.0,
+                "Er": 0.0,
+                "Dp": 0.0,
+                "UpStrmQ": 0.0,
+                "SubRIn": 0.0,
+                "latqcc": 0.0,
+                "Total-Soil Water": 100.0,
+                "SoilWaterTotal": 100.0,
+                "frozwt": 0.0,
+                "Snow-Water": 5.0,
+                "QOFE": 0.0,
+                "Tile": 0.0,
+                "Irr": 0.0,
+                "Area": 100.0,
+                "InterceptionStorage": 0.0,
+            },
+            {
+                "wepp_id": 501,
+                "ofe_id": 1,
+                "year": 1987,
+                "sim_day_index": 2,
+                "julian": 45,
+                "month": 2,
+                "day_of_month": 14,
+                "water_year": 1987,
+                "OFE": 1,
+                "P": 10.0,
+                "RM": 15.0,
+                "Q": 1.0,
+                "Ep": 1.0,
+                "Es": 1.0,
+                "Er": 0.0,
+                "Dp": 1.0,
+                "UpStrmQ": 0.0,
+                "SubRIn": 0.0,
+                "latqcc": 0.0,
+                "Total-Soil Water": 100.0,
+                "SoilWaterTotal": 100.0,
+                "frozwt": 0.0,
+                "Snow-Water": 0.0,
+                "QOFE": 1.0,
+                "Tile": 0.0,
+                "Irr": 0.0,
+                "Area": 100.0,
+                "InterceptionStorage": 11.0,
+            },
+        ],
+        pass_records=_mofe_pass_rows(501),
+    )
+
+    ofe_rows = load_ofe_rows(interchange_dir, 501)
+    daily_full, full_meta = compute_full(ofe_rows)
+
+    assert full_meta["storage_basis"] == "SoilWaterTotal_plus_SnowWater_plus_InterceptionStorage"
+    assert full_meta["uses_interception_storage"] is True
+
+    day2 = daily_full[daily_full["sim_day_index"] == 2].iloc[0]
+    assert day2["audit_full_physical_closure_residual_mm"] == pytest.approx(0.0, abs=1.0e-8)
+    assert day2["audit_full_external_input_mm"] == pytest.approx(10.0, abs=1.0e-8)
+    assert day2["audit_full_rm_mm"] == pytest.approx(15.0, abs=1.0e-8)
+
+
 def test_chain_transfer_residuals_and_artifacts(
     tmp_path: Path,
     monkeypatch: pytest.MonkeyPatch,

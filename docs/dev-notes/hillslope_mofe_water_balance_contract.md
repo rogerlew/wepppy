@@ -17,7 +17,7 @@ Scope constraints:
 - R5 Contour/channel runon branch (`runoffin = roffon`) and channel subsurface aggregation branch: `/workdir/wepp-forest/src/watbal.for:352-355,404-423`
 - R6 Lateral subsurface generation and clipping (`latqcc`, `sbrunf`, shortfall correction): `/workdir/wepp-forest/src/watbal.for:694-709,732-735,783-784`
 - R7 WEPP internal (commented) daily water-balance check equation and `watcon` update context: `/workdir/wepp-forest/src/watbal.for:954-999`
-- R8 Water-file write mapping for `RM`, `Q/QOFE`, `UpStrmQ`, `SubRIn`, `latqcc`, `Tile`, `Irr`, `SoilWaterTotal`: `/workdir/wepp-forest/src/watbal.for:1023-1024,1073-1105`
+- R8 Water-file write mapping for `P`, `RM`, `Q/QOFE`, `UpStrmQ`, `SubRIn`, `latqcc`, `Tile`, `Irr`, `SoilWaterTotal`, optional `InterceptionStorage`: `/workdir/wepp-forest/src/watbal.for:1023-1024,1073-1105`
 - R9 Interception ET component (`etplcp`) is computed but not written in `H.wat` record: `/workdir/wepp-forest/src/watbal.for:942-951,1077-1105`
 - R10 Hillslope outlet runoff volume (`runvol`) on final OFE: `/workdir/wepp-forest/src/contin.for:1237-1246`
 - R11 PASS serialization of `runvol`, `sbrunf`, `sbrunv`; `sbrunv = sbrunf * slplen * fwidth`: `/workdir/wepp-forest/src/wshpas.for:154-165,220-223,230-237`
@@ -38,13 +38,22 @@ Producer implementation evidence in `watbal` shows the same physical structure:
 - Lateral flow and deep percolation terms are generated and removed (R6).
 - A code-commented daily balance check equation exists for `watcon` updates (R7).
 
+Dual-basis policy alignment:
+- Kernel-basis closure is normative for producer correctness.
+- Interchange-basis closure (this tool) is diagnostic over exported terms and must use the same external-input convention as the producer audit (`P + Irr`, not `RM`).
+
 ## Normative Terms for This Audit
 Per OFE/day, this audit uses:
-- Inputs: `RM`, `UpStrmQ`, `SubRIn`
+- Inputs: `P`, `Irr`, `UpStrmQ`, `SubRIn`
 - Outputs: `QOFE`, `latqcc`, `Dp`, `Ep`, `Es`, `Er`, `Tile`
 - Storage candidates:
-  - preferred: `SoilWaterTotal + Snow-Water`
-  - fallback: `Total-Soil Water + frozwt + Snow-Water`
+  - preferred: `SoilWaterTotal + Snow-Water (+ InterceptionStorage when exported)`
+  - fallback: `Total-Soil Water + frozwt + Snow-Water (+ InterceptionStorage when exported)`
+
+Accounting convention note:
+- `RM` includes snowmelt, but snowmelt is an internal transfer from snowpack storage.
+- Using `RM` as external input while also carrying `Snow-Water` in storage creates snowmelt double-count.
+- This contract therefore treats external input as `P + Irr`; snowpack dynamics are represented via `DeltaStorage`.
 
 Root-zone/profile clarification:
 - WEPP documentation often frames Eq. 5.1.1 in root-zone terms (D1).
@@ -55,9 +64,11 @@ Root-zone/profile clarification:
 ### 1. Known exported-term closure (per OFE/day)
 Define:
 - `ET = Ep + Es + Er`
-- `KnownInputs = RM + UpStrmQ + SubRIn`
+- `KnownInputs = P + Irr + UpStrmQ + SubRIn`
 - `KnownOutputs = QOFE + latqcc + Dp + ET + Tile`
-- `Storage = SoilWaterTotal + Snow-Water` when `SoilWaterTotal` is available
+- `Storage = SoilWaterTotal + Snow-Water + InterceptionStorage` when `SoilWaterTotal` and `InterceptionStorage` are available
+- `Storage = SoilWaterTotal + Snow-Water` when `SoilWaterTotal` is available and `InterceptionStorage` is unavailable
+- `Storage = Total-Soil Water + frozwt + Snow-Water + InterceptionStorage` when only legacy profile storage is available and `InterceptionStorage` is available
 - else `Storage = Total-Soil Water + frozwt + Snow-Water`
 - `DeltaStorage(d) = Storage(d) - Storage(d-1)` per OFE
 
@@ -66,7 +77,7 @@ Residual:
 
 Interpretation:
 - `Residual_full_exported = 0` means exported terms close for that OFE/day.
-- Non-zero residual is interpreted as an **implied unresolved term** from canonical physics that is not fully observable in interchange (for example interception and other unexported storage/flux components).
+- Non-zero residual is interpreted as an **implied unresolved term** from canonical physics that is not fully observable in interchange (for example missing storage exports on legacy runs or unexported internal flux components).
 
 ### 2. Daily hillslope aggregation (contracted output)
 Per day, aggregate OFE terms by area-weighted volume and convert back to depth:
@@ -84,20 +95,21 @@ Because `H.wat` does not export all canonical Eq. 5.1.1 terms, the tool must lab
 - not as strict model mass-balance failure by default.
 
 Evidence for missing exported terms:
-- Interception handling is explicit in runtime physics (R3), but interception terms are not exported as standalone `H.wat` columns (R1, R8).
+- Interception handling is explicit in runtime physics (R3). Legacy runs may omit optional `InterceptionStorage`, so storage-visible closure can retain a residual when that term is unavailable.
 - `etplcp` (interception ET component) is computed internally but not included in the water-file write record (R9).
 - `Surf` and `Base` are channel-format terms only and not in the standard non-channel hillslope format used for `H.wat` interchange (R1 vs R2).
 
 ## Interchange Mapping Contract
 ### H.wat (required)
 Required for full-physics closure in this package:
-- `RM`, `UpStrmQ`, `SubRIn`, `QOFE`, `latqcc`, `Dp`, `Ep`, `Es`, `Er`, `Tile`, `Area`, `OFE`
+- `P`, `Irr`, `UpStrmQ`, `SubRIn`, `QOFE`, `latqcc`, `Dp`, `Ep`, `Es`, `Er`, `Tile`, `Area`, `OFE`
 - storage: `Snow-Water` and one of:
   - preferred `SoilWaterTotal`, or
   - fallback `Total-Soil Water` + `frozwt`
+- optional storage add-on: `InterceptionStorage` (included in storage when present)
 
 Optional diagnostics:
-- `P`, `Irr`, profile-capacity terms, `QRain`, `QSnow` (via optional `H.element`) for contextual interpretation.
+- `RM`, profile-capacity terms, `QRain`, `QSnow` (via optional `H.element`) for contextual interpretation.
 
 ### H.pass (required)
 Used for outlet reconciliation diagnostics:

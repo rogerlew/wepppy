@@ -1,14 +1,10 @@
 # Server Procurement Request: WEPPcloud Compute Infrastructure for the St. Joe Basin Project
 
-**Date:** March 2026
-
-**Project:** I-CREWS / St. Joe River Basin Watershed Modeling
-
-**Requested by:** WEPPcloud Development Team
-
-**Funding Source:** I-CREWS Grant
-
-**Total Cost:** $42,783.00 (two servers at $21,391.50 each)
+**Date:** March 2026  
+**Project:** I-CREWS / St. Joe River Basin Watershed Modeling  
+**Requested by:** WEPPcloud Development Team  
+**Funding Source:** I-CREWS Grant  
+**Total Cost:** Estimated $42,783.00 (two servers at $21,391.50 each)  
 
 ## Approval Snapshot
 

@@ -18,7 +18,6 @@ from wepppy.all_your_base.geo import haversine, read_raster, utm_srid
 __all__ = ["Map"]
 
 _LEGACY_MAP_OBJECT_PATH = "wepppy.nodb.core.ron.Map"
-_LEGACY_JSONPICKLE_MODULE = "wepppy.nodb.core.map"
 
 
 class Map(object):
@@ -424,7 +423,3 @@ class Map(object):
                 the_set.discard(val)
         return sorted(the_set)
 
-
-# Preserve raw jsonpickle contract for persisted ``*.nodb`` payloads so mixed
-# version/rollback reads continue to resolve ``wepppy.nodb.core.map.Map``.
-Map.__module__ = _LEGACY_JSONPICKLE_MODULE

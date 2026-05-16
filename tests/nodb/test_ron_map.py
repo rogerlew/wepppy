@@ -275,7 +275,7 @@ def test_ron_module_still_exports_map_class():
 
 
 @pytest.mark.unit
-def test_map_jsonpickle_uses_legacy_module_path():
+def test_map_jsonpickle_uses_map_object_module_path():
     import jsonpickle
 
     encoded = jsonpickle.encode(
@@ -287,8 +287,7 @@ def test_map_jsonpickle_uses_legacy_module_path():
         )
     )
 
-    assert "wepppy.nodb.core.map.Map" in encoded
-    assert "wepppy.nodb.core.map_object.Map" not in encoded
+    assert "wepppy.nodb.core.map_object.Map" in encoded
 
 
 @pytest.mark.unit
