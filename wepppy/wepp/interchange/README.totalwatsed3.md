@@ -35,8 +35,10 @@ Key output columns (see `SCHEMA` in `totalwatsed3.py` for the complete list):
 - `SoilWaterTotal`, `ProfileDepth`, `ProfilePorosityCap`, `ProfileFCStore`, `ProfileWPStore`: optional producer-authoritative storage/capacity terms from `H.wat` in mm. They are null for legacy WEPP executables that do not emit the additive columns.
 - `TSMF`: area-weighted true soil moisture fraction from `H.soil` when available (null when absent).
 - `QRain`, `QSnow`: area-weighted runoff-partition depths from `H.element` when available (null when absent).
-- MOFE lateral flow rule: when multiple OFEs are present for a hillslope/day, `latqcc` uses only the outlet-facing (last) OFE. This avoids counting internal lateral-routing transfers multiple times.
-- MOFE runoff rule: `Runoff` uses PASS `runvol` volume divided by aggregated watershed area (not summed `QOFE`), avoiding OFE-count scaling bias.
+- MOFE aggregation rules (multi-OFE hillslopes): per-OFE columns in `H.wat` are not all physically summable across OFEs without producing a non-canonical total. `totalwatsed3` handles this by:
+  - **`latqcc`**: uses only the outlet-facing (last) OFE per hillslope/day to avoid counting internal lateral-routing transfers multiple times.
+  - **`Runoff` (the user-facing column)**: computed from `H.pass.runvol` volume divided by aggregated watershed area, not from summed `Q` or `QOFE`. `runvol` is the canonical hillslope runoff volume under both legacy and `wepp_260516`+ builds.
+  - **`Q` and `QOFE` aggregate columns** (the literal `SUM(col * 0.001 * Area)` over OFEs): retained for diagnostic continuity but **not** the canonical hillslope totals. Under `wepp_260516` and later, per-OFE `QOFE = Q` in `H.wat`, so the two aggregates are equal post-fix. Under legacy builds the per-OFE `QOFE` was inflated by an OFE-count-scaled factor that did not appear in `Q`; see the canonical definitions for the per-OFE `Q`, `QOFE`, and `Area` columns in the main interchange README [§H.wat Multi-OFE Schema Semantics](README.md#hwat-multi-ofe-schema-semantics) and the historical context in `/workdir/wepp-forest/docs/20260504-stakeholder-watbalance.md` §QOFE: canonical definition.
 - Ash transport columns when the ash directory is available:
   - Totals and per-area masses: `wind_transport`, `water_transport`, `ash_transport`, `transportable_ash` (+ `_per_ha`).
   - Per-ash-type masses: `{wind,water,ash}_transport_{black,white}` (+ `_per_ha` via per-type area).

@@ -39,6 +39,19 @@ def _safe_depth_scalar(volume_m3: float, area_m2: float) -> float:
     return float((volume_m3 / area_m2) * 1000.0)
 
 
+def _compute_surface_pulse_proxy_mm_ofe(
+    *,
+    qofe: np.ndarray,
+    upstrmq: np.ndarray,
+    precip: np.ndarray,
+    irr: np.ndarray,
+    subrin: np.ndarray,
+    latqcc: np.ndarray,
+) -> np.ndarray:
+    raw_proxy = qofe - upstrmq - precip - irr - subrin + latqcc
+    return np.where(np.abs(qofe) > NONZERO_TOLERANCE, raw_proxy, np.nan)
+
+
 def _load_wat_ofe_rows_for_wepp(interchange_dir: Path, wepp_id: int) -> pd.DataFrame:
     targets = base._prepare_paths(interchange_dir)
 
@@ -302,13 +315,13 @@ def _compute_daily_full_physical_closure(ofe_rows: pd.DataFrame) -> tuple[pd.Dat
         out=np.full_like(qofe, np.nan, dtype=np.float64),
         where=np.abs(q_eff) > NONZERO_TOLERANCE,
     )
-    work["audit_surface_pulse_proxy_mm_ofe"] = (
-        work["QOFE"].to_numpy(dtype=np.float64, copy=False)
-        - work["UpStrmQ"].to_numpy(dtype=np.float64, copy=False)
-        - work["P"].to_numpy(dtype=np.float64, copy=False)
-        - work["Irr"].to_numpy(dtype=np.float64, copy=False)
-        - work["SubRIn"].to_numpy(dtype=np.float64, copy=False)
-        + work["latqcc"].to_numpy(dtype=np.float64, copy=False)
+    work["audit_surface_pulse_proxy_mm_ofe"] = _compute_surface_pulse_proxy_mm_ofe(
+        qofe=qofe,
+        upstrmq=work["UpStrmQ"].to_numpy(dtype=np.float64, copy=False),
+        precip=work["P"].to_numpy(dtype=np.float64, copy=False),
+        irr=work["Irr"].to_numpy(dtype=np.float64, copy=False),
+        subrin=work["SubRIn"].to_numpy(dtype=np.float64, copy=False),
+        latqcc=work["latqcc"].to_numpy(dtype=np.float64, copy=False),
     )
     work["audit_surface_pulse_proxy_pos_mm_ofe"] = np.maximum(
         work["audit_surface_pulse_proxy_mm_ofe"].to_numpy(dtype=np.float64, copy=False),
@@ -366,26 +379,27 @@ def _compute_daily_full_physical_closure(ofe_rows: pd.DataFrame) -> tuple[pd.Dat
         late_ratio_finite = late_ratio[np.isfinite(late_ratio)]
 
         late_residual_max_abs = float(np.max(np.abs(late_residual))) if late_residual.size else 0.0
-        late_pulse_max = float(np.max(late_pulse)) if late_pulse.size else 0.0
+        if late_pulse.size:
+            late_pulse_max = float("nan") if np.isnan(late_pulse).all() else float(np.nanmax(late_pulse))
+        else:
+            late_pulse_max = float("nan")
         late_ratio_max = float(np.max(late_ratio_finite)) if late_ratio_finite.size else float("nan")
         late_outlier_idx = int(np.argmax(np.abs(late_residual))) if late_residual.size else 0
         late_outlier_row = late_rows.iloc[late_outlier_idx] if late_residual.size else residual_row
 
         residual_exceeds = late_residual_max_abs >= SCIREVIEW_RESIDUAL_THRESHOLD_MM
-        pulse_exceeds = late_pulse_max >= SCIREVIEW_SURFACE_PULSE_PROXY_THRESHOLD_MM
+        pulse_supported = bool(np.isfinite(late_pulse_max))
+        pulse_exceeds = bool(pulse_supported and (late_pulse_max >= SCIREVIEW_SURFACE_PULSE_PROXY_THRESHOLD_MM))
         ratio_supported = bool(late_ratio_finite.size)
         ratio_exceeds = bool(ratio_supported and (late_ratio_max >= SCIREVIEW_QOFE_TO_Q_RATIO_THRESHOLD))
-        if ratio_supported:
-            requires_scientific_review = bool(residual_exceeds and pulse_exceeds and ratio_exceeds)
-        else:
-            requires_scientific_review = bool(residual_exceeds and pulse_exceeds)
+        all_supported = bool(pulse_supported and ratio_supported)
+        requires_scientific_review = bool(all_supported and residual_exceeds and pulse_exceeds and ratio_exceeds)
 
-        if requires_scientific_review and ratio_supported:
-            scireview_reason = "late_ofe_residual_plus_qofe_to_q_ratio_plus_surface_pulse_proxy"
-        elif requires_scientific_review:
-            scireview_reason = "late_ofe_residual_plus_surface_pulse_proxy_q_ratio_unavailable"
-        else:
-            scireview_reason = "none"
+        scireview_reason = (
+            "late_ofe_residual_plus_qofe_to_q_ratio_plus_surface_pulse_proxy"
+            if requires_scientific_review
+            else "none"
+        )
 
         day_records.append(
             {
@@ -719,7 +733,7 @@ def _build_full_physical_summary(daily_full: pd.DataFrame, metadata: dict[str, A
         "max_abs_ofe_closure_residual_mm": _quantiles(ofe_max),
         "late_max_abs_ofe_closure_residual_mm": _quantiles(late_residual),
         "late_max_qofe_to_q_ratio": _quantiles(late_ratio[np.isfinite(late_ratio)]),
-        "late_max_surface_pulse_proxy_mm": _quantiles(late_pulse),
+        "late_max_surface_pulse_proxy_mm": _quantiles(late_pulse[np.isfinite(late_pulse)]),
         "requires_scientific_review": bool(scireview_days > 0),
         "requires_scientific_review_days": scireview_days,
         "requires_scientific_review_thresholds": {
@@ -891,6 +905,34 @@ def _build_output_dir(interchange_dir: Path, wepp_id: int, output_dir: Path | No
     return interchange_dir / f"audit_hillslope_mofe_daily_closure_H{int(wepp_id)}"
 
 
+def _build_daily_scireview_export(audit: pd.DataFrame, wepp_id: int, topaz_id: int | None) -> pd.DataFrame:
+    columns = [
+        *DATE_COLUMNS,
+        "n_ofe",
+        "audit_requires_scientific_review",
+        "audit_requires_scientific_review_reason",
+        "audit_late_max_abs_ofe_closure_residual_mm",
+        "audit_late_max_qofe_to_q_ratio",
+        "audit_late_max_surface_pulse_proxy_mm",
+        "audit_late_outlier_ofe_id",
+        "audit_full_physical_closure_residual_mm",
+        "audit_full_implied_unresolved_term_mm",
+        "audit_full_outlier_ofe_id",
+        "audit_full_outlier_ofe_closure_residual_mm",
+    ]
+    missing = [column for column in columns if column not in audit.columns]
+    if missing:
+        raise KeyError(
+            "daily audit export is missing expected columns: "
+            + ", ".join(sorted(missing))
+        )
+
+    daily_export = audit[columns].copy()
+    daily_export.insert(0, "wepp_id", int(wepp_id))
+    daily_export.insert(1, "topaz_id", int(topaz_id) if topaz_id is not None else np.nan)
+    return daily_export.sort_values(DATE_SORT_COLUMNS, kind="mergesort").reset_index(drop=True)
+
+
 def parse_args() -> argparse.Namespace:
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument("interchange_dir", help="Path to .../wepp/output/interchange")
@@ -967,9 +1009,12 @@ def main() -> int:
 
     summary_path = output_dir / "hillslope_mofe_daily_closure_audit_summary.json"
     top_path = output_dir / "hillslope_mofe_daily_closure_audit_top_days.csv"
+    daily_path = output_dir / "hillslope_mofe_daily_closure_audit_daily.csv"
+    daily_export = _build_daily_scireview_export(audit, wepp_id=wepp_id, topaz_id=topaz_id)
 
     summary_path.write_text(json.dumps(summary, indent=2, sort_keys=True), encoding="utf-8")
     top.to_csv(top_path, index=False)
+    daily_export.to_csv(daily_path, index=False)
 
     print(f"interchange_dir={interchange_dir}")
     print(f"wepp_id={wepp_id}")
@@ -1002,6 +1047,7 @@ def main() -> int:
     )
     print(f"summary_json={summary_path}")
     print(f"top_days_csv={top_path}")
+    print(f"daily_csv={daily_path}")
     return 0
 
 

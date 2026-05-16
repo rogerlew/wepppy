@@ -417,7 +417,16 @@ class Ron(NoDbBase):
     
     @property
     def map(self) -> Optional[Map]:
-        return self._map
+        map_object = self._map
+        if map_object is None or isinstance(map_object, Map):
+            return map_object
+
+        map_object = Map.from_payload(
+            map_object,
+            default_cellsize=self.cellsize,
+        )
+        self._map = map_object
+        return map_object
 
     def set_map(
         self, 

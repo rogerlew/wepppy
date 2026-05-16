@@ -5,6 +5,7 @@ from pathlib import Path
 import runpy
 
 import duckdb
+import numpy as np
 import pandas as pd
 import pytest
 
@@ -196,6 +197,282 @@ def _mofe_scireview_wat_rows(wepp_id: int) -> list[dict[str, object]]:
     return rows
 
 
+def _mofe_pure_subsurface_wat_rows(wepp_id: int) -> list[dict[str, object]]:
+    return [
+        {
+            "wepp_id": wepp_id,
+            "ofe_id": 1,
+            "year": 1987,
+            "sim_day_index": 1,
+            "julian": 325,
+            "month": 11,
+            "day_of_month": 21,
+            "water_year": 1988,
+            "OFE": 1,
+            "P": 13.4,
+            "RM": 13.4,
+            "Q": 0.0,
+            "Ep": 0.0,
+            "Es": 0.0,
+            "Er": 0.0,
+            "Dp": 0.0,
+            "UpStrmQ": 0.0,
+            "SubRIn": 0.0,
+            "latqcc": 50.0,
+            "Total-Soil Water": 100.0,
+            "SoilWaterTotal": 100.0,
+            "frozwt": 0.0,
+            "Snow-Water": 0.0,
+            "QOFE": 0.0,
+            "Tile": 0.0,
+            "Irr": 0.0,
+            "Area": 100.0,
+        },
+        {
+            "wepp_id": wepp_id,
+            "ofe_id": 2,
+            "year": 1987,
+            "sim_day_index": 1,
+            "julian": 325,
+            "month": 11,
+            "day_of_month": 21,
+            "water_year": 1988,
+            "OFE": 2,
+            "P": 13.4,
+            "RM": 13.4,
+            "Q": 0.0,
+            "Ep": 0.0,
+            "Es": 0.0,
+            "Er": 0.0,
+            "Dp": 0.0,
+            "UpStrmQ": 0.0,
+            "SubRIn": 50.0,
+            "latqcc": 110.0,
+            "Total-Soil Water": 100.0,
+            "SoilWaterTotal": 100.0,
+            "frozwt": 0.0,
+            "Snow-Water": 0.0,
+            "QOFE": 0.0,
+            "Tile": 0.0,
+            "Irr": 0.0,
+            "Area": 100.0,
+        },
+        {
+            "wepp_id": wepp_id,
+            "ofe_id": 3,
+            "year": 1987,
+            "sim_day_index": 1,
+            "julian": 325,
+            "month": 11,
+            "day_of_month": 21,
+            "water_year": 1988,
+            "OFE": 3,
+            "P": 13.4,
+            "RM": 13.4,
+            "Q": 0.0,
+            "Ep": 0.0,
+            "Es": 0.0,
+            "Er": 0.0,
+            "Dp": 0.0,
+            "UpStrmQ": 0.0,
+            "SubRIn": 60.01,
+            "latqcc": 177.11,
+            "Total-Soil Water": 100.0,
+            "SoilWaterTotal": 100.0,
+            "frozwt": 0.0,
+            "Snow-Water": 0.0,
+            "QOFE": 0.0,
+            "Tile": 0.0,
+            "Irr": 0.0,
+            "Area": 100.0,
+        },
+    ]
+
+
+def _mofe_mixed_late_window_wat_rows(wepp_id: int) -> list[dict[str, object]]:
+    return [
+        {
+            "wepp_id": wepp_id,
+            "ofe_id": 1,
+            "year": 1987,
+            "sim_day_index": 1,
+            "julian": 120,
+            "month": 4,
+            "day_of_month": 30,
+            "water_year": 1987,
+            "OFE": 1,
+            "P": 10.0,
+            "RM": 10.0,
+            "Q": 0.0,
+            "Ep": 0.0,
+            "Es": 0.0,
+            "Er": 0.0,
+            "Dp": 0.0,
+            "UpStrmQ": 0.0,
+            "SubRIn": 10.0,
+            "latqcc": 100.0,
+            "Total-Soil Water": 100.0,
+            "SoilWaterTotal": 100.0,
+            "frozwt": 0.0,
+            "Snow-Water": 0.0,
+            "QOFE": 0.0,
+            "Tile": 0.0,
+            "Irr": 0.0,
+            "Area": 100.0,
+        },
+        {
+            "wepp_id": wepp_id,
+            "ofe_id": 2,
+            "year": 1987,
+            "sim_day_index": 1,
+            "julian": 120,
+            "month": 4,
+            "day_of_month": 30,
+            "water_year": 1987,
+            "OFE": 2,
+            "P": 10.0,
+            "RM": 10.0,
+            "Q": 10.0,
+            "Ep": 0.0,
+            "Es": 0.0,
+            "Er": 0.0,
+            "Dp": 0.0,
+            "UpStrmQ": 0.0,
+            "SubRIn": 10.0,
+            "latqcc": 70.0,
+            "Total-Soil Water": 100.0,
+            "SoilWaterTotal": 100.0,
+            "frozwt": 0.0,
+            "Snow-Water": 0.0,
+            "QOFE": 10.0,
+            "Tile": 0.0,
+            "Irr": 0.0,
+            "Area": 100.0,
+        },
+        {
+            "wepp_id": wepp_id,
+            "ofe_id": 3,
+            "year": 1987,
+            "sim_day_index": 1,
+            "julian": 120,
+            "month": 4,
+            "day_of_month": 30,
+            "water_year": 1987,
+            "OFE": 3,
+            "P": 10.0,
+            "RM": 10.0,
+            "Q": 20.0,
+            "Ep": 0.0,
+            "Es": 0.0,
+            "Er": 0.0,
+            "Dp": 0.0,
+            "UpStrmQ": 0.0,
+            "SubRIn": 10.0,
+            "latqcc": 140.0,
+            "Total-Soil Water": 100.0,
+            "SoilWaterTotal": 100.0,
+            "frozwt": 0.0,
+            "Snow-Water": 0.0,
+            "QOFE": 20.0,
+            "Tile": 0.0,
+            "Irr": 0.0,
+            "Area": 100.0,
+        },
+    ]
+
+
+def _mofe_ratio_unsupported_high_residual_rows(wepp_id: int) -> list[dict[str, object]]:
+    return [
+        {
+            "wepp_id": wepp_id,
+            "ofe_id": 1,
+            "year": 1987,
+            "sim_day_index": 1,
+            "julian": 45,
+            "month": 2,
+            "day_of_month": 14,
+            "water_year": 1987,
+            "OFE": 1,
+            "P": 5.0,
+            "RM": 5.0,
+            "Q": 0.0,
+            "Ep": 0.0,
+            "Es": 0.0,
+            "Er": 0.0,
+            "Dp": 0.0,
+            "UpStrmQ": 0.0,
+            "SubRIn": 0.0,
+            "latqcc": 0.0,
+            "Total-Soil Water": 100.0,
+            "SoilWaterTotal": 100.0,
+            "frozwt": 0.0,
+            "Snow-Water": 0.0,
+            "QOFE": 5.0,
+            "Tile": 0.0,
+            "Irr": 0.0,
+            "Area": 100.0,
+        },
+        {
+            "wepp_id": wepp_id,
+            "ofe_id": 2,
+            "year": 1987,
+            "sim_day_index": 1,
+            "julian": 45,
+            "month": 2,
+            "day_of_month": 14,
+            "water_year": 1987,
+            "OFE": 2,
+            "P": 5.0,
+            "RM": 5.0,
+            "Q": 0.0,
+            "Ep": 0.0,
+            "Es": 0.0,
+            "Er": 0.0,
+            "Dp": 0.0,
+            "UpStrmQ": 0.0,
+            "SubRIn": 0.0,
+            "latqcc": 0.0,
+            "Total-Soil Water": 100.0,
+            "SoilWaterTotal": 100.0,
+            "frozwt": 0.0,
+            "Snow-Water": 0.0,
+            "QOFE": 5.0,
+            "Tile": 0.0,
+            "Irr": 0.0,
+            "Area": 100.0,
+        },
+        {
+            "wepp_id": wepp_id,
+            "ofe_id": 3,
+            "year": 1987,
+            "sim_day_index": 1,
+            "julian": 45,
+            "month": 2,
+            "day_of_month": 14,
+            "water_year": 1987,
+            "OFE": 3,
+            "P": 10.0,
+            "RM": 10.0,
+            "Q": 0.0,
+            "Ep": 0.0,
+            "Es": 0.0,
+            "Er": 0.0,
+            "Dp": 0.0,
+            "UpStrmQ": 0.0,
+            "SubRIn": 0.0,
+            "latqcc": 0.0,
+            "Total-Soil Water": 100.0,
+            "SoilWaterTotal": 100.0,
+            "frozwt": 0.0,
+            "Snow-Water": 0.0,
+            "QOFE": 220.0,
+            "Tile": 0.0,
+            "Irr": 0.0,
+            "Area": 100.0,
+        },
+    ]
+
+
 def test_full_physical_closure_uses_p_plus_irr_and_interception_storage(tmp_path: Path) -> None:
     module = _module()
     load_ofe_rows = module["_load_wat_ofe_rows_for_wepp"]
@@ -354,8 +631,10 @@ def test_chain_transfer_residuals_and_artifacts(
 
     summary_path = out_dir / "hillslope_mofe_daily_closure_audit_summary.json"
     top_path = out_dir / "hillslope_mofe_daily_closure_audit_top_days.csv"
+    daily_path = out_dir / "hillslope_mofe_daily_closure_audit_daily.csv"
     assert summary_path.exists()
     assert top_path.exists()
+    assert daily_path.exists()
 
     summary = json.loads(summary_path.read_text(encoding="utf-8"))
     assert summary["rows"] == 2
@@ -384,6 +663,16 @@ def test_chain_transfer_residuals_and_artifacts(
         "audit_full_outlier_ofe_closure_residual_mm",
     }.issubset(top.columns)
     assert int(top.iloc[0]["julian"]) == 45
+
+    daily = pd.read_csv(daily_path)
+    assert daily.shape[0] == 2
+    assert {
+        "wepp_id",
+        "topaz_id",
+        "audit_requires_scientific_review",
+        "audit_late_max_surface_pulse_proxy_mm",
+    }.issubset(daily.columns)
+    assert set(daily["wepp_id"].astype(int)) == {71}
 
 
 def test_main_topaz_selector_writes_outputs(tmp_path: Path, monkeypatch: pytest.MonkeyPatch) -> None:
@@ -526,6 +815,82 @@ def test_scientific_review_diagnostic_flags_terminal_amplification(
     top = pd.read_csv(out_dir / "hillslope_mofe_daily_closure_audit_top_days.csv")
     day45 = top[top["julian"] == 45].iloc[0]
     assert str(day45["audit_requires_scientific_review"]).lower() in {"true", "1"}
-    assert day45["audit_requires_scientific_review_reason"].startswith(
-        "late_ofe_residual_plus_qofe_to_q_ratio_plus_surface_pulse_proxy"
+    assert (
+        day45["audit_requires_scientific_review_reason"]
+        == "late_ofe_residual_plus_qofe_to_q_ratio_plus_surface_pulse_proxy"
     )
+
+
+def test_pure_subsurface_day_masks_surface_proxy_and_does_not_flag(tmp_path: Path) -> None:
+    module = _module()
+    load_ofe_rows = module["_load_wat_ofe_rows_for_wepp"]
+    compute_full = module["_compute_daily_full_physical_closure"]
+    compute_surface_pulse_proxy = module["_compute_surface_pulse_proxy_mm_ofe"]
+
+    interchange_dir = tmp_path / "run" / "wepp" / "output" / "interchange"
+    _write_interchange(
+        interchange_dir,
+        wat_records=_mofe_pure_subsurface_wat_rows(136),
+        pass_records=_mofe_pass_rows(136),
+    )
+
+    ofe_rows = load_ofe_rows(interchange_dir, 136)
+    surface_proxy = compute_surface_pulse_proxy(
+        qofe=ofe_rows["QOFE"].to_numpy(dtype=np.float64, copy=False),
+        upstrmq=ofe_rows["UpStrmQ"].to_numpy(dtype=np.float64, copy=False),
+        precip=ofe_rows["P"].to_numpy(dtype=np.float64, copy=False),
+        irr=ofe_rows["Irr"].to_numpy(dtype=np.float64, copy=False),
+        subrin=ofe_rows["SubRIn"].to_numpy(dtype=np.float64, copy=False),
+        latqcc=ofe_rows["latqcc"].to_numpy(dtype=np.float64, copy=False),
+    )
+    daily_full, _meta = compute_full(ofe_rows)
+
+    assert np.isnan(surface_proxy).all()
+
+    day = daily_full.iloc[0]
+    assert np.isnan(day["audit_late_max_surface_pulse_proxy_mm"])
+    assert bool(day["audit_requires_scientific_review"]) is False
+    assert day["audit_requires_scientific_review_reason"] == "none"
+
+
+def test_mixed_late_window_uses_nanmax_for_surface_pulse_proxy(tmp_path: Path) -> None:
+    module = _module()
+    load_ofe_rows = module["_load_wat_ofe_rows_for_wepp"]
+    compute_full = module["_compute_daily_full_physical_closure"]
+
+    interchange_dir = tmp_path / "run" / "wepp" / "output" / "interchange"
+    _write_interchange(
+        interchange_dir,
+        wat_records=_mofe_mixed_late_window_wat_rows(777),
+        pass_records=_mofe_pass_rows(777),
+    )
+
+    ofe_rows = load_ofe_rows(interchange_dir, 777)
+    daily_full, _meta = compute_full(ofe_rows)
+
+    day = daily_full.iloc[0]
+    assert day["audit_late_max_surface_pulse_proxy_mm"] == pytest.approx(140.0, abs=1.0e-8)
+    assert bool(day["audit_requires_scientific_review"]) is False
+
+
+def test_scireview_requires_all_three_signals_supported(tmp_path: Path) -> None:
+    module = _module()
+    load_ofe_rows = module["_load_wat_ofe_rows_for_wepp"]
+    compute_full = module["_compute_daily_full_physical_closure"]
+
+    interchange_dir = tmp_path / "run" / "wepp" / "output" / "interchange"
+    _write_interchange(
+        interchange_dir,
+        wat_records=_mofe_ratio_unsupported_high_residual_rows(901),
+        pass_records=_mofe_pass_rows(901),
+    )
+
+    ofe_rows = load_ofe_rows(interchange_dir, 901)
+    daily_full, _meta = compute_full(ofe_rows)
+
+    day = daily_full.iloc[0]
+    assert day["audit_late_max_abs_ofe_closure_residual_mm"] >= 100.0
+    assert day["audit_late_max_surface_pulse_proxy_mm"] >= 100.0
+    assert np.isnan(day["audit_late_max_qofe_to_q_ratio"])
+    assert bool(day["audit_requires_scientific_review"]) is False
+    assert day["audit_requires_scientific_review_reason"] == "none"

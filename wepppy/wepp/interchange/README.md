@@ -269,6 +269,24 @@ Per 2025 ID standardization effort:
 - Parquet exports, GeoJSON, and DuckDB queries expect lowercase
 - Migration CLIs ensure legacy uppercase schemas are converted before interchange runs
 
+### H.wat Multi-OFE Schema Semantics
+
+For multi-OFE hillslopes (`n_ofe ≥ 2`), the per-OFE rows in `H.wat.parquet` carry canonical semantics that consumers need to be aware of when aggregating to hillslope-scale totals:
+
+- **`Q` (mm)** — Day's runoff at the bottom of the OFE, normalized to the cumulative slope length down to that point. At the bottom OFE (where cumulative slope length equals the total hillslope length) `Q` equals the canonical hillslope-average daily runoff depth, equivalently `H.pass.runvol / total_hillslope_area`. At intermediate OFEs `Q` reflects cumulative runoff routed past that OFE bottom edge normalized by cumulative contributing length, *not* a per-OFE-incremental contribution.
+- **`QOFE` (mm)** — In `wepp_260516` and later, identical to `Q` in every row. In legacy builds (`wepp_260514` and earlier), `QOFE` used the OFE's own slope length as denominator rather than the cumulative length, producing inflated per-OFE depths approximately equal to `i × Q` for equal-length OFEs (where `i` is the OFE's ordinal position from the top of the slope). The pre-fix `QOFE` write was corrected as part of the carved-letter MOFE closure-anomaly fix; see `/workdir/wepp-forest/docs/20260504-stakeholder-watbalance.md` §QOFE: canonical definition for full context.
+- **`Area` (m²)** — The OFE's own footprint, `slplen × fwidth` (slope length × hillslope flow width), as emitted by `watbal.for:1252,1270` and the hourly mirrors. For equal-length OFEs every row of a given hillslope-day reports the same value. The total hillslope area is the sum of `Area` across the day's per-OFE rows for a given hillslope, equivalently `n_ofe × Area(any row)` for equal-length OFEs.
+
+To recover the canonical daily hillslope runoff *volume* from `H.wat.parquet` alone (post-`wepp_260516`):
+
+> `canonical_volume_m³ = Q(bottom_OFE) × total_hillslope_area × 0.001`
+
+where `total_hillslope_area = sum of Area across the day's OFE rows for the hillslope`. Equivalently and authoritatively: use `H.pass.runvol`. `Q(bottom_OFE) × Area(bottom_OFE)` does **not** equal the canonical volume post-fix; it gives `canonical_volume / n_ofe`. (Under legacy builds the same expression happened to equal canonical volume by an algebraic coincidence — the `n×` inflation in the pre-fix `QOFE` cancelled the `1/n` deflation in per-OFE `Area`. That coincidence is the reason the inconsistency was silent for 18 years across the single-OFE production era.)
+
+`SUM(Q × Area)` or `SUM(QOFE × Area)` across the day's OFE rows does **not** recover the canonical hillslope runoff volume under any build, because per-OFE `Q` values are cumulative routing depths, not per-OFE-incremental contributions; summing them double-counts upslope flow at every downstream OFE.
+
+For consumers needing the canonical hillslope runoff volume, prefer `H.pass.runvol` directly under both legacy and post-fix builds. `totalwatsed3.py`'s `Runoff` column is computed this way and is the canonical hillslope runoff depth in the daily aggregates (see [README.totalwatsed3.md](README.totalwatsed3.md)).
+
 ## Quick Start
 
 ### Example 1: Basic Hillslope Interchange

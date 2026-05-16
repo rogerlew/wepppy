@@ -9,7 +9,6 @@ from .hill_pass_interchange import run_wepp_hillslope_pass_interchange
 from .hill_soil_interchange import run_wepp_hillslope_soil_interchange
 from .hill_wat_interchange import run_wepp_hillslope_wat_interchange
 from .versioning import remove_incompatible_interchange, write_version_manifest
-from wepppy.nodb.core.watershed import Watershed
 
 try:
     from wepppy.query_engine import update_catalog_entry as _update_catalog_entry
@@ -233,6 +232,11 @@ def _expected_hillslopes(output_dir: Path) -> int | None:
         wd = output_dir.parents[1]
     except IndexError:
         return None
+
+    # Import lazily to avoid module-load circular imports with
+    # wepppy.nodb.wepp_nodb_post_utils -> wepppy.wepp.interchange.
+    from wepppy.nodb.core.watershed import Watershed
+
     try:
         watershed = Watershed.getInstance(str(wd))
     except Exception:

@@ -291,6 +291,43 @@ def test_map_jsonpickle_uses_map_object_module_path():
 
 
 @pytest.mark.unit
+@pytest.mark.parametrize(
+    "legacy_object_path",
+    [
+        "wepppy.nodb.core.map.Map",
+        "wepppy.nodb.core.ron.Map",
+        "wepppy.nodb.core.map_object.Map",
+    ],
+)
+def test_ron_map_property_coerces_legacy_dict_payload(legacy_object_path: str) -> None:
+    from wepppy.nodb.core.ron import Ron
+
+    ron = object.__new__(Ron)
+    ron._cellsize = 10.0
+    ron._map = {
+        "py/object": legacy_object_path,
+        "extent": [-116.1, 43.9, -116.0, 44.0],
+        "center": [-116.05, 43.95],
+        "zoom": 13.0,
+        "cellsize": 10.0,
+        "utm": {"py/tuple": [572497.368086884, 4872186.900315426, 11, "T"]},
+        "_ul_x": 572497.368086884,
+        "_ul_y": 4872186.900315426,
+        "_lr_x": 580671.3437969491,
+        "_lr_y": 4860879.087680544,
+        "_num_cols": 817,
+        "_num_rows": 1131,
+    }
+
+    hydrated = ron.map
+
+    assert isinstance(hydrated, Map)
+    assert ron._map is hydrated
+    assert hydrated.extent == pytest.approx([-116.1, 43.9, -116.0, 44.0])
+    assert hydrated.center == pytest.approx([-116.05, 43.95])
+
+
+@pytest.mark.unit
 @pytest.mark.skip(reason="Test needs raster in UTM projection matching Map's UTM zone")
 def test_raster_intersection_discard_values(mock_raster):
     """Test that discard parameter filters out specified values."""
