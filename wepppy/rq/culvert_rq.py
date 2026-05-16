@@ -1385,6 +1385,9 @@ def _process_culvert_run(
         soils = Soils.getInstance(wd)
         climate = Climate.getInstance(wd)  # Settings from copied base project
         wepp = Wepp.getInstance(wd)
+        # Culvert batches may need to re-run watershed interchange checks; retain
+        # raw watershed outputs instead of deleting them after first interchange.
+        wepp.delete_after_interchange = False
 
         if nlcd_db_override is not None:
             landuse.nlcd_db = nlcd_db_override
