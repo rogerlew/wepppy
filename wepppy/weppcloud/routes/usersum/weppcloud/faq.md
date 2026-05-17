@@ -22,6 +22,21 @@ Other than precipitation and temperature inputs, soil parameters (soil depth, hy
 
 For soil erosion rates, sensitive parameters commonly include soil surface cover, interrill erodibility, rill erodibility, and critical shear. Late-summer streamflows and hydrograph shape are often sensitive to lateral hydraulic conductivity and the baseflow recession coefficient. The baseflow recession coefficient is typically stable across a region and can be constrained using streamflow from a nearby gage. Soil surface cover is relatively easy to measure and generally requires estimating recovery or disturbance impacts to ground cover.
 
+## Why do Frost settings sometimes appear to have no effect?
+
+In current WEPP-Forest builds used by WEPPcloud, frost/freeze-thaw routines are
+gated by soil `ksflag`.
+- `ksflag = 0`: frost routines are suppressed.
+- `ksflag = 1`: frost routines are allowed to run.
+
+This means changing Frost controls in `frost.txt` may not change results when
+`ksflag` is off.
+
+See:
+- [WEPP Advanced Options](./wepp-advanced-options.md)
+- [Soil File Parameters](../db/soil_file.parameters.md)
+- [Soil File Specification](../input-file-specifications/soil-file.spec.md)
+
 ## Is carbon/nitrogen cycling included in the model?
 
 No. The WEPP watershed interface does not simulate changes in soil carbon or nitrogen cycling. Beta versions with related algorithms have existed in research contexts but are still under development.

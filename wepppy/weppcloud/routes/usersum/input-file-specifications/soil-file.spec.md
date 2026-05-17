@@ -29,8 +29,9 @@ Accurate estimation of soil physical and hydrological parameters is essential wh
   a) number of overland flow elements (OFE’s) or channels - integer (`ntemp`)
 
   b) flag to use internal hydraulic conductivity adjustments - integer (`ksflag`)
-    - 0 - do not use adjustments (conductivity will be held constant)
-    - 1 - use internal adjustments
+    - 0 - do not use adjustments (conductivity will be held constant); in current WEPP-Forest builds used by WEPPcloud, this also suppresses frost/freeze-thaw routines
+    - 1 - use internal adjustments; frost/freeze-thaw routines are allowed to run
+    - `ksflag` is separate from `kslast` (restrictive-layer conductivity)
 
 **Lines 4 & 5 are repeated for the number of OFE's or channels on Line 3a.**
 

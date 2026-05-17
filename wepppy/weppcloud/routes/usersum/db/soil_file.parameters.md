@@ -16,7 +16,11 @@ Derived from `soil-file.spec.md` and `wepppy/wepp/soils/utils/wepp_soil_util.py`
 
 #### `ksflag` — Internal hydraulic conductivity adjustment flag (integer)
 - **Context**: header
-- **Extended**: `0` keeps conductivity fixed; `1` allows WEPP to apply internal adjustments during simulation.
+- **Extended**:
+  - `0` keeps conductivity fixed.
+  - `1` allows WEPP to apply internal conductivity adjustments during simulation.
+  - In current WEPP-Forest builds used by WEPPcloud, this flag also gates frost/freeze-thaw routine execution (`0` suppresses frost routines, `1` allows them).
+  - This flag is separate from `kslast` (restrictive-layer conductivity).
 
 ## OFE Records (Line 4)
 #### `slid` — Soil identifier for the OFE (text)

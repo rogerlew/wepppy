@@ -19,6 +19,12 @@ Current base-table header contract:
 
 `luse,stext,ki,kr,shcrit,avke,bd,ksflag,ksatadj,ksatfac,ksatrec,pmet_kcb,pmet_rawp,rdmax,xmxlai,keffflag,lkeff,plant.data.decfct,plant.data.dropfc`
 
+`ksflag` controls more than one mechanism in current WEPP-Forest builds used by
+WEPPcloud:
+- `ksflag = 0`: conductivity adjustments are off, and frost/freeze-thaw routines are suppressed.
+- `ksflag = 1`: conductivity adjustments are on, and frost/freeze-thaw routines are allowed.
+- `ksflag` is separate from `kslast` (restrictive-layer conductivity in WEPP Advanced Options - Bedrock).
+
 ### Extended Table Schema
 
 Current generated extended table includes:

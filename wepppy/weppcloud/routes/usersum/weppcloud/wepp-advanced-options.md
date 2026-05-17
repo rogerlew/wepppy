@@ -95,6 +95,11 @@ Controls whether WEPP uses Penman-Monteith ET coefficients from `pmetpara.txt`.
 
 Writes `frost.txt` to control winter freeze/thaw process parameters.
 
+Important runtime behavior in current WEPP-Forest builds used by WEPPcloud:
+frost execution is gated by soil `ksflag`.
+- `ksflag = 0`: frost/freeze-thaw routines are suppressed.
+- `ksflag = 1`: frost/freeze-thaw routines are allowed to run.
+
 ### Inputs and parameters
 
 | UI control | What it means |
@@ -125,6 +130,8 @@ Writes `frost.txt` to control winter freeze/thaw process parameters.
 
 - Aggressive changes can create unrealistic winter hydrographs.
 - Keep calibration physically defensible (snowpack, frost depth, thaw timing).
+- If Frost controls appear to have no effect, verify the soil `ksflag` value in
+  your run inputs.
 
 ## 4) Snow
 
@@ -279,6 +286,8 @@ Overrides restrictive-layer hydraulic conductivity (`kslast`) in generated soil 
 ### Cautions
 
 - This is a powerful structural soil-hydrology control; avoid using it as a generic calibration knob without field justification.
+- `kslast` (restrictive-layer conductivity) is separate from `ksflag`; changing
+  `kslast` does not enable or disable frost routines.
 
 ## 9) Clip Hillslopes
 

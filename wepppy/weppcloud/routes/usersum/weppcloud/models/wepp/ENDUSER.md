@@ -31,7 +31,7 @@ On the run page, the main control is titled `WEPP` or `WEPP-SWAT+`. The top-leve
 | --- | --- | --- |
 | `WEPP UI - Hourly Seepage` | `Run hourly seepage (wepp_ui.txt)` | Use only for runs where hourly seepage behavior is relevant; the card itself notes this is for 7778 soils and not WEPP-PEP |
 | `Potential ET (PMET)` | `Basal crop coefficient ratio (kcb)`, `Readily available water fraction (rawp)`, `Run PMET (pmetpara.txt)` | Switches from the default Penman ET treatment to Penman-Monteith and exposes crop-water assumptions |
-| `Frost` | `Write frost inputs (frost.txt)` plus `wintRed`, `fineTop`, `fineBot`, `ksnowf`, `kresf`, `ksoilf`, `kfactor(1)`, `kfactor(2)`, `kfactor(3)` | Only for cold-region runs where frozen-soil behavior is materially important |
+| `Frost` | `Write frost inputs (frost.txt)` plus `wintRed`, `fineTop`, `fineBot`, `ksnowf`, `kresf`, `ksoilf`, `kfactor(1)`, `kfactor(2)`, `kfactor(3)` | Only for cold-region runs where frozen-soil behavior is materially important; in current WEPP-Forest builds, frost execution is gated by soil `ksflag` |
 | `Snow` | `Write snow inputs (snow.txt)`, `Rain/snow threshold temperature`, `Density of new snow`, `Snow settling density` | Only when snow accumulation and melt assumptions matter |
 | `Baseflow Processing` | `Initial groundwater storage`, `Baseflow coefficient`, `Deep seepage coefficient`, `Watershed groundwater baseflow threshold area` | Important for continuous simulations when low-flow or delayed-flow behavior matters |
 | `Channel Inputs (chan.inp)` | `Output interval override (dtchr_override, seconds)`, `Channel hydrograph output (ichout_override)`, `Channel TOPAZ IDs of interest (chn_topaz_ids_of_interest)` | Use when you need more or less channel hydrograph detail or want outputs only for selected channels |
@@ -144,6 +144,7 @@ The strongest end-user use of WEPP is usually comparative:
 - Runoff is generated through infiltration-excess and saturation-excess mechanisms, so soil properties and starting wetness matter.
 - Channel routing is only included when watershed/channel routing is enabled.
 - Many advanced cards only write optional WEPP text inputs such as `frost.txt`, `snow.txt`, `tcr.txt`, or `pmetpara.txt`. If you enable them, you are replacing the default internal behavior with your chosen override values.
+- In current WEPP-Forest builds, `frost.txt` settings only take effect when soil `ksflag = 1`; when `ksflag = 0`, frost/freeze-thaw routines are suppressed.
 - `Baseflow Processing` is not implemented for single-storm climates.
 - Very local features such as short road ditches, small berms, culverts, or engineered controls may not be represented unless another workflow models them explicitly.
 - Results are only as defensible as the watershed delineation, soil inputs, climate record, land cover, burn severity, and treatment scenario behind them.

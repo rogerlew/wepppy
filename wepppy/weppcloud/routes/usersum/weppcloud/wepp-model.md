@@ -74,6 +74,8 @@ Extended figure descriptions for Figures 1 and 2 are provided in the `Extended F
 - Winter hydrology:
   - Snow accumulation, snowmelt, frost, and thaw.
   - These processes are performed internally by the model on an hourly basis.
+  - In current WEPP-Forest builds used by WEPPcloud, frost/thaw execution is
+    gated by soil `ksflag` (`0` suppresses, `1` allows).
 - Surface hydrology:
   - Calculates infiltration, rainfall excess, depression storage, and peak discharge.
   - Rainfall excess is calculated at 1-minute intervals following the modified Green-Ampt-Mein-Larson equation.
