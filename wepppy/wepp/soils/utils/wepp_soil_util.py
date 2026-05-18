@@ -14,6 +14,7 @@ from datetime import datetime
 from typing import Any, Dict, List, Optional
 
 from wepppy.all_your_base import isfloat, try_parse, try_parse_float
+from wepppy.wepp.soils.utils.utils import _quote_wepp_text
 
 DISTURBED_BD_MIN_G_CM3 = 0.6
 DISTURBED_BD_MAX_G_CM3 = 2.2
@@ -44,6 +45,13 @@ def _pars_to_string(d: Dict[str, Any]) -> str:
         else:
             kv_pairs.append(f"{k}={v}")
     return f"({', '.join(kv_pairs)})"
+
+
+def _strip_legacy_text_delimiters(value: str) -> str:
+    """Remove only quote delimiters left by legacy non-shlex callers."""
+    if len(value) >= 2 and value[0] == value[-1] and value[0] in ("'", '"'):
+        return value[1:-1]
+    return value
 
 
 def _parse_disturbed_bd_override(raw_bd: Any) -> Optional[float]:
@@ -321,8 +329,8 @@ class WeppSoilUtil(object):
                 sat = 0.75
 
             ofes.append(
-                dict(slid=slid.replace("'", '').replace('"', ''),
-                     texid=texid.replace("'", '').replace('"', ''),
+                dict(slid=_strip_legacy_text_delimiters(slid),
+                     texid=_strip_legacy_text_delimiters(texid),
                      nsl=try_parse(nsl),
                      salb=try_parse(salb),
                      sat=sat,
@@ -552,13 +560,19 @@ class WeppSoilUtil(object):
                 _ksatfac = ofe['ksatfac']
                 _ksatrec = ofe['ksatrec']
                 _stext = ofe['stext']
-                s.append(f"{_ksatadj}\t '{_luse}'\t '{_stext}'\t {_ksatfac} \t {_ksatrec}")
+                s.append(
+                    f"{_ksatadj}\t {_quote_wepp_text(_luse)}\t "
+                    f"{_quote_wepp_text(_stext)}\t {_ksatfac} \t {_ksatrec}"
+                )
 
             elif datver == 9003.0:
                 _ksatadj = ofe['ksatadj']
                 _stext = ofe['stext']
                 _lkeff = ofe['lkeff']
-                s.append(f"{_ksatadj}\t '{_luse}'\t {_burn_code}\t '{_stext}'\t {_lkeff}")
+                s.append(
+                    f"{_ksatadj}\t {_quote_wepp_text(_luse)}\t {_burn_code}\t "
+                    f"{_quote_wepp_text(_stext)}\t {_lkeff}"
+                )
 
             elif datver == 9005.0:
                 _ksatadj = ofe['ksatadj']
@@ -566,9 +580,15 @@ class WeppSoilUtil(object):
                 _lkeff = ofe['lkeff']
                 _uksat = ofe['uksat']
                 _texid_enum = self.simple_texture_enum
-                s.append(f"{_ksatadj}\t '{_luse}'\t {_burn_code}\t '{_stext}'\t {_texid_enum}\t {_uksat}\t {_lkeff}")
+                s.append(
+                    f"{_ksatadj}\t {_quote_wepp_text(_luse)}\t {_burn_code}\t "
+                    f"{_quote_wepp_text(_stext)}\t {_texid_enum}\t {_uksat}\t {_lkeff}"
+                )
 
-            L = "'{0}'\t '{1}'".format(ofe['slid'], ofe['texid'])
+            L = "{0}\t {1}".format(
+                _quote_wepp_text(ofe['slid']),
+                _quote_wepp_text(ofe['texid']),
+            )
             pars = 'nsl salb sat ki kr shcrit'.split()
             L2 = ('\t '.join([str(ofe[p]) for p in pars]))
             s.append(f'{L}\t {L2}')

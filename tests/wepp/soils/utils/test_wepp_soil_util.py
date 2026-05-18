@@ -245,6 +245,25 @@ def test_replace_parameter_with_none_like_string(wepp_soil_util_module):
     assert wepp_soil_util_module._replace_parameter("10", " none ") == "10"
 
 
+def test_serialized_soil_text_quotes_apostrophe_fields_for_roundtrip(
+    make_soil_util, workspace_tmp_dir, wepp_soil_util_module
+):
+    soil_name = "Kana'a-Cinder land complex, 1 to 15 percent slopes"
+    util = make_soil_util()
+    util.obj["ofes"][0]["slid"] = soil_name
+
+    rendered = str(util)
+
+    assert f'"{soil_name}"' in rendered
+    assert f"'{soil_name}'" not in rendered
+
+    sol_path = workspace_tmp_dir / "apostrophe.sol"
+    sol_path.write_text(rendered)
+
+    parsed = wepp_soil_util_module.WeppSoilUtil(str(sol_path))
+    assert parsed.obj["ofes"][0]["slid"] == soil_name
+
+
 def test_pars_to_string_formats_values(wepp_soil_util_module):
     formatted = wepp_soil_util_module._pars_to_string({"a": "value", "b": 1.5})
     assert formatted == "(a='value', b=1.5)"

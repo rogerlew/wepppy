@@ -42,6 +42,7 @@ from wepppy.all_your_base import try_parse, try_parse_float, isfloat, isint
 
 from wepppy.wepp.soils import HorizonMixin, estimate_bulk_density
 from wepppy.wepp.soils.utils import simple_texture, soil_texture
+from wepppy.wepp.soils.utils.utils import _quote_wepp_text
 
 __version__ = "v.0.1.0"
 
@@ -1429,9 +1430,10 @@ Any comments:
         if self.is_water:
             return self._build_water()
 
+        horizon0 = self.getFirstHorizon()
         s = (
             "7778\n{0.description}\nAny comments:\n{0.num_ofes} {ksflag}\n"
-            "'{majorComponent.muname}'\t\t'{horizon0.texture}'\t"
+            "{muname}\t\t{texture}\t"
             "{0.num_layers}\t{majorComponent.albedodry_r:0.4f}\t"
             "{0.initial_sat:0.4f}\t{horizon0.interrill:0.2f}\t{horizon0.rill:0.4f}\t"
             "{horizon0.shear:0.4f}"
@@ -1441,8 +1443,10 @@ Any comments:
             s.format(
                 self,
                 majorComponent=self.majorComponent,
-                horizon0=self.getFirstHorizon(),
+                horizon0=horizon0,
                 ksflag=ksflag,
+                muname=_quote_wepp_text(self.majorComponent.muname),
+                texture=_quote_wepp_text(horizon0.texture),
             )
         ]
 
@@ -1528,7 +1532,7 @@ Any comments:
 
         s = (
             "2006.2\n{0.description}\nAny comments:\n{0.num_ofes} {ksflag}\n"
-            "'{majorComponent.muname}'\t\t'{horizon0.texture}'\t"
+            "{muname}\t\t{texture}\t"
             "{0.num_layers}\t{majorComponent.albedodry_r:0.4f}\t"
             "{0.initial_sat:0.4f}\t{horizon0.interrill:0.2f}\t{horizon0.rill:0.4f}\t"
             "{horizon0.shear:0.4f}\t{ksat:0.4f}"
@@ -1541,6 +1545,8 @@ Any comments:
                 horizon0=self.horizons[0],
                 ksat=ksat,
                 ksflag=ksflag,
+                muname=_quote_wepp_text(self.majorComponent.muname),
+                texture=_quote_wepp_text(h0.texture),
             )
         ]
 

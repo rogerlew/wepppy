@@ -97,6 +97,16 @@ def _replace_parameter(original: str, replacement: Optional[str]) -> str:
     return replacement
 
 
+def _quote_wepp_text(value: object) -> str:
+    """Return a shlex-parseable WEPP text token for list-directed soil fields."""
+    text = "" if value is None else str(value)
+    if "'" not in text:
+        return f"'{text}'"
+
+    escaped = text.replace("\\", "\\\\").replace('"', '\\"')
+    return f'"{escaped}"'
+
+
 def simple_texture(clay: float, sand: float) -> Optional[str]:
     """Classify soil texture into coarse categories (loam, sand loam, etc.).
 
