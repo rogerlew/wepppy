@@ -150,6 +150,9 @@ def _analyze_return_periods_rq(runid: str) -> None:
             require_stable_size=True,
             logger=wepp.logger,
         )
+        # Legacy/forked runs may lack an export root. Ensure return-period TSV
+        # writes can proceed without requiring prior export job execution.
+        Path(wepp.export_dir).mkdir(parents=True, exist_ok=True)
         wepp.export_return_periods_tsv_summary(meoization=True)
         wepp.export_return_periods_tsv_summary(meoization=True, extraneous=True)
         StatusMessenger.publish(status_channel, f'rq:{job.id} COMPLETED {func_name}({runid})')

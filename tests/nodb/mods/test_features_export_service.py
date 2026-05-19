@@ -2211,6 +2211,64 @@ def test_dedupe_identity_selected_columns_drops_suffixed_join_key_duplicates() -
     ]
 
 
+def test_execute_features_export_rejects_empty_job_id_before_export_dir_creation(
+    tmp_path: Path,
+) -> None:
+    export_root = tmp_path / "export"
+    assert not export_root.exists()
+
+    with pytest.raises(service.FeaturesExportServiceError) as exc:
+        service.execute_features_export(
+            tmp_path,
+            runid="run-1",
+            config="cfg",
+            payload={"format": "geopackage"},
+            job_id="",
+        )
+
+    assert exc.value.status_code == 500
+    assert str(exc.value) == "job_id must be a non-empty string."
+    assert not export_root.exists()
+
+
+def test_execute_features_export_creates_export_root_before_cache_miss(
+    tmp_path: Path,
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    submission = _build_submission(cache_key="request-hash+dependency-fingerprint")
+    monkeypatch.setattr(service, "prepare_export_submission", lambda wd, payload: submission)
+    monkeypatch.setattr(service, "get_cache_index_entry", lambda wd, cache_key: None)
+
+    def _fake_cache_miss(
+        wd: Path,
+        *,
+        runid: str,
+        config: str,
+        job_id: str,
+        submission: service.FeaturesExportSubmission,
+    ) -> dict[str, object]:
+        assert (wd / "export").is_dir()
+        assert runid == "run-1"
+        assert config == "cfg"
+        assert job_id == "job-source"
+        assert submission.cache_key_parts.cache_key == "request-hash+dependency-fingerprint"
+        return {"ok": True}
+
+    monkeypatch.setattr(service, "_run_cache_miss_export", _fake_cache_miss)
+    assert not (tmp_path / "export").exists()
+
+    result = service.execute_features_export(
+        tmp_path,
+        runid="run-1",
+        config="cfg",
+        payload={"format": "geopackage"},
+        job_id="job-source",
+    )
+
+    assert result == {"ok": True}
+    assert (tmp_path / "export").is_dir()
+
+
 def test_execute_features_export_cache_miss_result_shape(
     tmp_path: Path,
     monkeypatch: pytest.MonkeyPatch,

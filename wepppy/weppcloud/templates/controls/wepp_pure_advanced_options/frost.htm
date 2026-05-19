@@ -1,6 +1,6 @@
 {% import "controls/_pure_macros.html" as ui %}
 
-  <p class="wc-text-muted">WEPP winter process settings written to <code>frost.txt</code> (line 1: 3 ints, line 2: 6 floats). If <code>frost.txt</code> is not written, WEPP uses internal default winter parameters.</p>
+  <p class="wc-text-muted">WEPP winter process settings written to <code>frost.txt</code> (line 1: 3 ints, line 2: 6 floats). If <code>frost.txt</code> is not written, WEPP uses internal default winter parameters. Frost routines run only for hillslopes with <code>ksflag=1</code>; set <code>ksflag</code> in the Land Soil Lookup Table, editable from the Disturbed panel.</p>
   {{ ui.checkbox_field(
        "checkbox_wepp_frost",
        "Write frost inputs (frost.txt)",

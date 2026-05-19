@@ -273,6 +273,9 @@ def execute_features_export(
     wd_path = Path(wd).resolve()
     if not isinstance(job_id, str) or not job_id:
         raise FeaturesExportServiceError("job_id must be a non-empty string.", status_code=500)
+    # Some legacy/forked runs are missing the export root. Create it lazily so
+    # features export can materialize artifacts without pre-seeded directories.
+    _resolve_relpath(wd_path, "export").mkdir(parents=True, exist_ok=True)
 
     submission = prepare_export_submission(wd_path, payload)
     cache_key = submission.cache_key_parts.cache_key

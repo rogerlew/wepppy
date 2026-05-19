@@ -20,6 +20,50 @@ def _touch(path: Path) -> None:
     path.write_text("x", encoding="utf-8")
 
 
+def test_analyze_return_periods_creates_export_dir_lazily(
+    tmp_path: Path,
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    status_messages: list[tuple[str, str]] = []
+    export_calls: list[tuple[bool, bool]] = []
+
+    wd = tmp_path
+    export_dir = wd / "export"
+    output_dir = wd / "wepp" / "output"
+    assert not export_dir.exists()
+
+    def _export_return_periods_tsv_summary(*, meoization: bool = True, extraneous: bool = False) -> None:
+        export_calls.append((meoization, extraneous))
+
+    monkeypatch.setattr(stage_post, "get_current_job", lambda: SimpleNamespace(id="job-1"))
+    monkeypatch.setattr(stage_post, "get_wd", lambda _runid: str(wd))
+    monkeypatch.setattr(
+        stage_post.StatusMessenger,
+        "publish",
+        lambda channel, msg: status_messages.append((channel, msg)),
+    )
+    monkeypatch.setattr(
+        stage_post.Wepp,
+        "getInstance",
+        lambda _wd: SimpleNamespace(
+            output_dir=str(output_dir),
+            export_dir=str(export_dir),
+            logger=_DummyLogger(),
+            export_return_periods_tsv_summary=_export_return_periods_tsv_summary,
+        ),
+    )
+    monkeypatch.setattr(stage_post, "wait_for_paths", lambda *_args, **_kwargs: None)
+
+    stage_post._analyze_return_periods_rq("run-1")
+
+    assert export_dir.is_dir()
+    assert export_calls == [(True, False), (True, True)]
+    assert any(
+        channel == "run-1:wepp" and "COMPLETED _analyze_return_periods_rq(run-1)" in message
+        for channel, message in status_messages
+    )
+
+
 def test_post_watershed_interchange_times_out_when_expected_output_missing(
     tmp_path: Path,
     monkeypatch: pytest.MonkeyPatch,
