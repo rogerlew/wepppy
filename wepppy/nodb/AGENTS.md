@@ -81,6 +81,25 @@ harnesses) stay consistent across agents.
   and compare it against the current file digest. A mismatch causes the Redis
   entry to be ignored and refreshed to avoid stale state.
 
+## Persistence Semantics (Atomic Write Path)
+
+* `NoDbBase.dump()` persists via temp-file write + `os.replace()` in the same
+  directory, not in-place truncate/write. This is required so concurrent readers
+  do not observe empty/partial JSON windows.
+* Parent directory fsync can fail on NFS after replace (for example stale handle
+  interruptions). Treat that as a durability warning path: the content replace
+  may already be committed and should not be reclassified as a stale-write
+  rejection.
+* Replace failures must not poison `_nodb_mtime`/`_nodb_size`; signatures are
+  assigned only after commit so retry attempts are not falsely rejected.
+* Mode semantics:
+  * rewrites preserve existing file mode,
+  * first-create uses umask-derived mode (`0o666 & ~umask`).
+* Regression coverage anchor:
+  `tests/nodb/test_base_boundary_characterization.py` (atomic contention,
+  legacy truncate deficiency characterization, replace-failure cleanup/retry,
+  mode semantics, and ESTALE post-commit fsync behavior).
+
 ## Common Debug Hooks
 
 * Set `WEPPPY_DEBUG_NODB_REFRESH=1` to trace cache decisions, TTL checks, and

@@ -1,8 +1,13 @@
 from __future__ import annotations
 
+import errno
+import json
 import os
+import stat
 import sys
+import threading
 import types
+from concurrent.futures import ThreadPoolExecutor
 from pathlib import Path
 
 import pytest
@@ -605,12 +610,14 @@ def test_dump_forces_monotonic_signature_after_second_same_size_rewrite(
         writer.unlock(flag="-f")
 
     first_rewrite_mtime = writer._nodb_mtime
+    first_rewrite_size = writer._nodb_size
     assert first_rewrite_mtime is not None
+    assert first_rewrite_size is not None
 
     monkeypatch.setattr(
         base.os,
         "fstat",
-        _fstat_with_signature_once(stale_expected_mtime, stale_expected_size),
+        _fstat_with_signature_once(first_rewrite_mtime, first_rewrite_size),
     )
     writer.lock()
     try:
@@ -619,7 +626,6 @@ def test_dump_forces_monotonic_signature_after_second_same_size_rewrite(
     finally:
         writer.unlock(flag="-f")
 
-    refreshed_stat = nodb_path.stat()
     # Serialized payload width can drift when signature field text length changes.
     # The stale-write safety contract is monotonic signature advancement.
     assert writer._nodb_mtime is not None
@@ -687,3 +693,260 @@ def test_dump_cache_mirror_uses_post_write_signature(
     cached = base.jsonpickle.decode(cache.payloads[-1])
     assert cached._nodb_mtime == writer._nodb_mtime
     assert cached._nodb_size == writer._nodb_size
+
+
+def test_dump_atomic_replace_keeps_target_decodable_until_replace_commits(
+    tmp_path: Path,
+    redis_lock_stub: _RedisStub,
+    disable_redis_cache: None,
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    """Characterize atomic-write contention: reader sees valid old payload before replace."""
+
+    _install_db_api_stub(monkeypatch, update_last_modified=lambda *_args, **_kwargs: None)
+
+    writer = _DummyNoDb(str(tmp_path))
+    writer.lock()
+    try:
+        writer.value = 11
+        writer.dump()
+    finally:
+        writer.unlock(flag="-f")
+
+    nodb_path = tmp_path / writer.filename
+    baseline_payload = nodb_path.read_text(encoding="utf-8")
+
+    replace_started = threading.Event()
+    allow_replace = threading.Event()
+    real_replace = base.os.replace
+
+    def _blocked_replace(src: str, dst: str) -> None:
+        replace_started.set()
+        if not allow_replace.wait(timeout=5):
+            raise TimeoutError("timed out waiting to release os.replace")
+        real_replace(src, dst)
+
+    monkeypatch.setattr(base.os, "replace", _blocked_replace)
+
+    def _writer_dump() -> None:
+        writer.lock()
+        try:
+            writer.value = 12
+            writer.dump()
+        finally:
+            writer.unlock(flag="-f")
+
+    with ThreadPoolExecutor(max_workers=1) as executor:
+        future = executor.submit(_writer_dump)
+        assert replace_started.wait(timeout=5), "expected writer to reach os.replace barrier"
+
+        # While replace is blocked, target file should still expose the baseline payload.
+        assert nodb_path.read_text(encoding="utf-8") == baseline_payload
+        baseline_loaded = _DummyNoDb.load_detached(str(tmp_path))
+        assert baseline_loaded is not None
+        assert baseline_loaded.value == 11
+
+        allow_replace.set()
+        future.result(timeout=5)
+
+    updated = _DummyNoDb.load_detached(str(tmp_path))
+    assert updated is not None
+    assert updated.value == 12
+
+
+def test_legacy_truncate_write_window_can_raise_jsondecodeerror(
+    tmp_path: Path,
+    redis_lock_stub: _RedisStub,
+    disable_redis_cache: None,
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    """Demonstrate why legacy truncate-in-place writes are race-prone."""
+
+    _install_db_api_stub(monkeypatch, update_last_modified=lambda *_args, **_kwargs: None)
+
+    writer = _DummyNoDb(str(tmp_path))
+    writer.lock()
+    try:
+        writer.value = 21
+        writer.dump()
+    finally:
+        writer.unlock(flag="-f")
+
+    nodb_path = tmp_path / writer.filename
+    next_payload_owner = _DummyNoDb.load_detached(str(tmp_path))
+    assert next_payload_owner is not None
+    next_payload_owner.value = 22
+    next_payload = base.jsonpickle.encode(next_payload_owner)
+
+    truncate_started = threading.Event()
+    allow_finalize = threading.Event()
+    def _legacy_truncate_writer() -> None:
+        with open(nodb_path, "w", encoding="utf-8") as fp:
+            truncate_started.set()
+            if not allow_finalize.wait(timeout=5):
+                raise TimeoutError("timed out waiting to finalize legacy write")
+            fp.write(next_payload)
+            fp.flush()
+            os.fsync(fp.fileno())
+
+    with ThreadPoolExecutor(max_workers=1) as executor:
+        future = executor.submit(_legacy_truncate_writer)
+        assert truncate_started.wait(timeout=5), "expected legacy writer to truncate before read"
+
+        with pytest.raises(json.JSONDecodeError):
+            _DummyNoDb.load_detached(str(tmp_path))
+
+        allow_finalize.set()
+        future.result(timeout=5)
+
+    repaired = _DummyNoDb.load_detached(str(tmp_path))
+    assert repaired is not None
+    assert repaired.value == 22
+
+
+def test_dump_replace_failure_preserves_signature_and_allows_retry(
+    tmp_path: Path,
+    redis_lock_stub: _RedisStub,
+    disable_redis_cache: None,
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    _install_db_api_stub(monkeypatch, update_last_modified=lambda *_args, **_kwargs: None)
+
+    writer = _DummyNoDb(str(tmp_path))
+    writer.lock()
+    try:
+        writer.value = 31
+        writer.dump()
+    finally:
+        writer.unlock(flag="-f")
+
+    baseline_mtime = writer._nodb_mtime
+    baseline_size = writer._nodb_size
+    nodb_path = tmp_path / writer.filename
+    baseline_payload = nodb_path.read_text(encoding="utf-8")
+    real_replace = base.os.replace
+
+    def _failing_replace(_src: str, _dst: str) -> None:
+        raise OSError("replace failed")
+
+    monkeypatch.setattr(base.os, "replace", _failing_replace)
+
+    writer.lock()
+    try:
+        writer.value = 32
+        with pytest.raises(OSError, match="replace failed"):
+            writer.dump()
+    finally:
+        writer.unlock(flag="-f")
+
+    assert writer._nodb_mtime == baseline_mtime
+    assert writer._nodb_size == baseline_size
+    assert nodb_path.read_text(encoding="utf-8") == baseline_payload
+    assert list(tmp_path.glob(f".{writer.filename}.*.tmp")) == []
+
+    monkeypatch.setattr(base.os, "replace", real_replace)
+    writer.lock()
+    try:
+        writer.value = 33
+        writer.dump()
+    finally:
+        writer.unlock(flag="-f")
+
+    repaired = _DummyNoDb.load_detached(str(tmp_path))
+    assert repaired is not None
+    assert repaired.value == 33
+
+
+def test_dump_atomic_replace_preserves_existing_file_mode(
+    tmp_path: Path,
+    redis_lock_stub: _RedisStub,
+    disable_redis_cache: None,
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    _install_db_api_stub(monkeypatch, update_last_modified=lambda *_args, **_kwargs: None)
+
+    writer = _DummyNoDb(str(tmp_path))
+    writer.lock()
+    try:
+        writer.value = 41
+        writer.dump()
+    finally:
+        writer.unlock(flag="-f")
+
+    nodb_path = tmp_path / writer.filename
+    os.chmod(nodb_path, 0o664)
+
+    writer.lock()
+    try:
+        writer.value = 42
+        writer.dump()
+    finally:
+        writer.unlock(flag="-f")
+
+    assert stat.S_IMODE(nodb_path.stat().st_mode) == 0o664
+
+
+def test_dump_atomic_replace_initial_create_uses_umask_mode(
+    tmp_path: Path,
+    redis_lock_stub: _RedisStub,
+    disable_redis_cache: None,
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    _install_db_api_stub(monkeypatch, update_last_modified=lambda *_args, **_kwargs: None)
+    monkeypatch.setattr(
+        base.NoDbBase,
+        "_read_process_umask",
+        staticmethod(lambda: 0o022),
+    )
+
+    writer = _DummyNoDb(str(tmp_path))
+    writer.lock()
+    try:
+        writer.value = 45
+        writer.dump()
+    finally:
+        writer.unlock(flag="-f")
+
+    nodb_path = tmp_path / writer.filename
+    assert stat.S_IMODE(nodb_path.stat().st_mode) == 0o644
+
+
+def test_dump_parent_directory_fsync_estale_after_replace_keeps_committed_write(
+    tmp_path: Path,
+    redis_lock_stub: _RedisStub,
+    disable_redis_cache: None,
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    _install_db_api_stub(monkeypatch, update_last_modified=lambda *_args, **_kwargs: None)
+
+    writer = _DummyNoDb(str(tmp_path))
+    writer.lock()
+    try:
+        writer.value = 51
+        writer.dump()
+    finally:
+        writer.unlock(flag="-f")
+
+    fsync_calls = {"count": 0}
+
+    def _failing_parent_fsync(_path: str) -> None:
+        fsync_calls["count"] += 1
+        raise OSError(errno.ESTALE, "Stale file handle")
+
+    monkeypatch.setattr(
+        base.NoDbBase,
+        "_fsync_parent_directory",
+        staticmethod(_failing_parent_fsync),
+    )
+
+    writer.lock()
+    try:
+        writer.value = 52
+        writer.dump()
+    finally:
+        writer.unlock(flag="-f")
+
+    updated = _DummyNoDb.load_detached(str(tmp_path))
+    assert updated is not None
+    assert updated.value == 52
+    assert fsync_calls["count"] >= 1

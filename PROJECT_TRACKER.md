@@ -1,7 +1,7 @@
 # PROJECT_TRACKER.md
 > Kanban board for wepppy work packages and vision items
 
-**Last Updated**: 2026-05-13
+**Last Updated**: 2026-05-20
 **Active Packages**: 7
 **Quick Links**: [Work Packages Directory](docs/work-packages/) | [God-Tier Prompting Strategy](docs/god-tier-prompting-strategy.md)
 
@@ -378,6 +378,15 @@ Currently active work packages. Limit to 2-4 packages to maintain focus.
 ## ✅ Done
 
 Recently completed work packages. Archived immediately upon completion.
+
+### NoDb Atomic Write Replace Hardening (2026-05-20)
+**Status**: ✅ **COMPLETE (waiver accepted for unrelated baseline test)**
+
+**Link**: [docs/work-packages/20260519_nodb_atomic_write_hardening/](docs/work-packages/20260519_nodb_atomic_write_hardening/)
+
+**Lifecycle**: Backlog -> In Progress -> Done (2026-05-20)
+
+**Summary**: Closed atomic NoDb write hardening for the `omni.nodb` concurrent decode race by replacing truncate-in-place writes with temp-file + atomic `os.replace` persistence, preserving stale-writer contract behavior, mode semantics, and replace-failure retry safety. Added deterministic race/failure characterization coverage in `tests/nodb/test_base_boundary_characterization.py`, including explicit legacy deficiency demonstration (`JSONDecodeError` under truncate window) and NFS-oriented `ESTALE` post-commit fsync behavior. Iterative `reviewer` + `qa_reviewer` loops closed with zero unresolved High/Medium findings. Operator accepted waiver for unrelated baseline failure `tests/nodb/test_ron_fetch_dem_copernicus.py` (`Ron._cellsize` missing), which remains tracked outside this package scope.
 
 ### EBE `peak_runoff` Regression Ablation and Repair (2026-05-13)
 **Status**: ✅ **COMPLETE (with residual follow-ups)**

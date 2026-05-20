@@ -83,7 +83,9 @@ import inspect
 import multiprocessing as mp
 import socket
 import re
+import stat
 import sys
+import tempfile
 import uuid
 import threading
 from concurrent.futures import ProcessPoolExecutor
@@ -1631,6 +1633,38 @@ class NoDbBase(object):
         if stored_token is not None and stored_token != local_token:
             raise RuntimeError("cannot dump with non-matching lock token")
 
+    @staticmethod
+    def _fsync_parent_directory(path: str) -> None:
+        """Fsync the parent directory for ``path`` so rename metadata is durable."""
+
+        parent_dir = os.path.dirname(path) or "."
+        flags = os.O_RDONLY
+        if hasattr(os, "O_DIRECTORY"):
+            flags |= os.O_DIRECTORY
+
+        dir_fd = os.open(parent_dir, flags)
+        try:
+            os.fsync(dir_fd)
+        finally:
+            os.close(dir_fd)
+
+    @staticmethod
+    def _read_process_umask() -> int:
+        """Return the current process umask as an integer."""
+
+        try:
+            with open("/proc/self/status", "r", encoding="utf-8") as fp:
+                for line in fp:
+                    if line.startswith("Umask:"):
+                        return int(line.split(":", 1)[1].strip(), 8)
+        except (OSError, ValueError):
+            pass
+
+        # Conservative fallback for environments without /proc support.
+        # Avoid toggling process umask at runtime because this path can be
+        # executed concurrently in worker processes.
+        return 0o022
+
     def dump(self) -> None:
         global redis_nodb_cache_client, REDIS_NODB_EXPIRY
 
@@ -1659,85 +1693,141 @@ class NoDbBase(object):
 
         js = jsonpickle.encode(self)
 
-        # Write-then-sync
-        with open(self._nodb, "w") as fp:  # absolute path to .nodb file
-            fp.write(js)
-            fp.flush()                 # flush Python’s userspace buffer
-            os.fsync(fp.fileno())      # fsync forces kernel page-cache to disk
-            try:
-                stat_result = os.fstat(fp.fileno())
-                self._nodb_mtime = stat_result.st_mtime
-                self._nodb_size = stat_result.st_size
-            except OSError:
-                self._nodb_mtime = None
-                self._nodb_size = None
+        # Write-then-sync via temp file + atomic replace so readers never observe
+        # truncated payload windows.
+        nodb_dir = os.path.dirname(self._nodb) or "."
+        target_mode: Optional[int] = None
+        try:
+            target_mode = stat.S_IMODE(os.stat(self._nodb, follow_symlinks=False).st_mode)
+        except OSError:
+            target_mode = 0o666 & ~self._read_process_umask()
 
-            if (
-                expected_mtime is not None
-                and expected_size is not None
-                and self._nodb_size == expected_size
-            ):
-                if self._nodb_mtime is None:
-                    raise NoDbStaleWriteError(
-                        "cannot persist NoDb state because post-write signature could not be read "
-                        f"({self._nodb})"
+        post_write_mtime: Optional[float] = None
+        post_write_size: Optional[int] = None
+        temp_fd: Optional[int] = None
+        temp_path: Optional[str] = None
+        replaced = False
+        try:
+            temp_fd, temp_path = tempfile.mkstemp(
+                prefix=f".{os.path.basename(self._nodb)}.",
+                suffix=".tmp",
+                dir=nodb_dir,
+                text=True,
+            )
+            with os.fdopen(temp_fd, "w") as fp:  # absolute path to temp nodb file
+                temp_fd = None
+                os.fchmod(fp.fileno(), target_mode)
+                fp.write(js)
+                fp.flush()  # flush Python userspace buffer
+                os.fsync(fp.fileno())  # persist temp file data to disk
+                try:
+                    stat_result = os.fstat(fp.fileno())
+                    post_write_mtime = stat_result.st_mtime
+                    post_write_size = stat_result.st_size
+                except OSError:
+                    post_write_mtime = None
+                    post_write_size = None
+
+                os.replace(temp_path, self._nodb)
+                replaced = True
+                temp_path = None
+
+                try:
+                    self._fsync_parent_directory(self._nodb)
+                except OSError:
+                    logging.getLogger(__name__).warning(
+                        "NoDbBase.dump: parent directory fsync failed after atomic replace for %s",
+                        self._nodb,
+                        exc_info=True,
                     )
 
-                # Some filesystems can report unchanged or regressed mtime across
-                # rapid rewrites of same-sized payloads. Enforce a monotonic
-                # post-write mtime so stale detached writers are rejected.
-                if self._nodb_mtime <= expected_mtime:
-                    expected_mtime_ns = int(round(expected_mtime * 1_000_000_000))
-                    forced_mtime_ns = max(time_ns(), expected_mtime_ns + 1_000_000_000)
-                    try:
-                        current_stat = os.stat(self._nodb, follow_symlinks=False)
-                        current_fd_stat = os.fstat(fp.fileno())
-                        if (
-                            current_stat.st_ino != current_fd_stat.st_ino
-                            or current_stat.st_dev != current_fd_stat.st_dev
-                        ):
-                            raise NoDbStaleWriteError(
-                                "cannot persist NoDb state because file target changed during mtime advance "
-                                f"({self._nodb})"
-                            )
-                        os.utime(
-                            self._nodb,
-                            ns=(
-                                getattr(current_stat, "st_atime_ns", forced_mtime_ns),
-                                forced_mtime_ns,
-                            ),
-                            follow_symlinks=False,
-                        )
-                        os.fsync(fp.fileno())
-                        refreshed_stat = os.stat(self._nodb, follow_symlinks=False)
-                        refreshed_fd_stat = os.fstat(fp.fileno())
-                        if (
-                            refreshed_stat.st_ino != refreshed_fd_stat.st_ino
-                            or refreshed_stat.st_dev != refreshed_fd_stat.st_dev
-                        ):
-                            raise NoDbStaleWriteError(
-                                "cannot persist NoDb state because file target changed after mtime advance "
-                                f"({self._nodb})"
-                            )
-                        self._nodb_mtime = refreshed_stat.st_mtime
-                        self._nodb_size = refreshed_stat.st_size
-                    except OSError as exc:
+                if (
+                    expected_mtime is not None
+                    and expected_size is not None
+                    and post_write_size == expected_size
+                ):
+                    if post_write_mtime is None:
                         raise NoDbStaleWriteError(
-                            "cannot persist NoDb state because deterministic mtime advance failed "
+                            "cannot persist NoDb state because post-write signature could not be read "
                             f"({self._nodb})"
-                        ) from exc
+                        )
 
-                    if (
-                        self._nodb_size == expected_size
-                        and (
-                            self._nodb_mtime is None
-                            or self._nodb_mtime <= expected_mtime
-                        )
-                    ):
-                        raise NoDbStaleWriteError(
-                            "cannot persist NoDb state because post-write signature did not advance "
-                            f"({self._nodb})"
-                        )
+                    # Some filesystems can report unchanged or regressed mtime across
+                    # rapid rewrites of same-sized payloads. Enforce a monotonic
+                    # post-write mtime so stale detached writers are rejected.
+                    if post_write_mtime <= expected_mtime:
+                        expected_mtime_ns = int(round(expected_mtime * 1_000_000_000))
+                        forced_mtime_ns = max(time_ns(), expected_mtime_ns + 1_000_000_000)
+                        try:
+                            current_stat = os.stat(self._nodb, follow_symlinks=False)
+                            current_fd_stat = os.fstat(fp.fileno())
+                            if (
+                                current_stat.st_ino != current_fd_stat.st_ino
+                                or current_stat.st_dev != current_fd_stat.st_dev
+                            ):
+                                raise NoDbStaleWriteError(
+                                    "cannot persist NoDb state because file target changed during mtime advance "
+                                    f"({self._nodb})"
+                                )
+                            os.utime(
+                                self._nodb,
+                                ns=(
+                                    getattr(current_stat, "st_atime_ns", forced_mtime_ns),
+                                    forced_mtime_ns,
+                                ),
+                                follow_symlinks=False,
+                            )
+                            os.fsync(fp.fileno())
+                            try:
+                                self._fsync_parent_directory(self._nodb)
+                            except OSError:
+                                logging.getLogger(__name__).warning(
+                                    "NoDbBase.dump: parent directory fsync failed after mtime advance for %s",
+                                    self._nodb,
+                                    exc_info=True,
+                                )
+                            refreshed_stat = os.stat(self._nodb, follow_symlinks=False)
+                            refreshed_fd_stat = os.fstat(fp.fileno())
+                            if (
+                                refreshed_stat.st_ino != refreshed_fd_stat.st_ino
+                                or refreshed_stat.st_dev != refreshed_fd_stat.st_dev
+                            ):
+                                raise NoDbStaleWriteError(
+                                    "cannot persist NoDb state because file target changed after mtime advance "
+                                    f"({self._nodb})"
+                                )
+                            post_write_mtime = refreshed_stat.st_mtime
+                            post_write_size = refreshed_stat.st_size
+                        except OSError as exc:
+                            raise NoDbStaleWriteError(
+                                "cannot persist NoDb state because deterministic mtime advance failed "
+                                f"({self._nodb})"
+                            ) from exc
+
+                        if (
+                            post_write_size == expected_size
+                            and (
+                                post_write_mtime is None
+                                or post_write_mtime <= expected_mtime
+                            )
+                        ):
+                            raise NoDbStaleWriteError(
+                                "cannot persist NoDb state because post-write signature did not advance "
+                                f"({self._nodb})"
+                            )
+            self._nodb_mtime = post_write_mtime
+            self._nodb_size = post_write_size
+        finally:
+            if temp_fd is not None:
+                try:
+                    os.close(temp_fd)
+                except OSError:
+                    pass
+            if not replaced and temp_path and _exists(temp_path):
+                try:
+                    os.remove(temp_path)
+                except OSError:
+                    pass
 
         write_version(self.wd, CURRENT_VERSION)
 
