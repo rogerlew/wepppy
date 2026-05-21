@@ -1,0 +1,11 @@
+# LaTeX build artifacts
+*.aux
+*.log
+*.nav
+*.out
+*.snm
+*.toc
+*.synctex.gz
+
+# Compiled poster (regenerate: lualatex WEPPcloud_ICREWS_poster.tex)
+WEPPcloud_ICREWS_poster.pdf

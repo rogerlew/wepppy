@@ -28,9 +28,11 @@ Prepared for: I-CREWS Annual Meeting Poster Session
 
 **WEPPcloud Enables Basin-Scale Runoff and Sediment Science for I-CREWS Energy-Water Decisions**
 
-### Author and Affiliation
+### Authors and Affiliations
 
-Roger Lew, Department of Design and Environments, University of Idaho
+Roger Lew¹, Mariana Dobre², Erin Brooks²
+¹ Department of Design and Environments, University of Idaho
+² Department of Soil and Water Systems, College of Agricultural and Life Sciences, University of Idaho
 Platform: https://wepp.cloud
 
 ### Abstract (target <250 words)
@@ -60,7 +62,7 @@ How do disturbance, treatment, and climate assumptions change runoff and sedimen
 
 - Basin preparation complete: 56 watersheds, 79,393 hillslopes, 35,840 channels, ~411,000 ha.
 - WEPPcloud workflow readiness: end-to-end basin setup and execution path is operational.
-- Science product availability: spatial annual soil-loss outputs are now generated and reviewable in the WEPPcloud GL Dashboard (spatial-results viewer).
+- Spatial-output capability: the WEPPcloud GL Dashboard renders spatial annual soil-loss and related outputs across the basin for interactive review.
 - Modeling implication: full-basin runs make upstream-to-downstream coupling explicit and support basin-scale hypothesis testing.
 - Operational note: additional dedicated compute (pending procurement) is expected to shorten iteration cycles for calibration and scenario ensembles.
 
@@ -95,7 +97,7 @@ Suggested result-focused figure titles:
 
 - "Delineated Watersheds of the St. Joe Basin"
 - "WEPPcloud Platform Topology Supporting Basin-Scale Science"
-- "Modeled Annual Soil Loss in WEPPcloud GL Dashboard"
+- "Spatial-Output Review in the WEPPcloud GL Dashboard"
 
 ## 4) Layout Blueprint (36 x 48 landscape)
 

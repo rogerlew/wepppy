@@ -1,0 +1,350 @@
+% =====================================================================
+%  I-CREWS 2026 Annual Meeting Poster -- WEPPcloud / St. Joe Basin
+%  Author : Roger Lew, University of Idaho
+%  Engine : LUALATEX  (run twice)   <-- not pdflatex: the topology figure
+%           is Unicode box-drawing ASCII art rendered in DejaVu Sans Mono
+%  Canvas : 48 in wide x 36 in tall  (121.92 cm x 91.44 cm), landscape
+%  Theme  : light / default  (beamerposter)
+%  Source : WEPPcloud_ICREWS_poster_spec.md
+%
+%  Build:
+%     cd docs/projects/i-crews/2026_annual_meeting
+%     lualatex WEPPcloud_ICREWS_poster.tex
+%     lualatex WEPPcloud_ICREWS_poster.tex
+%
+%  Figure 2 is the verbatim ASCII platform-topology diagram in
+%  figures/weppcloud_topology.txt (extracted from
+%  ../st_joe/weppcloud-architecture-overview.md). It occupies the centre
+%  column at full width.
+%
+%  Logos in figures/ (all present):
+%     - university_of_idaho_main_full_color_horizontal_RGB.png
+%     - icrews_logo.png            (idahocrews.org)
+%     - idaho_nsf_epscor_logo.png  (current NSF EPSCoR lockup; the NSF
+%       roundel is built in, so no separate NSF logo is shown)
+% =====================================================================
+\documentclass[final]{beamer}
+\usepackage[orientation=landscape,size=custom,%
+            width=121.92,height=91.44,scale=1.13]{beamerposter}
+\usetheme{default}
+\usepackage{fontspec}
+\setmonofont{DejaVu Sans Mono}
+\usepackage{graphicx}
+\usepackage{xcolor}
+\usepackage{qrcode}
+\usepackage{fancyvrb}
+\usepackage{tikz}
+
+% ----------------------------------------------------------- palette --
+\definecolor{icrewsblue}{RGB}{19,76,132}
+\definecolor{icrewsnavy}{RGB}{12,42,74}
+\definecolor{icrewssky}{RGB}{225,236,246}
+\definecolor{uidahogold}{RGB}{241,179,0}
+\definecolor{watergreen}{RGB}{30,118,92}
+\definecolor{inkgray}{RGB}{38,42,48}
+\definecolor{softgray}{RGB}{245,246,248}
+
+% ------------------------------------------------------ beamer setup --
+\setbeamercolor{background canvas}{bg=white}
+\setbeamercolor{normal text}{fg=inkgray}
+\setbeamercolor{structure}{fg=icrewsblue}
+\setbeamercolor{block title}{bg=icrewsblue,fg=white}
+\setbeamercolor{block body}{bg=softgray,fg=inkgray}
+\setbeamertemplate{blocks}[rounded][shadow=false]
+\setbeamertemplate{navigation symbols}{}
+\setbeamerfont{block title}{size=\large,series=\bfseries}
+\setbeamertemplate{itemize item}{%
+  \raisebox{0.12ex}{\footnotesize\textcolor{icrewsblue}{$\blacktriangleright$}}}
+\setbeamertemplate{itemize subitem}{\textcolor{watergreen}{\textbf{--}}}
+
+% custom block style: padded heading bar, clear gap, then body box
+\setbeamertemplate{block begin}{%
+  \par\vskip0.30cm%
+  \begin{beamercolorbox}[rounded=true,sep=0.42cm]{block title}%
+    \usebeamerfont*{block title}\insertblocktitle%
+  \end{beamercolorbox}%
+  \vskip0.45cm% bottom margin under the heading
+  \usebeamerfont{block body}%
+  \begin{beamercolorbox}[rounded=true,sep=0.34cm,vmode]{block body}%
+}
+\setbeamertemplate{block end}{%
+  \end{beamercolorbox}\vskip0.32cm%
+}
+
+\setlength{\columnsep}{2.2cm}
+
+% height of the three body columns (header + body + footer = 91.44 cm)
+\newlength{\bodyH}\setlength{\bodyH}{69cm}
+
+% --------------------------------------------------------- helpers ----
+\newcommand{\goldrule}{\textcolor{uidahogold}{\rule{\linewidth}{7pt}}}
+
+% compact poster itemize
+\newenvironment{pitem}
+  {\begin{itemize}\setlength{\itemsep}{0.3em}\setlength{\parskip}{0pt}}
+  {\end{itemize}}
+
+% lead-in label for a bullet
+\newcommand{\lead}[1]{\textbf{\color{icrewsnavy}#1}}
+
+\begin{document}
+
+% verbatim ASCII platform-topology diagram, captured once into a box
+\newsavebox{\topobox}
+\sbox{\topobox}{\BVerbatimInput{figures/weppcloud_topology.txt}}
+
+\begin{frame}[t]
+
+% --- QR code pinned to the top-right corner ---
+\begin{tikzpicture}[remember picture,overlay]
+  \node[anchor=north east] at
+    ([xshift=-1.1cm,yshift=-1.1cm]current page.north east){%
+    \begin{minipage}{7cm}\centering
+      \qrcode[height=1.55in]{https://wepp.cloud}\\[4pt]
+      {\fontsize{20}{24}\selectfont\bfseries\color{icrewsblue}%
+       Scan for wepp.cloud}
+    \end{minipage}};
+\end{tikzpicture}
+
+% ============================== HEADER ===============================
+\begin{center}
+  {\fontsize{72}{84}\selectfont\bfseries\color{icrewsnavy}%
+    WEPPcloud Enables Basin-Scale Runoff and Sediment\\[6pt]
+    Science for I-CREWS Energy-Water Decisions\par}
+\end{center}
+\vspace{8pt}
+
+\begin{columns}[c]
+  \begin{column}{0.21\textwidth}
+    \centering
+    \includegraphics[width=0.80\linewidth]%
+      {figures/university_of_idaho_main_full_color_horizontal_RGB.png}
+  \end{column}
+  \begin{column}{0.50\textwidth}
+    \centering
+    {\fontsize{34}{40}\selectfont\color{icrewsblue}\bfseries
+      Roger Lew\textsuperscript{1}, Mariana Dobre\textsuperscript{2},
+      Erin Brooks\textsuperscript{2}\par}
+    \vspace{5pt}
+    {\fontsize{23}{28}\selectfont\color{inkgray}%
+      \textsuperscript{1}Department of Design and Environments,
+      University of Idaho\\[3pt]
+      \textsuperscript{2}Department of Soil and Water Systems,
+      College of Agricultural and Life Sciences, University of Idaho\par}
+    \vspace{5pt}
+    {\fontsize{25}{31}\selectfont\color{watergreen}%
+      In collaboration with the Coeur d'Alene Tribe~~$\cdot$~~wepp.cloud\par}
+  \end{column}
+  \begin{column}{0.25\textwidth}
+    \centering
+    \begin{tabular}{@{}c@{\hspace{1.0cm}}c@{}}
+      \includegraphics[height=4.7cm]{figures/icrews_logo.png} &
+      \includegraphics[height=3.0cm]{figures/idaho_nsf_epscor_logo.png}
+    \end{tabular}
+  \end{column}
+\end{columns}
+
+\vspace{6pt}
+\goldrule
+\vspace{12pt}
+
+% ============================== BODY =================================
+\begin{columns}[t]
+
+% --------------------------- COLUMN 1 --------------------------------
+\begin{column}{0.31\textwidth}
+\begin{minipage}[t][\bodyH][t]{\linewidth}
+
+  \begin{block}{Abstract}
+    \begin{pitem}
+      \item \lead{Purpose:} quantify basin-scale controls on runoff and
+        sediment export in the St. Joe Basin and connect those outputs to
+        downstream flow and energy questions in I-CREWS.
+      \item \lead{Methods:} prepare full-basin inputs in WEPPcloud
+        (terrain, channels, hillslopes, soils, landuse, climate), run
+        full-basin WEPP simulations, and iterate through
+        hypothesis-driven scenario comparison.
+      \item \lead{Key result:} the St. Joe basin is prepared at
+        operational scale (56 tributary watersheds, 79,393 hillslopes,
+        35,840 channel segments across about 411,000 hectares), and the
+        end-to-end WEPPcloud modeling workflow is operational.
+      \item \lead{Scientific implication:} WEPPcloud now provides a
+        reproducible pathway to test how disturbance, treatment, and
+        climate assumptions propagate from hillslopes to channels to
+        basin outlets.
+    \end{pitem}
+  \end{block}
+
+  \vfill
+
+  \begin{block}{Background}
+    St. Joe Basin modeling was added to I-CREWS scope in collaboration
+    with the Coeur d'Alene Tribe, integrating process-based watershed
+    science with the project's energy-water systems and resource-decision
+    goals. The basin is materially larger than prior project domains and
+    creates a new opportunity to test runoff and sediment hypotheses at
+    watershed-network scale. WEPPcloud links hydrology, sediment, energy,
+    and resource-management questions across researchers, tribal
+    partners, and I-CREWS sites.
+  \end{block}
+
+  \vfill
+
+  \begin{block}{Research Question}
+    {\itshape\color{icrewsnavy} How do disturbance, treatment, and
+    climate assumptions change runoff and sediment pathways across the
+    full St. Joe Basin, and how can those modeled responses inform
+    downstream I-CREWS flow and energy modeling?}
+  \end{block}
+
+  \vfill
+
+  \begin{block}{Methods}
+    \begin{pitem}
+      \item Delineated St. Joe tributary watersheds and generated
+        hillslope/channel topology using the WEPPcloud
+        terrain-processing workflow.
+      \item Built model inputs in-platform (soils, landuse, climate,
+        disturbance context) using WEPPcloud preprocessing controls.
+      \item Executed full-basin WEPP simulations with asynchronous
+        worker queues and run-level reporting.
+      \item Designed an iterative calibration loop (observe outputs,
+        adjust parameters, rerun basin, compare outcomes).
+      \item Framed cross-site reproducibility around consistent data
+        preparation, run settings, and output comparison.
+    \end{pitem}
+  \end{block}
+
+  \vfill
+
+  \begin{block}{Delineated Watersheds of the St. Joe Basin}
+    \centering
+    \includegraphics[width=\linewidth,height=7cm,keepaspectratio]%
+      {figures/st_joe_watersheds.png}\\[4pt]
+    {\small 56 tributary watersheds across about 411,000 hectares of the
+     St. Joe River Basin.}
+  \end{block}
+
+\end{minipage}
+\end{column}
+
+% --------------------------- COLUMN 2 --------------------------------
+% Centre column: the verbatim ASCII platform-topology figure, scaled to
+% the full column width.
+\begin{column}{0.31\textwidth}
+\begin{minipage}[t][\bodyH][t]{\linewidth}
+
+  \begin{block}{WEPPcloud Platform Topology}
+    \centering
+    \setlength{\fboxsep}{10pt}%
+    \fcolorbox{icrewsblue!40}{white}{%
+      \resizebox{0.95\linewidth}{!}{\usebox{\topobox}}}\\[8pt]
+    {\small WEPPcloud is a containerized web-application and modeling
+     platform. Requests from human and AI operators are authenticated
+     and routed through the core web stack; an asynchronous worker pool
+     runs the intensive WEPP simulations, and centralized storage
+     (Postgres, Redis, local storage) maintains all run data.}
+  \end{block}
+
+\end{minipage}
+\end{column}
+
+% --------------------------- COLUMN 3 --------------------------------
+\begin{column}{0.31\textwidth}
+\begin{minipage}[t][\bodyH][t]{\linewidth}
+
+  \begin{block}{Results --- Current Status}
+    \begin{pitem}
+      \item \lead{Basin preparation complete:} 56 watersheds,
+        79,393 hillslopes, 35,840 channels, $\sim$411,000 ha.
+      \item \lead{Workflow readiness:} end-to-end basin setup and
+        execution path is operational.
+      \item \lead{Spatial-output capability:} the WEPPcloud GL Dashboard
+        renders spatial annual soil-loss and related outputs across the
+        basin for interactive review.
+      \item \lead{Modeling implication:} full-basin runs make
+        upstream-to-downstream coupling explicit and support basin-scale
+        hypothesis testing.
+      \item \lead{Operational note:} additional dedicated compute
+        (pending procurement) is expected to shorten iteration cycles
+        for calibration and scenario ensembles.
+    \end{pitem}
+  \end{block}
+
+  \vfill
+
+  \begin{block}{Spatial-Output Review in the WEPPcloud GL Dashboard}
+    \centering
+    \includegraphics[width=\linewidth,height=12cm,keepaspectratio]%
+      {figures/gl-dashboard.png}
+  \end{block}
+
+  \vfill
+
+  \begin{block}{Discussion}
+    \begin{pitem}
+      \item \lead{Science takeaway:} process-based runoff and sediment
+        analysis is now operational at St. Joe basin scale, enabling
+        testable hypotheses on disturbance, connectivity, and climate
+        controls on watershed export.
+      \item \lead{Why full-basin runs matter:} upstream parameter
+        changes propagate through downstream routing, so tributary-only
+        tuning cannot resolve basin outlet behavior.
+      \item \lead{Energy-water linkage:} modeled runoff timing and
+        sediment delivery feed downstream reservoir storage, hydropower
+        operations, and water quality, so St. Joe export estimates
+        become direct inputs to I-CREWS energy-water tradeoff analysis.
+      \item \lead{Near-term priority:} calibrate modeled hydro-sediment
+        responses against observations, then evaluate alternative-futures
+        scenario contrasts.
+      \item \lead{Broader impacts:} a shared, reproducible WEPPcloud
+        workflow builds basin-scale modeling capacity across the I-CREWS
+        community --- equipping students and new modelers, supporting
+        tribal and agency decision-makers, and connecting watershed
+        topology to energy-water and land-management decisions.
+    \end{pitem}
+  \end{block}
+
+  \vfill
+
+  \begin{block}{Conclusion}
+    \begin{pitem}
+      \item WEPPcloud now supports St. Joe modeling at full basin extent.
+      \item The workflow supports science-first hypothesis testing of
+        runoff and sediment pathways across hillslope, channel, and
+        basin scales.
+      \item St. Joe outputs provide a basin-scale evidence layer for
+        downstream flow and energy modeling.
+      \item WEPPcloud (wepp.cloud) offers a shared modeling platform for
+        cross-site, alternative-futures science across all I-CREWS
+        basins.
+    \end{pitem}
+  \end{block}
+
+\end{minipage}
+\end{column}
+
+\end{columns}
+
+% ============================== FOOTER ===============================
+\vfill
+\goldrule
+\vspace{12pt}
+\begin{columns}[c]
+  \begin{column}{0.70\textwidth}
+    {\color{icrewsnavy}\bfseries Acknowledgment.}~
+    ``This material is based upon work supported by the National Science
+    Foundation under EPSCoR Award \#OIA2242769.''\\[8pt]
+    {\color{icrewsblue}\bfseries Contact:}~ Roger Lew, University of
+    Idaho \qquad
+    {\color{icrewsblue}\bfseries Platform:}~ https://wepp.cloud
+  \end{column}
+  \begin{column}{0.28\textwidth}
+    \raggedleft
+    {\fontsize{54}{60}\selectfont\bfseries\color{icrewsblue}wepp.cloud}
+  \end{column}
+\end{columns}
+\vspace{4pt}
+
+\end{frame}
+\end{document}
