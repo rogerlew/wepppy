@@ -17,6 +17,10 @@ Prepared for: I-CREWS Annual Meeting Poster Session
   - Section headings: 36-48 pt
   - Body: 24-32 pt
 - Design target: readable at 3-4 feet, visual-first composition.
+- I-CREWS expectations (poster must address):
+  - Connect to energy-water systems.
+  - Emphasize interdisciplinary integration.
+  - Highlight broader impacts (community, workforce, decision-making).
 
 ## 2) Ready-to-Use Poster Content Draft
 
@@ -38,7 +42,7 @@ Platform: https://wepp.cloud
 
 ### Background
 
-St. Joe Basin modeling was added to I-CREWS scope in collaboration with the Coeur d'Alene Tribe. The basin is materially larger than prior project domains and creates a new opportunity to test process-based runoff and sediment hypotheses at watershed-network scale. WEPPcloud provides a common modeling environment for this science workflow across researchers, partners, and sites.
+St. Joe Basin modeling was added to I-CREWS scope in collaboration with the Coeur d'Alene Tribe, integrating process-based watershed science with the project's energy-water systems and resource-decision goals. The basin is materially larger than prior project domains and creates a new opportunity to test runoff and sediment hypotheses at watershed-network scale. WEPPcloud provides a common modeling environment that links hydrology, sediment, energy, and resource-management questions across researchers, tribal partners, and I-CREWS sites.
 
 ### Research Question
 
@@ -66,7 +70,7 @@ How do disturbance, treatment, and climate assumptions change runoff and sedimen
 - Why full-basin runs matter: upstream parameter changes propagate through downstream routing, so tributary-only tuning cannot resolve basin outlet behavior.
 - Energy-water linkage: modeled runoff timing and sediment delivery feed downstream reservoir storage, hydropower operations, and water quality, so St. Joe export estimates become direct inputs to I-CREWS energy-water tradeoff analysis.
 - Near-term science priority: calibrate modeled hydro-sediment responses against observations, then evaluate alternative-futures scenario contrasts.
-- I-CREWS transfer value: other sites can apply the same workflow to delineate topology, run consistent scenarios, and connect watershed outputs to downstream water and energy modeling.
+- Broader impacts: a shared, reproducible WEPPcloud workflow builds basin-scale modeling capacity across the I-CREWS community — equipping students and new modelers, supporting tribal and agency decision-makers, and giving other sites a transferable path from watershed topology to energy-water and land-management decisions.
 
 ### Conclusion (bulleted takeaways)
 
@@ -106,3 +110,4 @@ Suggested result-focused figure titles:
 - Lead with the science questions (runoff/sediment controls and downstream implications), then use infrastructure only as enabling context.
 - Present modeled annual soil-loss patterns as basin-scale scientific outputs and identify calibration as the next validation step.
 - If discussed, describe capacity figures as planning estimates and keep them secondary to scientific interpretation.
+- Connect the work to I-CREWS expectations when presenting: the energy-water link, interdisciplinary integration with the Coeur d'Alene Tribe, and broader impacts for community decision-making and modeling-workforce capacity.
