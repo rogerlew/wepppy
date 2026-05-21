@@ -2,7 +2,7 @@
 
 > File-backed, Redis-cached singleton controllers for WEPPcloud run state management with distributed locking and zero-downtime serialization.
 
-> **See also:** [AGENTS.md](../../AGENTS.md#working-with-nodb-controllers) for coding conventions and [docs/dev-notes/style-guide.md](../../docs/dev-notes/style-guide.md) for clarity expectations.
+> **See also:** [NoDb Persistence and Concurrency Contract](../../docs/schemas/nodb-persistence-concurrency-contract.md), [AGENTS.md](../../AGENTS.md) for coding conventions, and [docs/dev-notes/style-guide.md](../../docs/dev-notes/style-guide.md) for clarity expectations.
 
 ## Overview
 
@@ -11,7 +11,7 @@ The NoDb module replaces traditional relational databases with a constellation o
 - **Serializes to JSON** - Human-readable `.nodb` files in the working directory
 - **Caches in Redis** - 72-hour TTL in DB 13 for instant hydration
 - **Distributed locking** - Redis-backed locks (DB 0) prevent concurrent mutations
-- **Singleton per run** - `getInstance(wd)` guarantees same object across workers
+- **Singleton per process** - `getInstance(wd)` reuses a per-process cached object for repeated calls in the same worker process
 - **Structured telemetry** - Per-controller log files (`<wd>/<controller>.log`) and Redis pub/sub (DB 2)
 
 Instead of SQL queries, developers interact with rich Python objects that expose domain-specific methods and properties. Redis provides coarse-grained locking and caching so these objects can be quickly deserialized and shared across workers and RQ tasks without conflicts.
@@ -33,14 +33,22 @@ Instead of SQL queries, developers interact with rich Python objects that expose
 
 `wepppy/nodb/base.py` provides the `NoDbBase` superclass that every controller inherits from. Important behaviors:
 
-- **Singleton lifecycle** – `NoDbBase.getInstance(wd)` guarantees a single controller per working directory, hydrating from Redis (DB 13) before touching disk.
+- **Singleton lifecycle** – `NoDbBase.getInstance(wd)` maintains one process-local cached controller per working directory for writable paths and refreshes from cache/disk when signatures drift.
 - **Distributed locking** – `with controller.locked():` acquires a Redis-backed lock (DB 0), mirrors legacy hash flags, and raises `NoDbAlreadyLockedError` when re-entrancy is unsafe.
-- **Persistence helpers** – `dump_and_unlock()` fsyncs the JSON payload, refreshes Redis cache entries, and validates the round-trip before releasing locks.
+- **Persistence helpers** – `dump_and_unlock()` fsyncs and atomically replaces the JSON payload, releases the lock, then sanity-checks persisted state via `getInstance()` signature/hydration paths.
 - **Telemetry wiring** – `_init_logging()` attaches a QueueListener fan-out to StatusMessenger, controller-scoped log files, and a console error stream; `try_redis_set_log_level()` dynamically adjusts levels via DB 15.
 - **Status channels** – `_status_channel` resolves to `<runid>:<controller>` (pup runs routed to `runid:omni`).
 - **Trigger events** – `TriggerEvents` enum documents lifecycle hooks (e.g., `LANDUSE_BUILD_COMPLETE`) that mods and UI components listen for when orchestrating runs.
 
 When extending NoDb, prefer these utilities over bespoke implementations—custom locking or logging code frequently regresses cross-worker behavior. See the module docstring in `wepppy/nodb/base.py` for deeper context and example usage.
+
+## Authoritative Contract
+
+`NoDbBase` lock ownership, stale-write rejection, atomic write behavior, cache hydration, and NFS-focused durability/error classification are specified in:
+
+- `docs/schemas/nodb-persistence-concurrency-contract.md`
+
+If this README and implementation behavior diverge, treat the schema contract as authoritative and update this README in the same change set.
 
 ## Lock Contention and Retry Pattern
 
