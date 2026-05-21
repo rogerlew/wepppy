@@ -27,6 +27,7 @@ Prepared for: I-CREWS Annual Meeting Poster Session
 ### Author and Affiliation
 
 Roger Lew, Department of Design and Environments, University of Idaho
+Platform: https://wepp.cloud
 
 ### Abstract (target <250 words)
 
@@ -61,14 +62,16 @@ Can WEPPcloud support iterative, basin-scale calibration and alternative-futures
 
 ### Discussion
 
-The key finding is not a software gap; it is a capacity gap between basin-ready science workflows and available compute. Full-basin calibration requires repeated runs because upstream parameter changes propagate through downstream channels and outlet behavior. A dedicated WEPPcloud deployment is therefore a methodological requirement for timely scenario work, not just a performance convenience. For I-CREWS, this enables an integrated pathway from watershed management scenarios (fire, treatments, climate variation) to downstream outcomes that matter for coupled water-quality and energy-system planning.
+The central science result is that basin-scale, process-based runoff and sediment analysis is now operational for St. Joe, enabling testable hypotheses about how hillslope disturbance, channel connectivity, and climate variability control watershed export. Full-basin calibration remains essential because upstream parameter changes propagate through downstream routing and alter outlet behavior; tributary-only tuning cannot capture those coupled effects. The main constraint is therefore throughput for iterative hypothesis testing, not model formulation. For I-CREWS, this creates a transferable science workflow that other project sites can use: delineate basin topology, run consistent WEPPcloud scenarios, compare alternative futures, and link watershed outputs to downstream water-quality and energy-system models.
 
 ### Conclusion (bulleted takeaways)
 
 - WEPPcloud now supports St. Joe modeling at full basin extent.
+- The workflow supports science-first hypothesis testing of runoff and sediment pathways across scales.
 - The dominant blocker for calibration and scenario throughput is infrastructure capacity.
-- A dedicated WEPPcloud deployment is specified and aligned with I-CREWS project needs.
-- Pending procurement approval is the key near-term gate to execute full iterative basin calibration.
+- A dedicated WEPPcloud deployment is specified, aligned with I-CREWS project needs, and available to all I-CREWS sites and participants.
+- The St. Joe basin model can inform downstream flow and energy modeling through linked watershed-to-lake-to-river analyses.
+- WEPPcloud (https://wepp.cloud) is positioned as a shared modeling platform for other I-CREWS sites.
 
 ### Required NSF Acknowledgment (verbatim)
 
@@ -78,24 +81,23 @@ The key finding is not a software gap; it is a capacity gap between basin-ready 
 
 Use visuals to carry the narrative and keep text concise.
 
-- Figure 1 (left column): St. Joe Basin map showing tributary watershed coverage and outlet context.
-- Figure 2 (center): WEPPcloud workflow schematic (delineation -> inputs -> run -> outputs -> recalibration loop).
-- Figure 3 (right): Infrastructure comparison chart (current shared environment vs proposed dedicated deployment).
-- Figure 4 (bottom/right): Example WEPPcloud output panel(s) showing runoff/sediment or scenario comparison surfaces.
+- Figure 1 (left column): St. Joe Basin map image file `figures/st_joe_watersheds.png` showing proposed basin coverage and tributary structure.
+- Figure 2 (center): WEPPcloud Platform Topology diagram using the provided architecture block (Human/AI operators, core stack, services, and storage buses).
+- Figure 3 (right column): WEPPcloud GL Dashboard image file `figures/gl-dashboard.png` showing modeled annual soil loss outputs.
 
 Suggested result-focused figure titles:
 
-- "Basin Preparation Completed at Operational Scale"
-- "WEPPcloud Enables Iterative Full-Basin Modeling"
-- "Dedicated Deployment Closes the Compute Throughput Gap"
+- "Proposed Watersheds for St. Joe Basin"
+- "WEPPcloud Platform Topology"
+- "Modeled Annual Soil Loss in WEPPcloud GL Dashboard"
 
 ## 4) Layout Blueprint (36 x 48 landscape)
 
 - Header band (full width): title, author/affiliation, logos.
 - Column 1: abstract + background + research question + basin map.
-- Column 2: methods + WEPPcloud workflow diagram.
-- Column 3: results + discussion + conclusions + infrastructure chart.
-- Footer band: NSF acknowledgment, contact, optional QR code to project/repository.
+- Column 2: methods + WEPPcloud Platform Topology diagram.
+- Column 3: results + discussion + conclusions + GL Dashboard annual soil-loss figure.
+- Footer band: NSF acknowledgment, contact, and explicit platform URL `https://wepp.cloud` (plus optional QR code to `https://wepp.cloud`).
 
 ## 5) Presenter Notes (for consistency with current status)
 
