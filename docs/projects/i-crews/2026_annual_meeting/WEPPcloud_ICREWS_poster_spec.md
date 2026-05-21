@@ -22,7 +22,7 @@ Prepared for: I-CREWS Annual Meeting Poster Session
 
 ### Title (<=100 chars, includes WEPPcloud)
 
-**WEPPcloud for I-CREWS: Basin-Scale St. Joe Modeling for Energy-Water Decisions**
+**WEPPcloud Enables Basin-Scale Runoff and Sediment Science for I-CREWS Energy-Water Decisions**
 
 ### Author and Affiliation
 
@@ -31,15 +31,18 @@ Platform: https://wepp.cloud
 
 ### Abstract (target <250 words)
 
-WEPPcloud is a browser-based watershed modeling platform that combines geospatial preprocessing, climate assembly, and physically based WEPP simulations into an integrated workflow for runoff and sediment analysis. For the I-CREWS St. Joe Basin effort, the full basin has been prepared at operational scale (56 tributary watersheds, 134,033 hillslopes, and 151,121 channel segments across about 411,000 hectares). This creates a new opportunity to support alternative-futures analysis that links upstream land management to downstream water and energy systems. Methods include automated delineation and parameter assembly in WEPPcloud, iterative full-basin simulation, and scenario comparison across disturbance and treatment assumptions. Results to date show the software and data pipeline are ready for basin-scale calibration, while compute and storage capacity remain the primary bottleneck. A dedicated two-server deployment has been specified to provide local-storage-backed throughput for iterative calibration and scenario production; this procurement is currently pending approval. This work supports I-CREWS goals by creating a reproducible decision-support pathway from watershed disturbance and treatment scenarios to downstream impacts relevant to lake water quality, streamflow, and hydropower planning.
+- Purpose: quantify basin-scale controls on runoff and sediment export in the St. Joe Basin and connect those outputs to downstream flow and energy questions in I-CREWS.
+- Methods: prepare full-basin inputs in WEPPcloud (terrain, channels, hillslopes, soils, landuse, climate), run full-basin WEPP simulations, and iterate through hypothesis-driven scenario comparison.
+- Key result: the St. Joe basin is prepared at operational scale (56 tributary watersheds, 134,033 hillslopes, 151,121 channel segments across about 411,000 hectares), and the end-to-end WEPPcloud modeling workflow is operational.
+- Scientific implication: WEPPcloud now provides a reproducible pathway to test how disturbance, treatment, and climate assumptions propagate from hillslopes to channels to basin outlets.
 
 ### Background
 
-St. Joe Basin modeling was added to I-CREWS scope in collaboration with the Coeur d'Alene Tribe. The scale is materially larger than prior project basins and now requires repeated full-basin simulations for calibration and scenario testing. WEPPcloud is already an operational platform used for agency, research, and management workflows; the current challenge is scaling computational throughput to match the newly prepared basin domain.
+St. Joe Basin modeling was added to I-CREWS scope in collaboration with the Coeur d'Alene Tribe. The basin is materially larger than prior project domains and creates a new opportunity to test process-based runoff and sediment hypotheses at watershed-network scale. WEPPcloud provides a common modeling environment for this science workflow across researchers, partners, and sites.
 
 ### Research Question
 
-Can WEPPcloud support iterative, basin-scale calibration and alternative-futures scenario modeling for the St. Joe Basin in a way that is useful for I-CREWS energy-water decision support?
+How do disturbance, treatment, and climate assumptions change runoff and sediment pathways across the full St. Joe Basin, and how can those modeled responses inform downstream I-CREWS flow and energy analyses?
 
 ### Methods
 
@@ -47,30 +50,30 @@ Can WEPPcloud support iterative, basin-scale calibration and alternative-futures
 - Built model inputs in-platform (soils, landuse, climate, disturbance context) using WEPPcloud preprocessing controls.
 - Executed full-basin WEPP simulations with asynchronous worker queues and run-level reporting.
 - Designed an iterative calibration loop (observe outputs -> adjust parameters -> rerun basin -> compare outcomes).
-- Framed deployment architecture for sustained throughput using a dedicated two-server WEPPcloud topology.
+- Framed cross-site reproducibility around consistent data preparation, run settings, and output comparison across scenarios.
 
 ### Results (current status)
 
 - Basin preparation complete: 56 watersheds, 134,033 hillslopes, 151,121 channels, ~411,000 ha.
 - WEPPcloud workflow readiness: end-to-end basin setup and execution path is operational.
-- Infrastructure bottleneck identified: shared-service compute and network storage constraints limit calibration velocity.
-- Dedicated deployment specification completed:
-  - Two servers, 256 total cores, 512 GB RAM, local RAID-backed storage.
-  - About 3.9x raw aggregate compute vs current shared baseline.
-  - About 40x project-usable provisioning estimate for I-CREWS due to dedicated allocation.
-- Procurement status: server procurement request is pending approval.
+- Science product availability: spatial annual soil-loss outputs are now generated and reviewable in WEPPcloud GL Dashboard.
+- Modeling implication: full-basin runs make upstream-to-downstream coupling explicit and support basin-scale hypothesis testing.
+- Operational note: additional dedicated compute (pending procurement) is expected to shorten iteration cycles for calibration and scenario ensembles.
 
 ### Discussion
 
-The central science result is that basin-scale, process-based runoff and sediment analysis is now operational for St. Joe, enabling testable hypotheses about how hillslope disturbance, channel connectivity, and climate variability control watershed export. Full-basin calibration remains essential because upstream parameter changes propagate through downstream routing and alter outlet behavior; tributary-only tuning cannot capture those coupled effects. The main constraint is therefore throughput for iterative hypothesis testing, not model formulation. For I-CREWS, this creates a transferable science workflow that other project sites can use: delineate basin topology, run consistent WEPPcloud scenarios, compare alternative futures, and link watershed outputs to downstream water-quality and energy-system models.
+- Science takeaway: process-based runoff and sediment analysis is now operational at St. Joe basin scale, enabling testable hypotheses on disturbance, connectivity, and climate controls on watershed export.
+- Why full-basin runs matter: upstream parameter changes propagate through downstream routing, so tributary-only tuning cannot resolve basin outlet behavior.
+- Near-term science priority: calibrate modeled hydro-sediment responses against observations and then evaluate alternative-futures scenario contrasts.
+- I-CREWS transfer value: other sites can apply the same workflow to delineate basin topology, run consistent scenarios, compare alternatives, and connect watershed outputs to downstream water-quality and energy modeling.
 
 ### Conclusion (bulleted takeaways)
 
 - WEPPcloud now supports St. Joe modeling at full basin extent.
-- The workflow supports science-first hypothesis testing of runoff and sediment pathways across scales.
-- The dominant blocker for calibration and scenario throughput is infrastructure capacity.
-- A dedicated WEPPcloud deployment is specified, aligned with I-CREWS project needs, and available to all I-CREWS sites and participants.
-- The St. Joe basin model can inform downstream flow and energy modeling through linked watershed-to-lake-to-river analyses.
+- The workflow supports science-first hypothesis testing of runoff and sediment pathways across hillslope, channel, and basin scales.
+- St. Joe outputs provide a basin-scale evidence layer for downstream flow and energy modeling.
+- A shared WEPPcloud deployment can support coordinated scenario science for all I-CREWS sites and participants.
+- A common WEPPcloud workflow enables cross-site comparison of alternative-futures science across I-CREWS basins.
 - WEPPcloud (https://wepp.cloud) is positioned as a shared modeling platform for other I-CREWS sites.
 
 ### Required NSF Acknowledgment (verbatim)
@@ -88,7 +91,7 @@ Use visuals to carry the narrative and keep text concise.
 Suggested result-focused figure titles:
 
 - "Proposed Watersheds for St. Joe Basin"
-- "WEPPcloud Platform Topology"
+- "WEPPcloud Platform Topology Supporting Basin-Scale Science"
 - "Modeled Annual Soil Loss in WEPPcloud GL Dashboard"
 
 ## 4) Layout Blueprint (36 x 48 landscape)
@@ -101,6 +104,6 @@ Suggested result-focused figure titles:
 
 ## 5) Presenter Notes (for consistency with current status)
 
-- State clearly that infrastructure procurement is pending approval as of May 2026.
-- Present capacity numbers as planning/provisioning values, not final measured post-deployment benchmarks.
-- Emphasize that this poster reports workflow readiness and deployment readiness for the next modeling phase.
+- Lead with the science questions (runoff/sediment controls and downstream implications), then use infrastructure only as enabling context.
+- Present modeled annual soil-loss patterns as basin-scale scientific outputs and identify calibration as the next validation step.
+- If discussed, describe capacity figures as planning estimates and keep them secondary to scientific interpretation.
