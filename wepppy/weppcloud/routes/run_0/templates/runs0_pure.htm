@@ -13,19 +13,23 @@
 {% set hide_landuse_wepp = 'rhem' in mods_list and not playwright_load_all %}
 {% set disabled_controllers = ['landuse', 'landuseModify', 'wepp'] if hide_landuse_wepp else [] %}
 
-{% set show_rangeland_cover = 'rangeland_cover' in mods_list or playwright_load_all %}
-{% set show_rap_ts = 'rap_ts' in mods_list or playwright_load_all %}
-{% set openet_admin_enabled = user.has_role('Admin') or playwright_load_all %}
-{% set show_openet_ts = openet_admin_enabled and ('openet_ts' in mods_list or playwright_load_all) %}
-{% set show_treatments = 'treatments' in mods_list or playwright_load_all %}
+{% set show_rangeland_cover = show_rangeland_cover if show_rangeland_cover is defined else ('rangeland_cover' in mods_list or playwright_load_all) %}
+{% set show_rap_ts = show_rap_ts if show_rap_ts is defined else ('rap_ts' in mods_list or playwright_load_all) %}
+{% set openet_admin_enabled = openet_admin_enabled if openet_admin_enabled is defined else playwright_load_all %}
+{% set show_openet_ts = show_openet_ts if show_openet_ts is defined else (openet_admin_enabled and ('openet_ts' in mods_list or playwright_load_all)) %}
+{% set show_treatments = show_treatments if show_treatments is defined else ('treatments' in mods_list or playwright_load_all) %}
 {% set show_ash = show_ash if show_ash is defined else ((('ash' in mods_list) and (ash is defined) and (ash is not none)) or playwright_load_all) %}
-{% set show_rhem = 'rhem' in mods_list or playwright_load_all %}
-{% set show_observed = 'observed' in mods_list or playwright_load_all %}
-{% set allow_debris_flow = user.has_role('PowerUser') or (config is mapping and config.get('TEST_SUPPORT_ENABLED')) or playwright_load_all %}
-{% set show_debris_flow = ('debris_flow' in mods_list or playwright_load_all) and (debris_flow is not none or playwright_load_all) and allow_debris_flow %}
+{% set show_rhem = show_rhem if show_rhem is defined else ('rhem' in mods_list or playwright_load_all) %}
+{% set show_omni = show_omni if show_omni is defined else ((('omni' in mods_list) and (omni is defined) and (omni is not none)) or playwright_load_all) %}
+{% set show_omni_contrasts = show_omni_contrasts if show_omni_contrasts is defined else show_omni %}
+{% set show_observed = show_observed if show_observed is defined else ('observed' in mods_list or playwright_load_all) %}
+{% set allow_debris_flow = allow_debris_flow if allow_debris_flow is defined else playwright_load_all %}
+{% set show_debris_flow = show_debris_flow if show_debris_flow is defined else ((('debris_flow' in mods_list or playwright_load_all) and (debris_flow is not none or playwright_load_all) and allow_debris_flow)) %}
 {% set show_features_export = show_features_export if show_features_export is defined else ('features_export' in mods_list or playwright_load_all) %}
-{% set show_dss_export = 'dss_export' in mods_list or playwright_load_all %}
-{% set show_geneva = show_geneva if show_geneva is defined else ('geneva' in mods_list or playwright_load_all) %}
+{% set show_dss_export = show_dss_export if show_dss_export is defined else ('dss_export' in mods_list or playwright_load_all) %}
+{% set show_roads = show_roads if show_roads is defined else ((('roads' in mods_list) and (roads is defined) and (roads is not none)) or playwright_load_all) %}
+{% set show_geneva = show_geneva if show_geneva is defined else ((('geneva' in mods_list) and (geneva is defined) and (geneva is not none)) or playwright_load_all) %}
+{% set show_path_ce = show_path_ce if show_path_ce is defined else ('path_ce' in mods_list or playwright_load_all) %}
 {% set rusle_backend_supported = rusle_backend_supported if rusle_backend_supported is defined else (watershed.delineation_backend_is_wbt if watershed is defined and watershed is not none and watershed.delineation_backend_is_wbt is defined else False) %}
 {% set show_rusle = show_rusle if show_rusle is defined else ((('rusle' in mods_list and 'disturbed' in mods_list and rusle_backend_supported) or playwright_load_all)) %}
 {% set show_disturbed_sbs = (('baer' in ron.mods or 'disturbed' in ron.mods) and 'lt' not in ron.mods) or playwright_load_all %}
@@ -125,13 +129,12 @@
         <li data-mod-nav="omni" {% if not show_omni %}hidden{% endif %}>
           <a href="#omni-scenarios" class="nav-link">Omni Scenarios</a>
         </li>
-        <li data-mod-nav="omni" {% if not show_omni %}hidden{% endif %}>
+        <li data-mod-nav="omni_contrasts" {% if not show_omni_contrasts %}hidden{% endif %}>
           <a href="#omni-contrasts" class="nav-link">Omni Contrasts</a>
         </li>
         <li data-mod-nav="observed" {% if not show_observed %}hidden{% endif %}>
           <a href="#observed" class="nav-link">Observed Data</a>
         </li>
-        {% set allow_debris_flow = user.has_role('PowerUser') or (config is mapping and config.get('TEST_SUPPORT_ENABLED')) or playwright_load_all %}
         {% if allow_debris_flow %}
         <li data-mod-nav="debris_flow" {% if not show_debris_flow %}hidden{% endif %}>
           <a href="#debris-flow" class="nav-link">Debris Flow</a>
@@ -255,6 +258,11 @@
         <section id="omni-scenarios" class="wc-stack">
           {% include 'controls/omni_scenarios_pure.htm' %}
         </section>
+        {% endif %}
+      </div>
+
+      <div data-mod-section="omni_contrasts" {% if not show_omni_contrasts %}hidden{% endif %}>
+        {% if show_omni_contrasts %}
         <section id="omni-contrasts" class="wc-stack">
           {% include 'controls/omni_contrasts_pure.htm' %}
         </section>

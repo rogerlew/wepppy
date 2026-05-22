@@ -3,7 +3,6 @@
 import wepppy
 import os
 import pathlib
-from collections import OrderedDict
 
 from datetime import datetime
 import re
@@ -77,6 +76,15 @@ from wepppy.weppcloud.utils.helpers import (
     authorize_and_handle_with_exception_factory,
     handle_with_exception_factory
 )
+from wepppy.weppcloud.feature_registry.runtime import (
+    build_header_mod_options,
+    config_maturity_badge,
+    config_registry_by_id,
+    feature_maturity_badge,
+    feature_registry_by_id,
+    load_feature_registry,
+    user_meets_min_role,
+)
 from wepppy.weppcloud.utils.browse_cookie import (
     browse_cookie_name,
     browse_cookie_path,
@@ -145,13 +153,51 @@ else:  # pragma: no cover - pyarrow missing in non-runtime contexts
     _FEATURES_EXPORT_PARQUET_SCHEMA_EXCEPTIONS = (OSError, ValueError)
 
 
-def _current_user_has_role(role: str) -> bool:
-    has_role = getattr(current_user, "has_role", None)
-    return bool(callable(has_role) and has_role(role))
+def _feature_spec(mod_name: str):
+    return feature_registry_by_id().get(mod_name)
+
+
+def _feature_role_display(min_role: str) -> str:
+    display = {
+        "user": "User",
+        "poweruser": "PowerUser",
+        "dev": "Dev",
+        "admin": "Admin",
+        "root": "Root",
+    }
+    return display.get(min_role, min_role)
+
+
+def _feature_role_enabled(mod_name: str, *, playwright_load_all: bool) -> bool:
+    if bool(playwright_load_all):
+        return True
+    spec = _feature_spec(mod_name)
+    if spec is None:
+        return False
+    return user_meets_min_role(current_user, spec.min_role)
+
+
+def _feature_role_restriction_message(mod_name: str) -> str:
+    spec = _feature_spec(mod_name)
+    if spec is None:
+        return f"Unknown module '{mod_name}'."
+    return f"{spec.label} is restricted to {_feature_role_display(spec.min_role)} users"
 
 
 def _openet_admin_enabled(*, playwright_load_all: bool) -> bool:
-    return bool(playwright_load_all) or _current_user_has_role("Admin")
+    return _feature_role_enabled("openet_ts", playwright_load_all=playwright_load_all)
+
+
+def _query_arg_is_true(name: str) -> bool:
+    return str(request.args.get(name, "")).strip().lower() in {"true", "1", "yes"}
+
+
+def _playwright_load_all_enabled() -> bool:
+    if not _query_arg_is_true("playwright_load_all"):
+        return False
+    if not bool(current_app.config.get("TEST_SUPPORT_ENABLED")):
+        return False
+    return user_meets_min_role(current_user, "admin")
 
 
 def _normalize_landuse_custom_mapping_relpath(value: object) -> str | None:
@@ -236,87 +282,19 @@ def _call_landuse_with_stale_mapping_recovery(landuse: object, producer):
             raise
         return producer()
 
-MOD_UI_DEFINITIONS = OrderedDict([
-    ('rap_ts', {
-        'label': 'RAP Time Series',
-        'section_id': 'rap-ts',
-        'section_class': 'wc-stack',
-        'template': 'controls/rap_ts_pure.htm',
-    }),
-    ('openet_ts', {
-        'label': 'OpenET Time Series',
-        'section_id': 'openet-ts',
-        'section_class': 'wc-stack',
-        'template': 'controls/openet_ts_pure.htm',
-    }),
-    ('treatments', {
-        'label': 'Treatments',
-        'section_id': 'treatments',
-        'section_class': 'wc-stack',
-        'template': 'controls/treatments_pure.htm',
-    }),
-    ('ash', {
-        'label': 'Ash Transport',
-        'section_id': 'ash',
-        'section_class': 'wc-stack',
-        'template': 'controls/ash_pure.htm',
-    }),
-    ('omni', {
-        'label': 'Omni Scenarios',
-        'section_id': 'omni-wrapper',
-        'section_class': 'wc-stack',
-        'template': 'controls/omni_mod_pure.htm',
-    }),
-    ('observed', {
-        'label': 'Observed Data',
-        'section_id': 'observed',
-        'section_class': 'wc-stack',
-        'template': 'controls/observed_pure.htm',
-    }),
-    ('debris_flow', {
-        'label': 'Debris Flow',
-        'section_id': 'debris-flow',
-        'section_class': 'wc-stack',
-        'template': 'controls/debris_flow_pure.htm',
-        'requires_power_user': True,
-    }),
-    ('roads', {
-        'label': 'Roads',
-        'section_id': 'roads',
-        'section_class': 'wc-stack',
-        'template': 'controls/roads_pure.htm',
-    }),
-    ('geneva', {
-        'label': 'Geneva',
-        'section_id': 'geneva',
-        'section_class': 'wc-stack',
-        'template': 'controls/geneva_pure.htm',
-    }),
-    ('features_export', {
-        'label': 'Features Export',
-        'section_id': 'features-export',
-        'section_class': 'wc-stack',
-        'template': 'controls/features_export_pure.htm',
-    }),
-    ('dss_export', {
-        'label': 'DSS Export',
-        'section_id': 'dss-export',
-        'section_class': 'wc-stack',
-        'template': 'controls/dss_export_pure.htm',
-    }),
-    ('path_ce', {
-        'label': 'PATH Cost-Effective',
-        'section_id': 'path-cost-effective',
-        'section_class': 'wc-stack',
-        'template': 'controls/path_cost_effective_pure.htm',
-    }),
-    ('rusle', {
-        'label': 'RUSLE',
-        'section_id': 'rusle',
-        'section_class': 'wc-stack',
-        'template': 'controls/rusle_pure.htm',
-    }),
-])
+def _mod_ui_definitions() -> dict[str, dict[str, object]]:
+    definitions: dict[str, dict[str, object]] = {}
+    for entry in load_feature_registry():
+        definitions[entry.id] = {
+            "label": entry.nav_label,
+            "section_id": entry.section_id,
+            "section_class": entry.section_class,
+            "template": entry.section_template,
+        }
+    return definitions
+
+
+MOD_UI_DEFINITIONS = _mod_ui_definitions()
 
 
 FEATURES_EXPORT_FAMILY_ORDER = [
@@ -1742,8 +1720,11 @@ def _build_runs0_context(runid, config, playwright_load_all):
         topaz = None
 
     mods_list = ron.mods or []
-    openet_admin_enabled = _openet_admin_enabled(playwright_load_all=playwright_load_all)
-    show_openet_ts = openet_admin_enabled and ('openet_ts' in mods_list or playwright_load_all)
+    openet_role_enabled = _feature_role_enabled(
+        "openet_ts",
+        playwright_load_all=playwright_load_all,
+    )
+    show_openet_ts = openet_role_enabled and ('openet_ts' in mods_list or playwright_load_all)
 
     observed = Observed.tryGetInstance(wd)
     rangeland_cover = RangelandCover.tryGetInstance(wd)
@@ -1833,11 +1814,13 @@ def _build_runs0_context(runid, config, playwright_load_all):
         and ((omni is not None) or playwright_load_all)
         and not is_omni_child
     )
+    show_omni_contrasts = show_omni and _feature_role_enabled(
+        "omni_contrasts",
+        playwright_load_all=playwright_load_all,
+    )
     show_observed = (observed is not None) or playwright_load_all
     allow_debris_flow = (
-        current_user.has_role('PowerUser')
-        or current_app.config.get('TEST_SUPPORT_ENABLED')
-        or playwright_load_all
+        _feature_role_enabled("debris_flow", playwright_load_all=playwright_load_all)
     )
     show_debris_flow = allow_debris_flow and (debris_flow is not None or playwright_load_all)
     show_roads = ('roads' in mods_list and roads is not None) or playwright_load_all
@@ -1860,21 +1843,44 @@ def _build_runs0_context(runid, config, playwright_load_all):
     omni_has_ran_scenarios = bool(omni and omni.has_ran_scenarios)
     omni_has_ran_contrasts = bool(omni and omni.has_ran_contrasts)
 
-    mod_visibility = {
-        'rap_ts': show_rap_ts,
-        'openet_ts': show_openet_ts,
-        'treatments': show_treatments,
-        'ash': show_ash,
-        'omni': show_omni,
-        'observed': show_observed,
-        'debris_flow': show_debris_flow,
-        'roads': show_roads,
-        'geneva': show_geneva,
-        'features_export': show_features_export,
-        'dss_export': show_dss_export,
-        'path_ce': show_path_ce,
-        'rusle': show_rusle,
+    feature_registry_entries = load_feature_registry()
+    mod_visibility = {entry.id: False for entry in feature_registry_entries}
+    mod_visibility.update(
+        {
+            'rap_ts': show_rap_ts,
+            'openet_ts': show_openet_ts,
+            'treatments': show_treatments,
+            'ash': show_ash,
+            'omni': show_omni,
+            'omni_contrasts': show_omni_contrasts,
+            'observed': show_observed,
+            'debris_flow': show_debris_flow,
+            'roads': show_roads,
+            'geneva': show_geneva,
+            'features_export': show_features_export,
+            'dss_export': show_dss_export,
+            'path_ce': show_path_ce,
+            'rusle': show_rusle,
+        }
+    )
+    header_mod_options = build_header_mod_options(
+        active_mods=set(mods_list),
+        user=current_user,
+        is_wbt=rusle_backend_supported,
+        include_all=bool(playwright_load_all),
+    )
+    maturity_definition_href = (
+        url_for('usersum.view_markdown', category='weppcloud', filename='user-guide.md')
+        + '#feature-maturity-labels'
+    )
+    feature_maturity_labels = {
+        entry.id: feature_maturity_badge(entry)
+        for entry in feature_registry_entries
     }
+    run_config_spec = config_registry_by_id().get(config)
+    run_config_maturity_label = (
+        config_maturity_badge(run_config_spec) if run_config_spec is not None else None
+    )
 
     features_export_catalog_payload = {}
     features_export_bootstrap_payload = {}
@@ -1943,11 +1949,14 @@ def _build_runs0_context(runid, config, playwright_load_all):
         VAPID_PUBLIC_KEY=VAPID_PUBLIC_KEY,
         show_rap_ts=show_rap_ts,
         show_openet_ts=show_openet_ts,
+        openet_admin_enabled=openet_role_enabled,
         show_treatments=show_treatments,
         show_ash=show_ash,
         show_omni=show_omni,
+        show_omni_contrasts=show_omni_contrasts,
         show_observed=show_observed,
         show_debris_flow=show_debris_flow,
+        allow_debris_flow=allow_debris_flow,
         show_roads=show_roads,
         show_geneva=show_geneva,
         show_features_export=show_features_export,
@@ -1955,6 +1964,11 @@ def _build_runs0_context(runid, config, playwright_load_all):
         show_path_ce=show_path_ce,
         show_rusle=show_rusle,
         rusle_backend_supported=rusle_backend_supported,
+        maturity_definition_href=maturity_definition_href,
+        feature_maturity_labels=feature_maturity_labels,
+        run_config_maturity_label=run_config_maturity_label,
+        run_config_maturity_href=maturity_definition_href,
+        header_mod_options=header_mod_options,
         omni_user_defined_contrast_limit=int(getattr(omni_mod, "USER_DEFINED_CONTRAST_LIMIT", 200)),
         is_omni_child=is_omni_child,
         omni_has_ran_scenarios=omni_has_ran_scenarios,
@@ -1988,8 +2002,8 @@ def runs0(runid, config):
         authorize(runid, config)
 
         # Check if migrations are needed (unless skip_migration_check is set)
-        skip_migration_check = request.args.get('skip_migration_check', '').lower() in ('true', '1', 'yes')
-        playwright_load_all = request.args.get('playwright_load_all', '').lower() in ('true', '1', 'yes')
+        skip_migration_check = _query_arg_is_true("skip_migration_check")
+        playwright_load_all = _playwright_load_all_enabled()
 
         if not skip_migration_check and not playwright_load_all:
             wd = get_wd(runid)
@@ -2076,8 +2090,8 @@ def view_mod_section(runid, config, mod_name):
     mod_info = MOD_UI_DEFINITIONS.get(mod_name)
     if not mod_info:
         return error_factory('Unknown module')
-    if mod_name == 'openet_ts' and not _openet_admin_enabled(playwright_load_all=False):
-        return error_factory('OpenET Time Series is restricted to Admin users')
+    if not _feature_role_enabled(mod_name, playwright_load_all=False):
+        return error_factory(_feature_role_restriction_message(mod_name))
 
     context = _build_runs0_context(runid, config, playwright_load_all=False)
     if 'redirect' in context:

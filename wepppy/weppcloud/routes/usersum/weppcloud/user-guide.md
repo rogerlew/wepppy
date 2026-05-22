@@ -65,6 +65,20 @@ For software bugs and feature requests, submit an issue on the WEPPcloud GitHub 
 
 ---
 
+## Feature Maturity Labels
+
+WEPPcloud uses the following maturity labels for user-facing features and interface configs. These labels communicate release readiness, support expectations, and change risk.
+
+| Label | Classification guidance | User expectation |
+|---|---|---|
+| `stable` | Use for default production capability with broad operational confidence and normal support. | Safe for routine operational use. |
+| `preview` | Use for near-production capability still collecting validation/feedback or pending final interface/contract stabilization. | Usable, but behavior/details may still change. |
+| `experimental` | Use for research-stage capability with limited validation, narrower transferability, or active method development. | Try with caution; validate independently before operational decisions. |
+| `deprecated` | Use for capability planned for removal or replacement; no new investment except maintenance and migration support. | Avoid new use; migrate to replacement path. |
+| `internal` | Use for constrained capability not intended for general public workflows. Mark an `internal_reason` (`compute`, `api_constrained`, `beta`, or `publication_embargo`). | Not a general release feature; availability is intentionally limited to users with the `Dev` role. |
+
+---
+
 ## Privacy Statement
 
 WEPPcloud collects only the information necessary to operate the platform and support your work.

@@ -5,6 +5,7 @@
      macros that also consume `caller` (doing so will raise a double-caller
      TypeError at render time).
 #}
+{% import "shared/maturity_pill_macros.htm" as maturity_ui %}
 
 {# Status/Summary/Stacktrace overrides exist but should be rare—only use when the
    standard panels cannot express the special case. Excess overrides make the
@@ -12,6 +13,9 @@
 {% macro control_shell(
       form_id,
       title,
+      feature_id=None,
+      maturity_label=None,
+      maturity_href=None,
       toolbar=None,
       description=None,
       meta=None,
@@ -26,11 +30,34 @@
       stacktrace_panel_override=None,
       stacktrace_panel_options=None
     ) -%}
+{% set _feature_form_map = {
+  "rap_ts_form": "rap_ts",
+  "openet_ts_form": "openet_ts",
+  "treatments_form": "treatments",
+  "ash_form": "ash",
+  "omni_form": "omni",
+  "omni_contrasts_form": "omni",
+  "observed_form": "observed",
+  "debris_flow_form": "debris_flow",
+  "roads_form": "roads",
+  "geneva_form": "geneva",
+  "features_export_form": "features_export",
+  "dss_export_form": "dss_export",
+  "path_ce_form": "path_ce",
+  "rusle_form": "rusle",
+} %}
+{% set _resolved_feature_id = feature_id if feature_id else _feature_form_map.get(form_id) %}
+{% set _feature_maturity_labels = feature_maturity_labels if feature_maturity_labels is defined else {} %}
+{% set _resolved_maturity_label = maturity_label if maturity_label else (_feature_maturity_labels.get(_resolved_feature_id) if _resolved_feature_id else None) %}
+{% set _resolved_maturity_href = maturity_href if maturity_href else (maturity_definition_href if maturity_definition_href is defined else (url_for('usersum.view_markdown', category='weppcloud', filename='user-guide.md') ~ '#feature-maturity-labels')) %}
 {% if collapsible %}
 <details class="wc-control wc-control--collapsible"{% if open %} open{% endif %}>
   <summary class="wc-control__summary">
     <div class="wc-control__summary-text">
-      <h2 class="wc-control__title">{{ title }}</h2>
+      <div class="wc-control__title-row">
+        <h2 class="wc-control__title">{{ title }}</h2>
+        {{ maturity_ui.maturity_pill(_resolved_maturity_label, href=_resolved_maturity_href, title="Feature maturity: " ~ _resolved_maturity_label if _resolved_maturity_label else None, new_tab=True) }}
+      </div>
       {% if meta %}
       <div class="wc-control__meta">
         {{ meta|safe }}
@@ -43,7 +70,10 @@
 <div class="wc-control wc-control--static">
   <div class="wc-control__summary wc-control__summary--static">
     <div class="wc-control__summary-text">
-      <h2 class="wc-control__title">{{ title }}</h2>
+      <div class="wc-control__title-row">
+        <h2 class="wc-control__title">{{ title }}</h2>
+        {{ maturity_ui.maturity_pill(_resolved_maturity_label, href=_resolved_maturity_href, title="Feature maturity: " ~ _resolved_maturity_label if _resolved_maturity_label else None, new_tab=True) }}
+      </div>
       {% if meta %}
       <div class="wc-control__meta">
         {{ meta|safe }}

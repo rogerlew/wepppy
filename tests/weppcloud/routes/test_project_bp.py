@@ -1,5 +1,6 @@
 from __future__ import annotations
 
+from dataclasses import replace
 from pathlib import Path
 from typing import Any, Dict
 
@@ -41,9 +42,10 @@ def project_client(
         def __init__(self) -> None:
             self.is_authenticated = True
             self.id = "test-user-id"
+            self.roles: set[str] = set()
 
-        def has_role(self, _role: str) -> bool:
-            return False
+        def has_role(self, role: str) -> bool:
+            return role in self.roles
 
         def get_id(self) -> str:
             return self.id
@@ -306,8 +308,8 @@ def test_set_mod_enables_features_export_module(project_client):
     assert "features_export" in controller.mods
 
 
-def test_set_mod_openet_requires_admin(project_client):
-    client, RonStub, _, run_dir, _ = project_client
+def test_set_mod_openet_requires_dev(project_client):
+    client, RonStub, dispatched, run_dir, _ = project_client
     controller = RonStub.getInstance(run_dir)
     assert controller.mods == []
 
@@ -318,13 +320,14 @@ def test_set_mod_openet_requires_admin(project_client):
 
     assert response.status_code == 200
     payload = response.get_json()
-    assert "restricted to Admin users" in payload["error"]["message"]
+    assert "restricted to Dev users" in payload["error"]["message"]
     assert controller.mods == []
+    assert dispatched["current_user"].roles == set()
 
 
-def test_set_mod_openet_allows_admin(project_client, monkeypatch: pytest.MonkeyPatch) -> None:
-    client, RonStub, _, run_dir, _ = project_client
-    monkeypatch.setattr(project_module, "_openet_admin_enabled", lambda: True)
+def test_set_mod_openet_allows_dev(project_client) -> None:
+    client, RonStub, dispatched, run_dir, _ = project_client
+    dispatched["current_user"].roles = {"Dev"}
 
     controller = RonStub.getInstance(run_dir)
     assert controller.mods == []
@@ -339,6 +342,41 @@ def test_set_mod_openet_allows_admin(project_client, monkeypatch: pytest.MonkeyP
     assert payload["Content"]["mod"] == "openet_ts"
     assert payload["Content"]["enabled"] is True
     assert "openet_ts" in controller.mods
+
+
+def test_set_mod_openet_allows_root(project_client) -> None:
+    client, RonStub, dispatched, run_dir, _ = project_client
+    dispatched["current_user"].roles = {"Root"}
+
+    controller = RonStub.getInstance(run_dir)
+    assert controller.mods == []
+
+    response = client.post(
+        f"/runs/{RUN_ID}/{CONFIG}/tasks/set_mod",
+        json={"mod": "openet_ts", "enabled": True},
+    )
+
+    assert response.status_code == 200
+    payload = response.get_json()
+    assert payload["Content"]["mod"] == "openet_ts"
+    assert payload["Content"]["enabled"] is True
+    assert "openet_ts" in controller.mods
+
+
+def test_set_mod_debris_flow_requires_poweruser_or_higher(project_client) -> None:
+    client, RonStub, _, run_dir, _ = project_client
+    controller = RonStub.getInstance(run_dir)
+    assert controller.mods == []
+
+    response = client.post(
+        f"/runs/{RUN_ID}/{CONFIG}/tasks/set_mod",
+        json={"mod": "debris_flow", "enabled": True},
+    )
+
+    assert response.status_code == 200
+    payload = response.get_json()
+    assert "restricted to PowerUser users" in payload["error"]["message"]
+    assert controller.mods == []
 
 
 def test_set_mod_rusle_requires_disturbed(project_client):
@@ -463,6 +501,47 @@ def test_set_mod_geneva_allows_when_wbt_backend(project_client):
     assert "geneva" in controller.mods
 
 
+def test_set_mod_enforces_registry_backend_requirements_generically(project_client, monkeypatch):
+    client, RonStub, _, run_dir, _ = project_client
+    controller = RonStub.getInstance(run_dir)
+    controller._mods = []
+    project_module.Watershed.getInstance(run_dir).delineation_backend_is_wbt = False
+
+    registry_map = dict(project_module.feature_registry_by_id())
+    registry_map["rap_ts"] = replace(registry_map["rap_ts"], requires_backend="wbt")
+    monkeypatch.setattr(project_module, "feature_registry_by_id", lambda: registry_map)
+
+    response = client.post(
+        f"/runs/{RUN_ID}/{CONFIG}/tasks/set_mod",
+        json={"mod": "rap_ts", "enabled": True},
+    )
+
+    assert response.status_code == 200
+    payload = response.get_json()
+    assert "requires the WBT delineation backend" in payload["error"]["message"]
+    assert "rap_ts" not in controller.mods
+
+
+def test_set_mod_enforces_registry_required_features_generically(project_client, monkeypatch):
+    client, RonStub, _, run_dir, _ = project_client
+    controller = RonStub.getInstance(run_dir)
+    controller._mods = []
+
+    registry_map = dict(project_module.feature_registry_by_id())
+    registry_map["rap_ts"] = replace(registry_map["rap_ts"], requires_features=("openet_ts",))
+    monkeypatch.setattr(project_module, "feature_registry_by_id", lambda: registry_map)
+
+    response = client.post(
+        f"/runs/{RUN_ID}/{CONFIG}/tasks/set_mod",
+        json={"mod": "rap_ts", "enabled": True},
+    )
+
+    assert response.status_code == 200
+    payload = response.get_json()
+    assert "requires OpenET Time Series to be enabled" in payload["error"]["message"]
+    assert "rap_ts" not in controller.mods
+
+
 def test_set_mod_disables_module_when_no_guards(project_client):
     client, RonStub, _, run_dir, _ = project_client
     controller = RonStub.getInstance(run_dir)
@@ -556,7 +635,8 @@ def test_set_mod_enable_restores_backup(project_client):
 
 
 def test_set_mod_imports_missing_mod_class(project_client, monkeypatch: pytest.MonkeyPatch) -> None:
-    client, RonStub, _, run_dir, _ = project_client
+    client, RonStub, dispatched, run_dir, _ = project_client
+    dispatched["current_user"].roles = {"PowerUser"}
     controller = RonStub.getInstance(run_dir)
     assert controller.mods == []
 

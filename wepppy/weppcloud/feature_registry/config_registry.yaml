@@ -1,0 +1,135 @@
+version: 1
+configs:
+  - id: disturbed9002
+    label: Disturbed (CONUS)
+    cfg_path: wepppy/nodb/configs/disturbed9002.cfg
+    maturity: stable
+    internal_reason: null
+    min_role: user
+    requires_backend: any
+
+  - id: disturbed-hi
+    label: Disturbed (Hawaii)
+    cfg_path: wepppy/nodb/configs/disturbed-hi.cfg
+    maturity: stable
+    internal_reason: null
+    min_role: user
+    requires_backend: any
+
+  - id: disturbed-ak
+    label: Disturbed (Alaska)
+    cfg_path: wepppy/nodb/configs/disturbed-ak.cfg
+    maturity: stable
+    internal_reason: null
+    min_role: user
+    requires_backend: any
+
+  - id: disturbed9002_wbt
+    label: Disturbed + WBT (CONUS)
+    cfg_path: wepppy/nodb/configs/disturbed9002_wbt.cfg
+    maturity: preview
+    internal_reason: null
+    min_role: user
+    requires_backend: wbt
+
+  - id: disturbed9002-wbt-mofe
+    label: Disturbed + WBT Multiple OFE (CONUS)
+    cfg_path: wepppy/nodb/configs/disturbed9002-wbt-mofe.cfg
+    maturity: preview
+    internal_reason: null
+    min_role: user
+    requires_backend: wbt
+
+  - id: reveg
+    label: Revegetation (CONUS)
+    cfg_path: wepppy/nodb/configs/reveg.cfg
+    maturity: experimental
+    internal_reason: null
+    min_role: user
+    requires_backend: any
+
+  - id: reveg-mofe
+    label: Revegetation Multiple OFE (CONUS)
+    cfg_path: wepppy/nodb/configs/reveg-mofe.cfg
+    maturity: experimental
+    internal_reason: null
+    min_role: user
+    requires_backend: any
+
+  - id: reveg-10m-mofe
+    label: Revegetation 10m Multiple OFE (CONUS)
+    cfg_path: wepppy/nodb/configs/reveg-10m-mofe.cfg
+    maturity: experimental
+    internal_reason: null
+    min_role: user
+    requires_backend: any
+
+  - id: eu-disturbed
+    label: EU Disturbed
+    cfg_path: wepppy/nodb/configs/eu-disturbed.cfg
+    maturity: stable
+    internal_reason: null
+    min_role: user
+    requires_backend: any
+
+  - id: au-disturbed
+    label: AU Disturbed
+    cfg_path: wepppy/nodb/configs/au-disturbed.cfg
+    maturity: experimental
+    internal_reason: null
+    min_role: user
+    requires_backend: any
+
+  - id: earth
+    label: Disturbed Earth
+    cfg_path: wepppy/nodb/configs/earth.cfg
+    maturity: preview
+    internal_reason: null
+    min_role: user
+    requires_backend: wbt
+
+  - id: rhem
+    label: RHEM
+    cfg_path: wepppy/nodb/configs/rhem.cfg
+    maturity: preview
+    internal_reason: null
+    min_role: user
+    requires_backend: any
+
+  - id: "0"
+    label: Legacy WEPPcloud
+    cfg_path: wepppy/nodb/configs/0.cfg
+    maturity: deprecated
+    internal_reason: null
+    min_role: user
+    requires_backend: any
+    replaced_by: disturbed9002
+
+  - id: "13"
+    label: Legacy WEPPcloud 10m
+    cfg_path: wepppy/nodb/configs/13.cfg
+    maturity: deprecated
+    internal_reason: null
+    min_role: user
+    requires_backend: any
+    replaced_by: disturbed9002
+
+  - id: baer
+    label: WEPPcloud-PEP w/ WATAR
+    cfg_path: wepppy/nodb/configs/baer.cfg
+    maturity: deprecated
+    internal_reason: null
+    min_role: user
+    requires_backend: any
+    replaced_by: disturbed9002
+
+overrides:
+  - id: multi-ofe-is-preview
+    when:
+      cfg_bool:
+        section: wepp
+        option: multi_ofe
+        equals: true
+    set:
+      maturity: preview
+      internal_reason: null

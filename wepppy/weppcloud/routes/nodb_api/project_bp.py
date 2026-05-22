@@ -24,58 +24,87 @@ from wepppy.weppcloud.utils.helpers import (
     get_run_owners_lazy, get_user_models, authorize, 
     authorize_and_handle_with_exception_factory
 ) 
+from wepppy.weppcloud.feature_registry.runtime import (
+    backend_matches_requirement,
+    feature_registry_by_id,
+    user_meets_min_role,
+)
 
 
 project_bp = Blueprint('project', __name__)
 
-MOD_DISPLAY_NAMES = {
-    'rap_ts': 'RAP Time Series',
-    'openet_ts': 'OpenET Time Series',
-    'ash': 'Ash Transport',
-    'treatments': 'Treatments',
-    'observed': 'Observed Data',
-    'debris_flow': 'Debris Flow',
-    'roads': 'Roads',
-    'geneva': 'Geneva',
-    'features_export': 'Features Export',
-    'dss_export': 'DSS Export',
-    'omni': 'Omni',
-    'path_ce': 'Path CE',
-    'rusle': 'RUSLE',
-}
 
-MOD_DEPENDENCIES = {
-    'omni': ['treatments'],
-    'rusle': ['polaris'],
-}
-
-MOD_DISABLE_GUARDS = {
-    'treatments': ['omni'],
-}
+def _feature_spec(mod_name: str):
+    return feature_registry_by_id().get(mod_name)
 
 
-def _current_user_has_role(role: str) -> bool:
-    has_role = getattr(current_user, "has_role", None)
-    return bool(callable(has_role) and has_role(role))
+def _feature_label(mod_name: str) -> str:
+    spec = _feature_spec(mod_name)
+    return spec.label if spec is not None else mod_name
 
 
-def _openet_admin_enabled() -> bool:
-    return _current_user_has_role("Admin")
+def _feature_role_display(min_role: str) -> str:
+    display = {
+        "user": "User",
+        "poweruser": "PowerUser",
+        "dev": "Dev",
+        "admin": "Admin",
+        "root": "Root",
+    }
+    return display.get(min_role, min_role)
 
 
-def _rusle_backend_supported(wd: str) -> bool:
+def _feature_role_enabled(mod_name: str) -> bool:
+    spec = _feature_spec(mod_name)
+    if spec is None:
+        return False
+    return user_meets_min_role(current_user, spec.min_role)
+
+
+def _feature_role_restriction_message(mod_name: str) -> str:
+    spec = _feature_spec(mod_name)
+    if spec is None:
+        return f"Unknown module '{mod_name}'."
+    return f"{spec.label} is restricted to {_feature_role_display(spec.min_role)} users"
+
+
+def _delineation_backend_is_wbt(wd: str) -> bool:
     watershed = Watershed.getInstance(wd)
     return bool(getattr(watershed, "delineation_backend_is_wbt", False))
 
 
-def _roads_backend_supported(wd: str) -> bool:
-    watershed = Watershed.getInstance(wd)
-    return bool(getattr(watershed, "delineation_backend_is_wbt", False))
+def _feature_or_prerequisite_label(feature_id: str) -> str:
+    spec = _feature_spec(feature_id)
+    if spec is not None:
+        return spec.label
+    return feature_id.replace("_", " ").title()
 
 
-def _geneva_backend_supported(wd: str) -> bool:
-    watershed = Watershed.getInstance(wd)
-    return bool(getattr(watershed, "delineation_backend_is_wbt", False))
+def _validate_feature_enable_preconditions(
+    *,
+    spec,
+    active_mods: set[str],
+    wd: str,
+) -> None:
+    is_wbt_backend = _delineation_backend_is_wbt(wd)
+    if not backend_matches_requirement(spec.requires_backend, is_wbt=is_wbt_backend):
+        if spec.requires_backend == "wbt":
+            raise ValueError(
+                f"{spec.label} requires the WBT delineation backend; TOPAZ runs are not supported."
+            )
+        if spec.requires_backend == "topaz":
+            raise ValueError(
+                f"{spec.label} requires the TOPAZ delineation backend; WBT runs are not supported."
+            )
+        raise ValueError(f"{spec.label} backend requirements are not satisfied.")
+
+    missing_required = [
+        feature_id for feature_id in spec.requires_features if feature_id not in active_mods
+    ]
+    if not missing_required:
+        return
+    pretty = ", ".join(_feature_or_prerequisite_label(feature_id) for feature_id in missing_required)
+    raise ValueError(f"{spec.label} requires {pretty} to be enabled.")
 
 
 def _mod_state_paths(wd: str, mod_name: str) -> tuple[str, str]:
@@ -141,29 +170,37 @@ def _instantiate_mod_if_available(wd: str, cfg_fn: str, mod_name: str) -> bool:
 
 def _enable_mod_for_run(ron: Ron, wd: str, cfg_fn: str, mod_name: str) -> bool:
     """Add the mod (and dependencies) then materialize their controllers."""
+    spec = _feature_spec(mod_name)
+    if spec is None:
+        raise ValueError(f"Unknown module '{mod_name}'.")
+
     changed = _append_mod(ron, mod_name)
 
-    for dependency in MOD_DEPENDENCIES.get(mod_name, []):
+    for dependency in spec.enable_dependencies:
         dependency_added = _append_mod(ron, dependency)
         if dependency_added:
-            restored_dep = _restore_mod_backup(wd, dependency)
+            _restore_mod_backup(wd, dependency)
             _instantiate_mod_if_available(wd, cfg_fn, dependency)
 
-    restored = _restore_mod_backup(wd, mod_name)
+    _restore_mod_backup(wd, mod_name)
     _instantiate_mod_if_available(wd, cfg_fn, mod_name)
     return changed
 
 
 def _disable_mod_for_run(ron: Ron, wd: str, mod_name: str) -> bool:
     """Remove a mod when doing so will not violate dependency guards."""
+    spec = _feature_spec(mod_name)
+    if spec is None:
+        raise ValueError(f"Unknown module '{mod_name}'.")
+
     active_mods = set(ron.mods or [])
     blockers = [
-        blocker for blocker in MOD_DISABLE_GUARDS.get(mod_name, [])
+        blocker for blocker in spec.disable_blockers
         if blocker in active_mods
     ]
     if blockers:
-        pretty = ", ".join(sorted(MOD_DISPLAY_NAMES.get(b, b) for b in blockers))
-        label = MOD_DISPLAY_NAMES.get(mod_name, mod_name)
+        pretty = ", ".join(sorted(_feature_label(blocker) for blocker in blockers))
+        label = _feature_label(mod_name)
         raise ValueError(f"Disable {pretty} before removing {label}.")
 
     if mod_name not in active_mods:
@@ -176,7 +213,8 @@ def _disable_mod_for_run(ron: Ron, wd: str, mod_name: str) -> bool:
 
 def set_project_mod_state(runid: str, config: str, mod_name: str, enabled: bool) -> dict:
     """Toggle a project mod and return the updated state payload."""
-    if mod_name not in MOD_DISPLAY_NAMES:
+    spec = _feature_spec(mod_name)
+    if spec is None:
         raise ValueError(f"Unknown module '{mod_name}'.")
 
     ctx = load_run_context(runid, config)
@@ -185,19 +223,12 @@ def set_project_mod_state(runid: str, config: str, mod_name: str, enabled: bool)
     cfg_fn = f"{config}.cfg"
     active_mods = set(ron.mods or [])
 
-    if enabled and mod_name == "rusle":
-        if "disturbed" not in active_mods:
-            raise ValueError("RUSLE requires Disturbed to be enabled.")
-        if not _rusle_backend_supported(wd):
-            raise ValueError("RUSLE requires the WBT delineation backend; TOPAZ runs are not supported.")
-    if enabled and mod_name == "roads":
-        if not _roads_backend_supported(wd):
-            raise ValueError("Roads requires the WBT delineation backend; TOPAZ runs are not supported.")
-    if enabled and mod_name == "geneva":
-        if not _geneva_backend_supported(wd):
-            raise ValueError("Geneva requires the WBT delineation backend; TOPAZ runs are not supported.")
-
     if enabled:
+        _validate_feature_enable_preconditions(
+            spec=spec,
+            active_mods=active_mods,
+            wd=wd,
+        )
         changed = _enable_mod_for_run(ron, wd, cfg_fn, mod_name)
     else:
         changed = _disable_mod_for_run(ron, wd, mod_name)
@@ -207,7 +238,7 @@ def set_project_mod_state(runid: str, config: str, mod_name: str, enabled: bool)
         "enabled": enabled,
         "changed": bool(changed),
         "mods": list(ron.mods or []),
-        "label": MOD_DISPLAY_NAMES.get(mod_name, mod_name),
+        "label": spec.label,
     }
 
 
@@ -647,8 +678,8 @@ def task_set_mod(runid, config):
         return error_factory('enabled must be boolean')
 
     mod_key = str(mod_name).strip()
-    if mod_key == 'openet_ts' and not _openet_admin_enabled():
-        return error_factory('OpenET Time Series is restricted to Admin users')
+    if not _feature_role_enabled(mod_key):
+        return error_factory(_feature_role_restriction_message(mod_key))
 
     try:
         state = set_project_mod_state(runid, config, mod_key, bool(enabled))

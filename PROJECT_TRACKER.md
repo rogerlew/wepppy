@@ -1,8 +1,8 @@
 # PROJECT_TRACKER.md
 > Kanban board for wepppy work packages and vision items
 
-**Last Updated**: 2026-05-20
-**Active Packages**: 7
+**Last Updated**: 2026-05-22
+**Active Packages**: 6
 **Quick Links**: [Work Packages Directory](docs/work-packages/) | [God-Tier Prompting Strategy](docs/god-tier-prompting-strategy.md)
 
 ## Purpose
@@ -378,6 +378,15 @@ Currently active work packages. Limit to 2-4 packages to maintain focus.
 ## ✅ Done
 
 Recently completed work packages. Archived immediately upon completion.
+
+### WEPPcloud Feature and Config Registry Implementation (2026-05-22)
+**Status**: ✅ **COMPLETE**
+
+**Link**: [docs/work-packages/20260521_feature_registry/](docs/work-packages/20260521_feature_registry/)
+
+**Lifecycle**: Backlog -> In Progress -> Done (2026-05-22)
+
+**Summary**: Implemented dual registries under `wepppy/weppcloud/feature_registry/` (`feature_registry.yaml`, `config_registry.yaml`) with shared schema validation/runtime loaders. Migrated `project_bp.py` feature label/dependency/disable-guard metadata to registry authority, migrated `run_0_bp.py` mod UI definitions and header mod options to registry-backed metadata, and wired `weppcloud_site.interfaces` + `interfaces.htm` launch config values/maturity badges to config registry metadata. Added user-facing maturity definitions in usersum guide and landed targeted regressions (`test_feature_registry_runtime.py`, template rendering updates) with passing focused validation (`112 passed`).
 
 ### NoDb Atomic Write Replace Hardening (2026-05-20)
 **Status**: ✅ **COMPLETE (waiver accepted for unrelated baseline test)**

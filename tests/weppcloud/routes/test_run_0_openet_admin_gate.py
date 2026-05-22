@@ -53,6 +53,8 @@ def run0_template_app(run0_module):
 
 def _bootstrap_context(user_roles: set[str]) -> dict:
     user = _RoleUser(user_roles)
+    openet_admin_enabled = bool({"Dev", "Root"} & user_roles)
+    allow_debris_flow = bool({"PowerUser", "Admin", "Root"} & user_roles)
     return {
         "ron": SimpleNamespace(
             mods=["openet_ts"],
@@ -73,6 +75,8 @@ def _bootstrap_context(user_roles: set[str]) -> dict:
         "current_ttl": None,
         "rq_job_ids": {},
         "playwright_load_all": False,
+        "openet_admin_enabled": openet_admin_enabled,
+        "allow_debris_flow": allow_debris_flow,
         "watershed": SimpleNamespace(
             has_channels=False,
             has_subcatchments=False,
@@ -222,26 +226,34 @@ def test_call_landuse_with_stale_mapping_recovery_raises_stale_write_for_non_sys
             run0_module._call_landuse_with_stale_mapping_recovery(landuse, producer)
 
 
-def test_view_mod_section_openet_denied_for_non_admin(
+def test_view_mod_section_openet_denied_for_non_dev(
     run0_client,
     monkeypatch: pytest.MonkeyPatch,
 ) -> None:
     client, module = run0_client
-    monkeypatch.setattr(module, "_openet_admin_enabled", lambda *, playwright_load_all: False)
+    monkeypatch.setattr(
+        module,
+        "_feature_role_enabled",
+        lambda mod_name, *, playwright_load_all: False if mod_name == "openet_ts" else True,
+    )
 
     response = client.get("/runs/run-1/cfg/view/mod/openet_ts")
 
     assert response.status_code == 200
     payload = response.get_json()
-    assert payload["error"]["message"] == "OpenET Time Series is restricted to Admin users"
+    assert payload["error"]["message"] == "OpenET Time Series is restricted to Dev users"
 
 
-def test_view_mod_section_openet_allows_admin(
+def test_view_mod_section_openet_allows_dev(
     run0_client,
     monkeypatch: pytest.MonkeyPatch,
 ) -> None:
     client, module = run0_client
-    monkeypatch.setattr(module, "_openet_admin_enabled", lambda *, playwright_load_all: True)
+    monkeypatch.setattr(
+        module,
+        "_feature_role_enabled",
+        lambda mod_name, *, playwright_load_all: True,
+    )
     monkeypatch.setattr(
         module,
         "_build_runs0_context",
@@ -303,18 +315,84 @@ def test_view_mod_section_geneva_renders_module_template(
     ]
 
 
-def test_run_page_bootstrap_openet_flag_false_for_non_admin(run0_template_app) -> None:
+def test_run_page_bootstrap_openet_flag_false_for_non_dev(run0_template_app) -> None:
     context = _bootstrap_context(set())
     with run0_template_app.app_context():
         js = render_template("run_page_bootstrap.js.j2", **context)
     assert _extract_openet_flag(js) == "false"
 
 
-def test_run_page_bootstrap_openet_flag_true_for_admin(run0_template_app) -> None:
-    context = _bootstrap_context({"Admin"})
+def test_run_page_bootstrap_openet_flag_true_for_dev(run0_template_app) -> None:
+    context = _bootstrap_context({"Dev"})
     with run0_template_app.app_context():
         js = render_template("run_page_bootstrap.js.j2", **context)
     assert _extract_openet_flag(js) == "true"
+
+
+def test_run_page_bootstrap_openet_flag_true_for_root(run0_template_app) -> None:
+    context = _bootstrap_context({"Root"})
+    with run0_template_app.app_context():
+        js = render_template("run_page_bootstrap.js.j2", **context)
+    assert _extract_openet_flag(js) == "true"
+
+
+def test_run_page_bootstrap_debris_flow_flag_false_for_non_power_roles(run0_template_app) -> None:
+    context = _bootstrap_context(set())
+    context["ron"].mods = ["debris_flow"]
+    with run0_template_app.app_context():
+        js = render_template("run_page_bootstrap.js.j2", **context)
+    assert _extract_mod_flag(js, "debris_flow") == "false"
+
+
+def test_run_page_bootstrap_debris_flow_flag_true_for_root(run0_template_app) -> None:
+    context = _bootstrap_context({"Root"})
+    context["ron"].mods = ["debris_flow"]
+    with run0_template_app.app_context():
+        js = render_template("run_page_bootstrap.js.j2", **context)
+    assert _extract_mod_flag(js, "debris_flow") == "true"
+
+
+def test_run_page_bootstrap_debris_flow_flag_respects_show_debris_flow_false(run0_template_app) -> None:
+    context = _bootstrap_context({"Root"})
+    context["ron"].mods = ["debris_flow"]
+    context["show_debris_flow"] = False
+    with run0_template_app.app_context():
+        js = render_template("run_page_bootstrap.js.j2", **context)
+    assert _extract_mod_flag(js, "debris_flow") == "false"
+
+
+def test_playwright_load_all_requires_test_support_flag(run0_template_app, run0_module, monkeypatch) -> None:
+    monkeypatch.setattr(run0_module, "current_user", _RoleUser({"Admin"}))
+    with run0_template_app.test_request_context("/runs/run-1/cfg/?playwright_load_all=true"):
+        assert run0_module._playwright_load_all_enabled() is False
+
+
+def test_playwright_load_all_requires_admin_role(run0_template_app, run0_module, monkeypatch) -> None:
+    run0_template_app.config["TEST_SUPPORT_ENABLED"] = True
+    monkeypatch.setattr(run0_module, "current_user", _RoleUser(set()))
+    with run0_template_app.test_request_context("/runs/run-1/cfg/?playwright_load_all=true"):
+        assert run0_module._playwright_load_all_enabled() is False
+
+
+def test_playwright_load_all_enabled_for_admin_in_test_support(
+    run0_template_app,
+    run0_module,
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    run0_template_app.config["TEST_SUPPORT_ENABLED"] = True
+    monkeypatch.setattr(run0_module, "current_user", _RoleUser({"Admin"}))
+    with run0_template_app.test_request_context("/runs/run-1/cfg/?playwright_load_all=true"):
+        assert run0_module._playwright_load_all_enabled() is True
+
+
+def test_build_runs0_context_does_not_elevate_debris_with_test_support_flag(run0_module) -> None:
+    source = Path(run0_module.__file__).read_text(encoding="utf-8")
+    allow_block = re.search(
+        r"allow_debris_flow\s*=\s*\((?:.|\n)*?\)\n\s*show_debris_flow",
+        source,
+    )
+    assert allow_block is not None
+    assert "TEST_SUPPORT_ENABLED" not in allow_block.group(0)
 
 
 def test_run_page_bootstrap_serializes_wepp_controller_job_id(run0_template_app) -> None:
@@ -346,6 +424,16 @@ def test_run_page_bootstrap_rusle_flag_true_with_disturbed(run0_template_app) ->
         js = render_template("run_page_bootstrap.js.j2", **context)
 
     assert _extract_mod_flag(js, "rusle") == "true"
+
+
+def test_run_page_bootstrap_rusle_flag_respects_show_rusle_false(run0_template_app) -> None:
+    context = _bootstrap_context(set())
+    context["ron"].mods = ["rusle", "disturbed"]
+    context["show_rusle"] = False
+    with run0_template_app.app_context():
+        js = render_template("run_page_bootstrap.js.j2", **context)
+
+    assert _extract_mod_flag(js, "rusle") == "false"
 
 
 def test_run_page_bootstrap_rusle_flag_false_for_topaz_backend(run0_template_app) -> None:

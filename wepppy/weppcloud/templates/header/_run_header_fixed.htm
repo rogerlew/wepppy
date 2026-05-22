@@ -1,28 +1,14 @@
 {% from "controls/_pure_macros.html" import header_text_field %}
-{% set header_mod_options = [
-  ('rap_ts', 'RAP Time Series'),
-  ('openet_ts', 'OpenET Time Series'),
-  ('ash', 'Ash Transport'),
-  ('treatments', 'Treatments'),
-  ('observed', 'Observed Data'),
-  ('debris_flow', 'Debris Flow'),
-  ('roads', 'Roads'),
-  ('geneva', 'Geneva'),
-  ('features_export', 'Features Export'),
-  ('dss_export', 'DSS Export'),
-  ('omni', 'Omni'),
-  ('path_ce', 'Path CE'),
-  ('rusle', 'RUSLE')
-] %}
+{% import "shared/maturity_pill_macros.htm" as maturity_ui %}
+{% set header_mod_options = header_mod_options if header_mod_options is defined else [] %}
 {% set current_mods = current_ron_mods if current_ron_mods is defined else (current_ron.mods or []) %}
-{% set allow_debris_flow = user.has_role('PowerUser') %}
-{% set rusle_backend_supported = rusle_backend_supported if rusle_backend_supported is defined else (watershed.delineation_backend_is_wbt if watershed is defined and watershed is not none and watershed.delineation_backend_is_wbt is defined else False) %}
 {% set last_modified_dt = get_last_modified(current_ron.runid) if current_ron is defined else None %}
 {% set last_modified_display = last_modified_dt.strftime('%Y-%m-%d %H:%M:%S') ~ ' UTC' if last_modified_dt else None %}
 {% set last_modified_epoch = last_modified_dt.timestamp()|int if last_modified_dt else None %}
 {% set view_args = request.view_args if request and request.view_args else {} %}
 {% set view_runid = view_args.get('runid', current_ron.runid) %}
 {% set view_config = view_args.get('config', current_ron.config_stem) %}
+{% set maturity_definition_href = maturity_definition_href if maturity_definition_href is defined else (url_for('usersum.view_markdown', category='weppcloud', filename='user-guide.md') ~ '#feature-maturity-labels') %}
 <header class="wc-header wc-run-header wc-run-header--hideaway">
   <div class="wc-container wc-container--fluid">
     <div class="wc-run-header__inner">
@@ -35,6 +21,9 @@
         <span class="wc-run-header__version">
           NoDb v{{ current_ron.nodb_version|default('?', false) }}
         </span>
+        {% if run_config_maturity_label is defined and run_config_maturity_label %}
+        {{ maturity_ui.maturity_pill(run_config_maturity_label, href=run_config_maturity_href if run_config_maturity_href is defined else maturity_definition_href, title="Interface maturity: " ~ run_config_maturity_label, new_tab=True) }}
+        {% endif %}
         {% if last_modified_display %}
         <span class="wc-run-header__meta js-run-last-modified"
               data-run-last-modified="{{ last_modified_epoch }}"
@@ -109,15 +98,17 @@
               Mods
             </summary>
             <div class="wc-run-header__menu-content">
-              {% for mod_name, mod_label in header_mod_options %}
-              {% if (mod_name != 'openet_ts' or user.has_role('Admin')) and (mod_name != 'debris_flow' or allow_debris_flow) and (mod_name != 'rusle' or ('disturbed' in current_mods and rusle_backend_supported)) %}
+              {% for mod_item in header_mod_options %}
+              {% set mod_id = mod_item.id %}
+              {% set mod_text = mod_item.label %}
+              {% set mod_badge = mod_item.maturity_badge if mod_item.maturity_badge is defined else None %}
+              {% set mod_badge_href = maturity_definition_href %}
               <label class="wc-run-header__toggle">
                 <input type="checkbox"
-                       data-project-mod="{{ mod_name }}"
-                       {% if mod_name in current_mods %}checked{% endif %}>
-                <span>{{ mod_label }}</span>
+                       data-project-mod="{{ mod_id }}"
+                       {% if mod_id in current_mods %}checked{% endif %}>
+                <span>{{ mod_text }}{% if mod_badge %} {{ maturity_ui.maturity_pill(mod_badge, href=mod_badge_href, title="Feature maturity: " ~ mod_badge, new_tab=True) }}{% endif %}</span>
               </label>
-              {% endif %}
               {% endfor %}
               <hr>
               <a class="wc-run-header__menu-link"

@@ -1,4 +1,4 @@
-{% import "controls/_pure_macros.html" as ui %}
+{% import "controls/_pure_macros.html" as ui with context %}
 {% set disturbed_runid = runid if runid is defined else (ron.runid if ron is defined else None) %}
 {% set disturbed_config = config if config is defined else (ron.config_stem if ron is defined else None) %}
 {% set disturbed_mod_enabled = ron is defined and 'disturbed' in (ron.mods or []) %}

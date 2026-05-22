@@ -1,0 +1,13 @@
+{% import "controls/_pure_macros.html" as ui with context %}
+
+{% call ui.control_shell(
+     form_id="internal_workflow_placeholder",
+     title="Internal Workflow",
+     collapsible=False,
+     summary_panel_override='',
+     stacktrace_panel_override=''
+   ) %}
+  <p class="wc-text-muted">
+    This capability is managed through internal or API-backed workflows and is not configured directly from this run control.
+  </p>
+{% endcall %}

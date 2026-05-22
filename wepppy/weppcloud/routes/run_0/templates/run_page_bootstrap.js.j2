@@ -4,7 +4,8 @@
 
 (function () {
     {% set mods_list = ron.mods or [] %}
-    {% set openet_admin_enabled = current_user.has_role('Admin') or playwright_load_all %}
+    {% set openet_admin_enabled = openet_admin_enabled if openet_admin_enabled is defined else playwright_load_all %}
+    {% set allow_debris_flow = allow_debris_flow if allow_debris_flow is defined else playwright_load_all %}
     {% if ron.boundary %}
     {% set boundary = {
         "url": site_prefix ~ "/" ~ ron.boundary,
@@ -44,6 +45,16 @@
     {% endif %}
 
     {% set ash_enabled = show_ash if show_ash is defined else ((('ash' in mods_list) and (ash is defined) and (ash is not none)) or playwright_load_all) %}
+    {% set show_omni = show_omni if show_omni is defined else ('omni' in mods_list or playwright_load_all) %}
+    {% set show_roads = show_roads if show_roads is defined else ('roads' in mods_list or playwright_load_all) %}
+    {% set show_geneva = show_geneva if show_geneva is defined else ('geneva' in mods_list or playwright_load_all) %}
+    {% set show_features_export = show_features_export if show_features_export is defined else ('features_export' in mods_list or playwright_load_all) %}
+    {% set show_dss_export = show_dss_export if show_dss_export is defined else ('dss_export' in mods_list or playwright_load_all) %}
+    {% set show_path_ce = show_path_ce if show_path_ce is defined else ('path_ce' in mods_list or playwright_load_all) %}
+    {% set show_rap_ts = show_rap_ts if show_rap_ts is defined else ('rap_ts' in mods_list or playwright_load_all) %}
+    {% set show_treatments = show_treatments if show_treatments is defined else ('treatments' in mods_list or playwright_load_all) %}
+    {% set show_observed = show_observed if show_observed is defined else ('observed' in mods_list or playwright_load_all) %}
+    {% set show_debris_flow = show_debris_flow if show_debris_flow is defined else ((('debris_flow' in mods_list) and allow_debris_flow) or playwright_load_all) %}
     {% set ash_has_results = False %}
     {% set ash_depth_mode = None %}
     {% if ash_enabled and ash is defined and ash is not none %}
@@ -58,6 +69,7 @@
 {% set baer_uniform = baer.uniform_severity if baer is not none else disturbed_uniform %}
 {% set hide_landuse_wepp = 'rhem' in mods_list %}
 {% set rusle_backend_supported = rusle_backend_supported if rusle_backend_supported is defined else (watershed.delineation_backend_is_wbt if watershed is defined and watershed is not none and watershed.delineation_backend_is_wbt is defined else False) %}
+{% set show_rusle = show_rusle if show_rusle is defined else ((('rusle' in mods_list) and ('disturbed' in mods_list) and rusle_backend_supported) or playwright_load_all) %}
 {% set ttl_state = current_ttl if current_ttl is defined else None %}
 
     var sitePrefix = {{ site_prefix | tojson }};
@@ -94,19 +106,19 @@
                 "disturbed": 'disturbed' in mods_list,
                 "rangeland_cover": 'rangeland_cover' in mods_list,
                 "ash": ash_enabled,
-                "omni": 'omni' in mods_list,
+                "omni": show_omni,
                 "rhem": 'rhem' in mods_list,
-                "dss_export": 'dss_export' in mods_list,
-                "path_ce": 'path_ce' in mods_list,
-                "debris_flow": 'debris_flow' in mods_list,
-                "roads": 'roads' in mods_list,
-                "geneva": 'geneva' in mods_list,
-                "features_export": 'features_export' in mods_list,
-                "rap_ts": 'rap_ts' in mods_list,
+                "dss_export": show_dss_export,
+                "path_ce": show_path_ce,
+                "debris_flow": show_debris_flow,
+                "roads": show_roads,
+                "geneva": show_geneva,
+                "features_export": show_features_export,
+                "rap_ts": show_rap_ts,
                 "openet_ts": ('openet_ts' in mods_list) and openet_admin_enabled,
-                "treatments": 'treatments' in mods_list,
-                "observed": 'observed' in mods_list,
-                "rusle": ('rusle' in mods_list) and ('disturbed' in mods_list) and rusle_backend_supported
+                "treatments": show_treatments,
+                "observed": show_observed,
+                "rusle": show_rusle
             }
         },
         "flags": {

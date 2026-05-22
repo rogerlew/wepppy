@@ -1,6 +1,22 @@
 {% extends "base_pure.htm" %}
 {% import "shared/cap_macros.htm" as cap_macros %}
+{% import "shared/maturity_pill_macros.htm" as maturity_ui %}
 {% set create_action = "/rq-engine/create/" %}
+{% set config_registry_map = config_registry_map if config_registry_map is defined else {} %}
+{% set config_maturity_labels = config_maturity_labels if config_maturity_labels is defined else {} %}
+{% set visible_config_ids = visible_config_ids if visible_config_ids is defined else none %}
+{% set maturity_definition_href = maturity_definition_href if maturity_definition_href is defined else (url_for('usersum.view_markdown', category='weppcloud', filename='user-guide.md') ~ '#feature-maturity-labels') %}
+
+{% macro config_value(config_id) -%}
+  {{ config_registry_map.get(config_id).id if config_registry_map and config_registry_map.get(config_id) else config_id }}
+{%- endmacro %}
+
+{% macro maturity_badge(config_id) -%}
+  {% set label = config_maturity_labels.get(config_id) if config_maturity_labels else none %}
+  {% if label -%}
+  {{ maturity_ui.maturity_pill(label, href=maturity_definition_href, title="Interface maturity: " ~ label, new_tab=True) }}
+  {%- endif %}
+{%- endmacro %}
 
 {% block title %}WEPPcloud{% endblock %}
 
@@ -60,6 +76,18 @@
 
 {% block head_extras %}
   {{ super() }}
+  <style>
+    .wc-feature__heading-row {
+      display: inline-flex;
+      align-items: center;
+      flex-wrap: wrap;
+      gap: var(--wc-space-sm);
+    }
+
+    .wc-feature__heading-row :is(h2, h3) {
+      margin: 0;
+    }
+  </style>
   {% if not current_user.is_authenticated %}
   <style>
     .wc-login-bypass-banner {
@@ -209,13 +237,23 @@
   </section>
   {% endif %}
 
+  {% set show_disturbed_card = (
+    visible_config_ids is none
+    or 'disturbed9002' in visible_config_ids
+    or 'disturbed-hi' in visible_config_ids
+    or 'disturbed-ak' in visible_config_ids
+  ) %}
+  {% if show_disturbed_card %}
   <section class="wc-panel" aria-labelledby="section-disturbed">
     <article class="wc-feature">
       <div class="wc-feature__media">
         <img src="{{ url_for('static', filename='images/interfaces/disturbed.png') }}?v=20251212" alt="Disturbed interface illustration" />
       </div>
       <div class="wc-feature__body">
-        <h2 id="section-disturbed">WEPPcloud-(Un)Disturbed for United States</h2>
+        <div class="wc-feature__heading-row">
+          <h2 id="section-disturbed">WEPPcloud-(Un)Disturbed for United States</h2>
+          {{ maturity_badge('disturbed9002') }}
+        </div>
         <p>
           The WEPPcloud-Disturbed interface allows users to upload burn severity maps and predict erosion based on fire impacts.
           Unburned conditions can be analyzed by skipping the burn severity map. <a href="https://www.nrcs.usda.gov/resources/data-and-reports/soil-survey-geographic-database-ssurgo">SSURGO</a>-derived soils and <a href="https://www.usgs.gov/centers/eros/science/national-land-cover-database">NLCD</a> landuse parameterize
@@ -230,8 +268,9 @@
         {{ cap_macros.cap_prompt("disturbed", "cap-disturbed", cap_base_url, cap_site_key) }}
         {% endif %}
         <div class="wc-feature__actions">
+          {% if visible_config_ids is none or 'disturbed9002' in visible_config_ids %}
           <form class="wc-run-form" method="post" action="{{ create_action }}"{% if not current_user.is_authenticated %} data-cap-section="disturbed" data-cap-required="true"{% endif %}>
-            <input type="hidden" name="config" value="disturbed9002">
+            <input type="hidden" name="config" value="{{ config_value('disturbed9002') }}">
             {% if not current_user.is_authenticated %}
             <input type="hidden" name="cap_token" value="" data-cap-token>
             {% endif %}
@@ -245,8 +284,10 @@
               Start Disturbed Run (CONUS)
             </button>
           </form>
+          {% endif %}
+          {% if visible_config_ids is none or 'disturbed-hi' in visible_config_ids %}
           <form class="wc-run-form" method="post" action="{{ create_action }}"{% if not current_user.is_authenticated %} data-cap-section="disturbed" data-cap-required="true"{% endif %}>
-            <input type="hidden" name="config" value="disturbed-hi">
+            <input type="hidden" name="config" value="{{ config_value('disturbed-hi') }}">
             {% if not current_user.is_authenticated %}
             <input type="hidden" name="cap_token" value="" data-cap-token>
             {% endif %}
@@ -257,11 +298,13 @@
                     data-run-menu
                     data-run-action="{{ create_action }}"
                     {% if not current_user.is_authenticated %}aria-disabled="true" disabled{% endif %}>
-              Start Disturbed-Hawaii Run (Experimental)
+              Start Disturbed-Hawaii Run
             </button>
           </form>
+          {% endif %}
+          {% if visible_config_ids is none or 'disturbed-ak' in visible_config_ids %}
           <form class="wc-run-form" method="post" action="{{ create_action }}"{% if not current_user.is_authenticated %} data-cap-section="disturbed" data-cap-required="true"{% endif %}>
-            <input type="hidden" name="config" value="disturbed-ak">
+            <input type="hidden" name="config" value="{{ config_value('disturbed-ak') }}">
             {% if not current_user.is_authenticated %}
             <input type="hidden" name="cap_token" value="" data-cap-token>
             {% endif %}
@@ -272,21 +315,27 @@
                     data-run-menu
                     data-run-action="{{ create_action }}"
                     {% if not current_user.is_authenticated %}aria-disabled="true" disabled{% endif %}>
-              Start Disturbed-Alaska Run (Experimental)
+              Start Disturbed-Alaska Run
             </button>
           </form>
+          {% endif %}
         </div>
       </div>
     </article>
   </section>
+  {% endif %}
 
+  {% if visible_config_ids is none or 'disturbed9002_wbt' in visible_config_ids %}
   <section class="wc-panel" aria-labelledby="section-disturbed-wbt">
     <article class="wc-feature">
       <div class="wc-feature__media">
         <img src="{{ url_for('static', filename='images/interfaces/disturbed_wbt.png') }}?v=20260129" alt="Disturbed WBT interface illustration" />
       </div>
       <div class="wc-feature__body">
-        <h2 id="section-disturbed-wbt">WEPPcloud-(Un)Disturbed-WBT</h2>
+        <div class="wc-feature__heading-row">
+          <h2 id="section-disturbed-wbt">WEPPcloud-(Un)Disturbed-WBT</h2>
+          {{ maturity_badge('disturbed9002_wbt') }}
+        </div>
         <p>
           WEPPcloud-(Un)Disturbed-WBT is the successor to TOPAZ-based delineation for the (Un)Disturbed workflow. It uses the
           WhiteboxTools hard fork <a href="https://github.com/rogerlew/weppcloud-wbt">WEPPcloud-WBT</a> for watershed preprocessing and hillslope delineation.
@@ -300,7 +349,7 @@
         {% endif %}
         <div class="wc-feature__actions">
           <form class="wc-run-form" method="post" action="{{ create_action }}"{% if not current_user.is_authenticated %} data-cap-section="disturbed" data-cap-required="true"{% endif %}>
-            <input type="hidden" name="config" value="disturbed9002_wbt">
+            <input type="hidden" name="config" value="{{ config_value('disturbed9002_wbt') }}">
             {% if not current_user.is_authenticated %}
             <input type="hidden" name="cap_token" value="" data-cap-token>
             {% endif %}
@@ -318,14 +367,26 @@
       </div>
     </article>
   </section>
+  {% endif %}
 
+  {% set show_reveg_card = (
+    visible_config_ids is none
+    or 'reveg' in visible_config_ids
+    or 'reveg-mofe' in visible_config_ids
+    or 'reveg-10m-mofe' in visible_config_ids
+    or 'disturbed-ak' in visible_config_ids
+  ) %}
+  {% if show_reveg_card %}
   <section class="wc-panel" aria-labelledby="section-revegetation">
     <article class="wc-feature">
       <div class="wc-feature__media">
         <img src="{{ url_for('static', filename='images/interfaces/revegetation.png') }}?v=20251212" alt="Revegetation interface illustration" />
       </div>
       <div class="wc-feature__body">
-        <h2 id="section-revegetation">WEPPcloud-Revegetation for United States</h2>
+        <div class="wc-feature__heading-row">
+          <h2 id="section-revegetation">WEPPcloud-Revegetation for United States</h2>
+          {{ maturity_badge('reveg') }}
+        </div>
         <p>
           The WEPPcloud-Revegetation interface supports burn severity uploads and leverages historical vegetative cover data from the
           <a href="https://rangelands.app/">Rangeland Analysis Platform (RAP)</a> to model post-fire hydrology and erosion.
@@ -336,8 +397,9 @@
         {{ cap_macros.cap_prompt("revegetation", "cap-revegetation", cap_base_url, cap_site_key) }}
         {% endif %}
         <div class="wc-feature__actions">
+          {% if visible_config_ids is none or 'reveg' in visible_config_ids %}
           <form class="wc-run-form" method="post" action="{{ create_action }}"{% if not current_user.is_authenticated %} data-cap-section="revegetation" data-cap-required="true"{% endif %}>
-            <input type="hidden" name="config" value="reveg">
+            <input type="hidden" name="config" value="{{ config_value('reveg') }}">
             {% if not current_user.is_authenticated %}
             <input type="hidden" name="cap_token" value="" data-cap-token>
             {% endif %}
@@ -351,8 +413,10 @@
               Start Revegetation Run (CONUS)
             </button>
           </form>
+          {% endif %}
+          {% if visible_config_ids is none or 'reveg-mofe' in visible_config_ids %}
           <form class="wc-run-form" method="post" action="{{ create_action }}"{% if not current_user.is_authenticated %} data-cap-section="revegetation" data-cap-required="true"{% endif %}>
-            <input type="hidden" name="config" value="reveg-mofe">
+            <input type="hidden" name="config" value="{{ config_value('reveg-mofe') }}">
             {% if not current_user.is_authenticated %}
             <input type="hidden" name="cap_token" value="" data-cap-token>
             {% endif %}
@@ -366,8 +430,10 @@
               Start Multiple OFE Revegetation Run (CONUS)
             </button>
           </form>
+          {% endif %}
+          {% if visible_config_ids is none or 'reveg-10m-mofe' in visible_config_ids %}
           <form class="wc-run-form" method="post" action="{{ create_action }}"{% if not current_user.is_authenticated %} data-cap-section="revegetation" data-cap-required="true"{% endif %}>
-            <input type="hidden" name="config" value="reveg-10m-mofe">
+            <input type="hidden" name="config" value="{{ config_value('reveg-10m-mofe') }}">
             {% if not current_user.is_authenticated %}
             <input type="hidden" name="cap_token" value="" data-cap-token>
             {% endif %}
@@ -381,8 +447,10 @@
               Start 10m Multiple OFE Revegetation Run (CONUS)
             </button>
           </form>
+          {% endif %}
+          {% if visible_config_ids is none or 'disturbed-ak' in visible_config_ids %}
           <form class="wc-run-form" method="post" action="{{ create_action }}"{% if not current_user.is_authenticated %} data-cap-section="revegetation" data-cap-required="true"{% endif %}>
-            <input type="hidden" name="config" value="disturbed-ak">
+            <input type="hidden" name="config" value="{{ config_value('disturbed-ak') }}">
             {% if not current_user.is_authenticated %}
             <input type="hidden" name="cap_token" value="" data-cap-token>
             {% endif %}
@@ -393,21 +461,27 @@
                     data-run-menu
                     data-run-action="{{ create_action }}"
                     {% if not current_user.is_authenticated %}aria-disabled="true" disabled{% endif %}>
-              Start Disturbed-Alaska Run (Experimental)
+              Start Disturbed-Alaska Run
             </button>
           </form>
+          {% endif %}
         </div>
       </div>
     </article>
   </section>
+  {% endif %}
 
+  {% if visible_config_ids is none or 'eu-disturbed' in visible_config_ids %}
   <section class="wc-panel" aria-labelledby="section-eu">
     <article class="wc-feature">
       <div class="wc-feature__media">
         <img src="{{ url_for('static', filename='images/interfaces/europe.png') }}?v=20251219" alt="European interface illustration" />
       </div>
       <div class="wc-feature__body">
-        <h2 id="section-eu">WEPPcloud-EU</h2>
+        <div class="wc-feature__heading-row">
+          <h2 id="section-eu">WEPPcloud-EU</h2>
+          {{ maturity_badge('eu-disturbed') }}
+        </div>
         <p>WEPPcloud for Europe uses <a href="https://esdac.jrc.ec.europa.eu/resource-type/datasets">ESDAC</a> landuses to assign managements and builds soils from ESDAC and <a href="https://esdac.jrc.ec.europa.eu/content/3d-soil-hydraulic-database-europe-1-km-and-250-m-resolution">EU-SoilHydroGrids</a> data. U.S. climate stations are selected using <a href="https://surfobs.climate.copernicus.eu/dataaccess/access_eobs.php">E-OBS</a> monthly precipitation and temperature patterns.</p>
         <p>
           The PeP interfaces extend post-fire erosion modeling and WATAR ash transport modeling by parameterizing soils based on burn severity and soil texture via Disturbed WEPP soil files.
@@ -420,7 +494,7 @@
         {% endif %}
         <div class="wc-feature__actions">
           <form class="wc-run-form" method="post" action="{{ create_action }}"{% if not current_user.is_authenticated %} data-cap-section="eu" data-cap-required="true"{% endif %}>
-            <input type="hidden" name="config" value="eu-disturbed">
+            <input type="hidden" name="config" value="{{ config_value('eu-disturbed') }}">
             {% if not current_user.is_authenticated %}
             <input type="hidden" name="cap_token" value="" data-cap-token>
             {% endif %}
@@ -438,21 +512,26 @@
       </div>
     </article>
   </section>
+  {% endif %}
 
+  {% if visible_config_ids is none or 'au-disturbed' in visible_config_ids %}
   <section class="wc-panel" aria-labelledby="section-au">
     <article class="wc-feature">
       <div class="wc-feature__media">
         <img src="{{ url_for('static', filename='images/interfaces/australia.png') }}?v=20251219" alt="Australian interface illustration" />
       </div>
       <div class="wc-feature__body">
-        <h2 id="section-au">WEPPcloud-AU</h2>
+        <div class="wc-feature__heading-row">
+          <h2 id="section-au">WEPPcloud-AU</h2>
+          {{ maturity_badge('au-disturbed') }}
+        </div>
         <p>WEPPcloud for Australia assigns managements from the Land Use of Australia 2010-11 dataset and constructs soils from <a href="https://www.asris.csiro.au">ASRIS</a> data. U.S. climate stations are selected using AGDC monthly precipitation and temperature patterns.</p>
         {% if not current_user.is_authenticated %}
         {{ cap_macros.cap_prompt("au", "cap-au", cap_base_url, cap_site_key) }}
         {% endif %}
         <div class="wc-feature__actions">
           <form class="wc-run-form" method="post" action="{{ create_action }}"{% if not current_user.is_authenticated %} data-cap-section="au" data-cap-required="true"{% endif %}>
-            <input type="hidden" name="config" value="au-disturbed">
+            <input type="hidden" name="config" value="{{ config_value('au-disturbed') }}">
             {% if not current_user.is_authenticated %}
             <input type="hidden" name="cap_token" value="" data-cap-token>
             {% endif %}
@@ -463,21 +542,26 @@
                     data-run-menu
                     data-run-action="{{ create_action }}"
                     {% if not current_user.is_authenticated %}aria-disabled="true" disabled{% endif %}>
-              Start AU-Disturbed WEPPcloud Run w/ WATAR (Experimental)
+              Start AU-Disturbed WEPPcloud Run w/ WATAR
             </button>
           </form>
         </div>
       </div>
     </article>
   </section>
+  {% endif %}
 
+  {% if visible_config_ids is none or 'earth' in visible_config_ids %}
   <section class="wc-panel" aria-labelledby="section-earth">
     <article class="wc-feature">
       <div class="wc-feature__media">
         <img src="{{ url_for('static', filename='images/interfaces/earth-interface.png') }}?v=20260405" alt="Earth interface illustration" />
       </div>
       <div class="wc-feature__body">
-        <h2 id="section-earth">WEPPcloud-(Un)Disturbed-Earth</h2>
+        <div class="wc-feature__heading-row">
+          <h2 id="section-earth">WEPPcloud-(Un)Disturbed-Earth</h2>
+          {{ maturity_badge('earth') }}
+        </div>
         <p>
           The Earth interface extends the disturbed or undisturbed workflow to watersheds outside the dedicated U.S., EU, and AU
           configurations. It uses <a href="https://dataspace.copernicus.eu/explore-data/data-collections/copernicus-contributing-missions/collections-description/COP-DEM">Copernicus DEM 30 m</a>,
@@ -498,7 +582,7 @@
         {% endif %}
         <div class="wc-feature__actions">
           <form class="wc-run-form" method="post" action="{{ create_action }}"{% if not current_user.is_authenticated %} data-cap-section="earth" data-cap-required="true"{% endif %}>
-            <input type="hidden" name="config" value="earth">
+            <input type="hidden" name="config" value="{{ config_value('earth') }}">
             {% if not current_user.is_authenticated %}
             <input type="hidden" name="cap_token" value="" data-cap-token>
             {% endif %}
@@ -516,14 +600,19 @@
       </div>
     </article>
   </section>
+  {% endif %}
 
+  {% if visible_config_ids is none or 'rhem' in visible_config_ids %}
   <section class="wc-panel" aria-labelledby="section-rhem">
     <article class="wc-feature">
       <div class="wc-feature__media">
         <img src="{{ url_for('static', filename='images/interfaces/rhem.png') }}?v=20251220" alt="RHEM interface illustration" />
       </div>
       <div class="wc-feature__body">
-        <h2 id="section-rhem">WEPPcloud-RHEM</h2>
+        <div class="wc-feature__heading-row">
+          <h2 id="section-rhem">WEPPcloud-RHEM</h2>
+          {{ maturity_badge('rhem') }}
+        </div>
         <p>
           Run the <a href="https://apps.tucson.ars.ag.gov/rhem/">Rangeland Hydrology and Erosion Model (RHEM)</a> across the United States. Where available, foliar and ground covers are
           estimated from NLCD Shrubland 2016 data, while SURGO/STATSGO identifies soil textures.
@@ -533,7 +622,7 @@
         {% endif %}
         <div class="wc-feature__actions">
           <form class="wc-run-form" method="post" action="{{ create_action }}"{% if not current_user.is_authenticated %} data-cap-section="rhem" data-cap-required="true"{% endif %}>
-            <input type="hidden" name="config" value="rhem">
+            <input type="hidden" name="config" value="{{ config_value('rhem') }}">
             {% if not current_user.is_authenticated %}
             <input type="hidden" name="cap_token" value="" data-cap-token>
             {% endif %}
@@ -544,13 +633,14 @@
                     data-run-menu
                     data-run-action="{{ create_action }}"
                     {% if not current_user.is_authenticated %}aria-disabled="true" disabled{% endif %}>
-              Start RHEM Run (Experimental)
+              Start RHEM Run
             </button>
           </form>
         </div>
       </div>
     </article>
   </section>
+  {% endif %}
 
   <section class="wc-panel wc-stack" aria-labelledby="section-site-resources">
     <h2 id="section-site-resources">Site Specific Resources</h2>
@@ -583,14 +673,25 @@
     </article>
   </section>
 
+  {% set show_legacy_section = (
+    visible_config_ids is none
+    or '0' in visible_config_ids
+    or '13' in visible_config_ids
+    or 'baer' in visible_config_ids
+  ) %}
+  {% if show_legacy_section %}
   <section class="wc-panel wc-stack" aria-labelledby="section-legacy">
     <h2 id="section-legacy">Legacy Interfaces</h2>
+    {% if visible_config_ids is none or '0' in visible_config_ids or '13' in visible_config_ids %}
     <article class="wc-feature">
       <div class="wc-feature__media">
         <img src="{{ url_for('static', filename='images/interfaces/legacy-weppcloud.png') }}?v=20251212" alt="Legacy WEPPcloud interface" />
       </div>
       <div class="wc-feature__body">
-        <h3>WEPPcloud</h3>
+        <div class="wc-feature__heading-row">
+          <h3>WEPPcloud</h3>
+          {{ maturity_badge('0') }}
+        </div>
         <p>
           Run WEPP anywhere in the continental United States. Legacy interface. Since 2021 we recommend using WEPPcloud-US instead of WEPP-PEP.
           WEPP-PEP is limited to four general soils based on textures, whereas WEPPcloud-Disturbed incorporates spatial soil variability from
@@ -602,8 +703,9 @@
         {{ cap_macros.cap_prompt("legacy-weppcloud", "cap-legacy-weppcloud", cap_base_url, cap_site_key) }}
         {% endif %}
         <div class="wc-feature__actions">
+          {% if visible_config_ids is none or '0' in visible_config_ids %}
           <form class="wc-run-form" method="post" action="{{ create_action }}"{% if not current_user.is_authenticated %} data-cap-section="legacy-weppcloud" data-cap-required="true"{% endif %}>
-            <input type="hidden" name="config" value="0">
+            <input type="hidden" name="config" value="{{ config_value('0') }}">
             {% if not current_user.is_authenticated %}
             <input type="hidden" name="cap_token" value="" data-cap-token>
             {% endif %}
@@ -616,8 +718,10 @@
               Start WEPPcloud Run
             </button>
           </form>
+          {% endif %}
+          {% if visible_config_ids is none or '13' in visible_config_ids %}
           <form class="wc-run-form" method="post" action="{{ create_action }}"{% if not current_user.is_authenticated %} data-cap-section="legacy-weppcloud" data-cap-required="true"{% endif %}>
-            <input type="hidden" name="config" value="13">
+            <input type="hidden" name="config" value="{{ config_value('13') }}">
             {% if not current_user.is_authenticated %}
             <input type="hidden" name="cap_token" value="" data-cap-token>
             {% endif %}
@@ -627,18 +731,24 @@
                     data-run-menu
                     data-run-action="{{ create_action }}"
                     {% if not current_user.is_authenticated %}aria-disabled="true" disabled{% endif %}>
-              10m (Experimental)
+              10m
             </button>
           </form>
+          {% endif %}
         </div>
       </div>
     </article>
+    {% endif %}
+    {% if visible_config_ids is none or 'baer' in visible_config_ids %}
     <article class="wc-feature">
       <div class="wc-feature__media">
         <img src="{{ url_for('static', filename='images/interfaces/baer-pep.png') }}?v=20251212" alt="WEPPcloud-PEP interface" />
       </div>
       <div class="wc-feature__body">
-        <h3>WEPPcloud-PEP w/ WATAR</h3>
+        <div class="wc-feature__heading-row">
+          <h3>WEPPcloud-PEP w/ WATAR</h3>
+          {{ maturity_badge('baer') }}
+        </div>
         <p>
           Legacy interface. Since 2021 we recommend using WEPPcloud-(Un)Disturbed instead of WEPP-PEP. WEPP-PEP is limited to four general soils based on textures, whereas
           WEPPcloud-(Un)Disturbed incorporates spatial soil variability from SSURGO/STATSGO databases.
@@ -652,7 +762,7 @@
         {% endif %}
         <div class="wc-feature__actions">
           <form class="wc-run-form" method="post" action="{{ create_action }}"{% if not current_user.is_authenticated %} data-cap-section="legacy-baer" data-cap-required="true"{% endif %}>
-            <input type="hidden" name="config" value="baer">
+            <input type="hidden" name="config" value="{{ config_value('baer') }}">
             {% if not current_user.is_authenticated %}
             <input type="hidden" name="cap_token" value="" data-cap-token>
             {% endif %}
@@ -671,7 +781,9 @@
         </p>
       </div>
     </article>
+    {% endif %}
   </section>
+  {% endif %}
 
 </div>
 {% endblock %}

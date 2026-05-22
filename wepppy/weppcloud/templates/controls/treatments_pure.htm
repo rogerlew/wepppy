@@ -1,5 +1,5 @@
 {# Doc: controllers_js/README.md — Treatments Controller Reference (2025 helper migration) #}
-{% import "controls/_pure_macros.html" as ui %}
+{% import "controls/_pure_macros.html" as ui with context %}
 {% from "shared/console_macros.htm" import button_row %}
 
 {% set current_mode = treatments.mode.value if treatments.mode is not none else 1 %}
@@ -59,7 +59,7 @@
 
 {% call ui.control_shell(
      form_id="treatments_form",
-     title="Treatments (Experimental)",
+     title="Treatments",
      description=description,
      collapsible=True,
      open=False,

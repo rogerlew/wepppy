@@ -1,0 +1,252 @@
+version: 1
+internal_prerequisites:
+  - disturbed
+  - polaris
+features:
+  - id: rap_ts
+    label: RAP Time Series
+    nav_label: RAP Time Series
+    section_id: rap-ts
+    section_class: wc-stack
+    section_template: controls/rap_ts_pure.htm
+    maturity: stable
+    internal_reason: null
+    min_role: user
+    requires_backend: any
+    requires_features: []
+    enable_dependencies: []
+    disable_blockers: []
+
+  - id: openet_ts
+    label: OpenET Time Series
+    nav_label: OpenET Time Series
+    section_id: openet-ts
+    section_class: wc-stack
+    section_template: controls/openet_ts_pure.htm
+    maturity: internal
+    internal_reason: api_constrained
+    embargo_until: null
+    min_role: dev
+    requires_backend: any
+    requires_features: []
+    enable_dependencies: []
+    disable_blockers: []
+
+  - id: treatments
+    label: Treatments
+    nav_label: Treatments
+    section_id: treatments
+    section_class: wc-stack
+    section_template: controls/treatments_pure.htm
+    maturity: preview
+    internal_reason: null
+    min_role: user
+    requires_backend: any
+    requires_features: []
+    enable_dependencies: []
+    disable_blockers:
+      - omni
+
+  - id: ash
+    label: Ash Transport
+    nav_label: Ash Transport
+    section_id: ash
+    section_class: wc-stack
+    section_template: controls/ash_pure.htm
+    maturity: experimental
+    internal_reason: null
+    min_role: user
+    requires_backend: any
+    requires_features: []
+    enable_dependencies: []
+    disable_blockers: []
+
+  - id: omni
+    label: Omni Scenarios
+    nav_label: Omni Scenarios
+    section_id: omni-scenarios
+    section_class: wc-stack
+    section_template: controls/omni_scenarios_pure.htm
+    maturity: preview
+    internal_reason: null
+    min_role: user
+    requires_backend: any
+    requires_features: []
+    enable_dependencies:
+      - treatments
+    disable_blockers: []
+
+  - id: omni_contrasts
+    label: Omni Contrasts
+    nav_label: Omni Contrasts
+    section_id: omni-contrasts
+    section_class: wc-stack
+    section_template: controls/omni_contrasts_pure.htm
+    maturity: internal
+    internal_reason: publication_embargo
+    embargo_until: "2027-05-22"
+    min_role: dev
+    requires_backend: any
+    requires_features:
+      - omni
+    enable_dependencies: []
+    disable_blockers: []
+
+  - id: observed
+    label: Observed Data
+    nav_label: Observed Data
+    section_id: observed
+    section_class: wc-stack
+    section_template: controls/observed_pure.htm
+    maturity: preview
+    internal_reason: null
+    min_role: user
+    requires_backend: any
+    requires_features: []
+    enable_dependencies: []
+    disable_blockers: []
+
+  - id: debris_flow
+    label: Debris Flow
+    nav_label: Debris Flow
+    section_id: debris-flow
+    section_class: wc-stack
+    section_template: controls/debris_flow_pure.htm
+    maturity: stable
+    internal_reason: null
+    min_role: poweruser
+    requires_backend: any
+    requires_features: []
+    enable_dependencies: []
+    disable_blockers: []
+
+  - id: roads
+    label: Roads
+    nav_label: Roads
+    section_id: roads
+    section_class: wc-stack
+    section_template: controls/roads_pure.htm
+    maturity: experimental
+    internal_reason: null
+    min_role: user
+    requires_backend: wbt
+    requires_features: []
+    enable_dependencies: []
+    disable_blockers: []
+
+  - id: geneva
+    label: Geneva
+    nav_label: Geneva
+    section_id: geneva
+    section_class: wc-stack
+    section_template: controls/geneva_pure.htm
+    maturity: preview
+    internal_reason: null
+    min_role: user
+    requires_backend: wbt
+    requires_features: []
+    enable_dependencies: []
+    disable_blockers: []
+
+  - id: features_export
+    label: Features Export
+    nav_label: Features Export
+    section_id: features-export
+    section_class: wc-stack
+    section_template: controls/features_export_pure.htm
+    maturity: preview
+    internal_reason: null
+    min_role: user
+    requires_backend: any
+    requires_features: []
+    enable_dependencies: []
+    disable_blockers: []
+
+  - id: dss_export
+    label: DSS Export
+    nav_label: DSS Export
+    section_id: dss-export
+    section_class: wc-stack
+    section_template: controls/dss_export_pure.htm
+    maturity: preview
+    internal_reason: null
+    min_role: user
+    requires_backend: any
+    requires_features: []
+    enable_dependencies: []
+    disable_blockers: []
+
+  - id: path_ce
+    label: Path CE
+    nav_label: PATH Cost-Effective
+    section_id: path-cost-effective
+    section_class: wc-stack
+    section_template: controls/path_cost_effective_pure.htm
+    maturity: experimental
+    internal_reason: null
+    min_role: user
+    requires_backend: any
+    requires_features: []
+    enable_dependencies: []
+    disable_blockers: []
+
+  - id: rusle
+    label: RUSLE
+    nav_label: Gridded RUSLE
+    section_id: rusle
+    section_class: wc-stack
+    section_template: controls/rusle_pure.htm
+    maturity: preview
+    internal_reason: null
+    min_role: user
+    requires_backend: wbt
+    requires_features:
+      - disturbed
+    enable_dependencies:
+      - polaris
+    disable_blockers: []
+
+  - id: culvert_runner
+    label: Culvert Runner
+    nav_label: Culvert Runner
+    section_id: culvert-runner
+    section_class: wc-stack
+    section_template: controls/internal_workflow_placeholder.htm
+    maturity: internal
+    internal_reason: compute
+    embargo_until: null
+    min_role: dev
+    requires_backend: any
+    requires_features: []
+    enable_dependencies: []
+    disable_blockers: []
+
+  - id: batch_runner
+    label: Batch Runner
+    nav_label: Batch Runner
+    section_id: batch-runner
+    section_class: wc-stack
+    section_template: controls/internal_workflow_placeholder.htm
+    maturity: internal
+    internal_reason: compute
+    embargo_until: null
+    min_role: dev
+    requires_backend: any
+    requires_features: []
+    enable_dependencies: []
+    disable_blockers: []
+
+  - id: ag_fields
+    label: Ag Fields
+    nav_label: Ag Fields
+    section_id: ag-fields
+    section_class: wc-stack
+    section_template: controls/internal_workflow_placeholder.htm
+    maturity: internal
+    internal_reason: beta
+    embargo_until: null
+    min_role: dev
+    requires_backend: any
+    requires_features: []
+    enable_dependencies: []
+    disable_blockers: []

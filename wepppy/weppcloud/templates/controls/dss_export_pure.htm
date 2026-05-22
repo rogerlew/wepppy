@@ -1,5 +1,5 @@
 {# Doc: controllers_js/README.md — DSS Export Controller Reference (2025 helper migration) #}
-{% import "controls/_pure_macros.html" as ui %}
+{% import "controls/_pure_macros.html" as ui with context %}
 {% from "shared/console_macros.htm" import button_row %}
 
 {% set current_mode = wepp.dss_export_mode if wepp.dss_export_mode in [1, 2] else 1 %}

@@ -1,10 +1,10 @@
 {# RUSLE build control #}
-{% import "controls/_pure_macros.html" as ui %}
+{% import "controls/_pure_macros.html" as ui with context %}
 {% from "shared/console_macros.htm" import button_row %}
 
 {% set description %}
   <p class="wc-text-muted">
-    Experimental Gridded RUSLE Model. Build RUSLE factors and mode-specific annual detachment output (<code>A = R * K * LS * C * P</code>)
+    Gridded RUSLE Model. Build RUSLE factors and mode-specific annual detachment output (<code>A = R * K * LS * C * P</code>)
     for this run. The build executes asynchronously through RQ.
   </p>
   <p class="wc-text-muted">

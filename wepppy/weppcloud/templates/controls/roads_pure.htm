@@ -1,4 +1,4 @@
-{% import "controls/_pure_macros.html" as ui %}
+{% import "controls/_pure_macros.html" as ui with context %}
 {% from "shared/console_macros.htm" import button_row %}
 
 {% set roads_summary = roads.query_summary() if roads is defined and roads is not none else {} %}

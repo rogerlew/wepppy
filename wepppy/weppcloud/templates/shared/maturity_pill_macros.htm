@@ -1,0 +1,18 @@
+{% macro maturity_pill(label, href=None, title=None, new_tab=False) -%}
+{% if label %}
+  {% set _title = title if title else ("Maturity: " ~ label) %}
+  {% set _pill_style = "display:inline-flex;align-items:center;gap:var(--wc-space-2xs);padding:var(--wc-space-2xs) var(--wc-space-sm);border-radius:var(--wc-radius-pill);background:var(--wc-color-surface-alt);color:var(--wc-color-text-muted);font-size:0.9rem;font-weight:600;letter-spacing:0.02em;text-decoration:none;line-height:1;" %}
+  {% if href %}
+  <a class="wc-run-header__version wc-maturity-pill"
+     href="{{ href }}"
+     title="{{ _title }}"
+     aria-label="{{ _title }}"
+     style="{{ _pill_style }}"
+     {% if new_tab %}target="_blank" rel="noopener" data-open-tab-pref{% endif %}>
+    {{ label }}
+  </a>
+  {% else %}
+  <span class="wc-run-header__version wc-maturity-pill" title="{{ _title }}" style="{{ _pill_style }}">{{ label }}</span>
+  {% endif %}
+{% endif %}
+{%- endmacro %}

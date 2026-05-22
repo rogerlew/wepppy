@@ -1,4 +1,4 @@
-{% import "controls/_pure_macros.html" as ui %}
+{% import "controls/_pure_macros.html" as ui with context %}
 {% from "shared/console_macros.htm" import button_row %}
 
 {% set run_base = site_prefix ~ "/runs/" ~ (runid | urlencode) ~ "/" ~ (config | urlencode) %}
@@ -31,7 +31,7 @@
 
 {% set description %}
   <p class="wc-text-muted">
-    Experimental Event runoff hydrograph modeling for BAER-style post-fire workflows using
+    Event runoff hydrograph modeling for BAER-style post-fire workflows using
     RMRS-GTR-334-aligned Curve Number (CN) + unit hydrograph methods.
   </p>
   <p class="wc-text-muted">

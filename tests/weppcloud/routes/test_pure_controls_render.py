@@ -8,6 +8,11 @@ from types import SimpleNamespace
 import pytest
 from jinja2 import DebugUndefined, Environment, FileSystemLoader
 
+from wepppy.weppcloud.feature_registry.runtime import (
+    config_maturity_badge,
+    load_config_registry,
+)
+
 REPO_ROOT = Path(__file__).resolve().parents[3]
 TEMPLATE_ROOT = REPO_ROOT / "wepppy" / "weppcloud" / "templates"
 COMMAND_BAR_TEMPLATE_ROOT = REPO_ROOT / "wepppy" / "weppcloud" / "routes" / "command_bar" / "templates"
@@ -681,6 +686,94 @@ def test_interfaces_template_renders_earth_launch_card(jinja_env: Environment) -
     assert rendered.index("WEPPcloud-AU") < rendered.index("WEPPcloud-(Un)Disturbed-Earth") < rendered.index("WEPPcloud-RHEM")
 
 
+def test_interfaces_template_renders_registry_maturity_badges(jinja_env: Environment) -> None:
+    template = jinja_env.get_template("interfaces.htm")
+    auth_user = SimpleNamespace(has_role=lambda role: False, roles=[], is_authenticated=True)
+
+    def _url_for(endpoint: str, **values) -> str:
+        if endpoint == "static":
+            return f"/static/{values.get('filename', '')}"
+        return f"/mock/{endpoint}"
+
+    config_entries = load_config_registry()
+    config_registry_map = {
+        entry.id: SimpleNamespace(id=entry.id)
+        for entry in config_entries
+    }
+    config_maturity_labels = {
+        entry.id: config_maturity_badge(entry)
+        for entry in config_entries
+    }
+
+    rendered = template.render(
+        user=auth_user,
+        current_user=auth_user,
+        url_for=_url_for,
+        rq_engine_token="token",
+        config_registry_map=config_registry_map,
+        config_maturity_labels=config_maturity_labels,
+    )
+
+    assert rendered.count('aria-label="Interface maturity:') == 9
+    assert rendered.count('href="/mock/usersum.view_markdown#feature-maturity-labels"') == 9
+    assert 'name="config" value="disturbed9002_wbt"' in rendered
+
+    disturbed_section = re.search(
+        r'<section class="wc-panel" aria-labelledby="section-disturbed">(.|\n)*?</section>',
+        rendered,
+    )
+    assert disturbed_section is not None
+    assert disturbed_section.group(0).count('aria-label="Interface maturity:') == 1
+
+    reveg_section = re.search(
+        r'<section class="wc-panel" aria-labelledby="section-revegetation">(.|\n)*?</section>',
+        rendered,
+    )
+    assert reveg_section is not None
+    assert reveg_section.group(0).count('aria-label="Interface maturity:') == 1
+
+    legacy_section = re.search(
+        r'<section class="wc-panel wc-stack" aria-labelledby="section-legacy">(.|\n)*?</section>',
+        rendered,
+    )
+    assert legacy_section is not None
+    assert legacy_section.group(0).count('aria-label="Interface maturity:') == 2
+
+
+def test_interfaces_template_applies_visible_config_filter(jinja_env: Environment) -> None:
+    template = jinja_env.get_template("interfaces.htm")
+    auth_user = SimpleNamespace(has_role=lambda role: False, roles=[], is_authenticated=True)
+
+    def _url_for(endpoint: str, **values) -> str:
+        if endpoint == "static":
+            return f"/static/{values.get('filename', '')}"
+        return f"/mock/{endpoint}"
+
+    config_entries = load_config_registry()
+    config_registry_map = {
+        entry.id: SimpleNamespace(id=entry.id)
+        for entry in config_entries
+    }
+    config_maturity_labels = {
+        entry.id: config_maturity_badge(entry)
+        for entry in config_entries
+    }
+
+    rendered = template.render(
+        user=auth_user,
+        current_user=auth_user,
+        url_for=_url_for,
+        rq_engine_token="token",
+        config_registry_map=config_registry_map,
+        config_maturity_labels=config_maturity_labels,
+        visible_config_ids={"disturbed9002_wbt"},
+    )
+
+    assert 'name="config" value="disturbed9002_wbt"' in rendered
+    assert 'name="config" value="disturbed9002"' not in rendered
+    assert 'name="config" value="reveg"' not in rendered
+
+
 def test_run_header_shows_team_public_readonly_for_authenticated_user(jinja_env: Environment) -> None:
     template = jinja_env.get_template("header/_run_header_fixed.htm")
     auth_user = SimpleNamespace(has_role=lambda role: False, roles=[], is_authenticated=True)
@@ -697,6 +790,55 @@ def test_run_header_shows_team_public_readonly_for_authenticated_user(jinja_env:
     assert 'id="checkbox_public"' in rendered
 
 
+def test_run_header_renders_registry_maturity_badges(jinja_env: Environment) -> None:
+    template = jinja_env.get_template("header/_run_header_fixed.htm")
+    auth_user = SimpleNamespace(has_role=lambda role: role == "Admin", roles=["Admin"], is_authenticated=True)
+    request = SimpleNamespace(view_args={"runid": "test-run", "config": "test-config"})
+
+    rendered = template.render(
+        user=auth_user,
+        current_user=auth_user,
+        request=request,
+        current_ron_mods=["openet_ts", "disturbed"],
+        run_config_maturity_label="Stable",
+        run_config_maturity_href="/mock/usersum.view_markdown#feature-maturity-labels",
+        header_mod_options=[
+            {"id": "openet_ts", "label": "OpenET Time Series", "maturity_badge": "Preview"},
+            {"id": "rusle", "label": "RUSLE", "maturity_badge": "Preview"},
+        ],
+    )
+
+    assert "OpenET Time Series" in rendered
+    assert "RUSLE" in rendered
+    assert "Preview" in rendered
+    assert "Stable" in rendered
+    assert 'href="/mock/usersum.view_markdown#feature-maturity-labels"' in rendered
+
+
+def test_feature_control_shell_renders_maturity_pill_next_to_label(jinja_env: Environment) -> None:
+    template = jinja_env.get_template("controls/rap_ts_pure.htm")
+    rendered = template.render(
+        rap_schedule=[],
+        feature_maturity_labels={"rap_ts": "Stable"},
+        maturity_definition_href="/mock/usersum.view_markdown#feature-maturity-labels",
+    )
+
+    assert "RAP Time Series Acquisition" in rendered
+    assert "Stable" in rendered
+    assert 'href="/mock/usersum.view_markdown#feature-maturity-labels"' in rendered
+
+
+def test_feature_control_shell_defaults_maturity_pill_link(jinja_env: Environment) -> None:
+    template = jinja_env.get_template("controls/rap_ts_pure.htm")
+    rendered = template.render(
+        rap_schedule=[],
+        feature_maturity_labels={"rap_ts": "Stable"},
+    )
+
+    assert "Stable" in rendered
+    assert 'href="#feature-maturity-labels"' in rendered
+
+
 def test_run_header_hides_rusle_mod_when_disturbed_not_enabled(jinja_env: Environment) -> None:
     template = jinja_env.get_template("header/_run_header_fixed.htm")
     auth_user = SimpleNamespace(has_role=lambda role: False, roles=[], is_authenticated=True)
@@ -707,6 +849,7 @@ def test_run_header_hides_rusle_mod_when_disturbed_not_enabled(jinja_env: Enviro
         current_user=auth_user,
         request=request,
         current_ron_mods=[],
+        header_mod_options=[{"id": "features_export", "label": "Features Export"}],
     )
 
     assert 'data-project-mod="rusle"' not in rendered
@@ -724,6 +867,9 @@ def test_run_header_shows_rusle_mod_when_disturbed_enabled(jinja_env: Environmen
         request=request,
         current_ron_mods=["disturbed", "rusle"],
         watershed=SimpleNamespace(delineation_backend_is_wbt=True),
+        header_mod_options=[
+            {"id": "rusle", "label": "RUSLE", "maturity_badge": "Preview"},
+        ],
     )
 
     assert 'data-project-mod="rusle"' in rendered
@@ -814,6 +960,7 @@ def test_run_header_includes_features_export_mod_toggle(jinja_env: Environment) 
         current_user=auth_user,
         request=request,
         current_ron_mods=[],
+        header_mod_options=[{"id": "features_export", "label": "Features Export"}],
     )
 
     assert 'data-project-mod="features_export"' in rendered
@@ -829,6 +976,7 @@ def test_run_header_includes_geneva_mod_toggle(jinja_env: Environment) -> None:
         current_user=auth_user,
         request=request,
         current_ron_mods=[],
+        header_mod_options=[{"id": "geneva", "label": "Geneva"}],
     )
 
     assert 'data-project-mod="geneva"' in rendered

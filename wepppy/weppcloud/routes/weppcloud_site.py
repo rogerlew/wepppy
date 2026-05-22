@@ -16,6 +16,12 @@ from werkzeug.routing import BuildError
 
 from ._common import *  # noqa: F401,F403
 from wepppy.config.redis_settings import RedisDB, redis_connection_kwargs
+from wepppy.weppcloud.feature_registry.runtime import (
+    config_maturity_badge,
+    config_registry_by_id,
+    load_config_registry,
+    user_meets_min_role,
+)
 from wepppy.weppcloud.utils import auth_tokens
 from wepppy.weppcloud.utils.helpers import exception_factory, handle_with_exception_factory
 from wepppy.weppcloud.utils.rq_engine_token import issue_user_rq_engine_token
@@ -1024,12 +1030,27 @@ def interfaces():
             or os.getenv('CAP_ASSET_BASE_URL', f'{cap_base_url}/assets')
         ).rstrip('/')
         cap_site_key = current_app.config.get('CAP_SITE_KEY') or os.getenv('CAP_SITE_KEY', '')
+        config_registry_map = config_registry_by_id()
+        config_maturity_labels = {entry.id: config_maturity_badge(entry) for entry in load_config_registry()}
+        maturity_definition_href = (
+            url_for('usersum.view_markdown', category='weppcloud', filename='user-guide.md')
+            + '#feature-maturity-labels'
+        )
+        visible_config_ids = {
+            entry.id
+            for entry in load_config_registry()
+            if user_meets_min_role(current_user, entry.min_role)
+        }
         return render_template(
             'interfaces.htm',
             user=current_user,
             cap_base_url=cap_base_url,
             cap_asset_base_url=cap_asset_base_url,
             cap_site_key=cap_site_key,
+            config_registry_map=config_registry_map,
+            config_maturity_labels=config_maturity_labels,
+            maturity_definition_href=maturity_definition_href,
+            visible_config_ids=visible_config_ids,
         )
     except Exception:
         # Boundary catch: preserve contract behavior while logging unexpected failures.

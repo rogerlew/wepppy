@@ -9,7 +9,7 @@
   - Controller: controllers_js/README.md — Disturbed/Baer Controller Reference
   - Behavior: docs/ui-docs/control-ui-styling/sbs_controls_behavior.md
 #}
-{% import "controls/_pure_macros.html" as ui %}
+{% import "controls/_pure_macros.html" as ui with context %}
 {% from "shared/console_macros.htm" import button_row %}
 
 {% set has_disturbed = disturbed is not none %}

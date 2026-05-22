@@ -1,4 +1,4 @@
-{% import "controls/_pure_macros.html" as ui %}
+{% import "controls/_pure_macros.html" as ui with context %}
 {% from "shared/console_macros.htm" import button_row %}
 
 {% set has_uploaded_dem = watershed.uploaded_dem_filename is not none %}
