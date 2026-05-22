@@ -33,7 +33,7 @@ The two YAML files above are the only hand-edited metadata sources.
 
 ## Shared Enums (Both Registries)
 
-- `maturity`: `stable | preview | experimental | deprecated | internal | beta`
+- `maturity`: `stable | preview | experimental | deprecated | internal`
 - `internal_reason`: `compute | api_constrained | beta | publication_embargo | null`
 - `embargo_until`: `YYYY-MM-DD | null`
 - `min_role`: `user | poweruser | dev | admin | root`
@@ -41,7 +41,7 @@ The two YAML files above are the only hand-edited metadata sources.
 
 `internal_reason` must be present only when `maturity=internal`.
 `embargo_until` is required only when `internal_reason=publication_embargo`.
-`min_role` must be `dev` when `maturity=internal` or `maturity=beta`.
+`min_role` must be `dev` when `maturity=internal`.
 
 User-facing maturity definitions are published in:
 
@@ -72,6 +72,7 @@ Optional fields:
 - `nav_label`: run-page navigation label when different from `label`
 - `section_id`: section anchor id for async section rendering and nav wiring
 - `section_class`: section wrapper class (defaults to `wc-stack`)
+- `adr_reference`: optional repo-relative ADR link under `docs/adrs/*.md` for release-governance rationale
 - `enable_dependencies`: mod ids to auto-enable when this feature is enabled
 - `disable_blockers`: mod ids that must be disabled before this feature can be disabled
 
@@ -154,7 +155,8 @@ Registry file order is authoritative for display order in MVP.
 - shared enum values required.
 - `internal_reason` is non-null only when `maturity=internal`.
 - `embargo_until` must be null unless `internal_reason=publication_embargo`, and must be an ISO date (`YYYY-MM-DD`) when set.
-- `min_role` must be `dev` when `maturity=internal` or `maturity=beta`.
+- `min_role` must be `dev` when `maturity=internal`.
+- `adr_reference` (when present) must be repo-relative, remain under `docs/adrs/`, reference a `.md` file, and reference an existing file.
 - feature `requires_features` and `enable_dependencies` entries must reference known run-mod ids (registry feature ids or `internal_prerequisites`).
 - feature `section_template` must be repo-relative, remain under `wepppy/weppcloud/templates/`, and reference an existing file.
 - feature `disable_blockers` entries must reference existing feature ids.

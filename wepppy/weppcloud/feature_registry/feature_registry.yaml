@@ -85,6 +85,7 @@ features:
     maturity: internal
     internal_reason: publication_embargo
     embargo_until: "2027-05-22"
+    adr_reference: docs/adrs/ADR-0001-time-limited-publication-embargo-for-omni-contrasts.md
     min_role: dev
     requires_backend: any
     requires_features:
@@ -182,8 +183,10 @@ features:
     section_id: path-cost-effective
     section_class: wc-stack
     section_template: controls/path_cost_effective_pure.htm
-    maturity: beta
-    internal_reason: null
+    maturity: internal
+    internal_reason: beta
+    embargo_until: null
+    adr_reference: docs/adrs/ADR-0001-time-limited-publication-embargo-for-omni-contrasts.md
     min_role: dev
     requires_backend: any
     requires_features: []

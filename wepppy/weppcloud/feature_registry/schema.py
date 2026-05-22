@@ -5,7 +5,7 @@ from datetime import date
 from pathlib import Path
 from typing import Any, Mapping
 
-VALID_MATURITY = {"stable", "preview", "experimental", "deprecated", "internal", "beta"}
+VALID_MATURITY = {"stable", "preview", "experimental", "deprecated", "internal"}
 VALID_INTERNAL_REASON = {"compute", "api_constrained", "beta", "publication_embargo"}
 VALID_MIN_ROLE = {"user", "poweruser", "dev", "admin", "root"}
 VALID_BACKEND = {"any", "wbt", "topaz"}
@@ -22,6 +22,7 @@ class FeatureSpec:
     maturity: str
     internal_reason: str | None
     embargo_until: str | None
+    adr_reference: str | None
     min_role: str
     requires_backend: str
     requires_features: tuple[str, ...]
@@ -173,9 +174,9 @@ def _optional_embargo_until(
 
 
 def _validate_internal_min_role(*, min_role: str, maturity: str, context: str) -> None:
-    if maturity in {"internal", "beta"} and min_role != "dev":
+    if maturity == "internal" and min_role != "dev":
         raise FeatureRegistryValidationError(
-            f"{context} must be 'dev' when maturity is 'internal' or 'beta'"
+            f"{context} must be 'dev' when maturity is 'internal'"
         )
 
 
@@ -193,6 +194,31 @@ def _validate_template_exists(registry_dir: Path, rel_template_path: str, contex
         raise FeatureRegistryValidationError(
             f"{context} references missing template path: {rel_template_path}"
         )
+
+
+def _optional_adr_reference(value: Any, *, registry_dir: Path, context: str) -> str | None:
+    if value is None:
+        return None
+
+    adr_reference = _require_string(value, context)
+    rel_path = _normalize_repo_relative_path(adr_reference, context)
+    expected_root = Path("docs") / "adrs"
+    if not rel_path.is_relative_to(expected_root):
+        raise FeatureRegistryValidationError(
+            f"{context} must be under {expected_root.as_posix()}/"
+        )
+
+    repo_root = registry_dir.parents[2]
+    abs_path = _resolve_under_root(repo_root, rel_path, context)
+    if abs_path.suffix.lower() != ".md":
+        raise FeatureRegistryValidationError(
+            f"{context} must reference a markdown file under {expected_root.as_posix()}/"
+        )
+    if not abs_path.is_file():
+        raise FeatureRegistryValidationError(
+            f"{context} references missing ADR path: {adr_reference}"
+        )
+    return adr_reference
 
 
 def _validate_cfg_path_exists(registry_dir: Path, cfg_path: str, context: str) -> None:
@@ -253,6 +279,11 @@ def validate_feature_registry_payload(
             maturity=maturity,
             internal_reason=internal_reason,
         )
+        adr_reference = _optional_adr_reference(
+            item.get("adr_reference"),
+            registry_dir=registry_dir,
+            context=f"{context}.adr_reference",
+        )
         min_role = _require_enum(item.get("min_role"), f"{context}.min_role", VALID_MIN_ROLE)
         _validate_internal_min_role(
             min_role=min_role,
@@ -297,6 +328,7 @@ def validate_feature_registry_payload(
                 maturity=maturity,
                 internal_reason=internal_reason,
                 embargo_until=embargo_until,
+                adr_reference=adr_reference,
                 min_role=min_role,
                 requires_backend=requires_backend,
                 requires_features=requires_features,

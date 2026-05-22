@@ -42,6 +42,16 @@ def test_feature_registry_loads_expected_entries() -> None:
     assert "rusle" in feature_ids
 
 
+def test_feature_registry_adr_references_for_omni_contrasts_and_path_ce() -> None:
+    features = feature_registry_by_id()
+    adr_path = "docs/adrs/ADR-0001-time-limited-publication-embargo-for-omni-contrasts.md"
+
+    assert features["omni_contrasts"].adr_reference == adr_path
+    assert features["path_ce"].adr_reference == adr_path
+    assert features["path_ce"].maturity == "internal"
+    assert features["path_ce"].internal_reason == "beta"
+
+
 def test_config_registry_loads_expected_entries() -> None:
     configs = load_config_registry()
     config_ids = {entry.id for entry in configs}
@@ -222,6 +232,26 @@ def test_schema_rejects_parent_traversal_template_paths() -> None:
         validate_feature_registry_payload(mutated, registry_dir=registry_dir)
 
 
+def test_schema_rejects_adr_reference_outside_docs_adrs() -> None:
+    registry_dir = Path(registry_runtime.__file__).resolve().parent
+    payload = yaml.safe_load((registry_dir / "feature_registry.yaml").read_text(encoding="utf-8"))
+    mutated = copy.deepcopy(payload)
+    mutated["features"][0]["adr_reference"] = "docs/work-packages/README.md"
+
+    with pytest.raises(FeatureRegistryValidationError, match=r"must be under docs/adrs/"):
+        validate_feature_registry_payload(mutated, registry_dir=registry_dir)
+
+
+def test_schema_rejects_missing_adr_reference_file() -> None:
+    registry_dir = Path(registry_runtime.__file__).resolve().parent
+    payload = yaml.safe_load((registry_dir / "feature_registry.yaml").read_text(encoding="utf-8"))
+    mutated = copy.deepcopy(payload)
+    mutated["features"][0]["adr_reference"] = "docs/adrs/ADR-does-not-exist.md"
+
+    with pytest.raises(FeatureRegistryValidationError, match="references missing ADR path"):
+        validate_feature_registry_payload(mutated, registry_dir=registry_dir)
+
+
 def test_schema_validates_enable_dependency_references() -> None:
     registry_dir = Path(registry_runtime.__file__).resolve().parent
     payload = yaml.safe_load((registry_dir / "feature_registry.yaml").read_text(encoding="utf-8"))
@@ -364,23 +394,23 @@ def test_schema_rejects_internal_feature_with_non_dev_min_role() -> None:
 
     with pytest.raises(
         FeatureRegistryValidationError,
-        match="must be 'dev' when maturity is 'internal' or 'beta'",
+        match="must be 'dev' when maturity is 'internal'",
     ):
         validate_feature_registry_payload(mutated, registry_dir=registry_dir)
 
 
-def test_schema_rejects_beta_feature_with_non_dev_min_role() -> None:
+def test_schema_rejects_beta_as_feature_maturity_value() -> None:
     registry_dir = Path(registry_runtime.__file__).resolve().parent
     payload = yaml.safe_load((registry_dir / "feature_registry.yaml").read_text(encoding="utf-8"))
     mutated = copy.deepcopy(payload)
     mutated["features"][0]["maturity"] = "beta"
-    mutated["features"][0]["internal_reason"] = None
+    mutated["features"][0]["internal_reason"] = "beta"
     mutated["features"][0]["embargo_until"] = None
-    mutated["features"][0]["min_role"] = "user"
+    mutated["features"][0]["min_role"] = "dev"
 
     with pytest.raises(
         FeatureRegistryValidationError,
-        match="must be 'dev' when maturity is 'internal' or 'beta'",
+        match=r"maturity must be one of",
     ):
         validate_feature_registry_payload(mutated, registry_dir=registry_dir)
 
