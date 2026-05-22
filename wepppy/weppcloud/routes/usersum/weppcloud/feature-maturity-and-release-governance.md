@@ -42,9 +42,9 @@ Important defects and limitations are often discovered only when users apply WEP
 
 A feature may be technically reachable, known to some users, or available in limited workflows without being stable, broadly supported, or publication-ready. Maturity status must be explicit.
 
-### 4. Restrictions need reasons
+### 4. Restrictions need reasons and should be transparent
 
-If a feature is internal, hidden, role-gated, deprecated, or publication-embargoed, the reason should be documented. Restrictions should not depend on memory, assumptions, or informal ownership claims.
+If a feature is internal, hidden, role-gated, deprecated, or publication-embargoed, the reason should be documented. Restrictions should not depend on memory, assumptions, or informal ownership claims. Restrictions and their reasons should be visible to users.
 
 ### 5. Publication priority may be legitimate, but it must be time-limited
 
@@ -392,7 +392,7 @@ If a user needs one restricted feature but does not need broad development/admin
 
 ## PowerUser Onboarding Procedure
 
-PowerUser access is intended for trained users who need elevated WEPPcloud workflows that are not appropriate for all users, but do not require feature-specific internal review.
+PowerUser access is intended for trained users who need elevated WEPPcloud workflows that are not appropriate for all users, but who do not require feature-specific internal review.
 
 PowerUser onboarding should minimize stored personal information.
 
@@ -411,7 +411,7 @@ Before requesting PowerUser access, the user must acknowledge concise onboarding
 
 Suggested text:
 
-> PowerUser workflows may expose advanced WEPPcloud features, larger jobs, or less commonly used model configurations. WEPPcloud outputs are model-based estimates, not measurements or guarantees. Results depend on input data, assumptions, parameterization, model structure, and watershed/domain suitability. You are responsible for reviewing outputs, checking whether assumptions are appropriate for your use case, and documenting versions, inputs, and limitations when results are shared or published. Preview or experimental functionality may change, produce unexpected results, or require additional interpretation. Elevated access may be limited, reviewed, or removed to protect system reliability, storage, compute capacity, or scientific integrity. PowerUser access does not provide access to use internal, publication-embargoed, or restricted features unless that access is separately granted.
+> PowerUser workflows may expose advanced WEPPcloud features, larger jobs, or less commonly used model configurations. WEPPcloud outputs are model-based estimates, not measurements or guarantees. Results depend on input data, assumptions, parameterization, model structure, and watershed/domain suitability. You are responsible for reviewing outputs, checking whether assumptions are appropriate for your use case, and documenting versions, inputs, and limitations when results are shared or published. Preview or experimental functionality may change, produce unexpected results, or require additional interpretation. Elevated access may be limited, reviewed, or removed to protect system reliability, storage, compute capacity, or scientific integrity. PowerUser access does not provide access to internal, publication-embargoed, or restricted features unless that access is separately granted.
 
 ### PowerUser Request
 
@@ -535,15 +535,15 @@ Before access is granted, the user should accept concise onboarding text.
 
 Suggested text:
 
-> Internal WEPPcloud access may include experimental, preview, restricted, or publication-embargoed functionality. Access is granted only for the approved feature, purpose, and time period. Outputs may be incomplete, unstable, or unsuitable for publication or management decisions without additional review. You are responsible for documenting versions, inputs, assumptions, limitations, and maturity status. If results appear anomalous or scientifically important, notify the WEPPcloud project contact before public release when practical. Internal access does not imply authorship rights, publication approval, or access to unrelated features. Authorship and acknowledgement should be discussed early when WEPPcloud personnel provide substantial intellectual, scientific, technical, or interpretive contributions.
+> Internal WEPPcloud access may include experimental, preview, restricted, or publication-embargoed functionality. Access is granted only for the approved feature, purpose, and time period. Outputs may be incomplete, unstable, or unsuitable for publication or management decisions without additional review. You are responsible for documenting versions, inputs, assumptions, limitations, and maturity status. If results appear anomalous or scientifically important, notify the WEPPcloud project contact before public release when practical. Internal access does not imply authorship rights, publication approval, or access to unrelated features. Authorship and acknowledgment should be discussed early when WEPPcloud personnel provide substantial intellectual, scientific, technical, or interpretive contributions.
 
-### Authorship and Acknowledgement
+### Authorship and Acknowledgment
 
 Internal access does not create an automatic coauthorship requirement.
 
 Authorship should be based on substantive intellectual, scientific, technical, or interpretive contribution.
 
-Acknowledgement or citation may be appropriate when WEPPcloud personnel provide support, when a feature is grant-funded, or when model development materially enabled the work.
+Acknowledgment or citation may be appropriate when WEPPcloud personnel provide support, when a feature is grant-funded, or when model development materially enabled the work.
 
 Expectations should be discussed early when a user intends to publish with internal, experimental, or preview functionality.
 
@@ -596,7 +596,7 @@ The project should be able to answer:
 - when access should be reviewed,
 - whether publication restrictions or expectations apply.
 
-## Review and Expiration
+## Expiration and Review
 
 Internal Feature Access should have a review date or expiration date unless there is a documented reason for continuing access.
 
@@ -644,9 +644,6 @@ The current registry may use coarse role gates as an MVP enforcement mechanism, 
 - broad Dev/Admin roles are not used as a substitute for narrow collaborator access.
 
 If the current user model cannot represent a fair policy decision, the user model should be extended rather than weakening the policy.
-
-
-
 ## Decision Records
 
 Significant release decisions should be recorded using an Architecture Decision Record or equivalent repo-tracked document.
@@ -776,7 +773,7 @@ Preview or experimental features should be cited and caveated as such.
 
 WEPPcloud may restrict access to internal or publication-embargoed features before use. Once results are independently generated, the project should generally rely on scholarly norms, citation expectations, documentation, and future access decisions rather than attempting to control publication.
 
-When substantial development, interpretation, troubleshooting, or model-design support is provided by WEPPcloud developers or project scientists, authorship or acknowledgement should be discussed early.
+When substantial development, interpretation, troubleshooting, or model-design support is provided by WEPPcloud developers or project scientists, authorship or acknowledgment should be discussed early.
 
 ## Resource and Operations Expectations
 
