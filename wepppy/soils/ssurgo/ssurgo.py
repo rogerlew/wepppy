@@ -456,6 +456,7 @@ class Horizon(HorizonMixin):
         self.sieveno10_r = None
         self.wthirdbar_r = None
         self.wfifteenbar_r = None
+        # SSURGO chorizon.ksat_r representative saturated conductivity (um/s).
         self.ksat_r = None
         self.dbthirdbar_r = None
 
@@ -494,7 +495,8 @@ class Horizon(HorizonMixin):
             res_dict = r2.predict_kwargs(sand=sand, silt=vfs, clay=clay)
 
         if not isfloat(self.ksat_r):
-            self.ksat_r = res_dict["ks"] * 10.0 / 24.0  # convert from cm/day to mm/hour
+            # Rosetta returns Ks in cm/day; SSURGO ksat_r is stored as um/s.
+            self.ksat_r = res_dict["ks"] / 8.64  # cm/day -> um/s
             self.horizon_build_notes.append(
                 f"  {chkey}::ksat_r estimated from {rosetta_model}"
             )
@@ -914,6 +916,7 @@ class WeppSoil:
         self.res_lyr_i = None  # index of res_lyr in horizon
         self.res_lyr_ksat = None
         self.num_layers = 0
+        # Threshold is evaluated in the same units as ksat_r (um/s).
         self.res_lyr_ksat_threshold = res_lyr_ksat_threshold
         self.is_urban = False
         self.is_water = False
@@ -1059,8 +1062,9 @@ POSSIBILITY OF SUCH DAMAGE."""
         horizons = self.horizons
         horizons_mask = self.horizons_mask
 
-        res_lyr_ksat_threshold = self.res_lyr_ksat_threshold
+        res_lyr_ksat_threshold = self.res_lyr_ksat_threshold  # um/s
 
+        # Track minimum horizon conductivity in SSURGO units (um/s).
         ksat_min = 1e38
         n = 0
 
@@ -1073,7 +1077,7 @@ POSSIBILITY OF SUCH DAMAGE."""
 
             if isfloat(h.ksat_r) and h.ksat_r < res_lyr_ksat_threshold:
                 self.res_lyr_i = i
-                self.res_lyr_ksat = ksat_min  # * 0.01
+                self.res_lyr_ksat = ksat_min
                 break
 
         # determine number of layers
@@ -1129,7 +1133,7 @@ POSSIBILITY OF SUCH DAMAGE."""
             ),
             "Texture: {}".format(self.getFirstHorizon().simple_texture),
             "",
-            "  Chkey   hzname  mask hzdepb_r  ksat_r fraggt10_r frag3to10_r dbthirdbar_r    clay    sand     vfs      om",
+            "  Chkey   hzname  mask hzdepb_r(cm) ksat_r(um/s) fraggt10_r frag3to10_r dbthirdbar_r    clay    sand     vfs      om",
             "------------------------------------------------------------------------------------------------------------",
         ]
 
@@ -1167,7 +1171,7 @@ POSSIBILITY OF SUCH DAMAGE."""
             [
                 "",
                 "Restricting Layer:",
-                "    ksat threshold: %0.05f" % self.res_lyr_ksat_threshold,
+                "    ksat threshold (um/s): %0.05f" % self.res_lyr_ksat_threshold,
             ]
         )
 
@@ -1175,7 +1179,7 @@ POSSIBILITY OF SUCH DAMAGE."""
             s.extend(
                 [
                     "    type: %s" % self.horizons[self.res_lyr_i].reskind,
-                    "    ksat: %0.05f" % float(self.res_lyr_ksat),
+                    "    ksat (um/s): %0.05f" % float(self.res_lyr_ksat),
                     "",
                 ]
             )
@@ -1472,7 +1476,7 @@ Any comments:
                 #  depth += h.hzdepb_r
                 continue
 
-            hzdepb_r10 = h.hzdepb_r * 10.0
+            hzdepb_r10 = h.hzdepb_r * 10.0  # SSURGO depth cm -> WEPP depth mm
 
             # check if on last layer
             if i == last_valid_i:
@@ -1482,15 +1486,16 @@ Any comments:
 
                 hzdepb_r10 = math.ceil(hzdepb_r10 / 200.0) * 200.0
 
+            ksat_mm_h = h.ksat_r * 3.6  # SSURGO ksat_r um/s -> WEPP ksat mm/h
             s2 = (
                 "{hzdepb_r10:0.03f}\t{0.dbthirdbar_r:0.02f}\t{ksat:0.04f}\t"
                 "{0.anisotropy:0.01f}\t{0.field_cap:0.04f}\t{0.wilt_pt:0.04f}\t"
                 "{0.sandtotal_r:0.2f}\t{0.claytotal_r:0.2f}\t{0.om_r:0.2f}\t"
                 "{0.cec7_r:0.2f}\t{0.smr:0.2f}".format(
-                    h, ksat=h.ksat_r * 3.6, hzdepb_r10=hzdepb_r10
+                    h, ksat=ksat_mm_h, hzdepb_r10=hzdepb_r10
                 )
             )
-            ksat_last = h.ksat_r * 3.6
+            ksat_last = ksat_mm_h
 
             # make the layers easier to read by making cols fixed width
             # aligning to the right.
@@ -1507,9 +1512,12 @@ Any comments:
         if ag:
             s.append("0 0 0.000000 0.000000")
         elif self.res_lyr_i is None:
+            # WEPP soil-file kslast units are mm/h.
             s.append("1 10000.0 %0.5f" % 0.01)
         else:
-            s.append("1 10000.0 %0.5f" % ((self.res_lyr_ksat * 3.6) / 1000.0))
+            res_lyr_ksat_mm_h = self.res_lyr_ksat * 3.6  # um/s -> mm/h
+            # Legacy heuristic: downscale restrictive-layer ksat by 1000 for bedrock proxy.
+            s.append("1 10000.0 %0.5f" % (res_lyr_ksat_mm_h / 1000.0))
 
         return "\n".join(s)
 
@@ -1528,7 +1536,7 @@ Any comments:
         if ag:
             ksat = h0.conductivity
         else:
-            ksat = h0.ksat_r * 3.6
+            ksat = h0.ksat_r * 3.6  # SSURGO ksat_r um/s -> WEPP ksat mm/h
 
         s = (
             "2006.2\n{0.description}\nAny comments:\n{0.num_ofes} {ksflag}\n"
@@ -1572,7 +1580,7 @@ Any comments:
                 #  depth += h.hzdepb_r
                 continue
 
-            hzdepb_r10 = h.hzdepb_r * 10.0
+            hzdepb_r10 = h.hzdepb_r * 10.0  # SSURGO depth cm -> WEPP depth mm
 
             # check if on last layer
             if i == last_valid_i:
@@ -1585,7 +1593,7 @@ Any comments:
                 "{0.sandtotal_r:0.2f}\t{0.claytotal_r:0.2f}\t{0.om_r:0.2f}\t"
                 "{0.cec7_r:0.2f}\t{0.smr:0.2f}".format(h, hzdepb_r10=hzdepb_r10)
             )
-            ksat_last = h.ksat_r * 3.6
+            ksat_last = h.ksat_r * 3.6  # SSURGO ksat_r um/s -> WEPP ksat mm/h
 
             # make the layers easier to read by making cols fixed width
             # aligning to the right.
@@ -1601,9 +1609,12 @@ Any comments:
         if ag:
             s.append("0 0 0.000000 0.000000")
         elif self.res_lyr_i is None:
+            # WEPP soil-file kslast units are mm/h.
             s.append("1 10000.0 %0.5f" % 0.01)
         else:
-            s.append("1 10000.0 %0.5f" % ((self.res_lyr_ksat * 3.6) / 1000.0))
+            res_lyr_ksat_mm_h = self.res_lyr_ksat * 3.6  # um/s -> mm/h
+            # Legacy heuristic: downscale restrictive-layer ksat by 1000 for bedrock proxy.
+            s.append("1 10000.0 %0.5f" % (res_lyr_ksat_mm_h / 1000.0))
 
         return "\n".join(s)
 

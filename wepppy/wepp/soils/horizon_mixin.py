@@ -58,12 +58,12 @@ def compute_conductivity(clay: float, sand: float, cec: float) -> Optional[float
     if clay <= 40.0:
         if cec > 1.0:
             # Equation 1 from WEPP usersum.pdf
-            return -0.265 + 0.0086 * pow(sand, 1.8) + 11.46 * pow(cec, -0.75)
+            return -0.265 + 0.0086 * pow(sand, 1.8) + 11.46 * pow(cec, -0.75)  # mm/h
         # Empirical fallback used by the watershed interface
-        return 11.195 + 0.0086 * pow(sand, 1.8)
+        return 11.195 + 0.0086 * pow(sand, 1.8)  # mm/h
 
     # Equation 2 from WEPP usersum.pdf
-    return 0.0066 * exp(244.0 / clay)
+    return 0.0066 * exp(244.0 / clay)  # mm/h
 
 
 def compute_erodibilities(clay: float, sand: float, vfs: float, om: float) -> Dict[str, float]:
@@ -152,17 +152,19 @@ class HorizonMixin(object):
             r2 = Rosetta2()
             res_dict = r2.predict_kwargs(sand=sand, silt=vfs, clay=clay)
 
-        self.ks = res_dict['ks']
-        self.wilt_pt = res_dict['wp']
-        self.field_cap = res_dict['fc']
+        self.ks = res_dict['ks']  # Rosetta Ks output in cm/day.
+        self.wilt_pt = res_dict['wp']  # Volumetric water content (cm3/cm3).
+        self.field_cap = res_dict['fc']  # Volumetric water content (cm3/cm3).
         self.rosetta_d = res_dict
 
     def _computeConductivity(self) -> None:
-        self.conductivity = compute_conductivity(clay=self.clay, sand=self.sand, cec=self.cec)
+        self.conductivity = compute_conductivity(
+            clay=self.clay, sand=self.sand, cec=self.cec
+        )  # WEPP ksat in mm/h.
 
     @property
     def ksat(self) -> Optional[float]:
-        return self.conductivity
+        return self.conductivity  # mm/h
 
     def _computeErodibility(self) -> None:
         """Compute erodibility estimates using WEPP usersum equations."""
@@ -182,7 +184,7 @@ class HorizonMixin(object):
             else:
                 anisotropy = 10.0
 
-        self.anisotropy = anisotropy
+        self.anisotropy = anisotropy  # Ratio (unitless), lateral/vertical conductivity scale.
 
     @property
     def simple_texture(self) -> str:
