@@ -5,7 +5,7 @@ from datetime import date
 from pathlib import Path
 from typing import Any, Mapping
 
-VALID_MATURITY = {"stable", "preview", "experimental", "deprecated", "internal"}
+VALID_MATURITY = {"stable", "preview", "experimental", "deprecated", "internal", "beta"}
 VALID_INTERNAL_REASON = {"compute", "api_constrained", "beta", "publication_embargo"}
 VALID_MIN_ROLE = {"user", "poweruser", "dev", "admin", "root"}
 VALID_BACKEND = {"any", "wbt", "topaz"}
@@ -173,9 +173,9 @@ def _optional_embargo_until(
 
 
 def _validate_internal_min_role(*, min_role: str, maturity: str, context: str) -> None:
-    if maturity == "internal" and min_role != "dev":
+    if maturity in {"internal", "beta"} and min_role != "dev":
         raise FeatureRegistryValidationError(
-            f"{context} must be 'dev' when maturity is 'internal'"
+            f"{context} must be 'dev' when maturity is 'internal' or 'beta'"
         )
 
 

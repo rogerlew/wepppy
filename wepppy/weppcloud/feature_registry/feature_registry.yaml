@@ -182,9 +182,9 @@ features:
     section_id: path-cost-effective
     section_class: wc-stack
     section_template: controls/path_cost_effective_pure.htm
-    maturity: experimental
+    maturity: beta
     internal_reason: null
-    min_role: user
+    min_role: dev
     requires_backend: any
     requires_features: []
     enable_dependencies: []

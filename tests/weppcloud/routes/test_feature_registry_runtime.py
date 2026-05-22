@@ -364,7 +364,23 @@ def test_schema_rejects_internal_feature_with_non_dev_min_role() -> None:
 
     with pytest.raises(
         FeatureRegistryValidationError,
-        match="must be 'dev' when maturity is 'internal'",
+        match="must be 'dev' when maturity is 'internal' or 'beta'",
+    ):
+        validate_feature_registry_payload(mutated, registry_dir=registry_dir)
+
+
+def test_schema_rejects_beta_feature_with_non_dev_min_role() -> None:
+    registry_dir = Path(registry_runtime.__file__).resolve().parent
+    payload = yaml.safe_load((registry_dir / "feature_registry.yaml").read_text(encoding="utf-8"))
+    mutated = copy.deepcopy(payload)
+    mutated["features"][0]["maturity"] = "beta"
+    mutated["features"][0]["internal_reason"] = None
+    mutated["features"][0]["embargo_until"] = None
+    mutated["features"][0]["min_role"] = "user"
+
+    with pytest.raises(
+        FeatureRegistryValidationError,
+        match="must be 'dev' when maturity is 'internal' or 'beta'",
     ):
         validate_feature_registry_payload(mutated, registry_dir=registry_dir)
 

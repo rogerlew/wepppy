@@ -12,6 +12,8 @@ roots:
         doc_id: usersum.weppcloud.getting_started
       - key: usersum.weppcloud.quick_start
         doc_id: usersum.weppcloud.quick_start
+      - key: usersum.weppcloud.feature_maturity_and_release_governance
+        doc_id: usersum.weppcloud.feature_maturity_and_release_governance
 
   - key: usersum.modeling_basics
     title: Modeling Basics and Tuning

@@ -270,6 +270,15 @@ docs:
     audience_tags: [user]
     status: active
     nav_key: usersum.weppcloud.user_guide
+  - doc_id: usersum.weppcloud.feature_maturity_and_release_governance
+    source: local
+    rel_path: wepppy/weppcloud/routes/usersum/weppcloud/feature-maturity-and-release-governance.md
+    title: Feature Maturity and Release Governance
+    min_role: user
+    category: weppcloud
+    audience_tags: [user, operator, developer]
+    status: active
+    nav_key: usersum.weppcloud.feature_maturity_and_release_governance
   - doc_id: usersum.weppcloud.models.wepp
     source: local
     rel_path: wepppy/weppcloud/routes/usersum/weppcloud/models/wepp/ENDUSER.md

@@ -42,7 +42,7 @@ When changing feature/config metadata, these are the main consumers:
 - Valid enums for maturity, internal reason, backend, and min role.
 - `internal_reason` required only when `maturity=internal`.
 - `embargo_until` required for `internal_reason=publication_embargo`, and must be ISO `YYYY-MM-DD`.
-- `min_role` must be `dev` when `maturity=internal`.
+- `min_role` must be `dev` when `maturity=internal` or `maturity=beta`.
 - Unique ids, existing template/config paths, and dependency/blocker references.
 - Config attribute overrides from YAML `overrides` (for example, `multi_ofe -> preview`).
 - Role/backend/prerequisite visibility checks via `user_meets_min_role()` and `backend_matches_requirement()`.
@@ -78,6 +78,6 @@ For feature/config lifecycle or visibility changes:
 
 - New feature id added to registry, but no matching `data-mod-nav`/`data-mod-section` in `runs0_pure.htm`.
 - `section_template` exists but controller bootstrap mapping is missing, causing dead UI controls after dynamic enable.
-- Internal feature set to `admin` instead of `dev` (schema reject).
+- Internal/beta feature set to `admin` instead of `dev` (schema reject).
 - `publication_embargo` uses non-ISO date (schema reject).
 - Feature role semantics confused with usersum docs role semantics.

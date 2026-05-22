@@ -33,7 +33,7 @@ The two YAML files above are the only hand-edited metadata sources.
 
 ## Shared Enums (Both Registries)
 
-- `maturity`: `stable | preview | experimental | deprecated | internal`
+- `maturity`: `stable | preview | experimental | deprecated | internal | beta`
 - `internal_reason`: `compute | api_constrained | beta | publication_embargo | null`
 - `embargo_until`: `YYYY-MM-DD | null`
 - `min_role`: `user | poweruser | dev | admin | root`
@@ -41,7 +41,7 @@ The two YAML files above are the only hand-edited metadata sources.
 
 `internal_reason` must be present only when `maturity=internal`.
 `embargo_until` is required only when `internal_reason=publication_embargo`.
-`min_role` must be `dev` when `maturity=internal`.
+`min_role` must be `dev` when `maturity=internal` or `maturity=beta`.
 
 User-facing maturity definitions are published in:
 
@@ -154,7 +154,7 @@ Registry file order is authoritative for display order in MVP.
 - shared enum values required.
 - `internal_reason` is non-null only when `maturity=internal`.
 - `embargo_until` must be null unless `internal_reason=publication_embargo`, and must be an ISO date (`YYYY-MM-DD`) when set.
-- `min_role` must be `dev` when `maturity=internal`.
+- `min_role` must be `dev` when `maturity=internal` or `maturity=beta`.
 - feature `requires_features` and `enable_dependencies` entries must reference known run-mod ids (registry feature ids or `internal_prerequisites`).
 - feature `section_template` must be repo-relative, remain under `wepppy/weppcloud/templates/`, and reference an existing file.
 - feature `disable_blockers` entries must reference existing feature ids.
