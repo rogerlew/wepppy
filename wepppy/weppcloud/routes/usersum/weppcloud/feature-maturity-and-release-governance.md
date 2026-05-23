@@ -28,6 +28,33 @@ This policy applies to:
 
 This policy does not replace scientific judgment, grant management, authorship discussions, institutional policy, or legal/compliance review. It provides a shared project-level release framework.
 
+## Federal Compliance Boundary for This Policy
+
+WEPPcloud may be federally funded. This policy defines release-governance controls and evidence expectations in that context.
+
+In scope for this policy:
+
+- maturity labeling and known-limitation disclosure,
+- auditable release and access decisions,
+- access review/expiration and governance-record retention expectations,
+- release-governance evidence that supports applicable `2 CFR Part 200` requirements for federally funded work,
+- accessibility conformance expectations by maturity state.
+
+Out of scope for this policy:
+
+- Privacy Act/SORN implementation details,
+- system-specific Federal security program implementation (including FISMA-class controls),
+- full contract clause implementation and agency-specific procurement terms,
+- software and hardware supply-chain assurance frameworks unless explicitly required by an award, contract, or sponsor term.
+
+This policy should not be interpreted as asserting that WEPPcloud is operated on behalf of a Federal agency absent explicit award or contract terms.
+
+For federally funded work, this policy's governance evidence should be sufficient to support, at minimum, the following where applicable:
+
+- `2 CFR 200.303` internal-controls expectations for documented controls, compliance monitoring, and corrective action in release/access governance paths;
+- `2 CFR 200.334` record-retention expectations for award-relevant governance records;
+- `2 CFR 200.337` oversight-access expectations for award-relevant governance records.
+
 ## Core Principles
 
 ### 1. Models are not oracles
@@ -184,6 +211,20 @@ Allowed internal reasons include:
 - `publication_embargo`: time-limited priority window for the originating team.
 
 Internal features require explicit review or expiration when the reason is temporary.
+
+## Accessibility Conformance by Maturity
+
+Accessibility conformance expectations are tied to maturity state:
+
+- `stable`: must be WCAG 2.1 AA compliant.
+- `preview`: must be WCAG 2.1 AA compliant.
+- `internal` with non-`beta` reason: must be WCAG 2.1 AA compliant.
+- `internal` with `internal_reason: beta`: may be non-compliant with WCAG 2.1 AA while maturing.
+- `deprecated`: remediations and patches are at maintainer discretion; no WCAG conformance guarantee is made.
+
+`internal_reason: beta` accessibility exceptions are not time-constrained and may remain in beta indefinitely.
+
+When user-visible accessibility limitations are known, the maturity state and limitation should be disclosed in docs or UI warning text where practical.
 
 ## Release Policies
 
@@ -681,6 +722,8 @@ The record should include:
 - related ADR, issue, grant, or work package when relevant.
 
 Access records may live in the repository, a database, an admin interface, or another durable project system. The important requirement is that they are retrievable and reviewable.
+
+For records tied to Federal awards, retention should meet applicable award terms and at minimum the `2 CFR 200.334` baseline (three years from the relevant final financial report, with longer retention when litigation, claims, or audit findings remain unresolved). Records should remain retrievable for authorized oversight access consistent with `2 CFR 200.337` when applicable.
 
 The project should be able to answer:
 

@@ -77,6 +77,16 @@ WEPPcloud uses the following maturity labels for user-facing features and interf
 | `deprecated` | Use for capability planned for removal or replacement; no new investment except maintenance and migration support. | Avoid new use; migrate to replacement path. |
 | `internal` | Use for constrained capability not intended for general public workflows. Mark an `internal_reason` (`compute`, `api_constrained`, `beta`, or `publication_embargo`). | Not a general release feature; availability is intentionally limited to users with the `Dev` role. |
 
+### Accessibility Warning
+
+Accessibility expectations vary by maturity state:
+
+- `stable`, `preview`, and non-`beta` `internal` features are expected to be WCAG 2.1 AA compliant.
+- `internal` features with `internal_reason: beta` may not be WCAG 2.1 AA compliant.
+- `deprecated` features are patched at maintainer discretion and do not carry a WCAG conformance guarantee.
+
+If you encounter an accessibility barrier, treat the feature maturity label as part of your risk assessment and contact the WEPPcloud team before relying on that workflow for accessibility-sensitive use.
+
 ---
 
 ## Privacy Statement
