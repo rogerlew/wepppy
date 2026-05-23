@@ -112,6 +112,28 @@ def test_build_header_mod_options_allows_internal_features_for_dev_role() -> Non
     assert "omni_contrasts" in option_ids
 
 
+def test_build_header_mod_options_hides_path_ce_without_wbt_backend() -> None:
+    user = _User({"Dev"})
+
+    non_wbt_options = build_header_mod_options(
+        active_mods=set(),
+        user=user,
+        is_wbt=False,
+        include_all=False,
+    )
+    non_wbt_ids = {entry["id"] for entry in non_wbt_options}
+    assert "path_ce" not in non_wbt_ids
+
+    wbt_options = build_header_mod_options(
+        active_mods=set(),
+        user=user,
+        is_wbt=True,
+        include_all=False,
+    )
+    wbt_ids = {entry["id"] for entry in wbt_options}
+    assert "path_ce" in wbt_ids
+
+
 def test_config_registry_by_id_has_maturity_metadata() -> None:
     configs = config_registry_by_id()
     disturbed = configs["disturbed9002"]

@@ -188,7 +188,7 @@ features:
     embargo_until: null
     adr_reference: docs/adrs/ADR-0001-time-limited-publication-embargo-for-omni-contrasts.md
     min_role: dev
-    requires_backend: any
+    requires_backend: wbt
     requires_features: []
     enable_dependencies: []
     disable_blockers: []
