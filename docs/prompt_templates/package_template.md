@@ -47,6 +47,16 @@
 - [ ] Criterion 3 (e.g., "Performance benchmarks meet target (<100ms p95)")
 - [ ] Criterion 4 (e.g., "Zero regressions in test suite")
 
+## Parameterization ADR Gate
+[Required when the package changes parameterization defaults/formulas/thresholds/unit conversions/fallback rules.]
+
+- **Parameterization change present**: `yes | no`
+- **ADR required**: `yes | no` (must be `yes` when parameterization change present)
+- **ADR link(s)**: `docs/adrs/ADR-XXXX-<slug>.md` (or `TBD` during draft)
+- **Decision provenance captured**: `yes | no` (venue, participants present, decision owner, implementer)
+
+Reference: `docs/standards/parameterization-adr-standard.md`
+
 ## Dependencies
 [What must be complete before this work can start? What will be blocked until this completes?]
 

@@ -43,6 +43,7 @@ Feel free to omit `notes/` or `artifacts/` if the package stays simple.
 6. Drop prompts or automation scripts in `prompts/active/`; when they finish, move them to `prompts/completed/` with a brief outcome summary (inline at top of file or as `<prompt>_outcome.md`).
 7. **Update `PROJECT_TRACKER.md`** (root) when starting, progressing, or closing packages so other agents can discover active work.
 8. When the initiative ends, update `package.md` with the closure date and highlight deliverables or follow-ups.
+9. If the package changes parameterization defaults/formulas/thresholds/unit conversions/fallback rules, add or update an ADR in `docs/adrs/` per `docs/standards/parameterization-adr-standard.md`.
 
 Keeping everything inside one folder makes handoffs easier and lets us archive the package without losing the history.
 

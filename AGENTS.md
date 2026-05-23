@@ -65,6 +65,7 @@
 - Default to additive/backward-compatible evolution; do not rename or remove user-visible keys/columns without explicit operator approval.
 - For data/schema mutations, validate downstream propagation to generated run artifacts (for example `wepp/runs/*`) in addition to regression tests.
 - Update user/operator/developer documentation in the same change set; do not defer contract docs.
+- Any change that modifies parameterization defaults, formulas, thresholds, unit conversions, or fallback heuristics must include an ADR per `docs/standards/parameterization-adr-standard.md` before merge (or within one business day for urgent incident fixes).
 
 ## Dependency and Performance Discipline (Required)
 - Before recommending or integrating a new external dependency, run the precedent check and evaluation gates in `docs/standards/dependency-evaluation-standard.md`.
@@ -117,6 +118,7 @@
 - Mini packages: `docs/mini-work-packages/`
 - Prompt/template catalog: `docs/prompt_templates/AGENTS.md`
 - Hardening lifecycle standard (including callus softening): `docs/standards/hardening-lifecycle-standard.md`
+- Parameterization ADR requirement: `docs/standards/parameterization-adr-standard.md`
 - RQ scoped NoDb mutation cache-guard standard: `docs/standards/rq-scoped-nodb-mutation-cache-guard-standard.md`
 - NoDb facade/collaborator implementation standard: `docs/standards/nodb-facade-collaborator-pattern.md`
 - Vulture dead-code gate standard: `docs/standards/vulture-dead-code-gate-standard.md`

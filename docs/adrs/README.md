@@ -8,6 +8,11 @@ ADRs answer: why did we make this decision at that time?
 
 Use ADRs when a decision is likely to be questioned later, affects user-visible behavior, or changes release/operational governance.
 
+Parameterization changes are explicitly in scope and require ADRs. See:
+
+- `docs/standards/parameterization-adr-standard.md`
+- `docs/adrs/ADR-template.md`
+
 ## Scope
 
 ADRs in this directory may cover:
@@ -24,6 +29,7 @@ ADRs in this directory may cover:
 Use a stable, sortable naming convention:
 
 - `ADR-0001-<slug>.md`, `ADR-0002-<slug>.md`, etc.
+- Use `docs/adrs/ADR-template.md` as the starting template for new records.
 
 ## Recommended Sections
 
@@ -43,3 +49,4 @@ Each ADR should normally include:
 ## ADR Index
 
 - `ADR-0001`: [Time-Limited Publication Embargo for OMNI Contrasts](ADR-0001-time-limited-publication-embargo-for-omni-contrasts.md) (Accepted, 2026-05-22)
+- `ADR-0002`: [Require ADRs for Parameterization Changes](ADR-0002-parameterization-change-adr-requirement.md) (Accepted, 2026-05-22)

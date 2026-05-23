@@ -110,6 +110,8 @@ Pre-closure validation steps. Check these off as the package nears completion.
 - [ ] Inline code comments for complex logic
 - [ ] API documentation generated/updated
 - [ ] Work package closure notes complete
+- [ ] Parameterization ADR added/updated when parameterization behavior changed.
+- [ ] ADR captures decision provenance (venue, participants present, decision owner, implementer).
 
 ### Testing
 - [ ] Unit test coverage for new code
