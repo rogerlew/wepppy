@@ -443,6 +443,39 @@ These roles should not be used merely to give a collaborator access to one inter
 
 If a user needs one restricted feature but does not need broad development/admin access, the policy preference is feature-scoped internal access.
 
+### Internal Review Roles
+
+Internal feature authorization uses role-based review.
+
+Reviewer roles may be assigned to qualified humans or designated control-agent roles recognized by repository governance.
+
+#### Org Administrator Reviewer
+
+The Org Administrator Reviewer evaluates:
+
+- fairness and consistency of access decisions,
+- process compliance and record completeness,
+- scope minimization and review/expiration controls,
+- policy fit for embargo and collaboration pathway rules.
+
+#### Technical-Science Reviewer
+
+The Technical-Science Reviewer evaluates:
+
+- maturity-state compatibility of requested use,
+- scientific-risk and interpretation-risk profile,
+- known-limitation and warning implications,
+- whether requested use conflicts with unresolved technical-science concerns.
+
+#### Operational Maintainer Reviewer
+
+The Operational Maintainer Reviewer evaluates:
+
+- compute and storage burden,
+- API/service dependency risk,
+- supportability and reliability constraints,
+- operational blast radius of the requested access.
+
 ## PowerUser Onboarding Procedure
 
 PowerUser access is intended for trained users who need elevated WEPPcloud workflows that are not appropriate for all users, but who do not require feature-specific internal review.
@@ -485,7 +518,7 @@ PowerUser status does not grant access to internal or publication-embargoed feat
 
 ## Internal Collaborator Pathway
 
-Internal access should not be limited to existing project insiders. External researchers, agency partners, students, consultants, and unaffiliated collaborators may receive scoped access to internal WEPPcloud features when there is a documented purpose and human review.
+Internal access should not be limited to existing project insiders. External researchers, agency partners, students, consultants, and unaffiliated collaborators may receive scoped access to internal WEPPcloud features when there is a documented purpose and role-based review.
 
 The purpose of this pathway is to provide fair access without treating internal features as generally public or publication-ready.
 
@@ -513,7 +546,13 @@ Access may be denied, deferred, or narrowed when the requested use conflicts wit
 
 ### Internal Access Request
 
-Internal access requires human review. A web form may collect the request, but approval should be made by an authorized maintainer, project lead, or governance group.
+Internal access requires role-based review. A web form may collect the request, but approval should be made by authorized reviewer roles.
+
+Review minimums by internal reason:
+
+- `compute` or `api_constrained`: Org Administrator Reviewer plus Operational Maintainer Reviewer.
+- `beta` or `publication_embargo`: Org Administrator Reviewer plus Technical-Science Reviewer.
+- any request with flagged scientific-risk concerns: Technical-Science Reviewer is required even if the internal reason is operational.
 
 The stored request record should minimize PII. Normally it should include only:
 
@@ -554,6 +593,7 @@ Internal Collaborator access may be approved when:
 - the access can be scoped narrowly enough to avoid unnecessary exposure;
 - compute, storage, support, and scientific-risk burdens are acceptable;
 - any active publication embargo or originating-team priority window is respected.
+- the required reviewer roles for the request class have approved and recorded rationale.
 
 PowerUser status alone does not grant access to internal or publication-embargoed features.
 
@@ -631,7 +671,9 @@ The record should include:
 - requested feature/config,
 - maturity state at time of request,
 - internal reason,
-- approving person or group,
+- approving roles and reviewer identities,
+- authority claim and approval scope,
+- authorizing principal or delegated authority source,
 - rationale for approval or denial,
 - access scope,
 - expiration or review date,
@@ -646,6 +688,7 @@ The project should be able to answer:
 - what they have access to,
 - why access was granted,
 - who approved it,
+- under what authority claim it was approved,
 - when access should be reviewed,
 - whether publication restrictions or expectations apply.
 
@@ -690,7 +733,8 @@ Implementation should follow this policy.
 The current registry may use coarse role gates as an MVP enforcement mechanism, but the governance target is:
 
 - PowerUser access can be requested through a web-facing application,
-- Internal Feature Access requires human review,
+- Internal Feature Access requires role-based review,
+- dual-role review is enforced for `beta`/`publication_embargo` and other science-sensitive access requests,
 - internal approvals are feature-scoped where practical,
 - approvals and denials create auditable records,
 - publication-embargoed access is explicitly documented,
@@ -868,7 +912,11 @@ This policy should be updated when the project’s release process changes.
 
 Small wording improvements may be made through normal commits.
 
-Substantive changes should be discussed with relevant project stakeholders and recorded in an ADR when appropriate.
+Substantive policy changes should be framed as proposals and discussed with relevant project stakeholders for technical review before adoption.
+
+Substantive adopted changes should be recorded in an ADR with authority path, rationale, and review date.
+
+This policy must be interpreted consistent with the AI authority doctrine; conflicting clauses are non-operative until reconciled.
 
 ## Summary
 
