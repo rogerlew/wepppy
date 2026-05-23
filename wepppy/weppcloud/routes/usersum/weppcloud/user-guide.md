@@ -59,7 +59,7 @@ If you need help using WEPPcloud, have questions about model setup, or want to r
 | Roger Lew | WEPPcloud DevOps Architect, Associate Research Professor | University of Idaho | rogerlew@uidaho.edu | WEPPcloud, WEPP inputs and outputs, data pipelines, analytics |
 | Mariana Dobre | Assistant Professor | University of Idaho | mdobre@uidaho.edu | Hydrology, soil science, calibration, forests |
 | Anurag Srivastava | Research Scientist | University of Idaho | srivanu@uidaho.edu | WEPP model, hydrology, soil erosion, climate datasets |
-| Pete Robichaud | Research Engineer | USDA Forest Service, Rocky Mountain Research Station | peter.robichaud@usda.gov | Forest response, WEPP, post-fire erosion, ash transport |
+| Pete Robichaud | Senior Advisor | Former USDA Forest Service, Rocky Mountain Research Station | probi@wsu.edu | Forest response, WEPP, post-fire erosion, ash transport |
 
 For software bugs and feature requests, submit an issue on the WEPPcloud GitHub repository.
 

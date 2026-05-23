@@ -136,9 +136,9 @@ const CONTACTS: Contact[] = [
   },
   {
     name: 'Pete Robichaud',
-    title: 'Research Engineer',
-    institution: 'USDA Forest Service, Rocky Mountain Research Station',
-    email: 'peter.robichaud@usda.gov',
+    title: 'Senior Advisor',
+    institution: 'Former USDA Forest Service, Rocky Mountain Research Station',
+    email: 'probi@wsu.edu',
     expertise: ['Forest response', 'WEPP', 'Post-fire erosion', 'Ash transport'],
     icon: 'flame',
     accent: 'amber',

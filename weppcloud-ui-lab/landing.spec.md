@@ -39,9 +39,9 @@
      - Email: mdobre@uidaho.edu
      - Expertise: Hydrology, Soil Science, Calibration, Forests
    - **Pete Robichaud** (Icon: `Flame`)
-     - Title: Research Engineer
-     - Institution: USDA Forest Service, Rocky Mountain Research Station
-     - Email: peter.robichaud@usda.gov
+     - Title: Senior Advisor
+     - Institution: Former USDA Forest Service, Rocky Mountain Research Station
+     - Email: probi@wsu.edu
      - Expertise: Forest, WEPP, Post-fire erosion modeling, Ash Transport
    - **Anurag Srivastava** (Icon: `CloudRain`)
      - Title: Research Scientist
