@@ -85,6 +85,8 @@ Represents a single WEPP soil file built from SSURGO data.
 - `res_lyr_i` - Index of restrictive layer (or None)
 - `num_layers` - Count of valid layers
 
+Note: horizon `depth` / `hzdepb_r` values are in cm; WEPP soil-file depths are written in mm.
+
 #### `Horizon`
 Individual soil layer with computed WEPP parameters.
 
@@ -98,7 +100,7 @@ Individual soil layer with computed WEPP parameters.
 - Track parameter estimation methods in build notes
 
 **Key Computed Properties:**
-- `ksat_r` - Saturated hydraulic conductivity (mm/h)
+- `ksat_r` - Saturated hydraulic conductivity from SSURGO `chorizon.ksat_r` (um/s)
 - `field_cap` - Field capacity (m³/m³)
 - `wilt_pt` - Wilting point (m³/m³)
 - `dbthirdbar_r` - Bulk density (g/cm³)
@@ -156,7 +158,7 @@ cokey, reskind
 |--------------|----------------|-------|-------|
 | `hzdepb_r` | `solthk` | mm | Multiplied by 10 (cm → mm) |
 | `dbthirdbar_r` | `bd` | g/cm³ | Estimated if missing |
-| `ksat_r` | `ksat` | mm/h | Convert cm/day → mm/h × 3.6 |
+| `ksat_r` | `ksat` | um/s (source), mm/h (WEPP output) | Stored internally as SSURGO `um/s`; converted to WEPP `mm/h` with `ksat_mm_h = ksat_r * 3.6` |
 | `wfifteenbar_r` | `wp` | m³/m³ | Adjusted for rock content |
 | `wthirdbar_r` | `fc` | m³/m³ | Adjusted for rock content |
 | `sandtotal_r` | `sand` | % | Direct mapping |
@@ -235,9 +237,9 @@ bd = (sand% × 1.6 + silt% × 1.4 + clay% × 1.2 + remainder% × 1.4) / 100
 - **Rosetta3** if bulk density is available → uses sand, silt, clay, BD
 - **Rosetta2** if bulk density missing → uses sand, silt, clay only
 
-**Conversion:** Rosetta returns cm/day, converted to mm/h
+**Conversion:** Rosetta returns cm/day, converted to SSURGO-compatible um/s for `ksat_r`
 ```python
-ksat_r = rosetta_ks × 10.0 / 24.0  # cm/day → mm/h
+ksat_r = rosetta_ks / 8.64  # cm/day -> um/s
 ```
 
 **Build Note:** `"ksat_r estimated from rosetta2"` or `"rosetta3"`
@@ -381,7 +383,7 @@ Anisotropy represents the ratio of horizontal to vertical hydraulic conductivity
 
 **Rules:**
 ```python
-if depth > 50 mm:
+if depth > 50 cm:
     anisotropy = 1.0   # isotropic
 else:
     anisotropy = 10.0  # surface layer, preferential lateral flow
@@ -398,7 +400,7 @@ WEPP models subsurface flow impedance via a restrictive layer below the soil pro
 **Algorithm:**
 1. Iterate through valid horizons in depth order
 2. Track minimum `ksat_r` encountered
-3. If `ksat_r < res_lyr_ksat_threshold` (default 2.0 mm/h), mark as restrictive layer
+3. If `ksat_r < res_lyr_ksat_threshold` (default 2.0 um/s, about 7.2 mm/h), mark as restrictive layer
 4. Truncate horizon list at restrictive layer
 
 **WEPP File Encoding (Line 6):**
@@ -407,8 +409,27 @@ slflag  ui_bdrkth  kslast
 
 slflag: 1 if restrictive layer exists, 0 otherwise
 ui_bdrkth: 10000 mm (fixed thickness, effectively infinite)
-kslast: minimum ksat encountered, converted to m/h (ksat_min × 3.6 / 1000)
+kslast: current non-AG rule writes 0.01 if no restrictive layer; otherwise writes (res_lyr_ksat_um_s * 3.6) / 1000 in mm/h
 ```
+
+**Current implementation note (code at commit `569a1a291`, 2026-05-22):**
+- Restrictive-layer detection compares `h.ksat_r` against `res_lyr_ksat_threshold` in `um/s` (default `2.0 um/s`, about `7.2 mm/h`).
+- WEPP file `kslast` is written in `mm/h`.
+- The conversion used before writing is `ksat_mm_h = ksat_r * 3.6` (`um/s` -> `mm/h`).
+
+#### Historical `kslast` Parameterization (Git Record)
+
+The historical behavior in `ssurgo.py` has changed multiple times; key milestones are:
+
+| Date (Pacific) | Commit(s) | `kslast` behavior |
+|---|---|---|
+| 2018-03-19 | `f9b41be1a67a` | Restrictive layer set `self.res_lyr_ksat = ksat_min * 0.01`, then wrote `self.res_lyr_ksat * 3.6` to `kslast`. Effective restrictive-layer rule: `(ksat_min * 3.6) / 100` (this is the `ks_min / 100` era). No restrictive layer used `ksat_last`. |
+| 2020-01-27 | `a664f0ef9ada` (mirror: `966cc83560e8`) | Removed the `* 0.01` factor (`self.res_lyr_ksat = ksat_min`), so restrictive-layer `kslast` became `ksat_min * 3.6`. No restrictive layer still used `ksat_last`. |
+| 2021-04-01 | `727f4d9bd56c` (mirrors: `b91f570ae001`, `228e24ca2d49`, `a8999bc6dc8c`) | Added `ag=True` handling in the `2006.2` writer: line 6 becomes `0 0 0.000000 0.000000`. Non-AG `kslast` rules unchanged. |
+| 2022-06-08 | `785d128eb35d` (mirror: `fe4ee665de0f`) | Added configurable `ksflag` plumbing; no direct formula change to `kslast`. |
+| 2023-04-24 | `cdf7339069d7` (mirror: `591a2e2b78d4`) | Major rewrite of line-6 defaults: `ag=True` now also short-circuits 7778 output; no restrictive layer now writes constant `0.01`; restrictive layer writes `(self.res_lyr_ksat * 3.6) / 1000.0`. |
+| 2023-05-26 | `e6a3e27c06f2` (mirror: `434095e33c47`) | Parentheses fix only: `((self.res_lyr_ksat * 3.6) / 1000.0)` for explicit evaluation order. |
+| 2026-05-22 | `569a1a29124c` | Unit-audit comments added (`ksat_r` tracked as `um/s`, WEPP output in `mm/h`), with behavior retained (`0.01` default and `/1000` restrictive-layer rule). |
 
 **Purpose:** Restrictive layers limit drainage depth and promote lateral subsurface flow, affecting hydrograph shape and baseflow.
 
@@ -491,7 +512,8 @@ horizon_defaults = OrderedDict([
 
 **Properties:**
 - Minimal erodibility
-- Very high conductivity (999 mm/h)
+- Very high critical shear stress (999 N/m²)
+- High layer conductivity (100 mm/h in the hardcoded layer record)
 - Low bulk density (0.8 g/cm³)
 
 **Purpose:** Prevents erosion calculations on water features while maintaining model compatibility.
@@ -552,9 +574,9 @@ Example:
 slflag  thickness  kslast
 
 Example:
-1  10000.0  0.00325  (restrictive layer present, ksat = 3.25 mm/h)
+1  10000.0  0.00325  (restrictive layer present; kslast written in mm/h)
 1  10000.0  0.01000  (restrictive layer, default ksat)
-0  0  0.0           (no restrictive layer)
+0  0  0.0           (ag output path)
 ```
 
 ### Version 2006.2 (Simplified)
@@ -610,7 +632,7 @@ analyzing chkey 23456789
 analyzing chkey 23456790
 ...
 horizons mask: [True, True, True, True, False]
-identified 4 layers, ksat_min=2.45
+identified 4 layers, ksat_min=2.45 (um/s)
 Validity: all checks passed
 ```
 
@@ -834,12 +856,12 @@ print(ws.majorComponent.albedodry_r)
 # Inspect horizons
 for i, (h, mask) in enumerate(zip(ws.horizons, ws.horizons_mask)):
     if mask:
-        print(f"Layer {i}: {h.depth} mm, ksat={h.ksat_r} mm/h")
+        print(f"Layer {i}: {h.depth} cm, ksat_r={h.ksat_r} um/s, ksat={h.ksat_r * 3.6} mm/h")
 
 # Check restrictive layer
 if ws.res_lyr_i is not None:
     print(f"Restrictive layer at index {ws.res_lyr_i}")
-    print(f"Minimum ksat: {ws.res_lyr_ksat} mm/h")
+    print(f"Minimum ksat_r: {ws.res_lyr_ksat} um/s ({ws.res_lyr_ksat * 3.6} mm/h)")
 ```
 
 ### Parallel Processing with Logging
@@ -885,7 +907,7 @@ ssc.makeWeppSoils(
 ### Restrictive Layer Simplification
 **Issue:** WEPP models a single restrictive layer below the profile; SSURGO may have multiple restrictive features within the profile.
 
-**Current:** First restrictive layer (ksat < 2.0 mm/h) truncates profile.
+**Current:** First restrictive layer (ksat_r < 2.0 um/s, about 7.2 mm/h) truncates profile.
 
 **Tradeoff:** Simplifies hydrology but may miss perched water tables above deeper restrictive layers.
 

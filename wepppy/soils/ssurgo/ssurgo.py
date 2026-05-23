@@ -1509,6 +1509,12 @@ Any comments:
             s.append("\t" + s2)
             depth = 0.0
 
+        # Maintainer contract:
+        # If this kslast parameterization changes, update
+        # `wepppy/soils/ssurgo/ssurgo.md` under
+        # "Historical `kslast` Parameterization (Git Record)" and include
+        # the ssurgo.py commit SHA that introduced the change.
+        # Commit ssurgo.py first, then edit ssurgo.md to record that SHA.
         if ag:
             s.append("0 0 0.000000 0.000000")
         elif self.res_lyr_i is None:
@@ -1606,6 +1612,12 @@ Any comments:
             s.append("\t" + s2)
             depth = 0.0
 
+        # Maintainer contract:
+        # If this kslast parameterization changes, update
+        # `wepppy/soils/ssurgo/ssurgo.md` under
+        # "Historical `kslast` Parameterization (Git Record)" and include
+        # the ssurgo.py commit SHA that introduced the change.
+        # Commit ssurgo.py first, then edit ssurgo.md to record that SHA.
         if ag:
             s.append("0 0 0.000000 0.000000")
         elif self.res_lyr_i is None:
