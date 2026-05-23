@@ -1,0 +1,100 @@
+{
+  "epa_query_url": "https://services2.arcgis.com/FiaPA4ga0iQKduv3/ArcGIS/rest/services/EPA_Level_III_Ecoregions/FeatureServer/0/query",
+  "generated_at_utc": "2026-05-23 00:54:49 UTC",
+  "notes": [
+    "Region polygons were sourced from EPA Level III ArcGIS features and simplified with tolerance=0.08 degrees.",
+    "National coverage metrics are full-table SDA aggregates; per-ecoregion metrics are sampled-component denominators.",
+    "Sampling mode: polygon-ranked for Marine West Coast Forest/Cascades/Sierra Nevada; bounded point-sampling for remaining regions.",
+    "Restrictive-present sample shortfalls in some regions are execution-time SDA extraction/runtime constraints for this run, not evidence of missing SSURGO records.",
+    "Candidate A and B are assessment-only formulas with hard bounds [0.0005, 0.05] mm/h."
+  ],
+  "regions": [
+    {
+      "holdout": false,
+      "label": "Marine West Coast Forest",
+      "source_l3_names": [
+        "Coast Range"
+      ]
+    },
+    {
+      "holdout": false,
+      "label": "Cascades",
+      "source_l3_names": [
+        "Cascades"
+      ]
+    },
+    {
+      "holdout": false,
+      "label": "Sierra Nevada",
+      "source_l3_names": [
+        "Sierra Nevada"
+      ]
+    },
+    {
+      "holdout": false,
+      "label": "Mediterranean California",
+      "source_l3_names": [
+        "California Coastal Sage, Chaparral, and Oak Woodlands"
+      ]
+    },
+    {
+      "holdout": false,
+      "label": "Columbia Plateau / Intermountain Basins",
+      "source_l3_names": [
+        "Columbia Plateau"
+      ]
+    },
+    {
+      "holdout": false,
+      "label": "High Plains / Northern Great Plains",
+      "source_l3_names": [
+        "High Plains"
+      ]
+    },
+    {
+      "holdout": false,
+      "label": "Central Corn Belt Plains",
+      "source_l3_names": [
+        "Central Corn Belt Plains"
+      ]
+    },
+    {
+      "holdout": false,
+      "label": "Ridge and Valley / Blue Ridge",
+      "source_l3_names": [
+        "Blue Ridge"
+      ]
+    },
+    {
+      "holdout": false,
+      "label": "Southeastern Plains",
+      "source_l3_names": [
+        "Southeastern Plains"
+      ]
+    },
+    {
+      "holdout": false,
+      "label": "Southern Coastal Plain",
+      "source_l3_names": [
+        "Southern Coastal Plain"
+      ]
+    },
+    {
+      "holdout": false,
+      "label": "Mississippi Alluvial Plain",
+      "source_l3_names": [
+        "Mississippi Alluvial Plain"
+      ]
+    },
+    {
+      "holdout": true,
+      "label": "Mojave/Chihuahuan Basin and Range",
+      "source_l3_names": [
+        "Mojave Basin and Range"
+      ]
+    }
+  ],
+  "repo_head_sha": "20f6b0ef6ab737812dcddcb5ea762d14910273e9",
+  "script": "/home/workdir/wepppy/docs/work-packages/20260522_ssurgo_corestrictions_kslast_viability/artifacts/run_corestrictions_kslast_viability.py",
+  "sda_url": "https://sdmdataaccess.sc.egov.usda.gov/tabular/post.rest"
+}

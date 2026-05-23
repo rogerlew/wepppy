@@ -1,0 +1,13 @@
+restriction_rows,negative_resdept_r,negative_resdepb_r,negative_resthk_r,resdepb_lt_resdept,resthk_mismatch_gt25cm,bedrock_rows,bedrock_mean_resdept_r,nonbedrock_rows,nonbedrock_mean_resdept_r,ksat_rows_nonnull,ksat_rows_nonpositive,negative_brockdepmin,brockdepmin_vs_resdept_gap_gt100cm,ecoregion
+150,0,0,0,0,0,81,99.24691358024691,69,88.21739130434783,274,0,0,0,Marine West Coast Forest
+150,0,0,0,0,0,113,99.83185840707965,37,88.0,283,0,0,0,Cascades
+150,0,0,0,0,0,126,103.17460317460318,23,113.8695652173913,220,0,0,0,Sierra Nevada
+150,0,0,0,0,1,128,67.03125,22,34.54545454545455,194,0,0,2,Mediterranean California
+136,0,0,0,0,0,101,45.2970297029703,34,69.47058823529412,224,0,0,2,Columbia Plateau / Intermountain Basins
+100,0,0,0,0,0,60,65.03333333333333,40,51.925,247,0,0,2,High Plains / Northern Great Plains
+86,0,0,0,1,0,5,115.4,81,65.87654320987654,229,0,0,0,Central Corn Belt Plains
+150,0,0,0,0,0,143,76.26573426573427,6,74.0,281,0,0,0,Ridge and Valley / Blue Ridge
+42,0,0,0,0,0,4,93.5,36,76.0,190,0,0,0,Southeastern Plains
+81,0,0,0,0,0,72,79.61111111111111,9,71.44444444444444,213,0,0,4,Southern Coastal Plain
+28,0,0,0,0,0,0,,28,58.642857142857146,165,0,0,0,Mississippi Alluvial Plain
+150,0,0,0,0,1,102,42.470588235294116,48,48.041666666666664,247,0,0,6,Mojave/Chihuahuan Basin and Range

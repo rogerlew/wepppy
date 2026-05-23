@@ -379,6 +379,15 @@ Currently active work packages. Limit to 2-4 packages to maintain focus.
 
 Recently completed work packages. Archived immediately upon completion.
 
+### SSURGO Corestrictions `kslast` Viability Assessment (2026-05-23)
+**Status**: ✅ **COMPLETE**
+
+**Link**: [docs/work-packages/20260522_ssurgo_corestrictions_kslast_viability/](docs/work-packages/20260522_ssurgo_corestrictions_kslast_viability/)
+
+**Lifecycle**: Backlog -> In Progress -> Done (2026-05-23)
+
+**Summary**: Completed M0-M5 assessment artifacts for SSURGO `corestrictions` viability against legacy `kslast` behavior, including national coverage aggregates, ecoregion-sampled coverage/reasonableness matrices, bounded candidate-rule comparisons, and recommendation memo. Final outcome is `retain legacy` with explicit follow-up gating for full run-fixture hydrologic validation. Restrictive-present shortfalls in some regions are documented as SDA extraction/runtime infrastructure constraints for this run, not evidence of missing underlying SSURGO records.
+
 ### WEPPcloud Feature and Config Registry Implementation (2026-05-22)
 **Status**: ✅ **COMPLETE**
 

@@ -1,0 +1,13 @@
+components_total,components_with_corestrictions,components_without_corestrictions,components_with_reskind,components_with_resdept_r,components_with_resdepb_r,components_with_resthk_r,components_with_reshard,components_with_ksat_r_nonnull,components_with_ksat_r_positive,mapunits_total,mapunits_with_brockdepmin,ecoregion,source_l3_names,source_feature_count,geometry_simplify_tolerance_deg
+300,150,150,150,150,1,52,150,274,274,300,81,Marine West Coast Forest,Coast Range,9,0.08
+300,150,150,150,150,0,3,150,283,283,300,113,Cascades,Cascades,4,0.08
+300,150,150,149,149,55,18,149,220,220,300,126,Sierra Nevada,Sierra Nevada,1,0.08
+300,150,150,150,150,86,61,150,194,194,138,86,Mediterranean California,"California Coastal Sage, Chaparral, and Oak Woodlands",27,0.08
+286,136,150,135,135,2,12,136,224,224,149,56,Columbia Plateau / Intermountain Basins,Columbia Plateau,3,0.08
+250,100,150,100,100,67,72,98,247,247,164,20,High Plains / Northern Great Plains,High Plains,3,0.08
+236,86,150,86,86,61,55,80,229,229,165,2,Central Corn Belt Plains,Central Corn Belt Plains,1,0.08
+300,150,150,149,150,103,48,145,281,281,165,95,Ridge and Valley / Blue Ridge,Blue Ridge,8,0.08
+192,42,150,40,41,32,23,38,190,190,168,3,Southeastern Plains,Southeastern Plains,11,0.08
+231,81,150,81,81,33,33,81,213,213,162,8,Southern Coastal Plain,Southern Coastal Plain,147,0.08
+178,28,150,28,28,25,24,26,165,165,159,0,Mississippi Alluvial Plain,Mississippi Alluvial Plain,217,0.08
+300,150,150,150,150,120,91,150,247,247,123,46,Mojave/Chihuahuan Basin and Range,Mojave Basin and Range,1,0.08
