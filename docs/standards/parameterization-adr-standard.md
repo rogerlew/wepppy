@@ -11,6 +11,19 @@ The goal is to preserve:
 - who was present for the decision,
 - and what evidence supported the decision.
 
+## Universal Sponsorship Principle
+
+Governance under this standard is sponsor-neutral and universal across sponsors.
+
+The same ADR/provenance requirements apply regardless of whether work is funded by:
+
+- federal/state contracts,
+- university or foundation grants,
+- internal discretionary funding,
+- or mixed sponsorship.
+
+No sponsor gets ad hoc bypass privileges for parameterization governance.
+
 ## Requirement
 
 Any change that modifies model or workflow parameterization must have an ADR in `docs/adrs/` before merge.

@@ -16,6 +16,8 @@ Any change that modifies model or workflow parameterization must include an ADR 
 
 For urgent incident fixes that must merge first, the ADR must be added within one business day.
 
+This requirement is universal across sponsors and funding sources. It applies equally to all sponsor-funded and non-sponsor-funded parameterization changes.
+
 The required ADR fields and process are defined in:
 
 - `docs/standards/parameterization-adr-standard.md`
