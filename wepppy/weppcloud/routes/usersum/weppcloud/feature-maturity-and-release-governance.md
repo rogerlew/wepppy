@@ -54,6 +54,14 @@ Grant-funded teams may need a reasonable head start to analyze, write, and submi
 
 The feature/config registry defines the current executable state of WEPPcloud. Architecture Decision Records, issue threads, meeting notes, or work-package documents should capture why significant release decisions were made.
 
+### 7. Sponsor authority must be bounded and universal
+
+Sponsors may legitimately influence funded scope, delivery priority, and time-limited publication-priority windows.
+
+Sponsors must not control scientific truth claims, maturity labeling, known-limitation disclosure, or incident-risk communication.
+
+Governance boundaries must be universal across sponsors. Sponsor identity, size, or funding level must not create ad hoc exception pathways.
+
 ## Conflicting Points of View
 
 ### Public-service and model-maturation view
@@ -321,6 +329,51 @@ Review is especially important for:
 - features restricted due to operational constraints.
 
 A review does not guarantee release. It requires reassessment.
+
+### Policy 13: Sponsor authority is scoped
+
+Sponsors may request:
+
+- funding priorities and milestone sequencing,
+- time-limited publication embargo windows with explicit `embargo_until`,
+- scoped collaborator access for funded workflows during a valid embargo window.
+
+Sponsors may not require:
+
+- suppression of known limitations, warnings, or maturity downgrades,
+- stable labeling when evidence does not support stability,
+- indefinite infrastructure control after delivery,
+- undocumented governance exceptions.
+
+### Policy 14: Separate technical-science authority from release/business authority
+
+Technical-science authority governs:
+
+- maturity labels,
+- known-limitation statements,
+- warning/deprecation decisions,
+- interpretation and scientific-risk messaging.
+
+Release/business authority governs:
+
+- visibility state (public/internal),
+- role and access gates,
+- operational enablement constraints,
+- embargo administration and review cadence.
+
+Sponsor input is expected in both domains, but sponsor preference is not a unilateral veto over technical-science authority.
+
+### Policy 15: Sponsor conflicts require documented escalation
+
+When sponsor preference conflicts with technical-science assessment, maintainers must run a documented escalation that records:
+
+- the disputed decision,
+- participants in the decision meeting,
+- evidence considered,
+- final authority path and rationale,
+- resulting registry/ADR updates and review date.
+
+Escalation outcomes must be durable and auditable (ADR, issue, or work package), and must preserve universal sponsor-neutral governance.
 
 ## Access Governance
 
@@ -628,7 +681,7 @@ Different outcomes should be explainable by documented differences in:
 - security or data constraints,
 - prior misuse or unresolved compliance concern.
 
-Access decisions should not be based on favoritism, personal preference, informal proximity, or publication competition alone.
+Access decisions should not be based on favoritism, personal preference, informal proximity, sponsor identity, or publication competition alone.
 
 ## Implementation Requirement
 
