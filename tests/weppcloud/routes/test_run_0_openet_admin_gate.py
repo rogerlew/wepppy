@@ -3,6 +3,7 @@ from __future__ import annotations
 import importlib
 import os
 import re
+import subprocess
 from pathlib import Path
 from types import SimpleNamespace
 
@@ -359,6 +360,71 @@ def test_run_page_bootstrap_debris_flow_flag_respects_show_debris_flow_false(run
     with run0_template_app.app_context():
         js = render_template("run_page_bootstrap.js.j2", **context)
     assert _extract_mod_flag(js, "debris_flow") == "false"
+
+
+def test_run_page_bootstrap_uses_shared_bootstrap_observability_notifier(run0_template_app) -> None:
+    context = _bootstrap_context(set())
+    with run0_template_app.app_context():
+        js = render_template("run_page_bootstrap.js.j2", **context)
+
+    assert "window.WCBootstrapObservability || null" in js
+    assert "createBootstrapErrorNotifier" in js
+    assert "notifier.notify(summary, err, meta);" in js
+    assert "function resolveBootstrapNotifier()" in js
+    assert "recorderFactory" in js
+    assert "bootstrapFallbackErrorKeys" in js
+    assert "function sanitizeDiagnosticLine(line)" not in js
+
+
+def test_run_page_bootstrap_uses_helper_caps_and_fallback_dedupe_for_bootstrap_errors(run0_template_app) -> None:
+    context = _bootstrap_context(set())
+    with run0_template_app.app_context():
+        js = render_template("run_page_bootstrap.js.j2", **context)
+
+    assert "MAX_BOOTSTRAP_RECORDER_EVENTS = 8" in js
+    assert "maxRecorderEvents: MAX_BOOTSTRAP_RECORDER_EVENTS" in js
+    assert "bootstrapFallbackErrorKeys[fallbackKey]" in js
+    assert "bootstrapRecorderEventCount" not in js
+    assert "bootstrapCommandBarState" not in js
+    assert "helper.bootstrapMany(entries, context);" not in js
+    assert "helper.bootstrapManyBestEffort(entries, context" in js
+    assert "helper.bootstrap(entry.controller, entry.name, context);" in js
+    assert "function sanitizeBootstrapFallbackLine(line)" in js
+    assert "access_token" in js
+
+
+def test_run_page_bootstrap_fallback_sanitizer_redacts_runtime_samples(run0_template_app) -> None:
+    context = _bootstrap_context(set())
+    with run0_template_app.app_context():
+        js = render_template("run_page_bootstrap.js.j2", **context)
+
+    function_match = re.search(
+        r"function sanitizeBootstrapFallbackLine\(line\)\s*\{[\s\S]*?return text;\n\s*\}",
+        js,
+    )
+    assert function_match is not None
+
+    node_script = f"""
+{function_match.group(0)}
+const samples = [
+  'authorization Bearer abc.def.ghi',
+  'Bearer xyz.123',
+  'x-api-key: top-secret',
+  'x-auth-token=token-123',
+  '{{"access_token":"abc123","refresh_token":"def456"}}',
+  'cookie=sessionid=abc',
+  '/path?token=abc123'
+];
+const sanitized = samples.map((line) => sanitizeBootstrapFallbackLine(line));
+if (sanitized[0].includes('abc.def.ghi')) process.exit(1);
+if (sanitized[1].includes('xyz.123')) process.exit(1);
+if (sanitized[2].includes('top-secret')) process.exit(1);
+if (sanitized[3].includes('token-123')) process.exit(1);
+if (sanitized[4].includes('abc123') || sanitized[4].includes('def456')) process.exit(1);
+if (sanitized[5].includes('sessionid=abc')) process.exit(1);
+if (sanitized[6].includes('token=abc123')) process.exit(1);
+"""
+    subprocess.run(["node", "-e", node_script], check=True, capture_output=True, text=True)
 
 
 def test_playwright_load_all_requires_test_support_flag(run0_template_app, run0_module, monkeypatch) -> None:

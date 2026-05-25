@@ -790,7 +790,7 @@ def test_run_header_shows_team_public_readonly_for_authenticated_user(jinja_env:
     assert 'id="checkbox_public"' in rendered
 
 
-def test_run_header_renders_registry_maturity_badges(jinja_env: Environment) -> None:
+def test_run_header_renders_interface_maturity_badge_without_mod_dropdown_badges(jinja_env: Environment) -> None:
     template = jinja_env.get_template("header/_run_header_fixed.htm")
     auth_user = SimpleNamespace(has_role=lambda role: role == "Admin", roles=["Admin"], is_authenticated=True)
     request = SimpleNamespace(view_args={"runid": "test-run", "config": "test-config"})
@@ -810,9 +810,9 @@ def test_run_header_renders_registry_maturity_badges(jinja_env: Environment) -> 
 
     assert "OpenET Time Series" in rendered
     assert "RUSLE" in rendered
-    assert "Preview" in rendered
+    assert "Feature maturity: Preview" not in rendered
     assert "Stable" in rendered
-    assert 'href="/mock/usersum.view_markdown#feature-maturity-labels"' in rendered
+    assert rendered.count('href="/mock/usersum.view_markdown#feature-maturity-labels"') == 1
 
 
 def test_feature_control_shell_renders_maturity_pill_next_to_label(jinja_env: Environment) -> None:
