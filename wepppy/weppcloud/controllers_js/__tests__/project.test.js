@@ -51,6 +51,7 @@ describe("Project controller", () => {
             hideResult: jest.fn()
         };
         global.initializeCommandBar = jest.fn(() => commandBar);
+        global.WCRecorder = { emit: jest.fn() };
 
         delegateTeardowns = [];
         global.controlBase = jest.fn(() => ({
@@ -166,6 +167,7 @@ describe("Project controller", () => {
         delete global.runid;
         delete global.config;
         delete global.initializeCommandBar;
+        delete global.WCRecorder;
         delete global.url_for_run;
         delete global.setGlobalUnitizerPreference;
         delete window.Geneva;
@@ -287,9 +289,15 @@ describe("Project controller", () => {
             <div data-mod-section="geneva" hidden></div>
             <input type="checkbox" data-project-mod="geneva">
         `);
+        const eventOrder = [];
+        const updatedHandler = jest.fn(() => {
+            eventOrder.push("event");
+        });
+        project.events.on("project:mod:updated", updatedHandler);
 
         const workflowClickHandler = jest.fn();
         const bootstrap = jest.fn(() => {
+            eventOrder.push("bootstrap");
             document
                 .querySelector('[data-geneva-action="run-workflow"]')
                 .addEventListener("click", workflowClickHandler);
@@ -328,8 +336,813 @@ describe("Project controller", () => {
         expect(window.runContext.mods.flags.geneva).toBe(true);
         expect(window.Geneva.getInstance).toHaveBeenCalled();
         expect(bootstrap).toHaveBeenCalledWith(window.runContext);
+        expect(updatedHandler).toHaveBeenCalledWith(expect.objectContaining({
+            mod: "geneva",
+            enabled: true,
+            label: "Geneva"
+        }));
+        expect(bootstrap.mock.invocationCallOrder[0]).toBeLessThan(updatedHandler.mock.invocationCallOrder[0]);
+        expect(eventOrder).toEqual(["bootstrap", "event"]);
 
         document.querySelector('[data-geneva-action="run-workflow"]').click();
         expect(workflowClickHandler).toHaveBeenCalled();
+    });
+
+    test("set_mod reconciles authoritative backend mods and syncs dependent toggles", async () => {
+        window.runContext = { mods: { list: [], flags: { geneva: false, roads: false } } };
+        document.getElementById("project-fixture").insertAdjacentHTML("beforeend", `
+            <li data-mod-nav="openet_ts" hidden></li>
+            <li data-mod-nav="geneva" hidden></li>
+            <li data-mod-nav="roads" hidden></li>
+            <div data-mod-section="geneva" hidden></div>
+            <input type="checkbox" data-project-mod="openet_ts">
+            <input type="checkbox" data-project-mod="geneva">
+            <input type="checkbox" data-project-mod="roads">
+        `);
+
+        const bootstrap = jest.fn();
+        window.Geneva = {
+            getInstance: jest.fn(() => ({ bootstrap }))
+        };
+
+        requestMock.mockResolvedValueOnce({
+            body: {
+                Content: {
+                    label: "Geneva",
+                    mods: ["geneva", "roads"]
+                }
+            }
+        });
+        getJsonMock.mockResolvedValueOnce({
+            Content: {
+                html: "<section id='geneva'>Geneva control</section>"
+            }
+        });
+
+        const input = document.querySelector('[data-project-mod="geneva"]');
+        input.checked = true;
+        const resultPromise = project.set_mod("geneva", true, { input, notify: false });
+        await flushPromises();
+        await flushPromises();
+        await new Promise((resolve) => setTimeout(resolve, 0));
+        await resultPromise;
+
+        expect(window.runContext.mods.list).toEqual(expect.arrayContaining(["geneva", "roads"]));
+        expect(window.runContext.mods.flags.geneva).toBe(true);
+        expect(window.runContext.mods.flags.roads).toBe(true);
+        expect(document.querySelector('[data-project-mod="roads"]').checked).toBe(true);
+        expect(document.querySelector('[data-mod-nav="geneva"]').hidden).toBe(false);
+        expect(document.querySelector('[data-mod-nav="roads"]').hidden).toBe(false);
+    });
+
+    test("set_mod preserves capability-gated flags while syncing authoritative dependencies", async () => {
+        window.runContext = {
+            mods: {
+                list: ["openet_ts"],
+                flags: { openet_ts: false, geneva: false, roads: false }
+            }
+        };
+        document.getElementById("project-fixture").insertAdjacentHTML("beforeend", `
+            <li data-mod-nav="openet_ts" hidden></li>
+            <li data-mod-nav="geneva" hidden></li>
+            <li data-mod-nav="roads" hidden></li>
+            <div data-mod-section="geneva" hidden></div>
+            <input type="checkbox" data-project-mod="openet_ts">
+            <input type="checkbox" data-project-mod="geneva">
+            <input type="checkbox" data-project-mod="roads">
+        `);
+
+        const bootstrap = jest.fn();
+        window.Geneva = {
+            getInstance: jest.fn(() => ({ bootstrap }))
+        };
+
+        requestMock.mockResolvedValueOnce({
+            body: {
+                Content: {
+                    label: "Geneva",
+                    mods: ["openet_ts", "geneva", "roads"]
+                }
+            }
+        });
+        getJsonMock.mockResolvedValueOnce({
+            Content: {
+                html: "<section id='geneva'>Geneva control</section>"
+            }
+        });
+
+        const input = document.querySelector('[data-project-mod="geneva"]');
+        input.checked = true;
+        const resultPromise = project.set_mod("geneva", true, { input, notify: false });
+        await flushPromises();
+        await flushPromises();
+        await new Promise((resolve) => setTimeout(resolve, 0));
+        await resultPromise;
+
+        expect(window.runContext.mods.list).toEqual(["openet_ts", "geneva", "roads"]);
+        expect(window.runContext.mods.flags.openet_ts).toBe(false);
+        expect(window.runContext.mods.flags.geneva).toBe(true);
+        expect(window.runContext.mods.flags.roads).toBe(true);
+        expect(document.querySelector('[data-project-mod="openet_ts"]').checked).toBe(false);
+        expect(document.querySelector('[data-project-mod="roads"]').checked).toBe(true);
+        expect(document.querySelector('[data-mod-nav="openet_ts"]').hidden).toBe(true);
+        expect(document.querySelector('[data-mod-nav="geneva"]').hidden).toBe(false);
+        expect(document.querySelector('[data-mod-nav="roads"]').hidden).toBe(false);
+    });
+
+    test("set_mod keeps capability-gated flags disabled when backend reintroduces gated mods", async () => {
+        window.runContext = {
+            mods: {
+                list: [],
+                flags: { openet_ts: false, geneva: false, roads: false }
+            }
+        };
+        document.getElementById("project-fixture").insertAdjacentHTML("beforeend", `
+            <li data-mod-nav="openet_ts" hidden></li>
+            <li data-mod-nav="geneva" hidden></li>
+            <li data-mod-nav="roads" hidden></li>
+            <div data-mod-section="geneva" hidden></div>
+            <input type="checkbox" data-project-mod="openet_ts">
+            <input type="checkbox" data-project-mod="geneva">
+            <input type="checkbox" data-project-mod="roads">
+        `);
+
+        const bootstrap = jest.fn();
+        window.Geneva = {
+            getInstance: jest.fn(() => ({ bootstrap }))
+        };
+
+        requestMock.mockResolvedValueOnce({
+            body: {
+                Content: {
+                    label: "Geneva",
+                    mods: ["openet_ts", "geneva", "roads"]
+                }
+            }
+        });
+        getJsonMock.mockResolvedValueOnce({
+            Content: {
+                html: "<section id='geneva'>Geneva control</section>"
+            }
+        });
+
+        const input = document.querySelector('[data-project-mod="geneva"]');
+        input.checked = true;
+        const resultPromise = project.set_mod("geneva", true, { input, notify: false });
+        await flushPromises();
+        await flushPromises();
+        await new Promise((resolve) => setTimeout(resolve, 0));
+        await resultPromise;
+
+        expect(window.runContext.mods.flags.openet_ts).toBe(false);
+        expect(document.querySelector('[data-project-mod="openet_ts"]').checked).toBe(false);
+        expect(document.querySelector('[data-mod-nav="openet_ts"]').hidden).toBe(true);
+        expect(window.runContext.mods.flags.roads).toBe(true);
+        expect(document.querySelector('[data-project-mod="roads"]').checked).toBe(true);
+        expect(document.querySelector('[data-mod-nav="roads"]').hidden).toBe(false);
+    });
+
+    test("set_mod defaults sticky-gated mods to hidden when gate flag key is absent", async () => {
+        window.runContext = {
+            mods: {
+                list: [],
+                flags: { geneva: false, roads: false }
+            }
+        };
+        document.getElementById("project-fixture").insertAdjacentHTML("beforeend", `
+            <li data-mod-nav="openet_ts" hidden></li>
+            <li data-mod-nav="geneva" hidden></li>
+            <li data-mod-nav="roads" hidden></li>
+            <div data-mod-section="geneva" hidden></div>
+            <input type="checkbox" data-project-mod="openet_ts">
+            <input type="checkbox" data-project-mod="geneva">
+            <input type="checkbox" data-project-mod="roads">
+        `);
+
+        const bootstrap = jest.fn();
+        window.Geneva = {
+            getInstance: jest.fn(() => ({ bootstrap }))
+        };
+
+        requestMock.mockResolvedValueOnce({
+            body: {
+                Content: {
+                    label: "Geneva",
+                    mods: ["openet_ts", "geneva", "roads"]
+                }
+            }
+        });
+        getJsonMock.mockResolvedValueOnce({
+            Content: {
+                html: "<section id='geneva'>Geneva control</section>"
+            }
+        });
+
+        const input = document.querySelector('[data-project-mod="geneva"]');
+        input.checked = true;
+        const resultPromise = project.set_mod("geneva", true, { input, notify: false });
+        await flushPromises();
+        await flushPromises();
+        await new Promise((resolve) => setTimeout(resolve, 0));
+        await resultPromise;
+
+        expect(window.runContext.mods.flags.openet_ts).toBe(false);
+        expect(document.querySelector('[data-project-mod="openet_ts"]').checked).toBe(false);
+        expect(document.querySelector('[data-mod-nav="openet_ts"]').hidden).toBe(true);
+        expect(window.runContext.mods.flags.roads).toBe(true);
+        expect(document.querySelector('[data-project-mod="roads"]').checked).toBe(true);
+    });
+
+    test("set_mod loads and bootstraps newly enabled dependent modules from authoritative response", async () => {
+        window.runContext = { mods: { list: [], flags: { geneva: false, roads: false } } };
+        document.getElementById("project-fixture").insertAdjacentHTML("beforeend", `
+            <li data-mod-nav="geneva" hidden></li>
+            <li data-mod-nav="roads" hidden></li>
+            <div data-mod-section="geneva" hidden></div>
+            <div data-mod-section="roads" hidden></div>
+            <input type="checkbox" data-project-mod="geneva">
+            <input type="checkbox" data-project-mod="roads">
+        `);
+
+        const genevaBootstrap = jest.fn();
+        const roadsBootstrap = jest.fn();
+        window.Geneva = {
+            getInstance: jest.fn(() => ({ bootstrap: genevaBootstrap }))
+        };
+        window.Roads = {
+            getInstance: jest.fn(() => ({ bootstrap: roadsBootstrap }))
+        };
+
+        requestMock.mockResolvedValueOnce({
+            body: {
+                Content: {
+                    label: "Geneva",
+                    mods: ["geneva", "roads"]
+                }
+            }
+        });
+        getJsonMock
+            .mockResolvedValueOnce({ Content: { html: "<section id='geneva'>Geneva control</section>" } })
+            .mockResolvedValueOnce({ Content: { html: "<section id='roads'>Roads control</section>" } });
+
+        const input = document.querySelector('[data-project-mod="geneva"]');
+        input.checked = true;
+        const resultPromise = project.set_mod("geneva", true, { input, notify: false });
+        await flushPromises();
+        await flushPromises();
+        await new Promise((resolve) => setTimeout(resolve, 0));
+        await resultPromise;
+
+        expect(getJsonMock).toHaveBeenNthCalledWith(1, "view/mod/geneva");
+        expect(getJsonMock).toHaveBeenNthCalledWith(2, "view/mod/roads");
+        expect(document.querySelector('[data-mod-section="roads"]').hidden).toBe(false);
+        expect(document.querySelector('[data-mod-section="roads"]').innerHTML).toContain("Roads control");
+        expect(roadsBootstrap).toHaveBeenCalledWith(window.runContext);
+        expect(window.runContext.mods.flags.roads).toBe(true);
+    });
+
+    test("set_mod returns dependency failure and suppresses success event when dependent bootstrap fails", async () => {
+        window.runContext = { mods: { list: [], flags: { geneva: false, roads: false } } };
+        document.getElementById("project-fixture").insertAdjacentHTML("beforeend", `
+            <li data-mod-nav="geneva" hidden></li>
+            <li data-mod-nav="roads" hidden></li>
+            <div data-mod-section="geneva" hidden></div>
+            <div data-mod-section="roads" hidden></div>
+            <input type="checkbox" data-project-mod="geneva">
+            <input type="checkbox" data-project-mod="roads">
+        `);
+
+        const updatedHandler = jest.fn();
+        const failedHandler = jest.fn();
+        project.events.on("project:mod:updated", updatedHandler);
+        project.events.on("project:mod:update:failed", failedHandler);
+
+        const genevaBootstrap = jest.fn();
+        const roadsBootstrap = jest.fn(() => {
+            throw new Error("roads bootstrap failure");
+        });
+        window.Geneva = {
+            getInstance: jest.fn(() => ({ bootstrap: genevaBootstrap }))
+        };
+        window.Roads = {
+            getInstance: jest.fn(() => ({ bootstrap: roadsBootstrap }))
+        };
+
+        requestMock.mockResolvedValueOnce({
+            body: {
+                Content: {
+                    label: "Geneva",
+                    mods: ["geneva", "roads"]
+                }
+            }
+        });
+        getJsonMock
+            .mockResolvedValueOnce({ Content: { html: "<section id='geneva'>Geneva control</section>" } })
+            .mockResolvedValueOnce({ Content: { html: "<section id='roads'>Roads control</section>" } });
+
+        const input = document.querySelector('[data-project-mod="geneva"]');
+        input.checked = true;
+        const resultPromise = project.set_mod("geneva", true, { input, notify: false });
+        await flushPromises();
+        await flushPromises();
+        await new Promise((resolve) => setTimeout(resolve, 0));
+        const result = await resultPromise;
+
+        expect(result).toEqual(expect.objectContaining({
+            error: expect.objectContaining({
+                phase: "dependency"
+            }),
+            dependency_error: expect.objectContaining({
+                mod: "roads"
+            })
+        }));
+        expect(updatedHandler).not.toHaveBeenCalled();
+        expect(failedHandler).toHaveBeenCalledWith(expect.objectContaining({
+            mod: "roads",
+            phase: "bootstrap"
+        }));
+        expect(input.disabled).toBe(false);
+        expect(input.checked).toBe(true);
+    });
+
+    test("set_mod skips render/bootstrap when authoritative mods exclude requested mod", async () => {
+        window.runContext = { mods: { list: [], flags: { geneva: false } } };
+        document.getElementById("project-fixture").insertAdjacentHTML("beforeend", `
+            <li data-mod-nav="geneva" hidden></li>
+            <div data-mod-section="geneva" hidden></div>
+            <input type="checkbox" data-project-mod="geneva">
+        `);
+        const bootstrap = jest.fn();
+        window.Geneva = {
+            getInstance: jest.fn(() => ({ bootstrap }))
+        };
+        const updatedHandler = jest.fn();
+        project.events.on("project:mod:updated", updatedHandler);
+
+        requestMock.mockResolvedValueOnce({
+            body: {
+                Content: {
+                    label: "Geneva",
+                    mods: []
+                }
+            }
+        });
+
+        const input = document.querySelector('[data-project-mod="geneva"]');
+        input.checked = true;
+        const result = await project.set_mod("geneva", true, { input, notify: false });
+
+        expect(result).toEqual(expect.objectContaining({
+            Content: expect.objectContaining({
+                mods: []
+            })
+        }));
+        expect(getJsonMock).not.toHaveBeenCalled();
+        expect(window.Geneva.getInstance).not.toHaveBeenCalled();
+        expect(bootstrap).not.toHaveBeenCalled();
+        expect(window.runContext.mods.flags.geneva).toBe(false);
+        expect(window.runContext.mods.list).toEqual([]);
+        expect(document.querySelector('[data-mod-nav="geneva"]').hidden).toBe(true);
+        expect(input.checked).toBe(false);
+        expect(updatedHandler).toHaveBeenCalledWith(expect.objectContaining({
+            mod: "geneva",
+            enabled: false,
+            desired: true
+        }));
+    });
+
+    test("set_mod disable path syncs nav, section teardown, and runContext", async () => {
+        window.runContext = { mods: { list: ["geneva"], flags: { geneva: true } } };
+        document.getElementById("project-fixture").insertAdjacentHTML("beforeend", `
+            <li data-mod-nav="geneva"></li>
+            <div data-mod-section="geneva"><div>Loaded</div></div>
+            <input type="checkbox" data-project-mod="geneva" checked>
+        `);
+        requestMock.mockResolvedValueOnce({
+            body: {
+                Content: {
+                    label: "Geneva",
+                    mods: []
+                }
+            }
+        });
+
+        const failedHandler = jest.fn();
+        const updatedHandler = jest.fn();
+        project.events.on("project:mod:update:failed", failedHandler);
+        project.events.on("project:mod:updated", updatedHandler);
+
+        const input = document.querySelector('[data-project-mod="geneva"]');
+        input.checked = false;
+        const result = await project.set_mod("geneva", false, { input, notify: false });
+
+        expect(result).toEqual(expect.objectContaining({
+            Content: expect.objectContaining({
+                mods: []
+            })
+        }));
+        expect(window.runContext.mods.list).toEqual([]);
+        expect(window.runContext.mods.flags.geneva).toBe(false);
+        expect(document.querySelector('[data-mod-nav="geneva"]').hidden).toBe(true);
+        expect(document.querySelector('[data-mod-section="geneva"]').innerHTML).toBe("");
+        expect(input.checked).toBe(false);
+        expect(updatedHandler).toHaveBeenCalledWith(expect.objectContaining({
+            mod: "geneva",
+            enabled: false,
+            desired: false
+        }));
+        expect(failedHandler).not.toHaveBeenCalled();
+    });
+
+    test("set_mod preserves enabled state when bootstrap fails after authoritative enable", async () => {
+        window.runContext = { mods: { list: [], flags: { geneva: false } } };
+        document.getElementById("project-fixture").insertAdjacentHTML("beforeend", `
+            <li data-mod-nav="geneva" hidden></li>
+            <div data-mod-section="geneva" hidden></div>
+            <input type="checkbox" data-project-mod="geneva">
+        `);
+        window.Geneva = {
+            getInstance: jest.fn(() => ({
+                bootstrap: () => {
+                    throw new Error("bootstrap failure");
+                }
+            }))
+        };
+        requestMock.mockResolvedValueOnce({
+            body: {
+                Content: {
+                    label: "Geneva",
+                    mods: ["geneva"]
+                }
+            }
+        });
+        getJsonMock.mockResolvedValueOnce({
+            Content: {
+                html: "<section id='geneva'>Geneva control</section>"
+            }
+        });
+
+        const input = document.querySelector('[data-project-mod="geneva"]');
+        input.checked = true;
+        const resultPromise = project.set_mod("geneva", true, { input, notify: false });
+        await flushPromises();
+        await flushPromises();
+        await new Promise((resolve) => setTimeout(resolve, 0));
+        const result = await resultPromise;
+
+        expect(result).toEqual(expect.objectContaining({
+            error: expect.objectContaining({
+                phase: "bootstrap"
+            })
+        }));
+        expect(window.runContext.mods.list).toEqual(expect.arrayContaining(["geneva"]));
+        expect(window.runContext.mods.flags.geneva).toBe(true);
+        expect(document.querySelector('[data-mod-nav="geneva"]').hidden).toBe(false);
+        expect(input.checked).toBe(true);
+        expect(commandBar.showResult.mock.calls.join("\n")).not.toContain("Geneva enabled.");
+    });
+
+    test("set_mod restores prior checkbox state on request failure during idempotent enable", async () => {
+        window.runContext = { mods: { list: ["rusle"], flags: { rusle: true } } };
+        document.getElementById("project-fixture").insertAdjacentHTML("beforeend", `
+            <input type="checkbox" data-project-mod="rusle" checked>
+        `);
+        requestMock.mockRejectedValueOnce(new Error("network down"));
+
+        const input = document.querySelector('[data-project-mod="rusle"]');
+        input.checked = true;
+        const result = await project.set_mod("rusle", true, { input, notify: false });
+
+        expect(result).toBeNull();
+        expect(input.disabled).toBe(false);
+        expect(input.checked).toBe(true);
+    });
+
+    test("set_mod surfaces response diagnostics to users when backend returns an error payload", async () => {
+        document.getElementById("project-fixture").insertAdjacentHTML("beforeend", `
+            <input type="checkbox" data-project-mod="rusle">
+        `);
+        requestMock.mockResolvedValueOnce({
+            body: {
+                error: {
+                    message: "RUSLE requires disturbed mode",
+                    details: "Traceback (most recent call last):\nValueError: requirement failed"
+                }
+            }
+        });
+
+        const input = document.querySelector('[data-project-mod="rusle"]');
+        input.checked = true;
+        const result = await project.set_mod("rusle", true, { input });
+
+        expect(result).toEqual(expect.objectContaining({
+            error: expect.objectContaining({
+                message: "RUSLE requires disturbed mode"
+            })
+        }));
+        expect(input.disabled).toBe(false);
+        expect(input.checked).toBe(false);
+
+        const lastMessage = commandBar.showResult.mock.calls[commandBar.showResult.mock.calls.length - 1][0];
+        expect(lastMessage).toContain("project.set_mod failed");
+        expect(lastMessage).toContain("mod=rusle enabled=true phase=response");
+        expect(lastMessage).toContain("message=RUSLE requires disturbed mode");
+        expect(lastMessage).toContain("stacktrace:");
+        expect(lastMessage).toContain("Traceback (most recent call last):");
+        expect(global.WCRecorder.emit).toHaveBeenCalledWith(
+            "project_mod_toggle_error",
+            expect.objectContaining({
+                category: "mod-toggle",
+                mod: "rusle",
+                enabled: true,
+                phase: "response"
+            })
+        );
+    });
+
+    test("set_mod redacts sensitive diagnostics before command bar and recorder emission", async () => {
+        const failedHandler = jest.fn();
+        project.events.on("project:mod:update:failed", failedHandler);
+        document.getElementById("project-fixture").insertAdjacentHTML("beforeend", `
+            <input type="checkbox" data-project-mod="rusle">
+        `);
+        requestMock.mockResolvedValueOnce({
+            body: {
+                error: {
+                    message: "authorization=Bearer abc.def",
+                    details: "Traceback (most recent call last):\ncookie=sessionid=abc\nurl=/x?token=abc123"
+                }
+            }
+        });
+
+        const input = document.querySelector('[data-project-mod="rusle"]');
+        input.checked = true;
+        await project.set_mod("rusle", true, { input });
+
+        const lastMessage = commandBar.showResult.mock.calls[commandBar.showResult.mock.calls.length - 1][0];
+        expect(lastMessage).toContain("message=authorization=[redacted]");
+        expect(lastMessage).toContain("cookie=[redacted]");
+        expect(lastMessage).toContain("token=[redacted]");
+        expect(lastMessage).not.toContain("abc.def");
+        expect(lastMessage).not.toContain("sessionid=abc");
+        expect(lastMessage).not.toContain("abc123");
+
+        expect(global.WCRecorder.emit).toHaveBeenCalledWith(
+            "project_mod_toggle_error",
+            expect.objectContaining({
+                message: "authorization=[redacted]",
+                detail: expect.stringContaining("cookie=[redacted]"),
+                stacktrace: expect.arrayContaining([
+                    expect.stringContaining("token=[redacted]")
+                ])
+            })
+        );
+        expect(failedHandler).toHaveBeenCalledWith(expect.objectContaining({
+            phase: "response",
+            response: expect.objectContaining({
+                error: expect.objectContaining({
+                    message: "authorization=[redacted]",
+                    details: expect.stringContaining("cookie=[redacted]")
+                })
+            }),
+            error: null
+        }));
+    });
+
+    test("set_mod surfaces request diagnostics to users when transport throws", async () => {
+        const failedHandler = jest.fn();
+        project.events.on("project:mod:update:failed", failedHandler);
+
+        document.getElementById("project-fixture").insertAdjacentHTML("beforeend", `
+            <input type="checkbox" data-project-mod="rusle">
+        `);
+        const transportError = new Error("network down");
+        transportError.status = 503;
+        transportError.statusText = "Service Unavailable";
+        transportError.url = "/runs/run-123/config-a/tasks/set_mod";
+        transportError.detail = "upstream timeout";
+        transportError.body = {
+            error: {
+                message: "upstream timeout",
+                details: "Traceback (most recent call last):\nRuntimeError: upstream timeout"
+            }
+        };
+        transportError.stack = "Error: network down\n    at set_mod";
+        requestMock.mockRejectedValueOnce(transportError);
+
+        const input = document.querySelector('[data-project-mod="rusle"]');
+        input.checked = true;
+        const result = await project.set_mod("rusle", true, { input });
+
+        expect(result).toBeNull();
+        expect(input.disabled).toBe(false);
+        expect(input.checked).toBe(false);
+
+        const lastMessage = commandBar.showResult.mock.calls[commandBar.showResult.mock.calls.length - 1][0];
+        expect(lastMessage).toContain("project.set_mod failed");
+        expect(lastMessage).toContain("mod=rusle enabled=true phase=request");
+        expect(lastMessage).toContain("status=503 Service Unavailable");
+        expect(lastMessage).toContain("message=upstream timeout");
+        expect(lastMessage).toContain("detail=Traceback (most recent call last):");
+        expect(lastMessage).toContain("RuntimeError: upstream timeout");
+        expect(lastMessage).toContain("stacktrace:");
+        expect(lastMessage).toContain("Error: network down");
+        expect(lastMessage).toContain("RuntimeError: upstream timeout");
+        expect(global.WCRecorder.emit).toHaveBeenCalledWith(
+            "project_mod_toggle_error",
+            expect.objectContaining({
+                category: "mod-toggle",
+                mod: "rusle",
+                enabled: true,
+                phase: "request",
+                status: 503
+            })
+        );
+        expect(failedHandler).toHaveBeenCalledWith(expect.objectContaining({
+            mod: "rusle",
+            phase: "request",
+            diagnostic: expect.objectContaining({
+                detail: expect.stringContaining("RuntimeError: upstream timeout"),
+                stack: expect.arrayContaining([
+                    expect.stringContaining("RuntimeError: upstream timeout")
+                ])
+            })
+        }));
+    });
+
+    test("set_mod emits sanitized request-phase error payload on failed events", async () => {
+        const failedHandler = jest.fn();
+        project.events.on("project:mod:update:failed", failedHandler);
+
+        document.getElementById("project-fixture").insertAdjacentHTML("beforeend", `
+            <input type="checkbox" data-project-mod="rusle">
+        `);
+        const transportError = new Error("network down");
+        transportError.detail = "authorization=Bearer abc.def";
+        transportError.body = {
+            error: {
+                message: "request failed",
+                details: {
+                    access_token: "abc123",
+                    cookie: "sessionid=abc"
+                }
+            }
+        };
+        requestMock.mockRejectedValueOnce(transportError);
+
+        const input = document.querySelector('[data-project-mod="rusle"]');
+        input.checked = true;
+        await project.set_mod("rusle", true, { input, notify: false });
+
+        expect(failedHandler).toHaveBeenCalledWith(expect.objectContaining({
+            phase: "request",
+            error: expect.objectContaining({
+                detail: "authorization=[redacted]",
+                body: expect.objectContaining({
+                    error: expect.objectContaining({
+                        details: expect.objectContaining({
+                            access_token: "[redacted]",
+                            cookie: "[redacted]"
+                        })
+                    })
+                })
+            })
+        }));
+        const errorPayload = failedHandler.mock.calls[0][0].error;
+        expect(JSON.stringify(errorPayload)).not.toContain("abc.def");
+        expect(JSON.stringify(errorPayload)).not.toContain("sessionid=abc");
+    });
+
+    test("set_mod preserves nested traceback arrays from transport detail objects", async () => {
+        document.getElementById("project-fixture").insertAdjacentHTML("beforeend", `
+            <input type="checkbox" data-project-mod="rusle">
+        `);
+        const transportError = new Error("network down");
+        transportError.status = 503;
+        transportError.statusText = "Service Unavailable";
+        transportError.detail = {
+            message: "transport wrapper",
+            details: [
+                "Traceback (most recent call last):",
+                "RuntimeError: nested transport detail"
+            ]
+        };
+        transportError.body = {
+            error: {
+                message: "upstream timeout",
+                details: [
+                    "Traceback (most recent call last):",
+                    "RuntimeError: nested upstream timeout"
+                ]
+            }
+        };
+        requestMock.mockRejectedValueOnce(transportError);
+
+        const input = document.querySelector('[data-project-mod="rusle"]');
+        input.checked = true;
+        await project.set_mod("rusle", true, { input });
+
+        const lastMessage = commandBar.showResult.mock.calls[commandBar.showResult.mock.calls.length - 1][0];
+        expect(lastMessage).toContain("detail=Traceback (most recent call last):");
+        expect(lastMessage).toContain("RuntimeError: nested transport detail");
+        expect(lastMessage).toContain("RuntimeError: nested upstream timeout");
+
+        expect(global.WCRecorder.emit).toHaveBeenCalledWith(
+            "project_mod_toggle_error",
+            expect.objectContaining({
+                stacktrace: expect.arrayContaining([
+                    expect.stringContaining("RuntimeError: nested transport detail"),
+                    expect.stringContaining("RuntimeError: nested upstream timeout")
+                ])
+            })
+        );
+    });
+
+    test("set_mod surfaces render-phase diagnostics when module section loading fails", async () => {
+        const failedHandler = jest.fn();
+        project.events.on("project:mod:update:failed", failedHandler);
+        window.runContext = { mods: { list: [], flags: { rusle: false, roads: false } } };
+
+        document.getElementById("project-fixture").insertAdjacentHTML("beforeend", `
+            <li data-mod-nav="rusle" hidden></li>
+            <li data-mod-nav="roads" hidden></li>
+            <div data-mod-section="rusle" hidden></div>
+            <input type="checkbox" data-project-mod="rusle">
+            <input type="checkbox" data-project-mod="roads">
+        `);
+        requestMock.mockResolvedValueOnce({
+            body: { Content: { label: "RUSLE", mods: ["rusle", "roads"] } }
+        });
+        getJsonMock.mockRejectedValueOnce({
+            status: 500,
+            statusText: "Internal Server Error",
+            body: {
+                error: {
+                    message: "Module fragment unavailable",
+                    details: "Traceback (most recent call last):\nRuntimeError: render failed\ncookie=sessionid=abc"
+                }
+            }
+        });
+
+        const input = document.querySelector('[data-project-mod="rusle"]');
+        input.checked = true;
+        const result = await project.set_mod("rusle", true, { input });
+
+        expect(result).toEqual(expect.objectContaining({
+            error: expect.objectContaining({
+                message: "Module fragment unavailable",
+                detail: expect.stringContaining("RuntimeError: render failed"),
+                details: expect.stringContaining("RuntimeError: render failed"),
+                phase: "render"
+            }),
+            Content: expect.objectContaining({ label: "RUSLE", mods: ["rusle", "roads"] }),
+            response: expect.objectContaining({
+                Content: expect.objectContaining({ label: "RUSLE", mods: ["rusle", "roads"] })
+            }),
+            render_error: expect.objectContaining({
+                details: expect.stringContaining("RuntimeError: render failed"),
+                phase: "render"
+            }),
+            diagnostic: expect.objectContaining({
+                phase: "render",
+                message: "Module fragment unavailable"
+            })
+        }));
+        expect(input.disabled).toBe(false);
+        expect(input.checked).toBe(true);
+        expect(document.querySelector('[data-project-mod="roads"]').checked).toBe(true);
+        expect(document.querySelector('[data-mod-nav="rusle"]').hidden).toBe(false);
+        expect(document.querySelector('[data-mod-nav="roads"]').hidden).toBe(false);
+        expect(window.runContext.mods.list).toEqual(["rusle", "roads"]);
+        expect(window.runContext.mods.flags.rusle).toBe(true);
+        expect(window.runContext.mods.flags.roads).toBe(true);
+
+        const lastMessage = commandBar.showResult.mock.calls[commandBar.showResult.mock.calls.length - 1][0];
+        expect(lastMessage).toContain("project.set_mod failed");
+        expect(lastMessage).toContain("mod=rusle enabled=true phase=render");
+        expect(lastMessage).toContain("message=Module fragment unavailable");
+        expect(lastMessage).toContain("stacktrace:");
+        expect(lastMessage).toContain("RuntimeError: render failed");
+        expect(lastMessage).toContain("cookie=[redacted]");
+        expect(lastMessage).not.toContain("sessionid=abc");
+
+        expect(failedHandler).toHaveBeenCalledWith(expect.objectContaining({
+            mod: "rusle",
+            enabled: true,
+            phase: "render",
+            error: expect.objectContaining({
+                body: expect.objectContaining({
+                    error: expect.objectContaining({
+                        details: expect.stringContaining("cookie=[redacted]")
+                    })
+                })
+            }),
+            response: expect.objectContaining({
+                Content: expect.objectContaining({ label: "RUSLE", mods: ["rusle", "roads"] })
+            }),
+            diagnostic: expect.objectContaining({
+                message: "Module fragment unavailable"
+            })
+        }));
     });
 });

@@ -337,6 +337,169 @@
         return entries;
     }
 
+    var MAX_BOOTSTRAP_STACK_LINES = 80;
+    var MAX_BOOTSTRAP_RECORDER_EVENTS = 8;
+    var MAX_BOOTSTRAP_FALLBACK_ERROR_KEYS = 256;
+    var bootstrapNotifier = null;
+    var bootstrapFallbackErrorKeys = {};
+    var bootstrapFallbackErrorKeyOrder = [];
+
+    function resolveBootstrapNotifier() {
+        if (bootstrapNotifier && typeof bootstrapNotifier.notify === "function") {
+            return bootstrapNotifier;
+        }
+        var helper = window.WCBootstrapObservability || null;
+        if (!helper || typeof helper.createBootstrapErrorNotifier !== "function") {
+            return null;
+        }
+        bootstrapNotifier = helper.createBootstrapErrorNotifier({
+            maxStackLines: MAX_BOOTSTRAP_STACK_LINES,
+            maxRecorderEvents: MAX_BOOTSTRAP_RECORDER_EVENTS,
+            commandBarFactory: function () {
+                if (typeof window.initializeCommandBar !== "function") {
+                    return null;
+                }
+                return window.initializeCommandBar();
+            },
+            recorderFactory: function () {
+                return window.WCRecorder || null;
+            },
+            logger: window.console || null
+        });
+        return bootstrapNotifier;
+    }
+
+    function sanitizeBootstrapFallbackLine(line) {
+        var text = String(line === undefined || line === null ? "" : line);
+        text = text.replace(/\bauthorization\b\s*:\s*[^\r\n]*/gi, "authorization: [redacted]");
+        text = text.replace(/\bauthorization\b\s*=\s*[^\r\n]*/gi, "authorization=[redacted]");
+        text = text.replace(/\b(set-cookie|cookie)\b\s*:\s*[^\r\n]*/gi, "$1: [redacted]");
+        text = text.replace(/\b(set-cookie|cookie)\b\s*=\s*[^\r\n]*/gi, "$1=[redacted]");
+        text = text.replace(/\b(x-api-key|api-key|x-auth-token|x-csrf-token)\b\s*:\s*[^\r\n]*/gi, "$1: [redacted]");
+        text = text.replace(/\b(x-api-key|api-key|x-auth-token|x-csrf-token)\b\s*=\s*[^\r\n]*/gi, "$1=[redacted]");
+        text = text.replace(/\bauthorization\b\s+(?:Bearer|Token)\s+[^\s,;]+/gi, "authorization [redacted]");
+        text = text.replace(/\b(Bearer|Token)\s+[A-Za-z0-9._~+\/-]+=*/gi, "$1 [redacted]");
+        text = text.replace(
+            /([?&](?:token|access_token|refresh_token|id_token|key|api_key|apikey|api-key|x-api-key|authorization|set-cookie|cookie|session|email|auth|x-auth-token|x-csrf-token)=)([^&\s#]+)/gi,
+            "$1[redacted]"
+        );
+        text = text.replace(
+            /\b(token|access_token|refresh_token|id_token|key|api_key|apikey|api-key|x-api-key|authorization|set-cookie|cookie|session|email|auth|x-auth-token|x-csrf-token)\b\s*=\s*([^\s,;&]+)/gi,
+            "$1=[redacted]"
+        );
+        text = text.replace(
+            /((?:\\[\\"'])?(?:token|access_token|refresh_token|id_token|key|api_key|apikey|api-key|x-api-key|authorization|set-cookie|cookie|session|email|auth|x-auth-token|x-csrf-token)(?:\\[\\"'])?\s*:\s*(?:\\[\\"']))([^\\]*?)((?:\\[\\"']))/gi,
+            "$1[redacted]$3"
+        );
+        text = text.replace(
+            /((?:\\?[\\"'])?(?:token|access_token|refresh_token|id_token|key|api_key|apikey|api-key|x-api-key|authorization|set-cookie|cookie|session|email|auth|x-auth-token|x-csrf-token)(?:\\?[\\"'])?\s*:\s*(?:\\?[\\"']))([^"\\]*?)((?:\\?[\\"']))/gi,
+            "$1[redacted]$3"
+        );
+        text = text.replace(/[A-Z0-9._%+-]+@[A-Z0-9.-]+\.[A-Z]{2,}/gi, "[redacted-email]");
+        return text;
+    }
+
+    function resolveBootstrapFallbackMessage(err) {
+        if (err === undefined || err === null) {
+            return "";
+        }
+        if (typeof err === "string") {
+            return err;
+        }
+        if (typeof err === "object") {
+            if (typeof err.message === "string" && err.message) {
+                return err.message;
+            }
+            if (typeof err.detail === "string" && err.detail) {
+                return err.detail;
+            }
+        }
+        return String(err);
+    }
+
+    function resolveBootstrapFallbackStack(err) {
+        var raw = "";
+        if (err && err.stack) {
+            raw = err.stack;
+        } else if (err && err.detail) {
+            raw = err.detail;
+        } else {
+            raw = resolveBootstrapFallbackMessage(err);
+        }
+        if (!raw) {
+            return [];
+        }
+        var lines = String(raw).split(/\r?\n/).filter(function (line) {
+            return line !== "";
+        });
+        if (lines.length > MAX_BOOTSTRAP_STACK_LINES) {
+            lines = lines.slice(0, MAX_BOOTSTRAP_STACK_LINES);
+            lines.push("... [truncated]");
+        }
+        return lines.map(function (line) {
+            return sanitizeBootstrapFallbackLine(line);
+        });
+    }
+
+    function notifyBootstrapError(summary, err, meta) {
+        var notifier = resolveBootstrapNotifier();
+        if (notifier && typeof notifier.notify === "function") {
+            notifier.notify(summary, err, meta);
+            return;
+        }
+
+        var fallbackMessage = resolveBootstrapFallbackMessage(err);
+
+        var fallbackKey = [
+            summary || "",
+            meta && meta.stage ? meta.stage : "",
+            meta && meta.controller ? meta.controller : "",
+            fallbackMessage
+        ].join("|");
+        if (bootstrapFallbackErrorKeys[fallbackKey]) {
+            return;
+        }
+        bootstrapFallbackErrorKeys[fallbackKey] = true;
+        bootstrapFallbackErrorKeyOrder.push(fallbackKey);
+        if (bootstrapFallbackErrorKeyOrder.length > MAX_BOOTSTRAP_FALLBACK_ERROR_KEYS) {
+            var oldestFallbackKey = bootstrapFallbackErrorKeyOrder.shift();
+            if (oldestFallbackKey !== undefined) {
+                delete bootstrapFallbackErrorKeys[oldestFallbackKey];
+            }
+        }
+
+        var lines = ["[bootstrap] " + summary];
+        if (meta && meta.stage) {
+            lines.push("stage=" + meta.stage);
+        }
+        if (meta && meta.controller) {
+            lines.push("controller=" + meta.controller);
+        }
+        if (fallbackMessage) {
+            lines.push("message=" + sanitizeBootstrapFallbackLine(fallbackMessage));
+        }
+        var fallbackStack = resolveBootstrapFallbackStack(err);
+        if (fallbackStack.length) {
+            lines.push("stacktrace:");
+            fallbackStack.forEach(function (line) {
+                lines.push(line);
+            });
+        }
+        var diagnostic = lines.join("\n");
+
+        if (typeof window.initializeCommandBar === "function") {
+            try {
+                var commandBar = window.initializeCommandBar();
+                if (commandBar && typeof commandBar.showResult === "function") {
+                    commandBar.showResult(diagnostic);
+                }
+            } catch (commandBarErr) {
+                console.warn("[Bootstrap] Failed to notify command bar", commandBarErr);
+            }
+        }
+        console.error(diagnostic);
+    }
+
     function bootstrapControllers(context) {
         var helper = window.WCControllerBootstrap || null;
         var entries = createBootstrapEntries(context);
@@ -345,23 +508,33 @@
             helper.setContext(context);
         }
 
-        if (helper && typeof helper.bootstrapMany === "function") {
-            try {
-                helper.bootstrapMany(entries, context);
-                return;
-            } catch (err) {
-                console.error("Controller bootstrap failure", err);
-            }
+        if (helper && typeof helper.bootstrapManyBestEffort === "function") {
+            helper.bootstrapManyBestEffort(entries, context, function (err, meta) {
+                notifyBootstrapError(
+                    "Controller bootstrap failure",
+                    err,
+                    { stage: "fallback", controller: meta && meta.name ? meta.name : null }
+                );
+            });
+            return;
         }
 
         entries.forEach(function (entry) {
             try {
+                if (helper && typeof helper.bootstrap === "function") {
+                    helper.bootstrap(entry.controller, entry.name, context);
+                    return;
+                }
                 var instance = entry.controller.getInstance();
                 if (instance && typeof instance.bootstrap === "function") {
                     instance.bootstrap(context);
                 }
             } catch (err) {
-                console.error("Fallback bootstrap failure for " + entry.name, err);
+                notifyBootstrapError(
+                    "Controller bootstrap failure",
+                    err,
+                    { stage: "fallback", controller: entry.name }
+                );
             }
         });
     }

@@ -33,11 +33,53 @@ var Project = (function () {
         "project:public:update:failed",
         "project:ttl-disabled:changed",
         "project:ttl-disabled:update:failed",
+        "project:mod:updated",
+        "project:mod:update:failed",
         "project:unitizer:sync:started",
         "project:unitizer:preferences",
         "project:unitizer:sync:completed",
         "project:unitizer:sync:failed"
     ];
+    var MOD_DIAGNOSTIC_SECRET_KEYS_ALT = [
+        "token",
+        "access_token",
+        "refresh_token",
+        "id_token",
+        "key",
+        "api_key",
+        "apikey",
+        "api-key",
+        "x-api-key",
+        "authorization",
+        "set-cookie",
+        "cookie",
+        "session",
+        "email",
+        "auth",
+        "x-auth-token",
+        "x-csrf-token"
+    ].join("|");
+    var MOD_DIAGNOSTIC_SECRET_HEADER_KEYS_ALT = [
+        "authorization",
+        "set-cookie",
+        "cookie",
+        "x-api-key",
+        "api-key",
+        "x-auth-token",
+        "x-csrf-token"
+    ].join("|");
+    var MOD_ENABLE_PROPAGATION = {
+        geneva: ["roads"]
+    };
+    var MOD_STICKY_FALSE_FLAGS = {
+        openet_ts: true,
+        rusle: true,
+        debris_flow: true
+    };
+    var MOD_DIAGNOSTIC_SECRET_KEY_PATTERN = new RegExp(
+        "^(?:" + MOD_DIAGNOSTIC_SECRET_KEYS_ALT + ")$",
+        "i"
+    );
 
     function ensureHelpers() {
         var dom = window.WCDom;
@@ -151,14 +193,21 @@ var Project = (function () {
     }
 
     function notifyError(message, error) {
+        var safeMessage = sanitizeModDiagnosticLine(message || "Error");
         if (error) {
+            var safeError = sanitizeModDiagnosticPayload(error);
             if (window.WCHttp && typeof window.WCHttp.isHttpError === "function" && window.WCHttp.isHttpError(error)) {
-                console.error(message, error.detail || error.body, error);
+                var safeDetail = sanitizeModDiagnosticPayload(error.detail || error.body || null);
+                if (safeDetail !== undefined && safeDetail !== null) {
+                    console.error(safeMessage, safeDetail, safeError);
+                } else {
+                    console.error(safeMessage, safeError);
+                }
             } else {
-                console.error(message, error);
+                console.error(safeMessage, safeError);
             }
         } else {
-            console.error(message);
+            console.error(safeMessage);
         }
     }
 
@@ -202,6 +251,91 @@ var Project = (function () {
             }
         }
         return String(value);
+    }
+
+    function sanitizeModDiagnosticLine(line) {
+        var helper = window.WCBootstrapObservability || null;
+        if (helper && typeof helper.sanitizeDiagnosticLine === "function") {
+            return helper.sanitizeDiagnosticLine(line);
+        }
+        var text = String(line === undefined || line === null ? "" : line);
+        text = text.replace(new RegExp(
+            "\\b(" + MOD_DIAGNOSTIC_SECRET_HEADER_KEYS_ALT + ")\\b\\s*:\\s*[^\\r\\n]*",
+            "gi"
+        ), "$1: [redacted]");
+        text = text.replace(/\bauthorization\b\s*=\s*[^\r\n]*/gi, "authorization=[redacted]");
+        text = text.replace(/\b(set-cookie|cookie)\b\s*=\s*[^\r\n]*/gi, "$1=[redacted]");
+        text = text.replace(
+            new RegExp(
+                "([?&](?:" + MOD_DIAGNOSTIC_SECRET_KEYS_ALT + ")=)([^&\\s#]+)",
+                "gi"
+            ),
+            "$1[redacted]"
+        );
+        text = text.replace(
+            new RegExp(
+                "(\\b(?:" + MOD_DIAGNOSTIC_SECRET_KEYS_ALT + ")\\b\\s*=\\s*)([^\\s,;&]+)",
+                "gi"
+            ),
+            "$1[redacted]"
+        );
+        text = text.replace(/[A-Z0-9._%+-]+@[A-Z0-9.-]+\.[A-Z]{2,}/gi, "[redacted-email]");
+        return text;
+    }
+
+    function sanitizeModDiagnosticLines(lines) {
+        return (Array.isArray(lines) ? lines : []).map(function (line) {
+            return sanitizeModDiagnosticLine(line);
+        });
+    }
+
+    function sanitizeModDiagnosticPayload(value, depth) {
+        var level = typeof depth === "number" ? depth : 0;
+        if (level > 5) {
+            return "[truncated]";
+        }
+        if (value === undefined || value === null) {
+            return value;
+        }
+        if (typeof value === "string") {
+            return sanitizeModDiagnosticLine(value);
+        }
+        if (
+            typeof value === "number"
+            || typeof value === "boolean"
+            || typeof value === "bigint"
+        ) {
+            return value;
+        }
+        if (Array.isArray(value)) {
+            var arrayLimit = 40;
+            var sanitizedArray = value.slice(0, arrayLimit).map(function (entry) {
+                return sanitizeModDiagnosticPayload(entry, level + 1);
+            });
+            if (value.length > arrayLimit) {
+                sanitizedArray.push("... [truncated]");
+            }
+            return sanitizedArray;
+        }
+        if (typeof value === "object") {
+            var sanitizedObject = {};
+            if (value instanceof Error) {
+                sanitizedObject.name = value.name || "Error";
+                sanitizedObject.message = sanitizeModDiagnosticLine(value.message || "");
+                if (value.stack) {
+                    sanitizedObject.stack = sanitizeModDiagnosticLine(value.stack);
+                }
+            }
+            Object.keys(value).forEach(function (key) {
+                if (MOD_DIAGNOSTIC_SECRET_KEY_PATTERN.test(String(key))) {
+                    sanitizedObject[key] = "[redacted]";
+                    return;
+                }
+                sanitizedObject[key] = sanitizeModDiagnosticPayload(value[key], level + 1);
+            });
+            return sanitizedObject;
+        }
+        return sanitizeModDiagnosticLine(String(value));
     }
 
     function formatErrorList(errors) {
@@ -261,6 +395,289 @@ var Project = (function () {
             return normalizeErrorValue(response.detail);
         }
         return fallback || null;
+    }
+
+    function splitStackLines(value) {
+        if (value === undefined || value === null) {
+            return [];
+        }
+        if (Array.isArray(value)) {
+            var arrayLines = [];
+            value.forEach(function (entry) {
+                if (entry === undefined || entry === null) {
+                    return;
+                }
+                String(entry).split(/\r?\n/).forEach(function (line) {
+                    if (line !== "") {
+                        arrayLines.push(line);
+                    }
+                });
+            });
+            return arrayLines;
+        }
+        if (typeof value === "string") {
+            return value.split(/\r?\n/).filter(function (line) {
+                return line !== "";
+            });
+        }
+        if (typeof value === "object") {
+            var objectLines = [];
+            if (value.stacktrace !== undefined) {
+                objectLines = objectLines.concat(splitStackLines(value.stacktrace));
+            }
+            if (value.details !== undefined) {
+                objectLines = objectLines.concat(splitStackLines(value.details));
+            }
+            if (value.detail !== undefined) {
+                objectLines = objectLines.concat(splitStackLines(value.detail));
+            }
+            if (value.stack !== undefined) {
+                objectLines = objectLines.concat(splitStackLines(value.stack));
+            }
+            if (value.message !== undefined) {
+                objectLines = objectLines.concat(splitStackLines(value.message));
+            }
+            if (objectLines.length) {
+                return objectLines;
+            }
+        }
+        return splitStackLines(normalizeErrorValue(value));
+    }
+
+    function truncateLines(lines, maxLines) {
+        var list = Array.isArray(lines) ? lines : [];
+        var max = typeof maxLines === "number" && maxLines > 0 ? maxLines : 40;
+        if (list.length <= max) {
+            return list.slice();
+        }
+        var trimmed = list.slice(0, max);
+        trimmed.push("... [truncated]");
+        return trimmed;
+    }
+
+    function collectModErrorStackLines(response, error) {
+        var lines = [];
+        var seen = {};
+
+        function appendUnique(source) {
+            splitStackLines(source).forEach(function (line) {
+                var key = String(line);
+                if (seen[key]) {
+                    return;
+                }
+                seen[key] = true;
+                lines.push(key);
+            });
+        }
+
+        if (response && typeof response === "object") {
+            appendUnique(response.stacktrace);
+            if (response.error && typeof response.error === "object") {
+                appendUnique(response.error.details);
+                appendUnique(response.error.detail);
+            }
+            appendUnique(response.detail);
+            appendUnique(response.details);
+        }
+
+        if (error && typeof error === "object") {
+            appendUnique(error.stack);
+            appendUnique(error.detail);
+            appendUnique(error.stacktrace);
+            if (error.body && typeof error.body === "object") {
+                appendUnique(error.body.stacktrace);
+                appendUnique(error.body.details);
+                appendUnique(error.body.detail);
+                if (error.body.error && typeof error.body.error === "object") {
+                    appendUnique(error.body.error.details);
+                    appendUnique(error.body.error.detail);
+                }
+            }
+            if (error.error && typeof error.error === "object") {
+                appendUnique(error.error.details);
+                appendUnique(error.error.detail);
+            }
+            appendUnique(error.details);
+            if (!error.detail && !error.body) {
+                appendUnique(error.message);
+            }
+        }
+
+        return truncateLines(lines, 80);
+    }
+
+    function resolveNestedErrorDetail(error) {
+        if (!error || typeof error !== "object") {
+            return null;
+        }
+        if (error.body && typeof error.body === "object") {
+            if (error.body.error && typeof error.body.error === "object") {
+                if (error.body.error.details !== undefined) {
+                    return normalizeErrorValue(error.body.error.details);
+                }
+                if (error.body.error.detail !== undefined) {
+                    return normalizeErrorValue(error.body.error.detail);
+                }
+            }
+            if (error.body.stacktrace !== undefined) {
+                return normalizeErrorValue(error.body.stacktrace);
+            }
+            if (error.body.details !== undefined) {
+                return normalizeErrorValue(error.body.details);
+            }
+            if (error.body.detail !== undefined) {
+                return normalizeErrorValue(error.body.detail);
+            }
+        }
+        return null;
+    }
+
+    function resolveDiagnosticPayload(error) {
+        if (!error || typeof error !== "object") {
+            return null;
+        }
+        if (error.body && typeof error.body === "object") {
+            return error.body;
+        }
+        if (error.detail && typeof error.detail === "object") {
+            return error.detail;
+        }
+        if (
+            Object.prototype.hasOwnProperty.call(error, "error")
+            || Object.prototype.hasOwnProperty.call(error, "errors")
+            || Object.prototype.hasOwnProperty.call(error, "message")
+            || Object.prototype.hasOwnProperty.call(error, "detail")
+            || Object.prototype.hasOwnProperty.call(error, "details")
+            || Object.prototype.hasOwnProperty.call(error, "stacktrace")
+        ) {
+            return error;
+        }
+        return null;
+    }
+
+    function buildModErrorDiagnostic(modName, desiredState, phase, response, error, fallbackMessage) {
+        var status = null;
+        var statusText = null;
+        if (error && error.status !== undefined && error.status !== null) {
+            status = error.status;
+        } else if (response && response.status !== undefined && response.status !== null) {
+            status = response.status;
+        }
+        if (error && error.statusText) {
+            statusText = error.statusText;
+        } else if (response && response.statusText) {
+            statusText = response.statusText;
+        }
+        var errorPayload = resolveDiagnosticPayload(error);
+        var url = (error && error.url) || (response && response.url) || null;
+        var detail = null;
+        var nestedDetail = resolveNestedErrorDetail(error);
+        if (nestedDetail) {
+            detail = nestedDetail;
+        }
+        if (error && error.detail !== undefined) {
+            if (!detail && error.detail && typeof error.detail === "object") {
+                if (error.detail.details !== undefined) {
+                    detail = normalizeErrorValue(error.detail.details);
+                } else if (error.detail.detail !== undefined) {
+                    detail = normalizeErrorValue(error.detail.detail);
+                }
+            }
+            if (!detail || (typeof detail === "string" && detail.trim() === "")) {
+                detail = normalizeErrorValue(error.detail);
+            }
+        }
+        if (!detail && error && error.body !== undefined) {
+            detail = normalizeErrorValue(error.body);
+        }
+        if (!detail && errorPayload) {
+            detail = resolveErrorMessage(errorPayload, null);
+        }
+        if (!detail && response && typeof response === "object" && response.error && typeof response.error === "object") {
+            if (response.error.details !== undefined) {
+                detail = normalizeErrorValue(response.error.details);
+            } else if (response.error.detail !== undefined) {
+                detail = normalizeErrorValue(response.error.detail);
+            }
+        }
+        if (!detail) {
+            detail = resolveErrorMessage(response, null);
+        }
+        var message = resolveErrorMessage(response, null);
+        if (!message && errorPayload) {
+            message = resolveErrorMessage(errorPayload, null);
+        }
+        if (!message && error && error.message) {
+            message = error.message;
+        }
+        if (nestedDetail && message && detail === message) {
+            detail = nestedDetail;
+        }
+        if (!message) {
+            message = fallbackMessage || "Unable to update module.";
+        }
+        var sanitizedMessage = sanitizeModDiagnosticLine(message);
+        var sanitizedDetail = detail ? sanitizeModDiagnosticLine(detail) : null;
+        var sanitizedUrl = url ? sanitizeModDiagnosticLine(url) : null;
+        var sanitizedStack = sanitizeModDiagnosticLines(collectModErrorStackLines(response, error));
+        return {
+            mod: modName,
+            enabled: Boolean(desiredState),
+            phase: phase || "unknown",
+            message: sanitizedMessage,
+            detail: sanitizedDetail,
+            status: status,
+            statusText: statusText,
+            url: sanitizedUrl,
+            stack: sanitizedStack
+        };
+    }
+
+    function formatModErrorDiagnosticMessage(diagnostic) {
+        var lines = [];
+        lines.push("project.set_mod failed");
+        lines.push(
+            "mod="
+            + diagnostic.mod
+            + " enabled="
+            + String(Boolean(diagnostic.enabled))
+            + " phase="
+            + diagnostic.phase
+        );
+        if (diagnostic.status !== null && diagnostic.status !== undefined) {
+            var statusLine = "status=" + String(diagnostic.status);
+            if (diagnostic.statusText) {
+                statusLine += " " + diagnostic.statusText;
+            }
+            lines.push(statusLine);
+        }
+        if (diagnostic.url) {
+            lines.push("url=" + diagnostic.url);
+        }
+        if (diagnostic.message) {
+            lines.push("message=" + diagnostic.message);
+        }
+        if (diagnostic.detail) {
+            lines.push("detail=" + diagnostic.detail);
+        }
+        if (diagnostic.stack && diagnostic.stack.length) {
+            lines.push("stacktrace:");
+            diagnostic.stack.forEach(function (line) {
+                lines.push(line);
+            });
+        }
+        return lines.join("\n");
+    }
+
+    function emitRecorderEvent(stage, payload) {
+        if (!window.WCRecorder || typeof window.WCRecorder.emit !== "function") {
+            return;
+        }
+        try {
+            window.WCRecorder.emit(stage, payload);
+        } catch (err) {
+            console.warn("Failed to emit recorder event", err);
+        }
     }
 
     function isSuccess(response) {
@@ -576,6 +993,136 @@ var Project = (function () {
             }
         }
 
+        function normalizeModList(mods) {
+            var seen = {};
+            var normalized = [];
+            if (!Array.isArray(mods)) {
+                return normalized;
+            }
+            mods.forEach(function (entry) {
+                var modName = typeof entry === "string" ? entry.trim() : "";
+                if (!modName || seen[modName]) {
+                    return;
+                }
+                seen[modName] = true;
+                normalized.push(modName);
+            });
+            return normalized;
+        }
+
+        function collectDomModNames() {
+            var seen = {};
+            function track(name) {
+                if (!name || seen[name]) {
+                    return;
+                }
+                seen[name] = true;
+            }
+            Array.prototype.forEach.call(document.querySelectorAll(MOD_SELECTOR), function (input) {
+                track(input.getAttribute("data-project-mod"));
+            });
+            Array.prototype.forEach.call(document.querySelectorAll("[data-mod-nav]"), function (node) {
+                track(node.getAttribute("data-mod-nav"));
+            });
+            Array.prototype.forEach.call(document.querySelectorAll("[data-mod-section]"), function (node) {
+                track(node.getAttribute("data-mod-section"));
+            });
+            return Object.keys(seen);
+        }
+
+        function collectKnownModNames() {
+            var seen = {};
+            function track(name) {
+                if (!name || seen[name]) {
+                    return;
+                }
+                seen[name] = true;
+            }
+            collectDomModNames().forEach(track);
+            if (window.runContext && window.runContext.mods) {
+                normalizeModList(window.runContext.mods.list || []).forEach(track);
+                if (window.runContext.mods.flags && typeof window.runContext.mods.flags === "object") {
+                    Object.keys(window.runContext.mods.flags).forEach(track);
+                }
+            }
+            return Object.keys(seen);
+        }
+
+        function resolveAllowEnableMods(modName, enabled) {
+            if (!enabled || !modName) {
+                return [];
+            }
+            var allowed = [modName];
+            if (Object.prototype.hasOwnProperty.call(MOD_ENABLE_PROPAGATION, modName)) {
+                allowed = allowed.concat(MOD_ENABLE_PROPAGATION[modName] || []);
+            }
+            return normalizeModList(allowed);
+        }
+
+        function setRunContextModsList(mods, options) {
+            var normalizedMods = normalizeModList(mods);
+            if (typeof window.runContext !== "object" || !window.runContext) {
+                return normalizedMods;
+            }
+            var opts = options || {};
+            var ctx = window.runContext.mods || {};
+            var allowEnableMods = normalizeModList(opts.allowEnableMods || []);
+            var allowEnableMap = {};
+            allowEnableMods.forEach(function (modName) {
+                allowEnableMap[modName] = true;
+            });
+            var existingFlags = ctx.flags && typeof ctx.flags === "object" ? ctx.flags : {};
+            var domMods = collectDomModNames();
+            var domModMap = {};
+            domMods.forEach(function (modName) {
+                domModMap[modName] = true;
+            });
+            var flags = {};
+            Object.keys(existingFlags).forEach(function (key) {
+                flags[key] = false;
+            });
+            domMods.forEach(function (modName) {
+                if (!Object.prototype.hasOwnProperty.call(flags, modName)) {
+                    flags[modName] = false;
+                }
+            });
+            normalizedMods.forEach(function (modName) {
+                var hasExisting = Object.prototype.hasOwnProperty.call(existingFlags, modName);
+                if (hasExisting) {
+                    if (existingFlags[modName]) {
+                        flags[modName] = true;
+                        return;
+                    }
+                    if (allowEnableMap[modName]) {
+                        flags[modName] = true;
+                        return;
+                    }
+                    if (Object.prototype.hasOwnProperty.call(MOD_STICKY_FALSE_FLAGS, modName)) {
+                        flags[modName] = false;
+                        return;
+                    }
+                    flags[modName] = true;
+                    return;
+                }
+                if (
+                    Object.prototype.hasOwnProperty.call(MOD_STICKY_FALSE_FLAGS, modName)
+                    && !allowEnableMap[modName]
+                ) {
+                    flags[modName] = false;
+                    return;
+                }
+                if (domModMap[modName]) {
+                    flags[modName] = true;
+                    return;
+                }
+                flags[modName] = true;
+            });
+            ctx.list = normalizedMods;
+            ctx.flags = flags;
+            window.runContext.mods = ctx;
+            return normalizedMods;
+        }
+
         function updateRunContextMods(modName, enabled) {
             if (typeof window.runContext !== "object" || !window.runContext) {
                 return;
@@ -588,10 +1135,57 @@ var Project = (function () {
             } else if (!enabled && index !== -1) {
                 list.splice(index, 1);
             }
-            ctx.list = list;
-            ctx.flags = ctx.flags || {};
-            ctx.flags[modName] = enabled;
-            window.runContext.mods = ctx;
+            setRunContextModsList(list, {
+                allowEnableMods: resolveAllowEnableMods(modName, enabled)
+            });
+        }
+
+        function reconcileRunContextModsFromResponse(response, modName, enabled) {
+            var content = response && typeof response === "object" ? (response.Content || response.content || null) : null;
+            if (content && Array.isArray(content.mods)) {
+                return setRunContextModsList(content.mods, {
+                    allowEnableMods: resolveAllowEnableMods(modName, enabled)
+                });
+            }
+            updateRunContextMods(modName, enabled);
+            if (window.runContext && window.runContext.mods && Array.isArray(window.runContext.mods.list)) {
+                return window.runContext.mods.list.slice();
+            }
+            return normalizeModList(enabled ? [modName] : []);
+        }
+
+        function syncModInputsAndNav(modList) {
+            var enabledMods = {};
+            var flags = (window.runContext && window.runContext.mods && window.runContext.mods.flags)
+                ? window.runContext.mods.flags
+                : {};
+            normalizeModList(modList).forEach(function (modName) {
+                enabledMods[modName] = true;
+            });
+
+            function isModVisible(modName) {
+                if (!enabledMods[modName]) {
+                    return false;
+                }
+                if (Object.prototype.hasOwnProperty.call(flags, modName)) {
+                    return Boolean(flags[modName]);
+                }
+                if (Object.prototype.hasOwnProperty.call(MOD_STICKY_FALSE_FLAGS, modName)) {
+                    return false;
+                }
+                return true;
+            }
+
+            Array.prototype.forEach.call(document.querySelectorAll(MOD_SELECTOR), function (modInput) {
+                var modName = modInput.getAttribute("data-project-mod");
+                if (!modName) {
+                    return;
+                }
+                modInput.checked = isModVisible(modName);
+            });
+            collectKnownModNames().forEach(function (modName) {
+                toggleModNav(modName, isModVisible(modName));
+            });
         }
 
         function bootstrapModController(modName) {
@@ -982,6 +1576,136 @@ var Project = (function () {
             }
             var desiredState = Boolean(enabled);
             var input = options.input || null;
+            var priorEnabled = (window.runContext
+                && window.runContext.mods
+                && window.runContext.mods.flags
+                && typeof window.runContext.mods.flags[normalized] === "boolean")
+                ? window.runContext.mods.flags[normalized]
+                : Boolean(!desiredState);
+            var reconciledMods = [];
+            var effectiveEnabled = desiredState;
+            var priorMods = normalizeModList(
+                (window.runContext && window.runContext.mods && window.runContext.mods.list) || []
+            );
+
+            function restoreInput() {
+                if (!input) {
+                    return;
+                }
+                input.disabled = false;
+                input.checked = Boolean(priorEnabled);
+            }
+
+            function reportFailure(phase, response, error, fallbackMessage, context) {
+                var failureContext = context || {};
+                var failedMod = failureContext.mod || normalized;
+                var failedEnabled = typeof failureContext.enabled === "boolean"
+                    ? failureContext.enabled
+                    : desiredState;
+                var diagnostic = buildModErrorDiagnostic(
+                    failedMod,
+                    failedEnabled,
+                    phase,
+                    response,
+                    error,
+                    fallbackMessage
+                );
+                var stackPayload = { error: { message: diagnostic.message } };
+                if (diagnostic.detail) {
+                    stackPayload.detail = diagnostic.detail;
+                }
+                if (diagnostic.stack && diagnostic.stack.length) {
+                    stackPayload.stacktrace = diagnostic.stack;
+                }
+                project.pushResponseStacktrace(project, stackPayload);
+                if (options.notify !== false) {
+                    project.notifyCommandBar(formatModErrorDiagnosticMessage(diagnostic), { duration: null });
+                }
+                emitRecorderEvent("project_mod_toggle_error", {
+                    category: "mod-toggle",
+                    mod: diagnostic.mod,
+                    enabled: diagnostic.enabled,
+                    phase: diagnostic.phase,
+                    status: diagnostic.status,
+                    statusText: diagnostic.statusText,
+                    url: diagnostic.url,
+                    message: diagnostic.message,
+                    detail: diagnostic.detail,
+                    stacktrace: diagnostic.stack
+                });
+                emitEvent(emitter, "project:mod:update:failed", {
+                    mod: diagnostic.mod,
+                    enabled: diagnostic.enabled,
+                    phase: phase,
+                    response: response ? sanitizeModDiagnosticPayload(response) : null,
+                    error: error ? sanitizeModDiagnosticPayload(error) : null,
+                    diagnostic: diagnostic
+                });
+                return diagnostic;
+            }
+
+            function resolveAdditionalEnabledMods() {
+                var priorMap = {};
+                priorMods.forEach(function (modKey) {
+                    priorMap[modKey] = true;
+                });
+                return normalizeModList(reconciledMods).filter(function (modKey) {
+                    return modKey !== normalized && !priorMap[modKey];
+                });
+            }
+
+            function hasModSectionContainer(modKey) {
+                return Boolean(document.querySelector('[data-mod-section="' + modKey + '"]'));
+            }
+
+            function loadAndBootstrapAdditionalMods(modKeys, response) {
+                var queue = normalizeModList(modKeys).filter(function (modKey) {
+                    return modKey !== normalized && hasModSectionContainer(modKey);
+                });
+                var dependencyStatus = { failed: false, diagnostic: null };
+                var sequence = Promise.resolve();
+                queue.forEach(function (modKey) {
+                    sequence = sequence.then(function () {
+                        return project.load_mod_section(modKey).then(function (payload) {
+                            var html = payload && payload.html ? payload.html : "";
+                            toggleModSection(modKey, true, html);
+                            try {
+                                bootstrapModController(modKey);
+                            } catch (dependencyBootstrapError) {
+                                notifyError("Error bootstrapping dependent module section", dependencyBootstrapError);
+                                var bootstrapDiagnostic = reportFailure(
+                                    "bootstrap",
+                                    response,
+                                    dependencyBootstrapError,
+                                    "Dependent module enabled but failed to initialize.",
+                                    { mod: modKey, enabled: true }
+                                );
+                                if (!dependencyStatus.failed) {
+                                    dependencyStatus.failed = true;
+                                    dependencyStatus.diagnostic = bootstrapDiagnostic;
+                                }
+                            }
+                        }).catch(function (dependencyRenderError) {
+                            notifyError("Error rendering dependent module section", dependencyRenderError);
+                            var renderDiagnostic = reportFailure(
+                                "render",
+                                response,
+                                dependencyRenderError,
+                                "Dependent module enabled but failed to render.",
+                                { mod: modKey, enabled: true }
+                            );
+                            if (!dependencyStatus.failed) {
+                                dependencyStatus.failed = true;
+                                dependencyStatus.diagnostic = renderDiagnostic;
+                            }
+                        });
+                    });
+                });
+                return sequence.then(function () {
+                    return dependencyStatus;
+                });
+            }
+
             if (input) {
                 input.disabled = true;
             }
@@ -992,77 +1716,154 @@ var Project = (function () {
             }).then(function (result) {
                 var response = unpackResponse(result);
                 if (!isSuccess(response)) {
-                    var message = resolveErrorMessage(response, null);
-                    if (input) {
-                        input.disabled = false;
-                        input.checked = !desiredState;
-                    }
-                    if (response) {
-                        project.pushResponseStacktrace(project, response);
-                    }
-                    if (options.notify !== false) {
-                        if (message) {
-                            project.notifyCommandBar(message, { duration: null });
-                        } else {
-                            project.notifyCommandBar("Unable to update module.", { duration: null });
-                        }
-                    }
+                    restoreInput();
+                    reportFailure("response", response, null, "Unable to update module.");
                     return response;
                 }
 
                 var label = response.Content && response.Content.label ? response.Content.label : normalized;
+                reconciledMods = reconcileRunContextModsFromResponse(response, normalized, desiredState);
+                effectiveEnabled = reconciledMods.indexOf(normalized) !== -1;
 
-                var applyUI = function (html) {
-                    toggleModNav(normalized, desiredState);
-                    toggleModSection(normalized, desiredState, html);
-                    updateRunContextMods(normalized, desiredState);
-                    if (options.notify !== false) {
-                        var verb = desiredState ? "enabled" : "disabled";
-                        project.notifyCommandBar(label + " " + verb + ".");
+                var applyUI = function (html, applyOptions) {
+                    var opts = applyOptions || {};
+                    syncModInputsAndNav(reconciledMods);
+                    toggleModSection(normalized, effectiveEnabled, html);
+                    if (opts.emitUpdated !== false) {
+                        emitEvent(emitter, "project:mod:updated", {
+                            mod: normalized,
+                            enabled: effectiveEnabled,
+                            desired: desiredState,
+                            label: label,
+                            response: response
+                        });
                     }
                 };
 
-                if (desiredState) {
+                if (desiredState && effectiveEnabled) {
                     return project.load_mod_section(normalized).then(function (payload) {
                         var html = payload && payload.html ? payload.html : "";
-                        applyUI(html);
+                        applyUI(html, { emitUpdated: false });
                         // Allow DOM to settle before bootstrapping controller
                         return new Promise(function (resolve) {
                             setTimeout(function () {
-                                bootstrapModController(normalized);
-                                if (input) {
-                                    input.checked = true;
-                                    input.disabled = false;
+                                try {
+                                    bootstrapModController(normalized);
+                                } catch (bootstrapError) {
+                                    if (input) {
+                                        input.disabled = false;
+                                        input.checked = Boolean(effectiveEnabled);
+                                    }
+                                    notifyError("Error bootstrapping module section", bootstrapError);
+                                    var bootstrapDiagnostic = reportFailure(
+                                        "bootstrap",
+                                        response,
+                                        bootstrapError,
+                                        "Module enabled but failed to initialize."
+                                    );
+                                    resolve({
+                                        error: {
+                                            message: bootstrapDiagnostic.message,
+                                            detail: bootstrapDiagnostic.detail,
+                                            details: bootstrapDiagnostic.detail,
+                                            phase: "bootstrap"
+                                        },
+                                        Content: response && response.Content ? response.Content : null,
+                                        response: response || null,
+                                        diagnostic: bootstrapDiagnostic
+                                    });
+                                    return;
                                 }
-                                resolve(response);
+                                var dependentMods = resolveAdditionalEnabledMods();
+                                loadAndBootstrapAdditionalMods(dependentMods, response).then(function (dependencyStatus) {
+                                    if (input) {
+                                        input.checked = Boolean(effectiveEnabled);
+                                        input.disabled = false;
+                                    }
+                                    if (dependencyStatus && dependencyStatus.failed && dependencyStatus.diagnostic) {
+                                        var dependencyDiagnostic = dependencyStatus.diagnostic;
+                                        resolve({
+                                            error: {
+                                                message: dependencyDiagnostic.message,
+                                                detail: dependencyDiagnostic.detail,
+                                                details: dependencyDiagnostic.detail,
+                                                phase: "dependency"
+                                            },
+                                            Content: response && response.Content ? response.Content : null,
+                                            response: response || null,
+                                            dependency_error: {
+                                                mod: dependencyDiagnostic.mod,
+                                                phase: dependencyDiagnostic.phase,
+                                                message: dependencyDiagnostic.message,
+                                                detail: dependencyDiagnostic.detail,
+                                                details: dependencyDiagnostic.detail
+                                            },
+                                            diagnostic: dependencyDiagnostic
+                                        });
+                                        return;
+                                    }
+                                    if (options.notify !== false) {
+                                        var enabledVerb = effectiveEnabled ? "enabled" : "disabled";
+                                        project.notifyCommandBar(label + " " + enabledVerb + ".");
+                                    }
+                                    emitEvent(emitter, "project:mod:updated", {
+                                        mod: normalized,
+                                        enabled: effectiveEnabled,
+                                        desired: desiredState,
+                                        label: label,
+                                        response: response
+                                    });
+                                    resolve(response);
+                                });
                             }, 0);
                         });
                     }).catch(function (error) {
+                        syncModInputsAndNav(reconciledMods);
                         if (input) {
                             input.disabled = false;
-                            input.checked = false;
+                            input.checked = Boolean(effectiveEnabled);
                         }
                         notifyError("Error rendering module section", error);
-                        project.notifyCommandBar("Module enabled but failed to render. Refresh to continue.", { duration: null });
-                        return response;
+                        var diagnostic = reportFailure(
+                            "render",
+                            response,
+                            error,
+                            "Module enabled but failed to render. Refresh to continue."
+                        );
+                        return {
+                            error: {
+                                message: diagnostic.message,
+                                detail: diagnostic.detail,
+                                details: diagnostic.detail,
+                                phase: "render"
+                            },
+                            Content: response && response.Content ? response.Content : null,
+                            response: response || null,
+                            render_error: {
+                                message: diagnostic.message,
+                                detail: diagnostic.detail,
+                                details: diagnostic.detail,
+                                phase: "render"
+                            },
+                            diagnostic: diagnostic
+                        };
                     });
                 }
 
-                applyUI();
+                applyUI(undefined, { emitUpdated: true });
                 if (input) {
-                    input.checked = false;
+                    input.checked = Boolean(effectiveEnabled);
                     input.disabled = false;
+                }
+                if (options.notify !== false) {
+                    var verb = effectiveEnabled ? "enabled" : "disabled";
+                    project.notifyCommandBar(label + " " + verb + ".");
                 }
                 return response;
             }).catch(function (error) {
-                if (input) {
-                    input.disabled = false;
-                    input.checked = !desiredState;
-                }
+                restoreInput();
                 notifyError("Error updating module state", error);
-                if (options.notify !== false) {
-                    project.notifyCommandBar("Error updating module.", { duration: null });
-                }
+                reportFailure("request", null, error, "Error updating module.");
                 return null;
             });
         };

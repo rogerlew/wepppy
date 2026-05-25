@@ -416,6 +416,54 @@ When sponsor preference conflicts with technical-science assessment, maintainers
 
 Escalation outcomes must be durable and auditable (ADR, issue, or work package), and must preserve universal sponsor-neutral governance.
 
+## Governance Roles, Responsibilities, and Scope
+
+This section defines governance roles used for release and internal-access decisions.
+
+Roles are functional and may be held by one or more qualified people. One person may hold multiple roles if role-specific rationale is documented in the decision record.
+
+### Org Administrator Reviewer
+
+The Org Administrator Reviewer evaluates:
+
+- fairness and consistency of access decisions,
+- process compliance and record completeness,
+- scope minimization and review/expiration controls,
+- policy fit for embargo and collaboration pathway rules.
+
+### Technical-Science Reviewer
+
+The Technical-Science Reviewer evaluates:
+
+- maturity-state compatibility of requested use,
+- scientific-risk and interpretation-risk profile,
+- known-limitation and warning implications,
+- whether requested use conflicts with unresolved technical-science concerns.
+
+### Operational Maintainer Reviewer
+
+The Operational Maintainer Reviewer evaluates:
+
+- compute and storage burden,
+- API/service dependency risk,
+- supportability and reliability constraints,
+- operational blast radius of the requested access.
+
+### Sponsor Role
+
+The Sponsor role may:
+
+- request funding priorities and milestone sequencing,
+- request time-limited publication-priority windows through documented embargo proposals,
+- request scoped collaborator access for funded workflows.
+
+The Sponsor role may not:
+
+- require suppression of known limitations, warnings, or maturity downgrades,
+- require stable labeling when evidence does not support stability,
+- require indefinite infrastructure control after delivery,
+- require undocumented governance exceptions.
+
 ## Access Governance
 
 ### Principle
@@ -484,38 +532,7 @@ These roles should not be used merely to give a collaborator access to one inter
 
 If a user needs one restricted feature but does not need broad development/admin access, the policy preference is feature-scoped internal access.
 
-### Internal Review Roles
-
-Internal feature authorization uses role-based review.
-
-Reviewer roles may be assigned to qualified humans or designated control-agent roles recognized by repository governance.
-
-#### Org Administrator Reviewer
-
-The Org Administrator Reviewer evaluates:
-
-- fairness and consistency of access decisions,
-- process compliance and record completeness,
-- scope minimization and review/expiration controls,
-- policy fit for embargo and collaboration pathway rules.
-
-#### Technical-Science Reviewer
-
-The Technical-Science Reviewer evaluates:
-
-- maturity-state compatibility of requested use,
-- scientific-risk and interpretation-risk profile,
-- known-limitation and warning implications,
-- whether requested use conflicts with unresolved technical-science concerns.
-
-#### Operational Maintainer Reviewer
-
-The Operational Maintainer Reviewer evaluates:
-
-- compute and storage burden,
-- API/service dependency risk,
-- supportability and reliability constraints,
-- operational blast radius of the requested access.
+Internal feature authorization uses the governance roles defined in `Governance Roles, Responsibilities, and Scope`.
 
 ## PowerUser Onboarding Procedure
 

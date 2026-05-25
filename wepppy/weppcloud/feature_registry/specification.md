@@ -175,8 +175,9 @@ Registry file order is authoritative for display order in MVP.
 ## UI Presentation Expectations (Maturity)
 
 - Documentation surfaces: use plain text maturity definitions (no pills).
-- Non-documentation UI surfaces: render maturity as a pill, not inline plain text.
-- Link target: every maturity pill links to `wepppy/weppcloud/routes/usersum/weppcloud/user-guide.md#feature-maturity-labels`.
+- Maturity pills are opt-in and must be explicitly approved per surface in this section. Do not add pills to new surfaces by default.
+- Mods dropdown rule: do not render feature maturity pills/labels in `_run_header_fixed.htm` Mods dropdown.
+- Link target: every approved maturity pill links to `wepppy/weppcloud/routes/usersum/weppcloud/user-guide.md#feature-maturity-labels`.
 - Interfaces card rule: `interfaces.htm` renders exactly one maturity pill per interface card, even when a card exposes multiple config launch buttons.
 - Interfaces card selection rule: when a card contains multiple config launch buttons, the card pill uses the card's primary/canonical config maturity (not one pill per button).
 - Run header rule: render interface maturity pill adjacent to the NoDb version token in `_run_header_fixed.htm`.

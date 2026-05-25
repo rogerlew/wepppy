@@ -101,13 +101,11 @@
               {% for mod_item in header_mod_options %}
               {% set mod_id = mod_item.id %}
               {% set mod_text = mod_item.label %}
-              {% set mod_badge = mod_item.maturity_badge if mod_item.maturity_badge is defined else None %}
-              {% set mod_badge_href = maturity_definition_href %}
               <label class="wc-run-header__toggle">
                 <input type="checkbox"
                        data-project-mod="{{ mod_id }}"
                        {% if mod_id in current_mods %}checked{% endif %}>
-                <span>{{ mod_text }}{% if mod_badge %} {{ maturity_ui.maturity_pill(mod_badge, href=mod_badge_href, title="Feature maturity: " ~ mod_badge, new_tab=True) }}{% endif %}</span>
+                <span>{{ mod_text }}</span>
               </label>
               {% endfor %}
               <hr>

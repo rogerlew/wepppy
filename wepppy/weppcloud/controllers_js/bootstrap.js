@@ -70,6 +70,41 @@
         });
     }
 
+    function bootstrapManyBestEffort(entries, context, onError) {
+        if (!Array.isArray(entries)) {
+            return [];
+        }
+        var onErrorFn = typeof onError === "function" ? onError : null;
+        return entries.map(function (entry) {
+            var entryName = null;
+            try {
+                if (!entry) {
+                    return null;
+                }
+                if (Array.isArray(entry)) {
+                    entryName = entry[1] || null;
+                    return bootstrap(entry[0], entryName, context);
+                }
+                if (typeof entry === "object" && entry.controller) {
+                    entryName = entry.name || entry.key || null;
+                    return bootstrap(entry.controller, entryName, context);
+                }
+                return bootstrap(entry, null, context);
+            } catch (err) {
+                if (onErrorFn) {
+                    try {
+                        onErrorFn(err, { name: entryName, entry: entry });
+                    } catch (onErrorErr) {
+                        if (global.console && typeof global.console.warn === "function") {
+                            global.console.warn("[Bootstrap] Error callback failed", onErrorErr);
+                        }
+                    }
+                }
+                return null;
+            }
+        });
+    }
+
     function getControllerContext(context, key) {
         var ctx = context || storedContext || {};
         if (!key) {
@@ -107,6 +142,7 @@
         getContext: getContext,
         bootstrap: bootstrap,
         bootstrapMany: bootstrapMany,
+        bootstrapManyBestEffort: bootstrapManyBestEffort,
         getControllerContext: getControllerContext,
         resolveJobId: resolveJobId
     };
