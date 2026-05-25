@@ -1,6 +1,6 @@
 m                               # metric units
 Yes                             # not watershed option
-1                               # storm option, 1=abbreviated annual soil loss output option for continuous simulation
+1                               # storm option
 1                               # hillslope version
 Yes                             # pass file output
 {pass_file}   #
