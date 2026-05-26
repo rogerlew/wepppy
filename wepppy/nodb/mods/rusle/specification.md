@@ -259,18 +259,16 @@ hard-coded moderate regime.
 - Default flow input: specific catchment area from a hydrologically
   conditioned DEM
 - The `RusleLsFactor` tool assumes the DEM is hydrologically corrected
-  upstream, but may apply a conservative bounded fallback for small residual
-  interior no-flow defects when deriving `DInf` SCA.
+  upstream, but applies a robust fallback path for residual interior no-flow
+  defects when deriving `DInf` SCA.
 - Fallback policy for v1:
   - evaluate interior no-flow cells on the derived-flow DEM grid
-  - allow fallback only when defect count is within both:
-    - `interior_no_flow_count <= 64`
-    - `interior_no_flow_count <= ceil(0.001 * eligible_interior_cells)`
-  - conservative correction method: `BreachSingleCellPits`
-  - rerun no-flow validation after correction and continue only when
-    interior no-flow cells are fully cleared
-- If defect counts exceed the fallback bounds, or remain after fallback, fail
-  fast with an explicit actionable error requiring upstream DEM conditioning
+  - apply conservative correction method: `BreachSingleCellPits`
+  - rerun no-flow validation after correction
+  - if interior no-flow cells remain, mask those residual interior cells from
+    primary `L`, `S`, and `LS` outputs instead of failing the run
+- Interior no-flow residuals are explicitly reported in output metadata so
+  downstream consumers can distinguish conditioned versus masked cells.
 - If `sca` is supplied, it must already be a same-grid specific catchment area
   raster in `m^2/m`
 - If `slope_deg` is supplied, it must already be a same-grid local slope raster
@@ -337,12 +335,11 @@ hard-coded moderate regime.
   - `stop_mask_routing_behavior = terminal_sink_no_renormalization`
   - `sca_source = derived | input`
   - `slope_source = derived | input`
-  - `interior_noflow_fallback = not_checked | none | breach_single_cell_pits`
+  - `interior_noflow_fallback = not_checked | none | breach_single_cell_pits | breach_single_cell_pits_with_mask`
   - `interior_noflow_cells_initial`
   - `interior_noflow_cells_post_fallback`
   - `interior_noflow_cells_eligible`
-  - `interior_noflow_fallback_max_count = 64`
-  - `interior_noflow_fallback_max_fraction = 0.001`
+  - `interior_noflow_cells_masked`
 - Required v1 metadata typing and enum spellings (for Rust/Python parity):
   - `tool` and `tool_version`: string
   - `l_method`: enum, must be `desmet_govers_1996`
@@ -361,12 +358,12 @@ hard-coded moderate regime.
   - `slope_source`: enum, one of `derived`, `input`
   - `blocking_mask_source`: enum, one of `none`, `input_raster`
   - `interior_noflow_fallback`: enum, one of
-    `not_checked`, `none`, `breach_single_cell_pits`
+    `not_checked`, `none`, `breach_single_cell_pits`,
+    `breach_single_cell_pits_with_mask`
   - `interior_noflow_cells_initial`: integer
   - `interior_noflow_cells_post_fallback`: integer
   - `interior_noflow_cells_eligible`: integer
-  - `interior_noflow_fallback_max_count`: integer
-  - `interior_noflow_fallback_max_fraction`: float
+  - `interior_noflow_cells_masked`: integer
 - The target interpretation is broad hillslope pattern and relative detachment
   potential at the run cell size, not microtopographic truth
 - `SedimentTransportIndex` may still be exported as an auxiliary comparison
