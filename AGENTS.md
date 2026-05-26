@@ -25,10 +25,7 @@
 ## Agent Feedback Loop
 - Treat avoidable friction as diagnostic signal about the codebase, docs, tooling, or task framing.
 - Surface unprompted feedback when it would materially improve developer ergonomics, architectural clarity, or shared docs, tooling, and agent-facing interfaces.
-- Distinguish clearly between:
-  - confirmed defects/blockers
-  - local painpoints or ambiguity
-  - speculative improvement ideas
+- Distinguish clearly between confirmed defects/blockers, local painpoints or ambiguity, and speculative improvement ideas.
 - Keep unsolicited feedback concise and actionable: name the friction, why it mattered, and the smallest improvement that would reduce recurrence.
 - Do not invent speculative redesigns; prefer substrate improvements tied to concrete task experience.
 

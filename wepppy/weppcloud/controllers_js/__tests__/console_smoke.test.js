@@ -237,7 +237,7 @@ describe("Fork console smoke", () => {
                 "Content-Type": "application/x-www-form-urlencoded",
                 Authorization: "Bearer session-token",
             },
-            body: "undisturbify=false",
+            body: "undisturbify=false&skip_wepp_runs_output=false",
         });
 
         expect(statusStreamInstance.append).toHaveBeenCalledWith("Submitting fork job...");
@@ -292,7 +292,7 @@ describe("Fork console smoke", () => {
                 "Content-Type": "application/x-www-form-urlencoded",
                 Authorization: "Bearer rq-token-123",
             },
-            body: "undisturbify=false",
+            body: "undisturbify=false&skip_wepp_runs_output=false",
         });
     });
 
