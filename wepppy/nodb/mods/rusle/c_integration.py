@@ -21,8 +21,9 @@ from rasterio.warp import reproject
 from wepppy.all_your_base.geo import raster_stacker
 from wepppy.nodb.mods.baer.sbs_map import SoilBurnSeverityMap
 from wepppy.query_engine.activate import update_catalog_entry
+from wepppy.runtime_paths.parquet_sidecars import pick_existing_parquet_path
 
-from .c_formula import compute_c_from_fg_pct, compute_fg_from_bare_ground_pct
+from .c_formula import compute_c_from_fg_pct, compute_observed_rap_fg_pct
 from .c_lookup import (
     BASE_DISTURBED_CLASS_RASTER_CODES,
     BURNABLE_FAMILIES,
@@ -57,6 +58,23 @@ SBS_VALUE_TO_CLASS: dict[int, str] = {
     2: "moderate",
     3: "high",
 }
+
+COSURFFRAGS_PARQUET_COLUMN_CANDIDATES: tuple[str, ...] = (
+    "cosurffrags_cover_pct",
+    "surface_rock_cover_pct",
+    "surface_rock_cover_percent",
+    "sfragcov",
+)
+
+CFVO_TOP_LAYER_CANDIDATES: tuple[str, ...] = (
+    "polaris/cfvo_mean_0_5.tif",
+    "soils/cfvo_0-5cm_Q0.5.tif",
+)
+
+try:
+    import duckdb
+except ModuleNotFoundError:  # pragma: no cover - optional dependency boundary
+    duckdb = None
 
 
 __all__ = ["RusleCResult", "run_rusle_c_factor"]
@@ -118,6 +136,233 @@ def _mask_rap_cover_values(data: np.ndarray) -> np.ndarray:
     invalid = ~np.isfinite(masked) | (masked < 0.0) | (masked >= 65535.0)
     masked[invalid] = np.nan
     return masked
+
+
+def _coerce_rock_fraction_of_rap_bare(value: Any) -> float | str:
+    if isinstance(value, str):
+        token = value.strip().lower()
+        if token == "auto":
+            return "auto"
+        if token == "":
+            raise ValueError("rock_fraction_of_rap_bare must be numeric in [0,1] or 'auto'")
+        try:
+            parsed = float(token)
+        except ValueError as exc:
+            raise ValueError("rock_fraction_of_rap_bare must be numeric in [0,1] or 'auto'") from exc
+    else:
+        try:
+            parsed = float(value)
+        except (TypeError, ValueError) as exc:
+            raise ValueError("rock_fraction_of_rap_bare must be numeric in [0,1] or 'auto'") from exc
+
+    if not np.isfinite(parsed):
+        raise ValueError("rock_fraction_of_rap_bare must be finite")
+    if parsed < 0.0 or parsed > 1.0:
+        raise ValueError("rock_fraction_of_rap_bare must be within [0, 1]")
+    return float(parsed)
+
+
+def _mean_bare_rap_0_1(*, bare_ground_pct: np.ndarray, valid_mask: np.ndarray) -> float:
+    finite = valid_mask & np.isfinite(bare_ground_pct)
+    if not np.any(finite):
+        return 0.0
+    bare_0_1 = np.clip(bare_ground_pct[finite] / 100.0, 0.0, 1.0)
+    if bare_0_1.size == 0:
+        return 0.0
+    return float(np.nanmean(bare_0_1))
+
+
+def _load_cosurffrags_surface_proxy_from_soils_parquet(wd: str) -> tuple[float | None, dict[str, Any]]:
+    soils_parquet = pick_existing_parquet_path(wd, "soils/soils.parquet")
+    if soils_parquet is None:
+        return None, {"status": "unavailable", "reason": "missing_soils_parquet"}
+    if duckdb is None:
+        return None, {"status": "unavailable", "reason": "duckdb_unavailable"}
+
+    selected_column: str | None = None
+    try:
+        with duckdb.connect() as con:
+            schema = con.execute("SELECT * FROM read_parquet(?) LIMIT 0", [str(soils_parquet)])
+            column_names = {desc[0] for desc in schema.description}
+
+            for candidate in COSURFFRAGS_PARQUET_COLUMN_CANDIDATES:
+                if candidate in column_names:
+                    selected_column = candidate
+                    break
+
+            if selected_column is None:
+                return None, {
+                    "status": "unavailable",
+                    "reason": "missing_cosurffrags_columns",
+                    "available_columns": sorted(column_names),
+                    "expected_columns": list(COSURFFRAGS_PARQUET_COLUMN_CANDIDATES),
+                }
+
+            column_expr = f'"{selected_column}"'
+            if "area" in column_names:
+                rows = con.execute(
+                    f"SELECT {column_expr}, area FROM read_parquet(?) WHERE {column_expr} IS NOT NULL",
+                    [str(soils_parquet)],
+                ).fetchall()
+                weighted_rows = [
+                    (float(cover_pct), float(area))
+                    for cover_pct, area in rows
+                    if cover_pct is not None
+                    and area is not None
+                    and np.isfinite(float(cover_pct))
+                    and np.isfinite(float(area))
+                    and float(area) > 0.0
+                ]
+                if not weighted_rows:
+                    return None, {
+                        "status": "unavailable",
+                        "reason": "cosurffrags_no_weighted_rows",
+                        "column": selected_column,
+                    }
+                total_area = float(sum(area for _value, area in weighted_rows))
+                if total_area <= 0.0:
+                    return None, {
+                        "status": "unavailable",
+                        "reason": "cosurffrags_nonpositive_total_area",
+                        "column": selected_column,
+                    }
+                cover_pct = float(sum(value * area for value, area in weighted_rows) / total_area)
+                row_count = len(weighted_rows)
+                aggregation = "area_weighted_mean"
+            else:
+                rows = con.execute(
+                    f"SELECT {column_expr} FROM read_parquet(?) WHERE {column_expr} IS NOT NULL",
+                    [str(soils_parquet)],
+                ).fetchall()
+                values = [
+                    float(cover_pct)
+                    for (cover_pct,) in rows
+                    if cover_pct is not None and np.isfinite(float(cover_pct))
+                ]
+                if not values:
+                    return None, {
+                        "status": "unavailable",
+                        "reason": "cosurffrags_no_finite_rows",
+                        "column": selected_column,
+                    }
+                cover_pct = float(np.mean(values))
+                row_count = len(values)
+                aggregation = "mean"
+    except Exception as exc:
+        return None, {
+            "status": "unavailable",
+            "reason": "cosurffrags_query_failed",
+            "error": str(exc),
+        }
+
+    surface_proxy_0_1 = float(np.clip(cover_pct / 100.0, 0.0, 1.0))
+    return surface_proxy_0_1, {
+        "status": "available",
+        "source_kind": "soils_parquet_cosurffrags",
+        "column": selected_column,
+        "aggregation": aggregation,
+        "cover_pct": cover_pct,
+        "row_count": int(row_count),
+        "surface_rock_cover_proxy_0_1": surface_proxy_0_1,
+    }
+
+
+def _load_cfvo_surface_proxy_from_raster(
+    *,
+    wd: str,
+    dem_profile: dict[str, Any],
+    valid_mask: np.ndarray,
+) -> tuple[float | None, dict[str, Any]]:
+    for relpath in CFVO_TOP_LAYER_CANDIDATES:
+        raster_path = _join(wd, relpath)
+        if not _exists(raster_path):
+            continue
+        try:
+            aligned = _aligned_band(raster_path, dem_profile)
+        except (OSError, rasterio.errors.RasterioError) as exc:
+            return None, {
+                "status": "unavailable",
+                "reason": "cfvo_read_failed",
+                "path": raster_path,
+                "error": str(exc),
+            }
+
+        finite = valid_mask & np.isfinite(aligned)
+        if not np.any(finite):
+            continue
+
+        cfvo_values = np.asarray(aligned[finite], dtype=np.float64)
+        raw_max = float(np.nanmax(cfvo_values))
+        scale_divisor = 10.0 if raw_max > 100.0 else 1.0
+        cfvo_volpct = np.clip(cfvo_values / scale_divisor, 0.0, 100.0)
+        cfvo_0_5cm_volpct = float(np.nanmean(cfvo_volpct))
+        surface_proxy_0_1 = float(np.clip(cfvo_0_5cm_volpct / 100.0, 0.0, 1.0))
+        return surface_proxy_0_1, {
+            "status": "available",
+            "source_kind": "cfvo_top_horizon",
+            "path": raster_path,
+            "cfvo_0_5cm_volpct": cfvo_0_5cm_volpct,
+            "scale_divisor": scale_divisor,
+            "surface_rock_cover_proxy_0_1": surface_proxy_0_1,
+            "sample_cells": int(np.count_nonzero(finite)),
+        }
+
+    return None, {
+        "status": "unavailable",
+        "reason": "missing_cfvo_top_horizon_raster",
+        "expected_paths": [_join(wd, relpath) for relpath in CFVO_TOP_LAYER_CANDIDATES],
+    }
+
+
+def _resolve_rock_fraction_auto(
+    *,
+    wd: str,
+    dem_profile: dict[str, Any],
+    valid_mask: np.ndarray,
+    bare_ground_pct: np.ndarray,
+) -> dict[str, Any]:
+    bare_rap_mean_0_1 = _mean_bare_rap_0_1(bare_ground_pct=bare_ground_pct, valid_mask=valid_mask)
+    cosurffrags_proxy_0_1, cosurffrags_report = _load_cosurffrags_surface_proxy_from_soils_parquet(wd)
+    cfvo_proxy_0_1: float | None = None
+    cfvo_report: dict[str, Any] | None = None
+
+    if cosurffrags_proxy_0_1 is not None:
+        source = "auto:cosurffrags"
+        surface_proxy_0_1 = float(cosurffrags_proxy_0_1)
+    else:
+        cfvo_proxy_0_1, cfvo_report = _load_cfvo_surface_proxy_from_raster(
+            wd=wd,
+            dem_profile=dem_profile,
+            valid_mask=valid_mask,
+        )
+        if cfvo_proxy_0_1 is not None:
+            source = "auto:cfvo"
+            surface_proxy_0_1 = float(cfvo_proxy_0_1)
+        else:
+            source = "auto:fallback_0"
+            surface_proxy_0_1 = 0.0
+
+    if bare_rap_mean_0_1 > 0.0:
+        effective_fraction = float(np.clip(surface_proxy_0_1 / bare_rap_mean_0_1, 0.0, 1.0))
+    else:
+        effective_fraction = 0.0
+
+    report: dict[str, Any] = {
+        "requested": "auto",
+        "effective": effective_fraction,
+        "source": source,
+        "surface_rock_cover_proxy_0_1": float(surface_proxy_0_1),
+        "bare_rap_mean_0_1": float(bare_rap_mean_0_1),
+        "normalization": "clamp(surface_rock_cover_proxy_0_1 / bare_rap_mean_0_1, 0, 1) when bare_rap_mean_0_1 > 0 else 0",
+        "sources": {"cosurffrags": cosurffrags_report},
+    }
+    if cfvo_report is not None:
+        report["sources"]["cfvo"] = cfvo_report
+    if source == "auto:fallback_0":
+        report["fallback_reason"] = (
+            "No cosurffrags surface proxy or cfvo top-horizon proxy available for this run."
+        )
+    return report
 
 
 def _write_float_raster(path: str, data: np.ndarray, profile: dict[str, Any], *, nodata: float = -9999.0) -> None:
@@ -258,6 +503,7 @@ def run_rusle_c_factor(
     c_mode: str,
     c_output_filename: str = "c.tif",
     rap: str | None = None,
+    rock_fraction_of_rap_bare: float | str = "auto",
     landuse: str | None = None,
     sbs: str | None = None,
     sbs_is_4class: bool = False,
@@ -293,7 +539,30 @@ def run_rusle_c_factor(
             band_data[band_name] = cleaned
             valid_mask &= np.isfinite(cleaned)
 
-        fg = np.asarray(compute_fg_from_bare_ground_pct(band_data["bare_ground"]), dtype=np.float64)
+        requested_rock_fraction = _coerce_rock_fraction_of_rap_bare(rock_fraction_of_rap_bare)
+        if requested_rock_fraction == "auto":
+            rock_report = _resolve_rock_fraction_auto(
+                wd=wd,
+                dem_profile=dem_profile,
+                valid_mask=valid_mask,
+                bare_ground_pct=band_data["bare_ground"],
+            )
+            effective_rock_fraction = float(rock_report["effective"])
+        else:
+            effective_rock_fraction = float(requested_rock_fraction)
+            rock_report = {
+                "requested": float(requested_rock_fraction),
+                "effective": float(effective_rock_fraction),
+                "source": "user",
+            }
+
+        fg = np.asarray(
+            compute_observed_rap_fg_pct(
+                band_data["bare_ground"],
+                rock_fraction_of_rap_bare=effective_rock_fraction,
+            ),
+            dtype=np.float64,
+        )
         fg[~valid_mask] = np.nan
         c = np.asarray(compute_c_from_fg_pct(fg), dtype=np.float64)
         c[~valid_mask] = np.nan
@@ -307,7 +576,9 @@ def run_rusle_c_factor(
         c_manifest = {
             "mode": "observed_rap",
             "formula": {
-                "fg": "clamp(100 - bare_ground_pct, 0, 100)",
+                "fg": "100 * (1 - bare_rap_0_1 * (1 - r_bare))",
+                "bare_rap_0_1": "clamp(bare_ground_pct / 100, 0, 1)",
+                "r_bare": "clamp(rock_fraction_of_rap_bare, 0, 1)",
                 "c": "exp(-0.04 * fg)",
                 "b": 0.04,
             },
@@ -318,6 +589,7 @@ def run_rusle_c_factor(
                 "consolidation": 1.0,
             },
             "rap_band_indices": dict(RAP_COVER_BAND_INDICES),
+            "rock_fraction_of_rap_bare": rock_report,
             "valid_mask_rule": "all_required_rap_cover_bands_finite_after_dem_alignment",
             "generated_utc": _utc_now_iso(),
             "source_paths": {"dem": dem, "rap": rap},

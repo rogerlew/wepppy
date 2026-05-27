@@ -564,6 +564,195 @@ def test_build_with_momm2025_r_mode_uses_external_selection(
     assert manifest["rusle"]["static_r"]["source_mode"] == "momm2025_county_region"
 
 
+def test_build_observed_rap_forwards_rock_fraction_and_records_manifest_provenance(
+    tmp_path: Path,
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    wd = tmp_path
+    dem_path = wd / "dem.tif"
+    relief_path = wd / "dem" / "wbt" / "relief.tif"
+    landuse_path = wd / "landuse.tif"
+    rap_path = wd / "rusle" / "rap" / "rap.tif"
+    cli_path = wd / "climate.cli"
+    rusle_dir = wd / "rusle"
+    rusle_dir.mkdir(parents=True, exist_ok=True)
+    relief_path.parent.mkdir(parents=True, exist_ok=True)
+    rap_path.parent.mkdir(parents=True, exist_ok=True)
+
+    _write_raster(dem_path, np.ones((2, 2), dtype=np.float32))
+    _write_raster(relief_path, np.ones((2, 2), dtype=np.float32))
+    _write_raster(landuse_path, np.ones((2, 2), dtype=np.float32))
+    _write_raster(rap_path, np.ones((2, 2), dtype=np.float32))
+    cli_path.write_text("cli", encoding="utf-8")
+
+    controller = rusle_module.Rusle(str(wd), "disturbed9002.cfg")
+    c_call: dict[str, object] = {}
+
+    monkeypatch.setattr(
+        rusle_module.Ron,
+        "getInstance",
+        lambda _wd: SimpleNamespace(
+            dem_fn=str(dem_path),
+            map=SimpleNamespace(extent=(-121.0, 45.0, -120.0, 46.0)),
+        ),
+    )
+    monkeypatch.setattr(
+        rusle_module.Climate,
+        "getInstance",
+        lambda _wd: SimpleNamespace(cli_path=str(cli_path)),
+    )
+    monkeypatch.setattr(
+        rusle_module.Landuse,
+        "getInstance",
+        lambda _wd: SimpleNamespace(lc_fn=str(landuse_path)),
+    )
+    monkeypatch.setattr(
+        rusle_module.Watershed,
+        "getInstance",
+        lambda _wd: SimpleNamespace(
+            netful=None,
+            delineation_backend_is_wbt=True,
+            relief=str(relief_path),
+        ),
+    )
+    monkeypatch.setattr(rusle_module.Disturbed, "tryGetInstance", lambda _wd: None)
+    monkeypatch.setattr(rusle_module, "cli_calculate_static_r", lambda _cli: {"mean_annual_r": 6.0})
+    monkeypatch.setattr(
+        controller,
+        "_ensure_polaris_layers",
+        lambda force_refresh=False: {
+            "fetched": False,
+            "reason": "aligned",
+            "payload": {
+                "force_refresh": bool(force_refresh),
+                "properties": ["sand", "silt", "clay", "om", "bd", "ksat"],
+                "statistics": ["mean"],
+                "depths": ["0_5", "5_15"],
+            },
+            "summary": {"layers_requested": 12},
+        },
+    )
+    monkeypatch.setattr(controller, "_resolve_observed_rap", lambda extent, rap_year: str(rap_path))
+    monkeypatch.setattr(rusle_module, "update_catalog_entry", lambda _wd, relpath: relpath)
+
+    def _fake_ls(
+        _wd: str,
+        _dem: str,
+        *,
+        channel_mask=None,
+        blocking_mask=None,
+        max_slope_length_m=304.8,
+    ):
+        ls_path = rusle_dir / "ls.tif"
+        l_path = rusle_dir / "l.tif"
+        s_path = rusle_dir / "s.tif"
+        sca_path = rusle_dir / "sca.tif"
+        eff_path = rusle_dir / "effective_slope_length.tif"
+        manifest_path = rusle_dir / "manifest.json"
+        _write_constant_from_dem(dem_path, ls_path, 2.0)
+        _write_constant_from_dem(dem_path, l_path, 2.0)
+        _write_constant_from_dem(dem_path, s_path, 2.0)
+        _write_constant_from_dem(dem_path, sca_path, 2.0)
+        _write_constant_from_dem(dem_path, eff_path, 2.0)
+        manifest_path.write_text("{}", encoding="utf-8")
+        return RusleLsResult(
+            ls=str(ls_path),
+            l=str(l_path),
+            s=str(s_path),
+            sca=str(sca_path),
+            effective_slope_length=str(eff_path),
+            manifest=str(manifest_path),
+        )
+
+    def _fake_k(
+        _wd: str,
+        *,
+        statistic: str,
+        selected_modes,
+        default_k_mode: str,
+        write_default_k: bool,
+        **_kwargs,
+    ):
+        nomograph_path = rusle_dir / "k_polaris_nomograph.tif"
+        manifest_path = rusle_dir / "manifest.json"
+        _write_constant_from_dem(dem_path, nomograph_path, 3.0)
+        if not manifest_path.exists():
+            manifest_path.write_text("{}", encoding="utf-8")
+        return RusleKResult(
+            nomograph=str(nomograph_path),
+            epic=None,
+            k_default=None,
+            manifest=str(manifest_path),
+            reference_samples=None,
+            comparison_summary=None,
+        )
+
+    def _fake_c(
+        _wd: str,
+        _dem: str,
+        *,
+        c_mode: str,
+        c_output_filename: str,
+        rap: str | None = None,
+        rock_fraction_of_rap_bare: float | str = "auto",
+        **_kwargs,
+    ):
+        c_call["mode"] = c_mode
+        c_call["rap"] = rap
+        c_call["rock_fraction_of_rap_bare"] = rock_fraction_of_rap_bare
+        c_path = rusle_dir / c_output_filename
+        fg_path = rusle_dir / "c_fg.tif"
+        manifest_path = rusle_dir / "manifest.json"
+        _write_constant_from_dem(dem_path, c_path, 4.0)
+        _write_constant_from_dem(dem_path, fg_path, 60.0)
+        manifest_path.write_text(
+            json.dumps(
+                {
+                    "c": {
+                        "mode": "observed_rap",
+                        "rock_fraction_of_rap_bare": {
+                            "requested": float(rock_fraction_of_rap_bare),
+                            "effective": float(rock_fraction_of_rap_bare),
+                            "source": "user",
+                        },
+                    }
+                }
+            ),
+            encoding="utf-8",
+        )
+        return RusleCResult(
+            c=str(c_path),
+            manifest=str(manifest_path),
+            fg=str(fg_path),
+            disturbed_class=None,
+            sbs_4class=None,
+            lookup_copy=None,
+        )
+
+    monkeypatch.setattr(rusle_module, "run_rusle_ls_factor", _fake_ls)
+    monkeypatch.setattr(rusle_module, "run_rusle_k_factors", _fake_k)
+    monkeypatch.setattr(rusle_module, "run_rusle_c_factor", _fake_c)
+
+    summary = controller.build(
+        payload={
+            "c_mode": "observed_rap",
+            "k_modes": ["polaris_nomograph"],
+            "default_k_mode": "polaris_nomograph",
+            "rock_fraction_of_rap_bare": 0.75,
+        }
+    )
+
+    assert c_call["mode"] == "observed_rap"
+    assert c_call["rap"] == str(rap_path)
+    assert c_call["rock_fraction_of_rap_bare"] == pytest.approx(0.75)
+    assert summary["rock_fraction_of_rap_bare"] == pytest.approx(0.75)
+
+    with open(rusle_dir / "manifest.json", "r", encoding="utf-8") as stream:
+        manifest = json.load(stream)
+    assert manifest["rusle"]["options"]["rock_fraction_of_rap_bare"] == pytest.approx(0.75)
+    assert manifest["rusle"]["observed_rap_rock_fraction"]["source"] == "user"
+
+
 def test_build_rejects_topaz_backend(
     tmp_path: Path,
     monkeypatch: pytest.MonkeyPatch,
@@ -586,6 +775,7 @@ def test_build_rejects_topaz_backend(
             "max_slope_length_m": 304.8,
             "p_value": 1.0,
             "force_polaris_refresh": False,
+            "rock_fraction_of_rap_bare": "auto",
         },
     )
     monkeypatch.setattr(
@@ -616,6 +806,21 @@ def test_parse_inputs_accepts_max_slope_length_override(
     parsed = controller.parse_inputs(payload={"max_slope_length_m": "250.5"})
 
     assert parsed["max_slope_length_m"] == pytest.approx(250.5)
+    assert parsed["rock_fraction_of_rap_bare"] == "auto"
+
+
+def test_parse_inputs_accepts_auto_and_numeric_rock_fraction(
+    tmp_path: Path,
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    controller = rusle_module.Rusle(str(tmp_path), "disturbed9002.cfg")
+    monkeypatch.setattr(controller, "available_rap_years", lambda: [])
+
+    parsed_auto = controller.parse_inputs(payload={"rock_fraction_of_rap_bare": "auto"})
+    parsed_numeric = controller.parse_inputs(payload={"rock_fraction_of_rap_bare": "0.35"})
+
+    assert parsed_auto["rock_fraction_of_rap_bare"] == "auto"
+    assert parsed_numeric["rock_fraction_of_rap_bare"] == pytest.approx(0.35)
 
 
 def test_parse_inputs_rejects_non_positive_max_slope_length(
@@ -627,6 +832,17 @@ def test_parse_inputs_rejects_non_positive_max_slope_length(
 
     with pytest.raises(ValueError, match="max_slope_length_m must be greater than 0"):
         controller.parse_inputs(payload={"max_slope_length_m": 0})
+
+
+def test_parse_inputs_rejects_invalid_rock_fraction(
+    tmp_path: Path,
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    controller = rusle_module.Rusle(str(tmp_path), "disturbed9002.cfg")
+    monkeypatch.setattr(controller, "available_rap_years", lambda: [])
+
+    with pytest.raises(ValueError, match="rock_fraction_of_rap_bare"):
+        controller.parse_inputs(payload={"rock_fraction_of_rap_bare": 1.2})
 
 
 def test_available_rap_years_uses_rap_manager_surface(

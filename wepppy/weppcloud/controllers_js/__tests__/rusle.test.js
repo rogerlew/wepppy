@@ -30,6 +30,9 @@ describe("Rusle controller", () => {
                         <option value="2025">2025</option>
                     </select>
                 </div>
+                <div data-rusle-section="rock-fraction">
+                    <input id="rock_fraction_of_rap_bare" name="rock_fraction_of_rap_bare" value="auto">
+                </div>
                 <label><input type="checkbox" id="rusle_k_mode_nomograph" name="k_modes" value="polaris_nomograph" data-rusle-k-mode checked></label>
                 <label><input type="checkbox" id="rusle_k_mode_epic" name="k_modes" value="polaris_epic" data-rusle-k-mode></label>
                 <select id="default_k_mode" name="default_k_mode">
@@ -122,6 +125,7 @@ describe("Rusle controller", () => {
                 r_mode: "cligen_static",
                 c_mode: "observed_rap",
                 rap_year: "2024",
+                rock_fraction_of_rap_bare: "auto",
                 k_modes: ["polaris_nomograph"],
                 default_k_mode: "polaris_nomograph",
                 max_slope_length_m: "304.8",
@@ -153,7 +157,9 @@ describe("Rusle controller", () => {
         scenario.dispatchEvent(new Event("change", { bubbles: true }));
 
         const rapSection = document.querySelector('[data-rusle-section="rap-year"]');
+        const rockSection = document.querySelector('[data-rusle-section="rock-fraction"]');
         expect(rapSection.hidden).toBe(true);
+        expect(rockSection.hidden).toBe(true);
 
         const button = document.querySelector("[data-rusle-action='run']");
         button.dispatchEvent(new MouseEvent("click", { bubbles: true }));
@@ -163,6 +169,7 @@ describe("Rusle controller", () => {
         const payload = httpMock.postJsonWithSessionToken.mock.calls[0][1];
         expect(payload.c_mode).toBe("scenario_sbs");
         expect(Object.prototype.hasOwnProperty.call(payload, "rap_year")).toBe(false);
+        expect(Object.prototype.hasOwnProperty.call(payload, "rock_fraction_of_rap_bare")).toBe(false);
     });
 
     test("run enforces at least one K mode and normalizes default selection", async () => {
@@ -195,6 +202,19 @@ describe("Rusle controller", () => {
 
         const payload = httpMock.postJsonWithSessionToken.mock.calls[0][1];
         expect(payload.max_slope_length_m).toBe("304.8");
+    });
+
+    test("observed_rap empty rock fraction defaults to auto", async () => {
+        const rock = document.getElementById("rock_fraction_of_rap_bare");
+        rock.value = "";
+
+        const button = document.querySelector("[data-rusle-action='run']");
+        button.dispatchEvent(new MouseEvent("click", { bubbles: true }));
+
+        await flushPromises();
+
+        const payload = httpMock.postJsonWithSessionToken.mock.calls[0][1];
+        expect(payload.rock_fraction_of_rap_bare).toBe("auto");
     });
 
     test("completion event refreshes the run results summary", async () => {

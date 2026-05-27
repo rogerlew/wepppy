@@ -1190,8 +1190,11 @@ Defaulting policy (scientifically conservative):
     proxy toward total-area cover, not fraction-of-bare control space
 - for `cosurffrags`, treat the proxy as:
   - `surface_rock_cover_proxy_0_1 = clamp(cosurffrags_cover_pct / 100, 0, 1)`
-  - where `cosurffrags_cover_pct` is built from component/map-unit weighted
-    `sfragcov` aggregation across the run footprint
+  - where `cosurffrags_cover_pct` is read from run-scoped
+    `soils/soils.parquet` proxy columns
+    (`cosurffrags_cover_pct`, `surface_rock_cover_pct`,
+    `surface_rock_cover_percent`, `sfragcov`) and aggregated with area-weighted
+    mean when `area` is present (otherwise simple mean)
 - this default is a first-order proxy, not a physical equivalence rule
 - `cosurffrags` records fragments `>=2 mm` (wood `>=20 mm`), while common
   RUSLE operational guidance often focuses on larger rock fragments (for
@@ -1581,15 +1584,14 @@ in the first release:
   refresh it explicitly
 - expose `rock_fraction_of_rap_bare` in the `observed_rap` panel
 - if `rock_fraction_of_rap_bare = auto`:
-  - if SSURGO `cosurffrags` data are available for the run footprint:
-    - derive `surface_rock_cover_proxy_0_1` from component/map-unit weighted
-      `sfragcov` aggregation (`cover_pct -> /100 -> clamp`)
-    - aggregation contract:
-      - include mineral fragment kinds; exclude non-mineral organic kinds (for
-        example wood/charcoal) from `sfragcov` summation
-      - `component_surface_cover_pct = clamp(sum(sfragcov rows for included fragment kinds), 0, 100)`
-      - `mapunit_surface_cover_pct = clamp(sum((comppct_r/100) * component_surface_cover_pct), 0, 100)`
-      - `cosurffrags_cover_pct = area-weighted mean(mapunit_surface_cover_pct across run footprint)`
+  - if a run-scoped SSURGO `cosurffrags` proxy is available in
+    `soils/soils.parquet`, use it first:
+    - accepted proxy columns (in precedence order):
+      `cosurffrags_cover_pct`, `surface_rock_cover_pct`,
+      `surface_rock_cover_percent`, `sfragcov`
+    - aggregate with area-weighted mean when `area` is present; otherwise use
+      simple mean
+    - convert to `surface_rock_cover_proxy_0_1` as `clamp(cover_pct / 100, 0, 1)`
     - convert to control domain with selected RAP bare context:
       `rock_fraction_of_rap_bare_default = clamp(surface_rock_cover_proxy_0_1 / bare_rap_mean_0_1, 0, 1)` when `bare_rap_mean_0_1 > 0`, else `0.0`
   - else if aligned `cfvo` 0-5 cm exists for the run:

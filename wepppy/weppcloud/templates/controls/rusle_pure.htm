@@ -19,6 +19,7 @@
 {% set rusle_default_k_mode = rusle.default_k_mode if rusle is not none else 'polaris_nomograph' %}
 {% set rusle_p_value = rusle.p_value if rusle is not none else 1.0 %}
 {% set rusle_max_slope_length_m = rusle.max_slope_length_m if rusle is not none else 304.8 %}
+{% set rusle_rock_fraction_of_rap_bare = (rusle.rock_fraction_of_rap_bare | string) if rusle is not none else 'auto' %}
 {% set rap_year_options = rusle_rap_year_options | default([], true) %}
 {% set selected_rap_year = (rusle.rap_year | string) if rusle is not none else (rap_year_options[-1] | string if rap_year_options else '') %}
 
@@ -101,6 +102,20 @@
          help="Defaults to the latest completed RAP year unless this run has a saved override.",
          attrs={"class": "disable-readonly", "data-rusle-input": "rap-year"}
        ) }}
+  </div>
+
+  <div data-rusle-section="rock-fraction" {% if rusle_c_mode != 'observed_rap' %}style="display: none;"{% endif %}>
+    {{ ui.text_field(
+         "rock_fraction_of_rap_bare",
+         "Rock fraction of RAP bare",
+         value=rusle_rock_fraction_of_rap_bare,
+         placeholder="auto",
+         attrs={"class": "disable-readonly", "data-rusle-input": "rock-fraction-of-rap-bare"},
+         help="Use `auto` or enter a numeric value in [0, 1]. This partitions RAP bare ground into exposed mineral soil versus protective surface rock."
+       ) }}
+    <p class="wc-field__help">
+      Users should verify local surface rock cover and set this fraction accordingly.
+    </p>
   </div>
 
   <div class="wc-field" style="max-width: 750px;">

@@ -16,12 +16,12 @@ Users can verify behavior by building RUSLE with different rock-fraction values 
 - [x] (2026-05-27 21:42 UTC) Mapped concrete implementation surfaces across UI, JS controller, rq-engine route/schema, and RUSLE C integration.
 - [x] (2026-05-27 21:51 UTC) Completed independent review + findings disposition for package/plan quality; acceptance and validation criteria tightened.
 - [x] (2026-05-27 22:20 UTC) Revised `auto` source precedence to `cosurffrags` first with `cfvo` fallback and RAP-bare normalization.
-- [ ] Implement UI control + guidance copy for `rock_fraction_of_rap_bare` with `auto` support.
-- [ ] Implement payload parsing/allowlist/schema-default updates through rq-engine.
-- [ ] Implement `observed_rap` C partition runtime logic and manifest provenance fields.
-- [ ] Add/adjust targeted Python and JS regression tests.
-- [ ] Run focused validation gates.
-- [ ] Run independent review and disposition all high/medium findings.
+- [x] (2026-05-27 22:36 UTC) Implemented UI control + guidance copy for `rock_fraction_of_rap_bare` with `auto` support.
+- [x] (2026-05-27 22:36 UTC) Implemented payload parsing/allowlist/schema-default updates through rq-engine.
+- [x] (2026-05-27 22:36 UTC) Implemented `observed_rap` C partition runtime logic and manifest provenance fields.
+- [x] (2026-05-27 22:36 UTC) Added targeted Python and JS regressions for math, payload contracts, and defaults metadata.
+- [x] (2026-05-27 22:36 UTC) Ran focused validation gates (targeted pytest suites + rusle controller Jest + controller bundle rebuild).
+- [x] (2026-05-27 22:43 UTC) Ran independent post-implementation review and dispositioned all high/medium findings with code fixes + revalidation.
 
 ## Surprises & Discoveries
 
@@ -29,6 +29,8 @@ Users can verify behavior by building RUSLE with different rock-fraction values 
   Evidence: `wepppy/weppcloud/templates/controls/rusle_pure.htm` current field set.
 - Observation: `build-rusle` rq-engine route filters payload through an explicit allowlist, so the new field must be added there even if controller JS sends it.
   Evidence: `wepppy/microservices/rq_engine/rusle_routes.py` `allowed_keys` tuple.
+- Observation: No spatialized `cosurffrags` layer is currently produced in run artifacts, so the implementation resolves `auto` from run-scoped `soils/soils.parquet` proxy columns first, then falls back to cfvo raster inference.
+  Evidence: runtime inspection of `soils/` artifacts and `Soils.dump_soils_parquet()` output schema.
 
 ## Decision Log
 
@@ -41,7 +43,7 @@ Users can verify behavior by building RUSLE with different rock-fraction values 
 
 ## Outcomes & Retrospective
 
-Package initialization is complete. Implementation and validation remain pending.
+Implementation, targeted validation, and post-implementation review disposition are complete. Package is ready for closeout.
 
 ## Context and Orientation
 

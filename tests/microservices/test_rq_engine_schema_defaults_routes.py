@@ -24,6 +24,8 @@ RUN_ENDPOINT_SCHEMA_PATH = f"/api/runs/{RUNID}/{CONFIG}/endpoints/rq_engine_run_
 RUN_ENDPOINT_DEFAULTS_PATH = f"/api/runs/{RUNID}/{CONFIG}/endpoints/rq_engine_run_wepp/defaults"
 BUILD_SOILS_SCHEMA_PATH = f"/api/runs/{RUNID}/{CONFIG}/endpoints/rq_engine_build_soils/schema"
 BUILD_SOILS_DEFAULTS_PATH = f"/api/runs/{RUNID}/{CONFIG}/endpoints/rq_engine_build_soils/defaults"
+BUILD_RUSLE_SCHEMA_PATH = f"/api/runs/{RUNID}/{CONFIG}/endpoints/rq_engine_build_rusle/schema"
+BUILD_RUSLE_DEFAULTS_PATH = f"/api/runs/{RUNID}/{CONFIG}/endpoints/rq_engine_build_rusle/defaults"
 FORK_SCHEMA_PATH = f"/api/runs/{RUNID}/{CONFIG}/endpoints/rq_engine_fork_project/schema"
 FORK_DEFAULTS_PATH = f"/api/runs/{RUNID}/{CONFIG}/endpoints/rq_engine_fork_project/defaults"
 
@@ -818,6 +820,37 @@ def test_build_soils_defaults_infer_sol_ver_from_disturbed9002_config_when_missi
     assert defaults_response.status_code == 200
     defaults_payload = defaults_response.json()
     assert defaults_payload["resolved_defaults"]["sol_ver"] == 9002.0
+
+
+def test_build_rusle_schema_and_defaults_include_rock_fraction_partition(
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    _stub_auth(monkeypatch, "rq:status")
+    monkeypatch.setattr(schema_defaults_routes, "_load_runtime_state", lambda runid, config: _sample_runtime())
+
+    with TestClient(rq_engine.app) as client:
+        schema_response = client.get(BUILD_RUSLE_SCHEMA_PATH)
+        defaults_response = client.get(BUILD_RUSLE_DEFAULTS_PATH)
+
+    assert schema_response.status_code == 200
+    schema_payload = schema_response.json()
+    request_properties = schema_payload["request"]["properties"]
+    assert request_properties["rock_fraction_of_rap_bare"]["type"] == "string_or_number"
+    assert request_properties["rock_fraction_of_rap_bare"]["constraint_mode"] == "static"
+    assert request_properties["rock_fraction_of_rap_bare"]["one_of"] == [
+        {"type": "string", "enum": ["auto"]},
+        {"type": "number", "minimum": 0.0, "maximum": 1.0},
+    ]
+    assert request_properties["rock_fraction_of_rap_bare"]["available_if"] == {
+        "field": "c_mode",
+        "op": "eq",
+        "value": "observed_rap",
+    }
+
+    assert defaults_response.status_code == 200
+    defaults_payload = defaults_response.json()
+    assert defaults_payload["resolved_defaults"]["force_polaris_refresh"] is False
+    assert defaults_payload["resolved_defaults"]["rock_fraction_of_rap_bare"] == "auto"
 
 
 def test_run_endpoints_include_upload_sbs_for_baer_mod(monkeypatch: pytest.MonkeyPatch) -> None:

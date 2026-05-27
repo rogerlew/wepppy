@@ -116,6 +116,37 @@ def _coerce_mode_list(
     return selected
 
 
+def _coerce_rock_fraction_of_rap_bare(
+    value: Any,
+    *,
+    default: float | str = "auto",
+) -> float | str:
+    if value is None:
+        return default
+
+    if isinstance(value, str):
+        token = value.strip()
+        if token == "":
+            return default
+        if token.lower() == "auto":
+            return "auto"
+        try:
+            parsed = float(token)
+        except ValueError as exc:
+            raise ValueError("rock_fraction_of_rap_bare must be numeric in [0,1] or 'auto'") from exc
+    else:
+        try:
+            parsed = float(value)
+        except (TypeError, ValueError) as exc:
+            raise ValueError("rock_fraction_of_rap_bare must be numeric in [0,1] or 'auto'") from exc
+
+    if not np.isfinite(parsed):
+        raise ValueError("rock_fraction_of_rap_bare must be finite")
+    if parsed < 0.0 or parsed > 1.0:
+        raise ValueError("rock_fraction_of_rap_bare must be within [0, 1]")
+    return float(parsed)
+
+
 def _read_float_band(path: str) -> tuple[np.ndarray, dict[str, Any]]:
     with rasterio.open(path) as dataset:
         data = dataset.read(1).astype(np.float64)
@@ -215,6 +246,10 @@ class Rusle(NoDbBase):
         configured_default_k = self.config_get_str("rusle", "default_k_mode", configured_modes[0])
         if configured_default_k not in configured_modes:
             configured_modes.append(configured_default_k)
+        configured_rock_fraction = _coerce_rock_fraction_of_rap_bare(
+            self.config_get_raw("rusle", "rock_fraction_of_rap_bare", "auto"),
+            default="auto",
+        )
 
         with self.locked():
             os.makedirs(self.rusle_dir, exist_ok=True)
@@ -225,6 +260,7 @@ class Rusle(NoDbBase):
             self._default_k_mode = configured_default_k
             self._max_slope_length_m = configured_max_slope_length
             self._p_value = float(self.config_get_float("rusle", "p_value", 1.0))
+            self._rock_fraction_of_rap_bare = configured_rock_fraction
             self._last_build_artifacts: dict[str, str] = {}
 
     def on(self, evt: TriggerEvents) -> None:
@@ -315,6 +351,15 @@ class Rusle(NoDbBase):
         self._max_slope_length_m = _coerce_positive_float(value, field="max_slope_length_m")
 
     @property
+    def rock_fraction_of_rap_bare(self) -> float | str:
+        return getattr(self, "_rock_fraction_of_rap_bare", "auto")
+
+    @rock_fraction_of_rap_bare.setter
+    @nodb_setter
+    def rock_fraction_of_rap_bare(self, value: float | str) -> None:
+        self._rock_fraction_of_rap_bare = _coerce_rock_fraction_of_rap_bare(value, default="auto")
+
+    @property
     def last_build_artifacts(self) -> dict[str, str]:
         return dict(getattr(self, "_last_build_artifacts", {}))
 
@@ -366,6 +411,10 @@ class Rusle(NoDbBase):
 
         p_value = float(raw.get("p_value", self.p_value))
         force_polaris_refresh = _coerce_bool(raw.get("force_polaris_refresh"), default=False)
+        rock_fraction_of_rap_bare = _coerce_rock_fraction_of_rap_bare(
+            raw.get("rock_fraction_of_rap_bare", self.rock_fraction_of_rap_bare),
+            default=self.rock_fraction_of_rap_bare,
+        )
 
         return {
             "r_mode": r_mode,
@@ -376,6 +425,7 @@ class Rusle(NoDbBase):
             "max_slope_length_m": max_slope_length_m,
             "p_value": p_value,
             "force_polaris_refresh": force_polaris_refresh,
+            "rock_fraction_of_rap_bare": rock_fraction_of_rap_bare,
         }
 
     def _extract_static_r(self, payload: Mapping[str, Any]) -> float:
@@ -772,6 +822,8 @@ class Rusle(NoDbBase):
             "| Raster | Description | Units | Provenance |",
             "| --- | --- | --- | --- |",
         ]
+        if options["c_mode"] == "observed_rap":
+            lines.insert(10, f"- Rock fraction of RAP bare: `{options['rock_fraction_of_rap_bare']}`")
         for raster, description, units, provenance in table_rows:
             lines.append(f"| {raster} | {description} | {units} | {provenance} |")
 
@@ -816,6 +868,7 @@ class Rusle(NoDbBase):
             self._default_k_mode = options["default_k_mode"]
             self._max_slope_length_m = float(options["max_slope_length_m"])
             self._p_value = float(options["p_value"])
+            self._rock_fraction_of_rap_bare = options["rock_fraction_of_rap_bare"]
 
         ron = Ron.getInstance(self.wd)
         climate = Climate.getInstance(self.wd)
@@ -874,6 +927,7 @@ class Rusle(NoDbBase):
                 c_mode="observed_rap",
                 c_output_filename=c_output_filename,
                 rap=rap_path,
+                rock_fraction_of_rap_bare=options["rock_fraction_of_rap_bare"],
             )
         else:
             sbs_path: str | None = None
@@ -947,12 +1001,20 @@ class Rusle(NoDbBase):
                 "rap_year": int(options["rap_year"]),
                 "max_slope_length_m": float(options["max_slope_length_m"]),
                 "p_value": float(options["p_value"]),
+                "rock_fraction_of_rap_bare": options["rock_fraction_of_rap_bare"],
             },
             "r_factor": dict(r_manifest),
             "static_r": static_r_payload,
             "polaris": polaris_state,
             "artifacts": artifacts,
         }
+        c_manifest = manifest.get("c")
+        if (
+            isinstance(c_manifest, Mapping)
+            and str(c_manifest.get("mode")) == "observed_rap"
+            and isinstance(c_manifest.get("rock_fraction_of_rap_bare"), Mapping)
+        ):
+            manifest["rusle"]["observed_rap_rock_fraction"] = dict(c_manifest["rock_fraction_of_rap_bare"])
         _write_manifest(manifest_path, manifest)
         update_catalog_entry(self.wd, _relative_path(self.wd, manifest_path))
 
@@ -965,5 +1027,6 @@ class Rusle(NoDbBase):
             "default_k_mode": options["default_k_mode"],
             "rap_year": int(options["rap_year"]),
             "max_slope_length_m": float(options["max_slope_length_m"]),
+            "rock_fraction_of_rap_bare": options["rock_fraction_of_rap_bare"],
             "artifacts": artifacts,
         }

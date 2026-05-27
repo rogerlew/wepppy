@@ -22,6 +22,7 @@ var Rusle = (function () {
         statusPanel: "#rusle_status_panel",
         stacktracePanel: "#rusle_stacktrace_panel",
         rapYearSection: '[data-rusle-section="rap-year"]',
+        rockFractionSection: '[data-rusle-section="rock-fraction"]',
         cMode: '[data-rusle-c-mode]',
         kMode: '[data-rusle-k-mode]',
         defaultKMode: "#default_k_mode",
@@ -226,27 +227,29 @@ var Rusle = (function () {
         }
     }
 
-    function syncRapYearVisibility(formElement) {
+    function syncObservedRapVisibility(formElement) {
         if (!formElement) {
             return;
         }
         var checked = formElement.querySelector(SELECTORS.cMode + ":checked");
         var cMode = checked ? String(checked.value || "") : "observed_rap";
-        var section = formElement.querySelector(SELECTORS.rapYearSection);
-        if (!section) {
-            return;
-        }
-        if (cMode === "observed_rap") {
-            section.hidden = false;
-            if (section.style) {
-                section.style.removeProperty("display");
+        [SELECTORS.rapYearSection, SELECTORS.rockFractionSection].forEach(function (selector) {
+            var section = formElement.querySelector(selector);
+            if (!section) {
+                return;
             }
-        } else {
-            section.hidden = true;
-            if (section.style) {
-                section.style.display = "none";
+            if (cMode === "observed_rap") {
+                section.hidden = false;
+                if (section.style) {
+                    section.style.removeProperty("display");
+                }
+            } else {
+                section.hidden = true;
+                if (section.style) {
+                    section.style.display = "none";
+                }
             }
-        }
+        });
     }
 
     function buildPayload(controller) {
@@ -260,8 +263,16 @@ var Rusle = (function () {
 
         if (payload.c_mode !== "observed_rap") {
             delete payload.rap_year;
+            delete payload.rock_fraction_of_rap_bare;
         } else if (payload.rap_year === "" || payload.rap_year === null || payload.rap_year === undefined) {
             delete payload.rap_year;
+        }
+
+        if (payload.c_mode === "observed_rap") {
+            var rockValue = payload.rock_fraction_of_rap_bare;
+            if (rockValue === "" || rockValue === null || rockValue === undefined) {
+                payload.rock_fraction_of_rap_bare = "auto";
+            }
         }
 
         return payload;
@@ -403,7 +414,7 @@ var Rusle = (function () {
         };
 
         controller.syncUi = function () {
-            syncRapYearVisibility(controller.form);
+            syncObservedRapVisibility(controller.form);
             syncDefaultKMode(controller.form);
             if (controller.events && typeof controller.events.emit === "function") {
                 var modeControl = controller.form ? controller.form.querySelector(SELECTORS.cMode + ":checked") : null;

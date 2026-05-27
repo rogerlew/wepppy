@@ -11,6 +11,7 @@ __all__ = [
     "compute_c_from_fg_pct",
     "compute_c_from_ground_cover_fraction",
     "compute_fg_from_bare_ground_pct",
+    "compute_observed_rap_fg_pct",
 ]
 
 
@@ -33,6 +34,49 @@ def compute_fg_from_bare_ground_pct(bare_ground_pct: float | np.ndarray) -> floa
 
     valid = np.isfinite(bare)
     fg[valid] = np.clip(100.0 - bare[valid], 0.0, 100.0)
+
+    return _return_scalar_if_needed(bare_ground_pct, fg)
+
+
+def compute_observed_rap_fg_pct(
+    bare_ground_pct: float | np.ndarray,
+    *,
+    rock_fraction_of_rap_bare: float | np.ndarray = 0.0,
+) -> float | np.ndarray:
+    """Return observed-RAP ground-cover percent with rock-partitioned bare ground.
+
+    Locked v1 contract:
+
+    `fg = 100 * (1 - bare_rap_0_1 * (1 - r_bare))`
+
+    where:
+    - `bare_rap_0_1 = clamp(bare_ground_pct / 100, 0, 1)`
+    - `r_bare = clamp(rock_fraction_of_rap_bare, 0, 1)`
+    """
+
+    bare = np.asarray(bare_ground_pct, dtype=np.float64)
+    rock_fraction = np.asarray(rock_fraction_of_rap_bare, dtype=np.float64)
+    if rock_fraction.ndim == 0:
+        rock_fraction = np.full_like(bare, float(rock_fraction), dtype=np.float64)
+    else:
+        try:
+            rock_fraction = np.broadcast_to(rock_fraction, bare.shape).astype(np.float64, copy=False)
+        except ValueError as exc:
+            raise ValueError(
+                "rock_fraction_of_rap_bare must be scalar or broadcastable to bare_ground_pct shape"
+            ) from exc
+    fg = np.full_like(bare, np.nan, dtype=np.float64)
+
+    valid_bare = np.isfinite(bare)
+    valid_rock = np.isfinite(rock_fraction)
+    if not np.all(valid_rock):
+        raise ValueError("rock_fraction_of_rap_bare must be finite")
+    if np.any((rock_fraction < 0.0) | (rock_fraction > 1.0)):
+        raise ValueError("rock_fraction_of_rap_bare must be within [0, 1]")
+
+    bare_0_1 = np.full_like(bare, np.nan, dtype=np.float64)
+    bare_0_1[valid_bare] = np.clip(bare[valid_bare] / 100.0, 0.0, 1.0)
+    fg[valid_bare] = 100.0 * (1.0 - (bare_0_1[valid_bare] * (1.0 - rock_fraction[valid_bare])))
 
     return _return_scalar_if_needed(bare_ground_pct, fg)
 
@@ -69,4 +113,3 @@ def compute_c_from_ground_cover_fraction(
     fg_pct[valid] = ground_cover[valid] * 100.0
 
     return compute_c_from_fg_pct(fg_pct, b=b)
-

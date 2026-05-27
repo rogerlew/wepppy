@@ -35,8 +35,10 @@ Use it to partition RAP bare into exposed-soil and protective-rock fractions:
 
 Provide an `auto` convenience default with source precedence:
 
-- first from SSURGO `cosurffrags` (`sfragcov`) aggregated across the run
-  footprint as a total-surface-rock proxy (`surface_rock_cover_proxy_0_1`)
+- first from run-scoped SSURGO `cosurffrags` proxy columns in
+  `soils/soils.parquet` (`cosurffrags_cover_pct`, `surface_rock_cover_pct`,
+  `surface_rock_cover_percent`, `sfragcov`) aggregated across the run footprint
+  as a total-surface-rock proxy (`surface_rock_cover_proxy_0_1`)
 - fallback to top-horizon `cfvo` (`surface_rock_cover_proxy_0_1 = clamp(cfvo_0_5cm_volpct / 100, 0, 1)`)
 - final fallback to `0.0`
 

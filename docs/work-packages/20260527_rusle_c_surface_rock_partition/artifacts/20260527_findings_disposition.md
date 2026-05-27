@@ -23,3 +23,25 @@
 ## Notes
 
 These dispositions tighten the implementation contract and test plan without changing runtime behavior yet. Post-implementation independent review remains required to assess code-level regressions and correctness.
+
+## Post-Implementation Review Disposition (2026-05-27 22:41 UTC)
+
+**Input review artifact**:
+`artifacts/20260527_post_implementation_independent_review.md`
+
+### Summary
+
+- High findings resolved in code: 1/1
+- Medium findings resolved in code: 1/1
+- Remaining open high/medium findings: 0
+
+### Disposition Details
+
+| Finding | Severity | Disposition | Evidence of Update |
+|---|---|---|---|
+| Schema enum advertised non-runtime token (`\"0.0_to_1.0_numeric\"`) for `rock_fraction_of_rap_bare` | High | **Resolved in code + tests**. Replaced placeholder enum with structured `one_of` contract: `{\"type\": \"string\", \"enum\": [\"auto\"]}` or `{\"type\": \"number\", \"minimum\": 0.0, \"maximum\": 1.0}`. | `wepppy/microservices/rq_engine/schema_defaults_routes.py`; `tests/microservices/test_rq_engine_schema_defaults_routes.py` |
+| `compute_observed_rap_fg_pct` ndarray handling not broadcast-safe | Medium | **Resolved in code + tests**. Added explicit scalar-or-broadcastable coercion and index-aligned masking; added regression for ndarray rock-fraction inputs. | `wepppy/nodb/mods/rusle/c_formula.py`; `tests/nodb/mods/test_rusle_c_formula.py` |
+
+### Verification After Disposition
+
+- `wctl run-pytest tests/nodb/mods/test_rusle_c_formula.py tests/nodb/mods/test_rusle_c_integration.py tests/nodb/mods/test_rusle_controller.py tests/microservices/test_rq_engine_schema_defaults_routes.py tests/microservices/test_rq_engine_rusle_routes.py --maxfail=1`

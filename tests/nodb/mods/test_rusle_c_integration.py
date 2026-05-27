@@ -132,9 +132,14 @@ def test_run_rusle_c_factor_observed_rap_writes_artifacts_manifest_and_catalog(
 
     c_manifest = manifest["c"]
     assert c_manifest["mode"] == "observed_rap"
-    assert c_manifest["formula"]["fg"] == "clamp(100 - bare_ground_pct, 0, 100)"
+    assert c_manifest["formula"]["fg"] == "100 * (1 - bare_rap_0_1 * (1 - r_bare))"
+    assert c_manifest["formula"]["bare_rap_0_1"] == "clamp(bare_ground_pct / 100, 0, 1)"
+    assert c_manifest["formula"]["r_bare"] == "clamp(rock_fraction_of_rap_bare, 0, 1)"
     assert c_manifest["neutral_terms"]["canopy"] == pytest.approx(1.0)
     assert c_manifest["rap_band_indices"]["bare_ground"] == 2
+    assert c_manifest["rock_fraction_of_rap_bare"]["requested"] == "auto"
+    assert c_manifest["rock_fraction_of_rap_bare"]["source"] == "auto:fallback_0"
+    assert c_manifest["rock_fraction_of_rap_bare"]["effective"] == pytest.approx(0.0)
 
     assert "rusle/c.tif" in catalog_updates
     assert "rusle/c_fg.tif" in catalog_updates
@@ -166,6 +171,160 @@ def test_run_rusle_c_factor_observed_rap_masks_union_nodata_across_cover_bands(t
     assert c_data[0, 1] == c_nodata
     assert fg_data[0, 1] == fg_nodata
     assert c_data[0, 0] != c_nodata
+
+
+def test_run_rusle_c_factor_observed_rap_uses_user_rock_fraction_partition(tmp_path: Path) -> None:
+    dem_path = tmp_path / "dem.tif"
+    rap_path = tmp_path / "rap.tif"
+
+    _write_raster(dem_path, np.ones((2, 2), dtype=np.float32), dtype="float32", nodata=-9999.0)
+    _write_default_rap_dataset(
+        rap_path,
+        bare_ground=np.asarray([[50.0, 50.0], [50.0, 50.0]], dtype=np.float32),
+    )
+
+    result = c_integration.run_rusle_c_factor(
+        wd=str(tmp_path),
+        dem=str(dem_path),
+        c_mode="observed_rap",
+        rap=str(rap_path),
+        rock_fraction_of_rap_bare=0.5,
+    )
+
+    fg_data, fg_nodata = _read_single_band(result.fg or "")
+    valid_fg = np.where(fg_data == fg_nodata, np.nan, fg_data)
+    assert np.allclose(valid_fg, 75.0)
+
+    with open(result.manifest, "r", encoding="utf-8") as stream:
+        manifest = json.load(stream)
+    rock_meta = manifest["c"]["rock_fraction_of_rap_bare"]
+    assert rock_meta["requested"] == pytest.approx(0.5)
+    assert rock_meta["effective"] == pytest.approx(0.5)
+    assert rock_meta["source"] == "user"
+
+
+def test_run_rusle_c_factor_observed_rap_auto_prefers_cosurffrags_over_cfvo(
+    tmp_path: Path,
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    dem_path = tmp_path / "dem.tif"
+    rap_path = tmp_path / "rap.tif"
+
+    _write_raster(dem_path, np.ones((2, 2), dtype=np.float32), dtype="float32", nodata=-9999.0)
+    _write_default_rap_dataset(
+        rap_path,
+        bare_ground=np.asarray([[50.0, 50.0], [50.0, 50.0]], dtype=np.float32),
+    )
+
+    monkeypatch.setattr(
+        c_integration,
+        "_load_cosurffrags_surface_proxy_from_soils_parquet",
+        lambda wd: (
+            0.2,
+            {
+                "status": "available",
+                "source_kind": "soils_parquet_cosurffrags",
+                "column": "cosurffrags_cover_pct",
+                "cover_pct": 20.0,
+            },
+        ),
+    )
+
+    cfvo_calls = {"count": 0}
+
+    def _unexpected_cfvo(**kwargs):
+        cfvo_calls["count"] += 1
+        return 0.9, {"status": "available"}
+
+    monkeypatch.setattr(c_integration, "_load_cfvo_surface_proxy_from_raster", _unexpected_cfvo)
+
+    result = c_integration.run_rusle_c_factor(
+        wd=str(tmp_path),
+        dem=str(dem_path),
+        c_mode="observed_rap",
+        rap=str(rap_path),
+        rock_fraction_of_rap_bare="auto",
+    )
+
+    fg_data, fg_nodata = _read_single_band(result.fg or "")
+    valid_fg = np.where(fg_data == fg_nodata, np.nan, fg_data)
+    assert np.allclose(valid_fg, 70.0)
+    assert cfvo_calls["count"] == 0
+
+    with open(result.manifest, "r", encoding="utf-8") as stream:
+        manifest = json.load(stream)
+    rock_meta = manifest["c"]["rock_fraction_of_rap_bare"]
+    assert rock_meta["source"] == "auto:cosurffrags"
+    assert rock_meta["surface_rock_cover_proxy_0_1"] == pytest.approx(0.2)
+    assert rock_meta["bare_rap_mean_0_1"] == pytest.approx(0.5)
+    assert rock_meta["effective"] == pytest.approx(0.4)
+
+
+def test_run_rusle_c_factor_observed_rap_rejects_invalid_rock_fraction(tmp_path: Path) -> None:
+    dem_path = tmp_path / "dem.tif"
+    rap_path = tmp_path / "rap.tif"
+
+    _write_raster(dem_path, np.ones((2, 2), dtype=np.float32), dtype="float32", nodata=-9999.0)
+    _write_default_rap_dataset(
+        rap_path,
+        bare_ground=np.asarray([[50.0, 50.0], [50.0, 50.0]], dtype=np.float32),
+    )
+
+    with pytest.raises(ValueError, match="rock_fraction_of_rap_bare"):
+        c_integration.run_rusle_c_factor(
+            wd=str(tmp_path),
+            dem=str(dem_path),
+            c_mode="observed_rap",
+            rap=str(rap_path),
+            rock_fraction_of_rap_bare="not-a-number",
+        )
+
+
+def test_run_rusle_c_factor_observed_rap_auto_falls_back_to_cfvo(
+    tmp_path: Path,
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    dem_path = tmp_path / "dem.tif"
+    rap_path = tmp_path / "rap.tif"
+
+    _write_raster(dem_path, np.ones((2, 2), dtype=np.float32), dtype="float32", nodata=-9999.0)
+    _write_default_rap_dataset(
+        rap_path,
+        bare_ground=np.asarray([[50.0, 50.0], [50.0, 50.0]], dtype=np.float32),
+    )
+
+    monkeypatch.setattr(
+        c_integration,
+        "_load_cosurffrags_surface_proxy_from_soils_parquet",
+        lambda wd: (None, {"status": "unavailable", "reason": "missing_cosurffrags_columns"}),
+    )
+    monkeypatch.setattr(
+        c_integration,
+        "_load_cfvo_surface_proxy_from_raster",
+        lambda **kwargs: (
+            0.25,
+            {
+                "status": "available",
+                "source_kind": "cfvo_top_horizon",
+                "cfvo_0_5cm_volpct": 25.0,
+            },
+        ),
+    )
+
+    result = c_integration.run_rusle_c_factor(
+        wd=str(tmp_path),
+        dem=str(dem_path),
+        c_mode="observed_rap",
+        rap=str(rap_path),
+        rock_fraction_of_rap_bare="auto",
+    )
+
+    with open(result.manifest, "r", encoding="utf-8") as stream:
+        manifest = json.load(stream)
+    rock_meta = manifest["c"]["rock_fraction_of_rap_bare"]
+    assert rock_meta["source"] == "auto:cfvo"
+    assert rock_meta["surface_rock_cover_proxy_0_1"] == pytest.approx(0.25)
+    assert rock_meta["effective"] == pytest.approx(0.5)
 
 
 def test_run_rusle_c_factor_scenario_sbs_writes_disturbed_class_alignment_and_lookup_copy(
