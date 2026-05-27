@@ -25,6 +25,7 @@ _thisdir = os.path.dirname(__file__)
 
 DEFAULT_VERSION = 'v3'
 RAP_FIRST_DATA_YEAR = 1986
+RAP_VEGETATION_COVER_BASE_URL = "https://rangeland.ntsg.umt.edu/data/rap/rap-vegetation-cover"
 
 
 __all__ = [
@@ -88,7 +89,7 @@ class RangelandAnalysisPlatform(object):
                        '-te', str(ul_x), str(lr_y), str(lr_x), str(ul_y),
                        '-r', 'near',
                        '-tr', str(cellsize), str(cellsize),
-                       f'/vsicurl/http://rangeland.ntsg.umt.edu/data/rap/rap-vegetation-cover/{version}/vegetation-cover-{version}-{year}.tif',
+                       _build_rap_cover_source_url(version, year),
                        dst_fn]
 
                 if _exists(dst_fn):
@@ -114,6 +115,14 @@ class RangelandAnalysisPlatform(object):
         self.lr_x, self.lr_y = float(lr_x), float(lr_y)
 
         return retries
+
+
+def _build_rap_cover_source_url(version: str, year: str) -> str:
+    """Return the GDAL ``/vsicurl/`` source URL for RAP vegetation-cover GeoTIFFs."""
+    return (
+        f"/vsicurl/{RAP_VEGETATION_COVER_BASE_URL}/"
+        f"{version}/vegetation-cover-{version}-{year}.tif"
+    )
 
     @classmethod
     def latest_completed_year(cls, *, today=None):
