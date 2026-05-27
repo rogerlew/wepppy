@@ -50,7 +50,7 @@
 ## Change Scope Discipline (Required)
 - Do not add speculative abstractions for unsupported or hypothetical cases.
 - Match existing data and API contracts first; call out contract changes before implementation.
-- Prefer the smallest fix that resolves the confirmed failing path.
+- Prefer the smallest fix that resolves the confirmed failing path; for mechanical refactors, preserve code structure (scope/indent/order) and change only the intended tokens.
 - For incident-driven hardening and mitigation-retirement work, follow `docs/standards/hardening-lifecycle-standard.md`.
 - State assumptions explicitly in change notes before broadening behavior.
 - Assume model memory is unreliable for requirements: do not rely on chat history as the only source of truth.
