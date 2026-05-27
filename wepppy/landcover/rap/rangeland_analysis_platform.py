@@ -7,6 +7,7 @@ from datetime import date
 import utm
 import subprocess
 import os
+import shutil
 from enum import IntEnum
 from glob import glob
 import math
@@ -116,14 +117,6 @@ class RangelandAnalysisPlatform(object):
 
         return retries
 
-
-def _build_rap_cover_source_url(version: str, year: str) -> str:
-    """Return the GDAL ``/vsicurl/`` source URL for RAP vegetation-cover GeoTIFFs."""
-    return (
-        f"/vsicurl/{RAP_VEGETATION_COVER_BASE_URL}/"
-        f"{version}/vegetation-cover-{version}-{year}.tif"
-    )
-
     @classmethod
     def latest_completed_year(cls, *, today=None):
         """Return the latest completed RAP year available for stable selection."""
@@ -144,7 +137,7 @@ def _build_rap_cover_source_url(version: str, year: str) -> str:
                 except (TypeError, ValueError):
                     continue
         return sorted(years)
-        
+
     def validate_raster(self, filename):
         """Return True when ``filename`` exists and includes non-zero values."""
         dataset = None
@@ -152,14 +145,14 @@ def _build_rap_cover_source_url(version: str, year: str) -> str:
             dataset = gdal.Open(filename, gdal.GA_ReadOnly)
             if not dataset:
                 return False
-            
+
             band = dataset.GetRasterBand(1)
             if not band:
                 return False
-            
+
             # Read the data as a NumPy array
             data = band.ReadAsArray()
-            
+
             # Check if there are any non-zero, non-masked values
             if np.any(data):
                 return True
@@ -189,7 +182,15 @@ def _build_rap_cover_source_url(version: str, year: str) -> str:
         """Copy the required attribution README into ``wd`` if missing."""
         readme_txt = _join(self.wd, 'rap_readme.txt')
         if not _exists(readme_txt):
-            os.copyfile(_join(_thisdir, 'rap_readme.txt', readme_txt))
+            shutil.copyfile(_join(_thisdir, 'rap_readme.txt'), readme_txt)
+
+
+def _build_rap_cover_source_url(version: str, year: str) -> str:
+    """Return the GDAL ``/vsicurl/`` source URL for RAP vegetation-cover GeoTIFFs."""
+    return (
+        f"/vsicurl/{RAP_VEGETATION_COVER_BASE_URL}/"
+        f"{version}/vegetation-cover-{version}-{year}.tif"
+    )
 
 
 class RangelandAnalysisPlatformV2(RangelandAnalysisPlatform):

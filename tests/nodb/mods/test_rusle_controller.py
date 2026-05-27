@@ -627,3 +627,26 @@ def test_parse_inputs_rejects_non_positive_max_slope_length(
 
     with pytest.raises(ValueError, match="max_slope_length_m must be greater than 0"):
         controller.parse_inputs(payload={"max_slope_length_m": 0})
+
+
+def test_available_rap_years_uses_rap_manager_surface(
+    tmp_path: Path,
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    controller = rusle_module.Rusle(str(tmp_path), "disturbed9002.cfg")
+    manager_cls = rusle_module.RangelandAnalysisPlatformV3
+
+    assert callable(getattr(manager_cls, "available_years", None))
+    assert callable(getattr(manager_cls, "latest_completed_year", None))
+
+    monkeypatch.setattr(
+        manager_cls,
+        "latest_completed_year",
+        classmethod(lambda cls, *, today=None: 1990),
+    )
+
+    years = controller.available_rap_years()
+
+    assert years == sorted(years)
+    assert years[0] == 1986
+    assert years[-1] == 1990
