@@ -33,10 +33,20 @@ Use it to partition RAP bare into exposed-soil and protective-rock fractions:
 - `fg = 100 * (1 - bare_exposed)`
 - `C = exp(-0.04 * fg)`
 
-Provide an `auto` convenience default seeded from top-horizon profile
-coarse-fragment volume:
+Provide an `auto` convenience default with source precedence:
 
-- `rock_fraction_of_rap_bare_default = clamp(cfvo_0_5cm_volpct / 100, 0, 1)`
+- first from SSURGO `cosurffrags` (`sfragcov`) aggregated across the run
+  footprint as a total-surface-rock proxy (`surface_rock_cover_proxy_0_1`)
+- fallback to top-horizon `cfvo` (`surface_rock_cover_proxy_0_1 = clamp(cfvo_0_5cm_volpct / 100, 0, 1)`)
+- final fallback to `0.0`
+
+Convert proxy total-surface cover into the control domain (fraction of RAP bare
+interpreted as rock):
+
+- `rock_fraction_of_rap_bare_default = clamp(surface_rock_cover_proxy_0_1 / bare_rap_mean_0_1, 0, 1)` when `bare_rap_mean_0_1 > 0`
+- `rock_fraction_of_rap_bare_default = 0.0` when `bare_rap_mean_0_1 <= 0`
+- Multiplying by `bare_rap_mean_0_1` is intentionally rejected because it
+  shifts the parameter into total-area space instead of fraction-of-bare space.
 
 The `auto` value is explicitly documented as a proxy prior, not canonical
 surface-rock truth.
@@ -59,7 +69,8 @@ New behavior:
 
 - `observed_rap` includes `rock_fraction_of_rap_bare` user control.
 - `fg` now reflects overlap-consistent rock partitioning of RAP bare.
-- `auto` default can populate the control from top-horizon `cfvo` when present.
+- `auto` default populates from SSURGO `cosurffrags` when available, with
+  fallback to top-horizon `cfvo`.
 
 ## Rationale
 
@@ -68,6 +79,8 @@ New behavior:
 - Preserves explicit user control where no robust spatial surface-rock raster
   exists.
 - Keeps profile-fragment effects in `K` while avoiding double counting.
+- Uses a surface-fragment dataset (`cosurffrags`) as primary proxy rather than
+  profile volumetric fragments (`cfvo`) for the `C`-factor surface-cover path.
 
 ## Alternatives Considered
 
@@ -82,8 +95,8 @@ New behavior:
   - Clearer separation of surface-rock (`C`) vs profile-fragment (`K`) effects.
   - Explicit uncertainty labeling for proxy defaults.
 - Risks:
-  - `auto` default from profile `cfvo` is uncertain and can misestimate true
-    surface cover if not overridden.
+  - `auto` defaults are still uncertain proxies; `cosurffrags` and `cfvo` can
+    both misestimate true site-observed surface rock cover if not overridden.
 
 ## Evidence
 

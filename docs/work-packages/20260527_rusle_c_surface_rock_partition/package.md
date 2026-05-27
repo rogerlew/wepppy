@@ -5,13 +5,13 @@
 
 ## Overview
 
-This package implements the new `observed_rap` surface-rock partition feature defined in the RUSLE specification and ADR-0003. The goal is to prevent stony armored surfaces from being treated as fully exposed bare soil by introducing a user-facing `rock_fraction_of_rap_bare` control, a conservative `auto` proxy default from top-horizon `cfvo`, and explicit user guidance to verify rock cover with field/local evidence.
+This package implements the new `observed_rap` surface-rock partition feature defined in the RUSLE specification and ADR-0003. The goal is to prevent stony armored surfaces from being treated as fully exposed bare soil by introducing a user-facing `rock_fraction_of_rap_bare` control, a conservative `auto` proxy default from SSURGO `cosurffrags` with `cfvo` fallback, and explicit user guidance to verify rock cover with field/local evidence.
 
 ## Objectives
 
 - Implement `observed_rap` C-factor runtime partitioning of RAP bare ground into exposed mineral soil and protective surface rock.
 - Add user-facing `rock_fraction_of_rap_bare` control to the RUSLE UI with explicit verification guidance.
-- Support `auto` defaulting from top-horizon profile `cfvo` (when available) with explicit proxy semantics.
+- Support `auto` defaulting from SSURGO `cosurffrags` (when available), with top-horizon profile `cfvo` fallback and explicit proxy semantics.
 - Persist manifest provenance for effective value and source (`user` vs `auto`).
 - Add targeted regressions for C-factor math, API payload contracts, UI payload behavior, and manifest metadata.
 - Run independent review and disposition all high/medium findings before closeout.
@@ -36,7 +36,7 @@ This package implements the new `observed_rap` surface-rock partition feature de
 
 ### Explicitly Out of Scope
 
-- New spatial surface-rock raster/proxy generation beyond `cfvo`-based `auto` default.
+- New spatial surface-rock raster/proxy generation beyond `cosurffrags`-first `auto` default with `cfvo` fallback.
 - Recalibration of `b` parameter or broader C-subfactor model redesign.
 - Changes to `scenario_sbs` C mode behavior.
 - K-factor `cfvo` class-shift policy changes.
@@ -53,11 +53,13 @@ This package implements the new `observed_rap` surface-rock partition feature de
 - [ ] `observed_rap` C computation uses `rock_fraction_of_rap_bare` partition contract from spec.
 - [ ] RUSLE UI exposes `rock_fraction_of_rap_bare` with explicit verification guidance text.
 - [ ] `auto` default is supported with explicit proxy semantics:
-  - use top-horizon `cfvo` proxy when available (`clamp(cfvo_0_5cm_volpct / 100, 0, 1)`)
-  - fallback to `0.0` when `cfvo` is unavailable and record fallback reason in manifest metadata
+  - use SSURGO `cosurffrags` proxy first when available
+  - fallback to top-horizon `cfvo` proxy when `cosurffrags` is unavailable
+  - convert proxy total-surface cover into control domain with RAP-bare normalization
+  - fallback to `0.0` when neither proxy is available and record fallback reason in manifest metadata
 - [ ] Build payload contract includes `rock_fraction_of_rap_bare` end-to-end (UI -> rq-engine -> RUSLE controller), including schema/default discoverability metadata.
 - [ ] Input contract is enforced as numeric `[0,1]` or literal `auto`; invalid values (`<0`, `>1`, non-numeric non-`auto`) are rejected with canonical RQ error payload behavior.
-- [ ] Manifest captures effective rock fraction and value source provenance (`user` vs `auto`), including explicit `auto` fallback annotation when `cfvo` is missing.
+- [ ] Manifest captures effective rock fraction and value source provenance (`user` vs `auto`), including explicit `auto` fallback annotation when `cosurffrags` and/or `cfvo` are missing.
 - [ ] Targeted Python/JS tests pass for changed behavior, including boundary/error-path regression coverage.
 - [ ] Review artifact and findings disposition artifact are complete with no unresolved high/medium findings.
 

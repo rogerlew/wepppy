@@ -1176,10 +1176,27 @@ Defaulting policy (scientifically conservative):
   rock content is not a canonical substitute for surface cover
 - because no robust run-scoped surface-rock raster exists in current workflow,
   a user-editable convenience default is still useful
-- default value should be populated from top-horizon profile coarse-fragment
-  volume where available:
-  - `rock_fraction_of_rap_bare_default = clamp(cfvo_0_5cm_volpct / 100, 0, 1)`
+- default source precedence for `auto`:
+  - first, use SSURGO `cosurffrags.sfragcov` (`component_surface_fragments`)
+    as the surface-cover proxy where available
+  - if `cosurffrags` is unavailable for the run footprint, fallback to
+    top-horizon `cfvo` as a lower-confidence profile proxy
+  - if neither proxy is available, fallback to `0.0`
+- when a proxy represents total-surface rock cover (`0-1`), convert to the
+  control domain (fraction of RAP bare interpreted as rock) as:
+  - `rock_fraction_of_rap_bare_default = clamp(surface_rock_cover_proxy_0_1 / bare_rap_mean_0_1, 0, 1)` if `bare_rap_mean_0_1 > 0`
+  - `rock_fraction_of_rap_bare_default = 0.0` if `bare_rap_mean_0_1 <= 0`
+  - do not multiply by `bare_rap_mean_0_1`; multiplication would convert the
+    proxy toward total-area cover, not fraction-of-bare control space
+- for `cosurffrags`, treat the proxy as:
+  - `surface_rock_cover_proxy_0_1 = clamp(cosurffrags_cover_pct / 100, 0, 1)`
+  - where `cosurffrags_cover_pct` is built from component/map-unit weighted
+    `sfragcov` aggregation across the run footprint
 - this default is a first-order proxy, not a physical equivalence rule
+- `cosurffrags` records fragments `>=2 mm` (wood `>=20 mm`), while common
+  RUSLE operational guidance often focuses on larger rock fragments (for
+  example `>=10 mm`); treat this as additional proxy uncertainty and keep the
+  explicit user override guidance in UI
 - UI copy must label the proxy as an estimate and prompt override with field
   evidence when available
 
@@ -1208,9 +1225,9 @@ Interpretation cautions:
 - post-fire RAP vegetation recovery should not automatically imply a strongly
   protective `C`
 - litter and bare ground must remain first-class controls
-- if `rock_fraction_of_rap_bare` is auto-filled from `cfvo`, treat that value
-  as low-confidence prior information unless field-derived surface-rock cover
-  confirms it
+- if `rock_fraction_of_rap_bare` is auto-filled from `cosurffrags` or `cfvo`,
+  treat that value as low-confidence prior information unless field-derived
+  surface-rock cover confirms it
 
 #### Mode 2: `scenario_sbs`
 
@@ -1492,7 +1509,9 @@ test request:
 - default `C` mode in the first user-facing release is `observed_rap`
 - `observed_rap` rock-partition control:
   - `rock_fraction_of_rap_bare` numeric in `[0, 1]`
-  - `auto` fills from top-horizon profile `cfvo` proxy when available
+  - `auto` fills from SSURGO `cosurffrags` proxy when available
+  - fallback source for `auto` is top-horizon profile `cfvo` when
+    `cosurffrags` is unavailable
   - editable after `auto` fill; user value always takes precedence
   - UI must display explicit guidance that users should verify surface rock
     cover from local/field evidence and set `rock_fraction_of_rap_bare`
@@ -1562,16 +1581,28 @@ in the first release:
   refresh it explicitly
 - expose `rock_fraction_of_rap_bare` in the `observed_rap` panel
 - if `rock_fraction_of_rap_bare = auto`:
-  - if aligned `cfvo` 0-5 cm exists for the run, derive default proxy as
-    `clamp(cfvo_0_5cm_volpct / 100, 0, 1)`
-  - if `cfvo` is unavailable, fall back to `0.0` and emit explicit manifest
-    metadata that no profile proxy was available
+  - if SSURGO `cosurffrags` data are available for the run footprint:
+    - derive `surface_rock_cover_proxy_0_1` from component/map-unit weighted
+      `sfragcov` aggregation (`cover_pct -> /100 -> clamp`)
+    - aggregation contract:
+      - include mineral fragment kinds; exclude non-mineral organic kinds (for
+        example wood/charcoal) from `sfragcov` summation
+      - `component_surface_cover_pct = clamp(sum(sfragcov rows for included fragment kinds), 0, 100)`
+      - `mapunit_surface_cover_pct = clamp(sum((comppct_r/100) * component_surface_cover_pct), 0, 100)`
+      - `cosurffrags_cover_pct = area-weighted mean(mapunit_surface_cover_pct across run footprint)`
+    - convert to control domain with selected RAP bare context:
+      `rock_fraction_of_rap_bare_default = clamp(surface_rock_cover_proxy_0_1 / bare_rap_mean_0_1, 0, 1)` when `bare_rap_mean_0_1 > 0`, else `0.0`
+  - else if aligned `cfvo` 0-5 cm exists for the run:
+    - derive `surface_rock_cover_proxy_0_1 = clamp(cfvo_0_5cm_volpct / 100, 0, 1)`
+    - convert with the same RAP-bare normalization rule above
+  - else, fall back to `0.0` and emit explicit manifest metadata that no
+    `cosurffrags` or `cfvo` proxy was available
 - manifest metadata must record:
   - the effective numeric `rock_fraction_of_rap_bare`
   - whether the value came from explicit user entry or `auto` proxy
-  - if proxied, the source raster and summary statistic used
-- UI text must explicitly state that `auto` is a profile-to-surface proxy and
-  that field-estimated surface rock cover is preferred when available
+  - if proxied, the source and summary statistic used (`cosurffrags` or `cfvo`)
+- UI text must explicitly state that `auto` is a proxy estimate and that
+  field-estimated surface rock cover is preferred when available
 
 ### Internal `polaris` Acquisition Contract
 
@@ -1696,7 +1727,9 @@ Recommended initial precedence:
     - surface rock precedence: field-observed surface-rock cover over any proxy
     - if no field value is available, use user-entered
       `rock_fraction_of_rap_bare`
-    - use `cfvo`-derived `auto` value only as editable prior/default
+    - use `cosurffrags`-derived `auto` value first as editable prior/default
+    - use `cfvo`-derived `auto` only as fallback prior/default when
+      `cosurffrags` is unavailable
   - or `scenario_sbs`
 - `P`
   - `1.0` unless explicit treatment/practice inputs exist
@@ -1777,8 +1810,9 @@ Longer term, the mod should be checked against:
   bare into protective surface rock versus exposed mineral soil, consistent
   with canonical `RUSLE2` placement of surface rock in `C` rather than `K`
 - `rock_fraction_of_rap_bare = auto` is an explicit convenience proxy seeded
-  from top-horizon `cfvo` (`vol% -> fraction`) and is not a claim of literal
-  profile-to-surface equivalence
+  first from SSURGO `cosurffrags` and then from top-horizon `cfvo` fallback,
+  with RAP-bare normalization into the control domain; neither path is a claim
+  of literal field-observed surface rock
 - `scenario_sbs` v1 uses static severity lookups only; no time axis until a
   separate recovery-trajectory path is defined and validated
 - `scenario_sbs` is restricted to disturbed runs and uses canonical

@@ -7,7 +7,7 @@
 **Timezone**: UTC  
 **Started**: 2026-05-27 21:42 UTC  
 **Current phase**: Planning complete / implementation-ready  
-**Last updated**: 2026-05-27 21:51 UTC  
+**Last updated**: 2026-05-27 22:20 UTC  
 **Next milestone**: Begin implementation across UI, rq-engine, and RUSLE runtime with targeted regressions  
 **Security impact**: `low`  
 **Dedicated security review**: `no`  
@@ -47,6 +47,7 @@
 - **2026-05-27 21:42 UTC** - Package scaffolded and tracker initialized.
 - **2026-05-27 21:48 UTC** - Independent review completed (1 High, 2 Medium, 2 Low findings).
 - **2026-05-27 21:51 UTC** - Findings disposition documented and package acceptance/validation criteria tightened.
+- **2026-05-27 22:20 UTC** - Auto-default contract revised to `cosurffrags` primary with `cfvo` fallback and RAP-bare normalization.
 
 ## Decisions Log
 
@@ -62,11 +63,23 @@
 
 **Impact**: Matches the specification and ADR, keeps package size bounded, and avoids unscoped behavior drift in `scenario_sbs`.
 
+### 2026-05-27 22:20 UTC: `auto` source precedence revised to `cosurffrags` first
+**Context**: `rock_fraction_of_rap_bare` is a surface-cover control in `C`; SSURGO `cosurffrags` is a closer proxy to surface fragments than profile-volumetric `cfvo`.
+
+**Options considered**:
+1. Keep `cfvo` as sole `auto` proxy.
+2. Use `cosurffrags` primary, `cfvo` fallback, then `0.0`.
+3. Remove `auto` and require explicit user entry.
+
+**Decision**: Option 2.
+
+**Impact**: Improves scientific defensibility of defaulting while preserving deterministic fallback behavior and explicit user override.
+
 ## Risks and Issues
 
 | Risk | Severity | Likelihood | Mitigation | Status |
 |------|----------|------------|------------|--------|
-| Misinterpreting profile `cfvo` as canonical surface-rock truth | High | Medium | Explicit UI guidance + manifest/source provenance + `auto` labeled proxy only | Open |
+| Misinterpreting proxy defaults as canonical surface-rock truth | High | Medium | Explicit UI guidance + manifest/source provenance + `auto` labeled proxy only | Open |
 | Payload drift across JS/API/controller layers | Medium | Medium | Add route + JS contract tests and schema-default checks | Open |
 | Overlooked regressions in existing RAP/SBS mode switching | Medium | Medium | Add focused controller JS tests for mode-specific payload behavior | Open |
 
@@ -77,9 +90,9 @@ Disposition artifact: `artifacts/20260527_findings_disposition.md`
 
 | Finding | Severity | Disposition | Status |
 |------|----------|-------------|--------|
-| Missing explicit boundary/error contract tests for `rock_fraction_of_rap_bare` | High | Accepted; added acceptance and planned regression matrix for `<0`, `>1`, non-numeric, `auto` with/without `cfvo`, and canonical error-path handling | Closed (planning) |
+| Missing explicit boundary/error contract tests for `rock_fraction_of_rap_bare` | High | Accepted; added acceptance and planned regression matrix for `<0`, `>1`, non-numeric, and `auto` with `cosurffrags`/`cfvo`/fallback paths, plus canonical error-path handling | Closed (planning) |
 | `schema_defaults_routes` scope not explicit in validation plan | Medium | Accepted; added explicit scope + validation command target for `test_rq_engine_schema_defaults_routes.py` | Closed (planning) |
-| `auto` fallback semantics not pinned in acceptance language | Medium | Accepted; pinned fallback contract to `0.0` with explicit manifest fallback annotation when `cfvo` is unavailable | Closed (planning) |
+| `auto` fallback semantics not pinned in acceptance language | Medium | Accepted; pinned fallback contract to `0.0` with explicit manifest fallback annotation when proxy sources are unavailable | Closed (planning) |
 | PROJECT tracker WIP counters inconsistent | Low | Accepted; reconciled tracker counters to current active package count | Closed |
 | Package tracker next-steps stale / ADR linkage not visible | Low | Accepted; updated task board, next milestone, and explicit ADR link in quick status | Closed |
 
@@ -129,7 +142,7 @@ Disposition artifact: `artifacts/20260527_findings_disposition.md`
 **Work completed**:
 - Dispatched independent review and captured findings (1 High, 2 Medium, 2 Low).
 - Updated package acceptance criteria to include explicit input validation/error contract coverage.
-- Pinned `auto` fallback semantics to `0.0` when `cfvo` is unavailable, with manifest reason requirement.
+- Pinned `auto` fallback semantics to `0.0` when proxy data are unavailable, with manifest reason requirement.
 - Added explicit schema-default test coverage target.
 - Reconciled `PROJECT_TRACKER.md` WIP counters.
 
@@ -143,3 +156,21 @@ Disposition artifact: `artifacts/20260527_findings_disposition.md`
 **Test results**:
 - `wctl doc-lint --path docs/work-packages/20260527_rusle_c_surface_rock_partition`
 - `wctl doc-lint --path PROJECT_TRACKER.md`
+
+### 2026-05-27 22:20 UTC: Proxy Source Contract Revision
+**Agent/Contributor**: Codex
+
+**Work completed**:
+- Updated spec + ADR + package docs to use SSURGO `cosurffrags` as primary `auto` proxy source.
+- Preserved deterministic fallback chain: `cosurffrags -> cfvo -> 0.0`.
+- Clarified control-domain conversion rule: normalize proxy total-surface cover into fraction-of-RAP-bare space by division (with zero-bare guard), not multiplication.
+
+**Blockers encountered**:
+- None.
+
+**Next steps**:
+- Implement code-path support for `cosurffrags` retrieval and aggregation.
+- Add regression coverage for `auto` source precedence and RAP-bare normalization behavior.
+
+**Test results**:
+- `wctl doc-lint --path docs/work-packages/20260527_rusle_c_surface_rock_partition --path docs/adrs/ADR-0003-rusle-observed-rap-surface-rock-partition.md --path wepppy/nodb/mods/rusle/specification.md`

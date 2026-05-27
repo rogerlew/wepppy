@@ -6,7 +6,7 @@ This plan is maintained in accordance with `docs/prompt_templates/codex_exec_pla
 
 ## Purpose / Big Picture
 
-After this change, RUSLE users can set a new control (`rock_fraction_of_rap_bare`) to partition RAP bare ground into exposed mineral soil and protective surface rock for `observed_rap` C-factor builds. This prevents highly armored stony surfaces from being interpreted as fully exposed bare soil. The UI will explicitly tell users to verify rock cover and set this fraction accordingly, while `auto` provides a conservative proxy default from top-horizon `cfvo` when available.
+After this change, RUSLE users can set a new control (`rock_fraction_of_rap_bare`) to partition RAP bare ground into exposed mineral soil and protective surface rock for `observed_rap` C-factor builds. This prevents highly armored stony surfaces from being interpreted as fully exposed bare soil. The UI will explicitly tell users to verify rock cover and set this fraction accordingly, while `auto` provides a conservative proxy default from SSURGO `cosurffrags` with top-horizon `cfvo` fallback.
 
 Users can verify behavior by building RUSLE with different rock-fraction values (`0.0`, `auto`, high value), then checking `rusle/manifest.json` for effective value/source and confirming `c_observed_rap`/`a_observed_rap_*` outputs shift directionally as expected.
 
@@ -15,6 +15,7 @@ Users can verify behavior by building RUSLE with different rock-fraction values 
 - [x] (2026-05-27 21:42 UTC) Created work-package scaffold (`package.md`, `tracker.md`, and this active ExecPlan).
 - [x] (2026-05-27 21:42 UTC) Mapped concrete implementation surfaces across UI, JS controller, rq-engine route/schema, and RUSLE C integration.
 - [x] (2026-05-27 21:51 UTC) Completed independent review + findings disposition for package/plan quality; acceptance and validation criteria tightened.
+- [x] (2026-05-27 22:20 UTC) Revised `auto` source precedence to `cosurffrags` first with `cfvo` fallback and RAP-bare normalization.
 - [ ] Implement UI control + guidance copy for `rock_fraction_of_rap_bare` with `auto` support.
 - [ ] Implement payload parsing/allowlist/schema-default updates through rq-engine.
 - [ ] Implement `observed_rap` C partition runtime logic and manifest provenance fields.
@@ -34,9 +35,9 @@ Users can verify behavior by building RUSLE with different rock-fraction values 
 - Decision: Implement `rock_fraction_of_rap_bare` as an `observed_rap`-scoped control with explicit `auto` option rather than globally applying it to all C modes.
   Rationale: Aligns with specification contract and limits unscoped behavior drift in `scenario_sbs`.
   Date/Author: 2026-05-27 21:42 UTC / Codex.
-- Decision: Treat `auto` as a convenience proxy seeded from top-horizon `cfvo` only, with mandatory user-facing verification guidance.
-  Rationale: Preserves canonical RUSLE distinction between surface cover and profile fragments while still offering an operational default.
-  Date/Author: 2026-05-27 21:42 UTC / Codex.
+- Decision: Treat `auto` as a convenience proxy seeded first from SSURGO `cosurffrags`, with top-horizon `cfvo` fallback and mandatory user-facing verification guidance.
+  Rationale: Prefers a surface-fragment proxy for `C` while preserving an operational fallback when `cosurffrags` is unavailable.
+  Date/Author: 2026-05-27 22:20 UTC / Codex.
 
 ## Outcomes & Retrospective
 
@@ -72,8 +73,9 @@ Third, propagate the field through rq-engine by extending the `build-rusle` allo
 Fourth, implement runtime behavior in RUSLE C integration and controller plumbing, including:
 
 - observed RAP bare partition formula from specification,
-- `auto` default resolution from run-scoped top-horizon `cfvo` when available,
-- fallback behavior when `cfvo` is unavailable,
+- `auto` default resolution from run-scoped SSURGO `cosurffrags` when available,
+- `cfvo` fallback behavior when `cosurffrags` is unavailable,
+- fallback behavior when neither proxy is available,
 - explicit manifest provenance fields (`effective value`, `source`).
 
 Finally, add targeted regressions and run validation gates, then perform a post-implementation independent review and disposition findings.
@@ -106,7 +108,7 @@ Acceptance behavior:
 - rq-engine `build-rusle` accepts and forwards the field in filtered payload.
 - rq-engine schema-default metadata includes the new field and default contract.
 - Runtime C computation uses partitioned bare-ground contract from specification.
-- `rusle/manifest.json` includes effective partition value and source (`user`/`auto`), and for `auto` with missing `cfvo`, records fallback to `0.0` with explicit reason.
+- `rusle/manifest.json` includes effective partition value and source (`user`/`auto`), and for `auto` records whether source was `cosurffrags`, `cfvo`, or `fallback_0`.
 - Input contract accepts only numeric `[0,1]` or literal `auto`; invalid values (`<0`, `>1`, non-numeric non-`auto`) follow canonical RQ error payload behavior.
 - Targeted Python + JS tests pass.
 
@@ -114,8 +116,9 @@ Acceptance test matrix to implement:
 
 - `rock_fraction_of_rap_bare = 0.0` (user): uses exact user value; manifest source=`user`.
 - `rock_fraction_of_rap_bare = 1.0` (user): uses exact user value; manifest source=`user`.
-- `rock_fraction_of_rap_bare = auto` with top-horizon `cfvo`: uses `clamp(cfvo_0_5cm_volpct / 100, 0, 1)`; manifest source=`auto`.
-- `rock_fraction_of_rap_bare = auto` without `cfvo`: uses fallback `0.0`; manifest source=`auto`; manifest includes fallback reason.
+- `rock_fraction_of_rap_bare = auto` with `cosurffrags`: derives total-surface proxy from `sfragcov`, normalizes by RAP bare context, and records manifest source=`auto:cosurffrags`.
+- `rock_fraction_of_rap_bare = auto` with missing `cosurffrags` but available `cfvo`: uses `cfvo` proxy with the same RAP-bare normalization, source=`auto:cfvo`.
+- `rock_fraction_of_rap_bare = auto` without `cosurffrags` and `cfvo`: uses fallback `0.0`; source=`auto:fallback_0`; manifest includes fallback reason.
 - Invalid values (`<0`, `>1`, non-numeric non-`auto`): rejected using canonical RQ response contract.
 
 Planned validation commands:
@@ -128,7 +131,7 @@ Planned validation commands:
 
 ## Idempotence and Recovery
 
-The rollout is additive and should remain backward-compatible for clients that do not send the new field. If `auto` proxy resolution is unavailable, behavior must degrade deterministically to explicit fallback semantics documented in manifest metadata. If regressions are found, disable only the new field handling path while preserving pre-existing `observed_rap` behavior.
+The rollout is additive and should remain backward-compatible for clients that do not send the new field. If proxy resolution is unavailable, behavior must degrade deterministically to explicit fallback semantics documented in manifest metadata. If regressions are found, disable only the new field handling path while preserving pre-existing `observed_rap` behavior.
 
 ## Artifacts and Notes
 
