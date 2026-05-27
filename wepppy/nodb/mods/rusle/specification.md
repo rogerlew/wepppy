@@ -1108,8 +1108,10 @@ by:
 
 The first implementation uses:
 
-- a `RUSLE2`-style surface-cover subfactor driven by RAP bare ground
-- canopy set to a neutral default in `observed_rap` v1
+- a `RUSLE2`-style surface-cover subfactor driven by a mode-specific bare
+  fraction (`bare_rap` for `observed_rap`; lookup-derived `bare_lookup` for
+  `scenario_sbs`)
+- canopy set to a neutral default in `observed_rap` v1 and `scenario_sbs` v1
 - roughness, biomass, and consolidation set to neutral defaults unless separate
   data are introduced
 
@@ -1241,6 +1243,46 @@ Use explicit lookup values keyed by:
 - canonical `disturbed_class` family from the disturbed workflow
 - SBS class
 
+#### Canonical Surface-Rock Adjustment for `scenario_sbs`
+
+`scenario_sbs` should treat surface rock as protective `C`-factor cover, not
+as a `K` substitution and not as a RAP dependency. Apply one explicit
+`scenario_sbs` control:
+
+- `rock_fraction_of_sbs_bare` in `[0, 1]`
+  - `0.0`: none of lookup bare is protective rock
+  - `1.0`: all lookup bare is protective rock
+
+Apply this control on top of the baseline lookup bare fraction:
+
+- `fg_lookup = clamp(fg_lookup_pct / 100, 0, 1)` from the canonical
+  `scenario_sbs` lookup row (`disturbed_class`, `sbs_class`)
+- `bare_lookup = 1 - fg_lookup`
+- `r_sbs_bare = clamp(rock_fraction_of_sbs_bare, 0, 1)`
+- `bare_exposed = bare_lookup * (1 - r_sbs_bare)`
+- `fg_effective_pct = 100 * (1 - bare_exposed)`
+- `C = exp(-0.04 * fg_effective_pct)`
+
+This keeps the SBS contract RAP-independent: no RAP raster or RAP year is
+required for `scenario_sbs` rock adjustment.
+
+Defaulting policy for `rock_fraction_of_sbs_bare`:
+
+- field-observed surface rock cover remains preferred where available
+- `auto` source precedence follows the same proxy order as `observed_rap`:
+  - first, SSURGO `cosurffrags` proxy columns in run-scoped
+    `soils/soils.parquet`
+  - fallback, top-horizon `cfvo` proxy
+  - final fallback, `0.0`
+- when proxy input is total-surface rock cover (`0-1`), convert into
+  fraction-of-SBS-bare control space as:
+  - `rock_fraction_of_sbs_bare_default = clamp(surface_rock_cover_proxy_0_1 / bare_lookup_mean_0_1, 0, 1)` when `bare_lookup_mean_0_1 > 0`
+  - `rock_fraction_of_sbs_bare_default = 0.0` when `bare_lookup_mean_0_1 <= 0`
+- `bare_lookup_mean_0_1` is computed from the pre-rock `scenario_sbs`
+  lookup-derived bare raster over the active valid-analysis mask
+- do not multiply by `bare_lookup_mean_0_1`; multiplication would map toward
+  total-area cover rather than fraction-of-bare control space
+
 Initial implementation choice:
 
 - static low/moderate/high severity lookups only
@@ -1293,6 +1335,9 @@ defaults for `rusle_c_lookup.csv`, derived from the same simplified
 
 - `C = exp(-0.04 * fg)`
 - `fg` taken from the static disturbed management ground-cover defaults
+- these values are the baseline case for
+  `rock_fraction_of_sbs_bare = 0.0`; nonzero SBS rock partition should
+  recompute effective `fg` from lookup bare before mapping to `C`
 
 | Canonical disturbed class | Unburned | Low | Moderate | High | Notes |
 | --- | ---: | ---: | ---: | ---: | --- |
@@ -1370,7 +1415,8 @@ Suggested fields:
 - `sbs_class`
 - `nlcd_class`
 - `canopy_cover`
-- `ground_cover`
+- `ground_cover` (or canonical alias `fg_lookup_pct`)
+- `fg_lookup_pct` (preferred explicit field for base lookup net ground cover)
 - `litter_cover`
 - `rock_cover`
 - `effective_fall_height`
@@ -1519,6 +1565,16 @@ test request:
   - UI must display explicit guidance that users should verify surface rock
     cover from local/field evidence and set `rock_fraction_of_rap_bare`
     accordingly; `auto` is only a proxy starting value
+- `scenario_sbs` rock-partition control:
+  - `rock_fraction_of_sbs_bare` numeric in `[0, 1]`
+  - `auto` fills from SSURGO `cosurffrags` proxy when available
+  - fallback source for `auto` is top-horizon profile `cfvo` when
+    `cosurffrags` is unavailable
+  - editable after `auto` fill; user value always takes precedence
+  - shown when `c_mode = scenario_sbs`
+  - UI must display explicit guidance that users should verify surface rock
+    cover from local/field evidence and set `rock_fraction_of_sbs_bare`
+    accordingly; `auto` is only a proxy starting value
 - `RAP` year selector shown only when `c_mode = observed_rap`
   - single year only
   - valid year choices come from the same RAP implementation surface used by
@@ -1570,6 +1626,34 @@ in the first release:
 - the gridded `disturbed_class` raster remains required and must still be
   derived on the DEM grid from the disturbed mapping; do not substitute the
   hillslope-only disturbed assignment
+- `scenario_sbs` rock partition is RAP-independent:
+  - do not require RAP raster retrieval
+  - do not require RAP year selection
+- expose `rock_fraction_of_sbs_bare` in the `scenario_sbs` panel
+- if `rock_fraction_of_sbs_bare = auto`:
+  - if a run-scoped SSURGO `cosurffrags` proxy is available in
+    `soils/soils.parquet`, use it first:
+    - accepted proxy columns (in precedence order):
+      `cosurffrags_cover_pct`, `surface_rock_cover_pct`,
+      `surface_rock_cover_percent`, `sfragcov`
+    - aggregate with area-weighted mean when `area` is present; otherwise use
+      simple mean
+    - convert to `surface_rock_cover_proxy_0_1` as `clamp(cover_pct / 100, 0, 1)`
+  - else if aligned `cfvo` 0-5 cm exists for the run:
+    - derive `surface_rock_cover_proxy_0_1 = clamp(cfvo_0_5cm_volpct / 100, 0, 1)`
+  - else, fall back to `0.0` and emit explicit manifest metadata that no
+    `cosurffrags` or `cfvo` proxy was available
+  - convert proxy total-surface cover to SBS control space with lookup-bare
+    normalization:
+    - `rock_fraction_of_sbs_bare_default = clamp(surface_rock_cover_proxy_0_1 / bare_lookup_mean_0_1, 0, 1)` when `bare_lookup_mean_0_1 > 0`, else `0.0`
+  - compute `bare_lookup_mean_0_1` from pre-rock lookup-derived `scenario_sbs`
+    bare fraction over the active valid-analysis mask
+- manifest metadata must record:
+  - the effective numeric `rock_fraction_of_sbs_bare`
+  - whether the value came from explicit user entry or `auto` proxy
+  - if proxied, the source and summary statistic used (`cosurffrags` or `cfvo`)
+- UI text must explicitly state that `auto` is a proxy estimate and that
+  field-estimated surface rock cover is preferred when available
 
 ### `observed_rap` User-Facing Contract
 
@@ -1733,6 +1817,14 @@ Recommended initial precedence:
     - use `cfvo`-derived `auto` only as fallback prior/default when
       `cosurffrags` is unavailable
   - or `scenario_sbs`
+    - surface rock precedence: field-observed surface-rock cover over any proxy
+    - if no field value is available, use user-entered
+      `rock_fraction_of_sbs_bare`
+    - use `cosurffrags`-derived `auto` value first as editable prior/default
+    - use `cfvo`-derived `auto` only as fallback prior/default when
+      `cosurffrags` is unavailable
+    - compute SBS rock partition from lookup bare fraction only; do not require
+      RAP artifacts
 - `P`
   - `1.0` unless explicit treatment/practice inputs exist
 
@@ -1765,6 +1857,8 @@ At minimum, validation should include:
 - sensitivity checks for `LS`, `R`, and `C`
 - sensitivity checks for `rock_fraction_of_rap_bare` (for example `0.0`, auto,
   and a field-informed high-rock case)
+- sensitivity checks for `rock_fraction_of_sbs_bare` (for example `0.0`, auto,
+  and a field-informed high-rock case)
 - sensitivity checks across `K` estimators where the differences materially
   affect the map pattern
 - `cfvo`-adjusted versus fine-earth `POLARIS` `K` comparison where the profile
@@ -1787,6 +1881,8 @@ Longer term, the mod should be checked against:
   v1, with no time axis until recovery trajectories are defined and validated.
 - `scenario_sbs` is restricted to disturbed runs and keyed by canonical
   `disturbed_class` family plus `sbs_class`, not generic `landuse_class`.
+- `scenario_sbs` surface-rock handling is RAP-independent and uses an explicit
+  lookup-bare partition control (`rock_fraction_of_sbs_bare`) in `C`.
 
 ### Resolved Implementation Choices
 
@@ -1819,6 +1915,12 @@ Longer term, the mod should be checked against:
   separate recovery-trajectory path is defined and validated
 - `scenario_sbs` is restricted to disturbed runs and uses canonical
   `disturbed_class` family plus `sbs_class` as its lookup key
+- `scenario_sbs` applies surface-rock partition through
+  `rock_fraction_of_sbs_bare`, using `bare_lookup = 1 - fg_lookup` from the
+  lookup baseline and `bare_exposed = bare_lookup * (1 - r_sbs_bare)`
+- `rock_fraction_of_sbs_bare = auto` uses the same proxy precedence as
+  `observed_rap` (`cosurffrags -> cfvo -> 0.0`) but normalizes into SBS
+  lookup-bare control space using `bare_lookup_mean_0_1`
 - `scenario_sbs` requires a DEM-aligned gridded `disturbed_class` raster and
   only applies SBS burn remapping to canonical `forest`, `shrub`, and
   `tall_grass` families

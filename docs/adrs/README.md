@@ -51,3 +51,4 @@ Each ADR should normally include:
 - `ADR-0001`: [Time-Limited Publication Embargo for OMNI Contrasts](ADR-0001-time-limited-publication-embargo-for-omni-contrasts.md) (Accepted, 2026-05-22)
 - `ADR-0002`: [Require ADRs for Parameterization Changes](ADR-0002-parameterization-change-adr-requirement.md) (Accepted, 2026-05-22)
 - `ADR-0003`: [RUSLE `observed_rap` Surface-Rock Partition for `C`](ADR-0003-rusle-observed-rap-surface-rock-partition.md) (Accepted, 2026-05-27)
+- `ADR-0004`: [RUSLE `scenario_sbs` Surface-Rock Partition for `C`](ADR-0004-rusle-scenario-sbs-surface-rock-partition.md) (Accepted, 2026-05-27)
