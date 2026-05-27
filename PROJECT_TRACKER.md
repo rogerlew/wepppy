@@ -1,8 +1,8 @@
 # PROJECT_TRACKER.md
 > Kanban board for wepppy work packages and vision items
 
-**Last Updated**: 2026-05-22
-**Active Packages**: 6
+**Last Updated**: 2026-05-27
+**Active Packages**: 7
 **Quick Links**: [Work Packages Directory](docs/work-packages/) | [God-Tier Prompting Strategy](docs/god-tier-prompting-strategy.md)
 
 ## Purpose
@@ -37,7 +37,7 @@ This tracker makes all work visible at a glance, helping agents coordinate and a
 ### 2. Limit Work in Progress
 **Target**: 2-4 active packages maximum to maintain focus and ensure packages complete rather than stall.
 
-**Current WIP**: 6 packages (above target range)
+**Current WIP**: 7 packages (above target range)
 
 ### 3. Manage Flow
 Monitor how long packages spend in each column:
@@ -222,7 +222,28 @@ When resuming Kubernetes work:
 
 Currently active work packages. Limit to 2-4 packages to maintain focus.
 
-**Current WIP Count**: 6 packages
+**Current WIP Count**: 7 packages
+
+---
+
+### RUSLE C Surface-Rock Partition Implementation
+**Started**: 2026-05-27  
+**Status**: Package scaffolded; implementation planning and review-disposition kickoff in progress  
+**Size**: Medium-High (2-3 focused sessions)  
+**Owner**: Codex  
+**Link**: [docs/work-packages/20260527_rusle_c_surface_rock_partition/](docs/work-packages/20260527_rusle_c_surface_rock_partition/)  
+**Description**: Implement `observed_rap` C-factor surface-rock partition (`rock_fraction_of_rap_bare`) across RUSLE UI, rq-engine payload contracts, and runtime C integration with explicit user verification guidance and manifest provenance.
+
+**Current Status**:
+- New work package, tracker, and active ExecPlan created under `docs/work-packages/20260527_rusle_c_surface_rock_partition/`.
+- Scope is locked to `observed_rap` implementation across `rusle_pure.htm`, `controllers_js/rusle.js`, rq-engine route/schema defaults, and RUSLE C/controller paths.
+- Parameterization governance is anchored to `docs/adrs/ADR-0003-rusle-observed-rap-surface-rock-partition.md`.
+- Independent package/plan review findings were dispositioned; acceptance criteria now explicitly include boundary/error-path tests and `auto` fallback semantics.
+
+**Next Steps**:
+1. Implement runtime/UI/API wiring and focused regressions.
+2. Run targeted Python/JS validation gates including schema-default route coverage.
+3. Perform post-implementation independent review, then close package docs.
 
 ---
 
