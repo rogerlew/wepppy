@@ -1120,7 +1120,12 @@ cover path, not an `NDVI -> C` regression and not a land-cover lookup table.
 
 Use:
 
-- `fg = clamp(100 - bare_ground_pct, 0, 100)` as net ground cover percent
+- `bare_rap = clamp(bare_ground_pct / 100, 0, 1)` from RAP
+- `r_bare = clamp(rock_fraction_of_rap_bare, 0, 1)` where
+  `rock_fraction_of_rap_bare` is a user-facing fraction of RAP bare interpreted
+  as protective surface rock
+- `bare_exposed = bare_rap * (1 - r_bare)`
+- `fg = 100 * (1 - bare_exposed)` as net ground cover percent
 - `C = exp(-b * fg)` with `b = 0.04` for the initial implementation
 - `canopy = 1.0`, `roughness = 1.0`, `biomass = 1.0`, and
   `consolidation = 1.0` in `observed_rap` v1
@@ -1130,6 +1135,9 @@ Rationale:
 - `RUSLE2` defines the ground-cover subfactor as an exponential reduction in
   erosion with increasing net ground cover, and explicitly notes that net
   ground cover is effectively `100 - bare ground`
+- `RUSLE2` treats surface rock fragments as ground cover in `C` equations and
+  requires overlap-aware combination with other cover rather than a separate
+  multiplicative post-adjustment
 - RAP directly observes `bare_ground`, `litter`, and live fractional-cover
   components, but it does not directly observe the `RUSLE2` canopy inputs
   needed for a more defensible canopy subfactor, especially effective fall
@@ -1142,9 +1150,43 @@ Rationale:
   literature notes that broad `NDVI` formulas can behave unrealistically for
   grassland and woodland classes
 
-Use RAP fractions as follows in `observed_rap` v1:
+#### Canonical Surface-Rock Adjustment for RAP Bare
 
-- `bare_ground` is the direct input to `fg`
+RAP `bare_ground` includes both exposed mineral soil and exposed rock. For
+`RUSLE C`, exposed rock is protective cover while exposed fine earth is the
+erodible fraction.
+
+The `observed_rap` runtime therefore uses one explicit partition control:
+
+- `rock_fraction_of_rap_bare` in `[0, 1]`
+  - `0.0`: none of RAP bare is protective rock cover
+  - `1.0`: all RAP bare is protective rock cover
+
+Equivalent overlap interpretation:
+
+- additional protective rock cover contributed from RAP bare is
+  `bare_rap * rock_fraction_of_rap_bare`
+- this is mathematically equivalent to the `RUSLE2` overlap form
+  `f_net = f1 + f2 - f1*f2` when the added cover term is interpreted on the
+  remaining exposed fraction
+
+Defaulting policy (scientifically conservative):
+
+- canonical `RUSLE2` guidance is field-measured surface rock cover; profile
+  rock content is not a canonical substitute for surface cover
+- because no robust run-scoped surface-rock raster exists in current workflow,
+  a user-editable convenience default is still useful
+- default value should be populated from top-horizon profile coarse-fragment
+  volume where available:
+  - `rock_fraction_of_rap_bare_default = clamp(cfvo_0_5cm_volpct / 100, 0, 1)`
+- this default is a first-order proxy, not a physical equivalence rule
+- UI copy must label the proxy as an estimate and prompt override with field
+  evidence when available
+
+Use RAP fractions as follows in `observed_rap`:
+
+- `bare_ground` is the base input and is partitioned by
+  `rock_fraction_of_rap_bare`
 - `litter`, `annual_forb_and_grass`, `perennial_forb_and_grass`, `shrub`, and
   `tree` are retained for QA, masking interpretation, and future canopy or
   roughness extensions
@@ -1166,6 +1208,9 @@ Interpretation cautions:
 - post-fire RAP vegetation recovery should not automatically imply a strongly
   protective `C`
 - litter and bare ground must remain first-class controls
+- if `rock_fraction_of_rap_bare` is auto-filled from `cfvo`, treat that value
+  as low-confidence prior information unless field-derived surface-rock cover
+  confirms it
 
 #### Mode 2: `scenario_sbs`
 
@@ -1378,6 +1423,7 @@ r_mode = "cligen_static"
 k_mode = "polaris_nomograph"
 c_mode = "observed_rap"
 rap_year = "auto"
+rock_fraction_of_rap_bare = "auto"  # or numeric 0.0-1.0
 p_mode = "default"
 mask_nlcd_water = true
 mask_nlcd_urban = true
@@ -1444,6 +1490,13 @@ test request:
   - `observed_rap`
   - `scenario_sbs`
 - default `C` mode in the first user-facing release is `observed_rap`
+- `observed_rap` rock-partition control:
+  - `rock_fraction_of_rap_bare` numeric in `[0, 1]`
+  - `auto` fills from top-horizon profile `cfvo` proxy when available
+  - editable after `auto` fill; user value always takes precedence
+  - UI must display explicit guidance that users should verify surface rock
+    cover from local/field evidence and set `rock_fraction_of_rap_bare`
+    accordingly; `auto` is only a proxy starting value
 - `RAP` year selector shown only when `c_mode = observed_rap`
   - single year only
   - valid year choices come from the same RAP implementation surface used by
@@ -1507,6 +1560,18 @@ in the first release:
 - reuse an existing aligned RAP artifact only when the saved artifact matches
   the requested year and the current run extent/alignment contract; otherwise
   refresh it explicitly
+- expose `rock_fraction_of_rap_bare` in the `observed_rap` panel
+- if `rock_fraction_of_rap_bare = auto`:
+  - if aligned `cfvo` 0-5 cm exists for the run, derive default proxy as
+    `clamp(cfvo_0_5cm_volpct / 100, 0, 1)`
+  - if `cfvo` is unavailable, fall back to `0.0` and emit explicit manifest
+    metadata that no profile proxy was available
+- manifest metadata must record:
+  - the effective numeric `rock_fraction_of_rap_bare`
+  - whether the value came from explicit user entry or `auto` proxy
+  - if proxied, the source raster and summary statistic used
+- UI text must explicitly state that `auto` is a profile-to-surface proxy and
+  that field-estimated surface rock cover is preferred when available
 
 ### Internal `polaris` Acquisition Contract
 
@@ -1628,6 +1693,10 @@ Recommended initial precedence:
     for benchmark or reference mode
 - `C`
   - `observed_rap`
+    - surface rock precedence: field-observed surface-rock cover over any proxy
+    - if no field value is available, use user-entered
+      `rock_fraction_of_rap_bare`
+    - use `cfvo`-derived `auto` value only as editable prior/default
   - or `scenario_sbs`
 - `P`
   - `1.0` unless explicit treatment/practice inputs exist
@@ -1659,6 +1728,8 @@ At minimum, validation should include:
   assumption actually used
 - pre-fire/post-fire directional checks
 - sensitivity checks for `LS`, `R`, and `C`
+- sensitivity checks for `rock_fraction_of_rap_bare` (for example `0.0`, auto,
+  and a field-informed high-rock case)
 - sensitivity checks across `K` estimators where the differences materially
   affect the map pattern
 - `cfvo`-adjusted versus fine-earth `POLARIS` `K` comparison where the profile
@@ -1674,8 +1745,9 @@ Longer term, the mod should be checked against:
 ## Resolved Open Questions
 
 - The preferred initial `C` formula for `observed_rap` is the simplified
-  `RUSLE2` surface-cover form `C = exp(-0.04 * fg)` where
-  `fg = clamp(100 - bare_ground_pct, 0, 100)`.
+  `RUSLE2` surface-cover form `C = exp(-0.04 * fg)` where RAP bare is
+  partitioned into exposed-soil and protective-surface-rock fractions by
+  `rock_fraction_of_rap_bare`.
 - `scenario_sbs` supports static low/moderate/high severity lookups in
   v1, with no time axis until recovery trajectories are defined and validated.
 - `scenario_sbs` is restricted to disturbed runs and keyed by canonical
@@ -1697,8 +1769,16 @@ Longer term, the mod should be checked against:
   values, nullable `tp/ip`, derived breakpoint `dur`, and no sentinel `-1`
   intensities
 - Initial `observed_rap` `C` uses the simplified `RUSLE2` surface-cover form
-  `C = exp(-0.04 * fg)` with `fg = clamp(100 - bare_ground_pct, 0, 100)` and
-  neutral canopy/roughness/biomass/consolidation terms in v1
+  `C = exp(-0.04 * fg)` with `fg = 100 * (1 - bare_rap*(1-r_bare))`, where
+  `bare_rap = clamp(bare_ground_pct/100, 0, 1)` and
+  `r_bare = clamp(rock_fraction_of_rap_bare, 0, 1)`, plus neutral
+  canopy/roughness/biomass/consolidation terms in v1
+- `rock_fraction_of_rap_bare` is a user-facing control for partitioning RAP
+  bare into protective surface rock versus exposed mineral soil, consistent
+  with canonical `RUSLE2` placement of surface rock in `C` rather than `K`
+- `rock_fraction_of_rap_bare = auto` is an explicit convenience proxy seeded
+  from top-horizon `cfvo` (`vol% -> fraction`) and is not a claim of literal
+  profile-to-surface equivalence
 - `scenario_sbs` v1 uses static severity lookups only; no time axis until a
   separate recovery-trajectory path is defined and validated
 - `scenario_sbs` is restricted to disturbed runs and uses canonical
@@ -2010,6 +2090,15 @@ runtime `R` inputs in the current `Rusle` design.
   https://www.nrcs.usda.gov/sites/default/files/2022-09/Chapter%207%20-%20Grazing%20Lands%20Hydrology.pdf
   Useful NRCS synthesis for why litter, vegetation, and exposed interspace are
   first-order controls on runoff and erosion in rangeland settings.
+- USDA-ARS. *RUSLE2 User’s Reference Guide*.
+  https://www.ars.usda.gov/ARSUserFiles/60600505/RUSLE/RUSLE2_User_Ref_Guide.pdf
+  Canonical guidance that surface rock is ground cover in `C`, must be
+  overlap-combined with other cover, and should be field-estimated rather than
+  inferred as a direct substitute from profile rock content.
+- USDA-NRCS. *National Soil Survey Handbook, Part 618*.
+  https://directives.nrcs.usda.gov/sites/default/files2/1719846855/Part%20618%20Subpart%20A%20%E2%80%93%20General%20Information.pdf
+  Defines `surface fragment cover percent` as a distinct surface property
+  (`percent of ground covered`) separate from profile coarse-fragment volume.
 - Multi-Resolution Land Characteristics Consortium. *National Land Cover
   Database Class Legend and Description*.
   https://www.mrlc.gov/sites/default/files/NLCDclasses.pdf
