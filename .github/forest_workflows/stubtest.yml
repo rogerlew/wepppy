@@ -68,7 +68,7 @@ jobs:
     - name: Ensure weppcloud service is running
       run: |
         set -euo pipefail
-        wctl up -d weppcloud
+        wctl docker compose up -d --no-deps weppcloud
     - name: Run stubtest suite
       run: |
         set -euo pipefail
