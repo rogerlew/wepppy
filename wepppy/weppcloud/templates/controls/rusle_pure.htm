@@ -41,167 +41,169 @@
      stacktrace_panel_options={"panel_id": "rusle_stacktrace_panel", "body_id": "stacktrace"}
    ) %}
 
-  {{ ui.radio_group(
-       "r_mode",
-       label="R factor mode",
-       layout="vertical",
-       options=[
-         {
-           "id": "rusle_r_mode_cligen_static",
-           "label": "WEPP Climate-Derived R",
-           "value": "cligen_static",
-           "selected": rusle_r_mode == "cligen_static",
-           "attrs": {"class": "disable-readonly", "data-rusle-r-mode": "cligen_static"}
-         },
-         {
-           "id": "rusle_r_mode_momm2025_county_region",
-           "label": "Momm 2025 County Climatology",
-           "value": "momm2025_county_region",
-           "selected": rusle_r_mode == "momm2025_county_region",
-           "attrs": {"class": "disable-readonly", "data-rusle-r-mode": "momm2025_county_region"}
-         },
-         {
-           "id": "rusle_r_mode_canonical_rusle2",
-           "label": "Canonical RUSLE2",
-           "value": "canonical_rusle2",
-           "selected": rusle_r_mode == "canonical_rusle2",
-           "attrs": {"class": "disable-readonly", "data-rusle-r-mode": "canonical_rusle2"}
-         }
-       ],
-      help="cligen_static estimates erosivity from cligen event hyetographs; momm2025_county_region and canonical_rusle2 are planning-climatology references selected at the watershed centroid."
-     ) }}
-
-  {{ ui.radio_group(
-       "c_mode",
-       label="C factor mode",
-       layout="horizontal",
-       options=[
-         {
-           "id": "rusle_c_mode_observed_rap",
-           "label": "Observed RAP",
-           "value": "observed_rap",
-           "selected": rusle_c_mode == "observed_rap",
-           "attrs": {"class": "disable-readonly", "data-rusle-c-mode": "observed_rap"}
-         },
-         {
-           "id": "rusle_c_mode_scenario_sbs",
-           "label": "Scenario SBS",
-           "value": "scenario_sbs",
-           "selected": rusle_c_mode == "scenario_sbs",
-           "attrs": {"class": "disable-readonly", "data-rusle-c-mode": "scenario_sbs"}
-         }
-       ],
-       help="Observed RAP uses RAP bare-ground by year; Scenario SBS uses landcover + SBS classes (or unburned defaults when no SBS map is present)."
-     ) }}
-
-  <div data-rusle-section="rap-year" {% if rusle_c_mode != 'observed_rap' %}style="display: none;"{% endif %}>
-    {{ ui.select_field(
-         "rap_year",
-         "RAP year",
-         options=rap_ns.options,
-         selected=selected_rap_year,
-         help="Defaults to the latest completed RAP year unless this run has a saved override.",
-         attrs={"class": "disable-readonly", "data-rusle-input": "rap-year"}
+  <div class="rusle-factor-parameter-cards">
+    {{ ui.radio_group(
+         "r_mode",
+         label="R factor mode",
+         layout="vertical",
+         options=[
+           {
+             "id": "rusle_r_mode_cligen_static",
+             "label": "WEPP Climate-Derived R",
+             "value": "cligen_static",
+             "selected": rusle_r_mode == "cligen_static",
+             "attrs": {"class": "disable-readonly", "data-rusle-r-mode": "cligen_static"}
+           },
+           {
+             "id": "rusle_r_mode_momm2025_county_region",
+             "label": "Momm 2025 County Climatology",
+             "value": "momm2025_county_region",
+             "selected": rusle_r_mode == "momm2025_county_region",
+             "attrs": {"class": "disable-readonly", "data-rusle-r-mode": "momm2025_county_region"}
+           },
+           {
+             "id": "rusle_r_mode_canonical_rusle2",
+             "label": "Canonical RUSLE2",
+             "value": "canonical_rusle2",
+             "selected": rusle_r_mode == "canonical_rusle2",
+             "attrs": {"class": "disable-readonly", "data-rusle-r-mode": "canonical_rusle2"}
+           }
+         ],
+        help="cligen_static estimates erosivity from cligen event hyetographs; momm2025_county_region and canonical_rusle2 are planning-climatology references selected at the watershed centroid."
        ) }}
-  </div>
 
-  <div data-rusle-section="rock-fraction-rap" {% if rusle_c_mode != 'observed_rap' %}style="display: none;"{% endif %}>
-    {{ ui.text_field(
-         "rock_fraction_of_rap_bare",
-         "Rock fraction of RAP bare",
-         value=rusle_rock_fraction_of_rap_bare,
-         placeholder="auto",
-         attrs={"class": "disable-readonly", "data-rusle-input": "rock-fraction-of-rap-bare"},
-         help="Use `auto` or enter a numeric value in [0, 1]. This partitions RAP bare ground into exposed mineral soil versus protective surface rock."
+    {{ ui.radio_group(
+         "c_mode",
+         label="C factor mode",
+         layout="horizontal",
+         options=[
+           {
+             "id": "rusle_c_mode_observed_rap",
+             "label": "Observed RAP",
+             "value": "observed_rap",
+             "selected": rusle_c_mode == "observed_rap",
+             "attrs": {"class": "disable-readonly", "data-rusle-c-mode": "observed_rap"}
+           },
+           {
+             "id": "rusle_c_mode_scenario_sbs",
+             "label": "Scenario SBS",
+             "value": "scenario_sbs",
+             "selected": rusle_c_mode == "scenario_sbs",
+             "attrs": {"class": "disable-readonly", "data-rusle-c-mode": "scenario_sbs"}
+           }
+         ],
+         help="Observed RAP uses RAP bare-ground by year; Scenario SBS uses landcover + SBS classes (or unburned defaults when no SBS map is present)."
        ) }}
-    <p class="wc-field__help">
-      Users should verify local surface rock cover and set this fraction accordingly.
-    </p>
-  </div>
 
-  <div data-rusle-section="rock-fraction-sbs" {% if rusle_c_mode != 'scenario_sbs' %}style="display: none;"{% endif %}>
-    {{ ui.text_field(
-         "rock_fraction_of_sbs_bare",
-         "Rock fraction of SBS bare",
-         value=rusle_rock_fraction_of_sbs_bare,
-         placeholder="auto",
-         attrs={"class": "disable-readonly", "data-rusle-input": "rock-fraction-of-sbs-bare"},
-         help="Use `auto` or enter a numeric value in [0, 1]. This partitions scenario lookup bare ground into exposed mineral soil versus protective surface rock."
-       ) }}
-    <p class="wc-field__help">
-      Users should verify local surface rock cover and set this fraction accordingly.
-    </p>
-  </div>
-
-  <div class="wc-field" style="max-width: 750px;">
-    <span class="wc-field__label">K factor modes</span>
-    <div class="wc-choice-group wc-choice-group--horizontal" data-rusle-k-group>
-      <label class="wc-choice wc-choice--checkbox">
-        <input type="checkbox"
-               id="rusle_k_mode_nomograph"
-               name="k_modes"
-               value="polaris_nomograph"
-               data-rusle-k-mode
-               class="disable-readonly"
-               {% if 'polaris_nomograph' in rusle_k_modes %}checked{% endif %}>
-        <span class="wc-choice__body"><span class="wc-choice__label">POLARIS Nomograph</span></span>
-      </label>
-      <label class="wc-choice wc-choice--checkbox">
-        <input type="checkbox"
-               id="rusle_k_mode_epic"
-               name="k_modes"
-               value="polaris_epic"
-               data-rusle-k-mode
-               class="disable-readonly"
-               {% if 'polaris_epic' in rusle_k_modes %}checked{% endif %}>
-        <span class="wc-choice__body"><span class="wc-choice__label">POLARIS EPIC</span></span>
-      </label>
+    <div data-rusle-section="rap-year" {% if rusle_c_mode != 'observed_rap' %}style="display: none;"{% endif %}>
+      {{ ui.select_field(
+           "rap_year",
+           "RAP year",
+           options=rap_ns.options,
+           selected=selected_rap_year,
+           help="Defaults to the latest completed RAP year unless this run has a saved override.",
+           attrs={"class": "disable-readonly", "data-rusle-input": "rap-year"}
+         ) }}
     </div>
-    <p class="wc-field__help">Build outputs are limited to selected modes.</p>
+
+    <div data-rusle-section="rock-fraction-rap" {% if rusle_c_mode != 'observed_rap' %}style="display: none;"{% endif %}>
+      {{ ui.text_field(
+           "rock_fraction_of_rap_bare",
+           "Rock fraction of RAP bare",
+           value=rusle_rock_fraction_of_rap_bare,
+           placeholder="auto",
+           attrs={"class": "disable-readonly", "data-rusle-input": "rock-fraction-of-rap-bare"},
+           help="Use `auto` or enter a numeric value in [0, 1]. This partitions RAP bare ground into exposed mineral soil versus protective surface rock."
+         ) }}
+      <p class="wc-field__help">
+        Users should verify local surface rock cover and set this fraction accordingly.
+      </p>
+    </div>
+
+    <div data-rusle-section="rock-fraction-sbs" {% if rusle_c_mode != 'scenario_sbs' %}style="display: none;"{% endif %}>
+      {{ ui.text_field(
+           "rock_fraction_of_sbs_bare",
+           "Rock fraction of SBS bare",
+           value=rusle_rock_fraction_of_sbs_bare,
+           placeholder="auto",
+           attrs={"class": "disable-readonly", "data-rusle-input": "rock-fraction-of-sbs-bare"},
+           help="Use `auto` or enter a numeric value in [0, 1]. This partitions scenario lookup bare ground into exposed mineral soil versus protective surface rock."
+         ) }}
+      <p class="wc-field__help">
+        Users should verify local surface rock cover and set this fraction accordingly.
+      </p>
+    </div>
+
+    <div class="wc-field" style="max-width: 750px;">
+      <span class="wc-field__label">K factor modes</span>
+      <div class="wc-choice-group wc-choice-group--horizontal" data-rusle-k-group>
+        <label class="wc-choice wc-choice--checkbox">
+          <input type="checkbox"
+                 id="rusle_k_mode_nomograph"
+                 name="k_modes"
+                 value="polaris_nomograph"
+                 data-rusle-k-mode
+                 class="disable-readonly"
+                 {% if 'polaris_nomograph' in rusle_k_modes %}checked{% endif %}>
+          <span class="wc-choice__body"><span class="wc-choice__label">POLARIS Nomograph</span></span>
+        </label>
+        <label class="wc-choice wc-choice--checkbox">
+          <input type="checkbox"
+                 id="rusle_k_mode_epic"
+                 name="k_modes"
+                 value="polaris_epic"
+                 data-rusle-k-mode
+                 class="disable-readonly"
+                 {% if 'polaris_epic' in rusle_k_modes %}checked{% endif %}>
+          <span class="wc-choice__body"><span class="wc-choice__label">POLARIS EPIC</span></span>
+        </label>
+      </div>
+      <p class="wc-field__help">Build outputs are limited to selected modes.</p>
+    </div>
+
+    {{ ui.select_field(
+         "default_k_mode",
+         "Default K mode for final A",
+         options=[
+           ('polaris_nomograph', 'POLARIS Nomograph'),
+           ('polaris_epic', 'POLARIS EPIC')
+         ],
+         selected=rusle_default_k_mode,
+         attrs={"class": "disable-readonly", "data-rusle-input": "default-k"},
+         help="The selected default mode supplies K in the final mode-specific A raster."
+       ) }}
+
+    {{ ui.numeric_field(
+         "max_slope_length_m",
+         "Maximum slope length cap",
+         value=rusle_max_slope_length_m,
+         precision="0.1",
+         min="0.1",
+         unit_label="m",
+         unit_category="sm-distance",
+         unit_name="m",
+         attrs={"class": "disable-readonly", "data-rusle-input": "max-slope-length"},
+        help="LS uses this cap before L/LS calculation. Default is 304.8 m (1000 ft, RUSLE2 handbook); change only for explicit sensitivity analysis."
+       ) }}
+
+    {{ ui.numeric_field(
+         "p_value",
+         "P factor scalar",
+         value=rusle_p_value,
+         precision="0.01",
+         min="0",
+         attrs={"class": "disable-readonly", "data-rusle-input": "p-value"},
+         help="Run-scoped constant multiplier used for P in this workflow."
+       ) }}
+
+    {{ ui.checkbox_field(
+         "force_polaris_refresh",
+         "Force POLARIS refresh before build",
+         checked=False,
+         attrs={"class": "disable-readonly", "data-rusle-input": "force-polaris-refresh"},
+         help="When enabled, POLARIS layers are re-acquired even if current layers appear aligned."
+       ) }}
   </div>
-
-  {{ ui.select_field(
-       "default_k_mode",
-       "Default K mode for final A",
-       options=[
-         ('polaris_nomograph', 'POLARIS Nomograph'),
-         ('polaris_epic', 'POLARIS EPIC')
-       ],
-       selected=rusle_default_k_mode,
-       attrs={"class": "disable-readonly", "data-rusle-input": "default-k"},
-       help="The selected default mode supplies K in the final mode-specific A raster."
-     ) }}
-
-  {{ ui.numeric_field(
-       "max_slope_length_m",
-       "Maximum slope length cap",
-       value=rusle_max_slope_length_m,
-       precision="0.1",
-       min="0.1",
-       unit_label="m",
-       unit_category="sm-distance",
-       unit_name="m",
-       attrs={"class": "disable-readonly", "data-rusle-input": "max-slope-length"},
-      help="LS uses this cap before L/LS calculation. Default is 304.8 m (1000 ft, RUSLE2 handbook); change only for explicit sensitivity analysis."
-     ) }}
-
-  {{ ui.numeric_field(
-       "p_value",
-       "P factor scalar",
-       value=rusle_p_value,
-       precision="0.01",
-       min="0",
-       attrs={"class": "disable-readonly", "data-rusle-input": "p-value"},
-       help="Run-scoped constant multiplier used for P in this workflow."
-     ) }}
-
-  {{ ui.checkbox_field(
-       "force_polaris_refresh",
-       "Force POLARIS refresh before build",
-       checked=False,
-       attrs={"class": "disable-readonly", "data-rusle-input": "force-polaris-refresh"},
-       help="When enabled, POLARIS layers are re-acquired even if current layers appear aligned."
-     ) }}
 
   {% call button_row() %}
     <button

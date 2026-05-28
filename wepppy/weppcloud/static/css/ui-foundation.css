@@ -1422,6 +1422,15 @@ a.wc-maturity-pill:focus-visible {
   box-shadow: var(--wc-shadow-sm);
 }
 
+#rusle_form .rusle-factor-parameter-cards {
+  display: grid;
+  gap: var(--wc-space-xl);
+}
+
+#rusle_form .rusle-factor-parameter-cards > .wc-field {
+  margin-bottom: 0;
+}
+
 .wc-control__panel-title {
   margin: 0 0 var(--wc-space-sm) 0;
   font-size: 1rem;
