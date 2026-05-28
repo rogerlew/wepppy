@@ -165,14 +165,66 @@ basis, source data, and runtime selection contracts.
 **`observed_rap`** (default) — Uses observed RAP (Rangeland Analysis Platform)
 fractional cover for a selected year. Bare ground drives net ground cover
 (`fg = clamp(100 - bare_ground_pct, 0, 100)`), and the C factor is computed
-as `C = exp(-0.04 * fg)`. Best fit for current condition, recent post-fire,
-and monitoring workflows.
+as `C = exp(-0.04 * fg)`. Supports `rock_fraction_of_rap_bare` to partition
+RAP bare into exposed mineral soil versus protective surface rock. Best fit for
+current condition, recent post-fire, and monitoring workflows.
 
 **`scenario_sbs`** — Uses explicit lookup values keyed by canonical disturbed
 family (forest, shrub, tall_grass) and SBS (Soil Burn Severity) class
 (unburned, low, moderate, high). Restricted to runs with the Disturbed module
-active. Best fit for counterfactual pre-fire/post-fire comparisons and
-planning mode.
+active. Supports `rock_fraction_of_sbs_bare` to partition lookup-derived bare
+fraction into exposed mineral soil versus protective surface rock. Best fit for
+counterfactual pre-fire/post-fire comparisons and planning mode.
+
+#### Surface-Rock Partition Controls
+
+These controls implement canonical `RUSLE2` treatment used by this mod:
+surface rock fragments are a cover-management (`C`) effect, while profile
+coarse fragments are handled in erodibility/permeability (`K`) logic.
+
+- `rock_fraction_of_rap_bare`:
+  fraction of RAP bare interpreted as protective surface rock (`[0,1]` or
+  `auto`)
+- `rock_fraction_of_sbs_bare`:
+  fraction of lookup SBS bare interpreted as protective surface rock (`[0,1]`
+  or `auto`)
+
+`observed_rap` equations:
+
+- `bare_rap_0_1 = clamp(bare_ground_pct / 100, 0, 1)`
+- `r_bare = clamp(rock_fraction_of_rap_bare, 0, 1)`
+- `bare_exposed = bare_rap_0_1 * (1 - r_bare)`
+- `fg = 100 * (1 - bare_exposed)`
+- `C = exp(-0.04 * fg)`
+
+`scenario_sbs` equations:
+
+- `fg_lookup_0_1 = clamp(fg_lookup_pct / 100, 0, 1)`
+- `bare_lookup_0_1 = 1 - fg_lookup_0_1`
+- `r_sbs_bare = clamp(rock_fraction_of_sbs_bare, 0, 1)`
+- `bare_exposed = bare_lookup_0_1 * (1 - r_sbs_bare)`
+- `fg_effective_pct = 100 * (1 - bare_exposed)`
+- `C = exp(-0.04 * fg_effective_pct)`
+
+`auto` data-source precedence and normalization for both controls:
+
+- primary proxy: run-scoped SSURGO surface-fragment fields in
+  `soils/soils.parquet` (`cosurffrags_cover_pct`, `surface_rock_cover_pct`,
+  `surface_rock_cover_percent`, `sfragcov`), area-weighted mean when `area` is
+  available
+- fallback proxy: aligned top-horizon coarse-fragment raster
+  (`polaris/cfvo_mean_0_5.tif` or `soils/cfvo_0-5cm_Q0.5.tif`)
+- final fallback: `0.0`
+- convert proxy total-surface cover into fraction-of-bare control space:
+  - RAP control: `clamp(surface_rock_cover_proxy_0_1 / bare_rap_mean_0_1, 0, 1)`
+  - SBS control: `clamp(surface_rock_cover_proxy_0_1 / bare_lookup_mean_0_1, 0, 1)`
+
+Operational guidance:
+
+- `auto` is a proxy prior, not field truth
+- users should verify local surface rock cover and set these fractions
+  accordingly
+- when uncertain, run sensitivity checks (`0.0`, `auto`, field-informed value)
 
 See [specification.md § C](specification.md#c) for the full formula
 derivation, static matrix values, and non-burnable class policy.
@@ -242,6 +294,8 @@ the `[rusle]` section:
 | `r_mode` | `cligen_static` | R-factor source: `cligen_static`, `momm2025_county_region`, or `canonical_rusle2` |
 | `c_mode` | `observed_rap` | C-factor source: `observed_rap` or `scenario_sbs` |
 | `rap_year` | latest available | RAP observation year for `observed_rap` mode |
+| `rock_fraction_of_rap_bare` | `auto` | Fraction of RAP bare treated as protective surface rock (`[0,1]` or `auto`) |
+| `rock_fraction_of_sbs_bare` | `auto` | Fraction of scenario SBS bare treated as protective surface rock (`[0,1]` or `auto`, used in `scenario_sbs`) |
 | `k_modes` | `polaris_nomograph` | Comma-separated K estimators to compute |
 | `default_k_mode` | first in `k_modes` | Which K raster feeds the final A product |
 | `max_slope_length_m` | `304.8` | LS effective slope-length cap in meters (1000 ft handbook basis); override only for explicit sensitivity analysis |
@@ -292,6 +346,12 @@ artifacts (`disturbed_class.tif`, `sbs_4class.tif`) use `uint8` with nodata
 
 - [specification.md](specification.md) — Full design specification, method
   contracts, and scientific references
+- [docs/pdfs/rusle2_handbook.pdf](docs/pdfs/rusle2_handbook.pdf) — Canonical
+  RUSLE2 handbook guidance used for surface-rock-in-`C` and profile-fragment-in-`K`
+  separation
+- [docs/pdfs/rusle2_user_reference_guide.pdf](docs/pdfs/rusle2_user_reference_guide.pdf) —
+  RUSLE2 user-reference equations and implementation guidance informing
+  the cover-management mapping
 - [docs/](docs/) — Reference PDF bundle
 - [../../README.md](../../README.md) — NoDb framework documentation
 - [../disturbed/README.md](../disturbed/README.md) — Disturbed module
