@@ -255,6 +255,17 @@ rock-fragment handling, and comparison guidance.
   aligned copies under `polaris/`;
 - otherwise, skip `cfvo` adjustment and record explicit `not_applied` metadata.
 
+POLARIS nodata handling for `K` uses a conservative two-stage interior-hole
+fill before near-surface aggregation:
+
+- stage-1 fills interior components `1-64` px (`<=10%` candidate fraction,
+  search distance `6` px)
+- stage-2 fills residual interior components `65-4096` px (`<=5%` candidate
+  fraction, search distance `12` px)
+- edge-connected and oversized gaps remain nodata by design
+- policy and per-property outcomes are recorded in `rusle/manifest.json`
+  (`k.gap_fill_policy`, `k.gap_fill_summary`)
+
 ### POLARIS Soil Layers
 
 The mod automatically acquires POLARIS near-surface soil property rasters

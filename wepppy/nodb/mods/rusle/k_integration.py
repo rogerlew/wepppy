@@ -33,10 +33,17 @@ from .k_reference import (
 
 NEAR_SURFACE_DEPTHS: tuple[str, str] = ("0_5", "5_15")
 DEFAULT_DEPTH_WEIGHTS_CM: dict[str, float] = {"0_5": 5.0, "5_15": 10.0}
-GAP_FILL_MAX_HOLE_PIXELS = 64
-GAP_FILL_MAX_TOTAL_FRACTION = 0.10
-GAP_FILL_MAX_SEARCH_DISTANCE_PX = 6.0
-GAP_FILL_SMOOTHING_ITERATIONS = 0
+GAP_FILL_STAGE1_MIN_HOLE_PIXELS = 1
+GAP_FILL_STAGE1_MAX_HOLE_PIXELS = 64
+GAP_FILL_STAGE1_MAX_TOTAL_FRACTION = 0.10
+GAP_FILL_STAGE1_MAX_SEARCH_DISTANCE_PX = 6.0
+GAP_FILL_STAGE1_SMOOTHING_ITERATIONS = 0
+
+GAP_FILL_STAGE2_MIN_HOLE_PIXELS = 65
+GAP_FILL_STAGE2_MAX_HOLE_PIXELS = 4096
+GAP_FILL_STAGE2_MAX_TOTAL_FRACTION = 0.05
+GAP_FILL_STAGE2_MAX_SEARCH_DISTANCE_PX = 12.0
+GAP_FILL_STAGE2_SMOOTHING_ITERATIONS = 0
 CFVO_SOILSGRIDS_DEPTH_LABELS: tuple[str, str] = ("0-5cm", "5-15cm")
 CFVO_SCALE_DIVISOR_IF_PERMILLE = 10.0
 
@@ -124,13 +131,21 @@ def _write_k_raster(path: str, data: np.ndarray, profile: Mapping[str, Any]) -> 
         dataset.write(writable, 1)
 
 
-def _collect_small_interior_holes(
+def _collect_interior_hole_candidates(
     nodata_mask: np.ndarray,
     *,
+    min_hole_pixels: int,
     max_hole_pixels: int,
 ) -> tuple[list[np.ndarray], dict[str, int]]:
     if nodata_mask.ndim != 2:
         raise ValueError("nodata_mask must be a 2D array")
+    if min_hole_pixels < 1:
+        raise ValueError(f"min_hole_pixels must be >= 1, got {min_hole_pixels}")
+    if max_hole_pixels < min_hole_pixels:
+        raise ValueError(
+            "max_hole_pixels must be >= min_hole_pixels, "
+            f"got min={min_hole_pixels}, max={max_hole_pixels}"
+        )
 
     height, width = nodata_mask.shape
     visited = np.zeros_like(nodata_mask, dtype=bool)
@@ -145,7 +160,7 @@ def _collect_small_interior_holes(
         (1, 1),
     )
 
-    small_interior_holes: list[np.ndarray] = []
+    candidate_components: list[np.ndarray] = []
     hole_components_total = 0
     interior_hole_components = 0
     candidate_hole_components = 0
@@ -188,12 +203,12 @@ def _collect_small_interior_holes(
             continue
 
         interior_hole_components += 1
-        if component_size > max_hole_pixels:
+        if component_size < min_hole_pixels or component_size > max_hole_pixels:
             continue
 
         candidate_hole_components += 1
         candidate_hole_pixels += component_size
-        small_interior_holes.append(np.asarray(component_coords, dtype=np.int64))
+        candidate_components.append(np.asarray(component_coords, dtype=np.int64))
 
     stats = {
         "hole_components_total": int(hole_components_total),
@@ -201,7 +216,7 @@ def _collect_small_interior_holes(
         "candidate_hole_components": int(candidate_hole_components),
         "candidate_hole_pixels": int(candidate_hole_pixels),
     }
-    return small_interior_holes, stats
+    return candidate_components, stats
 
 
 def _fill_small_hole_component(
@@ -249,7 +264,15 @@ def _fill_small_hole_component(
     return filled_count
 
 
-def _apply_conservative_gap_fill(data: np.ndarray) -> tuple[np.ndarray, dict[str, Any]]:
+def _apply_conservative_gap_fill(
+    data: np.ndarray,
+    *,
+    min_hole_pixels: int,
+    max_hole_pixels: int,
+    max_total_fraction: float,
+    max_search_distance_px: float,
+    smoothing_iterations: int,
+) -> tuple[np.ndarray, dict[str, Any]]:
     nodata_mask = ~np.isfinite(data)
     nodata_pixels_in = int(np.count_nonzero(nodata_mask))
     eligible_pixels = int(data.size)
@@ -257,10 +280,11 @@ def _apply_conservative_gap_fill(data: np.ndarray) -> tuple[np.ndarray, dict[str
     report: dict[str, Any] = {
         "strategy": "inverse_distance_weighting",
         "enabled": True,
-        "max_hole_pixels": int(GAP_FILL_MAX_HOLE_PIXELS),
-        "max_total_fraction": float(GAP_FILL_MAX_TOTAL_FRACTION),
-        "max_search_distance_px": float(GAP_FILL_MAX_SEARCH_DISTANCE_PX),
-        "smoothing_iterations": int(GAP_FILL_SMOOTHING_ITERATIONS),
+        "min_hole_pixels": int(min_hole_pixels),
+        "max_hole_pixels": int(max_hole_pixels),
+        "max_total_fraction": float(max_total_fraction),
+        "max_search_distance_px": float(max_search_distance_px),
+        "smoothing_iterations": int(smoothing_iterations),
         "eligible_pixels": int(eligible_pixels),
         "nodata_pixels_in": int(nodata_pixels_in),
         "nodata_pixels_out": int(nodata_pixels_in),
@@ -276,20 +300,21 @@ def _apply_conservative_gap_fill(data: np.ndarray) -> tuple[np.ndarray, dict[str
     if nodata_pixels_in == 0:
         return data, report
 
-    candidates, component_stats = _collect_small_interior_holes(
+    candidates, component_stats = _collect_interior_hole_candidates(
         nodata_mask,
-        max_hole_pixels=GAP_FILL_MAX_HOLE_PIXELS,
+        min_hole_pixels=min_hole_pixels,
+        max_hole_pixels=max_hole_pixels,
     )
     report.update(component_stats)
 
     candidate_hole_pixels = int(component_stats["candidate_hole_pixels"])
     if candidate_hole_pixels == 0:
-        report["reason"] = "no_small_interior_holes"
+        report["reason"] = "no_eligible_interior_holes"
         return data, report
 
     candidate_fraction = candidate_hole_pixels / max(eligible_pixels, 1)
     report["candidate_fraction"] = float(candidate_fraction)
-    if candidate_fraction > GAP_FILL_MAX_TOTAL_FRACTION:
+    if candidate_fraction > max_total_fraction:
         report["reason"] = "candidate_fraction_above_threshold"
         return data, report
 
@@ -299,8 +324,8 @@ def _apply_conservative_gap_fill(data: np.ndarray) -> tuple[np.ndarray, dict[str
         filled_pixels += _fill_small_hole_component(
             filled_data,
             component,
-            max_search_distance=GAP_FILL_MAX_SEARCH_DISTANCE_PX,
-            smoothing_iterations=GAP_FILL_SMOOTHING_ITERATIONS,
+            max_search_distance=max_search_distance_px,
+            smoothing_iterations=smoothing_iterations,
         )
 
     nodata_pixels_out = int(np.count_nonzero(~np.isfinite(filled_data)))
@@ -317,6 +342,95 @@ def _apply_conservative_gap_fill(data: np.ndarray) -> tuple[np.ndarray, dict[str
     return filled_data, report
 
 
+def _stage_fill_policy(
+    *,
+    min_hole_pixels: int,
+    max_hole_pixels: int,
+    max_total_fraction: float,
+    max_search_distance_px: float,
+    smoothing_iterations: int,
+) -> dict[str, Any]:
+    return {
+        "enabled": True,
+        "strategy": "inverse_distance_weighting",
+        "min_hole_pixels": int(min_hole_pixels),
+        "max_hole_pixels": int(max_hole_pixels),
+        "max_total_fraction": float(max_total_fraction),
+        "max_search_distance_px": float(max_search_distance_px),
+        "smoothing_iterations": int(smoothing_iterations),
+    }
+
+
+def _apply_two_stage_conservative_gap_fill(data: np.ndarray) -> tuple[np.ndarray, dict[str, Any]]:
+    stage1_policy = _stage_fill_policy(
+        min_hole_pixels=GAP_FILL_STAGE1_MIN_HOLE_PIXELS,
+        max_hole_pixels=GAP_FILL_STAGE1_MAX_HOLE_PIXELS,
+        max_total_fraction=GAP_FILL_STAGE1_MAX_TOTAL_FRACTION,
+        max_search_distance_px=GAP_FILL_STAGE1_MAX_SEARCH_DISTANCE_PX,
+        smoothing_iterations=GAP_FILL_STAGE1_SMOOTHING_ITERATIONS,
+    )
+    stage2_policy = _stage_fill_policy(
+        min_hole_pixels=GAP_FILL_STAGE2_MIN_HOLE_PIXELS,
+        max_hole_pixels=GAP_FILL_STAGE2_MAX_HOLE_PIXELS,
+        max_total_fraction=GAP_FILL_STAGE2_MAX_TOTAL_FRACTION,
+        max_search_distance_px=GAP_FILL_STAGE2_MAX_SEARCH_DISTANCE_PX,
+        smoothing_iterations=GAP_FILL_STAGE2_SMOOTHING_ITERATIONS,
+    )
+
+    stage1_data, stage1_report = _apply_conservative_gap_fill(
+        data,
+        min_hole_pixels=GAP_FILL_STAGE1_MIN_HOLE_PIXELS,
+        max_hole_pixels=GAP_FILL_STAGE1_MAX_HOLE_PIXELS,
+        max_total_fraction=GAP_FILL_STAGE1_MAX_TOTAL_FRACTION,
+        max_search_distance_px=GAP_FILL_STAGE1_MAX_SEARCH_DISTANCE_PX,
+        smoothing_iterations=GAP_FILL_STAGE1_SMOOTHING_ITERATIONS,
+    )
+    stage2_data, stage2_report = _apply_conservative_gap_fill(
+        stage1_data,
+        min_hole_pixels=GAP_FILL_STAGE2_MIN_HOLE_PIXELS,
+        max_hole_pixels=GAP_FILL_STAGE2_MAX_HOLE_PIXELS,
+        max_total_fraction=GAP_FILL_STAGE2_MAX_TOTAL_FRACTION,
+        max_search_distance_px=GAP_FILL_STAGE2_MAX_SEARCH_DISTANCE_PX,
+        smoothing_iterations=GAP_FILL_STAGE2_SMOOTHING_ITERATIONS,
+    )
+
+    filled_pixels_total = int(stage1_report.get("filled_pixels", 0)) + int(stage2_report.get("filled_pixels", 0))
+    nodata_pixels_in = int(stage1_report.get("nodata_pixels_in", 0))
+    nodata_pixels_after_stage1 = int(stage1_report.get("nodata_pixels_out", nodata_pixels_in))
+    nodata_pixels_out = int(stage2_report.get("nodata_pixels_out", nodata_pixels_after_stage1))
+
+    if int(stage2_report.get("filled_pixels", 0)) > 0:
+        reason = "filled_two_stage"
+    elif int(stage1_report.get("filled_pixels", 0)) > 0:
+        reason = "filled_stage1_only"
+    else:
+        reason = str(stage2_report.get("reason") or stage1_report.get("reason") or "not_filled")
+
+    report: dict[str, Any] = {
+        "enabled": True,
+        "strategy": "inverse_distance_weighting_two_stage",
+        "fill_applied": bool(filled_pixels_total > 0),
+        "filled_pixels": int(filled_pixels_total),
+        "nodata_pixels_in": int(nodata_pixels_in),
+        "nodata_pixels_after_stage1": int(nodata_pixels_after_stage1),
+        "nodata_pixels_out": int(nodata_pixels_out),
+        "reason": reason,
+        "stage1_fill_applied": bool(stage1_report.get("fill_applied", False)),
+        "stage2_fill_applied": bool(stage2_report.get("fill_applied", False)),
+        # Backward-compatible top-level stage-1 policy keys for consumers that
+        # have not yet moved to the nested two-stage structure.
+        "max_hole_pixels": int(GAP_FILL_STAGE1_MAX_HOLE_PIXELS),
+        "max_total_fraction": float(GAP_FILL_STAGE1_MAX_TOTAL_FRACTION),
+        "max_search_distance_px": float(GAP_FILL_STAGE1_MAX_SEARCH_DISTANCE_PX),
+        "smoothing_iterations": int(GAP_FILL_STAGE1_SMOOTHING_ITERATIONS),
+        "stage1_policy": stage1_policy,
+        "stage2_policy": stage2_policy,
+        "stage1": stage1_report,
+        "stage2": stage2_report,
+    }
+    return stage2_data, report
+
+
 def _load_near_surface_property(
     wd: str,
     *,
@@ -330,8 +444,8 @@ def _load_near_surface_property(
 
     top_data, profile = _read_layer(top_path, is_log10=is_log10)
     sub_data, _ = _read_layer(sub_path, is_log10=is_log10)
-    top_filled, top_report = _apply_conservative_gap_fill(top_data)
-    sub_filled, sub_report = _apply_conservative_gap_fill(sub_data)
+    top_filled, top_report = _apply_two_stage_conservative_gap_fill(top_data)
+    sub_filled, sub_report = _apply_two_stage_conservative_gap_fill(sub_data)
 
     averaged = _weighted_depth_average(
         top_filled,
@@ -340,11 +454,26 @@ def _load_near_surface_property(
         sub_weight_cm=float(depth_weights_cm[NEAR_SURFACE_DEPTHS[1]]),
     )
     gap_fill_report = {
-        "strategy": "inverse_distance_weighting",
-        "max_hole_pixels": int(GAP_FILL_MAX_HOLE_PIXELS),
-        "max_total_fraction": float(GAP_FILL_MAX_TOTAL_FRACTION),
-        "max_search_distance_px": float(GAP_FILL_MAX_SEARCH_DISTANCE_PX),
-        "smoothing_iterations": int(GAP_FILL_SMOOTHING_ITERATIONS),
+        "strategy": "inverse_distance_weighting_two_stage",
+        # Backward-compatible top-level stage-1 keys.
+        "max_hole_pixels": int(GAP_FILL_STAGE1_MAX_HOLE_PIXELS),
+        "max_total_fraction": float(GAP_FILL_STAGE1_MAX_TOTAL_FRACTION),
+        "max_search_distance_px": float(GAP_FILL_STAGE1_MAX_SEARCH_DISTANCE_PX),
+        "smoothing_iterations": int(GAP_FILL_STAGE1_SMOOTHING_ITERATIONS),
+        "stage1_policy": _stage_fill_policy(
+            min_hole_pixels=GAP_FILL_STAGE1_MIN_HOLE_PIXELS,
+            max_hole_pixels=GAP_FILL_STAGE1_MAX_HOLE_PIXELS,
+            max_total_fraction=GAP_FILL_STAGE1_MAX_TOTAL_FRACTION,
+            max_search_distance_px=GAP_FILL_STAGE1_MAX_SEARCH_DISTANCE_PX,
+            smoothing_iterations=GAP_FILL_STAGE1_SMOOTHING_ITERATIONS,
+        ),
+        "stage2_policy": _stage_fill_policy(
+            min_hole_pixels=GAP_FILL_STAGE2_MIN_HOLE_PIXELS,
+            max_hole_pixels=GAP_FILL_STAGE2_MAX_HOLE_PIXELS,
+            max_total_fraction=GAP_FILL_STAGE2_MAX_TOTAL_FRACTION,
+            max_search_distance_px=GAP_FILL_STAGE2_MAX_SEARCH_DISTANCE_PX,
+            smoothing_iterations=GAP_FILL_STAGE2_SMOOTHING_ITERATIONS,
+        ),
         "top": top_report,
         "sub": sub_report,
         "averaged_nodata_pixels": int(np.count_nonzero(~np.isfinite(averaged))),
@@ -496,8 +625,8 @@ def _load_optional_cfvo_near_surface(
         top_raw, _ = _read_layer(top_path, is_log10=False)
         sub_raw, _ = _read_layer(sub_path, is_log10=False)
 
-        top_filled, top_gap_fill = _apply_conservative_gap_fill(top_raw)
-        sub_filled, sub_gap_fill = _apply_conservative_gap_fill(sub_raw)
+        top_filled, top_gap_fill = _apply_two_stage_conservative_gap_fill(top_raw)
+        sub_filled, sub_gap_fill = _apply_two_stage_conservative_gap_fill(sub_raw)
 
         source_kind = str(source_report.get("source_kind", ""))
         assume_soilgrids_per_mille = source_kind in {
@@ -778,11 +907,26 @@ def run_rusle_k_factors(
         "default_k_mode": default_mode,
         "gap_fill_policy": {
             "enabled": True,
-            "strategy": "inverse_distance_weighting",
-            "max_hole_pixels": int(GAP_FILL_MAX_HOLE_PIXELS),
-            "max_total_fraction": float(GAP_FILL_MAX_TOTAL_FRACTION),
-            "max_search_distance_px": float(GAP_FILL_MAX_SEARCH_DISTANCE_PX),
-            "smoothing_iterations": int(GAP_FILL_SMOOTHING_ITERATIONS),
+            "strategy": "inverse_distance_weighting_two_stage",
+            # Backward-compatible stage-1 keys.
+            "max_hole_pixels": int(GAP_FILL_STAGE1_MAX_HOLE_PIXELS),
+            "max_total_fraction": float(GAP_FILL_STAGE1_MAX_TOTAL_FRACTION),
+            "max_search_distance_px": float(GAP_FILL_STAGE1_MAX_SEARCH_DISTANCE_PX),
+            "smoothing_iterations": int(GAP_FILL_STAGE1_SMOOTHING_ITERATIONS),
+            "stage1_policy": _stage_fill_policy(
+                min_hole_pixels=GAP_FILL_STAGE1_MIN_HOLE_PIXELS,
+                max_hole_pixels=GAP_FILL_STAGE1_MAX_HOLE_PIXELS,
+                max_total_fraction=GAP_FILL_STAGE1_MAX_TOTAL_FRACTION,
+                max_search_distance_px=GAP_FILL_STAGE1_MAX_SEARCH_DISTANCE_PX,
+                smoothing_iterations=GAP_FILL_STAGE1_SMOOTHING_ITERATIONS,
+            ),
+            "stage2_policy": _stage_fill_policy(
+                min_hole_pixels=GAP_FILL_STAGE2_MIN_HOLE_PIXELS,
+                max_hole_pixels=GAP_FILL_STAGE2_MAX_HOLE_PIXELS,
+                max_total_fraction=GAP_FILL_STAGE2_MAX_TOTAL_FRACTION,
+                max_search_distance_px=GAP_FILL_STAGE2_MAX_SEARCH_DISTANCE_PX,
+                smoothing_iterations=GAP_FILL_STAGE2_SMOOTHING_ITERATIONS,
+            ),
         },
         "gap_fill_summary": {
             "sand": sand_gap_fill,

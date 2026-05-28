@@ -1,7 +1,7 @@
 # PROJECT_TRACKER.md
 > Kanban board for wepppy work packages and vision items
 
-**Last Updated**: 2026-05-27
+**Last Updated**: 2026-05-28
 **Active Packages**: 7
 **Quick Links**: [Work Packages Directory](docs/work-packages/) | [God-Tier Prompting Strategy](docs/god-tier-prompting-strategy.md)
 
@@ -399,6 +399,23 @@ Currently active work packages. Limit to 2-4 packages to maintain focus.
 ## ✅ Done
 
 Recently completed work packages. Archived immediately upon completion.
+
+### RUSLE K Conservative Second-Stage Gap Fill (2026-05-28)
+**Status**: ✅ **COMPLETE**
+
+**Link**: [docs/work-packages/20260527_rusle_k_second_stage_gap_fill/](docs/work-packages/20260527_rusle_k_second_stage_gap_fill/)
+
+**Lifecycle**: Backlog -> In Progress -> Done (2026-05-28)
+
+**Summary**: Implemented a conservative two-stage POLARIS nodata fill policy
+for RUSLE `K` preprocessing in `k_integration.py`. Stage-1 remains unchanged
+(`1-64` px, `<=10%`, search `6` px). New stage-2 fills residual medium interior
+components (`65-4096` px, `<=5%`, search `12` px), preserving edge-connected
+and oversized gaps as nodata. Manifest reporting now captures stage-specific
+policy/outcomes while retaining stage-1-compatible top-level keys.
+Added regression tests for stage-2 fill-applied and stage-2 fraction-guard skip
+paths. Targeted validation passed (`12` + `11` tests), docs were updated, and
+ADR-0005 captured parameterization governance.
 
 ### RUSLE `scenario_sbs` Surface-Rock Partition Integration (2026-05-27)
 **Status**: ✅ **COMPLETE**

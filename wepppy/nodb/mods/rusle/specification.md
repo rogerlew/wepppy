@@ -928,16 +928,30 @@ on `0_5`. Both `polaris_nomograph` and `polaris_epic` should use the same
 thickness-weighted near-surface aggregation so comparisons are about the
 equation family, not mismatched horizons.
 
-For run-scoped robustness, small interior `POLARIS` `NoData` holes should be
-filled conservatively before near-surface aggregation using an inverse-distance
-kernel with bounded search radius.
+For run-scoped robustness, interior `POLARIS` `NoData` holes should be filled
+conservatively before near-surface aggregation using a two-stage
+inverse-distance process with bounded search radii.
 
-- Fill only interior `NoData` components with size `<= 64` pixels
+Stage-1 (`small interior holes`):
+
+- Candidate components are interior-only with size `1-64` pixels
 - Do not fill edge-connected `NoData` regions
-- Skip automatic filling when candidate small-hole coverage exceeds `10%` of
-  eligible grid cells
-- Record fill policy and per-property fill outcomes in `rusle/manifest.json`
-  under `k.gap_fill_policy` and `k.gap_fill_summary`
+- Skip stage-1 fill when candidate coverage exceeds `10%` of eligible cells
+- Stage-1 search radius: `6` pixels
+
+Stage-2 (`medium interior holes`):
+
+- Candidate components are interior-only with size `65-4096` pixels
+- Stage-2 runs on residual `NoData` after stage-1
+- Skip stage-2 fill when candidate coverage exceeds `5%` of eligible cells
+- Stage-2 search radius: `12` pixels
+
+Shared constraints:
+
+- keep smoothing iterations at `0` for both stages in v1
+- preserve unresolved edge-connected and oversized holes as explicit `NoData`
+- record stage policies and per-property stage outcomes in
+  `rusle/manifest.json` under `k.gap_fill_policy` and `k.gap_fill_summary`
 
 #### Locked Assumptions by Mode
 

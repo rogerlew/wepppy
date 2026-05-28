@@ -221,6 +221,8 @@ def test_run_rusle_k_factors_fills_small_interior_holes_and_reports_manifest(
     assert int(gap_fill["filled_pixels"]) >= 1
     assert int(gap_fill["nodata_pixels_in"]) == 1
     assert int(gap_fill["nodata_pixels_out"]) == 0
+    assert gap_fill["stage1"]["fill_applied"] is True
+    assert gap_fill["stage2"]["fill_applied"] is False
 
 
 def test_run_rusle_k_factors_skips_fill_when_candidate_fraction_too_high(
@@ -241,8 +243,55 @@ def test_run_rusle_k_factors_skips_fill_when_candidate_fraction_too_high(
     with open(result.manifest, "r", encoding="utf-8") as stream:
         manifest = json.load(stream)
     gap_fill = manifest["k"]["gap_fill_summary"]["sand"]["top"]
-    assert gap_fill["reason"] == "candidate_fraction_above_threshold"
     assert gap_fill["fill_applied"] is False
+    assert gap_fill["stage1"]["reason"] == "candidate_fraction_above_threshold"
+    assert gap_fill["stage2"]["reason"] == "no_eligible_interior_holes"
+
+
+def test_run_rusle_k_factors_stage2_fills_medium_interior_holes(
+    tmp_path: Path,
+) -> None:
+    nodata_mask = np.zeros((40, 40), dtype=bool)
+    nodata_mask[15:23, 15:25] = True  # 80 px interior hole (>64, <=4096)
+    _write_polaris_layers_with_nodata(tmp_path, shape=(40, 40), nodata_mask=nodata_mask)
+
+    result = k_integration.run_rusle_k_factors(str(tmp_path))
+
+    nomograph_data, nomograph_nodata = _read_raster_with_nodata(Path(result.nomograph or ""))
+    assert nomograph_nodata is not None
+    center = nomograph_data[18, 19]
+    assert not np.isclose(center, float(nomograph_nodata))
+
+    with open(result.manifest, "r", encoding="utf-8") as stream:
+        manifest = json.load(stream)
+    gap_fill = manifest["k"]["gap_fill_summary"]["sand"]["top"]
+    assert gap_fill["stage1"]["fill_applied"] is False
+    assert gap_fill["stage2"]["fill_applied"] is True
+    assert int(gap_fill["stage2"]["filled_pixels"]) >= 1
+    assert gap_fill["reason"] == "filled_two_stage"
+
+
+def test_run_rusle_k_factors_stage2_skips_when_candidate_fraction_too_high(
+    tmp_path: Path,
+) -> None:
+    nodata_mask = np.zeros((40, 40), dtype=bool)
+    nodata_mask[5:15, 5:15] = True
+    nodata_mask[20:30, 20:30] = True  # total 200 px => 12.5% of grid
+    _write_polaris_layers_with_nodata(tmp_path, shape=(40, 40), nodata_mask=nodata_mask)
+
+    result = k_integration.run_rusle_k_factors(str(tmp_path))
+
+    nomograph_data, nomograph_nodata = _read_raster_with_nodata(Path(result.nomograph or ""))
+    assert nomograph_nodata is not None
+    nodata_count = int(np.count_nonzero(np.isclose(nomograph_data, float(nomograph_nodata))))
+    assert nodata_count >= 190
+
+    with open(result.manifest, "r", encoding="utf-8") as stream:
+        manifest = json.load(stream)
+    gap_fill = manifest["k"]["gap_fill_summary"]["sand"]["top"]
+    assert gap_fill["stage1"]["fill_applied"] is False
+    assert gap_fill["stage2"]["fill_applied"] is False
+    assert gap_fill["stage2"]["reason"] == "candidate_fraction_above_threshold"
 
 
 def test_run_rusle_k_factors_applies_cfvo_profile_fragment_adjustment(
