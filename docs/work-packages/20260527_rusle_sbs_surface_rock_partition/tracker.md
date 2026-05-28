@@ -6,9 +6,9 @@
 
 **Timezone**: UTC  
 **Started**: 2026-05-27 23:09 UTC  
-**Current phase**: Scoped / implementation pending  
-**Last updated**: 2026-05-27 23:09 UTC  
-**Next milestone**: Implement SBS control through UI -> API -> runtime and add regressions  
+**Current phase**: Closed  
+**Last updated**: 2026-05-27 23:49 UTC  
+**Next milestone**: N/A  
 **Security impact**: `low`  
 **Dedicated security review**: `no`  
 **Security artifact**: `N/A`  
@@ -18,11 +18,7 @@
 
 ### Ready / Backlog
 
-- [ ] Implement `rock_fraction_of_sbs_bare` option parsing/storage in `Rusle` controller.
-- [ ] Implement SBS `C` partition math in `c_integration.py` using lookup-derived `bare_lookup`.
-- [ ] Add UI control and guidance copy in `rusle_pure.htm` and `controllers_js/rusle.js`.
-- [ ] Extend rq-engine payload allowlist/schema-default contracts for SBS rock control.
-- [ ] Add and run focused Python/JS regression tests.
+- [ ] None.
 
 ### In Progress
 
@@ -37,11 +33,20 @@
 - [x] Created package scaffold (`package.md`, `tracker.md`, `prompts/active/`, `artifacts/`) (2026-05-27 23:09 UTC).
 - [x] Updated RUSLE specification with RAP-independent SBS rock-partition contract and controls (2026-05-27 23:09 UTC).
 - [x] Drafted active ExecPlan for implementation execution (2026-05-27 23:09 UTC).
+- [x] Implemented `rock_fraction_of_sbs_bare` controller/runtime plumbing and RAP-independent `scenario_sbs` C partition math (2026-05-27 23:34 UTC).
+- [x] Added UI/rq-engine contract wiring and targeted regressions across Python and JS suites (2026-05-27 23:34 UTC).
+- [x] Ran targeted validation gates and rebuilt controller bundle (2026-05-27 23:38 UTC).
+- [x] Completed independent review and disposition artifacts with no unresolved high/medium findings (2026-05-27 23:42 UTC).
+- [x] Closed package docs and archived ExecPlan under `prompts/completed/` (2026-05-27 23:49 UTC).
 
 ## Timeline
 
 - **2026-05-27 23:09 UTC** - Package initialized and scoped.
 - **2026-05-27 23:09 UTC** - Specification updated with SBS rock-partition formula/default policy.
+- **2026-05-27 23:34 UTC** - Runtime/UI/API/test implementation completed.
+- **2026-05-27 23:38 UTC** - Targeted validation suites passed.
+- **2026-05-27 23:42 UTC** - Independent review and findings disposition completed.
+- **2026-05-27 23:49 UTC** - Package documentation closed; ExecPlan archived.
 
 ## Decisions Log
 
@@ -73,15 +78,15 @@
 
 | Risk | Severity | Likelihood | Mitigation | Status |
 |------|----------|------------|------------|--------|
-| Users treat `auto` as canonical truth | High | Medium | Explicit UI guidance and manifest provenance | Open |
-| Cross-layer payload drift (`UI -> API -> runtime`) | Medium | Medium | Add focused route/controller JS tests | Open |
-| Lookup schema ambiguity (`ground_cover` vs `fg_lookup_pct`) | Medium | Medium | Pin canonical field handling in runtime + tests | Open |
+| Users treat `auto` as canonical truth | High | Medium | Explicit UI guidance and manifest provenance | Mitigated |
+| Cross-layer payload drift (`UI -> API -> runtime`) | Medium | Medium | Added focused route/controller JS tests | Mitigated |
+| Lookup schema ambiguity (`ground_cover` vs `fg_lookup_pct`) | Medium | Medium | Runtime now uses explicit lookup `ground_cover` semantics with fallback inversion for `c_override` | Mitigated |
 
 ## Verification Checklist
 
 ### Code Quality
-- [ ] Targeted Python/JS tests pass for changed modules.
-- [ ] No regressions in existing `observed_rap` behavior.
+- [x] Targeted Python/JS tests pass for changed modules.
+- [x] No regressions in existing `observed_rap` behavior.
 
 ### Security
 - [x] Security impact triage recorded (`low`) with rationale.
@@ -93,9 +98,9 @@
 - [x] Parameterization ADR linked.
 
 ### Testing
-- [ ] Unit coverage for SBS rock-partition math and validation paths.
-- [ ] API payload tests for new SBS option.
-- [ ] JS controller tests for mode-specific payload behavior.
+- [x] Unit coverage for SBS rock-partition math and validation paths.
+- [x] API payload tests for new SBS option.
+- [x] JS controller tests for mode-specific payload behavior.
 
 ## Progress Notes
 
@@ -115,3 +120,24 @@
 - Add targeted regressions and collect validation evidence.
 
 **Test results**: Not run yet (specification/work-package scaffolding stage).
+
+### 2026-05-27 23:42 UTC: Implementation + Validation + Review
+**Agent/Contributor**: Codex
+
+**Work completed**:
+- Implemented SBS rock-partition runtime in `c_integration.py` with user/auto controls and provenance.
+- Added `rock_fraction_of_sbs_bare` parsing/plumbing in `rusle.py`, UI/template wiring, and rq-engine payload/schema updates.
+- Added targeted regression coverage in NoDb, rq-engine, and JS suites.
+- Completed independent review artifact and findings disposition artifact.
+
+**Blockers encountered**:
+- None.
+
+**Next steps**:
+- None; package closed.
+
+**Test results**:
+- `wctl run-pytest tests/nodb/mods/test_rusle_c_formula.py tests/nodb/mods/test_rusle_c_integration.py tests/nodb/mods/test_rusle_controller.py --maxfail=1`
+- `wctl run-pytest tests/microservices/test_rq_engine_rusle_routes.py tests/microservices/test_rq_engine_schema_defaults_routes.py --maxfail=1`
+- `wctl run-npm test -- controllers_js/__tests__/rusle.test.js`
+- `python3 wepppy/weppcloud/controllers_js/build_controllers_js.py`

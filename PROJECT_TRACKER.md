@@ -2,7 +2,7 @@
 > Kanban board for wepppy work packages and vision items
 
 **Last Updated**: 2026-05-27
-**Active Packages**: 8
+**Active Packages**: 7
 **Quick Links**: [Work Packages Directory](docs/work-packages/) | [God-Tier Prompting Strategy](docs/god-tier-prompting-strategy.md)
 
 ## Purpose
@@ -76,31 +76,6 @@ Feedback mechanisms:
 ## 📋 Backlog
 
 Work packages that are scoped but not yet started. Dependencies and prerequisites should be noted.
-
-### RUSLE `scenario_sbs` Surface-Rock Partition Integration
-**Proposed**: 2026-05-27
-**Size**: Medium (1-2 focused sessions)
-**Priority**: High
-**Link**: [docs/work-packages/20260527_rusle_sbs_surface_rock_partition/](docs/work-packages/20260527_rusle_sbs_surface_rock_partition/)
-**Description**: Add RAP-independent surface-rock handling to `scenario_sbs` by partitioning lookup bare fractions into exposed-soil and protective-rock components via a user-facing `rock_fraction_of_sbs_bare` control.
-
-**Scope**:
-- Add `scenario_sbs` control contract (`rock_fraction_of_sbs_bare`: numeric `[0,1]` or `auto`) through UI, rq-engine payload/schema defaults, and RUSLE runtime/controller plumbing.
-- Apply SBS `C` partition formula using lookup bare context (`bare_lookup`) before exponential cover mapping.
-- Support `auto` with `cosurffrags -> cfvo -> 0.0` defaulting and SBS-bare normalization (`bare_lookup_mean_0_1`).
-- Persist manifest provenance for effective control value and source.
-- Add targeted Python + JS regressions for mode-specific payload and factor behavior.
-
-**Strategic Value**:
-- Reduces overprediction risk on armored/stony slopes in scenario-mode comparisons.
-- Aligns `scenario_sbs` with canonical RUSLE placement of surface rock in `C`.
-- Keeps SBS operation independent of RAP raster/year dependencies.
-
-**Dependencies**: Spec and ADR are drafted (`wepppy/nodb/mods/rusle/specification.md`, `docs/adrs/ADR-0004-rusle-scenario-sbs-surface-rock-partition.md`).
-
-**Next Steps**: Execute active ExecPlan and run targeted validation/review gates.
-
----
 
 ### Run Statistics Ledger
 **Proposed**: 2026-05-05
@@ -424,6 +399,15 @@ Currently active work packages. Limit to 2-4 packages to maintain focus.
 ## ✅ Done
 
 Recently completed work packages. Archived immediately upon completion.
+
+### RUSLE `scenario_sbs` Surface-Rock Partition Integration (2026-05-27)
+**Status**: ✅ **COMPLETE**
+
+**Link**: [docs/work-packages/20260527_rusle_sbs_surface_rock_partition/](docs/work-packages/20260527_rusle_sbs_surface_rock_partition/)
+
+**Lifecycle**: Backlog -> In Progress -> Done (2026-05-27)
+
+**Summary**: Executed end-to-end RAP-independent SBS surface-rock integration for RUSLE `C` by introducing `rock_fraction_of_sbs_bare` across NoDb runtime/controller parsing, rq-engine payload/schema-default contracts, and WEPPcloud RUSLE UI controls. `scenario_sbs` now partitions lookup bare fraction before `C = exp(-0.04 * fg)` mapping, supports `auto` proxy precedence (`cosurffrags -> cfvo -> 0.0`) with lookup-bare normalization, and records manifest provenance (`requested`, `effective`, `source`). Added targeted regressions for runtime math/validation, API contract wiring, and JS payload behavior; targeted validation suites passed and review/disposition artifacts closed with no unresolved high/medium findings.
 
 ### SSURGO Corestrictions `kslast` Viability Assessment (2026-05-23)
 **Status**: ✅ **COMPLETE**

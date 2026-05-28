@@ -280,6 +280,27 @@ def test_run_rusle_c_factor_observed_rap_rejects_invalid_rock_fraction(tmp_path:
         )
 
 
+def test_run_rusle_c_factor_scenario_sbs_rejects_invalid_rock_fraction(tmp_path: Path) -> None:
+    dem_path = tmp_path / "dem.tif"
+    landuse_path = tmp_path / "landuse.tif"
+    mapping_path = tmp_path / "disturbed.json"
+
+    _write_raster(dem_path, np.ones((1, 1), dtype=np.float32), dtype="float32", nodata=-9999.0)
+    _write_raster(landuse_path, np.asarray([[52]], dtype=np.uint8), dtype="uint8", nodata=0)
+    _write_disturbed_mapping(mapping_path, {52: {"DisturbedClass": "shrub"}})
+
+    with pytest.raises(ValueError, match="rock_fraction_of_sbs_bare"):
+        c_integration.run_rusle_c_factor(
+            wd=str(tmp_path),
+            dem=str(dem_path),
+            c_mode="scenario_sbs",
+            landuse=str(landuse_path),
+            sbs=None,
+            disturbed_mapping_path=str(mapping_path),
+            rock_fraction_of_sbs_bare="not-a-number",
+        )
+
+
 def test_run_rusle_c_factor_observed_rap_auto_falls_back_to_cfvo(
     tmp_path: Path,
     monkeypatch: pytest.MonkeyPatch,
@@ -413,6 +434,8 @@ def test_run_rusle_c_factor_scenario_sbs_writes_disturbed_class_alignment_and_lo
         manifest = json.load(stream)
     c_manifest = manifest["c"]
     assert c_manifest["mode"] == "scenario_sbs"
+    assert c_manifest["rock_fraction_of_sbs_bare"]["source"] == "auto:fallback_0"
+    assert c_manifest["rock_fraction_of_sbs_bare"]["effective"] == pytest.approx(0.0)
     assert c_manifest["disturbed_class_codes"]["forest"] == forest_code
     assert any(item["disturbed_class"] == "forest" and item["sbs_class"] == "moderate" for item in c_manifest["lookup_keys_used"])
 
@@ -570,6 +593,146 @@ def test_scenario_sbs_without_sbs_uses_unburned_and_does_not_write_sbs_artifact(
     with open(result.manifest, "r", encoding="utf-8") as stream:
         manifest = json.load(stream)
     assert manifest["c"]["sbs_input_mode"] == "missing_use_unburned"
+
+
+def test_scenario_sbs_uses_user_rock_fraction_partition(tmp_path: Path) -> None:
+    dem_path = tmp_path / "dem.tif"
+    landuse_path = tmp_path / "landuse.tif"
+    mapping_path = tmp_path / "disturbed.json"
+
+    _write_raster(dem_path, np.ones((1, 1), dtype=np.float32), dtype="float32", nodata=-9999.0)
+    _write_raster(landuse_path, np.asarray([[52]], dtype=np.uint8), dtype="uint8", nodata=0)
+    _write_disturbed_mapping(mapping_path, {52: {"DisturbedClass": "shrub"}})
+
+    result = c_integration.run_rusle_c_factor(
+        wd=str(tmp_path),
+        dem=str(dem_path),
+        c_mode="scenario_sbs",
+        landuse=str(landuse_path),
+        sbs=None,
+        disturbed_mapping_path=str(mapping_path),
+        rock_fraction_of_sbs_bare=0.5,
+    )
+
+    c_data, c_nodata = _read_single_band(result.c)
+    value = float(c_data[0, 0])
+    assert value != c_nodata
+    assert value == pytest.approx(np.exp(-0.04 * 95.0))
+
+    with open(result.manifest, "r", encoding="utf-8") as stream:
+        manifest = json.load(stream)
+    rock_meta = manifest["c"]["rock_fraction_of_sbs_bare"]
+    assert rock_meta["requested"] == pytest.approx(0.5)
+    assert rock_meta["effective"] == pytest.approx(0.5)
+    assert rock_meta["source"] == "user"
+
+
+def test_scenario_sbs_auto_prefers_cosurffrags_over_cfvo(
+    tmp_path: Path,
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    dem_path = tmp_path / "dem.tif"
+    landuse_path = tmp_path / "landuse.tif"
+    mapping_path = tmp_path / "disturbed.json"
+
+    _write_raster(dem_path, np.ones((1, 1), dtype=np.float32), dtype="float32", nodata=-9999.0)
+    _write_raster(landuse_path, np.asarray([[52]], dtype=np.uint8), dtype="uint8", nodata=0)
+    _write_disturbed_mapping(mapping_path, {52: {"DisturbedClass": "shrub"}})
+
+    monkeypatch.setattr(
+        c_integration,
+        "_load_cosurffrags_surface_proxy_from_soils_parquet",
+        lambda wd: (
+            0.02,
+            {
+                "status": "available",
+                "source_kind": "soils_parquet_cosurffrags",
+                "column": "cosurffrags_cover_pct",
+                "cover_pct": 2.0,
+            },
+        ),
+    )
+
+    cfvo_calls = {"count": 0}
+
+    def _unexpected_cfvo(**kwargs):
+        cfvo_calls["count"] += 1
+        return 0.4, {"status": "available"}
+
+    monkeypatch.setattr(c_integration, "_load_cfvo_surface_proxy_from_raster", _unexpected_cfvo)
+
+    result = c_integration.run_rusle_c_factor(
+        wd=str(tmp_path),
+        dem=str(dem_path),
+        c_mode="scenario_sbs",
+        landuse=str(landuse_path),
+        sbs=None,
+        disturbed_mapping_path=str(mapping_path),
+        rock_fraction_of_sbs_bare="auto",
+    )
+
+    assert cfvo_calls["count"] == 0
+
+    c_data, c_nodata = _read_single_band(result.c)
+    value = float(c_data[0, 0])
+    assert value != c_nodata
+    assert value == pytest.approx(np.exp(-0.04 * 92.0))
+
+    with open(result.manifest, "r", encoding="utf-8") as stream:
+        manifest = json.load(stream)
+    rock_meta = manifest["c"]["rock_fraction_of_sbs_bare"]
+    assert rock_meta["source"] == "auto:cosurffrags"
+    assert rock_meta["surface_rock_cover_proxy_0_1"] == pytest.approx(0.02)
+    assert rock_meta["bare_lookup_mean_0_1"] == pytest.approx(0.1)
+    assert rock_meta["effective"] == pytest.approx(0.2)
+
+
+def test_scenario_sbs_auto_falls_back_to_cfvo(
+    tmp_path: Path,
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    dem_path = tmp_path / "dem.tif"
+    landuse_path = tmp_path / "landuse.tif"
+    mapping_path = tmp_path / "disturbed.json"
+
+    _write_raster(dem_path, np.ones((1, 1), dtype=np.float32), dtype="float32", nodata=-9999.0)
+    _write_raster(landuse_path, np.asarray([[52]], dtype=np.uint8), dtype="uint8", nodata=0)
+    _write_disturbed_mapping(mapping_path, {52: {"DisturbedClass": "shrub"}})
+
+    monkeypatch.setattr(
+        c_integration,
+        "_load_cosurffrags_surface_proxy_from_soils_parquet",
+        lambda wd: (None, {"status": "unavailable", "reason": "missing_cosurffrags_columns"}),
+    )
+    monkeypatch.setattr(
+        c_integration,
+        "_load_cfvo_surface_proxy_from_raster",
+        lambda **kwargs: (
+            0.03,
+            {
+                "status": "available",
+                "source_kind": "cfvo_top_horizon",
+                "cfvo_0_5cm_volpct": 3.0,
+            },
+        ),
+    )
+
+    result = c_integration.run_rusle_c_factor(
+        wd=str(tmp_path),
+        dem=str(dem_path),
+        c_mode="scenario_sbs",
+        landuse=str(landuse_path),
+        sbs=None,
+        disturbed_mapping_path=str(mapping_path),
+        rock_fraction_of_sbs_bare="auto",
+    )
+
+    with open(result.manifest, "r", encoding="utf-8") as stream:
+        manifest = json.load(stream)
+    rock_meta = manifest["c"]["rock_fraction_of_sbs_bare"]
+    assert rock_meta["source"] == "auto:cfvo"
+    assert rock_meta["surface_rock_cover_proxy_0_1"] == pytest.approx(0.03)
+    assert rock_meta["effective"] == pytest.approx(0.3)
 
 
 def test_observed_rap_supports_mode_specific_output_filename(tmp_path: Path) -> None:

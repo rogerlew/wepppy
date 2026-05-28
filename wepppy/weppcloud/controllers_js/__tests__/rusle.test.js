@@ -30,8 +30,11 @@ describe("Rusle controller", () => {
                         <option value="2025">2025</option>
                     </select>
                 </div>
-                <div data-rusle-section="rock-fraction">
+                <div data-rusle-section="rock-fraction-rap">
                     <input id="rock_fraction_of_rap_bare" name="rock_fraction_of_rap_bare" value="auto">
+                </div>
+                <div data-rusle-section="rock-fraction-sbs" style="display:none;">
+                    <input id="rock_fraction_of_sbs_bare" name="rock_fraction_of_sbs_bare" value="auto">
                 </div>
                 <label><input type="checkbox" id="rusle_k_mode_nomograph" name="k_modes" value="polaris_nomograph" data-rusle-k-mode checked></label>
                 <label><input type="checkbox" id="rusle_k_mode_epic" name="k_modes" value="polaris_epic" data-rusle-k-mode></label>
@@ -157,9 +160,11 @@ describe("Rusle controller", () => {
         scenario.dispatchEvent(new Event("change", { bubbles: true }));
 
         const rapSection = document.querySelector('[data-rusle-section="rap-year"]');
-        const rockSection = document.querySelector('[data-rusle-section="rock-fraction"]');
+        const rockRapSection = document.querySelector('[data-rusle-section="rock-fraction-rap"]');
+        const rockSbsSection = document.querySelector('[data-rusle-section="rock-fraction-sbs"]');
         expect(rapSection.hidden).toBe(true);
-        expect(rockSection.hidden).toBe(true);
+        expect(rockRapSection.hidden).toBe(true);
+        expect(rockSbsSection.hidden).toBe(false);
 
         const button = document.querySelector("[data-rusle-action='run']");
         button.dispatchEvent(new MouseEvent("click", { bubbles: true }));
@@ -170,6 +175,7 @@ describe("Rusle controller", () => {
         expect(payload.c_mode).toBe("scenario_sbs");
         expect(Object.prototype.hasOwnProperty.call(payload, "rap_year")).toBe(false);
         expect(Object.prototype.hasOwnProperty.call(payload, "rock_fraction_of_rap_bare")).toBe(false);
+        expect(payload.rock_fraction_of_sbs_bare).toBe("auto");
     });
 
     test("run enforces at least one K mode and normalizes default selection", async () => {
@@ -215,6 +221,24 @@ describe("Rusle controller", () => {
 
         const payload = httpMock.postJsonWithSessionToken.mock.calls[0][1];
         expect(payload.rock_fraction_of_rap_bare).toBe("auto");
+    });
+
+    test("scenario_sbs empty rock fraction defaults to auto", async () => {
+        const scenario = document.querySelector('[data-rusle-c-mode="scenario_sbs"]');
+        scenario.checked = true;
+        scenario.dispatchEvent(new Event("change", { bubbles: true }));
+
+        const rock = document.getElementById("rock_fraction_of_sbs_bare");
+        rock.value = "";
+
+        const button = document.querySelector("[data-rusle-action='run']");
+        button.dispatchEvent(new MouseEvent("click", { bubbles: true }));
+
+        await flushPromises();
+
+        const payload = httpMock.postJsonWithSessionToken.mock.calls[0][1];
+        expect(payload.rock_fraction_of_sbs_bare).toBe("auto");
+        expect(Object.prototype.hasOwnProperty.call(payload, "rock_fraction_of_rap_bare")).toBe(false);
     });
 
     test("completion event refreshes the run results summary", async () => {

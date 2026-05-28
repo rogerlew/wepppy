@@ -14,10 +14,10 @@ Users can verify behavior by running `scenario_sbs` builds with `rock_fraction_o
 
 - [x] (2026-05-27 23:09 UTC) Scoped package and created work-package scaffold.
 - [x] (2026-05-27 23:09 UTC) Updated RUSLE specification with SBS rock-partition contract and user-control requirements.
-- [ ] Implement runtime/controller/UI/API changes for `rock_fraction_of_sbs_bare`.
-- [ ] Add targeted Python + JS regressions for SBS rock control and mode-specific payload behavior.
-- [ ] Run focused validation suites and capture outcomes in tracker artifacts.
-- [ ] Dispatch independent review and disposition all high/medium findings.
+- [x] (2026-05-27 23:34 UTC) Implemented runtime/controller/UI/API changes for `rock_fraction_of_sbs_bare`.
+- [x] (2026-05-27 23:34 UTC) Added targeted Python + JS regressions for SBS rock control and mode-specific payload behavior.
+- [x] (2026-05-27 23:38 UTC) Ran focused validation suites and captured outcomes in tracker artifacts.
+- [x] (2026-05-27 23:42 UTC) Completed independent review and findings disposition (no unresolved high/medium findings).
 
 ## Surprises & Discoveries
 
@@ -25,6 +25,8 @@ Users can verify behavior by running `scenario_sbs` builds with `rock_fraction_o
   Evidence: `docs/work-packages/20260527_rusle_c_surface_rock_partition/package.md` out-of-scope section.
 - Observation: `scenario_sbs` currently relies on static lookup-derived `C` behavior with no explicit rock-partition control.
   Evidence: `wepppy/nodb/mods/rusle/specification.md` prior `scenario_sbs` contract sections.
+- Observation: rq-engine route payload parsing preserves the JSON string token for `rock_fraction_of_sbs_bare` rather than coercing to float.
+  Evidence: `tests/microservices/test_rq_engine_rusle_routes.py` payload assertion (`"0.45"`).
 
 ## Decision Log
 
@@ -34,10 +36,15 @@ Users can verify behavior by running `scenario_sbs` builds with `rock_fraction_o
 - Decision: Reuse `cosurffrags -> cfvo -> 0.0` proxy precedence for `auto`, but normalize into SBS lookup-bare control space.
   Rationale: Preserves existing proxy hierarchy while respecting SBS control semantics.
   Date/Author: 2026-05-27 23:09 UTC / Codex.
+- Decision: Derive lookup baseline `fg` from `ground_cover` when present and invert from `c_override` only as fallback.
+  Rationale: Preserves explicit lookup cover semantics while retaining compatibility for override-only rows.
+  Date/Author: 2026-05-27 23:31 UTC / Codex.
 
 ## Outcomes & Retrospective
 
-Implementation not started in this ExecPlan yet. Scoping and specification updates are complete.
+Implementation is complete across runtime/UI/API/test layers with passing targeted validation suites. `scenario_sbs` now supports RAP-independent surface-rock partitioning using `rock_fraction_of_sbs_bare` with `auto` proxy defaulting and manifest provenance.
+
+No high or medium findings remained after independent review; one low-severity contract-consistency note (string token preserved in route payload) was accepted as non-blocking because NoDb parse validation remains authoritative.
 
 ## Context and Orientation
 
@@ -124,3 +131,7 @@ This rollout is additive. If regressions are found, rollback by disabling only S
 ## Interfaces and Dependencies
 
 No new external dependencies are required. The package extends existing RUSLE control contracts and reuses established SSURGO proxy sourcing conventions. Parameterization governance is recorded in `docs/adrs/ADR-0004-rusle-scenario-sbs-surface-rock-partition.md`.
+
+## Revision Note
+
+Updated on 2026-05-27 23:42 UTC to record completed implementation, validation evidence, and review/disposition outcomes after executing the full work package.

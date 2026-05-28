@@ -3454,6 +3454,15 @@ def _build_run_operations(runtime: RuntimeState) -> dict[str, dict[str, Any]]:
                             ],
                             "available_if": _predicate("c_mode", "eq", "observed_rap"),
                         },
+                        "rock_fraction_of_sbs_bare": {
+                            "type": "string_or_number",
+                            "constraint_mode": "static",
+                            "one_of": [
+                                {"type": "string", "enum": ["auto"]},
+                                {"type": "number", "minimum": 0.0, "maximum": 1.0},
+                            ],
+                            "available_if": _predicate("c_mode", "eq", "scenario_sbs"),
+                        },
                         "k_modes": {
                             "type": "array",
                             "constraint_mode": "static",
@@ -3483,6 +3492,7 @@ def _build_run_operations(runtime: RuntimeState) -> dict[str, dict[str, Any]]:
                 "resolved_defaults": {
                     "force_polaris_refresh": False,
                     "rock_fraction_of_rap_bare": "auto",
+                    "rock_fraction_of_sbs_bare": "auto",
                 },
                 "defaults_context": _defaults_context(runtime),
             },

@@ -1,6 +1,6 @@
 # RUSLE `scenario_sbs` Surface-Rock Partition Integration
 
-**Status**: Open (2026-05-27)
+**Status**: Closed (2026-05-27)
 **Timezone**: UTC
 
 ## Overview
@@ -47,13 +47,13 @@ This package scopes and implements surface-rock partitioning for `scenario_sbs` 
 
 ## Success Criteria
 
-- [ ] `scenario_sbs` supports `rock_fraction_of_sbs_bare` (`[0,1]` or `auto`) end-to-end.
-- [ ] SBS `C` math applies `bare_lookup` partition (`bare_exposed = bare_lookup * (1 - r_sbs_bare)`) before `C = exp(-0.04 * fg_effective_pct)`.
-- [ ] `scenario_sbs` rock path is RAP-independent (no RAP-year or RAP-raster dependency).
-- [ ] `auto` default uses `cosurffrags` first and `cfvo` fallback with SBS-bare normalization.
-- [ ] UI explicitly instructs users to verify field/local surface rock cover and set fraction accordingly.
-- [ ] Manifest metadata records effective value and source for SBS rock control.
-- [ ] Focused Python + JS regressions pass for SBS control and payload contracts.
+- [x] `scenario_sbs` supports `rock_fraction_of_sbs_bare` (`[0,1]` or `auto`) end-to-end.
+- [x] SBS `C` math applies `bare_lookup` partition (`bare_exposed = bare_lookup * (1 - r_sbs_bare)`) before `C = exp(-0.04 * fg_effective_pct)`.
+- [x] `scenario_sbs` rock path is RAP-independent (no RAP-year or RAP-raster dependency).
+- [x] `auto` default uses `cosurffrags` first and `cfvo` fallback with SBS-bare normalization.
+- [x] UI explicitly instructs users to verify field/local surface rock cover and set fraction accordingly.
+- [x] Manifest metadata records effective value and source for SBS rock control.
+- [x] Focused Python + JS regressions pass for SBS control and payload contracts.
 
 ## Parameterization ADR Gate
 
@@ -113,4 +113,20 @@ Reference: `docs/standards/parameterization-adr-standard.md`
 
 ## Kickoff Prompt
 
-- Active ExecPlan: `docs/work-packages/20260527_rusle_sbs_surface_rock_partition/prompts/active/rusle_sbs_surface_rock_partition_execplan.md`
+- Completed ExecPlan: `docs/work-packages/20260527_rusle_sbs_surface_rock_partition/prompts/completed/rusle_sbs_surface_rock_partition_execplan.md`
+
+## Closure Notes
+
+**Closed**: 2026-05-27
+
+**Summary**: Implemented RAP-independent SBS rock partitioning by adding `rock_fraction_of_sbs_bare` across RUSLE runtime, rq-engine request contracts, and WEPPcloud RUSLE UI controls. Runtime now partitions lookup-derived bare fraction before `C` mapping and records user/auto provenance. Added regression coverage for SBS user and auto proxy paths (`cosurffrags` precedence, `cfvo` fallback, invalid input handling) and mode-specific payload behavior in JS/API tests.
+
+**Validation**:
+- `wctl run-pytest tests/nodb/mods/test_rusle_c_formula.py tests/nodb/mods/test_rusle_c_integration.py tests/nodb/mods/test_rusle_controller.py --maxfail=1`
+- `wctl run-pytest tests/microservices/test_rq_engine_rusle_routes.py tests/microservices/test_rq_engine_schema_defaults_routes.py --maxfail=1`
+- `wctl run-npm test -- controllers_js/__tests__/rusle.test.js`
+- `python3 wepppy/weppcloud/controllers_js/build_controllers_js.py`
+
+**Review Artifacts**:
+- `docs/work-packages/20260527_rusle_sbs_surface_rock_partition/artifacts/20260527_independent_review.md`
+- `docs/work-packages/20260527_rusle_sbs_surface_rock_partition/artifacts/20260527_findings_disposition.md`

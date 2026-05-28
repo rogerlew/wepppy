@@ -22,7 +22,8 @@ var Rusle = (function () {
         statusPanel: "#rusle_status_panel",
         stacktracePanel: "#rusle_stacktrace_panel",
         rapYearSection: '[data-rusle-section="rap-year"]',
-        rockFractionSection: '[data-rusle-section="rock-fraction"]',
+        rockFractionRapSection: '[data-rusle-section="rock-fraction-rap"]',
+        rockFractionSbsSection: '[data-rusle-section="rock-fraction-sbs"]',
         cMode: '[data-rusle-c-mode]',
         kMode: '[data-rusle-k-mode]',
         defaultKMode: "#default_k_mode",
@@ -233,12 +234,12 @@ var Rusle = (function () {
         }
         var checked = formElement.querySelector(SELECTORS.cMode + ":checked");
         var cMode = checked ? String(checked.value || "") : "observed_rap";
-        [SELECTORS.rapYearSection, SELECTORS.rockFractionSection].forEach(function (selector) {
+        function setVisible(selector, isVisible) {
             var section = formElement.querySelector(selector);
             if (!section) {
                 return;
             }
-            if (cMode === "observed_rap") {
+            if (isVisible) {
                 section.hidden = false;
                 if (section.style) {
                     section.style.removeProperty("display");
@@ -249,7 +250,11 @@ var Rusle = (function () {
                     section.style.display = "none";
                 }
             }
-        });
+        }
+
+        setVisible(SELECTORS.rapYearSection, cMode === "observed_rap");
+        setVisible(SELECTORS.rockFractionRapSection, cMode === "observed_rap");
+        setVisible(SELECTORS.rockFractionSbsSection, cMode === "scenario_sbs");
     }
 
     function buildPayload(controller) {
@@ -267,11 +272,19 @@ var Rusle = (function () {
         } else if (payload.rap_year === "" || payload.rap_year === null || payload.rap_year === undefined) {
             delete payload.rap_year;
         }
+        if (payload.c_mode !== "scenario_sbs") {
+            delete payload.rock_fraction_of_sbs_bare;
+        }
 
         if (payload.c_mode === "observed_rap") {
             var rockValue = payload.rock_fraction_of_rap_bare;
             if (rockValue === "" || rockValue === null || rockValue === undefined) {
                 payload.rock_fraction_of_rap_bare = "auto";
+            }
+        } else if (payload.c_mode === "scenario_sbs") {
+            var sbsRockValue = payload.rock_fraction_of_sbs_bare;
+            if (sbsRockValue === "" || sbsRockValue === null || sbsRockValue === undefined) {
+                payload.rock_fraction_of_sbs_bare = "auto";
             }
         }
 

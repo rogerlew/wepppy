@@ -62,6 +62,7 @@ async def build_rusle(runid: str, config: str, request: Request) -> JSONResponse
             "c_mode",
             "rap_year",
             "rock_fraction_of_rap_bare",
+            "rock_fraction_of_sbs_bare",
             "k_modes",
             "default_k_mode",
             "max_slope_length_m",

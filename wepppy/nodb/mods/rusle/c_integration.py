@@ -138,28 +138,36 @@ def _mask_rap_cover_values(data: np.ndarray) -> np.ndarray:
     return masked
 
 
-def _coerce_rock_fraction_of_rap_bare(value: Any) -> float | str:
+def _coerce_rock_fraction_value(value: Any, *, field_name: str) -> float | str:
     if isinstance(value, str):
         token = value.strip().lower()
         if token == "auto":
             return "auto"
         if token == "":
-            raise ValueError("rock_fraction_of_rap_bare must be numeric in [0,1] or 'auto'")
+            raise ValueError(f"{field_name} must be numeric in [0,1] or 'auto'")
         try:
             parsed = float(token)
         except ValueError as exc:
-            raise ValueError("rock_fraction_of_rap_bare must be numeric in [0,1] or 'auto'") from exc
+            raise ValueError(f"{field_name} must be numeric in [0,1] or 'auto'") from exc
     else:
         try:
             parsed = float(value)
         except (TypeError, ValueError) as exc:
-            raise ValueError("rock_fraction_of_rap_bare must be numeric in [0,1] or 'auto'") from exc
+            raise ValueError(f"{field_name} must be numeric in [0,1] or 'auto'") from exc
 
     if not np.isfinite(parsed):
-        raise ValueError("rock_fraction_of_rap_bare must be finite")
+        raise ValueError(f"{field_name} must be finite")
     if parsed < 0.0 or parsed > 1.0:
-        raise ValueError("rock_fraction_of_rap_bare must be within [0, 1]")
+        raise ValueError(f"{field_name} must be within [0, 1]")
     return float(parsed)
+
+
+def _coerce_rock_fraction_of_rap_bare(value: Any) -> float | str:
+    return _coerce_rock_fraction_value(value, field_name="rock_fraction_of_rap_bare")
+
+
+def _coerce_rock_fraction_of_sbs_bare(value: Any) -> float | str:
+    return _coerce_rock_fraction_value(value, field_name="rock_fraction_of_sbs_bare")
 
 
 def _mean_bare_rap_0_1(*, bare_ground_pct: np.ndarray, valid_mask: np.ndarray) -> float:
@@ -167,6 +175,16 @@ def _mean_bare_rap_0_1(*, bare_ground_pct: np.ndarray, valid_mask: np.ndarray) -
     if not np.any(finite):
         return 0.0
     bare_0_1 = np.clip(bare_ground_pct[finite] / 100.0, 0.0, 1.0)
+    if bare_0_1.size == 0:
+        return 0.0
+    return float(np.nanmean(bare_0_1))
+
+
+def _mean_lookup_bare_0_1(*, bare_lookup_0_1: np.ndarray, valid_mask: np.ndarray) -> float:
+    finite = valid_mask & np.isfinite(bare_lookup_0_1)
+    if not np.any(finite):
+        return 0.0
+    bare_0_1 = np.clip(bare_lookup_0_1[finite], 0.0, 1.0)
     if bare_0_1.size == 0:
         return 0.0
     return float(np.nanmean(bare_0_1))
@@ -365,6 +383,74 @@ def _resolve_rock_fraction_auto(
     return report
 
 
+def _resolve_rock_fraction_auto_for_scenario_sbs(
+    *,
+    wd: str,
+    dem_profile: dict[str, Any],
+    valid_mask: np.ndarray,
+    bare_lookup_0_1: np.ndarray,
+) -> dict[str, Any]:
+    bare_lookup_mean_0_1 = _mean_lookup_bare_0_1(bare_lookup_0_1=bare_lookup_0_1, valid_mask=valid_mask)
+    cosurffrags_proxy_0_1, cosurffrags_report = _load_cosurffrags_surface_proxy_from_soils_parquet(wd)
+    cfvo_proxy_0_1: float | None = None
+    cfvo_report: dict[str, Any] | None = None
+
+    if cosurffrags_proxy_0_1 is not None:
+        source = "auto:cosurffrags"
+        surface_proxy_0_1 = float(cosurffrags_proxy_0_1)
+    else:
+        cfvo_proxy_0_1, cfvo_report = _load_cfvo_surface_proxy_from_raster(
+            wd=wd,
+            dem_profile=dem_profile,
+            valid_mask=valid_mask,
+        )
+        if cfvo_proxy_0_1 is not None:
+            source = "auto:cfvo"
+            surface_proxy_0_1 = float(cfvo_proxy_0_1)
+        else:
+            source = "auto:fallback_0"
+            surface_proxy_0_1 = 0.0
+
+    if bare_lookup_mean_0_1 > 0.0:
+        effective_fraction = float(np.clip(surface_proxy_0_1 / bare_lookup_mean_0_1, 0.0, 1.0))
+    else:
+        effective_fraction = 0.0
+
+    report: dict[str, Any] = {
+        "requested": "auto",
+        "effective": effective_fraction,
+        "source": source,
+        "surface_rock_cover_proxy_0_1": float(surface_proxy_0_1),
+        "bare_lookup_mean_0_1": float(bare_lookup_mean_0_1),
+        "normalization": "clamp(surface_rock_cover_proxy_0_1 / bare_lookup_mean_0_1, 0, 1) when bare_lookup_mean_0_1 > 0 else 0",
+        "sources": {"cosurffrags": cosurffrags_report},
+    }
+    if cfvo_report is not None:
+        report["sources"]["cfvo"] = cfvo_report
+    if source == "auto:fallback_0":
+        report["fallback_reason"] = (
+            "No cosurffrags surface proxy or cfvo top-horizon proxy available for this run."
+        )
+    return report
+
+
+def _lookup_fg_pct_for_row(row: RusleCLookupRow) -> float:
+    if row.ground_cover is not None:
+        return float(np.clip(float(row.ground_cover) * 100.0, 0.0, 100.0))
+    if row.c_override is not None:
+        c_value = float(row.c_override)
+        if not np.isfinite(c_value) or c_value <= 0.0:
+            raise ValueError(
+                "scenario_sbs lookup row requires finite positive c_override when ground_cover is absent: "
+                f"disturbed_class={row.disturbed_class!r}, sbs_class={row.sbs_class!r}"
+            )
+        return float(np.clip(-np.log(c_value) / 0.04, 0.0, 100.0))
+    raise ValueError(
+        "scenario_sbs lookup row requires ground_cover or c_override: "
+        f"disturbed_class={row.disturbed_class!r}, sbs_class={row.sbs_class!r}"
+    )
+
+
 def _write_float_raster(path: str, data: np.ndarray, profile: dict[str, Any], *, nodata: float = -9999.0) -> None:
     out_profile = dict(profile)
     out_profile.update(
@@ -504,6 +590,7 @@ def run_rusle_c_factor(
     c_output_filename: str = "c.tif",
     rap: str | None = None,
     rock_fraction_of_rap_bare: float | str = "auto",
+    rock_fraction_of_sbs_bare: float | str = "auto",
     landuse: str | None = None,
     sbs: str | None = None,
     sbs_is_4class: bool = False,
@@ -648,6 +735,8 @@ def run_rusle_c_factor(
         )
 
     inverse_family_codes = {code: family for family, code in family_codes.items()}
+    requested_sbs_rock_fraction = _coerce_rock_fraction_of_sbs_bare(rock_fraction_of_sbs_bare)
+    bare_lookup_0_1 = np.full(landuse_aligned.shape, np.nan, dtype=np.float64)
     c = np.full(landuse_aligned.shape, np.nan, dtype=np.float64)
     lookup_keys_used: set[tuple[str, str]] = set()
 
@@ -668,13 +757,38 @@ def run_rusle_c_factor(
                 if not np.any(mask):
                     continue
                 row = resolve_lookup_row(lookup, family, sbs_class)
-                c[mask] = row.resolved_c()
+                fg_lookup_pct = _lookup_fg_pct_for_row(row)
+                bare_lookup_0_1[mask] = np.clip(1.0 - (fg_lookup_pct / 100.0), 0.0, 1.0)
                 lookup_keys_used.add((family, canonicalize_sbs_class(sbs_class)))
             continue
 
         row = resolve_lookup_row(lookup, family, "unburned")
-        c[family_mask] = row.resolved_c()
+        fg_lookup_pct = _lookup_fg_pct_for_row(row)
+        bare_lookup_0_1[family_mask] = np.clip(1.0 - (fg_lookup_pct / 100.0), 0.0, 1.0)
         lookup_keys_used.add((family, "unburned"))
+
+    valid_lookup_mask = np.isfinite(bare_lookup_0_1)
+    if requested_sbs_rock_fraction == "auto":
+        sbs_rock_report = _resolve_rock_fraction_auto_for_scenario_sbs(
+            wd=wd,
+            dem_profile=dem_profile,
+            valid_mask=valid_lookup_mask,
+            bare_lookup_0_1=bare_lookup_0_1,
+        )
+        effective_sbs_rock_fraction = float(sbs_rock_report["effective"])
+    else:
+        effective_sbs_rock_fraction = float(requested_sbs_rock_fraction)
+        sbs_rock_report = {
+            "requested": float(requested_sbs_rock_fraction),
+            "effective": float(effective_sbs_rock_fraction),
+            "source": "user",
+        }
+
+    fg_effective_pct = np.full(landuse_aligned.shape, np.nan, dtype=np.float64)
+    fg_effective_pct[valid_lookup_mask] = 100.0 * (
+        1.0 - (bare_lookup_0_1[valid_lookup_mask] * (1.0 - effective_sbs_rock_fraction))
+    )
+    c[valid_lookup_mask] = np.asarray(compute_c_from_fg_pct(fg_effective_pct[valid_lookup_mask]), dtype=np.float64)
 
     shutil.copyfile(lookup_path, lookup_copy_path)
     _write_float_raster(c_path, c, dem_profile)
@@ -692,10 +806,14 @@ def run_rusle_c_factor(
     c_manifest = {
         "mode": "scenario_sbs",
         "formula": {
-            "fg": "lookup ground_cover -> percent -> exp(-0.04 * fg)",
-            "c": "exp(-0.04 * fg)",
+            "fg_lookup_pct": "lookup ground_cover fraction * 100 (or inverse from c_override when ground_cover absent)",
+            "bare_lookup_0_1": "clamp(1 - fg_lookup_pct / 100, 0, 1)",
+            "r_sbs_bare": "clamp(rock_fraction_of_sbs_bare, 0, 1)",
+            "fg_effective_pct": "100 * (1 - bare_lookup_0_1 * (1 - r_sbs_bare))",
+            "c": "exp(-0.04 * fg_effective_pct)",
             "b": 0.04,
         },
+        "rock_fraction_of_sbs_bare": sbs_rock_report,
         "burnable_families": list(BURNABLE_FAMILIES),
         "masked_families": sorted(MASKED_FAMILY_NAMES),
         "disturbed_class_codes": {family: int(code) for family, code in sorted(family_codes.items(), key=lambda item: item[1])},

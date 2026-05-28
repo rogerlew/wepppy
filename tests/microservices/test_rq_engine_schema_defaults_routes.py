@@ -846,11 +846,23 @@ def test_build_rusle_schema_and_defaults_include_rock_fraction_partition(
         "op": "eq",
         "value": "observed_rap",
     }
+    assert request_properties["rock_fraction_of_sbs_bare"]["type"] == "string_or_number"
+    assert request_properties["rock_fraction_of_sbs_bare"]["constraint_mode"] == "static"
+    assert request_properties["rock_fraction_of_sbs_bare"]["one_of"] == [
+        {"type": "string", "enum": ["auto"]},
+        {"type": "number", "minimum": 0.0, "maximum": 1.0},
+    ]
+    assert request_properties["rock_fraction_of_sbs_bare"]["available_if"] == {
+        "field": "c_mode",
+        "op": "eq",
+        "value": "scenario_sbs",
+    }
 
     assert defaults_response.status_code == 200
     defaults_payload = defaults_response.json()
     assert defaults_payload["resolved_defaults"]["force_polaris_refresh"] is False
     assert defaults_payload["resolved_defaults"]["rock_fraction_of_rap_bare"] == "auto"
+    assert defaults_payload["resolved_defaults"]["rock_fraction_of_sbs_bare"] == "auto"
 
 
 def test_run_endpoints_include_upload_sbs_for_baer_mod(monkeypatch: pytest.MonkeyPatch) -> None:

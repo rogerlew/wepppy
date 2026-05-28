@@ -283,12 +283,14 @@ def test_build_scenario_sbs_without_sbs_writes_mode_specific_outputs(
         c_output_filename: str,
         landuse: str | None = None,
         sbs: str | None = None,
+        rock_fraction_of_sbs_bare: float | str = "auto",
         **_kwargs,
     ):
         c_call["mode"] = c_mode
         c_call["output"] = c_output_filename
         c_call["landuse"] = landuse
         c_call["sbs"] = sbs
+        c_call["rock_fraction_of_sbs_bare"] = rock_fraction_of_sbs_bare
 
         c_path = rusle_dir / c_output_filename
         manifest_path = rusle_dir / "manifest.json"
@@ -318,6 +320,7 @@ def test_build_scenario_sbs_without_sbs_writes_mode_specific_outputs(
             "k_modes": ["polaris_nomograph"],
             "default_k_mode": "polaris_nomograph",
             "p_value": 5.0,
+            "rock_fraction_of_sbs_bare": 0.4,
         }
     )
 
@@ -326,6 +329,7 @@ def test_build_scenario_sbs_without_sbs_writes_mode_specific_outputs(
         "output": "c_scenario_sbs.tif",
         "landuse": str(landuse_path),
         "sbs": None,
+        "rock_fraction_of_sbs_bare": 0.4,
     }
     assert ls_call["max_slope_length_m"] == pytest.approx(304.8)
     assert ls_call["blocking_mask"] is None
@@ -345,6 +349,7 @@ def test_build_scenario_sbs_without_sbs_writes_mode_specific_outputs(
     assert manifest["rusle"]["options"]["r_mode"] == "cligen_static"
     assert manifest["rusle"]["options"]["c_mode"] == "scenario_sbs"
     assert manifest["rusle"]["options"]["k_modes"] == ["polaris_nomograph"]
+    assert manifest["rusle"]["options"]["rock_fraction_of_sbs_bare"] == pytest.approx(0.4)
     assert manifest["rusle"]["r_factor"]["r_source_label"] == "WEPP Climate-Derived R"
     assert "rusle/README.md" in catalog_updates
 
@@ -776,6 +781,7 @@ def test_build_rejects_topaz_backend(
             "p_value": 1.0,
             "force_polaris_refresh": False,
             "rock_fraction_of_rap_bare": "auto",
+            "rock_fraction_of_sbs_bare": "auto",
         },
     )
     monkeypatch.setattr(
@@ -807,6 +813,7 @@ def test_parse_inputs_accepts_max_slope_length_override(
 
     assert parsed["max_slope_length_m"] == pytest.approx(250.5)
     assert parsed["rock_fraction_of_rap_bare"] == "auto"
+    assert parsed["rock_fraction_of_sbs_bare"] == "auto"
 
 
 def test_parse_inputs_accepts_auto_and_numeric_rock_fraction(
@@ -818,9 +825,13 @@ def test_parse_inputs_accepts_auto_and_numeric_rock_fraction(
 
     parsed_auto = controller.parse_inputs(payload={"rock_fraction_of_rap_bare": "auto"})
     parsed_numeric = controller.parse_inputs(payload={"rock_fraction_of_rap_bare": "0.35"})
+    parsed_sbs_auto = controller.parse_inputs(payload={"rock_fraction_of_sbs_bare": "auto"})
+    parsed_sbs_numeric = controller.parse_inputs(payload={"rock_fraction_of_sbs_bare": "0.45"})
 
     assert parsed_auto["rock_fraction_of_rap_bare"] == "auto"
     assert parsed_numeric["rock_fraction_of_rap_bare"] == pytest.approx(0.35)
+    assert parsed_sbs_auto["rock_fraction_of_sbs_bare"] == "auto"
+    assert parsed_sbs_numeric["rock_fraction_of_sbs_bare"] == pytest.approx(0.45)
 
 
 def test_parse_inputs_rejects_non_positive_max_slope_length(
@@ -843,6 +854,8 @@ def test_parse_inputs_rejects_invalid_rock_fraction(
 
     with pytest.raises(ValueError, match="rock_fraction_of_rap_bare"):
         controller.parse_inputs(payload={"rock_fraction_of_rap_bare": 1.2})
+    with pytest.raises(ValueError, match="rock_fraction_of_sbs_bare"):
+        controller.parse_inputs(payload={"rock_fraction_of_sbs_bare": 1.2})
 
 
 def test_available_rap_years_uses_rap_manager_surface(
