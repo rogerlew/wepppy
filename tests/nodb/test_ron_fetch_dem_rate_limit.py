@@ -113,11 +113,14 @@ def _make_detached_ron(tmp_path: Path) -> Ron:
     ron.wd = str(tmp_path)
     ron._dem_db = "opentopo://COP30"
     ron._dem_is_vrt = False
+    ron._cellsize = 30.0
     ron.config_get_str = lambda *_args, **_kwargs: "opentopo://COP30"
-    ron._map = SimpleNamespace(
-        extent=[-120.5, 38.5, -120.4, 38.6],
-        cellsize=30.0,
-    )
+    ron._map = {
+        "extent": [-120.5, 38.5, -120.4, 38.6],
+        "center": [-120.45, 38.55],
+        "zoom": 12.0,
+        "cellsize": 30.0,
+    }
 
     logger = logging.getLogger(f"tests.ron.fetch_dem.{tmp_path.name}")
     logger.handlers = []
