@@ -1,8 +1,6 @@
 from __future__ import annotations
 
 import logging
-import sys
-import types
 from pathlib import Path
 from types import SimpleNamespace
 
@@ -261,16 +259,7 @@ def test_download_noaa_atlas14_intensity_skips_non_legacy_cligen_db(tmp_path: Pa
 
 
 def _install_fake_atlas14(monkeypatch: pytest.MonkeyPatch, atlas14_obj: object) -> None:
-    pfdf_mod = types.ModuleType("pfdf")
-    data_mod = types.ModuleType("pfdf.data")
-    noaa_mod = types.ModuleType("pfdf.data.noaa")
-    noaa_mod.atlas14 = atlas14_obj
-    data_mod.noaa = noaa_mod
-    pfdf_mod.data = data_mod
-
-    monkeypatch.setitem(sys.modules, "pfdf", pfdf_mod)
-    monkeypatch.setitem(sys.modules, "pfdf.data", data_mod)
-    monkeypatch.setitem(sys.modules, "pfdf.data.noaa", noaa_mod)
+    monkeypatch.setattr("wepppy.nodb.core.climate_artifact_export_service.atlas14", atlas14_obj)
 
 
 def _configure_noaa_retry_env(

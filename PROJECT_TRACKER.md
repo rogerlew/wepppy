@@ -1,7 +1,7 @@
 # PROJECT_TRACKER.md
 > Kanban board for wepppy work packages and vision items
 
-**Last Updated**: 2026-05-28
+**Last Updated**: 2026-05-29
 **Active Packages**: 7
 **Quick Links**: [Work Packages Directory](docs/work-packages/) | [God-Tier Prompting Strategy](docs/god-tier-prompting-strategy.md)
 
@@ -399,6 +399,15 @@ Currently active work packages. Limit to 2-4 packages to maintain focus.
 ## ✅ Done
 
 Recently completed work packages. Archived immediately upon completion.
+
+### PFDF Removal and Native NOAA Atlas 14 Client (2026-05-29)
+**Status**: ✅ **COMPLETE**
+
+**Link**: [docs/work-packages/20260529_noaa_atlas14_pfdf_removal/](docs/work-packages/20260529_noaa_atlas14_pfdf_removal/)
+
+**Lifecycle**: Backlog -> In Progress -> Done (2026-05-29)
+
+**Summary**: Removed GPLv3 `pfdf` runtime dependency by introducing a WEPPpy-owned Atlas 14 client at `wepppy/climates/noaa/atlas14.py` based on NOAA PFDS public endpoint contracts (`cgi_readH5.py` and HDSC FAQ references). Cut over `ClimateArtifactExportService.download_noaa_atlas14_intensity` to the new client, preserved optional NOAA artifact and retry/no-coverage semantics, removed `pfdf` from `docker/requirements-uv.txt`, updated NOAA tests/docs, and added deterministic unit coverage (`tests/climates/noaa/test_atlas14_client.py`). Focused validation passed (`4 passed`, `12 passed`, NOAA live tests network-gated/`4 skipped`). Full-suite gate still stops on unrelated baseline failure in `tests/nodb/test_ron_fetch_dem_copernicus.py` (`Ron._cellsize` AttributeError).
 
 ### RUSLE K Conservative Second-Stage Gap Fill (2026-05-28)
 **Status**: ✅ **COMPLETE**

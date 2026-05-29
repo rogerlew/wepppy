@@ -10,13 +10,13 @@ NOAA Atlas 14 provides precipitation frequency estimates (PFEs) for the United S
 - **Time Series Types**:
   - PDS (Partial Duration Series)
   - AMS (Annual Maximum Series)
-- **Statistics**: Mean, Upper bound (90% CI), Lower bound (90% CI)
+- **Statistics**: Mean, upper bound (90% CI), lower bound (90% CI)
 
 ## Test Script
 
 ### `test_atlas14_download.py`
 
-Test script that verifies the `pfdf.data.noaa.atlas14.download` function and generates reference artifacts.
+Test script that verifies the `wepppy.climates.noaa.atlas14.download` client and generates reference artifacts.
 
 **Usage:**
 ```bash
@@ -27,6 +27,7 @@ python test_atlas14_download.py
 1. Precipitation intensity download (metric units)
 2. Precipitation depth download (metric units)
 3. English units download (inches/hour)
+4. No-coverage behavior for unsupported locations
 
 ## Reference Artifacts
 
@@ -65,42 +66,48 @@ Each CSV file contains:
 
 2. **Frequency Estimates Table**: PFE values for different durations and return periods
    - Rows: Duration (5-min, 10-min, 15-min, 30-min, 1-hr, 2-hr, etc.)
-   - Columns: Annual Recurrence Interval (ARI) in years (1, 2, 5, 10, 25, 50, 100, 200, 500, 1000)
+   - Columns: Annual Recurrence Interval (ARI) in years
 
-## API Documentation
+## Public API References
 
-Official API documentation: https://ghsc.code-pages.usgs.gov/lhp/pfdf/api/data/noaa/atlas14.html
+The in-repo Atlas 14 client is based on publicly documented NOAA PFDS endpoint contracts:
+
+- NOAA HDSC FAQ (web scraping contract and query arguments):
+  - `https://www.weather.gov/owp/hdsc_faqs` (FAQ item 2.5)
+- NOAA PFDS query endpoint example:
+  - `https://hdsc.nws.noaa.gov/cgi-bin/new/cgi_readH5.py?lat=37.4000&lon=-119.2000&type=pf&data=depth&units=english&series=pds`
+
+The client also preserves option semantics historically used by the prior `pfdf` integration:
+
+- `https://ghsc.code-pages.usgs.gov/users/jking/pfdf/api/data/noaa/atlas14.html`
 
 ### Basic Usage
 
 ```python
-from pfdf.data.noaa import atlas14
+from wepppy.climates.noaa import atlas14
 
-# Download precipitation intensity data
 result = atlas14.download(
     lat=39.0,
     lon=-105.0,
-    parent='/path/to/save',
-    name='precipitation.csv',
-    statistic='mean',      # Options: 'mean', 'upper', 'lower', 'all'
-    data='intensity',      # Options: 'intensity', 'depth'
-    series='pds',          # Options: 'pds', 'ams'
-    units='metric',        # Options: 'metric', 'english'
-    timeout=30
+    parent="/path/to/save",
+    name="precipitation.csv",
+    statistic="mean",      # mean, upper, lower, all
+    data="intensity",      # intensity, depth
+    series="pds",          # pds, ams
+    units="metric",        # metric, english
+    timeout=30,
+    overwrite=True,
 )
 ```
 
-## Development Notes
+## Test Location
 
-### NumPy Compatibility
-The pfdf library was updated to support NumPy 1.26+ by fixing deprecated `copy=None` parameter usage in array operations.
-
-### Test Location
-The test uses coordinates 39°N, 105°W which corresponds to:
+The test uses coordinates 39°N, 105°W which correspond to:
 - Project area: Midwestern States
 - NOAA Atlas 14 Volume 8 Version 2
 
-### Future Development
+## Future Development
+
 These artifacts can be used for:
 - Validating data parsing routines
 - Testing integration with WEPPcloud climate data processing
@@ -109,6 +116,6 @@ These artifacts can be used for:
 
 ## Related Files
 
-- `/workdir/pfdf/pfdf/data/noaa/atlas14.py` - Main implementation
-- `/workdir/pfdf/tests/data/noaa/test_atlas14.py` - Unit tests
-- `https://github.com/rogerlew/usgs-pfdf` - pfdf repository
+- `/home/workdir/wepppy/wepppy/climates/noaa/atlas14.py` - WEPPpy NOAA Atlas 14 client
+- `/home/workdir/wepppy/tests/climates/noaa/test_atlas14_download.py` - integration characterization tests
+- `/home/workdir/wepppy/wepppy/nodb/core/climate_artifact_export_service.py` - climate exporter call-site

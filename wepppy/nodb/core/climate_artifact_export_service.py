@@ -12,6 +12,7 @@ import pandas as pd
 
 from wepppy.all_your_base.stats import weibull_series
 from wepppy.climates.cligen import ClimateFile
+from wepppy.climates.noaa import atlas14
 
 if TYPE_CHECKING:
     from wepppy.nodb.core.climate import Climate
@@ -393,13 +394,6 @@ class ClimateArtifactExportService:
         # Geolocation boundary: unavailable centroid should not fail the climate build.
         except (AttributeError, RuntimeError, TypeError, ValueError):
             climate.logger.exception("Failed resolving watershed centroid for NOAA Atlas 14")
-            return None
-
-        try:
-            from pfdf.data.noaa import atlas14
-        # Optional dependency boundary: pfdf may not be installed in all environments.
-        except ImportError:
-            climate.logger.exception("Failed importing pfdf NOAA Atlas 14 client")
             return None
 
         timeout_seconds = _parse_int_env(

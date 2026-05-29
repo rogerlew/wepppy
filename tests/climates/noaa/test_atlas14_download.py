@@ -1,7 +1,7 @@
 """
 Test script for NOAA Atlas 14 precipitation frequency data download
 
-This script tests the pfdf.data.noaa.atlas14.download function and saves
+This script tests the wepppy.climates.noaa.atlas14.download function and saves
 intensity and depth artifacts for reference in further development.
 
 Usage:
@@ -50,10 +50,9 @@ def test_atlas14_download_intensity():
     _ensure_network_enabled()
 
     try:
-        from pfdf.data.noaa import atlas14
+        from wepppy.climates.noaa import atlas14
     except ImportError as e:
-        print(f"✗ Failed to import pfdf.data.noaa.atlas14: {e}")
-        print("  Make sure pfdf is installed: pip install git+https://github.com/rogerlew/usgs-pfdf.git")
+        print(f"✗ Failed to import wepppy.climates.noaa.atlas14: {e}")
         return False
 
     print("\n" + "="*80)
@@ -139,9 +138,9 @@ def test_atlas14_download_depth():
     _ensure_network_enabled()
 
     try:
-        from pfdf.data.noaa import atlas14
+        from wepppy.climates.noaa import atlas14
     except ImportError as e:
-        print(f"✗ Failed to import pfdf.data.noaa.atlas14: {e}")
+        print(f"✗ Failed to import wepppy.climates.noaa.atlas14: {e}")
         return False
 
     print("\n" + "="*80)
@@ -226,7 +225,7 @@ def test_atlas14_download_english_units():
     _ensure_network_enabled()
 
     try:
-        from pfdf.data.noaa import atlas14
+        from wepppy.climates.noaa import atlas14
     except ImportError:
         return False
 
@@ -279,7 +278,7 @@ def test_atlas14_no_coverage():
     _ensure_network_enabled()
 
     try:
-        from pfdf.data.noaa import atlas14
+        from wepppy.climates.noaa import atlas14
     except ImportError:
         return False
 
