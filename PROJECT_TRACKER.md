@@ -413,9 +413,12 @@ over-TOA source rows at the WEPPpy producer boundary, added ADR-0006, and
 implemented bounded normalization to baseline `sunmap.r3` before generated CLI
 `rad` publication while preserving original source values and a per-build CSV
 provenance artifact. The WBVAL03 blocker row `1990-02-18` now normalizes from
-`486.398513 Ly/day` to `453.068716 Ly/day`; real-run validation found 53
-affected rows and post-normalization max excess `0.0`. Focused validation
-passed (`18` + `29` tests). Follow-up is to regenerate downstream openWEPP
+`486.398513 Ly/day` to publication-safe `453 Ly/day`; real-run validation
+found 53 affected rows and post-normalization max excess `0.0`. Post-rebuild
+verification found the exact-bound rule still allowed 22 integer CLI rounding
+exceedances, so the producer now publishes the largest integer L/day value
+below `sunmap.r3`. Focused validation passed (`20` + `29` tests). Follow-up is
+to regenerate downstream openWEPP
 WBVAL03 inputs from corrected WEPPpy climate artifacts.
 
 ### PFDF Removal and Native NOAA Atlas 14 Client (2026-05-29)

@@ -61,6 +61,7 @@ CLIGEN_OBSERVED_QUALITY_GUARD_USER_MESSAGE = (
 
 _SUNMAP_SOLCON_LY_PER_MIN = 1.94
 _SUNMAP_DOMAIN_EPS = 1.0e-12
+_CLIGEN_DAILY_RADIATION_PUBLICATION_DECIMALS = 0
 
 
 @dataclass(frozen=True)
@@ -129,7 +130,8 @@ def _normalize_daymet_radiation_to_toa_bound(
     if "srad(l/day)" not in df.columns:
         raise KeyError("expected Daymet dataframe column 'srad(l/day)'")
 
-    source = pd.to_numeric(df["srad(l/day)"], errors="raise").astype(float)
+    source_column = "srad_source(l/day)" if "srad_source(l/day)" in df.columns else "srad(l/day)"
+    source = pd.to_numeric(df[source_column], errors="raise").astype(float)
     bounds = pd.Series(
         [
             _baseline_sunmap_horizontal_daily_potential_ly(
@@ -142,10 +144,14 @@ def _normalize_daymet_radiation_to_toa_bound(
         dtype=float,
         name="srad_toa_bound(l/day)",
     )
+    publication_bounds = np.floor(bounds)
+    published_source = source.round(_CLIGEN_DAILY_RADIATION_PUBLICATION_DECIMALS)
     over_toa = source > bounds
-    normalized = source.mask(over_toa, bounds)
+    publication_over_toa = published_source > bounds
+    normalize_mask = over_toa | publication_over_toa
+    normalized = source.mask(normalize_mask, publication_bounds)
 
-    affected_count = int(over_toa.sum())
+    affected_count = int(normalize_mask.sum())
     artifact_path = None
     if affected_count == 0:
         return DaymetRadiationNormalizationResult(normalized, affected_count, artifact_path)
@@ -153,24 +159,31 @@ def _normalize_daymet_radiation_to_toa_bound(
     if "srad_source(l/day)" not in df.columns:
         df["srad_source(l/day)"] = source
     df["srad_toa_bound(l/day)"] = bounds
-    df["srad_toa_normalized"] = over_toa
-    df["srad_toa_normalization_reason"] = np.where(over_toa, "daymet_over_toa", "")
+    df["srad_toa_publication_bound(l/day)"] = publication_bounds
+    df["srad_toa_normalized"] = normalize_mask
+    df["srad_toa_normalization_reason"] = np.where(
+        over_toa,
+        "daymet_over_toa",
+        np.where(publication_over_toa, "daymet_toa_publication_rounding", ""),
+    )
     df["srad_toa_bound_latitude(deg)"] = float(latitude_deg)
     df["srad(l/day)"] = normalized
 
-    affected_dates = [pd.Timestamp(value) for value in df.index[over_toa]]
+    affected_dates = [pd.Timestamp(value) for value in df.index[normalize_mask]]
     provenance = pd.DataFrame(
         {
             "date": [value.date().isoformat() for value in affected_dates],
             "year": [int(value.year) for value in affected_dates],
             "julian": [int(value.dayofyear) for value in affected_dates],
             "latitude_deg": float(latitude_deg),
-            "source_column": "srad(l/day)",
-            "original_srad_l_day": source[over_toa].to_numpy(),
-            "toa_bound_l_day": bounds[over_toa].to_numpy(),
-            "normalized_srad_l_day": normalized[over_toa].to_numpy(),
-            "excess_l_day": (source[over_toa] - bounds[over_toa]).to_numpy(),
-            "normalization_reason": "daymet_over_toa",
+            "source_column": source_column,
+            "original_srad_l_day": source[normalize_mask].to_numpy(),
+            "toa_bound_l_day": bounds[normalize_mask].to_numpy(),
+            "toa_publication_bound_l_day": publication_bounds[normalize_mask].to_numpy(),
+            "normalized_srad_l_day": normalized[normalize_mask].to_numpy(),
+            "published_original_srad_l_day": published_source[normalize_mask].to_numpy(),
+            "excess_l_day": (source[normalize_mask] - bounds[normalize_mask]).to_numpy(),
+            "normalization_reason": df.loc[normalize_mask, "srad_toa_normalization_reason"].to_numpy(),
         }
     )
 

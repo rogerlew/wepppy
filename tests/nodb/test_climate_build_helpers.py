@@ -186,9 +186,11 @@ def test_daymet_radiation_normalization_clamps_over_toa_rows_and_writes_provenan
     assert result.affected_count == 1
     assert result.artifact_path == str(tmp_path / "daymet_radiation_toa_normalization_wepp_cli.csv")
     assert result.normalized_values.iloc[0] == pytest.approx(300.0)
-    assert result.normalized_values.iloc[1] == pytest.approx(453.068716, rel=1.0e-6)
-    assert df["srad(l/day)"].iloc[1] == pytest.approx(453.068716, rel=1.0e-6)
+    assert result.normalized_values.iloc[1] == pytest.approx(453.0)
+    assert df["srad(l/day)"].iloc[1] == pytest.approx(453.0)
     assert df["srad_source(l/day)"].iloc[1] == pytest.approx(486.0)
+    assert df["srad_toa_bound(l/day)"].iloc[1] == pytest.approx(453.068716, rel=1.0e-6)
+    assert df["srad_toa_publication_bound(l/day)"].iloc[1] == pytest.approx(453.0)
     assert bool(df["srad_toa_normalized"].iloc[1]) is True
     assert df["srad_toa_normalization_reason"].iloc[1] == "daymet_over_toa"
 
@@ -196,6 +198,61 @@ def test_daymet_radiation_normalization_clamps_over_toa_rows_and_writes_provenan
     assert list(provenance["date"]) == ["1990-02-18"]
     assert provenance["original_srad_l_day"].iloc[0] == pytest.approx(486.0)
     assert provenance["toa_bound_l_day"].iloc[0] == pytest.approx(453.068716, rel=1.0e-6)
+    assert provenance["toa_publication_bound_l_day"].iloc[0] == pytest.approx(453.0)
+    assert provenance["normalized_srad_l_day"].iloc[0] == pytest.approx(453.0)
+
+
+def test_daymet_radiation_normalization_accounts_for_cli_integer_publication(
+    tmp_path: Path,
+) -> None:
+    df = pd.DataFrame(
+        {
+            "srad(l/day)": [458.7],
+        },
+        index=pd.to_datetime(["1990-02-19"]),
+    )
+
+    result = helper_module._normalize_daymet_radiation_to_toa_bound(
+        df,
+        latitude_deg=43.73,
+        cli_dir=str(tmp_path),
+        artifact_label="wepp.cli",
+    )
+
+    assert result.affected_count == 1
+    assert df["srad_source(l/day)"].iloc[0] == pytest.approx(458.7)
+    assert df["srad_toa_bound(l/day)"].iloc[0] == pytest.approx(458.706289, rel=1.0e-6)
+    assert df["srad_toa_publication_bound(l/day)"].iloc[0] == pytest.approx(458.0)
+    assert df["srad(l/day)"].iloc[0] == pytest.approx(458.0)
+    assert df["srad_toa_normalization_reason"].iloc[0] == "daymet_toa_publication_rounding"
+
+
+def test_daymet_radiation_normalization_is_idempotent_with_preserved_source(
+    tmp_path: Path,
+) -> None:
+    df = pd.DataFrame(
+        {
+            "srad(l/day)": [453.068716],
+            "srad_source(l/day)": [486.0],
+        },
+        index=pd.to_datetime(["1990-02-18"]),
+    )
+
+    result = helper_module._normalize_daymet_radiation_to_toa_bound(
+        df,
+        latitude_deg=43.73,
+        cli_dir=str(tmp_path),
+        artifact_label="wepp.cli",
+    )
+
+    assert result.affected_count == 1
+    assert df["srad_source(l/day)"].iloc[0] == pytest.approx(486.0)
+    assert df["srad(l/day)"].iloc[0] == pytest.approx(453.0)
+    assert df["srad_toa_normalization_reason"].iloc[0] == "daymet_over_toa"
+
+    provenance = pd.read_csv(result.artifact_path)
+    assert provenance["source_column"].iloc[0] == "srad_source(l/day)"
+    assert provenance["original_srad_l_day"].iloc[0] == pytest.approx(486.0)
 
 
 def test_build_observed_daymet_normalizes_over_toa_source_before_cli_publication(
@@ -238,8 +295,10 @@ def test_build_observed_daymet_normalizes_over_toa_source_before_cli_publication
     assert cli.loc[cli["da"] == 18, "rad"].iloc[0] == pytest.approx(453.0)
 
     exported = pd.read_parquet(tmp_path / "daymet_1990-1990.parquet")
-    assert exported["srad(l/day)"].iloc[1] == pytest.approx(453.068716, rel=1.0e-6)
+    assert exported["srad(l/day)"].iloc[1] == pytest.approx(453.0)
     assert exported["srad_source(l/day)"].iloc[1] == pytest.approx(486.0)
+    assert exported["srad_toa_bound(l/day)"].iloc[1] == pytest.approx(453.068716, rel=1.0e-6)
+    assert exported["srad_toa_publication_bound(l/day)"].iloc[1] == pytest.approx(453.0)
     assert (tmp_path / "daymet_radiation_toa_normalization_wepp.csv").exists()
 
 
@@ -275,8 +334,10 @@ def test_build_observed_daymet_interpolated_persists_radiation_normalization(
     assert cli.loc[cli["da"] == 18, "rad"].iloc[0] == pytest.approx(453.0)
 
     exported = pd.read_parquet(source_path)
-    assert exported["srad(l/day)"].iloc[1] == pytest.approx(453.068716, rel=1.0e-6)
+    assert exported["srad(l/day)"].iloc[1] == pytest.approx(453.0)
     assert exported["srad_source(l/day)"].iloc[1] == pytest.approx(486.0)
+    assert exported["srad_toa_bound(l/day)"].iloc[1] == pytest.approx(453.068716, rel=1.0e-6)
+    assert exported["srad_toa_publication_bound(l/day)"].iloc[1] == pytest.approx(453.0)
     assert (tmp_path / "daymet_radiation_toa_normalization_p1.csv").exists()
 
 

@@ -28,8 +28,11 @@ over-TOA daily radiation rows before writing generated WEPP CLI radiation:
 - compute the baseline `sunmap.r3` horizontal daily potential in Langleys/day
   from day-of-year and CLI latitude using the legacy `sunmap` formula and solar
   constant `1.94 Ly min^-1`;
-- when Daymet-derived `srad(l/day)` exceeds that bound, publish the bound
-  instead of the over-bound source value;
+- when Daymet-derived `srad(l/day)` exceeds that bound, publish the largest
+  CLIGEN/WEPP CLI `rad` value that remains less than or equal to the bound;
+- also apply that publication-safe value when a fractional source value is at
+  or below `sunmap.r3` but the integer CLI `rad` formatter would round it above
+  `sunmap.r3`;
 - leave all non-over-bound rows unchanged;
 - preserve original source values in the exported Daymet parquet with explicit
   provenance columns;
@@ -60,9 +63,11 @@ New behavior:
 
 - observed-Daymet `srad(l/day)` is compared to baseline `sunmap.r3` using the
   CLI latitude and day-of-year;
-- rows above `sunmap.r3` are bounded to `sunmap.r3`;
+- rows above `sunmap.r3`, or rows whose integer CLI publication would exceed
+  `sunmap.r3`, are bounded to the publication-safe integer value below
+  `sunmap.r3`;
 - provenance columns and CSV artifact preserve the original source value and
-  the exact bound used.
+  the exact physical bound plus the publication-safe value used.
 
 ## Rationale
 
@@ -74,6 +79,12 @@ source rows from blocking downstream validation and operation.
 Using baseline `sunmap.r3` avoids an arbitrary clamp. It matches the downstream
 contract that rejected the values, keeps the unit in Langleys/day, and preserves
 auditability through explicit artifacts.
+
+The WEPP CLI `rad` field is emitted as an integer by
+`ClimateFile.replace_var()`. Therefore the production value must be the largest
+integer-publishable value that does not exceed the exact `sunmap.r3` bound;
+otherwise a normalized fractional bound such as `458.706289` can publish as
+`459` and still trip the downstream guard.
 
 ## Alternatives Considered
 
@@ -131,6 +142,7 @@ which will again let downstream guards fail closed on over-bound rows.
 - Parquet provenance columns:
   - `srad_source(l/day)`
   - `srad_toa_bound(l/day)`
+  - `srad_toa_publication_bound(l/day)`
   - `srad_toa_normalized`
   - `srad_toa_normalization_reason`
   - `srad_toa_bound_latitude(deg)`

@@ -55,7 +55,7 @@ normalization reason, and cover the rule with an ADR plus regression tests.
   `indispensable-presenter`: 53 affected rows, post-normalization max excess
   over bound `0.0`.
 - [x] (2026-06-06 21:03 UTC) Ran focused validation:
-  `tests/nodb/test_climate_build_helpers.py` (`18 passed`) and additional
+  `tests/nodb/test_climate_build_helpers.py` (`20 passed`) and additional
   climate suites (`29 passed`).
 - [x] (2026-06-06 21:03 UTC) Updated package disposition artifacts.
 - [x] (2026-06-06 21:07 UTC) Moved this ExecPlan to `prompts/completed/` and
@@ -108,8 +108,8 @@ rows are normalized.
 
 The concrete `indispensable-presenter` blocker is resolved at the producer
 boundary: the `1990-02-18` source row that previously published rounded
-`rad=486` is normalized to `453.068716 Ly/day`, which publishes rounded
-`rad=453` and satisfies the downstream `radly <= sunmap.r3` guard.
+`rad=486` is normalized to publication-safe `453 Ly/day`, which satisfies the
+downstream `radly <= sunmap.r3` guard.
 
 Focused validation passed. Remaining work is outside this package: regenerate
 or rebuild downstream openWEPP validation inputs from corrected WEPPpy climate

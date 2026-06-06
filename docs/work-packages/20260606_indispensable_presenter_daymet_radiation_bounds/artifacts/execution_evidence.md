@@ -42,8 +42,27 @@ For the downstream WBVAL03 blocker:
 - original Daymet-derived source value: `486.398513 Ly/day`
 - generated rounded CLI `rad`: `486 Ly/day`
 - baseline `sunmap.r3` bound: `453.068716 Ly/day`
-- normalized value before CLI publication: `453.068716 Ly/day`
+- normalized publication-safe value before CLI publication: `453 Ly/day`
 - generated rounded CLI `rad` after normalization: `453 Ly/day`
+
+Post-close rebuild verification on `2026-06-06` showed that exact fractional
+`sunmap.r3` normalization was not sufficient for every row because
+`ClimateFile.replace_var()` serializes CLI `rad` as an integer. The corrected
+publication rule preserves exact `sunmap.r3` in `srad_toa_bound(l/day)` and
+publishes `srad_toa_publication_bound(l/day)`, the largest integer L/day value
+that remains below the exact bound.
+
+Current rebuilt-run verification:
+
+- artifact timestamp: `2026-06-06 14:19` local filesystem time
+- current `daymet_1990-1995.parquet` normalized rows: `53`
+- current `wepp.cli` / `wepp_cli.parquet` rows above exact `sunmap.r3` after
+  integer publication: `22`
+- maximum current published excess: `0.437451 Ly/day`
+- repaired-helper simulation against the same source artifact: `0` published
+  exceedances, maximum simulated excess `-0.000292877 Ly/day`
+- conclusion: the current rebuilt run is not yet openWEPP-clean; rebuild the
+  climate once more after the publication-safe producer fix.
 
 ## Real-Run Validation
 
@@ -115,6 +134,8 @@ Regression tests:
 - `tests/nodb/test_climate_build_helpers.py`
   - validates the `1990-02-18` bound,
   - validates over-TOA row normalization and provenance CSV,
+  - validates fractional-bound CLI publication does not round above
+    `sunmap.r3`,
   - validates `build_observed_daymet()` publishes bounded CLI `rad`,
   - validates `build_observed_daymet_interpolated()` publishes bounded CLI
     `rad` and persists parquet provenance.
@@ -127,7 +148,7 @@ Focused helper suite:
 
 Result:
 
-- `18 passed`
+- `20 passed`
 
 Additional focused climate suites:
 

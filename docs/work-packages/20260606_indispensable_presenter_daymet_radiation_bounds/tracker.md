@@ -108,7 +108,7 @@ date, units, station/run context, and downstream acceptance evidence recorded.
   - `indispensable-presenter` normalization affects 53 rows.
   - Post-normalization max excess over baseline `sunmap.r3` is `0.0`.
   - The `1990-02-18` source row normalizes from `486.398513 Ly/day` to
-    `453.068716 Ly/day`.
+    publication-safe `453 Ly/day`.
 - **Danger signals observed**: None beyond baseline defect evidence.
 - **Temporary callus register**: None.
 - **Softening experiments**: Not applicable.
@@ -222,7 +222,7 @@ date, units, station/run context, and downstream acceptance evidence recorded.
 
 **Test results**:
 - `wctl run-pytest tests/nodb/test_climate_build_helpers.py --maxfail=1`
-  (`18 passed`).
+  (`20 passed`).
 - `wctl run-pytest tests/nodb/test_climate_artifact_export_service.py
   tests/climate/test_cligen_peak_intensity_contract.py
   tests/nodb/test_climate_build_router_services.py
