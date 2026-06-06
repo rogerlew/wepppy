@@ -6,9 +6,12 @@ import os
 import random
 import time
 from concurrent.futures import FIRST_COMPLETED, ProcessPoolExecutor, ThreadPoolExecutor, wait
+from dataclasses import dataclass
 from datetime import date, datetime
+from math import acos, cos, isfinite, pi, sin, tan
 from os.path import exists as _exists
 from os.path import join as _join
+from pathlib import Path
 from subprocess import PIPE, Popen
 from typing import TYPE_CHECKING, Any, Optional, Tuple
 
@@ -56,8 +59,136 @@ CLIGEN_OBSERVED_QUALITY_GUARD_USER_MESSAGE = (
 )
 
 
+_SUNMAP_SOLCON_LY_PER_MIN = 1.94
+_SUNMAP_DOMAIN_EPS = 1.0e-12
+
+
+@dataclass(frozen=True)
+class DaymetRadiationNormalizationResult:
+    normalized_values: pd.Series
+    affected_count: int
+    artifact_path: Optional[str]
+
+
 def _is_cligen_observed_quality_guard_error(exc: RuntimeError) -> bool:
     return "cligen run_observed quality guard tripped" in str(exc).lower()
+
+
+def _baseline_sunmap_horizontal_daily_potential_ly(julian_day: int, latitude_deg: float) -> float:
+    """Return baseline ``sunmap.r3`` horizontal daily potential in Langleys/day."""
+    if not 1 <= int(julian_day) <= 366:
+        raise ValueError(f"julian_day must be in 1..366, got {julian_day!r}")
+    if not isfinite(float(latitude_deg)):
+        raise ValueError(f"latitude_deg must be finite, got {latitude_deg!r}")
+
+    sdate = float(julian_day)
+    radlat = float(latitude_deg) * pi / 180.0
+    declination = 0.00698 - 0.4067 * cos((sdate + 10.0) * 0.0172)
+    eccentricity = 1.0 - 0.0167 * cos((sdate - 3.0) * 0.0172)
+    if abs(eccentricity) <= _SUNMAP_DOMAIN_EPS:
+        raise ValueError(f"invalid sunmap eccentricity for julian_day={julian_day}")
+
+    r1 = (60.0 * _SUNMAP_SOLCON_LY_PER_MIN) / (eccentricity * eccentricity)
+    hour_angle_arg = -(tan(radlat) * tan(declination))
+    hour_angle_arg = max(-1.0, min(1.0, hour_angle_arg))
+    sunset_hour_angle = acos(hour_angle_arg)
+    t1 = sunset_hour_angle
+    t0 = -sunset_hour_angle
+
+    r3 = r1 * (
+        (sin(declination) * sin(radlat) * (t1 - t0) * 12.0 / pi)
+        + (cos(declination) * cos(radlat) * (sin(t1) - sin(t0)) * 12.0 / pi)
+    )
+    if not isfinite(r3) or r3 <= _SUNMAP_DOMAIN_EPS:
+        raise ValueError(
+            "invalid baseline sunmap horizontal daily potential "
+            f"for julian_day={julian_day} latitude_deg={latitude_deg}"
+        )
+    return r3
+
+
+def _safe_daymet_radiation_artifact_label(label: str) -> str:
+    safe = "".join(c if c.isalnum() or c in {"-", "_"} else "_" for c in str(label))
+    return safe or "wepp"
+
+
+def _normalize_daymet_radiation_to_toa_bound(
+    df: pd.DataFrame,
+    *,
+    latitude_deg: float,
+    cli_dir: Optional[str] = None,
+    artifact_label: str = "wepp",
+    logger: Optional[Any] = None,
+) -> DaymetRadiationNormalizationResult:
+    """Clamp Daymet over-TOA radiation to baseline daily horizontal potential.
+
+    Daymet observed radiation remains the source value. This helper only
+    normalizes rows that exceed the baseline ``sunmap.r3`` physical upper bound
+    consumed by openWEPP, and records provenance columns/artifact for review.
+    """
+    if "srad(l/day)" not in df.columns:
+        raise KeyError("expected Daymet dataframe column 'srad(l/day)'")
+
+    source = pd.to_numeric(df["srad(l/day)"], errors="raise").astype(float)
+    bounds = pd.Series(
+        [
+            _baseline_sunmap_horizontal_daily_potential_ly(
+                pd.Timestamp(index_value).dayofyear,
+                latitude_deg,
+            )
+            for index_value in df.index
+        ],
+        index=df.index,
+        dtype=float,
+        name="srad_toa_bound(l/day)",
+    )
+    over_toa = source > bounds
+    normalized = source.mask(over_toa, bounds)
+
+    affected_count = int(over_toa.sum())
+    artifact_path = None
+    if affected_count == 0:
+        return DaymetRadiationNormalizationResult(normalized, affected_count, artifact_path)
+
+    if "srad_source(l/day)" not in df.columns:
+        df["srad_source(l/day)"] = source
+    df["srad_toa_bound(l/day)"] = bounds
+    df["srad_toa_normalized"] = over_toa
+    df["srad_toa_normalization_reason"] = np.where(over_toa, "daymet_over_toa", "")
+    df["srad_toa_bound_latitude(deg)"] = float(latitude_deg)
+    df["srad(l/day)"] = normalized
+
+    affected_dates = [pd.Timestamp(value) for value in df.index[over_toa]]
+    provenance = pd.DataFrame(
+        {
+            "date": [value.date().isoformat() for value in affected_dates],
+            "year": [int(value.year) for value in affected_dates],
+            "julian": [int(value.dayofyear) for value in affected_dates],
+            "latitude_deg": float(latitude_deg),
+            "source_column": "srad(l/day)",
+            "original_srad_l_day": source[over_toa].to_numpy(),
+            "toa_bound_l_day": bounds[over_toa].to_numpy(),
+            "normalized_srad_l_day": normalized[over_toa].to_numpy(),
+            "excess_l_day": (source[over_toa] - bounds[over_toa]).to_numpy(),
+            "normalization_reason": "daymet_over_toa",
+        }
+    )
+
+    if cli_dir is not None:
+        label = _safe_daymet_radiation_artifact_label(artifact_label)
+        artifact = Path(cli_dir) / f"daymet_radiation_toa_normalization_{label}.csv"
+        provenance.to_csv(artifact, index=False)
+        artifact_path = str(artifact)
+
+    if logger is not None:
+        logger.warning(
+            "  normalized %s Daymet radiation row(s) to baseline sunmap TOA bound"
+            " using latitude %.5f",
+            affected_count,
+            latitude_deg,
+        )
+
+    return DaymetRadiationNormalizationResult(normalized, affected_count, artifact_path)
 
 
 def _run_observed_with_quality_guard_handling(
@@ -260,8 +391,14 @@ def build_observed_daymet(
     dates = df.index
     cli_path = _join(cli_dir, cli_fn)
     climate = ClimateFile(cli_path)
+    radiation = _normalize_daymet_radiation_to_toa_bound(
+        df,
+        latitude_deg=climate.lat,
+        cli_dir=cli_dir,
+        artifact_label=Path(cli_fn).stem,
+    )
 
-    climate.replace_var("rad", dates, df["srad(l/day)"])
+    climate.replace_var("rad", dates, radiation.normalized_values)
     climate.replace_var("tdew", dates, df["tdew(degc)"])
 
     if gridmet_wind:
@@ -309,8 +446,14 @@ def build_observed_daymet_interpolated(
     dates = df.index
     cli_path = _join(cli_dir, cli_fn)
     climate = ClimateFile(cli_path)
+    radiation = _normalize_daymet_radiation_to_toa_bound(
+        df,
+        latitude_deg=climate.lat,
+        cli_dir=cli_dir,
+        artifact_label=topaz_id,
+    )
 
-    climate.replace_var("rad", dates, df["srad(l/day)"])
+    climate.replace_var("rad", dates, radiation.normalized_values)
     climate.replace_var("tdew", dates, df["tdew(degc)"])
 
     if wind_vs is not None:
@@ -319,6 +462,7 @@ def build_observed_daymet_interpolated(
     if wind_dir is not None:
         climate.replace_var("w-dir", dates, wind_dir)
 
+    df.to_parquet(_join(cli_dir, _parquet_fn))
     climate.write(cli_path)
     return topaz_id, bool(quality_guard_bypassed)
 

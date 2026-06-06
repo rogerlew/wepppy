@@ -53,3 +53,4 @@ Each ADR should normally include:
 - `ADR-0003`: [RUSLE `observed_rap` Surface-Rock Partition for `C`](ADR-0003-rusle-observed-rap-surface-rock-partition.md) (Accepted, 2026-05-27)
 - `ADR-0004`: [RUSLE `scenario_sbs` Surface-Rock Partition for `C`](ADR-0004-rusle-scenario-sbs-surface-rock-partition.md) (Accepted, 2026-05-27)
 - `ADR-0005`: [RUSLE `K` Conservative Second-Stage Gap Fill](ADR-0005-rusle-k-second-stage-gap-fill.md) (Accepted, 2026-05-27)
+- `ADR-0006`: [Observed-Daymet Radiation TOA Normalization](ADR-0006-observed-daymet-radiation-toa-normalization.md) (Accepted, 2026-06-06)

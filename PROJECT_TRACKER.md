@@ -1,7 +1,7 @@
 # PROJECT_TRACKER.md
 > Kanban board for wepppy work packages and vision items
 
-**Last Updated**: 2026-05-29
+**Last Updated**: 2026-06-06
 **Active Packages**: 7
 **Quick Links**: [Work Packages Directory](docs/work-packages/) | [God-Tier Prompting Strategy](docs/god-tier-prompting-strategy.md)
 
@@ -399,6 +399,24 @@ Currently active work packages. Limit to 2-4 packages to maintain focus.
 ## ✅ Done
 
 Recently completed work packages. Archived immediately upon completion.
+
+### Indispensable Presenter Daymet Radiation Bounds Investigation (2026-06-06)
+**Status**: ✅ **COMPLETE**
+
+**Link**: [docs/work-packages/20260606_indispensable_presenter_daymet_radiation_bounds/](docs/work-packages/20260606_indispensable_presenter_daymet_radiation_bounds/)
+
+**Lifecycle**: Backlog -> In Progress -> Done (2026-06-06)
+
+**Summary**: Closed the observed-Daymet radiation source-boundary package for
+`/wc1/runs/in/indispensable-presenter`. Execution proved genuine Daymet
+over-TOA source rows at the WEPPpy producer boundary, added ADR-0006, and
+implemented bounded normalization to baseline `sunmap.r3` before generated CLI
+`rad` publication while preserving original source values and a per-build CSV
+provenance artifact. The WBVAL03 blocker row `1990-02-18` now normalizes from
+`486.398513 Ly/day` to `453.068716 Ly/day`; real-run validation found 53
+affected rows and post-normalization max excess `0.0`. Focused validation
+passed (`18` + `29` tests). Follow-up is to regenerate downstream openWEPP
+WBVAL03 inputs from corrected WEPPpy climate artifacts.
 
 ### PFDF Removal and Native NOAA Atlas 14 Client (2026-05-29)
 **Status**: ✅ **COMPLETE**

@@ -5,6 +5,7 @@ import logging
 from pathlib import Path
 from types import SimpleNamespace
 
+import pandas as pd
 import pytest
 
 import wepppy.nodb.core.climate_build_helpers as helper_module
@@ -100,6 +101,46 @@ class _MonthliesClimateFile:
         return [1.0] * 12
 
 
+class _ObservedDaymetCligenStub:
+    def __init__(self, cli_dir: Path) -> None:
+        self.cli_dir = cli_dir
+
+    def run_observed(
+        self,
+        _prn_fn: str,
+        *,
+        cli_fn: str,
+        adjust_mx_pt5: bool,
+        silently_pass_quality_guard: bool,
+    ) -> bool:
+        _ = (adjust_mx_pt5, silently_pass_quality_guard)
+        (self.cli_dir / cli_fn).write_text(
+            "\n".join(
+                [
+                    "5.32300",
+                    "   1   0   0",
+                    "  Station:  DRIGGS ID                                      CLIGEN VER. 5.32300 -r:    0 -I: 2",
+                    " Latitude Longitude Elevation (m) Obs. Years   Beginning year  Years simulated Command Line:",
+                    "    43.73  -111.12        1859          40        1990             1          -itest.par -Ows.prn -owepp.cli",
+                    " Observed monthly ave max temperature (C)",
+                    "  -1.8   0.7   5.1  11.1  16.4  21.8  26.8  25.9  21.0  13.4   4.6  -1.2",
+                    " Observed monthly ave min temperature (C)",
+                    " -13.5 -11.8  -7.1  -2.9   1.2   5.0   8.4   7.3   3.0  -2.1  -7.5 -12.5",
+                    " Observed monthly ave solar radiation (Langleys/day)",
+                    " 129.0 207.0 330.0 440.0 540.0 602.0 630.0 530.0 404.0 267.0 149.0 103.0",
+                    " Observed monthly ave precipitation (mm)",
+                    "  28.5  18.9  26.5  33.1  47.8  32.0  26.8  25.5  24.3  30.6  27.4  32.2",
+                    " da mo year  prcp  dur   tp     ip  tmax  tmin  rad  w-vl w-dir  tdew",
+                    "             (mm)  (h)               (C)   (C) (l/d) (m/s)(Deg)   (C)",
+                    " 17  2 1990   0.0   0.0  0.0    0.0   0.0  -6.0  300  2.0   180  -7.0",
+                    " 18  2 1990   0.0   0.0  0.0    0.0   1.0  -5.0  100  2.0   180  -6.0",
+                    "",
+                ]
+            )
+        )
+        return False
+
+
 class _FutureStub:
     def __init__(self, *, value=None, exc: Exception | None = None, done: bool = True) -> None:
         self._value = value
@@ -118,6 +159,125 @@ class _FutureStub:
     def cancel(self) -> None:
         self.cancel_called = True
         self._done = True
+
+
+def test_baseline_sunmap_daily_potential_matches_wbval03_failure_bound() -> None:
+    bound = helper_module._baseline_sunmap_horizontal_daily_potential_ly(49, 43.73)
+    assert bound == pytest.approx(453.068716, rel=1.0e-6)
+
+
+def test_daymet_radiation_normalization_clamps_over_toa_rows_and_writes_provenance(
+    tmp_path: Path,
+) -> None:
+    df = pd.DataFrame(
+        {
+            "srad(l/day)": [300.0, 486.0],
+        },
+        index=pd.to_datetime(["1990-02-17", "1990-02-18"]),
+    )
+
+    result = helper_module._normalize_daymet_radiation_to_toa_bound(
+        df,
+        latitude_deg=43.73,
+        cli_dir=str(tmp_path),
+        artifact_label="wepp.cli",
+    )
+
+    assert result.affected_count == 1
+    assert result.artifact_path == str(tmp_path / "daymet_radiation_toa_normalization_wepp_cli.csv")
+    assert result.normalized_values.iloc[0] == pytest.approx(300.0)
+    assert result.normalized_values.iloc[1] == pytest.approx(453.068716, rel=1.0e-6)
+    assert df["srad(l/day)"].iloc[1] == pytest.approx(453.068716, rel=1.0e-6)
+    assert df["srad_source(l/day)"].iloc[1] == pytest.approx(486.0)
+    assert bool(df["srad_toa_normalized"].iloc[1]) is True
+    assert df["srad_toa_normalization_reason"].iloc[1] == "daymet_over_toa"
+
+    provenance = pd.read_csv(result.artifact_path)
+    assert list(provenance["date"]) == ["1990-02-18"]
+    assert provenance["original_srad_l_day"].iloc[0] == pytest.approx(486.0)
+    assert provenance["toa_bound_l_day"].iloc[0] == pytest.approx(453.068716, rel=1.0e-6)
+
+
+def test_build_observed_daymet_normalizes_over_toa_source_before_cli_publication(
+    tmp_path: Path,
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    df = pd.DataFrame(
+        {
+            "prcp(mm/day)": [0.0, 0.0],
+            "tmax(degc)": [0.0, 1.0],
+            "tmin(degc)": [-6.0, -5.0],
+            "srad(l/day)": [300.0, 486.0],
+            "tdew(degc)": [-7.0, -6.0],
+        },
+        index=pd.to_datetime(["1990-02-17", "1990-02-18"]),
+    )
+
+    import wepppy.climates.daymet as daymet_module
+
+    monkeypatch.setattr(
+        daymet_module,
+        "retrieve_historical_timeseries",
+        lambda *_args, **_kwargs: df.copy(),
+    )
+
+    helper_module.build_observed_daymet(
+        _ObservedDaymetCligenStub(tmp_path),
+        -111.12,
+        43.73,
+        1990,
+        1990,
+        str(tmp_path),
+        "ws.prn",
+        "wepp.cli",
+        gridmet_wind=False,
+    )
+
+    cli = helper_module.ClimateFile(str(tmp_path / "wepp.cli")).as_dataframe()
+    assert cli.loc[cli["da"] == 17, "rad"].iloc[0] == pytest.approx(300.0)
+    assert cli.loc[cli["da"] == 18, "rad"].iloc[0] == pytest.approx(453.0)
+
+    exported = pd.read_parquet(tmp_path / "daymet_1990-1990.parquet")
+    assert exported["srad(l/day)"].iloc[1] == pytest.approx(453.068716, rel=1.0e-6)
+    assert exported["srad_source(l/day)"].iloc[1] == pytest.approx(486.0)
+    assert (tmp_path / "daymet_radiation_toa_normalization_wepp.csv").exists()
+
+
+def test_build_observed_daymet_interpolated_persists_radiation_normalization(
+    tmp_path: Path,
+) -> None:
+    df = pd.DataFrame(
+        {
+            "srad(l/day)": [300.0, 486.0],
+            "tdew(degc)": [-7.0, -6.0],
+        },
+        index=pd.to_datetime(["1990-02-17", "1990-02-18"]),
+    )
+    source_path = tmp_path / "daymet_observed_p1_1990-1990.parquet"
+    df.to_parquet(source_path)
+
+    topaz_id, bypassed = helper_module.build_observed_daymet_interpolated(
+        _ObservedDaymetCligenStub(tmp_path),
+        "p1",
+        -111.12,
+        43.73,
+        1990,
+        1990,
+        str(tmp_path),
+        "wepp.cli",
+        "ws.prn",
+    )
+
+    assert topaz_id == "p1"
+    assert bypassed is False
+    cli = helper_module.ClimateFile(str(tmp_path / "wepp.cli")).as_dataframe()
+    assert cli.loc[cli["da"] == 17, "rad"].iloc[0] == pytest.approx(300.0)
+    assert cli.loc[cli["da"] == 18, "rad"].iloc[0] == pytest.approx(453.0)
+
+    exported = pd.read_parquet(source_path)
+    assert exported["srad(l/day)"].iloc[1] == pytest.approx(453.068716, rel=1.0e-6)
+    assert exported["srad_source(l/day)"].iloc[1] == pytest.approx(486.0)
+    assert (tmp_path / "daymet_radiation_toa_normalization_p1.csv").exists()
 
 
 class _ExecutorStub:
