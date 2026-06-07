@@ -11,7 +11,7 @@ Kitchen sink of daily (`sim_day_index` is the 1-indexed simulation day) measures
 if `wepp_ids` is None aggregate all the wepp_ids, otherwise filter to only include wepp_ids
 
 ## Specification
-- H.wat.parquet -> wat (optional columns: `SoilWaterTotal`, `ProfileDepth`, `ProfilePorosityCap`, `ProfileFCStore`, `ProfileWPStore`)
+- H.wat.parquet -> wat (optional columns: `SoilWaterTotal`, `ProfileDepth`, `ProfilePorosityCap`, `ProfileFCStore`, `ProfileWPStore`, `Interception`, `InterceptionStorage`)
 - H.pass.parquet -> pass
 - H.soil.parquet -> soil (optional `TSMF` full-profile moisture fraction)
 - H.element.parquet -> element (optional runoff partition columns `QRain` and `QSnow`)
@@ -44,7 +44,7 @@ re-deriving them if present.
 Daily water-balance terms (mm):
 - Primary input: `Precipitation`.
 - Diagnostic input: `Rain+Melt`.
-- Outflows: `Runoff`, `Lateral Flow`, `Percolation`, `ET`.
+- Outflows: `Runoff`, `Lateral Flow`, `Percolation`, `ET`, `Interception` (defaults to `0` when absent).
 - Legacy storage state: `S_legacy = Total-Soil Water + frozwt + Snow-Water`.
 - Enriched storage state (optional): `S_enriched = SoilWaterTotal + Snow-Water`.
 
@@ -55,9 +55,9 @@ Daily storage delta:
 
 Daily closure definitions (mm):
 - Primary reported closure:
-  `C_reported_precip = Precipitation - (Runoff + Lateral Flow + ET + Percolation) - ΔS_legacy`.
+  `C_reported_precip = Precipitation - (Runoff + Lateral Flow + ET + Percolation + Interception) - ΔS_legacy`.
 - Primary reconstructed closure:
-  `C_reconstructed_precip = Precipitation - (runvol/Area*1000 + latqcc/Area*1000 + (Ep+Es+Er)/Area*1000 + Dp/Area*1000) - ΔS_legacy`.
+  `C_reconstructed_precip = Precipitation - (runvol/Area*1000 + latqcc/Area*1000 + (Ep+Es+Er)/Area*1000 + Dp/Area*1000 + Interception) - ΔS_legacy`.
 - Diagnostic rain/melt closure (reported/reconstructed) uses `Rain+Melt` in place of `Precipitation`.
 - Enriched variants replace `ΔS_legacy` with `ΔS_enriched` when available.
 
@@ -73,6 +73,7 @@ Whole-run closure definitions:
 Availability and fallback contract:
 - When optional reported depth columns are absent, audit reconstructs from volume columns (`P`, `RM`, `runvol`, `latqcc`, `Dp`, `Ep`, `Es`, `Er`) and `Area`.
 - `SoilWaterTotal`/profile-capacity diagnostics are optional and remain null/unavailable for legacy producers.
+- `Interception` is optional at ingestion. If absent or null, totalwatsed3/audit consume it as `0` to preserve legacy closure behavior.
 - Output artifacts are:
   - `daily_closure_audit_summary.json`
   - `daily_closure_audit_top_days.csv`
@@ -132,6 +133,7 @@ Availability and fallback contract:
 | Transpiration | double | mm | Plant transpiration (Ep depth normalized) | Ep / Area * 1000 |
 | Evaporation | double | mm | Soil (Es) + Residue (Er) evaporation (depth normalized) | (Es+Er) / Area * 1000 |
 | ET | double | mm | Total ET (depth normalized Ep+Es+Er)  | (Ep+Es+Er) / Area * 1000 |
+| Interception | double | mm | Daily canopy/residue interception flux (producer-authoritative when present) | sum(wat.Interception * 0.001 * wat.Area) / Area * 1000 when available; else `0` |
 | Baseflow | double | mm | Baseflow | reimplement running calc from totalwatsed.py provided below |
 | Aquifer losses | double | mm | Aquifer losses | reimplement running calc from totalwatsed.py provided below |
 | Reservoir Volume | double | mm | Reservoir Volume | reimplement running calc from totalwatsed.py provided below |
@@ -274,3 +276,4 @@ Hillslope water balance per OFE; aligns with wat.out content.
 | ProfilePorosityCap | double | mm | Full-profile porosity capacity (`sum(por*dg)`); optional additive term |
 | ProfileFCStore | double | mm | Full-profile field-capacity storage (`sum(thetfc*dg)`); optional additive term |
 | ProfileWPStore | double | mm | Full-profile wilting-point storage (`sum(thetdr*dg)`); optional additive term |
+| Interception | double | mm | Daily canopy/residue interception flux (`I`); optional additive outflow term |

@@ -1,6 +1,6 @@
 # totalwatsed3 Interception-Flux Closure
 
-**Status**: Backlog
+**Status**: Closed 2026-06-08 UTC
 **Created**: 2026-06-07 UTC
 
 ## Overview
@@ -82,15 +82,29 @@ WB closure is not auditable on the real surface until this is fixed.
 
 ## Success Criteria
 
-- [ ] totalwatsed3 daily closure consumes optional `hillslope_wat.Interception`
+- [x] totalwatsed3 daily closure consumes optional `hillslope_wat.Interception`
       as an outflow; absent column defaults to `0`.
-- [ ] `tools/totalwatsed3_daily_closure_audit.py` includes the interception
+- [x] `tools/totalwatsed3_daily_closure_audit.py` includes the interception
       outflow in its closure identity.
-- [ ] totalwatsed3 audit closes on openWEPP post-WBVAL06 `indispensable-presenter`
+- [x] totalwatsed3 audit closes on openWEPP post-WBVAL06 `indispensable-presenter`
       output for years `2..6` within tolerance.
-- [ ] Legacy-run closure is unchanged when `Interception` is absent (regression).
-- [ ] `ET` computation is untouched.
-- [ ] Focused tests pass; `wctl doc-lint` clean for this package + PROJECT_TRACKER.
+- [x] Legacy-run closure is unchanged when `Interception` is absent (regression).
+- [x] `ET` computation is untouched.
+- [x] Focused tests pass; package and tracker docs updated.
+
+## Closure Summary
+
+- Implemented interception consumption in
+  `wepppy/wepp/interchange/totalwatsed3.py` with optional-default-to-`0`
+  semantics for absent/null source values.
+- Updated closure identities in
+  `tools/totalwatsed3_daily_closure_audit.py` to include interception in both
+  reported and reconstructed outflow surfaces.
+- Added/updated focused tests in:
+  - `tests/wepp/interchange/test_totalwatsed3.py`
+  - `tests/tools/test_totalwatsed3_daily_closure_audit.py`
+- Acceptance evidence is captured in:
+  - `docs/work-packages/20260607_totalwatsed3_interception_flux_closure/artifacts/2026-06-07_execution_evidence.md`
 
 ## Provenance
 

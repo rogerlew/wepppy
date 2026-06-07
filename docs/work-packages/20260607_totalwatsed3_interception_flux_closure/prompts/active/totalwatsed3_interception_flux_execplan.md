@@ -64,11 +64,27 @@ output for years `2..6`, and legacy-run closure is unchanged.
 
 ## Progress
 
-- 2026-06-07: package scoped; not yet started.
+- 2026-06-07 23:41 UTC: implemented interception consumption in
+   `wepppy/wepp/interchange/totalwatsed3.py` with optional-default-to-`0`
+   semantics when absent.
+- 2026-06-07 23:47 UTC: updated
+   `tools/totalwatsed3_daily_closure_audit.py` closure identities to include the
+   interception outflow in reported/reconstructed and whole-run surfaces.
+- 2026-06-07 23:52 UTC: added focused regression coverage in
+   `tests/wepp/interchange/test_totalwatsed3.py` and
+   `tests/tools/test_totalwatsed3_daily_closure_audit.py`.
+- 2026-06-08 00:02 UTC: targeted tests passed (`8 passed`).
+- 2026-06-08 00:20 UTC: acceptance evidence recorded from openWEPP post-WBVAL06
+   WAT outputs (`/tmp/wbval06_interception_after_20260607T000000Z/outputs/p*/H*.wat.parquet`)
+   aggregated into a totalwatsed3-like dataset; years `2..6` annual closure
+   residuals with interception are ~`1.87e-07..2.09e-07 mm/yr`.
 
 ## Surprises & Discoveries
 
-- (none yet)
+- openWEPP WBVAL06 artifacts provide per-prefix `H*.wat.parquet` and `H*.hbp`
+   files but no prebuilt watershed `H.pass.parquet`; acceptance evidence therefore
+   used a documented WAT-aggregated totalwatsed3-like surface for years `2..6`
+   closure verification.
 
 ## Decision Log
 
@@ -77,4 +93,9 @@ output for years `2..6`, and legacy-run closure is unchanged.
 
 ## Outcomes & Retrospective
 
-- (pending execution)
+- Closed as implemented and validated for scoped goals:
+   - Interception is a first-class outflow in totalwatsed3 closure auditing.
+   - Legacy no-column behavior remains compatible via zero-default consumption.
+   - Focused tests pass.
+   - Acceptance evidence confirms years `2..6` close on openWEPP WBVAL06 output
+      when interception is included and remain materially open without it.

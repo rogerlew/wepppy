@@ -60,6 +60,7 @@ def _optional_columns() -> tuple[str, ...]:
         "Lateral Flow",
         "Percolation",
         "ET",
+        "Interception",
         "SoilWaterTotal",
         "ProfileDepth",
         "ProfilePorosityCap",
@@ -108,6 +109,13 @@ def compute_daily_audit(df: pd.DataFrame) -> pd.DataFrame:
     lateral_reported_mm = audit["Lateral Flow"].to_numpy(dtype=np.float64, copy=False) if "Lateral Flow" in audit else lateral_calc_mm
     percolation_reported_mm = audit["Percolation"].to_numpy(dtype=np.float64, copy=False) if "Percolation" in audit else percolation_calc_mm
     et_reported_mm = audit["ET"].to_numpy(dtype=np.float64, copy=False) if "ET" in audit else et_calc_mm
+    if "Interception" in audit:
+        interception_reported_mm = np.nan_to_num(
+            audit["Interception"].to_numpy(dtype=np.float64, copy=False),
+            nan=0.0,
+        )
+    else:
+        interception_reported_mm = np.zeros(audit.shape[0], dtype=np.float64)
 
     storage_mm = (
         audit["Total-Soil Water"].to_numpy(dtype=np.float64, copy=False)
@@ -128,20 +136,20 @@ def compute_daily_audit(df: pd.DataFrame) -> pd.DataFrame:
     # Primary closure accounting uses total precipitation (P/Precipitation), so
     # snowfall water is counted on the input side when Snow-Water is in storage.
     closure_reported_basic_mm = precip_reported_mm - (
-        runoff_reported_mm + lateral_reported_mm + et_reported_mm + percolation_reported_mm
+        runoff_reported_mm + lateral_reported_mm + et_reported_mm + percolation_reported_mm + interception_reported_mm
     )
     closure_reconstructed_basic_mm = precip_reported_mm - (
-        runoff_calc_mm + lateral_calc_mm + et_calc_mm + percolation_calc_mm
+        runoff_calc_mm + lateral_calc_mm + et_calc_mm + percolation_calc_mm + interception_reported_mm
     )
     closure_reported_with_storage_mm = closure_reported_basic_mm - storage_delta_mm
     closure_reconstructed_with_storage_mm = closure_reconstructed_basic_mm - storage_delta_mm
 
     # Keep Rain+Melt-based closure as a diagnostic to highlight snowpack timing.
     closure_reported_with_storage_rain_melt_mm = rain_melt_reported_mm - (
-        runoff_reported_mm + lateral_reported_mm + et_reported_mm + percolation_reported_mm
+        runoff_reported_mm + lateral_reported_mm + et_reported_mm + percolation_reported_mm + interception_reported_mm
     ) - storage_delta_mm
     closure_reconstructed_with_storage_rain_melt_mm = rain_melt_reported_mm - (
-        runoff_calc_mm + lateral_calc_mm + et_calc_mm + percolation_calc_mm
+        runoff_calc_mm + lateral_calc_mm + et_calc_mm + percolation_calc_mm + interception_reported_mm
     ) - storage_delta_mm
 
     if np.isnan(enriched_storage_delta_mm).all():
@@ -153,10 +161,10 @@ def compute_daily_audit(df: pd.DataFrame) -> pd.DataFrame:
         closure_reported_with_enriched_storage_mm = closure_reported_basic_mm - enriched_storage_delta_mm
         closure_reconstructed_with_enriched_storage_mm = closure_reconstructed_basic_mm - enriched_storage_delta_mm
         closure_reported_with_enriched_storage_rain_melt_mm = rain_melt_reported_mm - (
-            runoff_reported_mm + lateral_reported_mm + et_reported_mm + percolation_reported_mm
+            runoff_reported_mm + lateral_reported_mm + et_reported_mm + percolation_reported_mm + interception_reported_mm
         ) - enriched_storage_delta_mm
         closure_reconstructed_with_enriched_storage_rain_melt_mm = rain_melt_reported_mm - (
-            runoff_calc_mm + lateral_calc_mm + et_calc_mm + percolation_calc_mm
+            runoff_calc_mm + lateral_calc_mm + et_calc_mm + percolation_calc_mm + interception_reported_mm
         ) - enriched_storage_delta_mm
 
     runoff_to_precip_reported_pct = _safe_divide(runoff_reported_mm, precip_reported_mm) * 100.0
@@ -175,6 +183,7 @@ def compute_daily_audit(df: pd.DataFrame) -> pd.DataFrame:
     audit["audit_lateral_reported_mm"] = lateral_reported_mm
     audit["audit_percolation_reported_mm"] = percolation_reported_mm
     audit["audit_et_reported_mm"] = et_reported_mm
+    audit["audit_interception_reported_mm"] = interception_reported_mm
 
     audit["audit_storage_mm"] = storage_mm
     audit["audit_storage_delta_mm"] = storage_delta_mm
@@ -321,6 +330,7 @@ def _build_whole_run_closure(audit: pd.DataFrame) -> dict[str, float]:
     percolation_reconstructed_total_mm = float(audit["audit_percolation_calc_mm"].sum())
     et_reported_total_mm = float(audit["audit_et_reported_mm"].sum())
     et_reconstructed_total_mm = float(audit["audit_et_calc_mm"].sum())
+    interception_reported_total_mm = float(audit["audit_interception_reported_mm"].sum())
     storage_change_mm = float(audit["audit_storage_mm"].iloc[-1] - audit["audit_storage_mm"].iloc[0])
     closure_reported_basic_total_mm = float(audit["audit_closure_reported_basic_mm"].sum())
     closure_reconstructed_basic_total_mm = float(audit["audit_closure_reconstructed_basic_mm"].sum())
@@ -380,6 +390,7 @@ def _build_whole_run_closure(audit: pd.DataFrame) -> dict[str, float]:
         "percolation_reconstructed_total_mm": percolation_reconstructed_total_mm,
         "et_reported_total_mm": et_reported_total_mm,
         "et_reconstructed_total_mm": et_reconstructed_total_mm,
+        "interception_reported_total_mm": interception_reported_total_mm,
         "storage_change_mm": storage_change_mm,
         "closure_reported_basic_total_mm": closure_reported_basic_total_mm,
         "closure_reconstructed_basic_total_mm": closure_reconstructed_basic_total_mm,
@@ -513,6 +524,7 @@ def build_summary(audit: pd.DataFrame, source_path: Path) -> dict[str, Any]:
     soilwater_minus_fc = audit["audit_soilwater_minus_fc_mm"].to_numpy(dtype=np.float64, copy=False)
     soilwater_minus_wp = audit["audit_soilwater_minus_wp_mm"].to_numpy(dtype=np.float64, copy=False)
     runoff_consistency = audit["audit_runoff_consistency_mm"].to_numpy(dtype=np.float64, copy=False)
+    interception_reported = audit["audit_interception_reported_mm"].to_numpy(dtype=np.float64, copy=False)
 
     top_runoff = audit.iloc[int(np.argmax(audit["audit_runoff_reported_mm"].to_numpy(dtype=np.float64, copy=False)))]
 
@@ -536,6 +548,7 @@ def build_summary(audit: pd.DataFrame, source_path: Path) -> dict[str, Any]:
         "max_runoff_to_precip_reported_pct": float(np.max(audit["audit_runoff_to_precip_reported_pct"].to_numpy(dtype=np.float64, copy=False))),
         "max_runoff_to_precip_reconstructed_pct": float(np.max(audit["audit_runoff_to_precip_reconstructed_pct"].to_numpy(dtype=np.float64, copy=False))),
         "runoff_consistency_mm": _quantiles(runoff_consistency),
+        "interception_reported_mm": _quantiles(interception_reported),
         "closure_reported_with_storage_mm": _quantiles(closure_reported),
         "closure_reconstructed_with_storage_mm": _quantiles(closure_reconstructed),
         "closure_reconstructed_with_enriched_storage_mm": (
@@ -600,6 +613,7 @@ def _top_anomalies(audit: pd.DataFrame, top_n: int) -> pd.DataFrame:
             "audit_et_calc_mm",
             "audit_percolation_reported_mm",
             "audit_percolation_calc_mm",
+            "audit_interception_reported_mm",
             "audit_storage_delta_mm",
             "audit_enriched_storage_delta_mm",
             "audit_closure_reported_with_storage_mm",
@@ -681,6 +695,10 @@ def main() -> int:
     print(
         "closure_reconstructed_with_storage_rain_melt_pct_of_rain_melt="
         f"{summary['whole_run_closure']['closure_reconstructed_with_storage_rain_melt_pct_of_rain_melt']:.6f}"
+    )
+    print(
+        "interception_reported_total_mm="
+        f"{summary['whole_run_closure']['interception_reported_total_mm']:.6f}"
     )
     if summary["whole_run_closure"]["enriched_storage_available"]:
         print(

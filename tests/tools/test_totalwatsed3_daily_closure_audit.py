@@ -204,6 +204,54 @@ def test_precipitation_based_closure_handles_snow_storage_days(tmp_path: Path) -
     )
 
 
+def test_interception_outflow_is_consumed_when_present(tmp_path: Path) -> None:
+    module = _module()
+    compute_daily_audit = module["compute_daily_audit"]
+    load_dataset = module["load_dataset"]
+    build_summary = module["build_summary"]
+
+    dataset = tmp_path / "totalwatsed3.parquet"
+    records = [
+        {
+            "year": 1987,
+            "sim_day_index": 1,
+            "julian": 46,
+            "month": 2,
+            "day_of_month": 15,
+            "water_year": 1987,
+            "Area": 100.0,
+            "P": 1.0,
+            "RM": 1.0,
+            "runvol": 0.2,
+            "latqcc": 0.1,
+            "Dp": 0.1,
+            "Ep": 0.1,
+            "Es": 0.05,
+            "Er": 0.05,
+            "Total-Soil Water": 50.0,
+            "frozwt": 0.0,
+            "Snow-Water": 0.0,
+            "Precipitation": 10.0,
+            "Rain+Melt": 10.0,
+            "Runoff": 2.0,
+            "Lateral Flow": 1.0,
+            "Percolation": 1.0,
+            "ET": 2.0,
+            "Interception": 4.0,
+        }
+    ]
+    pd.DataFrame.from_records(records).to_parquet(dataset, index=False)
+
+    audit = compute_daily_audit(load_dataset(dataset))
+    summary = build_summary(audit, dataset)
+
+    assert audit.loc[0, "audit_interception_reported_mm"] == pytest.approx(4.0)
+    assert audit.loc[0, "audit_closure_reconstructed_with_storage_mm"] == pytest.approx(0.0)
+    assert audit.loc[0, "audit_closure_reconstructed_with_storage_rain_melt_mm"] == pytest.approx(0.0)
+    assert summary["whole_run_closure"]["interception_reported_total_mm"] == pytest.approx(4.0)
+    assert summary["whole_run_closure"]["closure_reconstructed_with_storage_total_mm"] == pytest.approx(0.0)
+
+
 def test_main_writes_outputs(tmp_path: Path, monkeypatch: pytest.MonkeyPatch) -> None:
     module = _module()
     main = module["main"]

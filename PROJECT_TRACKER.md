@@ -1,7 +1,7 @@
 # PROJECT_TRACKER.md
 > Kanban board for wepppy work packages and vision items
 
-**Last Updated**: 2026-06-06
+**Last Updated**: 2026-06-08
 **Active Packages**: 7
 **Quick Links**: [Work Packages Directory](docs/work-packages/) | [God-Tier Prompting Strategy](docs/god-tier-prompting-strategy.md)
 
@@ -76,27 +76,6 @@ Feedback mechanisms:
 ## 📋 Backlog
 
 Work packages that are scoped but not yet started. Dependencies and prerequisites should be noted.
-
-### totalwatsed3 Interception-Flux Closure
-**Proposed**: 2026-06-07
-**Size**: Small (1 focused session)
-**Priority**: High (gates openWEPP single-OFE rung-1 WB-closure acceptance)
-**Link**: [docs/work-packages/20260607_totalwatsed3_interception_flux_closure/](docs/work-packages/20260607_totalwatsed3_interception_flux_closure/)
-**Description**: openWEPP (WBVAL06, commit `b6dc2de`) now publishes the daily interception flux `I` as `hillslope_wat.Interception` (mm) and excludes interception from `ET`. totalwatsed3's daily closure audit does not consume an interception-flux outflow, so it leaves a residual ≈ `+I` (~26.8 mm/yr) on openWEPP output. Add `Interception` as a first-class outflow (optional, defaulting to `0`) so the audit closes on openWEPP output while keeping legacy-run closure unchanged.
-
-**Scope**:
-- Consume optional `hillslope_wat.Interception` in `wepppy/wepp/interchange/totalwatsed3.py` and add it to the daily closure outflow sum.
-- Add the interception outflow to `tools/totalwatsed3_daily_closure_audit.py`.
-- Document the legacy-vs-openWEPP interception convention in `docs/dev-notes/totalwatsed-interchange.spec.md`.
-- Focused tests; acceptance run on openWEPP post-WBVAL06 `indispensable-presenter` output (years `2..6`).
-
-**Strategic Value**:
-- Makes single-OFE water-balance closure auditable on the real acceptance surface (totalwatsed3), completing openWEPP roadmap rung-1 before frost.
-- Producer-agnostic: optional-defaulting-to-0 closes both openWEPP (separate `I`) and legacy (interception in `ET`) without branching.
-
-**Constraints**: Do **not** change `ET` (`Ep`/`Es`/`Er`) — producer-authoritative physics; interception is a separate first-class outflow.
-
-**Dependencies**: openWEPP `H.wat.Interception` publication is complete (WBVAL06). Package + active ExecPlan created; implementation pending.
 
 ### Run Statistics Ledger
 **Proposed**: 2026-05-05
@@ -420,6 +399,24 @@ Currently active work packages. Limit to 2-4 packages to maintain focus.
 ## ✅ Done
 
 Recently completed work packages. Archived immediately upon completion.
+
+### totalwatsed3 Interception-Flux Closure (2026-06-08)
+**Status**: ✅ **COMPLETE**
+
+**Link**: [docs/work-packages/20260607_totalwatsed3_interception_flux_closure/](docs/work-packages/20260607_totalwatsed3_interception_flux_closure/)
+
+**Lifecycle**: Backlog -> Done (2026-06-08)
+
+**Summary**: Closed the openWEPP WBVAL06 interception-audit gap by consuming
+optional `hillslope_wat.Interception` as a first-class outflow in
+`totalwatsed3` and its closure audit surface, with legacy-safe zero-default
+semantics when the column is absent. Updated
+`wepppy/wepp/interchange/totalwatsed3.py`,
+`tools/totalwatsed3_daily_closure_audit.py`, and
+`docs/dev-notes/totalwatsed-interchange.spec.md`; added focused regressions and
+validated targeted tests (`8 passed`). Acceptance evidence on openWEPP
+post-WBVAL06 WAT outputs shows year-index `2..6` annual residuals near
+`~2e-07 mm` with interception versus `~14.7..18.9 mm` without interception.
 
 ### Indispensable Presenter Daymet Radiation Bounds Investigation (2026-06-06)
 **Status**: ✅ **COMPLETE**

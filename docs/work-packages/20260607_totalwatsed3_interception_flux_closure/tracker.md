@@ -6,10 +6,10 @@
 ## Quick Status
 
 **Timezone**: UTC
-**Started**: not started
-**Current phase**: Backlog (scoped)
-**Last updated**: 2026-06-07 UTC
-**Next milestone**: Add `Interception` outflow to totalwatsed3 closure + audit tool
+**Started**: 2026-06-07 23:41 UTC
+**Current phase**: Done
+**Last updated**: 2026-06-08 00:24 UTC
+**Next milestone**: Package closeout complete
 **Security impact**: `none`
 **Dedicated security review**: `no`
 **Security artifact**: `N/A`
@@ -18,17 +18,17 @@
 
 ### Ready / Backlog
 
-- [ ] Add optional `hillslope_wat.Interception` consumption to
+- [x] Add optional `hillslope_wat.Interception` consumption to
       `wepppy/wepp/interchange/totalwatsed3.py` schema and daily closure
       aggregation (outflow term; default `0` when absent).
-- [ ] Add the interception outflow to
+- [x] Add the interception outflow to
       `tools/totalwatsed3_daily_closure_audit.py` closure identity.
-- [ ] Update `docs/dev-notes/totalwatsed-interchange.spec.md` (interception
+- [x] Update `docs/dev-notes/totalwatsed-interchange.spec.md` (interception
       outflow term; legacy-vs-openWEPP convention).
-- [ ] Add/extend focused tests in `tests/wepp/interchange/test_totalwatsed3.py`
+- [x] Add/extend focused tests in `tests/wepp/interchange/test_totalwatsed3.py`
       and `tests/tools/test_totalwatsed3_daily_closure_audit.py`
       (openWEPP-with-`Interception` closes; legacy-without-`Interception` unchanged).
-- [ ] Acceptance: run the totalwatsed3 audit on openWEPP post-WBVAL06
+- [x] Acceptance: run the totalwatsed3 audit on openWEPP post-WBVAL06
       `indispensable-presenter` output; confirm years `2..6` close within tolerance.
 
 ### In Progress
@@ -41,7 +41,12 @@
 
 ### Done
 
-- [ ] None yet.
+- [x] Interception consumption shipped in `wepppy/wepp/interchange/totalwatsed3.py`.
+- [x] Audit closure identities updated in `tools/totalwatsed3_daily_closure_audit.py`.
+- [x] Spec updated in `docs/dev-notes/totalwatsed-interchange.spec.md`.
+- [x] Focused regressions added and passing.
+- [x] Acceptance evidence captured at
+      `docs/work-packages/20260607_totalwatsed3_interception_flux_closure/artifacts/2026-06-07_execution_evidence.md`.
 
 ## Decisions
 
@@ -61,3 +66,10 @@
 - openWEPP side is complete (WBVAL06): `H.wat.Interception` (mm) published,
   `SC-WATBAL-001` v146. This package is the wepppy-side audit consumer that makes
   single-OFE rung-1 WB closure auditable from totalwatsed3.
+- 2026-06-08 00:02 UTC: Ran focused tests:
+      `wctl run-pytest tests/wepp/interchange/test_totalwatsed3.py tests/tools/test_totalwatsed3_daily_closure_audit.py`
+      -> `8 passed`.
+- 2026-06-08 00:20 UTC: Acceptance run on openWEPP WBVAL06 post-fix WAT outputs
+      recorded in package artifacts. Year-index `2..6` annual residuals with
+      interception are `~1.87e-07..2.09e-07 mm`, while without interception they are
+      `~14.71..18.94 mm`.

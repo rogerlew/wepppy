@@ -1,0 +1,172 @@
+{
+  "closure_reconstructed_with_enriched_storage_mm": {
+    "max_abs": 2.3072431479199462,
+    "p50": 9.325873406851315e-15,
+    "p90": 8.107114979338803e-11,
+    "p95": 4.550162913119493e-09,
+    "p99": 1.262581785788086e-08
+  },
+  "closure_reconstructed_with_enriched_storage_rain_melt_mm": {
+    "max_abs": 48.20329793735773,
+    "p50": 2.220446049250313e-16,
+    "p90": 1.3424833689157367e-08,
+    "p95": 9.757708965343847,
+    "p99": 30.48094129195255
+  },
+  "closure_reconstructed_with_storage_mm": {
+    "max_abs": 2.3072431479199462,
+    "p50": 9.325873406851315e-15,
+    "p90": 8.107114979338803e-11,
+    "p95": 4.550162913119493e-09,
+    "p99": 1.262581785788086e-08
+  },
+  "closure_reconstructed_with_storage_rain_melt_mm": {
+    "max_abs": 48.20329793735773,
+    "p50": 2.220446049250313e-16,
+    "p90": 1.3424833689157367e-08,
+    "p95": 9.757708965343847,
+    "p99": 30.48094129195255
+  },
+  "closure_reported_with_storage_mm": {
+    "max_abs": 2.3072431479199462,
+    "p50": 9.325873406851315e-15,
+    "p90": 8.107159388259788e-11,
+    "p95": 4.550163357208703e-09,
+    "p99": 1.2625817724654098e-08
+  },
+  "closure_reported_with_storage_rain_melt_mm": {
+    "max_abs": 48.20329793735773,
+    "p50": 2.220446049250313e-16,
+    "p90": 1.3424833245068157e-08,
+    "p95": 9.757708965343847,
+    "p99": 30.48094129195255
+  },
+  "date_max": {
+    "day_of_month": 31,
+    "julian": 365,
+    "month": 12,
+    "year": 6
+  },
+  "date_min": {
+    "day_of_month": 1,
+    "julian": 1,
+    "month": 1,
+    "year": 1
+  },
+  "interception_reported_mm": {
+    "max_abs": 0.6203888262158823,
+    "p50": 0.0,
+    "p90": 2.145152413369893e-16,
+    "p95": 0.6203888262158823,
+    "p99": 0.6203888262158823
+  },
+  "max_reconstructed_runoff_mm": 5.039612499183603e-15,
+  "max_reported_runoff_day": {
+    "day_of_month": 16,
+    "julian": 168,
+    "month": 6,
+    "precip_reported_mm": 21.099999999999998,
+    "rain_melt_reported_mm": 21.100000000000012,
+    "reconstructed_runoff_mm": 5.039612499183603e-15,
+    "reported_runoff_mm": 5.039612499183603e-15,
+    "runoff_consistency_mm": 0.0,
+    "year": 3
+  },
+  "max_reported_runoff_mm": 5.039612499183603e-15,
+  "max_runoff_to_precip_reconstructed_pct": 7.91548485596409e-14,
+  "max_runoff_to_precip_reported_pct": 7.91548485596409e-14,
+  "rows": 2191,
+  "runoff_consistency_mm": {
+    "max_abs": 0.0,
+    "p50": 0.0,
+    "p90": 0.0,
+    "p95": 0.0,
+    "p99": 0.0
+  },
+  "soilwater_minus_fc_mm": {
+    "max_abs": 467.4817984454293,
+    "p50": 43.18600516572755,
+    "p90": 185.15963067125006,
+    "p95": 247.7375468361251,
+    "p99": 397.81858971280604
+  },
+  "soilwater_minus_wp_mm": {
+    "max_abs": 579.6398817640576,
+    "p50": 155.3440884843558,
+    "p90": 297.3177139898783,
+    "p95": 359.89563015475335,
+    "p99": 509.9766730314343
+  },
+  "soilwater_to_porosity_fraction": {
+    "max_abs": 0.890340393745675,
+    "p50": 0.3344720513268215,
+    "p90": 0.520471170636792,
+    "p95": 0.6024542661129808,
+    "p99": 0.7990748827999777
+  },
+  "soilwatertotal_vs_legacy_storage_mm": {
+    "max_abs": 0.0,
+    "p50": 0.0,
+    "p90": 0.0,
+    "p95": 0.0,
+    "p99": 0.0
+  },
+  "source": "/workdir/wepppy/tmp/totalwatsed3_interception_flux_closure/openwepp_post_wbval06_totalwatsed3_like.parquet",
+  "whole_run_closure": {
+    "closure_basis_diagnostic": "rain_melt",
+    "closure_basis_primary": "precipitation",
+    "closure_reconstructed_basic_total_mm": 144.6375095099541,
+    "closure_reconstructed_with_enriched_storage_pct_of_precip": -0.04598847624907757,
+    "closure_reconstructed_with_enriched_storage_pct_of_rain_melt": -2.804097203289687,
+    "closure_reconstructed_with_enriched_storage_rain_melt_pct_of_rain_melt": -2.804097203289687,
+    "closure_reconstructed_with_enriched_storage_rain_melt_total_mm": -136.90724185341568,
+    "closure_reconstructed_with_enriched_storage_total_mm": -2.3072418534162216,
+    "closure_reconstructed_with_storage_pct_of_precip": -0.04598847624907757,
+    "closure_reconstructed_with_storage_pct_of_rain_melt": -2.804097203289687,
+    "closure_reconstructed_with_storage_rain_melt_pct_of_rain_melt": -2.804097203289687,
+    "closure_reconstructed_with_storage_rain_melt_total_mm": -136.90724185341568,
+    "closure_reconstructed_with_storage_total_mm": -2.3072418534162216,
+    "closure_reported_basic_total_mm": 144.63750950995407,
+    "closure_reported_with_enriched_storage_pct_of_precip": -0.04598847624907784,
+    "closure_reported_with_enriched_storage_pct_of_rain_melt": -2.80409720328969,
+    "closure_reported_with_enriched_storage_rain_melt_pct_of_rain_melt": -2.80409720328969,
+    "closure_reported_with_enriched_storage_rain_melt_total_mm": -136.90724185341583,
+    "closure_reported_with_enriched_storage_total_mm": -2.3072418534162353,
+    "closure_reported_with_storage_pct_of_precip": -0.04598847624907784,
+    "closure_reported_with_storage_pct_of_rain_melt": -2.80409720328969,
+    "closure_reported_with_storage_rain_melt_pct_of_rain_melt": -2.80409720328969,
+    "closure_reported_with_storage_rain_melt_total_mm": -136.90724185341583,
+    "closure_reported_with_storage_total_mm": -2.3072418534162353,
+    "enriched_storage_available": true,
+    "enriched_storage_change_mm": 146.9447513633702,
+    "et_reconstructed_total_mm": 2873.262049975494,
+    "et_reported_total_mm": 2873.262049975494,
+    "interception_reported_total_mm": 106.90438009747575,
+    "lateral_reconstructed_total_mm": 1730.314440254805,
+    "lateral_reported_total_mm": 1730.314440254805,
+    "mean_abs_daily_closure_reconstructed_with_enriched_storage_mm": 0.0010530554279109833,
+    "mean_abs_daily_closure_reconstructed_with_enriched_storage_rain_melt_mm": 2.7498723638689055,
+    "mean_abs_daily_closure_reconstructed_with_storage_mm": 0.0010530554279109833,
+    "mean_abs_daily_closure_reconstructed_with_storage_rain_melt_mm": 2.7498723638689055,
+    "mean_abs_daily_closure_reported_with_enriched_storage_mm": 0.0010530554279109814,
+    "mean_abs_daily_closure_reported_with_enriched_storage_rain_melt_mm": 2.7498723638689055,
+    "mean_abs_daily_closure_reported_with_storage_mm": 0.0010530554279109814,
+    "mean_abs_daily_closure_reported_with_storage_rain_melt_mm": 2.7498723638689055,
+    "mean_daily_closure_reconstructed_with_storage_mm": -0.0010530542461963585,
+    "mean_daily_closure_reported_with_storage_mm": -0.0010530542461963648,
+    "percolation_reconstructed_total_mm": 161.88162016227116,
+    "percolation_reported_total_mm": 161.88162016227116,
+    "precip_total_mm": 5017.0,
+    "profile_order_fc_gt_porosity_days": 0,
+    "profile_order_wp_gt_fc_days": 0,
+    "profile_terms_available": true,
+    "rain_melt_total_mm": 4882.400000000001,
+    "runoff_reconstructed_total_mm": 1.1240996188797249e-13,
+    "runoff_reported_total_mm": 1.1240996188797249e-13,
+    "soilwater_gt_porositycap_days": 0,
+    "soilwater_lt_wpstore_days": 0,
+    "soilwater_total_available": true,
+    "soilwatertotal_vs_legacy_max_abs_mm": 0.0,
+    "storage_change_mm": 146.9447513633702
+  }
+}

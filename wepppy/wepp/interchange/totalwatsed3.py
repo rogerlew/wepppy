@@ -52,6 +52,7 @@ WAT_OPTIONAL_COLUMNS = (
     "ProfilePorosityCap",
     "ProfileFCStore",
     "ProfileWPStore",
+    "Interception",
     "InterceptionStorage",
 )
 
@@ -127,6 +128,7 @@ SCHEMA = schema_with_version(
             pa_field("Transpiration", pa.float64(), units="mm", description="Plant transpiration depth"),
             pa_field("Evaporation", pa.float64(), units="mm", description="Soil + residue evaporation depth"),
             pa_field("ET", pa.float64(), units="mm", description="Total evapotranspiration depth"),
+            pa_field("Interception", pa.float64(), units="mm", description="Daily canopy/residue interception flux depth (optional producer-authoritative outflow)"),
             pa_field("Baseflow", pa.float64(), units="mm", description="Baseflow depth"),
             pa_field("Aquifer losses", pa.float64(), units="mm", description="Aquifer losses depth"),
             pa_field("Reservoir Volume", pa.float64(), units="mm", description="Groundwater storage depth"),
@@ -958,10 +960,14 @@ def run_totalwatsed3(
     for column in WAT_OPTIONAL_COLUMNS:
         volume_col = f"{column}_volume"
         if volume_col in merged and not merged[volume_col].isna().all():
-            merged[column] = _safe_depth(merged.pop(volume_col).to_numpy(dtype=np.float64, copy=False), area)
+            depth = _safe_depth(merged.pop(volume_col).to_numpy(dtype=np.float64, copy=False), area)
+            if column == "Interception":
+                merged[column] = np.nan_to_num(depth, nan=0.0)
+            else:
+                merged[column] = depth
         else:
             merged.drop(columns=[volume_col], inplace=True, errors="ignore")
-            merged[column] = np.nan
+            merged[column] = 0.0 if column == "Interception" else np.nan
     if soil_df is not None:
         merged = merged.merge(soil_df, on=list(DATE_COLUMNS), how="left", validate="one_to_one")
     else:

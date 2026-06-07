@@ -142,6 +142,7 @@ def _write_wat_with_storage_terms(path: Path) -> None:
             510.0 AS ProfilePorosityCap,
             310.0 AS ProfileFCStore,
             130.0 AS ProfileWPStore,
+            2.0 AS Interception,
             4.0 AS InterceptionStorage
         UNION ALL
         SELECT
@@ -175,6 +176,7 @@ def _write_wat_with_storage_terms(path: Path) -> None:
             600.0 AS ProfilePorosityCap,
             350.0 AS ProfileFCStore,
             150.0 AS ProfileWPStore,
+                6.0 AS Interception,
             10.0 AS InterceptionStorage
     ) TO '{safe}' (FORMAT PARQUET)
     """
@@ -355,6 +357,7 @@ def test_run_totalwatsed3_merges_ash_metrics(tmp_path):
         "InterceptionStorage",
     ):
         assert _is_nullish(data[column][0])
+    assert data["Interception"][0] == pytest.approx(0.0)
 
     # Missing ash directory should still produce rows with zeroed ash metrics.
     run_totalwatsed3(
@@ -409,6 +412,7 @@ def test_run_totalwatsed3_exposes_optional_wat_storage_terms(tmp_path):
     assert data["ProfilePorosityCap"][0] == pytest.approx(577.5)
     assert data["ProfileFCStore"][0] == pytest.approx(340.0)
     assert data["ProfileWPStore"][0] == pytest.approx(145.0)
+    assert data["Interception"][0] == pytest.approx(5.0)
     assert data["InterceptionStorage"][0] == pytest.approx(8.5)
 
 
