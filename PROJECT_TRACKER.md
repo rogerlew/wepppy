@@ -77,6 +77,27 @@ Feedback mechanisms:
 
 Work packages that are scoped but not yet started. Dependencies and prerequisites should be noted.
 
+### totalwatsed3 Interception-Flux Closure
+**Proposed**: 2026-06-07
+**Size**: Small (1 focused session)
+**Priority**: High (gates openWEPP single-OFE rung-1 WB-closure acceptance)
+**Link**: [docs/work-packages/20260607_totalwatsed3_interception_flux_closure/](docs/work-packages/20260607_totalwatsed3_interception_flux_closure/)
+**Description**: openWEPP (WBVAL06, commit `b6dc2de`) now publishes the daily interception flux `I` as `hillslope_wat.Interception` (mm) and excludes interception from `ET`. totalwatsed3's daily closure audit does not consume an interception-flux outflow, so it leaves a residual ≈ `+I` (~26.8 mm/yr) on openWEPP output. Add `Interception` as a first-class outflow (optional, defaulting to `0`) so the audit closes on openWEPP output while keeping legacy-run closure unchanged.
+
+**Scope**:
+- Consume optional `hillslope_wat.Interception` in `wepppy/wepp/interchange/totalwatsed3.py` and add it to the daily closure outflow sum.
+- Add the interception outflow to `tools/totalwatsed3_daily_closure_audit.py`.
+- Document the legacy-vs-openWEPP interception convention in `docs/dev-notes/totalwatsed-interchange.spec.md`.
+- Focused tests; acceptance run on openWEPP post-WBVAL06 `indispensable-presenter` output (years `2..6`).
+
+**Strategic Value**:
+- Makes single-OFE water-balance closure auditable on the real acceptance surface (totalwatsed3), completing openWEPP roadmap rung-1 before frost.
+- Producer-agnostic: optional-defaulting-to-0 closes both openWEPP (separate `I`) and legacy (interception in `ET`) without branching.
+
+**Constraints**: Do **not** change `ET` (`Ep`/`Es`/`Er`) — producer-authoritative physics; interception is a separate first-class outflow.
+
+**Dependencies**: openWEPP `H.wat.Interception` publication is complete (WBVAL06). Package + active ExecPlan created; implementation pending.
+
 ### Run Statistics Ledger
 **Proposed**: 2026-05-05
 **Size**: Medium-High (2-4 focused sessions)
