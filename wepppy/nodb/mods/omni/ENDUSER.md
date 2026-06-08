@@ -141,6 +141,23 @@ This is the right tool when your question is not "Which whole scenario is better
 
 If you use polygon areas, hillslopes are included when at least half of the hillslope area falls inside a polygon. This makes the result easier to interpret, but it also means polygon boundaries do not create exact partial-hillslope treatment fractions.
 
+### Stream-Order Grouping
+
+Stream-order grouping bundles hillslopes by where they sit in the drainage network, so each contrast treats one drainage unit at a time instead of individual hillslopes.
+
+Streams have an "order" that describes their place in the network. Small headwater channels are low order. Where channels join, they form larger, higher-order channels downstream. Stream-order grouping uses this structure to organize hillslopes by the part of the network they drain into.
+
+Here is what happens when you choose this mode:
+
+- Omni first simplifies the channel network by trimming the smallest headwater tributaries. The **Order reduction passes** setting controls how much trimming is done: each pass removes another level of the smallest remaining headwater channels. The minimum is 1, and 1 is the default. A higher number leaves fewer, larger channels, which produces fewer and broader groups. A lower number keeps more channels and produces more, smaller groups.
+- The watershed is then re-divided around the simplified network, so each remaining channel segment gathers the hillslopes that drain to it into one group.
+- Each original hillslope is assigned to the group it overlaps the most. Every hillslope ends up in exactly one group.
+- Channel areas themselves are not treated as hillslope groups.
+
+Omni then creates one contrast for every group, for each control-and-treatment scenario pair you selected. That lets you compare what happens when a treatment is applied to one drainage unit at a time, rather than to hand-picked hillslopes or mapped polygons.
+
+Use this mode when your question is about drainage structure, such as which subcatchments contribute the most or where treatment at the drainage-unit scale would help most. If a group ends up with no hillslopes after trimming, its contrast is skipped and noted in the report.
+
 ## Interpreting Results
 
 ### Scenario Results
