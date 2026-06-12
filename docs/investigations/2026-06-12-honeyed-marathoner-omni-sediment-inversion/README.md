@@ -50,6 +50,36 @@ The raw WEPP `loss.dat` files show the same pattern:
 | 122 | 0.000 | 0.159 |
 | 264 | 0.000 | 61.179 |
 
+## Related Low-Severity Forest Hillslopes
+
+A follow-up read-only query on `2026-06-12 16:44:11 PDT` checked the full
+`omni/scenarios.hillslope_summaries.parquet` table for other base
+low-severity forest hillslopes. Interpreting low-severity forest as base
+`Low Severity Fire` hillslopes with a base soil key containing
+`forest low sev fire`, the project has 56 such hillslopes:
+
+| Base soil key | Count | Inversions | No inversion |
+| --- | ---: | ---: | ---: |
+| `620333-loam-forest low sev fire` | 27 | 3 | 24 |
+| `620349-loam-forest low sev fire` | 29 | 0 | 29 |
+| Total | 56 | 3 | 53 |
+
+The defect is therefore not universal across low-severity forest hillslopes,
+and it is not universal within the same `620333` soil key as the affected
+hillslopes. The broader low-severity forest subset totals `3.1304 t/yr` of
+burned base sediment yield versus `0.0670 t/yr` of unburned sediment yield.
+
+Examples of same-soil `620333-loam-forest low sev fire` hillslopes that do not
+invert:
+
+| WEPP ID | Topaz ID | Base sediment (t/yr) | Unburned sediment (t/yr) | Result |
+| ---: | ---: | ---: | ---: | --- |
+| 256 | 1122 | 1.6230 | 0.0048 | burned > unburned |
+| 119 | 552 | 0.0000 | 0.0000 | equal |
+| 123 | 563 | 0.0000 | 0.0000 | equal |
+| 133 | 612 | 0.0000 | 0.0000 | equal |
+| 148 | 672 | 0.0000 | 0.0000 | equal |
+
 ## Root Cause Evidence
 
 Slope and climate are shared. The unburned `.run` files reference the same
