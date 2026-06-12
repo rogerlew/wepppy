@@ -241,10 +241,10 @@ Component benchmarks:
       (devtools) observations support the <300 ms rule and sub-40 ms jobstatus
       responses. Optional: formalize with a measured distribution; at minimum
       the paper says "observed in routine operation," not "benchmarked."
-- [x] Flask-SocketIO comparison case: Culvert web app audit
-      (docs/culvert-at-risk-integration/audits/
-      culvert-web-app-codebase-audit-2026-02-20.md) documents gevent/SocketIO
-      single-worker scaling barriers — first-hand domain evidence for §3.
+- [x] Flask-SocketIO scaling constraints: internally grounded by the Culvert
+      web app audit (docs/culvert-at-risk-integration/audits/, 2026-02-20).
+      **Not named or cited in the manuscript** (Roger 2026-06-12) — presented
+      there as the conventional pattern's well-known deployment constraints.
 - [ ] GL-Dashboard: dataset sizes that broke Leaflet; interaction latency on deck.gl.
 
 Data/repo (ACG Option C):

@@ -108,17 +108,16 @@ source/compose — see planning doc):
   (wepppy/rq/ inventory). Latency provenance: observed browser-session
   timings (devtools), incl. sub-40 ms rq-engine job-status responses.
   Optionally formalize with a measured route-latency distribution in §8.
-- Conventional design and its costs — DOCUMENTED COMPARISON CASE, not
-  counterfactual: the Culvert web app (companion decision-support app in the
-  WEPPcloud ecosystem) runs Flask-SocketIO + gevent worker + Redis message
-  queue; its codebase audit
-  (docs/culvert-at-risk-integration/audits/culvert-web-app-codebase-audit-2026-02-20.md)
-  documents the scaling barriers: optimized for single-web-worker simplicity,
-  horizontal scaling needs sticky affinity + upgrade continuity at the load
-  balancer, worker-local task state diverges across workers, gevent
-  monkey-patch coupling (open issue #98). Diplomatic framing — "a companion
-  application adopted the conventional pattern; an audit identified the
-  predicted constraints"; naming is Roger's call.
+- Conventional design and its costs: in the manuscript, present generically —
+  the Flask-SocketIO + gevent pattern requires single-worker processes,
+  sticky-session load balancing to scale horizontally, and risks worker-local
+  state divergence; one long request can stall the UI. DO NOT name the Culvert
+  web app or cite its audit in the manuscript (Roger 2026-06-12 — no calling
+  out a partner app as an anti-pattern; a citation would identify it). The
+  audit (docs/culvert-at-risk-integration/audits/, 2026-02-20) remains our
+  internal confidence that these constraints are real and domain-relevant —
+  it grounds the claim, it does not appear in the paper. Phrase as the
+  well-known deployment constraints of the conventional pattern.
 - WEPPcloud instead: server push via Redis pub/sub fanned out by Go
   status2/preflight2 WebSocket services; client->server stays plain HTTP
   through Flask and rq-engine (FastAPI, async ASGI). Browse and query-engine
