@@ -98,7 +98,26 @@ preferences — consequences of a persistent, interactive modeling platform." --
 "Why HPC and WEPPcloud are a Poor Match" — the why-bespoke argument (batch
 queuing vs real-time, always-on services, small-file random I/O vs Lustre,
 FORTRAN+Python+Rust dependency glue vs module systems). 20+ container topology,
-~1.5M LOC, effectively single-developer-maintained. -->
+~1.5M LOC, effectively single-developer-maintained.
+
+UI-responsiveness rationale (Roger 2026-06-12; statically verified against
+source/compose — see planning doc):
+- Architectural rule: Flask routes stay interactive (<300 ms intent; a few in
+  the seconds range); ALL long-running work goes to RQ queues — not just WEPP
+  FORTRAN: climate builds, soils, Omni, fork/archive, exports, interchange
+  (wepppy/rq/ inventory). [300 ms is design intent — back with measured route
+  latency distribution in §8.]
+- Rejected conventional design: Flask-SocketIO for push -> forces
+  gevent/eventlet single-worker processes, horizontal scaling via multiple
+  containers behind a session-aware (sticky) reverse proxy, and one long
+  request can stall the worker. Present as counterfactual (never deployed).
+- WEPPcloud instead: server push via Redis pub/sub fanned out by Go
+  status2/preflight2 WebSocket services; client->server stays plain HTTP
+  through Flask (gunicorn 4wx2t sync) and rq-engine (FastAPI, uvicorn ASGI,
+  4 workers in prod). Job-status polling target sub-40 ms [needs benchmark].
+- Same segregation logic: browse (Starlette, gunicorn -k UvicornWorker x3)
+  and query-engine (Starlette, single-process async uvicorn) isolate
+  file-explorer and analytics workloads from the UI app. -->
 
 **Figure 1.** WEPPcloud runtime topology. Requests from human operators and
 JWT-authenticated AI agents route through the core web stack; the asynchronous

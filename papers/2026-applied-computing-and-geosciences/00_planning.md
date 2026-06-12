@@ -237,6 +237,10 @@ Component benchmarks:
       parquet, small/medium/large runs.
 - [ ] Omni: storage + wall time, N-scenario Omni project vs. N forked projects.
 - [ ] Query-engine: example payloads + latency on representative runs.
+- [ ] Flask route latency distribution (validate the <300 ms design rule;
+      identify the seconds-range outliers and name them honestly).
+- [ ] rq-engine jobstatus latency under realistic load (claimed sub-40 ms —
+      needs benchmark before the number appears in the paper).
 - [ ] GL-Dashboard: dataset sizes that broke Leaflet; interaction latency on deck.gl.
 
 Data/repo (ACG Option C):
