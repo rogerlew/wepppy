@@ -8,30 +8,30 @@
 
 **Roger Lew^a,\*, Mariana Dobre^b, Anurag Srivastava^b, Erin S. Brooks^b, Peter R. Robichaud^c**
 
-^a Virtual Technology and Design, University of Idaho, Moscow, ID, USA
+^a Department of Design and Environments, University of Idaho, Moscow, ID, USA
 ^b Department of Soil and Water Systems, University of Idaho, Moscow, ID, USA
 ^c USDA Forest Service, Rocky Mountain Research Station, Moscow, ID, USA
 
 \* Corresponding author: rogerlew@uidaho.edu
 
-<!-- TODO: confirm departmental affiliations match current appointments -->
-
 ## Abstract
 
-WEPPcloud is an online platform that couples the Water Erosion Prediction
-Project (WEPP) model with automated acquisition of terrain, soil, land cover,
-and climate data to support watershed-scale erosion and hydrology decision
-making, including post-wildfire emergency response. The implementation
+WEPPcloud is an online platform that couples watershed-scale erosion and
+hydrology models — foremost the Water Erosion Prediction Project (WEPP),
+alongside RUSLE, rangeland-erosion, ash-transport, and debris-flow models —
+with automated acquisition of terrain, soil, land cover, and climate data to
+support land-management decision making, including post-wildfire emergency
+response. The implementation
 described in 2022 served early adopters well but was naive about production
 demand: larger watersheds, fire-season surges from Burned Area Emergency
 Response (BAER) teams, scenario-intensive treatment planning, and programmatic
-access. This paper describes the platform's evolution into a tightly
-integrated architecture of containerized, on-demand microservices, organized
-around the operational lessons that shaped each design decision.
+access. This paper traces the platform's evolution into tightly integrated,
+containerized, on-demand microservices, organized around the operational
+lessons that shaped each design decision.
 (1) Long-running legacy FORTRAN model executions are isolated from interactive
 requests through Redis-backed job queues. (2) Portable, file-backed run state —
 retained from the original design and hardened with distributed locking — lets
-every model run be forked, archived, and re-executed. (3) Model outputs are
+every run be forked, archived, and re-executed. (3) Model outputs are
 published as self-describing columnar Parquet tables with embedded units
 metadata and queried through a declarative, safety-bounded analytics service
 that also serves AI agents. (4) Performance-critical components are
@@ -40,8 +40,8 @@ abstraction, Go services for real-time status streaming. These foundations
 enable scenario fan-out — one user action clones and selectively reruns
 treatment scenarios — and interactive WebGL visualization of multi-scenario
 results. We demonstrate a post-fire treatment-planning workflow and report
-production evidence: [N] model runs across [N] watersheds, fire-season demand
-surges, and queue and worker utilization behavior. The lessons offer a
+production evidence: [N] runs across [N] watersheds, fire-season demand
+surges, and queue and worker utilization. The lessons offer a
 transferable guide for operationalizing legacy environmental models as
 responsive, scalable web services.
 
