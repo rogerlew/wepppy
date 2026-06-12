@@ -54,7 +54,7 @@ the production architecture. Similarly, MCP/agentic access is an operational
 capability worth one subsection (it works today), but it is a secondary surface —
 not the hook, not in the title.
 
-## Article type (decide with co-authors)
+## Article type (decide with coauthors)
 
 - **Application article** (5,000 w): "real-world case study" — most honest match;
   adoption + surge case study carry the evidence load.
@@ -79,7 +79,7 @@ turns out strong enough to support research-paper claims.
 | Units | SI required |
 | Data | Option C: deposit in repository + cite/link, or explain why not |
 | AI declaration | **Required**: statement of generative AI use in manuscript prep, in a section before references (relevant to our Claude/Codex workflow — draft this early, it will appear in the published article) |
-| Open access | Fully OA, mandatory APC — **verify amount + UI/USDA agreement/waiver before committing co-authors** |
+| Open access | Fully OA, mandatory APC — **verify amount + UI/USDA agreement/waiver before committing coauthors** |
 | Review | Single anonymized, ≥2 reviewers |
 | Template | els-cas (cas-sc.cls fine; double-column permitted for LaTeX but unnecessary) |
 | Preprint | Free SSRN posting offered at submission, optional |
@@ -139,8 +139,9 @@ at the expense of section 2 if needed.
 ## Related work
 
 Annotated bibliography: `research/annotated-bibliography.md` (Deep Research,
-2026-06-12; 40 entries across the nine themes, ranked top-15, synthesis with
-gaps and positioning risks). PDFs for 17 entries in `research/pdfs/`.
+2026-06-12; 53 annotated entries across the nine themes, ranked top-15,
+synthesis with gaps and positioning risks, plus 5 unverified leads). PDFs for
+17 entries in `research/pdfs/`.
 
 Verification status (Claude Code, 2026-06-12):
 - **Title-page verified from PDFs**: Wilcox et al. 2026 A-KBS (ACG 29:100322),
@@ -148,21 +149,22 @@ Verification status (Claude Code, 2026-06-12):
   GEOL-QMAPS (ACG 24:100197).
 - **Web-verified**: PixelSWAT (Bole et al. 2024, ACG 100175), Alyaev et al. 2021
   geosteering benchmark (ACG 12:100072), Zhang et al. LLM-driven Mindat workflow
-  (ACG 100218).
-- **Corroborated but verify DOI before citing**: Oldemeyer & Russell 2022
-  (acags.2021.100077 — INL repository hit only).
+  (ACG 100218), Oldemeyer & Russell 2022 (ACG 13:100077), eWaterCycle (Hut et
+  al. 2022, GMD 15:5371-5390), CSDMS (Tucker et al. 2022, GMD
+  15:1413-1439), BMI 2.0 (Hutton et al. 2020, JOSS 5:2317), and Model My
+  Watershed official software/documentation.
 - Remaining entries (HydroShare, Tethys, SWATShare, GEE, DuckDB, Spatial
   Parquet, Pegasus, Parsl, ERMiT, ...) are canonical and low-risk; spot-check
   DOIs at citation time. PDFs on hand cover most of the top-15.
 
-Candidate additions Deep Research missed (verify before adding):
-- [ ] **eWaterCycle** (Hut et al., ~2022, Geosci. Model Dev.) — FAIR hydrological
-      platform running multiple legacy models in containers; arguably the closest
-      legacy-model-productionization comparator; conspicuous absence.
-- [ ] **CSDMS / pymt / Basic Model Interface** (Tucker et al. GMD; Hutton et al.
-      JOSS) — community model-coupling infrastructure; prompt asked, not returned.
-- [ ] **Model My Watershed / WikiWatershed** — public-facing watershed
-      decision-support web app; close audience overlap; prompt asked, not returned.
+Claude review additions addressed:
+- [x] **eWaterCycle** (Hut et al. 2022, Geosci. Model Dev.) — added as the
+      strongest comparator for FAIR, containerized hydrological model execution.
+- [x] **CSDMS / pymt / Basic Model Interface** (Tucker et al. GMD; Hutton et al.
+      JOSS) — added as model-interoperability and coupling infrastructure.
+- [x] **Model My Watershed / WikiWatershed** — added as verified public-facing
+      watershed scenario software; no DOI-bearing systems architecture paper was
+      identified in this pass.
 
 Positioning takeaways from the synthesis (adopted):
 - Do not claim novelty for microservices/containers/remote execution per se —
@@ -247,9 +249,9 @@ Data/repo (ACG Option C):
 ## Next steps
 
 0. ~~Deep Research bibliography~~ done 2026-06-12; key entries verified (see
-   Related work). Remaining: chase eWaterCycle / CSDMS / Model My Watershed
-   candidates; verify Oldemeyer & Russell DOI.
-1. Confirm article type (default: Application article) with co-authors; verify
+   Related work). Claude review additions and Oldemeyer & Russell DOI check
+   addressed 2026-06-12.
+1. Confirm article type (default: Application article) with coauthors; verify
    APC + UI/USDA OA agreement.
 2. Write highlights (3–5) and 250-word abstract first — framing forcing function.
 3. Audit available production telemetry (top of evidence inventory); decide

@@ -206,6 +206,30 @@ Verification note: citation metadata and DOI/stable URLs were checked on 2026-06
 
 ### 5. Wrapping or Modernizing Legacy Environmental Models for Web or Cloud Execution
 
+- **Hut, R., Drost, N., van de Giesen, N., van Werkhoven, B., et al. (2022). "The eWaterCycle platform for open and FAIR hydrological collaboration." Geoscientific Model Development, 15, 5371-5390. https://doi.org/10.5194/gmd-15-5371-2022**
+
+  eWaterCycle is a FAIR hydrological modeling platform that separates experiment code from model code. It exposes hydrological models through BMI-style Python interfaces, runs models inside software containers, supports multiple models and languages, and uses browser-accessed Jupyter notebooks plus supporting services for data, forcing, model execution, and result export.
+
+  Relevance: Highest-priority addition because it is the closest verified comparator for containerized legacy hydrological models. It directly overlaps with WEPPcloud on model accessibility, containers, notebooks/web access, FAIR data, and model comparison, but differs in being research-notebook and FAIR-experiment oriented rather than an operational decision-support application with queue-isolated production workflows, status-triggered UI behavior, persisted run-state transitions, treatment scenario fan-out, and agency post-fire usage.
+
+  Evidence type: Hydrological platform design, FAIR/reproducibility architecture, and multi-model case studies.
+
+- **Tucker, G. E., Hutton, E. W. H., Piper, M. D., Campforts, B., et al. (2022). "CSDMS: a community platform for numerical modeling of Earth surface processes." Geoscientific Model Development, 15, 1413-1439. https://doi.org/10.5194/gmd-15-1413-2022**
+
+  This paper describes the Community Surface Dynamics Modeling System as an interoperable Earth-surface modeling ecosystem. It covers model repositories and metadata, interface and ontology standards, language-bridging tools, Landlab, data-access components, and a Python-based execution/model-coupling framework.
+
+  Relevance: Important background for the model-interoperability and wrapper discussion. It shows a mature community approach to reusable model components and coupling, while WEPPcloud should be framed as an operational platform for a specific decision-support model family and run-state contract rather than a general community model ecosystem.
+
+  Evidence type: Community cyberinfrastructure and model-interoperability platform paper.
+
+- **Hutton, E. W. H., Piper, M. D., & Tucker, G. E. (2020). "The Basic Model Interface 2.0: A standard interface for coupling numerical models in the geosciences." Journal of Open Source Software, 5(51), 2317. https://doi.org/10.21105/joss.02317**
+
+  BMI 2.0 defines a standard interface for coupling numerical models in geoscience. It is central to CSDMS and underlies tools such as pymt and eWaterCycle that make models callable through common interfaces across languages and execution environments.
+
+  Relevance: Useful when discussing why WEPPcloud does not present itself as a general model-coupling framework. BMI/pymt-style ecosystems support reusable model interoperability; WEPPcloud instead wraps established WEPP-family workflows into an application-specific orchestration, persistence, and decision-support contract.
+
+  Evidence type: Software/interface standard paper.
+
 - **Rajib, M. A., Merwade, V., Kim, I. L., Zhao, L., et al. (2016). "SWATShare - A web platform for collaborative research and education through online sharing, simulation and visualization of SWAT models." Environmental Modelling & Software, 75, 498-512. https://doi.org/10.1016/j.envsoft.2015.10.032**
 
   SWATShare provides web-based sharing, simulation, calibration, and visualization of SWAT models. It is one of the closest hydrologic-model platform comparators because it combines model instances, online execution, and collaboration.
@@ -297,6 +321,14 @@ Verification note: citation metadata and DOI/stable URLs were checked on 2026-06
   Evidence type: Disaster case study and automated geovisualization workflow.
 
 ### 7. Scenario Management and Ensemble Run Management
+
+- **Stroud Water Research Center. (2017). "Model My Watershed." WikiWatershed software. https://wikiwatershed.org/model/**
+
+  Model My Watershed is a public-facing watershed-modeling web application for analyzing land use and soil data, modeling stormwater runoff and water-quality impacts, and comparing conservation or development scenarios. The official citation guidance cites it as software rather than as a peer-reviewed systems paper; peer-reviewed publications around the tool primarily emphasize education and watershed learning outcomes.
+
+  Relevance: Useful audience and scenario-management comparator because it overlaps with WEPPcloud on watershed web modeling and conservation/development scenario comparison. WEPPcloud should differentiate on physics-based erosion/hydrology execution, file-backed run artifacts, queue-isolated long-running jobs, treatment scenario fan-out, and operational post-fire decision support.
+
+  Evidence type: Verified software/tool documentation, not peer-reviewed platform architecture evidence.
 
 - **Alyaev, S., Ivanova, S., Holsaeter, A., Bratvold, R. B., & Bendiksen, M. (2021). "An interactive sequential-decision benchmark from geosteering." Applied Computing and Geosciences, 12, 100072. https://doi.org/10.1016/j.acags.2021.100072**
 
@@ -421,36 +453,36 @@ Verification note: citation metadata and DOI/stable URLs were checked on 2026-06
 | Rank | Entry | Why it matters for the WEPPcloud manuscript |
 | --- | --- | --- |
 | 1 | Lew et al. 2022, WEPPcloud Part I | Direct predecessor; anchors the domain and defines what the new paper succeeds. |
-| 2 | Wilcox et al. 2026, A-KBS | Closest ACG architecture precedent for science gateways, containers, HPC, and geospatial prediction. |
-| 3 | Tarboton et al. 2024, HydroShare retrospective | Best long-horizon platform sustainability and adoption comparator in water science. |
-| 4 | Swain et al. 2016, Tethys Platform | Core environmental web-app platform comparator; helps justify bespoke vs. framework paths. |
-| 5 | Rajib et al. 2016, SWATShare | Closest hydrologic web execution/collaboration competitor. |
-| 6 | Robichaud et al. 2007, ERMiT | Foundational post-fire WEPP web decision-support citation. |
-| 7 | Robichaud & Ashmun 2013, post-wildfire tools | Connects BAER decision workflows to internet-delivered science tools. |
-| 8 | Gorelick et al. 2017, Google Earth Engine | Canonical production-scale geospatial analytics platform. |
-| 9 | Krishnan et al. 2011, OpenTopography | Early service-oriented geoscience cyberinfrastructure comparator. |
-| 10 | Stern et al. 2022, Pangeo Forge | Strong cloud-optimized data-production comparator for cataloged data contracts. |
-| 11 | Raasveldt & Mühleisen 2019, DuckDB | Supports embedded analytics for per-run archives. |
-| 12 | Saeedan & Eldawy 2022, Spatial Parquet | Peer-reviewed support for columnar geospatial file design. |
-| 13 | Alyaev et al. 2021, geosteering benchmark | ACG precedent for interactive decision-support systems with measurable user behavior. |
-| 14 | Zhang et al. 2025, LLM-driven workflow | ACG precedent for bounded LLM/agent geoscience workflows. |
+| 2 | Hut et al. 2022, eWaterCycle | Closest verified comparator for FAIR, containerized, multi-model hydrological execution. |
+| 3 | Wilcox et al. 2026, A-KBS | Closest ACG architecture precedent for science gateways, containers, HPC, and geospatial prediction. |
+| 4 | Tarboton et al. 2024, HydroShare retrospective | Best long-horizon platform sustainability and adoption comparator in water science. |
+| 5 | Swain et al. 2016, Tethys Platform | Core environmental web-app platform comparator; helps justify bespoke vs. framework paths. |
+| 6 | Rajib et al. 2016, SWATShare | Closest hydrologic web execution/collaboration competitor. |
+| 7 | Tucker et al. 2022, CSDMS | Mature community model-interoperability and coupling ecosystem comparator. |
+| 8 | Robichaud et al. 2007, ERMiT | Foundational post-fire WEPP web decision-support citation. |
+| 9 | Robichaud & Ashmun 2013, post-wildfire tools | Connects BAER decision workflows to internet-delivered science tools. |
+| 10 | Gorelick et al. 2017, Google Earth Engine | Canonical production-scale geospatial analytics platform. |
+| 11 | Stern et al. 2022, Pangeo Forge | Strong cloud-optimized data-production comparator for cataloged data contracts. |
+| 12 | Raasveldt & Mühleisen 2019, DuckDB | Supports embedded analytics for per-run archives. |
+| 13 | Saeedan & Eldawy 2022, Spatial Parquet | Peer-reviewed support for columnar geospatial file design. |
+| 14 | Alyaev et al. 2021, geosteering benchmark | ACG precedent for interactive decision-support systems with measurable user behavior. |
 | 15 | Oakley et al. 2023, probabilistic PFDF support | Recent post-fire hazard decision-support comparator with uncertainty communication. |
 
 ### Gaps the Manuscript Can Claim
 
-The literature has many prototypes, data portals, model interfaces, and general science-gateway frameworks, but comparatively few papers document the production behavior of a long-lived geoscience modeling platform serving deadline-driven operational users. HydroShare and MyGeoHub report sustainability and adoption, and A-KBS reports modern gateway/HPC workflow orchestration, but none of the verified comparators combine fine-grained environmental-model task orchestration, long-running legacy erosion/hydrology binaries, queue isolation from interactive request paths, portable file-backed run artifacts, and post-fire emergency-response usage in one architecture.
+The literature has many prototypes, data portals, model interfaces, and general science-gateway frameworks, but comparatively few papers document the production behavior of a long-lived geoscience modeling platform serving deadline-driven operational users. eWaterCycle is the strongest comparator for FAIR, containerized hydrological models, and A-KBS reports modern gateway/HPC workflow orchestration. The remaining gap is narrower but defensible: none of the verified comparators combine fine-grained application-level environmental-model task orchestration, queue isolation from interactive request paths, portable file-backed run artifacts, treatment scenario fan-out, status-triggered web UI behavior, and post-fire emergency-response usage in one production architecture.
 
 There is also a gap around model-output contracts. Pangeo Forge, Earth system data cubes, Spatial Parquet, DuckDB, and DataFusion show strong movement toward cloud-optimized, columnar, and embedded analytical substrates, but they generally address provider archives, data lakes, or general query engines. A WEPPcloud paper can claim a narrower but useful contribution: per-run model outputs exposed through self-describing Parquet/Arrow metadata and bounded, declarative analytics over run-scoped archives.
 
-Scenario work is well represented in robust decision-making frameworks, geosteering decision benchmarks, and SWAT-related platforms, but those papers rarely discuss operational cloning, selective rerun, and storage/compute reuse for treatment scenarios initiated from one user action. The Omni scenario workflow can therefore be positioned as production scenario management rather than generic ensemble analysis.
+Scenario work is well represented in robust decision-making frameworks, geosteering decision benchmarks, Model My Watershed, and SWAT-related platforms, but those comparators rarely discuss operational cloning, selective rerun, and storage/compute reuse for treatment scenarios initiated from one user action. The Omni scenario workflow can therefore be positioned as production scenario management rather than generic ensemble analysis or educational conservation-scenario comparison.
 
 Finally, LLM/agent papers are emerging in geoscience, but the verified literature is thin on LLM agents operating against scientific modeling platforms through constrained tool contracts. The Zhang et al. Mindat workflow supports the ACG genre, but WEPPcloud should present MCP routes as a bounded access layer over authoritative run catalogs, not as an open-ended chatbot contribution.
 
 ### Positioning Risks
 
-The largest direct risk is A-KBS: it already makes an ACG architecture claim around a science gateway, containers, Kubernetes, HPC, Globus, and AI-assisted geospatial workflows. WEPPcloud should not claim novelty merely for using microservices, containers, or remote job execution. The differentiator should be the application-level orchestration contract: production hydrologic/erosion decision support, fine-grained model task sequencing, queue-isolated legacy binaries, file-backed run-state artifacts, scenario fan-out, and measured post-fire workload behavior.
+The largest direct risks are eWaterCycle and A-KBS. eWaterCycle already makes a strong FAIR hydrology claim around containerized multi-model execution, BMI interfaces, notebooks, model comparison, and reproducible experiments. A-KBS already makes an ACG architecture claim around a science gateway, containers, Kubernetes, HPC, Globus, and AI-assisted geospatial workflows. WEPPcloud should not claim novelty merely for using microservices, containers, or remote job execution. The differentiator should be the application-level orchestration contract: production hydrologic/erosion decision support, fine-grained model task sequencing, queue-isolated legacy binaries, file-backed run-state artifacts, scenario fan-out, and measured post-fire workload behavior.
 
-HydroShare and SWATShare are also close enough that reviewers may ask why WEPPcloud is not simply another hydrologic web platform. The answer should be concrete: HydroShare is primarily publication/collaboration infrastructure; SWATShare is SWAT-focused sharing and execution; WEPPcloud is a production watershed modeling service with a run-state contract, scenario fan-out, and interactive analytics over model-output archives.
+HydroShare, SWATShare, and Model My Watershed are also close enough that reviewers may ask why WEPPcloud is not simply another hydrologic web platform. The answer should be concrete: HydroShare is primarily publication/collaboration infrastructure; SWATShare is SWAT-focused sharing and execution; Model My Watershed is public-facing stormwater/water-quality scenario software; WEPPcloud is a production watershed modeling service with a run-state contract, queue-isolated long-running erosion/hydrology jobs, scenario fan-out, and interactive analytics over model-output archives.
 
 Google Earth Engine and Pangeo Forge may dwarf WEPPcloud in scale. They should be used as conceptual comparators for cloud data/analytics patterns, not as direct competitors. WEPPcloud's claim is not planetary-scale raster analytics; it is the architecture required to operate legacy physics models interactively for watershed decision users.
 
@@ -459,4 +491,5 @@ Google Earth Engine and Pangeo Forge may dwarf WEPPcloud in scale. They should b
 - **Core "Pangeo ecosystem" platform paper.** A peer-reviewed, DOI-bearing paper for the overall Pangeo platform was not identified in this pass. Use Stern et al. 2022 on Pangeo Forge as the verified, citable Pangeo-family entry.
 - **Kepler.gl platform paper.** Kepler.gl is widely used and relevant to geospatial visualization, but a peer-reviewed platform paper with DOI was not found. Use deck.gl as a clearly labeled preprint only if an implementation citation is needed.
 - **GeoParquet formal peer-reviewed paper.** GeoParquet has stable project/specification URLs, but a peer-reviewed GeoParquet paper was not identified. Use Saeedan & Eldawy 2022 on Spatial Parquet for peer-reviewed geospatial-Parquet support and cite the GeoParquet specification separately only if required.
+- **Model My Watershed technical architecture paper.** The official software citation and public documentation are verified, and education-focused papers exist, but a DOI-bearing systems architecture paper for Model My Watershed was not identified in this pass.
 - **MCP-specific scientific modeling papers.** No peer-reviewed paper on Model Context Protocol interfaces to environmental modeling platforms was identified. Treat MCP as an implementation detail and cite broader LLM/agent and FAIR API literature instead.
