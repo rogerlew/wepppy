@@ -68,3 +68,6 @@ tests/wepp/interchange/fixtures/*
 
 # Local-only Codex operator roles (may contain sensitive hostnames/network details)
 .codex/agents/*_operator.toml
+
+# Claude Code local settings
+.claude/settings.local.json

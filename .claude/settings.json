@@ -1,0 +1,26 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(find . -type d -name \"work-packages\")",
+      "Bash(ls docs/)",
+      "WebFetch(domain:joss.readthedocs.io)",
+      "Bash(ls /workdir/weppcloud-wbt/whitebox-raster/../vrt_test_data 2>&1 && echo \"---\" && ls /workdir/weppcloud-wbt/test_fixtures/vrt_test_data/ | head -5)",
+      "Read(//workdir/weppcloud-wbt/**)",
+      "Bash(file /workdir/weppcloud-wbt/paper/figures/*)",
+      "WebFetch(domain:web.archive.org)",
+      "Read(//workdir/joss/app/controllers/**)",
+      "Read(//home/workdir/joss/app/controllers/**)",
+      "Read(//workdir/joss/app/helpers/**)",
+      "Read(//home/workdir/joss/app/helpers/**)",
+      "Read(//workdir/joss/app/models/**)",
+      "Read(//home/workdir/joss/app/models/**)",
+      "Read(//workdir/joss/spec/fixtures/**)",
+      "Read(//home/workdir/joss/spec/fixtures/**)",
+      "Read(//workdir/joss-reviews/**)",
+      "Read(//home/workdir/joss-reviews/**)",
+      "Read(//workdir/joss/**)",
+      "Read(//home/workdir/joss/**)",
+      "Bash(git -C /workdir/joss log --all --oneline --grep=\"editorialbot\\\\|bot\\\\|PRE REVIEW\")"
+    ]
+  }
+}
