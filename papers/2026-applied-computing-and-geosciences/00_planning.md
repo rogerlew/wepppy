@@ -21,6 +21,18 @@ measured behavior rather than tooling narrative; "we adopted Docker/CI" is
 weaker than "these production requirements forced these designs, here is how
 they behave under load."
 
+**Center of gravity (Roger, 2026-06-12): operational lessons learned.** The
+paper's distinctive value is *why* the architecture is the way it is — lessons
+paid for in operation, not retrofitted rationale. Two flavors: original
+decisions validated and hardened (file-backed run state → distributed locking,
+Redis caching) vs. decisions operation forced (queue isolation, columnar
+interchange, native kernels, pub/sub status streaming). Drafting convention:
+each architecture section opens with the operational pressure/incident, then
+the design, then observed behavior. Characterize the 2022-era implementation
+as "naive" (it had Flask + webservices + NoDb already — not monolithic), i.e.
+it worked but had not yet met production. Needed input: Roger's inventory of
+actual incidents/pressures 2022–2026 (see TODO in paper.md §2).
+
 Design pillars (each with rationale + observed behavior):
 
 1. File-backed run state with distributed locking (NoDb + Redis) instead of an
