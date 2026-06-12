@@ -56,7 +56,16 @@ cyberinfrastructure; interactive visualization
 
 ## Highlights (3–5 bullets, ≤85 chars each)
 
-<!-- TODO: draft after abstract settles -->
+- Operational lessons drove WEPPcloud's evolution to on-demand microservices
+- Job queues isolate long-running legacy FORTRAN models from interactive requests
+- Portable file-backed run state lets any run be forked, archived, and re-executed
+- Self-describing Parquet outputs feed a declarative query API for humans and AI
+- One user action clones and selectively reruns post-fire treatment scenarios
+
+<!-- Alternates if any bullet is cut:
+- Rust geoprocessing kernels make basin-scale watershed delineation interactive
+- Production evidence: [N] runs, fire-season surges, queue/worker utilization
+Submit as separate file with "highlights" in the filename. -->
 
 ---
 
