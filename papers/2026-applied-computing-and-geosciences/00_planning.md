@@ -54,16 +54,28 @@ the production architecture. Similarly, MCP/agentic access is an operational
 capability worth one subsection (it works today), but it is a secondary surface —
 not the hook, not in the title.
 
-## Article type (decide with coauthors)
+## Article type — DECIDED 2026-06-12: Application article
 
-- **Application article** (5,000 w): "real-world case study" — most honest match;
-  adoption + surge case study carry the evidence load.
-- **Research paper** (5,000 w): viable if the design principles + measured
-  behavior are foregrounded as generalizable findings.
+**Application article** (5,000 w): "real-world case study." Adoption, the
+post-fire workflow case study, and surge demand carry the evidence load;
+design principles and measured behavior are presented as the application's
+architecture rather than as generalizable research findings. This lowers the
+experimental-design bar reviewers can demand while keeping the same word limit.
 
-Same word limit either way; the choice mostly shapes the introduction and
-discussion register. Default: Application article unless the telemetry evidence
-turns out strong enough to support research-paper claims.
+## Working author list (2026-06-12)
+
+| Author | Affiliation | Notes |
+| --- | --- | --- |
+| Roger Lew | University of Idaho | Corresponding author (presumed — confirm); UI affiliation determines Elsevier publishing-agreement/APC eligibility |
+| Mariana Dobre | University of Idaho | |
+| Anurag Srivastava | University of Idaho | |
+| Erin Brooks | University of Idaho | |
+| Peter R. Robichaud | USDA Forest Service, Rocky Mountain Research Station (retired) | Confirm preferred retired-affiliation format with Pete; 2022 paper listed RMRS, Moscow, ID |
+
+CRediT roles to drift in as drafting assigns work (Conceptualization, Software,
+Writing — original draft, etc.). ACG: authorship changes after submission are
+heavily restricted and not allowed after acceptance — finalize order before
+submitting.
 
 ## Venue constraints (from applied-computing-and-geosciences.md)
 
@@ -251,8 +263,10 @@ Data/repo (ACG Option C):
 0. ~~Deep Research bibliography~~ done 2026-06-12; key entries verified (see
    Related work). Claude review additions and Oldemeyer & Russell DOI check
    addressed 2026-06-12.
-1. Confirm article type (default: Application article) with coauthors; verify
-   APC + UI/USDA OA agreement.
+1. ~~Article type~~ decided 2026-06-12: Application article. ~~Author list~~
+   working list set (see above). Remaining: verify APC + University of Idaho
+   Elsevier agreement (corresponding author's UI affiliation governs
+   eligibility); confirm Pete's preferred retired-affiliation format.
 2. Write highlights (3–5) and 250-word abstract first — framing forcing function.
 3. Audit available production telemetry (top of evidence inventory); decide
    whether a collection window is needed before drafting section 8.
