@@ -237,10 +237,14 @@ Component benchmarks:
       parquet, small/medium/large runs.
 - [ ] Omni: storage + wall time, N-scenario Omni project vs. N forked projects.
 - [ ] Query-engine: example payloads + latency on representative runs.
-- [ ] Flask route latency distribution (validate the <300 ms design rule;
-      identify the seconds-range outliers and name them honestly).
-- [ ] rq-engine jobstatus latency under realistic load (claimed sub-40 ms —
-      needs benchmark before the number appears in the paper).
+- [ ] Flask route latency distribution. Provenance today: browser-session
+      (devtools) observations support the <300 ms rule and sub-40 ms jobstatus
+      responses. Optional: formalize with a measured distribution; at minimum
+      the paper says "observed in routine operation," not "benchmarked."
+- [x] Flask-SocketIO comparison case: Culvert web app audit
+      (docs/culvert-at-risk-integration/audits/
+      culvert-web-app-codebase-audit-2026-02-20.md) documents gevent/SocketIO
+      single-worker scaling barriers — first-hand domain evidence for §3.
 - [ ] GL-Dashboard: dataset sizes that broke Leaflet; interaction latency on deck.gl.
 
 Data/repo (ACG Option C):

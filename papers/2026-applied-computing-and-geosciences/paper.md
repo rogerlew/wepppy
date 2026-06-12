@@ -102,22 +102,29 @@ FORTRAN+Python+Rust dependency glue vs module systems). 20+ container topology,
 
 UI-responsiveness rationale (Roger 2026-06-12; statically verified against
 source/compose — see planning doc):
-- Architectural rule: Flask routes stay interactive (<300 ms intent; a few in
+- Architectural rule: Flask routes stay interactive (<300 ms rule; a few in
   the seconds range); ALL long-running work goes to RQ queues — not just WEPP
   FORTRAN: climate builds, soils, Omni, fork/archive, exports, interchange
-  (wepppy/rq/ inventory). [300 ms is design intent — back with measured route
-  latency distribution in §8.]
-- Rejected conventional design: Flask-SocketIO for push -> forces
-  gevent/eventlet single-worker processes, horizontal scaling via multiple
-  containers behind a session-aware (sticky) reverse proxy, and one long
-  request can stall the worker. Present as counterfactual (never deployed).
+  (wepppy/rq/ inventory). Latency provenance: observed browser-session
+  timings (devtools), incl. sub-40 ms rq-engine job-status responses.
+  Optionally formalize with a measured route-latency distribution in §8.
+- Conventional design and its costs — DOCUMENTED COMPARISON CASE, not
+  counterfactual: the Culvert web app (companion decision-support app in the
+  WEPPcloud ecosystem) runs Flask-SocketIO + gevent worker + Redis message
+  queue; its codebase audit
+  (docs/culvert-at-risk-integration/audits/culvert-web-app-codebase-audit-2026-02-20.md)
+  documents the scaling barriers: optimized for single-web-worker simplicity,
+  horizontal scaling needs sticky affinity + upgrade continuity at the load
+  balancer, worker-local task state diverges across workers, gevent
+  monkey-patch coupling (open issue #98). Diplomatic framing — "a companion
+  application adopted the conventional pattern; an audit identified the
+  predicted constraints"; naming is Roger's call.
 - WEPPcloud instead: server push via Redis pub/sub fanned out by Go
   status2/preflight2 WebSocket services; client->server stays plain HTTP
-  through Flask (gunicorn 4wx2t sync) and rq-engine (FastAPI, uvicorn ASGI,
-  4 workers in prod). Job-status polling target sub-40 ms [needs benchmark].
-- Same segregation logic: browse (Starlette, gunicorn -k UvicornWorker x3)
-  and query-engine (Starlette, single-process async uvicorn) isolate
-  file-explorer and analytics workloads from the UI app. -->
+  through Flask and rq-engine (FastAPI, async ASGI). Browse and query-engine
+  (both Starlette, ASGI) segregate file-explorer and analytics workloads from
+  the UI app. [Keep worker counts out of the paper — extraneous detail;
+  demand has not required scaling beyond current provisioning.] -->
 
 **Figure 1.** WEPPcloud runtime topology. Requests from human operators and
 JWT-authenticated AI agents route through the core web stack; the asynchronous
