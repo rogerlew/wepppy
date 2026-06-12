@@ -66,11 +66,11 @@ experimental-design bar reviewers can demand while keeping the same word limit.
 
 | Author | Affiliation | Notes |
 | --- | --- | --- |
-| Roger Lew | University of Idaho | Corresponding author (presumed — confirm); UI affiliation determines Elsevier publishing-agreement/APC eligibility |
+| Roger Lew | University of Idaho | **Corresponding author** (confirmed 2026-06-12); UI affiliation determines Elsevier publishing-agreement/APC eligibility |
 | Mariana Dobre | University of Idaho | |
 | Anurag Srivastava | University of Idaho | |
 | Erin Brooks | University of Idaho | |
-| Peter R. Robichaud | USDA Forest Service, Rocky Mountain Research Station (retired) | Confirm preferred retired-affiliation format with Pete; 2022 paper listed RMRS, Moscow, ID |
+| Peter R. Robichaud | USDA Forest Service, Rocky Mountain Research Station | Confirmed 2026-06-12; retired May/June 2026, but RMRS is where the work was carried out (matches ACG affiliation rule and 2022 paper: RMRS, Moscow, ID) |
 
 CRediT roles to drift in as drafting assigns work (Conceptualization, Software,
 Writing — original draft, etc.). ACG: authorship changes after submission are
@@ -263,10 +263,9 @@ Data/repo (ACG Option C):
 0. ~~Deep Research bibliography~~ done 2026-06-12; key entries verified (see
    Related work). Claude review additions and Oldemeyer & Russell DOI check
    addressed 2026-06-12.
-1. ~~Article type~~ decided 2026-06-12: Application article. ~~Author list~~
-   working list set (see above). Remaining: verify APC + University of Idaho
-   Elsevier agreement (corresponding author's UI affiliation governs
-   eligibility); confirm Pete's preferred retired-affiliation format.
+1. ~~Article type~~ Application article. ~~Author list~~ set; Lew corresponding;
+   Robichaud affiliation USDA FS RMRS (all confirmed 2026-06-12). Remaining:
+   verify APC amount + University of Idaho Elsevier agreement coverage for ACG.
 2. Write highlights (3–5) and 250-word abstract first — framing forcing function.
 3. Audit available production telemetry (top of evidence inventory); decide
    whether a collection window is needed before drafting section 8.
