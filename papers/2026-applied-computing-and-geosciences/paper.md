@@ -18,7 +18,7 @@
 
 WEPPcloud is an online platform that couples watershed-scale erosion and
 hydrology models — foremost the Water Erosion Prediction Project (WEPP),
-alongside RUSLE, rangeland-erosion, ash-transport, and debris-flow models —
+alongside RUSLE, RHEM, WATAR, and debris-flow models —
 with automated acquisition of terrain, soil, land cover, and climate data to
 support land-management decision making, including post-wildfire emergency
 response. The implementation
@@ -76,11 +76,112 @@ design, then observed behavior.
 TODO(Roger): inventory of actual operational incidents/pressures 2022–2026 —
 what strained or failed (sync requests under load? flat-file parsing cost?
 status polling? geoprocessing wall times?). Lessons must be real, not
-retrofitted rationale. -->
+retrofitted rationale.
+Source material: i-crews/st_joe/weppcloud-architecture-overview.md
+"Infrastructure Requirements" table — persistent services, low-latency
+dispatch, local storage (millions of small files; NFS/Lustre degrade),
+unrestricted egress for data APIs, horizontal worker scaling: "not
+preferences — consequences of a persistent, interactive modeling platform." -->
 
 ## 3. On-demand microservices architecture (~800 w)
 
-<!-- Figure 1: runtime topology -->
+<!-- Source material: docs/projects/i-crews/st_joe/weppcloud-architecture-overview.md
+"Why HPC and WEPPcloud are a Poor Match" — the why-bespoke argument (batch
+queuing vs real-time, always-on services, small-file random I/O vs Lustre,
+FORTRAN+Python+Rust dependency glue vs module systems). 20+ container topology,
+~1.5M LOC, effectively single-developer-maintained. -->
+
+**Figure 1.** WEPPcloud runtime topology. Requests from human operators and
+JWT-authenticated AI agents route through the core web stack; the asynchronous
+worker pool executes model simulations; Postgres, Redis, and local storage
+maintain run state. (Redraw as vector art for submission; ASCII basis below
+from `docs/projects/i-crews/st_joe/weppcloud-architecture-overview.md`.)
+
+```
+ DATA BUS LEGEND
+ ---------------
+ ···  Postgres
+ ═══  Redis
+ ───  Local Storage
+
+
+    OPERATORS                  WEPPCLOUD CORE STACK                            STORAGE
+ ───────────────            ─────────────────────────                    ─────────────────────
+                                                          DATA BUSES
+ ┌─────────────┐            ┌───────────────────────┐                    ┌───────────────────┐
+ │    Human    │            │   weppcloud (Flask)   ├───▶ | ═▶ ‖    ·····│     Postgres      │
+ │ Web Browser │──http────▶ │   UI · Auth · NoDb    │···· | ·· ‖ ·▶ :    │   users · runs    │
+ └─────────────┘  /jwt      └───────────┬───────────┘     |    ‖    :    └───────────────────┘
+                    │                   │                 |    ‖    :
+                    │       ┌───────────┴───────────┐     |    ‖    :    ┌───────────────────┐
+                    ├─────▶ │  rq-engine (FastAPI)  ├───▶ | ═▶ ‖═══ : ═══│       Redis       |
+                    │       │  tasks · state · jobs │···· | ·· ‖ ·▶ :    │  rq · job status  |
+                    │       └───────────┬───────────┘     |    ‖    :    │ nodb locks/cache  |
+                    │                   │                 |    ‖    :    └───────────────────┘
+                    │       ┌───────────┴───────────┐     |    ‖    :
+                    │       |    rq-worker pool     ├───▶ |    ‖    :
+                    │       |  data acquisition /   │oooo | ═▶ ‖    :
+                    │       |  processing (Rust)    │···· | ·· ‖ ·▶ :
+                    |       |  subprocess (WEPP)    |     |    ‖    :
+                    |       └──┬────┬───────────────┘     |    ‖    :
+                    │          |   http                   |    ‖    :
+                    |      docker   |                     |    ‖    :
+                    |        exec   └-▶ EXTERNAL APIS     |    ‖    :
+                    |          |                          |    ‖    :
+                    |          └-▶ SERVICE CONTAINERS     |    ‖    :    ┌───────────────────┐
+                    │                                     ├──────────────│  Local Storage    │
+                    │       ┌───────────────────────┐     |    ‖    :    │  Run Data         │
+                    ├─────▶ │  query-engine         ├───▶ |    ‖    :    │  ├ *.nodb         │
+                    │       │  Analytics · MCP API  │oooo | ═▶ ‖    :    │  ├ **.parquet     │
+                    │       └───────────────────────┘     |    ‖    :    │  ├ wepp           │
+                    │                                     |    ‖    :    │  ├ ...            │
+                    │       ┌───────────────────────┐     |    ‖    :    └───────────────────┘
+ ┌─────────────┐    ├─────▶ │  browse (Starlette)   ├───▶ |    ‖    :
+ │  AI Agent   │    │       │  UI · files API       │oooo | ═▶ ‖    :
+ │             │──http      └───────────────────────┘     |    ‖    :
+ └─────────────┘  /jwt                                    |    ‖    :
+                    │                                     |    ‖    :
+                    │              WEBSERVICES            |    ‖    :
+                    │       ─────────────────────────     |    ‖    :
+                    │       ┌───────────────────────┐     |    ‖    :
+                    ├─────▶ │         dtale         ├───▶ | ═▶ ‖    :
+                    |       |      (sandboxed)      │···· | ·· ‖ ·▶ :
+                    │       └───────────────────────┘     |    ‖
+                    │       ┌───────────────────────┐     |    ‖
+                    ├─wss─▶ │       status (Go)     ├───▶ | ═▶ ‖
+                    │       └───────────────────────┘     |    ‖
+                    │       ┌───────────────────────┐     |    ‖
+                    ├─wss─▶ │     preflight  (Go)   ├───▶ | ═▶ ‖
+                    │       └───────────────────────┘     |
+                    │       ┌───────────────────────┐     |
+                    ├─────▶ │  wmesque2 (FastAPI)   ├───▶ |
+                    │       └───────────────────────┘     |
+                    │       ┌───────────────────────┐     |
+                    │─────▶ │    metquery (Flask)   ├───▶ |
+                    │       └───────────────────────┘
+                    │       ┌───────────────────────┐
+                    └─────▶ |    shape-converter    |
+                            |   (fully sandboxed)   |
+                            └───────────────────────┘
+
+                                SERVICE CONTAINERS
+                            ─────────────────────────
+                            ┌───────────────────────┐
+                            |     f(ormat)-esri     |
+                            └───────────────────────┘
+                            ┌───────────────────────┐
+                            |      weppcloudr       |
+                            └───────────────────────┘
+                            ┌───────────────────────┐
+                            |        cap.js         |
+                            └───────────────────────┘
+```
+
+<!-- Figure adaptations from source: "OpenClaw" genericized to "AI Agent".
+Open decisions for the vector redraw: (a) add Caddy reverse-proxy edge in
+front of services (present in production, omitted in source diagram);
+(b) include rq-worker-batch pool? (c) keep f-esri/weppcloudr/cap.js service
+containers or collapse to "sandboxed service containers" for figure economy. -->
 
 ## 4. State model and job orchestration (~550 w)
 
@@ -92,7 +193,11 @@ retrofitted rationale. -->
 
 ## 8. Production evidence (~550 w)
 
-<!-- post-fire workflow case study as running example; telemetry panels -->
+<!-- post-fire workflow case study as running example; telemetry panels.
+Scale datapoint (verify current numbers at drafting): St. Joe basin-scale
+prep — 56 watersheds, 134,033 hillslopes, 151,121 channel segments; >100x
+area of the 2013–2018 Fernan effort (~3,800 ha); enabled by Rust delineation
+(weppcloud-wbt) within the last year. Strong "larger watersheds" evidence. -->
 
 ## 9. Discussion: transferable lessons, limitations, future work (~300 w)
 

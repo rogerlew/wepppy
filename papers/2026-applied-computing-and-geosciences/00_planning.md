@@ -248,6 +248,11 @@ Data/repo (ACG Option C):
 ## Figures plan (draft)
 
 1. Runtime topology (services, Redis roles, job flow) — successor to 2022 Fig. 1.
+   Base on the ASCII topology in
+   `docs/projects/i-crews/st_joe/weppcloud-architecture-overview.md` (Roger,
+   2026-06-12); ASCII now embedded in paper.md §3. Redraw as vector for
+   submission; open decisions noted in paper.md (Caddy edge, batch worker pool,
+   service-container collapse).
 2. Job orchestration / state model: run dir + NoDb sidecars + locks + RQ flow +
    telemetry fan-out.
 3. Data-contract diagram: model binaries → interchange parquet → query-engine
