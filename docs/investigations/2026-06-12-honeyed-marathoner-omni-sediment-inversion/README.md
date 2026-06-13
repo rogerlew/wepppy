@@ -1,5 +1,8 @@
 # Honeyed Marathoner OMNI Sediment Inversion Investigation
 
+**Status: CLOSED — no defect; no code or configuration changes required
+(`2026-06-12`).** See Conclusion.
+
 ## Summary
 
 On `2026-06-12`, we investigated why three hillslopes in
@@ -351,6 +354,34 @@ erosive. Annual runoff remains higher in the burned scenario, and the observed
 inversion is trace-scale because the burned base sediment is exactly zero on
 these hillslopes, so any nonzero unburned sediment appears higher in annual
 comparisons.
+
+## Conclusion
+
+This investigation is **closed with no defect found, and no code or
+configuration changes required**. The OMNI sediment inversion on the three
+`620333-loam` low-severity-fire hillslopes is a correct, explicable WEPP result,
+not a bug in OMNI aggregation, the WEPP binary, or the WEPPcloud soil and
+management generation:
+
+- It reproduces identically under the current release `wepp_260606` and the
+  production `wepp_dcc52a6` build — version-stable, neither introduced by nor
+  fixed in the current release.
+- The mechanism is physical: the open burned canopy melts its snowpack out about
+  four days earlier, so the burned surface dries below saturation before the
+  `1992-06-16` storm while the unburned surface is still saturated and sheds the
+  burst as saturation-excess runoff that crosses the rill shear threshold.
+- It is trace-scale (combined `0.0622 t/yr`) and confined to hillslopes where
+  burned base sediment is exactly zero; annual runoff remains higher in the
+  burned scenario.
+- The soil `kslast` parameterization and the OMNI undisturbed scenario behave as
+  designed.
+
+The one item left open is **not a defect** but a modeling-calibration question
+for any future work: whether WEPP's canopy-cover control on snowmelt radiation
+(and, secondarily, on bare-soil evaporation) is appropriately parameterized for
+low-severity fire. The fixture and regression test preserve the three
+hillslopes, and the artifacts record the supporting water balance and cohort
+analysis.
 
 ## Fixture
 
