@@ -179,6 +179,17 @@ The surprising result is localized to one storm where WEPP routes enough
 unburned runoff to cross a sediment threshold while the burned scenario does
 not.
 
+### Soil restricting layer (`kslast`)
+
+The generated `.sol` ends with the restricting-layer record `1 10000.0 100.0`
+(`slflag`, depth `10000 mm`, `kslast = 100 mm/hr`), which relocates the SURGO
+Lithic bedrock (originally `1500 mm`, `0.4 um/s` = `1.44 mm/hr`) to `10 m`. This
+is intentional: the soil-builder relaxes the bedrock so water drains *through*
+it rather than perching above it. It does not bear on the inversion. `kslast`
+is identical in both scenarios, and WEPP percolates layer by layer, so vertical
+through-drainage is already throttled by horizons 3-4 (Bt1/Bt2, `10.8 mm/hr`)
+regardless of `kslast` — the `100 mm/hr` exit is never the binding constraint.
+
 ## Driver Isolation (Parameter Swap)
 
 To find which generated input drives the split, the `1992-06-16` response on
