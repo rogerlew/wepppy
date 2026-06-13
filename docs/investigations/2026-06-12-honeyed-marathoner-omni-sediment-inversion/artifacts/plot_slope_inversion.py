@@ -26,9 +26,10 @@ df = pd.read_csv(HERE / "slope_inversion_cohort.csv")
 inv = df[df["inverted"]]
 non = df[~df["inverted"]]
 
-# steep non-inverting hillslopes worth annotating as counterexamples to a clean
-# slope cut, plus the inverted set.
-LABEL = set(inv["wepp_id"]) | {148, 390, 256}
+# non-inverting hillslopes worth annotating as counterexamples to a clean cut,
+# plus the inverted set. 197 sits on top of the inverted set in slope-aspect
+# space (same slope+aspect, lower runoff) -> slope+aspect cannot separate it.
+LABEL = set(inv["wepp_id"]) | {148, 390, 256, 197}
 
 fig, axes = plt.subplots(1, 2, figsize=(12.5, 5.4))
 
@@ -69,7 +70,7 @@ ax.set_xlabel("Hillslope slope (m/m)")
 ax.set_ylabel("Aspect (deg from N)")
 ax.set_ylim(0, 360)
 ax.set_yticks([0, 90, 180, 270, 360])
-ax.set_title("Slope vs aspect\n(steep non-inverting 148 is north-facing)")
+ax.set_title("Slope vs aspect\n(148 north-facing; 197 coincides with inverted -> not separable)")
 ax.legend(loc="upper right", fontsize=8)
 
 fig.suptitle("620333-loam forest low-sev-fire cohort (n=27, 3 inverted): "

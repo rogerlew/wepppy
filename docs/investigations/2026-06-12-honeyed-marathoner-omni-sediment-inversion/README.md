@@ -112,6 +112,42 @@ invert:
 | 133 | 612 | 0.0000 | 0.0000 | equal |
 | 148 | 672 | 0.0000 | 0.0000 | equal |
 
+### Does slope (or slope + aspect) partition the inversions?
+
+Across the 27 same-mukey hillslopes, **slope alone does not partition** the
+three inverted ones. They sit at slope `0.288-0.352`, but the two *steepest*
+hillslopes in the cohort do not invert: `148` at `0.51` and `390` at `0.40`.
+Slope behaves only as a soft lower bound (no inversion below about `0.285`),
+consistent with rill shear requiring gradient.
+
+**Slope + aspect does not partition either.** The decisive counterexample is
+`197`: slope `0.288` and aspect `67 deg` (ENE) place it essentially on top of
+the inverted `118` (`0.288`, `90 deg`) and `122` (`0.352`, `70 deg`) in
+slope-aspect space, yet it does not invert. No function of slope and aspect can
+separate two near-coincident points with opposite outcomes. What distinguishes
+`197` is unburned runoff: `161 mm/yr` versus about `220 mm/yr` for the inverted
+set.
+
+The inverted set is jointly determined by three quantities, matching the
+mechanism:
+
+- **Slope** (>= about `0.29`) and **unburned runoff** (about `220 mm/yr`) —
+  together they supply rill flow shear, which scales with slope times
+  discharge. `256`/`133` have high runoff but gentle slopes; `390` is steep but
+  has the cohort's lowest runoff (`98 mm/yr`, lowest elevation). Neither
+  inverts.
+- **Sun-exposed aspect** — needed so the canopy radiation-melt difference
+  actually produces a snowmelt-out timing divergence. The steep, adequate-runoff
+  `148` escapes because it faces north (`22 deg`), muting the radiation forcing.
+
+A slope-and-runoff threshold does cleanly enclose these three inversions, but
+with only three positives that boundary is fragile; aspect is the mechanistic
+reason the steep north-facing hillslope is exempt. The partition is genuinely
+multivariate (slope, runoff, aspect), not a clean slope or slope-aspect cut.
+Cohort data and figure: `artifacts/slope_inversion_cohort.csv`,
+`artifacts/slope_inversion_cohort.png`
+(`artifacts/plot_slope_inversion.py`).
+
 ## Root Cause Evidence
 
 Slope and climate are shared. The unburned `.run` files reference the same
