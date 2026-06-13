@@ -13,10 +13,13 @@ isolated. Only 3 of 471 hillslopes invert, with a combined difference of
 `620333-loam`.
 
 The evidence points to a WEPP saturation-excess event-threshold behavior on one
-storm, `1992-06-16`: canopy-suppressed soil evaporation leaves the unburned
-*surface layer* near saturation entering the storm, while the exposed burned
-surface retains storage. It is not an OMNI aggregation error, and the
-*full-profile* antecedent soil water is nearly identical between scenarios.
+storm, `1992-06-16`. The open burned canopy melts its winter snowpack out about
+four days earlier than the dense unburned canopy (WEPP's radiation snowmelt term
+scales with `1 - canopy cover`), so the burned *surface layer* begins drying
+earlier and sits below saturation when the storm arrives, while the still-near-
+saturated unburned surface sheds the burst as saturation-excess runoff. It is
+not an OMNI aggregation error, and the *full-profile* antecedent soil water is
+nearly identical between scenarios.
 
 ## Scope
 
@@ -138,7 +141,7 @@ converged. The `soil.dat` top-layer relative saturation entering the storm
 
 The unburned surface enters the storm near saturation; the burned surface
 retains several times more air-filled storage. The cause of that gap is
-developed under Surface Evaporation and Saturation-Excess Runoff below.
+developed under Snowmelt Timing and Saturation-Excess Runoff below.
 
 On `1992-06-16`, the storm precipitation was identical between burned and
 unburned runs: `23.9 mm` on H118 and H122, and `24.6 mm` on H264. The
@@ -201,26 +204,36 @@ low-severity-fire plant-growth parameters (canopy, cover, biomass, surface
 roughness) — not soil conductivity or initial conditions — govern whether this
 storm crosses the peak-runoff and rill-detachment thresholds.
 
-## Surface Evaporation and Saturation-Excess Runoff
+## Snowmelt Timing and Saturation-Excess Runoff
 
-The surface-saturation gap is produced by soil evaporation, which the
-plant-growth block modulates through canopy. Across the entire antecedent
-run-up (J120-J167, 1992) both scenarios produce zero runoff, so the surface
-divergence is evaporative, not runoff-driven. Transpiration is also zero in
-both runs — this management is static cover with no active growth — leaving
-soil evaporation as the only active ET pathway:
+The earlier draft of this section attributed the surface-saturation gap to soil
+evaporation alone and asserted that both scenarios produced zero antecedent
+runoff. Recording the daily water balance (artifact below) disproved that. This
+is a high-elevation site (`2054 m`); the `1992` surface state is governed by a
+spring **snowmelt freshet**, and both scenarios run off heavily during it
+(H264: roughly `J126-J147`, daily runoff to about `24 mm`). The real driver is
+the timing of snowmelt-out, which the plant-growth canopy controls.
 
-| WEPP ID | Burned antecedent soil evap (mm) | Unburned antecedent soil evap (mm) |
-| --- | ---: | ---: |
-| 118 | 30.6 | 0.5 |
-| 122 | 30.7 | 0.5 |
-| 264 | 28.6 | 0.5 |
+WEPP's radiation snowmelt term is `amelt = 0.0607 * hradmj * (1 - cancov)`
+(`melt.for`). The burned canopy (`75%` cover) admits `1 - 0.75 = 0.25` of the
+radiation term against the undisturbed canopy's `1 - 0.90 = 0.10` — about
+`2.5x` more radiative melt energy. The burned snowpack therefore melts roughly
+`2.5x` faster per day and melts out about four days earlier:
 
-The reduced burned canopy (`75%` cover, LAI `2.320`) exposes the surface and
-evaporates roughly `28-31 mm` more over the six antecedent weeks than the
-undisturbed canopy (`90%` cover, LAI `11.875`), which suppresses evaporation to
-near zero. That extra drying is what holds the burned surface layer below
-saturation.
+| WEPP ID | Burned snow-free day | Unburned snow-free day | Burned J167 surface saturation | Unburned J167 surface saturation |
+| --- | ---: | ---: | ---: | ---: |
+| 118 | J139 | J144 | 0.83 | 0.95 |
+| 122 | J140 | J145 | 0.83 | 0.95 |
+| 264 | J143 | J147 | 0.84 | 0.98 |
+
+Each surface stays near saturation while its own snowpack persists and begins
+drying only once the snow is gone. The burned surface, snow-free four days
+sooner, has a four-day head start on drydown and reaches the `1992-06-16` storm
+below saturation; the unburned surface is still near saturation. Soil
+evaporation is a **secondary** accelerant of the same drydown, and it is also
+canopy-driven: with transpiration zero (static-cover management), the exposed
+burned surface evaporates `~28-31 mm` over the post-melt weeks versus `~0.5 mm`
+under the dense unburned canopy.
 
 On the storm day the partition then runs counter to the steady conductivity
 ordering. The `1992-06-16` burst is short and intense (H264: `24.6 mm` over
@@ -237,33 +250,44 @@ ordering. The `1992-06-16` burst is short and intense (H264: `24.6 mm` over
   Runoff is only `0.056 mm`.
 
 The lower-conductivity burned soil therefore infiltrates more of this
-particular burst because antecedent evaporation had emptied its surface
-storage, while the higher-conductivity unburned soil runs off because it was
-saturated. The concentrated unburned peak puts rill flow shear above the
-critical value (`Tauc = 2.0`), detaching `0.202 kg/m`; the burned trickle
-stays far below threshold at zero.
+particular burst because earlier snowmelt-out (and secondary evaporation) had
+emptied its surface storage, while the higher-conductivity unburned soil runs
+off because it was still saturated from a later-melting snowpack. The
+concentrated unburned peak puts rill flow shear above the critical value
+(`Tauc = 2.0`), detaching `0.202 kg/m`; the burned trickle stays far below
+threshold at zero.
+
+The daily and storm-day water balance behind this is recorded in
+`artifacts/event_water_balance_H264.csv` and plotted in
+`artifacts/event_water_balance_H264.png` (snow water, daily snowmelt, surface
+saturation, runoff over the melt-to-storm window, plus the hourly storm-day
+rain/melt confirming a single-hour liquid burst with no snowmelt). The hourly
+panel uses the one sub-daily series WEPP emits (`snow.dat`); surface-water state
+is daily because WEPP solves infiltration once per day.
 
 This is defensible physics rather than a routing, infiltration, or erosion code
-defect: it reproduces identically under `wepp_260606`. The only link open to
-challenge is whether WEPP's bare-soil evaporation response to reduced canopy
-(the `0.5` vs `~30 mm` antecedent split) is correctly parameterized — a
-calibration question, not a code bug.
+defect: it reproduces identically under `wepp_260606`. The link open to
+challenge is whether WEPP's canopy-cover control on snowmelt radiation (and,
+secondarily, on bare-soil evaporation) is correctly parameterized for
+low-severity fire — a calibration question, not a code bug.
 
 ## Interpretation
 
 The root cause is a nonlinear WEPP saturation-excess and erosion-threshold edge
 case created by the generated low-severity-fire plant-growth management
-parameters (see Driver Isolation and Surface Evaporation and Saturation-Excess
-Runoff). It is not driven by the soil file or the initial-condition parameters.
+parameters (see Driver Isolation and Snowmelt Timing and Saturation-Excess
+Runoff). The specific lever within that block is canopy cover, which controls
+the radiation snowmelt rate. It is not driven by the soil file or the
+initial-condition parameters.
 
 It *is* an antecedent-moisture effect, but in the surface layer rather than the
-full profile. Total-profile soil water converged to within about `1 mm` by the
-day before the storm, which earlier framing read as evidence that antecedent
-moisture was not involved; the infiltration-governing surface layer, however,
-had not converged (burned saturation about `0.84`, unburned about `0.98`),
-because canopy-suppressed evaporation kept the unburned surface near saturation
-while the exposed burned surface dried. The full-profile convergence is a red
-herring for this storm.
+full profile, and set by snowmelt-out timing rather than by the storm itself.
+Total-profile soil water converged to within about `1 mm` by the day before the
+storm, which earlier framing read as evidence that antecedent moisture was not
+involved; the infiltration-governing surface layer, however, had not converged
+(burned saturation about `0.84`, unburned about `0.98`), because the open burned
+canopy melted its snowpack out four days earlier and started drying sooner. The
+full-profile convergence is a red herring for this storm.
 
 This should not be interpreted as the unburned scenario being practically more
 erosive. Annual runoff remains higher in the burned scenario, and the observed
@@ -290,6 +314,28 @@ re-execute the binary.
 The focused regression test is:
 
 `tests/omni/test_honeyed_marathoner_sediment_inversion_fixture.py`
+
+## Artifacts
+
+`artifacts/` holds the event water-balance evidence for H264:
+
+- `event_water_balance_H264.png` — six-panel figure over the melt-to-storm
+  window (`J115-J176`, `1992`): precipitation, snow water equivalent, daily
+  snowmelt, surface saturation, daily runoff, and the hourly storm-day rain and
+  snowmelt.
+- `event_water_balance_H264.csv` — the daily series behind the figure.
+- `plot_event_water_balance.py` — regenerates both from the preserved daily
+  outputs plus a regenerated hourly `snow.dat`.
+
+Daily surface-water state comes from the preserved production `wat.dat` and
+`soil.dat`. Hourly data is limited to `snow.dat` (rain, snowmelt, snow depth,
+frost): WEPP runs an hourly loop on the storm day because it is a sub-freezing
+day, but it solves infiltration and runoff once per day, so hourly soil-water
+state is not available without recompiling instrumentation into the binary.
+The hourly `snow.dat` was produced by enabling the daily-winter output on a
+scratch copy of the fixture (never in the fixture itself, to preserve the
+production outputs) and pointing `plot_event_water_balance.py` at it via
+`HM_SNOW_ROOT`.
 
 ## Commands Used
 
