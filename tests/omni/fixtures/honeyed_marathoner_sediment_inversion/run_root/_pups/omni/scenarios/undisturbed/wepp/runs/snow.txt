@@ -1,0 +1,3 @@
+0.0  # rain-snow threshold
+100.0  # density of new snow
+250.0  # snow settling density
