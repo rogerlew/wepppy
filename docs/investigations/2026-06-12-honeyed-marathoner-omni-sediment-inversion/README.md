@@ -95,7 +95,9 @@ the end of `1992-06-15` was nearly equal between scenarios:
 | 122 | 343.21 | 343.16 | -0.05 |
 | 264 | 347.10 | 348.00 | +0.90 |
 
-On `1992-06-16`, the scenarios split sharply:
+On `1992-06-16`, the storm precipitation was identical between burned and
+unburned runs: `23.9 mm` on H118 and H122, and `24.6 mm` on H264. The
+scenarios split sharply in runoff and sediment response:
 
 | WEPP ID | Precipitation (mm) | Burned runoff (mm) | Unburned runoff (mm) | Burned sediment leaving profile | Unburned sediment leaving profile |
 | --- | ---: | ---: | ---: | ---: | ---: |
