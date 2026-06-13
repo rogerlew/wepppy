@@ -50,6 +50,33 @@ The raw WEPP `loss.dat` files show the same pattern:
 | 122 | 0.000 | 0.159 |
 | 264 | 0.000 | 61.179 |
 
+## Binary Version Reproduction
+
+The inversion was reproduced executionally on the dev container (not on
+`wepp1`) on `2026-06-12` by re-running the preserved fixture inputs under two
+WEPP builds:
+
+| Binary | SHA-256 (prefix) | Unburned H118/H122/H264 sediment (kg) |
+| --- | --- | ---: |
+| `wepp_dcc52a6_hill` (production, recorded in `.err`) | `365d44d6` | 0.765 / 0.159 / 61.179 |
+| `wepp_260606_hill` (current release) | `1fb763b0` | 0.765 / 0.159 / 61.179 |
+
+Burned sediment is `0.000 kg` on all three hillslopes under both builds. The
+`wepp_dcc52a6_hill` run reproduced the production `loss.dat` files
+byte-for-byte. The `wepp_260606_hill` run produced identical sediment totals;
+its only differences are cosmetic output formatting (column widths and a
+last-digit rounding in the particle-class table).
+
+The inversion is therefore version-stable across the `dcc52a6` to `260606`
+release range. It is neither a regression introduced by, nor a defect fixed
+in, the current release.
+
+Reproduction depends on the per-run sidecar inputs (`gwcoeff.txt`,
+`pmetpara.txt`, `snow.txt`, and the empty `wepp_ui.txt` flag). Without
+`wepp_ui.txt` the hourly seepage/melt path is disabled and every hillslope
+reports zero sediment, which masks the inversion. These sidecars are committed
+with the fixture for this reason.
+
 ## Related Low-Severity Forest Hillslopes
 
 A follow-up read-only query on `2026-06-12 16:44:11 PDT` checked the full
@@ -131,13 +158,39 @@ The surprising result is localized to one storm where WEPP routes enough
 unburned runoff to cross a sediment threshold while the burned scenario does
 not.
 
+## Driver Isolation (Parameter Swap)
+
+To find which generated input drives the split, the `1992-06-16` response on
+H264 was re-run under the current release with the burned and unburned
+`p264.man` / `p264.sol` files mixed, and with individual `.man` sections
+swapped in isolation:
+
+| H264 input combination | Storm runoff (mm) | Storm sediment (kg/m) |
+| --- | ---: | ---: |
+| Unburned man + unburned soil (baseline unburned) | 7.445 | 0.202 |
+| Burned man + burned soil (baseline burned) | 0.056 | 0.000 |
+| Unburned man + burned soil | 8.379 | 8.739 |
+| Unburned man, burned plant-growth section only | 0.241 | 0.000 |
+| Unburned man, burned initial-condition section only | 6.291 | 0.891 |
+
+The soil file is not the driver: pairing the unburned management with the
+burned soil leaves the inversion intact, and in fact larger. The flip is
+controlled by the plant-growth section of the management file. Substituting
+only the burned plant-growth block collapses the unburned storm to burned-like
+runoff and zero sediment, even on the unburned soil (`Keff = 50 mm/h`);
+substituting only the burned initial-condition block does not. The
+low-severity-fire plant-growth parameters (canopy, cover, biomass, surface
+roughness) — not soil conductivity or initial conditions — govern whether this
+storm crosses the peak-runoff and rill-detachment thresholds.
+
 ## Interpretation
 
 The root cause is a nonlinear WEPP event-routing and erosion-threshold edge
-case created by the generated soil and management parameter differences. It is
-not explained by materially wetter antecedent soil moisture in the unburned
-scenario. By the day before the storm, the soil-water states had converged to
-within about `1 mm`.
+case created by the generated low-severity-fire plant-growth management
+parameters (see Driver Isolation). It is not driven by the soil file or the
+initial-condition parameters, and it is not explained by materially wetter
+antecedent soil moisture in the unburned scenario. By the day before the
+storm, the soil-water states had converged to within about `1 mm`.
 
 This should not be interpreted as the unburned scenario being practically more
 erosive. The observed inversion is trace-scale because the burned base
@@ -153,6 +206,12 @@ The three hillslopes were preserved as static test fixtures under:
 The fixture preserves the production-relative WEPP layout below `run_root/` so
 the unburned `.run` files continue to resolve their shared slope and climate
 inputs through `../../../../../../wepp/runs/...`.
+
+Each `wepp/runs/` directory also carries the per-run sidecar inputs
+(`gwcoeff.txt`, `pmetpara.txt`, `snow.txt`, `wepp_ui.txt`) required to re-run
+WEPP and reproduce the inversion; see Binary Version Reproduction. The current
+regression test asserts against the preserved output files and does not
+re-execute the binary.
 
 The focused regression test is:
 
@@ -173,6 +232,14 @@ Fixture copy command shape:
 ```bash
 ssh wepp1 'cd /geodata/wc1/runs/ho/honeyed-marathoner && tar -cf - <targeted files>' \
   | tar -C tests/omni/fixtures/honeyed_marathoner_sediment_inversion/run_root -xf -
+```
+
+Reproduction command shape (run on a scratch copy, never in the fixture, to
+avoid overwriting the preserved outputs):
+
+```bash
+cd <scratch>/_pups/omni/scenarios/undisturbed/wepp/runs \
+  && /workdir/wepppy/wepp_runner/bin/wepp_260606_hill < p264.run
 ```
 
 No production files were modified.
