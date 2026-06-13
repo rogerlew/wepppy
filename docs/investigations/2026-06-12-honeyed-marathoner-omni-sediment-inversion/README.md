@@ -12,9 +12,11 @@ isolated. Only 3 of 471 hillslopes invert, with a combined difference of
 `0.0622 t/yr`. All three are `Low Severity Fire` base hillslopes on
 `620333-loam`.
 
-The evidence points to a WEPP event-threshold behavior on one storm,
-`1992-06-16`, rather than an OMNI aggregation error or a materially wetter
-unburned antecedent soil profile.
+The evidence points to a WEPP saturation-excess event-threshold behavior on one
+storm, `1992-06-16`: canopy-suppressed soil evaporation leaves the unburned
+*surface layer* near saturation entering the storm, while the exposed burned
+surface retains storage. It is not an OMNI aggregation error, and the
+*full-profile* antecedent soil water is nearly identical between scenarios.
 
 ## Scope
 
@@ -113,14 +115,30 @@ Slope and climate are shared. The unburned `.run` files reference the same
 root `p<ID>.slp` and `p<ID>.cli` files used by the burned base scenario. The
 meaningful differences are generated management and soil parameters.
 
-The inversion comes from the `1992-06-16` event. Antecedent total soil water at
-the end of `1992-06-15` was nearly equal between scenarios:
+The inversion comes from the `1992-06-16` event. Two soil-water quantities must
+be kept distinct. Antecedent *total-profile* soil water at the end of
+`1992-06-15` (J167) was nearly equal between scenarios:
 
-| WEPP ID | Burned J167 soil water (mm) | Unburned J167 soil water (mm) | Difference (mm) |
+| WEPP ID | Burned J167 total soil water (mm) | Unburned J167 total soil water (mm) | Difference (mm) |
 | --- | ---: | ---: | ---: |
 | 118 | 342.86 | 342.73 | -0.13 |
 | 122 | 343.21 | 343.16 | -0.05 |
 | 264 | 347.10 | 348.00 | +0.90 |
+
+This near-convergence is misleading. Infiltration and runoff are governed by
+the *surface layer*, not the full profile, and the surface layers had not
+converged. The `soil.dat` top-layer relative saturation entering the storm
+(J167) shows the burned surface materially drier:
+
+| WEPP ID | Burned J167 surface saturation | Unburned J167 surface saturation |
+| --- | ---: | ---: |
+| 118 | 0.83 | 0.95 |
+| 122 | 0.83 | 0.95 |
+| 264 | 0.84 | 0.98 |
+
+The unburned surface enters the storm near saturation; the burned surface
+retains several times more air-filled storage. The cause of that gap is
+developed under Surface Evaporation and Saturation-Excess Runoff below.
 
 On `1992-06-16`, the storm precipitation was identical between burned and
 unburned runs: `23.9 mm` on H118 and H122, and `24.6 mm` on H264. The
@@ -183,19 +201,75 @@ low-severity-fire plant-growth parameters (canopy, cover, biomass, surface
 roughness) — not soil conductivity or initial conditions — govern whether this
 storm crosses the peak-runoff and rill-detachment thresholds.
 
+## Surface Evaporation and Saturation-Excess Runoff
+
+The surface-saturation gap is produced by soil evaporation, which the
+plant-growth block modulates through canopy. Across the entire antecedent
+run-up (J120-J167, 1992) both scenarios produce zero runoff, so the surface
+divergence is evaporative, not runoff-driven. Transpiration is also zero in
+both runs — this management is static cover with no active growth — leaving
+soil evaporation as the only active ET pathway:
+
+| WEPP ID | Burned antecedent soil evap (mm) | Unburned antecedent soil evap (mm) |
+| --- | ---: | ---: |
+| 118 | 30.6 | 0.5 |
+| 122 | 30.7 | 0.5 |
+| 264 | 28.6 | 0.5 |
+
+The reduced burned canopy (`75%` cover, LAI `2.320`) exposes the surface and
+evaporates roughly `28-31 mm` more over the six antecedent weeks than the
+undisturbed canopy (`90%` cover, LAI `11.875`), which suppresses evaporation to
+near zero. That extra drying is what holds the burned surface layer below
+saturation.
+
+On the storm day the partition then runs counter to the steady conductivity
+ordering. The `1992-06-16` burst is short and intense (H264: `24.6 mm` over
+`1.4 h`, peak intensity near `44 mm/h`):
+
+- Unburned (`Keff = 50 mm/h`): peak rainfall is below `Keff`, so there is no
+  infiltration-excess driver — but the surface is already saturated, and on
+  J168 the wetting-front suction collapses to about `1 mm`. The profile cannot
+  accept more water and sheds it as saturation-excess runoff: `7.445 mm`
+  concentrated in about one hour, peak near `7.4 mm/h`.
+- Burned (`Keff = 20 mm/h`): peak rainfall exceeds `Keff`, so infiltration
+  excess would be expected — but the drier surface still has storage and a
+  strong wetting-front suction (about `40 mm` on J167) that draws the burst in.
+  Runoff is only `0.056 mm`.
+
+The lower-conductivity burned soil therefore infiltrates more of this
+particular burst because antecedent evaporation had emptied its surface
+storage, while the higher-conductivity unburned soil runs off because it was
+saturated. The concentrated unburned peak puts rill flow shear above the
+critical value (`Tauc = 2.0`), detaching `0.202 kg/m`; the burned trickle
+stays far below threshold at zero.
+
+This is defensible physics rather than a routing, infiltration, or erosion code
+defect: it reproduces identically under `wepp_260606`. The only link open to
+challenge is whether WEPP's bare-soil evaporation response to reduced canopy
+(the `0.5` vs `~30 mm` antecedent split) is correctly parameterized — a
+calibration question, not a code bug.
+
 ## Interpretation
 
-The root cause is a nonlinear WEPP event-routing and erosion-threshold edge
+The root cause is a nonlinear WEPP saturation-excess and erosion-threshold edge
 case created by the generated low-severity-fire plant-growth management
-parameters (see Driver Isolation). It is not driven by the soil file or the
-initial-condition parameters, and it is not explained by materially wetter
-antecedent soil moisture in the unburned scenario. By the day before the
-storm, the soil-water states had converged to within about `1 mm`.
+parameters (see Driver Isolation and Surface Evaporation and Saturation-Excess
+Runoff). It is not driven by the soil file or the initial-condition parameters.
+
+It *is* an antecedent-moisture effect, but in the surface layer rather than the
+full profile. Total-profile soil water converged to within about `1 mm` by the
+day before the storm, which earlier framing read as evidence that antecedent
+moisture was not involved; the infiltration-governing surface layer, however,
+had not converged (burned saturation about `0.84`, unburned about `0.98`),
+because canopy-suppressed evaporation kept the unburned surface near saturation
+while the exposed burned surface dried. The full-profile convergence is a red
+herring for this storm.
 
 This should not be interpreted as the unburned scenario being practically more
-erosive. The observed inversion is trace-scale because the burned base
-sediment is exactly zero on these hillslopes, so any nonzero unburned sediment
-appears higher in annual comparisons.
+erosive. Annual runoff remains higher in the burned scenario, and the observed
+inversion is trace-scale because the burned base sediment is exactly zero on
+these hillslopes, so any nonzero unburned sediment appears higher in annual
+comparisons.
 
 ## Fixture
 
