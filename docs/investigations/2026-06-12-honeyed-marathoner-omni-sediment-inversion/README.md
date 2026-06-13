@@ -144,9 +144,14 @@ A slope-and-runoff threshold does cleanly enclose these three inversions, but
 with only three positives that boundary is fragile; aspect is the mechanistic
 reason the steep north-facing hillslope is exempt. The partition is genuinely
 multivariate (slope, runoff, aspect), not a clean slope or slope-aspect cut.
-Cohort data and figure: `artifacts/slope_inversion_cohort.csv`,
-`artifacts/slope_inversion_cohort.png`
-(`artifacts/plot_slope_inversion.py`).
+Cohort data and script: `artifacts/slope_inversion_cohort.csv`,
+`artifacts/plot_slope_inversion.py`.
+
+![Same-mukey low-severity-fire cohort (n=27, 3 inverted). Left: slope vs unburned runoff - inversions need both high slope and high runoff; the steepest hillslope 148 and the high-product 390 are not inverted. Right: slope vs aspect - the steep non-inverting 148 is north-facing, and 197 coincides with the inverted set in slope-aspect space yet does not invert.](artifacts/slope_inversion_cohort.png)
+
+*Figure 2. Slope does not partition the inversions, and neither does
+slope + aspect (`197` is near-coincident with the inverted set but does not
+invert); the separation is multivariate (slope, runoff, aspect).*
 
 ## Root Cause Evidence
 
@@ -311,6 +316,11 @@ saturation, runoff over the melt-to-storm window, plus the hourly storm-day
 rain/melt confirming a single-hour liquid burst with no snowmelt). The hourly
 panel uses the one sub-daily series WEPP emits (`snow.dat`); surface-water state
 is daily because WEPP solves infiltration once per day.
+
+![H264 event water balance over the spring melt to the 1992-06-16 storm: precipitation, snow water equivalent, daily snowmelt, surface saturation, daily runoff, and hourly storm-day rain and snowmelt. The burned snowpack melts out ~4 days earlier, so the burned surface dries below saturation before the storm while the unburned surface stays saturated and sheds the burst.](artifacts/event_water_balance_H264.png)
+
+*Figure 1. H264 daily water balance over the spring melt to the `1992-06-16`
+storm, with the hourly storm-day panel from `snow.dat`.*
 
 This is defensible physics rather than a routing, infiltration, or erosion code
 defect: it reproduces identically under `wepp_260606`. The link open to
