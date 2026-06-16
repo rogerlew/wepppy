@@ -172,7 +172,7 @@ Post-fire straw or wood chip application to increase ground cover and reduce ero
 | mulch_30 | 1.0 tons/acre | Standard BAER recommendation |
 | mulch_60 | 2.0 tons/acre | Heavy—maximum cover increase |
 
-Mulch scenarios require a **base scenario** (typically a burn severity scenario) because mulch is applied *after* fire.
+Mulch scenarios require a **base scenario** (typically a burn severity scenario) because mulch is applied *after* fire. Omni rebuilds the disturbed base landuse and soils in the mulch child before changing ground cover, so lookup-derived management and soil parameters match the burned counterpart.
 
 #### Prescribed Fire
 
@@ -183,6 +183,7 @@ Prescribed fire scenarios require an **undisturbed** clone context (no SBS map).
 #### Scenario Dependency Behavior
 
 - Mulch scenarios depend on a selected base scenario (`uniform_low`, `uniform_moderate`, `uniform_high`, or `sbs_map`) and run in a later pass after base scenarios are processed.
+- During mulch builds, lookup specialization is applied in burned-base order first; the mulch pass then changes only the treatment-derived management and cover values.
 - Thinning and `prescribed_fire` run in an undisturbed context. If the project base is `sbs_map`, include/run an `undisturbed` Omni scenario so those treatments can clone from it.
 - Scenario list order does not control execution order; Omni resolves dependencies internally.
 - Per-scenario Filters are treatment-application masks for `mulch`, `thinning`, and `prescribed_fire` only.
@@ -381,9 +382,9 @@ wepppy/weppcloud/templates/controls/
 2. `OmniRunOrchestrationService.run_omni_scenario()` clones the scenario workspace and resolves sibling copy behavior for dependent scenarios.
 3. `OmniModeBuildServices.apply_scenario_mode()` executes one branch:
    - `uniform_*` and `sbs_map`: build/validate SBS, then rebuild landuse and soils.
-   - `mulch`: derive `treatments_domlc_d` from fire-classified hillslopes, call `Treatments.build_treatments()`, then rebuild soils.
+   - `mulch`: rebuild the disturbed base landuse/soils in the child, derive `treatments_domlc_d` from fire-classified hillslopes, call `Treatments.build_treatments()`, then rebuild soils.
    - `thinning` and `prescribed_fire`: apply treatment mapping by disturbed class, then rebuild landuse/soils in undisturbed clone context.
-4. `Treatments.build_treatments()` mutates scenario `landuse.domlc_d`, writes scenario-local `.man` files under `landuse/`, and applies matching soil adjustments.
+4. `Treatments.build_treatments()` mutates scenario `landuse.domlc_d`, writes scenario-local `.man` files under `landuse/`, and applies matching soil adjustments. Fire-derived mulch classes such as `forest moderate sev fire-mulch_30` resolve lookup-derived management and soil parameters from the burned base class; the mulch suffix controls the ground-cover adjustment.
 5. `landuse.build_managements()` finalizes management summaries from the scenario state immediately before WEPP input preparation.
 6. WEPP preparation/execution order is fixed:
    - `Wepp.prep_hillslopes()`

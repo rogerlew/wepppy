@@ -368,23 +368,29 @@ def test_apply_scenario_mode_mulch_maps_fire_landuse_to_treatment(
 ) -> None:
     service = OmniModeBuildServices()
     omni = _DummyOmni(tmp_path)
+    events: list[str] = []
 
     class DisturbedStub:
         pass
 
     class LanduseStub:
-        domlc_d = {101: "A", 102: "B", 104: "C"}
-        managements = {
-            "A": type("Summary", (), {"disturbed_class": "fire low"})(),
-            "B": type("Summary", (), {"disturbed_class": "forest mature"})(),
-            "C": type("Summary", (), {"disturbed_class": "fire high"})(),
-        }
+        def __init__(self) -> None:
+            self.domlc_d = {101: "A", 102: "B", 104: "C"}
+            self.managements = {
+                "A": type("Summary", (), {"disturbed_class": "fire low"})(),
+                "B": type("Summary", (), {"disturbed_class": "forest mature"})(),
+                "C": type("Summary", (), {"disturbed_class": "fire high"})(),
+            }
+
+        def build(self) -> None:
+            events.append("landuse.build")
 
     class SoilsStub:
         def __init__(self) -> None:
             self.calls: list[int] = []
 
         def build(self, max_workers: int | None = None) -> None:
+            events.append("soils.build")
             self.calls.append(int(max_workers or 0))
 
     class TreatmentsStub:
@@ -394,6 +400,7 @@ def test_apply_scenario_mode_mulch_maps_fire_landuse_to_treatment(
             self.build_calls = 0
 
         def build_treatments(self) -> None:
+            events.append("treatments.build")
             self.build_calls += 1
 
     treatments = TreatmentsStub()
@@ -403,6 +410,7 @@ def test_apply_scenario_mode_mulch_maps_fire_landuse_to_treatment(
     )
 
     soils = SoilsStub()
+    landuse = LanduseStub()
     service.apply_scenario_mode(
         omni,
         scenario_name="mulch_30_uniform_low",
@@ -414,14 +422,15 @@ def test_apply_scenario_mode_mulch_maps_fire_landuse_to_treatment(
         },
         new_wd=omni.wd,
         disturbed=DisturbedStub(),
-        landuse=LanduseStub(),
+        landuse=landuse,
         soils=soils,
         omni_base_scenario_name="uniform_low",
     )
 
     assert treatments.treatments_domlc_d == {101: "M30"}
     assert treatments.build_calls == 1
-    assert soils.calls == [2]
+    assert soils.calls == [2, 2]
+    assert events == ["landuse.build", "soils.build", "treatments.build", "soils.build"]
 
 
 def test_apply_scenario_mode_mulch_applies_per_scenario_filter_mask(
@@ -435,16 +444,20 @@ def test_apply_scenario_mode_mulch_applies_per_scenario_filter_mask(
         pass
 
     class LanduseStub:
-        domlc_d = {101: "A", 102: "B", 103: "C"}
-        managements = {
-            "A": type("Summary", (), {"disturbed_class": "fire low"})(),
-            "B": type("Summary", (), {"disturbed_class": "fire moderate"})(),
-            "C": type("Summary", (), {"disturbed_class": "fire high"})(),
-        }
+        def __init__(self) -> None:
+            self.domlc_d = {101: "A", 102: "B", 103: "C"}
+            self.managements = {
+                "A": type("Summary", (), {"disturbed_class": "fire low"})(),
+                "B": type("Summary", (), {"disturbed_class": "fire moderate"})(),
+                "C": type("Summary", (), {"disturbed_class": "fire high"})(),
+            }
 
         @staticmethod
         def identify_burn_class(topaz_id: str) -> str:
             return {"101": "Low", "102": "Moderate", "103": "Moderate"}[str(topaz_id)]
+
+        def build(self) -> None:
+            return None
 
     class WatershedStub:
         @staticmethod
@@ -478,6 +491,7 @@ def test_apply_scenario_mode_mulch_applies_per_scenario_filter_mask(
     )
 
     soils = SoilsStub()
+    landuse = LanduseStub()
     service.apply_scenario_mode(
         omni,
         scenario_name="mulch_30_uniform_low__filters_smin20_smax50_burn2",
@@ -492,14 +506,14 @@ def test_apply_scenario_mode_mulch_applies_per_scenario_filter_mask(
         },
         new_wd=omni.wd,
         disturbed=DisturbedStub(),
-        landuse=LanduseStub(),
+        landuse=landuse,
         soils=soils,
         omni_base_scenario_name="uniform_low",
     )
 
     assert treatments.treatments_domlc_d == {102: "M30"}
     assert treatments.build_calls == 1
-    assert soils.calls == [2]
+    assert soils.calls == [2, 2]
 
 
 def test_apply_scenario_mode_thinning_maps_mature_forest_landuse_to_treatment(

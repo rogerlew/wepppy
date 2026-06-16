@@ -2,6 +2,7 @@ import pytest
 
 from wepppy.nodb.core.management_overrides import (
     apply_disturbed_management_overrides,
+    normalize_disturbed_class_for_management_lookup,
     resolve_disturbed_scalar_replacements,
 )
 
@@ -59,6 +60,24 @@ def test_static_overrides_set_plant_decay_drop_factors() -> None:
 
     assert management.plant_data["decfct"] == 1.0
     assert management.plant_data["dropfc"] == 1.0
+
+
+@pytest.mark.unit
+def test_normalize_fire_mulch_uses_burned_base_lookup_class() -> None:
+    lookup_class, lookup_label = normalize_disturbed_class_for_management_lookup(
+        "forest moderate sev fire-mulch_30"
+    )
+
+    assert lookup_class == "forest moderate sev fire"
+    assert lookup_label == "forest moderate sev fire"
+
+
+@pytest.mark.unit
+def test_normalize_pure_mulch_uses_mulch_lookup_class() -> None:
+    lookup_class, lookup_label = normalize_disturbed_class_for_management_lookup("mulch_30")
+
+    assert lookup_class == "mulch"
+    assert lookup_label == "mulch"
 
 
 @pytest.mark.unit

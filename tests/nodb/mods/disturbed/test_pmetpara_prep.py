@@ -90,7 +90,14 @@ def test_pmetpara_prep_writes_lookup_and_default_rows(
     monkeypatch.setattr(
         Disturbed,
         "land_soil_replacements_d",
-        property(lambda self: {("mock-texture", "mulch"): {"pmet_kcb": "0.77", "pmet_rawp": "0.66"}}),
+        property(
+            lambda self: {
+                ("mock-texture", "forest high sev fire"): {
+                    "pmet_kcb": "0.77",
+                    "pmet_rawp": "0.66",
+                }
+            }
+        ),
     )
 
     disturbed.pmetpara_prep()
@@ -99,7 +106,7 @@ def test_pmetpara_prep_writes_lookup_and_default_rows(
     lines = pmetpara_path.read_text().strip().splitlines()
 
     assert lines[0] == "2"
-    assert lines[1].startswith("pine,0.77,0.66,1,mock-texture-mulch")
+    assert lines[1].startswith("pine,0.77,0.66,1,mock-texture-forest_high_sev_fire")
     assert lines[2].startswith("urban,0.95,0.8,2,mock-texture-developed_low_intensity")
 
 

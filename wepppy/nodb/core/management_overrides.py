@@ -10,6 +10,8 @@ __all__ = [
     "resolve_disturbed_scalar_replacements",
 ]
 
+_TREATMENT_SUFFIXES = ("-mulch_15", "-mulch_30", "-mulch_60", "-thinning", "-prescribed_fire")
+
 
 def _is_blank_lookup_value(value: Any) -> bool:
     if value is None:
@@ -17,6 +19,13 @@ def _is_blank_lookup_value(value: Any) -> bool:
     if isinstance(value, str) and value.strip() == "":
         return True
     return False
+
+
+def _strip_treatment_suffix(disturbed_class: str) -> str:
+    for suffix in _TREATMENT_SUFFIXES:
+        if disturbed_class.endswith(suffix):
+            return disturbed_class[: -len(suffix)]
+    return disturbed_class
 
 
 def apply_disturbed_management_overrides(
@@ -44,14 +53,18 @@ def normalize_disturbed_class_for_management_lookup(
 ) -> tuple[str | None, str]:
     """Normalize disturbed class labels used for replacement lookups.
 
-    WEPP prep currently treats any mulch/thinning treatment variants as the
-    canonical ``mulch`` / ``thinning`` lookup classes.
+    Fire-derived treatment variants inherit lookup parameters from their burned
+    base class; pure treatment rows still use canonical ``mulch`` / ``thinning``
+    classes.
     """
     disturbed_class_str = disturbed_class if isinstance(disturbed_class, str) else ""
     disturbed_lookup_class = disturbed_class if isinstance(disturbed_class, str) else None
 
     if isinstance(disturbed_lookup_class, str):
-        if "mulch" in disturbed_lookup_class:
+        stripped_class = _strip_treatment_suffix(disturbed_lookup_class)
+        if stripped_class != disturbed_lookup_class:
+            disturbed_lookup_class = stripped_class
+        elif "mulch" in disturbed_lookup_class:
             disturbed_lookup_class = "mulch"
         elif "thinning" in disturbed_lookup_class:
             disturbed_lookup_class = "thinning"

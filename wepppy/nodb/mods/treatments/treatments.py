@@ -35,7 +35,7 @@ from wepppy.nodb.core import (
 from wepppy.nodb.redis_prep import RedisPrep, TaskEnum
 from wepppy.nodb.base import NoDbBase, TriggerEvents, nodb_setter
 from wepppy.nodb.mods.baer.sbs_map import SoilBurnSeverityMap
-from wepppy.nodb.mods.disturbed import Disturbed
+from wepppy.nodb.mods.disturbed import Disturbed, lookup_disturbed_class
 
 from .mulch_application import ground_cover_change as mulch_ground_cover_change
 
@@ -692,10 +692,13 @@ class Treatments(NoDbBase):
         if man_summary is not None:
             disturbed_class = getattr(man_summary, "disturbed_class", None)
             if isinstance(disturbed_class, str):
-                if "mulch" in disturbed_class:
+                lookup_class = lookup_disturbed_class(disturbed_class)
+                if lookup_class == disturbed_class and "mulch" in disturbed_class:
                     disturbed_class = "mulch"
-                elif "thinning" in disturbed_class:
+                elif lookup_class == disturbed_class and "thinning" in disturbed_class:
                     disturbed_class = "thinning"
+                else:
+                    disturbed_class = lookup_class
         else:
             disturbed_class = None
 

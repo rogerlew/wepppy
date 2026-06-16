@@ -415,6 +415,23 @@ class OmniModeBuildServices:
 
             from wepppy.nodb.mods.treatments import Treatments
 
+            with omni.timed(f"  {scenario_name}: build disturbed base landuse and soils"):
+                _run_landuse_and_soils(
+                    lambda: (
+                        landuse.build(),
+                        soils.build(max_workers=omni.rq_job_pool_max_worker_per_scenario_task),
+                    ),
+                )
+
+            def _refresh_controller(controller: Any) -> Any:
+                get_instance = getattr(type(controller), "getInstance", None)
+                if callable(get_instance):
+                    return get_instance(new_wd)
+                return controller
+
+            landuse = _refresh_controller(landuse)
+            soils = _refresh_controller(soils)
+
             with omni.timed(f"  {scenario_name}: applying treatments"):
                 def _apply_treatments() -> None:
                     treatments = Treatments.getInstance(new_wd)

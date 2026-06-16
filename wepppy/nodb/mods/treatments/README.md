@@ -13,7 +13,7 @@ The Treatments module enables land managers and hydrologists to model how rehabi
 
 **What you can do:**
 - Apply mulch at different application rates to reduce post-fire erosion
-- Simulate prescribed fire as a pre-emptive forest treatment
+- Simulate prescribed fire as a preemptive forest treatment
 - Evaluate forest thinning with various harvest methods
 - Upload custom treatment maps to apply treatments spatially
 
@@ -85,6 +85,8 @@ Mulch increases ground cover following a saturating response—initial applicati
 *Example*: A high-severity burn area with 10% residual ground cover treated with mulch_30 (1.0 tons/acre) would increase to approximately 49% ground cover.
 
 > **Important**: Mulch treatments only apply to hillslopes classified as fire-disturbed (high, moderate, or low severity). Non-fire hillslopes are skipped even if selected or included in your treatment map.
+
+For fire-derived mulch classes, lookup-derived management and soil parameters come from the burned base class first. The mulch treatment then adjusts ground cover (`inrcov` and `rilcov`) for the selected application rate, so a mulched burned hillslope should otherwise stay aligned with its burned counterpart.
 
 ### Thinning Treatments
 
@@ -225,7 +227,7 @@ When you upload a treatment map:
 1. **Reprojection**: Your raster is automatically reprojected and resampled to align with the watershed
 2. **Hillslope assignment**: For each hillslope, the most common (modal) treatment pixel value becomes that hillslope's treatment
 3. **Filtering**: Pixel values that don't match valid treatment codes are ignored
-4. **Application**: Treatments are applied based on vegetation type (mulch requires fire disturbance, thinning requires forest)
+4. **Application**: Treatments are applied based on vegetation type (mulch requires fire disturbance, thinning requires forest). Mulch layers on top of the fire-disturbed lookup state instead of replacing it with a generic mulch parameter row.
 
 > **Tip**: If a hillslope contains multiple treatment types, only the dominant one applies. For precise treatment boundaries, consider refining your watershed delineation.
 

@@ -1714,10 +1714,13 @@ class Disturbed(NoDbBase):
                 disturbed_class = man_summary.disturbed_class
 
                 if disturbed_class is not None:
-                    if 'mulch' in disturbed_class:
+                    lookup_class = lookup_disturbed_class(disturbed_class)
+                    if lookup_class == disturbed_class and 'mulch' in disturbed_class:
                         disturbed_class = 'mulch'
-                    elif 'thinning' in disturbed_class:
+                    elif lookup_class == disturbed_class and 'thinning' in disturbed_class:
                         disturbed_class = 'thinning'
+                    else:
+                        disturbed_class = lookup_class
 
                 replacements = _land_soil_replacements_d.get((texid, disturbed_class))
                 if disturbed_class is None or disturbed_class == '' or 'developed' in disturbed_class:

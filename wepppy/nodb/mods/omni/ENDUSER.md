@@ -99,7 +99,7 @@ This is the right tool when your question is about comparing whole-run alternati
 ### Important Scenario Notes
 
 - For many users, the most useful first step is adding an `undisturbed` scenario to a burned project.
-- `mulch` scenarios depend on a burned base scenario because mulch is applied after fire.
+- `mulch` scenarios depend on a burned base scenario because mulch is applied after fire. The burned landuse and soil lookup settings are applied first; mulch then changes the treatment cover values.
 - `thinning` and `prescribed_fire` run in an undisturbed context. If your project base is burned, include an Omni `undisturbed` scenario so those scenarios have the correct clone context.
 - Scenario list order is not the same as execution order. Omni resolves dependencies internally.
 
