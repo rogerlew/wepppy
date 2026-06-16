@@ -148,6 +148,48 @@ Observed:
 - current worker CPU sampled near idle with `pidstat`.
 - worker memory returned to expected levels.
 
+## Follow-up Exact Archive Probe
+After the initial mitigation, the user provided the exact public archive URL:
+
+```text
+https://wepp.cloud/weppcloud/runs/arcadian-mourner/disturbed9002_wbt/download/archives/arcadian-mourner.20260616T152300Z.zip
+```
+
+Run path mapping:
+
+```text
+host:      /geodata/wc1/runs/ar/arcadian-mourner/archives/arcadian-mourner.20260616T152300Z.zip
+container: /wc1/runs/ar/arcadian-mourner/archives/arcadian-mourner.20260616T152300Z.zip
+```
+
+Observed at `Tue Jun 16 08:26:31 PDT 2026`:
+
+```text
+size=731391829 bytes
+mtime=2026-06-16 08:25:31.003685000 -0700
+```
+
+Public response headers were correct:
+
+```text
+HTTP/2 200
+accept-ranges: bytes
+content-disposition: attachment; filename="arcadian-mourner.20260616T152300Z.zip"
+content-type: application/zip
+content-length: 731391829
+```
+
+Read and download timings:
+
+```text
+host_full_read elapsed=5.41 sec
+local_caddy_full http=200 version=2 bytes=731391829 speed=135449904Bps time=5.399722s
+external_full_auto http=200 version=2 bytes=731391829 speed=117202809Bps time=6.240395s
+external_full_http1 http=200 version=1.1 bytes=731391829 speed=116611325Bps time=6.272048s
+```
+
+The exact archive did not reproduce a server-side or general public-edge slowdown after the `browse` restart. HTTP/2 and HTTP/1.1 performed similarly from the operator workspace. `curl` on the operator host did not include HTTP/3 support, so QUIC/HTTP/3 client-path behavior was not tested even though Caddy advertises `h3` via `alt-svc`.
+
 ## Assessment
 Most likely contributors:
 
@@ -170,7 +212,11 @@ Not proven:
 - a single NAS fault versus application-level metadata amplification.
 
 ## Follow-up Actions
-1. Ask the user for one exact slow download URL, approximate timestamp, and whether they were on the WSU network or VPN.
+1. Ask the user to retry the exact archive URL and report:
+   - wall-clock elapsed time
+   - browser
+   - whether they are on the WSU network or VPN
+   - whether an HTTP/1.1 command-line download is also slow
 2. Add or enable access timing for successful `browse` downloads, at least for archive ZIPs:
    - runid/config/subpath
    - file size
@@ -184,7 +230,7 @@ Not proven:
    - avoid opening ZIP comments during every archive list request when not needed
    - avoid recursive or child-count metadata calls in high-latency NFS paths
 6. Consider Caddy/user-agent controls during crawler pressure events if incomplete-response warnings continue.
-7. Re-run an exact archive-path throughput test when a user provides the affected URL.
+7. If WSU remains slow while external probes are fast, test whether disabling QUIC/HTTP/3 or using HTTP/1.1 changes the client-side result.
 
 ## Useful Commands For Recurrence
 ```bash
