@@ -35,13 +35,16 @@ import os
 import time
 from dataclasses import dataclass
 from pathlib import Path
-from typing import Callable, Iterable
+from typing import Any, Callable, Iterable
 
+import duckdb
 import pandas as pd
+import pyarrow.parquet as pq
 from flask import abort, jsonify, request
 
 from dtale import global_state
 from dtale.app import build_app, initialize_process_props
+import dtale.views as dtale_views
 from dtale.views import DtaleData, build_dtypes_state, startup
 from plotly import graph_objs as go
 
@@ -49,9 +52,10 @@ from wepppy.weppcloud.utils.helpers import get_wd
 
 from wepppy.config.secrets import get_secret
 from wepppy.microservices.parquet_filters import (
+    CompiledParquetFilter,
     ParquetFilterError,
     compile_filter_payload_for_path,
-    query_export as query_filtered_parquet_export,
+    count_rows as count_filtered_parquet_rows,
 )
 from wepppy.nodb.core.watershed import Watershed
 
@@ -123,6 +127,7 @@ class DatasetMeta:
 
 
 DATASETS: dict[str, DatasetMeta] = {}
+LAZY_PARQUET_DATASETS: dict[str, "LazyParquetDtaleInstance"] = {}
 REGISTERED_GEOJSON: dict[str, str] = {}
 MAP_DEFAULTS: dict[str, dict[str, object]] = {}
 MAP_CHOICES: dict[str, list[tuple[str, str, str | None]]] = {}
@@ -140,6 +145,17 @@ def _fingerprint(path: Path) -> str:
     """Return a stable fingerprint for ``path`` using mtime and file size."""
     stats = path.stat()
     return f"{stats.st_mtime_ns}:{stats.st_size}"
+
+
+def _is_parquet_path(path: Path) -> bool:
+    """Return True when ``path`` is a Parquet variant supported by D-Tale."""
+    return path.suffix.lower() in {".parquet", ".geoparquet", ".pq"}
+
+
+def _quote_identifier(name: str) -> str:
+    """Quote a DuckDB identifier while preserving unusual WEPP artifact names."""
+    escaped = name.replace('"', '""')
+    return f'"{escaped}"'
 
 
 def _make_dataset_id(runid: str, config: str, rel_path: str) -> str:
@@ -485,12 +501,6 @@ def _postprocess_dataframe(df: pd.DataFrame) -> pd.DataFrame:
     return df
 
 
-def _read_parquet(path: Path) -> pd.DataFrame:
-    """Read a Parquet file into a post-processed DataFrame."""
-    df = pd.read_parquet(path)
-    return _postprocess_dataframe(df)
-
-
 def _read_feather(path: Path) -> pd.DataFrame:
     """Read a Feather/Arrow file into a post-processed DataFrame."""
     df = pd.read_feather(path)
@@ -510,9 +520,6 @@ def _read_pickle(path: Path) -> pd.DataFrame:
 
 
 READERS: dict[str, Callable[[Path], pd.DataFrame]] = {
-    ".parquet": _read_parquet,
-    ".geoparquet": _read_parquet,
-    ".pq": _read_parquet,
     ".feather": _read_feather,
     ".arrow": _read_feather,
     ".csv": _read_csv,
@@ -533,6 +540,170 @@ def _load_dataframe(path: Path) -> pd.DataFrame:
     if not reader:
         abort(415, description=f"Unsupported file extension: {path.suffix or '<none>'}")
     return reader(path)
+
+
+class LazyParquetDtaleInstance:
+    """Page a Parquet file for D-Tale without retaining a full pandas DataFrame."""
+
+    def __init__(
+        self,
+        path: Path,
+        *,
+        compiled_filter: CompiledParquetFilter | None = None,
+    ) -> None:
+        self.path = Path(path)
+        self.compiled_filter = compiled_filter
+        self._schema = pq.read_schema(self.path)
+        self._base_columns = [field.name for field in self._schema]
+        self._rows: int | None = None
+        self._base_df: pd.DataFrame | None = None
+
+    @property
+    def base_columns(self) -> list[str]:
+        return list(self._base_columns)
+
+    @property
+    def alias_to_source(self) -> dict[str, str]:
+        return {
+            alias: source
+            for source, alias in _IDENTIFIER_STRING_ALIASES
+            if source in self._base_columns
+        }
+
+    def rows(self, **kwargs) -> int:
+        if kwargs:
+            unsupported = ", ".join(sorted(kwargs))
+            raise ValueError(f"Unsupported lazy parquet row-count options: {unsupported}")
+        if self._rows is None:
+            if self.compiled_filter is None:
+                metadata = pq.ParquetFile(self.path).metadata
+                self._rows = int(metadata.num_rows)
+            else:
+                self._rows = count_filtered_parquet_rows(self.path, self.compiled_filter)
+        return self._rows
+
+    @property
+    def base_df(self) -> pd.DataFrame:
+        if self._base_df is None:
+            self._base_df = self.load_data(row_range=[0, 1], columns=self._base_columns)
+        return self._base_df
+
+    @property
+    def is_large(self) -> bool:
+        return self.rows() > 1_000_000 or len(self._base_columns) > 50
+
+    @property
+    def data(self) -> pd.DataFrame:
+        raise RuntimeError("Lazy parquet datasets cannot be loaded as full pandas DataFrames.")
+
+    def _resolve_columns_to_read(self, columns: Iterable[str] | None) -> list[str]:
+        if not columns:
+            return self.base_columns
+
+        alias_to_source = self.alias_to_source
+        resolved: list[str] = []
+        for column in columns:
+            source = column if column in self._base_columns else alias_to_source.get(column)
+            if source and source not in resolved:
+                resolved.append(source)
+        return resolved or self.base_columns
+
+    def _resolve_sort_terms(self, sort: list[Any] | None) -> list[str]:
+        if not sort:
+            return []
+        alias_to_source = self.alias_to_source
+        terms: list[str] = []
+        for item in sort:
+            if not isinstance(item, (list, tuple)) or len(item) < 2:
+                continue
+            column = str(item[0])
+            direction = str(item[1]).upper()
+            if direction not in {"ASC", "DESC"}:
+                continue
+            source = column if column in self._base_columns else alias_to_source.get(column)
+            if source:
+                terms.append(f"{_quote_identifier(source)} {direction}")
+        return terms
+
+    def _select_sql(
+        self,
+        columns: list[str],
+        *,
+        row_range: list[int] | tuple[int, int] | None,
+        sort: list[Any] | None,
+    ) -> tuple[str, list[Any]]:
+        select_list = ", ".join(_quote_identifier(column) for column in columns)
+        sql = f"SELECT {select_list} FROM read_parquet(?)"
+        params: list[Any] = [str(self.path)]
+        if self.compiled_filter is not None:
+            sql = f"{sql} WHERE {self.compiled_filter.where_sql}"
+            params.extend(self.compiled_filter.params)
+        sort_terms = self._resolve_sort_terms(sort)
+        if sort_terms:
+            sql = f"{sql} ORDER BY {', '.join(sort_terms)}"
+        if row_range is not None:
+            start = max(int(row_range[0]), 0)
+            end = max(int(row_range[1]), start)
+            sql = f"{sql} LIMIT ? OFFSET ?"
+            params.extend([end - start, start])
+        return sql, params
+
+    def load_data(
+        self,
+        row_range: list[int] | tuple[int, int] | None = None,
+        columns: Iterable[str] | None = None,
+        sort: list[Any] | None = None,
+        **kwargs,
+    ) -> pd.DataFrame:
+        if kwargs:
+            unsupported = ", ".join(sorted(kwargs))
+            raise ValueError(f"Unsupported lazy parquet load options: {unsupported}")
+        columns_to_read = self._resolve_columns_to_read(columns)
+        sql, params = self._select_sql(columns_to_read, row_range=row_range, sort=sort)
+        with duckdb.connect() as conn:
+            df = conn.execute(sql, params).fetchdf()
+        df = _postprocess_dataframe(df)
+        if columns:
+            ordered_columns = [column for column in columns if column in df.columns]
+            if ordered_columns:
+                df = df[ordered_columns]
+        return df
+
+
+def _initialize_lazy_parquet_dataset(
+    data_id: str,
+    display_name: str,
+    path: Path,
+    *,
+    compiled_filter: CompiledParquetFilter | None = None,
+) -> DtaleData:
+    """Create a D-Tale shell backed by lazy Parquet page reads."""
+    lazy_instance = LazyParquetDtaleInstance(path, compiled_filter=compiled_filter)
+    sample_df = lazy_instance.base_df
+    instance = startup(
+        url=DTALE_BASE_URL,
+        data=sample_df,
+        data_id=data_id,
+        name=display_name,
+        ignore_duplicate=True,
+        allow_cell_edits=False,
+        force_save=True,
+        app_root=APP_ROOT,
+        is_proxy=IS_PROXY,
+        hide_header_editor=True,
+        lock_header_menu=True,
+    )
+    LAZY_PARQUET_DATASETS[data_id] = lazy_instance
+    try:
+        dtypes_state = build_dtypes_state(sample_df)
+    except (AttributeError, TypeError, ValueError):
+        logger.exception("Failed to build lazy parquet dtype state for %s", data_id)
+    else:
+        for col in dtypes_state:
+            if col["index"] >= 100:
+                col["visible"] = False
+        global_state.set_dtypes(data_id, dtypes_state)
+    return instance
 
 
 def _initialize_dtale_dataset(data_id: str, display_name: str, df: pd.DataFrame) -> DtaleData:
@@ -731,6 +902,90 @@ if dtale_custom_geojson is not None:
 app = build_app(reaper_on=False, app_root=APP_ROOT)
 
 
+def _format_lazy_rows(
+    data_id: str,
+    lazy_instance: LazyParquetDtaleInstance,
+    ids: list[str] | None,
+) -> tuple[dict[int, dict[str, object]], int]:
+    curr_settings = global_state.get_settings(data_id) or {}
+    curr_locked = curr_settings.get("locked", [])
+    params = dtale_views.retrieve_grid_params(request)
+    sort = params.get("sort")
+    if curr_settings.get("sortInfo") != sort:
+        curr_settings = dict(curr_settings)
+        if sort is not None:
+            curr_settings["sortInfo"] = sort
+        else:
+            curr_settings.pop("sortInfo", None)
+        global_state.set_settings(data_id, curr_settings)
+    col_types = global_state.get_dtypes(data_id) or []
+    visible_col_types = [c for c in col_types if c.get("visible", True)]
+    visible_columns = [c["name"] for c in visible_col_types]
+    columns_to_load = list(dict.fromkeys(curr_locked + visible_columns))
+    formatter = dtale_views.grid_formatter(
+        visible_col_types,
+        nan_display=curr_settings.get("nanDisplay", "nan"),
+    )
+    total = lazy_instance.rows()
+
+    results: dict[int, dict[str, object]] = {}
+    if total == 0 or ids is None:
+        return results, total
+
+    for sub_range_value in ids:
+        sub_range = list(map(int, sub_range_value.split("-")))
+        if len(sub_range) == 1:
+            start = sub_range[0]
+            end = start
+        else:
+            start, end = sub_range
+        if start >= total:
+            continue
+        bounded_end = total - 1 if end >= total else end
+        data = lazy_instance.load_data(
+            row_range=[start, bounded_end + 1],
+            columns=columns_to_load,
+            sort=sort,
+        )
+        data, _ = dtale_views.format_data(data)
+        data = data[curr_locked + [c for c in data.columns if c not in curr_locked]]
+        formatted_rows = formatter.format_dicts(data.itertuples())
+        for row_index, row in zip(range(start, bounded_end + 1), formatted_rows):
+            results[row_index] = dtale_views.dict_merge({dtale_views.IDX_COL: row_index}, row)
+    return results, total
+
+
+def _lazy_parquet_get_data(data_id: str):
+    lazy_instance = LAZY_PARQUET_DATASETS.get(data_id)
+    if lazy_instance is None:
+        return _ORIGINAL_DTALE_GET_DATA(data_id)
+
+    export = dtale_views.get_bool_arg(request, "export")
+    ids = dtale_views.get_json_arg(request, "ids")
+    if export:
+        abort(501, description="Lazy parquet D-Tale export is not supported; use browse CSV export.")
+    if not export and ids is None:
+        return jsonify({})
+
+    results, total = _format_lazy_rows(data_id, lazy_instance, ids)
+    return_data = {
+        "results": results,
+        "columns": [
+            {"name": dtale_views.IDX_COL, "dtype": "int64", "visible": True},
+            *global_state.get_dtypes(data_id),
+        ],
+        "total": total,
+        "final_query": None,
+    }
+    return jsonify(return_data)
+
+
+_ORIGINAL_DTALE_GET_DATA = app.view_functions.get("dtale.get_data")
+if _ORIGINAL_DTALE_GET_DATA is not None and not getattr(_ORIGINAL_DTALE_GET_DATA, "_wepppy_patched", False):
+    _lazy_parquet_get_data._wepppy_patched = True
+    app.view_functions["dtale.get_data"] = _lazy_parquet_get_data
+
+
 @app.route("/health")
 def health():
     """Return a simple liveness payload for monitoring."""
@@ -809,7 +1064,8 @@ def load_into_dtale():
     data_id = _make_dataset_id(runid, config, dataset_scope)
     display_name = f"{runid}/{config}/{rel_path}" if config else f"{runid}/{rel_path}"
     if parquet_filter_active:
-        display_name = f"{display_name} [filtered]"
+        filter_label = hashlib.sha1(raw_pqf.encode("utf-8")).hexdigest()[:8] if raw_pqf else "unknown"
+        display_name = f"{display_name} [filtered {filter_label}]"
     display_name = display_name.strip("/")[:120]
 
     _ensure_geojson_assets(runid, wd, data_id)
@@ -817,7 +1073,10 @@ def load_into_dtale():
     meta = DATASETS.get(data_id)
     reuse_ready = False
     if meta and meta.fingerprint == fingerprint:
-        if global_state.contains(data_id):
+        lazy_instance = LAZY_PARQUET_DATASETS.get(data_id)
+        if lazy_instance is not None and global_state.get_dtypes(data_id) is not None:
+            reuse_ready = True
+        elif global_state.contains(data_id):
             current_df = global_state.get_data(data_id)
             current_dtypes = global_state.get_dtypes(data_id)
             if current_df is not None and current_dtypes is not None:
@@ -825,11 +1084,13 @@ def load_into_dtale():
             else:
                 logger.info("Refreshing D-Tale dataset %s due to missing cached state.", data_id)
                 global_state.cleanup(data_id)
+                LAZY_PARQUET_DATASETS.pop(data_id, None)
         else:
             logger.info("Refreshing D-Tale dataset %s; no active state found.", data_id)
     elif meta and meta.fingerprint != fingerprint:
         logger.info("File changed, resetting cached dataset %s", data_id)
         global_state.cleanup(data_id)
+        LAZY_PARQUET_DATASETS.pop(data_id, None)
         DATASETS.pop(data_id, None)
 
     if reuse_ready:
@@ -838,18 +1099,53 @@ def load_into_dtale():
         instance = DtaleData(data_id, DTALE_BASE_URL, is_proxy=IS_PROXY, app_root=APP_ROOT)
         return _build_instance_response(data_id, instance, meta)
 
-    try:
-        if parquet_filter_active:
-            compiled = compile_filter_payload_for_path(target, raw_pqf)
-            max_rows = MAX_ROWS if MAX_ROWS > 0 else 0
-            filtered_table = query_filtered_parquet_export(
+    is_parquet_target = _is_parquet_path(target)
+    if is_parquet_target:
+        try:
+            compiled = None
+            if parquet_filter_active:
+                compiled = compile_filter_payload_for_path(target, raw_pqf)
+            instance = _initialize_lazy_parquet_dataset(
+                data_id,
+                display_name,
                 target,
-                compiled,
-                max_rows=max_rows,
+                compiled_filter=compiled,
             )
-            df = _postprocess_dataframe(filtered_table.to_pandas())
-        else:
-            df = _load_dataframe(target)
+            lazy_rows = LAZY_PARQUET_DATASETS[data_id].rows()
+        except ParquetFilterError as err:
+            return _parquet_filter_error_response(err)
+        except (duckdb.Error, OSError, ValueError) as exc:
+            logger.exception("Failed to lazily load parquet %s", target)
+            abort(500, description=str(exc))
+
+        if MAX_ROWS and lazy_rows > MAX_ROWS:
+            global_state.cleanup(data_id)
+            LAZY_PARQUET_DATASETS.pop(data_id, None)
+            abort(
+                413,
+                description=f"Row count {lazy_rows} exceeds limit ({MAX_ROWS}). "
+                "Adjust DTALE_MAX_ROWS to override.",
+            )
+
+        DATASETS[data_id] = DatasetMeta(
+            path=target,
+            fingerprint=fingerprint,
+            name=display_name,
+            last_loaded=time.time(),
+        )
+
+        logger.info(
+            "Registered lazy parquet %s in D-Tale (rows=%d, cols=%d, data_id=%s)",
+            target.relative_to(wd),
+            lazy_rows,
+            len(LAZY_PARQUET_DATASETS[data_id].base_df.columns),
+            data_id,
+        )
+
+        return _build_instance_response(data_id, instance, DATASETS[data_id])
+
+    try:
+        df = _load_dataframe(target)
     except ParquetFilterError as err:
         return _parquet_filter_error_response(err)
     except Exception as exc:  # pragma: no cover - surface full error to caller

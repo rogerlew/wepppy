@@ -4,7 +4,6 @@ import json
 from pathlib import Path
 
 import pandas as pd
-import pyarrow as pa
 import pytest
 
 TestClient = pytest.importorskip("starlette.testclient").TestClient
@@ -171,8 +170,10 @@ def test_dtale_loader_refreshes_missing_state(tmp_path: Path, monkeypatch, load_
     )
 
     df = pd.DataFrame({"a": [1, 2], "b": [3, 4]})
-    data_path = tmp_path / "landuse.parquet"
-    df.to_parquet(data_path)
+    data_dir = tmp_path / "landuse"
+    data_dir.mkdir(parents=True)
+    data_path = data_dir / "landuse.csv"
+    df.to_csv(data_path, index=False)
 
     target_module = module
     if not hasattr(module, "get_wd") and hasattr(module, "dtale"):
@@ -220,7 +221,7 @@ def test_dtale_loader_refreshes_missing_state(tmp_path: Path, monkeypatch, load_
     with app.test_client() as client:
         first = client.post(
             "/internal/load",
-            json={"runid": "run-1", "config": "default", "path": "landuse/landuse.parquet"},
+            json={"runid": "run-1", "config": "default", "path": "landuse/landuse.csv"},
         )
         if first.status_code != 200:
             pytest.skip(f"D-Tale service unavailable in test environment (status={first.status_code})")
@@ -230,7 +231,7 @@ def test_dtale_loader_refreshes_missing_state(tmp_path: Path, monkeypatch, load_
 
         second = client.post(
             "/internal/load",
-            json={"runid": "run-1", "config": "default", "path": "landuse/landuse.parquet"},
+            json={"runid": "run-1", "config": "default", "path": "landuse/landuse.csv"},
         )
         assert second.status_code == 200
         assert init_calls["count"] == 2
@@ -438,6 +439,75 @@ def test_dtale_open_forwards_parquet_filter_payload(tmp_path: Path, monkeypatch,
     assert captured["json"]["pqf"] == pqf
 
 
+def test_dtale_loader_registers_lazy_parquet_and_serves_grid_rows(
+    tmp_path: Path,
+    monkeypatch,
+    load_dtale_service,
+):
+    module = load_dtale_service(
+        DTALE_INTERNAL_TOKEN="",
+        SITE_PREFIX="/weppcloud",
+        HOST="127.0.0.1",
+        PORT="9010",
+    )
+    target_module = module if hasattr(module, "get_wd") else module.dtale
+
+    df = pd.DataFrame({"a": [1, 2, 3], "b": ["x", "y", "z"]})
+    data_path = tmp_path / "table.parquet"
+    df.to_parquet(data_path, index=False)
+
+    monkeypatch.setattr(target_module, "get_wd", lambda runid: str(tmp_path))
+    monkeypatch.setattr(target_module, "_ensure_geojson_assets", lambda *args, **kwargs: None)
+
+    def _fail_eager_load(path):
+        raise AssertionError(f"unexpected eager D-Tale load for {path}")
+
+    monkeypatch.setattr(target_module, "_load_dataframe", _fail_eager_load)
+
+    app = getattr(target_module, "app", getattr(module, "app", None))
+    assert app is not None
+    with app.test_client() as client:
+        load_response = client.post(
+            "/internal/load",
+            json={"runid": "run-lazy", "config": "default", "path": "table.parquet"},
+        )
+        assert load_response.status_code == 200
+        data_id = load_response.get_json()["data_id"]
+        assert data_id in target_module.LAZY_PARQUET_DATASETS
+
+        grid_response = client.get(
+            f"/dtale/data/{data_id}",
+            query_string={"ids": json.dumps(["0-1"])},
+        )
+        sorted_grid_response = client.get(
+            f"/dtale/data/{data_id}",
+            query_string={
+                "ids": json.dumps(["0-1"]),
+                "sort": json.dumps([["a", "DESC"]]),
+            },
+        )
+        export_response = client.get(
+            f"/dtale/data/{data_id}",
+            query_string={"export": "true", "ids": json.dumps(["0-1"])},
+        )
+
+    assert grid_response.status_code == 200
+    payload = grid_response.get_json()
+    assert payload["total"] == 3
+    assert payload["results"]["0"]["a"] == 1
+    assert payload["results"]["0"]["b"] == "x"
+    assert payload["results"]["1"]["a"] == 2
+    assert payload["results"]["1"]["b"] == "y"
+    assert sorted_grid_response.status_code == 200
+    sorted_payload = sorted_grid_response.get_json()
+    assert sorted_payload["total"] == 3
+    assert sorted_payload["results"]["0"]["a"] == 3
+    assert sorted_payload["results"]["0"]["b"] == "z"
+    assert sorted_payload["results"]["1"]["a"] == 2
+    assert sorted_payload["results"]["1"]["b"] == "y"
+    assert export_response.status_code == 501
+
+
 def test_dtale_loader_uses_distinct_dataset_ids_for_distinct_filters(
     tmp_path: Path,
     monkeypatch,
@@ -459,31 +529,6 @@ def test_dtale_loader_uses_distinct_dataset_ids_for_distinct_filters(
     monkeypatch.setattr(target_module, "get_wd", lambda runid: str(tmp_path))
     monkeypatch.setattr(target_module, "BROWSE_PARQUET_FILTERS_ENABLED", True)
     monkeypatch.setattr(target_module, "_ensure_geojson_assets", lambda *args, **kwargs: None)
-    monkeypatch.setattr(target_module.global_state, "contains", lambda data_id: False)
-    monkeypatch.setattr(target_module.global_state, "cleanup", lambda data_id: None)
-
-    init_calls = {"count": 0}
-
-    class DummyInstance:
-        def build_main_url(self):
-            return "/weppcloud/dtale/main/demo"
-
-    def _fake_initialize(data_id, display_name, frame):
-        _ = (data_id, display_name, frame)
-        init_calls["count"] += 1
-        return DummyInstance()
-
-    monkeypatch.setattr(target_module, "_initialize_dtale_dataset", _fake_initialize)
-    monkeypatch.setattr(
-        target_module,
-        "query_filtered_parquet_export",
-        lambda path, compiled, max_rows: pa.Table.from_pandas(df[df["a"] > 1]),
-    )
-    monkeypatch.setattr(
-        target_module,
-        "compile_filter_payload_for_path",
-        lambda path, payload: object(),
-    )
 
     payload_a = _encode_filter_payload(
         {"kind": "condition", "field": "a", "operator": "GreaterThan", "value": "1"}
@@ -506,5 +551,8 @@ def test_dtale_loader_uses_distinct_dataset_ids_for_distinct_filters(
 
     assert first.status_code == 200
     assert second.status_code == 200
-    assert init_calls["count"] == 2
-    assert first.get_json()["data_id"] != second.get_json()["data_id"]
+    first_data_id = first.get_json()["data_id"]
+    second_data_id = second.get_json()["data_id"]
+    assert first_data_id != second_data_id
+    assert target_module.LAZY_PARQUET_DATASETS[first_data_id].rows() == 1
+    assert target_module.LAZY_PARQUET_DATASETS[second_data_id].rows() == 2

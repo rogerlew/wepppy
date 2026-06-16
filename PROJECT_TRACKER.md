@@ -2,7 +2,7 @@
 > Kanban board for wepppy work packages and vision items
 
 **Last Updated**: 2026-06-16
-**Active Packages**: 8
+**Active Packages**: 9
 **Quick Links**: [Work Packages Directory](docs/work-packages/) | [God-Tier Prompting Strategy](docs/god-tier-prompting-strategy.md)
 
 ## Purpose
@@ -37,7 +37,7 @@ This tracker makes all work visible at a glance, helping agents coordinate and a
 ### 2. Limit Work in Progress
 **Target**: 2-4 active packages maximum to maintain focus and ensure packages complete rather than stall.
 
-**Current WIP**: 8 packages (above target range)
+**Current WIP**: 9 packages (above target range)
 
 ### 3. Manage Flow
 Monitor how long packages spend in each column:
@@ -222,7 +222,24 @@ When resuming Kubernetes work:
 
 Currently active work packages. Limit to 2-4 packages to maintain focus.
 
-**Current WIP Count**: 8 packages
+**Current WIP Count**: 9 packages
+
+---
+
+### D-Tale Lazy Parquet Backend
+**Started**: 2026-06-16
+**Status**: Implementation complete locally; production observation pending
+**Size**: Medium-High (1-3 focused sessions)
+**Owner**: Codex
+**Priority**: High
+**Link**: [docs/work-packages/20260616_dtale_lazy_parquet_backend/](docs/work-packages/20260616_dtale_lazy_parquet_backend/)
+**Description**: Patch the embedded D-Tale integration so Parquet launches use lazy, bounded row/column reads instead of eager full-table Arrow-to-pandas conversion.
+
+**Current Focus**: Local implementation and validation are complete. Production rollout/observation is the remaining operational step if this is promoted.
+
+**Dependencies**: Builds on the browse Arrow-to-pandas elimination package and the June 16 browse/D-Tale memory incident investigation.
+
+**Next Steps**: Deploy and observe D-Tale worker RSS on production if requested; consider a follow-up for bounded lazy chart/export adapters.
 
 ---
 
