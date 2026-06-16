@@ -705,41 +705,47 @@ async def _tabular_preview(env, *, path: str, path_lower: str, request):
 
     if path_lower.endswith(('.parquet', '.geoparquet', '.pq')):
         raw_payload = request.args.get('pqf')
+        started_ns = env._monotonic_ns()
+        rss_before_kb = env._current_rss_kb()
         if env.BROWSE_PARQUET_FILTERS_ENABLED and raw_payload:
             try:
                 compiled = await asyncio.to_thread(env.compile_parquet_filter_for_path, path, raw_payload)
-                if compiled is None:
-                    df = await asyncio.to_thread(env.pd.read_parquet, path)
-                    html_table = await env._async_df_to_html(df)
+                preview_table = await asyncio.to_thread(
+                    env.query_parquet_preview,
+                    path,
+                    compiled,
+                    env.BROWSE_PARQUET_PREVIEW_LIMIT,
+                )
+                html_table = await env._async_parquet_table_to_html(preview_table, path)
+                if preview_table.num_rows == 0:
+                    filter_feedback = {
+                        'active': True,
+                        'summary': compiled.summary if compiled is not None else None,
+                        'code': 'no_rows_matched_filter',
+                        'message': 'No rows matched the active parquet filter.',
+                        'status_code': 200,
+                        'pqf': raw_payload,
+                    }
                 else:
-                    df = await asyncio.to_thread(
-                        env.query_parquet_preview,
-                        path,
-                        compiled,
-                        env.BROWSE_PARQUET_PREVIEW_LIMIT,
-                    )
-                    html_table = await env._async_df_to_html(df)
-                    if df.empty:
-                        filter_feedback = {
-                            'active': True,
-                            'summary': compiled.summary,
-                            'code': 'no_rows_matched_filter',
-                            'message': 'No rows matched the active parquet filter.',
-                            'status_code': 200,
-                            'pqf': raw_payload,
-                        }
-                    else:
-                        filter_feedback = {
-                            'active': True,
-                            'summary': compiled.summary,
-                            'code': None,
-                            'message': (
-                                f'Showing {len(df)} filtered rows '
-                                f'(preview limit {env.BROWSE_PARQUET_PREVIEW_LIMIT}).'
-                            ),
-                            'status_code': 200,
-                            'pqf': raw_payload,
-                        }
+                    filter_feedback = {
+                        'active': True,
+                        'summary': compiled.summary if compiled is not None else None,
+                        'code': None,
+                        'message': (
+                            f'Showing {preview_table.num_rows} filtered rows '
+                            f'(preview limit {env.BROWSE_PARQUET_PREVIEW_LIMIT}).'
+                        ),
+                        'status_code': 200,
+                        'pqf': raw_payload,
+                    }
+                env._log_parquet_operation(
+                    env._logger,
+                    operation='preview_filtered',
+                    path=path,
+                    started_ns=started_ns,
+                    rss_before_kb=rss_before_kb,
+                    rows=preview_table.num_rows,
+                )
             except env.ParquetFilterError as exc:
                 filter_feedback = {
                     'active': True,
@@ -750,9 +756,41 @@ async def _tabular_preview(env, *, path: str, path_lower: str, request):
                     'pqf': raw_payload,
                     'payload': exc.to_payload(),
                 }
+                env._log_parquet_operation(
+                    env._logger,
+                    operation='preview_filtered',
+                    path=path,
+                    started_ns=started_ns,
+                    rss_before_kb=rss_before_kb,
+                    status=exc.code,
+                )
         else:
-            df = await asyncio.to_thread(env.pd.read_parquet, path)
-            html_table = await env._async_df_to_html(df)
+            preview_table = await asyncio.to_thread(
+                env.query_parquet_preview,
+                path,
+                None,
+                env.BROWSE_PARQUET_PREVIEW_LIMIT,
+            )
+            html_table = await env._async_parquet_table_to_html(preview_table, path)
+            filter_feedback = {
+                'active': False,
+                'summary': None,
+                'code': None,
+                'message': (
+                    f'Showing {preview_table.num_rows} rows '
+                    f'(preview limit {env.BROWSE_PARQUET_PREVIEW_LIMIT}).'
+                ),
+                'status_code': 200,
+                'pqf': None,
+            }
+            env._log_parquet_operation(
+                env._logger,
+                operation='preview',
+                path=path,
+                started_ns=started_ns,
+                rss_before_kb=rss_before_kb,
+                rows=preview_table.num_rows,
+            )
 
     if path_lower.endswith('.csv'):
         skiprows = 1 if 'totalwatsed2' in path_lower else 0

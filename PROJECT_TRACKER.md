@@ -1,8 +1,8 @@
 # PROJECT_TRACKER.md
 > Kanban board for wepppy work packages and vision items
 
-**Last Updated**: 2026-06-08
-**Active Packages**: 7
+**Last Updated**: 2026-06-16
+**Active Packages**: 8
 **Quick Links**: [Work Packages Directory](docs/work-packages/) | [God-Tier Prompting Strategy](docs/god-tier-prompting-strategy.md)
 
 ## Purpose
@@ -37,7 +37,7 @@ This tracker makes all work visible at a glance, helping agents coordinate and a
 ### 2. Limit Work in Progress
 **Target**: 2-4 active packages maximum to maintain focus and ensure packages complete rather than stall.
 
-**Current WIP**: 7 packages (above target range)
+**Current WIP**: 8 packages (above target range)
 
 ### 3. Manage Flow
 Monitor how long packages spend in each column:
@@ -222,7 +222,33 @@ When resuming Kubernetes work:
 
 Currently active work packages. Limit to 2-4 packages to maintain focus.
 
-**Current WIP Count**: 7 packages
+**Current WIP Count**: 8 packages
+
+---
+
+### Browse Arrow-to-Pandas Elimination
+**Started**: 2026-06-16
+**Status**: Implementation complete locally; broad validation/security/RSS evidence in progress
+**Size**: Medium-High (1-2 weeks)
+**Owner**: Codex
+**Priority**: High
+**Link**: [docs/work-packages/20260616_browse_arrow_pandas_elimination/](docs/work-packages/20260616_browse_arrow_pandas_elimination/)
+**Description**: Remove Arrow-to-pandas conversion from the `browse` service request paths so parquet preview/export/download behavior remains intact without long-lived Gunicorn workers retaining high RSS after large parquet operations.
+
+**Scope**:
+- Inventory and replace `table.to_pandas()` / `pd.read_parquet(...)` usage under `wepppy/microservices/browse`.
+- Preserve route-level behavior for parquet preview, filtered preview, parquet download, filtered parquet download, CSV export, and D-Tale launch.
+- Add worker RSS/request-duration observability and production-like validation evidence.
+- Complete a dedicated security review because the package touches public browse/download route internals.
+
+**Strategic Value**:
+- Addresses a likely contributor to the June 16, 2026 `wepp1` browse high-RSS/download slowdown incident.
+- Reduces reliance on targeted `browse` restarts as an operational mitigation.
+- Creates safer foundations for future large-artifact browse/export workflows.
+
+**Dependencies**: Existing browse parquet filter contract and route tests from `20260304_browse_parquet_quicklook_filters`; incident context in `docs/infrastructure/incident-2026-06-16-wepp1-browse-download-slowdown.md`.
+
+**Next Steps**: Complete broad validation gates, security review sign-off, and production-like worker RSS evidence.
 
 ---
 

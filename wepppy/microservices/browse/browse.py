@@ -15,7 +15,7 @@ All rendering is handled by Jinja templates bundled with the original blueprint 
 - `not_found.htm` - 404-style response shown when a requested directory segment is missing.
 - `_path_input_script.htm` - shared script that wires up the inline path input field for directory and 404 pages.
 - `arc_file.htm` - minimal viewer for “.arc” outputs.
-- `data_table.htm` - table presentation for CSV/TSV/Parquet/Pickle content rendered via pandas.
+- `data_table.htm` - table presentation for CSV/TSV/Pickle content rendered via pandas and Parquet content rendered from Arrow tables.
 - `text_file.htm` - general text viewer (including the command bar) for other readable file types.
 
 Routes
@@ -135,6 +135,13 @@ from wepppy.microservices.browse.security import (
     path_security_detail,
     validate_raw_subpath,
     validate_resolved_target,
+)
+from wepppy.microservices.browse.parquet_tables import (
+    current_rss_kb as _current_rss_kb,
+    log_parquet_operation as _log_parquet_operation,
+    monotonic_ns as _monotonic_ns,
+    project_table_for_output as _project_parquet_table_for_output,
+    table_to_html as _arrow_table_to_html,
 )
 from wepppy.microservices.parquet_filters import (
     ParquetFilterError,
@@ -493,6 +500,21 @@ async def _async_df_to_html(df: pd.DataFrame) -> str:
     )
 
 
+def _parquet_table_to_html(table, path: str) -> str:
+    schema = pq.read_schema(path)
+    projected = _project_parquet_table_for_output(
+        table,
+        source_schema=schema,
+        include_units=False,
+        drop_pandas_index=True,
+    )
+    return _arrow_table_to_html(projected)
+
+
+async def _async_parquet_table_to_html(table, path: str) -> str:
+    return await asyncio.to_thread(_parquet_table_to_html, table, path)
+
+
 def jsonify(payload):
     return JSONResponse(payload)
 
@@ -603,6 +625,7 @@ BROWSE_PARQUET_PREVIEW_LIMIT = max(1, _env_int("BROWSE_PARQUET_PREVIEW_LIMIT", d
 
 
 _logger = logging.getLogger(__name__)
+_logger.setLevel(logging.INFO)
 
 
 class _HealthLogFilter(logging.Filter):

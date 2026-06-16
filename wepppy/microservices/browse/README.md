@@ -14,7 +14,8 @@
   - Contains shims so templates that call `url_for(...)` or expect `SITE_PREFIX` still work.
 - **Async execution**
   - Directory listings (`ls -l`, `wc -l`) run via `asyncio.create_subprocess_shell` and `asyncio.gather` instead of blocking subprocess calls.
-  - Pandas I/O (`read_csv`, `read_parquet`) and heavy file reads are moved into `asyncio.to_thread` keeps the event loop responsive.
+  - CSV/TSV/pickle previews that still use pandas run in `asyncio.to_thread` so the event loop stays responsive.
+  - Parquet previews and browse download CSV exports avoid Arrow-to-pandas conversion in `browse`; they use bounded DuckDB/PyArrow table queries and batch CSV writing.
 - **Supporting modules**
   - `_download.py`: serves file downloads, parquet→CSV conversion, and aria2c manifests.
   - `dtale.py`: forwards supported tabular files to the D-Tale loader service and returns redirects.
@@ -41,7 +42,7 @@ Templates remain in `wepppy/weppcloud/routes/browse/templates/browse/`.
 | Route | What it does | Notable query params |
 |-------|---------------|----------------------|
 | `/weppcloud/runs/{runid}/{config}/browse/` | Top-level directory view with pagination and filters. | `page` (1-based start index), shell-style wildcard filter (`../output/p1.*`), `diff={runid}` to show diff links against another run. |
-| `/weppcloud/runs/{runid}/{config}/browse/{subpath}` | Lists a directory or displays a file. Handles text, archives, tables (pandas), and binary downloads. | Same as above plus file-specific options: `repr=1` (management/soil annotation), `raw=1`, `download=1`. Parquet viewers additionally accept `pqf=<base64url-json-filter>`. |
+| `/weppcloud/runs/{runid}/{config}/browse/{subpath}` | Lists a directory or displays a file. Handles text, archives, tables, and binary downloads. | Same as above plus file-specific options: `repr=1` (management/soil annotation), `raw=1`, `download=1`. Parquet viewers additionally accept `pqf=<base64url-json-filter>`. |
 | `/weppcloud/runs/{runid}/{config}/schema/{subpath}` | Returns parquet column metadata for browse row-level schema preview. | *(no additional options; parquet files only)* |
 | `/weppcloud/runs/{runid}/{config}/download/{subpath}` | Direct file download. Converts parquet to CSV when `?as_csv=1`. | `as_csv=1` for parquet conversion; parquet targets also accept `pqf=<...>` for filtered parquet/CSV output. |
 | `/weppcloud/runs/{runid}/{config}/dtale/{subpath}` | Loads parquet/CSV/TSV/feather/pickle into the D-Tale service and redirects to the D-Tale dataset URL. | Parquet targets accept `pqf=<...>` when filter feature flag is enabled. |
@@ -58,7 +59,7 @@ All routes honor the site prefix automatically (default `/weppcloud`). If the se
 
 ## Parquet quick-look filters
 - Feature flag: set `BROWSE_PARQUET_FILTERS_ENABLED=1` to enable parquet filter handling in browse, download/CSV, and D-Tale bridge flows.
-- Preview cap: `BROWSE_PARQUET_PREVIEW_LIMIT` (default `500`) limits parquet browse preview rows when `pqf` is active.
+- Preview cap: `BROWSE_PARQUET_PREVIEW_LIMIT` (default `500`) limits parquet browse preview rows for both filtered and unfiltered parquet previews.
 - Export cap: `BROWSE_PARQUET_EXPORT_MAX_ROWS` (default `2000000`) limits filtered parquet/CSV export rows.
 - Query parameter: `pqf` is URL-safe base64 JSON with this tree contract:
   - Group node: `{"kind":"group","logic":"AND"|"OR","children":[...]}`
@@ -73,6 +74,14 @@ All routes honor the site prefix automatically (default `/weppcloud`). If the se
   - Valid filter matching zero rows in export flows -> HTTP `422`, `error.code = "no_rows_matched_filter"`.
   - Filtered export exceeding configured row cap -> HTTP `413`, `error.code = "parquet_filter_row_limit_exceeded"`.
 - Cross-reference: `docs/schemas/weppcloud-browse-parquet-filter-contract.md`.
+
+## Parquet memory behavior
+- `browse` must not call `pd.read_parquet(...)` or `table.to_pandas()` in request paths. Long-lived Gunicorn workers can retain high RSS after Arrow-to-pandas conversion, even after Python objects are released.
+- HTML parquet previews use DuckDB `read_parquet` with the preview row cap and render the resulting Arrow table directly.
+- Unfiltered parquet-to-CSV downloads write PyArrow record batches to CSV and drop pandas physical index columns from the output header.
+- Filtered parquet and filtered CSV downloads reuse the existing DuckDB filter contract and enforce `BROWSE_PARQUET_EXPORT_MAX_ROWS` before materializing the bounded Arrow result.
+- Parquet preview/export paths log operation name, basename, file size, row count when known, duration, worker RSS before/after, and status. They must not log file contents, auth tokens, or raw filter payloads.
+- D-Tale remains a separate service. The browse bridge only forwards validated path/filter metadata; any pandas conversion inside the D-Tale service is outside `browse` worker RSS.
 
 ## Auth policy
 - Canonical policy: [`docs/schemas/weppcloud-browse-auth-contract.md`](../../../docs/schemas/weppcloud-browse-auth-contract.md).
@@ -90,7 +99,7 @@ All routes honor the site prefix automatically (default `/weppcloud`). If the se
   - Dot-prefixed entries are always omitted from listings.
 - **Performance**
   - Async subprocesses mean directory listings are ~4–10× faster for most runs.
-  - Large file conversions run in thread executors; gunicorn workers stay responsive.
+  - Parquet previews and CSV conversions avoid pandas DataFrame materialization in `browse`; non-parquet table conversions still run in thread executors.
 - **Template shims**
   - `url_for` supports the common `command_bar.static` and `static` endpoints. Extend the shim before pulling additional Flask templates.
 - **Logging**

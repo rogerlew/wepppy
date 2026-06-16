@@ -135,7 +135,7 @@ def test_query_preview_contains_case_insensitive_and_numeric_gt(tmp_path: Path) 
     assert compiled is not None
 
     preview = query_preview(parquet_path, compiled, limit=100)
-    assert list(preview["name"]) == ["Alice"]
+    assert preview.column("name").to_pylist() == ["Alice"]
 
 
 def test_query_export_returns_no_rows_error_code(tmp_path: Path) -> None:

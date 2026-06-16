@@ -11,7 +11,6 @@ from pathlib import Path
 from typing import Any
 
 import duckdb
-import pandas as pd
 import pyarrow as pa
 import pyarrow.parquet as pq
 
@@ -469,8 +468,8 @@ def query_preview(
     compiled: CompiledParquetFilter | None,
     *,
     limit: int,
-) -> pd.DataFrame:
-    """Return a preview dataframe with optional parquet filter applied."""
+) -> pa.Table:
+    """Return a preview Arrow table with optional parquet filter applied."""
 
     if limit <= 0:
         raise ValueError("Preview limit must be > 0")
@@ -479,7 +478,7 @@ def query_preview(
     sql = f"{sql} LIMIT ?"
     bind_params = [str(path), *params, int(limit)]
     with duckdb.connect() as conn:
-        return conn.execute(sql, bind_params).df()
+        return conn.execute(sql, bind_params).fetch_arrow_table()
 
 
 def count_rows(path: str | Path, compiled: CompiledParquetFilter | None) -> int:

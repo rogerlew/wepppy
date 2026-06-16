@@ -16,7 +16,7 @@ from starlette.datastructures import QueryParams
 from starlette.exceptions import HTTPException
 
 from wepppy.microservices.browse import _download as download_mod
-from wepppy.microservices.browse._download import _parquet_to_dataframe_with_units
+from wepppy.microservices.browse._download import _parquet_to_csv_bytes_with_units
 
 
 def _encode_filter_payload(payload: dict) -> str:
@@ -25,12 +25,12 @@ def _encode_filter_payload(payload: dict) -> str:
 
 
 @pytest.mark.unit
-def test_parquet_to_dataframe_with_index_column():
+def test_parquet_to_csv_with_index_column():
     """Test that parquet files with __index_level_0__ column are handled correctly.
     
     This regression test ensures that when converting parquet to CSV, we don't try
     to rename index columns that get converted to the DataFrame index during 
-    table.to_pandas().
+    Arrow-to-pandas conversion.
     
     Reproduces issue: ValueError: Length mismatch: Expected axis has 31 elements, 
     new values have 32 elements
@@ -56,29 +56,21 @@ def test_parquet_to_dataframe_with_index_column():
         # The exact column name depends on pandas version, but should be 5 columns total
         assert len(table.schema) >= 5  # At least 4 data columns + 1 index column
         
-        # Check that when converted to pandas, the index column disappears
-        df_roundtrip = table.to_pandas()
-        assert len(df_roundtrip.columns) == 4  # Only the 4 data columns remain
-        
         # Test the conversion
-        result_df = _parquet_to_dataframe_with_units(tmp_path)
-        
-        # Should have 4 columns (not 5)
-        assert len(result_df.columns) == 4
-        assert '__index_level_0__' not in result_df.columns
-        assert list(result_df.columns) == [
-            'fire_year (yr)', 
-            'year', 
-            'precip (mm)', 
-            'runoff (mm)'
-        ]
+        csv_text = _parquet_to_csv_bytes_with_units(tmp_path).decode("utf-8")
+        header = csv_text.splitlines()[0].split(",")
+
+        # Should have 4 columns (not 5), without materializing a DataFrame.
+        assert len(header) == 4
+        assert '__index_level_0__' not in header
+        assert header == ['fire_year (yr)', 'year', 'precip (mm)', 'runoff (mm)']
         
     finally:
         Path(tmp_path).unlink(missing_ok=True)
 
 
 @pytest.mark.unit
-def test_parquet_to_dataframe_with_units_metadata():
+def test_parquet_to_csv_with_units_metadata():
     """Test that parquet files with units metadata are converted correctly."""
     with tempfile.NamedTemporaryFile(suffix='.parquet', delete=False) as tmp:
         tmp_path = tmp.name
@@ -100,19 +92,19 @@ def test_parquet_to_dataframe_with_units_metadata():
         table = pa.Table.from_pandas(df, schema=schema)
         pq.write_table(table, tmp_path)
         
-        # Test the conversion
-        result_df = _parquet_to_dataframe_with_units(tmp_path)
-        
+        csv_text = _parquet_to_csv_bytes_with_units(tmp_path).decode("utf-8")
+        header = csv_text.splitlines()[0].split(",")
+
         # Should have 2 columns with units appended
-        assert len(result_df.columns) == 2
-        assert list(result_df.columns) == ['temperature (C)', 'pressure (kPa)']
+        assert len(header) == 2
+        assert header == ['temperature (C)', 'pressure (kPa)']
         
     finally:
         Path(tmp_path).unlink(missing_ok=True)
 
 
 @pytest.mark.unit
-def test_parquet_to_dataframe_units_already_in_name():
+def test_parquet_to_csv_units_already_in_name():
     """Test that units are not duplicated if already in column name."""
     with tempfile.NamedTemporaryFile(suffix='.parquet', delete=False) as tmp:
         tmp_path = tmp.name
@@ -134,12 +126,12 @@ def test_parquet_to_dataframe_units_already_in_name():
         table = pa.Table.from_pandas(df, schema=schema)
         pq.write_table(table, tmp_path)
         
-        # Test the conversion
-        result_df = _parquet_to_dataframe_with_units(tmp_path)
-        
+        csv_text = _parquet_to_csv_bytes_with_units(tmp_path).decode("utf-8")
+        header = csv_text.splitlines()[0].split(",")
+
         # Should keep original names without duplicating units
-        assert len(result_df.columns) == 2
-        assert list(result_df.columns) == ['temperature (C)', 'pressure (kPa)']
+        assert len(header) == 2
+        assert header == ['temperature (C)', 'pressure (kPa)']
         
     finally:
         Path(tmp_path).unlink(missing_ok=True)
@@ -175,9 +167,8 @@ def test_download_returns_filtered_parquet_when_pqf_active(monkeypatch):
         assert "attachment" in response.headers.get("content-disposition", "")
 
         table = pq.read_table(BytesIO(response.body))
-        result_df = table.to_pandas()
-        assert list(result_df["name"]) == ["Alice"]
-        assert list(result_df["value"]) == [1.0]
+        assert table.column("name").to_pylist() == ["Alice"]
+        assert table.column("value").to_pylist() == [1.0]
     finally:
         Path(tmp_path).unlink(missing_ok=True)
 

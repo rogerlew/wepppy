@@ -3,8 +3,9 @@
 from __future__ import annotations
 
 import asyncio
+import logging
 import os
-from io import BytesIO
+from io import BytesIO, StringIO
 from pathlib import Path
 from typing import BinaryIO, Callable
 from urllib.parse import urlsplit
@@ -14,7 +15,6 @@ from starlette.requests import Request
 from starlette.responses import FileResponse, PlainTextResponse, Response, StreamingResponse
 from starlette.routing import Route
 
-import pandas as pd
 import pyarrow as pa
 import pyarrow.parquet as pq
 
@@ -33,6 +33,15 @@ from wepppy.microservices.browse.security import (
     path_security_detail,
     validate_raw_subpath,
     validate_resolved_target,
+)
+from wepppy.microservices.browse.parquet_tables import (
+    current_rss_kb,
+    log_parquet_operation,
+    make_csv_writer,
+    monotonic_ns,
+    project_table_for_output,
+    table_to_csv_bytes,
+    write_table_to_csv_writer,
 )
 from wepppy.microservices.parquet_filters import (
     ParquetFilterError,
@@ -53,6 +62,8 @@ from wepppy.weppcloud.utils.helpers import get_wd
 _NODIR_SUFFIX = ".nodir"
 _NODIR_ROOTS = frozenset(NODIR_ROOTS)
 _RETIRED_NODIR_ARCHIVE_FILES = frozenset({f"{root}{_NODIR_SUFFIX}" for root in _NODIR_ROOTS})
+_logger = logging.getLogger(__name__)
+_logger.setLevel(logging.INFO)
 
 
 def _env_truthy(key: str, *, default: bool = False) -> bool:
@@ -297,11 +308,19 @@ async def download_with_subpath(request: Request) -> Response:
                 raise HTTPException(status_code=404)
             except NoDirError as err:
                 _raise_nodir_error(err)
+            started_ns = monotonic_ns()
+            rss_before_kb = current_rss_kb()
             try:
-                df = await asyncio.to_thread(_parquet_fp_to_dataframe_with_units, fp)
+                csv_bytes = await asyncio.to_thread(_parquet_fp_to_csv_bytes_with_units, fp)
             finally:
                 fp.close()
-            csv_bytes = await asyncio.to_thread(_df_to_csv_bytes, df)
+            log_parquet_operation(
+                _logger,
+                operation="nodir_csv_export",
+                path=filename,
+                started_ns=started_ns,
+                rss_before_kb=rss_before_kb,
+            )
             csv_name = os.path.splitext(filename)[0] + ".csv"
             headers = {
                 "Content-Disposition": f'attachment; filename="{csv_name}"'
@@ -418,6 +437,8 @@ async def download_response_file(path: str, query_params) -> Response:
             _raise_parquet_filter_error(err)
 
     if as_csv and ext in {'.parquet', '.geoparquet', '.pq'}:
+        started_ns = monotonic_ns()
+        rss_before_kb = current_rss_kb()
         if compiled_filter is not None:
             try:
                 filtered_table = await asyncio.to_thread(
@@ -428,10 +449,19 @@ async def download_response_file(path: str, query_params) -> Response:
                 )
             except ParquetFilterError as err:
                 _raise_parquet_filter_error(err)
-            df = await asyncio.to_thread(_table_to_dataframe_with_units, filtered_table, path)
+            csv_bytes = await asyncio.to_thread(_table_to_csv_bytes_with_units, filtered_table, path)
+            rows = filtered_table.num_rows
         else:
-            df = await asyncio.to_thread(_parquet_to_dataframe_with_units, path)
-        csv_bytes = await asyncio.to_thread(_df_to_csv_bytes, df)
+            csv_bytes = await asyncio.to_thread(_parquet_to_csv_bytes_with_units, path)
+            rows = None
+        log_parquet_operation(
+            _logger,
+            operation="csv_export",
+            path=path,
+            started_ns=started_ns,
+            rss_before_kb=rss_before_kb,
+            rows=rows,
+        )
         csv_name = os.path.splitext(filename)[0] + '.csv'
         headers = {
             'Content-Disposition': f'attachment; filename="{csv_name}"'
@@ -439,6 +469,8 @@ async def download_response_file(path: str, query_params) -> Response:
         return Response(csv_bytes, media_type='text/csv', headers=headers)
 
     if compiled_filter is not None:
+        started_ns = monotonic_ns()
+        rss_before_kb = current_rss_kb()
         try:
             filtered_table = await asyncio.to_thread(
                 query_export,
@@ -449,69 +481,77 @@ async def download_response_file(path: str, query_params) -> Response:
         except ParquetFilterError as err:
             _raise_parquet_filter_error(err)
         parquet_bytes = await asyncio.to_thread(_table_to_parquet_bytes, filtered_table)
+        log_parquet_operation(
+            _logger,
+            operation="filtered_parquet_export",
+            path=path,
+            started_ns=started_ns,
+            rss_before_kb=rss_before_kb,
+            rows=filtered_table.num_rows,
+        )
         headers = {'Content-Disposition': f'attachment; filename="{filename}"'}
         return Response(parquet_bytes, media_type='application/octet-stream', headers=headers)
 
     return FileResponse(path, filename=filename)
 
 
-def _df_to_csv_bytes(df: pd.DataFrame) -> bytes:
-    buf = BytesIO()
-    df.to_csv(buf, index=False)
-    return buf.getvalue()
+def _parquet_to_csv_bytes_with_units(path: str) -> bytes:
+    parquet_file = pq.ParquetFile(path)
+    return _parquet_file_to_csv_bytes_with_schema(parquet_file, parquet_file.schema_arrow)
 
 
-def _parquet_to_dataframe_with_units(path: str) -> pd.DataFrame:
-    table = pq.read_table(path)
-    schema = pq.read_schema(path)
-    return _table_to_dataframe_with_schema(table, schema)
-
-
-def _table_to_dataframe_with_units(table: pa.Table, source_path: str) -> pd.DataFrame:
+def _table_to_csv_bytes_with_units(table: pa.Table, source_path: str) -> bytes:
     schema = pq.read_schema(source_path)
-    return _table_to_dataframe_with_schema(table, schema)
+    return _table_to_csv_bytes_with_schema(table, schema)
 
 
-def _parquet_fp_to_dataframe_with_units(fp: BinaryIO) -> pd.DataFrame:
-    table = pq.read_table(fp)
-    return _table_to_dataframe_with_schema(table, table.schema)
+def _parquet_fp_to_csv_bytes_with_units(fp: BinaryIO) -> bytes:
+    parquet_file = pq.ParquetFile(fp)
+    return _parquet_file_to_csv_bytes_with_schema(parquet_file, parquet_file.schema_arrow)
 
 
-def _table_to_dataframe_with_schema(table: pa.Table, schema: pa.Schema) -> pd.DataFrame:
-    df = table.to_pandas()
-    # Only generate column names for actual DataFrame columns (not index columns)
-    labels_by_name = {
-        field.name: _field_label_with_units(field)
-        for field in schema
-        if field.name not in df.index.names and field.name != '__index_level_0__'
-    }
-    column_names = [labels_by_name.get(column_name, column_name) for column_name in df.columns]
-    df.columns = column_names
-    return df
+def _table_to_csv_bytes_with_schema(table: pa.Table, schema: pa.Schema) -> bytes:
+    projected = project_table_for_output(
+        table,
+        source_schema=schema,
+        include_units=True,
+        drop_pandas_index=True,
+    )
+    return table_to_csv_bytes(projected)
+
+
+def _parquet_file_to_csv_bytes_with_schema(parquet_file: pq.ParquetFile, schema: pa.Schema) -> bytes:
+    text_buffer = StringIO()
+    writer = make_csv_writer(text_buffer)
+    wrote_header = False
+    for batch in parquet_file.iter_batches(batch_size=65536):
+        table = pa.Table.from_batches([batch])
+        projected = project_table_for_output(
+            table,
+            source_schema=schema,
+            include_units=True,
+            drop_pandas_index=True,
+        )
+        write_table_to_csv_writer(projected, writer, include_header=not wrote_header)
+        wrote_header = True
+
+    if not wrote_header:
+        empty_table = pa.Table.from_batches([], schema=schema)
+        projected = project_table_for_output(
+            empty_table,
+            source_schema=schema,
+            include_units=True,
+            drop_pandas_index=True,
+        )
+        write_table_to_csv_writer(projected, writer, include_header=True)
+
+    return text_buffer.getvalue().encode("utf-8")
 
 
 def _table_to_parquet_bytes(table: pa.Table) -> bytes:
     buf = BytesIO()
     pq.write_table(table, buf)
     return buf.getvalue()
-
-
-def _field_label_with_units(field) -> str:
-    label = field.name
-    metadata = getattr(field, "metadata", None)
-    if metadata is None:
-        return label
-    units_bytes = metadata.get(b"units")
-    if units_bytes:
-        try:
-            units = units_bytes.decode().strip()
-        except UnicodeDecodeError:
-            units = units_bytes.decode("utf-8", "ignore").strip()
-        if units:
-            suffix = f"({units})"
-            if suffix not in label:
-                return f"{label} {suffix}"
-    return label
 
 
 def _resolve_run_context(runid: str, config: str) -> RunContext:
