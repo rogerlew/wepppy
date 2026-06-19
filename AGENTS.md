@@ -76,6 +76,7 @@
 - Canonical CSRF contract for browser/session boundaries: `docs/schemas/weppcloud-csrf-contract.md`.
 - Canonical WEPP output scope contract (baseline vs roads): `docs/schemas/output-scope-contract.md`.
 - Canonical NoDb persistence/concurrency contract: `docs/schemas/nodb-persistence-concurrency-contract.md`.
+- Canonical geospatial metadata and artifact README authoring guide: `wepppy/nodb/mods/features_export/specification.md#11-manifest-and-warning-contract`.
 - Update `wepppy/rq/job-dependencies-catalog.md` whenever enqueue sites or dependency edges change in:
   - `wepppy/rq/*.py`
   - `wepppy/microservices/rq_engine/*`
@@ -111,8 +112,7 @@
 - Architecture overview: `ARCHITECTURE.md`
 - Human-facing project overview: `readme.md`
 - Active initiative board: `PROJECT_TRACKER.md`
-- Full work package process: `docs/work-packages/README.md`
-- Mini packages: `docs/mini-work-packages/`
+- Work package process: `docs/work-packages/README.md`; mini packages: `docs/mini-work-packages/`
 - Prompt/template catalog: `docs/prompt_templates/AGENTS.md`
 - Hardening lifecycle standard (including callus softening): `docs/standards/hardening-lifecycle-standard.md`
 - Parameterization ADR requirement: `docs/standards/parameterization-adr-standard.md`
