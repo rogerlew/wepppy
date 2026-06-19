@@ -52,6 +52,7 @@ def _sample_runtime(
     disturbed_enabled: bool = True,
     sbs_upload_supported: bool = True,
     initial_sat: float | None = 0.75,
+    clear_ssurgo_cache_on_rebuild: bool = False,
     disturbed_sol_ver: float | None = 2018.0,
 ) -> schema_defaults_routes.RuntimeState:
     return schema_defaults_routes.RuntimeState(
@@ -74,6 +75,7 @@ def _sample_runtime(
             "soils_built": True,
             "soils_mode": "ssurgo",
             "initial_sat": initial_sat,
+            "clear_ssurgo_cache_on_rebuild": clear_ssurgo_cache_on_rebuild,
             "wepp_has_run": False,
             "disturbed_enabled": disturbed_enabled,
             "sbs_upload_supported": sbs_upload_supported,
@@ -742,6 +744,10 @@ def test_build_soils_schema_and_defaults_require_disturbed_fields(
 
         request_fields = schema_payload["request"]["properties"]
         assert request_fields["initial_sat"]["constraint_mode"] == "static"
+        assert request_fields["clear_ssurgo_cache_on_rebuild"] == {
+            "type": "boolean",
+            "constraint_mode": "static",
+        }
         assert request_fields["sol_ver"]["constraint_mode"] == "run_resolved"
         assert request_fields["sol_ver"]["constraint_source"] == "controller_state"
         assert request_fields["sol_ver"]["required_if"]["field"] == "context.active_mods"
@@ -755,6 +761,7 @@ def test_build_soils_schema_and_defaults_require_disturbed_fields(
         defaults_payload = defaults_response.json()
         assert defaults_payload["operation_id"] == "rq_engine_build_soils"
         assert defaults_payload["resolved_defaults"]["initial_sat"] == 0.75
+        assert defaults_payload["resolved_defaults"]["clear_ssurgo_cache_on_rebuild"] is False
         assert defaults_payload["resolved_defaults"]["sol_ver"] == 2018.0
 
 
@@ -770,6 +777,7 @@ def test_build_soils_defaults_omit_sol_ver_when_disturbed_disabled(
             disturbed_enabled=False,
             sbs_upload_supported=False,
             initial_sat=0.71,
+            clear_ssurgo_cache_on_rebuild=True,
         ),
     )
 
@@ -783,7 +791,10 @@ def test_build_soils_defaults_omit_sol_ver_when_disturbed_disabled(
 
     assert defaults_response.status_code == 200
     defaults_payload = defaults_response.json()
-    assert defaults_payload["resolved_defaults"] == {"initial_sat": 0.71}
+    assert defaults_payload["resolved_defaults"] == {
+        "initial_sat": 0.71,
+        "clear_ssurgo_cache_on_rebuild": True,
+    }
 
 
 def test_build_soils_defaults_fall_back_to_initial_sat_default(

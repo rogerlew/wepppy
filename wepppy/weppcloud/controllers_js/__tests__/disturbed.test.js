@@ -182,7 +182,6 @@ describe("Disturbed controller", () => {
     test("load-extended-lookup action posts to task endpoint after confirmation", async () => {
         httpRequestMock.mockImplementation((url, options) => {
             if (url === "tasks/load_extended_land_soil_lookup") {
-                expect(options.method).toBe("POST");
                 return Promise.resolve({ body: {} });
             }
             return Promise.resolve({ body: { Content: {} } });

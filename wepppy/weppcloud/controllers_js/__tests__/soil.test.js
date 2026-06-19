@@ -36,6 +36,7 @@ describe("Soil controller", () => {
                     <option value="DB1">DB1</option>
                 </select>
                 <input type="checkbox" id="checkbox_ksflag" name="checkbox_ksflag">
+                <input type="checkbox" id="clear_ssurgo_cache_on_rebuild" name="clear_ssurgo_cache_on_rebuild">
                 <select id="sol_ver" name="sol_ver">
                     <option value="7778.0">7778.0</option>
                     <option value="9002.0">9002.0</option>
@@ -108,6 +109,7 @@ describe("Soil controller", () => {
         });
 
         document.getElementById("soil_single_dbselection").value = "DB1";
+        document.getElementById("clear_ssurgo_cache_on_rebuild").checked = true;
         soil.build();
         await Promise.resolve();
 
@@ -118,6 +120,7 @@ describe("Soil controller", () => {
         }));
         const params = postFormMock.mock.calls[0][1].body;
         expect(params.get("soil_single_selection")).toBe("101");
+        expect(params.get("clear_ssurgo_cache_on_rebuild")).toBe("on");
         expect(baseInstance.connect_status_stream).toHaveBeenCalledWith(expect.any(Object));
         expect(baseInstance.set_rq_job_id).toHaveBeenCalledWith(soil, "soil-job");
         expect(pollCompletionValues).toEqual(["SOILS_BUILD_TASK_COMPLETED"]);

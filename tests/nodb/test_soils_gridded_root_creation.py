@@ -125,8 +125,8 @@ def test_build_gridded_coverage_uses_hillslope_area_not_wsarea(
             return {"11": "1001", "12": "1002"}
 
     class _SurgoCollectionStub:
-        def __init__(self, _mukeys: set[int]) -> None:
-            pass
+        def __init__(self, _mukeys: set[int], *, cache_db_path: str) -> None:
+            assert cache_db_path == str(wd / "soils" / "ssurgo_tabular_cache.sqlite")
 
         @staticmethod
         def makeWeppSoils(**_kwargs) -> None:

@@ -102,6 +102,12 @@
            checked=soils.ksflag,
            attrs={"class": "disable-readonly"}
          ) }}
+      {{ ui.checkbox_field(
+           "clear_ssurgo_cache_on_rebuild",
+           "Clear SSURGO cache on rebuild",
+           checked=soils.clear_ssurgo_cache_on_rebuild,
+           attrs={"class": "disable-readonly"}
+         ) }}
     </div>
 
     {% if disturbed %}

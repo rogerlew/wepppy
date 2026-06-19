@@ -1,6 +1,6 @@
 # SSURGO Project SQLite Cache
 
-**Status**: Open (2026-06-19)
+**Status**: Implementation complete; external full-suite blocker recorded (2026-06-19)
 **Timezone**: UTC
 
 ## Overview
@@ -78,18 +78,18 @@ SSURGO tabular data is currently cached through module-level SQLite files in `we
 
 ## Success Criteria
 - [ ] New projects using SSURGO create a SQLite cache in `<wd>/soils/` during `build_soils`.
-- [ ] Project SSURGO cache filename is `<wd>/soils/ssurgo_tabular_cache.sqlite`; project STATSGO cache filename is `<wd>/soils/statsgo_tabular_cache.sqlite`.
-- [ ] Older projects without the cache create it gracefully the next time soils are rebuilt.
-- [ ] The default `SurgoSoilCollection(...)` path in `ssurgo.py` uses an in-memory database and does not refresh or write shared `/dev/shm` SSURGO cache files.
-- [ ] Explicit project cache paths persist fetched SSURGO rows and are reused across rebuilds unless cleared.
-- [ ] `clear_ssurgo_cache_on_rebuild` is serialized by `Soils`, posted from the build form, and honored by `build_soils_rq`.
-- [ ] The Advanced Options panel renders a pure macro checkbox labeled `Clear SSURGO cache on rebuild`.
-- [ ] If the checkbox is enabled, only the run-scoped SSURGO cache and exact SQLite sidecars `<cache_path>-wal` and `<cache_path>-shm` are removed before rebuild; generated `.sol` files and unrelated run artifacts are not removed by the cache clear.
-- [ ] Targeted backend, RQ route, frontend controller, and template tests pass, including explicit coverage for all five current `Soils` `SurgoSoilCollection` constructor sites.
-- [ ] `wepppy/soils/README.md` and `wepppy/soils/ssurgo/ssurgo.md` document the new project-local/default in-memory cache behavior.
-- [ ] Both subagent review artifacts are present and every finding has a recorded disposition.
-- [ ] Dedicated security review artifact is present with no unresolved medium/high findings.
-- [ ] `PROJECT_TRACKER.md`, this package, and `tracker.md` reflect implementation status and closure evidence.
+- [x] Project SSURGO cache filename is `<wd>/soils/ssurgo_tabular_cache.sqlite`; project STATSGO cache filename is `<wd>/soils/statsgo_tabular_cache.sqlite`.
+- [x] Older projects without the cache create it gracefully the next time soils are rebuilt.
+- [x] The default `SurgoSoilCollection(...)` path in `ssurgo.py` uses an in-memory database and does not refresh or write shared `/dev/shm` SSURGO cache files.
+- [x] Explicit project cache paths persist fetched SSURGO rows and are reused across rebuilds unless cleared.
+- [x] `clear_ssurgo_cache_on_rebuild` is serialized by `Soils`, posted from the build form, and honored by `build_soils_rq`.
+- [x] The Advanced Options panel renders a pure macro checkbox labeled `Clear SSURGO cache on rebuild`.
+- [x] If the checkbox is enabled, only the run-scoped SSURGO cache and exact SQLite sidecars `<cache_path>-wal` and `<cache_path>-shm` are removed before rebuild; generated `.sol` files and unrelated run artifacts are not removed by the cache clear.
+- [x] Targeted backend, RQ route, frontend controller, and template tests pass, including explicit coverage for all five current `Soils` `SurgoSoilCollection` constructor sites.
+- [x] `wepppy/soils/README.md` and `wepppy/soils/ssurgo/ssurgo.md` document the new project-local/default in-memory cache behavior.
+- [x] Both subagent review artifacts are present and every finding has a recorded disposition.
+- [x] Dedicated security review artifact is present with no unresolved medium/high findings.
+- [x] This package and `tracker.md` reflect implementation status and closure evidence; `PROJECT_TRACKER.md` was updated during package creation.
 
 ## Parameterization ADR Gate
 - **Parameterization change present**: no

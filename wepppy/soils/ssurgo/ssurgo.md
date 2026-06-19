@@ -32,7 +32,7 @@ SSURGO Web Service / STATSGO2 Database
       (fetches & caches)
             ↓
      Local SQLite DB
-      (/dev/shm cache)
+  (project cache or memory)
             ↓
   Component Selection
    (major component)
@@ -61,7 +61,8 @@ Main orchestrator that manages SSURGO data acquisition and caching.
 - Track valid/invalid soil builds
 
 **Key Methods:**
-- `__init__(mukeys, use_statsgo=False)` - Initialize collection with map unit keys
+- `__init__(mukeys, use_statsgo=False, cache_db_path=None)` - Initialize collection
+  with map unit keys and an optional explicit SQLite cache path
 - `makeWeppSoils(...)` - Build WeppSoil objects concurrently
 - `writeWeppSoils(wd, version='7778')` - Write soil files to disk
 - `get_components(mukey)` - Retrieve soil components for map unit
@@ -680,7 +681,16 @@ ssc.makeWeppSoils(
 ## Caching Strategy
 
 ### SQLite Local Cache
-**Location:** `/dev/shm/surgo_tabular.db` (in-memory tmpfs) or fallback to module directory
+**Project build locations:**
+- SSURGO: `<wd>/soils/ssurgo_tabular_cache.sqlite`
+- STATSGO2: `<wd>/soils/statsgo_tabular_cache.sqlite`
+
+**Direct caller default:** `SurgoSoilCollection(mukeys)` opens an in-memory
+SQLite database. A direct caller that needs persistence must pass
+`cache_db_path`. The bundled `surgo_tabular_db_builder.py` does this because its
+purpose is to create a durable tabular database. `spatializer.py` intentionally
+uses the in-memory default because its flow materializes spatial outputs rather
+than reusing a tabular cache across project rebuilds.
 
 **Purpose:** Minimize SSURGO web service calls by caching previously fetched data.
 
@@ -698,7 +708,12 @@ ssc.makeWeppSoils(
 5. Insert into cache
 6. Update `bad_*` tables with failed keys
 
-**Cache Lifetime:** Persists across runs. Manual deletion required to force re-fetch.
+**Cache Lifetime:** Project cache files persist within a run directory and are
+reused by later soil rebuilds for the same project. The soil Advanced Options
+checkbox `Clear SSURGO cache on rebuild` removes only the selected project cache
+file and exact SQLite sidecars `<cache_path>-wal` and `<cache_path>-shm` before
+the rebuild. Direct in-memory collections are discarded when the collection
+connection closes.
 
 ### Web Service Queries
 **Endpoint:** `https://SDMDataAccess.nrcs.usda.gov/Tabular/post.rest`
@@ -997,7 +1012,7 @@ if INVALID_MUKEY in ssc.invalidSoils:
 ### WEPP Model Documentation
 - [WEPP User Summary](https://www.ars.usda.gov/ARSUserFiles/50201000/WEPP/usersum.pdf) - Soil parameter estimation equations (Chapters 3-4)
 - [Baseline Soil Erodibility Parameters](http://milford.nserl.purdue.edu/weppdocs/usersummary/BaselineSoilErodibilityParameterEstimation.html) - Online reference
-- [Soil File Specification](../../../weppcloud/routes/usersum/input-file-specifications/soil-file.spec.md) - WEPP input format details
+- [Soil File Specification](../../weppcloud/routes/usersum/input-file-specifications/soil-file.spec.md) - WEPP input format details
 
 ### Rosetta Pedotransfer Functions
 - [Rosetta Model Documentation](https://www.ars.usda.gov/pacific-west-area/riverside-ca/agricultural-water-efficiency-and-salinity-research-unit/docs/model/rosetta-model/) - USDA-ARS Rosetta home

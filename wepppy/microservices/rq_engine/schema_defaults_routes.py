@@ -380,6 +380,9 @@ def _load_runtime_state(runid: str, config: str) -> RuntimeState:
         "soils_built": bool(getattr(soils, "has_soils", False)),
         "soils_mode": _enum_name(getattr(soils, "mode", None)),
         "initial_sat": initial_sat,
+        "clear_ssurgo_cache_on_rebuild": bool(
+            getattr(soils, "clear_ssurgo_cache_on_rebuild", False)
+        ),
         "wepp_has_run": bool(getattr(wepp, "has_run", False)),
         "disturbed_enabled": disturbed_enabled,
         "sbs_upload_supported": sbs_upload_supported,
@@ -3222,6 +3225,10 @@ def _build_run_operations(runtime: RuntimeState) -> dict[str, dict[str, Any]]:
                             "type": "number",
                             "constraint_mode": "static",
                         },
+                        "clear_ssurgo_cache_on_rebuild": {
+                            "type": "boolean",
+                            "constraint_mode": "static",
+                        },
                         "sol_ver": {
                             "type": "number",
                             "constraint_mode": "run_resolved",
@@ -3250,6 +3257,9 @@ def _build_run_operations(runtime: RuntimeState) -> dict[str, dict[str, Any]]:
                             else 0.75
                         )
                     },
+                    "clear_ssurgo_cache_on_rebuild": bool(
+                        runtime.states.get("clear_ssurgo_cache_on_rebuild", False)
+                    ),
                     **(
                         {
                             "sol_ver": (

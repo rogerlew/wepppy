@@ -4,31 +4,19 @@
 
 ## Quick Status
 
-**Timezone**: UTC  
-**Started**: 2026-06-19 19:04 UTC  
-**Current phase**: Scoping  
-**Last updated**: 2026-06-19 19:24 UTC  
-**Next milestone**: Implement project-local cache path and NoDb serialization.  
-**Security impact**: high  
-**Dedicated security review**: yes  
+**Timezone**: UTC
+**Started**: 2026-06-19 19:04 UTC
+**Current phase**: Ready for commit with external full-suite blocker recorded
+**Last updated**: 2026-06-19 20:24 UTC
+**Next milestone**: Stage, commit, and push implementation package.
+**Security impact**: high
+**Dedicated security review**: yes
 **Security artifact**: `docs/work-packages/20260619_ssurgo_project_sqlite_cache/artifacts/security_review.md`
 
 ## Task Board
 
 ### Ready / Backlog
-- [ ] Refactor `wepppy/soils/ssurgo/ssurgo.py` so direct `SurgoSoilCollection(...)` use defaults to in-memory SQLite and explicit file-backed cache paths remain supported.
-- [ ] Add `clear_ssurgo_cache_on_rebuild` serialization to `wepppy/nodb/core/soils.py`, while deriving absolute cache paths from `Soils.soils_dir` instead of serializing them.
-- [ ] Pass project-local cache paths from all current `Soils` build paths that construct `SurgoSoilCollection`: `build_statsgo`, `_build_spatial_api` primary SSURGO, `_build_spatial_api` STATSGO fallback, `_build_single`, and `_build_gridded`.
-- [ ] Update direct non-`Soils` caller `surgo_tabular_db_builder.py` to pass its explicit builder DB path, and document `spatializer.py` as intentionally in-memory unless implementation finds it needs persistence.
-- [ ] Parse and persist the checkbox option in `wepppy/microservices/rq_engine/soils_routes.py`.
-- [ ] Honor cache clearing in the worker/build path while deleting only the project-local cache database and exact SQLite sidecar files `<cache_path>-wal` and `<cache_path>-shm`.
-- [ ] Render `Clear SSURGO cache on rebuild` in `soil_pure.htm` using `ui.checkbox_field(...)`.
-- [ ] Update soil controller tests and rebuild generated JS assets if required.
-- [ ] Add backend regression tests for in-memory default, explicit file cache, legacy NoDb defaults, normal and batch route parsing, and project cache artifact creation.
-- [ ] Run targeted validation and pre-handoff sanity checks.
-- [ ] Run dual subagent review and disposition all findings.
-- [ ] Complete mandatory dedicated security review artifact.
-- [ ] Update durable cache documentation in `wepppy/soils/README.md` and `wepppy/soils/ssurgo/ssurgo.md`.
+- [ ] Decide whether package closure can proceed with the unrelated deterministic WEPP route test failure recorded as an external blocker.
 
 ### In Progress
 - [ ] None.
@@ -38,10 +26,24 @@
 
 ### Done
 - [x] Work-package scaffold authored with package, tracker, active ExecPlan, and review disposition template (2026-06-19 19:04 UTC).
+- [x] Refactored `wepppy/soils/ssurgo/ssurgo.py` so direct `SurgoSoilCollection(...)` use defaults to in-memory SQLite and explicit file-backed cache paths remain supported.
+- [x] Added `clear_ssurgo_cache_on_rebuild` serialization to `wepppy/nodb/core/soils.py`, while deriving absolute cache paths from `Soils.soils_dir` instead of serializing them.
+- [x] Passed project-local cache paths from all current `Soils` build paths that construct `SurgoSoilCollection`: `build_statsgo`, `_build_spatial_api` primary SSURGO, `_build_spatial_api` STATSGO fallback, `_build_single`, and `_build_gridded`.
+- [x] Updated direct non-`Soils` caller `surgo_tabular_db_builder.py` to pass its explicit builder DB path, and documented `spatializer.py` as intentionally in-memory.
+- [x] Parsed and persisted the checkbox option in `wepppy/microservices/rq_engine/soils_routes.py` and exposed it through RQ schema/defaults.
+- [x] Honored cache clearing in the worker/build path while deleting only the project-local cache database and exact SQLite sidecar files `<cache_path>-wal` and `<cache_path>-shm`.
+- [x] Rendered `Clear SSURGO cache on rebuild` in `soil_pure.htm` using `ui.checkbox_field(...)`.
+- [x] Updated soil controller tests; generated frontend assets were not required because controller source did not change.
+- [x] Added backend regression tests for in-memory default, explicit file cache, legacy NoDb defaults, normal and batch route parsing, schema/defaults, template rendering, and constructor-site coverage.
+- [x] Updated durable cache documentation in `wepppy/soils/README.md` and `wepppy/soils/ssurgo/ssurgo.md`.
+- [x] Accepted and fixed dual subagent review findings for symlink path confinement, SpatialAPI cache-use locking, cache reuse coverage, doc links, and markdown whitespace.
+- [x] Completed dedicated security review artifact with no unresolved medium/high findings.
 
 ## Timeline
 
 - **2026-06-19 19:04 UTC** - Package created from user request and initial code inspection.
+- **2026-06-19 20:09 UTC** - Implementation completed; targeted tests, npm test/lint, and broad-exception gate passed. Full pytest remains blocked by an unrelated deterministic WEPP route test.
+- **2026-06-19 20:24 UTC** - Dual subagent findings dispositioned; accepted findings fixed and rechecked; security review gate passed.
 
 ## Decisions Log
 
@@ -89,16 +91,17 @@
 
 | Risk | Severity | Likelihood | Mitigation | Status |
 |------|----------|------------|------------|--------|
-| In-memory SQLite default breaks multiprocessing worker-view reads | High | Medium | Keep a parent connection alive or materialize a temporary URI only long enough for worker-view construction; test direct default construction and `makeWeppSoils` with stubs | Open |
-| Cache clear deletes generated `.sol` files or unrelated artifacts | High | Low | Delete only deterministic cache file and SQLite sidecars; path-resolve under `soils_dir`; add unit test | Open |
-| Old `soils.nodb` files fail due to missing new fields | High | Medium | Defaults in `__init__` and `_post_instance_loaded`; legacy-load regression test | Open |
-| Build route parses unchecked checkbox ambiguously | Medium | Medium | Use `parse_request_payload(..., boolean_fields={...})`; test checked and absent payloads | Open |
-| Batch no-enqueue route misses the persisted cache-clear option | Medium | Medium | Persist the option before the batch return and add route coverage for `run_group == "batch"` | Open |
+| In-memory SQLite default breaks multiprocessing worker-view reads | High | Medium | Keep a parent connection alive or materialize a temporary URI only long enough for worker-view construction; test direct default construction and `makeWeppSoils` with stubs | Mitigated |
+| Cache clear deletes generated `.sol` files or unrelated artifacts | High | Low | Delete only deterministic cache file and SQLite sidecars; path-resolve under `soils_dir`; add unit test | Mitigated |
+| Old `soils.nodb` files fail due to missing new fields | High | Medium | Defaults in `__init__` and `_post_instance_loaded`; legacy-load regression test | Mitigated |
+| Build route parses unchecked checkbox ambiguously | Medium | Medium | Use `parse_request_payload(..., boolean_fields={...})`; test checked and absent payloads | Mitigated |
+| Batch no-enqueue route misses the persisted cache-clear option | Medium | Medium | Persist the option before the batch return and add route coverage for `run_group == "batch"` | Mitigated |
 | Existing tests assume shared `/dev/shm` cache files | Medium | Medium | Audit SSURGO tests and add explicit cache path fixtures where persistence is expected | Open |
-| Durable docs retain stale `/dev/shm` cache guidance | Medium | Medium | Update `wepppy/soils/README.md` and `wepppy/soils/ssurgo/ssurgo.md` before closure | Open |
-| One of the five current `Soils` SSURGO/STATSGO constructor sites is missed | Medium | Medium | Add explicit constructor-site test or inspection evidence for `build_statsgo`, `_build_spatial_api` primary/fallback, `_build_single`, and `_build_gridded` | Open |
-| Direct non-`Soils` callers get unintended in-memory behavior | Low | Medium | Update the bundled DB builder to pass its DB path and disposition `spatializer.py` as intentionally in-memory or pass a cache path if persistence is required | Open |
-| Security review finds path traversal/cache-clear risk | High | Low | Resolve cache path from `self.soils_dir`, disallow user-supplied absolute paths from route payload, and record dedicated review evidence | Open |
+| Durable docs retain stale `/dev/shm` cache guidance | Medium | Medium | Update `wepppy/soils/README.md` and `wepppy/soils/ssurgo/ssurgo.md` before closure | Mitigated |
+| One of the five current `Soils` SSURGO/STATSGO constructor sites is missed | Medium | Medium | Add explicit constructor-site test or inspection evidence for `build_statsgo`, `_build_spatial_api` primary/fallback, `_build_single`, and `_build_gridded` | Mitigated |
+| Direct non-`Soils` callers get unintended in-memory behavior | Low | Medium | Update the bundled DB builder to pass its DB path and disposition `spatializer.py` as intentionally in-memory or pass a cache path if persistence is required | Mitigated |
+| Security review finds path traversal/cache-clear risk | High | Low | Resolve cache path from `self.soils_dir`, disallow user-supplied absolute paths from route payload, and record dedicated review evidence | Mitigated |
+| Full pytest gate blocked by unrelated WEPP disturbed preview route test | Medium | High | Targeted SSURGO/package tests passed; single failing test also fails standalone and contradicts existing disturbed normalization unit contract | Open |
 
 ## Hardening Signal Log
 
@@ -111,41 +114,41 @@
 ## Verification Checklist
 
 ### Code Quality
-- [ ] Targeted SSURGO/cache tests pass (`wctl run-pytest tests/soils/<target> --maxfail=1`).
-- [ ] Targeted NoDb soils tests pass (`wctl run-pytest tests/nodb/test_soils_gridded_root_creation.py --maxfail=1` plus any new file).
-- [ ] RQ engine soils route tests pass (`wctl run-pytest tests/microservices/test_rq_engine_soils_routes.py --maxfail=1`).
-- [ ] Frontend tests pass (`wctl run-npm test`).
-- [ ] Frontend lint passes (`wctl run-npm lint`).
+- [x] Targeted SSURGO/cache tests pass (`wctl run-pytest tests/soils/<target> --maxfail=1`).
+- [x] Targeted NoDb soils tests pass (`wctl run-pytest tests/nodb/test_soils_gridded_root_creation.py --maxfail=1` plus any new file).
+- [x] RQ engine soils route tests pass (`wctl run-pytest tests/microservices/test_rq_engine_soils_routes.py --maxfail=1`).
+- [x] Frontend tests pass (`wctl run-npm test`).
+- [x] Frontend lint passes (`wctl run-npm lint`).
 - [ ] Full pre-handoff sanity run completed (`wctl run-pytest tests --maxfail=1`) or explicit package-owner risk acceptance recorded if external constraints prevent it.
 
 ### Security
-- [ ] Security impact triage recorded as `high` with rationale.
-- [ ] File/path handling review proves cache path is derived from `Soils.soils_dir`, not from unchecked user input.
-- [ ] Cache clearing is limited to the project-local database and exact SQLite sidecars `<cache_path>-wal` and `<cache_path>-shm`.
-- [ ] Existing auth/session/queue access controls remain unchanged.
-- [ ] Dedicated security review artifact is complete.
-- [ ] No unresolved medium/high security findings remain.
+- [x] Security impact triage recorded as `high` with rationale.
+- [x] File/path handling review proves cache path is derived from `Soils.soils_dir`, not from unchecked user input.
+- [x] Cache clearing is limited to the project-local database and exact SQLite sidecars `<cache_path>-wal` and `<cache_path>-shm`.
+- [x] Existing auth/session/queue access controls remain unchanged.
+- [x] Dedicated security review artifact is complete.
+- [x] No unresolved medium/high security findings remain.
 
 ### Documentation
-- [ ] Package and tracker updated with implementation decisions and outcomes.
-- [ ] Active ExecPlan progress, surprises, decision log, and retrospective updated during work.
-- [ ] `wepppy/soils/README.md` and `wepppy/soils/ssurgo/ssurgo.md` updated for project-local/default in-memory cache behavior.
-- [ ] Parameterization ADR remains not required because no model formulas/default hydrology parameters change.
+- [x] Package and tracker updated with implementation decisions and outcomes.
+- [x] Active ExecPlan progress, surprises, decision log, and retrospective updated during work.
+- [x] `wepppy/soils/README.md` and `wepppy/soils/ssurgo/ssurgo.md` updated for project-local/default in-memory cache behavior.
+- [x] Parameterization ADR remains not required because no model formulas/default hydrology parameters change.
 
 ### Testing
-- [ ] Unit coverage for direct in-memory `SurgoSoilCollection` default.
-- [ ] Unit coverage for explicit project cache persistence and clear behavior.
-- [ ] Explicit coverage or inspection artifact for all five `Soils` constructor sites.
-- [ ] Explicit coverage or disposition for non-`Soils` direct callers (`surgo_tabular_db_builder.py`, `spatializer.py`).
-- [ ] Legacy NoDb load coverage for missing new fields.
-- [ ] Route/controller/template coverage for checkbox option, including batch no-enqueue route behavior.
-- [ ] Generated run artifact coverage proves project-local SQLite appears in `<wd>/soils/` after rebuild.
+- [x] Unit coverage for direct in-memory `SurgoSoilCollection` default.
+- [x] Unit coverage for explicit project cache persistence and clear behavior.
+- [x] Explicit coverage or inspection artifact for all five `Soils` constructor sites.
+- [x] Explicit coverage or disposition for non-`Soils` direct callers (`surgo_tabular_db_builder.py`, `spatializer.py`).
+- [x] Legacy NoDb load coverage for missing new fields.
+- [x] Route/controller/template coverage for checkbox option, including batch no-enqueue route behavior.
+- [ ] Generated run artifact coverage proves project-local SQLite appears in `<wd>/soils/` after rebuild; current coverage is fixture-only and avoids live NRCS requests.
 
 ### Review
-- [ ] `reviewer` subagent review completed and saved to `artifacts/code_review_findings.md`.
-- [ ] `qa_reviewer` subagent review completed and saved to `artifacts/qa_review_findings.md`.
-- [ ] Every finding is dispositioned in the artifact or tracker.
-- [ ] Accepted medium/high findings are fixed and rechecked.
+- [x] `reviewer` subagent review completed and saved to `artifacts/code_review_findings.md`.
+- [x] `qa_reviewer` subagent review completed and saved to `artifacts/qa_review_findings.md`.
+- [x] Every finding is dispositioned in the artifact or tracker.
+- [x] Accepted medium/high findings are fixed and rechecked.
 
 ## Progress Notes
 
@@ -194,6 +197,59 @@
 - Rerun doc lint and hand off implementation.
 
 **Test results**: Package doc-lint rerun passed.
+
+### 2026-06-19 20:09 UTC: Implementation and validation
+**Agent/Contributor**: Codex
+
+**Work completed**:
+- Refactored SSURGO tabular SQLite handling so direct `SurgoSoilCollection(...)` calls use in-memory SQLite by default, while project builds pass explicit cache files under `<wd>/soils/`.
+- Added `Soils.clear_ssurgo_cache_on_rebuild`, derived SSURGO/STATSGO cache paths, exact sidecar deletion, and legacy instance backfill.
+- Wired the option through the RQ build-soils route, RQ schema/defaults, `soil_pure.htm`, and controller serialization tests.
+- Updated durable soil docs and direct caller disposition.
+- Fixed two shared UI validation-gate issues discovered by full-suite attempts: query-engine pure macro context import/default maturity href handling, and pure macro default maturity href resolution for isolated Flask route tests.
+- Fixed two unrelated frontend test lint violations so `wctl run-npm lint` can run cleanly.
+
+**Blockers encountered**:
+- `wctl run-pytest tests --maxfail=1` still fails at `tests/weppcloud/routes/test_wepp_bp.py::test_view_management_effective_returns_texture_specific_preview[clay-1.1-2.1-0.11]`.
+- The same WEPP route test fails standalone and is outside the SSURGO cache change set. Its expectation also conflicts with existing `normalize_disturbed_class_for_management_lookup` unit coverage that says fire-mulch classes inherit burned-base lookup classes.
+
+**Next steps**:
+- Complete `reviewer` and `qa_reviewer` subagent reviews and disposition findings.
+- Complete the dedicated security review artifact.
+- Either obtain owner acceptance for the unrelated full-suite blocker or address it in a separate WEPP disturbed preview package.
+
+**Test results**:
+- Passed: `python -m py_compile wepppy/soils/ssurgo/ssurgo.py wepppy/nodb/core/soils.py wepppy/microservices/rq_engine/soils_routes.py wepppy/microservices/rq_engine/schema_defaults_routes.py`
+- Passed: `wctl run-pytest tests/soils/test_ssurgo_cache.py tests/nodb/test_soils_ssurgo_cache.py tests/nodb/test_soils_gridded_root_creation.py tests/microservices/test_rq_engine_soils_routes.py tests/microservices/test_rq_engine_schema_defaults_routes.py tests/weppcloud/routes/test_pure_controls_render.py --maxfail=1`
+- Passed: `wctl run-npm test`
+- Passed: `wctl run-npm lint`
+- Passed: `python3 tools/check_broad_exceptions.py --enforce-changed --base-ref origin/master`
+- Passed: `wctl run-pytest tests/query_engine/test_server_routes.py::test_query_endpoint_accepts_trailing_slash --maxfail=1`
+- Passed: `wctl run-pytest tests/weppcloud/routes/test_disturbed_bp.py::test_modify_disturbed_page_emits_csrf_token_for_save --maxfail=1`
+- Blocked: `wctl run-pytest tests --maxfail=1` due to the unrelated deterministic WEPP disturbed preview test listed above.
+
+### 2026-06-19 20:24 UTC: Review disposition and security closure
+**Agent/Contributor**: Codex + `reviewer` and `qa_reviewer` subagents
+
+**Work completed**:
+- Accepted and fixed the code-review symlink escape finding by realpath-checking the effective `soils` directory under `self.wd` and each candidate under the effective `soils` directory.
+- Accepted and fixed the QA SpatialAPI concurrency finding by keeping cache preparation, collection construction, WEPP soil building, output writes, and invalid-soil logging inside the same `self.locked()` block.
+- Accepted and fixed the QA cache-reuse coverage finding with a deterministic non-empty file-backed cache reuse test.
+- Fixed stale broken links in touched soil docs and normalized tracker whitespace.
+- Wrote `artifacts/code_review_findings.md`, `artifacts/qa_review_findings.md`, and a passing `artifacts/security_review.md`.
+
+**Blockers encountered**:
+- Full-suite pytest remains blocked by the unrelated deterministic WEPP disturbed preview route test recorded above.
+
+**Next steps**:
+- Stage, commit, and push the package implementation.
+
+**Test results**:
+- Passed: `python -m py_compile wepppy/nodb/core/soils.py tests/nodb/test_soils_ssurgo_cache.py`
+- Passed: `wctl run-pytest tests/soils/test_ssurgo_cache.py tests/nodb/test_soils_ssurgo_cache.py --maxfail=1`
+- Passed: `git diff --check origin/master`
+- Passed: `wctl doc-lint --path wepppy/soils/README.md`
+- Passed: `wctl doc-lint --path wepppy/soils/ssurgo/ssurgo.md`
 
 ## Watch List
 

@@ -49,7 +49,15 @@
 {% set _resolved_feature_id = feature_id if feature_id else _feature_form_map.get(form_id) %}
 {% set _feature_maturity_labels = feature_maturity_labels if feature_maturity_labels is defined else {} %}
 {% set _resolved_maturity_label = maturity_label if maturity_label else (_feature_maturity_labels.get(_resolved_feature_id) if _resolved_feature_id else None) %}
-{% set _resolved_maturity_href = maturity_href if maturity_href else (maturity_definition_href if maturity_definition_href is defined else (url_for('usersum.view_markdown', category='weppcloud', filename='user-guide.md') ~ '#feature-maturity-labels')) %}
+{% if maturity_href %}
+  {% set _resolved_maturity_href = maturity_href %}
+{% elif maturity_definition_href is defined %}
+  {% set _resolved_maturity_href = maturity_definition_href %}
+{% elif _resolved_maturity_label %}
+  {% set _resolved_maturity_href = url_for('usersum.view_markdown', category='weppcloud', filename='user-guide.md') ~ '#feature-maturity-labels' %}
+{% else %}
+  {% set _resolved_maturity_href = none %}
+{% endif %}
 {% if collapsible %}
 <details class="wc-control wc-control--collapsible"{% if open %} open{% endif %}>
   <summary class="wc-control__summary">

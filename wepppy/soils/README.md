@@ -435,10 +435,15 @@ def test_ssurgo_build():
 
 ### Caching Behavior
 
-**SQLite Cache:** `/dev/shm/surgo_tabular.db` (in-memory tmpfs)
-- Components, horizons, textures, fragments cached locally
-- Avoids redundant SSURGO web service calls
-- Persists across runs (manual deletion required to force re-fetch)
+**SQLite Cache:**
+- Project builds use `<wd>/soils/ssurgo_tabular_cache.sqlite` for SSURGO and
+  `<wd>/soils/statsgo_tabular_cache.sqlite` for STATSGO2.
+- Direct `SurgoSoilCollection(...)` calls use an in-memory SQLite database unless
+  the caller supplies `cache_db_path`.
+- Components, horizons, textures, fragments, and failed-key tables are cached
+  locally to avoid redundant SSURGO web service calls.
+- The soil Advanced Options checkbox `Clear SSURGO cache on rebuild` deletes the
+  project cache file and exact SQLite sidecars before rebuilding.
 
 **Cache Sync Logic:**
 1. Query local cache for existing data
@@ -557,7 +562,7 @@ if INVALID_MUKEY in ssc.invalidSoils:
 - Schaap, M.G., Leij, F.J., van Genuchten, M.Th. (2001). "ROSETTA: a computer program for estimating soil hydraulic parameters with hierarchical pedotransfer functions." *Journal of Hydrology*, 251(3-4), 163-176.
 
 ### Related WEPPcloud Modules
-- [wepppy.nodb.core.soils](../nodb/core/README.md#soils-controller) - Soils NoDb controller
+- [wepppy.nodb](../nodb/README.md) - Soils NoDb controller context
 - [wepppy.wepp.soils](../wepp/soils/README.md) - WEPP soil file handling
 - [wepppy.nodb.duckdb_agents](../nodb/duckdb_agents.py) - Soil summary queries
 

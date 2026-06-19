@@ -31,7 +31,6 @@ from xml.etree import ElementTree
 from math import exp
 from collections import OrderedDict
 import jsonpickle
-import shutil
 import sqlite3
 
 from rosetta import Rosetta2, Rosetta3
@@ -183,16 +182,8 @@ def _create_process_pool_executor(
     return ProcessPoolExecutor(max_workers=max_workers)
 
 _thisdir = os.path.dirname(__file__)
-
-# lazy load sqlite db to /dev/shm if available
-if _exists("/dev/shm"):
-    _ssurgo_cache_db = "/dev/shm/surgo_tabular.db"
-    if not _exists(_ssurgo_cache_db):
-        shutil.copyfile(_join(_thisdir, "data", "surgo", "surgo_tabular.db"), _ssurgo_cache_db)
-
-    _statsgo_cache_db = "/dev/shm/statsgo_tabular.db"
-    if not _exists(_statsgo_cache_db):
-        shutil.copyfile(_join(_thisdir, "data", "statsgo", "statsgo_tabular.db"), _statsgo_cache_db)
+SSURGO_PROJECT_CACHE_FILENAME = "ssurgo_tabular_cache.sqlite"
+STATSGO_PROJECT_CACHE_FILENAME = "statsgo_tabular_cache.sqlite"
 
 # Developer Notes
 ###################
@@ -229,6 +220,7 @@ def _configure_sqlite_connection(
     *,
     read_only: bool,
     context: str,
+    enable_wal: bool = True,
 ) -> None:
     """Apply busy timeout and best-effort WAL mode."""
     try:
@@ -236,7 +228,7 @@ def _configure_sqlite_connection(
     except sqlite3.Error as exc:
         _LOG.warning("%s: failed to set SQLite busy_timeout (%s)", context, exc)
 
-    if read_only:
+    if read_only or not enable_wal:
         return
 
     _ensure_wal_mode(conn, context=context)
@@ -1755,16 +1747,39 @@ class _SurgoCollectionWorkerView:
         return self._reskinds.get(cokey, "N/A")
 
 
+class _BorrowedSqliteConnection:
+    """Context manager that does not close an owned SQLite connection."""
+
+    def __init__(self, conn: sqlite3.Connection) -> None:
+        self._conn = conn
+
+    def __enter__(self) -> sqlite3.Connection:
+        return self._conn
+
+    def __exit__(self, exc_type, exc, tb) -> bool:
+        return False
+
+
 class SurgoCollectionWorkerViewFactory:
     """
     Builds a _SurgoCollectionWorkerView instance by pre-fetching all
     required data from the SQLite database for a given set of mukeys.
     """
-    def __init__(self, db_path: str):
+    def __init__(
+        self,
+        db_path: Optional[str] = None,
+        conn: Optional[sqlite3.Connection] = None,
+    ) -> None:
+        if db_path is None and conn is None:
+            raise ValueError("db_path or conn is required")
         self._db_path = db_path
+        self._conn = conn
 
     def _connect(self):
         """Creates a read-only, concurrency-friendly connection."""
+        if self._conn is not None:
+            return _BorrowedSqliteConnection(self._conn)
+
         # URI form enables read-only mode, which is safer.
         db_uri = f"file:{self._db_path}?mode=ro"
         conn = sqlite3.connect(db_uri, uri=True, timeout=10.0)
@@ -1873,18 +1888,21 @@ class SurgoSoilCollection(object):
         https://www.nrcs.usda.gov/Internet/FSE_DOCUMENTS/nrcs142p2_050900.pdf
     """
 
-    def __init__(self, mukeys: Iterable[int], use_statsgo: bool = False) -> None:
+    def __init__(
+        self,
+        mukeys: Iterable[int],
+        use_statsgo: bool = False,
+        cache_db_path: Optional[str] = None,
+    ) -> None:
         """Preload the necessary SSURGO/STATSGO tables for the supplied mukeys."""
         mukeys = [v for v in mukeys if isint(v)]
         mukeys = [int(v) for v in mukeys]
         if use_statsgo:
-            db_path = _statsgo_cache_db
             self.source_data = "StatsGo"
         else:
-            db_path = _ssurgo_cache_db
             self.source_data = "Surgo"
 
-        self._db_path = db_path
+        self._db_path = cache_db_path
         self.conn = None
         self.cur = None
         self._connect()
@@ -1897,10 +1915,13 @@ class SurgoSoilCollection(object):
         n += self._sync("component", _fetch_components, "mukey", mukeys)
 
         # identify cokeys
-        query = "SELECT  cokey FROM component WHERE mukey in (%s)" % ",".join(
-            [str(k) for k in mukeys]
-        )
-        cokeys = [r[0] for r in cur.execute(query)]
+        if mukeys:
+            query = "SELECT  cokey FROM component WHERE mukey in (%s)" % ",".join(
+                [str(k) for k in mukeys]
+            )
+            cokeys = [r[0] for r in cur.execute(query)]
+        else:
+            cokeys = []
 
         # chorizon
         n += self._sync("chorizon", _fetch_chorizon, "cokey", cokeys)
@@ -1909,10 +1930,13 @@ class SurgoSoilCollection(object):
         n += self._sync("corestrictions", _fetch_corestrictions, "cokey", cokeys, True)
 
         # identify chkeys
-        query = "SELECT chkey FROM chorizon WHERE cokey in (%s)" % ",".join(
-            [str(k) for k in cokeys]
-        )
-        chkeys = [r[0] for r in cur.execute(query)]
+        if cokeys:
+            query = "SELECT chkey FROM chorizon WHERE cokey in (%s)" % ",".join(
+                [str(k) for k in cokeys]
+            )
+            chkeys = [r[0] for r in cur.execute(query)]
+        else:
+            chkeys = []
 
         # chfrags
         n += self._sync("chfrags", _fetch_chfrags, "chkey", chkeys, True)
@@ -1991,7 +2015,10 @@ class SurgoSoilCollection(object):
         # 1. Build the single, in-memory data view object BEFORE forking.
         if logger:
             logger.info("Building in-memory soil data view...")
-        factory = SurgoCollectionWorkerViewFactory(self._db_path)
+        if self._db_path is None:
+            factory = SurgoCollectionWorkerViewFactory(conn=self.conn)
+        else:
+            factory = SurgoCollectionWorkerViewFactory(db_path=self._db_path)
         worker_view = factory.build(set(self.mukeys), self.source_data)
         if logger:
             logger.info("In-memory data view built successfully.")
@@ -2251,16 +2278,33 @@ class SurgoSoilCollection(object):
         if self.conn is not None:
             return
 
-        self.conn = sqlite3.connect(self._db_path, timeout=10.0)
+        if self._db_path is None:
+            db_context = f"{self.__class__.__name__}:memory:{self.source_data}"
+            self.conn = sqlite3.connect(":memory:", timeout=10.0)
+            enable_wal = False
+        else:
+            db_context = f"{self.__class__.__name__}:{self._db_path}"
+            cache_dir = os.path.dirname(os.path.abspath(self._db_path))
+            if cache_dir:
+                os.makedirs(cache_dir, exist_ok=True)
+            self.conn = sqlite3.connect(self._db_path, timeout=10.0)
+            enable_wal = True
+
+        self.conn.row_factory = sqlite3.Row
         _configure_sqlite_connection(
             self.conn,
             read_only=False,
-            context=f"{self.__class__.__name__}:{self._db_path}",
+            context=db_context,
+            enable_wal=enable_wal,
         )
         self.cur = self.conn.cursor()
 
     def _connect_for_read(self):
         """Creates a new read connection (used by get_* methods)."""
+        if self._db_path is None:
+            self._connect()
+            return _BorrowedSqliteConnection(self.conn)
+
         conn = sqlite3.connect(self._db_path, timeout=10.0)
         conn.row_factory = sqlite3.Row
         _configure_sqlite_connection(

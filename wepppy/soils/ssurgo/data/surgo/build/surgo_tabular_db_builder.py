@@ -46,7 +46,7 @@ if __name__ == '__main__':
         sys.stdout.write('mukeys[{}:{}]... '.format(i0, iend))
 
         _mukeys = mukeys[i0:iend]
-        surgo_c = SurgoSoilCollection(_mukeys)
+        surgo_c = SurgoSoilCollection(_mukeys, cache_db_path=_db)
         surgo_c.makeWeppSoils()
         surgo_c.writeWeppSoils(wd=_valid_dir, write_logs=True, db_build=True)
         surgo_c.logInvalidSoils(wd=_invalid_dir, db_build=True)

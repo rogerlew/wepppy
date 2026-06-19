@@ -97,7 +97,10 @@ async def build_soils(runid: str, config: str, request: Request) -> JSONResponse
         prep.remove_timestamp(TaskEnum.build_soils)
         prep.remove_timestamp(TaskEnum.run_geneva)
 
-        payload = await parse_request_payload(request)
+        payload = await parse_request_payload(
+            request,
+            boolean_fields={"clear_ssurgo_cache_on_rebuild"},
+        )
         try:
             initial_sat = _to_float(payload.get("initial_sat"))
         except (TypeError, ValueError):
@@ -105,6 +108,9 @@ async def build_soils(runid: str, config: str, request: Request) -> JSONResponse
 
         soils = Soils.getInstance(wd)
         soils.initial_sat = initial_sat
+        soils.clear_ssurgo_cache_on_rebuild = bool(
+            payload.get("clear_ssurgo_cache_on_rebuild", False)
+        )
 
         if "disturbed" in soils.mods:
             disturbed = Disturbed.getInstance(wd)

@@ -91,22 +91,15 @@ describe("landuse_map inline script", () => {
             lookup_sha256: "sha-before-save",
         });
 
+        let saveOptions;
+        let savePayload;
         const fetchMock = jest.fn((url, options) => {
             if (url === "/rq-engine/api/runs/test/cfg/session-token") {
                 return Promise.resolve(makeJsonResponse({ token: "rq-token" }));
             }
             if (url === "/rq-engine/api/runs/test/cfg/landuse-map/save") {
-                expect(options.method).toBe("POST");
-                expect(options.headers.Authorization).toBe("Bearer rq-token");
-                expect(options.headers["X-If-Match-Sha256"]).toBe("sha-before-save");
-                const payload = JSON.parse(options.body);
-                expect(payload.rows).toEqual([
-                    {
-                        key: "21",
-                        management_file: "Developed_Moderate_Intensity.man",
-                        description: "Moderate Severity Fire",
-                    },
-                ]);
+                saveOptions = options;
+                savePayload = JSON.parse(options.body);
                 return Promise.resolve(makeJsonResponse({ message: "Landuse map saved", lookup_sha256: "sha-after-save" }));
             }
             if (url === "/rq-engine/api/runs/test/cfg/landuse-map/snapshot") {
@@ -155,6 +148,15 @@ describe("landuse_map inline script", () => {
             "/rq-engine/api/runs/test/cfg/landuse-map/save",
             expect.objectContaining({ method: "POST" })
         );
+        expect(saveOptions.headers.Authorization).toBe("Bearer rq-token");
+        expect(saveOptions.headers["X-If-Match-Sha256"]).toBe("sha-before-save");
+        expect(savePayload.rows).toEqual([
+            {
+                key: "21",
+                management_file: "Developed_Moderate_Intensity.man",
+                description: "Moderate Severity Fire",
+            },
+        ]);
         expect(fetchMock).toHaveBeenCalledWith(
             "/rq-engine/api/runs/test/cfg/landuse-map/snapshot",
             expect.objectContaining({ method: "GET" })

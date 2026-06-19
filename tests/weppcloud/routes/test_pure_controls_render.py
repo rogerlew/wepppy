@@ -134,6 +134,27 @@ def test_pure_control_renders(template_name: str, jinja_env: Environment) -> Non
     template.render()
 
 
+def test_soil_pure_template_renders_ssurgo_cache_checkbox(jinja_env: Environment) -> None:
+    template = jinja_env.get_template("controls/soil_pure.htm")
+    rendered = template.render(
+        soils=SimpleNamespace(
+            mode=SimpleNamespace(value=0),
+            initial_sat=0.75,
+            single_selection=0,
+            single_dbselection=None,
+            ksflag=True,
+            clear_ssurgo_cache_on_rebuild=True,
+        ),
+        soildboptions=["DB1"],
+        disturbed=None,
+    )
+
+    assert 'id="clear_ssurgo_cache_on_rebuild"' in rendered
+    assert 'name="clear_ssurgo_cache_on_rebuild"' in rendered
+    assert "Clear SSURGO cache on rebuild" in rendered
+    assert re.search(r'id="clear_ssurgo_cache_on_rebuild"[^>]*checked', rendered)
+
+
 @pytest.mark.parametrize(
     ("template_name", "title_text", "run_link_class"),
     [

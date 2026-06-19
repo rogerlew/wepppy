@@ -73,26 +73,73 @@ def test_build_soils_enqueues_job(monkeypatch: pytest.MonkeyPatch) -> None:
         run_group = "default"
         mods: set[str] = set()
         initial_sat = None
+        clear_ssurgo_cache_on_rebuild = None
 
+    soils = DummySoils()
     monkeypatch.setattr(
         soils_routes.Soils,
         "getInstance",
-        lambda wd: DummySoils(),
+        lambda wd: soils,
     )
 
     with TestClient(rq_engine.app) as client:
         response = client.post(
             "/api/runs/run-1/cfg/build-soils",
-            json={"initial_sat": 0.42},
+            json={
+                "initial_sat": 0.42,
+                "clear_ssurgo_cache_on_rebuild": True,
+            },
         )
 
     assert response.status_code == 200
     assert response.json()["job_id"] == "job-77"
+    assert soils.initial_sat == 0.42
+    assert soils.clear_ssurgo_cache_on_rebuild is True
     assert prep_state["removed"] == [
         soils_routes.TaskEnum.build_soils,
         soils_routes.TaskEnum.run_geneva,
     ]
     assert prep_state["jobs"] == [("build_soils_rq", "job-77")]
+
+
+def test_build_soils_persists_cache_clear_option_for_batch(
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    _stub_auth(monkeypatch)
+    prep_state = _stub_prep(monkeypatch)
+    monkeypatch.setattr(soils_routes, "get_wd", lambda runid: "/tmp/run")
+
+    class DummySoils:
+        run_group = "batch"
+        mods: set[str] = set()
+        initial_sat = None
+        clear_ssurgo_cache_on_rebuild = None
+
+    soils = DummySoils()
+    monkeypatch.setattr(
+        soils_routes.Soils,
+        "getInstance",
+        lambda wd: soils,
+    )
+
+    with TestClient(rq_engine.app) as client:
+        response = client.post(
+            "/api/runs/run-1/cfg/build-soils",
+            json={
+                "initial_sat": 0.42,
+                "clear_ssurgo_cache_on_rebuild": "on",
+            },
+        )
+
+    assert response.status_code == 200
+    assert response.json() == {"message": "Set soils inputs for batch processing"}
+    assert soils.initial_sat == 0.42
+    assert soils.clear_ssurgo_cache_on_rebuild is True
+    assert prep_state["removed"] == [
+        soils_routes.TaskEnum.build_soils,
+        soils_routes.TaskEnum.run_geneva,
+    ]
+    assert prep_state["jobs"] == []
 
 
 def test_build_soils_propagates_nodir_preflight_errors(monkeypatch: pytest.MonkeyPatch) -> None:

@@ -73,6 +73,8 @@ import duckdb
 
 # wepppy
 from wepppy.soils.ssurgo import (
+    SSURGO_PROJECT_CACHE_FILENAME,
+    STATSGO_PROJECT_CACHE_FILENAME,
     SurgoMap,
     StatsgoSpatial,
     SurgoSoilCollection,
@@ -225,6 +227,7 @@ class Soils(NoDbBase):
             self._clip_soils_depth = self.config_get_float('soils', 'clip_soils_depth', 1000)
             self._clip_soils_minimum = self.config_get_bool('soils', 'clip_soils_minimum', False)
             self._clip_soils_minimum_depth = self.config_get_float('soils', 'clip_soils_minimum_depth', 0)
+            self._clear_ssurgo_cache_on_rebuild = False
             self._rosetta_wc_fc_from_disturbed_bd_override = self.config_get_bool(
                 'soils',
                 'rosetta_wc_fc_from_disturbed_bd_override',
@@ -239,6 +242,8 @@ class Soils(NoDbBase):
         instance = super()._post_instance_loaded(instance)
         instance._soils_map = instance._expand_config_path_tokens(getattr(instance, "_soils_map", None))
         instance._ssurgo_db = instance._expand_config_path_tokens(getattr(instance, "_ssurgo_db", None))
+        if not hasattr(instance, "_clear_ssurgo_cache_on_rebuild"):
+            instance._clear_ssurgo_cache_on_rebuild = False
 
         soils = getattr(instance, "soils", None)
         if not isinstance(soils, dict):
@@ -302,6 +307,15 @@ class Soils(NoDbBase):
     @nodb_setter
     def initial_sat(self, value: float) -> None:
         self._initial_sat = value
+
+    @property
+    def clear_ssurgo_cache_on_rebuild(self) -> bool:
+        return bool(getattr(self, '_clear_ssurgo_cache_on_rebuild', False))
+
+    @clear_ssurgo_cache_on_rebuild.setter
+    @nodb_setter
+    def clear_ssurgo_cache_on_rebuild(self, value: bool) -> None:
+        self._clear_ssurgo_cache_on_rebuild = bool(value)
 
     @property
     def rosetta_wc_fc_from_disturbed_bd_override(self) -> bool:
@@ -493,6 +507,55 @@ class Soils(NoDbBase):
     @property
     def soils_dir(self) -> str:
         return _join(self.wd, "soils")
+
+    @property
+    def ssurgo_cache_db_path(self) -> str:
+        return _join(self.soils_dir, SSURGO_PROJECT_CACHE_FILENAME)
+
+    @property
+    def statsgo_cache_db_path(self) -> str:
+        return _join(self.soils_dir, STATSGO_PROJECT_CACHE_FILENAME)
+
+    def _project_surgo_cache_path(self, *, use_statsgo: bool = False) -> str:
+        os.makedirs(self.soils_dir, exist_ok=True)
+        if use_statsgo:
+            return self.statsgo_cache_db_path
+        return self.ssurgo_cache_db_path
+
+    def _prepare_project_surgo_cache(self, *, use_statsgo: bool = False) -> str:
+        cache_path = self._project_surgo_cache_path(use_statsgo=use_statsgo)
+        if self.clear_ssurgo_cache_on_rebuild:
+            self._clear_project_surgo_cache(use_statsgo=use_statsgo)
+        return cache_path
+
+    def _clear_project_surgo_cache(self, *, use_statsgo: bool = False) -> None:
+        cache_path = self._project_surgo_cache_path(use_statsgo=use_statsgo)
+        wd_root = os.path.realpath(self.wd)
+        soils_dir = os.path.realpath(self.soils_dir)
+        try:
+            soils_under_project = os.path.commonpath([wd_root, soils_dir]) == wd_root
+        except ValueError as exc:
+            raise ValueError(f"Invalid project soils directory: {self.soils_dir}") from exc
+        if not soils_under_project:
+            raise ValueError(f"Refusing to clear cache outside project directory: {self.soils_dir}")
+
+        for candidate in (cache_path, f"{cache_path}-wal", f"{cache_path}-shm"):
+            abs_candidate = os.path.abspath(candidate)
+            real_candidate = os.path.realpath(candidate)
+            try:
+                candidate_under_soils = os.path.commonpath([soils_dir, real_candidate]) == soils_dir
+            except ValueError as exc:
+                raise ValueError(f"Invalid SSURGO cache path: {candidate}") from exc
+            if not candidate_under_soils:
+                raise ValueError(f"Refusing to clear cache outside soils directory: {candidate}")
+
+            if not os.path.lexists(abs_candidate):
+                continue
+            if os.path.isdir(abs_candidate) and not os.path.islink(abs_candidate):
+                raise IsADirectoryError(
+                    f"Refusing to remove directory while clearing SSURGO cache: {abs_candidate}"
+                )
+            os.unlink(abs_candidate)
 
     @property
     def ssurgo_fn(self) -> str:
@@ -843,7 +906,11 @@ class Soils(NoDbBase):
                 domsoil_d[str(topaz_id)] = str(mukey)
 
             mukeys = set(domsoil_d.values())
-            surgo_c = SurgoSoilCollection(mukeys, use_statsgo=True)
+            surgo_c = SurgoSoilCollection(
+                mukeys,
+                use_statsgo=True,
+                cache_db_path=self._prepare_project_surgo_cache(use_statsgo=True),
+            )
             surgo_c.makeWeppSoils(initial_sat=self.initial_sat, ksflag=self.ksflag)
             soils = surgo_c.writeWeppSoils(wd=soils_dir, write_logs=True)
             soils = {str(k): v for k, v in soils.items()}
@@ -994,12 +1061,14 @@ class Soils(NoDbBase):
         mukeys = set(sm.mukeys)
         self.logger.info(f"ssurgo mukeys: {mukeys}")
 
-        surgo_c = SurgoSoilCollection(mukeys)
-        surgo_c.makeWeppSoils(initial_sat=self.initial_sat, ksflag=self.ksflag)
+        with self.locked():
+            ssurgo_cache_db_path = self._prepare_project_surgo_cache(use_statsgo=False)
+            surgo_c = SurgoSoilCollection(mukeys, cache_db_path=ssurgo_cache_db_path)
+            surgo_c.makeWeppSoils(initial_sat=self.initial_sat, ksflag=self.ksflag)
 
-        soils = surgo_c.writeWeppSoils(wd=soils_dir, write_logs=True)
-        soils = {str(k): v for k, v in soils.items()}
-        surgo_c.logInvalidSoils(wd=soils_dir)
+            soils = surgo_c.writeWeppSoils(wd=soils_dir, write_logs=True)
+            soils = {str(k): v for k, v in soils.items()}
+            surgo_c.logInvalidSoils(wd=soils_dir)
 
         self.logger.info(f"valid mukeys: {soils.keys()}")
 
@@ -1012,11 +1081,17 @@ class Soils(NoDbBase):
             statsgoSpatial = StatsgoSpatial()
 
             mukeys = statsgoSpatial.identify_mukeys_extent(_map.extent)
-            surgo_c = SurgoSoilCollection(mukeys, use_statsgo=True)
-            surgo_c.makeWeppSoils(initial_sat=self.initial_sat, ksflag=self.ksflag)
-            soils = surgo_c.writeWeppSoils(wd=soils_dir, write_logs=True)
-            soils = {str(k): v for k, v in soils.items()}
-            surgo_c.logInvalidSoils(wd=soils_dir)
+            with self.locked():
+                statsgo_cache_db_path = self._prepare_project_surgo_cache(use_statsgo=True)
+                surgo_c = SurgoSoilCollection(
+                    mukeys,
+                    use_statsgo=True,
+                    cache_db_path=statsgo_cache_db_path,
+                )
+                surgo_c.makeWeppSoils(initial_sat=self.initial_sat, ksflag=self.ksflag)
+                soils = surgo_c.writeWeppSoils(wd=soils_dir, write_logs=True)
+                soils = {str(k): v for k, v in soils.items()}
+                surgo_c.logInvalidSoils(wd=soils_dir)
 
         with self.locked():
             self._soils_is_vrt = False
@@ -1342,7 +1417,10 @@ class Soils(NoDbBase):
 
             watershed = self.watershed_instance
             mukey = self.single_selection
-            surgo_c = SurgoSoilCollection([mukey])
+            surgo_c = SurgoSoilCollection(
+                [mukey],
+                cache_db_path=self._prepare_project_surgo_cache(use_statsgo=False),
+            )
             surgo_c.makeWeppSoils(initial_sat=self.initial_sat, ksflag=self.ksflag)
             surgo_c.logInvalidSoils(wd=soils_dir)
 
@@ -1469,7 +1547,10 @@ class Soils(NoDbBase):
                 mukeys = set(sm.mukeys)
                 self.logger.info(f"    ssurgo mukeys: {mukeys}")
 
-                surgo_c = SurgoSoilCollection(mukeys)
+                surgo_c = SurgoSoilCollection(
+                    mukeys,
+                    cache_db_path=self._prepare_project_surgo_cache(use_statsgo=False),
+                )
                 surgo_c.makeWeppSoils(initial_sat=self.initial_sat, ksflag=self.ksflag, logger=self.logger,
                                       max_workers=max_workers)
 

@@ -4,6 +4,8 @@ from __future__ import annotations
 
 from .ssurgo import (
     SoilSummary,
+    SSURGO_PROJECT_CACHE_FILENAME,
+    STATSGO_PROJECT_CACHE_FILENAME,
     SsurgoRequestError,
     SurgoSoilCollection,
     query_mukeys_in_extent,
@@ -15,6 +17,8 @@ from .surgo_map import NoValidSoilsException, SurgoMap
 __all__ = [
     "NoValidSoilsException",
     "SoilSummary",
+    "SSURGO_PROJECT_CACHE_FILENAME",
+    "STATSGO_PROJECT_CACHE_FILENAME",
     "SsurgoRequestError",
     "SurgoMap",
     "SurgoSoilCollection",
