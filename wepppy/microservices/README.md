@@ -25,15 +25,15 @@ This directory contains lightweight microservices built with Starlette or FastAP
 **File**: `browse/browse.py`  
 **Documentation**: [browse/README.md](browse/README.md)
 
-Provides filesystem browsing, compatibility downloads, table preview/export support, and GDAL metadata extraction for run directories.
+Provides filesystem browsing, compatibility downloads, table preview/export support, and GDAL metadata extraction for run directories. Exact run archive ZIP delivery is owned by the dedicated `download` service when the Caddy archive matcher is enabled.
 
 **Key endpoints:**
-- `GET /browse/<path>` - List directory contents or download files
+- `GET /browse/<path>` - List directory contents or browser-triggered file downloads
 - `GET /gdalinfo/<path>` - Extract raster metadata via GDAL
 
 **Use cases:**
 - Browsing run output files through the web interface
-- Downloading simulation results
+- Downloading non-archive simulation results and compatibility artifacts
 - Inspecting GeoTIFF metadata without GDAL client-side
 
 ### Download Microservice
@@ -41,7 +41,7 @@ Provides filesystem browsing, compatibility downloads, table preview/export supp
 **Package**: `download/`
 **Documentation**: [download/README.md](download/README.md)
 
-Dedicated Starlette service for critical exact run archive downloads. It preserves the public archive URL shape while moving `/weppcloud/runs/{runid}/{config}/download/archives/*.zip` traffic out of the interactive browse worker pool.
+Dedicated Starlette service for critical exact run archive downloads. It preserves the public archive URL shape while routing `/weppcloud/runs/{runid}/{config}/download/archives/*.zip` traffic out of the interactive browse worker pool when the Caddy archive matcher is active.
 
 **Key endpoints:**
 - `GET /weppcloud/runs/{runid}/{config}/download/archives/{name}.zip` - Full archive download

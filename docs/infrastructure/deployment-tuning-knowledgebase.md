@@ -17,6 +17,11 @@ Source-of-truth files: `docker/docker-compose.prod.yml`, `docker/caddy/Caddyfile
   - `uvicorn wepppy.microservices.rq_engine:app --workers 4 --host 0.0.0.0 --port 8042`
 - `weppcloud` service command in prod compose:
   - `gunicorn --workers 4 --threads 2 --timeout 1800 ...`
+- `download` service command in prod compose:
+  - `gunicorn --workers ${DOWNLOAD_WORKERS:-2} --timeout ${DOWNLOAD_TIMEOUT:-1800} --bind 0.0.0.0:9011 -k uvicorn.workers.UvicornWorker wepppy.microservices.download:app`
+- Exact archive ZIP route:
+  - Caddy matches `/weppcloud/runs/{runid}/{config}/download/archives/*.zip` before the broader browse matcher and proxies it to `download:9011`.
+  - Non-archive download, browse, schema, D-Tale, files, aria2c, and gdalinfo route families remain on `browse:9009`.
 - Current Caddyfile has no `/upload*` route block; upload routing was consolidated into `/rq-engine/api/*` in the migration series.
 
 Operational note:
@@ -39,6 +44,7 @@ Reviewed mini-work-packages and work-packages with deployment-impacting outcomes
 | [`docs/mini-work-packages/completed/20260203_resource_contraints.md`](../mini-work-packages/completed/20260203_resource_contraints.md) | Capacity protection | Captured crawler-induced 502 patterns and Caddy bot-blocklist/rate-limit recommendations. |
 | [`docs/mini-work-packages/completed/20260206_run_ttl_lifecycle.md`](../mini-work-packages/completed/20260206_run_ttl_lifecycle.md) | Storage lifecycle | Added TTL metadata + GC scheduler; logical delete first, deferred physical cleanup on NFS. |
 | [`docs/work-packages/20260208_rq_engine_agent_usability/tracker.md`](../work-packages/20260208_rq_engine_agent_usability/tracker.md) | Active work package | Documented polling auth/rate-limit decisions and deploy-readiness checklist items for rq-engine agent paths. |
+| [`docs/work-packages/20260619_dedicated_download_service/package.md`](../work-packages/20260619_dedicated_download_service/package.md) | Download isolation | Split exact run archive ZIP delivery into `download:9011` with range/resume handling and `download.complete` observability while leaving transform/grouped downloads on `browse`. |
 
 Interpretation:
 - For queue/upload pathing and timeout posture, treat the 2026-01 migration artifacts as current.
@@ -50,7 +56,8 @@ Interpretation:
 | Knob | Location | Default in repo | When to tune |
 | --- | --- | --- | --- |
 | `read_timeout`, `response_header_timeout` for `/rq-engine*` | `docker/caddy/Caddyfile` | `10m`, `10m` | Only if validated long-running upstream responses exceed current envelope. |
-| Bot blocks / crawler controls | `docker/caddy/Caddyfile` | Not globally enabled by default | During crawler pressure events causing browse/download 502 spikes. |
+| `read_timeout` for exact archive downloads | `docker/caddy/Caddyfile` | `30m` on `download:9011` route | Only if representative archive transfers exceed current envelope and `download.complete` logs show server-side completion pressure. |
+| Bot blocks / crawler controls | `docker/caddy/Caddyfile` | Not globally enabled by default | During crawler pressure events causing browse listing or non-migrated download 502 spikes. |
 | Route ordering | `docker/caddy/Caddyfile` | Explicit `handle_path` blocks above app fallback | If requests unexpectedly land on wrong upstream service. |
 
 ### App Server / Worker Runtime
@@ -58,6 +65,7 @@ Interpretation:
 | --- | --- | --- | --- |
 | Uvicorn worker count (`rq-engine`) | `docker/docker-compose.prod.yml` | `--workers 4` | CPU saturation or queue API tail-latency pressure. |
 | Gunicorn workers/threads (`weppcloud`) | `docker/docker-compose.prod.yml` | `workers=4`, `threads=2`, `timeout=1800` | Request concurrency imbalance, worker stalls, or memory pressure. |
+| Gunicorn workers/timeout (`download`) | `docker/docker-compose.prod.yml` | `DOWNLOAD_WORKERS=2`, `DOWNLOAD_TIMEOUT=1800` | Tune only from `download.complete` duration/bytes evidence and worker RSS/CPU; NFS stalls will not be fixed by worker count alone. |
 | Polling limiter strategy | rq-engine package decisions | In-process limiter retained | Revisit for cross-worker/global enforcement after deployment telemetry supports it. |
 
 ### Database + Session Safety
@@ -282,7 +290,9 @@ docker run --rm --privileged --pid=host alpine:3.20 sh -lc "\
 | Caddy `status=502`, `msg=\"EOF\"` on `/rq-engine/create/` with ~37-61s durations | `rq-engine` workers | Upstream worker death during blocking request path | Correlate Caddy timestamps with `docker-rq-engine` `Child process [...] died` lines; verify deployed `project_routes.py` version. |
 | Caddy `dial tcp ...:8042: connect: connection refused` | `rq-engine` availability | Service restart window or crash-loop | `docker ps`, recent container restart reason, parent/child start logs. |
 | `POST /rq-engine/api/runs/<runid>/<config>/session-token` returns `401 Invalid session cookie` while Redis session key exists | Auth/session boundary | `SECRET_KEY` mismatch between `weppcloud` and `rq-engine` (often from secret-value drift around `$` characters) | Compare `SECRET_KEY` length/hash between containers via `docker inspect`; ensure both services were recreated from the same env values. |
-| Rising `502` on browse/download with crawler user agents | Edge/capacity | Aggressive bot traffic | Apply user-agent blocks/rate controls from resource-constraints package; monitor status delta. |
+| Rising `502` on browse listing or non-migrated download paths with crawler user agents | Edge/capacity | Aggressive bot traffic | Apply user-agent blocks/rate controls from resource-constraints package; monitor status delta. |
+| Exact archive ZIP downloads are slow, but `download.complete` shows fast `status=200/206` completion | Client/network edge | Client path, VPN, institutional inspection, browser, or HTTP/3/QUIC behavior | Compare local Caddy `HEAD`/range/full probes, external probe, and user browser; test HTTP/1.1 fallback. |
+| Exact archive ZIP downloads are slow and `download.complete` duration is high | `download`/storage | Slow NFS file reads or saturated download workers | Check `download` health/RSS, run host file-read timing for the archive, compare range and full-transfer logs, and inspect NFS/iowait. |
 | Many open log FDs per `weppcloud` worker + DB `idle in transaction` | App/DB | Non-detached NoDb loading on list/render paths, delayed session closure | Confirm detached-load code path and query closure behavior from 2026-01 hardening package. |
 
 ## Deployment Verification Checklist
@@ -299,10 +309,15 @@ docker exec docker-caddy-1 sh -lc "nl -ba /etc/caddy/Caddyfile | sed -n '70,105p
 # 3) Health and path checks
 curl -fsS https://<host>/rq-engine/health
 curl -fsS "https://<host>/rq-engine/api/jobstatus/<job_id>"
+curl -fsS https://<host>/weppcloud/runs/<runid>/<config>/download/archives/<archive>.zip \
+  -H 'Range: bytes=0-1048575' \
+  -o /tmp/archive-range.part \
+  -w 'archive_http=%{http_code} bytes=%{size_download} speed=%{speed_download}Bps time=%{time_total}s\n'
 
 # 4) Error correlation
 docker logs --since 2h docker-caddy-1 2>&1 | grep '/rq-engine'
 docker logs --since 2h docker-rq-engine-1 2>&1 | grep -E 'Child process|POST /create/'
+docker logs --since 2h docker-download-1 2>&1 | grep 'download.complete'
 ```
 
 Release hygiene:

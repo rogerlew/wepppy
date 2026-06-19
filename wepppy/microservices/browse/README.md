@@ -9,7 +9,7 @@
 
 ## High-level architecture
 - **Application**: `wepppy/microservices/browse/browse.py`
-  - Creates a Starlette app and registers the browse UI plus the download and gdalinfo helper routes.
+  - Creates a Starlette app and registers the browse UI plus compatibility download and gdalinfo helper routes.
   - Reuses the existing Jinja templates (directory listings, text viewer, etc.) but renders them outside Flask.
   - Contains shims so templates that call `url_for(...)` or expect `SITE_PREFIX` still work.
 - **Async execution**
@@ -17,7 +17,7 @@
   - CSV/TSV/pickle previews that still use pandas run in `asyncio.to_thread` so the event loop stays responsive.
   - Parquet previews and browse download CSV exports avoid Arrow-to-pandas conversion in `browse`; they use bounded DuckDB/PyArrow table queries and batch CSV writing.
 - **Supporting modules**
-  - `_download.py`: currently serves file downloads, parquet-to-CSV conversion, and aria2c manifests.
+  - `_download.py`: serves compatibility file downloads, parquet-to-CSV conversion, and aria2c manifests. Exact run archive ZIP delivery can be routed to the dedicated `download` service.
   - `dtale.py`: forwards supported tabular files to the D-Tale loader service and returns redirects.
   - `files_api.py`: JSON `/files` route parsing, validation, and payload assembly.
   - `listing.py`: manifest creation plus sorted/paginated directory listing helpers.
@@ -28,7 +28,7 @@
 wepppy/microservices/
   browse/
     browse.py            # Starlette application factory and browse UI logic
-    _download.py         # Current download + aria2c routes shared with browse
+    _download.py         # Compatibility download + aria2c routes shared with browse
     dtale.py             # D-Tale loader bridge handlers and URL helpers
     files_api.py         # JSON files endpoint handlers
     listing.py           # Manifest + directory listing internals
@@ -44,7 +44,7 @@ Templates remain in `wepppy/weppcloud/routes/browse/templates/browse/`.
 | `/weppcloud/runs/{runid}/{config}/browse/` | Top-level directory view with pagination and filters. | `page` (1-based start index), shell-style wildcard filter (`../output/p1.*`), `diff={runid}` to show diff links against another run. |
 | `/weppcloud/runs/{runid}/{config}/browse/{subpath}` | Lists a directory or displays a file. Handles text, archives, tables, and binary downloads. | Same as above plus file-specific options: `repr=1` (management/soil annotation), `raw=1`, `download=1`. Parquet viewers additionally accept `pqf=<base64url-json-filter>`. |
 | `/weppcloud/runs/{runid}/{config}/schema/{subpath}` | Returns parquet column metadata for browse row-level schema preview. | *(no additional options; parquet files only)* |
-| `/weppcloud/runs/{runid}/{config}/download/{subpath}` | Direct file download. Converts parquet to CSV when `?as_csv=1`. | `as_csv=1` for parquet conversion; parquet targets also accept `pqf=<...>` for filtered parquet/CSV output. |
+| `/weppcloud/runs/{runid}/{config}/download/{subpath}` | Direct file download. Exact `archives/*.zip` routes are served by the dedicated `download` service when Caddy cutover is active; browse continues to handle compatibility downloads and parquet CSV conversion. | `as_csv=1` for parquet conversion; parquet targets also accept `pqf=<...>` for filtered parquet/CSV output. |
 | `/weppcloud/runs/{runid}/{config}/dtale/{subpath}` | Loads parquet/CSV/TSV/feather/pickle into the D-Tale service and redirects to the D-Tale dataset URL. | Parquet targets accept `pqf=<...>` when filter feature flag is enabled. |
 | `/weppcloud/runs/{runid}/{config}/aria2c.spec` | Generates an aria2c manifest for pulling the entire run. | *(no additional options)* |
 | `/weppcloud/runs/{runid}/{config}/gdalinfo/{subpath}` | Returns `gdalinfo -json` for a raster file. | *(no additional options)* |
@@ -59,16 +59,16 @@ All routes honor the site prefix automatically (default `/weppcloud`). If the se
 
 ## Dedicated download service boundary
 
-Critical run archive downloads are moving out of `browse` into the dedicated [`download`](../download/README.md) microservice. The implementation package is [`docs/work-packages/20260619_dedicated_download_service/`](../../../docs/work-packages/20260619_dedicated_download_service/).
+Critical run archive downloads are split out of `browse` into the dedicated [`download`](../download/README.md) microservice. The implementation package is [`docs/work-packages/20260619_dedicated_download_service/`](../../../docs/work-packages/20260619_dedicated_download_service/).
 
-Target shape:
+Current route ownership:
 
-1. `browse` remains the interactive filesystem UI and metadata service for listing, previewing, filtering, schema lookup, D-Tale handoff, `gdalinfo`, and non-critical compatibility routes during migration.
+1. `browse` remains the interactive filesystem UI and metadata service for listing, previewing, filtering, schema lookup, D-Tale handoff, `gdalinfo`, and non-migrated compatibility routes.
 2. The dedicated `download` service owns exact archive delivery for `/weppcloud/runs/{runid}/{config}/download/archives/*.zip`.
 3. The download service runs in its own process/container path with independent worker counts, timeouts, concurrency controls, health checks, and logs.
-4. Archive delivery is range/resume friendly and observable: full and partial responses should record status, bytes sent, duration, file size, range start/end, client abort/error reason when known, sanitized path category, client address, and user agent.
+4. Archive delivery is range/resume friendly and observable: full and partial responses record status, bytes sent, duration, file size, range start/end, client abort/error reason when known, sanitized path category, client address, and user agent.
 
-This split is not expected to remove the shared NFS/run-root dependency by itself. It is intended to remove non-NFS common-cause vectors from critical downloads: browse directory scans, table previews, parquet/CSV export work, D-Tale bridge traffic, crawler pressure, and browse worker RSS growth should not compete with long archive streams once the route is cut over.
+This split is not expected to remove the shared NFS/run-root dependency by itself. It is intended to remove non-NFS common-cause vectors from critical downloads: browse directory scans, table previews, parquet/CSV export work, D-Tale bridge traffic, crawler pressure, and browse worker RSS growth should not compete with long archive streams once the route is active.
 
 The dedicated service preserves the canonical browse authorization and path-boundary contracts. Download links exposed by browse remain stable for users; Caddy routing decides which backend receives the exact archive route during rollout.
 
@@ -145,7 +145,7 @@ The dedicated service preserves the canonical browse authorization and path-boun
 
 ## Operating the service
 - Systemd unit: `wepppy/microservices/_service_files/gunicorn-browse.service` (binds to 0.0.0.0:9009 with uvicorn workers).
-- Docker/Caddy wiring: `docker/docker-compose.dev.yml`, `docker/docker-compose.prod.yml`, `docker/docker-compose.prod.wepp1.yml`, `docker/caddy/Caddyfile`, and `docker/caddy/Caddyfile.wepp1` route browse traffic to `browse:9009`.
+- Docker/Caddy wiring: `docker/docker-compose.dev.yml`, `docker/docker-compose.prod.yml`, `docker/docker-compose.prod.wepp1.yml`, `docker/caddy/Caddyfile`, and `docker/caddy/Caddyfile.wepp1` route browse traffic to `browse:9009`; exact archive ZIP traffic can route to `download:9011`.
 - Health check: `GET /health` returns `OK`; Caddy or HAProxy health handling depends on the deployment.
 - Restart after code changes: `systemctl restart gunicorn-browse` (or equivalent in your environment).
 

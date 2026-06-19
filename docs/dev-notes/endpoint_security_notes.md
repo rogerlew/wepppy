@@ -7,7 +7,7 @@
 - `wepppy/microservices/rq_engine/job_routes.py` – `/rq-engine/api/canceljob/<job_id>` is now JWT-protected; keep it that way and avoid anonymous access.
 
 ## Medium-Risk Endpoints
-- `wepppy/microservices/browse/*` (browse/download/files handlers) enforce token-class and run-scope gating when auth is present. `/files/` routes require JWT auth (`user` or `service`) and reject anonymous/session tokens. Run browse/download routes still allow anonymous access for public runs on non-root-only paths; private runs and root-only paths require valid run-scoped tokens (`session`, `user`, or `service`).
+- `wepppy/microservices/browse/*` (browse/download/files handlers) and `wepppy/microservices/download/*` (exact run archive ZIP delivery) enforce token-class and run-scope gating when auth is present. `/files/` routes require JWT auth (`user` or `service`) and reject anonymous/session tokens. Run browse/download routes still allow anonymous access for public runs on non-root-only paths; private runs and root-only paths require valid run-scoped tokens (`session`, `user`, or `service`). The dedicated `download` service must continue reusing browse auth/path helpers so exact `/download/archives/*.zip` behavior does not drift from browse.
 - `POST /weppcloud/api/auth/rq-engine-token` (Flask `weppcloud_site`) mints
   browser fallback JWTs for transparent rq-engine renewal. It must remain
   authenticated-session only (`401` for anonymous), same-origin, and CSRF-protected.

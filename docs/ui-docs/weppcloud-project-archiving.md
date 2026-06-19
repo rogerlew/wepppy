@@ -17,6 +17,8 @@ Control: `wepppy/weppcloud/templates/controls/archive_console_control.htm`
 - Streams job progress into the status panel through the websocket channel `<runid>:archive`.
 - Status panel renders job status + start/end timestamps via polling (`#rq_job` element).
 
+Archive download links retain the existing public route shape under `/weppcloud/runs/{runid}/{config}/download/archives/{archive}.zip`. Current Docker/Caddy configuration routes exact archive ZIP delivery to the dedicated `download` microservice when that service is enabled, while archive listing, restore, delete, and non-archive browse/download behavior remain on `browse`.
+
 ## Front-End Orchestration
 Script: `wepppy/weppcloud/static/js/archive_console.js`
 
@@ -55,3 +57,4 @@ Module: `wepppy/rq/project_rq.py`
 - Archive + restore share a single websocket channel: `<runid>:archive`.
 - Archive metadata comments are UTF-8 encoded and limited to 40 characters (zip comment constraint).
 - Restore keeps `archives/` intact and blocks path traversal by validating zip entry destinations.
+- Dedicated archive download service health is observable through `download.complete` logs with status, bytes, duration, range metadata, request id, and sanitized archive basename.

@@ -9,6 +9,7 @@
 
 ## Scope
 - Covers browse microservice routes under `/weppcloud/runs/*`, `/weppcloud/batch/*`, and `/weppcloud/culverts/*`.
+- Also covers the dedicated `download` microservice for exact run archive ZIP delivery because it reuses the same browse authorization and path-security helpers for `/weppcloud/runs/{runid}/{config}/download/archives/*.zip`.
 - Covers token class requirements, public-run behavior, root-only path behavior, and re-auth redirect behavior.
 - Does not redefine JWT claim semantics (`docs/dev-notes/auth-token.spec.md`) or CSRF policy (`docs/schemas/weppcloud-csrf-contract.md`).
 
@@ -17,6 +18,7 @@
 | --- | --- | --- | --- |
 | `/weppcloud/runs/{runid}/{config}/browse/*` | Allowed only for public runs and non-root-only paths | `session`, `user`, `service` | Root-only paths require `Root` role. |
 | `/weppcloud/runs/{runid}/{config}/download/*` | Allowed only for public runs and non-root-only paths | `session`, `user`, `service` | Root-only paths require `Root` role. |
+| `/weppcloud/runs/{runid}/{config}/download/archives/*.zip` via dedicated `download` service | Allowed only for public runs and non-root-only archive paths | `session`, `user`, `service` | Exact archive ZIP delivery only; root-only paths require `Root` role. |
 | `/weppcloud/runs/{runid}/{config}/gdalinfo/*` | Allowed only for public runs and non-root-only paths | `session`, `user`, `service` | Root-only paths require `Root` role. |
 | `/weppcloud/runs/{runid}/{config}/dtale/*` | Not allowed | `session`, `user`, `service` | Root-only paths require `Root` role. |
 | `/weppcloud/runs/{runid}/{config}/files/*` | Not allowed | `session`, `user`, `service` | Root-only paths require `Root` role. |
@@ -50,12 +52,14 @@
 - `wepppy/microservices/browse/auth.py`
 - `wepppy/microservices/browse/browse.py`
 - `wepppy/microservices/browse/_download.py`
+- `wepppy/microservices/download/app.py`
 - `wepppy/microservices/browse/dtale.py`
 - `wepppy/microservices/_gdalinfo.py`
 - `wepppy/weppcloud/routes/run_0/run_0_bp.py`
 
 ## Conformance Tests (Required)
 - `tests/microservices/test_browse_auth_routes.py`
+- `tests/microservices/test_dedicated_download_service.py`
 - `tests/weppcloud/routes/test_run_0_nocfg_auth_bridge.py`
 - `tests/microservices/test_rq_engine_session_routes.py`
 

@@ -140,7 +140,7 @@ Add a uniqueness constraint on `(provider, provider_uid)` to prevent duplicate l
   - Expose health checks so the Flask layer can detect Redis unavailability, surface a friendly maintenance banner, and short-circuit confusing stack traces.
   - Flush sessions intentionally during deploys using `redis-cli FLUSHDB` or key-prefix deletion rather than relying on unplanned Redis restarts, which can happen mid-request and exacerbate flaky UX.
 - Inventory the session consumers outside the monolith and document their interfaces:
-  - The Starlette-based browse microservice serves file browsing, download, and metadata routes and currently trusts the upstream proxy for authentication context.【F:wepppy/microservices/browse/browse.py†L1-L70】
+  - The Starlette-based browse microservice serves file browsing, non-migrated download, and metadata routes; the dedicated Starlette download microservice serves exact run archive ZIPs at the same public URL shape. Both currently rely on the same browse authorization/path-security contract and should be included when replacing direct session coupling with service-validated JWTs.【F:wepppy/microservices/browse/browse.py†L1-L70】
   - `preflight2` is a Go WebSocket service that streams checklist updates over Redis and does not yet enforce first-party authentication beyond origin checks.【F:services/preflight2/internal/server/server.go†L1-L118】
   - `status2` is a Go WebSocket service with the same deployment model, subscribing to Redis status channels for browsers.【F:services/status2/README.md†L1-L85】
 - Establish a shared JWT authority inside the Flask app once OAuth sign-in succeeds:

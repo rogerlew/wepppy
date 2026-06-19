@@ -5,7 +5,7 @@
 
 ## Overview
 
-Critical WEPPcloud archive downloads currently share the `browse` service with interactive directory browsing, previews, parquet export, D-Tale handoff, and crawler-facing route families. This package separates exact archive delivery into a dedicated download service so large downloads can be isolated, range/resume friendly, and instrumented with request-level evidence.
+Critical WEPPcloud archive downloads historically shared the `browse` service with interactive directory browsing, previews, parquet export, D-Tale handoff, and crawler-facing route families. This package separates exact archive delivery into a dedicated download service so large downloads can be isolated, range/resume friendly, and instrumented with request-level evidence. Production hosts still need cutover/smoke evidence before the remediation is considered fully closed.
 
 The split does not remove shared NFS/run-root risk. It reduces other common-cause vectors so download reliability can be measured and hardened separately from browse UI pressure.
 
@@ -120,7 +120,7 @@ Reference: `docs/standards/parameterization-adr-standard.md`
 
 ## References
 
-- `wepppy/microservices/browse/README.md` - Current browse service contract and planned download service boundary.
+- `wepppy/microservices/browse/README.md` - Current browse service contract and dedicated download service boundary.
 - `wepppy/microservices/browse/_download.py` - Current download route implementation and archive serving behavior.
 - `wepppy/microservices/browse/auth.py` - Browse authorization helpers that must remain authoritative or be shared safely.
 - `wepppy/microservices/browse/security.py` - Path-boundary helpers for run-scoped files.

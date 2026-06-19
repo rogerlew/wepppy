@@ -4,7 +4,7 @@
 **Timezone**: UTC
 
 ## Overview
-The `browse` service serves WEPPcloud run directories, file previews, archive downloads, and parquet quick-look/export paths. A June 16, 2026 production incident showed `browse` workers retaining tens of GiB of RSS after heavy activity, and follow-up research identified Arrow-to-pandas conversion as a plausible contributor because upstream reports show pandas/PyArrow conversions can return Arrow allocated bytes to zero while process RSS remains high.
+The `browse` service serves WEPPcloud run directories, file previews, compatibility downloads, and parquet quick-look/export paths. It historically also served archive ZIP downloads; exact archive ZIP delivery is now split into the dedicated download service package (`docs/work-packages/20260619_dedicated_download_service/`) when the Caddy matcher is active. A June 16, 2026 production incident showed `browse` workers retaining tens of GiB of RSS after heavy activity, and follow-up research identified Arrow-to-pandas conversion as a plausible contributor because upstream reports show pandas/PyArrow conversions can return Arrow allocated bytes to zero while process RSS remains high.
 
 This work package eliminates Arrow-to-pandas conversion from `browse` request paths while preserving user-visible preview, download, CSV, and D-Tale behavior. The goal is a service that can inspect and export parquet artifacts without long-lived Gunicorn workers retaining large resident memory after requests complete.
 
@@ -83,6 +83,7 @@ Reference: `docs/standards/parameterization-adr-standard.md`
 ## Related Packages
 - **Related**: [20260304_browse_parquet_quicklook_filters](../20260304_browse_parquet_quicklook_filters/package.md)
 - **Related**: [20260224_correlation_id_structured_logging](../20260224_correlation_id_structured_logging/package.md)
+- **Related**: [20260619_dedicated_download_service](../20260619_dedicated_download_service/package.md) for exact archive ZIP isolation from the browse worker pool.
 - **Follow-up**: A separate package may be needed for D-Tale replacement or isolation if D-Tale itself remains a pandas-only endpoint.
 
 ## Timeline Estimate
@@ -111,7 +112,7 @@ Use `docs/prompt_templates/security_review_template.md` for the security artifac
 - **Health signals**:
   - Worker RSS returns near baseline after parquet preview/export requests.
   - No `WORKER TIMEOUT` events during representative browse parquet workloads.
-  - Download/archive route probes remain fast through Caddy and direct `browse`.
+  - Browse parquet/export route probes remain fast through Caddy and direct `browse`; exact archive ZIP probes remain fast through the dedicated `download` route after cutover.
 - **Danger signals**:
   - New streaming code weakens path validation or auth behavior.
   - CSV export behavior changes silently for existing users.
