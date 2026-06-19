@@ -5,7 +5,7 @@
 ## Why this exists
 - This service offloads all filesystem browsing and metadata endpoints from the Flask monolith onto a Starlette app that can be scaled and rate-limited independently.
 - It protects the main site from aggressive crawlers that were hammering directory listings while keeping the familiar `/browse`, `/download`, and `gdalinfo` features intact.
-- The microservice runs under gunicorn with uvicorn workers (port 9009 in production) and is fronted by HAProxy.
+- The microservice runs under gunicorn with uvicorn workers (port 9009 in production) and is fronted by Caddy in the Docker deployments; legacy systemd service files remain for non-Docker installs.
 
 ## High-level architecture
 - **Application**: `wepppy/microservices/browse/browse.py`
@@ -17,7 +17,7 @@
   - CSV/TSV/pickle previews that still use pandas run in `asyncio.to_thread` so the event loop stays responsive.
   - Parquet previews and browse download CSV exports avoid Arrow-to-pandas conversion in `browse`; they use bounded DuckDB/PyArrow table queries and batch CSV writing.
 - **Supporting modules**
-  - `_download.py`: serves file downloads, parquet→CSV conversion, and aria2c manifests.
+  - `_download.py`: currently serves file downloads, parquet-to-CSV conversion, and aria2c manifests.
   - `dtale.py`: forwards supported tabular files to the D-Tale loader service and returns redirects.
   - `files_api.py`: JSON `/files` route parsing, validation, and payload assembly.
   - `listing.py`: manifest creation plus sorted/paginated directory listing helpers.
@@ -28,7 +28,7 @@
 wepppy/microservices/
   browse/
     browse.py            # Starlette application factory and browse UI logic
-    _download.py         # Download + aria2c routes shared with browse
+    _download.py         # Current download + aria2c routes shared with browse
     dtale.py             # D-Tale loader bridge handlers and URL helpers
     files_api.py         # JSON files endpoint handlers
     listing.py           # Manifest + directory listing internals
@@ -56,6 +56,21 @@ Templates remain in `wepppy/weppcloud/routes/browse/templates/browse/`.
 | `/weppcloud/batch/{batch_name}/download/{subpath}` | Download batch grouped-run artifacts. | `as_csv=1` for parquet conversion. |
 
 All routes honor the site prefix automatically (default `/weppcloud`). If the service is deployed behind another prefix, set `SITE_PREFIX` in the environment.
+
+## Dedicated download service boundary (planned)
+
+Critical run archive downloads are planned to move out of `browse` into a dedicated download microservice. The implementation package is [`docs/work-packages/20260619_dedicated_download_service/`](../../../docs/work-packages/20260619_dedicated_download_service/).
+
+Target shape:
+
+1. `browse` remains the interactive filesystem UI and metadata service for listing, previewing, filtering, schema lookup, D-Tale handoff, `gdalinfo`, and non-critical compatibility routes during migration.
+2. A dedicated `download` service owns exact file/archive delivery, starting with `/weppcloud/runs/{runid}/{config}/download/archives/*.zip`.
+3. The download service runs in its own process/container path with independent worker counts, timeouts, concurrency controls, health checks, and logs.
+4. Archive delivery is range/resume friendly and observable: full and partial responses should record status, bytes sent, duration, file size, range start/end, client abort/error reason when known, sanitized path category, client address, and user agent.
+
+This split is not expected to remove the shared NFS/run-root dependency by itself. It is intended to remove non-NFS common-cause vectors from critical downloads: browse directory scans, table previews, parquet/CSV export work, D-Tale bridge traffic, crawler pressure, and browse worker RSS growth should not compete with long archive streams once the route is cut over.
+
+The dedicated service must preserve the canonical browse authorization and path-boundary contracts. Download links exposed by browse should remain stable for users; Caddy routing should decide which backend receives the exact archive route during rollout.
 
 ## Parquet quick-look filters
 - Feature flag: set `BROWSE_PARQUET_FILTERS_ENABLED=1` to enable parquet filter handling in browse, download/CSV, and D-Tale bridge flows.
@@ -104,6 +119,7 @@ All routes honor the site prefix automatically (default `/weppcloud`). If the se
   - `url_for` supports the common `command_bar.static` and `static` endpoints. Extend the shim before pulling additional Flask templates.
 - **Logging**
   - `/health` polling is filtered from gunicorn/uvicorn access logs.
+
 ## Manifest-backed directory listings
 - Status: **unstable/disabled** in runtime listing paths. `listing.get_page_entries` forces filesystem discovery and does not serve cached rows from `manifest.db`.
 - `manifest.db` is created when a project flips to readonly; it lives at the run root and is built by `create_manifest` in `browse.py` using the same traversal logic as on-demand browsing.
@@ -129,10 +145,11 @@ All routes honor the site prefix automatically (default `/weppcloud`). If the se
 
 ## Operating the service
 - Systemd unit: `wepppy/microservices/_service_files/gunicorn-browse.service` (binds to 0.0.0.0:9009 with uvicorn workers).
-- Health check: `GET /health` returns `OK` — HAProxy uses this for backend status.
+- Docker/Caddy wiring: `docker/docker-compose.dev.yml`, `docker/docker-compose.prod.yml`, `docker/docker-compose.prod.wepp1.yml`, `docker/caddy/Caddyfile`, and `docker/caddy/Caddyfile.wepp1` route browse traffic to `browse:9009`.
+- Health check: `GET /health` returns `OK`; Caddy or HAProxy health handling depends on the deployment.
 - Restart after code changes: `systemctl restart gunicorn-browse` (or equivalent in your environment).
 
 ## Future enhancements
 - Expand the `url_for` shim (or replace it) before migrating more Flask templates.
 - Consider caching popular directory listings or large file renders once LRU caching is revisited.
-- Centralize run-context resolution so `_download.py`, `_gdalinfo.py`, and future helpers reuse a single implementation.
+- Centralize run-context resolution so `_download.py`, `_gdalinfo.py`, the planned download service, and future helpers reuse a single implementation.

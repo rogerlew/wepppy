@@ -1,7 +1,7 @@
 # PROJECT_TRACKER.md
 > Kanban board for wepppy work packages and vision items
 
-**Last Updated**: 2026-06-16
+**Last Updated**: 2026-06-19
 **Active Packages**: 9
 **Quick Links**: [Work Packages Directory](docs/work-packages/) | [God-Tier Prompting Strategy](docs/god-tier-prompting-strategy.md)
 
@@ -76,6 +76,30 @@ Feedback mechanisms:
 ## 📋 Backlog
 
 Work packages that are scoped but not yet started. Dependencies and prerequisites should be noted.
+
+### Dedicated Download Service for Critical Run Artifacts
+**Proposed**: 2026-06-19
+**Size**: Medium-High (2-4 focused sessions)
+**Priority**: High
+**Link**: [docs/work-packages/20260619_dedicated_download_service/](docs/work-packages/20260619_dedicated_download_service/)
+**Description**: Split critical completed-run archive downloads out of `browse` into a dedicated, range/resume-friendly, observable download service with independent process controls and Caddy routing.
+
+**Scope**:
+- Keep `browse` responsible for interactive listing, preview, filtering, schema lookup, D-Tale handoff, `gdalinfo`, and non-migrated compatibility downloads.
+- Add a dedicated download service for exact archive ZIP delivery at the existing public URL shape.
+- Preserve browse auth/path contracts while adding `HEAD`, range responses, structured byte/duration/status/abort logs, tests, and Docker/Caddy configuration.
+- Document rollout, rollback, and security review evidence before wepp1 cutover.
+
+**Strategic Value**:
+- Makes critical downloads independently observable and tunable.
+- Removes browse UI, parquet/export, D-Tale, crawler, and worker-RSS pressure from the long archive-stream path.
+- Creates a narrower reliability surface before considering larger non-NFS download architecture work.
+
+**Dependencies**: Builds on the June 2026 browse/D-Tale memory remediation work and the wepp1 browse/download slowdown incident record.
+
+**Next Steps**: Inventory current `_download.py`, browse auth/path helpers, and Caddy matchers, then implement the archive-only service cutover behind tests and security review.
+
+---
 
 ### Run Statistics Ledger
 **Proposed**: 2026-05-05
