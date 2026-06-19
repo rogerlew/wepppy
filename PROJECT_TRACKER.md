@@ -2,7 +2,7 @@
 > Kanban board for wepppy work packages and vision items
 
 **Last Updated**: 2026-06-19
-**Active Packages**: 9
+**Active Packages**: 10
 **Quick Links**: [Work Packages Directory](docs/work-packages/) | [God-Tier Prompting Strategy](docs/god-tier-prompting-strategy.md)
 
 ## Purpose
@@ -76,30 +76,6 @@ Feedback mechanisms:
 ## 📋 Backlog
 
 Work packages that are scoped but not yet started. Dependencies and prerequisites should be noted.
-
-### Dedicated Download Service for Critical Run Artifacts
-**Proposed**: 2026-06-19
-**Size**: Medium-High (2-4 focused sessions)
-**Priority**: High
-**Link**: [docs/work-packages/20260619_dedicated_download_service/](docs/work-packages/20260619_dedicated_download_service/)
-**Description**: Split critical completed-run archive downloads out of `browse` into a dedicated, range/resume-friendly, observable download service with independent process controls and Caddy routing.
-
-**Scope**:
-- Keep `browse` responsible for interactive listing, preview, filtering, schema lookup, D-Tale handoff, `gdalinfo`, and non-migrated compatibility downloads.
-- Add a dedicated download service for exact archive ZIP delivery at the existing public URL shape.
-- Preserve browse auth/path contracts while adding `HEAD`, range responses, structured byte/duration/status/abort logs, tests, and Docker/Caddy configuration.
-- Document rollout, rollback, and security review evidence before wepp1 cutover.
-
-**Strategic Value**:
-- Makes critical downloads independently observable and tunable.
-- Removes browse UI, parquet/export, D-Tale, crawler, and worker-RSS pressure from the long archive-stream path.
-- Creates a narrower reliability surface before considering larger non-NFS download architecture work.
-
-**Dependencies**: Builds on the June 2026 browse/D-Tale memory remediation work and the wepp1 browse/download slowdown incident record.
-
-**Next Steps**: Inventory current `_download.py`, browse auth/path helpers, and Caddy matchers, then implement the archive-only service cutover behind tests and security review.
-
----
 
 ### Run Statistics Ledger
 **Proposed**: 2026-05-05
@@ -246,7 +222,24 @@ When resuming Kubernetes work:
 
 Currently active work packages. Limit to 2-4 packages to maintain focus.
 
-**Current WIP Count**: 9 packages
+**Current WIP Count**: 10 packages
+
+---
+
+### Dedicated Download Service for Critical Run Artifacts
+**Started**: 2026-06-19
+**Status**: Implementation complete locally; production rollout pending
+**Size**: Medium-High (2-4 focused sessions)
+**Owner**: Codex
+**Priority**: High
+**Link**: [docs/work-packages/20260619_dedicated_download_service/](docs/work-packages/20260619_dedicated_download_service/)
+**Description**: Split critical completed-run archive downloads out of `browse` into a dedicated, range/resume-friendly, observable download service with independent process controls and Caddy routing.
+
+**Current Focus**: Local service, tests, Docker/Caddy wiring, local full/range/resume smoke, QA review, and security review are complete with local findings dispositioned. Remaining work is wepp1 cutover plus production smoke/log evidence.
+
+**Dependencies**: Builds on the June 2026 browse/D-Tale memory remediation work and the wepp1 browse/download slowdown incident record.
+
+**Next Steps**: Start/restart the download service and Caddy on wepp1, smoke test a representative archive, and observe `download.complete` logs through the 14-day window.
 
 ---
 

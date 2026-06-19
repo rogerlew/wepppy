@@ -268,6 +268,44 @@ services:
     ports:
       - "9009:9009"
 
+  download:
+    <<: *wepppy-service
+    container_name: wepppy-download
+    secrets:
+      - redis_password
+      - wepp_auth_jwt_secrets
+    environment:
+      <<: *wepppy-env
+      WEPP_AUTH_JWT_SECRETS_FILE: /run/secrets/wepp_auth_jwt_secrets
+    ulimits:
+      nofile:
+        soft: 1000000
+        hard: 1000000
+    command:
+      - gunicorn
+      - --workers
+      - "2"
+      - --bind
+      - 0.0.0.0:9011
+      - --log-level
+      - info
+      - -k
+      - uvicorn.workers.UvicornWorker
+      - --timeout
+      - "1800"
+      - --max-requests
+      - "1000"
+      - --max-requests-jitter
+      - "200"
+      - wepppy.microservices.download:app
+    ports:
+      - "9011:9011"
+    healthcheck:
+      test: ["CMD-SHELL", "curl -fsS http://localhost:9011/health || exit 1"]
+      interval: 30s
+      timeout: 5s
+      retries: 5
+
   dtale:
     <<: *wepppy-service
     container_name: wepppy-dtale
@@ -842,6 +880,7 @@ services:
       - preflight
       - cap
       - browse
+      - download
       - dtale
       - weppcloudr
       - rq-dashboard

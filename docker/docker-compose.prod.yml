@@ -179,6 +179,45 @@ services:
     ports:
       - "${BROWSE_PORT:-9009}:9009"
 
+  download:
+    <<: *wepppy-service
+    ulimits:
+      nofile:
+        soft: 1000000
+        hard: 1000000
+    secrets:
+      - redis_password
+      - *discord-bot-token-secret
+      - wepp_auth_jwt_secrets
+    environment:
+      <<: *wepppy-env
+      REDIS_URL: ${DOWNLOAD_REDIS_URL:-redis://redis:6379/0}
+      WEPP_AUTH_JWT_SECRETS_FILE: /run/secrets/wepp_auth_jwt_secrets
+    command:
+      - gunicorn
+      - --workers
+      - "${DOWNLOAD_WORKERS:-3}"
+      - --bind
+      - 0.0.0.0:9011
+      - --log-level
+      - info
+      - -k
+      - uvicorn.workers.UvicornWorker
+      - --timeout
+      - "${DOWNLOAD_TIMEOUT:-1800}"
+      - --max-requests
+      - "1000"
+      - --max-requests-jitter
+      - "200"
+      - wepppy.microservices.download:app
+    ports:
+      - "${DOWNLOAD_PORT:-9011}:9011"
+    healthcheck:
+      test: ["CMD-SHELL", "curl -fsS http://localhost:9011/health || exit 1"]
+      interval: 30s
+      timeout: 5s
+      retries: 5
+
   dtale:
     <<: *wepppy-service
     ulimits:
@@ -678,6 +717,8 @@ services:
       cap:
         condition: service_started
       browse:
+        condition: service_started
+      download:
         condition: service_started
       dtale:
         condition: service_started

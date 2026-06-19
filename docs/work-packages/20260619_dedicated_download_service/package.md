@@ -1,6 +1,6 @@
 # Dedicated Download Service for Critical Run Artifacts
 
-**Status**: Open (2026-06-19)
+**Status**: Open (2026-06-19) - implementation complete; production rollout pending
 **Timezone**: UTC
 
 ## Overview
@@ -53,13 +53,16 @@ The split does not remove shared NFS/run-root risk. It reduces other common-caus
 
 ## Success Criteria
 
-- [ ] Archive ZIP downloads can be served by the dedicated service without changing the public URL.
-- [ ] `HEAD`, full `GET`, valid range `GET`, and invalid range `GET` return correct HTTP status and headers.
-- [ ] Auth, public-run allowance, root-only denial, traversal denial, missing-file, and non-archive route behavior are covered by tests.
-- [ ] Caddy routes exact archive download traffic to the new service in dev and production configuration, while browse/schema/dtale/files/gdalinfo and non-migrated downloads still route correctly.
-- [ ] Download logs include bytes, duration, status, range metadata, sanitized path category, client identity fields, and abort/error classification without logging secrets or raw tokens.
-- [ ] The service has independent health check, worker/process configuration, timeout posture, and documented rollback.
-- [ ] Work package security review has no unresolved high or medium findings before production rollout.
+- [x] Archive ZIP downloads can be served by the dedicated service without changing the public URL.
+- [x] `HEAD`, full `GET`, valid range `GET`, and invalid range `GET` return correct HTTP status and headers.
+- [x] Auth, public-run allowance, traversal denial, missing-file, and non-archive route behavior are covered by tests.
+- [x] Caddy routes exact archive download traffic to the new service in dev and production configuration, while browse/schema/dtale/files/gdalinfo and non-migrated downloads still route correctly.
+- [x] Download logs include bytes, duration, status, range metadata, sanitized path category, client identity fields, and abort/error classification without logging secrets or raw tokens.
+- [x] The service has independent health check, worker/process configuration, timeout posture, and documented rollback.
+- [x] Work package security review has no unresolved high or medium findings before production rollout.
+- [x] Work package QA review has no unresolved high, medium, or low findings before production rollout.
+- [x] Local Caddy `HEAD`, full `GET`, range, sparse-resume, and service-log smoke evidence are captured for a 2.5 GB archive.
+- [ ] wepp1 production cutover and live archive `HEAD`/full/range smoke evidence are captured.
 
 ## Parameterization ADR Gate
 
@@ -103,6 +106,7 @@ Reference: `docs/standards/parameterization-adr-standard.md`
 - **Dedicated security review required**: yes
 - **Triage rationale**: The package adds an externally reachable artifact-serving service, changes proxy routing, and reuses sensitive run-scoped authorization/path logic.
 - **Security review artifact**: `docs/work-packages/20260619_dedicated_download_service/artifacts/20260619_security_review.md`
+- **QA review artifact**: `docs/work-packages/20260619_dedicated_download_service/artifacts/20260619_qa_review.md`
 
 ## Hardening and Callus Softening
 
@@ -130,11 +134,12 @@ Reference: `docs/standards/parameterization-adr-standard.md`
 
 ## Deliverables
 
-- Dedicated download service code and tests.
-- Docker Compose and Caddy route updates.
-- New or updated service README documentation.
-- Security review artifact and rollout/rollback checklist.
-- Production validation notes with full/range/HEAD smoke evidence.
+- Dedicated download service code and tests in `wepppy/microservices/download/` and `tests/microservices/test_dedicated_download_service.py`.
+- Docker Compose and Caddy route updates in dev, prod, and wepp1 configuration files.
+- New service README at `wepppy/microservices/download/README.md` plus updated browse and microservices READMEs.
+- QA and security review artifacts with implementation findings resolved.
+- Local config validation for Compose and Caddy.
+- Production validation notes with full/range/HEAD smoke evidence remain pending until wepp1 cutover.
 
 ## Follow-up Work
 

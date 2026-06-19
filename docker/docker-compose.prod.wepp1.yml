@@ -96,6 +96,26 @@ services:
       - --max-requests-jitter
       - "200"
       - wepppy.microservices.browse:app
+  download:
+    <<: *wepppy-image
+    volumes: *wepp1-volumes
+    command:
+      - gunicorn
+      - --workers
+      - "4"
+      - --bind
+      - 0.0.0.0:9011
+      - --log-level
+      - info
+      - -k
+      - uvicorn.workers.UvicornWorker
+      - --timeout
+      - "1800"
+      - --max-requests
+      - "1000"
+      - --max-requests-jitter
+      - "200"
+      - wepppy.microservices.download:app
   dtale:
     <<: *wepppy-image
     volumes: *wepp1-volumes

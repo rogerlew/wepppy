@@ -57,20 +57,20 @@ Templates remain in `wepppy/weppcloud/routes/browse/templates/browse/`.
 
 All routes honor the site prefix automatically (default `/weppcloud`). If the service is deployed behind another prefix, set `SITE_PREFIX` in the environment.
 
-## Dedicated download service boundary (planned)
+## Dedicated download service boundary
 
-Critical run archive downloads are planned to move out of `browse` into a dedicated download microservice. The implementation package is [`docs/work-packages/20260619_dedicated_download_service/`](../../../docs/work-packages/20260619_dedicated_download_service/).
+Critical run archive downloads are moving out of `browse` into the dedicated [`download`](../download/README.md) microservice. The implementation package is [`docs/work-packages/20260619_dedicated_download_service/`](../../../docs/work-packages/20260619_dedicated_download_service/).
 
 Target shape:
 
 1. `browse` remains the interactive filesystem UI and metadata service for listing, previewing, filtering, schema lookup, D-Tale handoff, `gdalinfo`, and non-critical compatibility routes during migration.
-2. A dedicated `download` service owns exact file/archive delivery, starting with `/weppcloud/runs/{runid}/{config}/download/archives/*.zip`.
+2. The dedicated `download` service owns exact archive delivery for `/weppcloud/runs/{runid}/{config}/download/archives/*.zip`.
 3. The download service runs in its own process/container path with independent worker counts, timeouts, concurrency controls, health checks, and logs.
 4. Archive delivery is range/resume friendly and observable: full and partial responses should record status, bytes sent, duration, file size, range start/end, client abort/error reason when known, sanitized path category, client address, and user agent.
 
 This split is not expected to remove the shared NFS/run-root dependency by itself. It is intended to remove non-NFS common-cause vectors from critical downloads: browse directory scans, table previews, parquet/CSV export work, D-Tale bridge traffic, crawler pressure, and browse worker RSS growth should not compete with long archive streams once the route is cut over.
 
-The dedicated service must preserve the canonical browse authorization and path-boundary contracts. Download links exposed by browse should remain stable for users; Caddy routing should decide which backend receives the exact archive route during rollout.
+The dedicated service preserves the canonical browse authorization and path-boundary contracts. Download links exposed by browse remain stable for users; Caddy routing decides which backend receives the exact archive route during rollout.
 
 ## Parquet quick-look filters
 - Feature flag: set `BROWSE_PARQUET_FILTERS_ENABLED=1` to enable parquet filter handling in browse, download/CSV, and D-Tale bridge flows.
@@ -152,4 +152,4 @@ The dedicated service must preserve the canonical browse authorization and path-
 ## Future enhancements
 - Expand the `url_for` shim (or replace it) before migrating more Flask templates.
 - Consider caching popular directory listings or large file renders once LRU caching is revisited.
-- Centralize run-context resolution so `_download.py`, `_gdalinfo.py`, the planned download service, and future helpers reuse a single implementation.
+- Centralize run-context resolution so `_download.py`, `_gdalinfo.py`, the dedicated download service, and future helpers reuse a single implementation.

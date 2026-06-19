@@ -235,6 +235,19 @@ http://:8080 {
             }
         }
 
+        @archive_download_proxy path_regexp archive_download_proxy ^/weppcloud/runs/[^/]+/[^/]+/download/archives/.+\.[Zz][Ii][Pp]$
+        handle @archive_download_proxy {
+            reverse_proxy download:9011 {
+                header_up X-Forwarded-Prefix /weppcloud
+                header_up X-Forwarded-Proto {scheme}
+                header_up X-Forwarded-Host {host}
+                header_up Host {host}
+                transport http {
+                    read_timeout 30m
+                }
+            }
+        }
+
         @browse_proxy path_regexp browse_proxy ^/weppcloud/runs/[^/]+/[^/]+/(?:browse(?:/.*)?|schema(?:/.*)?|dtale(?:/.*)?|download(?:/.*)?|files(?:/.*)?|aria2c\.spec|gdalinfo/.*)$
         handle @browse_proxy {
             reverse_proxy browse:9009 {

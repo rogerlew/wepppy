@@ -25,7 +25,7 @@ This directory contains lightweight microservices built with Starlette or FastAP
 **File**: `browse/browse.py`  
 **Documentation**: [browse/README.md](browse/README.md)
 
-Provides filesystem browsing, file downloads, and GDAL metadata extraction for run directories.
+Provides filesystem browsing, compatibility downloads, table preview/export support, and GDAL metadata extraction for run directories.
 
 **Key endpoints:**
 - `GET /browse/<path>` - List directory contents or download files
@@ -35,6 +35,23 @@ Provides filesystem browsing, file downloads, and GDAL metadata extraction for r
 - Browsing run output files through the web interface
 - Downloading simulation results
 - Inspecting GeoTIFF metadata without GDAL client-side
+
+### Download Microservice
+
+**Package**: `download/`
+**Documentation**: [download/README.md](download/README.md)
+
+Dedicated Starlette service for critical exact run archive downloads. It preserves the public archive URL shape while moving `/weppcloud/runs/{runid}/{config}/download/archives/*.zip` traffic out of the interactive browse worker pool.
+
+**Key endpoints:**
+- `GET /weppcloud/runs/{runid}/{config}/download/archives/{name}.zip` - Full archive download
+- `HEAD /weppcloud/runs/{runid}/{config}/download/archives/{name}.zip` - Archive metadata without body
+- `GET /health` - Container health check
+
+**Use cases:**
+- Serving large completed-run archive ZIPs with independent worker/timeouts from browse
+- Supporting browser/download-client resume via single-range byte responses
+- Logging archive download bytes, duration, status, range metadata, client identity fields, and sanitized artifact identity
 
 ### Elevation Query Service
 
@@ -243,6 +260,7 @@ Common configuration:
 ## Further Reading
 
 - [browse/README.md](browse/README.md) - Detailed browse service documentation
+- [download/README.md](download/README.md) - Dedicated archive download service documentation
 - [AGENTS.md](../../AGENTS.md) - Microservices architecture and patterns
 - [docker/README.md](../../docker/README.md) - Docker deployment guide
 - [wepppy/webservices/](../webservices/) - Related Flask/FastAPI services

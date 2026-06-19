@@ -14,18 +14,30 @@ After this work, exact run archive ZIP URLs such as `/weppcloud/runs/{runid}/{co
 
 - [x] (2026-06-19 16:52Z) Created the work package scaffold, tracker, security artifact, and this active ExecPlan.
 - [x] (2026-06-19 16:52Z) Updated `wepppy/microservices/browse/README.md` with the planned dedicated download service boundary.
-- [ ] Inventory existing browse download, auth, path security, Docker, and Caddy behavior.
-- [ ] Design the minimal shared helper boundary so auth/path semantics do not drift.
-- [ ] Implement the dedicated archive download service.
-- [ ] Add structured download observability.
-- [ ] Wire Docker Compose and Caddy for exact archive route cutover.
-- [ ] Add tests and local route-smoke evidence.
-- [ ] Complete security review and production rollout notes.
+- [x] (2026-06-19 17:11Z) Inventory existing browse download, auth, path security, Docker, and Caddy behavior.
+- [x] (2026-06-19 17:11Z) Design the minimal shared helper boundary so auth/path semantics do not drift.
+- [x] (2026-06-19 17:11Z) Implement the dedicated archive download service.
+- [x] (2026-06-19 17:11Z) Add structured download observability.
+- [x] (2026-06-19 17:11Z) Wire Docker Compose and Caddy for exact archive route cutover.
+- [x] (2026-06-19 17:11Z) Add tests and local route/config validation evidence.
+- [x] (2026-06-19 17:11Z) Complete implementation security review.
+- [x] (2026-06-19 17:24Z) Complete QA review, security re-review, and disposition all local review findings.
+- [x] (2026-06-19 17:32Z) Capture local Caddy `HEAD`, full `GET`, range, sparse-resume, and service-log evidence against a 2.5 GB archive.
+- [ ] Cut over on wepp1 and capture live archive `HEAD`, full `GET`, and ranged `GET` smoke evidence.
 
 ## Surprises & Discoveries
 
-- Observation: None yet; scaffold only.
-  Evidence: Implementation inventory has not started.
+- Observation: Importing `wepppy.microservices.download.app` with normal dotted `import ... as ...` in tests bound the exported `app` object from `download/__init__.py`, not the submodule object.
+  Evidence: Focused tests initially failed with `TypeError: reload() argument must be a module`; the fixture now uses `importlib.import_module("wepppy.microservices.download.app")`.
+
+- Observation: Caddy validation succeeds, but both Caddyfiles already produce formatting and redundant forwarded-header warnings.
+  Evidence: `caddy validate` returned `Valid configuration` for `docker/caddy/Caddyfile` and `docker/caddy/Caddyfile.wepp1` while warning that the Caddyfile is not formatted and some `header_up` values are unnecessary.
+
+- Observation: QA review found the initial archive stream read files synchronously from the ASGI response loop.
+  Evidence: The service now opens, seeks, reads, and closes archive files through `asyncio.to_thread(...)` so slow storage reads do not block the event loop.
+
+- Observation: QA review found Caddy route matching was lowercase-only while the service accepted ZIP extensions case-insensitively.
+  Evidence: Both Caddyfiles now match `[Zz][Ii][Pp]`, and route tests include `/archives/run.ZIP`.
 
 ## Decision Log
 
@@ -41,9 +53,21 @@ After this work, exact run archive ZIP URLs such as `/weppcloud/runs/{runid}/{co
   Rationale: It changes externally reachable file delivery and proxy routing for run-scoped artifacts. Auth, path traversal, and sensitive-path behavior require explicit review.
   Date/Author: 2026-06-19 / Codex
 
+- Decision: Reuse `wepppy.microservices.browse.auth` and `wepppy.microservices.browse.security` directly.
+  Rationale: Direct reuse preserves canonical run authorization and path-boundary behavior while avoiding a broad helper relocation in an incident-driven package. A later cleanup can move these helpers to a neutral module if more services need them.
+  Date/Author: 2026-06-19 / Codex
+
+- Decision: Reject raw `.`, `..`, repeated separator, and backslash path syntax in the archive subpath.
+  Rationale: The dedicated service is narrower than legacy broad `/download/*`; exact archive ZIPs do not need normalization of ambiguous traversal syntax.
+  Date/Author: 2026-06-19 / Codex
+
+- Decision: Disposition QA findings before production handoff.
+  Rationale: The two findings were localized and affected critical-path concurrency and observability consistency. Fixing them before rollout reduces production risk without broadening scope.
+  Date/Author: 2026-06-19 / Codex
+
 ## Outcomes & Retrospective
 
-No implementation outcome yet. The package is scaffolded and ready for discovery and implementation.
+Local implementation and dual QA/security review are complete. The repository now has `wepppy/microservices/download/`, Docker Compose service definitions, Caddy exact archive matchers, service documentation, focused tests, and resolved review artifacts. Production rollout is still pending because this local execution did not restart wepp1 services or capture live archive smoke evidence.
 
 ## Context and Orientation
 
@@ -89,14 +113,23 @@ Inventory commands:
     sed -n '1,220p' wepppy/microservices/browse/security.py
     rg -n "browse_proxy|download|9009|reverse_proxy browse" docker/caddy docker/docker-compose*.yml
 
-Implementation commands will be added as the module path is finalized. Expected validation commands are:
+Implementation added the service at `wepppy/microservices/download/`. Validation commands used during local execution:
 
-    wctl run-pytest <focused new download tests>
-    wctl run-pytest tests/microservices --maxfail=1
+    wctl run-pytest tests/microservices/test_dedicated_download_service.py -q
+    wctl run-pytest tests/docker/unit/test_download_service_routing.py -q
+    wctl run-pytest tests/microservices/test_dedicated_download_service.py tests/docker/unit/test_download_service_routing.py -q
+    wctl run-pytest tests/microservices/test_download.py tests/microservices/test_browse_auth_routes.py::test_private_download_redirects_only_for_navigation tests/microservices/test_browse_auth_routes.py::test_private_download_uses_bearer_when_cookie_run_scope_mismatch tests/microservices/test_browse_auth_routes.py::test_run_download_root_only_path_uses_bearer_when_cookie_lacks_root_role -q
+    wctl run-pytest tests/microservices/test_dedicated_download_service.py tests/microservices/test_download.py tests/microservices/test_browse_auth_routes.py tests/microservices/test_browse_security.py tests/microservices/test_browse_routes.py tests/docker/unit/test_download_service_routing.py -q
+    docker compose --env-file docker/.env -f docker/docker-compose.dev.yml config --quiet
+    docker compose --env-file docker/.env -f docker/docker-compose.prod.yml config --quiet
+    docker compose --env-file docker/.env -f docker/docker-compose.prod.yml -f docker/docker-compose.prod.wepp1.yml config --quiet
+    docker run --rm -v /workdir/wepppy/docker/caddy/Caddyfile:/etc/caddy/Caddyfile:ro caddy:2-alpine caddy validate --config /etc/caddy/Caddyfile
+    docker run --rm -v /workdir/wepppy/docker/caddy/Caddyfile.wepp1:/etc/caddy/Caddyfile:ro caddy:2-alpine caddy validate --config /etc/caddy/Caddyfile
+    python3 tools/check_broad_exceptions.py --enforce-changed --base-ref origin/master
     wctl doc-lint --path docs/work-packages/20260619_dedicated_download_service
     wctl doc-lint --path wepppy/microservices/browse/README.md
 
-Local smoke commands after Docker/Caddy wiring should include, with a real or fixture archive URL:
+Local or production smoke commands after starting/restarting the Docker services should include, with a real archive URL:
 
     curl -I http://localhost/weppcloud/runs/<runid>/<config>/download/archives/<archive>.zip
     curl -H 'Range: bytes=0-1023' -o /tmp/archive.part http://localhost/weppcloud/runs/<runid>/<config>/download/archives/<archive>.zip
@@ -108,7 +141,9 @@ The `curl -I` response should include `200` or an expected auth redirect/denial 
 
 Acceptance is behavioral, not only structural. A local test run must prove the new service can serve archive files and rejects unsafe requests. A local Caddy smoke must prove the public archive URL reaches the new service without changing the URL. Negative probes must prove browse UI, schema, D-Tale, files, gdalinfo, parquet CSV, culvert, and batch route families are not accidentally captured by the archive matcher.
 
-Before production rollout, the security artifact must show no unresolved high or medium findings. After production rollout, capture wepp1 smoke evidence for `HEAD`, full `GET`, and ranged `GET` against a representative archive. The logs should show completion events with status, bytes, duration, range metadata when present, user agent, and sanitized path category.
+Before production rollout, the security artifact must show no unresolved high or medium findings; as of 2026-06-19 17:11Z, the implementation security review has no unresolved high or medium findings. After production rollout, capture wepp1 smoke evidence for `HEAD`, full `GET`, and ranged `GET` against a representative archive. The logs should show completion events with status, bytes, duration, range metadata when present, user agent, and sanitized path category.
+
+The QA artifact also has no unresolved high, medium, or low findings as of 2026-06-19 17:24Z. QA findings were resolved before handoff by moving file reads through worker threads and making Caddy ZIP route matching case-consistent with service behavior.
 
 ## Idempotence and Recovery
 
@@ -124,6 +159,7 @@ Update these files as evidence accumulates:
 
 - `docs/work-packages/20260619_dedicated_download_service/tracker.md`
 - `docs/work-packages/20260619_dedicated_download_service/artifacts/20260619_security_review.md`
+- `docs/work-packages/20260619_dedicated_download_service/artifacts/20260619_qa_review.md`
 - `docs/work-packages/20260619_dedicated_download_service/package.md`
 - `wepppy/microservices/browse/README.md`
 
@@ -143,3 +179,11 @@ The new implementation must preserve or reuse these existing contracts:
 - `wepppy/microservices/browse/security.py`
 
 Revision note, 2026-06-19: Initial ExecPlan created to scaffold the dedicated download service package and record the target shape before implementation begins.
+
+Revision note, 2026-06-19 17:11Z: Updated after local implementation. The new service, tests, Docker/Caddy wiring, and security review are in place; production rollout and live smoke evidence remain pending.
+
+Revision note, 2026-06-19 17:24Z: Added QA/security disposition record. QA-01, QA-02, and SEC-05 are resolved; production rollout and live smoke evidence remain pending.
+
+Revision note, 2026-06-19 17:30Z: Added post-disposition focused local pytest evidence. Container-backed `wctl run-pytest` was unavailable because the `weppcloud` service was not running.
+
+Revision note, 2026-06-19 17:32Z: Added local Caddy smoke evidence after the local stack was restarted. The smoke proved `HEAD`, full `GET`, `206` range, sparse curl resume, and matching `download.complete` logs; production cutover evidence remains pending.
