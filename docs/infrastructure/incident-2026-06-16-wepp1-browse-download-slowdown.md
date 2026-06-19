@@ -1,14 +1,16 @@
 # Incident Report: wepp1 Browse Download Slowdown
 > Date: June 16, 2026 (America/Los_Angeles)  
 > Scope: WEPPcloud archive/file downloads through `browse` on `wepp1`  
-> Status: mitigated with targeted `browse` restart; root cause not fully proven
+> Status: mitigated with targeted `browse` restart; follow-up observation found intermittent `browse` responsiveness degradation, but no current broad download slowdown or high-RSS recurrence
 
 ## Summary
 A user reported that archived WEPPcloud simulation downloads had become extremely slow, with an approximately 400 MB archive taking several hours where similar files previously downloaded in minutes.
 
 Investigation on `wepp1` found no host-wide CPU, memory, RQ, disk, or public-network saturation at the time of inspection. The concrete server-side fault was isolated to the `browse` service, which serves `/weppcloud/runs/.../download/...` and archive dashboard download links. `browse` had repeated worker timeouts, slow directory listing warnings, and two workers with abnormal resident memory near 45-49 GiB each.
 
-A targeted restart of `browse` cleared the abnormal worker memory and restored a normal service baseline. This likely improved the server-side condition, but the exact user archive URL was not available, so the specific slow download path was not reproduced end to end.
+A targeted restart of `browse` cleared the abnormal worker memory and restored a normal service baseline. This likely improved the server-side condition, but the exact user archive URL was not available during initial triage, so the specific slow download path was not reproduced end to end until a follow-up probe.
+
+Follow-up observation on June 19, 2026 found that the Arrow-to-pandas browse mitigation and lazy D-Tale Parquet backend were deployed. Current archive and local Caddy probes were fast, and `browse` worker RSS stayed in the normal hundreds-of-MiB range. However, logs since the June 17 deployment showed intermittent `browse` worker timeouts and slow directory listing warnings. The remaining evidence points to intermittent browse/NFS metadata pressure and noisy client traffic rather than recurrence of the June 16 high-RSS failure mode.
 
 ## Impact
 - Users could experience very slow downloads for project archive ZIPs or run files served through `browse`.
@@ -190,12 +192,52 @@ external_full_http1 http=200 version=1.1 bytes=731391829 speed=116611325Bps time
 
 The exact archive did not reproduce a server-side or general public-edge slowdown after the `browse` restart. HTTP/2 and HTTP/1.1 performed similarly from the operator workspace. `curl` on the operator host did not include HTTP/3 support, so QUIC/HTTP/3 client-path behavior was not tested even though Caddy advertises `h3` via `alt-svc`.
 
+## PyArrow-to-Pandas Remediation Work
+The June 16 high-RSS finding was routed into two remediation work packages because there were two separate long-lived service boundaries where Parquet data could become pandas DataFrames:
+
+- [Browse Arrow-to-Pandas Elimination](../work-packages/20260616_browse_arrow_pandas_elimination/package.md) targets the `browse` service request paths. Its inventory found production browse Parquet materialization in `_download.py`, `flow.py`, and `parquet_filters.py`: `table.to_pandas()`, `env.pd.read_parquet(...)`, and DuckDB `.df()` conversions. The implementation replaces those paths with bounded DuckDB/PyArrow helpers, Arrow-backed HTML previews, batch-oriented CSV export with `ParquetFile.iter_batches(...)`, and RSS/duration telemetry for Parquet preview/export operations. The local Gunicorn validation artifact showed a 34 MB Parquet preview plus 153 MB CSV export settling with the hottest worker around 583 MiB RSS, materially below the June 16 failure signature of 45-49 GiB workers.
+- [D-Tale Lazy Parquet Backend](../work-packages/20260616_dtale_lazy_parquet_backend/package.md) targets the separate `dtale` service. The browse D-Tale bridge only forwards authorized path/filter metadata, but D-Tale itself previously loaded Parquet artifacts through eager pandas paths. This package registers Parquet, GeoParquet, and PQ files as lazy D-Tale datasets, uses bounded DuckDB/PyArrow page reads for grid data, removes Parquet from the eager `_load_dataframe` dispatch, and rejects lazy D-Tale export requests that would otherwise ask for all rows. Small pandas slices remain only at the D-Tale presentation seam where upstream D-Tale expects pandas-shaped page data.
+
+The work-package docs were still in their production-observation window at the time of this incident-report update. The June 19 production check confirms that the deployed code included the D-Tale lazy backend commit and that current `browse`/`dtale` RSS did not show recurrence of the PyArrow-to-pandas high-RSS failure mode. It does not close the observation window because `browse` still logged intermittent worker timeouts and slow directory listings after deployment.
+
+## Post-Mitigation Observation
+Observed on `wepp1` on June 19, 2026 between about 08:49 and 08:52 PDT:
+
+- `browse`, `caddy`, and `dtale` were running and had been up since June 17, 2026 at about 06:36 PDT.
+- Deployed code was `1eff84354` (`Add lazy parquet D-Tale backend`, committed June 16, 2026 at 13:22:57 PDT).
+- Host load was low (`1.20, 1.08, 1.45`), `/geodata` was 72% used, memory had about 222 GiB available, and sampled iowait/public-network use were low.
+- Current `browse` worker RSS was about 488-645 MiB per worker; `dtale` was about 814 MiB RSS.
+- A local Caddy 4 MiB diagnostic completed in `0.033075s` at about 126.8 MB/s.
+- `/weppcloud/runs/` returned `302` through local Caddy in `0.012370s`.
+- The exact incident archive still existed with size `731391829` bytes and returned correct headers.
+- A 64 MiB public range request for the exact incident archive completed in `1.521683s` at about 44.1 MB/s.
+- The same 64 MiB archive range through local Caddy on `wepp1` completed in `0.562602s` at about 119.3 MB/s.
+
+The 72-hour log window still showed intermittent degraded `browse` responsiveness after the June 17 rollout:
+
+```text
+browse WORKER TIMEOUT entries: 70
+slow listing warnings: 95
+caddy incomplete responses: 1561
+caddy incomplete responses involving browse:9009: 1489
+```
+
+Timeouts appeared in clusters, including June 18 around 10:58-11:01 PDT and smaller clusters later on June 18 and early June 19. Slow listing warnings were spread across the window; the worst observed warning was:
+
+```text
+2026-06-18T16:22:44Z browse.get_page_entries() completed after 51.9 seconds
+```
+
+Recent Caddy incomplete-response examples were mostly client disconnects within milliseconds to a few seconds, often with crawler-like user agents and public run-file paths. That is noisy pressure on `browse`, but it is not by itself proof of a current server-side throughput collapse.
+
+No production restart or mitigation action was performed during this observation.
+
 ## Assessment
 Most likely contributors:
 
-- `browse` worker memory growth or leaked request state.
-- slow NFS metadata calls under browse/archive workloads.
-- noisy crawler traffic or aborted clients increasing browse worker pressure.
+- Original June 16 event: `browse` worker memory growth or leaked request state.
+- Ongoing intermittent symptoms: slow NFS metadata calls under browse/archive listing workloads.
+- Ongoing external pressure: noisy crawler traffic or aborted clients increasing `browse` worker churn.
 
 Less likely based on current evidence:
 
@@ -204,33 +246,40 @@ Less likely based on current evidence:
 - RQ backlog.
 - Postgres or Redis outage.
 - Caddy/TLS as the primary bottleneck.
+- recurrence of the June 16 high-RSS browse worker condition after the June 17 deployment.
 
 Not proven:
 
 - the exact slow archive path that affected the user.
 - WSU firewall/content-inspection behavior.
 - a single NAS fault versus application-level metadata amplification.
+- whether the remaining worker timeout clusters are caused by a small set of pathological directories, client disconnect pressure, NFS latency, or another request path.
 
 ## Follow-up Actions
-1. Ask the user to retry the exact archive URL and report:
-   - wall-clock elapsed time
-   - browser
-   - whether they are on the WSU network or VPN
-   - whether an HTTP/1.1 command-line download is also slow
-2. Add or enable access timing for successful `browse` downloads, at least for archive ZIPs:
+1. Continue `browse` post-deployment observation for the 14-day work-package window:
+   - alert or manually check for `WORKER TIMEOUT` clusters
+   - sample worker RSS and confirm workers remain below a practical threshold, for example 4 GiB
+   - track slow listing warnings and correlate them with request paths when possible
+   - append production observations to the browse and D-Tale work-package trackers before closing the observation windows
+2. Add or enable access timing for successful `browse` downloads and slow browse listings:
    - runid/config/subpath
    - file size
    - response duration
    - client IP / forwarded IP
    - status and disconnect/abort reason
-3. Add lightweight `browse` worker RSS monitoring and alert when a worker exceeds a practical threshold, for example 4 GiB.
-4. Investigate why `browse` workers can retain tens of GiB and hundreds of threads.
-5. Consider reducing metadata amplification for archive listings:
+3. Add path-safe logging for slow directory listings so operators can identify directories that trigger metadata amplification without logging private file contents.
+4. Ask the user to retry the exact archive URL and report:
+   - wall-clock elapsed time
+   - browser
+   - whether they are on the WSU network or VPN
+   - whether an HTTP/1.1 command-line download is also slow
+5. Investigate why `browse` workers previously retained tens of GiB and hundreds of threads, but treat this as a recurrence-prevention task unless high RSS returns.
+6. Consider reducing metadata amplification for archive listings:
    - cache archive list metadata briefly
    - avoid opening ZIP comments during every archive list request when not needed
    - avoid recursive or child-count metadata calls in high-latency NFS paths
-6. Consider Caddy/user-agent controls during crawler pressure events if incomplete-response warnings continue.
-7. If WSU remains slow while external probes are fast, test whether disabling QUIC/HTTP/3 or using HTTP/1.1 changes the client-side result.
+7. Consider Caddy/user-agent controls during crawler pressure events if incomplete-response warnings continue.
+8. If WSU remains slow while external probes are fast, test whether disabling QUIC/HTTP/3 or using HTTP/1.1 changes the client-side result.
 
 ## Useful Commands For Recurrence
 ```bash
