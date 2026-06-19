@@ -7,7 +7,7 @@ from pathlib import Path
 import pytest
 
 import wepppy.soils.ssurgo.ssurgo as ssurgo_module
-from wepppy.soils.ssurgo import SurgoSoilCollection
+from wepppy.soils.ssurgo import SurgoSoilCollection, surgo_cache_metadata_path
 
 pytestmark = pytest.mark.unit
 
@@ -31,6 +31,14 @@ def test_surgo_collection_uses_explicit_file_backed_cache(tmp_path: Path) -> Non
         assert cache_path.is_file()
     finally:
         collection._disconnect()
+
+    metadata_path = Path(surgo_cache_metadata_path(str(cache_path)))
+    metadata = metadata_path.read_text(encoding="utf-8")
+    assert metadata_path.is_file()
+    assert "# SSURGO SQLite Cache Metadata" in metadata
+    assert "| Source service | Soil Data Access Tabular API |" in metadata
+    assert "| Cache file | `ssurgo_tabular_cache.sqlite` |" in metadata
+    assert str(tmp_path) not in metadata
 
     with sqlite3.connect(cache_path) as conn:
         tables = {
@@ -140,6 +148,12 @@ def test_file_backed_cache_reuses_persisted_rows(
         "chfrags": 1,
         "chtexturegrp": 1,
     }
+    metadata = Path(surgo_cache_metadata_path(str(cache_path))).read_text(
+        encoding="utf-8"
+    )
+    assert "| Requested map unit keys | 1 |" in metadata
+    assert "| `component` | 1 |" in metadata
+    assert "| `chorizon` | 1 |" in metadata
 
     cached_collection = SurgoSoilCollection([123], cache_db_path=str(cache_path))
     try:

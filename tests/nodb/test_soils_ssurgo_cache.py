@@ -12,6 +12,7 @@ from wepppy.nodb.core.soils import Soils
 from wepppy.soils.ssurgo import (
     SSURGO_PROJECT_CACHE_FILENAME,
     STATSGO_PROJECT_CACHE_FILENAME,
+    surgo_cache_metadata_path,
 )
 
 pytestmark = pytest.mark.unit
@@ -41,7 +42,12 @@ def test_clear_project_surgo_cache_removes_only_sqlite_sidecars(tmp_path: Path) 
     soils_dir.mkdir(parents=True)
 
     cache_path = Path(soils.ssurgo_cache_db_path)
-    sidecars = [cache_path, Path(f"{cache_path}-wal"), Path(f"{cache_path}-shm")]
+    sidecars = [
+        cache_path,
+        Path(f"{cache_path}-wal"),
+        Path(f"{cache_path}-shm"),
+        Path(surgo_cache_metadata_path(str(cache_path))),
+    ]
     for path in sidecars:
         path.write_text("stale", encoding="utf-8")
     unrelated = soils_dir / "p1.sol"

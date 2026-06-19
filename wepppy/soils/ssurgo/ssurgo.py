@@ -24,7 +24,7 @@ import inspect
 import logging
 import multiprocessing as mp
 from collections import defaultdict
-from datetime import datetime
+from datetime import datetime, timezone
 import time
 
 from xml.etree import ElementTree
@@ -184,6 +184,19 @@ def _create_process_pool_executor(
 _thisdir = os.path.dirname(__file__)
 SSURGO_PROJECT_CACHE_FILENAME = "ssurgo_tabular_cache.sqlite"
 STATSGO_PROJECT_CACHE_FILENAME = "statsgo_tabular_cache.sqlite"
+SURGO_CACHE_METADATA_SUFFIX = ".meta.md"
+
+
+def surgo_cache_metadata_path(cache_db_path: str) -> str:
+    """Return the Markdown metadata sidecar path for a file-backed cache."""
+    return f"{cache_db_path}{SURGO_CACHE_METADATA_SUFFIX}"
+
+
+def _write_text_atomic(path: str, text: str) -> None:
+    tmp_path = f"{path}.tmp"
+    with open(tmp_path, "w", encoding="utf-8", newline="\n") as fp:
+        fp.write(text)
+    os.replace(tmp_path, path)
 
 # Developer Notes
 ###################
@@ -1952,6 +1965,7 @@ class SurgoSoilCollection(object):
 
         self.weppSoils = None
         self.invalidSoils = None
+        self._write_cache_metadata()
 
     def dump(self, table, fname):
         conn, cur = self.conn, self.cur
@@ -2273,6 +2287,92 @@ class SurgoSoilCollection(object):
             )
 
         conn.commit()
+
+    def _write_cache_metadata(self) -> None:
+        if self._db_path is None:
+            return
+
+        metadata_path = surgo_cache_metadata_path(self._db_path)
+        cache_filename = os.path.basename(self._db_path)
+        metadata_filename = os.path.basename(metadata_path)
+        generated_at = datetime.now(timezone.utc).replace(microsecond=0).isoformat()
+        source_label = "STATSGO2" if self.source_data == "StatsGo" else "SSURGO"
+        table_counts = self._cache_table_counts()
+
+        lines = [
+            f"# {source_label} SQLite Cache Metadata",
+            "",
+            "## Cache Summary",
+            "",
+            "| Field | Value |",
+            "| --- | --- |",
+            f"| Generated at (UTC) | {generated_at} |",
+            f"| Cache file | `{cache_filename}` |",
+            f"| Metadata sidecar | `{metadata_filename}` |",
+            f"| Source collection | {source_label} |",
+            "| Cache mode | Project-local file-backed SQLite cache |",
+            "| Canonical machine-readable cache | SQLite database file |",
+            "",
+            "## Data Provenance",
+            "",
+            "| Field | Value |",
+            "| --- | --- |",
+            "| Publisher | USDA Natural Resources Conservation Service (NRCS) |",
+            "| Source service | Soil Data Access Tabular API |",
+            f"| Source endpoint | `{_ssurgo_url}` |",
+            "| Source dataset | Soil Survey Geographic Database (SSURGO) / Digital General Soil Map (STATSGO2) |",
+            "| Retrieval implementation | `wepppy.soils.ssurgo.ssurgo` SSURGO fetch helpers |",
+            "",
+            "## Runtime Context",
+            "",
+            "| Field | Value |",
+            "| --- | --- |",
+            f"| Requested map unit keys | {len(self.mukeys)} |",
+            f"| Cached component keys | {len(self.cokeys)} |",
+            f"| Cached horizon keys | {len(self.chkeys)} |",
+            f"| Missing key lookups during this initialization | {self._sync_n} |",
+            "",
+            "## Cache Table Counts",
+            "",
+            "| Table | Rows |",
+            "| --- | ---: |",
+        ]
+        for table_name, row_count in table_counts:
+            lines.append(f"| `{table_name}` | {row_count} |")
+
+        lines.extend(
+            [
+                "",
+                "## Interpretation Notes",
+                "",
+                "- This sidecar is a human-readable provenance summary for the adjacent SQLite cache.",
+                "- The SQLite database is the canonical machine-readable cache artifact.",
+                "- WEPPcloud project rebuilds reuse this cache unless `Clear SSURGO cache on rebuild` is enabled.",
+                "- This file intentionally records cache-relative filenames only and does not include absolute host paths.",
+                "",
+            ]
+        )
+
+        _write_text_atomic(metadata_path, "\n".join(lines))
+
+    def _cache_table_counts(self) -> List[Tuple[str, int]]:
+        table_names = (
+            "component",
+            "chorizon",
+            "corestrictions",
+            "chfrags",
+            "chtexturegrp",
+            "bad_component_mukey",
+            "bad_chorizon_cokey",
+            "bad_corestrictions_cokey",
+            "bad_chfrags_chkey",
+            "bad_chtexturegrp_chkey",
+        )
+        counts = []
+        for table_name in table_names:
+            row = self.cur.execute(f"SELECT COUNT(*) FROM {table_name}").fetchone()
+            counts.append((table_name, int(row[0])))
+        return counts
 
     def _connect(self):
         if self.conn is not None:

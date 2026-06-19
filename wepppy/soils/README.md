@@ -438,12 +438,17 @@ def test_ssurgo_build():
 **SQLite Cache:**
 - Project builds use `<wd>/soils/ssurgo_tabular_cache.sqlite` for SSURGO and
   `<wd>/soils/statsgo_tabular_cache.sqlite` for STATSGO2.
+- Each file-backed cache writes a Markdown metadata sidecar next to the SQLite
+  file, using `<cache>.meta.md`, with NRCS source, endpoint, runtime, and table
+  count provenance. The SQLite database remains the canonical machine-readable
+  cache artifact.
 - Direct `SurgoSoilCollection(...)` calls use an in-memory SQLite database unless
   the caller supplies `cache_db_path`.
 - Components, horizons, textures, fragments, and failed-key tables are cached
   locally to avoid redundant SSURGO web service calls.
 - The soil Advanced Options checkbox `Clear SSURGO cache on rebuild` deletes the
-  project cache file and exact SQLite sidecars before rebuilding.
+  project cache file, exact SQLite sidecars, and cache metadata sidecar before
+  rebuilding.
 
 **Cache Sync Logic:**
 1. Query local cache for existing data

@@ -684,6 +684,13 @@ ssc.makeWeppSoils(
 **Project build locations:**
 - SSURGO: `<wd>/soils/ssurgo_tabular_cache.sqlite`
 - STATSGO2: `<wd>/soils/statsgo_tabular_cache.sqlite`
+- Metadata sidecars: `<wd>/soils/ssurgo_tabular_cache.sqlite.meta.md` and
+  `<wd>/soils/statsgo_tabular_cache.sqlite.meta.md`
+
+Each file-backed cache writes a deterministic Markdown metadata sidecar with
+NRCS source provenance, source endpoint, cache filename, runtime context, and
+table row counts. The sidecar is for human review; the adjacent SQLite database
+remains the canonical machine-readable cache artifact.
 
 **Direct caller default:** `SurgoSoilCollection(mukeys)` opens an in-memory
 SQLite database. A direct caller that needs persistence must pass

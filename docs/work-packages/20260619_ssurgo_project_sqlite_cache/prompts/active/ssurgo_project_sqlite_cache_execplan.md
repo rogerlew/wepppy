@@ -23,6 +23,7 @@ The visible proof is simple: start from a run directory without a project SSURGO
 - [x] (2026-06-19 20:24 UTC) Ran `reviewer` and `qa_reviewer` subagents, wrote artifacts, and dispositioned every finding.
 - [x] (2026-06-19 20:24 UTC) Fixed accepted review findings for symlink path confinement, SpatialAPI cache-use serialization, non-empty cache reuse coverage, doc links, and whitespace.
 - [x] (2026-06-19 20:24 UTC) Completed security review artifact with gate status `pass`.
+- [x] (2026-06-19 20:54 UTC) Added `<cache>.meta.md` provenance sidecars for file-backed SSURGO/STATSGO caches.
 - [ ] Stage, commit, and push implementation package.
 
 ## Surprises & Discoveries
@@ -39,6 +40,8 @@ The visible proof is simple: start from a run directory without a project SSURGO
   Evidence: `reviewer` finding accepted; `_clear_project_surgo_cache` now uses `realpath` checks and `tests/nodb/test_soils_ssurgo_cache.py::test_clear_project_surgo_cache_rejects_soils_dir_symlink_outside_project` covers the escape case.
 - Observation: `_build_spatial_api` previously serialized only cache preparation, not the subsequent SQLite cache use window.
   Evidence: `qa_reviewer` finding accepted; SSURGO and STATSGO fallback collection construction/use now remain inside `self.locked()`.
+- Observation: Existing metadata guidance for human-readable derivatives lives in the features-export artifact README metadata package and specification.
+  Evidence: `wepppy/nodb/mods/features_export/specification.md` says Markdown metadata should be deterministic, human-readable, avoid absolute host paths, and point to the canonical machine-readable artifact.
 
 ## Decision Log
 
@@ -60,10 +63,13 @@ The visible proof is simple: start from a run directory without a project SSURGO
 - Decision: Treat the deterministic WEPP disturbed preview route failure as an external package blocker rather than changing disturbed management semantics inside this SSURGO cache package.
   Rationale: The failing test reproduces standalone outside the cache surface and appears to conflict with existing disturbed normalization unit coverage.
   Date/Author: 2026-06-19 20:24 UTC / Codex.
+- Decision: Use `<cache>.meta.md` rather than a single `meta.md` filename.
+  Rationale: SSURGO and STATSGO caches can coexist in the same `soils` directory, so sidecar names must be unambiguous while still being exact cache sidecars.
+  Date/Author: 2026-06-19 20:54 UTC / Codex.
 
 ## Outcomes & Retrospective
 
-Implementation is complete for the SSURGO project-local cache behavior. Direct `SurgoSoilCollection([])` uses an in-memory SQLite database by default; an explicit `cache_db_path` creates a file-backed cache with schema tables and reusable rows. `Soils` now derives `ssurgo_tabular_cache.sqlite` and `statsgo_tabular_cache.sqlite` under `self.soils_dir`, persists `clear_ssurgo_cache_on_rebuild`, backfills legacy instances, deletes only exact SQLite cache sidecars after realpath confinement checks, and passes project cache paths from all five current SSURGO/STATSGO build call sites.
+Implementation is complete for the SSURGO project-local cache behavior. Direct `SurgoSoilCollection([])` uses an in-memory SQLite database by default; an explicit `cache_db_path` creates a file-backed cache with schema tables, reusable rows, and an adjacent `<cache>.meta.md` provenance sidecar. `Soils` now derives `ssurgo_tabular_cache.sqlite` and `statsgo_tabular_cache.sqlite` under `self.soils_dir`, persists `clear_ssurgo_cache_on_rebuild`, backfills legacy instances, deletes only exact SQLite cache sidecars and metadata sidecar after realpath confinement checks, and passes project cache paths from all five current SSURGO/STATSGO build call sites.
 
 The UI and API now expose the option through `soil_pure.htm`, `soil.test.js`, `soils_routes.py`, and `schema_defaults_routes.py`. Durable docs now describe project-local rebuild caches, direct in-memory defaults, and direct-caller disposition. Dual review artifacts and the dedicated security artifact are complete with no unresolved medium/high findings.
 
@@ -199,3 +205,4 @@ In `wepppy/weppcloud/templates/controls/soil_pure.htm`, the new checkbox field i
 - 2026-06-19 19:16 UTC / Codex: Patched scoping-review findings into the plan: mandatory security artifact, derived cache paths, exact SQLite sidecars, batch route coverage, and durable docs.
 - 2026-06-19 19:24 UTC / Codex: Patched QA scoping-review findings into the plan: full-suite gate wording, all constructor sites, fixed cache filenames, STATSGO strategy, and non-`Soils` direct caller audit.
 - 2026-06-19 20:24 UTC / Codex: Updated implementation outcomes after dual review disposition and security review closure.
+- 2026-06-19 20:54 UTC / Codex: Added cache metadata sidecar follow-up after operator validation of new and old projects.

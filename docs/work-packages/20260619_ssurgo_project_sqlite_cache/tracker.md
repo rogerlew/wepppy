@@ -6,9 +6,9 @@
 
 **Timezone**: UTC
 **Started**: 2026-06-19 19:04 UTC
-**Current phase**: Ready for commit with external full-suite blocker recorded
-**Last updated**: 2026-06-19 20:24 UTC
-**Next milestone**: Stage, commit, and push implementation package.
+**Current phase**: Metadata sidecar follow-up implementation
+**Last updated**: 2026-06-19 20:54 UTC
+**Next milestone**: Validate and hand off provenance sidecar follow-up.
 **Security impact**: high
 **Dedicated security review**: yes
 **Security artifact**: `docs/work-packages/20260619_ssurgo_project_sqlite_cache/artifacts/security_review.md`
@@ -38,12 +38,14 @@
 - [x] Updated durable cache documentation in `wepppy/soils/README.md` and `wepppy/soils/ssurgo/ssurgo.md`.
 - [x] Accepted and fixed dual subagent review findings for symlink path confinement, SpatialAPI cache-use locking, cache reuse coverage, doc links, and markdown whitespace.
 - [x] Completed dedicated security review artifact with no unresolved medium/high findings.
+- [x] Added file-backed cache Markdown metadata sidecars using `<cache>.meta.md`, with NRCS source provenance and table counts.
 
 ## Timeline
 
 - **2026-06-19 19:04 UTC** - Package created from user request and initial code inspection.
 - **2026-06-19 20:09 UTC** - Implementation completed; targeted tests, npm test/lint, and broad-exception gate passed. Full pytest remains blocked by an unrelated deterministic WEPP route test.
 - **2026-06-19 20:24 UTC** - Dual subagent findings dispositioned; accepted findings fixed and rechecked; security review gate passed.
+- **2026-06-19 20:54 UTC** - Added cache provenance metadata sidecar behavior after operator validation of new and old projects.
 
 ## Decisions Log
 
@@ -72,6 +74,20 @@
 **Decision**: Option 2.
 
 **Impact**: The implementation must name the cache file deterministically and constrain deletion to that file plus SQLite sidecars derived exactly as `<cache_path>-wal` and `<cache_path>-shm`.
+
+---
+
+### 2026-06-19 20:54 UTC: Cache provenance sidecars are Markdown derivatives
+**Context**: Operator validation showed project-local cache behavior works for new and old projects. The follow-up request added a human-readable provenance sidecar when SQLite caches are written.
+
+**Options considered**:
+1. Write one generic `meta.md` in `<wd>/soils/`.
+2. Write one sidecar per cache as `<cache>.meta.md`.
+3. Store provenance only inside SQLite tables.
+
+**Decision**: Option 2.
+
+**Impact**: SSURGO and STATSGO caches can coexist without metadata collisions, and cache clearing can target each sidecar exactly. The sidecar is a human-readable derivative; the SQLite file remains canonical for machine-readable cache data.
 
 ---
 
@@ -106,7 +122,7 @@
 ## Hardening Signal Log
 
 - **Baseline health signals**: Current `ssurgo.py` can use shared `/dev/shm/surgo_tabular.db` copied from bundled data.
-- **Post-change health signals**: Rebuild logs or tests show `<wd>/soils/ssurgo_tabular_cache.sqlite` or `<wd>/soils/statsgo_tabular_cache.sqlite` creation, and direct constructor use leaves no shared cache file writes.
+- **Post-change health signals**: Rebuild logs or tests show `<wd>/soils/ssurgo_tabular_cache.sqlite` or `<wd>/soils/statsgo_tabular_cache.sqlite` creation with adjacent `<cache>.meta.md` provenance sidecars, and direct constructor use leaves no shared cache file writes.
 - **Danger signals observed**: None yet.
 - **Temporary callus register**: None.
 - **Softening experiments**: None.
@@ -124,7 +140,7 @@
 ### Security
 - [x] Security impact triage recorded as `high` with rationale.
 - [x] File/path handling review proves cache path is derived from `Soils.soils_dir`, not from unchecked user input.
-- [x] Cache clearing is limited to the project-local database and exact SQLite sidecars `<cache_path>-wal` and `<cache_path>-shm`.
+- [x] Cache clearing is limited to the project-local database, exact SQLite sidecars `<cache_path>-wal` and `<cache_path>-shm`, and cache metadata sidecar.
 - [x] Existing auth/session/queue access controls remain unchanged.
 - [x] Dedicated security review artifact is complete.
 - [x] No unresolved medium/high security findings remain.
@@ -138,6 +154,7 @@
 ### Testing
 - [x] Unit coverage for direct in-memory `SurgoSoilCollection` default.
 - [x] Unit coverage for explicit project cache persistence and clear behavior.
+- [x] Unit coverage for explicit project cache metadata sidecar creation and clearing.
 - [x] Explicit coverage or inspection artifact for all five `Soils` constructor sites.
 - [x] Explicit coverage or disposition for non-`Soils` direct callers (`surgo_tabular_db_builder.py`, `spatializer.py`).
 - [x] Legacy NoDb load coverage for missing new fields.

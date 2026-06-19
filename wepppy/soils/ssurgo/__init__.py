@@ -9,6 +9,7 @@ from .ssurgo import (
     SsurgoRequestError,
     SurgoSoilCollection,
     query_mukeys_in_extent,
+    surgo_cache_metadata_path,
 )
 from .statsgo_spatial import StatsgoSpatial
 from .spatializer import SurgoSpatializer, spatial_vars
@@ -26,4 +27,5 @@ __all__ = [
     "StatsgoSpatial",
     "query_mukeys_in_extent",
     "spatial_vars",
+    "surgo_cache_metadata_path",
 ]

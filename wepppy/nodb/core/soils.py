@@ -78,7 +78,8 @@ from wepppy.soils.ssurgo import (
     SurgoMap,
     StatsgoSpatial,
     SurgoSoilCollection,
-    SoilSummary
+    SoilSummary,
+    surgo_cache_metadata_path,
 )
 from wepppy.topo.watershed_abstraction.support import is_channel
 from wepppy.all_your_base.geo import read_raster, raster_stacker
@@ -539,7 +540,12 @@ class Soils(NoDbBase):
         if not soils_under_project:
             raise ValueError(f"Refusing to clear cache outside project directory: {self.soils_dir}")
 
-        for candidate in (cache_path, f"{cache_path}-wal", f"{cache_path}-shm"):
+        for candidate in (
+            cache_path,
+            f"{cache_path}-wal",
+            f"{cache_path}-shm",
+            surgo_cache_metadata_path(cache_path),
+        ):
             abs_candidate = os.path.abspath(candidate)
             real_candidate = os.path.realpath(candidate)
             try:

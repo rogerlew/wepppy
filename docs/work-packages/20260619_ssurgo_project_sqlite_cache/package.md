@@ -8,6 +8,7 @@ SSURGO tabular data is currently cached through module-level SQLite files in `we
 
 ## Objectives
 - Create and use a project-local SSURGO SQLite cache during `build_soils`, stored under the run's `soils` directory.
+- Write a human-readable Markdown provenance sidecar next to each file-backed SSURGO/STATSGO cache.
 - Preserve older project compatibility: rebuilding soils on an existing run should create the cache if it is missing, without requiring migration tooling.
 - Serialize cache behavior parameters and UI-selected rebuild options through `wepppy/nodb/core/soils.py`, while deriving absolute cache paths from the active run directory at runtime.
 - Add an Advanced Options checkbox in `wepppy/weppcloud/templates/controls/soil_pure.htm` labeled `Clear SSURGO cache on rebuild`, using the pure UI macro.
@@ -22,6 +23,7 @@ SSURGO tabular data is currently cached through module-level SQLite files in `we
   - Support explicit file-backed cache paths for project builds.
   - Support in-memory default behavior for direct `SurgoSoilCollection(...)` callers.
   - Use `ssurgo_tabular_cache.sqlite` for project SSURGO caches and `statsgo_tabular_cache.sqlite` for project STATSGO caches.
+  - Write `<cache>.meta.md` sidecars derived from cache runtime/source metadata; keep SQLite as the canonical machine-readable cache artifact.
   - Preserve existing table initialization, sync, bad-key table, worker-view, and write behavior.
 - `wepppy/nodb/core/soils.py` NoDb serialization:
   - Add persisted fields/properties for `clear_ssurgo_cache_on_rebuild` and any cache metadata needed for compatibility, but do not serialize absolute cache paths.
@@ -79,12 +81,13 @@ SSURGO tabular data is currently cached through module-level SQLite files in `we
 ## Success Criteria
 - [ ] New projects using SSURGO create a SQLite cache in `<wd>/soils/` during `build_soils`.
 - [x] Project SSURGO cache filename is `<wd>/soils/ssurgo_tabular_cache.sqlite`; project STATSGO cache filename is `<wd>/soils/statsgo_tabular_cache.sqlite`.
+- [x] File-backed SSURGO/STATSGO caches write adjacent `<cache>.meta.md` provenance sidecars without absolute host paths.
 - [x] Older projects without the cache create it gracefully the next time soils are rebuilt.
 - [x] The default `SurgoSoilCollection(...)` path in `ssurgo.py` uses an in-memory database and does not refresh or write shared `/dev/shm` SSURGO cache files.
 - [x] Explicit project cache paths persist fetched SSURGO rows and are reused across rebuilds unless cleared.
 - [x] `clear_ssurgo_cache_on_rebuild` is serialized by `Soils`, posted from the build form, and honored by `build_soils_rq`.
 - [x] The Advanced Options panel renders a pure macro checkbox labeled `Clear SSURGO cache on rebuild`.
-- [x] If the checkbox is enabled, only the run-scoped SSURGO cache and exact SQLite sidecars `<cache_path>-wal` and `<cache_path>-shm` are removed before rebuild; generated `.sol` files and unrelated run artifacts are not removed by the cache clear.
+- [x] If the checkbox is enabled, only the run-scoped SSURGO cache, exact SQLite sidecars `<cache_path>-wal` and `<cache_path>-shm`, and the cache metadata sidecar are removed before rebuild; generated `.sol` files and unrelated run artifacts are not removed by the cache clear.
 - [x] Targeted backend, RQ route, frontend controller, and template tests pass, including explicit coverage for all five current `Soils` `SurgoSoilCollection` constructor sites.
 - [x] `wepppy/soils/README.md` and `wepppy/soils/ssurgo/ssurgo.md` document the new project-local/default in-memory cache behavior.
 - [x] Both subagent review artifacts are present and every finding has a recorded disposition.
@@ -100,7 +103,7 @@ SSURGO tabular data is currently cached through module-level SQLite files in `we
 Reference: `docs/standards/parameterization-adr-standard.md`
 
 ## Compatibility and Regression Plan
-Adding a project-local SQLite cache changes run-scoped artifacts and `Soils` NoDb serialization. The implementation must keep this additive: no existing serialized keys may be renamed or removed, and old `soils.nodb` files must load with default values for the new cache option fields. Absolute cache paths must not be serialized; project cache paths must be derived from the current `Soils.soils_dir` so moved, copied, or forked runs do not retain stale filesystem paths. Regression tests must cover a legacy-style `Soils` object missing the new attributes, the generated `<wd>/soils/` cache artifact, batch and non-batch route persistence, and downstream generated `.sol` outputs from a representative build path or focused stubbed build.
+Adding a project-local SQLite cache and Markdown provenance sidecar changes run-scoped artifacts and `Soils` NoDb serialization. The implementation must keep this additive: no existing serialized keys may be renamed or removed, and old `soils.nodb` files must load with default values for the new cache option fields. Absolute cache paths must not be serialized; project cache paths and metadata sidecar paths must be derived from the current `Soils.soils_dir` so moved, copied, or forked runs do not retain stale filesystem paths. Regression tests must cover a legacy-style `Soils` object missing the new attributes, the generated `<wd>/soils/` cache artifact and sidecar, batch and non-batch route persistence, and downstream generated `.sol` outputs from a representative build path or focused stubbed build.
 
 ## Dependencies
 

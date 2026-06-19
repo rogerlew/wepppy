@@ -7,7 +7,7 @@
 - **Package**: `docs/work-packages/20260619_ssurgo_project_sqlite_cache/`
 - **Reviewer**: Codex
 - **Date**: 2026-06-19
-- **Scope reviewed**: Project-local SSURGO/STATSGO SQLite cache implementation, NoDb option serialization, RQ route parsing, soil pure checkbox wiring, cache-clear tests, docs, and validation-gate cleanups.
+- **Scope reviewed**: Project-local SSURGO/STATSGO SQLite cache implementation, metadata sidecar generation, NoDb option serialization, RQ route parsing, soil pure checkbox wiring, cache-clear tests, docs, and validation-gate cleanups.
 - **Commit/branch context**: Working tree implementation state on `master`.
 - **Related artifacts**:
   - Code review: `docs/work-packages/20260619_ssurgo_project_sqlite_cache/artifacts/code_review_findings.md`
@@ -22,13 +22,13 @@
 - **Threat model assumptions**:
   - Request payload fields are untrusted even when sent by the first-party UI.
   - Cache file paths must be derived from `Soils.soils_dir`, not from request payloads or serialized absolute paths.
-  - Cache clearing must not delete generated `.sol` files, user uploads, cache files outside the run tree, or non-cache artifacts.
+  - Cache clearing must not delete generated `.sol` files, user uploads, cache files outside the run tree, or artifacts beyond exact cache sidecars.
 
 ## Findings
 
 | ID | Severity | Surface | Description | Evidence | Required action | Status |
 | --- | --- | --- | --- | --- | --- | --- |
-| SEC-01 | High | File system boundary | Cache clearing needed path confinement and exact sidecar deletion. | `Soils._project_surgo_cache_path`, `Soils._clear_project_surgo_cache`, `tests/nodb/test_soils_ssurgo_cache.py` | Derive cache paths from `self.soils_dir`, realpath-check the effective soils directory under `self.wd`, realpath-check each candidate under the effective soils directory, delete only `<cache_path>`, `<cache_path>-wal`, and `<cache_path>-shm`, and refuse directories. | Resolved |
+| SEC-01 | High | File system boundary | Cache clearing needed path confinement and exact sidecar deletion. | `Soils._project_surgo_cache_path`, `Soils._clear_project_surgo_cache`, `tests/nodb/test_soils_ssurgo_cache.py` | Derive cache paths from `self.soils_dir`, realpath-check the effective soils directory under `self.wd`, realpath-check each candidate under the effective soils directory, delete only `<cache_path>`, `<cache_path>-wal`, `<cache_path>-shm`, and `<cache_path>.meta.md`, and refuse directories. | Resolved |
 | SEC-02 | Medium | RQ route payload | The checkbox option needed typed parsing and persistence before enqueue and batch no-enqueue return. | `wepppy/microservices/rq_engine/soils_routes.py`, `tests/microservices/test_rq_engine_soils_routes.py` | Parse `clear_ssurgo_cache_on_rebuild` as a boolean field and persist it on `Soils` before any enqueue/batch branch. | Resolved |
 | SEC-03 | Medium | Queue and worker consistency | Queue shape and cache-clear/use concurrency needed to remain safe. | `build_soils_rq(runid)` call shape unchanged; `_build_spatial_api`, `_build_gridded`, `_build_single`, and `build_statsgo` cache use occur under existing `Soils.locked()` boundaries; `tests/nodb/test_soils_ssurgo_cache.py` constructor-site inspection. | Preserve queue edges and keep cache clearing serialized with cache construction/use. | Resolved |
 
@@ -64,7 +64,7 @@ Risk acceptance authority: `Accepted-risk` requires security reviewer recommenda
 
 - [x] Project cache paths are derived from `<wd>/soils/`.
 - [x] Cache clearing refuses symlink-resolved soils directories outside the project root.
-- [x] Cache clearing removes only the named SQLite file and exact SQLite sidecars.
+- [x] Cache clearing removes only the named SQLite file, exact SQLite sidecars, and the cache metadata sidecar.
 - [x] Cache clearing refuses non-symlink directories.
 
 ### 5) Queue, Worker, and Subprocess Surfaces
