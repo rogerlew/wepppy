@@ -77,6 +77,33 @@ Feedback mechanisms:
 
 Work packages that are scoped but not yet started. Dependencies and prerequisites should be noted.
 
+### SSURGO Project SQLite Cache
+**Proposed**: 2026-06-19
+**Size**: Medium (2-4 focused sessions)
+**Priority**: High
+**Link**: [docs/work-packages/20260619_ssurgo_project_sqlite_cache/](docs/work-packages/20260619_ssurgo_project_sqlite_cache/)
+**Description**: Move SSURGO tabular cache persistence from shared module-level SQLite files to project-local SQLite databases created under `<wd>/soils/` during `build_soils`, with an Advanced Options checkbox to clear the run-scoped cache before rebuild.
+
+**Scope**:
+- Make `wepppy/soils/ssurgo/ssurgo.py` use in-memory SQLite by default unless a caller supplies an explicit cache path.
+- Serialize cache behavior options and `clear_ssurgo_cache_on_rebuild` through `wepppy/nodb/core/soils.py`, while deriving absolute cache paths from the active run's `soils` directory.
+- Wire the pure UI checkbox, build-soils route parsing, worker-visible NoDb state, and cache-clear behavior.
+- Add targeted backend, RQ route, template, and controller regression tests.
+- Update stale durable SSURGO cache documentation.
+- Use fixed project cache files `ssurgo_tabular_cache.sqlite` and `statsgo_tabular_cache.sqlite`, and cover all current `Soils` constructor sites plus direct non-`Soils` callers.
+- Complete dual subagent review with finding disposition before closure.
+
+**Strategic Value**:
+- Avoids stale shared SSURGO cache rows while preserving per-project rebuild efficiency.
+- Makes cache clearing an explicit operator/user action scoped to the current run.
+- Keeps old projects backward compatible by creating the cache when soils are rebuilt.
+
+**Dependencies**: Work-package, tracker, active ExecPlan, and review disposition template are authored; implementation is pending.
+
+**Next Steps**: Implement the cache path abstraction in `ssurgo.py`, then wire `Soils` serialization, RQ route parsing, UI control, and regression coverage.
+
+---
+
 ### Run Statistics Ledger
 **Proposed**: 2026-05-05
 **Size**: Medium-High (2-4 focused sessions)
