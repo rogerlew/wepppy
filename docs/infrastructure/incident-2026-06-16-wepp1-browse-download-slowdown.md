@@ -1,7 +1,7 @@
 # Incident Report: wepp1 Browse Download Slowdown
 > Date: June 16, 2026 (America/Los_Angeles)  
 > Scope: WEPPcloud archive/file downloads through `browse` on `wepp1`  
-> Status: mitigated with targeted `browse` restart; follow-up observation found intermittent `browse` responsiveness degradation, but no current broad download slowdown or high-RSS recurrence
+> Status: mitigated with targeted `browse` restart; follow-up observation found intermittent `browse` responsiveness degradation, but no current broad download slowdown or high-RSS recurrence; dedicated archive download service remediation implemented and locally validated on June 19, 2026 with production cutover evidence still pending
 
 ## Summary
 A user reported that archived WEPPcloud simulation downloads had become extremely slow, with an approximately 400 MB archive taking several hours where similar files previously downloaded in minutes.
@@ -11,6 +11,8 @@ Investigation on `wepp1` found no host-wide CPU, memory, RQ, disk, or public-net
 A targeted restart of `browse` cleared the abnormal worker memory and restored a normal service baseline. This likely improved the server-side condition, but the exact user archive URL was not available during initial triage, so the specific slow download path was not reproduced end to end until a follow-up probe.
 
 Follow-up observation on June 19, 2026 found that the Arrow-to-pandas browse mitigation and lazy D-Tale Parquet backend were deployed. Current archive and local Caddy probes were fast, and `browse` worker RSS stayed in the normal hundreds-of-MiB range. However, logs since the June 17 deployment showed intermittent `browse` worker timeouts and slow directory listing warnings. The remaining evidence points to intermittent browse/NFS metadata pressure and noisy client traffic rather than recurrence of the June 16 high-RSS failure mode.
+
+On June 19, 2026, the incident follow-up added a dedicated archive download service. Exact ZIP archive routes keep their public URL shape but can be routed by Caddy to `download:9011` instead of the interactive `browse:9009` worker pool. The service reuses canonical browse authorization and path-security helpers, supports `HEAD`, full `GET`, and single-range/resume `GET`, and emits one structured `download.complete` log line per request. This does not remove NFS as a shared dependency, but it removes browse UI, D-Tale/parquet, directory listing, crawler, and long archive-stream common-cause vectors from the critical archive-download path.
 
 ## Impact
 - Users could experience very slow downloads for project archive ZIPs or run files served through `browse`.
@@ -23,8 +25,10 @@ Follow-up observation on June 19, 2026 found that the Arrow-to-pandas browse mit
 - Compose stack: services up for about 24 hours before mitigation
 - Download route:
   - Caddy route `/weppcloud/runs/<runid>/<config>/download/...`
-  - reverse proxy target: `browse:9009`
+  - original reverse proxy target: `browse:9009`
+  - dedicated archive remediation target: exact `/download/archives/*.zip` route to `download:9011`; non-archive download and browse route families remain on `browse:9009`
   - browse command: `gunicorn --workers 8 --bind 0.0.0.0:9009 -k uvicorn.workers.UvicornWorker ...`
+  - download command: `gunicorn --workers ... --bind 0.0.0.0:9011 -k uvicorn.workers.UvicornWorker wepppy.microservices.download:app`
 - Storage:
   - `/geodata` mounted from `nas.rocket.net:/wepp` via NFSv4.2
   - mount options included `hard`, `rsize=65536`, `wsize=65536`, `acregmax=30`, `acdirmin=5`
@@ -200,6 +204,46 @@ The June 16 high-RSS finding was routed into two remediation work packages becau
 
 The work-package docs were still in their production-observation window at the time of this incident-report update. The June 19 production check confirms that the deployed code included the D-Tale lazy backend commit and that current `browse`/`dtale` RSS did not show recurrence of the PyArrow-to-pandas high-RSS failure mode. It does not close the observation window because `browse` still logged intermittent worker timeouts and slow directory listings after deployment.
 
+## Dedicated Download Service Remediation
+The June 19 follow-up created and pushed the [Dedicated Download Service for Critical Run Artifacts](../work-packages/20260619_dedicated_download_service/package.md) package.
+
+Implemented behavior:
+
+- Adds `wepppy.microservices.download`, a Starlette/Gunicorn/Uvicorn service listening on port `9011`.
+- Routes exact archive ZIP URLs matching `/weppcloud/runs/{runid}/{config}/download/archives/*.zip` to `download:9011` through Caddy before the broader `browse` matcher.
+- Keeps existing public URLs stable; users do not need new links.
+- Leaves directory browsing, schema/files APIs, D-Tale handoff, `gdalinfo`, aria2c manifests, parquet-to-CSV, culvert, batch, and non-migrated compatibility downloads on `browse`.
+- Reuses `wepppy.microservices.browse.auth` and `wepppy.microservices.browse.security` so public/private run and path-boundary behavior does not fork.
+- Supports `HEAD`, full `GET`, closed ranges, open-ended ranges, suffix ranges, and invalid-range `416` responses.
+- Rejects raw `.`, `..`, repeated separator, backslash, hidden path, non-ZIP, and out-of-scope archive paths.
+- Runs archive file open, seek, read, and close operations through worker threads so slow storage reads do not block the ASGI event loop.
+
+Enhanced logging:
+
+```text
+download.complete route_family=run_archive request_id=<id> runid=<runid> config=<config> path_category=archives basename=<archive.zip> file_size=<bytes> method=<HEAD|GET> status=<status> range_start=<start> range_end=<end> bytes_sent=<bytes> duration_ms=<ms> outcome=<success|client_aborted|not_found|forbidden|range_not_satisfiable|server_error> error_reason=<reason> client_ip=<ip> user_agent=<ua>
+```
+
+The log intentionally records the sanitized archive category and basename, not absolute filesystem paths. It must not contain Authorization headers, cookies, JWTs, raw query strings, or full run-root paths.
+
+Local validation evidence captured on June 19, 2026:
+
+```text
+wctl focused pytest slice: 140 passed, 5 warnings
+local Caddy HEAD: 200, Accept-Ranges: bytes, Content-Length: 2516876934, Server: uvicorn, Via: 1.1 Caddy
+local Caddy full GET: 200, 2516876934 bytes in 12.207687 seconds, curl speed 206171483 bytes/s
+local Caddy range: 206, Content-Range: bytes 0-1048575/2516876934, 1048576 bytes
+local Caddy sparse resume: 206, Content-Range: bytes 2515828358-2516876933/2516876934, 1048576 bytes
+download.complete logs: matching HEAD, full GET, and range/resume completion records with bytes, duration, request id, range metadata, and sanitized basename
+```
+
+The QA and security review artifacts have no unresolved findings:
+
+- [QA review](../work-packages/20260619_dedicated_download_service/artifacts/20260619_qa_review.md)
+- [Security review](../work-packages/20260619_dedicated_download_service/artifacts/20260619_security_review.md)
+
+Production status at the time of this update: code is committed to `master` in commit `0791616db` (`Add dedicated archive download service`), but the incident is not considered fully closed until wepp1 cutover and production smoke/log evidence are captured.
+
 ## Post-Mitigation Observation
 Observed on `wepp1` on June 19, 2026 between about 08:49 and 08:52 PDT:
 
@@ -255,33 +299,52 @@ Not proven:
 - a single NAS fault versus application-level metadata amplification.
 - whether the remaining worker timeout clusters are caused by a small set of pathological directories, client disconnect pressure, NFS latency, or another request path.
 
+Dedicated download remediation assessment:
+
+- The service split should eliminate several non-NFS common-cause vectors for exact archive ZIP downloads: browse worker RSS growth, D-Tale/parquet request pressure, directory listing stalls, crawler-heavy browse paths, and long archive streaming sharing the same worker pool.
+- The split does not eliminate NFS. If archive reads stall in NFS kernel I/O, both `browse` and `download` can still be affected by the same storage substrate.
+- The new `download.complete` logs make archive health measurable by status, duration, bytes sent, range behavior, client identity, and sanitized artifact identity. Future diagnosis should start from these logs instead of inferring successful download behavior from Caddy warnings alone.
+
 ## Follow-up Actions
-1. Continue `browse` post-deployment observation for the 14-day work-package window:
+1. Cut over or confirm cutover of exact archive ZIP downloads to the dedicated `download` service on wepp1:
+   - `download` container healthy
+   - Caddy archive matcher active before the broad `browse` matcher
+   - representative production archive `HEAD`, full `GET`, and range/resume probes return expected headers and statuses
+   - matching `download.complete` logs show bytes, duration, status, and range metadata
+2. Continue `browse` post-deployment observation for the 14-day work-package window:
    - alert or manually check for `WORKER TIMEOUT` clusters
    - sample worker RSS and confirm workers remain below a practical threshold, for example 4 GiB
    - track slow listing warnings and correlate them with request paths when possible
    - append production observations to the browse and D-Tale work-package trackers before closing the observation windows
-2. Add or enable access timing for successful `browse` downloads and slow browse listings:
+3. Use `download.complete` logs as the primary successful-archive evidence source:
+   - `status=200` with full `bytes_sent=file_size` for full downloads
+   - `status=206` with expected `range_start`, `range_end`, and `bytes_sent` for resume/range probes
+   - `duration_ms` and `bytes_sent` for throughput estimates
+   - `outcome=client_aborted`, `not_found`, `forbidden`, `range_not_satisfiable`, or `server_error` for failure classification
+4. Add or enable equivalent access timing for non-migrated `browse` downloads and slow browse listings:
    - runid/config/subpath
    - file size
    - response duration
    - client IP / forwarded IP
    - status and disconnect/abort reason
-3. Add path-safe logging for slow directory listings so operators can identify directories that trigger metadata amplification without logging private file contents.
-4. Ask the user to retry the exact archive URL and report:
+5. Add path-safe logging for slow directory listings so operators can identify directories that trigger metadata amplification without logging private file contents.
+6. Ask affected users to retry the exact archive URL and report:
    - wall-clock elapsed time
    - browser
    - whether they are on the WSU network or VPN
    - whether an HTTP/1.1 command-line download is also slow
-5. Investigate why `browse` workers previously retained tens of GiB and hundreds of threads, but treat this as a recurrence-prevention task unless high RSS returns.
-6. Consider reducing metadata amplification for archive listings:
+7. Investigate why `browse` workers previously retained tens of GiB and hundreds of threads, but treat this as a recurrence-prevention task unless high RSS returns.
+8. Consider reducing metadata amplification for archive listings:
    - cache archive list metadata briefly
    - avoid opening ZIP comments during every archive list request when not needed
    - avoid recursive or child-count metadata calls in high-latency NFS paths
-7. Consider Caddy/user-agent controls during crawler pressure events if incomplete-response warnings continue.
-8. If WSU remains slow while external probes are fast, test whether disabling QUIC/HTTP/3 or using HTTP/1.1 changes the client-side result.
+9. Consider Caddy/user-agent controls during crawler pressure events if incomplete-response warnings continue.
+10. If WSU remains slow while external probes are fast, test whether disabling QUIC/HTTP/3 or using HTTP/1.1 changes the client-side result.
 
-## Useful Commands For Recurrence
+## Future Health Checks and Troubleshooting
+
+Use these checks when archive downloads are reported slow again. Start by determining whether the exact archive route is being served by `download:9011` or has fallen back to `browse:9009`.
+
 ```bash
 # Host identity and stack health
 hostname
@@ -289,6 +352,45 @@ date
 uptime
 cd /workdir/wepppy && wctl docker compose ps
 cd /workdir/wepppy && wctl rq-info
+
+# Dedicated download service health
+cd /workdir/wepppy && wctl docker compose ps download caddy browse
+cd /workdir/wepppy && wctl docker compose logs --since 30m download \
+  | egrep 'download.complete|WORKER TIMEOUT|Traceback|ERROR'
+
+# If the port is published on the host, this should return OK.
+curl -fsS http://127.0.0.1:9011/health
+
+# Confirm exact archive routing through local Caddy.
+archive_url='https://wepp.cloud/weppcloud/runs/<runid>/<config>/download/archives/<archive>.zip'
+curl -k --resolve wepp.cloud:443:127.0.0.1 -I "$archive_url"
+
+# Expected for a public or authorized archive:
+# HTTP 200
+# Accept-Ranges: bytes
+# Content-Length: <archive size>
+# Server: uvicorn
+# Via: 1.1 Caddy
+
+# Range/resume probe without downloading the whole archive.
+curl -k --resolve wepp.cloud:443:127.0.0.1 \
+  -H 'Range: bytes=0-1048575' \
+  -o /tmp/wepp-archive-range.part -D /tmp/wepp-archive-range.headers \
+  -w 'http=%{http_code} bytes=%{size_download} speed=%{speed_download}Bps time=%{time_total}s\n' \
+  "$archive_url"
+egrep -i 'HTTP/|accept-ranges:|content-range:|content-length:|x-request-id:' /tmp/wepp-archive-range.headers
+wc -c /tmp/wepp-archive-range.part
+
+# Full-transfer probe for a representative archive when safe to do so.
+curl -k --resolve wepp.cloud:443:127.0.0.1 \
+  -o /tmp/wepp-archive-full.zip \
+  -w 'http=%{http_code} bytes=%{size_download} speed=%{speed_download}Bps time=%{time_total}s\n' \
+  "$archive_url"
+
+# Compute throughput from structured logs. Duration is milliseconds.
+cd /workdir/wepppy && wctl docker compose logs --since 30m download \
+  | grep 'download.complete' \
+  | tail -20
 
 # Browse service health
 cd /workdir/wepppy && wctl docker compose logs --since 6h browse \
@@ -301,9 +403,32 @@ for p in $(pgrep -f 'gunicorn --workers 8 --bind 0.0.0.0:9009' | tail -n +2); do
   egrep 'VmRSS|RssAnon|Threads|State' /proc/$p/status
 done
 
-# Download route smoke through local Caddy
+# Diagnostic bandwidth route through local Caddy. This is useful for edge sanity,
+# but it is not a substitute for exact archive route testing.
 curl -k --resolve wepp.cloud:443:127.0.0.1 \
   -o /dev/null -sS \
   -w 'http=%{http_code} bytes=%{size_download} speed=%{speed_download}Bps time=%{time_total}s\n' \
   'https://wepp.cloud/query-engine/diagnostics/bandwidth/download?bytes=4194304'
+```
+
+Interpretation guide:
+
+- `Server: uvicorn` plus `download.complete` logs indicates the exact archive route reached the dedicated service.
+- `status=200` with `bytes_sent=file_size` and reasonable `duration_ms` indicates a successful full archive transfer from the service perspective.
+- `status=206` with expected `range_start`, `range_end`, and `bytes_sent` confirms resume/range behavior.
+- Fast local Caddy probes with slow user downloads suggest client path, ISP, VPN, institutional inspection, HTTP/3/QUIC, or browser-specific behavior.
+- Slow local Caddy probes plus slow host file reads suggest NFS/storage substrate pressure.
+- Slow browse listings with healthy download archive probes suggest metadata amplification or crawler pressure in `browse`, not critical archive streaming.
+- High `browse` RSS with healthy `download` RSS suggests recurrence of a browse-specific leak or pandas/materialization path, not the dedicated archive service.
+
+Rollback if the dedicated route is implicated:
+
+```bash
+# Disable or revert the exact archive matcher in the active Caddyfile so
+# /download/archives/*.zip falls back to browse:9009, then reload Caddy.
+cd /workdir/wepppy
+wctl docker compose restart caddy
+
+# Optionally stop only the download service after Caddy no longer routes to it.
+wctl docker compose stop download
 ```
