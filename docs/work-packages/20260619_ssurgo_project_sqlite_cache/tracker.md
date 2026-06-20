@@ -6,12 +6,13 @@
 
 **Timezone**: UTC
 **Started**: 2026-06-19 19:04 UTC
-**Current phase**: Metadata sidecar follow-up implementation
-**Last updated**: 2026-06-19 20:54 UTC
-**Next milestone**: Validate and hand off provenance sidecar follow-up.
+**Current phase**: ADR ratification follow-up
+**Last updated**: 2026-06-19 21:38 UTC
+**Next milestone**: Validate ADR docs and hand off ratified decision record.
 **Security impact**: high
 **Dedicated security review**: yes
 **Security artifact**: `docs/work-packages/20260619_ssurgo_project_sqlite_cache/artifacts/security_review.md`
+**Parameterization ADR**: `docs/adrs/ADR-0007-project-local-ssurgo-sqlite-cache.md`
 
 ## Task Board
 
@@ -39,6 +40,7 @@
 - [x] Accepted and fixed dual subagent review findings for symlink path confinement, SpatialAPI cache-use locking, cache reuse coverage, doc links, and markdown whitespace.
 - [x] Completed dedicated security review artifact with no unresolved medium/high findings.
 - [x] Added file-backed cache Markdown metadata sidecars using `<cache>.meta.md`, with NRCS source provenance and table counts.
+- [x] Authored and ratified ADR-0007 for project-local SSURGO SQLite cache non-determinism and provenance expectations.
 
 ## Timeline
 
@@ -46,6 +48,7 @@
 - **2026-06-19 20:09 UTC** - Implementation completed; targeted tests, npm test/lint, and broad-exception gate passed. Full pytest remains blocked by an unrelated deterministic WEPP route test.
 - **2026-06-19 20:24 UTC** - Dual subagent findings dispositioned; accepted findings fixed and rechecked; security review gate passed.
 - **2026-06-19 20:54 UTC** - Added cache provenance metadata sidecar behavior after operator validation of new and old projects.
+- **2026-06-19 21:38 UTC** - Ratified ADR-0007 because project-local SSURGO caching can affect generated soil parameters when upstream NRCS rows change.
 
 ## Decisions Log
 
@@ -88,6 +91,19 @@
 **Decision**: Option 2.
 
 **Impact**: SSURGO and STATSGO caches can coexist without metadata collisions, and cache clearing can target each sidecar exactly. The sidecar is a human-readable derivative; the SQLite file remains canonical for machine-readable cache data.
+
+---
+
+### 2026-06-19 21:38 UTC: ADR required for source-snapshot non-determinism
+**Context**: Operator validation showed the cache works for old and new projects, then the user identified that per-project SSURGO caches can lead to non-deterministic generated soil parameters when NRCS rows change over time.
+
+**Options considered**:
+1. Keep the package ADR gate as `not required` because no formulas/defaults changed.
+2. Ratify a parameterization ADR because source-snapshot policy can change generated WEPP soil inputs.
+
+**Decision**: Option 2.
+
+**Impact**: `docs/adrs/ADR-0007-project-local-ssurgo-sqlite-cache.md` now records the accepted cache behavior, non-determinism modes, provenance expectations, and rollback options.
 
 ---
 
@@ -149,7 +165,7 @@
 - [x] Package and tracker updated with implementation decisions and outcomes.
 - [x] Active ExecPlan progress, surprises, decision log, and retrospective updated during work.
 - [x] `wepppy/soils/README.md` and `wepppy/soils/ssurgo/ssurgo.md` updated for project-local/default in-memory cache behavior.
-- [x] Parameterization ADR remains not required because no model formulas/default hydrology parameters change.
+- [x] Parameterization ADR added because cache source-snapshot behavior can affect generated WEPP soil inputs.
 
 ### Testing
 - [x] Unit coverage for direct in-memory `SurgoSoilCollection` default.
@@ -277,8 +293,8 @@
 
 ## Communication Log
 
-### 2026-06-19 19:04 UTC: User scoping request
-**Participants**: User, Codex  
+### 2026-06-19 19:04 UTC: Roger Lew scoping request
+**Participants**: Roger Lew, Codex
 **Question/Topic**: Author a work-package to implement project-local SSURGO SQLite cache behavior, UI control, NoDb serialization, and dual subagent review with dispositioning.  
 **Outcome**: Package authored and ready for implementation.
 

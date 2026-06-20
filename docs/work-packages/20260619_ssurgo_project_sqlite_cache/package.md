@@ -95,10 +95,16 @@ SSURGO tabular data is currently cached through module-level SQLite files in `we
 - [x] This package and `tracker.md` reflect implementation status and closure evidence; `PROJECT_TRACKER.md` was updated during package creation.
 
 ## Parameterization ADR Gate
-- **Parameterization change present**: no
-- **ADR required**: no
-- **ADR link(s)**: N/A
-- **Decision provenance captured**: yes, in this package and tracker.
+- **Parameterization change present**: yes
+- **ADR required**: yes
+- **ADR link(s)**: `docs/adrs/ADR-0007-project-local-ssurgo-sqlite-cache.md`
+- **Decision provenance captured**: yes, in `docs/adrs/ADR-0007-project-local-ssurgo-sqlite-cache.md`.
+
+Triage correction: no WEPP formulas, unit conversions, or hydrology defaults
+changed, but per-project SSURGO caching changes source-snapshot behavior for
+generated WEPP soil inputs. Because upstream NRCS rows can change over time,
+this cache policy can produce non-deterministic generated parameters across
+projects or after explicit cache clearing.
 
 Reference: `docs/standards/parameterization-adr-standard.md`
 
