@@ -1,7 +1,7 @@
 # PROJECT_TRACKER.md
 > Kanban board for wepppy work packages and vision items
 
-**Last Updated**: 2026-06-19
+**Last Updated**: 2026-06-22
 **Active Packages**: 10
 **Quick Links**: [Work Packages Directory](docs/work-packages/) | [God-Tier Prompting Strategy](docs/god-tier-prompting-strategy.md)
 
@@ -76,6 +76,32 @@ Feedback mechanisms:
 ## 📋 Backlog
 
 Work packages that are scoped but not yet started. Dependencies and prerequisites should be noted.
+
+### SSURGO Reclaimed Soil Conversion and Fallback Transparency
+**Proposed**: 2026-06-22
+**Size**: Medium-High (2-4 focused sessions)
+**Priority**: High
+**Link**: [docs/work-packages/20260622_ssurgo_reclaimed_soil_fallback/](docs/work-packages/20260622_ssurgo_reclaimed_soil_fallback/)
+**Description**: Fix reclaimed mined-land SSURGO profiles that collapse to zero WEPP layers when the first horizon is below the restrictive-layer threshold, and make invalid-dominant-MUKEY fallback preserve/report the raw raster-selected MUKEY instead of silently substituting a common valid soil.
+
+**Scope**:
+- Fix SSURGO-to-WEPP conversion so Fairpoint reclaimed MUKEYs `3294459`, `3294460`, and `3294461` build valid WEPP soil files.
+- Add unit and integrated generated-output tests for those three MUKEYs.
+- Preserve raw dominant MUKEYs and record substitution details when fallback still occurs.
+- Keep NoDb and `soils.parquet` evolution additive/backward-compatible.
+- Add a parameterization ADR and update durable SSURGO docs.
+- Complete QA review with finding disposition before closure.
+
+**Strategic Value**:
+- Restores current SSURGO/gNATSGO behavior for reclaimed mined lands.
+- Prevents old-looking substituted soils from hiding valid current Fairpoint map units.
+- Gives operators and users provenance when WEPPcloud must substitute invalid soil data.
+
+**Dependencies**: Builds on completed project-local SSURGO cache work in `20260619_ssurgo_project_sqlite_cache`.
+
+**Next Steps**: Draft ADR-0008, add failing Fairpoint fixture tests, then implement the restrictive-layer fix and fallback provenance.
+
+---
 
 ### SSURGO Project SQLite Cache
 **Proposed**: 2026-06-19
