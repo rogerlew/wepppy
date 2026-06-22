@@ -217,6 +217,8 @@ class Soils(NoDbBase):
 
             self.domsoil_d = None  # topaz_id keys
             self.ssurgo_domsoil_d = None
+            self.raw_ssurgo_domsoil_d = None
+            self.ssurgo_substitution_d = {}
 
             self.soils = None
             self._subs_summary = None
@@ -245,6 +247,13 @@ class Soils(NoDbBase):
         instance._ssurgo_db = instance._expand_config_path_tokens(getattr(instance, "_ssurgo_db", None))
         if not hasattr(instance, "_clear_ssurgo_cache_on_rebuild"):
             instance._clear_ssurgo_cache_on_rebuild = False
+        if not hasattr(instance, "raw_ssurgo_domsoil_d"):
+            instance.raw_ssurgo_domsoil_d = None
+        if (
+            not hasattr(instance, "ssurgo_substitution_d")
+            or instance.ssurgo_substitution_d is None
+        ):
+            instance.ssurgo_substitution_d = {}
 
         soils = getattr(instance, "soils", None)
         if not isinstance(soils, dict):
@@ -1118,6 +1127,8 @@ class Soils(NoDbBase):
         with self.locked():
             self.domsoil_d = None
             self.ssurgo_domsoil_d = None
+            self.raw_ssurgo_domsoil_d = None
+            self.ssurgo_substitution_d = {}
 
         if self._mode == SoilsMode.SpatialAPI:
             self._build_spatial_api()
@@ -1575,6 +1586,8 @@ class Soils(NoDbBase):
                     domsoil_d = identify_mode_single_raster_key(
                         key_fn=watershed.subwta, parameter_fn=ssurgo_fn, ignore_channels=True, ignore_keys={-2147483648,})
                     domsoil_d = {k: str(v) for k, v in domsoil_d.items() if int(k) > 0}
+            raw_domsoil_d = deepcopy(domsoil_d)
+            ssurgo_substitution_d = {}
 
             dom_mukey = None
             for mukey, count in Counter(domsoil_d.values()).most_common():
@@ -1593,6 +1606,11 @@ class Soils(NoDbBase):
                 for topaz_id, mukey in domsoil_d.items():
                     if mukey not in soils:
                         domsoil_d[topaz_id] = dom_mukey
+                        ssurgo_substitution_d[str(topaz_id)] = {
+                            "raw_mukey": str(mukey),
+                            "replacement_mukey": str(dom_mukey),
+                            "reason": "invalid_dominant_mukey",
+                        }
 
                 # while we are at it we will calculate the pct coverage
                 # for the landcover types in the watershed
@@ -1612,6 +1630,8 @@ class Soils(NoDbBase):
                 with self.timed('  Storing soils'):
                     self.domsoil_d = domsoil_d
                     self.ssurgo_domsoil_d = deepcopy(domsoil_d)
+                    self.raw_ssurgo_domsoil_d = raw_domsoil_d
+                    self.ssurgo_substitution_d = ssurgo_substitution_d
                     self.soils = {str(k): v for k, v in soils.items()}
 
         # fallback to statsgo if surgo failed
@@ -1695,6 +1715,21 @@ class Soils(NoDbBase):
             for topaz_id, mukey in domsoil_d.items()
             if not is_channel(topaz_id)
         }
+        raw_domsoil_d = getattr(self, "raw_ssurgo_domsoil_d", None) or {}
+        ssurgo_substitution_d = getattr(self, "ssurgo_substitution_d", None) or {}
+        for topaz_id, soil_data in summary.items():
+            str_topaz_id = str(topaz_id)
+            raw_mukey = raw_domsoil_d.get(str_topaz_id)
+            soil_data["raw_mukey"] = None if raw_mukey is None else str(raw_mukey)
+
+            substitution = ssurgo_substitution_d.get(str_topaz_id)
+            if substitution is None:
+                soil_data["substituted_mukey"] = None
+                soil_data["substitution_reason"] = None
+                continue
+
+            soil_data["substituted_mukey"] = str(substitution["replacement_mukey"])
+            soil_data["substitution_reason"] = str(substitution["reason"])
 
         return summary
 

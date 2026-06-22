@@ -152,6 +152,185 @@ def test_build_gridded_coverage_uses_hillslope_area_not_wsarea(
     ) == pytest.approx(100.0)
 
 
+def test_build_gridded_preserves_raw_mukey_for_invalid_fairpoint_fallback(
+    tmp_path: Path,
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    wd = tmp_path / "run"
+    wd.mkdir(parents=True, exist_ok=True)
+    (wd / "watershed").mkdir(parents=True, exist_ok=True)
+    (wd / "soils").mkdir(parents=True, exist_ok=True)
+    (wd / "soils" / "ssurgo.tif").write_text("stub", encoding="utf-8")
+
+    soils = Soils.__new__(Soils)
+    soils.wd = str(wd)
+    soils.logger = logging.getLogger("tests.nodb.soils_gridded_raw_mukey")
+    soils._soils_is_vrt = False
+    soils._ssurgo_db = "ssurgo"
+    soils._initial_sat = 0.75
+    soils._ksflag = True
+
+    soils.locked = lambda: nullcontext()
+    soils.timed = lambda _label: nullcontext()
+    soils.trigger = lambda *_args, **_kwargs: None
+
+    map_stub = SimpleNamespace(extent=(-80.1, 40.0, -80.0, 40.1), cellsize=30.0)
+
+    class _WatershedStub:
+        subwta = str(wd / "watershed" / "subwta.tif")
+        sub_area = 4.0
+
+        @staticmethod
+        def hillslope_area(topaz_id: str) -> float:
+            return {"573": 1.0, "581": 1.0, "582": 1.0, "590": 1.0}[str(topaz_id)]
+
+    monkeypatch.setattr(
+        Soils,
+        "ron_instance",
+        property(lambda _self: SimpleNamespace(map=map_stub)),
+    )
+    monkeypatch.setattr(
+        Soils,
+        "watershed_instance",
+        property(lambda _self: _WatershedStub()),
+    )
+    monkeypatch.setattr(Soils, "getInstance", classmethod(lambda cls, _wd: soils))
+    monkeypatch.setattr("wepppy.nodb.core.soils.wepppyo3", None)
+
+    class _SoilSummaryStub:
+        def __init__(self, mukey: str) -> None:
+            self.mukey = mukey
+            self.area = 0.0
+            self.pct_coverage = 0.0
+
+    class _SurgoMapStub:
+        def __init__(self, _ssurgo_fn: str) -> None:
+            self.mukeys = [3294459, 3294460, 3294461, 2451115]
+
+        @staticmethod
+        def build_soilgrid(_subwta: str) -> dict[str, str]:
+            return {
+                "573": "3294459",
+                "581": "3294460",
+                "582": "3294461",
+                "590": "2451115",
+            }
+
+    class _SurgoCollectionStub:
+        def __init__(self, _mukeys: set[int], *, cache_db_path: str) -> None:
+            assert cache_db_path == str(wd / "soils" / "ssurgo_tabular_cache.sqlite")
+
+        @staticmethod
+        def makeWeppSoils(**_kwargs) -> None:
+            return None
+
+        @staticmethod
+        def writeWeppSoils(**_kwargs) -> dict[int, _SoilSummaryStub]:
+            return {2451115: _SoilSummaryStub("2451115")}
+
+        @staticmethod
+        def logInvalidSoils(**_kwargs) -> None:
+            return None
+
+    monkeypatch.setattr("wepppy.nodb.core.soils.SurgoMap", _SurgoMapStub)
+    monkeypatch.setattr("wepppy.nodb.core.soils.SurgoSoilCollection", _SurgoCollectionStub)
+
+    soils._build_gridded(retrieve_gridded_ssurgo=False, max_workers=1)
+
+    assert soils.raw_ssurgo_domsoil_d == {
+        "573": "3294459",
+        "581": "3294460",
+        "582": "3294461",
+        "590": "2451115",
+    }
+    assert soils.domsoil_d == {
+        "573": "2451115",
+        "581": "2451115",
+        "582": "2451115",
+        "590": "2451115",
+    }
+    assert soils.ssurgo_domsoil_d == soils.domsoil_d
+    assert soils.ssurgo_substitution_d == {
+        "573": {
+            "raw_mukey": "3294459",
+            "replacement_mukey": "2451115",
+            "reason": "invalid_dominant_mukey",
+        },
+        "581": {
+            "raw_mukey": "3294460",
+            "replacement_mukey": "2451115",
+            "reason": "invalid_dominant_mukey",
+        },
+        "582": {
+            "raw_mukey": "3294461",
+            "replacement_mukey": "2451115",
+            "reason": "invalid_dominant_mukey",
+        },
+    }
+    assert soils.soils["2451115"].pct_coverage == pytest.approx(100.0)
+
+
+def test_subs_summary_includes_raw_and_substituted_mukey_columns() -> None:
+    soils = Soils.__new__(Soils)
+    soils.domsoil_d = {
+        "573": "2451115",
+        "581": "2451115",
+        "590": "2451115",
+    }
+    soils.raw_ssurgo_domsoil_d = {
+        "573": "3294459",
+        "581": "3294460",
+        "590": "2451115",
+    }
+    soils.ssurgo_substitution_d = {
+        "573": {
+            "raw_mukey": "3294459",
+            "replacement_mukey": "2451115",
+            "reason": "invalid_dominant_mukey",
+        },
+        "581": {
+            "raw_mukey": "3294460",
+            "replacement_mukey": "2451115",
+            "reason": "invalid_dominant_mukey",
+        },
+    }
+
+    class _SoilSummaryStub:
+        @staticmethod
+        def as_dict() -> dict[str, object]:
+            return {
+                "mukey": "2451115",
+                "fname": "2451115.sol",
+                "desc": "Shelocta-Latham association, steep",
+            }
+
+    soils.soils = {"2451115": _SoilSummaryStub()}
+
+    summary = soils._subs_summary_gen()
+
+    assert summary["573"]["raw_mukey"] == "3294459"
+    assert summary["573"]["substituted_mukey"] == "2451115"
+    assert summary["573"]["substitution_reason"] == "invalid_dominant_mukey"
+    assert summary["581"]["raw_mukey"] == "3294460"
+    assert summary["590"]["raw_mukey"] == "2451115"
+    assert summary["590"]["substituted_mukey"] is None
+    assert summary["590"]["substitution_reason"] is None
+
+
+def test_post_instance_loaded_backfills_ssurgo_fallback_provenance(
+    tmp_path: Path,
+) -> None:
+    instance = Soils.__new__(Soils)
+    instance.wd = str(tmp_path / "run")
+    instance.soils = None
+
+    result = Soils._post_instance_loaded(instance)
+
+    assert result is instance
+    assert instance.raw_ssurgo_domsoil_d is None
+    assert instance.ssurgo_substitution_d == {}
+
+
 def test_build_from_map_db_refreshes_existing_run_local_sol_from_db(
     tmp_path: Path,
     monkeypatch: pytest.MonkeyPatch,

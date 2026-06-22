@@ -11,12 +11,14 @@ WEPPcloud should use current SSURGO/gNATSGO soil map units when they exist. In a
 ## Progress
 
 - [x] (2026-06-22 18:28 UTC) Created the work package and initial ExecPlan from production investigation evidence.
-- [ ] Draft ADR-0008 for restrictive-layer and fallback behavior.
-- [ ] Add deterministic Fairpoint fixture data and failing tests for MUKEYs `3294459`, `3294460`, and `3294461`.
-- [ ] Implement the SSURGO-to-WEPP conversion fix.
-- [ ] Implement additive fallback transparency for raw dominant MUKEYs and substitution reasons.
-- [ ] Update documentation and run validation gates.
-- [ ] Complete QA review and disposition findings.
+- [x] (2026-06-22 18:50 UTC) Draft ADR-0008 for restrictive-layer and fallback behavior.
+- [x] (2026-06-22 18:50 UTC) Add deterministic Fairpoint fixture data and failing tests for MUKEYs `3294459`, `3294460`, and `3294461`.
+- [x] (2026-06-22 18:50 UTC) Implement the SSURGO-to-WEPP conversion fix.
+- [x] (2026-06-22 18:50 UTC) Implement additive fallback transparency for raw dominant MUKEYs and substitution reasons.
+- [x] (2026-06-22 18:50 UTC) Update documentation.
+- [x] (2026-06-22 18:56 UTC) Run final validation gates; package gates pass and unrelated full-suite blocker is documented.
+- [x] (2026-06-22 18:56 UTC) Complete QA review and disposition findings.
+- [x] (2026-06-22 20:27 UTC) Amend ADR-0008 with Brooks et al. Tahoe restrictive-layer rationale and local comparison-run evidence.
 
 ## Surprises & Discoveries
 
@@ -29,6 +31,15 @@ WEPPcloud should use current SSURGO/gNATSGO soil map units when they exist. In a
 - Observation: The converter marks Fairpoint invalid because the first valid horizon has `ksat_r < 2.0 um/s`, which sets the restrictive layer before any WEPP layers are counted.
   Evidence: Fairpoint logs show `found 2 layers`, `horizons mask: [True, True]`, `identified 0 layers`, and `Validity: no horizons`.
 
+- Observation: Existing `ssurgo_domsoil_d` consumers expect final generated-soil MUKEYs, not raw raster values.
+  Evidence: The disturbed and summary paths use `domsoil_d`/`ssurgo_domsoil_d` to resolve generated `.sol` files; the implementation keeps those final and adds `raw_ssurgo_domsoil_d` for provenance.
+
+- Observation: Full-suite validation has an unrelated persistent blocker.
+  Evidence: `wctl run-pytest tests --maxfail=1` stopped after 4,425 passed and 59 skipped at `tests/weppcloud/routes/test_wepp_bp.py::test_view_management_effective_returns_texture_specific_preview[clay-1.1-2.1-0.11]`. A standalone rerun of that test fails, and the route/test files have no local diff.
+
+- Observation: The Lake Tahoe restrictive-layer precedent and the reclaimed Fairpoint failure describe different physical cases.
+  Evidence: Brooks et al. used measured Tahoe Basin Soil Survey properties for steep, rocky forest soils and treated consolidated bedrock as the hydrologic lower boundary. The local Blackwood/Lake Tahoe run has 231 restrictive-profile hillslopes but zero prior-rule first-horizon zero-layer reassignment cases; `hard-line-foothold` has 73 restrictive-profile hillslopes and 71 prior-rule first-horizon zero-layer reassignment cases.
+
 ## Decision Log
 
 - Decision: Treat the work as a conversion/fallback bug, not a raster replacement.
@@ -39,9 +50,21 @@ WEPPcloud should use current SSURGO/gNATSGO soil map units when they exist. In a
   Rationale: The fix changes how a threshold affects generated WEPP layers and how fallback substitutions are applied or reported.
   Date/Author: 2026-06-22 18:28 UTC / Codex.
 
+- Decision: Retain the first valid horizon when it is already below the restrictive-layer threshold.
+  Rationale: A valid first horizon can be represented as a low-conductivity WEPP layer; collapsing it to zero layers rejects current reclaimed SSURGO map units.
+  Date/Author: 2026-06-22 18:50 UTC / Codex, recorded in ADR-0008.
+
+- Decision: Keep `domsoil_d` and `ssurgo_domsoil_d` as final model-ready maps and add `raw_ssurgo_domsoil_d` plus `ssurgo_substitution_d`.
+  Rationale: This exposes fallback provenance without breaking downstream generated-soil consumers.
+  Date/Author: 2026-06-22 18:50 UTC / Codex, recorded in ADR-0008.
+
+- Decision: Interpret the Brooks et al. Tahoe restrictive-layer precedent as lower-boundary truncation after a modeled soil mantle exists, not as rejection of a valid first low-conductivity horizon.
+  Rationale: Tahoe-style consolidated bedrock below steep forest soils is a lower-boundary case; reclaimed mine-land profiles with a valid low-ksat first horizon should retain that horizon as a WEPP layer.
+  Date/Author: 2026-06-22 20:27 UTC / Codex, recorded in ADR-0008.
+
 ## Outcomes & Retrospective
 
-Implementation has not started. At package creation, the desired outcome is defined as valid Fairpoint generated soil outputs plus observable fallback provenance.
+Implementation and QA are complete. Targeted package validation, docs, stub hygiene, py_compile, and broad-exception gates pass. ADR-0008 records both the reclaimed Fairpoint rule and the Tahoe restrictive-layer interpretation. Full-suite validation was attempted and is blocked by a persistent unrelated route-test failure documented in the tracker and QA artifact.
 
 ## Context and Orientation
 

@@ -401,8 +401,9 @@ WEPP models subsurface flow impedance via a restrictive layer below the soil pro
 **Algorithm:**
 1. Iterate through valid horizons in depth order
 2. Track minimum `ksat_r` encountered
-3. If `ksat_r < res_lyr_ksat_threshold` (default 2.0 um/s, about 7.2 mm/h), mark as restrictive layer
-4. Truncate horizon list at restrictive layer
+3. If the first valid horizon is below `res_lyr_ksat_threshold` (default 2.0 um/s, about 7.2 mm/h), retain it as a WEPP layer
+4. If a later horizon has `ksat_r < res_lyr_ksat_threshold`, mark that later horizon as the restrictive layer
+5. Truncate horizon list at the restrictive layer
 
 **WEPP File Encoding (Line 6):**
 ```
@@ -417,6 +418,9 @@ kslast: current non-AG rule writes 0.01 if no restrictive layer; otherwise write
 - Restrictive-layer detection compares `h.ksat_r` against `res_lyr_ksat_threshold` in `um/s` (default `2.0 um/s`, about `7.2 mm/h`).
 - WEPP file `kslast` is written in `mm/h`.
 - The conversion used before writing is `ksat_mm_h = ksat_r * 3.6` (`um/s` -> `mm/h`).
+- Since ADR-0008, a valid first horizon below the threshold is not allowed to
+  produce a zero-layer profile. It is written as a low-conductivity WEPP layer,
+  and restrictive-layer truncation may start below it.
 
 #### Historical `kslast` Parameterization (Git Record)
 
@@ -433,6 +437,21 @@ The historical behavior in `ssurgo.py` has changed multiple times; key milestone
 | 2026-05-22 | `569a1a29124c` | Unit-audit comments added (`ksat_r` tracked as `um/s`, WEPP output in `mm/h`), with behavior retained (`0.01` default and `/1000` restrictive-layer rule). |
 
 **Purpose:** Restrictive layers limit drainage depth and promote lateral subsurface flow, affecting hydrograph shape and baseflow.
+
+### Gridded Dominant MUKEY Fallback Provenance
+
+`wepppy.nodb.core.soils.Soils._build_gridded()` computes a raw dominant raster
+MUKEY for each hillslope, then replaces any dominant MUKEY that failed WEPP soil
+generation with the run's most common valid generated MUKEY. The final
+model-ready mapping remains in `domsoil_d` and `ssurgo_domsoil_d` for backward
+compatibility.
+
+When substitutions occur, the raw raster-selected map is retained in
+`raw_ssurgo_domsoil_d`. Each replacement is recorded in
+`ssurgo_substitution_d[topaz_id]` with `raw_mukey`, `replacement_mukey`, and
+`reason`. Generated soil summaries and `soils.parquet` include nullable
+`raw_mukey`, `substituted_mukey`, and `substitution_reason` columns when
+available.
 
 ### 8. Horizon Depth Adjustments
 

@@ -1,6 +1,6 @@
 # SSURGO Reclaimed Soil Conversion and Fallback Transparency
 
-**Status**: Open (2026-06-22)  
+**Status**: Complete; unrelated full-suite blocker documented (2026-06-22)
 **Timezone**: UTC
 
 ## Overview
@@ -68,23 +68,23 @@ WEPPcloud is selecting current Fairpoint reclaimed SSURGO map units from the 202
 
 ## Success Criteria
 
-- [ ] `3294459`, `3294460`, and `3294461` build valid WEPP soil files from deterministic fixture data.
-- [ ] The Fairpoint tests prove at least one WEPP layer is emitted for the first-horizon restrictive case.
-- [ ] Generated `.sol` descriptions for `3294459`, `3294460`, and `3294461` include Fairpoint/reclaimed names and do not fall back to Shelocta-Latham.
-- [ ] Gridded invalid-soil fallback preserves raw dominant MUKEYs and records substitution details with original MUKEY, replacement MUKEY, and reason.
-- [ ] Existing consumers of `domsoil_d`, `ssurgo_domsoil_d`, and `soils.parquet` remain backward compatible.
-- [ ] Unit and integration tests pass with `wctl run-pytest` targeted at the new soil and NoDb tests.
-- [ ] `wctl run-pytest tests --maxfail=1` passes or an unrelated external blocker is recorded.
-- [ ] QA review artifact is complete and all findings are dispositioned.
-- [ ] Parameterization ADR is present, linked from this package, and records decision provenance.
-- [ ] Durable soil docs describe reclaimed-profile handling and fallback provenance.
+- [x] `3294459`, `3294460`, and `3294461` build valid WEPP soil files from deterministic fixture data.
+- [x] The Fairpoint tests prove at least one WEPP layer is emitted for the first-horizon restrictive case.
+- [x] Generated `.sol` descriptions for `3294459`, `3294460`, and `3294461` include Fairpoint/reclaimed names and do not fall back to Shelocta-Latham.
+- [x] Gridded invalid-soil fallback preserves raw dominant MUKEYs and records substitution details with original MUKEY, replacement MUKEY, and reason.
+- [x] Existing consumers of `domsoil_d`, `ssurgo_domsoil_d`, and `soils.parquet` remain backward compatible.
+- [x] Unit and integration tests pass with `wctl run-pytest` targeted at the new soil and NoDb tests.
+- [x] `wctl run-pytest tests --maxfail=1` passes or an unrelated external blocker is recorded.
+- [x] QA review artifact is complete and all findings are dispositioned.
+- [x] Parameterization ADR is present, linked from this package, and records decision provenance.
+- [x] Durable soil docs describe reclaimed-profile handling and fallback provenance.
 
 ## Parameterization ADR Gate
 
 - **Parameterization change present**: yes
 - **ADR required**: yes
-- **ADR link(s)**: `docs/adrs/ADR-0008-ssurgo-reclaimed-soil-restrictive-layer-fallback.md` (planned)
-- **Decision provenance captured**: no; must be captured before merge.
+- **ADR link(s)**: [ADR-0008](../../adrs/ADR-0008-ssurgo-reclaimed-soil-restrictive-layer-fallback.md)
+- **Decision provenance captured**: yes.
 
 This package changes how restrictive-layer thresholds affect generated WEPP soil layers and how invalid-dominant-soil fallback is applied or reported. That is model parameterization and fallback behavior under `docs/standards/parameterization-adr-standard.md`.
 
@@ -163,6 +163,9 @@ If implementation changes route payloads, filesystem deletion/write surfaces bey
 - `tests/nodb/` - NoDb soils build and serialization tests.
 - `docs/standards/parameterization-adr-standard.md` - ADR requirement for threshold/fallback changes.
 - `docs/work-packages/20260619_ssurgo_project_sqlite_cache/tracker.md` - Prior SSURGO cache investigation and ADR context.
+- Brooks, Dobre, Elliot, Wu, and Boll (2016), "Watershed-scale evaluation of
+  the Water Erosion Prediction Project (WEPP) model in the Lake Tahoe basin" -
+  `https://research.fs.usda.gov/download/treesearch/50802.pdf`
 
 ## Deliverables
 
@@ -178,3 +181,5 @@ If implementation changes route payloads, filesystem deletion/write surfaces bey
 
 - Consider a separate policy package for fail-fast vs substitution behavior across all invalid SSURGO MUKEY classes.
 - Consider operator UI/report surfacing for raw-vs-final soil substitutions if users need direct visibility outside downloaded artifacts.
+- Investigate unrelated route-test blocker:
+  `tests/weppcloud/routes/test_wepp_bp.py::test_view_management_effective_returns_texture_specific_preview[clay-1.1-2.1-0.11]`.

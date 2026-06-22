@@ -126,6 +126,14 @@ soils.build_soils()
 dominant_soil = soils.domsoil_d  # Dict[topaz_id, mukey]
 ```
 
+For gridded SSURGO builds, `domsoil_d` and `ssurgo_domsoil_d` store final
+model-ready MUKEYs that have generated WEPP soil files. If a raw raster-selected
+dominant MUKEY cannot generate a valid soil file, the original dominant MUKEY is
+kept in `raw_ssurgo_domsoil_d` and the replacement is recorded in
+`ssurgo_substitution_d`. Downloaded/generated soil summaries include nullable
+`raw_mukey`, `substituted_mukey`, and `substitution_reason` fields when that
+provenance is available.
+
 ## SSURGO-to-WEPP Conversion
 
 The core technical process is documented in [ssurgo/ssurgo.md](ssurgo/ssurgo.md). Key steps:
@@ -213,10 +221,14 @@ Defaults only apply when SSURGO fields are missing or non-numeric. Existing SSUR
 Restrictive layers (hardpan, bedrock) limit subsurface drainage:
 
 ```python
-res_lyr_ksat_threshold = 2.0  # mm/h
+res_lyr_ksat_threshold = 2.0  # um/s
 ```
 
-Horizons with `ksat < 2.0 mm/h` trigger restrictive layer encoding in WEPP soil files, truncating the profile at that depth.
+Horizons with `ksat_r < 2.0 um/s` trigger restrictive layer encoding in WEPP
+soil files, truncating the profile at that depth. When the first valid mineral
+horizon is already below the threshold, WEPPcloud retains that horizon as a
+low-conductivity WEPP layer and only allows restrictive-layer truncation below
+it; this prevents valid reclaimed profiles from collapsing to zero WEPP layers.
 
 ## Key Concepts
 
@@ -481,7 +493,8 @@ def test_ssurgo_build():
 **Restrictive Layer Simplification:**
 - WEPP models single restrictive layer below profile
 - SSURGO may have multiple restrictive features within profile
-- First restrictive layer (ksat < 2.0 mm/h) truncates profile
+- First restrictive layer below the retained surface layer truncates profile
+- First valid low-ksat horizon is retained to avoid zero-layer profiles
 
 **Horizon Gaps:**
 - Depth discontinuities not filled (e.g., 0-20 cm, 30-50 cm)

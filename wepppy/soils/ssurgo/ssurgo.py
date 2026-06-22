@@ -1071,19 +1071,28 @@ POSSIBILITY OF SUCH DAMAGE."""
 
         # Track minimum horizon conductivity in SSURGO units (um/s).
         ksat_min = 1e38
-        n = 0
+        valid_layers_seen = 0
 
         # iterate over the layers and look for res_lyr
         for i, (h, m) in enumerate(zip(horizons, horizons_mask)):
+            if not m:
+                continue
+
             if isfloat(h.ksat_r) and h.ksat_r < ksat_min:
                 ksat_min = h.ksat_r
 
-            n += m
-
             if isfloat(h.ksat_r) and h.ksat_r < res_lyr_ksat_threshold:
+                if valid_layers_seen == 0:
+                    self.build_notes.append(
+                        "  first valid low-ksat horizon retained as WEPP layer"
+                    )
+                    valid_layers_seen += 1
+                    continue
                 self.res_lyr_i = i
                 self.res_lyr_ksat = ksat_min
                 break
+
+            valid_layers_seen += 1
 
         # determine number of layers
         n = 0
