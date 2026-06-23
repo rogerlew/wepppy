@@ -204,7 +204,12 @@ class OmniCloneContrastService:
             with open(dst, "r") as f:
                 data = json.load(f)
 
-            update_nodb_wd(data, new_wd, parent_wd=wd)
+            update_nodb_wd(
+                data,
+                new_wd,
+                parent_wd=wd,
+                rewrite_disturbed_source=False,
+            )
 
             with open(dst, "w") as fp:
                 json.dump(data, fp)

@@ -185,6 +185,8 @@ Prescribed fire scenarios require an **undisturbed** clone context (no SBS map).
 - Mulch scenarios depend on a selected base scenario (`uniform_low`, `uniform_moderate`, `uniform_high`, or `sbs_map`) and run in a later pass after base scenarios are processed.
 - During mulch builds, lookup specialization is applied in burned-base order first; the mulch pass then changes only the treatment-derived management and cover values.
 - Thinning and `prescribed_fire` run in an undisturbed context. If the project base is `sbs_map`, include/run an `undisturbed` Omni scenario so those treatments can clone from it.
+- The `undisturbed` scenario clears active SBS metadata only; source SBS rasters remain on disk so burned sibling scenarios and mulch dependencies can rebuild from copied
+  maps.
 - Scenario list order does not control execution order; Omni resolves dependencies internally.
 - Per-scenario Filters are treatment-application masks for `mulch`, `thinning`, and `prescribed_fire` only.
   Slope masks always apply when configured.

@@ -3,6 +3,7 @@ from __future__ import annotations
 import os
 from contextlib import contextmanager
 from pathlib import Path
+from types import SimpleNamespace
 
 import numpy as np
 import pytest
@@ -21,6 +22,9 @@ pytestmark = pytest.mark.nodb
 
 class _NoopLogger:
     def info(self, *_args: object, **_kwargs: object) -> None:
+        return
+
+    def warning(self, *_args: object, **_kwargs: object) -> None:
         return
 
     def log(self, *_args: object, **_kwargs: object) -> None:
@@ -54,6 +58,150 @@ def _disturbed_stub(run_dir: Path) -> Disturbed:
     disturbed._sbs_mode = 0
     disturbed._uniform_severity = None
     return disturbed
+
+
+@pytest.mark.unit
+def test_remove_sbs_clears_metadata_without_deleting_source(
+    tmp_path: Path,
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    run_dir = tmp_path / "run"
+    disturbed_dir = run_dir / "disturbed"
+    disturbed_dir.mkdir(parents=True)
+    source = disturbed_dir / "source.tif"
+    source.write_bytes(b"source")
+    sbs_4class = disturbed_dir / "sbs_4class.tif"
+    sbs_4class.write_bytes(b"4class")
+
+    disturbed = _disturbed_stub(run_dir)
+    disturbed._disturbed_fn = str(source)
+    disturbed._nodata_vals = [255]
+    disturbed._bounds = [[0.0, 0.0], [1.0, 1.0]]
+    disturbed._is256 = False
+    disturbed._classes = [0, 1, 2, 3]
+    disturbed._counts = {"Low Severity Burn": 1}
+    disturbed._breaks = [0, 1, 2, 3]
+    disturbed._ct = None
+    disturbed._color_map = None
+    disturbed._color_coverage_pcts = None
+    disturbed._sbs_mode = 1
+    disturbed._uniform_severity = 2
+    disturbed.sbs_coverage = {"low": 1.0}
+    prep = _PrepRecorder()
+
+    monkeypatch.setattr(
+        Disturbed,
+        "locked",
+        lambda self, validate_on_success=True: _null_context(),
+    )
+    monkeypatch.setattr(
+        disturbed_module.RedisPrep,
+        "getInstance",
+        staticmethod(lambda _wd: prep),
+    )
+
+    disturbed.remove_sbs()
+
+    assert source.exists()
+    assert sbs_4class.exists()
+    assert disturbed._disturbed_fn is None
+    assert disturbed._nodata_vals is None
+    assert disturbed._bounds is None
+    assert disturbed._counts is None
+    assert disturbed._sbs_mode == 0
+    assert disturbed._uniform_severity is None
+    assert disturbed.sbs_coverage is None
+    assert prep.timestamps == [disturbed_module.TaskEnum.landuse_map]
+    assert prep.has_sbs is False
+
+
+@pytest.mark.unit
+def test_get_sbs_falls_back_to_4class_when_configured_source_is_missing(
+    tmp_path: Path,
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    run_dir = tmp_path / "run"
+    disturbed_dir = run_dir / "disturbed"
+    disturbed_dir.mkdir(parents=True)
+    sbs_4class = disturbed_dir / "sbs_4class.tif"
+    sbs_4class.write_bytes(b"4class")
+
+    disturbed = _disturbed_stub(run_dir)
+    disturbed._disturbed_fn = str(disturbed_dir / "missing-source.tif")
+    disturbed._breaks = [0, 2, 3, 4]
+    disturbed._nodata_vals = None
+
+    stacker_calls: list[tuple[str, str, str, str]] = []
+
+    def _record_stacker(src: str, dem: str, dst: str, resample: str) -> None:
+        stacker_calls.append((src, dem, dst, resample))
+
+    class SoilBurnSeverityMapStub:
+        def __init__(
+            self,
+            fname: str,
+            *,
+            breaks: object,
+            nodata_vals: object,
+            color_map: object,
+        ) -> None:
+            self.fname = fname
+            self.breaks = breaks
+            self.nodata_vals = nodata_vals
+            self.color_map = color_map
+
+    monkeypatch.setattr(
+        disturbed_module.Ron,
+        "getInstance",
+        lambda _wd: SimpleNamespace(dem_fn="dem.tif"),
+    )
+    monkeypatch.setattr(disturbed_module, "raster_stacker", _record_stacker)
+    monkeypatch.setattr(disturbed_module, "SoilBurnSeverityMap", SoilBurnSeverityMapStub)
+
+    sbs = disturbed.get_sbs()
+
+    assert stacker_calls == [
+        (
+            str(sbs_4class),
+            "dem.tif",
+            str(disturbed_dir / "baer.cropped.tif"),
+            "near",
+        )
+    ]
+    assert isinstance(sbs, SoilBurnSeverityMapStub)
+    assert sbs.breaks is None
+    assert sbs.nodata_vals is None
+    assert sbs.color_map is None
+
+
+@pytest.mark.unit
+def test_class_map_fallback_interprets_normalized_sbs_4class_without_source_breaks(
+    tmp_path: Path,
+) -> None:
+    run_dir = tmp_path / "run"
+    disturbed_dir = run_dir / "disturbed"
+    disturbed_dir.mkdir(parents=True)
+    sbs_4class = disturbed_dir / "sbs_4class.tif"
+    values = np.array([[0, 1, 2, 3, 255]], dtype=np.uint8)
+    _write_uint8_tif(sbs_4class, values)
+
+    disturbed = _disturbed_stub(run_dir)
+    disturbed._disturbed_fn = str(disturbed_dir / "missing-source.tif")
+    disturbed._breaks = [0, 2, 3, 4]
+    disturbed._nodata_vals = None
+
+    class_map = {
+        value: severity
+        for value, severity, _count in disturbed.class_map
+    }
+
+    assert class_map == {
+        0: "No Burn",
+        1: "Low Severity Burn",
+        2: "Moderate Severity Burn",
+        3: "High Severity Burn",
+        255: "No Burn",
+    }
 
 
 @pytest.mark.unit

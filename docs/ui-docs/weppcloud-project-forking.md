@@ -53,7 +53,8 @@ Module: `wepppy/rq/project_rq.py`
   - Uses `rsync` to clone the run directory and streams rsync output to `<runid>:fork`.
   - When `skip_wepp_runs_output=True` (or when `undisturbify=True`), excludes `wepp/runs` and `wepp/output` from content copy, then creates those directories in the destination run.
   - Rewrites `.nodb` paths and clears locks, `READONLY`, and `PUBLIC` markers.
-  - When `undisturbify=True`, removes SBS artifacts, rebuilds landuse/soils, and enqueues WEPP; completion is emitted by `_finish_fork_rq` after WEPP finishes.
+  - When `undisturbify=True`, clears active SBS metadata without deleting copied SBS rasters, rebuilds landuse/soils, and enqueues WEPP; completion is emitted by
+    `_finish_fork_rq` after WEPP finishes.
   - Emits `FORK_COMPLETE` on success and `FORK_FAILED` on failure.
 - `_finish_fork_rq(runid)`: publishes the final completion trigger once dependent jobs finish.
 

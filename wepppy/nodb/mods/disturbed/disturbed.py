@@ -773,6 +773,36 @@ class Disturbed(NoDbBase):
 
         return _join(self.disturbed_dir, self._disturbed_fn)
 
+    def _available_disturbed_path(self) -> Optional[str]:
+        disturbed_path = self.disturbed_path
+        if disturbed_path is None or _exists(disturbed_path):
+            return disturbed_path
+
+        sbs_4class_path = self.sbs_4class_path
+        if _exists(sbs_4class_path):
+            logger_warning = getattr(self.logger, "warning", None)
+            if callable(logger_warning):
+                logger_warning(
+                    "Configured SBS source %s is missing; using %s",
+                    disturbed_path,
+                    sbs_4class_path,
+                )
+            return sbs_4class_path
+
+        return disturbed_path
+
+    def _sbs_map_args(
+        self,
+        disturbed_path: str,
+    ) -> Tuple[
+        Optional[Sequence[int | float]],
+        Optional[List[int | float]],
+        Optional[Dict[Tuple[int, int, int], str]],
+    ]:
+        if disturbed_path == self.sbs_4class_path:
+            return None, None, None
+        return self.breaks, self._nodata_vals, self.color_to_severity_map
+
     @property
     def sbs_mode(self) -> int:
         return int(getattr(self, '_sbs_mode', 0))
@@ -953,7 +983,17 @@ class Disturbed(NoDbBase):
 
     @property
     def class_map(self) -> Dict[str, str]:
-        sbs = SoilBurnSeverityMap(self.disturbed_path, breaks=self.breaks, nodata_vals=self._nodata_vals, color_map=self.color_to_severity_map)
+        disturbed_path = self._available_disturbed_path()
+        if disturbed_path is None:
+            raise FileNotFoundError("No SBS map is configured")
+
+        breaks, nodata_vals, color_map = self._sbs_map_args(disturbed_path)
+        sbs = SoilBurnSeverityMap(
+            disturbed_path,
+            breaks=breaks,
+            nodata_vals=nodata_vals,
+            color_map=color_map,
+        )
         return sbs.class_map
 
     def modify_burn_class(
@@ -1031,12 +1071,8 @@ class Disturbed(NoDbBase):
         self.logger.info(f'{self.class_name}.{func_name}()')
 
         with self.locked():
-            disturbed_fn = getattr(self, '_disturbed_fn', None)
-
-            if disturbed_fn is not None and  _exists(disturbed_fn):
-                os.remove(disturbed_fn)
-
-
+            # Clearing SBS is a metadata transition; the source raster may be
+            # reused by OMNI sibling scenarios or fork audits.
             self._disturbed_fn = None
             self._nodata_vals = None
             self._bounds = None
@@ -1047,6 +1083,9 @@ class Disturbed(NoDbBase):
             self._ct = None
             self._color_map = None
             self._color_coverage_pcts = None
+            self._sbs_mode = 0
+            self._uniform_severity = None
+            self.sbs_coverage = None
 
         try:
             prep = RedisPrep.getInstance(self.wd)
@@ -1199,15 +1238,19 @@ class Disturbed(NoDbBase):
         if not self.has_map:
             return
 
-        disturbed_path = self.disturbed_path
+        disturbed_path = self._available_disturbed_path()
+        if disturbed_path is None:
+            return
+
         disturbed_cropped = self.disturbed_cropped
         if _exists(disturbed_cropped):
             os.remove(disturbed_cropped)
 
         dem_fn = Ron.getInstance(wd).dem_fn
         raster_stacker(disturbed_path, dem_fn, disturbed_cropped, resample='near')
+        breaks, nodata_vals, color_map = self._sbs_map_args(disturbed_path)
         return SoilBurnSeverityMap(
-            disturbed_cropped, breaks=self.breaks, nodata_vals=self._nodata_vals, color_map=self.color_to_severity_map)
+            disturbed_cropped, breaks=breaks, nodata_vals=nodata_vals, color_map=color_map)
 
     def get_sbs_4class(self) -> SoilBurnSeverityMap:
         sbs = self.get_sbs()

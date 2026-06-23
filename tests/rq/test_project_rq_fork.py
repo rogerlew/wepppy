@@ -484,6 +484,11 @@ def test_prepare_fork_run_undisturbify_clears_new_run_scoped_nodb_cache(
             encoding="ascii",
         )
 
+    disturbed_dir = source_wd / "disturbed"
+    disturbed_dir.mkdir(parents=True, exist_ok=True)
+    (disturbed_dir / "source_sbs.tif").write_text("source", encoding="ascii")
+    (disturbed_dir / "sbs_4class.tif").write_text("4class", encoding="ascii")
+
     cache_dir = source_wd / "wepp" / "reports" / "cache"
     cache_dir.mkdir(parents=True, exist_ok=True)
     (cache_dir / "stale.bin").write_text("stale", encoding="ascii")
@@ -625,6 +630,8 @@ def test_prepare_fork_run_undisturbify_clears_new_run_scoped_nodb_cache(
     assert disturbed.remove_calls == 1
     assert landuse.build_calls == 1
     assert soils.build_calls == 1
+    assert (target_wd / "disturbed" / "source_sbs.tif").read_text(encoding="ascii") == "source"
+    assert (target_wd / "disturbed" / "sbs_4class.tif").read_text(encoding="ascii") == "4class"
     assert mutate_calls == [
         ("landuse", "fork-undisturbify-build-landuse"),
         ("soils", "fork-undisturbify-build-soils"),

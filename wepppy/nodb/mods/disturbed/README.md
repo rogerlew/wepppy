@@ -41,6 +41,8 @@ Burn-severity remapping is based only on valid SBS pixels that intersect each hi
 - If a hillslope has at least one valid SBS pixel, the hillslope uses the dominant class from those valid pixels.
 - If a hillslope has no valid SBS pixels (for example, outside raster footprint or SBS nodata-only), the hillslope must default to `130` (`No Burn` / unburned).
 - Disturbed mapping must not use global-mode fallback for nodata-only hillslopes.
+- Removing SBS from a run clears active SBS metadata and prep state only; it must not unlink the source raster or normalized `sbs_4class.tif` artifact, because OMNI sibling scenarios
+  and fork audits may still need those files.
 
 Rationale:
 - Global-mode fallback can propagate a burned class (often moderate) into hillslopes with no burn evidence, which overstates burned area and produces incorrect management/soil assignment.

@@ -138,22 +138,63 @@ def _enforce_user_defined_contrast_limit(
     )
 
 
-def _update_nodb_wd(d: Dict[str, Any], new_wd: str, parent_wd: Optional[str] = None) -> None:
+def _rewrite_disturbed_source_path(
+    state: Dict[str, Any],
+    new_wd: str,
+    source_wd: Optional[str],
+) -> None:
+    disturbed_fn = state.get("_disturbed_fn")
+    if (
+        source_wd is None
+        or not isinstance(disturbed_fn, str)
+        or not os.path.isabs(disturbed_fn)
+    ):
+        return
+
+    source_root = os.path.normpath(source_wd)
+    source_path = os.path.normpath(disturbed_fn)
+    try:
+        common_path = os.path.commonpath([source_root, source_path])
+    except ValueError:
+        return
+    if common_path != source_root:
+        return
+
+    relpath = os.path.relpath(source_path, source_root)
+    rel_parts = relpath.split(os.sep)
+    if not rel_parts or rel_parts[0] != "disturbed":
+        return
+
+    state["_disturbed_fn"] = os.path.join(new_wd, relpath)
+
+
+def _update_nodb_wd(
+    d: Dict[str, Any],
+    new_wd: str,
+    parent_wd: Optional[str] = None,
+    source_wd: Optional[str] = None,
+    rewrite_disturbed_source: bool = True,
+) -> None:
     """Update wd (and optionally _parent_wd) in nodb JSON, handling both formats.
     
     Old jsonpickle format stores properties at top level.
     New format (with __getstate__) wraps properties in py/state.
     """
+    rewrite_source_wd = source_wd if source_wd is not None else parent_wd
     if 'py/state' in d:
         # New format: properties nested in py/state
-        d['py/state']['wd'] = new_wd
+        state = d['py/state']
+        state['wd'] = new_wd
         if parent_wd is not None:
-            d['py/state']['_parent_wd'] = parent_wd
+            state['_parent_wd'] = parent_wd
     else:
         # Old format: properties at top level
-        d['wd'] = new_wd
+        state = d
+        state['wd'] = new_wd
         if parent_wd is not None:
-            d['_parent_wd'] = parent_wd
+            state['_parent_wd'] = parent_wd
+    if rewrite_disturbed_source:
+        _rewrite_disturbed_source_path(state, new_wd, rewrite_source_wd)
 
 
 ContrastMapping = Dict[int | str, str]
@@ -525,7 +566,7 @@ def _omni_clone_sibling(new_wd: str, omni_clone_sibling_name: str, runid: str, p
         with open(dst, 'r') as f:
             d = json.load(f)
             
-        _update_nodb_wd(d, new_wd)
+        _update_nodb_wd(d, new_wd, source_wd=sibling_wd)
 
         with open(dst, 'w') as fp:
             json.dump(d, fp)
