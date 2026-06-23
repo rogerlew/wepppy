@@ -1,19 +1,31 @@
 # Honeyed Marathoner OMNI Sediment Inversion Investigation
 
-**Status: CLOSED — no defect; no code or configuration changes required
-(`2026-06-12`).** See Conclusion.
+**Status: SUPERSEDED FOR CURRENT RERUNS (`2026-06-23`).** The original
+`2026-06-12` investigation is retained as fixture evidence for the stale
+disturbed-parameter run, but the corrected disturbed-parameter rerun no longer
+has a burned-vs-undisturbed sediment inversion. See Rerun Update and
+Conclusion.
 
 ## Summary
 
 On `2026-06-12`, we investigated why three hillslopes in
-`/wc1/runs/ho/honeyed-marathoner` on `wepp1` report higher annual sediment
+`/wc1/runs/ho/honeyed-marathoner` on `wepp1` reported higher annual sediment
 yield in the unburned OMNI `undisturbed` scenario than in the burned
 `sbs_map` base scenario.
 
-The inversion is real in the raw WEPP output, but it is very small and
-isolated. Only 3 of 471 hillslopes invert, with a combined difference of
-`0.0622 t/yr`. All three are `Low Severity Fire` base hillslopes on
-`620333-loam`.
+That original inversion was real in the raw WEPP output preserved by the
+fixture, but it was very small and isolated: 3 of 471 hillslopes inverted, with
+a combined difference of `0.0622 t/yr`. All three were `Low Severity Fire` base
+hillslopes on `620333-loam`.
+
+On `2026-06-23`, honeyed-marathoner was rerun with corrected disturbed
+parameters. The current run materially changes the outcome: **0 of 471
+hillslopes invert**. The three formerly affected hillslopes now all have
+nonzero burned sediment yield that exceeds the undisturbed scenario.
+
+The remaining root-cause sections document why the preserved stale-parameter
+fixture produced the original trace inversion. They should no longer be cited
+as the current behavior of honeyed-marathoner.
 
 The evidence points to a WEPP saturation-excess event-threshold behavior on one
 storm, `1992-06-16`. The open burned canopy melts its winter snowpack out about
@@ -23,6 +35,46 @@ earlier and sits below saturation when the storm arrives, while the still-near-
 saturated unburned surface sheds the burst as saturation-excess runoff. It is
 not an OMNI aggregation error, and the *full-profile* antecedent soil water is
 nearly identical between scenarios.
+
+## Rerun Update (`2026-06-23`)
+
+The corrected-parameter rerun was checked against:
+
+- `/wc1/runs/ho/honeyed-marathoner/omni/scenarios.hillslope_summaries.parquet`
+- `/wc1/runs/ho/honeyed-marathoner/wepp/output/interchange/loss_pw0.hill.parquet`
+- `/wc1/runs/ho/honeyed-marathoner/_pups/omni/scenarios/undisturbed/wepp/output/interchange/loss_pw0.hill.parquet`
+
+The OMNI hillslope summary now contains scenario slices for `sbs_map`,
+`undisturbed`, and the three mulch scenarios. Comparing `sbs_map` against
+`undisturbed`, there are **no negative sediment deltas** across the 471
+hillslopes.
+
+Current raw WEPP annual sediment yield for the three formerly affected
+hillslopes:
+
+| WEPP ID | Topaz ID | Burned `sbs_map` (t/yr) | Undisturbed (t/yr) | Burned - undisturbed (t/yr) |
+| ---: | ---: | ---: | ---: | ---: |
+| 118 | 543 | 0.1934 | 0.0008 | +0.1926 |
+| 122 | 562 | 0.0115 | 0.0002 | +0.0113 |
+| 264 | 1153 | 0.2977 | 0.0612 | +0.2365 |
+
+In raw WEPP units, those burned sediment yields are `193.4 kg/yr`,
+`11.5 kg/yr`, and `297.7 kg/yr`; undisturbed remains `0.8 kg/yr`,
+`0.2 kg/yr`, and `61.2 kg/yr`.
+
+The low-severity forest cohort also changed materially:
+
+| Check | Original `2026-06-12` run | Corrected `2026-06-23` rerun |
+| --- | ---: | ---: |
+| Matching low-severity forest hillslopes | 56 | 61 |
+| Burned-lower-than-undisturbed inversions | 3 | 0 |
+| Burned sediment total (t/yr) | 3.1304 | 9.4106 |
+| Undisturbed sediment total (t/yr) | 0.0670 | 0.0670 |
+
+The old undisturbed H264 `1992-06-16` storm signature is still present in the
+corrected rerun, but it no longer controls the annual ordering. The corrected
+burned H264 run now produces sediment in spring snowmelt events, so annual
+burned sediment exceeds undisturbed sediment.
 
 ## Scope
 
@@ -43,6 +95,9 @@ The project had been forked, so `.err` files retaining older source paths were
 treated as provenance noise and not as the root cause.
 
 ## Affected Hillslopes
+
+This section documents the original `2026-06-12` stale-parameter run. Current
+corrected-parameter values are listed in Rerun Update.
 
 | WEPP ID | Topaz ID | Area (ha) | Burned landuse | Unburned landuse | Burned sediment (t/yr) | Unburned sediment (t/yr) |
 | --- | ---: | ---: | --- | --- | ---: | ---: |
@@ -86,6 +141,9 @@ reports zero sediment, which masks the inversion. These sidecars are committed
 with the fixture for this reason.
 
 ## Related Low-Severity Forest Hillslopes
+
+This section documents the original `2026-06-12` stale-parameter run. Current
+corrected-parameter cohort totals are listed in Rerun Update.
 
 A follow-up read-only query on `2026-06-12 16:44:11 PDT` checked the full
 `omni/scenarios.hillslope_summaries.parquet` table for other base
@@ -333,6 +391,9 @@ low-severity fire — a calibration question, not a code bug.
 
 ## Interpretation
 
+This interpretation applies to the preserved stale-parameter fixture, not to
+the corrected `2026-06-23` rerun.
+
 The root cause is a nonlinear WEPP saturation-excess and erosion-threshold edge
 case created by the generated low-severity-fire plant-growth management
 parameters (see Driver Isolation and Snowmelt Timing and Saturation-Excess
@@ -357,11 +418,18 @@ comparisons.
 
 ## Conclusion
 
-This investigation is **closed with no defect found, and no code or
-configuration changes required**. The OMNI sediment inversion on the three
-`620333-loam` low-severity-fire hillslopes is a correct, explicable WEPP result,
-not a bug in OMNI aggregation, the WEPP binary, or the WEPPcloud soil and
-management generation:
+This investigation is **superseded for current honeyed-marathoner reruns**.
+With corrected disturbed parameters, the current `sbs_map` baseline no longer
+has a sediment inversion against the OMNI `undisturbed` scenario:
+
+- The inversion count changed from `3/471` to `0/471`.
+- The three formerly affected hillslopes now have burned sediment yield above
+  undisturbed sediment yield.
+- The low-severity forest cohort changed from 3 inversions to 0 inversions.
+
+The original `2026-06-12` conclusion remains useful only for the preserved
+fixture and the stale-parameter run. It showed that the old trace inversion was
+not an OMNI aggregation error and was not caused by a WEPP binary regression:
 
 - It reproduces identically under the current release `wepp_260606` and the
   production `wepp_dcc52a6` build — version-stable, neither introduced by nor
@@ -376,12 +444,12 @@ management generation:
 - The soil `kslast` parameterization and the OMNI undisturbed scenario behave as
   designed.
 
-The one item left open is **not a defect** but a modeling-calibration question
-for any future work: whether WEPP's canopy-cover control on snowmelt radiation
-(and, secondarily, on bare-soil evaporation) is appropriately parameterized for
-low-severity fire. The fixture and regression test preserve the three
-hillslopes, and the artifacts record the supporting water balance and cohort
-analysis.
+The corrected rerun changes the operational takeaway: the old "no code or
+configuration changes required" status should not be cited for current runs.
+For current honeyed-marathoner outputs, no burned-lower-than-undisturbed
+sediment inversion remains to explain. The fixture and regression test still
+preserve the three hillslopes, and the artifacts still record the old
+water-balance and cohort analysis for historical comparison.
 
 ## Fixture
 
@@ -405,7 +473,8 @@ The focused regression test is:
 
 ## Artifacts
 
-`artifacts/` holds the event water-balance evidence for H264:
+`artifacts/` holds the original `2026-06-12` stale-parameter event
+water-balance evidence for H264:
 
 - `event_water_balance_H264.png` — six-panel figure over the melt-to-storm
   window (`J115-J176`, `1992`): precipitation, snow water equivalent, daily
@@ -451,3 +520,33 @@ cd <scratch>/_pups/omni/scenarios/undisturbed/wepp/runs \
 ```
 
 No production files were modified.
+
+Corrected-parameter rerun comparison:
+
+```bash
+cd /workdir/wepppy
+.venv/bin/python - <<'PY'
+import pandas as pd
+
+omni = pd.read_parquet(
+    '/wc1/runs/ho/honeyed-marathoner/omni/scenarios.hillslope_summaries.parquet'
+)
+base = omni[omni['scenario'].eq('sbs_map')]
+und = omni[omni['scenario'].eq('undisturbed')]
+merged = base.merge(
+    und[['Wepp ID', 'Sediment Yield (t)']],
+    on='Wepp ID',
+    suffixes=('_burned', '_undisturbed'),
+)
+merged['delta'] = (
+    merged['Sediment Yield (t)_burned']
+    - merged['Sediment Yield (t)_undisturbed']
+)
+print((merged['delta'] < 0).sum())
+print(
+    merged[merged['Wepp ID'].isin([118, 122, 264])]
+    [['Wepp ID', 'Sediment Yield (t)_burned',
+      'Sediment Yield (t)_undisturbed', 'delta']]
+)
+PY
+```

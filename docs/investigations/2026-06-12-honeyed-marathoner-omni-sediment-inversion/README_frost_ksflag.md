@@ -1,9 +1,18 @@
 # Frost-Routine (`ksflag=1`) Sensitivity for H264
 
+**Status: ARCHIVAL / SUPERSEDED FOR CURRENT HONEYED-MARATHONER RERUNS
+(`2026-06-23`).** This sensitivity was run against the preserved
+stale-parameter fixture. With corrected disturbed parameters, current H264
+already has burned `ksflag=0` sediment greater than undisturbed sediment
+(`297.7 kg/yr` versus `61.2 kg/yr`), so the old headline result that frost
+"reverses" the inversion no longer applies to current outputs. The WEPP
+`ksflag` mechanics below remain useful background.
+
 Follow-on to `README.md` (the honeyed-marathoner OMNI sediment inversion). This
 document asks how enabling WEPP's frost routine changes snowpack/melt and
-runoff/erosion for hillslope `264`. It does not change any conclusion in the
-main report; it is a sensitivity test.
+runoff/erosion for hillslope `264`. It did not change the original
+`2026-06-12` conclusion; after the `2026-06-23` corrected-parameter rerun, the
+main report is superseded for current behavior and this note is archival.
 
 **Evidence class:** executional. H264 was re-run on the dev container (not
 `wepp1`) with `wepp_dcc52a6_hill` on a scratch copy of the committed fixture;
@@ -32,8 +41,9 @@ forest as cropland (`lanuse=1`); WEPP only forces `ksflag=0` when
 
 ## Headline result
 
-With frost enabled, the burned hillslope erodes far more, and the inversion
-reverses to the physically expected direction.
+Historical fixture result: with frost enabled, the burned hillslope erodes far
+more, and the original stale-parameter inversion reverses to the physically
+expected direction.
 
 | Quantity (H264, 1992) | Burned `ksflag=0` | Burned `ksflag=1` | Unburned `ksflag=0` | Unburned `ksflag=1` |
 | --- | ---: | ---: | ---: | ---: |
@@ -78,6 +88,9 @@ Figure 1 in the main report, which is `ksflag=0`).*
 
 ## Interpretation
 
+This interpretation applies to the preserved stale-parameter fixture, not to
+the corrected `2026-06-23` honeyed-marathoner rerun.
+
 Enabling frost gives the physically expected ordering (burned erodes more than
 unburned) and removes the inversion. The production default `ksflag=0` disables
 frost (and the internal Ksat adjustments) for these forest-as-cropland soils,
@@ -92,6 +105,11 @@ Conclusion: whether frost (and the bundled Ksat adjustments) should be enabled
 for high-elevation forest soils where a deep seasonal frozen layer would
 realistically force snowmelt runoff. That is a configuration decision for the
 modeling team, not a change required by this investigation.
+
+Under the corrected disturbed parameters, enabling frost is not needed to remove
+the H264 annual sediment inversion because the current `ksflag=0` burned run
+already exceeds undisturbed sediment. This sensitivity was not re-run under the
+corrected parameters.
 
 ## Reproduction
 
