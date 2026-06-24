@@ -1279,7 +1279,12 @@ def runs0_nocfg(runid):
     next_target = _sanitize_runs0_next_target(request.args.get("next"), runid, ron.config_stem)
     if next_target:
         response = redirect(next_target)
-        if _set_run_session_jwt_cookie(response, runid=runid, config=ron.config_stem):
+        if _set_run_session_jwt_cookie(
+            response,
+            runid=runid,
+            config=ron.config_stem,
+            require_root=_next_target_requires_root(next_target, runid, ron.config_stem),
+        ):
             return response
         target_args['next'] = next_target
         return redirect(url_for_run('run_0.runs0', **target_args))
@@ -1518,16 +1523,21 @@ def _store_session_marker(runid: str, session_id: str) -> None:
             close_fn()
 
 
-def _set_run_session_jwt_cookie(response, *, runid: str, config: str) -> bool:
+def _set_run_session_jwt_cookie(response, *, runid: str, config: str, require_root: bool = False) -> bool:
     user_id, roles = _session_identity_claims()
     fallback_user_id: int | None = None
     fallback_roles: set[str] = set()
-    if user_id is None or not roles:
+    role_set = {role.lower() for role in roles}
+    if user_id is None or not {"admin", "root"} & role_set:
         fallback_user_id, fallback_roles = _request_current_user_identity()
         if user_id is None and fallback_user_id is not None:
             user_id = fallback_user_id
         if fallback_roles:
             roles = _normalize_role_names([*roles, *sorted(fallback_roles)])
+            role_set = {role.lower() for role in roles}
+
+    if require_root and "root" not in role_set:
+        return False
 
     session_id = _resolve_session_id_from_request()
     if not session_id:
@@ -1583,6 +1593,31 @@ def _set_run_session_jwt_cookie(response, *, runid: str, config: str) -> bool:
             path=_batch_browse_compat_cookie_path(),
         )
     return True
+
+
+def _next_target_requires_root(next_target: str, runid: str, config: str) -> bool:
+    try:
+        parsed = urlsplit(str(next_target))
+    except ValueError:
+        # Malformed next targets should not escalate cookie claims.
+        return False
+
+    path = parsed.path or ""
+    expected_prefix = f"{_site_prefix()}/runs/{runid}/{config}/"
+    if not path.startswith(expected_prefix):
+        return False
+
+    relpath = path[len(expected_prefix):].lstrip("/")
+    if not relpath:
+        return False
+
+    route, _, subpath = relpath.partition("/")
+    if route not in {"browse", "download", "gdalinfo", "dtale", "files", "schema"}:
+        return False
+
+    from wepppy.microservices.browse.auth import is_root_only_path
+
+    return is_root_only_path(subpath)
 
 
 def _sanitize_runs0_next_target(next_value: str | None, runid: str, config: str) -> str | None:

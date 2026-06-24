@@ -224,10 +224,28 @@ var WCMapGlShared = (function () {
         if (!value) {
             return [];
         }
-        var sanitized = String(value).replace(/[a-zA-Z{}\[\]\\|\/<>';:\u00b0]/g, "");
+        var normalized = String(value)
+            .replace(/[−﹣－]/g, "-")
+            .replace(/["“”„‟'‘’`]/g, "")
+            .replace(/\u00a0/g, " ");
+        var sanitized = normalized.replace(/[a-zA-Z{}\[\]\\|\/<>';:\u00b0\u00ba]/g, "");
         return sanitized.split(/[\s,]+/).filter(function (item) {
             return item !== "";
         });
+    }
+
+    function parseNumericToken(token) {
+        if (token === undefined || token === null) {
+            return NaN;
+        }
+        var normalized = String(token).trim();
+        if (!normalized) {
+            return NaN;
+        }
+        normalized = normalized.replace(/^[+\-]{2,}/, function (signs) {
+            return signs.indexOf("-") !== -1 ? "-" : "+";
+        });
+        return Number(normalized);
     }
 
     function parseLocationInput(value) {
@@ -235,14 +253,14 @@ var WCMapGlShared = (function () {
         if (tokens.length < 2) {
             return null;
         }
-        var lng = Number(tokens[0]);
-        var lat = Number(tokens[1]);
+        var lng = parseNumericToken(tokens[0]);
+        var lat = parseNumericToken(tokens[1]);
         if (!Number.isFinite(lat) || !Number.isFinite(lng)) {
             return null;
         }
         var zoom = null;
         if (tokens.length > 2) {
-            var parsedZoom = Number(tokens[2]);
+            var parsedZoom = parseNumericToken(tokens[2]);
             if (Number.isFinite(parsedZoom)) {
                 zoom = parsedZoom;
             }

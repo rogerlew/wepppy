@@ -408,6 +408,22 @@ def authorize_run_request(
                         source="cookie",
                     )
                 )
+            if (
+                primary_exc.status_code == 403
+                and primary_exc.message == "Root role required for this path"
+                and context.token_class == "session"
+            ):
+                # Session cookies can outlive role changes or earlier minting bugs. Treat
+                # root-only denials from a session cookie as stale so the run bridge can
+                # re-mint with current Flask-Login roles when the browser session is root.
+                return _evaluate_context(
+                    AuthContext(
+                        claims=None,
+                        token_class=None,
+                        roles=frozenset(),
+                        source="cookie",
+                    )
+                )
         raise primary_exc
 
 

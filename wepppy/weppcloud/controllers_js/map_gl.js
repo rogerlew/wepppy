@@ -1592,6 +1592,11 @@ var MapController = (function () {
                 if (!parsed) {
                     if (inputValue && String(inputValue).trim()) {
                         var trimmed = String(inputValue).trim();
+                        var looksLikeCoordinate = /[\d]/.test(trimmed) && /[.,\s]/.test(trimmed);
+                        if (looksLikeCoordinate) {
+                            console.warn("Map GL: invalid location input. Expected 'lon, lat[, zoom]'.", inputValue);
+                            return;
+                        }
                         var helper = ensureFindAndFlashHelper();
                         if (helper && typeof map.findByTopazId === "function") {
                             return Promise.resolve(map.findByTopazId(trimmed)).then(function (result) {

@@ -1212,6 +1212,46 @@ def test_root_only_path_uses_bearer_when_cookie_lacks_root_role(
     assert response.status_code == 200
 
 
+def test_root_only_path_with_session_cookie_missing_root_redirects_to_remint(
+    tmp_path: Path,
+    load_secure_browse,
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    runid = "run-root-stale-session-cookie"
+    config = "cfg"
+    run_root = tmp_path / runid
+    subpath = "exception_factory.log"
+    _touch(run_root / subpath, "sensitive")
+    browse = load_secure_browse({runid: run_root}, SITE_PREFIX="/weppcloud")
+    app = browse.create_app()
+
+    import wepppy.microservices.rq_engine.auth as rq_auth
+
+    monkeypatch.setattr(rq_auth, "_check_session_marker", lambda *_args: None)
+
+    session_token = _issue_token(
+        token_class="session",
+        subject="sid-root-stale",
+        runs=[runid],
+        roles=["User"],
+        extra_claims={"runid": runid, "session_id": "sid-root-stale"},
+    )
+
+    with TestClient(app) as client:
+        client.cookies.set("wepp_browse_jwt", session_token)
+        response = client.get(
+            f"/weppcloud/runs/{runid}/{config}/browse/{subpath}",
+            headers={"Accept": "text/html"},
+            follow_redirects=False,
+        )
+
+    assert response.status_code == 302
+    parsed = urlparse(response.headers["location"])
+    assert parsed.path == f"/weppcloud/runs/{runid}/"
+    next_value = parse_qs(parsed.query).get("next", [""])[0]
+    assert next_value == f"/weppcloud/runs/{runid}/{config}/browse/{subpath}"
+
+
 def test_run_download_root_only_path_uses_bearer_when_cookie_lacks_root_role(
     tmp_path: Path,
     load_secure_browse,

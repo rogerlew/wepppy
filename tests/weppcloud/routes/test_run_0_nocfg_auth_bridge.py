@@ -107,7 +107,8 @@ def test_runs0_nocfg_mints_cookie_and_redirects_to_next(
     app, module, runid, url_for_calls = run0_app
     cookie_calls: list[tuple[str, str]] = []
 
-    def _set_cookie(response, *, runid: str, config: str) -> bool:
+    def _set_cookie(response, *, runid: str, config: str, require_root: bool = False) -> bool:
+        assert require_root is False
         cookie_calls.append((runid, config))
         response.set_cookie("probe", "1")
         return True
@@ -124,12 +125,36 @@ def test_runs0_nocfg_mints_cookie_and_redirects_to_next(
     assert url_for_calls == []
 
 
+def test_runs0_nocfg_marks_root_only_next_for_cookie_minting(
+    run0_app,
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    app, module, runid, url_for_calls = run0_app
+    cookie_calls: list[tuple[str, str, bool]] = []
+
+    def _set_cookie(response, *, runid: str, config: str, require_root: bool = False) -> bool:
+        cookie_calls.append((runid, config, require_root))
+        response.set_cookie("probe", "1")
+        return True
+
+    monkeypatch.setattr(module, "_set_run_session_jwt_cookie", _set_cookie)
+
+    raw_next = f"/weppcloud/runs/{runid}/cfg/browse/exception_factory.log"
+    with app.test_client() as client:
+        response = client.get(f"/runs/{runid}/?next={quote(raw_next, safe='')}", follow_redirects=False)
+
+    assert response.status_code == 302
+    assert response.headers["Location"] == f"/weppcloud/runs/{runid}/cfg/browse/exception_factory.log"
+    assert cookie_calls == [(runid, "cfg", True)]
+    assert url_for_calls == []
+
+
 def test_runs0_nocfg_falls_back_to_runs0_when_cookie_mint_fails(
     run0_app,
     monkeypatch: pytest.MonkeyPatch,
 ) -> None:
     app, module, runid, _url_for_calls = run0_app
-    monkeypatch.setattr(module, "_set_run_session_jwt_cookie", lambda response, *, runid, config: False)
+    monkeypatch.setattr(module, "_set_run_session_jwt_cookie", lambda response, *, runid, config, require_root=False: False)
 
     raw_next = f"/weppcloud/runs/{runid}/browse/private.txt"
     with app.test_client() as client:
@@ -482,7 +507,8 @@ def test_composite_browse_redirect_chain_terminates_after_cookie_mint(
     digest = hashlib.sha256(f"{runid}\n{config}".encode("utf-8")).hexdigest()[:16]
     expected_cookie_key = f"{module.DEFAULT_BROWSE_JWT_COOKIE_NAME}_{digest}"
 
-    def _set_cookie(response, *, runid: str, config: str) -> bool:
+    def _set_cookie(response, *, runid: str, config: str, require_root: bool = False) -> bool:
+        assert require_root is False
         response.set_cookie(
             key=expected_cookie_key,
             value="session-token",
@@ -594,3 +620,88 @@ def test_set_run_session_jwt_cookie_adds_fallback_admin_roles_to_claims(
     claims = captured["extra_claims"]
     assert claims["user_id"] == 7
     assert set(claims["roles"]) == {"admin", "root"}
+
+
+def test_set_run_session_jwt_cookie_merges_current_user_root_when_session_has_user_role(
+    run0_app,
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    app, module, runid, _url_for_calls = run0_app
+
+    captured: dict[str, object] = {}
+
+    class _CurrentUser:
+        is_authenticated = True
+        id = 7
+
+        @staticmethod
+        def get_id() -> str:
+            return "7"
+
+        @staticmethod
+        def has_role(role: str) -> bool:
+            return role == "Root"
+
+    monkeypatch.setattr(module, "_session_identity_claims", lambda: (7, ["User"]))
+    monkeypatch.setattr(module, "_resolve_session_id_from_request", lambda: "sid-1")
+    monkeypatch.setattr(module, "_session_user_authorized_for_run", lambda *_args: True)
+    monkeypatch.setattr(module, "_store_session_marker", lambda *_args: None)
+    monkeypatch.setattr(module, "current_user", _CurrentUser())
+
+    def _issue_token(_subject, *, scopes, audience, expires_in, extra_claims):
+        captured["extra_claims"] = extra_claims
+        return {"token": "session-token"}
+
+    monkeypatch.setattr(module.auth_tokens, "issue_token", _issue_token)
+
+    with app.test_request_context(f"/runs/{runid}/", headers={"X-Forwarded-Proto": "https"}):
+        response = app.make_response(("ok", 200))
+        assert module._set_run_session_jwt_cookie(
+            response,
+            runid=runid,
+            config="cfg",
+            require_root=True,
+        ) is True
+
+    claims = captured["extra_claims"]
+    assert claims["user_id"] == 7
+    assert set(claims["roles"]) == {"User", "root"}
+
+
+def test_set_run_session_jwt_cookie_refuses_root_only_target_for_non_root_session(
+    run0_app,
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    app, module, runid, _url_for_calls = run0_app
+
+    class _CurrentUser:
+        is_authenticated = True
+        id = 7
+
+        @staticmethod
+        def get_id() -> str:
+            return "7"
+
+        @staticmethod
+        def has_role(_role: str) -> bool:
+            return False
+
+    monkeypatch.setattr(module, "_session_identity_claims", lambda: (7, ["User"]))
+    monkeypatch.setattr(module, "_resolve_session_id_from_request", lambda: "sid-1")
+    monkeypatch.setattr(module, "_session_user_authorized_for_run", lambda *_args: True)
+    monkeypatch.setattr(module, "_store_session_marker", lambda *_args: None)
+    monkeypatch.setattr(module, "current_user", _CurrentUser())
+    monkeypatch.setattr(
+        module.auth_tokens,
+        "issue_token",
+        lambda *_args, **_kwargs: pytest.fail("non-root root-only target must not mint a browse token"),
+    )
+
+    with app.test_request_context(f"/runs/{runid}/", headers={"X-Forwarded-Proto": "https"}):
+        response = app.make_response(("ok", 200))
+        assert module._set_run_session_jwt_cookie(
+            response,
+            runid=runid,
+            config="cfg",
+            require_root=True,
+        ) is False

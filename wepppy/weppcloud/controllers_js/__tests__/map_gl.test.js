@@ -664,6 +664,45 @@ describe("Map GL controller", () => {
         expect(mapInstance.getZoom()).toBe(14);
     });
 
+    test("goToEnteredLocation accepts unicode minus in coordinates", () => {
+        const mapInstance = global.MapController.getInstance();
+        mapInstance.setView([44.0, -116.0], 6);
+
+        const input = document.getElementById("input_centerloc");
+        input.value = "−122.5714, 44.0782, 12";
+
+        mapInstance.goToEnteredLocation();
+
+        const center = mapInstance.getCenter();
+        expect(center.lat).toBeCloseTo(44.0782);
+        expect(center.lng).toBeCloseTo(-122.5714);
+        expect(mapInstance.getZoom()).toBe(12);
+    });
+
+    test("invalid coordinate-like input does not fall back to findById", async () => {
+        const mapInstance = global.MapController.getInstance();
+        mapInstance.setView([44.0, -116.0], 6);
+
+        const warnSpy = jest.spyOn(console, "warn").mockImplementation(() => {});
+        const findTopazSpy = jest.spyOn(mapInstance, "findByTopazId").mockResolvedValue(null);
+        const findWeppSpy = jest.spyOn(mapInstance, "findByWeppId").mockResolvedValue(null);
+
+        const input = document.getElementById("input_centerloc");
+        input.value = "-122.5, abc";
+
+        await mapInstance.goToEnteredLocation();
+
+        const center = mapInstance.getCenter();
+        expect(center.lat).toBeCloseTo(44.0);
+        expect(center.lng).toBeCloseTo(-116.0);
+        expect(mapInstance.getZoom()).toBe(6);
+        expect(findTopazSpy).not.toHaveBeenCalled();
+        expect(findWeppSpy).not.toHaveBeenCalled();
+        expect(warnSpy).toHaveBeenCalled();
+
+        warnSpy.mockRestore();
+    });
+
     test("goToEnteredLocation does not auto-swap lat/lon ordering", () => {
         const mapInstance = global.MapController.getInstance();
         mapInstance.setView([44.0, -116.0], 6);

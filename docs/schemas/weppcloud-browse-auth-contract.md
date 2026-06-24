@@ -47,6 +47,11 @@
 ## Root-Only Path Rules
 - Paths under `_logs` and sensitive filenames such as `exceptions.log` and `exception_factory.log` are root-only.
 - Root-only paths MUST return 403 unless the resolved auth context has the `Root` role.
+- Exception: a run-scoped `session` browse cookie that is valid but lacks
+  `Root` MAY be treated as stale for browser navigation and redirected through
+  the run re-auth bridge. The bridge MUST only re-mint the browse cookie for a
+  root-only target when the live Flask user has the `Root` role; non-root users
+  MUST NOT receive a replacement cookie for that root-only target.
 
 ## Source-of-Truth Implementation
 - `wepppy/microservices/browse/auth.py`
