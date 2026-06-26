@@ -1,12 +1,12 @@
 # RAP NoDb Mods (Rangeland Analysis Platform)
 
-> Retrieves and summarizes RAP fractional cover rasters for WEPPcloud scenarios, both as a single-year snapshot and as a multi-year time series.
+> Retrieves and summarizes RAP fractional-cover rasters for WEPPcloud scenarios, both as a single-year snapshot and as a multi-year time series.
 
 > **See also:** [AGENTS.md](../../AGENTS.md) for NoDb locking/serialization/cache expectations.
 
 ## Overview
 
-This directory contains two NoDb controllers that integrate the **Rangeland Analysis Platform (RAP) V3** fractional cover products into the WEPPpy/WEPPcloud run lifecycle:
+This directory contains two NoDb controllers that integrate the **Rangeland Analysis Platform (RAP) V3** fractional-cover products into the WEPPpy/WEPPcloud run lifecycle. RAP band summaries are stored in RAP's native percent scale (`0..100`). WEPP management canopy cover (`cancov`) is a fraction (`0..1`), so the management-cover accessor converts at that boundary.
 
 - `RAP` (`rap.py`): downloads a single RAP year, summarizes each fractional cover band to TOPAZ hillslopes (and optionally to multi-OFE footprints), and exposes the result to downstream mods (for example, Landuse and Rangeland Cover).
 - `RAP_TS` (`rap_ts.py`): orchestrates RAP downloads and summarization across a year range, persists a time-series dataset (optionally in Parquet), and can generate time-varying `.cov` cover files for WEPP runs (including revegetation transforms when enabled).
@@ -35,7 +35,7 @@ Both controllers rely on prior run setup:
 3. **Analyze**: `RAP_TS.analyze()` summarizes all `(year, band)` combinations to hillslopes (and optionally multi-OFE), producing `RAP_TS.data`.
    - If `pandas` and `pyarrow` are available, the analysis result is also written to `<wd>/rap/rap_ts.parquet` for faster load times and to avoid bloating `rap_ts.nodb`.
 4. **Consume**:
-   - `RAP_TS.get_cover(topaz_id, year)` returns a canopy-style cover metric (sum of selected vegetation bands) for a given hillslope/year.
+   - `RAP_TS.get_cover(topaz_id, year)` returns a WEPP canopy-cover fraction (`0..1`) from the percent-scale sum of selected vegetation bands for a given hillslope/year.
    - Iteration yields `(topaz_id, RAPPointData)` for a single “reference year” when `multi_ofe` is **not** enabled (prefers `rap_end_year` when present).
    - `RAP_TS.prep_cover(runs_dir)` writes per-hillslope `.cov` files that WEPP consumes; when Disturbed + Revegetation metadata are present it applies burn-class/year transforms.
 
@@ -48,7 +48,7 @@ All artifacts are stored under the scenario working directory (`<wd>`).
 | NoDb state | `<wd>/rap.nodb` | `RAP` | Tracks the controller state and (for `RAP`) the summarized band data. |
 | NoDb state | `<wd>/rap_ts.nodb` | `RAP_TS` | Tracks controller metadata (years, etc.). When Parquet exists, `data` is intentionally omitted from the serialized state. |
 | RAP working directory | `<wd>/rap/` | both | Stores RAP rasters and derived artifacts. |
-| Time-series parquet | `<wd>/rap/rap_ts.parquet` | `RAP_TS.analyze()` | Flat time-series table used for faster hydration and downstream analytics. |
+| Time-series parquet | `<wd>/rap/rap_ts.parquet` | `RAP_TS.analyze()` | Flat percent-scale time-series table used for faster hydration and downstream analytics. |
 | WEPP cover files | `<runs_dir>/p<wepp_id>.cov` | `RAP_TS.prep_cover()` | Time-varying cover inputs for WEPP runs (one file per hillslope). |
 | Sentinels | `<runs_dir>/cancov.txt`, `<runs_dir>/simfire.txt` | `RAP_TS.prep_cover()` | Empty “presence” files used by downstream tooling; `simfire.txt` is written when transformed cover is used. |
 
@@ -136,6 +136,8 @@ RAP data is represented with the `RAP_Band` enum (from `wepppy.landcover.rap`). 
 
 - `data[band][year][topaz_id] -> value`
 - when `multi_ofe` is enabled: `data[band][year][topaz_id][mofe_id] -> value`
+
+Those stored values are percent-scale RAP band summaries (`0..100`). `RAP_TS.get_cover(...)` divides the selected vegetation-band sum by `100.0` before returning a value for WEPP management generation.
 
 `RAPPointData` is a convenience wrapper for a single hillslope’s band values. It exposes:
 

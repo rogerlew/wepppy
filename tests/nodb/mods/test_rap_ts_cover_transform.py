@@ -22,6 +22,23 @@ def test_parse_fire_year_supports_common_disturbed_formats() -> None:
     assert _parse_fire_year('2024-06-01') == 2024
 
 
+def test_get_cover_returns_wepp_fraction_from_percent_scale_rap_bands() -> None:
+    year = '2020'
+    topaz_id = '101'
+
+    rap_ts = object.__new__(RAP_TS)
+    rap_ts.data = {
+        RAP_Band.TREE: {year: {topaz_id: 30.0}},
+        RAP_Band.SHRUB: {year: {topaz_id: 20.0}},
+        RAP_Band.PERENNIAL_FORB_AND_GRASS: {year: {topaz_id: 12.0}},
+        RAP_Band.ANNUAL_FORB_AND_GRASS: {year: {topaz_id: 20.0}},
+        RAP_Band.LITTER: {year: {topaz_id: 8.0}},
+        RAP_Band.BARE_GROUND: {year: {topaz_id: 10.0}},
+    }
+
+    assert rap_ts.get_cover(topaz_id, year) == pytest.approx(0.82)
+
+
 def test_prep_transformed_cover_handles_two_digit_fire_year(
     tmp_path: Path,
     monkeypatch: pytest.MonkeyPatch,

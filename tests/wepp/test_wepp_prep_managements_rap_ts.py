@@ -10,6 +10,8 @@ from wepppy.nodb.core.landuse import Landuse
 from wepppy.nodb.core.soils import Soils
 from wepppy.nodb.core.watershed import Watershed
 from wepppy.nodb.core.wepp import Wepp
+from wepppy.nodb.mods.rap.rap import RAP_Band
+from wepppy.nodb.mods.rap.rap_ts import RAP_TS
 
 pytestmark = pytest.mark.unit
 
@@ -62,11 +64,25 @@ class _RapTsStub:
         self.rap_start_year = 2000
         self.rap_end_year = 2020
         self.calls: list[tuple[str, int, bool]] = []
+        self.data = {
+            RAP_Band.TREE: {
+                "2010": {"5": 30.0, "6": 10.0, "7": 30.0, "8": 35.0},
+            },
+            RAP_Band.SHRUB: {
+                "2010": {"5": 20.0, "6": 10.0, "7": 20.0, "8": 25.0},
+            },
+            RAP_Band.PERENNIAL_FORB_AND_GRASS: {
+                "2010": {"5": 6.0, "6": 8.0, "7": 12.0, "8": 12.0},
+            },
+            RAP_Band.ANNUAL_FORB_AND_GRASS: {
+                "2010": {"5": 5.0, "6": 5.0, "7": 10.0, "8": 12.0},
+            },
+        }
 
     def get_cover(self, topaz_id, year, fallback=True):  # noqa: ANN001
         topaz = str(topaz_id)
         self.calls.append((topaz, int(year), bool(fallback)))
-        return {"5": 0.61, "6": 0.33, "7": 0.72, "8": 0.84}[topaz]
+        return RAP_TS.get_cover(self, topaz, str(year), fallback=fallback)
 
 
 def test_prep_managements_rap_ts_only_updates_undisturbed_classes(

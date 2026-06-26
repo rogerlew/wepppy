@@ -213,10 +213,26 @@ def test_view_management_effective_returns_texture_specific_preview(
         def tryGetInstance(cls, wd: str):
             assert wd == run_dir
             replacements = {
-                ("clay loam", "mulch"): {"rdmax": 1.1, "xmxlai": 2.1, "plant.data.decfct": 0.11},
-                ("loam", "mulch"): {"rdmax": 1.2, "xmxlai": 2.2, "plant.data.decfct": 0.22},
-                ("sand loam", "mulch"): {"rdmax": 1.3, "xmxlai": 2.3, "plant.data.decfct": 0.33},
-                ("silt loam", "mulch"): {"rdmax": 1.4, "xmxlai": 2.4, "plant.data.decfct": 0.44},
+                ("clay loam", "forest moderate sev fire"): {
+                    "rdmax": 1.1,
+                    "xmxlai": 2.1,
+                    "plant.data.decfct": 0.11,
+                },
+                ("loam", "forest moderate sev fire"): {
+                    "rdmax": 1.2,
+                    "xmxlai": 2.2,
+                    "plant.data.decfct": 0.22,
+                },
+                ("sand loam", "forest moderate sev fire"): {
+                    "rdmax": 1.3,
+                    "xmxlai": 2.3,
+                    "plant.data.decfct": 0.33,
+                },
+                ("silt loam", "forest moderate sev fire"): {
+                    "rdmax": 1.4,
+                    "xmxlai": 2.4,
+                    "plant.data.decfct": 0.44,
+                },
             }
             return type("DisturbedObj", (), {"land_soil_replacements_d": replacements})()
 

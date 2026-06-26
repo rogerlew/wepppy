@@ -1,8 +1,9 @@
 """Rangeland Analysis Platform (RAP) time-series controller.
 
 The RAP time-series mod orchestrates multi-year downloads of the RAP fractional
-cover rasters, summarizes the per-band values to TOPAZ hillslopes (and optional
-multi-OFE footprints), and persists the results for downstream analytics.
+cover rasters, summarizes percent-scale per-band values to TOPAZ hillslopes
+(and optional multi-OFE footprints), and persists the results for downstream
+analytics.
 
 Inputs:
 - Watershed rasters (`subwta`, optional `mofe_map`) supplied by the `Watershed`
@@ -298,7 +299,9 @@ class RAP_TS(NoDbBase):
                     cover_value = values.get(str(topaz_id), 0.0)
 
             cover += float(cover_value if cover_value is not None else 0.0)
-        return cover
+        # RAP summaries are stored as percentages (0-100); WEPP management
+        # canopy cover (`cancov`) is a fraction (0-1).
+        return cover / 100.0
 
     def analyze(self, use_sbs: bool = False, verbose: bool = False) -> None:
         start_year = self.rap_start_year

@@ -21,6 +21,7 @@ EXPECTED_DISTURBED_CLASSES = {
     "developed high intensity",
     "developed low intensity",
     "developed moderate intensity",
+    "deciduous forest",
     "forest",
     "forest high sev fire",
     "forest low sev fire",
@@ -34,6 +35,7 @@ EXPECTED_DISTURBED_CLASSES = {
     "mulch_15",
     "mulch_30",
     "mulch_60",
+    "mixed forest",
     "prescribed_fire",
     "short grass",
     "shrub",
@@ -59,7 +61,7 @@ class TestGetDisturbedClasses(unittest.TestCase):
     def test_disturbed_classes_snapshot(self):
         classes = get_disturbed_classes()
         self.assertEqual(classes, EXPECTED_DISTURBED_CLASSES)
-        self.assertEqual(len(classes), 37)
+        self.assertEqual(len(classes), 39)
 
 
 class TestLoadMap(unittest.TestCase):
