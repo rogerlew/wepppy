@@ -1,0 +1,7 @@
+variant,rain_runoff_mm_yr,winter_runoff_mm_yr,total_runoff_mm_yr,sediment_kg_yr,sediment_t_yr,sediment_density_t_ha_yr
+base sbs_map,39.91,139.89,179.79999999999998,16581.197,16.581197,1.189
+undisturbed,54.3,181.69,235.99,29640.577,29.640577,2.125
+base with undisturbed sol,54.3,181.69,235.99,29640.577,29.640577,2.125
+undisturbed with base sol,39.91,139.89,179.79999999999998,16581.197,16.581197,1.189
+base with undisturbed pmetpara,39.91,139.89,179.79999999999998,16581.197,16.581197,1.189
+undisturbed with base pmetpara,54.3,181.69,235.99,29640.577,29.640577,2.125
