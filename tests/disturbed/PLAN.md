@@ -6,9 +6,9 @@ This document describes the implementation plan for a comprehensive test script 
 
 - **4 soil textures**: clay loam, loam, sand loam, silt loam
 - **4 burn severities**: unburned, low, moderate, high
-- **3 vegetation types**: forest, shrub, tall grass
+- **5 vegetation types**: forest, deciduous forest, mixed forest, shrub, tall grass
 
-**Total combinations**: 4 × 4 × 3 = **48 pseudo-hillslopes**
+**Total combinations**: 4 × 4 × 5 = **80 pseudo-hillslopes**
 
 ## Test Objectives
 
@@ -105,19 +105,23 @@ tests/disturbed/
 
 ### Vegetation Types
 
-| Veg Type   | Base Disturbed Class | Unburned Management File | Burn Management Pattern |
-|------------|---------------------|-------------------------|------------------------|
-| forest     | `forest`            | `UnDisturbed/Old_Forest.man` | `UnDisturbed/{Low,Moderate,High}_Severity_Fire.man` |
-| shrub      | `shrub`             | `UnDisturbed/Shrub.man` | `UnDisturbed/Shrub_{Low,Moderate,High}_Severity_Fire.man` |
-| tall grass | `tall grass`        | `UnDisturbed/Tall_Grass.man` | `UnDisturbed/Grass_{Low,Moderate,High}_Severity_Fire.man` |
+| Veg Type | Base Disturbed Class | Unburned Management File | Burn Management Pattern |
+|----------|----------------------|--------------------------|-------------------------|
+| forest | `forest` | `UnDisturbed/Old_Forest.man` | `UnDisturbed/{Low,Moderate,High}_Severity_Fire.man` |
+| deciduous forest | `deciduous forest` | `UnDisturbed/Deciduous_Forest.man` | Existing generic forest `{Low,Moderate,High}_Severity_Fire.man` |
+| mixed forest | `mixed forest` | `UnDisturbed/Mixed_Forest.man` | Existing generic forest `{Low,Moderate,High}_Severity_Fire.man` |
+| shrub | `shrub` | `UnDisturbed/Shrub.man` | `UnDisturbed/Shrub_{Low,Moderate,High}_Severity_Fire.man` |
+| tall grass | `tall grass` | `UnDisturbed/Tall_Grass.man` | `UnDisturbed/Grass_{Low,Moderate,High}_Severity_Fire.man` |
 
 ### Full Disturbed Class Matrix
 
-| Veg Type   | Unburned      | Low Severity              | Moderate Severity              | High Severity              |
-|------------|---------------|---------------------------|--------------------------------|----------------------------|
-| forest     | `forest`      | `forest low sev fire`     | `forest moderate sev fire`     | `forest high sev fire`     |
-| shrub      | `shrub`       | `shrub low sev fire`      | `shrub moderate sev fire`      | `shrub high sev fire`      |
-| tall grass | `tall grass`  | `grass low sev fire`      | `grass moderate sev fire`      | `grass high sev fire`      |
+| Veg Type | Unburned | Low Severity | Moderate Severity | High Severity |
+|----------|----------|--------------|-------------------|---------------|
+| forest | `forest` | `forest low sev fire` | `forest moderate sev fire` | `forest high sev fire` |
+| deciduous forest | `deciduous forest` | `forest low sev fire` | `forest moderate sev fire` | `forest high sev fire` |
+| mixed forest | `mixed forest` | `forest low sev fire` | `forest moderate sev fire` | `forest high sev fire` |
+| shrub | `shrub` | `shrub low sev fire` | `shrub moderate sev fire` | `shrub high sev fire` |
+| tall grass | `tall grass` | `grass low sev fire` | `grass moderate sev fire` | `grass high sev fire` |
 
 ---
 
@@ -308,24 +312,32 @@ MAN_DATA_DIR = Path('wepppy/wepp/management/data')
 
 MANAGEMENT_FILES = {
     # Unburned (severity=0)
-    ('forest', 0):     'UnDisturbed/Old_Forest.man',
-    ('shrub', 0):      'UnDisturbed/Shrub.man',
-    ('tall grass', 0): 'UnDisturbed/Tall_Grass.man',
+    ('forest', 0):           'UnDisturbed/Old_Forest.man',
+    ('deciduous forest', 0): 'UnDisturbed/Deciduous_Forest.man',
+    ('mixed forest', 0):     'UnDisturbed/Mixed_Forest.man',
+    ('shrub', 0):            'UnDisturbed/Shrub.man',
+    ('tall grass', 0):       'UnDisturbed/Tall_Grass.man',
 
     # Low severity (severity=1)
-    ('forest', 1):     'UnDisturbed/Low_Severity_Fire.man',
-    ('shrub', 1):      'UnDisturbed/Shrub_Low_Severity_Fire.man',
-    ('tall grass', 1): 'UnDisturbed/Grass_Low_Severity_Fire.man',
+    ('forest', 1):           'UnDisturbed/Low_Severity_Fire.man',
+    ('deciduous forest', 1): 'UnDisturbed/Low_Severity_Fire.man',
+    ('mixed forest', 1):     'UnDisturbed/Low_Severity_Fire.man',
+    ('shrub', 1):            'UnDisturbed/Shrub_Low_Severity_Fire.man',
+    ('tall grass', 1):       'UnDisturbed/Grass_Low_Severity_Fire.man',
 
     # Moderate severity (severity=2)
-    ('forest', 2):     'UnDisturbed/Moderate_Severity_Fire.man',
-    ('shrub', 2):      'UnDisturbed/Shrub_Moderate_Severity_Fire.man',
-    ('tall grass', 2): 'UnDisturbed/Grass_Moderate_Severity_Fire.man',
+    ('forest', 2):           'UnDisturbed/Moderate_Severity_Fire.man',
+    ('deciduous forest', 2): 'UnDisturbed/Moderate_Severity_Fire.man',
+    ('mixed forest', 2):     'UnDisturbed/Moderate_Severity_Fire.man',
+    ('shrub', 2):            'UnDisturbed/Shrub_Moderate_Severity_Fire.man',
+    ('tall grass', 2):       'UnDisturbed/Grass_Moderate_Severity_Fire.man',
 
     # High severity (severity=3)
-    ('forest', 3):     'UnDisturbed/High_Severity_Fire.man',
-    ('shrub', 3):      'UnDisturbed/Shrub_High_Severity_Fire.man',
-    ('tall grass', 3): 'UnDisturbed/Grass_High_Severity_Fire.man',
+    ('forest', 3):           'UnDisturbed/High_Severity_Fire.man',
+    ('deciduous forest', 3): 'UnDisturbed/High_Severity_Fire.man',
+    ('mixed forest', 3):     'UnDisturbed/High_Severity_Fire.man',
+    ('shrub', 3):            'UnDisturbed/Shrub_High_Severity_Fire.man',
+    ('tall grass', 3):       'UnDisturbed/Grass_High_Severity_Fire.man',
 }
 
 def prepare_management(veg_type: str, severity: int, dst_path: Path, sim_years: int):
@@ -402,24 +414,32 @@ success, wepp_id, elapsed = run_hillslope(
 ```python
 DISTURBED_CLASSES = {
     # Unburned
-    ('forest', 0):     'forest',
-    ('shrub', 0):      'shrub',
-    ('tall grass', 0): 'tall grass',
+    ('forest', 0):           'forest',
+    ('deciduous forest', 0): 'deciduous forest',
+    ('mixed forest', 0):     'mixed forest',
+    ('shrub', 0):            'shrub',
+    ('tall grass', 0):       'tall grass',
 
     # Low severity
-    ('forest', 1):     'forest low sev fire',
-    ('shrub', 1):      'shrub low sev fire',
-    ('tall grass', 1): 'grass low sev fire',
+    ('forest', 1):           'forest low sev fire',
+    ('deciduous forest', 1): 'forest low sev fire',
+    ('mixed forest', 1):     'forest low sev fire',
+    ('shrub', 1):            'shrub low sev fire',
+    ('tall grass', 1):       'grass low sev fire',
 
     # Moderate severity
-    ('forest', 2):     'forest moderate sev fire',
-    ('shrub', 2):      'shrub moderate sev fire',
-    ('tall grass', 2): 'grass moderate sev fire',
+    ('forest', 2):           'forest moderate sev fire',
+    ('deciduous forest', 2): 'forest moderate sev fire',
+    ('mixed forest', 2):     'forest moderate sev fire',
+    ('shrub', 2):            'shrub moderate sev fire',
+    ('tall grass', 2):       'grass moderate sev fire',
 
     # High severity
-    ('forest', 3):     'forest high sev fire',
-    ('shrub', 3):      'shrub high sev fire',
-    ('tall grass', 3): 'grass high sev fire',
+    ('forest', 3):           'forest high sev fire',
+    ('deciduous forest', 3): 'forest high sev fire',
+    ('mixed forest', 3):     'forest high sev fire',
+    ('shrub', 3):            'shrub high sev fire',
+    ('tall grass', 3):       'grass high sev fire',
 }
 ```
 
@@ -450,7 +470,7 @@ For **loam** texture:
 
 ### Output Validation
 
-1. **WEPP completes successfully** for all 48 combinations
+1. **WEPP completes successfully** for all 80 combinations
 2. **Soil loss increases** with burn severity for each veg type
 3. **Runoff increases** with burn severity (due to lower avke/lkeff)
 4. **Graphical output files** (`H*.graph.dat`) are produced
@@ -475,7 +495,7 @@ For **loam** texture:
 - [ ] Implement WEPP execution via `wepp_runner`
 
 ### Phase 3: Matrix Testing
-- [ ] Parametrize tests across all 48 combinations
+- [ ] Parametrize tests across all 80 combinations
 - [ ] Add output parsing for soil loss, runoff, and graphics
 - [ ] Implement severity gradient validation tests
 

@@ -11,7 +11,7 @@ After a wildfire, hillslope soils and vegetation change dramatically. Burned soi
 The core logic is:
 
 1. **Read the burn severity map** — a GeoTIFF classifying each pixel as unburned, low, moderate, or high severity
-2. **For each hillslope**, determine its dominant burn severity and existing vegetation type (forest, shrub, or grass)
+2. **For each hillslope**, determine its dominant burn severity and existing vegetation type (forest family, shrub, or grass)
 3. **Look up replacement parameters** from a table keyed by `(vegetation type + severity, soil texture)` — this produces new erodibility values, hydraulic conductivity, cover fractions, and plant parameters
 4. **Write new WEPP input files** (`.sol` and `.man`) that reflect the post-fire state
 
@@ -258,17 +258,17 @@ disturbed.modify_soils()
 - `build_extended_land_soil_lookup()` exports the extended scheme (management + soil parameters) and normalizes scalar plant keys to `plant.data.rdmax` / `plant.data.xmxlai`; it is not part of the default run workflow.
 - All mutations must occur inside `with disturbed.locked():` blocks to respect Redis-backed locking.
 
-## Validation Results (48-Simulation Matrix)
+## Validation Results (80-Simulation Matrix)
 
-A 48-simulation matrix test (4 soil textures × 3 vegetation types × 4 burn severities, 100-year climate) validates the parameterization. Key findings:
+An 80-simulation matrix test (4 soil textures × 5 vegetation types × 4 burn severities, 100-year climate) validates the parameterization. Key findings:
 
-1. **Runoff increases with burn severity**: Forest burned conditions show more runoff events than unburned in 86% of matched events (low severity) through 76% (high severity).
+1. **Forest-family burned totals remain directionally correct**: Evergreen, deciduous, and mixed forest baselines all show burned totals greater than matched unburned totals for runoff, sediment delivery, and peakflow across low, moderate, and high severity rows.
 
-2. **Sediment delivery increases dramatically at high severity**: Forest high severity produces 174× more total sediment than unburned (5,338 vs 30.6 kg/m). Shrub high severity shows 23×. At high severity, 100% of matched events show burned > unburned for forest.
+2. **Deciduous and mixed forest do not require separate burned classes based on this matrix**: Deciduous runoff ratios range from 1.06× to 1.08×, sediment ratios from 15.89× to 178.87×, and peakflow ratios from 1.30× upward. Mixed forest runoff ratios range from 1.05× to 1.08×, sediment ratios from 21.95× to 251.63×, and peakflow ratios from 1.36× upward.
 
-3. **Texture matters**: Clay loam shows the highest sediment response; sand loam shows minimal differences due to high infiltration capacity even when burned.
+3. **Sediment delivery increases dramatically at high severity**: Forest high severity produces 174× more total sediment than unburned (5,338 vs 30.6 kg/m). Deciduous high severity produces 179×, mixed high severity produces 252×, and shrub high severity produces 23×.
 
-4. **Grass response is muted at low severity**: Tall grass shows high "equal" event counts at low severity (66% of events), indicating minimal hydrologic impact from low-severity grass fires.
+4. **Grass response is muted at low severity**: Tall grass shows high "equal" event counts at low severity (981 of 1,493 matched runoff events), indicating minimal hydrologic impact from low-severity grass fires.
 
 Full results: `tests/disturbed/analysis_results.md`
 Test suite: `tests/disturbed/test_disturbed_matrix.py`

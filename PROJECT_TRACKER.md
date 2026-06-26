@@ -1,7 +1,7 @@
 # PROJECT_TRACKER.md
 > Kanban board for wepppy work packages and vision items
 
-**Last Updated**: 2026-06-22
+**Last Updated**: 2026-06-26
 **Active Packages**: 10
 **Quick Links**: [Work Packages Directory](docs/work-packages/) | [God-Tier Prompting Strategy](docs/god-tier-prompting-strategy.md)
 
@@ -512,6 +512,25 @@ Currently active work packages. Limit to 2-4 packages to maintain focus.
 ## ✅ Done
 
 Recently completed work packages. Archived immediately upon completion.
+
+### Forest-Family Burn Gradient Assessment (2026-06-26)
+**Status**: ✅ **COMPLETE**
+
+**Link**: [docs/work-packages/20260626_forest_family_burn_gradient_assessment/](docs/work-packages/20260626_forest_family_burn_gradient_assessment/)
+
+**Lifecycle**: Backlog -> Done (2026-06-26)
+
+**Summary**: Expanded the disturbed matrix harness and regenerated
+`tests/disturbed/analysis_results.md` for 80 hillslope simulations
+(`4` soil textures x `5` vegetation types x `4` burn severities). The new
+forest-family assessment compares evergreen, deciduous, and mixed unburned
+baselines against the existing generic forest low/moderate/high burn
+managements. All forest-family rows remained directionally correct for matched
+runoff total, sediment-delivery total, and peakflow total, so no
+low/moderate/high burned deciduous or mixed forest parameterization is indicated
+by this matrix. Focused validation passed:
+`wctl run-pytest tests/disturbed/test_disturbed_matrix.py -q` (`83 passed`,
+`2 warnings`, `232.70s`).
 
 ### totalwatsed3 Interception-Flux Closure (2026-06-08)
 **Status**: ✅ **COMPLETE**

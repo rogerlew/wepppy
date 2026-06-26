@@ -4,9 +4,9 @@ Disturbed WEPP Test Matrix
 Runs the full matrix of:
 - 4 soil textures (clay loam, loam, sand loam, silt loam)
 - 4 burn severities (unburned, low, moderate, high)
-- 3 vegetation types (forest, shrub, tall grass)
+- 5 vegetation types (forest, deciduous forest, mixed forest, shrub, tall grass)
 
-Total: 48 hillslope simulations using 9002 soil format.
+Total: 80 hillslope simulations using 9002 soil format.
 
 This test exercises the Disturbed module's soil modification workflow
 using the disturbed_land_soil_lookup.csv for parameter replacements.
@@ -27,6 +27,8 @@ from wepppy.wepp.management import Management
 
 # Import wepp_runner
 from wepp_runner import run_hillslope, make_hillslope_run
+
+pytestmark = [pytest.mark.integration, pytest.mark.slow]
 
 
 # =============================================================================
@@ -91,8 +93,10 @@ TEXTURES = ["clay loam", "loam", "sand loam", "silt loam"]
 SEVERITIES = [0, 1, 2, 3]
 SEVERITY_NAMES = {0: "unburned", 1: "low", 2: "moderate", 3: "high"}
 
-# Vegetation types
-VEG_TYPES = ["forest", "shrub", "tall grass"]
+# Vegetation types. Deciduous and mixed use distinct unburned managements but
+# intentionally reuse the generic forest burn-severity classes for this
+# directionality assessment.
+VEG_TYPES = ["forest", "deciduous forest", "mixed forest", "shrub", "tall grass"]
 
 # Simulation years (must match climate file)
 SIM_YEARS = 100
@@ -109,18 +113,26 @@ CANONICAL_SOILS = {
 MANAGEMENT_FILES = {
     # Unburned (severity=0)
     ("forest", 0): "UnDisturbed/Old_Forest.man",
+    ("deciduous forest", 0): "UnDisturbed/Deciduous_Forest.man",
+    ("mixed forest", 0): "UnDisturbed/Mixed_Forest.man",
     ("shrub", 0): "UnDisturbed/Shrub.man",
     ("tall grass", 0): "UnDisturbed/Tall_Grass.man",
     # Low severity (severity=1)
     ("forest", 1): "UnDisturbed/Low_Severity_Fire.man",
+    ("deciduous forest", 1): "UnDisturbed/Low_Severity_Fire.man",
+    ("mixed forest", 1): "UnDisturbed/Low_Severity_Fire.man",
     ("shrub", 1): "UnDisturbed/Shrub_Low_Severity_Fire.man",
     ("tall grass", 1): "UnDisturbed/Grass_Low_Severity_Fire.man",
     # Moderate severity (severity=2)
     ("forest", 2): "UnDisturbed/Moderate_Severity_Fire.man",
+    ("deciduous forest", 2): "UnDisturbed/Moderate_Severity_Fire.man",
+    ("mixed forest", 2): "UnDisturbed/Moderate_Severity_Fire.man",
     ("shrub", 2): "UnDisturbed/Shrub_Moderate_Severity_Fire.man",
     ("tall grass", 2): "UnDisturbed/Grass_Moderate_Severity_Fire.man",
     # High severity (severity=3)
     ("forest", 3): "UnDisturbed/High_Severity_Fire.man",
+    ("deciduous forest", 3): "UnDisturbed/High_Severity_Fire.man",
+    ("mixed forest", 3): "UnDisturbed/High_Severity_Fire.man",
     ("shrub", 3): "UnDisturbed/Shrub_High_Severity_Fire.man",
     ("tall grass", 3): "UnDisturbed/Grass_High_Severity_Fire.man",
 }
@@ -129,18 +141,26 @@ MANAGEMENT_FILES = {
 DISTURBED_CLASSES = {
     # Unburned
     ("forest", 0): "forest",
+    ("deciduous forest", 0): "deciduous forest",
+    ("mixed forest", 0): "mixed forest",
     ("shrub", 0): "shrub",
     ("tall grass", 0): "tall grass",
     # Low severity
     ("forest", 1): "forest low sev fire",
+    ("deciduous forest", 1): "forest low sev fire",
+    ("mixed forest", 1): "forest low sev fire",
     ("shrub", 1): "shrub low sev fire",
     ("tall grass", 1): "grass low sev fire",
     # Moderate severity
     ("forest", 2): "forest moderate sev fire",
+    ("deciduous forest", 2): "forest moderate sev fire",
+    ("mixed forest", 2): "forest moderate sev fire",
     ("shrub", 2): "shrub moderate sev fire",
     ("tall grass", 2): "grass moderate sev fire",
     # High severity
     ("forest", 3): "forest high sev fire",
+    ("deciduous forest", 3): "forest high sev fire",
+    ("mixed forest", 3): "forest high sev fire",
     ("shrub", 3): "shrub high sev fire",
     ("tall grass", 3): "grass high sev fire",
 }
@@ -268,8 +288,12 @@ def generate_wepp_id(texture: str, severity: int, veg_type: str) -> int:
     """Generate a unique WEPP ID for this combination."""
     texture_idx = TEXTURES.index(texture)
     veg_idx = VEG_TYPES.index(veg_type)
-    # wepp_id = texture * 12 + veg * 4 + severity + 1 (1-indexed)
-    return texture_idx * 12 + veg_idx * 4 + severity + 1
+    return (
+        texture_idx * len(VEG_TYPES) * len(SEVERITIES)
+        + veg_idx * len(SEVERITIES)
+        + severity
+        + 1
+    )
 
 
 # =============================================================================
@@ -377,19 +401,21 @@ class TestDisturbedMatrix:
         graph_file = output_dir / f"H{wepp_id}.grph.dat"
         assert graph_file.exists(), f"Graph file not created: {graph_file}"
 
-    def test_severity_gradient_forest(
+    def test_severity_gradient_forest_family(
         self,
         all_results: Dict[Tuple[str, int, str], HillslopeResult],
     ):
-        """Verify all forest simulations completed successfully."""
+        """Verify all forest-family simulations completed successfully."""
         forest_results = [
-            r for (t, s, v), r in all_results.items() if v == "forest"
+            r
+            for (t, s, v), r in all_results.items()
+            if v in {"forest", "deciduous forest", "mixed forest"}
         ]
         if not forest_results:
-            pytest.skip("No forest results available yet")
+            pytest.skip("No forest-family results available yet")
 
         failed = [r for r in forest_results if not r.success]
-        assert not failed, f"Failed forest simulations: {failed}"
+        assert not failed, f"Failed forest-family simulations: {failed}"
 
     def test_severity_gradient_shrub(
         self,

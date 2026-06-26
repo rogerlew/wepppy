@@ -5,6 +5,7 @@ Analyze the disturbed matrix test results.
 Compares burned vs unburned simulations for:
 - Event counts (burned > unburned, same, unburned > burned)
 - Descriptive statistics for runoff, peak discharge, and sediment delivery
+- Forest-family directionality for evergreen, deciduous, and mixed baselines
 
 Output: Markdown tables for inclusion in the disturbed README.md
 """
@@ -26,23 +27,33 @@ import numpy as np
 TEXTURES = ["clay loam", "loam", "sand loam", "silt loam"]
 SEVERITIES = [0, 1, 2, 3]
 SEVERITY_NAMES = {0: "unburned", 1: "low", 2: "moderate", 3: "high"}
-VEG_TYPES = ["forest", "shrub", "tall grass"]
+VEG_TYPES = ["forest", "deciduous forest", "mixed forest", "shrub", "tall grass"]
+FOREST_FAMILY_VEG_TYPES = ["forest", "deciduous forest", "mixed forest"]
+TOTAL_SIMULATIONS = len(TEXTURES) * len(SEVERITIES) * len(VEG_TYPES)
 
 DISTURBED_CLASSES = {
     # Unburned
     ("forest", 0): "forest",
+    ("deciduous forest", 0): "deciduous forest",
+    ("mixed forest", 0): "mixed forest",
     ("shrub", 0): "shrub",
     ("tall grass", 0): "tall grass",
     # Low severity
     ("forest", 1): "forest low sev fire",
+    ("deciduous forest", 1): "forest low sev fire",
+    ("mixed forest", 1): "forest low sev fire",
     ("shrub", 1): "shrub low sev fire",
     ("tall grass", 1): "grass low sev fire",
     # Moderate severity
     ("forest", 2): "forest moderate sev fire",
+    ("deciduous forest", 2): "forest moderate sev fire",
+    ("mixed forest", 2): "forest moderate sev fire",
     ("shrub", 2): "shrub moderate sev fire",
     ("tall grass", 2): "grass moderate sev fire",
     # High severity
     ("forest", 3): "forest high sev fire",
+    ("deciduous forest", 3): "forest high sev fire",
+    ("mixed forest", 3): "forest high sev fire",
     ("shrub", 3): "shrub high sev fire",
     ("tall grass", 3): "grass high sev fire",
 }
@@ -55,16 +66,22 @@ def generate_wepp_id(texture: str, severity: int, veg_type: str) -> int:
     """Generate a unique WEPP ID for this combination."""
     texture_idx = TEXTURES.index(texture)
     veg_idx = VEG_TYPES.index(veg_type)
-    return texture_idx * 12 + veg_idx * 4 + severity + 1
+    return (
+        texture_idx * len(VEG_TYPES) * len(SEVERITIES)
+        + veg_idx * len(SEVERITIES)
+        + severity
+        + 1
+    )
 
 
 def wepp_id_to_params(wepp_id: int) -> Tuple[str, int, str]:
     """Convert WEPP ID back to parameters."""
     wepp_id -= 1  # Convert to 0-indexed
-    texture_idx = wepp_id // 12
-    remainder = wepp_id % 12
-    veg_idx = remainder // 4
-    severity = remainder % 4
+    texture_stride = len(VEG_TYPES) * len(SEVERITIES)
+    texture_idx = wepp_id // texture_stride
+    remainder = wepp_id % texture_stride
+    veg_idx = remainder // len(SEVERITIES)
+    severity = remainder % len(SEVERITIES)
     return TEXTURES[texture_idx], severity, VEG_TYPES[veg_idx]
 
 
@@ -188,7 +205,7 @@ def load_all_events(output_dir: Path) -> Dict[int, List[Event]]:
     """Load all ebe.dat files and return dict keyed by wepp_id."""
     events_by_id = {}
 
-    for wepp_id in range(1, 49):  # 48 simulations
+    for wepp_id in range(1, TOTAL_SIMULATIONS + 1):
         ebe_file = output_dir / f"H{wepp_id}.ebe.dat"
         if ebe_file.exists():
             events_by_id[wepp_id] = parse_ebe_file(ebe_file)
@@ -262,7 +279,7 @@ def load_all_peak_events(output_dir: Path) -> Dict[int, List[PeakEvent]]:
     """Load all pass.dat peakflow EVENT rows keyed by wepp_id."""
     peak_events_by_id: Dict[int, List[PeakEvent]] = {}
 
-    for wepp_id in range(1, 49):  # 48 simulations
+    for wepp_id in range(1, TOTAL_SIMULATIONS + 1):
         pass_file = output_dir / f"H{wepp_id}.pass.dat"
         if pass_file.exists():
             peak_events_by_id[wepp_id] = parse_pass_peakflow_file(pass_file)
@@ -270,6 +287,34 @@ def load_all_peak_events(output_dir: Path) -> Dict[int, List[PeakEvent]]:
             print(f"Warning: Missing {pass_file}")
 
     return peak_events_by_id
+
+
+def require_full_matrix(
+    events_by_id: Dict[int, List[Event]],
+    peak_events_by_id: Dict[int, List[PeakEvent]],
+) -> None:
+    """Fail fast when the output directory does not contain the full matrix."""
+    expected_ids = set(range(1, TOTAL_SIMULATIONS + 1))
+    missing_event_ids = sorted(expected_ids - set(events_by_id))
+    missing_peak_ids = sorted(expected_ids - set(peak_events_by_id))
+
+    if missing_event_ids or missing_peak_ids:
+        details = []
+        if missing_event_ids:
+            details.append(
+                f"missing ebe.dat outputs for WEPP IDs {missing_event_ids[:8]}"
+                f"{'...' if len(missing_event_ids) > 8 else ''}"
+            )
+        if missing_peak_ids:
+            details.append(
+                f"missing pass.dat outputs for WEPP IDs {missing_peak_ids[:8]}"
+                f"{'...' if len(missing_peak_ids) > 8 else ''}"
+            )
+        raise SystemExit(
+            "Output directory does not contain the full "
+            f"{TOTAL_SIMULATIONS}-simulation matrix: {'; '.join(details)}. "
+            "Rerun the disturbed matrix or pass --output-dir for a complete run."
+        )
 
 
 # =============================================================================
@@ -563,6 +608,90 @@ def format_number(n: float, decimals: int = 1) -> str:
     return f"{n:,.{decimals}f}"
 
 
+def format_ratio(numerator: float, denominator: float) -> str:
+    """Format a burned/unburned ratio for markdown."""
+    if abs(denominator) < 1e-12:
+        return "n/a"
+    return f"{numerator / denominator:.2f}x"
+
+
+def format_percent(numerator: int, denominator: int) -> str:
+    """Format a percentage for markdown."""
+    if denominator <= 0:
+        return "n/a"
+    return f"{100.0 * numerator / denominator:.1f}%"
+
+
+def generate_directionality_markdown(results: List[ComparisonResult]) -> str:
+    """Generate forest-family directionality assessment markdown."""
+    lines = []
+    agg = aggregate_by_veg_severity(results)
+
+    lines.append("### Forest-Family Burn Directionality Assessment")
+    lines.append("")
+    lines.append(
+        "These rows compare the existing generic burned forest managements "
+        "against each forest-family unburned baseline. Deciduous and mixed "
+        "forest use their distinct unburned managements at severity `0`, then "
+        "reuse `Low_Severity_Fire.man`, `Moderate_Severity_Fire.man`, and "
+        "`High_Severity_Fire.man` for burn severities `1..3`."
+    )
+    lines.append("")
+    lines.append(
+        "Directionally correct means the burned total is greater than the "
+        "matched unburned total for runoff, sediment delivery, and peakflow."
+    )
+    lines.append("")
+    lines.append(
+        "| Veg Type | Severity | Runoff Ratio | Runoff Burned> Share | "
+        "Sediment Ratio | Peakflow Ratio | Directionally Correct? |"
+    )
+    lines.append(
+        "|----------|----------|-------------:|---------------------:|---------------:|---------------:|------------------------|"
+    )
+
+    all_pass = True
+    for veg_type in FOREST_FAMILY_VEG_TYPES:
+        for severity in [1, 2, 3]:
+            key = (veg_type, severity)
+            if key not in agg:
+                continue
+            a = agg[key]
+            runoff_ok = a["runoff_burned_sum"] > a["runoff_unburned_sum"]
+            sed_ok = a["sed_burned_sum"] > a["sed_unburned_sum"]
+            peak_ok = a["peak_burned_sum"] > a["peak_unburned_sum"]
+            directional = runoff_ok and sed_ok and peak_ok
+            all_pass = all_pass and directional
+            runoff_directional_events = (
+                a["runoff_burned_gt"] + a["runoff_unburned_gt"]
+            )
+            lines.append(
+                f"| {veg_type} | {SEVERITY_NAMES[severity]} | "
+                f"{format_ratio(a['runoff_burned_sum'], a['runoff_unburned_sum'])} | "
+                f"{format_percent(a['runoff_burned_gt'], runoff_directional_events)} | "
+                f"{format_ratio(a['sed_burned_sum'], a['sed_unburned_sum'])} | "
+                f"{format_ratio(a['peak_burned_sum'], a['peak_unburned_sum'])} | "
+                f"{'yes' if directional else 'no'} |"
+            )
+
+    lines.append("")
+    if all_pass:
+        lines.append(
+            "Assessment: the existing generic forest burn managements remain "
+            "directionally correct for evergreen, deciduous, and mixed "
+            "unburned baselines in this matrix. No low/moderate/high burned "
+            "deciduous or mixed parameterization is indicated by this test."
+        )
+    else:
+        lines.append(
+            "Assessment: at least one forest-family row is not directionally "
+            "correct. Open a follow-up parameterization package before relying "
+            "on the generic burned forest classes for that class/severity."
+        )
+
+    return "\n".join(lines)
+
+
 def generate_event_counts_markdown(results: List[ComparisonResult]) -> str:
     """Generate markdown tables for event counts."""
     lines = []
@@ -573,7 +702,10 @@ def generate_event_counts_markdown(results: List[ComparisonResult]) -> str:
     lines.append("### Runoff Event Counts (Burned vs Unburned)")
     lines.append("")
     lines.append("Event counts compare burned vs unburned runoff by matching day/month/year across")
-    lines.append("all 4 soil textures. Results aggregated from 100-year simulations (48 total runs).")
+    lines.append(
+        "all 4 soil textures. Results aggregated from 100-year simulations "
+        f"({TOTAL_SIMULATIONS} total runs)."
+    )
     lines.append("")
     lines.append("| Veg Type | Severity | Total Events | Burned > Unburned | Equal | Unburned > Burned |")
     lines.append("|----------|----------|-------------:|------------------:|------:|------------------:|")
@@ -584,7 +716,6 @@ def generate_event_counts_markdown(results: List[ComparisonResult]) -> str:
             if key not in agg:
                 continue
             a = agg[key]
-            disturbed_class = DISTURBED_CLASSES[(veg_type, severity)]
             lines.append(
                 f"| {veg_type} | {SEVERITY_NAMES[severity]} | "
                 f"{format_number(a['total_events'], 0)} | "
@@ -825,9 +956,9 @@ def generate_full_report(results: List[ComparisonResult]) -> str:
 
     lines.append("## Test Matrix Analysis Results")
     lines.append("")
-    lines.append("Analysis of 48 hillslope simulations across:")
+    lines.append(f"Analysis of {TOTAL_SIMULATIONS} hillslope simulations across:")
     lines.append("- 4 soil textures (clay loam, loam, sand loam, silt loam)")
-    lines.append("- 3 vegetation types (forest, shrub, tall grass)")
+    lines.append("- 5 vegetation types (forest, deciduous forest, mixed forest, shrub, tall grass)")
     lines.append("- 4 burn severities (unburned, low, moderate, high)")
     lines.append("")
     lines.append("**Climate**: MC KENZIE BRIDGE RS, OR - 100 years, ~1,194 mm/yr precipitation")
@@ -837,6 +968,8 @@ def generate_full_report(results: List[ComparisonResult]) -> str:
     lines.append("**Soil format**: 9002 with hydrophobicity parameters")
     lines.append("")
 
+    lines.append(generate_directionality_markdown(results))
+    lines.append("")
     lines.append(generate_event_counts_markdown(results))
     lines.append("")
     lines.append(generate_descriptive_stats_markdown(results))
@@ -871,6 +1004,7 @@ def main():
     print(f"Loaded {len(events_by_id)} simulations")
     peak_events_by_id = load_all_peak_events(args.output_dir)
     print(f"Loaded peakflow events for {len(peak_events_by_id)} simulations")
+    require_full_matrix(events_by_id, peak_events_by_id)
 
     # Summarize event counts
     for wepp_id, events in sorted(events_by_id.items()):
