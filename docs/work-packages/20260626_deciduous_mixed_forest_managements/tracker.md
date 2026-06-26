@@ -48,6 +48,13 @@
 - 2026-06-26: Final-year single-hillslope validation showed winter mean
   `Cancov` ordering of deciduous `6.653%`, mixed `44.446%`, evergreen
   `90.000%`; see `artifacts/winter-cancov-validation.md`.
+- 2026-06-26: Executed `artifacts/gdd-senescence-experiment.md` as a
+  follow-up investigation using the disturbed harness slope/soil, Moran WY
+  cold/high-elevation climate, and McKenzie Bridge OR warmer/lower-elevation
+  climate. The GDD/`dlai` path was rejected: `jdharv=0` produced no perennial
+  leaf-off, the nonzero-date gate grid produced zero correct-direction
+  candidates, and some early-gate combinations emitted invalid negative
+  `Cancov`. No shipped `.man` or lookup files were changed.
 - 2026-06-26: Targeted QA passed:
   `wctl run-pytest tests/test_managements_module.py tests/nodb/mods/disturbed/test_lookup_contract.py tests/nodb/test_disturbed_management_overrides.py tests/nodb/mods/test_rusle_c_lookup.py tests/wepp/test_wepp_prep_managements_rap_ts.py -q`,
   `wctl run-stubtest wepppy.nodb.core.management_overrides`,

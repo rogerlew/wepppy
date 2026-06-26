@@ -97,6 +97,34 @@ thresholds to create the observed seasonal trajectory.
 4. Share the existing `forest` lookup rows without new `luse` values - rejected
    because `disturbed_land_soil_lookup.csv` keys on `(luse, stext)` and the
    new `DisturbedClass` values require matching rows to avoid fallback errors.
+5. Replace fixed-date leaf-off with WEPP's `gddmax>0` + `dlai` heat-unit
+   senescence path - rejected after the 2026-06-26 work-package experiment.
+   The exact `jdharv=0` GDD-only variant produced no perennial leaf-off because
+   WEPP's `grow.for` keeps the growth branch true when `jdsene == 0`. Nonzero
+   `jdharv` values acted as earliest-date gates rather than backstops, and the
+   screened grid produced zero candidates where the cold/high-elevation site
+   senesced earlier than the warmer/lower site. Several early-gate variants also
+   emitted invalid negative `Cancov`.
+
+   The failure is **structural, not a tuning shortfall**. WEPP's heat-unit
+   senescence fires when `fphu = sumgdd / gddmax >= dlai`; a warmer site
+   accumulates growing-degree-days faster and therefore reaches `dlai` and
+   senesces *earlier*. That is correct for crop maturity but the **reverse of
+   autumn leaf-off**, which is driven by shortening photoperiod and frost and
+   should make colder sites drop their leaves first. The "warm site senesced
+   earlier" outcome and the zero correct-direction count were therefore
+   inevitable for a GDD-maturity trigger. WEPP does implement the physically
+   correct cold-driven mechanism — a frost/daylength canopy decline
+   `dec = 0.5 * vdmt * (1 - fphu) * max(fhr, frst)`, where `fhr` is the daylength
+   reduction and `frst` the frost-damage factor — but only in the **rangeland**
+   branch (`grow.for` ~804-850), not the **cropland-perennial** branch
+   (`lanuse == 1 .and. imngmt == 2`, `grow.for:751`) that these forest
+   managements run under. It therefore never executes for cropland-mode forests,
+   leaving the fixed calendar senescence date as the only workable leaf-off
+   trigger for this pathway. (The correct physics is reachable only by running
+   the forest as rangeland — a different growth model that legacy WEPP and
+   WEPPcloud do not use for forest, so it is out of scope here.) See
+   `docs/work-packages/20260626_deciduous_mixed_forest_managements/artifacts/gdd-senescence-experiment.md`.
 
 ## Consequences
 
@@ -138,11 +166,9 @@ scope is recorded so the assumption is explicit rather than silent.
 A Southern-Hemisphere variant would require, at minimum, shifting the senescence
 date by ~+182 days (to ~day 104, mid-April) and verifying WEPP's winter-cycle
 handling for an SH season; reason (2) cannot be fixed in the management file
-alone. If the leaf-off is later moved to WEPP's temperature-driven heat-unit
-senescence (`gddmax>0` + `dlai`; see
-`docs/work-packages/20260626_deciduous_mixed_forest_managements/artifacts/gdd-senescence-experiment.md`),
-the *leaf phenology* becomes hemisphere-robust and only reason (2) remains
-NH-specific.
+alone. The 2026-06-26 GDD/`dlai` experiment did not provide a usable
+hemisphere-robust replacement for the fixed date, so both limitations remain for
+the shipped seasonal forest managements.
 
 The evergreen management (`Old_Forest.man`, no senescence, static canopy) has no
 seasonal leaf cycle and is canopy-neutral with respect to hemisphere, but
@@ -155,13 +181,15 @@ day (~Oct 13) to every site regardless of climate or elevation, whereas real
 leaf-off ranges from late September (high-elevation aspen) to early November
 (southern hardwood). Because the downstream snow fixtures span Minnesota,
 Vermont, Colorado, and Appalachian climates — and leaf-off timing relative to
-snow onset is the snow-relevant signal — the climate-adaptive
-`gddmax>0`/`dlai` senescence route (which WEPP supports via `grow.for`'s
-`fphu ≥ dlai` trigger) is the preferred follow-up. The `jdplt=126` failure
-documented under Alternatives concerned the *planting / leaf-out* path, not
-leaf-off senescence, so it does not establish that the heat-unit senescence path
-fails; that path was disabled (`gddmax=0`), not shown to fail. See the
-work-package experiment note above.
+snow onset is the snow-relevant signal — this remains a documented limitation.
+
+The `jdplt=126` failure documented under Alternatives concerned the *planting /
+leaf-out* path, not leaf-off senescence. A separate GDD/`dlai` leaf-off
+experiment was run on 2026-06-26 and rejected for this default
+parameterization: `jdharv=0` produced no perennial leaf-off, nonzero `jdharv`
+acted as an earliest-date gate, and the heat-unit mechanism made warm-site
+senescence occur earlier or at the same time as cold-site senescence across the
+screened grid. See the work-package experiment note above.
 
 ## Evidence
 
@@ -171,6 +199,8 @@ work-package experiment note above.
   `docs/work-packages/20260626_deciduous_mixed_forest_managements/artifacts/parameterization-research.md`
 - Winter canopy validation:
   `docs/work-packages/20260626_deciduous_mixed_forest_managements/artifacts/winter-cancov-validation.md`
+- GDD/`dlai` senescence experiment:
+  `docs/work-packages/20260626_deciduous_mixed_forest_managements/artifacts/gdd-senescence-experiment.md`
 - MRLC NLCD class definitions:
   <https://www.mrlc.gov/data/legends/national-land-cover-database-class-legend-and-description>
 - NASA LAI definition:
