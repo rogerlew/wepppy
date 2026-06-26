@@ -113,6 +113,56 @@ The mixed management is a single-perennial approximation of an evergreen and
 deciduous blend. It is intended as a default NLCD class parameterization, not a
 site calibration.
 
+## Hemisphere Scope and Limitations
+
+(Documented during review, 2026-06-26.)
+
+These managements are valid for the **Northern Hemisphere only**, for two
+independent reasons:
+
+1. **Fixed-date leaf-off.** The deciduous and mixed managements trigger leaf-off
+   with a fixed Julian senescence date (`286`, ~Oct 13) and disable WEPP's
+   heat-unit senescence path (`gddmax=0`). Day 286 is an NH-autumn day; in the
+   Southern Hemisphere it is mid-spring, so the canopy would drop in SH spring and
+   persist through SH winter — the seasonal cycle inverted.
+2. **WEPP annual-cycle bookkeeping.** The WEPP engine's pre-winter / frost-cycle
+   resets (`contin.for`) assume NH winter timing. A perennial whose growing season
+   straddles the calendar-year boundary (SH summer, Dec–Feb) would have its
+   GDD/frost cycle reset mid-season, independent of the management file. This is an
+   engine-level constraint, not a management-file property.
+
+In practice this is not a current limitation: WEPPcloud's climate stack
+(DAYMET / GRIDMET / CLIGEN / PRISM) is CONUS-bound, so all targets are NH. The
+scope is recorded so the assumption is explicit rather than silent.
+
+A Southern-Hemisphere variant would require, at minimum, shifting the senescence
+date by ~+182 days (to ~day 104, mid-April) and verifying WEPP's winter-cycle
+handling for an SH season; reason (2) cannot be fixed in the management file
+alone. If the leaf-off is later moved to WEPP's temperature-driven heat-unit
+senescence (`gddmax>0` + `dlai`; see
+`docs/work-packages/20260626_deciduous_mixed_forest_managements/artifacts/gdd-senescence-experiment.md`),
+the *leaf phenology* becomes hemisphere-robust and only reason (2) remains
+NH-specific.
+
+The evergreen management (`Old_Forest.man`, no senescence, static canopy) has no
+seasonal leaf cycle and is canopy-neutral with respect to hemisphere, but
+inherits the same WEPP winter-cycle assumption.
+
+### Related limitation: fixed-date leaf-off is not climate-adaptive
+
+Even within the NH/CONUS target, the fixed senescence date applies one leaf-off
+day (~Oct 13) to every site regardless of climate or elevation, whereas real
+leaf-off ranges from late September (high-elevation aspen) to early November
+(southern hardwood). Because the downstream snow fixtures span Minnesota,
+Vermont, Colorado, and Appalachian climates — and leaf-off timing relative to
+snow onset is the snow-relevant signal — the climate-adaptive
+`gddmax>0`/`dlai` senescence route (which WEPP supports via `grow.for`'s
+`fphu ≥ dlai` trigger) is the preferred follow-up. The `jdplt=126` failure
+documented under Alternatives concerned the *planting / leaf-out* path, not
+leaf-off senescence, so it does not establish that the heat-unit senescence path
+fails; that path was disabled (`gddmax=0`), not shown to fail. See the
+work-package experiment note above.
+
 ## Evidence
 
 - Work package:
