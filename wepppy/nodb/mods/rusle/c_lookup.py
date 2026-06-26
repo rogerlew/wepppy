@@ -6,6 +6,7 @@ import csv
 from dataclasses import dataclass
 from pathlib import Path
 
+from wepppy.nodb.core.management_overrides import is_forest_cover_disturbed_class
 from wepppy.nodb.mods.disturbed import lookup_disturbed_class
 
 from .c_formula import compute_c_from_ground_cover_fraction
@@ -139,7 +140,7 @@ def normalize_disturbed_family(disturbed_class: str | None) -> str | None:
     base = lookup_disturbed_class(raw) or raw
     text = base.replace("_", " ").strip()
 
-    if text in {"forest", "young forest"} or text.startswith("forest ") or text.startswith("young forest "):
+    if is_forest_cover_disturbed_class(text):
         return "forest"
     if text == "shrub" or text.startswith("shrub "):
         return "shrub"

@@ -104,6 +104,8 @@ from wepppy.runtime_paths.paths import normalize_relpath
 from wepppy.nodb.redis_prep import RedisPrep, TaskEnum
 from wepppy.nodb.core.management_overrides import (
     apply_disturbed_management_overrides,
+    is_forest_cover_disturbed_class,
+    is_unburned_forest_disturbed_class,
     resolve_disturbed_scalar_replacements,
 )
 
@@ -1284,7 +1286,7 @@ class Landuse(NoDbBase):
                     cancov = _grass_cov
                 elif disturbed_class in ['shrub', 'shrub high sev fire', 'shrub moderate sev fire', 'shrub low sev fire']:
                     cancov = _grass_cov + _shrub_cov
-                elif disturbed_class in ['forest', 'young forest', 'forest high sev fire', 'forest moderate sev fire', 'forest low sev fire']:
+                elif is_forest_cover_disturbed_class(disturbed_class):
                     cancov = _grass_cov + _shrub_cov + _tree_cov
                 cancov_d[topaz_id] = max(cancov, 0.05)
 
@@ -1446,7 +1448,7 @@ class Landuse(NoDbBase):
                         burn_class = class_pixel_map.get(val, '130')
 
                         if burn_class in ['131', '132', '133']:
-                            if man.disturbed_class in ['forest', 'young forest']:
+                            if is_unburned_forest_disturbed_class(man.disturbed_class):
                                 domlc_d[topaz_id][mofe_id] = {'131': disturbed_key_lookup['forest_low_sev_fire'], 
                                                             '132': disturbed_key_lookup['forest_moderate_sev_fire'], 
                                                             '133': disturbed_key_lookup['forest_high_sev_fire']}[burn_class]
@@ -1536,7 +1538,7 @@ class Landuse(NoDbBase):
                             cancov = _grass_cov
                         elif disturbed_class in ['shrub', 'shrub high sev fire', 'shrub moderate sev fire', 'shrub low sev fire']:
                             cancov = _grass_cov + _shrub_cov
-                        elif disturbed_class in ['forest', 'young forest', 'forest high sev fire', 'forest moderate sev fire', 'forest low sev fire']:
+                        elif is_forest_cover_disturbed_class(disturbed_class):
                             cancov = _grass_cov + _shrub_cov + _tree_cov
                         cancov_d[topaz_id][mofe_id] = max(cancov, 0.05)
                         cancov_override = cancov_d[topaz_id][mofe_id]

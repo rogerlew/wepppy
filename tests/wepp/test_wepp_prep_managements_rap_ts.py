@@ -66,7 +66,7 @@ class _RapTsStub:
     def get_cover(self, topaz_id, year, fallback=True):  # noqa: ANN001
         topaz = str(topaz_id)
         self.calls.append((topaz, int(year), bool(fallback)))
-        return {"5": 0.61, "6": 0.33}[topaz]
+        return {"5": 0.61, "6": 0.33, "7": 0.72, "8": 0.84}[topaz]
 
 
 def test_prep_managements_rap_ts_only_updates_undisturbed_classes(
@@ -81,25 +81,52 @@ def test_prep_managements_rap_ts_only_updates_undisturbed_classes(
     wepp._mods = []
 
     forest_summary = _DummyManagementSummary("forest")
+    deciduous_summary = _DummyManagementSummary("deciduous forest")
+    mixed_summary = _DummyManagementSummary("mixed forest")
+    young_summary = _DummyManagementSummary("young forest")
     fire_summary = _DummyManagementSummary("forest high sev fire")
 
     landuse_stub = type("LanduseStub", (), {})()
     landuse_stub.hillslope_cancovs = None
-    landuse_stub.domlc_d = {"5": "forest_dom", "6": "fire_dom"}
+    landuse_stub.domlc_d = {
+        "5": "forest_dom",
+        "6": "fire_dom",
+        "7": "deciduous_dom",
+        "8": "mixed_dom",
+        "9": "young_dom",
+    }
     landuse_stub.managements = {
         "forest_dom": forest_summary,
         "fire_dom": fire_summary,
+        "deciduous_dom": deciduous_summary,
+        "mixed_dom": mixed_summary,
+        "young_dom": young_summary,
     }
 
     climate_stub = type("ClimateStub", (), {"input_years": [2010], "year0": 2010})()
     watershed_stub = object()
 
     soils_stub = type("SoilsStub", (), {})()
-    soils_stub.domsoil_d = {"5": "mukey_1", "6": "mukey_2"}
-    soils_stub.bd_d = {"mukey_1": 1.2, "mukey_2": 1.3}
+    soils_stub.domsoil_d = {
+        "5": "mukey_1",
+        "6": "mukey_2",
+        "7": "mukey_3",
+        "8": "mukey_4",
+        "9": "mukey_5",
+    }
+    soils_stub.bd_d = {
+        "mukey_1": 1.2,
+        "mukey_2": 1.3,
+        "mukey_3": 1.4,
+        "mukey_4": 1.5,
+        "mukey_5": 1.6,
+    }
     soils_stub.soils = {
         "mukey_1": type("SoilStub", (), {"clay": 20.0, "sand": 40.0})(),
         "mukey_2": type("SoilStub", (), {"clay": 25.0, "sand": 35.0})(),
+        "mukey_3": type("SoilStub", (), {"clay": 25.0, "sand": 35.0})(),
+        "mukey_4": type("SoilStub", (), {"clay": 25.0, "sand": 35.0})(),
+        "mukey_5": type("SoilStub", (), {"clay": 25.0, "sand": 35.0})(),
     }
     monkeypatch.setattr(Landuse, "getInstance", classmethod(lambda cls, wd: landuse_stub))
     monkeypatch.setattr(Climate, "getInstance", classmethod(lambda cls, wd: climate_stub))
@@ -126,6 +153,12 @@ def test_prep_managements_rap_ts_only_updates_undisturbed_classes(
 
     assert forest_summary.last_management is not None
     assert fire_summary.last_management is not None
+    assert deciduous_summary.last_management is not None
+    assert mixed_summary.last_management is not None
+    assert young_summary.last_management is not None
     assert forest_summary.last_management.cancov_values == [0.61]
     assert fire_summary.last_management.cancov_values == []
-    assert rap_ts.calls == [("5", 2010, True)]
+    assert deciduous_summary.last_management.cancov_values == [0.72]
+    assert mixed_summary.last_management.cancov_values == [0.84]
+    assert young_summary.last_management.cancov_values == []
+    assert rap_ts.calls == [("5", 2010, True), ("7", 2010, True), ("8", 2010, True)]

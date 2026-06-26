@@ -60,6 +60,54 @@ def test_canonical_disturbed_lookup_includes_bd_after_avke_with_blank_defaults()
     assert all((row.get("bd") or "").strip() == "" for row in rows)
 
 
+def test_canonical_lookup_includes_deciduous_and_mixed_forest_rows() -> None:
+    lookup_path = (
+        Path(disturbed_module.__file__).resolve().parent
+        / "data"
+        / "disturbed_land_soil_lookup.csv"
+    )
+
+    with lookup_path.open() as fp:
+        rows = list(csv.DictReader(fp))
+
+    keyed = {(row["luse"], row["stext"]): row for row in rows}
+    soil_columns = [
+        "ki",
+        "kr",
+        "shcrit",
+        "avke",
+        "bd",
+        "ksflag",
+        "ksatadj",
+        "ksatfac",
+        "ksatrec",
+        "keffflag",
+        "lkeff",
+    ]
+
+    for texture in ("clay loam", "loam", "sand loam", "silt loam"):
+        forest = keyed[("forest", texture)]
+        deciduous = keyed[("deciduous forest", texture)]
+        mixed = keyed[("mixed forest", texture)]
+
+        assert {column: deciduous[column] for column in soil_columns} == {
+            column: forest[column] for column in soil_columns
+        }
+        assert {column: mixed[column] for column in soil_columns} == {
+            column: forest[column] for column in soil_columns
+        }
+
+        assert deciduous["rdmax"] == forest["rdmax"] == "2"
+        assert deciduous["xmxlai"] == "5"
+        assert deciduous["plant.data.decfct"] == "0.2"
+        assert deciduous["plant.data.dropfc"] == "0.2"
+
+        assert mixed["rdmax"] == forest["rdmax"] == "2"
+        assert mixed["xmxlai"] == "9.5"
+        assert mixed["plant.data.decfct"] == "0.55"
+        assert mixed["plant.data.dropfc"] == "0.55"
+
+
 class TestLookupDisturbedClass:
     def test_strips_mulch_15_suffix(self) -> None:
         assert lookup_disturbed_class("forest moderate sev fire-mulch_15") == "forest moderate sev fire"

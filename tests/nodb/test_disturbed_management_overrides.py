@@ -2,6 +2,8 @@ import pytest
 
 from wepppy.nodb.core.management_overrides import (
     apply_disturbed_management_overrides,
+    is_forest_cover_disturbed_class,
+    is_unburned_forest_disturbed_class,
     normalize_disturbed_class_for_management_lookup,
     resolve_disturbed_scalar_replacements,
 )
@@ -60,6 +62,25 @@ def test_static_overrides_set_plant_decay_drop_factors() -> None:
 
     assert management.plant_data["decfct"] == 1.0
     assert management.plant_data["dropfc"] == 1.0
+
+
+@pytest.mark.unit
+def test_unburned_forest_helper_includes_deciduous_and_mixed_classes() -> None:
+    assert is_unburned_forest_disturbed_class("forest")
+    assert is_unburned_forest_disturbed_class("young forest")
+    assert is_unburned_forest_disturbed_class("deciduous forest")
+    assert is_unburned_forest_disturbed_class("mixed forest")
+    assert not is_unburned_forest_disturbed_class("forest high sev fire")
+    assert not is_unburned_forest_disturbed_class("shrub")
+
+
+@pytest.mark.unit
+def test_forest_cover_helper_includes_burned_and_treatment_suffix_classes() -> None:
+    assert is_forest_cover_disturbed_class("deciduous forest")
+    assert is_forest_cover_disturbed_class("mixed forest")
+    assert is_forest_cover_disturbed_class("forest high sev fire")
+    assert is_forest_cover_disturbed_class("forest moderate sev fire-mulch_15")
+    assert not is_forest_cover_disturbed_class("shrub high sev fire")
 
 
 @pytest.mark.unit

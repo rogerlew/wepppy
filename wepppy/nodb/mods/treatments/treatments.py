@@ -568,7 +568,9 @@ class Treatments(NoDbBase):
         disturbed_key_lookup = disturbed_instance.get_disturbed_key_lookup()
         treatment_dom = disturbed_key_lookup[treatment]
 
-        if disturbed_class in ['forest']:
+        applies_to_forest = disturbed_class in {"forest", "deciduous forest", "mixed forest"}
+
+        if applies_to_forest:
             self.logger.info(f'Applying prescribed fire treatment to hillslope {topaz_id} with disturbed_class {disturbed_class}\n')
             landuse_instance.domlc_d[topaz_id] = treatment_dom
             self.logger.info(f'  _apply_thinning: {topaz_id} -> {treatment_dom}\n')
@@ -577,7 +579,7 @@ class Treatments(NoDbBase):
             man = get_management_summary(treatment_dom, landuse_instance.mapping)
             landuse_instance.managements[treatment_dom] = man
 
-        return treatment_dom if disturbed_class in ['forest'] else None
+        return treatment_dom if applies_to_forest else None
 
     def _resolve_source_soil_path(
         self,

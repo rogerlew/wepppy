@@ -126,6 +126,8 @@ Writes `pmetpara.txt` with basal crop coefficient (`pmet_kcb`) and readily-avail
 | Disturbed class | Management file | cancov | inrcov | rilcov |
 |----------------|----------------|--------|--------|--------|
 | forest | `Old_Forest.man` | 0.90 | 1.00 | 1.00 |
+| deciduous forest | `Deciduous_Forest.man` | 0.20 | 1.00 | 1.00 |
+| mixed forest | `Mixed_Forest.man` | 0.55 | 1.00 | 1.00 |
 | young forest | `Young_Forest.man` | 0.80 | 0.96 | 0.96 |
 | forest low sev fire | `Low_Severity_Fire.man` | 0.75 | 0.85 | 0.85 |
 | forest moderate sev fire | `Moderate_Severity_Fire.man` | 0.60 | 0.60 | 0.60 |
@@ -137,6 +139,8 @@ Writes `pmetpara.txt` with basal crop coefficient (`pmet_kcb`) and readily-avail
 | Disturbed class | rdmax | xmxlai | hmax | cuthgt |
 |----------------|-------|--------|------|--------|
 | forest | 2.00 | 14.0 | 20.0 | 20.0 |
+| deciduous forest | 2.00 | 5.0 | 20.0 | 20.0 |
+| mixed forest | 2.00 | 9.5 | 20.0 | 20.0 |
 | young forest | 0.60 | 12.0 | 4.0 | 20.0 |
 | forest low sev fire | 0.30 | 4.0 | 0.30 | 0.30 |
 | forest moderate sev fire | 0.30 | 3.0 | 0.28 | 0.30 |
@@ -219,7 +223,7 @@ The parameterization is **directionally correct at the regime level**: burned co
 
 ### Static Management Overrides
 
-To keep undisturbed vs. disturbed comparisons strictly "static to static," the lookup table sets `plant.data.decfct` and `plant.data.dropfc` to `1` for all landuses except agriculture crops. This prevents management files from decaying or dropping plant material during the comparison window, avoiding unintended differences in residue/root mass between templates.
+To keep most undisturbed vs. disturbed comparisons strictly "static to static," the lookup table sets `plant.data.decfct` and `plant.data.dropfc` to `1` for all landuses except agriculture crops and the seasonal unburned forest classes. This prevents management files from decaying or dropping plant material during the comparison window, avoiding unintended differences in residue/root mass between static templates. `deciduous forest` and `mixed forest` are the explicit exception: their lookup rows preserve the leaf-off canopy parameterization required by `ADR-0009`.
 
 ## Quick Start
 

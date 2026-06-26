@@ -16,6 +16,8 @@ pytestmark = pytest.mark.unit
     [
         ("forest", "forest"),
         ("young forest", "forest"),
+        ("deciduous forest", "forest"),
+        ("mixed forest", "forest"),
         ("forest high sev fire-mulch_15", "forest"),
         ("shrub moderate sev fire", "shrub"),
         ("grass low sev fire", "tall_grass"),

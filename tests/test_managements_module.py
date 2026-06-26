@@ -102,6 +102,58 @@ def test_get_disturbed_classes_includes_expected_entries(managements_module):
 
     assert None in disturbed_classes
     assert "forest" in disturbed_classes
+    assert "deciduous forest" in disturbed_classes
+    assert "mixed forest" in disturbed_classes
+
+
+def test_disturbed_forest_classes_resolve_distinct_managements(managements_module):
+    deciduous = managements_module.get_management_summary(41, _map="disturbed")
+    evergreen = managements_module.get_management_summary(42, _map="disturbed")
+    mixed = managements_module.get_management_summary(43, _map="disturbed")
+
+    assert deciduous.disturbed_class == "deciduous forest"
+    assert deciduous.man_fn == "UnDisturbed/Deciduous_Forest.man"
+    assert deciduous.cancov == pytest.approx(0.2)
+
+    assert evergreen.disturbed_class == "forest"
+    assert evergreen.man_fn == "UnDisturbed/Old_Forest.man"
+    assert evergreen.cancov == pytest.approx(0.9)
+
+    assert mixed.disturbed_class == "mixed forest"
+    assert mixed.man_fn == "UnDisturbed/Mixed_Forest.man"
+    assert mixed.cancov == pytest.approx(0.55)
+
+
+def test_seasonal_forest_managements_parse_with_expected_plant_scalars(managements_module):
+    data_dir = Path(managements_module._management_dir)
+
+    deciduous = managements_module.read_management(
+        str(data_dir / "UnDisturbed" / "Deciduous_Forest.man")
+    )
+    mixed = managements_module.read_management(
+        str(data_dir / "UnDisturbed" / "Mixed_Forest.man")
+    )
+
+    deciduous_plant = deciduous.plants[0].data
+    assert deciduous_plant.xmxlai == pytest.approx(5.0)
+    assert deciduous_plant.beinp == pytest.approx(13.0)
+    assert deciduous_plant.tmpmin == pytest.approx(-24.0)
+    assert deciduous_plant.decfct == pytest.approx(0.2)
+    assert deciduous_plant.dropfc == pytest.approx(0.2)
+    assert deciduous_plant.spriod == 45
+    assert deciduous.years[0].data.perennial.jdharv.julian == 286
+    assert deciduous.years[0].data.perennial.jdplt == 0
+
+    mixed_plant = mixed.plants[0].data
+    assert mixed_plant.bb == pytest.approx(1.0)
+    assert mixed_plant.xmxlai == pytest.approx(9.5)
+    assert mixed_plant.beinp == pytest.approx(13.0)
+    assert mixed_plant.tmpmin == pytest.approx(-25.0)
+    assert mixed_plant.decfct == pytest.approx(0.55)
+    assert mixed_plant.dropfc == pytest.approx(0.55)
+    assert mixed_plant.spriod == 45
+    assert mixed.years[0].data.perennial.jdharv.julian == 286
+    assert mixed.years[0].data.perennial.jdplt == 0
 
 
 def test_management_summary_rejects_invalid_disturbed_class(managements_module):

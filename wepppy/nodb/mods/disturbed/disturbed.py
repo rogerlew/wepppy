@@ -74,6 +74,7 @@ from wepppy.nodb.core import (
     Ron,
     Watershed,
 )
+from wepppy.nodb.core.management_overrides import is_unburned_forest_disturbed_class
 from ...redis_prep import RedisPrep, TaskEnum
 from ...base import NoDbBase, TriggerEvents, createProcessPoolExecutor, nodb_setter
 from ..baer.sbs_map import SoilBurnSeverityMap
@@ -1222,7 +1223,7 @@ class Disturbed(NoDbBase):
                 dom = landuse.domlc_d[topaz_id]
                 man = landuse.managements[dom]
 
-                if man.disturbed_class in ['forest', 'young forest'] and treecanopy:
+                if is_unburned_forest_disturbed_class(man.disturbed_class) and treecanopy:
                     _dom = '{}-{}'.format(dom, topaz_id)
                     _man = deepcopy(man)
                     _man.key = _dom
@@ -1369,7 +1370,7 @@ class Disturbed(NoDbBase):
                 )
                 # topaz_id: 8632, sbs_lc: 2, dom: 42, man.disturbed_class: forest, burn_class: 255
                 if burn_class in ['131', '132', '133']:
-                    if man.disturbed_class in ['forest', 'young forest']:
+                    if is_unburned_forest_disturbed_class(man.disturbed_class):
                         landuse.logger.debug('     burning topaz_id=%s bucket=forest', topaz_key)
                         landuse.domlc_d[topaz_id] = {'131': disturbed_key_lookup['forest_low_sev_fire'], 
                                                      '132': disturbed_key_lookup['forest_moderate_sev_fire'], 
@@ -1600,7 +1601,7 @@ class Disturbed(NoDbBase):
 
                     # TODO: probably a better way to do this based on the disturbed_class
                     if burn_class in ['131', '132', '133']:
-                        if man.disturbed_class in ['forest', 'young forest']:
+                        if is_unburned_forest_disturbed_class(man.disturbed_class):
                             landuse.domlc_mofe_d[topaz_id][_id] = {'131': '106', '132': '118', '133': '105'}[burn_class]
                             burned_counts['forest'] += 1
 

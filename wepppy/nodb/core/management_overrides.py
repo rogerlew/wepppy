@@ -6,11 +6,29 @@ from typing import Any, Dict
 
 __all__ = [
     "apply_disturbed_management_overrides",
+    "is_forest_cover_disturbed_class",
+    "is_unburned_forest_disturbed_class",
     "normalize_disturbed_class_for_management_lookup",
     "resolve_disturbed_scalar_replacements",
 ]
 
 _TREATMENT_SUFFIXES = ("-mulch_15", "-mulch_30", "-mulch_60", "-thinning", "-prescribed_fire")
+_UNBURNED_FOREST_CLASSES = frozenset(
+    {
+        "forest",
+        "young forest",
+        "deciduous forest",
+        "mixed forest",
+    }
+)
+_FOREST_COVER_CLASSES = _UNBURNED_FOREST_CLASSES | frozenset(
+    {
+        "forest high sev fire",
+        "forest moderate sev fire",
+        "forest low sev fire",
+        "forest prescribed fire",
+    }
+)
 
 
 def _is_blank_lookup_value(value: Any) -> bool:
@@ -26,6 +44,29 @@ def _strip_treatment_suffix(disturbed_class: str) -> str:
         if disturbed_class.endswith(suffix):
             return disturbed_class[: -len(suffix)]
     return disturbed_class
+
+
+def _normalize_class_text(disturbed_class: Any) -> str:
+    if not isinstance(disturbed_class, str):
+        return ""
+    return disturbed_class.replace("_", " ").strip().lower()
+
+
+def is_unburned_forest_disturbed_class(disturbed_class: Any) -> bool:
+    """Return true for forest classes that should receive forest fire routing."""
+    return _normalize_class_text(disturbed_class) in _UNBURNED_FOREST_CLASSES
+
+
+def is_forest_cover_disturbed_class(disturbed_class: Any) -> bool:
+    """Return true for classes whose RAP canopy cover should include tree cover."""
+    if not isinstance(disturbed_class, str):
+        return False
+    disturbed_class_str = disturbed_class.strip().lower()
+    if disturbed_class_str == "":
+        return False
+    disturbed_class_str = _strip_treatment_suffix(disturbed_class_str)
+    disturbed_class_str = _normalize_class_text(disturbed_class_str)
+    return disturbed_class_str in _FOREST_COVER_CLASSES
 
 
 def apply_disturbed_management_overrides(

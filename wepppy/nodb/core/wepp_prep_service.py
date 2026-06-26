@@ -324,7 +324,10 @@ class WeppPrepService:
                         disturbed_class_lc = (
                             disturbed_class.lower().strip() if isinstance(disturbed_class, str) else ""
                         )
-                        apply_rap_ts_cover = disturbed_class_lc in {"forest", "shrub", "tall grass"}
+                        apply_rap_ts_cover = (
+                            disturbed_class_lc
+                            in {"forest", "deciduous forest", "mixed forest", "shrub", "tall grass"}
+                        )
 
                     if apply_rap_ts_cover and year0 >= rap_ts.rap_start_year and year0 <= rap_ts.rap_end_year:
                         cover = rap_ts.get_cover(topaz_id, year0, fallback=True)
