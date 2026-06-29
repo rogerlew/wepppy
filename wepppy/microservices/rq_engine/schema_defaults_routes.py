@@ -1487,36 +1487,55 @@ def _outputs_export_catalog() -> list[dict[str, Any]]:
         {
             "operation_id": rq_operation_id("export_ermit"),
             "path": "/api/runs/{runid}/{config}/export/ermit",
+            "method": "GET",
+            "response_mode": "file",
+        },
+        {
+            "operation_id": rq_operation_id("export_ermit_submit"),
+            "path": "/api/runs/{runid}/{config}/export/ermit",
+            "method": "POST",
+            "response_mode": "json",
+        },
+        {
+            "operation_id": rq_operation_id("export_ermit_download"),
+            "path": "/api/runs/{runid}/{config}/export/ermit/job/{job_id}/download",
+            "method": "GET",
             "response_mode": "file",
         },
         {
             "operation_id": rq_operation_id("export_geopackage"),
             "path": "/api/runs/{runid}/{config}/export/geopackage",
+            "method": "GET",
             "response_mode": "file",
         },
         {
             "operation_id": rq_operation_id("export_geodatabase"),
             "path": "/api/runs/{runid}/{config}/export/geodatabase",
+            "method": "GET",
             "response_mode": "file",
         },
         {
             "operation_id": rq_operation_id("export_prep_details"),
             "path": "/api/runs/{runid}/{config}/export/prep_details",
+            "method": "GET",
             "response_mode": "file",
         },
         {
             "operation_id": rq_operation_id("export_features_submit"),
             "path": "/api/runs/{runid}/{config}/export/features",
+            "method": "POST",
             "response_mode": "json",
         },
         {
             "operation_id": rq_operation_id("export_features_download"),
             "path": "/api/runs/{runid}/{config}/export/features/job/{job_id}/download",
+            "method": "GET",
             "response_mode": "file",
         },
         {
             "operation_id": rq_operation_id("export_features_download_published"),
             "path": "/api/runs/{runid}/{config}/export/features/published/{profile}/download",
+            "method": "GET",
             "response_mode": "file",
         },
     ]

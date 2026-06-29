@@ -132,7 +132,7 @@ def test_set_run_wepp_routine_requires_known_routine(wepp_client):
 
 
 def test_set_run_wepp_routine_rejects_flowpaths_toggle(wepp_client):
-    client, _, _ = wepp_client
+    client, _, run_dir = wepp_client
 
     response = client.post(
         f"/runs/{RUN_ID}/{CONFIG}/tasks/set_run_wepp_routine/",
@@ -799,29 +799,27 @@ def test_download_features_export_published_returns_file_with_canonical_filename
     assert "test-run.prep-details.csv.zip" in response.headers.get("Content-Disposition", "")
 
 
-def test_download_ermit_export_returns_generated_file(
+def test_download_ermit_export_renders_rq_engine_launcher(
     wepp_client,
     monkeypatch: pytest.MonkeyPatch,
 ) -> None:
-    client, _, run_dir = wepp_client
+    client, _, _ = wepp_client
     monkeypatch.setattr(cap_guard, "current_user", type("User", (), {"is_authenticated": True})(), raising=False)
 
-    export_path = Path(run_dir) / "export" / "ermit" / "ermit_input.csv"
-    export_path.parent.mkdir(parents=True, exist_ok=True)
-    export_path.write_text("topaz_id\n1\n", encoding="utf-8")
+    captured: dict[str, Any] = {}
 
-    import wepppy.export as export_pkg
+    def fake_render_template(template_name: str, **kwargs: Any) -> str:
+        assert template_name == "reports/ermit_export_download.htm"
+        captured.update(kwargs)
+        return "launcher"
 
-    def _create_ermit_input(wd: str) -> str:
-        assert wd == run_dir
-        return str(export_path)
-
-    monkeypatch.setattr(export_pkg, "create_ermit_input", _create_ermit_input)
+    monkeypatch.setattr(wepp_module, "render_template", fake_render_template)
 
     response = client.get(f"/runs/{RUN_ID}/{CONFIG}/download/ermit")
     assert response.status_code == 200
-    assert response.get_data(as_text=True) == "topaz_id\n1\n"
-    assert "ermit_input.csv" in response.headers.get("Content-Disposition", "")
+    assert response.get_data(as_text=True) == "launcher"
+    assert captured["ermit_export_submit_url"] == f"/rq-engine/api/runs/{RUN_ID}/{CONFIG}/export/ermit"
+    assert captured["ermit_export_session_token_url"] == f"/rq-engine/api/runs/{RUN_ID}/{CONFIG}/session-token"
 
 
 def test_download_features_export_published_stale_returns_service_error(

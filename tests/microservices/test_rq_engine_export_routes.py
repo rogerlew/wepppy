@@ -1,6 +1,7 @@
 from __future__ import annotations
 
 from pathlib import Path
+from types import SimpleNamespace
 
 import pytest
 
@@ -104,6 +105,86 @@ def test_export_ermit_propagates_nodir_errors(tmp_path: Path, monkeypatch: pytes
     payload = response.json()
     assert payload["error"]["code"] == "NODIR_INVALID_ARCHIVE"
     assert payload["error"]["message"] == "invalid archive"
+
+
+def test_export_ermit_submit_enqueues_rq_job(tmp_path: Path, monkeypatch: pytest.MonkeyPatch) -> None:
+    runid = "run-export-ermit-submit"
+    run_root = tmp_path / runid
+    run_root.mkdir()
+    enqueued: dict[str, object] = {}
+
+    _stub_auth(monkeypatch)
+    monkeypatch.setattr(export_routes, "get_wd", lambda runid, prefer_active=False: str(run_root))
+    monkeypatch.setattr(export_routes.RedisPrep, "tryGetInstance", lambda wd: None)
+
+    class DummyRedis:
+        def __init__(self, **_kwargs):
+            pass
+
+        def __enter__(self):
+            return self
+
+        def __exit__(self, exc_type, exc, tb):
+            return False
+
+    class DummyQueue:
+        def __init__(self, connection):
+            self.connection = connection
+
+        def enqueue_call(self, func, args, timeout):
+            enqueued["func"] = func
+            enqueued["args"] = args
+            enqueued["timeout"] = timeout
+            return SimpleNamespace(id="ermit-job-1")
+
+    monkeypatch.setattr(export_routes.redis, "Redis", DummyRedis)
+    monkeypatch.setattr(export_routes, "Queue", DummyQueue)
+
+    with TestClient(rq_engine.app) as client:
+        response = client.post(f"/api/runs/{runid}/cfg/export/ermit")
+
+    assert response.status_code == 202
+    payload = response.json()
+    assert payload["job_id"] == "ermit-job-1"
+    assert payload["status_url"] == "/rq-engine/api/jobstatus/ermit-job-1"
+    assert payload["download_url"] == f"/rq-engine/api/runs/{runid}/cfg/export/ermit/job/ermit-job-1/download"
+    assert enqueued["func"] is export_routes.run_ermit_export_rq
+    assert enqueued["args"] == (runid, "cfg", str(run_root))
+
+
+def test_export_ermit_download_returns_finished_job_artifact(
+    tmp_path: Path,
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    runid = "run-export-ermit-download"
+    run_root = tmp_path / runid
+    run_root.mkdir()
+    artifact_path = run_root / "export" / "ERMiT_input_demo.zip"
+    artifact_path.parent.mkdir(parents=True, exist_ok=True)
+    artifact_path.write_bytes(b"ermit-zip")
+
+    _stub_auth(monkeypatch)
+    monkeypatch.setattr(export_routes, "get_wd", lambda runid, prefer_active=False: str(run_root))
+    monkeypatch.setattr(
+        export_routes,
+        "get_wepppy_rq_job_info",
+        lambda job_id: {
+            "job_id": job_id,
+            "runid": runid,
+            "status": "finished",
+            "result": {
+                "artifact_relpath": "export/ERMiT_input_demo.zip",
+                "filename": "ERMiT_input_demo.zip",
+            },
+        },
+    )
+
+    with TestClient(rq_engine.app) as client:
+        response = client.get(f"/api/runs/{runid}/cfg/export/ermit/job/ermit-job-2/download")
+
+    assert response.status_code == 200
+    assert response.content == b"ermit-zip"
+    assert "ERMiT_input_demo.zip" in response.headers.get("content-disposition", "")
 
 
 def test_export_geodatabase_propagates_nodir_errors(

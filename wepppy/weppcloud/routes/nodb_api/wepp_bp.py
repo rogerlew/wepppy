@@ -4,6 +4,7 @@ import io
 import re
 from datetime import datetime
 from pathlib import Path
+from urllib.parse import quote
 
 import pandas as pd
 import wepppy
@@ -816,28 +817,25 @@ def report_wepp_results(runid, config):
 @authorize_and_handle_with_exception_factory
 @requires_cap(gate_reason="Complete verification to download ERMiT exports.")
 def download_ermit_export(runid: str, config: str):
-    try:
-        from wepppy.export import create_ermit_input
-
-        ctx = load_run_context(runid, config)
-        wd = str(ctx.active_root)
-        export_path = Path(create_ermit_input(wd))
-        if not export_path.is_file():
-            response = error_factory(f"ERMiT export not found at {export_path}", code="not_found")
-            response.status_code = 404
-            return response
-        return send_file(
-            str(export_path),
-            as_attachment=True,
-            download_name=export_path.name,
-        )
-    except FileNotFoundError as exc:
-        response = error_factory(str(exc), code="not_found")
-        response.status_code = 404
-        return response
-    except Exception:
-        # Route boundary: preserve browser-download error behavior for generated ERMiT files.
-        return exception_factory('Error exporting ERMiT', runid=runid)
+    quoted_runid = quote(runid, safe="")
+    quoted_config = quote(config, safe="")
+    rq_base = f"/rq-engine/api/runs/{quoted_runid}/{quoted_config}"
+    ctx = load_run_context(runid, config)
+    pup_relpath = getattr(ctx, "pup_relpath", None)
+    pup_query = f"?pup={quote(pup_relpath, safe='')}" if pup_relpath else ""
+    return render_template(
+        "reports/ermit_export_download.htm",
+        runid=runid,
+        config=config,
+        ermit_export_submit_url=f"{rq_base}/export/ermit{pup_query}",
+        ermit_export_session_token_url=f"{rq_base}/session-token",
+        ermit_export_return_url=url_for_run(
+            'wepp.report_wepp_results',
+            runid=runid,
+            config=config,
+        ),
+        user=current_user,
+    )
 
 
 @wepp_bp.route('/runs/<string:runid>/<config>/download/features/published/<string:profile>')

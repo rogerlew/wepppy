@@ -355,6 +355,22 @@ def test_wepp_reports_template_renders_ermit_export_link(jinja_env: Environment)
     assert 'href="/runs/test-run/test-config/download/ermit"' in rendered
 
 
+def test_ermit_export_download_template_exposes_rq_engine_contract(jinja_env: Environment) -> None:
+    template = jinja_env.get_template("reports/ermit_export_download.htm")
+    rendered = template.render(
+        runid="test-run",
+        config="test-config",
+        ermit_export_submit_url="/rq-engine/api/runs/test-run/test-config/export/ermit",
+        ermit_export_session_token_url="/rq-engine/api/runs/test-run/test-config/session-token",
+        ermit_export_return_url="/runs/test-run/test-config/report/wepp/results/",
+    )
+
+    assert "ERMiT and Disturbed WEPP Export" in rendered
+    assert '"/rq-engine/api/runs/test-run/test-config/export/ermit"' in rendered
+    assert '"/rq-engine/api/runs/test-run/test-config/session-token"' in rendered
+    assert "Download ERMiT Export" in rendered
+
+
 def test_omni_contrasts_template_shows_user_defined_limit_hint(jinja_env: Environment) -> None:
     template = jinja_env.get_template("controls/omni_contrasts_pure.htm")
     rendered = template.render(omni_user_defined_contrast_limit=200)

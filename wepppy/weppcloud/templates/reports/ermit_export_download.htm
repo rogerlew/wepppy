@@ -1,0 +1,245 @@
+{% extends "base_pure.htm" %}
+
+{% block title %}ERMiT Export{% endblock %}
+
+{% block body %}
+<section class="wc-panel wc-stack" aria-live="polite">
+  <header class="wc-stack">
+    <h1>ERMiT and Disturbed WEPP Export</h1>
+    <div id="ermitExportStatusChip" class="wc-status-chip" data-state="queued">QUEUED</div>
+  </header>
+
+  <div class="wc-meta-list">
+    <div>Run ID: <code>{{ runid }}</code></div>
+    <div>Configuration: <code>{{ config }}</code></div>
+  </div>
+
+  <div id="ermitExportStatusNote" class="wc-status-note" data-state="active">
+    <span id="ermitExportSpinner" class="wc-spinner" aria-hidden="true"></span>
+    <span id="ermitExportStatusText">Preparing export request…</span>
+  </div>
+
+  <div id="ermitExportActions" class="wc-actions" hidden>
+    <a id="ermitExportDownloadLink" class="pure-button pure-button-primary" href="#" download>
+      Download ERMiT Export
+    </a>
+    <a class="pure-button" href="{{ ermit_export_return_url }}">Back to Run Results</a>
+  </div>
+
+  <div id="ermitExportErrorPanel" class="wc-status-note" data-state="error" hidden>
+    <div class="wc-stack">
+      <strong>Export failed.</strong>
+      <div id="ermitExportErrorMessage"></div>
+      <button id="ermitExportRetry" type="button" class="pure-button pure-button-primary">Retry Export</button>
+    </div>
+  </div>
+
+  <noscript>
+    <div class="wc-status" data-state="attention">
+      JavaScript is required to run and download the ERMiT export from this page.
+    </div>
+  </noscript>
+</section>
+{% endblock %}
+
+{% block script_extras %}
+<script>
+  (function () {
+    const submitUrl = {{ ermit_export_submit_url|tojson }};
+    const sessionTokenUrl = {{ ermit_export_session_token_url|tojson }};
+    const ACTIVE_STATES = new Set(["queued", "started", "deferred", "scheduled"]);
+    const FAILURE_STATES = new Set(["failed", "stopped", "canceled"]);
+    const POLL_INTERVAL_MS = 1000;
+    const SPINNER_FRAMES = ["|", "/", "-", "\\"];
+
+    const statusChip = document.getElementById("ermitExportStatusChip");
+    const statusNote = document.getElementById("ermitExportStatusNote");
+    const statusText = document.getElementById("ermitExportStatusText");
+    const spinner = document.getElementById("ermitExportSpinner");
+    const actions = document.getElementById("ermitExportActions");
+    const downloadLink = document.getElementById("ermitExportDownloadLink");
+    const errorPanel = document.getElementById("ermitExportErrorPanel");
+    const errorMessage = document.getElementById("ermitExportErrorMessage");
+    const retryButton = document.getElementById("ermitExportRetry");
+
+    let tokenPromise = null;
+    let pollTimer = null;
+    let spinnerTimer = null;
+    let spinnerIndex = 0;
+    let currentDownloadUrl = null;
+
+    function setState(state, text, noteState) {
+      statusChip.dataset.state = state;
+      statusChip.textContent = String(state || "").toUpperCase();
+      statusNote.dataset.state = noteState || "active";
+      statusText.textContent = text;
+    }
+
+    function setSpinner(active) {
+      if (!spinner) {
+        return;
+      }
+      if (!active) {
+        spinner.textContent = "";
+        spinner.style.visibility = "hidden";
+        if (spinnerTimer) {
+          window.clearInterval(spinnerTimer);
+          spinnerTimer = null;
+        }
+        return;
+      }
+      spinner.style.visibility = "visible";
+      if (!spinnerTimer) {
+        spinnerTimer = window.setInterval(() => {
+          spinner.textContent = SPINNER_FRAMES[spinnerIndex % SPINNER_FRAMES.length];
+          spinnerIndex += 1;
+        }, 150);
+      }
+    }
+
+    async function parseJsonResponse(response) {
+      const contentType = response.headers.get("content-type") || "";
+      if (!contentType.includes("application/json")) {
+        return null;
+      }
+      try {
+        return await response.json();
+      } catch (error) {
+        return null;
+      }
+    }
+
+    function payloadMessage(payload, fallback) {
+      if (payload && payload.error && typeof payload.error.message === "string") {
+        return payload.error.message;
+      }
+      if (payload && typeof payload.message === "string") {
+        return payload.message;
+      }
+      return fallback;
+    }
+
+    async function getSessionToken() {
+      if (!tokenPromise) {
+        tokenPromise = fetch(sessionTokenUrl, {
+          method: "POST",
+          headers: { "Accept": "application/json" },
+          credentials: "same-origin"
+        }).then(async (response) => {
+          const payload = await parseJsonResponse(response);
+          if (!response.ok) {
+            throw new Error(payloadMessage(payload, "Unable to create an rq-engine session token."));
+          }
+          const token = payload && typeof payload.token === "string" ? payload.token : "";
+          if (!token) {
+            throw new Error("rq-engine session token response did not include a token.");
+          }
+          return token;
+        });
+      }
+      return tokenPromise;
+    }
+
+    async function fetchJsonWithToken(url, options) {
+      const token = await getSessionToken();
+      const requestOptions = Object.assign({}, options || {});
+      requestOptions.headers = Object.assign(
+        { "Accept": "application/json" },
+        requestOptions.headers || {},
+        { "Authorization": "Bearer " + token }
+      );
+      requestOptions.credentials = "same-origin";
+      const response = await fetch(url, requestOptions);
+      const payload = await parseJsonResponse(response);
+      if (!response.ok) {
+        throw new Error(payloadMessage(payload, "Request failed with HTTP " + response.status + "."));
+      }
+      return payload || {};
+    }
+
+    async function downloadWithToken(url) {
+      const token = await getSessionToken();
+      const response = await fetch(url, {
+        headers: { "Authorization": "Bearer " + token },
+        credentials: "same-origin"
+      });
+      if (!response.ok) {
+        const payload = await parseJsonResponse(response);
+        throw new Error(payloadMessage(payload, "Download failed with HTTP " + response.status + "."));
+      }
+      const blob = await response.blob();
+      const objectUrl = URL.createObjectURL(blob);
+      const disposition = response.headers.get("content-disposition") || "";
+      const filenameMatch = disposition.match(/filename\*?=(?:UTF-8''|")?([^";]+)/i);
+      const filename = filenameMatch ? decodeURIComponent(filenameMatch[1].replace(/"/g, "")) : "ermit_export.zip";
+      downloadLink.href = objectUrl;
+      downloadLink.download = filename;
+      actions.hidden = false;
+      downloadLink.click();
+    }
+
+    function showError(message) {
+      setSpinner(false);
+      setState("failed", "Export failed.", "error");
+      errorMessage.textContent = message || "No additional details were provided.";
+      errorPanel.hidden = false;
+    }
+
+    async function pollStatus(statusUrl, downloadUrl) {
+      try {
+        const payload = await fetchJsonWithToken(statusUrl);
+        const state = payload.status || payload.job_status || "unknown";
+        if (ACTIVE_STATES.has(state)) {
+          setState(state, state === "queued" ? "Export job queued…" : "Export in progress…", "active");
+          pollTimer = window.setTimeout(() => pollStatus(statusUrl, downloadUrl), POLL_INTERVAL_MS);
+          return;
+        }
+        if (FAILURE_STATES.has(state)) {
+          showError(payload.exc_info || payload.description || "The ERMiT export job failed.");
+          return;
+        }
+        setSpinner(false);
+        setState("finished", "Export finished. Downloading…", "active");
+        await downloadWithToken(downloadUrl);
+        setState("finished", "Export downloaded.", "active");
+      } catch (error) {
+        showError(error && error.message ? error.message : "Unable to check export status.");
+      }
+    }
+
+    async function startExport() {
+      if (pollTimer) {
+        window.clearTimeout(pollTimer);
+        pollTimer = null;
+      }
+      errorPanel.hidden = true;
+      actions.hidden = true;
+      setSpinner(true);
+      setState("queued", "Submitting ERMiT export job…", "active");
+      try {
+        const payload = await fetchJsonWithToken(submitUrl, { method: "POST" });
+        const statusUrl = payload.status_url;
+        currentDownloadUrl = payload.download_url;
+        if (!payload.job_id || !statusUrl || !currentDownloadUrl) {
+          throw new Error("rq-engine did not return job, status, and download URLs.");
+        }
+        setState("queued", "Export job queued…", "active");
+        pollStatus(statusUrl, currentDownloadUrl);
+      } catch (error) {
+        showError(error && error.message ? error.message : "Unable to submit ERMiT export job.");
+      }
+    }
+
+    retryButton.addEventListener("click", startExport);
+    downloadLink.addEventListener("click", (event) => {
+      if (!downloadLink.href || downloadLink.href === "#") {
+        event.preventDefault();
+        if (currentDownloadUrl) {
+          downloadWithToken(currentDownloadUrl).catch((error) => showError(error.message));
+        }
+      }
+    });
+    startExport();
+  })();
+</script>
+{% endblock %}

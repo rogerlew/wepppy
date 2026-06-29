@@ -245,6 +245,16 @@ wepp.cloud {
             }
         }
 
+        @ermit_export_launcher path_regexp ermit_export_launcher ^/weppcloud/runs/[^/]+/[^/]+/download/ermit/?$
+        handle @ermit_export_launcher {
+            uri strip_prefix /weppcloud
+            reverse_proxy weppcloud:8000 {
+                header_up X-Forwarded-Prefix /weppcloud
+                header_up X-Forwarded-Proto {scheme}
+                header_up Host {host}
+            }
+        }
+
         @archive_download_proxy path_regexp archive_download_proxy ^/weppcloud/runs/[^/]+/[^/]+/download/archives/.+\.[Zz][Ii][Pp]$
         handle @archive_download_proxy {
             reverse_proxy download:9011 {

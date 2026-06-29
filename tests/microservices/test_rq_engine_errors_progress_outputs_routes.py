@@ -262,6 +262,8 @@ def test_outputs_payload_includes_trust_provenance_and_retrieval_handles(
     exports = payload["exports"]
     export_operation_ids = {entry["operation_id"] for entry in exports}
     assert "rq_engine_export_ermit" in export_operation_ids
+    assert "rq_engine_export_ermit_submit" in export_operation_ids
+    assert "rq_engine_export_ermit_download" in export_operation_ids
     assert "rq_engine_export_features_submit" in export_operation_ids
 
 
