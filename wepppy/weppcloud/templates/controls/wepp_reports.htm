@@ -155,6 +155,15 @@
       <section class="wc-stack">
         <h4 class="wc-heading wc-heading--sm">Exports</h4>
         <div class="wc-stack">
+          {% if ermit_export_download_url|default(None) %}
+          <a class="wc-link wc-link--file"
+             href="{{ ermit_export_download_url }}"
+             target="_blank"
+             rel="noopener">
+            Hillslope Input CSV for ERMiT and Disturbed WEPP
+          </a>
+          {% endif %}
+
           {% if prep_details_export_download_url %}
           <a class="wc-link wc-link--file"
              href="{{ prep_details_export_download_url }}"

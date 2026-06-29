@@ -192,6 +192,13 @@ def _resolve_published_export_relpath(wd: str, profile: str) -> str | None:
     return artifact_relpath
 
 
+def _load_report_mods(wd: str) -> tuple[str, ...]:
+    ron = Ron.load_detached(wd, allow_nonexistent=True)
+    if ron is None:
+        return ()
+    return tuple(getattr(ron, "mods", ()) or ())
+
+
 _DOWNLOAD_FILENAME_TOKEN_PATTERN = re.compile(r"[^A-Za-z0-9._-]+")
 
 
@@ -774,6 +781,12 @@ def report_wepp_results(runid, config):
         if post_wepp_geodatabase_export_relpath
         else None
     )
+    report_mods = _load_report_mods(wd)
+    ermit_export_download_url = (
+        url_for_run('wepp.download_ermit_export', runid=runid, config=config)
+        if "rhem" not in report_mods
+        else None
+    )
 
     try:
         return render_template('controls/wepp_reports.htm',
@@ -787,6 +800,7 @@ def report_wepp_results(runid, config):
                                totalwatsed2_exists=totalwatsed2_exists,
                                interchange_readme_exists=interchange_readme_exists,
                                storm_event_analyzer_ready=storm_event_analyzer_ready,
+                               ermit_export_download_url=ermit_export_download_url,
                                prep_details_export_download_url=prep_details_export_download_url,
                                post_wepp_geopackage_export_download_url=post_wepp_geopackage_export_download_url,
                                post_wepp_geodatabase_export_download_url=post_wepp_geodatabase_export_download_url,
@@ -795,6 +809,35 @@ def report_wepp_results(runid, config):
         # Boundary catch: preserve contract behavior while logging unexpected failures.
         __import__("logging").getLogger(__name__).exception("Boundary exception at wepppy/weppcloud/routes/nodb_api/wepp_bp.py:504", extra={"runid": locals().get("runid"), "config": locals().get("config"), "job_id": locals().get("job_id")})
         return exception_factory('Error building reports template', runid=runid)
+
+
+@wepp_bp.route('/runs/<string:runid>/<config>/download/ermit')
+@wepp_bp.route('/runs/<string:runid>/<config>/download/ermit/')
+@authorize_and_handle_with_exception_factory
+@requires_cap(gate_reason="Complete verification to download ERMiT exports.")
+def download_ermit_export(runid: str, config: str):
+    try:
+        from wepppy.export import create_ermit_input
+
+        ctx = load_run_context(runid, config)
+        wd = str(ctx.active_root)
+        export_path = Path(create_ermit_input(wd))
+        if not export_path.is_file():
+            response = error_factory(f"ERMiT export not found at {export_path}", code="not_found")
+            response.status_code = 404
+            return response
+        return send_file(
+            str(export_path),
+            as_attachment=True,
+            download_name=export_path.name,
+        )
+    except FileNotFoundError as exc:
+        response = error_factory(str(exc), code="not_found")
+        response.status_code = 404
+        return response
+    except Exception:
+        # Route boundary: preserve browser-download error behavior for generated ERMiT files.
+        return exception_factory('Error exporting ERMiT', runid=runid)
 
 
 @wepp_bp.route('/runs/<string:runid>/<config>/download/features/published/<string:profile>')

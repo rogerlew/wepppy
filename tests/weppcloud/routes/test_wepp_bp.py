@@ -613,6 +613,56 @@ def test_report_wepp_results_passes_export_relpaths(wepp_client, monkeypatch: py
         captured["post_wepp_geodatabase_export_download_url"].rstrip("/")
         == f"/runs/{RUN_ID}/{CONFIG}/download/features/published/prep-wepp-geodatabase"
     )
+    assert (
+        captured["ermit_export_download_url"].rstrip("/")
+        == f"/runs/{RUN_ID}/{CONFIG}/download/ermit"
+    )
+
+
+def test_report_wepp_results_hides_ermit_export_for_rhem(
+    wepp_client,
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    client, _, run_dir = wepp_client
+    _touch_wepp_results(run_dir)
+
+    monkeypatch.setattr(cap_guard, "current_user", type("User", (), {"is_authenticated": True})(), raising=False)
+
+    class DummyClimate:
+        @classmethod
+        def getInstance(cls, wd: str):
+            assert wd == run_dir
+            return type("ClimateInstance", (), {"is_single_storm": False, "ss_batch_storms": None})()
+
+    monkeypatch.setattr(wepp_module, "Climate", DummyClimate)
+
+    def _raise_file_not_found(_wd: str):
+        raise FileNotFoundError()
+
+    monkeypatch.setattr(wepp_module.RedisPrep, "getInstance", _raise_file_not_found)
+
+    class DummyRon:
+        @staticmethod
+        def load_detached(wd: str, allow_nonexistent: bool = False):
+            assert wd == run_dir
+            assert allow_nonexistent is True
+            return type("RonInstance", (), {"mods": ("rhem",)})()
+
+    monkeypatch.setattr(wepp_module, "Ron", DummyRon)
+
+    captured: dict[str, Any] = {}
+
+    def fake_render_template(template_name: str, **kwargs: Any) -> str:
+        assert template_name == "controls/wepp_reports.htm"
+        captured.update(kwargs)
+        return "ok"
+
+    monkeypatch.setattr(wepp_module, "render_template", fake_render_template)
+
+    response = client.get(f"/runs/{RUN_ID}/{CONFIG}/report/wepp/results/")
+    assert response.status_code == 200
+    assert response.get_data(as_text=True) == "ok"
+    assert captured["ermit_export_download_url"] is None
 
 
 def test_report_wepp_results_sets_storm_event_analyzer_ready_when_metric_csv_exists(
@@ -747,6 +797,31 @@ def test_download_features_export_published_returns_file_with_canonical_filename
     )
     assert response.status_code == 200
     assert "test-run.prep-details.csv.zip" in response.headers.get("Content-Disposition", "")
+
+
+def test_download_ermit_export_returns_generated_file(
+    wepp_client,
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    client, _, run_dir = wepp_client
+    monkeypatch.setattr(cap_guard, "current_user", type("User", (), {"is_authenticated": True})(), raising=False)
+
+    export_path = Path(run_dir) / "export" / "ermit" / "ermit_input.csv"
+    export_path.parent.mkdir(parents=True, exist_ok=True)
+    export_path.write_text("topaz_id\n1\n", encoding="utf-8")
+
+    import wepppy.export as export_pkg
+
+    def _create_ermit_input(wd: str) -> str:
+        assert wd == run_dir
+        return str(export_path)
+
+    monkeypatch.setattr(export_pkg, "create_ermit_input", _create_ermit_input)
+
+    response = client.get(f"/runs/{RUN_ID}/{CONFIG}/download/ermit")
+    assert response.status_code == 200
+    assert response.get_data(as_text=True) == "topaz_id\n1\n"
+    assert "ermit_input.csv" in response.headers.get("Content-Disposition", "")
 
 
 def test_download_features_export_published_stale_returns_service_error(

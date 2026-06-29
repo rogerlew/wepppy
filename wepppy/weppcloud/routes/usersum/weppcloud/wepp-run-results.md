@@ -11,7 +11,7 @@ The Run Results surface usually groups links into four families:
 | Report family | Use it when you want to... | Typical starting points |
 | --- | --- | --- |
 | `WEPP Results` | answer the main runoff and erosion questions for this run | `Watershed Loss Summary`, `Return Periods Report`, `Summary by Landuse Report`, `Sediment Characteristics Report`, `GL Dashboard` |
-| `Exports` | download supporting files for QA, GIS, or sharing | `Prep Details`, `Post WEPP Geopackage Features Export`, `Post WEPP Geodatabase (ESRI) Features Export` |
+| `Exports` | download supporting files for QA, GIS, or sharing | `Hillslope Input CSV for ERMiT and Disturbed WEPP`, `Prep Details`, `Post WEPP Geopackage Features Export`, `Post WEPP Geodatabase (ESRI) Features Export` |
 | `Water Balance Reports` | understand how runoff, lateral flow, and baseflow behave through time | `Average Annual Report`, `Yearly Report`, `Daily Runoff / Lateral Flow / Baseflow Graph` |
 | `Fork Project and Run Undisturbed` | create a comparison run with disturbance removed | `Fork, rebuild, and run WEPP undisturbed` |
 
@@ -30,6 +30,7 @@ Some links are conditional:
 | `Storm Event Analyzer` | Continuous-climate runs with the needed storm-metric data prepared |
 | `TotalWatSed3 CSV` and `Interchange README (schema + preview)` | Runs where interchange outputs were generated |
 | `TotalWatSed2 CSV` | Runs where the legacy compatibility file still exists |
+| `Hillslope Input CSV for ERMiT and Disturbed WEPP` | Non-RHEM WEPP runs; generated on demand when downloaded |
 | `Exports` items | Only if that export artifact was generated and published for the run |
 | `Water Balance Reports` | Continuous-climate runs; they are generally not shown for single-storm runs |
 | `Fork, rebuild, and run WEPP undisturbed` | Disturbed runs with an SBS-based setup where an undisturbed comparison makes sense |
@@ -111,6 +112,13 @@ Use these links after a successful WEPP run to answer different kinds of questio
 ## Exports
 
 These links download shareable run artifacts. They are not live report pages, and a link can be unavailable if the export was not generated or published for that run.
+
+### `Hillslope Input CSV for ERMiT and Disturbed WEPP`
+
+- **What it is for:** A batch-input CSV describing hillslope setup for ERMiT and Disturbed WEPP workflows.
+- **When to use it:** Use it when you need to hand off hillslope inputs to the ERMiT/Disturbed WEPP batch-processing spreadsheet workflow.
+- **Cautions and limits:** The file is generated from the current run state at download time. Rerun or rebuild the project first if inputs changed.
+- **Do not confuse it with:** The post-WEPP GIS exports, which package spatial layers and WEPP summary outputs rather than ERMiT batch inputs.
 
 ### `Prep Details`
 

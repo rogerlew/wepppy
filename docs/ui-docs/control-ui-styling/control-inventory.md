@@ -37,8 +37,8 @@ _Date: 2025-10-22 (updated audit aligned with current Pure migration status)_
 ## Read-Only & Report Panels
 | Panel | Template Extends | Entry Point(s) | What It Surfaces | Notes |
 | --- | --- | --- | --- | --- |
-| Export Downloads | _Removed (no panel)_ | N/A | Direct links now hit `/rq-engine/api/runs/<runid>/<config>/export/{ermit,geopackage,geodatabase,prep_details}` or the archive dashboard | If reintroduced, target rq-engine export routes (Flask `export_bp` removed) |
-| WEPP Reports | `_content_base.htm` | Conditional include (`controls/wepp_reports.htm`) | Links to WEPP summary/return period reports & fork actions | Locale-aware text, heavy reliance on `url_for_run` helpers |
+| Export Downloads | _Removed (no panel)_ | N/A | Legacy export-panel links moved into WEPP Reports, published feature-export downloads, rq-engine API export routes, or the archive dashboard | Flask `export_bp` removed; browser downloads that need session auth use WEPP routes such as `wepp.download_ermit_export`, while API clients use rq-engine export routes |
+| WEPP Reports | `_content_base.htm` | Conditional include (`controls/wepp_reports.htm`) | Links to WEPP summary/return period reports, ERMiT/Disturbed WEPP CSV export, and fork actions | Locale-aware text, heavy reliance on `url_for_run` helpers |
 | RHEM Reports | `_content_base.htm` | Conditional include (`controls/rhem_reports.htm`) | Report shortcuts for RHEM outputs | Only visible when RHEM runs; inherits Bootstrap list styling |
 | Climate Monthlies | Partial table (`controls/climate_monthlies.htm`) | Rendered inside climate dialogs | Tabular summary of climate stats with unitizer helpers | Uses inline `<table>` markup; designed for modal display |
 
@@ -239,8 +239,8 @@ The experimental WEPP flowpaths card is retired. Current builds do not expose it
 ### Read-Only / Content Panels
 | Panel | Template | Key Links / Content | Notes |
 | --- | --- | --- | --- |
-| Export Downloads | _Removed (no panel)_ | Direct links now hit `/rq-engine/api/runs/<runid>/<config>/export/{ermit,geopackage,geodatabase,prep_details}` or the archive dashboard | If reintroduced, target rq-engine export routes; remove legacy `controls/export.htm` references |
-| WEPP Reports | `controls/wepp_reports.htm` | Links to watershed summaries, return periods, sediment characteristics, Deval report, fork project actions | Conditional content based on `climate.is_single_storm`, `prep.has_sbs`, user roles | Requires external anchor styling but no inputs |
+| Export Downloads | _Removed (no panel)_ | Legacy export-panel links moved into WEPP Reports, published feature-export downloads, rq-engine API export routes, or the archive dashboard | Keep browser downloads behind session-auth WEPP routes when needed; remove legacy `controls/export.htm` references |
+| WEPP Reports | `controls/wepp_reports.htm` | Links to watershed summaries, return periods, sediment characteristics, ERMiT/Disturbed WEPP CSV export, Deval report, fork project actions | Conditional content based on `climate.is_single_storm`, `prep.has_sbs`, user roles | Requires external anchor styling but no inputs |
 | RHEM Reports | `controls/rhem_reports.htm` | Average annuals, return periods, run log links | Visible only when RHEM mod active; minimal markup |
 | Climate Monthlies | `controls/climate_monthlies.htm` | Tabular summary with `unitizer` helpers for monthly stats | Embedded via modals/summary blocks; ensure macros preserve table classes |
 | Power User Panel | `controls/poweruser_panel.htm` | Modal for push notifications/resources | Inline JS manages service worker; already captured in summary but treat as modal-only content when porting |

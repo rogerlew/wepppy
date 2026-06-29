@@ -335,6 +335,26 @@ def test_roads_reports_control_template_renders_with_link_panel(jinja_env: Envir
     assert "Run Results" in rendered
 
 
+def test_wepp_reports_template_renders_ermit_export_link(jinja_env: Environment) -> None:
+    template = jinja_env.get_template("controls/wepp_reports.htm")
+    rendered = template.render(
+        climate=SimpleNamespace(is_single_storm=False, ss_batch_storms=None, mods=set()),
+        prep=SimpleNamespace(has_sbs=False),
+        runid="test-run",
+        config="test-config",
+        run_results_title="Run Results",
+        totalwatsed3_exists=False,
+        totalwatsed2_exists=False,
+        ermit_export_download_url="/runs/test-run/test-config/download/ermit",
+        prep_details_export_download_url=None,
+        post_wepp_geopackage_export_download_url=None,
+        post_wepp_geodatabase_export_download_url=None,
+    )
+
+    assert "Hillslope Input CSV for ERMiT and Disturbed WEPP" in rendered
+    assert 'href="/runs/test-run/test-config/download/ermit"' in rendered
+
+
 def test_omni_contrasts_template_shows_user_defined_limit_hint(jinja_env: Environment) -> None:
     template = jinja_env.get_template("controls/omni_contrasts_pure.htm")
     rendered = template.render(omni_user_defined_contrast_limit=200)
