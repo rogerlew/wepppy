@@ -47,73 +47,106 @@ function buildUrl(pathname) {
   return new URL(pathname, base).toString();
 }
 
-async function activeElementName(page) {
+async function activeElementSnapshot(page) {
   return page.evaluate(() => {
     const element = document.activeElement;
     if (!element || element === document.body) {
-      return '';
+      return {
+        name: '',
+        tagName: '',
+        isMapStage: false,
+        hasVisibleFocus: false,
+        top: 0,
+        bottom: 0,
+      };
     }
     const ariaLabel = element.getAttribute('aria-label');
-    if (ariaLabel) {
-      return ariaLabel.trim();
-    }
     const labelledBy = element.getAttribute('aria-labelledby');
-    if (labelledBy) {
-      const text = labelledBy
+    let name = ariaLabel ? ariaLabel.trim() : '';
+    if (!name && labelledBy) {
+      name = labelledBy
         .split(/\s+/)
         .map((id) => document.getElementById(id)?.textContent?.trim() || '')
         .filter(Boolean)
         .join(' ');
-      if (text) {
-        return text;
-      }
     }
-    return (element.textContent || '').trim().replace(/\s+/g, ' ');
+    if (!name) {
+      name = (element.textContent || '').trim().replace(/\s+/g, ' ');
+    }
+
+    const style = window.getComputedStyle(element);
+    const rect = element.getBoundingClientRect();
+    const outlineWidth = Number.parseFloat(style.outlineWidth || '0');
+    const hasVisibleFocus =
+      (outlineWidth >= 2 && style.outlineStyle !== 'none') ||
+      (style.boxShadow && style.boxShadow !== 'none');
+
+    return {
+      name,
+      tagName: element.tagName,
+      isMapStage: element.classList.contains('light-map-stage'),
+      hasVisibleFocus,
+      top: rect.top,
+      bottom: rect.bottom,
+    };
   });
 }
 
 test.describe('light landing keyboard accessibility', () => {
   test('loads installed light route and exposes a usable tab sequence', async ({ page }) => {
-    const failedAssets = [];
+    const failedVariantRequests = [];
     page.on('response', (response) => {
-      if (response.status() >= 400 && response.url().includes('/landing/light/assets/')) {
-        failedAssets.push(`${response.status()} ${response.url()}`);
+      const url = response.url();
+      const failedVariantAsset = url.includes('/landing/light/assets/');
+      const failedVariantData = url.includes('/landing/light/run-locations.json');
+      if (response.status() >= 400 && (failedVariantAsset || failedVariantData)) {
+        failedVariantRequests.push(`${response.status()} ${url}`);
       }
     });
 
-    await page.goto(buildUrl(withSitePrefix('/landing/light/')), { waitUntil: 'networkidle' });
+    await page.goto(buildUrl(withSitePrefix('/landing/light/')), { waitUntil: 'domcontentloaded' });
 
     await expect(page.getByRole('heading', { name: 'WEPPcloud', exact: true })).toBeVisible();
     await expect(page.getByRole('link', { name: 'Skip to main content' })).toBeAttached();
     await expect(page.getByRole('region', { name: 'Explore Active WEPPcloud Projects' })).toBeVisible();
-    expect(failedAssets).toEqual([]);
+    expect(failedVariantRequests).toEqual([]);
+    expect(await page.evaluate(() => document.activeElement === document.body)).toBe(true);
 
     const focusableCount = await page.evaluate(
       () => document.querySelectorAll('a[href], button, select, textarea, input, [tabindex]:not([tabindex="-1"])').length
     );
     expect(focusableCount).toBeGreaterThan(20);
+    await expect(page.getByRole('link', { name: 'Interfaces' })).toHaveAttribute('tabindex', '0');
+    await expect(page.getByRole('link', { name: 'Docs', exact: true })).toHaveAttribute('tabindex', '0');
 
     await expect(page.getByLabel('Run year filter')).toBeHidden();
 
-    const seen = new Set();
-    for (let index = 0; index < 18; index += 1) {
+    const expectedSequence = [
+      'Skip to main content',
+      'Interfaces',
+      'Docs',
+      'Research',
+      'Login',
+      'WEPP Model',
+      'FAQ',
+      'Zoom map in',
+      'Zoom map out',
+      'Reset map view',
+      'Open run atlas filters',
+    ];
+    const seen = [];
+    const viewportHeight = page.viewportSize()?.height || 720;
+    for (let index = 0; index < expectedSequence.length; index += 1) {
       await page.keyboard.press('Tab');
-      const name = await activeElementName(page);
-      if (name) {
-        seen.add(name);
-      }
+      const snapshot = await activeElementSnapshot(page);
+      seen.push(snapshot.name);
+      expect(snapshot.isMapStage).toBe(false);
+      expect(snapshot.hasVisibleFocus).toBe(true);
+      expect(snapshot.top).toBeGreaterThanOrEqual(0);
+      expect(snapshot.bottom).toBeLessThanOrEqual(viewportHeight);
     }
 
-    expect(seen).toContain('Skip to main content');
-    expect(seen).toContain('Interfaces');
-    expect(seen).toContain('Docs');
-    expect(seen).toContain('WEPP Model');
-    expect(seen).toContain('FAQ');
-    expect([...seen].some((name) => name.includes('Map of WEPPcloud run locations'))).toBe(true);
-    expect(seen).toContain('Zoom map in');
-    expect(seen).toContain('Zoom map out');
-    expect(seen).toContain('Reset map view');
-    expect(seen).toContain('Open run atlas filters');
+    expect(seen).toEqual(expectedSequence);
     expect(seen).not.toContain('Run year filter');
 
     await page.getByRole('button', { name: 'Open run atlas filters' }).focus();
@@ -123,5 +156,6 @@ test.describe('light landing keyboard accessibility', () => {
 
     await page.keyboard.press('Tab');
     await expect(page.getByLabel('Run year filter')).toBeFocused();
+    expect((await activeElementSnapshot(page)).hasVisibleFocus).toBe(true);
   });
 });

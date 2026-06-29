@@ -338,6 +338,7 @@ const INITIAL_VIEW_STATE: MapViewState = {
 const POINT_SCALE = 1
 
 export function AppLight() {
+  const lightRootRef = useRef<HTMLDivElement>(null)
   const [data, setData] = useState<RunLocation[]>([])
   const [yearFilter, setYearFilter] = useState<string>('all')
   const [isLoading, setIsLoading] = useState<boolean>(true)
@@ -355,8 +356,41 @@ export function AppLight() {
   const mapTitleId = 'light-run-atlas-title'
   const mapDescriptionId = 'light-run-atlas-description'
   const mapInstructionsId = 'light-run-atlas-keyboard-instructions'
+  const mapSummaryId = 'light-run-atlas-summary'
   const filterPanelId = 'light-run-atlas-filter-panel'
   const offsetCache = useRef(new Map<string, [number, number]>())
+  const mapStageRef = useRef<HTMLDivElement>(null)
+
+  useEffect(() => {
+    const root = lightRootRef.current
+    if (!root) {
+      return
+    }
+
+    const focusableSelector = 'a[href], button:not([disabled]), select:not([disabled])'
+    root.querySelectorAll<HTMLAnchorElement>('a[href]:not([tabindex])').forEach((anchor) => {
+      anchor.tabIndex = 0
+    })
+
+    const focusFirstPageControl = (event: KeyboardEvent) => {
+      if (event.key !== 'Tab' || event.shiftKey || event.defaultPrevented) {
+        return
+      }
+      if (document.activeElement !== document.body) {
+        return
+      }
+
+      const first = root.querySelector<HTMLElement>(focusableSelector)
+      if (!first) {
+        return
+      }
+      event.preventDefault()
+      first.focus()
+    }
+
+    document.addEventListener('keydown', focusFirstPageControl)
+    return () => document.removeEventListener('keydown', focusFirstPageControl)
+  }, [])
 
   useEffect(() => {
     const controller = new AbortController()
@@ -444,6 +478,43 @@ export function AppLight() {
       hillslopes: hills,
     }
   }, [sortedData])
+
+  useEffect(() => {
+    const stage = mapStageRef.current
+    if (!stage || typeof MutationObserver === 'undefined') {
+      return
+    }
+
+    let pending = false
+    const removeMapDescendantTabStops = () => {
+      stage
+        .querySelectorAll<HTMLElement>('a[href], button, input, select, textarea, [tabindex]')
+        .forEach((element) => {
+          if (element.getAttribute('tabindex') !== '-1') {
+            element.setAttribute('tabindex', '-1')
+          }
+          element.setAttribute('aria-hidden', 'true')
+        })
+    }
+    const scheduleMapDescendantTabStopRemoval = () => {
+      if (pending) {
+        return
+      }
+      pending = true
+      window.requestAnimationFrame(() => {
+        pending = false
+        removeMapDescendantTabStops()
+      })
+    }
+
+    removeMapDescendantTabStops()
+    const observer = new MutationObserver(scheduleMapDescendantTabStopRemoval)
+    observer.observe(stage, {
+      childList: true,
+      subtree: true,
+    })
+    return () => observer.disconnect()
+  }, [sortedData.length])
 
   const handleViewStateChange = useCallback(
     ({ viewState: next }: ViewStateChangeParameters) => {
@@ -570,7 +641,7 @@ export function AppLight() {
   )
 
   return (
-    <div className="light-theme min-h-screen bg-white text-slate-800">
+    <div ref={lightRootRef} className="light-theme min-h-screen bg-white text-slate-800">
       <a href="#main-content" className="light-skip-link">
         Skip to main content
       </a>
@@ -692,12 +763,15 @@ export function AppLight() {
             className="relative border border-gray-300 bg-white shadow-sm"
             role="region"
             aria-labelledby={mapTitleId}
-            aria-describedby={`${mapDescriptionId} ${mapInstructionsId}`}
+            aria-describedby={`${mapDescriptionId} ${mapSummaryId} ${mapInstructionsId}`}
           >
             <div className="relative h-[65vh] min-h-[520px] overflow-hidden">
+              <p id={mapSummaryId} className="light-sr-only">
+                {filteredStats.message}. Filtered hillslopes: {filteredStats.hillslopes.toLocaleString()}.
+              </p>
               <p id={mapInstructionsId} className="light-sr-only">
-                The map shows georeferenced WEPPcloud run locations. Use the map control buttons to zoom or reset
-                the view. Use the filters button to open display options, then continue tabbing to page links.
+                The map visual is not a tab stop. Use the map control buttons to zoom or reset the view. Use the
+                filters button to open display options, then continue tabbing to page links.
               </p>
               {/* Legend */}
               <div className="light-legend">
@@ -716,11 +790,9 @@ export function AppLight() {
               </div>
 
               <div
+                ref={mapStageRef}
                 className="light-map-stage absolute inset-0"
-                tabIndex={0}
-                role="img"
-                aria-label={`${filteredStats.message}. Map of WEPPcloud run locations.`}
-                aria-describedby={mapInstructionsId}
+                aria-hidden="true"
                 onWheelCapture={(event) => {
                   if (!event.ctrlKey) {
                     event.stopPropagation()

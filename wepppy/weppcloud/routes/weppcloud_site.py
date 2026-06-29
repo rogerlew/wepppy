@@ -987,6 +987,7 @@ def _render_ui_lab_index_with_state(index_path: Path) -> Optional['flask.Respons
 
     response = make_response(html)
     response.headers['Content-Type'] = 'text/html; charset=utf-8'
+    response.headers['Cache-Control'] = 'no-store, max-age=0'
     return response
 
 
@@ -1101,7 +1102,9 @@ def cap_verify():
 
 def _landing_run_locations_response() -> 'flask.Response':
     dataset = _load_or_refresh_run_locations()
-    return jsonify(dataset)
+    response = jsonify(dataset)
+    response.headers['Cache-Control'] = 'no-store, max-age=0'
+    return response
 
 
 @weppcloud_site_bp.route('/landing/', strict_slashes=False)
@@ -1127,6 +1130,13 @@ def landing_dark():
 @weppcloud_site_bp.route('/landing/run-locations.json', strict_slashes=False)
 @handle_with_exception_factory
 def landing_run_locations():
+    return _landing_run_locations_response()
+
+
+@weppcloud_site_bp.route('/landing/light/run-locations.json', strict_slashes=False)
+@weppcloud_site_bp.route('/landing/dark/run-locations.json', strict_slashes=False)
+@handle_with_exception_factory
+def landing_variant_run_locations():
     return _landing_run_locations_response()
 
 

@@ -64,14 +64,14 @@
   font-weight: 700;
   text-decoration: none;
   box-shadow: 0 8px 20px rgba(15, 23, 42, 0.18);
-  transition: transform 120ms ease-out;
 }
 
 .light-skip-link:focus,
 .light-skip-link:focus-visible {
-  transform: translateY(0);
-  outline: 3px solid #2563eb;
-  outline-offset: 2px;
+  transform: translateY(0) !important;
+  outline: 4px solid #1d4ed8 !important;
+  outline-offset: 3px !important;
+  box-shadow: 0 0 0 7px rgba(29, 78, 216, 0.2), 0 8px 20px rgba(15, 23, 42, 0.18);
 }
 
 .light-sr-only {
@@ -86,9 +86,16 @@
   border: 0;
 }
 
-.light-theme :where(a, button, select, [tabindex]:not([tabindex='-1'])):focus-visible {
-  outline: 3px solid #2563eb;
-  outline-offset: 3px;
+.light-theme :where(a[href], button, select, input, textarea, [role='button'], [tabindex]:not([tabindex='-1'])):focus-visible {
+  outline: 4px solid #1d4ed8 !important;
+  outline-offset: 4px !important;
+  box-shadow: 0 0 0 7px rgba(29, 78, 216, 0.18) !important;
+}
+
+.light-theme :where(a[href]):focus-visible {
+  text-decoration: underline;
+  text-decoration-thickness: 2px;
+  text-underline-offset: 4px;
 }
 
 .light-theme main:focus {
@@ -97,11 +104,7 @@
 
 .light-map-stage {
   z-index: 0;
-}
-
-.light-map-stage:focus-visible {
-  outline: 3px solid #2563eb;
-  outline-offset: -6px;
+  pointer-events: auto;
 }
 
 .light-map-actions {
@@ -133,6 +136,13 @@
   border-color: #64748b;
   background: #f8fafc;
   color: #0f172a;
+}
+
+.light-map-icon-button:focus-visible,
+.light-control-toggle:focus-visible {
+  border-color: #1d4ed8 !important;
+  background: #eff6ff !important;
+  color: #0f172a !important;
 }
 
 .light-control-toggle {

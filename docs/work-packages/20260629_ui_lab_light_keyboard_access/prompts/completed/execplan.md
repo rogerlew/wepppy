@@ -20,6 +20,8 @@ The WEPPcloud UI Lab light landing page is a public entry point for WEPPcloud. A
 - [x] (2026-06-29 18:14 UTC) Ran focused tests and live-route verification.
 - [x] (2026-06-29 18:14 UTC) Updated package/tracker/outcomes and closed the work package.
 - [x] (2026-06-29 18:18 UTC) Recorded full frontend test gate after closure.
+- [x] (2026-06-29 22:10 UTC) Follow-up remediation removed the map visual from tab order, strengthened focus indication, covered variant run-data loading, rebuilt/exported the bundle, and reran focused validation.
+- [x] (2026-06-29 23:00 UTC) Follow-up hardening added explicit link tab stops, a first-Tab body fallback, no-store landing responses, cross-engine Playwright probes, and stricter smoke assertions.
 
 ## Surprises & Discoveries
 
@@ -31,6 +33,9 @@ The WEPPcloud UI Lab light landing page is a public entry point for WEPPcloud. A
 
 - Observation: The remediated `/weppcloud/landing/light/` route exposes a non-empty focus order and no longer emits variant asset 404s.
   Evidence: Live route smoke reported `focusable: 44` and `badAssets: []`; `wctl run-playwright --suite full --grep "light landing keyboard" --workers 1` passed.
+
+- Observation: A focusable map visual is a poor keyboard stop because it is not an actionable link or control and can make traversal appear to jump to the map and stop.
+  Evidence: User follow-up reported the behavior; follow-up smoke confirms focus now advances from about links directly to explicit map zoom/reset/filter buttons and then downstream page links.
 
 ## Decision Log
 
@@ -46,9 +51,17 @@ The WEPPcloud UI Lab light landing page is a public entry point for WEPPcloud. A
   Rationale: Relative assets keep the exported bundle deployable under both `/landing/` and local static previews. Route aliases fix `/landing/light/` and `/landing/dark/` without hard-coding `/weppcloud` into the generated bundle.
   Date/Author: 2026-06-29 / Codex.
 
+- Decision: Keep the map visual out of sequential keyboard focus and expose keyboard operation through explicit buttons.
+  Rationale: Keyboard traversal should advance link by link and control by control. The map canvas is not itself a useful keyboard target, so zoom/reset/filter buttons carry the operable map surface.
+  Date/Author: 2026-06-29 / Codex.
+
+- Decision: Normalize landing links with explicit `tabindex="0"` and add a first-Tab fallback from `document.body`.
+  Rationale: Native link focus worked in Playwright engines, but the user still observed Tab doing nothing. Explicit link tab stops and a page-owned first-Tab fallback make the route robust to browser focus settings and stale body focus without replacing normal subsequent tab navigation.
+  Date/Author: 2026-06-29 / Codex.
+
 ## Outcomes & Retrospective
 
-The package completed in one focused session. `/weppcloud/landing/light/` now loads the React light landing page, keyboard users can tab through the page, the map section has named keyboard controls, and the year filter stays out of the tab order until the filter panel is opened. The UI Lab bundle was rebuilt and installed under `wepppy/weppcloud/static/ui-lab/`, and validation passed through source lint/build, full frontend test, Playwright keyboard smoke, route pytest, direct ESLint for the new smoke spec, doc lint, and live-route smoke.
+The package completed in one focused session and same-day follow-up hardening passes. `/weppcloud/landing/light/` now loads the React light landing page, keyboard users can tab link by link through the page from body focus, the map visual is skipped as a non-actionable tab stop, the map section has explicit keyboard controls, and the year filter stays out of the tab order until the filter panel is opened. The UI Lab bundle was rebuilt and installed under `wepppy/weppcloud/static/ui-lab/`, and validation passed through source lint/build, full frontend test, Playwright keyboard smoke, route pytest, direct ESLint for the smoke spec, doc lint, and live-route smoke.
 
 The main lesson is that keyboard accessibility defects on generated pages should be tested at the installed WEPPcloud route, not only in the source app, because route-relative asset loading can erase the entire interactive tree.
 

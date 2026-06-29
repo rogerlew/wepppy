@@ -521,14 +521,18 @@ Recently completed work packages. Archived immediately upon completion.
 **Lifecycle**: Backlog -> In Progress -> Done (2026-06-29)
 
 **Summary**: Fixed the UI Lab light landing route and keyboard traversal. The
-`/weppcloud/landing/light/` variant now serves generated assets through narrow
-Flask aliases, the light landing source exposes a skip link, visible focus
-styling, a named map region, keyboard map zoom/reset controls, and a hidden
-filter-panel focus guard. Added Playwright coverage in
+`/weppcloud/landing/light/` variant now serves generated assets and run-location
+data through narrow Flask aliases with no-store landing responses, the light
+landing source exposes a skip link, explicit link tab stops, a body-start
+first-Tab fallback, strong visible focus styling, a named map region, keyboard
+map zoom/reset controls, a non-focusable map visual, and a hidden filter-panel
+focus guard.
+Added Playwright coverage in
 `wepppy/weppcloud/static-src/tests/smoke/landing-keyboard.spec.js`, rebuilt and
 installed the UI Lab bundle into `wepppy/weppcloud/static/ui-lab/`, and verified
-the live local route at `wc.bearhive.duckdns.org` reports `44` focusable targets
-with no `/landing/light/assets/*` 404s. Focused validation passed:
+the live local route at `wc.bearhive.duckdns.org` tabs link-by-link through the
+early page controls with visible focus indicators and no map-stage focus.
+Focused validation passed:
 `npm --prefix weppcloud-ui-lab run lint`, `npm --prefix weppcloud-ui-lab run
 build`, `npm --prefix weppcloud-ui-lab run export:landing`,
 `wctl run-pytest tests/weppcloud/routes/test_landing_template.py --maxfail=1`,

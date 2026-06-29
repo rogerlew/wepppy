@@ -118,8 +118,8 @@ This package fixes the installed light landing page, adds automated keyboard acc
 
 ## Deliverables
 
-- Additive Flask asset aliases for `/landing/light/assets/<asset_path>` and `/landing/dark/assets/<asset_path>`.
-- UI Lab light landing source updates for skip link, focus-visible styling, named map region, keyboard map zoom/reset controls, hidden filter-panel focus guard, and status announcements.
+- Additive Flask asset aliases for `/landing/light/assets/<asset_path>`, `/landing/dark/assets/<asset_path>`, and variant-relative run-location data, with no-store landing HTML/data responses.
+- UI Lab light landing source updates for skip link, explicit link tab stops, body-start first-Tab fallback, strong focus-visible styling, named map region, keyboard map zoom/reset controls, non-focusable map visual, hidden filter-panel focus guard, and status announcements.
 - New Playwright keyboard accessibility smoke test at `wepppy/weppcloud/static-src/tests/smoke/landing-keyboard.spec.js`.
 - Rebuilt and installed UI Lab static bundle under `wepppy/weppcloud/static/ui-lab/`.
 - Accessibility strategy documentation updated to include the new keyboard traversal smoke.
@@ -133,7 +133,7 @@ This package fixes the installed light landing page, adds automated keyboard acc
 
 **Closed**: 2026-06-29
 
-**Summary**: The UI Lab light landing variant now loads correctly from `/weppcloud/landing/light/` and exposes a keyboard-accessible tab sequence. The map section has a named focusable representation and keyboard zoom/reset controls, the filter panel no longer leaks its select into the tab order while hidden, the rebuilt bundle is installed in WEPPcloud static assets, and targeted plus frontend validation passed.
+**Summary**: The UI Lab light landing variant now loads correctly from `/weppcloud/landing/light/` and exposes a keyboard-accessible tab sequence. Body-start Tab focuses the skip link, landing links have explicit tab stops, and the map visual is not a tab stop; keyboard focus advances through real links and explicit map zoom/reset/filter controls with visible focus indicators. The filter panel no longer leaks its select into the tab order while hidden, the rebuilt bundle is installed in WEPPcloud static assets, and targeted plus frontend validation passed.
 
 **Lessons Learned**: The user-visible keyboard failure had two layers: the variant route first failed to load generated assets, leaving no focusable content, and the working `/landing/` route lacked a focused regression for map/filter keyboard behavior. Testing the installed route rather than only the Vite source caught both issues.
 

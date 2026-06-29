@@ -124,9 +124,11 @@ wctl run-playwright --suite full --grep "light landing keyboard" --workers 1
 ```
 
 This validates `/weppcloud/landing/light/` against the installed WEPPcloud route, including:
-- generated JavaScript and CSS assets loading from the light variant route
+- generated JavaScript, CSS, and run-location data loading from the light variant route
 - non-empty focusable controls
-- Tab traversal through hero links, about links, map summary, map zoom/reset controls, and the filter toggle
+- body-start Tab behavior, with landing links explicitly normalized into the sequential tab order
+- Tab traversal through hero links, about links, map zoom/reset controls, the filter toggle, and downstream page links without focusing the map visual
+- visible focus indication on each keyboard-focused link and control
 - the year filter staying out of the tab order while hidden and becoming focusable after the filter panel opens
 
 ## Coverage-to-Requirement Map
@@ -139,7 +141,7 @@ This table is an evidence map for engineering and release review. It is not a su
 | `wepppy/weppcloud/controllers_js/__tests__/copytext.test.js` and `wepppy/weppcloud/controllers_js/__tests__/map_gl.test.js` | semantic buttons, modal accessible names, keyboard behavior for map-related UI | 2.1.1, 2.1.2, 2.4.3, 2.4.7, 4.1.2 | Supports software/web-application behavior checks typically confirmed with manual keyboard and assistive-technology testing. |
 | `wepppy/weppcloud/static-src/tests/smoke/theme-metrics.spec.js` | rendered text, control, and non-text contrast across the theme set | 1.4.3, 1.4.11 | Supplies repeatable contrast evidence for the validated theme set; manual review still needed for context-specific exceptions and real-page edge cases. |
 | `wepppy/weppcloud/static-src/tests/smoke/a11y/*.spec.js` | axe scans over representative anonymous and authenticated pages | partial structural coverage across 1.1.1, 1.3.1, 2.4.1, 2.4.6, 4.1.2 and related rules | Automated scan coverage only; Section 508 guidance requires manual confirmation for gaps and false positives/negatives. |
-| `wepppy/weppcloud/static-src/tests/smoke/landing-keyboard.spec.js` | rendered keyboard traversal for the installed UI Lab light landing route, including map/filter focus behavior | 2.1.1, 2.4.3, 2.4.7, 4.1.2 | Supplies repeatable keyboard-focused smoke evidence for the public landing page; manual assistive-technology confirmation is still required for release evidence. |
+| `wepppy/weppcloud/static-src/tests/smoke/landing-keyboard.spec.js` | rendered keyboard traversal for the installed UI Lab light landing route, including visible focus indicators and map/filter focus behavior | 2.1.1, 2.4.3, 2.4.7, 4.1.2 | Supplies repeatable keyboard-focused smoke evidence for the public landing page; manual assistive-technology confirmation is still required for release evidence. |
 | Manual verification checklist in this document | keyboard traversal, screen-reader spot checks, zoom/reflow, live-region behavior | 1.4.4, 1.4.10, 2.1.1, 2.4.7, 4.1.3 | Aligns with Trusted Tester / ICT Baseline style manual validation and must remain part of release evidence. |
 
 ### Universal Design Theme Policy
