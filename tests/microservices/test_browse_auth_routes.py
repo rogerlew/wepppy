@@ -73,6 +73,7 @@ def _issue_token(
     token_class: str,
     runs: list[str] | None = None,
     roles: list[str] | None = None,
+    scopes: list[str] | None = None,
     subject: str = "svc-browse",
     extra_claims: dict | None = None,
 ) -> str:
@@ -86,7 +87,7 @@ def _issue_token(
 
     payload = auth_tokens.issue_token(
         subject,
-        scopes=["rq:status"],
+        scopes=scopes or ["rq:status"],
         audience="rq-engine",
         runs=runs,
         extra_claims=merged_claims,
@@ -843,6 +844,139 @@ def test_private_download_uses_bearer_when_cookie_run_scope_mismatch(
 
     assert response.status_code == 200
     assert response.text == "hello"
+
+
+def test_legacy_ermit_download_proxies_to_rq_engine(
+    tmp_path: Path,
+    monkeypatch: pytest.MonkeyPatch,
+    load_secure_browse,
+) -> None:
+    runid = "run-legacy-ermit"
+    config = "disturbed9002_wbt"
+    run_root = tmp_path / runid
+    run_root.mkdir()
+    browse = load_secure_browse(
+        {runid: run_root},
+        SITE_PREFIX="/weppcloud",
+        RQ_ENGINE_INTERNAL_BASE_URL="http://rq-engine.test",
+    )
+    app = browse.create_app()
+
+    token = _issue_token(
+        token_class="service",
+        runs=[runid],
+        roles=["User"],
+        scopes=["rq:status", "rq:export"],
+    )
+
+    import wepppy.microservices.browse._download as download_mod
+
+    captured: dict[str, object] = {}
+
+    class DummyResponse:
+        status_code = 200
+        content = b"ermit-zip"
+        headers = {
+            "content-type": "application/zip",
+            "content-disposition": 'attachment; filename="ERMiT_input_run.zip"',
+            "content-length": "999",
+        }
+
+    class DummyClient:
+        def __init__(self, *args, **kwargs):
+            captured["client_kwargs"] = kwargs
+
+        async def __aenter__(self):
+            return self
+
+        async def __aexit__(self, exc_type, exc, tb):
+            return False
+
+        async def get(self, url, headers):
+            captured["url"] = url
+            captured["headers"] = headers
+            return DummyResponse()
+
+    monkeypatch.setattr(download_mod.httpx, "AsyncClient", lambda *args, **kwargs: DummyClient(*args, **kwargs))
+
+    with TestClient(app) as client:
+        client.cookies.set("wepp_browse_jwt", token)
+        response = client.get(
+            f"/weppcloud/runs/{runid}/{config}/download/ermit/",
+            follow_redirects=False,
+        )
+
+    assert response.status_code == 200
+    assert response.content == b"ermit-zip"
+    assert response.headers["content-type"] == "application/zip"
+    assert response.headers["content-disposition"] == 'attachment; filename="ERMiT_input_run.zip"'
+    assert "content-length" in response.headers
+    assert response.headers["content-length"] == str(len(b"ermit-zip"))
+    assert captured["url"] == (
+        f"http://rq-engine.test/api/runs/{runid}/{config}/export/ermit"
+    )
+    assert captured["headers"] == {"Authorization": f"Bearer {token}"}
+
+
+def test_public_legacy_ermit_download_uses_internal_rq_engine_token(
+    tmp_path: Path,
+    monkeypatch: pytest.MonkeyPatch,
+    load_secure_browse,
+) -> None:
+    runid = "run-public-legacy-ermit"
+    config = "disturbed9002_wbt"
+    run_root = tmp_path / runid
+    _touch(run_root / "PUBLIC", "")
+    browse = load_secure_browse(
+        {runid: run_root},
+        SITE_PREFIX="/weppcloud",
+        RQ_ENGINE_INTERNAL_BASE_URL="http://rq-engine.test",
+    )
+    app = browse.create_app()
+
+    import wepppy.microservices.browse._download as download_mod
+
+    captured: dict[str, object] = {}
+
+    class DummyResponse:
+        status_code = 200
+        content = b"public-ermit-zip"
+        headers = {"content-type": "application/zip"}
+
+    class DummyClient:
+        def __init__(self, *args, **kwargs):
+            pass
+
+        async def __aenter__(self):
+            return self
+
+        async def __aexit__(self, exc_type, exc, tb):
+            return False
+
+        async def get(self, url, headers):
+            captured["url"] = url
+            captured["headers"] = headers
+            return DummyResponse()
+
+    monkeypatch.setattr(download_mod.httpx, "AsyncClient", lambda *args, **kwargs: DummyClient(*args, **kwargs))
+
+    with TestClient(app) as client:
+        response = client.get(
+            f"/weppcloud/runs/{runid}/{config}/download/ermit/",
+            follow_redirects=False,
+        )
+
+    assert response.status_code == 200
+    assert response.content == b"public-ermit-zip"
+    assert captured["url"] == (
+        f"http://rq-engine.test/api/runs/{runid}/{config}/export/ermit"
+    )
+    auth_header = str(captured["headers"]["Authorization"])
+    assert auth_header.startswith("Bearer ")
+    claims = auth_tokens.decode_token(auth_header.removeprefix("Bearer "), audience="rq-engine")
+    assert claims["token_class"] == "service"
+    assert claims["runs"] == [runid]
+    assert "rq:export" in claims["scope"]
 
 
 def test_aria2c_private_run_returns_401_without_redirect(

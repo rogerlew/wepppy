@@ -5,11 +5,13 @@ from __future__ import annotations
 import asyncio
 import logging
 import os
+import uuid
 from io import BytesIO, StringIO
 from pathlib import Path
 from typing import BinaryIO, Callable
-from urllib.parse import urlsplit
+from urllib.parse import quote, urlsplit
 
+import httpx
 from starlette.exceptions import HTTPException
 from starlette.requests import Request
 from starlette.responses import FileResponse, PlainTextResponse, Response, StreamingResponse
@@ -25,6 +27,7 @@ from wepppy.microservices.browse.auth import (
     BrowseAuthError,
     authorize_group_request,
     authorize_run_request,
+    browse_jwt_cookie_name,
     handle_auth_error,
     is_root_only_path,
 )
@@ -57,6 +60,8 @@ from wepppy.runtime_paths import (
 )
 from wepppy.runtime_paths.paths import NODIR_ROOTS, split_nodir_root
 from wepppy.weppcloud.routes._run_context import RunContext
+from wepppy.weppcloud.utils import auth_tokens
+from wepppy.weppcloud.utils.browse_cookie import browse_cookie_name_candidates
 from wepppy.weppcloud.utils.helpers import get_wd
 
 _NODIR_SUFFIX = ".nodir"
@@ -64,6 +69,21 @@ _NODIR_ROOTS = frozenset(NODIR_ROOTS)
 _RETIRED_NODIR_ARCHIVE_FILES = frozenset({f"{root}{_NODIR_SUFFIX}" for root in _NODIR_ROOTS})
 _logger = logging.getLogger(__name__)
 _logger.setLevel(logging.INFO)
+_RQ_ENGINE_EXPORT_TIMEOUT = httpx.Timeout(600.0, connect=10.0)
+_HOP_BY_HOP_RESPONSE_HEADERS = frozenset(
+    {
+        "connection",
+        "content-encoding",
+        "content-length",
+        "keep-alive",
+        "proxy-authenticate",
+        "proxy-authorization",
+        "te",
+        "trailer",
+        "transfer-encoding",
+        "upgrade",
+    }
+)
 
 
 def _env_truthy(key: str, *, default: bool = False) -> bool:
@@ -143,6 +163,92 @@ def _resolve_aria2c_base_url(request: Request, runid: str, config: str) -> str:
     origin = _resolve_external_origin(request)
     site_prefix = _normalize_prefix(os.getenv("SITE_PREFIX", "/weppcloud"))
     return f"{origin}{site_prefix}/runs/{runid}/{config}/download"
+
+
+def _resolve_rq_engine_base_url() -> str:
+    return (os.getenv("RQ_ENGINE_INTERNAL_BASE_URL") or "http://rq-engine:8042").rstrip("/")
+
+
+def _is_legacy_ermit_download_subpath(subpath: str) -> bool:
+    parts = [part for part in str(subpath or "").strip("/").split("/") if part]
+    return len(parts) == 1 and parts[0].casefold() == "ermit"
+
+
+def _extract_forwardable_rq_engine_token(request: Request, *, runid: str, config: str) -> str | None:
+    auth_header = request.headers.get("Authorization", "")
+    parts = auth_header.split()
+    if len(parts) == 2 and parts[0].lower() == "bearer" and parts[1].strip():
+        return parts[1].strip()
+
+    for cookie_name in browse_cookie_name_candidates(browse_jwt_cookie_name(), runid, config):
+        token = request.cookies.get(cookie_name)
+        if token:
+            return token
+    return None
+
+
+def _issue_internal_public_export_token(runid: str) -> str:
+    token_payload = auth_tokens.issue_token(
+        "browse-legacy-ermit-export",
+        scopes=["rq:export"],
+        audience="rq-engine",
+        runs=[runid],
+        extra_claims={
+            "token_class": "service",
+            "jti": uuid.uuid4().hex,
+        },
+    )
+    token = token_payload.get("token")
+    if not isinstance(token, str) or not token:
+        raise HTTPException(
+            status_code=500,
+            detail="ERMiT export token unavailable.",
+        )
+    return token
+
+
+def _copy_rq_engine_response_headers(response: httpx.Response) -> dict[str, str]:
+    headers: dict[str, str] = {}
+    for key, value in response.headers.items():
+        if key.lower() in _HOP_BY_HOP_RESPONSE_HEADERS:
+            continue
+        headers[key] = value
+    return headers
+
+
+async def _proxy_legacy_ermit_export(request: Request, *, runid: str, config: str, auth_context) -> Response:
+    token = _extract_forwardable_rq_engine_token(request, runid=runid, config=config)
+    if not token and not auth_context.is_authenticated:
+        token = _issue_internal_public_export_token(runid)
+    if not token:
+        raise HTTPException(
+            status_code=401,
+            detail="ERMiT export requires an rq-engine session token.",
+        )
+
+    quoted_runid = quote(runid, safe="")
+    quoted_config = quote(config, safe="")
+    export_url = f"{_resolve_rq_engine_base_url()}/api/runs/{quoted_runid}/{quoted_config}/export/ermit"
+    if request.url.query:
+        export_url = f"{export_url}?{request.url.query}"
+
+    try:
+        async with httpx.AsyncClient(timeout=_RQ_ENGINE_EXPORT_TIMEOUT) as client:
+            export_response = await client.get(
+                export_url,
+                headers={"Authorization": f"Bearer {token}"},
+            )
+    except httpx.HTTPError as exc:
+        raise HTTPException(
+            status_code=502,
+            detail="ERMiT export service unavailable.",
+        ) from exc
+
+    return Response(
+        export_response.content,
+        status_code=export_response.status_code,
+        headers=_copy_rq_engine_response_headers(export_response),
+    )
 
 
 def _nodir_error_payload(err: NoDirError) -> dict:
@@ -262,6 +368,15 @@ async def download_with_subpath(request: Request) -> Response:
             violation = None
     if violation is not None:
         raise HTTPException(status_code=403, detail=path_security_detail(violation))
+
+    # Legacy export shortcut: browse authorizes the old URL, rq-engine generates the file.
+    if _is_legacy_ermit_download_subpath(subpath):
+        return await _proxy_legacy_ermit_export(
+            request,
+            runid=runid,
+            config=config,
+            auth_context=auth_context,
+        )
 
     ctx = await asyncio.to_thread(_resolve_run_context, runid, config)
     wd = str(ctx.active_root.resolve())
