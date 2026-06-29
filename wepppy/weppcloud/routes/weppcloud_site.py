@@ -1161,6 +1161,13 @@ def landing_static_assets(asset_path: str):
     return send_from_directory(assets_root, asset_path)
 
 
+@weppcloud_site_bp.route('/landing/light/assets/<path:asset_path>', strict_slashes=False)
+@weppcloud_site_bp.route('/landing/dark/assets/<path:asset_path>', strict_slashes=False)
+@handle_with_exception_factory
+def landing_variant_static_assets(asset_path: str):
+    return landing_static_assets(asset_path)
+
+
 @weppcloud_site_bp.route('/assets/<path:asset_path>', strict_slashes=False)
 @handle_with_exception_factory
 def landing_static_assets_root(asset_path: str):

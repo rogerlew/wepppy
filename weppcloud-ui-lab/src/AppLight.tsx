@@ -13,7 +13,10 @@ import {
   Server,
   Settings,
   Sprout,
+  RotateCcw,
   Zap,
+  ZoomIn,
+  ZoomOut,
   type LucideIcon,
 } from 'lucide-react'
 
@@ -349,6 +352,10 @@ export function AppLight() {
   const mapTitle = 'Explore Active WEPPcloud Projects'
   const mapSubtitle =
     'Every WEPPcloud run with a recorded centroid appears on this map. Use it to highlight recent wildfire response studies, watershed planning campaigns, and the scale of collaboration across the platform.'
+  const mapTitleId = 'light-run-atlas-title'
+  const mapDescriptionId = 'light-run-atlas-description'
+  const mapInstructionsId = 'light-run-atlas-keyboard-instructions'
+  const filterPanelId = 'light-run-atlas-filter-panel'
   const offsetCache = useRef(new Map<string, [number, number]>())
 
   useEffect(() => {
@@ -444,6 +451,22 @@ export function AppLight() {
     },
     [],
   )
+
+  const zoomMap = useCallback((delta: number) => {
+    setViewState((current) => {
+      const currentZoom = current.zoom ?? INITIAL_VIEW_STATE.zoom ?? 3.5
+      const minZoom = current.minZoom ?? 1
+      const maxZoom = current.maxZoom ?? INITIAL_VIEW_STATE.maxZoom ?? 14
+      return {
+        ...current,
+        zoom: Math.min(maxZoom, Math.max(minZoom, currentZoom + delta)),
+      }
+    })
+  }, [])
+
+  const resetMapView = useCallback(() => {
+    setViewState(INITIAL_VIEW_STATE)
+  }, [])
 
   const getLabelOffset = useCallback(
     (entry: RunLocation): [number, number] => {
@@ -548,6 +571,10 @@ export function AppLight() {
 
   return (
     <div className="light-theme min-h-screen bg-white text-slate-800">
+      <a href="#main-content" className="light-skip-link">
+        Skip to main content
+      </a>
+      <main id="main-content" tabIndex={-1}>
       {/* Hero Section - Clean government style */}
       <section id="hero" className="relative bg-white border-b border-gray-200">
         <div className="max-w-6xl mx-auto px-6 py-12 sm:py-16">
@@ -638,8 +665,8 @@ export function AppLight() {
             transition={{ duration: 0.5, ease: 'easeOut' }}
           >
             <h2 className="text-xs font-semibold uppercase tracking-wider text-slate-500 mb-2">{mapEyebrow}</h2>
-            <h3 className="text-2xl font-semibold text-slate-900 mb-2">{mapTitle}</h3>
-            <p className="text-base text-slate-600 max-w-3xl">{mapSubtitle}</p>
+            <h3 id={mapTitleId} className="text-2xl font-semibold text-slate-900 mb-2">{mapTitle}</h3>
+            <p id={mapDescriptionId} className="text-base text-slate-600 max-w-3xl">{mapSubtitle}</p>
             
             {/* Stats grid */}
             <div className="mt-6 grid gap-4 sm:grid-cols-3">
@@ -663,8 +690,15 @@ export function AppLight() {
             viewport={{ once: true, amount: 0.3 }}
             transition={{ duration: 0.6, ease: 'easeOut', delay: 0.1 }}
             className="relative border border-gray-300 bg-white shadow-sm"
+            role="region"
+            aria-labelledby={mapTitleId}
+            aria-describedby={`${mapDescriptionId} ${mapInstructionsId}`}
           >
             <div className="relative h-[65vh] min-h-[520px] overflow-hidden">
+              <p id={mapInstructionsId} className="light-sr-only">
+                The map shows georeferenced WEPPcloud run locations. Use the map control buttons to zoom or reset
+                the view. Use the filters button to open display options, then continue tabbing to page links.
+              </p>
               {/* Legend */}
               <div className="light-legend">
                 <span className="light-legend-chip">
@@ -682,7 +716,11 @@ export function AppLight() {
               </div>
 
               <div
-                className="absolute inset-0"
+                className="light-map-stage absolute inset-0"
+                tabIndex={0}
+                role="img"
+                aria-label={`${filteredStats.message}. Map of WEPPcloud run locations.`}
+                aria-describedby={mapInstructionsId}
                 onWheelCapture={(event) => {
                   if (!event.ctrlKey) {
                     event.stopPropagation()
@@ -713,6 +751,36 @@ export function AppLight() {
                 )}
               </div>
 
+              <div className="light-map-actions" aria-label="Map controls">
+                <button
+                  type="button"
+                  className="light-map-icon-button"
+                  aria-label="Zoom map in"
+                  title="Zoom map in"
+                  onClick={() => zoomMap(1)}
+                >
+                  <ZoomIn className="h-4 w-4" aria-hidden="true" />
+                </button>
+                <button
+                  type="button"
+                  className="light-map-icon-button"
+                  aria-label="Zoom map out"
+                  title="Zoom map out"
+                  onClick={() => zoomMap(-1)}
+                >
+                  <ZoomOut className="h-4 w-4" aria-hidden="true" />
+                </button>
+                <button
+                  type="button"
+                  className="light-map-icon-button"
+                  aria-label="Reset map view"
+                  title="Reset map view"
+                  onClick={resetMapView}
+                >
+                  <RotateCcw className="h-4 w-4" aria-hidden="true" />
+                </button>
+              </div>
+
               <div className="absolute bottom-4 right-4 border border-gray-300 bg-white px-3 py-2 text-xs text-slate-600">
                 Tip: Hold <span className="font-semibold text-slate-800">Ctrl</span> while scrolling to zoom the map.
               </div>
@@ -720,6 +788,8 @@ export function AppLight() {
               <button
                 type="button"
                 className="light-control-toggle"
+                aria-label={panelOpen ? 'Close run atlas filters' : 'Open run atlas filters'}
+                aria-controls={filterPanelId}
                 aria-expanded={panelOpen}
                 onClick={() => setPanelOpen((open) => !open)}
               >
@@ -728,9 +798,12 @@ export function AppLight() {
               </button>
 
               <aside
+                id={filterPanelId}
+                hidden={!panelOpen}
+                aria-hidden={!panelOpen}
                 className={cn(
                   'absolute right-4 top-16 w-64 border border-gray-300 bg-white p-4 text-sm shadow-lg transition-all',
-                  panelOpen ? 'pointer-events-auto opacity-100' : 'pointer-events-none opacity-0',
+                  panelOpen && 'pointer-events-auto opacity-100',
                 )}
               >
                 <h4 className="text-sm font-semibold text-slate-800 mb-3">Display options</h4>
@@ -756,7 +829,11 @@ export function AppLight() {
               </aside>
 
               {statusMessage && (
-                <div className="absolute bottom-4 left-4 border border-gray-300 bg-white px-3 py-2 text-xs text-slate-600">
+                <div
+                  className="absolute bottom-4 left-4 border border-gray-300 bg-white px-3 py-2 text-xs text-slate-600"
+                  role="status"
+                  aria-live="polite"
+                >
                   {statusMessage}
                 </div>
               )}
@@ -826,6 +903,7 @@ export function AppLight() {
         <div className="mx-auto max-w-5xl grid gap-4 md:grid-cols-2">
           {CONTACTS.map((contact, index) => {
             const IconComponent = CONTACT_ICON_MAP[contact.icon]
+            const accent = CONTACT_ACCENTS[contact.accent]
             return (
               <motion.article
                 key={contact.email}
@@ -833,10 +911,10 @@ export function AppLight() {
                 whileInView={{ opacity: 1, y: 0 }}
                 viewport={{ once: true, amount: 0.2 }}
                 transition={{ duration: 0.4, delay: index * 0.05 }}
-                className="flex flex-col p-5 border border-gray-200 bg-white"
+                className={cn("flex flex-col p-5 border bg-white", accent.border)}
               >
                 <div className="flex items-start gap-4 mb-4">
-                  <div className="flex h-10 w-10 items-center justify-center rounded bg-gray-100 text-slate-600">
+                  <div className={cn("flex h-10 w-10 items-center justify-center", accent.icon)}>
                     <IconComponent className="h-5 w-5" aria-hidden="true" />
                   </div>
                   <div className="flex-1">
@@ -855,7 +933,7 @@ export function AppLight() {
                   {contact.expertise.map((item) => (
                     <span
                       key={item}
-                      className="px-2 py-0.5 text-xs bg-gray-50 text-slate-600 border border-gray-200"
+                      className={cn("px-2 py-0.5 text-xs", accent.chip)}
                     >
                       {item}
                     </span>
@@ -1124,6 +1202,7 @@ export function AppLight() {
           </div>
         </motion.div>
       </section>
+      </main>
 
       {/* Footer */}
       <footer className="bg-white border-t border-gray-200 px-4 py-6 sm:px-6">

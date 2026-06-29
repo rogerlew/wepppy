@@ -1,7 +1,7 @@
 # PROJECT_TRACKER.md
 > Kanban board for wepppy work packages and vision items
 
-**Last Updated**: 2026-06-26
+**Last Updated**: 2026-06-29
 **Active Packages**: 10
 **Quick Links**: [Work Packages Directory](docs/work-packages/) | [God-Tier Prompting Strategy](docs/god-tier-prompting-strategy.md)
 
@@ -512,6 +512,29 @@ Currently active work packages. Limit to 2-4 packages to maintain focus.
 ## ✅ Done
 
 Recently completed work packages. Archived immediately upon completion.
+
+### UI Lab Light Landing Keyboard Access (2026-06-29)
+**Status**: ✅ **COMPLETE**
+
+**Link**: [docs/work-packages/20260629_ui_lab_light_keyboard_access/](docs/work-packages/20260629_ui_lab_light_keyboard_access/)
+
+**Lifecycle**: Backlog -> In Progress -> Done (2026-06-29)
+
+**Summary**: Fixed the UI Lab light landing route and keyboard traversal. The
+`/weppcloud/landing/light/` variant now serves generated assets through narrow
+Flask aliases, the light landing source exposes a skip link, visible focus
+styling, a named map region, keyboard map zoom/reset controls, and a hidden
+filter-panel focus guard. Added Playwright coverage in
+`wepppy/weppcloud/static-src/tests/smoke/landing-keyboard.spec.js`, rebuilt and
+installed the UI Lab bundle into `wepppy/weppcloud/static/ui-lab/`, and verified
+the live local route at `wc.bearhive.duckdns.org` reports `44` focusable targets
+with no `/landing/light/assets/*` 404s. Focused validation passed:
+`npm --prefix weppcloud-ui-lab run lint`, `npm --prefix weppcloud-ui-lab run
+build`, `npm --prefix weppcloud-ui-lab run export:landing`,
+`wctl run-pytest tests/weppcloud/routes/test_landing_template.py --maxfail=1`,
+`wctl run-playwright --suite full --grep "light landing keyboard" --workers 1`,
+`wctl run-npm test`, direct ESLint on the new smoke spec, py_compile for
+`weppcloud_site.py`, and work-package doc lint.
 
 ### Forest-Family Burn Gradient Assessment (2026-06-26)
 **Status**: ✅ **COMPLETE**

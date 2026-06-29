@@ -50,6 +50,91 @@
   --tooltip-text: #1e293b;
 }
 
+.light-skip-link {
+  position: fixed;
+  left: 16px;
+  top: 16px;
+  z-index: 1000;
+  transform: translateY(-140%);
+  border: 2px solid #0f172a;
+  background: #ffffff;
+  color: #0f172a;
+  padding: 10px 14px;
+  font-size: 14px;
+  font-weight: 700;
+  text-decoration: none;
+  box-shadow: 0 8px 20px rgba(15, 23, 42, 0.18);
+  transition: transform 120ms ease-out;
+}
+
+.light-skip-link:focus,
+.light-skip-link:focus-visible {
+  transform: translateY(0);
+  outline: 3px solid #2563eb;
+  outline-offset: 2px;
+}
+
+.light-sr-only {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  padding: 0;
+  margin: -1px;
+  overflow: hidden;
+  clip: rect(0, 0, 0, 0);
+  white-space: nowrap;
+  border: 0;
+}
+
+.light-theme :where(a, button, select, [tabindex]:not([tabindex='-1'])):focus-visible {
+  outline: 3px solid #2563eb;
+  outline-offset: 3px;
+}
+
+.light-theme main:focus {
+  outline: none;
+}
+
+.light-map-stage {
+  z-index: 0;
+}
+
+.light-map-stage:focus-visible {
+  outline: 3px solid #2563eb;
+  outline-offset: -6px;
+}
+
+.light-map-actions {
+  position: absolute;
+  left: 16px;
+  bottom: 16px;
+  z-index: 10;
+  display: flex;
+  gap: 6px;
+  border: 1px solid #d1d5db;
+  background: rgba(255, 255, 255, 0.96);
+  padding: 6px;
+  box-shadow: 0 4px 12px rgba(15, 23, 42, 0.12);
+}
+
+.light-map-icon-button {
+  display: inline-flex;
+  height: 32px;
+  width: 32px;
+  align-items: center;
+  justify-content: center;
+  border: 1px solid #cbd5e1;
+  background: #ffffff;
+  color: #334155;
+  transition: border-color 120ms ease-out, background-color 120ms ease-out, color 120ms ease-out;
+}
+
+.light-map-icon-button:hover {
+  border-color: #64748b;
+  background: #f8fafc;
+  color: #0f172a;
+}
+
 .light-control-toggle {
   @apply absolute right-4 top-4 z-10 flex items-center gap-2 border border-gray-300 bg-white px-3 py-1.5 text-sm font-medium text-slate-700 shadow-sm transition hover:bg-gray-50 hover:border-gray-400;
 }
