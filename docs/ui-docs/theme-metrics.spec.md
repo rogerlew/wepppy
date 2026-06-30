@@ -19,7 +19,7 @@
   - Representative form fields with `.wc-field__help`, `.wc-text-muted`, `.wc-field__message`, hint text, and error state.
   - Radio/checkbox groups (including the `sub_cmap_radio_*` set) wired through the same macros as production.
   - Leaflet zoom controls rendered via a lightweight stub container (no map tiles) so `.leaflet-control-zoom-in/out` exist.
-  - Standalone themed surfaces that do not inherit the main WEPPcloud shell, including the browse parquet preview banner.
+  - Standalone themed surfaces that do not inherit the main WEPPcloud shell, including the browse parquet preview banner, browse directory tree rows, and Parquet Data Filter builder.
   - Geneva Storm Measure vs Intensity SVG marker specimens covering every series marker class and every duration label used by the report chart.
 - Each specimen uses Pure macros so markup stays in sync with `control-components.md`.
 

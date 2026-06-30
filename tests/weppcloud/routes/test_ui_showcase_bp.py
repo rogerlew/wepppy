@@ -193,3 +193,97 @@ def test_component_gallery_registers_browse_parquet_preview_banner_target(
     assert 'id="theme_lab_browse_preview_banner"' in template_source
     assert 'id="theme_lab_browse_filter_feedback"' in template_source
     assert 'id="theme_lab_browse_preview_action"' in template_source
+
+
+def test_component_gallery_registers_browse_tree_row_theme_lab_target(
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    captured: dict[str, object] = {}
+
+    def fake_render_template(template_name: str, **context: object) -> str:
+        captured["template_name"] = template_name
+        captured["context"] = context
+        return "rendered"
+
+    monkeypatch.setattr(ui_showcase_module, "render_template", fake_render_template)
+
+    app = Flask(__name__)
+    app.config["CAP_BASE_URL"] = "/cap"
+    app.config["CAP_SITE_KEY"] = "demo"
+
+    with app.app_context():
+        result = ui_showcase_module.component_gallery()
+
+    assert result == "rendered"
+    assert captured["template_name"] == "ui_showcase/component_gallery.htm"
+
+    context = captured["context"]
+    assert isinstance(context, dict)
+    theme_targets = context["theme_contrast_targets"]
+    assert isinstance(theme_targets, list)
+
+    target = next((entry for entry in theme_targets if entry.get("id") == "browse_tree_rows"), None)
+    assert target is not None
+    assert {pair["name"] for pair in target["pairs"]} == {
+        "odd_link_vs_row",
+        "odd_text_vs_row",
+        "even_link_vs_row",
+        "even_text_vs_row",
+        "hover_link_vs_row",
+        "hover_text_vs_row",
+    }
+
+    template_source = COMPONENT_GALLERY_TEMPLATE.read_text(encoding="utf-8")
+    assert 'data-contrast-id="browse-tree-rows"' in template_source
+    assert 'id="theme_lab_browse_tree_odd_row"' in template_source
+    assert 'id="theme_lab_browse_tree_even_row"' in template_source
+    assert 'id="theme_lab_browse_tree_hover_row"' in template_source
+
+
+def test_component_gallery_registers_parquet_filter_builder_theme_lab_target(
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    captured: dict[str, object] = {}
+
+    def fake_render_template(template_name: str, **context: object) -> str:
+        captured["template_name"] = template_name
+        captured["context"] = context
+        return "rendered"
+
+    monkeypatch.setattr(ui_showcase_module, "render_template", fake_render_template)
+
+    app = Flask(__name__)
+    app.config["CAP_BASE_URL"] = "/cap"
+    app.config["CAP_SITE_KEY"] = "demo"
+
+    with app.app_context():
+        result = ui_showcase_module.component_gallery()
+
+    assert result == "rendered"
+    assert captured["template_name"] == "ui_showcase/component_gallery.htm"
+
+    context = captured["context"]
+    assert isinstance(context, dict)
+    theme_targets = context["theme_contrast_targets"]
+    assert isinstance(theme_targets, list)
+
+    target = next((entry for entry in theme_targets if entry.get("id") == "browse_parquet_filter_builder"), None)
+    assert target is not None
+    assert {pair["name"] for pair in target["pairs"]} == {
+        "summary_vs_builder",
+        "status_vs_builder",
+        "node_label_vs_builder",
+        "field_text_vs_field",
+        "operator_text_vs_operator",
+        "apply_text_vs_button",
+        "clear_text_vs_button",
+    }
+
+    template_source = COMPONENT_GALLERY_TEMPLATE.read_text(encoding="utf-8")
+    assert 'data-contrast-id="browse-parquet-filter-builder"' in template_source
+    assert 'id="theme_lab_parquet_filter_builder"' in template_source
+    assert 'id="theme_lab_parquet_filter_summary"' in template_source
+    assert 'id="theme_lab_parquet_filter_apply"' in template_source
+    assert 'class="parquet-filter-builder pure-form"' in template_source
+    assert 'class="wc-field__control parquet-filter-builder__input parquet-filter-builder__input--field"' in template_source
+    assert 'class="wc-field__control parquet-filter-builder__select parquet-filter-builder__operator"' in template_source

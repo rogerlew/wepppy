@@ -1,11 +1,25 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="en" class="wc-page">
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <meta name="robots" content="noindex,nofollow,noarchive">
-<link rel="icon" type="image/svg+xml" href="/static/favicon/open_folder.svg?v=20250908"/>
+<link rel="icon" type="image/svg+xml" href="{{ static_url('favicon/open_folder.svg') }}"/>
 <title>{{ runid }} - {{ page_title|default('Not Found') }}</title>
+<script>
+  (function () {
+    try {
+      var theme = localStorage.getItem("wc-theme");
+      if (theme && theme !== "default") {
+        document.documentElement.setAttribute("data-theme", theme);
+      } else {
+        document.documentElement.removeAttribute("data-theme");
+      }
+    } catch (e) {}
+  })();
+</script>
+<link rel="stylesheet" href="{{ static_url('css/ui-foundation.css') }}">
+<link rel="stylesheet" href="{{ static_url('css/themes/all-themes.css') }}">
 <script>
 function redirectToDiff() {
     const runId = document.getElementById('runIdInput').value;
@@ -14,28 +28,21 @@ function redirectToDiff() {
 const runid = "{{ runid }}";
 const config = "{{ config }}";
 </script>
-<style>
-  input[type='text'] {
-    font-family: monospace;
-    width: 64ch;
-  }
-  a { text-decoration: none; }
-  .command-bar-container {
-    display: none !important;
-  }
-</style>
 </head>
-<body>
+<body class="wc-browse-tree-page">
 {% include 'command-bar.htm' %}
+<div class="wc-browse-tree-toolbar">
 <input type="text"
        value="{{ diff_runid|e }}"
        id="runIdInput"
        placeholder="runid"
        aria-label="Run ID to compare">
-<button onclick="redirectToDiff()">Compare project</button>
-<pre>
+<button type="button" class="pure-button pure-button-secondary" onclick="redirectToDiff()">Compare project</button>
+</div>
+<pre class="wc-browse-tree">
 {{ project_href|safe }}{{ breadcrumbs_html|safe }}{{ error_message|safe }}
 </pre>
 {% include 'browse/_path_input_script.htm' %}
+<script src="{{ static_url('js/theme.js') }}" defer></script>
 </body>
 </html>

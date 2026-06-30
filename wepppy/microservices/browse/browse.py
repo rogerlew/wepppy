@@ -821,10 +821,11 @@ def _path_not_found_response(runid, subpath, wd, request, config):
     breadcrumbs_html = ' ❯ '.join(breadcrumbs)
     
     # Create the main content tree with the error message
+    escaped_subpath = html_escape(subpath)
     error_message = f"""
-<div style="padding: 1em 0 0 2em;">
-    <h3 style="color: #d9534f;">404 - Directory Not Found</h3>
-    <p>The path '<b style="font-family: monospace;">{subpath}</b>' could not be found on the server.</p>
+<div class="wc-browse-tree-error">
+    <h3>404 - Directory Not Found</h3>
+    <p>The path '<code>{escaped_subpath}</code>' could not be found on the server.</p>
 </div>"""
     
     project_href = Markup(f'<a href="{home_href}">☁️</a> ')
@@ -966,8 +967,8 @@ async def browse_exception_handler(request: StarletteRequest, exc: Exception):
         project_href = Markup('')
 
     error_message = f"""
-<div style="padding: 1em 0 0 2em;">
-    <h3 style="color: #d9534f;">500 - Internal Server Error</h3>
+<div class="wc-browse-tree-error">
+    <h3>500 - Internal Server Error</h3>
     <p>{escaped_message}</p>
     {stacktrace_block}
 </div>"""

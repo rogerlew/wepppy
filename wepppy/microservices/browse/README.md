@@ -76,7 +76,7 @@ The dedicated service preserves the canonical browse authorization and path-boun
 - Feature flag: set `BROWSE_PARQUET_FILTERS_ENABLED=1` to enable parquet filter handling in browse, download/CSV, and D-Tale bridge flows.
 - Preview cap: `BROWSE_PARQUET_PREVIEW_LIMIT` (default `500`) limits parquet browse preview rows for both filtered and unfiltered parquet previews.
 - Preview pages must show one fixed top-of-page banner that states the rendered table is an HTML preview, not the full parquet file, and keeps full-file/CSV download actions visible. When a `pqf` filter is active, the filter summary/code appears inside the same banner; do not add a second standalone filter notice below it.
-- The parquet preview banner and table preview must use WEPPcloud theme tokens from `ui-foundation.css`/`all-themes.css` plus the persisted `wc-theme` bootstrap. The banner is represented in Theme Lab so `wctl run-playwright --suite theme-metrics` samples the preview/filter/action contrast pairs for every catalog theme.
+- The parquet preview banner, table preview, and directory-page Parquet Data Filter builder must use WEPPcloud theme tokens from `ui-foundation.css`/`all-themes.css` plus the persisted `wc-theme` bootstrap. The banner and builder are represented in Theme Lab so `wctl run-playwright --suite theme-metrics` samples their preview/filter/action/control contrast pairs for every catalog theme.
 - Export cap: `BROWSE_PARQUET_EXPORT_MAX_ROWS` (default `2000000`) limits filtered parquet/CSV export rows.
 - Query parameter: `pqf` is URL-safe base64 JSON with this tree contract:
   - Group node: `{"kind":"group","logic":"AND"|"OR","children":[...]}`
@@ -91,6 +91,12 @@ The dedicated service preserves the canonical browse authorization and path-boun
   - Valid filter matching zero rows in export flows -> HTTP `422`, `error.code = "no_rows_matched_filter"`.
   - Filtered export exceeding configured row cap -> HTTP `413`, `error.code = "parquet_filter_row_limit_exceeded"`.
 - Cross-reference: `docs/schemas/weppcloud-browse-parquet-filter-contract.md`.
+
+## Browse tree theming
+- Directory tree and tree-style not-found pages load `ui-foundation.css`, `all-themes.css`, and `theme.js`, with the same pre-paint `wc-theme` bootstrap used by other standalone browse templates.
+- The Default theme preserves the legacy directory row colors exactly: odd rows `#ffffff`, even rows `#f6f6f6`, and hover rows `#d0ebff`.
+- Named themes override those row variables through generic `:root[data-theme]` values. Odd rows use the theme surface, while even and hover rows mix the theme alternate surface with the theme border token so every catalog theme has distinct odd/even/hover row styling without hand-maintained per-theme CSS.
+- Browse tree row contrast is represented in Theme Lab and covered by `wctl run-playwright --suite theme-metrics`; add new tree row states there before relying on theme metrics coverage.
 
 ## Parquet memory behavior
 - `browse` must not call `pd.read_parquet(...)` or `table.to_pandas()` in request paths. Long-lived Gunicorn workers can retain high RSS after Arrow-to-pandas conversion, even after Python objects are released.

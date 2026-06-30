@@ -1,11 +1,25 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="en" class="wc-page">
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <meta name="robots" content="noindex,nofollow,noarchive">
-<link rel="icon" type="image/svg+xml" href="/static/favicon/open_folder.svg?v=20250908"/>
+<link rel="icon" type="image/svg+xml" href="{{ static_url('favicon/open_folder.svg') }}"/>
 <title>{{ runid }}</title>
+<script>
+  (function () {
+    try {
+      var theme = localStorage.getItem("wc-theme");
+      if (theme && theme !== "default") {
+        document.documentElement.setAttribute("data-theme", theme);
+      } else {
+        document.documentElement.removeAttribute("data-theme");
+      }
+    } catch (e) {}
+  })();
+</script>
+<link rel="stylesheet" href="{{ static_url('css/ui-foundation.css') }}">
+<link rel="stylesheet" href="{{ static_url('css/themes/all-themes.css') }}">
 <script>
 function redirectToDiff() {
     const runId = document.getElementById('runIdInput').value;
@@ -14,113 +28,26 @@ function redirectToDiff() {
 const runid = "{{ runid }}";
 const config = "{{ config }}";
 </script>
-<style>
-  input[type='text'] {
-    font-family: monospace;
-    width: 64ch;
-  }
-  a { text-decoration: none; }
-  span.even-row {
-    background-color: #f6f6f6;
-    display: block;
-  }
-  span.odd-row {
-    background-color: #ffffff;
-    display: block;
-  }
-  span.even-row:hover,
-  span.odd-row:hover {
-    background-color: #d0ebff;
-    cursor: pointer;
-  }
-  #file-tree {
-    font-size: 0.875em;
-  }
-  #file-tree .browse-header {
-    display: block;
-    border-bottom: 1px solid #b1b1b1;
-    padding-bottom: 2px;
-    margin-top: 6px;
-  }
-  #file-tree .browse-sort-link {
-    display: inline-block;
-    white-space: pre;
-    padding-right: 6px;
-  }
-  .breadcrumb-separator {
-    cursor: pointer;
-    user-select: none;
-  }
-  .mixed-state-warning {
-    display: block;
-    margin-top: 0.75em;
-    padding: 0.5em 0.75em;
-    border: 1px solid #f4c27a;
-    background-color: #fff7e6;
-    color: #8a5200;
-    white-space: normal;
-  }
-  #parquet-filter-builder {
-    margin-top: 0.5rem;
-    margin-bottom: 0.5rem;
-    font-family: monospace;
-    font-size: 0.9rem;
-  }
-  .parquet-schema-row {
-    display: block;
-    white-space: normal;
-  }
-  .parquet-schema-row[hidden] {
-    display: none;
-  }
-  .parquet-schema-panel {
-    display: block;
-    margin: 0 0 0.2rem 1.6rem;
-    padding: 0.15rem 0.25rem;
-    border: 1px solid #d9d9d9;
-    border-radius: 2px;
-    background: transparent;
-    font-size: inherit;
-    line-height: inherit;
-  }
-  .parquet-schema-table {
-    border-collapse: collapse;
-    width: auto;
-    font-size: inherit;
-  }
-  .parquet-schema-table th,
-  .parquet-schema-table td {
-    border: 1px solid #d9e3ee;
-    padding: 0.2rem 0.35rem;
-    text-align: left;
-    vertical-align: top;
-  }
-  .parquet-schema-empty,
-  .parquet-schema-error,
-  .parquet-schema-loading {
-    color: #475569;
-  }
-  .parquet-schema-error {
-    color: #a12b2b;
-  }
-</style>
 </head>
-<body>
+<body class="wc-browse-tree-page">
+<div class="wc-browse-tree-toolbar">
 <input type="text"
        value="{{ diff_runid|e }}"
        id="runIdInput"
        placeholder="runid"
        aria-label="Run ID to compare">
-<button onclick="redirectToDiff()">Compare project</button>
+<button type="button" class="pure-button pure-button-secondary" onclick="redirectToDiff()">Compare project</button>
+</div>
 {% if parquet_filters_enabled %}
 <div
   id="parquet-filter-builder"
+  class="wc-browse-tree-filter-builder"
   data-runid="{{ runid|e }}"
   data-config="{{ config|e }}"
   data-initial-pqf="{{ parquet_filter_payload|e }}"
 ></div>
 {% endif %}
-<pre id="file-tree">
+<pre id="file-tree" class="wc-browse-tree">
 {{ showing_text|safe }}{{ pagination_html|safe }}
 {{ project_href|safe }}{{ breadcrumbs_html|safe }}
 {{ listing_html|safe }}
@@ -199,9 +126,10 @@ const config = "{{ config }}";
 })();
 </script>
 {% include 'browse/_path_input_script.htm' %}
-<script src="/weppcloud/static/js/parquet_schema_preview.js"></script>
+<script src="{{ static_url('js/theme.js') }}" defer></script>
+<script src="{{ static_url('js/parquet_schema_preview.js') }}"></script>
 {% if parquet_filters_enabled %}
-<script src="/weppcloud/static/js/parquet_filter_builder.js"></script>
+<script src="{{ static_url('js/parquet_filter_builder.js') }}"></script>
 {% endif %}
 </body>
 </html>

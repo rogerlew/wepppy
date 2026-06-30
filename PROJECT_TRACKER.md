@@ -513,6 +513,26 @@ Currently active work packages. Limit to 2-4 packages to maintain focus.
 
 Recently completed work packages. Archived immediately upon completion.
 
+### Browse Tree Theme Integration (2026-06-30)
+**Status**: ✅ **COMPLETE**
+
+**Link**: [docs/work-packages/20260630_browse_tree_theme/](docs/work-packages/20260630_browse_tree_theme/)
+
+**Lifecycle**: Backlog -> In Progress -> Done (2026-06-30)
+
+**Summary**: Applied WEPPcloud theme assets and persisted `wc-theme` bootstrapping
+to browse directory tree and not-found views while preserving the Default
+theme's exact odd/even/hover row backgrounds. Added generic theme-token
+odd/even/hover row styling for named themes, moved the Parquet Data Filter
+builder off inline hard-coded colors, and added Theme Lab targets for browse
+tree rows plus the filter builder. Focused validation passed:
+`tests/microservices/test_browse_routes.py` (18 passed),
+`tests/weppcloud/routes/test_ui_showcase_bp.py` (6 passed), package/docs lint,
+and `wctl run-playwright --suite theme-metrics` (1,430 measurements, 13 themes,
+78 browse-tree measurements, 0 browse-tree failures, 91 filter-builder
+measurements, 0 filter-builder failures, 13/13 themes with distinct browse-tree
+row backgrounds).
+
 ### Browse Parquet Preview Theme Integration (2026-06-30)
 **Status**: ✅ **COMPLETE**
 

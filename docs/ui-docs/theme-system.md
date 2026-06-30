@@ -180,7 +180,7 @@ wepppy/weppcloud/
 - When overrides cannot rescue a palette, ship an “Accessible” variant rather than diluting the base catalog.
 
 ### Theme Lab & Metrics
-- `/weppcloud/ui/components/#theme-lab` hosts the canonical specimens (buttons, helper text, radios, checkboxes, Leaflet zoom controls, and themed standalone surfaces such as the browse parquet preview banner) that the automation harness inspects. Keep this page in sync with macro and standalone-template updates so the rendered sample always matches production markup.
+- `/weppcloud/ui/components/#theme-lab` hosts the canonical specimens (buttons, helper text, radios, checkboxes, Leaflet zoom controls, and themed standalone surfaces such as the browse parquet preview banner, browse directory tree rows, and Parquet Data Filter builder) that the automation harness inspects. Keep this page in sync with macro and standalone-template updates so the rendered sample always matches production markup.
 - Theme IDs are pulled from the Theme Lab `<select data-theme-select>` list (`THEME_OPTIONS` in `ui_showcase_bp.py`).
 - Theme Lab exclusions (intentional): `cursor-light`, `light-high-contrast`.
 - Run the contrast suite locally with `npm run smoke:theme-metrics` from `wepppy/weppcloud/static-src/` or through the CLI via `wctl2 run-playwright --suite theme-metrics --env local`. The harness simply hits the Theme Lab and does **not** require run provisioning, but the backend must be running so the page renders.

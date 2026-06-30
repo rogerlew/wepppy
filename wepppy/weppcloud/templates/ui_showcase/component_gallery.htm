@@ -765,6 +765,70 @@
           </div>
         </article>
       </div>
+      <div class="pure-u-1">
+        <article class="wc-card wc-theme-lab__card" data-contrast-id="browse-tree-rows">
+          <header class="wc-card__header">
+            <h3 class="wc-card__title">Browse tree rows</h3>
+            <p class="wc-card__description">Directory tree odd/even/hover row backgrounds used by browse listings.</p>
+          </header>
+          <div class="wc-card__body">
+            <pre id="theme_lab_browse_tree"
+                 class="wc-browse-tree"
+                 aria-label="Browse tree row contrast specimens"><span class="browse-header">   Name                               Modified         Size        Actions</span>
+<span id="theme_lab_browse_tree_odd_row" class="odd-row"> ├ <a id="theme_lab_browse_tree_odd_link" href="#theme-lab"><b>wepp/                             </b></a><span id="theme_lab_browse_tree_odd_text">2026-06-30 10:24    12 items</span></span>
+<span id="theme_lab_browse_tree_even_row" class="even-row"> ├ <a id="theme_lab_browse_tree_even_link" href="#theme-lab">contrasts.out.parquet              </a><span id="theme_lab_browse_tree_even_text">2026-06-30 10:25    42 KB  download .csv schema</span></span>
+<span id="theme_lab_browse_tree_hover_row" class="odd-row is-hovered"> └ <a id="theme_lab_browse_tree_hover_link" href="#theme-lab">runs/                              </a><span id="theme_lab_browse_tree_hover_text">2026-06-30 10:26    69 items</span></span></pre>
+          </div>
+        </article>
+      </div>
+      <div class="pure-u-1">
+        <article class="wc-card wc-theme-lab__card" data-contrast-id="browse-parquet-filter-builder">
+          <header class="wc-card__header">
+            <h3 class="wc-card__title">Browse parquet data filter</h3>
+            <p class="wc-card__description">Directory browse filter builder controls and status text.</p>
+          </header>
+          <div class="wc-card__body">
+            <details id="theme_lab_parquet_filter_builder"
+                     class="parquet-filter-builder pure-form"
+                     open>
+              <summary id="theme_lab_parquet_filter_summary"
+                       class="parquet-filter-builder__summary">Parquet Data Filter</summary>
+              <div class="parquet-filter-builder__body">
+                <div class="parquet-filter-builder__controls">
+                  <button id="theme_lab_parquet_filter_apply"
+                          type="button"
+                          class="pure-button parquet-filter-builder__button parquet-filter-builder__apply">Apply Filter</button>
+                  <button id="theme_lab_parquet_filter_clear"
+                          type="button"
+                          class="pure-button pure-button-secondary parquet-filter-builder__button">Clear Filter</button>
+                  <span id="theme_lab_parquet_filter_status"
+                        class="parquet-filter-builder__status">Active filter loaded.</span>
+                </div>
+                <div class="parquet-filter-builder__tree">
+                  <div class="parquet-filter-builder__node parquet-filter-builder__node--condition">
+                    <span id="theme_lab_parquet_filter_node_label"
+                          class="parquet-filter-builder__node-label">Condition</span>
+                    <input id="theme_lab_parquet_filter_field"
+                           class="wc-field__control parquet-filter-builder__input parquet-filter-builder__input--field"
+                           type="text"
+                           aria-label="Filter field fixture"
+                           value="name">
+                    <select id="theme_lab_parquet_filter_operator"
+                            class="wc-field__control parquet-filter-builder__select parquet-filter-builder__operator"
+                            aria-label="Filter operator fixture">
+                      <option selected>Contains</option>
+                    </select>
+                    <input class="wc-field__control parquet-filter-builder__input parquet-filter-builder__input--value"
+                           type="text"
+                           aria-label="Filter value fixture"
+                           value="AL">
+                  </div>
+                </div>
+              </div>
+            </details>
+          </div>
+        </article>
+      </div>
       <div class="pure-u-1 pure-u-md-1-2 pure-u-lg-1-3">
         <article class="wc-card wc-theme-lab__card" data-contrast-id="wc-checkbox">
           <header class="wc-card__header">

@@ -9,6 +9,7 @@ import pytest
 TestClient = pytest.importorskip("starlette.testclient").TestClient
 
 pytestmark = pytest.mark.microservice
+REPO_ROOT = Path(__file__).resolve().parents[2]
 
 
 @pytest.fixture
@@ -144,6 +145,72 @@ def test_run_browse_repr_unknown_extension_returns_not_found(tmp_path: Path, loa
         response = client.get(f"/weppcloud/runs/{runid}/{config}/browse/plain.txt?repr=1")
 
     assert response.status_code == 404
+
+
+def test_run_browse_directory_tree_uses_theme_assets_and_preserves_default_row_colors(
+    tmp_path: Path,
+    load_run_browse,
+):
+    runid = "run-tree-theme"
+    config = "cfg"
+    run_root = tmp_path / runid
+    _write_file(run_root / "alpha.txt", "a")
+    _write_file(run_root / "bravo.txt", "b")
+
+    browse = load_run_browse(
+        {runid: run_root},
+        SITE_PREFIX="/weppcloud",
+    )
+    app = browse.create_app()
+
+    with TestClient(app) as client:
+        response = client.get(f"/weppcloud/runs/{runid}/{config}/browse/")
+
+    assert response.status_code == 200
+    body = response.text
+    assert 'class="wc-browse-tree-page"' in body
+    assert 'id="file-tree" class="wc-browse-tree"' in body
+    assert "css/ui-foundation.css" in body
+    assert "css/themes/all-themes.css" in body
+    assert "js/theme.js" in body
+    assert "odd-row" in body
+    assert "even-row" in body
+
+    foundation_css = (REPO_ROOT / "wepppy" / "weppcloud" / "static" / "css" / "ui-foundation.css").read_text(
+        encoding="utf-8"
+    )
+    assert "--wc-browse-tree-row-odd-bg: #ffffff;" in foundation_css
+    assert "--wc-browse-tree-row-even-bg: #f6f6f6;" in foundation_css
+    assert "--wc-browse-tree-row-hover-bg: #d0ebff;" in foundation_css
+    assert ":root[data-theme]" in foundation_css
+    assert "--wc-browse-tree-row-even-bg: color-mix(in srgb, var(--wc-color-surface-alt) 90%, var(--wc-color-border));" in foundation_css
+    assert "--wc-browse-tree-row-hover-bg: color-mix(in srgb, var(--wc-color-surface-alt) 68%, var(--wc-color-border));" in foundation_css
+
+
+def test_run_browse_not_found_tree_uses_theme_assets(tmp_path: Path, load_run_browse):
+    runid = "run-tree-not-found"
+    config = "cfg"
+    run_root = tmp_path / runid
+    run_root.mkdir(parents=True, exist_ok=True)
+
+    browse = load_run_browse(
+        {runid: run_root},
+        SITE_PREFIX="/weppcloud",
+    )
+    app = browse.create_app()
+
+    with TestClient(app) as client:
+        response = client.get(f"/weppcloud/runs/{runid}/{config}/browse/missing/")
+
+    assert response.status_code == 404
+    body = response.text
+    assert 'class="wc-browse-tree-page"' in body
+    assert 'class="wc-browse-tree"' in body
+    assert "css/ui-foundation.css" in body
+    assert "css/themes/all-themes.css" in body
+    assert "js/theme.js" in body
+    assert "wc-browse-tree-error" in body
+    assert "<code>missing/</code>" in body
 
 
 def test_parquet_preview_fixed_header_warns_preview_is_limited(tmp_path: Path, load_run_browse):
@@ -407,10 +474,32 @@ def test_directory_includes_parquet_filter_builder_and_parquet_link_attrs(tmp_pa
 
     assert response.status_code == 200
     assert "parquet_filter_builder.js" in response.text
+    assert 'class="wc-browse-tree-filter-builder"' in response.text
     assert 'data-parquet-link="1"' in response.text
     assert 'data-parquet-schema-link="1"' in response.text
     assert f"/weppcloud/runs/{runid}/{config}/schema/table.parquet" in response.text
     assert f"pqf={pqf}" in response.text
+
+    builder_js = (
+        REPO_ROOT / "wepppy" / "weppcloud" / "static" / "js" / "parquet_filter_builder.js"
+    ).read_text(encoding="utf-8")
+    assert '"parquet-filter-builder pure-form"' in builder_js
+    assert "wc-field__control parquet-filter-builder__input" in builder_js
+    assert "wc-field__control parquet-filter-builder__select" in builder_js
+    assert ".style." not in builder_js
+    assert "#fafafa" not in builder_js
+    assert "#1d6fdc" not in builder_js
+    assert "#555" not in builder_js
+
+    foundation_css = (REPO_ROOT / "wepppy" / "weppcloud" / "static" / "css" / "ui-foundation.css").read_text(
+        encoding="utf-8"
+    )
+    assert ".parquet-filter-builder {" in foundation_css
+    assert "background: var(--wc-color-surface);" in foundation_css
+    assert "color: var(--wc-color-text);" in foundation_css
+    assert "border: 1px solid var(--wc-color-border);" in foundation_css
+    assert ".wc-browse-tree-filter-builder > details" in foundation_css
+    assert ".wc-browse-tree-filter-builder button:not(.pure-button)" in foundation_css
 
 
 @pytest.mark.parametrize("extension", [".parquet", ".geoparquet"])

@@ -388,6 +388,85 @@ def component_gallery() -> str:
             ],
         },
         {
+            "id": "browse_tree_rows",
+            "label": "Browse tree row states",
+            "threshold": 4.5,
+            "pairs": [
+                {
+                    "name": "odd_link_vs_row",
+                    "foreground": "#theme_lab_browse_tree_odd_link",
+                    "background": "#theme_lab_browse_tree_odd_row",
+                },
+                {
+                    "name": "odd_text_vs_row",
+                    "foreground": "#theme_lab_browse_tree_odd_text",
+                    "background": "#theme_lab_browse_tree_odd_row",
+                },
+                {
+                    "name": "even_link_vs_row",
+                    "foreground": "#theme_lab_browse_tree_even_link",
+                    "background": "#theme_lab_browse_tree_even_row",
+                },
+                {
+                    "name": "even_text_vs_row",
+                    "foreground": "#theme_lab_browse_tree_even_text",
+                    "background": "#theme_lab_browse_tree_even_row",
+                },
+                {
+                    "name": "hover_link_vs_row",
+                    "foreground": "#theme_lab_browse_tree_hover_link",
+                    "background": "#theme_lab_browse_tree_hover_row",
+                },
+                {
+                    "name": "hover_text_vs_row",
+                    "foreground": "#theme_lab_browse_tree_hover_text",
+                    "background": "#theme_lab_browse_tree_hover_row",
+                },
+            ],
+        },
+        {
+            "id": "browse_parquet_filter_builder",
+            "label": "Browse parquet data filter",
+            "threshold": 4.5,
+            "pairs": [
+                {
+                    "name": "summary_vs_builder",
+                    "foreground": "#theme_lab_parquet_filter_summary",
+                    "background": "#theme_lab_parquet_filter_builder",
+                },
+                {
+                    "name": "status_vs_builder",
+                    "foreground": "#theme_lab_parquet_filter_status",
+                    "background": "#theme_lab_parquet_filter_builder",
+                },
+                {
+                    "name": "node_label_vs_builder",
+                    "foreground": "#theme_lab_parquet_filter_node_label",
+                    "background": "#theme_lab_parquet_filter_builder",
+                },
+                {
+                    "name": "field_text_vs_field",
+                    "foreground": "#theme_lab_parquet_filter_field",
+                    "background": "#theme_lab_parquet_filter_field",
+                },
+                {
+                    "name": "operator_text_vs_operator",
+                    "foreground": "#theme_lab_parquet_filter_operator",
+                    "background": "#theme_lab_parquet_filter_operator",
+                },
+                {
+                    "name": "apply_text_vs_button",
+                    "foreground": "#theme_lab_parquet_filter_apply",
+                    "background": "#theme_lab_parquet_filter_apply",
+                },
+                {
+                    "name": "clear_text_vs_button",
+                    "foreground": "#theme_lab_parquet_filter_clear",
+                    "background": "#theme_lab_parquet_filter_clear",
+                },
+            ],
+        },
+        {
             "id": "wc_checkbox_checked",
             "label": "Readonly toggle (checked)",
             "threshold": 3.0,

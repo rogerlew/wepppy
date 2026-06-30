@@ -173,48 +173,37 @@
 
   const wrapper = document.createElement("details");
   wrapper.open = false;
-  wrapper.style.border = "1px solid #d0d0d0";
-  wrapper.style.padding = "0.4rem 0.5rem";
-  wrapper.style.background = "#fafafa";
+  wrapper.className = "parquet-filter-builder pure-form";
 
   const title = document.createElement("summary");
   title.textContent = "Parquet Data Filter";
-  title.style.fontWeight = "700";
-  title.style.fontSize = "0.85rem";
-  title.style.cursor = "pointer";
-  title.style.userSelect = "none";
+  title.className = "parquet-filter-builder__summary";
 
   const body = document.createElement("div");
-  body.style.marginTop = "0.45rem";
+  body.className = "parquet-filter-builder__body";
 
   const controls = document.createElement("div");
-  controls.style.marginBottom = "0.4rem";
+  controls.className = "parquet-filter-builder__controls";
 
   const applyButton = document.createElement("button");
   applyButton.type = "button";
   applyButton.textContent = "Apply Filter";
-  applyButton.style.backgroundColor = "#1d6fdc";
-  applyButton.style.border = "1px solid #1557ad";
-  applyButton.style.color = "#fff";
-  applyButton.style.fontWeight = "600";
-  applyButton.style.borderRadius = "4px";
-  applyButton.style.padding = "0.25rem 0.55rem";
+  applyButton.className = "pure-button parquet-filter-builder__button parquet-filter-builder__apply";
 
   const clearButton = document.createElement("button");
   clearButton.type = "button";
   clearButton.textContent = "Clear Filter";
-  clearButton.style.marginLeft = "0.5rem";
+  clearButton.className = "pure-button pure-button-secondary parquet-filter-builder__button";
 
   const status = document.createElement("span");
-  status.style.marginLeft = "0.75rem";
-  status.style.whiteSpace = "normal";
-  status.style.fontSize = "0.82rem";
+  status.className = "parquet-filter-builder__status";
 
   controls.appendChild(applyButton);
   controls.appendChild(clearButton);
   controls.appendChild(status);
 
   const treeHost = document.createElement("div");
+  treeHost.className = "parquet-filter-builder__tree";
 
   wrapper.appendChild(title);
   body.appendChild(controls);
@@ -246,24 +235,24 @@
   function createNodeLabel(text) {
     const label = document.createElement("span");
     label.textContent = text;
-    label.style.fontSize = "0.78rem";
-    label.style.fontWeight = "600";
-    label.style.color = "#555";
-    label.style.marginRight = "0.3rem";
+    label.className = "parquet-filter-builder__node-label";
     return label;
   }
 
   function makeNodeControls(node, parent, index, depth) {
     const row = document.createElement("div");
-    row.style.borderLeft = "2px solid #c8c8c8";
-    row.style.marginLeft = depth === 0 ? "0" : "0.75rem";
-    row.style.paddingLeft = "0.6rem";
-    row.style.marginBottom = "0.4rem";
+    row.className = `parquet-filter-builder__node parquet-filter-builder__node--${node.kind}`;
+    if (depth > 0) {
+      row.classList.add("parquet-filter-builder__node--child");
+    }
 
     if (node.kind === "group") {
       const header = document.createElement("div");
+      header.className = "parquet-filter-builder__node-header";
 
       const logicSelect = document.createElement("select");
+      logicSelect.className = "wc-field__control parquet-filter-builder__select parquet-filter-builder__logic";
+      logicSelect.setAttribute("aria-label", "Filter group logic");
       ["AND", "OR"].forEach((logic) => {
         const opt = document.createElement("option");
         opt.value = logic;
@@ -281,7 +270,7 @@
       const addConditionBtn = document.createElement("button");
       addConditionBtn.type = "button";
       addConditionBtn.textContent = "+ Condition";
-      addConditionBtn.style.marginLeft = "0.4rem";
+      addConditionBtn.className = "pure-button pure-button-secondary parquet-filter-builder__button";
       addConditionBtn.addEventListener("click", () => {
         node.children.push(createCondition());
         markFilterDirty();
@@ -291,7 +280,7 @@
       const addGroupBtn = document.createElement("button");
       addGroupBtn.type = "button";
       addGroupBtn.textContent = "+ Group";
-      addGroupBtn.style.marginLeft = "0.35rem";
+      addGroupBtn.className = "pure-button pure-button-secondary parquet-filter-builder__button";
       addGroupBtn.addEventListener("click", () => {
         node.children.push(createGroup());
         markFilterDirty();
@@ -307,7 +296,7 @@
         const removeBtn = document.createElement("button");
         removeBtn.type = "button";
         removeBtn.textContent = "Remove";
-        removeBtn.style.marginLeft = "0.35rem";
+        removeBtn.className = "pure-button pure-button-secondary parquet-filter-builder__button";
         removeBtn.addEventListener("click", () => {
           parent.children.splice(index, 1);
           markFilterDirty();
@@ -329,13 +318,16 @@
     fieldInput.type = "text";
     fieldInput.placeholder = "field";
     fieldInput.value = node.field || "";
-    fieldInput.style.width = "14rem";
+    fieldInput.className = "wc-field__control parquet-filter-builder__input parquet-filter-builder__input--field";
+    fieldInput.setAttribute("aria-label", "Filter field");
     fieldInput.addEventListener("input", () => {
       node.field = fieldInput.value;
       markFilterDirty();
     });
 
     const operatorSelect = document.createElement("select");
+    operatorSelect.className = "wc-field__control parquet-filter-builder__select parquet-filter-builder__operator";
+    operatorSelect.setAttribute("aria-label", "Filter operator");
     OPERATORS.forEach((operator) => {
       const opt = document.createElement("option");
       opt.value = operator;
@@ -345,7 +337,6 @@
       }
       operatorSelect.appendChild(opt);
     });
-    operatorSelect.style.marginLeft = "0.35rem";
     operatorSelect.addEventListener("change", () => {
       node.operator = operatorSelect.value;
       markFilterDirty();
@@ -355,8 +346,8 @@
     valueInput.type = "text";
     valueInput.placeholder = "value";
     valueInput.value = node.value || "";
-    valueInput.style.width = "14rem";
-    valueInput.style.marginLeft = "0.35rem";
+    valueInput.className = "wc-field__control parquet-filter-builder__input parquet-filter-builder__input--value";
+    valueInput.setAttribute("aria-label", "Filter value");
     valueInput.addEventListener("input", () => {
       node.value = valueInput.value;
       markFilterDirty();
@@ -365,7 +356,7 @@
     const removeBtn = document.createElement("button");
     removeBtn.type = "button";
     removeBtn.textContent = "Remove";
-    removeBtn.style.marginLeft = "0.35rem";
+    removeBtn.className = "pure-button pure-button-secondary parquet-filter-builder__button";
     removeBtn.addEventListener("click", () => {
       if (parent) {
         parent.children.splice(index, 1);
