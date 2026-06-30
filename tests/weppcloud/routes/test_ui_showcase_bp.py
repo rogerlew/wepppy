@@ -147,3 +147,49 @@ def test_component_gallery_registers_geneva_marker_theme_lab_target(
     assert 'data-contrast-id="geneva-summary-marker-labels"' in template_source
     assert "theme_lab_geneva_marker_{{ marker.id }}_circle" in template_source
     assert "theme_lab_geneva_marker_{{ marker.id }}_label" in template_source
+
+
+def test_component_gallery_registers_browse_parquet_preview_banner_target(
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    captured: dict[str, object] = {}
+
+    def fake_render_template(template_name: str, **context: object) -> str:
+        captured["template_name"] = template_name
+        captured["context"] = context
+        return "rendered"
+
+    monkeypatch.setattr(ui_showcase_module, "render_template", fake_render_template)
+
+    app = Flask(__name__)
+    app.config["CAP_BASE_URL"] = "/cap"
+    app.config["CAP_SITE_KEY"] = "demo"
+
+    with app.app_context():
+        result = ui_showcase_module.component_gallery()
+
+    assert result == "rendered"
+    assert captured["template_name"] == "ui_showcase/component_gallery.htm"
+
+    context = captured["context"]
+    assert isinstance(context, dict)
+    theme_targets = context["theme_contrast_targets"]
+    assert isinstance(theme_targets, list)
+
+    target = next((entry for entry in theme_targets if entry.get("id") == "browse_parquet_preview_banner"), None)
+    assert target is not None
+    assert {pair["name"] for pair in target["pairs"]} == {
+        "preview_title_vs_banner",
+        "preview_message_vs_banner",
+        "filter_title_vs_banner",
+        "filter_summary_vs_banner",
+        "filter_code_vs_code_background",
+        "action_text_vs_background",
+        "action_border_vs_background",
+    }
+
+    template_source = COMPONENT_GALLERY_TEMPLATE.read_text(encoding="utf-8")
+    assert 'data-contrast-id="browse-parquet-preview-banner"' in template_source
+    assert 'id="theme_lab_browse_preview_banner"' in template_source
+    assert 'id="theme_lab_browse_filter_feedback"' in template_source
+    assert 'id="theme_lab_browse_preview_action"' in template_source

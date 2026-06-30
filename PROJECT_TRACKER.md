@@ -1,7 +1,7 @@
 # PROJECT_TRACKER.md
 > Kanban board for wepppy work packages and vision items
 
-**Last Updated**: 2026-06-29
+**Last Updated**: 2026-06-30
 **Active Packages**: 10
 **Quick Links**: [Work Packages Directory](docs/work-packages/) | [God-Tier Prompting Strategy](docs/god-tier-prompting-strategy.md)
 
@@ -37,7 +37,7 @@ This tracker makes all work visible at a glance, helping agents coordinate and a
 ### 2. Limit Work in Progress
 **Target**: 2-4 active packages maximum to maintain focus and ensure packages complete rather than stall.
 
-**Current WIP**: 9 packages (above target range)
+**Current WIP**: 10 packages (above target range)
 
 ### 3. Manage Flow
 Monitor how long packages spend in each column:
@@ -512,6 +512,15 @@ Currently active work packages. Limit to 2-4 packages to maintain focus.
 ## ✅ Done
 
 Recently completed work packages. Archived immediately upon completion.
+
+### Browse Parquet Preview Theme Integration (2026-06-30)
+**Status**: ✅ **COMPLETE**
+
+**Link**: [docs/work-packages/20260630_browse_parquet_preview_theme/](docs/work-packages/20260630_browse_parquet_preview_theme/)
+
+**Lifecycle**: Backlog -> In Progress -> Done (2026-06-30)
+
+**Summary**: Consolidated parquet preview and active-filter feedback into a single fixed browse banner, moved the standalone browse table preview onto WEPPcloud theme assets and persisted `wc-theme` bootstrapping, and added Theme Lab contrast-target coverage for preview text, filter text/code, and actions. Focused validation passed: `tests/microservices/test_browse_routes.py` (16 passed), `tests/weppcloud/routes/test_ui_showcase_bp.py` (4 passed), package/docs lint, and `wctl run-playwright --suite theme-metrics` (1261 measurements, 13 themes, 91 browse-banner measurements, 0 browse-banner failures).
 
 ### UI Lab Light Landing Keyboard Access (2026-06-29)
 **Status**: ✅ **COMPLETE**

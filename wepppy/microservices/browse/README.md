@@ -75,7 +75,8 @@ The dedicated service preserves the canonical browse authorization and path-boun
 ## Parquet quick-look filters
 - Feature flag: set `BROWSE_PARQUET_FILTERS_ENABLED=1` to enable parquet filter handling in browse, download/CSV, and D-Tale bridge flows.
 - Preview cap: `BROWSE_PARQUET_PREVIEW_LIMIT` (default `500`) limits parquet browse preview rows for both filtered and unfiltered parquet previews.
-- Preview pages must show a fixed top-of-page warning banner that states the rendered table is an HTML preview, not the full parquet file, and keeps full-file/CSV download actions visible.
+- Preview pages must show one fixed top-of-page banner that states the rendered table is an HTML preview, not the full parquet file, and keeps full-file/CSV download actions visible. When a `pqf` filter is active, the filter summary/code appears inside the same banner; do not add a second standalone filter notice below it.
+- The parquet preview banner and table preview must use WEPPcloud theme tokens from `ui-foundation.css`/`all-themes.css` plus the persisted `wc-theme` bootstrap. The banner is represented in Theme Lab so `wctl run-playwright --suite theme-metrics` samples the preview/filter/action contrast pairs for every catalog theme.
 - Export cap: `BROWSE_PARQUET_EXPORT_MAX_ROWS` (default `2000000`) limits filtered parquet/CSV export rows.
 - Query parameter: `pqf` is URL-safe base64 JSON with this tree contract:
   - Group node: `{"kind":"group","logic":"AND"|"OR","children":[...]}`

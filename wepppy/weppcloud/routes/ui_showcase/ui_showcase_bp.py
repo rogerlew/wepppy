@@ -343,6 +343,51 @@ def component_gallery() -> str:
             ],
         },
         {
+            "id": "browse_parquet_preview_banner",
+            "label": "Browse parquet preview banner",
+            "threshold": 4.5,
+            "pairs": [
+                {
+                    "name": "preview_title_vs_banner",
+                    "foreground": "#theme_lab_browse_preview_title",
+                    "background": "#theme_lab_browse_preview_banner",
+                },
+                {
+                    "name": "preview_message_vs_banner",
+                    "foreground": "#theme_lab_browse_preview_message",
+                    "background": "#theme_lab_browse_preview_banner",
+                },
+                {
+                    "name": "filter_title_vs_banner",
+                    "foreground": "#theme_lab_browse_filter_title",
+                    "background": "#theme_lab_browse_preview_banner",
+                },
+                {
+                    "name": "filter_summary_vs_banner",
+                    "foreground": "#theme_lab_browse_filter_summary",
+                    "background": "#theme_lab_browse_preview_banner",
+                },
+                {
+                    "name": "filter_code_vs_code_background",
+                    "foreground": "#theme_lab_browse_filter_code",
+                    "background": "#theme_lab_browse_filter_code",
+                },
+                {
+                    "name": "action_text_vs_background",
+                    "foreground": "#theme_lab_browse_preview_action",
+                    "background": "#theme_lab_browse_preview_action",
+                },
+                {
+                    "name": "action_border_vs_background",
+                    "foreground": "#theme_lab_browse_preview_action",
+                    "background": "#theme_lab_browse_preview_action",
+                    "foreground_mode": "border",
+                    "aa_kind": "non_text",
+                    "threshold": 3.0,
+                },
+            ],
+        },
+        {
             "id": "wc_checkbox_checked",
             "label": "Readonly toggle (checked)",
             "threshold": 3.0,

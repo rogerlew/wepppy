@@ -180,7 +180,7 @@ wepppy/weppcloud/
 - When overrides cannot rescue a palette, ship an “Accessible” variant rather than diluting the base catalog.
 
 ### Theme Lab & Metrics
-- `/weppcloud/ui/components/#theme-lab` hosts the canonical specimens (buttons, helper text, radios, checkboxes, Leaflet zoom controls) that the automation harness inspects. Keep this page in sync with macro updates so the rendered sample always matches production markup.
+- `/weppcloud/ui/components/#theme-lab` hosts the canonical specimens (buttons, helper text, radios, checkboxes, Leaflet zoom controls, and themed standalone surfaces such as the browse parquet preview banner) that the automation harness inspects. Keep this page in sync with macro and standalone-template updates so the rendered sample always matches production markup.
 - Theme IDs are pulled from the Theme Lab `<select data-theme-select>` list (`THEME_OPTIONS` in `ui_showcase_bp.py`).
 - Theme Lab exclusions (intentional): `cursor-light`, `light-high-contrast`.
 - Run the contrast suite locally with `npm run smoke:theme-metrics` from `wepppy/weppcloud/static-src/` or through the CLI via `wctl2 run-playwright --suite theme-metrics --env local`. The harness simply hits the Theme Lab and does **not** require run provisioning, but the backend must be running so the page renders.
@@ -199,7 +199,7 @@ wepppy/weppcloud/
 - **Theme renders incorrectly:** Re-run the converter with `--validate-only` to confirm tokens; add per-theme overrides for missing or unsuitable values.
 - **Theme missing from dropdown:** Ensure `_theme_switcher.htm` (header) and `THEME_OPTIONS` (Theme Lab) include the key as intended, then rebuild `all-themes.css`.
 - **Contrast warnings:** Check `themes-contrast.md` (converter) and `static-src/test-results/theme-metrics/` (Playwright); patch `theme-mapping.json` overrides and regenerate the CSS.
-- **FOUC on first load:** `base_pure.htm` now applies persisted theme before paint. If you add a template that does not inherit `base_pure.htm`, add an equivalent inline boot script in its `<head>`.
+- **FOUC on first load:** `base_pure.htm` now applies persisted theme before paint. If you add a template that does not inherit `base_pure.htm`, add an equivalent inline boot script in its `<head>` and register any new themed color surface in Theme Lab before relying on theme metrics coverage.
 - **Print outputs unreadable:** No print-specific overrides exist today; add `@media print` rules in `ui-foundation.css` if needed.
 
 ## Zero-Aesthetic Alignment

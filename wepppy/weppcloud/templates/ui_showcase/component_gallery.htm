@@ -719,6 +719,52 @@
           </div>
         </article>
       </div>
+      <div class="pure-u-1">
+        <article class="wc-card wc-theme-lab__card" data-contrast-id="browse-parquet-preview-banner">
+          <header class="wc-card__header">
+            <h3 class="wc-card__title">Browse parquet preview banner</h3>
+            <p class="wc-card__description">Fixed browse notice with preview scope, active filter feedback, and download actions.</p>
+          </header>
+          <div class="wc-card__body" id="theme_lab_browse_preview_surface">
+            <section id="theme_lab_browse_preview_banner"
+                     class="parquet-preview-banner parquet-preview-banner--fixture"
+                     role="region"
+                     aria-label="Parquet preview notice fixture">
+              <div class="parquet-preview-banner__inner">
+                <div class="parquet-preview-banner__content">
+                  <span id="theme_lab_browse_preview_title"
+                        class="parquet-preview-banner__title">Preview Only</span>
+                  <span id="theme_lab_browse_preview_message"
+                        class="parquet-preview-banner__message">
+                    Filtered HTML preview only; this is not the full parquet file. Showing up to 47 matching rows.
+                  </span>
+                  <div id="theme_lab_browse_filter_feedback"
+                       class="parquet-preview-banner__filter filter-feedback"
+                       data-parquet-filter-feedback>
+                    <div>
+                      <span id="theme_lab_browse_filter_title"
+                            class="parquet-preview-banner__filter-title">Parquet filter active</span>:
+                      <span id="theme_lab_browse_filter_summary"
+                            class="parquet-preview-banner__filter-summary">name Contains "AL"</span>
+                    </div>
+                    <div><span class="parquet-preview-banner__filter-title">Code</span>:
+                      <span id="theme_lab_browse_filter_code"
+                            class="parquet-preview-banner__filter-code">condition:name:contains</span>
+                    </div>
+                  </div>
+                </div>
+                <nav class="parquet-preview-banner__actions" aria-label="Parquet file actions fixture">
+                  <a id="theme_lab_browse_preview_action"
+                     class="pure-button pure-button-secondary parquet-preview-banner__action"
+                     href="#theme-lab">Download Filtered File</a>
+                  <a class="pure-button pure-button-secondary parquet-preview-banner__action"
+                     href="#theme-lab">Download Filtered CSV</a>
+                </nav>
+              </div>
+            </section>
+          </div>
+        </article>
+      </div>
       <div class="pure-u-1 pure-u-md-1-2 pure-u-lg-1-3">
         <article class="wc-card wc-theme-lab__card" data-contrast-id="wc-checkbox">
           <header class="wc-card__header">

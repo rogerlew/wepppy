@@ -168,8 +168,11 @@ def test_parquet_preview_fixed_header_warns_preview_is_limited(tmp_path: Path, l
 
     assert response.status_code == 200
     assert response.headers["content-type"].startswith("text/html")
-    assert 'class="has-fixed-preview-banner"' in response.text
+    assert 'class="wc-browse-table-page has-fixed-preview-banner"' in response.text
     assert "data-parquet-preview-banner" in response.text
+    assert "css/ui-foundation.css" in response.text
+    assert "css/themes/all-themes.css" in response.text
+    assert "js/theme.js" in response.text
     assert "Preview Only" in response.text
     assert "HTML preview only; this is not the full parquet file." in response.text
     assert "Showing first 2 of 3 rows" in response.text
@@ -298,6 +301,12 @@ def test_parquet_preview_contains_case_insensitive_filter(tmp_path: Path, load_r
     assert "Alice" in response.text
     assert "bob" not in response.text
     assert "Parquet filter active" in response.text
+    assert response.text.count("data-parquet-filter-feedback") == 1
+    banner = response.text.split("</header>", 1)[0]
+    assert "data-parquet-filter-feedback" in banner
+    assert "Parquet filter active" in banner
+    body_after_banner = response.text.split("</header>", 1)[1]
+    assert "filter-feedback" not in body_after_banner
 
 
 def test_parquet_preview_under_nodir_root_renders_html_table(tmp_path: Path, load_run_browse):
@@ -331,6 +340,9 @@ def test_parquet_preview_under_nodir_root_renders_html_table(tmp_path: Path, loa
     assert response.headers["content-type"].startswith("text/html")
     assert "content-disposition" not in response.headers
     assert "Parquet filter active" in response.text
+    assert response.text.count("data-parquet-filter-feedback") == 1
+    banner = response.text.split("</header>", 1)[0]
+    assert "data-parquet-filter-feedback" in banner
     assert ">23<" in response.text
     assert ">24<" not in response.text
 
