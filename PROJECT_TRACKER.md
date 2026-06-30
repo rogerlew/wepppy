@@ -77,6 +77,31 @@ Feedback mechanisms:
 
 Work packages that are scoped but not yet started. Dependencies and prerequisites should be noted.
 
+### Batch Runner Durability
+**Proposed**: 2026-06-30
+**Size**: Medium-High (2-4 focused sessions)
+**Priority**: High
+**Link**: [docs/work-packages/20260630_batch_runner_durability/](docs/work-packages/20260630_batch_runner_durability/)
+**Description**: Make Run Batch restart-aware so a partially failed batch can be retried after operator correction without enqueueing every completed watershed leaf again.
+
+**Scope**:
+- Add durable per-leaf status classification from run directory existence, enabled `RedisPrep` task timestamps, and terminal `run_metadata.json`.
+- Write success metadata from `run_batch_watershed_rq` so stale failed metadata is overwritten by successful reruns.
+- Filter default `run_batch_rq` enqueue targets to missing, incomplete, or failed leaves while preserving explicit full rerun through `Remove existing files`.
+- Reject duplicate Run Batch submissions while batch jobs are active.
+- Add focused RQ, RQ Engine route, and Batch Runner runstate regression coverage plus required security review.
+
+**Strategic Value**:
+- Lets operators recover large batch jobs after fixed input/configuration mistakes without wasting queue capacity on completed leaves.
+- Makes batch failure evidence durable even though per-leaf RQ jobs currently finish with `(False, elapsed)` and empty `exc_info`.
+- Reduces manual failed-run bookkeeping for production batches such as `nasa-roses-202606-psbs`.
+
+**Dependencies**: Production evidence captured from `wepp1`; implementation should not be rolled out while the target batch still has active queued/started jobs.
+
+**Next Steps**: Implement the status classifier and retry-selection tests, then wire enqueue filtering and active-job conflict handling.
+
+---
+
 ### SSURGO Reclaimed Soil Conversion and Fallback Transparency
 **Proposed**: 2026-06-22
 **Size**: Medium-High (2-4 focused sessions)
