@@ -707,6 +707,7 @@ async def _tabular_preview(env, *, path: str, path_lower: str, request):
         raw_payload = request.args.get('pqf')
         started_ns = env._monotonic_ns()
         rss_before_kb = env._current_rss_kb()
+        total_rows = env.pq.ParquetFile(path).metadata.num_rows
         if env.BROWSE_PARQUET_FILTERS_ENABLED and raw_payload:
             try:
                 compiled = await asyncio.to_thread(env.compile_parquet_filter_for_path, path, raw_payload)
@@ -720,6 +721,10 @@ async def _tabular_preview(env, *, path: str, path_lower: str, request):
                 if preview_table.num_rows == 0:
                     filter_feedback = {
                         'active': True,
+                        'preview': True,
+                        'preview_rows': preview_table.num_rows,
+                        'preview_limit': env.BROWSE_PARQUET_PREVIEW_LIMIT,
+                        'total_rows': total_rows,
                         'summary': compiled.summary if compiled is not None else None,
                         'code': 'no_rows_matched_filter',
                         'message': 'No rows matched the active parquet filter.',
@@ -729,10 +734,15 @@ async def _tabular_preview(env, *, path: str, path_lower: str, request):
                 else:
                     filter_feedback = {
                         'active': True,
+                        'preview': True,
+                        'preview_rows': preview_table.num_rows,
+                        'preview_limit': env.BROWSE_PARQUET_PREVIEW_LIMIT,
+                        'total_rows': total_rows,
                         'summary': compiled.summary if compiled is not None else None,
                         'code': None,
                         'message': (
-                            f'Showing {preview_table.num_rows} filtered rows '
+                            'Filtered HTML preview only; this is not the full parquet file. '
+                            f'Showing up to {preview_table.num_rows} matching rows '
                             f'(preview limit {env.BROWSE_PARQUET_PREVIEW_LIMIT}).'
                         ),
                         'status_code': 200,
@@ -749,6 +759,10 @@ async def _tabular_preview(env, *, path: str, path_lower: str, request):
             except env.ParquetFilterError as exc:
                 filter_feedback = {
                     'active': True,
+                    'preview': True,
+                    'preview_rows': None,
+                    'preview_limit': env.BROWSE_PARQUET_PREVIEW_LIMIT,
+                    'total_rows': total_rows,
                     'summary': None,
                     'code': exc.code,
                     'message': exc.message,
@@ -772,14 +786,20 @@ async def _tabular_preview(env, *, path: str, path_lower: str, request):
                 env.BROWSE_PARQUET_PREVIEW_LIMIT,
             )
             html_table = await env._async_parquet_table_to_html(preview_table, path)
+            preview_message = (
+                'HTML preview only; this is not the full parquet file. '
+                f'Showing first {preview_table.num_rows} of {total_rows} rows '
+                f'(preview limit {env.BROWSE_PARQUET_PREVIEW_LIMIT}).'
+            )
             filter_feedback = {
                 'active': False,
+                'preview': True,
+                'preview_rows': preview_table.num_rows,
+                'preview_limit': env.BROWSE_PARQUET_PREVIEW_LIMIT,
+                'total_rows': total_rows,
                 'summary': None,
                 'code': None,
-                'message': (
-                    f'Showing {preview_table.num_rows} rows '
-                    f'(preview limit {env.BROWSE_PARQUET_PREVIEW_LIMIT}).'
-                ),
+                'message': preview_message,
                 'status_code': 200,
                 'pqf': None,
             }
@@ -867,6 +887,11 @@ def _tabular_response(
         csv_url=csv_url,
         dtale_url=dtale_url,
         parquet_filter_active=bool(filter_feedback and filter_feedback.get('active')),
+        parquet_preview_active=bool(filter_feedback and filter_feedback.get('preview')),
+        parquet_preview_message=(filter_feedback or {}).get('message'),
+        parquet_preview_rows=(filter_feedback or {}).get('preview_rows'),
+        parquet_preview_limit=(filter_feedback or {}).get('preview_limit'),
+        parquet_total_rows=(filter_feedback or {}).get('total_rows'),
         parquet_filter_summary=(filter_feedback or {}).get('summary'),
         parquet_filter_message=(filter_feedback or {}).get('message'),
         parquet_filter_code=(filter_feedback or {}).get('code'),

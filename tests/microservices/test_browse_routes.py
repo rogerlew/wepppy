@@ -146,6 +146,40 @@ def test_run_browse_repr_unknown_extension_returns_not_found(tmp_path: Path, loa
     assert response.status_code == 404
 
 
+def test_parquet_preview_fixed_header_warns_preview_is_limited(tmp_path: Path, load_run_browse):
+    runid = "run-parquet-preview-banner"
+    config = "cfg"
+    run_root = tmp_path / runid
+    run_root.mkdir(parents=True, exist_ok=True)
+    df = pytest.importorskip("pandas").DataFrame(
+        {"name": ["first", "second", "third"], "value": [1, 2, 3]}
+    )
+    df.to_parquet(run_root / "table.parquet")
+
+    browse = load_run_browse(
+        {runid: run_root},
+        SITE_PREFIX="/weppcloud",
+        BROWSE_PARQUET_PREVIEW_LIMIT="2",
+    )
+    app = browse.create_app()
+
+    with TestClient(app) as client:
+        response = client.get(f"/weppcloud/runs/{runid}/{config}/browse/table.parquet")
+
+    assert response.status_code == 200
+    assert response.headers["content-type"].startswith("text/html")
+    assert 'class="has-fixed-preview-banner"' in response.text
+    assert "data-parquet-preview-banner" in response.text
+    assert "Preview Only" in response.text
+    assert "HTML preview only; this is not the full parquet file." in response.text
+    assert "Showing first 2 of 3 rows" in response.text
+    assert "Download Full File" in response.text
+    assert "Download Full CSV" in response.text
+    assert "first" in response.text
+    assert "second" in response.text
+    assert "third" not in response.text
+
+
 @pytest.mark.parametrize("page_value,expected_page", [("0", "1"), ("99", "1")])
 def test_run_browse_page_clamp_preserves_diff_sort_order_query(
     tmp_path: Path,

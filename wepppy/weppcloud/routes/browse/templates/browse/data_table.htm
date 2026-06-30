@@ -12,6 +12,74 @@
       crossorigin="anonymous">
 <script src="/weppcloud/static/js/sorttable.js"></script>
 <style>
+  body.has-fixed-preview-banner {
+    padding-top: 8.5rem;
+  }
+  .parquet-preview-banner {
+    position: fixed;
+    top: 0;
+    left: 0;
+    right: 0;
+    z-index: 2000;
+    background: #7a2e00;
+    color: #fff;
+    border-bottom: 4px solid #f4b400;
+    box-shadow: 0 2px 10px rgba(0, 0, 0, 0.35);
+    padding: 0.85rem 1rem;
+  }
+  .parquet-preview-banner__inner {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 1rem;
+    flex-wrap: wrap;
+  }
+  .parquet-preview-banner__title {
+    display: block;
+    font-size: 1.15rem;
+    font-weight: 700;
+    letter-spacing: 0;
+    text-transform: uppercase;
+  }
+  .parquet-preview-banner__message {
+    display: block;
+    max-width: 78rem;
+    font-size: 1rem;
+    line-height: 1.35;
+  }
+  .parquet-preview-banner__actions {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    flex-wrap: wrap;
+  }
+  .parquet-preview-banner__actions a {
+    color: #1f1f1f;
+    background: #fff;
+    border: 2px solid #fff;
+    border-radius: 4px;
+    padding: 0.35rem 0.65rem;
+    font-weight: 700;
+    text-decoration: none;
+    white-space: nowrap;
+  }
+  .parquet-preview-banner__actions a:focus,
+  .parquet-preview-banner__actions a:hover {
+    color: #000;
+    background: #ffe08a;
+    border-color: #ffe08a;
+    outline: 3px solid #fff;
+    outline-offset: 2px;
+  }
+  @media (max-width: 700px) {
+    body.has-fixed-preview-banner {
+      padding-top: 12rem;
+    }
+    .parquet-preview-banner__inner {
+      align-items: flex-start;
+      flex-direction: column;
+    }
+  }
   .table-nonfluid { width: auto !important; }
   .filter-feedback {
     margin: 0.75rem 0;
@@ -26,7 +94,28 @@
   }
 </style>
 </head>
-<body>
+<body{% if parquet_preview_active %} class="has-fixed-preview-banner"{% endif %}>
+{% if parquet_preview_active %}
+<header class="parquet-preview-banner" role="status" aria-live="polite" data-parquet-preview-banner>
+  <div class="parquet-preview-banner__inner">
+    <div>
+      <span class="parquet-preview-banner__title">Preview Only</span>
+      <span class="parquet-preview-banner__message">
+        {{ parquet_preview_message|default('This page shows a limited HTML preview, not the full parquet file.', true)|e }}
+      </span>
+    </div>
+    <nav class="parquet-preview-banner__actions" aria-label="Parquet file actions">
+      <a href="{{ download_url }}">{% if parquet_filter_active %}Download Filtered File{% else %}Download Full File{% endif %}</a>
+      {% if csv_url %}
+      <a href="{{ csv_url }}">{% if parquet_filter_active %}Download Filtered CSV{% else %}Download Full CSV{% endif %}</a>
+      {% endif %}
+      {% if dtale_url %}
+      <a href="{{ dtale_url }}">Open in D-Tale</a>
+      {% endif %}
+    </nav>
+  </div>
+</header>
+{% else %}
 <a href="{{ download_url }}">Download File</a>
 {% if csv_url %}
  | <a href="{{ csv_url }}">Download CSV</a>
@@ -35,6 +124,7 @@
  | <a href="{{ dtale_url }}">Open in D-Tale</a>
 {% endif %}
 <hr>
+{% endif %}
 {% if parquet_filter_active %}
 <div class="filter-feedback{% if parquet_filter_code %} error{% endif %}">
   <div><b>Parquet filter active</b>{% if parquet_filter_summary %}: {{ parquet_filter_summary|e }}{% endif %}</div>
