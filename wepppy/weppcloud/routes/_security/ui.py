@@ -1,5 +1,7 @@
 """Custom authentication blueprint wrapping Flask-Security views."""
 
+import os
+
 from .._common import (
     Blueprint,
     abort,
@@ -35,9 +37,25 @@ def goodbye():
 
 @security_bp.app_context_processor
 def inject_auth_context():
+    cap_base_url = (
+        current_app.config.get("CAP_BASE_URL")
+        or os.getenv("CAP_BASE_URL", "/cap")
+    ).rstrip("/")
+    cap_asset_base_url = (
+        current_app.config.get("CAP_ASSET_BASE_URL")
+        or os.getenv("CAP_ASSET_BASE_URL", f"{cap_base_url}/assets")
+    ).rstrip("/")
+    cap_site_key = (
+        current_app.config.get("CAP_SITE_KEY")
+        or os.getenv("CAP_SITE_KEY", "")
+    ).strip("/")
+
     return {
         "auth_login_url": url_for_security("login"),
         "auth_logout_url": url_for_security("logout"),
+        "cap_base_url": cap_base_url,
+        "cap_asset_base_url": cap_asset_base_url,
+        "cap_site_key": cap_site_key,
     }
 
 

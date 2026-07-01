@@ -10,6 +10,7 @@ from werkzeug.datastructures import MultiDict
 from wtforms import BooleanField, Form, PasswordField, StringField, SubmitField
 
 from wepppy.weppcloud import auth_forms
+from wepppy.weppcloud.routes._security import ui as security_ui
 
 
 pytestmark = pytest.mark.unit
@@ -50,8 +51,15 @@ class _CaptchaOnlyForm(auth_forms.CapTokenFormMixin, Form):
 
 
 @pytest.fixture()
-def auth_template_app() -> Flask:
+def auth_template_app(monkeypatch: pytest.MonkeyPatch) -> Flask:
     app = Flask(__name__, template_folder=str(TEMPLATE_ROOT))
+    app.config.update(
+        CAP_BASE_URL="/cap/",
+        CAP_ASSET_BASE_URL="/cap/assets/",
+        CAP_SITE_KEY="/test-site-key/",
+    )
+    monkeypatch.setattr(security_ui, "url_for_security", lambda endpoint: f"/{endpoint}")
+    app.context_processor(security_ui.inject_auth_context)
     app.jinja_env.globals.update(
         static_url=lambda filename: f"/static/{filename}",
         csrf_token=lambda: "csrf-token",
@@ -130,6 +138,18 @@ def test_register_template_renders_cap_contract(auth_template_app: Flask) -> Non
     assert 'window.CAP_CUSTOM_WASM_URL = "/cap/assets/cap_wasm.js";' in rendered
     assert 'src="/cap/assets/widget.js"' in rendered
     assert 'src="/cap/assets/floating.js"' in rendered
+
+
+def test_register_template_uses_cap_context_from_app_config(auth_template_app: Flask) -> None:
+    with auth_template_app.test_request_context("/register"):
+        rendered = render_template(
+            "security/register_user.html",
+            register_user_form=_RenderableRegisterForm(),
+        )
+
+    assert 'data-cap-api-endpoint="/cap/test-site-key/"' in rendered
+    assert 'data-cap-api-endpoint="/cap//"' not in rendered
+    assert 'window.CAP_CUSTOM_WASM_URL = "/cap/assets/cap_wasm.js";' in rendered
 
 
 def test_cap_token_form_mixin_rejects_missing_token(monkeypatch: pytest.MonkeyPatch) -> None:
