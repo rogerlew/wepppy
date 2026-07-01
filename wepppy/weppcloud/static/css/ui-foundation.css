@@ -564,6 +564,15 @@ input[type="file"]:disabled::-webkit-file-upload-button {
   box-shadow: var(--wc-button-shadow);
 }
 
+.pure-button.pure-button-primary,
+.pure-button.pure-button-selected,
+a.pure-button.pure-button-primary,
+a.pure-button.pure-button-selected {
+  color: var(--wc-button-primary-text, var(--wc-color-on-primary, #ffffff)) !important;
+  background-color: var(--wc-button-primary-bg, var(--wc-color-primary, var(--wc-color-accent)));
+  border-color: var(--wc-button-primary-bg, var(--wc-color-primary, var(--wc-color-accent)));
+}
+
 .pure-button:hover:not(:disabled):not(.pure-button-disabled),
 .pure-button:focus-visible:not(:disabled):not(.pure-button-disabled) {
   background-color: var(--wc-button-primary-bg-hover, var(--wc-color-primary-dark, var(--wc-color-primary, var(--wc-color-accent))));
