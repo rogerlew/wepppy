@@ -1,5 +1,6 @@
 from __future__ import annotations
 
+import math
 from pathlib import Path
 from typing import TYPE_CHECKING, Any, Mapping
 
@@ -18,6 +19,7 @@ _DEFAULT_ARI = (1, 2, 5, 10, 25, 50, 100)
 _DEFAULT_CLIGEN_PATH = "climate/wepp_cli_pds_mean_metric.csv"
 _DEFAULT_NOAA_PATH = "climate/atlas14_intensity_pds_mean_metric.csv"
 _NORMALIZED_CLIGEN_RELPATH = "normalized_sources/wepp_cli_pds_mean_metric_kernel.csv"
+_NORMALIZED_NOAA_RELPATH = "normalized_sources/atlas14_intensity_pds_mean_metric_kernel.csv"
 
 
 class GenevaFrequencyPanelService:
@@ -175,6 +177,10 @@ class GenevaFrequencyPanelService:
             geneva,
             payload_sources["cligen_freq"],
         )
+        payload_sources["noaa14_pds"] = self._normalize_noaa_source_for_kernel(
+            geneva,
+            payload_sources["noaa14_pds"],
+        )
 
         payload: dict[str, Any] = {
             "kernel_schema_version": 1,
@@ -239,6 +245,32 @@ class GenevaFrequencyPanelService:
             artifact_io.write_text(geneva.wd, _NORMALIZED_CLIGEN_RELPATH, normalized_text)
         return str(artifact_path)
 
+    def _normalize_noaa_source_for_kernel(
+        self,
+        geneva: "Geneva",
+        source_path: str | None,
+    ) -> str | None:
+        if source_path in (None, ""):
+            return None
+
+        raw_source = str(source_path)
+        resolved = Path(raw_source)
+        if not resolved.is_absolute():
+            resolved = Path(geneva.wd) / resolved
+        if not resolved.exists():
+            return raw_source
+
+        normalized_text = _normalize_noaa_text_for_kernel(resolved.read_text(encoding="utf-8"))
+        if normalized_text is None:
+            return raw_source
+
+        artifact_io = geneva.artifact_io
+        artifact_path = artifact_io.resolve_path(geneva.wd, _NORMALIZED_NOAA_RELPATH)
+        artifact_path.parent.mkdir(parents=True, exist_ok=True)
+        if not artifact_path.exists() or artifact_path.read_text(encoding="utf-8") != normalized_text:
+            artifact_io.write_text(geneva.wd, _NORMALIZED_NOAA_RELPATH, normalized_text)
+        return str(artifact_path)
+
 
 def _normalize_cligen_text_for_kernel(text: str) -> str | None:
     normalized_lines: list[str] = []
@@ -269,6 +301,65 @@ def _normalize_cligen_text_for_kernel(text: str) -> str | None:
         return None
 
     return "\n".join(normalized_lines) + "\n"
+
+
+def _normalize_noaa_text_for_kernel(text: str) -> str | None:
+    normalized_lines: list[str] = []
+    in_frequency_block = False
+    saw_header = False
+    omitted_invalid_row = False
+
+    for raw_line in text.splitlines():
+        line = raw_line.strip()
+        lower = line.lower()
+        if lower.startswith("by duration for ari (years):"):
+            saw_header = True
+            in_frequency_block = True
+            normalized_lines.append(raw_line)
+            continue
+
+        if in_frequency_block:
+            parsed = _parse_noaa_intensity_row(raw_line)
+            if parsed is not None:
+                _, values = parsed
+                if values and all(math.isfinite(value) and value > 0.0 for value in values):
+                    normalized_lines.append(raw_line)
+                else:
+                    omitted_invalid_row = True
+                continue
+
+            if line == "":
+                in_frequency_block = False
+            normalized_lines.append(raw_line)
+            continue
+
+        normalized_lines.append(raw_line)
+
+    if not saw_header or not omitted_invalid_row:
+        return None
+    return "\n".join(normalized_lines) + "\n"
+
+
+def _parse_noaa_intensity_row(raw_line: str) -> tuple[str, list[float]] | None:
+    label, separator, values_part = raw_line.partition(":")
+    if not separator:
+        return None
+
+    label_text = label.strip()
+    label_lower = label_text.lower()
+    if not label_lower.endswith(("-min", "-hr", "-day")):
+        return None
+
+    values: list[float] = []
+    for token in values_part.split(","):
+        cleaned = token.strip()
+        if not cleaned:
+            continue
+        try:
+            values.append(float(cleaned))
+        except ValueError:
+            values.append(math.nan)
+    return label_text, values
 
 
 __all__ = ["GenevaFrequencyPanelService"]

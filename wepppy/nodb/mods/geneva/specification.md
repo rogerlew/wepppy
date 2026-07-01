@@ -443,6 +443,18 @@ CLIGEN normalization shim (current implementation detail):
   - `geneva/normalized_sources/wepp_cli_pds_mean_metric_kernel.csv`
 - normalization preserves CLIGEN intensity rows so they remain available to the kernel.
 
+NOAA normalization shim (current implementation detail):
+
+- NOAA Atlas 14 intensity exports can include rounded zero rows for long
+  durations, for example 7-day and longer rows with `0` intensities at low ARI.
+- Before calling the kernel, the service writes a normalized copy to:
+  - `geneva/normalized_sources/atlas14_intensity_pds_mean_metric_kernel.csv`
+- The normalized copy omits NOAA duration rows containing any non-finite or
+  non-positive intensity value and preserves valid rows plus metadata.
+- If a requested duration is omitted this way, the panel reports existing
+  unavailable-cell reasons such as `duration_unavailable` instead of failing
+  the whole frequency-panel build.
+
 Output invariants:
 
 - persisted to `geneva/frequency_panel.json`
@@ -1165,6 +1177,7 @@ Under `<run>/geneva/`:
 - `storms/<storm_id>/summary.json`
 - optional normalization artifact:
   - `normalized_sources/wepp_cli_pds_mean_metric_kernel.csv`
+  - `normalized_sources/atlas14_intensity_pds_mean_metric_kernel.csv`
 
 WP02 production note:
 

@@ -58,3 +58,4 @@ Each ADR should normally include:
 - `ADR-0008`: [SSURGO Reclaimed Soil Restrictive Layer Fallback](ADR-0008-ssurgo-reclaimed-soil-restrictive-layer-fallback.md) (Accepted, 2026-06-22)
 - `ADR-0009`: [Deciduous and Mixed Forest Managements](ADR-0009-deciduous-mixed-forest-managements.md) (Accepted, 2026-06-26)
 - `ADR-0010`: [RAP_TS Management Cover Fraction Normalization](ADR-0010-rap-ts-management-cover-fraction-normalization.md) (Accepted, 2026-06-26)
+- `ADR-0011`: [Geneva NOAA Rounded-Zero Intensity Row Normalization](ADR-0011-geneva-noaa-rounded-zero-intensity-row-normalization.md) (Accepted, 2026-06-30)

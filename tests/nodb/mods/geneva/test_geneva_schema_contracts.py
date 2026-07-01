@@ -11,6 +11,7 @@ from wepppy.nodb.mods.geneva.schemas import (
 from wepppy.nodb.mods.geneva.collaborators.frequency_panel_service import (
     GenevaFrequencyPanelService,
     _normalize_cligen_text_for_kernel,
+    _normalize_noaa_text_for_kernel,
 )
 
 
@@ -173,6 +174,40 @@ def test_cligen_normalization_noops_when_kernel_row_already_present() -> None:
         "Storm duration (hours):, 0.5,1.0\n"
     )
     assert _normalize_cligen_text_for_kernel(source_text) is None
+
+
+def test_noaa_normalization_omits_non_positive_intensity_rows_for_kernel() -> None:
+    source_text = (
+        "Point precipitation frequency estimates (millimeters/hour)\n"
+        "NOAA Atlas 14 Volume 12 Version 2\n"
+        "\n"
+        "PRECIPITATION FREQUENCY ESTIMATES\n"
+        "by duration for ARI (years):, 1,2,5\n"
+        "24-hr:, 1,2,3\n"
+        "7-day:, 0,0,1\n"
+        "10-day:, 0,0,0\n"
+        "\n"
+        "Date/time (GMT): Tue Jun 30 23:27:55 2026\n"
+        "pyRunTime: 0.77\n"
+    )
+
+    normalized = _normalize_noaa_text_for_kernel(source_text)
+
+    assert normalized is not None
+    assert "24-hr:, 1,2,3" in normalized
+    assert "7-day:" not in normalized
+    assert "10-day:" not in normalized
+    assert "Date/time (GMT): Tue Jun 30 23:27:55 2026" in normalized
+
+
+def test_noaa_normalization_noops_when_frequency_rows_are_positive() -> None:
+    source_text = (
+        "PRECIPITATION FREQUENCY ESTIMATES\n"
+        "by duration for ARI (years):, 1,2\n"
+        "24-hr:, 1,2\n"
+        "2-day:, 1,1\n"
+    )
+    assert _normalize_noaa_text_for_kernel(source_text) is None
 
 
 def test_frequency_panel_default_durations_include_cligen_15_minute_intensity() -> None:

@@ -440,6 +440,84 @@ def test_frequency_panel_service_rebuilds_cached_panel_when_requested_shape_chan
     assert gateway.calls == 2
 
 
+def test_frequency_panel_service_passes_normalized_noaa_source_to_kernel(tmp_path: Path) -> None:
+    noaa_source = tmp_path / "climate" / "atlas14_intensity_pds_mean_metric.csv"
+    noaa_source.parent.mkdir(parents=True)
+    noaa_source.write_text(
+        "\n".join(
+            [
+                "Point precipitation frequency estimates (millimeters/hour)",
+                "NOAA Atlas 14 Volume 12 Version 2",
+                "",
+                "PRECIPITATION FREQUENCY ESTIMATES",
+                "by duration for ARI (years):, 1,2,5",
+                "24-hr:, 1,2,3",
+                "7-day:, 0,0,1",
+                "",
+                "Date/time (GMT): Tue Jun 30 23:27:55 2026",
+            ]
+        )
+        + "\n",
+        encoding="utf-8",
+    )
+
+    class _CapturePanelGateway:
+        def __init__(self) -> None:
+            self.payloads: list[dict[str, object]] = []
+
+        def call_json_api(self, api_name: str, payload: dict[str, object]) -> dict[str, object]:
+            assert api_name == "geneva_build_frequency_panel"
+            self.payloads.append(json.loads(json.dumps(payload)))
+            return {
+                "status": "ok",
+                "phase": "build_frequency_panel",
+                "kernel_schema_version": 1,
+                "datasource_ids": ["cligen_freq", "noaa14_pds"],
+                "distribution_type": str(payload.get("distribution_type") or "neh4_type_b"),
+                "durations_minutes": [1440],
+                "ari_years": [1],
+                "cells": [
+                    {
+                        "storm_id": "noaa14_1440m_1y",
+                        "datasource_id": "noaa14_pds",
+                        "duration_minutes": 1440,
+                        "ari_years": 1,
+                        "depth_mm": 24.0,
+                        "intensity_mm_per_hr": 1.0,
+                        "distribution_type": str(payload.get("distribution_type") or "neh4_type_b"),
+                        "availability": "available",
+                        "reason_code": None,
+                    }
+                ],
+                "warnings": [],
+            }
+
+    gateway = _CapturePanelGateway()
+    service = GenevaFrequencyPanelService()
+    geneva = SimpleNamespace(
+        wd=str(tmp_path),
+        artifact_io=GenevaArtifactIO(),
+        kernel_gateway=gateway,
+    )
+
+    service.build_frequency_panel(
+        geneva,
+        durations_minutes=[1440],
+        ari_years=[1],
+        rebuild=True,
+        sources={"noaa14_pds": str(noaa_source)},
+    )
+
+    normalized_source = Path(gateway.payloads[0]["sources"]["noaa14_pds"])
+    assert normalized_source != noaa_source
+    assert normalized_source == tmp_path / "geneva" / "normalized_sources" / (
+        "atlas14_intensity_pds_mean_metric_kernel.csv"
+    )
+    normalized_text = normalized_source.read_text(encoding="utf-8")
+    assert "24-hr:, 1,2,3" in normalized_text
+    assert "7-day:" not in normalized_text
+
+
 def test_hru_preparation_service_persists_hru_artifacts(tmp_path: Path) -> None:
     service = GenevaHruPreparationService()
     kernel_gateway = _RecordingKernelGateway(prepare_rows=[_kernel_hru_row()])
