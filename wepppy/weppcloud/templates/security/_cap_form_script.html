@@ -1,0 +1,47 @@
+<script>
+document.addEventListener("DOMContentLoaded", function () {
+  document.querySelectorAll(".wc-auth-form .wc-auth-cap").forEach(function (container) {
+    var widget = container.querySelector("cap-widget[data-cap-section]");
+    var form = container.closest("form");
+    if (!widget || !form) {
+      return;
+    }
+
+    var tokenInput = form.querySelector("[data-cap-token]");
+    var prompt = container.querySelector(".wc-cap-prompt");
+    var trigger = container.querySelector("[data-cap-trigger]");
+    var status = container.querySelector("[data-cap-status]");
+
+    widget.addEventListener("solve", function (event) {
+      var detail = event && event.detail ? event.detail : null;
+      var token = detail && detail.token ? String(detail.token) : "";
+      if (!token || !tokenInput) {
+        return;
+      }
+      tokenInput.value = token;
+      if (prompt) {
+        prompt.setAttribute("data-cap-verified", "true");
+      }
+      if (trigger) {
+        trigger.classList.add("is-verified");
+        trigger.setAttribute("aria-disabled", "true");
+      }
+      if (status) {
+        status.textContent = "Verification complete.";
+      }
+    });
+
+    form.addEventListener("submit", function (event) {
+      if (tokenInput && tokenInput.value) {
+        return;
+      }
+      if (event && typeof event.preventDefault === "function") {
+        event.preventDefault();
+      }
+      if (trigger && !trigger.disabled) {
+        trigger.click();
+      }
+    });
+  });
+});
+</script>

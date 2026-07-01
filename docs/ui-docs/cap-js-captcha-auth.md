@@ -6,8 +6,7 @@ The Cap.js integration has two parts:
 - A lightweight Node service that wraps `@cap.js/server` and serves assets (widget + floating).
 - A front-end pattern that shows an on-demand floating CAPTCHA, captures the token, and enables submit buttons.
 
-This pattern is used on the interfaces landing page and will be replicated for other run page tasks.
-The fork console uses the same pattern, with the submit button disabled until verification completes.
+This pattern is used on the interfaces landing page, fork console, local login, and account registration. The fork console uses the same pattern, with the submit button disabled until verification completes.
 
 ## Cap Service (Node)
 Path: `services/cap/server.js`
@@ -143,6 +142,19 @@ Create endpoint behavior:
 - `/create/` index is restricted to authenticated users.
 
 Authenticated users should bypass CAPTCHA.
+
+## Local Auth Pages
+The local password login and registration forms are also Cap.js protected:
+- `wepppy/weppcloud/auth_forms.py` defines `ExtendedLoginForm` and `ExtendedRegisterForm`.
+- Both forms require a submitted `cap_token` and call `verify_cap_token()` during Flask-Security form validation.
+- Missing tokens, Cap service errors, and `success: false` verification payloads reject the form with a generic validation message.
+- OAuth provider links on the login page remain plain links outside the local password form and are not gated by this `cap_token` field.
+- `wepppy/weppcloud/templates/security/login_user.html` and `register_user.html` render `cap_prompt(...)`, a hidden `cap_token`, and the Cap widget/floating assets.
+
+Operational notes:
+- `CAP_BASE_URL`, `CAP_SITE_KEY`, and `CAP_SECRET` must be configured for local password login and registration to work.
+- Do not add a silent bypass for missing Cap configuration; auth forms should fail closed.
+- Browser smoke helpers should solve the login-page Cap prompt when `input[name="cap_token"]` is present before submitting the `dev-agent` credentials.
 
 ## Troubleshooting
 - If the widget never appears: confirm the prompt trigger has `data-cap-floating` and is not disabled.

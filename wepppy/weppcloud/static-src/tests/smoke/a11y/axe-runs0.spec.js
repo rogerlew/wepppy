@@ -1,4 +1,5 @@
 import fs from 'node:fs/promises';
+import { createHash } from 'node:crypto';
 import path from 'node:path';
 import { fileURLToPath } from 'node:url';
 
@@ -248,6 +249,134 @@ async function mirrorSecureAuthCookiesForHttp(page) {
   return mirrored.length;
 }
 
+function fnv32aHash(text) {
+  let value = 2166136261;
+  for (const char of text) {
+    value ^= char.codePointAt(0);
+    value = (value + (value << 1) + (value << 4) + (value << 7) + (value << 8) + (value << 24)) >>> 0;
+  }
+  return value >>> 0;
+}
+
+function capExpandHex(seed, length) {
+  let state = fnv32aHash(seed);
+
+  function nextU32() {
+    state ^= (state << 13) >>> 0;
+    state ^= state >>> 17;
+    state ^= (state << 5) >>> 0;
+    state >>>= 0;
+    return state;
+  }
+
+  let out = '';
+  while (out.length < length) {
+    out += nextU32().toString(16).padStart(8, '0');
+  }
+  return out.slice(0, length);
+}
+
+function buildCapPairs(challengePayload) {
+  const token = String(challengePayload && challengePayload.token ? challengePayload.token : '').trim();
+  const challenge = challengePayload && challengePayload.challenge;
+  if (!token || !challenge || typeof challenge !== 'object') {
+    throw new Error(`Unexpected CAP challenge payload: ${JSON.stringify(challengePayload).slice(0, 240)}`);
+  }
+
+  const count = Number(challenge.c || 0);
+  const saltLength = Number(challenge.s || 0);
+  const targetLength = Number(challenge.d || 0);
+  if (!Number.isInteger(count) || !Number.isInteger(saltLength) || !Number.isInteger(targetLength)
+      || count <= 0 || saltLength <= 0 || targetLength <= 0) {
+    throw new Error(`Invalid CAP challenge dimensions: ${JSON.stringify(challenge)}`);
+  }
+
+  const pairs = [];
+  for (let idx = 1; idx <= count; idx += 1) {
+    pairs.push([
+      capExpandHex(`${token}${idx}`, saltLength),
+      capExpandHex(`${token}${idx}d`, targetLength),
+    ]);
+  }
+  return { token, pairs };
+}
+
+function solvePowNonce(salt, targetHex) {
+  const target = Buffer.from(targetHex, 'hex');
+  let nonce = 0;
+  while (true) {
+    const digest = createHash('sha256').update(`${salt}${nonce}`, 'utf8').digest();
+    if (digest.subarray(0, target.length).equals(target)) {
+      return nonce;
+    }
+    nonce += 1;
+  }
+}
+
+async function solveCapTokenFromEndpoint(page, endpoint) {
+  const endpointUrl = new URL(endpoint, page.url());
+  const challengeUrl = new URL('challenge', endpointUrl).toString();
+  const redeemUrl = new URL('redeem', endpointUrl).toString();
+
+  const challengeResponse = await page.request.post(challengeUrl, { headers: forwardedProtoHeader });
+  if (!challengeResponse.ok()) {
+    throw new Error(`CAP challenge failed: ${challengeResponse.status()} ${challengeResponse.statusText()}`);
+  }
+  const challengePayload = await challengeResponse.json();
+  const { token, pairs } = buildCapPairs(challengePayload);
+  const solutions = pairs.map(([salt, targetHex]) => solvePowNonce(salt, targetHex));
+
+  const redeemResponse = await page.request.post(redeemUrl, {
+    headers: forwardedProtoHeader,
+    data: { token, solutions },
+  });
+  if (!redeemResponse.ok()) {
+    throw new Error(`CAP redeem failed: ${redeemResponse.status()} ${redeemResponse.statusText()}`);
+  }
+  const redeemPayload = await redeemResponse.json();
+  const capToken = String(redeemPayload && redeemPayload.token ? redeemPayload.token : '').trim();
+  if (!capToken || !redeemPayload.success) {
+    throw new Error(`CAP redeem did not return a success token: ${JSON.stringify(redeemPayload).slice(0, 240)}`);
+  }
+  return capToken;
+}
+
+async function completeLoginCapIfPresent(page, loginForm) {
+  const capTokenInput = loginForm.locator('input[name="cap_token"]');
+  if ((await capTokenInput.count()) === 0) {
+    return { verified: true, reason: 'Login form has no CAP token field.' };
+  }
+
+  const existingToken = await capTokenInput.first().inputValue().catch(() => '');
+  if (existingToken) {
+    return { verified: true, reason: 'Login CAP token already present.' };
+  }
+
+  const capWidget = loginForm.locator('cap-widget[data-cap-api-endpoint]').first();
+  if ((await capWidget.count()) === 0) {
+    return { verified: false, reason: 'Login form has CAP token field but no CAP widget endpoint.' };
+  }
+
+  try {
+    const endpoint = await capWidget.getAttribute('data-cap-api-endpoint');
+    if (!endpoint) {
+      return { verified: false, reason: 'Login CAP widget endpoint is empty.' };
+    }
+    const capToken = await solveCapTokenFromEndpoint(page, endpoint);
+    await capTokenInput.first().evaluate((input, token) => {
+      input.value = token;
+      input.dispatchEvent(new Event('input', { bubbles: true }));
+      input.dispatchEvent(new Event('change', { bubbles: true }));
+    }, capToken);
+  } catch (err) {
+    return {
+      verified: false,
+      reason: `Login CAP challenge did not produce a token (${err && err.message ? err.message : err}).`,
+    };
+  }
+  return { verified: true, reason: 'Login CAP challenge completed.' };
+}
+
 async function ensureAgentSession(page) {
   if (!agentCredentials) {
     return {
@@ -290,6 +419,14 @@ async function ensureAgentSession(page) {
   const rememberField = loginForm.locator('input[name="remember"]');
   if ((await rememberField.count()) > 0) {
     await rememberField.check({ force: true });
+  }
+
+  const capResult = await completeLoginCapIfPresent(page, loginForm);
+  if (!capResult.verified) {
+    return {
+      authenticated: false,
+      reason: `${agentAccountLabel} login failed (${capResult.reason}).`,
+    };
   }
 
   const submitButton = loginForm.locator('[type="submit"]').first();

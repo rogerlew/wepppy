@@ -196,7 +196,7 @@ Clients should use `/rq-engine/api/...` for job polling and enqueue endpoints.
 
 ### Cap.js CAPTCHA
 
-Anonymous create + fork actions are gated by Cap.js. See `docs/ui-docs/cap-js-captcha-auth.md` for UI wiring details.
+Anonymous create + fork actions and local password login/register forms are gated by Cap.js. See `docs/ui-docs/cap-js-captcha-auth.md` for UI wiring details.
 
 Weppcloud + Cap service config (typically `docker/.env`):
 
@@ -283,7 +283,7 @@ Use this endpoint for Kubernetes liveness/readiness probes or load balancer heal
 ### CAPTCHA Operations
 
 - **Health check:** `curl -H 'X-Forwarded-Proto: https' http://localhost:8080/cap/health` (via Caddy) or `curl -I https://<host>/cap/health`.
-- **Key rotation:** generate a new key pair, update `CAP_SITE_KEY` + `CAP_SECRET` in the env source, restart the Cap service and weppcloud, then verify anonymous create + fork flows.
+- **Key rotation:** generate a new key pair, update `CAP_SITE_KEY` + `CAP_SECRET` in the env source, restart the Cap service and weppcloud, then verify local login/register plus anonymous create + fork flows.
 - **Routing/asset check:** confirm `/cap` is reverse-proxied and `curl -I http://localhost:8080/cap/assets/widget.js` returns `200`; `404` usually means the `/workdir/cap` mount or `CAP_ASSET_ROOT` is wrong.
 
 ### Logging

@@ -1,14 +1,18 @@
 {% extends "security/_layout.html" %}
 {% from "security/_macros.html" import render_aligned_field, render_aligned_password, render_aligned_checkbox, render_form_errors, prop_next %}
+{% import "shared/cap_macros.htm" as cap_macros %}
 
 {% set title = 'WEPPcloud Sign In' %}
+{% set auth_cap_base_url = cap_base_url | default('/cap', true) %}
+{% set auth_cap_asset_base_url = cap_asset_base_url | default(auth_cap_base_url ~ '/assets', true) %}
+{% set auth_cap_site_key = cap_site_key | default('', true) %}
+{% set local_login_enabled = enable_local_login|default(true) %}
 
 {% block title %}{{ title }}{% endblock %}
 {% block auth_heading %}WEPPcloud Sign In{% endblock %}
 {% block auth_subheading %}<p>Enter your WEPPcloud credentials to access tools and projects.</p>{% endblock %}
 
 {% block content %}
-  {% set local_login_enabled = enable_local_login|default(true) %}
   {% if enabled_oauth_providers %}
     <div class="wc-oauth-container">
       <p class="wc-oauth-intro">Sign in with a connected account:</p>
@@ -87,6 +91,16 @@
           {{ render_aligned_checkbox(login_user_form.remember, 'Remember me on this device') }}
         {% endif %}
 
+        <div class="wc-auth-cap">
+          {{ cap_macros.cap_prompt("auth-login", "cap-auth-login", auth_cap_base_url, auth_cap_site_key, status_text="Complete verification to sign in.") }}
+          {{ login_user_form.cap_token(type='hidden', data_cap_token=True, autocomplete='off') }}
+          {% if login_user_form.cap_token.errors %}
+            {% for error in login_user_form.cap_token.errors %}
+              <span class="pure-form-message-inline" role="alert">{{ error }}</span>
+            {% endfor %}
+          {% endif %}
+        </div>
+
         <div class="pure-controls">
           {{ login_user_form.submit(class_='pure-button pure-button-primary') }}
         </div>
@@ -100,6 +114,14 @@
 {% endblock %}
 
 {% block script_extras %}
+{% if local_login_enabled %}
+<script>
+  window.CAP_CUSTOM_WASM_URL = "{{ auth_cap_asset_base_url }}/cap_wasm.js";
+</script>
+<script src="{{ auth_cap_asset_base_url }}/widget.js" defer></script>
+<script src="{{ auth_cap_asset_base_url }}/floating.js" defer></script>
+{% include "security/_cap_form_script.html" %}
+{% endif %}
 <script>
 document.addEventListener('DOMContentLoaded', function () {
   document.querySelectorAll('.wc-password-toggle').forEach(function (toggle) {

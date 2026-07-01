@@ -123,9 +123,13 @@ wctl run-playwright --suite full --grep "axe accessibility" --workers 1
 
 ## Using `dev-agent` for CAP-Guarded Endpoints
 - CAP gating applies to anonymous sessions on protected routes.
-- `dev-agent` login bypasses CAP and is the intended path for automated smoke work.
+- `dev-agent` is the intended authenticated path for automated smoke work. The
+  login form itself may render Cap.js; browser smoke helpers should solve the
+  login-page CAP prompt when `input[name="cap_token"]` is present before
+  submitting credentials.
 - Typical sequence:
-  - login to `/weppcloud/login` with stored credentials
+  - login to `/weppcloud/login` with stored credentials and a solved Cap.js token
+    when the login page requires one
   - request a protected run route (or use `/weppcloud/tests/api/create-run` in smoke flows)
   - verify `#cap-gate` is absent before continuing assertions
 
@@ -163,6 +167,8 @@ password = pairs["DEV_AGENT_PASSWORD"]
 s = requests.Session()
 
 login = s.get(f"{base}/login", timeout=30)
+if 'name="cap_token"' in login.text:
+    raise SystemExit("Login page requires Cap.js. Use Playwright/browser smoke login so the widget can solve the challenge.")
 csrf = re.search(r'<meta[^>]+name="csrf-token"[^>]+content="([^"]+)"', login.text, re.I).group(1)
 s.post(f"{base}/login", data={"email": email, "password": password, "remember": "y", "csrf_token": csrf}, timeout=30).raise_for_status()
 

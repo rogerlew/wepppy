@@ -1,5 +1,10 @@
 {% extends "security/_layout.html" %}
 {% from "security/_macros.html" import render_aligned_field, render_form_errors %}
+{% import "shared/cap_macros.htm" as cap_macros %}
+
+{% set auth_cap_base_url = cap_base_url | default('/cap', true) %}
+{% set auth_cap_asset_base_url = cap_asset_base_url | default(auth_cap_base_url ~ '/assets', true) %}
+{% set auth_cap_site_key = cap_site_key | default('', true) %}
 
 {% block title %}Create a WEPPcloud Account{% endblock %}
 {% block auth_heading %}Create a WEPPcloud Account{% endblock %}
@@ -20,9 +25,27 @@
       {% if register_user_form.password_confirm %}
         {{ render_aligned_field(register_user_form.password_confirm, label_text='Confirm password', input_class='pure-input-1', autocomplete='new-password') }}
       {% endif %}
+      <div class="wc-auth-cap">
+        {{ cap_macros.cap_prompt("auth-register", "cap-auth-register", auth_cap_base_url, auth_cap_site_key, status_text="Complete verification to create your account.") }}
+        {{ register_user_form.cap_token(type='hidden', data_cap_token=True, autocomplete='off') }}
+        {% if register_user_form.cap_token.errors %}
+          {% for error in register_user_form.cap_token.errors %}
+            <span class="pure-form-message-inline" role="alert">{{ error }}</span>
+          {% endfor %}
+        {% endif %}
+      </div>
       <div class="pure-controls">
         {{ register_user_form.submit(class_='pure-button pure-button-primary') }}
       </div>
     </fieldset>
   </form>
+{% endblock %}
+
+{% block script_extras %}
+<script>
+  window.CAP_CUSTOM_WASM_URL = "{{ auth_cap_asset_base_url }}/cap_wasm.js";
+</script>
+<script src="{{ auth_cap_asset_base_url }}/widget.js" defer></script>
+<script src="{{ auth_cap_asset_base_url }}/floating.js" defer></script>
+{% include "security/_cap_form_script.html" %}
 {% endblock %}

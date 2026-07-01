@@ -27,19 +27,15 @@ from sqlalchemy import func
 
 from flask_sqlalchemy import SQLAlchemy
 from flask_security import (
-    RegisterForm,
     Security, SQLAlchemyUserDatastore,
     UserMixin, RoleMixin
 )
 
-from wtforms.validators import DataRequired as Required, ValidationError
 from flask_mail import Mail
 from flask_session import Session
 from flask_session.sessions import RedisSessionInterface
 from flask_migrate import Migrate
 from flask_wtf.csrf import CSRFError, CSRFProtect
-
-from wtforms import StringField
 
 from wepppy.nodb.core import Ron
 from wepppy.observability.correlation import (
@@ -61,6 +57,7 @@ from wepppy.weppcloud._blueprints_context import register_blueprints
 from wepppy.weppcloud._context_processors import register_context_processors
 from wepppy.weppcloud._config_app import config_app
 from wepppy.weppcloud._config_logging import config_logging
+from wepppy.weppcloud.auth_forms import ExtendedLoginForm, ExtendedRegisterForm
 
 config_logging(logging.INFO)
 logger = logging.getLogger(__name__)
@@ -448,22 +445,10 @@ class WeppCloudUserDatastore(SQLAlchemyUserDatastore):
 
 user_datastore = WeppCloudUserDatastore(db, User, Role, Run)
 
-# flask-security extended form
-def _reject_url_like_name(form, field):
-    value = field.data or ''
-    if ':' in value or '/' in value:
-        raise ValidationError(
-            f"{field.label.text} cannot contain ':' or '/' characters."
-        )
-
-
-class ExtendedRegisterForm(RegisterForm):
-    first_name = StringField('First Name', [Required(), _reject_url_like_name])
-    last_name = StringField('Last Name', [Required(), _reject_url_like_name])
-
 migrate = Migrate(app, db, directory='/workdir/wepppy/wepppy/weppcloud/migrations')
 
 security = Security(app, user_datastore,
+                    login_form=ExtendedLoginForm,
                     register_form=ExtendedRegisterForm,
                     confirm_register_form=ExtendedRegisterForm)
 

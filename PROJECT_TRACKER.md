@@ -1,7 +1,7 @@
 # PROJECT_TRACKER.md
 > Kanban board for wepppy work packages and vision items
 
-**Last Updated**: 2026-06-30
+**Last Updated**: 2026-07-01
 **Active Packages**: 10
 **Quick Links**: [Work Packages Directory](docs/work-packages/) | [God-Tier Prompting Strategy](docs/god-tier-prompting-strategy.md)
 
@@ -529,6 +529,23 @@ Currently active work packages. Limit to 2-4 packages to maintain focus.
 ## ✅ Done
 
 Recently completed work packages. Archived immediately upon completion.
+
+### Auth Cap.js CAPTCHA (2026-07-01)
+**Status**: ✅ **COMPLETE**
+
+**Link**: [docs/work-packages/20260701_auth_cap_captcha/](docs/work-packages/20260701_auth_cap_captcha/)
+
+**Lifecycle**: Scoped -> Implemented -> Done (2026-07-01)
+
+**Summary**: Added Cap.js to local password login and registration forms,
+enforced server-side `cap_token` validation in Flask-Security forms, and
+updated the Playwright smoke login helper to solve login-page Cap challenges
+through the Cap challenge/redeem API. Focused validation passed:
+`wctl run-pytest tests/weppcloud/test_auth_cap_captcha.py --maxfail=1`,
+`wctl run-npm lint`, `wctl run-npm test`, JS syntax check, and doc lint for
+changed docs.
+
+---
 
 ### Browse Tree Theme Integration (2026-06-30)
 **Status**: ✅ **COMPLETE**

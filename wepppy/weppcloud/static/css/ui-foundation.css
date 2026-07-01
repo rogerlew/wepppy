@@ -2716,6 +2716,101 @@ a.wc-maturity-pill:focus-visible {
   accent-color: var(--wc-color-accent);
 }
 
+.wc-auth-cap {
+  margin-top: var(--wc-space-lg);
+}
+
+.wc-auth-cap .pure-form-message-inline {
+  display: block;
+  margin-top: var(--wc-space-sm);
+}
+
+.wc-cap-prompt {
+  display: grid;
+  gap: var(--wc-space-xs);
+  margin: var(--wc-space-lg) 0;
+}
+
+.wc-cap-trigger {
+  display: grid;
+  grid-template-columns: auto minmax(0, 1fr) auto;
+  align-items: center;
+  gap: var(--wc-space-sm);
+  width: 100%;
+  padding: var(--wc-space-sm) var(--wc-space-md);
+  border: 1px solid var(--wc-color-border-strong);
+  border-radius: 4px;
+  background: var(--wc-color-surface);
+  color: var(--wc-color-text);
+  cursor: pointer;
+  text-align: left;
+}
+
+.wc-cap-trigger:hover {
+  border-color: var(--wc-color-accent);
+}
+
+.wc-cap-trigger:focus-visible {
+  outline: 2px solid var(--wc-color-accent);
+  outline-offset: 2px;
+}
+
+.wc-cap-checkbox {
+  width: 1.35rem;
+  height: 1.35rem;
+  border: 2px solid var(--wc-color-border-strong);
+  background: var(--wc-color-surface-alt);
+  display: inline-grid;
+  place-items: center;
+}
+
+.wc-cap-label {
+  font-weight: 600;
+  min-width: 0;
+}
+
+.wc-cap-brand {
+  display: inline-grid;
+  justify-items: end;
+  gap: 0.05rem;
+  color: var(--wc-color-text-muted);
+  font-size: 0.7rem;
+  line-height: 1.05;
+  text-transform: uppercase;
+}
+
+.wc-cap-brand-mark {
+  font-weight: 700;
+  letter-spacing: 0;
+}
+
+.wc-cap-status {
+  color: var(--wc-color-text-muted);
+  font-size: 0.875rem;
+}
+
+.wc-cap-prompt[data-cap-verified="true"] .wc-cap-status {
+  color: var(--wc-color-positive);
+}
+
+.wc-cap-trigger.is-verified .wc-cap-checkbox {
+  border-color: var(--wc-color-positive);
+  background: var(--wc-color-positive-soft);
+}
+
+.wc-cap-trigger.is-verified .wc-cap-checkbox::after {
+  content: "";
+  width: 0.5rem;
+  height: 0.85rem;
+  border: solid var(--wc-color-positive);
+  border-width: 0 2px 2px 0;
+  transform: rotate(45deg);
+}
+
+.wc-cap-widget {
+  display: none;
+}
+
 .wc-auth-separator {
   margin: var(--wc-space-xl) 0;
   text-align: center;
