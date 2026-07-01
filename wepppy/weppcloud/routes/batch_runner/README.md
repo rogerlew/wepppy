@@ -27,11 +27,17 @@ The batch runner feature now lives as a proof-of-concept that stitches together 
 - Persists `rq_job_ids` (currently `run_batch_rq`) so the UI can recover the RQ dashboard hint after reloads.
 - Exposes helpers for rehydrating a `WatershedCollection` and for persisting template validation output so the UI can refresh without re-reading the upload.
 - `get_watershed_features_lpt()` orders features by area (largest first), which matches the enqueue order used by `run_batch_rq`.
- - SBS uploads run `sbs_map_sanity_check` and capture burn-class pixel counts for display in the summary pane.
+- Classifies each watershed run as `missing`, `incomplete`, `failed`, `invalid`, or `complete` by combining run directory existence, enabled `RedisPrep` task timestamps, optional mod presence, and `run_metadata.json` terminal status.
+- `retry_eligible_watershed_features()` is the default Run Batch selection contract: completed leaves are skipped, while missing/incomplete/failed leaves rerun. Enabling the existing "Remove existing files" directive remains the explicit full-rerun path.
+- Batch child mutations use path-scoped NoDir maintenance locks, so stale legacy leaf-name locks from canceled attempts do not block a retry of a distinct child workspace.
+- Each batch child start clears NoDb cache and locks for its composite run id before loading `RedisPrep` and controllers, so stale controller locks from canceled attempts do not block reused-leaf retries.
+- Before enqueueing child jobs, the parent Run Batch clears exact path-scoped runtime locks for selected leaves after active-job preflight, so dead-worker locks do not block retry while same-named leaves in other batches are left untouched.
+- Before watershed execution, a retry ensures hillslope interchange outputs exist or can be rebuilt from raw hillslope outputs, so interrupted conversions do not leave `H.pass.parquet` or `H.wat.parquet` missing after the hillslope task timestamp is set.
+- SBS uploads run `sbs_map_sanity_check` and capture burn-class pixel counts for display in the summary pane.
 
 ### `WatershedCollection`
 - Wraps a GeoJSON FeatureCollection and performs lightweight analysis (feature count, bounding box, CRS detection, property schema, checksum).
-- Provides deterministic template evaluation with a curated set of formatting helpers (`slug`, `lower`, `zfill`, etc.), surfaced both for preview rows and duplicate detection.
+- Provides deterministic template evaluation with a curated set of formatting helpers (`slug`, `lower`, `zfill`, etc.), surfaced both for preview rows and duplicate/path-safety detection.
 - `load_from_analysis_results()` allows `BatchRunner` to persist only metadata while still reconstructing the full collection when validations are rerun.
 
 ### Run ID Semantics (`NoDbBase.runid`)
@@ -43,11 +49,11 @@ The batch runner feature now lives as a proof-of-concept that stitches together 
 2. **Manage** – `/batch/_/<batch_name>/` renders the standard controls for the `_base` project plus batch-specific bootstrap context (run directives, resources, and RQ job hints).
 3. **GeoJSON Intake** – Uploads flow through rq-engine (`/rq-engine/api/batch/_/<batch_name>/upload-geojson`), which stores the file under `resources/` and persists metadata via `BatchRunner.register_geojson()`.
 4. **Template Preview** – Template validation rebuilds the `WatershedCollection`, generates prospective run IDs, records the summary (`_runid_template_state`), and returns duplicates/errors for UI display.
-5. **Run Batch** – The UI submits `/rq-engine/api/batch/_/<batch_name>/run-batch`, stores the RQ job id, connects the status stream, and begins polling `/batch/_/<batch_name>/runstate` every 10s for the CLI report. The hint under "Run Batch" always links back to the RQ dashboard for the active job.
+5. **Run Batch** – The UI submits `/rq-engine/api/batch/_/<batch_name>/run-batch`, stores the RQ job id, connects the status stream, and begins polling `/batch/_/<batch_name>/runstate` every 10s for the CLI report. By default, the parent RQ job enqueues only retry-eligible watershed leaves. If existing batch jobs are queued, started, deferred, or scheduled, rq-engine returns `409 batch_busy` instead of enqueueing overlapping work. The parent job returns a serializable summary with the finalizer job id and selection counts. The finalizer publishes a run summary and emits `BATCH_RUN_COMPLETED_WITH_FAILURES` when leaves remain failed/incomplete/missing/invalid while preserving the existing `BATCH_RUN_COMPLETED` trigger. The hint under "Run Batch" always links back to the RQ dashboard for the active job.
 
 ## Current Constraints & Gaps
-- Progress reporting is intentionally coarse (emoji state per task); per-run failure details only surface in the status stream or run metadata.
-- Runstate depends on `RedisPrep` status for each run directory; missing runs render blanks in the report.
+- Progress reporting is intentionally coarse (run ID plus emoji state per task); per-run failure details surface in the status stream and `runs/<runid>/run_metadata.json`.
+- Runstate depends on `RedisPrep` status for each run directory and marks missing runs as retry-eligible. RAP/OpenET timestamps are required only when the corresponding optional NoDb files exist.
 - Minimal input hardening: feature flag + admin check exist, but file validation stops at GeoJSON semantics.
 
 ## Next Steps (guided)

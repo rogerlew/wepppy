@@ -3,7 +3,6 @@ from __future__ import annotations
 import logging
 from typing import Any, Callable, Tuple
 
-from rq.job import Job
 from wepppy.topo.watershed_collection import WatershedFeature
 
 _hostname: str
@@ -13,7 +12,7 @@ TIMEOUT: int
 logger: logging.Logger
 send_discord_message: Callable[[str], None] | None
 
-def run_batch_rq(batch_name: str) -> Job: ...
+def run_batch_rq(batch_name: str) -> dict[str, Any]: ...
 
 def delete_batch_rq(batch_name: str) -> dict[str, Any]: ...
 

@@ -37,7 +37,7 @@ This tracker makes all work visible at a glance, helping agents coordinate and a
 ### 2. Limit Work in Progress
 **Target**: 2-4 active packages maximum to maintain focus and ensure packages complete rather than stall.
 
-**Current WIP**: 10 packages (above target range)
+**Current WIP**: 11 packages (above target range)
 
 ### 3. Manage Flow
 Monitor how long packages spend in each column:
@@ -76,31 +76,6 @@ Feedback mechanisms:
 ## 📋 Backlog
 
 Work packages that are scoped but not yet started. Dependencies and prerequisites should be noted.
-
-### Batch Runner Durability
-**Proposed**: 2026-06-30
-**Size**: Medium-High (2-4 focused sessions)
-**Priority**: High
-**Link**: [docs/work-packages/20260630_batch_runner_durability/](docs/work-packages/20260630_batch_runner_durability/)
-**Description**: Make Run Batch restart-aware so a partially failed batch can be retried after operator correction without enqueueing every completed watershed leaf again.
-
-**Scope**:
-- Add durable per-leaf status classification from run directory existence, enabled `RedisPrep` task timestamps, and terminal `run_metadata.json`.
-- Write success metadata from `run_batch_watershed_rq` so stale failed metadata is overwritten by successful reruns.
-- Filter default `run_batch_rq` enqueue targets to missing, incomplete, or failed leaves while preserving explicit full rerun through `Remove existing files`.
-- Reject duplicate Run Batch submissions while batch jobs are active.
-- Add focused RQ, RQ Engine route, and Batch Runner runstate regression coverage plus required security review.
-
-**Strategic Value**:
-- Lets operators recover large batch jobs after fixed input/configuration mistakes without wasting queue capacity on completed leaves.
-- Makes batch failure evidence durable even though per-leaf RQ jobs currently finish with `(False, elapsed)` and empty `exc_info`.
-- Reduces manual failed-run bookkeeping for production batches such as `nasa-roses-202606-psbs`.
-
-**Dependencies**: Production evidence captured from `wepp1`; implementation should not be rolled out while the target batch still has active queued/started jobs.
-
-**Next Steps**: Implement the status classifier and retry-selection tests, then wire enqueue filtering and active-job conflict handling.
-
----
 
 ### SSURGO Reclaimed Soil Conversion and Fallback Transparency
 **Proposed**: 2026-06-22
@@ -300,7 +275,24 @@ When resuming Kubernetes work:
 
 Currently active work packages. Limit to 2-4 packages to maintain focus.
 
-**Current WIP Count**: 10 packages
+**Current WIP Count**: 11 packages
+
+---
+
+### Batch Runner Durability
+**Started**: 2026-06-30
+**Status**: Implementation complete locally; production rollout pending
+**Size**: Medium-High (2-4 focused sessions)
+**Owner**: Codex
+**Priority**: High
+**Link**: [docs/work-packages/20260630_batch_runner_durability/](docs/work-packages/20260630_batch_runner_durability/)
+**Description**: Make Run Batch restart-aware so a partially failed batch can be retried after operator correction without enqueueing every completed watershed leaf again.
+
+**Current Focus**: Local implementation, dual-agent review disposition, focused tests, RQ graph regeneration, docs, and security review are complete. Remaining work is production preflight/rollout after active target-batch jobs finish or are explicitly canceled.
+
+**Dependencies**: Production evidence captured from `wepp1`; implementation should not be rolled out while the target batch still has active queued/started jobs.
+
+**Next Steps**: Run production preflight and deploy when requested; existing broad-exception boundary debt remains recorded as residual cleanup work.
 
 ---
 

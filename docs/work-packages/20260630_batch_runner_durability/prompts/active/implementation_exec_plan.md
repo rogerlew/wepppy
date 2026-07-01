@@ -15,11 +15,16 @@ The observable behavior is that a second Run Batch submission for a partially co
 - [x] (2026-06-30 19:56 UTC) Read current batch enqueue, worker, route, and runstate implementation.
 - [x] (2026-06-30 19:56 UTC) Captured production evidence from `wepp1` for `nasa-roses-202606-psbs`.
 - [x] (2026-06-30 19:56 UTC) Created this ExecPlan as a scaffold.
-- [ ] Implement and test durable leaf status classification in `wepppy/nodb/batch_runner.py`.
-- [ ] Write success metadata in `run_batch_watershed_rq` and keep failure metadata contract.
-- [ ] Filter `run_batch_rq` enqueue targets and preserve full-rerun behavior when `TaskEnum.if_exists_rmtree` is enabled.
-- [ ] Add active Run Batch conflict handling in `wepppy/microservices/rq_engine/batch_routes.py`.
-- [ ] Update docs, queue graph/catalog if required, and complete security review.
+- [x] (2026-06-30 20:22 UTC) Implemented and tested durable leaf status classification in `wepppy/nodb/batch_runner.py`.
+- [x] (2026-06-30 20:22 UTC) Wrote success metadata in `run_batch_watershed_rq` and kept failure metadata contract.
+- [x] (2026-06-30 20:22 UTC) Filtered `run_batch_rq` enqueue targets and preserved full-rerun behavior when `TaskEnum.if_exists_rmtree` is enabled.
+- [x] (2026-06-30 20:22 UTC) Added active Run Batch conflict handling in `wepppy/microservices/rq_engine/batch_routes.py` and a worker-side guard.
+- [x] (2026-06-30 20:22 UTC) Updated docs, regenerated queue graph/catalog, and completed security review artifact for local implementation.
+- [x] (2026-06-30 20:45 UTC) Dispatched dual-agent correctness/security reviews and fixed all actionable findings.
+- [x] (2026-06-30 22:33 UTC) Hardened reused-leaf retry startup by clearing stale child NoDb locks before controller loading.
+- [x] (2026-06-30 22:47 UTC) Hardened retry enqueue against stale path-scoped runtime locks left by dead prior worker containers.
+- [x] (2026-06-30 23:08 UTC) Fixed parent Run Batch result serialization by returning a summary dict instead of an RQ `Job`.
+- [x] (2026-06-30 23:51 UTC) Hardened watershed retries against interrupted hillslope interchange outputs.
 
 ## Surprises & Discoveries
 
@@ -29,6 +34,22 @@ The observable behavior is that a second Run Batch submission for a partially co
   Evidence: `wepppy/rq/batch_rq.py` writes `run_metadata.json` in the exception block, while the success path only publishes status messages and returns.
 - Observation: Current runstate reports task timestamps but not terminal retry eligibility.
   Evidence: `BatchRunner.generate_runstate_report` and `generate_runstate_cli_report` iterate `RedisPrep` timestamps only.
+- Observation: `if_exists_rmtree` and `run_omni_contrasts` are not reliable per-leaf completion timestamps for the retry classifier.
+  Evidence: `if_exists_rmtree` is a reset directive, and `run_batch_watershed_rq` does not execute `run_omni_contrasts`.
+- Observation: Broad exception enforcement currently fails on touched files even though this implementation did not add new broad catches.
+  Evidence: `python3 tools/check_broad_exceptions.py --enforce-changed --base-ref origin/master` reports existing broad boundary catches in `batch_routes.py` and `batch_rq.py`.
+- Observation: Default-enabled RAP/OpenET directives are optional in the leaf worker when their NoDb controllers are absent.
+  Evidence: `BatchRunner.run_batch_project()` calls `RAP_TS.tryGetInstance()` and `OpenET_TS.tryGetInstance()` before those acquisitions; completion proof now requires those timestamps only when the corresponding optional NoDb file exists.
+- Observation: `run_batch_watershed_rq` writes leaf success metadata before asynchronous Omni scenario finalization can timestamp `run_omni_scenarios`.
+  Evidence: success metadata is written after `run_omni_scenarios_rq()` returns its final job, so success metadata cannot be a blanket replacement for required task timestamps.
+- Observation: Reused child workspaces can retain stale NoDb controller locks after a canceled climate build.
+  Evidence: Local `durability_test` retries for `OR-154`, `OR-204`, and `OR-20` failed immediately with empty `AssertionError`; each climate log stopped after `assert not self.islocked()`, matching `ClimateBuildRouter.build()`.
+- Observation: Path-scoped runtime locks can survive a dead worker container and block retry for the full lock TTL.
+  Evidence: Local WA-174 climate generation was writing `_prism_revision()` files at 22:38 UTC; after the compose stack restarted, a retry failed with `NODIR_LOCKED` held by old owner `fbdc2c500f0a:199` and no matching running container.
+- Observation: Returning live RQ `Job` objects from parent workers causes the dashboard to show failed/canceled even after enqueue succeeded.
+  Evidence: Parent job `871f4334-479d-4e63-95f8-f80fe9e01c98` had `result=Unserializable return value`, `status=canceled`, and no `exc_info` after publishing `COMPLETED run_batch_rq(durability_test)`.
+- Observation: A canceled/interrupted retry can timestamp `run_wepp_hillslopes` while leaving hillslope interchange conversion incomplete, then the next retry skips hillslope/interchange and fails inside watershed post-processing.
+  Evidence: `OR,WA-101` failed missing `H.wat.parquet` with `H.soil.parquet.tmp` present; `OR,WA-102` failed missing `H.pass.parquet` with `H.pass.parquet.tmp` present. Both had `run_wepp_hillslopes` set and `run_wepp_watershed` missing.
 
 ## Decision Log
 
@@ -41,10 +62,31 @@ The observable behavior is that a second Run Batch submission for a partially co
 - Decision: Treat queue orchestration changes as security-impact high.
   Rationale: Repository policy treats queue wiring and worker subprocess surfaces as high by default.
   Date/Author: 2026-06-30 19:56 UTC / Codex.
+- Decision: Exclude directive-only and non-leaf tasks from retry completion proof.
+  Rationale: A task must be both enabled and actually timestamped by the leaf worker to prove completion; otherwise retry filtering would permanently rerun leaves for directives that are not part of the leaf chain.
+  Date/Author: 2026-06-30 20:22 UTC / Codex.
+- Decision: Validate batch leaf run IDs at template and classifier boundaries.
+  Rationale: Leaf IDs are used to resolve paths below `runs/`; unsafe legacy/generated IDs should not probe outside that tree even for admin-created batches.
+  Date/Author: 2026-06-30 20:45 UTC / Codex.
+- Decision: Preserve `BATCH_RUN_COMPLETED` and add a failure-specific signal instead of replacing the trigger.
+  Rationale: Existing clients may depend on `BATCH_RUN_COMPLETED`; the new summary and `BATCH_RUN_COMPLETED_WITH_FAILURES` make partial failure visible without breaking compatibility.
+  Date/Author: 2026-06-30 20:45 UTC / Codex.
+- Decision: Clear child-scoped NoDb cache and locks at the start of every batch watershed run.
+  Rationale: The climate controller assertion is a valid lock invariant; the retry worker must remove stale lock/cache state left by canceled child builds before loading `RedisPrep` and NoDb controllers. Cleanup is scoped to the composite child run id and remains protected from active duplicate submissions by route and worker active-job guards.
+  Date/Author: 2026-06-30 22:33 UTC / Codex.
+- Decision: Clear exact selected-leaf path-scoped runtime locks before child enqueue.
+  Rationale: Runid-wide runtime lock clearing is unsafe for batch leaves because path-scoped locks store the leaf id, such as `WA-174`, and different batches can share that id. The parent run has already passed active-job preflight, so clearing only the exact `wd`/root/`effective_root_path` keys for selected leaves removes stale dead-worker locks without disturbing other batches.
+  Date/Author: 2026-06-30 22:47 UTC / Codex.
+- Decision: Return a serializable parent Run Batch summary.
+  Rationale: RQ must serialize worker return values; a live finalizer `Job` object is not a durable result. The finalizer job id plus selection summary is enough for dashboards and diagnostics.
+  Date/Author: 2026-06-30 23:08 UTC / Codex.
+- Decision: Ensure hillslope interchange before watershed retries.
+  Rationale: Watershed execution depends on `H.pass.parquet` and `H.wat.parquet`, and `run_wepp_hillslopes` can be timestamped before batch post-processing has finished. Rebuilding missing interchange from existing raw hillslope outputs is cheaper and more targeted than forcing a full hillslope rerun.
+  Date/Author: 2026-06-30 23:51 UTC / Codex.
 
 ## Outcomes & Retrospective
 
-No implementation outcome yet. The package is scaffolded with production evidence and a concrete implementation path.
+Local implementation is complete after dual-agent review disposition and local retry hardening. The batch runner now classifies leaf runs, skips completed old-style leaves by default, handles absent optional RAP/OpenET controllers, rejects unsafe generated leaf IDs, preserves explicit full rerun through `Remove existing files`, writes success metadata with best-effort task diagnostics, rejects active duplicate submissions at both route and worker boundaries, clears stale child NoDb locks before reused-leaf retries, clears exact selected-leaf path-scoped runtime locks before child enqueue, ensures hillslope interchange before watershed retries, returns a serializable parent summary, and publishes final failed/incomplete/missing/invalid counts. Focused RQ, runtime-path, rq-engine route, and batch endpoint tests pass. Production rollout remains pending, and changed-file broad exception enforcement still flags existing broad boundary catches in touched files.
 
 ## Context and Orientation
 
@@ -75,7 +117,7 @@ Then change `run_batch_rq` so it asks `BatchRunner` for retry-eligible features 
 
 Add active Run Batch conflict handling to `wepppy/microservices/rq_engine/batch_routes.py`, similar to Delete Batch. Before enqueueing the parent job, call `_active_batch_job_summaries(batch_name, redis_conn=redis_conn)`. If it returns jobs, respond with status 409, code `batch_busy`, and details listing up to five active jobs. Keep the existing auth and admin-role checks unchanged.
 
-Update runstate reporting so `generate_runstate_report` returns the new status fields, while the CLI report can remain compact but should make retry status visible enough for an operator. Update tests to avoid requiring a live Redis service where feasible by monkeypatching `RedisPrep` or using existing project test patterns.
+Update runstate reporting so `generate_runstate_report` returns the new status fields, while the CLI report remains compact as run ID plus task glyphs for the Batch Progress panel. Update tests to avoid requiring a live Redis service where feasible by monkeypatching `RedisPrep` or using existing project test patterns.
 
 Finally, run focused tests and queue graph validation. If `wctl check-rq-graph` reports drift, update `wepppy/rq/job-dependencies-catalog.md` with `python tools/check_rq_dependency_graph.py --write`, then review the diff.
 

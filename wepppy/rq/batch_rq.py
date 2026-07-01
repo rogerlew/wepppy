@@ -68,6 +68,56 @@ _TERMINAL_JOB_STATUSES = {
 def _write_run_metadata(path: Path, payload: dict) -> None:
     path.write_text(json.dumps(payload, indent=2), encoding="utf-8")
 
+
+def _collect_run_task_status(run_wd: Path) -> tuple[dict[str, Any], list[str]]:
+    try:
+        prep = RedisPrep.getInstance(str(run_wd))
+    except FileNotFoundError:
+        return {}, []
+    except (OSError, TypeError, ValueError, redis.exceptions.RedisError) as exc:
+        return {}, [f"task_status_unavailable: {type(exc).__name__}: {exc}"]
+
+    task_status: dict[str, Any] = {}
+    warnings: list[str] = []
+    for task in BatchRunner.DEFAULT_TASKS:
+        try:
+            task_status[task.value] = prep[task]
+        except (TypeError, ValueError, redis.exceptions.RedisError) as exc:
+            task_status[task.value] = None
+            task_status[f"{task.value}_error"] = f"{type(exc).__name__}: {exc}"
+            warnings.append(f"{task.value}: {type(exc).__name__}: {exc}")
+    return task_status, warnings
+
+
+def _write_watershed_run_metadata(
+    *,
+    run_wd: Path,
+    runid: str,
+    batch_name: str,
+    status: str,
+    started_at: datetime,
+    elapsed: float,
+    job_id: str,
+    error: dict[str, str] | None = None,
+) -> None:
+    completed_at = datetime.now(timezone.utc)
+    task_status, metadata_warnings = _collect_run_task_status(run_wd)
+    run_metadata: dict[str, Any] = {
+        "runid": runid,
+        "batch_name": batch_name,
+        "status": status,
+        "started_at": started_at.isoformat(),
+        "completed_at": completed_at.isoformat(),
+        "duration_seconds": elapsed,
+        "rq_job_id": job_id,
+        "task_status": task_status,
+    }
+    if metadata_warnings:
+        run_metadata["metadata_warnings"] = metadata_warnings
+    if error is not None:
+        run_metadata["error"] = error
+    _write_run_metadata(run_wd / "run_metadata.json", run_metadata)
+
 def _reset_omni_nodb_from_base(base_wd: Path, runid_wd: Path, runid: str) -> None:
     base_omni = base_wd / "omni.nodb"
     if not base_omni.exists():
@@ -214,6 +264,13 @@ def _active_batch_job_summaries(
         return _collect(connection)
 
 
+def _format_active_jobs_text(active_jobs: list[str]) -> str:
+    active_jobs_text = ", ".join(active_jobs[:5])
+    if len(active_jobs) > 5:
+        active_jobs_text += f" (+{len(active_jobs) - 5} more)"
+    return active_jobs_text
+
+
 def delete_batch_rq(batch_name: str) -> dict[str, Any]:
     """Delete an entire batch workspace (base + generated runs)."""
     job = get_current_job()
@@ -236,6 +293,13 @@ def delete_batch_rq(batch_name: str) -> dict[str, Any]:
             )
             StatusMessenger.publish(status_channel, f'rq:{job_id} TRIGGER batch BATCH_DELETE_COMPLETED')
             return {'batch_name': batch_name, 'deleted': False, 'already_missing': True}
+
+        active_jobs = _active_batch_job_summaries(batch_name, exclude_job_ids={job_id})
+        if active_jobs:
+            raise RuntimeError(
+                "Batch cannot be deleted while jobs are active. "
+                f"Active jobs: {_format_active_jobs_text(active_jobs)}"
+            )
 
         batch_wd = Path(batch_runner.wd).resolve()
         runids = _collect_batch_runids(batch_wd, batch_name)
@@ -262,16 +326,6 @@ def delete_batch_rq(batch_name: str) -> dict[str, Any]:
             except Exception as exc:
                 logger.warning("batch_rq: failed to cleanup NoDb instances for %s - %s", wd, exc)
 
-        active_jobs = _active_batch_job_summaries(batch_name, exclude_job_ids={job_id})
-        if active_jobs:
-            active_jobs_text = ", ".join(active_jobs[:5])
-            if len(active_jobs) > 5:
-                active_jobs_text += f" (+{len(active_jobs) - 5} more)"
-            raise RuntimeError(
-                "Batch cannot be deleted while jobs are active. "
-                f"Active jobs: {active_jobs_text}"
-            )
-
         if batch_wd.exists():
             shutil.rmtree(batch_wd)
 
@@ -287,14 +341,14 @@ def delete_batch_rq(batch_name: str) -> dict[str, Any]:
         StatusMessenger.publish(status_channel, f'rq:{job_id} TRIGGER batch BATCH_DELETE_FAILED')
         raise
 
-def run_batch_rq(batch_name: str) -> Job:
+def run_batch_rq(batch_name: str) -> dict[str, Any]:
     """Enqueue a batch run for each watershed feature and a finalizer task.
 
     Args:
         batch_name: Identifier of the batch runner workspace.
 
     Returns:
-        The final RQ job that marks the batch as complete.
+        Serializable summary containing the finalizer job id and selection counts.
 
     Raises:
         Exception: Any failure encountered while preparing or enqueuing tasks.
@@ -312,6 +366,13 @@ def run_batch_rq(batch_name: str) -> Job:
         StatusMessenger.publish(status_channel, f'rq:{job_id} STARTED {func_name}({batch_name})')
 
         batch_runner = BatchRunner.getInstanceFromBatchName(batch_name)
+        active_jobs = _active_batch_job_summaries(batch_name, exclude_job_ids={job_id})
+        if active_jobs:
+            raise RuntimeError(
+                "Batch cannot be run while jobs are active. "
+                f"Active jobs: {_format_active_jobs_text(active_jobs)}"
+            )
+
         if job is not None:
             try:
                 batch_runner.set_rq_job_id("run_batch_rq", job.id)
@@ -327,19 +388,73 @@ def run_batch_rq(batch_name: str) -> Job:
         watershed_features = batch_runner.get_watershed_features_lpt()
         if not watershed_features:
             raise ValueError('No watershed features available to enqueue.')
+        full_rerun = batch_runner.is_task_enabled(TaskEnum.if_exists_rmtree)
+        if full_rerun:
+            selected_features = list(watershed_features)
+            selection_mode = "full_rerun"
+            runstate_summary = {
+                "total": len(watershed_features),
+                "complete": 0,
+                "failed": 0,
+                "incomplete": 0,
+                "missing": 0,
+                "invalid": 0,
+                "retry_eligible": len(watershed_features),
+                "metadata_stale": 0,
+                "metadata_error": 0,
+                "prep_error": 0,
+                "unclassified": len(watershed_features),
+            }
+        else:
+            run_states = batch_runner.classify_batch_run_states(watershed_features)
+            runstate_summary = batch_runner.summarize_batch_run_states(run_states)
+            selected_features = [
+                wf for wf in watershed_features
+                if run_states.get(str(wf.runid), {}).get("retry_eligible")
+            ]
+            selection_mode = "retry_eligible"
+
+        selection_summary = {
+            **runstate_summary,
+            "mode": selection_mode,
+            "enqueued": len(selected_features),
+            "skipped": len(watershed_features) - len(selected_features),
+        }
+        if job is not None:
+            job.meta["batch_run_selection"] = selection_summary
+            job.save()
+        StatusMessenger.publish(
+            status_channel,
+            (
+                f"rq:{job_id} STATUS run selection total={len(watershed_features)} "
+                f"enqueued={selection_summary['enqueued']} "
+                f"skipped={selection_summary['skipped']} mode={selection_mode}"
+            ),
+        )
+
+        cleared_runtime_locks = batch_runner.clear_retry_runtime_locks(selected_features)
+        if cleared_runtime_locks:
+            if job is not None:
+                job.meta["batch_runtime_locks_cleared"] = len(cleared_runtime_locks)
+                job.save()
+            StatusMessenger.publish(
+                status_channel,
+                f"rq:{job_id} INFO cleared stale runtime locks count={len(cleared_runtime_locks)}",
+            )
+
         watershed_jobs: List[Job] = []
         conn_kwargs = redis_connection_kwargs(RedisDB.RQ)
         with redis.Redis(**conn_kwargs) as redis_conn:
             q = Queue("batch", connection=redis_conn)
 
-            for wf in watershed_features:
-                runid = wf.runid
+            for wf in selected_features:
+                runid = str(wf.runid)
                 child_job = q.enqueue_call(
                     func=run_batch_watershed_rq,
                     args=[batch_name, wf],
                     timeout=TIMEOUT,
                 )
-                child_job.meta['runid'] = runid
+                child_job.meta['runid'] = f'batch;;{batch_name};;{runid}'
                 child_job.save()
                 if job is not None:
                     job.meta[f'jobs:0,runid:{runid}'] = child_job.id
@@ -363,7 +478,12 @@ def run_batch_rq(batch_name: str) -> Job:
                 job.save()
 
         StatusMessenger.publish(status_channel, f'rq:{job_id} COMPLETED {func_name}({batch_name})')
-        return final_job
+        return {
+            "batch_name": batch_name,
+            "final_job_id": final_job.id,
+            "enqueued": len(watershed_jobs),
+            "selection": selection_summary,
+        }
 
     except Exception:
         # Boundary catch: preserve contract behavior while logging unexpected failures.
@@ -450,6 +570,19 @@ def run_batch_watershed_rq(
 
         elapsed = time.time() - start_ts
         status = True
+        try:
+            runid_wd.mkdir(parents=True, exist_ok=True)
+            _write_watershed_run_metadata(
+                run_wd=runid_wd,
+                runid=runid,
+                batch_name=batch_name,
+                status="success",
+                started_at=started_at,
+                elapsed=elapsed,
+                job_id=job_id,
+            )
+        except (OSError, TypeError, ValueError) as meta_exc:
+            logger.warning("batch_rq: failed to write success metadata for %s - %s", runid, meta_exc)
         StatusMessenger.publish(
             status_channel,
             f'rq:{job_id} COMPLETED {func_name}({runid}) -> ({status}, {elapsed:.3f})',
@@ -468,18 +601,17 @@ def run_batch_watershed_rq(
         try:
             run_wd = Path(get_wd(runid))
             run_wd.mkdir(parents=True, exist_ok=True)
-            completed_at = datetime.now(timezone.utc)
-            run_metadata = {
-                "runid": runid,
-                "batch_name": batch_name,
-                "status": "failed",
-                "started_at": started_at.isoformat(),
-                "completed_at": completed_at.isoformat(),
-                "duration_seconds": elapsed,
-                "error": error_payload,
-            }
-            _write_run_metadata(run_wd / "run_metadata.json", run_metadata)
-        except Exception as meta_exc:
+            _write_watershed_run_metadata(
+                run_wd=run_wd,
+                runid=runid,
+                batch_name=batch_name,
+                status="failed",
+                started_at=started_at,
+                elapsed=elapsed,
+                job_id=job_id,
+                error=error_payload,
+            )
+        except (OSError, TypeError, ValueError) as meta_exc:
             logger.warning("batch_rq: failed to write run metadata for %s - %s", runid, meta_exc)
 
         StatusMessenger.publish(status_channel, f'rq:{job_id} EXCEPTION {func_name}({runid})')
@@ -502,7 +634,25 @@ def _final_batch_complete_rq(batch_name: str) -> None:
     try:
         StatusMessenger.publish(status_channel, f'rq:{job.id} STARTED {func_name}({batch_name})')
 
-        BatchRunner.getInstanceFromBatchName(batch_name)
+        batch_runner = BatchRunner.getInstanceFromBatchName(batch_name)
+        run_states = batch_runner.classify_batch_run_states()
+        runstate_summary = batch_runner.summarize_batch_run_states(run_states)
+        StatusMessenger.publish(
+            status_channel,
+            (
+                f"rq:{job.id} STATUS run summary total={runstate_summary['total']} "
+                f"complete={runstate_summary['complete']} "
+                f"failed={runstate_summary['failed']} "
+                f"incomplete={runstate_summary['incomplete']} "
+                f"missing={runstate_summary['missing']} "
+                f"invalid={runstate_summary['invalid']} "
+                f"retry_eligible={runstate_summary['retry_eligible']}"
+            ),
+        )
+        has_incomplete_leaves = any(
+            runstate_summary[key] > 0
+            for key in ("failed", "incomplete", "missing", "invalid", "retry_eligible")
+        )
 
         if send_discord_message is not None:
             try:
@@ -513,6 +663,8 @@ def _final_batch_complete_rq(batch_name: str) -> None:
                 pass
 
         StatusMessenger.publish(status_channel, f'rq:{job.id} COMPLETED {func_name}({batch_name})')
+        if has_incomplete_leaves:
+            StatusMessenger.publish(status_channel, f'rq:{job.id} TRIGGER batch BATCH_RUN_COMPLETED_WITH_FAILURES')
         StatusMessenger.publish(status_channel, f'rq:{job.id} TRIGGER batch BATCH_RUN_COMPLETED')
         StatusMessenger.publish(status_channel, f'rq:{job.id} TRIGGER batch END_BROADCAST')
         StatusMessenger.publish(status_channel, f'rq:{job.id} TRIGGER omni END_BROADCAST')

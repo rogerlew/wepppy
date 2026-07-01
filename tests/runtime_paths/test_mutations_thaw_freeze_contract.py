@@ -11,10 +11,13 @@ from wepppy.runtime_paths.errors import NoDirError
 from wepppy.runtime_paths.mutations import mutate_root, mutate_roots, preflight_root_forms
 from wepppy.runtime_paths.thaw_freeze import (
     clear_runtime_locks,
+    clear_runtime_locks_for_scope,
     freeze_locked,
     maintenance_lock,
     maintenance_lock_key,
+    maintenance_lock_scope_token,
     runtime_lock_statuses,
+    runtime_lock_statuses_for_scope,
     thaw_locked,
 )
 
@@ -258,3 +261,71 @@ def test_clear_runtime_locks_does_not_delete_new_lock_when_token_changes(
         assert len(statuses) == 1
         assert statuses[0]["key"] == lock.key
         client.delete(lock.key)
+
+
+def test_clear_runtime_locks_for_scope_only_deletes_exact_path_scope(
+    tmp_path: Path,
+) -> None:
+    batch1 = tmp_path / "wc1" / "batch" / "demo1" / "runs" / "WA-174"
+    batch2 = tmp_path / "wc1" / "batch" / "demo2" / "runs" / "WA-174"
+    (batch1 / "climate").mkdir(parents=True, exist_ok=True)
+    (batch2 / "climate").mkdir(parents=True, exist_ok=True)
+
+    scope1 = maintenance_lock_scope_token(
+        str(batch1),
+        "climate",
+        scope="effective_root_path",
+    )
+    scope2 = maintenance_lock_scope_token(
+        str(batch2),
+        "climate",
+        scope="effective_root_path",
+    )
+
+    with maintenance_lock(
+        str(batch1),
+        "climate",
+        purpose="batch1",
+        ttl_seconds=30,
+        scope="effective_root_path",
+        scope_token=scope1,
+    ) as lock1:
+        with maintenance_lock(
+            str(batch2),
+            "climate",
+            purpose="batch2",
+            ttl_seconds=30,
+            scope="effective_root_path",
+            scope_token=scope2,
+        ) as lock2:
+            statuses1 = runtime_lock_statuses_for_scope(
+                str(batch1),
+                "climate",
+                scope="effective_root_path",
+                scope_token=scope1,
+            )
+            assert [status["key"] for status in statuses1] == [lock1.key]
+
+            cleared = clear_runtime_locks_for_scope(
+                str(batch1),
+                "climate",
+                scope="effective_root_path",
+                scope_token=scope1,
+            )
+
+            assert [status["key"] for status in cleared] == [lock1.key]
+            assert runtime_lock_statuses_for_scope(
+                str(batch1),
+                "climate",
+                scope="effective_root_path",
+                scope_token=scope1,
+            ) == []
+            assert [
+                status["key"]
+                for status in runtime_lock_statuses_for_scope(
+                    str(batch2),
+                    "climate",
+                    scope="effective_root_path",
+                    scope_token=scope2,
+                )
+            ] == [lock2.key]

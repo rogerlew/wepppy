@@ -44,6 +44,22 @@ def test_run_batch_missing_batch_returns_404(monkeypatch: pytest.MonkeyPatch) ->
     assert payload["error"]["message"] == "missing"
 
 
+def test_run_batch_invalid_name_returns_400(monkeypatch: pytest.MonkeyPatch) -> None:
+    monkeypatch.setattr(
+        batch_routes,
+        "require_jwt",
+        lambda request, required_scopes=None: {"roles": ["Admin"]},
+    )
+
+    with TestClient(rq_engine.app) as client:
+        response = client.post("/api/batch/_/ab/run-batch")
+
+    assert response.status_code == 400
+    payload = response.json()
+    assert payload["error"]["code"] == "validation_error"
+    assert payload["errors"][0]["code"] == "invalid_batch_name"
+
+
 def test_run_batch_enqueues_job(monkeypatch: pytest.MonkeyPatch) -> None:
     class DummyJob:
         id = "job-123"
@@ -74,6 +90,11 @@ def test_run_batch_enqueues_job(monkeypatch: pytest.MonkeyPatch) -> None:
     )
     monkeypatch.setattr(batch_routes, "Queue", DummyQueue)
     monkeypatch.setattr(batch_routes.redis, "Redis", lambda **kwargs: DummyRedis())
+    monkeypatch.setattr(
+        batch_routes,
+        "_active_batch_job_summaries",
+        lambda batch_name, redis_conn=None: [],
+    )
 
     with TestClient(rq_engine.app) as client:
         response = client.post("/api/batch/_/demo/run-batch")
@@ -81,6 +102,41 @@ def test_run_batch_enqueues_job(monkeypatch: pytest.MonkeyPatch) -> None:
     assert response.status_code == 200
     payload = response.json()
     assert payload["job_id"] == "job-123"
+
+
+def test_run_batch_busy_returns_409(monkeypatch: pytest.MonkeyPatch) -> None:
+    monkeypatch.setattr(
+        batch_routes,
+        "require_jwt",
+        lambda request, required_scopes=None: {"roles": ["Admin"]},
+    )
+    monkeypatch.setattr(
+        batch_routes.BatchRunner,
+        "getInstanceFromBatchName",
+        lambda batch_name: object(),
+    )
+    monkeypatch.setattr(
+        batch_routes,
+        "_active_batch_job_summaries",
+        lambda batch_name, redis_conn=None: ["job-1:started:run_batch_rq"],
+    )
+
+    class DummyRedis:
+        def __enter__(self):
+            return self
+
+        def __exit__(self, exc_type, exc, tb):
+            return False
+
+    monkeypatch.setattr(batch_routes.redis, "Redis", lambda **kwargs: DummyRedis())
+
+    with TestClient(rq_engine.app) as client:
+        response = client.post("/api/batch/_/demo/run-batch")
+
+    assert response.status_code == 409
+    payload = response.json()
+    assert payload["error"]["code"] == "batch_busy"
+    assert "Active jobs" in payload["error"]["details"]
 
 
 def test_delete_batch_requires_admin_role(monkeypatch: pytest.MonkeyPatch) -> None:

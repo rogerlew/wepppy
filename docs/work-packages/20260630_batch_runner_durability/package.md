@@ -1,6 +1,6 @@
 # Batch Runner Durability
 
-**Status**: Open (2026-06-30)
+**Status**: Open (2026-06-30) - implementation complete locally; production rollout pending
 **Timezone**: UTC
 
 ## Overview
@@ -34,7 +34,7 @@ The Batch Runner can resume work inside an enqueued watershed job by checking `R
 
 - **Fidelity target**: faithful extraction
 - **Authoritative source path(s)**: `wepppy/rq/batch_rq.py`, `wepppy/nodb/batch_runner.py`, `wepppy/microservices/rq_engine/batch_routes.py`
-- **Cutover proof required**: focused tests prove a second Run Batch call enqueues only failed/incomplete/missing leaves while completed leaves are skipped; route tests prove active batch jobs return `409 batch_busy`; local runstate output explains retry eligibility.
+- **Cutover proof required**: focused tests prove a second Run Batch call enqueues only failed/incomplete/missing leaves while completed leaves are skipped; route tests prove active batch jobs return `409 batch_busy`; structured runstate fields explain retry eligibility while the Batch Progress panel remains run ID plus task glyphs.
 - **Acceptance evidence type**: both
 
 ## Stakeholders
@@ -44,13 +44,13 @@ The Batch Runner can resume work inside an enqueued watershed job by checking `R
 - **Informed**: Batch Runner users, production operators.
 
 ## Success Criteria
-- [ ] Pressing Run Batch for a partially completed batch enqueues only retry-eligible leaf runs when `Remove existing files` is disabled.
-- [ ] Enabling `Remove existing files` remains an explicit full-rerun/replace path.
-- [ ] Successful watershed jobs write `run_metadata.json` with `status: success` and overwrite stale failed metadata from prior attempts.
-- [ ] Failed watershed jobs remain RQ-finished with `(False, elapsed)` only if the finalizer contract still expects that shape, but durable failure metadata and summary reporting make the failure visible.
-- [ ] Existing batches with complete enabled `RedisPrep` timestamps and no success metadata are treated as complete, not rerun just because they predate the metadata contract.
-- [ ] Active queued/started/deferred/scheduled batch jobs block a new Run Batch submission with an explicit conflict response.
-- [ ] Tests and docs cover the `wepp1` failure mode: empty observed climate years, lock conflicts after cancellation, and later failed WEPP hillslope runs.
+- [x] Pressing Run Batch for a partially completed batch enqueues only retry-eligible leaf runs when `Remove existing files` is disabled.
+- [x] Enabling `Remove existing files` remains an explicit full-rerun/replace path.
+- [x] Successful watershed jobs write `run_metadata.json` with `status: success` and overwrite stale failed metadata from prior attempts.
+- [x] Failed watershed jobs remain RQ-finished with `(False, elapsed)` only if the finalizer contract still expects that shape, but durable failure metadata and summary reporting make the failure visible.
+- [x] Existing batches with complete enabled `RedisPrep` timestamps and no success metadata are treated as complete, not rerun just because they predate the metadata contract.
+- [x] Active queued/started/deferred/scheduled batch jobs block a new Run Batch submission with an explicit conflict response.
+- [x] Tests and docs cover the `wepp1` failure mode: empty observed climate years, lock conflicts after cancellation, and later failed WEPP hillslope runs.
 
 ## Parameterization ADR Gate
 - **Parameterization change present**: no
@@ -89,10 +89,10 @@ Reference: `docs/standards/parameterization-adr-standard.md`
 - **Security review artifact**: `docs/work-packages/20260630_batch_runner_durability/artifacts/2026-06-30_security_review.md`
 
 ## Hardening and Callus Softening
-- **Failure signature(s)**: `ValueError: observed_start_year must be an integer year, got empty string`; `NoDirError: NODIR_LOCKED`; `Error running WEPP hillslope ... returncode=-8`; RQ watershed jobs with status `finished`, result `(False, elapsed)`, and empty `exc_info`.
+- **Failure signature(s)**: `ValueError: observed_start_year must be an integer year, got empty string`; `NoDirError: NODIR_LOCKED`, including dead-owner path-scoped climate locks after worker/container restart; empty `AssertionError` at climate startup after `assert not self.islocked()`; parent RQ jobs with `result=Unserializable return value`; interrupted hillslope interchange with missing `H.wat.parquet` or `H.pass.parquet`; `Error running WEPP hillslope ... returncode=-8`; RQ watershed jobs with status `finished`, result `(False, elapsed)`, and empty `exc_info`.
 - **Related prior hardening efforts**: Redis persistence/session durability, NoDir archives/lock work, RQ response contract.
 - **Health signals**: Run Batch enqueues a small retry set after partial failure; stale failed metadata is overwritten by success; runstate explains retry reason; active duplicate submissions are rejected.
-- **Danger signals**: Completed leaves are skipped incorrectly despite changed directives; old failed metadata causes endless reruns; active jobs are hidden by RQ status `finished`; finalizer reports success while leaves failed.
+- **Danger signals**: Completed leaves are skipped incorrectly despite changed directives; old failed metadata causes endless reruns; active jobs are hidden by RQ status `finished`; finalizer reports success while leaves failed; watershed retry resumes before required hillslope interchange parquet exists.
 - **Observation window**: 14 days after production rollout or two large batch rerun cycles, whichever is longer.
 - **Temporary calluses introduced**: None planned. Any production-only cleanup script or manual retry list must be recorded here with owner and sunset criteria.
 - **Callus softening hypothesis (if applicable)**: Once success metadata and retry selection are deployed, operators should no longer need ad hoc manual failed-run lists for ordinary batch recovery.
@@ -104,14 +104,17 @@ Reference: `docs/standards/parameterization-adr-standard.md`
 - `tests/weppcloud/test_batch_runner_endpoints.py` - current batch blueprint/runstate coverage.
 - `tests/microservices/test_rq_engine_batch_routes.py` - current RQ Engine batch route coverage.
 - `docs/work-packages/20260630_batch_runner_durability/artifacts/wepp1_exception_evidence_20260630.md` - production evidence captured during scoping.
+- `docs/work-packages/20260630_batch_runner_durability/artifacts/2026-06-30_dual_agent_review_disposition.md` - independent review findings and dispositions.
 
 ## Deliverables
-- Durable per-leaf status classifier and retry-eligibility report.
-- Run Batch enqueue filter that skips completed leaves by default and records skipped/enqueued counts.
+- Durable per-leaf status classifier and retry-eligibility report in `wepppy/nodb/batch_runner.py`.
+- Run Batch enqueue filter in `wepppy/rq/batch_rq.py` that skips completed leaves by default and records skipped/enqueued counts.
 - Success and failure `run_metadata.json` contract for batch leaves.
 - Active-job guard for Run Batch route and worker-side safety check.
-- Focused regression tests and queue graph/catalog validation.
-- Security review artifact completed before production rollout.
+- Focused regression tests in `tests/rq/test_batch_rq_retry_selection.py`, `tests/microservices/test_rq_engine_batch_routes.py`, and existing batch endpoint coverage.
+- Dual-agent review dispositions covering optional task completion, delete guard ordering, full-rerun recovery, run ID containment, metadata diagnostics, finalizer summary, and run route validation.
+- Queue graph/catalog regeneration for shifted enqueue line numbers.
+- Security review artifact completed for local implementation, with production rollout still pending.
 
 ## Follow-up Work
 - Consider a later dashboard enhancement that previews the retry set before submission.

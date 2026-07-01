@@ -39,6 +39,15 @@ def _validate_batch_name(batch_name: str) -> str:
     return name
 
 
+def _format_active_jobs_detail(active_jobs: list[str]) -> str:
+    visible_jobs = active_jobs[:5]
+    hidden_count = max(0, len(active_jobs) - len(visible_jobs))
+    detail = "Active jobs: " + ", ".join(visible_jobs)
+    if hidden_count:
+        detail += f" (+{hidden_count} more)"
+    return detail
+
+
 @router.post("/batch/_/{batch_name}/run-batch")
 def run_batch(batch_name: str, request: Request) -> JSONResponse:
     try:
@@ -51,6 +60,19 @@ def run_batch(batch_name: str, request: Request) -> JSONResponse:
         return error_response_with_traceback("Failed to authorize request", status_code=401)
 
     try:
+        batch_name = _validate_batch_name(batch_name)
+    except ValueError as exc:
+        return validation_error_response(
+            [
+                {
+                    "code": "invalid_batch_name",
+                    "message": str(exc),
+                    "path": "batch_name",
+                }
+            ]
+        )
+
+    try:
         batch_runner = BatchRunner.getInstanceFromBatchName(batch_name)
     except FileNotFoundError as exc:
         return error_response(str(exc), status_code=404)
@@ -58,6 +80,16 @@ def run_batch(batch_name: str, request: Request) -> JSONResponse:
     try:
         conn_kwargs = redis_connection_kwargs(RedisDB.RQ)
         with redis.Redis(**conn_kwargs) as redis_conn:
+            active_jobs = _active_batch_job_summaries(batch_name, redis_conn=redis_conn)
+            if active_jobs:
+                detail = _format_active_jobs_detail(active_jobs)
+                return error_response(
+                    f"Batch cannot be run while jobs are active. {detail}",
+                    status_code=409,
+                    code="batch_busy",
+                    details=detail,
+                )
+
             q = Queue("batch", connection=redis_conn)
             job = q.enqueue_call(run_batch_rq, (batch_name,), timeout=RQ_TIMEOUT)
     except Exception:
@@ -106,11 +138,7 @@ def delete_batch(batch_name: str, request: Request) -> JSONResponse:
         with redis.Redis(**conn_kwargs) as redis_conn:
             active_jobs = _active_batch_job_summaries(batch_name, redis_conn=redis_conn)
             if active_jobs:
-                visible_jobs = active_jobs[:5]
-                hidden_count = max(0, len(active_jobs) - len(visible_jobs))
-                detail = "Active jobs: " + ", ".join(visible_jobs)
-                if hidden_count:
-                    detail += f" (+{hidden_count} more)"
+                detail = _format_active_jobs_detail(active_jobs)
                 return error_response(
                     f"Batch cannot be deleted while jobs are active. {detail}",
                     status_code=409,

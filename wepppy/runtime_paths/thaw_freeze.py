@@ -31,6 +31,8 @@ __all__ = [
     "maintenance_lock_key",
     "runtime_lock_statuses",
     "clear_runtime_locks",
+    "runtime_lock_statuses_for_scope",
+    "clear_runtime_locks_for_scope",
     "acquire_maintenance_lock",
     "release_maintenance_lock",
     "maintenance_lock",
@@ -405,11 +407,101 @@ def runtime_lock_statuses(runid: str) -> list[dict[str, Any]]:
     return statuses
 
 
+def runtime_lock_statuses_for_scope(
+    wd: str | Path,
+    root: str,
+    *,
+    scope: NoDirMaintenanceLockScope = "legacy_runid",
+    scope_token: str | None = None,
+) -> list[dict[str, Any]]:
+    """Return active runtime locks that would contend for ``wd``/``root``."""
+
+    client = _runtime_lock_redis_client()
+    now = int(time())
+    wd_path = Path(os.path.abspath(str(wd)))
+    normalized_root = _normalize_root(root)
+    normalized_scope = _normalize_scope(scope)
+    resolved_scope_token = (
+        scope_token
+        if scope_token is not None
+        else _scope_token_for_scope(wd_path, normalized_root, normalized_scope)
+    )
+
+    statuses: list[dict[str, Any]] = []
+    for lock_key in _contended_lock_keys_for_scope(
+        wd_path,
+        normalized_root,
+        normalized_scope,
+        resolved_scope_token,
+    ):
+        payload = _read_active_lock_payload(client, lock_key, now)
+        if payload is None:
+            continue
+        statuses.append(
+            {
+                "key": lock_key,
+                "owner": payload.get("owner"),
+                "expires_at": payload.get("expires_at"),
+                "acquired_at": payload.get("acquired_at"),
+                "purpose": payload.get("purpose"),
+                "root": payload.get("root"),
+                "scope": payload.get("scope"),
+                "scope_token": payload.get("scope_token"),
+                "runid": payload.get("runid") or _legacy_runid_from_lock_key(lock_key),
+                "token": payload.get("token"),
+                "ttl_seconds": payload.get("ttl_seconds"),
+            }
+        )
+
+    return statuses
+
+
 def clear_runtime_locks(runid: str) -> list[dict[str, Any]]:
     """Clear active runtime locks for ``runid`` and return cleared payloads."""
 
     client = _runtime_lock_redis_client()
     statuses = runtime_lock_statuses(runid)
+
+    cleared: list[dict[str, Any]] = []
+    for status in statuses:
+        key = status.get("key")
+        if not isinstance(key, str) or not key:
+            continue
+        token = status.get("token")
+        if isinstance(token, str) and token:
+            if _release_lock_key(client, key, token):
+                cleared.append(status)
+            continue
+
+        try:
+            deleted = client.delete(key)
+            if deleted:
+                cleared.append(status)
+                continue
+            if not client.get(key):
+                cleared.append(status)
+        except redis.exceptions.RedisError as exc:
+            raise RuntimeError("runtime lock Redis operation failed") from exc
+
+    return cleared
+
+
+def clear_runtime_locks_for_scope(
+    wd: str | Path,
+    root: str,
+    *,
+    scope: NoDirMaintenanceLockScope = "legacy_runid",
+    scope_token: str | None = None,
+) -> list[dict[str, Any]]:
+    """Clear active runtime locks that would contend for ``wd``/``root``."""
+
+    client = _runtime_lock_redis_client()
+    statuses = runtime_lock_statuses_for_scope(
+        wd,
+        root,
+        scope=scope,
+        scope_token=scope_token,
+    )
 
     cleared: list[dict[str, Any]] = []
     for status in statuses:

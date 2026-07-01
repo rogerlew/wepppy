@@ -17,6 +17,10 @@ __all__ = ["WatershedFeature", "WatershedCollection"]
 WGS84_GEOD = Geod(ellps="WGS84")
 
 
+def _is_valid_batch_leaf_runid(runid: str) -> bool:
+    return bool(runid) and runid not in {".", ".."} and "/" not in runid and "\\" not in runid and "\x00" not in runid
+
+
 def _normalize_geojson_crs_name(name: str) -> str:
     normalized = name.strip()
     upper = normalized.upper()
@@ -831,6 +835,11 @@ class WatershedCollection(object):
                 rendered = str(rendered).strip()
                 if not rendered:
                     raise ValueError("Template produced an empty run id")
+                if not _is_valid_batch_leaf_runid(rendered):
+                    raise ValueError(
+                        "Template produced an invalid run id; run ids cannot be '.', '..', "
+                        "or contain path separators"
+                    )
             except Exception as exc:  # noqa: BLE001
                 message = str(exc)
                 errors.append({

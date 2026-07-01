@@ -42,7 +42,12 @@ from wepppy.nodb.wepp_nodb_post_utils import (
 )
 from wepppy.runtime_paths.errors import NoDirError
 from wepppy.runtime_paths.fs import resolve as nodir_resolve
-from wepppy.runtime_paths.thaw_freeze import maintenance_lock as nodir_maintenance_lock
+from wepppy.runtime_paths.paths import NODIR_ROOTS
+from wepppy.runtime_paths.thaw_freeze import (
+    clear_runtime_locks_for_scope as nodir_clear_runtime_locks_for_scope,
+    maintenance_lock as nodir_maintenance_lock,
+    maintenance_lock_scope_token as nodir_maintenance_lock_scope_token,
+)
 
 
 from .base import NoDbBase, TriggerEvents, nodb_setter, clear_nodb_file_cache, clear_locks
@@ -54,6 +59,13 @@ __all__ = [
 ]
 
 _SBS_UPDATE_UNSET = object()
+_BATCH_LOCK_SCOPE = "effective_root_path"
+_BATCH_LOCK_RETRY_ATTEMPTS = 3
+_BATCH_LOCK_RETRY_SECONDS = 1.0
+
+
+def _is_valid_batch_leaf_runid(runid: str) -> bool:
+    return bool(runid) and runid not in {".", ".."} and "/" not in runid and "\\" not in runid and "\x00" not in runid
 
 
 def _coerce_bool(value: Any) -> bool:
@@ -124,6 +136,20 @@ def _reset_run_workspace(runid_wd: str | Path, logger: logging.Logger) -> None:
         )
 
 
+def _clear_batch_leaf_nodb_state(runid: str, logger: logging.Logger) -> Tuple[str, ...]:
+    logger.info(f'clearing NoDb cache and locks for runid: {runid}')
+    clear_nodb_file_cache(runid)
+    logger.info('cleared NoDb file cache')
+    try:
+        locks_cleared = clear_locks(runid)
+    except RuntimeError as exc:
+        logger.warning(f'failed to clear NoDb locks for {runid}: {exc}')
+        return ()
+
+    logger.info(f'cleared NoDb locks: {locks_cleared}')
+    return tuple(locks_cleared) if locks_cleared else ()
+
+
 def _require_directory_root(wd: str, root: str) -> None:
     resolved = nodir_resolve(wd, root, view="effective")
     if resolved is not None and getattr(resolved, "form", "dir") != "dir":
@@ -141,10 +167,30 @@ def _run_with_directory_root_lock(
     *,
     purpose: str,
 ):
-    _require_directory_root(wd, root)
-    with nodir_maintenance_lock(wd, root, purpose=purpose):
+    retry_attempts = max(1, int(_BATCH_LOCK_RETRY_ATTEMPTS))
+    retry_delay_seconds = max(0.0, float(_BATCH_LOCK_RETRY_SECONDS))
+
+    for attempt in range(1, retry_attempts + 1):
         _require_directory_root(wd, root)
-        return callback()
+        try:
+            scope_token = nodir_maintenance_lock_scope_token(
+                wd,
+                root,
+                scope=_BATCH_LOCK_SCOPE,
+            )
+            with nodir_maintenance_lock(
+                wd,
+                root,
+                purpose=purpose,
+                scope=_BATCH_LOCK_SCOPE,
+                scope_token=scope_token,
+            ):
+                _require_directory_root(wd, root)
+                return callback()
+        except NoDirError as exc:
+            if exc.code != "NODIR_LOCKED" or attempt >= retry_attempts:
+                raise
+            time.sleep(retry_delay_seconds * attempt)
 
 
 class BatchRunner(NoDbBase):
@@ -335,13 +381,8 @@ class BatchRunner(NoDbBase):
                     json.dump(state, fp)
                     fp.flush()
                     os.fsync(fp.fileno())
-            clear_nodb_file_cache(runid)
-            logger.info('cleared NoDb file cache')
-            try:
-                locks_cleared = clear_locks(runid)
-                logger.info(f'cleared NoDb locks: {locks_cleared}')
-            except RuntimeError:
-                pass
+
+            locks_cleared = _clear_batch_leaf_nodb_state(runid, logger)
 
             try:
                 watershed_feature.save_geojson(_join(runid_wd, 'dem','target_watershed.geojson'))
@@ -355,6 +396,8 @@ class BatchRunner(NoDbBase):
 
             except (OSError, ValueError, RuntimeError) as e:
                 logger.error(f"Failed to save GeoJSON: {e}")
+        else:
+            locks_cleared = _clear_batch_leaf_nodb_state(runid, logger)
 
         logger.info('getting RedisPrep instance')
         prep = RedisPrep.getInstance(runid_wd)
@@ -493,7 +536,7 @@ class BatchRunner(NoDbBase):
             logger.info('calling wepp.run_hillslopes()')
             wepp.run_hillslopes()
 
-        if run_hillslopes:
+        if run_hillslopes or run_watershed:
             ensure_hillslope_interchange(
                 wepp,
                 climate,
@@ -516,6 +559,51 @@ class BatchRunner(NoDbBase):
             activate_query_engine_for_run(wepp, logger)
 
         return tuple(locks_cleared) if locks_cleared else ()
+
+    def clear_retry_runtime_locks(
+        self,
+        watershed_features: Iterable[WatershedFeature],
+    ) -> List[Dict[str, Any]]:
+        cleared: List[Dict[str, Any]] = []
+        for watershed_feature in watershed_features:
+            leaf_runid = str(watershed_feature.runid)
+            if not _is_valid_batch_leaf_runid(leaf_runid):
+                continue
+
+            runid = f'batch;;{self.batch_name};;{leaf_runid}'
+            runid_wd = get_wd(runid)
+            for root in NODIR_ROOTS:
+                try:
+                    scope_token = nodir_maintenance_lock_scope_token(
+                        runid_wd,
+                        root,
+                        scope=_BATCH_LOCK_SCOPE,
+                    )
+                    root_cleared = nodir_clear_runtime_locks_for_scope(
+                        runid_wd,
+                        root,
+                        scope=_BATCH_LOCK_SCOPE,
+                        scope_token=scope_token,
+                    )
+                except (RuntimeError, ValueError) as exc:
+                    self.logger.warning(
+                        "failed to clear runtime locks for %s/%s: %s",
+                        runid,
+                        root,
+                        exc,
+                    )
+                    continue
+
+                for status in root_cleared:
+                    cleared.append(
+                        {
+                            **status,
+                            "batch_leaf_runid": leaf_runid,
+                            "composite_runid": runid,
+                        }
+                    )
+
+        return cleared
 
     @property
     def batch_name(self) -> str:
@@ -785,22 +873,216 @@ class BatchRunner(NoDbBase):
     # ------------------------------------------------------------------
     # Report
     # ------------------------------------------------------------------
-    def generate_runstate_report(self) -> Dict[str, Any]:
-        report = {}
-        for wf in self.get_watershed_features_lpt():
-            _runid = wf.runid
-            run_states = {str(task): None for task in BatchRunner.DEFAULT_TASKS}
-            run_wd = _join(self.wd, "runs", _runid)
-            if _exists(run_wd):
-                prep = RedisPrep.getInstance(run_wd)
-                for task in BatchRunner.DEFAULT_TASKS:
-                    run_states[str(task)] = prep[task]
-                
-            report[_runid] = {
-                "runid": _runid,
+    RUN_METADATA_FILENAME: ClassVar[str] = "run_metadata.json"
+    OPTIONAL_TASK_NODB_FILENAMES: ClassVar[Dict[TaskEnum, str]] = {
+        TaskEnum.fetch_rap_ts: RAP_TS.filename,
+        TaskEnum.fetch_openet_ts: OpenET_TS.filename,
+    }
+
+    def _completion_tasks(self, run_wd: Optional[str] = None) -> List[TaskEnum]:
+        """Return tasks that prove a leaf run is complete for retry selection."""
+        non_completion_tasks = {
+            TaskEnum.if_exists_rmtree,
+            TaskEnum.run_omni_contrasts,
+        }
+        tasks: List[TaskEnum] = []
+        for task in self.DEFAULT_TASKS:
+            if task in non_completion_tasks or not self.is_task_enabled(task):
+                continue
+            optional_filename = self.OPTIONAL_TASK_NODB_FILENAMES.get(task)
+            if optional_filename is not None and run_wd is not None and not _exists(_join(run_wd, optional_filename)):
+                continue
+            tasks.append(task)
+        return tasks
+
+    def _read_run_metadata(self, run_wd: str) -> Tuple[Optional[Dict[str, Any]], Optional[str]]:
+        metadata_path = _join(run_wd, self.RUN_METADATA_FILENAME)
+        if not _exists(metadata_path):
+            return None, None
+        try:
+            with open(metadata_path, "r", encoding="utf-8") as fp:
+                payload = json.load(fp)
+        except OSError as exc:
+            return None, f"{type(exc).__name__}: {exc}"
+        except json.JSONDecodeError as exc:
+            return None, f"{type(exc).__name__}: {exc}"
+
+        if not isinstance(payload, dict):
+            return None, f"metadata payload must be an object, got {type(payload).__name__}"
+        return payload, None
+
+    def classify_batch_run_state(self, watershed_feature: WatershedFeature) -> Dict[str, Any]:
+        leaf_runid = str(watershed_feature.runid)
+        composite_runid = f"batch;;{self.batch_name};;{leaf_runid}"
+        if not _is_valid_batch_leaf_runid(leaf_runid):
+            run_states = {task.value: None for task in self.DEFAULT_TASKS}
+            return {
+                "runid": leaf_runid,
+                "composite_runid": composite_runid,
+                "run_wd": None,
+                "run_exists": False,
+                "status": "invalid",
+                "retry_eligible": False,
+                "retry_reason": "invalid_runid",
+                "enabled_tasks": [],
+                "missing_tasks": [],
                 "run_state": run_states,
+                "metadata_status": None,
+                "metadata_error": f"Invalid batch leaf run id: {leaf_runid}",
+                "metadata_stale": False,
+                "prep_missing": False,
+                "prep_error": None,
             }
-        return report
+
+        run_wd = _join(self.wd, "runs", leaf_runid)
+        runs_root = Path(self.batch_runs_dir).resolve()
+        resolved_run_wd = Path(run_wd).resolve()
+        if not resolved_run_wd.is_relative_to(runs_root):
+            run_states = {task.value: None for task in self.DEFAULT_TASKS}
+            return {
+                "runid": leaf_runid,
+                "composite_runid": composite_runid,
+                "run_wd": str(resolved_run_wd),
+                "run_exists": False,
+                "status": "invalid",
+                "retry_eligible": False,
+                "retry_reason": "run_path_outside_batch",
+                "enabled_tasks": [],
+                "missing_tasks": [],
+                "run_state": run_states,
+                "metadata_status": None,
+                "metadata_error": f"Resolved run path is outside batch runs dir: {resolved_run_wd}",
+                "metadata_stale": False,
+                "prep_missing": False,
+                "prep_error": None,
+            }
+
+        run_exists = _exists(run_wd)
+        completion_tasks = self._completion_tasks(run_wd if run_exists else None)
+        run_states = {task.value: None for task in self.DEFAULT_TASKS}
+        enabled_tasks = [task.value for task in completion_tasks]
+        prep_missing = False
+        prep_error = None
+
+        if run_exists:
+            try:
+                prep = RedisPrep.getInstance(run_wd)
+            except FileNotFoundError:
+                prep = None
+                prep_missing = True
+            except (OSError, TypeError, ValueError) as exc:
+                prep = None
+                prep_error = f"{type(exc).__name__}: {exc}"
+            if prep is not None:
+                for task in self.DEFAULT_TASKS:
+                    try:
+                        run_states[task.value] = prep[task]
+                    except (TypeError, ValueError) as exc:
+                        run_states[task.value] = None
+                        run_states[f"{task.value}_error"] = f"{type(exc).__name__}: {exc}"
+
+        metadata, metadata_error = self._read_run_metadata(run_wd) if run_exists else (None, None)
+        metadata_status = None
+        if metadata is not None:
+            raw_status = metadata.get("status")
+            metadata_status = str(raw_status).strip().lower() if raw_status is not None else None
+            metadata_task_status = metadata.get("task_status")
+            if isinstance(metadata_task_status, Mapping):
+                for task in self.DEFAULT_TASKS:
+                    task_value = task.value
+                    if run_states.get(task_value) is None and metadata_task_status.get(task_value) is not None:
+                        run_states[task_value] = metadata_task_status.get(task_value)
+
+        missing_tasks = [
+            task.value for task in completion_tasks
+            if run_states.get(task.value) is None
+        ]
+        metadata_stale = False
+        retry_eligible = True
+        retry_reason = "missing_run_directory"
+
+        if not run_exists:
+            status = "missing"
+        elif not missing_tasks:
+            status = "complete"
+            retry_eligible = False
+            retry_reason = None
+            metadata_stale = metadata_status == "failed"
+        elif metadata_status == "failed":
+            status = "failed"
+            retry_reason = "failed_metadata"
+        else:
+            status = "incomplete"
+            retry_reason = "missing_enabled_tasks"
+
+        return {
+            "runid": leaf_runid,
+            "composite_runid": composite_runid,
+            "run_wd": run_wd,
+            "run_exists": run_exists,
+            "status": status,
+            "retry_eligible": retry_eligible,
+            "retry_reason": retry_reason,
+            "enabled_tasks": enabled_tasks,
+            "missing_tasks": missing_tasks,
+            "run_state": run_states,
+            "metadata_status": metadata_status,
+            "metadata_error": metadata_error,
+            "metadata_stale": metadata_stale,
+            "prep_missing": prep_missing,
+            "prep_error": prep_error,
+        }
+
+    def classify_batch_run_states(
+        self,
+        watershed_features: Optional[Iterable[WatershedFeature]] = None,
+    ) -> Dict[str, Dict[str, Any]]:
+        features = list(watershed_features) if watershed_features is not None else self.get_watershed_features_lpt()
+        return {
+            str(feature.runid): self.classify_batch_run_state(feature)
+            for feature in features
+        }
+
+    def retry_eligible_watershed_features(
+        self,
+        watershed_features: Optional[Iterable[WatershedFeature]] = None,
+    ) -> List[WatershedFeature]:
+        features = list(watershed_features) if watershed_features is not None else self.get_watershed_features_lpt()
+        states = self.classify_batch_run_states(features)
+        return [
+            feature for feature in features
+            if states.get(str(feature.runid), {}).get("retry_eligible")
+        ]
+
+    def summarize_batch_run_states(self, states: Mapping[str, Mapping[str, Any]]) -> Dict[str, int]:
+        summary = {
+            "total": len(states),
+            "complete": 0,
+            "failed": 0,
+            "incomplete": 0,
+            "missing": 0,
+            "invalid": 0,
+            "retry_eligible": 0,
+            "metadata_stale": 0,
+            "metadata_error": 0,
+            "prep_error": 0,
+        }
+        for state in states.values():
+            status = str(state.get("status") or "")
+            if status in {"complete", "failed", "incomplete", "missing", "invalid"}:
+                summary[status] += 1
+            if state.get("retry_eligible"):
+                summary["retry_eligible"] += 1
+            if state.get("metadata_stale"):
+                summary["metadata_stale"] += 1
+            if state.get("metadata_error"):
+                summary["metadata_error"] += 1
+            if state.get("prep_error"):
+                summary["prep_error"] += 1
+        return summary
+
+    def generate_runstate_report(self) -> Dict[str, Any]:
+        return self.classify_batch_run_states()
 
     def state_dict(self) -> Dict[str, Any]:
         snapshot: Dict[str, Any] = {
@@ -857,15 +1139,9 @@ class BatchRunner(NoDbBase):
 
     def generate_runstate_cli_report(self) -> str:
         s = []
-        for wf in self.get_watershed_features_lpt():
-            _runid = wf.runid
-            run_states = {task.value: None for task in BatchRunner.DEFAULT_TASKS}
-            run_wd = _join(self.wd, "runs", _runid)
-            if _exists(run_wd):
-                prep = RedisPrep.getInstance(run_wd)
-                for task in BatchRunner.DEFAULT_TASKS:
-                    run_states[task.value] = prep[task]
-                
+        states = self.classify_batch_run_states()
+        for _runid, state in states.items():
+            run_states = state["run_state"]
             _checked_states = ''.join(
                 TaskEnum(k).emoji() if v is not None else ' ' for k, v in run_states.items())
             s.append(f'{_runid} {_checked_states}')

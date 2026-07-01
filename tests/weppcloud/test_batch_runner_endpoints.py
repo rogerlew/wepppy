@@ -108,6 +108,22 @@ def test_validate_template_reports_duplicates(client, app):
     assert payload["stored"]["status"] == "invalid"
 
 
+def test_validate_template_rejects_path_like_runids(client, app):
+    _register_geojson(app, DATA_DIR / "simple.geojson")
+
+    response = client.post(
+        "/batch/_/demo/validate-template",
+        json={"template": "{'../_base'}"},
+    )
+
+    assert response.status_code == 200
+    payload = response.get_json()
+    assert payload["validation"]["summary"]["is_valid"] is False
+    assert payload["validation"]["errors"]
+    assert "invalid run id" in payload["validation"]["errors"][0]["error"]
+    assert payload["stored"]["status"] == "invalid"
+
+
 def test_validate_template_success_path(client, app):
     _register_geojson(app, DATA_DIR / "simple.geojson")
 

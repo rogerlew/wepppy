@@ -16,7 +16,7 @@
     "notes": [],
     "queue_name": "batch",
     "source_function": "delete_batch",
-    "source_lineno": 122,
+    "source_lineno": 150,
     "source_module": "wepppy/microservices/rq_engine/batch_routes.py"
   },
   {
@@ -26,7 +26,7 @@
     "notes": [],
     "queue_name": "batch",
     "source_function": "run_batch",
-    "source_lineno": 62,
+    "source_lineno": 94,
     "source_module": "wepppy/microservices/rq_engine/batch_routes.py"
   },
   {
@@ -442,7 +442,7 @@
     "notes": [],
     "queue_name": "batch",
     "source_function": "run_batch_rq",
-    "source_lineno": 337,
+    "source_lineno": 442,
     "source_module": "wepppy/rq/batch_rq.py"
   },
   {
@@ -454,7 +454,7 @@
     "notes": [],
     "queue_name": "batch",
     "source_function": "run_batch_rq",
-    "source_lineno": 349,
+    "source_lineno": 454,
     "source_module": "wepppy/rq/batch_rq.py"
   },
   {
