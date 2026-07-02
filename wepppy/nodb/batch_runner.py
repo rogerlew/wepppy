@@ -62,6 +62,7 @@ _SBS_UPDATE_UNSET = object()
 _BATCH_LOCK_SCOPE = "effective_root_path"
 _BATCH_LOCK_RETRY_ATTEMPTS = 3
 _BATCH_LOCK_RETRY_SECONDS = 1.0
+_MISSING_STATE_VALUE = object()
 
 
 def _is_valid_batch_leaf_runid(runid: str) -> bool:
@@ -191,6 +192,35 @@ def _run_with_directory_root_lock(
             if exc.code != "NODIR_LOCKED" or attempt >= retry_attempts:
                 raise
             time.sleep(retry_delay_seconds * attempt)
+
+
+def _nodb_state_payload(document: Dict[str, Any]) -> Dict[str, Any]:
+    state = document.get("py/state")
+    if isinstance(state, dict):
+        return state
+    return document
+
+
+def _load_nodb_document(path: Path) -> Tuple[Dict[str, Any], Dict[str, Any]]:
+    with path.open("r", encoding="utf-8") as fp:
+        document = json.load(fp)
+    if not isinstance(document, dict):
+        raise ValueError(f"NoDb payload must be an object: {path}")
+    state = _nodb_state_payload(document)
+    if not isinstance(state, dict):
+        raise ValueError(f"NoDb state payload must be an object: {path}")
+    return document, state
+
+
+def _write_nodb_document(path: Path, document: Dict[str, Any]) -> None:
+    with path.open("w", encoding="utf-8") as fp:
+        json.dump(document, fp)
+        fp.flush()
+        os.fsync(fp.fileno())
+
+
+def _json_clone(value: Any) -> Any:
+    return json.loads(json.dumps(value))
 
 
 class BatchRunner(NoDbBase):
@@ -407,6 +437,8 @@ class BatchRunner(NoDbBase):
             logger.info(f'init_required: {init_required} removing all RedisPrep timestamps')
             prep.remove_all_timestamp()
             logger.info(prep.timestamps_report())
+
+        self.resync_base_project_attributes(runid_wd, prep, logger)
 
         logger.info('getting NoDb instances')
         ron = Ron.getInstance(runid_wd)
@@ -878,6 +910,43 @@ class BatchRunner(NoDbBase):
         TaskEnum.fetch_rap_ts: RAP_TS.filename,
         TaskEnum.fetch_openet_ts: OpenET_TS.filename,
     }
+    BASE_PROJECT_RESYNC_RULES: ClassVar[Dict[str, Dict[str, Any]]] = {
+        Climate.filename: {
+            "attributes": (
+                "_catalog_id",
+                "_climate_daily_temp_ds",
+                "_climate_mode",
+                "_climate_spatialmode",
+                "_cligen_db",
+                "_climatestation",
+                "_climatestation_mode",
+                "_future_clis_wc",
+                "_future_end_year",
+                "_future_start_year",
+                "_input_years",
+                "_observed_clis_wc",
+                "_observed_end_year",
+                "_observed_start_year",
+                "_orig_cli_fn",
+                "_precip_monthly_scale_factors",
+                "_precip_scale_factor",
+                "_precip_scale_factor_map",
+                "_precip_scaling_mode",
+                "_precip_scaling_reference",
+                "_silent_pass_observed_quality_guard",
+                "_use_gridmet_wind_when_applicable",
+                "_user_station_meta",
+            ),
+            "invalidate_tasks": (
+                TaskEnum.build_climate,
+                TaskEnum.fetch_rap_ts,
+                TaskEnum.fetch_openet_ts,
+                TaskEnum.run_wepp_hillslopes,
+                TaskEnum.run_wepp_watershed,
+                TaskEnum.run_omni_scenarios,
+            ),
+        },
+    }
 
     def _completion_tasks(self, run_wd: Optional[str] = None) -> List[TaskEnum]:
         """Return tasks that prove a leaf run is complete for retry selection."""
@@ -911,6 +980,131 @@ class BatchRunner(NoDbBase):
             return None, f"metadata payload must be an object, got {type(payload).__name__}"
         return payload, None
 
+    def _base_project_attribute_drift(self, run_wd: str) -> Tuple[List[Dict[str, Any]], List[str], List[TaskEnum]]:
+        changes: List[Dict[str, Any]] = []
+        errors: List[str] = []
+        invalidate_tasks: List[TaskEnum] = []
+
+        for filename, rule in self.BASE_PROJECT_RESYNC_RULES.items():
+            base_path = Path(self.base_wd) / filename
+            run_path = Path(run_wd) / filename
+            if not base_path.exists() and not run_path.exists():
+                continue
+            if not base_path.exists():
+                errors.append(f"{filename}: base NoDb file is missing")
+                continue
+            if not run_path.exists():
+                errors.append(f"{filename}: leaf NoDb file is missing")
+                continue
+
+            try:
+                _base_document, base_state = _load_nodb_document(base_path)
+                _run_document, run_state = _load_nodb_document(run_path)
+            except (OSError, ValueError, json.JSONDecodeError) as exc:
+                errors.append(f"{filename}: {type(exc).__name__}: {exc}")
+                continue
+
+            file_changed = False
+            for attr in rule["attributes"]:
+                if attr not in base_state:
+                    continue
+                base_value = base_state.get(attr)
+                run_value = run_state.get(attr, _MISSING_STATE_VALUE)
+                if run_value is _MISSING_STATE_VALUE or run_value != base_value:
+                    changes.append(
+                        {
+                            "file": filename,
+                            "attribute": attr,
+                            "current": None if run_value is _MISSING_STATE_VALUE else _json_clone(run_value),
+                            "base": _json_clone(base_value),
+                        }
+                    )
+                    file_changed = True
+
+            if file_changed:
+                for task in rule["invalidate_tasks"]:
+                    if task not in invalidate_tasks:
+                        invalidate_tasks.append(task)
+
+        return changes, errors, invalidate_tasks
+
+    def resync_base_project_attributes(
+        self,
+        run_wd: str,
+        prep: RedisPrep,
+        logger: logging.Logger,
+    ) -> Dict[str, Any]:
+        changes: List[Dict[str, Any]] = []
+        errors: List[str] = []
+        invalidate_tasks: List[TaskEnum] = []
+
+        for filename, rule in self.BASE_PROJECT_RESYNC_RULES.items():
+            base_path = Path(self.base_wd) / filename
+            run_path = Path(run_wd) / filename
+            if not base_path.exists() and not run_path.exists():
+                continue
+            if not base_path.exists():
+                errors.append(f"{filename}: base NoDb file is missing")
+                continue
+            if not run_path.exists():
+                errors.append(f"{filename}: leaf NoDb file is missing")
+                continue
+
+            try:
+                _base_document, base_state = _load_nodb_document(base_path)
+                run_document, run_state = _load_nodb_document(run_path)
+            except (OSError, ValueError, json.JSONDecodeError) as exc:
+                errors.append(f"{filename}: {type(exc).__name__}: {exc}")
+                continue
+
+            file_changed = False
+            for attr in rule["attributes"]:
+                if attr not in base_state:
+                    continue
+                base_value = base_state.get(attr)
+                run_value = run_state.get(attr, _MISSING_STATE_VALUE)
+                if run_value is _MISSING_STATE_VALUE or run_value != base_value:
+                    changes.append(
+                        {
+                            "file": filename,
+                            "attribute": attr,
+                            "current": None if run_value is _MISSING_STATE_VALUE else _json_clone(run_value),
+                            "base": _json_clone(base_value),
+                        }
+                    )
+                    run_state[attr] = _json_clone(base_value)
+                    file_changed = True
+
+            if file_changed:
+                _write_nodb_document(run_path, run_document)
+                for task in rule["invalidate_tasks"]:
+                    if task not in invalidate_tasks:
+                        invalidate_tasks.append(task)
+
+        invalidated_task_values: List[str] = []
+        for task in invalidate_tasks:
+            prep.remove_timestamp(task)
+            invalidated_task_values.append(task.value)
+
+        if changes:
+            logger.info(
+                "resynced base project attributes changed=%s invalidated_tasks=%s",
+                [(change["file"], change["attribute"]) for change in changes],
+                invalidated_task_values,
+            )
+        for error in errors:
+            logger.warning("base project attribute resync check failed: %s", error)
+        if errors:
+            raise RuntimeError(
+                "base project attribute resync failed: " + "; ".join(errors)
+            )
+
+        return {
+            "changed_attributes": changes,
+            "errors": errors,
+            "invalidated_tasks": invalidated_task_values,
+        }
+
     def classify_batch_run_state(self, watershed_feature: WatershedFeature) -> Dict[str, Any]:
         leaf_runid = str(watershed_feature.runid)
         composite_runid = f"batch;;{self.batch_name};;{leaf_runid}"
@@ -932,6 +1126,9 @@ class BatchRunner(NoDbBase):
                 "metadata_stale": False,
                 "prep_missing": False,
                 "prep_error": None,
+                "base_sync_changed_attributes": [],
+                "base_sync_error": None,
+                "stale_tasks": [],
             }
 
         run_wd = _join(self.wd, "runs", leaf_runid)
@@ -955,9 +1152,21 @@ class BatchRunner(NoDbBase):
                 "metadata_stale": False,
                 "prep_missing": False,
                 "prep_error": None,
+                "base_sync_changed_attributes": [],
+                "base_sync_error": None,
+                "stale_tasks": [],
             }
 
         run_exists = _exists(run_wd)
+        base_sync_changes: List[Dict[str, Any]] = []
+        base_sync_errors: List[str] = []
+        base_sync_invalidate_tasks: List[TaskEnum] = []
+        if run_exists:
+            (
+                base_sync_changes,
+                base_sync_errors,
+                base_sync_invalidate_tasks,
+            ) = self._base_project_attribute_drift(run_wd)
         completion_tasks = self._completion_tasks(run_wd if run_exists else None)
         run_states = {task.value: None for task in self.DEFAULT_TASKS}
         enabled_tasks = [task.value for task in completion_tasks]
@@ -1003,6 +1212,12 @@ class BatchRunner(NoDbBase):
 
         if not run_exists:
             status = "missing"
+        elif base_sync_errors:
+            status = "incomplete"
+            retry_reason = "base_project_attribute_check_failed"
+        elif base_sync_changes:
+            status = "incomplete"
+            retry_reason = "base_project_attributes_changed"
         elif not missing_tasks:
             status = "complete"
             retry_eligible = False
@@ -1031,6 +1246,9 @@ class BatchRunner(NoDbBase):
             "metadata_stale": metadata_stale,
             "prep_missing": prep_missing,
             "prep_error": prep_error,
+            "base_sync_changed_attributes": base_sync_changes,
+            "base_sync_error": "; ".join(base_sync_errors) if base_sync_errors else None,
+            "stale_tasks": [task.value for task in base_sync_invalidate_tasks],
         }
 
     def classify_batch_run_states(
@@ -1066,6 +1284,8 @@ class BatchRunner(NoDbBase):
             "metadata_stale": 0,
             "metadata_error": 0,
             "prep_error": 0,
+            "base_stale": 0,
+            "base_sync_error": 0,
         }
         for state in states.values():
             status = str(state.get("status") or "")
@@ -1079,6 +1299,10 @@ class BatchRunner(NoDbBase):
                 summary["metadata_error"] += 1
             if state.get("prep_error"):
                 summary["prep_error"] += 1
+            if state.get("base_sync_changed_attributes"):
+                summary["base_stale"] += 1
+            if state.get("base_sync_error"):
+                summary["base_sync_error"] += 1
         return summary
 
     def generate_runstate_report(self) -> Dict[str, Any]:

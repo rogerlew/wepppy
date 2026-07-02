@@ -403,6 +403,8 @@ def run_batch_rq(batch_name: str) -> dict[str, Any]:
                 "metadata_stale": 0,
                 "metadata_error": 0,
                 "prep_error": 0,
+                "base_stale": 0,
+                "base_sync_error": 0,
                 "unclassified": len(watershed_features),
             }
         else:

@@ -281,14 +281,14 @@ Currently active work packages. Limit to 2-4 packages to maintain focus.
 
 ### Batch Runner Durability
 **Started**: 2026-06-30
-**Status**: Implementation complete locally; production rollout pending
+**Status**: Implementation updated locally; production rollout pending
 **Size**: Medium-High (2-4 focused sessions)
 **Owner**: Codex
 **Priority**: High
 **Link**: [docs/work-packages/20260630_batch_runner_durability/](docs/work-packages/20260630_batch_runner_durability/)
-**Description**: Make Run Batch restart-aware so a partially failed batch can be retried after operator correction without enqueueing every completed watershed leaf again.
+**Description**: Make Run Batch restart-aware so a partially failed batch can be retried after operator correction without enqueueing every completed watershed leaf again, including leaves whose cloned climate config drifted from the corrected base project.
 
-**Current Focus**: Local implementation, dual-agent review disposition, focused tests, RQ graph regeneration, docs, and security review are complete. Remaining work is production preflight/rollout after active target-batch jobs finish or are explicitly canceled.
+**Current Focus**: Local implementation, dual-agent review disposition, focused tests, RQ graph regeneration, docs, security review, and climate base-attribute resync hardening are complete. Remaining work is production preflight/rollout after active target-batch jobs finish or are explicitly canceled.
 
 **Dependencies**: Production evidence captured from `wepp1`; implementation should not be rolled out while the target batch still has active queued/started jobs.
 

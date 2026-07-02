@@ -6,8 +6,8 @@
 
 **Timezone**: UTC
 **Started**: 2026-06-30 19:56 UTC
-**Current phase**: Implementation complete locally / rollout pending
-**Last updated**: 2026-06-30 23:51 UTC
+**Current phase**: Implementation updated locally / rollout pending
+**Last updated**: 2026-07-01 19:54 UTC
 **Next milestone**: Production rollout preflight after active batch jobs finish or are canceled
 **Security impact**: high
 **Dedicated security review**: yes
@@ -41,6 +41,7 @@
 - [x] Fixed stale path-scoped runtime locks left by dead prior worker containers before retry enqueue. (2026-06-30 22:47 UTC)
 - [x] Fixed parent Run Batch job failure caused by returning an unserializable RQ `Job` object. (2026-06-30 23:08 UTC)
 - [x] Fixed watershed retries resuming past interrupted hillslope interchange outputs. (2026-06-30 23:51 UTC)
+- [x] Fixed stale cloned base climate attributes by selecting drifted leaves, resyncing critical `_base/climate.nodb` fields, and invalidating climate/downstream timestamps. (2026-07-01 19:54 UTC)
 
 ## Timeline
 
@@ -52,6 +53,7 @@
 - **2026-06-30 22:47 UTC** - Local retry exposed a stale path-scoped WA-174 climate lock from a dead prior worker container; parent Run Batch now clears exact path-scoped locks for selected leaves after active-job preflight and before enqueue.
 - **2026-06-30 23:08 UTC** - Parent `run_batch_rq` dashboard status showed failed/canceled despite publishing `COMPLETED`; RQ recorded `Unserializable return value`, so the parent now returns a serializable summary dict.
 - **2026-06-30 23:51 UTC** - Local retry exposed missing `H.wat.parquet`/`H.pass.parquet` after an interrupted hillslope interchange conversion; watershed retries now ensure hillslope interchange outputs before watershed resumes.
+- **2026-07-01 19:54 UTC** - Production retry exposed leaves initialized before base observed climate years were set; classifier now marks base-climate drift as retry eligible and worker startup resyncs critical climate config from `_base`.
 
 ## Decisions Log
 
@@ -162,6 +164,18 @@
 
 **Impact**: A watershed retry can rebuild missing hillslope interchange parquet from existing raw hillslope outputs before `wepp.run_watershed()` calls post-processing that depends on `H.pass.parquet` and `H.wat.parquet`. This avoids an unnecessary hillslope rerun while still failing explicitly if the raw source outputs are not recoverable.
 
+### 2026-07-01 19:54 UTC: Resync stale cloned base climate attributes
+**Context**: Production batch `nasa-roses-202606-psbs` showed many leaves failing with `ValueError: observed_start_year must be an integer year, got empty string`. The operator had set observed year bounds in the base project after the affected leaves were initialized, so retrying reused stale cloned `climate.nodb` files.
+
+**Options considered**:
+1. Require `Remove existing files` and rerun every leaf - reliable but wastes completed work and does not make the default retry path durable.
+2. Copy whole NoDb files from `_base` into leaves - simple but risks copying generated base artifacts such as `cli_fn`, `par_fn`, `monthlies`, and cached station search output into leaf runs.
+3. Compare and copy only critical climate configuration fields, then clear climate/downstream timestamps.
+
+**Decision**: Implement climate-only base attribute drift detection and resync. The classifier marks drifted leaves retry eligible with `base_project_attributes_changed`; worker startup copies selected climate config fields and removes `build_climate`, RAP/OpenET, WEPP, and Omni scenario timestamps.
+
+**Impact**: Corrected base observed years propagate to already-initialized leaves without full workspace replacement, while DEM, watershed, landuse, and soils artifacts remain valid.
+
 ## Risks and Issues
 
 | Risk | Severity | Likelihood | Mitigation | Status |
@@ -181,12 +195,13 @@
 | Stale path-scoped runtime locks from dead prior worker containers block selected leaves for the full TTL. | High | Medium | Clear exact child/root path-scoped runtime locks after active-job preflight and before enqueue. | Mitigated |
 | Parent Run Batch job is marked failed after enqueue because its return value is not serializable. | Medium | High | Return a serializable summary dict instead of a live RQ `Job` object. | Mitigated |
 | Interrupted hillslope interchange leaves task timestamps complete but watershed parquet dependencies missing. | High | Medium | Ensure hillslope interchange before watershed resumes on retry. | Mitigated |
+| Completed leaves are skipped even though cloned climate settings drifted from `_base`. | High | Medium | Compare critical climate config fields during classification and resync/invalidate downstream timestamps at worker startup. | Mitigated |
 
 ## Hardening Signal Log
 
 - **Baseline health signals**: Current Run Batch enqueues every watershed feature; failed worker exceptions are caught and represented as RQ `finished` with result `(False, elapsed)`; failure metadata is written only on exception.
-- **Post-change health signals**: Retry submission count matches failed/incomplete leaf count; completed leaves are skipped with reasons; stale failed metadata is cleared by success; route and worker reject active duplicate submissions; finalizer publishes failed/incomplete/missing/invalid counts.
-- **Danger signals observed**: RQ `exc_info` is empty for failed leaves because `run_batch_watershed_rq` catches exceptions; production run metadata currently has 36 failed leaves while the live batch is still active; broad-exception changed-file enforcement flags pre-existing broad catches in touched files; stale legacy NoDir runtime locks can survive canceled local attempts; stale child NoDb controller locks can survive canceled climate builds; path-scoped runtime locks can survive dead worker containers until TTL; RQ records `Unserializable return value` when parent jobs return live `Job` objects; interrupted hillslope interchange can leave `.tmp` parquet files and missing `H.pass.parquet`/`H.wat.parquet` while the hillslope task timestamp is already set.
+- **Post-change health signals**: Retry submission count matches failed/incomplete/stale-base leaf count; completed leaves are skipped with reasons; stale failed metadata is cleared by success; route and worker reject active duplicate submissions; finalizer publishes failed/incomplete/missing/invalid counts; base-climate drift increments `base_stale` and clears only climate/downstream timestamps.
+- **Danger signals observed**: RQ `exc_info` is empty for failed leaves because `run_batch_watershed_rq` catches exceptions; production run metadata currently has failed leaves while the live batch is still active; broad-exception changed-file enforcement flags pre-existing broad catches in touched files; stale legacy NoDir runtime locks can survive canceled local attempts; stale child NoDb controller locks can survive canceled climate builds; path-scoped runtime locks can survive dead worker containers until TTL; RQ records `Unserializable return value` when parent jobs return live `Job` objects; interrupted hillslope interchange can leave `.tmp` parquet files and missing `H.pass.parquet`/`H.wat.parquet` while the hillslope task timestamp is already set; leaf `climate.nodb` can retain empty observed years after `_base` is corrected.
 - **Temporary callus register**: None.
 - **Softening experiments**: Remove ad hoc/manual failed-run lists once retry selection is proven on a large batch.
 
@@ -224,6 +239,8 @@
 - [x] Parent Run Batch clears exact selected-leaf path-scoped runtime locks after active-job preflight.
 - [x] Parent Run Batch returns a JSON-serializable summary instead of a live RQ `Job`.
 - [x] Watershed retries ensure hillslope interchange outputs before `wepp.run_watershed()`.
+- [x] Leaves with stale cloned base climate attributes are retry eligible.
+- [x] Worker startup resyncs critical climate attributes from `_base` and invalidates only climate/downstream timestamps.
 
 ### Deployment
 - [ ] Tested in docker-compose.dev.yml environment.
@@ -395,6 +412,30 @@
 **Test results**:
 - `wctl run-pytest tests/rq/test_batch_rq_retry_selection.py --maxfail=1` - 18 passed.
 
+### 2026-07-01 19:54 UTC: Stale base climate attribute resync
+**Agent/Contributor**: Codex
+
+**Work completed**:
+- Diagnosed the repeated `observed_start_year must be an integer year, got empty string` failures as existing leaves retaining cloned `climate.nodb` state after `_base` was corrected.
+- Added climate base-attribute drift detection to `BatchRunner.classify_batch_run_state()`.
+- Added worker-side climate resync before NoDb controller loading and invalidated only climate-dependent timestamps.
+- Documented the implemented climate resync contract and deferred landuse/soils/WEPP/Ron/watershed resync criteria.
+
+**Blockers encountered**:
+- Production rollout remains pending; no production mutation was performed in this session.
+
+**Next steps**:
+- Deploy/reload batch workers through the normal production gate after active-job preflight.
+- Re-run the target batch in retry mode and verify the selection summary reports stale-base leaves as enqueued.
+
+**Test results**:
+- `wctl run-pytest tests/rq/test_batch_rq_retry_selection.py --maxfail=1` - 21 passed.
+- `wctl doc-lint --path docs/work-packages/20260630_batch_runner_durability` - 6 files validated, 0 errors, 0 warnings.
+- `wctl doc-lint --path wepppy/nodb/README.batch-runner.md` - 1 file validated, 0 errors, 0 warnings.
+- `wctl doc-lint --path PROJECT_TRACKER.md` - 1 file validated, 0 errors, 0 warnings.
+- `python3 tools/check_broad_exceptions.py --enforce-changed --base-ref origin/master` - passed with net delta +0.
+- `git diff --check` - passed.
+
 ## Watch List
 
 - **Production active jobs**: `nasa-roses-202606-psbs` still had active queued jobs at the scoping sample. Re-check before any deployment or production verification.
@@ -407,3 +448,8 @@
 **Participants**: User, Codex
 **Question/Topic**: Batch was started without observed climate years, canceled, fixed, and restarted. User wants Run Batch to later rerun only failed leaves based on per-project task status.
 **Outcome**: Scaffold this durability package and capture `wepp1` evidence for implementation.
+
+### 2026-07-01 19:54 UTC: User incident context
+**Participants**: User, Codex
+**Question/Topic**: Production retry still failed because leaves were initialized before observed climate dates were set in the base project. User requested hardening that resyncs critical base attributes and an assessment of invalidation criteria.
+**Outcome**: Implemented climate-only base attribute drift detection/resync with targeted climate/downstream timestamp invalidation, and documented broader resync criteria.

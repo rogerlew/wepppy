@@ -75,6 +75,28 @@ def _set_timestamps(runner: BatchRunner, leaf: str, tasks: tuple[TaskEnum, ...])
     }
 
 
+def _write_climate_state(path: Path, *, observed_start_year, observed_end_year) -> None:
+    path.parent.mkdir(parents=True, exist_ok=True)
+    path.write_text(
+        json.dumps(
+            {
+                "wd": str(path.parent),
+                "_climate_mode": 9,
+                "_climate_spatialmode": 0,
+                "_input_years": 1,
+                "_observed_start_year": observed_start_year,
+                "_observed_end_year": observed_end_year,
+                "_future_start_year": "",
+                "_future_end_year": "",
+                "_use_gridmet_wind_when_applicable": True,
+                "_adjust_mx_pt5": False,
+                "_silent_pass_observed_quality_guard": True,
+            }
+        ),
+        encoding="utf-8",
+    )
+
+
 def test_batch_directory_root_lock_uses_effective_path_scope(
     monkeypatch: pytest.MonkeyPatch,
 ) -> None:
@@ -302,6 +324,135 @@ def test_run_batch_project_repairs_hillslope_interchange_before_watershed_retry(
         "ensure_watershed_interchange",
         "activate_query_engine",
     ]
+
+
+def test_classify_batch_run_state_marks_base_climate_drift_retry_eligible(
+    tmp_path: Path,
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    runner = _runner(tmp_path, monkeypatch)
+    all_tasks = (
+        TaskEnum.fetch_dem,
+        TaskEnum.build_climate,
+        TaskEnum.run_wepp_hillslopes,
+        TaskEnum.run_wepp_watershed,
+    )
+    _set_timestamps(runner, "stale-climate", all_tasks)
+    run_dir = Path(runner.batch_runs_dir) / "stale-climate"
+    _write_climate_state(
+        Path(runner.base_wd) / "climate.nodb",
+        observed_start_year=1985,
+        observed_end_year=2024,
+    )
+    _write_climate_state(
+        run_dir / "climate.nodb",
+        observed_start_year="",
+        observed_end_year="",
+    )
+
+    state = runner.classify_batch_run_state(_feature("stale-climate"))
+    summary = runner.summarize_batch_run_states({"stale-climate": state})
+
+    assert state["status"] == "incomplete"
+    assert state["retry_eligible"] is True
+    assert state["retry_reason"] == "base_project_attributes_changed"
+    assert {
+        (change["file"], change["attribute"])
+        for change in state["base_sync_changed_attributes"]
+    } >= {
+        ("climate.nodb", "_observed_start_year"),
+        ("climate.nodb", "_observed_end_year"),
+    }
+    assert state["stale_tasks"] == [
+        TaskEnum.build_climate.value,
+        TaskEnum.fetch_rap_ts.value,
+        TaskEnum.fetch_openet_ts.value,
+        TaskEnum.run_wepp_hillslopes.value,
+        TaskEnum.run_wepp_watershed.value,
+        TaskEnum.run_omni_scenarios.value,
+    ]
+    assert summary["base_stale"] == 1
+
+
+def test_classify_batch_run_state_ignores_leaf_generated_cligen_seed(
+    tmp_path: Path,
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    runner = _runner(tmp_path, monkeypatch)
+    all_tasks = (
+        TaskEnum.fetch_dem,
+        TaskEnum.build_climate,
+        TaskEnum.run_wepp_hillslopes,
+        TaskEnum.run_wepp_watershed,
+    )
+    _set_timestamps(runner, "complete-with-seed", all_tasks)
+    run_dir = Path(runner.batch_runs_dir) / "complete-with-seed"
+    base_climate = Path(runner.base_wd) / "climate.nodb"
+    leaf_climate = run_dir / "climate.nodb"
+    _write_climate_state(base_climate, observed_start_year=1985, observed_end_year=2024)
+    _write_climate_state(leaf_climate, observed_start_year=1985, observed_end_year=2024)
+
+    base_state = json.loads(base_climate.read_text(encoding="utf-8"))
+    base_state["_cligen_seed"] = None
+    base_climate.write_text(json.dumps(base_state), encoding="utf-8")
+    leaf_state = json.loads(leaf_climate.read_text(encoding="utf-8"))
+    leaf_state["_cligen_seed"] = 12345
+    leaf_climate.write_text(json.dumps(leaf_state), encoding="utf-8")
+
+    state = runner.classify_batch_run_state(_feature("complete-with-seed"))
+
+    assert state["status"] == "complete"
+    assert state["retry_eligible"] is False
+    assert state["base_sync_changed_attributes"] == []
+
+
+def test_run_batch_project_resyncs_base_climate_and_invalidates_downstream_timestamps(
+    tmp_path: Path,
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    runner = _runner(tmp_path, monkeypatch)
+    run_dir = Path(runner.batch_runs_dir) / "retry-leaf"
+    run_dir.mkdir(parents=True)
+    _write_climate_state(
+        Path(runner.base_wd) / "climate.nodb",
+        observed_start_year=1985,
+        observed_end_year=2024,
+    )
+    _write_climate_state(
+        run_dir / "climate.nodb",
+        observed_start_year="",
+        observed_end_year="",
+    )
+    _FakeRedisPrep.timestamps_by_wd[str(run_dir)] = {
+        TaskEnum.fetch_dem.value: 1,
+        TaskEnum.build_climate.value: 2,
+        TaskEnum.fetch_rap_ts.value: 3,
+        TaskEnum.fetch_openet_ts.value: 4,
+        TaskEnum.run_wepp_hillslopes.value: 5,
+        TaskEnum.run_wepp_watershed.value: 6,
+        TaskEnum.run_omni_scenarios.value: 7,
+    }
+
+    monkeypatch.setattr(
+        batch_runner_module,
+        "get_wd",
+        lambda runid: str(Path(runner.batch_runs_dir) / runid.split(";;")[-1]),
+    )
+    monkeypatch.setattr(batch_runner_module, "_clear_batch_leaf_nodb_state", lambda *_args: ())
+    monkeypatch.setattr(
+        batch_runner_module.Ron,
+        "getInstance",
+        lambda _wd: (_ for _ in ()).throw(RuntimeError("stop after resync")),
+    )
+
+    with pytest.raises(RuntimeError, match="stop after resync"):
+        runner.run_batch_project(_feature("retry-leaf"))
+
+    state = json.loads((run_dir / "climate.nodb").read_text(encoding="utf-8"))
+    assert state["_observed_start_year"] == 1985
+    assert state["_observed_end_year"] == 2024
+    timestamps = _FakeRedisPrep.timestamps_by_wd[str(run_dir)]
+    assert timestamps == {TaskEnum.fetch_dem.value: 1}
 
 
 def test_clear_retry_runtime_locks_uses_child_path_scope(

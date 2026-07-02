@@ -1,10 +1,12 @@
 # Batch Runner Durability
 
-**Status**: Open (2026-06-30) - implementation complete locally; production rollout pending
+**Status**: Open (2026-07-01) - implementation updated locally; production rollout pending
 **Timezone**: UTC
 
 ## Overview
 The Batch Runner can resume work inside an enqueued watershed job by checking `RedisPrep` task timestamps, but pressing Run Batch currently enqueues every watershed feature again. This package makes Run Batch durable and restart-aware so an operator can fix a batch-wide input problem, press Run Batch again after active jobs finish, and enqueue only the missing, incomplete, or failed leaf runs.
+
+On 2026-07-01, production batch `nasa-roses-202606-psbs` exposed a second stale-leaf path: some leaf workspaces were cloned before the base project received observed climate year bounds. The batch retry classifier and worker now compare critical climate configuration fields in each existing leaf against `_base/climate.nodb`, enqueue drifted leaves, copy the corrected base values into the leaf, and clear only climate/downstream task timestamps.
 
 ## Objectives
 - Make the default Run Batch action select only eligible watershed leaves: missing run directory, incomplete enabled task chain, or confirmed current-attempt failure.
@@ -12,6 +14,7 @@ The Batch Runner can resume work inside an enqueued watershed job by checking `R
 - Preserve backward compatibility for existing batch runs that predate success metadata by treating complete enabled `RedisPrep` timestamps as successful unless a newer failure is proven.
 - Add an active-batch guard so duplicate Run Batch submissions cannot overlap queued/started/deferred/scheduled batch work.
 - Expose enough batch run state for the UI/API and operators to explain which leaves will rerun and why.
+- Resync critical base climate attributes into already-initialized leaves and invalidate only climate-dependent tasks when those attributes change.
 
 ## Scope
 
@@ -22,10 +25,12 @@ The Batch Runner can resume work inside an enqueued watershed job by checking `R
 - Regression coverage in `tests/rq/`, `tests/microservices/`, and `tests/weppcloud/`.
 - Queue graph/catalog validation if enqueue dependencies or metadata edges change.
 - Operator-facing docs and work-package artifacts for the `wepp1` incident signatures.
+- Climate base-project attribute drift detection and worker-side resync in existing batch leaves.
 
 ### Explicitly Out of Scope
 - Automatically diagnosing or fixing WEPP `returncode=-8` model failures.
 - Changing climate parameterization defaults, formulas, thresholds, or year-selection semantics.
+- Resyncing landuse, soils, WEPP, Ron, or watershed base-project state without a confirmed drift signature and dedicated invalidation tests.
 - Reworking the Batch Runner UI beyond showing/using the durable runstate contract needed for retry decisions.
 - Adding new external dependencies.
 - Production deployment or hotfixing while `nasa-roses-202606-psbs` still has active jobs.
@@ -51,6 +56,7 @@ The Batch Runner can resume work inside an enqueued watershed job by checking `R
 - [x] Existing batches with complete enabled `RedisPrep` timestamps and no success metadata are treated as complete, not rerun just because they predate the metadata contract.
 - [x] Active queued/started/deferred/scheduled batch jobs block a new Run Batch submission with an explicit conflict response.
 - [x] Tests and docs cover the `wepp1` failure mode: empty observed climate years, lock conflicts after cancellation, and later failed WEPP hillslope runs.
+- [x] Existing leaves whose cloned climate settings drift from `_base/climate.nodb` are retry eligible and have `build_climate`, RAP/OpenET, WEPP, and Omni scenario timestamps invalidated after resync.
 
 ## Parameterization ADR Gate
 - **Parameterization change present**: no
@@ -89,10 +95,10 @@ Reference: `docs/standards/parameterization-adr-standard.md`
 - **Security review artifact**: `docs/work-packages/20260630_batch_runner_durability/artifacts/2026-06-30_security_review.md`
 
 ## Hardening and Callus Softening
-- **Failure signature(s)**: `ValueError: observed_start_year must be an integer year, got empty string`; `NoDirError: NODIR_LOCKED`, including dead-owner path-scoped climate locks after worker/container restart; empty `AssertionError` at climate startup after `assert not self.islocked()`; parent RQ jobs with `result=Unserializable return value`; interrupted hillslope interchange with missing `H.wat.parquet` or `H.pass.parquet`; `Error running WEPP hillslope ... returncode=-8`; RQ watershed jobs with status `finished`, result `(False, elapsed)`, and empty `exc_info`.
+- **Failure signature(s)**: `ValueError: observed_start_year must be an integer year, got empty string`, including the 2026-07-01 stale leaf path where observed climate years were fixed in `_base` after leaves were initialized; `NoDirError: NODIR_LOCKED`, including dead-owner path-scoped climate locks after worker/container restart; empty `AssertionError` at climate startup after `assert not self.islocked()`; parent RQ jobs with `result=Unserializable return value`; interrupted hillslope interchange with missing `H.wat.parquet` or `H.pass.parquet`; `Error running WEPP hillslope ... returncode=-8`; RQ watershed jobs with status `finished`, result `(False, elapsed)`, and empty `exc_info`.
 - **Related prior hardening efforts**: Redis persistence/session durability, NoDir archives/lock work, RQ response contract.
-- **Health signals**: Run Batch enqueues a small retry set after partial failure; stale failed metadata is overwritten by success; runstate explains retry reason; active duplicate submissions are rejected.
-- **Danger signals**: Completed leaves are skipped incorrectly despite changed directives; old failed metadata causes endless reruns; active jobs are hidden by RQ status `finished`; finalizer reports success while leaves failed; watershed retry resumes before required hillslope interchange parquet exists.
+- **Health signals**: Run Batch enqueues a small retry set after partial failure; stale failed metadata is overwritten by success; runstate explains retry reason; active duplicate submissions are rejected; leaves with base climate drift report `base_stale` and rerun climate/downstream tasks after resync.
+- **Danger signals**: Completed leaves are skipped incorrectly despite changed directives or base climate drift; old failed metadata causes endless reruns; active jobs are hidden by RQ status `finished`; finalizer reports success while leaves failed; watershed retry resumes before required hillslope interchange parquet exists; resync clears unrelated DEM/watershed/landuse/soils timestamps.
 - **Observation window**: 14 days after production rollout or two large batch rerun cycles, whichever is longer.
 - **Temporary calluses introduced**: None planned. Any production-only cleanup script or manual retry list must be recorded here with owner and sunset criteria.
 - **Callus softening hypothesis (if applicable)**: Once success metadata and retry selection are deployed, operators should no longer need ad hoc manual failed-run lists for ordinary batch recovery.
@@ -108,6 +114,7 @@ Reference: `docs/standards/parameterization-adr-standard.md`
 
 ## Deliverables
 - Durable per-leaf status classifier and retry-eligibility report in `wepppy/nodb/batch_runner.py`.
+- Climate base-project drift detection and leaf resync in `wepppy/nodb/batch_runner.py`, with explicit downstream timestamp invalidation.
 - Run Batch enqueue filter in `wepppy/rq/batch_rq.py` that skips completed leaves by default and records skipped/enqueued counts.
 - Success and failure `run_metadata.json` contract for batch leaves.
 - Active-job guard for Run Batch route and worker-side safety check.
@@ -119,3 +126,4 @@ Reference: `docs/standards/parameterization-adr-standard.md`
 ## Follow-up Work
 - Consider a later dashboard enhancement that previews the retry set before submission.
 - Consider an operator CLI that prints `would_rerun` leaves for a batch without enqueueing jobs.
+- Consider landuse, soils, and WEPP base-project resync only after a confirmed stale-leaf incident and an explicit compatibility plan for generated artifacts.

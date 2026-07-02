@@ -173,3 +173,15 @@ Risk acceptance authority: `Accepted-risk` requires security reviewer recommenda
 
 - **Security reviewer**: Codex, 2026-06-30
 - **Package owner**: Codex, 2026-06-30
+
+## Addendum - 2026-07-01 Climate Base Attribute Resync
+
+The 2026-07-01 hardening added worker-side resync of selected climate configuration fields from `_base/climate.nodb` into an already-initialized batch leaf. The mutation remains within the existing batch workspace and selected leaf run directory. It does not add routes, permissions, network calls, dependencies, subprocesses, or new user-controlled path joins.
+
+Security and data-integrity checks:
+
+- [x] Run ID containment remains guarded by existing batch leaf ID validation and run directory resolution.
+- [x] Resync copies only allowlisted climate configuration fields; generated climate artifacts such as `cli_fn`, `par_fn`, `monthlies`, and station-search caches are not copied.
+- [x] Timestamp invalidation is targeted to `build_climate`, RAP/OpenET, WEPP, and Omni scenario tasks; DEM, watershed, landuse, and soils timestamps are not cleared.
+- [x] Resync runs after stale child lock/cache cleanup and before NoDb controller loading, preserving the existing duplicate-job active guard.
+- [x] Focused validation passed: `wctl run-pytest tests/rq/test_batch_rq_retry_selection.py --maxfail=1` - 21 passed.
