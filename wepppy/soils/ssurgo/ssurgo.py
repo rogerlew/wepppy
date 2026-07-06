@@ -48,6 +48,48 @@ __version__ = "v.0.1.0"
 ERIN_ADJUST_FCWP = True
 
 
+def _is_finite_float(value: Any) -> bool:
+    try:
+        return math.isfinite(float(value))
+    except (TypeError, ValueError, OverflowError):
+        return False
+
+
+def _as_finite_float(value: Any, *, context: str) -> float:
+    if not _is_finite_float(value):
+        raise ValueError(f"{context} must be finite, got {value!r}")
+    return float(value)
+
+
+def _valid_fc_wp_pair(field_cap: Any, wilt_pt: Any) -> bool:
+    if not (_is_finite_float(field_cap) and _is_finite_float(wilt_pt)):
+        return False
+    field_cap_f = float(field_cap)
+    wilt_pt_f = float(wilt_pt)
+    return 0.0 <= wilt_pt_f <= field_cap_f <= 1.0
+
+
+def _require_valid_fc_wp_pair(
+    field_cap: Any,
+    wilt_pt: Any,
+    *,
+    context: str,
+) -> Tuple[float, float]:
+    if not _valid_fc_wp_pair(field_cap, wilt_pt):
+        raise ValueError(
+            f"Invalid SSURGO-derived fc/wp for {context}: "
+            f"field_cap={field_cap!r}, wilt_pt={wilt_pt!r}. "
+            "Expected finite values with 0 <= wilt_pt <= field_cap <= 1."
+        )
+    return float(field_cap), float(wilt_pt)
+
+
+def _rosetta_fc_wp(res_dict: Dict[str, Any], *, context: str) -> Tuple[float, float]:
+    field_cap = res_dict.get("fc")
+    wilt_pt = res_dict.get("wp")
+    return _require_valid_fc_wp_pair(field_cap, wilt_pt, context=context)
+
+
 def _decode_jsonpickle_safe(json_text: str) -> Any:
     """
     Decode jsonpickle payloads that may contain NumPy scalars from older numpy versions.
@@ -479,16 +521,13 @@ class Horizon(HorizonMixin):
         rock, not_rock = self._computeRock(defaults.get("smr", None))
         self.smr = rock
 
-        clay = self.claytotal_r
-        sand = self.sandtotal_r
-        vfs = self.sandvf_r
+        clay = _as_finite_float(self.claytotal_r, context=f"{chkey}::claytotal_r")
+        sand = _as_finite_float(self.sandtotal_r, context=f"{chkey}::sandtotal_r")
+        vfs = _as_finite_float(self.sandvf_r, context=f"{chkey}::sandvf_r")
         bd = self.dbthirdbar_r
 
-        assert isfloat(clay), clay
-        assert isfloat(sand), sand
-        assert isfloat(vfs), vfs
-
-        if isfloat(bd):
+        if _is_finite_float(bd):
+            bd = float(bd)
             r3 = Rosetta3()
             rosetta_model = "rosetta3"
             res_dict = r3.predict_kwargs(sand=sand, silt=vfs, clay=clay, bd=bd)
@@ -499,7 +538,7 @@ class Horizon(HorizonMixin):
             r2 = Rosetta2()
             res_dict = r2.predict_kwargs(sand=sand, silt=vfs, clay=clay)
 
-        if not isfloat(self.ksat_r):
+        if not _is_finite_float(self.ksat_r):
             # Rosetta returns Ks in cm/day; SSURGO ksat_r is stored as um/s.
             self.ksat_r = res_dict["ks"] / 8.64  # cm/day -> um/s
             self.horizon_build_notes.append(
@@ -507,12 +546,12 @@ class Horizon(HorizonMixin):
             )
 
         # wilting point
-        if isfloat(self.wfifteenbar_r) and isfloat(rock):
+        if _is_finite_float(self.wfifteenbar_r) and _is_finite_float(rock):
             self.horizon_build_notes.append(
                 f"  {chkey}::wilt_pt estimated from wfifteenbar_r and rock"
             )
-            self.wilt_pt = (0.01 * self.wfifteenbar_r) / (
-                1.0 - min(50.0, rock) / 100.0
+            self.wilt_pt = (0.01 * float(self.wfifteenbar_r)) / (
+                1.0 - min(50.0, float(rock)) / 100.0
             )  # ERIN_ADJUST_FCWP
         else:
             self.horizon_build_notes.append(
@@ -521,12 +560,12 @@ class Horizon(HorizonMixin):
             self.wilt_pt = res_dict["wp"]
 
         # field capacity
-        if isfloat(self.wthirdbar_r) and isfloat(rock):
+        if _is_finite_float(self.wthirdbar_r) and _is_finite_float(rock):
             self.horizon_build_notes.append(
                 f"  {chkey}::field_cap estimated from wthirdbar_r and rock"
             )
-            self.field_cap = (0.01 * self.wthirdbar_r) / (
-                1.0 - min(50.0, rock) / 100.0
+            self.field_cap = (0.01 * float(self.wthirdbar_r)) / (
+                1.0 - min(50.0, float(rock)) / 100.0
             )  # ERIN_ADJUST_FCWP
         else:
             self.horizon_build_notes.append(
@@ -534,7 +573,17 @@ class Horizon(HorizonMixin):
             )
             self.field_cap = res_dict["fc"]
 
-        if not isfloat(self.dbthirdbar_r):
+        if not _valid_fc_wp_pair(self.field_cap, self.wilt_pt):
+            self.field_cap, self.wilt_pt = _rosetta_fc_wp(
+                res_dict,
+                context=f"{chkey}::{rosetta_model} fc/wp fallback",
+            )
+            self.horizon_build_notes.append(
+                f"  {chkey}::field_cap/wilt_pt sanitized with {rosetta_model} "
+                "because generated values failed finite/physical validation"
+            )
+
+        if not _is_finite_float(self.dbthirdbar_r):
             self.horizon_build_notes.append(
                 f"  {chkey}::bd estimated from sand, vfs, and clay"
             )
@@ -1490,6 +1539,11 @@ Any comments:
                 #  depth += h.hzdepb_r
                 continue
 
+            h.field_cap, h.wilt_pt = _require_valid_fc_wp_pair(
+                h.field_cap,
+                h.wilt_pt,
+                context=f"mukey={self.mukey}, horizon={getattr(h, 'chkey', i)}",
+            )
             hzdepb_r10 = h.hzdepb_r * 10.0  # SSURGO depth cm -> WEPP depth mm
 
             # check if on last layer

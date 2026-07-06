@@ -368,6 +368,7 @@ print('\n'.join(ws.build_notes))
 # albedo estimated from om_r (3.5%)
 # ksat_r estimated from rosetta3
 # field_cap estimated from wthirdbar_r and rock
+# field_cap/wilt_pt sanitized with rosetta3 because generated values failed finite/physical validation
 ```
 
 ## Developer Notes

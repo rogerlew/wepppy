@@ -59,3 +59,4 @@ Each ADR should normally include:
 - `ADR-0009`: [Deciduous and Mixed Forest Managements](ADR-0009-deciduous-mixed-forest-managements.md) (Accepted, 2026-06-26)
 - `ADR-0010`: [RAP_TS Management Cover Fraction Normalization](ADR-0010-rap-ts-management-cover-fraction-normalization.md) (Accepted, 2026-06-26)
 - `ADR-0011`: [Geneva NOAA Rounded-Zero Intensity Row Normalization](ADR-0011-geneva-noaa-rounded-zero-intensity-row-normalization.md) (Accepted, 2026-06-30)
+- `ADR-0012`: [SSURGO Field Capacity and Wilting Point Sanitization](ADR-0012-ssurgo-fc-wp-sanitization.md) (Accepted, 2026-07-06)

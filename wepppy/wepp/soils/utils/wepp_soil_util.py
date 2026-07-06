@@ -9,6 +9,7 @@ disk.
 from __future__ import annotations
 
 import shlex
+import math
 from copy import deepcopy
 from datetime import datetime
 from typing import Any, Dict, List, Optional
@@ -19,6 +20,54 @@ from wepppy.wepp.soils.utils.utils import _quote_wepp_text
 DISTURBED_BD_MIN_G_CM3 = 0.6
 DISTURBED_BD_MAX_G_CM3 = 2.2
 VG_PAR_KEYS = ("theta_r", "theta_s", "alpha", "npar", "ks", "wp", "fc")
+
+
+def _is_finite_float(value: Any) -> bool:
+    try:
+        return math.isfinite(float(value))
+    except (TypeError, ValueError, OverflowError):
+        return False
+
+
+def _as_finite_float(value: Any, *, context: str) -> float:
+    if not _is_finite_float(value):
+        raise ValueError(f"{context} must be finite, got {value!r}")
+    return float(value)
+
+
+def _valid_wp_fc_pair(wp: Any, fc: Any) -> bool:
+    if not (_is_finite_float(wp) and _is_finite_float(fc)):
+        return False
+    wp_f = float(wp)
+    fc_f = float(fc)
+    return 0.0 <= wp_f <= fc_f <= 1.0
+
+
+def _require_valid_wp_fc_pair(
+    wp: Any,
+    fc: Any,
+    *,
+    context: str,
+) -> tuple[float, float]:
+    if not _valid_wp_fc_pair(wp, fc):
+        raise ValueError(
+            f"Invalid WEPP soil wp/fc for {context}: "
+            f"wp={wp!r}, fc={fc!r}. "
+            "Expected finite values with 0 <= wp <= fc <= 1."
+        )
+    return float(wp), float(fc)
+
+
+def _require_finite_prediction(
+    prediction: Dict[str, Any],
+    *,
+    context: str,
+) -> None:
+    invalid = [key for key in VG_PAR_KEYS if not _is_finite_float(prediction.get(key))]
+    if invalid:
+        values = ", ".join(f"{key}={prediction.get(key)!r}" for key in invalid)
+        raise ValueError(f"Rosetta prediction returned non-finite values for {context}: {values}.")
+    _require_valid_wp_fc_pair(prediction.get("wp"), prediction.get("fc"), context=context)
 
 
 def _replace_parameter(original: Any, replacement: Any) -> Any:
@@ -91,7 +140,7 @@ def _compute_rosetta_wp_fc(horizon: Dict[str, Any]) -> tuple[float, float]:
     clay = horizon.get("clay")
     sand = horizon.get("sand")
     bd = horizon.get("bd")
-    if not (isfloat(clay) and isfloat(sand) and isfloat(bd)):
+    if not (_is_finite_float(clay) and _is_finite_float(sand) and _is_finite_float(bd)):
         raise ValueError(
             "Cannot recompute disturbed wp/fc with Rosetta: top horizon requires numeric "
             f"clay/sand/bd, got clay={clay!r}, sand={sand!r}, bd={bd!r}."
@@ -101,18 +150,41 @@ def _compute_rosetta_wp_fc(horizon: Dict[str, Any]) -> tuple[float, float]:
     sand_f = float(sand)
     bd_f = float(bd)
     silt_f = 100.0 - clay_f - sand_f
+    if not (
+        0.0 <= clay_f <= 100.0
+        and 0.0 <= sand_f <= 100.0
+        and 0.0 <= silt_f <= 100.0
+    ):
+        raise ValueError(
+            "Cannot recompute disturbed wp/fc with Rosetta: texture fractions must "
+            f"sum to 100 with non-negative silt, got clay={clay_f}, sand={sand_f}, silt={silt_f}."
+        )
 
     r3 = Rosetta3()
     prediction = r3.predict_kwargs(clay=clay_f, sand=sand_f, silt=silt_f, bd=bd_f)
-    wp = prediction.get("wp")
-    fc = prediction.get("fc")
-    if not (isfloat(wp) and isfloat(fc)):
-        raise ValueError(
-            "Rosetta wp/fc recomputation returned non-numeric values: "
-            f"wp={wp!r}, fc={fc!r}."
-        )
+    return _require_valid_wp_fc_pair(
+        prediction.get("wp"),
+        prediction.get("fc"),
+        context="wp/fc recomputation",
+    )
 
-    return float(wp), float(fc)
+
+def _repair_invalid_wp_fc_with_rosetta(
+    horizon: Dict[str, Any],
+    *,
+    context: str,
+) -> Optional[str]:
+    """Repair invalid legacy wp/fc values in-place when Rosetta can provide a pair."""
+    if _valid_wp_fc_pair(horizon.get("wp"), horizon.get("fc")):
+        return None
+
+    wp, fc = _compute_rosetta_wp_fc(horizon)
+    horizon["wp"] = round(wp, 4)
+    horizon["fc"] = round(fc, 4)
+    return (
+        f"{context} wp/fc sanitized using Rosetta3 because generated values were "
+        "invalid"
+    )
 
 
 def _require_rosetta3_for_serialization(datver: float):
@@ -445,32 +517,40 @@ class WeppSoilUtil(object):
             horizons = []
             kslast = 0.0
             for j, horizon in enumerate(ofe['horizons']):
-                clay, sand, bd = horizon['clay'], horizon['sand'], horizon['bd']
-                silt = 100 - clay - sand
-                if not isfloat(bd):
+                clay = _as_finite_float(horizon['clay'], context=f'ofe={i},horizon={j} clay')
+                sand = _as_finite_float(horizon['sand'], context=f'ofe={i},horizon={j} sand')
+                bd = horizon['bd']
+                silt = 100.0 - clay - sand
+                if not _is_finite_float(bd):
                     ros_model = f'Rosetta(clay={clay}, sand={sand}, silt={silt})'
-                    res_dict = r2.predict_kwargs(clay=float(clay), sand=float(sand), silt=float(silt))
+                    res_dict = r2.predict_kwargs(clay=clay, sand=sand, silt=silt)
                 else:
+                    bd = float(bd)
                     ros_model = f'Rosetta(clay={clay}, sand={sand}, bd={bd}, silt={silt})'
-                    res_dict = r3.predict_kwargs(bd=float(bd), clay=float(clay), sand=float(sand), silt=float(silt))
+                    res_dict = r3.predict_kwargs(bd=bd, clay=clay, sand=sand, silt=silt)
 
-                if not isfloat(horizon['bd']):
+                if not _is_finite_float(horizon['bd']):
                     horizon['bd'] = 1.4
                     header.append(f'ofe={i},horizon={j} bd default value of 1.4')
 
-                if not isfloat(horizon['fc']):
-                    horizon['fc'] = round(res_dict['fc'], 4)
-                    header.append(f'ofe={i},horizon={j} fc estimated using {ros_model}')
+                if not _valid_wp_fc_pair(horizon['wp'], horizon['fc']):
+                    wp, fc = _require_valid_wp_fc_pair(
+                        res_dict.get('wp'),
+                        res_dict.get('fc'),
+                        context=f'ofe={i},horizon={j} {ros_model}',
+                    )
+                    horizon['wp'] = round(wp, 4)
+                    horizon['fc'] = round(fc, 4)
+                    header.append(
+                        f'ofe={i},horizon={j} wp/fc sanitized using {ros_model} '
+                        'because generated values were invalid'
+                    )
 
-                if not isfloat(horizon['wp']):
-                    horizon['wp'] = round(res_dict['wp'], 4)
-                    header.append(f'ofe={i},horizon={j} wp estimated using {ros_model}')
-
-                if not isfloat(horizon['ksat']):
+                if not _is_finite_float(horizon['ksat']):
                     horizon['ksat'] = round(res_dict['ks'] * 10 / 24, 4)  # convert from cm/day to mm/hour
                     header.append(f'ofe={i},horizon={j} ksat estimated using {ros_model}')
 
-                if not isfloat(horizon['anisotropy']):
+                if not _is_finite_float(horizon['anisotropy']):
                     if horizon['solthk'] > 50:
                         horizon['anisotropy'] = 1.0
                     else:
@@ -594,15 +674,24 @@ class WeppSoilUtil(object):
             s.append(f'{L}\t {L2}')
 
             for j, horizon in enumerate(ofe['horizons']):
+                horizon['wp'], horizon['fc'] = _require_valid_wp_fc_pair(
+                    horizon.get('wp'),
+                    horizon.get('fc'),
+                    context=f'datver={datver}, ofe={i}, horizon={j}',
+                )
                 pars = 'solthk bd ksat anisotropy fc wp sand clay orgmat cec rfg'.split()
                 s.append('\t' + '\t '.join([str(horizon[p]) for p in pars]))
  # hrdric parameter yes or no
                 if datver >= 9002.0:
-                    clay = horizon['clay']
-                    sand = horizon['sand']
+                    clay = _as_finite_float(horizon['clay'], context=f'ofe={i},horizon={j} clay')
+                    sand = _as_finite_float(horizon['sand'], context=f'ofe={i},horizon={j} sand')
                     silt = 100.0 - clay - sand
-                    bd = horizon['bd']
+                    bd = _as_finite_float(horizon['bd'], context=f'ofe={i},horizon={j} bd')
                     res = r3.predict_kwargs(clay=clay, sand=sand, silt=silt, bd=bd)
+                    _require_finite_prediction(
+                        res,
+                        context=f'datver={datver}, ofe={i}, horizon={j} appended 9002 values',
+                    )
                     s[-1] += '\t ' + '\t '.join([f'{res[p]:.4}' for p in VG_PAR_KEYS])
 
             res_lyr = ofe['res_lyr']
@@ -841,6 +930,14 @@ class WeppSoilUtil(object):
                     top_horizon['fc'] = round(fc, 4)
                     header.append(f'ofe={i},horizon=0 wp/fc recomputed using Rosetta3 with bd={_bd_override}')
 
+            for j, horizon in enumerate(horizons):
+                repair_note = _repair_invalid_wp_fc_with_rosetta(
+                    horizon,
+                    context=f'ofe={i},horizon={j}',
+                )
+                if repair_note is not None:
+                    header.append(repair_note)
+
             ofe['res_lyr']['kslast'] = _replace_parameter(ofe['res_lyr']['kslast'], _kslast)
             ofes.append(ofe)
 
@@ -1037,6 +1134,14 @@ class WeppSoilUtil(object):
                     top_horizon['wp'] = round(wp, 4)
                     top_horizon['fc'] = round(fc, 4)
                     header.append(f'ofe={i},horizon=0 wp/fc recomputed using Rosetta3 with bd={_bd_override}')
+
+            for j, horizon in enumerate(horizons):
+                repair_note = _repair_invalid_wp_fc_with_rosetta(
+                    horizon,
+                    context=f'ofe={i},horizon={j}',
+                )
+                if repair_note is not None:
+                    header.append(repair_note)
 
             ofe['res_lyr']['kslast'] = _replace_parameter(ofe['res_lyr']['kslast'], _kslast)
             ofes.append(ofe)

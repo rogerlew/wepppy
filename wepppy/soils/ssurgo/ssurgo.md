@@ -263,6 +263,12 @@ ksat_r = rosetta_ks / 8.64  # cm/day -> um/s
    - Uses Rosetta2 or Rosetta3 predicted values
    - **Build Note:** `"field_cap estimated from rosetta2"`
 
+3. **Invalid-value sanitization** (guardrail)
+   - The generated pair must be finite and satisfy `0 <= wilt_pt <= field_cap <= 1`
+   - If SSURGO-derived values fail that check, both `field_cap` and `wilt_pt`
+     are replaced by the selected Rosetta prediction for the horizon
+   - **Build Note:** `"field_cap/wilt_pt sanitized with rosetta3 because generated values failed finite/physical validation"`
+
 **Rock Adjustment Rationale:** SSURGO water content values represent the fine earth fraction. Rock fragments reduce the effective pore space, so values are adjusted upward to represent volumetric water content of the whole soil.
 
 #### Rock Content Calculation
@@ -785,6 +791,13 @@ connection closes.
 **Zero Values:**
 - Sand = 0, Clay = 0, or CEC = 0 → fails validation
 - Ensures erodibility equations have valid inputs
+
+**Invalid FC/WP Values:**
+- `field_cap` and `wilt_pt` must be finite volumetric water-content fractions.
+- The accepted range is `0 <= wilt_pt <= field_cap <= 1`.
+- SSURGO-derived `nan`, `inf`, negative sentinel values such as `-9.9`, values
+  above `1`, and inverted `wilt_pt > field_cap` pairs are replaced with the
+  horizon's Rosetta prediction before a WEPP soil file is written.
 
 ### Rock Content Limits
 

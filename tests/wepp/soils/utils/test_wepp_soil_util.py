@@ -621,6 +621,121 @@ def test_str_datver9002_uses_rosetta_predictions(make_soil_util, monkeypatch):
     assert "0.0000\t 0.0000\t 0.0000\t 0.0000\t 0.0000\t 0.0000\t 0.0000" not in serialized
 
 
+@pytest.mark.parametrize(
+    "wp,fc",
+    [
+        (float("nan"), -9.9),
+        (0.42, 0.31),
+        (0.12, 1.2),
+        (float("inf"), 0.31),
+        (-0.1, 0.31),
+    ],
+)
+def test_str_rejects_invalid_legacy_fc_wp(make_soil_util, wp, fc):
+    util = make_soil_util()
+    horizon = util.obj["ofes"][0]["horizons"][0]
+    horizon["fc"] = fc
+    horizon["wp"] = wp
+
+    with pytest.raises(ValueError, match="Invalid WEPP soil wp/fc"):
+        str(util)
+
+
+def test_affected_mukey_9002_conversion_sanitizes_legacy_fc_wp(
+    make_soil_util,
+    monkeypatch,
+):
+    util = make_soil_util()
+    util.fn = "affected-mukey-1385512.sol"
+    util.obj["header"].append("Mukey: 1385512")
+    horizon = util.obj["ofes"][0]["horizons"][0]
+    horizon["fc"] = -9.9
+    horizon["wp"] = float("nan")
+
+    class _FakeRosetta3:
+        def predict_kwargs(self, **_kwargs):
+            return {
+                "theta_r": 0.01,
+                "theta_s": 0.43,
+                "alpha": 0.02,
+                "npar": 1.5,
+                "ks": 0.77,
+                "wp": 0.12,
+                "fc": 0.34,
+            }
+
+    rosetta_stub = types.ModuleType("rosetta")
+    rosetta_stub.Rosetta3 = _FakeRosetta3
+    monkeypatch.setitem(sys.modules, "rosetta", rosetta_stub)
+
+    converted = util.to9002({}, hostname="unit.test")
+    serialized = str(converted)
+    converted_horizon = converted.obj["ofes"][0]["horizons"][0]
+
+    assert converted_horizon["wp"] == pytest.approx(0.12)
+    assert converted_horizon["fc"] == pytest.approx(0.34)
+    assert "nan" not in serialized.lower()
+    assert "-9.9" not in serialized
+    assert "0.01\t 0.43\t 0.02\t 1.5\t 0.77\t 0.12\t 0.34" in serialized
+    assert any("wp/fc sanitized using Rosetta3" in line for line in converted.obj["header"])
+
+
+def test_affected_mukey_9002_conversion_rejects_invalid_rosetta_fc_wp(
+    make_soil_util,
+    monkeypatch,
+):
+    util = make_soil_util()
+    horizon = util.obj["ofes"][0]["horizons"][0]
+    horizon["fc"] = -9.9
+    horizon["wp"] = float("nan")
+
+    class _InvalidRosetta3:
+        def predict_kwargs(self, **_kwargs):
+            return {
+                "theta_r": 0.01,
+                "theta_s": 0.43,
+                "alpha": 0.02,
+                "npar": 1.5,
+                "ks": 0.77,
+                "wp": 0.42,
+                "fc": 0.34,
+            }
+
+    rosetta_stub = types.ModuleType("rosetta")
+    rosetta_stub.Rosetta3 = _InvalidRosetta3
+    monkeypatch.setitem(sys.modules, "rosetta", rosetta_stub)
+
+    with pytest.raises(ValueError, match="Invalid WEPP soil wp/fc"):
+        util.to9002({}, hostname="unit.test")
+
+
+def test_str_datver9002_rejects_invalid_appended_rosetta_fc_wp(
+    make_soil_util,
+    monkeypatch,
+):
+    util = make_soil_util()
+    util.obj["datver"] = 9002.0
+
+    class _InvalidRosetta3:
+        def predict_kwargs(self, **_kwargs):
+            return {
+                "theta_r": 0.01,
+                "theta_s": 0.43,
+                "alpha": 0.02,
+                "npar": 1.5,
+                "ks": 0.77,
+                "wp": 0.42,
+                "fc": 0.34,
+            }
+
+    rosetta_stub = types.ModuleType("rosetta")
+    rosetta_stub.Rosetta3 = _InvalidRosetta3
+    monkeypatch.setitem(sys.modules, "rosetta", rosetta_stub)
+
+    with pytest.raises(ValueError, match="appended 9002 values"):
+        str(util)
+
+
 def test_to_over9000_applies_replacements_and_sets_datver(make_soil_util):
     util = make_soil_util()
 

@@ -1,8 +1,8 @@
 # PROJECT_TRACKER.md
 > Kanban board for wepppy work packages and vision items
 
-**Last Updated**: 2026-07-01
-**Active Packages**: 10
+**Last Updated**: 2026-07-06
+**Active Packages**: 12
 **Quick Links**: [Work Packages Directory](docs/work-packages/) | [God-Tier Prompting Strategy](docs/god-tier-prompting-strategy.md)
 
 ## Purpose
@@ -37,7 +37,7 @@ This tracker makes all work visible at a glance, helping agents coordinate and a
 ### 2. Limit Work in Progress
 **Target**: 2-4 active packages maximum to maintain focus and ensure packages complete rather than stall.
 
-**Current WIP**: 11 packages (above target range)
+**Current WIP**: 12 packages (above target range)
 
 ### 3. Manage Flow
 Monitor how long packages spend in each column:
@@ -275,7 +275,22 @@ When resuming Kubernetes work:
 
 Currently active work packages. Limit to 2-4 packages to maintain focus.
 
-**Current WIP Count**: 11 packages
+**Current WIP Count**: 12 packages
+
+---
+
+### SSURGO FC/WP Sanitization
+**Started**: 2026-07-05
+**Status**: Local implementation complete; production invalidation pending deployment
+**Size**: Medium (single focused session)
+**Owner**: Codex
+**Priority**: High
+**Link**: [docs/work-packages/20260705_ssurgo_fc_wp_sanitization/](docs/work-packages/20260705_ssurgo_fc_wp_sanitization/)
+**Description**: Sanitize SSURGO-generated field-capacity and wilting-point values after NASA ROSES batch runs produced WEPP soil files containing `-9.9 nan`, enforce the same guard in `WeppSoilUtil`, and document timestamp-based invalidation for affected production runids.
+
+**Current Focus**: Deploy the sanitizer to wepp1, then run the documented timestamp invalidation with `DRY_RUN = False`.
+
+**Next Steps**: Deploy fixed worker code, invalidate the 39 affected runids, and rerun the NASA ROSES batch.
 
 ---
 
