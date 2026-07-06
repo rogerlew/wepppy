@@ -404,7 +404,10 @@ This sequence is the canonical path for diagnosing scenario treatment failures, 
 3. **Selection Sidecar**: Each contrast mapping is written to `omni/contrasts/contrast_<id>.tsv`
 4. **Canonical ID Mapping**: `omni/contrast_id_definitions.psv` is refreshed with `<contrast_id>|<topaz_id_1>,<topaz_id_2>,...` rows for downstream consumers
 5. **Clone Assembly**: Creates contrast workspace, merges hillslope outputs from control + contrast scenarios
-6. **WEPP Execution**: Runs watershed simulation with mixed hillslope inputs
+6. **WEPP Execution**: Runs watershed simulation with mixed hillslope inputs.
+   Contrast clones preserve inherited base `wepp/runs` sidecars such as
+   `chan.inp` and `tc.txt`; contrast output switches may create missing
+   diagnostic sidecars, but disabled switches do not remove inherited sidecars.
 7. **Reporting**: `contrasts_report()` computes deltas between control and contrast metrics
 
 For cumulative mode, `contrast_id` is the sequential run/sidecar ID (1..N), while the selected hillslope ID is represented in the PSV value list.

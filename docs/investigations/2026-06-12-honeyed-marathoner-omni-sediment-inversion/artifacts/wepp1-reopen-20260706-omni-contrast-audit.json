@@ -1,0 +1,736 @@
+{
+  "audit": "wepp1 honeyed-marathoner reopened omni contrast check",
+  "container_hostname": "ab3bc4edcf34",
+  "contrast_sediment_discharge_summary": [
+    {
+      "max_control_minus_target_t_yr": 1098.0,
+      "mean_control_minus_target_t_yr": -35.165,
+      "min_control_minus_target_t_yr": -154.0,
+      "negative_count_target_gt_control": 81,
+      "positive_count_control_gt_target": 19,
+      "rows": 100,
+      "target_scenario": "mulch_60_sbs_map",
+      "zero_count": 0
+    }
+  ],
+  "deployed_commit": "b54861c5a",
+  "file_stats": {
+    "base_out": {
+      "mtime_utc": "2026-06-24T16:06:25.370946+00:00",
+      "path": "/wc1/runs/ho/honeyed-marathoner/wepp/output/interchange/loss_pw0.out.parquet",
+      "size": 2315
+    },
+    "contrasts_out": {
+      "mtime_utc": "2026-07-04T15:55:22.861340+00:00",
+      "path": "/wc1/runs/ho/honeyed-marathoner/omni/contrasts.out.parquet",
+      "size": 20552
+    },
+    "representative_contrast_out": {
+      "mtime_utc": "2026-06-25T22:54:12.641532+00:00",
+      "path": "/wc1/runs/ho/honeyed-marathoner/_pups/omni/contrasts/62/wepp/output/interchange/loss_pw0.out.parquet",
+      "size": 2316
+    },
+    "scenarios_hillslope_summaries": {
+      "mtime_utc": "2026-06-24T16:37:20.914094+00:00",
+      "path": "/wc1/runs/ho/honeyed-marathoner/omni/scenarios.hillslope_summaries.parquet",
+      "size": 221029
+    },
+    "scenarios_out": {
+      "mtime_utc": "2026-07-04T15:55:07.979357+00:00",
+      "path": "/wc1/runs/ho/honeyed-marathoner/omni/scenarios.out.parquet",
+      "size": 4253
+    }
+  },
+  "hillslope_totals": [
+    {
+      "hillslopes": 471,
+      "hillslopes_eq_sbs_map": 248,
+      "hillslopes_gt_sbs_map": 0,
+      "hillslopes_lt_sbs_map": 223,
+      "runoff_m3_yr": 9883838.799999999,
+      "scenario": "mulch_15_sbs_map",
+      "sediment_yield_kg_yr": 32075378.4,
+      "sediment_yield_t_yr": 32075.3784,
+      "soil_loss_kg_yr": 32828683.700000003,
+      "total_sediment_delta_kg_yr_vs_sbs_map": -8359241.0
+    },
+    {
+      "hillslopes": 471,
+      "hillslopes_eq_sbs_map": 248,
+      "hillslopes_gt_sbs_map": 0,
+      "hillslopes_lt_sbs_map": 223,
+      "runoff_m3_yr": 9880577.5,
+      "scenario": "mulch_30_sbs_map",
+      "sediment_yield_kg_yr": 24197659.7,
+      "sediment_yield_t_yr": 24197.6597,
+      "soil_loss_kg_yr": 24680702.3,
+      "total_sediment_delta_kg_yr_vs_sbs_map": -16236959.700000003
+    },
+    {
+      "hillslopes": 471,
+      "hillslopes_eq_sbs_map": 248,
+      "hillslopes_gt_sbs_map": 0,
+      "hillslopes_lt_sbs_map": 223,
+      "runoff_m3_yr": 9876714.7,
+      "scenario": "mulch_60_sbs_map",
+      "sediment_yield_kg_yr": 18483028.0,
+      "sediment_yield_t_yr": 18483.028,
+      "soil_loss_kg_yr": 18824616.599999998,
+      "total_sediment_delta_kg_yr_vs_sbs_map": -21951591.400000002
+    },
+    {
+      "hillslopes": 471,
+      "hillslopes_eq_sbs_map": 471,
+      "hillslopes_gt_sbs_map": 0,
+      "hillslopes_lt_sbs_map": 0,
+      "runoff_m3_yr": 9886232.3,
+      "scenario": "sbs_map",
+      "sediment_yield_kg_yr": 40434619.39999999,
+      "sediment_yield_t_yr": 40434.6194,
+      "soil_loss_kg_yr": 41627336.7,
+      "total_sediment_delta_kg_yr_vs_sbs_map": 0.0
+    },
+    {
+      "hillslopes": 471,
+      "hillslopes_eq_sbs_map": 245,
+      "hillslopes_gt_sbs_map": 3,
+      "hillslopes_lt_sbs_map": 223,
+      "runoff_m3_yr": 8207379.199999999,
+      "scenario": "undisturbed",
+      "sediment_yield_kg_yr": 119086.8,
+      "sediment_yield_t_yr": 119.0868,
+      "soil_loss_kg_yr": 119086.5,
+      "total_sediment_delta_kg_yr_vs_sbs_map": -40315532.6
+    }
+  ],
+  "negative_contrast_count": 81,
+  "negative_contrast_top20": [
+    {
+      "_contrast_name": "None,271__to__mulch_60_sbs_map",
+      "contrast_id": 62,
+      "contrast_topaz_id": "271",
+      "control-contrast_v": -154.0,
+      "control_v": 44006.7,
+      "units": "tonne/yr",
+      "value": 44160.7
+    },
+    {
+      "_contrast_name": "None,691__to__mulch_60_sbs_map",
+      "contrast_id": 87,
+      "contrast_topaz_id": "691",
+      "control-contrast_v": -152.3,
+      "control_v": 44006.7,
+      "units": "tonne/yr",
+      "value": 44159.0
+    },
+    {
+      "_contrast_name": "None,1471__to__mulch_60_sbs_map",
+      "contrast_id": 93,
+      "contrast_topaz_id": "1471",
+      "control-contrast_v": -147.9,
+      "control_v": 44006.7,
+      "units": "tonne/yr",
+      "value": 44154.6
+    },
+    {
+      "_contrast_name": "None,1442__to__mulch_60_sbs_map",
+      "contrast_id": 88,
+      "contrast_topaz_id": "1442",
+      "control-contrast_v": -143.1,
+      "control_v": 44006.7,
+      "units": "tonne/yr",
+      "value": 44149.8
+    },
+    {
+      "_contrast_name": "None,892__to__mulch_60_sbs_map",
+      "contrast_id": 99,
+      "contrast_topaz_id": "892",
+      "control-contrast_v": -141.1,
+      "control_v": 44006.7,
+      "units": "tonne/yr",
+      "value": 44147.8
+    },
+    {
+      "_contrast_name": "None,953__to__mulch_60_sbs_map",
+      "contrast_id": 97,
+      "contrast_topaz_id": "953",
+      "control-contrast_v": -140.4,
+      "control_v": 44006.7,
+      "units": "tonne/yr",
+      "value": 44147.1
+    },
+    {
+      "_contrast_name": "None,891__to__mulch_60_sbs_map",
+      "contrast_id": 71,
+      "contrast_topaz_id": "891",
+      "control-contrast_v": -138.7,
+      "control_v": 44006.7,
+      "units": "tonne/yr",
+      "value": 44145.4
+    },
+    {
+      "_contrast_name": "None,1081__to__mulch_60_sbs_map",
+      "contrast_id": 100,
+      "contrast_topaz_id": "1081",
+      "control-contrast_v": -138.5,
+      "control_v": 44006.7,
+      "units": "tonne/yr",
+      "value": 44145.2
+    },
+    {
+      "_contrast_name": "None,1501__to__mulch_60_sbs_map",
+      "contrast_id": 94,
+      "contrast_topaz_id": "1501",
+      "control-contrast_v": -138.1,
+      "control_v": 44006.7,
+      "units": "tonne/yr",
+      "value": 44144.8
+    },
+    {
+      "_contrast_name": "None,1221__to__mulch_60_sbs_map",
+      "contrast_id": 75,
+      "contrast_topaz_id": "1221",
+      "control-contrast_v": -137.0,
+      "control_v": 44006.7,
+      "units": "tonne/yr",
+      "value": 44143.7
+    },
+    {
+      "_contrast_name": "None,1053__to__mulch_60_sbs_map",
+      "contrast_id": 85,
+      "contrast_topaz_id": "1053",
+      "control-contrast_v": -135.7,
+      "control_v": 44006.7,
+      "units": "tonne/yr",
+      "value": 44142.4
+    },
+    {
+      "_contrast_name": "None,802__to__mulch_60_sbs_map",
+      "contrast_id": 92,
+      "contrast_topaz_id": "802",
+      "control-contrast_v": -134.7,
+      "control_v": 44006.7,
+      "units": "tonne/yr",
+      "value": 44141.4
+    },
+    {
+      "_contrast_name": "None,1421__to__mulch_60_sbs_map",
+      "contrast_id": 59,
+      "contrast_topaz_id": "1421",
+      "control-contrast_v": -134.5,
+      "control_v": 44006.7,
+      "units": "tonne/yr",
+      "value": 44141.2
+    },
+    {
+      "_contrast_name": "None,971__to__mulch_60_sbs_map",
+      "contrast_id": 73,
+      "contrast_topaz_id": "971",
+      "control-contrast_v": -134.4,
+      "control_v": 44006.7,
+      "units": "tonne/yr",
+      "value": 44141.1
+    },
+    {
+      "_contrast_name": "None,1241__to__mulch_60_sbs_map",
+      "contrast_id": 80,
+      "contrast_topaz_id": "1241",
+      "control-contrast_v": -132.7,
+      "control_v": 44006.7,
+      "units": "tonne/yr",
+      "value": 44139.4
+    },
+    {
+      "_contrast_name": "None,1451__to__mulch_60_sbs_map",
+      "contrast_id": 52,
+      "contrast_topaz_id": "1451",
+      "control-contrast_v": -131.0,
+      "control_v": 44006.7,
+      "units": "tonne/yr",
+      "value": 44137.7
+    },
+    {
+      "_contrast_name": "None,1152__to__mulch_60_sbs_map",
+      "contrast_id": 79,
+      "contrast_topaz_id": "1152",
+      "control-contrast_v": -130.7,
+      "control_v": 44006.7,
+      "units": "tonne/yr",
+      "value": 44137.4
+    },
+    {
+      "_contrast_name": "None,951__to__mulch_60_sbs_map",
+      "contrast_id": 67,
+      "contrast_topaz_id": "951",
+      "control-contrast_v": -130.4,
+      "control_v": 44006.7,
+      "units": "tonne/yr",
+      "value": 44137.1
+    },
+    {
+      "_contrast_name": "None,572__to__mulch_60_sbs_map",
+      "contrast_id": 74,
+      "contrast_topaz_id": "572",
+      "control-contrast_v": -127.6,
+      "control_v": 44006.7,
+      "units": "tonne/yr",
+      "value": 44134.3
+    },
+    {
+      "_contrast_name": "None,412__to__mulch_60_sbs_map",
+      "contrast_id": 78,
+      "contrast_topaz_id": "412",
+      "control-contrast_v": -125.7,
+      "control_v": 44006.7,
+      "units": "tonne/yr",
+      "value": 44132.4
+    }
+  ],
+  "production_host": "wepp1",
+  "representative_contrast": {
+    "channel_totals": [
+      {
+        "base": 589054325.1,
+        "contrast": 589041714.4000001,
+        "contrast_minus_base": -12610.699999928474,
+        "metric": "Discharge Volume"
+      },
+      {
+        "base": 996221.8999999999,
+        "contrast": 999851.8,
+        "contrast_minus_base": 3629.9000000001397,
+        "metric": "Sediment Yield"
+      },
+      {
+        "base": 35836506.6,
+        "contrast": 35818115.2,
+        "contrast_minus_base": -18391.39999999851,
+        "metric": "Soil Loss"
+      },
+      {
+        "base": 589107169.0,
+        "contrast": 589094558.3,
+        "contrast_minus_base": -12610.700000047684,
+        "metric": "Upland Charge"
+      }
+    ],
+    "contrast_id": 62,
+    "contrast_topaz_id": 271,
+    "hill_totals": [
+      {
+        "base": 9886232.299999999,
+        "contrast": 9886217.899999999,
+        "contrast_minus_base": -14.400000000372529,
+        "metric": "Runoff Volume"
+      },
+      {
+        "base": 426765.80000000005,
+        "contrast": 426761.7,
+        "contrast_minus_base": -4.100000000034925,
+        "metric": "Subrunoff Volume"
+      },
+      {
+        "base": 17560187.0,
+        "contrast": 17559154.9,
+        "contrast_minus_base": -1032.1000000014901,
+        "metric": "Baseflow Volume"
+      },
+      {
+        "base": 41627336.7,
+        "contrast": 41567582.1,
+        "contrast_minus_base": -59754.60000000149,
+        "metric": "Soil Loss"
+      },
+      {
+        "base": 1192877.3,
+        "contrast": 1135365.9000000001,
+        "contrast_minus_base": -57511.39999999991,
+        "metric": "Sediment Deposition"
+      },
+      {
+        "base": 40434619.39999999,
+        "contrast": 40432375.699999996,
+        "contrast_minus_base": -2243.6999999955297,
+        "metric": "Sediment Yield"
+      }
+    ],
+    "outlet_key_comparison": [
+      {
+        "base": 27820293.0,
+        "base_minus_contrast": 1050.0,
+        "contrast": 27819243.0,
+        "key": "Avg. Ann. water discharge from outlet",
+        "units": "m^3/yr"
+      },
+      {
+        "base": 41627.3,
+        "base_minus_contrast": 59.700000000004366,
+        "contrast": 41567.6,
+        "key": "Avg. Ann. total hillslope soil loss",
+        "units": "tonne/yr"
+      },
+      {
+        "base": 35836.5,
+        "base_minus_contrast": 18.400000000001455,
+        "contrast": 35818.1,
+        "key": "Avg. Ann. total channel soil loss",
+        "units": "tonne/yr"
+      },
+      {
+        "base": 44006.7,
+        "base_minus_contrast": -154.0,
+        "contrast": 44160.7,
+        "key": "Avg. Ann. sediment discharge from outlet",
+        "units": "tonne/yr"
+      },
+      {
+        "base": 9.6,
+        "base_minus_contrast": 0.0,
+        "contrast": 9.6,
+        "key": "Avg. Ann. Sed. delivery per unit area of watershed",
+        "units": "tonne/ha/yr"
+      },
+      {
+        "base": 0.568,
+        "base_minus_contrast": -0.0030000000000000027,
+        "contrast": 0.571,
+        "key": "Sediment Delivery Ratio for Watershed",
+        "units": ""
+      }
+    ],
+    "selected_hillslope_scenario_rows": [
+      {
+        "Landuse Area (ha)": 10.8,
+        "Landuse Description": "Shrub Low Severity Fire - mulch_15",
+        "NTU (g/L)": 0.1942854425,
+        "Runoff Depth (mm/yr)": 179.9407407407,
+        "Sediment Yield (kg/yr)": 12253.0,
+        "Sediment Yield (t)": 12.253,
+        "Slope": 0.2866199911,
+        "Soil Key": "620349-loam-shrub low sev fire-mulch_15",
+        "Topaz ID": 271,
+        "Wepp ID": 58,
+        "scenario": "mulch_15_sbs_map"
+      },
+      {
+        "Landuse Area (ha)": 10.8,
+        "Landuse Description": "Shrub Low Severity Fire - mulch_30",
+        "NTU (g/L)": 0.1826512409,
+        "Runoff Depth (mm/yr)": 179.8666666667,
+        "Sediment Yield (kg/yr)": 11457.0,
+        "Sediment Yield (t)": 11.457,
+        "Slope": 0.2866199911,
+        "Soil Key": "620349-loam-shrub low sev fire-mulch_30",
+        "Topaz ID": 271,
+        "Wepp ID": 58,
+        "scenario": "mulch_30_sbs_map"
+      },
+      {
+        "Landuse Area (ha)": 10.8,
+        "Landuse Description": "Shrub Low Severity Fire - mulch_60",
+        "NTU (g/L)": 0.171360401,
+        "Runoff Depth (mm/yr)": 179.8648148148,
+        "Sediment Yield (kg/yr)": 10665.3,
+        "Sediment Yield (t)": 10.6653,
+        "Slope": 0.2866199911,
+        "Soil Key": "620349-loam-shrub low sev fire-mulch_60",
+        "Topaz ID": 271,
+        "Wepp ID": 58,
+        "scenario": "mulch_60_sbs_map"
+      },
+      {
+        "Landuse Area (ha)": 10.8,
+        "Landuse Description": "Shrub Low Severity Fire",
+        "NTU (g/L)": 0.2039803747,
+        "Runoff Depth (mm/yr)": 179.9981481481,
+        "Sediment Yield (kg/yr)": 12909.0,
+        "Sediment Yield (t)": 12.909,
+        "Slope": 0.2866199911,
+        "Soil Key": "620349-loam-shrub low sev fire",
+        "Topaz ID": 271,
+        "Wepp ID": 58,
+        "scenario": "sbs_map"
+      },
+      {
+        "Landuse Area (ha)": 10.8,
+        "Landuse Description": "Shrub/Scrub",
+        "NTU (g/L)": 0.0195488316,
+        "Runoff Depth (mm/yr)": 159.1018518519,
+        "Sediment Yield (kg/yr)": 942.5,
+        "Sediment Yield (t)": 0.9425,
+        "Slope": 0.2866199911,
+        "Soil Key": "620349-loam-shrub",
+        "Topaz ID": 271,
+        "Wepp ID": 58,
+        "scenario": "undisturbed"
+      }
+    ],
+    "sidecar_non_base_paths": [
+      {
+        "path": "/wc1/runs/ho/honeyed-marathoner/_pups/omni/scenarios/mulch_60_sbs_map/wepp/output/H58",
+        "topaz_id": 271
+      }
+    ],
+    "yearly_sediment_discharge_deltas": [
+      {
+        "contrast_minus_base": 1630.9,
+        "key": "Total sediment discharge from outlet",
+        "units": "tonnes",
+        "v_base": 79930.3,
+        "v_contrast": 81561.2,
+        "year": 1993
+      },
+      {
+        "contrast_minus_base": 88.9,
+        "key": "Total sediment discharge from outlet",
+        "units": "tonnes",
+        "v_base": 67423.7,
+        "v_contrast": 67512.6,
+        "year": 1991
+      },
+      {
+        "contrast_minus_base": 2.3,
+        "key": "Total sediment discharge from outlet",
+        "units": "tonnes",
+        "v_base": 33114.4,
+        "v_contrast": 33116.7,
+        "year": 1989
+      },
+      {
+        "contrast_minus_base": -22.5,
+        "key": "Total sediment discharge from outlet",
+        "units": "tonnes",
+        "v_base": 29390.8,
+        "v_contrast": 29368.3,
+        "year": 1994
+      },
+      {
+        "contrast_minus_base": -34.3,
+        "key": "Total sediment discharge from outlet",
+        "units": "tonnes",
+        "v_base": 24303.6,
+        "v_contrast": 24269.3,
+        "year": 1992
+      },
+      {
+        "contrast_minus_base": -741.2,
+        "key": "Total sediment discharge from outlet",
+        "units": "tonnes",
+        "v_base": 29877.5,
+        "v_contrast": 29136.3,
+        "year": 1990
+      }
+    ]
+  },
+  "run_root": "/wc1/runs/ho/honeyed-marathoner",
+  "scenario_sediment_discharge": [
+    {
+      "scenario": "sbs_map",
+      "units": "tonne/yr",
+      "value": 44006.7
+    },
+    {
+      "scenario": "mulch_15_sbs_map",
+      "units": "tonne/yr",
+      "value": 39238.4
+    },
+    {
+      "scenario": "mulch_30_sbs_map",
+      "units": "tonne/yr",
+      "value": 34678.1
+    },
+    {
+      "scenario": "mulch_60_sbs_map",
+      "units": "tonne/yr",
+      "value": 31266.2
+    },
+    {
+      "scenario": "undisturbed",
+      "units": "tonne/yr",
+      "value": 13973.2
+    }
+  ],
+  "scenario_selected_keys": [
+    {
+      "key": "Avg. Ann. Sed. delivery per unit area of watershed",
+      "scenario": "mulch_15_sbs_map",
+      "units": "tonne/ha/yr",
+      "value": 8.5
+    },
+    {
+      "key": "Avg. Ann. sediment discharge from outlet",
+      "scenario": "mulch_15_sbs_map",
+      "units": "tonne/yr",
+      "value": 39238.4
+    },
+    {
+      "key": "Avg. Ann. total channel soil loss",
+      "scenario": "mulch_15_sbs_map",
+      "units": "tonne/yr",
+      "value": 35795.7
+    },
+    {
+      "key": "Avg. Ann. total hillslope soil loss",
+      "scenario": "mulch_15_sbs_map",
+      "units": "tonne/yr",
+      "value": 32828.7
+    },
+    {
+      "key": "Avg. Ann. water discharge from outlet",
+      "scenario": "mulch_15_sbs_map",
+      "units": "m^3/yr",
+      "value": 27755251.0
+    },
+    {
+      "key": "Sediment Delivery Ratio for Watershed",
+      "scenario": "mulch_15_sbs_map",
+      "units": "",
+      "value": 0.572
+    },
+    {
+      "key": "Avg. Ann. Sed. delivery per unit area of watershed",
+      "scenario": "mulch_30_sbs_map",
+      "units": "tonne/ha/yr",
+      "value": 7.5
+    },
+    {
+      "key": "Avg. Ann. sediment discharge from outlet",
+      "scenario": "mulch_30_sbs_map",
+      "units": "tonne/yr",
+      "value": 34678.1
+    },
+    {
+      "key": "Avg. Ann. total channel soil loss",
+      "scenario": "mulch_30_sbs_map",
+      "units": "tonne/yr",
+      "value": 35722.5
+    },
+    {
+      "key": "Avg. Ann. total hillslope soil loss",
+      "scenario": "mulch_30_sbs_map",
+      "units": "tonne/yr",
+      "value": 24680.7
+    },
+    {
+      "key": "Avg. Ann. water discharge from outlet",
+      "scenario": "mulch_30_sbs_map",
+      "units": "m^3/yr",
+      "value": 27640394.0
+    },
+    {
+      "key": "Sediment Delivery Ratio for Watershed",
+      "scenario": "mulch_30_sbs_map",
+      "units": "",
+      "value": 0.574
+    },
+    {
+      "key": "Avg. Ann. Sed. delivery per unit area of watershed",
+      "scenario": "mulch_60_sbs_map",
+      "units": "tonne/ha/yr",
+      "value": 6.8
+    },
+    {
+      "key": "Avg. Ann. sediment discharge from outlet",
+      "scenario": "mulch_60_sbs_map",
+      "units": "tonne/yr",
+      "value": 31266.2
+    },
+    {
+      "key": "Avg. Ann. total channel soil loss",
+      "scenario": "mulch_60_sbs_map",
+      "units": "tonne/yr",
+      "value": 35607.4
+    },
+    {
+      "key": "Avg. Ann. total hillslope soil loss",
+      "scenario": "mulch_60_sbs_map",
+      "units": "tonne/yr",
+      "value": 18824.6
+    },
+    {
+      "key": "Avg. Ann. water discharge from outlet",
+      "scenario": "mulch_60_sbs_map",
+      "units": "m^3/yr",
+      "value": 27446990.0
+    },
+    {
+      "key": "Sediment Delivery Ratio for Watershed",
+      "scenario": "mulch_60_sbs_map",
+      "units": "",
+      "value": 0.574
+    },
+    {
+      "key": "Avg. Ann. Sed. delivery per unit area of watershed",
+      "scenario": "sbs_map",
+      "units": "tonne/ha/yr",
+      "value": 9.6
+    },
+    {
+      "key": "Avg. Ann. sediment discharge from outlet",
+      "scenario": "sbs_map",
+      "units": "tonne/yr",
+      "value": 44006.7
+    },
+    {
+      "key": "Avg. Ann. total channel soil loss",
+      "scenario": "sbs_map",
+      "units": "tonne/yr",
+      "value": 35836.5
+    },
+    {
+      "key": "Avg. Ann. total hillslope soil loss",
+      "scenario": "sbs_map",
+      "units": "tonne/yr",
+      "value": 41627.3
+    },
+    {
+      "key": "Avg. Ann. water discharge from outlet",
+      "scenario": "sbs_map",
+      "units": "m^3/yr",
+      "value": 27820293.0
+    },
+    {
+      "key": "Sediment Delivery Ratio for Watershed",
+      "scenario": "sbs_map",
+      "units": "",
+      "value": 0.568
+    },
+    {
+      "key": "Avg. Ann. Sed. delivery per unit area of watershed",
+      "scenario": "undisturbed",
+      "units": "tonne/ha/yr",
+      "value": 3.0
+    },
+    {
+      "key": "Avg. Ann. sediment discharge from outlet",
+      "scenario": "undisturbed",
+      "units": "tonne/yr",
+      "value": 13973.2
+    },
+    {
+      "key": "Avg. Ann. total channel soil loss",
+      "scenario": "undisturbed",
+      "units": "tonne/yr",
+      "value": 29165.4
+    },
+    {
+      "key": "Avg. Ann. total hillslope soil loss",
+      "scenario": "undisturbed",
+      "units": "tonne/yr",
+      "value": 119.1
+    },
+    {
+      "key": "Avg. Ann. water discharge from outlet",
+      "scenario": "undisturbed",
+      "units": "m^3/yr",
+      "value": 21579339.0
+    },
+    {
+      "key": "Sediment Delivery Ratio for Watershed",
+      "scenario": "undisturbed",
+      "units": "",
+      "value": 0.477
+    }
+  ],
+  "timestamp_utc": "2026-07-06T06:16:58.033668+00:00"
+}

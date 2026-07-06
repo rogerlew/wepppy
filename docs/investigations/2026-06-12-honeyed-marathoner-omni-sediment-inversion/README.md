@@ -1,10 +1,11 @@
 # Honeyed Marathoner OMNI Sediment Inversion Investigation
 
-**Status: SUPERSEDED FOR CURRENT RERUNS (`2026-06-23`).** The original
-`2026-06-12` investigation is retained as fixture evidence for the stale
-disturbed-parameter run, but the corrected disturbed-parameter rerun no longer
-has a burned-vs-undisturbed sediment inversion. See Rerun Update and
-Conclusion.
+**Status: REOPENED FOR OMNI CONTRASTS (`2026-07-06`).** The original
+`2026-06-12` burned-vs-undisturbed hillslope inversion remains superseded for
+current reruns, but the rerun on `wepp1` has a separate current issue:
+localized `mulch_60_sbs_map` contrast runs often report higher outlet sediment
+discharge than the burned `sbs_map` control. See Rerun Update and Reopen
+Update.
 
 ## Summary
 
@@ -23,9 +24,18 @@ parameters. The current run materially changes the outcome: **0 of 471
 hillslopes invert**. The three formerly affected hillslopes now all have
 nonzero burned sediment yield that exceeds the undisturbed scenario.
 
+On `2026-07-06`, the investigation was reopened after Jackson reported mulch
+results higher than burned. That report is confirmed for OMNI contrast outputs,
+not for the full mulch scenarios or the hillslope summary. Full-scenario outlet
+sediment discharge remains ordered as burned greater than mulch greater than
+undisturbed. However, `omni/contrasts.out.parquet` contains 100 localized
+`mulch_60_sbs_map` contrasts, and 81 of them have a negative
+`control-contrast_v` for `Avg. Ann. sediment discharge from outlet`, meaning the
+mixed contrast watershed produced more outlet sediment than the burned control.
+
 The remaining root-cause sections document why the preserved stale-parameter
 fixture produced the original trace inversion. They should no longer be cited
-as the current behavior of honeyed-marathoner.
+as the current burned-vs-undisturbed hillslope behavior of honeyed-marathoner.
 
 The evidence points to a WEPP saturation-excess event-threshold behavior on one
 storm, `1992-06-16`. The open burned canopy melts its winter snowpack out about
@@ -75,6 +85,109 @@ The old undisturbed H264 `1992-06-16` storm signature is still present in the
 corrected rerun, but it no longer controls the annual ordering. The corrected
 burned H264 run now produces sediment in spring snowmelt events, so annual
 burned sediment exceeds undisturbed sediment.
+
+## Reopen Update (`2026-07-06`): Mulch Contrast Sediment Discharge
+
+Jackson's reported mulch-over-burned sediment discharge is reproduced in the
+current `wepp1` contrast artifacts, but not in the full scenario artifacts.
+
+Read-only production check:
+
+- Host: `wepp1`
+- Host timestamp: `2026-07-05T23:08:01-07:00`
+- Deployed code on `wepp1`: `b54861c5a`
+- Run path, host view: `/geodata/wc1/runs/ho/honeyed-marathoner`
+- Run path, container view: `/wc1/runs/ho/honeyed-marathoner`
+- Services checked: `rq-engine`, `rq-worker`, `rq-worker-batch`, and
+  `weppcloud` were up; `weppcloud` was healthy.
+- Audit artifact:
+  `artifacts/wepp1-reopen-20260706-omni-contrast-audit.json`
+
+Full-scenario outlet sediment discharge from
+`/wc1/runs/ho/honeyed-marathoner/omni/scenarios.out.parquet`:
+
+| Scenario | Avg. Ann. sediment discharge from outlet (tonne/yr) |
+| --- | ---: |
+| `sbs_map` | 44006.7 |
+| `mulch_15_sbs_map` | 39238.4 |
+| `mulch_30_sbs_map` | 34678.1 |
+| `mulch_60_sbs_map` | 31266.2 |
+| `undisturbed` | 13973.2 |
+
+Full-scenario and hillslope summaries therefore do not support the simple claim
+that mulch scenarios exceed burned. In
+`omni/scenarios.hillslope_summaries.parquet`, every mulch scenario has zero
+hillslopes with greater sediment yield than `sbs_map`; each has 223 lower
+hillslopes and 248 unchanged hillslopes.
+
+The contrast report is different. `omni/contrasts.out.parquet` currently holds
+100 localized `mulch_60_sbs_map` contrasts. For the outlet sediment discharge
+key, 81 of 100 rows have `control-contrast_v < 0`, so the localized mixed
+watershed result is higher than the burned control. The range is:
+
+| Target scenario | Rows | Target > control | Control > target | Min control - target (tonne/yr) | Max control - target (tonne/yr) | Mean control - target (tonne/yr) |
+| --- | ---: | ---: | ---: | ---: | ---: | ---: |
+| `mulch_60_sbs_map` | 100 | 81 | 19 | -154.0 | 1098.0 | -35.2 |
+
+Representative contrast `62` (`topaz_id=271`) has the largest negative outlet
+delta. The sidecar changes only one hillslope output path, from base burned to
+`_pups/omni/scenarios/mulch_60_sbs_map/wepp/output/H58`.
+
+For that selected hillslope, mulch reduces sediment yield:
+
+| Scenario | WEPP ID | Topaz ID | Runoff depth (mm/yr) | Sediment yield (t/yr) |
+| --- | ---: | ---: | ---: | ---: |
+| `sbs_map` | 58 | 271 | 179.998 | 12.909 |
+| `mulch_60_sbs_map` | 58 | 271 | 179.865 | 10.665 |
+
+The mixed contrast watershed still raises outlet sediment discharge:
+
+| Metric | Burned control | Contrast 62 | Control - contrast | Units |
+| --- | ---: | ---: | ---: | --- |
+| Avg. Ann. water discharge from outlet | 27820293 | 27819243 | +1050 | m^3/yr |
+| Avg. Ann. total hillslope soil loss | 41627.3 | 41567.6 | +59.7 | tonne/yr |
+| Avg. Ann. total channel soil loss | 35836.5 | 35818.1 | +18.4 | tonne/yr |
+| Avg. Ann. sediment discharge from outlet | 44006.7 | 44160.7 | -154.0 | tonne/yr |
+| Sediment Delivery Ratio for Watershed | 0.568 | 0.571 | -0.003 | |
+
+The immediate interpretation is that the selected mulch hillslope and channel
+erosion both decrease, but watershed sediment delivery changes enough that
+outlet sediment discharge can increase in the mixed contrast run. For contrast
+`62`, the annual outlet increase is dominated by `1993` (`+1630.9 tonnes`)
+and partly offset by `1990` (`-741.2 tonnes`) and smaller decreases in other
+years. This points to WEPP watershed routing/deposition behavior in localized
+mixed contrasts, not to a mulch hillslope emitting more sediment and not to the
+full mulch scenarios being higher than burned.
+
+Follow-up scratch experiments on `wepp1` used a short-path clone under
+`/wc1/scratch/hmexp-20260706T155416Z` and reran contrast `62` without mutating
+the live run. The default output contract reproduced the live contrast exactly:
+water discharge stayed `27819243 m^3/yr` and outlet sediment stayed
+`44160.7 tonne/yr`. The output-trigger sidecars were then isolated:
+
+| Scratch contrast variant | Trigger files / output switches | Water discharge (m^3/yr) | Outlet sediment (tonne/yr) | Interpretation |
+| --- | --- | ---: | ---: | --- |
+| Default contrast output | `ebe_pw0` only | 27819243 | 44160.7 | Reproduces live contrast `62` |
+| `tc.txt` only | time-of-concentration sidecar | 27819243 | 44160.7 | Does not alter sediment result |
+| `chan.inp` only | channel-output sidecar | 27819243 | 44004.8 | Alters routed sediment result |
+| `chan.inp` + `tc.txt` | all run-directory trigger sidecars | 27819243 | 44004.8 | Same as `chan.inp` only |
+| `chan.inp` + `tc.txt` + `chnwb` | all diagnostic outputs enabled | 27819243 | 44004.8 | Same sediment shift, plus large `chnwb` output |
+
+This makes the channel peak diagnostics **intrusive** for this binary/run
+contract: enabling `chan.inp` is not a passive report switch. It changes the
+watershed sediment result enough to mask the live contrast inversion. The
+diagnostic run with `chan.inp` found no material routed-peak explanation:
+annual maximum channel peaks were unchanged, only three tiny positive peak
+deltas occurred (`<= 1e-7 m^3/s`), most changed peak rows decreased, and only
+one matched channel row changed time-to-peak (`+600 s`). Those peak diagnostics
+therefore describe the `chan.inp` execution path, not the default live contrast
+execution path.
+
+Open follow-up: review whether OMNI contrast reporting should flag negative
+`control-contrast_v` values as adverse outcomes and whether contrast ranking
+should separate hillslope reduction from outlet sediment delivery response.
+Also review why WEPP's `chan.inp` sidecar changes watershed sediment routing
+instead of acting as a passive channel-output request.
 
 ## Scope
 
@@ -474,7 +587,7 @@ The focused regression test is:
 ## Artifacts
 
 `artifacts/` holds the original `2026-06-12` stale-parameter event
-water-balance evidence for H264:
+water-balance evidence for H264 plus the `2026-07-06` reopened contrast audit:
 
 - `event_water_balance_H264.png` — six-panel figure over the melt-to-storm
   window (`J115-J176`, `1992`): precipitation, snow water equivalent, daily
@@ -483,6 +596,13 @@ water-balance evidence for H264:
 - `event_water_balance_H264.csv` — the daily series behind the figure.
 - `plot_event_water_balance.py` — regenerates both from the preserved daily
   outputs plus a regenerated hourly `snow.dat`.
+- `wepp1-reopen-20260706-omni-contrast-audit.json` — read-only `wepp1` audit
+  for the reopened July contrast issue, including full-scenario totals,
+  contrast inversion counts, and representative contrast `62`.
+- `wepp1-20260706-output-sidecar-isolation.json` — scratch `wepp1` contrast
+  `62` output-trigger experiment showing that default and `tc.txt`-only runs
+  reproduce live sediment (`44160.7 tonne/yr`), while any run with `chan.inp`
+  shifts outlet sediment to `44004.8 tonne/yr`.
 
 Daily surface-water state comes from the preserved production `wat.dat` and
 `soil.dat`. Hourly data is limited to `snow.dat` (rain, snowmelt, snow depth,
@@ -549,4 +669,12 @@ print(
       'Sediment Yield (t)_undisturbed', 'delta']]
 )
 PY
+```
+
+Reopened contrast check:
+
+```bash
+ssh wepp1 'hostname; pwd; date -Is; cd /workdir/wepppy && git rev-parse --short HEAD'
+ssh wepp1 'cd /workdir/wepppy && wctl docker compose ps rq-worker-batch rq-worker rq-engine weppcloud'
+ssh wepp1 'cd /workdir/wepppy && wctl docker compose exec -T rq-worker-batch bash -lc "cd /workdir/wepppy && /opt/venv/bin/python -"'
 ```

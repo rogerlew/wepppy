@@ -273,18 +273,12 @@ def _apply_contrast_output_triggers(wepp: Wepp, output_options: Dict[str, bool])
                 wepp._prep_channel_input()
             except Exception as exc:
                 LOGGER.warning("Failed to prepare chan.inp for contrast outputs: %s", exc)
-    else:
-        if _exists(chan_inp_path):
-            os.remove(chan_inp_path)
 
     tc_path = _join(runs_dir, "tc.txt")
     if output_options.get("tcr_out", False):
         if not _exists(tc_path):
             with open(tc_path, "w", encoding="ascii", newline="\n") as fp:
                 fp.write("")
-    else:
-        if _exists(tc_path):
-            os.remove(tc_path)
 
 class OmniScenario(IntEnum):
     UniformLow = 1

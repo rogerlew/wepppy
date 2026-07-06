@@ -1,0 +1,197 @@
+{
+  "all_diag_previous": {
+    "sediment": {
+      "units": "tonne/yr",
+      "value": 44004.8
+    },
+    "water": {
+      "units": "m^3/yr",
+      "value": 27819243.0
+    }
+  },
+  "base": {
+    "sediment": {
+      "units": "tonne/yr",
+      "value": 44006.7
+    },
+    "water": {
+      "units": "m^3/yr",
+      "value": 27820293.0
+    }
+  },
+  "live_contrast_62": {
+    "sediment": {
+      "units": "tonne/yr",
+      "value": 44160.7
+    },
+    "water": {
+      "units": "m^3/yr",
+      "value": 27819243.0
+    }
+  },
+  "scratch": "/wc1/scratch/hmexp-20260706T155416Z",
+  "variants": [
+    {
+      "elapsed_s": 59.058366775512695,
+      "files": {
+        "chan.out": {
+          "exists": true,
+          "size": 118453
+        },
+        "chanwb.out": {
+          "exists": true,
+          "size": 289748
+        },
+        "chnwb.txt": {
+          "exists": false,
+          "size": null
+        },
+        "ebe_pw0.txt": {
+          "exists": true,
+          "size": 274412
+        },
+        "interchange/loss_pw0.out.parquet": {
+          "exists": true,
+          "size": 2314
+        },
+        "loss_pw0.txt": {
+          "exists": true,
+          "size": 1025938
+        },
+        "pass_pw0.txt": {
+          "exists": true,
+          "size": 64153259
+        },
+        "tc_out.txt": {
+          "exists": false,
+          "size": null
+        }
+      },
+      "name": "manual-chan-only",
+      "ok": true,
+      "options": {
+        "chan": true,
+        "chnwb": false,
+        "tcr": false
+      },
+      "output": "/wc1/scratch/hmexp-20260706T155416Z/_pups/omni/contrasts/manual-chan-only/wepp/output",
+      "runs": "/wc1/scratch/hmexp-20260706T155416Z/_pups/omni/contrasts/manual-chan-only/wepp/runs",
+      "sediment": {
+        "units": "tonne/yr",
+        "value": 44004.8
+      },
+      "water": {
+        "units": "m^3/yr",
+        "value": 27819243.0
+      }
+    },
+    {
+      "elapsed_s": 161.70494413375854,
+      "files": {
+        "chan.out": {
+          "exists": false,
+          "size": null
+        },
+        "chanwb.out": {
+          "exists": false,
+          "size": null
+        },
+        "chnwb.txt": {
+          "exists": false,
+          "size": null
+        },
+        "ebe_pw0.txt": {
+          "exists": true,
+          "size": 537
+        },
+        "interchange/loss_pw0.out.parquet": {
+          "exists": true,
+          "size": 2316
+        },
+        "loss_pw0.txt": {
+          "exists": true,
+          "size": 1025938
+        },
+        "pass_pw0.txt": {
+          "exists": true,
+          "size": 64153259
+        },
+        "tc_out.txt": {
+          "exists": true,
+          "size": 24746438
+        }
+      },
+      "name": "manual-tcr-only",
+      "ok": true,
+      "options": {
+        "chan": false,
+        "chnwb": false,
+        "tcr": true
+      },
+      "output": "/wc1/scratch/hmexp-20260706T155416Z/_pups/omni/contrasts/manual-tcr-only/wepp/output",
+      "runs": "/wc1/scratch/hmexp-20260706T155416Z/_pups/omni/contrasts/manual-tcr-only/wepp/runs",
+      "sediment": {
+        "units": "tonne/yr",
+        "value": 44160.7
+      },
+      "water": {
+        "units": "m^3/yr",
+        "value": 27819243.0
+      }
+    },
+    {
+      "elapsed_s": 60.93840789794922,
+      "files": {
+        "chan.out": {
+          "exists": true,
+          "size": 118453
+        },
+        "chanwb.out": {
+          "exists": true,
+          "size": 289748
+        },
+        "chnwb.txt": {
+          "exists": false,
+          "size": null
+        },
+        "ebe_pw0.txt": {
+          "exists": true,
+          "size": 274412
+        },
+        "interchange/loss_pw0.out.parquet": {
+          "exists": true,
+          "size": 2314
+        },
+        "loss_pw0.txt": {
+          "exists": true,
+          "size": 1025938
+        },
+        "pass_pw0.txt": {
+          "exists": true,
+          "size": 64153259
+        },
+        "tc_out.txt": {
+          "exists": true,
+          "size": 24746438
+        }
+      },
+      "name": "manual-chan-tcr",
+      "ok": true,
+      "options": {
+        "chan": true,
+        "chnwb": false,
+        "tcr": true
+      },
+      "output": "/wc1/scratch/hmexp-20260706T155416Z/_pups/omni/contrasts/manual-chan-tcr/wepp/output",
+      "runs": "/wc1/scratch/hmexp-20260706T155416Z/_pups/omni/contrasts/manual-chan-tcr/wepp/runs",
+      "sediment": {
+        "units": "tonne/yr",
+        "value": 44004.8
+      },
+      "water": {
+        "units": "m^3/yr",
+        "value": 27819243.0
+      }
+    }
+  ]
+}

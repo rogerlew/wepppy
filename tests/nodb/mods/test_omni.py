@@ -278,7 +278,7 @@ def omni_module():
             sys.modules.pop(name, None)
 
 
-def test_apply_contrast_output_triggers_creates_and_removes_files(tmp_path, omni_module):
+def test_apply_contrast_output_triggers_creates_missing_diagnostics(tmp_path, omni_module):
     runs_dir = tmp_path / "runs"
     runs_dir.mkdir()
     created = {"chan": 0}
@@ -303,13 +303,29 @@ def test_apply_contrast_output_triggers_creates_and_removes_files(tmp_path, omni
     assert (runs_dir / "tc.txt").exists()
     assert created["chan"] == 1
 
+
+def test_apply_contrast_output_triggers_preserves_inherited_sidecars(tmp_path, omni_module):
+    runs_dir = tmp_path / "runs"
+    runs_dir.mkdir()
+    (runs_dir / "chan.inp").write_text("base-channel-sidecar", encoding="ascii")
+    (runs_dir / "tc.txt").write_text("base-tc-sidecar", encoding="ascii")
+
+    class DummyWepp:
+        def __init__(self, runs_dir):
+            self.runs_dir = str(runs_dir)
+
+        def _prep_channel_input(self):
+            raise AssertionError("existing base chan.inp should not be regenerated")
+
+    wepp = DummyWepp(runs_dir)
+
     omni_module._apply_contrast_output_triggers(
         wepp,
         {"chan_out": False, "tcr_out": False},
     )
 
-    assert not (runs_dir / "chan.inp").exists()
-    assert not (runs_dir / "tc.txt").exists()
+    assert (runs_dir / "chan.inp").read_text(encoding="ascii") == "base-channel-sidecar"
+    assert (runs_dir / "tc.txt").read_text(encoding="ascii") == "base-tc-sidecar"
 
 
 @pytest.mark.parametrize(
