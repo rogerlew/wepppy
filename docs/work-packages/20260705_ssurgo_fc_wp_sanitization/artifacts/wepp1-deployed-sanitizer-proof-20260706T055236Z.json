@@ -1,0 +1,8 @@
+{
+  "serializer_uses_guard": true,
+  "ssurgo_file": "/workdir/wepppy/wepppy/soils/ssurgo/ssurgo.py",
+  "ssurgo_has_fc_wp_guard": true,
+  "ssurgo_horizon_uses_guard": true,
+  "wepp_soil_util_file": "/workdir/wepppy/wepppy/wepp/soils/utils/wepp_soil_util.py",
+  "wepp_soil_util_has_fc_wp_guard": true
+}

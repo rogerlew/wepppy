@@ -20,10 +20,10 @@ WEPPcloud users should be able to rerun the affected NASA ROSES batch without WE
 - [x] (2026-07-06 05:35 UTC) Updated durable SSURGO docs.
 - [x] (2026-07-06 05:35 UTC) Ran targeted tests and recorded results.
 - [x] (2026-07-06 05:35 UTC) Provided production invalidation command, gated on deployment.
-- [ ] Deploy sanitizer to wepp1.
+- [x] (2026-07-06 05:52 UTC) Confirmed sanitizer deployed to wepp1 `rq-worker-batch`.
 - [x] (2026-07-06 05:40 UTC) Ran production invalidation dry-run on wepp1 without timestamp deletion.
 - [x] (2026-07-06 06:05 UTC) Dispositioned subagent review findings with edge-case tests and hardened invalidation runbook.
-- [ ] Execute production invalidation on wepp1 after deployment.
+- [x] (2026-07-06 05:55 UTC) Executed production invalidation on wepp1 after deployment and confirmed target timestamps were removed.
 
 ## Surprises & Discoveries
 
@@ -48,7 +48,7 @@ WEPPcloud users should be able to rerun the affected NASA ROSES batch without WE
 
 ## Outcomes & Retrospective
 
-Local implementation is complete. The sanitizer now repairs invalid SSURGO-generated `fc`/`wp` pairs using Rosetta, and `WeppSoilUtil` repairs invalid legacy values during conversion while rejecting invalid values at final serialization. Targeted tests passed in the project Docker environment. Subagent review findings were dispositioned by adding edge-case tests and strengthening the production invalidation runbook. The production invalidation dry-run checked 39 runids with none missing; live invalidation remains pending until fixed code is deployed to wepp1.
+Local implementation is complete. The sanitizer now repairs invalid SSURGO-generated `fc`/`wp` pairs using Rosetta, and `WeppSoilUtil` repairs invalid legacy values during conversion while rejecting invalid values at final serialization. Targeted tests passed in the project Docker environment. Subagent review findings were dispositioned by adding edge-case tests and strengthening the production invalidation runbook. Production invalidation was executed on wepp1 after deployed-code and active-job preflight gates passed; the postcheck confirmed all target timestamps were missing for the 39 affected runids.
 
 ## Context and Orientation
 
@@ -92,7 +92,7 @@ Work from `/home/workdir/wepppy`.
 
 The targeted tests must pass. The SSURGO affected-mukey test must fail before the sanitizer because it would serialize `nan` or a sentinel negative value, and pass after the sanitizer by showing finite `fc`/`wp` values. The 9002 conversion test must show the legacy columns and appended Rosetta values are finite, with no `nan`, `inf`, or `-9.9` in serialized soil rows.
 
-Production acceptance requires the affected runids to become retry-eligible after timestamp invalidation and to rebuild soils before rerunning WEPP hillslopes. The invalidation step is not complete until fixed code is deployed to wepp1 workers.
+Production acceptance requires the affected runids to become retry-eligible after timestamp invalidation and to rebuild soils before rerunning WEPP hillslopes. The invalidation step is complete: fixed code was confirmed in `rq-worker-batch`, live timestamp deletion checked 39 runids with none missing, and postcheck found no remaining target timestamps. The batch rerun and rebuilt-output verification remain the next operational step.
 
 ## Idempotence and Recovery
 
@@ -167,6 +167,16 @@ Dry-run evidence from 2026-07-06:
 
 The dry-run showed `build_soils` still timestamped and the downstream WEPP/OMNI task timestamps already missing for the affected runids.
 
+Live invalidation evidence from 2026-07-06:
+
+    deployed proof artifact: docs/work-packages/20260705_ssurgo_fc_wp_sanitization/artifacts/wepp1-deployed-sanitizer-proof-20260706T055236Z.json
+    active-job preflight artifact: docs/work-packages/20260705_ssurgo_fc_wp_sanitization/artifacts/wepp1-active-batch-jobs-20260706T055256Z.json
+    dry-run artifact: docs/work-packages/20260705_ssurgo_fc_wp_sanitization/artifacts/wepp1-invalidation-dry-run-20260706T055321Z.jsonl
+    live artifact: docs/work-packages/20260705_ssurgo_fc_wp_sanitization/artifacts/wepp1-invalidation-live-20260706T055437Z.jsonl
+    postcheck artifact: docs/work-packages/20260705_ssurgo_fc_wp_sanitization/artifacts/wepp1-invalidation-postcheck-20260706T055514Z.json
+
+The live invalidation checked 39 runids, found none missing, and removed target timestamps for `build_soils`, `run_wepp_hillslopes`, `run_wepp_watershed`, `run_omni_scenarios`, `run_geneva`, and `run_path_ce`. The postcheck reported `checked=39`, `missing=[]`, `non_null=[]`, and `ok=true`.
+
 ## Interfaces and Dependencies
 
 No new external dependencies are allowed. Use the existing `rosetta.Rosetta2` and `rosetta.Rosetta3` classes already imported by SSURGO and imported lazily by `WeppSoilUtil`.
@@ -189,3 +199,5 @@ Names may differ if the implementation keeps the same semantics.
 2026-07-06: Updated after wepp1 dry-run. The command now uses `/opt/venv/bin/python` inside `rq-worker`, because plain `python` did not load the application dependencies in that container.
 
 2026-07-06: Updated after subagent review. The invalidation procedure now uses `rq-worker-batch`, requires deployed-code and active-job preflight gates, emits JSONL for audit/rollback, and includes optional `run_geneva` and `run_path_cost_effective` downstream timestamps while still excluding `run_omni_contrasts`.
+
+2026-07-06: Updated after production invalidation. wepp1 deployed-code proof and active-job preflight passed, live invalidation checked 39 runids with none missing, and postcheck confirmed all target timestamps were removed.

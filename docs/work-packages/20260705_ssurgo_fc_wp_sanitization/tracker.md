@@ -6,9 +6,9 @@
 
 **Timezone**: UTC  
 **Started**: 2026-07-06 05:11 UTC  
-**Current phase**: Production invalidation pending deployment  
-**Last updated**: 2026-07-06 05:40 UTC  
-**Next milestone**: Deploy sanitizer to wepp1, then invalidate affected runids  
+**Current phase**: Production invalidation complete; batch rerun pending
+**Last updated**: 2026-07-06 05:56 UTC
+**Next milestone**: Re-run `nasa-roses-202606-psbs` so affected runids queue with rebuilt soils
 **Security impact**: none  
 **Dedicated security review**: no  
 **Security artifact**: N/A
@@ -16,14 +16,13 @@
 ## Task Board
 
 ### Ready / Backlog
-- [ ] Deploy sanitizer to wepp1 worker containers and capture `rq-worker-batch` proof.
-- [ ] Execute production invalidation command for affected runids after deployment and save JSONL artifact.
+- [ ] Re-run `nasa-roses-202606-psbs` and verify affected runids rebuild soils before WEPP hillslopes.
 
 ### In Progress
-- [ ] Production invalidation is staged but not executed.
+- None.
 
 ### Blocked
-- [ ] Production invalidation execution - blocked until fixed code is deployed to wepp1 worker containers.
+- None.
 
 ### Done
 - [x] Created work package, tracker, active ExecPlan, and parameterization ADR draft (2026-07-06 05:11 UTC).
@@ -35,6 +34,10 @@
 - [x] Ran targeted tests through `wctl run-pytest` with 64 passed after review disposition (2026-07-06 06:15 UTC).
 - [x] Ran production invalidation dry-run on wepp1; checked 39 runids, missing 0, `DRY_RUN=True` (2026-07-06 05:40 UTC).
 - [x] Dispositioned subagent review findings with edge-case tests and hardened invalidation runbook (2026-07-06 06:05 UTC).
+- [x] Captured deployed sanitizer proof from `rq-worker-batch` on wepp1 (artifact `wepp1-deployed-sanitizer-proof-20260706T055236Z.json`).
+- [x] Confirmed active-job zero preflight for affected batch runids (artifact `wepp1-active-batch-jobs-20260706T055256Z.json`).
+- [x] Executed live production invalidation on wepp1; checked 39 runids, missing 0, `DRY_RUN=False` (artifact `wepp1-invalidation-live-20260706T055437Z.jsonl`).
+- [x] Ran post-invalidation read-back check; checked 39 runids, no missing runs, no remaining target timestamps (artifact `wepp1-invalidation-postcheck-20260706T055514Z.json`).
 
 ## Timeline
 
@@ -42,6 +45,7 @@
 - **2026-07-06 05:35 UTC** - Local implementation, docs, ADR, and targeted tests completed; production invalidation remains gated on deployment.
 - **2026-07-06 05:40 UTC** - wepp1 invalidation dry-run succeeded with `/opt/venv/bin/python`; live invalidation not executed.
 - **2026-07-06 06:05 UTC** - Subagent review disposition added rollback/audit artifacts, `rq-worker-batch` preflight gates, optional downstream timestamps, and edge-case tests.
+- **2026-07-06 05:55 UTC** - wepp1 live invalidation executed from `rq-worker-batch`; postcheck confirmed all target timestamps are missing for the 39 affected runids.
 
 ## Decisions Log
 
@@ -74,13 +78,13 @@
 | Risk | Severity | Likelihood | Mitigation | Status |
 |------|----------|------------|------------|--------|
 | Rosetta returns invalid values for an affected horizon | Medium | Low | Validate Rosetta output and raise `ValueError` with horizon context | Open |
-| Production invalidation runs before fixed code is deployed | High | Medium | Require `rq-worker-batch` sanitizer proof and active-job zero preflight before live mutation | Open |
+| Production invalidation runs before fixed code is deployed | High | Medium | Require `rq-worker-batch` sanitizer proof and active-job zero preflight before live mutation | Closed |
 | Guard rejects unusual but intentionally supplied soils | Medium | Low | Use broad physical fraction range `0 <= wp <= fc <= 1` and targeted tests | Open |
 
 ## Hardening Signal Log
 
 - **Baseline health signals**: 39 NASA ROSES runids failed WEPP hillslopes; representative failing `.sol` rows contained `-9.9 nan`.
-- **Post-change health signals**: targeted tests pass; production rerun remains pending deployment and live invalidation.
+- **Post-change health signals**: targeted tests pass; deployed sanitizer proof passed; live invalidation postcheck passed; production rerun remains pending.
 - **Danger signals observed**: existing `isfloat()` accepted `nan`; WEPP Fortran consumed `thetd2` after read instead of discarding it.
 - **Temporary callus register**: none.
 - **Softening experiments**: N/A.
@@ -109,7 +113,7 @@
 
 ### Deployment
 - [x] Production invalidation procedure documented.
-- [ ] Invalidation executed only after fixed code is deployed.
+- [x] Invalidation executed only after fixed code is deployed.
 
 ## Progress Notes
 
@@ -168,6 +172,24 @@
 - Run live invalidation only after preflight gates pass.
 
 **Test results**: `PATH=/home/workdir/wepppy/.venv/bin:$PATH wctl run-pytest tests/soils/test_ssurgo_fc_wp_sanitization.py tests/wepp/soils/utils/test_wepp_soil_util.py` passed: 64 passed, 2 warnings.
+
+### 2026-07-06 05:56 UTC: Production invalidation executed
+**Agent/Contributor**: Codex
+
+**Work completed**:
+- Verified wepp1 was running deployed commit `b54861c5a` and that `rq-engine`, `rq-worker`, `rq-worker-batch`, and `weppcloud` were up.
+- Captured deployed sanitizer proof from `rq-worker-batch`.
+- Confirmed there were no active `batch` queue jobs for `nasa-roses-202606-psbs` or the 39 affected runids.
+- Executed live timestamp invalidation for `build_soils`, `run_wepp_hillslopes`, `run_wepp_watershed`, `run_omni_scenarios`, `run_geneva`, and `run_path_ce`.
+- Ran a postcheck that found no remaining target timestamps for the affected runids.
+
+**Blockers encountered**:
+- None.
+
+**Next steps**:
+- Re-run `nasa-roses-202606-psbs` so the affected runids queue and rebuild soils before WEPP hillslopes.
+
+**Test results**: Production read-back check passed: 39 checked, 0 missing, 0 non-null target timestamps.
 
 ## Production Invalidation Procedure
 
@@ -312,4 +334,4 @@ test "${PIPESTATUS[0]}" -eq 0
 
 The dry-run on 2026-07-06 checked all 39 runids with none missing. At that time `build_soils` had timestamps and `run_wepp_hillslopes`, `run_wepp_watershed`, and `run_omni_scenarios` were already missing for the affected runids.
 
-After inspecting the dry-run artifact, set `DRY_RUN = False`, change the artifact filename prefix to `wepp1-invalidation-live-`, and rerun the same command. Expected result after execution: each listed task has `None` for `after`, making the run retry-eligible for soil rebuild and downstream derived work. `run_omni_contrasts` is intentionally excluded because batch completion excludes it and contrast rerun is a separate decision.
+The live invalidation on 2026-07-06 checked all 39 runids with none missing and `DRY_RUN=False`. The postcheck reported `checked=39`, `missing=[]`, `non_null=[]`, and `ok=true`. The affected runids are now retry-eligible for soil rebuild and downstream derived work. `run_omni_contrasts` is intentionally excluded because batch completion excludes it and contrast rerun is a separate decision.
