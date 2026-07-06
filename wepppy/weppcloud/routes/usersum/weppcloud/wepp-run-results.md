@@ -50,7 +50,7 @@ Use these links after a successful WEPP run to answer different kinds of questio
 
 - **What it is for:** A recurrence-interval view of modeled event metrics such as precipitation, runoff, peak discharge, and sediment yield.
 - **When to use it:** Use it when you need frequency-style interpretation such as "about a 2-year" or "10-year" modeled event under the run's climate and land conditions.
-- **Cautions and limits:** These are modeled return periods from the run's event set, not observed gage statistics or a regulatory flood study. They depend on the simulated climate, exclusions, and selected metric.
+- **Cautions and limits:** These are modeled return periods from the run's event set, not observed gage statistics or a regulatory flood study. They depend on the simulated climate, exclusions, and selected metric. When months are excluded in CTA mode, the report removes those months from the event set and recalculates the effective days per year from the included season. Interpret those return periods as recurrence within the included seasonal window, not the full calendar year. If a core measure reports no events, no top-ranked events for that measure survived the selected year and month filters.
 - **Do not confuse it with:** NOAA Atlas 14 precipitation products or `Storm Event Analyzer`, which helps you inspect specific storms rather than summarize recurrence intervals.
 
 ### `Summary by Landuse Report`

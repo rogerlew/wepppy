@@ -70,7 +70,9 @@ This guide captures the DuckDB-backed report pipelines that translate WEPP inter
 - **Staging procedure**:
   1. Use DuckDB to join the event table `ebe_pw0.parquet` with the climate parquet
      and any hillslope/channels tables needed for the metrics shown in the report.
-  2. Apply year/month exclusions in SQL to trim the candidate event set.
+  2. Persist the full staged event set plus year/month event counts. Year and
+     month exclusions are applied later by `ReturnPeriodDataset.create_report()`
+     so one staged parquet pair can serve multiple report filter combinations.
   3. For each metric (runoff, peak discharge, sediment yield, phosphorus, hill
      sediment delivery, hill streamflow, etc.), compute a descending rank (dense)
      and keep only the top *N* rows, where *N* ≥ max recurrence interval + buffer
@@ -85,8 +87,26 @@ This guide captures the DuckDB-backed report pipelines that translate WEPP inter
     computes Weibull positions for the requested recurrence intervals, resolves the
     appropriate events by rank, and returns the same structure the template expects
     today (measure → period → values + units, Weibull rank/T, etc.).
+  - For CTA reports with excluded months, compute the effective days per year from
+    the filtered event-count table and use that basis for both CTA recurrence-rank
+    selection and displayed Weibull T. Interpret these results as recurrence within
+    the included seasonal window, not the full calendar year.
+  - Always render the core report measures (precipitation depth, runoff, peak
+    discharge, sediment yield). If no ranked rows for a core measure survive the
+    selected filters, the report should show an explicit no-events state rather
+    than omit the measure.
   - Provide a helper (e.g., `refresh_return_period_events(wd)`) that regenerates the
     staged parquet files when a run is updated.
+- **Runtime and cache split**:
+  - The RQ postprocess task `_analyze_return_periods_rq` builds or refreshes the
+    staged parquet assets and TSV exports during the WEPP pipeline.
+  - The Flask `weppcloud` report route calls `Wepp.report_return_periods()`
+    synchronously when a user opens the report. That call reads/writes meoized
+    JSON caches under `wepp/output/return_periods*.json`.
+  - To force UI report regeneration without rerunning WEPP, remove only the
+    matching `wepp/output/return_periods*.json` cache files and leave
+    `wepp/output/interchange/return_period_events.parquet` and
+    `return_period_event_ranks.parquet` intact.
 - **Reboot prompt for implementation phase**:
   > “Rebuild `ReturnPeriods` using the staged query-engine approach: generate
   > `return_period_events.parquet` and `return_period_event_ranks.parquet` from

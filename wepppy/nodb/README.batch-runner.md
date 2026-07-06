@@ -341,7 +341,7 @@ Test fixture: `tests/data/batch_runner/simple.geojson` (3 Point features).
 
 - Per-watershed failures are caught and logged to `runs/<runid>/run_metadata.json` with error type, message, and timing
 - Failures emit `EXCEPTION_JSON` on the status channel but do not abort sibling jobs
-- The finalizer job (`_final_batch_complete_rq`) runs after all watershed jobs complete (including failed ones) via RQ `depends_on`
+- The finalizer job (`_final_batch_complete_rq`) runs after all watershed jobs reach a terminal state, including failed jobs, via a failure-tolerant RQ `Dependency(allow_failure=True)`. If dependencies are already terminal when the finalizer is created, the orchestrator releases the deferred finalizer immediately so batch summaries do not remain stuck behind failed leaves.
 
 ### Known Limitations
 
