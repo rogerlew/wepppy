@@ -2191,8 +2191,48 @@ class SurgoSoilCollection(object):
     ) -> None:
         """Write WEPP soil build logs for invalid/failed mukeys."""
         assert self.invalidSoils is not None
-        for weppSoil in self.invalidSoils.values():
+        for mukey, weppSoil in self.invalidSoils.items():
+            if weppSoil is None:
+                self._write_missing_wepp_soil_log(
+                    mukey,
+                    wd=wd,
+                    overwrite=overwrite,
+                    db_build=db_build,
+                )
+                continue
+
             weppSoil.write_log(wd, overwrite, db_build=db_build)
+
+    @staticmethod
+    def _write_missing_wepp_soil_log(
+        mukey: int,
+        *,
+        wd: str,
+        overwrite: bool,
+        db_build: bool,
+    ) -> None:
+        """Write a placeholder log when a worker failed before returning a soil."""
+        assert _exists(wd), wd
+        mukey_s = str(mukey)
+        if db_build:
+            wd = _join(wd, mukey_s[:3])
+            if not _exists(wd):
+                os.mkdir(wd)
+
+        fname = _join(wd, f"{mukey_s}.log")
+        if _exists(fname):
+            if overwrite:
+                os.remove(fname)
+            else:
+                return
+
+        txt = (
+            f"WEPP soil build failed for mukey {mukey_s} before a soil object "
+            "was produced. Check the worker exception log for the underlying "
+            "traceback."
+        )
+        with open(fname, "w") as fp:
+            fp.write(txt)
 
     def _sync(self, table, fetch_func, keyname, keys, insert_null_data=True) -> int:
         conn, cur = self.conn, self.cur

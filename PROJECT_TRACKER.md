@@ -281,16 +281,16 @@ Currently active work packages. Limit to 2-4 packages to maintain focus.
 
 ### SSURGO FC/WP Sanitization
 **Started**: 2026-07-05
-**Status**: Local implementation complete; production invalidation pending deployment
+**Status**: Sanitizer deployed and invalidation complete; invalid-soil logging follow-up complete locally
 **Size**: Medium (single focused session)
 **Owner**: Codex
 **Priority**: High
 **Link**: [docs/work-packages/20260705_ssurgo_fc_wp_sanitization/](docs/work-packages/20260705_ssurgo_fc_wp_sanitization/)
-**Description**: Sanitize SSURGO-generated field-capacity and wilting-point values after NASA ROSES batch runs produced WEPP soil files containing `-9.9 nan`, enforce the same guard in `WeppSoilUtil`, and document timestamp-based invalidation for affected production runids.
+**Description**: Sanitize SSURGO-generated field-capacity and wilting-point values after NASA ROSES batch runs produced WEPP soil files containing `-9.9 nan`, enforce the same guard in `WeppSoilUtil`, document timestamp-based invalidation for affected production runids, and harden invalid-soil diagnostic logging for failed-worker mukeys.
 
-**Current Focus**: Deploy the sanitizer to wepp1, then run the documented timestamp invalidation with `DRY_RUN = False`.
+**Current Focus**: Deploy the invalid-soil logging follow-up to wepp1, then rerun the NASA ROSES batch.
 
-**Next Steps**: Deploy fixed worker code, invalidate the 39 affected runids, and rerun the NASA ROSES batch.
+**Next Steps**: Deploy the logging follow-up, rerun the NASA ROSES batch, and verify affected runids rebuild soils before WEPP hillslopes.
 
 ---
 

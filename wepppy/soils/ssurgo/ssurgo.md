@@ -695,11 +695,13 @@ ssc.makeWeppSoils(
 
 **Progress Monitoring:**
 - Completed task count logged every 60 seconds
-- Invalid soils logged with exceptions
+- Invalid soil worker exceptions logged by the parent process
+- `logInvalidSoils()` writes detailed logs for invalid `WeppSoil` objects and
+  placeholder `<mukey>.log` files for failed workers that returned `None`
 - Results collected via `concurrent.futures.wait()`
 
 **Error Handling:**
-- Worker exceptions propagate to main process
+- Worker exceptions are caught in the parent collection loop and logged with mukey context
 - Failed mukeys added to `invalidSoils` with `None` value
 - Partial success allowed (some mukeys valid, others invalid)
 

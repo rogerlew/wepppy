@@ -24,6 +24,8 @@ WEPPcloud users should be able to rerun the affected NASA ROSES batch without WE
 - [x] (2026-07-06 05:40 UTC) Ran production invalidation dry-run on wepp1 without timestamp deletion.
 - [x] (2026-07-06 06:05 UTC) Dispositioned subagent review findings with edge-case tests and hardened invalidation runbook.
 - [x] (2026-07-06 05:55 UTC) Executed production invalidation on wepp1 after deployment and confirmed target timestamps were removed.
+- [x] (2026-07-06 15:47 UTC) Hardened `SurgoSoilCollection.logInvalidSoils()` after the post-invalidation Omni rerun path hit `AttributeError: 'NoneType' object has no attribute 'write_log'`.
+- [ ] Deploy the invalid-soil logging follow-up to wepp1 worker containers and rerun the affected batch path.
 
 ## Surprises & Discoveries
 
@@ -33,6 +35,8 @@ WEPPcloud users should be able to rerun the affected NASA ROSES batch without WE
   Evidence: `isfloat()` only attempts `float(f)` and does not call `math.isfinite()`.
 - Observation: Batch retry eligibility is timestamp-based.
   Evidence: `wepppy/nodb/batch_runner.py` queues enabled tasks when the corresponding `RedisPrep` timestamp is missing; `RedisPrep.remove_timestamp()` deletes the timestamp and persists `redisprep.dump`.
+- Observation: SSURGO worker exceptions are intentionally represented as `invalidSoils[mukey] = None`, but `logInvalidSoils()` assumed every invalid entry was a `WeppSoil`.
+  Evidence: `makeWeppSoils()` assigns `invalidSoils[mukey] = None` in its `except` block; the post-invalidation Omni scenario traceback failed at `weppSoil.write_log()` with `AttributeError: 'NoneType' object has no attribute 'write_log'`.
 
 ## Decision Log
 
@@ -45,10 +49,13 @@ WEPPcloud users should be able to rerun the affected NASA ROSES batch without WE
 - Decision: For production rerun, invalidate `build_soils` plus downstream WEPP and OMNI timestamps, not whole run directories.
   Rationale: This preserves diagnostics and forces rebuilt soil inputs before hillslope rerun.
   Date/Author: 2026-07-06 / Codex
+- Decision: Keep partial-success soil builds and write placeholder invalid-soil logs for failed-worker `None` entries.
+  Rationale: Re-raising all worker failures would broaden behavior and stop existing dominant-soil fallback paths. Silently skipping `None` entries would lose per-mukey diagnostics. A placeholder `<mukey>.log` preserves the invalid mukey signal while the parent process keeps the traceback in the worker log.
+  Date/Author: 2026-07-06 / Codex
 
 ## Outcomes & Retrospective
 
-Local implementation is complete. The sanitizer now repairs invalid SSURGO-generated `fc`/`wp` pairs using Rosetta, and `WeppSoilUtil` repairs invalid legacy values during conversion while rejecting invalid values at final serialization. Targeted tests passed in the project Docker environment. Subagent review findings were dispositioned by adding edge-case tests and strengthening the production invalidation runbook. Production invalidation was executed on wepp1 after deployed-code and active-job preflight gates passed; the postcheck confirmed all target timestamps were missing for the 39 affected runids.
+Local implementation is complete for both the original FC/WP sanitizer and the invalid-soil logging follow-up. The sanitizer now repairs invalid SSURGO-generated `fc`/`wp` pairs using Rosetta, and `WeppSoilUtil` repairs invalid legacy values during conversion while rejecting invalid values at final serialization. The logging follow-up prevents failed-worker invalid mukeys from crashing `logInvalidSoils()` and writes placeholder mukey logs instead. Targeted tests passed in the project Docker environment. Subagent review findings were dispositioned by adding edge-case tests and strengthening the production invalidation runbook. Production invalidation was executed on wepp1 after deployed-code and active-job preflight gates passed; the postcheck confirmed all target timestamps were missing for the 39 affected runids. The remaining operational step is to deploy the invalid-soil logging follow-up before rerunning the affected batch path again.
 
 ## Context and Orientation
 
@@ -57,6 +64,8 @@ Local implementation is complete. The sanitizer now repairs invalid SSURGO-gener
 `wepppy/wepp/soils/utils/wepp_soil_util.py` parses existing `.sol` files, migrates them between WEPP soil versions, and serializes them. For datver 9002 and later, it writes the legacy 7778-style row and appends van Genuchten/Rosetta parameters, including appended `wp` and `fc`. Both the legacy columns and appended values must be finite.
 
 The production failure was observed under `/wc1/batch/nasa-roses-202606-psbs/`. Failed hillslope runs used `wepp_260606_hill` and returned `-8` with a Fortran floating-point exception. Affected rows had values like `-9.9 nan` in the legacy `fc wp` columns.
+
+The follow-up failure was observed during an Omni scenario soils rebuild after production invalidation. `SurgoSoilCollection.makeWeppSoils()` stores failed worker mukeys in `invalidSoils` with the value `None`; `SurgoSoilCollection.logInvalidSoils()` must therefore handle both real invalid `WeppSoil` objects and failed-worker `None` entries.
 
 ## Plan of Work
 
@@ -69,6 +78,8 @@ Third, add tests. The SSURGO test should use affected production mukeys, includi
 Fourth, update `wepppy/soils/ssurgo/ssurgo.md`, `docs/adrs/README.md`, this ExecPlan, and the package tracker. Run targeted tests through `wctl run-pytest`.
 
 Finally, provide the wepp1 invalidation command. It must remove `build_soils`, `run_wepp_hillslopes`, `run_wepp_watershed`, and `run_omni_scenarios` timestamps for the 39 affected runids after the fixed code is deployed to worker containers.
+
+Follow-up work adds a narrow diagnostic hardening in `wepppy/soils/ssurgo/ssurgo.py`: `logInvalidSoils()` should iterate `invalidSoils.items()`, call `WeppSoil.write_log()` for real invalid soil objects, and write a deterministic placeholder `<mukey>.log` when the value is `None`. This preserves partial-success behavior and gives operators a file-level signal for failed mukeys.
 
 ## Concrete Steps
 
@@ -87,16 +98,28 @@ Work from `/home/workdir/wepppy`.
        64 passed, 2 warnings in 11.02s
 
 6. Before production invalidation, confirm deployed code on wepp1 includes the sanitizer. Then execute a timestamp invalidation script inside the worker container using the affected runid list.
+7. Patch `SurgoSoilCollection.logInvalidSoils()` and add a regression in `tests/soils/test_ssurgo_cache.py` for a mixed invalid-soil set containing a failed-worker `None` entry.
+8. Run:
+
+       wctl run-pytest tests/soils/test_ssurgo_cache.py tests/nodb/test_soils_gridded_root_creation.py tests/soils/test_ssurgo_fc_wp_sanitization.py --maxfail=1
+
+   Observed 2026-07-06:
+
+       23 passed, 2 warnings in 7.96s
 
 ## Validation and Acceptance
 
 The targeted tests must pass. The SSURGO affected-mukey test must fail before the sanitizer because it would serialize `nan` or a sentinel negative value, and pass after the sanitizer by showing finite `fc`/`wp` values. The 9002 conversion test must show the legacy columns and appended Rosetta values are finite, with no `nan`, `inf`, or `-9.9` in serialized soil rows.
 
-Production acceptance requires the affected runids to become retry-eligible after timestamp invalidation and to rebuild soils before rerunning WEPP hillslopes. The invalidation step is complete: fixed code was confirmed in `rq-worker-batch`, live timestamp deletion checked 39 runids with none missing, and postcheck found no remaining target timestamps. The batch rerun and rebuilt-output verification remain the next operational step.
+The invalid-soil logging follow-up must prove that `logInvalidSoils()` does not raise when an invalid entry has value `None`; it must write a placeholder log naming the mukey and must still call `write_log()` for invalid object entries.
+
+Production acceptance requires the affected runids to become retry-eligible after timestamp invalidation and to rebuild soils before rerunning WEPP hillslopes. The invalidation step is complete: fixed code was confirmed in `rq-worker-batch`, live timestamp deletion checked 39 runids with none missing, and postcheck found no remaining target timestamps. The invalid-soil logging follow-up must be deployed before the next rerun. The batch rerun and rebuilt-output verification remain the next operational step.
 
 ## Idempotence and Recovery
 
 The code and test edits are additive and can be reapplied normally by git. The production invalidation script is idempotent: removing an already missing task timestamp leaves the run retry-eligible. Do not delete run directories. If invalidation is performed too early, deploy the fix and rerun the same invalidation script to ensure `build_soils` remains missing.
+
+The invalid-soil logging follow-up is idempotent. Re-running `logInvalidSoils()` with `overwrite=True` replaces the same placeholder `<mukey>.log`; with `overwrite=False`, existing logs are preserved.
 
 ## Artifacts and Notes
 
@@ -190,6 +213,12 @@ Required local helper behavior:
 
 Names may differ if the implementation keeps the same semantics.
 
+Required invalid-soil logging behavior:
+
+    SurgoSoilCollection.logInvalidSoils(wd, overwrite=True, db_build=False) -> None
+
+The method must accept `invalidSoils` dictionaries containing either `WeppSoil` instances or `None` values. `None` means the worker failed before returning a soil object.
+
 ## Revision Notes
 
 2026-07-06: Initial ExecPlan created from production investigation and user request. The plan records the sanitizer scope, test requirements, and production invalidation gate.
@@ -201,3 +230,5 @@ Names may differ if the implementation keeps the same semantics.
 2026-07-06: Updated after subagent review. The invalidation procedure now uses `rq-worker-batch`, requires deployed-code and active-job preflight gates, emits JSONL for audit/rollback, and includes optional `run_geneva` and `run_path_cost_effective` downstream timestamps while still excluding `run_omni_contrasts`.
 
 2026-07-06: Updated after production invalidation. wepp1 deployed-code proof and active-job preflight passed, live invalidation checked 39 runids with none missing, and postcheck confirmed all target timestamps were removed.
+
+2026-07-06: Updated after post-invalidation Omni rerun exposed invalid-soil diagnostic failure. The plan now covers placeholder logs for failed-worker `None` entries and records focused validation for the follow-up.

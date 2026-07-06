@@ -52,6 +52,44 @@ def test_surgo_collection_uses_explicit_file_backed_cache(tmp_path: Path) -> Non
     assert "chorizon" in tables
 
 
+def test_log_invalid_soils_handles_failed_worker_without_soil_object(
+    tmp_path: Path,
+) -> None:
+    class _InvalidSoilStub:
+        def __init__(self) -> None:
+            self.calls: list[tuple[str, bool, bool]] = []
+
+        def write_log(
+            self,
+            wd: str,
+            overwrite: bool = True,
+            *,
+            db_build: bool = False,
+        ) -> None:
+            self.calls.append((wd, overwrite, db_build))
+            Path(wd, "456.log").write_text("invalid soil details", encoding="utf-8")
+
+    invalid_soil = _InvalidSoilStub()
+    collection = SurgoSoilCollection([])
+    try:
+        collection.invalidSoils = {
+            123: None,
+            456: invalid_soil,
+        }
+
+        collection.logInvalidSoils(wd=str(tmp_path))
+    finally:
+        collection._disconnect()
+
+    failed_worker_log = tmp_path / "123.log"
+    assert failed_worker_log.is_file()
+    assert "failed for mukey 123 before a soil object was produced" in (
+        failed_worker_log.read_text(encoding="utf-8")
+    )
+    assert (tmp_path / "456.log").read_text(encoding="utf-8") == "invalid soil details"
+    assert invalid_soil.calls == [(str(tmp_path), True, False)]
+
+
 def test_file_backed_cache_reuses_persisted_rows(
     tmp_path: Path, monkeypatch: pytest.MonkeyPatch
 ) -> None:

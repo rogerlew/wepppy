@@ -6,9 +6,9 @@
 
 **Timezone**: UTC  
 **Started**: 2026-07-06 05:11 UTC  
-**Current phase**: Production invalidation complete; batch rerun pending
-**Last updated**: 2026-07-06 05:56 UTC
-**Next milestone**: Re-run `nasa-roses-202606-psbs` so affected runids queue with rebuilt soils
+**Current phase**: Invalid-soil logging follow-up complete locally; production rerun pending redeploy
+**Last updated**: 2026-07-06 15:47 UTC
+**Next milestone**: Deploy the invalid-soil logging fix, then re-run `nasa-roses-202606-psbs` so affected runids queue with rebuilt soils
 **Security impact**: none  
 **Dedicated security review**: no  
 **Security artifact**: N/A
@@ -16,6 +16,7 @@
 ## Task Board
 
 ### Ready / Backlog
+- [ ] Deploy the invalid-soil logging fix to wepp1 worker containers.
 - [ ] Re-run `nasa-roses-202606-psbs` and verify affected runids rebuild soils before WEPP hillslopes.
 
 ### In Progress
@@ -38,6 +39,7 @@
 - [x] Confirmed active-job zero preflight for affected batch runids (artifact `wepp1-active-batch-jobs-20260706T055256Z.json`).
 - [x] Executed live production invalidation on wepp1; checked 39 runids, missing 0, `DRY_RUN=False` (artifact `wepp1-invalidation-live-20260706T055437Z.jsonl`).
 - [x] Ran post-invalidation read-back check; checked 39 runids, no missing runs, no remaining target timestamps (artifact `wepp1-invalidation-postcheck-20260706T055514Z.json`).
+- [x] Hardened `SurgoSoilCollection.logInvalidSoils()` for worker-failure `None` entries after Omni scenario rerun exposed `AttributeError: 'NoneType' object has no attribute 'write_log'` (2026-07-06 15:47 UTC).
 
 ## Timeline
 
@@ -46,6 +48,7 @@
 - **2026-07-06 05:40 UTC** - wepp1 invalidation dry-run succeeded with `/opt/venv/bin/python`; live invalidation not executed.
 - **2026-07-06 06:05 UTC** - Subagent review disposition added rollback/audit artifacts, `rq-worker-batch` preflight gates, optional downstream timestamps, and edge-case tests.
 - **2026-07-06 05:55 UTC** - wepp1 live invalidation executed from `rq-worker-batch`; postcheck confirmed all target timestamps are missing for the 39 affected runids.
+- **2026-07-06 15:47 UTC** - Post-invalidation rerun path exposed invalid-soil diagnostic crash in Omni scenario soils build; local hardening now writes placeholder mukey logs for failed workers and preserves partial-success behavior.
 
 ## Decisions Log
 
@@ -73,6 +76,18 @@
 
 **Impact**: Re-running the batch queues only the affected runids and rebuilds soils before WEPP.
 
+### 2026-07-06 15:47 UTC: Preserve partial-success soils build when invalid-soil logging sees failed workers
+**Context**: `SurgoSoilCollection.makeWeppSoils()` records worker exceptions as `invalidSoils[mukey] = None`. The rerun path reached `logInvalidSoils()`, which iterated values and called `write_log()` unconditionally.
+
+**Options considered**:
+1. Re-raise the worker failure from `makeWeppSoils()` - broadens behavior and would stop partial-success builds that currently substitute invalid dominant mukeys when possible.
+2. Drop `None` invalid-soil entries silently - avoids the crash but loses per-mukey diagnostics.
+3. Write a deterministic placeholder `<mukey>.log` for `None` entries and keep detailed `WeppSoil.write_log()` output for invalid object entries.
+
+**Decision**: Add placeholder invalid-soil logs for failed-worker `None` entries.
+
+**Impact**: The soils build can continue to the existing dominant-soil fallback logic while preserving an on-disk diagnostic for the failed mukey.
+
 ## Risks and Issues
 
 | Risk | Severity | Likelihood | Mitigation | Status |
@@ -80,11 +95,12 @@
 | Rosetta returns invalid values for an affected horizon | Medium | Low | Validate Rosetta output and raise `ValueError` with horizon context | Open |
 | Production invalidation runs before fixed code is deployed | High | Medium | Require `rq-worker-batch` sanitizer proof and active-job zero preflight before live mutation | Closed |
 | Guard rejects unusual but intentionally supplied soils | Medium | Low | Use broad physical fraction range `0 <= wp <= fc <= 1` and targeted tests | Open |
+| Placeholder invalid-soil logs hide worker tracebacks | Medium | Low | Placeholder text points operators to worker exception logs; parent loop still logs traceback with mukey context | Open |
 
 ## Hardening Signal Log
 
 - **Baseline health signals**: 39 NASA ROSES runids failed WEPP hillslopes; representative failing `.sol` rows contained `-9.9 nan`.
-- **Post-change health signals**: targeted tests pass; deployed sanitizer proof passed; live invalidation postcheck passed; production rerun remains pending.
+- **Post-change health signals**: targeted tests pass; deployed sanitizer proof passed; live invalidation postcheck passed; invalid-soil logging regression passed; production rerun remains pending after redeploy.
 - **Danger signals observed**: existing `isfloat()` accepted `nan`; WEPP Fortran consumed `thetd2` after read instead of discarding it.
 - **Temporary callus register**: none.
 - **Softening experiments**: N/A.
@@ -93,6 +109,7 @@
 
 ### Code Quality
 - [x] Targeted tests passing (`wctl run-pytest tests/soils/test_ssurgo_fc_wp_sanitization.py tests/wepp/soils/utils/test_wepp_soil_util.py`).
+- [x] Invalid-soil logging follow-up tests passing (`wctl run-pytest tests/soils/test_ssurgo_cache.py tests/nodb/test_soils_gridded_root_creation.py tests/soils/test_ssurgo_fc_wp_sanitization.py --maxfail=1`).
 - [ ] Broader tests considered (`wctl run-pytest tests --maxfail=1`).
 
 ### Security
@@ -190,6 +207,25 @@
 - Re-run `nasa-roses-202606-psbs` so the affected runids queue and rebuild soils before WEPP hillslopes.
 
 **Test results**: Production read-back check passed: 39 checked, 0 missing, 0 non-null target timestamps.
+
+### 2026-07-06 15:47 UTC: Invalid-soil logging follow-up
+**Agent/Contributor**: Codex
+
+**Work completed**:
+- Captured follow-up failure signature: `AttributeError: 'NoneType' object has no attribute 'write_log'` in `SurgoSoilCollection.logInvalidSoils()` during an Omni scenario soils rebuild.
+- Confirmed the data model intentionally stores failed workers as `invalidSoils[mukey] = None`.
+- Updated `logInvalidSoils()` to write a placeholder `<mukey>.log` for failed-worker `None` entries while preserving `WeppSoil.write_log()` for invalid object entries.
+- Added unit coverage for a mixed invalid-soil set containing both a failed worker and a real invalid soil object.
+- Updated SSURGO docs to describe parent-loop worker exception logging and placeholder invalid logs.
+
+**Blockers encountered**:
+- None locally. Production still needs this follow-up deployed before rerunning the affected batch path.
+
+**Next steps**:
+- Deploy the invalid-soil logging fix to wepp1 worker containers.
+- Re-run `nasa-roses-202606-psbs` and confirm failed-worker invalid mukeys no longer abort at diagnostic logging.
+
+**Test results**: `wctl run-pytest tests/soils/test_ssurgo_cache.py tests/nodb/test_soils_gridded_root_creation.py tests/soils/test_ssurgo_fc_wp_sanitization.py --maxfail=1` passed: 23 passed, 2 warnings.
 
 ## Production Invalidation Procedure
 

@@ -6,11 +6,14 @@
 ## Overview
 NASA ROSES batch runs under `/wc1/batch/nasa-roses-202606-psbs/` produced WEPP soil files containing non-finite or sentinel field-capacity and wilting-point values such as `-9.9` and `nan`. WEPP hillslope execution then failed with SIGFPE after reading those values. This package hardens SSURGO soil generation and WEPP soil serialization so invalid `fc`/`wp` values are replaced by valid Rosetta estimates at the SSURGO boundary or rejected before serialization.
 
+During the post-invalidation rerun path on 2026-07-06, an Omni scenario soils rebuild exposed a second SSURGO failure signature: `SurgoSoilCollection.logInvalidSoils()` crashed with `AttributeError: 'NoneType' object has no attribute 'write_log'` after a worker failure recorded `invalidSoils[mukey] = None`. The same package now includes a small diagnostics hardening so failed-worker mukeys get placeholder log files instead of aborting the broader partial-success soils build.
+
 ## Objectives
 - Prevent SSURGO-generated 7778 soil files from containing non-finite or physically invalid `field_cap`/`wilt_pt` values.
 - Enforce the same `fc`/`wp` validity rules in `WeppSoilUtil` before 7778/900x serialization.
 - Add regression tests using affected production mukeys and a 9002 conversion path.
 - Document how to invalidate affected production batch runids so they queue for a rebuild after the fixed code is deployed.
+- Preserve SSURGO partial-success behavior when a worker fails before returning a `WeppSoil` object.
 
 ## Scope
 
@@ -18,6 +21,7 @@ NASA ROSES batch runs under `/wc1/batch/nasa-roses-202606-psbs/` produced WEPP s
 - `wepppy/soils/ssurgo/ssurgo.py` finite and physical validity checks for field capacity and wilting point.
 - `wepppy/wepp/soils/utils/wepp_soil_util.py` serializer enforcement and Rosetta recomputation validation.
 - Regression tests under `tests/soils/` and `tests/wepp/soils/utils/`.
+- `SurgoSoilCollection.logInvalidSoils()` handling for `invalidSoils` entries whose value is `None`.
 - Durable docs and ADR updates for the changed fallback rule.
 - Operator runbook notes for redis timestamp invalidation of affected batch runids.
 
@@ -44,6 +48,7 @@ NASA ROSES batch runs under `/wc1/batch/nasa-roses-202606-psbs/` produced WEPP s
 - [x] Regression tests cover affected mukeys and 9002 conversion.
 - [x] Documentation and ADR describe the fallback rule, evidence, risks, and rollback.
 - [x] Production invalidation command is documented and gated on deployment of the fix.
+- [x] Invalid-soil diagnostic logging tolerates worker-failure `None` entries and writes a placeholder mukey log.
 
 ## Parameterization ADR Gate
 - **Parameterization change present**: yes
@@ -78,10 +83,10 @@ Reference: `docs/standards/parameterization-adr-standard.md`
 - **Security review artifact**: N/A
 
 ## Hardening and Callus Softening
-- **Failure signature(s)**: `wepp_260606_hill` returns `-8`/SIGFPE with Fortran backtrace through `src/input.for` while reading soil hydraulic values; affected `.sol` files contain `-9.9 nan` in legacy `fc wp` columns.
+- **Failure signature(s)**: `wepp_260606_hill` returns `-8`/SIGFPE with Fortran backtrace through `src/input.for` while reading soil hydraulic values; affected `.sol` files contain `-9.9 nan` in legacy `fc wp` columns. Follow-up rerun failure: `AttributeError: 'NoneType' object has no attribute 'write_log'` in `SurgoSoilCollection.logInvalidSoils()` after an invalid-soil worker recorded `invalidSoils[mukey] = None`.
 - **Related prior hardening efforts**: `docs/work-packages/20260622_ssurgo_reclaimed_soil_fallback/`
 - **Health signals**: affected mukey soil files contain no `nan`, `inf`, or sentinel negative `fc`/`wp`; affected batch runids become retry-eligible and complete WEPP hillslope tasks after deployment.
-- **Danger signals**: silent fallback hides broad upstream data corruption; serializer starts accepting invalid Rosetta predictions.
+- **Danger signals**: silent fallback hides broad upstream data corruption; serializer starts accepting invalid Rosetta predictions; invalid-soil placeholder logs replace rather than supplement real worker tracebacks.
 - **Observation window**: next NASA ROSES batch rerun.
 - **Temporary calluses introduced**: none.
 - **Callus softening hypothesis**: N/A.
@@ -97,6 +102,7 @@ Reference: `docs/standards/parameterization-adr-standard.md`
 - `wepppy/soils/ssurgo/ssurgo.py` local finite/physical `fc`/`wp` sanitizer.
 - `wepppy/wepp/soils/utils/wepp_soil_util.py` conversion repair and serialization enforcement.
 - `tests/soils/test_ssurgo_fc_wp_sanitization.py` affected-mukey regression coverage.
+- `tests/soils/test_ssurgo_cache.py` invalid-soil worker failure logging regression coverage.
 - `tests/wepp/soils/utils/test_wepp_soil_util.py` 9002 conversion and invalid serialization coverage.
 - `docs/adrs/ADR-0012-ssurgo-fc-wp-sanitization.md` parameterization ADR.
 - `docs/work-packages/20260705_ssurgo_fc_wp_sanitization/tracker.md` production invalidation runbook.
