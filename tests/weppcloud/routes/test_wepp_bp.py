@@ -1178,6 +1178,12 @@ def test_return_periods_supports_roads_output_scope(wepp_client, monkeypatch: py
     assert captured_template["template_name"] == "reports/wepp/return_periods.htm"
     assert captured_template["kwargs"]["output_scope"] == "roads"
     assert captured_template["kwargs"]["method"] == "am"
+    assert captured_template["kwargs"]["measure_order"][:4] == [
+        "Precipitation Depth",
+        "Runoff",
+        "Peak Discharge",
+        "Sediment Yield",
+    ]
 
 
 def test_return_periods_rejects_invalid_method(wepp_client, monkeypatch: pytest.MonkeyPatch) -> None:

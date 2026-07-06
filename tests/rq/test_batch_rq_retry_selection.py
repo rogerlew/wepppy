@@ -643,9 +643,13 @@ class _DummyJob:
         self.id = job_id
         self.meta: dict[str, object] = {}
         self.saves = 0
+        self.status = batch_rq.JobStatus.QUEUED
 
     def save(self) -> None:
         self.saves += 1
+
+    def get_status(self, refresh: bool = True):
+        return self.status
 
 
 class _DummyRedis:
@@ -654,6 +658,77 @@ class _DummyRedis:
 
     def __exit__(self, exc_type, exc, tb):
         return False
+
+
+def test_release_deferred_finalizer_if_ready_enqueues_met_dependencies(
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    removed_jobs: list[object] = []
+
+    class _Registry:
+        def __init__(self, queue) -> None:
+            self.queue = queue
+
+        def remove(self, job) -> None:
+            removed_jobs.append(job)
+
+    class _FinalJob:
+        def get_status(self, refresh: bool = True):
+            return batch_rq.JobStatus.DEFERRED
+
+        def dependencies_are_met(self) -> bool:
+            return True
+
+    class _Queue:
+        def __init__(self) -> None:
+            self.enqueued: list[object] = []
+
+        def _enqueue_job(self, job) -> None:
+            self.enqueued.append(job)
+
+    monkeypatch.setattr(batch_rq, "DeferredJobRegistry", _Registry)
+    queue = _Queue()
+    final_job = _FinalJob()
+
+    batch_rq._release_deferred_finalizer_if_ready(queue, final_job)
+
+    assert removed_jobs == [final_job]
+    assert queue.enqueued == [final_job]
+
+
+def test_release_deferred_finalizer_if_ready_keeps_unmet_dependencies_deferred(
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    removed_jobs: list[object] = []
+
+    class _Registry:
+        def __init__(self, queue) -> None:
+            self.queue = queue
+
+        def remove(self, job) -> None:
+            removed_jobs.append(job)
+
+    class _FinalJob:
+        def get_status(self, refresh: bool = True):
+            return batch_rq.JobStatus.DEFERRED
+
+        def dependencies_are_met(self) -> bool:
+            return False
+
+    class _Queue:
+        def __init__(self) -> None:
+            self.enqueued: list[object] = []
+
+        def _enqueue_job(self, job) -> None:
+            self.enqueued.append(job)
+
+    monkeypatch.setattr(batch_rq, "DeferredJobRegistry", _Registry)
+    queue = _Queue()
+
+    batch_rq._release_deferred_finalizer_if_ready(queue, _FinalJob())
+
+    assert removed_jobs == []
+    assert queue.enqueued == []
 
 
 def test_run_batch_rq_enqueues_only_retry_eligible_features(
@@ -740,7 +815,10 @@ def test_run_batch_rq_enqueues_only_retry_eligible_features(
     assert result["enqueued"] == 2
     assert result["selection"]["enqueued"] == 2
     json.dumps(result)
-    assert enqueue_calls[-1]["depends_on"] == [call["job"] for call in watershed_calls]
+    final_depends_on = enqueue_calls[-1]["depends_on"]
+    assert isinstance(final_depends_on, batch_rq.Dependency)
+    assert final_depends_on.dependencies == [call["job"].id for call in watershed_calls]
+    assert final_depends_on.allow_failure is True
     assert parent_job.meta["batch_run_selection"]["enqueued"] == 2
     assert parent_job.meta["batch_run_selection"]["skipped"] == 1
     assert cleared_runids == ["failed", "missing"]

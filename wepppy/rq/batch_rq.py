@@ -20,7 +20,7 @@ from typing import Any, Tuple, List, Optional
 
 import redis
 from rq import Queue, get_current_job
-from rq.job import Job
+from rq.job import Dependency, Job, JobStatus
 from rq.registry import DeferredJobRegistry, ScheduledJobRegistry, StartedJobRegistry
 from wepppy.config.redis_settings import (
     RedisDB,
@@ -271,6 +271,17 @@ def _format_active_jobs_text(active_jobs: list[str]) -> str:
     return active_jobs_text
 
 
+def _release_deferred_finalizer_if_ready(queue: Queue, final_job: Job) -> None:
+    """Release a failure-tolerant finalizer if all dependencies are already terminal."""
+    if final_job.get_status(refresh=True) != JobStatus.DEFERRED:
+        return
+    if not final_job.dependencies_are_met():
+        return
+
+    DeferredJobRegistry(queue=queue).remove(final_job)
+    queue._enqueue_job(final_job)
+
+
 def delete_batch_rq(batch_name: str) -> dict[str, Any]:
     """Delete an entire batch workspace (base + generated runs)."""
     job = get_current_job()
@@ -463,11 +474,20 @@ def run_batch_rq(batch_name: str) -> dict[str, Any]:
                     job.save()
                 watershed_jobs.append(child_job)
 
+            # RQ otherwise leaves dependents deferred when any dependency fails.
+            final_depends_on = (
+                Dependency(
+                    jobs=[watershed_job.id for watershed_job in watershed_jobs],
+                    allow_failure=True,
+                )
+                if watershed_jobs
+                else None
+            )
             final_job = q.enqueue_call(
                 func=_final_batch_complete_rq,
                 args=[batch_name],
                 timeout=TIMEOUT,
-                depends_on=watershed_jobs if watershed_jobs else None,
+                depends_on=final_depends_on,
             )
             final_job.meta['runid'] = batch_name
             final_job.save()
@@ -478,6 +498,7 @@ def run_batch_rq(batch_name: str) -> dict[str, Any]:
             if job is not None:
                 job.meta['jobs:1,func:_final_batch_complete_rq'] = final_job.id
                 job.save()
+            _release_deferred_finalizer_if_ready(q, final_job)
 
         StatusMessenger.publish(status_channel, f'rq:{job_id} COMPLETED {func_name}({batch_name})')
         return {

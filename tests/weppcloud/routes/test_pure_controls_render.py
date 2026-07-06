@@ -1126,6 +1126,58 @@ def test_report_templates_use_semantic_copy_buttons() -> None:
         assert "aria-label=\"Copy " in source
 
 
+def test_wepp_return_period_template_reports_empty_core_measures(jinja_env: Environment) -> None:
+    jinja_env.filters["sort_numeric"] = lambda values, reverse=False: sorted(values, key=float, reverse=reverse)
+    jinja_env.globals["unitizer"] = lambda value, _units: value
+    jinja_env.globals["unitizer_units"] = lambda units: units
+
+    template = jinja_env.get_template("reports/wepp/return_periods.htm")
+    report = SimpleNamespace(
+        return_periods={
+            "Precipitation Depth": {
+                2: {"mo": 6, "da": 15, "year": 1, "Precipitation Depth": 32.0},
+            },
+            "Sediment Yield": {
+                2: {"mo": 6, "da": 15, "year": 1, "Sediment Yield": 0.4},
+            },
+        },
+        units_d={
+            "Precipitation Depth": "mm",
+            "Runoff": "mm",
+            "Peak Discharge": "m^3/s",
+            "Sediment Yield": "tonne",
+        },
+        intervals=[2],
+        exclude_yr_indxs=None,
+        years=4,
+        num_events=12,
+        y0=2020,
+    )
+
+    rendered = template.render(
+        report=report,
+        measure_order=["Precipitation Depth", "Runoff", "Peak Discharge", "Sediment Yield"],
+        extraneous=False,
+        gringorten_correction=False,
+        method="cta",
+        exclude_yr_indxs=None,
+        exclude_months=[6],
+        output_scope="baseline",
+        chn_topaz_id_options=[],
+        chn_topaz_id_of_interest=None,
+    )
+
+    assert '<h2 class="wc-heading__subtitle">Runoff</h2>' in rendered
+    assert "For CTA, month exclusions define a seasonal analysis window." in rendered
+    assert "recalculates the effective days per year from the remaining event counts" in rendered
+    assert "Interpret CTA return periods as recurrence within the included season" in rendered
+    assert "No runoff events are available for the current year and month selection." in rendered
+    assert '<h2 class="wc-heading__subtitle">Peak Discharge</h2>' in rendered
+    assert "No peak discharge events are available for the current year and month selection." in rendered
+    assert 'data-report-table="runoff"' not in rendered
+    assert 'data-report-table="peak-discharge"' not in rendered
+
+
 def test_map_templates_do_not_use_application_role_for_canvas() -> None:
     map_template = (TEMPLATE_ROOT / "controls/map_pure_gl.htm").read_text(encoding="utf-8")
     runs_template = (TEMPLATE_ROOT / "user/runs2.html").read_text(encoding="utf-8")

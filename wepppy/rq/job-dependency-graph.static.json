@@ -442,19 +442,19 @@
     "notes": [],
     "queue_name": "batch",
     "source_function": "run_batch_rq",
-    "source_lineno": 442,
+    "source_lineno": 465,
     "source_module": "wepppy/rq/batch_rq.py"
   },
   {
     "depends_on": [
-      "run_batch_watershed_rq"
+      "Dependency(jobs=[watershed_job.id for watershed_job in watershed_jobs], allow_failure=True)"
     ],
     "enqueue_target": "_final_batch_complete_rq",
     "job_meta_stage": "jobs:1",
     "notes": [],
     "queue_name": "batch",
     "source_function": "run_batch_rq",
-    "source_lineno": 454,
+    "source_lineno": 486,
     "source_module": "wepppy/rq/batch_rq.py"
   },
   {

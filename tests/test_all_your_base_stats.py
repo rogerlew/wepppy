@@ -30,6 +30,18 @@ def test_weibull_series_cta_method() -> None:
     assert period >= 1.0
 
 
+def test_weibull_series_cta_accepts_custom_days_per_year() -> None:
+    recurrence = [1.02]
+    default_mapping = weibull_series(recurrence, years=2, method="cta")
+    seasonal_mapping = weibull_series(recurrence, years=2, method="cta", days_per_year=10)
+
+    assert default_mapping[1.02] == 0
+    assert seasonal_mapping[1.02] == 1
+
+    with pytest.raises(ValueError, match="days_per_year"):
+        weibull_series(recurrence, years=2, method="cta", days_per_year=0)
+
+
 def test_weibull_series_am_method_and_validation() -> None:
     recurrence = [2, 3]
     mapping = weibull_series(recurrence, years=5, method="am")

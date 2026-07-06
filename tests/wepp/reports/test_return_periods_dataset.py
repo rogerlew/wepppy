@@ -58,6 +58,7 @@ if "rasterio" not in sys.modules:
     sys.modules["rasterio"] = rasterio_module
     sys.modules["rasterio.warp"] = warp_module
 
+from wepppy.wepp.reports import return_periods as return_periods_module
 from wepppy.wepp.reports.return_periods import (
     ReturnPeriodDataset,
     ReturnPeriods,
@@ -307,6 +308,36 @@ def test_return_period_dataset_uses_roads_output_scope(tmp_path):
     precip_entries = report.return_periods.get("Precipitation Depth", {})
     assert precip_entries
     assert max(entry["Precipitation Depth"] for entry in precip_entries.values()) > 900.0
+
+
+def test_return_period_dataset_passes_filtered_days_per_year_to_cta(monkeypatch, tmp_path):
+    run_dir = _prepare_run_directory(tmp_path)
+
+    refresh_return_period_events(run_dir)
+    dataset = ReturnPeriodDataset(run_dir, auto_refresh=False)
+    topaz_id = dataset.topaz_ids[0]
+    exclude_months = [1]
+    counts = dataset._counts_for_topaz(topaz_id)
+    filtered_counts = counts[~counts["month"].isin(exclude_months)]
+    expected_days_per_year = float(filtered_counts["event_count"].sum()) / len(set(filtered_counts["year"]))
+    captured: dict[str, float | None] = {}
+
+    def _capture_weibull_series(
+        recurrence,
+        years,
+        method="cta",
+        gringorten_correction=False,
+        days_per_year=None,
+    ):
+        captured["days_per_year"] = days_per_year
+        return {float(recurrence[0]): 0}
+
+    monkeypatch.setattr(return_periods_module, "weibull_series", _capture_weibull_series)
+
+    report = dataset.create_report((2,), exclude_months=exclude_months, method="cta")
+
+    assert report.return_periods["Precipitation Depth"]
+    assert captured["days_per_year"] == pytest.approx(expected_days_per_year)
 
 
 def test_return_period_dataset_rejects_invalid_output_scope(tmp_path):

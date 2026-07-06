@@ -2,7 +2,7 @@ from __future__ import annotations
 
 from typing import Dict, Sequence
 
-__all__: list[str]
+__all__: list[str] = ['probability_of_occurrence', 'weibull_series']
 
 
 def probability_of_occurrence(
@@ -17,4 +17,5 @@ def weibull_series(
     years: float,
     method: str = ...,
     gringorten_correction: bool = ...,
+    days_per_year: float | None = ...,
 ) -> Dict[float, int]: ...

@@ -395,6 +395,13 @@ _RETURN_PERIOD_METRIC_ORDER = [
     "Total P",
 ]
 
+_RETURN_PERIOD_CORE_METRICS = (
+    "Precipitation Depth",
+    "Runoff",
+    "Peak Discharge",
+    "Sediment Yield",
+)
+
 _RETURN_PERIOD_DISPLAY_LABELS = {
     "Precipitation Depth": "Precipitation",
     "Runoff": "Runoff",
@@ -1398,7 +1405,10 @@ def report_wepp_return_periods(runid, config):
     translator = Watershed.getInstance(wd).translator_factory()
     unitizer = Unitizer.getInstance(wd)
 
-    measure_order = [key for key in _RETURN_PERIOD_METRIC_ORDER if key in report.return_periods]
+    measure_order = list(_RETURN_PERIOD_CORE_METRICS)
+    for key in _RETURN_PERIOD_METRIC_ORDER:
+        if key in report.return_periods and key not in measure_order:
+            measure_order.append(key)
     for key in report.return_periods.keys():
         if key not in measure_order:
             measure_order.append(key)

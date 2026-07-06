@@ -25,6 +25,7 @@ def weibull_series(
     years: float,
     method: str = 'cta',
     gringorten_correction: bool = False,
+    days_per_year: float | None = None,
 ) -> Dict[float, int]:
     """Return order statistic ranks for a set of recurrence intervals."""
     if years <= 0:
@@ -32,7 +33,10 @@ def weibull_series(
 
     method = method.lower()
     if method == 'cta':
-        count = int(round(years * 365.25))
+        cta_days_per_year = 365.25 if days_per_year is None else float(days_per_year)
+        if not np.isfinite(cta_days_per_year) or cta_days_per_year <= 0.0:
+            raise ValueError('days_per_year must be greater than zero.')
+        count = int(round(years * cta_days_per_year))
     elif method in ('am', 'annual_maximum', 'pds'):
         count = int(round(years))
     else:
@@ -45,7 +49,7 @@ def weibull_series(
         periods = (count + 1.0) / ranks
 
     if method == 'cta':
-        periods /= 365.25
+        periods /= cta_days_per_year
 
     result: Dict[float, int] = {}
     for target in sorted(recurrence):

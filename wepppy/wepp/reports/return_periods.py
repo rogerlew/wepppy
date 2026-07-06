@@ -868,7 +868,16 @@ class ReturnPeriodDataset:
         years_count = max(years_count, 1)
         days_in_year = total_events / years_count if years_count > 0 else 0.0
 
-        rec_map = weibull_series(recurrence, years_count, method=method, gringorten_correction=gringorten_correction)
+        rec_map_kwargs: Dict[str, Any] = {}
+        if method.lower() == "cta" and days_in_year > 0.0:
+            rec_map_kwargs["days_per_year"] = days_in_year
+        rec_map = weibull_series(
+            recurrence,
+            years_count,
+            method=method,
+            gringorten_correction=gringorten_correction,
+            **rec_map_kwargs,
+        )
 
         measure_results: Dict[str, Dict[int, Dict[str, float]]] = {}
 

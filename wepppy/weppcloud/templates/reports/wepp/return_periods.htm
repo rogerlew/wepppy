@@ -110,46 +110,54 @@
   {% set units = report.units_d.get(key) %}
   {% set table_id = slug ~ '_tbl' %}
   {% set intervals = report.intervals | sort_numeric(reverse=True) %}
+  {% set dataset = report.return_periods.get(key, {}) %}
   <section class="wc-panel wc-stack">
     <header class="wc-stack">
       <h2 class="wc-heading__subtitle">{{ label }}</h2>
     </header>
-    <div class="wc-table-wrapper wc-table-wrapper--compact">
-      <table class="wc-table wc-table--dense wc-table--compact wc-table--striped sortable" id="{{ table_id }}">
-        <thead>
-          <tr>
-            <th scope="col">Recurrence interval</th>
-            <th scope="col">Date</th>
-            <th scope="col">{{ label }}</th>
-          </tr>
-        </thead>
-        <tbody>
-          <tr data-sort-position="top">
-            <td>years</td>
-            <td>mm/dd/yyyy</td>
-            <td>{{ render_units(units) }}</td>
-          </tr>
-          {% for rec_interval in intervals %}
-            {% if rec_interval in report.return_periods[key] %}
-              {% set entry = report.return_periods[key][rec_interval] %}
-              <tr>
-                <td>{{ rec_interval }}</td>
-                <td>{{ format_date(entry) }}</td>
-                <td>{{ render_value(entry.get(key), units) }}</td>
-              </tr>
-            {% endif %}
-          {% endfor %}
-        </tbody>
-      </table>
-    </div>
-    <div class="wc-table-actions">
-      <button type="button" class="pure-button pure-button-link"
-              data-report-csv="{{ table_id }}"
-              data-report-url="{{ build_csv_url(slug) }}"
-              data-report-table="{{ slug }}">
-        Download CSV
-      </button>
-    </div>
+    {% if dataset %}
+      <div class="wc-table-wrapper wc-table-wrapper--compact">
+        <table class="wc-table wc-table--dense wc-table--compact wc-table--striped sortable" id="{{ table_id }}">
+          <thead>
+            <tr>
+              <th scope="col">Recurrence interval</th>
+              <th scope="col">Date</th>
+              <th scope="col">{{ label }}</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr data-sort-position="top">
+              <td>years</td>
+              <td>mm/dd/yyyy</td>
+              <td>{{ render_units(units) }}</td>
+            </tr>
+            {% for rec_interval in intervals %}
+              {% if rec_interval in dataset %}
+                {% set entry = dataset[rec_interval] %}
+                <tr>
+                  <td>{{ rec_interval }}</td>
+                  <td>{{ format_date(entry) }}</td>
+                  <td>{{ render_value(entry.get(key), units) }}</td>
+                </tr>
+              {% endif %}
+            {% endfor %}
+          </tbody>
+        </table>
+      </div>
+      <div class="wc-table-actions">
+        <button type="button" class="pure-button pure-button-link"
+                data-report-csv="{{ table_id }}"
+                data-report-url="{{ build_csv_url(slug) }}"
+                data-report-table="{{ slug }}">
+          Download CSV
+        </button>
+      </div>
+    {% else %}
+      <div class="wc-status" data-state="attention">
+        <strong>No events:</strong>
+        No {{ label | lower }} events are available for the current year and month selection.
+      </div>
+    {% endif %}
   </section>
 {%- endmacro %}
 
@@ -157,7 +165,8 @@
   {% set slug = slugify_key(key) %}
   {% set label = display_label(key) %}
   {% set table_id = slug ~ '_tbl' %}
-  {% set dataset_items = report.return_periods[key].items() | list %}
+  {% set dataset = report.return_periods.get(key, {}) %}
+  {% set dataset_items = dataset.items() | list %}
   {% if dataset_items %}
     {% set sample_entry = dataset_items[0][1] %}
   {% else %}
@@ -192,71 +201,78 @@
     <header class="wc-stack">
       <h2 class="wc-heading__subtitle">{{ label }}</h2>
     </header>
-    <div class="wc-table-wrapper">
-      <table class="wc-table wc-table--dense wc-table--striped sortable" id="{{ table_id }}">
-        <thead>
-          <tr>
-            <th scope="col">Recurrence interval</th>
-            <th scope="col">Date</th>
-            {% for metric in metrics %}
-              {% set highlight = 'wc-return-period__measure' if metric == key else '' %}
-              <th scope="col" class="{{ highlight }}">{{ display_label(metric) }}</th>
+    {% if dataset %}
+      <div class="wc-table-wrapper">
+        <table class="wc-table wc-table--dense wc-table--striped sortable" id="{{ table_id }}">
+          <thead>
+            <tr>
+              <th scope="col">Recurrence interval</th>
+              <th scope="col">Date</th>
+              {% for metric in metrics %}
+                {% set highlight = 'wc-return-period__measure' if metric == key else '' %}
+                <th scope="col" class="{{ highlight }}">{{ display_label(metric) }}</th>
+              {% endfor %}
+              {% if show_rank %}
+                <th scope="col">Rank</th>
+              {% endif %}
+              {% if show_weibull_t %}
+                <th scope="col">Weibull T</th>
+              {% endif %}
+            </tr>
+          </thead>
+          <tbody>
+            <tr data-sort-position="top">
+              <td>years</td>
+              <td>mm/dd/yyyy</td>
+              {% for metric in metrics %}
+                {% set highlight = 'wc-return-period__measure' if metric == key else '' %}
+                <td class="{{ highlight }}">{{ render_units(report.units_d.get(metric)) }}</td>
+              {% endfor %}
+              {% if show_rank %}
+                <td>&nbsp;</td>
+              {% endif %}
+              {% if show_weibull_t %}
+                <td>&nbsp;</td>
+              {% endif %}
+            </tr>
+            {% for rec_interval in intervals %}
+              {% if rec_interval in dataset %}
+                {% set entry = dataset[rec_interval] %}
+                <tr>
+                  <td>{{ rec_interval }}</td>
+                  <td>{{ format_date(entry) }}</td>
+                  {% for metric in metrics %}
+                    {% set highlight = 'wc-return-period__measure' if metric == key else '' %}
+                    <td class="{{ highlight }}">
+                      {{ render_extraneous_value(metric, entry.get(metric), report.units_d.get(metric)) }}
+                    </td>
+                  {% endfor %}
+                  {% if show_rank %}
+                    <td>{{ entry.get('weibull_rank') or '&mdash;' }}</td>
+                  {% endif %}
+                  {% if show_weibull_t %}
+                    <td>{{ entry.get('weibull_T') if entry.get('weibull_T') is not none else '&mdash;' }}</td>
+                  {% endif %}
+                </tr>
+              {% endif %}
             {% endfor %}
-            {% if show_rank %}
-              <th scope="col">Rank</th>
-            {% endif %}
-            {% if show_weibull_t %}
-              <th scope="col">Weibull T</th>
-            {% endif %}
-          </tr>
-        </thead>
-        <tbody>
-          <tr data-sort-position="top">
-            <td>years</td>
-            <td>mm/dd/yyyy</td>
-            {% for metric in metrics %}
-              {% set highlight = 'wc-return-period__measure' if metric == key else '' %}
-              <td class="{{ highlight }}">{{ render_units(report.units_d.get(metric)) }}</td>
-            {% endfor %}
-            {% if show_rank %}
-              <td>&nbsp;</td>
-            {% endif %}
-            {% if show_weibull_t %}
-              <td>&nbsp;</td>
-            {% endif %}
-          </tr>
-          {% for rec_interval in intervals %}
-            {% if rec_interval in report.return_periods[key] %}
-              {% set entry = report.return_periods[key][rec_interval] %}
-              <tr>
-                <td>{{ rec_interval }}</td>
-                <td>{{ format_date(entry) }}</td>
-                {% for metric in metrics %}
-                  {% set highlight = 'wc-return-period__measure' if metric == key else '' %}
-                  <td class="{{ highlight }}">
-                    {{ render_extraneous_value(metric, entry.get(metric), report.units_d.get(metric)) }}
-                  </td>
-                {% endfor %}
-                {% if show_rank %}
-                  <td>{{ entry.get('weibull_rank') or '&mdash;' }}</td>
-                {% endif %}
-                {% if show_weibull_t %}
-                  <td>{{ entry.get('weibull_T') if entry.get('weibull_T') is not none else '&mdash;' }}</td>
-                {% endif %}
-              </tr>
-            {% endif %}
-          {% endfor %}
-        </tbody>
-      </table>
-    </div>
-    <div class="wc-table-actions">
-      <button type="button" class="pure-button pure-button-link"
-              data-report-csv="{{ table_id }}"
-              data-report-url="{{ build_csv_url(slug) }}"
-              data-report-table="{{ slug }}">
-        Download CSV
-      </button>
-    </div>
+          </tbody>
+        </table>
+      </div>
+      <div class="wc-table-actions">
+        <button type="button" class="pure-button pure-button-link"
+                data-report-csv="{{ table_id }}"
+                data-report-url="{{ build_csv_url(slug) }}"
+                data-report-table="{{ slug }}">
+          Download CSV
+        </button>
+      </div>
+    {% else %}
+      <div class="wc-status" data-state="attention">
+        <strong>No events:</strong>
+        No {{ label | lower }} events are available for the current year and month selection.
+      </div>
+    {% endif %}
   </section>
 {%- endmacro %}
 
@@ -357,6 +373,16 @@
 
           <fieldset class="wc-stack">
             <legend class="wc-text-muted">Exclude months from analysis</legend>
+            <p class="wc-text-muted">
+              For CTA, month exclusions define a seasonal analysis window. The report removes events from checked
+              months, recalculates the effective days per year from the remaining event counts, and uses that basis
+              for CTA recurrence ranks and Weibull T.
+            </p>
+            <p class="wc-text-muted">
+              Interpret CTA return periods as recurrence within the included season, not the full calendar year. If a
+              runoff or peak discharge table reports no events, no top-ranked events for that measure survived the
+              selected month and year filters.
+            </p>
             <div class="wc-choice-group">
               {% set months = [
                 (1,'January'),(2,'February'),(3,'March'),(4,'April'),
@@ -442,12 +468,10 @@
 </div>
 
 {% for key in measure_order %}
-  {% if key in report.return_periods %}
-    {% if extraneous %}
-      {{ extraneous_table(key) }}
-    {% else %}
-      {{ simple_table(key) }}
-    {% endif %}
+  {% if extraneous %}
+    {{ extraneous_table(key) }}
+  {% else %}
+    {{ simple_table(key) }}
   {% endif %}
 {% endfor %}
 
