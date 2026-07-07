@@ -178,3 +178,4 @@ sdyd = pd.read_parquet(wd / "path" / "hillslope_sdyd.parquet")
 - Preset scenarios: `presets.py`
 - Omni background: `../omni/README.md`
 
+## Jackson Nakae's Development repository https://github.com/jackson-nakae/PATH-cost-effective
