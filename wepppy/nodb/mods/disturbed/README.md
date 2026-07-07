@@ -58,12 +58,24 @@ The Disturbed module supports two lookup table schemes:
 | Lookup variant | Runtime file | Key columns | Scalar plant keys | Notes |
 |-----------|-----------|-----------|-----------|-----------|
 | Base lookup | `disturbed/disturbed_land_soil_lookup.csv` | `luse`, `stext` | `rdmax`, `xmxlai` | Canonical calibration table for soil and PMET values. Also carries static override fields like `plant.data.decfct` and `plant.data.dropfc`. |
-| Extended lookup | `disturbed/disturbed_land_soil_lookup_extended.csv` | `luse`, `stext` (plus `disturbed_class`, `landuse`, `sev_enum`) | `plant.data.rdmax`, `plant.data.xmxlai` | Derived table that merges base lookup values with management-file fields (`ini.data.*`, `plant.data.*`). |
+| Extended lookup | `disturbed/disturbed_land_soil_lookup_extended.csv` | `luse`, `stext` (plus `disturbed_class`, `landuse`, `sev_enum`) | `plant.data.rdmax`, `plant.data.xmxlai` | Derived table that merges base lookup values with management-file fields (`ini.data.*`, `plant.data.*`) and native openWEPP route coefficients. |
 
 Scalar normalization contract:
 
 - `build_extended_land_soil_lookup()` always normalizes base scalar keys `rdmax` and `xmxlai` into `plant.data.rdmax` and `plant.data.xmxlai` in the extended table.
 - Treat `rdmax` and `xmxlai` as base-table keys only. Treat `plant.data.rdmax` and `plant.data.xmxlai` as extended-table keys only.
+- The extended table also carries explicit openWEPP Lane-D route coefficient
+  columns (`route_skin_friction_coefficient_ko`,
+  `route_form_drag_coefficient`, `route_roughness_element_height_m`,
+  `route_roughness_concentration`,
+  `route_vegetation_drag_coefficient`) plus provenance fields. These values
+  are operator-calibrated Disturbed parameters recorded in
+  `docs/adrs/ADR-0014-disturbed-openwepp-route-coefficients.md`; they are not
+  inferred from legacy WEPP management fields.
+- Native `ow-lanuse-1` management output remains opt-in. Default legacy WEPP
+  management generation is unchanged unless a caller explicitly uses the
+  native openWEPP management producer. In the WEPP prep path, the opt-in
+  control is `disturbed.openwepp_native_managements_enabled`.
 
 Key parameters in the base lookup:
 

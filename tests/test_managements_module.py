@@ -6,6 +6,8 @@ from pathlib import Path
 
 import pytest
 
+pytestmark = pytest.mark.unit
+
 
 @pytest.fixture(scope="module")
 def managements_module():
@@ -55,6 +57,57 @@ def test_get_management_basic_metadata(managements_module):
     assert man.sim_years == 1
     assert man.plants[0].name == "bromegr1"
     assert man.inis[0].data.cancov == pytest.approx(0.5)
+
+
+def test_openwepp_native_cropland_round_trips_and_preserves_legacy(tmp_path, managements_module):
+    man = managements_module.get_management(21)
+    legacy_text = str(man)
+    route_coefficients = (510.0, 0.35, 0.012, 0.06, 0.2)
+
+    native = man.as_openwepp_native_cropland(route_coefficients)
+    native_text = str(native)
+
+    assert str(man) == legacy_text
+    assert native.datver == managements_module.OW_LANUSE_1_DATVER
+    assert native_text.startswith("ow-lanuse-1\n")
+    assert "4 # Landuse - <NativeCropland>" in native_text
+    assert "routing_coefficients\n510.00000 0.35000 0.01200 0.06000 0.20000\n" in native_text
+    assert all(loop.landuse == 4 for loop in native.plants)
+    assert all(loop.landuse == 4 for loop in native.inis)
+    assert all(loop.landuse == 4 for loop in native.surfs)
+    assert all(loop.landuse == 4 for loop in native.years)
+
+    native_path = tmp_path / "native_cropland.man"
+    native_path.write_text(native_text)
+    parsed = managements_module.read_management(str(native_path))
+
+    assert parsed.datver == managements_module.OW_LANUSE_1_DATVER
+    assert parsed.plants[0].landuse == 4
+    assert type(parsed.plants[0].data).__name__ == "PlantLoopCropland"
+    assert parsed.plants[0].data.routing_coefficients.as_tuple() == pytest.approx(route_coefficients)
+    assert "4 # Landuse - <NativeCropland>" in str(parsed)
+
+
+def test_routing_coefficients_marker_rejected_for_legacy_datver(tmp_path, managements_module):
+    native = managements_module.get_management(21).as_openwepp_native_cropland(
+        (510.0, 0.35, 0.012, 0.06, 0.2)
+    )
+    legacy_with_marker = (
+        str(native)
+        .replace("ow-lanuse-1", "98.4", 1)
+        .replace("4 # Landuse - <NativeCropland>", "1 # Landuse - <Cropland>")
+    )
+
+    path = tmp_path / "legacy_with_marker.man"
+    path.write_text(legacy_with_marker)
+
+    with pytest.raises(ValueError, match="routing_coefficients may only appear"):
+        managements_module.read_management(str(path))
+
+
+def test_routing_coefficients_validate_physical_coupling(managements_module):
+    with pytest.raises(ValueError, match="both be zero or both be positive"):
+        managements_module.RoutingCoefficients((510.0, 0.35, 0.012, 0.0, 0.2))
 
 
 def test_operations_report_cli_no_operations(managements_module):

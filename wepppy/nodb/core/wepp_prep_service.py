@@ -128,8 +128,12 @@ class WeppPrepService:
         disturbed = wepp_module.Disturbed.tryGetInstance(wd)
         if disturbed is not None:
             _land_soil_replacements_d = disturbed.land_soil_replacements_d
+            openwepp_native_managements = bool(
+                getattr(disturbed, "openwepp_native_managements_enabled", False)
+            )
         else:
             _land_soil_replacements_d = None
+            openwepp_native_managements = False
 
         rap_ts = RAP_TS.tryGetInstance(wd)
 
@@ -157,7 +161,7 @@ class WeppPrepService:
             meoization_key = (mukey, dom)
             if disturbed:
                 disturbed_class = man_summary.disturbed_class
-                meoization_key = (mukey, dom, disturbed_class)
+                meoization_key = (mukey, dom, disturbed_class, openwepp_native_managements)
 
             if rap_ts is not None:
                 meoization_key = (topaz_id, mukey, dom)
@@ -316,7 +320,21 @@ class WeppPrepService:
                             replacements,
                         )
 
-                    meoization_key = (mukey, dom, disturbed_class)
+                    if openwepp_native_managements:
+                        if replacements is None:
+                            raise ValueError(
+                                "openWEPP native management output requires disturbed lookup "
+                                f"replacements for texid={texid!r}, disturbed_class={disturbed_class!r}"
+                            )
+                        native_lookup_row = dict(replacements)
+                        native_lookup_row.setdefault("disturbed_class", disturbed_class)
+                        native_lookup_row.setdefault("luse", disturbed_class)
+                        management = disturbed.build_openwepp_native_management(
+                            management,
+                            native_lookup_row,
+                        )
+
+                    meoization_key = (mukey, dom, disturbed_class, openwepp_native_managements)
 
                 if rap_ts is not None:
                     apply_rap_ts_cover = True

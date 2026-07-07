@@ -82,6 +82,13 @@ from .. import MODS_DIR, EXTENDED_MODS_DATA
 
 from wepppyo3.raster_characteristics import count_intersecting_raster_key_pairs
 
+from .route_coefficients import (
+    ROUTE_COEFFICIENT_ALL_COLUMNS,
+    enrich_route_coefficient_row,
+    routing_coefficients_from_row,
+    validate_route_coefficient_row,
+)
+
 __all__ = [
     'disturbed_class_aliases',
     'TREATMENT_SUFFIXES',
@@ -91,6 +98,9 @@ __all__ = [
     'get_disturbed_land_soil_lookup_sha256',
     'migrate_land_soil_lookup',
     'write_disturbed_land_soil_lookup',
+    'enrich_route_coefficient_row',
+    'routing_coefficients_from_row',
+    'validate_route_coefficient_row',
     'DisturbedNoDbLockedException',
     'InvalidProjection',
     'Disturbed',
@@ -1421,6 +1431,26 @@ class Disturbed(NoDbBase):
             self.remap_landuse()
 
         return self._meta
+
+    @staticmethod
+    def build_openwepp_native_management(management: Any, lookup_row: Dict[str, Any]) -> Any:
+        """Return an ``ow-lanuse-1`` management using Disturbed route coefficients."""
+        lookup_row = dict(lookup_row)
+        if any(str(lookup_row.get(column, '')).strip() == '' for column in ROUTE_COEFFICIENT_ALL_COLUMNS):
+            enrich_route_coefficient_row(lookup_row)
+        validate_route_coefficient_row(lookup_row)
+        return management.as_openwepp_native_cropland(
+            routing_coefficients_from_row(lookup_row)
+        )
+
+    @staticmethod
+    def write_openwepp_native_management(management: Any, lookup_row: Dict[str, Any], dst_fn: str) -> str:
+        """Write an opt-in native openWEPP management file and return ``dst_fn``."""
+        native = Disturbed.build_openwepp_native_management(management, lookup_row)
+        os.makedirs(os.path.dirname(dst_fn), exist_ok=True)
+        with open(dst_fn, 'w') as fp:
+            fp.write(str(native))
+        return dst_fn
     
     def build_extended_land_soil_lookup(self) -> None:
         import csv
@@ -1538,6 +1568,10 @@ class Disturbed(NoDbBase):
                         del _d['xmxlai']
                     elif 'plant.data.xmxlai' not in _d:
                         _d['plant.data.xmxlai'] = None
+
+                    enrich_route_coefficient_row(_d)
+                    for column in ROUTE_COEFFICIENT_ALL_COLUMNS:
+                        assert column in _d, column
 
                     if wtr is None:
                         wtr = csv.DictWriter(f, fieldnames=_d.keys())

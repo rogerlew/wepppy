@@ -67,9 +67,19 @@ The disturbed workflow can operate on either a base lookup table or an extended 
 | Lookup variant | Runtime file | Row identity fields | Plant scalar fields |
 | --- | --- | --- | --- |
 | Base | `disturbed/disturbed_land_soil_lookup.csv` | `luse`, `stext` | `rdmax`, `xmxlai` |
-| Extended | `disturbed/disturbed_land_soil_lookup_extended.csv` | `luse`, `stext` (plus helper fields `disturbed_class`, `landuse`, `sev_enum`) | `plant.data.rdmax`, `plant.data.xmxlai` |
+| Extended | `disturbed/disturbed_land_soil_lookup_extended.csv` | `luse`, `stext` (plus helper fields `disturbed_class`, `landuse`, `sev_enum`) | `plant.data.rdmax`, `plant.data.xmxlai`, native openWEPP route coefficients |
 
 When the extended table is generated, WEPPcloud normalizes the scalar plant keys from base (`rdmax`, `xmxlai`) into extended namespaced fields (`plant.data.rdmax`, `plant.data.xmxlai`).
+
+For openWEPP Lane-D workflows, the extended table also includes explicit
+route-coefficient columns used to generate native `ow-lanuse-1` management
+files when native routing output is selected. These route coefficients are
+Disturbed class calibration values with provenance fields in the CSV; they are
+not derived from legacy row, ridge, roughness, residue, or cover fields.
+
+Native openWEPP management generation is opt-in. Normal WEPPcloud runs continue
+to write legacy WEPP management files unless the openWEPP native routing path is
+selected by the application/runtime.
 
 ## Steps
 

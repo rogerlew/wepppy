@@ -4,6 +4,23 @@ from enum import Enum
 from typing import Any, Dict, Iterable, List, Optional, Sequence, Set
 
 WEPPPY_MAN_DIR: str
+OverrideScalar = str | int | float
+OW_LANUSE_1_DATVER: str
+
+
+class RoutingCoefficients:
+    skin_friction_coefficient_ko: float
+    form_drag_coefficient: float
+    roughness_element_height_m: float
+    roughness_concentration: float
+    vegetation_drag_coefficient: float
+    def __init__(self, values: Sequence[OverrideScalar]) -> None: ...
+    @classmethod
+    def from_line(cls, line: str) -> RoutingCoefficients: ...
+    @classmethod
+    def from_mapping(cls, values: Dict[str, Any]) -> RoutingCoefficients: ...
+    def as_tuple(self) -> tuple[float, float, float, float, float]: ...
+    def as_dict(self) -> Dict[str, float]: ...
 
 
 class ScenarioBase:
@@ -258,6 +275,8 @@ class Management:
     drains: DrainLoops
     years: YearLoops
     man: ManagementLoop
+    def apply_openwepp_native_cropland(self, routing_coefficients: Any) -> None: ...
+    def as_openwepp_native_cropland(self, routing_coefficients: Any) -> Management: ...
     def __init__(self, **kwargs: Any) -> None: ...
     def dump_to_json(self, fn: str) -> None: ...
     @staticmethod

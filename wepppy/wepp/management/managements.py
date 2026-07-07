@@ -28,6 +28,7 @@ from __future__ import annotations
 
 from glob import glob
 import os
+import math
 from os.path import join as _join
 from os.path import exists as _exists
 from os.path import split as _split
@@ -47,6 +48,8 @@ OverrideScalar = str | int | float
 
 __all__ = [
     'WEPPPY_MAN_DIR',
+    'OW_LANUSE_1_DATVER',
+    'RoutingCoefficients',
     'ScenarioBase',
     'SectionType',
     'ScenarioReference',
@@ -138,6 +141,118 @@ _turkey_map_fn = _join(_management_dir, "turkey_map.json")
 _palouse_map_fn = _join(_management_dir, "palouse_map.json")
 
 WEPPPY_MAN_DIR = _management_dir
+OW_LANUSE_1_DATVER = 'ow-lanuse-1'
+NATIVE_CROPLAND_LANDUSE = 4
+ROUTING_COEFFICIENT_MARKERS = ('routing_coefficients', 'routing_coefficients_v1')
+ROUTING_COEFFICIENT_FIELD_NAMES = (
+    'route_skin_friction_coefficient_ko',
+    'route_form_drag_coefficient',
+    'route_roughness_element_height_m',
+    'route_roughness_concentration',
+    'route_vegetation_drag_coefficient',
+)
+LEGACY_LANDUSE_DESCRIPTIONS = ('N/A', 'Cropland', 'Rangeland', 'Forest', 'Roads')
+OW_LANUSE_1_LANDUSE_DESCRIPTIONS = {
+    3: 'NativeForest',
+    4: 'NativeCropland',
+}
+
+
+def _is_ow_lanuse_1(root: Any) -> bool:
+    return getattr(root, 'datver', None) == OW_LANUSE_1_DATVER
+
+
+def _is_modern_datver(root: Any) -> bool:
+    return _is_ow_lanuse_1(root) or getattr(root, 'datver_value', 0.0) >= 2016.3
+
+
+def _effective_landuse_for_data(root: Any, landuse: int) -> int:
+    if _is_ow_lanuse_1(root) and landuse == NATIVE_CROPLAND_LANDUSE:
+        return 1
+    return landuse
+
+
+def _landuse_description(root: Any, landuse: int) -> str:
+    if _is_ow_lanuse_1(root) and landuse in OW_LANUSE_1_LANDUSE_DESCRIPTIONS:
+        return OW_LANUSE_1_LANDUSE_DESCRIPTIONS[landuse]
+    return LEGACY_LANDUSE_DESCRIPTIONS[landuse]
+
+
+def _is_routing_coefficients_marker(value: str) -> bool:
+    return str(value).strip().lower() in ROUTING_COEFFICIENT_MARKERS
+
+
+class RoutingCoefficients:
+    """Lane-D static routing coefficients carried by native management files."""
+
+    def __init__(self, values: Sequence[OverrideScalar]) -> None:
+        if len(values) != 5:
+            raise ValueError(
+                f"routing_coefficients requires exactly five values; got {len(values)}"
+            )
+
+        coerced = tuple(float(value) for value in values)
+        labels = ROUTING_COEFFICIENT_FIELD_NAMES
+        for label, value in zip(labels, coerced):
+            if not math.isfinite(value):
+                raise ValueError(f"{label} must be finite; got {value!r}")
+
+        ko, form_cd, roughness_height, roughness_concentration, veg_cd = coerced
+        if ko <= 0:
+            raise ValueError("route_skin_friction_coefficient_ko must be > 0")
+        if form_cd < 0:
+            raise ValueError("route_form_drag_coefficient must be >= 0")
+        if roughness_height < 0:
+            raise ValueError("route_roughness_element_height_m must be >= 0")
+        if roughness_concentration < 0 or roughness_concentration > 1:
+            raise ValueError("route_roughness_concentration must be in [0, 1]")
+        if veg_cd < 0:
+            raise ValueError("route_vegetation_drag_coefficient must be >= 0")
+        if (roughness_height == 0) != (roughness_concentration == 0):
+            raise ValueError(
+                "route_roughness_element_height_m and "
+                "route_roughness_concentration must both be zero or both be positive"
+            )
+
+        self.skin_friction_coefficient_ko = ko
+        self.form_drag_coefficient = form_cd
+        self.roughness_element_height_m = roughness_height
+        self.roughness_concentration = roughness_concentration
+        self.vegetation_drag_coefficient = veg_cd
+
+    @classmethod
+    def from_line(cls, line: str) -> 'RoutingCoefficients':
+        tokens = str(line).split()
+        if len(tokens) != 5:
+            raise ValueError(
+                f"routing_coefficients requires exactly five values; got {len(tokens)}"
+            )
+        return cls(tokens)
+
+    @classmethod
+    def from_mapping(cls, values: Dict[str, Any]) -> 'RoutingCoefficients':
+        return cls([values[field] for field in ROUTING_COEFFICIENT_FIELD_NAMES])
+
+    def as_tuple(self) -> tuple[float, float, float, float, float]:
+        return (
+            self.skin_friction_coefficient_ko,
+            self.form_drag_coefficient,
+            self.roughness_element_height_m,
+            self.roughness_concentration,
+            self.vegetation_drag_coefficient,
+        )
+
+    def as_dict(self) -> Dict[str, float]:
+        return dict(zip(ROUTING_COEFFICIENT_FIELD_NAMES, self.as_tuple()))
+
+    def __iter__(self):
+        return iter(self.as_tuple())
+
+    def __str__(self):
+        return ' '.join(f'{value:0.5f}' for value in self.as_tuple())
+
+    def __repr__(self):
+        return f"RoutingCoefficients({self.as_tuple()!r})"
 
 def _parse_julian(x):
     foo = int(x)
@@ -290,10 +405,11 @@ class ScenarioReference(ScenarioBase):
 
 
 class PlantLoopCropland(ScenarioBase):
-    def __init__(self, lines, root):
+    def __init__(self, lines, root, landuse: Optional[int] = None):
         super().__init__()
 
         self.root = root
+        self.routing_coefficients: Optional[RoutingCoefficients] = None
         self.crunit = lines.pop(0)
 
         line = lines.pop(0).split()
@@ -347,8 +463,19 @@ class PlantLoopCropland(ScenarioBase):
         else:
             self.rcc = ''
 
+        if lines and _is_routing_coefficients_marker(lines[0]):
+            if not (_is_ow_lanuse_1(root) and landuse == NATIVE_CROPLAND_LANDUSE):
+                raise ValueError(
+                    "routing_coefficients may only appear on ow-lanuse-1 "
+                    "native cropland plant records"
+                )
+            lines.pop(0)
+            if not lines:
+                raise ValueError("routing_coefficients marker is missing its value line")
+            self.routing_coefficients = RoutingCoefficients.from_line(lines.pop(0))
+
     def __str__(self):
-        return """\
+        s = """\
 {0.crunit}
 {0.bb:0.5f} {0.bbb:0.5f} {0.beinp:0.5f} {0.btemp:0.5f} {0.cf:0.5f} \
 {0.crit:0.5f} {0.critvm:0.5f} {0.cuthgt:0.5f} {0.decfct:0.5f} {0.diam:0.5f}
@@ -359,6 +486,9 @@ class PlantLoopCropland(ScenarioBase):
 {0.rdmax:0.5f} {0.rsr:0.5f} {0.rtmmax:0.5f} {0.spriod} {0.tmpmax:0.5f}
 {0.tmpmin:0.5f} {0.xmxlai:0.5f} {0.yld:0.5f} {0.rcc}
 """.format(self)
+        if self.routing_coefficients is not None:
+            s += f"routing_coefficients\n{self.routing_coefficients}\n"
+        return s
 
 
     def __repr__(self):
@@ -482,7 +612,7 @@ class OpLoopCropland(ScenarioBase):
         line = lines.pop(0).split()
         self.pcode = int(line.pop(0))
 
-        if getattr(self.root, 'datver_value', 0.0) >= 2016.3:
+        if _is_modern_datver(self.root):
             valid_pcodes = [1, 2, 3, 4, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19]
         elif self.root.datver == '98.4':
             valid_pcodes = [1, 2, 3, 4, 10, 11, 12, 13]
@@ -1635,7 +1765,7 @@ class Loop(ScenarioBase):
         self.data.setroot(root)
 
     def __str__(self):
-        landuse_desc = ('N/A', 'Cropland', 'Rangeland', 'Forest', 'Roads')[self.landuse]
+        landuse_desc = _landuse_description(self.root, self.landuse)
 
         assert self.data is not None, self.name
         assert self.landuse is not None, self.name
@@ -1660,7 +1790,7 @@ class Loop(ScenarioBase):
 {0.data}""".format(self, landuse_desc=landuse_desc)
 
     def __repr__(self):
-        landuse_desc = ('N/A', 'Cropland', 'Rangeland', 'Forest', 'Roads')[self.landuse]
+        landuse_desc = _landuse_description(self.root, self.landuse)
 
         assert self.data is not None, self.name
         assert self.landuse is not None, self.name
@@ -1699,14 +1829,16 @@ class PlantLoop(Loop):
         super(PlantLoop, self).__init__(lines, root)
         landuse = self.landuse
 
-        assert landuse in [1, 2, 3, 4]
-        if landuse == 1:
-            self.data = PlantLoopCropland(lines, root)
-        elif landuse == 2:
+        data_landuse = _effective_landuse_for_data(root, landuse)
+
+        assert data_landuse in [1, 2, 3, 4]
+        if data_landuse == 1:
+            self.data = PlantLoopCropland(lines, root, landuse=landuse)
+        elif data_landuse == 2:
             self.data = PlantLoopRangeland(lines, root)
-        elif landuse == 3:
+        elif data_landuse == 3:
             self.data = PlantLoopForest(lines, root)
-        elif landuse == 4:
+        elif data_landuse == 4:
             self.data = PlantLoopRoads(lines, root)
 
 
@@ -1718,14 +1850,16 @@ class OpLoop(Loop):
         super(OpLoop, self).__init__(lines, root)
         landuse = self.landuse
 
-        assert landuse in [1, 2, 3, 4]
-        if landuse == 1:
+        data_landuse = _effective_landuse_for_data(root, landuse)
+
+        assert data_landuse in [1, 2, 3, 4]
+        if data_landuse == 1:
             self.data = OpLoopCropland(lines, root)
-        elif landuse == 2:
+        elif data_landuse == 2:
             self.data = OpLoopRangeland(lines, root)
-        elif landuse == 3:
+        elif data_landuse == 3:
             self.data = OpLoopForest(lines, root)
-        elif landuse == 4:
+        elif data_landuse == 4:
             self.data = OpLoopRoads(lines, root)
 
 
@@ -1737,14 +1871,16 @@ class IniLoop(Loop):
         super(IniLoop, self).__init__(lines, root)
         landuse = self.landuse
 
-        assert landuse in [1, 2, 3, 4]
-        if landuse == 1:
+        data_landuse = _effective_landuse_for_data(root, landuse)
+
+        assert data_landuse in [1, 2, 3, 4]
+        if data_landuse == 1:
             self.data = IniLoopCropland(lines, root)
-        elif landuse == 2:
+        elif data_landuse == 2:
             self.data = IniLoopRangeland(lines, root)
-        elif landuse == 3:
+        elif data_landuse == 3:
             self.data = IniLoopForest(lines, root)
-        elif landuse == 4:
+        elif data_landuse == 4:
             self.data = IniLoopRoads(lines, root)
 
 
@@ -1758,16 +1894,18 @@ class SurfLoop(Loop):
 
         self.ntill = ntill = int(lines.pop(0))
 
-        assert landuse in [1, 2, 3, 4], landuse
+        data_landuse = _effective_landuse_for_data(root, landuse)
+
+        assert data_landuse in [1, 2, 3, 4], landuse
         self.data = Loops()
         for k in range(ntill):
-            if landuse == 1:
+            if data_landuse == 1:
                 self.data.append(SurfLoopCropland(lines, root))
-            elif landuse == 2:
+            elif data_landuse == 2:
                 self.data.append(SurfLoopRangeland(lines, root))
-            elif landuse == 3:
+            elif data_landuse == 3:
                 self.data.append(SurfLoopForest(lines, root))
-            elif landuse == 4:
+            elif data_landuse == 4:
                 self.data.append(SurfLoopRoads(lines, root))
 
 
@@ -1779,8 +1917,10 @@ class ContourLoop(Loop):
         super(ContourLoop, self).__init__(lines, root)
         landuse = self.landuse
 
-        assert landuse in [1]
-        if landuse == 1:
+        data_landuse = _effective_landuse_for_data(root, landuse)
+
+        assert data_landuse in [1]
+        if data_landuse == 1:
             self.data = ContourLoopCropland(lines, root)
 
 
@@ -1792,12 +1932,14 @@ class DrainLoop(Loop):
         super(DrainLoop, self).__init__(lines, root)
         landuse = self.landuse
 
-        assert landuse in [1, 2, 4]
-        if landuse == 1:
+        data_landuse = _effective_landuse_for_data(root, landuse)
+
+        assert data_landuse in [1, 2, 4]
+        if data_landuse == 1:
             self.data = DrainLoopCropland(lines, root)
-        elif landuse == 2:
+        elif data_landuse == 2:
             self.data = DrainLoopRangeland(lines, root)
-        elif landuse == 4:
+        elif data_landuse == 4:
             self.data = DrainLoopRoads(lines, root)
 
 
@@ -1809,14 +1951,16 @@ class YearLoop(Loop):
         super(YearLoop, self).__init__(lines, root)
         landuse = self.landuse
 
-        assert landuse in [1, 2, 3, 4]
-        if landuse == 1:
+        data_landuse = _effective_landuse_for_data(root, landuse)
+
+        assert data_landuse in [1, 2, 3, 4]
+        if data_landuse == 1:
             self.data = YearLoopCropland(lines, root)
-        elif landuse == 2:
+        elif data_landuse == 2:
             self.data = YearLoopRangeland(lines, root)
-        elif landuse == 3:
+        elif data_landuse == 3:
             self.data = YearLoopForest(lines, root)
-        elif landuse == 4:
+        elif data_landuse == 4:
             self.data = YearLoopRoads(lines, root)
 
 # In your managements.py file, find the ManagementLoopManLoop class...
@@ -2392,6 +2536,93 @@ class Management(object):
         raise NotImplementedError(
             f"Setting attribute '{attr}' is not implemented."
         )
+
+    @staticmethod
+    def _coerce_routing_coefficients(value: Any) -> RoutingCoefficients:
+        if isinstance(value, RoutingCoefficients):
+            return value
+        if isinstance(value, dict):
+            return RoutingCoefficients.from_mapping(value)
+        return RoutingCoefficients(value)
+
+    def _expand_routing_coefficients(self, routing_coefficients: Any) -> List[RoutingCoefficients]:
+        if isinstance(routing_coefficients, RoutingCoefficients) or isinstance(routing_coefficients, dict):
+            return [self._coerce_routing_coefficients(routing_coefficients) for _ in range(self.ncrop)]
+
+        if not isinstance(routing_coefficients, (list, tuple)):
+            return [self._coerce_routing_coefficients(routing_coefficients) for _ in range(self.ncrop)]
+
+        is_single_value_set = (
+            len(routing_coefficients) == 5
+            and not any(isinstance(value, (RoutingCoefficients, dict, list, tuple)) for value in routing_coefficients)
+        )
+        if is_single_value_set:
+            coeffs = self._coerce_routing_coefficients(routing_coefficients)
+            return [coeffs for _ in range(self.ncrop)]
+
+        coeffs = [self._coerce_routing_coefficients(value) for value in routing_coefficients]
+        if len(coeffs) != self.ncrop:
+            raise ValueError(
+                f"Expected one routing_coefficients set or {self.ncrop} per-plant sets; "
+                f"got {len(coeffs)}"
+            )
+        return coeffs
+
+    @staticmethod
+    def _require_cropland_loop_for_native(loop: Loop) -> None:
+        if loop.landuse != 1 and loop.landuse != NATIVE_CROPLAND_LANDUSE:
+            raise ValueError(
+                f"openWEPP native cropland output can only convert cropland loops; "
+                f"{loop.name!r} has landuse={loop.landuse}"
+            )
+
+    def apply_openwepp_native_cropland(self, routing_coefficients: Any) -> None:
+        """Convert this parsed cropland management to native ``ow-lanuse-1`` form."""
+
+        coeffs = self._expand_routing_coefficients(routing_coefficients)
+
+        for collection in (
+            self.plants,
+            self.ops,
+            self.inis,
+            self.surfs,
+            self.contours,
+            self.drains,
+            self.years,
+        ):
+            for loop in collection:
+                self._require_cropland_loop_for_native(loop)
+
+        for plant in self.plants:
+            if not isinstance(plant.data, PlantLoopCropland):
+                raise ValueError(
+                    f"openWEPP native cropland output requires cropland plant data; "
+                    f"{plant.name!r} has {type(plant.data).__name__}"
+                )
+
+        self.datver = OW_LANUSE_1_DATVER
+        self.datver_value = 0.0
+
+        for collection in (
+            self.plants,
+            self.ops,
+            self.inis,
+            self.surfs,
+            self.contours,
+            self.drains,
+            self.years,
+        ):
+            for loop in collection:
+                loop.landuse = NATIVE_CROPLAND_LANDUSE
+
+        for plant, coeff in zip(self.plants, coeffs):
+            plant.data.routing_coefficients = coeff
+
+    def as_openwepp_native_cropland(self, routing_coefficients: Any) -> 'Management':
+        """Return a copy serialized as native cropland with route coefficients."""
+        native = deepcopy(self)
+        native.apply_openwepp_native_cropland(routing_coefficients)
+        return native
 
     def make_multiple_ofe(self, nofe: int) -> None:
         assert self.nofe == 1
