@@ -1,4 +1,4 @@
-# Monthly Work Log: May 2025 – April 2026
+# Monthly Work Log: May 2025 – May 2026
 
 Retroactive summaries of WEPPpy development activity by month, constructed from git history. Commit counts are non-merge commits on master.
 
@@ -537,40 +537,108 @@ Retroactive summaries of WEPPpy development activity by month, constructed from 
 
 ---
 
-## Seven-Month Totals
+## May 2026
 
-| Metric | Oct 2025 | Nov 2025 | Dec 2025 | Jan 2026 | Feb 2026 | Mar 2026 | Apr 2026 | **Total** |
-|--------|----------|----------|----------|----------|----------|----------|----------|-----------|
-| Commits (all repos) | 678 | 363 | 284 | 307 | 443 | 326 | 659 | **3,060** |
-| Lines added (wepppy) | ~304K | ~410K | ~136K | ~744K | ~304K | ~711K | ~957K** | **~3.57M** |
-| Lines removed (wepppy) | ~103M* | ~329K | ~56K | ~21K | ~46K | ~13K | ~16K | — |
+### Features
+
+- **RUSLE Rock/Soil Parameterization** — Added conservative POLARIS K gap fill, optional CFVO K adjustment, cosurffrags-first rock proxies, RAP/SBS rock partitioning, and UI/docs contracts for interpreting surface-rock effects.
+  *(~25 commits)*
+
+- **Feature Maturity and Access Governance** — Introduced the feature/config maturity registry, beta visibility gating, sponsor/access governance docs, and universal parameterization ADR provenance requirements.
+  *(~20 commits)*
+
+- **WEPP Binary, HBP, and Sidecar Integration** — Continued WEPP binary vendoring through `wepp_260514`, added HBP pass-family support, schema2 sidecar handling, optional interception-storage parsing, and binary-contract-aware watershed run prompts.
+  *(~35 commits)*
+
+- **MOFE, Disturbed, and Omni Reliability** — Advanced MOFE closure auditing and triage, fixed runtime mulch-key rebuilds, added per-scenario Omni treatment filters, and hardened disturbed nodata/BAER remapping behavior.
+  *(~20 commits)*
+
+- **NoDb/RQ/Culvert/Export Hardening** — Refactored map handling, hardened stale-write and lock-conflict paths, invalidated inherited WEPP markers on fork, expanded features-export tests, and tightened rq-engine/session payload behavior.
+  *(~25 commits)*
+
+- **Usersum, Profiles, and Research Artifacts** — Clarified usersum language around model behavior and governance, refreshed profile/UI bundle assets, and added the I-CREWS poster specification and supporting figures.
+  *(~15 commits)*
+
+### Debugging & QA
+
+- Fixed observed CLIGEN silent-pass warning persistence and climate validation messages
+- Fixed stream-order fallback regressions, disturbed nodata leakage, and WBT/Topaz set-outlet validation
+- Fixed WEPP bootstrap summary deferral for stale job states and detached config fallback coverage
+- Fixed landuse lock-conflict error surfacing, culvert batch stale-write races, and inherited WEPP job markers on fork
+- Fixed SSURGO quote serialization and clarified `kslast` bedrock-control conductivity units
+- Fixed RUSLE RAP endpoint protocol, RAP year discovery, K-factor gap fills, and residual no-flow LS routing cells
+- Fixed CI Redis bind collisions, docs-quality size-gate assertions, and detached Ron `fetch_dem` fixtures
+- Replaced the PFDF Atlas14 dependency with the in-repo NOAA client
+
+### Cross-repo: weppcloud-wbt (3 commits, +291 / −77)
+
+- Hardened `RusleLsFactor` with bounded no-flow fallback behavior, residual no-flow masking, and refreshed release artifacts
+- Removed tracked Python cache output from the WBT tree
+
+### Cross-repo: peridot (0 commits)
+
+- No May 2026 activity in local history
+
+### Cross-repo: wepppyo3 (9 commits, +5.2K / −744)
+
+- Added optional `InterceptionStorage` support in hill WAT parsing and deterministic `raster_characteristics` API ordering
+- Implemented HBP reader/pass-family dispatch, HBP schema2 dual-major parser support, and direct negative-path parser tests
+- Migrated interchange crates from `arrow2`/`parquet2` to `arrow-rs` and refreshed Py3.12 release artifacts
+
+### Cross-repo: wepp-forest (343 commits, +26.4M / −24.5K)
+
+- Continued the WEPP release train through `wepp_260514` and `wepp_260516fc1`, including HBP v2/schema2 sidecar support and FC recertification artifacts
+- Executed watershed-routing modernization across WB33-WB36, covering channel geometry, impoundment routing, Muskingum-Cunge/time-of-concentration paths, publish-balance retirement, and peak-summary outputs
+- Expanded water-balance, winter, soil, snow/frost, ET, erosion, and channel-sediment closure campaigns with contract-derived vectors and replay evidence
+- Added formal authority, science-contract, ablation, and release-gate documentation for the Fortran modernization stream
+- Carried large binary/evidence churn from release artifacts, ablation packages, and parity/replay fixture publication
+
+### Cross-repo: openWEPP (381 commits, +542.7K / −49.4K)
+
+- Launched the Rust openWEPP workspace with governance, non-clean-room provenance policy, reference ingestion, and architecture-first science-contract strategy
+- Authored the initial science-contract corpus and work-package program for climate, water balance, snow/freeze, runoff partitioning, evaporation, percolation, subsurface hydrology, soil, residue, hydraulics, sediment, routing, irrigation, impoundments, plant growth, and system behavior
+- Implemented the early hillslope CLI/runner surface, Python wrapper, WAT parquet output, integration tests, and legacy comparison suite
+- Ported and staged kernels across water balance, ET, percolation, lateral drainage, peak runoff, watershed channel/impoundment routing, erosion, frost, and snow workflows
+- Added HBP serializer/parser work, release-gate automation, authority-stack tests, fixture provenance checks, and Apache-2.0 relicensing from inception
+
+---
+
+## Eight-Month Totals
+
+| Metric | Oct 2025 | Nov 2025 | Dec 2025 | Jan 2026 | Feb 2026 | Mar 2026 | Apr 2026 | May 2026 | **Total** |
+|--------|----------|----------|----------|----------|----------|----------|----------|----------|-----------|
+| Commits (all repos) | 678 | 363 | 284 | 307 | 443 | 326 | 659 | 880 | **3,940** |
+| Lines added (wepppy) | ~304K | ~410K | ~136K | ~744K | ~304K | ~711K | ~957K** | ~58K | **~3.62M** |
+| Lines removed (wepppy) | ~103M* | ~329K | ~56K | ~21K | ~46K | ~13K | ~16K | ~4K | — |
 
 \* The 103M deletion figure reflects removal of legacy submodules, deprecated `wepp.out` parsers, and old binary test data. Net new functional code for October is approximately 225K lines.
 \** April insertions include a 713K-line ablation evidence commit plus repeated WEPP binary vendoring; functional logic churn is materially smaller than raw LOC.
 
 ### Key Themes Across the Period
 
-1. **Interchange & Query Engine** (Oct–Apr): Migration from text-file WEPP parsing to typed Parquet interchange, followed by sustained closure audits, export hardening, and downstream reliability fixes.
+1. **Interchange & Query Engine** (Oct–May): Migration from text-file WEPP parsing to typed Parquet interchange, followed by sustained closure audits, export hardening, HBP sidecar support, and downstream reliability fixes.
 
-2. **Containerization & DevOps** (Oct–Apr): Full Docker Compose stack plus ongoing deploy/runtime hardening, secrets wiring, rq-engine integration, and service startup reliability fixes.
+2. **Containerization & DevOps** (Oct–May): Full Docker Compose stack plus ongoing deploy/runtime hardening, secrets wiring, rq-engine integration, and service startup reliability fixes.
 
-3. **Modern Frontend** (Nov–Apr): Leaflet→deck.gl migration followed by GL dashboard refinements (contrast UX, legend controls, date/unit handling) and controller usability polish.
+3. **Modern Frontend** (Nov–May): Leaflet→deck.gl migration followed by GL dashboard refinements (contrast UX, legend controls, date/unit handling), RUSLE panel tuning, and controller usability polish.
 
 4. **Culvert-at-Risk Integration** (Jan–Feb): Culvert-Web-App integration matured with batch finalization queueing, token-auth boundaries, race-condition fixes, and audit/test coverage.
 
 5. **NoDir + Auth Boundary Hardening** (Feb): NoDir reversal completion paired with extensive CSRF/session/cookie-bearer fallback contract hardening and regression coverage.
 
-6. **Omni/Batch/Export + MOFE Maturity** (Jan–Apr): Continued Omni contrast/batch orchestration improvements plus April MOFE throughput hardening and contract stabilization, culminating in hardened features-export matrix contracts and legacy export cutover.
+6. **Omni/Batch/Export + MOFE Maturity** (Jan–May): Continued Omni contrast/batch orchestration improvements plus MOFE throughput hardening, closure audits, and contract stabilization, culminating in hardened features-export matrix contracts and legacy export cutover.
 
-7. **RUSLE + Roads Modeling Stack** (Mar–Apr): RUSLE and Roads NoDb workflows landed, then advanced with drilldown overlays, outslope flow refinements, and companion native tooling support.
+7. **RUSLE + Roads Modeling Stack** (Mar–May): RUSLE and Roads NoDb workflows landed, then advanced with drilldown overlays, outslope flow refinements, companion native tooling support, and conservative rock/soil parameterization.
 
-8. **Usersum as In-Product Documentation** (Mar–Apr): Manifest-driven usersum engine expanded with role-aware discovery, richer search snippets, and broad control-to-doc linking.
+8. **Usersum as In-Product Documentation** (Mar–May): Manifest-driven usersum engine expanded with role-aware discovery, richer search snippets, broad control-to-doc linking, and governance/frost-gating clarifications.
 
-9. **Accessibility & Compliance Evidence** (Mar–Apr): Section 508 statement updates, VPAT workspace packaging, and automated/manual accessibility smoke checks expanded release evidence.
+9. **Accessibility & Compliance Evidence** (Mar–May): Section 508 statement updates, VPAT workspace packaging, feature governance policy, and automated/manual accessibility smoke checks expanded release evidence.
 
-10. **Rust/Fortran Performance Baseline** (Oct–Apr): Continued investment in owned native components (`weppcloud-wbt`, `peridot`, `wepppyo3`, `wepp-forest`) for geometry, roads, Geneva kernels, and stable WEPP binary workflows.
+10. **Rust/Fortran Performance Baseline** (Oct–May): Continued investment in owned native components (`weppcloud-wbt`, `peridot`, `wepppyo3`, `wepp-forest`, `openWEPP`) for geometry, roads, Geneva kernels, WEPP binary workflows, and the Rust reimplementation path.
 
-11. **WEPP Incident-Ablation Discipline** (Apr): `wepp-forest` established milestone-driven ablation/fuzzing evidence, policy gates, and release traceability as a recurring hardening workflow.
+11. **WEPP Incident-Ablation Discipline** (Apr–May): `wepp-forest` established milestone-driven ablation/fuzzing evidence, policy gates, release traceability, and closure-campaign mechanics as a recurring hardening workflow.
+
+12. **openWEPP Launch** (May): `/workdir/openWEPP` became an active Rust reimplementation workspace with science contracts, runner/CLI surfaces, legacy comparison lanes, and early hydrology/erosion/watershed kernels.
 
 ---
 
