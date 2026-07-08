@@ -1,4 +1,4 @@
-# Monthly Work Log: May 2025 – May 2026
+# Monthly Work Log: May 2025 – June 2026
 
 Retroactive summaries of WEPPpy development activity by month, constructed from git history. Commit counts are non-merge commits on master.
 
@@ -603,42 +603,112 @@ Retroactive summaries of WEPPpy development activity by month, constructed from 
 
 ---
 
-## Eight-Month Totals
+## June 2026
 
-| Metric | Oct 2025 | Nov 2025 | Dec 2025 | Jan 2026 | Feb 2026 | Mar 2026 | Apr 2026 | May 2026 | **Total** |
-|--------|----------|----------|----------|----------|----------|----------|----------|----------|-----------|
-| Commits (all repos) | 678 | 363 | 284 | 307 | 443 | 326 | 659 | 880 | **3,940** |
-| Lines added (wepppy) | ~304K | ~410K | ~136K | ~744K | ~304K | ~711K | ~957K** | ~58K | **~3.62M** |
-| Lines removed (wepppy) | ~103M* | ~329K | ~56K | ~21K | ~46K | ~13K | ~16K | ~4K | — |
+### Features
+
+- **SSURGO Project Cache and Reclaimed Soils** — Added project-local SSURGO SQLite caching, cache metadata sidecars, an ADR for cache behavior, geospatial metadata authoring guidance, and reclaimed-soil fallback handling.
+  *(~10 commits)*
+
+- **Browse, Download, and Parquet UX Hardening** — Added a dedicated archive download service, lazy parquet D-Tale backend, Arrow-to-pandas browse-path removal, themed browse tree/parquet preview UI, and clearer download documentation.
+  *(~15 commits)*
+
+- **Omni Sediment Inversion Investigation** — Documented the honeyed-marathoner sediment inversion, including version-stable reproduction, slope/aspect/runoff partitioning, canopy evaporation/saturation-excess findings, storm timing, SBS raster preservation, and follow-on frost sensitivity notes.
+  *(~15 commits)*
+
+- **ERMiT and RQ-Engine Export Flow** — Restored ERMiT export in Run Results, moved ERMiT export through rq-engine, and proxied legacy ERMiT downloads through rq-engine.
+  *(3 commits)*
+
+- **Batch, Climate, and Geneva Reliability** — Hardened batch runner retry durability, normalized Geneva NOAA frequency rows, normalized observed Daymet radiation bounds for CLI publication, and added Treasure Valley hydropower-to-USGS gauge validation.
+  *(~8 commits)*
+
+- **Forest Management and Land/Soil Inputs** — Added deciduous and mixed forest managements, documented forest management hemisphere limits and GDD senescence investigations, normalized RAP_TS management cover fractions, and synced disturbed land-soil lookup data.
+  *(~8 commits)*
+
+- **WEPPcloud Paper and Research Artifacts** — Advanced the ACG 2026 manuscript planning, abstract, figures, SocketIO framing, highlights, bibliography, operational lessons narrative, and JOSS submission tracking.
+  *(~12 commits)*
+
+### Debugging & QA
+
+- Fixed OMNI SBS raster preservation and mulch lookup ordering
+- Fixed map fly-to parsing for Unicode minus values
+- Fixed observed Daymet radiation bounds and normalized Daymet radiation for CLI publication
+- Fixed ERMiT export availability in Run Results and routed export/download paths through rq-engine
+- Fixed batch runner retry durability and added a durability work package
+- Added totalwatsed3 interception-flux closure support consuming openWEPP interception flux
+- Added SSURGO reclaimed-soil fallback and project-cache metadata safeguards
+- Added UI Lab keyboard-focus hardening for the light landing page
+
+### Publication Tracking
+
+- **JOSS submission** — Opened [openjournals/joss-reviews#10701](https://github.com/openjournals/joss-reviews/issues/10701) on 2026-06-11 for `[PRE REVIEW]: weppcloud-wbt: TOPAZ-style watershed parameterization tools for WEPPcloud workflows in WhiteboxTools`; initial pre-review metadata lists `weppcloud-wbt` version `2.3.0.post2`, managing EiC Kristen Thyng, and editor/reviewers pending.
+
+### Cross-repo: weppcloud-wbt (65 commits, +19.1K / −603)
+
+- Added weppcloud-wbt paper/JOSS artifacts, WEPPcloud workflow framing, figures, bibliography updates, claim-test matrix, and Zenodo DOI citation
+- Built PyPI packaging and release machinery: `whitebox_tools` shim package, wheel inspection, Linux auditwheel repair, Windows DLL/PROJ bundling, macOS/Linux/Windows validation reports, and manual publish workflow
+- Expanded integration coverage for FindOutlet, HillslopesTopaz, FVSlope, stream-junction identifiers, RaiseRoads, PruneStrahlerOrder, UnnestBasins, ClipRaster, watershed, and VRT variants
+- Refreshed README/end-user docs for WEPPcloud-owned tools and upstream attribution, added OSS maintenance artifacts, CI workflows, and a 2.3.0.post2 changelog release
+
+### Cross-repo: peridot (0 commits)
+
+- No June 2026 activity in local history
+
+### Cross-repo: wepppyo3 (0 commits)
+
+- No June 2026 activity in local history
+
+### Cross-repo: wepp-forest (0 commits)
+
+- No June 2026 activity in local history; WEPP engine modernization work during June was concentrated in `/workdir/openWEPP`
+
+### Cross-repo: openWEPP (666 commits, +12.2M / −224.2K)
+
+- Advanced hydrology physics closure across HPHYS/WB lanes: FC/WP theta authority, lateral/drainage, percolation, PMET demand, snowpack state, snowmelt infiltration, storage-budget lineage, and unit-boundary governance
+- Closed the first single-OFE water-balance rung by publishing daily interception flux to `H.wat`, adding totalwatsed3 companion support, and formalizing conservation/publication acceptance rules
+- Executed MOFE and watershed closure work: per-OFE state architecture, sequential OFE lane execution, Q/QOFE geometry validation, openWEPP-native runvol, totalwatsed3 CLI ownership, and watershed routed-output milestones
+- Built the array-native/direct runtime path: indexed runtime surfaces, HillslopeDayFrame architecture, direct publication/runtime spans, direct WAT/PMET producers, winter-column snow/frost state, and RSS/performance characterization
+- Expanded snow/frost fidelity work with frost-depth heat-flow diagnostics, ksflag frost activation, observed frost fixtures, SNOTEL snow-density rubrics, Harder-Pomeroy phase default activation, multilayer snow/frost insulation gates, and dynamic litter/residue frost-surface coupling
+- Continued governance and maintainability work: ADRs, ROADMAP and backlog tracking, science-contract restructuring, required-reading budgeting, mechanical refactor guidance, Rust line-count governance, CQR/CRAP complexity burndown, and kernel-boundary typing/deletion planning
+
+---
+
+## Nine-Month Totals
+
+| Metric | Oct 2025 | Nov 2025 | Dec 2025 | Jan 2026 | Feb 2026 | Mar 2026 | Apr 2026 | May 2026 | Jun 2026 | **Total** |
+|--------|----------|----------|----------|----------|----------|----------|----------|----------|----------|-----------|
+| Commits (all repos) | 678 | 363 | 284 | 307 | 443 | 326 | 659 | 880 | 802 | **4,742** |
+| Lines added (wepppy) | ~304K | ~410K | ~136K | ~744K | ~304K | ~711K | ~957K** | ~58K | ~71K | **~3.70M** |
+| Lines removed (wepppy) | ~103M* | ~329K | ~56K | ~21K | ~46K | ~13K | ~16K | ~4K | ~2K | — |
 
 \* The 103M deletion figure reflects removal of legacy submodules, deprecated `wepp.out` parsers, and old binary test data. Net new functional code for October is approximately 225K lines.
 \** April insertions include a 713K-line ablation evidence commit plus repeated WEPP binary vendoring; functional logic churn is materially smaller than raw LOC.
 
 ### Key Themes Across the Period
 
-1. **Interchange & Query Engine** (Oct–May): Migration from text-file WEPP parsing to typed Parquet interchange, followed by sustained closure audits, export hardening, HBP sidecar support, and downstream reliability fixes.
+1. **Interchange & Query Engine** (Oct–Jun): Migration from text-file WEPP parsing to typed Parquet interchange, followed by sustained closure audits, export hardening, HBP sidecar support, lazy parquet browse paths, and downstream reliability fixes.
 
-2. **Containerization & DevOps** (Oct–May): Full Docker Compose stack plus ongoing deploy/runtime hardening, secrets wiring, rq-engine integration, and service startup reliability fixes.
+2. **Containerization & DevOps** (Oct–Jun): Full Docker Compose stack plus ongoing deploy/runtime hardening, secrets wiring, rq-engine integration, dedicated archive downloads, and service startup reliability fixes.
 
-3. **Modern Frontend** (Nov–May): Leaflet→deck.gl migration followed by GL dashboard refinements (contrast UX, legend controls, date/unit handling), RUSLE panel tuning, and controller usability polish.
+3. **Modern Frontend** (Nov–Jun): Leaflet→deck.gl migration followed by GL dashboard refinements (contrast UX, legend controls, date/unit handling), RUSLE panel tuning, themed browse previews, UI Lab keyboard-focus fixes, and controller usability polish.
 
 4. **Culvert-at-Risk Integration** (Jan–Feb): Culvert-Web-App integration matured with batch finalization queueing, token-auth boundaries, race-condition fixes, and audit/test coverage.
 
 5. **NoDir + Auth Boundary Hardening** (Feb): NoDir reversal completion paired with extensive CSRF/session/cookie-bearer fallback contract hardening and regression coverage.
 
-6. **Omni/Batch/Export + MOFE Maturity** (Jan–May): Continued Omni contrast/batch orchestration improvements plus MOFE throughput hardening, closure audits, and contract stabilization, culminating in hardened features-export matrix contracts and legacy export cutover.
+6. **Omni/Batch/Export + MOFE Maturity** (Jan–Jun): Continued Omni contrast/batch orchestration improvements plus MOFE throughput hardening, closure audits, sediment-inversion investigations, and contract stabilization, culminating in hardened features-export matrix contracts and legacy export cutover.
 
 7. **RUSLE + Roads Modeling Stack** (Mar–May): RUSLE and Roads NoDb workflows landed, then advanced with drilldown overlays, outslope flow refinements, companion native tooling support, and conservative rock/soil parameterization.
 
-8. **Usersum as In-Product Documentation** (Mar–May): Manifest-driven usersum engine expanded with role-aware discovery, richer search snippets, broad control-to-doc linking, and governance/frost-gating clarifications.
+8. **Usersum as In-Product Documentation** (Mar–Jun): Manifest-driven usersum engine expanded with role-aware discovery, richer search snippets, broad control-to-doc linking, governance/frost-gating clarifications, and paper-facing operational narratives.
 
-9. **Accessibility & Compliance Evidence** (Mar–May): Section 508 statement updates, VPAT workspace packaging, feature governance policy, and automated/manual accessibility smoke checks expanded release evidence.
+9. **Accessibility & Compliance Evidence** (Mar–Jun): Section 508 statement updates, VPAT workspace packaging, feature governance policy, keyboard-focus fixes, and automated/manual accessibility smoke checks expanded release evidence.
 
-10. **Rust/Fortran Performance Baseline** (Oct–May): Continued investment in owned native components (`weppcloud-wbt`, `peridot`, `wepppyo3`, `wepp-forest`, `openWEPP`) for geometry, roads, Geneva kernels, WEPP binary workflows, and the Rust reimplementation path.
+10. **Rust/Fortran Performance Baseline** (Oct–Jun): Continued investment in owned native components (`weppcloud-wbt`, `peridot`, `wepppyo3`, `wepp-forest`, `openWEPP`) for geometry, roads, Geneva kernels, WEPP binary workflows, WBT packaging, and the Rust reimplementation path.
 
-11. **WEPP Incident-Ablation Discipline** (Apr–May): `wepp-forest` established milestone-driven ablation/fuzzing evidence, policy gates, release traceability, and closure-campaign mechanics as a recurring hardening workflow.
+11. **WEPP Incident-Ablation Discipline** (Apr–Jun): `wepp-forest` and `openWEPP` established milestone-driven ablation/fuzzing evidence, policy gates, release traceability, and closure-campaign mechanics as a recurring hardening workflow.
 
-12. **openWEPP Launch** (May): `/workdir/openWEPP` became an active Rust reimplementation workspace with science contracts, runner/CLI surfaces, legacy comparison lanes, and early hydrology/erosion/watershed kernels.
+12. **openWEPP Launch and Runtime Maturity** (May–Jun): `/workdir/openWEPP` became an active Rust reimplementation workspace with science contracts, runner/CLI surfaces, legacy comparison lanes, early hydrology/erosion/watershed kernels, direct runtime work, and snow/frost fidelity programs.
 
 ---
 
@@ -648,16 +718,18 @@ To extend this log for additional months, use the following approach with Claude
 
 ### 1. Gather commit messages
 
-For each repository, pull the one-line log for the target month:
+For each repository, pull the one-line log for the target month. Use explicit local
+month bounds instead of date-only `--after`/`--before` filters so boundary-day
+commits do not leak into the adjacent month.
 
 ```bash
-# Adjust --after and --before for the target month
-git -C /workdir/wepppy      log --after="2026-01-31" --before="2026-03-01" --oneline --no-merges
-git -C /workdir/wepppyo3     log --after="2026-01-31" --before="2026-03-01" --oneline --no-merges
-git -C /workdir/weppcloud-wbt log --after="2026-01-31" --before="2026-03-01" --oneline --no-merges
-git -C /workdir/peridot      log --after="2026-01-31" --before="2026-03-01" --oneline --no-merges
-git -C /workdir/wepp-forest  log --after="2026-01-31" --before="2026-03-01" --oneline --no-merges
-git -C /workdir/openWEPP     log --after="2026-01-31" --before="2026-03-01" --oneline --no-merges
+# Adjust --since and --until for the target month
+git -C /workdir/wepppy       log --since="2026-06-01 00:00:00" --until="2026-06-30 23:59:59" --oneline --no-merges
+git -C /workdir/wepppyo3     log --since="2026-06-01 00:00:00" --until="2026-06-30 23:59:59" --oneline --no-merges
+git -C /workdir/weppcloud-wbt log --since="2026-06-01 00:00:00" --until="2026-06-30 23:59:59" --oneline --no-merges
+git -C /workdir/peridot      log --since="2026-06-01 00:00:00" --until="2026-06-30 23:59:59" --oneline --no-merges
+git -C /workdir/wepp-forest  log --since="2026-06-01 00:00:00" --until="2026-06-30 23:59:59" --oneline --no-merges
+git -C /workdir/openWEPP     log --since="2026-06-01 00:00:00" --until="2026-06-30 23:59:59" --oneline --no-merges
 ```
 
 ### 2. Gather LOC statistics
@@ -665,14 +737,14 @@ git -C /workdir/openWEPP     log --after="2026-01-31" --before="2026-03-01" --on
 Aggregate insertions/deletions per repo per month:
 
 ```bash
-git -C /workdir/wepppy log --after="2026-01-31" --before="2026-03-01" --no-merges --shortstat --format="" \
+git -C /workdir/wepppy log --since="2026-06-01 00:00:00" --until="2026-06-30 23:59:59" --no-merges --shortstat --format="" \
   | awk '{f+=$1; i+=$4; d+=$6} END {printf "Files: %d, +%d, -%d\n", f, i, d}'
 ```
 
 Commit count:
 
 ```bash
-git -C /workdir/wepppy log --after="2026-01-31" --before="2026-03-01" --oneline --no-merges | wc -l
+git -C /workdir/wepppy log --since="2026-06-01 00:00:00" --until="2026-06-30 23:59:59" --oneline --no-merges | wc -l
 ```
 
 ### 3. Identify LOC outliers
@@ -684,7 +756,7 @@ Large test fixtures, generated assets, or scaffolds inflate LOC counts. Find com
 import subprocess
 result = subprocess.run(
     ['git', '-C', '/workdir/wepppy', 'log',
-     '--after=2026-01-31', '--before=2026-03-01',
+     '--since=2026-06-01 00:00:00', '--until=2026-06-30 23:59:59',
      '--no-merges', '--oneline', '--shortstat'],
     capture_output=True, text=True)
 lines = result.stdout.strip().split('\n')
