@@ -477,13 +477,13 @@ Retroactive summaries of WEPPpy development activity by month, constructed from 
 - **RQ-Engine Controller-State + Operator APIs** — Added setup/readiness/orchestration discovery surfaces, strengthened controller-state/auth/concurrency contracts, and aligned operator-facing docs/roadmaps around canonical APIs.
   *(~60 commits)*
 
-- **Shape Converter + Async Landuse Mapping** — Implemented inspect/convert pipeline hardening, parser containment and CI gates, then shifted landuse mapping mutation flows into async rq-engine execution with runtime safety checks. Provides secure shapefile upload capabily
+- **Shape Converter + Async Landuse Mapping** — Implemented inspect/convert pipeline hardening, parser containment and CI gates, then shifted landuse mapping mutation flows into async rq-engine execution with runtime safety checks. Provides secure shapefile upload capability.
   *(~40 commits)*
 
 - **MOFE Optimization Sprint** — Optimized MOFE landuse/disturbed execution paths (process-pool synthesis, `wepppyo3` pair-count/map-assignment acceleration), added closure-audit tooling, and hardened `mofe_max_ofes`/mapping persistence contracts.
   *(~18 commits)*
 
-- **WEPP Binary Release Cadence + Closure Audits** — Repeated WEPP binary vendor/update cycles (`wepp_260409` through `wepp_260501`) with provenance checks, totalwatsed3/hillslope closure-audit tooling, and climate guardrails for observed/noaa workflows.
+- **WEPP Binary Release Cadence + Closure Audits** — Repeated WEPP binary vendor/update cycles (`wepp_260409` through `wepp_260430`) with provenance checks, totalwatsed3/hillslope closure-audit tooling, and climate guardrails for observed/noaa workflows.
   *(~70 commits)*
 
 - **Roads Workflow Iteration** — Added roads map drilldown/overlay parity and advanced stepwise outslope unrutted/rutted replacement flows, including PASS token normalization and ag-fields CRS tolerance.
@@ -521,9 +521,9 @@ Retroactive summaries of WEPPpy development activity by month, constructed from 
 - Added HRU-local peak runoff outputs, MOFE slope segmentation/map assigner APIs, and raster key-pair count contracts
 - Refreshed Py3.12 release artifacts/provenance and module catalog docs
 
-### Cross-repo: wepp-forest (93 commits, +270.2M / −3.1K)
+### Cross-repo: wepp-forest (89 commits; large binary/evidence churn)
 
-- Ran a rapid WEPP release train (`wepp_260409` through `wepp_260501`) with repeated watershed/hillslope binary rebuilds and changelog/stakeholder-brief synchronization
+- Ran a rapid WEPP release train (`wepp_260409` through `wepp_260430`) with repeated watershed/hillslope binary rebuilds and changelog/stakeholder-brief synchronization
 - Modernized compiler posture around strict SIGFPE trapping (no physics rewrite) to eliminate silent numeric corruption and improve cross-platform determinism/debuggability
 - Operationalized formal ablation campaigns with incident packages (`incident.md`, `matrix.csv`, `notes.md`, reproducible artifact manifests/checksums) for every production failure signature
 - Ran explicit parity validation lanes against canonical `wepp_dcc52a6` and IFX Windows witness builds, including raw-file and tolerance-based drift checks before release promotion
@@ -531,15 +531,19 @@ Retroactive summaries of WEPPpy development activity by month, constructed from 
 - Added optional WAT storage terms plus Gregorian/leap-day handling corrections in release binaries (`wepp_260429`/`wepp_260430`) and synchronized downstream vendoring
 - Scaled proactive generative fuzzing/single-OFE pressure campaigns with climate/slope stratification and positive-control sensitivity checks to convert recurring SIGFPE classes into regression-gated hardening milestones
 
+### Cross-repo: openWEPP (0 commits)
+
+- Included in the April all-repo scan; no April 2026 activity appears in local history, and the first non-merge commits in `/workdir/openWEPP` begin on 2026-05-11
+
 ---
 
 ## Seven-Month Totals
 
 | Metric | Oct 2025 | Nov 2025 | Dec 2025 | Jan 2026 | Feb 2026 | Mar 2026 | Apr 2026 | **Total** |
 |--------|----------|----------|----------|----------|----------|----------|----------|-----------|
-| Commits (all repos) | 678 | 363 | 284 | 307 | 443 | 326 | 624 | **3,025** |
-| Lines added (wepppy) | ~304K | ~410K | ~136K | ~744K | ~304K | ~711K | ~949K** | **~3.56M** |
-| Lines removed (wepppy) | ~103M* | ~329K | ~56K | ~21K | ~46K | ~13K | ~15K | — |
+| Commits (all repos) | 678 | 363 | 284 | 307 | 443 | 326 | 659 | **3,060** |
+| Lines added (wepppy) | ~304K | ~410K | ~136K | ~744K | ~304K | ~711K | ~957K** | **~3.57M** |
+| Lines removed (wepppy) | ~103M* | ~329K | ~56K | ~21K | ~46K | ~13K | ~16K | — |
 
 \* The 103M deletion figure reflects removal of legacy submodules, deprecated `wepp.out` parsers, and old binary test data. Net new functional code for October is approximately 225K lines.
 \** April insertions include a 713K-line ablation evidence commit plus repeated WEPP binary vendoring; functional logic churn is materially smaller than raw LOC.
