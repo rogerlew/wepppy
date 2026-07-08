@@ -585,6 +585,7 @@ git -C /workdir/wepppyo3     log --after="2026-01-31" --before="2026-03-01" --on
 git -C /workdir/weppcloud-wbt log --after="2026-01-31" --before="2026-03-01" --oneline --no-merges
 git -C /workdir/peridot      log --after="2026-01-31" --before="2026-03-01" --oneline --no-merges
 git -C /workdir/wepp-forest  log --after="2026-01-31" --before="2026-03-01" --oneline --no-merges
+git -C /workdir/openWEPP     log --after="2026-01-31" --before="2026-03-01" --oneline --no-merges
 ```
 
 ### 2. Gather LOC statistics
@@ -659,3 +660,4 @@ Add a column for the new month in the Summary table at the top and update the Fo
 | weppcloud-wbt | `/workdir/weppcloud-wbt` | WhiteboxTools fork — Rust geospatial binaries for channel delineation, hillslope profiling, raster ops |
 | peridot | `/workdir/peridot` | Rust CLI tools for topographic analysis — sub-field abstraction, flowpath generation, DEM processing |
 | wepp-forest | `/workdir/wepp-forest` | Fortran WEPP model source — hillslope and watershed erosion simulation binaries |
+| openWEPP | `/workdir/openWEPP` | Rust reimplementation of the WEPP hillslope and watershed simulation engine |
