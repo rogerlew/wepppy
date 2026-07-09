@@ -416,6 +416,8 @@ reasons:
   - guard tests
   - this document when behavior changes for clients
 
+The global canonical OpenAPI size budget is 130,000 bytes as of 2026-07-09. It increased from 118,500 bytes when the internal AgFields backend added 13 run-scoped operations (`/api/runs/{runid}/{config}/agfields/*`), producing a measured 129,217-byte schema. AgFields remains outside the frozen 97-route agent-facing inventory while its feature registry maturity is `internal`; the successor UI package must classify/freeze the routes if it promotes the feature.
+
 ## Controller-State Contract Status
 - Controller-state/schema/orchestration contract for agent clients is tracked in
   `docs/schemas/rq-controller-state-contract.md`.

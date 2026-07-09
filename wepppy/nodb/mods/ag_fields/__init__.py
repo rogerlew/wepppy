@@ -1,6 +1,15 @@
-from .ag_fields import AgFields, AgFieldsNoDbLockedException
+from .ag_fields import (
+    AgFields,
+    AgFieldsNoDbLockedException,
+    AgFieldsRunError,
+    PlantFileProcessingError,
+    RotationLookupValidationError,
+)
 
 __all__ = [
     'AgFields',
-    'AgFieldsNoDbLockedException'
+    'AgFieldsNoDbLockedException',
+    'AgFieldsRunError',
+    'PlantFileProcessingError',
+    'RotationLookupValidationError',
 ]

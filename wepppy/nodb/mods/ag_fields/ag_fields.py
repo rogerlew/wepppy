@@ -9,18 +9,19 @@ drive agricultural dashboards and treatment comparisons.
 
 from __future__ import annotations
 
+import csv
 import hashlib
 import json
 import logging
 import os
 import re
 import shutil
+import tempfile
 import time
 import zipfile
 from concurrent.futures import FIRST_COMPLETED, Future, ThreadPoolExecutor, wait
 from copy import deepcopy
 from enum import Enum, IntEnum
-from glob import glob
 from pathlib import Path, PurePosixPath
 from typing import Any, Dict, Iterable, Iterator, List, Optional, Set, Tuple
 
@@ -30,20 +31,19 @@ from wepp_runner.wepp_runner import run_hillslope
 
 from wepppy.all_your_base.all_your_base import isint
 from wepppy.nodb.base import NoDbBase, nodb_setter
-from wepppy.nodb.core import Climate, Landuse, Watershed
+from wepppy.nodb.core import Climate, ClimateMode, Landuse, Watershed
 from wepppy.nodb.geojson_crs_inference import infer_geojson_crs
 from wepppy.topo.peridot.peridot_runner import (
     post_abstract_sub_fields,
     run_peridot_wbt_sub_fields_abstraction,
 )
 from wepppy.topo.watershed_abstraction.slope_file import clip_slope_file_length
-from wepppy.wepp.management import InvalidManagementKey, get_management_summary
+from wepppy.wepp.management import InvalidManagementKey, get_management_summary, load_map
 from wepppy.wepp.management.managements import read_management
 from wepppy.wepp.management.utils import ManagementRotationSynth, downgrade_to_98_4_format
 
 from os.path import exists as _exists
 from os.path import join as _join
-from os.path import split as _split
 
 try:
     from wepppy.query_engine import update_catalog_entry as _update_catalog_entry
@@ -52,11 +52,36 @@ except ImportError:  # pragma: no cover - optional dependency
 
 __all__ = [
     'AgFieldsNoDbLockedException',
+    'AgFieldsRunError',
+    'PlantFileProcessingError',
+    'RotationLookupValidationError',
     'AgFields',
 ]
 
 class AgFieldsNoDbLockedException(Exception):
     pass
+
+
+class AgFieldsRunError(RuntimeError):
+    def __init__(self, field_id: int, sub_field_id: int, message: str) -> None:
+        self.field_id = int(field_id)
+        self.sub_field_id = int(sub_field_id)
+        super().__init__(
+            f'WEPP sub-field run failed for sub_field_id={self.sub_field_id}, '
+            f'field_id={self.field_id}: {message}'
+        )
+
+
+class PlantFileProcessingError(ValueError):
+    def __init__(self, filename: str, message: str) -> None:
+        self.filename = filename
+        super().__init__(f'Plant file processing failed for "{filename}": {message}')
+
+
+class RotationLookupValidationError(ValueError):
+    def __init__(self, results: List[Dict[str, Any]]) -> None:
+        self.results = results
+        super().__init__('Rotation lookup contains invalid mapped rows.')
 
 
 class AgFields(NoDbBase):
@@ -110,6 +135,11 @@ class AgFields(NoDbBase):
             self._geojson_timestamp = None
             self._geojson_is_valid = False
             self._field_columns = []
+            self._valid_plant_files = []
+            self._invalid_plant_files = []
+            self._plant_file_provenance = {}
+            self._subfields_source_signature = None
+            self._wepp_source_signature = None
 
     @property
     def field_n(self) -> int:
@@ -130,6 +160,10 @@ class AgFields(NoDbBase):
     @property
     def geojson_is_valid(self) -> bool:
         return bool(getattr(self, '_geojson_is_valid', False))
+
+    @property
+    def geojson_hash(self) -> Optional[str]:
+        return getattr(self, '_geojson_hash', None)
 
     @property
     def field_columns(self) -> List[str]:
@@ -163,33 +197,56 @@ class AgFields(NoDbBase):
         canonical_name = "fields.WGS.geojson"
         canonical_path = Path(self.ag_fields_dir) / canonical_name
         canonical_path.parent.mkdir(parents=True, exist_ok=True)
+        geojson_fd, staged_geojson = tempfile.mkstemp(
+            prefix='.field-boundaries-',
+            suffix='.geojson',
+            dir=self.ag_fields_dir,
+        )
+        parquet_fd, staged_parquet = tempfile.mkstemp(
+            prefix='.rotation-schedule-',
+            suffix='.parquet',
+            dir=self.ag_fields_dir,
+        )
+        os.close(geojson_fd)
+        os.close(parquet_fd)
 
         try:
-            if source_path.resolve() != canonical_path.resolve():
-                shutil.copy2(source_path, canonical_path)
-        except OSError as exc:
-            raise OSError(f"Failed to normalize field boundary GeoJSON: {exc}") from exc
+            try:
+                shutil.copy2(source_path, staged_geojson)
+            except OSError as exc:
+                raise OSError(f"Failed to stage field boundary GeoJSON: {exc}") from exc
 
-        with self.locked():
-            self._field_boundaries_geojson = canonical_name
+            import geopandas as gpd
 
-        import geopandas as gpd
+            df = gpd.read_file(staged_geojson, ignore_geometry=True)
+            if "field_id" not in df.columns:
+                raise ValueError(f'field_id column not found in field boundary GeoJSON: {source_path}')
 
-        df = gpd.read_file(canonical_path, ignore_geometry=True)
+            duplicates: Set[Any] = set()
+            if df["field_id"].duplicated().any():
+                duplicates = set(df[df["field_id"].duplicated()]["field_id"].tolist())
+                self.logger.warning(
+                    "Duplicate field_id values found in field boundary GeoJSON: %s", sorted(duplicates)
+                )
 
-        # make sure df has field_id column
-        if "field_id" not in df.columns:
-            raise ValueError(f'field_id column not found in field boundary GeoJSON: {canonical_path}')
+            df.to_parquet(staged_parquet, index=False)
+            geojson_hash = self._file_sha1(staged_geojson)
 
-        duplicates: Set[Any] = set()
-        if df["field_id"].duplicated().any():
-            duplicates = set(df[df["field_id"].duplicated()]["field_id"].tolist())
-            self.logger.warn(
-                "Duplicate field_id values found in field boundary GeoJSON: %s", sorted(duplicates)
-            )
-
-        # dump attributes to parquet
-        df.to_parquet(self.rotation_schedule_parquet, index=False)
+            with self.locked():
+                os.replace(staged_geojson, canonical_path)
+                os.replace(staged_parquet, self.rotation_schedule_parquet)
+                self._field_boundaries_geojson = canonical_name
+                self._field_n = len(df)
+                self._geojson_hash = geojson_hash
+                self._geojson_timestamp = int(time.time())
+                self._geojson_is_valid = True
+                self._field_columns = [str(col) for col in df.columns]
+                self._field_id_key = None
+                self._rotation_accessor = None
+        finally:
+            for staged_path in (staged_geojson, staged_parquet):
+                if os.path.exists(staged_path):
+                    os.unlink(staged_path)
 
         if _update_catalog_entry is not None:
             try:
@@ -198,19 +255,8 @@ class AgFields(NoDbBase):
                 relative_path = 'ag_fields'
             try:
                 _update_catalog_entry(self.wd, relative_path)
-            except Exception as exc:  # pragma: no cover - best effort
+            except Exception as exc:  # broad-except: optional catalog refresh must not reject a valid upload
                 self.logger.warning("Failed to refresh catalog for rotation schedule: %s", exc)
-
-        geojson_hash = None
-        with open(canonical_path, "rb") as fp:
-            geojson_hash = hashlib.sha1(fp.read()).hexdigest()
-
-        with self.locked():
-            self._field_n = len(df)
-            self._geojson_hash = geojson_hash
-            self._geojson_timestamp = int(time.time())
-            self._geojson_is_valid = True
-            self._field_columns = [str(col) for col in df.columns]
 
         return dict(field_id_duplicates=sorted(duplicates))
 
@@ -223,15 +269,25 @@ class AgFields(NoDbBase):
             unique_crops.update(str(value) for value in rotation_schedule_df[column_key].unique())
         return unique_crops
 
-    def set_field_id_key(self, key: str) -> None:
+    def validate_field_id_key(self, key: str) -> None:
         if not self.field_boundaries_geojson:
             raise ValueError("field_boundaries_geojson is not set. Call validate_field_boundary_geojson first.")
 
         if key not in self.field_columns:
             raise ValueError(f'field_id_key "{key}" not found in field boundary GeoJSON columns: {self.field_columns}')
 
+    def set_field_id_key(self, key: str) -> None:
+        self.validate_field_id_key(key)
         with self.locked():
             self._field_id_key = key
+
+    def confirm_schema(self, field_id_key: str, rotation_accessor: str) -> None:
+        """Validate both schema values before persisting either one."""
+        with self.locked():
+            self.validate_field_id_key(field_id_key)
+            self.validate_rotation_accessor(rotation_accessor)
+            self._field_id_key = field_id_key
+            self._rotation_accessor = rotation_accessor
 
     @property
     def field_boundaries_tif(self) -> str:
@@ -468,6 +524,8 @@ class AgFields(NoDbBase):
             self.sub_fields_map, 
             self.get_sub_field_translator(),
             self.sub_fields_geojson)
+        with self.locked():
+            self._subfields_source_signature = self._schema_signature()
 
     @property
     def rotation_schedule_parquet(self) -> str:
@@ -494,33 +552,60 @@ class AgFields(NoDbBase):
         return _join(self.plant_files_dir, '2017.1')
 
     def clear_ag_field_wepp_runs(self) -> None:
-        if _exists(self.ag_field_wepp_runs_dir):
-            shutil.rmtree(self.ag_field_wepp_runs_dir)
-        os.makedirs(self.ag_field_wepp_runs_dir, exist_ok=True) 
+        with self.locked():
+            if _exists(self.ag_field_wepp_runs_dir):
+                shutil.rmtree(self.ag_field_wepp_runs_dir)
+            os.makedirs(self.ag_field_wepp_runs_dir, exist_ok=True)
+            self._wepp_source_signature = None
 
     def clear_ag_field_wepp_outputs(self) -> None:
-        if _exists(self.ag_field_wepp_output_dir):
-            shutil.rmtree(self.ag_field_wepp_output_dir)
-        os.makedirs(self.ag_field_wepp_output_dir, exist_ok=True)
+        with self.locked():
+            if _exists(self.ag_field_wepp_output_dir):
+                shutil.rmtree(self.ag_field_wepp_output_dir)
+            os.makedirs(self.ag_field_wepp_output_dir, exist_ok=True)
+            self._wepp_source_signature = None
+
+    def clear_ag_field_wepp_artifacts(self) -> None:
+        with self.locked():
+            for directory in (self.ag_field_wepp_runs_dir, self.ag_field_wepp_output_dir):
+                if _exists(directory):
+                    shutil.rmtree(directory)
+                os.makedirs(directory, exist_ok=True)
+            self._wepp_source_signature = None
 
     @property
     def rotation_accessor(self) -> Optional[str]:
         return getattr(self, '_rotation_accessor', None)
 
-    def set_rotation_accessor(self, candidate: str) -> None:
+    @staticmethod
+    def _parse_year_bound(value: Any, field_name: str) -> int:
+        if isinstance(value, bool):
+            raise ValueError(f'{field_name} must be an integer year, got {value!r}.')
+        if isinstance(value, float) and not value.is_integer():
+            raise ValueError(f'{field_name} must be an integer year, got {value!r}.')
+        try:
+            return int(value)
+        except (TypeError, ValueError) as exc:
+            raise ValueError(f'{field_name} must be an integer year, got {value!r}.') from exc
+
+    def _observed_year_bounds(self) -> Tuple[int, int]:
+        climate = self.climate_instance
+        start_year = self._parse_year_bound(climate.observed_start_year, 'observed_start_year')
+        end_year = self._parse_year_bound(climate.observed_end_year, 'observed_end_year')
+        if end_year < start_year:
+            raise ValueError('observed_end_year must be greater than or equal to observed_start_year.')
+        return start_year, end_year
+
+    def validate_rotation_accessor(self, candidate: str) -> None:
         """
-        Defined by user, used to lookup the column in rotation_schedule_parquet.
+        Validate the column accessor used to read the rotation schedule.
         Must contain {} str.format is applied with year as the argument.
         """
-        self.logger.info(f'set_rotation_accessor("{candidate}")')
-
         if '{}' not in candidate:
             self.logger.error("rotation_accessor must contain '{}' for year substitution.")
             raise ValueError("rotation_accessor must contain '{}' for year substitution.")
 
-        climate = self.climate_instance
-        start_year = climate.observed_start_year
-        end_year = climate.observed_end_year
+        start_year, end_year = self._observed_year_bounds()
 
         for year in range(start_year, end_year + 1):
             column_key = candidate.format(str(year))
@@ -529,11 +614,40 @@ class AgFields(NoDbBase):
                 self.logger.error(f'Column key "{column_key}" not found in field boundary GeoJSON columns: {self.field_columns}')
                 raise ValueError(f'Column key "{column_key}" not found in field boundary GeoJSON columns: {self.field_columns}')
 
+    def set_rotation_accessor(self, candidate: str) -> None:
+        self.logger.info(f'set_rotation_accessor("{candidate}")')
+        self.validate_rotation_accessor(candidate)
         with self.locked():
             self._rotation_accessor = candidate
             self.logger.info(f'Set rotation_accessor to "{candidate}"')
 
-    def handle_plant_file_db_upload(self, plant_db_zip_fn: str) -> None:
+    @staticmethod
+    def _normalized_plant_filename(filename: str) -> str:
+        path = PurePosixPath(filename)
+        stem = Path(path.name).stem.replace(' ', '_')
+        return f'{stem}.man'
+
+    @staticmethod
+    def _unique_archive_filename(filename: str, assigned: Set[str]) -> str:
+        candidate = filename
+        stem = Path(filename).stem
+        counter = 1
+        while candidate.casefold() in assigned:
+            candidate = f'{stem}_{counter}.man'
+            counter += 1
+        assigned.add(candidate.casefold())
+        return candidate
+
+    def _persist_plant_processing_failure(self, filename: str, message: str) -> None:
+        invalid = [
+            item for item in getattr(self, '_invalid_plant_files', [])
+            if item.get('filename') != filename
+        ]
+        invalid.append({'filename': filename, 'error': message})
+        with self.locked():
+            self._invalid_plant_files = sorted(invalid, key=lambda item: item['filename'].casefold())
+
+    def handle_plant_file_db_upload(self, plant_db_zip_fn: str) -> Dict[str, Any]:
         """
         Unzip the plant file database zip files int self.plant_files_dir.
         
@@ -544,106 +658,163 @@ class AgFields(NoDbBase):
         """
         self.logger.info(f'handle_plant_file_db_upload("{plant_db_zip_fn}")')
         
-        zip_path = _join(self.ag_fields_dir, plant_db_zip_fn)
-        if not _exists(zip_path):
-            raise FileNotFoundError(f'Plant file DB zip not found: {zip_path}')
+        root = Path(self.ag_fields_dir).resolve()
+        zip_path = (root / plant_db_zip_fn).resolve()
+        if root not in zip_path.parents or not zip_path.is_file():
+            raise FileNotFoundError(f'Plant file DB zip not found inside ag_fields: {plant_db_zip_fn}')
 
-        # open zip and extract .man files
-        with self.timed('Extracting .man files from plant file DB zip'):
-            with zipfile.ZipFile(zip_path, 'r') as z:
-                for file_info in z.infolist():
-                    if not file_info.filename.endswith('.man'):
+        assigned: Set[str] = set()
+        staged: List[Dict[str, Any]] = []
+        with tempfile.TemporaryDirectory(prefix='.plant-upload-', dir=self.ag_fields_dir) as staging_dir:
+            staging = Path(staging_dir)
+            final_staging = staging / 'final'
+            source_staging = staging / '2017.1'
+            final_staging.mkdir()
+            source_staging.mkdir()
+
+            with self.timed('Extracting .man files from plant file DB zip'):
+                with zipfile.ZipFile(zip_path, 'r') as archive:
+                    for file_info in archive.infolist():
+                        path_in_zip = PurePosixPath(file_info.filename)
+                        if path_in_zip.suffix.lower() != '.man':
+                            continue
+                        if path_in_zip.is_absolute() or '..' in path_in_zip.parts:
+                            self.logger.warning('Skipping plant file with unsafe path: %s', file_info.filename)
+                            continue
+
+                        normalized = self._unique_archive_filename(
+                            self._normalized_plant_filename(path_in_zip.name), assigned
+                        )
+                        with archive.open(file_info) as source:
+                            first_line = source.readline()
+                            is_2017_1 = b'2017.1' in first_line
+                            target = (source_staging if is_2017_1 else final_staging) / normalized
+                            with target.open('wb') as destination:
+                                destination.write(first_line)
+                                shutil.copyfileobj(source, destination, length=64 * 1024)
+                        staged.append(
+                            {
+                                'filename': normalized,
+                                'source_filename': file_info.filename,
+                                'is_2017_1': is_2017_1,
+                            }
+                        )
+
+            with self.timed('Downgrading 2017.1 plant files to 98.4 format'):
+                for item in staged:
+                    if not item['is_2017_1']:
                         continue
+                    filename = item['filename']
+                    try:
+                        management = read_management(str(source_staging / filename))
+                        downgrade_to_98_4_format(
+                            management,
+                            str(final_staging / filename),
+                            first_year_only=False,
+                        )
+                    except (OSError, UnicodeError, ValueError, AssertionError, IndexError) as exc:
+                        message = str(exc) or exc.__class__.__name__
+                        self._persist_plant_processing_failure(filename, message)
+                        raise PlantFileProcessingError(filename, message) from exc
 
-                    path_in_zip = PurePosixPath(file_info.filename)
-                    if path_in_zip.is_absolute() or '..' in path_in_zip.parts:
-                        self.logger.warning(f'Skipping plant file with unsafe path: {file_info.filename}')
-                        continue
-
-                    # read the first line of the file to check if it is a 2017.1 file
-                    is_2017_1 = False
-                    with z.open(file_info) as f:
-                        first_line = f.readline().decode('utf-8').strip()
-                        if '2017.1' in first_line:
-                            is_2017_1 = True
-
-                    target_root = self.plant_files_2017_1_dir if is_2017_1 else self.plant_files_dir
-                    os.makedirs(target_root, exist_ok=True)
-                    z.extract(file_info, target_root)
-
-                    if is_2017_1:
-                        self.logger.info(f'  Extracted 2017.1 plant file {file_info.filename} to {self.plant_files_2017_1_dir}')
-                    else:
-                        self.logger.info(f'. Extracted plant file {file_info.filename} to {self.plant_files_dir}')
-
-                    # flatten into the plant_files directory and normalize spaces to underscores (filename only)
-                    src_path = os.path.join(target_root, *path_in_zip.parts)
-                    sanitized_name = path_in_zip.name.replace(' ', '_')
-                    dest_path = os.path.join(target_root, sanitized_name)
-
-                    if os.path.isdir(src_path):
-                        # skip directories created during extraction
-                        continue
-
-                    src_abs = os.path.abspath(src_path)
-                    dest_abs = os.path.abspath(dest_path)
-
-                    if src_abs != dest_abs:
-                        if os.path.exists(dest_path):
-                            base, ext = os.path.splitext(sanitized_name)
-                            counter = 1
-                            while True:
-                                candidate = f'{base}_{counter}{ext}'
-                                candidate_path = os.path.join(target_root, candidate)
-                                if not os.path.exists(candidate_path):
-                                    dest_path = candidate_path
-                                    break
-                                counter += 1
-
-                        os.makedirs(os.path.dirname(dest_path), exist_ok=True)
-                        os.replace(src_path, dest_path)
-
-                        # remove empty directories left behind after flattening
-                        cleanup_dir = os.path.dirname(src_path)
-                        while cleanup_dir and cleanup_dir != target_root:
-                            try:
-                                os.rmdir(cleanup_dir)
-                            except OSError:
-                                break
-                            cleanup_dir = os.path.dirname(cleanup_dir)
-
-                    self.logger.info(f'. Renamed plant file {file_info.filename} to {os.path.basename(dest_path)}')
-
-        with self.timed('Downgrading 2017.1 plant files to 98.4 format'):
-            for man_path in glob(_join(self.plant_files_2017_1_dir, '*.man')):
+            staged_valid: Set[str] = set()
+            staged_errors: Dict[str, str] = {}
+            for path in sorted(final_staging.glob('*.man'), key=lambda item: item.name.casefold()):
                 try:
-                    man_2017_1 = read_management(man_path)
-                except Exception as e:
-                    self.logger.error(f'  Failed to read 2017.1 plant file {man_path}: {e}')
-                    raise
-                target_man_path = _join(self.plant_files_dir, os.path.basename(man_path))
-                _man = downgrade_to_98_4_format(man_2017_1, target_man_path, first_year_only=False)
-                self.logger.info(f'. Downgraded {os.path.basename(man_path)} to 98.4 format')
+                    read_management(str(path))
+                except (OSError, UnicodeError, ValueError, AssertionError, IndexError) as exc:
+                    staged_errors[path.name] = str(exc) or exc.__class__.__name__
+                else:
+                    staged_valid.add(path.name)
 
-        valid_plant_files = []
-        with self.timed('Validating plant files'):
-            for man_path in glob(_join(self.plant_files_dir, '*.man')):
-                man_fn = _split(man_path)[-1]
-                try:
-                    _man = read_management(man_path)
-                except Exception as e:
-                    self.logger.error(f'  Failed to validate plant file {man_path}: {e}')
-                    continue
-                valid_plant_files.append(man_fn)
-                self.logger.info(f'  Valid plant file found: {man_fn}')
-
+            replaced: List[str] = []
+            provenance = deepcopy(getattr(self, '_plant_file_provenance', {}))
             with self.locked():
-                self._valid_plant_files = valid_plant_files
+                for item in staged:
+                    filename = item['filename']
+                    final_target = Path(self.plant_files_dir) / filename
+                    if final_target.exists():
+                        replaced.append(filename)
+                    os.replace(final_staging / filename, final_target)
+                    source_target = Path(self.plant_files_2017_1_dir) / filename
+                    if item['is_2017_1']:
+                        os.replace(source_staging / filename, source_target)
+                    elif source_target.exists():
+                        source_target.unlink()
+                    provenance[filename] = {
+                        'source_filename': item['source_filename'],
+                        'format': '2017.1_downgraded' if item['is_2017_1'] else '98.4',
+                        'replaced': filename in replaced,
+                    }
 
-        self.logger.info(f'Finished handling plant file DB upload for {plant_db_zip_fn}')
+                all_valid: List[str] = []
+                all_invalid: List[Dict[str, str]] = []
+                for path in sorted(Path(self.plant_files_dir).glob('*.man'), key=lambda item: item.name.casefold()):
+                    if path.name in staged_errors:
+                        all_invalid.append({'filename': path.name, 'error': staged_errors[path.name]})
+                        continue
+                    if path.name in staged_valid:
+                        all_valid.append(path.name)
+                        continue
+                    try:
+                        read_management(str(path))
+                    except (OSError, UnicodeError, ValueError, AssertionError, IndexError) as exc:
+                        all_invalid.append({'filename': path.name, 'error': str(exc) or exc.__class__.__name__})
+                    else:
+                        all_valid.append(path.name)
+                self._valid_plant_files = all_valid
+                self._invalid_plant_files = all_invalid
+                self._plant_file_provenance = provenance
+
+        inventory = self.get_plant_file_inventory()
+        inventory['replaced'] = sorted(replaced, key=str.casefold)
+        self.logger.info('Finished handling plant file DB upload for %s', plant_db_zip_fn)
+        return inventory
 
     def get_valid_plant_files(self) -> List[str]:
         return deepcopy(getattr(self, '_valid_plant_files', []))
+
+    def get_invalid_plant_files(self) -> List[Dict[str, str]]:
+        return deepcopy(getattr(self, '_invalid_plant_files', []))
+
+    def get_plant_file_inventory(self) -> Dict[str, Any]:
+        valid = self.get_valid_plant_files()
+        invalid = self.get_invalid_plant_files()
+        provenance = deepcopy(getattr(self, '_plant_file_provenance', {}))
+        invalid_by_name = {item['filename']: item['error'] for item in invalid}
+        filenames = sorted(set(valid) | set(invalid_by_name), key=str.casefold)
+        files = []
+        for filename in filenames:
+            source = provenance.get(filename, {})
+            files.append(
+                {
+                    'filename': filename,
+                    'valid': filename in valid,
+                    'error': invalid_by_name.get(filename),
+                    'format': source.get('format', '98.4'),
+                    'source_filename': source.get('source_filename', filename),
+                    'replaced': bool(source.get('replaced', False)),
+                }
+            )
+        return {'files': files, 'valid_files': valid, 'invalid_files': invalid}
+
+    def delete_plant_file(self, filename: str) -> Dict[str, Any]:
+        if not filename or Path(filename).name != filename or Path(filename).suffix.lower() != '.man':
+            raise ValueError('filename must be a .man basename without path components.')
+        canonical = self._normalized_plant_filename(filename)
+        with self.locked():
+            for directory in (self.plant_files_dir, self.plant_files_2017_1_dir):
+                path = Path(directory) / canonical
+                if path.exists():
+                    path.unlink()
+            self._valid_plant_files = [name for name in self.get_valid_plant_files() if name != canonical]
+            self._invalid_plant_files = [
+                item for item in self.get_invalid_plant_files() if item.get('filename') != canonical
+            ]
+            provenance = deepcopy(getattr(self, '_plant_file_provenance', {}))
+            provenance.pop(canonical, None)
+            self._plant_file_provenance = provenance
+        return self.get_plant_file_inventory()
 
     def get_rotation_key(self, year: int) -> str:  # to access Crop{year} column in rotation_schedule_parquet
         if self.rotation_accessor is None:
@@ -651,26 +822,243 @@ class AgFields(NoDbBase):
         return self.rotation_accessor.format(str(year))
 
     def _crop_year_iter(self) -> Iterator[int]:
-        climate = self.climate_instance
-        start_year = climate.observed_start_year
-        end_year = climate.observed_end_year
-
-        if start_year is None or end_year is None:
-            raise ValueError('Climate must be observed')
-        
+        start_year, end_year = self._observed_year_bounds()
         for year in range(start_year, end_year + 1):
             yield year
 
-    def validate_rotation_lookup(self) -> None:  
-        # the rotation_crop_to_man.tsv should be generated using an interface on the website.
-        # backend identifies all the crops in the rotation schedule and then the user must map
-        # then loads a table form with three columns:
-        # LookupCrop, ManSource (weppcloud, plant_db), ManFileId (weppcloud id or plant file name)
+    @property
+    def rotation_lookup_path(self) -> str:
+        return _join(self.ag_fields_dir, 'rotation_lookup.tsv')
 
-        self.logger.info(f'validate_rotation_lookup')
-        rotation_manager = CropRotationManager(self.ag_fields_dir, self.landuse_instance.mapping, logger_name=self.logger.name)
-        from pprint import pprint
-        pprint(rotation_manager.rotation_lookup)
+    def _validate_rotation_rows(self, rows: Iterable[Dict[str, Any]]) -> List[Dict[str, Any]]:
+        row_list = list(rows)
+        by_crop: Dict[str, Dict[str, Any]] = {}
+        duplicates: Set[str] = set()
+        for row in row_list:
+            crop_name = str(row.get('crop_name', '')).strip()
+            if crop_name in by_crop:
+                duplicates.add(crop_name)
+            by_crop[crop_name] = row
+
+        try:
+            expected_crops = self.get_unique_crops()
+        except (FileNotFoundError, KeyError, ValueError):
+            expected_crops = set()
+
+        results: List[Dict[str, Any]] = []
+        for crop_name in sorted(expected_crops | set(by_crop), key=str.casefold):
+            row = by_crop.get(crop_name)
+            used = crop_name in expected_crops
+            if row is None:
+                results.append(
+                    {
+                        'crop_name': crop_name,
+                        'database': None,
+                        'rotation_id': None,
+                        'status': 'unmapped',
+                        'valid': False,
+                        'message': 'Crop is not mapped.',
+                        'used': used,
+                    }
+                )
+                continue
+
+            database = str(row.get('database') or row.get('source') or '').strip()
+            rotation_value = row.get('rotation_id', row.get('value'))
+            rotation_id = str(rotation_value).strip() if rotation_value is not None else ''
+            base_result = {
+                'crop_name': crop_name,
+                'database': database or None,
+                'rotation_id': rotation_id or None,
+                'used': used,
+            }
+            if not crop_name or '\t' in crop_name or '\n' in crop_name or '\r' in crop_name:
+                results.append({**base_result, 'status': 'error', 'valid': False, 'message': 'crop_name is required and cannot contain tabs or newlines.'})
+                continue
+            if crop_name in duplicates:
+                results.append({**base_result, 'status': 'error', 'valid': False, 'message': 'Duplicate crop mapping.'})
+                continue
+            if not database and not rotation_id:
+                results.append({**base_result, 'status': 'unmapped', 'valid': False, 'message': 'Crop is not mapped.'})
+                continue
+            if not database or not rotation_id:
+                results.append({**base_result, 'status': 'error', 'valid': False, 'message': 'Both database and rotation_id are required for a mapped crop.'})
+                continue
+            if any(token in rotation_id for token in ('\t', '\n', '\r')):
+                results.append({**base_result, 'status': 'error', 'valid': False, 'message': 'rotation_id cannot contain tabs or newlines.'})
+                continue
+            try:
+                rotation = CropRotationManager.resolve_rotation(
+                    self.ag_fields_dir,
+                    self.landuse_instance.mapping,
+                    crop_name,
+                    database,
+                    rotation_id,
+                    logger_name=self.logger.name,
+                )
+            except (ValueError, FileNotFoundError) as exc:
+                results.append({**base_result, 'status': 'error', 'valid': False, 'message': str(exc)})
+                continue
+            results.append(
+                {
+                    **base_result,
+                    'database': str(rotation.database),
+                    'rotation_id': str(rotation.rotation_id),
+                    'man_file_path': rotation.man_path,
+                    'status': 'ok',
+                    'valid': True,
+                    'message': None,
+                }
+            )
+        return results
+
+    def validate_rotation_lookup(self) -> List[Dict[str, Any]]:
+        self.logger.info('validate_rotation_lookup')
+        rows: List[Dict[str, Any]] = []
+        path = Path(self.rotation_lookup_path)
+        if path.exists():
+            with path.open(newline='', encoding='utf-8') as stream:
+                reader = csv.DictReader(stream, delimiter='\t')
+                if reader.fieldnames != ['crop_name', 'database', 'rotation_id']:
+                    return [
+                        {
+                            'crop_name': '',
+                            'database': None,
+                            'rotation_id': None,
+                            'status': 'error',
+                            'valid': False,
+                            'message': 'rotation_lookup.tsv must contain crop_name, database, and rotation_id columns.',
+                            'used': False,
+                        }
+                    ]
+                rows.extend(dict(row) for row in reader)
+        return self._validate_rotation_rows(rows)
+
+    def write_rotation_lookup(self, rows: Iterable[Dict[str, Any]]) -> List[Dict[str, Any]]:
+        row_list = list(rows)
+        results = self._validate_rotation_rows(row_list)
+        errors = [result for result in results if result['status'] == 'error']
+        if errors:
+            raise RotationLookupValidationError(results)
+
+        mapped = [result for result in results if result['status'] == 'ok']
+        with self.locked():
+            fd, temporary = tempfile.mkstemp(prefix='.rotation-lookup-', suffix='.tsv', dir=self.ag_fields_dir, text=True)
+            try:
+                with os.fdopen(fd, 'w', newline='', encoding='utf-8') as stream:
+                    writer = csv.DictWriter(
+                        stream,
+                        fieldnames=['crop_name', 'database', 'rotation_id'],
+                        delimiter='\t',
+                        lineterminator='\n',
+                    )
+                    writer.writeheader()
+                    for result in sorted(mapped, key=lambda item: item['crop_name'].casefold()):
+                        writer.writerow(
+                            {
+                                'crop_name': result['crop_name'],
+                                'database': result['database'],
+                                'rotation_id': result['rotation_id'],
+                            }
+                        )
+                    stream.flush()
+                    os.fsync(stream.fileno())
+                os.replace(temporary, self.rotation_lookup_path)
+                self._rotation_lookup_hash = self._file_sha1(self.rotation_lookup_path)
+            finally:
+                if os.path.exists(temporary):
+                    os.unlink(temporary)
+        return self.validate_rotation_lookup()
+
+    def get_weppcloud_management_options(self) -> List[Dict[str, str]]:
+        mapping = load_map(self.landuse_instance.mapping)
+        options = [
+            {'id': str(key), 'description': str(value.get('Description', ''))}
+            for key, value in mapping.items()
+        ]
+        return sorted(options, key=lambda item: (int(item['id']) if isint(item['id']) else 10**12, item['id']))
+
+    @staticmethod
+    def _file_sha1(path: str | os.PathLike[str]) -> Optional[str]:
+        candidate = Path(path)
+        if not candidate.is_file():
+            return None
+        digest = hashlib.sha1()
+        with candidate.open('rb') as stream:
+            for chunk in iter(lambda: stream.read(1024 * 1024), b''):
+                digest.update(chunk)
+        return digest.hexdigest()
+
+    def _schema_signature(self) -> Optional[str]:
+        if not self.geojson_hash or not self.field_id_key or not self.rotation_accessor:
+            return None
+        payload = json.dumps(
+            [self.geojson_hash, self.field_id_key, self.rotation_accessor],
+            separators=(',', ':'),
+        )
+        return hashlib.sha1(payload.encode('utf-8')).hexdigest()
+
+    def _workflow_signature(self) -> Optional[str]:
+        source = getattr(self, '_subfields_source_signature', None)
+        lookup_hash = self._file_sha1(self.rotation_lookup_path)
+        if not source or not lookup_hash:
+            return None
+        return hashlib.sha1(f'{source}:{lookup_hash}'.encode('utf-8')).hexdigest()
+
+    def get_staleness(self) -> Dict[str, bool]:
+        subfields_exist = self.sub_field_n > 0 or Path(self.sub_fields_wgs_geojson).is_file()
+        subfields_stale = subfields_exist and (
+            self._schema_signature() != getattr(self, '_subfields_source_signature', None)
+        )
+        runs_path = Path(self.ag_field_wepp_runs_dir)
+        outputs_path = Path(self.ag_field_wepp_output_dir)
+        wepp_exists = any(runs_path.glob('p*.run')) or (
+            outputs_path.is_dir() and any(outputs_path.iterdir())
+        )
+        wepp_stale = wepp_exists and (
+            subfields_stale
+            or self._workflow_signature() != getattr(self, '_wepp_source_signature', None)
+        )
+        return {'subfields': subfields_stale, 'wepp_runs': wepp_stale}
+
+    def get_readiness(self) -> Dict[str, Any]:
+        observed_modes = {
+            ClimateMode.Observed,
+            ClimateMode.ObservedPRISM,
+            ClimateMode.ObservedDb,
+            ClimateMode.PRISM,
+            ClimateMode.EOBS,
+            ClimateMode.AGDC,
+            ClimateMode.GridMetPRISM,
+            ClimateMode.DepNexrad,
+        }
+        try:
+            start_year, end_year = self._observed_year_bounds()
+            observed_ready = self.climate_instance.climate_mode in observed_modes
+        except ValueError:
+            start_year = None
+            end_year = None
+            observed_ready = False
+
+        missing_parent_ids: List[int] = []
+        if Path(self.subfields_parquet_path).is_file():
+            parent_ids = sorted({int(value) for value in self.subfields_parquet['wepp_id'].tolist()})
+            for wepp_id in parent_ids:
+                runs_dir = Path(self.wd) / 'wepp' / 'runs'
+                if not (runs_dir / f'p{wepp_id}.sol').is_file() or not (runs_dir / f'p{wepp_id}.cli').is_file():
+                    missing_parent_ids.append(wepp_id)
+            parent_wepp_ready = bool(parent_ids) and not missing_parent_ids
+        else:
+            parent_wepp_ready = False
+
+        return {
+            'observed_climate': observed_ready,
+            'observed_start_year': start_year,
+            'observed_end_year': end_year,
+            'watershed_abstraction': (Path(self.wd) / 'dem' / 'wbt' / 'flovec.tif').is_file(),
+            'parent_wepp': parent_wepp_ready,
+            'missing_parent_wepp_ids': missing_parent_ids,
+        }
 
     @property
     def subfields_parquet_path(self) -> str:
@@ -682,20 +1070,19 @@ class AgFields(NoDbBase):
             raise FileNotFoundError(f'Sub-fields parquet file not found: {self.subfields_parquet_path}')
         return pd.read_parquet(self.subfields_parquet_path)
 
-    def run_wepp_ag_fields(self, max_workers: Optional[int] = None) -> None:
+    def run_wepp_ag_fields(self, max_workers: Optional[int] = None) -> Dict[str, int]:
         """
         Run WEPP for each sub-field defined in the Peridot output.
 
         e.g. rotation_schedule_year_key_func = lambda year: f'Crop{year}'
         """
         self.logger.info('run_wepp_ag_fields()')
-        climate = self.climate_instance
-        start_year = climate.observed_start_year
-        end_year = climate.observed_end_year
+        start_year, end_year = self._observed_year_bounds()
 
         watershed = self.watershed_instance
         clip_hillslopes = watershed.clip_hillslopes
         clip_hillslope_length = watershed.clip_hillslope_length
+        wepp_bin = self.wepp_instance.wepp_bin
 
         subfields_df = self.subfields_parquet
         rotation_schedule_df = pd.read_parquet(self.rotation_schedule_parquet)
@@ -735,7 +1122,7 @@ class AgFields(NoDbBase):
         total_tasks = len(tasks)
         if total_tasks == 0:
             self.logger.info('No sub-field records found; nothing to run.')
-            return
+            return {'run_count': 0}
 
         cpu_count = os.cpu_count() or 1
         if max_workers is None:
@@ -763,6 +1150,7 @@ class AgFields(NoDbBase):
                     schedule,
                     clip_hillslopes,
                     clip_hillslope_length,
+                    wepp_bin,
                 )
                 futures[future] = (field_id, topaz_id, wepp_id, sub_field_id)
 
@@ -783,13 +1171,17 @@ class AgFields(NoDbBase):
                         self.logger.info(
                             f'  ({completed}/{total_tasks}) sub_field_id={sub_field_id} (field_id={field_id}, wepp_id={wepp_id}) completed.'
                         )
-                    except Exception as exc:
+                    except Exception as exc:  # broad-except: concurrent sub-field task boundary
                         for remaining in pending:
                             remaining.cancel()
                         self.logger.error(
                             f'  Sub-field run failed (field_id={field_id}, topaz_id={topaz_id}, sub_field_id={sub_field_id}): {exc}'
                         )
-                        raise
+                        raise AgFieldsRunError(field_id, sub_field_id, str(exc)) from exc
+
+        with self.locked():
+            self._wepp_source_signature = self._workflow_signature()
+        return {'run_count': total_tasks}
 
 
 class CropRotationDatabase(Enum):
@@ -865,8 +1257,6 @@ class CropRotationManager:
     def __init__(self, ag_fields_dir: str, landuse_mapping: str, logger_name: str | None):
         logger = logging.getLogger(logger_name or __name__)
 
-        plant_files_dir = _join(ag_fields_dir, 'plant_files')
-
         # get the path and verify it exists
         crop_name = _join(ag_fields_dir, 'rotation_lookup.tsv')
 
@@ -899,36 +1289,57 @@ class CropRotationManager:
                (rotation_id[0] == "'" and rotation_id[-1] == "'"):
                 rotation_id = rotation_id[1:-1]
 
-            logger.debug(f'  Crop "{crop_name}" -> database="{database}", rotation_id="{rotation_id}"')
-
-            if not database in ['weppcloud', 'plant_file_db']:
-                raise ValueError(f'Invalid management file source in crop key-value lookup TSV file: {parts[1]}')
-            
-            if database == 'plant_file_db':
-                if not rotation_id.endswith('.man'):
-                    raise ValueError(f'Management file must be specified as lookup value: {rotation_id}')
-
-            if database == 'weppcloud':
-                if not isint(rotation_id):
-                    raise ValueError(f'WEPP Cloud management file ID must be an integer: {rotation_id}')
-
-            if database == 'weppcloud':
-                try:
-                    man = get_management_summary(rotation_id, landuse_mapping)
-                    man_path = man.man_path
-                except InvalidManagementKey as e:
-                    logger.error(f'Error getting management summary for {rotation_id}: {e}')
-                    raise ValueError(f'Invalid WEPP Cloud management lookup id: {rotation_id}')
-            else:  # plant_file_db
-                man_path = _join(plant_files_dir, rotation_id)
-                if not _exists(man_path):
-                    raise FileNotFoundError(f'Management file not found: {man_path}')
-
-            rotation_lookup[crop_name] = CropRotation(crop_name, CropRotationDatabase(database), rotation_id, man_path)
+            rotation_lookup[crop_name] = self.resolve_rotation(
+                ag_fields_dir,
+                landuse_mapping,
+                crop_name,
+                database,
+                rotation_id,
+                logger_name=logger_name,
+            )
 
         self.ag_fields_dir = ag_fields_dir
         self.rotation_lookup: Dict[str, CropRotation] = rotation_lookup
         self.logger_name = logger_name
+
+    @staticmethod
+    def resolve_rotation(
+        ag_fields_dir: str,
+        landuse_mapping: str,
+        crop_name: str,
+        database: str,
+        rotation_id: str,
+        *,
+        logger_name: str | None,
+    ) -> CropRotation:
+        logger = logging.getLogger(logger_name or __name__)
+        normalized_id = rotation_id.strip().replace(' ', '_')
+        if database not in {'weppcloud', 'plant_file_db'}:
+            raise ValueError(f'Invalid management file source: {database}')
+        if database == 'plant_file_db':
+            path_token = PurePosixPath(normalized_id.replace('\\', '/'))
+            if path_token.is_absolute() or len(path_token.parts) != 1:
+                raise ValueError('Plant management lookup must be a .man basename without path components.')
+            if not normalized_id.lower().endswith('.man'):
+                raise ValueError(f'Management file must be specified as lookup value: {normalized_id}')
+            normalized_id = f'{Path(normalized_id).stem}.man'
+            man_path = _join(ag_fields_dir, 'plant_files', normalized_id)
+            if not _exists(man_path):
+                raise FileNotFoundError(f'Management file not found: {man_path}')
+        else:
+            if not isint(normalized_id):
+                raise ValueError(f'WEPP Cloud management file ID must be an integer: {normalized_id}')
+            try:
+                man_path = get_management_summary(normalized_id, landuse_mapping).man_path
+            except InvalidManagementKey as exc:
+                logger.error('Error getting management summary for %s: %s', normalized_id, exc)
+                raise ValueError(f'Invalid WEPP Cloud management lookup id: {normalized_id}') from exc
+        return CropRotation(
+            crop_name,
+            CropRotationDatabase(database),
+            normalized_id,
+            man_path,
+        )
 
     def dump_rotation_lookup(self) -> None:
         # dump to tsv
@@ -976,6 +1387,7 @@ def run_wepp_subfield(
     crop_rotation_schedule: Iterable[str],
     clip_hillslopes: bool,
     clip_hillslope_length: Optional[float],
+    wepp_bin: str,
     logger_name: Optional[str] = None,
 ) -> None:
     
@@ -1043,5 +1455,5 @@ def run_wepp_subfield(
     logger.info(f'  Created WEPP run file: {run_path}')
     run_hillslope(sub_field_id, 
                   ag_field_wepp_runs_dir,
-                  wepp_bin=self.wepp_instance.wepp_bin,
+                  wepp_bin=wepp_bin,
                   no_file_checks=True)

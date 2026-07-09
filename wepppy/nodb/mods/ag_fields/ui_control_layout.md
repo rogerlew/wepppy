@@ -186,7 +186,7 @@ Hydration: all gating state derives from one snapshot (template context at rende
 - Rows referencing missing plant files (orphans) render in error state with the missing filename shown; the select offers current valid files to re-map.
 - Crops present in the saved lookup but absent from the current schedule are shown in a collapsed "Unused mappings" group at the bottom (kept on save, harmless).
 - Footer: Cancel (discard, `data-modal-dismiss`) and "Save Mapping" (posts all rows). Server validates every row (`CropRotationManager` semantics); on any error the modal stays open, failing rows show server messages, valid rows persist state client-side. On success the modal closes and the stage 3 chip refreshes.
-- Partial mappings are saveable — save never blocks on unmapped rows (users map incrementally); only stage 4 gating requires completeness.
+- Partial mappings are savable — save never blocks on unmapped rows (users map incrementally); only stage 4 gating requires completeness.
 - No pagination; the table scrolls within the modal body. Crop counts are typically tens, not thousands.
 
 ## 6. Template Structure and DOM Contract
@@ -224,43 +224,51 @@ Hydration: all gating state derives from one snapshot (template context at rende
 
 ## 9. Route and Job Contract (new backend surface)
 
-All routes are run-scoped and follow existing runs-page conventions. Precedents: Treatments (`rq_engine/treatments_routes.py`) is the closest match for multipart upload + enqueue; the Disturbed SBS upload (`rq_engine/upload_disturbed_routes.py`) is the sync rq-engine upload precedent; Roads is a mixed legacy/new example (Flask `roads_bp.py` plus rq-engine duplicates) — follow Treatments/Disturbed, not the Roads split. All rq-engine routes call `authorize_run_access`. Names below are contractual for hooks/tests; align URL style with those precedents at implementation time.
+All routes are run-scoped under rq-engine and follow the Treatments/Disturbed precedents. Mutations require `rq:enqueue`, reads require `rq:status`, and every route calls `authorize_run_access`. Paths below are relative to the rq-engine `/api` prefix.
 
-| Action | Kind | Contract |
+| Action | Method and path | Contract |
 |---|---|---|
-| Upload field boundaries | sync POST, multipart | Saves into `ag_fields/`, runs `validate_field_boundary_geojson` (returns duplicates only); route assembles field count, column list, timestamp from NoDb state and applies the staleness contract (§10) |
-| Confirm schema | sync POST | Validates both values, then sets `field_id_key` + `rotation_accessor`; the backend setters are independent so the route enforces atomicity (validate-then-persist, no partial commit); returns per-year resolution errors on failure |
-| Build sub-fields | RQ job | Chains rasterize → abstract (with optional min-area param) → polygonize; publishes to the run status channel |
-| Upload plant file zip | multipart POST → RQ job | Saves zip to `ag_fields/`, job runs `handle_plant_file_db_upload`; terminal event carries valid/invalid summary |
-| Plant file inventory | sync GET | Valid files, invalid files with reasons, downgrade provenance |
-| Delete plant file | sync POST/DELETE | Removes file, returns refreshed inventory + orphaned mapping rows |
-| Rotation mapping (read) | sync GET | Unique crops, current lookup rows with validation status, valid plant files, weppcloud management options |
-| Rotation mapping (save) | sync POST | JSON rows → server writes `rotation_lookup.tsv` and validates; returns per-row results |
-| Run WEPP sub-fields | RQ job | Wraps `run_wepp_ag_fields(max_workers)`; failure payload names sub_field_id/field_id |
-| Clear runs/outputs | sync POST | Wraps the two clear methods |
-| Sub-fields overlay resource | sync GET | Serves `sub_fields.WGS.geojson` for the map overlay (Roads `resources/roads.json` precedent) |
-| State snapshot | sync GET | Everything §4 hydrates from: schema state, counts, staleness flags, mapping completeness, plant file counts, observed-climate readiness, parent-WEPP readiness, active job ids |
+| Upload field boundaries | `POST /runs/{runid}/{config}/agfields/boundaries` (`field_boundaries`) | Accepts `.geojson`/`.json` up to 10 MB, validates before replacing canonical artifacts, and returns field count, columns, timestamp, and duplicates |
+| Confirm schema | `POST /runs/{runid}/{config}/agfields/schema` | JSON/form `field_id_key` + `rotation_accessor`; validates and persists both atomically |
+| Build sub-fields | `POST /runs/{runid}/{config}/agfields/build-subfields` | Enqueues rasterize → abstract → polygonize with optional `sub_field_min_area_threshold_m2` |
+| Upload plant file zip | `POST /runs/{runid}/{config}/agfields/plant-database` (`plant_database`) | Validates ZIP quotas/member paths, stages a unique archive, and enqueues plant processing |
+| Plant file inventory | `GET /runs/{runid}/{config}/agfields/plant-files` | Returns valid files, invalid reasons, downgrade provenance, and replacement flags |
+| Delete plant file | `DELETE /runs/{runid}/{config}/agfields/plant-files/{filename}` | Deletes a `.man` basename and returns refreshed inventory plus mapping validation |
+| Rotation mapping (read/save) | `GET/POST /runs/{runid}/{config}/agfields/rotation-mapping` | Reads modal data or saves JSON `rows` to canonical `rotation_lookup.tsv` and returns per-row validation |
+| Management options | `GET /runs/{runid}/{config}/agfields/management-options` | Returns management id + description pairs from the run's landuse mapping |
+| Run WEPP sub-fields | `POST /runs/{runid}/{config}/agfields/run-wepp` | Enforces sub-field, mapping, and parent-WEPP readiness, then enqueues optional `max_workers` |
+| Clear runs/outputs | `POST /runs/{runid}/{config}/agfields/clear` | Clears both regenerable AgFields WEPP directories and recorded run provenance |
+| Sub-fields overlay resource | `GET /runs/{runid}/{config}/agfields/sub-fields.geojson` | Serves `sub_fields.WGS.geojson` as `application/geo+json` |
+| State snapshot | `GET /runs/{runid}/{config}/agfields/state` | Returns all stage hydration state described below |
 
-## 10. Backend Prerequisites (blocking template/controller work)
+The state snapshot has top-level objects `boundary`, `schema`, `subfields`, `mapping`, `plant_files`, `wepp`, `staleness`, and `readiness`. It also exposes `job_ids` (last known ids) and `active_job_ids` (only queued/started/deferred/scheduled ids) under the contractual keys `agfields_build_subfields`, `agfields_plantdb`, and `agfields_run_wepp`. Staleness keys are `subfields` and `wepp_runs`; readiness keys are `observed_climate`, `watershed_abstraction`, `parent_wepp`, observed year bounds, and missing parent WEPP ids.
 
-1. **`run_wepp_subfield` is broken.** The module-level function references `self.wepp_instance.wepp_bin` (`ag_fields.py:1046`) — a `NameError` on every sub-field run. `wepp_bin` must become a parameter, read from the Wepp NoDb in `run_wepp_ag_fields` and passed through. Stage 4 cannot ship without this fix.
-2. **RQ task wrappers do not exist.** `wepppy/rq` has no AgFields tasks; build-subfields chain, plant-db processing, and run-wepp jobs must be added with status-channel publishing and the §7 job keys.
-3. **Re-upload staleness contract.** Uploading a new GeoJSON refreshes count/hash/timestamp/columns but leaves `field_id_key`, `rotation_accessor`, and sub-field state untouched. The upload route (or controller) must either clear dependent state or record enough (e.g. the geojson hash sub-fields were built from) for the state snapshot to emit the §4 staleness flags.
-4. **`validate_rotation_lookup` returns nothing** — it pretty-prints to stdout (`ag_fields.py:664`). It must return structured per-crop results (and not print) for the mapping save/read routes.
-5. **Plant file replace/delete semantics.** No delete method exists. Collision suffixing (`name_1.man`) applies on flatten/rename conflicts, while same-named root-level entries and downgrade outputs can silently overwrite — the semantics are accidental either way. For the fix-and-re-upload loop the upload must deterministically replace same-named files; add an explicit delete method. Suffixing should remain only for genuinely distinct files arriving in one zip.
-6. **Invalid plant files are only logged.** Persist the reject list (filename + parse error) on the NoDb alongside `_valid_plant_files` so the inventory endpoint can report it. Also: only lowercase `.man` extensions are extracted — uppercase `.MAN` files are silently ignored; make the extension check case-insensitive.
-7. **Rotation mapping writer.** Server-side construction of `rotation_lookup.tsv` from the modal's JSON payload (the TSV format and `CropRotationManager` validation already exist; only a debug dump to a different filename exists today).
-8. **weppcloud management options endpoint** (or reuse): id + description list for the run's landuse mapping, for the modal's WEPPcloud source select.
-9. **Readiness checks for the state snapshot**: parent-WEPP artifacts (`wepp/runs/p*.sol`/`.cli`), watershed abstraction (`dem/wbt/flovec.tif`), and observed-climate readiness derived from `climate_mode` + parseable observed year bounds (no `is_observed` helper exists).
-10. `first_year_only` truncation on the 2017.1 downgrade stays hardcoded off in v1 — not exposed in the UI.
-11. Minor: duplicate-field warning uses deprecated `logger.warn` (`ag_fields.py:187`); fix opportunistically.
+RQ tasks return their terminal payload through the RQ job result and publish the same payload as `RESULT_JSON` before their completion trigger. Plant processing publishes the valid/invalid inventory; sub-field building publishes field/sub-field counts; WEPP publishes `run_count`. Failures publish `EXCEPTION_JSON`; plant failures include `filename`, and WEPP failures include both `sub_field_id` and parent `field_id`. Completion triggers are `AGFIELDS_BUILD_SUBFIELDS_TASK_COMPLETED`, `AGFIELDS_PLANTDB_TASK_COMPLETED`, and `AGFIELDS_RUN_WEPP_TASK_COMPLETED`.
+
+Async submissions are single-flight per run across all three job families. A concurrent submission, boundary/schema/mapping mutation, plant-file delete, or artifact clear receives HTTP 409 with `error.code="agfields_job_active"` while a job is active; the UI must keep the current stream attached rather than replacing its job id.
+
+## 10. Backend Prerequisites (implemented 2026-07-09)
+
+The backend-readiness package `docs/work-packages/20260709_ag_fields_backend_readiness/` completed these prerequisites. The list remains as implementation rationale and regression scope for the successor UI package.
+
+1. **`run_wepp_subfield` binary propagation:** `wepp_bin` is explicit and is read from the Wepp NoDb before executor submission.
+2. **RQ task wrappers:** `wepppy/rq/ag_fields_rq.py` provides build-subfields, plant-db, and run-wepp jobs with the §7 keys and status events.
+3. **Re-upload staleness:** boundary replacement clears schema selections; build/run source signatures drive server-side `subfields` and `wepp_runs` staleness.
+4. **Structured lookup validation:** `validate_rotation_lookup()` returns per-crop `ok`/`unmapped`/`error` results and does not print.
+5. **Plant replace/delete semantics:** re-upload replaces same-named files; archive-local flatten collisions suffix deterministically; `delete_plant_file()` removes a basename.
+6. **Invalid and uppercase plant files:** invalid reasons persist in NoDb inventory and `.man` matching is case-insensitive.
+7. **Rotation mapping writer:** `write_rotation_lookup()` atomically writes the existing three-column TSV after validating mapped rows.
+8. **weppcloud management options:** the mapping response and dedicated endpoint return id + description pairs from the run mapping.
+9. **Readiness checks:** the snapshot reports observed climate, `dem/wbt/flovec.tif`, and required parent `.sol`/`.cli` pairs.
+10. **2017.1 truncation:** `first_year_only=False` remains fixed and is not exposed in v1.
+11. **Logging:** duplicate-field warnings use `logger.warning`.
 
 ## 11. Accessibility
 
 - Status chips that change from job flow use `role="status"` / `aria-live="polite"` (Batch Runner precedent).
-- The modal follows the shared modal semantics: `role="dialog"`, `aria-modal`, labelled title, focus trap and Escape via the shared modal helper.
+- The modal follows the shared modal semantics: `role="dialog"`, `aria-modal`, labeled title, focus trap and Escape via the shared modal helper.
 - Collapsibles are native `details`/`summary` (from `collapsible_card`) — keyboard-operable for free.
-- Dependent selects in the modal must be labelled per row (visually-hidden labels including the crop name, e.g. "Management for Corn").
+- Dependent selects in the modal must be labeled per row (visually-hidden labels including the crop name, e.g. "Management for Corn").
 - Disabled primary buttons always have an adjacent visible chip explaining why (gating is never conveyed by disabled state alone).
 
 ## 12. Test Checklist

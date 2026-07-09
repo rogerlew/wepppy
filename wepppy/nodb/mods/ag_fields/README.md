@@ -21,12 +21,11 @@ The controller is stateful and persisted as `ag_fields.nodb` at the root of the 
 Typical sequence (some steps are optional depending on the UI/route calling into this module):
 
 1. **Ingest boundaries**: `AgFields.validate_field_boundary_geojson(...)`
-2. **Pick the ID column**: `AgFields.set_field_id_key(...)`
-3. **Define crop column accessor**: `AgFields.set_rotation_accessor("Crop{}")`
+2. **Confirm the boundary schema atomically**: `AgFields.confirm_schema("field_id", "Crop{}")`
 4. **Rasterize boundaries**: `AgFields.rasterize_field_boundaries_geojson()`
 5. **Abstract sub-fields (Peridot)**: `AgFields.periodot_abstract_sub_fields(...)`
 6. **Polygonize sub-fields**: `AgFields.polygonize_sub_fields()`
-7. **Provide crop→management mapping**: create `ag_fields/rotation_lookup.tsv` (and optionally populate `ag_fields/plant_files/` via `handle_plant_file_db_upload`)
+7. **Provide crop→management mapping**: call `AgFields.write_rotation_lookup(rows)` (and optionally populate `ag_fields/plant_files/` via `handle_plant_file_db_upload`)
 8. **Run WEPP per sub-field**: `AgFields.run_wepp_ag_fields(max_workers=...)`
 
 ## Inputs and outputs
@@ -66,11 +65,8 @@ ag = AgFields.getInstance(wd)
 # 1) Normalize + validate boundaries (copies into wd/ag_fields/fields.WGS.geojson)
 ag.validate_field_boundary_geojson("inputs/field_boundaries.geojson")
 
-# 2) Column to burn into rasters and to join rotation rows to peridot outputs
-ag.set_field_id_key("field_id")
-
-# 3) Crop columns are typically named like Crop2008, Crop2009, ...
-ag.set_rotation_accessor("Crop{}")
+# 2) Validate both schema choices before either value is persisted
+ag.confirm_schema("field_id", "Crop{}")
 
 # 4) Create wd/ag_fields/field_boundaries.tif aligned to the project DEM
 ag.rasterize_field_boundaries_geojson()
@@ -80,7 +76,8 @@ ag.periodot_abstract_sub_fields(sub_field_min_area_threshold_m2=0.0, verbose=Tru
 ag.polygonize_sub_fields()
 
 # 6) Provide crop->management mapping and run WEPP per sub-field
-# - Ensure wd/ag_fields/rotation_lookup.tsv exists (see below).
+# - Write wd/ag_fields/rotation_lookup.tsv from structured rows (see below).
+#   ag.write_rotation_lookup(rows)
 # - Optionally populate wd/ag_fields/plant_files/ with:
 #   ag.handle_plant_file_db_upload("plant_db.zip")
 ag.run_wepp_ag_fields(max_workers=8)
@@ -103,6 +100,22 @@ crop_name	database	rotation_id
 Corn	plant_file_db	corn_spring_NT.man
 Forest	weppcloud	42
 ```
+
+`write_rotation_lookup()` preserves this three-column schema, permits intentionally unmapped rows by omitting them from the TSV, validates every mapped row before replacement, and returns structured `ok`/`unmapped` results. Any invalid mapped row raises `RotationLookupValidationError` and leaves the prior file unchanged. `validate_rotation_lookup()` returns the same per-crop result structure and does not print.
+
+### Plant management archives
+
+`handle_plant_file_db_upload()` accepts a ZIP already staged under `ag_fields/`. Member paths are checked, `.man` matching is case-insensitive, final extensions are normalized to lowercase, and spaces become underscores. Same-named re-uploads replace deterministically; only distinct colliding names within one archive receive `_1`, `_2`, and so on. Unreadable 2017.1 files raise `PlantFileProcessingError` naming the member, while regular invalid files remain visible in the persisted inventory with their parse reason. Use `get_plant_file_inventory()` to read provenance and `delete_plant_file()` to remove a basename.
+
+## HTTP and RQ surface
+
+`wepppy.microservices.rq_engine.ag_fields_routes` exposes the staged workflow under `/api/runs/{runid}/{config}/agfields/`. The surface includes boundary upload, atomic schema confirmation, build-subfields enqueue, plant ZIP enqueue/inventory/delete, mapping read/save, management options, WEPP enqueue, artifact clear, overlay serving, and state hydration. Read routes require `rq:status`; mutations require `rq:enqueue`; all routes authorize access to the requested run.
+
+RQ entrypoints live in `wepppy.rq.ag_fields_rq`. Job hints use `agfields_build_subfields`, `agfields_plantdb`, and `agfields_run_wepp`. Workers publish to `{runid}:ag_fields`, clear only the `ag_fields.nodb` cache before mutable hydration, return JSON-serializable results, and publish completion/failure payloads for status-stream hydration.
+
+AgFields mutations are single-flight per run. A short Redis submit lock closes enqueue races, live RQ status prevents overlapping build/plant/WEPP jobs, and synchronous boundary/schema/mapping/delete/clear routes return `agfields_job_active` while a job is queued or running.
+
+The state snapshot reports build provenance rather than asking clients to infer it. Re-upload clears the schema selections; sub-fields are stale until polygonization records the current boundary/schema signature; WEPP runs are stale when either that signature or `rotation_lookup.tsv` changes. Historical runs without signatures are conservatively stale until rebuilt. Readiness covers observed climate year bounds, `dem/wbt/flovec.tif`, and the parent `wepp/runs/p<wepp_id>.sol`/`.cli` pairs.
 
 ## Integration points
 

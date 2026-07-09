@@ -1,6 +1,6 @@
 # AgFields Backend Readiness
 
-**Status**: Backlog (scoped 2026-07-09)
+**Status**: Closed (2026-07-09)
 **Timezone**: UTC
 
 ## Overview
@@ -41,24 +41,37 @@ The UI template and controller JS are explicitly not in this package; they follo
 
 - **Primary**: WEPPpy maintainers for AgFields, RQ, and rq-engine route surface.
 - **Reviewers**: NoDb/AgFields maintainers; route/auth reviewer for the new rq-engine endpoints.
-- **Security Reviewer**: Not dedicated; the new upload/enqueue routes must satisfy the CLAUDE.md security checklist (auth via `authorize_run_access`, upload path safety — zip-slip guards already exist in `handle_plant_file_db_upload` and must be preserved).
+- **Security Reviewer**: Codex; a dedicated review is required because the package adds uploads and queue wiring.
 - **Informed**: UI implementation package (successor), AgFields end users via updated docs.
 
 ## Success Criteria
 
-- [ ] `run_wepp_subfield` accepts `wepp_bin` as a parameter; regression test proves a sub-field run reaches `run_hillslope` without `NameError`.
-- [ ] Build-subfields RQ job chains rasterize → abstract → polygonize under one job with status publishing; chain order covered by a test.
-- [ ] Plant-db RQ job processes an uploaded zip and its terminal event carries the valid/invalid summary, naming any aborting 2017.1 file.
-- [ ] Run-wepp RQ job wraps `run_wepp_ag_fields`; failure payload names `sub_field_id` and parent `field_id`.
-- [ ] All §9 routes exist, are run-scoped, and rq-engine routes call `authorize_run_access`; route contract tests pass.
-- [ ] Schema confirm is atomic at the route level: an invalid rotation accessor leaves `field_id_key` unchanged (tested).
-- [ ] Re-uploading a boundary GeoJSON produces staleness flags in the state snapshot per spec §4 (tested).
-- [ ] `validate_rotation_lookup` returns structured per-crop results and no longer prints.
-- [ ] Plant-file upload deterministically replaces same-named files; delete method exists; invalid files persist with reasons; `.man` matching is case-insensitive (all tested).
-- [ ] Rotation-mapping save writes `rotation_lookup.tsv` from a JSON payload and round-trips through `CropRotationManager` validation (tested).
-- [ ] State snapshot exposes everything spec §4 hydrates from, including the three readiness checks.
-- [ ] `tools/check_broad_exceptions.py --enforce-changed` passes; no unallowlisted broad handlers in new routes.
-- [ ] Module README updated; package closed with disposition of any review findings.
+- [x] `run_wepp_subfield` accepts `wepp_bin` as a parameter; regression test proves a sub-field run reaches `run_hillslope` without `NameError`.
+- [x] Build-subfields RQ job chains rasterize → abstract → polygonize under one job with status publishing; chain order covered by a test.
+- [x] Plant-db RQ job processes an uploaded zip and its terminal event carries the valid/invalid summary, naming any aborting 2017.1 file.
+- [x] Run-wepp RQ job wraps `run_wepp_ag_fields`; failure payload names `sub_field_id` and parent `field_id`.
+- [x] All §9 routes exist, are run-scoped, and rq-engine routes call `authorize_run_access`; route contract tests pass.
+- [x] Schema confirm is atomic at the route level: an invalid rotation accessor leaves `field_id_key` unchanged (tested).
+- [x] Re-uploading a boundary GeoJSON produces staleness flags in the state snapshot per spec §4 (tested).
+- [x] `validate_rotation_lookup` returns structured per-crop results and no longer prints.
+- [x] Plant-file upload deterministically replaces same-named files; delete method exists; invalid files persist with reasons; `.man` matching is case-insensitive (all tested).
+- [x] Rotation-mapping save writes `rotation_lookup.tsv` from a JSON payload and round-trips through `CropRotationManager` validation (tested).
+- [x] State snapshot exposes everything spec §4 hydrates from, including the three readiness checks.
+- [x] `tools/check_broad_exceptions.py --enforce-changed` passes; no unallowlisted broad handlers in new routes.
+- [x] Module README updated; package closed with disposition of all review findings.
+
+## Closure Summary
+
+Completed the controller, RQ, authenticated HTTP, state/readiness, upload safety,
+and documentation work required by the authoritative UI contract. The dedicated
+security review passed with all findings resolved. The successor runs-page UI
+package is unblocked; feature maturity remains `internal` until that control
+ships.
+
+The final focused set passed 52 tests, and the broader NoDb and OpenAPI suites
+passed. The repository-wide suite stopped at an unrelated, independently
+reproducible batch-runner baseline failure after 2,070 passing tests. No seeded
+AgFields run was available for a real WEPP binary end-to-end execution.
 
 ## References
 

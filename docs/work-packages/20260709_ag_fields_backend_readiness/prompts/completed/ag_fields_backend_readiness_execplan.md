@@ -4,6 +4,13 @@ This ExecPlan is a living document. The sections `Progress`, `Surprises & Discov
 
 This plan must be maintained in accordance with `docs/prompt_templates/codex_exec_plans.md`.
 
+## Completion Outcome
+
+Completed on 2026-07-09. The package delivered the AgFields controller fixes,
+authenticated rq-engine routes, guarded RQ jobs, upload/archive controls,
+staleness and readiness state, regression coverage, contract documentation, and
+security review required to unblock the successor runs-page UI package.
+
 ## Purpose / Big Picture
 
 After this package, the AgFields workflow is drivable over HTTP: a runs-page UI (successor package) can upload field boundaries, confirm schema, build sub-fields, manage plant files, save crop-to-management mappings, and run per-sub-field WEPP simulations — all through run-scoped routes and RQ jobs with status streaming. Today none of that surface exists and sub-field WEPP runs are broken outright by a `NameError`.
@@ -14,24 +21,56 @@ A user can see this package working by exercising the new routes against a seede
 
 ## Progress
 
-- [ ] Milestone 1: `wepp_bin` fix + regression test.
-- [ ] Milestone 2: Controller contract gaps (staleness, structured lookup validation, plant-file semantics, mapping writer, readiness helpers).
-- [ ] Milestone 3: RQ tasks with contractual job keys and status publishing.
-- [ ] Milestone 4: HTTP routes per spec §9.
-- [ ] Milestone 5: Test coverage and lint gates.
-- [ ] Milestone 6: Docs refresh and package closure.
+- [x] (2026-07-09 21:53 UTC) Loaded the authoritative UI contract, subsystem instructions, persistence/RQ contracts, and package security requirements.
+- [x] (2026-07-09 21:57 UTC) Milestone 1: passed `wepp_bin` from the configured Wepp controller into each sub-field runner and added propagation/generated-artifact regressions.
+- [x] (2026-07-09 22:07 UTC) Milestone 2: implemented controller staleness, structured mapping validation/writer, deterministic plant inventory/replace/delete, and readiness helpers; full NoDb mods suite passed.
+- [x] (2026-07-09 22:19 UTC) Milestone 3: added guarded RQ tasks with contractual keys, JSON terminal payloads, completion triggers, and queue graph registration.
+- [x] (2026-07-09 22:19 UTC) Milestone 4: added the authenticated run-scoped rq-engine surface from spec section 9 with upload/archive guards and route tests.
+- [x] (2026-07-09 22:52 UTC) Milestone 5: completed targeted controller/RQ/route coverage, queue graph, stub, broad-exception, OpenAPI, docs, and live job-tree validation; confirmed one unrelated batch-runner baseline failure in the full-suite gate.
+- [x] (2026-07-09 22:55 UTC) Milestone 6: refreshed module and contract docs, completed the security review, closed the package trackers, and archived this ExecPlan.
 
 ## Surprises & Discoveries
 
-(record as encountered)
+- Observation: The package scaffold classified the new upload and queue surfaces as `low` security impact, while `docs/work-packages/README.md` classifies both as `high` by default.
+  Evidence: The tracker now links the required dedicated security artifact.
+- Observation: Historical AgFields state has no build-source signatures, so existing sub-fields and WEPP runs cannot be proven current.
+  Evidence: The controller conservatively reports those artifacts stale until they are rebuilt by the new workflow; the historical-state regression covers this default.
+- Observation: The 13-route AgFields surface increased canonical rq-engine OpenAPI size from its 118,500-byte budget to 129,217 bytes.
+  Evidence: The full suite stopped at `test_openapi_document_size_budget`; the documented ceiling is now 130,000 bytes while AgFields remains outside the frozen agent inventory at `internal` maturity.
+- Observation: The repository-wide pytest gate has a reproducible baseline failure in `tests/nodb/test_batch_runner.py::test_run_batch_project_does_not_delete_workspace_when_rmtree_disabled` because the test stubs `batch_runner.get_wd` while `clear_nodb_file_cache` imports the canonical helper directly.
+  Evidence: The full run stopped after `2070 passed, 41 skipped`; the same failure reproduced alone, and this package does not modify `batch_runner.py`, `base.py`, or the failing test.
 
 ## Decision Log
 
-(seed decisions live in `../../tracker.md`; add implementation-level decisions here with rationale, date, author)
+- Decision: Evolve persisted and generated schemas additively: retain the existing `rotation_lookup.tsv` columns, use safe defaults for new NoDb keys, and add route response fields without renaming existing RQ response keys.
+  Rationale: Existing run directories and Python-driven AgFields workflows must remain readable while the HTTP surface is added.
+  Date/Author: 2026-07-09 / Codex
+- Decision: Treat every boundary upload as a schema reset, use boundary/schema/rotation source signatures for staleness, and conservatively report historical unsigned artifacts as stale.
+  Rationale: A replacement boundary can invalidate both selected columns and every downstream artifact; unverified historical products must not be presented as current.
+  Date/Author: 2026-07-09 / Codex
+- Decision: Apply the upload quotas, observed-climate modes, per-run single-flight admission, and 130,000-byte OpenAPI budget recorded in ADR-0015.
+  Rationale: These explicit limits protect upload and queue surfaces while keeping legitimate AgFields inputs and route discovery usable.
+  Date/Author: 2026-07-09 / Codex
+- Decision: Implement the exact run-scoped route and state contract in `ui_control_layout.md` section 9 and retain AgFields at `internal` agent maturity.
+  Rationale: The successor UI needs a stable backend contract, while agent-facing maturity should change only when the user control ships.
+  Date/Author: 2026-07-09 / Codex
 
 ## Outcomes & Retrospective
 
-(pending)
+The controller now propagates the configured WEPP binary, performs atomic
+boundary/schema/mapping mutations, tracks source signatures, validates
+readiness, and manages plant archives deterministically. Three RQ entrypoints
+and 13 authenticated rq-engine route shapes expose that behavior with scoped
+cache invalidation, contractual status events, single-flight admission, and
+bounded upload processing. Tests and documentation cover the persisted TSV and
+NoDb compatibility surface, generated run artifacts, failure payloads, auth,
+archive safety, and route contracts.
+
+No seeded `/wc1/runs/*/ag_fields.nodb` project was available, so a real WEPP
+binary end-to-end run was not possible. Regression coverage reaches the
+`run_hillslope` boundary with generated inputs, and a live Redis job-tree check
+verified all three RQ entrypoints. The runs-page UI and feature maturity bump
+remain intentionally assigned to the successor package.
 
 ## Context and Orientation
 
@@ -67,3 +106,17 @@ Milestone 6 refreshes `wepppy/nodb/mods/ag_fields/README.md` for the changed pla
 - Targeted pytest for new routes and RQ tasks (paths chosen at implementation time; record commands and outputs in the tracker).
 - `python tools/check_broad_exceptions.py --enforce-changed` must pass.
 - Record all validation evidence in `../../tracker.md` under Validation with actual command output, not paraphrase.
+
+Recorded outcome:
+
+- Focused AgFields controller/RQ/route set: `52 passed, 9 warnings in 15.86s`.
+- NoDb mods suite: `748 passed, 23 skipped, 17 warnings in 27.57s`.
+- rq-engine OpenAPI contract module: `10 passed, 5 warnings in 12.78s`.
+- RQ graph, runtime stubtest, test-stub completeness, broad-exception enforcement, docs lint, and live Redis job-tree checks passed.
+- Repository-wide `wctl run-pytest tests --maxfail=1`: stopped at the unrelated, independently reproducible batch-runner baseline failure after `2070 passed, 41 skipped, 35 warnings in 300.01s`.
+
+## Revision Note
+
+Revised on 2026-07-09 at package closure to record implementation decisions,
+validation evidence, the reproducible baseline suite failure, residual
+end-to-end limitation, and final outcome before archival.

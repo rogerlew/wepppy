@@ -11,6 +11,7 @@ from wepppy.observability.correlation import (
 from wepppy.rq.auth_actor import install_rq_auth_actor_hook
 
 from .batch_routes import router as batch_router
+from .ag_fields_routes import router as ag_fields_router
 from .bootstrap_routes import router as bootstrap_router
 from .climate_routes import router as climate_router
 from .culvert_routes import router as culvert_router
@@ -91,6 +92,7 @@ def health() -> dict[str, str]:
 
 
 app.include_router(job_router, prefix="/api")
+app.include_router(ag_fields_router, prefix="/api")
 app.include_router(admin_job_router, prefix="/api")
 app.include_router(batch_router, prefix="/api")
 app.include_router(bootstrap_router, prefix="/api")

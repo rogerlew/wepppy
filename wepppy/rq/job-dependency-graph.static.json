@@ -1,6 +1,16 @@
 [
   {
     "depends_on": [],
+    "enqueue_target": "func",
+    "job_meta_stage": null,
+    "notes": [],
+    "queue_name": "default",
+    "source_function": "_enqueue_job",
+    "source_lineno": 134,
+    "source_module": "wepppy/microservices/rq_engine/ag_fields_routes.py"
+  },
+  {
+    "depends_on": [],
     "enqueue_target": "run_ash_rq",
     "job_meta_stage": null,
     "notes": [],

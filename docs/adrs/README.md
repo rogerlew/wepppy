@@ -61,3 +61,5 @@ Each ADR should normally include:
 - `ADR-0011`: [Geneva NOAA Rounded-Zero Intensity Row Normalization](ADR-0011-geneva-noaa-rounded-zero-intensity-row-normalization.md) (Accepted, 2026-06-30)
 - `ADR-0012`: [SSURGO Field Capacity and Wilting Point Sanitization](ADR-0012-ssurgo-fc-wp-sanitization.md) (Accepted, 2026-07-06)
 - `ADR-0013`: [Seasonal Return-Period Frequency Basis](ADR-0013-seasonal-return-period-frequency-basis.md) (Accepted, 2026-07-06)
+- `ADR-0014`: [Disturbed OpenWEPP Route Coefficients](ADR-0014-disturbed-openwepp-route-coefficients.md) (Accepted, 2026-07-07)
+- `ADR-0015`: [AgFields Backend Readiness and Upload Guardrails](ADR-0015-agfields-upload-archive-guardrails.md) (Accepted, 2026-07-09)
