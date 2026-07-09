@@ -1,8 +1,8 @@
 # PROJECT_TRACKER.md
 > Kanban board for wepppy work packages and vision items
 
-**Last Updated**: 2026-07-06
-**Active Packages**: 12
+**Last Updated**: 2026-07-09
+**Active Packages**: 13
 **Quick Links**: [Work Packages Directory](docs/work-packages/) | [God-Tier Prompting Strategy](docs/god-tier-prompting-strategy.md)
 
 ## Purpose
@@ -37,7 +37,7 @@ This tracker makes all work visible at a glance, helping agents coordinate and a
 ### 2. Limit Work in Progress
 **Target**: 2-4 active packages maximum to maintain focus and ensure packages complete rather than stall.
 
-**Current WIP**: 12 packages (above target range)
+**Current WIP**: 13 packages (above target range)
 
 ### 3. Manage Flow
 Monitor how long packages spend in each column:
@@ -76,6 +76,30 @@ Feedback mechanisms:
 ## 📋 Backlog
 
 Work packages that are scoped but not yet started. Dependencies and prerequisites should be noted.
+
+### AgFields Backend Readiness
+**Proposed**: 2026-07-09
+**Size**: Medium (2-4 focused sessions)
+**Priority**: High
+**Link**: [docs/work-packages/20260709_ag_fields_backend_readiness/](docs/work-packages/20260709_ag_fields_backend_readiness/)
+**Description**: Make the AgFields backend ready for the runs-page UI specced in `wepppy/nodb/mods/ag_fields/ui_control_layout.md`: fix the `run_wepp_subfield` `wepp_bin` `NameError` that breaks every sub-field WEPP run, add the three RQ job families, stand up the run-scoped HTTP surface (spec §9), and close the controller contract gaps (spec §10).
+
+**Scope**:
+- Fix `run_wepp_subfield` self-reference bug with a pre-fix-failing regression test.
+- RQ tasks with contractual job keys and status publishing (build-subfields chain, plant-db processing, run-wepp).
+- Routes per spec §9 following Treatments/Disturbed-SBS precedents, `authorize_run_access` on rq-engine surface.
+- Controller gaps: re-upload staleness signals, structured `validate_rotation_lookup`, plant-file replace/delete + invalid-file persistence, JSON→`rotation_lookup.tsv` writer, readiness helpers.
+- Targeted pytest coverage and module README refresh.
+
+**Strategic Value**:
+- Unblocks the AgFields pure-CSS UI (successor package) against a stable backend surface.
+- Repairs a latent break in per-sub-field WEPP execution.
+
+**Dependencies**: UI spec verified and committed (`849da71a6`); Codex spec-verification findings dispositioned (see package artifacts).
+
+**Next Steps**: Milestone 1 (`wepp_bin` fix + regression test), then controller contract gaps, then RQ/routes.
+
+---
 
 ### SSURGO Reclaimed Soil Conversion and Fallback Transparency
 **Proposed**: 2026-06-22
