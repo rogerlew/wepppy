@@ -2,7 +2,7 @@
 > Kanban board for wepppy work packages and vision items
 
 **Last Updated**: 2026-07-09
-**Active Packages**: 12
+**Active Packages**: 13
 **Quick Links**: [Work Packages Directory](docs/work-packages/) | [God-Tier Prompting Strategy](docs/god-tier-prompting-strategy.md)
 
 ## Purpose
@@ -37,7 +37,7 @@ This tracker makes all work visible at a glance, helping agents coordinate and a
 ### 2. Limit Work in Progress
 **Target**: 2-4 active packages maximum to maintain focus and ensure packages complete rather than stall.
 
-**Current WIP**: 12 packages (above target range)
+**Current WIP**: 13 packages (above target range)
 
 ### 3. Manage Flow
 Monitor how long packages spend in each column:
@@ -76,6 +76,29 @@ Feedback mechanisms:
 ## 📋 Backlog
 
 Work packages that are scoped but not yet started. Dependencies and prerequisites should be noted.
+
+### AgFields Runs-Page UI
+**Proposed**: 2026-07-09
+**Size**: Medium (2-4 focused sessions)
+**Priority**: High
+**Link**: [docs/work-packages/20260709_ag_fields_runs_page_ui/](docs/work-packages/20260709_ag_fields_runs_page_ui/)
+**Description**: Implement the AgFields pure-CSS runs-page control per `wepppy/nodb/mods/ag_fields/ui_control_layout.md`: four-stage control template, rotation mapping modal, `ag_fields.js` controller with state-snapshot hydration and the three contractual job keys, runs-page wiring, map overlay, and registry maturity bump to `experimental`.
+
+**Scope**:
+- `controls/ag_fields_pure.htm` (control + modal) with spec §6 DOM hooks and §8 copy rules.
+- `controllers_js/ag_fields.js` + Jest suites per spec §12.1.
+- Runs-page wiring (`show_ag_fields`, nav, section include) and feature-id/maturity resolution.
+- Sub-fields map overlay via `addGeoJsonOverlay`.
+- Acceptance: manual four-stage walkthrough on a fresh small-watershed `ag-fields` project (also closes the backend package's real-binary E2E limitation).
+
+**Strategic Value**:
+- Makes the AgFields workflow usable by humans; the backend surface shipped 2026-07-09 and this is its first real consumer.
+
+**Dependencies**: `20260709_ag_fields_backend_readiness` (complete). Acceptance milestone depends on a fresh AgFields project (copacetic-note no longer exists).
+
+**Next Steps**: Milestone 1 (control template + modal), then controller JS against fixture-driven Jest tests.
+
+---
 
 ### SSURGO Reclaimed Soil Conversion and Fallback Transparency
 **Proposed**: 2026-06-22
@@ -275,7 +298,7 @@ When resuming Kubernetes work:
 
 Currently active work packages. Limit to 2-4 packages to maintain focus.
 
-**Current WIP Count**: 12 packages
+**Current WIP Count**: 13 packages
 
 ---
 
