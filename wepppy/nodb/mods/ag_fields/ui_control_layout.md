@@ -1,6 +1,6 @@
 # AgFields Runs-Page UI Control Layout
 
-Status: Spec-only
+Status: Implemented through automated UI milestones 2026-07-09; fresh-project acceptance pending
 Audience: template, controller, route, and test implementers for `wepppy/nodb/mods/ag_fields`
 
 ## Grounding

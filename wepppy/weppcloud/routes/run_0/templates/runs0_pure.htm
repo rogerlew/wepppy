@@ -23,6 +23,7 @@
 {% set show_omni = show_omni if show_omni is defined else ((('omni' in mods_list) and (omni is defined) and (omni is not none)) or playwright_load_all) %}
 {% set show_omni_contrasts = show_omni_contrasts if show_omni_contrasts is defined else show_omni %}
 {% set show_observed = show_observed if show_observed is defined else ('observed' in mods_list or playwright_load_all) %}
+{% set show_ag_fields = show_ag_fields if show_ag_fields is defined else ('ag_fields' in mods_list or playwright_load_all) %}
 {% set allow_debris_flow = allow_debris_flow if allow_debris_flow is defined else playwright_load_all %}
 {% set show_debris_flow = show_debris_flow if show_debris_flow is defined else ((('debris_flow' in mods_list or playwright_load_all) and (debris_flow is not none or playwright_load_all) and allow_debris_flow)) %}
 {% set show_features_export = show_features_export if show_features_export is defined else ('features_export' in mods_list or playwright_load_all) %}
@@ -134,6 +135,9 @@
         </li>
         <li data-mod-nav="observed" {% if not show_observed %}hidden{% endif %}>
           <a href="#observed" class="nav-link">Observed Data</a>
+        </li>
+        <li data-mod-nav="ag_fields" {% if not show_ag_fields %}hidden{% endif %}>
+          <a href="#ag-fields" class="nav-link">Agricultural Fields</a>
         </li>
         {% if allow_debris_flow %}
         <li data-mod-nav="debris_flow" {% if not show_debris_flow %}hidden{% endif %}>
@@ -281,6 +285,14 @@
         {% if show_observed %}
         <section id="observed" class="wc-stack">
           {% include 'controls/observed_pure.htm' %}
+        </section>
+        {% endif %}
+      </div>
+
+      <div data-mod-section="ag_fields" {% if not show_ag_fields %}hidden{% endif %}>
+        {% if show_ag_fields %}
+        <section id="ag-fields" class="wc-stack">
+          {% include 'controls/ag_fields_pure.htm' %}
         </section>
         {% endif %}
       </div>

@@ -240,15 +240,15 @@ features:
     disable_blockers: []
 
   - id: ag_fields
-    label: Ag Fields
-    nav_label: Ag Fields
+    label: Agricultural Fields
+    nav_label: Agricultural Fields
     section_id: ag-fields
     section_class: wc-stack
-    section_template: controls/internal_workflow_placeholder.htm
-    maturity: internal
-    internal_reason: beta
+    section_template: controls/ag_fields_pure.htm
+    maturity: experimental
+    internal_reason: null
     embargo_until: null
-    min_role: dev
+    min_role: user
     requires_backend: any
     requires_features: []
     enable_dependencies: []

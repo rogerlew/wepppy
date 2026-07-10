@@ -348,6 +348,41 @@ describe("Project controller", () => {
         expect(workflowClickHandler).toHaveBeenCalled();
     });
 
+    test("set_mod bootstraps AgFields after rendering the dynamic section", async () => {
+        window.runContext = { mods: { list: [], flags: {} } };
+        document.getElementById("project-fixture").insertAdjacentHTML("beforeend", `
+            <li data-mod-nav="ag_fields" hidden></li>
+            <div data-mod-section="ag_fields" hidden></div>
+            <input type="checkbox" data-project-mod="ag_fields">
+        `);
+        const bootstrap = jest.fn();
+        window.AgFields = {
+            getInstance: jest.fn(() => ({ bootstrap }))
+        };
+        requestMock.mockResolvedValueOnce({ body: { Content: { label: "Agricultural Fields" } } });
+        getJsonMock.mockResolvedValueOnce({
+            Content: {
+                html: '<section id="ag-fields"><form id="ag_fields_form"></form></section>'
+            }
+        });
+
+        const input = document.querySelector('[data-project-mod="ag_fields"]');
+        input.checked = true;
+        const resultPromise = project.set_mod("ag_fields", true, { input, notify: false });
+
+        await flushPromises();
+        await new Promise((resolve) => {
+            setTimeout(resolve, 0);
+        });
+        await resultPromise;
+
+        expect(getJsonMock).toHaveBeenCalledWith("view/mod/ag_fields");
+        expect(window.AgFields.getInstance).toHaveBeenCalled();
+        expect(bootstrap).toHaveBeenCalledWith(window.runContext);
+        expect(window.runContext.mods.flags.ag_fields).toBe(true);
+        expect(document.querySelector('[data-mod-section="ag_fields"]').hidden).toBe(false);
+    });
+
     test("set_mod reconciles authoritative backend mods and syncs dependent toggles", async () => {
         window.runContext = { mods: { list: [], flags: { geneva: false, roads: false } } };
         document.getElementById("project-fixture").insertAdjacentHTML("beforeend", `

@@ -77,29 +77,6 @@ Feedback mechanisms:
 
 Work packages that are scoped but not yet started. Dependencies and prerequisites should be noted.
 
-### AgFields Runs-Page UI
-**Proposed**: 2026-07-09
-**Size**: Medium (2-4 focused sessions)
-**Priority**: High
-**Link**: [docs/work-packages/20260709_ag_fields_runs_page_ui/](docs/work-packages/20260709_ag_fields_runs_page_ui/)
-**Description**: Implement the AgFields pure-CSS runs-page control per `wepppy/nodb/mods/ag_fields/ui_control_layout.md`: four-stage control template, rotation mapping modal, `ag_fields.js` controller with state-snapshot hydration and the three contractual job keys, runs-page wiring, map overlay, and registry maturity bump to `experimental`.
-
-**Scope**:
-- `controls/ag_fields_pure.htm` (control + modal) with spec §6 DOM hooks and §8 copy rules.
-- `controllers_js/ag_fields.js` + Jest suites per spec §12.1.
-- Runs-page wiring (`show_ag_fields`, nav, section include) and feature-id/maturity resolution.
-- Sub-fields map overlay via `addGeoJsonOverlay`.
-- Acceptance: manual four-stage walkthrough on a fresh small-watershed `ag-fields` project (also closes the backend package's real-binary E2E limitation).
-
-**Strategic Value**:
-- Makes the AgFields workflow usable by humans; the backend surface shipped 2026-07-09 and this is its first real consumer.
-
-**Dependencies**: `20260709_ag_fields_backend_readiness` (complete). Acceptance milestone depends on a fresh AgFields project (copacetic-note no longer exists).
-
-**Next Steps**: Milestone 1 (control template + modal), then controller JS against fixture-driven Jest tests.
-
----
-
 ### SSURGO Reclaimed Soil Conversion and Fallback Transparency
 **Proposed**: 2026-06-22
 **Size**: Medium-High (2-4 focused sessions)
@@ -298,7 +275,24 @@ When resuming Kubernetes work:
 
 Currently active work packages. Limit to 2-4 packages to maintain focus.
 
-**Current WIP Count**: 13 packages
+**Current WIP Count**: 14 packages
+
+---
+
+### AgFields Runs-Page UI
+**Started**: 2026-07-09
+**Status**: Milestones 1-5 implemented and automated gates green; fresh-project acceptance pending
+**Size**: Medium (2-4 focused sessions)
+**Owner**: Codex
+**Priority**: High
+**Link**: [docs/work-packages/20260709_ag_fields_runs_page_ui/](docs/work-packages/20260709_ag_fields_runs_page_ui/)
+**Description**: Implements the AgFields four-stage runs-page control, rotation mapping modal, snapshot-driven controller lifecycle, authenticated map overlay, dynamic mod wiring, and `experimental` feature maturity.
+
+**Current Focus**: Automated implementation is complete. Milestone 6 requires a maintainer-created small-watershed `ag-fields` project for the manual four-stage walkthrough and real-WEPP-binary evidence.
+
+**Dependencies**: `20260709_ag_fields_backend_readiness` is complete. Acceptance depends on a fresh AgFields project because `copacetic-note` no longer exists.
+
+**Next Steps**: Create the fresh project, drive all four UI stages, record output evidence under `wepp/ag_fields/output/`, and close this package plus the backend package's real-binary limitation.
 
 ---
 

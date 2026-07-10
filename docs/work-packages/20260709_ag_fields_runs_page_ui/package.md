@@ -1,6 +1,6 @@
 # AgFields Runs-Page UI
 
-**Status**: Backlog (scoped 2026-07-09)
+**Status**: In progress — implementation complete; fresh-project acceptance pending (2026-07-09)
 **Timezone**: UTC
 
 ## Overview
@@ -54,15 +54,21 @@ The walkthrough is deliberately the last gate: it validates UI, backend, Peridot
 
 ## Success Criteria
 
-- [ ] Four-stage control renders per spec §2 wireframe with all §6 DOM hooks; no backend method names appear in labels or instructions.
-- [ ] Stage gating and staleness render exclusively from the state snapshot; disabled primary buttons always have an adjacent explanatory chip.
-- [ ] Crop-year pattern auto-detection handles the three spec outcomes (single candidate, multiple, none → collapsible auto-expands with per-year table).
-- [ ] Rotation modal round-trips mapping read/save, renders per-row server errors without closing, and supports partial saves.
-- [ ] Job lifecycle: enqueue → stream attach → terminal event → snapshot re-hydration works for all three job families; 409 conflict keeps the existing stream.
-- [ ] Sub-fields overlay appears via "Show on Map" and refreshes after a rebuild.
-- [ ] Registry maturity is `experimental`; the shell renders the label.
-- [ ] Jest suites per spec §12.1 pass; `wctl run-npm lint` and `wctl run-npm test` pass.
+- [x] Four-stage control renders per spec §2 wireframe with all §6 DOM hooks; no backend method names appear in labels or instructions.
+- [x] Stage gating and staleness render exclusively from the state snapshot; disabled primary buttons always have an adjacent explanatory chip.
+- [x] Crop-year pattern auto-detection handles the three spec outcomes (single candidate, multiple, none → collapsible auto-expands with per-year table).
+- [x] Rotation modal round-trips mapping read/save, renders per-row server errors without closing, and supports partial saves.
+- [x] Job lifecycle: enqueue → stream attach → terminal event → snapshot re-hydration works for all three job families; 409 conflict keeps the existing stream.
+- [x] Sub-fields overlay appears via "Show on Map" and refreshes after a rebuild.
+- [x] Registry maturity is `experimental`; the shell renders the label.
+- [x] Jest suites per spec §12.1 pass; `wctl run-npm lint` and `wctl run-npm test` pass.
 - [ ] Acceptance walkthrough on a fresh small-watershed project completes all four stages and produces sub-field outputs under `wepp/ag_fields/output/` with a real WEPP binary.
+
+## Implementation Status
+
+Milestones 1-5 were implemented on 2026-07-09. The shipped surface includes the four-stage template and modal, the `AgFields` singleton controller, dynamic and initial runs-page bootstrap wiring, authenticated rq-engine overlay loading through `MapController.addGeoJsonOverlay`, registry promotion to `experimental`, and focused Jest/Python render coverage. The controller bundle rebuild succeeds.
+
+Milestone 6 remains open by design. No fresh AgFields run was supplied during implementation, so this package does not claim browser acceptance or real-WEPP-binary output evidence. The required maintainer handoff is unchanged: create a small-watershed `ag-fields` run, drive the four stages, and record the output listing in `tracker.md`.
 
 ## References
 

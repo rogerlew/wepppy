@@ -14,29 +14,14 @@ This is a field-management workflow layered onto a WEPPcloud watershed project. 
 
 ## The User-Facing Setup Flow
 
-AgFields currently behaves more like a staged setup-and-prep workflow than a single one-click model control. The user-facing decisions are centered on uploaded files, file columns, and required support tables.
+The Agricultural Fields control on the runs page presents four stages. Work from top to bottom; each blocked stage explains which earlier result is still needed.
 
 The core setup sequence is:
 
-1. provide a field-boundary GeoJSON,
-2. confirm the field ID column,
-3. define the crop-year column pattern,
-4. rasterize fields onto the project DEM grid,
-5. abstract hydrologic sub-fields,
-6. polygonize sub-fields,
-7. provide the crop-to-management lookup,
-8. run WEPP per sub-field.
-
-If you automate or troubleshoot this workflow, those stages map directly to controller actions:
-
-- `validate_field_boundary_geojson(...)`
-- `set_field_id_key(...)`
-- `set_rotation_accessor(...)`
-- `rasterize_field_boundaries_geojson()`
-- `peridot_abstract_sub_fields(...)`
-- `polygonize_sub_fields()`
-- `validate_rotation_lookup()`
-- `run_wepp_ag_fields(...)`
+1. **Field Boundaries** — upload the field-boundary GeoJSON, review the detected field ID and crop-year columns, and confirm the schema.
+2. **Sub-field Delineation** — build sub-fields and use **Show on Map** to review how fields were split across hillslopes.
+3. **Crop Managements** — open **Map Crops to Managements**, choose a WEPPcloud management or uploaded plant file for each crop, and save partial progress as needed.
+4. **Run WEPP on Sub-fields** — after the parent watershed hillslopes have run, start and monitor one WEPP simulation per sub-field.
 
 Those prep stages matter because later steps assume the earlier ones already succeeded. If the field IDs, crop columns, rasterized boundaries, or sub-field abstractions are wrong, the WEPP runs are still likely to finish but the answers will be attached to the wrong field logic.
 
@@ -49,7 +34,7 @@ The current AgFields workflow expects these user-provided inputs:
 | Field boundary GeoJSON | Polygon boundaries for fields in the project area | Defines where fields exist spatially |
 | `field_id` attribute | A stable unique identifier in the GeoJSON | Used to join geometry, crop schedule rows, sub-fields, and outputs |
 | Crop-year columns | One crop value for every modeled observed year, using a repeatable pattern such as `Crop2008`, `Crop2009`, and so on | Supplies the crop sequence that becomes management inputs |
-| `ag_fields/rotation_lookup.tsv` | `crop_name`, `database`, `rotation_id` | Tells WEPPcloud how each crop name maps to a management file or WEPPcloud rotation |
+| Crop-to-management choices | One WEPPcloud management or uploaded plant file for each crop | Tells WEPPcloud which management to use without requiring you to edit `rotation_lookup.tsv` |
 | Optional plant database zip | `.man` files, including 2017.1 files if needed | Lets you use custom or external management files |
 
 Important current rules:
@@ -151,20 +136,20 @@ Current simplifications to keep in mind:
 3. Confirm the ID field and crop-year pattern.
    The ID must be stable across the workflow, and the crop-year pattern must match every observed climate year in the run.
 
-4. Rasterize the field boundaries.
-   This is where CRS mistakes and extent mismatches usually become obvious. If the fields do not overlap the DEM grid, stop and fix that before continuing.
+4. Select **Build Sub-fields**.
+   Coordinate-system mistakes and extent mismatches usually become obvious here. If the fields do not overlap the project, stop and fix the GeoJSON before continuing.
 
-5. Run sub-field abstraction.
-   Expect fields that span more than one hydrologic setting to split into multiple sub-fields. That is normal and often the point of using AgFields.
+5. Select **Show on Map** and review the result.
+   Expect fields that span more than one hydrologic setting to split into multiple sub-fields. Check that the geometry matches your understanding of local drainage before spending compute on WEPP.
 
-6. Review the sub-field products before running WEPP.
-   Check whether the resulting sub-fields match your understanding of field drainage structure.
+6. Open **Map Crops to Managements**.
+   Choose a WEPPcloud management for each crop, or upload a plant database zip and choose a valid `.man` file. You can save an incomplete mapping and return later; the run remains blocked until every crop is valid.
 
-7. Build or review `rotation_lookup.tsv`, and upload plant files if needed.
-   This is the management-translation step. A clean crop lookup is more important than squeezing in every possible crop label variation.
+7. Run the parent watershed WEPP hillslopes if they are not already complete.
+   AgFields reuses their soil and climate files, so the final stage explains this prerequisite when it is missing.
 
-8. Run WEPP per sub-field.
-   Expect one WEPP hillslope-style simulation per sub-field rather than one simulation per original field polygon.
+8. Select **Run WEPP on Sub-fields**.
+   Expect one WEPP hillslope-style simulation per sub-field rather than one simulation per original field polygon. The status panel reports progress, and successful runs link to the output browser and Features Export.
 
 ## What Outputs To Look At
 

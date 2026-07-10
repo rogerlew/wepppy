@@ -1,0 +1,413 @@
+{% import "controls/_pure_macros.html" as ui with context %}
+
+{% set ag_fields_description %}
+  <p class="wc-text-muted">
+    Model per-field WEPP runs driven by crop rotation schedules. Work from top to bottom, and
+    {{ usersum_doc_link('weppcloud', 'models/agricultural-fields/ENDUSER.md', 'open the Agricultural Fields user guide') }}
+    when you need file-preparation details.
+  </p>
+{% endset %}
+
+<style>
+  #ag_fields_form [data-role$="-status"]:empty,
+  #ag_fields_form [data-role="boundary-summary"]:empty,
+  #ag_fields_form [data-role="duplicate-warning"]:empty,
+  #ag_fields_form [data-role="subfields-summary"]:empty,
+  #ag_fields_form [data-role="mapping-chip"]:empty,
+  #ag_fields_form [data-role="results-links"]:empty,
+  #agfields_rotation_modal [data-role="mapping-status"]:empty {
+    display: none;
+  }
+
+  #ag_fields_form .agfields-stage {
+    margin: 0;
+  }
+
+  #ag_fields_form .agfields-stage__heading {
+    margin: 0;
+  }
+
+  #ag_fields_form .agfields-stage__actions {
+    align-items: center;
+    display: flex;
+    flex-wrap: wrap;
+    gap: var(--wc-space-sm);
+  }
+
+  #ag_fields_form .agfields-accessor-display {
+    margin: 0;
+  }
+
+  #ag_fields_form .agfields-resolution-table [data-state="missing"],
+  #agfields_rotation_modal [data-state="error"] {
+    color: var(--wc-error-fg);
+  }
+
+  #ag_fields_form .agfields-resolution-table [data-state="found"],
+  #agfields_rotation_modal [data-state="ok"] {
+    color: var(--wc-success-fg);
+  }
+
+  .agfields-modal__dialog {
+    max-height: 90vh;
+    max-width: 90vw;
+    width: 90vw;
+  }
+
+  .agfields-modal__body {
+    overflow: auto;
+  }
+
+  .agfields-mapping-source {
+    align-items: flex-start;
+    display: flex;
+    flex-direction: column;
+    gap: var(--wc-space-xs);
+  }
+
+  .agfields-mapping-source label {
+    align-items: center;
+    display: inline-flex;
+    gap: var(--wc-space-xs);
+    white-space: nowrap;
+  }
+
+  .agfields-modal__footer {
+    align-items: center;
+    display: flex;
+    gap: var(--wc-space-sm);
+    justify-content: flex-end;
+  }
+
+  .agfields-modal__unused {
+    margin-top: var(--wc-space-md);
+  }
+</style>
+
+{% call ui.control_shell(
+     form_id="ag_fields_form",
+     title="Agricultural Fields",
+     feature_id="ag_fields",
+     collapsible=True,
+     open=True,
+     description=ag_fields_description,
+     status_panel_options={
+       "id": "ag_fields_status_panel",
+       "job_id": "ag_fields_rq_job",
+       "braille_id": "ag_fields_braille",
+       "log_id": "ag_fields_status_log",
+       "height": "8rem",
+       "variant": "compact"
+     },
+     summary_panel_options={
+       "panel_id": "ag_fields_summary_panel",
+       "summary_id": "ag_fields_summary",
+       "title": "Workflow Summary"
+     },
+     stacktrace_panel_options={
+       "panel_id": "ag_fields_stacktrace_panel",
+       "body_id": "ag_fields_stacktrace",
+       "description": "Appears when a request or background job fails."
+     }
+   ) %}
+<div class="wc-stack" data-agfields-root>
+  <section class="wc-panel wc-stack agfields-stage" id="agfields_stage_boundaries">
+    <header class="wc-panel__header">
+      <div class="wc-stack">
+        <h3 class="wc-panel__title wc-heading__subtitle agfields-stage__heading">1. Field Boundaries</h3>
+        <p class="wc-text-muted">
+          Upload a GeoJSON of field polygons with a literal <code>field_id</code> column and one crop column per observed year.
+        </p>
+      </div>
+    </header>
+
+    {{ ui.file_upload(
+         'agfields_geojson',
+         'Field boundary GeoJSON',
+         accept='.geojson,.json',
+         help='Choose a GeoJSON or JSON file up to 10 MB.',
+         field_name='field_boundaries',
+         attrs={'data-role': 'geojson-input'},
+         max_width='100%'
+       ) }}
+    <div class="agfields-stage__actions">
+      <button type="button"
+              class="pure-button pure-button-primary"
+              data-action="upload-boundaries"
+              data-role="upload-button">
+        Upload Field Boundaries
+      </button>
+    </div>
+    <div class="wc-status-chip" data-role="upload-status" role="status" aria-live="polite"></div>
+    <div class="wc-status-chip" data-role="boundary-summary" role="status" aria-live="polite"></div>
+    <div class="wc-status-chip" data-role="duplicate-warning" role="status" aria-live="polite"></div>
+
+    <div class="wc-field">
+      <label class="wc-field__label" for="agfields_field_id_key">Field ID column</label>
+      <select class="wc-field__control"
+              id="agfields_field_id_key"
+              name="field_id_key"
+              data-role="field-id-select"
+              disabled></select>
+      <p class="wc-field__help">The uploaded file's <code>field_id</code> column is selected by default.</p>
+    </div>
+
+    <div class="wc-field">
+      <span class="wc-field__label">Crop-year pattern</span>
+      <p class="wc-text-muted agfields-accessor-display" data-role="accessor-display">
+        Upload boundaries to detect crop-year columns.
+      </p>
+      <select class="wc-field__control"
+              data-role="accessor-candidates"
+              aria-label="Crop-year pattern"
+              hidden></select>
+    </div>
+
+    <div class="agfields-stage__actions">
+      <button type="button"
+              class="pure-button pure-button-primary"
+              data-action="confirm-schema"
+              data-role="confirm-schema-button"
+              disabled>
+        Confirm Schema
+      </button>
+    </div>
+    <div class="wc-status-chip" data-role="schema-status" role="status" aria-live="polite"></div>
+
+    {% call ui.collapsible_card(
+         'Schema options',
+         description='Override the detected pattern and verify how every observed year resolves.',
+         expanded=False,
+         card_id='agfields_schema_options'
+       ) %}
+      <div class="wc-field">
+        <label class="wc-field__label" for="agfields_rotation_accessor">Crop-year pattern</label>
+        <input class="wc-field__control"
+               id="agfields_rotation_accessor"
+               name="rotation_accessor"
+               type="text"
+               placeholder="Crop{}"
+               data-role="accessor-input">
+        <p class="wc-field__help">Use <code>{}</code> where the four-digit year belongs.</p>
+      </div>
+      <div class="wc-table-wrapper agfields-resolution-table">
+        <table class="wc-table">
+          <thead>
+            <tr>
+              <th scope="col">Year</th>
+              <th scope="col">Resolved column</th>
+              <th scope="col">Status</th>
+            </tr>
+          </thead>
+          <tbody data-role="accessor-resolution-body">
+            <tr><td colspan="3"><em>Observed years are not available yet.</em></td></tr>
+          </tbody>
+        </table>
+      </div>
+    {% endcall %}
+  </section>
+
+  <section class="wc-panel wc-stack agfields-stage" id="agfields_stage_subfields">
+    <header class="wc-panel__header">
+      <div class="wc-stack">
+        <h3 class="wc-panel__title wc-heading__subtitle agfields-stage__heading">2. Sub-field Delineation</h3>
+        <p class="wc-text-muted">Split fields where they cross hillslope boundaries, then review the geometry before running WEPP.</p>
+      </div>
+    </header>
+    <div class="agfields-stage__actions">
+      <button type="button"
+              class="pure-button pure-button-primary"
+              data-action="build-subfields"
+              data-role="build-subfields-button"
+              disabled>
+        Build Sub-fields
+      </button>
+      <button type="button"
+              class="pure-button"
+              data-action="show-on-map"
+              data-role="show-on-map-button"
+              disabled>
+        Show on Map
+      </button>
+    </div>
+    <div class="wc-status-chip" data-role="subfields-status" role="status" aria-live="polite"></div>
+    <div class="wc-status-chip" data-role="subfields-summary" role="status" aria-live="polite"></div>
+    {% call ui.collapsible_card(
+         'Delineation options',
+         description='Rebuilding replaces prior sub-fields and makes prior sub-field runs stale.',
+         expanded=False,
+         card_id='agfields_delineation_options'
+       ) %}
+      {{ ui.numeric_field(
+           'agfields_min_area',
+           'Minimum sub-field area',
+           value='0',
+           unit_label='m²',
+           min=0,
+           precision='any',
+           help='Sub-fields smaller than this are dropped.',
+           attrs={'data-role': 'min-area-input'}
+         ) }}
+    {% endcall %}
+  </section>
+
+  <section class="wc-panel wc-stack agfields-stage" id="agfields_stage_managements">
+    <header class="wc-panel__header">
+      <div class="wc-stack">
+        <h3 class="wc-panel__title wc-heading__subtitle agfields-stage__heading">3. Crop Managements</h3>
+        <p class="wc-text-muted">Map every crop name in the rotation schedule to a WEPP management.</p>
+      </div>
+    </header>
+    <div class="wc-status-chip" data-role="mapping-chip" role="status" aria-live="polite"></div>
+    <div class="agfields-stage__actions">
+      <button type="button"
+              class="pure-button pure-button-primary"
+              data-action="open-mapping"
+              data-modal-open="agfields_rotation_modal"
+              data-role="open-mapping-button"
+              disabled>
+        Map Crops to Managements
+      </button>
+    </div>
+
+    {% call ui.collapsible_card(
+         'Plant file database',
+         description='Upload a zip of .man files from the USDA rotation builder; 2017.1 files are converted to 98.4 automatically.',
+         expanded=False,
+         card_id='agfields_plantdb_options'
+       ) %}
+      {{ ui.file_upload(
+           'agfields_plantdb',
+           'Plant file zip',
+           accept='.zip',
+           help='Filenames are normalized and matching existing files are replaced.',
+           field_name='plant_database',
+           attrs={'data-role': 'plantdb-input'},
+           max_width='100%'
+         ) }}
+      <div class="agfields-stage__actions">
+        <button type="button"
+                class="pure-button pure-button-primary"
+                data-action="upload-plantdb"
+                data-role="plantdb-upload-button">
+          Upload Plant Files
+        </button>
+      </div>
+      <div class="wc-status-chip" data-role="plantdb-status" role="status" aria-live="polite"></div>
+      <div class="wc-table-wrapper">
+        <table class="wc-table">
+          <thead>
+            <tr>
+              <th scope="col">Filename</th>
+              <th scope="col">Format</th>
+              <th scope="col">Status</th>
+              <th scope="col">Actions</th>
+            </tr>
+          </thead>
+          <tbody data-role="plantfile-table-body">
+            <tr><td colspan="4"><em>No plant files uploaded.</em></td></tr>
+          </tbody>
+        </table>
+      </div>
+    {% endcall %}
+  </section>
+
+  <section class="wc-panel wc-stack agfields-stage" id="agfields_stage_run">
+    <header class="wc-panel__header">
+      <div class="wc-stack">
+        <h3 class="wc-panel__title wc-heading__subtitle agfields-stage__heading">4. Run WEPP on Sub-fields</h3>
+        <p class="wc-text-muted">Run one WEPP hillslope simulation per sub-field using its parent hillslope soil and climate.</p>
+      </div>
+    </header>
+    <div class="agfields-stage__actions">
+      <button type="button"
+              class="pure-button pure-button-primary"
+              data-action="run-wepp"
+              data-role="run-button"
+              disabled>
+        Run WEPP on Sub-fields
+      </button>
+    </div>
+    <div class="wc-status-chip" data-role="run-status" role="status" aria-live="polite"></div>
+    <div class="wc-status-chip" data-role="results-links" role="status" aria-live="polite"></div>
+    {% call ui.collapsible_card(
+         'Run options',
+         description='Leave workers blank for automatic sizing, or clear regenerable AgFields run artifacts before rerunning.',
+         expanded=False,
+         card_id='agfields_run_options'
+       ) %}
+      {{ ui.numeric_field(
+           'agfields_max_workers',
+           'Maximum workers',
+           value='',
+           min=1,
+           precision=1,
+           nullable=True,
+           help='Auto uses one worker per CPU core, at most one per sub-field.',
+           attrs={'data-role': 'max-workers-input'}
+         ) }}
+      <button type="button"
+              class="pure-button button-error"
+              data-action="clear-runs"
+              data-role="clear-runs-button">
+        Clear Previous Runs and Outputs
+      </button>
+    {% endcall %}
+  </section>
+
+  {{ ui.job_hint('hint_ag_fields_job') }}
+</div>
+{% endcall %}
+
+{% if ron is defined and 'ag_fields' in (ron.mods or []) %}
+<div class="wc-modal" id="agfields_rotation_modal" data-modal hidden>
+  <div class="wc-modal__overlay" data-modal-dismiss></div>
+  <div class="wc-modal__dialog agfields-modal__dialog"
+       role="dialog"
+       aria-modal="true"
+       aria-labelledby="agfieldsRotationModalTitle">
+    <header class="wc-modal__header">
+      <h2 class="wc-modal__title" id="agfieldsRotationModalTitle">Map Crops to Managements</h2>
+      <button type="button"
+              class="wc-modal__close"
+              data-modal-dismiss
+              aria-label="Close crop management mapping dialog">&times;</button>
+    </header>
+    <div class="wc-modal__body agfields-modal__body">
+      <p class="wc-text-muted">
+        Every crop below appears in the rotation schedule. Choose a management source and file for each; unmapped crops block the WEPP run.
+      </p>
+      <div class="wc-table-wrapper">
+        <table class="wc-table">
+          <thead>
+            <tr>
+              <th scope="col">Crop</th>
+              <th scope="col">Source</th>
+              <th scope="col">Management</th>
+              <th scope="col">Status</th>
+            </tr>
+          </thead>
+          <tbody data-role="mapping-table-body"></tbody>
+        </table>
+      </div>
+      <details class="wc-collapse agfields-modal__unused" data-role="unused-mappings">
+        <summary class="wc-collapse__summary">
+          <span class="wc-collapse__title">Unused mappings</span>
+          <span class="wc-collapse__icon" aria-hidden="true"></span>
+        </summary>
+        <div class="wc-collapse__content" data-role="unused-mappings-body"></div>
+      </details>
+      <div class="wc-status-chip" data-role="mapping-status" role="status" aria-live="polite"></div>
+    </div>
+    <footer class="wc-modal__footer agfields-modal__footer">
+      <button type="button" class="pure-button" data-modal-dismiss>Cancel</button>
+      <button type="button"
+              class="pure-button pure-button-primary"
+              data-action="save-mapping"
+              data-role="mapping-save-button">
+        Save Mapping
+      </button>
+    </footer>
+  </div>
+</div>
+{% endif %}

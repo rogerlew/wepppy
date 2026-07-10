@@ -1373,7 +1373,8 @@ var MapController = (function () {
                     layerName: layerName,
                     url: url,
                     layerProps: options.layerProps || {},
-                    mapKey: options.mapKey || null
+                    mapKey: options.mapKey || null,
+                    loadJson: options.loadJson || null
                 });
                 attachLayerRefresh(layerName, controller);
                 map.registerOverlay(controller.layer, layerName);
@@ -1828,6 +1829,7 @@ var MapController = (function () {
             var layerName = options.layerName || "Overlay";
             var layerId = options.layerId || toOverlayId(layerName);
             var layerProps = options.layerProps || {};
+            var loadJson = typeof options.loadJson === "function" ? options.loadJson : http.getJson;
             var activeAbort = null;
             var requestToken = 0;
             var currentLayer = buildGeoJsonLayer(layerId, EMPTY_GEOJSON, layerProps);
@@ -1889,7 +1891,7 @@ var MapController = (function () {
                 requestToken += 1;
                 var token = requestToken;
 
-                return http.getJson(url, {
+                return loadJson(url, {
                     signal: abortController ? abortController.signal : undefined
                 }).then(function (data) {
                     if (token !== requestToken) {

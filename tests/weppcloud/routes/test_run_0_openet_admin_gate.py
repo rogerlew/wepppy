@@ -558,6 +558,16 @@ def test_run_page_bootstrap_geneva_flag_true_when_enabled(run0_template_app) -> 
     )
 
 
+def test_run_page_bootstrap_ag_fields_flag_true_when_enabled(run0_template_app) -> None:
+    context = _bootstrap_context(set())
+    context["ron"].mods = ["ag_fields"]
+    with run0_template_app.app_context():
+        js = render_template("run_page_bootstrap.js.j2", **context)
+
+    assert _extract_mod_flag(js, "ag_fields") == "true"
+    assert 'add("agFields", typeof AgFields !== "undefined" ? AgFields : null)' in js
+
+
 def test_run_page_bootstrap_features_export_flag_true_when_enabled(run0_template_app) -> None:
     context = _bootstrap_context(set())
     context["ron"].mods = ["features_export"]

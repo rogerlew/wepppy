@@ -54,6 +54,7 @@
     {% set show_rap_ts = show_rap_ts if show_rap_ts is defined else ('rap_ts' in mods_list or playwright_load_all) %}
     {% set show_treatments = show_treatments if show_treatments is defined else ('treatments' in mods_list or playwright_load_all) %}
     {% set show_observed = show_observed if show_observed is defined else ('observed' in mods_list or playwright_load_all) %}
+    {% set show_ag_fields = show_ag_fields if show_ag_fields is defined else ('ag_fields' in mods_list or playwright_load_all) %}
     {% set show_debris_flow = show_debris_flow if show_debris_flow is defined else ((('debris_flow' in mods_list) and allow_debris_flow) or playwright_load_all) %}
     {% set ash_has_results = False %}
     {% set ash_depth_mode = None %}
@@ -118,6 +119,7 @@
                 "openet_ts": ('openet_ts' in mods_list) and openet_admin_enabled,
                 "treatments": show_treatments,
                 "observed": show_observed,
+                "ag_fields": show_ag_fields,
                 "rusle": show_rusle
             }
         },
@@ -256,6 +258,7 @@
             modFlags.openet_ts = true;
             modFlags.treatments = true;
             modFlags.rusle = true;
+            modFlags.ag_fields = true;
         }
         var disabledControllers = new Set(
             (context.ui && Array.isArray(context.ui.disabledControllers)) ? context.ui.disabledControllers : []
@@ -283,6 +286,9 @@
         add("soil", typeof Soil !== "undefined" ? Soil : null);
         add("climate", typeof Climate !== "undefined" ? Climate : null);
         add("observed", typeof Observed !== "undefined" ? Observed : null);
+        if (modFlags.ag_fields) {
+            add("agFields", typeof AgFields !== "undefined" ? AgFields : null);
+        }
         add("wepp", typeof Wepp !== "undefined" ? Wepp : null);
         add("bootstrap", typeof BootstrapControl !== "undefined" ? BootstrapControl : null);
         add("dssExport", typeof DssExport !== "undefined" ? DssExport : null);

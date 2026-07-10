@@ -389,6 +389,26 @@ describe("Map GL controller", () => {
         expect(snotelIndex).toBeLessThan(nhdIndex);
     });
 
+    test("addGeoJsonOverlay uses a caller-provided JSON loader", async () => {
+        const mapInstance = global.MapController.getInstance();
+        const payload = { type: "FeatureCollection", features: [] };
+        const loadJson = jest.fn(() => Promise.resolve(payload));
+
+        mapInstance.addGeoJsonOverlay({
+            layerName: "Authenticated overlay",
+            url: "/rq-engine/api/runs/test-run/cfg/example.geojson",
+            loadJson,
+        });
+        await Promise.resolve();
+        await Promise.resolve();
+
+        expect(loadJson).toHaveBeenCalledWith(
+            "/rq-engine/api/runs/test-run/cfg/example.geojson",
+            expect.any(Object),
+        );
+        expect(mapInstance.overlayMaps["Authenticated overlay"]).toBeDefined();
+    });
+
     test("overlay control hides SBS when initialHasSbs is false", () => {
         global.window.runContext = { flags: { initialHasSbs: false } };
         global.MapController.getInstance();

@@ -18,6 +18,7 @@ TEMPLATE_ROOT = REPO_ROOT / "wepppy" / "weppcloud" / "templates"
 COMMAND_BAR_TEMPLATE_ROOT = REPO_ROOT / "wepppy" / "weppcloud" / "routes" / "command_bar" / "templates"
 RUN_0_TEMPLATE_ROOT = REPO_ROOT / "wepppy" / "weppcloud" / "routes" / "run_0" / "templates"
 PURE_TEMPLATES = [
+    "controls/ag_fields_pure.htm",
     "controls/path_cost_effective_pure.htm",
     "controls/omni_contrasts_pure.htm",
     "controls/geneva_pure.htm",
@@ -1005,6 +1006,78 @@ def test_runs0_template_places_geneva_between_roads_and_features_export() -> Non
     geneva_section_index = source.index('<div data-mod-section="geneva"')
     features_section_index = source.index('<div data-mod-section="features_export"')
     assert roads_section_index < geneva_section_index < features_section_index
+
+
+def test_runs0_template_places_ag_fields_between_observed_and_roads() -> None:
+    template_path = RUN_0_TEMPLATE_ROOT / "runs0_pure.htm"
+    source = template_path.read_text(encoding="utf-8")
+
+    observed_nav_index = source.index('<a href="#observed" class="nav-link">Observed Data</a>')
+    ag_fields_nav_index = source.index('<a href="#ag-fields" class="nav-link">Agricultural Fields</a>')
+    roads_nav_index = source.index('<a href="#roads" class="nav-link">Roads</a>')
+    assert observed_nav_index < ag_fields_nav_index < roads_nav_index
+
+    observed_section_index = source.index('<div data-mod-section="observed"')
+    ag_fields_section_index = source.index('<div data-mod-section="ag_fields"')
+    roads_section_index = source.index('<div data-mod-section="roads"')
+    assert observed_section_index < ag_fields_section_index < roads_section_index
+
+
+def test_ag_fields_control_renders_required_dom_contract(jinja_env: Environment) -> None:
+    template = jinja_env.get_template("controls/ag_fields_pure.htm")
+    rendered = template.render(
+        ron=SimpleNamespace(mods={"ag_fields"}),
+        feature_maturity_labels={"ag_fields": "Experimental"},
+    )
+
+    for stage_id in (
+        "agfields_stage_boundaries",
+        "agfields_stage_subfields",
+        "agfields_stage_managements",
+        "agfields_stage_run",
+    ):
+        assert f'id="{stage_id}"' in rendered
+
+    for role in (
+        "geojson-input",
+        "upload-button",
+        "upload-status",
+        "boundary-summary",
+        "duplicate-warning",
+        "field-id-select",
+        "accessor-display",
+        "accessor-input",
+        "accessor-resolution-body",
+        "confirm-schema-button",
+        "schema-status",
+        "build-subfields-button",
+        "subfields-status",
+        "subfields-summary",
+        "show-on-map-button",
+        "min-area-input",
+        "mapping-chip",
+        "open-mapping-button",
+        "plantdb-input",
+        "plantdb-upload-button",
+        "plantdb-status",
+        "plantfile-table-body",
+        "mapping-table-body",
+        "mapping-status",
+        "mapping-save-button",
+        "unused-mappings",
+        "run-button",
+        "run-status",
+        "max-workers-input",
+        "clear-runs-button",
+        "results-links",
+    ):
+        assert f'data-role="{role}"' in rendered
+
+    assert "Experimental" in rendered
+    assert 'role="dialog"' in rendered
+    assert 'aria-modal="true"' in rendered
+    assert "rasterize" not in rendered.lower()
+    assert "polygonize" not in rendered.lower()
 
 
 def test_run_header_includes_features_export_mod_toggle(jinja_env: Environment) -> None:

@@ -40,6 +40,16 @@ def test_feature_registry_loads_expected_entries() -> None:
     assert "openet_ts" in feature_ids
     assert "omni_contrasts" in feature_ids
     assert "rusle" in feature_ids
+    assert "ag_fields" in feature_ids
+
+
+def test_ag_fields_registry_ships_experimental_control() -> None:
+    ag_fields = feature_registry_by_id()["ag_fields"]
+
+    assert ag_fields.maturity == "experimental"
+    assert ag_fields.internal_reason is None
+    assert ag_fields.min_role == "user"
+    assert ag_fields.section_template == "controls/ag_fields_pure.htm"
 
 
 def test_feature_registry_adr_references_for_omni_contrasts_and_path_ce() -> None:

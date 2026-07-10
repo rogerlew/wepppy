@@ -1854,6 +1854,7 @@ def _build_runs0_context(runid, config, playwright_load_all):
         playwright_load_all=playwright_load_all,
     )
     show_observed = (observed is not None) or playwright_load_all
+    show_ag_fields = 'ag_fields' in mods_list or playwright_load_all
     allow_debris_flow = (
         _feature_role_enabled("debris_flow", playwright_load_all=playwright_load_all)
     )
@@ -1889,6 +1890,7 @@ def _build_runs0_context(runid, config, playwright_load_all):
             'omni': show_omni,
             'omni_contrasts': show_omni_contrasts,
             'observed': show_observed,
+            'ag_fields': show_ag_fields,
             'debris_flow': show_debris_flow,
             'roads': show_roads,
             'geneva': show_geneva,
@@ -1990,6 +1992,7 @@ def _build_runs0_context(runid, config, playwright_load_all):
         show_omni=show_omni,
         show_omni_contrasts=show_omni_contrasts,
         show_observed=show_observed,
+        show_ag_fields=show_ag_fields,
         show_debris_flow=show_debris_flow,
         allow_debris_flow=allow_debris_flow,
         show_roads=show_roads,
