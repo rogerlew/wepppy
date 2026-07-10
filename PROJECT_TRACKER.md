@@ -2,7 +2,7 @@
 > Kanban board for wepppy work packages and vision items
 
 **Last Updated**: 2026-07-10
-**Active Packages**: 13
+**Active Packages**: 12
 **Quick Links**: [Work Packages Directory](docs/work-packages/) | [God-Tier Prompting Strategy](docs/god-tier-prompting-strategy.md)
 
 ## Purpose
@@ -37,7 +37,7 @@ This tracker makes all work visible at a glance, helping agents coordinate and a
 ### 2. Limit Work in Progress
 **Target**: 2-4 active packages maximum to maintain focus and ensure packages complete rather than stall.
 
-**Current WIP**: 13 packages (above target range)
+**Current WIP**: 12 packages (above target range)
 
 ### 3. Manage Flow
 Monitor how long packages spend in each column:
@@ -275,24 +275,7 @@ When resuming Kubernetes work:
 
 Currently active work packages. Limit to 2-4 packages to maintain focus.
 
-**Current WIP Count**: 13 packages
-
----
-
-### AgFields Runs-Page UI
-**Started**: 2026-07-09
-**Status**: Milestones 1-5 implemented and automated gates green; fresh-project acceptance pending
-**Size**: Medium (2-4 focused sessions)
-**Owner**: Codex
-**Priority**: High
-**Link**: [docs/work-packages/20260709_ag_fields_runs_page_ui/](docs/work-packages/20260709_ag_fields_runs_page_ui/)
-**Description**: Implements the AgFields four-stage runs-page control, rotation mapping modal, snapshot-driven controller lifecycle, authenticated map overlay, dynamic mod wiring, and `experimental` feature maturity.
-
-**Current Focus**: Automated implementation is complete. Milestone 6 requires a maintainer-created small-watershed `ag-fields` project for the manual four-stage walkthrough and real-WEPP-binary evidence.
-
-**Dependencies**: `20260709_ag_fields_backend_readiness` is complete. Acceptance depends on a fresh AgFields project because `copacetic-note` no longer exists.
-
-**Next Steps**: Create the fresh project, drive all four UI stages, record output evidence under `wepp/ag_fields/output/`, and close this package plus the backend package's real-binary limitation.
+**Current WIP Count**: 12 packages
 
 ---
 
@@ -561,6 +544,23 @@ Currently active work packages. Limit to 2-4 packages to maintain focus.
 ## ✅ Done
 
 Recently completed work packages. Archived immediately upon completion.
+
+### AgFields Runs-Page UI (2026-07-10)
+**Status**: ✅ **COMPLETE**
+
+**Link**: [docs/work-packages/20260709_ag_fields_runs_page_ui/](docs/work-packages/20260709_ag_fields_runs_page_ui/)
+
+**Lifecycle**: Backlog -> In Progress -> Done (2026-07-10)
+
+**Summary**: Four-stage AgFields runs-page control, rotation mapping modal,
+snapshot-driven controller, authenticated map overlay, dynamic mod wiring, and
+`experimental` maturity. Acceptance walkthrough on `sacral-self-discipline`
+completed all four stages and produced 6,626 sub-field simulations (46,382
+output files) under `wepp_dcc52a6`, also closing the backend package's
+real-binary E2E limitation. One follow-up filed: persist `_wepp_bin` on the
+pre-ADR-0017 acceptance project.
+
+---
 
 ### Management Rotation Synthesizer Hardening (2026-07-10)
 **Status**: ✅ **COMPLETE**

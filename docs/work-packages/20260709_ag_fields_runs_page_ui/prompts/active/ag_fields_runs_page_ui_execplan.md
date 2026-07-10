@@ -22,10 +22,13 @@ A user can see this working by opening a run created from the `ag-fields` config
 - [x] (2026-07-10 16:38 UTC) Follow-up: added a persisted uploaded-boundary-filename display to Stage 1, backed by the additive `boundary.filename` snapshot field, source-basename NoDb metadata, historical-project fallback, and reload regression coverage.
 - [x] (2026-07-10 16:57 UTC) Follow-up: made project-UTM acceptance explicit in rasterization and the specification, added ambiguous-CRS diagnostics with project EPSG/bounds, and covered both paths.
 - [x] (2026-07-10 21:52 UTC) Follow-up: replaced the Stage 4 worker control with a persisted WEPP Exec selector, defaulted new `ag-fields` projects to `wepp_dcc52a6`, pinned and propagated the selected executable to sub-field runs, and made the clear action content-width.
-- [ ] Milestone 6: rerun Stage 4 acceptance on `sacral-self-discipline` with
-  `wepp_dcc52a6` selected and record the project output listing. The exact
-  normalized p3733 fixture completes with that executable, but no full-project
-  browser-run success is claimed yet.
+- [ ] (2026-07-10 22:43 UTC) Post-close follow-up in progress: state the field-boundary projection requirements directly in Stage 1 and show the assigned project EPSG as a conditional pill in run-header title rows.
+- [x] (2026-07-10 22:40 UTC) Milestone 6: full Stage 4 run on
+  `sacral-self-discipline` completed and maintainer-validated. Artifact
+  evidence in `../../tracker.md` Validation: 6,626 sub-field runs, 46,382
+  output files, `VERSION 2020.500` stamp consistent with `wepp_dcc52a6`.
+  Package closed; the ExecPlan stays in `prompts/active/` only while the
+  post-close projection-feedback follow-up above is in flight.
 
 ## Surprises & Discoveries
 

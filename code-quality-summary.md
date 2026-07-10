@@ -1,7 +1,7 @@
 # Code Quality Observability Report
 
 - Mode: `observe-only` (non-blocking)
-- Generated (UTC): `2026-03-28T04:20:39Z`
+- Generated (UTC): `2026-07-10T21:51:44Z`
 - Base ref: `origin/master`
 
 ## Threshold Bands
@@ -16,7 +16,7 @@
 
 ## Tooling
 
-- `radon` available: `True`
+- `radon` available: `False`
 - `eslint` available: `True`
 - Python runtime: `Python 3.12.3`
 - Exception rules source: _none_
@@ -27,11 +27,11 @@
 
 | Distribution | Count | p50 | p75 | p90 | p95 | p99 | Max |
 | --- | ---: | ---: | ---: | ---: | ---: | ---: | ---: |
-| `python_prod_file_sloc` | 819 | 105.0 | 252.0 | 522.2 | 845.2 | 1569.18 | 3225.0 |
-| `python_prod_max_function_len` | 646 | 56.0 | 104.0 | 149.5 | 216.75 | 293.35 | 850.0 |
-| `python_prod_max_cc` | 659 | 10.0 | 18.0 | 28.0 | 38.0 | 55.42 | 66.0 |
-| `js_source_file_sloc` | 159 | 275.0 | 560.5 | 1230.8 | 1469.0 | 2365.52 | 2500.0 |
-| `js_source_max_cc` | 159 | 7.0 | 22.5 | 33.2 | 42.3 | 78.68 | 155.0 |
+| `python_prod_file_sloc` | 908 | 124.0 | 294.5 | 661.2 | 960.6 | 1969.92 | 5697.0 |
+| `python_prod_max_function_len` | 728 | 60.0 | 108.25 | 175.3 | 225.65 | 345.14 | 2126.0 |
+| `python_prod_max_cc` | 0 | 0.0 | 0.0 | 0.0 | 0.0 | 0.0 | 0.0 |
+| `js_source_file_sloc` | 181 | 282.0 | 582.0 | 1238.0 | 1617.0 | 2458.8 | 2835.0 |
+| `js_source_max_cc` | 181 | 7.0 | 22.0 | 33.0 | 45.0 | 87.4 | 155.0 |
 
 ## Changed Files
 
@@ -43,76 +43,65 @@ _No changed-file analysis available (base ref missing or no analyzable files cha
 
 | Path | Value |
 | --- | ---: |
-| `wepppy/nodb/mods/roads/roads.py` | 3225 |
-| `tests/nodb/mods/test_omni.py` | 2467 |
-| `wepppy/wepp/management/managements.py` | 2214 |
-| `wepppy/nodb/core/wepp.py` | 2100 |
-| `wepppy/climates/cligen/cligen.py` | 2091 |
-| `wepppy/nodb/base.py` | 1884 |
-| `tests/microservices/test_browse_auth_routes.py` | 1779 |
-| `wepppy/soils/ssurgo/ssurgo.py` | 1778 |
-| `wepppy/weppcloud/routes/run_0/run_0_bp.py` | 1770 |
-| `wepppy/topo/wbt/terrain_processor.py` | 1671 |
+| `wepppy/nodb/mods/roads/roads.py` | 5697 |
+| `wepppy/microservices/rq_engine/schema_defaults_routes.py` | 4232 |
+| `tests/nodb/mods/test_roads_controller.py` | 3240 |
+| `tests/nodb/mods/test_features_export_service.py` | 3043 |
+| `wepppy/nodb/mods/features_export/service.py` | 2998 |
+| `tests/nodb/mods/test_omni.py` | 2895 |
+| `wepppy/wepp/management/managements.py` | 2548 |
+| `wepppy/nodb/core/wepp.py` | 2430 |
+| `wepppy/climates/cligen/cligen.py` | 2248 |
+| `wepppy/nodb/base.py` | 2213 |
 
 ### `python_max_function_len_top20`
 
 | Path | Value |
 | --- | ---: |
-| `wepppy/nodb/mods/roads/roads.py` | 850 |
+| `wepppy/nodb/mods/roads/roads.py` | 2126 |
+| `wepppy/microservices/rq_engine/schema_defaults_routes.py` | 2063 |
+| `tests/nodb/mods/disturbed/live_e2e/runbook.py` | 768 |
+| `wepppy/weppcloud/routes/ui_showcase/ui_showcase_bp.py` | 631 |
+| `wepppy/wepp/fuzzing/single_ofe_stratified_campaign.py` | 528 |
+| `wepppy/microservices/rq_engine/orchestration_read_routes.py` | 460 |
 | `wepppy/nodb/mods/ash_transport/neris_ash_model.py` | 381 |
-| `wepppy/weppcloud/routes/ui_showcase/ui_showcase_bp.py` | 368 |
 | `wepppy/rq/wepp_rq_pipeline.py` | 352 |
+| `wepppy/nodb/core/landuse.py` | 350 |
 | `wepppy/export/arc_export.py` | 332 |
-| `wepppy/tools/migrations/unroll_root_resources_batch.py` | 309 |
-| `wepppy/nodb/mods/ash_transport/ashpost.py` | 301 |
-| `wepppy/export/ermit_input.py` | 284 |
-| `wepppy/climates/cligen/cligen.py` | 276 |
-| `wepppy/weppcloud/routes/run_0/run_0_bp.py` | 276 |
 
 ### `python_max_cc_top20`
 
-| Path | Value |
-| --- | ---: |
-| `wepppy/microservices/rq_engine/fork_archive_routes.py` | 66 |
-| `wepppy/export/gpkg_export.py` | 65 |
-| `wepppy/export/arc_export.py` | 61 |
-| `wepppy/nodb/core/wepp_prep_service.py` | 58 |
-| `tools/code_quality_observability.py` | 57 |
-| `wepppy/nodb/mods/path_ce/path_ce_solver.py` | 56 |
-| `wepppy/nodb/mods/roads/roads.py` | 56 |
-| `wepppy/weppcloud/routes/run_0/run_0_bp.py` | 55 |
-| `wepppy/nodb/mods/ash_transport/ashpost.py` | 53 |
-| `wepppy/climates/cligen/cligen.py` | 51 |
+_No entries._
 
 ### `js_file_sloc_top20`
 
 | Path | Value |
 | --- | ---: |
-| `wepppy/weppcloud/controllers_js/omni.js` | 2500 |
-| `wepppy/weppcloud/controllers_js/features_export.js` | 2398 |
-| `wepppy/weppcloud/controllers_js/map_gl.js` | 2342 |
+| `wepppy/weppcloud/controllers_js/omni.js` | 2835 |
+| `wepppy/weppcloud/controllers_js/features_export.js` | 2690 |
+| `wepppy/weppcloud/controllers_js/map_gl.js` | 2401 |
+| `wepppy/weppcloud/controllers_js/project.js` | 2040 |
 | `wepppy/weppcloud/controllers_js/batch_runner.js` | 1911 |
-| `wepppy/weppcloud/controllers_js/channel_gl.js` | 1780 |
-| `wepppy/weppcloud/controllers_js/control_base.js` | 1642 |
+| `wepppy/weppcloud/controllers_js/channel_gl.js` | 1782 |
+| `wepppy/weppcloud/controllers_js/geneva_summary_report.js` | 1747 |
+| `wepppy/weppcloud/controllers_js/control_base.js` | 1659 |
 | `wepppy/weppcloud/controllers_js/subcatchment_delineation.js` | 1636 |
-| `wepppy/weppcloud/controllers_js/subcatchments_gl.js` | 1586 |
-| `wepppy/weppcloud/static/js/gl-dashboard/layers/detector.js` | 1456 |
-| `wepppy/weppcloud/static/js/gl-dashboard/map/layers.js` | 1339 |
+| `wepppy/weppcloud/controllers_js/ag_fields.js` | 1617 |
 
 ### `js_max_cc_top20`
 
 | Path | Value |
 | --- | ---: |
 | `wepppy/weppcloud/static/js/gl-dashboard/map/layers.js` | 155 |
+| `wepppy/weppcloud/controllers_js/wepp.js` | 93 |
+| `wepppy/weppcloud/static/js/gl-dashboard/layers/renderer.js` | 86 |
 | `wepppy/weppcloud/static-src/tests/smoke/map-gl.spec.js` | 81 |
-| `wepppy/weppcloud/static/js/gl-dashboard/layers/renderer.js` | 77 |
-| `wepppy/weppcloud/controllers_js/wepp.js` | 75 |
 | `wepppy/weppcloud/controllers_js/dss_export.js` | 58 |
 | `wepppy/weppcloud/controllers_js/control_base.js` | 57 |
+| `wepppy/weppcloud/controllers_js/project.js` | 52 |
 | `wepppy/weppcloud/static/js/gl-dashboard/graphs/timeseries-graph.js` | 47 |
+| `wepppy/weppcloud/controllers_js/features_export.js` | 46 |
 | `wepppy/weppcloud/controllers_js/utils.js` | 45 |
-| `wepppy/weppcloud/controllers_js/omni.js` | 42 |
-| `wepppy/weppcloud/controllers_js/climate.js` | 40 |
 
 ## Review Guidance
 

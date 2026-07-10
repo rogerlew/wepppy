@@ -91,13 +91,20 @@ The `database` column can currently point to:
 
 Use `weppcloud` when the crop should map to a WEPPcloud management ID. Use `plant_file_db` when the crop should map to a `.man` file stored under `ag_fields/plant_files/`.
 
-When a custom archive comes from Jim's management interface, WEPPcloud also
-handles its known applied-residue placeholder: a nonpositive `hmax` is set to
-the minimum positive management-file value only when the plant is residue-only.
-Active crop heights are never changed by this rule, and the plant-file inventory
-records the original and normalized values.
+When a custom archive comes from Jim's management interface, WEPPcloud also handles its known applied-residue placeholder: a nonpositive `hmax` is raised to the minimum positive management-file value, but only for plants that are referenced purely as residue. Active crop heights are never changed by this rule, and the plant-file inventory records the original and normalized values so the adjustment stays visible.
 
 This lookup is where many "the model ran but the management is wrong" problems actually begin. If the crop spelling in the uploaded schedule does not match the lookup spelling, the crop cannot be mapped cleanly.
+
+### WEPP executable
+
+Stage 4's **Run options** includes a **WEPP Exec** selection. Agricultural projects default to `wepp_dcc52a6`, and you should leave it there: it is the executable validated end-to-end against imported agricultural rotations. Newer WEPP executables have aborted partway through multi-year agricultural simulations on these same inputs, so a different selection is a deliberate modeling decision, not a routine upgrade.
+
+Two things follow from this:
+
+- The AgFields executable is independent of the parent watershed's WEPP executable. It is normal for the watershed to run a newer build while the sub-fields run `wepp_dcc52a6`.
+- Your selection is saved with the project, so sub-field results remain attributable to the executable that produced them.
+
+Projects created before this default existed inherit the parent watershed executable until you set **WEPP Exec** once in Stage 4.
 
 ## Why API-Backed Prep Matters
 
@@ -142,7 +149,7 @@ Current simplifications to keep in mind:
 
 2. Upload a field-boundary GeoJSON that includes `field_id` and crop-year columns.
    Expect the workflow to extract the attribute table into `rotation_schedule.parquet`.
-   Prefer coordinates in the same UTM CRS as the project DEM; this avoids an unnecessary reprojection and retains project-grid precision.
+   Prefer coordinates in the same UTM CRS shown by the project header's `EPSG:` pill; this avoids an unnecessary reprojection and retains project-grid precision. WGS84 longitude/latitude is accepted. If you use another projected CRS, the file must include correct CRS metadata.
 
 3. Confirm the ID field and crop-year pattern.
    The ID must be stable across the workflow, and the crop-year pattern must match every observed climate year in the run.
@@ -159,8 +166,8 @@ Current simplifications to keep in mind:
 7. Run the parent watershed WEPP hillslopes if they are not already complete.
    AgFields reuses their soil and climate files, so the final stage explains this prerequisite when it is missing.
 
-8. Expand **Run options**, verify **WEPP Exec**, and select **Run WEPP on Sub-fields**.
-   New agricultural projects default to the compatibility-tested `wepp_dcc52a6` executable independently of the parent watershed setting. Expect one WEPP hillslope-style simulation per sub-field rather than one simulation per original field polygon. The status panel reports progress, and successful runs link to the output browser and Features Export. **Clear Previous Runs and Outputs** removes only regenerable AgFields run artifacts.
+8. Expand **Run options**, confirm **WEPP Exec** is `wepp_dcc52a6` (see "WEPP executable" above), and select **Run WEPP on Sub-fields**.
+   Expect one WEPP hillslope-style simulation per sub-field rather than one simulation per original field polygon. The status panel reports progress, and successful runs link to the output browser and Features Export. **Clear Previous Runs and Outputs** removes only regenerable AgFields run artifacts.
 
 ## What Outputs To Look At
 
@@ -185,6 +192,8 @@ A large difference between two sub-fields in the same mapped field usually means
 - The uploaded GeoJSON must carry both usable geometry and a usable rotation table.
 - `field_id` is required and should be stable and effectively unique for interpretation to remain clear.
 - Crop names must match `rotation_lookup.tsv`; near-matches are still mismatches.
+- WEPP accepts at most 20 plant scenarios in one management rotation. AgFields consolidates duplicate plant and operation definitions automatically, so typical multi-year rotations fit comfortably, but a rotation drawing on very many distinct managements can still exceed the limit. When that happens the run fails before simulation with an error identifying the rotation, rather than producing partial results.
+- Sub-field simulations run the executable selected in Stage 4 (default `wepp_dcc52a6`), which may differ from — and produce different numbers than — the parent watershed executable.
 - Sub-fields are representative hydrologic units, not full operational replicas of every within-field feature.
 - Results inherit the strengths and weaknesses of the underlying watershed, soils, climate, and management data.
 

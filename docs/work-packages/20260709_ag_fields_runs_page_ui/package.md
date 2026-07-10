@@ -1,6 +1,6 @@
 # AgFields Runs-Page UI
 
-**Status**: In progress — implementation complete; fresh-project acceptance pending (2026-07-09)
+**Status**: Closed (2026-07-10)
 **Timezone**: UTC
 
 ## Overview
@@ -49,8 +49,8 @@ systematic Jim-interface residue-only `hmax=0` placeholder. A wired replay now
 advances into simulation and exposes an independent zero-random-roughness
 SIGFPE in `frcfac.for:184` under `wepp_260430` and `wepp_260606`. The exact
 repaired p3733 replay completes under `wepp_dcc52a6`, now the new-project
-AgFields default, so end-to-end acceptance is ready to resume but remains open
-until the full browser-started project run is recorded.
+AgFields default. The full browser-started project run subsequently completed
+on 2026-07-10 and is recorded in `tracker.md`; acceptance is closed.
 
 1. Use the small-watershed `sacral-self-discipline` project with its corrected
    project-UTM boundaries.
@@ -77,13 +77,13 @@ The walkthrough is deliberately the last gate: it validates UI, backend, Peridot
 - [x] Registry maturity is `experimental`; the shell renders the label.
 - [x] Jest suites per spec §12.1 pass; `wctl run-npm lint` and `wctl run-npm test` pass.
 - [x] Boundary rasterization accepts unlabeled coordinates in the exact project UTM grid, retains WGS84/correctly declared reprojection support, and reports the required project CRS/bounds for ambiguous projected input.
-- [ ] Acceptance walkthrough on a fresh small-watershed project completes all four stages and produces sub-field outputs under `wepp/ag_fields/output/` with a real WEPP binary.
+- [x] Acceptance walkthrough on a fresh small-watershed project completes all four stages and produces sub-field outputs under `wepp/ag_fields/output/` with a real WEPP binary.
 
-## Implementation Status
+## Closure Summary
 
-Milestones 1-5 were implemented on 2026-07-09. The shipped surface includes the four-stage template and modal, the `AgFields` singleton controller, dynamic and initial runs-page bootstrap wiring, authenticated rq-engine overlay loading through `MapController.addGeoJsonOverlay`, registry promotion to `experimental`, and focused Jest/Python render coverage. The controller bundle rebuild succeeds.
+Milestones 1-5 were implemented on 2026-07-09: the four-stage template and modal, the `AgFields` singleton controller, dynamic and initial runs-page bootstrap wiring, authenticated rq-engine overlay loading through `MapController.addGeoJsonOverlay`, registry promotion to `experimental`, and Jest/Python regression coverage.
 
-Milestone 6 remains open by design. No fresh AgFields run was supplied during implementation, so this package does not claim browser acceptance or real-WEPP-binary output evidence. The required maintainer handoff is unchanged: create a small-watershed `ag-fields` run, drive the four stages, and record the output listing in `tracker.md`.
+The acceptance walkthrough on `sacral-self-discipline` (2026-07-10) surfaced and drove four real fixes: unlabeled project-UTM boundary handling with actionable CRS errors, rotation-synthesizer scenario canonicalization against WEPP's 20-plant limit (`20260710_management_rotation_synth_hardening`, ADR-0016), the Stage 1 current-file display, and the AgFields-owned WEPP executable defaulting to `wepp_dcc52a6` (ADR-0017). The completed run produced 6,626 sub-field simulations (46,382 output files) under the `wepp_dcc52a6` executable; the maintainer validated the interface. Acceptance evidence and one filed follow-up (persisting `_wepp_bin` on the pre-ADR-0017 acceptance project) are recorded in `tracker.md`. This walkthrough also closes the backend package's real-binary E2E limitation.
 
 ## References
 

@@ -71,7 +71,10 @@ ships.
 The final focused set passed 52 tests, and the broader NoDb and OpenAPI suites
 passed. The repository-wide suite stopped at an unrelated, independently
 reproducible batch-runner baseline failure after 2,070 passing tests. No seeded
-AgFields run was available for a real WEPP binary end-to-end execution.
+AgFields run was available for a real WEPP binary end-to-end execution at
+closure; that limitation was closed on 2026-07-10 by the `sacral-self-discipline`
+acceptance walkthrough (6,626 sub-field simulations under `wepp_dcc52a6` — see
+`20260709_ag_fields_runs_page_ui/tracker.md`).
 
 ## References
 

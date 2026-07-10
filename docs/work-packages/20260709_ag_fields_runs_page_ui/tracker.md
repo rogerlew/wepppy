@@ -6,9 +6,10 @@
 
 **Timezone**: UTC
 **Started**: 2026-07-09 23:21 UTC
-**Current phase**: Acceptance pending (Milestones 1-5 complete)
-**Last updated**: 2026-07-10 21:52 UTC
-**Next milestone**: Milestone 6 acceptance with `wepp_dcc52a6`
+**Closed**: 2026-07-10 22:40 UTC
+**Current phase**: Complete
+**Last updated**: 2026-07-10 22:40 UTC
+**Next milestone**: None; one follow-up filed (persisted `_wepp_bin` gap on the acceptance project, see Handoffs)
 **Security impact**: `low` — no new backend surface; browser client reuses existing rq-engine session bearer tokens
 **Dedicated security review**: `no`
 **Security artifact**: `N/A`
@@ -16,17 +17,18 @@
 ## Task Board
 
 ### Ready / Backlog
-- [ ] Milestone 6: rerun Stage 4 on `sacral-self-discipline` with
-  `wepp_dcc52a6` and record full-project output evidence.
+- [ ] None.
 
 ### In Progress
-- [ ] None.
+- [ ] Post-close follow-up: add explicit Stage 1 projection guidance and a
+  conditional project-EPSG pill to run-header title rows.
 
 ### Blocked
 - [ ] None.
 
 ### Done
 - [x] Package scaffold created with package brief, tracker, active ExecPlan, and root tracker registration (2026-07-09 23:21 UTC).
+- [x] Milestone 6: full Stage 4 run on `sacral-self-discipline` completed and maintainer-validated (2026-07-10; evidence in Validation).
 - [x] Milestone 1: four-stage `ag_fields_pure.htm` control and accessible rotation mapping modal (2026-07-09 23:53 UTC).
 - [x] Milestone 2: dynamic-safe `ag_fields.js` controller, snapshot-only gating, uploads, mapping, job streams/poll fallback, exact job keys, and 409 retention (2026-07-09 23:53 UTC).
 - [x] Milestone 3: initial/dynamic runs-page wiring, real registry template, `experimental` maturity, and user visibility (2026-07-09 23:53 UTC).
@@ -112,10 +114,13 @@
 - Scoped documentation lint — passed for the work package, ADR-0017, AgFields README, and end-user guide.
 - `python3 tools/check_broad_exceptions.py --enforce-changed --base-ref origin/master` — passed with net delta `+0`.
 - `wctl run-pytest tests --maxfail=1` — repository gate failed outside package scope after `2070 passed, 41 skipped`: `tests/nodb/test_batch_runner.py::test_run_batch_project_does_not_delete_workspace_when_rmtree_disabled`; isolated rerun failed identically.
-- Acceptance walkthrough evidence (Milestone 6) remains required: stage-by-stage notes plus output listing under `wepp/ag_fields/output/`.
+- **Milestone 6 acceptance evidence (2026-07-10)**: full Stage 4 run on `sacral-self-discipline` completed and the maintainer validated the interface. Artifact inspection: 2,177 fields → 6,626 sub-fields; 6,626 `p*.run` files under `wepp/ag_fields/runs/`; 46,382 output files under `wepp/ag_fields/output/`, last written 2026-07-10 ~22:05 UTC; spot-checked `H1000.loss.dat` completes with final-year annual summary and carries the `VERSION 2020.500` stamp consistent with `wepp_dcc52a6` (the job-pinned executable), not a 2025-series build.
+
+## Timeline (closure)
+
+- **2026-07-10 22:40 UTC** - Milestone 6 recorded and package closed. ENDUSER.md updated with the WEPP-executable guidance (keep `wepp_dcc52a6`), the 20-plant-scenario limit, and the residue `hmax` normalization wording. Backend package closure notes updated: the real-binary E2E limitation is closed by this walkthrough.
 
 ## Handoffs
 
-- Fresh AgFields project creation (Roger): small agricultural watershed; `ag-fields` config; observed climate years must match the boundary GeoJSON's crop-year columns; boundary file needs a literal `field_id` column; plant zip from the USDA rotation builder or weppcloud management ids for the mapping.
-- On acceptance completion, update `20260709_ag_fields_backend_readiness` closure notes to record that the real-binary E2E limitation is closed.
-- Do not archive the active ExecPlan or close this package until the fresh-project walkthrough is recorded.
+- **Follow-up (Codex)**: the acceptance run predates or raced the persist-before-execution change — `sacral-self-discipline`'s `ag_fields.nodb` has no `_wepp_bin` key (verified 2026-07-10 22:40 UTC), so its next Stage 4 hydration falls back to the parent `wepp_250915`. Either the maintainer sets **WEPP Exec** once in Stage 4 to persist `wepp_dcc52a6`, or a small migration/default lands for pre-ADR-0017 AgFields projects. Verify persist-before-execution works on the next real submission.
+- Controller-module splitting (deferred at 1,700 lines): acceptance is done; reassess only if maintenance friction appears.
