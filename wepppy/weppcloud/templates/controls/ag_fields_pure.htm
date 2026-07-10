@@ -38,6 +38,11 @@
     margin: 0;
   }
 
+  #ag_fields_form .agfields-clear-button {
+    justify-self: start;
+    width: auto;
+  }
+
   #ag_fields_form .agfields-resolution-table [data-state="missing"],
   #agfields_rotation_modal [data-state="error"] {
     color: var(--wc-error-fg);
@@ -130,6 +135,13 @@
          attrs={'data-role': 'geojson-input'},
          max_width='100%'
        ) }}
+    <div data-role="boundary-file-display" hidden>
+      {% set current_boundary_content %}<code data-role="boundary-filename"></code>{% endset %}
+      {{ ui.text_display(
+           label='Current field boundary file',
+           content=current_boundary_content
+         ) }}
+    </div>
     <div class="agfields-stage__actions">
       <button type="button"
               class="pure-button pure-button-primary"
@@ -332,22 +344,19 @@
     <div class="wc-status-chip" data-role="results-links" role="status" aria-live="polite"></div>
     {% call ui.collapsible_card(
          'Run options',
-         description='Leave workers blank for automatic sizing, or clear regenerable AgFields run artifacts before rerunning.',
+         description='Choose the WEPP executable for agricultural simulations or clear regenerable run artifacts before rerunning.',
          expanded=False,
          card_id='agfields_run_options'
        ) %}
-      {{ ui.numeric_field(
-           'agfields_max_workers',
-           'Maximum workers',
-           value='',
-           min=1,
-           precision=1,
-           nullable=True,
-           help='Auto uses one worker per CPU core, at most one per sub-field.',
-           attrs={'data-role': 'max-workers-input'}
+      {{ ui.select_field(
+           'agfields_wepp_bin',
+           'WEPP Exec',
+           wepp_bin_options,
+           help='Agricultural runs default to the compatibility-tested wepp_dcc52a6 executable.',
+           attrs={'data-role': 'wepp-bin-select'}
          ) }}
       <button type="button"
-              class="pure-button button-error"
+              class="pure-button button-error agfields-clear-button"
               data-action="clear-runs"
               data-role="clear-runs-button">
         Clear Previous Runs and Outputs

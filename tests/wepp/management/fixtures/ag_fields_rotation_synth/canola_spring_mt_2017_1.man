@@ -1,0 +1,276 @@
+2017.1
+#
+# Build Version: Apr 13 2023 16:09:39
+#
+#
+
+1 # number of OFE's
+2 # (total) years in simulation
+
+#######################
+# Plant Section       #
+#######################
+
+2  # Number of plant scenarios
+
+
+L29_Cano
+Annual, broadleaf, grain. Suggest harvest op: Harvest, killing crop with percent...
+(from WEPP LMOD service)
+comment...
+1  #landuse
+WeppWillSet
+15.60000 3.00000 30.00000 3.00000 5.18334 60.00000 0.00000 0.15000 0.80000 0.01500
+0.50000 0.80000 0.65000 0.99200 3.00000 0.00000 0.34000 1.00000
+1  # mfo - <fragile>
+0.01319 0.01319 20.00000 0.25000 0.08000 1.40000 0.25000 0.00000 14 0.00000
+0.00000 5.00000 0.00000 0.00000
+
+L179_weed
+Applied residue type, pre or post emergent weeds that are allowed to grow during...
+(from WEPP LMOD service)
+comment...
+1  #landuse
+WeppWillSet
+0.00000 0.00000 0.00000 10.00000 1.00000 0.00000 0.00000 0.00000 0.00000 0.00500
+0.00000 0.00000 0.00000 0.00000 0.00000 0.00000 0.00000 0.00000
+1  # mfo - <fragile>
+0.03000 0.03000 25.00000 0.00000 0.00000 0.00000 0.00000 0.00000 0 0.00000
+0.00000 0.00000 0.00000 0.00000
+
+#######################
+# Operation Section   #
+#######################
+
+8  # Number of operation scenarios
+
+
+CULTIV_471144
+comment: Cultivator, field w/ spike points, coil tine har
+(from WEPP LMOD service)
+comment...
+1  #landuse
+0.4500 0.3100 0
+4 # pcode - other 
+0.0508 0.3000 0.4500 0.3100 0.0102 1.0000 0.1016 0.0500 0.0700
+
+
+CULTIV_471145
+comment: Cultivator, field w/ spike points, coil tine har
+(from WEPP LMOD service)
+comment...
+1  #landuse
+0.2200 0.1300 0
+4 # pcode - other 
+0.0254 0.0254 0.2200 0.1300 0.0102 1.0000 0.0508 0.0100 0.0100
+
+
+FERT_A_793456
+comment: Chisel, st. pt. 12 in deep, coil tine har
+(from WEPP LMOD service)
+comment...
+1  #landuse
+0.2000 0.1000 0
+4 # pcode - other 
+0.0254 0.3048 0.2000 0.1000 0.0102 0.2500 0.1016 0.0600 0.0600
+
+
+FERT_A_793457
+comment: Chisel, st. pt. 12 in deep, coil tine har
+(from WEPP LMOD service)
+comment...
+1  #landuse
+0.2500 0.1500 0
+4 # pcode - other 
+0.0254 0.1016 0.2500 0.1500 0.0102 1.0000 0.0254 0.0100 0.0100
+
+
+DRILL_478316
+comment: Drill or airseeder, double disk
+(from WEPP LMOD service)
+comment...
+1  #landuse
+0.1900 0.1100 0
+4 # pcode - other 
+0.0254 0.2030 0.1900 0.1100 0.0076 0.5500 0.0381 0.0100 0.0100
+
+
+RES_2     # ResidueAddition
+comment...
+comment...
+comment...
+1  # landuse <CROPLAND>
+0 0 0  # place holder for interrill frag,non-frag, rows
+10  # res add- no disturb
+0 0 0 0 0 0 0 0 0
+2  # plant index
+0.02802  # amount added
+
+
+CHISEL_770325
+comment: Chisel, st. pt., coil tine har
+(from WEPP LMOD service)
+comment...
+1  #landuse
+0.5700 0.3700 0
+4 # pcode - other 
+0.0762 0.3000 0.5700 0.3700 0.0102 1.0000 0.1778 0.0500 0.0700
+
+
+CHISEL_770326
+comment: Chisel, st. pt., coil tine har
+(from WEPP LMOD service)
+comment...
+1  #landuse
+0.2000 0.1000 0
+4 # pcode - other 
+0.0254 0.1016 0.2000 0.1000 0.0102 1.0000 0.0508 0.0100 0.0100
+
+
+
+
+###############################
+# Initial Conditions Section  #
+###############################
+
+1  # Number of initial scenarios
+
+
+Default1
+Put here as default by LMOD -> .rot convert - Default corn initial conditions set - continuous corn - spring/summer tillage only
+90 percent cover, approximately 200 days since last tillage
+500 mm of rain since last tillage in summer prior
+1  #landuse
+1.10000 0.00000 200 92 0.00000 0.50000
+1 # iresd  <L29_Cano>
+1 # mang annual
+500.12601 0.02000 0.50000 0.02000 0.00000
+1  # rtyp - temporary
+0.00000 0.00000 0.10000 0.20000 0.02540
+0.20000 0.19997 0.00000 0.00000
+
+
+
+
+############################
+# Surface Effects Section  #
+############################
+
+1  # Number of Surface Effects Scenarios
+
+
+#
+#   Surface Effects Scenario 1 of 1
+#
+Year 1
+From WEPP database
+Your name, phone
+
+1  # landuse  - cropland
+10 # ntill - number of operations
+  110  # mdate  --- 4 / 20 
+  1  # op --- CULTIV_471144
+      0.102  # depth
+      2  # type
+  110  # mdate  --- 4 / 20 
+  2  # op --- CULTIV_471145
+      0.051  # depth
+      2  # type
+  111  # mdate  --- 4 / 21 
+  3  # op --- FERT_A_793456
+      0.102  # depth
+      2  # type
+  111  # mdate  --- 4 / 21 
+  4  # op --- FERT_A_793457
+      0.025  # depth
+      2  # type
+  113  # mdate  --- 4 / 23 
+  1  # op --- CULTIV_471144
+      0.102  # depth
+      2  # type
+  113  # mdate  --- 4 / 23 
+  2  # op --- CULTIV_471145
+      0.051  # depth
+      2  # type
+  115  # mdate  --- 4 / 25 
+  5  # op --- DRILL_478316
+      0.038  # depth
+      2  # type
+  135  # mdate  --- 5 / 15 
+  6  # op --- NO-DISTURB Res A
+      0.000  # depth
+      2  # type
+  274  # mdate  --- 10 / 1 
+  7  # op --- CHISEL_770325
+      0.178  # depth
+      2  # type
+  274  # mdate  --- 10 / 1 
+  8  # op --- CHISEL_770326
+      0.051  # depth
+      2  # type
+
+
+#######################
+# Contouring Section  #
+#######################
+
+0  # Number of contour scenarios
+
+
+#######################
+# Drainage Section    #
+#######################
+
+0  # Number of drainage scenarios
+
+
+#######################
+# Yearly Section      #
+#######################
+
+1  # looper; number of Yearly Scenarios
+#
+# Yearly scenario 1 of 1 (type=1)
+#
+Year 1 
+
+
+
+1  # landuse <cropland>
+1  # plant growth scenario
+1  # surface effect scenario
+0  # contour scenario
+0  # drainage scenario
+1 # management <annual>
+   227  # harvest date --- 8 / 15 / 1
+   115  # planting date --- 4 /25 /1
+   0.2540  # row width
+   6   # residue man - <none>
+
+
+#######################
+# Management Section  #
+#######################
+
+Manage
+description 1
+description 2
+description 3
+1   # number of OFE's
+    1   # initial condition index
+2  # rotation repeats
+1  # years in rotation
+
+#
+# Rotation 1: year 1 to 1
+#
+
+   1	#  <plants/yr 1> - OFE: 1>
+      1	# year index
+
+#
+# Rotation 2: year 2 to 2
+#
+
+   1	#  <plants/yr 1> - OFE: 1>
+      1	# year index

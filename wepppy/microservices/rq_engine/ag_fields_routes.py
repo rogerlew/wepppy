@@ -18,6 +18,7 @@ from rq.exceptions import NoSuchJobError
 from rq.job import Job
 from starlette.datastructures import UploadFile
 
+from wepp_runner.wepp_runner import get_linux_wepp_bin_opts
 from wepppy.config.redis_settings import RedisDB, redis_connection_kwargs
 from wepppy.microservices.shape_converter.archive_validation import (
     ArchiveLimits,
@@ -240,6 +241,10 @@ def _state_snapshot(wd: str) -> dict[str, Any]:
     overlay_exists = Path(ag_fields.sub_fields_wgs_geojson).is_file()
     return {
         "boundary": {
+            "filename": (
+                ag_fields.field_boundaries_source_filename
+                or ag_fields.field_boundaries_geojson
+            ),
             "geojson_is_valid": ag_fields.geojson_is_valid,
             "geojson_hash": ag_fields.geojson_hash,
             "geojson_timestamp": ag_fields.geojson_timestamp,
@@ -267,6 +272,7 @@ def _state_snapshot(wd: str) -> dict[str, Any]:
             "run_count": run_count,
             "output_count": output_count,
             "complete": run_count > 0 and not staleness["wepp_runs"],
+            "wepp_bin": ag_fields.wepp_bin,
         },
         "staleness": staleness,
         "readiness": readiness,
@@ -299,7 +305,12 @@ async def upload_boundaries(runid: str, config: str, request: Request) -> JSONRe
 
         def _validate_boundary(path: Path) -> None:
             try:
-                validation_result.update(ag_fields.validate_field_boundary_geojson(path))
+                validation_result.update(
+                    ag_fields.validate_field_boundary_geojson(
+                        path,
+                        source_filename=upload.filename,
+                    )
+                )
             except Exception as exc:  # broad-except: untrusted geospatial parser boundary
                 logger.warning(
                     "rq-engine AgFields boundary validation rejected upload",
@@ -639,11 +650,14 @@ async def run_wepp(runid: str, config: str, request: Request) -> JSONResponse:
         max_workers = None if raw_max_workers in (None, "") else int(raw_max_workers)
         if max_workers is not None and max_workers < 1:
             raise ValueError("max_workers must be at least 1 when provided.")
+        wepp_bin = str(payload.get("wepp_bin") or ag_fields.wepp_bin or "").strip()
+        if wepp_bin not in get_linux_wepp_bin_opts():
+            raise ValueError(f"Unknown WEPP executable: {wepp_bin}")
         return _enqueue_job(
             wd,
             AGFIELDS_RUN_WEPP_JOB_KEY,
             run_ag_fields_wepp_rq,
-            (runid, max_workers),
+            (runid, max_workers, wepp_bin),
         )
     except (TypeError, ValueError) as exc:
         return error_response(str(exc), status_code=400)

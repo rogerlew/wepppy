@@ -44,11 +44,15 @@ Important current rules:
 - crop names in the schedule must match `rotation_lookup.tsv`,
 - the field geometry must overlap the project DEM extent after CRS handling.
 
+For best spatial precision, export the boundary GeoJSON in the same projected UTM CRS as the project's DEM. AgFields also accepts WGS84 longitude/latitude and files with another correctly declared projected CRS, but it will not guess an unlabeled non-UTM projection from coordinate values alone. If Stage 2 reports a CRS/extent failure, use the project EPSG code and bounds shown in the error when re-exporting the file.
+
 ## Key Choices You Actually Make
 
 ### Field boundary upload
 
 The boundary upload is not just geometry input. During validation, AgFields normalizes the file into `ag_fields/fields.WGS.geojson` and extracts the non-geometry attributes into `ag_fields/rotation_schedule.parquet`.
+
+After a successful upload, Stage 1 shows the uploaded file's name in a separate display below the file chooser. That display remains available after a page reload, even though the browser clears the file chooser itself. Older projects that predate stored upload names show the canonical `fields.WGS.geojson` name instead.
 
 That means one uploaded GeoJSON is carrying two jobs at once:
 
@@ -86,6 +90,12 @@ The `database` column can currently point to:
 - `plant_file_db`
 
 Use `weppcloud` when the crop should map to a WEPPcloud management ID. Use `plant_file_db` when the crop should map to a `.man` file stored under `ag_fields/plant_files/`.
+
+When a custom archive comes from Jim's management interface, WEPPcloud also
+handles its known applied-residue placeholder: a nonpositive `hmax` is set to
+the minimum positive management-file value only when the plant is residue-only.
+Active crop heights are never changed by this rule, and the plant-file inventory
+records the original and normalized values.
 
 This lookup is where many "the model ran but the management is wrong" problems actually begin. If the crop spelling in the uploaded schedule does not match the lookup spelling, the crop cannot be mapped cleanly.
 
@@ -132,12 +142,13 @@ Current simplifications to keep in mind:
 
 2. Upload a field-boundary GeoJSON that includes `field_id` and crop-year columns.
    Expect the workflow to extract the attribute table into `rotation_schedule.parquet`.
+   Prefer coordinates in the same UTM CRS as the project DEM; this avoids an unnecessary reprojection and retains project-grid precision.
 
 3. Confirm the ID field and crop-year pattern.
    The ID must be stable across the workflow, and the crop-year pattern must match every observed climate year in the run.
 
 4. Select **Build Sub-fields**.
-   Coordinate-system mistakes and extent mismatches usually become obvious here. If the fields do not overlap the project, stop and fix the GeoJSON before continuing.
+   Coordinate-system mistakes and extent mismatches usually become obvious here. The error reports the project DEM's EPSG code and both extents. If the fields do not overlap the project, re-export the GeoJSON in that project CRS (preferred) or attach the correct source CRS before continuing.
 
 5. Select **Show on Map** and review the result.
    Expect fields that span more than one hydrologic setting to split into multiple sub-fields. Check that the geometry matches your understanding of local drainage before spending compute on WEPP.
@@ -148,8 +159,8 @@ Current simplifications to keep in mind:
 7. Run the parent watershed WEPP hillslopes if they are not already complete.
    AgFields reuses their soil and climate files, so the final stage explains this prerequisite when it is missing.
 
-8. Select **Run WEPP on Sub-fields**.
-   Expect one WEPP hillslope-style simulation per sub-field rather than one simulation per original field polygon. The status panel reports progress, and successful runs link to the output browser and Features Export.
+8. Expand **Run options**, verify **WEPP Exec**, and select **Run WEPP on Sub-fields**.
+   New agricultural projects default to the compatibility-tested `wepp_dcc52a6` executable independently of the parent watershed setting. Expect one WEPP hillslope-style simulation per sub-field rather than one simulation per original field polygon. The status panel reports progress, and successful runs link to the output browser and Features Export. **Clear Previous Runs and Outputs** removes only regenerable AgFields run artifacts.
 
 ## What Outputs To Look At
 

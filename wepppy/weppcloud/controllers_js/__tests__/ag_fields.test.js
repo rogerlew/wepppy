@@ -10,6 +10,7 @@ function buildHtml() {
             <input type="file" data-role="geojson-input">
             <button type="button" data-action="upload-boundaries" data-role="upload-button">Upload Field Boundaries</button>
             <div data-role="upload-status"></div>
+            <div data-role="boundary-file-display" hidden><code data-role="boundary-filename"></code></div>
             <div data-role="boundary-summary"></div>
             <div data-role="duplicate-warning"></div>
             <select data-role="field-id-select"></select>
@@ -37,7 +38,10 @@ function buildHtml() {
 
             <button type="button" data-action="run-wepp" data-role="run-button">Run WEPP</button>
             <div data-role="run-status"></div>
-            <input data-role="max-workers-input">
+            <select data-role="wepp-bin-select">
+                <option value="wepp_dcc52a6">wepp_dcc52a6</option>
+                <option value="wepp_260606">wepp_260606</option>
+            </select>
             <button type="button" data-action="clear-runs" data-role="clear-runs-button">Clear</button>
             <div data-role="results-links"></div>
 
@@ -60,6 +64,7 @@ function buildHtml() {
 function makeState(overrides = {}) {
     const state = {
         boundary: {
+            filename: "My Fields.geojson",
             geojson_is_valid: true,
             geojson_hash: "hash-1",
             geojson_timestamp: "2026-07-09T20:00:00Z",
@@ -88,7 +93,7 @@ function makeState(overrides = {}) {
             ],
         },
         plant_files: { valid_count: 0, invalid_count: 0 },
-        wepp: { run_count: 0, output_count: 0, complete: false },
+        wepp: { run_count: 0, output_count: 0, complete: false, wepp_bin: "wepp_dcc52a6" },
         staleness: { subfields: false, wepp_runs: false },
         readiness: {
             observed_climate: true,
@@ -274,8 +279,11 @@ describe("AgFields controller", () => {
         );
         expect(baseInstance.attach_status_stream).toHaveBeenCalledTimes(1);
         expect(document.querySelector('[data-role="boundary-summary"]').textContent).toContain("12 fields loaded");
+        expect(document.querySelector('[data-role="boundary-file-display"]').hidden).toBe(false);
+        expect(document.querySelector('[data-role="boundary-filename"]').textContent).toBe("My Fields.geojson");
         expect(document.querySelector('[data-role="field-id-select"]').value).toBe("field_id");
         expect(document.querySelector('[data-role="run-button"]').disabled).toBe(false);
+        expect(document.querySelector('[data-role="wepp-bin-select"]').value).toBe("wepp_dcc52a6");
         expect(document.getElementById("ag_fields_summary").textContent).toBe("3 of 4 stages complete.");
     });
 
@@ -284,9 +292,11 @@ describe("AgFields controller", () => {
         await flushPromises();
 
         controller.renderState(makeState({
+            boundary: { filename: null, geojson_is_valid: false },
             schema: { complete: false, field_id_key: null, rotation_accessor: null },
             subfields: { complete: false, sub_field_n: 0, overlay_exists: false },
         }));
+        expect(document.querySelector('[data-role="boundary-file-display"]').hidden).toBe(true);
         expect(document.querySelector('[data-role="build-subfields-button"]').disabled).toBe(true);
         expect(document.querySelector('[data-role="subfields-status"]').textContent).toBe(
             "Confirm the field boundary schema above first.",
@@ -468,6 +478,12 @@ describe("AgFields controller", () => {
             new MouseEvent("click", { bubbles: true }),
         );
         await flushPromises();
+
+        expect(httpMock.postJsonWithSessionToken).toHaveBeenCalledWith(
+            expect.stringContaining("agfields/run-wepp"),
+            { wepp_bin: "wepp_dcc52a6" },
+            expect.objectContaining({ form: controller.form }),
+        );
 
         expect(tracked).toEqual(expect.arrayContaining([
             {

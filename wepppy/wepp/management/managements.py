@@ -657,7 +657,13 @@ class OpLoopCropland(ScenarioBase):
         if self.pcode in [10, 12]:
             line = lines.pop(0).split()
             assert len(line) >= 1, line
-            self.iresad = int(line.pop(0))
+            residue_plant_index = int(line.pop(0))
+            self.iresad = _scenario_reference_factory(
+                residue_plant_index,
+                SectionType.Plant,
+                root,
+                self,
+            )
             if len(line) >= 1:
                 self.amtres = float(line.pop(0))
                 assert len(line) == 0, line

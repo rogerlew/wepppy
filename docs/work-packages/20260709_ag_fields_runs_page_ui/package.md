@@ -28,18 +28,32 @@ The spec's Design Mandate governs review: the UI presents four user decisions, n
 - `runs0_pure.htm` wiring and any `run_0_bp.py` template-context additions the include idiom requires.
 - Feature registry maturity change and control-shell feature-id resolution.
 - Browser client auth: reuse the existing rq-engine session bearer token mechanism (no new auth surface).
+- Stage 4 follow-up: persisted AgFields WEPP executable selection, the
+  `wepp_dcc52a6` new-project default, and automatic worker sizing in the browser.
 
 ### Explicitly Out of Scope
 
-- Backend changes. The backend package is closed; if UI work surfaces a backend defect, file it as a finding against this package and fix it in a scoped follow-up commit, not by silently expanding this package.
+- Unrelated backend changes. Acceptance findings may be fixed as scoped,
+  documented follow-ups; the Stage 4 executable persistence and propagation
+  change is one such follow-up and is governed by ADR-0017.
 - The full Playwright staged walkthrough (spec §12.2) — it needs a seeded AgFields project; it lands in the acceptance phase below.
 - Sub-fields-as-OFEs, `first_year_only` exposure, and everything the spec's §13 open decisions defer.
 
 ## Acceptance Phase (after implementation)
 
-No seeded AgFields project exists (`copacetic-note` is gone), so final acceptance is a manual walkthrough on a freshly created project:
+The fresh acceptance project is `sacral-self-discipline`. Its initial Stage 2
+CRS failure was corrected with a project-UTM (`EPSG:32611`) export, and the
+walkthrough reached Stage 4. The first WEPP attempt exposed management synthesis
+overflow; `20260710_management_rotation_synth_hardening` fixes that path and the
+systematic Jim-interface residue-only `hmax=0` placeholder. A wired replay now
+advances into simulation and exposes an independent zero-random-roughness
+SIGFPE in `frcfac.for:184` under `wepp_260430` and `wepp_260606`. The exact
+repaired p3733 replay completes under `wepp_dcc52a6`, now the new-project
+AgFields default, so end-to-end acceptance is ready to resume but remains open
+until the full browser-started project run is recorded.
 
-1. Create a small-watershed project from the `ag-fields` config (observed climate years must match the boundary file's crop columns).
+1. Use the small-watershed `sacral-self-discipline` project with its corrected
+   project-UTM boundaries.
 2. Drive all four stages through the UI: upload boundaries, confirm schema, build sub-fields, review overlay on the map, upload a plant zip from the USDA rotation builder, complete the mapping modal, run WEPP.
 3. This single walkthrough simultaneously closes this package's UI acceptance AND the backend package's recorded limitation (no real-WEPP-binary end-to-end run).
 
@@ -62,6 +76,7 @@ The walkthrough is deliberately the last gate: it validates UI, backend, Peridot
 - [x] Sub-fields overlay appears via "Show on Map" and refreshes after a rebuild.
 - [x] Registry maturity is `experimental`; the shell renders the label.
 - [x] Jest suites per spec §12.1 pass; `wctl run-npm lint` and `wctl run-npm test` pass.
+- [x] Boundary rasterization accepts unlabeled coordinates in the exact project UTM grid, retains WGS84/correctly declared reprojection support, and reports the required project CRS/bounds for ambiguous projected input.
 - [ ] Acceptance walkthrough on a fresh small-watershed project completes all four stages and produces sub-field outputs under `wepp/ag_fields/output/` with a real WEPP binary.
 
 ## Implementation Status

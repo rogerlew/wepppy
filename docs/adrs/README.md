@@ -63,3 +63,5 @@ Each ADR should normally include:
 - `ADR-0013`: [Seasonal Return-Period Frequency Basis](ADR-0013-seasonal-return-period-frequency-basis.md) (Accepted, 2026-07-06)
 - `ADR-0014`: [Disturbed OpenWEPP Route Coefficients](ADR-0014-disturbed-openwepp-route-coefficients.md) (Accepted, 2026-07-07)
 - `ADR-0015`: [AgFields Backend Readiness and Upload Guardrails](ADR-0015-agfields-upload-archive-guardrails.md) (Accepted, 2026-07-09)
+- `ADR-0016`: [AgFields Applied-Residue `hmax` Floor](ADR-0016-agfields-applied-residue-hmax-floor.md) (Accepted, 2026-07-10)
+- `ADR-0017`: [AgFields WEPP Executable Default](ADR-0017-agfields-wepp-executable-default.md) (Accepted, 2026-07-10)

@@ -1,7 +1,7 @@
 # PROJECT_TRACKER.md
 > Kanban board for wepppy work packages and vision items
 
-**Last Updated**: 2026-07-09
+**Last Updated**: 2026-07-10
 **Active Packages**: 13
 **Quick Links**: [Work Packages Directory](docs/work-packages/) | [God-Tier Prompting Strategy](docs/god-tier-prompting-strategy.md)
 
@@ -275,7 +275,7 @@ When resuming Kubernetes work:
 
 Currently active work packages. Limit to 2-4 packages to maintain focus.
 
-**Current WIP Count**: 14 packages
+**Current WIP Count**: 13 packages
 
 ---
 
@@ -561,6 +561,25 @@ Currently active work packages. Limit to 2-4 packages to maintain focus.
 ## ✅ Done
 
 Recently completed work packages. Archived immediately upon completion.
+
+### Management Rotation Synthesizer Hardening (2026-07-10)
+**Status**: ✅ **COMPLETE**
+
+**Link**: [docs/work-packages/20260710_management_rotation_synth_hardening/](docs/work-packages/20260710_management_rotation_synth_hardening/)
+
+**Lifecycle**: Incident -> Implemented -> Reopened -> Done (2026-07-10)
+
+**Summary**: Scanned all 119 attempted AgFields runs, repaired rotation scenario
+reuse and residue-index remapping, and reduced p3733 from 50 plants/136
+operations to 3/10 while preserving 17 years. The reopened ADR-0016 milestone
+normalizes systematic Jim-interface residue-only `hmax <= 0` to `0.00001 m`
+during both ZIP ingestion paths, preserves original 2017.1 files and raw 98.4
+header notes, records additive provenance, and excludes active plants. Focused
+tests pass (31); the wired replay clears `ncrop` and `HMAX` before exposing a
+separate `frcfac.for:184` zero-random-roughness SIGFPE, dispositioned for a new
+incident rather than hidden by a broader fallback.
+
+---
 
 ### AgFields Backend Readiness (2026-07-09)
 **Status**: ✅ **COMPLETE**

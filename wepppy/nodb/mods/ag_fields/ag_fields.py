@@ -21,13 +21,13 @@ import time
 import zipfile
 from concurrent.futures import FIRST_COMPLETED, Future, ThreadPoolExecutor, wait
 from copy import deepcopy
-from enum import Enum, IntEnum
+from enum import Enum
 from pathlib import Path, PurePosixPath
 from typing import Any, Dict, Iterable, Iterator, List, Optional, Set, Tuple
 
 import pandas as pd
 
-from wepp_runner.wepp_runner import run_hillslope
+from wepp_runner.wepp_runner import get_linux_wepp_bin_opts, run_hillslope
 
 from wepppy.all_your_base.all_your_base import isint
 from wepppy.nodb.base import NoDbBase, nodb_setter
@@ -39,7 +39,7 @@ from wepppy.topo.peridot.peridot_runner import (
 )
 from wepppy.topo.watershed_abstraction.slope_file import clip_slope_file_length
 from wepppy.wepp.management import InvalidManagementKey, get_management_summary, load_map
-from wepppy.wepp.management.managements import read_management
+from wepppy.wepp.management.managements import ScenarioReference, read_management
 from wepppy.wepp.management.utils import ManagementRotationSynth, downgrade_to_98_4_format
 
 from os.path import exists as _exists
@@ -57,6 +57,10 @@ __all__ = [
     'RotationLookupValidationError',
     'AgFields',
 ]
+
+_APPLIED_RESIDUE_HMAX_FLOOR_M = 0.00001
+_APPLIED_RESIDUE_HMAX_REASON = 'applied_residue_positive_hmax_required_by_wepp'
+
 
 class AgFieldsNoDbLockedException(Exception):
     pass
@@ -122,6 +126,7 @@ class AgFields(NoDbBase):
                 os.makedirs(self.plant_files_2017_1_dir)
 
             self._field_boundaries_geojson = None
+            self._field_boundaries_source_filename = None
             self._field_id_key = None
             self._rotation_schedule_tsv = None
             self._crop_kv_lookup_tsv = None
@@ -140,6 +145,7 @@ class AgFields(NoDbBase):
             self._plant_file_provenance = {}
             self._subfields_source_signature = None
             self._wepp_source_signature = None
+            self._wepp_bin = self.config_get_str('ag_fields', 'bin')
 
     @property
     def field_n(self) -> int:
@@ -152,6 +158,21 @@ class AgFields(NoDbBase):
     @property
     def sub_field_fp_n(self) -> int:
         return int(getattr(self, '_sub_field_fp_n', 0))
+
+    @property
+    def wepp_bin(self) -> Optional[str]:
+        value = getattr(self, '_wepp_bin', None)
+        if value:
+            return str(value)
+        return self.wepp_instance.wepp_bin
+
+    @wepp_bin.setter
+    @nodb_setter
+    def wepp_bin(self, value: str) -> None:
+        normalized = str(value).strip()
+        if normalized not in get_linux_wepp_bin_opts():
+            raise ValueError(f'Unknown WEPP executable: {normalized}')
+        self._wepp_bin = normalized
 
     @property
     def geojson_timestamp(self) -> Optional[int]:
@@ -174,10 +195,19 @@ class AgFields(NoDbBase):
         return getattr(self, '_field_boundaries_geojson', None)
 
     @property
+    def field_boundaries_source_filename(self) -> Optional[str]:
+        return getattr(self, '_field_boundaries_source_filename', None)
+
+    @property
     def field_id_key(self) -> Optional[str]:
         return getattr(self, '_field_id_key', None)
 
-    def validate_field_boundary_geojson(self, fn: str | os.PathLike[str]) -> Dict[str, List[Any]]:
+    def validate_field_boundary_geojson(
+        self,
+        fn: str | os.PathLike[str],
+        *,
+        source_filename: Optional[str] = None,
+    ) -> Dict[str, List[Any]]:
         """
         Validate a user-supplied field boundary GeoJSON and normalize it into the canonical
         `ag_fields/fields.WGS.geojson` location for downstream tooling.
@@ -193,6 +223,10 @@ class AgFields(NoDbBase):
         source_path = next((p for p in search_paths if p.exists()), None)
         if source_path is None:
             raise FileNotFoundError(f'Field boundary geojson file not found: {search_paths[0]}')
+
+        source_basename = PurePosixPath(str(source_filename or '').replace('\\', '/')).name.strip()
+        if not source_basename:
+            source_basename = source_path.name
 
         canonical_name = "fields.WGS.geojson"
         canonical_path = Path(self.ag_fields_dir) / canonical_name
@@ -236,6 +270,7 @@ class AgFields(NoDbBase):
                 os.replace(staged_geojson, canonical_path)
                 os.replace(staged_parquet, self.rotation_schedule_parquet)
                 self._field_boundaries_geojson = canonical_name
+                self._field_boundaries_source_filename = source_basename
                 self._field_n = len(df)
                 self._geojson_hash = geojson_hash
                 self._geojson_timestamp = int(time.time())
@@ -368,21 +403,26 @@ class AgFields(NoDbBase):
                 float(template_bounds.right),
                 float(template_bounds.top),
             )
-            if gdf.crs is None:
-                payload = json.loads(Path(geojson_path).read_text(encoding='utf-8'))
+            payload = json.loads(Path(geojson_path).read_text(encoding='utf-8'))
+            payload_declares_crs = bool(payload.get('crs'))
+            if gdf.crs is None or not payload_declares_crs:
                 crs_inference = infer_geojson_crs(
                     payload,
                     explicit_crs=None,
                     project_crs=str(template_crs),
-                    configured_crs="EPSG:4326",
+                    configured_crs=str(gdf.crs or "EPSG:4326"),
                     project_bounds=template_bounds_tuple,
                 )
-                gdf = gdf.set_crs(crs_inference.crs, allow_override=True)
-                self.logger.info(
-                    'Field boundary GeoJSON missing CRS; inferred %s (%s).',
-                    crs_inference.crs,
-                    crs_inference.source,
-                )
+                if (
+                    gdf.crs is None
+                    or crs_inference.source == 'inferred_project_utm_coordinates'
+                ):
+                    gdf = gdf.set_crs(crs_inference.crs, allow_override=True)
+                    self.logger.info(
+                        'Field boundary GeoJSON lacks explicit CRS metadata; using %s (%s).',
+                        crs_inference.crs,
+                        crs_inference.source,
+                    )
 
             original_bounds = gdf.total_bounds
             has_nonzero_field_ids = bool((gdf[self.field_id_key] != 0).any())
@@ -415,9 +455,14 @@ class AgFields(NoDbBase):
             meta.update(compress='lzw', dtype=rasterio.int32, nodata=0)
 
         if not _bounds_intersect(gdf.total_bounds, template_bounds):
+            raw_bounds = tuple(round(float(value), 3) for value in original_bounds)
+            project_bounds = tuple(round(float(value), 3) for value in template_bounds_tuple)
             raise ValueError(
                 'Field boundary geometries do not overlap the DEM extent after reprojection. '
-                'Check that the GeoJSON covers the same area as the DEM or update the CRS definition.'
+                f'The project DEM uses {template_crs} with bounds {project_bounds}; '
+                f'the uploaded boundary coordinate bounds are {raw_bounds}. '
+                f'For best precision, export the boundaries in the project CRS ({template_crs}), '
+                'or include correct CRS metadata when using another projected CRS.'
             )
 
         # Prepare shapes for rasterization. This creates a generator of (geometry, value) tuples.
@@ -647,6 +692,71 @@ class AgFields(NoDbBase):
         with self.locked():
             self._invalid_plant_files = sorted(invalid, key=lambda item: item['filename'].casefold())
 
+    @staticmethod
+    def _normalize_applied_residue_hmax(management: Any) -> List[Dict[str, Any]]:
+        residue_plant_names: Set[str] = set()
+        active_plant_names: Set[str] = set()
+
+        for operation in getattr(management, 'ops', ()):
+            data = getattr(operation, 'data', None)
+            residue_ref = getattr(data, 'iresad', None)
+            if (
+                getattr(operation, 'landuse', None) == 1
+                and getattr(data, 'pcode', None) in (10, 12)
+                and isinstance(residue_ref, ScenarioReference)
+                and residue_ref.loop_name
+            ):
+                residue_plant_names.add(residue_ref.loop_name)
+
+        for initial in getattr(management, 'inis', ()):
+            plant_ref = getattr(getattr(initial, 'data', None), 'iresd', None)
+            if isinstance(plant_ref, ScenarioReference) and plant_ref.loop_name:
+                active_plant_names.add(plant_ref.loop_name)
+
+        for year in getattr(management, 'years', ()):
+            plant_ref = getattr(getattr(year, 'data', None), 'itype', None)
+            if isinstance(plant_ref, ScenarioReference) and plant_ref.loop_name:
+                active_plant_names.add(plant_ref.loop_name)
+
+        normalizations: List[Dict[str, Any]] = []
+        for plant in getattr(management, 'plants', ()):
+            if plant.name not in residue_plant_names or plant.name in active_plant_names:
+                continue
+            hmax = getattr(getattr(plant, 'data', None), 'hmax', None)
+            if not isinstance(hmax, (int, float)) or not hmax <= 0:
+                continue
+            plant.data.hmax = _APPLIED_RESIDUE_HMAX_FLOOR_M
+            normalizations.append(
+                {
+                    'scenario': plant.name,
+                    'field': 'plant.data.hmax',
+                    'original_value': float(hmax),
+                    'normalized_value': _APPLIED_RESIDUE_HMAX_FLOOR_M,
+                    'units': 'm',
+                    'reason': _APPLIED_RESIDUE_HMAX_REASON,
+                }
+            )
+
+        return normalizations
+
+    @staticmethod
+    def _rewrite_management_preserving_header_comments(
+        management: Any,
+        path: Path,
+    ) -> None:
+        source_lines = path.read_text(encoding='utf-8').splitlines()
+        header_lines: List[str] = []
+        for line in source_lines[1:]:
+            if line.lstrip().startswith('#') or not line.strip():
+                header_lines.append(line)
+                continue
+            break
+
+        rendered_lines = str(management).splitlines()
+        if header_lines:
+            rendered_lines = [rendered_lines[0], *header_lines, *rendered_lines[1:]]
+        path.write_text('\n'.join(rendered_lines) + '\n', encoding='utf-8', newline='\n')
+
     def handle_plant_file_db_upload(self, plant_db_zip_fn: str) -> Dict[str, Any]:
         """
         Unzip the plant file database zip files int self.plant_files_dir.
@@ -707,6 +817,7 @@ class AgFields(NoDbBase):
                     filename = item['filename']
                     try:
                         management = read_management(str(source_staging / filename))
+                        item['normalizations'] = self._normalize_applied_residue_hmax(management)
                         downgrade_to_98_4_format(
                             management,
                             str(final_staging / filename),
@@ -719,9 +830,15 @@ class AgFields(NoDbBase):
 
             staged_valid: Set[str] = set()
             staged_errors: Dict[str, str] = {}
+            staged_by_filename = {item['filename']: item for item in staged}
             for path in sorted(final_staging.glob('*.man'), key=lambda item: item.name.casefold()):
                 try:
-                    read_management(str(path))
+                    management = read_management(str(path))
+                    item = staged_by_filename[path.name]
+                    if not item['is_2017_1']:
+                        item['normalizations'] = self._normalize_applied_residue_hmax(management)
+                        if item['normalizations']:
+                            self._rewrite_management_preserving_header_comments(management, path)
                 except (OSError, UnicodeError, ValueError, AssertionError, IndexError) as exc:
                     staged_errors[path.name] = str(exc) or exc.__class__.__name__
                 else:
@@ -745,6 +862,7 @@ class AgFields(NoDbBase):
                         'source_filename': item['source_filename'],
                         'format': '2017.1_downgraded' if item['is_2017_1'] else '98.4',
                         'replaced': filename in replaced,
+                        'normalizations': deepcopy(item.get('normalizations', [])),
                     }
 
                 all_valid: List[str] = []
@@ -794,6 +912,7 @@ class AgFields(NoDbBase):
                     'format': source.get('format', '98.4'),
                     'source_filename': source.get('source_filename', filename),
                     'replaced': bool(source.get('replaced', False)),
+                    'normalizations': deepcopy(source.get('normalizations', [])),
                 }
             )
         return {'files': files, 'valid_files': valid, 'invalid_files': invalid}
@@ -1082,7 +1201,7 @@ class AgFields(NoDbBase):
         watershed = self.watershed_instance
         clip_hillslopes = watershed.clip_hillslopes
         clip_hillslope_length = watershed.clip_hillslope_length
-        wepp_bin = self.wepp_instance.wepp_bin
+        wepp_bin = self.wepp_bin
 
         subfields_df = self.subfields_parquet
         rotation_schedule_df = pd.read_parquet(self.rotation_schedule_parquet)

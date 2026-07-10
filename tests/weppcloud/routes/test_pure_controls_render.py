@@ -1028,6 +1028,7 @@ def test_ag_fields_control_renders_required_dom_contract(jinja_env: Environment)
     rendered = template.render(
         ron=SimpleNamespace(mods={"ag_fields"}),
         feature_maturity_labels={"ag_fields": "Experimental"},
+        wepp_bin_options=[("wepp_dcc52a6", "wepp_dcc52a6"), ("wepp_260606", "wepp_260606")],
     )
 
     for stage_id in (
@@ -1042,6 +1043,8 @@ def test_ag_fields_control_renders_required_dom_contract(jinja_env: Environment)
         "geojson-input",
         "upload-button",
         "upload-status",
+        "boundary-file-display",
+        "boundary-filename",
         "boundary-summary",
         "duplicate-warning",
         "field-id-select",
@@ -1067,7 +1070,7 @@ def test_ag_fields_control_renders_required_dom_contract(jinja_env: Environment)
         "unused-mappings",
         "run-button",
         "run-status",
-        "max-workers-input",
+        "wepp-bin-select",
         "clear-runs-button",
         "results-links",
     ):
@@ -1078,6 +1081,9 @@ def test_ag_fields_control_renders_required_dom_contract(jinja_env: Environment)
     assert 'aria-modal="true"' in rendered
     assert "rasterize" not in rendered.lower()
     assert "polygonize" not in rendered.lower()
+    assert "Maximum workers" not in rendered
+    assert "wepp_dcc52a6" in rendered
+    assert 'class="pure-button button-error agfields-clear-button"' in rendered
 
 
 def test_run_header_includes_features_export_mod_toggle(jinja_env: Environment) -> None:

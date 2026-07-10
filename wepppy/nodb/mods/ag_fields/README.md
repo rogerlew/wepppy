@@ -26,7 +26,7 @@ Typical sequence (some steps are optional depending on the UI/route calling into
 5. **Abstract sub-fields (Peridot)**: `AgFields.periodot_abstract_sub_fields(...)`
 6. **Polygonize sub-fields**: `AgFields.polygonize_sub_fields()`
 7. **Provide crop→management mapping**: call `AgFields.write_rotation_lookup(rows)` (and optionally populate `ag_fields/plant_files/` via `handle_plant_file_db_upload`)
-8. **Run WEPP per sub-field**: `AgFields.run_wepp_ag_fields(max_workers=...)`
+8. **Run WEPP per sub-field**: choose the persisted `AgFields.wepp_bin`, then call `AgFields.run_wepp_ag_fields()` (optional `max_workers` remains available to API callers)
 
 ## Inputs and outputs
 
@@ -80,7 +80,8 @@ ag.polygonize_sub_fields()
 #   ag.write_rotation_lookup(rows)
 # - Optionally populate wd/ag_fields/plant_files/ with:
 #   ag.handle_plant_file_db_upload("plant_db.zip")
-ag.run_wepp_ag_fields(max_workers=8)
+ag.wepp_bin = "wepp_dcc52a6"
+ag.run_wepp_ag_fields()
 ```
 
 ### `rotation_lookup.tsv` format
@@ -103,9 +104,45 @@ Forest	weppcloud	42
 
 `write_rotation_lookup()` preserves this three-column schema, permits intentionally unmapped rows by omitting them from the TSV, validates every mapped row before replacement, and returns structured `ok`/`unmapped` results. Any invalid mapped row raises `RotationLookupValidationError` and leaves the prior file unchanged. `validate_rotation_lookup()` returns the same per-crop result structure and does not print.
 
+### Multi-year management synthesis
+
+AgFields builds one source-management entry per observed crop year and composes
+them with `ManagementRotationSynth(..., mode="stack-and-merge")`. Some uploaded
+plant managements encode a crop as two one-year rotations: a setup year followed
+by the retained crop year. The synthesizer normalizes those rotations, removes
+the setup year as a separate simulation year, and combines its distinct surface
+operations with the preceding crop year. When setup and crop years already
+reference the same surface sequence, that sequence is retained as-is; spring and
+fall operations are therefore not duplicated or reordered.
+
+Plant, operation, initial-condition, contour, and drainage definitions are
+shared when their complete model structure is identical. Scenario names are
+reference keys and may differ after segment prefixing, so they do not make two
+otherwise identical definitions distinct. All explicit scenario references,
+including the residue-addition plant index (`iresad`), are remapped to the
+retained definition. Unreferenced definitions are omitted after the final
+management graph is assembled. Surface and yearly scenarios remain isolated by
+simulation year because a later setup-year merge may mutate one of them.
+
+The resulting crop order, number of simulation years, operation dates, and
+referenced model values are unchanged. Synthesis fails before writing when more
+than 20 distinct referenced plant scenarios remain, matching the WEPP hillslope
+input limit and avoiding a misleading zero-return-code run without a success
+marker.
+
 ### Plant management archives
 
 `handle_plant_file_db_upload()` accepts a ZIP already staged under `ag_fields/`. Member paths are checked, `.man` matching is case-insensitive, final extensions are normalized to lowercase, and spaces become underscores. Same-named re-uploads replace deterministically; only distinct colliding names within one archive receive `_1`, `_2`, and so on. Unreadable 2017.1 files raise `PlantFileProcessingError` naming the member, while regular invalid files remain visible in the persisted inventory with their parse reason. Use `get_plant_file_inventory()` to read provenance and `delete_plant_file()` to remove a basename.
+
+Jim-interface archives can contain applied-residue plant placeholders with a
+nonpositive maximum canopy height. During ingestion, a plant with `hmax <= 0`
+is normalized to `0.00001 m` only when parsed references prove it is used by a
+residue-addition operation and is not used as an active yearly or initial plant.
+This is the minimum positive value retained by the management serializer; no
+other plant or operation field changes. Preserved 2017.1 sources remain
+unchanged, raw 98.4 header notes are retained, and each inventory file reports
+an additive `normalizations` list with the original and final values. See
+`docs/adrs/ADR-0016-agfields-applied-residue-hmax-floor.md`.
 
 ## HTTP and RQ surface
 
@@ -113,9 +150,9 @@ Forest	weppcloud	42
 
 RQ entrypoints live in `wepppy.rq.ag_fields_rq`. Job hints use `agfields_build_subfields`, `agfields_plantdb`, and `agfields_run_wepp`. Workers publish to `{runid}:ag_fields`, clear only the `ag_fields.nodb` cache before mutable hydration, return JSON-serializable results, and publish completion/failure payloads for status-stream hydration.
 
-AgFields mutations are single-flight per run. A short Redis submit lock closes enqueue races, live RQ status prevents overlapping build/plant/WEPP jobs, and synchronous boundary/schema/mapping/delete/clear routes return `agfields_job_active` while a job is queued or running.
+AgFields mutations are single-flight per run. A short Redis submit lock closes enqueue races, live RQ status prevents overlapping build/plant/WEPP jobs, and synchronous boundary/schema/mapping/delete/clear routes return `agfields_job_active` while a job is queued or running. Successful boundary ingestion also retains the source basename for reload-safe UI reporting while continuing to store geometry under the canonical `fields.WGS.geojson` artifact name.
 
-The state snapshot reports build provenance rather than asking clients to infer it. Re-upload clears the schema selections; sub-fields are stale until polygonization records the current boundary/schema signature; WEPP runs are stale when either that signature or `rotation_lookup.tsv` changes. Historical runs without signatures are conservatively stale until rebuilt. Readiness covers observed climate year bounds, `dem/wbt/flovec.tif`, and the parent `wepp/runs/p<wepp_id>.sol`/`.cli` pairs.
+The state snapshot reports build provenance rather than asking clients to infer it. Re-upload clears the schema selections; sub-fields are stale until polygonization records the current boundary/schema signature; WEPP runs are stale when either that signature or `rotation_lookup.tsv` changes. Historical runs without signatures are conservatively stale until rebuilt. Readiness covers observed climate year bounds, `dem/wbt/flovec.tif`, and the parent `wepp/runs/p<wepp_id>.sol`/`.cli` pairs. `wepp.wepp_bin` hydrates the Stage 4 executable selector and is persisted in `ag_fields.nodb` when the queued run starts.
 
 ## Integration points
 
@@ -130,11 +167,15 @@ The state snapshot reports build provenance rather than asking clients to infer 
 - **Locking**: `AgFields` is a `NoDbBase` controller; mutations are expected to occur under the NoDb lock. Many public methods acquire the lock internally (via `with self.locked():`) and persist on success.
 - **GeoJSON requirements**:
   - must include a `field_id` column (validation fails otherwise)
-  - must declare a CRS; rasterization requires it and will reproject to the DEM CRS when needed
+  - preferably uses the exact projected UTM CRS of the project DEM so rasterization preserves project-grid precision
+  - unlabeled coordinates matching the project UTM grid are recognized even when the GeoJSON driver defaults them to WGS84
+  - WGS84 longitude/latitude and correctly declared alternate projected CRSs are reprojected to the DEM CRS; ambiguous projected coordinates are rejected rather than guessed
   - features must overlap the project DEM extent, or rasterization fails fast
+- **Legacy artifact name**: `fields.WGS.geojson` is the established canonical basename, but boundary ingestion preserves the uploaded coordinate values until rasterization; the basename does not guarantee WGS84 coordinates.
 - **Peridot prerequisites**: Peridot’s sub-field abstraction asserts `wd/dem/wbt/flovec.tif` and `wd/ag_fields/field_boundaries.tif` exist.
 - **Sub-field flowpath schema**: Peridot writes `field_flowpaths.csv` with parent `topaz_id` and flowpath-record `flowpath_topaz_id`. WEPPpy normalizes that table to `ag_fields/sub_fields/field_flowpaths.parquet` and keeps compatibility for historical CSVs where pandas read the old duplicate header as `topaz_id.1`.
-- **Concurrency**: `run_wepp_ag_fields()` runs sub-fields in a `ThreadPoolExecutor`; use `max_workers` to control parallelism.
+- **WEPP executable**: `[ag_fields] bin` supplies the new-project default independently of `[wepp] bin`; `ag-fields.cfg` uses `wepp_dcc52a6`. Historical NoDb payloads without `_wepp_bin` fall back to the parent Wepp controller until the user selects an AgFields executable.
+- **Concurrency**: `run_wepp_ag_fields()` runs sub-fields in a `ThreadPoolExecutor`. The UI uses automatic sizing; API callers may still pass `max_workers`.
 
 ## Further reading
 

@@ -1,5 +1,6 @@
 from __future__ import annotations
 
+import json
 import zipfile
 from pathlib import Path
 from types import SimpleNamespace
@@ -13,13 +14,63 @@ from wepppy.nodb.mods.ag_fields import (
     RotationLookupValidationError,
 )
 from wepppy.nodb.mods.ag_fields import ag_fields as ag_fields_module
+from wepppy.wepp.management.managements import read_management
 
 
 pytestmark = [pytest.mark.unit, pytest.mark.nodb]
 
+MANAGEMENT_FIXTURES = (
+    Path(__file__).resolve().parents[2]
+    / "wepp"
+    / "management"
+    / "fixtures"
+    / "ag_fields_rotation_synth"
+)
+
 
 def _controller(tmp_path: Path) -> AgFields:
     return AgFields(str(tmp_path), "disturbed9002-wbt-mofe.cfg")
+
+
+def test_ag_fields_config_defaults_new_projects_to_legacy_wepp(tmp_path: Path) -> None:
+    controller = AgFields(str(tmp_path), "ag-fields.cfg")
+
+    assert controller.wepp_bin == "wepp_dcc52a6"
+    persisted = json.loads((tmp_path / controller.filename).read_text(encoding="ascii"))
+    assert persisted["py/state"]["_wepp_bin"] == "wepp_dcc52a6"
+
+
+def test_ag_fields_wepp_selection_persists(
+    tmp_path: Path,
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    controller = AgFields(str(tmp_path), "ag-fields.cfg")
+    monkeypatch.setattr(
+        ag_fields_module,
+        "get_linux_wepp_bin_opts",
+        lambda: ["wepp_dcc52a6", "wepp_260606"],
+    )
+
+    controller.wepp_bin = "wepp_260606"
+
+    persisted = json.loads((tmp_path / controller.filename).read_text(encoding="ascii"))
+    assert persisted["py/state"]["_wepp_bin"] == "wepp_260606"
+
+
+def test_historical_ag_fields_state_falls_back_to_parent_wepp(
+    tmp_path: Path,
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    controller = _controller(tmp_path)
+    with controller.locked():
+        controller.__dict__.pop("_wepp_bin", None)
+    monkeypatch.setattr(
+        AgFields,
+        "wepp_instance",
+        property(lambda _self: SimpleNamespace(wepp_bin="wepp_260430")),
+    )
+
+    assert controller.wepp_bin == "wepp_260430"
 
 
 def _set_observed_climate(monkeypatch: pytest.MonkeyPatch, start: int = 2001, end: int = 2002) -> None:
@@ -71,8 +122,14 @@ def test_boundary_reupload_clears_schema_and_marks_subfields_stale(
     monkeypatch.setattr(geopandas_module, "read_file", lambda *_args, **_kwargs: frame)
     monkeypatch.setattr(pd.DataFrame, "to_parquet", lambda *_args, **_kwargs: None)
 
-    controller.validate_field_boundary_geojson(source)
+    controller.validate_field_boundary_geojson(
+        source,
+        source_filename=r"C:\\uploads\\My Fields.geojson",
+    )
 
+    assert controller.field_boundaries_source_filename == "My Fields.geojson"
+    persisted = json.loads((tmp_path / controller.filename).read_text(encoding="ascii"))
+    assert persisted["py/state"]["_field_boundaries_source_filename"] == "My Fields.geojson"
     assert controller.field_id_key is None
     assert controller.rotation_accessor is None
     assert controller.get_staleness()["subfields"] is True
@@ -87,6 +144,7 @@ def test_invalid_boundary_reupload_preserves_canonical_artifacts_and_state(
     canonical.write_text("old-valid-content", encoding="utf-8")
     with controller.locked():
         controller._field_boundaries_geojson = canonical.name
+        controller._field_boundaries_source_filename = "old-fields.geojson"
         controller._geojson_is_valid = True
         controller._geojson_hash = "old-hash"
         controller._field_columns = ["field_id", "Crop2001"]
@@ -107,6 +165,7 @@ def test_invalid_boundary_reupload_preserves_canonical_artifacts_and_state(
         controller.validate_field_boundary_geojson(source)
 
     assert canonical.read_text(encoding="utf-8") == "old-valid-content"
+    assert controller.field_boundaries_source_filename == "old-fields.geojson"
     assert controller.geojson_hash == "old-hash"
     assert controller.field_id_key == "field_id"
     assert controller.rotation_accessor == "Crop{}"
@@ -176,6 +235,91 @@ def test_unreadable_2017_plant_file_persists_filename_in_failure_inventory(
     assert controller.get_invalid_plant_files() == [
         {"filename": "Broken.man", "error": "bad 2017 format"}
     ]
+
+
+def test_plant_upload_normalizes_residue_only_hmax_with_provenance(tmp_path: Path) -> None:
+    controller = _controller(tmp_path)
+    upload = Path(controller.ag_fields_dir) / "jim-plants.zip"
+    source_2017 = MANAGEMENT_FIXTURES / "canola_spring_mt_2017_1.man"
+    source_98_4 = MANAGEMENT_FIXTURES / "canola_spring_mt.man"
+    source_oats = MANAGEMENT_FIXTURES / "oats_spring_conventional.man"
+    with zipfile.ZipFile(upload, "w") as archive:
+        archive.writestr("Jim Canola.MAN", source_2017.read_bytes())
+        archive.writestr("Raw Canola.man", source_98_4.read_bytes())
+        archive.writestr("Raw Oats.man", source_oats.read_bytes())
+
+    inventory = controller.handle_plant_file_db_upload(upload.name)
+
+    expected_normalization = {
+        "scenario": "L179_weed",
+        "field": "plant.data.hmax",
+        "original_value": 0.0,
+        "normalized_value": 0.00001,
+        "units": "m",
+        "reason": "applied_residue_positive_hmax_required_by_wepp",
+    }
+    files_by_name = {item["filename"]: item for item in inventory["files"]}
+    assert files_by_name["Jim_Canola.man"]["normalizations"] == [expected_normalization]
+    assert files_by_name["Raw_Canola.man"]["normalizations"] == [expected_normalization]
+    assert files_by_name["Raw_Oats.man"]["normalizations"] == [expected_normalization]
+
+    for filename in ("Jim_Canola.man", "Raw_Canola.man", "Raw_Oats.man"):
+        management = read_management(str(Path(controller.plant_files_dir) / filename))
+        residue = next(plant for plant in management.plants if plant.name == "L179_weed")
+        assert residue.data.hmax == 0.00001
+
+    archived_path = Path(controller.plant_files_2017_1_dir) / "Jim_Canola.man"
+    archived_source = read_management(str(archived_path))
+    assert archived_path.read_bytes() == source_2017.read_bytes()
+    archived_residue = next(plant for plant in archived_source.plants if plant.name == "L179_weed")
+    assert archived_residue.data.hmax == 0.0
+
+    raw_text = (Path(controller.plant_files_dir) / "Raw_Canola.man").read_text(encoding="utf-8")
+    assert "# Conversion note: Residue resurfacing fractions" in raw_text
+
+    stack = [
+        read_management(str(Path(controller.plant_files_dir) / "Jim_Canola.man")),
+        *[
+            read_management(str(Path(controller.plant_files_dir) / "Raw_Oats.man"))
+            for _index in range(16)
+        ],
+    ]
+    synthesized = ag_fields_module.ManagementRotationSynth(stack, mode="stack-and-merge").build()
+    synthesized_residue = next(
+        plant for plant in synthesized.plants if plant.name == "L179_weed"
+    )
+    assert synthesized.sim_years == 17
+    assert synthesized.ncrop == 3
+    assert synthesized.nop == 10
+    assert synthesized_residue.data.hmax == 0.00001
+
+
+def test_residue_hmax_normalizer_does_not_change_active_zero_height_plant() -> None:
+    management = read_management(str(MANAGEMENT_FIXTURES / "canola_spring_mt.man"))
+    active = next(plant for plant in management.plants if plant.name == "L29_Cano")
+    active.data.hmax = 0.0
+
+    normalizations = AgFields._normalize_applied_residue_hmax(management)
+
+    assert [item["scenario"] for item in normalizations] == ["L179_weed"]
+    assert active.data.hmax == 0.0
+
+
+def test_legacy_plant_inventory_defaults_normalizations_to_empty(tmp_path: Path) -> None:
+    controller = _controller(tmp_path)
+    with controller.locked():
+        controller._valid_plant_files = ["legacy.man"]
+        controller._plant_file_provenance = {
+            "legacy.man": {
+                "source_filename": "legacy.man",
+                "format": "98.4",
+                "replaced": False,
+            }
+        }
+
+    inventory = controller.get_plant_file_inventory()
+
+    assert inventory["files"][0]["normalizations"] == []
 
 
 def test_rotation_lookup_writer_round_trips_partial_mapping_and_rejects_invalid_rows(

@@ -120,3 +120,26 @@ def test_run_wepp_rq_failure_names_subfield_and_parent_field(rq_context) -> None
     payload = json.loads(failure_message.split("EXCEPTION_JSON ", 1)[1])
     assert payload["sub_field_id"] == 34
     assert payload["field_id"] == 12
+
+
+def test_run_wepp_rq_applies_selected_binary_before_execution(rq_context) -> None:
+    _events, _published, controller_box = rq_context
+
+    class DummyAgFields:
+        wepp_bin = "wepp_260430"
+
+        def run_wepp_ag_fields(self, *, max_workers):
+            assert max_workers is None
+            assert self.wepp_bin == "wepp_dcc52a6"
+            return {"run_count": 2}
+
+    controller = DummyAgFields()
+    controller_box["controller"] = controller
+
+    result = ag_fields_rq.run_ag_fields_wepp_rq(
+        "demo",
+        wepp_bin="wepp_dcc52a6",
+    )
+
+    assert result == {"run_count": 2}
+    assert controller.wepp_bin == "wepp_dcc52a6"

@@ -1,0 +1,269 @@
+98.4
+# Conversion note: Residue resurfacing fractions (dimensionless, 0-1) were set to 0.0
+# because WEPP 98.4 cannot store them. Original 2016.3 values:
+# - Operation 'CULTIV_471144': fragile resurfacing=0.05000, non-fragile resurfacing=0.07000
+# - Operation 'CULTIV_471145': fragile resurfacing=0.01000, non-fragile resurfacing=0.01000
+# - Operation 'FERT_A_793456': fragile resurfacing=0.06000, non-fragile resurfacing=0.06000
+# - Operation 'FERT_A_793457': fragile resurfacing=0.01000, non-fragile resurfacing=0.01000
+# - Operation 'DRILL_478316': fragile resurfacing=0.01000, non-fragile resurfacing=0.01000
+# - Operation 'CHISEL_870817': fragile resurfacing=0.05000, non-fragile resurfacing=0.07000
+# Conversion note: Herbicide operations (code 17) were exported as code 4 ('other').
+# WEPP 98.4 does not simulate herbicide applications; management behaviour may differ.
+# - Operation '000_HERB': original code 17 -> exported code 4
+1 # number of ofes or channels
+2 # sim_years
+
+#############################
+#   Plant Growth Section    #
+#############################
+3 # ncrop
+L84_Oats
+Annual, grass, cool season, grain. Suggest harvest op: 
+(from WEPP LMOD service)
+comment...
+1 # Landuse - <Cropland>
+WeppWillSet
+15.60000 2.65000 30.00000 3.00000 5.22794 60.00000 0.00000 0.30000 0.80000 0.00500
+0.90000 0.80000 0.65000 0.99200 3.00000 0.00000 0.41000 1.00000
+2
+0.01100 0.01100 21.00000 0.25000 0.08000 1.22000 0.30000 0.00000 14 0.00000
+0.00000 5.00000 0.00000 
+
+L163_Weed
+Annual, warm season, weed growth. Use with Begin growth
+(from WEPP LMOD service)
+comment...
+1 # Landuse - <Cropland>
+WeppWillSet
+4.50000 3.00000 35.00000 4.00000 5.22794 45.00000 0.00000 0.04999 0.65000 0.00500
+0.80000 0.80000 0.65000 0.99000 3.00000 1100.00000 0.50000 0.49988
+1
+0.01500 0.01500 25.00000 0.25000 0.05000 1.50000 0.25000 0.00000 30 0.00000
+0.00000 3.50000 0.00000 
+
+L179_weed
+Applied residue type, pre or post emergent weeds that a
+(from WEPP LMOD service)
+comment...
+1 # Landuse - <Cropland>
+WeppWillSet
+0.00000 0.00000 0.00000 10.00000 1.00000 0.00000 0.00000 0.00000 0.00000 0.00500
+0.00000 0.00000 0.00000 0.00000 0.00000 0.00000 0.00000 0.00000
+1
+0.03000 0.03000 25.00000 0.00000 0.00000 0.00000 0.00000 0.00000 0 0.00000
+0.00000 0.00000 0.00000 
+
+#############################
+#     Operation Section     #
+#############################
+8 # nop
+000_HERB
+comment...
+comment...
+comment..
+1 # Landuse - <Cropland>
+0.00000 0.00000 0
+4
+0.00000 0.00000 0.00000 0.00000 0.00000 0.00000 0.00000
+
+CULTIV_471144
+comment: Cultivator, field w/ spike points, coil tine h
+(from WEPP LMOD service)
+comment...
+1 # Landuse - <Cropland>
+0.45000 0.31000 0
+4
+0.05080 0.30000 0.45000 0.31000 0.01020 1.00000 0.10160
+
+CULTIV_471145
+comment: Cultivator, field w/ spike points, coil tine h
+(from WEPP LMOD service)
+comment...
+1 # Landuse - <Cropland>
+0.22000 0.13000 0
+4
+0.02540 0.02540 0.22000 0.13000 0.01020 1.00000 0.05080
+
+FERT_A_793456
+comment: Chisel, st. pt. 12 in deep, coil tine har
+(from WEPP LMOD service)
+comment...
+1 # Landuse - <Cropland>
+0.20000 0.10000 0
+4
+0.02540 0.30480 0.20000 0.10000 0.01020 0.25000 0.10160
+
+FERT_A_793457
+comment: Chisel, st. pt. 12 in deep, coil tine har
+(from WEPP LMOD service)
+comment...
+1 # Landuse - <Cropland>
+0.25000 0.15000 0
+4
+0.02540 0.10160 0.25000 0.15000 0.01020 1.00000 0.02540
+
+DRILL_478316
+comment: Drill or airseeder, double disk
+(from WEPP LMOD service)
+comment...
+1 # Landuse - <Cropland>
+0.19000 0.11000 0
+4
+0.02540 0.20300 0.19000 0.11000 0.00760 0.55000 0.03810
+
+RES_2
+comment...
+comment...
+comment...
+1 # Landuse - <Cropland>
+0.00000 0.00000 0
+10
+0.00000 0.00000 0.00000 0.00000 0.00000 0.00000 0.00000
+3
+0.02802
+
+CHISEL_870817
+comment: Chisel, st. pt.
+(from WEPP LMOD service)
+comment...
+1 # Landuse - <Cropland>
+0.57000 0.37000 0
+4
+0.07620 0.38100 0.57000 0.37000 0.03810 1.00000 0.17700
+
+#############################
+# Initial Condition Section
+#############################
+1 # nini
+Default1
+Put here as default by LMOD -> .rot convert - Default c
+90 percent cover, approximately 200 days since last til
+500 mm of rain since last tillage in summer prior
+1 # Landuse - <Cropland>
+1.10000 0.00000 200 92 0.00000 0.50000
+1
+1
+500.12601 0.02000 0.50000 0.02000 0.00000
+1
+0.00000 0.00000 0.10000 0.20000 0.02540
+0.20000 0.19997  
+
+#############################
+#  Surface Effects Section  #
+#############################
+1 # nseq
+Year 1
+From WEPP database
+Your name, phone
+(null)
+1 # Landuse - <Cropland>
+8 # ntill
+   110 # mdate
+   1 # op
+     0.00000 # tildep
+     2 # typtil
+
+   110 # mdate
+   2 # op
+     0.10200 # tildep
+     2 # typtil
+
+   110 # mdate
+   3 # op
+     0.05100 # tildep
+     2 # typtil
+
+   111 # mdate
+   4 # op
+     0.10200 # tildep
+     2 # typtil
+
+   111 # mdate
+   5 # op
+     0.02500 # tildep
+     2 # typtil
+
+   112 # mdate
+   6 # op
+     0.03800 # tildep
+     2 # typtil
+
+   135 # mdate
+   7 # op
+     0.00000 # tildep
+     2 # typtil
+
+   274 # mdate
+   8 # op
+     0.17700 # tildep
+     2 # typtil
+
+#############################
+#      Contour Section      #
+#############################
+0 # ncnt
+
+#############################
+#      Drainage Section     #
+#############################
+0 # ndrain
+
+#############################
+#       Yearly Section      #
+#############################
+2 # nscen
+Year 1
+(null)
+(null)
+(null)
+1 # Landuse - <Cropland>
+2 	# Plant Growth Scenario index (itype)
+1 	# Surface Effect Scenario index (itype)
+0 	# Contour Scenario index (conset)
+0 	# Drainage Scenario index (drset)
+1 	# Cropping system (imngmt)
+   110 	# Harvesting date or end of fallow period (jdharv)
+   32 	# Planting date or start of fallow period (jdplt)
+   0.91440 	# Row width (rw)
+   6 	# Residue management option (resmgt)
+   
+
+
+Year 2
+(null)
+(null)
+(null)
+1 # Landuse - <Cropland>
+1 	# Plant Growth Scenario index (itype)
+1 	# Surface Effect Scenario index (itype)
+0 	# Contour Scenario index (conset)
+0 	# Drainage Scenario index (drset)
+1 	# Cropping system (imngmt)
+   227 	# Harvesting date or end of fallow period (jdharv)
+   112 	# Planting date or start of fallow period (jdplt)
+   0.25400 	# Row width (rw)
+   6 	# Residue management option (resmgt)
+   
+
+
+#############################
+#     Management Section    #
+#############################
+Manage
+description 1
+description 2
+description 3
+1 # number of ofes in the rotation (nofe)
+# Initial Condition Scenario indices used for each OFE
+  1
+2 # number of times the rotation is repeated (nrots)
+1 # number of years in a single rotation
+   2 	# plants/year; <Year: 1 - OFE: 1>  (nycrop)
+      1 	# yearly index <Year 1>
+      2 	# yearly index <Year 2>
+
+1 # number of years in a single rotation
+   2 	# plants/year; <Year: 1 - OFE: 1>  (nycrop)
+      1 	# yearly index <Year 1>
+      2 	# yearly index <Year 2>
+

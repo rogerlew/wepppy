@@ -369,13 +369,15 @@ var AgFields = (function () {
             }
         }
 
-        function setDisabled(button, disabled) {
-            if (!button) {
+        function setDisabled(control, disabled) {
+            if (!control) {
                 return;
             }
-            setButtonBusy(button, false);
-            button.disabled = Boolean(disabled);
-            button.setAttribute("aria-disabled", disabled ? "true" : "false");
+            if (control.tagName === "BUTTON") {
+                setButtonBusy(control, false);
+            }
+            control.disabled = Boolean(disabled);
+            control.setAttribute("aria-disabled", disabled ? "true" : "false");
         }
 
         function hasActiveJob(state) {
@@ -423,6 +425,8 @@ var AgFields = (function () {
                 geojsonInput: queryRole("geojson-input", form),
                 uploadButton: queryRole("upload-button", form),
                 uploadStatus: queryRole("upload-status", form),
+                boundaryFileDisplay: queryRole("boundary-file-display", form),
+                boundaryFilename: queryRole("boundary-filename", form),
                 boundarySummary: queryRole("boundary-summary", form),
                 duplicateWarning: queryRole("duplicate-warning", form),
                 fieldIdSelect: queryRole("field-id-select", form),
@@ -447,7 +451,7 @@ var AgFields = (function () {
                 plantdbOptions: dom.qs("#agfields_plantdb_options", form),
                 runButton: queryRole("run-button", form),
                 runStatus: queryRole("run-status", form),
-                maxWorkersInput: queryRole("max-workers-input", form),
+                weppBinSelect: queryRole("wepp-bin-select", form),
                 clearRunsButton: queryRole("clear-runs-button", form),
                 resultsLinks: queryRole("results-links", form),
                 statusPanel: dom.qs("#ag_fields_status_panel", form),
@@ -762,6 +766,13 @@ var AgFields = (function () {
             var state = controller.state || {};
             var boundary = asObject(state.boundary);
             var active = hasActiveJob(state);
+            var filename = asString(boundary.filename);
+            if (controller.nodes.boundaryFilename) {
+                controller.nodes.boundaryFilename.textContent = filename;
+            }
+            if (controller.nodes.boundaryFileDisplay) {
+                controller.nodes.boundaryFileDisplay.hidden = !filename;
+            }
             if (boundary.geojson_is_valid) {
                 setChip(
                     controller.nodes.boundarySummary,
@@ -941,6 +952,9 @@ var AgFields = (function () {
             var staleness = asObject(state.staleness);
             var active = hasActiveJob(state);
             var blocked = "";
+            if (controller.nodes.weppBinSelect && asString(wepp.wepp_bin)) {
+                controller.nodes.weppBinSelect.value = asString(wepp.wepp_bin);
+            }
             if (!subfields.complete) {
                 blocked = "Build sub-fields first.";
             } else if (!mapping.complete) {
@@ -950,6 +964,7 @@ var AgFields = (function () {
                 blocked = "Run the watershed WEPP hillslopes first — sub-fields reuse their soil and climate files.";
             }
             setDisabled(controller.nodes.runButton, active || Boolean(blocked));
+            setDisabled(controller.nodes.weppBinSelect, active);
             setDisabled(controller.nodes.clearRunsButton, active);
             if (active) {
                 setChip(controller.nodes.runStatus, "An AgFields job is running; wait for it to finish.", "warning");
@@ -1552,10 +1567,10 @@ var AgFields = (function () {
         }
 
         function runWepp() {
-            var value = controller.nodes.maxWorkersInput ? controller.nodes.maxWorkersInput.value.trim() : "";
+            var weppBin = controller.nodes.weppBinSelect ? controller.nodes.weppBinSelect.value.trim() : "";
             enqueue(
                 "agfields/run-wepp",
-                { max_workers: value === "" ? null : Number(value) },
+                { wepp_bin: weppBin },
                 "agfields_run_wepp",
                 controller.nodes.runButton,
                 "Queuing sub-field WEPP runs…",

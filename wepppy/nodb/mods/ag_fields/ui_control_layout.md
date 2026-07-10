@@ -113,8 +113,10 @@ Every stage is a `wc-panel` section inside the shell with a numbered `wc-panel__
 Purpose: get a valid boundary file and freeze its interpretation.
 
 - Upload: `ui.file_upload` accepting `.geojson,.json`, primary button "Upload Field Boundaries". Upload is synchronous (route runs `validate_field_boundary_geojson`); button shows busy state while in flight.
+- Current file: after hydration, render the persisted source basename in its own `ui.text_display` control below the upload input. Historical projects without source-name metadata fall back to the canonical boundary filename. Hide the control when no boundary file exists; a reload must not make the accepted upload appear lost merely because browsers cannot repopulate file inputs.
 - On success the route returns feature count, column list, and `field_id_duplicates`. Note: the controller method returns only the duplicates — the route assembles count/columns/timestamp from the NoDb properties it just populated. Render a success chip with count/columns/timestamp; render a separate warning chip for duplicates (non-blocking — duplicates are a data-quality warning, per backend behavior).
-- Validation failures (missing `field_id` column, unreadable file) render in the upload status chip with the server message. The backend hard-requires a literal `field_id` column; say so in the instruction copy before the user uploads. CRS problems do NOT surface here — upload validation reads attributes only; a missing CRS is inferred (or fails on non-overlap) during rasterization in stage 2.
+- Validation failures (missing `field_id` column, unreadable file) render in the upload status chip with the server message. The backend hard-requires a literal `field_id` column; say so in the instruction copy before the user uploads. CRS problems do NOT surface here — upload validation reads attributes only; CRS resolution and extent validation occur during rasterization in stage 2.
+- Boundary CRS contract: for maximum overlay and rasterization precision, the preferred input is a GeoJSON whose coordinates are already in the exact projected UTM CRS used by the project DEM. AgFields recognizes unlabeled coordinates that match the project UTM coordinate domain/bounds even though GeoJSON readers commonly default unlabeled files to `EPSG:4326`. Longitude/latitude WGS84 remains supported and is reprojected to the DEM CRS. A different projected CRS is supported only when the file carries CRS metadata that GDAL can resolve; AgFields must not guess an arbitrary projection from ambiguous numeric coordinates.
 - Field ID column: `ui.select_field` populated from the returned column list, defaulting to `field_id`. Most users never touch it.
 - Crop-year pattern: the controller JS proposes the pattern by scanning column names for trailing 4-digit years within the observed climate range and grouping by the surrounding template (e.g. `Crop2008…Crop2015` → `Crop{}`). Three outcomes:
   - Exactly one candidate covering every observed year: render as read-only text ("Crop{} — resolves Crop2008…Crop2015") with the collapsible available to override.
@@ -132,7 +134,7 @@ Purpose: run the mechanical chain (rasterize → Peridot abstraction → polygon
 - Primary button "Build Sub-fields" enqueues one RQ job that chains `rasterize_field_boundaries_geojson`, `periodot_abstract_sub_fields`, `polygonize_sub_fields`. The words "rasterize", "abstract", and "polygonize" appear only in the status log, never as controls.
 - "Delineation options" collapsible: `ui.numeric_field` for minimum sub-field area (m², default 0 = keep everything, help text: "Sub-fields smaller than this are dropped."). A note that rebuilding replaces prior sub-fields and invalidates prior runs.
 - Blocked chips: stage 1 incomplete → "Confirm the field boundary schema above first." Watershed abstraction missing (`dem/wbt/flovec.tif` absent) → "Build the watershed subcatchments first." (Peridot asserts both `flovec.tif` and `field_boundaries.tif`, but the latter is produced by this job's own first step, so only `flovec.tif` is a UI gate. The readiness check belongs in the state snapshot — do not rely on Peridot's Python `assert` as the user-facing error.)
-- Failure modes that surface here, not at upload: un-inferable CRS and field geometry not overlapping the DEM extent. Both render the server message in the stage status chip.
+- Failure modes that surface here, not at upload: un-inferable/ambiguous CRS and field geometry not overlapping the DEM extent. Both render the server message in the stage status chip. The CRS error must include the project DEM CRS and project/upload bounds and instruct the user to export in that project CRS for best precision or supply correct metadata for another projected CRS.
 - Summary on completion (hydrated from `field_n`, `sub_field_n`, `sub_field_fp_n`): "N fields → M sub-fields". Include "Show on Map": follow the Roads precedent — a run-scoped resource endpoint serves `sub_fields.WGS.geojson` (as `roads_bp.py` serves `resources/roads.json`) and the controller registers a named overlay via the GL map's `addGeoJsonOverlay`, refreshing it after rebuilds.
 - Instruction copy must tell the user to review before running: sub-field splitting is the point of the tool, and geometry mistakes here poison everything downstream.
 - Complete when: `sub_field_n > 0` and `sub_fields.WGS.geojson` exists.
@@ -157,7 +159,8 @@ Purpose: run and monitor the per-sub-field simulations.
 
 - Primary button "Run WEPP on Sub-fields" enqueues the RQ job wrapping `run_wepp_ag_fields`.
 - Blocked chips, checked in order: stage 2 incomplete → "Build sub-fields first." Stage 3 incomplete → "Map all crops to managements first (N unmapped)." Parent WEPP hillslope artifacts missing (`wepp/runs/p*.sol`/`.cli`) → "Run the watershed WEPP hillslopes first — sub-fields reuse their soil and climate files."
-- "Run options" collapsible: max workers numeric (blank = auto, help: "Auto uses one worker per CPU core, at most one per sub-field."), and "Clear previous runs and outputs" button wrapping `clear_ag_field_wepp_runs`/`clear_ag_field_wepp_outputs` (confirmation via status chip, not a modal — it only deletes regenerable artifacts).
+- "Run options" collapsible: a "WEPP Exec" select populated from the same installed-binary list as the main WEPP control, and a content-width "Clear previous runs and outputs" button wrapping `clear_ag_field_wepp_runs`/`clear_ag_field_wepp_outputs` (confirmation via status chip, not a modal — it only deletes regenerable artifacts). Do not expose the executor worker count in this UI.
+- The AgFields executable is independent of the parent watershed WEPP executable and is persisted in `ag_fields.nodb`. New projects created from `ag-fields.cfg` default to `wepp_dcc52a6`; historical projects that predate the setting retain their parent WEPP executable until a user makes an AgFields selection. The selected executable is submitted with the run request and is the value propagated to every sub-field hillslope process.
 - Progress streams to the status panel (the backend already logs "(k/N) sub_field_id=… completed"). No separate progress widget in v1.
 - On success: success chip with run count and links — browse `wepp/ag_fields/output/`, and a pointer to Features Export for `AgFields Spatial` / `AgFields Metrics` layers.
 - A single sub-field failure aborts the run (backend cancels pending sub-fields; already-running ones finish): the stacktrace panel shows the failing sub-field; the status chip must name the failed `sub_field_id` and its parent `field_id`.
@@ -198,10 +201,10 @@ Hydration: all gating state derives from one snapshot (template context at rende
 
 | Region | Hooks |
 |---|---|
-| Stage 1 | `geojson-input`, `upload-button`, `upload-status`, `boundary-summary`, `duplicate-warning`, `field-id-select`, `accessor-display`, `accessor-input`, `accessor-resolution-body`, `confirm-schema-button`, `schema-status` |
+| Stage 1 | `geojson-input`, `upload-button`, `upload-status`, `boundary-file-display`, `boundary-filename`, `boundary-summary`, `duplicate-warning`, `field-id-select`, `accessor-display`, `accessor-input`, `accessor-resolution-body`, `confirm-schema-button`, `schema-status` |
 | Stage 2 | `build-subfields-button`, `subfields-status`, `subfields-summary`, `show-on-map-button`, `min-area-input` |
 | Stage 3 | `mapping-chip`, `open-mapping-button`, `plantdb-input`, `plantdb-upload-button`, `plantdb-status`, `plantfile-table-body` |
-| Stage 4 | `run-button`, `run-status`, `max-workers-input`, `clear-runs-button`, `results-links` |
+| Stage 4 | `run-button`, `run-status`, `wepp-bin-select`, `clear-runs-button`, `results-links` |
 | Modal | `mapping-table-body`, `mapping-status`, `mapping-save-button`, `unused-mappings` |
 
 - Empty status chips collapse via the `:empty { display: none }` pattern.
@@ -236,12 +239,12 @@ All routes are run-scoped under rq-engine and follow the Treatments/Disturbed pr
 | Delete plant file | `DELETE /runs/{runid}/{config}/agfields/plant-files/{filename}` | Deletes a `.man` basename and returns refreshed inventory plus mapping validation |
 | Rotation mapping (read/save) | `GET/POST /runs/{runid}/{config}/agfields/rotation-mapping` | Reads modal data or saves JSON `rows` to canonical `rotation_lookup.tsv` and returns per-row validation |
 | Management options | `GET /runs/{runid}/{config}/agfields/management-options` | Returns management id + description pairs from the run's landuse mapping |
-| Run WEPP sub-fields | `POST /runs/{runid}/{config}/agfields/run-wepp` | Enforces sub-field, mapping, and parent-WEPP readiness, then enqueues optional `max_workers` |
+| Run WEPP sub-fields | `POST /runs/{runid}/{config}/agfields/run-wepp` | Enforces sub-field, mapping, and parent-WEPP readiness, validates and persists required `wepp_bin`, then enqueues with automatic worker sizing; legacy callers may continue to send optional `max_workers` |
 | Clear runs/outputs | `POST /runs/{runid}/{config}/agfields/clear` | Clears both regenerable AgFields WEPP directories and recorded run provenance |
 | Sub-fields overlay resource | `GET /runs/{runid}/{config}/agfields/sub-fields.geojson` | Serves `sub_fields.WGS.geojson` as `application/geo+json` |
 | State snapshot | `GET /runs/{runid}/{config}/agfields/state` | Returns all stage hydration state described below |
 
-The state snapshot has top-level objects `boundary`, `schema`, `subfields`, `mapping`, `plant_files`, `wepp`, `staleness`, and `readiness`. It also exposes `job_ids` (last known ids) and `active_job_ids` (only queued/started/deferred/scheduled ids) under the contractual keys `agfields_build_subfields`, `agfields_plantdb`, and `agfields_run_wepp`. Staleness keys are `subfields` and `wepp_runs`; readiness keys are `observed_climate`, `watershed_abstraction`, `parent_wepp`, observed year bounds, and missing parent WEPP ids.
+The state snapshot has top-level objects `boundary`, `schema`, `subfields`, `mapping`, `plant_files`, `wepp`, `staleness`, and `readiness`. `boundary.filename` is the persisted source basename shown after reload, with the canonical boundary filename as the compatibility fallback for historical projects. `wepp.wepp_bin` is the current AgFields executable and hydrates the Stage 4 selector. The snapshot also exposes `job_ids` (last known ids) and `active_job_ids` (only queued/started/deferred/scheduled ids) under the contractual keys `agfields_build_subfields`, `agfields_plantdb`, and `agfields_run_wepp`. Staleness keys are `subfields` and `wepp_runs`; readiness keys are `observed_climate`, `watershed_abstraction`, `parent_wepp`, observed year bounds, and missing parent WEPP ids.
 
 RQ tasks return their terminal payload through the RQ job result and publish the same payload as `RESULT_JSON` before their completion trigger. Plant processing publishes the valid/invalid inventory; sub-field building publishes field/sub-field counts; WEPP publishes `run_count`. Failures publish `EXCEPTION_JSON`; plant failures include `filename`, and WEPP failures include both `sub_field_id` and parent `field_id`. Completion triggers are `AGFIELDS_BUILD_SUBFIELDS_TASK_COMPLETED`, `AGFIELDS_PLANTDB_TASK_COMPLETED`, and `AGFIELDS_RUN_WEPP_TASK_COMPLETED`.
 
@@ -251,7 +254,7 @@ Async submissions are single-flight per run across all three job families. A con
 
 The backend-readiness package `docs/work-packages/20260709_ag_fields_backend_readiness/` completed these prerequisites. The list remains as implementation rationale and regression scope for the successor UI package.
 
-1. **`run_wepp_subfield` binary propagation:** `wepp_bin` is explicit and is read from the Wepp NoDb before executor submission.
+1. **`run_wepp_subfield` binary propagation:** `wepp_bin` is explicit and is read from the AgFields NoDb before executor submission; historical AgFields NoDb payloads without that additive key fall back to the parent Wepp NoDb value.
 2. **RQ task wrappers:** `wepppy/rq/ag_fields_rq.py` provides build-subfields, plant-db, and run-wepp jobs with the §7 keys and status events.
 3. **Re-upload staleness:** boundary replacement clears schema selections; build/run source signatures drive server-side `subfields` and `wepp_runs` staleness.
 4. **Structured lookup validation:** `validate_rotation_lookup()` returns per-crop `ok`/`unmapped`/`error` results and does not print.

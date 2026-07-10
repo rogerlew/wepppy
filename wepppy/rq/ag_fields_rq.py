@@ -167,7 +167,11 @@ def process_ag_fields_plant_db_rq(runid: str, plant_db_zip_fn: str) -> Dict[str,
 
 
 @with_exception_logging
-def run_ag_fields_wepp_rq(runid: str, max_workers: Optional[int] = None) -> Dict[str, Any]:
+def run_ag_fields_wepp_rq(
+    runid: str,
+    max_workers: Optional[int] = None,
+    wepp_bin: Optional[str] = None,
+) -> Dict[str, Any]:
     """Run WEPP for each current AgFields sub-field."""
     if max_workers is not None:
         max_workers = int(max_workers)
@@ -183,6 +187,8 @@ def run_ag_fields_wepp_rq(runid: str, max_workers: Optional[int] = None) -> Dict
         wd = get_wd(runid)
         clear_nodb_file_cache(runid, pup_relpath="ag_fields.nodb")
         ag_fields = AgFields.getInstance(wd)
+        if wepp_bin is not None:
+            ag_fields.wepp_bin = wepp_bin
         result = ag_fields.run_wepp_ag_fields(max_workers=max_workers)
         _publish_result(status_channel, job_id, result)
         _publish_completed(

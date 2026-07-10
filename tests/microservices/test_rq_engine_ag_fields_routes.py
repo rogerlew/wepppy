@@ -32,6 +32,8 @@ class DummyAgFields:
         ):
             Path(directory).mkdir(parents=True, exist_ok=True)
         self.geojson_is_valid = True
+        self.field_boundaries_geojson = "fields.WGS.geojson"
+        self.field_boundaries_source_filename = "uploaded-fields.geojson"
         self.geojson_hash = "hash"
         self.geojson_timestamp = 123
         self.field_columns = ["field_id", "Crop2001"]
@@ -40,11 +42,14 @@ class DummyAgFields:
         self.rotation_accessor = "Crop{}"
         self.sub_field_n = 2
         self.sub_field_fp_n = 0
+        self.wepp_bin = "wepp_dcc52a6"
         self.cleared = False
         self.saved_rows = None
 
-    def validate_field_boundary_geojson(self, path: Path):
+    def validate_field_boundary_geojson(self, path: Path, *, source_filename: str | None = None):
         assert path.name == "field-boundaries-upload.geojson"
+        assert source_filename == "fields.geojson"
+        self.field_boundaries_source_filename = source_filename
         return {"field_id_duplicates": [7]}
 
     def confirm_schema(self, field_id_key: str, rotation_accessor: str) -> None:
@@ -158,7 +163,7 @@ def test_every_agfields_route_authorizes_run_access(
 
 
 def test_boundary_upload_returns_controller_summary(route_context) -> None:
-    _controller, auth_calls = route_context
+    controller, auth_calls = route_context
 
     with TestClient(rq_engine.app) as client:
         response = client.post(
@@ -173,6 +178,7 @@ def test_boundary_upload_returns_controller_summary(route_context) -> None:
         "geojson_timestamp": 123,
         "field_id_duplicates": [7],
     }
+    assert controller.field_boundaries_source_filename == "fields.geojson"
     assert auth_calls[-1][1] == "demo"
 
 
@@ -440,10 +446,12 @@ def test_state_and_overlay_return_hydration_contract(route_context) -> None:
 
     assert state.status_code == 200
     payload = state.json()
+    assert payload["boundary"]["filename"] == "uploaded-fields.geojson"
     assert payload["schema"]["complete"] is True
     assert payload["subfields"]["complete"] is True
     assert payload["mapping"]["complete"] is True
     assert payload["readiness"]["parent_wepp"] is True
+    assert payload["wepp"]["wepp_bin"] == "wepp_dcc52a6"
     assert set(payload["active_job_ids"]) == {
         "agfields_build_subfields",
         "agfields_plantdb",
@@ -451,6 +459,11 @@ def test_state_and_overlay_return_hydration_contract(route_context) -> None:
     }
     assert overlay.status_code == 200
     assert overlay.headers["content-type"].startswith("application/geo+json")
+
+    controller.field_boundaries_source_filename = None
+    with TestClient(rq_engine.app) as client:
+        historical_state = client.get("/api/runs/demo/cfg/agfields/state")
+    assert historical_state.json()["boundary"]["filename"] == "fields.WGS.geojson"
 
 
 def test_state_job_ids_only_marks_active_rq_statuses(
@@ -510,9 +523,28 @@ def test_run_wepp_enqueues_contractual_job_key(route_context, monkeypatch: pytes
     with TestClient(rq_engine.app) as client:
         response = client.post(
             "/api/runs/demo/cfg/agfields/run-wepp",
-            json={"max_workers": 4},
+            json={"max_workers": 4, "wepp_bin": "wepp_dcc52a6"},
         )
 
     assert response.status_code == 202
     assert calls[0][1] == "agfields_run_wepp"
-    assert calls[0][3] == ("demo", 4)
+    assert calls[0][3] == ("demo", 4, "wepp_dcc52a6")
+
+
+def test_run_wepp_rejects_unknown_binary(route_context, monkeypatch: pytest.MonkeyPatch) -> None:
+    controller, _auth_calls = route_context
+    Path(controller.sub_fields_wgs_geojson).touch()
+    monkeypatch.setattr(
+        ag_fields_routes,
+        "get_linux_wepp_bin_opts",
+        lambda: ["wepp_dcc52a6"],
+    )
+
+    with TestClient(rq_engine.app) as client:
+        response = client.post(
+            "/api/runs/demo/cfg/agfields/run-wepp",
+            json={"wepp_bin": "../../not-a-wepp-binary"},
+        )
+
+    assert response.status_code == 400
+    assert response.json()["error"]["message"] == "Unknown WEPP executable: ../../not-a-wepp-binary"

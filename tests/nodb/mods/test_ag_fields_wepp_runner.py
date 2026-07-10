@@ -40,7 +40,7 @@ def test_run_wepp_ag_fields_passes_configured_binary_to_subfield_runner(
         logger=SimpleNamespace(info=lambda *_args, **_kwargs: None, error=lambda *_args, **_kwargs: None),
         climate_instance=SimpleNamespace(observed_start_year=2001, observed_end_year=2001),
         watershed_instance=SimpleNamespace(clip_hillslopes=False, clip_hillslope_length=None),
-        wepp_instance=SimpleNamespace(wepp_bin="/opt/wepp/bin/wepp"),
+        wepp_bin="wepp_dcc52a6",
         subfields_parquet=subfields,
         rotation_schedule_parquet="rotation_schedule.parquet",
         field_id_key="field_id",
@@ -54,7 +54,7 @@ def test_run_wepp_ag_fields_passes_configured_binary_to_subfield_runner(
     ag_fields_module.AgFields.run_wepp_ag_fields(controller, max_workers=1)
 
     assert len(calls) == 1
-    assert calls[0][8] == "/opt/wepp/bin/wepp"
+    assert calls[0][8] == "wepp_dcc52a6"
 
 
 def test_run_wepp_subfield_reaches_runner_with_explicit_binary(

@@ -4,10 +4,9 @@ from __future__ import annotations
 
 from copy import deepcopy
 from dataclasses import dataclass
+from enum import Enum
 from pathlib import Path
-from typing import Any, Dict, Iterable, List, Optional, Sequence
-
-import sys
+from typing import Any, Dict, Iterable, Iterator, List, Optional, Sequence
 
 from wepppy.wepp.management.managements import (
     Loops,
@@ -15,6 +14,7 @@ from wepppy.wepp.management.managements import (
     ManagementLoopMan,
     ManagementLoopManLoop,
     ScenarioReference,
+    SectionType,
 )
 
 __all__ = [
@@ -27,6 +27,7 @@ class _MergedOperation:
     obj: object
     name: Optional[str]
     day: Optional[int]
+
 
 @dataclass
 class _FirstYearMerge:
@@ -44,8 +45,9 @@ class ManagementRotationSynth(object):
     The synthesiser accepts a sequence of ``Management`` instances that represent
     consecutive treatments or crop rotations.  It verifies that each input has
     the same number of OFEs and then builds a new ``Management`` whose yearly
-    section and management loops are concatenations of the inputs while sharing
-    plant/operation/initial-condition scenarios.
+    section and management loops follow the input order. ``end-to-end`` mode
+    preserves each segment's definitions, while ``stack-and-merge`` mode shares
+    structurally identical reusable scenarios and omits unreachable definitions.
 
     Parameters
     ----------
@@ -61,6 +63,15 @@ class ManagementRotationSynth(object):
     """
 
     _VALID_MODES = ('end-to-end', 'stack-and-merge')
+    _MAX_WEPP_PLANT_SCENARIOS = 20
+    _GRAPH_POINTER_FIELDS = frozenset({'root', 'parent', 'this'})
+    _REUSABLE_SECTIONS = (
+        ('plants', SectionType.Plant),
+        ('ops', SectionType.Op),
+        ('contours', SectionType.Contour),
+        ('drains', SectionType.Drain),
+        ('inis', SectionType.Ini),
+    )
 
     def __init__(self, managements: Sequence[Management], mode: str = 'end-to-end'):
         if not managements:
@@ -104,63 +115,179 @@ class ManagementRotationSynth(object):
         return '\n'.join(f"# {line}" for line in lines)
 
     def _apply_prefix(self, management: Management, prefix: str) -> None:
-        name_maps = {}
+        name_maps: Dict[SectionType, Dict[str, str]] = {}
 
-        def rename(section_name):
+        def rename(section_name: str, section_type: SectionType) -> None:
             loops = getattr(management, section_name)
-            mapping = {}
+            mapping: Dict[str, str] = {}
             for loop in loops:
                 old = loop.name
                 new = f"{prefix}{old}"
                 loop.name = new
                 mapping[old] = new
-            name_maps[section_name] = mapping
+            name_maps[section_type] = mapping
 
-        for section in ('plants', 'ops', 'inis', 'surfs', 'contours', 'drains', 'years'):
-            rename(section)
+        for section_name, section_type in (
+            ('plants', SectionType.Plant),
+            ('ops', SectionType.Op),
+            ('inis', SectionType.Ini),
+            ('surfs', SectionType.Surf),
+            ('contours', SectionType.Contour),
+            ('drains', SectionType.Drain),
+            ('years', SectionType.Year),
+        ):
+            rename(section_name, section_type)
 
-        def update_ref(ref, section_name):
-            if isinstance(ref, ScenarioReference):
-                mapping = name_maps.get(section_name, {})
-                if ref.loop_name in mapping:
-                    ref.loop_name = mapping[ref.loop_name]
+        for section_type, mapping in name_maps.items():
+            self._remap_references(management, section_type, mapping)
 
-        # Initial conditions reference plants
-        for ini in management.inis:
-            data = getattr(ini, 'data', None)
-            if data and hasattr(data, 'iresd'):
-                update_ref(data.iresd, 'plants')
+    def _iter_references(self, obj: Any) -> Iterator[ScenarioReference]:
+        seen: set[int] = set()
 
-        # Surface effects reference operations
-        for surf in management.surfs:
-            data = getattr(surf, 'data', None)
-            if isinstance(data, Loops):
-                for til_op in data:
-                    if hasattr(til_op, 'op'):
-                        update_ref(til_op.op, 'ops')
+        def visit(value: Any) -> Iterator[ScenarioReference]:
+            if value is None:
+                return
 
-        # Year loops reference plant/surface/contour/drain scenarios
-        for year in management.years:
-            data = getattr(year, 'data', None)
-            if data:
-                if hasattr(data, 'itype'):
-                    update_ref(data.itype, 'plants')
-                if hasattr(data, 'tilseq'):
-                    update_ref(data.tilseq, 'surfs')
-                if hasattr(data, 'conset'):
-                    update_ref(data.conset, 'drains')
-                if hasattr(data, 'drset'):
-                    update_ref(data.drset, 'contours')
+            value_id = id(value)
+            if value_id in seen:
+                return
+            seen.add(value_id)
 
-        # Management loop references initial conditions and years
-        for ref in management.man.ofeindx:
-            update_ref(ref, 'inis')
+            if isinstance(value, ScenarioReference):
+                yield value
+                return
 
-        for rot in management.man.loops:
-            for year_list in rot.years:
-                for man_loop in year_list:
-                    for ref in man_loop.manindx:
-                        update_ref(ref, 'years')
+            if isinstance(value, dict):
+                for item in value.values():
+                    yield from visit(item)
+                return
+
+            if isinstance(value, (list, tuple, set, frozenset)):
+                for item in value:
+                    yield from visit(item)
+                return
+
+            if hasattr(value, '__dict__'):
+                for field_name, item in vars(value).items():
+                    if field_name in self._GRAPH_POINTER_FIELDS:
+                        continue
+                    yield from visit(item)
+
+        yield from visit(obj)
+
+    def _remap_references(
+        self,
+        management: Management,
+        section_type: SectionType,
+        name_map: Dict[str, str],
+    ) -> None:
+        if not name_map:
+            return
+        for ref in self._iter_references(management):
+            if ref.section_type == section_type and ref.loop_name in name_map:
+                ref.loop_name = name_map[ref.loop_name]
+
+    def _scenario_signature(self, scenario: Any) -> tuple[Any, ...]:
+        return self._freeze_signature_value(scenario, top_level=True)
+
+    def _freeze_signature_value(self, value: Any, *, top_level: bool = False) -> tuple[Any, ...]:
+        if isinstance(value, Enum):
+            return ('enum', type(value).__qualname__, value.name)
+        if isinstance(value, ScenarioReference):
+            section_name = value.section_type.name if value.section_type is not None else None
+            return ('reference', section_name, value.loop_name)
+        if value is None or isinstance(value, (str, int, float, bool)):
+            return ('scalar', type(value).__qualname__, value)
+        if isinstance(value, dict):
+            items = tuple(
+                sorted(
+                    (self._freeze_signature_value(key), self._freeze_signature_value(item))
+                    for key, item in value.items()
+                )
+            )
+            return ('mapping', type(value).__qualname__, items)
+        if isinstance(value, (list, tuple)):
+            items = tuple(self._freeze_signature_value(item) for item in value)
+            return ('sequence', type(value).__qualname__, items)
+        if isinstance(value, (set, frozenset)):
+            items = tuple(sorted(self._freeze_signature_value(item) for item in value))
+            return ('set', type(value).__qualname__, items)
+        if hasattr(value, '__dict__'):
+            fields = tuple(
+                (field_name, self._freeze_signature_value(item))
+                for field_name, item in sorted(vars(value).items())
+                if field_name not in self._GRAPH_POINTER_FIELDS
+                and not (top_level and field_name == 'name')
+            )
+            return ('object', type(value).__qualname__, fields)
+        return ('value', type(value).__qualname__, repr(value))
+
+    def _deduplicate_reusable_scenarios(
+        self,
+        segment: Management,
+        canonical_names: Dict[str, Dict[tuple[Any, ...], str]],
+    ) -> None:
+        for section_name, section_type in self._REUSABLE_SECTIONS:
+            section_registry = canonical_names[section_name]
+            retained = Loops()
+            name_map: Dict[str, str] = {}
+
+            for loop in getattr(segment, section_name):
+                signature = self._scenario_signature(loop)
+                canonical_name = section_registry.get(signature)
+                if canonical_name is None:
+                    section_registry[signature] = loop.name
+                    retained.append(loop)
+                else:
+                    name_map[loop.name] = canonical_name
+
+            getattr(segment, section_name)[:] = retained
+            self._remap_references(segment, section_type, name_map)
+
+    def _validate_wepp_limits(self, management: Management) -> None:
+        if management.ncrop > self._MAX_WEPP_PLANT_SCENARIOS:
+            raise ValueError(
+                f"Synthesized management contains {management.ncrop} distinct plant scenarios; "
+                f"the WEPP hillslope limit is {self._MAX_WEPP_PLANT_SCENARIOS}. "
+                "Use managements with fewer distinct plant definitions."
+            )
+
+    def _prune_unreferenced_scenarios(self, management: Management) -> None:
+        section_loops = {
+            SectionType.Plant: management.plants,
+            SectionType.Op: management.ops,
+            SectionType.Ini: management.inis,
+            SectionType.Surf: management.surfs,
+            SectionType.Contour: management.contours,
+            SectionType.Drain: management.drains,
+            SectionType.Year: management.years,
+        }
+        loop_lookup = {
+            section_type: {loop.name: loop for loop in loops}
+            for section_type, loops in section_loops.items()
+        }
+        reachable = {section_type: set() for section_type in section_loops}
+        pending = list(self._iter_references(management.man))
+
+        while pending:
+            ref = pending.pop()
+            if ref.section_type is None or not ref.loop_name or ref.loop_name == '0':
+                continue
+            if ref.section_type not in loop_lookup:
+                raise ValueError(f"Unsupported scenario reference section: {ref.section_type!r}")
+            if ref.loop_name in reachable[ref.section_type]:
+                continue
+
+            loop = loop_lookup[ref.section_type].get(ref.loop_name)
+            if loop is None:
+                raise ValueError(
+                    f"{ref.section_type.name} scenario '{ref.loop_name}' is referenced but not defined."
+                )
+            reachable[ref.section_type].add(ref.loop_name)
+            pending.extend(self._iter_references(loop))
+
+        for section_type, loops in section_loops.items():
+            loops[:] = [loop for loop in loops if loop.name in reachable[section_type]]
 
     def build(self, key: str | None = None, desc: str | None = None) -> Management:
         self.warnings = []
@@ -529,12 +656,16 @@ class ManagementRotationSynth(object):
         year_lookup: Dict[str, object] = {}
         surf_lookup: Dict[str, object] = {}
         last_event_day = [0 for _ in range(self.nofe)]
+        canonical_names: Dict[str, Dict[tuple[Any, ...], str]] = {
+            section_name: {} for section_name, _section_type in self._REUSABLE_SECTIONS
+        }
 
         for idx, original in enumerate(self.managements):
             segment = deepcopy(original)
             rotation = self._normalize_rotations(segment)
             if idx > 0:
                 self._apply_prefix(segment, f"SEG{idx + 1}_")
+            self._deduplicate_reusable_scenarios(segment, canonical_names)
             nyears = rotation.nyears
             if nyears not in (1, 2):
                 label = self._segment_label(original)
@@ -624,6 +755,8 @@ class ManagementRotationSynth(object):
         result.man.loops.append(new_man_loop)
         result.man.nofes = self.nofe
 
+        self._prune_unreferenced_scenarios(result)
+        self._validate_wepp_limits(result)
         self._validate_year_references(result)
         result.setroot()
 
@@ -675,8 +808,6 @@ class ManagementRotationSynth(object):
 
 
 if __name__ == "__main__":
-    import sys
-    import types
     from glob import glob
 
     from wepppy.wepp.management.managements import read_management

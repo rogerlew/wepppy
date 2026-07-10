@@ -14,3 +14,4 @@ wepppy/nodb/mods/rusle/data/**/*.parquet filter=lfs diff=lfs merge=lfs -text
 wepppy/nodb/mods/rusle/data/**/*.geoparquet filter=lfs diff=lfs merge=lfs -text
 slidedecks/*/*.pdf filter=lfs diff=lfs merge=lfs -text
 slidedecks/*/*.pptx filter=lfs diff=lfs merge=lfs -text
+tests/wepp/management/fixtures/ag_fields_rotation_synth/*.man -text whitespace=-trailing-space

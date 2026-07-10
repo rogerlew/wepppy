@@ -1,0 +1,26 @@
+{
+  "source_run": "sacral-self-discipline",
+  "sub_field_id": 3733,
+  "field_id": 1479,
+  "expected_sim_years": 17,
+  "pre_repair_ncrop": 50,
+  "managements": [
+    "canola_spring_mt.man",
+    "oats_spring_conventional.man",
+    "oats_spring_conventional.man",
+    "oats_spring_conventional.man",
+    "oats_spring_conventional.man",
+    "oats_spring_conventional.man",
+    "oats_spring_conventional.man",
+    "oats_spring_conventional.man",
+    "oats_spring_conventional.man",
+    "oats_spring_conventional.man",
+    "oats_spring_conventional.man",
+    "oats_spring_conventional.man",
+    "oats_spring_conventional.man",
+    "oats_spring_conventional.man",
+    "oats_spring_conventional.man",
+    "oats_spring_conventional.man",
+    "oats_spring_conventional.man"
+  ]
+}

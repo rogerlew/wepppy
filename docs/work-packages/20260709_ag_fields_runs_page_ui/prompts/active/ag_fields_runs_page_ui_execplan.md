@@ -19,7 +19,13 @@ A user can see this working by opening a run created from the `ag-fields` config
 - [x] (2026-07-09 23:53 UTC) Milestone 3: wired initial and dynamic runs-page rendering and promoted the registry entry to user-visible `experimental` maturity.
 - [x] (2026-07-09 23:53 UTC) Milestone 4: registered an authenticated `addGeoJsonOverlay` loader and rebuild refresh behavior.
 - [x] (2026-07-09 23:53 UTC) Milestone 5: added Jest/Python regression coverage, passed frontend lint and the full Jest suite, and rebuilt `controllers-gl.js`.
-- [ ] Milestone 6: acceptance walkthrough on a fresh project (external dependency: project creation). No walkthrough or real-binary evidence has been claimed.
+- [x] (2026-07-10 16:38 UTC) Follow-up: added a persisted uploaded-boundary-filename display to Stage 1, backed by the additive `boundary.filename` snapshot field, source-basename NoDb metadata, historical-project fallback, and reload regression coverage.
+- [x] (2026-07-10 16:57 UTC) Follow-up: made project-UTM acceptance explicit in rasterization and the specification, added ambiguous-CRS diagnostics with project EPSG/bounds, and covered both paths.
+- [x] (2026-07-10 21:52 UTC) Follow-up: replaced the Stage 4 worker control with a persisted WEPP Exec selector, defaulted new `ag-fields` projects to `wepp_dcc52a6`, pinned and propagated the selected executable to sub-field runs, and made the clear action content-width.
+- [ ] Milestone 6: rerun Stage 4 acceptance on `sacral-self-discipline` with
+  `wepp_dcc52a6` selected and record the project output listing. The exact
+  normalized p3733 fixture completes with that executable, but no full-project
+  browser-run success is claimed yet.
 
 ## Surprises & Discoveries
 
@@ -29,6 +35,21 @@ A user can see this working by opening a run created from the `ag-fields` config
   Evidence: `ag_fields_routes.py:subfields_overlay` requires `rq:status`; the map helper now accepts an optional `loadJson` callback, covered by `map_gl.test.js`.
 - Observation: The required full Python sweep is blocked by deterministic, unrelated Batch Runner test debt.
   Evidence: `wctl run-pytest tests --maxfail=1` stopped after `2070 passed, 41 skipped` at `tests/nodb/test_batch_runner.py::test_run_batch_project_does_not_delete_workspace_when_rmtree_disabled`; the isolated rerun fails because `clear_nodb_file_cache()` resolves `/wc1/batch/...` outside the test's patched `batch_runner_mod.get_wd`.
+- Observation: Module-level AgFields `stubtest` has 21 existing surface errors unrelated to the new source-filename property and validation keyword; repository `check-test-stubs` remains green.
+  Evidence: The reported omissions are older runtime exports and methods already absent from the HEAD stub; neither changed symbol appears in the failure list.
+- Observation: The first fresh-project acceptance attempt reached Stage 2 but the uploaded file is neither WGS84 nor project UTM despite GDAL defaulting the unlabeled GeoJSON to `EPSG:4326`.
+  Evidence: `sacral-self-discipline` uses DEM `EPSG:32611` with bounds approximately `(493891, 5208829, 523081, 5232109)`, while uploaded bounds are approximately `(-1591832, 2847952, -1569162, 2867454)`. Transforming a representative point as `EPSG:5070` lands inside the project near `(507110, 5220699)`, so the source appears CONUS Albers-like but cannot be guessed safely without metadata.
+- Observation: Corrected UTM boundaries advanced acceptance through management
+  setup to the real WEPP binary.
+  Evidence: p3733 first failed at `ncrop=50`; after synthesis compaction and
+  ADR-0016 residue-height normalization it enters simulation, then SIGFPEs at
+  `frcfac.for:184` on zero random roughness. This is the current acceptance
+  blocker and is not masked by the ingestion patch.
+- Observation: The controller's existing disable helper was button-specific and
+  rewrote `textContent`; applying it to the new select removed every option.
+  Evidence: The first focused Jest run returned an empty selected value. The
+  helper now invokes busy-label restoration only for `BUTTON` elements, and all
+  10 AgFields tests plus the 619-test frontend suite pass.
 
 ## Decision Log
 
@@ -44,10 +65,19 @@ A user can see this working by opening a run created from the `ag-fields` config
 - Decision: Keep the v1 workflow in the repository's one-controller-per-control structure through acceptance, despite `ag_fields.js` entering the observability yellow band for JavaScript file size.
   Rationale: Boundary/schema, sub-field, mapping, run, and modal behavior share one snapshot and job lifecycle. Splitting before the first browser walkthrough would add speculative module boundaries; reassess after acceptance if maintenance friction is observed.
   Date/Author: 2026-07-09 / Codex.
+- Decision: Expose the persisted source basename as optional `boundary.filename`, fall back to the canonical artifact basename for historical projects, and hide its display when neither exists.
+  Rationale: This is backward-compatible for older NoDb state and snapshots and restores the accepted-upload context that the browser file input necessarily loses on reload, without changing project artifact names.
+  Date/Author: 2026-07-10 / Codex.
+- Decision: Prefer exact project-UTM boundary coordinates, continue accepting WGS84 and correctly declared projected CRSs, and reject rather than guess ambiguous projected coordinates.
+  Rationale: Project UTM avoids unnecessary reprojection and preserves raster-grid precision. Guessing among arbitrary projected CRSs from coordinate magnitudes can silently place fields in the wrong location; actionable EPSG/bounds diagnostics make re-export deterministic.
+  Date/Author: 2026-07-10 / Codex.
+- Decision: Give AgFields its own persisted WEPP executable, default new `ag-fields.cfg` projects to `wepp_dcc52a6`, and retain the parent-WEPP executable as the fallback only for historical NoDb payloads lacking the new field.
+  Rationale: The exact repaired p3733 replay completes under `wepp_dcc52a6` while `wepp_260430` and `wepp_260606` SIGFPE at `frcfac.for:184`. An additive AgFields-owned setting makes that compatibility choice explicit without rewriting existing project state. ADR-0017 records the parameterization decision.
+  Date/Author: 2026-07-10 / Roger Lew and Codex.
 
 ## Outcomes & Retrospective
 
-Milestones 1-5 now deliver the complete automated UI implementation. The design mandate is preserved: the visible workflow exposes four user decisions while mechanical backend methods remain confined to logs. The main integration lesson was that both registry-driven dynamic loading and rq-engine overlay authentication had to be wired explicitly; neither was satisfied by adding the static runs-page include alone.
+Milestones 1-5 now deliver the complete automated UI implementation. The design mandate is preserved: the visible workflow exposes four user decisions while mechanical backend methods remain confined to logs. Stage 1 retains visible current-file context after reload, and Stage 4 now exposes the AgFields-specific executable instead of worker tuning. New projects persist `wepp_dcc52a6`; historical state remains additive and compatible. The main integration lesson was that both registry-driven dynamic loading and rq-engine overlay authentication had to be wired explicitly; neither was satisfied by adding the static runs-page include alone.
 
 The remaining gap is operational acceptance, not code implementation. Milestone 6 needs a fresh small-watershed run and cannot be replaced by fixture-driven Jest coverage. The unrelated full-Python Batch Runner failure is recorded as repository test debt and was not expanded into this UI package.
 
@@ -71,6 +101,8 @@ Milestone 2 implements `ag_fields.js` against the template: bootstrap, snapshot 
 
 Milestone 3 wires the runs page and registry. Milestone 4 adds the overlay with rebuild refresh. Milestone 5 runs the frontend gates and any pytest touched by template-context changes.
 
+The Stage 4 executable follow-up adds `_wepp_bin` to newly initialized `AgFields` state from `[ag_fields] bin`, exposes it as `wepp.wepp_bin` in the hydration snapshot, and accepts a whitelisted `wepp_bin` in the existing run request before enqueue. Existing serialized projects without `_wepp_bin` remain readable and fall back to the parent Wepp NoDb executable until the user submits a selection. The browser removes `max_workers`, hydrates the executable select from state, submits that selection, and styles only the clear button at intrinsic width. Regression coverage proves initialization, historical fallback, RQ propagation, route validation/persistence, reload hydration, and removal of the worker DOM hook.
+
 Milestone 6 is the acceptance walkthrough on a freshly created small-watershed AgFields project (created by the maintainer once Milestones 1-5 land): all four stages driven through the UI, outputs verified under `wepp/ag_fields/output/`, evidence recorded in the tracker. This closes the backend package's recorded real-binary E2E limitation as well; update its closure notes when done.
 
 ## Concrete Steps
@@ -85,7 +117,7 @@ For Milestone 6, create a run from the `ag-fields` config, complete the base wat
 - `wctl run-pytest` for any touched Python (template context, registry).
 - Milestone 6 walkthrough evidence recorded in `../../tracker.md` with stage-by-stage notes and an output listing; no claim of end-to-end success without the walkthrough actually performed.
 
-Observed automated results on 2026-07-09 are recorded in `../../tracker.md`. The focused AgFields Jest suite passes 10 tests, the affected Python route/template/registry group passes 135 tests, frontend lint passes, the full Jest suite passes, and the bundle builds. The repository-wide Python sweep has an unrelated deterministic Batch Runner failure described under `Surprises & Discoveries`.
+Observed automated results are recorded in `../../tracker.md`. The focused AgFields Jest suite passes 10 tests, the original affected Python route/template/registry group passes 135 tests, and the current-file follow-up NoDb/route/template group passes. Frontend lint, `check-test-stubs`, the full Jest suite, and the bundle build pass. The module-level `stubtest` and repository-wide Python sweep have unrelated existing failures described under `Surprises & Discoveries`.
 
 ## Idempotence and Recovery
 
@@ -96,3 +128,5 @@ Controller bootstrap and state hydration are idempotent and re-query the DOM aft
 The implementation evidence is the new `ag_fields.test.js` suite, the affected map/project tests, the Python render/registry/bootstrap assertions, and the command transcripts summarized in `../../tracker.md`. No screenshot or real-run output artifact exists yet because Milestone 6 has not run.
 
 Revision note (2026-07-09, Codex): Updated the living plan after implementing Milestones 1-5, documented dynamic registry and authenticated overlay decisions, recorded automated validation and unrelated suite debt, and kept Milestone 6 explicitly open for fresh-project acceptance.
+
+Revision note (2026-07-10, Codex): Added the Stage 4 WEPP executable follow-up, its backward-compatibility plan, ADR requirement, UI simplification, and focused regression scope after the real p3733 binary comparison.
