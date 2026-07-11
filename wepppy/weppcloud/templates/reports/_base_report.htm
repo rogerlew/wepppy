@@ -13,6 +13,7 @@
 {% set view_args = request.view_args if request and request.view_args else {} %}
 {% set view_runid = view_args.get('runid', current_ron.runid) %}
 {% set view_config = view_args.get('config', current_ron.config_stem) %}
+{% set project_srid = current_ron.srid if current_ron.srid is defined else none %}
 <header class="wc-header wc-run-header">
   <div class="wc-container wc-container--fluid">
     <div class="wc-run-header__inner">
@@ -25,6 +26,11 @@
         <span class="wc-run-header__version">
           NoDb v{{ current_ron.nodb_version|default('?', false) }}
         </span>
+        {% if project_srid %}
+        <span class="wc-run-header__version wc-run-header__projection"
+              data-project-projection="EPSG:{{ project_srid }}"
+              title="Project projection">EPSG:{{ project_srid }}</span>
+        {% endif %}
         {% if last_modified_display %}
         <span class="wc-run-header__meta js-run-last-modified"
               data-run-last-modified="{{ last_modified_epoch }}"

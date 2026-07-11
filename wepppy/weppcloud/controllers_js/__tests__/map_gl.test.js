@@ -409,6 +409,48 @@ describe("Map GL controller", () => {
         expect(mapInstance.overlayMaps["Authenticated overlay"]).toBeDefined();
     });
 
+    test("overlay control hides a layer without unregistering it", async () => {
+        const mapInstance = global.MapController.getInstance();
+        const payload = {
+            type: "FeatureCollection",
+            features: [{ type: "Feature", properties: { sub_field_id: 1 }, geometry: null }],
+        };
+        const loadJson = jest.fn(() => Promise.resolve(payload));
+
+        mapInstance.addGeoJsonOverlay({
+            layerName: "AgFields Sub-fields",
+            url: "/rq-engine/api/runs/test-run/cfg/agfields/sub-fields.geojson",
+            loadJson,
+        });
+        await Promise.resolve();
+        await Promise.resolve();
+
+        const input = Array.from(document.querySelectorAll('input[name="wc-map-overlay"]')).find((candidate) => {
+            const label = candidate.parentElement.querySelector(".wc-map-layer-control__text");
+            return label && label.textContent === "AgFields Sub-fields";
+        });
+        const registeredLayer = mapInstance.overlayMaps["AgFields Sub-fields"];
+        expect(input).toBeDefined();
+        expect(mapInstance.hasLayer(registeredLayer)).toBe(true);
+
+        input.checked = false;
+        input.dispatchEvent(new Event("change"));
+
+        expect(mapInstance.hasLayer(registeredLayer)).toBe(false);
+        expect(mapInstance.overlayMaps["AgFields Sub-fields"]).toBe(registeredLayer);
+        expect(document.body.contains(input)).toBe(true);
+
+        input.checked = true;
+        input.dispatchEvent(new Event("change"));
+
+        const shownLayer = mapInstance.overlayMaps["AgFields Sub-fields"];
+        expect(shownLayer).not.toBe(registeredLayer);
+        expect(shownLayer.props.data).toBe(payload);
+        expect(mapInstance.hasLayer(shownLayer)).toBe(true);
+        expect(deckInstance.props.layers).toContain(shownLayer);
+        expect(loadJson).toHaveBeenCalledTimes(1);
+    });
+
     test("overlay control hides SBS when initialHasSbs is false", () => {
         global.window.runContext = { flags: { initialHasSbs: false } };
         global.MapController.getInstance();

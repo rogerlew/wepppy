@@ -59,9 +59,20 @@ def test_run_batch_project_does_not_delete_workspace_when_rmtree_disabled(
     runid_wd.mkdir(parents=True, exist_ok=True)
     marker = runid_wd / "preserve.me"
     marker.write_text("keep", encoding="utf-8")
+    state_reset_calls: list[tuple[str, str]] = []
 
     monkeypatch.setattr(batch_runner_mod, "get_wd", lambda _runid: str(runid_wd))
     monkeypatch.setattr(BatchRunner, "_get_run_logger", lambda _self, _runid: _NoopLogger())
+    monkeypatch.setattr(
+        batch_runner_mod,
+        "clear_nodb_file_cache",
+        lambda runid: state_reset_calls.append(("cache", runid)) or [],
+    )
+    monkeypatch.setattr(
+        batch_runner_mod,
+        "clear_locks",
+        lambda runid: state_reset_calls.append(("locks", runid)) or [],
+    )
     monkeypatch.setattr(
         batch_runner_mod.RedisPrep,
         "getInstance",
@@ -78,6 +89,10 @@ def test_run_batch_project_does_not_delete_workspace_when_rmtree_disabled(
 
     assert runid_wd.is_dir()
     assert marker.read_text(encoding="utf-8") == "keep"
+    assert state_reset_calls == [
+        ("cache", "batch;;batch-demo;;leaf-run"),
+        ("locks", "batch;;batch-demo;;leaf-run"),
+    ]
 
 
 def test_run_batch_project_survives_enotempty_during_workspace_cleanup(

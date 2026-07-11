@@ -873,6 +873,50 @@ def test_run_header_renders_interface_maturity_badge_without_mod_dropdown_badges
     assert rendered.count('href="/mock/usersum.view_markdown#feature-maturity-labels"') == 1
 
 
+@pytest.mark.parametrize(
+    "template_name",
+    ("header/_run_header_fixed.htm", "reports/_base_report.htm"),
+)
+def test_run_header_shows_projection_pill_only_after_map_assignment(
+    jinja_env: Environment,
+    template_name: str,
+) -> None:
+    template = jinja_env.get_template(template_name)
+    anon_user = SimpleNamespace(has_role=lambda role: False, roles=[], is_authenticated=False)
+    request = SimpleNamespace(view_args={"runid": "test-run", "config": "test-config"})
+    base_ron = {
+        "mods": [],
+        "runid": "test-run",
+        "config_stem": "test-config",
+        "nodb_version": 3,
+        "name": "",
+        "scenario": "",
+        "readonly": False,
+        "public": False,
+    }
+
+    unassigned_ron = SimpleNamespace(**base_ron, srid=None)
+    assigned_ron = SimpleNamespace(**base_ron, srid=32611)
+    unassigned = template.render(
+        user=anon_user,
+        current_user=anon_user,
+        request=request,
+        current_ron=unassigned_ron,
+        ron=unassigned_ron,
+    )
+    assigned = template.render(
+        user=anon_user,
+        current_user=anon_user,
+        request=request,
+        current_ron=assigned_ron,
+        ron=assigned_ron,
+    )
+
+    assert "data-project-projection" not in unassigned
+    assert 'data-project-projection="EPSG:32611"' in assigned
+    assert ">EPSG:32611</span>" in assigned
+
+
 def test_feature_control_shell_renders_maturity_pill_next_to_label(jinja_env: Environment) -> None:
     template = jinja_env.get_template("controls/rap_ts_pure.htm")
     rendered = template.render(
@@ -1056,7 +1100,6 @@ def test_ag_fields_control_renders_required_dom_contract(jinja_env: Environment)
         "build-subfields-button",
         "subfields-status",
         "subfields-summary",
-        "show-on-map-button",
         "min-area-input",
         "mapping-chip",
         "open-mapping-button",
@@ -1082,8 +1125,10 @@ def test_ag_fields_control_renders_required_dom_contract(jinja_env: Environment)
     assert "rasterize" not in rendered.lower()
     assert "polygonize" not in rendered.lower()
     assert "Maximum workers" not in rendered
+    assert "Show on Map" not in rendered
     assert "wepp_dcc52a6" in rendered
     assert 'class="pure-button button-error agfields-clear-button"' in rendered
+    assert "Use the project UTM EPSG shown in the header for best precision" in rendered
 
 
 def test_run_header_includes_features_export_mod_toggle(jinja_env: Environment) -> None:

@@ -182,6 +182,40 @@ def test_boundary_upload_returns_controller_summary(route_context) -> None:
     assert auth_calls[-1][1] == "demo"
 
 
+def test_successful_sync_mutations_invalidate_ag_fields_preflight(
+    route_context,
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    removed: list[object] = []
+    prep = SimpleNamespace(
+        remove_timestamp=lambda task: removed.append(task),
+        get_rq_job_id=lambda key: None,
+    )
+    monkeypatch.setattr(ag_fields_routes.RedisPrep, "getInstance", lambda wd: prep)
+    monkeypatch.setattr(ag_fields_routes, "_active_job_conflict_response", lambda wd: None)
+
+    with TestClient(rq_engine.app) as client:
+        responses = [
+            client.post(
+                "/api/runs/demo/cfg/agfields/boundaries",
+                files={"field_boundaries": ("fields.geojson", b"{}")},
+            ),
+            client.post(
+                "/api/runs/demo/cfg/agfields/schema",
+                json={"field_id_key": "field_id", "rotation_accessor": "Crop{}"},
+            ),
+            client.post(
+                "/api/runs/demo/cfg/agfields/rotation-mapping",
+                json={"rows": [{"crop_name": "Corn"}]},
+            ),
+            client.delete("/api/runs/demo/cfg/agfields/plant-files/corn.man"),
+            client.post("/api/runs/demo/cfg/agfields/clear"),
+        ]
+
+    assert all(response.status_code == 200 for response in responses)
+    assert removed == [ag_fields_routes.TaskEnum.run_ag_fields] * len(responses)
+
+
 def test_boundary_upload_rejects_extension_and_oversize(
     route_context,
     monkeypatch: pytest.MonkeyPatch,
@@ -268,6 +302,9 @@ def test_enqueue_job_serializes_submission_and_persists_job_hint(
         def get_rq_job_id(self, _key: str):
             return None
 
+        def remove_timestamp(self, task) -> None:
+            events.append(("preflight-remove", task))
+
         def set_rq_job_id(self, key: str, job_id: str) -> None:
             events.append(("hint", key, job_id))
 
@@ -330,6 +367,10 @@ def test_enqueue_job_serializes_submission_and_persists_job_hint(
 
     assert response.status_code == 202
     assert ("hint", "agfields_build_subfields", "job-queued") in events
+    assert ("preflight-remove", ag_fields_routes.TaskEnum.run_ag_fields) in events
+    assert events.index(("preflight-remove", ag_fields_routes.TaskEnum.run_ag_fields)) < next(
+        index for index, event in enumerate(events) if event[0] == "enqueue"
+    )
     assert ("unlock", "agfields:submit_lock:demo") in events
     assert next(event for event in events if event[0] == "lock")[3] == 30
 

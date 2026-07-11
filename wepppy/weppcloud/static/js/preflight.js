@@ -297,6 +297,7 @@ function getSelectorForKey(key) {
         "rap_ts": 'a[href="#rap-ts"]',
         "openet_ts": 'a[href="#openet-ts"]',
         "wepp": 'a[href="#wepp"]',
+        "ag_fields": 'a[href="#ag-fields"]',
         "omni_scenarios": 'a[href="#omni-scenarios"]',
         "omni_contrasts": 'a[href="#omni-contrasts"]',
         "observed": 'a[href="#observed"]',

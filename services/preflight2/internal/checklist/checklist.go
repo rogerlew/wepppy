@@ -34,6 +34,7 @@ func Evaluate(prep map[string]string) (map[string]bool, map[string]bool) {
 		"openet_ts":       false,
 		"rhem":            false,
 		"wepp":            false,
+		"ag_fields":       false,
 		"omni_scenarios":  false,
 		"omni_contrasts":  false,
 		"observed":        false,
@@ -78,6 +79,19 @@ func Evaluate(prep map[string]string) (map[string]bool, map[string]bool) {
 			safeGT(rusleRun, prep["timestamps:build_soils"]) &&
 			safeGT(rusleRun, prep["timestamps:build_climate"])
 	}
+
+	parentAgFieldsWepp := maxTimestamp(
+		prep,
+		"timestamps:run_wepp_hillslopes",
+		"timestamps:run_wepp_watershed",
+		"timestamps:run_wepp",
+	)
+	runAgFields := prep["timestamps:run_ag_fields"]
+	check["ag_fields"] = safeGT(runAgFields, parentAgFieldsWepp) &&
+		safeGT(runAgFields, prep["timestamps:abstract_watershed"]) &&
+		safeGT(runAgFields, prep["timestamps:build_landuse"]) &&
+		safeGT(runAgFields, prep["timestamps:build_soils"]) &&
+		safeGT(runAgFields, prep["timestamps:build_climate"])
 
 	omniRun := prep["timestamps:run_omni_scenarios"]
 	if runWepp == "" {

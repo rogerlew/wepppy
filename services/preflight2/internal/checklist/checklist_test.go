@@ -111,6 +111,50 @@ func TestEvaluateRoadsStaysFalseWithoutRunWepp(t *testing.T) {
 	}
 }
 
+func TestEvaluateAgFieldsRequiresFreshParentAndCoreInputs(t *testing.T) {
+	check, _ := Evaluate(map[string]string{
+		"timestamps:abstract_watershed":  "100",
+		"timestamps:build_landuse":       "110",
+		"timestamps:build_soils":         "120",
+		"timestamps:build_climate":       "130",
+		"timestamps:run_wepp_hillslopes": "200",
+		"timestamps:run_ag_fields":       "300",
+	})
+
+	if !check["ag_fields"] {
+		t.Fatalf("expected ag_fields checklist entry to be true when the run is newer than its inputs")
+	}
+}
+
+func TestEvaluateAgFieldsStaleWhenParentHillslopesAreNewer(t *testing.T) {
+	check, _ := Evaluate(map[string]string{
+		"timestamps:abstract_watershed":  "100",
+		"timestamps:build_landuse":       "110",
+		"timestamps:build_soils":         "120",
+		"timestamps:build_climate":       "130",
+		"timestamps:run_ag_fields":       "200",
+		"timestamps:run_wepp_hillslopes": "300",
+	})
+
+	if check["ag_fields"] {
+		t.Fatalf("expected ag_fields checklist entry to be false when parent hillslopes are newer")
+	}
+}
+
+func TestEvaluateAgFieldsRequiresCompletionTimestamp(t *testing.T) {
+	check, _ := Evaluate(map[string]string{
+		"timestamps:abstract_watershed":  "100",
+		"timestamps:build_landuse":       "110",
+		"timestamps:build_soils":         "120",
+		"timestamps:build_climate":       "130",
+		"timestamps:run_wepp_hillslopes": "200",
+	})
+
+	if check["ag_fields"] {
+		t.Fatalf("expected ag_fields checklist entry to be false without a completed AgFields run")
+	}
+}
+
 func TestEvaluateGenevaRequiresFreshCoreDependencies(t *testing.T) {
 	check, _ := Evaluate(map[string]string{
 		"timestamps:run_geneva":    "400",

@@ -13,6 +13,7 @@ from rq import get_current_job
 
 from wepppy.nodb.base import clear_nodb_file_cache
 from wepppy.nodb.mods.ag_fields import AgFields, AgFieldsRunError, PlantFileProcessingError
+from wepppy.nodb.redis_prep import RedisPrep, TaskEnum
 from wepppy.nodb.status_messenger import StatusMessenger
 from wepppy.rq.exception_logging import with_exception_logging
 from wepppy.weppcloud.utils.helpers import get_wd
@@ -62,6 +63,12 @@ def _publish_exception(channel: str, job_id: str, func_name: str, runid: str) ->
     StatusMessenger.publish(channel, f"rq:{job_id} EXCEPTION {func_name}({runid})")
 
 
+def _invalidate_ag_fields_preflight(wd: str) -> RedisPrep:
+    prep = RedisPrep.getInstance(wd)
+    prep.remove_timestamp(TaskEnum.run_ag_fields)
+    return prep
+
+
 @with_exception_logging
 def build_ag_fields_subfields_rq(
     runid: str,
@@ -79,6 +86,7 @@ def build_ag_fields_subfields_rq(
 
     try:
         wd = get_wd(runid)
+        _invalidate_ag_fields_preflight(wd)
         clear_nodb_file_cache(runid, pup_relpath="ag_fields.nodb")
         ag_fields = AgFields.getInstance(wd)
 
@@ -124,6 +132,7 @@ def process_ag_fields_plant_db_rq(runid: str, plant_db_zip_fn: str) -> Dict[str,
     wd: Optional[str] = None
     try:
         wd = get_wd(runid)
+        _invalidate_ag_fields_preflight(wd)
         clear_nodb_file_cache(runid, pup_relpath="ag_fields.nodb")
         ag_fields = AgFields.getInstance(wd)
         result = ag_fields.handle_plant_file_db_upload(plant_db_zip_fn)
@@ -185,11 +194,13 @@ def run_ag_fields_wepp_rq(
 
     try:
         wd = get_wd(runid)
+        prep = _invalidate_ag_fields_preflight(wd)
         clear_nodb_file_cache(runid, pup_relpath="ag_fields.nodb")
         ag_fields = AgFields.getInstance(wd)
         if wepp_bin is not None:
             ag_fields.wepp_bin = wepp_bin
         result = ag_fields.run_wepp_ag_fields(max_workers=max_workers)
+        prep.timestamp(TaskEnum.run_ag_fields)
         _publish_result(status_channel, job_id, result)
         _publish_completed(
             status_channel,

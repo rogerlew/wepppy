@@ -335,6 +335,10 @@ var WCMapGlLayerControl = (function () {
                 if (input.checked) {
                     activeLayer = rebuildLayer(name, activeLayer);
                     map.addLayer(activeLayer);
+                } else if (typeof map.hideLayer === "function") {
+                    // Layer-control toggles preserve overlay registration so the
+                    // same layer can be shown again without re-registering it.
+                    map.hideLayer(activeLayer);
                 } else {
                     map.removeLayer(activeLayer);
                 }

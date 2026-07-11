@@ -6,6 +6,7 @@ Tests edge cases where small extents cause pixel coordinate rounding issues.
 import json
 import os
 import tempfile
+from types import SimpleNamespace
 from typing import List
 
 import numpy as np
@@ -18,6 +19,32 @@ except ImportError:
     GDAL_AVAILABLE = False
 
 from wepppy.nodb.core.map_object import Map
+from wepppy.nodb.core.ron import RonViewModel
+from wepppy.nodb.core import ron as ron_module
+
+
+@pytest.mark.unit
+@pytest.mark.parametrize(("map_object", "expected_srid"), ((None, None), (SimpleNamespace(srid=32611), 32611)))
+def test_ron_view_model_exposes_assigned_project_srid(
+    monkeypatch: pytest.MonkeyPatch,
+    map_object: object,
+    expected_srid: int | None,
+) -> None:
+    monkeypatch.setattr(ron_module, "read_version", lambda _wd: 3)
+    ron = SimpleNamespace(
+        runid="test-run",
+        name="",
+        scenario="",
+        config_stem="test-config",
+        readonly=False,
+        public=False,
+        pup_relpath=None,
+        mods=[],
+        wd="/runs/test-run",
+        map=map_object,
+    )
+
+    assert RonViewModel(ron).srid == expected_srid
 
 
 @pytest.fixture

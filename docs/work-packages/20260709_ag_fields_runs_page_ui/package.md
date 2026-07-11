@@ -85,6 +85,16 @@ Milestones 1-5 were implemented on 2026-07-09: the four-stage template and modal
 
 The acceptance walkthrough on `sacral-self-discipline` (2026-07-10) surfaced and drove four real fixes: unlabeled project-UTM boundary handling with actionable CRS errors, rotation-synthesizer scenario canonicalization against WEPP's 20-plant limit (`20260710_management_rotation_synth_hardening`, ADR-0016), the Stage 1 current-file display, and the AgFields-owned WEPP executable defaulting to `wepp_dcc52a6` (ADR-0017). The completed run produced 6,626 sub-field simulations (46,382 output files) under the `wepp_dcc52a6` executable; the maintainer validated the interface. Acceptance evidence and one filed follow-up (persisting `_wepp_bin` on the pre-ADR-0017 acceptance project) are recorded in `tracker.md`. This walkthrough also closes the backend package's real-binary E2E limitation.
 
+A post-close projection UX follow-up makes the upload contract visible at the decision point: Stage 1 names the preferred project EPSG, accepted WGS84 input, and metadata requirement for other projected CRSs. Runs-page and report headers show the assigned project projection as an `EPSG:<srid>` pill and omit it before map assignment.
+
+The canonical UI specification was reconciled after acceptance so it describes the shipped experimental registry entry, snapshot-driven lifecycle, current DOM/route contracts, management-ingestion hardening, AgFields-owned executable, and recorded validation rather than the package's original prospective design state.
+
+A final Stage 2 simplification removes the redundant "Show on Map" action: current sub-fields load automatically after hydration and successful builds, while the shared map layer control hides and restores the retained overlay registration.
+
+The layer re-show path reconstructs a fresh Deck descriptor from the retained remote GeoJSON data rather than reusing a finalized hidden descriptor, so checking `AgFields Sub-fields` displays it again without another authenticated download.
+
+AgFields is also integrated with preflight through additive `TaskEnum.run_ag_fields` and checklist key `ag_fields`. The 🌽 indicator appears only after a successful current Stage 4 run; AgFields mutations/jobs invalidate it, and upstream freshness is enforced by `preflight2`. The durable contract is documented in `docs/ui-docs/control-ui-styling/preflight_behavior.md`.
+
 ## References
 
 - UI spec (authoritative): `wepppy/nodb/mods/ag_fields/ui_control_layout.md`

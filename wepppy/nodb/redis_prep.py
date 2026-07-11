@@ -34,6 +34,7 @@ class TaskEnum(Enum):
     fetch_polaris = 'build_polaris'
     run_wepp_hillslopes = 'run_wepp_hillslopes'
     run_wepp_watershed = 'run_wepp_watershed'
+    run_ag_fields = 'run_ag_fields'
     run_observed = 'run_observed'
     run_debris = 'run_debris'
     run_roads = 'run_roads'
@@ -75,6 +76,7 @@ class TaskEnum(Enum):
             TaskEnum.fetch_polaris: 'Build POLARIS Layers',
             TaskEnum.run_wepp_hillslopes: 'Run WEPP Hillslopes',
             TaskEnum.run_wepp_watershed: 'Run WEPP Watershed',
+            TaskEnum.run_ag_fields: 'Run Agricultural Fields',
             TaskEnum.run_observed: 'Run Observed',
             TaskEnum.run_debris: 'Run Debris',
             TaskEnum.run_roads: 'Run Roads',
@@ -114,6 +116,7 @@ class TaskEnum(Enum):
             TaskEnum.fetch_polaris: '🧱',
             TaskEnum.run_wepp_hillslopes: '💧',
             TaskEnum.run_wepp_watershed: '⛰️',
+            TaskEnum.run_ag_fields: '🌽',
             TaskEnum.run_observed: '📊',
             TaskEnum.run_debris: '🪨',
             TaskEnum.run_roads: '🚗',

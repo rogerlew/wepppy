@@ -25,7 +25,6 @@ function buildHtml() {
             <button type="button" data-action="build-subfields" data-role="build-subfields-button">Build Sub-fields</button>
             <div data-role="subfields-status"></div>
             <div data-role="subfields-summary"></div>
-            <button type="button" data-action="show-on-map" data-role="show-on-map-button">Show on Map</button>
             <input data-role="min-area-input" value="0">
 
             <div data-role="mapping-chip"></div>
@@ -309,7 +308,6 @@ describe("AgFields controller", () => {
         expect(document.querySelector('[data-role="subfields-status"]').textContent).toBe(
             "Sub-fields are stale — rebuild required.",
         );
-        expect(document.querySelector('[data-role="show-on-map-button"]').disabled).toBe(true);
 
         controller.renderState(makeState({
             mapping: {
@@ -537,7 +535,7 @@ describe("AgFields controller", () => {
         );
     });
 
-    test("registers an authenticated map overlay loader", async () => {
+    test("automatically loads the authenticated sub-field overlay and refreshes it after rebuild", async () => {
         const refresh = jest.fn(() => Promise.resolve({ type: "FeatureCollection", features: [] }));
         const map = {
             addGeoJsonOverlay: jest.fn((options) => {
@@ -547,11 +545,8 @@ describe("AgFields controller", () => {
         };
         window.MapController = { getInstance: jest.fn(() => map) };
         controller.bootstrap({});
+        await controller.hydrate();
         await flushPromises();
-
-        document.querySelector('[data-action="show-on-map"]').dispatchEvent(
-            new MouseEvent("click", { bubbles: true }),
-        );
         expect(map.addGeoJsonOverlay).toHaveBeenCalledWith(expect.objectContaining({
             layerName: "AgFields Sub-fields",
             url: "/rq-engine/api/runs/demo-run/cfg/agfields/sub-fields.geojson",
@@ -567,6 +562,7 @@ describe("AgFields controller", () => {
             options.url,
             expect.objectContaining({ method: "GET" }),
         );
+        expect(document.querySelector('[data-action="show-on-map"]')).toBeNull();
 
         controller.triggerEvent("AGFIELDS_BUILD_SUBFIELDS_TASK_COMPLETED", { job_id: "build-finished" });
         await controller.hydrate({ force: true });

@@ -566,18 +566,16 @@ def _mutate_soil(
                         }
                     )
 
-            if profile in {
-                "P2_EVENT_EDGE",
-                "P4_TEXTURE_DENSITY_DISCONTINUITY",
-                "P5_SLOPE_RESPONSE_AMPLIFICATION",
-            }:
-                _apply_profile_horizon_boundary_clamps(
-                    horizon=horizon,
-                    ofe_idx=ofe_idx,
-                    horizon_idx=horizon_idx,
-                    profile=profile,
-                    mutations=mutations,
-                )
+            # Every mutation profile must preserve the serializer's physical
+            # input contract. Targeted profiles select narrower bounds inside
+            # the shared clamp; baseline/edge profiles use the broad bounds.
+            _apply_profile_horizon_boundary_clamps(
+                horizon=horizon,
+                ofe_idx=ofe_idx,
+                horizon_idx=horizon_idx,
+                profile=profile,
+                mutations=mutations,
+            )
 
         if profile == "P3_CONDUCTIVITY_SATURATION_CONTRAST" and sat_value is not None:
             ofe["sat"] = round(0.01 if sat_value >= 0.5 else 0.92, 6)

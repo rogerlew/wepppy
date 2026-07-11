@@ -440,7 +440,6 @@ var AgFields = (function () {
                 buildSubfieldsButton: queryRole("build-subfields-button", form),
                 subfieldsStatus: queryRole("subfields-status", form),
                 subfieldsSummary: queryRole("subfields-summary", form),
-                showOnMapButton: queryRole("show-on-map-button", form),
                 minAreaInput: queryRole("min-area-input", form),
                 mappingChip: queryRole("mapping-chip", form),
                 openMappingButton: queryRole("open-mapping-button", form),
@@ -570,9 +569,6 @@ var AgFields = (function () {
                 } else if (name === "build-subfields") {
                     event.preventDefault();
                     buildSubfields();
-                } else if (name === "show-on-map") {
-                    event.preventDefault();
-                    showOnMap();
                 } else if (name === "open-mapping") {
                     loadMapping();
                 } else if (name === "upload-plantdb") {
@@ -840,10 +836,6 @@ var AgFields = (function () {
                 blockedMessage = "Build the watershed subcatchments first.";
             }
             setDisabled(controller.nodes.buildSubfieldsButton, active || Boolean(blockedMessage));
-            setDisabled(
-                controller.nodes.showOnMapButton,
-                active || !subfields.overlay_exists || Boolean(staleness.subfields)
-            );
             if (active) {
                 setChip(controller.nodes.subfieldsStatus, "An AgFields job is running; wait for it to finish.", "warning");
             } else if (blockedMessage) {
@@ -1108,7 +1100,18 @@ var AgFields = (function () {
                     syncTrackedJob(controller.state);
                     renderState();
                     emitter.emit("agfields:state:loaded", controller.state);
-                    return loadPlantInventory().then(function () { return controller.state; });
+                    return loadPlantInventory().then(function () {
+                        var subfields = asObject(controller.state.subfields);
+                        var staleness = asObject(controller.state.staleness);
+                        if (
+                            subfields.overlay_exists &&
+                            !staleness.subfields &&
+                            !controller._overlayRegistered
+                        ) {
+                            loadSubfieldsOverlay({ forceVisible: true });
+                        }
+                        return controller.state;
+                    });
                 })
                 .catch(function (error) {
                     setChip(
@@ -1155,14 +1158,18 @@ var AgFields = (function () {
                 return;
             }
             controller._terminalJobsSeen[terminalKey] = true;
+            var overlayWasRegistered = controller._overlayRegistered;
             controller.hydrate({ force: true }).then(function (state) {
                 if (
                     matchingKey === "agfields_build_subfields" &&
-                    controller._overlayRegistered &&
                     state &&
                     asObject(state.subfields).overlay_exists
                 ) {
-                    refreshOverlay();
+                    loadSubfieldsOverlay({
+                        forceVisible: true,
+                        refresh: overlayWasRegistered,
+                        announce: true
+                    });
                 }
             });
         }
@@ -1629,18 +1636,18 @@ var AgFields = (function () {
             return Promise.resolve(null);
         }
 
-        function showOnMap() {
+        function loadSubfieldsOverlay(options) {
+            var settings = options || {};
             var map = resolveMap();
             if (!map || typeof map.addGeoJsonOverlay !== "function") {
-                setChip(controller.nodes.subfieldsStatus, "The map is not ready yet; try again after it loads.", "warning");
-                return;
+                if (settings.announce) {
+                    setChip(controller.nodes.subfieldsStatus, "Sub-fields are ready, but the map is not available yet.", "warning");
+                }
+                return Promise.resolve(false);
             }
             var url = urlFor("agfields/sub-fields.geojson");
-            if (controller._overlayRegistered) {
-                refreshOverlay().catch(function (error) {
-                    handleRequestError("overlay", controller.nodes.subfieldsStatus, "Could not refresh the sub-field map", error);
-                });
-            } else {
+            var layer = map.overlayMaps ? map.overlayMaps[LAYER_NAME] : null;
+            if (!layer) {
                 map.addGeoJsonOverlay({
                     layerName: LAYER_NAME,
                     mapKey: LAYER_KEY,
@@ -1657,9 +1664,34 @@ var AgFields = (function () {
                     }
                 });
                 controller._overlayRegistered = true;
+                if (settings.announce) {
+                    setChip(controller.nodes.subfieldsStatus, "Sub-fields loaded on the map. Use the layer control to hide or show them.", "success");
+                }
+                emitter.emit("agfields:overlay:shown", { url: url, layerName: LAYER_NAME });
+                return Promise.resolve(true);
             }
-            setChip(controller.nodes.subfieldsStatus, "Sub-fields added to the map. Review them before running WEPP.", "success");
+            controller._overlayRegistered = true;
+            if (
+                settings.forceVisible &&
+                typeof map.hasLayer === "function" &&
+                typeof map.addLayer === "function" &&
+                !map.hasLayer(layer)
+            ) {
+                map.addLayer(layer, { skipRefresh: true });
+            }
+            if (settings.announce) {
+                setChip(controller.nodes.subfieldsStatus, "Sub-fields loaded on the map. Use the layer control to hide or show them.", "success");
+            }
             emitter.emit("agfields:overlay:shown", { url: url, layerName: LAYER_NAME });
+            if (!settings.refresh) {
+                return Promise.resolve(true);
+            }
+            return refreshOverlay().then(function () {
+                return true;
+            }).catch(function (error) {
+                handleRequestError("overlay", controller.nodes.subfieldsStatus, "Could not refresh the sub-field map", error);
+                return false;
+            });
         }
 
         function resolveBootstrapJobs(context) {
@@ -1701,7 +1733,7 @@ var AgFields = (function () {
             }
             renderState();
         };
-        controller.showOnMap = showOnMap;
+        controller.loadSubfieldsOverlay = loadSubfieldsOverlay;
 
         return controller;
     }

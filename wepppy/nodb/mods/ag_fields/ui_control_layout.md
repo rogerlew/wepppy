@@ -1,13 +1,13 @@
 # AgFields Runs-Page UI Control Layout
 
-Status: Implemented through automated UI milestones 2026-07-09; fresh-project acceptance pending
+Status: Implemented and accepted 2026-07-10; includes post-close projection UX follow-up
 Audience: template, controller, route, and test implementers for `wepppy/nodb/mods/ag_fields`
 
 ## Grounding
 
 - This is a canonical runs-page control: `ui.control_shell(...)` from `controls/_pure_macros.html`, singleton controller in `controllers_js/ag_fields.js`, `controlBase.attach_status_stream`, `set_rq_job_id`, `WCControllerBootstrap.resolveJobId`, delegated events only.
-- Include in `runs0_pure.htm` following its existing idiom: a `show_ag_fields` flag alongside the other `show_*` flags, a `data-mod-nav` nav item, and a `data-mod-section` panel include placed after the WEPP/observed region near roads/geneva. The feature registry alone does not render a section — all three pieces are explicit template work.
-- Maturity label comes from the feature registry (`feature_registry/feature_registry.yaml`), not the template. AgFields is currently `maturity: internal`; bump it to a valid registry value (e.g. `experimental` — `alpha` is not in the schema) when the control ships, and the shell renders the label automatically once the feature id resolves (§6).
+- The feature registry entry supplies `section_template: controls/ag_fields_pure.htm`; the runs page dynamically loads the registered section and controller when the `ag_fields` mod is enabled. The registry is the rendering and navigation source of truth.
+- Maturity and access come from `weppcloud/feature_registry/feature_registry.yaml`, not the template. AgFields is user-visible with `maturity: experimental` and `min_role: user`; the shell renders the Experimental label from the resolved feature id (§6).
 - Borrow the Batch Runner's staged-intake patterns (`routes/batch_runner/templates/batch_runner_pure.htm`): ordered section cards inside one shell, per-section empty-state chips, hidden-until-populated panes (`data-role` + `hidden`), upload → inspect → validate → act progression, status chips that collapse when empty.
 - Borrow the Disturbed modal pattern (`controls/disturbed_modal.htm`) for the rotation mapping modal: a self-contained top-level `wc-modal` with `data-modal`/`data-modal-dismiss` that self-gates on `'ag_fields' in ron.mods` and is included unconditionally from the runs page. The opener button (`data-modal-open`) lives in the stage 3 panel, not in the modal file.
 - Use `ui.collapsible_card(expanded=False)` for every advanced or rarely-touched control (the Climate control's "Advanced options" card is the precedent).
@@ -15,12 +15,12 @@ Audience: template, controller, route, and test implementers for `wepppy/nodb/mo
 
 ## Design Mandate: Do Not Mirror the API
 
-The AgFields controller exposes eight public workflow methods. The UI must NOT render eight buttons. The backend call graph is an implementation detail; the user makes four decisions:
+The backend exposes more operations than the user needs to reason about. The UI must NOT mirror that call graph. It presents four stages:
 
-1. Provide field boundaries (upload).
-2. Confirm how the file is interpreted (ID column, crop-year pattern).
-3. Map crop names to managements (plus optional plant file uploads).
-4. Run.
+1. Provide field boundaries and confirm how the file is interpreted.
+2. Build and review sub-fields.
+3. Map crop names to managements, with optional plant-file uploads.
+4. Run WEPP on the sub-fields.
 
 `rasterize_field_boundaries_geojson`, `periodot_abstract_sub_fields`, and `polygonize_sub_fields` are mechanical consequences of decisions already made — they run as one chained job behind a single button. `set_field_id_key` and `set_rotation_accessor` are pickers populated from the uploaded file's own attribute table — the user must never type a column name from memory. Any layout that surfaces a backend method name as a button label is wrong.
 
@@ -30,7 +30,7 @@ The AgFields controller exposes eight public workflow methods. The UI must NOT r
 - Every stage states its own prerequisites when blocked, in plain language, via a status chip — never a disabled button with no explanation.
 - Auto-detect everything detectable: default the field ID column, propose the crop-year pattern from the column names, validate against the observed climate years before the user commits.
 - Surface the sub-field abstraction results (counts + map overlay) so users review geometry before spending compute on WEPP runs.
-- Keep the visible surface small. Thresholds, worker counts, and re-run/cleanup actions live in collapsed `collapsible_card`s.
+- Keep the visible surface small. Delineation thresholds, executable selection, and cleanup actions live in collapsed `collapsible_card`s. Worker sizing is automatic and is not exposed in the browser.
 - Preserve WEPPcloud async expectations: status panel with live log, stacktrace panel, job hint, poll fallback, stable DOM hooks.
 
 ## 2. Layout Overview
@@ -39,12 +39,14 @@ The AgFields controller exposes eight public workflow methods. The UI must NOT r
 
 ```text
 +--------------------------------------------------------------------------------------------------+
-| Agricultural Fields                                                       [alpha] [collapse]      |
+| Agricultural Fields                                                [Experimental] [collapse]      |
 | Model per-field WEPP runs driven by crop rotation schedules. Work top to bottom.                  |
 +--------------------------------------------------------------------------------------------------+
 | 1. Field Boundaries                                                                               |
 |    Upload a GeoJSON of field polygons with a field_id column and one crop column per year.        |
+|    Project header: [EPSG:32611] (shown after the project map is assigned)                         |
 |    [GeoJSON file......] [Upload Field Boundaries]                                                 |
+|    Current field boundary file: CSB_2008_2024_Hangman_EPSG32611.geojson                          |
 |    (chip: "2,177 fields loaded · 41 columns · uploaded 2026-07-09")                               |
 |    (chip, warning, only if present: "12 duplicate field_id values")                               |
 |    Field ID column:  [field_id        v]                                                          |
@@ -56,7 +58,8 @@ The AgFields controller exposes eight public workflow methods. The UI must NOT r
 |    Fields are split where they cross hillslope boundaries. Review the result before running WEPP. |
 |    [Build Sub-fields]                                                                             |
 |    (chip when blocked: "Confirm the field boundary schema above first.")                          |
-|    (summary when built: "2,177 fields → 8,109 sub-fields · median 0.9 ha")  [Show on Map]         |
+|    (summary when built: "2,177 fields → 6,626 sub-fields")                                  |
+|    Sub-fields load on the map automatically; the map layer control hides/shows them.             |
 |    > Delineation options (collapsed: minimum sub-field area m², rebuild note)                     |
 +--------------------------------------------------------------------------------------------------+
 | 3. Crop Managements                                                                               |
@@ -73,7 +76,7 @@ The AgFields controller exposes eight public workflow methods. The UI must NOT r
 |    [Run WEPP on Sub-fields]                                                                       |
 |    (chip when blocked: "Run the watershed WEPP hillslopes first — sub-fields reuse their          |
 |     soil and climate files.")                                                                     |
-|    > Run options (collapsed: max workers, clear previous runs/outputs)                            |
+|    > Run options (collapsed: WEPP Exec, compact clear previous runs/outputs action)               |
 |    (on success: links — browse outputs, export via Features Export)                               |
 +--------------------------------------------------------------------------------------------------+
 | Status Panel (compact, live log)                                                                  |
@@ -117,8 +120,8 @@ Purpose: get a valid boundary file and freeze its interpretation.
 - On success the route returns feature count, column list, and `field_id_duplicates`. Note: the controller method returns only the duplicates — the route assembles count/columns/timestamp from the NoDb properties it just populated. Render a success chip with count/columns/timestamp; render a separate warning chip for duplicates (non-blocking — duplicates are a data-quality warning, per backend behavior).
 - Validation failures (missing `field_id` column, unreadable file) render in the upload status chip with the server message. The backend hard-requires a literal `field_id` column; say so in the instruction copy before the user uploads. CRS problems do NOT surface here — upload validation reads attributes only; CRS resolution and extent validation occur during rasterization in stage 2.
 - Boundary CRS contract: for maximum overlay and rasterization precision, the preferred input is a GeoJSON whose coordinates are already in the exact projected UTM CRS used by the project DEM. AgFields recognizes unlabeled coordinates that match the project UTM coordinate domain/bounds even though GeoJSON readers commonly default unlabeled files to `EPSG:4326`. Longitude/latitude WGS84 remains supported and is reprojected to the DEM CRS. A different projected CRS is supported only when the file carries CRS metadata that GDAL can resolve; AgFields must not guess an arbitrary projection from ambiguous numeric coordinates.
-- Projection feedback: once the project map is assigned, every run-header title row shows its projection as a pill labeled `EPSG:<srid>` (for example, `EPSG:32611`). Stage 1 upload help points users to that pill: matching it is preferred; WGS84 remains accepted; any other projected CRS requires correct CRS metadata. Hide the pill before the project map/SRID exists rather than displaying an unknown placeholder.
-- Field ID column: `ui.select_field` populated from the returned column list, defaulting to `field_id`. Most users never touch it.
+- Projection feedback: `RonViewModel` exposes the assigned map's optional `srid`; once present, every run-header title row shows it as a pill labeled `EPSG:<srid>` (for example, `EPSG:32611`). Stage 1 upload help points users to that pill: matching it is preferred; WGS84 remains accepted; any other projected CRS requires correct CRS metadata. Hide the pill before the project map/SRID exists rather than displaying an unknown placeholder.
+- Field ID column: a labeled select populated from the returned column list, defaulting to `field_id`. Most users never touch it.
 - Crop-year pattern: the controller JS proposes the pattern by scanning column names for trailing 4-digit years within the observed climate range and grouping by the surrounding template (e.g. `Crop2008…Crop2015` → `Crop{}`). Three outcomes:
   - Exactly one candidate covering every observed year: render as read-only text ("Crop{} — resolves Crop2008…Crop2015") with the collapsible available to override.
   - Multiple candidates: render a select of candidates.
@@ -126,7 +129,7 @@ Purpose: get a valid boundary file and freeze its interpretation.
 - "Confirm Schema" posts both values in one call. The two backend setters are independent, so the route owns atomicity: validate both values first, persist only if both pass (§9). Server errors (per-year missing columns from `set_rotation_accessor`) render in the schema status chip and expand the collapsible.
 - Blocked state: observed-climate readiness is a derived boolean in the state snapshot (climate_mode is an observed mode AND both observed year bounds parse as integers) — `set_rotation_accessor` itself gives no friendly error for missing bounds, so the route/UI must gate before calling it. When not ready, the stage renders a warning chip explaining AgFields requires an observed climate; upload stays enabled, schema confirm is disabled.
 - Complete when: `geojson_is_valid` and `field_id_key` and `rotation_accessor` are all set (hydrated from NoDb state).
-- Re-upload must invalidate downstream stages. The backend does not do this today — upload only refreshes count/hash/timestamp/columns and leaves `field_id_key`, `rotation_accessor`, and sub-field state untouched — so staleness is a backend prerequisite (§10), signaled through the state snapshot, not inferred client-side.
+- Re-upload invalidates downstream stages in the backend: boundary replacement clears the schema selections, refreshes boundary metadata/signatures, and causes server-computed sub-field/run staleness to block later stages. The controller renders those snapshot flags; it does not infer staleness from client-side hashes.
 
 ### Stage 2 — Sub-field Delineation
 
@@ -136,7 +139,9 @@ Purpose: run the mechanical chain (rasterize → Peridot abstraction → polygon
 - "Delineation options" collapsible: `ui.numeric_field` for minimum sub-field area (m², default 0 = keep everything, help text: "Sub-fields smaller than this are dropped."). A note that rebuilding replaces prior sub-fields and invalidates prior runs.
 - Blocked chips: stage 1 incomplete → "Confirm the field boundary schema above first." Watershed abstraction missing (`dem/wbt/flovec.tif` absent) → "Build the watershed subcatchments first." (Peridot asserts both `flovec.tif` and `field_boundaries.tif`, but the latter is produced by this job's own first step, so only `flovec.tif` is a UI gate. The readiness check belongs in the state snapshot — do not rely on Peridot's Python `assert` as the user-facing error.)
 - Failure modes that surface here, not at upload: un-inferable/ambiguous CRS and field geometry not overlapping the DEM extent. Both render the server message in the stage status chip. The CRS error must include the project DEM CRS and project/upload bounds and instruct the user to export in that project CRS for best precision or supply correct metadata for another projected CRS.
-- Summary on completion (hydrated from `field_n`, `sub_field_n`, `sub_field_fp_n`): "N fields → M sub-fields". Include "Show on Map": follow the Roads precedent — a run-scoped resource endpoint serves `sub_fields.WGS.geojson` (as `roads_bp.py` serves `resources/roads.json`) and the controller registers a named overlay via the GL map's `addGeoJsonOverlay`, refreshing it after rebuilds.
+- Summary on completion (hydrated from `field_n` and `sub_field_n`): "N fields → M sub-fields". There is no separate "Show on Map" action.
+- When a successful build reaches its terminal event, the controller re-hydrates state, registers the authenticated `sub_fields.WGS.geojson` resource as the named `AgFields Sub-fields` GL overlay, makes it visible, and refreshes an existing registration with the rebuilt geometry. Hydration also registers and displays an existing current overlay after a page reload.
+- After registration, visibility belongs to the shared map layer control. Unchecking `AgFields Sub-fields` removes it only from the visible Deck layer set; it remains in the overlay registry and in the layer control. Checking it again constructs a fresh Deck layer descriptor from the cached GeoJSON, replaces the retained registry reference, and displays it without another HTTP request. Ordinary later state hydration respects that hidden choice; a newly completed rebuild makes the updated overlay visible again for review.
 - Instruction copy must tell the user to review before running: sub-field splitting is the point of the tool, and geometry mistakes here poison everything downstream.
 - Complete when: `sub_field_n > 0` and `sub_fields.WGS.geojson` exists.
 
@@ -147,7 +152,9 @@ Purpose: produce a complete, valid `rotation_lookup.tsv` without the user ever h
 - Headline chip: "N of M crops mapped" — success state when N == M and all rows validate, warning otherwise. M comes from `get_unique_crops()` (available once stage 1 is complete).
 - Primary button "Map Crops to Managements" opens the modal (§5). Disabled with an explanatory chip until stage 1 completes (crop enumeration needs the confirmed crop-year pattern and observed climate years; it does not use the field ID column).
 - "Plant file database" collapsible, auto-expanded when plant files exist or any mapping row references `plant_file_db`:
-  - One-sentence instruction: zip of `.man` files from the USDA rotation builder; 2017.1 files are converted to 98.4 automatically; filenames are normalized (spaces → underscores). Only lowercase `.man` extensions are processed today — uppercase `.MAN` entries are silently ignored (backend prerequisite §10).
+  - One-sentence instruction: zip of `.man` files from the USDA rotation builder; extension matching is case-insensitive, 2017.1 files are converted to 98.4 automatically, and filenames are normalized (spaces → underscores).
+  - Upload accepts a ZIP up to 100 MB. Archive ingestion rejects unsafe member paths and allows at most 200 members / 600 MB uncompressed before processing.
+  - Jim-interface residue-only plant placeholders with nonpositive `hmax` are normalized to `0.00001 m` and recorded in inventory provenance. Active crop scenarios are never normalized by this rule.
   - A single unreadable 2017.1 file aborts the whole processing job (backend raises); the terminal event must name the offending file so the user can fix the zip.
   - Zip upload → RQ job (extract/downgrade/validate streams to the status panel).
   - Inventory table: final filename, format badge ("2017.1 → 98.4" for downgraded files), validation status, delete button per row. Files that failed validation appear with their parse error and no delete ambiguity — the user must be able to see exactly which names are usable in the mapping.
@@ -170,7 +177,7 @@ Purpose: run and monitor the per-sub-field simulations.
 
 Gating is advisory-but-honest: downstream primary buttons are disabled with an explanatory chip, never silently disabled.
 
-The staleness signals below are not free: the backend keeps `geojson_hash`/`geojson_timestamp` but never invalidates downstream state on re-upload, so the state snapshot must carry explicit staleness flags computed server-side (§10). The controller renders what the snapshot says; it does not diff hashes itself.
+The backend owns invalidation and computes explicit staleness from boundary, schema, sub-field, mapping, and run source signatures. The state snapshot carries those flags; the controller renders what the snapshot says and never diffs hashes itself.
 
 | Event | Effect |
 |---|---|
@@ -180,7 +187,7 @@ The staleness signals below are not free: the backend keeps `geojson_hash`/`geoj
 | Mapping saved incomplete | Stage 3 chip shows remaining count; stage 4 stays blocked |
 | Plant file deleted while referenced | Stage 3 chip gains error state ("mapping references a deleted plant file"); stage 4 blocked |
 
-Hydration: all gating state derives from one snapshot (template context at render + `GET api/agfields/state` after job completion events). The controller re-hydrates idempotently — refresh mid-job must reattach to the stream and reconstruct chips (Batch Runner's runstate hydration is the pattern).
+Hydration: the server-rendered control contains static structure and installed WEPP executable options. All workflow state derives from `GET api/agfields/state`, fetched on bootstrap, after mutations, and after job terminal events. The controller re-hydrates idempotently; a refresh mid-job resolves the active job id, reattaches to its stream, and reconstructs the chips from the snapshot.
 
 ## 5. Rotation Mapping Modal
 
@@ -189,34 +196,39 @@ Hydration: all gating state derives from one snapshot (template context at rende
 - One row per unique crop, alphabetized. Columns: crop name (read-only), source (radio pair: WEPPcloud / Plant file), management (dependent select — weppcloud managements or valid plant files; disabled with placeholder until a source is chosen), row status (ok / unmapped / error).
 - Rows referencing missing plant files (orphans) render in error state with the missing filename shown; the select offers current valid files to re-map.
 - Crops present in the saved lookup but absent from the current schedule are shown in a collapsed "Unused mappings" group at the bottom (kept on save, harmless).
-- Footer: Cancel (discard, `data-modal-dismiss`) and "Save Mapping" (posts all rows). Server validates every row (`CropRotationManager` semantics); on any error the modal stays open, failing rows show server messages, valid rows persist state client-side. On success the modal closes and the stage 3 chip refreshes.
+- Footer: Cancel (discard, `data-modal-dismiss`) and "Save Mapping" (posts all rows). Server validates every mapped row (`CropRotationManager` semantics); on an HTTP validation error the modal stays open and matching rows show server messages. On success the modal closes, the controller re-hydrates state, and the stage 3 chip refreshes.
 - Partial mappings are savable — save never blocks on unmapped rows (users map incrementally); only stage 4 gating requires completeness.
 - No pagination; the table scrolls within the modal body. Crop counts are typically tens, not thousands.
 
 ## 6. Template Structure and DOM Contract
 
 - Template: `templates/controls/ag_fields_pure.htm`. Modal in the same file, outside the shell call, following the Disturbed modal include pattern.
-- Shell: `form_id="ag_fields_form"`, title "Agricultural Fields", collapsible shell (default open), status/summary/stacktrace panel options like Batch Runner's compact variant. For the maturity label either add `ag_fields_form` to the shell's `_feature_form_map` or pass `feature_id="ag_fields"` explicitly — the label text itself is registry-derived (see Grounding).
+- Shell: `form_id="ag_fields_form"`, title "Agricultural Fields", `feature_id="ag_fields"`, collapsible shell (default open), and compact status/summary/stacktrace panels. The label text is registry-derived (see Grounding).
 - Controller: `controllers_js/ag_fields.js`, built into the bundle via `build_controllers_js.py`. Singleton bootstrap, delegated events on the control root and the modal root only (`data-action` attributes), no per-row listeners.
 - All JS-addressable nodes use `data-role` attributes scoped under the control root, mirroring Batch Runner naming (kebab-case). Required hooks:
 
 | Region | Hooks |
 |---|---|
-| Stage 1 | `geojson-input`, `upload-button`, `upload-status`, `boundary-file-display`, `boundary-filename`, `boundary-summary`, `duplicate-warning`, `field-id-select`, `accessor-display`, `accessor-input`, `accessor-resolution-body`, `confirm-schema-button`, `schema-status` |
-| Stage 2 | `build-subfields-button`, `subfields-status`, `subfields-summary`, `show-on-map-button`, `min-area-input` |
+| Stage 1 | `geojson-input`, `upload-button`, `upload-status`, `boundary-file-display`, `boundary-filename`, `boundary-summary`, `duplicate-warning`, `field-id-select`, `accessor-display`, `accessor-candidates`, `accessor-input`, `accessor-resolution-body`, `confirm-schema-button`, `schema-status` |
+| Stage 2 | `build-subfields-button`, `subfields-status`, `subfields-summary`, `min-area-input` |
 | Stage 3 | `mapping-chip`, `open-mapping-button`, `plantdb-input`, `plantdb-upload-button`, `plantdb-status`, `plantfile-table-body` |
 | Stage 4 | `run-button`, `run-status`, `wepp-bin-select`, `clear-runs-button`, `results-links` |
-| Modal | `mapping-table-body`, `mapping-status`, `mapping-save-button`, `unused-mappings` |
+| Modal | `mapping-table-body`, `mapping-status`, `mapping-save-button`, `unused-mappings`, `unused-mappings-body` |
 
 - Empty status chips collapse via the `:empty { display: none }` pattern.
 - Stage panels get stable ids (`agfields_stage_boundaries`, `agfields_stage_subfields`, `agfields_stage_managements`, `agfields_stage_run`) for tests and deep links.
+- The shared runs-page and report header title rows expose an assigned map as a `data-project-projection="EPSG:<srid>"` pill. The element is omitted when the `RonViewModel` has no SRID.
 
 ## 7. Controller Lifecycle and Event Contract
 
-- Bootstrap resolves job ids for the three long-running job families via `WCControllerBootstrap.resolveJobId`, reattaches status streams, then hydrates gating from the state snapshot. `resolveJobId` matches exact keys only — the job key names are contractual: `agfields_build_subfields`, `agfields_plantdb`, `agfields_run_wepp`.
+- Bootstrap re-queries the dynamically inserted DOM, resolves job ids for the three long-running job families via `WCControllerBootstrap.resolveJobId`, attaches status streams/poll fallback, and hydrates gating from the state snapshot. `resolveJobId` matches exact keys only — the job key names are contractual: `agfields_build_subfields`, `agfields_plantdb`, `agfields_run_wepp`.
 - All mutations go through the route contract (§9); the controller never computes workflow state locally except for the crop-year pattern *suggestion*, which is client-side UX sugar with server confirmation.
 - Job completion (via status stream terminal events or poll fallback) triggers one `GET api/agfields/state` re-hydration; no optimistic gating flips.
+- Current sub-fields auto-register on initial hydration. A successful build terminal event forces the registered overlay visible and refreshes it; a user-hidden overlay otherwise stays hidden across later hydration.
 - Uploads use the shared upload helpers (`forms.js`/`http.js` conventions) with multipart posts; no drag-drop in v1.
+- Clear uses an inline two-click confirmation: the second click must occur within eight seconds. No modal is opened because only regenerable artifacts are removed.
+- Structured request/job failures are rendered in the stage chip and shared stacktrace panel. `EXCEPTION_JSON` supplies the offending plant filename or WEPP `sub_field_id`/`field_id` when available.
+- Preflight checklist key `ag_fields` maps to `TaskEnum.run_ag_fields` and the `#ag-fields` TOC entry. Its emoji is 🌽. AgFields mutations and job submissions clear the timestamp; only successful Stage 4 completion stamps it.
 
 ## 8. Copy Guidelines
 
@@ -226,7 +238,7 @@ Hydration: all gating state derives from one snapshot (template context at rende
 - Error chips carry the server message verbatim after a short plain-language lead-in.
 - The control description (shell header) links to the AgFields user guide page (`usersum` agricultural-fields ENDUSER doc).
 
-## 9. Route and Job Contract (new backend surface)
+## 9. Implemented Route and Job Contract
 
 All routes are run-scoped under rq-engine and follow the Treatments/Disturbed precedents. Mutations require `rq:enqueue`, reads require `rq:status`, and every route calls `authorize_run_access`. Paths below are relative to the rq-engine `/api` prefix.
 
@@ -235,25 +247,27 @@ All routes are run-scoped under rq-engine and follow the Treatments/Disturbed pr
 | Upload field boundaries | `POST /runs/{runid}/{config}/agfields/boundaries` (`field_boundaries`) | Accepts `.geojson`/`.json` up to 10 MB, validates before replacing canonical artifacts, and returns field count, columns, timestamp, and duplicates |
 | Confirm schema | `POST /runs/{runid}/{config}/agfields/schema` | JSON/form `field_id_key` + `rotation_accessor`; validates and persists both atomically |
 | Build sub-fields | `POST /runs/{runid}/{config}/agfields/build-subfields` | Enqueues rasterize → abstract → polygonize with optional `sub_field_min_area_threshold_m2` |
-| Upload plant file zip | `POST /runs/{runid}/{config}/agfields/plant-database` (`plant_database`) | Validates ZIP quotas/member paths, stages a unique archive, and enqueues plant processing |
+| Upload plant file zip | `POST /runs/{runid}/{config}/agfields/plant-database` (`plant_database`) | Accepts ZIPs up to 100 MB; validates the 200-member/600-MB-uncompressed quotas and member paths, stages a unique archive, and enqueues plant processing |
 | Plant file inventory | `GET /runs/{runid}/{config}/agfields/plant-files` | Returns valid files, invalid reasons, downgrade provenance, and replacement flags |
 | Delete plant file | `DELETE /runs/{runid}/{config}/agfields/plant-files/{filename}` | Deletes a `.man` basename and returns refreshed inventory plus mapping validation |
 | Rotation mapping (read/save) | `GET/POST /runs/{runid}/{config}/agfields/rotation-mapping` | Reads modal data or saves JSON `rows` to canonical `rotation_lookup.tsv` and returns per-row validation |
 | Management options | `GET /runs/{runid}/{config}/agfields/management-options` | Returns management id + description pairs from the run's landuse mapping |
-| Run WEPP sub-fields | `POST /runs/{runid}/{config}/agfields/run-wepp` | Enforces sub-field, mapping, and parent-WEPP readiness, validates and persists required `wepp_bin`, then enqueues with automatic worker sizing; legacy callers may continue to send optional `max_workers` |
+| Run WEPP sub-fields | `POST /runs/{runid}/{config}/agfields/run-wepp` | Enforces sub-field, mapping, and parent-WEPP readiness, validates required `wepp_bin`, then enqueues with automatic worker sizing; the worker persists the selected executable before it starts the sub-field runs, and legacy callers may continue to send optional `max_workers` |
 | Clear runs/outputs | `POST /runs/{runid}/{config}/agfields/clear` | Clears both regenerable AgFields WEPP directories and recorded run provenance |
 | Sub-fields overlay resource | `GET /runs/{runid}/{config}/agfields/sub-fields.geojson` | Serves `sub_fields.WGS.geojson` as `application/geo+json` |
 | State snapshot | `GET /runs/{runid}/{config}/agfields/state` | Returns all stage hydration state described below |
 
-The state snapshot has top-level objects `boundary`, `schema`, `subfields`, `mapping`, `plant_files`, `wepp`, `staleness`, and `readiness`. `boundary.filename` is the persisted source basename shown after reload, with the canonical boundary filename as the compatibility fallback for historical projects. `wepp.wepp_bin` is the current AgFields executable and hydrates the Stage 4 selector. The snapshot also exposes `job_ids` (last known ids) and `active_job_ids` (only queued/started/deferred/scheduled ids) under the contractual keys `agfields_build_subfields`, `agfields_plantdb`, and `agfields_run_wepp`. Staleness keys are `subfields` and `wepp_runs`; readiness keys are `observed_climate`, `watershed_abstraction`, `parent_wepp`, observed year bounds, and missing parent WEPP ids.
+The state snapshot has top-level objects `boundary`, `schema`, `subfields`, `mapping`, `plant_files`, `wepp`, `staleness`, and `readiness`. `boundary.filename` is the persisted source basename shown after reload, with the canonical boundary filename as the compatibility fallback for historical projects. `plant_files` carries valid/invalid counts; the inventory endpoint supplies the detailed rows. `wepp` carries `run_count`, `output_count`, `complete`, and the AgFields-owned `wepp_bin` used to hydrate Stage 4. The snapshot also exposes `job_ids` (last known ids) and `active_job_ids` (only queued/started/deferred/scheduled ids) under the contractual keys `agfields_build_subfields`, `agfields_plantdb`, and `agfields_run_wepp`. Staleness keys are `subfields` and `wepp_runs`; readiness includes observed-climate/year-bound validity, watershed abstraction, parent WEPP readiness, and missing parent WEPP ids.
 
 RQ tasks return their terminal payload through the RQ job result and publish the same payload as `RESULT_JSON` before their completion trigger. Plant processing publishes the valid/invalid inventory; sub-field building publishes field/sub-field counts; WEPP publishes `run_count`. Failures publish `EXCEPTION_JSON`; plant failures include `filename`, and WEPP failures include both `sub_field_id` and parent `field_id`. Completion triggers are `AGFIELDS_BUILD_SUBFIELDS_TASK_COMPLETED`, `AGFIELDS_PLANTDB_TASK_COMPLETED`, and `AGFIELDS_RUN_WEPP_TASK_COMPLETED`.
 
+The Stage 4 worker clears `TaskEnum.run_ag_fields` when it starts and stamps it only after all sub-field WEPP runs succeed. `preflight2` considers the timestamp fresh only when it is newer than the latest parent WEPP timestamp and the current watershed abstraction, landuse, soils, and climate timestamps. The canonical cross-component contract is `docs/ui-docs/control-ui-styling/preflight_behavior.md#agfields-preflight-integration`.
+
 Async submissions are single-flight per run across all three job families. A concurrent submission, boundary/schema/mapping mutation, plant-file delete, or artifact clear receives HTTP 409 with `error.code="agfields_job_active"` while a job is active; the UI must keep the current stream attached rather than replacing its job id.
 
-## 10. Backend Prerequisites (implemented 2026-07-09)
+## 10. Implemented Backend Behavior
 
-The backend-readiness package `docs/work-packages/20260709_ag_fields_backend_readiness/` completed these prerequisites. The list remains as implementation rationale and regression scope for the successor UI package.
+The backend-readiness and acceptance follow-up packages established the behavior the UI relies on. This list is implementation rationale and regression scope, not pending work.
 
 1. **`run_wepp_subfield` binary propagation:** `wepp_bin` is explicit and is read from the AgFields NoDb before executor submission; historical AgFields NoDb payloads without that additive key fall back to the parent Wepp NoDb value.
 2. **RQ task wrappers:** `wepppy/rq/ag_fields_rq.py` provides build-subfields, plant-db, and run-wepp jobs with the §7 keys and status events.
@@ -266,6 +280,11 @@ The backend-readiness package `docs/work-packages/20260709_ag_fields_backend_rea
 9. **Readiness checks:** the snapshot reports observed climate, `dem/wbt/flovec.tif`, and required parent `.sol`/`.cli` pairs.
 10. **2017.1 truncation:** `first_year_only=False` remains fixed and is not exposed in v1.
 11. **Logging:** duplicate-field warnings use `logger.warning`.
+12. **Boundary CRS handling:** exact project-UTM coordinates, WGS84, and correctly declared projected CRSs are accepted; ambiguous projected coordinates are rejected with project EPSG/bounds diagnostics.
+13. **Management synthesis:** `ManagementRotationSynth(..., mode="stack-and-merge")` preserves the crop timeline and existing setup-year/spring-fall composition while reusing structurally identical definitions and remapping references. It fails before writing when more than WEPP's 20 referenced plant scenarios remain.
+14. **Residue placeholder normalization:** archive ingestion applies the ADR-0016 `0.00001 m` floor only to proven residue-only plants with `hmax <= 0`, preserves archived 2017.1 sources, leaves active crops unchanged, and records additive provenance.
+15. **AgFields-owned executable:** `[ag_fields] bin` initializes new-project state independently of parent WEPP; `ag-fields.cfg` sets `wepp_dcc52a6`, while historical NoDb payloads without the field retain the parent-WEPP fallback until an AgFields run selection is submitted.
+16. **Preflight freshness:** additive Redis timestamp `run_ag_fields` is invalidated by input/artifact mutations and job starts, stamped only on successful Stage 4 completion, and exposed as checklist key `ag_fields` with the 🌽 TOC emoji.
 
 ## 11. Accessibility
 
@@ -275,25 +294,25 @@ The backend-readiness package `docs/work-packages/20260709_ag_fields_backend_rea
 - Dependent selects in the modal must be labeled per row (visually-hidden labels including the crop name, e.g. "Management for Corn").
 - Disabled primary buttons always have an adjacent visible chip explaining why (gating is never conveyed by disabled state alone).
 
-## 12. Test Checklist
+## 12. Regression Coverage and Acceptance
 
-### Jest (`controllers_js/__tests__/ag_fields.test.js`)
-- Singleton bootstrap + idempotent re-hydration from a state snapshot fixture.
-- Crop-year pattern detection: single candidate, multiple candidates, no candidate (collapsible auto-expand), partial year coverage.
-- Gating matrix transitions from §4 (re-upload resets downstream, mapping incomplete blocks run, orphaned plant file flips stage 3 to error).
-- Modal: dependent select enable/disable, per-row error rendering from a save-failure fixture, unused-mappings grouping.
-- Upload flows set busy state and render server errors in the correct chip.
+### Automated coverage
 
-### Playwright
-- Full staged walk-through against a seeded run with fixture GeoJSON and plant zip: upload → auto-detected schema → build sub-fields → map crops in modal → run blocked on parent WEPP → (with parent WEPP fixture) run enabled.
-- Refresh mid-job reattaches the status stream and preserves stage states.
+- `controllers_js/__tests__/ag_fields.test.js` contains 10 focused Jest cases covering dynamic bootstrap, snapshot hydration, crop-year detection, stage gating, uploads, modal mapping, active-job conflicts, automatic authenticated sub-field overlay loading/refresh, executable hydration/submission, and the compact clear action.
+- `controllers_js/__tests__/map_gl.test.js` proves the layer-control checkbox hides `AgFields Sub-fields` without unregistering it, then rebuilds a visible Deck descriptor from the cached non-empty feature collection without another load.
+- `tests/microservices/test_rq_engine_ag_fields_routes.py` covers authorization, payload/error contracts, state hydration, atomic schema confirmation, single-flight behavior, executable validation, and run enqueue behavior.
+- `tests/nodb/mods/test_ag_fields_backend_contract.py`, `test_ag_fields_rasterize_crs.py`, and `test_ag_fields_wepp_runner.py` cover NoDb persistence/staleness, archive inventory and normalization, CRS handling, management preparation, and executable propagation.
+- `tests/rq/test_ag_fields_rq.py` covers the three job wrappers and structured terminal payloads.
+- `tests/wepp/management/test_rotation_stack.py` plus the run-derived `ag_fields_rotation_synth` fixtures cover setup-year merging, structural reuse/reference remapping, the 20-plant preflight, residue-only `hmax` normalization, and representative WEPP replays.
+- `tests/weppcloud/routes/test_feature_registry_runtime.py`, `test_pure_controls_render.py`, and `tests/nodb/test_ron_map.py` cover registry loading, template/DOM contracts, current-file display, WEPP options, and conditional projection pills.
 
-### pytest
-- Route contract: each §9 route (auth, payload validation, error shapes); schema-confirm atomicity (bad accessor leaves field_id_key unchanged); mapping save round-trips through `CropRotationManager`.
-- RQ tasks: build-subfields chain ordering; run-wepp failure surfaces sub_field_id in the failure payload.
+### Manual acceptance
 
-## 13. Open Decisions (flagged for review)
+The 2026-07-10 walkthrough on `sacral-self-discipline` exercised all four stages with corrected `EPSG:32611` boundaries. It produced 2,177 fields → 6,626 sub-fields, 6,626 run files, and 46,382 output files. Output version evidence matched the job-pinned `wepp_dcc52a6`, and the maintainer accepted the interface. This closes the fresh-project acceptance requirement; evidence is recorded in `docs/work-packages/20260709_ag_fields_runs_page_ui/tracker.md`.
 
-1. **Plant file collapsible default state** — spec says auto-expand when files exist or are referenced; if that proves jumpy, demote to always-collapsed with a count in the summary line.
-2. **Duplicate `field_id` values** are non-blocking (matches backend). If real usage shows duplicates producing garbage joins, promote to a blocking error at upload.
-3. **Registry maturity value** — AgFields sits at `internal` in the feature registry; the ship decision is which valid value to move it to (`experimental` suggested).
+## 13. Known Limitations and Deferred Decisions
+
+1. **Duplicate `field_id` values remain non-blocking.** They are reported as a data-quality warning. Promote them to a blocking upload error only with evidence that real joins require that stricter contract.
+2. **Historical executable fallback is intentionally additive.** An AgFields NoDb created before `_wepp_bin` was introduced displays the parent WEPP executable until the user submits an AgFields run selection; new `ag-fields.cfg` projects start with `wepp_dcc52a6`.
+3. **Worker tuning is API-only compatibility.** The browser uses automatic sizing and sends no `max_workers`; legacy API callers may still provide the optional value.
+4. **Controller splitting is deferred.** The single controller shares one snapshot, modal, and job lifecycle. Reassess its module boundary only if observed maintenance friction justifies the churn.

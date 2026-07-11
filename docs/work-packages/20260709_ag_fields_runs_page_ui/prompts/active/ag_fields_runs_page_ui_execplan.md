@@ -22,13 +22,17 @@ A user can see this working by opening a run created from the `ag-fields` config
 - [x] (2026-07-10 16:38 UTC) Follow-up: added a persisted uploaded-boundary-filename display to Stage 1, backed by the additive `boundary.filename` snapshot field, source-basename NoDb metadata, historical-project fallback, and reload regression coverage.
 - [x] (2026-07-10 16:57 UTC) Follow-up: made project-UTM acceptance explicit in rasterization and the specification, added ambiguous-CRS diagnostics with project EPSG/bounds, and covered both paths.
 - [x] (2026-07-10 21:52 UTC) Follow-up: replaced the Stage 4 worker control with a persisted WEPP Exec selector, defaulted new `ag-fields` projects to `wepp_dcc52a6`, pinned and propagated the selected executable to sub-field runs, and made the clear action content-width.
-- [ ] (2026-07-10 22:43 UTC) Post-close follow-up in progress: state the field-boundary projection requirements directly in Stage 1 and show the assigned project EPSG as a conditional pill in run-header title rows.
+- [x] (2026-07-10 22:43 UTC) Post-close follow-up: stated the field-boundary projection requirements directly in Stage 1 and added the assigned project EPSG as a conditional pill in runs-page and report-header title rows.
+- [x] (2026-07-10 23:06 UTC) Post-close documentation reconciliation: aligned the canonical UI specification with the accepted implementation, including registry maturity, snapshot-owned hydration/staleness, archive ingestion and management-synthesis guarantees, the AgFields executable, current DOM hooks, regression coverage, and acceptance evidence.
+- [x] (2026-07-10 23:17 UTC) Post-close overlay follow-up: removed the Stage 2 "Show on Map" action, auto-loaded current sub-fields on hydration and successful build completion, and made layer-control hiding preserve the registered overlay.
+- [x] (2026-07-10 23:40 UTC) Overlay re-show fix: remote GeoJSON layers now rebuild a fresh Deck descriptor from cached feature data when re-enabled, while existing-run hydration continues to add current sub-fields automatically.
+- [x] (2026-07-11 00:04 UTC) Preflight follow-up: added `TaskEnum.run_ag_fields` with 🌽, success-only worker stamping, mutation/job invalidation, dependency-aware `preflight2` evaluation, TOC/browser mappings, regression coverage, and the canonical behavior contract.
+- [x] (2026-07-11 00:21 UTC) Validation-debt follow-up: fixed the Batch Runner workspace-preservation fixture so its mocked working directory cannot escape through the real cache helper; the test also verifies canonical cache/lock run-id propagation.
 - [x] (2026-07-10 22:40 UTC) Milestone 6: full Stage 4 run on
   `sacral-self-discipline` completed and maintainer-validated. Artifact
   evidence in `../../tracker.md` Validation: 6,626 sub-field runs, 46,382
   output files, `VERSION 2020.500` stamp consistent with `wepp_dcc52a6`.
-  Package closed; the ExecPlan stays in `prompts/active/` only while the
-  post-close projection-feedback follow-up above is in flight.
+  Package closed; this living plan records the accepted post-close UX fixes.
 
 ## Surprises & Discoveries
 
@@ -36,8 +40,8 @@ A user can see this working by opening a run created from the `ag-fields` config
   Evidence: `run_0_bp.py:view_mod_section` resolves the registry template and `project.js` separately resolves the controller bootstrap map.
 - Observation: The sub-fields overlay route requires an rq-engine bearer token, while `addGeoJsonOverlay` previously loaded only through unauthenticated `WCHttp.getJson`.
   Evidence: `ag_fields_routes.py:subfields_overlay` requires `rq:status`; the map helper now accepts an optional `loadJson` callback, covered by `map_gl.test.js`.
-- Observation: The required full Python sweep is blocked by deterministic, unrelated Batch Runner test debt.
-  Evidence: `wctl run-pytest tests --maxfail=1` stopped after `2070 passed, 41 skipped` at `tests/nodb/test_batch_runner.py::test_run_batch_project_does_not_delete_workspace_when_rmtree_disabled`; the isolated rerun fails because `clear_nodb_file_cache()` resolves `/wc1/batch/...` outside the test's patched `batch_runner_mod.get_wd`.
+- Observation: The full Python sweep exposed a Batch Runner unit-fixture isolation defect, not a production path-resolution defect.
+  Evidence: The test patched only `batch_runner_mod.get_wd`, while the real cache helper imports its own canonical resolver and therefore looked under `/wc1/batch/...`. The fixture now stubs the cache/lock reset boundary and asserts both calls receive the canonical batch run id. All four Batch Runner tests and the final canonical full sweep (4,817 passed, 60 skipped) are green.
 - Observation: Module-level AgFields `stubtest` has 21 existing surface errors unrelated to the new source-filename property and validation keyword; repository `check-test-stubs` remains green.
   Evidence: The reported omissions are older runtime exports and methods already absent from the HEAD stub; neither changed symbol appears in the failure list.
 - Observation: The first fresh-project acceptance attempt reached Stage 2 but the uploaded file is neither WGS84 nor project UTM despite GDAL defaulting the unlabeled GeoJSON to `EPSG:4326`.
@@ -53,6 +57,12 @@ A user can see this working by opening a run created from the `ag-fields` config
   Evidence: The first focused Jest run returned an empty selected value. The
   helper now invokes busy-label restoration only for `BUTTON` elements, and all
   10 AgFields tests plus the 619-test frontend suite pass.
+- Observation: Run-header templates receive `RonViewModel`, not the full `Ron`
+  controller, so reading `current_ron.map.srid` in the template always hid the
+  projection pill even though the run had an assigned map.
+  Evidence: `sacral-self-discipline/ron.nodb` contains UTM zone 11, while the
+  original `RonViewModel` exposed no map/SRID attribute. After the additive
+  view-model field, the live container resolves `srid=32611`.
 
 ## Decision Log
 
@@ -77,12 +87,18 @@ A user can see this working by opening a run created from the `ag-fields` config
 - Decision: Give AgFields its own persisted WEPP executable, default new `ag-fields.cfg` projects to `wepp_dcc52a6`, and retain the parent-WEPP executable as the fallback only for historical NoDb payloads lacking the new field.
   Rationale: The exact repaired p3733 replay completes under `wepp_dcc52a6` while `wepp_260430` and `wepp_260606` SIGFPE at `frcfac.for:184`. An additive AgFields-owned setting makes that compatibility choice explicit without rewriting existing project state. ADR-0017 records the parameterization decision.
   Date/Author: 2026-07-10 / Roger Lew and Codex.
+- Decision: Auto-load the authenticated sub-field overlay when current geometry hydrates and after every successful rebuild; use the shared map layer control as the only visibility affordance.
+  Rationale: Geometry review is an expected consequence of building sub-fields, so a second Stage 2 action adds no decision. Hiding must preserve the overlay registration so showing it again is local and reversible; only a new rebuild forces it visible for renewed review.
+  Date/Author: 2026-07-10 / Roger Lew and Codex.
+- Decision: Represent completed AgFields simulations with additive task `run_ag_fields` and checklist key `ag_fields`; stamp only after a successful Stage 4 worker and require freshness against parent WEPP plus watershed/core inputs.
+  Rationale: An existence-only flag would remain green after upstream reruns or input mutations. Timestamp invalidation at every AgFields mutation/job boundary plus server-side freshness comparisons makes the 🌽 indicator reflect reproducible current outputs without changing run artifacts or legacy keys.
+  Date/Author: 2026-07-11 / Roger Lew and Codex.
 
 ## Outcomes & Retrospective
 
 Milestones 1-5 now deliver the complete automated UI implementation. The design mandate is preserved: the visible workflow exposes four user decisions while mechanical backend methods remain confined to logs. Stage 1 retains visible current-file context after reload, and Stage 4 now exposes the AgFields-specific executable instead of worker tuning. New projects persist `wepp_dcc52a6`; historical state remains additive and compatible. The main integration lesson was that both registry-driven dynamic loading and rq-engine overlay authentication had to be wired explicitly; neither was satisfied by adding the static runs-page include alone.
 
-The remaining gap is operational acceptance, not code implementation. Milestone 6 needs a fresh small-watershed run and cannot be replaced by fixture-driven Jest coverage. The unrelated full-Python Batch Runner failure is recorded as repository test debt and was not expanded into this UI package.
+Operational acceptance is complete. The post-close UX work retains the accepted four-stage workflow while improving project projection feedback and making sub-field map review automatic and reversible. The unrelated Batch Runner failure found by the full sweep was dispositioned as a hermetic-test fixture defect without changing production path resolution.
 
 ## Context and Orientation
 
@@ -128,8 +144,22 @@ Controller bootstrap and state hydration are idempotent and re-query the DOM aft
 
 ## Artifacts and Notes
 
-The implementation evidence is the new `ag_fields.test.js` suite, the affected map/project tests, the Python render/registry/bootstrap assertions, and the command transcripts summarized in `../../tracker.md`. No screenshot or real-run output artifact exists yet because Milestone 6 has not run.
+The implementation evidence is the `ag_fields.test.js` suite, the affected map/project tests, the Python render/registry/bootstrap assertions, the accepted `sacral-self-discipline` run artifacts, and the command transcripts summarized in `../../tracker.md`.
 
 Revision note (2026-07-09, Codex): Updated the living plan after implementing Milestones 1-5, documented dynamic registry and authenticated overlay decisions, recorded automated validation and unrelated suite debt, and kept Milestone 6 explicitly open for fresh-project acceptance.
 
 Revision note (2026-07-10, Codex): Added the Stage 4 WEPP executable follow-up, its backward-compatibility plan, ADR requirement, UI simplification, and focused regression scope after the real p3733 binary comparison.
+
+Revision note (2026-07-10, Codex): Added the post-close projection-guidance follow-up. `RonViewModel` now carries the optional SRID from its assigned map because templates receive that view model rather than the `Ron` controller. Headers hide the pill until the SRID exists; no persistence contract was introduced.
+
+Revision note (2026-07-10, Codex): Reconciled `ui_control_layout.md` with the accepted implementation and converted historical future-tense/open-decision text into the shipped route, state, UI, compatibility, validation, and known-limitation contracts.
+
+Revision note (2026-07-10, Codex): Replaced the manual Stage 2 map action with automatic authenticated overlay loading and documented registry-preserving layer-control visibility semantics.
+
+Revision note (2026-07-10, Codex): Fixed the observed hide/re-show failure by making retained remote GeoJSON overlays reconstruct a fresh Deck descriptor from cached data; added non-empty feature regression coverage and reaffirmed existing-run auto-load behavior.
+
+Revision note (2026-07-11, Codex): Wired AgFields into the Redis/preflight2/TOC contract with the requested 🌽 task emoji, success-only completion, mutation and job invalidation, dependency freshness, and cross-language tests.
+
+Revision note (2026-07-11, Codex): Dispositioned the recorded Batch Runner failure by isolating its cache/lock fixture boundary and asserting canonical run-id propagation; production path resolution remains unchanged.
+
+Revision note (2026-07-11, Codex): Closed the Batch Runner validation debt after the canonical full Python sweep passed 4,817 tests with 60 skips.

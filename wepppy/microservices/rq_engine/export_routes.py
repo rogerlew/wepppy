@@ -426,7 +426,7 @@ async def export_ermit(runid: str, config: str, request: Request):
     summary="Submit ERMiT input export",
     description=(
         "Requires JWT Bearer scope `rq:export` and run access via `authorize_run_access`. "
-        "Queues ERMiT/Disturbed WEPP batch-input generation and returns job/download URLs."
+        "Enqueues ERMiT/Disturbed WEPP batch-input generation and returns job/download URLs."
     ),
     tags=["rq-engine", "exports"],
     operation_id=rq_operation_id("export_ermit_submit"),
@@ -480,8 +480,8 @@ async def export_ermit_submit(runid: str, config: str, request: Request):
     "/runs/{runid}/{config}/export/ermit/job/{job_id}/download",
     summary="Download completed ERMiT export artifact",
     description=(
-        "Requires JWT Bearer scope `rq:export` and run access via `authorize_run_access`. "
-        "Returns 409 until the ERMiT export job finishes."
+        "Supports public-run downloads or requires JWT Bearer `rq:export` scope and run access. "
+        "Read-only artifact response; returns 409 until the ERMiT export job finishes."
     ),
     tags=["rq-engine", "exports"],
     operation_id=rq_operation_id("export_ermit_download"),

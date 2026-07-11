@@ -96,6 +96,7 @@ class RonViewModel:
     readonly: Incomplete
     public: Incomplete
     pup_relpath: Incomplete
+    srid: Optional[int]
     def __init__(self, ron: Ron) -> None: ...
     @classmethod
     def getInstanceFromRunID(cls, runid: str) -> RonViewModel: ...

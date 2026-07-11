@@ -1,6 +1,6 @@
 # Preflight Behavior Documentation
 
-> **Last Updated:** April 29, 2026
+> **Last Updated:** July 10, 2026
 > **Related Files:**
 > - `/workdir/wepppy/wepppy/weppcloud/static/js/preflight.js`
 > - `/workdir/wepppy/wepppy/weppcloud/routes/run_0/templates/run_page_bootstrap.js.j2`
@@ -56,6 +56,7 @@ Controllers (e.g., subcatchment_delineation.js)
 {
   "type": "preflight",
   "checklist": {
+    "ag_fields": false,
     "channels": true,
     "climate": false,
     "debris": false,
@@ -86,6 +87,7 @@ Controllers (e.g., subcatchment_delineation.js)
 
 | Key | Description | Maps To Task |
 |-----|-------------|--------------|
+| `ag_fields` | Agricultural sub-field WEPP run completed and fresh | `TaskEnum.run_ag_fields` (`🌽`) |
 | `channels` | Channel delineation complete | `TaskEnum.build_channels` |
 | `climate` | Climate data built | `TaskEnum.build_climate` |
 | `debris` | Debris flow analysis run | `TaskEnum.run_debris` |
@@ -177,6 +179,26 @@ Operational intent:
 - Geneva completion should turn off immediately when prerequisites are mutated,
   then turn on only after a fresh Geneva run completes.
 
+### AgFields Preflight Integration
+
+The Agricultural Fields navigation entry (`#ag-fields`) maps to checklist key
+`ag_fields` and `TaskEnum.run_ag_fields`, whose authoritative emoji is `🌽`.
+
+Completion and freshness contract:
+
+- Every successful boundary/schema/mapping/plant-file/clear mutation and every
+  AgFields background-job submission clears `timestamps:run_ag_fields`.
+- The AgFields WEPP worker also clears the timestamp when it starts, so direct or
+  legacy worker calls cannot retain a stale completion state.
+- Only a successful `run_ag_fields_wepp_rq` stamps `TaskEnum.run_ag_fields`; a
+  failed or partial run leaves preflight incomplete.
+- `preflight2` reports `ag_fields=true` only when `run_ag_fields` is newer than
+  the latest parent WEPP hillslope/watershed timestamp and newer than watershed
+  abstraction, landuse, soils, and climate.
+- Runs without the AgFields module still receive `ag_fields=false`; because no
+  `#ag-fields` navigation entry is visible, the extra checklist key has no UI
+  effect.
+
 ---
 
 ## TOC Emoji Mapping
@@ -251,7 +273,8 @@ def emoji(self) -> str:
         TaskEnum.build_climate: '☁️',
         TaskEnum.fetch_rap_ts: '🗺️',
         TaskEnum.run_wepp_hillslopes: '💧',
-        TaskEnum.run_wepp_watershed: '🏃',
+        TaskEnum.run_wepp_watershed: '⛰️',
+        TaskEnum.run_ag_fields: '🌽',
         TaskEnum.run_observed: '📊',
         TaskEnum.run_debris: '🪨',
         TaskEnum.run_watar: '🌋',
@@ -543,7 +566,8 @@ document.addEventListener('preflight:update', function(event) {
 | `soils` | `#soils` | `build_soils` | 🪱 |
 | `climate` | `#climate` | `build_climate` | ☁️ |
 | `rap_ts` | `#rap-ts` | `fetch_rap_ts` | 🗺️ |
-| `wepp` | `#wepp` | `run_wepp_watershed` | 🏃 |
+| `wepp` | `#wepp` | `run_wepp_watershed` | ⛰️ |
+| `ag_fields` | `#ag-fields` | `run_ag_fields` | 🌽 |
 | `observed` | `#observed` | `run_observed` | 📊 |
 | `debris` | `#debris-flow` | `run_debris` | 🪨 |
 | `watar` | `#ash` | `run_watar` | 🌋 |

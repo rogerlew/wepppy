@@ -5,9 +5,9 @@ Source-of-truth inventory captured directly from:
 - `wepppy/weppcloud/routes/bootstrap.py`
 
 Snapshot summary:
-- Total endpoints inventoried: **120**
-- Classification counts: **agent-facing 97**, **internal 17**, **ui-only 6**
-- Canonical owner counts: **rq-engine 117**, **Flask wrapper 3**
+- Total endpoints inventoried: **135**
+- Classification counts: **agent-facing 112**, **internal 17**, **ui-only 6**
+- Canonical owner counts: **rq-engine 132**, **Flask wrapper 3**
 
 Cutover reconciliation note (2026-04-11):
 - Row-8 contract cutover package
@@ -15,6 +15,13 @@ Cutover reconciliation note (2026-04-11):
   the frozen parity baseline for controller-state rollout closure.
 - No route-count or ownership changes were required for cutover closure; guard
   checks continue to enforce this table as source-of-truth.
+
+Inventory reconciliation note (2026-07-10):
+- Added the 13 AgFields workflow endpoints and the asynchronous ERMiT submit and
+  download endpoints that landed after the prior reconciliation.
+- All 15 additions are agent-facing rq-engine routes. The table records their
+  run-access and authenticated-scope contracts, including the public-run ERMiT
+  download exception.
 
 ## Inventory Table
 
@@ -47,6 +54,19 @@ Cutover reconciliation note (2026-04-11):
 | POST | `/api/runs/{runid}/{config}/acquire-openet-ts` | `wepppy/microservices/rq_engine/openet_ts_routes.py` | `acquire_openet_ts` | agent-facing | rq-engine | JWT Bearer | `rq:enqueue` | mutating | Run access check: `authorize_run_access`. Async enqueue; response includes `job_id` (with `status_url`/`message` where implemented). |
 | POST | `/api/runs/{runid}/{config}/acquire-polaris` | `wepppy/microservices/rq_engine/polaris_routes.py` | `acquire_polaris` | agent-facing | rq-engine | JWT Bearer | `rq:enqueue` | mutating | Run access check: `authorize_run_access`. Async enqueue for POLARIS retrieval + alignment; response includes `job_id`. |
 | POST | `/api/runs/{runid}/{config}/acquire-rap-ts` | `wepppy/microservices/rq_engine/rap_ts_routes.py` | `acquire_rap_ts` | agent-facing | rq-engine | JWT Bearer | `rq:enqueue` | mutating | Run access check: `authorize_run_access`. Async enqueue; response includes `job_id` (with `status_url`/`message` where implemented). |
+| POST | `/api/runs/{runid}/{config}/agfields/boundaries` | `wepppy/microservices/rq_engine/ag_fields_routes.py` | `upload_boundaries` | agent-facing | rq-engine | JWT Bearer | `rq:enqueue` | mutating | Run access check: `authorize_run_access`. Validates and persists an uploaded field-boundary GeoJSON synchronously. |
+| POST | `/api/runs/{runid}/{config}/agfields/build-subfields` | `wepppy/microservices/rq_engine/ag_fields_routes.py` | `build_subfields` | agent-facing | rq-engine | JWT Bearer | `rq:enqueue` | mutating | Run access check: `authorize_run_access`. Enqueues the AgFields sub-field build and returns `202` with `job_id`. |
+| POST | `/api/runs/{runid}/{config}/agfields/clear` | `wepppy/microservices/rq_engine/ag_fields_routes.py` | `clear_wepp` | agent-facing | rq-engine | JWT Bearer | `rq:enqueue` | mutating | Run access check: `authorize_run_access`. Synchronously clears regenerable AgFields WEPP run and output artifacts. |
+| GET | `/api/runs/{runid}/{config}/agfields/management-options` | `wepppy/microservices/rq_engine/ag_fields_routes.py` | `management_options` | agent-facing | rq-engine | JWT Bearer | `rq:status` | read-only | Run access check: `authorize_run_access`. Returns the run's WEPPcloud management options. |
+| GET | `/api/runs/{runid}/{config}/agfields/plant-files` | `wepppy/microservices/rq_engine/ag_fields_routes.py` | `plant_file_inventory` | agent-facing | rq-engine | JWT Bearer | `rq:status` | read-only | Run access check: `authorize_run_access`. Returns the current AgFields plant-file inventory and validation status. |
+| DELETE | `/api/runs/{runid}/{config}/agfields/plant-files/{filename}` | `wepppy/microservices/rq_engine/ag_fields_routes.py` | `delete_plant_file` | agent-facing | rq-engine | JWT Bearer | `rq:enqueue` | mutating | Run access check: `authorize_run_access`. Deletes one run-scoped AgFields plant file after active-job conflict checks. |
+| POST | `/api/runs/{runid}/{config}/agfields/plant-database` | `wepppy/microservices/rq_engine/ag_fields_routes.py` | `upload_plant_database` | agent-facing | rq-engine | JWT Bearer | `rq:enqueue` | mutating | Run access check: `authorize_run_access`. Validates and stages a plant database ZIP, then enqueues processing and returns `202` with `job_id`. |
+| GET | `/api/runs/{runid}/{config}/agfields/rotation-mapping` | `wepppy/microservices/rq_engine/ag_fields_routes.py` | `get_rotation_mapping` | agent-facing | rq-engine | JWT Bearer | `rq:status` | read-only | Run access check: `authorize_run_access`. Returns crop mappings, unused mappings, plant files, and management options. |
+| POST | `/api/runs/{runid}/{config}/agfields/rotation-mapping` | `wepppy/microservices/rq_engine/ag_fields_routes.py` | `save_rotation_mapping` | agent-facing | rq-engine | JWT Bearer | `rq:enqueue` | mutating | Run access check: `authorize_run_access`. Validates and persists run-scoped crop-to-management mappings synchronously. |
+| POST | `/api/runs/{runid}/{config}/agfields/run-wepp` | `wepppy/microservices/rq_engine/ag_fields_routes.py` | `run_wepp` | agent-facing | rq-engine | JWT Bearer | `rq:enqueue` | mutating | Run access check: `authorize_run_access`. Validates readiness and enqueues the AgFields WEPP job with the selected executable. |
+| POST | `/api/runs/{runid}/{config}/agfields/schema` | `wepppy/microservices/rq_engine/ag_fields_routes.py` | `confirm_schema` | agent-facing | rq-engine | JWT Bearer | `rq:enqueue` | mutating | Run access check: `authorize_run_access`. Confirms and persists field-id and rotation-column schema metadata synchronously. |
+| GET | `/api/runs/{runid}/{config}/agfields/state` | `wepppy/microservices/rq_engine/ag_fields_routes.py` | `state` | agent-facing | rq-engine | JWT Bearer | `rq:status` | read-only | Run access check: `authorize_run_access`. Returns the complete staged AgFields hydration, readiness, staleness, and job state. |
+| GET | `/api/runs/{runid}/{config}/agfields/sub-fields.geojson` | `wepppy/microservices/rq_engine/ag_fields_routes.py` | `subfields_overlay` | agent-facing | rq-engine | JWT Bearer | `rq:status` | read-only | Run access check: `authorize_run_access`. Returns the current WGS84 sub-field overlay as GeoJSON. |
 | POST | `/api/runs/{runid}/{config}/archive` | `wepppy/microservices/rq_engine/fork_archive_routes.py` | `archive_run` | agent-facing | rq-engine | JWT Bearer | `rq:enqueue` | mutating | Run access check: `authorize_run_access`. Async enqueue; response includes `job_id` (with `status_url`/`message` where implemented). |
 | GET | `/api/runs/{runid}/{config}/controllers` | `wepppy/microservices/rq_engine/schema_defaults_routes.py` | `list_controllers` | agent-facing | rq-engine | JWT Bearer | `rq:status or rq:read` | read-only | Run access check: `authorize_run_access`. Read-only controller metadata catalog with schema/hints/templates links; no queue enqueue. |
 | GET | `/api/runs/{runid}/{config}/controllers/{controller}/hints` | `wepppy/microservices/rq_engine/schema_defaults_routes.py` | `get_controller_hints` | agent-facing | rq-engine | JWT Bearer | `rq:status or rq:read` | read-only | Run access check: `authorize_run_access`. Read-only controller hint metadata; returns canonical `404` for unknown controllers. |
@@ -84,6 +104,8 @@ Cutover reconciliation note (2026-04-11):
 | GET | `/api/runs/{runid}/{config}/endpoints/{operation_id}/errors` | `wepppy/microservices/rq_engine/schema_defaults_routes.py` | `get_run_endpoint_errors` | agent-facing | rq-engine | JWT Bearer | `rq:status or rq:read` | read-only | Run access check: `authorize_run_access`. Read-only operation error catalog with stable `error_code` and recovery-action metadata; returns canonical `404` for unknown operation IDs. |
 | GET | `/api/runs/{runid}/{config}/endpoints/{operation_id}/schema` | `wepppy/microservices/rq_engine/schema_defaults_routes.py` | `get_run_endpoint_schema` | agent-facing | rq-engine | JWT Bearer | `rq:status or rq:read` | read-only | Run access check: `authorize_run_access`. Read-only request schema + descriptor for one run-scoped operation; returns canonical `404` for unknown operation IDs. |
 | GET | `/api/runs/{runid}/{config}/export/ermit` | `wepppy/microservices/rq_engine/export_routes.py` | `export_ermit` | agent-facing | rq-engine | JWT Bearer | `rq:export` | read-only | Run access check: `authorize_run_access`. May generate export artifacts synchronously before file response. |
+| POST | `/api/runs/{runid}/{config}/export/ermit` | `wepppy/microservices/rq_engine/export_routes.py` | `export_ermit_submit` | agent-facing | rq-engine | JWT Bearer | `rq:export` | mutating | Run access check: `authorize_run_access`. Enqueues ERMiT input generation and returns `202` with `job_id`, `status_url`, and `download_url`. |
+| GET | `/api/runs/{runid}/{config}/export/ermit/job/{job_id}/download` | `wepppy/microservices/rq_engine/export_routes.py` | `export_ermit_download` | agent-facing | rq-engine | JWT Bearer or public-run access | `rq:export` when authenticated | read-only | Uses the export download authorization contract and returns the completed job artifact; returns canonical `409` until the job finishes. |
 | POST | `/api/runs/{runid}/{config}/export/features` | `wepppy/microservices/rq_engine/export_routes.py` | `export_features_submit` | agent-facing | rq-engine | JWT Bearer | `rq:export` | mutating | Run access check: `authorize_run_access`. JSON-only async enqueue endpoint; returns `202` with `job_id`, `status_url`, and `download_url`. |
 | POST | `/api/runs/{runid}/{config}/export/features/profile/resolve` | `wepppy/microservices/rq_engine/export_routes.py` | `export_features_profile_resolve` | agent-facing | rq-engine | JWT Bearer | `rq:export` | read-only | Run access check: `authorize_run_access`. Synchronous profile parse + normalization endpoint; no queue. |
 | GET | `/api/runs/{runid}/{config}/export/features/job/{job_id}/download` | `wepppy/microservices/rq_engine/export_routes.py` | `export_features_download` | agent-facing | rq-engine | JWT Bearer | `rq:export` | read-only | Run access check: `authorize_run_access`. Returns artifact file only when job status is `finished`; otherwise canonical `409` conflict payload. |

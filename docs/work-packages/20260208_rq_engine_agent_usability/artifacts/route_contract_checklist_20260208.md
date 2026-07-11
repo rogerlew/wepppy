@@ -7,7 +7,7 @@ Guarded by:
 - `tools/check_route_contract_checklist.py` (checklist row parity + non-empty contract fields)
 - `tests/microservices/test_rq_engine_openapi_contract.py` (OpenAPI metadata/response contract + oversize budgets)
 
-- Total frozen routes covered: **97**
+- Total frozen routes covered: **112**
 
 Cutover reconciliation note (2026-04-11):
 - Row-8 contract cutover package
@@ -17,6 +17,12 @@ Cutover reconciliation note (2026-04-11):
   checks continue to enforce checklist parity and response-code contracts.
 - Post-cutover parity refresh (2026-04-25) added eight landuse user-defined/map
   routes already present in the frozen endpoint inventory.
+
+Inventory reconciliation note (2026-07-10):
+- Added contract rows for the 13 AgFields workflow endpoints and the
+  asynchronous ERMiT submit/download pair.
+- AgFields routes are covered by their focused rq-engine suite; ERMiT routes
+  retain the export-route coverage in addition to the shared OpenAPI guard.
 
 ## Contract Matrix
 
@@ -38,6 +44,19 @@ Cutover reconciliation note (2026-04-11):
 | `POST` | `/api/runs/{runid}/{config}/acquire-openet-ts` | JWT Bearer | rq:enqueue | mutating | async enqueue | `200, 401, 403, 500` | `tests/microservices/test_rq_engine_openapi_contract.py` |
 | `POST` | `/api/runs/{runid}/{config}/acquire-polaris` | JWT Bearer | rq:enqueue | mutating | async enqueue | `200, 401, 403, 500` | `tests/microservices/test_rq_engine_openapi_contract.py`<br>`tests/microservices/test_rq_engine_polaris_routes.py` |
 | `POST` | `/api/runs/{runid}/{config}/acquire-rap-ts` | JWT Bearer | rq:enqueue | mutating | async enqueue | `200, 400, 401, 403, 500` | `tests/microservices/test_rq_engine_openapi_contract.py` |
+| `POST` | `/api/runs/{runid}/{config}/agfields/boundaries` | JWT Bearer | rq:enqueue | mutating | sync no queue | `200, 401, 403, 500` | `tests/microservices/test_rq_engine_openapi_contract.py`<br>`tests/microservices/test_rq_engine_ag_fields_routes.py` |
+| `POST` | `/api/runs/{runid}/{config}/agfields/build-subfields` | JWT Bearer | rq:enqueue | mutating | async enqueue | `202, 401, 403, 500` | `tests/microservices/test_rq_engine_openapi_contract.py`<br>`tests/microservices/test_rq_engine_ag_fields_routes.py` |
+| `POST` | `/api/runs/{runid}/{config}/agfields/clear` | JWT Bearer | rq:enqueue | mutating | sync no queue | `200, 401, 403, 500` | `tests/microservices/test_rq_engine_openapi_contract.py`<br>`tests/microservices/test_rq_engine_ag_fields_routes.py` |
+| `GET` | `/api/runs/{runid}/{config}/agfields/management-options` | JWT Bearer | rq:status | read-only | sync no queue | `200, 401, 403, 500` | `tests/microservices/test_rq_engine_openapi_contract.py`<br>`tests/microservices/test_rq_engine_ag_fields_routes.py` |
+| `GET` | `/api/runs/{runid}/{config}/agfields/plant-files` | JWT Bearer | rq:status | read-only | sync no queue | `200, 401, 403, 500` | `tests/microservices/test_rq_engine_openapi_contract.py`<br>`tests/microservices/test_rq_engine_ag_fields_routes.py` |
+| `DELETE` | `/api/runs/{runid}/{config}/agfields/plant-files/{filename}` | JWT Bearer | rq:enqueue | mutating | sync no queue | `200, 401, 403, 500` | `tests/microservices/test_rq_engine_openapi_contract.py`<br>`tests/microservices/test_rq_engine_ag_fields_routes.py` |
+| `POST` | `/api/runs/{runid}/{config}/agfields/plant-database` | JWT Bearer | rq:enqueue | mutating | async enqueue | `202, 401, 403, 500` | `tests/microservices/test_rq_engine_openapi_contract.py`<br>`tests/microservices/test_rq_engine_ag_fields_routes.py` |
+| `GET` | `/api/runs/{runid}/{config}/agfields/rotation-mapping` | JWT Bearer | rq:status | read-only | sync no queue | `200, 401, 403, 500` | `tests/microservices/test_rq_engine_openapi_contract.py`<br>`tests/microservices/test_rq_engine_ag_fields_routes.py` |
+| `POST` | `/api/runs/{runid}/{config}/agfields/rotation-mapping` | JWT Bearer | rq:enqueue | mutating | sync no queue | `200, 401, 403, 500` | `tests/microservices/test_rq_engine_openapi_contract.py`<br>`tests/microservices/test_rq_engine_ag_fields_routes.py` |
+| `POST` | `/api/runs/{runid}/{config}/agfields/run-wepp` | JWT Bearer | rq:enqueue | mutating | async enqueue | `202, 401, 403, 500` | `tests/microservices/test_rq_engine_openapi_contract.py`<br>`tests/microservices/test_rq_engine_ag_fields_routes.py` |
+| `POST` | `/api/runs/{runid}/{config}/agfields/schema` | JWT Bearer | rq:enqueue | mutating | sync no queue | `200, 401, 403, 500` | `tests/microservices/test_rq_engine_openapi_contract.py`<br>`tests/microservices/test_rq_engine_ag_fields_routes.py` |
+| `GET` | `/api/runs/{runid}/{config}/agfields/state` | JWT Bearer | rq:status | read-only | sync no queue | `200, 401, 403, 500` | `tests/microservices/test_rq_engine_openapi_contract.py`<br>`tests/microservices/test_rq_engine_ag_fields_routes.py` |
+| `GET` | `/api/runs/{runid}/{config}/agfields/sub-fields.geojson` | JWT Bearer | rq:status | read-only | sync no queue | `200, 401, 403, 500` | `tests/microservices/test_rq_engine_openapi_contract.py`<br>`tests/microservices/test_rq_engine_ag_fields_routes.py` |
 | `POST` | `/api/runs/{runid}/{config}/archive` | JWT Bearer | rq:enqueue | mutating | async enqueue | `200, 400, 401, 403, 404, 500` | `tests/microservices/test_rq_engine_openapi_contract.py` |
 | `GET` | `/api/runs/{runid}/{config}/controllers` | JWT Bearer | rq:status or rq:read | read-only | sync | `200, 401, 403, 404, 500` | `tests/microservices/test_rq_engine_openapi_contract.py`<br>`tests/microservices/test_rq_engine_schema_defaults_routes.py` |
 | `GET` | `/api/runs/{runid}/{config}/controllers/{controller}/hints` | JWT Bearer | rq:status or rq:read | read-only | sync | `200, 401, 403, 404, 500` | `tests/microservices/test_rq_engine_openapi_contract.py`<br>`tests/microservices/test_rq_engine_schema_defaults_routes.py` |
@@ -75,6 +94,8 @@ Cutover reconciliation note (2026-04-11):
 | `GET` | `/api/runs/{runid}/{config}/endpoints/{operation_id}/errors` | JWT Bearer | rq:status or rq:read | read-only | sync | `200, 401, 403, 404, 500` | `tests/microservices/test_rq_engine_openapi_contract.py`<br>`tests/microservices/test_rq_engine_errors_progress_outputs_routes.py` |
 | `GET` | `/api/runs/{runid}/{config}/endpoints/{operation_id}/schema` | JWT Bearer | rq:status or rq:read | read-only | sync | `200, 401, 403, 404, 500` | `tests/microservices/test_rq_engine_openapi_contract.py`<br>`tests/microservices/test_rq_engine_schema_defaults_routes.py` |
 | `GET` | `/api/runs/{runid}/{config}/export/ermit` | JWT Bearer | rq:export | read-only | sync | `200, 401, 403, 404, 500` | `tests/microservices/test_rq_engine_openapi_contract.py` |
+| `POST` | `/api/runs/{runid}/{config}/export/ermit` | JWT Bearer | rq:export | mutating | async enqueue | `202, 401, 403, 404, 500` | `tests/microservices/test_rq_engine_openapi_contract.py`<br>`tests/microservices/test_rq_engine_export_routes.py` |
+| `GET` | `/api/runs/{runid}/{config}/export/ermit/job/{job_id}/download` | JWT Bearer or public-run access | rq:export when authenticated | read-only | sync no queue | `200, 401, 403, 500` | `tests/microservices/test_rq_engine_openapi_contract.py`<br>`tests/microservices/test_rq_engine_export_routes.py` |
 | `GET` | `/api/runs/{runid}/{config}/export/geodatabase` | JWT Bearer | rq:export | read-only | sync | `200, 401, 403, 404, 500` | `tests/microservices/test_rq_engine_openapi_contract.py` |
 | `GET` | `/api/runs/{runid}/{config}/export/geopackage` | JWT Bearer | rq:export | read-only | sync | `200, 401, 403, 404, 500` | `tests/microservices/test_rq_engine_openapi_contract.py` |
 | `GET` | `/api/runs/{runid}/{config}/export/prep_details` | JWT Bearer | rq:export | read-only | sync | `200, 401, 403, 404, 500` | `tests/microservices/test_rq_engine_openapi_contract.py` |

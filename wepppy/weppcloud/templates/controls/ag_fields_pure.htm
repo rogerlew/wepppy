@@ -130,7 +130,7 @@
          'agfields_geojson',
          'Field boundary GeoJSON',
          accept='.geojson,.json',
-         help='Choose a GeoJSON or JSON file up to 10 MB.',
+         help='Use the project UTM EPSG shown in the header for best precision; WGS84 is accepted, and any other projected CRS must include correct CRS metadata. Maximum file size: 10 MB.',
          field_name='field_boundaries',
          attrs={'data-role': 'geojson-input'},
          max_width='100%'
@@ -233,13 +233,6 @@
               data-role="build-subfields-button"
               disabled>
         Build Sub-fields
-      </button>
-      <button type="button"
-              class="pure-button"
-              data-action="show-on-map"
-              data-role="show-on-map-button"
-              disabled>
-        Show on Map
       </button>
     </div>
     <div class="wc-status-chip" data-role="subfields-status" role="status" aria-live="polite"></div>

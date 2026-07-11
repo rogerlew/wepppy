@@ -1,6 +1,10 @@
 from __future__ import annotations
 
 SUCCESS_STATUS_OVERRIDES: dict[tuple[str, str], int] = {
+    ("POST", "/api/runs/{runid}/{config}/agfields/build-subfields"): 202,
+    ("POST", "/api/runs/{runid}/{config}/agfields/plant-database"): 202,
+    ("POST", "/api/runs/{runid}/{config}/agfields/run-wepp"): 202,
+    ("POST", "/api/runs/{runid}/{config}/export/ermit"): 202,
     ("POST", "/api/runs/{runid}/{config}/run-omni"): 202,
     ("POST", "/api/runs/{runid}/{config}/run-omni-contrasts"): 202,
     ("POST", "/api/runs/{runid}/{config}/export/features"): 202,

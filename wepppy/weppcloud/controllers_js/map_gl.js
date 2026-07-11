@@ -1328,6 +1328,15 @@ var MapController = (function () {
                 syncOverlayLayerControlSelection();
                 return layer;
             },
+            hideLayer: function (layer) {
+                if (layerRegistry && layer) {
+                    layerRegistry.delete(layer);
+                    applyLayers();
+                }
+                handleOverlayRemoved(layer);
+                syncOverlayLayerControlSelection();
+                return layer;
+            },
             removeLayer: function (layer, options) {
                 if (layerRegistry && layer) {
                     layerRegistry.delete(layer);
@@ -1832,11 +1841,27 @@ var MapController = (function () {
             var loadJson = typeof options.loadJson === "function" ? options.loadJson : http.getJson;
             var activeAbort = null;
             var requestToken = 0;
-            var currentLayer = buildGeoJsonLayer(layerId, EMPTY_GEOJSON, layerProps);
+            var currentData = EMPTY_GEOJSON;
+            var currentLayer = buildGeoJsonLayer(layerId, currentData, layerProps);
             var controller = {
                 layer: currentLayer,
                 refresh: refresh
             };
+
+            function attachLayerMethods(layer) {
+                layer.refresh = controller.refresh;
+                layer.__wcRebuild = function () {
+                    var nextLayer = buildGeoJsonLayer(layerId, currentData, layerProps);
+                    currentLayer = nextLayer;
+                    controller.layer = nextLayer;
+                    attachLayerMethods(nextLayer);
+                    if (options.mapKey) {
+                        map[options.mapKey] = nextLayer;
+                    }
+                    return nextLayer;
+                };
+                return layer;
+            }
 
             function replaceLayer(nextLayer) {
                 var label = overlayRegistry && overlayRegistry.get(currentLayer)
@@ -1857,7 +1882,7 @@ var MapController = (function () {
                 }
                 currentLayer = nextLayer;
                 controller.layer = currentLayer;
-                currentLayer.refresh = controller.refresh;
+                attachLayerMethods(currentLayer);
                 if (options.mapKey) {
                     map[options.mapKey] = currentLayer;
                 }
@@ -1898,7 +1923,8 @@ var MapController = (function () {
                         return data;
                     }
                     activeAbort = null;
-                    var nextLayer = buildGeoJsonLayer(layerId, data || EMPTY_GEOJSON, layerProps);
+                    currentData = data || EMPTY_GEOJSON;
+                    var nextLayer = buildGeoJsonLayer(layerId, currentData, layerProps);
                     replaceLayer(nextLayer);
                     return data;
                 }).catch(function (error) {
@@ -1910,7 +1936,7 @@ var MapController = (function () {
                 });
             }
 
-            currentLayer.refresh = refresh;
+            attachLayerMethods(currentLayer);
 
             return controller;
         }

@@ -31,6 +31,14 @@ def rq_context(monkeypatch: pytest.MonkeyPatch):
         lambda wd: events.append(("hydrate", wd)) or controller_box["controller"],
     )
     monkeypatch.setattr(
+        ag_fields_rq.RedisPrep,
+        "getInstance",
+        lambda wd: SimpleNamespace(
+            remove_timestamp=lambda task: events.append(("preflight-remove", task)),
+            timestamp=lambda task: events.append(("preflight-stamp", task)),
+        ),
+    )
+    monkeypatch.setattr(
         ag_fields_rq.StatusMessenger,
         "publish",
         lambda channel, message: published.append((channel, message)),
@@ -61,6 +69,7 @@ def test_build_subfields_rq_orders_chain_and_guards_hydration(rq_context) -> Non
 
     assert events == [
         ("get_wd", "demo"),
+        ("preflight-remove", ag_fields_rq.TaskEnum.run_ag_fields),
         ("clear", ("demo", "ag_fields.nodb")),
         ("hydrate", "/runs/demo"),
         ("stage", "rasterize"),
@@ -105,7 +114,7 @@ def test_plant_db_rq_failure_names_aborting_file(rq_context) -> None:
 
 
 def test_run_wepp_rq_failure_names_subfield_and_parent_field(rq_context) -> None:
-    _events, published, controller_box = rq_context
+    events, published, controller_box = rq_context
 
     def _fail(*, max_workers):
         assert max_workers == 3
@@ -120,10 +129,12 @@ def test_run_wepp_rq_failure_names_subfield_and_parent_field(rq_context) -> None
     payload = json.loads(failure_message.split("EXCEPTION_JSON ", 1)[1])
     assert payload["sub_field_id"] == 34
     assert payload["field_id"] == 12
+    assert ("preflight-remove", ag_fields_rq.TaskEnum.run_ag_fields) in events
+    assert ("preflight-stamp", ag_fields_rq.TaskEnum.run_ag_fields) not in events
 
 
 def test_run_wepp_rq_applies_selected_binary_before_execution(rq_context) -> None:
-    _events, _published, controller_box = rq_context
+    events, _published, controller_box = rq_context
 
     class DummyAgFields:
         wepp_bin = "wepp_260430"
@@ -143,3 +154,8 @@ def test_run_wepp_rq_applies_selected_binary_before_execution(rq_context) -> Non
 
     assert result == {"run_count": 2}
     assert controller.wepp_bin == "wepp_dcc52a6"
+    assert ("preflight-remove", ag_fields_rq.TaskEnum.run_ag_fields) in events
+    assert ("preflight-stamp", ag_fields_rq.TaskEnum.run_ag_fields) in events
+    assert events.index(("preflight-remove", ag_fields_rq.TaskEnum.run_ag_fields)) < events.index(
+        ("preflight-stamp", ag_fields_rq.TaskEnum.run_ag_fields)
+    )

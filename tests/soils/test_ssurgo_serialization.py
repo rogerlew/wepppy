@@ -33,6 +33,7 @@ def _fake_horizon(texture: str = "GRX-COS") -> SimpleNamespace:
 
 def _fake_wepp_soil(muname: str) -> WeppSoil:
     soil = WeppSoil.__new__(WeppSoil)
+    soil.mukey = 0
     soil.log = []
     soil.description = "# test soil"
     soil.num_ofes = 1

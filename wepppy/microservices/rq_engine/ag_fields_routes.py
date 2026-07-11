@@ -27,7 +27,7 @@ from wepppy.microservices.shape_converter.archive_validation import (
 )
 from wepppy.microservices.shape_converter.errors import ShapeConverterError
 from wepppy.nodb.mods.ag_fields import AgFields, RotationLookupValidationError
-from wepppy.nodb.redis_prep import RedisPrep
+from wepppy.nodb.redis_prep import RedisPrep, TaskEnum
 from wepppy.rq.ag_fields_rq import (
     AGFIELDS_BUILD_SUBFIELDS_JOB_KEY,
     AGFIELDS_PLANTDB_JOB_KEY,
@@ -103,6 +103,10 @@ def _upload_error_response(exc: UploadError) -> JSONResponse:
     return error_response(message, status_code=status)
 
 
+def _invalidate_ag_fields_preflight(wd: str) -> None:
+    RedisPrep.getInstance(wd).remove_timestamp(TaskEnum.run_ag_fields)
+
+
 def _enqueue_job(
     wd: str,
     job_key: str,
@@ -131,6 +135,7 @@ def _enqueue_job(
                         "An AgFields job is already active for this run "
                         f"(key={active['key']}, job_id={active['job_id']}, status={active['status']})."
                     )
+                prep.remove_timestamp(TaskEnum.run_ag_fields)
                 queue = Queue(connection=redis_conn)
                 job = queue.enqueue_call(func, args, timeout=RQ_TIMEOUT)
                 prep.set_rq_job_id(job_key, job.id)
@@ -283,9 +288,21 @@ def _state_snapshot(wd: str) -> dict[str, Any]:
 
 @router.post(
     "/runs/{runid}/{config}/agfields/boundaries",
+    summary="Upload AgFields boundaries",
+    description=(
+        "Requires JWT Bearer `rq:enqueue` scope and run access. "
+        "Validates and persists field-boundary GeoJSON synchronously; no queue."
+    ),
     operation_id=rq_operation_id("agfields_upload_boundaries"),
-    tags=["rq-engine", "agfields", "uploads"],
-    responses=agent_route_responses(success_code=200, success_description="Field boundaries validated."),
+    tags=["rq-engine", "agfields"],
+    responses=agent_route_responses(
+        success_code=200,
+        success_description="Field boundaries validated and persisted.",
+        extra={
+            400: "Invalid upload or boundary geometry. Returns the canonical error payload.",
+            409: "An AgFields job is active. Returns the canonical error payload.",
+        },
+    ),
 )
 async def upload_boundaries(runid: str, config: str, request: Request) -> JSONResponse:
     auth_error = _authorize(request, runid, RQ_ENQUEUE_SCOPES)
@@ -329,6 +346,7 @@ async def upload_boundaries(runid: str, config: str, request: Request) -> JSONRe
             post_save=_validate_boundary,
         )
         saved_path.unlink(missing_ok=True)
+        _invalidate_ag_fields_preflight(wd)
         return JSONResponse(
             {
                 "message": "Field boundaries uploaded and validated.",
@@ -351,8 +369,21 @@ async def upload_boundaries(runid: str, config: str, request: Request) -> JSONRe
 
 @router.post(
     "/runs/{runid}/{config}/agfields/schema",
+    summary="Confirm AgFields schema",
+    description=(
+        "Requires JWT Bearer `rq:enqueue` scope and run access. "
+        "Validates and persists field-id and rotation schema synchronously; no queue."
+    ),
     operation_id=rq_operation_id("agfields_confirm_schema"),
     tags=["rq-engine", "agfields"],
+    responses=agent_route_responses(
+        success_code=200,
+        success_description="AgFields schema confirmed.",
+        extra={
+            400: "Schema validation failed. Returns the canonical error payload.",
+            409: "An AgFields job is active. Returns the canonical error payload.",
+        },
+    ),
 )
 async def confirm_schema(runid: str, config: str, request: Request) -> JSONResponse:
     auth_error = _authorize(request, runid, RQ_ENQUEUE_SCOPES)
@@ -370,6 +401,7 @@ async def confirm_schema(runid: str, config: str, request: Request) -> JSONRespo
             return error_response("field_id_key and rotation_accessor are required", status_code=400)
         ag_fields = AgFields.getInstance(wd)
         ag_fields.confirm_schema(field_id_key, rotation_accessor)
+        _invalidate_ag_fields_preflight(wd)
         return JSONResponse(
             {
                 "message": "AgFields schema confirmed.",
@@ -389,9 +421,21 @@ async def confirm_schema(runid: str, config: str, request: Request) -> JSONRespo
 
 @router.post(
     "/runs/{runid}/{config}/agfields/build-subfields",
+    summary="Build AgFields sub-fields",
+    description=(
+        "Requires JWT Bearer `rq:enqueue` scope and run access. "
+        "Validates readiness and enqueues the AgFields sub-field build."
+    ),
     operation_id=rq_operation_id("agfields_build_subfields"),
     tags=["rq-engine", "agfields"],
-    responses=agent_route_responses(success_code=202, success_description="Sub-field build job enqueued."),
+    responses=agent_route_responses(
+        success_code=202,
+        success_description="Sub-field build job enqueued.",
+        extra={
+            400: "Invalid build options. Returns the canonical error payload.",
+            409: "Prerequisites are incomplete or a job is active. Returns the canonical error payload.",
+        },
+    ),
 )
 async def build_subfields(runid: str, config: str, request: Request) -> JSONResponse:
     auth_error = _authorize(request, runid, RQ_ENQUEUE_SCOPES)
@@ -425,9 +469,21 @@ async def build_subfields(runid: str, config: str, request: Request) -> JSONResp
 
 @router.post(
     "/runs/{runid}/{config}/agfields/plant-database",
+    summary="Upload AgFields plant database",
+    description=(
+        "Requires JWT Bearer `rq:enqueue` scope and run access. "
+        "Validates a plant database archive and enqueues its processing."
+    ),
     operation_id=rq_operation_id("agfields_upload_plant_database"),
-    tags=["rq-engine", "agfields", "uploads"],
-    responses=agent_route_responses(success_code=202, success_description="Plant database job enqueued."),
+    tags=["rq-engine", "agfields"],
+    responses=agent_route_responses(
+        success_code=202,
+        success_description="Plant database job enqueued.",
+        extra={
+            400: "Invalid archive or upload. Returns the canonical error payload.",
+            409: "An AgFields job is active. Returns the canonical error payload.",
+        },
+    ),
 )
 async def upload_plant_database(runid: str, config: str, request: Request) -> JSONResponse:
     auth_error = _authorize(request, runid, RQ_ENQUEUE_SCOPES)
@@ -488,8 +544,17 @@ async def upload_plant_database(runid: str, config: str, request: Request) -> JS
 
 @router.get(
     "/runs/{runid}/{config}/agfields/plant-files",
+    summary="Get AgFields plant files",
+    description=(
+        "Requires JWT Bearer `rq:status` scope and run access. "
+        "Read-only plant-file inventory and validation response; no queue."
+    ),
     operation_id=rq_operation_id("agfields_plant_file_inventory"),
     tags=["rq-engine", "agfields"],
+    responses=agent_route_responses(
+        success_code=200,
+        success_description="Plant-file inventory returned.",
+    ),
 )
 async def plant_file_inventory(runid: str, config: str, request: Request) -> JSONResponse:
     auth_error = _authorize(request, runid, RQ_READ_SCOPES)
@@ -504,8 +569,21 @@ async def plant_file_inventory(runid: str, config: str, request: Request) -> JSO
 
 @router.delete(
     "/runs/{runid}/{config}/agfields/plant-files/{filename}",
+    summary="Delete an AgFields plant file",
+    description=(
+        "Requires JWT Bearer `rq:enqueue` scope and run access. "
+        "Deletes one run-scoped plant file synchronously; no queue."
+    ),
     operation_id=rq_operation_id("agfields_delete_plant_file"),
     tags=["rq-engine", "agfields"],
+    responses=agent_route_responses(
+        success_code=200,
+        success_description="Plant file deleted.",
+        extra={
+            400: "Invalid plant filename. Returns the canonical error payload.",
+            409: "An AgFields job is active. Returns the canonical error payload.",
+        },
+    ),
 )
 async def delete_plant_file(runid: str, config: str, filename: str, request: Request) -> JSONResponse:
     auth_error = _authorize(request, runid, RQ_ENQUEUE_SCOPES)
@@ -518,6 +596,7 @@ async def delete_plant_file(runid: str, config: str, filename: str, request: Req
             return conflict
         ag_fields = AgFields.getInstance(wd)
         inventory = ag_fields.delete_plant_file(filename)
+        _invalidate_ag_fields_preflight(wd)
         return JSONResponse(
             {
                 "message": f"Deleted plant file {filename}.",
@@ -536,8 +615,17 @@ async def delete_plant_file(runid: str, config: str, filename: str, request: Req
 
 @router.get(
     "/runs/{runid}/{config}/agfields/rotation-mapping",
+    summary="Get AgFields rotation mapping",
+    description=(
+        "Requires JWT Bearer `rq:status` scope and run access. "
+        "Read-only crop mapping and management-option response; no queue."
+    ),
     operation_id=rq_operation_id("agfields_get_rotation_mapping"),
     tags=["rq-engine", "agfields"],
+    responses=agent_route_responses(
+        success_code=200,
+        success_description="Rotation mapping returned.",
+    ),
 )
 async def get_rotation_mapping(runid: str, config: str, request: Request) -> JSONResponse:
     auth_error = _authorize(request, runid, RQ_READ_SCOPES)
@@ -565,8 +653,21 @@ async def get_rotation_mapping(runid: str, config: str, request: Request) -> JSO
 
 @router.post(
     "/runs/{runid}/{config}/agfields/rotation-mapping",
+    summary="Save AgFields rotation mapping",
+    description=(
+        "Requires JWT Bearer `rq:enqueue` scope and run access. "
+        "Validates and persists crop mappings synchronously; no queue."
+    ),
     operation_id=rq_operation_id("agfields_save_rotation_mapping"),
     tags=["rq-engine", "agfields"],
+    responses=agent_route_responses(
+        success_code=200,
+        success_description="Rotation mapping saved.",
+        extra={
+            400: "Mapping validation failed. Returns the canonical error payload.",
+            409: "An AgFields job is active. Returns the canonical error payload.",
+        },
+    ),
 )
 async def save_rotation_mapping(runid: str, config: str, request: Request) -> JSONResponse:
     auth_error = _authorize(request, runid, RQ_ENQUEUE_SCOPES)
@@ -584,6 +685,7 @@ async def save_rotation_mapping(runid: str, config: str, request: Request) -> JS
         if not isinstance(rows, list):
             return error_response("rows must be a JSON array", status_code=400)
         results = AgFields.getInstance(wd).write_rotation_lookup(rows)
+        _invalidate_ag_fields_preflight(wd)
         return JSONResponse({"message": "Rotation mapping saved.", "result": {"rows": results}})
     except RotationLookupValidationError as exc:
         errors = [
@@ -609,8 +711,17 @@ async def save_rotation_mapping(runid: str, config: str, request: Request) -> JS
 
 @router.get(
     "/runs/{runid}/{config}/agfields/management-options",
+    summary="Get AgFields management options",
+    description=(
+        "Requires JWT Bearer `rq:status` scope and run access. "
+        "Read-only WEPPcloud management option response; no queue."
+    ),
     operation_id=rq_operation_id("agfields_management_options"),
     tags=["rq-engine", "agfields"],
+    responses=agent_route_responses(
+        success_code=200,
+        success_description="Management options returned.",
+    ),
 )
 async def management_options(runid: str, config: str, request: Request) -> JSONResponse:
     auth_error = _authorize(request, runid, RQ_READ_SCOPES)
@@ -627,9 +738,21 @@ async def management_options(runid: str, config: str, request: Request) -> JSONR
 
 @router.post(
     "/runs/{runid}/{config}/agfields/run-wepp",
+    summary="Run WEPP for AgFields",
+    description=(
+        "Requires JWT Bearer `rq:enqueue` scope and run access. "
+        "Validates staged readiness and enqueues AgFields WEPP execution."
+    ),
     operation_id=rq_operation_id("agfields_run_wepp"),
     tags=["rq-engine", "agfields"],
-    responses=agent_route_responses(success_code=202, success_description="AgFields WEPP job enqueued."),
+    responses=agent_route_responses(
+        success_code=202,
+        success_description="AgFields WEPP job enqueued.",
+        extra={
+            400: "Invalid run options. Returns the canonical error payload.",
+            409: "Prerequisites are incomplete or a job is active. Returns the canonical error payload.",
+        },
+    ),
 )
 async def run_wepp(runid: str, config: str, request: Request) -> JSONResponse:
     auth_error = _authorize(request, runid, RQ_ENQUEUE_SCOPES)
@@ -670,8 +793,20 @@ async def run_wepp(runid: str, config: str, request: Request) -> JSONResponse:
 
 @router.post(
     "/runs/{runid}/{config}/agfields/clear",
+    summary="Clear AgFields WEPP artifacts",
+    description=(
+        "Requires JWT Bearer `rq:enqueue` scope and run access. "
+        "Clears regenerable AgFields runs and outputs synchronously; no queue."
+    ),
     operation_id=rq_operation_id("agfields_clear_wepp"),
     tags=["rq-engine", "agfields"],
+    responses=agent_route_responses(
+        success_code=200,
+        success_description="AgFields WEPP artifacts cleared.",
+        extra={
+            409: "An AgFields job is active. Returns the canonical error payload.",
+        },
+    ),
 )
 async def clear_wepp(runid: str, config: str, request: Request) -> JSONResponse:
     auth_error = _authorize(request, runid, RQ_ENQUEUE_SCOPES)
@@ -683,6 +818,7 @@ async def clear_wepp(runid: str, config: str, request: Request) -> JSONResponse:
         if conflict is not None:
             return conflict
         AgFields.getInstance(wd).clear_ag_field_wepp_artifacts()
+        _invalidate_ag_fields_preflight(wd)
         return JSONResponse({"message": "AgFields WEPP runs and outputs cleared."})
     except Exception:  # broad-except: HTTP boundary contract
         logger.exception("rq-engine AgFields clear failed", extra={"runid": runid, "config": config})
@@ -691,8 +827,20 @@ async def clear_wepp(runid: str, config: str, request: Request) -> JSONResponse:
 
 @router.get(
     "/runs/{runid}/{config}/agfields/sub-fields.geojson",
+    summary="Get AgFields sub-field overlay",
+    description=(
+        "Requires JWT Bearer `rq:status` scope and run access. "
+        "Read-only current WGS84 sub-field GeoJSON response; no queue."
+    ),
     operation_id=rq_operation_id("agfields_subfields_overlay"),
     tags=["rq-engine", "agfields"],
+    responses=agent_route_responses(
+        success_code=200,
+        success_description="Sub-field GeoJSON returned.",
+        extra={
+            404: "Sub-field overlay is unavailable. Returns the canonical error payload.",
+        },
+    ),
 )
 async def subfields_overlay(runid: str, config: str, request: Request) -> Response:
     auth_error = _authorize(request, runid, RQ_READ_SCOPES)
@@ -710,8 +858,17 @@ async def subfields_overlay(runid: str, config: str, request: Request) -> Respon
 
 @router.get(
     "/runs/{runid}/{config}/agfields/state",
+    summary="Get AgFields workflow state",
+    description=(
+        "Requires JWT Bearer `rq:status` scope and run access. "
+        "Read-only staged workflow, readiness, staleness, and job state; no queue."
+    ),
     operation_id=rq_operation_id("agfields_state"),
     tags=["rq-engine", "agfields"],
+    responses=agent_route_responses(
+        success_code=200,
+        success_description="AgFields workflow state returned.",
+    ),
 )
 async def state(runid: str, config: str, request: Request) -> JSONResponse:
     auth_error = _authorize(request, runid, RQ_READ_SCOPES)

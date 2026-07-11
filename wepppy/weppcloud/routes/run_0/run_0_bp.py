@@ -126,6 +126,7 @@ TOC_TASK_ANCHOR_TO_TASK = {
     '#soils': TaskEnum.build_soils,
     '#treatments': TaskEnum.build_treatments,
     '#wepp': TaskEnum.run_wepp_watershed,
+    '#ag-fields': TaskEnum.run_ag_fields,
     '#rusle': TaskEnum.build_rusle,
     '#ash': TaskEnum.run_watar,
     '#rhem': TaskEnum.run_rhem,

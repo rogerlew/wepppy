@@ -8,7 +8,7 @@
 **Started**: 2026-07-09 23:21 UTC
 **Closed**: 2026-07-10 22:40 UTC
 **Current phase**: Complete
-**Last updated**: 2026-07-10 22:40 UTC
+**Last updated**: 2026-07-11 01:07 UTC
 **Next milestone**: None; one follow-up filed (persisted `_wepp_bin` gap on the acceptance project, see Handoffs)
 **Security impact**: `low` — no new backend surface; browser client reuses existing rq-engine session bearer tokens
 **Dedicated security review**: `no`
@@ -20,8 +20,7 @@
 - [ ] None.
 
 ### In Progress
-- [ ] Post-close follow-up: add explicit Stage 1 projection guidance and a
-  conditional project-EPSG pill to run-header title rows.
+- [ ] None.
 
 ### Blocked
 - [ ] None.
@@ -37,6 +36,11 @@
 - [x] Follow-up: persisted uploaded-boundary-filename display and additive state hydration contract (2026-07-10 16:38 UTC).
 - [x] Follow-up: explicit project-UTM support/precision contract, actionable ambiguous-CRS diagnostics, and regression coverage (2026-07-10 16:57 UTC).
 - [x] Follow-up: persisted WEPP Exec selector, `wepp_dcc52a6` new-project default, pinned RQ propagation, automatic UI worker sizing, and content-width clear action (2026-07-10 21:52 UTC).
+- [x] Post-close follow-up: explicit Stage 1 projection requirements and conditional project-EPSG pills in runs-page/report title rows (2026-07-10 22:43 UTC).
+- [x] Post-close documentation reconciliation: canonical UI specification aligned with the accepted implementation and validation evidence (2026-07-10 23:06 UTC).
+- [x] Post-close overlay follow-up: automatic sub-field map loading, removal of the Stage 2 map button, and registry-preserving layer-control hiding (2026-07-10 23:17 UTC).
+- [x] Post-close overlay re-show fix: reconstruct retained remote GeoJSON overlays from cached features and preserve existing-run automatic loading (2026-07-10 23:40 UTC).
+- [x] Post-close preflight integration: `run_ag_fields`/🌽 task, success-only stamping, invalidation/freshness, TOC mapping, and behavior documentation (2026-07-11 00:04 UTC).
 
 ## Timeline
 
@@ -60,6 +64,7 @@
   hydrates `wepp.wepp_bin`; run submission validates and pins the installed
   executable; the worker persists it before automatic parallel execution. The
   Maximum workers control is removed, and the clear action uses intrinsic width.
+- **2026-07-11 00:21 UTC** - Dispositioned the Batch Runner failure as a unit-fixture isolation defect. The workspace-preservation test now stubs the cache/lock reset boundary, asserts the canonical batch run id passed to both calls, and leaves production path resolution unchanged. The subsequent canonical full sweep passed 4,817 tests with 60 skips.
 
 ## Decisions Log
 
@@ -93,6 +98,12 @@
 
 **Decision**: Add an independent, persisted AgFields WEPP executable. New `ag-fields.cfg` projects default to `wepp_dcc52a6`; historical payloads without the additive field continue using the parent WEPP executable until explicitly changed. Remove worker tuning from the browser while retaining the optional backend argument for compatibility. See ADR-0017.
 
+### 2026-07-10: Auto-load and retain the sub-field overlay
+
+**Context**: Building sub-fields already creates the review geometry, while the separate "Show on Map" action deferred an expected consequence and left no reload-safe path once removed.
+
+**Decision**: Register and display current sub-fields during hydration and force a refreshed overlay visible after successful builds. The shared layer-control checkbox hides only the visible Deck layer and retains its overlay registration, so users can show it again without re-registration; ordinary hydration respects the hidden state.
+
 ## Validation
 
 - `wctl run-npm lint` — passed.
@@ -113,12 +124,26 @@
 - `wctl check-rq-graph` — passed after regenerating the canonical RQ graph/catalog for the pinned `wepp_bin` job argument.
 - Scoped documentation lint — passed for the work package, ADR-0017, AgFields README, and end-user guide.
 - `python3 tools/check_broad_exceptions.py --enforce-changed --base-ref origin/master` — passed with net delta `+0`.
-- `wctl run-pytest tests --maxfail=1` — repository gate failed outside package scope after `2070 passed, 41 skipped`: `tests/nodb/test_batch_runner.py::test_run_batch_project_does_not_delete_workspace_when_rmtree_disabled`; isolated rerun failed identically.
+- Projection-pill follow-up: 73 passed, 3 skipped across the full Ron map and pure-template suites; `stubtest wepppy.nodb.core.ron` and `check-test-stubs` passed. Live container verification returned `RonViewModel(sacral-self-discipline).srid == 32611` after the targeted `weppcloud` restart.
+- Specification reconciliation: `uk2us` previews were clean and `wctl doc-lint` passed for the canonical UI specification, package, tracker, and active ExecPlan.
+- Overlay follow-up: `wctl run-npm test -- ag_fields map_gl` passed 48 tests (10 AgFields, 38 map), including automatic authenticated loading/rebuild refresh and hide-without-unregister coverage.
+- Overlay follow-up: frontend lint passed, the rebuilt controller bundle passed its stale check, the full Jest suite passed 85 suites / 620 tests, and the focused AgFields template render test passed.
+- Overlay re-show fix: focused AgFields/map tests passed 48 tests with a non-empty feature collection; the test proves hide preserves registration and re-show installs a fresh visible Deck layer without another load.
+- Overlay re-show fix: frontend lint, controller bundle rebuild/stale check, and the full 85-suite / 620-test Jest run passed after the descriptor reconstruction change.
+- AgFields preflight integration: `wctl run-preflight-tests` passed all Go packages; focused RQ/rq-engine/run-page Python coverage passed 78 tests, followed by 28 passing rq-engine tests after enforcing required RedisPrep invalidation; `check-test-stubs` passed.
+- The focused RQ failure contract passed 5 tests after adding an explicit assertion that failed Stage 4 jobs clear but never stamp `run_ag_fields`. Direct `stubtest wepppy.nodb.redis_prep` remains blocked before module comparison by existing repository-wide mypy build errors.
+- AgFields preflight documentation: all seven affected behavior/specification/work-package/end-user Markdown files passed scoped `wctl doc-lint`; `uk2us` previews were clean.
+- Batch Runner fixture-path disposition: the isolated regression and all 4 tests in `tests/nodb/test_batch_runner.py` passed. The test now isolates `clear_nodb_file_cache`/`clear_locks` and verifies both receive `batch;;batch-demo;;leaf-run`; no production behavior changed. The final canonical `wctl run-pytest tests --maxfail=1` sweep passed 4,817 tests with 60 skips.
 - **Milestone 6 acceptance evidence (2026-07-10)**: full Stage 4 run on `sacral-self-discipline` completed and the maintainer validated the interface. Artifact inspection: 2,177 fields → 6,626 sub-fields; 6,626 `p*.run` files under `wepp/ag_fields/runs/`; 46,382 output files under `wepp/ag_fields/output/`, last written 2026-07-10 ~22:05 UTC; spot-checked `H1000.loss.dat` completes with final-year annual summary and carries the `VERSION 2020.500` stamp consistent with `wepp_dcc52a6` (the job-pinned executable), not a 2025-series build.
 
 ## Timeline (closure)
 
 - **2026-07-10 22:40 UTC** - Milestone 6 recorded and package closed. ENDUSER.md updated with the WEPP-executable guidance (keep `wepp_dcc52a6`), the 20-plant-scenario limit, and the residue `hmax` normalization wording. Backend package closure notes updated: the real-binary E2E limitation is closed by this walkthrough.
+- **2026-07-10 22:43 UTC** - Post-close projection UX follow-up completed. Stage 1 now states the preferred project-EPSG, WGS84, and alternate-projected-CRS metadata rules. `RonViewModel` carries the optional assigned-map SRID, and runs-page/report headers show `EPSG:<srid>` only when it exists; focused view-model and rendering coverage passes.
+- **2026-07-10 23:06 UTC** - Reconciled the canonical UI specification with the shipped control, controller, route/state contracts, accepted management hardening, executable behavior, automated regression scope, and completed fresh-project evidence. Removed obsolete pending-acceptance, internal-maturity, worker-control, and unimplemented-staleness statements.
+- **2026-07-10 23:17 UTC** - Removed "Show on Map" from Stage 2. Current sub-fields now load automatically on hydration and successful build completion; the map layer control hides them without dropping their registration. Focused controller/map tests pass and the UI specification records the lifecycle.
+- **2026-07-10 23:40 UTC** - Fixed the observed layer-control re-show failure. Remote GeoJSON overlays now retain their loaded feature collection and construct a fresh Deck descriptor when checked again, avoiding reuse of a finalized hidden descriptor. Loading an existing run with current sub-fields still auto-registers and displays the layer.
+- **2026-07-11 00:04 UTC** - Wired AgFields into preflight. `TaskEnum.run_ag_fields` owns the 🌽 emoji; successful Stage 4 completion stamps it, input/artifact mutations and job starts clear it, and `preflight2` requires it to be newer than parent WEPP, watershed abstraction, landuse, soils, and climate. The `ag_fields` checklist key targets `#ag-fields`.
 
 ## Handoffs
 

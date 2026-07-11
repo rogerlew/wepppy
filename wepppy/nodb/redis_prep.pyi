@@ -18,6 +18,7 @@ class TaskEnum(Enum):
     fetch_openet_ts = "build_openet_ts"
     run_wepp_hillslopes = "run_wepp_hillslopes"
     run_wepp_watershed = "run_wepp_watershed"
+    run_ag_fields = "run_ag_fields"
     run_observed = "run_observed"
     run_debris = "run_debris"
     run_watar = "run_watar"

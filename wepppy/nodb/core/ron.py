@@ -1142,6 +1142,8 @@ class RonViewModel(object):
         self.pup_relpath = ron.pup_relpath
         self.mods = [mod for mod in ron.mods]
         self.nodb_version = read_version(ron.wd)
+        map_object = ron.map
+        self.srid = int(map_object.srid) if map_object is not None else None
 
     @classmethod
     def getInstanceFromRunID(cls, runid: str) -> 'RonViewModel':

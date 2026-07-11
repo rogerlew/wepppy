@@ -157,8 +157,8 @@ Current simplifications to keep in mind:
 4. Select **Build Sub-fields**.
    Coordinate-system mistakes and extent mismatches usually become obvious here. The error reports the project DEM's EPSG code and both extents. If the fields do not overlap the project, re-export the GeoJSON in that project CRS (preferred) or attach the correct source CRS before continuing.
 
-5. Select **Show on Map** and review the result.
-   Expect fields that span more than one hydrologic setting to split into multiple sub-fields. Check that the geometry matches your understanding of local drainage before spending compute on WEPP.
+5. Review the sub-fields that load on the map when the build finishes.
+   Expect fields that span more than one hydrologic setting to split into multiple sub-fields. Use the **AgFields Sub-fields** layer control to hide or restore the layer, and check that the geometry matches your understanding of local drainage before spending compute on WEPP.
 
 6. Open **Map Crops to Managements**.
    Choose a WEPPcloud management for each crop, or upload a plant database zip and choose a valid `.man` file. You can save an incomplete mapping and return later; the run remains blocked until every crop is valid.
@@ -167,7 +167,7 @@ Current simplifications to keep in mind:
    AgFields reuses their soil and climate files, so the final stage explains this prerequisite when it is missing.
 
 8. Expand **Run options**, confirm **WEPP Exec** is `wepp_dcc52a6` (see "WEPP executable" above), and select **Run WEPP on Sub-fields**.
-   Expect one WEPP hillslope-style simulation per sub-field rather than one simulation per original field polygon. The status panel reports progress, and successful runs link to the output browser and Features Export. **Clear Previous Runs and Outputs** removes only regenerable AgFields run artifacts.
+   Expect one WEPP hillslope-style simulation per sub-field rather than one simulation per original field polygon. The status panel reports progress, and successful runs link to the output browser and Features Export. A current successful run shows a 🌽 beside **Agricultural Fields** in the project navigation; changing AgFields inputs or rebuilding an upstream project input clears that completion state until AgFields runs successfully again. **Clear Previous Runs and Outputs** removes only regenerable AgFields run artifacts.
 
 ## What Outputs To Look At
 

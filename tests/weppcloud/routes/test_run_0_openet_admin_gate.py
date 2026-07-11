@@ -128,6 +128,17 @@ def _extract_mod_flag(js_text: str, flag_name: str) -> str:
     return match.group(1)
 
 
+def test_ag_fields_preflight_contract_uses_corn_emoji(run0_module) -> None:
+    assert run0_module.TOC_TASK_ANCHOR_TO_TASK["#ag-fields"] is run0_module.TaskEnum.run_ag_fields
+    assert run0_module.TOC_TASK_EMOJI_MAP["#ag-fields"] == "🌽"
+    assert run0_module.TaskEnum.run_ag_fields.label() == "Run Agricultural Fields"
+
+    preflight_source = (
+        Path(run0_module.__file__).resolve().parents[2] / "static" / "js" / "preflight.js"
+    ).read_text(encoding="utf-8")
+    assert '"ag_fields": \'a[href="#ag-fields"]\'' in preflight_source
+
+
 def test_call_landuse_with_stale_mapping_recovery_retries_once(run0_template_app, run0_module) -> None:
     class DummyLanduse:
         def __init__(self) -> None:

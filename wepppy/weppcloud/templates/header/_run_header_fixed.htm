@@ -8,6 +8,7 @@
 {% set view_args = request.view_args if request and request.view_args else {} %}
 {% set view_runid = view_args.get('runid', current_ron.runid) %}
 {% set view_config = view_args.get('config', current_ron.config_stem) %}
+{% set project_srid = current_ron.srid if current_ron.srid is defined else none %}
 {% set maturity_definition_href = maturity_definition_href if maturity_definition_href is defined else (url_for('usersum.view_markdown', category='weppcloud', filename='user-guide.md') ~ '#feature-maturity-labels') %}
 <header class="wc-header wc-run-header wc-run-header--hideaway">
   <div class="wc-container wc-container--fluid">
@@ -21,6 +22,11 @@
         <span class="wc-run-header__version">
           NoDb v{{ current_ron.nodb_version|default('?', false) }}
         </span>
+        {% if project_srid %}
+        <span class="wc-run-header__version wc-run-header__projection"
+              data-project-projection="EPSG:{{ project_srid }}"
+              title="Project projection">EPSG:{{ project_srid }}</span>
+        {% endif %}
         {% if run_config_maturity_label is defined and run_config_maturity_label %}
         {{ maturity_ui.maturity_pill(run_config_maturity_label, href=run_config_maturity_href if run_config_maturity_href is defined else maturity_definition_href, title="Interface maturity: " ~ run_config_maturity_label, new_tab=True) }}
         {% endif %}
