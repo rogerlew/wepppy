@@ -40,6 +40,7 @@
           "root": {
             "py/id": 0
           },
+          "routing_coefficients": null,
           "crunit": "WeppWillSet",
           "bb": 14.0,
           "bbb": 3.0,
