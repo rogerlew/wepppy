@@ -42,6 +42,8 @@ The two YAML files above are the only hand-edited metadata sources.
 `internal_reason` must be present only when `maturity=internal`.
 `embargo_until` is required only when `internal_reason=publication_embargo`.
 `min_role` must be `dev` when `maturity=internal`.
+An internal beta is represented by `maturity=internal`,
+`internal_reason=beta`, and `min_role=dev`; `beta` is not a maturity value.
 
 User-facing maturity definitions are published in:
 

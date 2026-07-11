@@ -28,6 +28,7 @@ A user can see this working by opening a run created from the `ag-fields` config
 - [x] (2026-07-10 23:40 UTC) Overlay re-show fix: remote GeoJSON layers now rebuild a fresh Deck descriptor from cached feature data when re-enabled, while existing-run hydration continues to add current sub-fields automatically.
 - [x] (2026-07-11 00:04 UTC) Preflight follow-up: added `TaskEnum.run_ag_fields` with 🌽, success-only worker stamping, mutation/job invalidation, dependency-aware `preflight2` evaluation, TOC/browser mappings, regression coverage, and the canonical behavior contract.
 - [x] (2026-07-11 00:21 UTC) Validation-debt follow-up: fixed the Batch Runner workspace-preservation fixture so its mocked working directory cannot escape through the real cache helper; the test also verifies canonical cache/lock run-id propagation.
+- [x] (2026-07-11 02:15 UTC) Post-close lifecycle disposition: reclassified AgFields as an internal beta with Dev-role initial/dynamic runs-page visibility while preserving the implemented control and existing project state.
 - [x] (2026-07-10 22:40 UTC) Milestone 6: full Stage 4 run on
   `sacral-self-discipline` completed and maintainer-validated. Artifact
   evidence in `../../tracker.md` Validation: 6,626 sub-field runs, 46,382
@@ -93,12 +94,15 @@ A user can see this working by opening a run created from the `ag-fields` config
 - Decision: Represent completed AgFields simulations with additive task `run_ag_fields` and checklist key `ag_fields`; stamp only after a successful Stage 4 worker and require freshness against parent WEPP plus watershed/core inputs.
   Rationale: An existence-only flag would remain green after upstream reruns or input mutations. Timestamp invalidation at every AgFields mutation/job boundary plus server-side freshness comparisons makes the 🌽 indicator reflect reproducible current outputs without changing run artifacts or legacy keys.
   Date/Author: 2026-07-11 / Roger Lew and Codex.
+- Decision: Supersede the initial user-visible experimental disposition with `maturity: internal`, `internal_reason: beta`, and `min_role: dev`.
+  Rationale: The real control should remain available to developers during continued operational hardening without advertising AgFields to ordinary users. Registry policy now gates initial rendering as well as the existing dynamic-section endpoint; the change preserves the control, route contracts, NoDb state, and existing project artifacts.
+  Date/Author: 2026-07-11 / Roger Lew and Codex.
 
 ## Outcomes & Retrospective
 
 Milestones 1-5 now deliver the complete automated UI implementation. The design mandate is preserved: the visible workflow exposes four user decisions while mechanical backend methods remain confined to logs. Stage 1 retains visible current-file context after reload, and Stage 4 now exposes the AgFields-specific executable instead of worker tuning. New projects persist `wepp_dcc52a6`; historical state remains additive and compatible. The main integration lesson was that both registry-driven dynamic loading and rq-engine overlay authentication had to be wired explicitly; neither was satisfied by adding the static runs-page include alone.
 
-Operational acceptance is complete. The post-close UX work retains the accepted four-stage workflow while improving project projection feedback and making sub-field map review automatic and reversible. The unrelated Batch Runner failure found by the full sweep was dispositioned as a hermetic-test fixture defect without changing production path resolution.
+Operational acceptance is complete. The post-close UX work retains the accepted four-stage workflow while improving project projection feedback and making sub-field map review automatic and reversible. AgFields is now an internal beta visible to Dev-role users while hardening continues. The unrelated Batch Runner failure found by the full sweep was dispositioned as a hermetic-test fixture defect without changing production path resolution.
 
 ## Context and Orientation
 
@@ -108,7 +112,7 @@ Controller JS: `wepppy/weppcloud/controllers_js/` modules are bundled by `build_
 
 Routes the UI consumes are all under the rq-engine `/api` prefix, documented in spec §9 with the state-snapshot shape and the 409 `agfields_job_active` semantics (on 409, keep the currently attached stream; do not replace the job id). The browser obtains a session bearer token through the existing rq-engine session-token mechanism used by other controls.
 
-Feature registry: `wepppy/weppcloud/feature_registry/feature_registry.yaml` holds AgFields at `maturity: internal`; this package moves it to `experimental` and resolves the control shell's feature id (either a `_feature_form_map` entry for `ag_fields_form` in `_pure_macros.html` or an explicit `feature_id` argument).
+Feature registry: `wepppy/weppcloud/feature_registry/feature_registry.yaml` is the lifecycle and access authority. This package initially moved AgFields from its placeholder to user-visible experimental while resolving the real control shell feature id. The 2026-07-11 disposition keeps the real template but returns the entry to `maturity: internal` with `internal_reason: beta` and `min_role: dev`.
 
 The state snapshot is the single source of gating truth. The controller renders from it and re-fetches it on terminal job events; it never computes workflow state client-side except the crop-year pattern *suggestion* (spec §3 stage 1), which is UX sugar validated server-side on confirm.
 
@@ -136,7 +140,7 @@ For Milestone 6, create a run from the `ag-fields` config, complete the base wat
 - `wctl run-pytest` for any touched Python (template context, registry).
 - Milestone 6 walkthrough evidence recorded in `../../tracker.md` with stage-by-stage notes and an output listing; no claim of end-to-end success without the walkthrough actually performed.
 
-Observed automated results are recorded in `../../tracker.md`. The focused AgFields Jest suite passes 10 tests, the original affected Python route/template/registry group passes 135 tests, and the current-file follow-up NoDb/route/template group passes. Frontend lint, `check-test-stubs`, the full Jest suite, and the bundle build pass. The module-level `stubtest` and repository-wide Python sweep have unrelated existing failures described under `Surprises & Discoveries`.
+Observed automated results are recorded in `../../tracker.md`. The focused AgFields Jest suite passes 10 tests, the original affected Python route/template/registry group passes 135 tests, and the current-file follow-up NoDb/route/template group passes. The internal-beta registry/initial-render/dynamic-route/control-render group passes 172 tests, and the final canonical Python sweep passes 4,818 tests with 60 skips. Frontend lint, `check-test-stubs`, the full Jest suite, and the bundle build pass. The module-level AgFields `stubtest` limitation remains described under `Surprises & Discoveries`.
 
 ## Idempotence and Recovery
 
@@ -163,3 +167,7 @@ Revision note (2026-07-11, Codex): Wired AgFields into the Redis/preflight2/TOC 
 Revision note (2026-07-11, Codex): Dispositioned the recorded Batch Runner failure by isolating its cache/lock fixture boundary and asserting canonical run-id propagation; production path resolution remains unchanged.
 
 Revision note (2026-07-11, Codex): Closed the Batch Runner validation debt after the canonical full Python sweep passed 4,817 tests with 60 skips.
+
+Revision note (2026-07-11, Codex): Reclassified the real AgFields control as an internal beta with Dev-role visibility, documented that this supersedes the initial public experimental launch, and added registry-policy regression coverage.
+
+Revision note (2026-07-11, Codex): Confirmed the internal-beta disposition with 172 focused registry/route/render tests and a canonical full sweep of 4,818 passed with 60 skipped.

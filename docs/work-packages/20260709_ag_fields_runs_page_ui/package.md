@@ -16,7 +16,10 @@ The spec's Design Mandate governs review: the UI presents four user decisions, n
 - Implement `controllers_js/ag_fields.js`: singleton bootstrap, hydration from `GET .../agfields/state`, the three contractual job keys, status-stream attach with poll fallback, delegated events, client-side crop-year pattern suggestion, and 409 `agfields_job_active` handling that keeps the current stream attached.
 - Wire the runs page: `show_ag_fields` flag, `data-mod-nav` item, `data-mod-section` include near roads/geneva, modal include, feature-id resolution for the maturity label.
 - Map overlay: register the sub-fields overlay through `addGeoJsonOverlay` against the overlay resource endpoint, refreshing after rebuilds.
-- Bump the feature registry maturity from `internal` to `experimental` when the control ships.
+- Register the real control and maintain its current lifecycle disposition. It
+  shipped initially as `experimental`, then returned to an internal beta
+  (`maturity: internal`, `internal_reason: beta`, `min_role: dev`) for continued
+  operational hardening.
 - Jest coverage per spec §12.1; frontend gates (`wctl run-npm lint`, `wctl run-npm test`) pass.
 
 ## Scope
@@ -74,7 +77,8 @@ The walkthrough is deliberately the last gate: it validates UI, backend, Peridot
 - [x] Rotation modal round-trips mapping read/save, renders per-row server errors without closing, and supports partial saves.
 - [x] Job lifecycle: enqueue → stream attach → terminal event → snapshot re-hydration works for all three job families; 409 conflict keeps the existing stream.
 - [x] Sub-fields overlay appears via "Show on Map" and refreshes after a rebuild.
-- [x] Registry maturity is `experimental`; the shell renders the label.
+- [x] The real registry control is wired; its current lifecycle is internal
+  beta and Dev-role only, and the shell renders the Internal label.
 - [x] Jest suites per spec §12.1 pass; `wctl run-npm lint` and `wctl run-npm test` pass.
 - [x] Boundary rasterization accepts unlabeled coordinates in the exact project UTM grid, retains WGS84/correctly declared reprojection support, and reports the required project CRS/bounds for ambiguous projected input.
 - [x] Acceptance walkthrough on a fresh small-watershed project completes all four stages and produces sub-field outputs under `wepp/ag_fields/output/` with a real WEPP binary.
@@ -87,7 +91,7 @@ The acceptance walkthrough on `sacral-self-discipline` (2026-07-10) surfaced and
 
 A post-close projection UX follow-up makes the upload contract visible at the decision point: Stage 1 names the preferred project EPSG, accepted WGS84 input, and metadata requirement for other projected CRSs. Runs-page and report headers show the assigned project projection as an `EPSG:<srid>` pill and omit it before map assignment.
 
-The canonical UI specification was reconciled after acceptance so it describes the shipped experimental registry entry, snapshot-driven lifecycle, current DOM/route contracts, management-ingestion hardening, AgFields-owned executable, and recorded validation rather than the package's original prospective design state.
+The canonical UI specification was reconciled after acceptance so it describes the snapshot-driven lifecycle, current DOM/route contracts, management-ingestion hardening, AgFields-owned executable, and recorded validation rather than the package's original prospective design state. On 2026-07-11 the feature was reclassified from user-visible experimental to an internal beta (`min_role: dev`) while operational hardening continues; this changes registry visibility only and does not alter existing project data or the implemented control.
 
 A final Stage 2 simplification removes the redundant "Show on Map" action: current sub-fields load automatically after hydration and successful builds, while the shared map layer control hides and restores the retained overlay registration.
 

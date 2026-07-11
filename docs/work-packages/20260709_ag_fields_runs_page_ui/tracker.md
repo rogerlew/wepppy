@@ -8,7 +8,7 @@
 **Started**: 2026-07-09 23:21 UTC
 **Closed**: 2026-07-10 22:40 UTC
 **Current phase**: Complete
-**Last updated**: 2026-07-11 01:07 UTC
+**Last updated**: 2026-07-11 02:28 UTC
 **Next milestone**: None; one follow-up filed (persisted `_wepp_bin` gap on the acceptance project, see Handoffs)
 **Security impact**: `low` — no new backend surface; browser client reuses existing rq-engine session bearer tokens
 **Dedicated security review**: `no`
@@ -41,6 +41,7 @@
 - [x] Post-close overlay follow-up: automatic sub-field map loading, removal of the Stage 2 map button, and registry-preserving layer-control hiding (2026-07-10 23:17 UTC).
 - [x] Post-close overlay re-show fix: reconstruct retained remote GeoJSON overlays from cached features and preserve existing-run automatic loading (2026-07-10 23:40 UTC).
 - [x] Post-close preflight integration: `run_ag_fields`/🌽 task, success-only stamping, invalidation/freshness, TOC mapping, and behavior documentation (2026-07-11 00:04 UTC).
+- [x] Post-close lifecycle disposition: reclassified AgFields as an internal beta and restricted initial/dynamic runs-page visibility to Dev-role users (2026-07-11 02:15 UTC).
 
 ## Timeline
 
@@ -65,6 +66,11 @@
   executable; the worker persists it before automatic parallel execution. The
   Maximum workers control is removed, and the clear action uses intrinsic width.
 - **2026-07-11 00:21 UTC** - Dispositioned the Batch Runner failure as a unit-fixture isolation defect. The workspace-preservation test now stubs the cache/lock reset boundary, asserts the canonical batch run id passed to both calls, and leaves production path resolution unchanged. The subsequent canonical full sweep passed 4,817 tests with 60 skips.
+- **2026-07-11 02:15 UTC** - Reclassified AgFields from user-visible
+  experimental to internal beta while continued operational hardening is in
+  progress. The registry now requires the Dev role, and both initial and dynamic
+  section rendering enforce that policy; the implemented control, routes, and
+  existing project data remain unchanged.
 
 ## Decisions Log
 
@@ -87,6 +93,18 @@
 **Context**: The registry entry was an internal Dev-only placeholder even though the package objective is to ship an experimental runs-page control.
 
 **Decision**: Set the real section template, `maturity: experimental`, `internal_reason: null`, and `min_role: user`. Wire both initial render and dynamic enablement.
+
+### 2026-07-11: Supersede public experimental availability with internal beta
+
+**Context**: The control and end-to-end workflow are implemented, but AgFields
+is still undergoing operational hardening after the acceptance findings.
+
+**Decision**: Preserve the real section template and reclassify AgFields as
+`maturity: internal`, `internal_reason: beta`, and `min_role: dev`. This
+supersedes the 2026-07-09 availability decision: Dev-role users retain the
+working control, while ordinary users no longer receive its registry navigation
+or section. No NoDb schema, run artifact, route, or existing-project mutation is
+part of this visibility-only disposition.
 
 ### 2026-07-09: Defer controller-module splitting until acceptance
 **Context**: The complete four-stage controller is about 1,700 lines, entering the repository's observe-only yellow band for JavaScript file size.
@@ -134,6 +152,7 @@
 - The focused RQ failure contract passed 5 tests after adding an explicit assertion that failed Stage 4 jobs clear but never stamp `run_ag_fields`. Direct `stubtest wepppy.nodb.redis_prep` remains blocked before module comparison by existing repository-wide mypy build errors.
 - AgFields preflight documentation: all seven affected behavior/specification/work-package/end-user Markdown files passed scoped `wctl doc-lint`; `uk2us` previews were clean.
 - Batch Runner fixture-path disposition: the isolated regression and all 4 tests in `tests/nodb/test_batch_runner.py` passed. The test now isolates `clear_nodb_file_cache`/`clear_locks` and verifies both receive `batch;;batch-demo;;leaf-run`; no production behavior changed. The final canonical `wctl run-pytest tests --maxfail=1` sweep passed 4,817 tests with 60 skips.
+- Internal-beta disposition: the registry/initial-render/dynamic-route/control-render group passed 172 tests. The final canonical `wctl run-pytest tests --maxfail=1` sweep passed 4,818 tests with 60 skips; all five updated Markdown files passed scoped `wctl doc-lint`, and their `uk2us` previews were clean.
 - **Milestone 6 acceptance evidence (2026-07-10)**: full Stage 4 run on `sacral-self-discipline` completed and the maintainer validated the interface. Artifact inspection: 2,177 fields → 6,626 sub-fields; 6,626 `p*.run` files under `wepp/ag_fields/runs/`; 46,382 output files under `wepp/ag_fields/output/`, last written 2026-07-10 ~22:05 UTC; spot-checked `H1000.loss.dat` completes with final-year annual summary and carries the `VERSION 2020.500` stamp consistent with `wepp_dcc52a6` (the job-pinned executable), not a 2025-series build.
 
 ## Timeline (closure)

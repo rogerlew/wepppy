@@ -472,6 +472,18 @@ def test_build_runs0_context_does_not_elevate_debris_with_test_support_flag(run0
     assert "TEST_SUPPORT_ENABLED" not in allow_block.group(0)
 
 
+def test_build_runs0_context_gates_ag_fields_by_registry_role(run0_module) -> None:
+    source = Path(run0_module.__file__).read_text(encoding="utf-8")
+    visibility_block = re.search(
+        r"show_ag_fields\s*=\s*\((?:.|\n)*?\)\n\s*allow_debris_flow",
+        source,
+    )
+
+    assert visibility_block is not None
+    assert '_feature_role_enabled("ag_fields"' in visibility_block.group(0)
+    assert "'ag_fields' in mods_list" in visibility_block.group(0)
+
+
 def test_run_page_bootstrap_serializes_wepp_controller_job_id(run0_template_app) -> None:
     context = _bootstrap_context(set())
     context["wepp"].job_id = "wepp-job-42"

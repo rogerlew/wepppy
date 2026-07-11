@@ -1,13 +1,13 @@
 # AgFields Runs-Page UI Control Layout
 
-Status: Implemented and accepted 2026-07-10; includes post-close projection UX follow-up
+Status: Implemented and accepted 2026-07-10; internal beta as of 2026-07-11
 Audience: template, controller, route, and test implementers for `wepppy/nodb/mods/ag_fields`
 
 ## Grounding
 
 - This is a canonical runs-page control: `ui.control_shell(...)` from `controls/_pure_macros.html`, singleton controller in `controllers_js/ag_fields.js`, `controlBase.attach_status_stream`, `set_rq_job_id`, `WCControllerBootstrap.resolveJobId`, delegated events only.
 - The feature registry entry supplies `section_template: controls/ag_fields_pure.htm`; the runs page dynamically loads the registered section and controller when the `ag_fields` mod is enabled. The registry is the rendering and navigation source of truth.
-- Maturity and access come from `weppcloud/feature_registry/feature_registry.yaml`, not the template. AgFields is user-visible with `maturity: experimental` and `min_role: user`; the shell renders the Experimental label from the resolved feature id (§6).
+- Maturity and access come from `weppcloud/feature_registry/feature_registry.yaml`, not the template. AgFields is an internal beta with `maturity: internal`, `internal_reason: beta`, and `min_role: dev`. Dev-role users receive the real control for initial and dynamic rendering; ordinary users do not receive its navigation or control section. The shell renders the Internal label from the resolved feature id (§6).
 - Borrow the Batch Runner's staged-intake patterns (`routes/batch_runner/templates/batch_runner_pure.htm`): ordered section cards inside one shell, per-section empty-state chips, hidden-until-populated panes (`data-role` + `hidden`), upload → inspect → validate → act progression, status chips that collapse when empty.
 - Borrow the Disturbed modal pattern (`controls/disturbed_modal.htm`) for the rotation mapping modal: a self-contained top-level `wc-modal` with `data-modal`/`data-modal-dismiss` that self-gates on `'ag_fields' in ron.mods` and is included unconditionally from the runs page. The opener button (`data-modal-open`) lives in the stage 3 panel, not in the modal file.
 - Use `ui.collapsible_card(expanded=False)` for every advanced or rarely-touched control (the Climate control's "Advanced options" card is the precedent).

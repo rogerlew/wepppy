@@ -43,12 +43,12 @@ def test_feature_registry_loads_expected_entries() -> None:
     assert "ag_fields" in feature_ids
 
 
-def test_ag_fields_registry_ships_experimental_control() -> None:
+def test_ag_fields_registry_is_internal_beta() -> None:
     ag_fields = feature_registry_by_id()["ag_fields"]
 
-    assert ag_fields.maturity == "experimental"
-    assert ag_fields.internal_reason is None
-    assert ag_fields.min_role == "user"
+    assert ag_fields.maturity == "internal"
+    assert ag_fields.internal_reason == "beta"
+    assert ag_fields.min_role == "dev"
     assert ag_fields.section_template == "controls/ag_fields_pure.htm"
 
 
@@ -74,7 +74,7 @@ def test_config_registry_loads_expected_entries() -> None:
 
 def test_build_header_mod_options_applies_role_and_backend_policy() -> None:
     user = _User(set())
-    active_mods = {"disturbed", "openet_ts", "debris_flow", "rusle", "rap_ts"}
+    active_mods = {"ag_fields", "disturbed", "openet_ts", "debris_flow", "rusle", "rap_ts"}
 
     options = build_header_mod_options(
         active_mods=active_mods,
@@ -85,6 +85,7 @@ def test_build_header_mod_options_applies_role_and_backend_policy() -> None:
     option_ids = {entry["id"] for entry in options}
 
     assert "rap_ts" in option_ids
+    assert "ag_fields" not in option_ids
     assert "openet_ts" not in option_ids
     assert "debris_flow" not in option_ids
     assert "rusle" not in option_ids
@@ -108,7 +109,7 @@ def test_build_header_mod_options_include_all_overrides_policy() -> None:
 
 def test_build_header_mod_options_allows_internal_features_for_dev_role() -> None:
     user = _User({"Dev"})
-    active_mods = {"omni"}
+    active_mods = {"ag_fields", "omni"}
 
     options = build_header_mod_options(
         active_mods=active_mods,
@@ -120,6 +121,7 @@ def test_build_header_mod_options_allows_internal_features_for_dev_role() -> Non
 
     assert "openet_ts" in option_ids
     assert "omni_contrasts" in option_ids
+    assert "ag_fields" in option_ids
 
 
 def test_build_header_mod_options_hides_path_ce_without_wbt_backend() -> None:

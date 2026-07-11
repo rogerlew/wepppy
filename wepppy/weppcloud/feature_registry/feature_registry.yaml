@@ -245,10 +245,10 @@ features:
     section_id: ag-fields
     section_class: wc-stack
     section_template: controls/ag_fields_pure.htm
-    maturity: experimental
-    internal_reason: null
+    maturity: internal
+    internal_reason: beta
     embargo_until: null
-    min_role: user
+    min_role: dev
     requires_backend: any
     requires_features: []
     enable_dependencies: []

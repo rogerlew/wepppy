@@ -1855,7 +1855,10 @@ def _build_runs0_context(runid, config, playwright_load_all):
         playwright_load_all=playwright_load_all,
     )
     show_observed = (observed is not None) or playwright_load_all
-    show_ag_fields = 'ag_fields' in mods_list or playwright_load_all
+    show_ag_fields = (
+        _feature_role_enabled("ag_fields", playwright_load_all=playwright_load_all)
+        and ('ag_fields' in mods_list or playwright_load_all)
+    )
     allow_debris_flow = (
         _feature_role_enabled("debris_flow", playwright_load_all=playwright_load_all)
     )
