@@ -136,7 +136,10 @@ field_id, year, crop_name, runoff, sed_del, sed_det, sed_dep, (hill_wat) Ep+Es+E
 
 
 
-## Watershed model - Running subfields as OFEs (Future Feature 0% complete, unvetted concept)
+## Watershed model - Running subfields as OFEs (Future Feature 0% complete, unvetted concepts)
+
+### Concept 1 rerun as OFEs
+
 1. Calculate area of sub fields (there could be multiple)
    - order the sub fields by area in ascending order
    - if the area of the sub field is less than 1/8 the subcatchment's area disregard
@@ -149,3 +152,7 @@ field_id, year, crop_name, runoff, sed_del, sed_det, sed_dep, (hill_wat) Ep+Es+E
    - MOFE soil file
    - MOFE management with the rotation schedule for the field
 3. Run WEPP hillslopes and watershed as normal
+
+### Concept 2 aggregate passfiles (like Roads interface)
+
+For each hillslope identify intersecting subfields. Assume that subfield's water and sediment are delivered to the bottom of the hillslope. Merge the passfiles event by event and rescale the hillslope events based on the area not covered by subfields. Hillslopes without intersecting AgFields use hillslope pass file. Run watershed from the merged hillslope passfiles.
