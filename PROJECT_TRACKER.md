@@ -37,7 +37,7 @@ This tracker makes all work visible at a glance, helping agents coordinate and a
 ### 2. Limit Work in Progress
 **Target**: 2-4 active packages maximum to maintain focus and ensure packages complete rather than stall.
 
-**Current WIP**: 12 packages (above target range)
+**Current WIP**: 13 packages (above target range)
 
 ### 3. Manage Flow
 Monitor how long packages spend in each column:
@@ -568,6 +568,24 @@ Mariana Dobre performs the subsequent scientific evaluation. Concept 1 is deferr
 ## ✅ Done
 
 Recently completed work packages. Archived immediately upon completion.
+
+### AgFields Flowpath-to-Channel Connectivity Inventory (2026-07-13)
+**Status**: ✅ **COMPLETE**
+
+**Link**: [docs/work-packages/20260713_ag_fields_flowpath_channel_connectivity/](docs/work-packages/20260713_ag_fields_flowpath_channel_connectivity/)
+
+**Lifecycle**: In Progress -> Done (2026-07-13)
+
+**Summary**: Added and pushed Peridot's resource-oriented
+`subfield_channel_connectivity` CLI with explicit aligned raster inputs,
+schema-versioned JSON, an optional channel mask, grid validation, and six focused
+tests. On `sacral-self-discipline`, 3,269 of 6,626 retained sub-fields have at
+least one generated path whose first outside cell is a channel; 3,357 do not, and
+there are 12,365 direct channel outlet cells. SUBWTA suffix-4 and explicit
+`netful.tif` channel detection agree. This non-blocking topology inventory does not
+claim buffer or mass-delivery fidelity.
+
+---
 
 ### AgFields Runs-Page UI (2026-07-10)
 **Status**: ✅ **COMPLETE**
