@@ -9,12 +9,12 @@
 
 **Started**: 2026-07-13 19:37 UTC
 
-**Current phase**: Implementation planning and semantic-contract finalization
+**Current phase**: Isolated AgFields watershed orchestration implementation
 
-**Last updated**: 2026-07-13 19:37 UTC
+**Last updated**: 2026-07-13 21:17 UTC
 
-**Next milestone**: Accept ADR-0018 and implement the conservation-tested weighted
-PASS kernel
+**Next milestone**: Implement the additive facade/collaborator, isolated parent
+materialization, manifests, watershed execution, and interchange
 
 **Security impact**: `high`
 
@@ -26,9 +26,6 @@ PASS kernel
 
 ### Ready / Backlog
 
-- [ ] Finalize the PASS field-semantics table and serialization-derived closure
-  tolerances; update ADR-0018 from Proposed to Accepted.
-- [ ] Implement, export, document, build, and test the weighted `wepppyo3` PASS API.
 - [ ] Implement the AgFields watershed-integration collaborator, additive facade
   state, isolated workspace, manifests, and interchange generation.
 - [ ] Add RQ/API/UI stage, staleness/readiness/clear behavior, and dependency graph
@@ -38,8 +35,8 @@ PASS kernel
 
 ### In Progress
 
-- [ ] Ground the semantic table against the WEPP PASS writer/reader, especially
-  `gwbfv`, `gwdsv`, particle-class fields, header area, and hydrograph terms.
+- [ ] Implement `AgFieldsWatershedIntegrator` and facade state against the accepted
+  compatibility and NoDb concurrency contracts.
 
 ### Blocked
 
@@ -54,6 +51,10 @@ or implementing Concept 2.
   dev-project contracts (2026-07-13 19:37 UTC).
 - [x] Created the package, active ExecPlan, compatibility plan, proposed ADR, initial
   security review, and root tracker entry (2026-07-13 19:37 UTC).
+- [x] Finalized every PASS field transformation and zero-volume rule, derived the
+  serialization closure budgets, and accepted ADR-0018 (2026-07-13 21:02 UTC).
+- [x] Implemented, exported, documented, built, and release-tested the weighted
+  `wepppyo3` PASS API without changing Roads behavior (2026-07-13 21:17 UTC).
 
 ## Timeline
 
@@ -61,6 +62,10 @@ or implementing Concept 2.
   track; Concept 1 was explicitly deferred.
 - **2026-07-13 19:37 UTC** - `/wc1/runs/sa/sacral-self-discipline` designated as the
   generated-output dev and scientific-evaluation project.
+- **2026-07-13 21:02 UTC** - Milestone 1 completed with Accepted ADR-0018 and
+  `artifacts/pass_field_semantics.md` as the normative field contract.
+- **2026-07-13 21:17 UTC** - Milestone 2 completed; canonical py312 release exports
+  the weighted API and its Rust/Python release tests pass.
 
 ## Decisions Log
 
@@ -118,9 +123,11 @@ qualification pending until Mariana records her disposition.
 
 ### Native Kernel
 
-- [ ] `cargo fmt --check` and `cargo test -p wepp_interchange_rust` pass.
-- [ ] Existing Roads `combine_hillslope_pass_files` behavior and tests remain unchanged.
-- [ ] Canonical py312 release import and focused Python API tests pass.
+- [x] Touched Rust sources pass targeted `rustfmt --check`; all-crate
+  `cargo fmt --check` still reports unrelated preexisting formatting drift outside
+  the touched files. `cargo test -p wepp_interchange_rust` passes 39 tests.
+- [x] Existing Roads `combine_hillslope_pass_files` behavior and tests remain unchanged.
+- [x] Canonical py312 release import and focused Python API tests pass.
 
 ### WEPPpy
 
@@ -150,6 +157,61 @@ qualification pending until Mariana records her disposition.
   and ExecPlan describe as-built behavior.
 
 ## Progress Notes
+
+### 2026-07-13 21:17 UTC: Weighted native kernel and release refresh
+
+**Agent/Contributor**: Codex
+
+**Work completed**:
+
+- Added the stable `combine_weighted_hillslope_pass_files` PyO3 API and kept the
+  Roads function signature and output path unchanged.
+- Added typed source/header validation, exact source-area closure, header/calendar
+  compatibility, semantic reconstruction, legacy formatting, atomic output,
+  reparsed event/run closure, and bounded diagnostics.
+- Corrected PASS Arrow metadata for particle fractions and groundwater volumes.
+- Refreshed the canonical py312 extension and documented its provenance and
+  SHA-256 `8c94041776a66968aab302ee20fa1b85d6e53c0b0ca3ffec234ffb84247b5d6f`.
+- Published `wepppyo3` source commit `2779b41` and py312 release commit `96c028f`
+  to `origin/main`.
+
+**Test results**:
+
+- `cargo test -p wepp_interchange_rust`: `39 passed; 0 failed`.
+- Release-tree weighted API import: `ok`.
+- `python3.12 -m pytest -q tests/wepp_interchange/test_weighted_hillslope_pass.py`:
+  `1 passed`.
+- Touched Rust files pass targeted `rustfmt --check`; full workspace formatting has
+  preexisting drift in unrelated crate/test files and was not rewritten.
+
+**Next steps**:
+
+- Implement isolated AgFields orchestration and additive facade state.
+
+### 2026-07-13 21:02 UTC: PASS semantics and ADR acceptance
+
+**Agent/Contributor**: Codex
+
+**Work completed**:
+
+- Grounded header and row semantics against `wshpas.f90`, `wshred.for`,
+  `sloss.for`, the HBP contract, and the owned Rust parser.
+- Classified `gwbfv` and `gwdsv` as extensive m3 volumes and `clot` through `sdot`
+  as unitless sediment particle fractions.
+- Defined direct water/sediment closure and product-of-rounded-operands budgets
+  from legacy five-significant-digit `E11.5`/`E10.5` serialization.
+- Accepted ADR-0018 only after every header and row numeric had an explicit rule.
+
+**Test results**:
+
+- `wctl doc-lint` passed for the semantic table and ADR when invoked with the repo
+  virtual environment on `PATH`.
+- The default `/usr/local/bin/wctl` invocation lacked `typer`; the repository venv
+  resolved the environment mismatch without changing dependencies.
+
+**Next steps**:
+
+- Implement and release-test the additive weighted native API.
 
 ### 2026-07-13 19:37 UTC: Package opening and fixture discovery
 

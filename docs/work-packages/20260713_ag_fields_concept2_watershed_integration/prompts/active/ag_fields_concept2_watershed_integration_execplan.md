@@ -36,9 +36,12 @@ is deferred and must not be built as part of this plan.
 - [x] (2026-07-13 19:37 UTC) Inspected current AgFields, Roads, PASS, RQ/API/UI,
   run-artifact, and native release contracts; created the work package, proposed
   ADR, compatibility plan, security review, and tracker entries.
-- [ ] Milestone 1: finalize the PASS field-semantics table and accept ADR-0018.
-- [ ] Milestone 2: implement and release-test the additive weighted native PASS
-  combiner while preserving the Roads API.
+- [x] (2026-07-13 21:02 UTC) Milestone 1: finalized
+  `ag_fields_pass_semantics_v1`, derived quantity-specific closure budgets from
+  legacy serialization, and accepted ADR-0018.
+- [x] (2026-07-13 21:17 UTC) Milestone 2: implemented and release-tested the
+  additive weighted native PASS combiner while preserving the Roads API; 39 Rust
+  tests and the release-tree Python API test pass.
 - [ ] Milestone 3: implement the additive AgFields watershed-integration facade and
   collaborator with isolated parent materialization, manifests, combination,
   watershed execution, and interchange.
@@ -81,6 +84,17 @@ is deferred and must not be built as part of this plan.
   writer before scaling.
   Evidence: `wepp/output/interchange/H.pass.parquet` schema and
   `/home/workdir/wepppyo3/wepp_interchange/src/hill_pass.rs`.
+- Observation: WEPP's binary PASS contract and watershed consumer confirm that
+  `gwbfv` and `gwdsv` are m3 volumes. The Arrow metadata also incorrectly labels
+  `clot` as a flow rate and the remaining particle fractions as percentages.
+  Evidence: `/home/workdir/wepp-forest/docs/contracts/hillslope-binary-pass-format.md`,
+  `/home/workdir/wepp-forest/src/wshred.for`, and
+  `/home/workdir/wepppyo3/wepp_interchange/src/schema.rs`.
+- Observation: Fortran `E11.5` and `E10.5` serialize five significant digits in a
+  `0.ddddd` mantissa, not six digits as initially inferred from C-style scientific
+  notation.
+  Evidence: Real legacy PASS rows such as `0.43200E+05`, WEPP `wshpas.f90` format
+  declarations, and weighted writer/reparse tests.
 
 ## Decision Log
 
@@ -113,12 +127,33 @@ is deferred and must not be built as part of this plan.
   combiner operate on that family, and weighted HBP writing is not required for the
   selected delivery.
   Date/Author: 2026-07-13 / Codex
+- Decision: Conserve volumes and per-class sediment masses directly; reconstruct
+  depths and concentrations; sediment-mass-weight particle fractions; and derive
+  peak rate/time by scaled triangular-hydrograph superposition.
+  Rationale: These rules follow the WEPP producer and consumer units, preserve the
+  quantities used by watershed routing, and leave no PASS numeric field with an
+  implicit operation.
+  Date/Author: 2026-07-13 / Codex
+- Decision: Use value-specific half-ULP budgets from five-significant-digit
+  `E11.5`/`E10.5` serialization, with product bounds for class mass and
+  depth-volume identities.
+  Rationale: A fixed percentage would be either too permissive for small values or
+  too strict for large values and would not reflect the actual legacy writer.
+  Date/Author: 2026-07-13 / Codex
+- Decision: Preserve the existing Roads writer formatting and use the exact legacy
+  five-significant-digit formatter only for the new weighted path.
+  Rationale: The Roads public API and byte-level output behavior are outside this
+  package's contract; the additive path can meet ADR-0018 without changing them.
+  Date/Author: 2026-07-13 / Codex
 
 ## Outcomes & Retrospective
 
-The package is open. Planning and real-project discovery are complete; no runtime
-implementation has landed yet. Update this section after every milestone with what
-is demonstrably working, remaining gaps, and any change to the intended outcome.
+Milestones 1 and 2 are complete. Every legacy PASS field has an accepted rule, and
+the canonical py312 release now exports the additive weighted kernel with atomic
+write/reparse closure diagnostics. The unchanged Roads suite and new Rust/Python
+tests pass. WEPPpy orchestration, workflow exposure, broad validation, and the
+generated-output run remain. The published `wepppyo3` evidence is source commit
+`2779b41` plus py312 release commit `96c028f`.
 
 ## Context and Orientation
 
@@ -517,6 +552,13 @@ if an existing server-side validation contract supports them; it never accepts
 paths, source lists, scales, or executable names from the browser.
 
 ## Revision Note
+
+Updated 2026-07-13 after completing Milestone 2 to record the native API, exact
+five-significant-digit serialization behavior, release refresh, and validation
+evidence.
+
+Updated 2026-07-13 after completing Milestone 1 to record the accepted field
+semantics, serialization-derived closure formulas, source evidence, and decisions.
 
 Created 2026-07-13 after Roger Lew selected Concept 2 for implementation, assigned
 the scientific evaluation to Mariana Dobre, deferred Concept 1, and designated

@@ -1,6 +1,6 @@
 # ADR-0018: AgFields Weighted PASS Accounting
 
-Status: Proposed
+Status: Accepted
 Date: 2026-07-13
 
 ## Context
@@ -30,13 +30,23 @@ baseline_scale = A_background / A_parent
 subfield_scale_i = A_i / A_modeled_i
 ```
 
-Scale extensive water-volume and sediment-mass quantities by the applicable source
-scale. Reconstruct intensive depths, fluxes, and concentrations from the scaled
-extensive totals and target parent area wherever the PASS definition permits it.
-Reconstruct peak runoff from scaled source hydrograph components under a documented
-field-semantics table. The combined PASS must close to the weighted source totals
-event by event and for the full run within a tolerance derived from PASS
-serialization precision.
+Scale extensive water-volume, groundwater-volume, sediment-mass, and peak-rate
+quantities by the applicable source scale. Reconstruct runoff, subsurface-flow, and
+tile-drainage depths from combined volumes and target parent area. Reconstruct each
+sediment concentration from combined class mass and runoff volume, and reconstruct
+particle fractions with source sediment-mass weights. Superimpose scaled triangular
+source hydrographs to obtain combined peak runoff and its peak time. The normative
+field-by-field rules are in
+`docs/work-packages/20260713_ag_fields_concept2_watershed_integration/artifacts/pass_field_semantics.md`.
+
+Legacy `E11.5` row serialization and `E10.5` header-area serialization retain five
+significant decimal digits in the Fortran `0.ddddd` mantissa. Closure therefore
+uses the value-specific half-ULP budget
+`0.5 * 10^(floor(log10(abs(x))) - 4)`, plus a bounded floating-point term,
+rather than a tunable percentage. Derived sediment-mass and depth-volume identities
+use the documented product-of-rounded-operands bound. Event budgets sum into the
+full-run budget. A parent combine fails before replacement when any reparsed
+conserved quantity exceeds its calculated budget.
 
 Do not apply a delivery ratio, buffer correction, or other uncalibrated heuristic.
 The combined source is delivered at the parent hillslope outlet, after which normal
@@ -48,10 +58,10 @@ current prepared parent WEPP inputs when baseline PASS files are unavailable or
 were removed after interchange. Never rewrite baseline or independent sub-field
 run/output trees. Concept 1 is not an implementation or validation dependency.
 
-This ADR remains Proposed until the PASS field-semantics table confirms every
-column's units and scaling rule, including `gwbfv` and `gwdsv`, and records the
-serialization-derived closure tolerances. Implementation must not merge before
-that update changes the ADR to Accepted.
+`gwbfv` and `gwdsv` are extensive m3 volumes. `clot`, `slot`, `saot`, `laot`, and
+`sdot` are unitless particle fractions, not rates or percentages. Header particle
+diameters and phosphorus concentrations must match across sources and are copied
+from the target parent; v1 does not silently average heterogeneous chemistry.
 
 ## Decision Provenance
 
@@ -112,6 +122,8 @@ of the new state means "not run."
   affected parent area is 176,981,400 m2; no parent is overcovered.
 - Peridot metadata on that project closes `length * width` to raster area within
   `5.9e-11` m2 per sub-field.
+- The accepted semantic table cites the WEPP producer, watershed consumer,
+  sediment producer, binary PASS contract, and owned Rust parser for every field.
 
 ## Risk and Rollback Notes
 
@@ -130,5 +142,7 @@ data migration.
 
 The active ExecPlan is
 `docs/work-packages/20260713_ag_fields_concept2_watershed_integration/prompts/active/ag_fields_concept2_watershed_integration_execplan.md`.
-Update this ADR before code merge with the final semantic table, closure tolerance,
-and any formula changes discovered during implementation.
+The weighted kernel and its diagnostics must use the accepted semantic-table
+version `ag_fields_pass_semantics_v1` and algorithm name `ag_fields_v1`. A change
+to any formula, zero-volume rule, or closure budget requires a superseding ADR
+revision before implementation changes.

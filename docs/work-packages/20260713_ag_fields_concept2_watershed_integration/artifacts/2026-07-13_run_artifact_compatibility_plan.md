@@ -47,8 +47,65 @@ Use versioned, additive artifacts. The initial contract includes:
 - `manifest/README.md`: field definitions, units, algorithms, scientific warning,
   and evaluation-bundle orientation.
 
-Exact columns must be documented before implementation. Add columns when necessary;
-do not silently rename or remove them after generated-output acceptance.
+All four artifacts use `schema_version = "1.0"`,
+`algorithm = "ag_fields_v1"`,
+`semantic_contract = "ag_fields_pass_semantics_v1"`, and
+`adr = "ADR-0018"`. The conserved-metric suffixes are exactly:
+`runvol_m3`, `sbrunv_m3`, `drrunv_m3`, `gwbfv_m3`, `gwdsv_m3`,
+`tdet_kg`, `tdep_kg`, and `sediment_class_1_kg` through
+`sediment_class_5_kg`.
+
+`pass_sources.parquet` has these exact columns in order:
+
+1. `schema_version`, `algorithm`, `semantic_contract`, `adr`;
+2. `parent_topaz_id`, `parent_wepp_id`, `source_id`, `source_kind`,
+   `field_id`, `sub_field_id`;
+3. `source_pass_relpath`, `source_climate_token`, `source_climate_sha256`,
+   `target_climate_token`, `target_climate_sha256`;
+4. `parent_raster_area_m2`, `retained_field_area_m2`, `background_area_m2`,
+   `represented_area_m2`, `modeled_area_m2`, `scale`, `coverage_ratio`,
+   `area_residual_m2`;
+5. `calendar_valid`, `climate_valid`, `row_count`, `status`,
+   `rejection_reason`;
+6. `raw_<metric>` and then `weighted_<metric>` for every conserved-metric
+   suffix in the order above.
+
+`source_kind` is the closed v1 enum `background` or `sub_field`.
+`field_id` and `sub_field_id` are nullable for background rows. Paths are
+run-relative POSIX paths and never absolute host paths.
+
+`pass_event_closure.parquet` has these exact columns in order:
+
+1. `schema_version`, `algorithm`, `semantic_contract`, `adr`,
+   `parent_topaz_id`, `parent_wepp_id`, `year`, `julian`, `event`;
+2. `weighted_input_<metric>`, `reparsed_output_<metric>`,
+   `residual_<metric>`, and `budget_<metric>` for every conserved metric.
+
+`pass_run_closure.parquet` has these exact columns in order:
+
+1. `schema_version`, `algorithm`, `semantic_contract`, `adr`,
+   `parent_topaz_id`, `parent_wepp_id`, `target_area_m2`,
+   `serialized_target_area_m2`, `target_area_residual_m2`,
+   `target_area_budget_m2`;
+2. `weighted_input_<metric>`, `reparsed_output_<metric>`,
+   `residual_<metric>`, `budget_<metric>`,
+   `max_abs_event_residual_<metric>`, and
+   `max_event_budget_ratio_<metric>` for every conserved metric.
+
+`integration_summary.json` has these exact required keys:
+`schema_version`, `algorithm`, `semantic_contract`, `adr`, `status`,
+`source_signature`, `started_at`, `completed_at`, `run_root`,
+`pass_family`, `parent_wepp_bin`, `ag_fields_wepp_bin`,
+`parent_count`, `affected_parent_count`, `sub_field_source_count`,
+`full_coverage_parent_count`, `pass_count`, `required_resources`,
+`warnings`, `manifest_paths`, and `failure`. Executable objects contain the
+configured binary name plus resolved binary SHA-256 when it can be resolved;
+`failure` is null on success and a sanitized object with `type` and `message`
+on failure. `run_root` and every resource/manifest path are run-relative.
+
+These are the accepted v1 schemas. Future revisions may append columns or keys
+under a new schema version; they must not silently rename, reorder, or remove v1
+fields after generated-output acceptance.
 
 ## Parent PASS Compatibility
 
