@@ -1,8 +1,8 @@
 # PROJECT_TRACKER.md
 > Kanban board for wepppy work packages and vision items
 
-**Last Updated**: 2026-07-10
-**Active Packages**: 12
+**Last Updated**: 2026-07-13
+**Active Packages**: 13
 **Quick Links**: [Work Packages Directory](docs/work-packages/) | [God-Tier Prompting Strategy](docs/god-tier-prompting-strategy.md)
 
 ## Purpose
@@ -275,7 +275,31 @@ When resuming Kubernetes work:
 
 Currently active work packages. Limit to 2-4 packages to maintain focus.
 
-**Current WIP Count**: 12 packages
+**Current WIP Count**: 13 packages
+
+---
+
+### AgFields Concept 2 Watershed Integration
+**Started**: 2026-07-13
+**Status**: Open; implementation contract and weighted PASS kernel are next
+**Size**: High (multi-repository, multi-stage implementation)
+**Owner**: Codex
+**Priority**: High
+**Link**: [docs/work-packages/20260713_ag_fields_concept2_watershed_integration/](docs/work-packages/20260713_ag_fields_concept2_watershed_integration/)
+**Description**: Route independent AgFields sub-field water and sediment into an
+isolated parent watershed rerun using explicit area-weighted PASS aggregation,
+source/event/run closure diagnostics, and additive RQ/API/UI orchestration.
+
+**Current Focus**: Finalize ADR-0018 and the PASS field-semantics table, then build
+the weighted `wepppyo3` combiner without changing the existing Roads API.
+
+**Dependencies**: Uses the completed AgFields backend/runs-page workflow and the
+existing Roads watershed-rerun pattern. `/wc1/runs/sa/sacral-self-discipline` is
+the generated-output acceptance project.
+
+**Next Steps**: Implement the conservation-tested native kernel, isolated parent
+PASS materialization, AgFields integration collaborator, and workflow stage.
+Mariana Dobre performs the subsequent scientific evaluation. Concept 1 is deferred.
 
 ---
 
