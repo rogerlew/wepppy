@@ -136,7 +136,7 @@ field_id, year, crop_name, runoff, sed_del, sed_det, sed_dep, (hill_wat) Ep+Es+E
 
 
 
-## Watershed model - Running subfields as OFEs (Future Feature 0% complete)
+## Watershed model - Running subfields as OFEs (Future Feature 0% complete, unvetted concept)
 1. Calculate area of sub fields (there could be multiple)
    - order the sub fields by area in ascending order
    - if the area of the sub field is less than 1/8 the subcatchment's area disregard
@@ -144,7 +144,7 @@ field_id, year, crop_name, runoff, sed_del, sed_det, sed_dep, (hill_wat) Ep+Es+E
    - this become the division factor for breaking the hillslope into OFEs
    - use the inverse to determine how many OFEs (1/4 -> 4, 1/3 -> 3, 1/2 -> 2, 1/1 -> 1)
    - use the distance to channel map to detemine which OFE the sub field should be assigned to (e.g. bottom 1/2, middle 1/3, ...)
-2. Hillslope prep fro sub-fields
+2. Hillslope prep for sub-fields
    - MOFE slope file
    - MOFE soil file
    - MOFE management with the rotation schedule for the field
