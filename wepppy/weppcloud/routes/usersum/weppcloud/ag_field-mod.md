@@ -154,6 +154,7 @@ Related implementation references:
 - [Concept 2 implementation work package](../../../../../docs/work-packages/20260713_ag_fields_concept2_watershed_integration/package.md)
 - [Flowpath-to-channel connectivity inventory](../../../../../docs/work-packages/20260713_ag_fields_flowpath_channel_connectivity/package.md)
 - [Routing scheme suite work package](../../../../../docs/work-packages/20260714_ag_fields_routing_scheme_suite/package.md)
+- [Management capacity and corpus validation plan](../../../../../docs/work-packages/20260714_ag_fields_routing_scheme_suite/artifacts/2026-07-14_management_capacity_and_corpus_validation_plan.md)
 - [ADR-0018: AgFields weighted PASS accounting](../../../../../docs/adrs/ADR-0018-agfields-weighted-pass-accounting.md)
 - [ADR-0019: Field-aware OFE and hybrid routing](../../../../../docs/adrs/ADR-0019-agfields-field-aware-ofe-hybrid-routing.md)
 
@@ -188,9 +189,12 @@ limitations after engineering delivery.
 The first feasibility gate is now complete. Geometry, explicit-breakpoint input
 synthesis, and a real mixed-parent balance proof passed, but exact management
 preflight found 141 Concept 1 parents and 59 hybrid residual parents above the
-supported WEPP maximum of 20 referenced yearly scenarios. The suite is blocked
-before user-facing wiring pending a separately validated binary-limit expansion
-or an explicit ADR-0019 fidelity-contract revision. The measured evidence is in
+supported WEPP maximum of 20 referenced yearly scenarios. The routing-suite
+package now owns a synchronized forest hillslope-capacity increase and full
+management-corpus execution, including canonical AgFields input validation or
+evidence-driven forest numerical hardening when failures are found. User-facing
+wiring remains gated until that milestone and ADR-0019 pass. The measured
+evidence is in
 [the Concept 1 feasibility artifact](../../../../../docs/work-packages/20260714_ag_fields_routing_scheme_suite/artifacts/2026-07-14_concept1_feasibility.md).
 
 ### Shared objective and invariants
@@ -271,21 +275,22 @@ independent AgFields trees.
 
 | Dimension | Field-aware hillslope routing | Direct sub-field outlet injection | Connectivity-aware mixed routing |
 | --- | --- | --- | --- |
-| Engineering feasibility | Geometry/input spike passed; full-project execution blocked by 141 management overflows | High; engineering implementation complete | Residual/mixed proof passed; full-project execution blocked by 59 management overflows |
+| Engineering feasibility | Geometry/input spike passed; 141 management overflows are in the integrated capacity/corpus milestone | High; engineering implementation complete | Residual/mixed proof passed; 59 management overflows are in the integrated capacity/corpus milestone |
 | Per-subfield source fidelity | Medium at best; parent-profile bands can merge or misclassify field area | High; retains each Peridot slope, rotation, and independent result | High for connected sources; Concept 1 fit for all other sources |
 | Field/background runon | Yes, between represented OFEs | No | Yes for non-connected/residual sources; no parent-buffer routing for connected sources |
 | Downstream buffer trapping | Represented when a distinct, well-fitted background OFE lies below a field | None before outlet injection | Represented for Concept 1 branches only |
 | Water/sediment accounting | Native replacement-hillslope balance plus plan-area diagnostics | Explicit event/run weighted-source closure | Residual Concept 1 balance plus weighted connected-source event/run closure |
 | Main scientific risk | A two-dimensional mosaic may lack a defensible one-dimensional representation | Outlet injection can over-deliver when a real buffer lies below a field | Binary topology classification and residual projection combine both approximations |
-| Delivery status | Blocked before production wiring; ADR-0019 remains Proposed | Implemented; scheme-root migration deferred with the suite | Blocked before production wiring; ADR-0019 remains Proposed |
+| Delivery status | Binary/data milestone in progress; production wiring gated | Implemented; scheme-root migration deferred with the suite | Binary/data milestone in progress; production wiring gated |
 
-### Concept 1: rebuild affected hillslopes as field-aware OFE profiles (blocked)
+### Concept 1: rebuild affected hillslopes as field-aware OFE profiles (capacity milestone)
 
-**Status:** The geometry and input-synthesis spike passed, but production is
-blocked under the routing scheme suite work package by true native management
-overflows. The following model, planning, synthesis, validation, and feasibility
-contract remains normative. A planner-only or surrogate output does not satisfy
-the faithful implementation target.
+**Status:** The geometry and input-synthesis spike passed. The routing scheme
+suite now owns the forest capacity increase and complete management-corpus
+validation needed to resolve true native management overflows before production.
+The following model, planning, synthesis, validation, and feasibility contract
+remains normative. A planner-only or surrogate output does not satisfy the
+faithful implementation target.
 
 #### Model contract
 
@@ -593,7 +598,7 @@ fields high on long, depositional or vegetated hillslopes. Those cases must be
 diagnosed from distance-to-channel geometry and disclosed, not corrected with an
 uncalibrated delivery-ratio heuristic.
 
-### Hybrid: connectivity-aware mixed routing (blocked)
+### Hybrid: connectivity-aware mixed routing (capacity milestone)
 
 #### Classification contract
 
@@ -675,16 +680,17 @@ acceptance.
 
 ### Recommended delivery sequence
 
-1. Keep the active
+1. Continue the active
    [routing scheme suite ExecPlan](../../../../../docs/work-packages/20260714_ag_fields_routing_scheme_suite/prompts/active/ag_fields_routing_scheme_suite_execplan.md)
-   blocked before UI/RQ wiring; its Peridot detail, planner census,
+   through integrated Milestone 2B; its Peridot detail, planner census,
    explicit-breakpoint kernel, and mixed-parent proof are complete.
-2. Decide whether to open a separate WEPP `nmscen > 20` binary-limit augmentation
-   work package or revise ADR-0019's faithful all-parent routing contract. Do not
-   ship a surrogate, omitted parents, or a silent fallback under the requested
-   labels.
-3. Accept ADR-0019 only after that response and its regression evidence are
-   explicit.
+2. Inventory every generated management section, select the synchronized forest
+   hillslope capacity, and execute every Concept 1/hybrid input tuple. Fix proven
+   invalid source values at canonical AgFields ingest and finite-input numerical
+   producer faults through forest ablation evidence.
+3. Accept ADR-0019 only after the matching forest/WEPPpy limits, release evidence,
+   complete passing corpus, and regression results are explicit. Do not ship a
+   surrogate, omitted parent, clamped input, or silent fallback.
 4. Then complete faithful Concept 1 hillslope execution, manifests, watershed
    execution, and remaining fixtures.
 5. Build hybrid pure/mixed parent composition, reuse ADR-0018 weighted accounting,

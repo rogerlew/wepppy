@@ -1,6 +1,6 @@
 # AgFields Routing Scheme Suite
 
-**Status**: Blocked at native WEPP management feasibility gate (2026-07-14)
+**Status**: In progress - integrated management capacity/corpus milestone (2026-07-14)
 **Timezone**: UTC
 
 ## Overview
@@ -17,13 +17,16 @@ owns an independently repeatable output root under
 `wepp/ag_fields/watershed/{concept-1,concept-2,hybrid}/`; there is no `all/`
 result directory.
 
-The geometry and mixed-source accounting spike passed, but full production
-execution is blocked. Exact management preflight found 141 Concept 1 parents and
-59 hybrid residual parents that still require more than the native maximum of 20
-referenced yearly scenarios after structural deduplication. The package stops
-before UI/API/RQ wiring rather than dropping sources, merging unlike rotations,
-or silently falling back to Concept 2. See the
-[Concept 1 and hybrid feasibility evidence](artifacts/2026-07-14_concept1_feasibility.md).
+The geometry and mixed-source accounting spike passed. Exact management preflight
+then found 141 Concept 1 parents and 59 hybrid residual parents that require more
+than the current native maximum of 20 referenced yearly scenarios after structural
+deduplication. The package now owns the coordinated forest hillslope-capacity
+increase and complete management-corpus validation, including correction of
+proven invalid AgFields source values or evidence-driven forest numerical
+hardening. UI/API/RQ wiring remains gated; fields, rotations, and failures are not
+silently dropped, coerced, or substituted with Concept 2. See the
+[Concept 1 feasibility evidence](artifacts/2026-07-14_concept1_feasibility.md) and
+[management capacity/corpus plan](artifacts/2026-07-14_management_capacity_and_corpus_validation_plan.md).
 
 ## Objectives
 
@@ -50,6 +53,14 @@ or silently falling back to Concept 2. See the
 - Parent-level one-dimensional OFE planning, eligibility diagnostics, explicit
   breakpoint slope segmentation, and multi-OFE soil/management synthesis for
   Concept 1.
+- A synchronized `/workdir/wepp-forest_260430_baseline` hillslope management
+  capacity increase selected from the complete Concept 1/hybrid corpus, plus
+  matching forest release/vendoring and WEPPpy generation limits.
+- Complete corpus parsing/execution with stable classification of capacity/parse,
+  invalid-input, numerical-model-state, and environment/fixture failures.
+- Canonical AgFields management-ingest validation for objectively invalid source
+  values and forest ablation hardening for finite-input numerical producer faults,
+  with no undocumented science mutation.
 - An additive Peridot connectivity-detail output that reuses the existing direct
   channel-drainage classifier and identifies every retained sub-field
   deterministically.
@@ -100,9 +111,10 @@ or silently falling back to Concept 2. See the
   byte-identical.
 - **Acceptance evidence type**: `both`; focused fixtures and generated output from
   the designated dev project are required.
-- **Current feasibility disposition**: `blocked`; planning, explicit-breakpoint
-  synthesis, and one real mixed-parent native run pass, but the supported WEPP
-  binary cannot parse all required management graphs.
+- **Current feasibility disposition**: `implementation expanded`; planning,
+  explicit-breakpoint synthesis, and one real mixed-parent native run pass.
+  Milestone 2B must increase the supported binary capacity and run every required
+  management/input tuple before production routing resumes.
 
 ## Routing Scheme Contract
 
@@ -159,6 +171,12 @@ fails that parent with explicit manifest provenance.
 - [ ] Concept 1 produces parseable, internally consistent slope, soil,
   management, hillslope, PASS, watershed, and interchange artifacts from an
   accepted `ofe_plan.parquet`.
+- [ ] ADR-0019 records an evidence-backed synchronized hillslope capacity; the
+  forest include family, release binary, and WEPPpy guard agree exactly.
+- [ ] Every generated Concept 1 and hybrid management/input tuple parses and runs
+  without capacity, invalid-input, floating-point, non-finite, or invalid-producer
+  failures; every correction has boundary-appropriate provenance and regression
+  evidence.
 - [ ] Hybrid parents use the documented pure/mixed composition rules, and every
   parent closes its represented source area to the target raster area without
   overlap or omission.
@@ -191,9 +209,10 @@ fails that parent with explicit manifest provenance.
 The ADR remains Proposed. The spike established a 1-20 OFE engineering limit,
 exact source representation/positive overlap/area closure gates, and
 length-preserving residual geometry. Fit/error measures remain science diagnostics
-for Mariana rather than undocumented rejection thresholds. Production behavior
-also requires an accepted response to the confirmed `nmscen > 20` failures. The
-existing user-visible sub-field minimum-area setting remains the retention
+for Mariana rather than undocumented rejection thresholds. The complete corpus
+inventory must now establish and validate the synchronized forest management
+capacity; increasing binary capacity does not increase the 20-OFE planner limit.
+The existing user-visible sub-field minimum-area setting remains the retention
 threshold; this package must not introduce a second hidden small-field filter.
 
 ## Dependencies
@@ -207,6 +226,9 @@ threshold; this package must not introduce a second hidden small-field filter.
 - Existing WEPPpy MOFE slope, soil, management, map, and execution code.
 - Current parent WEPP inputs and independent AgFields runs for the designated dev
   project.
+- `/workdir/wepp-forest_260430_baseline` source/build/release workflow and its
+  numerical ablation protocol. Its unrelated detached dirty baseline is preserved
+  and explicitly dispositioned before canonical rebuild or staging.
 
 ### Blocks
 
@@ -272,15 +294,18 @@ Completed engineering substrate and evidence:
 - Concept 1 input-synthesis and reference-safe management-deduplication spike;
 - real mixed-parent native WEPP and ADR-0018 closure proof; and
 - [feasibility evidence and stop decision](artifacts/2026-07-14_concept1_feasibility.md).
+- [management capacity/corpus compatibility and validation plan](artifacts/2026-07-14_management_capacity_and_corpus_validation_plan.md).
 
 These deliverables are not a user-facing routing implementation. Scheme roots,
 state, RQ/API orchestration, UI choices, and generated all-project results remain
-unimplemented because the feasibility gate failed under the supported binary.
+unimplemented until the expanded management-capacity/corpus milestone and later
+wired acceptance pass.
 
 ## Follow-up Work
 
-The immediate follow-up is a decision between a separate WEPP binary-limit
-augmentation work package and an explicit revision to ADR-0019's all-parent
-fidelity contract. Mariana's scientific evaluation may later produce use
-constraints, scheme-comparison metrics, or a promotion/deprecation decision after
-generated engineering results exist; none are inferred here.
+The binary limit is no longer deferred to a separate package. Milestone 2B of the
+active ExecPlan owns inventory, capacity selection, forest changes, data/numerical
+failure resolution, release/vendoring, and complete corpus evidence. Mariana's
+scientific evaluation may later produce use constraints, scheme-comparison
+metrics, or a promotion/deprecation decision after generated engineering results
+exist; none are inferred here.

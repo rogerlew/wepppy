@@ -281,7 +281,7 @@ Currently active work packages. Limit to 2-4 packages to maintain focus.
 
 ### AgFields Routing Scheme Suite
 **Started**: 2026-07-14
-**Status**: Blocked at native WEPP management feasibility gate
+**Status**: In progress; integrated forest management-capacity/corpus milestone
 **Size**: High (multi-repository, multi-stage implementation)
 **Owner**: Codex
 **Priority**: High
@@ -292,18 +292,20 @@ dev-project sub-fields with direct channel drainage while routing the others
 through OFEs. The runs page will offer one scheme or all with description-first
 labels and fixed `concept-1`, `concept-2`, and `hybrid` result roots.
 
-**Current Focus**: Geometry, explicit-breakpoint synthesis, and a real
-mixed-parent closure proof pass. Resolve 141 Concept 1 and 59 hybrid residual
-parents that exceed the supported 20 referenced yearly scenarios.
+**Current Focus**: Inventory every bounded management section, increase the
+synchronized forest hillslope capacity, and execute the complete Concept 1/hybrid
+corpus without invalid-input or numerical producer failures.
 
-**Dependencies**: Builds on the completed Concept 2 implementation, ADR-0018, and
-the completed flowpath-to-channel connectivity inventory. ADR-0019 remains
-Proposed pending either a separately validated WEPP binary-limit expansion or an
-explicit all-parent fidelity-contract revision.
+**Dependencies**: Builds on the completed Concept 2 implementation, ADR-0018, the
+completed flowpath-to-channel connectivity inventory, and the owned
+`/workdir/wepp-forest_260430_baseline` build/ablation workflow. ADR-0019 remains
+Proposed pending an exact corpus-backed capacity and matching forest/WEPPpy
+release evidence.
 
-**Next Steps**: Decide between a WEPP `nmscen > 20` binary-limit work package and
-an explicit ADR-0019 contract revision. Do not wire Concept 1/hybrid RQ/API/UI or
-publish partial schemes until that decision is accepted.
+**Next Steps**: Implement the reusable management-corpus command, freeze the
+capacity from all section maxima, patch/test forest in isolation, classify and
+resolve every corpus failure, then vendor matching binaries and update the WEPPpy
+guard. UI/API/RQ wiring remains gated until this milestone passes.
 
 ---
 

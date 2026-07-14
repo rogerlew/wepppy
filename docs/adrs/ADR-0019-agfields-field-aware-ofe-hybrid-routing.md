@@ -89,10 +89,13 @@ length, excludes connected cells from assignment statistics, and sets width to
 The current WEPP input contract adds a second hard gate: the final structurally
 deduplicated management may reference no more than 20 yearly scenarios. The
 development-project census fails that gate for 141 Concept 1 and 59 hybrid
-residual parents. Consequently this ADR remains Proposed and none of these
-parameters may control a user-facing execution path until the decision owner
-accepts either a separately validated WEPP binary-limit expansion or an explicit
-revision to the all-parent fidelity contract.
+residual parents. The decision owner expanded this routing package to increase the
+synchronized forest hillslope capacity and validate the complete generated
+management corpus. Consequently this ADR remains Proposed and none of these
+parameters may control a user-facing execution path until the corpus inventory
+selects an exact capacity, matching forest/WEPPpy limits are release-tested, and
+every required management/input tuple completes without parser, invalid-input,
+non-finite, invalid-producer, or numerical-fault failures.
 
 The existing `sub_field_min_area_threshold_m2` remains the only small-field
 retention threshold. Do not add a second hidden minimum-area filter.
@@ -128,6 +131,11 @@ Proposed behavior:
   connected Concept 2 sources.
 - Concept 2 remains the omitted-value compatibility default.
 - No fallback/delivery heuristic is introduced.
+- The current routing package also owns the synchronized forest hillslope
+  management-capacity increase and full Concept 1/hybrid corpus validation.
+- Capacity/parser defects are fixed in forest; objectively invalid source values
+  are rejected or canonically normalized at authoritative AgFields ingest; and
+  finite-input numerical producer failures require forest ablation evidence.
 
 Measured Concept 1 parameter delta:
 
@@ -140,12 +148,18 @@ Measured Concept 1 parameter delta:
 - fit/error measures: recorded diagnostics, not hidden engineering rejection
   thresholds pending science evaluation.
 
-Feasibility disposition: blocked. The geometry gates pass for all 1,869 affected
-Concept 1 parents and 1,644 hybrid residual parents in the designated project,
+Feasibility disposition: expanded implementation. The geometry gates pass for all
+1,869 affected Concept 1 parents and 1,644 hybrid residual parents in the designated project,
 but management preflight passes only 1,728 Concept 1 parents (87.79% of affected
 area) and 1,585 hybrid residual parents (94.53% of residual-parent area). No
 numeric parameter may control wired behavior while the ADR status remains
 Proposed.
+
+The complete corpus must inventory every `ntype`, `ntype2`, and `mxplan`-bounded
+management section before the new capacity is accepted. The observed yearly
+maximum of 24 makes 32 a provisional candidate with headroom, not an accepted
+value. The synchronized binary capacity may exceed the unchanged 20-OFE Concept 1
+planner limit; extra binary capacity does not authorize more routed OFEs.
 
 ## Rationale
 
@@ -204,16 +218,17 @@ The direct-channel classifier is deterministic and reusable, but does not prove
 zero buffer effects or scientific suitability. All three schemes remain
 experimental until Mariana records a science disposition.
 
-The feasibility stop leaves Concept 2 as the only implemented user-facing
-compatibility path. The planner, native slope kernel, and input-synthesis spike
-are reusable substrate, but are not permission to expose partial Concept 1 or
-hybrid coverage.
+Concept 2 remains the only implemented user-facing compatibility path while the
+expanded capacity/corpus milestone executes. The planner, native slope kernel,
+input-synthesis spike, or a partially passing corpus are not permission to expose
+partial Concept 1 or hybrid coverage.
 
 ## Evidence
 
 - [AgFields routing scheme suite work package](../work-packages/20260714_ag_fields_routing_scheme_suite/package.md)
 - [Scheme artifact compatibility plan](../work-packages/20260714_ag_fields_routing_scheme_suite/artifacts/2026-07-14_scheme_artifact_compatibility_plan.md)
 - [Concept 1 and hybrid feasibility evidence](../work-packages/20260714_ag_fields_routing_scheme_suite/artifacts/2026-07-14_concept1_feasibility.md)
+- [Management capacity and corpus validation plan](../work-packages/20260714_ag_fields_routing_scheme_suite/artifacts/2026-07-14_management_capacity_and_corpus_validation_plan.md)
 - [AgFields flowpath-to-channel connectivity inventory](../work-packages/20260713_ag_fields_flowpath_channel_connectivity/package.md)
 - [Completed Concept 2 implementation](../work-packages/20260713_ag_fields_concept2_watershed_integration/package.md)
 - [ADR-0018 weighted PASS accounting](ADR-0018-agfields-weighted-pass-accounting.md)
@@ -221,8 +236,11 @@ hybrid coverage.
 
 Evidence still required for acceptance:
 
-- a decision and implementation that resolves true `nmscen > 20` managements, or
-  an owner-approved fidelity/coverage contract revision;
+- complete section-count distributions and an accepted synchronized hillslope
+  capacity;
+- matching forest release/vendored binaries and WEPPpy generation guard;
+- complete Concept 1/hybrid corpus execution with a resolved, provenance-backed
+  failure ledger;
 - remaining synthetic ordered, side-by-side, fragmented, tied-distance, buffer,
   and failure-mode fixtures;
 - water/sediment closure and protected-tree inventory from all three generated
@@ -252,6 +270,12 @@ direct-channel definition does not match generated Peridot paths.
 
 - Execute
   `docs/work-packages/20260714_ag_fields_routing_scheme_suite/prompts/active/ag_fields_routing_scheme_suite_execplan.md`.
+- Execute its integrated Milestone 2B against
+  `/workdir/wepp-forest_260430_baseline`; preserve the initial detached dirty
+  source/binary state and diagnose in an isolated build copy first.
+- Do not silently clamp management inputs or disable floating-point traps. Apply
+  canonical input validation at AgFields ingest and use the forest ablation
+  protocol for finite-input model-state failures.
 - Keep ADR-0018 unchanged for Concept 2 and weighted mixed-source arithmetic.
 - Extend the Peridot classifier additively; do not duplicate its D8 logic in
   WEPPpy.

@@ -11,11 +11,14 @@
 - **Date**: 2026-07-14 (scaffold); implementation review pending
 - **Scope reviewed**: Planned authenticated AgFields scheme-selection routes,
   NoDb state/locking, RQ orchestration, worker subprocesses, fixed scheme roots,
-  clear behavior, and browser artifact links
+  clear behavior, browser artifact links, AgFields management-corpus validation,
+  and forest binary build/vendoring
 - **Commit/branch context**: `master`; scaffold based on `9c5b585c6`
 - **Related artifacts**:
   - Compatibility plan:
     `artifacts/2026-07-14_scheme_artifact_compatibility_plan.md`
+  - Management capacity/corpus plan:
+    `artifacts/2026-07-14_management_capacity_and_corpus_validation_plan.md`
   - Active ExecPlan:
     `prompts/active/ag_fields_routing_scheme_suite_execplan.md`
 
@@ -48,6 +51,8 @@
 | THR-06 | Medium | Integrity | Failed/retried jobs overwrite a prior completed scheme or misreport partial results | Attempt staging, atomic terminal manifest, source signatures, independent job ids/status | Open |
 | THR-07 | Medium | Output exposure | Browse/result links can be influenced to reveal sibling or unrelated run files | Server-provided fixed relative paths and route-level run authorization | Open |
 | THR-08 | Medium | Input integrity | Duplicate classifier logic changes hybrid branch assignment silently | Invoke/version the canonical Peridot implementation and persist resource hashes | Open |
+| THR-09 | High | Native input integrity | Invalid/non-finite management data or silent coercion reaches WEPP and creates crashes or scientifically ambiguous results | Canonical row/value/unit validation, explicit failure, corpus provenance, no undocumented clamp/fallback | Open |
+| THR-10 | Medium | Supply chain | A binary built from the detached dirty forest baseline is misattributed or mismatched with watershed/PASS artifacts | Initial status/hashes, isolated build, explicit dirty-base disposition, matching release family, source/binary SHA-256 | Open |
 
 These are design threats, not dispositioned implementation findings. The Findings
 section is populated from actual code and validation evidence.
@@ -99,6 +104,11 @@ recommendation plus explicit package-owner acknowledgment in Sign-off.
 - [ ] `max_workers` retains finite positive range validation.
 - [ ] Peridot resource paths are server-derived from the authorized run, not
   supplied by the browser.
+- [ ] Management-corpus source/output paths are server-derived fixed run resources
+  in production; the diagnostic CLI validates explicit paths and does not execute
+  shell-composed arguments.
+- [ ] Invalid source values fail with bounded provenance and are not silently
+  clamped or emitted as raw database records in browser-visible errors.
 - [ ] Manifest/error values are escaped before browser rendering.
 - [ ] Validation failures are explicit and never trigger a fallback scheme.
 
@@ -142,9 +152,13 @@ recommendation plus explicit package-owner acknowledgment in Sign-off.
 
 ### 8. CI/CD and Supply Chain
 
-- [ ] Peridot/wepppyo3 changes use owned repositories and existing dependencies;
-  any new dependency passes the repository evaluation standard first.
-- [ ] Refreshed native binaries record source commit, version, and SHA-256.
+- [ ] Peridot/wepppyo3/forest changes use owned repositories and existing
+  dependencies; any new dependency passes the repository evaluation standard
+  first.
+- [ ] Refreshed native binaries record source commit, dirty-base disposition,
+  compiler/build flags, release family, and SHA-256.
+- [ ] Hillslope PASS generation and watershed execution use matching binary
+  families; no stale or mixed release is published.
 - [ ] Build/test logs do not expose secrets.
 
 ### 9. Data Integrity, Locking, and Concurrency
@@ -177,6 +191,8 @@ recommendation plus explicit package-owner acknowledgment in Sign-off.
   - `wctl check-rq-graph`
   - `wctl run-npm lint` and `wctl run-npm test`
   - Peridot and wepppyo3 Rust tests
+  - forest smoke, hillslope watchlist, pytest, ablation policy, watershed replay,
+    ELF interpreter, and binary provenance gates
   - `wctl doc-lint` for changed docs
   - changed-file broad-exception and stub gates
 - Manual checks pending:

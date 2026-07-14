@@ -9,12 +9,13 @@
 
 **Started**: 2026-07-14 15:37 UTC
 
-**Current phase**: Blocked at the native WEPP management feasibility gate
+**Current phase**: Milestone 2B management-capacity and full-corpus validation
 
-**Last updated**: 2026-07-14 19:08 UTC
+**Last updated**: 2026-07-14 20:14 UTC
 
-**Next milestone**: Decide whether to open a WEPP `nmscen > 20` binary-limit work
-package or revise ADR-0019's faithful all-parent routing contract
+**Next milestone**: Inventory every deduplicated management section, accept the
+synchronized hillslope capacity in ADR-0019, and run the corpus with an isolated
+forest candidate binary
 
 **Security impact**: `high`
 
@@ -27,6 +28,18 @@ package or revise ADR-0019's faithful all-parent routing contract
 
 ### Ready / Backlog
 
+- [ ] Implement a reusable explicit-resource Concept 1/hybrid management-corpus
+  CLI and versioned parent/result manifests.
+- [ ] Inventory all `ntype`/`ntype2`/`mxplan`-bounded sections and select the
+  smallest evidence-backed capacity with headroom.
+- [ ] Add forest old/new/above-limit fixtures and synchronize all tracked hill
+  capacity includes without changing watershed capacity.
+- [ ] Build the forest candidate in isolation, then execute every Concept 1 and
+  hybrid management/input tuple with stable failure classification.
+- [ ] Resolve invalid input contracts at authoritative AgFields ingest and route
+  finite-input numerical failures through forest ablation evidence.
+- [ ] Pass forest release gates, vendor matching binaries, and update WEPPpy's
+  explicit management guard in the same cutover.
 - [ ] Implement Concept 1 input synthesis, hillslope execution, watershed rerun,
   manifests, and generated fixture coverage.
 - [ ] Refactor Concept 2 behind the common scheme-root interface while preserving
@@ -44,17 +57,13 @@ package or revise ADR-0019's faithful all-parent routing contract
 
 ### In Progress
 
-None. The package is stopped at its explicit feasibility gate.
+- [ ] Milestone 2B: preserve the dirty forest baseline, freeze the management
+  corpus schema, and measure the complete capacity/input/runtime failure surface.
 
 ### Blocked
 
-- [ ] Production Concept 1 and hybrid execution: 141 of 1,869 Concept 1 parents
-  and 59 of 1,644 hybrid residual parents require 21-24 referenced yearly
-  management scenarios after exact structural deduplication; the supported native
-  WEPP maximum is 20.
-- [ ] ADR-0019 acceptance and Milestones 3-7 user-facing wiring: continuing would
-  require an explicitly validated WEPP binary-limit expansion or an owner-approved
-  revision to the no-fallback/all-parent fidelity contract.
+None. Production UI/RQ wiring remains gated by Milestone 2B, but the decision
+owner has authorized the integrated binary/data work needed to clear it.
 
 ### Done
 
@@ -83,6 +92,9 @@ None. The package is stopped at its explicit feasibility gate.
 - [x] Completed exact management feasibility preflight and recorded the native
   20-scenario blocker in the package evidence and proposed ADR-0019 (2026-07-14
   19:08 UTC).
+- [x] Expanded the current work package to own the forest capacity increase and
+  complete management-corpus validation; wrote the compatibility/regression plan
+  before further code or binary changes (2026-07-14 20:14 UTC).
 
 ## Timeline
 
@@ -94,6 +106,9 @@ None. The package is stopped at its explicit feasibility gate.
 - **2026-07-14 19:08 UTC** - Milestones 1 and 2 evidence completed. The package
   stopped before UI/API/RQ wiring because the current WEPP binary cannot parse all
   faithful Concept 1/hybrid managements.
+- **2026-07-14 20:14 UTC** - Roger Lew expanded the current package to resolve the
+  hillslope management limit and any integrated management-data/numerical failures.
+  The former blocker became executable Milestone 2B.
 
 ## Decisions Log
 
@@ -175,6 +190,21 @@ delete is part of this package.
 **Impact**: State hydration and browse behavior must distinguish historical
 Concept 2 evidence from a current `concept-2` scheme run.
 
+### 2026-07-14 20:14 UTC: Integrate forest capacity and management-corpus hardening
+
+**Context**: Faithful Concept 1/hybrid graphs require up to 24 yearly scenarios,
+and successful parsing alone does not prove that the combined management corpus is
+free of invalid input values or numerical producer faults.
+
+**Decision**: Expand this package to synchronize and increase the forest
+`wepp_hill` management capacity, validate every generated management/input tuple,
+patch canonical AgFields ingest validation for objectively invalid source data,
+and use forest ablation evidence for finite-input model-state failures.
+
+**Impact**: The package is no longer blocked on an external scope decision.
+Milestone 2B gates ADR acceptance and all UI/RQ work. No generic clamping, dropped
+source, disabled floating-point trap, or silent Concept 2 fallback is permitted.
+
 ## Risks and Issues
 
 | Risk | Severity | Likelihood | Mitigation | Status |
@@ -186,7 +216,10 @@ Concept 2 evidence from a current `concept-2` scheme run.
 | Scheme clear escapes its fixed directory | High | Low | Enum-to-slug allowlist, resolved-path/symlink checks, and cross-scheme deletion tests | Open |
 | Legacy clients or projects lose Concept 2 behavior/state | High | Low | Omitted scheme maps to Concept 2; additive state migration; immutable legacy tree | Open |
 | Users treat engineering schemes as scientifically equivalent | Medium | Medium | Description-first labels, limitations/manifests, side-by-side evidence, and Mariana-owned disposition | Open |
-| MOFE management scenario limits reject valid-looking plans | High | Confirmed | Open a binary-limit augmentation package or revise the fidelity contract; do not drop sources or fall back silently | Blocking |
+| MOFE management scenario limits reject valid-looking plans | High | Confirmed | Inventory all bounded sections, synchronize forest hill capacity, validate full corpus, and vendor the matching binary/WEPPpy guard | In progress |
+| Dirty detached forest baseline is overwritten or misattributed | High | Confirmed | Hash/status inventory, isolated diagnostic build, explicit staging, and retained-base provenance before canonical rebuild | Open |
+| Finite management inputs trigger invalid producer values or numerical traps | High | Unknown | Full-corpus execution, stable failure classification, observability-first forest ablation, watchlist/fuzzy non-regression | Open |
+| Invalid database values are silently coerced to make runs finish | High | Low | Validate against canonical bounds with row/value/unit/rule provenance; require ADR/science review for new normalization | Open |
 
 ## Verification Checklist
 
@@ -239,6 +272,34 @@ Concept 2 evidence from a current `concept-2` scheme run.
   disposition separately from engineering acceptance.
 
 ## Progress Notes
+
+### 2026-07-14 20:14 UTC: Integrated management capacity scope opened
+
+**Agent/Contributor**: Roger Lew and Codex
+
+**Work completed**:
+
+- Converted the management-limit stop into Milestone 2B within this package.
+- Added a compatibility/regression plan before binary or management-data edits.
+- Inspected the specified forest baseline, active hill/watershed include split,
+  `infile.for` bound, makefile copy behavior, and numerical-ablation requirements.
+- Recorded the detached dirty forest state and isolated-build requirement so
+  unrelated soil-layer cursor work and binaries are preserved.
+
+**Blockers encountered**: None. The existing forest dirt requires isolation and
+careful staging but does not prevent corpus inventory or candidate builds.
+
+**Next steps**:
+
+- Implement the explicit-resource management-corpus command and inventory all
+  section/nested counts.
+- Freeze the synchronized capacity in ADR-0019 from the complete distributions.
+- Add forest boundary fixtures and run the candidate binary over every Concept 1
+  and hybrid tuple, classifying and resolving failures by boundary.
+
+**Evidence**:
+`artifacts/2026-07-14_management_capacity_and_corpus_validation_plan.md` is the
+normative compatibility, patch-boundary, and acceptance contract.
 
 ### 2026-07-14 19:08 UTC: Feasibility evidence complete; production suite blocked
 
@@ -343,6 +404,18 @@ normalizations it identified, and `tools/check_agents_size.sh AGENTS.md` passed.
   without being mistaken for a current scheme result.
 
 ## Communication Log
+
+### 2026-07-14 20:14 UTC: Capacity scope expansion authorized
+
+**Participants**: Roger Lew, Codex
+
+**Question/Topic**: Whether to keep the 20-scenario limit as an external blocker or
+integrate a forest capacity increase plus management-data/numerical hardening into
+the routing suite.
+
+**Outcome**: The current package now owns that work because the failure surface is
+defined by the Concept 1/hybrid management datasets. Patch location is determined
+from classified corpus evidence, not assumed in advance.
 
 ### 2026-07-14 15:37 UTC: Scheme suite requested
 

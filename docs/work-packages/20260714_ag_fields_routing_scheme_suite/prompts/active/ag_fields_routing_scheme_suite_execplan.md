@@ -60,9 +60,16 @@ engineering results for a separate science evaluation.
 - [x] (2026-07-14 19:08 UTC) Completed Milestone 2: added and release-tested the
   explicit-breakpoint wepppyo3 slope segmentation kernel and verified WEPPpy
   imports the Python 3.12 release artifact.
-- [ ] Milestone 3: input synthesis and a native mixed-parent spike are complete,
-  but production Concept 1 execution, manifests, watershed rerun, and generated
-  all-parent acceptance are blocked by the management limit.
+- [x] (2026-07-14 20:14 UTC) Expanded this package, at the decision owner's
+  direction, to own the synchronized `wepp_hill` management-capacity increase and
+  complete Concept 1/hybrid management-corpus validation.
+- [ ] Milestone 2B: inventory every generated management section, select and
+  accept an evidence-backed capacity, patch/rebuild forest, classify every corpus
+  run failure, and vendor a matching binary family with zero invalid-producer or
+  numerical-fault failures.
+- [ ] Milestone 3: input synthesis and a native mixed-parent spike are complete;
+  resume production Concept 1 execution, manifests, watershed rerun, and generated
+  all-parent acceptance after Milestone 2B passes.
 - [ ] Milestone 4: implement hybrid sub-field classification, residual parent
   sources, pure/mixed parent composition, and closure evidence.
 - [ ] Milestone 5: migrate Concept 2 behind the scheme-root interface and add
@@ -129,6 +136,20 @@ engineering results for a separate science evaluation.
   valid file.
   Evidence: Moving the synthesized description after the `98.4` version and two
   numeric records made the real parent 102 mixed fixture run successfully.
+- Observation: The forest build already separates watershed and hillslope
+  capacity. Watershed includes use 15,000, while the active `_hill` include family
+  sets `mxplan`, `ntype`, and `ntype2` to 20 and `infile.for` validates `nmscen`
+  directly against `ntype`.
+  Evidence: `/workdir/wepp-forest_260430_baseline/src/makefile` selects
+  `includes_hill/` for `_hill` objects; `src/infile.for` calls
+  `readin(12,nmscen,1,ntype,...)`.
+- Observation: The specified forest baseline is detached at `dac3c950` and
+  contains unrelated dirty soil-layer cursor, ablation, change-log, watchlist, and
+  binary work.
+  Evidence: The initial status and hashes are recorded in
+  `artifacts/2026-07-14_management_capacity_and_corpus_validation_plan.md`.
+  This package must use isolated diagnostic builds and explicit staging so it
+  does not overwrite or claim those changes.
 
 Add new discoveries here with commands, paths, or concise test output. Do not
 erase observations that changed the design.
@@ -197,6 +218,22 @@ erase observations that changed the design.
   rotations, or silently substituting Concept 2 would violate the frozen faithful
   routing contract.
   Date/Author: 2026-07-14, Codex.
+- Decision: Expand this work package to resolve the hillslope management capacity
+  and validate the complete Concept 1/hybrid management corpus rather than opening
+  a detached follow-up package.
+  Rationale: The capacity and any invalid producer/numerical failures are exposed
+  by the integrated field-aware management datasets and must pass before the
+  routing implementations can be considered faithful or runnable.
+  Date/Author: 2026-07-14, Roger Lew and Codex.
+- Decision: Classify failures before selecting the patch boundary. Fix parser
+  capacity in forest; fix objectively invalid source values at the earliest
+  authoritative AgFields ingest boundary only when a canonical rule exists; route
+  finite-input numerical failures through the forest observability/ablation
+  protocol.
+  Rationale: Broad clamping or fallback would hide provenance and can change
+  science, while model-state guards require evidence that the producer—not the
+  input—is invalid.
+  Date/Author: 2026-07-14, Roger Lew and Codex.
 
 ## Outcomes & Retrospective
 
@@ -206,22 +243,38 @@ implementable. Parent 102 provided a real mixed-parent native WEPP proof with
 3,600 m2 residual area, 1,800 m2 connected area, 5,400 m2 combined area, and zero
 water/sediment closure residual across 6,210 events.
 
-The faithful suite cannot proceed with the supported binary because true
-referenced management scenarios remain above 20 for 141 Concept 1 and 59 hybrid
-parents. The package is intentionally blocked before user-facing behavior. Large
-planner scratch outputs remain outside git; the concise, input-hashed evidence is
-`artifacts/2026-07-14_concept1_feasibility.md`. Concept 2 remains the implemented
-compatibility path while the decision owner chooses binary-limit augmentation or
-an explicit routing-contract revision.
+The original feasibility stop is now an integrated implementation milestone, not
+an external decision blocker. The package owns a complete management-corpus
+inventory, synchronized hillslope binary capacity, data-contract validation, and
+evidence-driven numerical hardening before user-facing behavior. Large planner
+and corpus scratch outputs remain outside git; concise input-hashed evidence is in
+`artifacts/2026-07-14_concept1_feasibility.md` and the capacity/corpus compatibility
+contract is
+`artifacts/2026-07-14_management_capacity_and_corpus_validation_plan.md`.
+Concept 2 remains the implemented compatibility path until that new milestone and
+the remaining wired acceptance pass.
 
 ## Context and Orientation
 
-Work in `/home/workdir/wepppy` unless a step names `/workdir/peridot` or
-`/home/workdir/wepppyo3`. Do not create or switch branches. Inspect each repository
-status before edits and preserve unrelated user changes. In WEPPpy, follow the
-nearest `AGENTS.md`: root rules apply globally; `wepppy/nodb/AGENTS.md` applies to
-NoDb; `wepppy/weppcloud/AGENTS.md` applies to UI/routes; and `tests/AGENTS.md`
-applies to tests.
+Work in `/home/workdir/wepppy` unless a step names `/workdir/peridot`,
+`/home/workdir/wepppyo3`, or `/workdir/wepp-forest_260430_baseline`. Do not create
+or switch branches. Inspect each repository status before edits and preserve
+unrelated user changes. In WEPPpy, follow the nearest `AGENTS.md`: root rules
+apply globally; `wepppy/nodb/AGENTS.md` applies to NoDb;
+`wepppy/weppcloud/AGENTS.md` applies to UI/routes; and `tests/AGENTS.md` applies to
+tests.
+
+The forest worktree builds the legacy Fortran model engine. Its `_hill` executable
+runs Concept 1/hybrid replacement hillslopes. The active hill build includes set
+`mxplan`, `ntype`, and `ntype2` to 20; `infile.for` uses `ntype` to validate the
+management yearly-scenario count. The same constants size other management and
+OFE arrays, so they must be changed as one synchronized capacity contract after a
+complete corpus inventory. Read forest root/source `AGENTS.md`, its ablation
+protocol, and
+`artifacts/2026-07-14_management_capacity_and_corpus_validation_plan.md` before
+editing or building. The specified forest worktree begins detached and dirty;
+perform diagnostic builds in an isolated copy until its unrelated source/binary
+state can be preserved explicitly.
 
 AgFields first rasterizes field boundaries and retains field/hillslope
 intersections. Peridot writes a sub-field id raster, representative slope files,
@@ -248,9 +301,9 @@ OFEs. `wepppy/nodb/core/watershed_mixins.py` already segments representative slo
 files and maps raster cells to OFE ids by parent `SUBWTA` and `DISCHA` rank.
 `wepppy/wepp/soils/utils/multi_ofe.py` and
 `wepppy/wepp/management/utils/multi_ofe.py` synthesize multi-OFE soil and
-management inputs. `/home/workdir/wepppyo3/wepp_interchange/src/mofe.rs` provides
-the native segmenter but currently chooses breakpoints from target-length/buffer
-parameters; this package needs an additive explicit-normalized-breakpoint API.
+management inputs. `/home/workdir/wepppyo3/wepp_interchange/src/mofe.rs` now
+provides the release-tested additive explicit-normalized-breakpoint API while
+preserving its older target-length/buffer interface.
 
 The canonical hybrid classifier is
 `/workdir/peridot/src/subfield_channel_connectivity.rs`. It starts from every
@@ -356,6 +409,64 @@ verify WEPPpy imports the rebuilt function rather than a stale binary.
 Do not implement field assignment or scientific thresholds in wepppyo3. The
 native API is a deterministic geometry operation; the accepted WEPPpy plan remains
 the authority.
+
+### Milestone 2B: Expand hillslope management capacity and validate the corpus
+
+Create a reusable read-only management-corpus command under
+`wepppy/nodb/mods/ag_fields/` that consumes the corrected Concept 1 or hybrid OFE
+plan plus explicit baseline/sub-field management roots. It must build the same
+reference-safe deduplicated graph used by execution and record, for every parent,
+counts for every serialized management section, rotations, nested cutting/grazing
+cycles, OFEs, source ids, plan hash, input hashes, parse result, and stable failure
+classification. Separate graph construction from the current 20-scenario write
+guard so the diagnostic can measure the true corpus without serializing an input
+that the currently supported binary claims to accept. Keep all large generated
+files outside git and commit a concise Parquet/JSON schema description,
+distributions, maxima, representative boundary ids, and hashes.
+
+Use that inventory to propose the smallest synchronized `_hill` capacity with
+explicit headroom. The observed yearly-scenario maximum is currently 24, making
+32 a reasonable candidate, but do not freeze it until every `ntype`, `ntype2`, and
+`mxplan`-bounded management section is counted. Update ADR-0019 with the exact
+accepted value and rationale before it changes WEPPpy generation or a vendored
+binary. Increasing binary capacity does not increase the Concept 1 planner's
+20-OFE contract.
+
+In `/workdir/wepp-forest_260430_baseline`, preserve the unrelated detached dirty
+state and first build/test an isolated copy. Add regression fixtures at 20, the
+observed maximum, and one above the proposed limit. Change `mxplan`, `ntype`, and
+`ntype2` together in `src/pmxpln_hill.inc`, `src/pntype_hill.inc`, and all tracked
+hill include copies; keep watershed include values unchanged. Update the forest
+README, change log, tests, and dated-release provenance. The old binary must
+reproduce the `nmscen > 20` rejection, the candidate must parse/run the accepted
+boundary fixtures, and both must reject a count beyond their declared capacity.
+
+Generate complete slope, soil, climate, management, and run tuples for every
+unique Concept 1 and hybrid residual parent and execute them with the candidate
+`wepp_hill`. A successful row requires exit zero, the native completion marker, a
+valid PASS header/body, and no parser/runtime, floating-point, non-finite, or
+invalid-producer signature. Classify every failure as `capacity_or_parse`,
+`invalid_input_contract`, `numerical_model_state`, or `environment_or_fixture`.
+
+For `invalid_input_contract`, trace the value to its AgFields database/rotation
+row and parser field. Add a validation error with exact row, value, unit, and rule
+at the earliest authoritative ingest boundary. Normalize only if an existing
+canonical contract already defines the unique transformation; otherwise fail
+explicitly and record the required science decision. For
+`numerical_model_state`, initialize a forest ablation incident, reproduce with
+complete shared run context, enable `wepp_observe.on`, and test one guard or
+upstream mutation per lane under `docs/ablation/protocol.md`. Do not hide a model
+producer failure by clamping an input or disabling floating-point traps.
+
+After the complete corpus passes, run all forest release gates, build matching
+hillslope/watershed binaries, verify ELF interpreter and hashes, and vendor the
+same release family into WEPPpy. Update
+`ManagementMultipleOfeSynth.WEPP_HILLSLOPE_MAX_YEARLY_SCENARIOS` and its stub to
+the accepted capacity only in the same cutover. Add regression tests proving
+WEPPpy rejects one above the new limit and the vendored binary runs the accepted
+maximum. Record the final binary source identity, dirty-base disposition, build
+flags, hashes, corpus totals, failure/fix ledger, and protected-output comparisons
+before marking Milestone 2B complete.
 
 ### Milestone 3: Implement faithful Concept 1 execution
 
@@ -552,7 +663,7 @@ record Mariana's evaluation as pending or linked rather than fabricating it.
 
 ## Concrete Steps
 
-Start each work session by inspecting all three repositories and rereading local
+Start each work session by inspecting all four repositories and rereading local
 instructions:
 
     cd /home/workdir/wepppy
@@ -563,6 +674,51 @@ instructions:
     cat tests/AGENTS.md
     cd /workdir/peridot && git status --short --branch
     cd /home/workdir/wepppyo3 && git status --short --branch
+    cd /workdir/wepp-forest_260430_baseline
+    git status --short --branch
+    cat AGENTS.md
+    cat src/AGENTS.md
+    cat docs/ablation/protocol.md
+
+For the management-capacity milestone, regenerate the corrected Concept 1 and
+hybrid plans, then run the reusable corpus command with explicit resources. The
+implemented command may add output-format options, but it must retain these
+server-independent required inputs:
+
+    cd /home/workdir/wepppy
+    python3 -m wepppy.nodb.mods.ag_fields.management_corpus \
+      --ofe-plan /tmp/agfields-concept1-census-v8/ofe_plan.parquet \
+      --parent-runs /wc1/runs/sa/sacral-self-discipline/wepp/runs \
+      --subfield-runs /wc1/runs/sa/sacral-self-discipline/wepp/ag_fields/runs \
+      --output-dir /tmp/agfields-concept1-management-corpus
+    python3 -m wepppy.nodb.mods.ag_fields.management_corpus \
+      --ofe-plan /tmp/agfields-hybrid-census-v8/ofe_plan.parquet \
+      --parent-runs /wc1/runs/sa/sacral-self-discipline/wepp/runs \
+      --subfield-runs /wc1/runs/sa/sacral-self-discipline/wepp/ag_fields/runs \
+      --output-dir /tmp/agfields-hybrid-management-corpus
+
+Do not build over the initial dirty forest binaries during diagnosis. Make an
+isolated copy that preserves the exact source state, apply only the candidate hill
+include delta there, and use the forest-native build commands. Once the source
+boundary and ownership are explicit, repeat the accepted patch and release in the
+canonical worktree:
+
+    cd /workdir/wepp-forest_260430_baseline/src
+    make clean
+    make wepp
+    make wepp_hill
+    cd ..
+    tools/smoke_wepp_binary_host.sh src/wepp
+    tools/smoke_wepp_binary_host.sh src/wepp_hill
+    python tools/run_hillslope_watchlist.py --binary src/wepp_hill
+    python tools/check_ablation_artifact_policy.py
+    pytest
+
+Run the complete AgFields corpus with an explicit candidate binary and write one
+machine-readable result row per parent. Keep native stdout/stderr for failures and
+representative boundaries, and scan every log for parser/runtime, floating-point,
+non-finite, and invalid-producer signatures. A numerical failure must create or
+update a forest ablation incident before any behavioral source edit.
 
 For Peridot detail work, use its repository-native commands after reading its
 `AGENTS.md` or contributor guidance. At minimum run formatting, the focused
@@ -638,6 +794,14 @@ Milestone 2 is accepted when old and new wepppyo3 APIs pass tests, the explicit
 breakpoint output reparses with expected OFE endpoints and area, invalid inputs
 fail explicitly, and WEPPpy imports the current release hash.
 
+Milestone 2B is accepted when the complete Concept 1 and hybrid management section
+inventory supports an exact synchronized hill capacity in Accepted ADR-0019; the
+current binary reproduces the old boundary; the rebuilt candidate runs every
+required parent with valid PASS output and no failure signatures; all input
+corrections and numerical guards have their required provenance/ablation evidence;
+legacy boundary fixtures and forest release gates pass; and the matching binary
+family plus WEPPpy generation guard are vendored and exercised together.
+
 Concept 1 is accepted when synthetic physical layouts produce the expected OFE
 source order, every generated slope/soil/management triple agrees on OFE count,
 short and full hillslope runs parse, exactly one PASS is staged per parent, the
@@ -695,6 +859,14 @@ If an explicit-breakpoint or Peridot release is built but WEPPpy imports an olde
 binary, stop, compare module paths/version/hash, and fix the canonical release
 installation. Do not add a Python fallback that masks the missing owned native
 dependency.
+
+The management corpus command is read-only with respect to source runs and writes
+only to its caller-selected output directory. It must use staged/atomic manifests
+so an interrupted execution cannot be mistaken for a complete corpus. Forest
+diagnostic builds start in an isolated copy because the designated baseline is
+detached and dirty; do not clean, rebuild, stage, or overwrite its existing
+source/release binaries until the package has recorded which dirty changes are
+being retained in the candidate base.
 
 If Concept 1 or residual hybrid geometry fails the Milestone 1 gate, preserve the
 evidence, keep ADR-0019 Proposed, mark the package decision-blocked, and ask Roger
@@ -785,9 +957,9 @@ identifier, never a filesystem path.
 
 Use only owned existing dependencies: Peridot for topology, wepppyo3 for native
 slope/PASS operations, WEPPpy MOFE soil/management synthesis, RQ for serialized
-jobs, and existing frontend/control patterns. Do not introduce a new geospatial,
-raster, workflow, or UI dependency without the repository dependency evaluation
-gates.
+jobs, `wepp-forest` for the model binary, and existing frontend/control patterns.
+Do not introduce a new geospatial, raster, workflow, or UI dependency without the
+repository dependency evaluation gates.
 
 ## Plan Revision Note
 
@@ -806,3 +978,10 @@ package-level stop before production wiring because 141 Concept 1 and 59 hybrid
 residual parents exceed the supported WEPP management scenario ceiling after
 exact structural deduplication. ADR-0019 remains Proposed pending a binary-limit
 work package or an explicit fidelity-contract revision.
+
+2026-07-14 20:14 UTC: At Roger Lew's direction, expanded this package to own the
+forest hillslope capacity increase and complete management-corpus validation.
+Added a compatibility/regression plan that separates parser capacity, invalid
+input contracts, numerical producer failures, and environment/fixture failures.
+The former blocker is now Milestone 2B; UI/RQ wiring remains gated until the
+rebuilt binary family runs the full Concept 1/hybrid corpus.
