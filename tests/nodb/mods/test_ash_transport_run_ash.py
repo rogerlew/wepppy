@@ -76,6 +76,39 @@ def ash_module():
     return ash_pkg, ash_module
 
 
+@pytest.mark.parametrize(
+    ("property_name", "attribute_name", "model_class_name"),
+    [
+        ("anu_white_ash_model_pars", "_anu_white_ash_model_pars", "WhiteAshModelAnu"),
+        ("anu_black_ash_model_pars", "_anu_black_ash_model_pars", "BlackAshModelAnu"),
+        ("alex_white_ash_model_pars", "_alex_white_ash_model_pars", "WhiteAshModelAlex"),
+        ("alex_black_ash_model_pars", "_alex_black_ash_model_pars", "BlackAshModelAlex"),
+    ],
+)
+def test_missing_model_pars_initialize_without_lock_on_readonly_run(
+    ash_module,
+    tmp_path: Path,
+    property_name: str,
+    attribute_name: str,
+    model_class_name: str,
+) -> None:
+    _ash_pkg, ash_module_impl = ash_module
+    (tmp_path / "READONLY").touch()
+
+    ash = object.__new__(ash_module_impl.Ash)
+    ash.wd = str(tmp_path)
+
+    def fail_if_locked():
+        raise AssertionError("read-only lazy initialization must not acquire a write lock")
+
+    ash.locked = fail_if_locked
+
+    pars = getattr(ash, property_name)
+
+    assert isinstance(pars, getattr(ash_module_impl, model_class_name))
+    assert getattr(ash, attribute_name) is pars
+
+
 @pytest.fixture()
 def ash_runtime(monkeypatch: pytest.MonkeyPatch, tmp_path: Path, ash_module):
     ash_pkg, ash_module_impl = ash_module

@@ -416,32 +416,44 @@ class Ash(NoDbBase):
     def anu_white_ash_model_pars(self) -> WhiteAshModelAnu:
         pars = getattr(self, '_anu_white_ash_model_pars', None)
         if pars is None:
-            with self.locked():
+            if self.readonly:
                 pars = self._anu_white_ash_model_pars = WhiteAshModelAnu()
+            else:
+                with self.locked():
+                    pars = self._anu_white_ash_model_pars = WhiteAshModelAnu()
         return pars
 
     @property
     def anu_black_ash_model_pars(self) -> BlackAshModelAnu:
         pars = getattr(self, '_anu_black_ash_model_pars', None)
         if pars is None:
-            with self.locked():
+            if self.readonly:
                 pars = self._anu_black_ash_model_pars = BlackAshModelAnu()
+            else:
+                with self.locked():
+                    pars = self._anu_black_ash_model_pars = BlackAshModelAnu()
         return pars
 
     @property
     def alex_white_ash_model_pars(self) -> WhiteAshModelAlex:
         pars = getattr(self, '_alex_white_ash_model_pars', None)
         if pars is None:
-            with self.locked():
+            if self.readonly:
                 pars = self._alex_white_ash_model_pars = WhiteAshModelAlex()
+            else:
+                with self.locked():
+                    pars = self._alex_white_ash_model_pars = WhiteAshModelAlex()
         return pars
 
     @property
     def alex_black_ash_model_pars(self) -> BlackAshModelAlex:
         pars = getattr(self, '_alex_black_ash_model_pars', None)
         if pars is None:
-            with self.locked():
+            if self.readonly:
                 pars = self._alex_black_ash_model_pars = BlackAshModelAlex()
+            else:
+                with self.locked():
+                    pars = self._alex_black_ash_model_pars = BlackAshModelAlex()
         return pars
     
     @property
