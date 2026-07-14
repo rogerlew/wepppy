@@ -4,7 +4,7 @@ from __future__ import annotations
 
 import os
 from copy import deepcopy
-from typing import Iterable, List, Optional
+from typing import Dict, Iterable, List, Optional
 
 from os.path import exists as _exists
 from os.path import join as _join
@@ -19,7 +19,12 @@ class ManagementMultipleOfeSynth(object):
 
     WEPP_HILLSLOPE_MAX_YEARLY_SCENARIOS = 20
 
-    def __init__(self, stack: Optional[Iterable['Management']] = None) -> None:
+    def __init__(
+        self,
+        stack: Optional[Iterable['Management']] = None,
+        *,
+        deduplicate_scenarios: bool = False,
+    ) -> None:
         """
         Parameters
         ----------
@@ -29,6 +34,7 @@ class ManagementMultipleOfeSynth(object):
             entry is treated as the base file.
         """
         self.stack: List['Management'] = list(stack or [])
+        self.deduplicate_scenarios = bool(deduplicate_scenarios)
 
     @property
     def description(self) -> str:
@@ -110,6 +116,134 @@ class ManagementMultipleOfeSynth(object):
 
         management.years[:] = compacted_year_loops
 
+    @staticmethod
+    def _scenario_fingerprint(scenario) -> str:
+        original_name = scenario.name
+        scenario.name = "__SCENARIO__"
+        try:
+            return str(scenario)
+        finally:
+            scenario.name = original_name
+
+    @classmethod
+    def _merge_section_deduplicated(
+        cls,
+        target_loops,
+        source_loops,
+        *,
+        prefix: str,
+    ) -> Dict[str, str]:
+        """Merge one scenario section and reuse structurally identical entries."""
+        fingerprints = {
+            cls._scenario_fingerprint(loop): loop.name for loop in target_loops
+        }
+        name_map: Dict[str, str] = {}
+        for loop in source_loops:
+            old_name = loop.name
+            fingerprint = cls._scenario_fingerprint(loop)
+            canonical_name = fingerprints.get(fingerprint)
+            if canonical_name is None:
+                canonical_name = f"{prefix}{old_name}"
+                loop.name = canonical_name
+                target_loops.append(loop)
+                fingerprints[fingerprint] = canonical_name
+            name_map[old_name] = canonical_name
+        return name_map
+
+    @staticmethod
+    def _update_reference(reference, name_map: Dict[str, str]) -> None:
+        from wepppy.wepp.management import ScenarioReference
+
+        if isinstance(reference, ScenarioReference) and reference.loop_name in name_map:
+            reference.loop_name = name_map[reference.loop_name]
+
+    @classmethod
+    def _merge_management_deduplicated(
+        cls,
+        target: 'Management',
+        source: 'Management',
+        *,
+        new_ofe_num: int,
+    ) -> None:
+        """Append one OFE while reusing equivalent scenario graph nodes."""
+        prefix = f'OFE{new_ofe_num}_'
+        name_maps: Dict[str, Dict[str, str]] = {}
+
+        source.plants.setroot(target)
+        name_maps['plants'] = cls._merge_section_deduplicated(
+            target.plants, source.plants, prefix=prefix
+        )
+        target.setroot()
+        for operation in source.ops:
+            if hasattr(operation, 'data') and hasattr(operation.data, 'iresad'):
+                cls._update_reference(operation.data.iresad, name_maps['plants'])
+        source.ops.setroot(target)
+        name_maps['ops'] = cls._merge_section_deduplicated(
+            target.ops, source.ops, prefix=prefix
+        )
+        target.setroot()
+        source.contours.setroot(target)
+        name_maps['contours'] = cls._merge_section_deduplicated(
+            target.contours, source.contours, prefix=prefix
+        )
+        target.setroot()
+        source.drains.setroot(target)
+        name_maps['drains'] = cls._merge_section_deduplicated(
+            target.drains, source.drains, prefix=prefix
+        )
+        target.setroot()
+
+        for initial in source.inis:
+            if hasattr(initial, 'data') and hasattr(initial.data, 'iresd'):
+                cls._update_reference(initial.data.iresd, name_maps['plants'])
+        source.inis.setroot(target)
+        name_maps['inis'] = cls._merge_section_deduplicated(
+            target.inis, source.inis, prefix=prefix
+        )
+        target.setroot()
+
+        for surface in source.surfs:
+            if not hasattr(surface, 'data'):
+                continue
+            for operation in surface.data:
+                if hasattr(operation, 'op'):
+                    cls._update_reference(operation.op, name_maps['ops'])
+        source.surfs.setroot(target)
+        name_maps['surfs'] = cls._merge_section_deduplicated(
+            target.surfs, source.surfs, prefix=prefix
+        )
+        target.setroot()
+
+        for yearly in source.years:
+            if not hasattr(yearly, 'data'):
+                continue
+            cls._update_reference(yearly.data.itype, name_maps['plants'])
+            cls._update_reference(yearly.data.tilseq, name_maps['surfs'])
+            # Preserve the parser's historical conset/drset swap.
+            cls._update_reference(yearly.data.conset, name_maps['drains'])
+            cls._update_reference(yearly.data.drset, name_maps['contours'])
+        source.years.setroot(target)
+        name_maps['years'] = cls._merge_section_deduplicated(
+            target.years, source.years, prefix=prefix
+        )
+        target.setroot()
+
+        target.nofe = new_ofe_num
+        target.man.nofes = new_ofe_num
+        initial_reference = source.man.ofeindx[0]
+        cls._update_reference(initial_reference, name_maps['inis'])
+        target.man.ofeindx.append(initial_reference)
+
+        for rotation_index, rotation in enumerate(target.man.loops):
+            for year_index, year_ofes in enumerate(rotation.years):
+                source_rotation = source.man.loops[rotation_index % len(source.man.loops)]
+                source_year = source_rotation.years[year_index % len(source_rotation.years)]
+                ofe_data = source_year[0]
+                for yearly_reference in ofe_data.manindx:
+                    cls._update_reference(yearly_reference, name_maps['years'])
+                ofe_data._ofe = new_ofe_num
+                year_ofes.append(ofe_data)
+
     def write(self, dst_fn: str) -> None:
         """Merge the stack and write the synthesized management to ``dst_fn``."""
         # We need access to the ScenarioReference class for type checking
@@ -136,6 +270,14 @@ class ManagementMultipleOfeSynth(object):
             other = deepcopy(self.stack[i])
             new_ofe_num = i + 1
             prefix = f'OFE{new_ofe_num}_'
+
+            if self.deduplicate_scenarios:
+                self._merge_management_deduplicated(
+                    mf,
+                    other,
+                    new_ofe_num=new_ofe_num,
+                )
+                continue
 
             # Step 1: Rename all scenarios in 'other' to make them unique
             # and create maps of the old names to the new names.
@@ -229,9 +371,12 @@ class ManagementMultipleOfeSynth(object):
         with open(dst_fn, 'w') as pf:
             pf.write(str(mf))
         
-        # Add a descriptive header to the generated file
+        # Keep the WEPP version and two numeric header records first.  The native
+        # parser does not skip leading comments before the version token.
         with open(dst_fn, 'r') as pf:
-            content = pf.read()
+            lines = pf.readlines()
         
         with open(dst_fn, 'w') as pf:
-            pf.write(self.description + '\n' + content)
+            pf.writelines(lines[:3])
+            pf.write(self.description + '\n')
+            pf.writelines(lines[3:])

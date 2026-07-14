@@ -70,6 +70,26 @@ def _load_wepppyo3_mofe_segmenter():
     return segmenter
 
 
+@lru_cache(maxsize=1)
+def _load_wepppyo3_breakpoint_mofe_segmenter():
+    try:
+        module = importlib.import_module("wepppyo3.wepp_interchange")
+    except Exception as exc:
+        raise RuntimeError(
+            "Explicit-breakpoint MOFE segmentation requires `wepppyo3.wepp_interchange`; "
+            "install/update wepppyo3 to continue."
+        ) from exc
+
+    segmenter = getattr(module, "segment_single_ofe_slope_at_breakpoints", None)
+    if not callable(segmenter):
+        raise RuntimeError(
+            "Explicit-breakpoint MOFE segmentation requires "
+            "`wepppyo3.wepp_interchange.segment_single_ofe_slope_at_breakpoints`."
+        )
+
+    return segmenter
+
+
 class SlopeFile(object):
     def __init__(self, fname, z0=10000):
         with open(fname) as fp:
@@ -149,6 +169,19 @@ class SlopeFile(object):
                 max_ofes=int(max_ofes),
             )
         )
+
+    def segmented_multiple_ofe_at_breakpoints(
+        self,
+        breakpoints,
+        dst_fn=None,
+        target_width=None,
+    ):
+        """Segment this slope at explicit normalized downslope breakpoints."""
+        segmenter = _load_wepppyo3_breakpoint_mofe_segmenter()
+        kwargs = {"dst_fn": dst_fn}
+        if target_width is not None:
+            kwargs["target_width"] = float(target_width)
+        return int(segmenter(self.fname, breakpoints, **kwargs))
 
     def segmented_multiple_ofe_legacy(self,
         dst_fn=None,

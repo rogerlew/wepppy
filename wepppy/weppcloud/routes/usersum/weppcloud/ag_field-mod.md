@@ -185,6 +185,14 @@ evidence. Mariana Dobre will compare the three result sets from
 `/wc1/runs/sa/sacral-self-discipline` and qualify their scientific use and
 limitations after engineering delivery.
 
+The first feasibility gate is now complete. Geometry, explicit-breakpoint input
+synthesis, and a real mixed-parent balance proof passed, but exact management
+preflight found 141 Concept 1 parents and 59 hybrid residual parents above the
+supported WEPP maximum of 20 referenced yearly scenarios. The suite is blocked
+before user-facing wiring pending a separately validated binary-limit expansion
+or an explicit ADR-0019 fidelity-contract revision. The measured evidence is in
+[the Concept 1 feasibility artifact](../../../../../docs/work-packages/20260714_ag_fields_routing_scheme_suite/artifacts/2026-07-14_concept1_feasibility.md).
+
 ### Shared objective and invariants
 
 All three schemes must:
@@ -263,20 +271,21 @@ independent AgFields trees.
 
 | Dimension | Field-aware hillslope routing | Direct sub-field outlet injection | Connectivity-aware mixed routing |
 | --- | --- | --- | --- |
-| Engineering feasibility | Medium; fit and input synthesis remain to prove | High; engineering implementation complete | Medium; depends on defensible residual Concept 1 geometry |
+| Engineering feasibility | Geometry/input spike passed; full-project execution blocked by 141 management overflows | High; engineering implementation complete | Residual/mixed proof passed; full-project execution blocked by 59 management overflows |
 | Per-subfield source fidelity | Medium at best; parent-profile bands can merge or misclassify field area | High; retains each Peridot slope, rotation, and independent result | High for connected sources; Concept 1 fit for all other sources |
 | Field/background runon | Yes, between represented OFEs | No | Yes for non-connected/residual sources; no parent-buffer routing for connected sources |
 | Downstream buffer trapping | Represented when a distinct, well-fitted background OFE lies below a field | None before outlet injection | Represented for Concept 1 branches only |
 | Water/sediment accounting | Native replacement-hillslope balance plus plan-area diagnostics | Explicit event/run weighted-source closure | Residual Concept 1 balance plus weighted connected-source event/run closure |
 | Main scientific risk | A two-dimensional mosaic may lack a defensible one-dimensional representation | Outlet injection can over-deliver when a real buffer lies below a field | Binary topology classification and residual projection combine both approximations |
-| Delivery status | Reopened implementation track; feasibility gate first | Implemented; migrate additively to scheme root | Open implementation track; feasibility gate first |
+| Delivery status | Blocked before production wiring; ADR-0019 remains Proposed | Implemented; scheme-root migration deferred with the suite | Blocked before production wiring; ADR-0019 remains Proposed |
 
-### Concept 1: rebuild affected hillslopes as field-aware OFE profiles (reopened)
+### Concept 1: rebuild affected hillslopes as field-aware OFE profiles (blocked)
 
-**Status:** Open under the routing scheme suite work package. The following model,
-planning, synthesis, validation, and feasibility contract is normative. A
-planner-only or surrogate output does not satisfy the faithful implementation
-target.
+**Status:** The geometry and input-synthesis spike passed, but production is
+blocked under the routing scheme suite work package by true native management
+overflows. The following model, planning, synthesis, validation, and feasibility
+contract remains normative. A planner-only or surrogate output does not satisfy
+the faithful implementation target.
 
 #### Model contract
 
@@ -323,8 +332,8 @@ WEPP preparation must consume it rather than recomputing field placement.
      rank used by the current MOFE map builder.
    - Evaluate a parent-level set of contiguous OFE bands and assign each band to
      its dominant field or to background.
-   - Start the feasibility spike with the proposed one-to-four equal-area bands,
-     then compare it with a generalized search up to WEPPpy's current 19-OFE cap.
+   - Compare one-to-four equal-area bands with generalized and source-order
+     searches up to the explicit-breakpoint kernel's 20-OFE cap.
    - Score every candidate using field-area error, cell classification agreement,
      field fragmentation, ordering conflicts, and downstream-buffer error.
    - Reject an affected hillslope when no candidate meets documented acceptance
@@ -349,10 +358,10 @@ WEPP preparation must consume it rather than recomputing field placement.
    - Build one multi-year management per field from the rotation schedule, load the
      parent management for background OFEs, and compose the ordered stack with
      `ManagementMultipleOfeSynth`.
-   - Preflight the number of OFEs and referenced yearly scenarios. WEPPpy currently
-     caps slope segmentation at 19 OFEs, while hillslope management permits at most
-     20 referenced yearly scenarios; multi-field rotations can hit the management
-     limit before the slope limit.
+   - Preflight the number of OFEs and referenced yearly scenarios. Both current
+     explicit-breakpoint segmentation and hillslope management permit at most 20,
+     but multi-field rotations can hit the management limit independently of OFE
+     count.
 
 4. **Run replacement hillslopes and the isolated watershed.**
    - Copy or link baseline run inputs into
@@ -393,17 +402,18 @@ WEPP preparation must consume it rather than recomputing field placement.
 
 #### Feasibility assessment
 
-The WEPP input and execution pieces are feasible because the repository already has
-MOFE segmentation, raster assignment, soil synthesis, management synthesis, and an
-isolated watershed-rerun pattern. The principal uncertainty is scientific and
-geometric, not file generation.
+The planner represented every development-project source with 1-20 OFEs, positive
+field overlap, and exact raster-area closure. Assignment agreement and area/order/
+fragmentation diagnostics span a wide range, confirming that Concept 1 is not a
+general two-dimensional mosaic representation and that Mariana must assess the
+scientific effect.
 
-Concept 1 is feasible for hillslopes where fields and buffers form clear, ordered
-distance-to-channel bands. It is not a general representation of arbitrary field
-mosaics. Its production go/no-go decision should depend on plan-fit results from
-representative AgFields datasets and on the fraction of affected area that would be
-rejected or materially misclassified. If those results are poor, Concept 1 should
-remain a constrained validation mode rather than a user-selectable general mode.
+File generation is feasible for most parents, but not all with the supported WEPP
+binary. Even after exact structural scenario deduplication, management synthesis
+requires 21-24 referenced yearly scenarios for 141 of 1,869 affected parents,
+covering 12.21% of affected area. This confirmed native input-contract limit is
+the production blocker; no low-fit or scenario-limited parent may be silently
+dropped or rerouted.
 
 ### Concept 2: area-weighted PASS aggregation and watershed rerun (implemented)
 
@@ -583,7 +593,7 @@ fields high on long, depositional or vegetated hillslopes. Those cases must be
 diagnosed from distance-to-channel geometry and disclosed, not corrected with an
 uncalibrated delivery-ratio heuristic.
 
-### Hybrid: connectivity-aware mixed routing (open)
+### Hybrid: connectivity-aware mixed routing (blocked)
 
 #### Classification contract
 
@@ -594,9 +604,9 @@ outside cell is a channel. Positive cells in an explicit channel mask take
 precedence when supplied; otherwise a SUBWTA id whose final digit is `4` identifies
 a channel.
 
-Extend the reusable CLI additively to emit one deterministic detail row per
-retained sub-field while preserving the existing aggregate summary contract. Join
-those rows exactly once to current `fields.parquet` and persist
+The reusable Peridot CLI now emits one deterministic detail row per retained
+sub-field while preserving the existing aggregate summary contract. Production
+execution will join those rows exactly once to current `fields.parquet` and persist
 `wepp/ag_fields/watershed/hybrid/manifest/subfield_routing.parquet` with parent,
 field, sub-field, connectivity, direct-outlet-cell count, routing branch,
 classifier version/definition, channel source, and input identities. Missing,
@@ -621,8 +631,9 @@ uncovered background; it excludes connected sub-field cells from plan assignment
 and area. The first feasibility candidate preserves the parent representative
 profile length and normalized downslope breakpoint positions, then sets the rerun
 width to `A_residual / parent_length`. This preserves downstream distances while
-rerunning WEPP at the residual represented area. ADR-0019 must accept this geometry
-and its fit rules after generated evidence before the UI path is wired.
+rerunning WEPP at the residual represented area. A real mixed parent passed this
+geometry and exact area/water/sediment closure. ADR-0019 still requires acceptance
+of the management-limit response before the UI path is wired.
 
 Compose each parent explicitly:
 
@@ -664,16 +675,18 @@ acceptance.
 
 ### Recommended delivery sequence
 
-1. Execute the active
-   [routing scheme suite ExecPlan](../../../../../docs/work-packages/20260714_ag_fields_routing_scheme_suite/prompts/active/ag_fields_routing_scheme_suite_execplan.md).
-2. Extend the Peridot classifier with per-sub-field detail and complete the
-   read-only Concept 1/residual-hybrid feasibility census before wiring UI or RQ.
-3. Record and accept evidence-backed Concept 1 fit/geometry parameters in
-   ADR-0019. Stop for an explicit design decision if faithful residual geometry is
-   not feasible; do not ship a surrogate or fallback under the requested labels.
-4. Add and release-test explicit-breakpoint native slope segmentation, then build
-   faithful Concept 1 input synthesis, hillslope execution, manifests, watershed
-   execution, and fixtures.
+1. Keep the active
+   [routing scheme suite ExecPlan](../../../../../docs/work-packages/20260714_ag_fields_routing_scheme_suite/prompts/active/ag_fields_routing_scheme_suite_execplan.md)
+   blocked before UI/RQ wiring; its Peridot detail, planner census,
+   explicit-breakpoint kernel, and mixed-parent proof are complete.
+2. Decide whether to open a separate WEPP `nmscen > 20` binary-limit augmentation
+   work package or revise ADR-0019's faithful all-parent routing contract. Do not
+   ship a surrogate, omitted parents, or a silent fallback under the requested
+   labels.
+3. Accept ADR-0019 only after that response and its regression evidence are
+   explicit.
+4. Then complete faithful Concept 1 hillslope execution, manifests, watershed
+   execution, and remaining fixtures.
 5. Build hybrid pure/mixed parent composition, reuse ADR-0018 weighted accounting,
    and prove area/water/sediment closure plus stable rejection behavior.
 6. Move Concept 2 additively behind the current `concept-2` scheme root and evolve

@@ -1,6 +1,6 @@
 # AgFields Routing Scheme Suite
 
-**Status**: Open (2026-07-14)
+**Status**: Blocked at native WEPP management feasibility gate (2026-07-14)
 **Timezone**: UTC
 
 ## Overview
@@ -16,6 +16,14 @@ The runs-page UI will let a user run one routing scheme or all three. Each schem
 owns an independently repeatable output root under
 `wepp/ag_fields/watershed/{concept-1,concept-2,hybrid}/`; there is no `all/`
 result directory.
+
+The geometry and mixed-source accounting spike passed, but full production
+execution is blocked. Exact management preflight found 141 Concept 1 parents and
+59 hybrid residual parents that still require more than the native maximum of 20
+referenced yearly scenarios after structural deduplication. The package stops
+before UI/API/RQ wiring rather than dropping sources, merging unlike rotations,
+or silently falling back to Concept 2. See the
+[Concept 1 and hybrid feasibility evidence](artifacts/2026-07-14_concept1_feasibility.md).
 
 ## Objectives
 
@@ -92,6 +100,9 @@ result directory.
   byte-identical.
 - **Acceptance evidence type**: `both`; focused fixtures and generated output from
   the designated dev project are required.
+- **Current feasibility disposition**: `blocked`; planning, explicit-breakpoint
+  synthesis, and one real mixed-parent native run pass, but the supported WEPP
+  binary cannot parse all required management graphs.
 
 ## Routing Scheme Contract
 
@@ -173,13 +184,17 @@ fails that parent with explicit manifest provenance.
 - **ADR required**: `yes`
 - **ADR link**:
   [ADR-0019: AgFields Field-Aware OFE and Connectivity-Aware Hybrid Routing](../../adrs/ADR-0019-agfields-field-aware-ofe-hybrid-routing.md)
-- **Decision provenance captured**: `yes` for the scheme/classifier decision;
-  Concept 1 numeric fit parameters remain pending evidence and owner acceptance.
+- **Decision provenance captured**: `yes` for the scheme/classifier and measured
+  engineering rules; production acceptance remains pending a management-limit
+  decision and owner acceptance.
 
-The ADR must remain Proposed until candidate OFE limits, fit/error tolerances, and
-residual-geometry rules are explicit and evidence-backed. The existing
-user-visible sub-field minimum-area setting remains the retention threshold; this
-package must not introduce a second hidden small-field filter.
+The ADR remains Proposed. The spike established a 1-20 OFE engineering limit,
+exact source representation/positive overlap/area closure gates, and
+length-preserving residual geometry. Fit/error measures remain science diagnostics
+for Mariana rather than undocumented rejection thresholds. Production behavior
+also requires an accepted response to the confirmed `nmscen > 20` failures. The
+existing user-visible sub-field minimum-area setting remains the retention
+threshold; this package must not introduce a second hidden small-field filter.
 
 ## Dependencies
 
@@ -249,11 +264,23 @@ package must not introduce a second hidden small-field filter.
 
 ## Deliverables
 
-This package is newly scaffolded. Deliverables are recorded here as milestones
-complete; the scaffold itself is not implementation acceptance.
+Completed engineering substrate and evidence:
+
+- deterministic Peridot connectivity detail for all retained sub-fields;
+- read-only Concept 1/hybrid planner and full-project census;
+- release-tested explicit-breakpoint wepppyo3 segmentation and WEPPpy wrapper;
+- Concept 1 input-synthesis and reference-safe management-deduplication spike;
+- real mixed-parent native WEPP and ADR-0018 closure proof; and
+- [feasibility evidence and stop decision](artifacts/2026-07-14_concept1_feasibility.md).
+
+These deliverables are not a user-facing routing implementation. Scheme roots,
+state, RQ/API orchestration, UI choices, and generated all-project results remain
+unimplemented because the feasibility gate failed under the supported binary.
 
 ## Follow-up Work
 
-Mariana's scientific evaluation may produce use constraints, scheme-comparison
-metrics, or a promotion/deprecation decision. Those are recorded after generated
-engineering evidence exists and are not inferred during implementation.
+The immediate follow-up is a decision between a separate WEPP binary-limit
+augmentation work package and an explicit revision to ADR-0019's all-parent
+fidelity contract. Mariana's scientific evaluation may later produce use
+constraints, scheme-comparison metrics, or a promotion/deprecation decision after
+generated engineering results exist; none are inferred here.

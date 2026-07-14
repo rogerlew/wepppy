@@ -9,12 +9,12 @@
 
 **Started**: 2026-07-14 15:37 UTC
 
-**Current phase**: Discovery and feasibility gating
+**Current phase**: Blocked at the native WEPP management feasibility gate
 
-**Last updated**: 2026-07-14 16:08 UTC
+**Last updated**: 2026-07-14 19:08 UTC
 
-**Next milestone**: Prove Concept 1 plan fit and hybrid residual-area composition
-on representative parents before accepting ADR-0019
+**Next milestone**: Decide whether to open a WEPP `nmscen > 20` binary-limit work
+package or revise ADR-0019's faithful all-parent routing contract
 
 **Security impact**: `high`
 
@@ -27,15 +27,6 @@ on representative parents before accepting ADR-0019
 
 ### Ready / Backlog
 
-- [ ] Extend the Peridot connectivity CLI additively with deterministic
-  per-sub-field detail output and version/provenance coverage.
-- [ ] Build `ofe_plan.parquet` for the dev project and compare candidate Concept 1
-  fits, including rejection rates and area/buffer/order error.
-- [ ] Prove a residual-area Concept 1 source for mixed hybrid parents without
-  uniform whole-parent scaling or area overlap.
-- [ ] Complete and accept ADR-0019 with explicit numeric parameters and decision
-  provenance.
-- [ ] Add explicit-breakpoint slope segmentation and focused wepppyo3 tests.
 - [ ] Implement Concept 1 input synthesis, hillslope execution, watershed rerun,
   manifests, and generated fixture coverage.
 - [ ] Refactor Concept 2 behind the common scheme-root interface while preserving
@@ -53,13 +44,17 @@ on representative parents before accepting ADR-0019
 
 ### In Progress
 
-- [ ] Milestone 1 feasibility spike: freeze input/output schemas, generate the
-  first Concept 1 planning census, and validate mixed-parent residual geometry.
+None. The package is stopped at its explicit feasibility gate.
 
 ### Blocked
 
-None. UI production wiring is gated by feasibility evidence and ADR-0019
-acceptance, but the feasibility work can begin immediately.
+- [ ] Production Concept 1 and hybrid execution: 141 of 1,869 Concept 1 parents
+  and 59 of 1,644 hybrid residual parents require 21-24 referenced yearly
+  management scenarios after exact structural deduplication; the supported native
+  WEPP maximum is 20.
+- [ ] ADR-0019 acceptance and Milestones 3-7 user-facing wiring: continuing would
+  require an explicitly validated WEPP binary-limit expansion or an owner-approved
+  revision to the no-fallback/all-parent fidelity contract.
 
 ### Done
 
@@ -75,11 +70,30 @@ acceptance, but the feasibility work can begin immediately.
 - [x] Passed Markdown lint/link checks, heading extraction, spelling preview,
   whitespace validation, and the root AGENTS size gate for the scaffold
   (2026-07-14 16:08 UTC).
+- [x] Extended Peridot with deterministic per-sub-field connectivity detail and
+  preserved its aggregate output contract (recorded 2026-07-14 19:08 UTC).
+- [x] Added and release-tested explicit-breakpoint slope segmentation in
+  wepppyo3, including the WEPPpy wrapper (recorded 2026-07-14 19:08 UTC).
+- [x] Completed corrected Concept 1 and hybrid planner censuses with every source
+  represented, positive field overlap, and exact raster-area closure (2026-07-14
+  19:08 UTC).
+- [x] Proved real mixed parent 102 with a runnable 3,600 m2 residual source,
+  1,800 m2 connected source, 5,400 m2 combined PASS, and zero water/sediment
+  closure residual across 6,210 events (recorded 2026-07-14 19:08 UTC).
+- [x] Completed exact management feasibility preflight and recorded the native
+  20-scenario blocker in the package evidence and proposed ADR-0019 (2026-07-14
+  19:08 UTC).
 
 ## Timeline
 
 - **2026-07-14 15:37 UTC** - Package opened after the connectivity inventory found
   3,269 of 6,626 retained sub-fields (49.3%) directly connected to a channel.
+- **2026-07-14 17:01 UTC** - End-to-end execution began from the active ExecPlan;
+  unrelated dirty files in WEPPpy and generated Peridot release binaries were
+  explicitly excluded from package scope.
+- **2026-07-14 19:08 UTC** - Milestones 1 and 2 evidence completed. The package
+  stopped before UI/API/RQ wiring because the current WEPP binary cannot parse all
+  faithful Concept 1/hybrid managements.
 
 ## Decisions Log
 
@@ -165,23 +179,27 @@ Concept 2 evidence from a current `concept-2` scheme run.
 
 | Risk | Severity | Likelihood | Mitigation | Status |
 | --- | --- | --- | --- | --- |
-| Arbitrary field mosaics do not fit a defensible one-dimensional OFE plan | High | Medium | Measure fit/rejection census first; reject ineligible parents with reason codes; accept thresholds through ADR-0019 | Open |
-| Hybrid residual geometry double-counts or omits source area | High | Medium | Parent-level ownership plan, exact area identities, source manifest, and generated closure tests | Open |
-| Connectivity classifier is reimplemented inconsistently | High | Low | Extend and invoke the owned Peridot classifier; do not duplicate its D8/channel logic in Python | Open |
+| Arbitrary field mosaics do not fit a defensible one-dimensional OFE plan | High | Medium | Preserve agreement/error distributions for Mariana; the engineering planner represents every source but does not invent a science cutoff | Measured |
+| Hybrid residual geometry double-counts or omits source area | High | Medium | Parent-level ownership plan, exact area identities, source manifest, and generated closure tests | Fixture passed |
+| Connectivity classifier is reimplemented inconsistently | High | Low | Extend and invoke the owned Peridot classifier; do not duplicate its D8/channel logic in Python | Mitigated |
 | Run All overwhelms worker memory | High | Medium | Independent jobs chained serially with `allow_failure=True`; retain measured RSS evidence | Open |
 | Scheme clear escapes its fixed directory | High | Low | Enum-to-slug allowlist, resolved-path/symlink checks, and cross-scheme deletion tests | Open |
 | Legacy clients or projects lose Concept 2 behavior/state | High | Low | Omitted scheme maps to Concept 2; additive state migration; immutable legacy tree | Open |
 | Users treat engineering schemes as scientifically equivalent | Medium | Medium | Description-first labels, limitations/manifests, side-by-side evidence, and Mariana-owned disposition | Open |
-| MOFE management scenario limits reject valid-looking plans | Medium | Medium | Preflight the actual slope and management limits; expose reason codes and counts | Open |
+| MOFE management scenario limits reject valid-looking plans | High | Confirmed | Open a binary-limit augmentation package or revise the fidelity contract; do not drop sources or fall back silently | Blocking |
 
 ## Verification Checklist
 
 ### Code Quality
 
-- [ ] Focused Python tests pass through `wctl run-pytest`.
-- [ ] Peridot and wepppyo3 Rust tests and formatting checks pass.
+- [x] Focused Python tests pass through `wctl run-pytest`.
+- [x] Peridot and focused wepppyo3 Rust tests pass; Peridot retains two
+  unrelated unused-import warnings.
+- [ ] Peridot formatting passes. The wepppyo3 package formatting gate reports
+  preexisting drift in `catalog.rs` and `parquet.rs`; neither changed
+  `mofe.rs` nor `lib.rs` appears in its diff.
 - [ ] Frontend Jest tests and lint pass.
-- [ ] Stubs and changed-file broad-exception checks pass.
+- [x] Updated stub and changed-file broad-exception checks pass.
 - [ ] Full `wctl run-pytest tests --maxfail=1` gate passes.
 
 ### Security
@@ -198,8 +216,9 @@ Concept 2 evidence from a current `concept-2` scheme run.
 - [x] Artifact compatibility plan written before schema changes.
 - [x] ADR-0019 drafted with current decision provenance.
 - [ ] ADR-0019 accepted with exact fit parameters before wired behavior.
-- [ ] AgFields README, UI contract, API docs, output docs, package, tracker, and
-  ExecPlan reflect as-built behavior.
+- [x] The authoritative design, package, tracker, root board, proposed ADR, and
+  ExecPlan reflect the measured feasibility stop; deferred UI/API docs remain
+  unchanged because those paths were not wired.
 
 ### Testing
 
@@ -220,6 +239,71 @@ Concept 2 evidence from a current `concept-2` scheme run.
   disposition separately from engineering acceptance.
 
 ## Progress Notes
+
+### 2026-07-14 19:08 UTC: Feasibility evidence complete; production suite blocked
+
+**Agent/Contributor**: Codex
+
+**Work completed**:
+
+- Peridot now emits one deterministic topology-classification row for each of the
+  6,626 retained sub-fields; its prior summary contract is unchanged.
+- The corrected dev-project planner census represented every field with 1-20
+  OFEs and exact raster-area closure. Fit/error distributions are recorded as
+  science diagnostics rather than hidden rejection thresholds.
+- The native explicit-breakpoint slope kernel, WEPPpy wrapper, input synthesis
+  spike, and opt-in management graph deduplication have focused coverage.
+- A real mixed parent produced runnable native WEPP output and exact area,
+  event-water, and event-sediment closure.
+- Exact full-project management preflight found 141 Concept 1 and 59 hybrid
+  residual parents above native `nmscen = 20`.
+
+**Blockers encountered**: The supported WEPP hillslope binary cannot parse the
+required 21-24 referenced yearly scenarios. The prior MOFE NSCEN work explicitly
+deferred widening the relevant fixed-array/common-block contracts.
+
+**Next steps**: Obtain a decision to execute a separate binary-limit augmentation
+package or revise ADR-0019's routing coverage/fidelity contract. Do not wire the
+scheme choices while the ADR remains Proposed.
+
+**Evidence**:
+`artifacts/2026-07-14_concept1_feasibility.md` contains input hashes, distributions,
+coverage, runtime/RSS, mixed-parent proof, release provenance, and the stop
+rationale.
+
+**Test results**: 33 focused WEPPpy tests, 46 Peridot tests, 43 focused
+wepppyo3 Rust tests, and 9 wepppyo3 release Python tests passed. Stubtest,
+changed-file broad-exception enforcement, code-quality observability,
+`git diff --check`, Peridot formatting, and Markdown lint/heading extraction also
+passed. wepppyo3 package formatting reports unrelated preexisting drift in
+`catalog.rs` and `parquet.rs`; the touched source files are not in that diff. A
+broad wepppyo3 workspace `cargo test -q` was additionally attempted and hit the
+known host PyO3/libpython linker environment; the crate-local command required by
+the repository guide passed all 43 tests.
+
+### 2026-07-14 17:01 UTC: End-to-end execution started
+
+**Agent/Contributor**: Codex
+
+**Work completed**:
+
+- Re-read the active ExecPlan, compatibility plan, security gate, ADR, and nearest
+  repository instructions.
+- Inspected WEPPpy, Peridot, and wepppyo3 worktrees before implementation.
+- Confirmed that the existing Peridot connectivity CLI is committed and its only
+  dirty files are unrelated generated release binaries.
+
+**Blockers encountered**: None.
+
+**Next steps**:
+
+- Extend the canonical Peridot analysis with deterministic detail rows.
+- Freeze the planner schemas and implement the Concept 1 feasibility census.
+- Prove the mixed-parent residual source and update ADR-0019 with evidence-backed
+  parameters before user-facing wiring.
+
+**Test results**: Not yet run for implementation; this note records the clean
+execution boundary.
 
 ### 2026-07-14 15:37 UTC: Package scaffolding and contract freeze
 

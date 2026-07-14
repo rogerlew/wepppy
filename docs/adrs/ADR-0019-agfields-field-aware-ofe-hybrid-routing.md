@@ -53,10 +53,14 @@ efficiency estimate.
 
 Plan Concept 1 at the parent level. All OFEs in one parent share one ordered set of
 breakpoints. Each OFE is assigned either background or exactly one retained
-sub-field source. A plan is eligible only when its area, ordering, classification,
-downstream-background, OFE-count, and management-scenario diagnostics meet the
-accepted values recorded in this ADR. Ineligible parents fail explicitly; the
-runtime must not silently reinterpret them or substitute Concept 2.
+sub-field source. The measured engineering planner gates are 1-20 OFEs, every
+actual source represented, positive overlap between each field and its assigned
+OFE, contiguous normalized breakpoints, and exact raster-cell area closure.
+Assignment agreement, field/model area error, fragmentation, source-order
+conflicts, and downstream-background error are persisted science diagnostics;
+this ADR does not assign an undocumented acceptance threshold before Mariana's
+evaluation. Ineligible parents fail explicitly; the runtime must not silently
+reinterpret them or substitute Concept 2.
 
 For a mixed hybrid parent, remove the connected sub-field cells from the Concept 1
 geometry. Let `A_parent` be parent raster area, `A_connected_i` each connected
@@ -75,16 +79,20 @@ because it double-counts area. Uniformly scaling an unchanged full-parent Concep
 1 PASS to `A_residual` is also prohibited because it silently distorts the
 remaining field/background geometry and nonlinear response.
 
-The exact numeric Concept 1 fit parameters are intentionally unresolved at
-scaffolding time. Before this ADR can become Accepted and before the scheme can be
-wired into the user-facing execution path, update the Change Summary with:
+The candidate search compares one-to-four equal bands, generalized contiguous
+source runs, and a source-order partition, selecting first for complete source
+representation/overlap and then for agreement and area fit. For a mixed hybrid,
+the residual source keeps the full normalized parent profile positions and parent
+length, excludes connected cells from assignment statistics, and sets width to
+`A_residual / parent_length`.
 
-- candidate breakpoint/OFE-count search and hard OFE/scenario limits;
-- minimum assignment agreement and maximum field/model area error;
-- maximum acceptable ordering, fragmentation, and downstream-background error;
-- raster-discretization and exact closure tolerances;
-- residual-geometry eligibility rules; and
-- the evidence-backed behavior when any parent is ineligible.
+The current WEPP input contract adds a second hard gate: the final structurally
+deduplicated management may reference no more than 20 yearly scenarios. The
+development-project census fails that gate for 141 Concept 1 and 59 hybrid
+residual parents. Consequently this ADR remains Proposed and none of these
+parameters may control a user-facing execution path until the decision owner
+accepts either a separately validated WEPP binary-limit expansion or an explicit
+revision to the all-parent fidelity contract.
 
 The existing `sub_field_min_area_threshold_m2` remains the only small-field
 retention threshold. Do not add a second hidden minimum-area filter.
@@ -121,9 +129,23 @@ Proposed behavior:
 - Concept 2 remains the omitted-value compatibility default.
 - No fallback/delivery heuristic is introduced.
 
-Numeric Concept 1 parameter delta: pending the Milestone 1 fit study. No numeric
-parameter may control wired behavior while this field remains pending and the ADR
-status remains Proposed.
+Measured Concept 1 parameter delta:
+
+- maximum OFEs: 20;
+- maximum native referenced yearly scenarios: 20;
+- source representation: every source, with positive field/OFE overlap;
+- geometric closure: exact in raster-cell area arithmetic;
+- residual length: unchanged parent length, with width set from residual area;
+  and
+- fit/error measures: recorded diagnostics, not hidden engineering rejection
+  thresholds pending science evaluation.
+
+Feasibility disposition: blocked. The geometry gates pass for all 1,869 affected
+Concept 1 parents and 1,644 hybrid residual parents in the designated project,
+but management preflight passes only 1,728 Concept 1 parents (87.79% of affected
+area) and 1,585 hybrid residual parents (94.53% of residual-parent area). No
+numeric parameter may control wired behavior while the ADR status remains
+Proposed.
 
 ## Rationale
 
@@ -182,10 +204,16 @@ The direct-channel classifier is deterministic and reusable, but does not prove
 zero buffer effects or scientific suitability. All three schemes remain
 experimental until Mariana records a science disposition.
 
+The feasibility stop leaves Concept 2 as the only implemented user-facing
+compatibility path. The planner, native slope kernel, and input-synthesis spike
+are reusable substrate, but are not permission to expose partial Concept 1 or
+hybrid coverage.
+
 ## Evidence
 
 - [AgFields routing scheme suite work package](../work-packages/20260714_ag_fields_routing_scheme_suite/package.md)
 - [Scheme artifact compatibility plan](../work-packages/20260714_ag_fields_routing_scheme_suite/artifacts/2026-07-14_scheme_artifact_compatibility_plan.md)
+- [Concept 1 and hybrid feasibility evidence](../work-packages/20260714_ag_fields_routing_scheme_suite/artifacts/2026-07-14_concept1_feasibility.md)
 - [AgFields flowpath-to-channel connectivity inventory](../work-packages/20260713_ag_fields_flowpath_channel_connectivity/package.md)
 - [Completed Concept 2 implementation](../work-packages/20260713_ag_fields_concept2_watershed_integration/package.md)
 - [ADR-0018 weighted PASS accounting](ADR-0018-agfields-weighted-pass-accounting.md)
@@ -193,11 +221,10 @@ experimental until Mariana records a science disposition.
 
 Evidence still required for acceptance:
 
-- Concept 1 candidate-plan census and distributions for eligible/rejected parents
-  and represented area;
-- synthetic ordered, side-by-side, fragmented, tied-distance, buffer, and mixed
-  hybrid fixtures;
-- residual-geometry and source-area closure proof;
+- a decision and implementation that resolves true `nmscen > 20` managements, or
+  an owner-approved fidelity/coverage contract revision;
+- remaining synthetic ordered, side-by-side, fragmented, tied-distance, buffer,
+  and failure-mode fixtures;
 - water/sediment closure and protected-tree inventory from all three generated
   scheme results; and
 - Mariana's later science disposition (not an engineering merge gate unless she

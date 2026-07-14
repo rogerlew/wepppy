@@ -420,6 +420,7 @@ def test_management_multiple_ofe_synth(tmp_path: Path) -> None:
     output_path = tmp_path / "synthesized.man"
     synth.write(str(output_path))
     assert output_path.exists()
+    assert output_path.read_text().splitlines()[0] == "98.4"
 
     result = read_management(str(output_path))
 
@@ -554,3 +555,31 @@ def test_mofe_synth_raises_when_referenced_yearly_scenarios_exceed_hillslope_lim
     assert "21 referenced yearly scenarios" in message
     assert "WEPP hillslope limit of 20" in message
     assert "nmscen must be between 1 and 20" in message
+
+
+@pytest.mark.unit
+def test_mofe_synth_can_deduplicate_equivalent_scenario_graphs(tmp_path: Path) -> None:
+    man_paths = [
+        _write_management(tmp_path, f"man_{i}.man", HIGH_SEVERITY_FIRE_MAN)
+        for i in range(3)
+    ]
+    stack = [read_management(str(path)) for path in man_paths]
+    synth = ManagementMultipleOfeSynth(stack=stack, deduplicate_scenarios=True)
+
+    output_path = tmp_path / "deduplicated.man"
+    synth.write(str(output_path))
+
+    result = read_management(str(output_path))
+    assert result.nofe == result.man.nofes == 3
+    assert len(result.plants) == 1
+    assert len(result.inis) == 1
+    assert len(result.years) == 1
+    assert [reference.loop_name for reference in result.man.ofeindx] == [
+        "Tah_4436",
+        "Tah_4436",
+        "Tah_4436",
+    ]
+    assert all(
+        ofe.manindx[0].loop_name == "Year 1"
+        for ofe in result.man.loops[0].years[0]
+    )

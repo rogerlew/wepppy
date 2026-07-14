@@ -261,6 +261,45 @@ def test_segmented_multiple_ofe_promotes_zero_rounding_case_to_one_ofe(tmp_path:
     assert int(lines[1]) == 1
 
 
+def test_segmented_multiple_ofe_at_breakpoints_preserves_requested_geometry(tmp_path: Path) -> None:
+    src = tmp_path / "hill_18.slp"
+    dst = tmp_path / "hill_18.mofe.slp"
+    _write_single_ofe_slope(src, width=80.0, length=100.0)
+
+    slope = SlopeFile(str(src))
+    n_mofes = slope.segmented_multiple_ofe_at_breakpoints(
+        [0.0, 0.2, 0.55, 1.0],
+        dst_fn=str(dst),
+        target_width=37.5,
+    )
+
+    assert n_mofes == 3
+    lines = [line.strip() for line in dst.read_text(encoding="utf-8").splitlines() if line.strip()]
+    assert int(lines[1]) == 3
+    assert float(lines[2].split()[1]) == 37.5
+    assert np.allclose(mofe_distance_fractions(str(dst)), [0.0, 0.2, 0.55, 1.0])
+
+
+@pytest.mark.parametrize(
+    "breakpoints",
+    [
+        [0.1, 1.0],
+        [0.0, 0.5, 0.5, 1.0],
+        [0.0, float("nan"), 1.0],
+    ],
+)
+def test_segmented_multiple_ofe_at_breakpoints_rejects_invalid_boundaries(
+    tmp_path: Path,
+    breakpoints: list[float],
+) -> None:
+    src = tmp_path / "hill_19.slp"
+    _write_single_ofe_slope(src)
+
+    slope = SlopeFile(str(src))
+    with pytest.raises(ValueError):
+        slope.segmented_multiple_ofe_at_breakpoints(breakpoints)
+
+
 @pytest.mark.parametrize(
     ("apply_buffer", "target_length", "buffer_length", "max_ofes"),
     [

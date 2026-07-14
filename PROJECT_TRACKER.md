@@ -281,7 +281,7 @@ Currently active work packages. Limit to 2-4 packages to maintain focus.
 
 ### AgFields Routing Scheme Suite
 **Started**: 2026-07-14
-**Status**: Scaffolded; Concept 1 and mixed-parent residual feasibility gate in progress
+**Status**: Blocked at native WEPP management feasibility gate
 **Size**: High (multi-repository, multi-stage implementation)
 **Owner**: Codex
 **Priority**: High
@@ -292,18 +292,18 @@ dev-project sub-fields with direct channel drainage while routing the others
 through OFEs. The runs page will offer one scheme or all with description-first
 labels and fixed `concept-1`, `concept-2`, and `hybrid` result roots.
 
-**Current Focus**: Extend Peridot with per-sub-field routing detail, measure
-Concept 1 plan eligibility, and prove a residual-area Concept 1 source for mixed
-hybrid parents without double-counting or whole-parent PASS scaling.
+**Current Focus**: Geometry, explicit-breakpoint synthesis, and a real
+mixed-parent closure proof pass. Resolve 141 Concept 1 and 59 hybrid residual
+parents that exceed the supported 20 referenced yearly scenarios.
 
 **Dependencies**: Builds on the completed Concept 2 implementation, ADR-0018, and
-the completed flowpath-to-channel connectivity inventory. ADR-0019 must be
-accepted with evidence-backed fit/geometry parameters before user-facing wiring.
+the completed flowpath-to-channel connectivity inventory. ADR-0019 remains
+Proposed pending either a separately validated WEPP binary-limit expansion or an
+explicit all-parent fidelity-contract revision.
 
-**Next Steps**: Complete the feasibility census and mixed-parent WEPP fixture,
-accept ADR-0019 or stop for an explicit design revision, then implement native
-breakpoints, Concept 1/hybrid backends, scheme-aware RQ/API/UI, and generated
-all-scheme acceptance on `sacral-self-discipline`.
+**Next Steps**: Decide between a WEPP `nmscen > 20` binary-limit work package and
+an explicit ADR-0019 contract revision. Do not wire Concept 1/hybrid RQ/API/UI or
+publish partial schemes until that decision is accepted.
 
 ---
 

@@ -48,16 +48,21 @@ engineering results for a separate science evaluation.
 - [x] (2026-07-14 16:08 UTC) Passed scaffold documentation lint/link validation,
   heading extraction, spelling preview, whitespace checks, and the root AGENTS
   size gate.
-- [ ] Milestone 1: extend Peridot detail output, implement the read-only Concept 1
-  planning spike, measure the dev-project fit census, and prove residual hybrid
-  geometry.
-- [ ] Update and accept ADR-0019 with exact evidence-backed parameters and decision
-  provenance, or record a package-level stop if the faithful geometry is not
-  feasible.
-- [ ] Milestone 2: add and release-test the explicit-breakpoint wepppyo3 slope
-  segmentation kernel.
-- [ ] Milestone 3: implement Concept 1 planning, input synthesis, hillslope runs,
-  manifests, watershed rerun, and generated fixture acceptance.
+- [x] (2026-07-14 17:01 UTC) Began end-to-end execution, reconciled all three
+  repository worktrees, and isolated unrelated dirty Ash Transport, NASA report,
+  and Peridot release-binary changes from this package.
+- [x] (2026-07-14 19:08 UTC) Completed Milestone 1 engineering evidence: Peridot
+  detail, the corrected full-project Concept 1/hybrid census, exact management
+  preflight, residual geometry, and a real mixed-parent native WEPP/closure proof.
+- [x] (2026-07-14 19:08 UTC) Recorded the package-level feasibility stop and exact
+  evidence in ADR-0019. The ADR remains Proposed because 141 Concept 1 and 59
+  hybrid residual parents exceed the native 20-scenario management limit.
+- [x] (2026-07-14 19:08 UTC) Completed Milestone 2: added and release-tested the
+  explicit-breakpoint wepppyo3 slope segmentation kernel and verified WEPPpy
+  imports the Python 3.12 release artifact.
+- [ ] Milestone 3: input synthesis and a native mixed-parent spike are complete,
+  but production Concept 1 execution, manifests, watershed rerun, and generated
+  all-parent acceptance are blocked by the management limit.
 - [ ] Milestone 4: implement hybrid sub-field classification, residual parent
   sources, pure/mixed parent composition, and closure evidence.
 - [ ] Milestone 5: migrate Concept 2 behind the scheme-root interface and add
@@ -102,6 +107,28 @@ engineering results for a separate science evaluation.
   Concept 1 parent without representing those areas twice.
   Evidence: The source-area identity requires a residual Concept 1 source whose
   area is `A_parent - sum(A_connected)`.
+- Observation: The retained sub-field raster uses the finite NoData sentinel
+  `-2147483648`, not only non-finite NoData values.
+  Evidence: Normalizing all non-positive values to background removed a phantom
+  source from exploratory census runs; the corrected final census has no missing
+  or zero-overlap field sources.
+- Observation: Geometry is not the implementation blocker. All 1,869 affected
+  Concept 1 parents and all 1,644 hybrid residual parents can preserve every
+  source with 1-20 OFEs and exact raster-area closure.
+  Evidence:
+  `artifacts/2026-07-14_concept1_feasibility.md` records the selected-plan
+  distributions and zero missing-source/closure residuals.
+- Observation: Exact management synthesis still exceeds the native WEPP
+  `nmscen <= 20` limit for 141 Concept 1 parents and 59 hybrid residual parents
+  after reference-safe structural scenario deduplication.
+  Evidence: The failed parents cover 21,607,200 m2 (12.21%) and 9,273,600 m2
+  (5.47%), respectively. The prior MOFE NSCEN work explicitly deferred binary
+  limit augmentation to a separate work package.
+- Observation: Generated management comments must follow the first three native
+  header records; a leading comment causes WEPP `verchk` to reject an otherwise
+  valid file.
+  Evidence: Moving the synthesized description after the `98.4` version and two
+  numeric records made the real parent 102 mixed fixture run successfully.
 
 Add new discoveries here with commands, paths, or concise test output. Do not
 erase observations that changed the design.
@@ -150,15 +177,42 @@ erase observations that changed the design.
   Rationale: Automatic migration would create destructive ambiguity and is not
   needed for additive evolution.
   Date/Author: 2026-07-14, Roger Lew and Codex.
+- Decision: Treat 1-20 OFEs, exact source representation, positive field overlap,
+  contiguous breakpoints, and raster-area closure as engineering planner gates.
+  Retain agreement, area error, fragmentation, source-order, and downstream-buffer
+  metrics as visible diagnostics rather than inventing a science threshold before
+  Mariana's evaluation.
+  Rationale: The planner can preserve source/accounting identity across the dev
+  project, while the wide fit distributions quantify the one-dimensional
+  abstraction without silently rejecting scientifically unevaluated layouts.
+  Date/Author: 2026-07-14, Codex (Proposed under ADR-0019).
+- Decision: Use reference-safe management graph deduplication only as an explicit
+  Concept 1 synthesis option; preserve the legacy synthesis default.
+  Rationale: Reusing structurally equivalent scenarios reduces native counts
+  without merging unlike rotations or changing established callers.
+  Date/Author: 2026-07-14, Codex.
+- Decision: Stop before scheme-aware UI/API/RQ production wiring.
+  Rationale: 7.54% of Concept 1 parents and 3.59% of hybrid residual parents still
+  exceed the native management ceiling. Dropping sources, merging unlike
+  rotations, or silently substituting Concept 2 would violate the frozen faithful
+  routing contract.
+  Date/Author: 2026-07-14, Codex.
 
 ## Outcomes & Retrospective
 
-The package is scaffolded and its main ambiguity is now an explicit feasibility
-gate: whether a useful fraction of parents can be represented by a defensible
-Concept 1 plan and whether connected-cell removal yields a valid residual hybrid
-source. No implementation outcome is claimed yet. Update this section after every
-major milestone with what works, what remains, generated evidence, and any
-contract changes.
+Milestones 1 and 2 established that the geometry, explicit-breakpoint slope
+kernel, residual-area input construction, and ADR-0018 mixed-source balance are
+implementable. Parent 102 provided a real mixed-parent native WEPP proof with
+3,600 m2 residual area, 1,800 m2 connected area, 5,400 m2 combined area, and zero
+water/sediment closure residual across 6,210 events.
+
+The faithful suite cannot proceed with the supported binary because true
+referenced management scenarios remain above 20 for 141 Concept 1 and 59 hybrid
+parents. The package is intentionally blocked before user-facing behavior. Large
+planner scratch outputs remain outside git; the concise, input-hashed evidence is
+`artifacts/2026-07-14_concept1_feasibility.md`. Concept 2 remains the implemented
+compatibility path while the decision owner chooses binary-limit augmentation or
+an explicit routing-contract revision.
 
 ## Context and Orientation
 
@@ -742,3 +796,13 @@ motivated reopening Concept 1 and adding a per-sub-field hybrid. The initial
 revision freezes user-visible/API/path contracts, makes residual hybrid geometry
 the first feasibility gate, and requires faithful wired generated output rather
 than a planner-only surrogate.
+
+2026-07-14 17:01 UTC: Recorded the start of end-to-end execution and the unrelated
+dirty worktrees that must remain isolated while milestones proceed.
+
+2026-07-14 19:08 UTC: Completed the geometry census, exact management preflight,
+explicit-breakpoint release, and mixed-parent native execution proof. Recorded a
+package-level stop before production wiring because 141 Concept 1 and 59 hybrid
+residual parents exceed the supported WEPP management scenario ceiling after
+exact structural deduplication. ADR-0019 remains Proposed pending a binary-limit
+work package or an explicit fidelity-contract revision.
