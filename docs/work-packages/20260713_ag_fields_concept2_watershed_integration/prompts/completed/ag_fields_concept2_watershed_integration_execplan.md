@@ -42,15 +42,16 @@ is deferred and must not be built as part of this plan.
 - [x] (2026-07-13 21:17 UTC) Milestone 2: implemented and release-tested the
   additive weighted native PASS combiner while preserving the Roads API; 39 Rust
   tests and the release-tree Python API test pass.
-- [ ] Milestone 3: implement the additive AgFields watershed-integration facade and
+- [x] (2026-07-13 21:48 UTC) Milestone 3: implemented the additive AgFields watershed-integration facade and
   collaborator with isolated parent materialization, manifests, combination,
   watershed execution, and interchange.
-- [ ] Milestone 4: add the separate RQ/API/UI stage, state, invalidation, clear,
+- [x] (2026-07-13 21:48 UTC) Milestone 4: added the separate RQ/API/UI stage, state, invalidation, clear,
   browse, and dependency graph contracts.
-- [ ] Milestone 5: complete focused engineering, compatibility, documentation,
+- [x] (2026-07-13 22:46 UTC) Milestone 5: completed focused engineering, compatibility, documentation,
   security, and broad validation.
-- [ ] Milestone 6: execute `sacral-self-discipline`, prove existing artifacts are
-  unchanged, create the evaluation bundle, and hand it to Mariana.
+- [x] (2026-07-14 00:30 UTC) Milestone 6: executed `sacral-self-discipline`, proved existing artifacts are
+  unchanged, and published the public evaluation bundle for Mariana. Her scientific
+  disposition remains pending and is not an engineering acceptance gate.
 
 ## Surprises & Discoveries
 
@@ -95,6 +96,53 @@ is deferred and must not be built as part of this plan.
   notation.
   Evidence: Real legacy PASS rows such as `0.43200E+05`, WEPP `wshpas.f90` format
   declarations, and weighted writer/reparse tests.
+- Observation: The as-built real-project raster preflight reproduces every package
+  acceptance count exactly, and one real parent can be materialized in about one
+  second with the selected binary.
+  Evidence: Read-only `sacral-self-discipline` preflight returned 3,543 parents,
+  1,869 affected parents, 6,626 sources, 113,774,400 m2 retained area, 482
+  full-coverage parents, and zero overcoverage. Parent 747 materialized in 0.93 s.
+- Observation: Parent 747 combines one background plus eight field sources across
+  6,210 calendar rows with zero serialized area residual; its largest event
+  runoff-volume budget ratio is 0.993884, below the accepted bound.
+  Evidence: The release-tree weighted API rehearsal under
+  `/tmp/agfields-watershed-rehearsal`.
+- Observation: Real WEPP `tdep` is signed. The first full RQ attempt rejected a
+  valid negative value from parent 86 even though `sedseg.for` emits signed
+  deposition-profile totals and `wshred.for` accumulates them unchanged.
+  Evidence: Failed job `1c6a2bfd-2629-4a66-a273-a94fac7d9aa0`, exact parent-86
+  replay, and the producer/consumer Fortran sources.
+- Observation: Real particle-flow component vectors can be finite/nonnegative
+  without summing to exactly one. The second full RQ attempt found a parent-158
+  source vector totaling 1.008624; `wshimp.for` consumes the emitted components
+  without mandatory normalization.
+  Evidence: Failed job `f9045f70-2f59-44e9-964d-a728da6755d6`, exact parent-158
+  replay, and the producer/consumer Fortran sources.
+- Observation: Exhaustive native replay of all 1,869 affected parents passed after
+  those semantic corrections. The maximum event budget ratio was
+  `0.9999999999305551`.
+  Evidence: Release-tree sweep completed in 271 seconds before the final RQ retry.
+- Observation: The final authenticated run completed in 59 minutes 25 seconds with
+  peak observed unique allocation of 6,884,441,600 bytes. It produced 3,543 parent
+  PASS files and every required interchange resource.
+  Evidence: RQ job `2fc269a6-12f8-4d74-a876-0619b2ea3cf7`, integration summary,
+  monitored allocation, and output inventories.
+- Observation: Real completion exercised a state path not covered by the historical
+  default test: summaries with upstream timestamps referenced missing facade imports
+  for `RedisPrep` and `TaskEnum`. A one-line import correction plus exact regression
+  restored the endpoint.
+  Evidence: Initial post-completion HTTP 500, direct traceback, regression test, and
+  subsequent public HTTPS state response `completed`, `stale=false`.
+- Observation: Pre/post hashing proved all four protected source trees identical:
+  97,734 files and 18,498,460,698 bytes with digest
+  `198212dd58c9301b9d0b6bcd70c980e45b1c09b64374cc7db22dac8d28477426`.
+  Evidence: Parquet inventories under the isolated manifest evaluation bundle.
+- Observation: Making the run public exposed that the dev compose service mounted
+  the CAP secret but did not pass the CAP base, asset, or site-key environment.
+  Anonymous run-page requests therefore returned a CAPTCHA-configuration 500 after
+  a clean service recreation.
+  Evidence: Public HTTP response/error id, WEPPcloud traceback, compose comparison
+  with production, exact compose regression, and final public HTTP 200 CAP gate.
 
 ## Decision Log
 
@@ -145,15 +193,55 @@ is deferred and must not be built as part of this plan.
   Rationale: The Roads public API and byte-level output behavior are outside this
   package's contract; the additive path can meet ADR-0018 without changing them.
   Date/Author: 2026-07-13 / Codex
+- Decision: Keep Stage 5 completion in additive AgFields state; do not add or
+  overload a global `TaskEnum`.
+  Rationale: `run_ag_fields` remains the established Stage 4/preflight contract.
+  Stage 5 is an internal experimental result with its own source signature,
+  upstream timestamp snapshot, terminal summary, failure, and job id.
+  Date/Author: 2026-07-13 / Codex
+- Decision: Derive every represented area from paired cells in the exactly aligned
+  parent and sub-field rasters; use neither geometry area nor modeled PASS area as
+  the retained-area authority.
+  Rationale: Common-grid cell ownership gives exact parent/source closure while the
+  PASS header area remains the denominator used to derive each source scale.
+  Date/Author: 2026-07-13 / Codex
+- Decision: Treat `tdep` as a finite signed extensive term and preserve its sign;
+  do not apply the nonnegative validation used for other mass/volume fields.
+  Rationale: The WEPP producer creates signed deposition totals and the watershed
+  consumer accumulates them unchanged. Rejecting negative values rejected valid
+  source data.
+  Date/Author: 2026-07-13 / Codex
+- Decision: Preserve finite nonnegative particle-flow components without requiring
+  their serialized vector to sum to one and without silent renormalization.
+  Rationale: WEPP normalizes only some producer paths, while its consumer uses the
+  emitted components unchanged. Component-wise sediment-mass weighting preserves
+  the source shape contract.
+  Date/Author: 2026-07-13 / Codex
 
 ## Outcomes & Retrospective
 
-Milestones 1 and 2 are complete. Every legacy PASS field has an accepted rule, and
-the canonical py312 release now exports the additive weighted kernel with atomic
-write/reparse closure diagnostics. The unchanged Roads suite and new Rust/Python
-tests pass. WEPPpy orchestration, workflow exposure, broad validation, and the
-generated-output run remain. The published `wepppyo3` evidence is source commit
-`2779b41` plus py312 release commit `96c028f`.
+All six engineering milestones are complete. Every legacy PASS field has an
+accepted rule; the canonical py312 release exports the additive weighted kernel;
+the isolated collaborator materializes and combines a complete parent inventory;
+and the fifth authenticated RQ/API/UI stage exposes run, clear, hydration, failure,
+limitation, and browse behavior.
+
+The final authenticated job completed the real 3,543-parent watershed. Its 10,169
+source rows, 11,606,490 event rows, and 1,869 run rows have zero closure-budget
+violations, with maximum event ratio `0.9999999999305551`. All required interchange
+resources exist. Pre/post inventories prove the 97,734 protected source files are
+byte-identical. The public evaluation bundle is ready for Mariana; her scientific
+disposition remains pending, and Concept 1 remains deferred.
+
+The public acceptance URL returns HTTP 200 with its CAPTCHA gate after aligning the
+dev compose CAP environment with the production contract and adding an exact
+configuration regression.
+
+Validation passed 4,833 WEPPpy tests (60 skipped), 85 frontend suites/621 tests,
+41 native Rust tests, two release-tree Python tests, and the applicable security,
+docs, graph, stub, exception, vulture, and diff gates. The final native shared
+object SHA-256 is
+`5d8e1251d84aed97af358d4473413b089a001de000523fbcd41bf9ffba864db3`.
 
 ## Context and Orientation
 
@@ -524,6 +612,12 @@ The package owns these checked-in evidence documents:
 - `artifacts/2026-07-13_security_review.md`
 - optional concise generated-output evidence summaries from the dev run
 
+The generated evaluation bundle remains under
+`/wc1/runs/sa/sacral-self-discipline/wepp/ag_fields/watershed/`. Its manifest
+includes the scientific README, source/event/run closure Parquets, terminal summary,
+materialized parent provenance, and
+`evaluation_evidence/authoritative_{pre,post}.parquet`.
+
 Do not commit multi-gigabyte model outputs or the evaluation bundle. Keep them under
 the authorized run's isolated tree and record paths, counts, hashes, and concise
 transcripts in the tracker.
@@ -531,7 +625,7 @@ transcripts in the tracker.
 ## Interfaces and Dependencies
 
 No new external dependency is expected. Use Rust/PyO3, Arrow/Parquet support already
-present in `wepp_interchange`, pandas/rasterio already used by WEPPpy, existing
+present in `wepp_interchange`, pandas/GDAL already used by WEPPpy, existing
 `wepp_runner` functions, the NoDb lock/persistence contract, existing RQ/status
 machinery, and existing UI controller utilities.
 
@@ -552,6 +646,16 @@ if an existing server-side validation contract supports them; it never accepts
 paths, source lists, scales, or executable names from the browser.
 
 ## Revision Note
+
+Completed 2026-07-14 after final authenticated generated-output acceptance. This
+revision records the two evidence-driven semantic corrections, exhaustive native
+sweep, final job/runtime/disk evidence, state-endpoint regression, exact closure
+results, immutable source-tree proof, public Mariana bundle, and passing broad
+validation. Scientific qualification remains pending Mariana's disposition.
+
+Updated 2026-07-13 after completing Milestones 3-4 to record the as-built facade,
+collaborator, schemas, fifth workflow stage, no-new-TaskEnum decision, security
+disposition, real-project preflight, and one-parent executable rehearsal.
 
 Updated 2026-07-13 after completing Milestone 2 to record the native API, exact
 five-significant-digit serialization behavior, release refresh, and validation

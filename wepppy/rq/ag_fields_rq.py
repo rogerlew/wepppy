@@ -24,10 +24,12 @@ logger = logging.getLogger(__name__)
 AGFIELDS_BUILD_SUBFIELDS_JOB_KEY = "agfields_build_subfields"
 AGFIELDS_PLANTDB_JOB_KEY = "agfields_plantdb"
 AGFIELDS_RUN_WEPP_JOB_KEY = "agfields_run_wepp"
+AGFIELDS_RUN_WATERSHED_JOB_KEY = "agfields_run_watershed"
 
 AGFIELDS_BUILD_SUBFIELDS_COMPLETED = "AGFIELDS_BUILD_SUBFIELDS_TASK_COMPLETED"
 AGFIELDS_PLANTDB_COMPLETED = "AGFIELDS_PLANTDB_TASK_COMPLETED"
 AGFIELDS_RUN_WEPP_COMPLETED = "AGFIELDS_RUN_WEPP_TASK_COMPLETED"
+AGFIELDS_RUN_WATERSHED_COMPLETED = "AGFIELDS_RUN_WATERSHED_TASK_COMPLETED"
 
 
 def _job_id() -> str:
@@ -236,11 +238,62 @@ def run_ag_fields_wepp_rq(
         raise
 
 
+@with_exception_logging
+def run_ag_fields_watershed_rq(
+    runid: str,
+    max_workers: Optional[int] = None,
+) -> Dict[str, Any]:
+    """Run the isolated AgFields Concept 2 watershed integration."""
+    if max_workers is not None:
+        max_workers = int(max_workers)
+        if max_workers < 1:
+            raise ValueError("max_workers must be at least 1 when provided.")
+
+    job_id = _job_id()
+    func_name = inspect.currentframe().f_code.co_name
+    status_channel = f"{runid}:ag_fields"
+    StatusMessenger.publish(status_channel, f"rq:{job_id} STARTED {func_name}({runid})")
+
+    try:
+        wd = get_wd(runid)
+        clear_nodb_file_cache(runid, pup_relpath="ag_fields.nodb")
+        ag_fields = AgFields.getInstance(wd)
+
+        def publish_phase(phase: str) -> None:
+            payload = json.dumps({"phase": phase}, sort_keys=True, separators=(",", ":"))
+            StatusMessenger.publish(status_channel, f"rq:{job_id} PHASE_JSON {payload}")
+
+        result = ag_fields.run_watershed_integration(
+            max_workers=max_workers,
+            phase_callback=publish_phase,
+        )
+        _publish_result(status_channel, job_id, result)
+        _publish_completed(
+            status_channel,
+            job_id,
+            func_name,
+            runid,
+            AGFIELDS_RUN_WATERSHED_COMPLETED,
+        )
+        return result
+    except Exception as exc:  # broad-except: RQ task boundary preserves terminal status contract
+        logger.exception("AgFields watershed worker failed", extra={"runid": runid, "job_id": job_id})
+        _publish_failure(
+            status_channel,
+            job_id,
+            {"message": str(exc) or exc.__class__.__name__},
+        )
+        _publish_exception(status_channel, job_id, func_name, runid)
+        raise
+
+
 __all__ = [
     "AGFIELDS_BUILD_SUBFIELDS_JOB_KEY",
     "AGFIELDS_PLANTDB_JOB_KEY",
     "AGFIELDS_RUN_WEPP_JOB_KEY",
+    "AGFIELDS_RUN_WATERSHED_JOB_KEY",
     "build_ag_fields_subfields_rq",
     "process_ag_fields_plant_db_rq",
     "run_ag_fields_wepp_rq",
+    "run_ag_fields_watershed_rq",
 ]

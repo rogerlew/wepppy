@@ -31,9 +31,11 @@ from wepppy.nodb.redis_prep import RedisPrep, TaskEnum
 from wepppy.rq.ag_fields_rq import (
     AGFIELDS_BUILD_SUBFIELDS_JOB_KEY,
     AGFIELDS_PLANTDB_JOB_KEY,
+    AGFIELDS_RUN_WATERSHED_JOB_KEY,
     AGFIELDS_RUN_WEPP_JOB_KEY,
     build_ag_fields_subfields_rq,
     process_ag_fields_plant_db_rq,
+    run_ag_fields_watershed_rq,
     run_ag_fields_wepp_rq,
 )
 from wepppy.weppcloud.utils.helpers import get_wd
@@ -135,7 +137,8 @@ def _enqueue_job(
                         "An AgFields job is already active for this run "
                         f"(key={active['key']}, job_id={active['job_id']}, status={active['status']})."
                     )
-                prep.remove_timestamp(TaskEnum.run_ag_fields)
+                if job_key != AGFIELDS_RUN_WATERSHED_JOB_KEY:
+                    prep.remove_timestamp(TaskEnum.run_ag_fields)
                 queue = Queue(connection=redis_conn)
                 job = queue.enqueue_call(func, args, timeout=RQ_TIMEOUT)
                 prep.set_rq_job_id(job_key, job.id)
@@ -170,6 +173,7 @@ def _find_active_job(prep: RedisPrep, redis_conn: redis.Redis) -> dict[str, str]
         AGFIELDS_BUILD_SUBFIELDS_JOB_KEY,
         AGFIELDS_PLANTDB_JOB_KEY,
         AGFIELDS_RUN_WEPP_JOB_KEY,
+        AGFIELDS_RUN_WATERSHED_JOB_KEY,
     ):
         job_id = prep.get_rq_job_id(key)
         if job_id is None:
@@ -207,6 +211,7 @@ def _job_ids(prep: RedisPrep | None) -> tuple[dict[str, str | None], dict[str, s
         AGFIELDS_BUILD_SUBFIELDS_JOB_KEY,
         AGFIELDS_PLANTDB_JOB_KEY,
         AGFIELDS_RUN_WEPP_JOB_KEY,
+        AGFIELDS_RUN_WATERSHED_JOB_KEY,
     )
     job_ids = {key: prep.get_rq_job_id(key) if prep is not None else None for key in keys}
     active_job_ids: dict[str, str | None] = {key: None for key in keys}
@@ -279,6 +284,7 @@ def _state_snapshot(wd: str) -> dict[str, Any]:
             "complete": run_count > 0 and not staleness["wepp_runs"],
             "wepp_bin": ag_fields.wepp_bin,
         },
+        "watershed_integration": ag_fields.get_watershed_integration_state(),
         "staleness": staleness,
         "readiness": readiness,
         "job_ids": job_ids,
@@ -789,6 +795,108 @@ async def run_wepp(runid: str, config: str, request: Request) -> JSONResponse:
     except Exception:  # broad-except: HTTP boundary contract
         logger.exception("rq-engine AgFields WEPP enqueue failed", extra={"runid": runid, "config": config})
         return error_response("Could not enqueue AgFields WEPP", status_code=500)
+
+
+@router.post(
+    "/runs/{runid}/{config}/agfields/run-watershed",
+    summary="Run the integrated AgFields watershed",
+    description=(
+        "Requires JWT Bearer `rq:enqueue` scope and run access. "
+        "Validates current sub-field and parent inputs, then enqueues the isolated Concept 2 rerun."
+    ),
+    operation_id=rq_operation_id("agfields_run_watershed"),
+    tags=["rq-engine", "agfields"],
+    responses=agent_route_responses(
+        success_code=202,
+        success_description="AgFields watershed integration job enqueued.",
+        extra={
+            400: "Invalid run options. Returns the canonical error payload.",
+            409: "Prerequisites are incomplete or a job is active. Returns the canonical error payload.",
+        },
+    ),
+)
+async def run_watershed(runid: str, config: str, request: Request) -> JSONResponse:
+    auth_error = _authorize(request, runid, RQ_ENQUEUE_SCOPES)
+    if auth_error is not None:
+        return auth_error
+    try:
+        wd = get_wd(runid)
+        state = _state_snapshot(wd)
+        if not state["wepp"]["complete"] or state["staleness"]["wepp_runs"]:
+            return error_response(
+                "Run current AgFields sub-field WEPP simulations before watershed integration.",
+                status_code=409,
+            )
+        if not state["readiness"]["observed_climate"]:
+            return error_response(
+                "AgFields watershed integration requires a continuous observed climate.",
+                status_code=409,
+            )
+        if not state["readiness"]["parent_wepp"]:
+            return error_response(
+                "Prepare all parent WEPP hillslope inputs before watershed integration.",
+                status_code=409,
+            )
+        payload = await parse_request_payload(request)
+        raw_max_workers = payload.get("max_workers")
+        max_workers = None if raw_max_workers in (None, "") else int(raw_max_workers)
+        if max_workers is not None and max_workers < 1:
+            raise ValueError("max_workers must be at least 1 when provided.")
+        return _enqueue_job(
+            wd,
+            AGFIELDS_RUN_WATERSHED_JOB_KEY,
+            run_ag_fields_watershed_rq,
+            (runid, max_workers),
+        )
+    except (TypeError, ValueError) as exc:
+        return error_response(str(exc), status_code=400)
+    except AgFieldsJobConflict as exc:
+        return error_response(str(exc), status_code=409, code="agfields_job_active")
+    except Exception:  # broad-except: HTTP boundary contract
+        logger.exception(
+            "rq-engine AgFields watershed enqueue failed",
+            extra={"runid": runid, "config": config},
+        )
+        return error_response("Could not enqueue AgFields watershed integration", status_code=500)
+
+
+@router.post(
+    "/runs/{runid}/{config}/agfields/clear-watershed",
+    summary="Clear the integrated AgFields watershed",
+    description=(
+        "Requires JWT Bearer `rq:enqueue` scope and run access. "
+        "Clears only the fixed isolated Concept 2 tree and additive state."
+    ),
+    operation_id=rq_operation_id("agfields_clear_watershed"),
+    tags=["rq-engine", "agfields"],
+    responses=agent_route_responses(
+        success_code=200,
+        success_description="AgFields watershed integration artifacts cleared.",
+        extra={
+            400: "The isolated path contract is invalid. Returns the canonical error payload.",
+            409: "An AgFields job is active. Returns the canonical error payload.",
+        },
+    ),
+)
+async def clear_watershed(runid: str, config: str, request: Request) -> JSONResponse:
+    auth_error = _authorize(request, runid, RQ_ENQUEUE_SCOPES)
+    if auth_error is not None:
+        return auth_error
+    try:
+        wd = get_wd(runid)
+        conflict = _active_job_conflict_response(wd)
+        if conflict is not None:
+            return conflict
+        AgFields.getInstance(wd).clear_watershed_integration()
+        return JSONResponse({"message": "AgFields watershed integration artifacts cleared."})
+    except (TypeError, ValueError) as exc:
+        return error_response(str(exc), status_code=400)
+    except Exception:  # broad-except: HTTP boundary contract
+        logger.exception(
+            "rq-engine AgFields watershed clear failed",
+            extra={"runid": runid, "config": config},
+        )
+        return error_response("Could not clear AgFields watershed integration", status_code=500)
 
 
 @router.post(

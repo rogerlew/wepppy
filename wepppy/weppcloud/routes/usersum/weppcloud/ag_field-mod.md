@@ -136,12 +136,13 @@ field_id, year, crop_name, runoff, sed_del, sed_det, sed_dep, (hill_wat) Ep+Es+E
 
 
 
-## Watershed integration (Concept 2 open; Concept 1 deferred)
+## Watershed integration (Concept 2 implemented; Concept 1 deferred)
 
 The current AgFields workflow runs each retained field/hillslope intersection as an
-independent WEPP hillslope. Concept 2 is selected and open for implementation as
-the watershed-integration path. Concept 1 remains below as a deferred feasibility
-record and is not part of the active implementation scope.
+independent WEPP hillslope. Concept 2 is implemented as a separate, isolated fifth
+workflow stage; generated-output acceptance and Mariana's scientific disposition
+remain pending. Concept 1 remains below as a deferred feasibility record and is
+not part of the implementation scope.
 
 Related implementation references:
 
@@ -153,7 +154,7 @@ Related implementation references:
 
 ### Decision posture
 
-Concept 2 is approved and open for implementation under the
+Concept 2 is implemented under the
 [AgFields Concept 2 watershed-integration work package](../../../../../docs/work-packages/20260713_ag_fields_concept2_watershed_integration/package.md).
 It retains each sub-field's Peridot slope, crop rotation, and independent WEPP
 result, and its weighted merge must preserve each source's water-volume and
@@ -195,20 +196,19 @@ Both concepts must:
 - regenerate watershed interchange/report resources only under an isolated
   AgFields watershed-output tree.
 
-The proposed isolated layout is additive and does not move the existing per-field
+The isolated layout is additive and does not move the existing per-field
 artifacts:
 
 ```text
 wepp/ag_fields/runs/                 # existing independent sub-field runs
 wepp/ag_fields/output/               # existing independent sub-field outputs
-wepp/ag_fields/watershed/runs/       # proposed integrated watershed run
-wepp/ag_fields/watershed/output/     # proposed integrated parent PASS and watershed outputs
-wepp/ag_fields/watershed/manifest/   # proposed plans, diagnostics, and provenance
+wepp/ag_fields/watershed/runs/       # integrated parent and watershed runs
+wepp/ag_fields/watershed/output/     # integrated parent PASS and watershed outputs
+wepp/ag_fields/watershed/manifest/   # source, closure, summary, and evaluation provenance
 ```
 
-Adding this layout is a run-artifact schema change. Before implementation, define
-its compatibility and regression plan, document the generated artifacts, and keep
-all new keys and files additive. If integrated results become selectable in the
+The additive schema and compatibility contract are frozen in the work package's
+`2026-07-13_run_artifact_compatibility_plan.md`. If integrated results become selectable in the
 standard reports, add an `ag_fields` scope to the output-scope contract in the same
 change set; do not overload the existing `baseline` or `roads` meanings.
 
@@ -359,7 +359,7 @@ representative AgFields datasets and on the fraction of affected area that would
 rejected or materially misclassified. If those results are poor, Concept 1 should
 remain a constrained validation mode rather than a user-selectable general mode.
 
-### Concept 2: area-weighted PASS aggregation and watershed rerun (open)
+### Concept 2: area-weighted PASS aggregation and watershed rerun (implemented)
 
 #### Model contract
 
@@ -400,10 +400,10 @@ full-hillslope baseline response can be scaled to represent only the background
 area, even though runoff generation, erosion, and deposition can be nonlinear with
 hillslope length and runon.
 
-#### Proposed routing artifact
+#### Routing and closure artifacts
 
-Write `wepp/ag_fields/watershed/manifest/pass_sources.parquet` with one row per
-parent/source pair. At minimum, record:
+`wepp/ag_fields/watershed/manifest/pass_sources.parquet` has one row per
+parent/source pair and records:
 
 - parent `topaz_id`, parent `wepp_id`, source kind, and source PASS path;
 - `field_id` and `sub_field_id` for field sources;
@@ -445,16 +445,17 @@ zero-volume behavior. `gwbfv` and `gwdsv` currently lack unit metadata and requi
 confirmation against the WEPP writer/reader. No unsupported field may be silently
 zeroed, summed, or scaled.
 
-#### Implementation plan
+#### As-built implementation
 
-1. **Build the parent/source routing plan.**
+1. **Build the parent/source routing plan.** The
+   `AgFieldsWatershedIntegrator` collaborator:
    - Group `ag_fields/sub_fields/fields.parquet` rows by parent `wepp_id` and
      reconcile them against `subwta` and `sub_field_id_map` cell counts.
    - Validate parent area, unique cell ownership, sub-field modeled area, uncovered
      area, source PASS existence, and climate/calendar identity.
    - Persist the routing artifact before combining files.
 
-2. **Implement the weighted combiner in `wepppyo3`.**
+2. **Use the additive weighted combiner in `wepppyo3`.**
    - Add the semantic table and synthetic fixtures first.
    - Keep the current Roads `combine_hillslope_pass_files` API unchanged and add an
      additive weighted API or strategy with structured source metadata.
@@ -469,8 +470,11 @@ zeroed, summed, or scaled.
    - Regenerate interchange artifacts under the integrated output directory and
      assert required resources exist.
 
-4. **Add a separate RQ/API/UI stage.**
+4. **Expose a separate RQ/API/UI stage.**
    - Require successful baseline WEPP and current AgFields sub-field runs.
+   - Job key `agfields_run_watershed`, authenticated `run-watershed` and
+     `clear-watershed` routes, additive hydration state, and Stage 5 DOM/controller
+     hooks remain separate from Stage 4.
    - Track job state separately from the existing sub-field run and invalidate it
      when baseline outputs, field geometry, rotation mapping, sub-field outputs, or
      combiner version changes.
@@ -479,7 +483,7 @@ zeroed, summed, or scaled.
    - Initially label the feature experimental and surface the outlet-injection and
      no-buffer-routing limitations in the UI and result manifest.
 
-5. **Add report and download isolation.**
+5. **Keep report and download isolation.**
    - Keep integrated results under `wepp/ag_fields/watershed/output`.
    - Add an output scope only when the standard reports are ready to consume these
      results, updating the canonical scope contract and its route tests together.

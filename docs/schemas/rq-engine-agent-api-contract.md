@@ -359,7 +359,7 @@ Notes:
   `docs/schemas/weppcloud-csrf-contract.md`.
 
 ## Endpoint Families (Agent-Facing)
-For the exact frozen route list (currently 79 routes), use the contract
+For the exact frozen route list (currently 114 routes), use the contract
 checklist artifact. The
 table below is the practical family map used by agent clients.
 
@@ -370,6 +370,7 @@ table below is the practical family map used by agent clients.
 | Bootstrap | `/api/runs/{runid}/{config}/bootstrap/*` plus `run-*-noprep` endpoints | Mix of sync no-queue (`checkout`, reads, mint) and async (`enable`, no-prep runs) | `bootstrap:*` and `rq:enqueue` |
 | Build/prep | `/api/runs/{runid}/{config}/build-*`, `fetch-dem-and-build-channels`, `set-outlet` | Mostly async enqueue | `rq:enqueue` |
 | Model runs | `/api/runs/{runid}/{config}/run-*` (`wepp`, `wepp-watershed`, `swat`, `rhem`, `ash`, `debris-flow`, `omni`) | Mostly async enqueue; some sync dry-run paths | `rq:enqueue` |
+| AgFields | `/api/runs/{runid}/{config}/agfields/*` | Read-only state plus synchronous setup/clear and asynchronous sub-field/integrated watershed jobs | `rq:status` for reads; `rq:enqueue` for mutations |
 | Upload tasks | `/api/runs/{runid}/{config}/tasks/upload-*` | Sync for upload/validation or async enqueue depending on route | `rq:enqueue` |
 | Export | `/api/runs/{runid}/{config}/export/*` | Sync read-only file delivery | `rq:export` |
 | Archive/fork | `/api/runs/{runid}/{config}/archive`, `/restore-archive`, `/delete-archive`, `/fork` | Mostly async enqueue; some sync mutation paths | `rq:enqueue` |
@@ -386,7 +387,7 @@ Watershed map-input normalization (`fetch-dem-and-build-channels`):
 
 ## Internal Admin Debug Endpoints
 These routes are intentionally **internal/admin** and are not part of the
-frozen 79-route agent-facing checklist.
+frozen 114-route agent-facing checklist.
 
 | Method | Path | Purpose | Auth |
 |---|---|---|---|
@@ -416,7 +417,10 @@ reasons:
   - guard tests
   - this document when behavior changes for clients
 
-The global canonical OpenAPI size budget is 130,000 bytes as of 2026-07-09. It increased from 118,500 bytes when the internal AgFields backend added 13 run-scoped operations (`/api/runs/{runid}/{config}/agfields/*`), producing a measured 129,217-byte schema. AgFields remains outside the frozen 97-route agent-facing inventory while its feature registry maturity is `internal`; the successor UI package must classify/freeze the routes if it promotes the feature.
+The global canonical OpenAPI size budget is 138,000 bytes as of 2026-07-13.
+The AgFields backend now contributes 15 frozen run-scoped operations, including
+the Concept 2 watershed run and isolated-clear routes. The measured canonical
+schema after those additions is 137,109 bytes.
 
 ## Controller-State Contract Status
 - Controller-state/schema/orchestration contract for agent clients is tracked in

@@ -275,31 +275,7 @@ When resuming Kubernetes work:
 
 Currently active work packages. Limit to 2-4 packages to maintain focus.
 
-**Current WIP Count**: 13 packages
-
----
-
-### AgFields Concept 2 Watershed Integration
-**Started**: 2026-07-13
-**Status**: Open; implementation contract and weighted PASS kernel are next
-**Size**: High (multi-repository, multi-stage implementation)
-**Owner**: Codex
-**Priority**: High
-**Link**: [docs/work-packages/20260713_ag_fields_concept2_watershed_integration/](docs/work-packages/20260713_ag_fields_concept2_watershed_integration/)
-**Description**: Route independent AgFields sub-field water and sediment into an
-isolated parent watershed rerun using explicit area-weighted PASS aggregation,
-source/event/run closure diagnostics, and additive RQ/API/UI orchestration.
-
-**Current Focus**: Finalize ADR-0018 and the PASS field-semantics table, then build
-the weighted `wepppyo3` combiner without changing the existing Roads API.
-
-**Dependencies**: Uses the completed AgFields backend/runs-page workflow and the
-existing Roads watershed-rerun pattern. `/wc1/runs/sa/sacral-self-discipline` is
-the generated-output acceptance project.
-
-**Next Steps**: Implement the conservation-tested native kernel, isolated parent
-PASS materialization, AgFields integration collaborator, and workflow stage.
-Mariana Dobre performs the subsequent scientific evaluation. Concept 1 is deferred.
+**Current WIP Count**: 12 packages
 
 ---
 
@@ -568,6 +544,23 @@ Mariana Dobre performs the subsequent scientific evaluation. Concept 1 is deferr
 ## ✅ Done
 
 Recently completed work packages. Archived immediately upon completion.
+
+### AgFields Concept 2 Watershed Integration (2026-07-14)
+**Status**: ✅ **ENGINEERING COMPLETE; SCIENTIFIC EVALUATION PENDING**
+
+**Link**: [docs/work-packages/20260713_ag_fields_concept2_watershed_integration/](docs/work-packages/20260713_ag_fields_concept2_watershed_integration/)
+
+**Lifecycle**: In Progress -> Done (2026-07-14)
+
+**Summary**: Added a conservation-diagnosed native weighted PASS kernel, isolated
+AgFields parent materialization/watershed execution, additive manifests, and a
+fifth authenticated RQ/API/UI stage. Final public acceptance completed 3,543
+parents/1,869 affected parents, all closure and interchange checks passed, and
+97,734 protected files remained byte-identical. The public evaluation bundle is
+ready for Mariana Dobre; Concept 1 remains deferred pending her scientific-use
+disposition.
+
+---
 
 ### AgFields Flowpath-to-Channel Connectivity Inventory (2026-07-13)
 **Status**: ✅ **COMPLETE**

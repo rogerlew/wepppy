@@ -13,6 +13,8 @@ This module provides the `AgFields` NoDb controller, which coordinates an “ag 
 - Rasterizes the field boundary polygons onto the project DEM grid for downstream tools.
 - Runs Peridot “sub-field” abstraction (intersecting fields with hydrologic subwatersheds and generating representative slope files).
 - Builds multi-year WEPP management files from crop rotation schedules and runs a WEPP hillslope simulation per sub-field.
+- Integrates current sub-field PASS sources into an isolated, area-weighted parent
+  PASS set and reruns watershed WEPP with conservation manifests.
 
 The controller is stateful and persisted as `ag_fields.nodb` at the root of the working directory.
 
@@ -27,6 +29,8 @@ Typical sequence (some steps are optional depending on the UI/route calling into
 6. **Polygonize sub-fields**: `AgFields.polygonize_sub_fields()`
 7. **Provide crop→management mapping**: call `AgFields.write_rotation_lookup(rows)` (and optionally populate `ag_fields/plant_files/` via `handle_plant_file_db_upload`)
 8. **Run WEPP per sub-field**: choose the persisted `AgFields.wepp_bin`, then call `AgFields.run_wepp_ag_fields()` (optional `max_workers` remains available to API callers)
+9. **Run the isolated watershed integration**: call
+   `AgFields.run_watershed_integration()` after Stage 4 is current
 
 ## Inputs and outputs
 
@@ -51,6 +55,9 @@ Typical sequence (some steps are optional depending on the UI/route calling into
 | `ag_fields/sub_fields/sub_fields.geojson` | `polygonize_sub_fields` | Polygonized sub-fields with `field_id`, `topaz_id`, `wepp_id`, `sub_field_id` |
 | `wepp/ag_fields/runs/p<sub_field_id>.*` | `run_wepp_ag_fields` | Per-sub-field WEPP inputs (`.run`, `.man`, `.slp`) |
 | `wepp/ag_fields/output/H<sub_field_id>.*.dat` | WEPP | Per-sub-field WEPP outputs (loss, plot, soil, water balance, etc.) |
+| `wepp/ag_fields/watershed/runs/` | Concept 2 integrator | Copied parent inputs plus isolated parent and watershed run files |
+| `wepp/ag_fields/watershed/output/` | Concept 2 integrator | One legacy PASS per parent, watershed outputs, and isolated interchange |
+| `wepp/ag_fields/watershed/manifest/` | Concept 2 integrator | Versioned source, event/run closure, summary, and evaluation documentation |
 
 ## Quick start / examples
 
@@ -82,6 +89,10 @@ ag.polygonize_sub_fields()
 #   ag.handle_plant_file_db_upload("plant_db.zip")
 ag.wepp_bin = "wepp_dcc52a6"
 ag.run_wepp_ag_fields()
+
+# 7) Inject area-weighted sub-field sources at parent outlets and rerun watershed WEPP
+summary = ag.run_watershed_integration()
+print(summary["affected_parent_count"], summary["sub_field_source_count"])
 ```
 
 ### `rotation_lookup.tsv` format
@@ -146,11 +157,28 @@ an additive `normalizations` list with the original and final values. See
 
 ## HTTP and RQ surface
 
-`wepppy.microservices.rq_engine.ag_fields_routes` exposes the staged workflow under `/api/runs/{runid}/{config}/agfields/`. The surface includes boundary upload, atomic schema confirmation, build-subfields enqueue, plant ZIP enqueue/inventory/delete, mapping read/save, management options, WEPP enqueue, artifact clear, overlay serving, and state hydration. Read routes require `rq:status`; mutations require `rq:enqueue`; all routes authorize access to the requested run.
+`wepppy.microservices.rq_engine.ag_fields_routes` exposes the staged workflow under `/api/runs/{runid}/{config}/agfields/`. The surface includes boundary upload, atomic schema confirmation, build-subfields enqueue, plant ZIP enqueue/inventory/delete, mapping read/save, management options, sub-field WEPP enqueue, isolated watershed enqueue/clear, Stage 4 artifact clear, overlay serving, and state hydration. Read routes require `rq:status`; mutations require `rq:enqueue`; all routes authorize access to the requested run.
 
-RQ entrypoints live in `wepppy.rq.ag_fields_rq`. Job hints use `agfields_build_subfields`, `agfields_plantdb`, and `agfields_run_wepp`. Workers publish to `{runid}:ag_fields`, clear only the `ag_fields.nodb` cache before mutable hydration, return JSON-serializable results, and publish completion/failure payloads for status-stream hydration.
+RQ entrypoints live in `wepppy.rq.ag_fields_rq`. Job hints use `agfields_build_subfields`, `agfields_plantdb`, `agfields_run_wepp`, and `agfields_run_watershed`. Workers publish to `{runid}:ag_fields`, clear only the `ag_fields.nodb` cache before mutable hydration, return JSON-serializable results, and publish completion/failure payloads for status-stream hydration.
 
 Preflight completion uses additive `TaskEnum.run_ag_fields` (🌽) and checklist key `ag_fields`. Serialized submissions and synchronous input/artifact mutations clear the timestamp; the Stage 4 worker clears it again on start and stamps it only after every sub-field WEPP run succeeds. `preflight2` additionally requires that completion be newer than parent WEPP, watershed abstraction, landuse, soils, and climate.
+
+Stage 5 intentionally does not add or overload a global `TaskEnum`: its completion,
+failure, source signature, and terminal summary live in additive AgFields state.
+Submitting or clearing Stage 5 does not invalidate the successful Stage 4 preflight
+timestamp. All four AgFields jobs still share the same per-run submit lock and live
+job admission check.
+
+Concept 2 v1 derives parent and retained areas from the exactly aligned
+`subwta.tif` and `sub_field_id_map.tif` grid, materializes legacy parent PASS files
+from current prepared inputs inside the isolated tree, verifies climate content,
+and delegates weighted serialization/closure to the owned native
+`combine_weighted_hillslope_pass_files` API. Historical NoDb payloads default to
+`not_run` without a migration write. Clearing rejects path escapes and symlinked
+roots and never addresses baseline or independent sub-field artifacts.
+
+> Scientific limitation: field water and sediment are injected at the parent
+> outlet; downslope buffer, trapping, and runon effects are not represented.
 
 AgFields mutations are single-flight per run. A short Redis submit lock closes enqueue races, live RQ status prevents overlapping build/plant/WEPP jobs, and synchronous boundary/schema/mapping/delete/clear routes return `agfields_job_active` while a job is queued or running. Successful boundary ingestion also retains the source basename for reload-safe UI reporting while continuing to store geometry under the canonical `fields.WGS.geojson` artifact name.
 

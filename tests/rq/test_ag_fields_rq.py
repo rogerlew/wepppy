@@ -159,3 +159,24 @@ def test_run_wepp_rq_applies_selected_binary_before_execution(rq_context) -> Non
     assert events.index(("preflight-remove", ag_fields_rq.TaskEnum.run_ag_fields)) < events.index(
         ("preflight-stamp", ag_fields_rq.TaskEnum.run_ag_fields)
     )
+
+
+def test_run_watershed_rq_publishes_phases_without_reusing_stage4_timestamp(rq_context) -> None:
+    events, published, controller_box = rq_context
+
+    class DummyAgFields:
+        def run_watershed_integration(self, *, max_workers, phase_callback):
+            assert max_workers == 2
+            phase_callback("area_planning")
+            phase_callback("watershed_rerun")
+            return {"status": "completed", "parent_count": 3}
+
+    controller_box["controller"] = DummyAgFields()
+
+    result = ag_fields_rq.run_ag_fields_watershed_rq("demo", max_workers=2)
+
+    assert result == {"status": "completed", "parent_count": 3}
+    assert not any(event[0].startswith("preflight-") for event in events)
+    phase_messages = [message for _, message in published if "PHASE_JSON" in message]
+    assert len(phase_messages) == 2
+    assert any("AGFIELDS_RUN_WATERSHED_TASK_COMPLETED" in message for _, message in published)

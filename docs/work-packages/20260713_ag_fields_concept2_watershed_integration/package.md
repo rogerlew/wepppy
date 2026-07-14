@@ -1,6 +1,6 @@
 # AgFields Concept 2 Watershed Integration
 
-**Status**: Open (2026-07-13)
+**Status**: Engineering complete; scientific evaluation pending (2026-07-14)
 **Timezone**: UTC
 
 ## Overview
@@ -79,26 +79,27 @@ this package.
 
 ## Success Criteria
 
-- [ ] ADR-0018 is Accepted with every PASS field classified by units,
+- [x] ADR-0018 is Accepted with every PASS field classified by units,
   extensive/intensive semantics, transformation, zero-volume behavior, and a
   serialization-derived closure tolerance.
-- [ ] The weighted native API leaves the existing Roads API unchanged and passes
+- [x] The weighted native API leaves the existing Roads API unchanged and passes
   exact synthetic area/water/sediment identities plus parser round-trip tests.
-- [ ] Historical AgFields NoDb state loads without migration; new state and artifact
+- [x] Historical AgFields NoDb state loads without migration; new state and artifact
   schemas are additive and documented.
-- [ ] One integration run stages exactly one legacy PASS for every parent hillslope,
+- [x] One integration run stages exactly one legacy PASS for every parent hillslope,
   preserves source/event/run closure within the approved tolerance, completes
   watershed WEPP, and generates required interchange resources.
-- [ ] Missing/deleted baseline PASS files are materialized from current prepared
+- [x] Missing/deleted baseline PASS files are materialized from current prepared
   parent inputs inside the isolated tree; no baseline setting or file is rewritten.
-- [ ] RQ, route, state, clear, staleness, status-stream, UI, and browse behavior are
+- [x] RQ, route, state, clear, staleness, status-stream, UI, and browse behavior are
   covered and the RQ dependency graph is current.
-- [ ] `/wc1/runs/sa/sacral-self-discipline` produces an evaluation bundle covering
+- [x] `/wc1/runs/sa/sacral-self-discipline` produces an evaluation bundle covering
   6,626 sub-fields and 1,869 affected parents, with immutable preexisting artifacts
   and recorded generated-output evidence.
-- [ ] The bundle is handed to Mariana with explicit outlet-injection limitations;
-  scientific qualification remains recorded as pending until her disposition.
-- [ ] Security review has no unresolved medium/high findings and all applicable
+- [x] The bundle is published in the now-public run for Mariana with explicit
+  outlet-injection limitations; scientific qualification remains recorded as
+  pending until her disposition.
+- [x] Security review has no unresolved medium/high findings and all applicable
   focused, broad, docs, and release-import gates pass.
 
 ## Parameterization ADR Gate
@@ -108,8 +109,7 @@ this package.
 - **ADR link(s)**: `docs/adrs/ADR-0018-agfields-weighted-pass-accounting.md`
 - **Decision provenance captured**: `yes`
 
-ADR-0018 is Proposed at package opening. It must record the final field semantics
-and tolerances and become Accepted before implementation merges.
+ADR-0018 is Accepted and records the final field semantics and tolerances.
 
 ## Dependencies
 
@@ -167,8 +167,42 @@ and tolerances and become Accepted before implementation merges.
 
 ## Deliverables
 
-Pending implementation. The active ExecPlan names the exact code, schema,
-documentation, test, security, and generated-output artifacts required for closure.
+- Accepted PASS semantics and ADR-0018 plus the additive weighted native API and
+  refreshed py312 release.
+- `AgFieldsWatershedIntegrator`, additive NoDb facade/state/stub, fixed isolated
+  artifact schemas, parent materialization, watershed/interchange execution, and
+  evaluation README generation.
+- `agfields_run_watershed`, authenticated run/clear routes, single-flight state
+  hydration, fifth runs-page stage, regenerated controller asset, and queue graph.
+- Focused NoDb/RQ/route/template/Jest coverage and a passing dedicated security
+  review, broad validation, and full generated-output evidence.
+
+## Engineering Acceptance Evidence
+
+- Final authenticated RQ job `2fc269a6-12f8-4d74-a876-0619b2ea3cf7` ran from
+  2026-07-13 23:15:08 UTC to 2026-07-14 00:14:33 UTC (59 minutes 25 seconds).
+  The canonical job endpoint reports `finished`; the Stage 5 state endpoint reports
+  `completed`, `stale=false`, and source signature
+  `8885d05b786ed85f06def046a581a8260c6e99a6a601495639c1a7383adc29cc`.
+- The isolated tree contains 3,543 parent PASS files, 10,169 source rows, 11,606,490
+  event-closure rows, 1,869 run-closure rows, and every required interchange
+  resource. No event or run exceeds its serialization-derived budget; the maximum
+  event budget ratio is `0.9999999999305551`.
+- Peak observed unique allocation during the run was 6,884,441,600 bytes. The
+  public evaluation bundle is under
+  `wepp/ag_fields/watershed/manifest/`, including its limitation README and
+  `evaluation_evidence/authoritative_{pre,post}.parquet`.
+- The [public acceptance run](https://wc.bearhive.duckdns.org/weppcloud/runs/sacral-self-discipline/disturbed9002_wbt/)
+  returns HTTP 200 with the expected CAPTCHA gate. The dev compose contract now
+  passes the same CAP base/asset/site-key settings as production, with a compose
+  regression covering the configuration.
+- The pre/post inventories of baseline and independent AgFields trees are identical:
+  97,734 files, 18,498,460,698 bytes, no missing/added/changed paths, and SHA-256
+  `198212dd58c9301b9d0b6bcd70c980e45b1c09b64374cc7db22dac8d28477426`.
+- Repository validation passed with 4,833 tests, 60 skipped; frontend validation
+  passed 85 suites/621 tests; the final native kernel passed 41 Rust tests and two
+  release-tree Python tests. The dedicated security review remains `pass` with no
+  unresolved findings.
 
 ## Follow-up Work
 

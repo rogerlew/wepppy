@@ -2,6 +2,7 @@ import re
 from pathlib import Path
 
 import pytest
+import yaml
 
 pytestmark = pytest.mark.unit
 
@@ -58,3 +59,12 @@ def test_compose_defines_dedicated_download_service(relative_path: str) -> None:
     assert "\n  download:" in compose_text
     assert "wepppy.microservices.download:app" in compose_text
     assert "0.0.0.0:9011" in compose_text
+
+
+def test_dev_weppcloud_passes_cap_gate_configuration() -> None:
+    config = yaml.safe_load((REPO_ROOT / "docker/docker-compose.dev.yml").read_text())
+    environment = config["services"]["weppcloud"]["environment"]
+
+    assert environment["CAP_BASE_URL"] == "${CAP_BASE_URL:-/cap}"
+    assert environment["CAP_ASSET_BASE_URL"] == "${CAP_ASSET_BASE_URL:-/cap/assets}"
+    assert environment["CAP_SITE_KEY"] == "${CAP_SITE_KEY}"

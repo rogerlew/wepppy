@@ -4,6 +4,7 @@ SUCCESS_STATUS_OVERRIDES: dict[tuple[str, str], int] = {
     ("POST", "/api/runs/{runid}/{config}/agfields/build-subfields"): 202,
     ("POST", "/api/runs/{runid}/{config}/agfields/plant-database"): 202,
     ("POST", "/api/runs/{runid}/{config}/agfields/run-wepp"): 202,
+    ("POST", "/api/runs/{runid}/{config}/agfields/run-watershed"): 202,
     ("POST", "/api/runs/{runid}/{config}/export/ermit"): 202,
     ("POST", "/api/runs/{runid}/{config}/run-omni"): 202,
     ("POST", "/api/runs/{runid}/{config}/run-omni-contrasts"): 202,
@@ -20,6 +21,8 @@ PATHS_REQUIRING_400 = {
     "/api/culverts-wepp-batch/{batch_uuid}/retry/{point_id}",
     "/api/runs/{runid}/{config}/acquire-rap-ts",
     "/api/runs/{runid}/{config}/archive",
+    "/api/runs/{runid}/{config}/agfields/clear-watershed",
+    "/api/runs/{runid}/{config}/agfields/run-watershed",
     "/api/runs/{runid}/{config}/bootstrap/checkout",
     "/api/runs/{runid}/{config}/bootstrap/commits",
     "/api/runs/{runid}/{config}/bootstrap/current-ref",
@@ -99,6 +102,8 @@ PATHS_REQUIRING_404 = {
 }
 
 PATHS_REQUIRING_409 = {
+    "/api/runs/{runid}/{config}/agfields/clear-watershed",
+    "/api/runs/{runid}/{config}/agfields/run-watershed",
     "/api/runs/{runid}/{config}/export/features",
     "/api/runs/{runid}/{config}/export/features/job/{job_id}/download",
     "/api/runs/{runid}/{config}/export/features/published/{profile}/download",

@@ -44,6 +44,7 @@ class DummyAgFields:
         self.sub_field_fp_n = 0
         self.wepp_bin = "wepp_dcc52a6"
         self.cleared = False
+        self.watershed_cleared = False
         self.saved_rows = None
 
     def validate_field_boundary_geojson(self, path: Path, *, source_filename: str | None = None):
@@ -105,6 +106,21 @@ class DummyAgFields:
     def clear_ag_field_wepp_artifacts(self) -> None:
         self.cleared = True
 
+    def clear_watershed_integration(self) -> None:
+        self.watershed_cleared = True
+
+    def get_watershed_integration_state(self):
+        return {
+            "status": "not_run",
+            "stale": False,
+            "source_signature": None,
+            "summary": None,
+            "error": None,
+            "root_relpath": "wepp/ag_fields/watershed",
+            "browse_relpath": "wepp/ag_fields/watershed/",
+            "limitation": "Field water and sediment are injected at the parent outlet.",
+        }
+
 
 @pytest.fixture
 def route_context(tmp_path: Path, monkeypatch: pytest.MonkeyPatch):
@@ -135,7 +151,9 @@ def route_context(tmp_path: Path, monkeypatch: pytest.MonkeyPatch):
         ("post", "/api/runs/demo/cfg/agfields/rotation-mapping"),
         ("get", "/api/runs/demo/cfg/agfields/management-options"),
         ("post", "/api/runs/demo/cfg/agfields/run-wepp"),
+        ("post", "/api/runs/demo/cfg/agfields/run-watershed"),
         ("post", "/api/runs/demo/cfg/agfields/clear"),
+        ("post", "/api/runs/demo/cfg/agfields/clear-watershed"),
         ("get", "/api/runs/demo/cfg/agfields/sub-fields.geojson"),
         ("get", "/api/runs/demo/cfg/agfields/state"),
     ],
@@ -497,7 +515,9 @@ def test_state_and_overlay_return_hydration_contract(route_context) -> None:
         "agfields_build_subfields",
         "agfields_plantdb",
         "agfields_run_wepp",
+        "agfields_run_watershed",
     }
+    assert payload["watershed_integration"]["status"] == "not_run"
     assert overlay.status_code == 200
     assert overlay.headers["content-type"].startswith("application/geo+json")
 
@@ -516,6 +536,7 @@ def test_state_job_ids_only_marks_active_rq_statuses(
                 "agfields_build_subfields": "build-active",
                 "agfields_plantdb": "plant-complete",
                 "agfields_run_wepp": None,
+                "agfields_run_watershed": None,
             }[key]
 
     class DummyRedis:
@@ -548,7 +569,35 @@ def test_state_job_ids_only_marks_active_rq_statuses(
         "agfields_build_subfields": "build-active",
         "agfields_plantdb": None,
         "agfields_run_wepp": None,
+        "agfields_run_watershed": None,
     }
+
+
+def test_run_and_clear_watershed_routes_use_fixed_additive_surface(
+    route_context,
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    controller, _auth_calls = route_context
+    Path(controller.sub_fields_wgs_geojson).touch()
+    (Path(controller.ag_field_wepp_runs_dir) / "p1.run").touch()
+    calls = []
+
+    def _enqueue(wd, job_key, func, args):
+        calls.append((wd, job_key, func, args))
+        return ag_fields_routes.JSONResponse({"job_id": "watershed-1"}, status_code=202)
+
+    monkeypatch.setattr(ag_fields_routes, "_enqueue_job", _enqueue)
+    monkeypatch.setattr(ag_fields_routes, "_active_job_conflict_response", lambda wd: None)
+
+    with TestClient(rq_engine.app) as client:
+        queued = client.post("/api/runs/demo/cfg/agfields/run-watershed", json={})
+        cleared = client.post("/api/runs/demo/cfg/agfields/clear-watershed", json={})
+
+    assert queued.status_code == 202, queued.text
+    assert calls[0][1] == "agfields_run_watershed"
+    assert calls[0][3] == ("demo", None)
+    assert cleared.status_code == 200
+    assert controller.watershed_cleared is True
 
 
 def test_run_wepp_enqueues_contractual_job_key(route_context, monkeypatch: pytest.MonkeyPatch) -> None:

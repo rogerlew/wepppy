@@ -51,9 +51,18 @@ values would collapse a source distinction without an approved chemistry rule.
 | `month`, `day_of_month`, `water_year` | Parser-derived calendar fields | Derived identity | Recompute from `year` and `julian`; not serialized in legacy PASS. |
 
 All parsed row numbers must be finite. Negative volumes, depths, rates,
-concentrations, masses, durations, time-of-concentration values, or particle
-fractions are rejected. `tdep` is the nonnegative total-deposition magnitude used
-by the producer and consumer, not a signed balance term.
+concentrations, masses other than `tdep`, durations, time-of-concentration values,
+or particle-flow components are rejected. `tdep` is a signed extensive deposition term:
+`sedseg.for` derives it from signed deposition-profile values and `wshred.for`
+accumulates that sign unchanged. The combiner therefore accepts finite negative or
+positive `tdep` values and preserves their sign through scaling, summation, and
+closure diagnostics.
+
+`frcflw` is nominally a five-component particle-flow fraction vector, but WEPP
+normalizes it only on some producer paths. Authoritative records can therefore
+have a finite nonnegative component sum materially different from one. The
+watershed consumer reads those components unchanged. The combiner validates each
+component but neither rejects nor renormalizes the vector based only on its sum.
 
 ## EVENT Numeric Semantics
 
@@ -73,9 +82,9 @@ include positive-area sources only.
 | `drrunv` | m3 | Extensive | `sum(s_i * drrunv_i)`. | Conserved directly event-by-event and over the full run. |
 | `peakro` | m3/s | Extensive rate plus timing shape | Scale each source peak by `s_i`; superimpose source triangular hydrographs and serialize their maximum summed rate. | Zero when no valid positive-volume/positive-peak triangle exists; not a mass-closure quantity. |
 | `tdet` | kg | Extensive | `sum(s_i * tdet_i)`. | Conserved directly event-by-event and over the full run. |
-| `tdep` | kg | Extensive | `sum(s_i * tdep_i)`. | Conserved directly event-by-event and over the full run. |
+| `tdep` | kg | Signed extensive | `sum(s_i * tdep_i)`. | Preserve the WEPP sign convention and conserve the signed value directly event-by-event and over the full run. |
 | `sedcon_1..5` | kg/m3 | Intensive concentration | For class `k`, compute `M_k = sum(s_i * sedcon_ik * runvol_i)` and write `M_k / runvol`. | Write zero when `runvol = 0`; conserve each `M_k` through serialized concentration and volume. |
-| `clot`, `slot`, `saot`, `laot`, `sdot` | unitless fraction | Sediment shape | For class fraction `f_ik`, weight by source total class mass `M_i = runvol_i * sum_k(sedcon_ik)`: `sum(s_i * M_i * f_ik) / sum(s_i * M_i)`. | Write all five as zero when total sediment mass is zero; validate their sum against one when mass is positive, but do not treat the fractions themselves as extensive mass. |
+| `clot`, `slot`, `saot`, `laot`, `sdot` | unitless particle-flow component | Sediment shape | For component `f_ik`, weight by source total class mass `M_i = runvol_i * sum_k(sedcon_ik)`: `sum(s_i * M_i * f_ik) / sum(s_i * M_i)`. Do not renormalize the resulting vector. | Write all five as zero when total sediment mass is zero. Otherwise preserve the sediment-mass-weighted component vector, including a producer-origin sum different from one; the components are not extensive closure quantities. |
 | `gwbfv` | m3 | Extensive | `sum(s_i * gwbfv_i)`. The WEPP binary contract names it baseflow volume. | Conserved on every record type and over the full run. |
 | `gwdsv` | m3 | Extensive | `sum(s_i * gwdsv_i)`. The WEPP binary contract names it dissolved-storage volume; legacy reports also call it deep seepage. | Conserved on every record type and over the full run. |
 
@@ -143,6 +152,13 @@ atomic replacement.
 - `wshpas.f90` writes `peakro * harea`, `tdet`, `tdep`, class concentrations,
   particle fractions, `gwbfv`, and `gwdsv`; it derives runoff, lateral-flow, and
   tile volumes from their depths and area.
+- `sedseg.for` computes `tdep` from signed deposition-profile values, and the
+  authoritative development run contains negative `tdep` records; `tdep` is not
+  an absolute-magnitude field.
+- `enrich.for` normalizes `frcflw` on some paths but not all of them;
+  `wshimp.for` passes the emitted component vector into watershed routing. The
+  authoritative development run includes a serialized component sum of
+  `1.008624`, so a sum-to-one gate would reject valid WEPP output.
 - `wshred.for` consumes `runvol` as volume, derives average runoff depth as
   `runvol / wsarea`, accumulates `gwbfv` and `gwdsv` as volumes, and computes each
   sediment-class mass as `sedcon_i * runvol`.

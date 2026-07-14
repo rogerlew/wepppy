@@ -1,5 +1,5 @@
 {
-  "generated_at_utc": "2026-07-10T21:51:44Z",
+  "generated_at_utc": "2026-07-13T21:53:08Z",
   "mode": "observe-only",
   "base_ref": "origin/master",
   "thresholds": {
@@ -27,7 +27,7 @@
   "tooling": {
     "radon_available": false,
     "eslint_available": true,
-    "python_version": "Python 3.12.3"
+    "python_version": "Python 3.14.6"
   },
   "exceptions": {
     "source_file": null,
@@ -40,9 +40,9 @@
       "count": 908.0,
       "p50": 124.0,
       "p75": 294.5,
-      "p90": 661.2,
+      "p90": 662.7,
       "p95": 960.6,
-      "p99": 1969.92,
+      "p99": 1973.64,
       "max": 5697.0
     },
     "python_prod_max_function_len": {
@@ -51,7 +51,7 @@
       "p75": 108.25,
       "p90": 175.3,
       "p95": 225.65,
-      "p99": 345.14,
+      "p99": 345.68,
       "max": 2126.0
     },
     "python_prod_max_cc": {
@@ -68,8 +68,8 @@
       "p50": 282.0,
       "p75": 582.0,
       "p90": 1238.0,
-      "p95": 1617.0,
-      "p99": 2458.8,
+      "p95": 1636.0,
+      "p99": 2478.8,
       "max": 2835.0
     },
     "js_source_max_cc": {
@@ -134,7 +134,7 @@
       },
       {
         "path": "wepppy/weppcloud/routes/run_0/run_0_bp.py",
-        "value": 1973.0
+        "value": 1977.0
       },
       {
         "path": "tests/microservices/test_browse_auth_routes.py",
@@ -203,12 +203,12 @@
         "value": 350.0
       },
       {
-        "path": "wepppy/export/arc_export.py",
-        "value": 332.0
+        "path": "wepppy/weppcloud/routes/run_0/run_0_bp.py",
+        "value": 334.0
       },
       {
-        "path": "wepppy/weppcloud/routes/run_0/run_0_bp.py",
-        "value": 331.0
+        "path": "wepppy/export/arc_export.py",
+        "value": 332.0
       },
       {
         "path": "tools/hillslope_mofe_daily_closure_audit.py",
@@ -259,7 +259,7 @@
       },
       {
         "path": "wepppy/weppcloud/controllers_js/map_gl.js",
-        "value": 2401.0
+        "value": 2426.0
       },
       {
         "path": "wepppy/weppcloud/controllers_js/project.js",
@@ -274,6 +274,10 @@
         "value": 1782.0
       },
       {
+        "path": "wepppy/weppcloud/controllers_js/ag_fields.js",
+        "value": 1777.0
+      },
+      {
         "path": "wepppy/weppcloud/controllers_js/geneva_summary_report.js",
         "value": 1747.0
       },
@@ -284,10 +288,6 @@
       {
         "path": "wepppy/weppcloud/controllers_js/subcatchment_delineation.js",
         "value": 1636.0
-      },
-      {
-        "path": "wepppy/weppcloud/controllers_js/ag_fields.js",
-        "value": 1617.0
       },
       {
         "path": "wepppy/weppcloud/controllers_js/subcatchments_gl.js",

@@ -63,6 +63,22 @@ run/output trees. Concept 1 is not an implementation or validation dependency.
 diameters and phosphorus concentrations must match across sources and are copied
 from the target parent; v1 does not silently average heterogeneous chemistry.
 
+`tdep` is a signed extensive deposition term. WEPP's `sedseg.for` derives it from
+signed deposition-profile values, and `wshred.for` accumulates the signed value
+unchanged. Require it to be finite, preserve its sign through area scaling and
+summation, and apply the same serialization-derived closure budget used for other
+direct extensive quantities. The nonnegativity rule still applies to the other
+documented volumes, depths, rates, masses, concentrations, durations, and
+fractions.
+
+The five `frcflw` particle-flow components are finite nonnegative shape values but
+are not forcibly renormalized. WEPP normalizes them on some `enrich.for` paths, but
+other producer paths can emit a vector whose serialized sum differs materially
+from one; `wshred.for`/`wshimp.for` consume the components unchanged. Preserve each
+source vector through the documented sediment-mass-weighted component average.
+Reject invalid components, but do not reject or silently normalize a finite
+nonnegative vector solely because its sum is not one.
+
 ## Decision Provenance
 
 - Decision Venue: Codex API conversation, 2026-07-13 12:37 PDT
@@ -124,6 +140,12 @@ of the new state means "not run."
   `5.9e-11` m2 per sub-field.
 - The accepted semantic table cites the WEPP producer, watershed consumer,
   sediment producer, binary PASS contract, and owned Rust parser for every field.
+- The authoritative `sacral-self-discipline` rehearsal exposed a real signed
+  `tdep` value (`-0.75359` kg), confirming the `sedseg.for` sign convention and
+  correcting the initial nonnegative-validation assumption before delivery.
+- The same rehearsal exposed a real five-component `frcflw` sum of `1.008624`;
+  source inspection confirmed that WEPP does not renormalize every producer path,
+  so the kernel preserves rather than rejects or alters that shape vector.
 
 ## Risk and Rollback Notes
 
@@ -140,8 +162,8 @@ data migration.
 
 ## Implementation Notes
 
-The active ExecPlan is
-`docs/work-packages/20260713_ag_fields_concept2_watershed_integration/prompts/active/ag_fields_concept2_watershed_integration_execplan.md`.
+The completed ExecPlan is
+`docs/work-packages/20260713_ag_fields_concept2_watershed_integration/prompts/completed/ag_fields_concept2_watershed_integration_execplan.md`.
 The weighted kernel and its diagnostics must use the accepted semantic-table
 version `ag_fields_pass_semantics_v1` and algorithm name `ag_fields_v1`. A change
 to any formula, zero-volume rule, or closure budget requires a superseding ADR

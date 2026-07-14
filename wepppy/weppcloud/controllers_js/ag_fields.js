@@ -20,9 +20,13 @@ var AgFields = (function () {
         agfields_run_wepp: {
             completionEvent: "AGFIELDS_RUN_WEPP_TASK_COMPLETED",
             statusRole: "run-status"
+        },
+        agfields_run_watershed: {
+            completionEvent: "AGFIELDS_RUN_WATERSHED_TASK_COMPLETED",
+            statusRole: "integration-status"
         }
     };
-    var JOB_KEYS = ["agfields_run_wepp", "agfields_plantdb", "agfields_build_subfields"];
+    var JOB_KEYS = ["agfields_run_watershed", "agfields_run_wepp", "agfields_plantdb", "agfields_build_subfields"];
     var LAYER_NAME = "AgFields Sub-fields";
     var LAYER_KEY = "agFieldsSubfields";
 
@@ -36,7 +40,9 @@ var AgFields = (function () {
         "agfields:mapping:loaded",
         "agfields:mapping:saved",
         "agfields:wepp:queued",
+        "agfields:watershed:queued",
         "agfields:artifacts:cleared",
+        "agfields:watershed:cleared",
         "agfields:overlay:shown",
         "agfields:error"
     ];
@@ -309,6 +315,7 @@ var AgFields = (function () {
         controller._mappingPayload = null;
         controller._overlayRegistered = false;
         controller._clearArmedUntil = 0;
+        controller._clearWatershedArmedUntil = 0;
         controller.detectCropYearPatterns = detectCropYearPatterns;
 
         function urlFor(path) {
@@ -453,6 +460,11 @@ var AgFields = (function () {
                 weppBinSelect: queryRole("wepp-bin-select", form),
                 clearRunsButton: queryRole("clear-runs-button", form),
                 resultsLinks: queryRole("results-links", form),
+                integrationRunButton: queryRole("integration-run-button", form),
+                integrationStatus: queryRole("integration-status", form),
+                integrationClearButton: queryRole("integration-clear-button", form),
+                integrationResults: queryRole("integration-results", form),
+                integrationLimitation: queryRole("integration-limitation", form),
                 statusPanel: dom.qs("#ag_fields_status_panel", form),
                 statusSpinner: dom.qs("#ag_fields_braille", form),
                 statusLog: dom.qs("#ag_fields_status_log", form),
@@ -583,6 +595,12 @@ var AgFields = (function () {
                 } else if (name === "clear-runs") {
                     event.preventDefault();
                     clearRuns();
+                } else if (name === "run-watershed") {
+                    event.preventDefault();
+                    runWatershed();
+                } else if (name === "clear-watershed") {
+                    event.preventDefault();
+                    clearWatershed();
                 }
             });
             dom.delegate(controller.form, "input", '[data-role="accessor-input"]', function () {
@@ -972,6 +990,73 @@ var AgFields = (function () {
             renderResultsLinks(Boolean(wepp.complete));
         }
 
+        function renderIntegrationResults(integration) {
+            var container = controller.nodes.integrationResults;
+            if (!container) {
+                return;
+            }
+            container.textContent = "";
+            if (asString(integration.status) !== "completed") {
+                return;
+            }
+            var browse = document.createElement("a");
+            browse.href = url_for_run("browse/" + (integration.root_relpath || "wepp/ag_fields/watershed") + "/");
+            browse.target = "_blank";
+            browse.rel = "noopener";
+            browse.textContent = "Browse integrated watershed outputs";
+            container.appendChild(browse);
+            container.dataset.state = "success";
+        }
+
+        function renderIntegration() {
+            var state = controller.state || {};
+            var wepp = asObject(state.wepp);
+            var staleness = asObject(state.staleness);
+            var readiness = asObject(state.readiness);
+            var integration = asObject(state.watershed_integration);
+            var summary = asObject(integration.summary);
+            var failure = asObject(integration.error);
+            var status = asString(integration.status) || "not_run";
+            var active = hasActiveJob(state);
+            var blocked = "";
+            if (!wepp.complete || staleness.wepp_runs) {
+                blocked = "Run current WEPP simulations on all sub-fields first.";
+            } else if (!readiness.observed_climate) {
+                blocked = "A continuous observed climate is required.";
+            } else if (!readiness.parent_wepp) {
+                blocked = "Prepare all parent WEPP hillslope inputs first.";
+            }
+            setDisabled(controller.nodes.integrationRunButton, active || Boolean(blocked));
+            setDisabled(controller.nodes.integrationClearButton, active || status === "not_run");
+            if (controller.nodes.integrationLimitation) {
+                controller.nodes.integrationLimitation.textContent = integration.limitation || "";
+            }
+            if (active) {
+                setChip(controller.nodes.integrationStatus, "An AgFields job is running; wait for it to finish.", "warning");
+            } else if (blocked) {
+                setChip(controller.nodes.integrationStatus, blocked, "warning");
+            } else if (integration.stale) {
+                setChip(controller.nodes.integrationStatus, "The integrated watershed is stale — run it again.", "warning");
+            } else if (status === "failed") {
+                setChip(
+                    controller.nodes.integrationStatus,
+                    "Integration failed" + (failure.phase ? " during " + failure.phase : "") +
+                        ": " + (failure.message || "See the job details."),
+                    "critical"
+                );
+            } else if (status === "completed") {
+                setChip(
+                    controller.nodes.integrationStatus,
+                    formatCount(summary.affected_parent_count) + " affected parents integrated from " +
+                        formatCount(summary.sub_field_source_count) + " sub-field sources; closure accepted.",
+                    "success"
+                );
+            } else {
+                setChip(controller.nodes.integrationStatus, "Ready to run the isolated integrated watershed.", "info");
+            }
+            renderIntegrationResults(integration);
+        }
+
         function renderSummary() {
             if (!controller.nodes.summary || !controller.state) {
                 return;
@@ -981,9 +1066,10 @@ var AgFields = (function () {
                 Boolean(asObject(state.schema).complete),
                 Boolean(asObject(state.subfields).complete),
                 Boolean(asObject(state.mapping).complete),
-                Boolean(asObject(state.wepp).complete)
+                Boolean(asObject(state.wepp).complete),
+                asString(asObject(state.watershed_integration).status) === "completed"
             ].filter(Boolean).length;
-            controller.nodes.summary.textContent = complete + " of 4 stages complete.";
+            controller.nodes.summary.textContent = complete + " of 5 stages complete.";
         }
 
         function renderState() {
@@ -995,6 +1081,7 @@ var AgFields = (function () {
             renderSubfields();
             renderMapping();
             renderWepp();
+            renderIntegration();
             renderSummary();
         }
 
@@ -1607,6 +1694,51 @@ var AgFields = (function () {
                 handleRequestError("clear", controller.nodes.runStatus, "Could not clear AgFields artifacts", error);
             }).finally(function () {
                 setButtonBusy(controller.nodes.clearRunsButton, false);
+            });
+        }
+
+        function runWatershed() {
+            enqueue(
+                "agfields/run-watershed",
+                {},
+                "agfields_run_watershed",
+                controller.nodes.integrationRunButton,
+                "Queuing integrated watershed run…",
+                controller.nodes.integrationStatus,
+                "agfields:watershed:queued"
+            ).catch(function () {});
+        }
+
+        function clearWatershed() {
+            var now = Date.now();
+            if (controller._clearWatershedArmedUntil < now) {
+                controller._clearWatershedArmedUntil = now + 8000;
+                setChip(
+                    controller.nodes.integrationStatus,
+                    "Click “Clear Integrated Watershed” again within 8 seconds to confirm.",
+                    "warning"
+                );
+                return;
+            }
+            controller._clearWatershedArmedUntil = 0;
+            setButtonBusy(controller.nodes.integrationClearButton, true, "Clearing…");
+            authorizedPost("agfields/clear-watershed", {}).then(function (response) {
+                setChip(
+                    controller.nodes.integrationStatus,
+                    response.message || "Integrated watershed artifacts cleared.",
+                    "success"
+                );
+                emitter.emit("agfields:watershed:cleared", response || {});
+                return controller.hydrate();
+            }).catch(function (error) {
+                handleRequestError(
+                    "clear-watershed",
+                    controller.nodes.integrationStatus,
+                    "Could not clear integrated watershed artifacts",
+                    error
+                );
+            }).finally(function () {
+                setButtonBusy(controller.nodes.integrationClearButton, false);
             });
         }
 

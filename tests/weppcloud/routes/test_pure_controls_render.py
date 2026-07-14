@@ -1080,6 +1080,7 @@ def test_ag_fields_control_renders_required_dom_contract(jinja_env: Environment)
         "agfields_stage_subfields",
         "agfields_stage_managements",
         "agfields_stage_run",
+        "agfields_stage_watershed",
     ):
         assert f'id="{stage_id}"' in rendered
 
@@ -1116,6 +1117,11 @@ def test_ag_fields_control_renders_required_dom_contract(jinja_env: Environment)
         "wepp-bin-select",
         "clear-runs-button",
         "results-links",
+        "integration-run-button",
+        "integration-status",
+        "integration-clear-button",
+        "integration-results",
+        "integration-limitation",
     ):
         assert f'data-role="{role}"' in rendered
 

@@ -36,6 +36,10 @@ Use versioned, additive artifacts. The initial contract includes:
 - `manifest/pass_sources.parquet`: one row per parent/source with source kind and
   identity, parent/source raster and modeled areas, scale, climate/calendar proof,
   source full-run totals, status, and algorithm/ADR version.
+- `manifest/materialized_parent_pass/H*.pass.dat`: hard links to the exact
+  materialized parent background PASS inputs. Replacing an affected parent in the
+  isolated output leaves this auditable source inventory unchanged without
+  duplicating its file data.
 - `manifest/pass_event_closure.parquet`: one row per affected parent/day with
   weighted input totals, reparsed combined totals, and residuals for every
   conserved water-volume and sediment-mass quantity.
@@ -94,7 +98,7 @@ run-relative POSIX paths and never absolute host paths.
 
 `integration_summary.json` has these exact required keys:
 `schema_version`, `algorithm`, `semantic_contract`, `adr`, `status`,
-`source_signature`, `started_at`, `completed_at`, `run_root`,
+`source_signature`, `stage4_source_signature`, `upstream_timestamps`, `started_at`, `completed_at`, `run_root`,
 `pass_family`, `parent_wepp_bin`, `ag_fields_wepp_bin`,
 `parent_count`, `affected_parent_count`, `sub_field_source_count`,
 `full_coverage_parent_count`, `pass_count`, `required_resources`,

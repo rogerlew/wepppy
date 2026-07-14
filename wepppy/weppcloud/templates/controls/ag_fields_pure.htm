@@ -357,6 +357,36 @@
     {% endcall %}
   </section>
 
+  <section class="wc-panel wc-stack agfields-stage" id="agfields_stage_watershed">
+    <header class="wc-panel__header">
+      <div class="wc-stack">
+        <h3 class="wc-panel__title wc-heading__subtitle agfields-stage__heading">5. Integrate the Watershed</h3>
+        <p class="wc-text-muted">Area-weight the current sub-field results with each uncovered parent response, then rerun watershed WEPP in an isolated output tree.</p>
+      </div>
+    </header>
+    <div class="agfields-stage__actions">
+      <button type="button"
+              class="pure-button pure-button-primary"
+              data-action="run-watershed"
+              data-role="integration-run-button"
+              disabled>
+        Run Integrated Watershed
+      </button>
+      <button type="button"
+              class="pure-button button-error agfields-clear-button"
+              data-action="clear-watershed"
+              data-role="integration-clear-button"
+              disabled>
+        Clear Integrated Watershed
+      </button>
+    </div>
+    <div class="wc-status-chip" data-role="integration-status" role="status" aria-live="polite"></div>
+    <div class="wc-status-chip" data-role="integration-results" role="status" aria-live="polite"></div>
+    <p class="wc-text-muted" data-role="integration-limitation">
+      Field water and sediment are injected at the parent outlet; downslope buffer, trapping, and runon effects are not represented.
+    </p>
+  </section>
+
   {{ ui.job_hint('hint_ag_fields_job') }}
 </div>
 {% endcall %}

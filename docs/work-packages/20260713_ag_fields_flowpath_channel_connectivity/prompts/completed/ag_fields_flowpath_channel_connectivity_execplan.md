@@ -6,7 +6,7 @@ work proceeds. Maintain it according to
 `docs/prompt_templates/codex_exec_plans.md`.
 
 This is a secondary, bounded plan that may run concurrently with
-`docs/work-packages/20260713_ag_fields_concept2_watershed_integration/prompts/active/ag_fields_concept2_watershed_integration_execplan.md`.
+`docs/work-packages/20260713_ag_fields_concept2_watershed_integration/prompts/completed/ag_fields_concept2_watershed_integration_execplan.md`.
 It does not replace or block that primary plan.
 
 ## Purpose / Big Picture

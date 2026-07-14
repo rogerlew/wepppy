@@ -33,6 +33,7 @@ from wepppy.all_your_base.all_your_base import isint
 from wepppy.nodb.base import NoDbBase, nodb_setter
 from wepppy.nodb.core import Climate, ClimateMode, Landuse, Watershed
 from wepppy.nodb.geojson_crs_inference import infer_geojson_crs
+from wepppy.nodb.redis_prep import RedisPrep, TaskEnum
 from wepppy.topo.peridot.peridot_runner import (
     post_abstract_sub_fields,
     run_peridot_wbt_sub_fields_abstraction,
@@ -146,6 +147,10 @@ class AgFields(NoDbBase):
             self._subfields_source_signature = None
             self._wepp_source_signature = None
             self._wepp_bin = self.config_get_str('ag_fields', 'bin')
+            self._watershed_integration_source_signature = None
+            self._watershed_integration_summary = None
+            self._watershed_integration_status = 'not_run'
+            self._watershed_integration_error = None
 
     @property
     def field_n(self) -> int:
@@ -589,6 +594,22 @@ class AgFields(NoDbBase):
         return _join(self.wd, 'ag_fields')
 
     @property
+    def ag_field_watershed_root(self) -> str:
+        return _join(self.wd, 'wepp/ag_fields/watershed')
+
+    @property
+    def ag_field_watershed_runs_dir(self) -> str:
+        return _join(self.ag_field_watershed_root, 'runs')
+
+    @property
+    def ag_field_watershed_output_dir(self) -> str:
+        return _join(self.ag_field_watershed_root, 'output')
+
+    @property
+    def ag_field_watershed_manifest_dir(self) -> str:
+        return _join(self.ag_field_watershed_root, 'manifest')
+
+    @property
     def plant_files_dir(self) -> str:
         return _join(self.ag_fields_dir, 'plant_files')
 
@@ -617,6 +638,133 @@ class AgFields(NoDbBase):
                     shutil.rmtree(directory)
                 os.makedirs(directory, exist_ok=True)
             self._wepp_source_signature = None
+
+    def run_watershed_integration(
+        self,
+        max_workers: Optional[int] = None,
+        phase_callback: Optional[Any] = None,
+    ) -> Dict[str, Any]:
+        """Run the isolated Concept 2 watershed integration."""
+        from .watershed_integration import AgFieldsWatershedIntegrator
+
+        started_at = int(time.time())
+        with self.locked():
+            current_status = str(getattr(self, '_watershed_integration_status', 'not_run'))
+            if current_status == 'running' or current_status.startswith('running:'):
+                raise AgFieldsNoDbLockedException('AgFields watershed integration is already running.')
+            self._watershed_integration_status = 'running:preflight'
+            self._watershed_integration_source_signature = None
+            self._watershed_integration_summary = None
+            self._watershed_integration_error = None
+
+        def update_phase(phase: str) -> None:
+            with self.locked():
+                self._watershed_integration_status = f'running:{phase}'
+            if phase_callback is not None:
+                phase_callback(phase)
+
+        integrator = AgFieldsWatershedIntegrator(
+            self,
+            max_workers=max_workers,
+            phase_callback=update_phase,
+        )
+        try:
+            summary = integrator.run()
+        except Exception as exc:  # broad-except: persisted public operation boundary
+            public_message = str(exc).replace(str(Path(self.wd).resolve()), '<run>')
+            failure = {
+                'phase': integrator.phase,
+                'type': type(exc).__name__,
+                'message': public_message,
+                'failed_at': int(time.time()),
+                'started_at': started_at,
+            }
+            with self.locked():
+                self._watershed_integration_status = 'failed'
+                self._watershed_integration_error = failure
+                self._watershed_integration_summary = None
+            raise
+
+        with self.locked():
+            self._watershed_integration_source_signature = summary['source_signature']
+            self._watershed_integration_summary = summary
+            self._watershed_integration_status = 'completed'
+            self._watershed_integration_error = None
+        return deepcopy(summary)
+
+    def clear_watershed_integration(self) -> None:
+        """Clear only the fixed isolated Concept 2 subtree and additive state."""
+        root = Path(self.ag_field_watershed_root)
+        expected = Path(self.wd).resolve() / 'wepp' / 'ag_fields' / 'watershed'
+        if root.absolute() != expected.absolute():
+            raise ValueError('AgFields watershed path does not match the fixed isolated root.')
+        if any(path.is_symlink() for path in (expected.parent.parent, expected.parent, expected)):
+            raise ValueError('Refusing to clear through a symlinked AgFields watershed path.')
+        with self.locked():
+            current_status = str(getattr(self, '_watershed_integration_status', 'not_run'))
+            if current_status == 'running' or current_status.startswith('running:'):
+                raise AgFieldsNoDbLockedException('AgFields watershed integration is running.')
+            self._watershed_integration_status = 'clearing'
+        try:
+            if root.exists():
+                shutil.rmtree(root)
+        except OSError as exc:
+            with self.locked():
+                self._watershed_integration_status = 'failed'
+                self._watershed_integration_error = {
+                    'phase': 'clear',
+                    'type': type(exc).__name__,
+                    'message': str(exc).replace(str(Path(self.wd).resolve()), '<run>'),
+                    'failed_at': int(time.time()),
+                }
+            raise
+        with self.locked():
+            self._watershed_integration_source_signature = None
+            self._watershed_integration_summary = None
+            self._watershed_integration_status = 'not_run'
+            self._watershed_integration_error = None
+
+    def get_watershed_integration_state(self) -> Dict[str, Any]:
+        """Return additive state, including historical-payload defaults."""
+        summary = deepcopy(getattr(self, '_watershed_integration_summary', None))
+        status = str(getattr(self, '_watershed_integration_status', 'not_run'))
+        artifacts_exist = Path(self.ag_field_watershed_manifest_dir, 'integration_summary.json').is_file()
+        stage4_signature = getattr(self, '_wepp_source_signature', None)
+        stored_stage4_signature = summary.get('stage4_source_signature') if summary else None
+        upstream_changed = False
+        if summary and summary.get('upstream_timestamps'):
+            prep = RedisPrep.tryGetInstance(self.wd)
+            if prep is not None:
+                upstream_changed = any(
+                    prep[str(task)] != stored
+                    for task, stored in (
+                        (TaskEnum.abstract_watershed, summary['upstream_timestamps'].get(str(TaskEnum.abstract_watershed))),
+                        (TaskEnum.build_landuse, summary['upstream_timestamps'].get(str(TaskEnum.build_landuse))),
+                        (TaskEnum.build_soils, summary['upstream_timestamps'].get(str(TaskEnum.build_soils))),
+                        (TaskEnum.build_climate, summary['upstream_timestamps'].get(str(TaskEnum.build_climate))),
+                        (TaskEnum.run_wepp_hillslopes, summary['upstream_timestamps'].get(str(TaskEnum.run_wepp_hillslopes))),
+                        (TaskEnum.run_ag_fields, summary['upstream_timestamps'].get(str(TaskEnum.run_ag_fields))),
+                    )
+                )
+        stale = bool(summary) and (
+            not artifacts_exist
+            or self.get_staleness()['wepp_runs']
+            or upstream_changed
+            or (stored_stage4_signature is not None and stored_stage4_signature != stage4_signature)
+        )
+        return {
+            'status': status,
+            'stale': stale,
+            'source_signature': getattr(self, '_watershed_integration_source_signature', None),
+            'summary': summary,
+            'error': deepcopy(getattr(self, '_watershed_integration_error', None)),
+            'root_relpath': 'wepp/ag_fields/watershed',
+            'browse_relpath': 'wepp/ag_fields/watershed/',
+            'limitation': (
+                'Field water and sediment are injected at the parent outlet; downslope '
+                'buffer, trapping, and runon effects are not represented.'
+            ),
+        }
 
     @property
     def rotation_accessor(self) -> Optional[str]:

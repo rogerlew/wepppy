@@ -44,6 +44,12 @@ function buildHtml() {
             <button type="button" data-action="clear-runs" data-role="clear-runs-button">Clear</button>
             <div data-role="results-links"></div>
 
+            <button type="button" data-action="run-watershed" data-role="integration-run-button">Run Watershed</button>
+            <button type="button" data-action="clear-watershed" data-role="integration-clear-button">Clear Watershed</button>
+            <div data-role="integration-status"></div>
+            <div data-role="integration-results"></div>
+            <p data-role="integration-limitation"></p>
+
             <div id="ag_fields_status_panel"><div id="ag_fields_status_log"></div></div>
             <span id="ag_fields_braille"></span>
             <details id="ag_fields_stacktrace_panel"><div id="ag_fields_stacktrace"></div></details>
@@ -93,6 +99,14 @@ function makeState(overrides = {}) {
         },
         plant_files: { valid_count: 0, invalid_count: 0 },
         wepp: { run_count: 0, output_count: 0, complete: false, wepp_bin: "wepp_dcc52a6" },
+        watershed_integration: {
+            status: "not_run",
+            stale: false,
+            summary: null,
+            error: null,
+            root_relpath: "wepp/ag_fields/watershed",
+            limitation: "Field water and sediment are injected at the parent outlet.",
+        },
         staleness: { subfields: false, wepp_runs: false },
         readiness: {
             observed_climate: true,
@@ -106,11 +120,13 @@ function makeState(overrides = {}) {
             agfields_build_subfields: null,
             agfields_plantdb: null,
             agfields_run_wepp: null,
+            agfields_run_watershed: null,
         },
         active_job_ids: {
             agfields_build_subfields: null,
             agfields_plantdb: null,
             agfields_run_wepp: null,
+            agfields_run_watershed: null,
         },
     };
     Object.keys(overrides).forEach((key) => {
@@ -274,6 +290,7 @@ describe("AgFields controller", () => {
                 "agfields_build_subfields",
                 "agfields_plantdb",
                 "agfields_run_wepp",
+                "agfields_run_watershed",
             ]),
         );
         expect(baseInstance.attach_status_stream).toHaveBeenCalledTimes(1);
@@ -283,7 +300,7 @@ describe("AgFields controller", () => {
         expect(document.querySelector('[data-role="field-id-select"]').value).toBe("field_id");
         expect(document.querySelector('[data-role="run-button"]').disabled).toBe(false);
         expect(document.querySelector('[data-role="wepp-bin-select"]').value).toBe("wepp_dcc52a6");
-        expect(document.getElementById("ag_fields_summary").textContent).toBe("3 of 4 stages complete.");
+        expect(document.getElementById("ag_fields_summary").textContent).toBe("3 of 5 stages complete.");
     });
 
     test("renders snapshot-driven gating and orphan mapping errors", async () => {
@@ -443,7 +460,8 @@ describe("AgFields controller", () => {
         });
         httpMock.postJsonWithSessionToken
             .mockResolvedValueOnce({ body: { job_id: "build-1" } })
-            .mockResolvedValueOnce({ body: { job_id: "run-1" } });
+            .mockResolvedValueOnce({ body: { job_id: "run-1" } })
+            .mockResolvedValueOnce({ body: { job_id: "watershed-1" } });
         httpMock.requestWithSessionToken.mockImplementation((url) => {
             if (url.endsWith("agfields/plant-database")) {
                 return Promise.resolve({ body: { job_id: "plant-1" } });
@@ -477,6 +495,13 @@ describe("AgFields controller", () => {
         );
         await flushPromises();
 
+        currentState = makeState({ wepp: { run_count: 24, complete: true } });
+        controller.renderState(currentState);
+        document.querySelector('[data-action="run-watershed"]').dispatchEvent(
+            new MouseEvent("click", { bubbles: true }),
+        );
+        await flushPromises();
+
         expect(httpMock.postJsonWithSessionToken).toHaveBeenCalledWith(
             expect.stringContaining("agfields/run-wepp"),
             { wepp_bin: "wepp_dcc52a6" },
@@ -496,7 +521,34 @@ describe("AgFields controller", () => {
                 jobId: "run-1",
                 completionEvent: "AGFIELDS_RUN_WEPP_TASK_COMPLETED",
             },
+            {
+                jobId: "watershed-1",
+                completionEvent: "AGFIELDS_RUN_WATERSHED_TASK_COMPLETED",
+            },
         ]));
+    });
+
+    test("hydrates completed watershed counts, limitation, and browse link", async () => {
+        controller.bootstrap({});
+        await flushPromises();
+        controller.renderState(makeState({
+            wepp: { run_count: 24, complete: true },
+            watershed_integration: {
+                status: "completed",
+                summary: { affected_parent_count: 8, sub_field_source_count: 24 },
+            },
+        }));
+
+        expect(document.querySelector('[data-role="integration-status"]').textContent).toContain(
+            "8 affected parents integrated from 24 sub-field sources",
+        );
+        expect(document.querySelector('[data-role="integration-limitation"]').textContent).toContain(
+            "parent outlet",
+        );
+        expect(document.querySelector('[data-role="integration-results"] a').href).toContain(
+            "browse/wepp/ag_fields/watershed/",
+        );
+        expect(document.getElementById("ag_fields_summary").textContent).toBe("5 of 5 stages complete.");
     });
 
     test("409 conflict rehydrates and keeps the server-reported active stream", async () => {

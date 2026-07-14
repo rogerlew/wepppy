@@ -15,12 +15,13 @@ Audience: template, controller, route, and test implementers for `wepppy/nodb/mo
 
 ## Design Mandate: Do Not Mirror the API
 
-The backend exposes more operations than the user needs to reason about. The UI must NOT mirror that call graph. It presents four stages:
+The backend exposes more operations than the user needs to reason about. The UI must NOT mirror that call graph. It presents five stages:
 
 1. Provide field boundaries and confirm how the file is interpreted.
 2. Build and review sub-fields.
 3. Map crop names to managements, with optional plant-file uploads.
 4. Run WEPP on the sub-fields.
+5. Integrate the current sub-field results into an isolated watershed rerun.
 
 `rasterize_field_boundaries_geojson`, `periodot_abstract_sub_fields`, and `polygonize_sub_fields` are mechanical consequences of decisions already made — they run as one chained job behind a single button. `set_field_id_key` and `set_rotation_accessor` are pickers populated from the uploaded file's own attribute table — the user must never type a column name from memory. Any layout that surfaces a backend method name as a button label is wrong.
 
@@ -173,6 +174,24 @@ Purpose: run and monitor the per-sub-field simulations.
 - On success: success chip with run count and links — browse `wepp/ag_fields/output/`, and a pointer to Features Export for `AgFields Spatial` / `AgFields Metrics` layers.
 - A single sub-field failure aborts the run (backend cancels pending sub-fields; already-running ones finish): the stacktrace panel shows the failing sub-field; the status chip must name the failed `sub_field_id` and its parent `field_id`.
 
+### Stage 5 — Integrate the Watershed
+
+Purpose: combine current independent sub-field PASS sources with uncovered parent
+responses and rerun watershed WEPP without changing baseline or Stage 4 artifacts.
+
+- The primary button posts `agfields/run-watershed` and tracks job key
+  `agfields_run_watershed` with completion event
+  `AGFIELDS_RUN_WATERSHED_TASK_COMPLETED`.
+- The stage is blocked until Stage 4 is complete and current, the observed climate
+  is supported, and every parent prepared input exists. It shares the AgFields
+  single-flight guard with Stages 2–4.
+- Completion shows affected-parent and sub-field-source counts, accepted closure,
+  and a browse link rooted at `wepp/ag_fields/watershed/`.
+- The limitation is always visible: field water and sediment are injected at the
+  parent outlet; downslope buffer, trapping, and runon effects are not represented.
+- Clear requires a second click and calls `agfields/clear-watershed`. It can remove
+  only the isolated watershed tree and additive integration state.
+
 ## 4. Stage Gating and Staleness
 
 Gating is advisory-but-honest: downstream primary buttons are disabled with an explanatory chip, never silently disabled.
@@ -181,9 +200,10 @@ The backend owns invalidation and computes explicit staleness from boundary, sch
 
 | Event | Effect |
 |---|---|
-| GeoJSON re-uploaded | Stages 2–4 revert to blocked; prior sub-field summary shows a "stale — rebuild required" warning chip; schema selections reset to auto-detected defaults from the new column list |
+| GeoJSON re-uploaded | Stages 2–5 revert to blocked; prior sub-field summary shows a "stale — rebuild required" warning chip; schema selections reset to auto-detected defaults from the new column list |
 | Schema re-confirmed (changed values) | Same as re-upload for stages 2–4; crop list in stage 3 refreshes |
-| Sub-fields rebuilt | Stage 4 reverts to not-run; previous outputs remain on disk until cleared or overwritten; summary chip notes prior outputs are stale |
+| Sub-fields rebuilt | Stages 4–5 revert to not-run/stale; previous outputs remain on disk until cleared or overwritten; summary chips note prior outputs are stale |
+| Stage 4 rerun or parent inputs changed | Stage 5 is stale until the isolated integration is rerun |
 | Mapping saved incomplete | Stage 3 chip shows remaining count; stage 4 stays blocked |
 | Plant file deleted while referenced | Stage 3 chip gains error state ("mapping references a deleted plant file"); stage 4 blocked |
 
@@ -213,6 +233,7 @@ Hydration: the server-rendered control contains static structure and installed W
 | Stage 2 | `build-subfields-button`, `subfields-status`, `subfields-summary`, `min-area-input` |
 | Stage 3 | `mapping-chip`, `open-mapping-button`, `plantdb-input`, `plantdb-upload-button`, `plantdb-status`, `plantfile-table-body` |
 | Stage 4 | `run-button`, `run-status`, `wepp-bin-select`, `clear-runs-button`, `results-links` |
+| Stage 5 | `integration-run-button`, `integration-status`, `integration-clear-button`, `integration-results`, `integration-limitation` |
 | Modal | `mapping-table-body`, `mapping-status`, `mapping-save-button`, `unused-mappings`, `unused-mappings-body` |
 
 - Empty status chips collapse via the `:empty { display: none }` pattern.
@@ -257,13 +278,13 @@ All routes are run-scoped under rq-engine and follow the Treatments/Disturbed pr
 | Sub-fields overlay resource | `GET /runs/{runid}/{config}/agfields/sub-fields.geojson` | Serves `sub_fields.WGS.geojson` as `application/geo+json` |
 | State snapshot | `GET /runs/{runid}/{config}/agfields/state` | Returns all stage hydration state described below |
 
-The state snapshot has top-level objects `boundary`, `schema`, `subfields`, `mapping`, `plant_files`, `wepp`, `staleness`, and `readiness`. `boundary.filename` is the persisted source basename shown after reload, with the canonical boundary filename as the compatibility fallback for historical projects. `plant_files` carries valid/invalid counts; the inventory endpoint supplies the detailed rows. `wepp` carries `run_count`, `output_count`, `complete`, and the AgFields-owned `wepp_bin` used to hydrate Stage 4. The snapshot also exposes `job_ids` (last known ids) and `active_job_ids` (only queued/started/deferred/scheduled ids) under the contractual keys `agfields_build_subfields`, `agfields_plantdb`, and `agfields_run_wepp`. Staleness keys are `subfields` and `wepp_runs`; readiness includes observed-climate/year-bound validity, watershed abstraction, parent WEPP readiness, and missing parent WEPP ids.
+The state snapshot has top-level objects `boundary`, `schema`, `subfields`, `mapping`, `plant_files`, `wepp`, `watershed_integration`, `staleness`, and `readiness`. `boundary.filename` is the persisted source basename shown after reload, with the canonical boundary filename as the compatibility fallback for historical projects. `plant_files` carries valid/invalid counts; the inventory endpoint supplies the detailed rows. `wepp` carries `run_count`, `output_count`, `complete`, and the AgFields-owned `wepp_bin` used to hydrate Stage 4. `watershed_integration` carries status, staleness, terminal summary/error, fixed browse path, and limitation text. The snapshot also exposes `job_ids` and `active_job_ids` under the contractual keys `agfields_build_subfields`, `agfields_plantdb`, `agfields_run_wepp`, and `agfields_run_watershed`. Staleness keys are `subfields` and `wepp_runs`; readiness includes observed-climate/year-bound validity, watershed abstraction, parent WEPP readiness, and missing parent WEPP ids.
 
 RQ tasks return their terminal payload through the RQ job result and publish the same payload as `RESULT_JSON` before their completion trigger. Plant processing publishes the valid/invalid inventory; sub-field building publishes field/sub-field counts; WEPP publishes `run_count`. Failures publish `EXCEPTION_JSON`; plant failures include `filename`, and WEPP failures include both `sub_field_id` and parent `field_id`. Completion triggers are `AGFIELDS_BUILD_SUBFIELDS_TASK_COMPLETED`, `AGFIELDS_PLANTDB_TASK_COMPLETED`, and `AGFIELDS_RUN_WEPP_TASK_COMPLETED`.
 
 The Stage 4 worker clears `TaskEnum.run_ag_fields` when it starts and stamps it only after all sub-field WEPP runs succeed. `preflight2` considers the timestamp fresh only when it is newer than the latest parent WEPP timestamp and the current watershed abstraction, landuse, soils, and climate timestamps. The canonical cross-component contract is `docs/ui-docs/control-ui-styling/preflight_behavior.md#agfields-preflight-integration`.
 
-Async submissions are single-flight per run across all three job families. A concurrent submission, boundary/schema/mapping mutation, plant-file delete, or artifact clear receives HTTP 409 with `error.code="agfields_job_active"` while a job is active; the UI must keep the current stream attached rather than replacing its job id.
+Async submissions are single-flight per run across all four job families. A concurrent submission, boundary/schema/mapping mutation, plant-file delete, or artifact clear receives HTTP 409 with `error.code="agfields_job_active"` while a job is active; the UI must keep the current stream attached rather than replacing its job id.
 
 ## 10. Implemented Backend Behavior
 

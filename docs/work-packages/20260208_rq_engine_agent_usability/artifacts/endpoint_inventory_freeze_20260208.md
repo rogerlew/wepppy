@@ -5,9 +5,9 @@ Source-of-truth inventory captured directly from:
 - `wepppy/weppcloud/routes/bootstrap.py`
 
 Snapshot summary:
-- Total endpoints inventoried: **135**
-- Classification counts: **agent-facing 112**, **internal 17**, **ui-only 6**
-- Canonical owner counts: **rq-engine 132**, **Flask wrapper 3**
+- Total endpoints inventoried: **137**
+- Classification counts: **agent-facing 114**, **internal 17**, **ui-only 6**
+- Canonical owner counts: **rq-engine 134**, **Flask wrapper 3**
 
 Cutover reconciliation note (2026-04-11):
 - Row-8 contract cutover package
@@ -22,6 +22,11 @@ Inventory reconciliation note (2026-07-10):
 - All 15 additions are agent-facing rq-engine routes. The table records their
   run-access and authenticated-scope contracts, including the public-run ERMiT
   download exception.
+
+Inventory reconciliation note (2026-07-13):
+- Added the authenticated AgFields Concept 2 watershed run and isolated-clear
+  routes. Both preserve run access checks and the `rq:enqueue` scope; only the run
+  route enqueues asynchronous work.
 
 ## Inventory Table
 
@@ -57,6 +62,7 @@ Inventory reconciliation note (2026-07-10):
 | POST | `/api/runs/{runid}/{config}/agfields/boundaries` | `wepppy/microservices/rq_engine/ag_fields_routes.py` | `upload_boundaries` | agent-facing | rq-engine | JWT Bearer | `rq:enqueue` | mutating | Run access check: `authorize_run_access`. Validates and persists an uploaded field-boundary GeoJSON synchronously. |
 | POST | `/api/runs/{runid}/{config}/agfields/build-subfields` | `wepppy/microservices/rq_engine/ag_fields_routes.py` | `build_subfields` | agent-facing | rq-engine | JWT Bearer | `rq:enqueue` | mutating | Run access check: `authorize_run_access`. Enqueues the AgFields sub-field build and returns `202` with `job_id`. |
 | POST | `/api/runs/{runid}/{config}/agfields/clear` | `wepppy/microservices/rq_engine/ag_fields_routes.py` | `clear_wepp` | agent-facing | rq-engine | JWT Bearer | `rq:enqueue` | mutating | Run access check: `authorize_run_access`. Synchronously clears regenerable AgFields WEPP run and output artifacts. |
+| POST | `/api/runs/{runid}/{config}/agfields/clear-watershed` | `wepppy/microservices/rq_engine/ag_fields_routes.py` | `clear_watershed` | agent-facing | rq-engine | JWT Bearer | `rq:enqueue` | mutating | Run access check: `authorize_run_access`. Synchronously clears only the fixed isolated AgFields watershed tree and additive state after active-job checks. |
 | GET | `/api/runs/{runid}/{config}/agfields/management-options` | `wepppy/microservices/rq_engine/ag_fields_routes.py` | `management_options` | agent-facing | rq-engine | JWT Bearer | `rq:status` | read-only | Run access check: `authorize_run_access`. Returns the run's WEPPcloud management options. |
 | GET | `/api/runs/{runid}/{config}/agfields/plant-files` | `wepppy/microservices/rq_engine/ag_fields_routes.py` | `plant_file_inventory` | agent-facing | rq-engine | JWT Bearer | `rq:status` | read-only | Run access check: `authorize_run_access`. Returns the current AgFields plant-file inventory and validation status. |
 | DELETE | `/api/runs/{runid}/{config}/agfields/plant-files/{filename}` | `wepppy/microservices/rq_engine/ag_fields_routes.py` | `delete_plant_file` | agent-facing | rq-engine | JWT Bearer | `rq:enqueue` | mutating | Run access check: `authorize_run_access`. Deletes one run-scoped AgFields plant file after active-job conflict checks. |
@@ -64,6 +70,7 @@ Inventory reconciliation note (2026-07-10):
 | GET | `/api/runs/{runid}/{config}/agfields/rotation-mapping` | `wepppy/microservices/rq_engine/ag_fields_routes.py` | `get_rotation_mapping` | agent-facing | rq-engine | JWT Bearer | `rq:status` | read-only | Run access check: `authorize_run_access`. Returns crop mappings, unused mappings, plant files, and management options. |
 | POST | `/api/runs/{runid}/{config}/agfields/rotation-mapping` | `wepppy/microservices/rq_engine/ag_fields_routes.py` | `save_rotation_mapping` | agent-facing | rq-engine | JWT Bearer | `rq:enqueue` | mutating | Run access check: `authorize_run_access`. Validates and persists run-scoped crop-to-management mappings synchronously. |
 | POST | `/api/runs/{runid}/{config}/agfields/run-wepp` | `wepppy/microservices/rq_engine/ag_fields_routes.py` | `run_wepp` | agent-facing | rq-engine | JWT Bearer | `rq:enqueue` | mutating | Run access check: `authorize_run_access`. Validates readiness and enqueues the AgFields WEPP job with the selected executable. |
+| POST | `/api/runs/{runid}/{config}/agfields/run-watershed` | `wepppy/microservices/rq_engine/ag_fields_routes.py` | `run_watershed` | agent-facing | rq-engine | JWT Bearer | `rq:enqueue` | mutating | Run access check: `authorize_run_access`. Validates current Stage 4, observed climate, and parent inputs, then enqueues the isolated Concept 2 watershed integration. |
 | POST | `/api/runs/{runid}/{config}/agfields/schema` | `wepppy/microservices/rq_engine/ag_fields_routes.py` | `confirm_schema` | agent-facing | rq-engine | JWT Bearer | `rq:enqueue` | mutating | Run access check: `authorize_run_access`. Confirms and persists field-id and rotation-column schema metadata synchronously. |
 | GET | `/api/runs/{runid}/{config}/agfields/state` | `wepppy/microservices/rq_engine/ag_fields_routes.py` | `state` | agent-facing | rq-engine | JWT Bearer | `rq:status` | read-only | Run access check: `authorize_run_access`. Returns the complete staged AgFields hydration, readiness, staleness, and job state. |
 | GET | `/api/runs/{runid}/{config}/agfields/sub-fields.geojson` | `wepppy/microservices/rq_engine/ag_fields_routes.py` | `subfields_overlay` | agent-facing | rq-engine | JWT Bearer | `rq:status` | read-only | Run access check: `authorize_run_access`. Returns the current WGS84 sub-field overlay as GeoJSON. |
