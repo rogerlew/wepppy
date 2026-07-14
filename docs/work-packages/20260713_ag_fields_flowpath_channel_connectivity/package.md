@@ -139,8 +139,11 @@ block Concept 2 implementation.
 
 ## Follow-up Work
 
-Any richer connectivity, buffer, delivery, or mass-routing metric requires a
-separate science-led scope after Mariana reviews the simple inventory.
+The 49.3% result directly motivated the separate
+[AgFields Routing Scheme Suite](../20260714_ag_fields_routing_scheme_suite/package.md),
+which reuses this exact topology classifier for hybrid branch assignment and owns
+Concept 1/hybrid implementation. Richer delivery, buffer, travel-time, or
+mass-routing metrics still require a separate science-led scope.
 
 ## Closure Notes
 

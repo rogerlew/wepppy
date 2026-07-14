@@ -136,13 +136,15 @@ field_id, year, crop_name, runoff, sed_del, sed_det, sed_dep, (hill_wat) Ep+Es+E
 
 
 
-## Watershed integration (Concept 2 implemented; Concept 1 deferred)
+## Watershed integration (three-scheme implementation opened)
 
 The current AgFields workflow runs each retained field/hillslope intersection as an
-independent WEPP hillslope. Concept 2 is implemented as a separate, isolated fifth
-workflow stage; generated-output acceptance and Mariana's scientific disposition
-remain pending. Concept 1 remains below as a deferred feasibility record and is
-not part of the implementation scope.
+independent WEPP hillslope. Concept 2 is implemented and passed engineering
+generated-output acceptance. A subsequent connectivity inventory found direct
+channel drainage for only 3,269 of 6,626 retained sub-fields (49.3%) in
+`sacral-self-discipline`, so Concept 1 is reopened and a connectivity-aware hybrid
+is now an implementation target. Mariana's comparative scientific evaluation
+follows engineering delivery of all three schemes.
 
 Related implementation references:
 
@@ -150,35 +152,42 @@ Related implementation references:
 - [Roads NoDb integration specification](../../../../nodb/mods/roads/specification.md)
 - [WEPP output scope contract](../../../../../docs/schemas/output-scope-contract.md)
 - [Concept 2 implementation work package](../../../../../docs/work-packages/20260713_ag_fields_concept2_watershed_integration/package.md)
+- [Flowpath-to-channel connectivity inventory](../../../../../docs/work-packages/20260713_ag_fields_flowpath_channel_connectivity/package.md)
+- [Routing scheme suite work package](../../../../../docs/work-packages/20260714_ag_fields_routing_scheme_suite/package.md)
 - [ADR-0018: AgFields weighted PASS accounting](../../../../../docs/adrs/ADR-0018-agfields-weighted-pass-accounting.md)
+- [ADR-0019: Field-aware OFE and hybrid routing](../../../../../docs/adrs/ADR-0019-agfields-field-aware-ofe-hybrid-routing.md)
 
 ### Decision posture
 
-Concept 2 is implemented under the
+Concept 2 was implemented under the completed
 [AgFields Concept 2 watershed-integration work package](../../../../../docs/work-packages/20260713_ag_fields_concept2_watershed_integration/package.md).
 It retains each sub-field's Peridot slope, crop rotation, and independent WEPP
 result, and its weighted merge must preserve each source's water-volume and
 sediment-mass contribution event by event and for the full run.
 
-Engineering acceptance is based on source-area closure, water and sediment
-closure, successful isolated watershed execution, regression coverage, and
-generated-output evidence. Mariana Dobre will perform the scientific evaluation
-after the implementation produces a runnable result and evaluation bundle from
-`/wc1/runs/sa/sacral-self-discipline`. Her evaluation will qualify the scientific
-use and limitations of the Concept 2 results; it does not require a Concept 1
-prototype.
+That engineering result remains valid evidence. Concept 2 output must still be
+described as **area-weighted outlet injection**, not as field-to-buffer routing: it
+does not model runon, deposition, or trapping between a field and the parent
+hillslope outlet.
 
-Concept 2 output must still be described as **area-weighted outlet injection**,
-not as field-to-buffer routing: it does not model runon, deposition, or trapping
-between a field and the parent hillslope outlet.
+The connectivity inventory established a new decision: implement Concept 1 and a
+hybrid in a separate
+[routing scheme suite work package](../../../../../docs/work-packages/20260714_ag_fields_routing_scheme_suite/package.md).
+The hybrid chooses Concept 2 for each retained sub-field with at least one
+generated per-cell flowpath whose first outside cell is a channel, and Concept 1
+for every other retained sub-field. This is a topology classifier, not a delivery
+ratio or a claim that channel-connected fields have no buffer effects.
 
-Concept 1 is deferred. Do not implement its OFE planner, input synthesis, or
-comparison fixtures in the Concept 2 work package. Reopening Concept 1 requires a
-separate decision after the Concept 2 implementation and scientific evaluation.
+Concept 1 and hybrid engineering acceptance requires plan/source-area closure,
+parseable and runnable generated WEPP inputs, successful isolated watershed
+execution, stable failure provenance, regression coverage, and generated-output
+evidence. Mariana Dobre will compare the three result sets from
+`/wc1/runs/sa/sacral-self-discipline` and qualify their scientific use and
+limitations after engineering delivery.
 
 ### Shared objective and invariants
 
-Both concepts must:
+All three schemes must:
 
 - preserve the baseline `wepp/runs` and `wepp/output` trees;
 - use the existing Topaz-to-WEPP translator for parent hillslope identity;
@@ -191,49 +200,83 @@ Both concepts must:
 - treat filtered or uncovered field-raster cells as baseline/background area;
 - fail explicitly on missing inputs, area overlap, calendar mismatch, invalid WEPP
   files, or incomplete watershed outputs;
-- write a versioned integration manifest containing source paths, areas, weights,
-  decisions, warnings, and algorithm version; and
+- write a versioned integration manifest containing scheme id/slug, source paths,
+  areas, weights, decisions, warnings, classifier/algorithm versions, and accepted
+  parameter ADR version; and
 - regenerate watershed interchange/report resources only under an isolated
   AgFields watershed-output tree.
 
-The isolated layout is additive and does not move the existing per-field
-artifacts:
+The scheme layout is additive and does not move existing per-field artifacts or
+the completed unscoped Concept 2 evidence:
 
 ```text
 wepp/ag_fields/runs/                 # existing independent sub-field runs
 wepp/ag_fields/output/               # existing independent sub-field outputs
-wepp/ag_fields/watershed/runs/       # integrated parent and watershed runs
-wepp/ag_fields/watershed/output/     # integrated parent PASS and watershed outputs
-wepp/ag_fields/watershed/manifest/   # source, closure, summary, and evaluation provenance
+wepp/ag_fields/watershed/runs/       # legacy Concept 2 evidence; preserve in place
+wepp/ag_fields/watershed/output/     # legacy Concept 2 evidence; preserve in place
+wepp/ag_fields/watershed/manifest/   # legacy Concept 2 evidence; preserve in place
+wepp/ag_fields/watershed/concept-1/{runs,output,manifest}/
+wepp/ag_fields/watershed/concept-2/{runs,output,manifest}/
+wepp/ag_fields/watershed/hybrid/{runs,output,manifest}/
 ```
 
-The additive schema and compatibility contract are frozen in the work package's
-`2026-07-13_run_artifact_compatibility_plan.md`. If integrated results become selectable in the
-standard reports, add an `ag_fields` scope to the output-scope contract in the same
-change set; do not overload the existing `baseline` or `roads` meanings.
+There is no `watershed/all/` result. The UI-only `all` choice runs the three fixed
+schemes separately. The additive schema/state/path compatibility contract is
+frozen in
+[the scheme artifact compatibility plan](../../../../../docs/work-packages/20260714_ag_fields_routing_scheme_suite/artifacts/2026-07-14_scheme_artifact_compatibility_plan.md).
+If integrated results become selectable in the standard reports, add explicit
+AgFields scheme semantics to the output-scope contract in the same change set; do
+not overload the existing `baseline` or `roads` meanings.
+
+### Routing scheme and UI contract
+
+The Python/API identifiers and filesystem slugs are:
+
+| Identifier | Filesystem slug | Routing behavior |
+| --- | --- | --- |
+| `concept_1` | `concept-1` | Rebuild eligible parents as field-aware OFE profiles and route field response through downstream OFEs |
+| `concept_2` | `concept-2` | Inject area-weighted independent sub-field PASS response at the parent outlet |
+| `hybrid` | `hybrid` | Inject channel-connected sub-fields and route all other sub-fields through field-aware OFEs |
+
+The runs page offers one selection with these exact description-first labels:
+
+- **Field-aware hillslope routing (routes fields through downstream OFEs)**;
+- **Direct sub-field outlet injection (preserves independent sub-field results; no
+  buffer routing)**;
+- **Connectivity-aware mixed routing (injects channel-connected fields; routes
+  other fields through OFEs)**; and
+- **Run all routing schemes (writes three separate results for comparison)**.
+
+Do not render bare `Concept 1`, `Concept 2`, or `Hybrid` option labels. Concept 2
+is the initial UI default and the behavior for an old API client that omits the
+scheme. `all` expands in stable Concept 1, Concept 2, hybrid order to independently
+tracked, serial RQ jobs so their full-watershed memory peaks do not overlap. A
+failure in one scheme must remain visible but must not prevent a later comparison
+scheme from running.
+
+Per-scheme state, staleness, errors, retry, clear, and browse paths are independent.
+Clearing one current scheme can remove only its fixed root and state. Clearing all
+current schemes still preserves the legacy Concept 2 tree, baseline WEPP, and
+independent AgFields trees.
 
 ### Feasibility summary
 
-| Dimension | Concept 1: field-aware OFEs | Concept 2: weighted PASS aggregation |
-| --- | --- | --- |
-| Engineering feasibility | Medium | High for an MVP |
-| Reuse of current code | Mature MOFE slope, soil, and management synthesis | Existing sub-field PASS files, Roads staging pattern, and PASS parser/combiner |
-| Arbitrary two-dimensional field mosaics | Low to medium; requires lossy collapse into ordered bands | High; every rasterized sub-field remains an independent source |
-| Per-subfield source fidelity | Medium at best; uses parent-profile bands and can merge or misclassify field area | High; retains each Peridot slope, crop rotation, and independent WEPP output |
-| Water and sediment accounting | Native WEPP balance in the replacement hillslope, but source areas and identities reflect the OFE approximation | Explicit event-level and full-run closure from weighted sub-field sources into the combined parent PASS |
-| Field/background runon interaction | Yes, between represented OFEs | No |
-| Downstream buffer deposition/trapping | Medium to high when the buffer is a distinct, well-fitted downstream OFE | None; field load is injected at the parent outlet |
-| Field-area fidelity | Quantized and layout-dependent | High for field sources; Peridot preserves raster area in slope `length * width` |
-| Background fidelity | Rerun with explicit background OFEs | Approximate; scales the full baseline hillslope response to uncovered area |
-| Main scientific risk | A two-dimensional mosaic may not have a defensible one-dimensional OFE representation | Outlet injection can over-deliver water and sediment when a real buffer lies below the field |
-| Implementation size | Large | Medium |
-| Delivery status | Deferred; separate future decision required | Open implementation track |
+| Dimension | Field-aware hillslope routing | Direct sub-field outlet injection | Connectivity-aware mixed routing |
+| --- | --- | --- | --- |
+| Engineering feasibility | Medium; fit and input synthesis remain to prove | High; engineering implementation complete | Medium; depends on defensible residual Concept 1 geometry |
+| Per-subfield source fidelity | Medium at best; parent-profile bands can merge or misclassify field area | High; retains each Peridot slope, rotation, and independent result | High for connected sources; Concept 1 fit for all other sources |
+| Field/background runon | Yes, between represented OFEs | No | Yes for non-connected/residual sources; no parent-buffer routing for connected sources |
+| Downstream buffer trapping | Represented when a distinct, well-fitted background OFE lies below a field | None before outlet injection | Represented for Concept 1 branches only |
+| Water/sediment accounting | Native replacement-hillslope balance plus plan-area diagnostics | Explicit event/run weighted-source closure | Residual Concept 1 balance plus weighted connected-source event/run closure |
+| Main scientific risk | A two-dimensional mosaic may lack a defensible one-dimensional representation | Outlet injection can over-deliver when a real buffer lies below a field | Binary topology classification and residual projection combine both approximations |
+| Delivery status | Reopened implementation track; feasibility gate first | Implemented; migrate additively to scheme root | Open implementation track; feasibility gate first |
 
-### Concept 1: rebuild affected hillslopes as field-aware OFE profiles (deferred)
+### Concept 1: rebuild affected hillslopes as field-aware OFE profiles (reopened)
 
-**Status:** Deferred. The following material records feasibility only. None of its
-planner, synthesis, fixture, or validation work belongs to the open Concept 2
-implementation package.
+**Status:** Open under the routing scheme suite work package. The following model,
+planning, synthesis, validation, and feasibility contract is normative. A
+planner-only or surrogate output does not satisfy the faithful implementation
+target.
 
 #### Model contract
 
@@ -257,8 +300,9 @@ must instead solve segmentation and assignment at the parent-hillslope level.
 
 #### Proposed planning artifact
 
-Write `wepp/ag_fields/watershed/manifest/ofe_plan.parquet` with one row per planned
-OFE. At minimum, record:
+Write
+`wepp/ag_fields/watershed/concept-1/manifest/ofe_plan.parquet` with one row per
+planned OFE. At minimum, record:
 
 - parent `topaz_id` and `wepp_id`;
 - ordered `ofe_id` and normalized start/end distance;
@@ -271,12 +315,12 @@ OFE. At minimum, record:
 The manifest is the boundary between geospatial planning and WEPP input synthesis.
 WEPP preparation must consume it rather than recomputing field placement.
 
-#### Deferred implementation plan
+#### Implementation plan
 
 1. **Build and evaluate the one-dimensional field plan.**
-   - Read aligned `subwta`, `sub_field_id_map`, and distance-to-channel rasters.
-   - For each parent hillslope, order cells by the same distance rank used by the
-     current MOFE map builder.
+   - Read aligned `subwta`, `sub_field_id_map`, and `discha` rasters.
+   - For each parent hillslope, order cells by the same stable descending discharge
+     rank used by the current MOFE map builder.
    - Evaluate a parent-level set of contiguous OFE bands and assign each band to
      its dominant field or to background.
    - Start the feasibility spike with the proposed one-to-four equal-area bands,
@@ -311,10 +355,12 @@ WEPP preparation must consume it rather than recomputing field placement.
      limit before the slope limit.
 
 4. **Run replacement hillslopes and the isolated watershed.**
-   - Copy or link baseline run inputs into `wepp/ag_fields/watershed/runs`.
+   - Copy or link baseline run inputs into
+     `wepp/ag_fields/watershed/concept-1/runs`.
    - Run one replacement hillslope for every accepted affected parent.
    - Stage the replacement PASS for accepted parents and the unchanged baseline
-     PASS for untouched parents under `wepp/ag_fields/watershed/output`.
+     PASS for untouched parents under
+     `wepp/ag_fields/watershed/concept-1/output`.
    - Build `pw0.run` with `make_watershed_omni_contrasts_run`, run watershed WEPP,
      and regenerate scoped interchange artifacts.
 
@@ -328,11 +374,11 @@ WEPP preparation must consume it rather than recomputing field placement.
    - Expose counts for accepted, rejected, untouched, failed, and scenario-limited
      hillslopes plus the aggregate area and fit errors.
 
-#### Deferred validation plan
+#### Validation plan
 
 - Unit-test deterministic segmentation on synthetic layouts: one upslope field and
   downstream buffer, one field at the channel, two ordered fields, side-by-side
-  fields, fragmented fields, tiny fields, and flat/tied distance rasters.
+  fields, fragmented fields, tiny fields, and flat/tied discharge ranks.
 - Assert contiguous OFE IDs; matching slope/soil/management OFE counts; exact source
   ordering; and area closure within a documented raster-discretization tolerance.
 - Parse every generated WEPP input and run short hillslope fixtures before attempting
@@ -402,8 +448,10 @@ hillslope length and runon.
 
 #### Routing and closure artifacts
 
-`wepp/ag_fields/watershed/manifest/pass_sources.parquet` has one row per
-parent/source pair and records:
+New scheme-suite runs write
+`wepp/ag_fields/watershed/concept-2/manifest/pass_sources.parquet` with one row per
+parent/source pair. The completed legacy run retains the corresponding artifact in
+the unscoped `watershed/manifest` tree. Each artifact records:
 
 - parent `topaz_id`, parent `wepp_id`, source kind, and source PASS path;
 - `field_id` and `sub_field_id` for field sources;
@@ -484,7 +532,9 @@ zeroed, summed, or scaled.
      no-buffer-routing limitations in the UI and result manifest.
 
 5. **Keep report and download isolation.**
-   - Keep integrated results under `wepp/ag_fields/watershed/output`.
+   - Keep new integrated results under
+     `wepp/ag_fields/watershed/concept-2/output`; preserve the completed unscoped
+     result in place as legacy evidence.
    - Add an output scope only when the standard reports are ready to consume these
      results, updating the canonical scope contract and its route tests together.
    - Preserve direct access to independent field outputs for field-scale analysis.
@@ -509,8 +559,7 @@ zeroed, summed, or scaled.
   closure manifests, and geometry diagnostics for outlet and upslope fields.
 - Treat scientific suitability and buffer-bias findings as Mariana's evaluation
   task after engineering delivery. Record her disposition before changing the
-  feature's scientific-use guidance or production labeling; do not build Concept 1
-  as an implementation acceptance dependency.
+  feature's scientific-use guidance or production labeling.
 
 #### Feasibility assessment
 
@@ -534,26 +583,105 @@ fields high on long, depositional or vegetated hillslopes. Those cases must be
 diagnosed from distance-to-channel geometry and disclosed, not corrected with an
 uncalibrated delivery-ratio heuristic.
 
+### Hybrid: connectivity-aware mixed routing (open)
+
+#### Classification contract
+
+Reuse the owned Peridot direct-channel classifier; do not duplicate its D8 logic
+in WEPPpy. A retained sub-field is channel-connected when at least one generated
+per-cell flowpath has a valid D8 successor outside that sub-field and the first
+outside cell is a channel. Positive cells in an explicit channel mask take
+precedence when supplied; otherwise a SUBWTA id whose final digit is `4` identifies
+a channel.
+
+Extend the reusable CLI additively to emit one deterministic detail row per
+retained sub-field while preserving the existing aggregate summary contract. Join
+those rows exactly once to current `fields.parquet` and persist
+`wepp/ag_fields/watershed/hybrid/manifest/subfield_routing.parquet` with parent,
+field, sub-field, connectivity, direct-outlet-cell count, routing branch,
+classifier version/definition, channel source, and input identities. Missing,
+duplicate, or extra ids fail preflight.
+
+This binary classification selects an engineering routing approximation. It is not
+a sediment delivery ratio, buffer efficiency, travel-time estimate, or evidence
+that a connected sub-field has no buffer effect.
+
+#### Parent composition and area contract
+
+For parent raster area `A_parent`, connected sub-field raster areas
+`A_connected_i`, and residual Concept 1 source area `A_residual`:
+
+```text
+A_residual = A_parent - sum(A_connected_i)
+A_residual + sum(A_connected_i) = A_parent
+```
+
+The residual Concept 1 plan includes non-connected retained sub-fields and
+uncovered background; it excludes connected sub-field cells from plan assignment
+and area. The first feasibility candidate preserves the parent representative
+profile length and normalized downslope breakpoint positions, then sets the rerun
+width to `A_residual / parent_length`. This preserves downstream distances while
+rerunning WEPP at the residual represented area. ADR-0019 must accept this geometry
+and its fit rules after generated evidence before the UI path is wired.
+
+Compose each parent explicitly:
+
+- When no retained sub-field is connected, run/stage a pure Concept 1 parent at
+  `A_parent`.
+- When connected retained sub-fields cover the complete parent, use pure Concept 2
+  composition with no residual source.
+- When both connected and residual areas exist, run the residual Concept 1 parent
+  at `A_residual`, then use the ADR-0018 weighted combiner to merge its PASS with
+  each connected independent sub-field PASS into one target `A_parent` PASS.
+
+Adding connected sources to a complete Concept 1 parent is prohibited because it
+double-counts area. Uniformly scaling an unchanged whole-parent Concept 1 PASS to
+the residual area is also prohibited because it hides changes to non-connected
+field/background geometry and nonlinear hillslope response. If the residual plan
+is ineligible or cannot produce a valid area-correct source, hybrid fails that
+parent/scheme with stable manifest provenance; it does not silently substitute
+Concept 2.
+
+#### Execution and validation contract
+
+Hybrid writes only under
+`wepp/ag_fields/watershed/hybrid/{runs,output,manifest}`. It stages exactly one
+PASS per parent, runs watershed WEPP, regenerates isolated interchange resources,
+and preserves the baseline, independent AgFields, legacy Concept 2, and sibling
+scheme trees.
+
+Fixtures must cover no/mixed/full connected coverage; connected sources above and
+below non-connected fields; uncovered background; multiple connected sources;
+overlap/gap; ineligible residual plans; OFE/scenario limits; climate/calendar
+mismatch; and weighted serialization budgets. For mixed parents, validate raster
+cell ownership, exact source-area closure, source/header areas, event/full-run
+water and sediment closure, and the one-target-PASS rule.
+
+The dev-project acceptance must route exactly 3,269 sub-fields through Concept 2
+and 3,357 through Concept 1 when classifier inputs match the completed inventory.
+Any count change requires recorded input/version evidence rather than silent
+acceptance.
+
 ### Recommended delivery sequence
 
-1. Execute the open
-   [Concept 2 implementation work package](../../../../../docs/work-packages/20260713_ag_fields_concept2_watershed_integration/package.md),
-   with Concept 1 excluded from its scope.
-2. Finalize the PASS field-semantics table and parameterization ADR, then
-   implement and conservation-test the weighted PASS combiner.
-3. Implement isolated parent-PASS materialization, source routing, weighted
-   aggregation, watershed execution, manifests, closure diagnostics, and the
-   RQ/API/UI integration stage.
-4. Complete engineering validation on synthetic fixtures and
-   `/wc1/runs/sa/sacral-self-discipline`, leaving all baseline and independent
-   sub-field artifacts unchanged and producing a self-contained evaluation
-   bundle.
-5. Mariana Dobre performs the scientific evaluation using the baseline,
-   independent sub-field, and integrated Concept 2 results. Record her findings,
-   suitable-use guidance, and limitations without substituting engineering
+1. Execute the active
+   [routing scheme suite ExecPlan](../../../../../docs/work-packages/20260714_ag_fields_routing_scheme_suite/prompts/active/ag_fields_routing_scheme_suite_execplan.md).
+2. Extend the Peridot classifier with per-sub-field detail and complete the
+   read-only Concept 1/residual-hybrid feasibility census before wiring UI or RQ.
+3. Record and accept evidence-backed Concept 1 fit/geometry parameters in
+   ADR-0019. Stop for an explicit design decision if faithful residual geometry is
+   not feasible; do not ship a surrogate or fallback under the requested labels.
+4. Add and release-test explicit-breakpoint native slope segmentation, then build
+   faithful Concept 1 input synthesis, hillslope execution, manifests, watershed
+   execution, and fixtures.
+5. Build hybrid pure/mixed parent composition, reuse ADR-0018 weighted accounting,
+   and prove area/water/sediment closure plus stable rejection behavior.
+6. Move Concept 2 additively behind the current `concept-2` scheme root and evolve
+   persisted state, authenticated API/RQ, serial Run All jobs, and the exact
+   description-first UI contract with historical defaults.
+7. Generate all three current trees through the authenticated path on
+   `sacral-self-discipline`, prove protected artifacts byte-identical, complete
+   security/QA/broad gates, and publish a self-contained comparison bundle.
+8. Mariana Dobre performs the comparative scientific evaluation. Record her
+   suitable-use guidance and limitations without substituting engineering
    judgment for that review.
-6. Keep Concept 1 deferred. Reopen it only through a new scoped decision if the
-   Concept 2 evaluation establishes a need for an OFE-based buffer-routing mode.
-
-Concept 1 is not a prerequisite, validation oracle, or deliverable for the open
-Concept 2 implementation.

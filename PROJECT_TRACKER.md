@@ -1,7 +1,7 @@
 # PROJECT_TRACKER.md
 > Kanban board for wepppy work packages and vision items
 
-**Last Updated**: 2026-07-13
+**Last Updated**: 2026-07-14
 **Active Packages**: 13
 **Quick Links**: [Work Packages Directory](docs/work-packages/) | [God-Tier Prompting Strategy](docs/god-tier-prompting-strategy.md)
 
@@ -275,7 +275,35 @@ When resuming Kubernetes work:
 
 Currently active work packages. Limit to 2-4 packages to maintain focus.
 
-**Current WIP Count**: 12 packages
+**Current WIP Count**: 13 packages
+
+---
+
+### AgFields Routing Scheme Suite
+**Started**: 2026-07-14
+**Status**: Scaffolded; Concept 1 and mixed-parent residual feasibility gate in progress
+**Size**: High (multi-repository, multi-stage implementation)
+**Owner**: Codex
+**Priority**: High
+**Link**: [docs/work-packages/20260714_ag_fields_routing_scheme_suite/](docs/work-packages/20260714_ag_fields_routing_scheme_suite/)
+**Description**: Implement field-aware hillslope routing, retain direct sub-field
+outlet injection, and add a connectivity-aware hybrid that injects the 49.3% of
+dev-project sub-fields with direct channel drainage while routing the others
+through OFEs. The runs page will offer one scheme or all with description-first
+labels and fixed `concept-1`, `concept-2`, and `hybrid` result roots.
+
+**Current Focus**: Extend Peridot with per-sub-field routing detail, measure
+Concept 1 plan eligibility, and prove a residual-area Concept 1 source for mixed
+hybrid parents without double-counting or whole-parent PASS scaling.
+
+**Dependencies**: Builds on the completed Concept 2 implementation, ADR-0018, and
+the completed flowpath-to-channel connectivity inventory. ADR-0019 must be
+accepted with evidence-backed fit/geometry parameters before user-facing wiring.
+
+**Next Steps**: Complete the feasibility census and mixed-parent WEPP fixture,
+accept ADR-0019 or stop for an explicit design revision, then implement native
+breakpoints, Concept 1/hybrid backends, scheme-aware RQ/API/UI, and generated
+all-scheme acceptance on `sacral-self-discipline`.
 
 ---
 
@@ -557,8 +585,9 @@ AgFields parent materialization/watershed execution, additive manifests, and a
 fifth authenticated RQ/API/UI stage. Final public acceptance completed 3,543
 parents/1,869 affected parents, all closure and interchange checks passed, and
 97,734 protected files remained byte-identical. The public evaluation bundle is
-ready for Mariana Dobre; Concept 1 remains deferred pending her scientific-use
-disposition.
+ready for Mariana Dobre. Concept 1 was deferred at this package's close; the
+subsequent routing-scheme package reopened it after the connectivity inventory
+found direct channel drainage for only 49.3% of retained sub-fields.
 
 ---
 

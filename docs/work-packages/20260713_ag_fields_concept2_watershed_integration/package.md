@@ -131,7 +131,9 @@ ADR-0018 is Accepted and records the final field semantics and tolerances.
 - **Depends on**: [AgFields Backend Readiness](../20260709_ag_fields_backend_readiness/package.md)
 - **Depends on**: [AgFields Runs-Page UI](../20260709_ag_fields_runs_page_ui/package.md)
 - **Related**: [Roads NoDb Inslope E2E](../20260323_roads_nodb_inslope_e2e/package.md)
-- **Deferred**: Concept 1 requires a new package and decision if reopened.
+- **Successor**: [AgFields Routing Scheme Suite](../20260714_ag_fields_routing_scheme_suite/package.md)
+  reopens Concept 1 and adds a connectivity-aware hybrid without changing this
+  package's completed historical scope.
 
 ## Timeline Estimate
 
@@ -207,4 +209,7 @@ ADR-0018 is Accepted and records the final field semantics and tolerances.
 ## Follow-up Work
 
 - Mariana's scientific disposition and any approved use constraints.
-- A separate Concept 1 work package only if explicitly reopened after evaluation.
+- [AgFields Routing Scheme Suite](../20260714_ag_fields_routing_scheme_suite/package.md)
+  was explicitly opened after the connectivity inventory found direct channel
+  drainage for only 49.3% of retained sub-fields; it owns Concept 1, hybrid, and
+  scheme-selectable output work.

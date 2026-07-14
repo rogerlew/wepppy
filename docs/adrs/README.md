@@ -65,4 +65,5 @@ Each ADR should normally include:
 - `ADR-0015`: [AgFields Backend Readiness and Upload Guardrails](ADR-0015-agfields-upload-archive-guardrails.md) (Accepted, 2026-07-09)
 - `ADR-0016`: [AgFields Applied-Residue `hmax` Floor](ADR-0016-agfields-applied-residue-hmax-floor.md) (Accepted, 2026-07-10)
 - `ADR-0017`: [AgFields WEPP Executable Default](ADR-0017-agfields-wepp-executable-default.md) (Accepted, 2026-07-10)
-- `ADR-0018`: [AgFields Weighted PASS Accounting](ADR-0018-agfields-weighted-pass-accounting.md) (Proposed, 2026-07-13)
+- `ADR-0018`: [AgFields Weighted PASS Accounting](ADR-0018-agfields-weighted-pass-accounting.md) (Accepted, 2026-07-13)
+- `ADR-0019`: [AgFields Field-Aware OFE and Connectivity-Aware Hybrid Routing](ADR-0019-agfields-field-aware-ofe-hybrid-routing.md) (Proposed, 2026-07-14)
