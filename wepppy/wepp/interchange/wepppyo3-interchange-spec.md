@@ -69,8 +69,14 @@ preflight the subset they are about to use before removing or publishing output.
   different supported value.
 - Writers publish through a temporary path and rename only after a successful
   close. A failed operation must not replace its final target.
-- Multi-output formats such as watershed PASS and LOSS return summary metadata
-  but do not change the WEPPpy facade return contract.
+- Watershed PASS stages both outputs and watershed LOSS stages all eight outputs
+  before sequential same-directory publication. If a later publication fails,
+  the writer restores the preceding complete generation (or removes newly
+  created siblings). This is failure-atomic rollback, not simultaneous
+  multi-path visibility; the aggregate version manifest remains the completion
+  signal.
+- Multi-output formats return summary metadata but do not change the WEPPpy
+  facade return contract.
 
 ## Failure Contract
 

@@ -1,6 +1,6 @@
 # WEPPpyo3-Only Interchange Cutover
 
-**Status**: Open 2026-07-15
+**Status**: Closed 2026-07-15
 **Timezone**: UTC
 
 ## Overview
@@ -96,8 +96,8 @@ or write its primary interchange Parquet as a production compatibility path.
   reproducible provenance.
 - [x] The authorized stack is restarted and generated interchange completes
   through the installed native release with no fallback telemetry.
-- [ ] Focused and broad WEPPpy gates pass, plus wepppyo3 Rust/release gates.
-- [ ] Independent code and QA reviews have no unresolved medium/high findings.
+- [x] Focused and broad WEPPpy gates pass, plus wepppyo3 Rust/release gates.
+- [x] Independent code and QA reviews have no unresolved medium/high findings.
 
 ## Parameterization ADR Gate
 
@@ -151,8 +151,21 @@ or write its primary interchange Parquet as a production compatibility path.
 
 ## Deliverables
 
-To be completed at closure.
+- Required-native WEPPpy orchestration and stable error contract.
+- Native direct writers for all covered hillslope and watershed report formats.
+- Collision-resistant staged publication and failure-atomic PASS/LOSS rollback.
+- Shared startup provenance preflight across every interchange-capable service.
+- One canonical production WEPPpyo3 package tree with no masking site-packages
+  copy.
+- Twenty-two tracked schema snapshots and exact native-only contract coverage.
+- Refreshed WEPPpyo3 Python 3.12 release with reproducible provenance.
+- Generated Concept 2 smoke, stack/RQ evidence, and dual-review artifacts under
+  [artifacts/](artifacts/).
 
 ## Follow-up Work
 
-Only evidence-backed opportunities discovered during execution will be recorded.
+- Add a real HBP end-to-end fixture for the direct bulk PASS writer when a
+  compact representative artifact is available.
+- A future release package may build the complete production image as an
+  additional acceptance layer; this package statically enforces the corrected
+  single-origin Dockerfile contract and exercises symlinked origin validation.

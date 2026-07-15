@@ -4,9 +4,9 @@
 
 **Timezone**: UTC
 **Started**: 2026-07-15 17:05 UTC
-**Current phase**: Broad validation and independent review
-**Last updated**: 2026-07-15 17:54 UTC
-**Next milestone**: Run repository-wide gates, complete dual reviews, and close
+**Current phase**: Closed
+**Last updated**: 2026-07-15 18:50 UTC
+**Next milestone**: Observe native provenance/failure signals through 2026-08-14
 **Security impact**: `low`
 **Dedicated security review**: `no`
 **Security artifact**: `N/A`
@@ -15,11 +15,11 @@
 
 ### Ready / Backlog
 
-- [ ] Run repository-wide gates and dual reviews.
+None.
 
 ### In Progress
 
-- [ ] Resolve and disposition any review findings.
+None.
 
 ### Blocked
 
@@ -44,6 +44,19 @@ None.
   checks, and generated H1 all-format smoke (2026-07-15 17:54 UTC).
 - [x] Rewrite native ownership, failure, release, and test documentation
   (2026-07-15 17:50 UTC).
+- [x] Resolve code-review publication findings with unique stages,
+  failure-atomic PASS/LOSS rollback, SOIL staged validation, and physical
+  row-group telemetry (2026-07-15 18:26 UTC).
+- [x] Add the shared startup preflight, 22 tracked schema snapshots, and correct
+  native validation commands (2026-07-15 18:29 UTC).
+- [x] Resolve the QA re-review's production-origin finding by removing the
+  masking site-packages copy and testing the canonical symlinked release root
+  (2026-07-15 18:39 UTC).
+- [x] Complete code and QA re-reviews with zero unresolved high/medium findings
+  (2026-07-15 18:40 UTC).
+- [x] Pass the full WEPPpy gate: 4,895 passed and 58 skipped
+  (2026-07-15 18:49 UTC).
+- [x] Archive the ExecPlan and close the package (2026-07-15 18:50 UTC).
 
 ## Timeline
 
@@ -55,6 +68,15 @@ None.
   rebuilt extension; all ten RQ workers returned idle.
 - **2026-07-15 17:54 UTC** - Generated Concept 2 H1 smoke converted all six
   hillslope formats through native writers with source-ordered row groups.
+- **2026-07-15 18:26 UTC** - Installed failure-atomic release SHA
+  `7419203c8b91db1b595590b7c9a28040662d5fad9fdf8b182a17c85a76d518e4`.
+- **2026-07-15 18:29 UTC** - Force-recreated all local Python services; six
+  service families logged the exact SHA and ten RQ workers returned idle.
+- **2026-07-15 18:40 UTC** - Both independent re-reviews reported zero
+  unresolved high/medium findings.
+- **2026-07-15 18:49 UTC** - Repository-wide pytest completed with 4,895 passed
+  and 58 skipped in 891.19 seconds.
+- **2026-07-15 18:50 UTC** - Package closed and ExecPlan archived.
 
 ## Decisions Log
 
@@ -82,13 +104,38 @@ Python primary writer after the facades switch.
 **Impact**: The native release must land first and preserve schemas, metadata,
 empty output, row ordering, row groups, and atomic publication.
 
+### 2026-07-15 18:26 UTC: Multi-output publication is failure-atomic
+
+**Context**: PASS produces two files and LOSS produces eight. Independent final
+paths cannot become visible in one filesystem operation.
+
+**Decision**: Stage every sibling before sequential same-directory publication,
+serialize publishers, and restore the prior generation if any later rename
+fails. Describe this as failure-atomic rollback, not simultaneous visibility.
+
+**Impact**: A failed PASS/LOSS generation does not leave a mixed final set;
+successful readers may still observe the short sequential rename window and use
+the aggregate version manifest as the completion signal.
+
+### 2026-07-15 18:39 UTC: Production has one canonical native package tree
+
+**Context**: The production image copied WEPPpyo3 into site-packages while also
+adding the vendored release through a `.pth`; Python would select the copy first.
+
+**Decision**: Remove the duplicate copy and import only the vendored release
+through the `/workdir/wepppyo3` symlink.
+
+**Impact**: The shared origin guard now validates the same canonical tree in
+development and production instead of failing production or tolerating drift.
+
 ## Risks and Issues
 
 | Risk | Severity | Likelihood | Mitigation | Status |
 | --- | --- | --- | --- | --- |
 | An old worker imports a release missing one operation | High | Medium | Required-symbol preflight, provenance smoke, worker restart | Mitigated |
 | Removing dead parsers changes schema behavior accidentally | High | Low | Existing parity fixtures, schema snapshots, generated smoke | Mitigated |
-| Native failure leaves partial output | High | Low | Preserve temp/atomic publication and add exact regressions | Mitigated |
+| Native failure leaves partial output | High | Low | Unique stages, coordinated rollback, exact regressions | Mitigated |
+| Production imports a masking site-packages copy | High | Medium | Remove duplicate package; test canonical symlink origin | Closed |
 | Scope expands into aggregation/export rewrites | Medium | Medium | Freeze parser/writer boundary in package and ADR | Mitigated |
 | Missing direct native writers delay WEPPpy deletion | High | Medium | Land and test six APIs in wepppyo3 before facade cutover | Closed |
 
@@ -107,17 +154,17 @@ empty output, row ordering, row groups, and atomic publication.
 ### Code Quality
 
 - [x] Focused interchange tests pass.
-- [ ] Full WEPPpy pytest gate passes.
+- [x] Full WEPPpy pytest gate passes (4,895 passed, 58 skipped).
 - [x] Focused stub/API gates pass for changed public surfaces; package-wide
   stubtest baseline blocker is recorded in the ExecPlan.
 - [x] wepppyo3 Rust and release Python tests pass.
-- [x] Broad-exception gate passes; code-quality observability remains pending.
+- [x] Broad-exception gate and observe-only code-quality telemetry pass.
 
 ### Documentation
 
 - [x] ADR-0020 and ADR index are current.
 - [x] Interchange README/spec/plan describe native-only behavior.
-- [ ] Work package, tracker, reviews, and root board are current.
+- [x] Work package, tracker, reviews, and root board are current.
 
 ### Runtime
 
@@ -128,9 +175,9 @@ empty output, row ordering, row groups, and atomic publication.
 
 ### Reviews
 
-- [ ] Independent code review complete.
-- [ ] Independent QA/runtime review complete.
-- [ ] No unresolved medium/high findings.
+- [x] Independent code review complete.
+- [x] Independent QA/runtime review complete.
+- [x] No unresolved medium/high findings.
 
 ## Watch List
 

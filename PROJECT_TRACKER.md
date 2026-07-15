@@ -275,27 +275,7 @@ When resuming Kubernetes work:
 
 Currently active work packages. Limit to 2-4 packages to maintain focus.
 
-**Current WIP Count**: 13 packages
-
----
-
-### WEPPpyo3-Only Interchange Cutover
-**Started**: 2026-07-15
-**Status**: In progress; discovery and contract freeze
-**Size**: High (cross-repository native/runtime cutover)
-**Owner**: Codex
-**Priority**: High
-**Link**: [docs/work-packages/20260715_wepppyo3_only_interchange/](docs/work-packages/20260715_wepppyo3_only_interchange/)
-**Description**: Retire production WEPPpy text-parser fallbacks and require the
-owned `wepppyo3.wepp_interchange` release for every hillslope and watershed
-conversion while preserving public wrapper/path/schema contracts.
-
-**Current Focus**: Inventory every fallback/native symbol, implement one explicit
-required-native error boundary, remove duplicate parsers, rebuild/install the
-paired release, and prove the cutover through the restarted local stack.
-
-**Next Steps**: Complete discovery, implement milestone-by-milestone, then run
-full gates plus independent code and QA reviews.
+**Current WIP Count**: 12 packages
 
 ---
 
@@ -564,6 +544,27 @@ full gates plus independent code and QA reviews.
 ## ✅ Done
 
 Recently completed work packages. Archived immediately upon completion.
+
+### WEPPpyo3-Only Interchange Cutover (2026-07-15)
+
+**Status**: ✅ **COMPLETE**
+
+**Link**: [docs/work-packages/20260715_wepppyo3_only_interchange/](docs/work-packages/20260715_wepppyo3_only_interchange/)
+
+**Lifecycle**: In Progress -> Done (2026-07-15)
+
+**Summary**: Retired every production WEPPpy text-parser fallback and made the
+paired `wepppyo3.wepp_interchange` release mandatory for hillslope, watershed,
+and catalog conversion. Added six direct native writers, stable required-native
+errors, unique staged publication, failure-atomic PASS/LOSS rollback, 22 tracked
+schema snapshots, and shared provenance preflights across all Python services.
+The production image now has one canonical native package tree. The refreshed
+Python 3.12 extension SHA is `7419203c8b91db1b595590b7c9a28040662d5fad9fdf8b182a17c85a76d518e4`;
+all six local service families loaded it, ten RQ workers were idle, generated
+Concept 2 H1 conversion passed, the full 4,895-test gate passed, and both
+independent reviews closed with zero unresolved high/medium findings.
+
+---
 
 ### Fork Console Status Backpressure and Recovery (2026-07-15)
 **Status**: ✅ **COMPLETE; PRODUCTION DEPLOYMENT PENDING**

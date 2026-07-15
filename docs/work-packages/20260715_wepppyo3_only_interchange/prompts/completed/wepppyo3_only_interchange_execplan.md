@@ -36,8 +36,10 @@ publication.
   regression suite, stubs, and the native release artifact.
 - [x] (2026-07-15 17:54 UTC) Restarted the local stack and passed fixture plus
   generated native-only evidence with exact artifact provenance.
-- [ ] Complete independent code and QA reviews and disposition findings.
-- [ ] Pass broad gates, archive this plan, and close the package.
+- [x] (2026-07-15 18:40 UTC) Completed independent code and QA reviews,
+  resolved every high/medium finding, and passed both focused re-reviews.
+- [x] (2026-07-15 18:50 UTC) Passed all broad gates, archived this plan, and
+  closed the package.
 
 ## Surprises & Discoveries
 
@@ -72,6 +74,16 @@ publication.
   Evidence: `wctl run-stubtest wepppy.wepp.interchange` stopped in
   `hec_ras_boundary.py` and `hec_ras_buffer.py`; focused stubtest for
   `_rust_interchange` and `wctl check-test-stubs` pass.
+- Observation: fixed `<target>.tmp` stages permitted concurrent writers to
+  collide, and PASS/LOSS published sibling paths without failure rollback.
+  Evidence: independent code review reproduced a later-source failure; native
+  transaction and concurrency regressions now cover unique stages, two- and
+  eight-output rollback, absent prior outputs, and recovery-backup retention.
+- Observation: production copied WEPPpyo3 into site-packages in addition to the
+  canonical vendored release `.pth`, so the preflight would reject production's
+  first import origin.
+  Evidence: `docker/Dockerfile` placed the copy ahead of `.pth` additions;
+  commit `9c4f471f7` removes it and adds the single-origin regression.
 
 Add discoveries with exact paths, commands, or concise test output. Do not erase
 historical observations that changed the design.
@@ -103,15 +115,29 @@ historical observations that changed the design.
   Rationale: callers retain their signatures, but scheduling and primary
   Parquet construction now belong to the native bulk writers.
   Date/Author: 2026-07-15, Codex.
+- Decision: Make PASS/LOSS publication failure-atomic with staged sibling sets,
+  directory serialization, prior-generation rollback, and preserved recovery
+  backups; do not claim simultaneous multi-path visibility.
+  Rationale: it closes partial-generation failures while accurately describing
+  filesystem rename limits.
+  Date/Author: 2026-07-15, Codex after independent code review.
+- Decision: Remove the production site-packages copy and retain one canonical
+  vendored WEPPpyo3 release tree.
+  Rationale: duplicate origins defeat provenance validation and can mask a stale
+  extension.
+  Date/Author: 2026-07-15, Codex after independent QA review.
 
 ## Outcomes & Retrospective
 
-Native source and release commits are `942adff` and `5242c17`. The installed
-Python 3.12 extension SHA-256 is
-`92b180d5bc383165eb71e767285bfab1cd3ad24d48fe356145aef645bc185163`.
+Native feature/release commits are `942adff`, `5242c17`, `5819cb3`, and
+`4d3c060`. The final installed Python 3.12 extension SHA-256 is
+`7419203c8b91db1b595590b7c9a28040662d5fad9fdf8b182a17c85a76d518e4`.
 The local generated smoke converted all six `H1.*` report families from the
 AgFields Concept 2 output with one row group per source and logged only native
-writer/catalog operations. Broad gates and two reviews remain before closure.
+writer/catalog operations. All six local Python service families logged the
+same release SHA and ten RQ workers returned idle. Both independent re-reviews
+report zero unresolved high/medium findings. The repository-wide gate completed
+with 4,895 passed and 58 skipped in 891.19 seconds. The package is closed.
 
 ## Context and Orientation
 
@@ -266,3 +292,11 @@ parser retirement with stable public orchestration and generated wired evidence.
 hillslope formats still wrote primary Parquet through Python and TC_OUT had no
 native API. Native-only now explicitly includes direct primary writers and
 removal of the shared Python fan-in.
+
+2026-07-15 18:40 UTC: Revised the plan after dual review. Added unique staged
+publication, coordinated PASS/LOSS rollback, SOIL pre-publication validation,
+shared service startup provenance, tracked schema snapshots, and a single
+canonical production release origin. Both focused re-reviews are clear.
+
+2026-07-15 18:50 UTC: Recorded the 4,895-pass repository-wide gate, completed
+the final documentation checks, and archived the closed plan.
