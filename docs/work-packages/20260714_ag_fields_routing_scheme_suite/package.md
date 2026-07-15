@@ -150,9 +150,11 @@ is the package acceptance measurement.
   again grows with input-file size, an
   `.attempt-*` path appears in a published manifest, ordering/schema tests regress,
   or a worker experiences OOM/forced restart.
-- Sunset criteria: no temporary retry, fallback, feature flag, or delay was added.
-  The rolling bound is an invariant; reconsider it only with replacement parity
-  and bounded-memory evidence. Review the 30-day signals after 2026-08-14.
+- Sunset criteria: no temporary retry, feature flag, or delay was added. The
+  direct WAT path and rolling bounds are invariants; the explicit compatibility
+  fallback remains only for older native releases and is a danger signal, not an
+  accepted generated path. Reconsider either invariant only with replacement
+  parity and bounded-memory evidence. Review the 30-day signals after 2026-08-14.
 
 The same acceptance run also found that terminal `required_resources` entries
 were resolved against the staging root and therefore retained `.attempt-*` path
