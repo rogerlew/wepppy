@@ -11,7 +11,7 @@
 
 **Current phase**: Authenticated all-scheme generated acceptance
 
-**Last updated**: 2026-07-15 06:20 UTC
+**Last updated**: 2026-07-15 07:10 UTC
 
 **Next milestone**: Complete generated Concept 1, hybrid, and authenticated Run
 All acceptance while proving protected artifacts remain byte-identical
@@ -101,6 +101,12 @@ wiring is gated only by its own implementation and acceptance tests.
 - [x] Corrected terminal manifest resources to name the published scheme root,
   never a transient `.attempt-*` root, with an exact regression (2026-07-15 06:20
   UTC).
+- [x] Completed generated rolling-window remeasurement on Concept 2: sampled
+  anonymous memory peaked at 11,978,174,464 bytes, 80.5% below the unbounded
+  Concept 1 baseline and below the 16 GiB target, with zero OOM events
+  (2026-07-15 07:08 UTC).
+- [x] Passed the final post-hardening broad repository gate with 4,907 passed, 60
+  skipped, and 414 warnings in 9 minutes 33 seconds (2026-07-15 07:08 UTC).
 
 ## Timeline
 
@@ -297,7 +303,7 @@ replacement bounded-memory and parity proof.
 | Arbitrary field mosaics do not fit a defensible one-dimensional OFE plan | High | Medium | Preserve agreement/error distributions for Mariana; the engineering planner represents every source but does not invent a science cutoff | Measured |
 | Hybrid residual geometry double-counts or omits source area | High | Medium | Parent-level ownership plan, exact area identities, source manifest, and generated closure tests | Fixture passed |
 | Connectivity classifier is reimplemented inconsistently | High | Low | Extend and invoke the owned Peridot classifier; do not duplicate its D8/channel logic in Python | Mitigated |
-| Run All overwhelms worker memory | High | Medium | Independent jobs are chained serially; every interchange pool and its rolling outstanding-future window share the explicit 16-worker ceiling; retain anonymous-memory evidence | Mitigated in code; generated remeasurement pending |
+| Run All overwhelms worker memory | High | Medium | Independent jobs are chained serially; every interchange pool and its rolling outstanding-future window share the explicit 16-worker ceiling; retain anonymous-memory evidence | Mitigated; generated peak 11.16 GiB, zero OOM events |
 | Scheme clear escapes its fixed directory | High | Low | Enum-to-slug allowlist, resolved-path/symlink checks, and cross-scheme deletion tests | Open |
 | Legacy clients or projects lose Concept 2 behavior/state | High | Low | Omitted scheme maps to Concept 2; additive state migration; immutable legacy tree | Open |
 | Users treat engineering schemes as scientifically equivalent | Medium | Medium | Description-first labels, limitations/manifests, side-by-side evidence, and Mariana-owned disposition | Open |
@@ -319,9 +325,9 @@ replacement bounded-memory and parity proof.
   appear in its diff.
 - [x] Frontend Jest tests and lint pass.
 - [x] Updated stub and package-scoped changed-file broad-exception checks pass.
-- [x] Full `wctl run-pytest tests --maxfail=1` gate passes (latest pre-hardening
-  run: 4,905 passed, 60 skipped); a final rerun is required after the shared
-  interchange change.
+- [x] Full `wctl run-pytest tests --maxfail=1` gate passes after the shared
+  interchange change (4,907 passed, 60 skipped, 414 warnings in 9 minutes 33
+  seconds).
 
 ### Security
 

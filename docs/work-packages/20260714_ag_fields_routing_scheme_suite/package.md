@@ -121,6 +121,13 @@ will remain below 16 GiB, while row ordering and Parquet schemas remain identica
 The immediate observation window is the final generated rerun in this package;
 the post-merge health window runs through 2026-08-14.
 
+The first generated post-fix measurement completed on Concept 2 at 07:08:20 UTC.
+Its entire job peaked at 11,978,174,464 bytes (11.16 GiB) of sampled worker-cgroup
+anonymous memory, with zero cgroup OOM events. This is below the 16 GiB target and
+80.5% below the 61,335,310,336-byte Concept 1 baseline. The six hillslope outputs,
+including `H.wat.parquet`, completed in source order; the final repository gate
+passed 4,907 tests with 60 skips.
+
 - Primary health signals: outstanding futures never exceed `max_workers`, the
   dev-project interchange peak stays below 16 GiB, and the target job completes
   without OOM or manual recovery.

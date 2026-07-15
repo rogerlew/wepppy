@@ -131,6 +131,12 @@ engineering results for a separate science evaluation.
   so staged files are recorded below the fixed scheme root rather than an
   `.attempt-*` root. The full interchange suite passes with 82 tests and 3 skips;
   the combined publication/interchange regression passes 31 tests.
+- [x] (2026-07-15 07:08 UTC) Completed the generated rolling-window measurement
+  on Concept 2. The job finished all six hillslope interchange outputs and peaked
+  at 11,978,174,464 bytes of sampled cgroup anonymous memory, below the 16 GiB
+  target and 80.5% below the unbounded Concept 1 baseline, with zero OOM events.
+- [x] (2026-07-15 07:08 UTC) Passed the final post-hardening broad repository gate:
+  4,907 passed, 60 skipped, and 414 warnings in 9 minutes 33 seconds.
 - [ ] Milestone 7: pass focused/broad gates, security/QA review, and all-scheme
   generated acceptance; publish Mariana's comparison bundle.
 - [ ] Move this plan to `prompts/completed/`, update the package/tracker/root board,
