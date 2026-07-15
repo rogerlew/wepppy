@@ -1,4 +1,4 @@
 # Host-only overrides for local venvs.
 # Matches Ubuntu 24.04 + ubuntugis-unstable packages.
 # Rosetta is vendored separately by scripts/setup_host_venv.sh to match Docker.
-gdal==3.11.4
+gdal==3.13.1
