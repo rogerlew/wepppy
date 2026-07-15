@@ -7,7 +7,7 @@ import duckdb
 import pytest
 
 try:  # pragma: no cover - optional dependency probing
-    import pandas  # type: ignore  # noqa: F401
+    import pandas as pd  # type: ignore
     import pyarrow  # type: ignore  # noqa: F401
 except ModuleNotFoundError:
     _ASH_TESTS_ENABLED = False
@@ -17,7 +17,11 @@ else:
 pytestmark = pytest.mark.skipif(not _ASH_TESTS_ENABLED, reason="pandas/pyarrow required")
 
 if _ASH_TESTS_ENABLED:
-    from wepppy.wepp.interchange.totalwatsed3 import ASH_METRIC_COLUMNS, run_totalwatsed3
+    from wepppy.wepp.interchange.totalwatsed3 import (
+        ASH_METRIC_COLUMNS,
+        _aggregate_wat,
+        run_totalwatsed3,
+    )
 else:  # pragma: no cover - module-level skip
     ASH_METRIC_COLUMNS = tuple()
 
@@ -435,3 +439,28 @@ def test_run_totalwatsed3_uses_last_ofe_for_lateral_flow(tmp_path):
     assert data["latqcc"][0] == pytest.approx(2.0)  # m^3 from last OFE only (20 mm over 100 m^2)
     assert data["Lateral Flow"][0] == pytest.approx(10.0)  # depth over total aggregated Area (200 m^2)
     assert data["Runoff"][0] == pytest.approx(5.0)  # runvol depth over aggregated Area (1 m^3 over 200 m^2)
+
+
+def test_mofe_wat_aggregation_uses_bounded_hillslope_maxima_join(tmp_path):
+    wat_path = tmp_path / "H.wat.parquet"
+    _write_wat_multi_ofe(wat_path)
+
+    class CapturingConnection:
+        query = ""
+
+        def execute(self, query: str):
+            self.query = query
+            return self
+
+        @staticmethod
+        def df():
+            return pd.DataFrame()
+
+    connection = CapturingConnection()
+    _aggregate_wat(connection, wat_path, [1])
+
+    assert 'MAX("ofe_id") OVER' not in connection.query
+    assert 'MAX("ofe_id") AS _max_ofe_id' in connection.query
+    assert "GROUP BY wepp_id" in connection.query
+    assert "ON wat.wepp_id = maxima.wepp_id" in connection.query
+    assert "WHERE wat.wepp_id IN (1)" in connection.query

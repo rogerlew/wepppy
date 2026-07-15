@@ -610,7 +610,12 @@ def _aggregate_pass(con: duckdb.DuckDBPyConnection, pass_path: Path, where_claus
     return df
 
 
-def _aggregate_wat(con: duckdb.DuckDBPyConnection, wat_path: Path, where_clause: str) -> pd.DataFrame:
+def _aggregate_wat(
+    con: duckdb.DuckDBPyConnection,
+    wat_path: Path,
+    wepp_ids: list[int] | None,
+) -> pd.DataFrame:
+    where_clause = _build_where_clause(wepp_ids)
     day_column = _resolve_sim_day_column(wat_path)
     ofe_column = _resolve_ofe_column(wat_path)
     schema_names = set(pq.read_schema(wat_path).names)
@@ -627,21 +632,24 @@ def _aggregate_wat(con: duckdb.DuckDBPyConnection, wat_path: Path, where_clause:
         source_clause = f"FROM read_parquet('{path_sql}')\n        {where_clause}"
         latqcc_expr = "SUM(latqcc * 0.001 * Area) AS latqcc,"
     else:
+        aliased_where_clause = _build_where_clause_for_alias(wepp_ids, alias="wat")
         source_clause = f"""
-        FROM (
+        FROM read_parquet('{path_sql}') AS wat
+        INNER JOIN (
             SELECT
-                *,
-                MAX("{ofe_column}") OVER (
-                    PARTITION BY wepp_id, year, "{day_column}", julian, month, day_of_month, water_year
-                ) AS _max_ofe_id
+                wepp_id,
+                MAX("{ofe_column}") AS _max_ofe_id
             FROM read_parquet('{path_sql}')
             {where_clause}
-        ) AS wat
+            GROUP BY wepp_id
+        ) AS maxima
+            ON wat.wepp_id = maxima.wepp_id
+        {aliased_where_clause}
         """
         # In MOFE runs, latqcc is an internal lateral-routing term. Use only the
         # outlet-facing (last) OFE per hillslope/day to avoid counting internal
         # transfers multiple times.
-        latqcc_expr = f'SUM(CASE WHEN "{ofe_column}" = _max_ofe_id THEN latqcc * 0.001 * Area ELSE 0 END) AS latqcc,'
+        latqcc_expr = f'SUM(CASE WHEN wat."{ofe_column}" = maxima._max_ofe_id THEN latqcc * 0.001 * Area ELSE 0 END) AS latqcc,'
 
     query = f"""
         SELECT
@@ -918,7 +926,7 @@ def run_totalwatsed3(
 
     with duckdb.connect() as con:
         pass_df = _aggregate_pass(con, targets.pass_path, where_clause)
-        wat_df = _aggregate_wat(con, targets.wat_path, where_clause)
+        wat_df = _aggregate_wat(con, targets.wat_path, wepp_ids_normalized)
         soil_df = None
         if targets.soil_path is not None:
             soil_df = _aggregate_soil_tsmf(con, targets.soil_path, targets.wat_path, wepp_ids_normalized)
