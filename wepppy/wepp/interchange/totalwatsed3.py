@@ -924,15 +924,31 @@ def run_totalwatsed3(
     wepp_ids_normalized = _normalize_wepp_ids(wepp_ids)
     where_clause = _build_where_clause(wepp_ids_normalized)
 
+    # Keep each large parquet aggregation on its own connection. DuckDB retains
+    # scan/aggregation buffers for the lifetime of a connection, so sharing one
+    # across WAT, soil, and element queries stacks their otherwise bounded peaks.
     with duckdb.connect() as con:
         pass_df = _aggregate_pass(con, targets.pass_path, where_clause)
+    with duckdb.connect() as con:
         wat_df = _aggregate_wat(con, targets.wat_path, wepp_ids_normalized)
-        soil_df = None
-        if targets.soil_path is not None:
-            soil_df = _aggregate_soil_tsmf(con, targets.soil_path, targets.wat_path, wepp_ids_normalized)
-        element_df = None
-        if targets.element_path is not None:
-            element_df = _aggregate_element_partitions(con, targets.element_path, targets.wat_path, wepp_ids_normalized)
+    soil_df = None
+    if targets.soil_path is not None:
+        with duckdb.connect() as con:
+            soil_df = _aggregate_soil_tsmf(
+                con,
+                targets.soil_path,
+                targets.wat_path,
+                wepp_ids_normalized,
+            )
+    element_df = None
+    if targets.element_path is not None:
+        with duckdb.connect() as con:
+            element_df = _aggregate_element_partitions(
+                con,
+                targets.element_path,
+                targets.wat_path,
+                wepp_ids_normalized,
+            )
 
     if wat_df.empty:
         table = EMPTY_TABLE

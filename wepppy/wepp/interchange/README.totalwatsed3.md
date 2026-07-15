@@ -23,6 +23,11 @@ The resulting table is written to `<run>/wepp/output/interchange/totalwatsed3.pa
 
 Only the PASS file includes per-particle sediment concentrations (`sedcon_1`-`sedcon_5`, kg m⁻³). Those values are multiplied by the per-event runoff volume (`runvol`, m³) to recover per-class sediment mass in kilograms. The water-balance terms come from `H.wat` where inputs are expressed as depths (mm); the aggregator multiplies each depth by the contributing area to recover volumes, performs any needed sums, and finally divides by area again to restore depths.
 
+PASS, WAT, optional soil, and optional element aggregations each use a separate
+DuckDB connection. Closing a connection after its result is materialised releases
+its scan and aggregation buffers before the next large parquet query begins; the
+connections must not be combined into one long-lived interchange session.
+
 ## Output Snapshots
 
 Key output columns (see `SCHEMA` in `totalwatsed3.py` for the complete list):
