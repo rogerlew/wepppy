@@ -178,7 +178,7 @@ pyasn1-modules==0.4.0
 pycparser==2.22
 pycurl==7.45.6
 pydsstools==2.4.0
-pygments==2.15.0
+pygments==2.20.0
 pynacl==1.6.2
 pynvim==0.4.2
 pyparsing==2.4.7
