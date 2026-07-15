@@ -86,10 +86,10 @@ wepp/output/interchange/
 ### Concurrency Model
 
 **Hillslope files**: Processed with `write_parquet_with_pool()` which:
-1. Spawns `ProcessPoolExecutor` with `max_workers=NCPU` by default (or a caller-supplied bound; `WEPP_INTERCHANGE_FORCE_SERIAL=1` forces serial debugging)
-2. Distributes input files across workers (each worker parses subset of hillslopes)
-3. Workers write temp Parquet to `/dev/shm` (or `WEPP_INTERCHANGE_TMP_DIR`)
-4. Main process concatenates temp tables and commits atomically
+1. Spawns `ProcessPoolExecutor` with `max_workers=NCPU` by default (or a caller-supplied bound; `WEPP_INTERCHANGE_FORCE_SERIAL=1` forces serial debugging) and keeps at most that many parser futures outstanding
+2. Distributes input files across workers and consumes completed tables in source order
+3. Writes non-empty tables to one temporary Parquet file (`WEPP_INTERCHANGE_TMP_DIR` is used only when it shares the target filesystem)
+4. Atomically replaces the target after the writer closes successfully
 5. Falls back to serial processing on `/dev/shm` mount failures
 
 **Watershed files**: Processed with `ThreadPoolExecutor` because:
@@ -121,7 +121,7 @@ This ensures downstream tools never load incompatible schemas after WEPP model u
 ## Pipeline Overview
 - `run_wepp_hillslope_interchange()` removes incompatible artifacts, runs the six hillslope writers serially, and returns the refreshed interchange directory.
 - `run_wepp_watershed_interchange()` dispatches seven watershed writers in parallel, wiring shared `start_year` handling so truncated simulation years expand to full calendar years.
-- `write_parquet_with_pool()` handles fan-out parsing for high-volume hillslope files using a process pool, temp files on `/dev/shm` (overridable), and atomic commits.
+- `write_parquet_with_pool()` handles fan-out parsing for high-volume hillslope files using a bounded rolling process-pool window, source-ordered writes, temp files on `/dev/shm` (overridable), and atomic commits.
 
 ### Hillslope Inputs → Outputs
 | Input pattern | Writer | Output | Highlights |
@@ -155,7 +155,7 @@ This ensures downstream tools never load incompatible schemas after WEPP model u
 | --- | --- |
 | `run_wepp_hillslope_interchange(wepp_output_dir, start_year=None, max_workers=None)` | Serial hillslope pipeline; forwards the optional process-pool bound to all six converters, returns `Path` to `interchange/`, and writes the version manifest (supports `delete_after_interchange` to remove raw text outputs). |
 | `run_wepp_watershed_interchange(wepp_output_dir, start_year=None)` | Threaded watershed pipeline; fans out to individual writers and finalizes the manifest (supports `delete_after_interchange` to remove raw text outputs). |
-| `write_parquet_with_pool(files, parser, schema, target_path, **kwargs)` | Shared fan-out writer that parallelizes parsing, buffers results, and commits atomically (respects `WEPP_INTERCHANGE_FORCE_SERIAL`). |
+| `write_parquet_with_pool(files, parser, schema, target_path, **kwargs)` | Shared fan-out writer that parallelizes parsing with a bounded rolling window, writes in source order, and commits atomically (respects `WEPP_INTERCHANGE_FORCE_SERIAL`). |
 | `load_hill_wat_dataframe(wepp_output_dir, wepp_id, collapse='daily')` | Convenience accessor returning either daily aggregated or raw OFE-level WAT records via DuckDB. |
 | `run_totalwatsed3(interchange_dir, baseflow_opts, wepp_ids=None, *, ash_dir=None)` | Produces watershed-wide daily hydrologic summaries, baseflow diagnostics, and ash transport mass totals from interchange + `ash` parquet files. |
 | `totalwatsed_partitioned_dss_export(wd, export_channel_ids=None, status_channel=None)` | Writes one DSS file per channel using `run_totalwatsed3` output and optional status messaging. |

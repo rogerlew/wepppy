@@ -1061,7 +1061,7 @@ class AgFieldsWatershedIntegrator:
             raise AgFieldsWatershedIntegrationError(
                 f"Isolated interchange is missing required resources: {', '.join(missing)}"
             )
-        return [(interchange_dir / name).resolve().relative_to(self.wd).as_posix() for name in required]
+        return [self._published_relpath(interchange_dir / name) for name in required]
 
     def _executable_identity(self, configured: str | None, *, hill: bool) -> dict[str, Any]:
         name = str(configured or "latest")

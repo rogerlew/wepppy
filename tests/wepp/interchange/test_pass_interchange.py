@@ -64,6 +64,53 @@ def test_write_parquet_with_pool_concurrent(tmp_path: Path) -> None:
     assert table.column("value").to_pylist() == [0, 1]
 
 
+def test_write_parquet_with_pool_bounds_outstanding_futures(tmp_path: Path, monkeypatch: pytest.MonkeyPatch) -> None:
+    inputs = _make_dummy_inputs(tmp_path, 5)
+    target = tmp_path / "bounded-pool.parquet"
+    executors: list[object] = []
+
+    class TrackingFuture:
+        def __init__(self, executor: object, path: Path) -> None:
+            self.executor = executor
+            self.path = path
+
+        def result(self) -> pa.Table:
+            executor = self.executor
+            executor.outstanding -= 1
+            return _parser_with_delay(self.path)
+
+    class TrackingExecutor:
+        def __init__(self, max_workers: int, mp_context: object) -> None:
+            del mp_context
+            self.max_workers = max_workers
+            self.outstanding = 0
+            self.peak_outstanding = 0
+            executors.append(self)
+
+        def __enter__(self) -> "TrackingExecutor":
+            return self
+
+        def __exit__(self, exc_type: object, exc: object, traceback: object) -> None:
+            del exc_type, exc, traceback
+
+        def submit(self, parser: object, path: Path) -> TrackingFuture:
+            del parser
+            if self.outstanding >= self.max_workers:
+                raise AssertionError("submitted more parser futures than the worker bound")
+            self.outstanding += 1
+            self.peak_outstanding = max(self.peak_outstanding, self.outstanding)
+            return TrackingFuture(self, path)
+
+    monkeypatch.setattr(_concurrency, "ProcessPoolExecutor", TrackingExecutor)
+
+    write_parquet_with_pool(inputs, _parser_with_delay, _CONCURRENT_SCHEMA, target, max_workers=2)
+
+    table = pq.read_table(target)
+    assert table.column("value").to_pylist() == [0, 1, 2, 3, 4]
+    assert len(executors) == 1
+    assert executors[0].peak_outstanding == 2
+
+
 def test_write_parquet_with_pool_handles_empty(tmp_path: Path) -> None:
     schema = pa.schema([("value", pa.int32())])
     target = tmp_path / "empty.parquet"

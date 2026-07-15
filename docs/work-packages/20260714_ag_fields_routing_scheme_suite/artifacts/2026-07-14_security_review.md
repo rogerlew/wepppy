@@ -48,7 +48,7 @@
 | THR-02 | High | RQ/NoDb | Concurrent scheme jobs or clear actions corrupt state or publish the wrong result | Single-flight admission, preassigned atomic job-id state, scheme-scoped terminal state, atomic publish, lock/concurrency tests | Mitigated |
 | THR-03 | High | Subprocess | Scheme/resource values reach shell command composition | Structured argv only, allowlisted binaries/resources, explicit failure propagation | Validated |
 | THR-04 | Medium | Authorization | New Run All or clear-all behavior bypasses existing run access or enqueue scope | Preserve JWT scopes/run ownership and add route tests for each mutation | Validated |
-| THR-05 | Medium | Availability | Run All starts three memory-heavy watershed jobs concurrently | Dependency-chain serialization, explicit 16-worker ceiling propagated to every interchange pool, queue observability, measured peak-memory evidence | Mitigated; final remeasurement active |
+| THR-05 | Medium | Availability | Run All starts three memory-heavy watershed jobs concurrently or one scheme retains an input-sized backlog of parsed tables | Dependency-chain serialization, explicit 16-worker ceiling propagated to every interchange pool and outstanding-future window, queue observability, measured peak-memory evidence | Mitigated in code; final remeasurement active |
 | THR-06 | Medium | Integrity | Failed/retried jobs overwrite a prior completed scheme or misreport partial results | Attempt staging, atomic terminal manifest, source signatures, independent job ids/status | Validated |
 | THR-07 | Medium | Output exposure | Browse/result links can be influenced to reveal sibling or unrelated run files | Server-provided fixed relative paths and route-level run authorization | Validated |
 | THR-08 | Medium | Input integrity | Duplicate classifier logic changes hybrid branch assignment silently | Invoke/version the canonical Peridot implementation and persist resource hashes | Validated |
@@ -66,6 +66,8 @@ section is populated from actual code and validation evidence.
 | F-02 | Medium | Worker availability | The integrator's 16-worker bound did not reach hillslope interchange pools, allowing each pool to expand to host `NCPU`. | First full Concept 1 process reached `VmHWM=60,502,848 KiB`; call-chain audit found no converter `max_workers` argument. | Forward one validated 1-16 bound through the aggregate and all six writers; reject out-of-range API/RQ values. | Resolved; generated remeasurement active |
 | F-03 | Medium | Native release integrity | An in-place shared-object refresh invalidated mapped pages in the completed direct-generation process, causing exit 139 during teardown. | The terminal manifest/NoDb state completed before the refresh; wepppyo3 provenance records the incident and exact artifact hash. | Install shared objects through a same-directory temporary file and atomic rename; restart target services. | Resolved |
 | F-04 | Medium | RQ/NoDb availability | Stopping an RQ job bypassed the worker exception boundary, left its matching scheme in persisted `running:<phase>` state, and retained partial staging data, so a retry returned HTTP 409 and disk use accumulated. | Concept 1 job `2c7309f4-9c8e-485e-a9ec-a370782bf7a2` reached RQ `stopped` while NoDb remained `running:watershed_rerun` and a 17 GB hidden attempt remained. | Reconcile only exact persisted job ids whose authoritative RQ state is terminal/missing; atomically quarantine matching attempt roots before releasing state, preserve prior results, and add stopped/active/mismatched regressions. | Resolved; live state and partial-tree cleanup validated |
+| F-05 | Medium | Worker availability | Bounding parser processes did not bound submitted futures or completed out-of-order Arrow tables; the writer-side ordering dictionary could grow with the full input set. | Authenticated Concept 1 job `70750bcd-0e70-4906-b25c-0e6f827b9bb1` reached 61,335,310,336 bytes sampled cgroup anonymous memory during `H.wat` conversion with 3,543 inputs and no OOM event. | Use a source-ordered rolling window no larger than `max_workers`, write in the parent, remove the unbounded writer buffer, and add an executor regression that rejects excess submissions. | Resolved in code; generated remeasurement active |
+| F-06 | Medium | Published artifact integrity | A completed manifest's `required_resources` retained its transient `.attempt-*` prefix after the directory was atomically published. | The completed Concept 1 state at 06:10:47 UTC named nine resources below `.concept-1.attempt-6a97uivp`, while the files existed below `concept-1`. | Translate every staged resource through the fixed published scheme root before writing the terminal manifest and freeze the exact path list in a regression. | Resolved in code; final rerun required |
 
 Risk acceptance authority: `Accepted-risk` requires a security reviewer
 recommendation plus explicit package-owner acknowledgment in Sign-off.
@@ -199,6 +201,8 @@ recommendation plus explicit package-owner acknowledgment in Sign-off.
   - route/RQ/render: 104 passed;
   - enqueue-race focused rerun: 55 passed;
   - interrupted-job reconciliation focused suite: 66 passed;
+  - shared interchange suite after rolling-window hardening: 82 passed, 3 skipped;
+  - combined staged-resource and interchange regression: 31 passed;
   - rq-engine OpenAPI contract: 10 passed;
   - frontend lint and all 625 Jest tests passed;
   - RQ dependency graph: 141 edges, current;
@@ -224,7 +228,11 @@ recommendation plus explicit package-owner acknowledgment in Sign-off.
     and replaced by continuous anonymous/process sampling; and
   - exact stopped-job reconciliation changed the stranded Concept 1 state to a
     retryable `failed` state while preserving its prior result, after which a new
-    authenticated Run All returned three independent job ids.
+    authenticated Run All returned three independent job ids; and
+  - that Run All's Concept 1 job completed at 06:10:47 UTC, while continuous
+    sampling captured a 61,335,310,336-byte anonymous-memory peak and inspection
+    captured transient `.attempt-*` resource paths in its otherwise terminal
+    manifest, producing F-05 and F-06 with focused regressions.
 - Manual checks pending:
   - terminal authenticated Run All execution;
   - cross-scheme/legacy protected-tree inventory; and

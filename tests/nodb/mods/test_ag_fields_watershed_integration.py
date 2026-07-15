@@ -125,6 +125,62 @@ def test_scheme_staging_publishes_only_after_terminal_manifest(tmp_path: Path) -
     assert not list(published.parent.glob(".concept-2.previous-*"))
 
 
+def test_interchange_resources_use_published_scheme_paths(
+    tmp_path: Path,
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    controller = _area_controller(tmp_path)
+    controller.climate_instance = SimpleNamespace(calendar_start_year=2000)
+    controller.wepp_instance = SimpleNamespace(baseflow_opts=None)
+    integrator = AgFieldsConcept2Integrator(controller)
+    integrator._reset_isolated_tree()
+    required_names = (
+        "H.pass.parquet",
+        "H.wat.parquet",
+        "ebe_pw0.parquet",
+        "loss_pw0.out.parquet",
+        "loss_pw0.hill.parquet",
+        "loss_pw0.chn.parquet",
+        "totalwatsed3.parquet",
+        "README.md",
+    )
+
+    def fake_hillslope_interchange(output_dir: Path, **kwargs: object) -> Path:
+        del kwargs
+        interchange_dir = Path(output_dir) / "interchange"
+        interchange_dir.mkdir(parents=True)
+        for name in required_names:
+            (interchange_dir / name).touch()
+        return interchange_dir
+
+    monkeypatch.setattr(
+        integration_module,
+        "run_wepp_hillslope_interchange",
+        fake_hillslope_interchange,
+    )
+    monkeypatch.setattr(
+        integration_module,
+        "run_totalwatsed3",
+        lambda *_args, **_kwargs: None,
+    )
+    monkeypatch.setattr(
+        integration_module,
+        "run_wepp_watershed_interchange",
+        lambda *_args, **_kwargs: None,
+    )
+    monkeypatch.setattr(
+        integration_module,
+        "generate_interchange_documentation",
+        lambda *_args, **_kwargs: None,
+    )
+
+    resources = integrator._regenerate_interchange()
+
+    expected_prefix = "wepp/ag_fields/watershed/concept-2/output/interchange/"
+    assert resources == [f"{expected_prefix}{name}" for name in required_names]
+    assert all(".attempt-" not in resource for resource in resources)
+
+
 def test_failed_scheme_attempt_preserves_previous_result_and_failure_manifest(
     tmp_path: Path,
 ) -> None:

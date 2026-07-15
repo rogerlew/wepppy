@@ -281,7 +281,7 @@ Currently active work packages. Limit to 2-4 packages to maintain focus.
 
 ### AgFields Routing Scheme Suite
 **Started**: 2026-07-14
-**Status**: In progress; integrated forest management-capacity/corpus milestone
+**Status**: In progress; authenticated generated acceptance and interchange hardening
 **Size**: High (multi-repository, multi-stage implementation)
 **Owner**: Codex
 **Priority**: High
@@ -292,20 +292,21 @@ dev-project sub-fields with direct channel drainage while routing the others
 through OFEs. The runs page will offer one scheme or all with description-first
 labels and fixed `concept-1`, `concept-2`, and `hybrid` result roots.
 
-**Current Focus**: Inventory every bounded management section, increase the
-synchronized forest hillslope capacity, and execute the complete Concept 1/hybrid
-corpus without invalid-input or numerical producer failures.
+**Current Focus**: Complete the authenticated serial all-scheme run, verify
+protected artifacts and comparison outputs, and remeasure the bounded rolling
+interchange fix after the unbounded Concept 1 `H.wat` conversion reached
+61,335,310,336 bytes of anonymous worker memory.
 
 **Dependencies**: Builds on the completed Concept 2 implementation, ADR-0018, the
 completed flowpath-to-channel connectivity inventory, and the owned
-`/workdir/wepp-forest_260430_baseline` build/ablation workflow. ADR-0019 remains
-Proposed pending an exact corpus-backed capacity and matching forest/WEPPpy
-release evidence.
+`/workdir/wepp-forest_260430_baseline` build/ablation workflow. The corpus-backed
+capacity-32 forest/WEPPpy release evidence is complete; ADR-0019 remains Proposed
+pending final generated acceptance and owner disposition.
 
-**Next Steps**: Implement the reusable management-corpus command, freeze the
-capacity from all section maxima, patch/test forest in isolation, classify and
-resolve every corpus failure, then vendor matching binaries and update the WEPPpy
-guard. UI/API/RQ wiring remains gated until this milestone passes.
+**Next Steps**: Finish Concept 2 and hybrid in the active Run All chain, rerun
+affected schemes with the final bounded-interchange and stable-manifest code,
+capture protected-tree hashes and engineering comparison metrics, then close the
+QA/security/Mariana handoff artifacts.
 
 ---
 

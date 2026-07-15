@@ -122,6 +122,15 @@ engineering results for a separate science evaluation.
 - [x] (2026-07-15 04:57 UTC) Re-ran the broad WEPPpy gate after the final
   interrupted-attempt cleanup change: 4,905 tests passed, 60 skipped, and 414
   warnings in 9 minutes 18 seconds.
+- [x] (2026-07-15 06:20 UTC) The authenticated Concept 1 job completed and
+  published all 3,543 parents. Its old `H.wat` interchange reached
+  61,335,310,336 bytes of sampled anonymous cgroup memory because all futures and
+  out-of-order Arrow results were retained; the shared writer now uses a
+  source-ordered rolling window bounded by `max_workers`.
+- [x] (2026-07-15 06:20 UTC) Corrected published `required_resources` provenance
+  so staged files are recorded below the fixed scheme root rather than an
+  `.attempt-*` root. The full interchange suite passes with 82 tests and 3 skips;
+  the combined publication/interchange regression passes 31 tests.
 - [ ] Milestone 7: pass focused/broad gates, security/QA review, and all-scheme
   generated acceptance; publish Mariana's comparison bundle.
 - [ ] Move this plan to `prompts/completed/`, update the package/tracker/root board,
@@ -260,6 +269,22 @@ engineering results for a separate science evaluation.
   recovery now atomically quarantines exact-scheme attempts while holding the
   NoDb lock, deletes them afterwards, and leaves failed deletion tombstones in the
   already clearable `.previous-*` namespace.
+- Observation: Limiting `ProcessPoolExecutor` to 16 workers did not limit its
+  submitted-future/result backlog. Submitting all 3,543 parsers at once let
+  completed Arrow tables accumulate behind an earlier slow file in both futures
+  and the writer's ordering dictionary.
+  Evidence: authenticated Concept 1 job
+  `70750bcd-0e70-4906-b25c-0e6f827b9bb1` reached 61,335,310,336 bytes of sampled
+  cgroup anonymous memory during `H.wat` without swap/OOM events. A deterministic
+  fake executor now fails if submissions exceed the configured window; the old
+  implementation would fail that regression on its third submission with a
+  two-worker bound.
+- Observation: Atomic directory publication does not rewrite path strings already
+  serialized in a terminal manifest.
+  Evidence: the completed Concept 1 manifest named nine resources below
+  `.concept-1.attempt-6a97uivp` even though their files were correctly published
+  below `concept-1`. The common integrator already had `_published_relpath`; all
+  three schemes now use it when constructing `required_resources`.
 - Observation: Branch-wide broad-exception enforcement includes the separate
   `5da847b40` Ash Transport commit and reports its two new catches; the
   package-scoped AgFields/RQ/Peridot/interchange paths pass with a net reduction
@@ -329,6 +354,19 @@ erase observations that changed the design.
   filesystem cache separately and do not use raw cgroup peak as process RSS.
   Rationale: the first live retry populated tens of gigabytes of file cache,
   making raw cgroup peak unsuitable for the package's unique-memory criterion.
+  Date/Author: 2026-07-15, Codex.
+- Decision: Bound outstanding interchange futures to `max_workers`, consume them
+  in source order, and write their tables directly from the parent process.
+  Rationale: process count alone did not bound completed result retention. A
+  rolling window preserves parser parallelism, deterministic row order, the
+  existing worker parameter, and atomic output while removing the unbounded
+  writer queue/dictionary and its extra table serialization.
+  Date/Author: 2026-07-15, Codex.
+- Decision: Resolve staged interchange resources through the fixed public scheme
+  root before writing terminal summaries.
+  Rationale: a successful atomic rename makes staging-relative strings stale even
+  when the output files are sound. Stable public paths are part of the manifest
+  contract and must not require post-publication mutation.
   Date/Author: 2026-07-15, Codex.
 - Decision: Require scheme-specific routing evidence instead of universal
   `pass_sources` and `parent_routing` files.

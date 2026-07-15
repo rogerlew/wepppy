@@ -11,7 +11,7 @@
 
 **Current phase**: Authenticated all-scheme generated acceptance
 
-**Last updated**: 2026-07-15 04:57 UTC
+**Last updated**: 2026-07-15 06:20 UTC
 
 **Next milestone**: Complete generated Concept 1, hybrid, and authenticated Run
 All acceptance while proving protected artifacts remain byte-identical
@@ -95,6 +95,12 @@ wiring is gated only by its own implementation and acceptance tests.
 - [x] Replaced raw cache-inclusive cgroup peak interpretation with continuous
   anonymous-memory and worker-process sampling for generated acceptance
   (2026-07-15 04:29 UTC).
+- [x] Replaced the unbounded hillslope interchange future/result backlog with a
+  source-ordered rolling window no larger than `max_workers`; the complete
+  interchange suite passes (2026-07-15 06:20 UTC).
+- [x] Corrected terminal manifest resources to name the published scheme root,
+  never a transient `.attempt-*` root, with an exact regression (2026-07-15 06:20
+  UTC).
 
 ## Timeline
 
@@ -157,6 +163,13 @@ wiring is gated only by its own implementation and acceptance tests.
 - [x] Committed the forest capacity/G1 implementation, dated binaries,
   regression, and ablation evidence as detached commit `a87d0bbf` while leaving
   the earlier p1 dirty-tree layer unstaged (2026-07-15 03:51 UTC).
+- [x] The authenticated Concept 1 job completed all 3,543 parents and published
+  its terminal scheme tree at 06:10:47 UTC. Its old interchange implementation
+  reached 61,335,310,336 bytes of sampled cgroup anonymous memory during
+  `H.wat`, directly motivating the bounded-result fix (2026-07-15 06:20 UTC).
+- [x] Focused hardening validation passed: all 82 runnable interchange tests plus
+  3 skips, and the combined 31 Concept 2 publication/interchange regressions
+  (2026-07-15 06:20 UTC).
 
 ## Decisions Log
 
@@ -253,6 +266,30 @@ and use forest ablation evidence for finite-input model-state failures.
 Milestone 2B gates ADR acceptance and all UI/RQ work. No generic clamping, dropped
 source, disabled floating-point trap, or silent Concept 2 fallback is permitted.
 
+### 2026-07-15 06:20 UTC: Bound completed interchange results, not only workers
+
+**Context**: Concept 1 used the intended 16 parser processes, yet its `H.wat`
+interchange phase reached 61,335,310,336 bytes of anonymous cgroup memory.
+Inspection showed all 3,543 futures were submitted immediately and completed
+Arrow tables could accumulate behind one slow earlier index in both futures and
+the writer's ordering dictionary.
+
+**Decision**: Keep at most `max_workers` futures outstanding and consume/write
+them in exact source order in the parent process. Preserve parser functions,
+schemas, file order, atomic temporary-file commit, and the configured worker
+contract. Do not add a retry, fallback, or second memory knob.
+
+**Impact**: Retained tables are bounded by the already validated worker ceiling,
+and the writer-side unbounded buffer/thread is removed. A deterministic fake
+executor proves that a third future cannot be submitted while a two-worker window
+is full. Final generated remeasurement remains required.
+
+**Hardening signals**: The immediate health target is less than 16 GiB anonymous
+memory on the dev-project rerun with at most 16 outstanding futures. Schema/order
+tests, elapsed time no more than twice the old run, and zero OOM/restart events are
+guardrails. Observe through 2026-08-14; reconsider the invariant only with a
+replacement bounded-memory and parity proof.
+
 ## Risks and Issues
 
 | Risk | Severity | Likelihood | Mitigation | Status |
@@ -260,7 +297,7 @@ source, disabled floating-point trap, or silent Concept 2 fallback is permitted.
 | Arbitrary field mosaics do not fit a defensible one-dimensional OFE plan | High | Medium | Preserve agreement/error distributions for Mariana; the engineering planner represents every source but does not invent a science cutoff | Measured |
 | Hybrid residual geometry double-counts or omits source area | High | Medium | Parent-level ownership plan, exact area identities, source manifest, and generated closure tests | Fixture passed |
 | Connectivity classifier is reimplemented inconsistently | High | Low | Extend and invoke the owned Peridot classifier; do not duplicate its D8/channel logic in Python | Mitigated |
-| Run All overwhelms worker memory | High | Medium | Independent jobs chained serially with `allow_failure=True`; integration and every interchange pool share an explicit 16-worker ceiling; retain measured RSS evidence | Mitigated; generated remeasurement pending |
+| Run All overwhelms worker memory | High | Medium | Independent jobs are chained serially; every interchange pool and its rolling outstanding-future window share the explicit 16-worker ceiling; retain anonymous-memory evidence | Mitigated in code; generated remeasurement pending |
 | Scheme clear escapes its fixed directory | High | Low | Enum-to-slug allowlist, resolved-path/symlink checks, and cross-scheme deletion tests | Open |
 | Legacy clients or projects lose Concept 2 behavior/state | High | Low | Omitted scheme maps to Concept 2; additive state migration; immutable legacy tree | Open |
 | Users treat engineering schemes as scientifically equivalent | Medium | Medium | Description-first labels, limitations/manifests, side-by-side evidence, and Mariana-owned disposition | Open |
@@ -282,8 +319,9 @@ source, disabled floating-point trap, or silent Concept 2 fallback is permitted.
   appear in its diff.
 - [x] Frontend Jest tests and lint pass.
 - [x] Updated stub and package-scoped changed-file broad-exception checks pass.
-- [x] Full `wctl run-pytest tests --maxfail=1` gate passes (4,901 passed, 60
-  skipped).
+- [x] Full `wctl run-pytest tests --maxfail=1` gate passes (latest pre-hardening
+  run: 4,905 passed, 60 skipped); a final rerun is required after the shared
+  interchange change.
 
 ### Security
 

@@ -1,6 +1,6 @@
 # AgFields Routing Scheme Suite
 
-**Status**: In progress - faithful scheme implementation (2026-07-15)
+**Status**: In progress - generated acceptance and interchange hardening (2026-07-15)
 **Timezone**: UTC
 
 ## Overview
@@ -97,6 +97,58 @@ and failures are not silently dropped, coerced, or substituted with Concept 2. S
   output-scope contract and its route/report tests are updated in the same change.
 - General two-dimensional field routing. Concept 1 remains a documented
   one-dimensional abstraction of the parent hillslope.
+
+## Incident Hardening Addendum
+
+The authenticated Concept 1 job
+`70750bcd-0e70-4906-b25c-0e6f827b9bb1` exposed an in-scope worker-availability
+defect during hillslope interchange on 2026-07-15. The configured 16-process
+ceiling bounded active parsers, but `write_parquet_with_pool()` submitted all
+3,543 files at once and retained completed, out-of-order Arrow tables in futures
+and a writer-side dictionary. During `H.wat` conversion, sampled worker-cgroup
+anonymous memory reached 61,335,310,336 bytes. No cgroup OOM, swap growth, or
+scientific-output failure occurred, but the retention pattern could exhaust a
+smaller worker.
+
+**Scope boundary**: Fix the confirmed interchange result-retention path without
+changing parser schemas, source ordering, routing formulas, worker defaults, or
+unrelated WEPP/RQ execution.
+
+**Hardening hypothesis**: If parser submission uses a rolling window no larger
+than `max_workers` and the parent writes each result in source order, then no more
+than 16 parsed tables are retained and generated interchange anonymous memory
+will remain below 16 GiB, while row ordering and Parquet schemas remain identical.
+The immediate observation window is the final generated rerun in this package;
+the post-merge health window runs through 2026-08-14.
+
+- Primary health signals: outstanding futures never exceed `max_workers`, the
+  dev-project interchange peak stays below 16 GiB, and the target job completes
+  without OOM or manual recovery.
+- Guardrails: existing interchange tests preserve schema/order/empty-output and
+  atomic-commit behavior; generated elapsed time must not exceed twice the
+  unbounded run without a documented review.
+- Danger signals: anonymous memory again grows with input-file count, an
+  `.attempt-*` path appears in a published manifest, ordering/schema tests regress,
+  or a worker experiences OOM/forced restart.
+- Sunset criteria: no temporary retry, fallback, feature flag, or delay was added.
+  The rolling bound is an invariant; reconsider it only with replacement parity
+  and bounded-memory evidence. Review the 30-day signals after 2026-08-14.
+
+The same acceptance run also found that terminal `required_resources` entries
+were resolved against the staging root and therefore retained `.attempt-*` path
+components after atomic publication. Resource provenance now maps staged files to
+their fixed published scheme root before the manifest is written; a focused
+regression freezes this contract.
+
+Related precedent is the
+[WEPP interchange dependency race guard](../20260428_wepp_interchange_dependency_race_guard/package.md),
+whose deterministic ordering and atomic-output expectations are reused, and the
+[Browse Arrow/pandas elimination package](../20260616_browse_arrow_pandas_elimination/package.md),
+whose explicit large-Parquet memory discipline is reused. This incident differs
+because it is an in-process completed-result backlog rather than an RQ dependency
+race or an interactive preview allocation. The lifecycle and signal requirements
+come from the
+[hardening lifecycle standard](../../standards/hardening-lifecycle-standard.md).
 
 ## Implementation Fidelity and Evidence
 
