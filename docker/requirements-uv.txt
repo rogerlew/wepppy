@@ -191,7 +191,7 @@ pytest-cov==7.0.0
 pytest-reportlog==0.4.0
 python-dotenv==1.2.2
 python-frontmatter==1.1.0
-python-multipart==0.0.22
+python-multipart==0.0.31
 pythran==0.10.0
 pytz==2022.1
 pyyaml==6.0.2
