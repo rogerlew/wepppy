@@ -1,0 +1,273 @@
+{
+  "fields": [
+    {
+      "metadata": {},
+      "name": "wepp_id",
+      "nullable": true,
+      "type": "int32"
+    },
+    {
+      "metadata": {},
+      "name": "ofe_id",
+      "nullable": true,
+      "type": "int16"
+    },
+    {
+      "metadata": {},
+      "name": "year",
+      "nullable": true,
+      "type": "int16"
+    },
+    {
+      "metadata": {
+        "description": "1-indexed simulation day"
+      },
+      "name": "sim_day_index",
+      "nullable": true,
+      "type": "int32"
+    },
+    {
+      "metadata": {},
+      "name": "julian",
+      "nullable": true,
+      "type": "int16"
+    },
+    {
+      "metadata": {},
+      "name": "month",
+      "nullable": true,
+      "type": "int8"
+    },
+    {
+      "metadata": {},
+      "name": "day_of_month",
+      "nullable": true,
+      "type": "int8"
+    },
+    {
+      "metadata": {},
+      "name": "water_year",
+      "nullable": true,
+      "type": "int16"
+    },
+    {
+      "metadata": {},
+      "name": "OFE",
+      "nullable": true,
+      "type": "int16"
+    },
+    {
+      "metadata": {
+        "description": "Precipitation",
+        "units": "mm"
+      },
+      "name": "P",
+      "nullable": true,
+      "type": "double"
+    },
+    {
+      "metadata": {
+        "description": "Rainfall+Irrigation+Snowmelt",
+        "units": "mm"
+      },
+      "name": "RM",
+      "nullable": true,
+      "type": "double"
+    },
+    {
+      "metadata": {
+        "description": "Daily runoff over eff length",
+        "units": "mm"
+      },
+      "name": "Q",
+      "nullable": true,
+      "type": "double"
+    },
+    {
+      "metadata": {
+        "description": "Plant transpiration",
+        "units": "mm"
+      },
+      "name": "Ep",
+      "nullable": true,
+      "type": "double"
+    },
+    {
+      "metadata": {
+        "description": "Soil evaporation",
+        "units": "mm"
+      },
+      "name": "Es",
+      "nullable": true,
+      "type": "double"
+    },
+    {
+      "metadata": {
+        "description": "Residue evaporation",
+        "units": "mm"
+      },
+      "name": "Er",
+      "nullable": true,
+      "type": "double"
+    },
+    {
+      "metadata": {
+        "description": "Deep percolation",
+        "units": "mm"
+      },
+      "name": "Dp",
+      "nullable": true,
+      "type": "double"
+    },
+    {
+      "metadata": {
+        "description": "Runon added to OFE",
+        "units": "mm"
+      },
+      "name": "UpStrmQ",
+      "nullable": true,
+      "type": "double"
+    },
+    {
+      "metadata": {
+        "description": "Subsurface runon added to OFE",
+        "units": "mm"
+      },
+      "name": "SubRIn",
+      "nullable": true,
+      "type": "double"
+    },
+    {
+      "metadata": {
+        "description": "Lateral subsurface flow",
+        "units": "mm"
+      },
+      "name": "latqcc",
+      "nullable": true,
+      "type": "double"
+    },
+    {
+      "metadata": {
+        "description": "Unfrozen water in soil profile",
+        "units": "mm"
+      },
+      "name": "Total-Soil Water",
+      "nullable": true,
+      "type": "double"
+    },
+    {
+      "metadata": {
+        "description": "Frozen water in soil profile",
+        "units": "mm"
+      },
+      "name": "frozwt",
+      "nullable": true,
+      "type": "double"
+    },
+    {
+      "metadata": {
+        "description": "Water in surface snow",
+        "units": "mm"
+      },
+      "name": "Snow-Water",
+      "nullable": true,
+      "type": "double"
+    },
+    {
+      "metadata": {
+        "description": "Daily runoff scaled to single OFE",
+        "units": "mm"
+      },
+      "name": "QOFE",
+      "nullable": true,
+      "type": "double"
+    },
+    {
+      "metadata": {
+        "description": "Tile drainage",
+        "units": "mm"
+      },
+      "name": "Tile",
+      "nullable": true,
+      "type": "double"
+    },
+    {
+      "metadata": {
+        "description": "Irrigation",
+        "units": "mm"
+      },
+      "name": "Irr",
+      "nullable": true,
+      "type": "double"
+    },
+    {
+      "metadata": {
+        "description": "Area that depths apply over",
+        "units": "m^2"
+      },
+      "name": "Area",
+      "nullable": true,
+      "type": "double"
+    },
+    {
+      "metadata": {
+        "description": "Full-profile soil water depth (watcon + frozwt), optional producer-authoritative term",
+        "units": "mm"
+      },
+      "name": "SoilWaterTotal",
+      "nullable": true,
+      "type": "double"
+    },
+    {
+      "metadata": {
+        "description": "Full soil profile depth (solthk(nsl)), optional producer-authoritative term",
+        "units": "mm"
+      },
+      "name": "ProfileDepth",
+      "nullable": true,
+      "type": "double"
+    },
+    {
+      "metadata": {
+        "description": "Full-profile porosity storage capacity (sum(por * dg)), optional producer-authoritative term",
+        "units": "mm"
+      },
+      "name": "ProfilePorosityCap",
+      "nullable": true,
+      "type": "double"
+    },
+    {
+      "metadata": {
+        "description": "Full-profile field-capacity storage (sum(thetfc * dg)), optional producer-authoritative term",
+        "units": "mm"
+      },
+      "name": "ProfileFCStore",
+      "nullable": true,
+      "type": "double"
+    },
+    {
+      "metadata": {
+        "description": "Full-profile wilting-point storage (sum(thetdr * dg)), optional producer-authoritative term",
+        "units": "mm"
+      },
+      "name": "ProfileWPStore",
+      "nullable": true,
+      "type": "double"
+    },
+    {
+      "metadata": {
+        "description": "Plant/residue interception carryover storage (pintlv + resint), optional producer-authoritative term",
+        "units": "mm"
+      },
+      "name": "InterceptionStorage",
+      "nullable": true,
+      "type": "double"
+    }
+  ],
+  "metadata": {
+    "dataset_version": "1.2",
+    "dataset_version_major": "1",
+    "dataset_version_minor": "2",
+    "schema_version": "1"
+  }
+}

@@ -1,0 +1,137 @@
+{
+  "fields": [
+    {
+      "metadata": {
+        "description": "Calendar year"
+      },
+      "name": "year",
+      "nullable": true,
+      "type": "int16"
+    },
+    {
+      "metadata": {
+        "description": "1-indexed simulation day"
+      },
+      "name": "sim_day_index",
+      "nullable": true,
+      "type": "int32"
+    },
+    {
+      "metadata": {
+        "description": "WEPP simulation year reported in output"
+      },
+      "name": "simulation_year",
+      "nullable": true,
+      "type": "int16"
+    },
+    {
+      "metadata": {
+        "description": "Calendar month"
+      },
+      "name": "month",
+      "nullable": true,
+      "type": "int8"
+    },
+    {
+      "metadata": {
+        "description": "Calendar day of month"
+      },
+      "name": "day_of_month",
+      "nullable": true,
+      "type": "int8"
+    },
+    {
+      "metadata": {
+        "description": "Julian day from WEPP output"
+      },
+      "name": "julian",
+      "nullable": true,
+      "type": "int16"
+    },
+    {
+      "metadata": {
+        "description": "Water year derived from year/julian"
+      },
+      "name": "water_year",
+      "nullable": true,
+      "type": "int16"
+    },
+    {
+      "metadata": {
+        "description": "Watershed precipitation depth for the event",
+        "units": "mm"
+      },
+      "name": "precip",
+      "nullable": true,
+      "type": "double"
+    },
+    {
+      "metadata": {
+        "description": "Watershed runoff volume for the event",
+        "units": "m^3"
+      },
+      "name": "runoff_volume",
+      "nullable": true,
+      "type": "double"
+    },
+    {
+      "metadata": {
+        "description": "Peak watershed discharge",
+        "units": "m^3/s"
+      },
+      "name": "peak_runoff",
+      "nullable": true,
+      "type": "double"
+    },
+    {
+      "metadata": {
+        "description": "Sediment yield at the watershed outlet",
+        "units": "kg"
+      },
+      "name": "sediment_yield",
+      "nullable": true,
+      "type": "double"
+    },
+    {
+      "metadata": {
+        "description": "Soluble pollutant mass delivered at watershed outlet",
+        "units": "kg"
+      },
+      "name": "soluble_pollutant",
+      "nullable": true,
+      "type": "double"
+    },
+    {
+      "metadata": {
+        "description": "Particulate pollutant mass delivered at watershed outlet",
+        "units": "kg"
+      },
+      "name": "particulate_pollutant",
+      "nullable": true,
+      "type": "double"
+    },
+    {
+      "metadata": {
+        "description": "Total pollutant mass delivered (soluble + particulate)",
+        "units": "kg"
+      },
+      "name": "total_pollutant",
+      "nullable": true,
+      "type": "double"
+    },
+    {
+      "metadata": {
+        "description": "Channel element identifier (Elmt_ID)"
+      },
+      "name": "element_id",
+      "nullable": true,
+      "type": "int32"
+    }
+  ],
+  "metadata": {
+    "dataset_version": "1.2",
+    "dataset_version_major": "1",
+    "dataset_version_minor": "2",
+    "schema_version": "1"
+  }
+}

@@ -167,7 +167,7 @@ wctl check-test-stubs
 Run the native crate and release-package validation from `/home/workdir/wepppyo3`:
 
 ```bash
-cargo test -p wepp_interchange
+cargo test -p wepp_interchange_rust
 PYTHONPATH=release/linux/py312 \
   /home/workdir/wepppy/.venv/bin/pytest -q tests/wepp_interchange
 ```
@@ -181,8 +181,9 @@ installed copy.
 
 Confirm the paired release exports the full API and that the runtime imports its
 shared object from the expected release tree. In the local forest stack,
-`docker/weppcloud-entrypoint.sh` logs the resolved path and SHA-256 and rejects a
-baked image copy.
+`docker/wepppyo3-interchange-preflight.py` logs the resolved path and SHA-256 for
+the web, query, RQ, worker, and scheduler processes and rejects a baked
+development copy when the bind-mounted release is authoritative.
 
 ### Native conversion failed
 

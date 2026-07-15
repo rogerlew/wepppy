@@ -1,0 +1,102 @@
+{
+  "fields": [
+    {
+      "metadata": {},
+      "name": "Type",
+      "nullable": true,
+      "type": "string"
+    },
+    {
+      "metadata": {},
+      "name": "chn_enum",
+      "nullable": true,
+      "type": "int32"
+    },
+    {
+      "metadata": {
+        "units": "m^3"
+      },
+      "name": "Discharge Volume",
+      "nullable": true,
+      "type": "double"
+    },
+    {
+      "metadata": {
+        "units": "tonne"
+      },
+      "name": "Sediment Yield",
+      "nullable": true,
+      "type": "double"
+    },
+    {
+      "metadata": {
+        "units": "kg"
+      },
+      "name": "Soil Loss",
+      "nullable": true,
+      "type": "double"
+    },
+    {
+      "metadata": {
+        "units": "m^3"
+      },
+      "name": "Upland Charge",
+      "nullable": true,
+      "type": "double"
+    },
+    {
+      "metadata": {
+        "units": "m^3"
+      },
+      "name": "Subsuface Flow Volume",
+      "nullable": true,
+      "type": "double"
+    },
+    {
+      "metadata": {
+        "units": "ha"
+      },
+      "name": "Contributing Area",
+      "nullable": true,
+      "type": "double"
+    },
+    {
+      "metadata": {
+        "units": "kg"
+      },
+      "name": "Solub. React. Pollutant",
+      "nullable": true,
+      "type": "double"
+    },
+    {
+      "metadata": {
+        "units": "kg"
+      },
+      "name": "Particulate Pollutant",
+      "nullable": true,
+      "type": "double"
+    },
+    {
+      "metadata": {
+        "units": "kg"
+      },
+      "name": "Total Pollutant",
+      "nullable": true,
+      "type": "double"
+    },
+    {
+      "metadata": {},
+      "name": "wepp_id",
+      "nullable": true,
+      "type": "int32"
+    }
+  ],
+  "metadata": {
+    "average_years": "4",
+    "dataset_version": "1.2",
+    "dataset_version_major": "1",
+    "dataset_version_minor": "2",
+    "schema_version": "1",
+    "table": "loss_pw0.chn"
+  }
+}

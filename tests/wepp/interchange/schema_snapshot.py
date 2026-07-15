@@ -47,6 +47,7 @@ SNAPSHOT_TARGETS: dict[str, str] = {
     "hill_loss": "H.loss.parquet",
     "hill_soil": "H.soil.parquet",
     "hill_wat": "H.wat.parquet",
+    "tc_out": "tc_out.parquet",
 }
 
 REQUIRED_SCHEMA_METADATA_KEYS = {
@@ -86,9 +87,17 @@ def schema_from_parquet(parquet_path: Path) -> pa.Schema:
     return pq.read_schema(parquet_path)
 
 
-def assert_schema_matches_snapshot(schema: pa.Schema, snapshot_name: str) -> None:
+def assert_schema_matches_snapshot(
+    schema: pa.Schema,
+    snapshot_name: str,
+    *,
+    ignored_metadata_keys: frozenset[str] = frozenset(),
+) -> None:
     expected = load_schema_snapshot(snapshot_name)
     actual = schema_to_dict(schema)
+    for key in ignored_metadata_keys:
+        expected["metadata"].pop(key, None)
+        actual["metadata"].pop(key, None)
     assert actual == expected
 
 

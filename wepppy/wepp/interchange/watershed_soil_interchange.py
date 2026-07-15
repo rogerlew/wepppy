@@ -1,12 +1,19 @@
 from __future__ import annotations
 
 import logging
+import os
 from pathlib import Path
+import tempfile
 
 import pyarrow as pa
 import pyarrow.parquet as pq
 
-from ._rust_interchange import call_wepppyo3_interchange, resolve_cli_calendar_path, version_args
+from ._rust_interchange import (
+    WeppInterchangeExecutionError,
+    call_wepppyo3_interchange,
+    resolve_cli_calendar_path,
+    version_args,
+)
 from .schema_utils import pa_field
 from .versioning import schema_with_version
 
@@ -112,19 +119,37 @@ def run_wepp_watershed_soil_interchange(wepp_output_dir: Path | str) -> Path:
     interchange_dir = base / "interchange"
     interchange_dir.mkdir(parents=True, exist_ok=True)
     target = interchange_dir / SOIL_PARQUET
+    staged_fd, staged_name = tempfile.mkstemp(
+        dir=interchange_dir,
+        prefix=f".{SOIL_PARQUET}.",
+        suffix=".stage",
+    )
+    os.close(staged_fd)
+    staged_target = Path(staged_name)
 
     cli_calendar_path = resolve_cli_calendar_path(base, log=LOGGER)
     major, minor = version_args()
-    call_wepppyo3_interchange(
-        "watershed SOIL",
-        "watershed_soil_to_parquet",
-        str(soil_path),
-        str(target),
-        major,
-        minor,
-        cli_calendar_path=str(cli_calendar_path) if cli_calendar_path else None,
-        chunk_rows=CHUNK_SIZE,
-    )
-    _validate_native_schema(pq.read_schema(target))
+    try:
+        call_wepppyo3_interchange(
+            "watershed SOIL",
+            "watershed_soil_to_parquet",
+            str(soil_path),
+            str(staged_target),
+            major,
+            minor,
+            cli_calendar_path=str(cli_calendar_path) if cli_calendar_path else None,
+            chunk_rows=CHUNK_SIZE,
+        )
+        try:
+            _validate_native_schema(pq.read_schema(staged_target))
+            staged_target.replace(target)
+        except Exception as exc:  # broad-except: staged native output validation boundary
+            raise WeppInterchangeExecutionError(
+                "WEPPpyo3 interchange operation 'watershed SOIL' failed during "
+                f"staged schema validation/publication: {exc}"
+            ) from exc
+    finally:
+        staged_target.unlink(missing_ok=True)
+
     LOGGER.info("wepp interchange: SOIL via WEPPpyo3")
     return target

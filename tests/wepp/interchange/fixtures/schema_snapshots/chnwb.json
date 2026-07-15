@@ -1,0 +1,261 @@
+{
+  "fields": [
+    {
+      "metadata": {
+        "description": "Channel (OFE) identifier"
+      },
+      "name": "wepp_id",
+      "nullable": true,
+      "type": "int32"
+    },
+    {
+      "metadata": {
+        "description": "Julian day"
+      },
+      "name": "julian",
+      "nullable": true,
+      "type": "int16"
+    },
+    {
+      "metadata": {
+        "description": "Calendar year"
+      },
+      "name": "year",
+      "nullable": true,
+      "type": "int16"
+    },
+    {
+      "metadata": {
+        "description": "Simulation year value from input file"
+      },
+      "name": "simulation_year",
+      "nullable": true,
+      "type": "int16"
+    },
+    {
+      "metadata": {
+        "description": "Calendar month"
+      },
+      "name": "month",
+      "nullable": true,
+      "type": "int8"
+    },
+    {
+      "metadata": {
+        "description": "Calendar day of month"
+      },
+      "name": "day_of_month",
+      "nullable": true,
+      "type": "int8"
+    },
+    {
+      "metadata": {
+        "description": "Computed water year"
+      },
+      "name": "water_year",
+      "nullable": true,
+      "type": "int16"
+    },
+    {
+      "metadata": {
+        "description": "Channel OFE index"
+      },
+      "name": "OFE",
+      "nullable": true,
+      "type": "int16"
+    },
+    {
+      "metadata": {
+        "description": "Julian day as reported"
+      },
+      "name": "J",
+      "nullable": true,
+      "type": "int16"
+    },
+    {
+      "metadata": {
+        "description": "Simulation year as reported"
+      },
+      "name": "Y",
+      "nullable": true,
+      "type": "int16"
+    },
+    {
+      "metadata": {
+        "description": "precipitation",
+        "units": "mm"
+      },
+      "name": "P (mm)",
+      "nullable": true,
+      "type": "double"
+    },
+    {
+      "metadata": {
+        "description": "rainfall + irrigation + snowmelt",
+        "units": "mm"
+      },
+      "name": "RM (mm)",
+      "nullable": true,
+      "type": "double"
+    },
+    {
+      "metadata": {
+        "description": "daily runoff over effective length",
+        "units": "mm"
+      },
+      "name": "Q (mm)",
+      "nullable": true,
+      "type": "double"
+    },
+    {
+      "metadata": {
+        "description": "plant transpiration",
+        "units": "mm"
+      },
+      "name": "Ep (mm)",
+      "nullable": true,
+      "type": "double"
+    },
+    {
+      "metadata": {
+        "description": "soil evaporation",
+        "units": "mm"
+      },
+      "name": "Es (mm)",
+      "nullable": true,
+      "type": "double"
+    },
+    {
+      "metadata": {
+        "description": "residue evaporation",
+        "units": "mm"
+      },
+      "name": "Er (mm)",
+      "nullable": true,
+      "type": "double"
+    },
+    {
+      "metadata": {
+        "description": "deep percolation",
+        "units": "mm"
+      },
+      "name": "Dp (mm)",
+      "nullable": true,
+      "type": "double"
+    },
+    {
+      "metadata": {
+        "description": "Runon added to OFE",
+        "units": "mm"
+      },
+      "name": "UpStrmQ (mm)",
+      "nullable": true,
+      "type": "double"
+    },
+    {
+      "metadata": {
+        "description": "Subsurface runon added to OFE",
+        "units": "mm"
+      },
+      "name": "SubRIn (mm)",
+      "nullable": true,
+      "type": "double"
+    },
+    {
+      "metadata": {
+        "description": "lateral subsurface flow",
+        "units": "mm"
+      },
+      "name": "latqcc (mm)",
+      "nullable": true,
+      "type": "double"
+    },
+    {
+      "metadata": {
+        "description": "Unfrozen water in soil profile",
+        "units": "mm"
+      },
+      "name": "Total Soil Water (mm)",
+      "nullable": true,
+      "type": "double"
+    },
+    {
+      "metadata": {
+        "description": "Frozen water in soil profile",
+        "units": "mm"
+      },
+      "name": "frozwt (mm)",
+      "nullable": true,
+      "type": "double"
+    },
+    {
+      "metadata": {
+        "description": "Water in surface snow",
+        "units": "mm"
+      },
+      "name": "Snow Water (mm)",
+      "nullable": true,
+      "type": "double"
+    },
+    {
+      "metadata": {
+        "description": "Daily runoff scaled to single OFE",
+        "units": "mm"
+      },
+      "name": "QOFE (mm)",
+      "nullable": true,
+      "type": "double"
+    },
+    {
+      "metadata": {
+        "description": "Tile drainage",
+        "units": "mm"
+      },
+      "name": "Tile (mm)",
+      "nullable": true,
+      "type": "double"
+    },
+    {
+      "metadata": {
+        "description": "Irrigation",
+        "units": "mm"
+      },
+      "name": "Irr (mm)",
+      "nullable": true,
+      "type": "double"
+    },
+    {
+      "metadata": {
+        "description": "Surface storage",
+        "units": "mm"
+      },
+      "name": "Surf (mm)",
+      "nullable": true,
+      "type": "double"
+    },
+    {
+      "metadata": {
+        "description": "Portion of runon from external baseflow",
+        "units": "mm"
+      },
+      "name": "Base (mm)",
+      "nullable": true,
+      "type": "double"
+    },
+    {
+      "metadata": {
+        "description": "Area that depths apply over",
+        "units": "m^2"
+      },
+      "name": "Area (m^2)",
+      "nullable": true,
+      "type": "double"
+    }
+  ],
+  "metadata": {
+    "dataset_version": "1.2",
+    "dataset_version_major": "1",
+    "dataset_version_minor": "2",
+    "schema_version": "1"
+  }
+}

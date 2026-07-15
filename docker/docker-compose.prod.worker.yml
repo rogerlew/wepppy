@@ -1,3 +1,8 @@
+x-wepppyo3-interchange-entrypoint: &wepppyo3-interchange-entrypoint
+  - /opt/venv/bin/python
+  - /workdir/wepppy/docker/wepppyo3-interchange-preflight.py
+  - --
+
 x-wepppy-image: &wepppy-image
   image: ${WEPPCLOUD_IMAGE:-wepppy:latest}
   build:
@@ -67,6 +72,7 @@ services:
 
   rq-worker:
     <<: *worker-service
+    entrypoint: *wepppyo3-interchange-entrypoint
     depends_on:
       f-esri:
         condition: service_started
@@ -95,6 +101,7 @@ services:
 
   rq-worker-batch:
     <<: *worker-service
+    entrypoint: *wepppyo3-interchange-entrypoint
     depends_on:
       f-esri:
         condition: service_started

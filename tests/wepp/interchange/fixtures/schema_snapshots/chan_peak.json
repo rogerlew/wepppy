@@ -1,0 +1,92 @@
+{
+  "fields": [
+    {
+      "metadata": {
+        "description": "Calendar year"
+      },
+      "name": "year",
+      "nullable": true,
+      "type": "int16"
+    },
+    {
+      "metadata": {
+        "description": "Simulation year from chan.out"
+      },
+      "name": "simulation_year",
+      "nullable": true,
+      "type": "int16"
+    },
+    {
+      "metadata": {
+        "description": "Julian day reported by WEPP"
+      },
+      "name": "julian",
+      "nullable": true,
+      "type": "int16"
+    },
+    {
+      "metadata": {
+        "description": "Calendar month derived from Julian day"
+      },
+      "name": "month",
+      "nullable": true,
+      "type": "int8"
+    },
+    {
+      "metadata": {
+        "description": "Calendar day-of-month derived from Julian day"
+      },
+      "name": "day_of_month",
+      "nullable": true,
+      "type": "int8"
+    },
+    {
+      "metadata": {
+        "description": "Water year computed from Julian day"
+      },
+      "name": "water_year",
+      "nullable": true,
+      "type": "int16"
+    },
+    {
+      "metadata": {
+        "description": "Channel element identifier"
+      },
+      "name": "Elmt_ID",
+      "nullable": true,
+      "type": "int32"
+    },
+    {
+      "metadata": {
+        "description": "Channel ID reported by WEPP"
+      },
+      "name": "Chan_ID",
+      "nullable": true,
+      "type": "int32"
+    },
+    {
+      "metadata": {
+        "description": "Time to peak discharge",
+        "units": "s"
+      },
+      "name": "Time (s)",
+      "nullable": true,
+      "type": "double"
+    },
+    {
+      "metadata": {
+        "description": "Peak discharge within the reporting interval",
+        "units": "m^3/s"
+      },
+      "name": "Peak_Discharge (m^3/s)",
+      "nullable": true,
+      "type": "double"
+    }
+  ],
+  "metadata": {
+    "dataset_version": "1.2",
+    "dataset_version_major": "1",
+    "dataset_version_minor": "2",
+    "schema_version": "1"
+  }
+}

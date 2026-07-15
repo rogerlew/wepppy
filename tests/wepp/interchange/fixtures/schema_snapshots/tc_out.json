@@ -1,0 +1,69 @@
+{
+  "fields": [
+    {
+      "metadata": {
+        "description": "Julian day from tc_out.txt"
+      },
+      "name": "day",
+      "nullable": true,
+      "type": "int16"
+    },
+    {
+      "metadata": {
+        "description": "Calendar year"
+      },
+      "name": "year",
+      "nullable": true,
+      "type": "int16"
+    },
+    {
+      "metadata": {
+        "description": "1-indexed simulation day"
+      },
+      "name": "sim_day_index",
+      "nullable": true,
+      "type": "int32"
+    },
+    {
+      "metadata": {
+        "description": "Julian day from tc_out.txt (alias of day)"
+      },
+      "name": "julian",
+      "nullable": true,
+      "type": "int16"
+    },
+    {
+      "metadata": {
+        "description": "Event time of concentration at the outlet channel",
+        "units": "hr"
+      },
+      "name": "Time of Conc (hr)",
+      "nullable": true,
+      "type": "double"
+    },
+    {
+      "metadata": {
+        "description": "Storm duration for the event",
+        "units": "hr"
+      },
+      "name": "Storm Duration (hr)",
+      "nullable": true,
+      "type": "double"
+    },
+    {
+      "metadata": {
+        "description": "Time to storm peak for the event",
+        "units": "hr"
+      },
+      "name": "Storm Peak (hr)",
+      "nullable": true,
+      "type": "double"
+    }
+  ],
+  "metadata": {
+    "dataset_version": "1.2",
+    "dataset_version_major": "1",
+    "dataset_version_minor": "2",
+    "schema_version": "1"
+  }
+}

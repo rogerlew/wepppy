@@ -1,0 +1,72 @@
+{
+  "fields": [
+    {
+      "metadata": {},
+      "name": "Class",
+      "nullable": true,
+      "type": "int8"
+    },
+    {
+      "metadata": {
+        "units": "mm"
+      },
+      "name": "Diameter",
+      "nullable": true,
+      "type": "double"
+    },
+    {
+      "metadata": {},
+      "name": "Specific Gravity",
+      "nullable": true,
+      "type": "double"
+    },
+    {
+      "metadata": {
+        "units": "%"
+      },
+      "name": "Pct Sand",
+      "nullable": true,
+      "type": "double"
+    },
+    {
+      "metadata": {
+        "units": "%"
+      },
+      "name": "Pct Silt",
+      "nullable": true,
+      "type": "double"
+    },
+    {
+      "metadata": {
+        "units": "%"
+      },
+      "name": "Pct Clay",
+      "nullable": true,
+      "type": "double"
+    },
+    {
+      "metadata": {
+        "units": "%"
+      },
+      "name": "Pct OM",
+      "nullable": true,
+      "type": "double"
+    },
+    {
+      "metadata": {
+        "units": ""
+      },
+      "name": "Fraction In Flow Exiting",
+      "nullable": true,
+      "type": "double"
+    }
+  ],
+  "metadata": {
+    "average_years": "4",
+    "dataset_version": "1.2",
+    "dataset_version_major": "1",
+    "dataset_version_minor": "2",
+    "schema_version": "1",
+    "table": "loss_pw0.class_data"
+  }
+}

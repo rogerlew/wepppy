@@ -198,9 +198,9 @@ From `/home/workdir/wepppy`, inventory and test with:
 
 From `/home/workdir/wepppyo3`, validate source and release with:
 
-    cargo test -p wepp_interchange
-    release/linux/py312/.venv/bin/python -m pytest \
-      release/linux/py312/tests/wepp_interchange
+    cargo test -p wepp_interchange_rust
+    PYTHONPATH=release/linux/py312 \
+      /home/workdir/wepppy/.venv/bin/pytest -q tests/wepp_interchange
 
 Use the runtime audit's canonical stack commands after code/test readiness. Do
 not overwrite an imported shared object in place; build to a temporary path and

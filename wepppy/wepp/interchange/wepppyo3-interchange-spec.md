@@ -95,10 +95,12 @@ The development forest stack loads the bind-mounted release at:
 /workdir/wepppyo3/release/linux/py312/wepppyo3/
 ```
 
-`docker/weppcloud-entrypoint.sh` verifies the package and extension origins,
-the complete required API, and logs the native shared-object SHA-256. A baked
-image copy is not accepted for this development stack because it can mask an
-out-of-date bind mount.
+`docker/wepppyo3-interchange-preflight.py` verifies package and extension
+origins, the complete required API, and logs the native shared-object SHA-256.
+The web build entrypoint invokes it directly; query-engine, rq-engine, both RQ
+worker services, and scheduler use it as their process entrypoint. The required
+root resolves the production image symlink but rejects a baked development copy
+when the bind-mounted release should be authoritative.
 
 The release package and native shared object must be committed with provenance
 that identifies the source commit used to build them.
@@ -115,9 +117,10 @@ Before publishing a paired release:
 6. Exercise the public aggregate facades and a generated WEPP output without
    any Python-parser recovery telemetry.
 
-The committed fixture suite covers all required facade formats, row-group
-ordering, missing-symbol failure, native-execution failure, and non-publication
-of failed targets.
+The committed fixture suite covers all required facade formats, exact static
+schema/field metadata snapshots, normalized run-dependent schema metadata,
+row-group ordering, missing-symbol failure, native-execution failure, and
+non-publication of failed targets.
 
 ## Related Documentation
 

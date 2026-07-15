@@ -1,0 +1,88 @@
+{
+  "fields": [
+    {
+      "metadata": {},
+      "name": "wepp_id",
+      "nullable": true,
+      "type": "int32"
+    },
+    {
+      "metadata": {},
+      "name": "class_id",
+      "nullable": true,
+      "type": "int8"
+    },
+    {
+      "metadata": {
+        "description": "Sediment particle size class"
+      },
+      "name": "Class",
+      "nullable": true,
+      "type": "int8"
+    },
+    {
+      "metadata": {
+        "units": "mm"
+      },
+      "name": "Diameter",
+      "nullable": true,
+      "type": "double"
+    },
+    {
+      "metadata": {},
+      "name": "Specific Gravity",
+      "nullable": true,
+      "type": "double"
+    },
+    {
+      "metadata": {
+        "units": "%"
+      },
+      "name": "% Sand",
+      "nullable": true,
+      "type": "double"
+    },
+    {
+      "metadata": {
+        "units": "%"
+      },
+      "name": "% Silt",
+      "nullable": true,
+      "type": "double"
+    },
+    {
+      "metadata": {
+        "units": "%"
+      },
+      "name": "% Clay",
+      "nullable": true,
+      "type": "double"
+    },
+    {
+      "metadata": {
+        "units": "%"
+      },
+      "name": "% O.M.",
+      "nullable": true,
+      "type": "double"
+    },
+    {
+      "metadata": {},
+      "name": "Sediment Fraction",
+      "nullable": true,
+      "type": "double"
+    },
+    {
+      "metadata": {},
+      "name": "In Flow Exiting",
+      "nullable": true,
+      "type": "double"
+    }
+  ],
+  "metadata": {
+    "dataset_version": "1.2",
+    "dataset_version_major": "1",
+    "dataset_version_minor": "2",
+    "schema_version": "1"
+  }
+}

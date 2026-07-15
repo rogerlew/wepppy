@@ -1,0 +1,107 @@
+{
+  "fields": [
+    {
+      "metadata": {},
+      "name": "wepp_id",
+      "nullable": true,
+      "type": "int32"
+    },
+    {
+      "metadata": {},
+      "name": "climate_file",
+      "nullable": true,
+      "type": "string"
+    },
+    {
+      "metadata": {
+        "units": "m^2"
+      },
+      "name": "area",
+      "nullable": true,
+      "type": "double"
+    },
+    {
+      "metadata": {
+        "units": "mg/L"
+      },
+      "name": "srp",
+      "nullable": true,
+      "type": "double"
+    },
+    {
+      "metadata": {
+        "units": "mg/L"
+      },
+      "name": "slfp",
+      "nullable": true,
+      "type": "double"
+    },
+    {
+      "metadata": {
+        "units": "mg/L"
+      },
+      "name": "bfp",
+      "nullable": true,
+      "type": "double"
+    },
+    {
+      "metadata": {
+        "units": "mg/kg"
+      },
+      "name": "scp",
+      "nullable": true,
+      "type": "double"
+    },
+    {
+      "metadata": {
+        "units": "m"
+      },
+      "name": "dia_1",
+      "nullable": true,
+      "type": "double"
+    },
+    {
+      "metadata": {
+        "units": "m"
+      },
+      "name": "dia_2",
+      "nullable": true,
+      "type": "double"
+    },
+    {
+      "metadata": {
+        "units": "m"
+      },
+      "name": "dia_3",
+      "nullable": true,
+      "type": "double"
+    },
+    {
+      "metadata": {
+        "units": "m"
+      },
+      "name": "dia_4",
+      "nullable": true,
+      "type": "double"
+    },
+    {
+      "metadata": {
+        "units": "m"
+      },
+      "name": "dia_5",
+      "nullable": true,
+      "type": "double"
+    }
+  ],
+  "metadata": {
+    "begin_year": "2020",
+    "dataset_version": "1.2",
+    "dataset_version_major": "1",
+    "dataset_version_minor": "2",
+    "max_years": "4",
+    "nhill": "3096",
+    "npart": "5",
+    "schema_version": "1",
+    "version": "2020.5"
+  }
+}

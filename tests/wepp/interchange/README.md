@@ -44,7 +44,9 @@ PYTHONPATH=release/linux/py312 \
 ## Manual Facade Smoke
 
 Use a copied run directory; interchange generation writes or replaces files
-under `output/interchange/`.
+under `output/interchange/`. Copy the run's `climate/wepp_cli.parquet` with the
+output tree, or pass the correct `start_year`; simulation-year dates such as
+February 29 cannot be resolved faithfully without one of those calendar inputs.
 
 ```bash
 wctl exec weppcloud bash -lc 'cd /workdir/wepppy && /opt/venv/bin/python - <<"PY"

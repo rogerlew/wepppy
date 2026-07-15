@@ -1,0 +1,170 @@
+{
+  "fields": [
+    {
+      "metadata": {},
+      "name": "wepp_id",
+      "nullable": true,
+      "type": "int32"
+    },
+    {
+      "metadata": {},
+      "name": "year",
+      "nullable": true,
+      "type": "int16"
+    },
+    {
+      "metadata": {
+        "description": "1-indexed simulation day"
+      },
+      "name": "sim_day_index",
+      "nullable": true,
+      "type": "int32"
+    },
+    {
+      "metadata": {},
+      "name": "month",
+      "nullable": true,
+      "type": "int8"
+    },
+    {
+      "metadata": {},
+      "name": "day_of_month",
+      "nullable": true,
+      "type": "int8"
+    },
+    {
+      "metadata": {},
+      "name": "julian",
+      "nullable": true,
+      "type": "int16"
+    },
+    {
+      "metadata": {},
+      "name": "water_year",
+      "nullable": true,
+      "type": "int16"
+    },
+    {
+      "metadata": {
+        "description": "Storm precipitation depth",
+        "units": "mm"
+      },
+      "name": "Precip",
+      "nullable": true,
+      "type": "double"
+    },
+    {
+      "metadata": {
+        "description": "Runoff depth scaled by effective flow length",
+        "units": "mm"
+      },
+      "name": "Runoff",
+      "nullable": true,
+      "type": "double"
+    },
+    {
+      "metadata": {
+        "description": "Weighted interrill detachment over the hillslope",
+        "units": "kg/m^2"
+      },
+      "name": "IR-det",
+      "nullable": true,
+      "type": "double"
+    },
+    {
+      "metadata": {
+        "description": "Average soil detachment across detachment regions",
+        "units": "kg/m^2"
+      },
+      "name": "Av-det",
+      "nullable": true,
+      "type": "double"
+    },
+    {
+      "metadata": {
+        "description": "Maximum soil detachment across detachment regions",
+        "units": "kg/m^2"
+      },
+      "name": "Mx-det",
+      "nullable": true,
+      "type": "double"
+    },
+    {
+      "metadata": {
+        "description": "Location of maximum soil detachment along hillslope",
+        "units": "m"
+      },
+      "name": "Det-point",
+      "nullable": true,
+      "type": "double"
+    },
+    {
+      "metadata": {
+        "description": "Average sediment deposition across deposition regions",
+        "units": "kg/m^2"
+      },
+      "name": "Av-dep",
+      "nullable": true,
+      "type": "double"
+    },
+    {
+      "metadata": {
+        "description": "Maximum sediment deposition across deposition regions",
+        "units": "kg/m^2"
+      },
+      "name": "Max-dep",
+      "nullable": true,
+      "type": "double"
+    },
+    {
+      "metadata": {
+        "description": "Location of maximum sediment deposition along hillslope",
+        "units": "m"
+      },
+      "name": "Dep-point",
+      "nullable": true,
+      "type": "double"
+    },
+    {
+      "metadata": {
+        "description": "Storm sediment load per unit width at hillslope outlet",
+        "units": "kg/m"
+      },
+      "name": "Sed.Del",
+      "nullable": true,
+      "type": "double"
+    },
+    {
+      "metadata": {
+        "description": "Specific surface enrichment ratio for event sediment"
+      },
+      "name": "ER",
+      "nullable": true,
+      "type": "double"
+    },
+    {
+      "metadata": {
+        "description": "Effective detachment flow length",
+        "units": "m"
+      },
+      "name": "Det-Len",
+      "nullable": true,
+      "type": "double"
+    },
+    {
+      "metadata": {
+        "description": "Effective deposition flow length",
+        "units": "m"
+      },
+      "name": "Dep-Len",
+      "nullable": true,
+      "type": "double"
+    }
+  ],
+  "metadata": {
+    "dataset_version": "1.2",
+    "dataset_version_major": "1",
+    "dataset_version_minor": "2",
+    "schema_version": "1"
+  }
+}

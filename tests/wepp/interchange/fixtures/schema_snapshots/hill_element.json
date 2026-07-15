@@ -1,0 +1,241 @@
+{
+  "fields": [
+    {
+      "metadata": {},
+      "name": "wepp_id",
+      "nullable": true,
+      "type": "int32"
+    },
+    {
+      "metadata": {},
+      "name": "ofe_id",
+      "nullable": true,
+      "type": "int16"
+    },
+    {
+      "metadata": {},
+      "name": "year",
+      "nullable": true,
+      "type": "int16"
+    },
+    {
+      "metadata": {},
+      "name": "julian",
+      "nullable": true,
+      "type": "int16"
+    },
+    {
+      "metadata": {},
+      "name": "month",
+      "nullable": true,
+      "type": "int8"
+    },
+    {
+      "metadata": {},
+      "name": "day_of_month",
+      "nullable": true,
+      "type": "int8"
+    },
+    {
+      "metadata": {},
+      "name": "water_year",
+      "nullable": true,
+      "type": "int16"
+    },
+    {
+      "metadata": {},
+      "name": "OFE",
+      "nullable": true,
+      "type": "int16"
+    },
+    {
+      "metadata": {
+        "units": "mm"
+      },
+      "name": "Precip",
+      "nullable": true,
+      "type": "double"
+    },
+    {
+      "metadata": {
+        "units": "mm"
+      },
+      "name": "Runoff",
+      "nullable": true,
+      "type": "double"
+    },
+    {
+      "metadata": {
+        "description": "Effective rainfall intensity",
+        "units": "mm/h"
+      },
+      "name": "EffInt",
+      "nullable": true,
+      "type": "double"
+    },
+    {
+      "metadata": {
+        "description": "Peak runoff rate",
+        "units": "mm/h"
+      },
+      "name": "PeakRO",
+      "nullable": true,
+      "type": "double"
+    },
+    {
+      "metadata": {
+        "units": "h"
+      },
+      "name": "EffDur",
+      "nullable": true,
+      "type": "double"
+    },
+    {
+      "metadata": {
+        "description": "Sediment enrichment ratio"
+      },
+      "name": "Enrich",
+      "nullable": true,
+      "type": "double"
+    },
+    {
+      "metadata": {
+        "description": "Effective hydraulic conductivity",
+        "units": "mm/h"
+      },
+      "name": "Keff",
+      "nullable": true,
+      "type": "double"
+    },
+    {
+      "metadata": {
+        "units": "mm"
+      },
+      "name": "Sm",
+      "nullable": true,
+      "type": "double"
+    },
+    {
+      "metadata": {
+        "description": "Leaf area index"
+      },
+      "name": "LeafArea",
+      "nullable": true,
+      "type": "double"
+    },
+    {
+      "metadata": {
+        "description": "Canopy height",
+        "units": "m"
+      },
+      "name": "CanHgt",
+      "nullable": true,
+      "type": "double"
+    },
+    {
+      "metadata": {
+        "description": "Canopy cover",
+        "units": "%"
+      },
+      "name": "Cancov",
+      "nullable": true,
+      "type": "double"
+    },
+    {
+      "metadata": {
+        "description": "Interrill cover",
+        "units": "%"
+      },
+      "name": "IntCov",
+      "nullable": true,
+      "type": "double"
+    },
+    {
+      "metadata": {
+        "description": "Rill cover",
+        "units": "%"
+      },
+      "name": "RilCov",
+      "nullable": true,
+      "type": "double"
+    },
+    {
+      "metadata": {
+        "units": "kg/m^2"
+      },
+      "name": "LivBio",
+      "nullable": true,
+      "type": "double"
+    },
+    {
+      "metadata": {
+        "units": "kg/m^2"
+      },
+      "name": "DeadBio",
+      "nullable": true,
+      "type": "double"
+    },
+    {
+      "metadata": {
+        "description": "Interrill erodibility",
+        "units": "kg s/m^4"
+      },
+      "name": "Ki",
+      "nullable": true,
+      "type": "double"
+    },
+    {
+      "metadata": {
+        "description": "Rill erodibility",
+        "units": "s/m"
+      },
+      "name": "Kr",
+      "nullable": true,
+      "type": "double"
+    },
+    {
+      "metadata": {},
+      "name": "Tcrit",
+      "nullable": true,
+      "type": "double"
+    },
+    {
+      "metadata": {
+        "units": "m"
+      },
+      "name": "RilWid",
+      "nullable": true,
+      "type": "double"
+    },
+    {
+      "metadata": {
+        "units": "kg/m"
+      },
+      "name": "SedLeave",
+      "nullable": true,
+      "type": "double"
+    },
+    {
+      "metadata": {
+        "units": "mm"
+      },
+      "name": "QRain",
+      "nullable": true,
+      "type": "double"
+    },
+    {
+      "metadata": {
+        "units": "mm"
+      },
+      "name": "QSnow",
+      "nullable": true,
+      "type": "double"
+    }
+  ],
+  "metadata": {
+    "dataset_version": "1.2",
+    "dataset_version_major": "1",
+    "dataset_version_minor": "2",
+    "schema_version": "1"
+  }
+}

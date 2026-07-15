@@ -1,0 +1,276 @@
+{
+  "fields": [
+    {
+      "metadata": {},
+      "name": "wepp_id",
+      "nullable": true,
+      "type": "int32"
+    },
+    {
+      "metadata": {
+        "description": "Record type: EVENT, SUBEVENT, NO EVENT"
+      },
+      "name": "event",
+      "nullable": true,
+      "type": "string"
+    },
+    {
+      "metadata": {},
+      "name": "year",
+      "nullable": true,
+      "type": "int16"
+    },
+    {
+      "metadata": {
+        "description": "1-indexed simulation day since start year"
+      },
+      "name": "sim_day_index",
+      "nullable": true,
+      "type": "int32"
+    },
+    {
+      "metadata": {},
+      "name": "julian",
+      "nullable": true,
+      "type": "int16"
+    },
+    {
+      "metadata": {},
+      "name": "month",
+      "nullable": true,
+      "type": "int8"
+    },
+    {
+      "metadata": {},
+      "name": "day_of_month",
+      "nullable": true,
+      "type": "int8"
+    },
+    {
+      "metadata": {},
+      "name": "water_year",
+      "nullable": true,
+      "type": "int16"
+    },
+    {
+      "metadata": {
+        "description": "Storm duration",
+        "units": "s"
+      },
+      "name": "dur",
+      "nullable": true,
+      "type": "double"
+    },
+    {
+      "metadata": {
+        "description": "Overland flow time of concentration",
+        "units": "h"
+      },
+      "name": "tcs",
+      "nullable": true,
+      "type": "double"
+    },
+    {
+      "metadata": {
+        "description": "Overland flow alpha parameter",
+        "units": "unitless"
+      },
+      "name": "oalpha",
+      "nullable": true,
+      "type": "double"
+    },
+    {
+      "metadata": {
+        "description": "Runoff depth",
+        "units": "m"
+      },
+      "name": "runoff",
+      "nullable": true,
+      "type": "double"
+    },
+    {
+      "metadata": {
+        "description": "Runoff volume",
+        "units": "m^3"
+      },
+      "name": "runvol",
+      "nullable": true,
+      "type": "double"
+    },
+    {
+      "metadata": {
+        "description": "Subsurface runoff depth",
+        "units": "m"
+      },
+      "name": "sbrunf",
+      "nullable": true,
+      "type": "double"
+    },
+    {
+      "metadata": {
+        "description": "Subsurface runoff volume",
+        "units": "m^3"
+      },
+      "name": "sbrunv",
+      "nullable": true,
+      "type": "double"
+    },
+    {
+      "metadata": {
+        "description": "Drainage flux",
+        "units": "m/day"
+      },
+      "name": "drainq",
+      "nullable": true,
+      "type": "double"
+    },
+    {
+      "metadata": {
+        "description": "Tile Drainage volume",
+        "units": "m^3"
+      },
+      "name": "drrunv",
+      "nullable": true,
+      "type": "double"
+    },
+    {
+      "metadata": {
+        "description": "Peak runoff rate",
+        "units": "m^3/s"
+      },
+      "name": "peakro",
+      "nullable": true,
+      "type": "double"
+    },
+    {
+      "metadata": {
+        "description": "Total detachment",
+        "units": "kg"
+      },
+      "name": "tdet",
+      "nullable": true,
+      "type": "double"
+    },
+    {
+      "metadata": {
+        "description": "Total deposition",
+        "units": "kg"
+      },
+      "name": "tdep",
+      "nullable": true,
+      "type": "double"
+    },
+    {
+      "metadata": {
+        "description": "Sediment concentration 1",
+        "units": "kg/m^3"
+      },
+      "name": "sedcon_1",
+      "nullable": true,
+      "type": "double"
+    },
+    {
+      "metadata": {
+        "description": "Sediment concentration 2",
+        "units": "kg/m^3"
+      },
+      "name": "sedcon_2",
+      "nullable": true,
+      "type": "double"
+    },
+    {
+      "metadata": {
+        "description": "Sediment concentration 3",
+        "units": "kg/m^3"
+      },
+      "name": "sedcon_3",
+      "nullable": true,
+      "type": "double"
+    },
+    {
+      "metadata": {
+        "description": "Sediment concentration 4",
+        "units": "kg/m^3"
+      },
+      "name": "sedcon_4",
+      "nullable": true,
+      "type": "double"
+    },
+    {
+      "metadata": {
+        "description": "Sediment concentration 5",
+        "units": "kg/m^3"
+      },
+      "name": "sedcon_5",
+      "nullable": true,
+      "type": "double"
+    },
+    {
+      "metadata": {
+        "description": "Friction flow 1",
+        "units": "m^3/s"
+      },
+      "name": "clot",
+      "nullable": true,
+      "type": "double"
+    },
+    {
+      "metadata": {
+        "description": "% of exiting sediment in the silt size class",
+        "units": "%"
+      },
+      "name": "slot",
+      "nullable": true,
+      "type": "double"
+    },
+    {
+      "metadata": {
+        "description": "% of exiting sediment in the small aggregate size class",
+        "units": "%"
+      },
+      "name": "saot",
+      "nullable": true,
+      "type": "double"
+    },
+    {
+      "metadata": {
+        "description": "% of exiting sediment in the large aggregate size class",
+        "units": "%"
+      },
+      "name": "laot",
+      "nullable": true,
+      "type": "double"
+    },
+    {
+      "metadata": {
+        "description": "% of exiting sediment in the sand size class",
+        "units": "%"
+      },
+      "name": "sdot",
+      "nullable": true,
+      "type": "double"
+    },
+    {
+      "metadata": {
+        "description": "Groundwater baseflow"
+      },
+      "name": "gwbfv",
+      "nullable": true,
+      "type": "double"
+    },
+    {
+      "metadata": {
+        "description": "Groundwater deep seepage"
+      },
+      "name": "gwdsv",
+      "nullable": true,
+      "type": "double"
+    }
+  ],
+  "metadata": {
+    "dataset_version": "1.2",
+    "dataset_version_major": "1",
+    "dataset_version_minor": "2",
+    "schema_version": "1"
+  }
+}

@@ -1,3 +1,8 @@
+x-wepppyo3-interchange-entrypoint: &wepppyo3-interchange-entrypoint
+  - /opt/venv/bin/python
+  - /workdir/wepppy/docker/wepppyo3-interchange-preflight.py
+  - --
+
 x-wepppy-service: &wepppy-service
   build:
     context: ..
@@ -440,6 +445,7 @@ services:
 
   query-engine:
     <<: *wepppy-service
+    entrypoint: *wepppyo3-interchange-entrypoint
     container_name: wepppy-query-engine
     ulimits:
       nofile:
@@ -520,6 +526,7 @@ services:
 
   rq-engine:
     <<: *wepppy-service
+    entrypoint: *wepppyo3-interchange-entrypoint
     container_name: wepppy-rq-engine
     ulimits:
       nofile:
@@ -572,6 +579,7 @@ services:
 
   rq-worker:
     <<: *wepppy-service
+    entrypoint: *wepppyo3-interchange-entrypoint
     container_name: wepppy-rq-worker
     cpuset: "0-39"
     shm_size: "8g"
@@ -610,6 +618,7 @@ services:
 
   rq-worker-batch:
     <<: *wepppy-service
+    entrypoint: *wepppyo3-interchange-entrypoint
     container_name: wepppy-rq-worker-batch
     cpuset: "0-39"
     shm_size: "8g"
@@ -821,6 +830,7 @@ services:
 
   scheduler:
     <<: *wepppy-service
+    entrypoint: *wepppyo3-interchange-entrypoint
     container_name: wepppy-scheduler
     secrets:
       - redis_password

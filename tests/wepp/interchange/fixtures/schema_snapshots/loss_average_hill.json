@@ -1,0 +1,104 @@
+{
+  "fields": [
+    {
+      "metadata": {},
+      "name": "Type",
+      "nullable": true,
+      "type": "string"
+    },
+    {
+      "metadata": {},
+      "name": "wepp_id",
+      "nullable": true,
+      "type": "int32"
+    },
+    {
+      "metadata": {
+        "units": "m^3"
+      },
+      "name": "Runoff Volume",
+      "nullable": true,
+      "type": "double"
+    },
+    {
+      "metadata": {
+        "units": "m^3"
+      },
+      "name": "Subrunoff Volume",
+      "nullable": true,
+      "type": "double"
+    },
+    {
+      "metadata": {
+        "units": "m^3"
+      },
+      "name": "Baseflow Volume",
+      "nullable": true,
+      "type": "double"
+    },
+    {
+      "metadata": {
+        "units": "kg"
+      },
+      "name": "Soil Loss",
+      "nullable": true,
+      "type": "double"
+    },
+    {
+      "metadata": {
+        "units": "kg"
+      },
+      "name": "Sediment Deposition",
+      "nullable": true,
+      "type": "double"
+    },
+    {
+      "metadata": {
+        "units": "kg"
+      },
+      "name": "Sediment Yield",
+      "nullable": true,
+      "type": "double"
+    },
+    {
+      "metadata": {
+        "units": "ha"
+      },
+      "name": "Hillslope Area",
+      "nullable": true,
+      "type": "double"
+    },
+    {
+      "metadata": {
+        "units": "kg"
+      },
+      "name": "Solub. React. Pollutant",
+      "nullable": true,
+      "type": "double"
+    },
+    {
+      "metadata": {
+        "units": "kg"
+      },
+      "name": "Particulate Pollutant",
+      "nullable": true,
+      "type": "double"
+    },
+    {
+      "metadata": {
+        "units": "kg"
+      },
+      "name": "Total Pollutant",
+      "nullable": true,
+      "type": "double"
+    }
+  ],
+  "metadata": {
+    "average_years": "4",
+    "dataset_version": "1.2",
+    "dataset_version_major": "1",
+    "dataset_version_minor": "2",
+    "schema_version": "1",
+    "table": "loss_pw0.hill"
+  }
+}

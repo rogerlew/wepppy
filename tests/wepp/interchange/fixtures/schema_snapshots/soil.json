@@ -1,0 +1,172 @@
+{
+  "fields": [
+    {
+      "metadata": {},
+      "name": "wepp_id",
+      "nullable": true,
+      "type": "int32"
+    },
+    {
+      "metadata": {},
+      "name": "ofe_id",
+      "nullable": true,
+      "type": "int16"
+    },
+    {
+      "metadata": {},
+      "name": "year",
+      "nullable": true,
+      "type": "int16"
+    },
+    {
+      "metadata": {},
+      "name": "day",
+      "nullable": true,
+      "type": "int16"
+    },
+    {
+      "metadata": {},
+      "name": "julian",
+      "nullable": true,
+      "type": "int16"
+    },
+    {
+      "metadata": {},
+      "name": "month",
+      "nullable": true,
+      "type": "int8"
+    },
+    {
+      "metadata": {},
+      "name": "day_of_month",
+      "nullable": true,
+      "type": "int8"
+    },
+    {
+      "metadata": {},
+      "name": "water_year",
+      "nullable": true,
+      "type": "int16"
+    },
+    {
+      "metadata": {},
+      "name": "OFE",
+      "nullable": true,
+      "type": "int16"
+    },
+    {
+      "metadata": {
+        "description": "Soil porosity",
+        "units": "%"
+      },
+      "name": "Poros",
+      "nullable": true,
+      "type": "double"
+    },
+    {
+      "metadata": {
+        "description": "Effective hydraulic conductivity",
+        "units": "mm/hr"
+      },
+      "name": "Keff",
+      "nullable": true,
+      "type": "double"
+    },
+    {
+      "metadata": {
+        "description": "Suction across wetting front",
+        "units": "mm"
+      },
+      "name": "Suct",
+      "nullable": true,
+      "type": "double"
+    },
+    {
+      "metadata": {
+        "description": "Field capacity",
+        "units": "mm/mm"
+      },
+      "name": "FC",
+      "nullable": true,
+      "type": "double"
+    },
+    {
+      "metadata": {
+        "description": "Wilting point",
+        "units": "mm/mm"
+      },
+      "name": "WP",
+      "nullable": true,
+      "type": "double"
+    },
+    {
+      "metadata": {
+        "description": "Surface roughness",
+        "units": "mm"
+      },
+      "name": "Rough",
+      "nullable": true,
+      "type": "double"
+    },
+    {
+      "metadata": {
+        "description": "Interrill erodibility adjustment factor",
+        "units": "adjsmt"
+      },
+      "name": "Ki",
+      "nullable": true,
+      "type": "double"
+    },
+    {
+      "metadata": {
+        "description": "Rill erodibility adjustment factor",
+        "units": "adjsmt"
+      },
+      "name": "Kr",
+      "nullable": true,
+      "type": "double"
+    },
+    {
+      "metadata": {
+        "description": "Critical shear stress adjustment factor",
+        "units": "adjsmt"
+      },
+      "name": "Tauc",
+      "nullable": true,
+      "type": "double"
+    },
+    {
+      "metadata": {
+        "description": "Saturation as fraction",
+        "units": "frac"
+      },
+      "name": "Saturation",
+      "nullable": true,
+      "type": "double"
+    },
+    {
+      "metadata": {
+        "description": "Total soil water",
+        "units": "mm"
+      },
+      "name": "TSW",
+      "nullable": true,
+      "type": "double"
+    },
+    {
+      "metadata": {
+        "description": "True soil moisture fraction (full profile)",
+        "units": "frac"
+      },
+      "name": "TSMF",
+      "nullable": true,
+      "type": "double"
+    }
+  ],
+  "metadata": {
+    "dataset_version": "1.2",
+    "dataset_version_major": "1",
+    "dataset_version_minor": "2",
+    "schema_version": "1"
+  }
+}

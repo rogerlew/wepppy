@@ -1,0 +1,128 @@
+{
+  "fields": [
+    {
+      "metadata": {
+        "description": "Calendar year"
+      },
+      "name": "year",
+      "nullable": true,
+      "type": "int16"
+    },
+    {
+      "metadata": {
+        "description": "Simulation year from chanwb.out"
+      },
+      "name": "simulation_year",
+      "nullable": true,
+      "type": "int16"
+    },
+    {
+      "metadata": {
+        "description": "Julian day reported by WEPP"
+      },
+      "name": "julian",
+      "nullable": true,
+      "type": "int16"
+    },
+    {
+      "metadata": {
+        "description": "Calendar month derived from Julian day"
+      },
+      "name": "month",
+      "nullable": true,
+      "type": "int8"
+    },
+    {
+      "metadata": {
+        "description": "Calendar day-of-month derived from Julian day"
+      },
+      "name": "day_of_month",
+      "nullable": true,
+      "type": "int8"
+    },
+    {
+      "metadata": {
+        "description": "Water year computed from Julian day"
+      },
+      "name": "water_year",
+      "nullable": true,
+      "type": "int16"
+    },
+    {
+      "metadata": {
+        "description": "Channel element identifier"
+      },
+      "name": "Elmt_ID",
+      "nullable": true,
+      "type": "int32"
+    },
+    {
+      "metadata": {
+        "description": "Channel ID reported by WEPP"
+      },
+      "name": "Chan_ID",
+      "nullable": true,
+      "type": "int32"
+    },
+    {
+      "metadata": {
+        "description": "Total inflow above channel outlet, includes baseflow, all sources",
+        "units": "m^3"
+      },
+      "name": "Inflow (m^3)",
+      "nullable": true,
+      "type": "double"
+    },
+    {
+      "metadata": {
+        "description": "Water flow out of channel outlet",
+        "units": "m^3"
+      },
+      "name": "Outflow (m^3)",
+      "nullable": true,
+      "type": "double"
+    },
+    {
+      "metadata": {
+        "description": "Water surface storage at the end of the day",
+        "units": "m^3"
+      },
+      "name": "Storage (m^3)",
+      "nullable": true,
+      "type": "double"
+    },
+    {
+      "metadata": {
+        "description": "Portion of inflow from baseflow",
+        "units": "m^3"
+      },
+      "name": "Baseflow (m^3)",
+      "nullable": true,
+      "type": "double"
+    },
+    {
+      "metadata": {
+        "description": "Transmission loss in channel, infiltration",
+        "units": "m^3"
+      },
+      "name": "Loss (m^3)",
+      "nullable": true,
+      "type": "double"
+    },
+    {
+      "metadata": {
+        "description": "Water balance error at end of day (inflow - outflow - loss - \u0394storage)",
+        "units": "m^3"
+      },
+      "name": "Balance (m^3)",
+      "nullable": true,
+      "type": "double"
+    }
+  ],
+  "metadata": {
+    "dataset_version": "1.2",
+    "dataset_version_major": "1",
+    "dataset_version_minor": "2",
+    "schema_version": "1"
+  }
+}
