@@ -2,7 +2,7 @@
 > Kanban board for wepppy work packages and vision items
 
 **Last Updated**: 2026-07-15
-**Active Packages**: 13
+**Active Packages**: 12
 **Quick Links**: [Work Packages Directory](docs/work-packages/) | [God-Tier Prompting Strategy](docs/god-tier-prompting-strategy.md)
 
 ## Purpose
@@ -37,7 +37,7 @@ This tracker makes all work visible at a glance, helping agents coordinate and a
 ### 2. Limit Work in Progress
 **Target**: 2-4 active packages maximum to maintain focus and ensure packages complete rather than stall.
 
-**Current WIP**: 13 packages (above target range)
+**Current WIP**: 12 packages (above target range)
 
 ### 3. Manage Flow
 Monitor how long packages spend in each column:
@@ -544,6 +544,26 @@ Currently active work packages. Limit to 2-4 packages to maintain focus.
 ## ✅ Done
 
 Recently completed work packages. Archived immediately upon completion.
+
+### Dependabot PR Triage, Merge, and Local Rollout (2026-07-15)
+
+**Status**: ✅ **COMPLETE**
+
+**Link**: [docs/work-packages/20260715_dependabot_pr_triage_stack_rebuild/](docs/work-packages/20260715_dependabot_pr_triage_stack_rebuild/)
+
+**Lifecycle**: In Progress -> Done -> Reopened -> Done (2026-07-15)
+
+**Summary**: Reviewed 37 frozen Dependabot heads, excluded incompatible GDAL and
+stale Starlette updates, and incorporated all 35 approved dependency intents
+into `master`. GitHub reports 34 reviewed PRs merged; auto-superseded #564 is
+retained through exact reviewed merge ancestry at Mistune 3.2.1. No-cache
+WEPPcloud/CAP images were deployed locally with 26 services healthy, ten RQ
+workers idle, and native WEPPpyo3 loaded. Static lint/629 tests, UI lab
+lint/build, CAP smoke, 20 CAO tests, and the controlled full Python suite (4,897
+passed, 58 skipped) succeeded. The canonical Python wrapper's preexisting
+Daymet synthetic-Flask collection defect remains an explicit follow-up.
+
+---
 
 ### WEPPpyo3-Only Interchange Cutover (2026-07-15)
 
