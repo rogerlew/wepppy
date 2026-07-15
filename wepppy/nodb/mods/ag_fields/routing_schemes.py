@@ -67,6 +67,12 @@ def validate_watershed_max_workers(value: object | None) -> int | None:
     return workers
 
 
+def is_watershed_scheme_active_status(value: object) -> bool:
+    """Return whether a persisted scheme phase owns its artifact root."""
+    status = str(value)
+    return status == "clearing" or status == "running" or status.startswith("running:")
+
+
 __all__ = [
     "AgFieldsRoutingScheme",
     "DEFAULT_ROUTING_SCHEME",
@@ -75,6 +81,7 @@ __all__ = [
     "RUN_ALL_ORDER",
     "RUN_ALL_REQUEST",
     "expand_routing_scheme_request",
+    "is_watershed_scheme_active_status",
     "parse_routing_scheme",
     "routing_scheme_slug",
     "validate_watershed_max_workers",

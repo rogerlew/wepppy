@@ -34,6 +34,7 @@ from wepppy.nodb.mods.ag_fields import (
 from wepppy.nodb.mods.ag_fields.routing_schemes import (
     AgFieldsRoutingScheme,
     expand_routing_scheme_request,
+    is_watershed_scheme_active_status,
     validate_watershed_max_workers,
 )
 from wepppy.nodb.redis_prep import RedisPrep, TaskEnum
@@ -209,15 +210,15 @@ def _enqueue_watershed_jobs(
                     ag_fields,
                     redis_conn,
                 )
-                running_schemes = [
+                active_schemes = [
                     scheme
                     for scheme, state in states.items()
-                    if str(state["status"]).startswith("running")
+                    if is_watershed_scheme_active_status(state["status"])
                 ]
-                if running_schemes:
+                if active_schemes:
                     raise AgFieldsJobConflict(
-                        "An AgFields watershed integration is already running for this run "
-                        f"(schemes={','.join(running_schemes)})."
+                        "An AgFields watershed integration is already active for this run "
+                        f"(schemes={','.join(active_schemes)})."
                     )
                 planned_job_ids = {
                     scheme.value: str(uuid4())
@@ -363,18 +364,18 @@ def _active_job_conflict_response(wd: str) -> JSONResponse | None:
             )
     else:
         states = ag_fields.get_watershed_integration_states()
-    running_schemes = [
+    active_schemes = [
         scheme
         for scheme, state in states.items()
-        if str(state["status"]).startswith("running")
+        if is_watershed_scheme_active_status(state["status"])
     ]
-    if running_schemes:
+    if active_schemes:
         return error_response(
-            "An AgFields watershed integration is running; wait for it to finish "
+            "An AgFields watershed integration is active; wait for it to finish "
             "before changing AgFields inputs.",
             status_code=409,
             code="agfields_job_active",
-            details="schemes=" + ",".join(running_schemes),
+            details="schemes=" + ",".join(active_schemes),
         )
     return None
 
@@ -1084,14 +1085,14 @@ async def clear_watershed(runid: str, config: str, request: Request) -> JSONResp
         schemes = expand_routing_scheme_request(requested_scheme)
         ag_fields = AgFields.getInstance(wd)
         states = ag_fields.get_watershed_integration_states()
-        running = [
+        active = [
             scheme.value
             for scheme in schemes
-            if str(states[scheme.value]["status"]).startswith("running")
+            if is_watershed_scheme_active_status(states[scheme.value]["status"])
         ]
-        if running:
+        if active:
             return error_response(
-                "AgFields watershed integration is running for: " + ", ".join(running),
+                "AgFields watershed integration is active for: " + ", ".join(active),
                 status_code=409,
                 code="agfields_job_active",
             )

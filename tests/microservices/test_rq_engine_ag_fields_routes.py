@@ -682,16 +682,18 @@ def test_sync_mutation_returns_conflict_while_job_is_active(
     assert controller.saved_rows is None
 
 
-def test_sync_mutation_returns_conflict_for_persisted_running_scheme_state(
+@pytest.mark.parametrize("persisted_status", ["running:parent_execution", "clearing"])
+def test_sync_mutation_returns_conflict_for_persisted_active_scheme_state(
     route_context,
     monkeypatch: pytest.MonkeyPatch,
+    persisted_status: str,
 ) -> None:
     controller, _auth_calls = route_context
     original = controller.get_watershed_integration_states
 
     def _states():
         states = original()
-        states["hybrid"]["status"] = "running:parent_execution"
+        states["hybrid"]["status"] = persisted_status
         return states
 
     monkeypatch.setattr(controller, "get_watershed_integration_states", _states)

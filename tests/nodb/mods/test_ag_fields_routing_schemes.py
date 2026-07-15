@@ -7,6 +7,7 @@ from wepppy.nodb.mods.ag_fields.routing_schemes import (
     MAX_WATERSHED_WORKERS,
     RUN_ALL_ORDER,
     expand_routing_scheme_request,
+    is_watershed_scheme_active_status,
     parse_routing_scheme,
     routing_scheme_slug,
     validate_watershed_max_workers,
@@ -60,3 +61,13 @@ def test_watershed_worker_bound_is_explicit_and_not_silently_clamped() -> None:
             validate_watershed_max_workers(invalid)
     with pytest.raises(ValueError, match="between 1 and 16"):
         validate_watershed_max_workers(17)
+
+
+@pytest.mark.parametrize("status", ["running", "running:preflight", "clearing"])
+def test_active_scheme_statuses_own_the_artifact_root(status: str) -> None:
+    assert is_watershed_scheme_active_status(status) is True
+
+
+@pytest.mark.parametrize("status", ["not_run", "completed", "failed"])
+def test_terminal_scheme_statuses_do_not_own_the_artifact_root(status: str) -> None:
+    assert is_watershed_scheme_active_status(status) is False

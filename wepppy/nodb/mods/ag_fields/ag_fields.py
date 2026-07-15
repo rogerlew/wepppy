@@ -46,6 +46,7 @@ from wepppy.wepp.management.utils import ManagementRotationSynth, downgrade_to_9
 
 from .routing_schemes import (
     AgFieldsRoutingScheme,
+    is_watershed_scheme_active_status,
     parse_routing_scheme,
     routing_scheme_slug,
 )
@@ -678,9 +679,9 @@ class AgFields(NoDbBase):
         with self.locked():
             current = self._watershed_scheme_entry(parsed)
             current_status = str(current['status'])
-            if current_status == 'running' or current_status.startswith('running:'):
+            if is_watershed_scheme_active_status(current_status):
                 raise AgFieldsNoDbLockedException(
-                    f'AgFields {parsed.value} watershed integration is already running.'
+                    f'AgFields {parsed.value} watershed integration is already active.'
                 )
             previous_result_preserved = bool(current.get('summary'))
             self._set_watershed_scheme_entry(
@@ -772,9 +773,9 @@ class AgFields(NoDbBase):
         with self.locked():
             entry = self._watershed_scheme_entry(parsed)
             current_status = str(entry['status'])
-            if current_status == 'running' or current_status.startswith('running:'):
+            if is_watershed_scheme_active_status(current_status):
                 raise AgFieldsNoDbLockedException(
-                    f'AgFields {parsed.value} watershed integration is running.'
+                    f'AgFields {parsed.value} watershed integration is active.'
                 )
             entry['status'] = 'clearing'
             entry['phase'] = 'clear'

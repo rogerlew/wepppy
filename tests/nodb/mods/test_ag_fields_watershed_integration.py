@@ -9,7 +9,7 @@ import pandas as pd
 import pytest
 from osgeo import gdal
 
-from wepppy.nodb.mods.ag_fields import AgFields
+from wepppy.nodb.mods.ag_fields import AgFields, AgFieldsNoDbLockedException
 from wepppy.nodb.mods.ag_fields import hybrid_integration as hybrid_module
 from wepppy.nodb.mods.ag_fields import watershed_integration as integration_module
 from wepppy.nodb.mods.ag_fields.routing_schemes import AgFieldsRoutingScheme
@@ -598,6 +598,20 @@ def test_clear_removes_only_fixed_isolated_tree(tmp_path: Path) -> None:
     assert sibling.read_text(encoding="utf-8") == "sibling"
     assert not Path(controller.ag_field_watershed_scheme_root("concept_2")).exists()
     assert not stale_attempt.exists()
+
+
+def test_clearing_state_rejects_run_and_second_clear(tmp_path: Path) -> None:
+    controller = AgFields(str(tmp_path), "disturbed9002-wbt-mofe.cfg")
+    with controller.locked():
+        controller._set_watershed_scheme_entry(
+            AgFieldsRoutingScheme.CONCEPT_1,
+            {"status": "clearing", "phase": "clear"},
+        )
+
+    with pytest.raises(AgFieldsNoDbLockedException, match="already active"):
+        controller.run_watershed_integration(scheme="concept_1")
+    with pytest.raises(AgFieldsNoDbLockedException, match="is active"):
+        controller.clear_watershed_integration("concept_1")
 
 
 def test_clear_rejects_symlinked_isolated_root(tmp_path: Path) -> None:
