@@ -136,11 +136,24 @@ tables through Python. On the generated Hybrid corpus, it wrote 108,308,610 rows
 in 571.737 seconds at 489,709,568 bytes (0.456 GiB) sampled anonymous memory,
 98.951% below the rolling-pool Hybrid peak, with zero OOM events. Exact
 schema/value parity passed on a multi-file fixture, and the real artifact retained
-the expected version metadata and schema. The final authenticated all-scheme run
-is the package acceptance measurement.
+the expected version metadata and schema. The authenticated three-scheme
+acceptance sequence is the package measurement; its deferred Hybrid was
+deliberately replaced after Concept 1 exposed the downstream aggregation defect.
+
+The final Concept 1 run confirmed that direct WAT writing alone does not bound
+the complete interchange phase. After direct writing completed at low memory,
+`run_totalwatsed3()` applied a per-row window expression to the 172,364,760-row
+WAT table and the worker reached 59,396,808,704 bytes of sampled anonymous
+memory. The query now derives the last OFE once per hillslope in a bounded maxima
+relation and joins that small relation to WAT. A full Concept 1 regeneration
+completed in 28.55 seconds at 10,238,947,328 bytes maximum RSS. The before/after
+tables retain 6,210 rows, 79 columns, identical schema metadata, null masks, and
+integer values; all floating values agree at `rtol=1e-12, atol=1e-12`, with a
+worst relative difference of `2.34e-15` from parallel summation order.
 
 - Primary health signals: WAT defaults to direct wepppyo3 row-group writing,
-  other outstanding interchange futures never exceed `max_workers`, the
+  `totalwatsed3` derives last-OFE ids from a per-hillslope maxima relation, other
+  outstanding interchange futures never exceed `max_workers`, the
   dev-project interchange peak stays below 16 GiB, and the target job completes
   without OOM or manual recovery.
 - Guardrails: existing interchange tests preserve schema/order/empty-output and

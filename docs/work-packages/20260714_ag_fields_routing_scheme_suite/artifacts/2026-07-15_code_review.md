@@ -63,7 +63,22 @@ fixture parity passed, and the real 25,567,139,478-byte Hybrid corpus wrote
 108,308,610 rows in 571.737 seconds at a 489,709,568-byte peak.
 
 Status: Resolved in wepppyo3 `361c9ac`/`c84c586` and WEPPpy `dd6852a14`; final
-authenticated Run All remeasurement is active.
+authenticated Hybrid remeasurement is active.
+
+### CR-04 - `totalwatsed3` evaluated last-OFE identity on every WAT row
+
+Severity: Medium
+
+Direct WAT writing completed at low memory, but Concept 1 then reached
+59,396,808,704 bytes of sampled anonymous memory while `run_totalwatsed3()`
+evaluated `MAX(ofe_id) OVER (...)` across 172,364,760 rows. The query now computes
+one final-OFE id per hillslope and joins that bounded relation to WAT. A full
+Concept 1 regeneration completed in 28.55 seconds at 10,238,947,328 bytes
+maximum RSS. The 6,210-row, 79-column before/after outputs have identical schema
+metadata and pass `rtol=1e-12, atol=1e-12`; the worst relative difference is
+`2.34e-15` from parallel summation order.
+
+Status: Resolved in WEPPpy `90817edb2`; final Hybrid remeasurement is active.
 
 ## Closed Review Checks
 
@@ -102,5 +117,6 @@ authenticated Run All remeasurement is active.
 ## Gate Decision
 
 - Code review: Pass for implementation.
-- Generated acceptance: Pending the active final Run All chain and protected-tree
-  comparison.
+- Generated acceptance: Pending final Hybrid and the protected-tree comparison.
+  Concept 1 and Concept 2 are complete; final Hybrid job
+  `b166b9c0-c9f6-4e82-b1bf-def495e9c9f1` is active with both interchange fixes.

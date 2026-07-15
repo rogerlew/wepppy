@@ -9,12 +9,12 @@
 
 **Started**: 2026-07-14 15:37 UTC
 
-**Current phase**: Authenticated all-scheme generated acceptance
+**Current phase**: Final Hybrid generated acceptance
 
-**Last updated**: 2026-07-15 11:09 UTC
+**Last updated**: 2026-07-15 13:52 UTC
 
-**Next milestone**: Complete the final direct-wepppyo3 authenticated Run All
-acceptance while proving protected artifacts remain byte-identical
+**Next milestone**: Complete final Hybrid with both bounded interchange fixes,
+then prove protected artifacts remain byte-identical
 
 **Security impact**: `high`
 
@@ -33,11 +33,8 @@ acceptance while proving protected artifacts remain byte-identical
 
 ### In Progress
 
-- [ ] Finish final authenticated serial jobs
-  `dbb32684-a6e9-4893-9a18-624b67af6574`,
-  `e104dffa-0a3e-4e36-ab27-ff1fb207dfb2`, and
-  `4e196d19-f175-4ef9-a862-916c5b3cfa57`, and capture protected-tree/memory
-  evidence.
+- [ ] Finish final Hybrid job `b166b9c0-c9f6-4e82-b1bf-def495e9c9f1` and capture
+  protected-tree/memory evidence. Concept 1 and Concept 2 are complete.
 
 ### Blocked
 
@@ -116,6 +113,13 @@ wiring is gated only by its own implementation and acceptance tests.
   made it the WEPPpy default. The real Hybrid diagnostic wrote 108,308,610 rows
   in 571.737 seconds at 489,709,568 sampled anonymous bytes with exact fixture
   schema/value parity and zero OOM events (2026-07-15 11:02 UTC).
+- [x] Completed the authenticated direct-WAT Concept 1 and Concept 2 jobs with
+  stable resource paths and zero OOM events. Concept 2 peaked at
+  11,893,555,200 sampled anonymous bytes (2026-07-15 13:47 UTC).
+- [x] Replaced the remaining full-row `totalwatsed3` last-OFE window after it
+  drove Concept 1 to 59,396,808,704 sampled anonymous bytes. Full-corpus
+  regeneration completed in 28.55 seconds at 10,238,947,328 bytes maximum RSS
+  with identical schema and `1e-12` numerical parity (2026-07-15 13:51 UTC).
 - [x] Passed the final post-hardening broad repository gate with 4,907 passed, 60
   skipped, and 414 warnings in 9 minutes 33 seconds (2026-07-15 07:08 UTC).
 

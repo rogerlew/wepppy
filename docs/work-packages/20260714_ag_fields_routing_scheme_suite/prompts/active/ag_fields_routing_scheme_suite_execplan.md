@@ -144,11 +144,20 @@ engineering results for a separate science evaluation.
   passed, and the 25,567,139,478-byte Hybrid WAT corpus wrote 108,308,610 rows in
   571.737 seconds at a 489,709,568-byte sampled anonymous-memory peak, 98.951%
   below the prior 46,695,247,872-byte Hybrid peak, with zero OOM events.
-- [ ] (2026-07-15 11:08 UTC) Final authenticated Run All acceptance is active as
-  jobs `dbb32684-a6e9-4893-9a18-624b67af6574`,
-  `e104dffa-0a3e-4e36-ab27-ff1fb207dfb2`, and
-  `4e196d19-f175-4ef9-a862-916c5b3cfa57`, with continuous sampled anonymous-memory
-  and OOM monitoring.
+- [x] (2026-07-15 13:47 UTC) The direct-WAT authenticated chain completed Concept
+  1 and Concept 2 as jobs `dbb32684-a6e9-4893-9a18-624b67af6574` and
+  `e104dffa-0a3e-4e36-ab27-ff1fb207dfb2`. Both published stable resources with
+  zero OOM events; Concept 2 peaked at 11,893,555,200 sampled anonymous bytes.
+- [x] (2026-07-15 13:51 UTC) Isolated the direct-WAT Concept 1 peak of
+  59,396,808,704 sampled anonymous bytes to `run_totalwatsed3`'s full per-row
+  last-OFE window over 172,364,760 WAT rows. Replaced it with a per-hillslope
+  maxima relation. Full regeneration took 28.55 seconds at 10,238,947,328 bytes
+  maximum RSS; all 6,210 rows and 79 columns pass numerical parity at
+  `rtol=1e-12, atol=1e-12` with identical schema metadata.
+- [ ] (2026-07-15 13:51 UTC) The prior deferred Hybrid was deliberately canceled
+  before it could start. Final Hybrid job `b166b9c0-c9f6-4e82-b1bf-def495e9c9f1`
+  is active on a restarted worker with both interchange fixes and continuous
+  sampled anonymous-memory/OOM monitoring.
 - [ ] Milestone 7: pass focused/broad gates, security/QA review, and all-scheme
   generated acceptance; publish Mariana's comparison bundle.
 - [ ] Move this plan to `prompts/completed/`, update the package/tracker/root board,
@@ -305,6 +314,14 @@ engineering results for a separate science evaluation.
   bytes and peaked at 46,695,247,872 anonymous bytes during the same bounded path.
   The direct wepppyo3 diagnostic on Hybrid preserved the 108,308,610-row schema
   and metadata while peaking at 489,709,568 anonymous bytes.
+- Observation: Direct WAT writing removed the largest Python table handoff, but
+  the downstream `totalwatsed3` query still used a window over every WAT row to
+  identify the final OFE.
+  Evidence: authenticated Concept 1 completed direct WAT before worker anonymous
+  memory rose to 59,396,808,704 bytes during `run_totalwatsed3` over 172,364,760
+  rows. A per-hillslope maxima join regenerated the full table in 28.55 seconds
+  at 10,238,947,328 bytes maximum RSS, with schema equality and `1e-12`
+  numerical parity.
 - Observation: Atomic directory publication does not rewrite path strings already
   serialized in a terminal manifest.
   Evidence: the completed Concept 1 manifest named nine resources below
@@ -395,6 +412,13 @@ erase observations that changed the design.
   multi-OFE Arrow tables in Python. Parsing one source at a time into compact Rust
   arrays and immediately writing its row group preserves schema and source order
   while removing the input-sized Python handoff.
+  Date/Author: 2026-07-15, Codex.
+- Decision: Derive final OFE ids once per hillslope before aggregating WAT rather
+  than evaluating a partition window on the full multi-OFE row set.
+  Rationale: valid WEPP WAT output emits every OFE for every day, so the
+  per-hillslope maximum is the same final OFE used by the prior daily window. The
+  bounded relation preserves `latqcc` semantics while avoiding a 172-million-row
+  window allocation.
   Date/Author: 2026-07-15, Codex.
 - Decision: Resolve staged interchange resources through the fixed public scheme
   root before writing terminal summaries.

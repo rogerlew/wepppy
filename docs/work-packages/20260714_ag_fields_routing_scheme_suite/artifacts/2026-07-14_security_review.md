@@ -1,8 +1,8 @@
 # Security Review - AgFields Routing Scheme Suite
 
-> This gate remains open only for the final direct-wepppyo3 Run All remeasurement and
-> final package-owner sign-off. The implementation review below has resolved the
-> medium findings discovered during live acceptance.
+> This gate remains open only for final Hybrid remeasurement with both bounded
+> interchange fixes and final package-owner sign-off. The implementation review
+> below has resolved the medium findings discovered during live acceptance.
 
 ## Metadata
 
@@ -68,7 +68,8 @@ section is populated from actual code and validation evidence.
 | F-04 | Medium | RQ/NoDb availability | Stopping an RQ job bypassed the worker exception boundary, left its matching scheme in persisted `running:<phase>` state, and retained partial staging data, so a retry returned HTTP 409 and disk use accumulated. | Concept 1 job `2c7309f4-9c8e-485e-a9ec-a370782bf7a2` reached RQ `stopped` while NoDb remained `running:watershed_rerun` and a 17 GB hidden attempt remained. | Reconcile only exact persisted job ids whose authoritative RQ state is terminal/missing; atomically quarantine matching attempt roots before releasing state, preserve prior results, and add stopped/active/mismatched regressions. | Resolved; live state and partial-tree cleanup validated |
 | F-05 | Medium | Worker availability | Bounding parser processes did not bound submitted futures or completed out-of-order Arrow tables; the writer-side ordering dictionary could grow with the full input set. | Authenticated Concept 1 job `70750bcd-0e70-4906-b25c-0e6f827b9bb1` reached 61,335,310,336 bytes sampled cgroup anonymous memory during `H.wat` conversion with 3,543 inputs and no OOM event. | Use a source-ordered rolling window no larger than `max_workers`, write in the parent, remove the unbounded writer buffer, and add an executor regression that rejects excess submissions. | Resolved in the shared pool; Concept 2 measured 11,978,174,464 bytes with zero OOM events |
 | F-06 | Medium | Published artifact integrity | A completed manifest's `required_resources` retained its transient `.attempt-*` prefix after the directory was atomically published. | The completed Concept 1 state at 06:10:47 UTC named nine resources below `.concept-1.attempt-6a97uivp`, while the files existed below `concept-1`. | Translate every staged resource through the fixed published scheme root before writing the terminal manifest and freeze the exact path list in a regression. | Resolved in code; final rerun required |
-| F-07 | Medium | Worker availability | Even a bounded rolling pool returned complete multi-OFE WAT Arrow tables through Python, so retained memory still scaled with the largest in-flight source tables. | Hybrid's 25,567,139,478-byte WAT corpus peaked at 46,695,247,872 anonymous bytes; Concept 2's materially smaller corpus had masked the defect. | Write source-ordered WAT Parquet directly in wepppyo3 without Python table handoff; prove exact fixture parity, real-corpus elapsed-time guardrail, and bounded memory. | Resolved in diagnostic at 489,709,568 bytes and 571.737 seconds; final Run All active |
+| F-07 | Medium | Worker availability | Even a bounded rolling pool returned complete multi-OFE WAT Arrow tables through Python, so retained memory still scaled with the largest in-flight source tables. | Hybrid's 25,567,139,478-byte WAT corpus peaked at 46,695,247,872 anonymous bytes; Concept 2's materially smaller corpus had masked the defect. | Write source-ordered WAT Parquet directly in wepppyo3 without Python table handoff; prove exact fixture parity, real-corpus elapsed-time guardrail, and bounded memory. | Resolved in diagnostic at 489,709,568 bytes and 571.737 seconds; final Hybrid active |
+| F-08 | Medium | Worker availability | After direct WAT writing, `totalwatsed3` still evaluated a last-OFE window over every multi-OFE WAT row. | Concept 1 reached 59,396,808,704 sampled anonymous bytes after direct WAT completed while aggregating 172,364,760 rows. | Derive one final-OFE id per hillslope, join the bounded relation to WAT, and prove full-corpus output parity and sub-16-GiB memory. | Resolved in diagnostic at 10,238,947,328 bytes maximum RSS, 28.55 seconds, and `1e-12` parity; final Hybrid active |
 
 Risk acceptance authority: `Accepted-risk` requires a security reviewer
 recommendation plus explicit package-owner acknowledgment in Sign-off.
@@ -241,9 +242,14 @@ recommendation plus explicit package-owner acknowledgment in Sign-off.
   - Hybrid then exposed F-07 at 46,695,247,872 anonymous bytes. The direct
     wepppyo3 diagnostic wrote the full 108,308,610-row Hybrid WAT artifact in
     571.737 seconds at 489,709,568 bytes, with zero OOM events and exact fixture
-    parity.
+    parity; and
+  - the next authenticated Concept 1 run completed direct WAT at low memory but
+    exposed F-08 during `totalwatsed3` at 59,396,808,704 sampled anonymous bytes.
+    Its bounded maxima-join replacement regenerated the complete table in 28.55
+    seconds at 10,238,947,328 bytes maximum RSS, with identical schema metadata
+    and all numeric values within `rtol=1e-12, atol=1e-12`.
 - Manual checks pending:
-  - terminal authenticated Run All execution;
+  - terminal authenticated Hybrid execution with both interchange fixes;
   - cross-scheme/legacy protected-tree inventory; and
   - dev-project memory and output evidence.
 
