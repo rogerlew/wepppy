@@ -680,23 +680,15 @@ and 3,357 through Concept 1 when classifier inputs match the completed inventory
 Any count change requires recorded input/version evidence rather than silent
 acceptance.
 
-### Recommended delivery sequence
+### Delivery disposition
 
-1. Continue the active
-   [routing scheme suite ExecPlan](../../../../../docs/work-packages/20260714_ag_fields_routing_scheme_suite/prompts/active/ag_fields_routing_scheme_suite_execplan.md).
-   Milestone 2B is complete with synchronized capacity 32, exact release corpora,
-   and forest ablation/release evidence.
-2. Complete the active generated Concept 1 watershed/manifest acceptance.
-3. Exercise the wired hybrid pure/mixed composition on the generated project and
-   prove residual-area, water, and sediment closure plus stable rejection behavior.
-4. Exercise the authenticated per-scheme and serial Run All path, including the
-   exact description-first UI contract and historical Concept 2 defaults.
-5. Accept ADR-0019 only after the wired parameters, complete scheme roots, and
-   remaining generated/regression evidence are explicit. Do not ship a surrogate,
-   omitted parent, clamped input, or silent fallback.
-6. Generate all three current trees through the authenticated path on
-   `sacral-self-discipline`, prove protected artifacts byte-identical, complete
-   security/QA/broad gates, and publish a self-contained comparison bundle.
-7. Mariana Dobre performs the comparative scientific evaluation. Record her
-   suitable-use guidance and limitations without substituting engineering
-   judgment for that review.
+Engineering steps 1-6 completed under the
+[routing scheme suite ExecPlan](../../../../../docs/work-packages/20260714_ag_fields_routing_scheme_suite/prompts/completed/ag_fields_routing_scheme_suite_execplan.md).
+The delivery includes synchronized capacity 32 and exact release corpora; current
+Concept 1, Concept 2, and hybrid scheme roots; authenticated per-scheme and serial
+Run All behavior; description-first UI controls; QA/security/broad gates; a
+byte-identical protected inventory; and the comparison bundle.
+
+Mariana Dobre performs the comparative scientific evaluation. Record her
+suitable-use guidance and limitations without substituting engineering judgment
+for that review.

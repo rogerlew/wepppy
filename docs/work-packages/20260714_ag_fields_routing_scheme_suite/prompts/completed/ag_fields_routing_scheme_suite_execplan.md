@@ -1,5 +1,10 @@
 # Implement the AgFields routing scheme suite
 
+> **Outcome (2026-07-15 16:06 UTC)**: Completed all milestones. The three fixed
+> scheme roots, description-first UI/API/RQ workflow, comparison bundle, native
+> capacity/hardening work, and review gates passed. All 160,671 protected files
+> remained byte-identical. Scientific evaluation remains with Mariana Dobre.
+
 This ExecPlan is a living document. The sections `Progress`, `Surprises &
 Discoveries`, `Decision Log`, and `Outcomes & Retrospective` must be kept current
 as work proceeds. Maintain this plan according to
@@ -154,14 +159,21 @@ engineering results for a separate science evaluation.
   maxima relation. Full regeneration took 28.55 seconds at 10,238,947,328 bytes
   maximum RSS; all 6,210 rows and 79 columns pass numerical parity at
   `rtol=1e-12, atol=1e-12` with identical schema metadata.
-- [ ] (2026-07-15 13:51 UTC) The prior deferred Hybrid was deliberately canceled
+- [x] (2026-07-15 15:15 UTC) The prior deferred Hybrid was deliberately canceled
   before it could start. Final Hybrid job `b166b9c0-c9f6-4e82-b1bf-def495e9c9f1`
-  is active on a restarted worker with both interchange fixes and continuous
-  sampled anonymous-memory/OOM monitoring.
-- [ ] Milestone 7: pass focused/broad gates, security/QA review, and all-scheme
-  generated acceptance; publish Mariana's comparison bundle.
-- [ ] Move this plan to `prompts/completed/`, update the package/tracker/root board,
-  and record outcomes only after all wired generated-output criteria pass.
+  completed all stages, published all nine required resources below the fixed
+  root, and recorded zero cgroup OOM events.
+- [x] (2026-07-15 15:30 UTC) Closed the final Hybrid memory finding: separate
+  DuckDB connections now release WAT, soil, and element aggregation buffers
+  between scans. Full Hybrid `totalwatsed3` regeneration completed in 16.73
+  seconds at 6,104,309,760 bytes maximum RSS with identical schema/non-floating
+  values and `1e-12` floating-point parity.
+- [x] (2026-07-15 16:06 UTC) Milestone 7: focused/broad gates, implementation security/QA review,
+  all-scheme generated acceptance, and Mariana's comparison bundle are complete.
+  The protected comparison found 160,671 files and 39,066,986,682 bytes
+  byte-identical with zero missing, added, or changed entries.
+- [x] (2026-07-15 16:06 UTC) Moved this plan to `prompts/completed/`, updated the
+  package/tracker/root board, and recorded the completed outcomes.
 
 ## Surprises & Discoveries
 
@@ -322,6 +334,15 @@ engineering results for a separate science evaluation.
   rows. A per-hillslope maxima join regenerated the full table in 28.55 seconds
   at 10,238,947,328 bytes maximum RSS, with schema equality and `1e-12`
   numerical parity.
+- Observation: A single DuckDB connection retained large scan/aggregation buffers
+  after each `totalwatsed3` relation completed, so sequential WAT, soil, and
+  element work could stack well above each isolated query's memory.
+  Evidence: the completed Hybrid job briefly reached 20,510,617,600 sampled
+  anonymous bytes after direct WAT writing, while isolated WAT, soil, and element
+  aggregates measured 0.85 GB, 5.86 GB, and 1.54 GB maximum RSS. Closing a
+  dedicated connection after each aggregation reduced a full published Hybrid
+  regeneration to 6,104,309,760 bytes maximum RSS in 16.73 seconds with schema
+  equality and `1e-12` numerical parity.
 - Observation: Atomic directory publication does not rewrite path strings already
   serialized in a terminal manifest.
   Evidence: the completed Concept 1 manifest named nine resources below
@@ -420,6 +441,13 @@ erase observations that changed the design.
   bounded relation preserves `latqcc` semantics while avoiding a 172-million-row
   window allocation.
   Date/Author: 2026-07-15, Codex.
+- Decision: Give each large `totalwatsed3` WAT, soil, and element aggregation its
+  own DuckDB connection and close it before opening the next.
+  Rationale: DuckDB can retain reusable buffers for a connection's lifetime even
+  after a result relation is consumed. The aggregates are independent, so
+  connection isolation releases those buffers without changing query semantics,
+  schemas, or numerical contracts.
+  Date/Author: 2026-07-15, Codex.
 - Decision: Resolve staged interchange resources through the fixed public scheme
   root before writing terminal summaries.
   Rationale: a successful atomic rename makes staging-relative strings stale even
@@ -517,8 +545,20 @@ input-hashed evidence is in
 contract is
 `artifacts/2026-07-14_management_capacity_and_corpus_validation_plan.md`; completed
 release evidence is in
-`artifacts/2026-07-14_management_capacity_corpus_results.md`. Concept 2 remains
-the implemented compatibility path until the remaining wired acceptance pass.
+`artifacts/2026-07-14_management_capacity_corpus_results.md`.
+
+The complete wired suite now produces all 3,543 parents under each fixed scheme
+root. Hybrid classified 270 parents as pure Concept 1, 1,374 as mixed, 225 as
+pure Concept 2, and 1,674 as untouched; all 6,626 decisions match the persisted
+Peridot classifier. The generated comparison bundle records the shared source
+signatures, branch/source/closure metrics, required resources, and known
+scientific limitations without selecting a winner. Direct wepppyo3 WAT writing,
+bounded final-OFE aggregation, and connection-isolated downstream aggregates
+keep each measured full-corpus interchange component below 16 GiB. The final
+repository gate passes with 4,922 tests passed and 60 skipped. Protected-tree
+byte identity passed across 160,671 files and 39,066,986,682 bytes, with digest
+`2746c0f1667fb9f5b8d7c02d75e42704ae4cac02888c8b17dd2eccc542c5fc59`.
+Scientific disposition remains with Mariana Dobre.
 
 ## Context and Orientation
 
@@ -1255,3 +1295,10 @@ hybrid residual exact-release runs, passed the permanent watchlist/forest suite/
 301-hillslope watershed replay, and vendored hash-identical `wepp_260714`
 binaries. Added the production Concept 1 collaborator and resumed Milestone 3;
 NoDb/RQ/UI and hybrid wiring remain open.
+
+2026-07-15 16:06 UTC: Completed Milestones 3-7 and closed the package. All three
+authenticated scheme roots contain 3,543 parents and nine required resources;
+the comparison bundle validates without errors. Direct wepppyo3 WAT writing and
+the two downstream aggregation fixes passed full-corpus memory/parity evidence.
+The final repository gate passed, and all 160,671 protected files remained
+byte-identical. Mariana Dobre's scientific evaluation is the only follow-up.

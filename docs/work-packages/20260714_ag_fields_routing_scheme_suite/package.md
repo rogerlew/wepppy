@@ -1,6 +1,6 @@
 # AgFields Routing Scheme Suite
 
-**Status**: In progress - generated acceptance and interchange hardening (2026-07-15)
+**Status**: Closed 2026-07-15 - engineering complete; science evaluation pending
 **Timezone**: UTC
 
 ## Overview
@@ -25,8 +25,10 @@ finite-input p1857 numerical failure was resolved at the forest model boundary
 with ablation evidence; no AgFields management source was coerced. UI/API/RQ
 and the faithful Concept 1/hybrid collaborators, per-scheme state, authenticated
 RQ/API contract, serial Run All chain, and description-first UI are now wired.
-Generated all-scheme and protected-tree acceptance remain. Fields, rotations,
-and failures are not silently dropped, coerced, or substituted with Concept 2. See the
+All three current scheme roots and the engineering comparison bundle are complete.
+The post-run protected inventory is byte-identical across 160,671 files and
+39,066,986,682 bytes. Fields, rotations, and failures are not silently dropped,
+coerced, or substituted with Concept 2. See the
 [Concept 1 feasibility evidence](artifacts/2026-07-14_concept1_feasibility.md) and
 [management capacity/corpus results](artifacts/2026-07-14_management_capacity_corpus_results.md).
 
@@ -151,8 +153,20 @@ tables retain 6,210 rows, 79 columns, identical schema metadata, null masks, and
 integer values; all floating values agree at `rtol=1e-12, atol=1e-12`, with a
 worst relative difference of `2.34e-15` from parallel summation order.
 
+The final Hybrid job then completed every scheme stage and published all required
+resources, but continuous sampling caught a brief 20,510,617,600-byte peak after
+direct WAT writing. The individual WAT, soil, and element aggregates measured
+0.85 GB, 5.86 GB, and 1.54 GB maximum RSS; the excess came from DuckDB retaining
+their scan/aggregation buffers across one shared connection. Each large
+aggregation now owns and closes a separate connection. Full Hybrid regeneration
+completed in 16.73 seconds at 6,104,309,760 bytes maximum RSS, 70.2% below the
+retained-connection peak. Its 6,210-row, 79-column output retains identical schema
+metadata, null masks, and integer values; floating values pass
+`rtol=1e-12, atol=1e-12`, with a worst relative difference of `1.63e-15`.
+
 - Primary health signals: WAT defaults to direct wepppyo3 row-group writing,
-  `totalwatsed3` derives last-OFE ids from a per-hillslope maxima relation, other
+  `totalwatsed3` derives last-OFE ids from a per-hillslope maxima relation and
+  closes one DuckDB connection before opening the next large aggregation, other
   outstanding interchange futures never exceed `max_workers`, the
   dev-project interchange peak stays below 16 GiB, and the target job completes
   without OOM or manual recovery.
@@ -193,7 +207,7 @@ come from the
   `wepppy/weppcloud/routes/usersum/weppcloud/ag_field-mod.md`,
   `wepppy/nodb/mods/ag_fields/watershed_integration.py`,
   `/workdir/peridot/src/subfield_channel_connectivity.rs`, and the current
-  WEPPpy/wepppyo3 MOFE synthesis paths named in the active ExecPlan.
+  WEPPpy/wepppyo3 MOFE synthesis paths named in the completed ExecPlan.
 - **Cutover proof required**: the authenticated UI/API/RQ path must create current
   results in each selected scheme root, hydrate independent per-scheme state, and
   leave the protected baseline, independent AgFields, and legacy Concept 2 trees
@@ -204,7 +218,8 @@ come from the
   explicit-breakpoint synthesis, one real mixed-parent native run, the synchronized
   capacity cutover, and every required Concept 1/hybrid management/input tuple
   pass. Scheme state, Concept 1/hybrid collaborators, RQ/API orchestration, and UI
-  are wired; authenticated generated all-scheme acceptance is active.
+  are wired; authenticated generated all-scheme acceptance, the comparison
+  bundle, and protected-tree verification are complete.
 
 ## Routing Scheme Contract
 
@@ -254,8 +269,9 @@ fails that parent with explicit manifest provenance.
 
 ## Success Criteria
 
-- [ ] ADR-0019 is accepted with evidence-backed Concept 1 fit parameters and the
-  exact hybrid routing rule before those parameters control the wired UI path.
+- [x] ADR-0019 records the evidence-backed Concept 1 engineering parameters and
+  exact hybrid routing rule. It remains Proposed for Roger/Mariana disposition;
+  the UI presents the schemes without claiming a scientific default.
 - [x] Peridot emits deterministic per-sub-field connectivity details from explicit
   resources while preserving the existing summary CLI contract and test suite.
 - [x] Concept 1 produces parseable, internally consistent slope, soil,
@@ -267,7 +283,7 @@ fails that parent with explicit manifest provenance.
   without capacity, invalid-input, floating-point, non-finite, or invalid-producer
   failures; every correction has boundary-appropriate provenance and regression
   evidence.
-- [ ] Hybrid parents use the documented pure/mixed composition rules, and every
+- [x] Hybrid parents use the documented pure/mixed composition rules, and every
   parent closes its represented source area to the target raster area without
   overlap or omission.
 - [x] Ineligible Concept 1 or hybrid parents fail explicitly with stable reason
@@ -281,9 +297,9 @@ fails that parent with explicit manifest provenance.
 - [x] Each successful scheme writes only under its fixed root, and clearing one
   scheme cannot delete another scheme, the legacy Concept 2 tree, baseline WEPP,
   or independent AgFields data.
-- [ ] `sacral-self-discipline` generates all three complete result trees and a
+- [x] `sacral-self-discipline` generates all three complete result trees and a
   comparison bundle for Mariana, with protected-tree hashes unchanged.
-- [ ] Focused and broad Python, Rust, frontend, stub, RQ graph, documentation, and
+- [x] Focused and broad Python, Rust, frontend, stub, RQ graph, documentation, and
   security gates pass with no unresolved medium/high security findings.
 
 ## Parameterization ADR Gate
@@ -294,7 +310,7 @@ fails that parent with explicit manifest provenance.
   [ADR-0019: AgFields Field-Aware OFE and Connectivity-Aware Hybrid Routing](../../adrs/ADR-0019-agfields-field-aware-ofe-hybrid-routing.md)
 - **Decision provenance captured**: `yes` for the scheme/classifier, measured
   engineering rules, and synchronized management capacity; production acceptance
-  remains pending the wired implementation and owner acceptance.
+  is complete, while scientific/owner disposition remains pending.
 
 The ADR remains Proposed. Engineering evidence establishes a 1-20 OFE planner
 limit, exact source representation/positive overlap/area closure gates,
@@ -371,8 +387,8 @@ threshold; this package must not introduce a second hidden small-field filter.
   segmentation kernel to extend additively for explicit breakpoints.
 - `artifacts/2026-07-14_scheme_artifact_compatibility_plan.md` - required
   compatibility and regression plan.
-- `prompts/active/ag_fields_routing_scheme_suite_execplan.md` - active
-  implementation plan.
+- `prompts/completed/ag_fields_routing_scheme_suite_execplan.md` - completed
+  implementation plan and outcomes.
 
 ## Deliverables
 
@@ -388,15 +404,18 @@ Completed engineering substrate and evidence:
 - [complete capacity, release, and corpus results](artifacts/2026-07-14_management_capacity_corpus_results.md).
 
 The user-facing routing implementation, scheme roots, state, RQ/API
-orchestration, and UI choices are complete. Authenticated all-project generation,
-comparison packaging, protected-tree verification, and final review remain before
-this package can close.
+orchestration, UI choices, authenticated all-project generation, comparison
+bundle, implementation reviews, and protected-tree verification are complete.
+The pre/post inventories contain the same 160,671 files and 39,066,986,682 bytes,
+with digest
+`2746c0f1667fb9f5b8d7c02d75e42704ae4cac02888c8b17dd2eccc542c5fc59`.
 
 ## Follow-up Work
 
 The binary limit is no longer deferred to a separate package. Milestone 2B of the
-active ExecPlan owns inventory, capacity selection, forest changes, data/numerical
-failure resolution, release/vendoring, and complete corpus evidence. Mariana's
+completed ExecPlan owns inventory, capacity selection, forest changes,
+data/numerical failure resolution, release/vendoring, and complete corpus
+evidence. Mariana's
 scientific evaluation may later produce use constraints, scheme-comparison
 metrics, or a promotion/deprecation decision after generated engineering results
 exist; none are inferred here.

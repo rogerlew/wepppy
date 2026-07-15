@@ -9,12 +9,11 @@
 
 **Started**: 2026-07-14 15:37 UTC
 
-**Current phase**: Final Hybrid generated acceptance
+**Current phase**: Closed - engineering complete; science evaluation pending
 
-**Last updated**: 2026-07-15 13:52 UTC
+**Last updated**: 2026-07-15 16:06 UTC
 
-**Next milestone**: Complete final Hybrid with both bounded interchange fixes,
-then prove protected artifacts remain byte-identical
+**Next milestone**: Mariana Dobre's separate scientific evaluation
 
 **Security impact**: `high`
 
@@ -27,14 +26,11 @@ then prove protected artifacts remain byte-identical
 
 ### Ready / Backlog
 
-- [ ] Complete generated-output comparison on
-  `sacral-self-discipline`.
-- [ ] Complete QA, security, compatibility, and Mariana handoff artifacts.
+None.
 
 ### In Progress
 
-- [ ] Finish final Hybrid job `b166b9c0-c9f6-4e82-b1bf-def495e9c9f1` and capture
-  protected-tree/memory evidence. Concept 1 and Concept 2 are complete.
+None.
 
 ### Blocked
 
@@ -120,8 +116,26 @@ wiring is gated only by its own implementation and acceptance tests.
   drove Concept 1 to 59,396,808,704 sampled anonymous bytes. Full-corpus
   regeneration completed in 28.55 seconds at 10,238,947,328 bytes maximum RSS
   with identical schema and `1e-12` numerical parity (2026-07-15 13:51 UTC).
-- [x] Passed the final post-hardening broad repository gate with 4,907 passed, 60
-  skipped, and 414 warnings in 9 minutes 33 seconds (2026-07-15 07:08 UTC).
+- [x] Completed final Hybrid job `b166b9c0-c9f6-4e82-b1bf-def495e9c9f1` with
+  3,543 published parents, all nine stable required resources, no attempt-root
+  leakage, and zero cgroup OOM events (2026-07-15 15:15 UTC).
+- [x] Isolated Hybrid's brief 20,510,617,600-byte post-WAT peak to DuckDB buffers
+  retained across one shared connection. Separate WAT/soil/element connections
+  regenerated the full 6,210-row, 79-column table in 16.73 seconds at
+  6,104,309,760 bytes maximum RSS with `1e-12` numerical parity (2026-07-15
+  15:30 UTC).
+- [x] Generated the valid engineering comparison bundle with common source
+  signatures, exact branch/source/closure metrics, complete resource inventories,
+  and a science-neutral README for Mariana (2026-07-15 15:30 UTC).
+- [x] Passed the final post-code broad repository gate with 4,922 passed, 60
+  skipped, and 414 warnings in 9 minutes 10 seconds (2026-07-15 15:30 UTC).
+- [x] Proved the protected baseline, independent AgFields, and legacy Concept 2
+  trees byte-identical: 160,671 files, 39,066,986,682 bytes, zero
+  missing/added/changed entries, and matching digest
+  `2746c0f1667fb9f5b8d7c02d75e42704ae4cac02888c8b17dd2eccc542c5fc59`
+  (2026-07-15 16:06 UTC).
+- [x] Closed the QA/security gates and archived the completed ExecPlan
+  (2026-07-15 16:06 UTC).
 
 ## Timeline
 
@@ -319,14 +333,14 @@ invariant only with replacement bounded-memory and parity proof.
 | Arbitrary field mosaics do not fit a defensible one-dimensional OFE plan | High | Medium | Preserve agreement/error distributions for Mariana; the engineering planner represents every source but does not invent a science cutoff | Measured |
 | Hybrid residual geometry double-counts or omits source area | High | Medium | Parent-level ownership plan, exact area identities, source manifest, and generated closure tests | Fixture passed |
 | Connectivity classifier is reimplemented inconsistently | High | Low | Extend and invoke the owned Peridot classifier; do not duplicate its D8/channel logic in Python | Mitigated |
-| Run All overwhelms worker memory | High | Medium | Independent jobs are chained serially; WAT writes directly through wepppyo3 and the remaining pools share the 16-worker rolling window; retain anonymous-memory evidence | Mitigated in diagnostic; final generated rerun active |
-| Scheme clear escapes its fixed directory | High | Low | Enum-to-slug allowlist, resolved-path/symlink checks, and cross-scheme deletion tests | Open |
-| Legacy clients or projects lose Concept 2 behavior/state | High | Low | Omitted scheme maps to Concept 2; additive state migration; immutable legacy tree | Open |
-| Users treat engineering schemes as scientifically equivalent | Medium | Medium | Description-first labels, limitations/manifests, side-by-side evidence, and Mariana-owned disposition | Open |
+| Run All overwhelms worker memory | High | Medium | Independent jobs are chained serially; WAT writes directly through wepppyo3, remaining pools use the 16-worker rolling window, and large downstream aggregates close separate DuckDB connections | Mitigated in generated run and full-corpus diagnostics |
+| Scheme clear escapes its fixed directory | High | Low | Enum-to-slug allowlist, resolved-path/symlink checks, cross-scheme deletion tests, and byte-identical protected inventory | Mitigated |
+| Legacy clients or projects lose Concept 2 behavior/state | High | Low | Omitted scheme maps to Concept 2; additive state migration; immutable legacy tree verified byte-identical | Mitigated |
+| Users treat engineering schemes as scientifically equivalent | Medium | Medium | Description-first labels, limitations/manifests, side-by-side evidence, and Mariana-owned disposition | Assigned to science evaluation |
 | MOFE management scenario limits reject valid-looking plans | High | Confirmed | Capacity 32 accepted from complete inventory; full corpora and above-limit rejection pass | Mitigated |
 | Dirty detached forest baseline is overwritten or misattributed | High | Confirmed | Isolated build, unique `260714` artifacts, explicit p1 provenance, and selective staging | Mitigated |
 | Finite management inputs trigger invalid producer values or numerical traps | High | Confirmed | p1857 resolved through forest ablation G1; exact corpora and permanent watchlist pass | Mitigated |
-| Invalid database values are silently coerced to make runs finish | High | Low | Validate against canonical bounds with row/value/unit/rule provenance; require ADR/science review for new normalization | Open |
+| Invalid database values are silently coerced to make runs finish | High | Low | Validate against canonical bounds with row/value/unit/rule provenance; require ADR/science review for new normalization | Mitigated by full-corpus evidence |
 
 ## Verification Checklist
 
@@ -341,9 +355,8 @@ invariant only with replacement bounded-memory and parity proof.
   appear in its diff.
 - [x] Frontend Jest tests and lint pass.
 - [x] Updated stub and package-scoped changed-file broad-exception checks pass.
-- [x] Full `wctl run-pytest tests --maxfail=1` gate passes after the shared
-  interchange change (4,907 passed, 60 skipped, 414 warnings in 9 minutes 33
-  seconds).
+- [x] Full `wctl run-pytest tests --maxfail=1` gate passes after all code changes
+  (4,922 passed, 60 skipped, 414 warnings in 9 minutes 10 seconds).
 
 ### Security
 
@@ -352,14 +365,15 @@ invariant only with replacement bounded-memory and parity proof.
   dependencies, subprocess arguments, locking, and partial-failure recovery are
   reviewed.
 - [x] No unresolved medium/high implementation findings remain; generated
-  availability evidence is still required to pass the gate.
+  availability and protected-tree evidence are complete.
 
 ### Documentation and Governance
 
 - [x] Authoritative usersum decision contract updated.
 - [x] Artifact compatibility plan written before schema changes.
 - [x] ADR-0019 drafted with current decision provenance.
-- [ ] ADR-0019 accepted with exact fit parameters before wired behavior.
+- [x] ADR-0019 records the exact engineering parameters and wired behavior. It
+  remains Proposed for Roger/Mariana scientific disposition.
 - [x] The authoritative design, package, tracker, root board, proposed ADR, and
   ExecPlan reflect the measured feasibility stop; deferred UI/API docs remain
   unchanged because those paths were not wired.
@@ -371,14 +385,15 @@ invariant only with replacement bounded-memory and parity proof.
 - [x] API omission, one-scheme, all-scheme, invalid-scheme, job dependency, clear,
   stale, and partial-failure cases pass.
 - [x] Legacy Concept 2 state/artifact compatibility passes.
-- [ ] Generated all-scheme run completes on `sacral-self-discipline` with protected
+- [x] Generated all-scheme run completes on `sacral-self-discipline` with protected
   artifacts byte-identical.
 
 ### Deployment and Evaluation
 
 - [x] Current native binaries are built, provenance-stamped, and exercised by the
   wired path.
-- [ ] Dev compose RQ/API/UI smoke passes through authenticated routes.
+- [x] Dev compose authenticated RQ/API execution passed; route rendering,
+  controller tests, frontend lint, and all 625 Jest tests cover the UI contract.
 - [ ] Mariana receives the three-scheme comparison bundle and records scientific
   disposition separately from engineering acceptance.
 

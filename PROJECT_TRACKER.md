@@ -275,39 +275,7 @@ When resuming Kubernetes work:
 
 Currently active work packages. Limit to 2-4 packages to maintain focus.
 
-**Current WIP Count**: 13 packages
-
----
-
-### AgFields Routing Scheme Suite
-**Started**: 2026-07-14
-**Status**: In progress; final Hybrid generated acceptance
-**Size**: High (multi-repository, multi-stage implementation)
-**Owner**: Codex
-**Priority**: High
-**Link**: [docs/work-packages/20260714_ag_fields_routing_scheme_suite/](docs/work-packages/20260714_ag_fields_routing_scheme_suite/)
-**Description**: Implement field-aware hillslope routing, retain direct sub-field
-outlet injection, and add a connectivity-aware hybrid that injects the 49.3% of
-dev-project sub-fields with direct channel drainage while routing the others
-through OFEs. The runs page will offer one scheme or all with description-first
-labels and fixed `concept-1`, `concept-2`, and `hybrid` result roots.
-
-**Current Focus**: Complete the final authenticated Hybrid run, verify protected
-artifacts and comparison outputs, and confirm the combined direct wepppyo3 WAT
-writer plus bounded `totalwatsed3` last-OFE aggregation. The latter reduced full
-Concept 1 regeneration from a 59,396,808,704-byte worker peak to
-10,238,947,328 bytes maximum RSS with numerical parity.
-
-**Dependencies**: Builds on the completed Concept 2 implementation, ADR-0018, the
-completed flowpath-to-channel connectivity inventory, and the owned
-`/workdir/wepp-forest_260430_baseline` build/ablation workflow. The corpus-backed
-capacity-32 forest/WEPPpy release evidence is complete; ADR-0019 remains Proposed
-pending final generated acceptance and owner disposition.
-
-**Next Steps**: Finish active Hybrid job
-`b166b9c0-c9f6-4e82-b1bf-def495e9c9f1`, capture protected-tree hashes and
-engineering comparison metrics, then close the QA/security/Mariana handoff
-artifacts.
+**Current WIP Count**: 12 packages
 
 ---
 
@@ -576,6 +544,27 @@ artifacts.
 ## ✅ Done
 
 Recently completed work packages. Archived immediately upon completion.
+
+### AgFields Routing Scheme Suite (2026-07-15)
+**Status**: ✅ **ENGINEERING COMPLETE; SCIENTIFIC EVALUATION PENDING**
+
+**Link**: [docs/work-packages/20260714_ag_fields_routing_scheme_suite/](docs/work-packages/20260714_ag_fields_routing_scheme_suite/)
+
+**Lifecycle**: In Progress -> Done (2026-07-15)
+
+**Summary**: Delivered selectable field-aware OFE routing, direct sub-field
+outlet injection, connectivity-aware hybrid routing, and serial Run All under
+fixed `concept-1`, `concept-2`, and `hybrid` roots. Each scheme completed all
+3,543 parents with nine required resources. Hybrid used direct injection for
+3,269 connected sub-fields and Concept 1 for 3,357 non-connected sub-fields,
+with all 6,626 decisions matching Peridot and exact source-area closure. The
+package also synchronized hillslope management capacity 32, completed both
+management corpora, made direct wepppyo3 WAT writing the default, and bounded
+downstream aggregation memory. The final 4,922-test WEPPpy gate passed; all
+160,671 protected files remained byte-identical. The science-neutral comparison
+bundle is ready for Mariana Dobre.
+
+---
 
 ### AgFields Concept 2 Watershed Integration (2026-07-14)
 **Status**: ✅ **ENGINEERING COMPLETE; SCIENTIFIC EVALUATION PENDING**

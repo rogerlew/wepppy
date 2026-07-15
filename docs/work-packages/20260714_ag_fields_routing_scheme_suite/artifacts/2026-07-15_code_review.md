@@ -63,7 +63,7 @@ fixture parity passed, and the real 25,567,139,478-byte Hybrid corpus wrote
 108,308,610 rows in 571.737 seconds at a 489,709,568-byte peak.
 
 Status: Resolved in wepppyo3 `361c9ac`/`c84c586` and WEPPpy `dd6852a14`; final
-authenticated Hybrid remeasurement is active.
+authenticated Hybrid completed without taking the Python fallback.
 
 ### CR-04 - `totalwatsed3` evaluated last-OFE identity on every WAT row
 
@@ -78,7 +78,22 @@ maximum RSS. The 6,210-row, 79-column before/after outputs have identical schema
 metadata and pass `rtol=1e-12, atol=1e-12`; the worst relative difference is
 `2.34e-15` from parallel summation order.
 
-Status: Resolved in WEPPpy `90817edb2`; final Hybrid remeasurement is active.
+Status: Resolved in WEPPpy `90817edb2`; full Hybrid parity passed.
+
+### CR-05 - DuckDB retained buffers across independent aggregates
+
+Severity: Medium
+
+Final Hybrid completed successfully but briefly reached 20,510,617,600 sampled
+anonymous bytes after direct WAT writing. Isolated measurements showed the WAT,
+soil, and element queries at 0.85 GB, 5.86 GB, and 1.54 GB maximum RSS; their
+buffers accumulated because all three used one long-lived DuckDB connection.
+Each large aggregate now owns and closes a separate connection. Full Hybrid
+regeneration completed in 16.73 seconds at 6,104,309,760 bytes maximum RSS. Its
+6,210 rows and 79 columns preserve schema metadata and non-floating values, with
+all floating values within `rtol=1e-12, atol=1e-12`.
+
+Status: Resolved in WEPPpy `be60b6fc9`.
 
 ## Closed Review Checks
 
@@ -117,6 +132,5 @@ Status: Resolved in WEPPpy `90817edb2`; final Hybrid remeasurement is active.
 ## Gate Decision
 
 - Code review: Pass for implementation.
-- Generated acceptance: Pending final Hybrid and the protected-tree comparison.
-  Concept 1 and Concept 2 are complete; final Hybrid job
-  `b166b9c0-c9f6-4e82-b1bf-def495e9c9f1` is active with both interchange fixes.
+- Generated acceptance: Pass. All three scheme roots and the engineering
+  comparison bundle are complete; 160,671 protected files remain byte-identical.
