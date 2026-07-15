@@ -171,7 +171,7 @@ ptyprocess==0.7.0
 PuLP==3.3.0
 pure-eval==0.2.3
 py>=1.11.0
-pyarrow==16.1.0
+pyarrow==23.0.1
 pyarrow-hotfix==0.6
 pyasn1==0.6.3
 pyasn1-modules==0.4.0
