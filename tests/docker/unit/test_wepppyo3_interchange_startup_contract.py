@@ -68,6 +68,17 @@ def test_weppcloud_build_entrypoint_invokes_shared_preflight() -> None:
     assert 'python "${PROJECT_ROOT}/docker/wepppyo3-interchange-preflight.py"' in entrypoint
 
 
+def test_production_image_uses_one_canonical_wepppyo3_package_tree() -> None:
+    dockerfile = (REPO_ROOT / "docker" / "Dockerfile").read_text(encoding="utf-8")
+    assert 'mkdir -p "${SITE_PACKAGES}/wepppyo3"' not in dockerfile
+    assert "cp -a /opt/vendor/wepppyo3" not in dockerfile
+    assert "ln -s /opt/vendor/wepppyo3 /workdir/wepppyo3" in dockerfile
+    assert (
+        'printf "/workdir/wepppyo3/release/linux/py312/\\n" '
+        '> "${SITE_PACKAGES}/wepppyo3.pth"'
+    ) in dockerfile
+
+
 def test_preflight_accepts_configured_release_and_reports_sha() -> None:
     completed = subprocess.run(
         [sys.executable, str(PREFLIGHT)],
@@ -94,3 +105,23 @@ def test_preflight_rejects_extension_outside_configured_release(tmp_path: Path) 
     )
     assert completed.returncode != 0
     assert "unexpected origins" in completed.stderr
+
+
+def test_preflight_accepts_symlinked_canonical_release_root(tmp_path: Path) -> None:
+    import wepppyo3  # type: ignore
+
+    imported_release = Path(wepppyo3.__file__).resolve().parents[1]
+    release_link = tmp_path / "release"
+    release_link.symlink_to(imported_release, target_is_directory=True)
+    env = os.environ.copy()
+    env["WEPPPYO3_INTERCHANGE_RELEASE_ROOT"] = str(release_link)
+    completed = subprocess.run(
+        [sys.executable, str(PREFLIGHT)],
+        cwd=REPO_ROOT,
+        env=env,
+        check=False,
+        capture_output=True,
+        text=True,
+    )
+    assert completed.returncode == 0, completed.stderr
+    assert str(imported_release) in completed.stdout

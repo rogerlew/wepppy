@@ -145,13 +145,10 @@ RUN set -euxo pipefail; \
     ln -s /opt/vendor/weppcloud-wbt /workdir/weppcloud-wbt; \
     ln -s /opt/vendor/wepppyo3 /workdir/wepppyo3
 
-# Stage the prebuilt wepppyo3 release into site-packages for runtime imports.
-RUN set -euxo pipefail; \
-    SITE_PACKAGES=$(/opt/venv/bin/python -c 'import sysconfig; print(sysconfig.get_paths()["purelib"])'); \
-    mkdir -p "${SITE_PACKAGES}/wepppyo3"; \
-    cp -a /opt/vendor/wepppyo3/release/linux/py312/wepppyo3/. "${SITE_PACKAGES}/wepppyo3/"
-
-# Generate equivalent .pth injections inside the virtual environment.
+# Generate equivalent .pth injections inside the virtual environment. WEPPpyo3
+# has one canonical package tree: the vendored release reached through the
+# /workdir/wepppyo3 symlink. Do not duplicate it into site-packages because that
+# copy would precede the .pth entry and could mask release/provenance drift.
 RUN set -euxo pipefail; \
     SITE_PACKAGES=$(/opt/venv/bin/python -c 'import sysconfig; print(sysconfig.get_paths()["purelib"])'); \
     printf "/workdir/wepppy/\n" > "${SITE_PACKAGES}/wepppy.pth"; \
