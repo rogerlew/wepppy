@@ -275,7 +275,27 @@ When resuming Kubernetes work:
 
 Currently active work packages. Limit to 2-4 packages to maintain focus.
 
-**Current WIP Count**: 12 packages
+**Current WIP Count**: 13 packages
+
+---
+
+### WEPPpyo3-Only Interchange Cutover
+**Started**: 2026-07-15
+**Status**: In progress; discovery and contract freeze
+**Size**: High (cross-repository native/runtime cutover)
+**Owner**: Codex
+**Priority**: High
+**Link**: [docs/work-packages/20260715_wepppyo3_only_interchange/](docs/work-packages/20260715_wepppyo3_only_interchange/)
+**Description**: Retire production WEPPpy text-parser fallbacks and require the
+owned `wepppyo3.wepp_interchange` release for every hillslope and watershed
+conversion while preserving public wrapper/path/schema contracts.
+
+**Current Focus**: Inventory every fallback/native symbol, implement one explicit
+required-native error boundary, remove duplicate parsers, rebuild/install the
+paired release, and prove the cutover through the restarted local stack.
+
+**Next Steps**: Complete discovery, implement milestone-by-milestone, then run
+full gates plus independent code and QA reviews.
 
 ---
 
