@@ -292,10 +292,10 @@ dev-project sub-fields with direct channel drainage while routing the others
 through OFEs. The runs page will offer one scheme or all with description-first
 labels and fixed `concept-1`, `concept-2`, and `hybrid` result roots.
 
-**Current Focus**: Complete the authenticated serial all-scheme run, verify
-protected artifacts and comparison outputs, and remeasure the bounded rolling
-interchange fix after the unbounded Concept 1 `H.wat` conversion reached
-61,335,310,336 bytes of anonymous worker memory.
+**Current Focus**: Complete the final authenticated serial all-scheme run, verify
+protected artifacts and comparison outputs, and confirm the direct wepppyo3 WAT
+writer after the real Hybrid diagnostic reduced sampled anonymous memory from
+46,695,247,872 to 489,709,568 bytes.
 
 **Dependencies**: Builds on the completed Concept 2 implementation, ADR-0018, the
 completed flowpath-to-channel connectivity inventory, and the owned
@@ -303,9 +303,8 @@ completed flowpath-to-channel connectivity inventory, and the owned
 capacity-32 forest/WEPPpy release evidence is complete; ADR-0019 remains Proposed
 pending final generated acceptance and owner disposition.
 
-**Next Steps**: Finish Concept 2 and hybrid in the active Run All chain, rerun
-affected schemes with the final bounded-interchange and stable-manifest code,
-capture protected-tree hashes and engineering comparison metrics, then close the
+**Next Steps**: Finish the active direct-wepppyo3 Run All chain, capture
+protected-tree hashes and engineering comparison metrics, then close the
 QA/security/Mariana handoff artifacts.
 
 ---

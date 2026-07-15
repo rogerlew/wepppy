@@ -114,11 +114,11 @@ engineering results for a separate science evaluation.
   attempts before releasing state. Sixty-six focused tests and stub gates pass;
   the stopped live job reconciled to `failed`, preserved its prior result, and its
   identified 17 GB partial staging tree was safely removed.
-- [ ] (2026-07-15 04:29 UTC) Authenticated Run All acceptance restarted as jobs
+- [x] (2026-07-15 08:32 UTC) Authenticated Run All acceptance completed as jobs
   `70750bcd-0e70-4906-b25c-0e6f827b9bb1`,
   `f7da8423-bfa1-41de-b0ae-b24e2eb2058f`, and
-  `ad00cdb4-93b6-4467-8e08-a40391e84c10`; continuous cgroup anonymous-memory and
-  worker-process sampling is active.
+  `ad00cdb4-93b6-4467-8e08-a40391e84c10`. Hybrid published stable resource paths,
+  but its larger multi-OFE WAT corpus exposed a second interchange memory defect.
 - [x] (2026-07-15 04:57 UTC) Re-ran the broad WEPPpy gate after the final
   interrupted-attempt cleanup change: 4,905 tests passed, 60 skipped, and 414
   warnings in 9 minutes 18 seconds.
@@ -135,8 +135,20 @@ engineering results for a separate science evaluation.
   on Concept 2. The job finished all six hillslope interchange outputs and peaked
   at 11,978,174,464 bytes of sampled cgroup anonymous memory, below the 16 GiB
   target and 80.5% below the unbounded Concept 1 baseline, with zero OOM events.
+  Hybrid later proved that the smaller single-OFE Concept 2 WAT corpus was not a
+  representative whole-suite bound.
 - [x] (2026-07-15 07:08 UTC) Passed the final post-hardening broad repository gate:
   4,907 passed, 60 skipped, and 414 warnings in 9 minutes 33 seconds.
+- [x] (2026-07-15 11:02 UTC) Moved multi-file hillslope WAT aggregation and
+  Parquet writing into one source-ordered wepppyo3 operation. Exact fixture parity
+  passed, and the 25,567,139,478-byte Hybrid WAT corpus wrote 108,308,610 rows in
+  571.737 seconds at a 489,709,568-byte sampled anonymous-memory peak, 98.951%
+  below the prior 46,695,247,872-byte Hybrid peak, with zero OOM events.
+- [ ] (2026-07-15 11:08 UTC) Final authenticated Run All acceptance is active as
+  jobs `dbb32684-a6e9-4893-9a18-624b67af6574`,
+  `e104dffa-0a3e-4e36-ab27-ff1fb207dfb2`, and
+  `4e196d19-f175-4ef9-a862-916c5b3cfa57`, with continuous sampled anonymous-memory
+  and OOM monitoring.
 - [ ] Milestone 7: pass focused/broad gates, security/QA review, and all-scheme
   generated acceptance; publish Mariana's comparison bundle.
 - [ ] Move this plan to `prompts/completed/`, update the package/tracker/root board,
@@ -285,6 +297,14 @@ engineering results for a separate science evaluation.
   fake executor now fails if submissions exceed the configured window; the old
   implementation would fail that regression on its third submission with a
   two-worker bound.
+- Observation: A rolling future window still returns complete parsed tables to
+  Python, so its memory bound scales with the largest in-flight multi-OFE files,
+  not only the worker count.
+  Evidence: Concept 2 contained 3,987,168,195 WAT source bytes and peaked at
+  11,978,174,464 anonymous bytes, while Hybrid contained 25,567,139,478 WAT source
+  bytes and peaked at 46,695,247,872 anonymous bytes during the same bounded path.
+  The direct wepppyo3 diagnostic on Hybrid preserved the 108,308,610-row schema
+  and metadata while peaking at 489,709,568 anonymous bytes.
 - Observation: Atomic directory publication does not rewrite path strings already
   serialized in a terminal manifest.
   Evidence: the completed Concept 1 manifest named nine resources below
@@ -367,6 +387,14 @@ erase observations that changed the design.
   rolling window preserves parser parallelism, deterministic row order, the
   existing worker parameter, and atomic output while removing the unbounded
   writer queue/dictionary and its extra table serialization.
+  Date/Author: 2026-07-15, Codex.
+- Decision: Make the direct multi-file wepppyo3 WAT-to-Parquet operation the
+  default and keep the Python process-pool path as an explicit logged
+  compatibility boundary only.
+  Rationale: the rolling pool bounded future count but still materialized full
+  multi-OFE Arrow tables in Python. Parsing one source at a time into compact Rust
+  arrays and immediately writing its row group preserves schema and source order
+  while removing the input-sized Python handoff.
   Date/Author: 2026-07-15, Codex.
 - Decision: Resolve staged interchange resources through the fixed public scheme
   root before writing terminal summaries.

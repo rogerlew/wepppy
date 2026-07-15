@@ -123,18 +123,31 @@ the post-merge health window runs through 2026-08-14.
 
 The first generated post-fix measurement completed on Concept 2 at 07:08:20 UTC.
 Its entire job peaked at 11,978,174,464 bytes (11.16 GiB) of sampled worker-cgroup
-anonymous memory, with zero cgroup OOM events. This is below the 16 GiB target and
-80.5% below the 61,335,310,336-byte Concept 1 baseline. The six hillslope outputs,
-including `H.wat.parquet`, completed in source order; the final repository gate
-passed 4,907 tests with 60 skips.
+anonymous memory, with zero cgroup OOM events. Hybrid then reached
+46,695,247,872 bytes on the same rolling implementation because its 25.57 GB
+multi-OFE WAT corpus materialized much larger complete Arrow tables than Concept
+2's 3.99 GB single-OFE corpus. The Concept 2 measurement therefore did not prove
+the bound across schemes.
 
-- Primary health signals: outstanding futures never exceed `max_workers`, the
+The final hardening step moves the complete sorted WAT file list into one
+wepppyo3 call. Rust loads the calendar once, parses one source into compact arrays,
+and immediately writes that source's Parquet row group without returning full
+tables through Python. On the generated Hybrid corpus, it wrote 108,308,610 rows
+in 571.737 seconds at 489,709,568 bytes (0.456 GiB) sampled anonymous memory,
+98.951% below the rolling-pool Hybrid peak, with zero OOM events. Exact
+schema/value parity passed on a multi-file fixture, and the real artifact retained
+the expected version metadata and schema. The final authenticated all-scheme run
+is the package acceptance measurement.
+
+- Primary health signals: WAT defaults to direct wepppyo3 row-group writing,
+  other outstanding interchange futures never exceed `max_workers`, the
   dev-project interchange peak stays below 16 GiB, and the target job completes
   without OOM or manual recovery.
 - Guardrails: existing interchange tests preserve schema/order/empty-output and
   atomic-commit behavior; generated elapsed time must not exceed twice the
   unbounded run without a documented review.
-- Danger signals: anonymous memory again grows with input-file count, an
+- Danger signals: WAT logs the Python compatibility fallback, anonymous memory
+  again grows with input-file size, an
   `.attempt-*` path appears in a published manifest, ordering/schema tests regress,
   or a worker experiences OOM/forced restart.
 - Sunset criteria: no temporary retry, fallback, feature flag, or delay was added.
