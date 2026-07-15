@@ -155,6 +155,7 @@ Related implementation references:
 - [Flowpath-to-channel connectivity inventory](../../../../../docs/work-packages/20260713_ag_fields_flowpath_channel_connectivity/package.md)
 - [Routing scheme suite work package](../../../../../docs/work-packages/20260714_ag_fields_routing_scheme_suite/package.md)
 - [Management capacity and corpus validation plan](../../../../../docs/work-packages/20260714_ag_fields_routing_scheme_suite/artifacts/2026-07-14_management_capacity_and_corpus_validation_plan.md)
+- [Management capacity and corpus results](../../../../../docs/work-packages/20260714_ag_fields_routing_scheme_suite/artifacts/2026-07-14_management_capacity_corpus_results.md)
 - [ADR-0018: AgFields weighted PASS accounting](../../../../../docs/adrs/ADR-0018-agfields-weighted-pass-accounting.md)
 - [ADR-0019: Field-aware OFE and hybrid routing](../../../../../docs/adrs/ADR-0019-agfields-field-aware-ofe-hybrid-routing.md)
 
@@ -186,16 +187,16 @@ evidence. Mariana Dobre will compare the three result sets from
 `/wc1/runs/sa/sacral-self-discipline` and qualify their scientific use and
 limitations after engineering delivery.
 
-The first feasibility gate is now complete. Geometry, explicit-breakpoint input
-synthesis, and a real mixed-parent balance proof passed, but exact management
-preflight found 141 Concept 1 parents and 59 hybrid residual parents above the
-supported WEPP maximum of 20 referenced yearly scenarios. The routing-suite
-package now owns a synchronized forest hillslope-capacity increase and full
-management-corpus execution, including canonical AgFields input validation or
-evidence-driven forest numerical hardening when failures are found. User-facing
-wiring remains gated until that milestone and ADR-0019 pass. The measured
-evidence is in
-[the Concept 1 feasibility artifact](../../../../../docs/work-packages/20260714_ag_fields_routing_scheme_suite/artifacts/2026-07-14_concept1_feasibility.md).
+The feasibility and management/runtime corpus gates are complete. Geometry,
+explicit-breakpoint input synthesis, and a real mixed-parent balance proof pass.
+The synchronized forest/WEPPpy hillslope management capacity is 32, selected from
+a measured maximum of 24 plus eight slots of headroom. The exact release binary
+completes all 1,869 Concept 1 and 1,644 hybrid residual parents. The p1857
+finite-input numerical fault was fixed at the forest model boundary with ablation
+evidence; no AgFields source value was coerced. User-facing wiring remains gated
+by the faithful scheme/state/RQ/UI implementation and ADR-0019 acceptance. See the
+[Concept 1 feasibility artifact](../../../../../docs/work-packages/20260714_ag_fields_routing_scheme_suite/artifacts/2026-07-14_concept1_feasibility.md)
+and [capacity/corpus results](../../../../../docs/work-packages/20260714_ag_fields_routing_scheme_suite/artifacts/2026-07-14_management_capacity_corpus_results.md).
 
 ### Shared objective and invariants
 
@@ -281,16 +282,17 @@ independent AgFields trees.
 | Downstream buffer trapping | Represented when a distinct, well-fitted background OFE lies below a field | None before outlet injection | Represented for Concept 1 branches only |
 | Water/sediment accounting | Native replacement-hillslope balance plus plan-area diagnostics | Explicit event/run weighted-source closure | Residual Concept 1 balance plus weighted connected-source event/run closure |
 | Main scientific risk | A two-dimensional mosaic may lack a defensible one-dimensional representation | Outlet injection can over-deliver when a real buffer lies below a field | Binary topology classification and residual projection combine both approximations |
-| Delivery status | Binary/data milestone in progress; production wiring gated | Implemented; scheme-root migration deferred with the suite | Binary/data milestone in progress; production wiring gated |
+| Delivery status | Production collaborator/state/RQ/UI wired; generated watershed acceptance running | Production integrator moved behind the current scheme root with legacy evidence preserved | Production composition/state/RQ/UI wired; generated watershed acceptance pending |
 
-### Concept 1: rebuild affected hillslopes as field-aware OFE profiles (capacity milestone)
+### Concept 1: rebuild affected hillslopes as field-aware OFE profiles
 
-**Status:** The geometry and input-synthesis spike passed. The routing scheme
-suite now owns the forest capacity increase and complete management-corpus
-validation needed to resolve true native management overflows before production.
-The following model, planning, synthesis, validation, and feasibility contract
-remains normative. A planner-only or surrogate output does not satisfy the
-faithful implementation target.
+**Status:** Geometry, input synthesis, the synchronized capacity cutover, and the
+complete parent execution corpus pass. The production collaborator now plans,
+synthesizes, runs, validates, manifests, and reruns a scoped Concept 1 watershed
+through per-scheme NoDb, RQ/API, and UI contracts. Generated watershed acceptance
+is running. The following model, planning, synthesis, validation, and feasibility
+contract remains normative. A planner-only or surrogate output does not satisfy
+the faithful implementation target.
 
 #### Model contract
 
@@ -363,10 +365,10 @@ WEPP preparation must consume it rather than recomputing field placement.
    - Build one multi-year management per field from the rotation schedule, load the
      parent management for background OFEs, and compose the ordered stack with
      `ManagementMultipleOfeSynth`.
-   - Preflight the number of OFEs and referenced yearly scenarios. Both current
-     explicit-breakpoint segmentation and hillslope management permit at most 20,
-     but multi-field rotations can hit the management limit independently of OFE
-     count.
+   - Preflight the number of OFEs and referenced yearly scenarios. The
+     explicit-breakpoint planner permits at most 20 OFEs; synchronized hillslope
+     management capacity is 32. Multi-field rotations can hit the management
+     limit independently of OFE count.
 
 4. **Run replacement hillslopes and the isolated watershed.**
    - Copy or link baseline run inputs into
@@ -413,12 +415,12 @@ fragmentation diagnostics span a wide range, confirming that Concept 1 is not a
 general two-dimensional mosaic representation and that Mariana must assess the
 scientific effect.
 
-File generation is feasible for most parents, but not all with the supported WEPP
-binary. Even after exact structural scenario deduplication, management synthesis
-requires 21-24 referenced yearly scenarios for 141 of 1,869 affected parents,
-covering 12.21% of affected area. This confirmed native input-contract limit is
-the production blocker; no low-fit or scenario-limited parent may be silently
-dropped or rerouted.
+File generation and native parent execution are feasible for every designated-
+project parent under the synchronized capacity of 32. Exact structural scenario
+deduplication measured 24 as the maximum referenced yearly/surface count; the
+exact release binary completed 1,869/1,869 affected Concept 1 parents for 17/17
+years with no remaining failure classification. Fit diagnostics still require
+Mariana's evaluation, and no low-fit parent may be silently dropped or rerouted.
 
 ### Concept 2: area-weighted PASS aggregation and watershed rerun (implemented)
 
@@ -681,26 +683,20 @@ acceptance.
 ### Recommended delivery sequence
 
 1. Continue the active
-   [routing scheme suite ExecPlan](../../../../../docs/work-packages/20260714_ag_fields_routing_scheme_suite/prompts/active/ag_fields_routing_scheme_suite_execplan.md)
-   through integrated Milestone 2B; its Peridot detail, planner census,
-   explicit-breakpoint kernel, and mixed-parent proof are complete.
-2. Inventory every generated management section, select the synchronized forest
-   hillslope capacity, and execute every Concept 1/hybrid input tuple. Fix proven
-   invalid source values at canonical AgFields ingest and finite-input numerical
-   producer faults through forest ablation evidence.
-3. Accept ADR-0019 only after the matching forest/WEPPpy limits, release evidence,
-   complete passing corpus, and regression results are explicit. Do not ship a
-   surrogate, omitted parent, clamped input, or silent fallback.
-4. Then complete faithful Concept 1 hillslope execution, manifests, watershed
-   execution, and remaining fixtures.
-5. Build hybrid pure/mixed parent composition, reuse ADR-0018 weighted accounting,
-   and prove area/water/sediment closure plus stable rejection behavior.
-6. Move Concept 2 additively behind the current `concept-2` scheme root and evolve
-   persisted state, authenticated API/RQ, serial Run All jobs, and the exact
-   description-first UI contract with historical defaults.
-7. Generate all three current trees through the authenticated path on
+   [routing scheme suite ExecPlan](../../../../../docs/work-packages/20260714_ag_fields_routing_scheme_suite/prompts/active/ag_fields_routing_scheme_suite_execplan.md).
+   Milestone 2B is complete with synchronized capacity 32, exact release corpora,
+   and forest ablation/release evidence.
+2. Complete the active generated Concept 1 watershed/manifest acceptance.
+3. Exercise the wired hybrid pure/mixed composition on the generated project and
+   prove residual-area, water, and sediment closure plus stable rejection behavior.
+4. Exercise the authenticated per-scheme and serial Run All path, including the
+   exact description-first UI contract and historical Concept 2 defaults.
+5. Accept ADR-0019 only after the wired parameters, complete scheme roots, and
+   remaining generated/regression evidence are explicit. Do not ship a surrogate,
+   omitted parent, clamped input, or silent fallback.
+6. Generate all three current trees through the authenticated path on
    `sacral-self-discipline`, prove protected artifacts byte-identical, complete
    security/QA/broad gates, and publish a self-contained comparison bundle.
-8. Mariana Dobre performs the comparative scientific evaluation. Record her
+7. Mariana Dobre performs the comparative scientific evaluation. Record her
    suitable-use guidance and limitations without substituting engineering
    judgment for that review.

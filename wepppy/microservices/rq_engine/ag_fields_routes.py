@@ -15,7 +15,7 @@ from fastapi import APIRouter, Request
 from fastapi.responses import FileResponse, JSONResponse, Response
 from rq import Queue
 from rq.exceptions import NoSuchJobError
-from rq.job import Job
+from rq.job import Dependency, Job
 from starlette.datastructures import UploadFile
 
 from wepp_runner.wepp_runner import get_linux_wepp_bin_opts
@@ -26,12 +26,22 @@ from wepppy.microservices.shape_converter.archive_validation import (
     validate_and_extract_zip_archive,
 )
 from wepppy.microservices.shape_converter.errors import ShapeConverterError
-from wepppy.nodb.mods.ag_fields import AgFields, RotationLookupValidationError
+from wepppy.nodb.mods.ag_fields import (
+    AgFields,
+    AgFieldsNoDbLockedException,
+    RotationLookupValidationError,
+)
+from wepppy.nodb.mods.ag_fields.routing_schemes import (
+    AgFieldsRoutingScheme,
+    expand_routing_scheme_request,
+    validate_watershed_max_workers,
+)
 from wepppy.nodb.redis_prep import RedisPrep, TaskEnum
 from wepppy.rq.ag_fields_rq import (
     AGFIELDS_BUILD_SUBFIELDS_JOB_KEY,
     AGFIELDS_PLANTDB_JOB_KEY,
     AGFIELDS_RUN_WATERSHED_JOB_KEY,
+    AGFIELDS_RUN_WATERSHED_JOB_KEYS,
     AGFIELDS_RUN_WEPP_JOB_KEY,
     build_ag_fields_subfields_rq,
     process_ag_fields_plant_db_rq,
@@ -56,6 +66,7 @@ RQ_ENQUEUE_SCOPES = ["rq:enqueue"]
 RQ_READ_SCOPES = ["rq:status"]
 AGFIELDS_SUBMIT_LOCK_TTL_SECONDS = 30
 ACTIVE_RQ_JOB_STATUSES = {"queued", "started", "deferred", "scheduled"}
+AGFIELDS_CURRENT_WATERSHED_JOB_KEYS = tuple(AGFIELDS_RUN_WATERSHED_JOB_KEYS.values())
 
 AGFIELDS_BOUNDARY_ALLOWED_EXTENSIONS = ("geojson", "json")
 AGFIELDS_BOUNDARY_MAX_BYTES = 10 * 1024 * 1024
@@ -156,6 +167,94 @@ def _enqueue_job(
     return JSONResponse({"job_id": job.id}, status_code=202)
 
 
+def _enqueue_watershed_jobs(
+    wd: str,
+    runid: str,
+    schemes: tuple[AgFieldsRoutingScheme, ...],
+    max_workers: int | None,
+) -> JSONResponse:
+    """Enqueue one or three independently tracked watershed jobs in serial order."""
+    submit_owner = f"agfields_run_watershed:{uuid4().hex}"
+    submit_lock_key = f"agfields:submit_lock:{runid}"
+    prep = RedisPrep.getInstance(wd)
+    ag_fields = AgFields.getInstance(wd)
+    job_ids: dict[str, str] = {}
+    with redis.Redis(
+        **redis_connection_kwargs(RedisDB.LOCK, decode_responses=True)
+    ) as lock_conn:
+        if not lock_conn.set(
+            submit_lock_key,
+            submit_owner,
+            nx=True,
+            ex=AGFIELDS_SUBMIT_LOCK_TTL_SECONDS,
+        ):
+            raise AgFieldsJobConflict("Another AgFields submission is in progress for this run.")
+        try:
+            with redis.Redis(**redis_connection_kwargs(RedisDB.RQ)) as redis_conn:
+                active = _find_active_job(prep, redis_conn)
+                if active is not None:
+                    raise AgFieldsJobConflict(
+                        "An AgFields job is already active for this run "
+                        f"(key={active['key']}, job_id={active['job_id']}, status={active['status']})."
+                    )
+                running_schemes = [
+                    scheme
+                    for scheme, state in ag_fields.get_watershed_integration_states().items()
+                    if str(state["status"]).startswith("running")
+                ]
+                if running_schemes:
+                    raise AgFieldsJobConflict(
+                        "An AgFields watershed integration is already running for this run "
+                        f"(schemes={','.join(running_schemes)})."
+                    )
+                planned_job_ids = {
+                    scheme.value: str(uuid4())
+                    for scheme in schemes
+                }
+                for scheme in schemes:
+                    job_id = planned_job_ids[scheme.value]
+                    job_key = AGFIELDS_RUN_WATERSHED_JOB_KEYS[scheme.value]
+                    prep.set_rq_job_id(job_key, job_id)
+                    if scheme is AgFieldsRoutingScheme.CONCEPT_2:
+                        prep.set_rq_job_id(AGFIELDS_RUN_WATERSHED_JOB_KEY, job_id)
+                ag_fields.set_watershed_integration_job_ids(planned_job_ids)
+
+                queue = Queue(connection=redis_conn)
+                previous_job_id: str | None = None
+                for scheme in schemes:
+                    dependency = (
+                        Dependency(jobs=[previous_job_id], allow_failure=True)
+                        if previous_job_id is not None
+                        else None
+                    )
+                    job_id = planned_job_ids[scheme.value]
+                    queue.enqueue_call(
+                        run_ag_fields_watershed_rq,
+                        args=(runid, max_workers, scheme.value),
+                        timeout=RQ_TIMEOUT,
+                        depends_on=dependency,
+                        job_id=job_id,
+                    )
+                    job_ids[scheme.value] = job_id
+                    previous_job_id = job_id
+        finally:
+            try:
+                if lock_conn.get(submit_lock_key) == submit_owner:
+                    lock_conn.delete(submit_lock_key)
+            except redis.RedisError as exc:
+                logger.warning(
+                    "AgFields watershed submit lock release failed for %s: %s",
+                    runid,
+                    exc,
+                    extra={"runid": runid},
+                )
+    first_job_id = job_ids[schemes[0].value]
+    return JSONResponse(
+        {"job_id": first_job_id, "job_ids": job_ids},
+        status_code=202,
+    )
+
+
 def _mapping_summary(ag_fields: AgFields) -> dict[str, Any]:
     results = ag_fields.validate_rotation_lookup()
     used = [item for item in results if item.get("used")]
@@ -173,6 +272,7 @@ def _find_active_job(prep: RedisPrep, redis_conn: redis.Redis) -> dict[str, str]
         AGFIELDS_BUILD_SUBFIELDS_JOB_KEY,
         AGFIELDS_PLANTDB_JOB_KEY,
         AGFIELDS_RUN_WEPP_JOB_KEY,
+        *AGFIELDS_CURRENT_WATERSHED_JOB_KEYS,
         AGFIELDS_RUN_WATERSHED_JOB_KEY,
     ):
         job_id = prep.get_rq_job_id(key)
@@ -190,20 +290,33 @@ def _find_active_job(prep: RedisPrep, redis_conn: redis.Redis) -> dict[str, str]
 
 def _active_job_conflict_response(wd: str) -> JSONResponse | None:
     prep = RedisPrep.tryGetInstance(wd)
-    if prep is None:
-        return None
-    with redis.Redis(**redis_connection_kwargs(RedisDB.RQ)) as redis_conn:
-        active = _find_active_job(prep, redis_conn)
-    if active is None:
-        return None
-    return error_response(
-        "An AgFields job is active; wait for it to finish before changing AgFields inputs.",
-        status_code=409,
-        code="agfields_job_active",
-        details=(
-            f"key={active['key']}, job_id={active['job_id']}, status={active['status']}"
-        ),
-    )
+    if prep is not None:
+        with redis.Redis(**redis_connection_kwargs(RedisDB.RQ)) as redis_conn:
+            active = _find_active_job(prep, redis_conn)
+        if active is not None:
+            return error_response(
+                "An AgFields job is active; wait for it to finish before changing AgFields inputs.",
+                status_code=409,
+                code="agfields_job_active",
+                details=(
+                    f"key={active['key']}, job_id={active['job_id']}, status={active['status']}"
+                ),
+            )
+    states = AgFields.getInstance(wd).get_watershed_integration_states()
+    running_schemes = [
+        scheme
+        for scheme, state in states.items()
+        if str(state["status"]).startswith("running")
+    ]
+    if running_schemes:
+        return error_response(
+            "An AgFields watershed integration is running; wait for it to finish "
+            "before changing AgFields inputs.",
+            status_code=409,
+            code="agfields_job_active",
+            details="schemes=" + ",".join(running_schemes),
+        )
+    return None
 
 
 def _job_ids(prep: RedisPrep | None) -> tuple[dict[str, str | None], dict[str, str | None]]:
@@ -211,6 +324,7 @@ def _job_ids(prep: RedisPrep | None) -> tuple[dict[str, str | None], dict[str, s
         AGFIELDS_BUILD_SUBFIELDS_JOB_KEY,
         AGFIELDS_PLANTDB_JOB_KEY,
         AGFIELDS_RUN_WEPP_JOB_KEY,
+        *AGFIELDS_CURRENT_WATERSHED_JOB_KEYS,
         AGFIELDS_RUN_WATERSHED_JOB_KEY,
     )
     job_ids = {key: prep.get_rq_job_id(key) if prep is not None else None for key in keys}
@@ -285,6 +399,7 @@ def _state_snapshot(wd: str) -> dict[str, Any]:
             "wepp_bin": ag_fields.wepp_bin,
         },
         "watershed_integration": ag_fields.get_watershed_integration_state(),
+        "watershed_integrations": ag_fields.get_watershed_integration_states(),
         "staleness": staleness,
         "readiness": readiness,
         "job_ids": job_ids,
@@ -802,7 +917,8 @@ async def run_wepp(runid: str, config: str, request: Request) -> JSONResponse:
     summary="Run the integrated AgFields watershed",
     description=(
         "Requires JWT Bearer `rq:enqueue` scope and run access. "
-        "Validates current sub-field and parent inputs, then enqueues the isolated Concept 2 rerun."
+        "Validates current sub-field and parent inputs, then enqueues one routing scheme "
+        "or all three schemes serially. Omitted scheme defaults to concept_2."
     ),
     operation_id=rq_operation_id("agfields_run_watershed"),
     tags=["rq-engine", "agfields"],
@@ -839,14 +955,15 @@ async def run_watershed(runid: str, config: str, request: Request) -> JSONRespon
             )
         payload = await parse_request_payload(request)
         raw_max_workers = payload.get("max_workers")
-        max_workers = None if raw_max_workers in (None, "") else int(raw_max_workers)
-        if max_workers is not None and max_workers < 1:
-            raise ValueError("max_workers must be at least 1 when provided.")
-        return _enqueue_job(
+        max_workers = validate_watershed_max_workers(
+            None if raw_max_workers in (None, "") else int(raw_max_workers)
+        )
+        schemes = expand_routing_scheme_request(payload.get("scheme"))
+        return _enqueue_watershed_jobs(
             wd,
-            AGFIELDS_RUN_WATERSHED_JOB_KEY,
-            run_ag_fields_watershed_rq,
-            (runid, max_workers),
+            runid,
+            schemes,
+            max_workers,
         )
     except (TypeError, ValueError) as exc:
         return error_response(str(exc), status_code=400)
@@ -865,7 +982,8 @@ async def run_watershed(runid: str, config: str, request: Request) -> JSONRespon
     summary="Clear the integrated AgFields watershed",
     description=(
         "Requires JWT Bearer `rq:enqueue` scope and run access. "
-        "Clears only the fixed isolated Concept 2 tree and additive state."
+        "Clears one fixed current-scheme tree, or all three current trees, and their state. "
+        "Omitted scheme defaults to concept_2; legacy unscoped artifacts are preserved."
     ),
     operation_id=rq_operation_id("agfields_clear_watershed"),
     tags=["rq-engine", "agfields"],
@@ -887,10 +1005,35 @@ async def clear_watershed(runid: str, config: str, request: Request) -> JSONResp
         conflict = _active_job_conflict_response(wd)
         if conflict is not None:
             return conflict
-        AgFields.getInstance(wd).clear_watershed_integration()
-        return JSONResponse({"message": "AgFields watershed integration artifacts cleared."})
+        payload = await parse_request_payload(request)
+        requested_scheme = payload.get("scheme")
+        schemes = expand_routing_scheme_request(requested_scheme)
+        ag_fields = AgFields.getInstance(wd)
+        states = ag_fields.get_watershed_integration_states()
+        running = [
+            scheme.value
+            for scheme in schemes
+            if str(states[scheme.value]["status"]).startswith("running")
+        ]
+        if running:
+            return error_response(
+                "AgFields watershed integration is running for: " + ", ".join(running),
+                status_code=409,
+                code="agfields_job_active",
+            )
+        for scheme in schemes:
+            ag_fields.clear_watershed_integration(scheme)
+        cleared = [scheme.value for scheme in schemes]
+        return JSONResponse(
+            {
+                "message": "AgFields watershed integration artifacts cleared.",
+                "cleared_schemes": cleared,
+            }
+        )
     except (TypeError, ValueError) as exc:
         return error_response(str(exc), status_code=400)
+    except AgFieldsNoDbLockedException as exc:
+        return error_response(str(exc), status_code=409, code="agfields_job_active")
     except Exception:  # broad-except: HTTP boundary contract
         logger.exception(
             "rq-engine AgFields watershed clear failed",

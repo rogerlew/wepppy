@@ -470,7 +470,10 @@ def _parse_wat_file_rust(
 
 
 def run_wepp_hillslope_wat_interchange(
-    wepp_output_dir: Path | str, *, expected_hillslopes: int | None = None
+    wepp_output_dir: Path | str,
+    *,
+    expected_hillslopes: int | None = None,
+    max_workers: int | None = None,
 ) -> Path:
     base = Path(wepp_output_dir)
     if not base.exists():
@@ -505,7 +508,12 @@ def run_wepp_hillslope_wat_interchange(
         parser = partial(_parse_wat_file, calendar_lookup=calendar_lookup)
 
     write_parquet_with_pool(
-        wat_files, parser, SCHEMA, target_path, empty_table=EMPTY_TABLE
+        wat_files,
+        parser,
+        SCHEMA,
+        target_path,
+        max_workers=max_workers,
+        empty_table=EMPTY_TABLE,
     )
     return target_path
 

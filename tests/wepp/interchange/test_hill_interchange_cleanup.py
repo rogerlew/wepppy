@@ -169,3 +169,52 @@ def test_cleanup_hillslope_sources_rejects_invalid_pass_family(
             run_wat_interchange=False,
         )
     cleanup_import_state()
+
+
+def test_hillslope_interchange_forwards_worker_bound_to_every_converter(
+    tmp_path: Path,
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    hill_interchange = load_module(
+        "wepppy.wepp.interchange.hill_interchange",
+        "wepppy/wepp/interchange/hill_interchange.py",
+    )
+    calls: list[tuple[str, int | None]] = []
+
+    def _writer(name: str):
+        def _fake_writer(base: Path, **kwargs):
+            calls.append((name, kwargs.get("max_workers")))
+            target = Path(base) / "interchange" / f"H.{name}.parquet"
+            _touch(target)
+            return target
+
+        return _fake_writer
+
+    for name in ("pass", "ebe", "element", "loss", "soil", "wat"):
+        monkeypatch.setattr(
+            hill_interchange,
+            f"run_wepp_hillslope_{name}_interchange",
+            _writer(name),
+        )
+    monkeypatch.setattr(hill_interchange, "_expected_hillslopes", lambda _base: 3)
+    monkeypatch.setattr(hill_interchange, "remove_incompatible_interchange", lambda _path: None)
+    monkeypatch.setattr(hill_interchange, "write_version_manifest", lambda _path: None)
+    monkeypatch.setattr(hill_interchange, "_update_catalog_entry", None)
+
+    try:
+        result = hill_interchange.run_wepp_hillslope_interchange(
+            tmp_path,
+            max_workers=7,
+        )
+    finally:
+        cleanup_import_state()
+
+    assert result == tmp_path / "interchange"
+    assert calls == [
+        ("pass", 7),
+        ("ebe", 7),
+        ("element", 7),
+        ("loss", 7),
+        ("soil", 7),
+        ("wat", 7),
+    ]

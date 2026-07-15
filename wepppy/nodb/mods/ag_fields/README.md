@@ -13,8 +13,8 @@ This module provides the `AgFields` NoDb controller, which coordinates an “ag 
 - Rasterizes the field boundary polygons onto the project DEM grid for downstream tools.
 - Runs Peridot “sub-field” abstraction (intersecting fields with hydrologic subwatersheds and generating representative slope files).
 - Builds multi-year WEPP management files from crop rotation schedules and runs a WEPP hillslope simulation per sub-field.
-- Integrates current sub-field PASS sources into an isolated, area-weighted parent
-  PASS set and reruns watershed WEPP with conservation manifests.
+- Runs field-aware, direct-outlet, or connectivity-aware mixed watershed routing
+  below independently composable scheme roots with source/closure manifests.
 
 The controller is stateful and persisted as `ag_fields.nodb` at the root of the working directory.
 
@@ -29,8 +29,10 @@ Typical sequence (some steps are optional depending on the UI/route calling into
 6. **Polygonize sub-fields**: `AgFields.polygonize_sub_fields()`
 7. **Provide crop→management mapping**: call `AgFields.write_rotation_lookup(rows)` (and optionally populate `ag_fields/plant_files/` via `handle_plant_file_db_upload`)
 8. **Run WEPP per sub-field**: choose the persisted `AgFields.wepp_bin`, then call `AgFields.run_wepp_ag_fields()` (optional `max_workers` remains available to API callers)
-9. **Run the isolated watershed integration**: call
-   `AgFields.run_watershed_integration()` after Stage 4 is current
+9. **Run an isolated watershed scheme**: call
+   `AgFields.run_watershed_integration(scheme="concept_1" | "concept_2" |
+   "hybrid")` after Stage 4 is current. An omitted scheme remains Concept 2.
+   Automatic concurrency is capped at 16; explicit `max_workers` must be 1-16.
 
 ## Inputs and outputs
 
@@ -55,9 +57,12 @@ Typical sequence (some steps are optional depending on the UI/route calling into
 | `ag_fields/sub_fields/sub_fields.geojson` | `polygonize_sub_fields` | Polygonized sub-fields with `field_id`, `topaz_id`, `wepp_id`, `sub_field_id` |
 | `wepp/ag_fields/runs/p<sub_field_id>.*` | `run_wepp_ag_fields` | Per-sub-field WEPP inputs (`.run`, `.man`, `.slp`) |
 | `wepp/ag_fields/output/H<sub_field_id>.*.dat` | WEPP | Per-sub-field WEPP outputs (loss, plot, soil, water balance, etc.) |
-| `wepp/ag_fields/watershed/runs/` | Concept 2 integrator | Copied parent inputs plus isolated parent and watershed run files |
-| `wepp/ag_fields/watershed/output/` | Concept 2 integrator | One legacy PASS per parent, watershed outputs, and isolated interchange |
-| `wepp/ag_fields/watershed/manifest/` | Concept 2 integrator | Versioned source, event/run closure, summary, and evaluation documentation |
+| `wepp/ag_fields/watershed/runs/` | Historical Concept 2 run | Preserved unscoped parent and watershed run files |
+| `wepp/ag_fields/watershed/output/` | Historical Concept 2 run | Preserved unscoped parent PASS, watershed output, and interchange |
+| `wepp/ag_fields/watershed/manifest/` | Historical Concept 2 run | Preserved unscoped source, closure, summary, and evaluation evidence |
+| `wepp/ag_fields/watershed/concept-1/` | Concept 1 integrator | Field-aware OFE runs, watershed output, plan/routing manifests, and interchange |
+| `wepp/ag_fields/watershed/concept-2/` | Current Concept 2 integrator | Current direct-outlet source/closure manifests and isolated watershed output |
+| `wepp/ag_fields/watershed/hybrid/` | Hybrid integrator | Peridot branch detail, residual OFE inputs, weighted connected-source closure, and watershed output |
 
 ## Quick start / examples
 
@@ -87,12 +92,12 @@ ag.polygonize_sub_fields()
 #   ag.write_rotation_lookup(rows)
 # - Optionally populate wd/ag_fields/plant_files/ with:
 #   ag.handle_plant_file_db_upload("plant_db.zip")
-ag.wepp_bin = "wepp_dcc52a6"
+ag.wepp_bin = "wepp_260714"
 ag.run_wepp_ag_fields()
 
-# 7) Inject area-weighted sub-field sources at parent outlets and rerun watershed WEPP
-summary = ag.run_watershed_integration()
-print(summary["affected_parent_count"], summary["sub_field_source_count"])
+# 7) Run one routing scheme (omitting scheme selects concept_2)
+summary = ag.run_watershed_integration(scheme="concept_1", max_workers=8)
+print(summary["scheme"], summary["parent_count"])
 ```
 
 ### `rotation_lookup.tsv` format
@@ -136,10 +141,54 @@ management graph is assembled. Surface and yearly scenarios remain isolated by
 simulation year because a later setup-year merge may mutate one of them.
 
 The resulting crop order, number of simulation years, operation dates, and
-referenced model values are unchanged. Synthesis fails before writing when more
-than 20 distinct referenced plant scenarios remain, matching the WEPP hillslope
-input limit and avoiding a misleading zero-return-code run without a success
-marker.
+referenced model values are unchanged. Production synthesis fails before writing
+when more than 32 distinct referenced yearly scenarios remain, matching the
+expanded WEPP hillslope input limit and avoiding a misleading zero-return-code
+run without a success marker. The independent Concept 1 planner remains limited
+to 20 OFEs.
+
+### Concept 1 management-capacity census
+
+`management_corpus` is a server-independent diagnostic CLI for an accepted
+Concept 1 or hybrid `ofe_plan.parquet`. It composes the exact deduplicated
+management graph for each parent without applying the production yearly-scenario
+write ceiling, serializes and reparses every result, and records bounded-section
+metrics plus source and generated-file SHA-256 hashes. This inventory exception
+does not decide the production writer or WEPP executable limit.
+
+```bash
+python3 -m wepppy.nodb.mods.ag_fields.management_corpus \
+  --ofe-plan /tmp/agfields-concept1-census/ofe_plan.parquet \
+  --parent-runs /wc1/runs/<prefix>/<runid>/wepp/runs \
+  --subfield-runs /wc1/runs/<prefix>/<runid>/wepp/ag_fields/runs \
+  --output-dir /tmp/agfields-concept1-management-corpus
+```
+
+To materialize and execute every parent in an accepted plan against an explicit
+hillslope binary, also provide the matching parent summary and simulation length:
+
+```bash
+python3 -m wepppy.nodb.mods.ag_fields.corpus_execution \
+  --ofe-plan /tmp/agfields-concept1-census-v8/ofe_plan.parquet \
+  --parent-summary /tmp/agfields-concept1-census-v8/parent_summary.parquet \
+  --parent-runs /wc1/runs/sa/sacral-self-discipline/wepp/runs \
+  --subfield-runs /wc1/runs/sa/sacral-self-discipline/wepp/ag_fields/runs \
+  --output-dir /tmp/agfields-concept1-parent-corpus \
+  --wepp-bin /path/to/wepp_hill \
+  --sim-years 17
+```
+
+The command writes complete generated inputs, PASS-focused WEPP outputs,
+`execution_results.parquet`, `execution_summary.json`, and logs only for failed
+parents. It refuses a non-empty output directory and classifies materialization,
+invalid-input, invalid-producer, non-finite PASS, timeout, signal,
+missing-output, and numerical-fault failures without mutating the source project.
+
+The output directory contains `management_corpus.parquet` (one metric row per
+parent), `management_sources.parquet` (one hashed source row per OFE),
+`management_corpus_summary.json` (maxima and distributions), and reparsed files
+under `managements/`. Use `--workers` to override the default of up to eight
+independent parent-management processes.
 
 ### Plant management archives
 
@@ -157,17 +206,30 @@ an additive `normalizations` list with the original and final values. See
 
 ## HTTP and RQ surface
 
-`wepppy.microservices.rq_engine.ag_fields_routes` exposes the staged workflow under `/api/runs/{runid}/{config}/agfields/`. The surface includes boundary upload, atomic schema confirmation, build-subfields enqueue, plant ZIP enqueue/inventory/delete, mapping read/save, management options, sub-field WEPP enqueue, isolated watershed enqueue/clear, Stage 4 artifact clear, overlay serving, and state hydration. Read routes require `rq:status`; mutations require `rq:enqueue`; all routes authorize access to the requested run.
+`wepppy.microservices.rq_engine.ag_fields_routes` exposes the staged workflow under `/api/runs/{runid}/{config}/agfields/`. The surface includes boundary upload, atomic schema confirmation, build-subfields enqueue, plant ZIP enqueue/inventory/delete, mapping read/save, management options, sub-field WEPP enqueue, scheme-aware watershed enqueue/clear, Stage 4 artifact clear, overlay serving, and state hydration. Read routes require `rq:status`; mutations require `rq:enqueue`; all routes authorize access to the requested run. Watershed mutations accept `concept_1`, `concept_2`, `hybrid`, or request-only `all`; omission remains Concept 2.
 
-RQ entrypoints live in `wepppy.rq.ag_fields_rq`. Job hints use `agfields_build_subfields`, `agfields_plantdb`, `agfields_run_wepp`, and `agfields_run_watershed`. Workers publish to `{runid}:ag_fields`, clear only the `ag_fields.nodb` cache before mutable hydration, return JSON-serializable results, and publish completion/failure payloads for status-stream hydration.
+RQ entrypoints live in `wepppy.rq.ag_fields_rq`. Job hints use `agfields_build_subfields`, `agfields_plantdb`, `agfields_run_wepp`, and the three scheme-specific watershed keys. The historical `agfields_run_watershed` hint remains a Concept 2 alias. `all` enqueues one job per scheme in stable order with allow-failure dependencies, so later comparisons execute after an earlier failure without overlapping full-watershed memory peaks. The response preserves `job_id` and adds a scheme-to-id `job_ids` mapping. Workers publish scheme-aware phase/result/failure payloads to `{runid}:ag_fields`, clear only the `ag_fields.nodb` cache before mutable hydration, and return JSON-serializable results.
 
 Preflight completion uses additive `TaskEnum.run_ag_fields` (🌽) and checklist key `ag_fields`. Serialized submissions and synchronous input/artifact mutations clear the timestamp; the Stage 4 worker clears it again on start and stamps it only after every sub-field WEPP run succeeds. `preflight2` additionally requires that completion be newer than parent WEPP, watershed abstraction, landuse, soils, and climate.
 
 Stage 5 intentionally does not add or overload a global `TaskEnum`: its completion,
 failure, source signature, and terminal summary live in additive AgFields state.
 Submitting or clearing Stage 5 does not invalidate the successful Stage 4 preflight
-timestamp. All four AgFields jobs still share the same per-run submit lock and live
+timestamp. Every AgFields job still shares the same per-run submit lock and live
 job admission check.
+
+Current state is an additive mapping keyed by `concept_1`, `concept_2`, and
+`hybrid`. `get_watershed_integration_states()` hydrates all three independently;
+clear operations accept the same exact identifier and remove only its fixed
+scheme root. Historical singular state and the unscoped Concept 2 tree remain
+read-only legacy evidence.
+
+Each attempt builds in a server-named staging directory beside the fixed scheme
+root and publishes only after the terminal manifest is durable. A failed retry
+leaves the prior completed tree in place, persists
+`manifest/last_attempt_failure.json`, and records
+`error.preserved_previous_result` in scheme state. Scheme-scoped clear also
+removes abandoned attempt/previous directories for that exact slug.
 
 Concept 2 v1 derives parent and retained areas from the exactly aligned
 `subwta.tif` and `sub_field_id_map.tif` grid, materializes legacy parent PASS files
@@ -204,7 +266,7 @@ The state snapshot reports build provenance rather than asking clients to infer 
 - **Legacy artifact name**: `fields.WGS.geojson` is the established canonical basename, but boundary ingestion preserves the uploaded coordinate values until rasterization; the basename does not guarantee WGS84 coordinates.
 - **Peridot prerequisites**: Peridot’s sub-field abstraction asserts `wd/dem/wbt/flovec.tif` and `wd/ag_fields/field_boundaries.tif` exist.
 - **Sub-field flowpath schema**: Peridot writes `field_flowpaths.csv` with parent `topaz_id` and flowpath-record `flowpath_topaz_id`. WEPPpy normalizes that table to `ag_fields/sub_fields/field_flowpaths.parquet` and keeps compatibility for historical CSVs where pandas read the old duplicate header as `topaz_id.1`.
-- **WEPP executable**: `[ag_fields] bin` supplies the new-project default independently of `[wepp] bin`; `ag-fields.cfg` uses `wepp_dcc52a6`. Historical NoDb payloads without `_wepp_bin` fall back to the parent Wepp controller until the user selects an AgFields executable.
+- **WEPP executable**: `[ag_fields] bin` supplies the new-project default independently of `[wepp] bin`; `ag-fields.cfg` uses `wepp_260714`, whose synchronized hillslope management capacity is 32. Historical NoDb payloads without `_wepp_bin` fall back to the parent Wepp controller until the user selects an AgFields executable.
 - **Concurrency**: `run_wepp_ag_fields()` runs sub-fields in a `ThreadPoolExecutor`. The UI uses automatic sizing; API callers may still pass `max_workers`.
 
 ## Further reading

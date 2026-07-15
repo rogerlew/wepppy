@@ -241,6 +241,14 @@ def _get_wbt_sub_field_bin():
         raise RuntimeError('sub_fields_abstraction binary not found')
     return _bin
 
+
+def get_subfield_channel_connectivity_bin() -> str:
+    """Return the fixed vendored direct-channel connectivity executable."""
+    binary = _join(_thisdir, 'bin', 'subfield_channel_connectivity')
+    if not _exists(binary):
+        raise RuntimeError('subfield_channel_connectivity binary not found')
+    return binary
+
 def run_peridot_abstract_watershed(
     wd: str,
     clip_hillslopes: bool = True,

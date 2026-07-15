@@ -44,11 +44,24 @@ function buildHtml() {
             <button type="button" data-action="clear-runs" data-role="clear-runs-button">Clear</button>
             <div data-role="results-links"></div>
 
-            <button type="button" data-action="run-watershed" data-role="integration-run-button">Run Watershed</button>
-            <button type="button" data-action="clear-watershed" data-role="integration-clear-button">Clear Watershed</button>
+            <select data-role="integration-scheme-select">
+                <option value="concept_1">Field-aware hillslope routing (routes fields through downstream OFEs)</option>
+                <option value="concept_2" selected>Direct sub-field outlet injection (preserves independent sub-field results; no buffer routing)</option>
+                <option value="hybrid">Connectivity-aware mixed routing (injects channel-connected fields; routes other fields through OFEs)</option>
+                <option value="all">Run all routing schemes (writes three separate results for comparison)</option>
+            </select>
+            <button type="button" data-action="run-watershed" data-role="integration-run-button">Run Selected Routing Scheme</button>
+            <button type="button" data-action="clear-watershed" data-role="integration-clear-button">Clear Selected Routing Result</button>
             <div data-role="integration-status"></div>
-            <div data-role="integration-results"></div>
-            <p data-role="integration-limitation"></p>
+            <div data-role="integration-status-concept_1"></div>
+            <div data-role="integration-results-concept_1"></div>
+            <p data-role="integration-limitation-concept_1"></p>
+            <div data-role="integration-status-concept_2"></div>
+            <div data-role="integration-results-concept_2"></div>
+            <p data-role="integration-limitation-concept_2"></p>
+            <div data-role="integration-status-hybrid"></div>
+            <div data-role="integration-results-hybrid"></div>
+            <p data-role="integration-limitation-hybrid"></p>
 
             <div id="ag_fields_status_panel"><div id="ag_fields_status_log"></div></div>
             <span id="ag_fields_braille"></span>
@@ -107,6 +120,38 @@ function makeState(overrides = {}) {
             root_relpath: "wepp/ag_fields/watershed",
             limitation: "Field water and sediment are injected at the parent outlet.",
         },
+        watershed_integrations: {
+            concept_1: {
+                scheme: "concept_1",
+                status: "not_run",
+                stale: false,
+                summary: null,
+                error: null,
+                job_id: null,
+                root_relpath: "wepp/ag_fields/watershed/concept-1",
+                limitation: "Field placement is reduced to ordered one-dimensional OFEs.",
+            },
+            concept_2: {
+                scheme: "concept_2",
+                status: "not_run",
+                stale: false,
+                summary: null,
+                error: null,
+                job_id: null,
+                root_relpath: "wepp/ag_fields/watershed/concept-2",
+                limitation: "Field water and sediment are injected at the parent outlet.",
+            },
+            hybrid: {
+                scheme: "hybrid",
+                status: "not_run",
+                stale: false,
+                summary: null,
+                error: null,
+                job_id: null,
+                root_relpath: "wepp/ag_fields/watershed/hybrid",
+                limitation: "Channel-connected fields use outlet injection; other fields use OFEs.",
+            },
+        },
         staleness: { subfields: false, wepp_runs: false },
         readiness: {
             observed_climate: true,
@@ -120,12 +165,18 @@ function makeState(overrides = {}) {
             agfields_build_subfields: null,
             agfields_plantdb: null,
             agfields_run_wepp: null,
+            agfields_run_watershed_concept_1: null,
+            agfields_run_watershed_concept_2: null,
+            agfields_run_watershed_hybrid: null,
             agfields_run_watershed: null,
         },
         active_job_ids: {
             agfields_build_subfields: null,
             agfields_plantdb: null,
             agfields_run_wepp: null,
+            agfields_run_watershed_concept_1: null,
+            agfields_run_watershed_concept_2: null,
+            agfields_run_watershed_hybrid: null,
             agfields_run_watershed: null,
         },
     };
@@ -290,6 +341,9 @@ describe("AgFields controller", () => {
                 "agfields_build_subfields",
                 "agfields_plantdb",
                 "agfields_run_wepp",
+                "agfields_run_watershed_concept_1",
+                "agfields_run_watershed_concept_2",
+                "agfields_run_watershed_hybrid",
                 "agfields_run_watershed",
             ]),
         );
@@ -528,25 +582,150 @@ describe("AgFields controller", () => {
         ]));
     });
 
+    test("renders the four description-first routing choices with direct injection selected", async () => {
+        controller.bootstrap({});
+        await controller.hydrate();
+
+        const select = document.querySelector('[data-role="integration-scheme-select"]');
+        expect(select.value).toBe("concept_2");
+        expect(Array.from(select.options).map((option) => option.textContent)).toEqual([
+            "Field-aware hillslope routing (routes fields through downstream OFEs)",
+            "Direct sub-field outlet injection (preserves independent sub-field results; no buffer routing)",
+            "Connectivity-aware mixed routing (injects channel-connected fields; routes other fields through OFEs)",
+            "Run all routing schemes (writes three separate results for comparison)",
+        ]);
+    });
+
+    test("submits run all and tracks every returned scheme job id", async () => {
+        currentState = makeState({ wepp: { run_count: 24, complete: true } });
+        controller.bootstrap({});
+        await controller.hydrate();
+        httpMock.postJsonWithSessionToken.mockResolvedValueOnce({
+            body: {
+                job_id: "job-c1",
+                job_ids: {
+                    concept_1: "job-c1",
+                    concept_2: "job-c2",
+                    hybrid: "job-hybrid",
+                },
+            },
+        });
+        const select = document.querySelector('[data-role="integration-scheme-select"]');
+        select.value = "all";
+        select.dispatchEvent(new Event("change", { bubbles: true }));
+
+        document.querySelector('[data-action="run-watershed"]').dispatchEvent(
+            new MouseEvent("click", { bubbles: true }),
+        );
+        await flushPromises();
+
+        expect(httpMock.postJsonWithSessionToken).toHaveBeenCalledWith(
+            expect.stringContaining("agfields/run-watershed"),
+            { scheme: "all" },
+            expect.objectContaining({ form: controller.form }),
+        );
+        expect(controller._watershedJobIds).toEqual({
+            concept_1: "job-c1",
+            concept_2: "job-c2",
+            hybrid: "job-hybrid",
+        });
+        expect(baseInstance.set_rq_job_id).toHaveBeenCalledWith(controller, "job-c1");
+    });
+
+    test("renders independent completed and failed routing states", async () => {
+        controller.bootstrap({});
+        await flushPromises();
+        controller.renderState(makeState({
+            wepp: { run_count: 24, complete: true },
+            watershed_integrations: {
+                concept_1: {
+                    status: "completed",
+                    summary: { affected_parent_count: 7 },
+                    root_relpath: "wepp/ag_fields/watershed/concept-1",
+                },
+                hybrid: {
+                    status: "failed",
+                    error: {
+                        phase: "parent_execution",
+                        message: "parent 42 did not close",
+                        preserved_previous_result: true,
+                    },
+                    root_relpath: "wepp/ag_fields/watershed/hybrid",
+                },
+            },
+        }));
+
+        expect(document.querySelector('[data-role="integration-status-concept_1"]').textContent).toContain(
+            "7 parent hillslopes represented",
+        );
+        expect(document.querySelector('[data-role="integration-status-hybrid"]').textContent).toContain(
+            "Failed during parent_execution: parent 42 did not close",
+        );
+        expect(document.querySelector('[data-role="integration-status-hybrid"]').textContent).toContain(
+            "Previous completed artifacts were preserved",
+        );
+        expect(document.querySelector('[data-role="integration-results-hybrid"] a').textContent).toBe(
+            "Browse preserved previous routing result",
+        );
+        expect(document.querySelector('[data-role="integration-status-concept_2"]').textContent).toContain(
+            "Not run",
+        );
+    });
+
+    test("clear sends the exact selected scheme after second-click confirmation", async () => {
+        currentState = makeState({
+            wepp: { run_count: 24, complete: true },
+            watershed_integrations: {
+                concept_1: {
+                    status: "completed",
+                    summary: { affected_parent_count: 7 },
+                    root_relpath: "wepp/ag_fields/watershed/concept-1",
+                },
+            },
+        });
+        controller.bootstrap({});
+        await controller.hydrate();
+        httpMock.postJsonWithSessionToken.mockResolvedValueOnce({
+            body: { message: "Cleared.", cleared_schemes: ["concept_1"] },
+        });
+        const select = document.querySelector('[data-role="integration-scheme-select"]');
+        select.value = "concept_1";
+        select.dispatchEvent(new Event("change", { bubbles: true }));
+        const clear = document.querySelector('[data-action="clear-watershed"]');
+        clear.dispatchEvent(new MouseEvent("click", { bubbles: true }));
+        clear.dispatchEvent(new MouseEvent("click", { bubbles: true }));
+        await flushPromises();
+
+        expect(httpMock.postJsonWithSessionToken).toHaveBeenCalledWith(
+            expect.stringContaining("agfields/clear-watershed"),
+            { scheme: "concept_1" },
+            expect.objectContaining({ form: controller.form }),
+        );
+    });
+
     test("hydrates completed watershed counts, limitation, and browse link", async () => {
         controller.bootstrap({});
         await flushPromises();
         controller.renderState(makeState({
             wepp: { run_count: 24, complete: true },
-            watershed_integration: {
-                status: "completed",
-                summary: { affected_parent_count: 8, sub_field_source_count: 24 },
+            watershed_integrations: {
+                concept_2: {
+                    status: "completed",
+                    summary: { affected_parent_count: 8, sub_field_source_count: 24 },
+                    root_relpath: "wepp/ag_fields/watershed/concept-2",
+                    limitation: "Field water and sediment are injected at the parent outlet.",
+                },
             },
         }));
 
-        expect(document.querySelector('[data-role="integration-status"]').textContent).toContain(
-            "8 affected parents integrated from 24 sub-field sources",
+        expect(document.querySelector('[data-role="integration-status-concept_2"]').textContent).toContain(
+            "8 parent hillslopes represented; closure accepted",
         );
-        expect(document.querySelector('[data-role="integration-limitation"]').textContent).toContain(
+        expect(document.querySelector('[data-role="integration-limitation-concept_2"]').textContent).toContain(
             "parent outlet",
         );
-        expect(document.querySelector('[data-role="integration-results"] a').href).toContain(
-            "browse/wepp/ag_fields/watershed/",
+        expect(document.querySelector('[data-role="integration-results-concept_2"] a').href).toContain(
+            "browse/wepp/ag_fields/watershed/concept-2/",
         );
         expect(document.getElementById("ag_fields_summary").textContent).toBe("5 of 5 stages complete.");
     });

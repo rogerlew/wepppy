@@ -63,19 +63,51 @@ engineering results for a separate science evaluation.
 - [x] (2026-07-14 20:14 UTC) Expanded this package, at the decision owner's
   direction, to own the synchronized `wepp_hill` management-capacity increase and
   complete Concept 1/hybrid management-corpus validation.
-- [ ] Milestone 2B: inventory every generated management section, select and
-  accept an evidence-backed capacity, patch/rebuild forest, classify every corpus
-  run failure, and vendor a matching binary family with zero invalid-producer or
-  numerical-fault failures.
-- [ ] Milestone 3: input synthesis and a native mixed-parent spike are complete;
-  resume production Concept 1 execution, manifests, watershed rerun, and generated
-  all-parent acceptance after Milestone 2B passes.
-- [ ] Milestone 4: implement hybrid sub-field classification, residual parent
-  sources, pure/mixed parent composition, and closure evidence.
-- [ ] Milestone 5: migrate Concept 2 behind the scheme-root interface and add
-  backward-compatible NoDb state, API, RQ, and Run All orchestration.
-- [ ] Milestone 6: implement the four UI options and independent per-scheme
-  status, limitations, stale, clear, and browse behavior.
+- [x] (2026-07-15 00:01 UTC) Completed Milestone 2B: accepted synchronized
+  capacity 32, resolved p1857 through forest ablation G1, executed all 1,869
+  Concept 1 and 1,644 hybrid residual parents, passed forest/release gates, and
+  vendored matching `wepp_260714` binaries and the WEPPpy guard.
+- [x] (2026-07-15 02:20 UTC) Milestone 3: completed the generated Concept 1
+  watershed tree for all 3,543 parents, including 1,869 affected parents, full
+  watershed execution, scoped interchange, terminal manifest, and durable NoDb
+  state.
+- [x] (2026-07-15 01:25 UTC) Milestone 4: implemented deterministic Peridot
+  classification, residual Concept 1 execution, pure/mixed parent composition,
+  finite/header-area validation, and weighted closure evidence.
+- [x] (2026-07-15 01:25 UTC) Milestone 5: migrated Concept 2 behind its current
+  scheme root; added backward-compatible per-scheme NoDb state, exact API parsing,
+  separate job ids, and allow-failure serial Run All RQ dependencies.
+- [x] (2026-07-15 01:25 UTC) Milestone 6: implemented the four exact UI options
+  and independent per-scheme status, limitation, stale, clear, and browse behavior;
+  focused Jest, route, render, and RQ graph tests pass.
+- [x] (2026-07-15 01:51 UTC) Closed retry publication integrity: attempts now
+  build below bounded server-named staging roots, terminal trees publish only
+  after their manifest is durable, and failed retries preserve the prior result
+  plus a `last_attempt_failure.json` diagnostic.
+- [x] (2026-07-15 02:46 UTC) Repaired and release-tested the owned Rust UTF-8
+  interchange writer. Its 22,002,030-row PASS event output is schema-and-value
+  identical to the Python fallback; the real conversion completed in 78 seconds
+  at 435,296 KiB peak RSS.
+- [x] (2026-07-15 02:46 UTC) Bounded every AgFields hillslope interchange pool by
+  the integration worker count and made 16 an explicit API/RQ/integrator ceiling;
+  focused worker-propagation and rejection tests pass.
+- [x] (2026-07-15 03:08 UTC) Closed the authenticated Run All enqueue race found
+  on the first live submission: all scheme job ids are now preassigned and
+  persisted under one NoDb lock before the first job is enqueued. The retry is
+  active and 188 backend/frontend tests, all 625 Jest tests, lint, and the
+  141-edge RQ graph gate pass.
+- [x] (2026-07-15 03:33 UTC) Passed the broad repository gate with 4,901 tests
+  passed and 60 skipped in 9 minutes 32 seconds. The authenticated Run All retry
+  remains correctly serialized with Concept 1 started and Concept 2/Hybrid
+  deferred; its worker cgroup peak is 4,017,143,808 bytes so far.
+- [x] (2026-07-15 03:39 UTC) Committed the UTF-8 release artifact and provenance
+  as wepppyo3 `4f18126`; the three touched documents lint cleanly and the shared
+  object retains SHA-256 `d7a8ba031eed323d35c88f899a156230372ae1d582f516d8bfd4ef43d5a00bfb`.
+  Peridot's package formatting gate also passes.
+- [x] (2026-07-15 03:51 UTC) Committed the synchronized forest hillslope
+  capacity, p1857 G1 repair, dated binaries, regression, and ablation evidence as
+  detached commit `a87d0bbf`. The earlier p1 soil-cursor source, incident, and
+  rebuilt `260430` artifacts remain unstaged and unchanged as preexisting dirt.
 - [ ] Milestone 7: pass focused/broad gates, security/QA review, and all-scheme
   generated acceptance; publish Mariana's comparison bundle.
 - [ ] Move this plan to `prompts/completed/`, update the package/tracker/root board,
@@ -148,8 +180,54 @@ engineering results for a separate science evaluation.
   binary work.
   Evidence: The initial status and hashes are recorded in
   `artifacts/2026-07-14_management_capacity_and_corpus_validation_plan.md`.
+- Observation: The complete structurally deduplicated corpus requires at most 24
+  yearly/surface scenarios, 21 operation scenarios, 9 plant scenarios, 5 initial
+  scenarios, and 20 OFEs.
+  Evidence: Capacity 32 supplies eight yearly-scenario slots of headroom; the
+  exact inventory and distributions are recorded in
+  `artifacts/2026-07-14_management_capacity_corpus_results.md`.
+- Observation: The only full-corpus runtime failure was not an invalid management
+  source. For `surdis=0`, `soil.for` retained initialized roughness while
+  `frcfac.for` later divided by the zero-weighted nominal `rro=0`.
+  Evidence: The p1857 ablation incident proves the zero-disturbance branch, p94
+  control, 13-case watchlist, and both clean release corpora.
+- Observation: Legacy PASS headers quantize area as `.xxxxxE+xx`.
+  Evidence: Concept 1 uses a persisted `5e-5` relative half-unit format budget
+  when comparing PASS header area with serialized slope area; ADR-0019 records
+  the derivation separately from scientific fit thresholds.
   This package must use isolated diagnostic builds and explicit staging so it
   does not overwrite or claim those changes.
+- Observation: Full-project Concept 1 input synthesis is CPU-bound and precedes
+  native parent fanout; it is long but bounded and keeps the working set below the
+  later full-watershed peak.
+  Evidence: The generated run synthesized all 3,543 parent inputs serially, then
+  began producing `.run` and PASS artifacts across 16 native workers under only
+  `wepp/ag_fields/watershed/concept-1/`.
+- Observation: The Rust watershed LOSS and PASS converters construct dictionary
+  arrays for fields whose Arrow schemas declare `Utf8`; Arrow rejects the first
+  non-empty batch and the WEPPpy wrapper falls back to Python.
+  Evidence: The generated Concept 1 interchange logged `expected Utf8 but found
+  Dictionary(Int32, Utf8) at column index 0`. The successful fallback process
+  reached `VmHWM=60,502,848 kB` and `VmPeak=130,193,880 kB`, so this is an
+  availability defect rather than harmless fallback telemetry.
+- Observation: The AgFields integrator's 16-worker bound did not reach the six
+  hillslope interchange process pools; each defaulted independently to host
+  `NCPU`, accounting for the unexpectedly large process tree during conversion.
+  Evidence: `run_wepp_hillslope_interchange` and its six writers had no
+  `max_workers` argument before this package. The bound is now forwarded through
+  every layer with focused aggregate and leaf regression coverage.
+- Observation: The repaired Rust PASS converter is both compatible and materially
+  smaller than the Python fallback on the generated corpus.
+  Evidence: it wrote 22,002,030 event rows plus 3,543 metadata rows in 78.011
+  seconds at 435,296 KiB peak RSS; a streaming 250,000-row-batch comparison found
+  equal metadata-bearing schemas and equal values across 89 batches.
+- Observation: Enqueuing the first Run All job before persisting the second and
+  third job ids created a narrow but reproducible NoDb lock race.
+  Evidence: authenticated job `7ece99f4-6c0e-44d9-801e-6c8b693bf0ac`
+  started while rq-engine still owned the AgFields lock and failed in 0.130
+  seconds with `NoDbAlreadyLockedError`. The downstream deferred jobs were
+  canceled, all ids are now preassigned/persisted before enqueue, and the live
+  retry entered `running:ofe_planning` without contention.
 
 Add new discoveries here with commands, paths, or concise test output. Do not
 erase observations that changed the design.
@@ -178,6 +256,26 @@ erase observations that changed the design.
   Rationale: This preserves independent result/failure/retry state while bounding
   memory to one scheme at a time.
   Date/Author: 2026-07-14, Codex.
+- Decision: Preserve the public `Utf8` Arrow/Parquet schema and feed plain
+  string arrays to ArrowWriter, relying on Parquet writer dictionary encoding
+  for the physical categorical optimization.
+  Rationale: Declaring Arrow dictionary fields would change the public schema;
+  plain string batches repair the type mismatch while retaining the existing
+  Python-visible contract and encoded Parquet behavior.
+  Date/Author: 2026-07-15, Codex.
+- Decision: Reject explicit AgFields watershed concurrency outside 1-16 and
+  forward the selected bound to every hillslope interchange process pool.
+  Rationale: Run All serialization controls cross-scheme overlap but did not
+  prevent host-scale fanout within a scheme. An exact, defense-in-depth ceiling
+  prevents a caller from recreating the measured availability failure and avoids
+  silent clamping.
+  Date/Author: 2026-07-15, Codex (operational parameter recorded in ADR-0019).
+- Decision: Preassign every Run All RQ id and persist the complete mapping under
+  one NoDb lock before enqueuing any scheme job.
+  Rationale: persisting ids after each enqueue allowed the first worker to race
+  later route-side state writes. Preassignment preserves the existing independent
+  jobs and dependency graph while removing that lock overlap.
+  Date/Author: 2026-07-15, Codex.
 - Decision: A mixed hybrid uses a rerun residual Concept 1 source plus connected
   independent PASS sources. It does not inject on top of a full-area Concept 1
   source and does not uniformly scale a complete Concept 1 PASS after the fact.
@@ -234,6 +332,14 @@ erase observations that changed the design.
   science, while model-state guards require evidence that the producer—not the
   input—is invalid.
   Date/Author: 2026-07-14, Roger Lew and Codex.
+- Decision: Accept synchronized hillslope management capacity 32 and keep the
+  Concept 1 planner at 20 OFEs.
+  Rationale: The complete corpus maximum is 24 yearly/surface scenarios; 32 adds
+  eight slots while covering all other bounded sections. Both complete corpora,
+  33-scenario rejection, forest release gates, and vendored binaries pass. The
+  p1857 failure was an ablation-proven zero-disturbance model-state fault, not an
+  invalid AgFields producer value.
+  Date/Author: 2026-07-15, Codex (Proposed under ADR-0019).
 
 ## Outcomes & Retrospective
 
@@ -243,16 +349,18 @@ implementable. Parent 102 provided a real mixed-parent native WEPP proof with
 3,600 m2 residual area, 1,800 m2 connected area, 5,400 m2 combined area, and zero
 water/sediment closure residual across 6,210 events.
 
-The original feasibility stop is now an integrated implementation milestone, not
-an external decision blocker. The package owns a complete management-corpus
-inventory, synchronized hillslope binary capacity, data-contract validation, and
-evidence-driven numerical hardening before user-facing behavior. Large planner
-and corpus scratch outputs remain outside git; concise input-hashed evidence is in
+The original feasibility stop is resolved. The package now has a complete
+management-corpus inventory, synchronized capacity 32, uniquely named
+`wepp_260714` binaries, and evidence-driven zero-disturbance numerical hardening.
+Every generated Concept 1 and hybrid residual parent completes for the designated
+project. Large planner and corpus scratch outputs remain outside git; concise
+input-hashed evidence is in
 `artifacts/2026-07-14_concept1_feasibility.md` and the capacity/corpus compatibility
 contract is
-`artifacts/2026-07-14_management_capacity_and_corpus_validation_plan.md`.
-Concept 2 remains the implemented compatibility path until that new milestone and
-the remaining wired acceptance pass.
+`artifacts/2026-07-14_management_capacity_and_corpus_validation_plan.md`; completed
+release evidence is in
+`artifacts/2026-07-14_management_capacity_corpus_results.md`. Concept 2 remains
+the implemented compatibility path until the remaining wired acceptance pass.
 
 ## Context and Orientation
 
@@ -265,16 +373,13 @@ apply globally; `wepppy/nodb/AGENTS.md` applies to NoDb;
 tests.
 
 The forest worktree builds the legacy Fortran model engine. Its `_hill` executable
-runs Concept 1/hybrid replacement hillslopes. The active hill build includes set
-`mxplan`, `ntype`, and `ntype2` to 20; `infile.for` uses `ntype` to validate the
-management yearly-scenario count. The same constants size other management and
-OFE arrays, so they must be changed as one synchronized capacity contract after a
-complete corpus inventory. Read forest root/source `AGENTS.md`, its ablation
-protocol, and
-`artifacts/2026-07-14_management_capacity_and_corpus_validation_plan.md` before
-editing or building. The specified forest worktree begins detached and dirty;
-perform diagnostic builds in an isolated copy until its unrelated source/binary
-state can be preserved explicitly.
+runs Concept 1/hybrid replacement hillslopes. The synchronized hill include family
+and WEPPpy final-write guard are now 32; `infile.for` uses `ntype` to validate the
+management yearly-scenario count. The Concept 1 planner remains independently
+limited to 20 OFEs. Read forest root/source `AGENTS.md`, its ablation protocol,
+and the Milestone 2B plan/results before further release work. The specified
+forest worktree remains detached and dirty; preserve the unrelated p1 source,
+incident, changelog, watchlist, and overwritten old-binary work explicitly.
 
 AgFields first rasterizes field boundaries and retains field/hillslope
 intersections. Peridot writes a sub-field id raster, representative slope files,
@@ -985,3 +1090,10 @@ Added a compatibility/regression plan that separates parser capacity, invalid
 input contracts, numerical producer failures, and environment/fixture failures.
 The former blocker is now Milestone 2B; UI/RQ wiring remains gated until the
 rebuilt binary family runs the full Concept 1/hybrid corpus.
+
+2026-07-15 00:01 UTC: Completed Milestone 2B. Accepted synchronized capacity 32,
+closed the p1857 `frcfac` incident, passed 1,869/1,869 Concept 1 and 1,644/1,644
+hybrid residual exact-release runs, passed the permanent watchlist/forest suite/
+301-hillslope watershed replay, and vendored hash-identical `wepp_260714`
+binaries. Added the production Concept 1 collaborator and resumed Milestone 3;
+NoDb/RQ/UI and hybrid wiring remain open.

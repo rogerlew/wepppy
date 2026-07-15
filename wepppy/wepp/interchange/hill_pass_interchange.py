@@ -329,6 +329,7 @@ def run_wepp_hillslope_pass_interchange(
     *,
     expected_hillslopes: int | None = None,
     pass_family: str | None = None,
+    max_workers: int | None = None,
 ) -> Path:
     """Convert hillslope pass files into a consolidated parquet dataset."""
     base = Path(wepp_output_dir)
@@ -385,7 +386,14 @@ def run_wepp_hillslope_pass_interchange(
         )
         parser = partial(_parse_pass_file, calendar_lookup=calendar_lookup)
 
-    write_parquet_with_pool(pass_files, parser, SCHEMA, target_path, empty_table=EMPTY_TABLE)
+    write_parquet_with_pool(
+        pass_files,
+        parser,
+        SCHEMA,
+        target_path,
+        max_workers=max_workers,
+        empty_table=EMPTY_TABLE,
+    )
     return target_path
 
 

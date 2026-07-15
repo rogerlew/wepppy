@@ -59,6 +59,17 @@ Implementation references:
 Implementation reference:
 - `wepppy/nodb/mods/roads/roads.py::_regenerate_roads_report_resources`
 
+### AgFields routing-suite boundary
+
+AgFields routing results are independently composable experimental trees under
+`wepp/ag_fields/watershed/{concept-1,concept-2,hybrid}/`. They are not canonical
+`output_scope` values and MUST NOT be selected by passing their identifiers to a
+standard WEPP report route. Their runs, outputs, manifests, and interchange files
+remain isolated from both `wepp/output` and `wepp/roads/output`; current UI support
+is authenticated execution/state plus direct artifact browsing. Making a standard
+report scheme-aware requires an explicit additive contract and route tests in a
+future change.
+
 ## Route Support Matrix
 | Route | `output_scope` Query Param | Default | Invalid Value Behavior | Notes |
 | --- | --- | --- | --- | --- |

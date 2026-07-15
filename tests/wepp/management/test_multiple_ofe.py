@@ -406,6 +406,38 @@ def _orphan_yearly_names(management) -> list[str]:
     return [year_loop.name for year_loop in management.years if year_loop.name not in referenced]
 
 
+def _management_stack_with_referenced_scenarios(
+    tmp_path: Path,
+    scenario_count: int,
+) -> list:
+    stack = []
+    remaining = scenario_count
+    source_index = 0
+    while remaining > 0:
+        path = _write_management(
+            tmp_path,
+            f"man_{source_index}.man",
+            HIGH_SEVERITY_FIRE_MAN,
+        )
+        management = read_management(str(path))
+        if remaining > 1:
+            second_year = deepcopy(management.years[0])
+            second_year.name = "Year 2"
+            management.years.append(second_year)
+            ofe_year = management.man.loops[0].years[0][0]
+            second_reference = deepcopy(ofe_year.manindx[0])
+            second_reference.loop_name = "Year 2"
+            ofe_year.manindx.append(second_reference)
+            ofe_year.nycrop = 2
+            remaining -= 2
+        else:
+            remaining -= 1
+        management.setroot()
+        stack.append(management)
+        source_index += 1
+    return stack
+
+
 @pytest.mark.unit
 def test_management_multiple_ofe_synth(tmp_path: Path) -> None:
     man_paths = [
@@ -541,20 +573,45 @@ def test_mofe_synth_compacts_orphan_yearly_scenarios(tmp_path: Path) -> None:
 def test_mofe_synth_raises_when_referenced_yearly_scenarios_exceed_hillslope_limit(
     tmp_path: Path,
 ) -> None:
-    man_paths = [
-        _write_management(tmp_path, f"man_{i}.man", HIGH_SEVERITY_FIRE_MAN)
-        for i in range(21)
-    ]
-    stack = [read_management(str(path)) for path in man_paths]
+    stack = _management_stack_with_referenced_scenarios(tmp_path, 33)
     synth = ManagementMultipleOfeSynth(stack=stack)
 
     with pytest.raises(ValueError) as exc_info:
         synth.write(str(tmp_path / "overflow.man"))
 
     message = str(exc_info.value)
-    assert "21 referenced yearly scenarios" in message
-    assert "WEPP hillslope limit of 20" in message
-    assert "nmscen must be between 1 and 20" in message
+    assert "33 referenced yearly scenarios" in message
+    assert "WEPP hillslope limit of 32" in message
+    assert "nmscen must be between 1 and 32" in message
+
+
+@pytest.mark.unit
+def test_mofe_synth_can_render_overflow_graph_for_capacity_inventory(
+    tmp_path: Path,
+) -> None:
+    stack = _management_stack_with_referenced_scenarios(tmp_path, 33)
+    synth = ManagementMultipleOfeSynth(stack=stack)
+
+    management = synth.build(enforce_yearly_scenario_limit=False)
+    rendered = synth.render(enforce_yearly_scenario_limit=False)
+
+    assert management.nofe == management.man.nofes == 17
+    assert management.nscen == 33
+    assert rendered.splitlines()[:3] == [
+        "98.4",
+        "17 # number of ofes or channels",
+        "1 # sim_years",
+    ]
+    assert "# Number of OFEs: 17" in rendered
+
+    inventory_path = tmp_path / "inventory.man"
+    inventory_path.write_text(rendered)
+    reparsed = read_management(str(inventory_path))
+    assert reparsed.nofe == 17
+    assert reparsed.nscen == 33
+
+    with pytest.raises(ValueError, match="33 referenced yearly scenarios"):
+        synth.write(str(tmp_path / "production.man"))
 
 
 @pytest.mark.unit

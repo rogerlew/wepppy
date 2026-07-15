@@ -28,5 +28,6 @@ def run_wepp_hillslope_pass_interchange(
     *,
     expected_hillslopes: int | None = ...,
     pass_family: str | None = ...,
+    max_workers: int | None = ...,
 ) -> Path: ...
 PASS_FILE_RE: Any

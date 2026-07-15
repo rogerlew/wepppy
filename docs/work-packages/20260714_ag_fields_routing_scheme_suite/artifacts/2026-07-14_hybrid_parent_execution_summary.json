@@ -1,0 +1,31 @@
+{
+  "algorithm": "ag_fields_parent_corpus_execution_v1",
+  "elapsed_seconds": 315.23583118245006,
+  "execution_status_counts": {
+    "passed": 1644
+  },
+  "failure_count": 0,
+  "materialized_count": 1644,
+  "ofe_plan": "/tmp/agfields-hybrid-census-v8/ofe_plan.parquet",
+  "ofe_plan_sha256": "3631546af20ab3444e2c2db93939bf1f5dce96e20a50d3c50dfee621d4fabb2c",
+  "parent_count": 1644,
+  "parent_runs": "/wc1/runs/sa/sacral-self-discipline/wepp/runs",
+  "parent_summary": "/tmp/agfields-hybrid-census-v8/parent_summary.parquet",
+  "parent_summary_sha256": "e961ad240db3f86c95fc3f293cec1601be1ec7407b0f7c7688a1bc74921c058a",
+  "passed_count": 1644,
+  "runtime_context_sha256": {
+    "chan.inp": "5bba9e3debf6f77b1f4b6deb65777934dc4d237c50f65077e5cc95dc42edcaaa",
+    "chntyp.txt": "3dc400d0fa02ed67ba55f1ef77cd521e8c20d05475d6ae690e17b452dc7bd49d",
+    "gwcoeff.txt": "ec23463aad0cd1e3000d68b6af5a1a85a327d4952a239c92efeba060007eb7e8",
+    "pmetpara.txt": "67847d4b3277871c67b177ba8e18088aafe6f627e49eac75e2a9483a7250db31",
+    "snow.txt": "85216000b7c03edad6ab27b02bde39ca8c6c4f7736450e3974d74fd5aa6904ba",
+    "wepp_ui.txt": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+  },
+  "schema_version": "1.0",
+  "sim_years": 17,
+  "subfield_runs": "/wc1/runs/sa/sacral-self-discipline/wepp/ag_fields/runs",
+  "timeout_seconds": 120,
+  "wepp_bin": "/tmp/wepp-forest-agfields-release-v1/src/wepp_hill",
+  "wepp_bin_sha256": "cf70d059116b8f1d68d850761e1a12c0a1eca4f1467488ce377e27065bddc76d",
+  "workers": 12
+}

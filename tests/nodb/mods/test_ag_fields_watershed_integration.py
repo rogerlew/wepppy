@@ -10,8 +10,11 @@ import pytest
 from osgeo import gdal
 
 from wepppy.nodb.mods.ag_fields import AgFields
+from wepppy.nodb.mods.ag_fields import hybrid_integration as hybrid_module
 from wepppy.nodb.mods.ag_fields import watershed_integration as integration_module
+from wepppy.nodb.mods.ag_fields.routing_schemes import AgFieldsRoutingScheme
 from wepppy.nodb.mods.ag_fields.watershed_integration import (
+    AgFieldsConcept2Integrator,
     AgFieldsWatershedIntegrationError,
     AgFieldsWatershedIntegrator,
     ParentPlan,
@@ -84,6 +87,77 @@ def test_area_plan_uses_aligned_raster_cells_and_preserves_parent_closure(tmp_pa
         assert sum(source.represented_area_m2 for source in plan.sources) == plan.parent_raster_area_m2
 
 
+def test_current_concept2_workspace_uses_fixed_scheme_root(tmp_path: Path) -> None:
+    controller = _area_controller(tmp_path)
+    integrator = AgFieldsConcept2Integrator(controller)
+
+    integrator._reset_isolated_tree()
+
+    assert integrator.root == (
+        Path(controller.ag_field_watershed_root) / "concept-2"
+    )
+    assert integrator.runs_dir.is_dir()
+    assert integrator.output_dir.is_dir()
+    assert integrator.manifest_dir.is_dir()
+
+
+def test_scheme_staging_publishes_only_after_terminal_manifest(tmp_path: Path) -> None:
+    controller = _area_controller(tmp_path)
+    integrator = AgFieldsConcept2Integrator(controller)
+    published = integrator.root
+    (published / "manifest").mkdir(parents=True)
+    (published / "manifest" / "old.txt").write_text("old", encoding="utf-8")
+
+    integrator._reset_isolated_tree()
+    assert integrator.runs_dir.parent != published
+    assert (published / "manifest" / "old.txt").is_file()
+    (integrator.manifest_dir / "integration_summary.json").write_text(
+        json.dumps({"status": "completed"}),
+        encoding="utf-8",
+    )
+    (integrator.output_dir / "new.txt").write_text("new", encoding="utf-8")
+
+    integrator._publish_isolated_tree()
+
+    assert (published / "output" / "new.txt").read_text(encoding="utf-8") == "new"
+    assert not (published / "manifest" / "old.txt").exists()
+    assert integrator.output_dir == published / "output"
+    assert not list(published.parent.glob(".concept-2.previous-*"))
+
+
+def test_failed_scheme_attempt_preserves_previous_result_and_failure_manifest(
+    tmp_path: Path,
+) -> None:
+    controller = _area_controller(tmp_path)
+    integrator = AgFieldsConcept2Integrator(controller)
+    published = integrator.root
+    (published / "manifest").mkdir(parents=True)
+    (published / "manifest" / "integration_summary.json").write_text(
+        json.dumps({"status": "completed", "source_signature": "old"}),
+        encoding="utf-8",
+    )
+    (published / "output").mkdir()
+    (published / "output" / "trusted.txt").write_text("trusted", encoding="utf-8")
+
+    integrator._reset_isolated_tree()
+    (integrator.manifest_dir / "integration_summary.json").write_text(
+        json.dumps({"status": "failed", "failure": {"phase": "parent_execution"}}),
+        encoding="utf-8",
+    )
+    (integrator.output_dir / "partial.txt").write_text("partial", encoding="utf-8")
+
+    integrator._preserve_failed_attempt()
+
+    assert (published / "output" / "trusted.txt").read_text(encoding="utf-8") == "trusted"
+    assert not (published / "output" / "partial.txt").exists()
+    failure = json.loads(
+        (published / "manifest" / "last_attempt_failure.json").read_text(
+            encoding="utf-8"
+        )
+    )
+    assert failure["failure"]["phase"] == "parent_execution"
+
+
 def test_area_plan_rejects_subfield_cells_owned_by_another_parent(tmp_path: Path) -> None:
     controller = _area_controller(tmp_path, np.array([[1, 1, 0], [2, 0, 0]]))
     integrator = AgFieldsWatershedIntegrator(controller)
@@ -100,6 +174,7 @@ def test_materialization_stages_exactly_one_pass_for_each_parent(
     controller.climate_instance = SimpleNamespace(input_years=2)
     controller.wepp_instance = SimpleNamespace(wepp_bin="test-wepp")
     integrator = AgFieldsWatershedIntegrator(controller, max_workers=2)
+    integrator._reset_isolated_tree()
     integrator.plans = (
         ParentPlan(11, 1, 300.0, 0.0, 300.0, (SourcePlan("background:1", "background", 300.0, integrator.background_pass_dir / "H1.pass.dat"),)),
         ParentPlan(12, 2, 300.0, 0.0, 300.0, (SourcePlan("background:2", "background", 300.0, integrator.background_pass_dir / "H2.pass.dat"),)),
@@ -120,7 +195,6 @@ def test_materialization_stages_exactly_one_pass_for_each_parent(
         (integrator.output_dir / f"H{wepp_id}.pass.dat").write_text("pass", encoding="utf-8")
 
     monkeypatch.setattr(integration_module, "run_hillslope", fake_run)
-    integrator._reset_isolated_tree()
     integrator._materialize_parents()
 
     assert sorted(path.name for path in integrator.output_dir.glob("H*.pass.dat")) == [
@@ -147,6 +221,47 @@ def test_historical_state_defaults_without_migration(tmp_path: Path) -> None:
     assert state["status"] == "not_run"
     assert state["summary"] is None
     assert state["source_signature"] is None
+    assert state["scheme"] == "concept_2"
+    assert state["root_relpath"].endswith("/concept-2")
+    assert state["legacy_evidence"] is False
+
+    states = controller.get_watershed_integration_states()
+    assert list(states) == ["concept_1", "concept_2", "hybrid"]
+    assert states["concept_1"]["status"] == "not_run"
+    assert states["hybrid"]["root_relpath"].endswith("/hybrid")
+
+
+def test_scheme_job_ids_are_persisted_independently(tmp_path: Path) -> None:
+    controller = AgFields(str(tmp_path), "disturbed9002-wbt-mofe.cfg")
+
+    controller.set_watershed_integration_job_id("concept_1", "job-c1")
+    controller.set_watershed_integration_job_id("concept_2", "job-c2")
+
+    states = controller.get_watershed_integration_states()
+    assert states["concept_1"]["job_id"] == "job-c1"
+    assert states["concept_2"]["job_id"] == "job-c2"
+    assert states["hybrid"]["job_id"] is None
+    with pytest.raises(ValueError, match="job_id is required"):
+        controller.set_watershed_integration_job_id("hybrid", " ")
+
+
+def test_scheme_job_ids_can_be_persisted_as_one_submission(tmp_path: Path) -> None:
+    controller = AgFields(str(tmp_path), "disturbed9002-wbt-mofe.cfg")
+
+    controller.set_watershed_integration_job_ids(
+        {
+            "concept_1": "job-c1",
+            "concept_2": "job-c2",
+            "hybrid": "job-hybrid",
+        }
+    )
+
+    states = controller.get_watershed_integration_states()
+    assert {scheme: state["job_id"] for scheme, state in states.items()} == {
+        "concept_1": "job-c1",
+        "concept_2": "job-c2",
+        "hybrid": "job-hybrid",
+    }
 
 
 def test_completed_state_checks_upstream_timestamps(
@@ -190,28 +305,38 @@ def test_completed_state_checks_upstream_timestamps(
 
     assert state["status"] == "completed"
     assert state["stale"] is False
+    assert state["legacy_evidence"] is True
+    assert state["root_relpath"] == "wepp/ag_fields/watershed"
 
 
-def test_run_clears_prior_terminal_state_before_long_work(
+def test_run_preserves_prior_terminal_state_until_staged_attempt_succeeds(
     tmp_path: Path,
     monkeypatch: pytest.MonkeyPatch,
 ) -> None:
     controller = AgFields(str(tmp_path), "disturbed9002-wbt-mofe.cfg")
     with controller.locked():
-        controller._watershed_integration_source_signature = "old-signature"
-        controller._watershed_integration_summary = {"status": "completed"}
+        controller._watershed_integrations = {
+            "concept_2": {
+                "status": "completed",
+                "source_signature": "old-signature",
+                "summary": {"status": "completed"},
+            }
+        }
 
     class FakeIntegrator:
         phase = "preflight"
 
         def __init__(self, facade: AgFields, **_kwargs: object) -> None:
-            assert facade._watershed_integration_source_signature is None
-            assert facade._watershed_integration_summary is None
+            state = facade._watershed_scheme_entry(
+                AgFieldsRoutingScheme.CONCEPT_2
+            )
+            assert state["source_signature"] == "old-signature"
+            assert state["summary"] == {"status": "completed"}
 
         def run(self) -> dict[str, str]:
             return {"source_signature": "new-signature", "status": "completed"}
 
-    monkeypatch.setattr(integration_module, "AgFieldsWatershedIntegrator", FakeIntegrator)
+    monkeypatch.setattr(integration_module, "AgFieldsConcept2Integrator", FakeIntegrator)
 
     summary = controller.run_watershed_integration()
 
@@ -219,19 +344,116 @@ def test_run_clears_prior_terminal_state_before_long_work(
     assert controller.get_watershed_integration_state()["status"] == "completed"
 
 
+def test_failed_retry_retains_previous_summary_with_failure_provenance(
+    tmp_path: Path,
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    controller = AgFields(str(tmp_path), "disturbed9002-wbt-mofe.cfg")
+    previous = {"status": "completed", "source_signature": "old-signature"}
+    with controller.locked():
+        controller._watershed_integrations = {
+            "concept_2": {
+                "status": "completed",
+                "source_signature": "old-signature",
+                "summary": previous,
+            }
+        }
+
+    class FailingIntegrator:
+        phase = "parent_execution"
+
+        def __init__(self, _facade: AgFields, **_kwargs: object) -> None:
+            pass
+
+        def run(self) -> dict[str, str]:
+            raise RuntimeError("parent 42 failed")
+
+    monkeypatch.setattr(integration_module, "AgFieldsConcept2Integrator", FailingIntegrator)
+
+    with pytest.raises(RuntimeError, match="parent 42 failed"):
+        controller.run_watershed_integration()
+
+    state = controller.get_watershed_integration_state()
+    assert state["status"] == "failed"
+    assert state["summary"] == previous
+    assert state["source_signature"] == "old-signature"
+    assert state["error"]["preserved_previous_result"] is True
+
+
+def test_run_dispatches_hybrid_to_independent_state(
+    tmp_path: Path,
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    controller = AgFields(str(tmp_path), "disturbed9002-wbt-mofe.cfg")
+
+    class FakeHybridIntegrator:
+        phase = "preflight"
+
+        def __init__(self, _facade: AgFields, **_kwargs: object) -> None:
+            pass
+
+        def run(self) -> dict[str, str]:
+            return {
+                "source_signature": "hybrid-signature",
+                "scheme": "hybrid",
+                "status": "completed",
+            }
+
+    monkeypatch.setattr(
+        hybrid_module,
+        "AgFieldsHybridIntegrator",
+        FakeHybridIntegrator,
+    )
+
+    summary = controller.run_watershed_integration(scheme="hybrid")
+
+    assert summary["scheme"] == "hybrid"
+    assert (
+        controller.get_watershed_integration_state("hybrid")["status"]
+        == "completed"
+    )
+    assert (
+        controller.get_watershed_integration_state("concept_2")["status"]
+        == "not_run"
+    )
+
+
 def test_clear_removes_only_fixed_isolated_tree(tmp_path: Path) -> None:
     controller = AgFields(str(tmp_path), "disturbed9002-wbt-mofe.cfg")
     baseline = tmp_path / "wepp" / "output" / "keep.txt"
     baseline.parent.mkdir(parents=True)
     baseline.write_text("authoritative", encoding="utf-8")
-    isolated = Path(controller.ag_field_watershed_output_dir) / "remove.txt"
+    legacy = Path(controller.ag_field_watershed_output_dir) / "keep.txt"
+    legacy.parent.mkdir(parents=True)
+    legacy.write_text("historical", encoding="utf-8")
+    isolated = (
+        Path(controller.ag_field_watershed_scheme_root("concept_2"))
+        / "output"
+        / "remove.txt"
+    )
     isolated.parent.mkdir(parents=True)
     isolated.write_text("isolated", encoding="utf-8")
+    sibling = (
+        Path(controller.ag_field_watershed_scheme_root("concept_1"))
+        / "output"
+        / "keep.txt"
+    )
+    sibling.parent.mkdir(parents=True)
+    sibling.write_text("sibling", encoding="utf-8")
+    stale_attempt = (
+        Path(controller.ag_field_watershed_root)
+        / ".concept-2.attempt-abandoned"
+    )
+    stale_attempt.mkdir()
+    (stale_attempt / "partial.txt").write_text("partial", encoding="utf-8")
 
     controller.clear_watershed_integration()
 
     assert baseline.read_text(encoding="utf-8") == "authoritative"
-    assert not Path(controller.ag_field_watershed_root).exists()
+    assert legacy.read_text(encoding="utf-8") == "historical"
+    assert sibling.read_text(encoding="utf-8") == "sibling"
+    assert not Path(controller.ag_field_watershed_scheme_root("concept_2")).exists()
+    assert not stale_attempt.exists()
 
 
 def test_clear_rejects_symlinked_isolated_root(tmp_path: Path) -> None:

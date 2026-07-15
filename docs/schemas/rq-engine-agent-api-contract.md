@@ -370,7 +370,7 @@ table below is the practical family map used by agent clients.
 | Bootstrap | `/api/runs/{runid}/{config}/bootstrap/*` plus `run-*-noprep` endpoints | Mix of sync no-queue (`checkout`, reads, mint) and async (`enable`, no-prep runs) | `bootstrap:*` and `rq:enqueue` |
 | Build/prep | `/api/runs/{runid}/{config}/build-*`, `fetch-dem-and-build-channels`, `set-outlet` | Mostly async enqueue | `rq:enqueue` |
 | Model runs | `/api/runs/{runid}/{config}/run-*` (`wepp`, `wepp-watershed`, `swat`, `rhem`, `ash`, `debris-flow`, `omni`) | Mostly async enqueue; some sync dry-run paths | `rq:enqueue` |
-| AgFields | `/api/runs/{runid}/{config}/agfields/*` | Read-only state plus synchronous setup/clear and asynchronous sub-field/integrated watershed jobs | `rq:status` for reads; `rq:enqueue` for mutations |
+| AgFields | `/api/runs/{runid}/{config}/agfields/*` | Read-only state plus synchronous setup/clear and asynchronous sub-field/integrated watershed jobs; the watershed run accepts one fixed routing scheme or the serial `all` suite | `rq:status` for reads; `rq:enqueue` for mutations |
 | Upload tasks | `/api/runs/{runid}/{config}/tasks/upload-*` | Sync for upload/validation or async enqueue depending on route | `rq:enqueue` |
 | Export | `/api/runs/{runid}/{config}/export/*` | Sync read-only file delivery | `rq:export` |
 | Archive/fork | `/api/runs/{runid}/{config}/archive`, `/restore-archive`, `/delete-archive`, `/fork` | Mostly async enqueue; some sync mutation paths | `rq:enqueue` |
@@ -418,9 +418,17 @@ reasons:
   - this document when behavior changes for clients
 
 The global canonical OpenAPI size budget is 138,000 bytes as of 2026-07-13.
-The AgFields backend now contributes 15 frozen run-scoped operations, including
-the Concept 2 watershed run and isolated-clear routes. The measured canonical
-schema after those additions is 137,109 bytes.
+The AgFields backend contributes 15 frozen run-scoped operations. The existing
+watershed-run operation accepts exact `concept_1`, `concept_2`, `hybrid`, and
+`all` request values; omitted scheme remains `concept_2`. A single-scheme submit
+may omit `max_workers` for automatic sizing or provide an integer from 1 through
+16; values outside that range return the canonical 400 error rather than being
+clamped. It returns `job_id` plus a one-entry `job_ids` mapping. `all` returns the first job
+as `job_id` plus a scheme-to-job `job_ids` mapping for three serial,
+independently terminal jobs. The isolated-clear operation accepts the same
+selection contract, preserves legacy unscoped Concept 2 evidence, and never
+creates an `all` artifact tree. The canonical OpenAPI size budget remains
+138,000 bytes.
 
 ## Controller-State Contract Status
 - Controller-state/schema/orchestration contract for agent clients is tracked in

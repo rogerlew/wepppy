@@ -6,7 +6,19 @@
     "notes": [],
     "queue_name": "default",
     "source_function": "_enqueue_job",
-    "source_lineno": 143,
+    "source_lineno": 154,
+    "source_module": "wepppy/microservices/rq_engine/ag_fields_routes.py"
+  },
+  {
+    "depends_on": [
+      "Dependency(jobs=[previous_job_id], allow_failure=True)"
+    ],
+    "enqueue_target": "run_ag_fields_watershed_rq",
+    "job_meta_stage": null,
+    "notes": [],
+    "queue_name": "default",
+    "source_function": "_enqueue_watershed_jobs",
+    "source_lineno": 231,
     "source_module": "wepppy/microservices/rq_engine/ag_fields_routes.py"
   },
   {

@@ -321,6 +321,7 @@ def run_wepp_hillslope_ebe_interchange(
     *,
     start_year: int | None = None,
     expected_hillslopes: int | None = None,
+    max_workers: int | None = None,
 ) -> Path:
     base = Path(wepp_output_dir)
     if not base.exists():
@@ -360,5 +361,12 @@ def run_wepp_hillslope_ebe_interchange(
         )
         parser = partial(_parse_ebe_file, start_year=start_year, calendar_lookup=calendar_lookup)
 
-    write_parquet_with_pool(ebe_files, parser, SCHEMA, target_path, empty_table=EMPTY_TABLE)
+    write_parquet_with_pool(
+        ebe_files,
+        parser,
+        SCHEMA,
+        target_path,
+        max_workers=max_workers,
+        empty_table=EMPTY_TABLE,
+    )
     return target_path

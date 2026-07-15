@@ -23,7 +23,7 @@ from concurrent.futures import FIRST_COMPLETED, Future, ThreadPoolExecutor, wait
 from copy import deepcopy
 from enum import Enum
 from pathlib import Path, PurePosixPath
-from typing import Any, Dict, Iterable, Iterator, List, Optional, Set, Tuple
+from typing import Any, Dict, Iterable, Iterator, List, Mapping, Optional, Set, Tuple
 
 import pandas as pd
 
@@ -42,6 +42,12 @@ from wepppy.topo.watershed_abstraction.slope_file import clip_slope_file_length
 from wepppy.wepp.management import InvalidManagementKey, get_management_summary, load_map
 from wepppy.wepp.management.managements import ScenarioReference, read_management
 from wepppy.wepp.management.utils import ManagementRotationSynth, downgrade_to_98_4_format
+
+from .routing_schemes import (
+    AgFieldsRoutingScheme,
+    parse_routing_scheme,
+    routing_scheme_slug,
+)
 
 from os.path import exists as _exists
 from os.path import join as _join
@@ -151,6 +157,7 @@ class AgFields(NoDbBase):
             self._watershed_integration_summary = None
             self._watershed_integration_status = 'not_run'
             self._watershed_integration_error = None
+            self._watershed_integrations = {}
 
     @property
     def field_n(self) -> int:
@@ -609,6 +616,14 @@ class AgFields(NoDbBase):
     def ag_field_watershed_manifest_dir(self) -> str:
         return _join(self.ag_field_watershed_root, 'manifest')
 
+    def ag_field_watershed_scheme_root(
+        self,
+        scheme: str | AgFieldsRoutingScheme | None = None,
+    ) -> str:
+        """Return one fixed current-scheme root below the legacy watershed tree."""
+        parsed = parse_routing_scheme(scheme)
+        return _join(self.ag_field_watershed_root, routing_scheme_slug(parsed))
+
     @property
     def plant_files_dir(self) -> str:
         return _join(self.ag_fields_dir, 'plant_files')
@@ -643,92 +658,264 @@ class AgFields(NoDbBase):
         self,
         max_workers: Optional[int] = None,
         phase_callback: Optional[Any] = None,
+        scheme: str | AgFieldsRoutingScheme | None = None,
     ) -> Dict[str, Any]:
-        """Run the isolated Concept 2 watershed integration."""
-        from .watershed_integration import AgFieldsWatershedIntegrator
+        """Run one current routing scheme; omitted scheme remains Concept 2."""
+        from .concept1_integration import AgFieldsConcept1Integrator
+        from .hybrid_integration import AgFieldsHybridIntegrator
+        from .watershed_integration import AgFieldsConcept2Integrator
+
+        parsed = parse_routing_scheme(scheme)
+        if parsed is AgFieldsRoutingScheme.CONCEPT_1:
+            integrator_class = AgFieldsConcept1Integrator
+        elif parsed is AgFieldsRoutingScheme.CONCEPT_2:
+            integrator_class = AgFieldsConcept2Integrator
+        else:
+            integrator_class = AgFieldsHybridIntegrator
 
         started_at = int(time.time())
         with self.locked():
-            current_status = str(getattr(self, '_watershed_integration_status', 'not_run'))
+            current = self._watershed_scheme_entry(parsed)
+            current_status = str(current['status'])
             if current_status == 'running' or current_status.startswith('running:'):
-                raise AgFieldsNoDbLockedException('AgFields watershed integration is already running.')
-            self._watershed_integration_status = 'running:preflight'
-            self._watershed_integration_source_signature = None
-            self._watershed_integration_summary = None
-            self._watershed_integration_error = None
+                raise AgFieldsNoDbLockedException(
+                    f'AgFields {parsed.value} watershed integration is already running.'
+                )
+            previous_result_preserved = bool(current.get('summary'))
+            self._set_watershed_scheme_entry(
+                parsed,
+                {
+                    'status': 'running:preflight',
+                    'phase': 'preflight',
+                    'source_signature': current.get('source_signature'),
+                    'summary': current.get('summary'),
+                    'error': None,
+                    'job_id': current.get('job_id'),
+                },
+            )
 
         def update_phase(phase: str) -> None:
             with self.locked():
-                self._watershed_integration_status = f'running:{phase}'
+                entry = self._watershed_scheme_entry(parsed)
+                entry['status'] = f'running:{phase}'
+                entry['phase'] = phase
+                self._set_watershed_scheme_entry(parsed, entry)
             if phase_callback is not None:
                 phase_callback(phase)
 
-        integrator = AgFieldsWatershedIntegrator(
-            self,
-            max_workers=max_workers,
-            phase_callback=update_phase,
-        )
+        integrator = None
         try:
+            integrator = integrator_class(
+                self,
+                max_workers=max_workers,
+                phase_callback=update_phase,
+            )
             summary = integrator.run()
         except Exception as exc:  # broad-except: persisted public operation boundary
+            failed_phase = integrator.phase if integrator is not None else 'preflight'
             public_message = str(exc).replace(str(Path(self.wd).resolve()), '<run>')
             failure = {
-                'phase': integrator.phase,
+                'phase': failed_phase,
                 'type': type(exc).__name__,
                 'message': public_message,
                 'failed_at': int(time.time()),
                 'started_at': started_at,
+                'preserved_previous_result': previous_result_preserved,
             }
             with self.locked():
-                self._watershed_integration_status = 'failed'
-                self._watershed_integration_error = failure
-                self._watershed_integration_summary = None
+                entry = self._watershed_scheme_entry(parsed)
+                entry.update(
+                    {
+                        'status': 'failed',
+                        'phase': failed_phase,
+                        'error': failure,
+                    }
+                )
+                self._set_watershed_scheme_entry(parsed, entry)
             raise
 
         with self.locked():
-            self._watershed_integration_source_signature = summary['source_signature']
-            self._watershed_integration_summary = summary
-            self._watershed_integration_status = 'completed'
-            self._watershed_integration_error = None
+            entry = self._watershed_scheme_entry(parsed)
+            entry.update(
+                {
+                    'status': 'completed',
+                    'phase': 'completed',
+                    'source_signature': summary['source_signature'],
+                    'summary': summary,
+                    'error': None,
+                }
+            )
+            self._set_watershed_scheme_entry(parsed, entry)
         return deepcopy(summary)
 
-    def clear_watershed_integration(self) -> None:
-        """Clear only the fixed isolated Concept 2 subtree and additive state."""
-        root = Path(self.ag_field_watershed_root)
-        expected = Path(self.wd).resolve() / 'wepp' / 'ag_fields' / 'watershed'
+    def clear_watershed_integration(
+        self,
+        scheme: str | AgFieldsRoutingScheme | None = None,
+    ) -> None:
+        """Clear only one allowlisted current-scheme subtree and its state."""
+        parsed = parse_routing_scheme(scheme)
+        root = Path(self.ag_field_watershed_scheme_root(parsed))
+        base = Path(self.wd).absolute() / 'wepp' / 'ag_fields' / 'watershed'
+        expected = base / routing_scheme_slug(parsed)
         if root.absolute() != expected.absolute():
-            raise ValueError('AgFields watershed path does not match the fixed isolated root.')
-        if any(path.is_symlink() for path in (expected.parent.parent, expected.parent, expected)):
+            raise ValueError('AgFields scheme path does not match the fixed isolated root.')
+        path_chain = (base.parent.parent, base.parent, base, expected)
+        if any(path.is_symlink() for path in path_chain):
             raise ValueError('Refusing to clear through a symlinked AgFields watershed path.')
+        temporary_roots = [
+            *base.glob(f'.{routing_scheme_slug(parsed)}.attempt-*'),
+            *base.glob(f'.{routing_scheme_slug(parsed)}.previous-*'),
+        ]
+        if any(path.is_symlink() or path.parent.absolute() != base.absolute() for path in temporary_roots):
+            raise ValueError('Refusing to clear an invalid AgFields watershed staging path.')
         with self.locked():
-            current_status = str(getattr(self, '_watershed_integration_status', 'not_run'))
+            entry = self._watershed_scheme_entry(parsed)
+            current_status = str(entry['status'])
             if current_status == 'running' or current_status.startswith('running:'):
-                raise AgFieldsNoDbLockedException('AgFields watershed integration is running.')
-            self._watershed_integration_status = 'clearing'
+                raise AgFieldsNoDbLockedException(
+                    f'AgFields {parsed.value} watershed integration is running.'
+                )
+            entry['status'] = 'clearing'
+            entry['phase'] = 'clear'
+            self._set_watershed_scheme_entry(parsed, entry)
         try:
             if root.exists():
                 shutil.rmtree(root)
+            for temporary_root in temporary_roots:
+                if temporary_root.exists():
+                    shutil.rmtree(temporary_root)
         except OSError as exc:
             with self.locked():
-                self._watershed_integration_status = 'failed'
-                self._watershed_integration_error = {
+                entry = self._watershed_scheme_entry(parsed)
+                entry['status'] = 'failed'
+                entry['phase'] = 'clear'
+                entry['error'] = {
                     'phase': 'clear',
                     'type': type(exc).__name__,
-                    'message': str(exc).replace(str(Path(self.wd).resolve()), '<run>'),
+                    'message': str(exc).replace(
+                        str(Path(self.wd).resolve()),
+                        '<run>',
+                    ),
                     'failed_at': int(time.time()),
                 }
+                self._set_watershed_scheme_entry(parsed, entry)
             raise
         with self.locked():
-            self._watershed_integration_source_signature = None
-            self._watershed_integration_summary = None
-            self._watershed_integration_status = 'not_run'
-            self._watershed_integration_error = None
+            self._set_watershed_scheme_entry(
+                parsed,
+                self._empty_watershed_scheme_entry(),
+            )
 
-    def get_watershed_integration_state(self) -> Dict[str, Any]:
-        """Return additive state, including historical-payload defaults."""
+    def set_watershed_integration_job_id(
+        self,
+        scheme: str | AgFieldsRoutingScheme,
+        job_id: str,
+    ) -> None:
+        """Persist the RQ job id for exactly one current routing scheme."""
+        self.set_watershed_integration_job_ids({scheme: job_id})
+
+    def set_watershed_integration_job_ids(
+        self,
+        job_ids: Mapping[str | AgFieldsRoutingScheme, str],
+    ) -> None:
+        """Persist one submission's scheme job ids in a single NoDb lock."""
+        normalized: list[tuple[AgFieldsRoutingScheme, str]] = []
+        for scheme, job_id in job_ids.items():
+            parsed = parse_routing_scheme(scheme)
+            normalized_job_id = str(job_id).strip()
+            if not normalized_job_id:
+                raise ValueError('job_id is required.')
+            normalized.append((parsed, normalized_job_id))
+        with self.locked():
+            for parsed, normalized_job_id in normalized:
+                entry = self._watershed_scheme_entry(parsed)
+                entry['job_id'] = normalized_job_id
+                self._set_watershed_scheme_entry(parsed, entry)
+
+    @staticmethod
+    def _empty_watershed_scheme_entry() -> Dict[str, Any]:
+        return {
+            'status': 'not_run',
+            'phase': None,
+            'source_signature': None,
+            'summary': None,
+            'error': None,
+            'job_id': None,
+        }
+
+    def _watershed_scheme_entry(
+        self,
+        scheme: AgFieldsRoutingScheme,
+    ) -> Dict[str, Any]:
+        states = getattr(self, '_watershed_integrations', {})
+        if not isinstance(states, dict):
+            return self._empty_watershed_scheme_entry()
+        entry = states.get(scheme.value)
+        if not isinstance(entry, dict):
+            return self._empty_watershed_scheme_entry()
+        return {**self._empty_watershed_scheme_entry(), **deepcopy(entry)}
+
+    def _set_watershed_scheme_entry(
+        self,
+        scheme: AgFieldsRoutingScheme,
+        entry: Dict[str, Any],
+    ) -> None:
+        states = getattr(self, '_watershed_integrations', {})
+        updated = deepcopy(states) if isinstance(states, dict) else {}
+        updated[scheme.value] = {
+            **self._empty_watershed_scheme_entry(),
+            **deepcopy(entry),
+        }
+        self._watershed_integrations = updated
+
+    def _legacy_watershed_state(self) -> Optional[Dict[str, Any]]:
         summary = deepcopy(getattr(self, '_watershed_integration_summary', None))
         status = str(getattr(self, '_watershed_integration_status', 'not_run'))
-        artifacts_exist = Path(self.ag_field_watershed_manifest_dir, 'integration_summary.json').is_file()
+        manifest = Path(self.ag_field_watershed_manifest_dir, 'integration_summary.json')
+        if summary is None and status == 'not_run' and not manifest.is_file():
+            return None
+        return {
+            'status': status,
+            'phase': status.partition(':')[2] or None,
+            'source_signature': getattr(
+                self,
+                '_watershed_integration_source_signature',
+                None,
+            ),
+            'summary': summary,
+            'error': deepcopy(getattr(self, '_watershed_integration_error', None)),
+            'job_id': None,
+        }
+
+    def get_watershed_integration_state(
+        self,
+        scheme: str | AgFieldsRoutingScheme | None = None,
+    ) -> Dict[str, Any]:
+        """Return one current scheme state or immutable legacy Concept 2 evidence."""
+        parsed = parse_routing_scheme(scheme)
+        entry = self._watershed_scheme_entry(parsed)
+        legacy_evidence = False
+        persisted = getattr(self, '_watershed_integrations', {})
+        current_persisted = isinstance(persisted, dict) and parsed.value in persisted
+        if parsed is AgFieldsRoutingScheme.CONCEPT_2 and not current_persisted:
+            legacy = self._legacy_watershed_state()
+            if legacy is not None:
+                entry = legacy
+                legacy_evidence = True
+
+        summary = deepcopy(entry['summary'])
+        status = str(entry['status'])
+        root_relpath = (
+            'wepp/ag_fields/watershed'
+            if legacy_evidence
+            else f'wepp/ag_fields/watershed/{routing_scheme_slug(parsed)}'
+        )
+        artifacts_exist = Path(
+            self.wd,
+            root_relpath,
+            'manifest',
+            'integration_summary.json',
+        ).is_file()
         stage4_signature = getattr(self, '_wepp_source_signature', None)
         stored_stage4_signature = summary.get('stage4_source_signature') if summary else None
         upstream_changed = False
@@ -753,18 +940,44 @@ class AgFields(NoDbBase):
             or (stored_stage4_signature is not None and stored_stage4_signature != stage4_signature)
         )
         return {
+            'scheme': parsed.value,
+            'scheme_slug': routing_scheme_slug(parsed),
             'status': status,
+            'phase': entry['phase'],
             'stale': stale,
-            'source_signature': getattr(self, '_watershed_integration_source_signature', None),
+            'source_signature': entry['source_signature'],
             'summary': summary,
-            'error': deepcopy(getattr(self, '_watershed_integration_error', None)),
-            'root_relpath': 'wepp/ag_fields/watershed',
-            'browse_relpath': 'wepp/ag_fields/watershed/',
-            'limitation': (
-                'Field water and sediment are injected at the parent outlet; downslope '
-                'buffer, trapping, and runon effects are not represented.'
-            ),
+            'error': deepcopy(entry['error']),
+            'job_id': entry['job_id'],
+            'root_relpath': root_relpath,
+            'browse_relpath': f'{root_relpath}/',
+            'legacy_evidence': legacy_evidence,
+            'limitation': self._watershed_scheme_limitation(parsed),
         }
+
+    def get_watershed_integration_states(self) -> Dict[str, Dict[str, Any]]:
+        """Return independently hydrated state for all three current schemes."""
+        return {
+            scheme.value: self.get_watershed_integration_state(scheme)
+            for scheme in AgFieldsRoutingScheme
+        }
+
+    @staticmethod
+    def _watershed_scheme_limitation(scheme: AgFieldsRoutingScheme) -> str:
+        if scheme is AgFieldsRoutingScheme.CONCEPT_1:
+            return (
+                'Field placement is reduced from a two-dimensional mosaic to '
+                'ordered one-dimensional OFEs.'
+            )
+        if scheme is AgFieldsRoutingScheme.CONCEPT_2:
+            return (
+                'Field water and sediment are injected at the parent outlet; '
+                'downslope buffer, trapping, and runon effects are not represented.'
+            )
+        return (
+            'Channel-connected fields use outlet injection; other fields use a '
+            'one-dimensional OFE approximation.'
+        )
 
     @property
     def rotation_accessor(self) -> Optional[str]:

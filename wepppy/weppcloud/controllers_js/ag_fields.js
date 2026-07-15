@@ -24,9 +24,40 @@ var AgFields = (function () {
         agfields_run_watershed: {
             completionEvent: "AGFIELDS_RUN_WATERSHED_TASK_COMPLETED",
             statusRole: "integration-status"
+        },
+        agfields_run_watershed_concept_1: {
+            completionEvent: "AGFIELDS_RUN_WATERSHED_TASK_COMPLETED",
+            statusRole: "integration-status-concept_1"
+        },
+        agfields_run_watershed_concept_2: {
+            completionEvent: "AGFIELDS_RUN_WATERSHED_TASK_COMPLETED",
+            statusRole: "integration-status-concept_2"
+        },
+        agfields_run_watershed_hybrid: {
+            completionEvent: "AGFIELDS_RUN_WATERSHED_TASK_COMPLETED",
+            statusRole: "integration-status-hybrid"
         }
     };
-    var JOB_KEYS = ["agfields_run_watershed", "agfields_run_wepp", "agfields_plantdb", "agfields_build_subfields"];
+    var ROUTING_SCHEMES = ["concept_1", "concept_2", "hybrid"];
+    var WATERSHED_JOB_KEYS = {
+        concept_1: "agfields_run_watershed_concept_1",
+        concept_2: "agfields_run_watershed_concept_2",
+        hybrid: "agfields_run_watershed_hybrid"
+    };
+    var ROUTING_LIMITATIONS = {
+        concept_1: "Field placement is reduced from a two-dimensional mosaic to ordered one-dimensional OFEs.",
+        concept_2: "Field water and sediment are injected at the parent outlet; downslope buffer, trapping, and runon effects are not represented.",
+        hybrid: "Channel-connected fields use outlet injection; other fields use a one-dimensional OFE approximation."
+    };
+    var JOB_KEYS = [
+        "agfields_run_watershed_concept_1",
+        "agfields_run_watershed_concept_2",
+        "agfields_run_watershed_hybrid",
+        "agfields_run_watershed",
+        "agfields_run_wepp",
+        "agfields_plantdb",
+        "agfields_build_subfields"
+    ];
     var LAYER_NAME = "AgFields Sub-fields";
     var LAYER_KEY = "agFieldsSubfields";
 
@@ -314,6 +345,7 @@ var AgFields = (function () {
         controller._plantInventory = { files: [], valid_files: [], invalid_files: [] };
         controller._mappingPayload = null;
         controller._overlayRegistered = false;
+        controller._watershedJobIds = {};
         controller._clearArmedUntil = 0;
         controller._clearWatershedArmedUntil = 0;
         controller.detectCropYearPatterns = detectCropYearPatterns;
@@ -460,11 +492,13 @@ var AgFields = (function () {
                 weppBinSelect: queryRole("wepp-bin-select", form),
                 clearRunsButton: queryRole("clear-runs-button", form),
                 resultsLinks: queryRole("results-links", form),
+                integrationSchemeSelect: queryRole("integration-scheme-select", form),
                 integrationRunButton: queryRole("integration-run-button", form),
                 integrationStatus: queryRole("integration-status", form),
                 integrationClearButton: queryRole("integration-clear-button", form),
-                integrationResults: queryRole("integration-results", form),
-                integrationLimitation: queryRole("integration-limitation", form),
+                integrationStatuses: {},
+                integrationResults: {},
+                integrationLimitations: {},
                 statusPanel: dom.qs("#ag_fields_status_panel", form),
                 statusSpinner: dom.qs("#ag_fields_braille", form),
                 statusLog: dom.qs("#ag_fields_status_log", form),
@@ -474,6 +508,11 @@ var AgFields = (function () {
                 hint: dom.qs("#hint_ag_fields_job", form),
                 summary: dom.qs("#ag_fields_summary", form)
             };
+            ROUTING_SCHEMES.forEach(function (scheme) {
+                controller.nodes.integrationStatuses[scheme] = queryRole("integration-status-" + scheme, form);
+                controller.nodes.integrationResults[scheme] = queryRole("integration-results-" + scheme, form);
+                controller.nodes.integrationLimitations[scheme] = queryRole("integration-limitation-" + scheme, form);
+            });
             controller.statusPanelEl = controller.nodes.statusPanel;
             controller.statusSpinnerEl = controller.nodes.statusSpinner;
             controller.stacktracePanelEl = controller.nodes.stacktracePanel;
@@ -546,7 +585,10 @@ var AgFields = (function () {
                 return;
             }
             var job = JOBS[controller._jobKey];
-            var chip = job ? queryRole(job.statusRole, controller.form) : null;
+            var failureScheme = asString(failure.scheme);
+            var chip = failureScheme && controller.nodes.integrationStatuses
+                ? controller.nodes.integrationStatuses[failureScheme]
+                : (job ? queryRole(job.statusRole, controller.form) : null);
             var identifiers = [];
             if (failure.sub_field_id !== undefined && failure.sub_field_id !== null) {
                 identifiers.push("sub-field " + failure.sub_field_id);
@@ -613,6 +655,10 @@ var AgFields = (function () {
                 controller.nodes.accessorDisplay.textContent = describePattern(event.target.value);
                 renderAccessorResolution(event.target.value);
                 renderSchemaAction();
+            });
+            dom.delegate(controller.form, "change", '[data-role="integration-scheme-select"]', function () {
+                controller._clearWatershedArmedUntil = 0;
+                renderIntegration();
             });
         }
 
@@ -990,22 +1036,104 @@ var AgFields = (function () {
             renderResultsLinks(Boolean(wepp.complete));
         }
 
-        function renderIntegrationResults(integration) {
-            var container = controller.nodes.integrationResults;
+        function watershedIntegrationStates(state) {
+            var current = asObject(state && state.watershed_integrations);
+            var legacy = asObject(state && state.watershed_integration);
+            var states = {};
+            ROUTING_SCHEMES.forEach(function (scheme) {
+                if (current[scheme] && typeof current[scheme] === "object") {
+                    states[scheme] = current[scheme];
+                } else if (scheme === "concept_2" && Object.keys(legacy).length) {
+                    states[scheme] = legacy;
+                } else {
+                    states[scheme] = {
+                        scheme: scheme,
+                        status: "not_run",
+                        stale: false,
+                        summary: null,
+                        error: null,
+                        root_relpath: "wepp/ag_fields/watershed/" + scheme.replace("_", "-"),
+                        limitation: ROUTING_LIMITATIONS[scheme]
+                    };
+                }
+            });
+            return states;
+        }
+
+        function selectedRoutingScheme() {
+            var value = controller.nodes.integrationSchemeSelect
+                ? asString(controller.nodes.integrationSchemeSelect.value)
+                : "concept_2";
+            return ROUTING_SCHEMES.indexOf(value) !== -1 || value === "all" ? value : "concept_2";
+        }
+
+        function renderIntegrationResults(integration, scheme) {
+            var container = controller.nodes.integrationResults[scheme];
             if (!container) {
                 return;
             }
             container.textContent = "";
-            if (asString(integration.status) !== "completed") {
+            var preservedPrevious = Boolean(
+                asObject(integration.error).preserved_previous_result
+            );
+            if (asString(integration.status) !== "completed" && !preservedPrevious) {
                 return;
             }
             var browse = document.createElement("a");
             browse.href = url_for_run("browse/" + (integration.root_relpath || "wepp/ag_fields/watershed") + "/");
             browse.target = "_blank";
             browse.rel = "noopener";
-            browse.textContent = "Browse integrated watershed outputs";
+            browse.textContent = preservedPrevious
+                ? "Browse preserved previous routing result"
+                : "Browse this routing result";
             container.appendChild(browse);
             container.dataset.state = "success";
+        }
+
+        function renderIntegrationScheme(scheme, integration, blocked, activeJobIds) {
+            var summary = asObject(integration.summary);
+            var failure = asObject(integration.error);
+            var status = asString(integration.status) || "not_run";
+            var chip = controller.nodes.integrationStatuses[scheme];
+            var jobKey = WATERSHED_JOB_KEYS[scheme];
+            var activeJobId = activeJobIds[jobKey];
+            var limitation = controller.nodes.integrationLimitations[scheme];
+            if (limitation) {
+                limitation.textContent = integration.limitation || ROUTING_LIMITATIONS[scheme];
+            }
+            if (activeJobId || status.indexOf("running") === 0) {
+                setChip(
+                    chip,
+                    "Queued or running" + (integration.phase ? " — " + integration.phase : "") +
+                        (activeJobId ? " (job " + activeJobId + ")" : "") + ".",
+                    "info"
+                );
+            } else if (integration.stale) {
+                setChip(chip, "This routing result is stale — run it again.", "warning");
+            } else if (status === "failed") {
+                setChip(
+                    chip,
+                    "Failed" + (failure.phase ? " during " + failure.phase : "") +
+                        ": " + (failure.message || "See the job details.") +
+                        (failure.preserved_previous_result
+                            ? " Previous completed artifacts were preserved."
+                            : ""),
+                    "critical"
+                );
+            } else if (status === "completed") {
+                setChip(
+                    chip,
+                    formatCount(summary.affected_parent_count !== undefined
+                        ? summary.affected_parent_count
+                        : summary.parent_count) + " parent hillslopes represented; closure accepted.",
+                    "success"
+                );
+            } else if (blocked) {
+                setChip(chip, blocked, "warning");
+            } else {
+                setChip(chip, "Not run; ready for this routing scheme.", "info");
+            }
+            renderIntegrationResults(integration, scheme);
         }
 
         function renderIntegration() {
@@ -1013,10 +1141,9 @@ var AgFields = (function () {
             var wepp = asObject(state.wepp);
             var staleness = asObject(state.staleness);
             var readiness = asObject(state.readiness);
-            var integration = asObject(state.watershed_integration);
-            var summary = asObject(integration.summary);
-            var failure = asObject(integration.error);
-            var status = asString(integration.status) || "not_run";
+            var integrations = watershedIntegrationStates(state);
+            var selected = selectedRoutingScheme();
+            var activeJobIds = asObject(state.active_job_ids);
             var active = hasActiveJob(state);
             var blocked = "";
             if (!wepp.complete || staleness.wepp_runs) {
@@ -1026,35 +1153,39 @@ var AgFields = (function () {
             } else if (!readiness.parent_wepp) {
                 blocked = "Prepare all parent WEPP hillslope inputs first.";
             }
+            var selectedSchemes = selected === "all" ? ROUTING_SCHEMES : [selected];
+            var hasSelectedResult = selectedSchemes.some(function (scheme) {
+                return asString(asObject(integrations[scheme]).status) !== "not_run";
+            });
             setDisabled(controller.nodes.integrationRunButton, active || Boolean(blocked));
-            setDisabled(controller.nodes.integrationClearButton, active || status === "not_run");
-            if (controller.nodes.integrationLimitation) {
-                controller.nodes.integrationLimitation.textContent = integration.limitation || "";
+            setDisabled(controller.nodes.integrationClearButton, active || !hasSelectedResult);
+            setDisabled(controller.nodes.integrationSchemeSelect, active);
+            if (controller.nodes.integrationRunButton && controller.nodes.integrationRunButton.getAttribute("aria-busy") !== "true") {
+                controller.nodes.integrationRunButton.textContent = selected === "all"
+                    ? "Run All Routing Schemes"
+                    : "Run Selected Routing Scheme";
+            }
+            if (controller.nodes.integrationClearButton && controller.nodes.integrationClearButton.getAttribute("aria-busy") !== "true") {
+                controller.nodes.integrationClearButton.textContent = selected === "all"
+                    ? "Clear All Current Routing Results"
+                    : "Clear Selected Routing Result";
             }
             if (active) {
-                setChip(controller.nodes.integrationStatus, "An AgFields job is running; wait for it to finish.", "warning");
+                setChip(controller.nodes.integrationStatus, "One or more AgFields jobs are queued or running.", "warning");
             } else if (blocked) {
                 setChip(controller.nodes.integrationStatus, blocked, "warning");
-            } else if (integration.stale) {
-                setChip(controller.nodes.integrationStatus, "The integrated watershed is stale — run it again.", "warning");
-            } else if (status === "failed") {
-                setChip(
-                    controller.nodes.integrationStatus,
-                    "Integration failed" + (failure.phase ? " during " + failure.phase : "") +
-                        ": " + (failure.message || "See the job details."),
-                    "critical"
-                );
-            } else if (status === "completed") {
-                setChip(
-                    controller.nodes.integrationStatus,
-                    formatCount(summary.affected_parent_count) + " affected parents integrated from " +
-                        formatCount(summary.sub_field_source_count) + " sub-field sources; closure accepted.",
-                    "success"
-                );
             } else {
-                setChip(controller.nodes.integrationStatus, "Ready to run the isolated integrated watershed.", "info");
+                setChip(
+                    controller.nodes.integrationStatus,
+                    selected === "all"
+                        ? "Ready to run all three routing schemes serially."
+                        : "Ready to run the selected routing scheme.",
+                    "info"
+                );
             }
-            renderIntegrationResults(integration);
+            ROUTING_SCHEMES.forEach(function (scheme) {
+                renderIntegrationScheme(scheme, asObject(integrations[scheme]), blocked, activeJobIds);
+            });
         }
 
         function renderSummary() {
@@ -1067,7 +1198,9 @@ var AgFields = (function () {
                 Boolean(asObject(state.subfields).complete),
                 Boolean(asObject(state.mapping).complete),
                 Boolean(asObject(state.wepp).complete),
-                asString(asObject(state.watershed_integration).status) === "completed"
+                ROUTING_SCHEMES.some(function (scheme) {
+                    return asString(asObject(watershedIntegrationStates(state)[scheme]).status) === "completed";
+                })
             ].filter(Boolean).length;
             controller.nodes.summary.textContent = complete + " of 5 stages complete.";
         }
@@ -1151,6 +1284,13 @@ var AgFields = (function () {
         }
 
         function syncTrackedJob(state) {
+            var integrationStates = watershedIntegrationStates(state);
+            ROUTING_SCHEMES.forEach(function (scheme) {
+                var jobId = asString(asObject(integrationStates[scheme]).job_id);
+                if (jobId) {
+                    controller._watershedJobIds[scheme] = jobId;
+                }
+            });
             var active = activeJobEntry(state);
             if (active) {
                 trackJob(active.key, active.jobId);
@@ -1698,34 +1838,78 @@ var AgFields = (function () {
         }
 
         function runWatershed() {
-            enqueue(
-                "agfields/run-watershed",
-                {},
-                "agfields_run_watershed",
-                controller.nodes.integrationRunButton,
-                "Queuing integrated watershed run…",
-                controller.nodes.integrationStatus,
-                "agfields:watershed:queued"
-            ).catch(function () {});
+            var scheme = selectedRoutingScheme();
+            var busyLabel = scheme === "all"
+                ? "Queuing all routing schemes…"
+                : "Queuing selected routing scheme…";
+            setButtonBusy(controller.nodes.integrationRunButton, true, busyLabel);
+            setChip(controller.nodes.integrationStatus, busyLabel, "info");
+            controller.connect_status_stream(controller);
+            authorizedPost("agfields/run-watershed", { scheme: scheme }).then(function (response) {
+                if (!response || !response.job_id) {
+                    throw new Error("The job response did not include a job id.");
+                }
+                var jobIds = asObject(response.job_ids);
+                if (!Object.keys(jobIds).length && scheme !== "all") {
+                    jobIds[scheme] = response.job_id;
+                }
+                ROUTING_SCHEMES.forEach(function (currentScheme) {
+                    var jobId = jobIds[currentScheme];
+                    if (!jobId) {
+                        return;
+                    }
+                    controller._watershedJobIds[currentScheme] = jobId;
+                    controller._terminalJobsSeen[jobId] = false;
+                });
+                var firstScheme = ROUTING_SCHEMES.find(function (currentScheme) {
+                    return jobIds[currentScheme] === response.job_id;
+                }) || (scheme === "all" ? "concept_1" : scheme);
+                trackJob(WATERSHED_JOB_KEYS[firstScheme], response.job_id);
+                setChip(
+                    controller.nodes.integrationStatus,
+                    scheme === "all"
+                        ? "Three routing jobs queued serially."
+                        : "Routing job queued: " + response.job_id,
+                    "success"
+                );
+                emitter.emit("agfields:watershed:queued", {
+                    job_id: response.job_id,
+                    job_ids: jobIds,
+                    scheme: scheme
+                });
+                return controller.hydrate();
+            }).catch(function (error) {
+                handleRequestError(
+                    "agfields-run-watershed",
+                    controller.nodes.integrationStatus,
+                    "Could not queue watershed routing",
+                    error
+                );
+            }).finally(function () {
+                setButtonBusy(controller.nodes.integrationRunButton, false);
+            });
         }
 
         function clearWatershed() {
+            var scheme = selectedRoutingScheme();
             var now = Date.now();
             if (controller._clearWatershedArmedUntil < now) {
                 controller._clearWatershedArmedUntil = now + 8000;
                 setChip(
                     controller.nodes.integrationStatus,
-                    "Click “Clear Integrated Watershed” again within 8 seconds to confirm.",
+                    scheme === "all"
+                        ? "Click “Clear All Current Routing Results” again within 8 seconds to confirm."
+                        : "Click “Clear Selected Routing Result” again within 8 seconds to confirm.",
                     "warning"
                 );
                 return;
             }
             controller._clearWatershedArmedUntil = 0;
             setButtonBusy(controller.nodes.integrationClearButton, true, "Clearing…");
-            authorizedPost("agfields/clear-watershed", {}).then(function (response) {
+            authorizedPost("agfields/clear-watershed", { scheme: scheme }).then(function (response) {
                 setChip(
                     controller.nodes.integrationStatus,
-                    response.message || "Integrated watershed artifacts cleared.",
+                    response.message || "Selected routing artifacts cleared.",
                     "success"
                 );
                 emitter.emit("agfields:watershed:cleared", response || {});

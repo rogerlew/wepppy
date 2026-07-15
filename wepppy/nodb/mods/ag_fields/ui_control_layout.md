@@ -169,28 +169,39 @@ Purpose: run and monitor the per-sub-field simulations.
 - Primary button "Run WEPP on Sub-fields" enqueues the RQ job wrapping `run_wepp_ag_fields`.
 - Blocked chips, checked in order: stage 2 incomplete → "Build sub-fields first." Stage 3 incomplete → "Map all crops to managements first (N unmapped)." Parent WEPP hillslope artifacts missing (`wepp/runs/p*.sol`/`.cli`) → "Run the watershed WEPP hillslopes first — sub-fields reuse their soil and climate files."
 - "Run options" collapsible: a "WEPP Exec" select populated from the same installed-binary list as the main WEPP control, and a content-width "Clear previous runs and outputs" button wrapping `clear_ag_field_wepp_runs`/`clear_ag_field_wepp_outputs` (confirmation via status chip, not a modal — it only deletes regenerable artifacts). Do not expose the executor worker count in this UI.
-- The AgFields executable is independent of the parent watershed WEPP executable and is persisted in `ag_fields.nodb`. New projects created from `ag-fields.cfg` default to `wepp_dcc52a6`; historical projects that predate the setting retain their parent WEPP executable until a user makes an AgFields selection. The selected executable is submitted with the run request and is the value propagated to every sub-field hillslope process.
+- The AgFields executable is independent of the parent watershed WEPP executable and is persisted in `ag_fields.nodb`. New projects created from `ag-fields.cfg` default to the capacity-32 `wepp_260714` executable; historical projects retain their persisted executable until a user makes an AgFields selection. The selected executable is submitted with the run request and is the value propagated to every sub-field hillslope process.
 - Progress streams to the status panel (the backend already logs "(k/N) sub_field_id=… completed"). No separate progress widget in v1.
 - On success: success chip with run count and links — browse `wepp/ag_fields/output/`, and a pointer to Features Export for `AgFields Spatial` / `AgFields Metrics` layers.
 - A single sub-field failure aborts the run (backend cancels pending sub-fields; already-running ones finish): the stacktrace panel shows the failing sub-field; the status chip must name the failed `sub_field_id` and its parent `field_id`.
 
 ### Stage 5 — Integrate the Watershed
 
-Purpose: combine current independent sub-field PASS sources with uncovered parent
-responses and rerun watershed WEPP without changing baseline or Stage 4 artifacts.
+Purpose: run one or all of the field-aware, direct-injection, and connectivity-aware
+routing schemes without changing baseline or Stage 4 artifacts.
 
-- The primary button posts `agfields/run-watershed` and tracks job key
-  `agfields_run_watershed` with completion event
-  `AGFIELDS_RUN_WATERSHED_TASK_COMPLETED`.
+- The required select uses the exact machine values `concept_1`, `concept_2`,
+  `hybrid`, and `all`. Its visible labels are, respectively, "Field-aware hillslope
+  routing (routes fields through downstream OFEs)", "Direct sub-field outlet
+  injection (preserves independent sub-field results; no buffer routing)",
+  "Connectivity-aware mixed routing (injects channel-connected fields; routes
+  other fields through OFEs)", and "Run all routing schemes (writes three separate
+  results for comparison)". Direct injection is selected initially.
+- The primary button posts `agfields/run-watershed` with the exact selection.
+  One scheme queues one job; `all` returns and tracks a three-entry `job_ids`
+  mapping in Concept 1, Concept 2, hybrid order. The scheme-specific keys are
+  `agfields_run_watershed_concept_1`, `agfields_run_watershed_concept_2`, and
+  `agfields_run_watershed_hybrid`; all use completion event
+  `AGFIELDS_RUN_WATERSHED_TASK_COMPLETED`. The historical
+  `agfields_run_watershed` key remains a Concept 2 compatibility alias.
 - The stage is blocked until Stage 4 is complete and current, the observed climate
   is supported, and every parent prepared input exists. It shares the AgFields
   single-flight guard with Stages 2–4.
-- Completion shows affected-parent and sub-field-source counts, accepted closure,
-  and a browse link rooted at `wepp/ag_fields/watershed/`.
-- The limitation is always visible: field water and sediment are injected at the
-  parent outlet; downslope buffer, trapping, and runon effects are not represented.
-- Clear requires a second click and calls `agfields/clear-watershed`. It can remove
-  only the isolated watershed tree and additive integration state.
+- Each current scheme renders independent running, completed, failed, and stale
+  state, its limitation, and its fixed browse path under
+  `wepp/ag_fields/watershed/{concept-1,concept-2,hybrid}/`.
+- Clear requires a second click and calls `agfields/clear-watershed` with the exact
+  selected identifier. Selecting `all` clears the three current scheme roots and
+  states only; it preserves the legacy unscoped Concept 2 tree.
 
 ## 4. Stage Gating and Staleness
 
@@ -278,7 +289,7 @@ All routes are run-scoped under rq-engine and follow the Treatments/Disturbed pr
 | Sub-fields overlay resource | `GET /runs/{runid}/{config}/agfields/sub-fields.geojson` | Serves `sub_fields.WGS.geojson` as `application/geo+json` |
 | State snapshot | `GET /runs/{runid}/{config}/agfields/state` | Returns all stage hydration state described below |
 
-The state snapshot has top-level objects `boundary`, `schema`, `subfields`, `mapping`, `plant_files`, `wepp`, `watershed_integration`, `staleness`, and `readiness`. `boundary.filename` is the persisted source basename shown after reload, with the canonical boundary filename as the compatibility fallback for historical projects. `plant_files` carries valid/invalid counts; the inventory endpoint supplies the detailed rows. `wepp` carries `run_count`, `output_count`, `complete`, and the AgFields-owned `wepp_bin` used to hydrate Stage 4. `watershed_integration` carries status, staleness, terminal summary/error, fixed browse path, and limitation text. The snapshot also exposes `job_ids` and `active_job_ids` under the contractual keys `agfields_build_subfields`, `agfields_plantdb`, `agfields_run_wepp`, and `agfields_run_watershed`. Staleness keys are `subfields` and `wepp_runs`; readiness includes observed-climate/year-bound validity, watershed abstraction, parent WEPP readiness, and missing parent WEPP ids.
+The state snapshot has top-level objects `boundary`, `schema`, `subfields`, `mapping`, `plant_files`, `wepp`, `watershed_integration`, `watershed_integrations`, `staleness`, and `readiness`. `boundary.filename` is the persisted source basename shown after reload, with the canonical boundary filename as the compatibility fallback for historical projects. `plant_files` carries valid/invalid counts; the inventory endpoint supplies the detailed rows. `wepp` carries `run_count`, `output_count`, `complete`, and the AgFields-owned `wepp_bin` used to hydrate Stage 4. The singular `watershed_integration` remains the backward-compatible Concept 2 view. `watershed_integrations` carries independent `concept_1`, `concept_2`, and `hybrid` status, staleness, terminal summary/error, job id, fixed browse path, and limitation text. The snapshot also exposes `job_ids` and `active_job_ids` under the Stage 2-4 keys, the three current watershed keys, and the historical Concept 2 alias. Staleness keys are `subfields` and `wepp_runs`; readiness includes observed-climate/year-bound validity, watershed abstraction, parent WEPP readiness, and missing parent WEPP ids.
 
 RQ tasks return their terminal payload through the RQ job result and publish the same payload as `RESULT_JSON` before their completion trigger. Plant processing publishes the valid/invalid inventory; sub-field building publishes field/sub-field counts; WEPP publishes `run_count`. Failures publish `EXCEPTION_JSON`; plant failures include `filename`, and WEPP failures include both `sub_field_id` and parent `field_id`. Completion triggers are `AGFIELDS_BUILD_SUBFIELDS_TASK_COMPLETED`, `AGFIELDS_PLANTDB_TASK_COMPLETED`, and `AGFIELDS_RUN_WEPP_TASK_COMPLETED`.
 
@@ -335,5 +346,5 @@ The 2026-07-10 walkthrough on `sacral-self-discipline` exercised all four stages
 
 1. **Duplicate `field_id` values remain non-blocking.** They are reported as a data-quality warning. Promote them to a blocking upload error only with evidence that real joins require that stricter contract.
 2. **Historical executable fallback is intentionally additive.** An AgFields NoDb created before `_wepp_bin` was introduced displays the parent WEPP executable until the user submits an AgFields run selection; new `ag-fields.cfg` projects start with `wepp_dcc52a6`.
-3. **Worker tuning is API-only compatibility.** The browser uses automatic sizing and sends no `max_workers`; legacy API callers may still provide the optional value.
+3. **Worker tuning is API-only compatibility.** The browser uses automatic sizing and sends no `max_workers`; API callers may provide 1-16. Larger or non-positive values are rejected instead of clamped.
 4. **Controller splitting is deferred.** The single controller shares one snapshot, modal, and job lifecycle. Reassess its module boundary only if observed maintenance friction justifies the churn.

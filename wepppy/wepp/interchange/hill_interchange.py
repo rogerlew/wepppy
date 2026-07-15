@@ -139,6 +139,7 @@ def run_wepp_hillslope_interchange(
     run_soil_interchange: bool = True,
     run_wat_interchange: bool = True,
     delete_after_interchange: bool = False,
+    max_workers: int | None = None,
 ) -> Path:
     """Generate hillslope interchange parquet files.
 
@@ -153,6 +154,8 @@ def run_wepp_hillslope_interchange(
             Single storm runs don't produce .wat.dat files.
         delete_after_interchange: When True, remove source WEPP text outputs
             after successful conversion.
+        max_workers: Optional process-pool bound forwarded to every hillslope
+            converter. Omitted values preserve the existing interchange default.
 
     Returns:
         Path to the interchange directory.
@@ -180,22 +183,42 @@ def run_wepp_hillslope_interchange(
             base,
             expected_hillslopes=expected_hillslopes,
             pass_family=pass_family,
+            max_workers=max_workers,
         ),
-        "ebe": run_wepp_hillslope_ebe_interchange(base, start_year=start_year, expected_hillslopes=expected_hillslopes),
-        "element": run_wepp_hillslope_element_interchange(base, start_year=start_year, expected_hillslopes=expected_hillslopes),
+        "ebe": run_wepp_hillslope_ebe_interchange(
+            base,
+            start_year=start_year,
+            expected_hillslopes=expected_hillslopes,
+            max_workers=max_workers,
+        ),
+        "element": run_wepp_hillslope_element_interchange(
+            base,
+            start_year=start_year,
+            expected_hillslopes=expected_hillslopes,
+            max_workers=max_workers,
+        ),
     }
 
     # Optional outputs that may not exist for single storm runs
     if run_loss_interchange:
-        results["loss"] = run_wepp_hillslope_loss_interchange(base, expected_hillslopes=expected_hillslopes)
+        results["loss"] = run_wepp_hillslope_loss_interchange(
+            base,
+            expected_hillslopes=expected_hillslopes,
+            max_workers=max_workers,
+        )
     if run_soil_interchange:
         results["soil"] = run_wepp_hillslope_soil_interchange(
             base,
             start_year=start_year,
             expected_hillslopes=expected_hillslopes,
+            max_workers=max_workers,
         )
     if run_wat_interchange:
-        results["wat"] = run_wepp_hillslope_wat_interchange(base, expected_hillslopes=expected_hillslopes)
+        results["wat"] = run_wepp_hillslope_wat_interchange(
+            base,
+            expected_hillslopes=expected_hillslopes,
+            max_workers=max_workers,
+        )
 
     missing = [name for name, path in results.items() if path is None or not Path(path).exists()]
     if missing:

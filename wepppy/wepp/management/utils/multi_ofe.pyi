@@ -5,6 +5,7 @@ from typing import Iterable, List
 from wepppy.wepp.management.managements import Management
 
 class ManagementMultipleOfeSynth:
+    WEPP_HILLSLOPE_MAX_YEARLY_SCENARIOS: int
     stack: List[Management]
     deduplicate_scenarios: bool
 
@@ -18,4 +19,14 @@ class ManagementMultipleOfeSynth:
     def description(self) -> str: ...
     @property
     def num_ofes(self) -> int: ...
+    def build(
+        self,
+        *,
+        enforce_yearly_scenario_limit: bool = ...,
+    ) -> Management: ...
+    def render(
+        self,
+        *,
+        enforce_yearly_scenario_limit: bool = ...,
+    ) -> str: ...
     def write(self, dst_fn: str) -> None: ...

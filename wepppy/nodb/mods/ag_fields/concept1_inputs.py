@@ -22,6 +22,42 @@ class Concept1InputSynthesisError(RuntimeError):
     """Raised when an accepted OFE plan cannot produce consistent WEPP inputs."""
 
 
+def _serialized_ofe_lengths(
+    breakpoints: Sequence[float],
+    *,
+    total_length_m: float,
+) -> list[float]:
+    """Return the two-decimal OFE lengths written by the native serializer."""
+    return [
+        float(f"{(end - start) * total_length_m:.2f}")
+        for start, end in zip(breakpoints, breakpoints[1:])
+    ]
+
+
+def _serialized_breakpoint_fractions(
+    breakpoints: Sequence[float],
+    *,
+    total_length_m: float,
+) -> list[float]:
+    """Return breakpoints implied by WEPP's two-decimal OFE lengths."""
+    serialized_lengths = _serialized_ofe_lengths(
+        breakpoints,
+        total_length_m=total_length_m,
+    )
+    serialized_total = math.fsum(serialized_lengths)
+    if serialized_total <= 0.0:
+        raise Concept1InputSynthesisError(
+            "Serialized OFE lengths do not retain a positive hillslope length."
+        )
+    cumulative = [0.0]
+    running = 0.0
+    for length in serialized_lengths:
+        running += length
+        cumulative.append(running / serialized_total)
+    cumulative[-1] = 1.0
+    return cumulative
+
+
 def _coerce_subfield_id(row: Mapping[str, Any]) -> int:
     value = row.get("sub_field_id")
     if value is None or isinstance(value, float) and not math.isfinite(value):
@@ -59,8 +95,13 @@ def _validated_rows(
         raise Concept1InputSynthesisError("OFE breakpoints must begin at 0 and end at 1.")
     if any(left_end != right_start for left_end, right_start in zip(ends, starts[1:])):
         raise Concept1InputSynthesisError("OFE breakpoints are not contiguous.")
-    if any(not math.isfinite(start) or not math.isfinite(end) or end <= start for start, end in zip(starts, ends)):
-        raise Concept1InputSynthesisError("OFE breakpoints must be finite and strictly increasing.")
+    if any(
+        not math.isfinite(start) or not math.isfinite(end) or end <= start
+        for start, end in zip(starts, ends)
+    ):
+        raise Concept1InputSynthesisError(
+            "OFE breakpoints must be finite and strictly increasing."
+        )
     return ordered
 
 
@@ -75,7 +116,9 @@ def synthesize_concept1_parent_inputs(
 ) -> dict[str, Any]:
     """Write a consistent slope/soil/management/climate set for one parent."""
     if not math.isfinite(target_width_m) or target_width_m <= 0.0:
-        raise Concept1InputSynthesisError("Concept 1 target width must be finite and positive.")
+        raise Concept1InputSynthesisError(
+            "Concept 1 target width must be finite and positive."
+        )
     rows = _validated_rows(ofe_rows, parent_wepp_id=parent_wepp_id)
     target_runs_dir.mkdir(parents=True, exist_ok=True)
 
@@ -115,16 +158,24 @@ def synthesize_concept1_parent_inputs(
         )
     )
     fractions = mofe_distance_fractions(str(target_prefix.with_suffix(".slp")))
+    serialized_breakpoints = _serialized_breakpoint_fractions(
+        breakpoints,
+        total_length_m=slope.length,
+    )
+    serialized_target_length_m = math.fsum(
+        _serialized_ofe_lengths(breakpoints, total_length_m=slope.length)
+    )
     if slope_count != len(rows) or parsed_management.nofe != len(rows):
         raise Concept1InputSynthesisError(
             f"Parent {parent_wepp_id} generated inconsistent OFE counts."
         )
     if not all(
         math.isclose(actual, expected, rel_tol=0.0, abs_tol=1e-12)
-        for actual, expected in zip(fractions, breakpoints)
+        for actual, expected in zip(fractions, serialized_breakpoints)
     ):
         raise Concept1InputSynthesisError(
-            f"Parent {parent_wepp_id} generated slope breakpoints that differ from its plan."
+            f"Parent {parent_wepp_id} generated slope breakpoints that differ from "
+            "the plan's two-decimal serialized OFE lengths."
         )
     return {
         "parent_wepp_id": parent_wepp_id,
@@ -134,4 +185,6 @@ def synthesize_concept1_parent_inputs(
         "target_width_m": target_width_m,
         "target_length_m": slope.length,
         "target_area_m2": target_width_m * slope.length,
+        "serialized_target_length_m": serialized_target_length_m,
+        "serialized_target_area_m2": target_width_m * serialized_target_length_m,
     }

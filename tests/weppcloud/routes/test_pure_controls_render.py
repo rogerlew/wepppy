@@ -1117,13 +1117,36 @@ def test_ag_fields_control_renders_required_dom_contract(jinja_env: Environment)
         "wepp-bin-select",
         "clear-runs-button",
         "results-links",
+        "integration-scheme-select",
         "integration-run-button",
         "integration-status",
         "integration-clear-button",
-        "integration-results",
-        "integration-limitation",
+        "integration-status-concept_1",
+        "integration-results-concept_1",
+        "integration-limitation-concept_1",
+        "integration-status-concept_2",
+        "integration-results-concept_2",
+        "integration-limitation-concept_2",
+        "integration-status-hybrid",
+        "integration-results-hybrid",
+        "integration-limitation-hybrid",
     ):
         assert f'data-role="{role}"' in rendered
+
+    for value, label in (
+        ("concept_1", "Field-aware hillslope routing (routes fields through downstream OFEs)"),
+        (
+            "concept_2",
+            "Direct sub-field outlet injection (preserves independent sub-field results; no buffer routing)",
+        ),
+        (
+            "hybrid",
+            "Connectivity-aware mixed routing (injects channel-connected fields; routes other fields through OFEs)",
+        ),
+        ("all", "Run all routing schemes (writes three separate results for comparison)"),
+    ):
+        assert f'<option value="{value}"' in rendered
+        assert label in rendered
 
     assert "Experimental" in rendered
     assert 'role="dialog"' in rendered

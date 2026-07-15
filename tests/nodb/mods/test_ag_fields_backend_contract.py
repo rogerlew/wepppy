@@ -32,12 +32,12 @@ def _controller(tmp_path: Path) -> AgFields:
     return AgFields(str(tmp_path), "disturbed9002-wbt-mofe.cfg")
 
 
-def test_ag_fields_config_defaults_new_projects_to_legacy_wepp(tmp_path: Path) -> None:
+def test_ag_fields_config_defaults_new_projects_to_capacity_32_wepp(tmp_path: Path) -> None:
     controller = AgFields(str(tmp_path), "ag-fields.cfg")
 
-    assert controller.wepp_bin == "wepp_dcc52a6"
+    assert controller.wepp_bin == "wepp_260714"
     persisted = json.loads((tmp_path / controller.filename).read_text(encoding="ascii"))
-    assert persisted["py/state"]["_wepp_bin"] == "wepp_dcc52a6"
+    assert persisted["py/state"]["_wepp_bin"] == "wepp_260714"
 
 
 def test_ag_fields_wepp_selection_persists(

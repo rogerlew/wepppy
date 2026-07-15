@@ -143,7 +143,10 @@ def _parse_loss_file_rust(path: Path, *, version: tuple[int, int]) -> pa.Table:
 
 
 def run_wepp_hillslope_loss_interchange(
-    wepp_output_dir: Path | str, *, expected_hillslopes: int | None = None
+    wepp_output_dir: Path | str,
+    *,
+    expected_hillslopes: int | None = None,
+    max_workers: int | None = None,
 ) -> Path:
     """Generate `H.loss.parquet` by parsing all hillslope loss outputs."""
     base = Path(wepp_output_dir)
@@ -171,5 +174,12 @@ def run_wepp_hillslope_loss_interchange(
         )
         parser = _parse_loss_file
 
-    write_parquet_with_pool(loss_files, parser, SCHEMA, target_path, empty_table=EMPTY_TABLE)
+    write_parquet_with_pool(
+        loss_files,
+        parser,
+        SCHEMA,
+        target_path,
+        max_workers=max_workers,
+        empty_table=EMPTY_TABLE,
+    )
     return target_path

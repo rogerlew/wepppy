@@ -86,7 +86,7 @@ wepp/output/interchange/
 ### Concurrency Model
 
 **Hillslope files**: Processed with `write_parquet_with_pool()` which:
-1. Spawns `ProcessPoolExecutor` with `max_workers=NCPU` (or `WEPP_INTERCHANGE_FORCE_SERIAL=1` for debugging)
+1. Spawns `ProcessPoolExecutor` with `max_workers=NCPU` by default (or a caller-supplied bound; `WEPP_INTERCHANGE_FORCE_SERIAL=1` forces serial debugging)
 2. Distributes input files across workers (each worker parses subset of hillslopes)
 3. Workers write temp Parquet to `/dev/shm` (or `WEPP_INTERCHANGE_TMP_DIR`)
 4. Main process concatenates temp tables and commits atomically
@@ -153,7 +153,7 @@ This ensures downstream tools never load incompatible schemas after WEPP model u
 ## Key APIs
 | Function | Purpose |
 | --- | --- |
-| `run_wepp_hillslope_interchange(wepp_output_dir, start_year=None)` | Serial hillslope pipeline; returns `Path` to `interchange/` and writes the version manifest (supports `delete_after_interchange` to remove raw text outputs). |
+| `run_wepp_hillslope_interchange(wepp_output_dir, start_year=None, max_workers=None)` | Serial hillslope pipeline; forwards the optional process-pool bound to all six converters, returns `Path` to `interchange/`, and writes the version manifest (supports `delete_after_interchange` to remove raw text outputs). |
 | `run_wepp_watershed_interchange(wepp_output_dir, start_year=None)` | Threaded watershed pipeline; fans out to individual writers and finalizes the manifest (supports `delete_after_interchange` to remove raw text outputs). |
 | `write_parquet_with_pool(files, parser, schema, target_path, **kwargs)` | Shared fan-out writer that parallelizes parsing, buffers results, and commits atomically (respects `WEPP_INTERCHANGE_FORCE_SERIAL`). |
 | `load_hill_wat_dataframe(wepp_output_dir, wepp_id, collapse='daily')` | Convenience accessor returning either daily aggregated or raw OFE-level WAT records via DuckDB. |
@@ -281,7 +281,7 @@ To recover the canonical daily hillslope runoff *volume* from `H.wat.parquet` al
 
 > `canonical_volume_m³ = Q(bottom_OFE) × total_hillslope_area × 0.001`
 
-where `total_hillslope_area = sum of Area across the day's OFE rows for the hillslope`. Equivalently and authoritatively: use `H.pass.runvol`. `Q(bottom_OFE) × Area(bottom_OFE)` does **not** equal the canonical volume post-fix; it gives `canonical_volume / n_ofe`. (Under legacy builds the same expression happened to equal canonical volume by an algebraic coincidence — the `n×` inflation in the pre-fix `QOFE` cancelled the `1/n` deflation in per-OFE `Area`. That coincidence is the reason the inconsistency was silent for 18 years across the single-OFE production era.)
+where `total_hillslope_area = sum of Area across the day's OFE rows for the hillslope`. Equivalently and authoritatively: use `H.pass.runvol`. `Q(bottom_OFE) × Area(bottom_OFE)` does **not** equal the canonical volume post-fix; it gives `canonical_volume / n_ofe`. (Under legacy builds the same expression happened to equal canonical volume by an algebraic coincidence — the `n×` inflation in the pre-fix `QOFE` canceled the `1/n` deflation in per-OFE `Area`. That coincidence is the reason the inconsistency was silent for 18 years across the single-OFE production era.)
 
 `SUM(Q × Area)` or `SUM(QOFE × Area)` across the day's OFE rows does **not** recover the canonical hillslope runoff volume under any build, because per-OFE `Q` values are cumulative routing depths, not per-OFE-incremental contributions; summing them double-counts upslope flow at every downstream OFE.
 
@@ -692,7 +692,7 @@ interchange/
 5. **Check version manifest**: `cat interchange_version.json` to verify compatibility
 6. **Enable logging**: Interchange modules log to `wepppy.wepp.interchange` logger
 
-- `write_parquet_with_pool` uses a process pool sized by `wepppy.all_your_base.NCPU`; set `WEPP_INTERCHANGE_FORCE_SERIAL=1` or `max_workers=0` to force single-process parsing when debugging.
+- `write_parquet_with_pool` uses a process pool sized by `wepppy.all_your_base.NCPU` unless its caller supplies `max_workers`; set `WEPP_INTERCHANGE_FORCE_SERIAL=1` or `max_workers=0` to force single-process parsing when debugging.
 - Temporary Parquet writes land in `/dev/shm` by default (`WEPP_INTERCHANGE_TMP_DIR` overrides) and fall back to the target directory on cross-device errors.
 - Watershed soil and PASS writers transparently accept gzipped inputs, copying them to temporary plain-text files before parsing.
 - DSS exports require `pydsstools`; the import is optional so the interchange core remains usable without HEC tooling.

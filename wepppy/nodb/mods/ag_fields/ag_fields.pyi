@@ -2,17 +2,40 @@ from __future__ import annotations
 
 import os
 from enum import Enum
-from typing import Any, ClassVar, Dict, Iterable, Iterator, List, Optional, Set, Tuple
+from typing import Any, ClassVar, Dict, Iterable, Iterator, List, Mapping, Optional, Set, Tuple
 
 import pandas as pd
 
 from wepppy.nodb.base import NoDbBase
+from wepppy.nodb.mods.ag_fields.routing_schemes import AgFieldsRoutingScheme
 
-__all__: list[str] = ["AgFieldsNoDbLockedException", "AgFields"]
+__all__: list[str] = [
+    "AgFieldsNoDbLockedException",
+    "AgFieldsRunError",
+    "PlantFileProcessingError",
+    "RotationLookupValidationError",
+    "AgFields",
+]
 
 
 class AgFieldsNoDbLockedException(Exception):
     ...
+
+
+class AgFieldsRunError(RuntimeError):
+    field_id: int
+    sub_field_id: int
+    def __init__(self, field_id: int, sub_field_id: int, message: str) -> None: ...
+
+
+class PlantFileProcessingError(ValueError):
+    filename: str
+    def __init__(self, filename: str, message: str) -> None: ...
+
+
+class RotationLookupValidationError(ValueError):
+    results: List[Dict[str, Any]]
+    def __init__(self, results: List[Dict[str, Any]]) -> None: ...
 
 
 class AgFields(NoDbBase):
@@ -50,6 +73,9 @@ class AgFields(NoDbBase):
     def geojson_is_valid(self) -> bool: ...
 
     @property
+    def geojson_hash(self) -> Optional[str]: ...
+
+    @property
     def field_columns(self) -> List[str]: ...
 
     @property
@@ -70,7 +96,11 @@ class AgFields(NoDbBase):
 
     def get_unique_crops(self) -> Set[str]: ...
 
+    def validate_field_id_key(self, key: str) -> None: ...
+
     def set_field_id_key(self, key: str) -> None: ...
+
+    def confirm_schema(self, field_id_key: str, rotation_accessor: str) -> None: ...
 
     @property
     def field_boundaries_tif(self) -> str: ...
@@ -126,6 +156,11 @@ class AgFields(NoDbBase):
     @property
     def ag_field_watershed_manifest_dir(self) -> str: ...
 
+    def ag_field_watershed_scheme_root(
+        self,
+        scheme: str | AgFieldsRoutingScheme | None = ...,
+    ) -> str: ...
+
     @property
     def plant_files_dir(self) -> str: ...
 
@@ -142,26 +177,68 @@ class AgFields(NoDbBase):
         self,
         max_workers: Optional[int] = ...,
         phase_callback: Optional[Any] = ...,
+        scheme: str | AgFieldsRoutingScheme | None = ...,
     ) -> Dict[str, Any]: ...
 
-    def clear_watershed_integration(self) -> None: ...
+    def clear_watershed_integration(
+        self,
+        scheme: str | AgFieldsRoutingScheme | None = ...,
+    ) -> None: ...
 
-    def get_watershed_integration_state(self) -> Dict[str, Any]: ...
+    def set_watershed_integration_job_id(
+        self,
+        scheme: str | AgFieldsRoutingScheme,
+        job_id: str,
+    ) -> None: ...
+
+    def set_watershed_integration_job_ids(
+        self,
+        job_ids: Mapping[str | AgFieldsRoutingScheme, str],
+    ) -> None: ...
+
+    def get_watershed_integration_state(
+        self,
+        scheme: str | AgFieldsRoutingScheme | None = ...,
+    ) -> Dict[str, Any]: ...
+
+    def get_watershed_integration_states(self) -> Dict[str, Dict[str, Any]]: ...
 
     @property
     def rotation_accessor(self) -> Optional[str]: ...
 
+    def validate_rotation_accessor(self, candidate: str) -> None: ...
+
     def set_rotation_accessor(self, candidate: str) -> None: ...
 
-    def handle_plant_file_db_upload(self, plant_db_zip_fn: str) -> None: ...
+    def handle_plant_file_db_upload(self, plant_db_zip_fn: str) -> Dict[str, Any]: ...
 
     def get_valid_plant_files(self) -> List[str]: ...
+
+    def get_invalid_plant_files(self) -> List[Dict[str, str]]: ...
+
+    def get_plant_file_inventory(self) -> Dict[str, Any]: ...
+
+    def delete_plant_file(self, filename: str) -> Dict[str, Any]: ...
+
+    @property
+    def rotation_lookup_path(self) -> str: ...
 
     def get_rotation_key(self, year: int) -> str: ...
 
     def _crop_year_iter(self) -> Iterator[int]: ...
 
-    def validate_rotation_lookup(self) -> None: ...
+    def validate_rotation_lookup(self) -> List[Dict[str, Any]]: ...
+
+    def write_rotation_lookup(
+        self,
+        rows: Iterable[Dict[str, Any]],
+    ) -> List[Dict[str, Any]]: ...
+
+    def get_weppcloud_management_options(self) -> List[Dict[str, str]]: ...
+
+    def get_staleness(self) -> Dict[str, bool]: ...
+
+    def get_readiness(self) -> Dict[str, Any]: ...
 
     @property
     def subfields_parquet_path(self) -> str: ...
@@ -203,6 +280,17 @@ class CropRotationManager:
 
     def dump_rotation_lookup(self) -> None: ...
 
+    @staticmethod
+    def resolve_rotation(
+        ag_fields_dir: str,
+        landuse_mapping: str,
+        crop_name: str,
+        database: str,
+        rotation_id: str,
+        *,
+        logger_name: Optional[str],
+    ) -> CropRotation: ...
+
     def build_rotation_stack(self, crop_rotation_schedule: List[str], man_filepath: str) -> None: ...
 
 
@@ -215,5 +303,6 @@ def run_wepp_subfield(
     crop_rotation_schedule: Iterable[str],
     clip_hillslopes: bool,
     clip_hillslope_length: Optional[float],
+    wepp_bin: str,
     logger_name: Optional[str] = ...,
 ) -> None: ...

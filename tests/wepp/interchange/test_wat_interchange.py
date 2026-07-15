@@ -39,15 +39,17 @@ def test_wat_interchange_writes_parquet(tmp_path, monkeypatch):
 
     def _wrapper(files, parser, schema, target_path, **kwargs):
         file_list = [Path(p) for p in files]
-        calls.append({"files": file_list, "schema": schema})
+        calls.append({"files": file_list, "schema": schema, "kwargs": dict(kwargs)})
+        kwargs["max_workers"] = 0
         return concurrency_module.write_parquet_with_pool(file_list, parser, schema, target_path, **kwargs)
 
     monkeypatch.setattr(wat_module, "write_parquet_with_pool", _wrapper)
 
-    target = wat_module.run_wepp_hillslope_wat_interchange(workdir)
+    target = wat_module.run_wepp_hillslope_wat_interchange(workdir, max_workers=2)
     assert target.exists()
     assert calls
     assert all(p.name.lower().endswith(".wat.dat") for p in calls[0]["files"])
+    assert calls[0]["kwargs"]["max_workers"] == 2
 
     table = pq.read_table(target)
     assert table.schema == wat_module.SCHEMA

@@ -1,6 +1,6 @@
 # AgFields Routing Scheme Suite
 
-**Status**: In progress - integrated management capacity/corpus milestone (2026-07-14)
+**Status**: In progress - faithful scheme implementation (2026-07-15)
 **Timezone**: UTC
 
 ## Overview
@@ -17,16 +17,18 @@ owns an independently repeatable output root under
 `wepp/ag_fields/watershed/{concept-1,concept-2,hybrid}/`; there is no `all/`
 result directory.
 
-The geometry and mixed-source accounting spike passed. Exact management preflight
-then found 141 Concept 1 parents and 59 hybrid residual parents that require more
-than the current native maximum of 20 referenced yearly scenarios after structural
-deduplication. The package now owns the coordinated forest hillslope-capacity
-increase and complete management-corpus validation, including correction of
-proven invalid AgFields source values or evidence-driven forest numerical
-hardening. UI/API/RQ wiring remains gated; fields, rotations, and failures are not
-silently dropped, coerced, or substituted with Concept 2. See the
+The geometry, mixed-source accounting, and complete management/runtime corpus now
+pass. The synchronized forest and WEPPpy hillslope management capacity is 32,
+selected from a measured maximum of 24 plus eight slots of headroom. Exact release
+execution completed all 1,869 Concept 1 and 1,644 hybrid residual parents. The one
+finite-input p1857 numerical failure was resolved at the forest model boundary
+with ablation evidence; no AgFields management source was coerced. UI/API/RQ
+and the faithful Concept 1/hybrid collaborators, per-scheme state, authenticated
+RQ/API contract, serial Run All chain, and description-first UI are now wired.
+Generated all-scheme and protected-tree acceptance remain. Fields, rotations,
+and failures are not silently dropped, coerced, or substituted with Concept 2. See the
 [Concept 1 feasibility evidence](artifacts/2026-07-14_concept1_feasibility.md) and
-[management capacity/corpus plan](artifacts/2026-07-14_management_capacity_and_corpus_validation_plan.md).
+[management capacity/corpus results](artifacts/2026-07-14_management_capacity_corpus_results.md).
 
 ## Objectives
 
@@ -111,10 +113,11 @@ silently dropped, coerced, or substituted with Concept 2. See the
   byte-identical.
 - **Acceptance evidence type**: `both`; focused fixtures and generated output from
   the designated dev project are required.
-- **Current feasibility disposition**: `implementation expanded`; planning,
-  explicit-breakpoint synthesis, and one real mixed-parent native run pass.
-  Milestone 2B must increase the supported binary capacity and run every required
-  management/input tuple before production routing resumes.
+- **Current feasibility disposition**: `implementation continues`; planning,
+  explicit-breakpoint synthesis, one real mixed-parent native run, the synchronized
+  capacity cutover, and every required Concept 1/hybrid management/input tuple
+  pass. Production routing still requires scheme state, hybrid, RQ/API, UI, and
+  generated all-scheme acceptance.
 
 ## Routing Scheme Contract
 
@@ -202,16 +205,16 @@ fails that parent with explicit manifest provenance.
 - **ADR required**: `yes`
 - **ADR link**:
   [ADR-0019: AgFields Field-Aware OFE and Connectivity-Aware Hybrid Routing](../../adrs/ADR-0019-agfields-field-aware-ofe-hybrid-routing.md)
-- **Decision provenance captured**: `yes` for the scheme/classifier and measured
-  engineering rules; production acceptance remains pending a management-limit
-  decision and owner acceptance.
+- **Decision provenance captured**: `yes` for the scheme/classifier, measured
+  engineering rules, and synchronized management capacity; production acceptance
+  remains pending the wired implementation and owner acceptance.
 
-The ADR remains Proposed. The spike established a 1-20 OFE engineering limit,
-exact source representation/positive overlap/area closure gates, and
-length-preserving residual geometry. Fit/error measures remain science diagnostics
-for Mariana rather than undocumented rejection thresholds. The complete corpus
-inventory must now establish and validate the synchronized forest management
-capacity; increasing binary capacity does not increase the 20-OFE planner limit.
+The ADR remains Proposed. Engineering evidence establishes a 1-20 OFE planner
+limit, exact source representation/positive overlap/area closure gates,
+length-preserving residual geometry, and a synchronized hillslope management
+capacity of 32. Fit/error measures remain science diagnostics for Mariana rather
+than undocumented rejection thresholds. Increasing binary capacity does not
+increase the 20-OFE planner limit.
 The existing user-visible sub-field minimum-area setting remains the retention
 threshold; this package must not introduce a second hidden small-field filter.
 
@@ -295,6 +298,7 @@ Completed engineering substrate and evidence:
 - real mixed-parent native WEPP and ADR-0018 closure proof; and
 - [feasibility evidence and stop decision](artifacts/2026-07-14_concept1_feasibility.md).
 - [management capacity/corpus compatibility and validation plan](artifacts/2026-07-14_management_capacity_and_corpus_validation_plan.md).
+- [complete capacity, release, and corpus results](artifacts/2026-07-14_management_capacity_corpus_results.md).
 
 These deliverables are not a user-facing routing implementation. Scheme roots,
 state, RQ/API orchestration, UI choices, and generated all-project results remain

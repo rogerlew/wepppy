@@ -345,6 +345,7 @@ def run_wepp_hillslope_element_interchange(
     *,
     start_year: Optional[int] = None,
     expected_hillslopes: int | None = None,
+    max_workers: int | None = None,
 ) -> Path:
     base = Path(wepp_output_dir)
     if not base.exists():
@@ -378,5 +379,12 @@ def run_wepp_hillslope_element_interchange(
         else:
             parser = partial(_parse_element_file, start_year=start_year)
 
-    write_parquet_with_pool(element_files, parser, SCHEMA, target_path, empty_table=EMPTY_TABLE)
+    write_parquet_with_pool(
+        element_files,
+        parser,
+        SCHEMA,
+        target_path,
+        max_workers=max_workers,
+        empty_table=EMPTY_TABLE,
+    )
     return target_path

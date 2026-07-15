@@ -42,4 +42,5 @@ def run_wepp_hillslope_element_interchange(
     *,
     start_year: Optional[int] = ...,
     expected_hillslopes: int | None = ...,
+    max_workers: int | None = ...,
 ) -> Path: ...

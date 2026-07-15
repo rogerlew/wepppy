@@ -18,6 +18,7 @@ from dataclasses import dataclass
 from datetime import datetime, timezone
 from pathlib import Path
 from typing import TYPE_CHECKING, Any, Callable, Mapping, Sequence
+from uuid import uuid4
 
 import numpy as np
 import pyarrow as pa
@@ -40,6 +41,8 @@ from wepppy.wepp.interchange import (
     run_wepp_hillslope_interchange,
     run_wepp_watershed_interchange,
 )
+
+from .routing_schemes import MAX_WATERSHED_WORKERS, validate_watershed_max_workers
 
 if TYPE_CHECKING:
     from .ag_fields import AgFields
@@ -293,11 +296,9 @@ class AgFieldsWatershedIntegrator:
     ) -> None:
         self.controller = controller
         self.wd = Path(controller.wd).resolve()
-        self.root = Path(controller.ag_field_watershed_root)
-        self.runs_dir = Path(controller.ag_field_watershed_runs_dir)
-        self.output_dir = Path(controller.ag_field_watershed_output_dir)
-        self.manifest_dir = Path(controller.ag_field_watershed_manifest_dir)
-        self.background_pass_dir = self.manifest_dir / "materialized_parent_pass"
+        self.root = self._integration_root()
+        self._attempt_root: Path | None = None
+        self._set_work_root(self.root)
         self.parent_runs_dir = self.wd / "wepp" / "runs"
         self.subfield_runs_dir = Path(controller.ag_field_wepp_runs_dir)
         self.subfield_output_dir = Path(controller.ag_field_wepp_output_dir)
@@ -309,14 +310,45 @@ class AgFieldsWatershedIntegrator:
         self.source_signature: str | None = None
         self._climate_hashes: dict[Path, str] = {}
 
+    def _integration_root(self) -> Path:
+        """Return the fixed legacy Concept 2 root for this collaborator."""
+        return Path(self.controller.ag_field_watershed_root)
+
+    def _watershed_wepp_bin(self) -> str | None:
+        """Return the configured executable family for this scheme's watershed."""
+        return self.controller.wepp_instance.wepp_bin
+
+    def _validate_integration_root(self) -> Path:
+        """Validate this collaborator's root against the fixed scheme allowlist."""
+        base = self.wd / "wepp" / "ag_fields" / "watershed"
+        expected = self._integration_root()
+        allowed = {
+            base.absolute(),
+            (base / "concept-1").absolute(),
+            (base / "concept-2").absolute(),
+            (base / "hybrid").absolute(),
+        }
+        if self.root.absolute() != expected.absolute() or expected.absolute() not in allowed:
+            raise AgFieldsWatershedIntegrationError(
+                "Isolated watershed root does not match a fixed routing-scheme path."
+            )
+        chain = (base.parent.parent, base.parent, base)
+        if expected.absolute() != base.absolute():
+            chain = (*chain, expected)
+        if any(path.is_symlink() for path in chain):
+            raise AgFieldsWatershedIntegrationError(
+                "Refusing to operate through a symlinked watershed path."
+            )
+        return expected
+
     @staticmethod
     def _normalize_workers(value: int | None) -> int:
         cpu_count = os.cpu_count() or 1
         if value is None:
-            return max(1, min(cpu_count, 16))
-        if int(value) < 1:
-            raise ValueError("max_workers must be at least 1")
-        return min(int(value), max(cpu_count, 16))
+            return max(1, min(cpu_count, MAX_WATERSHED_WORKERS))
+        validated = validate_watershed_max_workers(value)
+        assert validated is not None
+        return validated
 
     def _set_phase(self, phase: str) -> None:
         self.phase = phase
@@ -328,11 +360,12 @@ class AgFieldsWatershedIntegrator:
         try:
             self._set_phase("preflight")
             self._preflight()
+            self._set_phase("workspace_reset")
+            self._reset_isolated_tree()
             self._set_phase("area_planning")
             self.plans = self._build_area_plan()
             self.source_signature = self._build_source_signature()
             self._set_phase("parent_materialization")
-            self._reset_isolated_tree()
             self._materialize_parents()
             self._set_phase("source_validation")
             source_rows = self._prepare_source_rows()
@@ -347,9 +380,12 @@ class AgFieldsWatershedIntegrator:
             summary = self._success_summary(required_resources)
             self._write_manifest_readme(summary)
             _atomic_json(self.manifest_dir / "integration_summary.json", summary)
+            self._publish_isolated_tree()
             return summary
         except Exception as exc:  # broad-except: terminal collaborator boundary records failed phase
-            self._write_failure_summary(exc)
+            if self._attempt_root is not None:
+                self._write_failure_summary(exc)
+                self._preserve_failed_attempt()
             public_message = self._public_error_message(exc)
             if public_message != str(exc):
                 raise AgFieldsWatershedIntegrationError(public_message) from exc
@@ -579,18 +615,112 @@ class AgFieldsWatershedIntegrator:
         return digest.hexdigest()
 
     def _reset_isolated_tree(self) -> None:
-        expected = self.wd / "wepp" / "ag_fields" / "watershed"
-        if self.root.absolute() != expected.absolute():
-            raise AgFieldsWatershedIntegrationError("Isolated watershed root does not match the fixed run path.")
-        if any(path.is_symlink() for path in (expected.parent.parent, expected.parent, expected)):
-            raise AgFieldsWatershedIntegrationError(
-                "Refusing to reset through a symlinked watershed path."
+        self._validate_integration_root()
+        self.root.parent.mkdir(parents=True, exist_ok=True)
+        attempt = Path(
+            tempfile.mkdtemp(
+                prefix=f".{self.root.name}.attempt-",
+                dir=self.root.parent,
             )
-        if self.root.exists():
-            shutil.rmtree(self.root)
+        )
+        self._attempt_root = attempt
+        self._set_work_root(attempt)
         self.runs_dir.mkdir(parents=True)
         self.output_dir.mkdir(parents=True)
         self.manifest_dir.mkdir(parents=True)
+
+    def _set_work_root(self, work_root: Path) -> None:
+        self.runs_dir = work_root / "runs"
+        self.output_dir = work_root / "output"
+        self.manifest_dir = work_root / "manifest"
+        self.background_pass_dir = self.manifest_dir / "materialized_parent_pass"
+
+    def _published_relpath(self, path: Path) -> str:
+        """Return stable provenance as if a staged path were already published."""
+        resolved = path.resolve()
+        if self._attempt_root is not None:
+            try:
+                staged_relative = resolved.relative_to(self._attempt_root.resolve())
+            except ValueError:
+                pass
+            else:
+                resolved = (self.root / staged_relative).absolute()
+        return resolved.relative_to(self.wd).as_posix()
+
+    def _validate_attempt_root(self) -> Path:
+        attempt = self._attempt_root
+        if attempt is None:
+            raise AgFieldsWatershedIntegrationError(
+                "No AgFields watershed staging attempt is active."
+            )
+        if attempt.parent.absolute() != self.root.parent.absolute():
+            raise AgFieldsWatershedIntegrationError(
+                "AgFields watershed staging path escapes the scheme parent."
+            )
+        if not attempt.name.startswith(f".{self.root.name}.attempt-"):
+            raise AgFieldsWatershedIntegrationError(
+                "AgFields watershed staging path has an invalid name."
+            )
+        if attempt.is_symlink() or not attempt.is_dir():
+            raise AgFieldsWatershedIntegrationError(
+                "AgFields watershed staging path is not a regular directory."
+            )
+        return attempt
+
+    def _publish_isolated_tree(self) -> None:
+        """Replace one published scheme tree only after its terminal manifest exists."""
+        self._validate_integration_root()
+        attempt = self._validate_attempt_root()
+        if not (attempt / "manifest" / "integration_summary.json").is_file():
+            raise AgFieldsWatershedIntegrationError(
+                "AgFields watershed staging attempt has no terminal manifest."
+            )
+        backup = self.root.parent / f".{self.root.name}.previous-{uuid4().hex}"
+        replaced_previous = False
+        try:
+            if self.root.exists():
+                os.replace(self.root, backup)
+                replaced_previous = True
+            os.replace(attempt, self.root)
+        except OSError:
+            if replaced_previous and backup.exists() and not self.root.exists():
+                os.replace(backup, self.root)
+            raise
+        else:
+            if backup.exists():
+                try:
+                    shutil.rmtree(backup)
+                except OSError as exc:
+                    self.controller.logger.warning(
+                        "Could not remove prior AgFields scheme backup %s: %s",
+                        backup.name,
+                        exc,
+                    )
+        self._attempt_root = None
+        self._set_work_root(self.root)
+
+    def _preserve_failed_attempt(self) -> None:
+        """Keep failure provenance while leaving a prior completed tree untouched."""
+        self._validate_integration_root()
+        attempt = self._validate_attempt_root()
+        failure_manifest = attempt / "manifest" / "integration_summary.json"
+        if self.root.exists():
+            published_manifest = self.root / "manifest"
+            if published_manifest.is_symlink():
+                raise AgFieldsWatershedIntegrationError(
+                    "Published AgFields watershed manifest path is symlinked."
+                )
+            if failure_manifest.is_file():
+                payload = json.loads(failure_manifest.read_text(encoding="utf-8"))
+                _atomic_json(
+                    published_manifest / "last_attempt_failure.json",
+                    payload,
+                )
+            shutil.rmtree(attempt)
+        else:
+            os.replace(attempt, self.root)
+        self._attempt_root = None
+        self._set_work_root(self.root)
 
     def _copy_input(self, source: Path, target: Path) -> None:
         self._require_regular_file(source, root=self.wd)
@@ -731,7 +861,7 @@ class AgFieldsWatershedIntegrator:
                     "source_kind": source.source_kind,
                     "field_id": source.field_id,
                     "sub_field_id": source.sub_field_id,
-                    "source_pass_relpath": source.pass_path.resolve().relative_to(self.wd).as_posix(),
+                    "source_pass_relpath": self._published_relpath(source.pass_path),
                     "source_climate_token": token,
                     "source_climate_sha256": source_sha,
                     "target_climate_token": target_token,
@@ -881,11 +1011,11 @@ class AgFieldsWatershedIntegrator:
             str(self.runs_dir),
             output_options={"chnwb": True, "soil_pw0": True},
             pass_family=PASS_FAMILY,
-            wepp_bin=self.controller.wepp_instance.wepp_bin,
+            wepp_bin=self._watershed_wepp_bin(),
         )
         run_watershed(
             str(self.runs_dir),
-            wepp_bin=self.controller.wepp_instance.wepp_bin,
+            wepp_bin=self._watershed_wepp_bin(),
         )
 
     def _regenerate_interchange(self) -> list[str]:
@@ -900,6 +1030,7 @@ class AgFieldsWatershedIntegrator:
             run_soil_interchange=any(self.output_dir.glob("H*.soil.dat")),
             run_wat_interchange=True,
             delete_after_interchange=False,
+            max_workers=self.max_workers,
         )
         baseflow_opts = getattr(self.controller.wepp_instance, "baseflow_opts", None) or BaseflowOpts()
         run_totalwatsed3(interchange_dir, baseflow_opts=baseflow_opts)
@@ -961,6 +1092,8 @@ class AgFieldsWatershedIntegrator:
             "algorithm": ALGORITHM,
             "semantic_contract": SEMANTIC_CONTRACT,
             "adr": ADR,
+            "scheme": "concept_2",
+            "scheme_slug": "concept-2",
             "status": "completed",
             "source_signature": self.source_signature,
             "stage4_source_signature": getattr(self.controller, "_wepp_source_signature", None),
@@ -969,7 +1102,10 @@ class AgFieldsWatershedIntegrator:
             "completed_at": _utc_now(),
             "run_root": self.root.resolve().relative_to(self.wd).as_posix(),
             "pass_family": PASS_FAMILY,
-            "parent_wepp_bin": self._executable_identity(self.controller.wepp_instance.wepp_bin, hill=False),
+            "parent_wepp_bin": self._executable_identity(
+                self._watershed_wepp_bin(),
+                hill=False,
+            ),
             "ag_fields_wepp_bin": self._executable_identity(self.controller.wepp_bin, hill=True),
             "parent_count": len(self.plans),
             "affected_parent_count": sum(plan.affected for plan in self.plans),
@@ -979,7 +1115,7 @@ class AgFieldsWatershedIntegrator:
             "required_resources": list(required_resources),
             "warnings": [LIMITATION],
             "manifest_paths": {
-                name: (self.manifest_dir / name).resolve().relative_to(self.wd).as_posix()
+                name: (self.root / "manifest" / name).resolve().relative_to(self.wd).as_posix()
                 for name in (
                     "pass_sources.parquet",
                     "pass_event_closure.parquet",
@@ -992,10 +1128,9 @@ class AgFieldsWatershedIntegrator:
         }
 
     def _write_failure_summary(self, exc: Exception) -> None:
-        expected = self.wd / "wepp" / "ag_fields" / "watershed"
-        if self.root.absolute() != expected.absolute() or any(
-            path.is_symlink() for path in (expected.parent.parent, expected.parent, expected)
-        ):
+        try:
+            self._validate_integration_root()
+        except AgFieldsWatershedIntegrationError:
             return
         self.manifest_dir.mkdir(parents=True, exist_ok=True)
         summary = {
@@ -1003,6 +1138,8 @@ class AgFieldsWatershedIntegrator:
             "algorithm": ALGORITHM,
             "semantic_contract": SEMANTIC_CONTRACT,
             "adr": ADR,
+            "scheme": "concept_2",
+            "scheme_slug": "concept-2",
             "status": "failed",
             "source_signature": self.source_signature,
             "stage4_source_signature": getattr(self.controller, "_wepp_source_signature", None),
@@ -1011,7 +1148,10 @@ class AgFieldsWatershedIntegrator:
             "completed_at": _utc_now(),
             "run_root": self.root.absolute().relative_to(self.wd).as_posix(),
             "pass_family": PASS_FAMILY,
-            "parent_wepp_bin": self._executable_identity(self.controller.wepp_instance.wepp_bin, hill=False),
+            "parent_wepp_bin": self._executable_identity(
+                self._watershed_wepp_bin(),
+                hill=False,
+            ),
             "ag_fields_wepp_bin": self._executable_identity(self.controller.wepp_bin, hill=True),
             "parent_count": len(self.plans),
             "affected_parent_count": sum(plan.affected for plan in self.plans),
@@ -1084,9 +1224,16 @@ identifiers in file metadata.
 All paths stored in these artifacts are relative to the project run root. Baseline
 results remain under `wepp/output`; independent field results remain under
 `wepp/ag_fields/output`; the integrated results are under
-`wepp/ag_fields/watershed/output`.
+`{self.root.relative_to(self.wd).as_posix()}/output`.
 """
         _atomic_text(self.manifest_dir / "README.md", text)
+
+
+class AgFieldsConcept2Integrator(AgFieldsWatershedIntegrator):
+    """Run current Concept 2 below its fixed composable scheme root."""
+
+    def _integration_root(self) -> Path:
+        return self.wd / "wepp" / "ag_fields" / "watershed" / "concept-2"
 
 
 __all__ = [
@@ -1099,6 +1246,7 @@ __all__ = [
     "SEMANTIC_CONTRACT",
     "AgFieldsWatershedIntegrationError",
     "AgFieldsWatershedIntegrator",
+    "AgFieldsConcept2Integrator",
     "ParentPlan",
     "SourcePlan",
 ]

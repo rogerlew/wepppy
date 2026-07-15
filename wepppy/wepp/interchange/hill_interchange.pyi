@@ -25,4 +25,5 @@ def run_wepp_hillslope_interchange(
     run_soil_interchange: bool = ...,
     run_wat_interchange: bool = ...,
     delete_after_interchange: bool = ...,
+    max_workers: int | None = ...,
 ) -> Path: ...

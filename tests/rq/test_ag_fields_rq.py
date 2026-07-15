@@ -165,18 +165,33 @@ def test_run_watershed_rq_publishes_phases_without_reusing_stage4_timestamp(rq_c
     events, published, controller_box = rq_context
 
     class DummyAgFields:
-        def run_watershed_integration(self, *, max_workers, phase_callback):
+        def run_watershed_integration(self, *, max_workers, phase_callback, scheme):
             assert max_workers == 2
+            assert scheme == "hybrid"
             phase_callback("area_planning")
             phase_callback("watershed_rerun")
             return {"status": "completed", "parent_count": 3}
 
     controller_box["controller"] = DummyAgFields()
 
-    result = ag_fields_rq.run_ag_fields_watershed_rq("demo", max_workers=2)
+    result = ag_fields_rq.run_ag_fields_watershed_rq(
+        "demo",
+        max_workers=2,
+        scheme="hybrid",
+    )
 
-    assert result == {"status": "completed", "parent_count": 3}
+    assert result == {"status": "completed", "parent_count": 3, "scheme": "hybrid"}
     assert not any(event[0].startswith("preflight-") for event in events)
     phase_messages = [message for _, message in published if "PHASE_JSON" in message]
     assert len(phase_messages) == 2
+    assert all('"scheme":"hybrid"' in message for message in phase_messages)
     assert any("AGFIELDS_RUN_WATERSHED_TASK_COMPLETED" in message for _, message in published)
+
+
+def test_run_watershed_rq_rejects_worker_count_above_operational_bound(rq_context) -> None:
+    with pytest.raises(ValueError, match="between 1 and 16"):
+        ag_fields_rq.run_ag_fields_watershed_rq(
+            "demo",
+            max_workers=17,
+            scheme="concept_1",
+        )

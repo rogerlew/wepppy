@@ -9,13 +9,12 @@
 
 **Started**: 2026-07-14 15:37 UTC
 
-**Current phase**: Milestone 2B management-capacity and full-corpus validation
+**Current phase**: Authenticated all-scheme generated acceptance
 
-**Last updated**: 2026-07-14 20:14 UTC
+**Last updated**: 2026-07-15 03:51 UTC
 
-**Next milestone**: Inventory every deduplicated management section, accept the
-synchronized hillslope capacity in ADR-0019, and run the corpus with an isolated
-forest candidate binary
+**Next milestone**: Complete generated Concept 1, hybrid, and authenticated Run
+All acceptance while proving protected artifacts remain byte-identical
 
 **Security impact**: `high`
 
@@ -28,42 +27,19 @@ forest candidate binary
 
 ### Ready / Backlog
 
-- [ ] Implement a reusable explicit-resource Concept 1/hybrid management-corpus
-  CLI and versioned parent/result manifests.
-- [ ] Inventory all `ntype`/`ntype2`/`mxplan`-bounded sections and select the
-  smallest evidence-backed capacity with headroom.
-- [ ] Add forest old/new/above-limit fixtures and synchronize all tracked hill
-  capacity includes without changing watershed capacity.
-- [ ] Build the forest candidate in isolation, then execute every Concept 1 and
-  hybrid management/input tuple with stable failure classification.
-- [ ] Resolve invalid input contracts at authoritative AgFields ingest and route
-  finite-input numerical failures through forest ablation evidence.
-- [ ] Pass forest release gates, vendor matching binaries, and update WEPPpy's
-  explicit management guard in the same cutover.
-- [ ] Implement Concept 1 input synthesis, hillslope execution, watershed rerun,
-  manifests, and generated fixture coverage.
-- [ ] Refactor Concept 2 behind the common scheme-root interface while preserving
-  the completed weighted accounting kernel.
-- [ ] Implement hybrid pure/mixed parent planning, source composition, failures,
-  and closure diagnostics.
-- [ ] Add per-scheme NoDb state and safe, backward-compatible legacy hydration.
-- [ ] Add scheme-aware RQ/API orchestration, stable `all` expansion, job-id mapping,
-  serial dependency edges, and route/graph tests.
-- [ ] Implement the four description-first UI choices and per-scheme status,
-  staleness, clear, and browse behavior.
-- [ ] Complete focused/broad validation and generated-output comparison on
+- [ ] Complete generated-output comparison on
   `sacral-self-discipline`.
 - [ ] Complete QA, security, compatibility, and Mariana handoff artifacts.
 
 ### In Progress
 
-- [ ] Milestone 2B: preserve the dirty forest baseline, freeze the management
-  corpus schema, and measure the complete capacity/input/runtime failure surface.
+- [ ] Finish the active authenticated serial Run All chain and capture
+  protected-tree/memory evidence.
 
 ### Blocked
 
-None. Production UI/RQ wiring remains gated by Milestone 2B, but the decision
-owner has authorized the integrated binary/data work needed to clear it.
+None. Management capacity/corpus validation is complete; remaining production
+wiring is gated only by its own implementation and acceptance tests.
 
 ### Done
 
@@ -95,6 +71,23 @@ owner has authorized the integrated binary/data work needed to clear it.
 - [x] Expanded the current work package to own the forest capacity increase and
   complete management-corpus validation; wrote the compatibility/regression plan
   before further code or binary changes (2026-07-14 20:14 UTC).
+- [x] Added reusable explicit-resource management-corpus and parent-execution
+  CLIs with stable failure classification (2026-07-15 00:01 UTC).
+- [x] Inventoried all generated management sections and accepted synchronized
+  hillslope capacity 32 from a measured maximum of 24 plus eight slots of
+  headroom (2026-07-15 00:01 UTC).
+- [x] Synchronized the forest hill include family, added old/current/above-limit
+  tests, and preserved watershed capacity (2026-07-15 00:01 UTC).
+- [x] Resolved p1857 through the forest ablation protocol without AgFields source
+  coercion; exact release corpora passed 1,869/1,869 Concept 1 and 1,644/1,644
+  hybrid residual parents (2026-07-15 00:01 UTC).
+- [x] Passed forest release gates and vendored hash-identical `wepp_260714`
+  watershed/hillslope binaries with WEPPpy capacity guard 32 (2026-07-15 00:01
+  UTC).
+- [x] Added the fixed routing enum/root and production Concept 1 collaborator for
+  planning, input synthesis, parent execution, PASS validation, manifests,
+  watershed rerun, and scoped interchange; focused tests pass (2026-07-15 00:01
+  UTC).
 
 ## Timeline
 
@@ -109,6 +102,47 @@ owner has authorized the integrated binary/data work needed to clear it.
 - **2026-07-14 20:14 UTC** - Roger Lew expanded the current package to resolve the
   hillslope management limit and any integrated management-data/numerical failures.
   The former blocker became executable Milestone 2B.
+- **2026-07-15 00:01 UTC** - Milestone 2B completed with capacity 32, clean exact-
+  release corpora, a resolved forest incident, and vendored `260714` binaries.
+  Milestone 3 resumed with the tested Concept 1 collaborator.
+- [x] Wired Concept 1, Concept 2, and hybrid behind fixed scheme roots with
+  independent NoDb state/job ids, backward-compatible singular Concept 2
+  hydration, and scheme-scoped safe clear (2026-07-15 01:25 UTC).
+- [x] Implemented hybrid pure Concept 1, pure Concept 2, and mixed residual-source
+  composition with exact area closure, residual PASS finite/header-area gates,
+  and ADR-0018 weighted-source evidence (2026-07-15 01:25 UTC).
+- [x] Added authenticated one/all RQ/API orchestration, allow-failure serial
+  dependencies, additive job-id mapping, queue graph/catalog coverage, and
+  scheme-aware telemetry (2026-07-15 01:25 UTC).
+- [x] Added the four exact description-first UI choices with independent
+  per-scheme status, limitation, clear, and browse behavior; focused frontend and
+  render tests pass (2026-07-15 01:25 UTC).
+- [x] Added bounded per-scheme staging/publish behavior so failed retries preserve
+  a previous completed tree and expose `last_attempt_failure.json`; scheme clear
+  removes only the matching current/staging roots (2026-07-15 01:51 UTC).
+- [x] Completed the generated Concept 1 result for all 3,543 parents, including
+  terminal interchange/manifest and durable completed state (2026-07-15 02:20
+  UTC).
+- [x] Repaired the owned Rust UTF-8 writer and proved exact 22,002,030-row event
+  parity in 78 seconds at 435,296 KiB peak RSS (2026-07-15 02:46 UTC).
+- [x] Threaded the integration worker bound through all hillslope converters and
+  enforced the ADR-recorded 1-16 range at API, RQ, and collaborator boundaries
+  (2026-07-15 02:46 UTC).
+- [x] Reproduced and fixed the live Run All NoDb admission race by preassigning
+  and atomically persisting all scheme job ids before the first enqueue; the
+  authenticated retry reached OFE planning (2026-07-15 03:08 UTC).
+- [x] Passed 84 focused AgFields/management tests, 104 route/RQ/render tests,
+  frontend lint, all 625 Jest tests, and the regenerated 141-edge RQ graph gate
+  (2026-07-15 03:08 UTC).
+- [x] Passed the full repository gate with 4,901 tests passed and 60 skipped in
+  9 minutes 32 seconds; the live Run All retry remains correctly serialized and
+  has peaked at 4,017,143,808 worker-cgroup bytes so far (2026-07-15 03:33 UTC).
+- [x] Committed the repaired wepppyo3 release artifact/provenance as `4f18126`;
+  its touched docs lint cleanly, and Peridot's package formatting gate passes
+  (2026-07-15 03:39 UTC).
+- [x] Committed the forest capacity/G1 implementation, dated binaries,
+  regression, and ablation evidence as detached commit `a87d0bbf` while leaving
+  the earlier p1 dirty-tree layer unstaged (2026-07-15 03:51 UTC).
 
 ## Decisions Log
 
@@ -212,13 +246,13 @@ source, disabled floating-point trap, or silent Concept 2 fallback is permitted.
 | Arbitrary field mosaics do not fit a defensible one-dimensional OFE plan | High | Medium | Preserve agreement/error distributions for Mariana; the engineering planner represents every source but does not invent a science cutoff | Measured |
 | Hybrid residual geometry double-counts or omits source area | High | Medium | Parent-level ownership plan, exact area identities, source manifest, and generated closure tests | Fixture passed |
 | Connectivity classifier is reimplemented inconsistently | High | Low | Extend and invoke the owned Peridot classifier; do not duplicate its D8/channel logic in Python | Mitigated |
-| Run All overwhelms worker memory | High | Medium | Independent jobs chained serially with `allow_failure=True`; retain measured RSS evidence | Open |
+| Run All overwhelms worker memory | High | Medium | Independent jobs chained serially with `allow_failure=True`; integration and every interchange pool share an explicit 16-worker ceiling; retain measured RSS evidence | Mitigated; generated remeasurement pending |
 | Scheme clear escapes its fixed directory | High | Low | Enum-to-slug allowlist, resolved-path/symlink checks, and cross-scheme deletion tests | Open |
 | Legacy clients or projects lose Concept 2 behavior/state | High | Low | Omitted scheme maps to Concept 2; additive state migration; immutable legacy tree | Open |
 | Users treat engineering schemes as scientifically equivalent | Medium | Medium | Description-first labels, limitations/manifests, side-by-side evidence, and Mariana-owned disposition | Open |
-| MOFE management scenario limits reject valid-looking plans | High | Confirmed | Inventory all bounded sections, synchronize forest hill capacity, validate full corpus, and vendor the matching binary/WEPPpy guard | In progress |
-| Dirty detached forest baseline is overwritten or misattributed | High | Confirmed | Hash/status inventory, isolated diagnostic build, explicit staging, and retained-base provenance before canonical rebuild | Open |
-| Finite management inputs trigger invalid producer values or numerical traps | High | Unknown | Full-corpus execution, stable failure classification, observability-first forest ablation, watchlist/fuzzy non-regression | Open |
+| MOFE management scenario limits reject valid-looking plans | High | Confirmed | Capacity 32 accepted from complete inventory; full corpora and above-limit rejection pass | Mitigated |
+| Dirty detached forest baseline is overwritten or misattributed | High | Confirmed | Isolated build, unique `260714` artifacts, explicit p1 provenance, and selective staging | Mitigated |
+| Finite management inputs trigger invalid producer values or numerical traps | High | Confirmed | p1857 resolved through forest ablation G1; exact corpora and permanent watchlist pass | Mitigated |
 | Invalid database values are silently coerced to make runs finish | High | Low | Validate against canonical bounds with row/value/unit/rule provenance; require ADR/science review for new normalization | Open |
 
 ## Verification Checklist
@@ -228,12 +262,14 @@ source, disabled floating-point trap, or silent Concept 2 fallback is permitted.
 - [x] Focused Python tests pass through `wctl run-pytest`.
 - [x] Peridot and focused wepppyo3 Rust tests pass; Peridot retains two
   unrelated unused-import warnings.
-- [ ] Peridot formatting passes. The wepppyo3 package formatting gate reports
-  preexisting drift in `catalog.rs` and `parquet.rs`; neither changed
-  `mofe.rs` nor `lib.rs` appears in its diff.
-- [ ] Frontend Jest tests and lint pass.
+- [x] Peridot formatting passes. The wepppyo3 package formatting gate reports
+  preexisting drift in untouched SWAT utilities and interchange
+  `catalog.rs`/`parquet.rs`; the changed `mofe.rs` and UTF-8 writer source do not
+  appear in its diff.
+- [x] Frontend Jest tests and lint pass.
 - [x] Updated stub and changed-file broad-exception checks pass.
-- [ ] Full `wctl run-pytest tests --maxfail=1` gate passes.
+- [x] Full `wctl run-pytest tests --maxfail=1` gate passes (4,901 passed, 60
+  skipped).
 
 ### Security
 

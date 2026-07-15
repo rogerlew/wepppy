@@ -56,7 +56,7 @@ def mofe_distance_fractions(fname):
 def _load_wepppyo3_mofe_segmenter():
     try:
         module = importlib.import_module("wepppyo3.wepp_interchange")
-    except Exception as exc:
+    except ImportError as exc:
         raise RuntimeError(
             "MOFE segmentation requires `wepppyo3.wepp_interchange`; install/update wepppyo3 to continue."
         ) from exc
@@ -74,7 +74,7 @@ def _load_wepppyo3_mofe_segmenter():
 def _load_wepppyo3_breakpoint_mofe_segmenter():
     try:
         module = importlib.import_module("wepppyo3.wepp_interchange")
-    except Exception as exc:
+    except ImportError as exc:
         raise RuntimeError(
             "Explicit-breakpoint MOFE segmentation requires `wepppyo3.wepp_interchange`; "
             "install/update wepppyo3 to continue."

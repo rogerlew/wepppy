@@ -27,6 +27,12 @@ Inventory reconciliation note (2026-07-10):
 Inventory reconciliation note (2026-07-13):
 - Added the AgFields Concept 2 watershed enqueue and isolated-clear contracts.
 
+Contract reconciliation note (2026-07-14):
+- The same two AgFields routes now accept one exact routing scheme or `all`;
+  auth, scope, execution class, response status, endpoint count, and operation
+  identifiers are unchanged. The run response adds a scheme-to-job `job_ids`
+  mapping while retaining `job_id`.
+
 ## Contract Matrix
 
 | Method | Path | Auth | Scope | Mutates | Execution | Required Responses | Contract Coverage |

@@ -35,5 +35,9 @@ def _parse_ebe_file(
 ) -> Any: ...
 
 def run_wepp_hillslope_ebe_interchange(
-    wepp_output_dir: Path | str, *, start_year: Optional[int] = ..., expected_hillslopes: int | None = ...
+    wepp_output_dir: Path | str,
+    *,
+    start_year: Optional[int] = ...,
+    expected_hillslopes: int | None = ...,
+    max_workers: int | None = ...,
 ) -> Path: ...

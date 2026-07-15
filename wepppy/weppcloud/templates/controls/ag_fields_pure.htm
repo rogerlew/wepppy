@@ -345,7 +345,7 @@
            'agfields_wepp_bin',
            'WEPP Exec',
            wepp_bin_options,
-           help='Agricultural runs default to the compatibility-tested wepp_dcc52a6 executable.',
+           help='Agricultural runs default to the capacity-32, corpus-tested wepp_260714 executable.',
            attrs={'data-role': 'wepp-bin-select'}
          ) }}
       <button type="button"
@@ -361,30 +361,57 @@
     <header class="wc-panel__header">
       <div class="wc-stack">
         <h3 class="wc-panel__title wc-heading__subtitle agfields-stage__heading">5. Integrate the Watershed</h3>
-        <p class="wc-text-muted">Area-weight the current sub-field results with each uncovered parent response, then rerun watershed WEPP in an isolated output tree.</p>
+        <p class="wc-text-muted">Choose how agricultural sub-fields enter the parent hillslopes, then rerun watershed WEPP in separate, comparable output trees.</p>
       </div>
     </header>
+    <div class="wc-field">
+      <label class="wc-field__label" for="agfields_routing_scheme">Routing scheme</label>
+      <select id="agfields_routing_scheme"
+              class="wc-field__control"
+              data-role="integration-scheme-select">
+        <option value="concept_1">Field-aware hillslope routing (routes fields through downstream OFEs)</option>
+        <option value="concept_2" selected>Direct sub-field outlet injection (preserves independent sub-field results; no buffer routing)</option>
+        <option value="hybrid">Connectivity-aware mixed routing (injects channel-connected fields; routes other fields through OFEs)</option>
+        <option value="all">Run all routing schemes (writes three separate results for comparison)</option>
+      </select>
+    </div>
     <div class="agfields-stage__actions">
       <button type="button"
               class="pure-button pure-button-primary"
               data-action="run-watershed"
               data-role="integration-run-button"
               disabled>
-        Run Integrated Watershed
+        Run Selected Routing Scheme
       </button>
       <button type="button"
               class="pure-button button-error agfields-clear-button"
               data-action="clear-watershed"
               data-role="integration-clear-button"
               disabled>
-        Clear Integrated Watershed
+        Clear Selected Routing Result
       </button>
     </div>
     <div class="wc-status-chip" data-role="integration-status" role="status" aria-live="polite"></div>
-    <div class="wc-status-chip" data-role="integration-results" role="status" aria-live="polite"></div>
-    <p class="wc-text-muted" data-role="integration-limitation">
-      Field water and sediment are injected at the parent outlet; downslope buffer, trapping, and runon effects are not represented.
-    </p>
+    <div class="wc-stack" data-role="integration-scheme-states">
+      <section class="wc-stack" data-integration-scheme="concept_1">
+        <h4 class="wc-heading__label">Field-aware hillslope routing (routes fields through downstream OFEs)</h4>
+        <div class="wc-status-chip" data-role="integration-status-concept_1" role="status" aria-live="polite"></div>
+        <div class="wc-status-chip" data-role="integration-results-concept_1" role="status" aria-live="polite"></div>
+        <p class="wc-text-muted" data-role="integration-limitation-concept_1"></p>
+      </section>
+      <section class="wc-stack" data-integration-scheme="concept_2">
+        <h4 class="wc-heading__label">Direct sub-field outlet injection (preserves independent sub-field results; no buffer routing)</h4>
+        <div class="wc-status-chip" data-role="integration-status-concept_2" role="status" aria-live="polite"></div>
+        <div class="wc-status-chip" data-role="integration-results-concept_2" role="status" aria-live="polite"></div>
+        <p class="wc-text-muted" data-role="integration-limitation-concept_2"></p>
+      </section>
+      <section class="wc-stack" data-integration-scheme="hybrid">
+        <h4 class="wc-heading__label">Connectivity-aware mixed routing (injects channel-connected fields; routes other fields through OFEs)</h4>
+        <div class="wc-status-chip" data-role="integration-status-hybrid" role="status" aria-live="polite"></div>
+        <div class="wc-status-chip" data-role="integration-results-hybrid" role="status" aria-live="polite"></div>
+        <p class="wc-text-muted" data-role="integration-limitation-hybrid"></p>
+      </section>
+    </div>
   </section>
 
   {{ ui.job_hint('hint_ag_fields_job') }}

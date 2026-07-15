@@ -2,13 +2,8 @@
 
 from __future__ import annotations
 
-import os
 from copy import deepcopy
 from typing import Dict, Iterable, List, Optional
-
-from os.path import exists as _exists
-from os.path import join as _join
-from os.path import split as _split
 
 if False:  # pragma: no cover - typing only
     from wepppy.wepp.management.managements import Management
@@ -17,7 +12,7 @@ if False:  # pragma: no cover - typing only
 class ManagementMultipleOfeSynth(object):
     """Compose a single management file from several single-OFE managements."""
 
-    WEPP_HILLSLOPE_MAX_YEARLY_SCENARIOS = 20
+    WEPP_HILLSLOPE_MAX_YEARLY_SCENARIOS = 32
 
     def __init__(
         self,
@@ -68,7 +63,12 @@ class ManagementMultipleOfeSynth(object):
         return referenced_names
 
     @classmethod
-    def _compact_yearly_scenarios(cls, management: 'Management') -> None:
+    def _compact_yearly_scenarios(
+        cls,
+        management: 'Management',
+        *,
+        enforce_yearly_scenario_limit: bool = True,
+    ) -> None:
         """
         Cull unreferenced yearly scenarios and enforce WEPP hillslope limits.
 
@@ -93,11 +93,17 @@ class ManagementMultipleOfeSynth(object):
             )
 
         referenced_count = len(referenced_names)
-        if referenced_count > cls.WEPP_HILLSLOPE_MAX_YEARLY_SCENARIOS:
+        if (
+            enforce_yearly_scenario_limit
+            and referenced_count > cls.WEPP_HILLSLOPE_MAX_YEARLY_SCENARIOS
+        ):
             raise ValueError(
                 "MOFE synthesis produced "
                 f"{referenced_count} referenced yearly scenarios, exceeding the WEPP "
-                "hillslope limit of 20 (nmscen must be between 1 and 20)."
+                "hillslope limit of "
+                f"{cls.WEPP_HILLSLOPE_MAX_YEARLY_SCENARIOS} "
+                "(nmscen must be between 1 and "
+                f"{cls.WEPP_HILLSLOPE_MAX_YEARLY_SCENARIOS})."
             )
 
         compacted_year_loops = []
@@ -244,8 +250,18 @@ class ManagementMultipleOfeSynth(object):
                 ofe_data._ofe = new_ofe_num
                 year_ofes.append(ofe_data)
 
-    def write(self, dst_fn: str) -> None:
-        """Merge the stack and write the synthesized management to ``dst_fn``."""
+    def build(
+        self,
+        *,
+        enforce_yearly_scenario_limit: bool = True,
+    ) -> 'Management':
+        """Return the synthesized management graph.
+
+        ``enforce_yearly_scenario_limit=False`` is an inventory-only escape
+        hatch.  It permits callers to measure a complete graph before choosing
+        a compatible WEPP hillslope build; :meth:`write` keeps enforcing the
+        currently supported production limit.
+        """
         # We need access to the ScenarioReference class for type checking
         from wepppy.wepp.management import ScenarioReference
 
@@ -256,11 +272,12 @@ class ManagementMultipleOfeSynth(object):
         # yearly scenario validity and WEPP limits.
         if len(self.stack) == 1:
             mf = deepcopy(self.stack[0])
-            self._compact_yearly_scenarios(mf)
+            self._compact_yearly_scenarios(
+                mf,
+                enforce_yearly_scenario_limit=enforce_yearly_scenario_limit,
+            )
             mf.setroot()
-            with open(dst_fn, 'w') as pf:
-                pf.write(str(mf))
-            return
+            return mf
 
         # Start with a deep copy of the first management file as our base.
         mf = deepcopy(self.stack[0])
@@ -362,21 +379,39 @@ class ManagementMultipleOfeSynth(object):
                     year_ofe_list.append(ofe_data_to_add)
 
         # Step 5: Remove orphan yearly scenarios and enforce WEPP limits.
-        self._compact_yearly_scenarios(mf)
+        self._compact_yearly_scenarios(
+            mf,
+            enforce_yearly_scenario_limit=enforce_yearly_scenario_limit,
+        )
 
         # Step 6: Finalize by ensuring all objects reference the final merged parent.
         mf.setroot()
+        return mf
+
+    def render(
+        self,
+        *,
+        enforce_yearly_scenario_limit: bool = True,
+    ) -> str:
+        """Return the synthesized management file text."""
+        management = self.build(
+            enforce_yearly_scenario_limit=enforce_yearly_scenario_limit,
+        )
+        rendered = str(management)
+
+        # Preserve historical single-stack serialization.  Multi-OFE output
+        # records its source stack after the three native header records; the
+        # native parser does not skip leading comments before the version token.
+        if len(self.stack) == 1:
+            return rendered
+
+        lines = rendered.splitlines(keepends=True)
+        return ''.join(lines[:3]) + self.description + '\n' + ''.join(lines[3:])
+
+    def write(self, dst_fn: str) -> None:
+        """Merge the stack and write the synthesized management to ``dst_fn``."""
+        rendered = self.render()
 
         # Write the complete, synthesized management file.
         with open(dst_fn, 'w') as pf:
-            pf.write(str(mf))
-        
-        # Keep the WEPP version and two numeric header records first.  The native
-        # parser does not skip leading comments before the version token.
-        with open(dst_fn, 'r') as pf:
-            lines = pf.readlines()
-        
-        with open(dst_fn, 'w') as pf:
-            pf.writelines(lines[:3])
-            pf.write(self.description + '\n')
-            pf.writelines(lines[3:])
+            pf.write(rendered)

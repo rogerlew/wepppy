@@ -27,7 +27,12 @@ def _extract_header(lines: List[str]) -> Tuple[List[str], int]: ...
 
 def _parse_wat_file(path: Path, *, calendar_lookup: Dict[int, List[Tuple[int, int]]] | None = ...) -> Any: ...
 
-def run_wepp_hillslope_wat_interchange(wepp_output_dir: Path | str, *, expected_hillslopes: int | None = None) -> Path: ...
+def run_wepp_hillslope_wat_interchange(
+    wepp_output_dir: Path | str,
+    *,
+    expected_hillslopes: int | None = ...,
+    max_workers: int | None = ...,
+) -> Path: ...
 
 def load_hill_wat_dataframe(
     wepp_output_dir: Path | str,

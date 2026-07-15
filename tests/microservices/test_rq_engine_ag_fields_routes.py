@@ -45,6 +45,8 @@ class DummyAgFields:
         self.wepp_bin = "wepp_dcc52a6"
         self.cleared = False
         self.watershed_cleared = False
+        self.watershed_cleared_schemes = []
+        self.watershed_job_ids = {}
         self.saved_rows = None
 
     def validate_field_boundary_geojson(self, path: Path, *, source_filename: str | None = None):
@@ -106,8 +108,20 @@ class DummyAgFields:
     def clear_ag_field_wepp_artifacts(self) -> None:
         self.cleared = True
 
-    def clear_watershed_integration(self) -> None:
+    def clear_watershed_integration(self, scheme=None) -> None:
         self.watershed_cleared = True
+        self.watershed_cleared_schemes.append(scheme.value if hasattr(scheme, "value") else scheme or "concept_2")
+
+    def set_watershed_integration_job_id(self, scheme, job_id) -> None:
+        self.watershed_job_ids[scheme.value if hasattr(scheme, "value") else scheme] = job_id
+
+    def set_watershed_integration_job_ids(self, job_ids) -> None:
+        self.watershed_job_ids.update(
+            {
+                scheme.value if hasattr(scheme, "value") else scheme: job_id
+                for scheme, job_id in job_ids.items()
+            }
+        )
 
     def get_watershed_integration_state(self):
         return {
@@ -119,6 +133,16 @@ class DummyAgFields:
             "root_relpath": "wepp/ag_fields/watershed",
             "browse_relpath": "wepp/ag_fields/watershed/",
             "limitation": "Field water and sediment are injected at the parent outlet.",
+        }
+
+    def get_watershed_integration_states(self):
+        return {
+            scheme: {
+                **self.get_watershed_integration_state(),
+                "scheme": scheme,
+                "status": "not_run",
+            }
+            for scheme in ("concept_1", "concept_2", "hybrid")
         }
 
 
@@ -393,6 +417,107 @@ def test_enqueue_job_serializes_submission_and_persists_job_hint(
     assert next(event for event in events if event[0] == "lock")[3] == 30
 
 
+def test_enqueue_watershed_jobs_serializes_run_all_with_allow_failure_dependencies(
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    events = []
+
+    class DummyPrep:
+        def get_rq_job_id(self, _key: str):
+            return None
+
+        def set_rq_job_id(self, key: str, job_id: str) -> None:
+            events.append(("hint", key, job_id))
+
+    class DummyController:
+        def set_watershed_integration_job_ids(self, job_ids) -> None:
+            for scheme, job_id in job_ids.items():
+                events.append(("state", scheme, job_id))
+
+        def get_watershed_integration_states(self):
+            return {
+                scheme: {"status": "not_run"}
+                for scheme in ("concept_1", "concept_2", "hybrid")
+            }
+
+    class DummyRedis:
+        owner = None
+
+        def __enter__(self):
+            return self
+
+        def __exit__(self, exc_type, exc, tb):
+            return False
+
+        def set(self, key, owner, *, nx, ex):
+            self.owner = owner
+            return True
+
+        def get(self, _key):
+            return self.owner
+
+        def delete(self, key):
+            events.append(("unlock", key))
+
+    class DummyDependency:
+        def __init__(self, *, jobs, allow_failure):
+            self.dependencies = jobs
+            self.allow_failure = allow_failure
+            events.append(("dependency", jobs[0], allow_failure))
+
+    class DummyQueue:
+        def __init__(self, connection):
+            pass
+
+        def enqueue_call(self, func, args, timeout, depends_on, job_id):
+            events.append(("enqueue", args, depends_on, job_id))
+            return SimpleNamespace(id=job_id)
+
+    redis_instance = DummyRedis()
+    monkeypatch.setattr(ag_fields_routes.RedisPrep, "getInstance", lambda wd: DummyPrep())
+    monkeypatch.setattr(ag_fields_routes.AgFields, "getInstance", lambda wd: DummyController())
+    monkeypatch.setattr(ag_fields_routes.redis, "Redis", lambda **kwargs: redis_instance)
+    monkeypatch.setattr(ag_fields_routes, "Queue", DummyQueue)
+    monkeypatch.setattr(ag_fields_routes, "Dependency", DummyDependency)
+
+    response = ag_fields_routes._enqueue_watershed_jobs(
+        "/runs/demo",
+        "demo",
+        (
+            ag_fields_routes.AgFieldsRoutingScheme.CONCEPT_1,
+            ag_fields_routes.AgFieldsRoutingScheme.CONCEPT_2,
+            ag_fields_routes.AgFieldsRoutingScheme.HYBRID,
+        ),
+        4,
+    )
+
+    assert response.status_code == 202
+    payload = json.loads(response.body)
+    assert payload["job_id"] == payload["job_ids"]["concept_1"]
+    assert set(payload["job_ids"]) == {"concept_1", "concept_2", "hybrid"}
+    assert len(set(payload["job_ids"].values())) == 3
+    enqueue_events = [event for event in events if event[0] == "enqueue"]
+    assert [event[1][2] for event in enqueue_events] == ["concept_1", "concept_2", "hybrid"]
+    assert enqueue_events[0][2] is None
+    assert [(event[1], event[2]) for event in events if event[0] == "dependency"] == [
+        (payload["job_ids"]["concept_1"], True),
+        (payload["job_ids"]["concept_2"], True),
+    ]
+    assert (
+        "hint",
+        "agfields_run_watershed",
+        payload["job_ids"]["concept_2"],
+    ) in events
+    assert [(event[1], event[2]) for event in events if event[0] == "state"] == [
+        ("concept_1", payload["job_ids"]["concept_1"]),
+        ("concept_2", payload["job_ids"]["concept_2"]),
+        ("hybrid", payload["job_ids"]["hybrid"]),
+    ]
+    assert max(index for index, event in enumerate(events) if event[0] == "state") < min(
+        index for index, event in enumerate(events) if event[0] == "enqueue"
+    )
+
+
 def _plant_zip_bytes() -> bytes:
     stream = io.BytesIO()
     with zipfile.ZipFile(stream, "w") as archive:
@@ -493,6 +618,31 @@ def test_sync_mutation_returns_conflict_while_job_is_active(
     assert controller.saved_rows is None
 
 
+def test_sync_mutation_returns_conflict_for_persisted_running_scheme_state(
+    route_context,
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    controller, _auth_calls = route_context
+    original = controller.get_watershed_integration_states
+
+    def _states():
+        states = original()
+        states["hybrid"]["status"] = "running:parent_execution"
+        return states
+
+    monkeypatch.setattr(controller, "get_watershed_integration_states", _states)
+
+    with TestClient(rq_engine.app) as client:
+        response = client.post(
+            "/api/runs/demo/cfg/agfields/schema",
+            json={"field_id_key": "field_id", "rotation_accessor": "Crop{}"},
+        )
+
+    assert response.status_code == 409
+    assert response.json()["error"]["code"] == "agfields_job_active"
+    assert "hybrid" in response.json()["error"]["details"]
+
+
 def test_state_and_overlay_return_hydration_contract(route_context) -> None:
     controller, _auth_calls = route_context
     Path(controller.sub_fields_wgs_geojson).write_text(
@@ -515,9 +665,13 @@ def test_state_and_overlay_return_hydration_contract(route_context) -> None:
         "agfields_build_subfields",
         "agfields_plantdb",
         "agfields_run_wepp",
+        "agfields_run_watershed_concept_1",
+        "agfields_run_watershed_concept_2",
+        "agfields_run_watershed_hybrid",
         "agfields_run_watershed",
     }
     assert payload["watershed_integration"]["status"] == "not_run"
+    assert set(payload["watershed_integrations"]) == {"concept_1", "concept_2", "hybrid"}
     assert overlay.status_code == 200
     assert overlay.headers["content-type"].startswith("application/geo+json")
 
@@ -536,6 +690,9 @@ def test_state_job_ids_only_marks_active_rq_statuses(
                 "agfields_build_subfields": "build-active",
                 "agfields_plantdb": "plant-complete",
                 "agfields_run_wepp": None,
+                "agfields_run_watershed_concept_1": None,
+                "agfields_run_watershed_concept_2": None,
+                "agfields_run_watershed_hybrid": None,
                 "agfields_run_watershed": None,
             }[key]
 
@@ -569,6 +726,9 @@ def test_state_job_ids_only_marks_active_rq_statuses(
         "agfields_build_subfields": "build-active",
         "agfields_plantdb": None,
         "agfields_run_wepp": None,
+        "agfields_run_watershed_concept_1": None,
+        "agfields_run_watershed_concept_2": None,
+        "agfields_run_watershed_hybrid": None,
         "agfields_run_watershed": None,
     }
 
@@ -582,22 +742,132 @@ def test_run_and_clear_watershed_routes_use_fixed_additive_surface(
     (Path(controller.ag_field_wepp_runs_dir) / "p1.run").touch()
     calls = []
 
-    def _enqueue(wd, job_key, func, args):
-        calls.append((wd, job_key, func, args))
-        return ag_fields_routes.JSONResponse({"job_id": "watershed-1"}, status_code=202)
+    def _enqueue(wd, runid, schemes, max_workers):
+        calls.append((wd, runid, schemes, max_workers))
+        return ag_fields_routes.JSONResponse(
+            {"job_id": "watershed-1", "job_ids": {"concept_2": "watershed-1"}},
+            status_code=202,
+        )
 
-    monkeypatch.setattr(ag_fields_routes, "_enqueue_job", _enqueue)
+    monkeypatch.setattr(ag_fields_routes, "_enqueue_watershed_jobs", _enqueue)
     monkeypatch.setattr(ag_fields_routes, "_active_job_conflict_response", lambda wd: None)
 
     with TestClient(rq_engine.app) as client:
         queued = client.post("/api/runs/demo/cfg/agfields/run-watershed", json={})
-        cleared = client.post("/api/runs/demo/cfg/agfields/clear-watershed", json={})
+        cleared = client.post(
+            "/api/runs/demo/cfg/agfields/clear-watershed",
+            json={"scheme": "concept_1"},
+        )
 
     assert queued.status_code == 202, queued.text
-    assert calls[0][1] == "agfields_run_watershed"
-    assert calls[0][3] == ("demo", None)
+    assert calls[0][1] == "demo"
+    assert [scheme.value for scheme in calls[0][2]] == ["concept_2"]
+    assert calls[0][3] is None
     assert cleared.status_code == 200
     assert controller.watershed_cleared is True
+    assert controller.watershed_cleared_schemes == ["concept_1"]
+
+
+def test_run_all_expands_in_stable_order_and_clear_all_is_scheme_scoped(
+    route_context,
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    controller, _auth_calls = route_context
+    Path(controller.sub_fields_wgs_geojson).touch()
+    (Path(controller.ag_field_wepp_runs_dir) / "p1.run").touch()
+    calls = []
+
+    def _enqueue(wd, runid, schemes, max_workers):
+        calls.append((wd, runid, schemes, max_workers))
+        return ag_fields_routes.JSONResponse(
+            {
+                "job_id": "concept-1-job",
+                "job_ids": {
+                    "concept_1": "concept-1-job",
+                    "concept_2": "concept-2-job",
+                    "hybrid": "hybrid-job",
+                },
+            },
+            status_code=202,
+        )
+
+    monkeypatch.setattr(ag_fields_routes, "_enqueue_watershed_jobs", _enqueue)
+    monkeypatch.setattr(ag_fields_routes, "_active_job_conflict_response", lambda wd: None)
+
+    with TestClient(rq_engine.app) as client:
+        queued = client.post(
+            "/api/runs/demo/cfg/agfields/run-watershed",
+            json={"scheme": "all", "max_workers": 3},
+        )
+        cleared = client.post(
+            "/api/runs/demo/cfg/agfields/clear-watershed",
+            json={"scheme": "all"},
+        )
+
+    assert queued.status_code == 202, queued.text
+    assert queued.json()["job_id"] == "concept-1-job"
+    assert list(queued.json()["job_ids"]) == ["concept_1", "concept_2", "hybrid"]
+    assert [scheme.value for scheme in calls[0][2]] == ["concept_1", "concept_2", "hybrid"]
+    assert calls[0][3] == 3
+    assert cleared.status_code == 200, cleared.text
+    assert cleared.json()["cleared_schemes"] == ["concept_1", "concept_2", "hybrid"]
+    assert controller.watershed_cleared_schemes == ["concept_1", "concept_2", "hybrid"]
+
+
+def test_run_watershed_rejects_worker_count_above_operational_bound(
+    route_context,
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    controller, _auth_calls = route_context
+    Path(controller.sub_fields_wgs_geojson).touch()
+    (Path(controller.ag_field_wepp_runs_dir) / "p1.run").touch()
+    enqueue_calls = []
+    monkeypatch.setattr(
+        ag_fields_routes,
+        "_enqueue_watershed_jobs",
+        lambda *args: enqueue_calls.append(args),
+    )
+
+    with TestClient(rq_engine.app) as client:
+        response = client.post(
+            "/api/runs/demo/cfg/agfields/run-watershed",
+            json={"scheme": "concept_1", "max_workers": 17},
+        )
+
+    assert response.status_code == 400
+    assert "between 1 and 16" in response.json()["error"]["message"]
+    assert enqueue_calls == []
+
+
+def test_run_and_clear_watershed_reject_unknown_scheme_before_mutation(
+    route_context,
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    controller, _auth_calls = route_context
+    Path(controller.sub_fields_wgs_geojson).touch()
+    (Path(controller.ag_field_wepp_runs_dir) / "p1.run").touch()
+    enqueue_calls = []
+    monkeypatch.setattr(
+        ag_fields_routes,
+        "_enqueue_watershed_jobs",
+        lambda *args: enqueue_calls.append(args),
+    )
+    monkeypatch.setattr(ag_fields_routes, "_active_job_conflict_response", lambda wd: None)
+
+    with TestClient(rq_engine.app) as client:
+        queued = client.post(
+            "/api/runs/demo/cfg/agfields/run-watershed",
+            json={"scheme": "concept-1"},
+        )
+        cleared = client.post(
+            "/api/runs/demo/cfg/agfields/clear-watershed",
+            json={"scheme": "concept-1"},
+        )
+
+    assert queued.status_code == 400
+    assert cleared.status_code == 400
+    assert enqueue_calls == []
+    assert controller.watershed_cleared_schemes == []
 
 
 def test_run_wepp_enqueues_contractual_job_key(route_context, monkeypatch: pytest.MonkeyPatch) -> None:
