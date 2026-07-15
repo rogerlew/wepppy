@@ -340,8 +340,7 @@ _SSURGO_UNAVAILABLE_MESSAGE = (
 )
 
 
-# noinspection PyPep8Naming
-def _makeSOAPrequest(query):
+def _make_sda_post_request(query):
     global _ssurgo_url
     headers = {"Content-Type": "application/x-www-form-urlencoded; charset=utf-8"}
     payload = {"query": query, "format": "xml"}
@@ -1720,7 +1719,7 @@ def _fetch_components(mukeys):
         "WHERE component.mukey IN ( %s ) ORDER BY mukey" % keys
     )
 
-    xml = _makeSOAPrequest(query)
+    xml = _make_sda_post_request(query)
     return _extract_table(xml)
 
 
@@ -1739,7 +1738,7 @@ def _fetch_chorizon(cokeys):
         "WHERE cokey IN (%s) ORDER BY cokey" % keys
     )
 
-    xml = _makeSOAPrequest(query)
+    xml = _make_sda_post_request(query)
     return _extract_table(xml)
 
 
@@ -1752,7 +1751,7 @@ def _fetch_chfrags(chkeys):
         "WHERE chkey IN (%s) ORDER BY chkey" % keys
     )
 
-    xml = _makeSOAPrequest(query)
+    xml = _make_sda_post_request(query)
     return _extract_unique(xml)
 
 
@@ -1765,7 +1764,7 @@ def _fetch_chtexturegrp(chkeys):
         "WHERE chkey IN (%s) ORDER BY chkey" % keys
     )
 
-    xml = _makeSOAPrequest(query)
+    xml = _make_sda_post_request(query)
     return _extract_unique(xml)
 
 
@@ -1778,7 +1777,7 @@ def _fetch_corestrictions(cokeys):
         "WHERE cokey IN (%s) ORDER BY cokey" % keys
     )
 
-    xml = _makeSOAPrequest(query)
+    xml = _make_sda_post_request(query)
     return _extract_unique(xml)
 
 
