@@ -28,26 +28,6 @@ def _wait_for_path(path: Path | str, timeout=60.0, poll=0.5):
         logger=logger,
     )
 
-def _parse_float(token: str) -> float:
-    stripped = token.strip()
-    if not stripped:
-        return 0.0
-    # Fortran overflow placeholders ("*****") should round-trip as NaN.
-    if set(stripped) == {"*"}:
-        return float("nan")
-    if stripped[0] == ".":
-        stripped = f"0{stripped}"
-    try:
-        return float(stripped)
-    except ValueError:
-        if "E" not in stripped.upper():
-            if "-" in stripped[1:]:
-                return float(stripped.replace("-", "E-", 1))
-            if "+" in stripped[1:]:
-                return float(stripped.replace("+", "E+", 1))
-        return float(stripped)
-
-
 def _julian_to_calendar(
     year: int,
     julian: int,

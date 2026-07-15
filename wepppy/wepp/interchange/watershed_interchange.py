@@ -7,6 +7,10 @@ from pathlib import Path
 
 from wepppy.all_your_base import NCPU
 
+from ._rust_interchange import (
+    WeppInterchangeNativeError,
+    require_wepppyo3_interchange,
+)
 from .watershed_chanwb_interchange import run_wepp_watershed_chanwb_interchange
 from .watershed_chan_peak_interchange import run_wepp_watershed_chan_peak_interchange
 from .watershed_chnwb_interchange import run_wepp_watershed_chnwb_interchange
@@ -97,12 +101,27 @@ def run_wepp_watershed_interchange(
     except (TypeError, ValueError):
         start_year = None
 
+    selected_pass_family = _normalize_pass_family(pass_family)
+
+    required_symbols = ["watershed_loss_to_parquet"]
+    if selected_pass_family != PASS_FAMILY_HBP:
+        required_symbols.extend(("watershed_pass_cli_hint", "watershed_pass_to_parquet"))
+    if run_ebe_interchange:
+        required_symbols.append("watershed_ebe_to_parquet")
+    if run_chan_out_interchange:
+        required_symbols.extend(
+            ("watershed_chanwb_to_parquet", "watershed_chan_peak_to_parquet")
+        )
+    if run_chnwb_interchange:
+        required_symbols.append("watershed_chnwb_to_parquet")
+    if run_soil_interchange:
+        required_symbols.append("watershed_soil_to_parquet")
+    require_wepppyo3_interchange("watershed aggregate preflight", *required_symbols)
+
     interchange_dir = base / "interchange"
     remove_incompatible_interchange(interchange_dir)
 
     start_year_kwargs = {"start_year": start_year} if start_year is not None else {}
-
-    selected_pass_family = _normalize_pass_family(pass_family)
 
     tasks = []
     if selected_pass_family == PASS_FAMILY_HBP:
@@ -139,6 +158,8 @@ def run_wepp_watershed_interchange(
             func = futures[future]
             try:
                 future.result()
+            except WeppInterchangeNativeError:
+                raise
             except Exception as exc:
                 raise RuntimeError(f"Watershed interchange task {func.__name__} failed") from exc
 

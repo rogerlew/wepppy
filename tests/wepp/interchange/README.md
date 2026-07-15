@@ -1,94 +1,68 @@
 # WEPP Interchange Fixtures
-> Terse notes for running the interchange modules against local fixtures.
 
-## Fixture Output Paths
-Default (small) fixture used by the interchange tests:
-`/workdir/wepppy/tests/wepp/interchange/test_project/output`
+The interchange suite validates the required `wepppyo3.wepp_interchange`
+implementation through WEPPpy's public facades. It does not maintain a Python
+parser baseline.
 
-Large fixture for parity/perf checks (not in git):
-`/workdir/wepppy/tests/wepp/interchange/fixtures/deductive-futurist/wepp/output`
+## Fixtures
 
-To point tests at the large fixture:
-```bash
-WEPPPY_INTERCHANGE_FIXTURE=tests/wepp/interchange/fixtures/deductive-futurist/wepp/output
+The small general fixture is:
+
+```text
+/workdir/wepppy/tests/wepp/interchange/test_project/output
 ```
 
-## Test Runs
-Default suite:
-```bash
-./wctl/wctl.sh exec weppcloud bash -lc \
-  "cd /workdir/wepppy && /opt/venv/bin/pytest tests/wepp/interchange"
+The compact all-format fixture is assembled from `test_project/output` and:
+
+```text
+/workdir/wepppy/tests/wepp/interchange/fixtures/decimal-pleasing/wepp/output
 ```
 
-## Rust Parity Tests (dev-only)
+An optional large local fixture may be selected with
+`WEPPPY_INTERCHANGE_FIXTURE`; large fixtures are not committed.
+
+## Test Commands
+
+Run the focused suite through the canonical wrapper:
+
 ```bash
-WEPPPY_RUST_INTERCHANGE_TESTS=1 ./wctl/wctl.sh exec weppcloud bash -lc \
-  "cd /workdir/wepppy && /opt/venv/bin/pytest tests/wepp/interchange/test_watershed_interchange_rust_parity.py"
+wctl run-pytest tests/wepp/interchange
 ```
 
-With the large fixture:
+The suite covers all public hillslope and watershed formats, schema metadata,
+calendar behavior, native catalog scanning, one-row-group-per-hillslope-source,
+missing native symbols, propagated native failures, and atomic target
+non-publication.
+
+Run the release package's native API tests from the WEPPpyo3 repository:
+
 ```bash
-WEPPPY_INTERCHANGE_FIXTURE=tests/wepp/interchange/fixtures/deductive-futurist/wepp/output \
-WEPPPY_RUST_INTERCHANGE_TESTS=1 ./wctl/wctl.sh exec weppcloud bash -lc \
-  "cd /workdir/wepppy && /opt/venv/bin/pytest tests/wepp/interchange/test_watershed_interchange_rust_parity.py"
+PYTHONPATH=release/linux/py312 \
+  /home/workdir/wepppy/.venv/bin/pytest -q tests/wepp_interchange
 ```
 
-## Schema Snapshot Generation
-```bash
-./wctl/wctl.sh exec weppcloud bash -lc \
-  "cd /workdir/wepppy && /opt/venv/bin/python -m tests.wepp.interchange.schema_snapshot"
-```
+## Manual Facade Smoke
 
-## Manual Module Run
+Use a copied run directory; interchange generation writes or replaces files
+under `output/interchange/`.
+
 ```bash
-./wctl/wctl.sh exec weppcloud bash -lc "cd /workdir/wepppy && /opt/venv/bin/python - <<'PY'
+wctl exec weppcloud bash -lc 'cd /workdir/wepppy && /opt/venv/bin/python - <<"PY"
 from pathlib import Path
-from wepppy.wepp.interchange.watershed_pass_interchange import run_wepp_watershed_pass_interchange
-from wepppy.wepp.interchange.watershed_soil_interchange import run_wepp_watershed_soil_interchange
-from wepppy.wepp.interchange.watershed_loss_interchange import run_wepp_watershed_loss_interchange
-from wepppy.wepp.interchange.watershed_chan_peak_interchange import run_wepp_watershed_chan_peak_interchange
-from wepppy.wepp.interchange.watershed_ebe_interchange import run_wepp_watershed_ebe_interchange
-from wepppy.wepp.interchange.watershed_chanwb_interchange import run_wepp_watershed_chanwb_interchange
-from wepppy.wepp.interchange.watershed_chnwb_interchange import run_wepp_watershed_chnwb_interchange
-from wepppy.wepp.interchange.hill_pass_interchange import run_wepp_hillslope_pass_interchange
-from wepppy.wepp.interchange.hill_ebe_interchange import run_wepp_hillslope_ebe_interchange
-from wepppy.wepp.interchange.hill_element_interchange import run_wepp_hillslope_element_interchange
-from wepppy.wepp.interchange.hill_loss_interchange import run_wepp_hillslope_loss_interchange
-from wepppy.wepp.interchange.hill_soil_interchange import run_wepp_hillslope_soil_interchange
-from wepppy.wepp.interchange.hill_wat_interchange import run_wepp_hillslope_wat_interchange
 
-output_dir = Path('/workdir/wepppy/tests/wepp/interchange/fixtures/deductive-futurist/wepp/output')
-run_wepp_watershed_pass_interchange(output_dir)
-run_wepp_watershed_soil_interchange(output_dir)
-run_wepp_watershed_loss_interchange(output_dir)
-run_wepp_watershed_chan_peak_interchange(output_dir)
-run_wepp_watershed_ebe_interchange(output_dir)
-run_wepp_watershed_chanwb_interchange(output_dir)
-run_wepp_watershed_chnwb_interchange(output_dir)
-run_wepp_hillslope_pass_interchange(output_dir)
-run_wepp_hillslope_ebe_interchange(output_dir)
-run_wepp_hillslope_element_interchange(output_dir)
-run_wepp_hillslope_loss_interchange(output_dir)
-run_wepp_hillslope_soil_interchange(output_dir)
-run_wepp_hillslope_wat_interchange(output_dir)
-PY"
-```
-
-## Manual Perf Check (deductive-futurist)
-```bash
-./wctl/wctl.sh exec weppcloud bash -lc "cd /workdir/wepppy && /usr/bin/time -v /opt/venv/bin/python - <<'PY'
-from pathlib import Path
-from wepppy.wepp.interchange.watershed_pass_interchange import (
-    _run_wepp_watershed_pass_interchange_python,
-    run_wepp_watershed_pass_interchange,
+from wepppy.wepp.interchange.hill_interchange import (
+    run_wepp_hillslope_interchange,
+)
+from wepppy.wepp.interchange.watershed_interchange import (
+    run_wepp_watershed_interchange,
 )
 
-output_dir = Path('/workdir/wepppy/tests/wepp/interchange/fixtures/deductive-futurist/wepp/output')
-
-# Python baseline
-_run_wepp_watershed_pass_interchange_python(output_dir)
-
-# Rust path (default)
-run_wepp_watershed_pass_interchange(output_dir)
-PY"
+output = Path("/tmp/copied-run/wepp/output")
+run_wepp_hillslope_interchange(output)
+run_wepp_watershed_interchange(output)
+PY'
 ```
+
+If the paired extension is missing, incomplete, or fails, the facade raises a
+`WeppInterchangeNativeError` subtype with the original failure chained as its
+cause. That is the expected deployment contract.

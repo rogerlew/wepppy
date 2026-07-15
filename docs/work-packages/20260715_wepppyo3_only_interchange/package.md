@@ -83,18 +83,18 @@ or write its primary interchange Parquet as a production compatibility path.
 
 ## Success Criteria
 
-- [ ] No production interchange path catches native import/API/parse/write errors
+- [x] No production interchange path catches native import/API/parse/write errors
   and continues with a WEPPpy text parser.
-- [ ] Missing module, missing required symbol, and native execution failure each
+- [x] Missing module, missing required symbol, and native execution failure each
   produce a stable explicit exception with operation context and chained cause.
-- [ ] Dead Python report parser/writer implementations and the shared Python
+- [x] Dead Python report parser/writer implementations and the shared Python
   Parquet fan-in are removed from production modules; test-only parity fixtures
   do not become runtime dependencies.
-- [ ] All public wrapper return/path/schema/order/metadata contracts pass focused
+- [x] All public wrapper return/path/schema/order/metadata contracts pass focused
   regression and native release tests.
-- [ ] The installed Python 3.12 release exposes every required symbol and records
+- [x] The installed Python 3.12 release exposes every required symbol and records
   reproducible provenance.
-- [ ] The authorized stack is restarted and generated interchange completes
+- [x] The authorized stack is restarted and generated interchange completes
   through the installed native release with no fallback telemetry.
 - [ ] Focused and broad WEPPpy gates pass, plus wepppyo3 Rust/release gates.
 - [ ] Independent code and QA reviews have no unresolved medium/high findings.

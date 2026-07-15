@@ -1,16 +1,12 @@
 from __future__ import annotations
 
-import errno
 import logging
 from datetime import datetime, timezone
-import shutil
 from pathlib import Path
-from typing import Dict, List
 
 import pyarrow as pa
-import pyarrow.parquet as pq
 
-from ._utils import _build_cli_calendar_lookup, _compute_sim_day_index, _parse_float
+from ._rust_interchange import call_wepppyo3_interchange, resolve_cli_calendar_path, version_args
 from .schema_utils import pa_field
 from .versioning import schema_with_version
 
@@ -26,7 +22,7 @@ def _audit_log(log_path: Path, message: str) -> None:
         timestamp = datetime.now(timezone.utc).isoformat().replace("+00:00", "Z")
         with log_path.open("a", encoding="utf-8") as stream:
             stream.write(f"{timestamp} {message}\n")
-    except Exception:
+    except OSError:
         LOGGER.warning("Failed to write interchange audit log: %s", log_path, exc_info=True)
 
 
@@ -64,140 +60,6 @@ SCHEMA = schema_with_version(
 )
 
 
-def _init_column_store() -> Dict[str, List]:
-    return {name: [] for name in SCHEMA.names}
-
-
-def _flush_chunk(store: Dict[str, List], writer: pq.ParquetWriter) -> None:
-    if not store["day"]:
-        return
-    table = pa.table(store, schema=SCHEMA)
-    writer.write_table(table)
-    store.clear()
-    store.update(_init_column_store())
-
-
-def _find_outlet_channel(source: Path) -> int | None:
-    outlet_channel = None
-    with source.open("r") as stream:
-        for raw_line in stream:
-            stripped = raw_line.strip()
-            if not stripped or stripped.startswith("Element") or stripped.startswith("-"):
-                continue
-
-            tokens = stripped.split()
-            if len(tokens) < 9 or tokens[1] != "C":
-                continue
-
-            try:
-                channel_id = int(tokens[2])
-            except ValueError:
-                continue
-
-            if outlet_channel is None or channel_id > outlet_channel:
-                outlet_channel = channel_id
-
-    return outlet_channel
-
-
-def _write_tc_out_parquet(
-    source: Path,
-    target: Path,
-    *,
-    outlet_channel: int,
-    chunk_size: int = CHUNK_SIZE,
-    calendar_lookup: dict[int, list[tuple[int, int]]] | None = None,
-    start_year: int | None = None,
-) -> None:
-    tmp_target = target.with_suffix(f"{target.suffix}.tmp")
-    if tmp_target.exists():
-        tmp_target.unlink()
-
-    writer = pq.ParquetWriter(
-        tmp_target,
-        SCHEMA,
-        compression="snappy",
-        use_dictionary=True,
-    )
-
-    store = _init_column_store()
-    row_counter = 0
-
-    calendar_start_year = min(calendar_lookup) if calendar_lookup else None
-    resolved_start_year = start_year if start_year is not None else calendar_start_year
-    normalize_sim_years = resolved_start_year is not None
-    sim_start_year = resolved_start_year
-
-    try:
-        with source.open("r") as stream:
-            for raw_line in stream:
-                stripped = raw_line.strip()
-                if not stripped or stripped.startswith("Element") or stripped.startswith("-"):
-                    continue
-
-                tokens = stripped.split()
-                if len(tokens) < 9 or tokens[1] != "C":
-                    continue
-
-                try:
-                    channel_id = int(tokens[2])
-                except ValueError:
-                    continue
-                if channel_id != outlet_channel:
-                    continue
-
-                try:
-                    day = int(tokens[3])
-                    raw_year = int(tokens[4])
-                except ValueError:
-                    continue
-
-                if normalize_sim_years and raw_year < 1000 and resolved_start_year is not None:
-                    year = resolved_start_year + raw_year - 1
-                else:
-                    year = raw_year
-                if sim_start_year is None:
-                    sim_start_year = year
-                julian = day
-                sim_day_index = _compute_sim_day_index(
-                    year,
-                    julian,
-                    start_year=sim_start_year,
-                    calendar_lookup=calendar_lookup,
-                )
-
-                store["day"].append(day)
-                store["year"].append(year)
-                store["sim_day_index"].append(sim_day_index)
-                store["julian"].append(julian)
-                store["Time of Conc (hr)"].append(_parse_float(tokens[6]))
-                store["Storm Duration (hr)"].append(_parse_float(tokens[7]))
-                store["Storm Peak (hr)"].append(_parse_float(tokens[8]))
-
-                row_counter += 1
-                if row_counter % chunk_size == 0:
-                    _flush_chunk(store, writer)
-
-        if store["day"]:
-            _flush_chunk(store, writer)
-        else:
-            writer.write_table(pa.table(_init_column_store(), schema=SCHEMA))
-    except Exception:
-        writer.close()
-        if tmp_target.exists():
-            tmp_target.unlink()
-        raise
-    else:
-        writer.close()
-        try:
-            tmp_target.replace(target)
-        except OSError as exc:
-            if exc.errno == errno.EXDEV:
-                shutil.move(str(tmp_target), str(target))
-            else:
-                raise
-
-
 def run_wepp_watershed_tc_out_interchange(
     wepp_output_dir: Path | str,
     *,
@@ -218,27 +80,27 @@ def run_wepp_watershed_tc_out_interchange(
         LOGGER.info("tc_out.txt not found in %s; skipping tc_out parquet.", base)
         return None
 
-    outlet_channel = _find_outlet_channel(source)
-    if outlet_channel is None:
-        LOGGER.info("tc_out.txt has no channel rows; skipping tc_out parquet.")
-        return None
-
     interchange_dir = base / "interchange"
     interchange_dir.mkdir(parents=True, exist_ok=True)
     target = interchange_dir / TC_OUT_PARQUET
-    calendar_lookup = _build_cli_calendar_lookup(base, log=LOGGER)
-    if not calendar_lookup:
-        LOGGER.warning(
-            "No CLI calendar lookup available for %s; falling back to Gregorian day math.",
-            base,
-        )
-    _write_tc_out_parquet(
-        source,
-        target,
-        outlet_channel=outlet_channel,
-        calendar_lookup=calendar_lookup,
+    cli_calendar_path = resolve_cli_calendar_path(base, log=LOGGER)
+    major, minor = version_args()
+    summary = call_wepppyo3_interchange(
+        "watershed TC_OUT",
+        "watershed_tc_out_to_parquet",
+        str(source),
+        str(target),
+        major,
+        minor,
+        cli_calendar_path=str(cli_calendar_path) if cli_calendar_path else None,
         start_year=start_year,
+        chunk_rows=CHUNK_SIZE,
+        compression="snappy",
     )
+    if not summary["output_paths"]:
+        LOGGER.info("tc_out.txt has no channel rows; skipping tc_out parquet.")
+        return None
+
     if delete_after_interchange:
         try:
             source.unlink()

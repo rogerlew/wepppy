@@ -1,11 +1,8 @@
 from __future__ import annotations
 
 import logging
-from functools import partial
 from pathlib import Path
-from typing import Dict, List, Optional, Tuple
-
-import re
+from typing import Dict, Optional, Tuple
 
 import duckdb
 import numpy as np
@@ -13,91 +10,11 @@ import pandas as pd
 import pyarrow as pa
 import pyarrow.parquet as pq
 
-from wepppy.all_your_base.hydro import determine_wateryear
-from .concurrency import write_parquet_with_pool
-
-from ._utils import (
-    _build_cli_calendar_lookup,
-    _compute_sim_day_index,
-    _julian_to_calendar,
-    _parse_float,
-)
 from .schema_utils import pa_field
 from .versioning import schema_with_version
-from ._rust_interchange import load_rust_interchange, resolve_cli_calendar_path, version_args
-
-WAT_FILE_RE = re.compile(r"H(?P<wepp_id>\d+)", re.IGNORECASE)
-RAW_HEADER_SUBSTITUTIONS = (
-    (" -", ""),
-    ("#", "(#)"),
-    (" mm", ""),
-    ("Water(mm)", "Water"),
-    ("m^2", "(m^2)"),
-)
+from ._rust_interchange import call_wepppyo3_interchange, resolve_cli_calendar_path, version_args
 
 LOGGER = logging.getLogger(__name__)
-
-WAT_BASE_COLUMN_NAMES = [
-    "OFE",
-    "J",
-    "Y",
-    "P",
-    "RM",
-    "Q",
-    "Ep",
-    "Es",
-    "Er",
-    "Dp",
-    "UpStrmQ",
-    "SubRIn",
-    "latqcc",
-    "Total-Soil Water",
-    "frozwt",
-    "Snow-Water",
-    "QOFE",
-    "Tile",
-    "Irr",
-    "Area",
-]
-
-WAT_OPTIONAL_COLUMN_NAMES = [
-    "SoilWaterTotal",
-    "ProfileDepth",
-    "ProfilePorosityCap",
-    "ProfileFCStore",
-    "ProfileWPStore",
-    "InterceptionStorage",
-]
-
-WAT_COLUMN_NAMES = WAT_BASE_COLUMN_NAMES + WAT_OPTIONAL_COLUMN_NAMES
-
-HEADER_ALIASES = {
-    "OFE (#)": "OFE",
-    "OFE": "OFE",
-    "P (mm)": "P",
-    "RM (mm)": "RM",
-    "Q (mm)": "Q",
-    "Ep (mm)": "Ep",
-    "Es (mm)": "Es",
-    "Er (mm)": "Er",
-    "Dp (mm)": "Dp",
-    "UpStrmQ (mm)": "UpStrmQ",
-    "SubRIn (mm)": "SubRIn",
-    "latqcc (mm)": "latqcc",
-    "Total-Soil Water (mm)": "Total-Soil Water",
-    "frozwt (mm)": "frozwt",
-    "Snow-Water (mm)": "Snow-Water",
-    "QOFE (mm)": "QOFE",
-    "Tile (mm)": "Tile",
-    "Irr (mm)": "Irr",
-    "Area (m^2)": "Area",
-    "SoilWaterTotal (mm)": "SoilWaterTotal",
-    "ProfileDepth (mm)": "ProfileDepth",
-    "ProfilePorosityCap (mm)": "ProfilePorosityCap",
-    "ProfileFCStore (mm)": "ProfileFCStore",
-    "ProfileWPStore (mm)": "ProfileWPStore",
-    "InterceptionStorage (mm)": "InterceptionStorage",
-}
 
 SCHEMA = schema_with_version(
     pa.schema(
@@ -168,7 +85,14 @@ SCHEMA = schema_with_version(
     )
 )
 
-EMPTY_TABLE = pa.table({name: [] for name in SCHEMA.names}, schema=SCHEMA)
+WAT_OPTIONAL_COLUMN_NAMES = [
+    "SoilWaterTotal",
+    "ProfileDepth",
+    "ProfilePorosityCap",
+    "ProfileFCStore",
+    "ProfileWPStore",
+    "InterceptionStorage",
+]
 
 CANONICAL_COLUMN_ALIASES = {
     "wepp_id": ("wepp_id",),
@@ -266,209 +190,6 @@ def _coerce_wat_dtypes(frame: pd.DataFrame) -> pd.DataFrame:
     return frame
 
 
-def _init_column_store() -> Dict[str, List]:
-    return {name: [] for name in SCHEMA.names}
-
-
-def _append_row(store: Dict[str, List], row: Dict[str, object]) -> None:
-    for name in SCHEMA.names:
-        store[name].append(row[name])
-
-
-def _extract_header(lines: List[str]) -> tuple[List[str], int]:
-    header_start: Optional[int] = None
-    header_end: Optional[int] = None
-
-    for idx, line in enumerate(lines):
-        stripped = line.strip()
-        if not stripped:
-            continue
-        if stripped.startswith("-"):
-            if header_start is None:
-                header_start = idx
-            elif header_end is None:
-                header_end = idx
-                break
-
-    if header_start is None or header_end is None:
-        raise ValueError("Unable to locate WAT header delimiters")
-
-    raw_header_rows = [line.split() for line in lines[header_start + 1 : header_end]]
-    transposed = list(zip(*raw_header_rows))
-    header: List[str] = []
-    for column_parts in transposed:
-        merged = " ".join(column_parts)
-        for old, new in RAW_HEADER_SUBSTITUTIONS:
-            merged = merged.replace(old, new)
-        header.append(merged.strip())
-
-    canonical_header: List[str] = [HEADER_ALIASES.get(value, value) for value in header]
-
-    base_len = len(WAT_BASE_COLUMN_NAMES)
-    if canonical_header[:base_len] != WAT_BASE_COLUMN_NAMES:
-        raise ValueError(f"Unexpected WAT column layout: {header}")
-
-    optional_header = canonical_header[base_len:]
-    expected_optional = WAT_OPTIONAL_COLUMN_NAMES[: len(optional_header)]
-    if optional_header != expected_optional:
-        raise ValueError(
-            "Unexpected WAT column layout: "
-            f"{header}; optional columns must be trailing approved terms {WAT_OPTIONAL_COLUMN_NAMES}"
-        )
-
-    return canonical_header, header_end + 2
-
-
-def _parse_wat_file(path: Path, *, calendar_lookup: dict[int, list[tuple[int, int]]] | None = None) -> pa.Table:
-    match = WAT_FILE_RE.match(path.name)
-    if not match:
-        raise ValueError(f"Unrecognized WAT filename pattern: {path}")
-    wepp_id = int(match.group("wepp_id"))
-
-    lines = path.read_text().splitlines()
-    header, data_start = _extract_header(lines)
-    column_positions = {name: idx for idx, name in enumerate(header)}
-
-    out = _init_column_store()
-
-    start_year: int | None = None
-
-    for raw_line in lines[data_start:]:
-        if not raw_line.strip():
-            continue
-        tokens = raw_line.split()
-        if len(tokens) != len(header):
-            continue
-
-        julian = int(tokens[column_positions["J"]])
-        year = int(tokens[column_positions["Y"]])
-        month, day_of_month = _julian_to_calendar(year, julian, calendar_lookup=calendar_lookup)
-        if start_year is None:
-            start_year = year
-        sim_day_index = _compute_sim_day_index(
-            year,
-            julian,
-            start_year=start_year,
-            calendar_lookup=calendar_lookup,
-        )
-        if sim_day_index < 1:
-            raise ValueError(
-                f"Computed negative simulation day index ({sim_day_index}) for {path} at year={year}, julian={julian}"
-            )
-        wy = determine_wateryear(year, julian)
-        ofe_id = int(tokens[column_positions["OFE"]])
-
-        row: Dict[str, object] = {
-            "wepp_id": wepp_id,
-            "ofe_id": ofe_id,
-            "year": year,
-            "sim_day_index": sim_day_index,
-            "julian": julian,
-            "month": month,
-            "day_of_month": day_of_month,
-            "water_year": int(wy),
-            "OFE": ofe_id,
-        }
-
-        for name in WAT_BASE_COLUMN_NAMES[3:]:
-            token = tokens[column_positions[name]]
-            row[name] = _parse_float(token)
-        for name in WAT_OPTIONAL_COLUMN_NAMES:
-            if name in column_positions:
-                token = tokens[column_positions[name]]
-                row[name] = _parse_float(token)
-            else:
-                row[name] = None
-
-        _append_row(out, row)
-
-    return pa.table(out, schema=SCHEMA)
-
-
-def _recompute_sim_day_index(
-    table: pa.Table,
-    *,
-    calendar_lookup: dict[int, list[tuple[int, int]]] | None = None,
-) -> pa.Table:
-    if table.num_rows == 0:
-        return table
-
-    years = table.column("year").combine_chunks().to_numpy(zero_copy_only=False).astype(np.int32, copy=False)
-    julians = table.column("julian").combine_chunks().to_numpy(zero_copy_only=False).astype(np.int32, copy=False)
-    start_year = int(years.min())
-
-    unique_dates = sorted({(int(year), int(julian)) for year, julian in zip(years, julians)})
-    sim_day_lookup = {
-        date_key: _compute_sim_day_index(
-            date_key[0],
-            date_key[1],
-            start_year=start_year,
-            calendar_lookup=calendar_lookup,
-        )
-        for date_key in unique_dates
-    }
-
-    sim_day = np.fromiter(
-        (sim_day_lookup[(int(year), int(julian))] for year, julian in zip(years, julians)),
-        dtype=np.int32,
-        count=len(years),
-    )
-    if sim_day.size and int(sim_day.min()) < 1:
-        min_sim_day = int(sim_day.min())
-        raise ValueError(f"Computed negative simulation day index ({min_sim_day}) in WAT table")
-
-    sim_col_index = table.schema.get_field_index("sim_day_index")
-    return table.set_column(sim_col_index, "sim_day_index", pa.array(sim_day, type=pa.int32()))
-
-
-def _normalize_rust_optional_columns(columns: dict) -> dict:
-    missing = [name for name in WAT_OPTIONAL_COLUMN_NAMES if name not in columns]
-    if not missing:
-        return columns
-    row_count = 0
-    if columns:
-        first_values = next(iter(columns.values()))
-        row_count = len(first_values)
-    for name in missing:
-        columns[name] = [None] * row_count
-    return columns
-
-
-def _parse_wat_file_rust(
-    path: Path,
-    *,
-    cli_calendar_path: str | None,
-    version: tuple[int, int],
-    calendar_lookup: dict[int, list[tuple[int, int]]] | None,
-) -> pa.Table:
-    rust_mod, rust_err = load_rust_interchange()
-    if rust_mod is None:
-        LOGGER.warning(
-            "wepp interchange: Rust module unavailable for hillslope WAT; falling back to Python (%s)",
-            rust_err,
-        )
-        return _parse_wat_file(path, calendar_lookup=calendar_lookup)
-
-    major, minor = version
-    try:
-        columns = rust_mod.hillslope_wat_to_columns(
-            str(path),
-            major,
-            minor,
-            cli_calendar_path=cli_calendar_path,
-        )
-        columns = _normalize_rust_optional_columns(columns)
-        table = pa.table(columns, schema=SCHEMA)
-        return _recompute_sim_day_index(table, calendar_lookup=calendar_lookup)
-    except Exception as exc:
-        LOGGER.warning(
-            "wepp interchange: Rust hillslope WAT failed; falling back to Python (%s)",
-            exc,
-            exc_info=True,
-        )
-        return _parse_wat_file(path, calendar_lookup=calendar_lookup)
-
-
 def run_wepp_hillslope_wat_interchange(
     wepp_output_dir: Path | str,
     *,
@@ -488,57 +209,19 @@ def run_wepp_hillslope_wat_interchange(
     interchange_dir.mkdir(parents=True, exist_ok=True)
     target_path = interchange_dir / "H.wat.parquet"
 
-    calendar_lookup = _build_cli_calendar_lookup(base, log=LOGGER)
-    rust_mod, rust_err = load_rust_interchange()
-    if rust_mod is not None:
-        cli_calendar_path = resolve_cli_calendar_path(base, log=LOGGER)
-        major, minor = version_args()
-        direct_writer = getattr(rust_mod, "hillslope_wat_files_to_parquet", None)
-        if direct_writer is not None:
-            try:
-                direct_writer(
-                    [str(path) for path in wat_files],
-                    str(target_path),
-                    major,
-                    minor,
-                    cli_calendar_path=(
-                        str(cli_calendar_path) if cli_calendar_path else None
-                    ),
-                    compression="snappy",
-                )
-                LOGGER.info(
-                    "wepp interchange: hillslope WAT direct-to-Parquet via Rust"
-                )
-                return target_path
-            except (OSError, RuntimeError, ValueError) as exc:
-                LOGGER.warning(
-                    "wepp interchange: direct Rust hillslope WAT failed; "
-                    "falling back to source-ordered table conversion (%s)",
-                    exc,
-                    exc_info=True,
-                )
-        parser = partial(
-            _parse_wat_file_rust,
-            cli_calendar_path=str(cli_calendar_path) if cli_calendar_path else None,
-            version=(major, minor),
-            calendar_lookup=calendar_lookup,
-        )
-        LOGGER.info("wepp interchange: hillslope WAT via Rust")
-    else:
-        LOGGER.warning(
-            "wepp interchange: Rust module unavailable for hillslope WAT; falling back to Python (%s)",
-            rust_err,
-        )
-        parser = partial(_parse_wat_file, calendar_lookup=calendar_lookup)
-
-    write_parquet_with_pool(
-        wat_files,
-        parser,
-        SCHEMA,
-        target_path,
-        max_workers=max_workers,
-        empty_table=EMPTY_TABLE,
+    cli_calendar_path = resolve_cli_calendar_path(base, log=LOGGER)
+    major, minor = version_args()
+    call_wepppyo3_interchange(
+        "hillslope WAT",
+        "hillslope_wat_files_to_parquet",
+        [str(path) for path in wat_files],
+        str(target_path),
+        major,
+        minor,
+        cli_calendar_path=str(cli_calendar_path) if cli_calendar_path else None,
+        compression="snappy",
     )
+    LOGGER.info("wepp interchange: hillslope WAT direct-to-Parquet via WEPPpyo3")
     return target_path
 
 

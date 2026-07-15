@@ -34,6 +34,11 @@ from .versioning import (
     schema_with_version as schema_with_version,
     write_version_manifest as write_version_manifest,
 )
+from ._rust_interchange import (
+    WeppInterchangeExecutionError as WeppInterchangeExecutionError,
+    WeppInterchangeNativeError as WeppInterchangeNativeError,
+    WeppInterchangeUnavailableError as WeppInterchangeUnavailableError,
+)
 
 __all__ = [
     "generate_interchange_documentation",
@@ -64,4 +69,7 @@ __all__ = [
     "read_version_manifest",
     "needs_major_refresh",
     "remove_incompatible_interchange",
+    "WeppInterchangeNativeError",
+    "WeppInterchangeUnavailableError",
+    "WeppInterchangeExecutionError",
 ]

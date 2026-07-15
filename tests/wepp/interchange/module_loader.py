@@ -7,8 +7,6 @@ import types
 from pathlib import Path
 from typing import List
 
-os.environ.setdefault("WEPP_INTERCHANGE_FORCE_SERIAL", "1")
-
 REPO_ROOT = Path(__file__).resolve().parents[3]
 DEFAULT_PROJECT_OUTPUT = (
     REPO_ROOT

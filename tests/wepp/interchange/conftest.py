@@ -1,21 +1,7 @@
-import os
 import sys
 from typing import Iterator
 
 import pytest
-
-
-@pytest.fixture(scope="session", autouse=True)
-def _force_serial_interchange() -> Iterator[None]:
-    prev = os.environ.get("WEPP_INTERCHANGE_FORCE_SERIAL")
-    os.environ["WEPP_INTERCHANGE_FORCE_SERIAL"] = "1"
-    try:
-        yield
-    finally:
-        if prev is None:
-            os.environ.pop("WEPP_INTERCHANGE_FORCE_SERIAL", None)
-        else:
-            os.environ["WEPP_INTERCHANGE_FORCE_SERIAL"] = prev
 
 
 @pytest.fixture(autouse=True)

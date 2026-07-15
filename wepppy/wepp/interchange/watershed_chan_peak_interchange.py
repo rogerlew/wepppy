@@ -1,8 +1,6 @@
 from __future__ import annotations
 
-import errno
 import logging
-import shutil
 from datetime import date, datetime, timedelta
 from pathlib import Path
 from typing import Dict, List
@@ -11,13 +9,11 @@ import pyarrow as pa
 import pyarrow.parquet as pq
 import pandas as pd
 
-from wepppy.all_your_base.hydro import determine_wateryear
-
-from ._utils import _build_cli_calendar_lookup, _julian_to_calendar, _parse_float, _wait_for_path
+from ._utils import _build_cli_calendar_lookup, _julian_to_calendar, _wait_for_path
 from .schema_utils import pa_field
 from .versioning import schema_with_version
 from .date_filters import apply_date_filters
-from ._rust_interchange import load_rust_interchange, resolve_cli_calendar_path, version_args
+from ._rust_interchange import call_wepppyo3_interchange, resolve_cli_calendar_path, version_args
 
 CHAN_PEAK_FILENAME = "chan.out"
 CHAN_PEAK_PARQUET = "chan.out.parquet"
@@ -50,127 +46,6 @@ SCHEMA = schema_with_version(
 )
 
 
-def _init_column_store() -> Dict[str, List]:
-    return {name: [] for name in SCHEMA.names}
-
-
-def _flush_chunk(store: Dict[str, List], writer: pq.ParquetWriter) -> None:
-    if not store["year"]:
-        return
-    table = pa.table(store, schema=SCHEMA)
-    writer.write_table(table)
-    store.clear()
-    store.update(_init_column_store())
-
-
-def _write_chan_peak_parquet(
-    source: Path,
-    target: Path,
-    *,
-    start_year: int | None = None,
-    calendar_lookup: dict[int, list[tuple[int, int]]] | None = None,
-    chunk_size: int = CHUNK_SIZE,
-) -> None:
-    tmp_target = target.with_suffix(f"{target.suffix}.tmp")
-    if tmp_target.exists():
-        tmp_target.unlink()
-
-    writer = pq.ParquetWriter(
-        tmp_target,
-        SCHEMA,
-        compression="snappy",
-        use_dictionary=True,
-    )
-
-    store = _init_column_store()
-    row_counter = 0
-    data_section = False
-
-    try:
-        with source.open("r") as stream:
-            for raw_line in stream:
-                stripped = raw_line.strip()
-                if not data_section:
-                    if stripped.startswith("Year") and "Elmt_ID" in stripped:
-                        data_section = True
-                    continue
-
-                if not stripped:
-                    continue
-
-                tokens = stripped.split()
-                if len(tokens) != 6:
-                    continue
-
-                sim_year = int(tokens[0])
-                julian = int(tokens[1])
-                elmt_id = int(tokens[2])
-                chan_id = int(tokens[3])
-
-                if start_year is not None and sim_year < 1000:
-                    year = start_year + sim_year - 1
-                else:
-                    year = sim_year
-
-                store["year"].append(year)
-                store["simulation_year"].append(sim_year)
-                store["julian"].append(julian)
-                month, day_of_month = _julian_to_calendar(year, julian, calendar_lookup=calendar_lookup)
-                store["month"].append(month)
-                store["day_of_month"].append(day_of_month)
-                store["water_year"].append(int(determine_wateryear(year, julian)))
-                store["Elmt_ID"].append(elmt_id)
-                store["Chan_ID"].append(chan_id)
-                store["Time (s)"].append(_parse_float(tokens[4]))
-                store["Peak_Discharge (m^3/s)"].append(_parse_float(tokens[5]))
-
-                row_counter += 1
-                if row_counter % chunk_size == 0:
-                    _flush_chunk(store, writer)
-
-        if store["year"]:
-            _flush_chunk(store, writer)
-        else:
-            writer.write_table(pa.table(_init_column_store(), schema=SCHEMA))
-    except Exception:
-        writer.close()
-        if tmp_target.exists():
-            tmp_target.unlink()
-        raise
-    else:
-        writer.close()
-        try:
-            tmp_target.replace(target)
-        except OSError as exc:
-            if exc.errno == errno.EXDEV:
-                shutil.move(str(tmp_target), str(target))
-            else:
-                raise
-
-
-def _run_wepp_watershed_chan_peak_interchange_python(
-    wepp_output_dir: Path | str, *, start_year: int | None = None
-) -> Path:
-    base = Path(wepp_output_dir)
-    if not base.exists():
-        raise FileNotFoundError(base)
-
-    try:
-        start_year = int(start_year)  # type: ignore
-    except (TypeError, ValueError):
-        start_year = None
-
-    source = base / CHAN_PEAK_FILENAME
-    _wait_for_path(source)
-
-    interchange_dir = base / "interchange"
-    interchange_dir.mkdir(parents=True, exist_ok=True)
-    target = interchange_dir / CHAN_PEAK_PARQUET
-    calendar_lookup = _build_cli_calendar_lookup(base, log=LOGGER)
-    _write_chan_peak_parquet(source, target, start_year=start_year, calendar_lookup=calendar_lookup)
-    return target
-
-
 def run_wepp_watershed_chan_peak_interchange(
     wepp_output_dir: Path | str, *, start_year: int | None = None
 ) -> Path:
@@ -190,35 +65,21 @@ def run_wepp_watershed_chan_peak_interchange(
     interchange_dir.mkdir(parents=True, exist_ok=True)
     target = interchange_dir / CHAN_PEAK_PARQUET
 
-    rust_mod, rust_err = load_rust_interchange()
-    if rust_mod is not None:
-        cli_calendar_path = resolve_cli_calendar_path(base, log=LOGGER)
-        major, minor = version_args()
-        try:
-            rust_mod.watershed_chan_peak_to_parquet(
-                str(source),
-                str(target),
-                major,
-                minor,
-                cli_calendar_path=str(cli_calendar_path) if cli_calendar_path else None,
-                start_year=start_year,
-                chunk_rows=CHUNK_SIZE,
-            )
-            LOGGER.info("wepp interchange: CHAN_PEAK via Rust")
-            return target
-        except Exception as exc:
-            LOGGER.warning(
-                "wepp interchange: Rust CHAN_PEAK failed; falling back to Python (%s)",
-                exc,
-                exc_info=True,
-            )
-    else:
-        LOGGER.warning(
-            "wepp interchange: Rust module unavailable for CHAN_PEAK; falling back to Python (%s)",
-            rust_err,
-        )
-
-    return _run_wepp_watershed_chan_peak_interchange_python(base, start_year=start_year)
+    cli_calendar_path = resolve_cli_calendar_path(base, log=LOGGER)
+    major, minor = version_args()
+    call_wepppyo3_interchange(
+        "watershed channel peak",
+        "watershed_chan_peak_to_parquet",
+        str(source),
+        str(target),
+        major,
+        minor,
+        cli_calendar_path=str(cli_calendar_path) if cli_calendar_path else None,
+        start_year=start_year,
+        chunk_rows=CHUNK_SIZE,
+    )
+    LOGGER.info("wepp interchange: CHAN_PEAK via WEPPpyo3")
+    return target
 
 
 def chanout_dss_export(
@@ -272,7 +133,7 @@ def chanout_dss_export(
         def _safe_topaz(wepp_id: object) -> int | None:
             try:
                 return translator.top(wepp=int(wepp_id))
-            except Exception:
+            except Exception:  # broad-except: optional third-party translator boundary
                 return None
 
         topaz_series = pd.to_numeric(df["Elmt_ID"].apply(_safe_topaz), errors="coerce")

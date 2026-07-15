@@ -57,6 +57,9 @@ _LAZY_EXPORTS = {
     "read_version_manifest": (".versioning", "read_version_manifest"),
     "needs_major_refresh": (".versioning", "needs_major_refresh"),
     "remove_incompatible_interchange": (".versioning", "remove_incompatible_interchange"),
+    "WeppInterchangeNativeError": ("._rust_interchange", "WeppInterchangeNativeError"),
+    "WeppInterchangeUnavailableError": ("._rust_interchange", "WeppInterchangeUnavailableError"),
+    "WeppInterchangeExecutionError": ("._rust_interchange", "WeppInterchangeExecutionError"),
 }
 
 
@@ -104,4 +107,7 @@ __all__ = [
     "read_version_manifest",
     "needs_major_refresh",
     "remove_incompatible_interchange",
+    "WeppInterchangeNativeError",
+    "WeppInterchangeUnavailableError",
+    "WeppInterchangeExecutionError",
 ]

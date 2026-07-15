@@ -24,13 +24,18 @@ publication.
 - [x] (2026-07-15 17:05 UTC) Opened work package, tracker, ADR-0020, and ExecPlan.
 - [x] (2026-07-15 17:15 UTC) Completed exhaustive Python fallback and native API
   inventory; strict ownership requires six new native writers.
-- [ ] Add five hillslope bulk writers and one watershed TC_OUT writer to
-  wepppyo3 with schema/value/ordering/empty-input coverage.
-- [ ] Implement the required-native dependency/error boundary.
-- [ ] Remove watershed production Python parsers and fallbacks.
-- [ ] Remove hillslope production Python parsers and fallbacks.
-- [ ] Refresh documentation, tests, and the native release artifact as required.
-- [ ] Restart the local stack and pass fixture/generated native-only evidence.
+- [x] (2026-07-15 17:40 UTC) Added five hillslope bulk writers and one watershed
+  TC_OUT writer to wepppyo3 with schema/value/ordering/empty-input coverage.
+- [x] (2026-07-15 17:42 UTC) Implemented the required-native dependency/error
+  boundary and operation-specific aggregate preflights.
+- [x] (2026-07-15 17:42 UTC) Removed watershed production Python parsers and
+  report-writer recovery paths, including EBE raw-channel parsing and TC_OUT.
+- [x] (2026-07-15 17:42 UTC) Removed hillslope production Python parsers and the
+  shared Python primary-Parquet fan-in.
+- [x] (2026-07-15 17:50 UTC) Refreshed the native-only README/spec/test guidance,
+  regression suite, stubs, and the native release artifact.
+- [x] (2026-07-15 17:54 UTC) Restarted the local stack and passed fixture plus
+  generated native-only evidence with exact artifact provenance.
 - [ ] Complete independent code and QA reviews and disposition findings.
 - [ ] Pass broad gates, archive this plan, and close the package.
 
@@ -56,6 +61,17 @@ publication.
   native writer to infer the outlet and audit peak counts.
   Evidence: `watershed_ebe_interchange.py` helpers between the schema and public
   runner parse the raw channel report.
+- Observation: `WAT_OPTIONAL_COLUMN_NAMES` is also a downstream DataFrame-helper
+  contract even though stale-release column normalization was removed from the
+  writer facade.
+  Evidence: the first restarted RQ process raised on that missing public module
+  constant; restoring the constant without restoring parser behavior fixed the
+  import and all ten workers returned idle.
+- Observation: package-wide stubtest is blocked during mypy construction by
+  existing HEC-RAS XML/shapefile typing errors outside this cutover.
+  Evidence: `wctl run-stubtest wepppy.wepp.interchange` stopped in
+  `hec_ras_boundary.py` and `hec_ras_buffer.py`; focused stubtest for
+  `_rust_interchange` and `wctl check-test-stubs` pass.
 
 Add discoveries with exact paths, commands, or concise test output. Do not erase
 historical observations that changed the design.
@@ -82,10 +98,20 @@ historical observations that changed the design.
   Rationale: absence and corruption are different contracts; corruption must not
   be hidden by another fallback.
   Date/Author: 2026-07-15, Codex.
+- Decision: Keep compatibility-only worker-count parameters on public hillslope
+  facades while making them operationally inert.
+  Rationale: callers retain their signatures, but scheduling and primary
+  Parquet construction now belong to the native bulk writers.
+  Date/Author: 2026-07-15, Codex.
 
 ## Outcomes & Retrospective
 
-Open. Update after each milestone and at closure.
+Native source and release commits are `942adff` and `5242c17`. The installed
+Python 3.12 extension SHA-256 is
+`92b180d5bc383165eb71e767285bfab1cd3ad24d48fe356145aef645bc185163`.
+The local generated smoke converted all six `H1.*` report families from the
+AgFields Concept 2 output with one row group per source and logged only native
+writer/catalog operations. Broad gates and two reviews remain before closure.
 
 ## Context and Orientation
 

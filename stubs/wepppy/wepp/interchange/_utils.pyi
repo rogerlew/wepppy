@@ -7,8 +7,6 @@ CalendarLookup = Dict[int, List[Tuple[int, int]]]
 
 def _wait_for_path(path: Path | str, timeout: float = ..., poll: float = ...) -> None: ...
 
-def _parse_float(token: str) -> float: ...  # Fortran overflow tokens ("*****") map to NaN.
-
 def _julian_to_calendar(year: int, julian: int, *, calendar_lookup: Optional[CalendarLookup] = ...) -> Tuple[int, int]: ...
 
 def _calendar_day_to_julian(

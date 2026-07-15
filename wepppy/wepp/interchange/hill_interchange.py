@@ -2,6 +2,7 @@ import logging
 from datetime import datetime, timezone
 from pathlib import Path
 
+from ._rust_interchange import require_wepppyo3_interchange
 from .hill_ebe_interchange import run_wepp_hillslope_ebe_interchange
 from .hill_element_interchange import run_wepp_hillslope_element_interchange
 from .hill_loss_interchange import run_wepp_hillslope_loss_interchange
@@ -41,7 +42,7 @@ def _audit_log(log_path: Path, message: str) -> None:
         timestamp = datetime.now(timezone.utc).isoformat().replace("+00:00", "Z")
         with log_path.open("a", encoding="utf-8") as stream:
             stream.write(f"{timestamp} {message}\n")
-    except Exception:
+    except Exception:  # broad-except: optional NoDb metadata lookup must not block conversion
         LOGGER.warning("Failed to write interchange audit log: %s", log_path, exc_info=True)
 
 
@@ -172,6 +173,19 @@ def run_wepp_hillslope_interchange(
     except (TypeError, ValueError):
         start_year = None
 
+    required_symbols = [
+        "hillslope_pass_files_to_parquet",
+        "hillslope_ebe_files_to_parquet",
+        "hillslope_element_files_to_parquet",
+    ]
+    if run_loss_interchange:
+        required_symbols.append("hillslope_loss_files_to_parquet")
+    if run_soil_interchange:
+        required_symbols.append("hillslope_soil_files_to_parquet")
+    if run_wat_interchange:
+        required_symbols.append("hillslope_wat_files_to_parquet")
+    require_wepppyo3_interchange("hillslope aggregate preflight", *required_symbols)
+
     interchange_dir = base / "interchange"
     remove_incompatible_interchange(interchange_dir)
 
@@ -262,7 +276,7 @@ def _expected_hillslopes(output_dir: Path) -> int | None:
 
     try:
         watershed = Watershed.getInstance(str(wd))
-    except Exception:
+    except Exception:  # broad-except: optional NoDb metadata may be absent or malformed
         return None
     try:
         return int(watershed.sub_n)

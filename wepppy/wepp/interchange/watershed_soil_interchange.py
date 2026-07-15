@@ -1,80 +1,21 @@
 from __future__ import annotations
 
 import logging
-import errno
-import shutil
 from pathlib import Path
-import gzip
-
-try:
-    from .schema_utils import pa_field
-except ModuleNotFoundError:
-    import importlib.machinery
-    import importlib.util
-    import sys
-
-    schema_utils_path = Path(__file__).with_name("schema_utils.py")
-    loader = importlib.machinery.SourceFileLoader("schema_utils_local", str(schema_utils_path))
-    spec = importlib.util.spec_from_loader(loader.name, loader)
-    module = importlib.util.module_from_spec(spec)
-    sys.modules[loader.name] = module
-    loader.exec_module(module)
-    pa_field = module.pa_field
-from typing import Dict, List, Optional
 
 import pyarrow as pa
 import pyarrow.parquet as pq
 
-from wepppy.all_your_base.hydro import determine_wateryear
-from ._utils import _build_cli_calendar_lookup, _julian_to_calendar
+from ._rust_interchange import call_wepppyo3_interchange, resolve_cli_calendar_path, version_args
+from .schema_utils import pa_field
 from .versioning import schema_with_version
-from ._rust_interchange import load_rust_interchange, resolve_cli_calendar_path, version_args
+
 
 SOIL_FILENAME = "soil_pw0.txt"
 SOIL_PARQUET = "soil_pw0.parquet"
 CHUNK_SIZE = 250_000
 
 LOGGER = logging.getLogger(__name__)
-
-
-RAW_HEADER = [
-    "OFE",
-    "Day",
-    "Y",
-    "Poros",
-    "Keff",
-    "Suct",
-    "FC",
-    "WP",
-    "Rough",
-    "Ki",
-    "Kr",
-    "Tauc",
-    "Saturation",
-    "TSW",
-]
-
-TSMF_HEADER = RAW_HEADER + ["TSMF"]
-
-LEGACY_HEADER = RAW_HEADER[:-2]
-
-MEASUREMENT_COLUMNS = [
-    "Poros",
-    "Keff",
-    "Suct",
-    "FC",
-    "WP",
-    "Rough",
-    "Ki",
-    "Kr",
-    "Tauc",
-    "Saturation",
-    "TSW",
-    "TSMF",
-]
-
-RAW_MEASUREMENT_COLUMNS = MEASUREMENT_COLUMNS[: len(RAW_HEADER) - 3]
-LEGACY_MEASUREMENT_COLUMNS = MEASUREMENT_COLUMNS[: len(LEGACY_HEADER) - 3]
 
 SCHEMA = schema_with_version(
     pa.schema(
@@ -89,185 +30,70 @@ SCHEMA = schema_with_version(
             pa_field("water_year", pa.int16()),
             pa_field("OFE", pa.int16()),
             pa_field("Poros", pa.float64(), units="%", description="Soil porosity"),
-            pa_field("Keff", pa.float64(), units="mm/hr", description="Effective hydraulic conductivity"),
-            pa_field("Suct", pa.float64(), units="mm", description="Suction across wetting front"),
+            pa_field(
+                "Keff",
+                pa.float64(),
+                units="mm/hr",
+                description="Effective hydraulic conductivity",
+            ),
+            pa_field(
+                "Suct",
+                pa.float64(),
+                units="mm",
+                description="Suction across wetting front",
+            ),
             pa_field("FC", pa.float64(), units="mm/mm", description="Field capacity"),
             pa_field("WP", pa.float64(), units="mm/mm", description="Wilting point"),
             pa_field("Rough", pa.float64(), units="mm", description="Surface roughness"),
-            pa_field("Ki", pa.float64(), units="adjsmt", description="Interrill erodibility adjustment factor"),
-            pa_field("Kr", pa.float64(), units="adjsmt", description="Rill erodibility adjustment factor"),
-            pa_field("Tauc", pa.float64(), units="adjsmt", description="Critical shear stress adjustment factor"),
-            pa_field("Saturation", pa.float64(), units="frac", description="Saturation as fraction"),
+            pa_field(
+                "Ki",
+                pa.float64(),
+                units="adjsmt",
+                description="Interrill erodibility adjustment factor",
+            ),
+            pa_field(
+                "Kr",
+                pa.float64(),
+                units="adjsmt",
+                description="Rill erodibility adjustment factor",
+            ),
+            pa_field(
+                "Tauc",
+                pa.float64(),
+                units="adjsmt",
+                description="Critical shear stress adjustment factor",
+            ),
+            pa_field(
+                "Saturation",
+                pa.float64(),
+                units="frac",
+                description="Saturation as fraction",
+            ),
             pa_field("TSW", pa.float64(), units="mm", description="Total soil water"),
-            pa_field("TSMF", pa.float64(), units="frac", description="True soil moisture fraction (full profile)"),
+            pa_field(
+                "TSMF",
+                pa.float64(),
+                units="frac",
+                description="True soil moisture fraction (full profile)",
+            ),
         ]
     )
 )
 
 
-def _init_column_store() -> Dict[str, List]:
-    return {name: [] for name in SCHEMA.names}
-
-
-def _validate_rust_schema(actual: pa.Schema) -> None:
+def _validate_native_schema(actual: pa.Schema) -> None:
     if actual.names != SCHEMA.names:
-        raise ValueError(f"Rust SOIL schema mismatch: expected {SCHEMA.names} but got {actual.names}")
+        raise ValueError(
+            f"WEPPpyo3 SOIL schema mismatch: expected {SCHEMA.names} but got {actual.names}"
+        )
 
     for expected_field in SCHEMA:
         actual_field = actual.field(expected_field.name)
         if actual_field.type != expected_field.type:
             raise ValueError(
-                "Rust SOIL schema type mismatch for "
+                "WEPPpyo3 SOIL schema type mismatch for "
                 f"{expected_field.name}: expected {expected_field.type} but got {actual_field.type}"
             )
-
-
-def _flush_chunk(store: Dict[str, List], writer: pq.ParquetWriter) -> None:
-    if not store["wepp_id"]:
-        return
-    table = pa.table(store, schema=SCHEMA)
-    writer.write_table(table)
-    store.clear()
-    store.update(_init_column_store())
-
-
-def _write_soil_parquet(
-    source: Path,
-    target: Path,
-    *,
-    chunk_size: int = CHUNK_SIZE,
-    calendar_lookup: dict[int, list[tuple[int, int]]] | None = None,
-) -> None:
-    tmp_target = target.with_suffix(f"{target.suffix}.tmp")
-    if tmp_target.exists():
-        tmp_target.unlink()
-
-    writer = pq.ParquetWriter(
-        tmp_target,
-        SCHEMA,
-        compression="snappy",
-        use_dictionary=True,
-    )
-
-    store = _init_column_store()
-    header_found = False
-    data_start = 0
-    row_counter = 0
-    header_tokens: Optional[List[str]] = None
-    measurement_columns = MEASUREMENT_COLUMNS
-    expected_tokens = len(TSMF_HEADER)
-
-    try:
-        with source.open("r") as stream:
-            for idx, raw_line in enumerate(stream):
-                stripped = raw_line.strip()
-                if not header_found:
-                    if stripped.startswith("OFE"):
-                        header_found = True
-                        header_tokens = stripped.split()
-                        if header_tokens == TSMF_HEADER:
-                            measurement_columns = MEASUREMENT_COLUMNS
-                        elif header_tokens == RAW_HEADER:
-                            measurement_columns = RAW_MEASUREMENT_COLUMNS
-                        elif header_tokens == LEGACY_HEADER:
-                            measurement_columns = LEGACY_MEASUREMENT_COLUMNS
-                        else:
-                            raise ValueError(f"Unexpected watershed soil header: {header_tokens}")
-                        expected_tokens = len(header_tokens)
-                        data_start = idx + 2
-                    continue
-
-                if idx < data_start:
-                    continue
-
-                if not stripped or stripped.startswith("-"):
-                    continue
-
-                tokens = stripped.split()
-                if not tokens or not tokens[0].isdigit():
-                    continue
-                if len(tokens) != expected_tokens:
-                    raise ValueError(f"Unexpected token count in soil row: {raw_line}")
-
-                ofe = int(tokens[0])
-                julian = int(tokens[1])
-                year = int(tokens[2])
-                measurement_values = {
-                    column_name: float(token)
-                    for column_name, token in zip(measurement_columns, tokens[3:])
-                }
-
-                month, day_of_month = _julian_to_calendar(year, julian, calendar_lookup=calendar_lookup)
-                water_year = int(determine_wateryear(year, julian))
-
-                store["wepp_id"].append(ofe)
-                store["ofe_id"].append(ofe)
-                store["year"].append(year)
-                store["day"].append(julian)
-                store["julian"].append(julian)
-                store["month"].append(month)
-                store["day_of_month"].append(day_of_month)
-                store["water_year"].append(water_year)
-                store["OFE"].append(ofe)
-                for column_name in MEASUREMENT_COLUMNS:
-                    store[column_name].append(measurement_values.get(column_name))
-
-                row_counter += 1
-                if row_counter % chunk_size == 0:
-                    _flush_chunk(store, writer)
-
-        if store["wepp_id"]:
-            _flush_chunk(store, writer)
-        elif row_counter == 0:
-            writer.write_table(pa.table(_init_column_store(), schema=SCHEMA))
-    except Exception:
-        writer.close()
-        if tmp_target.exists():
-            tmp_target.unlink()
-        raise
-    else:
-        writer.close()
-        try:
-            tmp_target.replace(target)
-        except OSError as exc:
-            if exc.errno == errno.EXDEV:
-                shutil.move(str(tmp_target), str(target))
-            else:
-                raise
-
-
-def _run_wepp_watershed_soil_interchange_python(wepp_output_dir: Path | str) -> Path:
-    base = Path(wepp_output_dir)
-    if not base.exists():
-        raise FileNotFoundError(base)
-
-    soil_path = base / SOIL_FILENAME
-    is_gzip = False
-    if not soil_path.exists():
-        gz_path = soil_path.with_suffix(soil_path.suffix + ".gz")
-        if gz_path.exists():
-            soil_path = gz_path
-            is_gzip = True
-        else:
-            raise FileNotFoundError(base / SOIL_FILENAME)
-
-    interchange_dir = base / "interchange"
-    interchange_dir.mkdir(parents=True, exist_ok=True)
-
-    calendar_lookup = _build_cli_calendar_lookup(base, log=LOGGER)
-    target = interchange_dir / SOIL_PARQUET
-    if is_gzip:
-        with gzip.open(soil_path, "rt") as stream:
-            tmp_source = target.with_suffix(target.suffix + ".src")
-            tmp_source.write_text(stream.read())
-        try:
-            _write_soil_parquet(tmp_source, target, calendar_lookup=calendar_lookup)
-        finally:
-            if tmp_source.exists():
-                tmp_source.unlink()
-    else:
-        _write_soil_parquet(soil_path, target, calendar_lookup=calendar_lookup)
-    return target
 
 
 def run_wepp_watershed_soil_interchange(wepp_output_dir: Path | str) -> Path:
@@ -287,32 +113,18 @@ def run_wepp_watershed_soil_interchange(wepp_output_dir: Path | str) -> Path:
     interchange_dir.mkdir(parents=True, exist_ok=True)
     target = interchange_dir / SOIL_PARQUET
 
-    rust_mod, rust_err = load_rust_interchange()
-    if rust_mod is not None:
-        cli_calendar_path = resolve_cli_calendar_path(base, log=LOGGER)
-        major, minor = version_args()
-        try:
-            rust_mod.watershed_soil_to_parquet(
-                str(soil_path),
-                str(target),
-                major,
-                minor,
-                cli_calendar_path=str(cli_calendar_path) if cli_calendar_path else None,
-                chunk_rows=CHUNK_SIZE,
-            )
-            _validate_rust_schema(pq.read_schema(target))
-            LOGGER.info("wepp interchange: SOIL via Rust")
-            return target
-        except Exception as exc:
-            LOGGER.warning(
-                "wepp interchange: Rust SOIL failed; falling back to Python (%s)",
-                exc,
-                exc_info=True,
-            )
-    else:
-        LOGGER.warning(
-            "wepp interchange: Rust module unavailable for SOIL; falling back to Python (%s)",
-            rust_err,
-        )
-
-    return _run_wepp_watershed_soil_interchange_python(base)
+    cli_calendar_path = resolve_cli_calendar_path(base, log=LOGGER)
+    major, minor = version_args()
+    call_wepppyo3_interchange(
+        "watershed SOIL",
+        "watershed_soil_to_parquet",
+        str(soil_path),
+        str(target),
+        major,
+        minor,
+        cli_calendar_path=str(cli_calendar_path) if cli_calendar_path else None,
+        chunk_rows=CHUNK_SIZE,
+    )
+    _validate_native_schema(pq.read_schema(target))
+    LOGGER.info("wepp interchange: SOIL via WEPPpyo3")
+    return target

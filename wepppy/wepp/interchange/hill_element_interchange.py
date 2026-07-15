@@ -1,89 +1,15 @@
 from __future__ import annotations
 
-from calendar import monthrange
 import logging
-from datetime import datetime
-from functools import partial
 from pathlib import Path
-from typing import Dict, List, Optional
-
-import re
+from typing import Optional
 
 import pyarrow as pa
 
-from wepppy.all_your_base.hydro import determine_wateryear
-from .concurrency import write_parquet_with_pool
-
+from ._rust_interchange import call_wepppyo3_interchange, version_args
 from .schema_utils import pa_field
-from ._utils import _parse_float
 from .versioning import schema_with_version
-from ._rust_interchange import load_rust_interchange, version_args
 
-ELEMENT_FILE_RE = re.compile(r"H(?P<wepp_id>\d+)", re.IGNORECASE)
-
-ELEMENT_COLUMN_NAMES = [
-    "OFE",
-    "DD",
-    "MM",
-    "YYYY",
-    "Precip",
-    "Runoff",
-    "EffInt",
-    "PeakRO",
-    "EffDur",
-    "Enrich",
-    "Keff",
-    "Sm",
-    "LeafArea",
-    "CanHgt",
-    "Cancov",
-    "IntCov",
-    "RilCov",
-    "LivBio",
-    "DeadBio",
-    "Ki",
-    "Kr",
-    "Tcrit",
-    "RilWid",
-    "SedLeave",
-]
-
-ELEMENT_OPTIONAL_COLUMN_NAMES = [
-    "QRain",
-    "QSnow",
-]
-
-ELEMENT_FIELD_WIDTHS = [
-    3,  # OFE
-    3,  # DD
-    3,  # MM
-    5,  # YYYY
-    9,  # Precip
-    9,  # Runoff
-    8,  # EffInt
-    8,  # PeakRO
-    8,  # EffDur
-    6,  # Enrich
-    8,  # Keff
-    8,  # Sm
-    8,  # LeafArea
-    7,  # CanHgt
-    9,  # Cancov
-    9,  # IntCov
-    9,  # RilCov
-    9,  # LivBio
-    7,  # DeadBio
-    7,  # Ki
-    7,  # Kr
-    7,  # Tcrit
-    7,  # RilWid
-    9,  # SedLeave
-]
-
-ELEMENT_OPTIONAL_FIELD_WIDTHS = [
-    9,  # QRain
-    9,  # QSnow
-]
 
 LOGGER = logging.getLogger(__name__)
 
@@ -106,7 +32,12 @@ SCHEMA = schema_with_version(
                 units="mm/h",
                 description="Effective rainfall intensity",
             ),
-            pa_field("PeakRO", pa.float64(), units="mm/h", description="Peak runoff rate"),
+            pa_field(
+                "PeakRO",
+                pa.float64(),
+                units="mm/h",
+                description="Peak runoff rate",
+            ),
             pa_field("EffDur", pa.float64(), units="h"),
             pa_field("Enrich", pa.float64(), description="Sediment enrichment ratio"),
             pa_field(
@@ -123,7 +54,12 @@ SCHEMA = schema_with_version(
             pa_field("RilCov", pa.float64(), units="%", description="Rill cover"),
             pa_field("LivBio", pa.float64(), units="kg/m^2"),
             pa_field("DeadBio", pa.float64(), units="kg/m^2"),
-            pa_field("Ki", pa.float64(), units="kg s/m^4", description="Interrill erodibility"),
+            pa_field(
+                "Ki",
+                pa.float64(),
+                units="kg s/m^4",
+                description="Interrill erodibility",
+            ),
             pa_field("Kr", pa.float64(), units="s/m", description="Rill erodibility"),
             pa_field("Tcrit", pa.float64()),
             pa_field("RilWid", pa.float64(), units="m"),
@@ -133,211 +69,6 @@ SCHEMA = schema_with_version(
         ]
     )
 )
-
-EMPTY_TABLE = pa.table({name: [] for name in SCHEMA.names}, schema=SCHEMA)
-
-def _is_missing_token(token: str) -> bool:
-    stripped = token.strip()
-    return bool(stripped) and set(stripped) == {"*"}
-
-
-def _parse_optional_float(token: str) -> Optional[float]:
-    if _is_missing_token(token):
-        return None
-    return _parse_float(token)
-
-
-def _init_column_store() -> Dict[str, List]:
-    return {name: [] for name in SCHEMA.names}
-
-
-def _append_row(store: Dict[str, List], row: Dict[str, object]) -> None:
-    for name in SCHEMA.names:
-        store[name].append(row[name])
-
-
-_LINE_WIDTH = sum(ELEMENT_FIELD_WIDTHS)
-_OPTIONAL_LINE_WIDTH = sum(ELEMENT_OPTIONAL_FIELD_WIDTHS)
-
-
-def _split_fixed_width_payload(raw_line: str, field_widths: List[int]) -> tuple[List[str], str]:
-    expected_width = sum(field_widths)
-    if len(raw_line) < expected_width:
-        raw_line = raw_line.ljust(expected_width)
-    tokens: List[str] = []
-    idx = 0
-    for width in field_widths:
-        segment = raw_line[idx : idx + width]
-        tokens.append(segment.strip())
-        idx += width
-    return tokens, raw_line[idx:]
-
-
-def _split_fixed_width_line(raw_line: str) -> List[str]:
-    tokens, remainder = _split_fixed_width_payload(raw_line, ELEMENT_FIELD_WIDTHS)
-    if not remainder.strip():
-        return tokens + [""] * len(ELEMENT_OPTIONAL_COLUMN_NAMES)
-
-    optional_tokens, tail = _split_fixed_width_payload(remainder, ELEMENT_OPTIONAL_FIELD_WIDTHS)
-    if tail.strip():
-        raise ValueError(f"Unexpected trailing characters past fixed width payload: {tail!r}")
-    return tokens + optional_tokens
-
-
-def _normalize_date_tokens(
-    raw_year: int,
-    raw_month: int,
-    raw_day: int,
-    *,
-    start_year: Optional[int] = None,
-) -> tuple[int, int, int, int, int]:
-    """Normalize WEPP element calendar tokens to valid Gregorian dates.
-
-    The revegetation binaries can emit month/day combinations that overflow the
-    civil calendar (for example 30 February when summarizing half-month periods)
-    and may also encode the simulation year as an offset from the configured
-    start year. This helper resolves the tokens to a valid date while preserving
-    ordering semantics.
-    """
-    year = raw_year
-    if start_year is not None and year < 1000:
-        year = start_year + year - 1
-
-    # Normalize months that fall outside 1-12 by rolling them into the year.
-    if raw_month < 1:
-        raw_month = 1
-    if raw_day < 1:
-        raw_day = 1
-    extra_years, month_index = divmod(raw_month - 1, 12)
-    year += extra_years
-    month = month_index + 1
-
-    max_day = monthrange(year, month)[1]
-    day = min(raw_day, max_day)
-
-    event_date = datetime(year, month, day)
-    julian = (event_date - datetime(year, 1, 1)).days + 1
-    water_year = int(determine_wateryear(event_date.year, julian))
-    return event_date.year, month, day, julian, water_year
-
-
-def _parse_element_file(path: Path, *, start_year: Optional[int] = None) -> pa.Table:
-    match = ELEMENT_FILE_RE.match(path.name)
-    if not match:
-        raise ValueError(f"Unrecognized element filename pattern: {path}")
-    wepp_id = int(match.group("wepp_id"))
-
-    raw_lines = path.read_text().splitlines()
-    trimmed_lines = [line.rstrip("\n") for line in raw_lines if line.strip()]
-    if len(trimmed_lines) < 3:
-        return pa.table({name: [] for name in SCHEMA.names}, schema=SCHEMA)
-
-    data_lines = trimmed_lines[2:]
-    out = _init_column_store()
-
-    base_value_names = ELEMENT_COLUMN_NAMES[4:]
-    optional_value_offset = 4 + len(base_value_names)
-    previous_values: Dict[str, float] = {}
-
-    for idx, raw_line in enumerate(data_lines):
-        tokens = _split_fixed_width_line(raw_line)
-
-        ofe = int(tokens[0])
-        day_of_month = int(tokens[1])
-        month = int(tokens[2])
-        year_token = int(tokens[3])
-
-        year, month, day_of_month, julian, water_year = _normalize_date_tokens(
-            year_token,
-            month,
-            day_of_month,
-            start_year=start_year,
-        )
-
-        row: Dict[str, object] = {
-            "wepp_id": wepp_id,
-            "ofe_id": ofe,
-            "year": year,
-            "julian": julian,
-            "month": month,
-            "day_of_month": day_of_month,
-            "water_year": water_year,
-            "OFE": ofe,
-        }
-
-        for column_name, token in zip(base_value_names, tokens[4:optional_value_offset]):
-            value = _parse_optional_float(token)
-            if value is None:
-                if idx == 0:
-                    value = 0.0
-                else:
-                    value = previous_values[column_name]
-            row[column_name] = value
-
-        for column_name, token in zip(
-            ELEMENT_OPTIONAL_COLUMN_NAMES,
-            tokens[optional_value_offset:],
-        ):
-            if not token:
-                row[column_name] = None
-            else:
-                row[column_name] = _parse_optional_float(token)
-
-        _append_row(out, row)
-        previous_values = {name: row[name] for name in base_value_names}
-
-    return pa.table(out, schema=SCHEMA)
-
-
-def _normalize_rust_optional_columns(columns: Dict[str, object]) -> Dict[str, object]:
-    missing_optional = [
-        name for name in ELEMENT_OPTIONAL_COLUMN_NAMES if name not in columns
-    ]
-    if not missing_optional:
-        return columns
-
-    row_count = 0
-    for values in columns.values():
-        row_count = len(values)
-        break
-
-    normalized = dict(columns)
-    for name in missing_optional:
-        normalized[name] = [None] * row_count
-    return normalized
-
-
-def _parse_element_file_rust(
-    path: Path,
-    *,
-    version: tuple[int, int],
-    start_year: Optional[int],
-) -> pa.Table:
-    rust_mod, rust_err = load_rust_interchange()
-    if rust_mod is None:
-        LOGGER.warning(
-            "wepp interchange: Rust module unavailable for hillslope ELEMENT; falling back to Python (%s)",
-            rust_err,
-        )
-        return _parse_element_file(path, start_year=start_year)
-
-    major, minor = version
-    try:
-        columns = rust_mod.hillslope_element_to_columns(
-            str(path),
-            major,
-            minor,
-            start_year=start_year,
-        )
-        columns = _normalize_rust_optional_columns(columns)
-        return pa.table(columns, schema=SCHEMA)
-    except Exception as exc:
-        LOGGER.warning(
-            "wepp interchange: Rust hillslope ELEMENT failed; falling back to Python (%s)",
-            exc,
-            exc_info=True,
-        )
-        return _parse_element_file(path, start_year=start_year)
 
 
 def run_wepp_hillslope_element_interchange(
@@ -356,35 +87,21 @@ def run_wepp_hillslope_element_interchange(
         raise FileNotFoundError(
             f"Expected {expected_hillslopes} hillslope element files but found {len(element_files)} in {base}"
         )
+
     interchange_dir = base / "interchange"
     interchange_dir.mkdir(parents=True, exist_ok=True)
     target_path = interchange_dir / "H.element.parquet"
 
-    rust_mod, rust_err = load_rust_interchange()
-    if rust_mod is not None:
-        major, minor = version_args()
-        parser = partial(
-            _parse_element_file_rust,
-            version=(major, minor),
-            start_year=start_year,
-        )
-        LOGGER.info("wepp interchange: hillslope ELEMENT via Rust")
-    else:
-        LOGGER.warning(
-            "wepp interchange: Rust module unavailable for hillslope ELEMENT; falling back to Python (%s)",
-            rust_err,
-        )
-        if start_year is None:
-            parser = _parse_element_file
-        else:
-            parser = partial(_parse_element_file, start_year=start_year)
-
-    write_parquet_with_pool(
-        element_files,
-        parser,
-        SCHEMA,
-        target_path,
-        max_workers=max_workers,
-        empty_table=EMPTY_TABLE,
+    major, minor = version_args()
+    call_wepppyo3_interchange(
+        "hillslope ELEMENT",
+        "hillslope_element_files_to_parquet",
+        [str(path) for path in element_files],
+        str(target_path),
+        major,
+        minor,
+        start_year=start_year,
+        compression="snappy",
     )
+    LOGGER.info("wepp interchange: hillslope ELEMENT direct-to-Parquet via WEPPpyo3")
     return target_path

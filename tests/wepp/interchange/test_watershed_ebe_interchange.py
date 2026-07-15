@@ -12,6 +12,10 @@ from .module_loader import PROJECT_OUTPUT, cleanup_import_state, load_module
 
 load_module("wepppy.all_your_base", "wepppy/all_your_base/__init__.py")
 load_module("wepppy.all_your_base.hydro", "wepppy/all_your_base/hydro/hydro.py")
+_rust_interchange = load_module(
+    "wepppy.wepp.interchange._rust_interchange",
+    "wepppy/wepp/interchange/_rust_interchange.py",
+)
 
 _watershed_ebe = load_module(
     "wepppy.wepp.interchange.watershed_ebe_interchange",
@@ -22,6 +26,7 @@ pytestmark = pytest.mark.integration
 
 run_wepp_watershed_ebe_interchange = _watershed_ebe.run_wepp_watershed_ebe_interchange
 EBE_PARQUET = _watershed_ebe.EBE_PARQUET
+WeppInterchangeExecutionError = _rust_interchange.WeppInterchangeExecutionError
 
 
 def test_watershed_ebe_interchange_writes_parquet(tmp_path: Path) -> None:
@@ -124,8 +129,12 @@ def test_watershed_ebe_interchange_rejects_all_zero_peaks_when_chan_out_is_posit
         encoding="utf-8",
     )
 
-    with pytest.raises(ValueError, match="all-zero .* chan.out has positive peaks"):
+    with pytest.raises(
+        WeppInterchangeExecutionError,
+        match="all-zero .* chan.out has positive peaks",
+    ) as raised:
         run_wepp_watershed_ebe_interchange(workdir, start_year=2000)
+    assert isinstance(raised.value.__cause__, ValueError)
 
 
 def test_watershed_ebe_interchange_keeps_nonzero_peak_signal_for_material_chan_peaks(

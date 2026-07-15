@@ -1,7 +1,5 @@
 from __future__ import annotations
 
-import errno
-import shutil
 import logging
 from pathlib import Path
 from typing import Dict, List
@@ -10,11 +8,9 @@ import pyarrow as pa
 import pyarrow.parquet as pq
 
 from .schema_utils import pa_field
-from ._utils import _build_cli_calendar_lookup, _julian_to_calendar, _parse_float, _wait_for_path
+from ._utils import _wait_for_path
 from .versioning import schema_with_version
-from ._rust_interchange import load_rust_interchange, resolve_cli_calendar_path, version_args
-
-from wepppy.all_your_base.hydro import determine_wateryear
+from ._rust_interchange import call_wepppyo3_interchange, resolve_cli_calendar_path, version_args
 
 CHANWB_FILENAME = "chnwb.txt"
 CHANWB_PARQUET = "chnwb.parquet"
@@ -66,125 +62,6 @@ SCHEMA = schema_with_version(
 )
 
 
-def _init_column_store() -> Dict[str, List]:
-    return {name: [] for name in SCHEMA.names}
-
-
-def _flush_chunk(store: Dict[str, List], writer: pq.ParquetWriter) -> None:
-    if not store["wepp_id"]:
-        return
-    table = pa.table(store, schema=SCHEMA)
-    writer.write_table(table)
-    store.clear()
-    store.update(_init_column_store())
-
-
-def _write_chanwb_parquet(
-    source: Path,
-    target: Path,
-    *,
-    start_year: int | None = None,
-    calendar_lookup: dict[int, list[tuple[int, int]]] | None = None,
-    chunk_size: int = 250_000,
-) -> None:
-    tmp_target = target.with_suffix(f"{target.suffix}.tmp")
-    if tmp_target.exists():
-        tmp_target.unlink()
-
-    writer = pq.ParquetWriter(
-        tmp_target,
-        SCHEMA,
-        compression="snappy",
-        use_dictionary=True,
-    )
-
-    store = _init_column_store()
-    row_counter = 0
-    header_found = False
-    data_offset = 0
-
-    try:
-        with source.open("r") as stream:
-            for idx, raw_line in enumerate(stream):
-                stripped = raw_line.strip()
-                if not header_found:
-                    if stripped.startswith("OFE"):
-                        header_found = True
-                        data_offset = idx + 3
-                    continue
-                if idx < data_offset:
-                    continue
-
-                if not stripped or stripped.startswith("-"):
-                    continue
-
-                tokens = stripped.split()
-                if len(tokens) != 22:
-                    continue
-
-                ofe = int(tokens[0])
-                julian = int(tokens[1])
-                sim_year = int(tokens[2])
-
-                if start_year is not None and sim_year < 1000:
-                    year = start_year + sim_year - 1
-                else:
-                    year = sim_year
-
-                month, day_of_month = _julian_to_calendar(year, julian, calendar_lookup=calendar_lookup)
-                store["wepp_id"].append(ofe)
-                store["julian"].append(julian)
-                store["year"].append(year)
-                store["simulation_year"].append(sim_year)
-                store["month"].append(month)
-                store["day_of_month"].append(day_of_month)
-                store["water_year"].append(int(determine_wateryear(year, julian)))
-                store["OFE"].append(ofe)
-                store["J"].append(julian)
-                store["Y"].append(sim_year)
-
-                measurement_values = tokens[3:]
-                for (key, _units, _description), token in zip(MEASUREMENT_COLUMNS, measurement_values):
-                    store[key].append(_parse_float(token))
-
-                row_counter += 1
-                if row_counter % chunk_size == 0:
-                    _flush_chunk(store, writer)
-
-        if store["wepp_id"]:
-            _flush_chunk(store, writer)
-        elif row_counter == 0:
-            writer.write_table(pa.table(_init_column_store(), schema=SCHEMA))
-    except Exception:
-        writer.close()
-        if tmp_target.exists():
-            tmp_target.unlink()
-        raise
-    else:
-        writer.close()
-        try:
-            tmp_target.replace(target)
-        except OSError as exc:
-            if exc.errno == errno.EXDEV:
-                shutil.move(str(tmp_target), str(target))
-            else:
-                raise
-
-
-def _run_wepp_watershed_chnwb_interchange_python(
-    base: Path, *, start_year: int | None = None
-) -> Path:
-    source = base / CHANWB_FILENAME
-    _wait_for_path(source)
-
-    interchange_dir = base / "interchange"
-    interchange_dir.mkdir(parents=True, exist_ok=True)
-    target = interchange_dir / CHANWB_PARQUET
-    calendar_lookup = _build_cli_calendar_lookup(base, log=LOGGER)
-    _write_chanwb_parquet(source, target, start_year=start_year, calendar_lookup=calendar_lookup)
-    return target
-
-
 def run_wepp_watershed_chnwb_interchange(
     wepp_output_dir: Path | str, *, start_year: int | None = None
 ) -> Path:
@@ -204,32 +81,18 @@ def run_wepp_watershed_chnwb_interchange(
     interchange_dir.mkdir(parents=True, exist_ok=True)
     target = interchange_dir / CHANWB_PARQUET
 
-    rust_mod, rust_err = load_rust_interchange()
-    if rust_mod is not None:
-        cli_calendar_path = resolve_cli_calendar_path(base, log=LOGGER)
-        major, minor = version_args()
-        try:
-            rust_mod.watershed_chnwb_to_parquet(
-                str(source),
-                str(target),
-                major,
-                minor,
-                cli_calendar_path=str(cli_calendar_path) if cli_calendar_path else None,
-                start_year=start_year,
-                chunk_rows=250_000,
-            )
-            LOGGER.info("wepp interchange: CHNWB via Rust")
-            return target
-        except Exception as exc:
-            LOGGER.warning(
-                "wepp interchange: Rust CHNWB failed; falling back to Python (%s)",
-                exc,
-                exc_info=True,
-            )
-    else:
-        LOGGER.warning(
-            "wepp interchange: Rust module unavailable for CHNWB; falling back to Python (%s)",
-            rust_err,
-        )
-
-    return _run_wepp_watershed_chnwb_interchange_python(base, start_year=start_year)
+    cli_calendar_path = resolve_cli_calendar_path(base, log=LOGGER)
+    major, minor = version_args()
+    call_wepppyo3_interchange(
+        "watershed CHNWB",
+        "watershed_chnwb_to_parquet",
+        str(source),
+        str(target),
+        major,
+        minor,
+        cli_calendar_path=str(cli_calendar_path) if cli_calendar_path else None,
+        start_year=start_year,
+        chunk_rows=250_000,
+    )
+    LOGGER.info("wepp interchange: CHNWB via WEPPpyo3")
+    return target

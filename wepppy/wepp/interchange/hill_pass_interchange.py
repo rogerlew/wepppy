@@ -1,118 +1,17 @@
 from __future__ import annotations
 
 import logging
-from functools import partial
 from pathlib import Path
-from typing import Dict, List
-
-import re
 
 import pyarrow as pa
-import pyarrow.parquet as pq
 
-from wepppy.all_your_base.hydro import determine_wateryear
-from .concurrency import write_parquet_with_pool
-
+from ._rust_interchange import call_wepppyo3_interchange, resolve_cli_calendar_path, version_args
 from .schema_utils import pa_field
-from ._utils import (
-    _build_cli_calendar_lookup,
-    _compute_sim_day_index,
-    _julian_to_calendar,
-    _parse_float,
-)
 from .versioning import schema_with_version
-from ._rust_interchange import load_rust_interchange, resolve_cli_calendar_path, version_args
 
-
-EVENT_LABELS = {"EVENT", "SUBEVENT", "NO EVENT"}
-SEDCLASS_COUNT = 5
-EVENT_FLOAT_COUNT = 12 + (2 * SEDCLASS_COUNT) + 2  # dur..tdep + sedcon + frcflw + gwbfv/gwdsv
-SUBEVENT_FLOAT_COUNT = 6  # sbrunf, sbrunv, drainq, drrunv, gwbfv, gwdsv
-NOEVENT_FLOAT_COUNT = 2  # gwbfv, gwdsv
 
 LOGGER = logging.getLogger(__name__)
 
-
-SCHEMA = schema_with_version(
-    pa.schema(
-        [
-            pa_field("wepp_id", pa.int32()),
-            pa_field("event", pa.string(), description="Record type: EVENT, SUBEVENT, NO EVENT"),
-            pa_field("year", pa.int16()),
-            pa_field("sim_day_index", pa.int32(), description="1-indexed simulation day since start year"),
-            pa_field("julian", pa.int16()),
-            pa_field("month", pa.int8()),
-            pa_field("day_of_month", pa.int8()),
-            pa_field("water_year", pa.int16()),
-            pa_field("dur", pa.float64(), units="s", description="Storm duration"),
-            pa_field("tcs", pa.float64(), units="h", description="Overland flow time of concentration"),
-            pa_field("oalpha", pa.float64(), units="unitless", description="Overland flow alpha parameter"),
-            pa_field("runoff", pa.float64(), units="m", description="Runoff depth"),
-            pa_field("runvol", pa.float64(), units="m^3", description="Runoff volume"),
-            pa_field("sbrunf", pa.float64(), units="m", description="Subsurface runoff depth"),
-            pa_field("sbrunv", pa.float64(), units="m^3", description="Subsurface runoff volume"),
-            pa_field("drainq", pa.float64(), units="m/day", description="Drainage flux"),
-            pa_field("drrunv", pa.float64(), units="m^3", description="Tile Drainage volume"),
-            pa_field("peakro", pa.float64(), units="m^3/s", description="Peak runoff rate"),
-            pa_field("tdet", pa.float64(), units="kg", description="Total detachment"),
-            pa_field("tdep", pa.float64(), units="kg", description="Total deposition"),
-            pa_field("sedcon_1", pa.float64(), units="kg/m^3", description="Sediment concentration 1"),
-            pa_field("sedcon_2", pa.float64(), units="kg/m^3", description="Sediment concentration 2"),
-            pa_field("sedcon_3", pa.float64(), units="kg/m^3", description="Sediment concentration 3"),
-            pa_field("sedcon_4", pa.float64(), units="kg/m^3", description="Sediment concentration 4"),
-            pa_field("sedcon_5", pa.float64(), units="kg/m^3", description="Sediment concentration 5"),
-            pa_field("clot", pa.float64(), units="m^3/s", description="Friction flow 1"),
-            pa_field("slot", pa.float64(), units="%", description="% of exiting sediment in the silt size class"),
-            pa_field("saot", pa.float64(), units="%", description="% of exiting sediment in the small aggregate size class"),
-            pa_field("laot", pa.float64(), units="%", description="% of exiting sediment in the large aggregate size class"),
-            pa_field("sdot", pa.float64(), units="%", description="% of exiting sediment in the sand size class"),
-            pa_field("gwbfv", pa.float64(), description="Groundwater baseflow"),
-            pa_field("gwdsv", pa.float64(), description="Groundwater deep seepage"),
-        ]
-    )
-)
-
-EMPTY_TABLE = pa.table({name: [] for name in SCHEMA.names}, schema=SCHEMA)
-
-def _event_tokens(lines: List[str], start_idx: int) -> tuple[List[str], int]:
-    """Collect numeric values for a multi-line EVENT record."""
-    primary = lines[start_idx]
-    numeric_tokens = primary[8:].split()
-
-    expected = 2 + EVENT_FLOAT_COUNT
-    idx = start_idx + 1
-    while len(numeric_tokens) < expected and idx < len(lines):
-        candidate = lines[idx]
-        label = candidate[:8].strip()
-        if label in EVENT_LABELS and label:
-            break
-        numeric_tokens.extend(candidate.split())
-        idx += 1
-    return numeric_tokens, idx
-
-
-def _subevent_tokens(line: str) -> List[str]:
-    """Return numeric tokens for a SUBEVENT line."""
-    return line[8:].split()
-
-
-def _noevent_tokens(line: str) -> List[str]:
-    """Return numeric tokens for a NO EVENT line."""
-    return line[8:].split()
-
-
-def _init_column_store() -> Dict[str, List]:
-    """Create an empty columnar store keyed by schema field."""
-    return {name: [] for name in SCHEMA.names}
-
-
-def _append_row(store: Dict[str, List], row: Dict[str, object]) -> None:
-    """Append a dictionary row to the in-memory columnar store."""
-    for name in SCHEMA.names:
-        store[name].append(row[name])
-
-
-PASS_FILE_RE = re.compile(r"H(?P<wepp_id>\d+)", re.IGNORECASE)
 PASS_FAMILY_AUTO = "auto"
 PASS_FAMILY_LEGACY_ASCII = "legacy_ascii"
 PASS_FAMILY_HBP = "hbp"
@@ -123,205 +22,118 @@ PASS_FAMILY_CHOICES = {
 }
 INVALID_PROCESS_HBP_SUFFIXES = (".pass.hbp", ".pass.dat.hbp")
 
-
-def _parse_pass_file(path: Path, *, calendar_lookup: dict[int, list[tuple[int, int]]] | None = None) -> pa.Table:
-    """Parse a single PASS file into a PyArrow table."""
-    match = PASS_FILE_RE.match(path.name)
-    if not match:
-        raise ValueError(f"Unrecognized PASS filename pattern: {path}")
-    wepp_id = int(match.group("wepp_id"))
-
-    with path.open("r") as stream:
-        lines = stream.readlines()
-
-    if len(lines) < 2:
-        raise ValueError(f"PASS file missing simulation metadata header: {path}")
-
-    header_tokens = lines[1].split()
-    if not header_tokens:
-        raise ValueError(f"Unable to determine simulation start year from PASS header in {path}")
-    try:
-        begin_year = int(header_tokens[-1])
-    except ValueError as exc:
-        raise ValueError(f"PASS header does not contain a valid start year in {path}") from exc
-
-    # skip header lines (climate setup, particle definitions)
-    data_lines = lines[5:]
-    out = _init_column_store()
-
-    idx = 0
-    while idx < len(data_lines):
-        raw_line = data_lines[idx]
-        label = raw_line[:8].strip()
-        if not label:
-            idx += 1
-            continue
-        label_upper = label.upper()
-        if label_upper not in EVENT_LABELS:
-            idx += 1
-            continue
-
-        if label_upper == "EVENT":
-            tokens, idx = _event_tokens(data_lines, idx)
-        elif label_upper == "SUBEVENT":
-            tokens = _subevent_tokens(raw_line)
-            idx += 1
-        else:
-            tokens = _noevent_tokens(raw_line)
-            idx += 1
-
-        if len(tokens) < 2:
-            continue
-
-        year = int(tokens[0])
-        julian = int(tokens[1])
-        month, day_of_month = _julian_to_calendar(year, julian, calendar_lookup=calendar_lookup)
-        wy = determine_wateryear(year, julian)
-        sim_day_index = _compute_sim_day_index(
-            year,
-            julian,
-            start_year=begin_year,
-            calendar_lookup=calendar_lookup,
-        )
-        if sim_day_index < 1:
-            raise ValueError(
-                f"Computed negative simulation day index ({sim_day_index}) for {path} at year={year}, julian={julian}"
-            )
-
-        row = {
-            "wepp_id": wepp_id,
-            "event": label_upper,
-            "year": year,
-            "sim_day_index": sim_day_index,
-            "julian": julian,
-            "month": month,
-            "day_of_month": day_of_month,
-            "water_year": int(wy),
-            "dur": 0.0,
-            "tcs": 0.0,
-            "oalpha": 0.0,
-            "runoff": 0.0,
-            "runvol": 0.0,
-            "sbrunf": 0.0,
-            "sbrunv": 0.0,
-            "drainq": 0.0,
-            "drrunv": 0.0,
-            "peakro": 0.0,
-            "tdet": 0.0,
-            "tdep": 0.0,
-            "sedcon_1": 0.0,
-            "sedcon_2": 0.0,
-            "sedcon_3": 0.0,
-            "sedcon_4": 0.0,
-            "sedcon_5": 0.0,
-            "clot": 0.0,
-            "slot": 0.0,
-            "saot": 0.0,
-            "laot": 0.0,
-            "sdot": 0.0,
-            "gwbfv": 0.0,
-            "gwdsv": 0.0,
-        }
-
-        if label_upper == "EVENT":
-            values = tokens[2:]
-            if len(values) != EVENT_FLOAT_COUNT:
-                raise ValueError(f"Unexpected EVENT token count in {path}: {len(values)}")
-            row.update(
-                {
-                    "dur": _parse_float(values[0]),
-                    "tcs": _parse_float(values[1]),
-                    "oalpha": _parse_float(values[2]),
-                    "runoff": _parse_float(values[3]),
-                    "runvol": _parse_float(values[4]),
-                    "sbrunf": _parse_float(values[5]),
-                    "sbrunv": _parse_float(values[6]),
-                    "drainq": _parse_float(values[7]),
-                    "drrunv": _parse_float(values[8]),
-                    "peakro": _parse_float(values[9]),
-                    "tdet": _parse_float(values[10]),
-                    "tdep": _parse_float(values[11]),
-                    "sedcon_1": _parse_float(values[12]),
-                    "sedcon_2": _parse_float(values[13]),
-                    "sedcon_3": _parse_float(values[14]),
-                    "sedcon_4": _parse_float(values[15]),
-                    "sedcon_5": _parse_float(values[16]),
-                    "clot": _parse_float(values[17]),
-                    "slot": _parse_float(values[18]),
-                    "saot": _parse_float(values[19]),
-                    "laot": _parse_float(values[20]),
-                    "sdot": _parse_float(values[21]),
-                    "gwbfv": _parse_float(values[22]),
-                    "gwdsv": _parse_float(values[23]),
-                }
-            )
-        elif label_upper == "SUBEVENT":
-            values = tokens[2:]
-            if len(values) != SUBEVENT_FLOAT_COUNT:
-                raise ValueError(f"Unexpected SUBEVENT token count in {path}: {len(values)}")
-            row.update(
-                {
-                    "sbrunf": _parse_float(values[0]),
-                    "sbrunv": _parse_float(values[1]),
-                    "drainq": _parse_float(values[2]),
-                    "drrunv": _parse_float(values[3]),
-                    "gwbfv": _parse_float(values[4]),
-                    "gwdsv": _parse_float(values[5]),
-                }
-            )
-        else:  # NO EVENT
-            values = tokens[2:]
-            if len(values) != NOEVENT_FLOAT_COUNT:
-                raise ValueError(f"Unexpected NO EVENT token count in {path}: {len(values)}")
-            row.update(
-                {
-                    "gwbfv": _parse_float(values[0]),
-                    "gwdsv": _parse_float(values[1]),
-                }
-            )
-
-        _append_row(out, row)
-
-    return pa.table(out, schema=SCHEMA)
-
-
-def _parse_pass_file_rust(
-    path: Path,
-    *,
-    cli_calendar_path: str | None,
-    version: tuple[int, int],
-    calendar_lookup: dict[int, list[tuple[int, int]]] | None,
-    pass_family: str,
-) -> pa.Table:
-    rust_mod, rust_err = load_rust_interchange()
-    if rust_mod is None:
-        LOGGER.warning(
-            "wepp interchange: Rust module unavailable for hillslope PASS; falling back to Python (%s)",
-            rust_err,
-        )
-        return _parse_pass_file(path, calendar_lookup=calendar_lookup)
-
-    major, minor = version
-    try:
-        columns = rust_mod.hillslope_pass_to_columns(
-            str(path),
-            major,
-            minor,
-            cli_calendar_path=cli_calendar_path,
-            pass_family=pass_family,
-        )
-        return pa.table(columns, schema=SCHEMA)
-    except Exception as exc:
-        if pass_family == PASS_FAMILY_HBP:
-            raise RuntimeError(
-                f"HBP hillslope parsing failed in Rust for {path}: {exc}"
-            ) from exc
-        LOGGER.warning(
-            "wepp interchange: Rust hillslope PASS failed; falling back to Python (%s)",
-            exc,
-            exc_info=True,
-        )
-        return _parse_pass_file(path, calendar_lookup=calendar_lookup)
+SCHEMA = schema_with_version(
+    pa.schema(
+        [
+            pa_field("wepp_id", pa.int32()),
+            pa_field("event", pa.string(), description="Record type: EVENT, SUBEVENT, NO EVENT"),
+            pa_field("year", pa.int16()),
+            pa_field(
+                "sim_day_index",
+                pa.int32(),
+                description="1-indexed simulation day since start year",
+            ),
+            pa_field("julian", pa.int16()),
+            pa_field("month", pa.int8()),
+            pa_field("day_of_month", pa.int8()),
+            pa_field("water_year", pa.int16()),
+            pa_field("dur", pa.float64(), units="s", description="Storm duration"),
+            pa_field(
+                "tcs",
+                pa.float64(),
+                units="h",
+                description="Overland flow time of concentration",
+            ),
+            pa_field(
+                "oalpha",
+                pa.float64(),
+                units="unitless",
+                description="Overland flow alpha parameter",
+            ),
+            pa_field("runoff", pa.float64(), units="m", description="Runoff depth"),
+            pa_field("runvol", pa.float64(), units="m^3", description="Runoff volume"),
+            pa_field(
+                "sbrunf",
+                pa.float64(),
+                units="m",
+                description="Subsurface runoff depth",
+            ),
+            pa_field(
+                "sbrunv",
+                pa.float64(),
+                units="m^3",
+                description="Subsurface runoff volume",
+            ),
+            pa_field("drainq", pa.float64(), units="m/day", description="Drainage flux"),
+            pa_field(
+                "drrunv",
+                pa.float64(),
+                units="m^3",
+                description="Tile Drainage volume",
+            ),
+            pa_field("peakro", pa.float64(), units="m^3/s", description="Peak runoff rate"),
+            pa_field("tdet", pa.float64(), units="kg", description="Total detachment"),
+            pa_field("tdep", pa.float64(), units="kg", description="Total deposition"),
+            pa_field(
+                "sedcon_1",
+                pa.float64(),
+                units="kg/m^3",
+                description="Sediment concentration 1",
+            ),
+            pa_field(
+                "sedcon_2",
+                pa.float64(),
+                units="kg/m^3",
+                description="Sediment concentration 2",
+            ),
+            pa_field(
+                "sedcon_3",
+                pa.float64(),
+                units="kg/m^3",
+                description="Sediment concentration 3",
+            ),
+            pa_field(
+                "sedcon_4",
+                pa.float64(),
+                units="kg/m^3",
+                description="Sediment concentration 4",
+            ),
+            pa_field(
+                "sedcon_5",
+                pa.float64(),
+                units="kg/m^3",
+                description="Sediment concentration 5",
+            ),
+            pa_field("clot", pa.float64(), units="m^3/s", description="Friction flow 1"),
+            pa_field(
+                "slot",
+                pa.float64(),
+                units="%",
+                description="% of exiting sediment in the silt size class",
+            ),
+            pa_field(
+                "saot",
+                pa.float64(),
+                units="%",
+                description="% of exiting sediment in the small aggregate size class",
+            ),
+            pa_field(
+                "laot",
+                pa.float64(),
+                units="%",
+                description="% of exiting sediment in the large aggregate size class",
+            ),
+            pa_field(
+                "sdot",
+                pa.float64(),
+                units="%",
+                description="% of exiting sediment in the sand size class",
+            ),
+            pa_field("gwbfv", pa.float64(), description="Groundwater baseflow"),
+            pa_field("gwdsv", pa.float64(), description="Groundwater deep seepage"),
+        ]
+    )
+)
 
 
 def run_wepp_hillslope_pass_interchange(
@@ -331,7 +143,7 @@ def run_wepp_hillslope_pass_interchange(
     pass_family: str | None = None,
     max_workers: int | None = None,
 ) -> Path:
-    """Convert hillslope pass files into a consolidated parquet dataset."""
+    """Convert ordered hillslope PASS/HBP files through the native writer."""
     base = Path(wepp_output_dir)
     if not base.exists():
         raise FileNotFoundError(base)
@@ -342,57 +154,32 @@ def run_wepp_hillslope_pass_interchange(
         raise FileNotFoundError(
             f"Expected {expected_hillslopes} hillslope pass files but found {len(pass_files)} in {base}"
         )
-
-    if not pass_files:
-        if selected_pass_family == PASS_FAMILY_HBP:
-            raise FileNotFoundError(
-                f"No hillslope pass files found for pass_family={selected_pass_family} in {base}"
-            )
-        interchange_dir = base / "interchange"
-        interchange_dir.mkdir(parents=True, exist_ok=True)
-        target_path = interchange_dir / "H.pass.parquet"
-        pq.write_table(EMPTY_TABLE, target_path, compression="snappy")
-        return target_path
+    if not pass_files and selected_pass_family == PASS_FAMILY_HBP:
+        raise FileNotFoundError(
+            f"No hillslope pass files found for pass_family={selected_pass_family} in {base}"
+        )
 
     interchange_dir = base / "interchange"
     interchange_dir.mkdir(parents=True, exist_ok=True)
     target_path = interchange_dir / "H.pass.parquet"
 
-    calendar_lookup = _build_cli_calendar_lookup(base, log=LOGGER)
-    rust_mod, rust_err = load_rust_interchange()
-    if rust_mod is not None:
-        cli_calendar_path = resolve_cli_calendar_path(base, log=LOGGER)
-        major, minor = version_args()
-        parser = partial(
-            _parse_pass_file_rust,
-            cli_calendar_path=str(cli_calendar_path) if cli_calendar_path else None,
-            version=(major, minor),
-            calendar_lookup=calendar_lookup,
-            pass_family=selected_pass_family,
-        )
-        LOGGER.info(
-            "wepp interchange: hillslope PASS via Rust (pass_family=%s)",
-            selected_pass_family,
-        )
-    else:
-        if selected_pass_family == PASS_FAMILY_HBP:
-            raise RuntimeError(
-                "HBP hillslope interchange requires the Rust wepp_interchange module; "
-                "Python fallback only supports legacy ASCII H*.pass.dat files."
-            )
-        LOGGER.warning(
-            "wepp interchange: Rust module unavailable for hillslope PASS; falling back to Python (%s)",
-            rust_err,
-        )
-        parser = partial(_parse_pass_file, calendar_lookup=calendar_lookup)
-
-    write_parquet_with_pool(
-        pass_files,
-        parser,
-        SCHEMA,
-        target_path,
-        max_workers=max_workers,
-        empty_table=EMPTY_TABLE,
+    cli_calendar_path = resolve_cli_calendar_path(base, log=LOGGER)
+    major, minor = version_args()
+    call_wepppyo3_interchange(
+        "hillslope PASS",
+        "hillslope_pass_files_to_parquet",
+        [str(path) for path in pass_files],
+        str(target_path),
+        major,
+        minor,
+        cli_calendar_path=str(cli_calendar_path) if cli_calendar_path else None,
+        pass_family=selected_pass_family,
+        compression="snappy",
+    )
+    LOGGER.info(
+        "wepp interchange: hillslope PASS direct-to-Parquet via WEPPpyo3 "
+        "(pass_family=%s)",
+        selected_pass_family,
     )
     return target_path
 
@@ -412,12 +199,11 @@ def _normalize_pass_family(pass_family: str | None) -> str:
 
 
 def _collect_invalid_hbp_names(base: Path) -> list[Path]:
-    invalid = []
-    for candidate in base.glob("H*.hbp"):
-        lower = candidate.name.lower()
-        if lower.endswith(INVALID_PROCESS_HBP_SUFFIXES):
-            invalid.append(candidate)
-    return sorted(invalid)
+    return sorted(
+        candidate
+        for candidate in base.glob("H*.hbp")
+        if candidate.name.lower().endswith(INVALID_PROCESS_HBP_SUFFIXES)
+    )
 
 
 def _select_pass_files(base: Path, pass_family: str) -> tuple[list[Path], str]:

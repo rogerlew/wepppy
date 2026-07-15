@@ -4,10 +4,9 @@
 
 **Timezone**: UTC
 **Started**: 2026-07-15 17:05 UTC
-**Current phase**: Native API expansion
-**Last updated**: 2026-07-15 17:15 UTC
-**Next milestone**: Add five hillslope bulk writers plus TC_OUT to wepppyo3,
-then implement the required-native WEPPpy boundary
+**Current phase**: Broad validation and independent review
+**Last updated**: 2026-07-15 17:54 UTC
+**Next milestone**: Run repository-wide gates, complete dual reviews, and close
 **Security impact**: `low`
 **Dedicated security review**: `no`
 **Security artifact**: `N/A`
@@ -16,15 +15,11 @@ then implement the required-native WEPPpy boundary
 
 ### Ready / Backlog
 
-- [ ] Remove watershed Python report parser fallbacks.
-- [ ] Remove hillslope Python report parser fallbacks.
-- [ ] Remove the shared Python Parquet fan-in and watershed EBE raw parser.
-- [ ] Rebuild/install native release and restart the stack.
-- [ ] Run generated smoke, broad gates, and dual reviews.
+- [ ] Run repository-wide gates and dual reviews.
 
 ### In Progress
 
-- [ ] Implement five native hillslope bulk writers and native TC_OUT.
+- [ ] Resolve and disposition any review findings.
 
 ### Blocked
 
@@ -38,12 +33,28 @@ None.
   five missing hillslope bulk writers, one missing TC_OUT writer, and one
   watershed EBE raw-`chan.out` parser (2026-07-15 17:15 UTC).
 - [x] Freeze package, ADR, and ExecPlan contracts (2026-07-15 17:15 UTC).
+- [x] Add five native hillslope bulk writers, native TC_OUT, PASS hint discovery,
+  and EBE raw-channel audit (2026-07-15 17:40 UTC).
+- [x] Cut all production facades and query catalog scanning to required native
+  operations; delete legacy parsers and fan-in (2026-07-15 17:42 UTC).
+- [x] Build/install release SHA
+  `92b180d5bc383165eb71e767285bfab1cd3ad24d48fe356145aef645bc185163`
+  and restart the local stack (2026-07-15 17:48 UTC).
+- [x] Pass 47-test focused suite, native release suite, exact-symbol/provenance
+  checks, and generated H1 all-format smoke (2026-07-15 17:54 UTC).
+- [x] Rewrite native ownership, failure, release, and test documentation
+  (2026-07-15 17:50 UTC).
 
 ## Timeline
 
 - **2026-07-15 17:05 UTC** - Package opened from the AgFields fallback incident.
 - **2026-07-15 17:15 UTC** - Discovery expanded the native API scope to five
   hillslope bulk writers and TC_OUT so the cutover removes Python writers too.
+- **2026-07-15 17:42 UTC** - Native API and WEPPpy facade cutover completed.
+- **2026-07-15 17:48 UTC** - Local forest Python services restarted on the exact
+  rebuilt extension; all ten RQ workers returned idle.
+- **2026-07-15 17:54 UTC** - Generated Concept 2 H1 smoke converted all six
+  hillslope formats through native writers with source-ordered row groups.
 
 ## Decisions Log
 
@@ -75,11 +86,11 @@ empty output, row ordering, row groups, and atomic publication.
 
 | Risk | Severity | Likelihood | Mitigation | Status |
 | --- | --- | --- | --- | --- |
-| An old worker imports a release missing one operation | High | Medium | Required-symbol preflight, provenance smoke, worker restart | Open |
-| Removing dead parsers changes schema behavior accidentally | High | Low | Existing parity fixtures, schema snapshots, generated smoke | Open |
-| Native failure leaves partial output | High | Low | Preserve temp/atomic publication and add exact regressions | Open |
+| An old worker imports a release missing one operation | High | Medium | Required-symbol preflight, provenance smoke, worker restart | Mitigated |
+| Removing dead parsers changes schema behavior accidentally | High | Low | Existing parity fixtures, schema snapshots, generated smoke | Mitigated |
+| Native failure leaves partial output | High | Low | Preserve temp/atomic publication and add exact regressions | Mitigated |
 | Scope expands into aggregation/export rewrites | Medium | Medium | Freeze parser/writer boundary in package and ADR | Mitigated |
-| Missing direct native writers delay WEPPpy deletion | High | Medium | Land and test six APIs in wepppyo3 before facade cutover | Open |
+| Missing direct native writers delay WEPPpy deletion | High | Medium | Land and test six APIs in wepppyo3 before facade cutover | Closed |
 
 ## Hardening Signal Log
 
@@ -95,24 +106,25 @@ empty output, row ordering, row groups, and atomic publication.
 
 ### Code Quality
 
-- [ ] Focused interchange tests pass.
+- [x] Focused interchange tests pass.
 - [ ] Full WEPPpy pytest gate passes.
-- [ ] Stub/API gates pass for changed public surfaces.
-- [ ] wepppyo3 Rust and release Python tests pass.
-- [ ] Broad-exception and code-quality observability run.
+- [x] Focused stub/API gates pass for changed public surfaces; package-wide
+  stubtest baseline blocker is recorded in the ExecPlan.
+- [x] wepppyo3 Rust and release Python tests pass.
+- [x] Broad-exception gate passes; code-quality observability remains pending.
 
 ### Documentation
 
-- [ ] ADR-0020 and ADR index are current.
-- [ ] Interchange README/spec/plan describe native-only behavior.
+- [x] ADR-0020 and ADR index are current.
+- [x] Interchange README/spec/plan describe native-only behavior.
 - [ ] Work package, tracker, reviews, and root board are current.
 
 ### Runtime
 
-- [ ] Installed release exposes the complete required symbol set.
-- [ ] Local stack restart completes and workers load the intended artifact.
-- [ ] Generated smoke completes with no fallback warning.
-- [ ] Forced missing/stale API fails explicitly without partial publication.
+- [x] Installed release exposes the complete required symbol set.
+- [x] Local stack restart completes and workers load the intended artifact.
+- [x] Generated smoke completes with no fallback warning.
+- [x] Forced missing/stale API fails explicitly without partial publication.
 
 ### Reviews
 
