@@ -11,7 +11,7 @@
 
 **Current phase**: Authenticated all-scheme generated acceptance
 
-**Last updated**: 2026-07-15 03:51 UTC
+**Last updated**: 2026-07-15 04:57 UTC
 
 **Next milestone**: Complete generated Concept 1, hybrid, and authenticated Run
 All acceptance while proving protected artifacts remain byte-identical
@@ -88,6 +88,13 @@ wiring is gated only by its own implementation and acceptance tests.
   planning, input synthesis, parent execution, PASS validation, manifests,
   watershed rerun, and scoped interchange; focused tests pass (2026-07-15 00:01
   UTC).
+- [x] Added exact job-id/terminal-RQ reconciliation for stopped or canceled
+  watershed jobs, including atomic stale-attempt quarantine/cleanup,
+  retry-integrity tests, and successful live recovery of the stopped Concept 1
+  state and its 17 GB partial tree (2026-07-15 04:29 UTC).
+- [x] Replaced raw cache-inclusive cgroup peak interpretation with continuous
+  anonymous-memory and worker-process sampling for generated acceptance
+  (2026-07-15 04:29 UTC).
 
 ## Timeline
 
@@ -128,6 +135,13 @@ wiring is gated only by its own implementation and acceptance tests.
 - [x] Threaded the integration worker bound through all hillslope converters and
   enforced the ADR-recorded 1-16 range at API, RQ, and collaborator boundaries
   (2026-07-15 02:46 UTC).
+- [x] Authenticated Run All was resubmitted after live stopped-state
+  reconciliation as serial jobs `70750bcd-0e70-4906-b25c-0e6f827b9bb1`,
+  `f7da8423-bfa1-41de-b0ae-b24e2eb2058f`, and
+  `ad00cdb4-93b6-4467-8e08-a40391e84c10` (2026-07-15 04:29 UTC).
+- [x] The final broad WEPPpy gate passed after interrupted-attempt cleanup with
+  4,905 passed, 60 skipped, and 414 warnings in 9 minutes 18 seconds (2026-07-15
+  04:57 UTC).
 - [x] Reproduced and fixed the live Run All NoDb admission race by preassigning
   and atomically persisting all scheme job ids before the first enqueue; the
   authenticated retry reached OFE planning (2026-07-15 03:08 UTC).
@@ -267,17 +281,18 @@ source, disabled floating-point trap, or silent Concept 2 fallback is permitted.
   `catalog.rs`/`parquet.rs`; the changed `mofe.rs` and UTF-8 writer source do not
   appear in its diff.
 - [x] Frontend Jest tests and lint pass.
-- [x] Updated stub and changed-file broad-exception checks pass.
+- [x] Updated stub and package-scoped changed-file broad-exception checks pass.
 - [x] Full `wctl run-pytest tests --maxfail=1` gate passes (4,901 passed, 60
   skipped).
 
 ### Security
 
 - [x] Security impact triage and dedicated artifact created.
-- [ ] Auth, CSRF/JWT scope, enum input validation, run-tree boundaries, queue
+- [x] Auth, session-token/JWT scope, enum input validation, run-tree boundaries, queue
   dependencies, subprocess arguments, locking, and partial-failure recovery are
   reviewed.
-- [ ] No unresolved medium/high findings remain.
+- [x] No unresolved medium/high implementation findings remain; generated
+  availability evidence is still required to pass the gate.
 
 ### Documentation and Governance
 
@@ -291,17 +306,17 @@ source, disabled floating-point trap, or silent Concept 2 fallback is permitted.
 
 ### Testing
 
-- [ ] Synthetic Concept 1 layout and failure-mode fixtures pass.
-- [ ] Pure and mixed hybrid parent fixtures close area, water, and sediment.
-- [ ] API omission, one-scheme, all-scheme, invalid-scheme, job dependency, clear,
+- [x] Synthetic Concept 1 layout and failure-mode fixtures pass.
+- [x] Pure and mixed hybrid parent fixtures close area, water, and sediment.
+- [x] API omission, one-scheme, all-scheme, invalid-scheme, job dependency, clear,
   stale, and partial-failure cases pass.
-- [ ] Legacy Concept 2 state/artifact compatibility passes.
+- [x] Legacy Concept 2 state/artifact compatibility passes.
 - [ ] Generated all-scheme run completes on `sacral-self-discipline` with protected
   artifacts byte-identical.
 
 ### Deployment and Evaluation
 
-- [ ] Current native binaries are built, provenance-stamped, and exercised by the
+- [x] Current native binaries are built, provenance-stamped, and exercised by the
   wired path.
 - [ ] Dev compose RQ/API/UI smoke passes through authenticated routes.
 - [ ] Mariana receives the three-scheme comparison bundle and records scientific
@@ -370,7 +385,7 @@ rationale.
 
 **Test results**: 33 focused WEPPpy tests, 46 Peridot tests, 43 focused
 wepppyo3 Rust tests, and 9 wepppyo3 release Python tests passed. Stubtest,
-changed-file broad-exception enforcement, code-quality observability,
+package-scoped changed-file broad-exception enforcement, code-quality observability,
 `git diff --check`, Peridot formatting, and Markdown lint/heading extraction also
 passed. wepppyo3 package formatting reports unrelated preexisting drift in
 `catalog.rs` and `parquet.rs`; the touched source files are not in that diff. A

@@ -108,6 +108,20 @@ engineering results for a separate science evaluation.
   capacity, p1857 G1 repair, dated binaries, regression, and ablation evidence as
   detached commit `a87d0bbf`. The earlier p1 soil-cursor source, incident, and
   rebuilt `260430` artifacts remain unstaged and unchanged as preexisting dirt.
+- [x] (2026-07-15 04:29 UTC) Closed interrupted-job recovery after a conservative
+  live cancellation exposed persisted `running` NoDb state: exact job-id and
+  terminal-RQ reconciliation now makes the scheme retryable and quarantines stale
+  attempts before releasing state. Sixty-six focused tests and stub gates pass;
+  the stopped live job reconciled to `failed`, preserved its prior result, and its
+  identified 17 GB partial staging tree was safely removed.
+- [ ] (2026-07-15 04:29 UTC) Authenticated Run All acceptance restarted as jobs
+  `70750bcd-0e70-4906-b25c-0e6f827b9bb1`,
+  `f7da8423-bfa1-41de-b0ae-b24e2eb2058f`, and
+  `ad00cdb4-93b6-4467-8e08-a40391e84c10`; continuous cgroup anonymous-memory and
+  worker-process sampling is active.
+- [x] (2026-07-15 04:57 UTC) Re-ran the broad WEPPpy gate after the final
+  interrupted-attempt cleanup change: 4,905 tests passed, 60 skipped, and 414
+  warnings in 9 minutes 18 seconds.
 - [ ] Milestone 7: pass focused/broad gates, security/QA review, and all-scheme
   generated acceptance; publish Mariana's comparison bundle.
 - [ ] Move this plan to `prompts/completed/`, update the package/tracker/root board,
@@ -228,6 +242,32 @@ engineering results for a separate science evaluation.
   seconds with `NoDbAlreadyLockedError`. The downstream deferred jobs were
   canceled, all ids are now preassigned/persisted before enqueue, and the live
   retry entered `running:ofe_planning` without contention.
+- Observation: Raw worker-cgroup `memory.current` and `memory.peak` materially
+  overstate unique process memory after large output reads because they include
+  retained filesystem cache.
+  Evidence: the conservative cancellation was triggered near 52.4 GB, but the
+  post-cancel cgroup breakdown was 47.84 GB file cache, 250 MB anonymous memory,
+  zero cgroup swap, and no pressure/OOM event. Restarting the worker reduced
+  `memory.current` to about 514 MB with a 486 MB anonymous baseline.
+- Observation: Stopping an RQ job does not execute the worker exception boundary,
+  so the matching NoDb scheme can remain `running:<phase>` after RQ reaches
+  `stopped` and reject a safe retry with HTTP 409.
+  Evidence: stopped Concept 1 job
+  `2c7309f4-9c8e-485e-a9ec-a370782bf7a2` remained at
+  `running:watershed_rerun`; the new exact-id reconciliation changed it to a
+  retryable `failed` state with `RQJobInterrupted` and preserved its prior
+  completed summary. The same stop left a 17 GB `.concept-1.attempt-*` tree;
+  recovery now atomically quarantines exact-scheme attempts while holding the
+  NoDb lock, deletes them afterwards, and leaves failed deletion tombstones in the
+  already clearable `.previous-*` namespace.
+- Observation: Branch-wide broad-exception enforcement includes the separate
+  `5da847b40` Ash Transport commit and reports its two new catches; the
+  package-scoped AgFields/RQ/Peridot/interchange paths pass with a net reduction
+  of one broad catch.
+  Evidence: the full `origin/master` comparison fails only at
+  `wepppy/nodb/mods/ash_transport/ash.py`, while the explicit package-path run
+  reports every package file at delta zero or below. This package does not rewrite
+  that unrelated committed work.
 
 Add new discoveries here with commands, paths, or concise test output. Do not
 erase observations that changed the design.
@@ -275,6 +315,28 @@ erase observations that changed the design.
   Rationale: persisting ids after each enqueue allowed the first worker to race
   later route-side state writes. Preassignment preserves the existing independent
   jobs and dependency graph while removing that lock overlap.
+  Date/Author: 2026-07-15, Codex.
+- Decision: Reconcile a persisted running scheme only when its exact stored RQ
+  job id is terminal or missing; preserve its phase and previous result, record a
+  bounded `RQJobInterrupted` error, and leave active, direct, and mismatched jobs
+  untouched.
+  Rationale: canonical RQ stop/cancel cannot call the scheme's exception path,
+  but clearing running state without an authoritative job-id/status match could
+  admit overlapping work.
+  Date/Author: 2026-07-15, Codex.
+- Decision: Use sampled cgroup anonymous memory as the primary unique-memory
+  acceptance metric and process RSS/concurrency as supporting evidence; report
+  filesystem cache separately and do not use raw cgroup peak as process RSS.
+  Rationale: the first live retry populated tens of gigabytes of file cache,
+  making raw cgroup peak unsuitable for the package's unique-memory criterion.
+  Date/Author: 2026-07-15, Codex.
+- Decision: Require scheme-specific routing evidence instead of universal
+  `pass_sources` and `parent_routing` files.
+  Rationale: Concept 1 performs a single field-aware parent rerun and has no
+  weighted-source merge; Concept 2 performs weighted outlet injection and has no
+  one-dimensional OFE plan. Hybrid performs both. The comparison bundle therefore
+  normalizes their truthful routing/OFE/source/closure artifacts without creating
+  synthetic records that imply an operation the scheme did not perform.
   Date/Author: 2026-07-15, Codex.
 - Decision: A mixed hybrid uses a rerun residual Concept 1 source plus connected
   independent PASS sources. It does not inject on top of a full-area Concept 1

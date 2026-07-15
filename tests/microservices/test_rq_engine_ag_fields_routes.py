@@ -518,6 +518,70 @@ def test_enqueue_watershed_jobs_serializes_run_all_with_allow_failure_dependenci
     )
 
 
+@pytest.mark.parametrize(
+    ("rq_status", "expected_status"),
+    [("stopped", "failed"), ("started", "running:parent_execution")],
+)
+def test_reconcile_interrupted_watershed_job_uses_matching_terminal_rq_state(
+    monkeypatch: pytest.MonkeyPatch,
+    rq_status: str,
+    expected_status: str,
+) -> None:
+    states = {
+        scheme: {
+            "status": "not_run",
+            "phase": None,
+            "summary": None,
+            "error": None,
+            "job_id": None,
+        }
+        for scheme in ("concept_1", "concept_2", "hybrid")
+    }
+    states["concept_1"].update(
+        {
+            "status": "running:parent_execution",
+            "phase": "parent_execution",
+            "job_id": "job-c1",
+        }
+    )
+    reconciled: list[tuple[str, str, str]] = []
+
+    class DummyController:
+        wd = "/runs/demo"
+
+        def get_watershed_integration_states(self):
+            return {scheme: dict(state) for scheme, state in states.items()}
+
+        def mark_watershed_integration_interrupted(self, scheme, job_id, status):
+            reconciled.append((scheme, job_id, status))
+            states[scheme]["status"] = "failed"
+            states[scheme]["error"] = {
+                "type": "RQJobInterrupted",
+                "rq_status": status,
+            }
+            return True
+
+    monkeypatch.setattr(
+        ag_fields_routes.Job,
+        "fetch",
+        lambda job_id, connection: SimpleNamespace(
+            get_status=lambda refresh=False: rq_status
+        ),
+    )
+
+    result = ag_fields_routes._reconcile_interrupted_watershed_jobs(
+        DummyController(),
+        object(),
+    )
+
+    assert result["concept_1"]["status"] == expected_status
+    if rq_status == "stopped":
+        assert reconciled == [("concept_1", "job-c1", "stopped")]
+        assert result["concept_1"]["error"]["rq_status"] == "stopped"
+    else:
+        assert reconciled == []
+
+
 def _plant_zip_bytes() -> bytes:
     stream = io.BytesIO()
     with zipfile.ZipFile(stream, "w") as archive:

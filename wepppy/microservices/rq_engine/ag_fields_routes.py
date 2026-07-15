@@ -66,6 +66,14 @@ RQ_ENQUEUE_SCOPES = ["rq:enqueue"]
 RQ_READ_SCOPES = ["rq:status"]
 AGFIELDS_SUBMIT_LOCK_TTL_SECONDS = 30
 ACTIVE_RQ_JOB_STATUSES = {"queued", "started", "deferred", "scheduled"}
+TERMINAL_RQ_JOB_STATUSES = {
+    "canceled",
+    "cancelled",
+    "failed",
+    "finished",
+    "missing",
+    "stopped",
+}
 AGFIELDS_CURRENT_WATERSHED_JOB_KEYS = tuple(AGFIELDS_RUN_WATERSHED_JOB_KEYS.values())
 
 AGFIELDS_BOUNDARY_ALLOWED_EXTENSIONS = ("geojson", "json")
@@ -197,9 +205,13 @@ def _enqueue_watershed_jobs(
                         "An AgFields job is already active for this run "
                         f"(key={active['key']}, job_id={active['job_id']}, status={active['status']})."
                     )
+                states = _reconcile_interrupted_watershed_jobs(
+                    ag_fields,
+                    redis_conn,
+                )
                 running_schemes = [
                     scheme
-                    for scheme, state in ag_fields.get_watershed_integration_states().items()
+                    for scheme, state in states.items()
                     if str(state["status"]).startswith("running")
                 ]
                 if running_schemes:
@@ -288,11 +300,58 @@ def _find_active_job(prep: RedisPrep, redis_conn: redis.Redis) -> dict[str, str]
     return None
 
 
+def _reconcile_interrupted_watershed_jobs(
+    ag_fields: AgFields,
+    redis_conn: redis.Redis,
+) -> dict[str, dict[str, Any]]:
+    """Persist failure when a running scheme's matching RQ job is terminal."""
+    states = ag_fields.get_watershed_integration_states()
+    for scheme, state in states.items():
+        persisted_status = str(state["status"])
+        if not (
+            persisted_status == "running"
+            or persisted_status.startswith("running:")
+        ):
+            continue
+        job_id = str(state.get("job_id") or "").strip()
+        if not job_id:
+            continue
+        try:
+            job = Job.fetch(job_id, connection=redis_conn)
+        except NoSuchJobError:
+            rq_status = "missing"
+        else:
+            rq_status = str(job.get_status(refresh=False) or "").lower()
+        if rq_status not in TERMINAL_RQ_JOB_STATUSES:
+            continue
+        if ag_fields.mark_watershed_integration_interrupted(
+            scheme,
+            job_id,
+            rq_status,
+        ):
+            logger.warning(
+                "Reconciled interrupted AgFields watershed job",
+                extra={
+                    "runid": Path(ag_fields.wd).name,
+                    "scheme": scheme,
+                    "job_id": job_id,
+                    "rq_status": rq_status,
+                },
+            )
+    return ag_fields.get_watershed_integration_states()
+
+
 def _active_job_conflict_response(wd: str) -> JSONResponse | None:
     prep = RedisPrep.tryGetInstance(wd)
+    ag_fields = AgFields.getInstance(wd)
     if prep is not None:
         with redis.Redis(**redis_connection_kwargs(RedisDB.RQ)) as redis_conn:
             active = _find_active_job(prep, redis_conn)
+            states = (
+                ag_fields.get_watershed_integration_states()
+                if active is not None
+                else _reconcile_interrupted_watershed_jobs(ag_fields, redis_conn)
+            )
         if active is not None:
             return error_response(
                 "An AgFields job is active; wait for it to finish before changing AgFields inputs.",
@@ -302,7 +361,8 @@ def _active_job_conflict_response(wd: str) -> JSONResponse | None:
                     f"key={active['key']}, job_id={active['job_id']}, status={active['status']}"
                 ),
             )
-    states = AgFields.getInstance(wd).get_watershed_integration_states()
+    else:
+        states = ag_fields.get_watershed_integration_states()
     running_schemes = [
         scheme
         for scheme, state in states.items()
@@ -347,6 +407,20 @@ def _job_ids(prep: RedisPrep | None) -> tuple[dict[str, str | None], dict[str, s
 
 def _state_snapshot(wd: str) -> dict[str, Any]:
     ag_fields = AgFields.getInstance(wd)
+    watershed_integrations = ag_fields.get_watershed_integration_states()
+    if any(
+        (
+            str(state["status"]) == "running"
+            or str(state["status"]).startswith("running:")
+        )
+        and bool(state.get("job_id"))
+        for state in watershed_integrations.values()
+    ):
+        with redis.Redis(**redis_connection_kwargs(RedisDB.RQ)) as redis_conn:
+            watershed_integrations = _reconcile_interrupted_watershed_jobs(
+                ag_fields,
+                redis_conn,
+            )
     readiness = ag_fields.get_readiness()
     staleness = ag_fields.get_staleness()
     mapping = _mapping_summary(ag_fields)
@@ -398,8 +472,8 @@ def _state_snapshot(wd: str) -> dict[str, Any]:
             "complete": run_count > 0 and not staleness["wepp_runs"],
             "wepp_bin": ag_fields.wepp_bin,
         },
-        "watershed_integration": ag_fields.get_watershed_integration_state(),
-        "watershed_integrations": ag_fields.get_watershed_integration_states(),
+        "watershed_integration": watershed_integrations["concept_2"],
+        "watershed_integrations": watershed_integrations,
         "staleness": staleness,
         "readiness": readiness,
         "job_ids": job_ids,

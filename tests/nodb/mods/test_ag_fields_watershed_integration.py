@@ -264,6 +264,94 @@ def test_scheme_job_ids_can_be_persisted_as_one_submission(tmp_path: Path) -> No
     }
 
 
+def test_interrupted_rq_job_releases_matching_running_scheme_for_retry(
+    tmp_path: Path,
+) -> None:
+    controller = AgFields(str(tmp_path), "disturbed9002-wbt-mofe.cfg")
+    previous_summary = {"status": "completed", "source_signature": "old"}
+    stale_attempt = (
+        tmp_path
+        / "wepp"
+        / "ag_fields"
+        / "watershed"
+        / ".concept-1.attempt-stopped"
+    )
+    stale_attempt.mkdir(parents=True)
+    (stale_attempt / "partial.txt").write_text("partial", encoding="utf-8")
+    with controller.locked():
+        controller._set_watershed_scheme_entry(
+            AgFieldsRoutingScheme.CONCEPT_1,
+            {
+                "status": "running:parent_execution",
+                "phase": "parent_execution",
+                "summary": previous_summary,
+                "job_id": "job-c1",
+            },
+        )
+
+    assert controller.mark_watershed_integration_interrupted(
+        "concept_1",
+        "job-c1",
+        "stopped",
+    ) is True
+    state = controller.get_watershed_integration_state("concept_1")
+    assert state["status"] == "failed"
+    assert state["phase"] == "parent_execution"
+    assert state["summary"] == previous_summary
+    assert state["error"] == {
+        "phase": "parent_execution",
+        "type": "RQJobInterrupted",
+        "message": (
+            "The routing worker stopped before publishing a terminal result; "
+            "the scheme may be retried."
+        ),
+        "failed_at": state["error"]["failed_at"],
+        "job_id": "job-c1",
+        "rq_status": "stopped",
+        "preserved_previous_result": True,
+    }
+    assert not stale_attempt.exists()
+    assert not list(stale_attempt.parent.glob(".concept-1.previous-interrupted-*"))
+    assert controller.mark_watershed_integration_interrupted(
+        "concept_1",
+        "job-c1",
+        "stopped",
+    ) is False
+
+
+def test_interrupted_rq_job_does_not_mutate_different_submission(
+    tmp_path: Path,
+) -> None:
+    controller = AgFields(str(tmp_path), "disturbed9002-wbt-mofe.cfg")
+    current_attempt = (
+        tmp_path
+        / "wepp"
+        / "ag_fields"
+        / "watershed"
+        / ".hybrid.attempt-current"
+    )
+    current_attempt.mkdir(parents=True)
+    with controller.locked():
+        controller._set_watershed_scheme_entry(
+            AgFieldsRoutingScheme.HYBRID,
+            {
+                "status": "running:preflight",
+                "phase": "preflight",
+                "job_id": "current-job",
+            },
+        )
+
+    assert controller.mark_watershed_integration_interrupted(
+        "hybrid",
+        "older-job",
+        "stopped",
+    ) is False
+    state = controller.get_watershed_integration_state("hybrid")
+    assert state["status"] == "running:preflight"
+    assert state["job_id"] == "current-job"
+    assert current_attempt.is_dir()
+
+
 def test_completed_state_checks_upstream_timestamps(
     tmp_path: Path,
     monkeypatch: pytest.MonkeyPatch,

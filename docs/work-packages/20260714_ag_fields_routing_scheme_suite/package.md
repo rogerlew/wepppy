@@ -116,8 +116,8 @@ and failures are not silently dropped, coerced, or substituted with Concept 2. S
 - **Current feasibility disposition**: `implementation continues`; planning,
   explicit-breakpoint synthesis, one real mixed-parent native run, the synchronized
   capacity cutover, and every required Concept 1/hybrid management/input tuple
-  pass. Production routing still requires scheme state, hybrid, RQ/API, UI, and
-  generated all-scheme acceptance.
+  pass. Scheme state, Concept 1/hybrid collaborators, RQ/API orchestration, and UI
+  are wired; authenticated generated all-scheme acceptance is active.
 
 ## Routing Scheme Contract
 
@@ -169,29 +169,29 @@ fails that parent with explicit manifest provenance.
 
 - [ ] ADR-0019 is accepted with evidence-backed Concept 1 fit parameters and the
   exact hybrid routing rule before those parameters control the wired UI path.
-- [ ] Peridot emits deterministic per-sub-field connectivity details from explicit
+- [x] Peridot emits deterministic per-sub-field connectivity details from explicit
   resources while preserving the existing summary CLI contract and test suite.
-- [ ] Concept 1 produces parseable, internally consistent slope, soil,
+- [x] Concept 1 produces parseable, internally consistent slope, soil,
   management, hillslope, PASS, watershed, and interchange artifacts from an
   accepted `ofe_plan.parquet`.
-- [ ] ADR-0019 records an evidence-backed synchronized hillslope capacity; the
+- [x] ADR-0019 records an evidence-backed synchronized hillslope capacity; the
   forest include family, release binary, and WEPPpy guard agree exactly.
-- [ ] Every generated Concept 1 and hybrid management/input tuple parses and runs
+- [x] Every generated Concept 1 and hybrid management/input tuple parses and runs
   without capacity, invalid-input, floating-point, non-finite, or invalid-producer
   failures; every correction has boundary-appropriate provenance and regression
   evidence.
 - [ ] Hybrid parents use the documented pure/mixed composition rules, and every
   parent closes its represented source area to the target raster area without
   overlap or omission.
-- [ ] Ineligible Concept 1 or hybrid parents fail explicitly with stable reason
+- [x] Ineligible Concept 1 or hybrid parents fail explicitly with stable reason
   codes; no implementation path silently substitutes Concept 2 or rescales a
   whole-parent Concept 1 response.
-- [ ] The runs page exposes the four exact description-first choices and hydrates
+- [x] The runs page exposes the four exact description-first choices and hydrates
   separate status, staleness, failure, clear, and browse state for every scheme.
-- [ ] An omitted API scheme runs Concept 2; `all` expands to three serialized jobs
+- [x] An omitted API scheme runs Concept 2; `all` expands to three serialized jobs
   and returns an additive scheme-to-job-id mapping while preserving the canonical
   RQ response/error envelope.
-- [ ] Each successful scheme writes only under its fixed root, and clearing one
+- [x] Each successful scheme writes only under its fixed root, and clearing one
   scheme cannot delete another scheme, the legacy Concept 2 tree, baseline WEPP,
   or independent AgFields data.
 - [ ] `sacral-self-discipline` generates all three complete result trees and a
@@ -300,10 +300,10 @@ Completed engineering substrate and evidence:
 - [management capacity/corpus compatibility and validation plan](artifacts/2026-07-14_management_capacity_and_corpus_validation_plan.md).
 - [complete capacity, release, and corpus results](artifacts/2026-07-14_management_capacity_corpus_results.md).
 
-These deliverables are not a user-facing routing implementation. Scheme roots,
-state, RQ/API orchestration, UI choices, and generated all-project results remain
-unimplemented until the expanded management-capacity/corpus milestone and later
-wired acceptance pass.
+The user-facing routing implementation, scheme roots, state, RQ/API
+orchestration, and UI choices are complete. Authenticated all-project generation,
+comparison packaging, protected-tree verification, and final review remain before
+this package can close.
 
 ## Follow-up Work
 

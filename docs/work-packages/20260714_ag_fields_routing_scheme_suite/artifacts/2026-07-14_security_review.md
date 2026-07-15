@@ -65,6 +65,7 @@ section is populated from actual code and validation evidence.
 | F-01 | Medium | RQ/NoDb availability | The first Run All job could start while rq-engine still persisted later scheme ids under the AgFields lock. | Authenticated job `7ece99f4-6c0e-44d9-801e-6c8b693bf0ac` failed in 0.130 seconds with `NoDbAlreadyLockedError`. | Preassign and persist the complete scheme/job mapping before the first enqueue; add an ordering regression. | Resolved |
 | F-02 | Medium | Worker availability | The integrator's 16-worker bound did not reach hillslope interchange pools, allowing each pool to expand to host `NCPU`. | First full Concept 1 process reached `VmHWM=60,502,848 KiB`; call-chain audit found no converter `max_workers` argument. | Forward one validated 1-16 bound through the aggregate and all six writers; reject out-of-range API/RQ values. | Resolved; generated remeasurement active |
 | F-03 | Medium | Native release integrity | An in-place shared-object refresh invalidated mapped pages in the completed direct-generation process, causing exit 139 during teardown. | The terminal manifest/NoDb state completed before the refresh; wepppyo3 provenance records the incident and exact artifact hash. | Install shared objects through a same-directory temporary file and atomic rename; restart target services. | Resolved |
+| F-04 | Medium | RQ/NoDb availability | Stopping an RQ job bypassed the worker exception boundary, left its matching scheme in persisted `running:<phase>` state, and retained partial staging data, so a retry returned HTTP 409 and disk use accumulated. | Concept 1 job `2c7309f4-9c8e-485e-a9ec-a370782bf7a2` reached RQ `stopped` while NoDb remained `running:watershed_rerun` and a 17 GB hidden attempt remained. | Reconcile only exact persisted job ids whose authoritative RQ state is terminal/missing; atomically quarantine matching attempt roots before releasing state, preserve prior results, and add stopped/active/mismatched regressions. | Resolved; live state and partial-tree cleanup validated |
 
 Risk acceptance authority: `Accepted-risk` requires a security reviewer
 recommendation plus explicit package-owner acknowledgment in Sign-off.
@@ -86,17 +87,19 @@ recommendation plus explicit package-owner acknowledgment in Sign-off.
 - [x] Run and clear routes preserve JWT scopes and run access checks.
 - [x] `all` grants no capability beyond invoking the three individually authorized
   scheme operations.
-- [ ] Browser mutation paths preserve the canonical CSRF/service-token boundary.
-- [ ] Unauthorized, wrong-run, and missing-scope tests cover run, clear-one, and
+- [x] Browser mutation paths preserve the canonical session-token boundary through
+  `postJsonWithSessionToken`; this package adds no Flask/session mutation route.
+- [x] Authorization-denial tests cover every AgFields route, including run,
+  clear-one, and
   clear-all requests.
 - [x] Errors redact the run root and do not disclose tokens or internal auth details.
 
 ### 2. Secrets and Credential Handling
 
-- [ ] No new secrets, plaintext credentials, query-string tokens, or logged bearer
+- [x] No new secrets, plaintext credentials, query-string tokens, or logged bearer
   values are introduced.
-- [ ] Existing rq-engine secret-file and JWT contracts remain unchanged.
-- [ ] Native binary provenance does not embed sensitive environment values.
+- [x] Existing rq-engine secret-file and JWT contracts remain unchanged.
+- [x] Native binary provenance does not embed sensitive environment values.
 
 ### 3. Input Validation and Output Safety
 
@@ -108,9 +111,10 @@ recommendation plus explicit package-owner acknowledgment in Sign-off.
 - [x] Management-corpus source/output paths are server-derived fixed run resources
   in production; the diagnostic CLI validates explicit paths and does not execute
   shell-composed arguments.
-- [ ] Invalid source values fail with bounded provenance and are not silently
+- [x] Invalid source values fail with bounded provenance and are not silently
   clamped or emitted as raw database records in browser-visible errors.
-- [ ] Manifest/error values are escaped before browser rendering.
+- [x] Manifest/error values render through `textContent`; fixed static markup is
+  the only `innerHTML` used by the changed UI path.
 - [x] Validation failures are explicit and never trigger a fallback scheme.
 
 ### 4. File System and Run-Tree Boundaries
@@ -121,7 +125,7 @@ recommendation plus explicit package-owner acknowledgment in Sign-off.
 - [x] Clear one/all tests prove baseline, independent AgFields, sibling scheme, and
   legacy Concept 2 trees cannot be removed.
 - [x] Temporary/staging roots are bounded and cleanup/retry behavior is explicit.
-- [ ] Browse paths cannot escape the authorized run or expose another scheme by
+- [x] Browse paths cannot escape the authorized run or expose another scheme by
   caller-controlled text.
 
 ### 5. Queue, Worker, and Subprocess Surfaces
@@ -130,25 +134,27 @@ recommendation plus explicit package-owner acknowledgment in Sign-off.
   the RQ dependency catalog/graph.
 - [x] `allow_failure=True` permits later comparison jobs without masking the
   earlier job's failed terminal state.
-- [ ] Active/deferred/started jobs prevent conflicting AgFields input mutation and
+- [x] Active/deferred/started jobs prevent conflicting AgFields input mutation and
   unsafe clear operations.
 - [x] Native and WEPP subprocesses use structured argv with fixed binaries and
   bounded worker/resource controls.
-- [ ] Job failure, cancel, retry, missing-job, and partial Run All cases preserve
+- [x] Job failure, cancel, retry, missing-job, and partial Run All cases preserve
   the canonical response/error contracts.
 - [x] `wctl check-rq-graph` passes after queue wiring changes.
 
 ### 6. Agentic Tooling and MCP Surfaces
 
 - [x] No agentic or MCP execution surface is added by this package.
-- [ ] Generated evaluation artifacts do not publish or copy data outside the
+- [x] Generated evaluation artifacts remain in the authorized run or this work
+  package and do not publish or copy data outside the
   authorized project without an explicit operator action.
 
 ### 7. Network and External Integrations
 
 - [x] No new outbound network call or external dependency is introduced.
 - [x] Existing internal rq-engine exposure is not widened.
-- [ ] High-cost Run All requests retain single-flight/rate controls adequate for
+- [x] High-cost Run All requests retain single-flight admission and serial
+  dependencies adequate for
   the existing authenticated audience.
 
 ### 8. CI/CD and Supply Chain
@@ -158,8 +164,9 @@ recommendation plus explicit package-owner acknowledgment in Sign-off.
   first.
 - [x] Refreshed native binaries record source commit, dirty-base disposition,
   compiler/build flags, release family, and SHA-256.
-- [ ] Hillslope PASS generation and watershed execution use matching binary
-  families; no stale or mixed release is published.
+- [x] Hillslope PASS generation and watershed execution use the recorded
+  `wepp_260714` family with role-specific hashes; stale or mixed releases are
+  rejected.
 - [x] Committed build/test evidence does not expose secrets.
 
 ### 9. Data Integrity, Locking, and Concurrency
@@ -180,7 +187,7 @@ recommendation plus explicit package-owner acknowledgment in Sign-off.
   code without absolute paths or secrets.
 - [x] Run All exposes job ordering and partial terminal results.
 - [x] No broad handler silently swallows implementation errors.
-- [ ] Rollback can disable/remove the new UI selection while retaining completed
+- [x] Rollback can disable/remove the new UI selection while retaining completed
   artifacts and the legacy Concept 2 path.
 - [ ] Peak memory, elapsed time, and disk usage are recorded on generated
   acceptance.
@@ -191,26 +198,37 @@ recommendation plus explicit package-owner acknowledgment in Sign-off.
   - focused AgFields/management: 84 passed;
   - route/RQ/render: 104 passed;
   - enqueue-race focused rerun: 55 passed;
+  - interrupted-job reconciliation focused suite: 66 passed;
   - rq-engine OpenAPI contract: 10 passed;
   - frontend lint and all 625 Jest tests passed;
   - RQ dependency graph: 141 edges, current;
   - endpoint inventory and route checklist guards passed;
-  - stub completeness and changed-file broad-exception enforcement passed;
+  - stub completeness and package-scoped changed-file broad-exception
+    enforcement passed;
   - Peridot and wepppyo3 Rust tests passed; and
   - forest smoke, hillslope watchlist, pytest, ablation policy, watershed replay,
-    ELF interpreter, and binary provenance gates passed.
-- Automated checks pending:
-  - final documentation lint and broad repository pytest gate.
+    ELF interpreter, and binary provenance gates passed;
+  - all touched WEPPpy documentation lints and spelling previews passed; and
+  - the final broad repository gate passed with 4,905 tests passed and 60 skipped.
+- Automated checks pending: none.
 - Manual checks completed:
   - authenticated validation rejects `max_workers=17` with canonical 400;
-  - authenticated Run All returns three independent job ids; and
-  - the corrected retry entered native parent execution with downstream jobs deferred.
+  - authenticated Run All returns three independent job ids;
+  - the first live chain exposed the NoDb enqueue race, preserved the existing
+    Concept 1 result, and permitted canonical cancellation of its deferred jobs;
+    and
+  - the corrected retry entered native parent execution with downstream jobs
+    deferred;
+  - the cache-inclusive memory alarm was conservatively canceled, decomposed into
+    47.84 GB file cache versus 250 MB anonymous memory with no cgroup swap/OOM,
+    and replaced by continuous anonymous/process sampling; and
+  - exact stopped-job reconciliation changed the stranded Concept 1 state to a
+    retryable `failed` state while preserving its prior result, after which a new
+    authenticated Run All returned three independent job ids.
 - Manual checks pending:
   - terminal authenticated Run All execution;
-  - Cross-scheme/legacy protected-tree inventory
-  - Clear-one/clear-all path containment
-  - Partial Run All failure/retry
-  - Dev-project memory and output evidence
+  - cross-scheme/legacy protected-tree inventory; and
+  - dev-project memory and output evidence.
 
 ## Residual Risk
 

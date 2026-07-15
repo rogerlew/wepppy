@@ -24,6 +24,7 @@ from copy import deepcopy
 from enum import Enum
 from pathlib import Path, PurePosixPath
 from typing import Any, Dict, Iterable, Iterator, List, Mapping, Optional, Set, Tuple
+from uuid import uuid4
 
 import pandas as pd
 
@@ -831,6 +832,87 @@ class AgFields(NoDbBase):
                 entry = self._watershed_scheme_entry(parsed)
                 entry['job_id'] = normalized_job_id
                 self._set_watershed_scheme_entry(parsed, entry)
+
+    def mark_watershed_integration_interrupted(
+        self,
+        scheme: str | AgFieldsRoutingScheme,
+        job_id: str,
+        rq_status: str,
+    ) -> bool:
+        """Fail a running scheme when its matching RQ job is no longer active."""
+        parsed = parse_routing_scheme(scheme)
+        normalized_job_id = str(job_id).strip()
+        normalized_status = str(rq_status).strip().lower()
+        if not normalized_job_id:
+            raise ValueError('job_id is required.')
+        if not normalized_status:
+            raise ValueError('rq_status is required.')
+        quarantined_attempts: list[Path] = []
+        with self.locked():
+            entry = self._watershed_scheme_entry(parsed)
+            status = str(entry['status'])
+            if not (status == 'running' or status.startswith('running:')):
+                return False
+            if entry.get('job_id') != normalized_job_id:
+                return False
+            base = Path(self.wd).absolute() / 'wepp' / 'ag_fields' / 'watershed'
+            expected = base / routing_scheme_slug(parsed)
+            root = Path(self.ag_field_watershed_scheme_root(parsed))
+            if root.absolute() != expected.absolute():
+                raise ValueError('AgFields scheme path does not match the fixed isolated root.')
+            path_chain = (base.parent.parent, base.parent, base)
+            if any(path.is_symlink() for path in path_chain):
+                raise ValueError(
+                    'Refusing to recover through a symlinked AgFields watershed path.'
+                )
+            attempts = sorted(
+                base.glob(f'.{routing_scheme_slug(parsed)}.attempt-*'),
+                key=lambda path: path.name,
+            )
+            if any(
+                attempt.is_symlink()
+                or attempt.parent.absolute() != base.absolute()
+                or not attempt.is_dir()
+                for attempt in attempts
+            ):
+                raise ValueError('Refusing to recover an invalid AgFields staging path.')
+            for attempt in attempts:
+                quarantined = base / (
+                    f'.{routing_scheme_slug(parsed)}.previous-interrupted-'
+                    f'{uuid4().hex}'
+                )
+                os.replace(attempt, quarantined)
+                quarantined_attempts.append(quarantined)
+            phase = str(entry.get('phase') or 'unknown')
+            entry.update(
+                {
+                    'status': 'failed',
+                    'phase': phase,
+                    'error': {
+                        'phase': phase,
+                        'type': 'RQJobInterrupted',
+                        'message': (
+                            'The routing worker stopped before publishing a terminal result; '
+                            'the scheme may be retried.'
+                        ),
+                        'failed_at': int(time.time()),
+                        'job_id': normalized_job_id,
+                        'rq_status': normalized_status,
+                        'preserved_previous_result': bool(entry.get('summary')),
+                    },
+                }
+            )
+            self._set_watershed_scheme_entry(parsed, entry)
+        for quarantined in quarantined_attempts:
+            try:
+                shutil.rmtree(quarantined)
+            except OSError as exc:
+                self.logger.warning(
+                    'Could not remove interrupted AgFields scheme attempt %s: %s',
+                    quarantined.name,
+                    exc,
+                )
+        return True
 
     @staticmethod
     def _empty_watershed_scheme_entry() -> Dict[str, Any]:

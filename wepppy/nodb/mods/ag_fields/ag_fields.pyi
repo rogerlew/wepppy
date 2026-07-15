@@ -196,6 +196,13 @@ class AgFields(NoDbBase):
         job_ids: Mapping[str | AgFieldsRoutingScheme, str],
     ) -> None: ...
 
+    def mark_watershed_integration_interrupted(
+        self,
+        scheme: str | AgFieldsRoutingScheme,
+        job_id: str,
+        rq_status: str,
+    ) -> bool: ...
+
     def get_watershed_integration_state(
         self,
         scheme: str | AgFieldsRoutingScheme | None = ...,

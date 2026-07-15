@@ -93,19 +93,28 @@ Every successful scheme root must contain:
 - `manifest/integration_summary.json` with schema version, scheme identifier,
   scheme slug, algorithm/native versions, source signature, timestamps, counts,
   limitations, and required-artifact inventory;
-- `manifest/pass_sources.parquet` with one row per weighted source;
-- `manifest/parent_routing.parquet` with one row per parent and stable status and
-  reason codes;
-- event/run closure artifacts for any weighted merge;
 - the required watershed interchange resources; and
 - a scheme-specific README that states the physical interpretation and
   limitations in ordinary language.
 
-Concept 1 and hybrid additionally require
-`manifest/ofe_plan.parquet`. Hybrid additionally requires
-`manifest/subfield_routing.parquet`. Concept 2 may write
-`subfield_routing.parquet` for comparison but every retained sub-field must be
-marked as the outlet-injection branch.
+Scheme-specific evidence follows the physical operation rather than inventing a
+synthetic universal table:
+
+- Concept 1 requires `manifest/parent_routing.parquet` with one row per parent and
+  `manifest/ofe_plan.parquet`; it does not claim a weighted-source merge.
+- Concept 2 requires `manifest/pass_sources.parquet` with one row per actual
+  weighted source plus event/run closure artifacts; those source rows are its
+  parent-routing evidence.
+- Hybrid requires `manifest/parent_routing.parquet`,
+  `manifest/subfield_routing.parquet`, `manifest/ofe_plan.parquet`,
+  `manifest/pass_sources.parquet`, and event/run closure artifacts because it
+  performs both branch planning and weighted composition.
+
+Concept 2 may add `subfield_routing.parquet` later for comparison, but every
+retained sub-field must then be marked as the outlet-injection branch. The
+comparison bundle normalizes counts across these scheme-specific evidence files;
+it does not fabricate weighted Concept 1 sources or one-dimensional Concept 2
+OFE plans.
 
 `subfield_routing.parquet` must include, at minimum:
 
@@ -257,6 +266,20 @@ all report/query/download consumers and route tests in the same change.
 Browse links may expose only the selected fixed scheme root. Generated evaluation
 comparisons must refer to scheme roots explicitly and must not write derived data
 into protected baseline or independent output directories.
+
+The engineering comparison bundle uses the additive non-scheme directory
+`wepp/ag_fields/watershed/comparison/`. It contains
+`engineering_summary.json` plus a human-readable `README.md`; it is not a fourth
+model result and must never be named `all`. The summary records description and
+scientific limitation text, common Stage 4/climate identities, tree counts/sizes,
+scheme-specific routing/source counts, classifier agreement, closure maxima, and
+missing-resource validation. Generate the machine-readable portion with:
+
+```bash
+docs/work-packages/20260714_ag_fields_routing_scheme_suite/artifacts/summarize_generated_schemes.py \
+  --run-root /wc1/runs/sa/sacral-self-discipline \
+  --output /wc1/runs/sa/sacral-self-discipline/wepp/ag_fields/watershed/comparison/engineering_summary.json
+```
 
 ## Regression Matrix
 
