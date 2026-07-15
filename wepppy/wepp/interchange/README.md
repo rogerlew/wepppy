@@ -85,12 +85,19 @@ wepp/output/interchange/
 
 ### Concurrency Model
 
-**Hillslope files**: Processed with `write_parquet_with_pool()` which:
+**Hillslope files except WAT**: Processed with `write_parquet_with_pool()` which:
 1. Spawns `ProcessPoolExecutor` with `max_workers=NCPU` by default (or a caller-supplied bound; `WEPP_INTERCHANGE_FORCE_SERIAL=1` forces serial debugging) and keeps at most that many parser futures outstanding
 2. Distributes input files across workers and consumes completed tables in source order
 3. Writes non-empty tables to one temporary Parquet file (`WEPP_INTERCHANGE_TMP_DIR` is used only when it shares the target filesystem)
 4. Atomically replaces the target after the writer closes successfully
 5. Falls back to serial processing on `/dev/shm` mount failures
+
+**Hillslope WAT files**: The default wepppyo3 path receives the complete sorted
+file list, parses one file at a time into compact Rust arrays, and writes each
+source as the next Parquet row group. This preserves source order and atomic
+publication without materializing full multi-OFE tables in Python or returning
+them through a process pool. If the direct Rust writer is unavailable or fails,
+the explicit logged compatibility path uses the bounded table pool above.
 
 **Watershed files**: Processed with `ThreadPoolExecutor` because:
 - Watershed outputs are single large files (not per-hillslope)
@@ -121,7 +128,11 @@ This ensures downstream tools never load incompatible schemas after WEPP model u
 ## Pipeline Overview
 - `run_wepp_hillslope_interchange()` removes incompatible artifacts, runs the six hillslope writers serially, and returns the refreshed interchange directory.
 - `run_wepp_watershed_interchange()` dispatches seven watershed writers in parallel, wiring shared `start_year` handling so truncated simulation years expand to full calendar years.
-- `write_parquet_with_pool()` handles fan-out parsing for high-volume hillslope files using a bounded rolling process-pool window, source-ordered writes, temp files on `/dev/shm` (overridable), and atomic commits.
+- `write_parquet_with_pool()` handles fan-out parsing for high-volume hillslope
+  files using a bounded rolling process-pool window, source-ordered writes, temp
+  files on `/dev/shm` (overridable), and atomic commits. Hillslope WAT uses the
+  direct source-ordered wepppyo3 Parquet writer because multi-OFE tables can be
+  much larger than their text inputs after Python object conversion.
 
 ### Hillslope Inputs → Outputs
 | Input pattern | Writer | Output | Highlights |

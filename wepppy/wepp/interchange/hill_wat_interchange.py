@@ -3,7 +3,7 @@ from __future__ import annotations
 import logging
 from functools import partial
 from pathlib import Path
-from typing import Dict, List, Optional, Sequence, Tuple
+from typing import Dict, List, Optional, Tuple
 
 import re
 
@@ -493,6 +493,30 @@ def run_wepp_hillslope_wat_interchange(
     if rust_mod is not None:
         cli_calendar_path = resolve_cli_calendar_path(base, log=LOGGER)
         major, minor = version_args()
+        direct_writer = getattr(rust_mod, "hillslope_wat_files_to_parquet", None)
+        if direct_writer is not None:
+            try:
+                direct_writer(
+                    [str(path) for path in wat_files],
+                    str(target_path),
+                    major,
+                    minor,
+                    cli_calendar_path=(
+                        str(cli_calendar_path) if cli_calendar_path else None
+                    ),
+                    compression="snappy",
+                )
+                LOGGER.info(
+                    "wepp interchange: hillslope WAT direct-to-Parquet via Rust"
+                )
+                return target_path
+            except (OSError, RuntimeError, ValueError) as exc:
+                LOGGER.warning(
+                    "wepp interchange: direct Rust hillslope WAT failed; "
+                    "falling back to source-ordered table conversion (%s)",
+                    exc,
+                    exc_info=True,
+                )
         parser = partial(
             _parse_wat_file_rust,
             cli_calendar_path=str(cli_calendar_path) if cli_calendar_path else None,

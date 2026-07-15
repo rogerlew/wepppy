@@ -44,6 +44,11 @@ def test_wat_interchange_writes_parquet(tmp_path, monkeypatch):
         return concurrency_module.write_parquet_with_pool(file_list, parser, schema, target_path, **kwargs)
 
     monkeypatch.setattr(wat_module, "write_parquet_with_pool", _wrapper)
+    monkeypatch.setattr(
+        wat_module,
+        "load_rust_interchange",
+        lambda: (None, RuntimeError("disabled for pool-path regression")),
+    )
 
     target = wat_module.run_wepp_hillslope_wat_interchange(workdir, max_workers=2)
     assert target.exists()
@@ -63,6 +68,87 @@ def test_wat_interchange_writes_parquet(tmp_path, monkeypatch):
     assert first_row["month"] == 1
     assert first_row["day_of_month"] == 1
     assert pytest.approx(first_row["P"], rel=1e-6) == 12.20
+
+
+def test_wat_interchange_prefers_direct_rust_writer(tmp_path, monkeypatch):
+    workdir = tmp_path / "output"
+    workdir.mkdir()
+    first = workdir / "H1.wat.dat"
+    second = workdir / "H2.wat.dat"
+    _write_multi_ofe_wat(first)
+    _write_multi_ofe_wat(second)
+    calls = []
+
+    class FakeRust:
+        @staticmethod
+        def hillslope_wat_files_to_parquet(
+            files,
+            target,
+            major,
+            minor,
+            *,
+            cli_calendar_path,
+            compression,
+        ):
+            calls.append(
+                {
+                    "files": files,
+                    "target": target,
+                    "version": (major, minor),
+                    "calendar": cli_calendar_path,
+                    "compression": compression,
+                }
+            )
+            pq.write_table(wat_module.EMPTY_TABLE, target)
+
+    monkeypatch.setattr(wat_module, "load_rust_interchange", lambda: (FakeRust(), None))
+    monkeypatch.setattr(wat_module, "resolve_cli_calendar_path", lambda *args, **kwargs: None)
+    monkeypatch.setattr(
+        wat_module,
+        "write_parquet_with_pool",
+        lambda *args, **kwargs: pytest.fail("pool path should not run"),
+    )
+
+    target = wat_module.run_wepp_hillslope_wat_interchange(workdir, max_workers=16)
+
+    assert target.is_file()
+    assert calls == [
+        {
+            "files": [str(first), str(second)],
+            "target": str(target),
+            "version": wat_module.version_args(),
+            "calendar": None,
+            "compression": "snappy",
+        }
+    ]
+
+
+def test_direct_rust_wat_writer_matches_python_schema_and_values(tmp_path):
+    rust_mod, rust_err = wat_module.load_rust_interchange()
+    if rust_mod is None or not hasattr(rust_mod, "hillslope_wat_files_to_parquet"):
+        pytest.skip(f"direct Rust WAT writer unavailable: {rust_err}")
+    first = tmp_path / "H1.wat.dat"
+    second = tmp_path / "H2.wat.dat"
+    target = tmp_path / "H.wat.parquet"
+    _write_multi_ofe_wat(first)
+    _write_multi_ofe_wat(second)
+    major, minor = wat_module.version_args()
+
+    rust_mod.hillslope_wat_files_to_parquet(
+        [str(first), str(second)],
+        str(target),
+        major,
+        minor,
+        cli_calendar_path=None,
+        compression="snappy",
+    )
+
+    observed = pq.read_table(target)
+    expected = wat_module.pa.concat_tables(
+        [wat_module._parse_wat_file(first), wat_module._parse_wat_file(second)]
+    )
+    assert observed.schema == wat_module.SCHEMA
+    assert observed.equals(expected)
 
 
 def test_wat_interchange_handles_missing_files(tmp_path):
