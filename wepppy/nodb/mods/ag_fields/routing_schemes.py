@@ -53,11 +53,13 @@ def routing_scheme_slug(scheme: AgFieldsRoutingScheme) -> str:
     return ROUTING_SCHEME_SLUGS[scheme]
 
 
-def validate_watershed_max_workers(value: int | None) -> int | None:
+def validate_watershed_max_workers(value: object | None) -> int | None:
     """Validate the explicit integration worker bound without silently clamping it."""
     if value is None:
         return None
-    workers = int(value)
+    if isinstance(value, bool) or not isinstance(value, int):
+        raise ValueError("max_workers must be an integer when provided.")
+    workers = value
     if not 1 <= workers <= MAX_WATERSHED_WORKERS:
         raise ValueError(
             f"max_workers must be between 1 and {MAX_WATERSHED_WORKERS} when provided."

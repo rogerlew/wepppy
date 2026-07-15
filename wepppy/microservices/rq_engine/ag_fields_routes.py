@@ -1030,7 +1030,7 @@ async def run_watershed(runid: str, config: str, request: Request) -> JSONRespon
         payload = await parse_request_payload(request)
         raw_max_workers = payload.get("max_workers")
         max_workers = validate_watershed_max_workers(
-            None if raw_max_workers in (None, "") else int(raw_max_workers)
+            None if raw_max_workers in (None, "") else raw_max_workers
         )
         schemes = expand_routing_scheme_request(payload.get("scheme"))
         return _enqueue_watershed_jobs(

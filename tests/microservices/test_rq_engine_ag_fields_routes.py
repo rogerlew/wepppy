@@ -903,6 +903,33 @@ def test_run_watershed_rejects_worker_count_above_operational_bound(
     assert enqueue_calls == []
 
 
+@pytest.mark.parametrize("max_workers", [True, 1.5, "2"])
+def test_run_watershed_rejects_non_integer_worker_count(
+    route_context,
+    monkeypatch: pytest.MonkeyPatch,
+    max_workers,
+) -> None:
+    controller, _auth_calls = route_context
+    Path(controller.sub_fields_wgs_geojson).touch()
+    (Path(controller.ag_field_wepp_runs_dir) / "p1.run").touch()
+    enqueue_calls = []
+    monkeypatch.setattr(
+        ag_fields_routes,
+        "_enqueue_watershed_jobs",
+        lambda *args: enqueue_calls.append(args),
+    )
+
+    with TestClient(rq_engine.app) as client:
+        response = client.post(
+            "/api/runs/demo/cfg/agfields/run-watershed",
+            json={"scheme": "concept_1", "max_workers": max_workers},
+        )
+
+    assert response.status_code == 400
+    assert "must be an integer" in response.json()["error"]["message"]
+    assert enqueue_calls == []
+
+
 def test_run_and_clear_watershed_reject_unknown_scheme_before_mutation(
     route_context,
     monkeypatch: pytest.MonkeyPatch,

@@ -55,5 +55,8 @@ def test_watershed_worker_bound_is_explicit_and_not_silently_clamped() -> None:
     assert validate_watershed_max_workers(None) is None
     assert validate_watershed_max_workers(1) == 1
     assert validate_watershed_max_workers(MAX_WATERSHED_WORKERS) == 16
+    for invalid in (True, 1.5, "2"):
+        with pytest.raises(ValueError, match="must be an integer"):
+            validate_watershed_max_workers(invalid)
     with pytest.raises(ValueError, match="between 1 and 16"):
         validate_watershed_max_workers(17)
