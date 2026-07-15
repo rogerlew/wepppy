@@ -1,7 +1,10 @@
 (function () {
   "use strict";
 
-  var MAX_STATUS_MESSAGES = 3000;
+  var MAX_STATUS_MESSAGES = 400;
+  var STATUS_RENDER_BATCH_MS = 100;
+  var FORK_HEARTBEAT_PREFIX = "FORK_HEARTBEAT ";
+  var FORK_STORAGE_PREFIX = "weppcloud:fork-console:";
 
   function ready(fn) {
     if (document.readyState === "loading") {
@@ -206,6 +209,7 @@
     var stacktracePanel = container.querySelector("#fork_stacktrace_panel");
     var stacktraceBody = stacktracePanel ? stacktracePanel.querySelector("[data-stacktrace-body]") : null;
     var rqJob = container.querySelector("#rq_job");
+    var liveProgress = container.querySelector("[data-fork-progress]");
     var hintElement = container.querySelector("#hint_run_fork");
     var hintAdapter = createHintAdapter(hintElement);
     var capTokenInput = null;
@@ -220,6 +224,108 @@
     var poller = null;
     var completionState = { completed: false, failed: false };
     var authRecoveryTriggered = false;
+
+    function storageKey() {
+      return FORK_STORAGE_PREFIX + encodeURIComponent(runId) + ":" + encodeURIComponent(config);
+    }
+
+    function clearTrackedForkRecord() {
+      try {
+        if (window.sessionStorage) {
+          window.sessionStorage.removeItem(storageKey());
+        }
+      } catch (err) {
+        console.warn("Unable to clear fork tracking state:", err);
+      }
+    }
+
+    function saveTrackedForkRecord() {
+      if (!jobId || !newRunId) {
+        return;
+      }
+      var record = {
+        version: 1,
+        runId: runId,
+        config: config,
+        jobId: jobId,
+        newRunId: newRunId
+      };
+      try {
+        if (window.sessionStorage) {
+          window.sessionStorage.setItem(storageKey(), JSON.stringify(record));
+        }
+      } catch (err) {
+        console.warn("Unable to persist fork tracking state:", err);
+      }
+    }
+
+    function loadTrackedForkRecord() {
+      var raw = null;
+      try {
+        if (!window.sessionStorage) {
+          return null;
+        }
+        raw = window.sessionStorage.getItem(storageKey());
+      } catch (err) {
+        console.warn("Unable to read fork tracking state:", err);
+        return null;
+      }
+      if (!raw) {
+        return null;
+      }
+      try {
+        var record = JSON.parse(raw);
+        if (!record || record.version !== 1 || record.runId !== runId || record.config !== config) {
+          clearTrackedForkRecord();
+          return null;
+        }
+        if (typeof record.jobId !== "string" || !record.jobId.trim()
+            || typeof record.newRunId !== "string" || !record.newRunId.trim()) {
+          clearTrackedForkRecord();
+          return null;
+        }
+        return {
+          jobId: record.jobId.trim(),
+          newRunId: record.newRunId.trim()
+        };
+      } catch (err) {
+        clearTrackedForkRecord();
+        return null;
+      }
+    }
+
+    function setLiveProgress(message) {
+      if (!liveProgress) {
+        return;
+      }
+      liveProgress.textContent = message || "";
+      liveProgress.hidden = !message;
+    }
+
+    function appendNewRunLink(target, prefix) {
+      if (!target) {
+        return;
+      }
+      target.appendChild(document.createTextNode(prefix));
+      var link = document.createElement("a");
+      link.href = origin + "/weppcloud/runs/" + encodeURIComponent(newRunId) + "/cfg";
+      link.target = "_blank";
+      link.rel = "noopener";
+      link.textContent = newRunId;
+      target.appendChild(link);
+    }
+
+    function formatForkStatus(message) {
+      var text = message === undefined || message === null ? "" : String(message);
+      if (text.indexOf(FORK_HEARTBEAT_PREFIX) === 0) {
+        setLiveProgress(text.slice(FORK_HEARTBEAT_PREFIX.length));
+        return "";
+      }
+      if (/^Copying project files\.\.\. done\.$/.test(text)) {
+        setLiveProgress("");
+      }
+      return text;
+    }
 
     function initCapElements() {
       if (!capRequired || !capSection) {
@@ -487,6 +593,7 @@
       if (statusLog) {
         statusLog.textContent = "";
       }
+      setLiveProgress("");
       if (stacktracePanel && stacktraceBody) {
         stacktraceBody.textContent = "";
         stacktracePanel.hidden = true;
@@ -497,7 +604,9 @@
     }
 
     function handleForkComplete() {
+      clearTrackedForkRecord();
       jobId = "";
+      setLiveProgress("");
       if (cancelButton) {
         cancelButton.hidden = true;
         cancelButton.disabled = false;
@@ -510,7 +619,7 @@
         consoleBlock.dataset.state = "positive";
         if (newRunId) {
           var link = document.createElement("a");
-          link.href = origin + "/weppcloud/runs/" + newRunId + "/cfg";
+          link.href = origin + "/weppcloud/runs/" + encodeURIComponent(newRunId) + "/cfg";
           link.target = "_blank";
           link.rel = "noopener";
           link.textContent = "Load " + newRunId + " project";
@@ -525,7 +634,9 @@
     }
 
     function handleForkFailed() {
+      clearTrackedForkRecord();
       jobId = "";
+      setLiveProgress("");
       if (cancelButton) {
         cancelButton.hidden = true;
         cancelButton.disabled = false;
@@ -573,11 +684,36 @@
         return;
       }
       var normalized = String(eventName).toUpperCase();
+      var fromPoll = detail && detail.source === "poll";
       if (normalized === "FORK_COMPLETE" || normalized === "JOB:COMPLETED") {
-        markCompleted(detail);
+        if (fromPoll) {
+          markCompleted(detail);
+        } else {
+          requestAuthoritativeJobStatus("Completion signal received; confirming job status...");
+        }
       } else if (normalized === "FORK_FAILED" || normalized === "JOB:ERROR") {
-        markFailed(detail);
+        if (fromPoll) {
+          markFailed(detail);
+        } else {
+          requestAuthoritativeJobStatus("Failure signal received; confirming job status...");
+        }
       }
+    }
+
+    function requestAuthoritativeJobStatus(message) {
+      if (!poller || !poller.rq_job_id || completionState.completed || completionState.failed) {
+        return;
+      }
+      if (message) {
+        setLiveProgress(message);
+      }
+      if (typeof poller.fetch_job_status === "function") {
+        poller.fetch_job_status(poller);
+      }
+    }
+
+    function reconcileTrackedJob() {
+      requestAuthoritativeJobStatus("Checking current fork job status...");
     }
 
     function initPoller() {
@@ -613,13 +749,54 @@
         channel: "fork",
         runId: currentRunId,
         logLimit: MAX_STATUS_MESSAGES,
+        renderBatchMs: STATUS_RENDER_BATCH_MS,
+        formatter: formatForkStatus,
         stacktrace: stacktrace,
-        onTrigger: handleTrigger
+        onTrigger: handleTrigger,
+        autoConnect: false
       });
       if (poller) {
         poller.statusStream = statusStream;
       }
       flushPendingStatus();
+      if (statusStream && typeof statusStream.connect === "function") {
+        statusStream.connect();
+      }
+    }
+
+    function showTrackedJob(restored) {
+      if (consoleBlock) {
+        consoleBlock.dataset.state = "attention";
+        if (restored) {
+          consoleBlock.innerHTML = "";
+          appendNewRunLink(consoleBlock, "Restored fork job for ");
+          consoleBlock.appendChild(document.createTextNode("."));
+        }
+      }
+      if (submitButton) {
+        submitButton.hidden = true;
+        submitButton.disabled = true;
+      }
+      if (cancelButton) {
+        cancelButton.hidden = false;
+        cancelButton.disabled = false;
+      }
+      connectStatusStreamForRun(runId);
+      if (poller) {
+        poller.set_rq_job_id(poller, jobId);
+      }
+    }
+
+    function restoreTrackedJob() {
+      var record = loadTrackedForkRecord();
+      if (!record) {
+        return;
+      }
+      jobId = record.jobId;
+      newRunId = record.newRunId;
+      resetCompletionState();
+      setLiveProgress("Restored fork job; checking current status...");
+      showTrackedJob(true);
     }
 
     function showStacktrace(lines) {
@@ -788,14 +965,13 @@
           var skipWeppRunsOutputFlag = body.skip_wepp_runs_output;
 
           if (consoleBlock) {
-            var jobDashboard = origin + "/weppcloud/rq/job-dashboard/" + jobId;
-            var newRunLink = origin + "/weppcloud/runs/" + newRunId + "/cfg";
             consoleBlock.dataset.state = "attention";
-            consoleBlock.innerHTML = [
-              'New runid: <a href="' + newRunLink + '" target="_blank" rel="noopener">' + newRunId + "</a>",
-              "Undisturbify: " + undisturbifyFlag,
-              "Skip wepp/runs + wepp/output: " + skipWeppRunsOutputFlag
-            ].join("<br>");
+            consoleBlock.innerHTML = "";
+            appendNewRunLink(consoleBlock, "New runid: ");
+            consoleBlock.appendChild(document.createElement("br"));
+            consoleBlock.appendChild(document.createTextNode("Undisturbify: " + undisturbifyFlag));
+            consoleBlock.appendChild(document.createElement("br"));
+            consoleBlock.appendChild(document.createTextNode("Skip wepp/runs + wepp/output: " + skipWeppRunsOutputFlag));
           }
 
           if (submitButton) {
@@ -806,10 +982,8 @@
             cancelButton.disabled = false;
           }
 
-          connectStatusStreamForRun(runId);
-          if (poller) {
-            poller.set_rq_job_id(poller, jobId);
-          }
+          saveTrackedForkRecord();
+          showTrackedJob(false);
         })
         .catch(function (err) {
           if (!capRequired && isAuthFailureStatus(err && err.status, err && err.body)) {
@@ -949,11 +1123,35 @@
     initCapElements();
     attachCapHandlers();
     initPoller();
-    connectStatusStreamForRun(runId);
-    flushPendingStatus();
+    container.__forkConsoleReconcileJob = reconcileTrackedJob;
+    restoreTrackedJob();
+  }
+
+  function reconcileVisibleForkConsoles() {
+    var containers = document.querySelectorAll('[data-controller="fork-console"]');
+    containers.forEach(function (container) {
+      if (typeof container.__forkConsoleReconcileJob === "function") {
+        container.__forkConsoleReconcileJob();
+      }
+    });
+  }
+
+  function attachRecoveryListeners() {
+    if (window.__forkConsoleRecoveryListenersAttached === true) {
+      return;
+    }
+    window.__forkConsoleRecoveryListenersAttached = true;
+    document.addEventListener("visibilitychange", function () {
+      if (document.hidden !== true) {
+        reconcileVisibleForkConsoles();
+      }
+    });
+    window.addEventListener("focus", reconcileVisibleForkConsoles);
+    window.addEventListener("pageshow", reconcileVisibleForkConsoles);
   }
 
   ready(function () {
+    attachRecoveryListeners();
     var containers = document.querySelectorAll('[data-controller="fork-console"]');
     containers.forEach(initForkConsole);
   });

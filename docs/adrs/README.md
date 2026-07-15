@@ -68,3 +68,4 @@ Each ADR should normally include:
 - `ADR-0018`: [AgFields Weighted PASS Accounting](ADR-0018-agfields-weighted-pass-accounting.md) (Accepted, 2026-07-13)
 - `ADR-0019`: [AgFields Field-Aware OFE and Connectivity-Aware Hybrid Routing](ADR-0019-agfields-field-aware-ofe-hybrid-routing.md) (Proposed, 2026-07-14)
 - `ADR-0020`: [Require WEPPpyo3 for WEPP Interchange](ADR-0020-require-wepppyo3-interchange.md) (Accepted, 2026-07-15)
+- `ADR-0021`: [Fork Console Status Backpressure Thresholds](ADR-0021-fork-console-status-backpressure-thresholds.md) (Accepted, 2026-07-15)

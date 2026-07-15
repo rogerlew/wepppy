@@ -127,6 +127,7 @@ describe("Fork console smoke", () => {
     let originalReadyStateDescriptor;
     let fetchMock;
     let statusStreamInstance;
+    let poller;
 
     beforeEach(async () => {
         jest.resetModules();
@@ -139,12 +140,21 @@ describe("Fork console smoke", () => {
 
         statusStreamInstance = {
             append: jest.fn(),
+            connect: jest.fn(),
             disconnect: jest.fn(),
         };
         global.StatusStream = {
             attach: jest.fn(() => statusStreamInstance),
             disconnect: jest.fn(),
         };
+
+        poller = {
+            set_rq_job_id: jest.fn((self, jobId) => {
+                self.rq_job_id = jobId;
+            }),
+            fetch_job_status: jest.fn(),
+        };
+        global.controlBase = jest.fn(() => poller);
 
         fetchMock = jest.fn((url, options = {}) => {
             if (url === "http://localhost/rq-engine/api/runs/demo-run/cfg/session-token") {
@@ -182,6 +192,7 @@ describe("Fork console smoke", () => {
                 <div id="fork_status_panel">
                     <div id="fork_status_log" data-status-log></div>
                 </div>
+                <div data-fork-progress hidden></div>
                 <div id="fork_stacktrace_panel"><pre data-stacktrace-body></pre></div>
                 <form id="fork_form">
                     <input id="runid_input" value="demo-run" />
@@ -198,7 +209,6 @@ describe("Fork console smoke", () => {
         await flushPromises();
         fetchMock.mockClear();
         statusStreamInstance.append.mockClear();
-        global.StatusStream.attach.mockClear();
     });
 
     afterEach(() => {
@@ -208,12 +218,15 @@ describe("Fork console smoke", () => {
             delete document.readyState;
         }
         document.body.innerHTML = "";
+        window.sessionStorage.clear();
         delete global.StatusStream;
+        delete global.controlBase;
         delete global.fetch;
         delete global.alert;
     });
 
     test("submitting fork form posts the fork job", async () => {
+        expect(global.StatusStream.attach).not.toHaveBeenCalled();
         const undisturbifyCheckbox = document.getElementById("undisturbify_checkbox");
         expect(undisturbifyCheckbox.checked).toBe(false);
 
@@ -247,7 +260,103 @@ describe("Fork console smoke", () => {
         expect(global.StatusStream.attach).toHaveBeenCalledWith(expect.objectContaining({
             channel: "fork",
             runId: "demo-run",
+            autoConnect: false,
         }));
+        expect(statusStreamInstance.connect).toHaveBeenCalledTimes(1);
+        expect(poller.set_rq_job_id).toHaveBeenCalledWith(poller, "job-456");
+
+        const stored = JSON.parse(window.sessionStorage.getItem("weppcloud:fork-console:demo-run:cfg"));
+        expect(Object.keys(stored).sort()).toEqual([
+            "config",
+            "jobId",
+            "newRunId",
+            "runId",
+            "version",
+        ]);
+        expect(stored).toEqual(expect.objectContaining({
+            runId: "demo-run",
+            config: "cfg",
+            jobId: "job-456",
+            newRunId: "demo-run-new",
+        }));
+    });
+
+    test("stream completion requests authoritative status before completing", async () => {
+        document.getElementById("fork_form").dispatchEvent(new Event("submit", { bubbles: true, cancelable: true }));
+        await flushPromises();
+
+        const streamOptions = global.StatusStream.attach.mock.calls[0][0];
+        streamOptions.onTrigger({ event: "FORK_COMPLETE", raw: "TRIGGER fork FORK_COMPLETE" });
+
+        expect(poller.fetch_job_status).toHaveBeenCalledWith(poller);
+        expect(document.getElementById("the_console").dataset.state).toBe("attention");
+        expect(window.sessionStorage.getItem("weppcloud:fork-console:demo-run:cfg")).not.toBeNull();
+
+        poller.triggerEvent("FORK_COMPLETE", { source: "poll", status: { status: "finished" } });
+
+        expect(document.getElementById("the_console").dataset.state).toBe("positive");
+        expect(window.sessionStorage.getItem("weppcloud:fork-console:demo-run:cfg")).toBeNull();
+    });
+
+    test("heartbeat updates replaceable progress instead of the log", async () => {
+        document.getElementById("fork_form").dispatchEvent(new Event("submit", { bubbles: true, cancelable: true }));
+        await flushPromises();
+
+        const streamOptions = global.StatusStream.attach.mock.calls[0][0];
+        const formatted = streamOptions.formatter("FORK_HEARTBEAT Copy in progress - elapsed 00:10:00");
+
+        expect(formatted).toBe("");
+        expect(document.querySelector("[data-fork-progress]").textContent).toBe("Copy in progress - elapsed 00:10:00");
+        expect(document.querySelector("[data-fork-progress]").hidden).toBe(false);
+    });
+
+    test("restores a tracked job and reconciles on focus", async () => {
+        window.sessionStorage.setItem("weppcloud:fork-console:demo-run:cfg", JSON.stringify({
+            version: 1,
+            runId: "demo-run",
+            config: "cfg",
+            jobId: "job-restored",
+            newRunId: "restored-run",
+        }));
+        document.querySelector('[data-controller="fork-console"]').__forkConsoleInit = false;
+        jest.resetModules();
+        await import("../../static/js/console_utils.js");
+        await import("../../static/js/fork_console.js");
+        await flushPromises();
+
+        expect(poller.set_rq_job_id).toHaveBeenCalledWith(poller, "job-restored");
+        expect(global.StatusStream.attach).toHaveBeenCalledWith(expect.objectContaining({
+            channel: "fork",
+            runId: "demo-run",
+        }));
+        poller.fetch_job_status.mockClear();
+
+        window.dispatchEvent(new Event("focus"));
+
+        expect(poller.fetch_job_status).toHaveBeenCalledWith(poller);
+        expect(document.getElementById("the_console").textContent).toContain("Restored fork job");
+    });
+
+    test("renders restored identifiers as text", async () => {
+        window.sessionStorage.setItem("weppcloud:fork-console:demo-run:cfg", JSON.stringify({
+            version: 1,
+            runId: "demo-run",
+            config: "cfg",
+            jobId: "job-restored",
+            newRunId: 'restored-run"><img data-injected src=x>',
+        }));
+        document.querySelector('[data-controller="fork-console"]').__forkConsoleInit = false;
+        jest.resetModules();
+        await import("../../static/js/console_utils.js");
+        await import("../../static/js/fork_console.js");
+        await flushPromises();
+
+        const consoleBlock = document.getElementById("the_console");
+        expect(consoleBlock.textContent).toContain('restored-run"><img data-injected src=x>');
+        expect(consoleBlock.querySelector("[data-injected]")).toBeNull();
+        expect(consoleBlock.querySelector("a").getAttribute("href")).toContain(
+            "restored-run%22%3E%3Cimg%20data-injected%20src%3Dx%3E"
+        );
     });
 
     test("submitting fork form uses rq-engine token when provided", async () => {

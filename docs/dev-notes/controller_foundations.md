@@ -67,7 +67,9 @@ This document captures the patterns, conventions, and principles established dur
 - `StatusStream` (`status_stream.js`) consumes the Redis Pub/Sub WebSocket feed via the `status2` Go service
 - Controllers attach streams to `[data-status-panel]` markup; fabricated panels are created when templates only expose legacy shells
 - Log messages appear in `[data-status-log]`, spinner animations in `[data-status-spinner]`, stacktraces in designated error areas
+- Log DOM updates are batched and bounded; lifecycle/error entries receive retention preference over ordinary lines, and hidden pages flush pending text when visible again
 - WebSocket reconnection, backoff, and heartbeat monitoring are handled transparently
+- Redis Pub/Sub is an ephemeral prompt channel; use `controlBase` job-status polling as the lifecycle authority when a job ID exists
 - The legacy `WSClient` has been removed; **do not reintroduce direct WebSocket wiring**
 
 **Backward compatibility**:
@@ -76,7 +78,7 @@ This document captures the patterns, conventions, and principles established dur
 - The RQ job badge, status area, and stacktrace panels remain in their canonical locations for template compatibility
 
 **Best practices**:
-- Attach streams early (during controller initialization or bootstrap)
+- Attach long-lived controller streams during bootstrap, but one-shot consoles should connect only while a job is tracked and disconnect at terminal state
 - Use the scoped event emitter for domain events; use `controlBase` events for cross-controller telemetry
 - Let `controlBase` manage polling—don't implement custom interval loops
 - Enrich errors with `controlBase.pushResponseStacktrace` or `appendStatus` for user-facing diagnostics

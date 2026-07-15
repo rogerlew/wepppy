@@ -17,6 +17,7 @@ class MockElement {
     this.scrollTop = 0;
     this.scrollHeight = 0;
     this.clientHeight = 100;
+    this.textWriteCount = 0;
   }
 
   appendChild(child) {
@@ -54,6 +55,7 @@ class MockElement {
   set textContent(value) {
     this._text = String(value);
     this.scrollHeight = this._text.length;
+    this.textWriteCount += 1;
   }
 }
 
@@ -113,9 +115,20 @@ async function runTests() {
     this.type = type;
     this.detail = options && options.detail;
   };
+  const documentListeners = {};
   global.document = {
+    hidden: false,
     querySelector() {
       return null;
+    },
+    addEventListener(type, handler) {
+      if (!documentListeners[type]) {
+        documentListeners[type] = [];
+      }
+      documentListeners[type].push(handler);
+    },
+    dispatch(type) {
+      (documentListeners[type] || []).forEach((handler) => handler({ type }));
     },
     createEvent() {
       return {
@@ -171,6 +184,7 @@ async function runTests() {
     channel: "fork",
     runId: "demo-run",
     logLimit: 4,
+    renderBatchMs: 0,
     stacktrace: {
       element: stacktracePanel,
       fetchJobInfo: (jobId) => {
@@ -238,6 +252,39 @@ async function runTests() {
   nextSocket.open();
   nextSocket.emitMessage(JSON.stringify({ type: "status", data: "second socket" }));
   assert.ok(logElement.textContent.includes("second socket"));
+
+  // Batched rendering, important-message retention, and hidden-page flush.
+  const batchedPanel = new MockElement("batched_panel", { "data-status-panel": true });
+  const batchedLog = new MockElement("batched_log", { "data-status-log": true });
+  batchedPanel.appendChild(batchedLog);
+  const batched = StatusStream.attach({
+    element: batchedPanel,
+    channel: "fork",
+    runId: "demo-run",
+    logLimit: 3,
+    renderBatchMs: 100,
+    autoConnect: false,
+  });
+
+  batched.append("rq:job STARTED fork_rq");
+  batched.append("ordinary one");
+  batched.append("ordinary two");
+  batched.append("ordinary three");
+  assert.strictEqual(batchedLog.textContent, "", "DOM writes should wait for the batch flush");
+  assert.strictEqual(deferred.length, 1, "a burst should schedule one render");
+  deferred.pop()();
+  assert.strictEqual(batchedLog.textWriteCount, 1, "a burst should produce one DOM write");
+  assert.ok(batchedLog.textContent.includes("STARTED"), "important lifecycle messages should be retained");
+  assert.ok(!batchedLog.textContent.includes("ordinary one"), "old ordinary messages should be trimmed first");
+  assert.strictEqual(batchedLog.textContent.trim().split("\n").length, 3);
+
+  const visibleText = batchedLog.textContent;
+  global.document.hidden = true;
+  batched.append("hidden update");
+  assert.strictEqual(batchedLog.textContent, visibleText, "hidden pages should defer log rendering");
+  global.document.hidden = false;
+  global.document.dispatch("visibilitychange");
+  assert.ok(batchedLog.textContent.includes("hidden update"), "visibility recovery should flush pending text");
 
   global.setTimeout = originalSetTimeout;
   console.log("status_stream tests passed");

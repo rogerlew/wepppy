@@ -12,18 +12,23 @@ Control: `wepppy/weppcloud/templates/controls/fork_console_control.htm`
 
 - Uses `control_shell` with a console-style status panel and stacktrace panel.
 - Shows source run ID (read-only), an undisturbify checkbox, a `Skip wepp/runs and wepp/output` checkbox, and submit/cancel controls.
-- Emits live status updates via the `<runid>:fork` StatusStream channel.
-- Renders job status plus start/end timestamps in the status panel (`#rq_job`) via polling fallback.
+- Emits bounded stage and heartbeat updates via the `<runid>:fork` StatusStream channel only while a job is tracked.
+- Renders authoritative job status plus start/end timestamps in the status panel (`#rq_job`) via polling.
+- Replaces copy-heartbeat text in a live status region instead of appending it to the console log.
 
 ## Front-End Orchestration
 Script: `wepppy/weppcloud/static/js/fork_console.js`
 
 - Reads run context from `data-fork-console-config` and the form.
 - Submits the fork request with `fetch` to `/rq-engine/api/runs/<runid>/<config>/fork` (form-encoded `undisturbify` + `skip_wepp_runs_output`).
-- Starts StatusStream on channel `fork` and uses `controlBase` polling to keep job status fresh:
+- Starts StatusStream on channel `fork` only after submission or session restoration and uses `controlBase` polling to keep job status authoritative:
   - `set_rq_job_id(...)` polls `/rq-engine/api/jobstatus/<job_id>` for status/started/ended timestamps.
   - Polling failures fetch `/rq-engine/api/jobinfo/<job_id>` to populate stacktraces.
-  - `job:completed`/`job:error` fallback handlers are idempotent.
+  - WebSocket `FORK_COMPLETE`/`FORK_FAILED` triggers request immediate job-status reconciliation but do not terminate the UI by themselves.
+  - Poll-origin `job:completed`/`job:error` handlers perform the idempotent terminal UI transition.
+- Stores source/config/job/destination identifiers (never tokens) in `sessionStorage` so same-tab reload restores polling.
+- Reconciles status immediately on `visibilitychange`, `focus`, and `pageshow` after browser throttling or suspension.
+- Retains at most 400 append-only messages and uses the shared StatusStream batched renderer; important lifecycle/error messages are discarded only after ordinary entries.
 - Completion updates the console with the new run link; failure surfaces the status log + stacktrace panel.
 - Auth failures (`401`/`403`, including stale session-tab cases) now trigger a reload/sign-in prompt instead of silently continuing with stale page state.
 - Cancel uses `/rq-engine/api/canceljob/<job_id>` to request termination.
@@ -50,7 +55,8 @@ Module: `wepppy/microservices/rq_engine/fork_archive_routes.py`
 Module: `wepppy/rq/project_rq.py`
 
 - `fork_rq(runid, new_runid, undisturbify, skip_wepp_runs_output)`:
-  - Uses `rsync` to clone the run directory and streams rsync output to `<runid>:fork`.
+  - Uses `rsync -a --stats` to clone the run directory without publishing per-file or per-progress output.
+  - Publishes copy stage transitions, a replaceable elapsed-time heartbeat every 10 seconds, and bounded final summary/error tails to `<runid>:fork`.
   - When `skip_wepp_runs_output=True` (or when `undisturbify=True`), excludes `wepp/runs` and `wepp/output` from content copy, then creates those directories in the destination run.
   - Rewrites `.nodb` paths and clears locks, `READONLY`, and `PUBLIC` markers.
   - When `undisturbify=True`, clears active SBS metadata without deleting copied SBS rasters, rebuilds landuse/soils, and enqueues WEPP; completion is emitted by
@@ -60,5 +66,6 @@ Module: `wepppy/rq/project_rq.py`
 
 ## Additional Details
 - Status messages and triggers are published on the source run channel `<runid>:fork`.
-- Fork completion can arrive from StatusStream or polling; the console uses guarded handlers to prevent duplicate completion flows.
+- Fork completion is signaled by both StatusStream and polling. `/jobstatus/<job_id>` is authoritative; stream triggers accelerate reconciliation and guarded handlers prevent duplicate terminal flows.
 - The new run ID is surfaced via both the status panel link and the console action panel.
+- Operational thresholds and rationale are recorded in `docs/adrs/ADR-0021-fork-console-status-backpressure-thresholds.md`.

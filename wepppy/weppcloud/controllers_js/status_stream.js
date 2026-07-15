@@ -9,6 +9,7 @@
     "use strict";
 
     var DEFAULT_LOG_LIMIT = 1000;
+    var DEFAULT_RENDER_BATCH_MS = 100;
     var DEFAULT_RECONNECT_BASE_MS = 1500;
     var DEFAULT_RECONNECT_MAX_MS = 15000;
     var streams = new Map();
@@ -97,6 +98,13 @@
         }
     }
 
+    function defaultIsImportantMessage(message) {
+        if (!message) {
+            return false;
+        }
+        return /(?:\bSTARTED\b|\bCOMPLETED\b|\bTRIGGER\b|\bEXCEPTION\b|\bERROR\b|\bFAILED\b|\bWARNING\b|\bWARN\b|Copying project files|rsync summary)/i.test(String(message));
+    }
+
     function defaultStacktraceFetcher(jobId) {
         if (!jobId) {
             return Promise.resolve(null);
@@ -154,8 +162,10 @@
         var config = {
             runId: options.runId || global.runid || global.runId || null,
             channel: options.channel || null,
-            logLimit: typeof options.logLimit === "number" ? options.logLimit : DEFAULT_LOG_LIMIT,
+            logLimit: typeof options.logLimit === "number" ? Math.max(1, Math.floor(options.logLimit)) : DEFAULT_LOG_LIMIT,
+            renderBatchMs: typeof options.renderBatchMs === "number" ? Math.max(0, options.renderBatchMs) : DEFAULT_RENDER_BATCH_MS,
             formatter: options.formatter,
+            isImportant: typeof options.isImportant === "function" ? options.isImportant : defaultIsImportantMessage,
             onTrigger: typeof options.onTrigger === "function" ? options.onTrigger : null,
             reconnectBaseMs: options.reconnectBaseMs || DEFAULT_RECONNECT_BASE_MS,
             reconnectMaxMs: options.reconnectMaxMs || DEFAULT_RECONNECT_MAX_MS,
@@ -178,17 +188,20 @@
         var reconnectAttempts = 0;
         var ws = null;
         var shouldReconnect = true;
+        var renderTimeout = null;
+        var renderPending = false;
+        var stickToBottomPending = false;
         var api = this;
 
         if (logElement.textContent) {
             logElement.textContent.split("\n").forEach(function (line) {
                 if (line) {
-                    messages.push(line);
+                    messages.push({ text: line, important: config.isImportant(line) });
                 }
             });
             if (messages.length > config.logLimit) {
-                messages.splice(0, messages.length - config.logLimit);
-                logElement.textContent = messages.join("\n") + "\n";
+                trimMessages();
+                logElement.textContent = messages.map(function (entry) { return entry.text; }).join("\n") + "\n";
             }
         }
 
@@ -200,8 +213,68 @@
             }
         }
 
+        function documentIsHidden() {
+            return typeof document !== "undefined" && document.hidden === true;
+        }
+
+        function trimMessages() {
+            while (messages.length > config.logLimit) {
+                var ordinaryIndex = messages.findIndex(function (entry) {
+                    return !entry.important;
+                });
+                messages.splice(ordinaryIndex === -1 ? 0 : ordinaryIndex, 1);
+            }
+        }
+
         function setLogContent() {
-            logElement.textContent = messages.length ? messages.join("\n") + "\n" : "";
+            renderPending = false;
+            logElement.textContent = messages.length
+                ? messages.map(function (entry) { return entry.text; }).join("\n") + "\n"
+                : "";
+            if (stickToBottomPending) {
+                logElement.scrollTop = logElement.scrollHeight;
+            }
+            stickToBottomPending = false;
+        }
+
+        function flushLogContent() {
+            if (renderTimeout !== null) {
+                clearTimeout(renderTimeout);
+                renderTimeout = null;
+            }
+            if (documentIsHidden()) {
+                renderPending = true;
+                return;
+            }
+            setLogContent();
+        }
+
+        function scheduleLogContent() {
+            renderPending = true;
+            if (documentIsHidden() || renderTimeout !== null) {
+                return;
+            }
+            if (config.renderBatchMs <= 0) {
+                setLogContent();
+                return;
+            }
+            renderTimeout = setTimeout(function () {
+                renderTimeout = null;
+                if (documentIsHidden()) {
+                    return;
+                }
+                setLogContent();
+            }, config.renderBatchMs);
+        }
+
+        function handleVisibilityChange() {
+            if (!documentIsHidden() && renderPending) {
+                flushLogContent();
+            }
+        }
+
+        if (typeof document !== "undefined" && typeof document.addEventListener === "function") {
+            document.addEventListener("visibilitychange", handleVisibilityChange);
         }
 
         function appendMessage(message, meta) {
@@ -216,16 +289,13 @@
 
             var shouldStickToBottom = Math.abs(logElement.scrollHeight - (logElement.scrollTop + logElement.clientHeight)) <= 12;
 
-            messages.push(formatted);
-            if (messages.length > config.logLimit) {
-                messages.splice(0, messages.length - config.logLimit);
-            }
-
-            setLogContent();
-
             if (shouldStickToBottom) {
-                logElement.scrollTop = logElement.scrollHeight;
+                stickToBottomPending = true;
             }
+
+            messages.push({ text: formatted, important: config.isImportant(formatted, message, meta || null) });
+            trimMessages();
+            scheduleLogContent();
 
             dispatch("status:append", { message: formatted, raw: message, meta: meta || null });
             if (config.onAppend) {
@@ -459,6 +529,7 @@
                 }
                 ws = null;
             }
+            flushLogContent();
         }
 
         this.element = element;
@@ -466,8 +537,10 @@
         this.append = appendMessage;
         this.clear = function () {
             messages = [];
-            setLogContent();
+            stickToBottomPending = false;
+            flushLogContent();
         };
+        this.flush = flushLogContent;
         this.connect = connect;
         this.disconnect = disconnect;
         this.setStacktrace = function (stacktraceConfig) {

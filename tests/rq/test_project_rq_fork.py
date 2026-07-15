@@ -25,6 +25,9 @@ def test_build_fork_rsync_cmd_directory_mode_has_no_nodir_cache_exclude() -> Non
     assert ".nodir/cache/***" not in excludes
     assert "wepp/runs" not in excludes
     assert "wepp/output" not in excludes
+    assert "-v" not in cmd
+    assert "--progress" not in cmd
+    assert "--stats" in cmd
     assert cmd[-2:] == [".", "/tmp/target/"]
 
 
@@ -140,7 +143,7 @@ def test_fork_rq_reports_ttl_import_failures(
     monkeypatch.setattr(project._fork_helpers.shutil, "which", lambda _name: "/usr/bin/rsync")
     monkeypatch.setattr(
         project._fork_helpers,
-        "_run_rsync_with_live_output",
+        "_run_rsync_with_bounded_output",
         lambda **_kwargs: None,
     )
 
@@ -188,6 +191,77 @@ def test_fork_rq_uses_wrapper_helper_aliases(monkeypatch: pytest.MonkeyPatch) ->
 
     assert captured["cmd"] == ["patched-rsync", "/tmp/target/", False, True]
     assert captured["env"] == {"PATH": "patched"}
+
+
+def test_run_rsync_with_bounded_output_emits_heartbeat_without_streaming_lines(
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    import wepppy.rq.project_rq_fork as fork_helpers
+
+    published: list[str] = []
+    monkeypatch.setattr(fork_helpers, "FORK_RSYNC_HEARTBEAT_SECONDS", 0.01)
+
+    fork_helpers._run_rsync_with_bounded_output(
+        cmd=[
+            sys.executable,
+            "-u",
+            "-c",
+            "import time; print('summary line'); time.sleep(0.25)",
+        ],
+        run_left="/tmp",
+        status_channel="source:fork",
+        publish_status=lambda _channel, message: published.append(message),
+        env=os.environ.copy(),
+    )
+
+    assert any(message.startswith(fork_helpers.FORK_RSYNC_HEARTBEAT_PREFIX) for message in published)
+    assert "summary line" not in published
+    assert any(message == "rsync summary:\nsummary line" for message in published)
+
+
+def test_run_rsync_with_bounded_output_limits_summary_and_failure_tails() -> None:
+    import wepppy.rq.project_rq_fork as fork_helpers
+
+    published: list[str] = []
+    fork_helpers._run_rsync_with_bounded_output(
+        cmd=[
+            sys.executable,
+            "-c",
+            "[print(f'line-{index}') for index in range(500)]",
+        ],
+        run_left="/tmp",
+        status_channel="source:fork",
+        publish_status=lambda _channel, message: published.append(message),
+        env=os.environ.copy(),
+    )
+
+    summary = next(message for message in published if message.startswith("rsync summary:"))
+    assert "line-0\n" not in summary
+    assert "line-299\n" not in summary
+    assert "line-300" in summary
+    assert "line-499" in summary
+    assert len(summary.splitlines()) == fork_helpers.FORK_RSYNC_TAIL_LINES + 1
+
+    published.clear()
+    with pytest.raises(RuntimeError, match="return code 7") as exc_info:
+        fork_helpers._run_rsync_with_bounded_output(
+            cmd=[
+                sys.executable,
+                "-c",
+                "import sys; [print(f'err-{index}', file=sys.stderr) for index in range(500)]; raise SystemExit(7)",
+            ],
+            run_left="/tmp",
+            status_channel="source:fork",
+            publish_status=lambda _channel, message: published.append(message),
+            env=os.environ.copy(),
+        )
+
+    error_text = str(exc_info.value)
+    assert "err-0\n" not in error_text
+    assert "err-299\n" not in error_text
+    assert "err-300" in error_text
+    assert "err-499" in error_text
+    assert published == [error_text]
 
 
 def test_fork_rq_invokes_reset_markers_with_new_run_context(monkeypatch: pytest.MonkeyPatch) -> None:
@@ -683,8 +757,8 @@ def test_prepare_fork_run_skip_wepp_copy_ensures_output_dirs(
         shutil.copytree(run_left, run_right, dirs_exist_ok=True, ignore=_ignore)
 
     published: list[str] = []
-    original_rsync_runner = fork_helpers._run_rsync_with_live_output
-    fork_helpers._run_rsync_with_live_output = _fake_rsync
+    original_rsync_runner = fork_helpers._run_rsync_with_bounded_output
+    fork_helpers._run_rsync_with_bounded_output = _fake_rsync
     try:
         new_wd = fork_helpers.prepare_fork_run(
             "source-run",
@@ -704,7 +778,7 @@ def test_prepare_fork_run_skip_wepp_copy_ensures_output_dirs(
             clean_env_for_system_tools=lambda: {"PATH": "/usr/bin:/bin", "LANG": "C.UTF-8", "LC_ALL": "C.UTF-8"},
         )
     finally:
-        fork_helpers._run_rsync_with_live_output = original_rsync_runner
+        fork_helpers._run_rsync_with_bounded_output = original_rsync_runner
 
     assert new_wd == str(target_wd)
     assert (target_wd / "wepp" / "runs").is_dir()

@@ -1,7 +1,7 @@
 # PROJECT_TRACKER.md
 > Kanban board for wepppy work packages and vision items
 
-**Last Updated**: 2026-07-14
+**Last Updated**: 2026-07-15
 **Active Packages**: 13
 **Quick Links**: [Work Packages Directory](docs/work-packages/) | [God-Tier Prompting Strategy](docs/god-tier-prompting-strategy.md)
 
@@ -564,6 +564,23 @@ full gates plus independent code and QA reviews.
 ## ✅ Done
 
 Recently completed work packages. Archived immediately upon completion.
+
+### Fork Console Status Backpressure and Recovery (2026-07-15)
+**Status**: ✅ **COMPLETE; PRODUCTION DEPLOYMENT PENDING**
+
+**Link**: [docs/work-packages/20260715_fork_console_status_backpressure/](docs/work-packages/20260715_fork_console_status_backpressure/)
+
+**Lifecycle**: In Progress -> Done (2026-07-15)
+
+**Summary**: Replaced high-volume fork rsync streaming with bounded stage,
+heartbeat, summary, and failure telemetry. The fork console retains redundant
+WebSocket and polling signals while making `/jobstatus/<job_id>` authoritative,
+batches and bounds browser rendering, restores jobs after reload, reconciles on
+resume, and avoids idle channel connections. All 629 frontend tests and focused
+worker/template gates pass; unrelated WEPPpyo3 worktree blockers for broad
+Python gates are recorded in the package QA review.
+
+---
 
 ### AgFields Routing Scheme Suite (2026-07-15)
 **Status**: ✅ **ENGINEERING COMPLETE; SCIENTIFIC EVALUATION PENDING**

@@ -1,13 +1,18 @@
 from __future__ import annotations
 
 import os
-import queue
 import shutil
 import threading
 import time
+from collections import deque
 from glob import glob
 from subprocess import PIPE, Popen
 from typing import Any, Callable, TextIO
+
+
+FORK_RSYNC_HEARTBEAT_PREFIX = "FORK_HEARTBEAT "
+FORK_RSYNC_HEARTBEAT_SECONDS = 10.0
+FORK_RSYNC_TAIL_LINES = 200
 
 
 def _clean_env_for_system_tools() -> dict[str, str]:
@@ -25,7 +30,7 @@ def _build_fork_rsync_cmd(
     undisturbify: bool,
     skip_wepp_runs_output: bool = False,
 ) -> list[str]:
-    cmd = ["rsync", "-av", "--progress"]
+    cmd = ["rsync", "-a", "--stats"]
     skip_wepp_copy = undisturbify or skip_wepp_runs_output
     # Archive staging artifacts are ephemeral and should not be synced into forked runs.
     if skip_wepp_copy:
@@ -93,15 +98,27 @@ def _clear_query_engine_catalog_cache(
     publish_status(status_channel, "No query engine catalog cache artifacts to clear.\n")
 
 
-def _stream_reader(stream: TextIO, output_queue: queue.Queue[str]) -> None:
+def _stream_reader(stream: TextIO, output_tail: deque[str]) -> None:
     try:
         for line in iter(stream.readline, ""):
-            output_queue.put(line)
+            output_tail.append(line)
     finally:
         stream.close()
 
 
-def _run_rsync_with_live_output(
+def _format_elapsed(elapsed_seconds: float) -> str:
+    total_seconds = max(0, int(elapsed_seconds))
+    hours, remainder = divmod(total_seconds, 3600)
+    minutes, seconds = divmod(remainder, 60)
+    return f"{hours:02d}:{minutes:02d}:{seconds:02d}"
+
+
+def _format_output_tail(output_tail: deque[str]) -> str:
+    lines = [line.strip() for line in output_tail if line.strip()]
+    return "\n".join(lines)
+
+
+def _run_rsync_with_bounded_output(
     *,
     cmd: list[str],
     run_left: str,
@@ -119,57 +136,49 @@ def _run_rsync_with_live_output(
         env=env,
     )
 
-    stdout_q: queue.Queue[str] = queue.Queue()
-    stderr_q: queue.Queue[str] = queue.Queue()
-    stdout_thread = threading.Thread(target=_stream_reader, args=(p.stdout, stdout_q))
-    stderr_thread = threading.Thread(target=_stream_reader, args=(p.stderr, stderr_q))
+    assert p.stdout is not None
+    assert p.stderr is not None
+    stdout_tail: deque[str] = deque(maxlen=FORK_RSYNC_TAIL_LINES)
+    stderr_tail: deque[str] = deque(maxlen=FORK_RSYNC_TAIL_LINES)
+    stdout_thread = threading.Thread(target=_stream_reader, args=(p.stdout, stdout_tail))
+    stderr_thread = threading.Thread(target=_stream_reader, args=(p.stderr, stderr_tail))
     stdout_thread.start()
     stderr_thread.start()
 
-    stdout_output: list[str] = []
-    stderr_output: list[str] = []
+    started_at = time.monotonic()
+    next_heartbeat_at = started_at + FORK_RSYNC_HEARTBEAT_SECONDS
 
     while p.poll() is None:
-        while not stdout_q.empty():
-            line = stdout_q.get()
-            publish_status(status_channel, line)
-            stdout_output.append(line)
-
-        while not stderr_q.empty():
-            line = stderr_q.get()
-            publish_status(status_channel, f"rsync stderr: {line}")
-            stderr_output.append(line)
-
-        time.sleep(0.01)
+        now = time.monotonic()
+        if now >= next_heartbeat_at:
+            elapsed = _format_elapsed(now - started_at)
+            publish_status(
+                status_channel,
+                f"{FORK_RSYNC_HEARTBEAT_PREFIX}Copy in progress - elapsed {elapsed}",
+            )
+            next_heartbeat_at = now + FORK_RSYNC_HEARTBEAT_SECONDS
+        time.sleep(0.1)
 
     p.wait()
     stdout_thread.join()
     stderr_thread.join()
 
-    while not stdout_q.empty():
-        line = stdout_q.get()
-        stripped_line = line.strip()
-        if stripped_line:
-            publish_status(status_channel, stripped_line)
-        stdout_output.append(line)
-
-    while not stderr_q.empty():
-        line = stderr_q.get()
-        stripped_line = line.strip()
-        if stripped_line:
-            publish_status(status_channel, f"rsync stderr: {stripped_line}")
-        stderr_output.append(line)
+    stdout_summary = _format_output_tail(stdout_tail)
+    stderr_summary = _format_output_tail(stderr_tail)
 
     if p.returncode != 0:
-        full_stdout = "".join(stdout_output).strip()
-        full_stderr = "".join(stderr_output).strip()
         error_msg = (
             f"ERROR: rsync failed with return code {p.returncode}:\n"
-            f"stdout:\n---\n{full_stdout}\n---\n"
-            f"stderr:\n---\n{full_stderr}\n---"
+            f"stdout tail:\n---\n{stdout_summary or '<no stdout captured>'}\n---\n"
+            f"stderr tail:\n---\n{stderr_summary or '<no stderr captured>'}\n---"
         )
         publish_status(status_channel, error_msg)
         raise RuntimeError(error_msg)
+
+    if stdout_summary:
+        publish_status(status_channel, f"rsync summary:\n{stdout_summary}")
+    if stderr_summary:
+        publish_status(status_channel, f"rsync stderr summary:\n{stderr_summary}")
 
 
 def prepare_fork_run(
@@ -242,13 +251,15 @@ def prepare_fork_run(
     publish_status(status_channel, f"In directory: {run_left}")
 
     env = clean_env_for_system_tools()
-    _run_rsync_with_live_output(
+    publish_status(status_channel, "Copying project files...")
+    _run_rsync_with_bounded_output(
         cmd=cmd,
         run_left=run_left,
         status_channel=status_channel,
         publish_status=publish_status,
         env=env,
     )
+    publish_status(status_channel, "Copying project files... done.")
 
     if skip_wepp_copy:
         _ensure_wepp_run_and_output_dirs(new_wd)
