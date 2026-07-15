@@ -423,17 +423,40 @@ describe("AgFields controller", () => {
         expect(document.querySelector('[data-role="unused-mappings-body"]').textContent).toContain("Barley");
     });
 
-    test("mapping save failure renders the server error on the matching row without closing", async () => {
+    test("mapping validation stays modal-local and a corrected save closes the modal", async () => {
+        currentState.mapping = {
+            crop_count: 2,
+            mapped_count: 1,
+            complete: false,
+            results: [
+                { crop_name: "Corn", database: "weppcloud", rotation_id: "42", status: "ok", used: true },
+                { crop_name: "Wheat", database: null, rotation_id: null, status: "unmapped", used: true },
+            ],
+        };
         controller.bootstrap({});
         await flushPromises();
         await controller.loadMapping();
+        baseInstance.pushResponseStacktrace.mockImplementation((_self, payload) => {
+            const panel = document.getElementById("ag_fields_stacktrace_panel");
+            const body = document.getElementById("ag_fields_stacktrace");
+            panel.open = true;
+            body.textContent = `${payload.error.message}\n${payload.error.details}`;
+        });
         const error = Object.assign(new Error("Bad Request"), {
             name: "HttpError",
             status: 400,
             body: {
-                error: { message: "Rotation mapping validation failed" },
+                error: {
+                    message: "Rotation mapping validation failed",
+                    details: "Validation failed.",
+                    code: "validation_error",
+                },
                 errors: [
-                    { path: "rows.Corn", message: "Management id 42 is unavailable." },
+                    {
+                        code: "invalid_mapping",
+                        path: "rows.Corn",
+                        message: "Management id 42 is unavailable.",
+                    },
                 ],
             },
         });
@@ -449,6 +472,186 @@ describe("AgFields controller", () => {
         );
         expect(window.ModalManager.close).not.toHaveBeenCalled();
         expect(document.querySelector('#agfields_rotation_modal [data-role="mapping-status"]').dataset.state).toBe("critical");
+
+        const detailsPanel = document.getElementById("ag_fields_stacktrace_panel");
+        const detailsBody = document.getElementById("ag_fields_stacktrace");
+        expect(baseInstance.pushResponseStacktrace).not.toHaveBeenCalled();
+        expect(detailsPanel.open).toBe(false);
+        expect(detailsBody.textContent).toBe("");
+
+        const management = document.querySelector('[data-crop-name="Corn"] [data-action="mapping-management"]');
+        management.value = "43";
+        management.dispatchEvent(new Event("change", { bubbles: true }));
+        currentState.mapping = makeState().mapping;
+        const stateRequestsBeforeRetry = httpMock.requestWithSessionToken.mock.calls.filter(
+            ([url]) => url.endsWith("agfields/state"),
+        ).length;
+        httpMock.postJsonWithSessionToken.mockResolvedValueOnce({
+            body: { message: "Rotation mapping saved.", result: { rows: [] } },
+        });
+        document.querySelector('[data-action="save-mapping"]').dispatchEvent(
+            new MouseEvent("click", { bubbles: true }),
+        );
+        await flushPromises();
+
+        expect(detailsBody.textContent).toBe("");
+        expect(detailsPanel.open).toBe(false);
+        expect(window.ModalManager.close).toHaveBeenCalled();
+        expect(httpMock.requestWithSessionToken.mock.calls.filter(
+            ([url]) => url.endsWith("agfields/state"),
+        )).toHaveLength(stateRequestsBeforeRetry + 1);
+        expect(document.querySelector('[data-role="mapping-chip"]').textContent).toContain("2 of 2 crops mapped");
+    });
+
+    test("successful mapping save preserves newer unrelated failure details", async () => {
+        controller.bootstrap({});
+        await flushPromises();
+        await controller.loadMapping();
+        baseInstance.pushResponseStacktrace.mockImplementation((_self, payload) => {
+            const panel = document.getElementById("ag_fields_stacktrace_panel");
+            const body = document.getElementById("ag_fields_stacktrace");
+            panel.open = true;
+            body.textContent = `${payload.error.message}\n${payload.error.details}`;
+        });
+
+        httpMock.postJsonWithSessionToken.mockRejectedValueOnce(Object.assign(new Error("Bad Request"), {
+            name: "HttpError",
+            status: 400,
+            body: {
+                error: {
+                    message: "Rotation mapping validation failed",
+                    details: "Validation failed.",
+                    code: "validation_error",
+                },
+                errors: [
+                    {
+                        code: "invalid_mapping",
+                        path: "rows.Corn",
+                        message: "Management id 42 is unavailable.",
+                    },
+                ],
+            },
+        }));
+        document.querySelector('[data-action="save-mapping"]').dispatchEvent(
+            new MouseEvent("click", { bubbles: true }),
+        );
+        await flushPromises();
+
+        const detailsPanel = document.getElementById("ag_fields_stacktrace_panel");
+        const detailsBody = document.getElementById("ag_fields_stacktrace");
+        expect(baseInstance.pushResponseStacktrace).not.toHaveBeenCalled();
+        expect(detailsBody.textContent).toBe("");
+
+        httpMock.requestWithSessionToken.mockRejectedValueOnce(Object.assign(new Error("Bad Request"), {
+            name: "HttpError",
+            status: 400,
+            body: {
+                error: {
+                    message: "Field boundary upload failed",
+                    details: "The uploaded GeoJSON is invalid.",
+                },
+            },
+        }));
+        const boundaryInput = document.querySelector('[data-role="geojson-input"]');
+        Object.defineProperty(boundaryInput, "files", {
+            configurable: true,
+            value: [new File(["{}"], "fields.geojson", { type: "application/geo+json" })],
+        });
+        document.querySelector('[data-action="upload-boundaries"]').dispatchEvent(
+            new MouseEvent("click", { bubbles: true }),
+        );
+        await flushPromises();
+
+        expect(detailsBody.textContent).toContain("Field boundary upload failed");
+        expect(detailsBody.textContent).toContain("The uploaded GeoJSON is invalid.");
+
+        const management = document.querySelector('[data-crop-name="Corn"] [data-action="mapping-management"]');
+        management.value = "43";
+        management.dispatchEvent(new Event("change", { bubbles: true }));
+        httpMock.postJsonWithSessionToken.mockResolvedValueOnce({
+            body: { message: "Rotation mapping saved.", result: { rows: [] } },
+        });
+        document.querySelector('[data-action="save-mapping"]').dispatchEvent(
+            new MouseEvent("click", { bubbles: true }),
+        );
+        await flushPromises();
+
+        expect(detailsBody.textContent).toContain("Field boundary upload failed");
+        expect(detailsPanel.open).toBe(true);
+    });
+
+    test.each([
+        ["server", () => Object.assign(new Error("Internal Server Error"), {
+            name: "HttpError",
+            status: 500,
+            body: {
+                error: {
+                    message: "Could not save rotation mapping",
+                    details: "Unexpected server failure.",
+                    code: "internal_error",
+                },
+            },
+        })],
+        ["network", () => new Error("Network unavailable")],
+        ["malformed validation", () => Object.assign(new Error("Bad Request"), {
+            name: "HttpError",
+            status: 400,
+            body: {
+                error: {
+                    message: "Rotation mapping validation failed",
+                    details: "Validation failed.",
+                    code: "validation_error",
+                },
+                errors: [
+                    {
+                        code: "invalid_mapping",
+                        path: "rows.Corn",
+                        message: "Management id 42 is unavailable.",
+                    },
+                    {
+                        code: "request_error",
+                        path: "request",
+                        message: "Request-level validation failed.",
+                    },
+                ],
+            },
+        })],
+        ["unused-row validation", () => Object.assign(new Error("Bad Request"), {
+            name: "HttpError",
+            status: 400,
+            body: {
+                error: {
+                    message: "Rotation mapping validation failed",
+                    details: "Validation failed.",
+                    code: "validation_error",
+                },
+                errors: [
+                    {
+                        code: "invalid_mapping",
+                        path: "rows.Barley",
+                        message: "Management id 44 is unavailable.",
+                    },
+                ],
+            },
+        })],
+    ])("unexpected mapping save %s failures populate the shared details panel", async (_case, makeError) => {
+        controller.bootstrap({});
+        await flushPromises();
+        await controller.loadMapping();
+        const error = makeError();
+        httpMock.postJsonWithSessionToken.mockRejectedValueOnce(error);
+
+        document.querySelector('[data-action="save-mapping"]').dispatchEvent(
+            new MouseEvent("click", { bubbles: true }),
+        );
+        await flushPromises();
+
+        expect(baseInstance.pushResponseStacktrace).toHaveBeenCalledWith(
+            controller,
+            error.body || { error: { message: error.message } },
+        );
+        expect(document.querySelector('#agfields_rotation_modal [data-role="mapping-status"]').dataset.state).toBe("critical");
+        expect(window.ModalManager.close).not.toHaveBeenCalled();
     });
 
     test("boundary upload sets a busy state and renders the server message in the upload chip", async () => {

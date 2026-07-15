@@ -435,9 +435,11 @@ var AgFields = (function () {
             return null;
         }
 
-        function emitError(scope, error) {
+        function emitError(scope, error, options) {
             var payload = resolveErrorPayload(error);
-            controller.pushResponseStacktrace(controller, payload);
+            if (!options || options.showDetails !== false) {
+                controller.pushResponseStacktrace(controller, payload);
+            }
             emitter.emit("agfields:error", { scope: scope, error: payload });
         }
 
@@ -1777,6 +1779,37 @@ var AgFields = (function () {
             );
         }
 
+        function isMappingValidationError(error) {
+            if (Number(error && error.status) !== 400) {
+                return false;
+            }
+            var payload = asObject(error && error.body);
+            var errorPayload = asObject(payload.error);
+            var errors = asArray(payload.errors);
+            if (
+                asString(errorPayload.code) !== "validation_error" ||
+                asString(errorPayload.message) !== "Rotation mapping validation failed" ||
+                !errors.length
+            ) {
+                return false;
+            }
+            return errors.every(function (item) {
+                var path = asString(item && item.path);
+                var cropName = path.indexOf("rows.") === 0 ? path.slice(5) : "";
+                if (
+                    asString(item && item.code) !== "invalid_mapping" ||
+                    !cropName ||
+                    !asString(item && item.message) ||
+                    !controller.modalNodes.tableBody
+                ) {
+                    return false;
+                }
+                return Boolean(controller.modalNodes.tableBody.querySelector(
+                    '[data-crop-name="' + escapeSelectorValue(cropName) + '"]'
+                ));
+            });
+        }
+
         function saveMapping() {
             var rows = collectMappingRows();
             setButtonBusy(controller.modalNodes.saveButton, true, "Saving…");
@@ -1794,7 +1827,7 @@ var AgFields = (function () {
                     return;
                 }
                 renderMappingSaveErrors(error);
-                emitError("mapping-save", error);
+                emitError("mapping-save", error, { showDetails: !isMappingValidationError(error) });
             }).finally(function () {
                 setButtonBusy(controller.modalNodes.saveButton, false);
             });
