@@ -162,6 +162,7 @@ function makeState(overrides = {}) {
             missing_parent_wepp_ids: [],
         },
         job_ids: {
+            agfields_run_watershed_suite: null,
             agfields_build_subfields: null,
             agfields_plantdb: null,
             agfields_run_wepp: null,
@@ -171,6 +172,7 @@ function makeState(overrides = {}) {
             agfields_run_watershed: null,
         },
         active_job_ids: {
+            agfields_run_watershed_suite: null,
             agfields_build_subfields: null,
             agfields_plantdb: null,
             agfields_run_wepp: null,
@@ -805,7 +807,7 @@ describe("AgFields controller", () => {
         await controller.hydrate();
         httpMock.postJsonWithSessionToken.mockResolvedValueOnce({
             body: {
-                job_id: "job-c1",
+                job_id: "job-suite-parent",
                 job_ids: {
                     concept_1: "job-c1",
                     concept_2: "job-c2",
@@ -832,7 +834,25 @@ describe("AgFields controller", () => {
             concept_2: "job-c2",
             hybrid: "job-hybrid",
         });
-        expect(baseInstance.set_rq_job_id).toHaveBeenCalledWith(controller, "job-c1");
+        expect(baseInstance.set_rq_job_id).toHaveBeenCalledWith(controller, "job-suite-parent");
+    });
+
+    test("reload tracks an active routing suite parent before scheme children", async () => {
+        currentState = makeState({
+            job_ids: {
+                agfields_run_watershed_suite: "job-suite-parent",
+                agfields_run_watershed_concept_1: "job-c1",
+            },
+            active_job_ids: {
+                agfields_run_watershed_suite: "job-suite-parent",
+                agfields_run_watershed_concept_1: "job-c1",
+            },
+        });
+
+        controller.bootstrap({});
+        await controller.hydrate();
+
+        expect(baseInstance.set_rq_job_id).toHaveBeenCalledWith(controller, "job-suite-parent");
     });
 
     test("renders independent completed and failed routing states", async () => {

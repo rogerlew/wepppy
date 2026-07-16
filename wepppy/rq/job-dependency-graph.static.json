@@ -6,19 +6,27 @@
     "notes": [],
     "queue_name": "default",
     "source_function": "_enqueue_job",
-    "source_lineno": 163,
+    "source_lineno": 167,
     "source_module": "wepppy/microservices/rq_engine/ag_fields_routes.py"
   },
   {
-    "depends_on": [
-      "Dependency(jobs=[previous_job_id], allow_failure=True)"
-    ],
+    "depends_on": [],
     "enqueue_target": "run_ag_fields_watershed_rq",
     "job_meta_stage": null,
     "notes": [],
     "queue_name": "default",
     "source_function": "_enqueue_watershed_jobs",
-    "source_lineno": 244,
+    "source_lineno": 238,
+    "source_module": "wepppy/microservices/rq_engine/ag_fields_routes.py"
+  },
+  {
+    "depends_on": [],
+    "enqueue_target": "run_ag_fields_watershed_suite_rq",
+    "job_meta_stage": null,
+    "notes": [],
+    "queue_name": "default",
+    "source_function": "_enqueue_watershed_jobs",
+    "source_lineno": 262,
     "source_module": "wepppy/microservices/rq_engine/ag_fields_routes.py"
   },
   {
@@ -456,6 +464,30 @@
     "source_function": "_handle_run_wepp_request",
     "source_lineno": 161,
     "source_module": "wepppy/microservices/rq_engine/wepp_routes.py"
+  },
+  {
+    "depends_on": [
+      "Dependency(jobs=[previous_job_id], allow_failure=True)"
+    ],
+    "enqueue_target": "run_ag_fields_watershed_rq",
+    "job_meta_stage": null,
+    "notes": [],
+    "queue_name": "default",
+    "source_function": "run_ag_fields_watershed_suite_rq",
+    "source_lineno": 469,
+    "source_module": "wepppy/rq/ag_fields_rq.py"
+  },
+  {
+    "depends_on": [
+      "Dependency(jobs=[child_job.id for child_job in scheme_jobs], allow_failure=True)"
+    ],
+    "enqueue_target": "finalize_ag_fields_watershed_suite_rq",
+    "job_meta_stage": null,
+    "notes": [],
+    "queue_name": "default",
+    "source_function": "run_ag_fields_watershed_suite_rq",
+    "source_lineno": 495,
+    "source_module": "wepppy/rq/ag_fields_rq.py"
   },
   {
     "depends_on": [],

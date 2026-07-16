@@ -205,7 +205,9 @@ if "metpy.units" not in sys.modules:
 
     units_module.units = _FakeUnits()
     sys.modules["metpy.units"] = units_module
-if "flask" not in sys.modules:
+try:
+    import flask as flask_module
+except ImportError:
     flask_module = types.ModuleType("flask")
 
     class _FakeFlask:
@@ -223,8 +225,6 @@ if "flask" not in sys.modules:
     flask_module.url_for = lambda *args, **kwargs: ""
     flask_module.Blueprint = _FakeFlask
     sys.modules["flask"] = flask_module
-else:
-    flask_module = sys.modules["flask"]
 
 if "werkzeug" not in sys.modules:
     sys.modules["werkzeug"] = types.ModuleType("werkzeug")

@@ -6,11 +6,17 @@ import inspect
 import json
 import logging
 import math
+import os
 from pathlib import Path
 from typing import Any, Dict, Optional
 
-from rq import get_current_job
+import redis
+from rq import Queue, get_current_job
+from rq.exceptions import NoSuchJobError
+from rq.job import Dependency, Job, JobStatus
+from rq.registry import DeferredJobRegistry
 
+from wepppy.config.redis_settings import RedisDB, redis_connection_kwargs
 from wepppy.nodb.base import clear_nodb_file_cache
 from wepppy.nodb.mods.ag_fields import AgFields, AgFieldsRunError, PlantFileProcessingError
 from wepppy.nodb.mods.ag_fields.routing_schemes import (
@@ -29,6 +35,7 @@ AGFIELDS_BUILD_SUBFIELDS_JOB_KEY = "agfields_build_subfields"
 AGFIELDS_PLANTDB_JOB_KEY = "agfields_plantdb"
 AGFIELDS_RUN_WEPP_JOB_KEY = "agfields_run_wepp"
 AGFIELDS_RUN_WATERSHED_JOB_KEY = "agfields_run_watershed"
+AGFIELDS_RUN_WATERSHED_SUITE_JOB_KEY = "agfields_run_watershed_suite"
 AGFIELDS_RUN_WATERSHED_CONCEPT_1_JOB_KEY = "agfields_run_watershed_concept_1"
 AGFIELDS_RUN_WATERSHED_CONCEPT_2_JOB_KEY = "agfields_run_watershed_concept_2"
 AGFIELDS_RUN_WATERSHED_HYBRID_JOB_KEY = "agfields_run_watershed_hybrid"
@@ -42,6 +49,8 @@ AGFIELDS_BUILD_SUBFIELDS_COMPLETED = "AGFIELDS_BUILD_SUBFIELDS_TASK_COMPLETED"
 AGFIELDS_PLANTDB_COMPLETED = "AGFIELDS_PLANTDB_TASK_COMPLETED"
 AGFIELDS_RUN_WEPP_COMPLETED = "AGFIELDS_RUN_WEPP_TASK_COMPLETED"
 AGFIELDS_RUN_WATERSHED_COMPLETED = "AGFIELDS_RUN_WATERSHED_TASK_COMPLETED"
+AGFIELDS_SUITE_DISPATCH_LOCK_PREFIX = "agfields:suite_dispatch:"
+RQ_TIMEOUT = int(os.getenv("RQ_ENGINE_RQ_TIMEOUT", "216000"))
 
 
 def _job_id() -> str:
@@ -255,6 +264,7 @@ def run_ag_fields_watershed_rq(
     runid: str,
     max_workers: Optional[int] = None,
     scheme: Optional[str] = None,
+    publish_completion_trigger: bool = True,
 ) -> Dict[str, Any]:
     """Run exactly one isolated AgFields watershed routing scheme."""
     max_workers = validate_watershed_max_workers(max_workers)
@@ -288,13 +298,19 @@ def run_ag_fields_watershed_rq(
         )
         result["scheme"] = parsed_scheme.value
         _publish_result(status_channel, job_id, result)
-        _publish_completed(
-            status_channel,
-            job_id,
-            func_name,
-            runid,
-            AGFIELDS_RUN_WATERSHED_COMPLETED,
-        )
+        if publish_completion_trigger:
+            _publish_completed(
+                status_channel,
+                job_id,
+                func_name,
+                runid,
+                AGFIELDS_RUN_WATERSHED_COMPLETED,
+            )
+        else:
+            StatusMessenger.publish(
+                status_channel,
+                f"rq:{job_id} COMPLETED {func_name}({runid})",
+            )
         return result
     except Exception as exc:  # broad-except: RQ task boundary preserves terminal status contract
         logger.exception(
@@ -313,11 +329,219 @@ def run_ag_fields_watershed_rq(
         raise
 
 
+def _release_deferred_job_if_ready(queue: Queue, dependent_job: Job) -> None:
+    """Release a failure-tolerant dependent whose prerequisites are terminal."""
+    if dependent_job.get_status(refresh=True) != JobStatus.DEFERRED:
+        return
+    if not dependent_job.dependencies_are_met():
+        return
+
+    DeferredJobRegistry(queue=queue).remove(dependent_job)
+    queue._enqueue_job(dependent_job)
+
+
+@with_exception_logging
+def finalize_ag_fields_watershed_suite_rq(
+    runid: str,
+    planned_job_ids: Dict[str, str],
+) -> Dict[str, Any]:
+    """Publish one terminal suite summary after every scheme job is terminal."""
+    job_id = _job_id()
+    func_name = inspect.currentframe().f_code.co_name
+    status_channel = f"{runid}:ag_fields"
+    StatusMessenger.publish(status_channel, f"rq:{job_id} STARTED {func_name}({runid})")
+
+    try:
+        statuses: Dict[str, str] = {}
+        with redis.Redis(**redis_connection_kwargs(RedisDB.RQ)) as redis_conn:
+            for scheme, child_job_id in planned_job_ids.items():
+                try:
+                    child_job = Job.fetch(child_job_id, connection=redis_conn)
+                except NoSuchJobError:
+                    statuses[scheme] = "missing"
+                    continue
+                statuses[scheme] = str(child_job.get_status(refresh=False) or "unknown").lower()
+
+        result: Dict[str, Any] = {
+            "job_ids": dict(planned_job_ids),
+            "statuses": statuses,
+        }
+        _publish_result(status_channel, job_id, result)
+        _publish_completed(
+            status_channel,
+            job_id,
+            func_name,
+            runid,
+            AGFIELDS_RUN_WATERSHED_COMPLETED,
+        )
+        return result
+    except Exception as exc:  # broad-except: RQ task boundary preserves terminal status contract
+        logger.exception(
+            "AgFields watershed suite finalizer failed",
+            extra={"runid": runid, "job_id": job_id},
+        )
+        _publish_failure(status_channel, job_id, {"message": str(exc) or exc.__class__.__name__})
+        _publish_exception(status_channel, job_id, func_name, runid)
+        raise
+
+
+@with_exception_logging
+def run_ag_fields_watershed_suite_rq(
+    runid: str,
+    max_workers: Optional[int],
+    planned_job_ids: Dict[str, str],
+    finalizer_job_id: str,
+) -> Dict[str, Any]:
+    """Dispatch three serial scheme children and an always-released finalizer."""
+    max_workers = validate_watershed_max_workers(max_workers)
+    expected_schemes = tuple(AGFIELDS_RUN_WATERSHED_JOB_KEYS)
+    normalized_job_ids = {
+        str(scheme): str(job_id).strip()
+        for scheme, job_id in planned_job_ids.items()
+    }
+    if tuple(normalized_job_ids) != expected_schemes:
+        raise ValueError(
+            "planned_job_ids must contain concept_1, concept_2, and hybrid in routing order."
+        )
+    if any(not job_id for job_id in normalized_job_ids.values()):
+        raise ValueError("Every planned AgFields watershed child job id is required.")
+    if len(set(normalized_job_ids.values())) != len(normalized_job_ids):
+        raise ValueError("AgFields watershed child job ids must be distinct.")
+    normalized_finalizer_job_id = str(finalizer_job_id).strip()
+    if not normalized_finalizer_job_id:
+        raise ValueError("The AgFields watershed suite finalizer job id is required.")
+    if normalized_finalizer_job_id in normalized_job_ids.values():
+        raise ValueError("The AgFields watershed suite finalizer job id must be distinct.")
+
+    parent_job = get_current_job()
+    if parent_job is None:
+        raise RuntimeError("AgFields watershed suite requires an active RQ parent job.")
+    parent_job_id = str(parent_job.id)
+    dispatch_lock_key = f"{AGFIELDS_SUITE_DISPATCH_LOCK_PREFIX}{parent_job_id}"
+    func_name = inspect.currentframe().f_code.co_name
+    status_channel = f"{runid}:ag_fields"
+    StatusMessenger.publish(
+        status_channel,
+        f"rq:{parent_job_id} STARTED {func_name}({runid})",
+    )
+
+    try:
+        tree_meta = {
+            f"jobs:{order},scheme:{scheme}": child_job_id
+            for order, (scheme, child_job_id) in enumerate(normalized_job_ids.items())
+        }
+        tree_meta[
+            "jobs:3,func:finalize_ag_fields_watershed_suite_rq"
+        ] = normalized_finalizer_job_id
+
+        wd = get_wd(runid)
+        prep = RedisPrep.getInstance(wd)
+        clear_nodb_file_cache(runid, pup_relpath="ag_fields.nodb")
+        ag_fields = AgFields.getInstance(wd)
+
+        scheme_jobs: list[Job] = []
+        previous_job_id: str | None = None
+        with redis.Redis(**redis_connection_kwargs(RedisDB.RQ)) as redis_conn:
+            with redis_conn.lock(dispatch_lock_key, timeout=30, blocking_timeout=30):
+                parent_job.refresh()
+                if parent_job.meta.get("cancel_requested"):
+                    raise RuntimeError("AgFields watershed suite was canceled before child dispatch.")
+                parent_job.meta.update(tree_meta)
+                parent_job.meta["runid"] = runid
+                parent_job.meta["child_dispatch_lock_key"] = dispatch_lock_key
+                parent_job.save()
+
+                for scheme, child_job_id in normalized_job_ids.items():
+                    prep.set_rq_job_id(AGFIELDS_RUN_WATERSHED_JOB_KEYS[scheme], child_job_id)
+                prep.set_rq_job_id(
+                    AGFIELDS_RUN_WATERSHED_JOB_KEY,
+                    normalized_job_ids["concept_2"],
+                )
+                ag_fields.set_watershed_integration_job_ids(normalized_job_ids)
+
+                queue = Queue(connection=redis_conn)
+                for order, (scheme, child_job_id) in enumerate(normalized_job_ids.items()):
+                    dependency = (
+                        Dependency(jobs=[previous_job_id], allow_failure=True)
+                        if previous_job_id is not None
+                        else None
+                    )
+                    child_job = queue.enqueue_call(
+                        run_ag_fields_watershed_rq,
+                        args=(runid, max_workers, scheme, False),
+                        timeout=RQ_TIMEOUT,
+                        depends_on=dependency,
+                        job_id=child_job_id,
+                        meta={
+                            "runid": runid,
+                            "agfields_scheme": scheme,
+                            "parent_job_id": parent_job_id,
+                            **(
+                                {"auth_actor": parent_job.meta["auth_actor"]}
+                                if isinstance(parent_job.meta.get("auth_actor"), dict)
+                                else {}
+                            ),
+                        },
+                    )
+                    if dependency is not None:
+                        _release_deferred_job_if_ready(queue, child_job)
+                    scheme_jobs.append(child_job)
+                    previous_job_id = child_job.id
+
+                finalizer_dependency = Dependency(
+                    jobs=[child_job.id for child_job in scheme_jobs],
+                    allow_failure=True,
+                )
+                finalizer_job = queue.enqueue_call(
+                    finalize_ag_fields_watershed_suite_rq,
+                    args=(runid, normalized_job_ids),
+                    timeout=RQ_TIMEOUT,
+                    depends_on=finalizer_dependency,
+                    job_id=normalized_finalizer_job_id,
+                    meta={
+                        "runid": runid,
+                        "parent_job_id": parent_job_id,
+                        **(
+                            {"auth_actor": parent_job.meta["auth_actor"]}
+                            if isinstance(parent_job.meta.get("auth_actor"), dict)
+                            else {}
+                        ),
+                    },
+                )
+                _release_deferred_job_if_ready(queue, finalizer_job)
+
+        result: Dict[str, Any] = {
+            "job_ids": normalized_job_ids,
+            "finalizer_job_id": finalizer_job.id,
+            "schemes": list(expected_schemes),
+        }
+        _publish_result(status_channel, parent_job_id, result)
+        StatusMessenger.publish(
+            status_channel,
+            f"rq:{parent_job_id} COMPLETED {func_name}({runid})",
+        )
+        return result
+    except Exception as exc:  # broad-except: RQ task boundary preserves terminal status contract
+        logger.exception(
+            "AgFields watershed suite dispatch failed",
+            extra={"runid": runid, "job_id": parent_job_id},
+        )
+        _publish_failure(
+            status_channel,
+            parent_job_id,
+            {"message": str(exc) or exc.__class__.__name__},
+        )
+        _publish_exception(status_channel, parent_job_id, func_name, runid)
+        raise
+
+
 __all__ = [
     "AGFIELDS_BUILD_SUBFIELDS_JOB_KEY",
     "AGFIELDS_PLANTDB_JOB_KEY",
     "AGFIELDS_RUN_WEPP_JOB_KEY",
     "AGFIELDS_RUN_WATERSHED_JOB_KEY",
+    "AGFIELDS_SUITE_DISPATCH_LOCK_PREFIX",
+    "AGFIELDS_RUN_WATERSHED_SUITE_JOB_KEY",
     "AGFIELDS_RUN_WATERSHED_CONCEPT_1_JOB_KEY",
     "AGFIELDS_RUN_WATERSHED_CONCEPT_2_JOB_KEY",
     "AGFIELDS_RUN_WATERSHED_HYBRID_JOB_KEY",
@@ -326,4 +550,6 @@ __all__ = [
     "process_ag_fields_plant_db_rq",
     "run_ag_fields_wepp_rq",
     "run_ag_fields_watershed_rq",
+    "run_ag_fields_watershed_suite_rq",
+    "finalize_ag_fields_watershed_suite_rq",
 ]

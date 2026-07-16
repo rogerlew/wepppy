@@ -15,7 +15,7 @@ from fastapi import APIRouter, Request
 from fastapi.responses import FileResponse, JSONResponse, Response
 from rq import Queue
 from rq.exceptions import NoSuchJobError
-from rq.job import Dependency, Job
+from rq.job import Job
 from starlette.datastructures import UploadFile
 
 from wepp_runner.wepp_runner import get_linux_wepp_bin_opts
@@ -38,15 +38,19 @@ from wepppy.nodb.mods.ag_fields.routing_schemes import (
     validate_watershed_max_workers,
 )
 from wepppy.nodb.redis_prep import RedisPrep, TaskEnum
+from wepppy.rq.auth_actor import current_auth_actor
 from wepppy.rq.ag_fields_rq import (
     AGFIELDS_BUILD_SUBFIELDS_JOB_KEY,
     AGFIELDS_PLANTDB_JOB_KEY,
     AGFIELDS_RUN_WATERSHED_JOB_KEY,
     AGFIELDS_RUN_WATERSHED_JOB_KEYS,
+    AGFIELDS_RUN_WATERSHED_SUITE_JOB_KEY,
+    AGFIELDS_SUITE_DISPATCH_LOCK_PREFIX,
     AGFIELDS_RUN_WEPP_JOB_KEY,
     build_ag_fields_subfields_rq,
     process_ag_fields_plant_db_rq,
     run_ag_fields_watershed_rq,
+    run_ag_fields_watershed_suite_rq,
     run_ag_fields_wepp_rq,
 )
 from wepppy.weppcloud.utils.helpers import get_wd
@@ -182,12 +186,14 @@ def _enqueue_watershed_jobs(
     schemes: tuple[AgFieldsRoutingScheme, ...],
     max_workers: int | None,
 ) -> JSONResponse:
-    """Enqueue one or three independently tracked watershed jobs in serial order."""
+    """Enqueue one direct scheme or one parent with children and a finalizer."""
     submit_owner = f"agfields_run_watershed:{uuid4().hex}"
     submit_lock_key = f"agfields:submit_lock:{runid}"
     prep = RedisPrep.getInstance(wd)
     ag_fields = AgFields.getInstance(wd)
-    job_ids: dict[str, str] = {}
+    job_ids: dict[str, str]
+    root_job_id: str
+    finalizer_job_id: str | None = None
     with redis.Redis(
         **redis_connection_kwargs(RedisDB.LOCK, decode_responses=True)
     ) as lock_conn:
@@ -220,36 +226,49 @@ def _enqueue_watershed_jobs(
                         "An AgFields watershed integration is already active for this run "
                         f"(schemes={','.join(active_schemes)})."
                     )
-                planned_job_ids = {
-                    scheme.value: str(uuid4())
-                    for scheme in schemes
-                }
-                for scheme in schemes:
+                queue = Queue(connection=redis_conn)
+                planned_job_ids = {scheme.value: str(uuid4()) for scheme in schemes}
+                if len(schemes) == 1:
+                    scheme = schemes[0]
                     job_id = planned_job_ids[scheme.value]
-                    job_key = AGFIELDS_RUN_WATERSHED_JOB_KEYS[scheme.value]
-                    prep.set_rq_job_id(job_key, job_id)
+                    prep.set_rq_job_id(AGFIELDS_RUN_WATERSHED_JOB_KEYS[scheme.value], job_id)
                     if scheme is AgFieldsRoutingScheme.CONCEPT_2:
                         prep.set_rq_job_id(AGFIELDS_RUN_WATERSHED_JOB_KEY, job_id)
-                ag_fields.set_watershed_integration_job_ids(planned_job_ids)
-
-                queue = Queue(connection=redis_conn)
-                previous_job_id: str | None = None
-                for scheme in schemes:
-                    dependency = (
-                        Dependency(jobs=[previous_job_id], allow_failure=True)
-                        if previous_job_id is not None
-                        else None
-                    )
-                    job_id = planned_job_ids[scheme.value]
+                    ag_fields.set_watershed_integration_job_ids(planned_job_ids)
                     queue.enqueue_call(
                         run_ag_fields_watershed_rq,
                         args=(runid, max_workers, scheme.value),
                         timeout=RQ_TIMEOUT,
-                        depends_on=dependency,
                         job_id=job_id,
                     )
-                    job_ids[scheme.value] = job_id
-                    previous_job_id = job_id
+                    root_job_id = job_id
+                else:
+                    parent_job_id = str(uuid4())
+                    finalizer_job_id = str(uuid4())
+                    parent_meta: dict[str, Any] = {
+                        "runid": runid,
+                        "child_dispatch_lock_key": (
+                            f"{AGFIELDS_SUITE_DISPATCH_LOCK_PREFIX}{parent_job_id}"
+                        ),
+                        **{
+                            f"jobs:{order},scheme:{scheme.value}": planned_job_ids[scheme.value]
+                            for order, scheme in enumerate(schemes)
+                        },
+                        "jobs:3,func:finalize_ag_fields_watershed_suite_rq": finalizer_job_id,
+                    }
+                    auth_actor = current_auth_actor()
+                    if auth_actor is not None:
+                        parent_meta["auth_actor"] = auth_actor
+                    parent_job = queue.enqueue_call(
+                        run_ag_fields_watershed_suite_rq,
+                        args=(runid, max_workers, planned_job_ids, finalizer_job_id),
+                        timeout=RQ_TIMEOUT,
+                        job_id=parent_job_id,
+                        meta=parent_meta,
+                    )
+                    prep.set_rq_job_id(AGFIELDS_RUN_WATERSHED_SUITE_JOB_KEY, parent_job.id)
+                    root_job_id = parent_job.id
+                job_ids = planned_job_ids
         finally:
             try:
                 if lock_conn.get(submit_lock_key) == submit_owner:
@@ -261,11 +280,10 @@ def _enqueue_watershed_jobs(
                     exc,
                     extra={"runid": runid},
                 )
-    first_job_id = job_ids[schemes[0].value]
-    return JSONResponse(
-        {"job_id": first_job_id, "job_ids": job_ids},
-        status_code=202,
-    )
+    response_payload = {"job_id": root_job_id, "job_ids": job_ids}
+    if finalizer_job_id is not None:
+        response_payload["finalizer_job_id"] = finalizer_job_id
+    return JSONResponse(response_payload, status_code=202)
 
 
 def _mapping_summary(ag_fields: AgFields) -> dict[str, Any]:
@@ -282,6 +300,7 @@ def _mapping_summary(ag_fields: AgFields) -> dict[str, Any]:
 
 def _find_active_job(prep: RedisPrep, redis_conn: redis.Redis) -> dict[str, str] | None:
     for key in (
+        AGFIELDS_RUN_WATERSHED_SUITE_JOB_KEY,
         AGFIELDS_BUILD_SUBFIELDS_JOB_KEY,
         AGFIELDS_PLANTDB_JOB_KEY,
         AGFIELDS_RUN_WEPP_JOB_KEY,
@@ -291,14 +310,23 @@ def _find_active_job(prep: RedisPrep, redis_conn: redis.Redis) -> dict[str, str]
         job_id = prep.get_rq_job_id(key)
         if job_id is None:
             continue
-        try:
-            job = Job.fetch(job_id, connection=redis_conn)
-        except NoSuchJobError:
-            continue
-        status = str(job.get_status(refresh=False) or "").lower()
+        status = _rq_job_status(key, job_id, redis_conn)
         if status in ACTIVE_RQ_JOB_STATUSES:
             return {"key": key, "job_id": job_id, "status": status}
     return None
+
+
+def _rq_job_status(key: str, job_id: str, redis_conn: redis.Redis) -> str:
+    """Return raw leaf status or recursive suite-parent status."""
+    if key == AGFIELDS_RUN_WATERSHED_SUITE_JOB_KEY:
+        from wepppy.rq.job_info import get_wepppy_rq_job_status
+
+        return str(get_wepppy_rq_job_status(job_id).get("status") or "").lower()
+    try:
+        job = Job.fetch(job_id, connection=redis_conn)
+    except NoSuchJobError:
+        return "missing"
+    return str(job.get_status(refresh=False) or "").lower()
 
 
 def _reconcile_interrupted_watershed_jobs(
@@ -382,6 +410,7 @@ def _active_job_conflict_response(wd: str) -> JSONResponse | None:
 
 def _job_ids(prep: RedisPrep | None) -> tuple[dict[str, str | None], dict[str, str | None]]:
     keys = (
+        AGFIELDS_RUN_WATERSHED_SUITE_JOB_KEY,
         AGFIELDS_BUILD_SUBFIELDS_JOB_KEY,
         AGFIELDS_PLANTDB_JOB_KEY,
         AGFIELDS_RUN_WEPP_JOB_KEY,
@@ -397,11 +426,7 @@ def _job_ids(prep: RedisPrep | None) -> tuple[dict[str, str | None], dict[str, s
         for key, job_id in job_ids.items():
             if job_id is None:
                 continue
-            try:
-                job = Job.fetch(job_id, connection=redis_conn)
-            except NoSuchJobError:
-                continue
-            if str(job.get_status(refresh=False) or "").lower() in ACTIVE_RQ_JOB_STATUSES:
+            if _rq_job_status(key, job_id, redis_conn) in ACTIVE_RQ_JOB_STATUSES:
                 active_job_ids[key] = job_id
     return job_ids, active_job_ids
 
@@ -993,7 +1018,8 @@ async def run_wepp(runid: str, config: str, request: Request) -> JSONResponse:
     description=(
         "Requires JWT Bearer `rq:enqueue` scope and run access. "
         "Validates current sub-field and parent inputs, then enqueues one routing scheme "
-        "or all three schemes serially. Omitted scheme defaults to concept_2."
+        "or one parent with three serial scheme children and an always-released finalizer. "
+        "Omitted scheme defaults to concept_2."
     ),
     operation_id=rq_operation_id("agfields_run_watershed"),
     tags=["rq-engine", "agfields"],

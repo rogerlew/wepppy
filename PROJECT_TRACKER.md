@@ -1,7 +1,7 @@
 # PROJECT_TRACKER.md
 > Kanban board for wepppy work packages and vision items
 
-**Last Updated**: 2026-07-15
+**Last Updated**: 2026-07-16
 **Active Packages**: 12
 **Quick Links**: [Work Packages Directory](docs/work-packages/) | [God-Tier Prompting Strategy](docs/god-tier-prompting-strategy.md)
 
@@ -544,6 +544,28 @@ Currently active work packages. Limit to 2-4 packages to maintain focus.
 ## ✅ Done
 
 Recently completed work packages. Archived immediately upon completion.
+
+### AgFields Watershed Parent Job (2026-07-16)
+
+**Status**: ✅ **COMPLETE**
+
+**Link**: [docs/work-packages/20260715_agfields_watershed_parent_job/](docs/work-packages/20260715_agfields_watershed_parent_job/)
+
+**Lifecycle**: In Progress -> Done (2026-07-16)
+
+**Summary**: Replaced three independent AgFields Run All submissions with one
+canonical RQ parent containing serial Concept 1, Concept 2, hybrid, and
+after-all-children finalizer groups. Added failure-tolerant deferred-release
+guards, atomic tree registration, dispatch/cancel synchronization, recursive
+status and cancellation hardening, authenticated cancellation ownership, and
+suite-aware browser/state hydration. Full verification passed: 4,914 Python
+tests, 635 frontend tests, all contract/graph/stub/lint/docs gates, dual reviews,
+and the dedicated security gate. Authenticated forest acceptance on
+`sacral-self-discipline` completed all five registered jobs and all three fixed
+output trees, each with 3,543 parent/PASS outputs and no missing required
+resources.
+
+---
 
 ### Dependabot PR Triage, Merge, and Local Rollout (2026-07-15)
 

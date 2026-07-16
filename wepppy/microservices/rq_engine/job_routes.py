@@ -20,7 +20,7 @@ from wepppy.rq.job_info import (
 )
 from wepppy.rq.jobinfo_payloads import extract_job_ids
 
-from .auth import AuthError, require_jwt, require_session_marker
+from .auth import AuthError, authorize_run_access, require_jwt
 from .openapi import agent_route_responses, rq_operation_id
 from .responses import error_response, error_response_with_traceback
 
@@ -128,14 +128,20 @@ def _is_scope_missing_error(exc: AuthError) -> bool:
     )
 
 
-def _authorize_cancel_request(request: Request) -> Mapping[str, Any]:
+def _authorize_cancel_request(request: Request) -> tuple[Mapping[str, Any], frozenset[str]]:
+    claims: Mapping[str, Any] | None = None
+    accepted_scopes: set[str] = set()
     for scope in CANCELJOB_SCOPES:
         try:
-            return require_jwt(request, required_scopes=[scope])
+            claims = require_jwt(request, required_scopes=[scope])
         except AuthError as exc:
             if _is_scope_missing_error(exc):
                 continue
             raise
+        accepted_scopes.add(scope)
+
+    if claims is not None:
+        return claims, frozenset(accepted_scopes)
 
     raise AuthError(
         f"Token missing required scope(s): {' or '.join(CANCELJOB_SCOPES)}",
@@ -422,8 +428,9 @@ async def jobinfo_batch(request: Request):
     "/canceljob/{job_id}",
     summary="Cancel a queued or running job",
     description=(
-        "Requires JWT Bearer scope `rq:status` or `culvert:batch:submit`. If job metadata contains a run ID, "
-        "enforces session marker access for that run. Synchronously cancels existing job(s); no enqueue."
+        "Requires JWT Bearer scope `rq:status` or `culvert:batch:submit`. The rq:status path enforces "
+        "token-class-appropriate run access; the culvert scope is accepted only for jobs carrying verified "
+        "culvert batch metadata. Synchronously cancels existing job(s); no enqueue."
     ),
     tags=["rq-engine", "jobs"],
     operation_id=rq_operation_id("canceljob"),
@@ -437,7 +444,7 @@ async def jobinfo_batch(request: Request):
 )
 def canceljob(job_id: str, request: Request):
     try:
-        claims = _authorize_cancel_request(request)
+        claims, accepted_scopes = _authorize_cancel_request(request)
     except AuthError as exc:
         return error_response(exc.message, status_code=exc.status_code, code=exc.code)
     except Exception:
@@ -455,8 +462,18 @@ def canceljob(job_id: str, request: Request):
             )
 
         runid = job_info.get("runid")
-        if runid:
-            require_session_marker(claims, runid)
+        is_culvert_job = bool(job_info.get("culvert_batch_uuid"))
+        if is_culvert_job and "culvert:batch:submit" in accepted_scopes:
+            pass
+        elif "rq:status" in accepted_scopes:
+            if runid:
+                authorize_run_access(claims, runid)
+        else:
+            raise AuthError(
+                "Culvert cancellation scope is valid only for culvert batch jobs",
+                status_code=403,
+                code="forbidden",
+            )
 
         payload = cancel_jobs(job_id)
         if "error" in payload:

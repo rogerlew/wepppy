@@ -33,6 +33,12 @@ Contract reconciliation note (2026-07-14):
   identifiers are unchanged. The run response adds a scheme-to-job `job_ids`
   mapping while retaining `job_id`.
 
+Contract reconciliation note (2026-07-15):
+- Run All retains the same authenticated async route and response status, but
+  `job_id` now identifies one suite parent. The existing `job_ids` mapping names
+  three serial scheme children, and an additive finalizer waits for all three
+  with failure allowed. Single-scheme execution remains direct.
+
 ## Contract Matrix
 
 | Method | Path | Auth | Scope | Mutates | Execution | Required Responses | Contract Coverage |

@@ -58,6 +58,9 @@ def recursive_get_job_details(job: Job, redis_conn: redis.Redis, now: datetime) 
             elapsed_s = (now - job.started_at).total_seconds()
 
     auth_actor = job.meta.get("auth_actor") if isinstance(job.meta, dict) else None
+    culvert_batch_uuid = (
+        job.meta.get("culvert_batch_uuid") if isinstance(job.meta, dict) else None
+    )
     job_info: Dict[str, Any] = {
         "job_id": job.id,
         "runid": _resolve_runid(job),
@@ -69,6 +72,9 @@ def recursive_get_job_details(job: Job, redis_conn: redis.Redis, now: datetime) 
         "elapsed_s": elapsed_s,
         "exc_info": _extract_exc_info(job),
         "auth_actor": auth_actor if isinstance(auth_actor, dict) else None,
+        "culvert_batch_uuid": (
+            str(culvert_batch_uuid) if culvert_batch_uuid else None
+        ),
         "children": {}
     }
 
@@ -222,9 +228,9 @@ def get_wepppy_rq_job_status(job_id: str) -> Dict[str, Any]:
         # Walk the job tree to collect all statuses and end times
         statuses, end_times, started_times = _flatten_job_tree(all_jobs_tree)
 
-        # Determine the aggregated status based on priority.
-        # If any job failed, the whole thing failed. If any is started, it's started.
-        status_priority = ['failed', 'stopped', 'canceled', 'started', 'queued', 'deferred', 'scheduled']
+        # Active descendants keep a job tree non-terminal. Once every job is
+        # terminal, any descendant failure determines the aggregate outcome.
+        status_priority = ['started', 'queued', 'deferred', 'scheduled', 'failed', 'stopped', 'canceled']
         aggregated_status = 'finished'  # Default to finished
         for status in status_priority:
             if status in statuses:

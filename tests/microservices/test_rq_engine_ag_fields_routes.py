@@ -417,7 +417,99 @@ def test_enqueue_job_serializes_submission_and_persists_job_hint(
     assert next(event for event in events if event[0] == "lock")[3] == 30
 
 
-def test_enqueue_watershed_jobs_serializes_run_all_with_allow_failure_dependencies(
+def test_enqueue_watershed_jobs_queues_one_run_all_parent_with_planned_children(
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    events = []
+
+    class DummyPrep:
+        def get_rq_job_id(self, _key: str):
+            return None
+
+        def set_rq_job_id(self, key: str, job_id: str) -> None:
+            events.append(("hint", key, job_id))
+
+    class DummyController:
+        def get_watershed_integration_states(self):
+            return {
+                scheme: {"status": "not_run"}
+                for scheme in ("concept_1", "concept_2", "hybrid")
+            }
+
+    class DummyRedis:
+        owner = None
+
+        def __enter__(self):
+            return self
+
+        def __exit__(self, exc_type, exc, tb):
+            return False
+
+        def set(self, key, owner, *, nx, ex):
+            self.owner = owner
+            return True
+
+        def get(self, _key):
+            return self.owner
+
+        def delete(self, key):
+            events.append(("unlock", key))
+
+    class DummyQueue:
+        def __init__(self, connection):
+            pass
+
+        def enqueue_call(self, func, args, timeout, **kwargs):
+            events.append(("enqueue", func, args, timeout, kwargs))
+            return SimpleNamespace(id=kwargs["job_id"])
+
+    redis_instance = DummyRedis()
+    monkeypatch.setattr(ag_fields_routes.RedisPrep, "getInstance", lambda wd: DummyPrep())
+    monkeypatch.setattr(ag_fields_routes.AgFields, "getInstance", lambda wd: DummyController())
+    monkeypatch.setattr(ag_fields_routes.redis, "Redis", lambda **kwargs: redis_instance)
+    monkeypatch.setattr(ag_fields_routes, "Queue", DummyQueue)
+    monkeypatch.setattr(ag_fields_routes, "current_auth_actor", lambda: None)
+
+    response = ag_fields_routes._enqueue_watershed_jobs(
+        "/runs/demo",
+        "demo",
+        (
+            ag_fields_routes.AgFieldsRoutingScheme.CONCEPT_1,
+            ag_fields_routes.AgFieldsRoutingScheme.CONCEPT_2,
+            ag_fields_routes.AgFieldsRoutingScheme.HYBRID,
+        ),
+        4,
+    )
+
+    assert response.status_code == 202
+    payload = json.loads(response.body)
+    assert payload["job_id"] not in set(payload["job_ids"].values())
+    assert set(payload["job_ids"]) == {"concept_1", "concept_2", "hybrid"}
+    assert len(set(payload["job_ids"].values())) == 3
+    enqueue_events = [event for event in events if event[0] == "enqueue"]
+    assert len(enqueue_events) == 1
+    assert enqueue_events[0][1] is ag_fields_routes.run_ag_fields_watershed_suite_rq
+    assert enqueue_events[0][2][:2] == ("demo", 4)
+    assert enqueue_events[0][2][2] == payload["job_ids"]
+    assert enqueue_events[0][2][3] == payload["finalizer_job_id"]
+    assert enqueue_events[0][4]["job_id"] == payload["job_id"]
+    assert enqueue_events[0][4]["meta"] == {
+        "runid": "demo",
+        "child_dispatch_lock_key": f"agfields:suite_dispatch:{payload['job_id']}",
+        "jobs:0,scheme:concept_1": payload["job_ids"]["concept_1"],
+        "jobs:1,scheme:concept_2": payload["job_ids"]["concept_2"],
+        "jobs:2,scheme:hybrid": payload["job_ids"]["hybrid"],
+        "jobs:3,func:finalize_ag_fields_watershed_suite_rq": payload["finalizer_job_id"],
+    }
+    assert (
+        "hint",
+        "agfields_run_watershed_suite",
+        payload["job_id"],
+    ) in events
+    assert not any(event[0] == "state" for event in events)
+
+
+def test_enqueue_watershed_jobs_keeps_single_concept_2_as_direct_job(
     monkeypatch: pytest.MonkeyPatch,
 ) -> None:
     events = []
@@ -431,8 +523,7 @@ def test_enqueue_watershed_jobs_serializes_run_all_with_allow_failure_dependenci
 
     class DummyController:
         def set_watershed_integration_job_ids(self, job_ids) -> None:
-            for scheme, job_id in job_ids.items():
-                events.append(("state", scheme, job_id))
+            events.append(("state", dict(job_ids)))
 
         def get_watershed_integration_states(self):
             return {
@@ -459,18 +550,12 @@ def test_enqueue_watershed_jobs_serializes_run_all_with_allow_failure_dependenci
         def delete(self, key):
             events.append(("unlock", key))
 
-    class DummyDependency:
-        def __init__(self, *, jobs, allow_failure):
-            self.dependencies = jobs
-            self.allow_failure = allow_failure
-            events.append(("dependency", jobs[0], allow_failure))
-
     class DummyQueue:
         def __init__(self, connection):
             pass
 
-        def enqueue_call(self, func, args, timeout, depends_on, job_id):
-            events.append(("enqueue", args, depends_on, job_id))
+        def enqueue_call(self, func, args, timeout, job_id):
+            events.append(("enqueue", func, args, timeout, job_id))
             return SimpleNamespace(id=job_id)
 
     redis_instance = DummyRedis()
@@ -478,43 +563,26 @@ def test_enqueue_watershed_jobs_serializes_run_all_with_allow_failure_dependenci
     monkeypatch.setattr(ag_fields_routes.AgFields, "getInstance", lambda wd: DummyController())
     monkeypatch.setattr(ag_fields_routes.redis, "Redis", lambda **kwargs: redis_instance)
     monkeypatch.setattr(ag_fields_routes, "Queue", DummyQueue)
-    monkeypatch.setattr(ag_fields_routes, "Dependency", DummyDependency)
 
     response = ag_fields_routes._enqueue_watershed_jobs(
         "/runs/demo",
         "demo",
-        (
-            ag_fields_routes.AgFieldsRoutingScheme.CONCEPT_1,
-            ag_fields_routes.AgFieldsRoutingScheme.CONCEPT_2,
-            ag_fields_routes.AgFieldsRoutingScheme.HYBRID,
-        ),
-        4,
+        (ag_fields_routes.AgFieldsRoutingScheme.CONCEPT_2,),
+        None,
     )
 
-    assert response.status_code == 202
     payload = json.loads(response.body)
-    assert payload["job_id"] == payload["job_ids"]["concept_1"]
-    assert set(payload["job_ids"]) == {"concept_1", "concept_2", "hybrid"}
-    assert len(set(payload["job_ids"].values())) == 3
-    enqueue_events = [event for event in events if event[0] == "enqueue"]
-    assert [event[1][2] for event in enqueue_events] == ["concept_1", "concept_2", "hybrid"]
-    assert enqueue_events[0][2] is None
-    assert [(event[1], event[2]) for event in events if event[0] == "dependency"] == [
-        (payload["job_ids"]["concept_1"], True),
-        (payload["job_ids"]["concept_2"], True),
-    ]
+    assert payload["job_id"] == payload["job_ids"]["concept_2"]
+    assert "finalizer_job_id" not in payload
+    assert len([event for event in events if event[0] == "enqueue"]) == 1
     assert (
         "hint",
         "agfields_run_watershed",
-        payload["job_ids"]["concept_2"],
+        payload["job_id"],
     ) in events
-    assert [(event[1], event[2]) for event in events if event[0] == "state"] == [
-        ("concept_1", payload["job_ids"]["concept_1"]),
-        ("concept_2", payload["job_ids"]["concept_2"]),
-        ("hybrid", payload["job_ids"]["hybrid"]),
-    ]
-    assert max(index for index, event in enumerate(events) if event[0] == "state") < min(
-        index for index, event in enumerate(events) if event[0] == "enqueue"
+    assert not any(
+        event[:2] == ("hint", "agfields_run_watershed_suite")
+        for event in events
     )
 
 
@@ -728,6 +796,7 @@ def test_state_and_overlay_return_hydration_contract(route_context) -> None:
     assert payload["readiness"]["parent_wepp"] is True
     assert payload["wepp"]["wepp_bin"] == "wepp_dcc52a6"
     assert set(payload["active_job_ids"]) == {
+        "agfields_run_watershed_suite",
         "agfields_build_subfields",
         "agfields_plantdb",
         "agfields_run_wepp",
@@ -753,6 +822,7 @@ def test_state_job_ids_only_marks_active_rq_statuses(
     class DummyPrep:
         def get_rq_job_id(self, key: str):
             return {
+                "agfields_run_watershed_suite": None,
                 "agfields_build_subfields": "build-active",
                 "agfields_plantdb": "plant-complete",
                 "agfields_run_wepp": None,
@@ -789,6 +859,7 @@ def test_state_job_ids_only_marks_active_rq_statuses(
         "status": "started",
     }
     assert active == {
+        "agfields_run_watershed_suite": None,
         "agfields_build_subfields": "build-active",
         "agfields_plantdb": None,
         "agfields_run_wepp": None,
@@ -796,6 +867,41 @@ def test_state_job_ids_only_marks_active_rq_statuses(
         "agfields_run_watershed_concept_2": None,
         "agfields_run_watershed_hybrid": None,
         "agfields_run_watershed": None,
+    }
+
+
+def test_suite_parent_remains_active_from_recursive_child_status(
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    from wepppy.rq import job_info
+
+    class DummyPrep:
+        def get_rq_job_id(self, key: str):
+            return "suite-parent" if key == "agfields_run_watershed_suite" else None
+
+    class DummyRedis:
+        def __enter__(self):
+            return self
+
+        def __exit__(self, exc_type, exc, tb):
+            return False
+
+    monkeypatch.setattr(ag_fields_routes.redis, "Redis", lambda **_kwargs: DummyRedis())
+    monkeypatch.setattr(
+        job_info,
+        "get_wepppy_rq_job_status",
+        lambda job_id: {"job_id": job_id, "status": "deferred"},
+    )
+
+    job_ids, active = ag_fields_routes._job_ids(DummyPrep())
+    active_job = ag_fields_routes._find_active_job(DummyPrep(), DummyRedis())
+
+    assert job_ids["agfields_run_watershed_suite"] == "suite-parent"
+    assert active["agfields_run_watershed_suite"] == "suite-parent"
+    assert active_job == {
+        "key": "agfields_run_watershed_suite",
+        "job_id": "suite-parent",
+        "status": "deferred",
     }
 
 

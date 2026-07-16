@@ -187,12 +187,21 @@ routing schemes without changing baseline or Stage 4 artifacts.
   other fields through OFEs)", and "Run all routing schemes (writes three separate
   results for comparison)". Direct injection is selected initially.
 - The primary button posts `agfields/run-watershed` with the exact selection.
-  One scheme queues one job; `all` returns and tracks a three-entry `job_ids`
-  mapping in Concept 1, Concept 2, hybrid order. The scheme-specific keys are
+  One scheme queues one direct job. `all` returns one suite parent as `job_id`
+  and a three-entry scheme-child `job_ids` mapping in Concept 1, Concept 2,
+  hybrid order. The browser polls and links to the parent while each scheme card
+  retains its child id. The scheme-specific keys are
   `agfields_run_watershed_concept_1`, `agfields_run_watershed_concept_2`, and
   `agfields_run_watershed_hybrid`; all use completion event
   `AGFIELDS_RUN_WATERSHED_TASK_COMPLETED`. The historical
-  `agfields_run_watershed` key remains a Concept 2 compatibility alias.
+  `agfields_run_watershed` key remains a Concept 2 compatibility alias. The
+  additive `agfields_run_watershed_suite` key identifies only the Run All parent.
+  That parent atomically registers the three scheme jobs and finalizer before
+  dispatch. The scheme jobs run serially, and Batch Runner-style release guards
+  keep later schemes and the finalizer from being stranded after child failure.
+  Dispatch and cancellation share a lock. Suite-owned scheme children do not
+  emit the suite terminal trigger; the finalizer emits it after all schemes
+  finish or fail.
 - The stage is blocked until Stage 4 is complete and current, the observed climate
   is supported, and every parent prepared input exists. It shares the AgFields
   single-flight guard with Stages 2–4.
@@ -289,7 +298,7 @@ All routes are run-scoped under rq-engine and follow the Treatments/Disturbed pr
 | Sub-fields overlay resource | `GET /runs/{runid}/{config}/agfields/sub-fields.geojson` | Serves `sub_fields.WGS.geojson` as `application/geo+json` |
 | State snapshot | `GET /runs/{runid}/{config}/agfields/state` | Returns all stage hydration state described below |
 
-The state snapshot has top-level objects `boundary`, `schema`, `subfields`, `mapping`, `plant_files`, `wepp`, `watershed_integration`, `watershed_integrations`, `staleness`, and `readiness`. `boundary.filename` is the persisted source basename shown after reload, with the canonical boundary filename as the compatibility fallback for historical projects. `plant_files` carries valid/invalid counts; the inventory endpoint supplies the detailed rows. `wepp` carries `run_count`, `output_count`, `complete`, and the AgFields-owned `wepp_bin` used to hydrate Stage 4. The singular `watershed_integration` remains the backward-compatible Concept 2 view. `watershed_integrations` carries independent `concept_1`, `concept_2`, and `hybrid` status, staleness, terminal summary/error, job id, fixed browse path, and limitation text. The snapshot also exposes `job_ids` and `active_job_ids` under the Stage 2-4 keys, the three current watershed keys, and the historical Concept 2 alias. Staleness keys are `subfields` and `wepp_runs`; readiness includes observed-climate/year-bound validity, watershed abstraction, parent WEPP readiness, and missing parent WEPP ids.
+The state snapshot has top-level objects `boundary`, `schema`, `subfields`, `mapping`, `plant_files`, `wepp`, `watershed_integration`, `watershed_integrations`, `staleness`, and `readiness`. `boundary.filename` is the persisted source basename shown after reload, with the canonical boundary filename as the compatibility fallback for historical projects. `plant_files` carries valid/invalid counts; the inventory endpoint supplies the detailed rows. `wepp` carries `run_count`, `output_count`, `complete`, and the AgFields-owned `wepp_bin` used to hydrate Stage 4. The singular `watershed_integration` remains the backward-compatible Concept 2 view. `watershed_integrations` carries independent `concept_1`, `concept_2`, and `hybrid` status, staleness, terminal summary/error, job id, fixed browse path, and limitation text. The snapshot also exposes `job_ids` and `active_job_ids` under the Stage 2-4 keys, the Run All suite-parent key, the three current watershed keys, and the historical Concept 2 alias. The suite key remains active while any registered descendant is active, even after the dispatch parent itself finishes. Staleness keys are `subfields` and `wepp_runs`; readiness includes observed-climate/year-bound validity, watershed abstraction, parent WEPP readiness, and missing parent WEPP ids.
 
 RQ tasks return their terminal payload through the RQ job result and publish the same payload as `RESULT_JSON` before their completion trigger. Plant processing publishes the valid/invalid inventory; sub-field building publishes field/sub-field counts; WEPP publishes `run_count`. Failures publish `EXCEPTION_JSON`; plant failures include `filename`, and WEPP failures include both `sub_field_id` and parent `field_id`. Completion triggers are `AGFIELDS_BUILD_SUBFIELDS_TASK_COMPLETED`, `AGFIELDS_PLANTDB_TASK_COMPLETED`, and `AGFIELDS_RUN_WEPP_TASK_COMPLETED`.
 

@@ -20,16 +20,16 @@ REDIS_HOST: str = redis_host()
 RQ_DB: int = int(RedisDB.RQ)
 
 
-def _cancel_job_recursive(job: Job, redis_conn: redis.Redis) -> None:
-    """Cancel a job and its children, stopping running jobs when necessary."""
-
+def _cancel_job_recursive_unlocked(job: Job, redis_conn: redis.Redis) -> None:
     try:
         if job.get_status() == "started":
             send_stop_job_command(redis_conn, job.id)
         else:
             job.cancel()
     except (NoSuchJobError, InvalidJobOperation):
-        return
+        # Dispatch parents normally finish before their children. A benign
+        # terminal-parent error must not prevent descendant cancellation.
+        pass
 
     for key, child_job_id in job.meta.items():
         if not key.startswith("jobs:"):
@@ -38,7 +38,20 @@ def _cancel_job_recursive(job: Job, redis_conn: redis.Redis) -> None:
             child_job = Job.fetch(child_job_id, connection=redis_conn)
         except NoSuchJobError:
             continue
-        _cancel_job_recursive(child_job, redis_conn)
+        _cancel_job_recursive_unlocked(child_job, redis_conn)
+
+
+def _cancel_job_recursive(job: Job, redis_conn: redis.Redis) -> None:
+    """Cancel a job and its children, synchronizing with child dispatch."""
+    dispatch_lock_key = job.meta.get("child_dispatch_lock_key")
+    if not dispatch_lock_key:
+        _cancel_job_recursive_unlocked(job, redis_conn)
+        return
+
+    with redis_conn.lock(str(dispatch_lock_key), timeout=30, blocking_timeout=30):
+        job.meta["cancel_requested"] = True
+        job.save_meta()
+        _cancel_job_recursive_unlocked(job, redis_conn)
 
 
 def cancel_jobs(job_id: str) -> Dict[str, str]:

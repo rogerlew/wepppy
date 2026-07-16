@@ -168,12 +168,15 @@ Submission/command responses:
 - Async submit commonly returns `job_id` and `status_url`.
 - Async status codes vary by endpoint contract (`200` or `202`); treat
   `job_id`/`job_ids` as the canonical async signal.
+- Previously shipped named-child `job_ids` objects remain endpoint-specific
+  compatibility surfaces. For AgFields Run All, `job_id` is the suite root and
+  the object values are its three routing children.
 - Sync operations return `message` and optional `result`.
 - Keys use `lower_snake_case`.
 
 Polling responses:
 - `jobstatus`: `{job_id, runid, status, started_at, ended_at}`
-- `jobinfo`: `{job_id, runid, status, result, started_at, ended_at, description, elapsed_s, exc_info, children, auth_actor?}`
+- `jobinfo`: `{job_id, runid, status, result, started_at, ended_at, description, elapsed_s, exc_info, children, auth_actor?, culvert_batch_uuid?}`
 - Canonical `status` values in successful polling payloads:
   - non-terminal: `queued`, `started`, `deferred`, `scheduled`
   - terminal success: `finished`
@@ -217,6 +220,9 @@ Climate-parse validation contract:
 3. If response includes `job_id`, poll `GET /api/jobstatus/{job_id}`.
 4. On failure/debug needs, fetch `GET /api/jobinfo/{job_id}`.
 5. Optionally cancel with `POST /api/canceljob/{job_id}`.
+   Cancellation requires access to the run resolved from job metadata for user,
+   session, service, and MCP tokens. The legacy `culvert:batch:submit` scope is
+   accepted only when job info carries verified `culvert_batch_uuid` metadata.
 
 ## Climate Build Ordering (Operator Replication)
 For API-only replication flows, climate setup is order-sensitive:
@@ -365,7 +371,7 @@ table below is the practical family map used by agent clients.
 
 | Family | Paths | Typical Execution | Primary Scope |
 |---|---|---|---|
-| Job control | `/api/jobstatus/{job_id}`, `/api/jobinfo/{job_id}`, `/api/jobinfo`, `/api/canceljob/{job_id}` | Polling is sync/read-only; cancel is sync mutation | `rq:status` (cancel also accepts `culvert:batch:submit`) |
+| Job control | `/api/jobstatus/{job_id}`, `/api/jobinfo/{job_id}`, `/api/jobinfo`, `/api/canceljob/{job_id}` | Polling is sync/read-only; cancel is sync mutation and enforces access to the job's run | `rq:status` (cancel also accepts `culvert:batch:submit`) |
 | Setup discovery | `/api/configs`, `/api/configs/{config}`, `/api/endpoints`, `/api/endpoints/{operation_id}/{schema\\|defaults\\|errors}`, `/api/runs/{runid}/{config}/endpoints?include_operation_docs=true` | Sync read-only discovery | `rq:status` or `rq:read` |
 | Bootstrap | `/api/runs/{runid}/{config}/bootstrap/*` plus `run-*-noprep` endpoints | Mix of sync no-queue (`checkout`, reads, mint) and async (`enable`, no-prep runs) | `bootstrap:*` and `rq:enqueue` |
 | Build/prep | `/api/runs/{runid}/{config}/build-*`, `fetch-dem-and-build-channels`, `set-outlet` | Mostly async enqueue | `rq:enqueue` |
@@ -423,9 +429,17 @@ watershed-run operation accepts exact `concept_1`, `concept_2`, `hybrid`, and
 `all` request values; omitted scheme remains `concept_2`. A single-scheme submit
 may omit `max_workers` for automatic sizing or provide an integer from 1 through
 16; values outside that range return the canonical 400 error rather than being
-clamped. It returns `job_id` plus a one-entry `job_ids` mapping. `all` returns the first job
-as `job_id` plus a scheme-to-job `job_ids` mapping for three serial,
-independently terminal jobs. The isolated-clear operation accepts the same
+clamped. It returns `job_id` plus a one-entry `job_ids` mapping. `all` returns one
+suite parent as `job_id`, a scheme-to-child `job_ids` mapping for the three serial
+routing jobs, and the additive `finalizer_job_id`. The parent registers those
+children plus a finalizer that depends on every scheme with
+`allow_failure=true`, so finalization waits for every terminal scheme and is not
+stranded by child failure. Every failure-tolerant dependent receives the same
+already-terminal release guard used by Batch Runner. The complete four-child
+tree and audit metadata are stored atomically on the parent before dispatch;
+dispatch and cancellation share a lock so cancellation cannot observe a partial
+tree. Suite-owned scheme children do not emit the suite completion trigger; the
+finalizer is its single publisher. The isolated-clear operation accepts the same
 selection contract, preserves legacy unscoped Concept 2 evidence, and never
 creates an `all` artifact tree. The canonical OpenAPI size budget remains
 138,000 bytes.

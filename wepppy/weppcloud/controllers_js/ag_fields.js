@@ -25,6 +25,10 @@ var AgFields = (function () {
             completionEvent: "AGFIELDS_RUN_WATERSHED_TASK_COMPLETED",
             statusRole: "integration-status"
         },
+        agfields_run_watershed_suite: {
+            completionEvent: "AGFIELDS_RUN_WATERSHED_TASK_COMPLETED",
+            statusRole: "integration-status"
+        },
         agfields_run_watershed_concept_1: {
             completionEvent: "AGFIELDS_RUN_WATERSHED_TASK_COMPLETED",
             statusRole: "integration-status-concept_1"
@@ -50,6 +54,7 @@ var AgFields = (function () {
         hybrid: "Channel-connected fields use outlet injection; other fields use a one-dimensional OFE approximation."
     };
     var JOB_KEYS = [
+        "agfields_run_watershed_suite",
         "agfields_run_watershed_concept_1",
         "agfields_run_watershed_concept_2",
         "agfields_run_watershed_hybrid",
@@ -1894,14 +1899,16 @@ var AgFields = (function () {
                     controller._watershedJobIds[currentScheme] = jobId;
                     controller._terminalJobsSeen[jobId] = false;
                 });
-                var firstScheme = ROUTING_SCHEMES.find(function (currentScheme) {
-                    return jobIds[currentScheme] === response.job_id;
-                }) || (scheme === "all" ? "concept_1" : scheme);
-                trackJob(WATERSHED_JOB_KEYS[firstScheme], response.job_id);
+                controller._terminalJobsSeen[response.job_id] = false;
+                if (scheme === "all") {
+                    trackJob("agfields_run_watershed_suite", response.job_id);
+                } else {
+                    trackJob(WATERSHED_JOB_KEYS[scheme], response.job_id);
+                }
                 setChip(
                     controller.nodes.integrationStatus,
                     scheme === "all"
-                        ? "Three routing jobs queued serially."
+                        ? "Routing suite queued as one parent job."
                         : "Routing job queued: " + response.job_id,
                     "success"
                 );

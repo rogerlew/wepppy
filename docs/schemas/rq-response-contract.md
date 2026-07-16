@@ -34,6 +34,14 @@
 - Multiple jobs:
   - Required: `job_ids` (non-empty)
   - Optional: `job_id` (primary job id; if present, must be `job_ids[0]`)
+- Named child groups retained for backward compatibility:
+  - An endpoint that already shipped a named `job_ids` object MAY preserve that
+    object when its route contract defines the keys and ordering.
+  - For a direct single job, the object's value must equal `job_id`.
+  - For a registered job tree, `job_id` is the tree root and the named object
+    contains its domain children; the root is not duplicated in the child map.
+  - New endpoints should use a root-inclusive `job_ids` list plus a specialized
+    named mapping instead of introducing another object-shaped `job_ids`.
 - Specialized fields (allowed but not authoritative):
   - `sync_job_id`, `migration_job_id`, etc. must be accompanied by `job_id` or `job_ids`.
 
@@ -96,9 +104,14 @@ Landuse first-class route notes (2026-04-24):
 ## Job polling responses
 - Job status (jobstatus):
   - `{job_id, runid, status, started_at, ended_at}`
+  - For registered trees, any queued/started/deferred/scheduled descendant keeps
+    the aggregate non-terminal. Failed/stopped/canceled takes precedence only
+    after no descendant remains active.
 - Job info (jobinfo):
-  - `{job_id, runid, status, result, started_at, ended_at, description, elapsed_s, exc_info, children, auth_actor}`
+  - `{job_id, runid, status, result, started_at, ended_at, description, elapsed_s, exc_info, children, auth_actor, culvert_batch_uuid}`
   - `auth_actor` is optional and only includes non-PII identifiers (no JWTs, no email).
+  - `culvert_batch_uuid` is optional verified job metadata used to constrain the
+    legacy `culvert:batch:submit` cancellation scope to Culvert jobs.
 
 ## Error responses
 - Use status-code-first semantics:
@@ -155,4 +168,6 @@ Landuse first-class route notes (2026-04-24):
 ## Compatibility rules (must)
 - Servers MUST emit canonical keys only.
 - Clients MUST rely on canonical keys.
-- If both `job_id` and `job_ids` are present, `job_ids[0]` MUST equal `job_id`.
+- If both `job_id` and list-shaped `job_ids` are present, `job_ids[0]` MUST equal
+  `job_id`. The documented named-child compatibility form follows the root/child
+  relationship above.

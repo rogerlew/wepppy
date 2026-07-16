@@ -34,6 +34,13 @@ Contract reconciliation note (2026-07-14):
   remains Concept 2. `all` expands into three serial, independently tracked
   jobs and fixed scheme trees; it does not add an endpoint or an `all/` tree.
 
+Contract reconciliation note (2026-07-15):
+- The Run All response now names one canonical suite parent in `job_id` while
+  preserving the three scheme-child IDs in `job_ids`. The parent registers the
+  serial scheme jobs and a finalizer that depends on all schemes with failure
+  allowed. Single-scheme topology, auth, scope, endpoint count, and fixed output
+  roots are unchanged.
+
 ## Inventory Table
 
 | Method | Path | Module | Function | Classification | Owner | Auth | Scope | Mutates | Notes |
@@ -76,7 +83,7 @@ Contract reconciliation note (2026-07-14):
 | GET | `/api/runs/{runid}/{config}/agfields/rotation-mapping` | `wepppy/microservices/rq_engine/ag_fields_routes.py` | `get_rotation_mapping` | agent-facing | rq-engine | JWT Bearer | `rq:status` | read-only | Run access check: `authorize_run_access`. Returns crop mappings, unused mappings, plant files, and management options. |
 | POST | `/api/runs/{runid}/{config}/agfields/rotation-mapping` | `wepppy/microservices/rq_engine/ag_fields_routes.py` | `save_rotation_mapping` | agent-facing | rq-engine | JWT Bearer | `rq:enqueue` | mutating | Run access check: `authorize_run_access`. Validates and persists run-scoped crop-to-management mappings synchronously. |
 | POST | `/api/runs/{runid}/{config}/agfields/run-wepp` | `wepppy/microservices/rq_engine/ag_fields_routes.py` | `run_wepp` | agent-facing | rq-engine | JWT Bearer | `rq:enqueue` | mutating | Run access check: `authorize_run_access`. Validates readiness and enqueues the AgFields WEPP job with the selected executable. |
-| POST | `/api/runs/{runid}/{config}/agfields/run-watershed` | `wepppy/microservices/rq_engine/ag_fields_routes.py` | `run_watershed` | agent-facing | rq-engine | JWT Bearer | `rq:enqueue` | mutating | Run access check: `authorize_run_access`. Validates current Stage 4, observed climate, parent inputs, and optional `max_workers` in 1-16, then enqueues one exact routing scheme or a serial `all` chain; omitted scheme remains Concept 2 and the response includes additive `job_ids`. |
+| POST | `/api/runs/{runid}/{config}/agfields/run-watershed` | `wepppy/microservices/rq_engine/ag_fields_routes.py` | `run_watershed` | agent-facing | rq-engine | JWT Bearer | `rq:enqueue` | mutating | Run access check: `authorize_run_access`. Validates current Stage 4, observed climate, parent inputs, and optional `max_workers` in 1-16. One exact scheme is a direct job. `all` returns one parent with three serial scheme children and an always-released finalizer; omitted scheme remains Concept 2 and the response preserves additive `job_ids`. |
 | POST | `/api/runs/{runid}/{config}/agfields/schema` | `wepppy/microservices/rq_engine/ag_fields_routes.py` | `confirm_schema` | agent-facing | rq-engine | JWT Bearer | `rq:enqueue` | mutating | Run access check: `authorize_run_access`. Confirms and persists field-id and rotation-column schema metadata synchronously. |
 | GET | `/api/runs/{runid}/{config}/agfields/state` | `wepppy/microservices/rq_engine/ag_fields_routes.py` | `state` | agent-facing | rq-engine | JWT Bearer | `rq:status` | read-only | Run access check: `authorize_run_access`. Returns the complete staged AgFields hydration, readiness, staleness, and job state. |
 | GET | `/api/runs/{runid}/{config}/agfields/sub-fields.geojson` | `wepppy/microservices/rq_engine/ag_fields_routes.py` | `subfields_overlay` | agent-facing | rq-engine | JWT Bearer | `rq:status` | read-only | Run access check: `authorize_run_access`. Returns the current WGS84 sub-field overlay as GeoJSON. |
