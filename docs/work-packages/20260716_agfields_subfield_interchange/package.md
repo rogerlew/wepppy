@@ -1,6 +1,6 @@
 # AgFields Sub-field WEPP Interchange Integration
 
-**Status**: Open (2026-07-16)
+**Status**: Complete (2026-07-16)
 **Timezone**: UTC
 
 ## Overview
@@ -88,32 +88,32 @@ its current API behavior, schemas, values, and publication locations.
 
 ## Success Criteria
 
-- [ ] Each of the six existing native bulk writer calls has the same signature,
+- [x] Each of the six existing native bulk writer calls has the same signature,
   schema, metadata, row values, ordering, and output behavior as the pre-change
   release.
-- [ ] Each dedicated AgFields writer emits exact
+- [x] Each dedicated AgFields writer emits exact
   `field_id` and `sub_field_id` values from `fields.parquet`; no parent
   `topaz_id` is emitted as sub-field identity.
-- [ ] WEPPpy rejects missing/extra descriptor sets; the native AgFields boundary
+- [x] WEPPpy rejects missing/extra descriptor sets; the native AgFields boundary
   rejects duplicate, non-integer, range-invalid, or path-mismatched descriptors
   before a final target is published.
-- [ ] The WEPPpy orchestrator requires exactly one identity for every input id,
+- [x] The WEPPpy orchestrator requires exactly one identity for every input id,
   requires all six raw families to cover the same sub-field set, and publishes
   the six-file bundle failure-atomically.
-- [ ] `run_ag_fields_wepp_rq` runs interchange after WEPP, stamps
+- [x] `run_ag_fields_wepp_rq` runs interchange after WEPP, stamps
   `TaskEnum.run_ag_fields` only after interchange succeeds, preserves raw
   reports, and preserves the existing explicit RQ error/status contract.
-- [ ] The ordinary WEPPpy hillslope interchange schema snapshots and targeted
+- [x] The ordinary WEPPpy hillslope interchange schema snapshots and targeted
   consumer tests pass without baseline snapshot changes.
-- [ ] The paired `wepppyo3` release is rebuilt, its provenance is updated, and
+- [x] The paired `wepppyo3` release is rebuilt, its provenance is updated, and
   container/runtime import checks prove the intended shared object is loaded.
-- [ ] Generated acceptance on `sacral-self-discipline` proves six families each
+- [x] Generated acceptance on `sacral-self-discipline` proves six families each
   receive 6,626 coupled descriptors spanning 2,169 fields; every row-bearing
   identity matches the mapping, zero-row sources are explicit without synthetic
   measurements, and baseline/watershed scheme artifacts are unchanged.
-- [ ] `wctl check-rq-graph` reports no graph drift, confirming that the change
+- [x] `wctl check-rq-graph` reports no graph drift, confirming that the change
   stays inside the existing stage-4 job.
-- [ ] Independent review and QA artifacts have no unresolved high or medium
+- [x] Independent review and QA artifacts have no unresolved high or medium
   findings.
 
 ## Parameterization ADR Gate
@@ -204,5 +204,9 @@ with raw reports under `wepp/ag_fields/output/` but no
 
 ## Follow-up Work
 
-Record only concrete downstream consumer or performance work discovered during
-implementation. Do not expand this package speculatively.
+The generic rq-engine endpoint catalogs omit the existing AgFields route family,
+so operator clients cannot discover schema/default/error documents for
+`rq_engine_agfields_run_wepp`. Add those established routes to the catalog in a
+separate agent-usability change; this package validated the functional route
+with an authenticated empty payload and did not broaden queue/API scope during
+closeout.

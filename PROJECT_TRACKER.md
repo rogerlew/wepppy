@@ -275,32 +275,7 @@ When resuming Kubernetes work:
 
 Currently active work packages. Limit to 2-4 packages to maintain focus.
 
-**Current WIP Count**: 13 packages
-
----
-
-### AgFields Sub-field WEPP Interchange Integration
-**Started**: 2026-07-16
-**Status**: Discovery and regression contract complete; implementation pending
-**Size**: High (3-5 focused sessions)
-**Owner**: Codex
-**Priority**: High
-**Link**: [docs/work-packages/20260716_agfields_subfield_interchange/](docs/work-packages/20260716_agfields_subfield_interchange/)
-**Description**: Add dedicated native AgFields hillslope writers that preserve
-real `field_id`/`sub_field_id` identity without changing ordinary interchange
-APIs or schemas, then make the existing stage-4 RQ job publish a validated,
-failure-atomic six-file Parquet bundle before reporting success.
-
-**Current Focus**: Capture pre-change native goldens, implement one isolated
-AgFields writer prototype, and prove the ordinary writer remains exact.
-
-**Dependencies**: Builds on the completed WEPPpyo3-only interchange cutover and
-the completed AgFields backend/routing packages. Requires a paired native release
-and full-corpus acceptance on `sacral-self-discipline` before forest enablement.
-
-**Next Steps**: Execute Milestone 1 in the active ExecPlan, then extend the
-isolated contract to all six families only after the first ordinary no-regression
-gate passes.
+**Current WIP Count**: 12 packages
 
 ---
 
@@ -569,6 +544,25 @@ gate passes.
 ## ✅ Done
 
 Recently completed work packages. Archived immediately upon completion.
+
+### AgFields Sub-field WEPP Interchange Integration (2026-07-16)
+
+**Status**: ✅ **COMPLETE**
+
+**Link**: [docs/work-packages/20260716_agfields_subfield_interchange/](docs/work-packages/20260716_agfields_subfield_interchange/)
+
+**Lifecycle**: In Progress -> Done (2026-07-16)
+
+**Summary**: Added six dedicated native AgFields writers carrying real
+`field_id`/`sub_field_id`, a failure-atomic specialized WEPPpy bundle, distinct
+completion/readiness semantics, and synchronous stage-4 RQ wiring without
+changing ordinary APIs or queue edges. Exact ordinary golden parity, 96 Rust
+tests, 46 native Python tests, 191 focused WEPPpy tests, and the 4,984-test full
+suite passed. Forest acceptance published all six resources for 6,626
+sub-fields, restarted and ABI-verified all importers, and completed authenticated
+job `9ff0f757-3ec4-4d48-ae1c-f3f6de2c8e84` with deep-valid state and unchanged
+ordinary/watershed/mapping hashes. All independent high/medium findings were
+resolved; residual risk is low-medium with paired rollback documented.
 
 ### Forked Batch Identity Normalization (2026-07-16)
 

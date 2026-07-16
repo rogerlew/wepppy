@@ -6,9 +6,9 @@
 
 **Timezone**: UTC
 **Started**: 2026-07-16 18:53 UTC
-**Current phase**: Milestone 6 - final gates and forest RQ acceptance
-**Last updated**: 2026-07-17 03:21 UTC
-**Next milestone**: Restart importers and complete authenticated stage-4 acceptance
+**Current phase**: Complete
+**Last updated**: 2026-07-17 04:15 UTC
+**Next milestone**: None; monitor ordinary and AgFields interchange consumers
 **Security impact**: low
 **Dedicated security review**: no
 **Security artifact**: N/A
@@ -17,31 +17,11 @@
 
 ### Ready / Backlog
 
-- [ ] Capture pre-change ordinary-writer golden outputs and schemas in
-  `wepppyo3`; prove the fixture set covers PASS/HBP, EBE, ELEMENT, LOSS, SOIL,
-  and WAT.
-- [ ] Implement six dedicated native AgFields writers using shared parser
-  internals without changing the ordinary public writer paths.
-- [ ] Add PyO3 binding tests for exact propagation and every mapping rejection
-  case; add an AgFields dataset-kind schema contract without rewriting ordinary
-  snapshots.
-- [ ] Rebuild only the canonical `wepp_interchange` release artifact, update
-  provenance, and verify import origin and public signatures.
-- [ ] Add the specialized staged WEPPpy AgFields interchange orchestrator and
-  focused contract tests.
-- [ ] Wire it into `run_ag_fields_wepp_rq` between WEPP completion and the
-  preflight timestamp/completion event.
-- [ ] Update AgFields and interchange documentation in both repositories.
-- [ ] Run targeted and full gates, then perform staged generated acceptance on
-  `sacral-self-discipline` and record resource, identity, and immutability
-  evidence.
-- [ ] Obtain independent code review and QA review; resolve all high/medium
-  findings before closeout.
+- None.
 
 ### In Progress
 
-- [ ] Complete the authoritative full WEPPpy suite, coordinated importer
-  restart, container ABI verification, and authenticated stage-4 RQ acceptance.
+- None.
 
 ### Blocked
 
@@ -68,6 +48,13 @@
   AgFields metric exports and impossible non-EBE zero-row completion metadata;
   the consolidated cross-layer suite passed 191 tests
   (2026-07-17 03:20 UTC).
+- [x] Passed the full WEPPpy suite (4,984 passed, 58 skipped), restarted all six
+  importers, and verified canonical native origin/SHA/signatures in each
+  (2026-07-17 03:38-03:41 UTC).
+- [x] Completed authenticated job
+  `9ff0f757-3ec4-4d48-ae1c-f3f6de2c8e84` in 30m11s; state and independent deep
+  validation reported current completion, protected hashes remained exact, and
+  no stage/backup debris remained (2026-07-17 04:12 UTC).
 
 - [x] Confirmed the current stage-4 RQ worker returns directly after
   `run_wepp_ag_fields` and does not invoke interchange (2026-07-16 18:53 UTC).
@@ -88,6 +75,10 @@
   ExecPlan; confirmed both repositories were clean and froze the canonical
   pre-change native SHA as
   `7419203c8b91db1b595590b7c9a28040662d5fad9fdf8b182a17c85a76d518e4`.
+- **2026-07-17 03:38 UTC** - All final repository gates passed; coordinated
+  forest restart and per-importer ABI verification completed.
+- **2026-07-17 04:12 UTC** - Authenticated stage-4 acceptance finished and all
+  generated/protected-scope postchecks passed.
 
 ## Decisions Log
 
@@ -164,12 +155,12 @@ do not see a partially refreshed bundle.
 | Mapping rows attach the wrong field to a raw file | High | Medium | Key by parsed `H<n>`, require one-to-one coverage, reject missing/extra/duplicate ids, full-corpus anti-join | Mitigated; 6,626-id anti-join passed |
 | Parent `topaz_id` is misrepresented as sub-field identity | High | Medium | Contract forbids propagation; focused negative tests and schema assertion | Mitigated; schemas contain only real identities |
 | Large conversion exhausts worker memory or disk | High | Medium | Native streaming writers, bounded staging, disk preflight, monitor peak RSS/disk, retain raw inputs | Mitigated; 752 MiB peak, no swap |
-| RQ reports success after partial interchange failure | High | Low | Interchange precedes timestamp/result/completion; inject failures in each family | Open |
-| Stale native `.so` makes Python and Rust signatures disagree | High | Medium | Canonical release rebuild, provenance update, host and restarted-container import/signature tests | Open |
+| RQ reports success after partial interchange failure | High | Low | Interchange precedes timestamp/result/completion; inject failures in each family | Mitigated; every family failure gate passed |
+| Stale native `.so` makes Python and Rust signatures disagree | High | Medium | Canonical release rebuild, provenance update, host and restarted-container import/signature tests | Mitigated in all six importers |
 | Existing bundle is destroyed by a failed rerun | High | Low | Unique stage, validate before publish, backup/restore around directory replacement | Mitigated; failure injection and replacement passed |
 | Queue graph changes accidentally | Medium | Low | No child job; run `wctl check-rq-graph` and inspect static catalog diff | Mitigated; graph gate passed |
-| Full acceptance mutates watershed or baseline artifacts | High | Low | Protected-file inventory before/after; scope writes to `wepp/ag_fields/output/interchange` | Direct conversion passed; post-RQ check pending |
-| Global dataset version changes create unrelated churn | Medium | Low | Use a versioned AgFields dataset-kind/schema marker; do not bump the ordinary dataset version without explicit plan revision and owner review | Open |
+| Full acceptance mutates watershed or baseline artifacts | High | Low | Protected-file inventory before/after; scope writes to `wepp/ag_fields/output/interchange` | Mitigated; all three post-RQ protected hashes exact |
+| Global dataset version changes create unrelated churn | Medium | Low | Use a versioned AgFields dataset-kind/schema marker; do not bump the ordinary dataset version without explicit plan revision and owner review | Avoided; ordinary version unchanged |
 | Raw WEPP signature makes state look complete after interchange failure | High | Medium | Separate persisted interchange signature, invalidate before run, set after publication, require manifest+signature in state snapshot | Mitigated; state/failure regressions passed |
 | Stale retained bundle is exported after readiness invalidation | High | Medium | Detached read-only semantic readiness gate before Features Export dependency planning | Mitigated; marker/hash/major regressions passed |
 
@@ -177,48 +168,62 @@ do not see a partially refreshed bundle.
 
 ### Code Quality
 
-- [ ] `cargo fmt --check` passes in `/home/workdir/wepppyo3`.
-- [ ] `cargo test -p wepp_interchange_rust` passes.
-- [ ] Changed-file broad-exception and quality observability checks are recorded.
-- [ ] No new external dependency is introduced.
+- [x] `cargo fmt --check` passes in `/home/workdir/wepppyo3`.
+- [x] `cargo test -p wepp_interchange_rust` passes.
+- [x] Changed-file broad-exception and quality observability checks are recorded.
+- [x] No new external dependency is introduced.
 
 ### Security
 
 - [x] Initial security impact triage recorded as low.
-- [ ] Confirm final diff has no new route, queue edge, user-controlled path,
+- [x] Confirm final diff has no new route, queue edge, user-controlled path,
   subprocess behavior, or out-of-run write.
-- [ ] Escalate to a dedicated security review if the scope crosses that boundary.
+- [x] Confirmed the scope did not cross the dedicated-review boundary.
 
 ### Documentation
 
-- [ ] `wepppy/nodb/mods/ag_fields/README.md` documents stage-4 interchange and
+- [x] `wepppy/nodb/mods/ag_fields/README.md` documents stage-4 interchange and
   identity semantics.
-- [ ] `docs/dev-notes/wepp_interchange.spec.md` documents the AgFields dataset kind.
-- [ ] WEPPpyo3 module/provenance docs describe the public signature and rebuilt
+- [x] `docs/dev-notes/wepp_interchange.spec.md` documents the AgFields dataset kind.
+- [x] WEPPpyo3 module/provenance docs describe the public signature and rebuilt
   artifact.
-- [ ] Work package, tracker, compatibility plan, and ExecPlan match as-built
+- [x] Work package, tracker, compatibility plan, and ExecPlan match as-built
   behavior.
 - [x] Parameterization ADR confirmed unnecessary.
 
 ### Testing
 
-- [ ] Ordinary native writer golden parity and exact schema tests pass.
-- [ ] AgFields native identity propagation/rejection tests pass.
-- [ ] WEPPpy specialized orchestrator tests pass.
-- [ ] RQ ordering, success, and injected-failure tests pass.
-- [ ] Ordinary WEPPpy interchange snapshots and consumer tests pass unchanged.
-- [ ] Full forest generated-output identity and protected-file checks pass.
+- [x] Ordinary native writer golden parity and exact schema tests pass.
+- [x] AgFields native identity propagation/rejection tests pass.
+- [x] WEPPpy specialized orchestrator tests pass.
+- [x] RQ ordering, success, and injected-failure tests pass.
+- [x] Ordinary WEPPpy interchange snapshots and consumer tests pass unchanged.
+- [x] Full forest generated-output identity and protected-file checks pass.
 
 ### Deployment
 
-- [ ] Canonical native release artifact and provenance are refreshed.
-- [ ] Host and container import origins resolve to the canonical release.
-- [ ] Forest stack is restarted only after pre-restart targeted gates pass.
-- [ ] Actual RQ stage-4 acceptance reaches terminal success with all six resources.
-- [ ] Rollback is rehearsed/documented: restore the prior native release and
-  WEPPpy code, restart, and leave raw outputs intact.
+- [x] Canonical native release artifact and provenance are refreshed.
+- [x] Host and container import origins resolve to the canonical release.
+- [x] Forest stack is restarted only after pre-restart targeted gates pass.
+- [x] Actual RQ stage-4 acceptance reaches terminal success with all six resources.
+- [x] Paired rollback is documented with exact revisions/hashes and leaves raw
+  outputs intact. It was not executed because that would undo the accepted
+  deployment; pre-change artifact recovery and both revert boundaries were
+  independently verified.
 
 ## Progress Notes
+
+### 2026-07-17 04:15 UTC: Generated and operational acceptance complete
+
+**Agent/Contributor**: Codex with independent code and QA reviewers
+
+**Outcome**: All repository gates passed, all high/medium review findings were
+resolved, the forest importer set was restarted against one canonical native
+SHA, and authenticated stage-4 job
+`9ff0f757-3ec4-4d48-ae1c-f3f6de2c8e84` reached terminal success. Independent
+deep validation, current-state checks, full descriptor/identity summaries, and
+protected-scope hashes all passed. Exact evidence and rollback commands are in
+the package artifacts.
 
 ### 2026-07-16 19:20 UTC: Independent review found a false-completion path
 
@@ -232,7 +237,7 @@ could therefore leave the API reporting stage 4 complete.
 **Disposition**: High severity, accepted. Add a separate persisted interchange
 completion signature, invalidate it before raw WEPP execution and clear paths,
 set it only after bundle publication, and require it plus a valid manifest in
-the state snapshot. Add failure coverage with a pre-existing bundle.
+the state snapshot. Add failure coverage with a preexisting bundle.
 
 ### 2026-07-16 18:53 UTC: Initial scaffold and evidence capture
 

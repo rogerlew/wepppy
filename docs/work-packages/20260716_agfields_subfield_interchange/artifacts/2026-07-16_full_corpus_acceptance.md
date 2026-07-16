@@ -72,4 +72,56 @@ mapping; expected raw/NoDb mutations are recorded separately.
 
 ## Service and RQ acceptance
 
-Pending final gates and the coordinated forest restart.
+The default and batch queues reported zero queued/executing jobs before the
+coordinated restart. `weppcloud`, `query-engine`, `rq-engine`, `rq-worker`,
+`rq-worker-batch`, and `scheduler` were force-recreated together. Every process
+then imported:
+
+- module origin
+  `/workdir/wepppyo3/release/linux/py312/wepppyo3/wepp_interchange/__init__.py`;
+- shared-object SHA-256
+  `8c42edd0a8e1b03bdaf423355a12414180c709efaac3e379e5dd23e6cc77214e`;
+- all six `ag_fields_hillslope_*_files_to_parquet` functions with their expected
+  signatures.
+
+Authenticated rq-engine setup and run-scoped discovery used a bearer token with
+audience `rq-engine`, token class `service`, the required read/status/enqueue
+scopes, and access limited to `sacral-self-discipline`. The generic endpoint
+catalogs do not currently expose the preexisting AgFields route family, so the
+operation-specific schema/default/error URLs were unavailable. Acceptance used
+an empty JSON request and therefore relied only on server defaults.
+
+`POST /api/runs/sacral-self-discipline/disturbed9002_wbt/agfields/run-wepp`
+returned HTTP 202 and job
+`9ff0f757-3ec4-4d48-ae1c-f3f6de2c8e84`. The job ran from
+`2026-07-16 20:41:52.653282` through `2026-07-16 21:12:03.296576` (30m11s) and
+finished without exception. Its result was:
+
+```json
+{"interchange_relpath":"wepp/ag_fields/output/interchange","run_count":6626}
+```
+
+The post-job AgFields state reported 6,626 runs, no active AgFields job,
+non-stale sub-fields/raw runs, and `wepp.complete=true`. Independent deep bundle
+validation returned true. The published rerun contained the same 6,626 mapping
+identities and 2,169 fields, no staging/backup debris, and these summaries:
+
+| Family | Rows | Row groups / identities | Size (bytes) | Explicit zero-row sources |
+| --- | ---: | ---: | ---: | ---: |
+| PASS | 41,147,460 | 6,626 | 386,991,531 | 0 |
+| EBE | 874,734 | 6,515 | 38,925,051 | 111 |
+| ELEMENT | 3,518,535 | 6,626 | 230,242,338 | 0 |
+| LOSS | 33,130 | 6,626 | 14,311,451 | 0 |
+| SOIL | 41,147,460 | 6,626 | 906,927,729 | 0 |
+| WAT | 41,147,460 | 6,626 | 1,054,458,121 | 0 |
+
+The three post-RQ protected scopes remained byte-identical: ordinary output
+`29717712558656084f81b7935961f0c35a9cfd0dc6feaf5ebe23ba8360196020`,
+watershed manifests
+`ffa24a9c75d52d06eb72d24f6a42a8e025ec4bade6c36888c152c10ac21a5422`,
+and source mapping
+`7adc2df6b1fa36537c784507e62a2b85ed38ddc51842712d9611cbc32e9d8c99`.
+As expected for an actual rerun, the raw-family tree changed from `6a0d3b...`
+to `bba2553647a7de55f83363ca397d6c45c3ddf030407c2f0ee5b40aca7e664e76`,
+and the root NoDb tree changed from `b1fb73...` to
+`d8f290f511af4a8998c4eba39417f5e24e03fa80b4c305e652cc036a9b5cf95f`.

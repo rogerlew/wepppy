@@ -49,15 +49,20 @@ Ordinary baseline and roads interchange outputs must remain exactly compatible.
 - [x] (2026-07-17 03:20 UTC) Implemented the staged WEPPpy AgFields
   orchestrator, Features Export catalog/readiness correction, and RQ
   ordering/error behavior.
-- [ ] Pass targeted and full repository gates in both repositories.
+- [x] (2026-07-17 03:38 UTC) Passed native Rust/Python gates, 191 focused
+  cross-layer tests, stub/API/graph/docs gates, and the authoritative WEPPpy
+  suite (4,984 passed, 58 skipped).
 - [x] (2026-07-17 03:21 UTC) Published and independently validated the full
   6,626-subfield forest bundle twice; the hardened rerun took 7m48.63s and
   peaked at 751,956 KiB RSS with protected scopes unchanged.
-- [ ] Restart the forest stack, verify native origin/SHA in every importer, and
-  complete an actual authenticated stage-4 RQ acceptance.
-- [ ] Complete independent code and QA reviews, resolve findings, update docs,
-  and archive this ExecPlan with an outcome. Both final reviews are complete and
-  all high/medium findings are resolved; operational evidence and archival remain.
+- [x] (2026-07-17 04:12 UTC) Restarted all six forest importers together and
+  verified canonical origin, SHA, and signatures in each process.
+- [x] (2026-07-17 04:12 UTC) Completed authenticated stage-4 job
+  `9ff0f757-3ec4-4d48-ae1c-f3f6de2c8e84`; it finished 6,626 runs plus the
+  deep-validated bundle in 30m11s and state reported WEPP complete.
+- [x] (2026-07-17 04:15 UTC) Completed independent code and QA reviews,
+  resolved every high/medium finding, updated evidence/docs, and archived the
+  plan with an outcome.
 
 ## Surprises & Discoveries
 
@@ -138,7 +143,7 @@ Ordinary baseline and roads interchange outputs must remain exactly compatible.
   `wepppy/nodb/mods/features_export/service.py`.
 
 - Observation: The generic rq-engine operation catalogs do not list the
-  pre-existing AgFields route family, so generic schema/default/error discovery
+  preexisting AgFields route family, so generic schema/default/error discovery
   for `rq_engine_agfields_run_wepp` returns no descriptor/404 even though the
   authenticated route and AgFields state endpoint are available.
   Evidence: post-restart operator discovery against both `/api/endpoints` and
@@ -221,11 +226,35 @@ historical observations that changed the design.
 
 ## Outcomes & Retrospective
 
-Planning is complete and implementation has not started. At each major
-milestone, summarize what passed, what remains, measured performance, any
-deviation from the compatibility contract, and lessons for shared native release
-work. At closeout, compare the generated forest evidence against the purpose and
-state the residual risk honestly.
+The package achieved its purpose. The existing stage-4 RQ job now withholds
+terminal success until six dedicated native AgFields datasets are published and
+deep-validated. Every row carries real `field_id` and `sub_field_id`; no
+sub-field is assigned a TOPAZ or parent WEPP identity. Forest acceptance covered
+6,626 descriptors across 2,169 fields, including 111 legitimate header-only EBE
+sources represented in the manifest without synthetic measurements.
+
+Ordinary interchange stayed behind its original six APIs and retained exact
+Arrow schema, metadata, value, order, row-group, and release-golden parity. The
+direct hardened conversion completed in 7m48.63s at 751,956 KiB peak RSS. The
+authenticated end-to-end RQ rerun completed in 30m11s, returned the expected
+interchange path, produced a current deep-valid bundle, and changed only the raw
+reports/NoDb state expected from rerunning WEPP. Ordinary output, watershed
+manifests, and the source mapping retained their baseline hashes.
+
+Validation passed 96 native Rust tests, all 46 native Python interchange tests,
+191 focused WEPPpy tests, both changed-module stub checks, stub completeness,
+the RQ dependency graph, documentation lint, broad-exception enforcement, and
+the full WEPPpy suite (4,984 passed, 58 skipped). All independent high/medium
+findings were fixed before restart.
+
+Residual regression risk is **low-medium**, not zero. The shared native artifact
+and multi-gigabyte bundle are still consumed by multiple long-lived process
+types. The bounded risk rests on additive dedicated APIs, exact ordinary golden
+parity, two-phase publication, persisted completion semantics, semantic consumer
+readiness, all-importer SHA/signature verification, generated-corpus evidence,
+and the paired rollback runbook. The generic rq-engine catalogs' omission of the
+existing AgFields route remains a concrete operator-discovery painpoint; it did
+not block authenticated empty-payload acceptance and is not a queue/data defect.
 
 ## Context and Orientation
 
