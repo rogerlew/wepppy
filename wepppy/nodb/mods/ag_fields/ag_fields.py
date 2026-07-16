@@ -154,6 +154,7 @@ class AgFields(NoDbBase):
             self._plant_file_provenance = {}
             self._subfields_source_signature = None
             self._wepp_source_signature = None
+            self._wepp_interchange_source_signature = None
             self._wepp_bin = self.config_get_str('ag_fields', 'bin')
             self._watershed_integration_source_signature = None
             self._watershed_integration_summary = None
@@ -640,6 +641,7 @@ class AgFields(NoDbBase):
                 shutil.rmtree(self.ag_field_wepp_runs_dir)
             os.makedirs(self.ag_field_wepp_runs_dir, exist_ok=True)
             self._wepp_source_signature = None
+            self._wepp_interchange_source_signature = None
 
     def clear_ag_field_wepp_outputs(self) -> None:
         with self.locked():
@@ -647,6 +649,7 @@ class AgFields(NoDbBase):
                 shutil.rmtree(self.ag_field_wepp_output_dir)
             os.makedirs(self.ag_field_wepp_output_dir, exist_ok=True)
             self._wepp_source_signature = None
+            self._wepp_interchange_source_signature = None
 
     def clear_ag_field_wepp_artifacts(self) -> None:
         with self.locked():
@@ -655,6 +658,60 @@ class AgFields(NoDbBase):
                     shutil.rmtree(directory)
                 os.makedirs(directory, exist_ok=True)
             self._wepp_source_signature = None
+            self._wepp_interchange_source_signature = None
+
+    @property
+    def wepp_source_signature(self) -> Optional[str]:
+        """Return the source signature for the current raw sub-field WEPP run."""
+        return getattr(self, '_wepp_source_signature', None)
+
+    @property
+    def wepp_interchange_source_signature(self) -> Optional[str]:
+        """Return the raw-run signature whose interchange bundle was published."""
+        return getattr(self, '_wepp_interchange_source_signature', None)
+
+    def mark_wepp_ag_fields_interchange_complete(self, expected_signature: str) -> None:
+        """Persist stage-4 completion only for the current raw run and bundle."""
+        from wepppy.wepp.interchange.ag_fields_interchange import (
+            _is_wepp_ag_fields_interchange_complete,
+        )
+
+        with self.locked():
+            current_signature = self._workflow_signature()
+            raw_signature = getattr(self, '_wepp_source_signature', None)
+            if (
+                not expected_signature
+                or expected_signature != raw_signature
+                or expected_signature != current_signature
+            ):
+                raise ValueError(
+                    "AgFields interchange completion signature does not match the current raw WEPP run"
+                )
+            if not _is_wepp_ag_fields_interchange_complete(
+                self.ag_field_wepp_output_dir,
+                self.subfields_parquet_path,
+                deep=True,
+            ):
+                raise ValueError("AgFields interchange bundle is missing, stale, or invalid")
+            self._wepp_interchange_source_signature = expected_signature
+
+    def has_current_wepp_ag_fields_interchange(self) -> bool:
+        """Return whether the persisted completion marker and bundle are current."""
+        from wepppy.wepp.interchange.ag_fields_interchange import (
+            _is_wepp_ag_fields_interchange_complete,
+        )
+
+        current_signature = self._workflow_signature()
+        return bool(
+            current_signature
+            and current_signature == getattr(self, '_wepp_source_signature', None)
+            and current_signature
+            == getattr(self, '_wepp_interchange_source_signature', None)
+            and _is_wepp_ag_fields_interchange_complete(
+                self.ag_field_wepp_output_dir,
+                self.subfields_parquet_path,
+            )
+        )
 
     def run_watershed_integration(
         self,
@@ -1640,6 +1697,8 @@ class AgFields(NoDbBase):
         e.g. rotation_schedule_year_key_func = lambda year: f'Crop{year}'
         """
         self.logger.info('run_wepp_ag_fields()')
+        with self.locked():
+            self._wepp_interchange_source_signature = None
         start_year, end_year = self._observed_year_bounds()
 
         watershed = self.watershed_instance

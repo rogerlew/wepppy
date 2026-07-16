@@ -21,9 +21,12 @@ sub-field identity.
 The result is visible under
 `<run>/wepp/ag_fields/output/interchange/` as `H.pass.parquet`, `H.ebe.parquet`,
 `H.element.parquet`, `H.loss.parquet`, `H.soil.parquet`, and `H.wat.parquet`.
-On the forest acceptance project, each file must cover the same 6,626 distinct
-sub-fields as `ag_fields/sub_fields/fields.parquet`. Ordinary baseline and roads
-interchange outputs must remain exactly compatible.
+On the forest acceptance project, every native call and bundle manifest must
+cover the same 6,626 source descriptors as
+`ag_fields/sub_fields/fields.parquet`. Every row-bearing report must carry its
+real identity. A source report with zero scientific rows is recorded explicitly
+as a zero-row source in the manifest; no synthetic measurement row is invented.
+Ordinary baseline and roads interchange outputs must remain exactly compatible.
 
 ## Progress
 
@@ -33,21 +36,28 @@ interchange outputs must remain exactly compatible.
   file counts, identity counts, allocated/apparent size, and free space.
 - [x] (2026-07-16 18:53 UTC) Authored the pre-implementation schema compatibility
   plan and selected dedicated AgFields APIs as the regression boundary.
-- [ ] Capture ordinary pre-change golden outputs and release/import provenance.
-- [ ] Implement and validate one dedicated AgFields native writer as a contained
+- [x] (2026-07-16 19:11 UTC) Began execution with clean WEPPpy and WEPPpyo3
+  worktrees and recorded the canonical pre-change native release SHA.
+- [x] (2026-07-16 19:14 UTC) Captured ordinary pre-change golden outputs,
+  signatures, schemas, metadata, row groups, logical values, and release SHA.
+- [x] (2026-07-16 19:27 UTC) Implemented and validated one dedicated AgFields native writer as a contained
   prototype while proving its ordinary sibling is unchanged.
-- [ ] Implement the remaining five dedicated native writers and their complete
+- [x] (2026-07-16 19:29 UTC) Implemented the remaining five dedicated native writers and their complete
   identity/error/schema test matrix.
-- [ ] Build and verify the paired canonical native release without restarting
+- [x] (2026-07-16 19:31 UTC) Built and atomically installed the paired canonical native release without restarting
   services.
-- [ ] Implement the staged WEPPpy AgFields orchestrator, Features Export catalog
-  correction, and RQ ordering/error behavior.
+- [x] (2026-07-17 03:20 UTC) Implemented the staged WEPPpy AgFields
+  orchestrator, Features Export catalog/readiness correction, and RQ
+  ordering/error behavior.
 - [ ] Pass targeted and full repository gates in both repositories.
-- [ ] Benchmark and validate direct conversion of the full forest corpus.
+- [x] (2026-07-17 03:21 UTC) Published and independently validated the full
+  6,626-subfield forest bundle twice; the hardened rerun took 7m48.63s and
+  peaked at 751,956 KiB RSS with protected scopes unchanged.
 - [ ] Restart the forest stack, verify native origin/SHA in every importer, and
   complete an actual authenticated stage-4 RQ acceptance.
 - [ ] Complete independent code and QA reviews, resolve findings, update docs,
-  and archive this ExecPlan with an outcome.
+  and archive this ExecPlan with an outcome. Both final reviews are complete and
+  all high/medium findings are resolved; operational evidence and archival remain.
 
 ## Surprises & Discoveries
 
@@ -91,6 +101,50 @@ interchange outputs must remain exactly compatible.
   version. A minor version alone cannot prove that an AgFields bundle contains
   the required dataset kind and identity columns.
   Evidence: `wepppy/wepp/interchange/versioning.py::needs_major_refresh`.
+
+- Observation: Suppressing the stage-4 RedisPrep timestamp is not enough to
+  prevent false completion after interchange failure. The AgFields controller
+  persists its raw-WEPP source signature before the RQ worker invokes
+  interchange, while the rq-engine state snapshot currently defines
+  `wepp.complete` from run count and raw-run staleness only.
+  Evidence: `wepppy/nodb/mods/ag_fields/ag_fields.py::run_wepp_ag_fields` and
+  `wepppy/microservices/rq_engine/ag_fields_routes.py::_state_snapshot`.
+
+- Observation: The ordinary calendar resolver can materialize
+  `climate/wepp_cli.parquet`, which conflicts with the AgFields orchestrator's
+  output-scoped mutation contract.
+  Evidence: `wepppy/wepp/interchange/_utils.py::_ensure_cli_parquet`.
+  The specialized orchestrator now consumes an existing canonical calendar
+  read-only and otherwise uses native Gregorian/start-year behavior.
+
+- Observation: Some full-corpus EBE reports parse to zero scientific rows.
+  Requiring every Parquet file to contain all 6,626 identities would require
+  inventing measurements and is therefore scientifically invalid.
+  Evidence: the first direct forest conversion stopped after 2:10 with valid
+  EBE output missing only rowless source identities; peak RSS was 660,220 KiB.
+  Acceptance now distinguishes complete descriptor coverage from row-bearing
+  identity coverage and records zero-row source counts in the manifest.
+
+- Observation: Lightweight manifest validation must still reject states the
+  writer can never publish. The initial completion validator permitted zero-row
+  metadata on non-EBE families even though generation rejects such sources.
+  Evidence: final QA review and the parameterized completion regressions in
+  `tests/nodb/mods/test_ag_fields_backend_contract.py`.
+
+- Observation: Catalog dependency fingerprints do not establish semantic
+  readiness. A stale specialized bundle could remain on disk after its NoDb
+  completion marker was cleared and still be selected by Features Export.
+  Evidence: final code review and the read-only readiness gate in
+  `wepppy/nodb/mods/features_export/service.py`.
+
+- Observation: The generic rq-engine operation catalogs do not list the
+  pre-existing AgFields route family, so generic schema/default/error discovery
+  for `rq_engine_agfields_run_wepp` returns no descriptor/404 even though the
+  authenticated route and AgFields state endpoint are available.
+  Evidence: post-restart operator discovery against both `/api/endpoints` and
+  `/api/runs/sacral-self-discipline/disturbed9002_wbt/endpoints`. Acceptance
+  therefore submitted empty JSON and relied only on server-resolved defaults.
+  This is operator-catalog friction, not a queue-wiring change in this package.
 
 Add discoveries with exact paths, commands, or concise test output. Do not erase
 historical observations that changed the design.
@@ -139,6 +193,31 @@ historical observations that changed the design.
   Rationale: This prevents false success without adding queue edges,
   cancellation semantics, UI child-job state, or dependency graph complexity.
   Date/Author: 2026-07-16 / Codex and reconnaissance reviewers.
+
+- Decision: Persist a distinct AgFields interchange completion signature and
+  require it, plus a valid published bundle manifest, for rq-engine stage-4
+  completeness. Invalidate that marker before raw WEPP execution and set it
+  only after bundle publication.
+  Rationale: Raw-run freshness and interchange publication are separate commit
+  points. Without a second marker, a failed rerun can leave a previous bundle
+  and a current raw signature that falsely satisfy the state endpoint and
+  watershed prerequisite.
+  Date/Author: 2026-07-16 / Codex and independent regression reviewer.
+
+- Decision: Features Export rejects an entire submission requesting an
+  `ag_fields_metrics` layer unless the detached AgFields controller reports the
+  specialized interchange current.
+  Rationale: File existence and cache fingerprints cannot distinguish a current
+  bundle from an obsolete bundle retained after mapping/configuration changes.
+  The gate is read-only and runs before dependency/cache planning.
+  Date/Author: 2026-07-17 / Codex and independent code reviewer.
+
+- Decision: Only EBE may report explicit zero-row sources in the bundle
+  manifest.
+  Rationale: The forest corpus contains legitimate header-only EBE reports;
+  every other supported family is required to emit scientific rows per source.
+  Completion validation now enforces the same invariant as publication.
+  Date/Author: 2026-07-17 / Codex and independent QA reviewer.
 
 ## Outcomes & Retrospective
 
@@ -274,8 +353,10 @@ numerically by `sub_field_id` and couple each path with its exact ids.
 
 Preflight the six dedicated native symbols through the existing required-native
 boundary. Write all native targets to one unique sibling stage, validate each
-schema's dataset kind, schema version, exact field list, non-null identity, and
-distinct identity coverage, then write an AgFields bundle manifest last. Publish
+schema's dataset kind, schema version, exact field list, non-null identity,
+numerically ordered row-bearing identity coverage, and one row group per
+row-bearing source. Record total descriptor and zero-row source counts, then
+write an AgFields bundle manifest last. Publish
 the completed directory with a recoverable backup-and-replace sequence. On any
 failure, restore the prior complete directory if publication started, remove or
 retain the failed unique stage according to the diagnostic contract, and always
@@ -284,9 +365,12 @@ preserve raw reports.
 Add `run_wepp_ag_fields_interchange` to the lazy public exports in
 `wepppy/wepp/interchange/__init__.py`. Add the six dedicated native symbols to
 the paired required-API preflight only after the canonical release artifact that
-contains them is ready to install. Update the Features Export catalog so
-AgFields PASS and WAT sources expose and join `sub_field_id`/`field_id`, not the
-ambiguous ordinary identity assumptions.
+contains them is ready to install. Update the Features Export sub-field metric
+layer so its PASS source joins on `sub_field_id`, not the ambiguous ordinary
+identity assumptions. Do not combine PASS and WAT on identity alone because
+their repeated temporal grains create a many-to-many join. Retain the draft
+field metric layer unchanged until a separate contract defines scientifically
+valid field aggregation.
 
 Do not call the general `run_interchange_migration(..., "ag_fields")` unchanged:
 its ordinary facade and `totalwatsed3` call have watershed identity assumptions
@@ -296,6 +380,14 @@ Milestone 3 passes with focused tests for positive publication, missing/extra or
 cross-family ids, malformed mappings, every injected family failure, previous
 bundle preservation, rerun replacement, stale dataset-kind rejection, and no
 mutation outside the final/staging paths.
+
+The bundle manifest must bind the published generation to the exact source
+mapping hash. The NoDb controller stores a separate interchange
+completion signature, invalidates it before raw WEPP execution or artifact
+clear, and sets it only after publication. The rq-engine state snapshot reports
+stage 4 complete only when the raw runs are current, the stored interchange
+signature matches, and the six-file manifest is valid. Cover an injected
+interchange failure even when a previous bundle exists.
 
 ### Milestone 4: Wire stage 4 and preserve its terminal contract
 
@@ -343,11 +435,13 @@ Using the candidate canonical release through an explicit `PYTHONPATH`, run the
 specialized orchestrator directly on the existing 6,626-sub-field corpus. Capture
 wall time, peak resident memory, input/output allocated and apparent sizes, row
 counts, row-group counts, and failure/retry behavior. Acceptance requires all
-six files, exact schemas/metadata, 6,626 distinct `(field_id, sub_field_id)`
-pairs in each family, a full two-way anti-join of zero rows against
-`fields.parquet`, no null identities, no missing/extra source ids, a valid final
-manifest, and no stage/backup debris. All protected files must remain
-byte-identical.
+six files, exact schemas/metadata, and 6,626 coupled source descriptors in every
+native call. Every output identity must anti-join to zero extra rows against
+`fields.parquet`, and every row-bearing source must appear in numeric order.
+Zero-row source ids must be reported explicitly and verified against the
+corresponding rowless reports. There must be no null identities, missing/extra
+source files, invalid manifest, or stage/backup debris. All protected files
+must remain byte-identical.
 
 Do not assume the candidate is operationally safe merely because it is Rust.
 The recent native-only validation used a one-hillslope smoke, while this corpus
@@ -487,14 +581,16 @@ fake `wepp_id`/`topaz_id`, preserve all measurement values, and reject every
 mapping mismatch explicitly.
 
 WEPPpy acceptance proves the six-file bundle is failure-atomic, the Features
-Export catalog joins on correct identity, ordinary snapshot fixtures do not
-change, and RQ success occurs only after publication. `wctl check-rq-graph` must
-remain clean with no new edge.
+Export sub-field PASS layer joins on correct identity without changing the draft
+field layer, ordinary snapshot fixtures do not change, and RQ success occurs
+only after publication. `wctl check-rq-graph` must remain clean with no new edge.
 
-Generated acceptance is mandatory. On the supplied run, every family must have
-6,626 distinct identities matching `fields.parquet` exactly; there must be no
-null, missing, extra, duplicate, or mismatched identities. Record row and
-row-group counts rather than assuming they are identical across families.
+Generated acceptance is mandatory. On the supplied run, every family must
+receive all 6,626 coupled descriptors. Every emitted row identity must match
+`fields.parquet`, with no null, extra, duplicate, or mismatched identities.
+Rowless source reports are listed in the manifest rather than represented by
+synthetic rows. Record row, row-group, row-bearing identity, and zero-row source
+counts rather than assuming they are identical across families.
 Protected baseline and watershed artifacts must remain byte-identical.
 
 Operational acceptance requires bounded resource behavior at full scale,

@@ -11,6 +11,7 @@ import sqlite3
 import string
 import re
 import shutil
+from typing import cast
 from uuid import uuid4
 import zipfile
 
@@ -20,6 +21,7 @@ import pandas as pd
 
 from wepppy import f_esri
 from wepppy.nodb.core import Watershed
+from wepppy.nodb.mods.ag_fields import AgFields
 from wepppy.nodb.unitizer import Unitizer
 from wepppy.runtime_paths import pick_existing_parquet_path
 from wepppy.runtime_paths.materialize import materialize_path_if_archive
@@ -179,6 +181,7 @@ def prepare_export_submission(
     layer_catalog = catalog or load_layer_catalog()
     plan = resolve_export_plan(payload, layer_catalog)
     resolved_plan = _resolve_plan_swat_run_id(plan, wd_path)
+    _require_current_ag_fields_interchange(wd_path, resolved_plan)
 
     dependency_snapshot = build_dependency_snapshot(
         resolved_plan,
@@ -205,6 +208,30 @@ def prepare_export_submission(
         cache_key_parts=cache_key_parts,
         unitizer_preferences_fingerprint=unitizer_preferences_fingerprint,
     )
+
+
+def _require_current_ag_fields_interchange(
+    wd: Path,
+    plan: ResolvedExportPlan,
+) -> None:
+    """Reject stale AgFields metric reads without preparing or mutating assets."""
+    if not any(layer.family == "ag_fields_metrics" for layer in plan.layers):
+        return
+
+    ag_fields = cast(
+        AgFields | None,
+        AgFields.load_detached(str(wd), allow_nonexistent=True),
+    )
+    if ag_fields is None or not ag_fields.has_current_wepp_ag_fields_interchange():
+        raise FeaturesExportServiceError(
+            "AgFields interchange is not current for the requested metric layer.",
+            status_code=409,
+            code="ag_fields_interchange_not_current",
+            details=(
+                "Run the current AgFields sub-field WEPP stage successfully before "
+                "exporting AgFields metrics."
+            ),
+        )
 
 
 def _resolve_nodb_ref_relpath(wd: str, controller: str, attribute: str) -> str | Path:

@@ -1,6 +1,7 @@
 from __future__ import annotations
 
 import json
+from pathlib import Path
 from types import SimpleNamespace
 
 import pytest
@@ -42,6 +43,20 @@ def rq_context(monkeypatch: pytest.MonkeyPatch):
         ag_fields_rq.StatusMessenger,
         "publish",
         lambda channel, message: published.append((channel, message)),
+    )
+    monkeypatch.setattr(
+        ag_fields_rq.Climate,
+        "getInstance",
+        lambda wd: events.append(("climate", wd))
+        or SimpleNamespace(calendar_start_year=2008),
+    )
+    monkeypatch.setattr(
+        ag_fields_rq,
+        "run_wepp_ag_fields_interchange",
+        lambda output_dir, mapping_path, start_year: events.append(
+            ("interchange", (output_dir, mapping_path, start_year))
+        )
+        or Path("/runs/demo/wepp/ag_fields/output/interchange"),
     )
     return events, published, controller_box
 
@@ -138,11 +153,18 @@ def test_run_wepp_rq_applies_selected_binary_before_execution(rq_context) -> Non
 
     class DummyAgFields:
         wepp_bin = "wepp_260430"
+        ag_field_wepp_output_dir = "/runs/demo/wepp/ag_fields/output"
+        subfields_parquet_path = "/runs/demo/ag_fields/sub_fields/fields.parquet"
+        wepp_source_signature = "signature-1"
 
         def run_wepp_ag_fields(self, *, max_workers):
             assert max_workers is None
             assert self.wepp_bin == "wepp_dcc52a6"
+            events.append(("stage", "wepp"))
             return {"run_count": 2}
+
+        def mark_wepp_ag_fields_interchange_complete(self, expected_signature: str) -> None:
+            events.append(("stage", ("mark-interchange", expected_signature)))
 
     controller = DummyAgFields()
     controller_box["controller"] = controller
@@ -152,13 +174,99 @@ def test_run_wepp_rq_applies_selected_binary_before_execution(rq_context) -> Non
         wepp_bin="wepp_dcc52a6",
     )
 
-    assert result == {"run_count": 2}
+    assert result == {
+        "run_count": 2,
+        "interchange_relpath": "wepp/ag_fields/output/interchange",
+    }
     assert controller.wepp_bin == "wepp_dcc52a6"
     assert ("preflight-remove", ag_fields_rq.TaskEnum.run_ag_fields) in events
     assert ("preflight-stamp", ag_fields_rq.TaskEnum.run_ag_fields) in events
     assert events.index(("preflight-remove", ag_fields_rq.TaskEnum.run_ag_fields)) < events.index(
         ("preflight-stamp", ag_fields_rq.TaskEnum.run_ag_fields)
     )
+    assert events.index(("stage", "wepp")) < events.index(
+        (
+            "interchange",
+            (
+                "/runs/demo/wepp/ag_fields/output",
+                "/runs/demo/ag_fields/sub_fields/fields.parquet",
+                2008,
+            ),
+        )
+    )
+    interchange_event = (
+        "interchange",
+        (
+            "/runs/demo/wepp/ag_fields/output",
+            "/runs/demo/ag_fields/sub_fields/fields.parquet",
+            2008,
+        ),
+    )
+    assert events.index(interchange_event) < events.index(
+        ("stage", ("mark-interchange", "signature-1"))
+    )
+    assert events.index(("stage", ("mark-interchange", "signature-1"))) < events.index(
+        ("preflight-stamp", ag_fields_rq.TaskEnum.run_ag_fields)
+    )
+    result_index = next(
+        index
+        for index, (_channel, message) in enumerate(_published)
+        if " RESULT_JSON " in message
+    )
+    completed_index = next(
+        index
+        for index, (_channel, message) in enumerate(_published)
+        if " COMPLETED " in message
+    )
+    trigger_index = next(
+        index
+        for index, (_channel, message) in enumerate(_published)
+        if " TRIGGER " in message
+    )
+    assert result_index < completed_index < trigger_index
+
+
+def test_run_wepp_rq_interchange_failure_prevents_terminal_success(
+    rq_context,
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    events, published, controller_box = rq_context
+
+    class DummyAgFields:
+        ag_field_wepp_output_dir = "/runs/demo/wepp/ag_fields/output"
+        subfields_parquet_path = "/runs/demo/ag_fields/sub_fields/fields.parquet"
+        wepp_source_signature = "signature-2"
+
+        def run_wepp_ag_fields(self, *, max_workers):
+            events.append(("stage", "wepp"))
+            return {"run_count": 2}
+
+        def mark_wepp_ag_fields_interchange_complete(self, expected_signature: str) -> None:
+            events.append(("stage", ("mark-interchange", expected_signature)))
+
+    controller_box["controller"] = DummyAgFields()
+
+    def _fail(*_args, **_kwargs):
+        events.append(("stage", "interchange-failed"))
+        raise RuntimeError("native conversion failed")
+
+    monkeypatch.setattr(ag_fields_rq, "run_wepp_ag_fields_interchange", _fail)
+
+    with pytest.raises(RuntimeError, match="native conversion failed"):
+        ag_fields_rq.run_ag_fields_wepp_rq("demo")
+
+    assert ("preflight-stamp", ag_fields_rq.TaskEnum.run_ag_fields) not in events
+    assert not any(event[0] == "stage" and isinstance(event[1], tuple) for event in events)
+    assert not any(" RESULT_JSON " in message for _, message in published)
+    assert not any(" TRIGGER " in message for _, message in published)
+    failure_message = next(
+        message for _, message in published if " EXCEPTION_JSON " in message
+    )
+    assert json.loads(failure_message.split("EXCEPTION_JSON ", 1)[1]) == {
+        "message": "native conversion failed"
+    }
+    assert any(" EXCEPTION run_ag_fields_wepp_rq" in message for _, message in published)
+    assert not any(" COMPLETED " in message for _, message in published)
 
 
 def test_run_watershed_rq_publishes_phases_without_reusing_stage4_timestamp(rq_context) -> None:

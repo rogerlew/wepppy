@@ -1,5 +1,6 @@
 from __future__ import annotations
 
+import hashlib
 import json
 from pathlib import Path
 import sqlite3
@@ -8,6 +9,8 @@ import zipfile
 
 import geopandas as gpd
 import pandas as pd
+import pyarrow as pa
+import pyarrow.parquet as pq
 import pytest
 from shapely.geometry import Point
 
@@ -170,6 +173,32 @@ def _build_submission(cache_key: str, *, format_token: str = "geopackage") -> se
         dependency_snapshot=dependency_snapshot,
         cache_key_parts=cache_key_parts,
         unitizer_preferences_fingerprint=None,
+    )
+
+
+def _ag_fields_metric_plan() -> ResolvedExportPlan:
+    request = NormalizedExportRequest(
+        format="geopackage",
+        units="si",
+        layers=("ag_fields.metrics.subfields",),
+        crs="wgs",
+        output_scopes=("baseline",),
+        swat_run_id="none",
+    )
+    return ResolvedExportPlan(
+        catalog_version="test-catalog-v1",
+        schema_version=1,
+        request=request,
+        layers=(
+            ResolvedLayerPlan(
+                layer_id="ag_fields.metrics.subfields",
+                family="ag_fields_metrics",
+                scope_class="scope_invariant",
+                scope="shared",
+                output_layer_id="shared__ag_fields.metrics.subfields",
+            ),
+        ),
+        warnings=(),
     )
 
 
@@ -2569,6 +2598,156 @@ def test_prepare_export_submission_passes_nodb_ref_resolver(
     assert resolver(str(tmp_path), "watershed", "subwta_shp") == "watershed/subwta.shp"
 
 
+def _write_shallow_ag_fields_bundle(wd: Path) -> tuple[Path, Path]:
+    from wepppy.wepp.interchange import ag_fields_interchange as interchange
+
+    mapping_path = wd / "ag_fields" / "sub_fields" / "fields.parquet"
+    mapping_path.parent.mkdir(parents=True, exist_ok=True)
+    pq.write_table(
+        pa.table(
+            {
+                "field_id": pa.array([7], type=pa.int32()),
+                "sub_field_id": pa.array([2], type=pa.int32()),
+            }
+        ),
+        mapping_path,
+    )
+    interchange_dir = wd / "wepp" / "ag_fields" / "output" / "interchange"
+    interchange_dir.mkdir(parents=True, exist_ok=True)
+    summaries: dict[str, dict[str, object]] = {}
+    for family, contract in interchange._FAMILY_CONTRACTS.items():
+        target_path = interchange_dir / contract[2]
+        target_path.write_bytes(f"bundle-{family}".encode("ascii"))
+        zero_row_source_count = 1 if family == "ebe" else 0
+        identity_count = 1 - zero_row_source_count
+        summaries[family] = {
+            "rows": identity_count,
+            "row_groups": identity_count,
+            "size_bytes": target_path.stat().st_size,
+            "identity_count": identity_count,
+            "source_count": 1,
+            "zero_row_source_count": zero_row_source_count,
+            "zero_row_sub_field_ids": [2] if zero_row_source_count else [],
+        }
+    manifest_path = interchange_dir / "interchange_version.json"
+    manifest_path.write_text(
+        json.dumps(
+            {
+                "dataset_kind": interchange.DATASET_KIND,
+                "ag_fields_schema_version": interchange.AG_FIELDS_SCHEMA_VERSION,
+                "major": interchange.INTERCHANGE_VERSION.major,
+                "source_mapping_sha256": hashlib.sha256(
+                    mapping_path.read_bytes()
+                ).hexdigest(),
+                "files": summaries,
+            }
+        ),
+        encoding="utf-8",
+    )
+    return mapping_path, manifest_path
+
+
+def _files_snapshot(root: Path) -> dict[str, bytes]:
+    return {
+        path.relative_to(root).as_posix(): path.read_bytes()
+        for path in root.rglob("*")
+        if path.is_file()
+    }
+
+
+@pytest.mark.parametrize(
+    "stale_reason",
+    ("cleared_completion_marker", "mapping_hash_mismatch", "wrong_major"),
+)
+def test_prepare_export_submission_rejects_stale_ag_fields_interchange_read_only(
+    tmp_path: Path,
+    monkeypatch: pytest.MonkeyPatch,
+    stale_reason: str,
+) -> None:
+    from wepppy.wepp.interchange import ag_fields_interchange as interchange
+
+    mapping_path, manifest_path = _write_shallow_ag_fields_bundle(tmp_path)
+    completion_marker_current = stale_reason != "cleared_completion_marker"
+    if stale_reason == "mapping_hash_mismatch":
+        pq.write_table(
+            pa.table(
+                {
+                    "field_id": pa.array([8], type=pa.int32()),
+                    "sub_field_id": pa.array([2], type=pa.int32()),
+                }
+            ),
+            mapping_path,
+        )
+    elif stale_reason == "wrong_major":
+        manifest = json.loads(manifest_path.read_text(encoding="utf-8"))
+        manifest["major"] = interchange.INTERCHANGE_VERSION.major + 1
+        manifest_path.write_text(json.dumps(manifest), encoding="utf-8")
+
+    controller = SimpleNamespace(
+        has_current_wepp_ag_fields_interchange=lambda: (
+            completion_marker_current
+            and interchange._is_wepp_ag_fields_interchange_complete(
+                tmp_path / "wepp" / "ag_fields" / "output",
+                mapping_path,
+            )
+        )
+    )
+    monkeypatch.setattr(
+        service.AgFields,
+        "load_detached",
+        classmethod(lambda _cls, _wd, allow_nonexistent=True: controller),
+    )
+    plan = _ag_fields_metric_plan()
+    monkeypatch.setattr(service, "load_layer_catalog", lambda: SimpleNamespace())
+    monkeypatch.setattr(service, "resolve_export_plan", lambda _payload, _catalog: plan)
+    monkeypatch.setattr(service, "_resolve_plan_swat_run_id", lambda value, _wd: value)
+    monkeypatch.setattr(
+        service,
+        "build_dependency_snapshot",
+        lambda *_args, **_kwargs: pytest.fail(
+            "stale AgFields readiness must fail before dependency planning"
+        ),
+    )
+    before = _files_snapshot(tmp_path)
+
+    with pytest.raises(service.FeaturesExportServiceError) as exc_info:
+        service.prepare_export_submission(tmp_path, {"format": "geopackage"})
+
+    assert exc_info.value.status_code == 409
+    assert exc_info.value.code == "ag_fields_interchange_not_current"
+    assert _files_snapshot(tmp_path) == before
+
+
+def test_ag_fields_interchange_readiness_gate_accepts_current_bundle(
+    tmp_path: Path,
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    from wepppy.wepp.interchange import ag_fields_interchange as interchange
+
+    mapping_path, _manifest_path = _write_shallow_ag_fields_bundle(tmp_path)
+    controller = SimpleNamespace(
+        has_current_wepp_ag_fields_interchange=lambda: (
+            interchange._is_wepp_ag_fields_interchange_complete(
+                tmp_path / "wepp" / "ag_fields" / "output",
+                mapping_path,
+            )
+        )
+    )
+    monkeypatch.setattr(
+        service.AgFields,
+        "load_detached",
+        classmethod(lambda _cls, _wd, allow_nonexistent=True: controller),
+    )
+    before = _files_snapshot(tmp_path)
+
+    service._require_current_ag_fields_interchange(
+        tmp_path,
+        _ag_fields_metric_plan(),
+    )
+
+    assert _files_snapshot(tmp_path) == before
+
+
 def test_nodb_ref_resolver_rejects_unsupported_controller(tmp_path: Path) -> None:
     with pytest.raises(service.FeaturesExportServiceError, match="Unsupported nodb_ref controller"):
         service._resolve_nodb_ref_relpath(str(tmp_path), "landuse", "landuse_shp")
@@ -2825,6 +3004,57 @@ def test_wepp_summary_channels_catalog_joins_internal_sources_on_wepp_id() -> No
     assert merged[service._CONSOLIDATED_JOIN_KEY_COLUMN].tolist() == ["1743", "1744"]
     assert merged["topaz_id"].tolist() == [24, 34]
     assert merged["Soil Loss"].tolist() == pytest.approx([84.2, 12.5])
+
+
+def test_ag_fields_subfield_metrics_do_not_collapse_shared_parent_identity() -> None:
+    catalog = load_layer_catalog()
+    catalog_layer = catalog.get_layer("ag_fields.metrics.subfields")
+    assert catalog_layer is not None
+    join_contract = dict(catalog_layer.raw["join"])
+
+    geometry_identity = {
+        "sub_field_id": [1, 2],
+        "field_id": [7, 7],
+        "wepp_id": [99, 99],
+    }
+    merged, _ = materialize_layer_attributes(
+        layer_id="ag_fields.metrics.subfields",
+        carrier_layer="ag_fields_subfields_geojson",
+        join_contract=join_contract,
+        sources=(
+            DiscoveredSourceFrame(
+                source_id="ag_fields_subfields_geojson",
+                source_kind="vector",
+                required=True,
+                dataframe=pd.DataFrame(geometry_identity),
+                units_by_column={},
+            ),
+            DiscoveredSourceFrame(
+                source_id="ag_fields_hill_pass",
+                source_kind="parquet",
+                required=True,
+                dataframe=pd.DataFrame(
+                    {
+                        "sub_field_id": [1, 1, 2, 2],
+                        "field_id": [7, 7, 7, 7],
+                        "year": [2023, 2024, 2023, 2024],
+                        "runoff": [1.25, 2.5, 9.5, 10.5],
+                    }
+                ),
+                units_by_column={"runoff": "m"},
+            ),
+        ),
+        allow_non_unique_keys=True,
+    )
+
+    assert merged[service._CONSOLIDATED_JOIN_KEY_COLUMN].tolist() == [
+        "1",
+        "1",
+        "2",
+        "2",
+    ]
+    assert merged["runoff"].tolist() == [1.25, 2.5, 9.5, 10.5]
+    assert merged["field_id"].tolist() == [7, 7, 7, 7]
 
 
 def test_execute_features_export_writes_spatial_geopackage_layers(

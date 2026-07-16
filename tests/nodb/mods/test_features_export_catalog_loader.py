@@ -64,6 +64,37 @@ def test_load_layer_catalog_default_file_contract_is_valid() -> None:
     assert catalog.layer_index["wepp.summary.hillslopes"].scope_class == "scope_aware"
 
 
+def test_ag_fields_metric_layer_uses_real_subfield_identity() -> None:
+    catalog = load_layer_catalog()
+    subfields = catalog.layer_index["ag_fields.metrics.subfields"].raw
+
+    assert subfields["join"]["primary_key"] == "sub_field_id"
+    assert subfields["join"]["fallback_keys"] == []
+    assert subfields["join"]["allow_non_unique_keys"] is True
+    assert subfields["join"]["source_key_map"]["ag_fields_hill_pass"] == [
+        "sub_field_id",
+        "field_id",
+    ]
+    assert set(subfields["join"]["source_key_map"]) == {
+        "ag_fields_subfields_geojson",
+        "ag_fields_hill_pass",
+    }
+    assert {source["source_id"] for source in subfields["sources"]} == {
+        "ag_fields_subfields_geojson",
+        "ag_fields_hill_pass",
+    }
+    assert "ag_fields_hill_wat" not in subfields["join"]["source_key_map"]
+    assert "ag_fields_subfields_table" not in subfields["join"]["source_key_map"]
+    assert "ag_fields_totalwatsed3" not in subfields["join"]["source_key_map"]
+    fields = catalog.layer_index["ag_fields.metrics.fields"].raw
+    assert fields["join"]["primary_key"] == "field_id"
+    assert fields["join"]["fallback_keys"] == ["wepp_id", "topaz_id"]
+    assert fields["join"]["source_key_map"]["ag_fields_hill_pass"] == [
+        "wepp_id",
+        "topaz_id",
+    ]
+
+
 def test_load_layer_catalog_requires_non_empty_labels_for_all_layers() -> None:
     catalog = load_layer_catalog()
 

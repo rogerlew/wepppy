@@ -6,9 +6,9 @@
 
 **Timezone**: UTC
 **Started**: 2026-07-16 18:53 UTC
-**Current phase**: Discovery and contract design
-**Last updated**: 2026-07-16 19:05 UTC
-**Next milestone**: Freeze the opt-in native identity contract and its no-regression fixtures
+**Current phase**: Milestone 6 - final gates and forest RQ acceptance
+**Last updated**: 2026-07-17 03:21 UTC
+**Next milestone**: Restart importers and complete authenticated stage-4 acceptance
 **Security impact**: low
 **Dedicated security review**: no
 **Security artifact**: N/A
@@ -40,14 +40,34 @@
 
 ### In Progress
 
-- [ ] Finalize the native identity/dataset-kind contract and regression fixture
-  matrix from the initial reconnaissance.
+- [ ] Complete the authoritative full WEPPpy suite, coordinated importer
+  restart, container ABI verification, and authenticated stage-4 RQ acceptance.
 
 ### Blocked
 
 - None.
 
 ### Done
+
+- [x] Captured the complete six-family ordinary golden and pre-change native
+  release provenance before Rust edits (2026-07-16 19:14 UTC).
+- [x] Implemented and validated six dedicated native AgFields writers while
+  retaining exact ordinary Arrow-table/schema/metadata parity
+  (2026-07-16 19:29 UTC).
+- [x] Atomically installed canonical native SHA
+  `8c42edd0a8e1b03bdaf423355a12414180c709efaac3e379e5dd23e6cc77214e`
+  with the prior SHA retained for rollback (2026-07-16 19:31 UTC).
+- [x] Added the specialized serialized/failure-atomic WEPPpy orchestrator,
+  RQ ordering, false-completion marker, and corrected Features Export identity
+  contract; focused cross-layer suite passed 70 tests (2026-07-16 19:32 UTC).
+- [x] Published the full 6,626-subfield bundle twice, validated every mapping
+  anti-join/order/schema/manifest invariant, measured 7m48.63s and 751,956 KiB
+  peak RSS, and preserved all direct-conversion protected hashes
+  (2026-07-17 03:21 UTC).
+- [x] Resolved the final independent code/QA findings by rejecting stale
+  AgFields metric exports and impossible non-EBE zero-row completion metadata;
+  the consolidated cross-layer suite passed 191 tests
+  (2026-07-17 03:20 UTC).
 
 - [x] Confirmed the current stage-4 RQ worker returns directly after
   `run_wepp_ag_fields` and does not invoke interchange (2026-07-16 18:53 UTC).
@@ -64,6 +84,10 @@
 
 - **2026-07-16 18:53 UTC** - Package created and initial local/run-tree
   reconnaissance completed.
+- **2026-07-16 19:11 UTC** - Began active execution against the package
+  ExecPlan; confirmed both repositories were clean and froze the canonical
+  pre-change native SHA as
+  `7419203c8b91db1b595590b7c9a28040662d5fad9fdf8b182a17c85a76d518e4`.
 
 ## Decisions Log
 
@@ -136,16 +160,18 @@ do not see a partially refreshed bundle.
 
 | Risk | Severity | Likelihood | Mitigation | Status |
 | --- | --- | --- | --- | --- |
-| Shared parser refactoring changes ordinary schemas or values | High | Medium | Dedicated public APIs, golden ordinary outputs, exact schema snapshots, independent review | Open |
-| Mapping rows attach the wrong field to a raw file | High | Medium | Key by parsed `H<n>`, require one-to-one coverage, reject missing/extra/duplicate ids, full-corpus anti-join | Open |
-| Parent `topaz_id` is misrepresented as sub-field identity | High | Medium | Contract forbids propagation; focused negative tests and schema assertion | Open |
-| Large conversion exhausts worker memory or disk | High | Medium | Native streaming writers, bounded staging, disk preflight, monitor peak RSS/disk, retain raw inputs | Open |
+| Shared parser refactoring changes ordinary schemas or values | High | Medium | Dedicated public APIs, golden ordinary outputs, exact schema snapshots, independent review | Mitigated; exact parity passed |
+| Mapping rows attach the wrong field to a raw file | High | Medium | Key by parsed `H<n>`, require one-to-one coverage, reject missing/extra/duplicate ids, full-corpus anti-join | Mitigated; 6,626-id anti-join passed |
+| Parent `topaz_id` is misrepresented as sub-field identity | High | Medium | Contract forbids propagation; focused negative tests and schema assertion | Mitigated; schemas contain only real identities |
+| Large conversion exhausts worker memory or disk | High | Medium | Native streaming writers, bounded staging, disk preflight, monitor peak RSS/disk, retain raw inputs | Mitigated; 752 MiB peak, no swap |
 | RQ reports success after partial interchange failure | High | Low | Interchange precedes timestamp/result/completion; inject failures in each family | Open |
 | Stale native `.so` makes Python and Rust signatures disagree | High | Medium | Canonical release rebuild, provenance update, host and restarted-container import/signature tests | Open |
-| Existing bundle is destroyed by a failed rerun | High | Low | Unique stage, validate before publish, backup/restore around directory replacement | Open |
-| Queue graph changes accidentally | Medium | Low | No child job; run `wctl check-rq-graph` and inspect static catalog diff | Open |
-| Full acceptance mutates watershed or baseline artifacts | High | Low | Protected-file inventory before/after; scope writes to `wepp/ag_fields/output/interchange` | Open |
+| Existing bundle is destroyed by a failed rerun | High | Low | Unique stage, validate before publish, backup/restore around directory replacement | Mitigated; failure injection and replacement passed |
+| Queue graph changes accidentally | Medium | Low | No child job; run `wctl check-rq-graph` and inspect static catalog diff | Mitigated; graph gate passed |
+| Full acceptance mutates watershed or baseline artifacts | High | Low | Protected-file inventory before/after; scope writes to `wepp/ag_fields/output/interchange` | Direct conversion passed; post-RQ check pending |
 | Global dataset version changes create unrelated churn | Medium | Low | Use a versioned AgFields dataset-kind/schema marker; do not bump the ordinary dataset version without explicit plan revision and owner review | Open |
+| Raw WEPP signature makes state look complete after interchange failure | High | Medium | Separate persisted interchange signature, invalidate before run, set after publication, require manifest+signature in state snapshot | Mitigated; state/failure regressions passed |
+| Stale retained bundle is exported after readiness invalidation | High | Medium | Detached read-only semantic readiness gate before Features Export dependency planning | Mitigated; marker/hash/major regressions passed |
 
 ## Verification Checklist
 
@@ -193,6 +219,20 @@ do not see a partially refreshed bundle.
   WEPPpy code, restart, and leave raw outputs intact.
 
 ## Progress Notes
+
+### 2026-07-16 19:20 UTC: Independent review found a false-completion path
+
+**Agent/Contributor**: Independent regression reviewer and Codex
+
+**Finding**: `run_wepp_ag_fields()` persists the raw-WEPP source signature
+before the new interchange call, while rq-engine's `wepp.complete` ignored both
+the RedisPrep timestamp and interchange publication. An interchange exception
+could therefore leave the API reporting stage 4 complete.
+
+**Disposition**: High severity, accepted. Add a separate persisted interchange
+completion signature, invalidate it before raw WEPP execution and clear paths,
+set it only after bundle publication, and require it plus a valid manifest in
+the state snapshot. Add failure coverage with a pre-existing bundle.
 
 ### 2026-07-16 18:53 UTC: Initial scaffold and evidence capture
 

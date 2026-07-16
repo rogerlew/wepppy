@@ -18,6 +18,7 @@ from rq.registry import DeferredJobRegistry
 
 from wepppy.config.redis_settings import RedisDB, redis_connection_kwargs
 from wepppy.nodb.base import clear_nodb_file_cache
+from wepppy.nodb.core.climate import Climate
 from wepppy.nodb.mods.ag_fields import AgFields, AgFieldsRunError, PlantFileProcessingError
 from wepppy.nodb.mods.ag_fields.routing_schemes import (
     parse_routing_scheme,
@@ -26,6 +27,7 @@ from wepppy.nodb.mods.ag_fields.routing_schemes import (
 from wepppy.nodb.redis_prep import RedisPrep, TaskEnum
 from wepppy.nodb.status_messenger import StatusMessenger
 from wepppy.rq.exception_logging import with_exception_logging
+from wepppy.wepp.interchange import run_wepp_ag_fields_interchange
 from wepppy.weppcloud.utils.helpers import get_wd
 
 
@@ -222,7 +224,29 @@ def run_ag_fields_wepp_rq(
         ag_fields = AgFields.getInstance(wd)
         if wepp_bin is not None:
             ag_fields.wepp_bin = wepp_bin
-        result = ag_fields.run_wepp_ag_fields(max_workers=max_workers)
+        result: Dict[str, Any] = dict(
+            ag_fields.run_wepp_ag_fields(max_workers=max_workers)
+        )
+        source_signature = ag_fields.wepp_source_signature
+        if not source_signature:
+            raise RuntimeError("AgFields raw WEPP run did not publish a source signature")
+        StatusMessenger.publish(
+            status_channel,
+            f"rq:{job_id} PHASE_JSON "
+            + json.dumps(
+                {"phase": "interchange", "message": "Publishing AgFields interchange."},
+                sort_keys=True,
+                separators=(",", ":"),
+            ),
+        )
+        climate = Climate.getInstance(wd)
+        interchange_dir = run_wepp_ag_fields_interchange(
+            ag_fields.ag_field_wepp_output_dir,
+            ag_fields.subfields_parquet_path,
+            start_year=climate.calendar_start_year,
+        )
+        ag_fields.mark_wepp_ag_fields_interchange_complete(source_signature)
+        result["interchange_relpath"] = str(interchange_dir.relative_to(Path(wd)))
         prep.timestamp(TaskEnum.run_ag_fields)
         _publish_result(status_channel, job_id, result)
         _publish_completed(

@@ -94,9 +94,9 @@ its current API behavior, schemas, values, and publication locations.
 - [ ] Each dedicated AgFields writer emits exact
   `field_id` and `sub_field_id` values from `fields.parquet`; no parent
   `topaz_id` is emitted as sub-field identity.
-- [ ] The native AgFields boundary rejects incomplete, duplicate, extra,
-  non-integer, or path-mismatched source descriptors before a final target is
-  published.
+- [ ] WEPPpy rejects missing/extra descriptor sets; the native AgFields boundary
+  rejects duplicate, non-integer, range-invalid, or path-mismatched descriptors
+  before a final target is published.
 - [ ] The WEPPpy orchestrator requires exactly one identity for every input id,
   requires all six raw families to cover the same sub-field set, and publishes
   the six-file bundle failure-atomically.
@@ -107,10 +107,10 @@ its current API behavior, schemas, values, and publication locations.
   consumer tests pass without baseline snapshot changes.
 - [ ] The paired `wepppyo3` release is rebuilt, its provenance is updated, and
   container/runtime import checks prove the intended shared object is loaded.
-- [ ] Generated acceptance on `sacral-self-discipline` proves six families with
-  6,626 distinct `sub_field_id` values, 2,169 distinct `field_id` values, exact
-  source-to-output identity coverage, and no mutation of baseline or watershed
-  scheme artifacts.
+- [ ] Generated acceptance on `sacral-self-discipline` proves six families each
+  receive 6,626 coupled descriptors spanning 2,169 fields; every row-bearing
+  identity matches the mapping, zero-row sources are explicit without synthetic
+  measurements, and baseline/watershed scheme artifacts are unchanged.
 - [ ] `wctl check-rq-graph` reports no graph drift, confirming that the change
   stays inside the existing stage-4 job.
 - [ ] Independent review and QA artifacts have no unresolved high or medium

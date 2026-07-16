@@ -28,7 +28,12 @@ Typical sequence (some steps are optional depending on the UI/route calling into
 5. **Abstract sub-fields (Peridot)**: `AgFields.periodot_abstract_sub_fields(...)`
 6. **Polygonize sub-fields**: `AgFields.polygonize_sub_fields()`
 7. **Provide crop→management mapping**: call `AgFields.write_rotation_lookup(rows)` (and optionally populate `ag_fields/plant_files/` via `handle_plant_file_db_upload`)
-8. **Run WEPP per sub-field**: choose the persisted `AgFields.wepp_bin`, then call `AgFields.run_wepp_ag_fields()` (optional `max_workers` remains available to API callers)
+8. **Run WEPP and publish interchange per sub-field**: use the Stage 4 RQ
+   endpoint, which selects the persisted `AgFields.wepp_bin`, calls
+   `AgFields.run_wepp_ag_fields()`, and then publishes the six native
+   interchange datasets before marking the stage complete. Direct controller
+   callers receive raw outputs only and must explicitly invoke
+   `run_wepp_ag_fields_interchange(...)`.
 9. **Run an isolated watershed scheme**: call
    `AgFields.run_watershed_integration(scheme="concept_1" | "concept_2" |
    "hybrid")` after Stage 4 is current. An omitted scheme remains Concept 2.
@@ -57,6 +62,8 @@ Typical sequence (some steps are optional depending on the UI/route calling into
 | `ag_fields/sub_fields/sub_fields.geojson` | `polygonize_sub_fields` | Polygonized sub-fields with `field_id`, `topaz_id`, `wepp_id`, `sub_field_id` |
 | `wepp/ag_fields/runs/p<sub_field_id>.*` | `run_wepp_ag_fields` | Per-sub-field WEPP inputs (`.run`, `.man`, `.slp`) |
 | `wepp/ag_fields/output/H<sub_field_id>.*.dat` | WEPP | Per-sub-field WEPP outputs (loss, plot, soil, water balance, etc.) |
+| `wepp/ag_fields/output/interchange/H.{pass,ebe,element,loss,soil,wat}.parquet` | Stage 4 RQ native interchange | Failure-atomic six-file bundle keyed by real `field_id` and `sub_field_id`; sub-fields do not have their own TOPAZ/parent-WEPP identity |
+| `wepp/ag_fields/output/interchange/interchange_version.json` | Stage 4 RQ native interchange | Last-written completion manifest with dataset kind, AgFields schema version, mapping hash, row counts, and row groups |
 | `wepp/ag_fields/watershed/runs/` | Historical Concept 2 run | Preserved unscoped parent and watershed run files |
 | `wepp/ag_fields/watershed/output/` | Historical Concept 2 run | Preserved unscoped parent PASS, watershed output, and interchange |
 | `wepp/ag_fields/watershed/manifest/` | Historical Concept 2 run | Preserved unscoped source, closure, summary, and evaluation evidence |
@@ -210,7 +217,15 @@ an additive `normalizations` list with the original and final values. See
 
 RQ entrypoints live in `wepppy.rq.ag_fields_rq`. Job hints use `agfields_build_subfields`, `agfields_plantdb`, `agfields_run_wepp`, the three scheme-specific watershed keys, and additive Run All parent key `agfields_run_watershed_suite`. The historical `agfields_run_watershed` hint remains a Concept 2 alias. A single scheme remains one direct job. `all` returns one suite parent as `job_id` plus the unchanged scheme-child `job_ids` mapping. The route atomically registers the complete planned tree on the parent; dispatch and cancellation share a lock. The parent records Concept 1, Concept 2, and hybrid under ordered `jobs:*` metadata with serial allow-failure dependencies, so later comparisons execute after an earlier failure without overlapping full-watershed memory peaks. A fourth registered finalizer depends on all three scheme IDs with `allow_failure=True`; Batch Runner-style release guards prevent already-failed dependencies from stranding later schemes or finalization. Only the finalizer emits the suite terminal trigger. Workers publish scheme-aware phase/result/failure payloads to `{runid}:ag_fields`, clear only the `ag_fields.nodb` cache before mutable hydration, and return JSON-serializable results.
 
-Preflight completion uses additive `TaskEnum.run_ag_fields` (🌽) and checklist key `ag_fields`. Serialized submissions and synchronous input/artifact mutations clear the timestamp; the Stage 4 worker clears it again on start and stamps it only after every sub-field WEPP run succeeds. `preflight2` additionally requires that completion be newer than parent WEPP, watershed abstraction, landuse, soils, and climate.
+Preflight completion uses additive `TaskEnum.run_ag_fields` (🌽) and checklist key
+`ag_fields`. Serialized submissions and synchronous input/artifact mutations
+clear the timestamp; the Stage 4 worker clears it again on start and stamps it
+only after every sub-field WEPP run and the six-file interchange publication
+succeed. The controller persists a separate interchange source signature, and
+rq-engine reports Stage 4 complete only when the raw-run signature, interchange
+signature, current workflow signature, source mapping hash, and last-written
+manifest agree. `preflight2` additionally requires that completion be newer
+than parent WEPP, watershed abstraction, landuse, soils, and climate.
 
 Stage 5 intentionally does not add or overload a global `TaskEnum`: its completion,
 failure, source signature, and terminal summary live in additive AgFields state.
@@ -244,7 +259,17 @@ roots and never addresses baseline or independent sub-field artifacts.
 
 AgFields mutations are single-flight per run. A short Redis submit lock closes enqueue races, live RQ status prevents overlapping build/plant/WEPP jobs, and synchronous boundary/schema/mapping/delete/clear routes return `agfields_job_active` while a job is queued or running. Successful boundary ingestion also retains the source basename for reload-safe UI reporting while continuing to store geometry under the canonical `fields.WGS.geojson` artifact name.
 
-The state snapshot reports build provenance rather than asking clients to infer it. Re-upload clears the schema selections; sub-fields are stale until polygonization records the current boundary/schema signature; WEPP runs are stale when either that signature or `rotation_lookup.tsv` changes. Historical runs without signatures are conservatively stale until rebuilt. Readiness covers observed climate year bounds, `dem/wbt/flovec.tif`, and the parent `wepp/runs/p<wepp_id>.sol`/`.cli` pairs. `wepp.wepp_bin` hydrates the Stage 4 executable selector and is persisted in `ag_fields.nodb` when the queued run starts.
+The state snapshot reports build provenance rather than asking clients to infer
+it. Re-upload clears the schema selections; sub-fields are stale until
+polygonization records the current boundary/schema signature; WEPP runs are
+stale when either that signature or `rotation_lookup.tsv` changes. Starting a
+raw run invalidates the interchange completion marker, so an interchange
+failure cannot leave Stage 4 or the Stage 5 prerequisite falsely complete.
+Historical runs without both signatures are conservatively incomplete until
+rebuilt. Readiness covers observed climate year bounds, `dem/wbt/flovec.tif`,
+and the parent `wepp/runs/p<wepp_id>.sol`/`.cli` pairs. `wepp.wepp_bin` hydrates
+the Stage 4 executable selector and is persisted in `ag_fields.nodb` when the
+queued run starts.
 
 ## Integration points
 

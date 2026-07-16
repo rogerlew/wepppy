@@ -42,6 +42,7 @@ from ._rust_interchange import (
 )
 
 __all__ = [
+    "run_wepp_ag_fields_interchange",
     "generate_interchange_documentation",
     "run_wepp_hillslope_interchange",
     "cleanup_hillslope_sources_for_completed_interchange",
@@ -75,3 +76,4 @@ __all__ = [
     "WeppInterchangeUnavailableError",
     "WeppInterchangeExecutionError",
 ]
+from .ag_fields_interchange import run_wepp_ag_fields_interchange as run_wepp_ag_fields_interchange

@@ -17,6 +17,13 @@
 
 ## Schema Standardization
 - All interchange writers share a single helper (`schema_utils.pa_field`) so column units and descriptions are embedded as Arrow metadata instead of being encoded in column names. Downstream consumers can inspect these attributes directly (`field.metadata['units']`, `field.metadata['description']`).
+- AgFields sub-field outputs use a dedicated native dataset kind,
+  `ag_fields_hillslope`, rather than the ordinary hillslope schema. Each of the
+  six datasets begins with non-nullable `field_id:int32` and
+  `sub_field_id:int32`; it does not label the sub-field with its parent
+  `wepp_id` or `topaz_id`. The six files are staged and validated as one bundle,
+  and `interchange_version.json` is written last before recoverable publication.
+  Stage 4 RQ completion occurs only after this publication.
 - Raw WEPP headers frequently duplicate names or include units (e.g. `Point`, `Point (m)_2`, `Precp (mm)`). Each module normalizes the raw tokens to canonical column names for the parquet schema (see the alias tables in `hill_*_interchange.py` and `watershed_*_interchange.py`). Tests assert the canonical schema so that parquet readers never depend on legacy spellings.
 - Redundant date fields printed in the flat files (`DD`, `MM`, `YYYY`, etc.) are removed once the calendar bundle (`year`, `month`, `day_of_month`, `julian`, `water_year`) is derived. This keeps tables compact and avoids ambiguous duplicate columns.
 

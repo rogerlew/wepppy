@@ -13,6 +13,10 @@ def _ensure_package(name: str) -> None:
 _ensure_package("wepppy.all_your_base")
 
 _LAZY_EXPORTS = {
+    "run_wepp_ag_fields_interchange": (
+        ".ag_fields_interchange",
+        "run_wepp_ag_fields_interchange",
+    ),
     "generate_interchange_documentation": (".interchange_documentation", "generate_interchange_documentation"),
     "run_wepp_hillslope_interchange": (".hill_interchange", "run_wepp_hillslope_interchange"),
     "cleanup_hillslope_sources_for_completed_interchange": (
@@ -78,6 +82,7 @@ def __dir__() -> list[str]:
     return sorted(set(globals()) | set(__all__))
 
 __all__ = [
+    "run_wepp_ag_fields_interchange",
     "generate_interchange_documentation",
     "run_wepp_hillslope_interchange",
     "cleanup_hillslope_sources_for_completed_interchange",

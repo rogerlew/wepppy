@@ -173,6 +173,16 @@ class AgFields(NoDbBase):
 
     def clear_ag_field_wepp_artifacts(self) -> None: ...
 
+    @property
+    def wepp_source_signature(self) -> Optional[str]: ...
+
+    @property
+    def wepp_interchange_source_signature(self) -> Optional[str]: ...
+
+    def mark_wepp_ag_fields_interchange_complete(self, expected_signature: str) -> None: ...
+
+    def has_current_wepp_ag_fields_interchange(self) -> bool: ...
+
     def run_watershed_integration(
         self,
         max_workers: Optional[int] = ...,

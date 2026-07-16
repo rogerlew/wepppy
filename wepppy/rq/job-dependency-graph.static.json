@@ -474,7 +474,7 @@
     "notes": [],
     "queue_name": "default",
     "source_function": "run_ag_fields_watershed_suite_rq",
-    "source_lineno": 469,
+    "source_lineno": 493,
     "source_module": "wepppy/rq/ag_fields_rq.py"
   },
   {
@@ -486,7 +486,7 @@
     "notes": [],
     "queue_name": "default",
     "source_function": "run_ag_fields_watershed_suite_rq",
-    "source_lineno": 495,
+    "source_lineno": 519,
     "source_module": "wepppy/rq/ag_fields_rq.py"
   },
   {

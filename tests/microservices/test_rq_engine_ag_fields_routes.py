@@ -43,6 +43,7 @@ class DummyAgFields:
         self.sub_field_n = 2
         self.sub_field_fp_n = 0
         self.wepp_bin = "wepp_dcc52a6"
+        self.interchange_current = True
         self.cleared = False
         self.watershed_cleared = False
         self.watershed_cleared_schemes = []
@@ -63,6 +64,9 @@ class DummyAgFields:
 
     def get_staleness(self):
         return {"subfields": False, "wepp_runs": False}
+
+    def has_current_wepp_ag_fields_interchange(self) -> bool:
+        return self.interchange_current
 
     def get_readiness(self):
         return {
@@ -938,6 +942,34 @@ def test_run_and_clear_watershed_routes_use_fixed_additive_surface(
     assert cleared.status_code == 200
     assert controller.watershed_cleared is True
     assert controller.watershed_cleared_schemes == ["concept_1"]
+
+
+def test_run_watershed_rejects_current_raw_run_without_current_interchange(
+    route_context,
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    controller, _auth_calls = route_context
+    Path(controller.sub_fields_wgs_geojson).touch()
+    (Path(controller.ag_field_wepp_runs_dir) / "p1.run").touch()
+    controller.interchange_current = False
+    enqueue_calls = []
+    monkeypatch.setattr(
+        ag_fields_routes,
+        "_enqueue_watershed_jobs",
+        lambda *args: enqueue_calls.append(args),
+    )
+
+    with TestClient(rq_engine.app) as client:
+        state = client.get("/api/runs/demo/cfg/agfields/state")
+        response = client.post(
+            "/api/runs/demo/cfg/agfields/run-watershed",
+            json={"scheme": "concept_2"},
+        )
+
+    assert state.status_code == 200
+    assert state.json()["wepp"]["complete"] is False
+    assert response.status_code == 409
+    assert enqueue_calls == []
 
 
 def test_run_all_expands_in_stable_order_and_clear_all_is_scheme_scoped(

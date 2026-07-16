@@ -1,7 +1,7 @@
 metadata:
-  catalog_version: "0.3.0-draft"
+  catalog_version: "0.4.0-draft"
   schema_version: 2
-  updated_at_utc: "2026-03-28T23:59:00Z"
+  updated_at_utc: "2026-07-16T19:30:00Z"
   owner: "wepppy/nodb/mods/features_export"
   status: "draft"
   resolver_contract:
@@ -2091,28 +2091,17 @@ layers:
         - "topaz_id"
         - "wepp_id"
     join:
-      primary_key: "wepp_id"
-      fallback_keys:
-        - "sub_field_id"
-        - "topaz_id"
+      primary_key: "sub_field_id"
+      fallback_keys: []
+      allow_non_unique_keys: true
       source_key_map:
         ag_fields_subfields_geojson:
           - "sub_field_id"
           - "field_id"
           - "wepp_id"
         ag_fields_hill_pass:
-          - "wepp_id"
-          - "topaz_id"
-        ag_fields_hill_wat:
-          - "wepp_id"
-          - "topaz_id"
-        ag_fields_totalwatsed3:
-          - "wepp_id"
-          - "topaz_id"
-        ag_fields_subfields_table:
           - "sub_field_id"
           - "field_id"
-          - "wepp_id"
     sources:
       - source_id: "ag_fields_subfields_geojson"
         kind: "vector"
@@ -2121,13 +2110,6 @@ layers:
           value: "ag_fields/sub_fields/sub_fields.WGS.geojson"
         required: true
         role: "geometry"
-      - source_id: "ag_fields_subfields_table"
-        kind: "parquet"
-        locator:
-          kind: "relpath"
-          value: "ag_fields/sub_fields/fields.parquet"
-        required: true
-        role: "field_to_hillslope_mapping"
       - source_id: "ag_fields_hill_pass"
         kind: "parquet"
         locator:
@@ -2135,20 +2117,6 @@ layers:
           value: "wepp/ag_fields/output/interchange/H.pass.parquet"
         required: true
         role: "event_and_yearly_metrics"
-      - source_id: "ag_fields_hill_wat"
-        kind: "parquet"
-        locator:
-          kind: "relpath"
-          value: "wepp/ag_fields/output/interchange/H.wat.parquet"
-        required: true
-        role: "hydrology_metrics"
-      - source_id: "ag_fields_totalwatsed3"
-        kind: "parquet"
-        locator:
-          kind: "relpath"
-          value: "wepp/ag_fields/output/interchange/totalwatsed3.parquet"
-        required: false
-        role: "derived_aggregate_metrics"
     dependencies:
       - dep_id: "ag_fields_controller_state"
         kind: "nodb"

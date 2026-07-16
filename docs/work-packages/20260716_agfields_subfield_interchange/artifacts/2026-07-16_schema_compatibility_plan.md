@@ -36,9 +36,12 @@ Before calling Rust, WEPPpy builds coupled
   `sub_field_id`;
 - all ids fit the declared `int32` output type.
 
-The native boundary repeats the one-to-one checks that are necessary to prevent a
-Python caller from bypassing the contract. It must reject invalid mappings with
-an explicit error and must not silently fill, drop, or infer identities.
+The native boundary validates the descriptor contract it can observe: tuple
+shape and types, positive/range-safe ids, duplicate `sub_field_id`, and equality
+between the filename token and descriptor `sub_field_id`. It cannot know the
+authoritative mapping's missing/extra set from a descriptor list alone; exact
+mapping/file set equality remains a WEPPpy responsibility. Neither boundary may
+silently fill, drop, or infer identities.
 
 ## Output Contract
 
@@ -75,8 +78,10 @@ Compatibility is additive and isolated:
   specialized orchestrator calls the dedicated APIs.
 - Existing raw AgFields outputs, NoDb keys, RQ route payloads, and UI job keys do
   not change.
-- The Features Export catalog changes its AgFields hillslope source keys to
-  `sub_field_id` in the same change; baseline catalog entries do not change.
+- The Features Export sub-field metric layer changes its PASS source key to
+  `sub_field_id`; baseline entries and the existing draft field metric layer do
+  not change. Field-level aggregation is deferred because attaching sub-field
+  values directly to whole-field geometry would be scientifically misleading.
 - The stage-4 RQ result may add a relative interchange path/resource summary, but
   must preserve `run_count` and existing status/error fields.
 
@@ -96,10 +101,12 @@ boundaries:
 7. published AgFields interchange bundle;
 8. RQ terminal result and discoverable run resource.
 
-The generated run assertion is a full anti-join in both directions between the
-distinct `(field_id, sub_field_id)` pairs in every output and the authoritative
-source mapping. Row counts differ by report family, so acceptance compares
-distinct identities and also asserts that every row is non-null and valid.
+The generated run assertion proves all 6,626 coupled source descriptors are
+passed to every writer, then anti-joins every row-bearing
+`(field_id, sub_field_id)` pair against the authoritative source mapping. Some
+valid reports contain zero scientific rows; the manifest records those sources
+explicitly and no synthetic row is added. Row counts differ by report family,
+so acceptance also asserts that every emitted identity is non-null and valid.
 
 ## Regression Matrix
 
@@ -152,8 +159,9 @@ The read-only discovery baseline on 2026-07-16 was:
 
 Acceptance must inventory protected baseline `wepp/output`, AgFields watershed
 scheme trees, NoDb files, and source mapping before conversion. After staged
-publication it must verify the six resources, exact distinct identity coverage,
-no null identities, dataset-kind/schema metadata, readable row groups, no leftover
+publication it must verify the six resources, complete source descriptor
+coverage, exact row-bearing identity coverage plus explicit zero-row counts, no
+null identities, dataset-kind/schema metadata, readable row groups, no leftover
 stage directory, and byte-identical protected artifacts.
 
 ## Publication and Recovery

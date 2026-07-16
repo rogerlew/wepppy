@@ -1,11 +1,14 @@
 from __future__ import annotations
 
+import hashlib
 import json
 import zipfile
 from pathlib import Path
 from types import SimpleNamespace
 
 import pandas as pd
+import pyarrow as pa
+import pyarrow.parquet as pq
 import pytest
 
 from wepppy.nodb.mods.ag_fields import (
@@ -469,3 +472,144 @@ def test_historical_state_without_source_signatures_defaults_to_stale(tmp_path: 
     (runs_dir / "p1.run").touch()
 
     assert controller.get_staleness() == {"subfields": True, "wepp_runs": True}
+
+
+def _test_value(data_type: pa.DataType):
+    if pa.types.is_string(data_type):
+        return "EVENT"
+    if pa.types.is_integer(data_type):
+        return 1
+    if pa.types.is_floating(data_type):
+        return 1.0
+    raise AssertionError(f"Unhandled test data type: {data_type}")
+
+
+def _write_test_interchange_bundle(
+    controller: AgFields,
+    *,
+    zero_row_families: set[str] | frozenset[str] = frozenset({"ebe"}),
+) -> None:
+    from wepppy.wepp.interchange import ag_fields_interchange as interchange
+
+    mapping_path = Path(controller.subfields_parquet_path)
+    mapping_path.parent.mkdir(parents=True, exist_ok=True)
+    pq.write_table(
+        pa.table(
+            {
+                "field_id": pa.array([7], type=pa.int32()),
+                "sub_field_id": pa.array([2], type=pa.int32()),
+            }
+        ),
+        mapping_path,
+    )
+    mapping_bytes = mapping_path.read_bytes()
+    interchange_dir = Path(controller.ag_field_wepp_output_dir) / "interchange"
+    interchange_dir.mkdir(parents=True, exist_ok=True)
+
+    summaries = {}
+    for family, contract in interchange._FAMILY_CONTRACTS.items():
+        ordinary_schema = contract[4]
+        metadata = dict(ordinary_schema.metadata or {})
+        metadata[b"dataset_kind"] = interchange.DATASET_KIND.encode()
+        metadata[b"ag_fields_schema_version"] = str(
+            interchange.AG_FIELDS_SCHEMA_VERSION
+        ).encode()
+        schema = pa.schema(
+            [
+                pa.field("field_id", pa.int32(), nullable=False),
+                pa.field("sub_field_id", pa.int32(), nullable=False),
+                *list(ordinary_schema)[1:],
+            ],
+            metadata=metadata,
+        )
+        target_path = interchange_dir / contract[2]
+        is_zero_row = family in zero_row_families
+        with pq.ParquetWriter(target_path, schema) as writer:
+            if not is_zero_row:
+                fields = list(schema)
+                values = [7, 2, *(_test_value(field.type) for field in fields[2:])]
+                writer.write_table(
+                    pa.Table.from_arrays(
+                        [
+                            pa.array([value], type=field.type)
+                            for value, field in zip(values, fields)
+                        ],
+                        schema=schema,
+                    )
+                )
+        summaries[family] = {
+            "identity_count": 0 if is_zero_row else 1,
+            "row_groups": 0 if is_zero_row else 1,
+            "rows": 0 if is_zero_row else 1,
+            "size_bytes": target_path.stat().st_size,
+            "source_count": 1,
+            "zero_row_source_count": 1 if is_zero_row else 0,
+            "zero_row_sub_field_ids": [2] if is_zero_row else [],
+        }
+    (interchange_dir / "interchange_version.json").write_text(
+        json.dumps(
+            {
+                "dataset_kind": "ag_fields_hillslope",
+                "ag_fields_schema_version": 1,
+                "major": interchange.INTERCHANGE_VERSION.major,
+                "source_mapping_sha256": hashlib.sha256(mapping_bytes).hexdigest(),
+                "files": summaries,
+            }
+        ),
+        encoding="utf-8",
+    )
+
+
+def test_interchange_completion_signature_is_separate_and_persisted(
+    tmp_path: Path,
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    controller = _controller(tmp_path)
+    monkeypatch.setattr(controller, "_workflow_signature", lambda: "raw-signature")
+    _write_test_interchange_bundle(controller)
+    with controller.locked():
+        controller._wepp_source_signature = "raw-signature"
+
+    controller.mark_wepp_ag_fields_interchange_complete("raw-signature")
+
+    assert controller.wepp_source_signature == "raw-signature"
+    assert controller.wepp_interchange_source_signature == "raw-signature"
+    assert controller.has_current_wepp_ag_fields_interchange() is True
+    persisted = json.loads((tmp_path / controller.filename).read_text(encoding="ascii"))
+    assert persisted["py/state"]["_wepp_interchange_source_signature"] == "raw-signature"
+
+
+@pytest.mark.parametrize("family", ("pass", "element", "loss", "soil", "wat"))
+def test_interchange_completion_rejects_non_ebe_zero_row_family(
+    tmp_path: Path,
+    monkeypatch: pytest.MonkeyPatch,
+    family: str,
+) -> None:
+    controller = _controller(tmp_path)
+    monkeypatch.setattr(controller, "_workflow_signature", lambda: "raw-signature")
+    _write_test_interchange_bundle(
+        controller,
+        zero_row_families={"ebe", family},
+    )
+    with controller.locked():
+        controller._wepp_source_signature = "raw-signature"
+
+    with pytest.raises(ValueError, match="missing, stale, or invalid"):
+        controller.mark_wepp_ag_fields_interchange_complete("raw-signature")
+
+    assert controller.wepp_interchange_source_signature is None
+
+
+def test_interchange_completion_rejects_stale_signature(
+    tmp_path: Path,
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    controller = _controller(tmp_path)
+    monkeypatch.setattr(controller, "_workflow_signature", lambda: "current")
+    with controller.locked():
+        controller._wepp_source_signature = "current"
+
+    with pytest.raises(ValueError, match="does not match"):
+        controller.mark_wepp_ag_fields_interchange_complete("stale")
+
+    assert controller.wepp_interchange_source_signature is None

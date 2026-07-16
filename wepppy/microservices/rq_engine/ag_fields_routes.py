@@ -495,7 +495,11 @@ def _state_snapshot(wd: str) -> dict[str, Any]:
         "wepp": {
             "run_count": run_count,
             "output_count": output_count,
-            "complete": run_count > 0 and not staleness["wepp_runs"],
+            "complete": (
+                run_count > 0
+                and not staleness["wepp_runs"]
+                and ag_fields.has_current_wepp_ag_fields_interchange()
+            ),
             "wepp_bin": ag_fields.wepp_bin,
         },
         "watershed_integration": watershed_integrations["concept_2"],

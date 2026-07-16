@@ -360,17 +360,43 @@ Dependency resolver contract:
 - Parent-run dependencies for canonical Omni child runs are valid cache dependencies when the resolved path stays within the inferred parent run root.
 - Build the final dependency fingerprint from ordered dependency entries serialized in canonical JSON.
 
-### 6.3 AgFields Interchange Auto-Preparation (Parity+)
+### 6.3 AgFields Interchange Preparation (Parity+)
 Trigger:
 - Any requested layer in the AgFields WEPP metrics family.
 - No backward-compatibility hooks are required for AgFields layer IDs or selectors; enforce the current parity+ contract directly.
 
 Behavior:
-- If required AgFields interchange assets are missing or version-incompatible, run on-demand interchange preparation for `wepp_output_subpath="ag_fields"` using the shared interchange workflow.
-- Required assets are catalog-driven from AgFields metrics layers (`ag_fields.metrics.subfields`, `ag_fields.metrics.fields`) across `geometry.locator`, `sources`, and `dependencies`; no hardcoded file list outside the catalog contract.
-- If preparation succeeds, continue export in the same job with prepared assets included in dependency fingerprinting.
-- If preparation fails and no requested layers remain exportable, return 404 or 409 according to root cause classification.
-- If preparation fails for some AgFields layers but other requested layers are still exportable, complete export with `layer_unavailable` warnings.
+- AgFields stage 4 publishes its six-file specialized interchange bundle
+  synchronously before the RQ task stamps completion. A missing, stale, or
+  version-incompatible bundle makes AgFields metric layers unavailable; export
+  does not invoke the ordinary interchange migration path.
+- The current metric layer joins sub-field geometry and PASS metrics on
+  `sub_field_id`. The native schemas carry both `sub_field_id` and `field_id`
+  and do not expose the parent hillslope `wepp_id` or `topaz_id` as sub-field
+  identity. The layer sources do not
+  pre-join `fields.parquet` or WAT: both PASS and WAT contain repeated temporal
+  rows, so identity-only composition would be many-to-many, while the field
+  mapping itself repeats `field_id`. A future WAT layer must declare its own
+  daily temporal grain instead of being combined with event-grain PASS rows.
+  The join explicitly allows repeated identity keys so temporal materialization
+  can aggregate multiple events after the single geometry-to-PASS join.
+  The existing draft `ag_fields.metrics.fields` catalog ID is retained unchanged
+  for compatibility but is not adapted to the specialized bundle in this
+  package: attaching sub-field depths or event values directly to a whole-field
+  polygon is scientifically misleading. A future field metric contract requires
+  explicit area-weighted depth and summed-volume aggregation semantics.
+- `run_interchange_migration(..., "ag_fields")` and ordinary
+  `totalwatsed3.parquet` are not valid preparation fallbacks because they apply
+  ordinary watershed identity assumptions.
+- Required assets are catalog-driven from `ag_fields.metrics.subfields` across
+  `geometry.locator`, `sources`, and `dependencies`; no hardcoded file list
+  exists outside the catalog contract.
+- Submission performs a read-only readiness check before dependency and cache
+  planning. If any requested AgFields metrics layer lacks the current controller
+  completion marker or has a stale/incompatible bundle, reject the submission
+  with HTTP 409 and `ag_fields_interchange_not_current`. The check does not run
+  interchange, mutate project assets, or silently drop the requested layer from
+  a mixed-layer export.
 
 ### 6.4 Cache Hit Behavior
 Cache hit flow:

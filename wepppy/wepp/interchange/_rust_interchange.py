@@ -10,6 +10,12 @@ from .versioning import INTERCHANGE_VERSION
 
 REQUIRED_WEPPPYO3_INTERCHANGE_API = frozenset(
     {
+        "ag_fields_hillslope_ebe_files_to_parquet",
+        "ag_fields_hillslope_element_files_to_parquet",
+        "ag_fields_hillslope_loss_files_to_parquet",
+        "ag_fields_hillslope_pass_files_to_parquet",
+        "ag_fields_hillslope_soil_files_to_parquet",
+        "ag_fields_hillslope_wat_files_to_parquet",
         "catalog_scan",
         "hillslope_ebe_files_to_parquet",
         "hillslope_element_files_to_parquet",
