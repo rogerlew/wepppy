@@ -545,6 +545,23 @@ Currently active work packages. Limit to 2-4 packages to maintain focus.
 
 Recently completed work packages. Archived immediately upon completion.
 
+### Forked Batch Identity Normalization (2026-07-16)
+
+**Status**: ✅ **COMPLETE**
+
+**Link**: [docs/work-packages/20260716_fork_batch_identity_normalization/](docs/work-packages/20260716_fork_batch_identity_normalization/)
+
+**Lifecycle**: In Progress -> Done (2026-07-16)
+
+**Summary**: Repaired `subsequent-hotbed` on `wepp1`, restoring interactive
+WATAR eligibility without changing scientific inputs or submitting a job. Added
+a guarded dry-run-first recovery CLI and permanent interactive-fork normalization
+with complete preflight, batch-name consistency, atomic forward/rollback writes,
+scoped cache recovery, and `_pups/` exclusion. Verification passed 55 focused
+tests, 4,948 full-suite tests, documentation/static gates, and dual independent
+reviews with no unresolved high or medium findings. Permanent deployment remains
+a separate operator action.
+
 ### AgFields Watershed Parent Job (2026-07-16)
 
 **Status**: ✅ **COMPLETE**

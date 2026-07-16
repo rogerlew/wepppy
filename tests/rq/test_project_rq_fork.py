@@ -1,5 +1,6 @@
 from __future__ import annotations
 
+import json
 import os
 import shutil
 import sys
@@ -543,6 +544,498 @@ def test_clear_query_engine_catalog_cache_reports_missing_artifacts(tmp_path: Pa
     assert "No query engine catalog cache artifacts to clear.\n" in published
 
 
+def test_prepare_fork_run_normalizes_batch_identity_without_touching_pups(
+    monkeypatch: pytest.MonkeyPatch,
+    tmp_path: Path,
+) -> None:
+    import wepppy.rq.project_rq_fork as fork_helpers
+
+    source_wd = tmp_path / "source-batch-leaf"
+    target_wd = tmp_path / "interactive-run"
+    source_wd.mkdir(parents=True)
+
+    def _write_controller(path: Path, *, wd: Path) -> None:
+        path.parent.mkdir(parents=True, exist_ok=True)
+        path.write_text(
+            json.dumps(
+                {
+                    "py/object": "example.Controller",
+                    "py/state": {
+                        "_run_group": "batch",
+                        "_group_name": "example-batch",
+                        "wd": str(wd),
+                        "preserved": {"value": 42},
+                    },
+                }
+            ),
+            encoding="utf-8",
+        )
+
+    _write_controller(source_wd / "ash.nodb", wd=source_wd)
+    child_path = source_wd / "_pups" / "omni" / "scenario" / "ash.nodb"
+    _write_controller(child_path, wd=child_path.parent)
+    child_before = child_path.read_bytes()
+    (source_wd / "run_metadata.json").write_text(
+        json.dumps(
+            {
+                "runid": "batch;;example-batch;;WA-10",
+                "batch_name": "example-batch",
+                "status": "success",
+            }
+        ),
+        encoding="utf-8",
+    )
+
+    def _fake_rsync(**kwargs) -> None:
+        run_left = Path(kwargs["run_left"].rstrip("/"))
+        run_right = Path(kwargs["cmd"][-1].rstrip("/"))
+        shutil.copytree(run_left, run_right)
+
+    monkeypatch.setattr(fork_helpers.shutil, "which", lambda _name: "/usr/bin/rsync")
+    monkeypatch.setattr(fork_helpers, "_run_rsync_with_bounded_output", _fake_rsync)
+    published: list[str] = []
+
+    result = fork_helpers.prepare_fork_run(
+        "batch;;example-batch;;WA-10",
+        "interactive-run",
+        undisturbify=False,
+        status_channel="batch-source:fork",
+        publish_status=lambda _channel, message: published.append(message),
+        get_wd=lambda _runid: str(source_wd),
+        get_primary_wd=lambda _runid: str(target_wd),
+        wait_for_paths=lambda _paths, timeout_s=60.0: None,
+        ron_cls=object(),
+        disturbed_cls=object(),
+        landuse_cls=object(),
+        soils_cls=object(),
+        initialize_ttl=None,
+        clean_env_for_system_tools=lambda: {
+            "PATH": "/usr/bin:/bin",
+            "LANG": "C.UTF-8",
+            "LC_ALL": "C.UTF-8",
+        },
+    )
+
+    assert result == str(target_wd)
+    root_state = json.loads((target_wd / "ash.nodb").read_text())["py/state"]
+    assert root_state["_run_group"] is None
+    assert root_state["_group_name"] is None
+    assert root_state["wd"] == str(target_wd)
+    assert root_state["preserved"] == {"value": 42}
+    assert (target_wd / "_pups" / "omni" / "scenario" / "ash.nodb").read_bytes() == child_before
+    assert not (target_wd / "run_metadata.json").exists()
+    assert "Normalized grouped-run identity in 1 root .nodb files.\n" in published
+    assert "Removed copied batch run_metadata.json.\n" in published
+
+
+def test_non_batch_fork_keeps_non_batch_run_metadata(tmp_path: Path) -> None:
+    import wepppy.rq.project_rq_fork as fork_helpers
+
+    metadata_path = tmp_path / "run_metadata.json"
+    metadata_path.write_text('{"runid": "ordinary-run"}', encoding="utf-8")
+
+    removed = fork_helpers._remove_copied_batch_run_metadata(
+        str(tmp_path),
+        "ordinary-run",
+    )
+
+    assert removed is False
+    assert metadata_path.exists()
+
+
+def test_contaminated_ordinary_fork_removes_copied_batch_metadata(
+    tmp_path: Path,
+) -> None:
+    import wepppy.rq.project_rq_fork as fork_helpers
+
+    metadata_path = tmp_path / "run_metadata.json"
+    metadata_path.write_text(
+        json.dumps(
+            {
+                "runid": "batch;;example-batch;;WA-10",
+                "batch_name": "example-batch",
+            }
+        ),
+        encoding="utf-8",
+    )
+
+    removed = fork_helpers._remove_copied_batch_run_metadata(
+        str(tmp_path),
+        "ordinary-contaminated-run",
+    )
+
+    assert removed is True
+    assert not metadata_path.exists()
+
+
+@pytest.mark.parametrize(
+    ("payload", "source_runid", "message"),
+    [
+        (
+            {"runid": "batch;;example-batch;;WA-10"},
+            "ordinary-run",
+            "Incomplete batch identity",
+        ),
+        (
+            {"batch_name": "example-batch"},
+            "ordinary-run",
+            "Incomplete batch identity",
+        ),
+        (
+            {
+                "runid": "batch;;example-batch;;WA-10",
+                "batch_name": "different-batch",
+            },
+            "ordinary-run",
+            "Conflicting batch names",
+        ),
+        (
+            {"runid": "ordinary-run"},
+            "batch;;example-batch;;WA-10",
+            "Batch fork source has non-batch",
+        ),
+        (
+            {"runid": "batch;;example-batch;;WA-10", "batch_name": ""},
+            "ordinary-run",
+            "Invalid batch_name",
+        ),
+    ],
+)
+def test_copied_batch_metadata_rejects_ambiguous_identity(
+    tmp_path: Path,
+    payload: dict[str, object],
+    source_runid: str,
+    message: str,
+) -> None:
+    import wepppy.rq.project_rq_fork as fork_helpers
+
+    metadata_path = tmp_path / "run_metadata.json"
+    metadata_path.write_text(json.dumps(payload), encoding="utf-8")
+    before = metadata_path.read_bytes()
+
+    with pytest.raises(ValueError, match=message):
+        fork_helpers._remove_copied_batch_run_metadata(
+            str(tmp_path),
+            source_runid,
+        )
+
+    assert metadata_path.read_bytes() == before
+
+
+@pytest.mark.parametrize(
+    ("run_group", "group_name", "message"),
+    [
+        ("culvert", "culvert-group", "non-batch run_group"),
+        (None, "orphaned-group", "Inconsistent grouped-run identity"),
+        ("batch", None, "lacks a valid group_name"),
+    ],
+)
+def test_fork_identity_normalization_rejects_unsafe_group_state(
+    run_group: str | None,
+    group_name: str | None,
+    message: str,
+) -> None:
+    import wepppy.rq.project_rq_fork as fork_helpers
+
+    text = json.dumps(
+        {
+            "py/object": "example.Controller",
+            "py/state": {
+                "_run_group": run_group,
+                "_group_name": group_name,
+            },
+        }
+    )
+
+    with pytest.raises(ValueError, match=message):
+        fork_helpers._normalize_interactive_fork_nodb_identity(
+            text,
+            path="/tmp/unsafe.nodb",
+        )
+
+
+def test_fork_identity_normalization_rejects_non_json_nodb() -> None:
+    import wepppy.rq.project_rq_fork as fork_helpers
+
+    with pytest.raises(ValueError, match="Invalid NoDb JSON"):
+        fork_helpers._normalize_interactive_fork_nodb_identity(
+            "not-json",
+            path="/tmp/invalid.nodb",
+        )
+
+
+def test_atomic_fork_write_preserves_original_on_replace_failure(
+    monkeypatch: pytest.MonkeyPatch,
+    tmp_path: Path,
+) -> None:
+    import wepppy.rq.project_rq_fork as fork_helpers
+
+    target = tmp_path / "ash.nodb"
+    target.write_text('{"original": true}', encoding="utf-8")
+    original = target.read_bytes()
+
+    def _fail_replace(_source: str, _target: str) -> None:
+        raise OSError("simulated replace failure")
+
+    monkeypatch.setattr(fork_helpers.os, "replace", _fail_replace)
+
+    with pytest.raises(OSError, match="simulated replace failure"):
+        fork_helpers._atomic_write_fork_text(target.as_posix(), '{"updated": true}')
+
+    assert target.read_bytes() == original
+    assert list(tmp_path.iterdir()) == [target]
+
+
+def test_prepare_fork_run_rejects_root_nodb_symlink_without_mutating_target(
+    monkeypatch: pytest.MonkeyPatch,
+    tmp_path: Path,
+) -> None:
+    import wepppy.rq.project_rq_fork as fork_helpers
+
+    source_wd = tmp_path / "source-batch-leaf"
+    target_wd = tmp_path / "interactive-run"
+    source_wd.mkdir(parents=True)
+    external = tmp_path / "external.nodb"
+    external.write_text(
+        json.dumps(
+            {
+                "py/object": "example.Controller",
+                "py/state": {
+                    "_run_group": "batch",
+                    "_group_name": "example-batch",
+                },
+            }
+        ),
+        encoding="utf-8",
+    )
+    external_before = external.read_bytes()
+    (source_wd / "ash.nodb").symlink_to(external)
+
+    def _fake_rsync(**kwargs) -> None:
+        run_left = Path(kwargs["run_left"].rstrip("/"))
+        run_right = Path(kwargs["cmd"][-1].rstrip("/"))
+        shutil.copytree(run_left, run_right, symlinks=True)
+
+    monkeypatch.setattr(fork_helpers.shutil, "which", lambda _name: "/usr/bin/rsync")
+    monkeypatch.setattr(fork_helpers, "_run_rsync_with_bounded_output", _fake_rsync)
+
+    with pytest.raises(ValueError, match="regular non-symlink file"):
+        fork_helpers.prepare_fork_run(
+            "batch;;example-batch;;WA-10",
+            "interactive-run",
+            undisturbify=False,
+            status_channel="batch-source:fork",
+            publish_status=lambda _channel, _message: None,
+            get_wd=lambda _runid: str(source_wd),
+            get_primary_wd=lambda _runid: str(target_wd),
+            wait_for_paths=lambda _paths, timeout_s=60.0: None,
+            ron_cls=object(),
+            disturbed_cls=object(),
+            landuse_cls=object(),
+            soils_cls=object(),
+            initialize_ttl=None,
+            clean_env_for_system_tools=lambda: {
+                "PATH": "/usr/bin:/bin",
+                "LANG": "C.UTF-8",
+                "LC_ALL": "C.UTF-8",
+            },
+        )
+
+    assert external.read_bytes() == external_before
+    assert (target_wd / "ash.nodb").is_symlink()
+
+
+def _prepare_identity_fork(
+    *,
+    fork_helpers,
+    source_wd: Path,
+    target_wd: Path,
+    source_runid: str = "batch;;example-batch;;WA-10",
+) -> str:
+    return fork_helpers.prepare_fork_run(
+        source_runid,
+        "interactive-run",
+        undisturbify=False,
+        status_channel="batch-source:fork",
+        publish_status=lambda _channel, _message: None,
+        get_wd=lambda _runid: str(source_wd),
+        get_primary_wd=lambda _runid: str(target_wd),
+        wait_for_paths=lambda _paths, timeout_s=60.0: None,
+        ron_cls=object(),
+        disturbed_cls=object(),
+        landuse_cls=object(),
+        soils_cls=object(),
+        initialize_ttl=None,
+        clean_env_for_system_tools=lambda: {
+            "PATH": "/usr/bin:/bin",
+            "LANG": "C.UTF-8",
+            "LC_ALL": "C.UTF-8",
+        },
+    )
+
+
+def test_prepare_fork_run_preflights_all_roots_before_first_write(
+    monkeypatch: pytest.MonkeyPatch,
+    tmp_path: Path,
+) -> None:
+    import wepppy.rq.project_rq_fork as fork_helpers
+
+    source_wd = tmp_path / "source"
+    target_wd = tmp_path / "target"
+    source_wd.mkdir()
+    first_path = source_wd / "a.nodb"
+    first_path.write_text(
+        json.dumps(
+            {
+                "py/state": {
+                    "_run_group": "batch",
+                    "_group_name": "example-batch",
+                    "wd": str(source_wd),
+                }
+            }
+        ),
+        encoding="utf-8",
+    )
+    (source_wd / "z.nodb").write_text("not-json", encoding="utf-8")
+    first_before = first_path.read_bytes()
+
+    def _fake_rsync(**kwargs) -> None:
+        shutil.copytree(
+            Path(kwargs["run_left"].rstrip("/")),
+            Path(kwargs["cmd"][-1].rstrip("/")),
+        )
+
+    monkeypatch.setattr(fork_helpers.shutil, "which", lambda _name: "/usr/bin/rsync")
+    monkeypatch.setattr(fork_helpers, "_run_rsync_with_bounded_output", _fake_rsync)
+
+    with pytest.raises(ValueError, match="Invalid NoDb JSON"):
+        _prepare_identity_fork(
+            fork_helpers=fork_helpers,
+            source_wd=source_wd,
+            target_wd=target_wd,
+        )
+
+    assert (target_wd / "a.nodb").read_bytes() == first_before
+
+
+@pytest.mark.parametrize(
+    ("source_runid", "root_groups"),
+    [
+        ("batch;;source-batch;;WA-10", ("different-batch",)),
+        ("ordinary-run", ("batch-a", "batch-b")),
+    ],
+)
+def test_prepare_fork_run_rejects_cross_file_batch_name_disagreement(
+    monkeypatch: pytest.MonkeyPatch,
+    tmp_path: Path,
+    source_runid: str,
+    root_groups: tuple[str, ...],
+) -> None:
+    import wepppy.rq.project_rq_fork as fork_helpers
+
+    source_wd = tmp_path / "source"
+    target_wd = tmp_path / "target"
+    source_wd.mkdir()
+    source_bytes: dict[str, bytes] = {}
+    for index, group_name in enumerate(root_groups):
+        filename = f"controller-{index}.nodb"
+        path = source_wd / filename
+        path.write_text(
+            json.dumps(
+                {
+                    "py/state": {
+                        "_run_group": "batch",
+                        "_group_name": group_name,
+                        "wd": str(source_wd),
+                    }
+                }
+            ),
+            encoding="utf-8",
+        )
+        source_bytes[filename] = path.read_bytes()
+
+    def _fake_rsync(**kwargs) -> None:
+        shutil.copytree(
+            Path(kwargs["run_left"].rstrip("/")),
+            Path(kwargs["cmd"][-1].rstrip("/")),
+        )
+
+    monkeypatch.setattr(fork_helpers.shutil, "which", lambda _name: "/usr/bin/rsync")
+    monkeypatch.setattr(fork_helpers, "_run_rsync_with_bounded_output", _fake_rsync)
+
+    with pytest.raises(ValueError, match="Conflicting batch names"):
+        _prepare_identity_fork(
+            fork_helpers=fork_helpers,
+            source_wd=source_wd,
+            target_wd=target_wd,
+            source_runid=source_runid,
+        )
+
+    assert {
+        filename: (target_wd / filename).read_bytes()
+        for filename in source_bytes
+    } == source_bytes
+
+
+def test_prepare_fork_run_rolls_back_earlier_root_after_write_failure(
+    monkeypatch: pytest.MonkeyPatch,
+    tmp_path: Path,
+) -> None:
+    import wepppy.rq.project_rq_fork as fork_helpers
+
+    source_wd = tmp_path / "source"
+    target_wd = tmp_path / "target"
+    source_wd.mkdir()
+    source_bytes: dict[str, bytes] = {}
+    for filename in ("a.nodb", "z.nodb"):
+        path = source_wd / filename
+        path.write_text(
+            json.dumps(
+                {
+                    "py/state": {
+                        "_run_group": "batch",
+                        "_group_name": "example-batch",
+                        "wd": str(source_wd),
+                    }
+                }
+            ),
+            encoding="utf-8",
+        )
+        source_bytes[filename] = path.read_bytes()
+
+    def _fake_rsync(**kwargs) -> None:
+        shutil.copytree(
+            Path(kwargs["run_left"].rstrip("/")),
+            Path(kwargs["cmd"][-1].rstrip("/")),
+        )
+
+    real_atomic_write = fork_helpers._atomic_write_fork_text
+    calls = 0
+
+    def _fail_second_write(path: str, text: str) -> None:
+        nonlocal calls
+        calls += 1
+        if calls == 2:
+            raise OSError("simulated second write failure")
+        real_atomic_write(path, text)
+
+    monkeypatch.setattr(fork_helpers.shutil, "which", lambda _name: "/usr/bin/rsync")
+    monkeypatch.setattr(fork_helpers, "_run_rsync_with_bounded_output", _fake_rsync)
+    monkeypatch.setattr(fork_helpers, "_atomic_write_fork_text", _fail_second_write)
+
+    with pytest.raises(OSError, match="simulated second write failure"):
+        _prepare_identity_fork(
+            fork_helpers=fork_helpers,
+            source_wd=source_wd,
+            target_wd=target_wd,
+        )
+
+    assert {
+        filename: (target_wd / filename).read_bytes()
+        for filename in source_bytes
+    } == source_bytes
+
+
 def test_prepare_fork_run_undisturbify_clears_new_run_scoped_nodb_cache(
     tmp_path: Path,
 ) -> None:
@@ -554,8 +1047,8 @@ def test_prepare_fork_run_undisturbify_clears_new_run_scoped_nodb_cache(
 
     for nodb_name in ("ron.nodb", "wepp.nodb", "landuse.nodb", "soils.nodb", "disturbed.nodb"):
         (source_wd / nodb_name).write_text(
-            f"wd={source_wd}\nrunid=source-run\n",
-            encoding="ascii",
+            json.dumps({"py/state": {"wd": str(source_wd), "runid": "source-run"}}),
+            encoding="utf-8",
         )
 
     disturbed_dir = source_wd / "disturbed"
@@ -722,8 +1215,8 @@ def test_prepare_fork_run_skip_wepp_copy_ensures_output_dirs(
     target_wd = tmp_path / "target-run"
     source_wd.mkdir(parents=True, exist_ok=True)
     (source_wd / "ron.nodb").write_text(
-        f"wd={source_wd}\nrunid=source-run\n",
-        encoding="ascii",
+        json.dumps({"py/state": {"wd": str(source_wd), "runid": "source-run"}}),
+        encoding="utf-8",
     )
     source_runs_dir = source_wd / "wepp" / "runs"
     source_runs_dir.mkdir(parents=True, exist_ok=True)

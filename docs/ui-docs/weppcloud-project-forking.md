@@ -58,11 +58,47 @@ Module: `wepppy/rq/project_rq.py`
   - Uses `rsync -a --stats` to clone the run directory without publishing per-file or per-progress output.
   - Publishes copy stage transitions, a replaceable elapsed-time heartbeat every 10 seconds, and bounded final summary/error tails to `<runid>:fork`.
   - When `skip_wepp_runs_output=True` (or when `undisturbify=True`), excludes `wepp/runs` and `wepp/output` from content copy, then creates those directories in the destination run.
-  - Rewrites `.nodb` paths and clears locks, `READONLY`, and `PUBLIC` markers.
+  - Rewrites root `.nodb` paths, clears copied `_run_group`/`_group_name`
+    identity for the interactive destination, removes copied Batch Runner
+    `run_metadata.json`, and clears locks, `READONLY`, and `PUBLIC` markers.
   - When `undisturbify=True`, clears active SBS metadata without deleting copied SBS rasters, rebuilds landuse/soils, and enqueues WEPP; completion is emitted by
     `_finish_fork_rq` after WEPP finishes.
   - Emits `FORK_COMPLETE` on success and `FORK_FAILED` on failure.
 - `_finish_fork_rq(runid)`: publishes the final completion trigger once dependent jobs finish.
+
+## Fork Identity Compatibility and Regression Plan
+
+An interactive destination fork must not retain batch-run identity from its source. For
+each root-level `.nodb` payload, the destination contract requires `_run_group` and
+`_group_name` to be absent or null even when the source is a Batch Runner leaf. Child
+workspaces under `_pups/` are outside this normalization contract because they retain
+their own orchestration identity. A copied `run_metadata.json` that identifies a batch
+leaf is source execution metadata, not destination state, and must not remain active in
+the interactive fork.
+
+Compatibility is additive for ordinary forks: payloads with no batch identity remain
+unchanged. Repair tooling must be dry-run-first, reject non-batch group identities,
+validate an operator-supplied batch name when provided, create timestamped backups
+before writing, update files atomically, and clear the destination's NoDb cache after a
+successful repair. Source IDs, every root controller, and copied batch metadata must
+name the same batch; incomplete or conflicting metadata fails before the first write.
+If a later write fails, already-published root changes are restored atomically. If file
+repair succeeds but cache invalidation fails, operators retry only cache invalidation
+from the prepared, hash-verified backup manifest. This preserves model inputs and
+outputs while changing only stale orchestration identity and copied batch execution
+metadata.
+
+Regression coverage must demonstrate that dry-run mode is non-mutating, apply mode
+clears batch identity across root controllers, `_pups/` is untouched, mismatched group
+identity fails before any write, batch `run_metadata.json` is backed up and removed,
+and an already-repaired run is an idempotent no-op. The production acceptance check is
+that `Ash.run_group` is unset and the ash route proceeds to WATAR enqueue rather than
+returning the Batch Runner input-only response.
+
+The alternative of changing only `ash.nodb` is rejected because the copied batch
+identity affects other interactive controllers. Treating a primary-run URL as
+authoritative while ignoring serialized group identity is also rejected because batch
+leaf controllers depend on that identity inside their native Batch Runner context.
 
 ## Additional Details
 - Status messages and triggers are published on the source run channel `<runid>:fork`.
