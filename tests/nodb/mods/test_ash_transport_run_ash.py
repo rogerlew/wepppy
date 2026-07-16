@@ -109,6 +109,67 @@ def test_missing_model_pars_initialize_without_lock_on_readonly_run(
     assert getattr(ash, attribute_name) is pars
 
 
+def test_transport_mode_round_trips_from_parsed_alex_parameters(ash_module) -> None:
+    _ash_pkg, ash_module_impl = ash_module
+    ash = object.__new__(ash_module_impl.Ash)
+    ash._model = "multi"
+    ash._field_black_ash_bulkdensity = 0.22
+    ash._field_white_ash_bulkdensity = 0.31
+    ash._alex_white_ash_model_pars = ash_module_impl.WhiteAshModelAlex()
+    ash._alex_black_ash_model_pars = ash_module_impl.BlackAshModelAlex()
+
+    @contextmanager
+    def noop_lock():
+        yield ash
+
+    ash.locked = noop_lock
+
+    ash.parse_inputs(
+        {
+            "ash_model": "alex",
+            "transport_mode": "static",
+            "white_initranscap": "2.0",
+            "black_initranscap": "2.0",
+            "white_depletcoeff": "0.1",
+            "black_depletcoeff": "0.1",
+        }
+    )
+
+    assert ash.transport_mode == "static"
+    assert ash.alex_white_ash_model_pars.initranscap == 2.0
+    assert ash.alex_black_ash_model_pars.initranscap == 2.0
+    assert ash.alex_white_ash_model_pars.depletcoeff == 0.1
+    assert ash.alex_black_ash_model_pars.depletcoeff == 0.1
+
+
+def test_transport_mode_defaults_for_legacy_parameters_without_mode(ash_module) -> None:
+    _ash_pkg, ash_module_impl = ash_module
+    ash = object.__new__(ash_module_impl.Ash)
+    ash._alex_white_ash_model_pars = ash_module_impl.WhiteAshModelAlex()
+    ash._alex_black_ash_model_pars = ash_module_impl.BlackAshModelAlex()
+    del ash._alex_white_ash_model_pars.transport_mode
+    del ash._alex_black_ash_model_pars.transport_mode
+
+    assert ash.transport_mode == "dynamic"
+
+
+def test_transport_mode_uses_white_mode_and_warns_when_modes_differ(
+    ash_module,
+    caplog: pytest.LogCaptureFixture,
+) -> None:
+    _ash_pkg, ash_module_impl = ash_module
+    ash = object.__new__(ash_module_impl.Ash)
+    ash.logger = logging.getLogger("tests.ash.transport_mode")
+    ash._alex_white_ash_model_pars = ash_module_impl.WhiteAshModelAlex()
+    ash._alex_black_ash_model_pars = ash_module_impl.BlackAshModelAlex()
+    ash._alex_white_ash_model_pars.transport_mode = "static"
+
+    with caplog.at_level(logging.WARNING, logger="tests.ash.transport_mode"):
+        assert ash.transport_mode == "static"
+
+    assert "Alex ash transport modes differ" in caplog.text
+
+
 @pytest.fixture()
 def ash_runtime(monkeypatch: pytest.MonkeyPatch, tmp_path: Path, ash_module):
     ash_pkg, ash_module_impl = ash_module

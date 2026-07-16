@@ -156,6 +156,60 @@ def test_soil_pure_template_renders_ssurgo_cache_checkbox(jinja_env: Environment
     assert re.search(r'id="clear_ssurgo_cache_on_rebuild"[^>]*checked', rendered)
 
 
+def test_ash_template_submits_canonical_model_selector_names(jinja_env: Environment) -> None:
+    def model_params(**overrides: float) -> SimpleNamespace:
+        values: dict[str, float] = {
+            "ini_bulk_den": 0.31,
+            "fin_bulk_den": 0.62,
+            "bulk_den_fac": 0.005,
+            "par_den": 1.2,
+            "decomp_fac": 0.00018,
+            "ini_erod": 4.5,
+            "fin_erod": 0.045,
+            "roughness_limit": 1.0,
+            "org_mat": 0.04,
+            "initranscap": 2.0,
+            "depletcoeff": 0.1,
+        }
+        values.update(overrides)
+        return SimpleNamespace(**values, to_dict=lambda: dict(values))
+
+    template = jinja_env.get_template("controls/ash_pure.htm")
+    rendered = template.render(
+        ash=SimpleNamespace(
+            ash_depth_mode=1,
+            fire_date="8/4",
+            ini_black_ash_depth_mm=5.0,
+            ini_white_ash_depth_mm=5.0,
+            ini_black_ash_load=11_000.0,
+            ini_white_ash_load=16_000.0,
+            field_black_ash_bulkdensity=0.22,
+            field_white_ash_bulkdensity=0.31,
+            model="alex",
+            available_models=[("multi", "Srivastava2023"), ("alex", "Watanabe2025")],
+            transport_mode="static",
+            run_wind_transport=False,
+            anu_white_ash_model_pars=model_params(),
+            anu_black_ash_model_pars=model_params(ini_bulk_den=0.22),
+            alex_white_ash_model_pars=model_params(),
+            alex_black_ash_model_pars=model_params(ini_bulk_den=0.22, org_mat=0.065),
+        )
+    )
+
+    assert re.search(
+        r'<select[^>]*id="ash_model_select"[^>]*name="ash_model"',
+        rendered,
+        re.DOTALL,
+    )
+    assert re.search(
+        r'<select[^>]*id="ash_transport_mode_select"[^>]*name="transport_mode"',
+        rendered,
+        re.DOTALL,
+    )
+    assert 'name="ash_model_select"' not in rendered
+    assert 'name="ash_transport_mode_select"' not in rendered
+
+
 @pytest.mark.parametrize(
     ("template_name", "title_text", "run_link_class"),
     [

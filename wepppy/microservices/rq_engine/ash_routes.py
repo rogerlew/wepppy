@@ -108,6 +108,49 @@ def _first_value(value: Any) -> Any:
     return value
 
 
+def _selector_value(payload: dict[str, Any], field_name: str) -> Any:
+    if field_name not in payload:
+        return None
+
+    value = payload.get(field_name)
+    if not isinstance(value, (list, tuple, set)):
+        if not isinstance(value, str) or not value:
+            raise ValueError(f"{field_name} must be a non-empty string")
+        return value
+
+    values = [candidate for candidate in value if candidate not in (None, "")]
+    if not values:
+        raise ValueError(f"{field_name} must be a non-empty string")
+    if any(candidate != values[0] for candidate in values[1:]):
+        raise ValueError(f"{field_name} contains conflicting values")
+    if not isinstance(values[0], str):
+        raise ValueError(f"{field_name} must be a non-empty string")
+    return values[0]
+
+
+def _normalize_and_validate_selector_fields(payload: dict[str, Any]) -> None:
+    for canonical_name, legacy_name in (
+        ("ash_model", "ash_model_select"),
+        ("transport_mode", "ash_transport_mode_select"),
+    ):
+        canonical_value = _selector_value(payload, canonical_name)
+        legacy_value = _selector_value(payload, legacy_name)
+        if canonical_value is not None and legacy_value is not None:
+            if canonical_value != legacy_value:
+                raise ValueError(f"{canonical_name} conflicts with legacy field {legacy_name}")
+        selected_value = canonical_value if canonical_value is not None else legacy_value
+        if selected_value is not None:
+            payload[canonical_name] = selected_value
+
+    ash_model = payload.get("ash_model")
+    if ash_model is not None and ash_model not in {"multi", "alex"}:
+        raise ValueError("ash_model must be one of: multi, alex")
+
+    transport_mode = payload.get("transport_mode")
+    if transport_mode is not None and transport_mode not in {"dynamic", "static"}:
+        raise ValueError("transport_mode must be one of: dynamic, static")
+
+
 def _preflight_ash_roots(wd: str) -> None:
     _require_directory_root(wd, "climate")
     _require_directory_root(wd, "watershed")
@@ -146,6 +189,10 @@ async def run_ash(runid: str, config: str, request: Request) -> JSONResponse:
         wd = get_wd(runid)
         _preflight_ash_roots(wd)
         payload = await parse_request_payload(request)
+        try:
+            _normalize_and_validate_selector_fields(payload)
+        except ValueError as exc:
+            return error_response(str(exc), status_code=400)
 
         mode_raw = _first_value(payload.get("ash_depth_mode"))
         if mode_raw is None:

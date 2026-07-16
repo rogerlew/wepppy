@@ -194,7 +194,8 @@
            options=ash.available_models,
            selected=selected_model,
            extra_control_class="disable-readonly",
-           attrs={"data-ash-action": "model-select"}
+           attrs={"data-ash-action": "model-select"},
+           field_name="ash_model"
          ) }}
 
       <div class="alex-only-param"
@@ -205,7 +206,8 @@
              options=[('dynamic', 'Dynamic'), ('static', 'Static')],
              selected=ash.transport_mode,
              extra_control_class="disable-readonly",
-             attrs={"data-ash-action": "transport-select"}
+             attrs={"data-ash-action": "transport-select"},
+             field_name="transport_mode"
            ) }}
         <div id="dynamic_description"
              class="wc-text-muted"

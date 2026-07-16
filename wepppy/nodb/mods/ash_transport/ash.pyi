@@ -92,6 +92,9 @@ class Ash(NoDbBase):
     def model(self, value: str) -> None: ...
 
     @property
+    def transport_mode(self) -> str: ...
+
+    @property
     def reservoir_storage(self) -> float: ...
 
     @reservoir_storage.setter

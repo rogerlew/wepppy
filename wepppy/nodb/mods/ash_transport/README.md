@@ -59,6 +59,8 @@ After execution, inspect `wd/ash` for per-hillslope parquet files and `wd/ash/po
 
 Configuration values are cached inside the NoDb instance; wrap overrides within `with ash.locked():` and rely on property setters (for example, `ash.black_ash_bulkdensity = 0.28`) so changes persist to disk and Redis.
 
+The `run-ash` request contract uses `ash_model` (`multi` or `alex`) and `transport_mode` (`dynamic` or `static`). The RQ endpoint accepts the historical `ash_model_select` and `ash_transport_mode_select` names for compatibility, but rejects invalid values or conflicting canonical and legacy fields with HTTP 400. The shared transport-mode selector updates both white- and black-ash Watanabe parameter objects; when loading older state where those modes differ, the UI displays the white-ash mode and logs the mismatch.
+
 ## Key Concepts / Domain Model
 
 | Concept | Description |

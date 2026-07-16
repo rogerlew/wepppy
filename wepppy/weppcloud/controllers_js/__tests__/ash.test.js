@@ -49,7 +49,12 @@ describe("Ash controller", () => {
                 <div class="alex-only-param" style="display: none;"></div>
                 <div class="anu-only-param"></div>
                 <div class="alex-dynamic-param" style="display: none;"></div>
-                <div class="alex-static-param" style="display: none;"></div>
+                <div class="alex-static-param" style="display: none;">
+                    <input id="white_initranscap" name="white_initranscap" value="0.8">
+                    <input id="black_initranscap" name="black_initranscap" value="0.8">
+                    <input id="white_depletcoeff" name="white_depletcoeff" value="0.009">
+                    <input id="black_depletcoeff" name="black_depletcoeff" value="0.009">
+                </div>
                 <div id="dynamic_description" style="display: none;"></div>
                 <div id="static_description" style="display: none;"></div>
 
@@ -264,6 +269,36 @@ describe("Ash controller", () => {
         });
         expect(baseInstance.set_rq_job_id).toHaveBeenCalledWith(ash, "ash-job");
         expect(pollCompletionEvent).toBe("ASH_RUN_TASK_COMPLETED");
+    });
+
+    test("run submits the selected Watanabe static model and edited parameters", async () => {
+        const modelSelect = document.getElementById("ash_model_select");
+        modelSelect.value = "alex";
+        modelSelect.dispatchEvent(new Event("change", { bubbles: true }));
+
+        const transportSelect = document.getElementById("ash_transport_mode_select");
+        transportSelect.value = "static";
+        transportSelect.dispatchEvent(new Event("change", { bubbles: true }));
+
+        ["white_initranscap", "black_initranscap"].forEach((id) => {
+            document.getElementById(id).value = "2.0";
+        });
+        ["white_depletcoeff", "black_depletcoeff"].forEach((id) => {
+            document.getElementById(id).value = "0.1";
+        });
+
+        ash.run();
+        await Promise.resolve();
+
+        const formData = requestMock.mock.calls[0][1].body;
+        expect(Array.from(formData.entries())).toEqual(expect.arrayContaining([
+            ["ash_model", "alex"],
+            ["transport_mode", "static"],
+            ["white_initranscap", "2.0"],
+            ["black_initranscap", "2.0"],
+            ["white_depletcoeff", "0.1"],
+            ["black_depletcoeff", "0.1"]
+        ]));
     });
 
     test("run handles message-only responses without undefined job id", async () => {

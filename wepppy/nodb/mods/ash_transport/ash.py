@@ -464,6 +464,19 @@ class Ash(NoDbBase):
     @nodb_setter
     def model(self, value: str) -> None:
         self._model = value
+
+    @property
+    def transport_mode(self) -> str:
+        """Return the shared UI mode, using white ash as canonical if persisted modes differ."""
+        white_mode = getattr(self.alex_white_ash_model_pars, 'transport_mode', 'dynamic')
+        black_mode = getattr(self.alex_black_ash_model_pars, 'transport_mode', 'dynamic')
+        if black_mode != white_mode:
+            self.logger.warning(
+                "Alex ash transport modes differ (white=%s, black=%s); using white mode in the UI",
+                white_mode,
+                black_mode,
+            )
+        return white_mode
             
     @property
     def reservoir_storage(self) -> float:
