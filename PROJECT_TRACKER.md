@@ -2,7 +2,7 @@
 > Kanban board for wepppy work packages and vision items
 
 **Last Updated**: 2026-07-16
-**Active Packages**: 12
+**Active Packages**: 13
 **Quick Links**: [Work Packages Directory](docs/work-packages/) | [God-Tier Prompting Strategy](docs/god-tier-prompting-strategy.md)
 
 ## Purpose
@@ -37,7 +37,7 @@ This tracker makes all work visible at a glance, helping agents coordinate and a
 ### 2. Limit Work in Progress
 **Target**: 2-4 active packages maximum to maintain focus and ensure packages complete rather than stall.
 
-**Current WIP**: 12 packages (above target range)
+**Current WIP**: 13 packages (above target range)
 
 ### 3. Manage Flow
 Monitor how long packages spend in each column:
@@ -275,7 +275,32 @@ When resuming Kubernetes work:
 
 Currently active work packages. Limit to 2-4 packages to maintain focus.
 
-**Current WIP Count**: 12 packages
+**Current WIP Count**: 13 packages
+
+---
+
+### AgFields Sub-field WEPP Interchange Integration
+**Started**: 2026-07-16
+**Status**: Discovery and regression contract complete; implementation pending
+**Size**: High (3-5 focused sessions)
+**Owner**: Codex
+**Priority**: High
+**Link**: [docs/work-packages/20260716_agfields_subfield_interchange/](docs/work-packages/20260716_agfields_subfield_interchange/)
+**Description**: Add dedicated native AgFields hillslope writers that preserve
+real `field_id`/`sub_field_id` identity without changing ordinary interchange
+APIs or schemas, then make the existing stage-4 RQ job publish a validated,
+failure-atomic six-file Parquet bundle before reporting success.
+
+**Current Focus**: Capture pre-change native goldens, implement one isolated
+AgFields writer prototype, and prove the ordinary writer remains exact.
+
+**Dependencies**: Builds on the completed WEPPpyo3-only interchange cutover and
+the completed AgFields backend/routing packages. Requires a paired native release
+and full-corpus acceptance on `sacral-self-discipline` before forest enablement.
+
+**Next Steps**: Execute Milestone 1 in the active ExecPlan, then extend the
+isolated contract to all six families only after the first ordinary no-regression
+gate passes.
 
 ---
 
