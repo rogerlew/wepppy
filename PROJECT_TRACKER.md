@@ -275,7 +275,46 @@ When resuming Kubernetes work:
 
 Currently active work packages. Limit to 2-4 packages to maintain focus.
 
-**Current WIP Count**: 12 packages
+**Current WIP Count**: 14 packages
+
+---
+
+### Pure UI Controller Contract Standardization
+**Started**: 2026-07-16
+**Status**: Milestone 1 package register frozen; canonical contract standard next
+**Size**: 71 execution units over a multi-year umbrella; each child limited to 1-4 focused weeks
+**Owner**: Codex
+**Priority**: High
+**Link**: [docs/work-packages/20260716_pure_ui_contract_standardization_c/](docs/work-packages/20260716_pure_ui_contract_standardization_c/)
+**Description**: Establish one evidence-backed contract standard and execute an iterative series of bounded work packages to audit every Pure UI controller from rendered fields through JavaScript payloads, route parsing, persistence, RQ behavior, and reload.
+
+**Current Status**:
+- Initial package, active ExecPlan, audit register, and reusable child-package prompt are authored.
+- Production reconnaissance found 33 run-page bootstrap controller entries, 26 main Pure panels plus four supporting templates, 56 bundled modules, and separate route-local Pure consoles that require explicit classification.
+- The current register separates 39 run-domain, 9 shared-foundation, 19 non-run/stateful, and 4 governance execution units. GOV-00 is the existing umbrella, GOV-00A is the active ratification child, and 69 later directories are created only when started. The credible full-program estimate remains 24-36 months serial or 12-20 months with separately authorized isolated worktrees and at most two disjoint writers after the shared foundation.
+- The 70-unit population/boundary register passed two independent reviews with no unresolved high/medium findings. Operator clarification then made every included row immediately contractual and added GOV-00A as the 71st governance unit; its scaffold receives a fresh dual review.
+
+**Next Steps**: Execute GOV-00A to ratify the canonical schema and derived `docs/ui-docs/contracts/README.md`, execute SHR-01 through SHR-04B, then instantiate DOM-01 WATAR/Ash.
+
+---
+
+### Pure UI Contract Ratification (GOV-00A)
+**Started**: 2026-07-16
+**Status**: Scaffold closed; ready for ExecPlan execution
+**Size**: 2-4 focused weeks
+**Owner**: Codex
+**Priority**: High
+**Link**: [docs/work-packages/20260716_pure_ui_contract_ratification/](docs/work-packages/20260716_pure_ui_contract_ratification/)
+**Description**: Ratify the binding Pure UI coverage model, canonical contract schema/template, authority hierarchy, compatibility/evidence rules, and deterministic governance validation before shared-foundation and domain audits.
+
+**Current Status**:
+- Every included parent-ledger row is now `contractual / unverified`; evidence maturity no longer controls whether the obligation exists.
+- Package brief, tracker, and self-contained active ExecPlan are scaffolded.
+- Documentation-only security triage is `none`; later behavior remediation repeats triage.
+- Two independent read-only scaffold reviews are dispositioned and both
+  reviewers confirmed closure-ready with no remaining high/medium findings.
+
+**Next Steps**: Execute authority/lifecycle ratification, publish the normative README/template/obligation registry, and add positive and negative governance checks.
 
 ---
 
