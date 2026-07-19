@@ -4,9 +4,9 @@
 
 **Batch:** `nasa-roses-202606-psbs`
 
-**Status:** Draft; blocked on static-model verification, MOFE runoff integration, and Alex's approved parameters
+**Status:** Draft; blocked on MOFE runoff integration and Alex's approved parameters
 
-**Last updated:** July 14, 2026
+**Last updated:** July 18, 2026
 
 ## Purpose
 
@@ -42,8 +42,8 @@ The following working decisions were made on July 14, 2026:
 - Use `OR-60` for fast iteration, `WA-10` for intermediate validation, and
   `OR-6` for the final large-watershed transfer and performance test.
 - Do not interpret the current WATAR output from a MOFE run as calibration
-  evidence until the runoff aggregation and static-formulation blockers below
-  are resolved.
+  evidence until the runoff aggregation blocker below is resolved. The static
+  formulation blocker was resolved and verified on July 18, 2026.
 
 ## Current Batch State
 
@@ -187,26 +187,30 @@ mode uses separate white- and black-ash values for:
 The implementation currently defaults Alex instances to `dynamic`, so every
 pilot and batch job must explicitly record `transport_mode=static`.
 
-### Confirmed static-branch blocker
+### Resolved static-branch blocker
 
-The current static expression passes `cum_ash_runoff_mm[:i]`, an array, to
-`math.exp`. It fails once the slice contains more than one value. The expression
-also needs an Alex-approved scalar equation and sign/parenthesis convention;
-the engineering team should not infer the intended formula from the current
-code.
+On 2026-07-18, the requesting maintainer approved the scalar static equation:
 
-Before parameter tuning:
+`delta_M = (A / B) * [exp(-B * Q_previous) - exp(-B * (Q_previous + delta_Q))]`
 
-1. Alex must provide the authoritative static equation, units, and at least
-   three test vectors covering zero runoff, a first runoff increment, and a
-   later cumulative-runoff increment.
-2. Correct the implementation and add unit tests for the supplied vectors,
-   nonnegative transport, monotonic depletion, clipping to available ash, and
-   full mass balance.
-3. Add a parameterization ADR because the change touches a formula and model
-   parameters.
-4. Confirm that static-mode results are independent of the dynamic-only slope,
-   organic-matter, and beta coefficients.
+Here `Q_previous` is `cum_ash_runoff_mm[i - 1]` and `delta_Q` is the current
+`ash_runoff_mm[i]`. This replaces the invalid `cum_ash_runoff_mm[:i]` array
+expression and fixes its sign and parenthesis convention. Units and decision
+provenance are recorded in
+`docs/adrs/ADR-0022-alex-static-ash-transport-increment.md`.
+
+Regression coverage includes zero runoff, first and later runoff increments,
+nonnegative and monotonically depleted transport, clipping to available ash,
+full mass balance, and independence from dynamic-only slope, organic-matter,
+and beta coefficients. The output schema is unchanged.
+
+Forest RQ job `b8f5d3ee-e45a-48fd-874e-3c3d839ed807` verified the repaired path
+against a local clone of production run `curable-program`. The job completed
+through rq-engine and the RQ worker in 59.1 seconds, producing 106 hillslope
+parquet files and five post-processing parquet datasets. Across 603,930
+hillslope rows, the maximum equation error was `4.88e-15`, the minimum raw
+transport was zero, and the maximum ash mass-balance error was `1.64e-14`
+tonne ha⁻¹.
 
 ## Parameter Package Requested from Alex
 
@@ -330,7 +334,7 @@ After completion:
 | Risk | Control |
 |---|---|
 | Noncanonical MOFE runoff biases WATAR | Gate all tuning and batch work on the `H.pass.runvol` adapter and analytical regression tests. |
-| Static mode is not executable or its equation is misinterpreted | Require Alex's equation and test vectors; implement no guessed formula. |
+| Static equation regresses or is misinterpreted | Preserve ADR-0022, exact vectors, model-loop regression tests, and cloned-run RQ evidence. |
 | Parameter drift between pilots and batch | Use one versioned manifest and persist its fingerprint with every run. |
 | Repeated scans of multi-gigabyte interchange files overload NFS | Use predicate pushdown or a one-pass materialized hillslope-daily input; benchmark with `OR-6`. |
 | Batch retry overwrites good results | Make orchestration artifact- and fingerprint-aware and retry only failed/incomplete leaves. |

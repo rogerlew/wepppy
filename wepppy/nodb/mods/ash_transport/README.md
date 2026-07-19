@@ -61,6 +61,8 @@ Configuration values are cached inside the NoDb instance; wrap overrides within 
 
 The `run-ash` request contract uses `ash_model` (`multi` or `alex`) and `transport_mode` (`dynamic` or `static`). The RQ endpoint accepts the historical `ash_model_select` and `ash_transport_mode_select` names for compatibility, but rejects invalid values or conflicting canonical and legacy fields with HTTP 400. The shared transport-mode selector updates both white- and black-ash Watanabe parameter objects; when loading older state where those modes differ, the UI displays the white-ash mode and logs the mismatch.
 
+Watanabe static mode computes each daily transport increment as `delta_M = (A / B) * [exp(-B * Q_previous) - exp(-B * (Q_previous + delta_Q))]`, where `Q_previous` is cumulative ash runoff through the prior timestep and `delta_Q` is current ash runoff. The raw increment is clipped to the remaining ash by the shared model loop. Static transport depends on `A`, `B`, and ash runoff; dynamic-only slope, organic-matter, and beta coefficients do not affect it. See `docs/adrs/ADR-0022-alex-static-ash-transport-increment.md` for provenance and compatibility notes.
+
 ## Key Concepts / Domain Model
 
 | Concept | Description |

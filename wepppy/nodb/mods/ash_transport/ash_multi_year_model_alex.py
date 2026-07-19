@@ -39,6 +39,26 @@ class AshNoDbLockedException(Exception):
     pass
 
 
+def _calc_static_transport_increment(
+    initial_transport_capacity: float,
+    depletion_coefficient: float,
+    previous_cumulative_runoff_mm: float,
+    runoff_increment_mm: float,
+) -> float:
+    """Return the static transport increment for one runoff timestep.
+
+    ``initial_transport_capacity`` is in tonne ha⁻¹ mm⁻¹,
+    ``depletion_coefficient`` is in mm⁻¹, and runoff values are in mm.
+    The returned transport increment is in tonne ha⁻¹.
+    """
+    return (initial_transport_capacity / depletion_coefficient) * (
+        math.exp(-depletion_coefficient * previous_cumulative_runoff_mm)
+        - math.exp(
+            -depletion_coefficient
+            * (previous_cumulative_runoff_mm + runoff_increment_mm)
+        )
+    )
+
 
 class AshModelAlex:
     """Enhanced hillslope ash model supporting dynamic transport calibration.
@@ -393,9 +413,11 @@ class AshModelAlex:
                         transport_tonspha[i] = \
                             transportable_ash_tonspha[i-1] * (1.0 - math.exp(-k_r[i] * ash_runoff_mm[i]))
                     elif transport_mode == 'static':
-                        transport_tonspha[i] = ( A / B ) * (
-                            math.exp(-B * cum_ash_runoff_mm[:i] - ash_runoff_mm[i]) -
-                            math.exp(-B * cum_ash_runoff_mm[i])
+                        transport_tonspha[i] = _calc_static_transport_increment(
+                            A,
+                            B,
+                            cum_ash_runoff_mm[i - 1],
+                            ash_runoff_mm[i],
                         )
 
                     water_transport_tonspha[i] = np.clip(transport_tonspha[i],

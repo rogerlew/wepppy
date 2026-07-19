@@ -116,6 +116,8 @@ The control description above the form also states that ash depths below the rou
 
 `Watanabe2025` with `Static` stays in the Watanabe family but switches to the fixed `A, B` style transport-capacity decline shown in the UI text. Use it when you want the newer family without the dynamic `K(x)` formulation.
 
+For each runoff timestep, Static mode subtracts the exponential capacity after the current ash-runoff increment from the capacity at the previous cumulative ash runoff. This produces a nonnegative daily increment that declines for equal runoff increments as cumulative runoff increases. The model clips that increment to the ash remaining on the hillslope.
+
 If you compare `Srivastava2023`, `Watanabe2025 Dynamic`, and `Watanabe2025 Static` on the same watershed, treat the differences as model-structure uncertainty. A difference across those runs means the answer is sensitive to the transport assumptions, not that one option is automatically correct by itself.
 
 ## What The Button Actually Does
