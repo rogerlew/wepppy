@@ -34,6 +34,8 @@ Create a standard work package using `docs/work-packages/README.md` and
 - `prompts/active/<scope>_execplan.md` following
   `docs/prompt_templates/codex_exec_plans.md`;
 - `artifacts/<date>_baseline_contract_evidence.md`;
+- `artifacts/<date>_contract_decision.md` with the pre-implementation checkpoint
+  required by `docs/standards/contract-first-change-standard.md`;
 - `artifacts/<date>_contract_review.md` containing the first reviewer's raw or
   verbatim findings and identity;
 - `artifacts/<date>_regression_qa_review.md` containing the second reviewer's raw
@@ -48,6 +50,7 @@ Add the child package to the umbrella tracker, the audit register, and
 
 Read all applicable nearest `AGENTS.md` files and at least:
 
+- `docs/standards/contract-first-change-standard.md`;
 - the umbrella `package.md`, `tracker.md`, active ExecPlan, and audit register;
 - `docs/ui-docs/contracts/README.md` after Milestone 1 creates it;
 - `docs/ui-docs/controller-contract.md`;
@@ -71,7 +74,23 @@ Read all applicable nearest `AGENTS.md` files and at least:
    add a failing regression before the fix when practical.
 
 Do not edit code until the baseline evidence distinguishes current behavior,
-documented intent, and confirmed mismatch.
+documented intent, and confirmed mismatch. Canonical contracts are normative,
+not descriptions inferred from code. For a conformance fix, keep the contract's
+normative behavior unchanged and add regression evidence. For an intended
+behavior change, first obtain explicit operator approval, then amend every
+applicable contract with the approved behavior, rationale, compatibility impact,
+and an open discrepancy status; only then edit UI, route, NoDb, or RQ
+implementation. If intent is missing, unclear, or conflicts across contracts,
+stop and create or ratify the resolution instead of selecting behavior from code.
+
+The contract-decision artifact records the starting implementation revision,
+applicable contracts, normative delta, rationale, compatibility/security impact,
+classification, operator decision, and both independent contract-review outcomes.
+Commit it with the contract amendments and review disposition as a standalone
+ancestor revision. Record that revision in the child tracker. Implementation
+begins only after the accepted ancestor exists. Use the standard's urgent-
+restoration path only with explicit operator authorization, unchanged intent,
+and its own committed standalone urgent ancestor before code edits.
 
 Build a per-field, per-mode, and per-configuration evidence matrix. Every value
 that is submitted, hydrated, persisted, enum/file-bearing, sensitive to hidden
@@ -125,7 +144,10 @@ defective, label it as a defect; do not write desired behavior as if deployed.
   last-write-wins behavior.
 - Treat macro changes as cross-controller until all call sites are audited.
 - Do not edit generated controller bundles directly; rebuild them from source.
-- Update authoritative contract and domain documentation in the same change.
+- Amend the authoritative contract before implementing an intended behavior
+  change through the accepted standalone ancestor checkpoint. Keep later
+  implementation, regression evidence, and supporting documentation in the same
+  final implementation change set.
 - If parameter defaults, formulas, units, thresholds, or fallbacks would change,
   satisfy the parameterization ADR gate before implementation.
 - Immediately repeat security triage before implementing any discovered

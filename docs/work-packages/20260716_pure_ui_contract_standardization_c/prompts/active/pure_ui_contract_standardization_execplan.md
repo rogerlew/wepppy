@@ -45,6 +45,15 @@ field-id tests can miss a real payload regression.
   are contractual now; evidence maturity is a separate axis.
 - [x] (2026-07-17) Scaffolded and dual-reviewed GOV-00A with no remaining
   high/medium findings; its ratification ExecPlan is ready for execution.
+- [x] (2026-07-17) Began GOV-00A Milestone 1 by recording the operator's
+  contract-first authority rule in root and UI/RQ/NoDb subsystem governance;
+  both reviewers confirmed closure-ready with no remaining high/medium findings.
+- [x] (2026-07-20 21:23 UTC) Operator authorized GOV-00A to register bounded
+  cross-owner remediation REM-01 for the Omni mod-state defect.
+- [x] (2026-07-20 21:40 UTC) Complete dual review for REM-01 with no unresolved
+  high/medium findings.
+- [ ] Commit the standalone REM-01 ancestor, then execute only its registered
+  defect boundary.
 - [ ] Ratify `docs/ui-docs/contracts/README.md` and its evidence levels.
 - [ ] Execute and close the WATAR/Ash pilot child package.
 - [ ] Use pilot findings to add a stable contract-coverage check.
@@ -121,6 +130,12 @@ historical observations when later evidence changes the design.
 
 ## Decision Log
 
+- Decision: Add REM-01 as a bounded remediation unit without advancing the
+  three borrowed domain owners.
+  Rationale: GOV-00A now defines a reviewed path for finite cross-owner defects;
+  the register must make its exception and exclusions explicit.
+  Date/Author: 2026-07-20 / Operator direction, recorded by Codex.
+
 - Decision: Use one umbrella ExecPlan to create and execute bounded child work
   packages rather than one monolithic controller audit.
   Rationale: The controller population crosses frontend, route, NoDb, and RQ
@@ -181,11 +196,14 @@ historical observations when later evidence changes the design.
   Date/Author: 2026-07-17 / Codex, updated after operator direction and GOV-00A
   scaffold review.
 
-- Decision: Enforce same-change maintenance with a source-to-contract manifest
-  and a change-aware gate.
+- Decision: Enforce contract-first ancestry and subsequent same-change
+  implementation maintenance with a source-to-contract manifest and a
+  change-aware gate.
   Rationale: Existence, headings, and a historical verified revision cannot
   detect a later template/controller/route/NoDb/RQ change that leaves its
-  contract stale. Shared producers must fan out to all mapped consumers.
+  contract stale. The gate must verify the accepted contract-decision ancestor,
+  not merely co-occurring file changes. Shared producers must fan out to every
+  mapped consumer.
   Date/Author: 2026-07-17 / Codex and independent governance reviewer.
 
 - Decision: Treat all submitted, hydrated, persisted, enum/file, visibility-
@@ -209,6 +227,14 @@ historical observations when later evidence changes the design.
   Date/Author: 2026-07-17 / Codex, from operator request to scaffold a
   ratification package.
 
+- Decision: Canonical contracts are normative and must be amended before an
+  intended UI or RQ behavior change is implemented.
+  Rationale: Code and tests are conformance evidence, not a competing source of
+  intent. Contract-first sequencing prevents defects or accidental behavior from
+  being ratified after the fact. Restoring implementation to an unchanged
+  contract requires regression evidence, not a normative contract rewrite.
+  Date/Author: 2026-07-17 / Operator direction, recorded by Codex in GOV-00A.
+
 ## Outcomes & Retrospective
 
 The scaffold is complete. Initial inventory and governance findings were
@@ -226,10 +252,14 @@ binding `contractual / unverified` obligation now; missing child/contract/
 manifest/revision evidence limits conformance claims but never makes scope
 optional.
 
-The current register contains 71 execution units because GOV-00A is now the
-fourth governance unit. It ratifies the contractual/evidence/execution model
+The current register contains 72 execution units because GOV-00A is the fourth
+governance unit and REM-01 is a bounded remediation unit. GOV-00A ratifies the contractual/evidence/execution model
 before shared foundations begin; the prior 70-unit review remains historical
 population/boundary evidence rather than the current total.
+
+GOV-00A Milestone 1 is now partially active. Root, WEPPcloud, controller, and
+rq-engine agent governance records contract-first precedence; canonical schema
+and registry publication plus dual review remain open.
 
 At final closure, summarize total in-scope controllers, verified/excluded counts,
 defects found, tests added, compatibility decisions, packages closed, review
@@ -288,7 +318,7 @@ the child audit prompt. It is the normative standard and derived published
 reader index. Separate binding coverage status (`contractual` or explicitly
 `excluded`) from evidence grade (`unverified`, `documented`, or `verified`) and
 from package execution state. Define required contract sections, evidence
-levels, canonical ownership, same-change maintenance, compatibility/
+levels, canonical ownership, contract-first checkpoints, compatibility/
 deprecation, and review gates. `contract-obligations.json` becomes the sole
 machine scope/owner/evidence/revision summary and source for
 `tools/ui_contract_ratification.py write-index`. The audit ledger remains a

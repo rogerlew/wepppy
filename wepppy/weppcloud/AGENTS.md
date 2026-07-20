@@ -14,6 +14,15 @@ provisioning and credential-file conventions (`dev-agent` is the canonical
 account for authenticated CAP bypass and rq-engine token mint flows).
 
 ## Task Start: Route or Blueprint Changes
+- Follow `docs/standards/contract-first-change-standard.md`, including its finite
+  canonical-authority set, conflict rule, and required ancestor checkpoint.
+- Identify every applicable current canonical domain and shared/cross-cutting
+  contract before editing. Treat those contracts as authoritative over observed
+  route/UI behavior; archived plans are historical leads only. If intended
+  behavior changes, use the accepted contract-decision checkpoint and amend
+  every applicable contract first; only then edit the route, paired UI, or tests. If the code is merely
+  being restored to the existing contract, cite that contract and add regression
+  evidence without rewriting its normative behavior.
 - If your route renders a template that extends `reports/_base_report.htm`, read `docs/dev-notes/weppcloud-base-report-shell.md` first so required shell context (`ron`, `current_ron`, `unitizer_nodb`, `precisions`) is always provided.
 - First-hop files:
   - `wepppy/weppcloud/routes/__init__.py`

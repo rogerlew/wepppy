@@ -74,7 +74,8 @@ features:
     requires_features: []
     enable_dependencies:
       - treatments
-    disable_blockers: []
+    disable_blockers:
+      - omni_contrasts
 
   - id: omni_contrasts
     label: Omni Contrasts
@@ -87,6 +88,7 @@ features:
     embargo_until: "2027-05-22"
     adr_reference: docs/adrs/ADR-0001-time-limited-publication-embargo-for-omni-contrasts.md
     min_role: dev
+    menu_min_role: user
     requires_backend: any
     requires_features:
       - omni

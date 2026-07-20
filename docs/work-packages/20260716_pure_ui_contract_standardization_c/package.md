@@ -27,10 +27,13 @@ independent review dispositions.
   track implementation evidence separately from scope.
 - Execute bounded child work packages until every in-scope controller has a
   current canonical contract and contract-focused regression coverage.
-- Make contract maintenance part of the same-change workflow for templates,
-  controllers, routes, NoDb inputs, RQ payloads, and persisted state.
+- Require the accepted contract-decision checkpoint and ancestor revision before
+  intended changes to templates, controllers, routes, NoDb inputs, RQ behavior,
+  or persisted state; keep implementation evidence and supporting docs together.
 - Require two independent subagent reviews and a finding-disposition artifact
   for the umbrella package and every child work package.
+- Register operator-authorized bounded remediation packages without treating
+  borrowed future owner packages as executed or dependency-complete.
 
 ## Scope
 
@@ -50,6 +53,9 @@ independent review dispositions.
   and maintenance guidance in the nearest developer documentation.
 - Child work packages that correct confirmed contract defects discovered by an
   audit, provided each correction stays within the audited controller boundary.
+- Bounded cross-owner remediation packages ratified through GOV-00A when a
+  concrete production defect spans planned owners before their normal
+  dependency order is complete.
 
 ### Explicitly Out of Scope
 
@@ -67,10 +73,15 @@ independent review dispositions.
 
 ## Implementation Fidelity and Evidence
 
-- **Fidelity target**: `faithful extraction`
-- **Authoritative source paths**:
-  `wepppy/weppcloud/templates/`, `wepppy/weppcloud/controllers_js/`, paired
-  WEPPcloud/rq-engine routes, NoDb controllers, RQ workers, and focused tests
+- **Fidelity target**: `contract-first conformance audit`
+- **Normative authority paths**: applicable current canonical shared/cross-
+  cutting contracts and each domain path registered by GOV-00A; until a domain
+  contract is ratified, its registered child package records operator-approved
+  intent and may not infer it from implementation
+- **Implementation evidence paths**: `wepppy/weppcloud/templates/`,
+  `wepppy/weppcloud/controllers_js/`, paired WEPPcloud/rq-engine routes, NoDb
+  controllers, RQ workers, and focused tests are authoritative only for observed
+  behavior and conformance evidence; they cannot define intended behavior
 - **Cutover proof required**: every canonical contract is linked from the
   coverage register and is backed by an automated rendered-template or request
   boundary test for its risk-bearing fields; documentation-only source reading
@@ -110,8 +121,8 @@ repository gates permit it.
 ## Success Criteria
 
 - [ ] `docs/ui-docs/contracts/README.md` defines the canonical schema, derived
-  published reader index, evidence levels, ownership rules, and same-change
-  maintenance policy without becoming a competing status authority.
+  published reader index, evidence levels, ownership rules, and contract-first
+  checkpoint policy without becoming a competing status authority.
 - [ ] The audit register contains every in-scope Pure UI controller and every
   shared component that can alter a submitted or hydrated value; exclusions
   include a rationale and evidence path.
@@ -173,7 +184,7 @@ parameterization behavior.
 ## Timeline Estimate
 
 - **Expected duration**: 18-32 serial weeks for GOV-00, GOV-00A, SHR-01 through
-  SHR-04B, the WATAR pilot, and maintenance gate; 24-36 months for all 71 execution units
+  SHR-04B, the WATAR pilot, and maintenance gate; 24-36 months for all 72 execution units
   with one authoring package active at a time, or roughly 12-20 months with
   separately authorized isolated worktrees and at most two disjoint writers
   after the shared foundation

@@ -29,7 +29,12 @@ OMNI Contrasts will be classified as `internal` with:
 
 This creates a 12-month publication-priority window for the originating project team while preserving OMNI Scenarios as usable scenario-orchestration infrastructure.
 
-During the embargo period, OMNI Contrasts should not be shown or exposed as a general public WEPPcloud capability. Access is limited to Dev-authorized users.
+During the embargo period, OMNI Contrasts must not be exposed as a usable
+general public WEPPcloud capability. Access is limited to Dev-authorized users.
+The Mods menu may list Omni Contrasts for discoverability when unauthorized
+users receive only a disabled checkbox with `Not Authorized`; that listing must
+not render the control section, preflight navigation, dynamic section, or any
+contrast data or action.
 
 ## PATH CE Dependency Rule
 
@@ -75,7 +80,9 @@ Rejected. Informal memory is not sufficient for release governance. The feature 
 
 ## Consequences
 
-OMNI Contrasts will not be generally visible or usable during the embargo period.
+OMNI Contrasts will not be generally usable during the embargo period. Its name
+may be visible only as the disabled Mods-menu discoverability entry described
+above.
 
 Users who need ordinary multi-scenario orchestration can continue to use OMNI Scenarios.
 
@@ -96,5 +103,8 @@ Any extension beyond the embargo date should require a new or updated ADR.
 The feature registry should contain an `omni_contrasts` entry with `maturity: internal`, `internal_reason: publication_embargo`, `embargo_until: 2027-05-22`, and `min_role: dev`.
 
 OMNI Scenarios and OMNI Contrasts should be gated independently so that scenario orchestration remains available while contrast analysis is restricted.
+
+Disabled menu discoverability is not authorization. `min_role: dev` continues
+to govern enablement, dynamic loading, controls, preflight, and contrast data.
 
 PATH CE release status must be checked against the OMNI Contrasts dependency before PATH CE is promoted beyond internal/restricted access.

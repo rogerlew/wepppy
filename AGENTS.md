@@ -40,7 +40,7 @@
 - Standard location for active ExecPlans is `docs/work-packages/*/prompts/active/`.
 - Ad hoc ExecPlans may live under `docs/mini-work-packages/*.md` when explicitly designated by the user.
 - Current ad hoc active ExecPlan: `none`.
-- Current work-package active ExecPlan: `none`.
+- Current work-package active ExecPlan: `docs/work-packages/20260716_pure_ui_contract_ratification/prompts/active/pure_ui_contract_ratification_execplan.md` (umbrella coordinator: `docs/work-packages/20260716_pure_ui_contract_standardization_c/prompts/active/pure_ui_contract_standardization_execplan.md`).
 - Before authoring or revising an ExecPlan, read `docs/prompt_templates/codex_exec_plans.md`.
 - Active plans are living documents: keep `Progress`, `Surprises & Discoveries`, `Decision Log`, and `Outcomes & Retrospective` current.
 - When asked to run a plan end-to-end, proceed milestone by milestone without pausing for extra confirmation unless blocked by an external dependency.
@@ -49,7 +49,8 @@
 
 ## Change Scope Discipline (Required)
 - Do not add speculative abstractions for unsupported or hypothetical cases.
-- Match existing data and API contracts first; call out contract changes before implementation.
+- For Pure UI and UI-coupled WEPPcloud/NoDb/RQ behavior, follow `docs/standards/contract-first-change-standard.md`; other subsystems retain current canonical specifications named by their nearest AGENTS.
+- Update affected user, operator, and developer documentation in the same final change set for every production change; contract-first sequencing is an additional requirement, not a replacement.
 - Prefer the smallest fix that resolves the confirmed failing path; for mechanical refactors, preserve code structure (scope/indent/order) and change only the intended tokens.
 - For incident-driven hardening and mitigation-retirement work, follow `docs/standards/hardening-lifecycle-standard.md`.
 - State assumptions explicitly in change notes before broadening behavior.
@@ -61,7 +62,6 @@
 - For project data/schema mutations (run-scoped CSV/parquet/NoDb contracts), write a brief compatibility and regression plan before editing.
 - Default to additive/backward-compatible evolution; do not rename or remove user-visible keys/columns without explicit operator approval.
 - For data/schema mutations, validate downstream propagation to generated run artifacts (for example `wepp/runs/*`) in addition to regression tests.
-- Update user/operator/developer documentation in the same change set; do not defer contract docs.
 - Any change that modifies parameterization defaults, formulas, thresholds, unit conversions, or fallback heuristics must include an ADR per `docs/standards/parameterization-adr-standard.md` before merge (or within one business day for urgent incident fixes).
 
 ## Dependency and Performance Discipline (Required)

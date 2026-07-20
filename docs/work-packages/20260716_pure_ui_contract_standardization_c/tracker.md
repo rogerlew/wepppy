@@ -6,9 +6,9 @@
 
 **Timezone**: UTC
 **Started**: 2026-07-17 00:30 UTC
-**Current phase**: Milestone 1 - GOV-00A ready for execution
-**Last updated**: 2026-07-17 01:48 UTC
-**Next milestone**: execute GOV-00A, then shared foundations
+**Current phase**: Milestone 1 - REM-01 ancestor commit
+**Last updated**: 2026-07-20 21:40 UTC
+**Next milestone**: commit accepted REM-01 authority, then implement REM-01
 **Security impact**: `none` for scaffold; child packages reassess
 **Dedicated security review**: `no`
 **Security artifact**: N/A
@@ -27,6 +27,8 @@
 ### In Progress
 
 - [ ] Execute GOV-00A and ratify the canonical contract schema.
+- [ ] Commit and execute bounded remediation REM-01 without advancing its
+  borrowed DOM owners.
 
 ### Blocked
 
@@ -43,8 +45,14 @@
   (2026-07-17 00:47 UTC).
 - [x] Closed both independent scaffold reviews with post-fix confirmation and no
   unresolved high/medium findings (2026-07-17 00:48 UTC).
+- [x] Registered operator-authorized bounded remediation REM-01 across the
+  exact DOM-02/DOM-25A/DOM-25B defect boundary (2026-07-20 21:23 UTC).
+- [x] Dual-reviewed and accepted the bounded GOV-00A-M1A/REM-01 ancestor with
+  no unresolved high/medium findings (2026-07-20 21:40 UTC).
 - [x] Identified, corrected, dual-reviewed, and froze the 70-unit execution
   register with no unresolved high/medium findings (2026-07-17).
+- [x] Began GOV-00A Milestone 1 by adding contract-first precedence to root and
+  UI/RQ subsystem agent governance (2026-07-17; bounded review pending).
 
 ## Child Package Register
 
@@ -56,7 +64,7 @@ the corresponding stable ID starts.
 | Stable IDs | Package class | Count | State | Review gate |
 | --- | --- | --- | --- | --- |
 | GOV-00 | Standard/population/register foundation | 1 | auditing | In progress |
-| GOV-00A | Contract schema and lifecycle ratification | 1 | auditing | Scaffold review in progress |
+| GOV-00A | Contract schema and lifecycle ratification | 1 | auditing | Contract-first governance reviewed; schema artifacts open |
 | DOM-01..DOM-29 (including A-D facets) | Run-domain controller packages | 39 | planned | Two independent reviews each |
 | GOV-01 | Change-aware maintenance enforcement | 1 | planned | Two independent reviews |
 | SHR-01..SHR-07 (including A/B facets) | Shared-foundation packages | 9 | planned | Two independent reviews each |
@@ -95,6 +103,10 @@ be dispositioned.
 | 2026-07-17 01:48 | GOV-00A regression/maintenance reviewer | Review DAG, drift prevention, validation, scope, and executability | Read-only | Four medium findings; all accepted/fixed |
 | 2026-07-17 | GOV-00A contract authority reviewer | Post-fix scaffold confirmation | Read-only | Closure-ready; no remaining high/medium findings |
 | 2026-07-17 | GOV-00A regression/maintenance reviewer | Post-fix scaffold confirmation | Read-only | Closure-ready; no remaining high/medium findings |
+| 2026-07-17 03:46 | GOV-00A contract authority reviewer | Review contract-first governance slice | Read-only | Two high and three medium findings; all accepted/fixed, post-fix pending |
+| 2026-07-17 03:46 | GOV-00A regression/maintenance reviewer | Review enforcement and regression loopholes | Read-only | Two high and four medium findings; all accepted/fixed, post-fix pending |
+| 2026-07-17 04:01 | GOV-00A contract authority reviewer | Final post-fix confirmation | Read-only | Closure-ready; no remaining high/medium findings |
+| 2026-07-17 04:01 | GOV-00A regression/maintenance reviewer | Final post-fix confirmation | Read-only | Closure-ready; no remaining high/medium findings |
 
 The operator authorized bounded subagent dispatch in the initiating request.
 This authority does not authorize scope expansion, branch creation/switching,
@@ -117,8 +129,21 @@ repository gates permit it.
 - **2026-07-17** - The exact register closed at 70 units after adding omitted
   ERMiT, RQ Info Details, and DEVAL stateful surfaces; both reviewers confirmed
   closure-ready.
+- **2026-07-17** - GOV-00A began bounded execution after the operator required
+  contracts to be authoritative and amended before intended UI/RQ code changes.
 
 ## Decisions Log
+
+### 2026-07-20 21:23 UTC: Register REM-01 without advancing borrowed owners
+
+**Context**: The reported Omni state defect touches the Project shell plus Omni
+scenario and contrast boundaries before their normal package order is ready.
+
+**Decision**: Add REM-01 as the 72nd registered execution unit under the GOV-00A
+bounded remediation mechanism. Its exact exclusions are binding.
+
+**Impact**: REM-01 can be reviewed and closed independently. DOM-02, DOM-25A,
+and DOM-25B remain planned with all existing dependencies intact.
 
 ### 2026-07-17 00:30 UTC: Use an umbrella ExecPlan with bounded child packages
 
@@ -176,16 +201,18 @@ approve their own fix.
 separate primary-agent disposition. Reviewer identity and post-fix confirmation
 are retained; unresolved high/medium findings block closure.
 
-### 2026-07-17 00:47 UTC: Enforce same-change contract maintenance
+### 2026-07-17 00:47 UTC: Enforce contract maintenance
 
 **Context**: A coverage check that validates only file existence and headings
 cannot detect a later source change that leaves a contract untouched.
 
 **Decision**: Publish a machine-readable source-to-contract manifest. The
 change-aware gate compares a base revision, maps changed template/controller/
-route/NoDb/RQ paths to contracts and contract tests, and requires both to change
-or a package-scoped no-contract-impact attestation confirmed by both reviewers.
-Shared macro/helper changes fan out to every mapped consumer.
+route/NoDb/RQ paths to contracts and contract tests, verifies the accepted
+contract-decision ancestor for intended behavior changes, and requires later
+implementation evidence or a package-scoped no-contract-impact attestation
+confirmed by both reviewers. Shared macro/helper changes fan out to every mapped
+consumer.
 
 **Impact**: The initiative enforces maintenance behavior, not merely initial
 documentation coverage.
@@ -261,6 +288,8 @@ credible four-week maximum boundary and an independent review gate.
 - [x] Expanded dependency graph is acyclic from GOV-00 through GOV-00A to
   GOV-99.
 - [x] GOV-00A scaffold reviews are dispositioned and confirmed.
+- [x] GOV-00A contract-first agent-governance review is dispositioned and
+  confirmed.
 
 ### Initiative Closeout
 
@@ -319,6 +348,8 @@ passed; spelling preview was clean after one package-local normalization.
   Jinja/macro output. Require rendered-template seam tests.
 - **No-impact attestations**: monitor for routine use. They are an exception path
   requiring evidence and both reviewers, not a substitute for contract upkeep.
+- **Implementation-first drift**: code and tests are conformance evidence. Reject
+  intended UI/RQ behavior changes that do not amend the canonical contract first.
 
 ## Communication Log
 

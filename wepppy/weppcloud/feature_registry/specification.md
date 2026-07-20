@@ -14,8 +14,12 @@ This specification covers two registries in one subsystem:
 
 ## UX Policy (Non-Negotiable)
 
-- Visible means usable.
-- If a feature is shown, user can use/toggle it.
+- Visible means usable unless a feature entry explicitly sets `menu_min_role`
+  below `min_role` to provide discoverable-but-disabled menu visibility.
+- If a feature is shown, the user can toggle it unless the checkbox is disabled
+  with a reason directly below its label.
+- A caller below `min_role` receives the exact disabled reason
+  `Not Authorized`.
 - If a config is shown, user can launch it.
 - Only exception: project `readonly` state on existing run surfaces.
 - Do not show tease-only controls that user cannot use.
@@ -37,6 +41,8 @@ The two YAML files above are the only hand-edited metadata sources.
 - `internal_reason`: `compute | api_constrained | beta | publication_embargo | null`
 - `embargo_until`: `YYYY-MM-DD | null`
 - `min_role`: `user | poweruser | dev | admin | root`
+- `menu_min_role`: optional `user | poweruser | dev | admin | root`; defaults
+  to `min_role` and may only broaden disabled menu discoverability
 - `requires_backend`: `any | wbt | topaz`
 
 `internal_reason` must be present only when `maturity=internal`.
@@ -77,6 +83,8 @@ Optional fields:
 - `adr_reference`: optional repo-relative ADR link under `docs/adrs/*.md` for release-governance rationale
 - `enable_dependencies`: mod ids to auto-enable when this feature is enabled
 - `disable_blockers`: mod ids that must be disabled before this feature can be disabled
+- `menu_min_role`: minimum role allowed to see the menu option even when the
+  caller cannot enable it; omission preserves existing visibility semantics
 
 Optional top-level fields:
 
@@ -116,11 +124,28 @@ Per-override schema:
 
 ## Runtime Semantics
 
-Feature visibility/usability requires all:
+Default feature visibility/usability requires all:
 
 - caller role is at least `min_role`
 - backend matches `requires_backend` (or it is `any`)
 - all `requires_features` are active for the run
+
+An entry with explicit `menu_min_role` uses discoverable menu semantics:
+
+- a caller at or above `menu_min_role` sees the menu option;
+- a caller below `min_role` sees a disabled checkbox with `Not Authorized`;
+- an authorized caller missing `requires_features` sees a disabled unchecked
+  checkbox with `Enable <feature labels> first`;
+- when prerequisites become active, the checkbox becomes enabled without being
+  checked and without activating the run-page section or preflight navigation;
+- an authorized caller may always disable an already-active feature, including
+  cleanup of a legacy state whose prerequisite is missing.
+
+`requires_features` is an enable-time guard and never auto-enables a feature.
+Only `enable_dependencies` may add another feature to the persisted mod list.
+Run-page sections and preflight navigation require the feature's own persisted
+id plus its authorization policy; a prerequisite's state cannot substitute for
+that id.
 
 Config visibility/selectability requires all:
 
@@ -139,7 +164,8 @@ Config attribute overrides are applied after YAML validation, from
 - Missing/null/absent matched config attributes do not trigger a rule.
 - Boolean override matching is strict (`true|false|yes|no|on|off|1|0`); invalid tokens fail validation.
 
-If conditions fail, hide the entry from user-facing launch/toggle surfaces.
+If conditions fail, hide the entry from user-facing launch/toggle surfaces
+unless explicit `menu_min_role` discoverability applies.
 
 Registry validation/load failures are treated as fatal for page render in MVP
 (surface returns exception response rather than partial render).
@@ -158,6 +184,12 @@ Registry file order is authoritative for display order in MVP.
 - `internal_reason` is non-null only when `maturity=internal`.
 - `embargo_until` must be null unless `internal_reason=publication_embargo`, and must be an ISO date (`YYYY-MM-DD`) when set.
 - `min_role` must be `dev` when `maturity=internal`.
+- `menu_min_role`, when present, must be a valid role whose authorized audience
+  is a superset of the `min_role` audience. Role names are not a linear rank:
+  `dev` authorizes Dev/Root while `admin` authorizes Admin/Root. Validation must
+  compare those concrete audiences, so neither can broaden the other. The field
+  changes menu discoverability only and never grants enable or dynamic-section
+  authorization.
 - `adr_reference` (when present) must be repo-relative, remain under `docs/adrs/`, reference a `.md` file, and reference an existing file.
 - feature `requires_features` and `enable_dependencies` entries must reference known run-mod ids (registry feature ids or `internal_prerequisites`).
 - feature `section_template` must be repo-relative, remain under `wepppy/weppcloud/templates/`, and reference an existing file.
@@ -254,5 +286,11 @@ At minimum:
 - schema validation tests for shared enums and cross-field rules
 - feature parity tests for header/run-page render lists from registry
 - feature visibility tests from backend + prerequisites + role
+- discoverable-disabled tests for menu role, authorization reason,
+  prerequisites, active legacy cleanup, and dynamic prerequisite activation
+- parity tests proving entries without `menu_min_role` retain existing
+  role/backend/prerequisite hiding, including RUSLE
+- schema negatives for unknown `menu_min_role` and for a menu audience that is
+  not a superset of the enable audience
 - config launch-surface render tests from registry data in `interfaces.htm`
 - toggle endpoint behavior parity for visible features

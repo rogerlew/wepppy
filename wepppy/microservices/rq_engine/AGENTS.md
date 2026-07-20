@@ -8,6 +8,24 @@
 WEPPcloud run workflows and exposes job polling endpoints. Agents should treat
 this service as the canonical async interface for run-scoped operations.
 
+## Contract Authority (Required)
+- Follow `docs/standards/contract-first-change-standard.md`, including its finite
+  canonical-authority set, conflict handling, and ancestor-checkpoint gate.
+- Applicable current canonical domain and shared/cross-cutting contracts are
+  normative. Routes, workers, and tests demonstrate conformance; they do not
+  silently redefine the contract. Historical and archived plans are context
+  only, never amendment targets.
+- Before changing intended payload keys/types/defaults/aliases, authorization,
+  enqueue/dependency behavior, or completion/error semantics, amend every
+  applicable contract in the accepted checkpoint revision. Only then change the
+  route, worker, and tests together.
+- If implementation contradicts a contract, treat that as a defect. Restore
+  conformance, or obtain operator approval and amend every applicable contract
+  before editing code. If applicable contracts conflict, stop and ratify the
+  resolution before implementation.
+- If no domain contract exists, create or ratify it through the registered
+  contract package before introducing new UI-coupled RQ behavior.
+
 ## Entrypoint
 - `wepppy/microservices/rq_engine/__init__.py` defines the FastAPI `app`,
   installs the auth-actor hook, and registers every router under `/api`.

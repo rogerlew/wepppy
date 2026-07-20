@@ -17,15 +17,24 @@ ignore a controller. It also gives every later domain package one standard for
 DOM fields, payloads, route normalization, persistence, RQ behavior, reload,
 compatibility, security, and review evidence.
 
+Canonical domain and repository contracts are normative authority. UI, route,
+worker, and test code is conformance evidence. An intended behavior change must
+amend every applicable contract before implementation begins; restoring code to
+an existing contract does not rewrite the contract's normative behavior.
+
 ## Objectives
 
 - Publish a normative Pure UI contract schema and authority hierarchy.
 - Make `contractual` the binding status for every included coverage row.
 - Separate contractual scope, evidence grade, and package execution state.
+- Ratify contract-first sequencing for UI, WEPPcloud/rq-engine route, and RQ
+  worker changes.
 - Provide one reusable canonical contract template and derived reader-index
   policy.
 - Ratify compatibility, discrepancy, security, and dual-review requirements
   before shared-foundation and domain audits begin.
+- Ratify a bounded cross-owner remediation mechanism for finite production
+  defects discovered before the normal domain dependency spine is complete.
 
 ## Scope
 
@@ -40,11 +49,17 @@ compatibility, security, and review evidence.
 - `tools/ui_contract_ratification.py` with `check` and `write-index` commands,
   plus `tests/tools/test_ui_contract_ratification.py` and fixtures under
   `tests/fixtures/ui_contract_ratification/`.
+- `docs/standards/contract-first-change-standard.md` as immediate contract-first
+  governance, including the finite pre-cutover authority set, checkpoint, and
+  bounded cross-owner remediation rules.
 - Targeted updates to the finite authority set:
   `docs/ui-docs/controller-contract.md`, `docs/ui-docs/README.md`,
   `wepppy/weppcloud/controllers_js/README.md`,
-  `wepppy/weppcloud/controllers_js/AGENTS.md`, the parent package/ledger/
-  register/ExecPlan/tracker, this child package, and `PROJECT_TRACKER.md`.
+  `AGENTS.md`, `wepppy/weppcloud/AGENTS.md`,
+  `wepppy/weppcloud/controllers_js/AGENTS.md`,
+  `wepppy/microservices/rq_engine/AGENTS.md`, `wepppy/nodb/AGENTS.md`,
+  `wepppy/rq/AGENTS.md`, the parent package/ledger/register/ExecPlan/tracker, this child package, and
+  `PROJECT_TRACKER.md`.
 - Reconciliation of the umbrella coverage ledger, execution register, child
   prompt, and future manifest specification with the ratified vocabulary.
 - Deterministic documentation/schema checks appropriate to a governance-only
@@ -66,10 +81,12 @@ compatibility, security, and review evidence.
 
 - **Fidelity target**: `faithful extraction` of the operator-approved governance
   contract and existing repository invariants
-- **Authoritative source paths**:
-  `docs/work-packages/20260716_pure_ui_contract_standardization_c/`,
-  `docs/ui-docs/controller-contract.md`, Pure controller/template sources used
-  only as schema examples, and relevant repository standards
+- **Normative governance authority paths**:
+  `docs/standards/contract-first-change-standard.md`, this active package, and
+  the parent contractual/execution registers
+- **Schema evidence paths**: `docs/ui-docs/controller-contract.md` for shared
+  invariants and Pure controller/template sources as representational examples;
+  neither source code nor historical prose defines domain intent
 - **Cutover proof required**: every enumerated obligation has exactly
   `contract_scope="contractual"`, one allowed evidence grade, and one registered
   execution owner in `contract-obligations.json`; current documentation points
@@ -109,6 +126,14 @@ reassigned; an implementer cannot approve their own work.
   evidence.
 - [ ] `docs/ui-docs/controller-contract.md`, umbrella artifacts, child prompt,
   and tracker links agree with the ratified authority.
+- [ ] Agent governance requires contract identification before implementation,
+  contract amendment before intended behavior changes, and regression evidence
+  when restoring code to an unchanged contract.
+- [ ] Intended behavior changes require an operator-approved, dual-reviewed
+  contract-decision artifact committed as an ancestor before implementation.
+- [ ] A bounded cross-owner remediation is registered, inherits the highest
+  borrowed-owner security impact, remains defect-scoped, and cannot advance or
+  bypass the borrowed owners' normal execution state.
 - [ ] Governance checks positively enumerate every obligation and require
   contractual scope, allowed evidence grade, registered owner, and uniqueness.
 - [ ] Negative fixtures cover missing, blank, optional, improperly excluded,
@@ -194,5 +219,6 @@ obligation and the evidence needed to make that later claim.
 ## Follow-up Work
 
 After ratification, execute shared-foundation packages in dependency order,
-then the DOM-01 WATAR/Ash pilot. GOV-01 implements machine-readable fan-out and
-same-change enforcement after the pilot proves stable metadata.
+then the DOM-01 WATAR/Ash pilot. GOV-01 implements machine-readable fan-out,
+contract-decision ancestry enforcement, and subsequent implementation-evidence
+maintenance after the pilot proves stable metadata.

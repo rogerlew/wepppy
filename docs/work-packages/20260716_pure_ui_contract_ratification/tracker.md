@@ -6,9 +6,9 @@
 
 **Timezone**: UTC
 **Started**: 2026-07-17 01:48 UTC
-**Current phase**: Scaffold closed; ready for Milestone 1 execution
-**Last updated**: 2026-07-17 UTC
-**Next milestone**: Execute Milestone 1 authority and lifecycle ratification
+**Current phase**: Milestone 1 - bounded remediation ancestor commit
+**Last updated**: 2026-07-20 21:40 UTC
+**Next milestone**: Commit the approved GOV-00A-M1A/REM-01 ancestor
 **Security impact**: `none`
 **Dedicated security review**: `no`
 **Security artifact**: N/A
@@ -26,7 +26,9 @@
 
 ### In Progress
 
-- None; execution has not started.
+- [ ] Complete Milestone 1 canonical README and obligation registry after the
+  contract-first agent-governance slice.
+- [ ] Commit the accepted bounded cross-owner remediation mechanism and REM-01 registration.
 
 ### Blocked
 
@@ -42,6 +44,16 @@
 - [x] Completed two independent scaffold reviews, dispositioned one high, seven
   medium, and two low findings, and received both post-fix confirmations
   (2026-07-17).
+- [x] Recorded operator authorization for a bounded cross-owner remediation
+  mechanism and REM-01 as its first defect-scoped registration
+  (2026-07-20 21:23 UTC).
+- [x] Dual-reviewed and accepted GOV-00A-M1A and REM-01 with no unresolved
+  high/medium findings (2026-07-20 21:40 UTC).
+- [x] Recorded contract-first authority and sequencing in root, WEPPcloud,
+  controller, NoDb, rq-engine, and direct RQ agent governance (2026-07-17).
+- [x] Dispositioned two high/three medium authority findings and two high/four
+  medium regression findings; both reviewers confirmed closure-ready with no
+  remaining high/medium findings (2026-07-17 04:01 UTC).
 
 ## Dispatch Log
 
@@ -51,14 +63,33 @@
 | 2026-07-17 01:48 | Regression/maintenance reviewer | Challenge executability, drift prevention, boundaries, and validation | Read-only | Four medium findings; all accepted/fixed |
 | 2026-07-17 | Contract authority reviewer | Post-fix confirmation | Read-only | Closure-ready; no remaining high/medium findings |
 | 2026-07-17 | Regression/maintenance reviewer | Post-fix confirmation | Read-only | Closure-ready; no remaining high/medium findings |
+| 2026-07-17 03:46 | Contract authority reviewer | Review contract-first precedence, sequencing, and authority boundaries | Read-only | Two high and three medium findings; all accepted/fixed, post-fix pending |
+| 2026-07-17 03:46 | Regression/maintenance reviewer | Challenge enforceability, missing-contract behavior, and code-first loopholes | Read-only | Two high and four medium findings; all accepted/fixed, post-fix pending |
+| 2026-07-17 04:01 | Contract authority reviewer | Final post-fix confirmation | Read-only | Closure-ready; no remaining high/medium findings |
+| 2026-07-17 04:01 | Regression/maintenance reviewer | Final post-fix confirmation | Read-only | Closure-ready; no remaining high/medium findings |
 
 ## Timeline
 
 - **2026-07-17 01:48 UTC** - Operator clarified that registered items must be
   contractual now and requested a committed ratification package.
 - **2026-07-17 01:48 UTC** - GOV-00A scaffolded under the active umbrella.
+- **2026-07-17** - Operator required agents to treat contracts as authoritative
+  and amend them before intended UI or RQ behavior changes; bounded Milestone 1
+  governance execution began.
 
 ## Decisions Log
+
+### 2026-07-20 21:23 UTC: Register bounded cross-owner remediation
+
+**Context**: The Omni mod-state defect spans three planned owners whose normal
+dependencies are incomplete, while an ad hoc package cannot be canonical.
+
+**Decision**: Ratify a finite borrowed-boundary mechanism and register REM-01.
+It inherits `high` security, requires dual review and an ancestor commit, and
+does not advance the borrowed owners.
+
+**Impact**: REM-01 may complete only its exact defect boundary before GOV-01;
+all unrelated DOM-02/DOM-25A/DOM-25B work remains planned and dependency-gated.
 
 ### 2026-07-17 01:48 UTC: Separate obligation from evidence
 
@@ -82,6 +113,21 @@ schema before they can produce canonical contracts.
 **Impact**: Shared foundations and WATAR cannot claim contract completion
 against an unratified vocabulary.
 
+### 2026-07-17: Contracts precede implementation
+
+**Context**: A same-change documentation rule does not prevent an agent from
+editing code first and then rewriting a contract to match observed behavior.
+
+**Decision**: Canonical contracts are normative authority. Agents identify the
+applicable contracts before editing and amend them before intended behavior
+changes to UI, WEPPcloud/rq-engine routes, or RQ workers. When code violates an
+unchanged contract, the code is fixed and regression evidence is added; the
+contract is not rewritten to legitimize the defect.
+
+**Impact**: Contract-first sequencing is now an explicit review gate. Missing
+domain contracts must be created or ratified through their registered package
+before new UI-coupled RQ behavior is introduced.
+
 ## Risks and Issues
 
 | Risk | Severity | Likelihood | Mitigation | Status |
@@ -91,6 +137,7 @@ against an unratified vocabulary.
 | Schema is too vague for later automation | High | Medium | Exact fields, fixtures, negative tests, GOV-01 handoff | Open |
 | Ratification expands into controller audits | Medium | Medium | Documentation/governance-only scope; domain evidence stays in registered children | Mitigated |
 | Historical docs retain current-authority wording | Medium | High | Source/reference inventory and explicit redirect policy | Open |
+| Code is edited before intent is ratified | High | Medium | Finite authority, ancestor checkpoint, manual dual review, future GOV-01 enforcement | Mitigated; governance slice reviewed |
 
 ## Verification Checklist
 
@@ -107,6 +154,8 @@ against an unratified vocabulary.
 - [ ] All included rows are contractual; no included `candidate` status remains.
 - [ ] Normative README and contract template are complete.
 - [ ] Authority and derived-index rules are deterministic.
+- [ ] Agent governance and canonical schema agree that contracts precede UI/RQ
+  implementation changes.
 - [ ] Positive/negative governance checks pass.
 - [ ] Both implementation reviews close without unresolved high/medium findings.
 - [ ] Active ExecPlan is moved to `prompts/completed/` with outcomes.
@@ -134,6 +183,32 @@ against an unratified vocabulary.
 `PROJECT_TRACKER.md` lint clean; 71-unit DAG validation and `git diff --check`
 pass.
 
+### 2026-07-17: Contract-first governance slice
+
+**Agent/Contributor**: Codex
+
+**Work completed**:
+
+- Strengthened root change-scope governance so contracts are normative.
+- Added explicit contract-first workflows to WEPPcloud routes, Pure UI
+  controllers, and rq-engine guidance.
+- Updated GOV-00A scope, acceptance, and ExecPlan to preserve this operator
+  decision in the authoritative work package.
+
+**Blockers encountered**: GOV-00A still must publish the canonical schema,
+template, and obligation registry. Registered DOM/SHR/SURF child packages own
+the later per-domain contracts; governance requires their ratification before
+behavior changes rather than treating current code as a substitute.
+
+**Next steps**:
+
+- Continue GOV-00A Milestone 1 with the canonical README and obligation registry.
+- Continue Milestone 1 with the contracts README and obligation registry.
+
+**Test results**: Root size gate, path-scoped documentation lint for all changed
+governance/package files, and `git diff --check` pass. Regression reviewer also
+reported frontend lint and 85 Jest suites / 636 tests passing.
+
 ## Watch List
 
 - **Vocabulary drift**: reject reintroduction of optional-sounding included
@@ -143,6 +218,8 @@ pass.
   authority; promotions and demotions update it atomically with domain evidence.
 - **Scope drift**: controller-specific conformance evidence belongs to later
   child packages.
+- **Implementation-first drift**: reject changes that infer normative behavior
+  from current UI/RQ code or amend contracts only after implementation.
 
 ## Communication Log
 
@@ -153,3 +230,11 @@ pass.
 candidate; commit the register and scaffold ratification.
 **Outcome**: Three-dimension semantics adopted and GOV-00A scaffolded for
 independent review and later execution.
+
+### 2026-07-17: Operator contract-first direction
+
+**Participants**: Operator, Codex
+**Question/Topic**: Agents must treat contracts as authoritative and amend them
+before RQ route or UI code changes.
+**Outcome**: Contract-first precedence added to agent governance and GOV-00A;
+independent review is required before this slice closes.

@@ -5,10 +5,19 @@ harnesses) stay consistent across agents.
 
 Canonical behavioral contract:
 
+* Follow `docs/standards/contract-first-change-standard.md`, including its finite
+  canonical-authority set, conflict handling, and ancestor-checkpoint gate.
 * `docs/schemas/nodb-persistence-concurrency-contract.md` is the authoritative
   lock/persistence/cache specification for `NoDbBase`.
-* If this local playbook and implementation-specific guidance diverge, update
-  the contract and this file in the same change set.
+* Applicable current canonical domain and shared/cross-cutting contracts are
+  normative for UI-coupled NoDb inputs, mutation, persistence, and reload.
+  Historical and archived plans are context only.
+* Before an intended behavior change, complete the accepted contract-decision
+  checkpoint and amend every applicable contract in its ancestor revision; then
+  update NoDb code, tests, and this playbook. If code diverges from an unchanged contract, restore
+  conformance and add regression evidence without rewriting normative behavior.
+  If contracts conflict or intent is unclear, stop and ratify the resolution
+  before editing implementation.
 
 ## Facade + Collaborator Standard
 

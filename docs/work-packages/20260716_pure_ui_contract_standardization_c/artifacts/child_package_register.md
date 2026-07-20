@@ -1,15 +1,18 @@
 # Pure UI Contract Child Package Register
 
-**Register version**: 1.1 contractual baseline
-**Last updated**: 2026-07-17 UTC
+**Register version**: 1.2 contractual baseline
+**Last updated**: 2026-07-20 UTC
 **Authority**: Stable IDs define package boundaries; dated package directories
 are created only when work starts.
-**Total**: 71 execution units: 4 governance, 39 run-domain, 9 shared-foundation,
-and 19 non-run/stateful surface packages. GOV-00 is the existing umbrella at
+**Total**: 72 execution units: 4 governance, 1 bounded remediation, 39
+run-domain, 9 shared-foundation, and 19 non-run/stateful surface packages.
+GOV-00 is the existing umbrella at
 `docs/work-packages/20260716_pure_ui_contract_standardization_c/`; GOV-00A is the
 active ratification child at
 `docs/work-packages/20260716_pure_ui_contract_ratification/`; the remaining 69
-receive dated directories only when started.
+receive dated directories only when started. REM-01 is the operator-authorized
+bounded remediation at
+`docs/work-packages/20260720_omni_mod_state_sync/`.
 
 ## Boundary and Review Rules
 
@@ -63,6 +66,16 @@ shared-foundation dependencies; row-level dependencies name additional ordering
 constraints. GOV-00A, SHR-01 through SHR-04B, and DOM-01 are the deliberate
 pre-GOV-01 ratification/foundation/pilot exceptions shown explicitly.
 
+REM-01 is a second, defect-scoped pre-GOV-01 exception authorized on 2026-07-20
+under `docs/standards/contract-first-change-standard.md` section "Bounded
+Cross-Owner Remediation." It borrows only the registered source and behavior
+listed below. It does not execute or advance DOM-02, DOM-25A, or DOM-25B and
+does not waive their dependencies for any other work.
+
+`GOV-00A-M1A` is the separately closable bounded-remediation governance
+milestone. Its accepted standalone ancestor is sufficient only for REM-01; the
+remaining GOV-00A deliverables stay open.
+
 Dependency shorthand expands exactly as follows:
 
 - `SHR-01..04B` = SHR-01, SHR-02, SHR-03A, SHR-03B, SHR-04A, SHR-04B.
@@ -86,9 +99,33 @@ GOV-01 machine-readable manifest. GOV-99 is intentionally absent from all sets.
 | ID | Proposed slug | Scope | Depends on | Risk / expected security | State |
 | --- | --- | --- | --- | --- | --- |
 | GOV-00 | Existing `20260716_pure_ui_contract_standardization_c` | Current umbrella: complete population, exclusions, contractual coverage, and frozen execution register | None | High contract risk; docs-only `none` | auditing |
-| GOV-00A | Existing `20260716_pure_ui_contract_ratification` | Ratify canonical schema, contractual/evidence axes, authority hierarchy, compatibility policy, contract template, and derived reader-index rules | GOV-00 | High contract risk; docs-only `none` | auditing |
+| GOV-00A | Existing `20260716_pure_ui_contract_ratification` | Ratify canonical schema, contractual/evidence axes, contract-first authority, compatibility policy, contract template, and derived reader-index rules | GOV-00 | High contract risk; docs-only `none` | auditing |
 | GOV-01 | `pure_ui_contract_maintenance_gate` | Source/contract/test manifest; full and change-aware checks; shared fan-out; reviewed no-impact attestations | GOV-00A, SHR-01..04B, DOM-01 | High regression risk; `low` unless CI/permissions change | planned |
 | GOV-99 | `pure_ui_contract_authority_cutover` | Final coverage audit, stale-link replacement, current AGENTS/README/catalog authority cutover, archived-plan labels, and umbrella closeout | GOV-00, GOV-00A, GOV-01, ALL-DOM, ALL-SHR, ALL-SURF | Medium; docs-only `none` | planned |
+
+## Bounded Remediation Packages
+
+| ID | Dated package | Borrowed owners | Exact defect boundary | Depends on | Security | State |
+| --- | --- | --- | --- | --- | --- | --- |
+| REM-01 | `20260720_omni_mod_state_sync` | DOM-02, DOM-25A, DOM-25B | Omni Scenarios/Contrasts feature-registry menu availability; Mods checkbox and reason markup; `Ron.mods` enable/disable guards; runs-page section/preflight visibility; dynamic shared Omni controller remount; focused tests and generated controller bundle only | GOV-00A-M1A | `high`: role-gated dynamic load and persisted mod mutation | contracted / implementation pending |
+
+REM-01 excludes Omni scenario/contrast payloads, uploads, RQ execution,
+artifacts, reports, overlays, deletion, model parameters, and all non-Omni
+Project shell behavior. Its final evidence is inherited as an input to the
+later DOM-02, DOM-25A, and DOM-25B audits without changing their planned state.
+
+The exact REM-01 source boundary is limited to:
+
+- `wepppy/weppcloud/feature_registry/{schema.py,runtime.py,feature_registry.yaml,specification.md}`;
+- `wepppy/weppcloud/routes/nodb_api/project_bp.py` and
+  `wepppy/weppcloud/routes/run_0/run_0_bp.py`;
+- `wepppy/weppcloud/templates/header/_run_header_fixed.htm`,
+  `wepppy/weppcloud/routes/run_0/templates/{runs0_pure.htm,run_page_bootstrap.js.j2}`;
+- `wepppy/weppcloud/controllers_js/project.js` and the generated
+  `wepppy/weppcloud/static/js/controllers-gl.js`;
+- focused registry, project-route, run-render, and Project-controller tests
+  named by the REM-01 ExecPlan; and
+- REM-01/GOV-00A documentation, review, tracker, and security artifacts.
 
 ## Run-Domain Packages
 
@@ -314,7 +351,7 @@ are planning ranges, not deadlines.
 | IDs | Estimate | Required first-day boundary probe |
 | --- | --- | --- |
 | GOV-00 | 2-4 weeks | Freeze deterministic coverage ledger and exclusions |
-| GOV-00A | 2-4 weeks | Ratify binding status/evidence semantics and canonical contract schema |
+| GOV-00A | 2-4 weeks | Ratify binding status/evidence semantics, contract-first authority, and canonical contract schema |
 | GOV-01 | 2-4 weeks | Prove manifest schema and one negative source-drift fixture |
 | GOV-99 | 2-3 weeks | Freeze finite dependency and authority-cutover checklist |
 | DOM-04A, DOM-08A, DOM-11A, DOM-13A, DOM-13C, DOM-13D, DOM-14A, DOM-14B, DOM-14C, DOM-23, DOM-25A, DOM-25B | 2-4 weeks | Confirm one route/state owner and that every member can reach one evidence grade |
@@ -330,7 +367,7 @@ package is split in this register and reviewed before implementation.
 
 This register is deliberately finer than the original waves because independent
 upload, queue, auth, and persistence boundaries should not share one regression
-review. At 71 execution units, even an uninterrupted one-week-per-unit sequence
+review. At 72 execution units, even an uninterrupted one-week-per-unit sequence
 has a theoretical serial floor above 18 months once foundation and review gates
 are included. A truthful serial planning range is 24-36 months. After GOV-00,
 GOV-00A, SHR-01 through SHR-04B, DOM-01, and GOV-01, separately authorized isolated

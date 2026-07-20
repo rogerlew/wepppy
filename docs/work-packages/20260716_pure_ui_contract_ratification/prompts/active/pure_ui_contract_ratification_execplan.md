@@ -25,6 +25,11 @@ required contract sections are enforced, the derived reader index does not
 compete with the ledger/manifest/domain authorities, and both independent
 reviewers approve the standard.
 
+Contracts are normative in this program. Agents must identify the applicable
+contract before editing and must amend it before an intended behavior change to
+UI, WEPPcloud/rq-engine routes, or RQ workers. Code and tests provide conformance
+evidence; they cannot silently redefine intended behavior.
+
 ## Progress
 
 - [x] (2026-07-17 01:48 UTC) Created GOV-00A package, tracker, and active
@@ -33,6 +38,14 @@ reviewers approve the standard.
   `contractual / unverified` semantics.
 - [x] (2026-07-17) Completed two independent scaffold reviews, dispositioned all
   findings, and received post-fix closure confirmation from both reviewers.
+- [x] (2026-07-17) Recorded the operator's contract-first authority rule in root
+  and UI/RQ/NoDb agent governance; both reviews are dispositioned and confirmed
+  closure-ready with no remaining high/medium findings.
+- [x] (2026-07-20 21:23 UTC) Operator authorized a bounded cross-owner
+  remediation mechanism and REM-01 registration for the Omni mod-state defect.
+- [x] (2026-07-20 21:40 UTC) Complete dual review for the bounded remediation
+  amendment with no unresolved high/medium findings.
+- [ ] Complete the standalone ancestor commit for the bounded remediation amendment.
 - [ ] Ratify authority hierarchy and lifecycle vocabulary.
 - [ ] Publish the normative README and reusable contract template.
 - [ ] Add deterministic governance validation and negative fixtures.
@@ -53,10 +66,24 @@ reviewers approve the standard.
   Evidence: Authority notes in the parent controller audit register, child
   register, and umbrella ExecPlan.
 
+- Observation: Contract-first prose is not enforceable until canonical authority
+  is finite and ordering is evidenced outside the implementation diff.
+  Evidence: Both governance-slice reviewers independently identified stale-doc
+  authority and code-first/self-ratification loopholes. The resulting standard
+  requires an allowlist and accepted standalone ancestor checkpoint.
+
 Add discoveries with exact paths, commands, or concise output. Do not erase
 historical discoveries when later evidence changes a decision.
 
 ## Decision Log
+
+- Decision: Allow a registered bounded cross-owner remediation before GOV-01
+  only for one operator-approved finite defect with exact borrowed boundaries,
+  highest-owner security triage, dual review, and a standalone ancestor.
+  Rationale: REM-01 must not leave an active production state defect in place,
+  but it also must not imply DOM-02, DOM-25A, or DOM-25B is executed or exempt
+  unrelated work from the dependency spine.
+  Date/Author: 2026-07-20 / Operator direction, recorded by Codex.
 
 - Decision: Use three independent dimensions: contractual scope, evidence
   grade, and package execution state.
@@ -86,11 +113,21 @@ historical discoveries when later evidence changes a decision.
   their output can be reviewed consistently.
   Date/Author: 2026-07-17 / Codex.
 
+- Decision: Treat canonical contracts as normative authority and require their
+  amendment before implementing an intended behavior change in UI or RQ code.
+  Rationale: Same-change documentation can still be written after code and can
+  accidentally promote observed behavior into the specification. Contract-first
+  sequencing forces intent, compatibility, and reviewable rationale to be fixed
+  before implementation. A conformance fix cites the unchanged contract instead
+  of rewriting it to match the defect.
+  Date/Author: 2026-07-17 / Operator direction, recorded by Codex.
+
 ## Outcomes & Retrospective
 
-The package is scaffolded but not executed. No canonical schema or template may
-be described as ratified until the milestones, validation, disposition, and
-post-fix reviews below are complete.
+Milestone 1 is partially executed: contract-first precedence is now recorded in
+agent governance, but the canonical schema, registry, and template are not yet
+ratified. No canonical schema or template may be described as ratified until the
+remaining milestones, validation, disposition, and post-fix reviews are complete.
 
 At closure, summarize the exact authorities created, validation behavior,
 review findings, deliberately deferred GOV-01 enforcement, and any unresolved
@@ -121,6 +158,15 @@ The authority files after ratification are:
   shared-consumer fan-out;
 - each `docs/ui-docs/contracts/<domain>.md`, which will own normative domain
   behavior and evidence at a named revision.
+
+Authority is contract-first. When an intended behavior change affects a mapped
+UI field, controller event, transport payload, WEPPcloud/rq-engine route, NoDb
+mutation, or RQ lifecycle, amend the applicable domain and cross-cutting
+contracts before editing implementation. If implementation differs from the
+contract, the discrepancy is a defect unless the operator first approves a
+contract amendment. If the contract is missing, create or ratify it through its
+registered package before changing behavior. Until GOV-01 automates this gate,
+reviewers enforce it manually.
 
 In this plan, `contractual` means a surface is unconditionally in scope.
 `Unverified` means required conformance evidence is missing. `Documented` means
@@ -181,13 +227,17 @@ match exactly.
 Update `docs/ui-docs/controller-contract.md` only where necessary to point to
 the ratified schema and preserve shared runtime invariants. Reconcile the parent
 ledger, child register, child audit prompt, package docs, and relevant AGENTS or
-README guidance. Preserve raw historical reviews without rewriting their
-then-current vocabulary; add supersession notes in current authority docs.
+README guidance. The root, WEPPcloud, controller, and rq-engine AGENTS files must
+state contract-first precedence and distinguish intended contract changes from
+implementation fixes that restore conformance. Preserve raw historical reviews
+without rewriting their then-current vocabulary; add supersession notes in
+current authority docs.
 
 Milestone acceptance: no current authority describes an included item as a
 candidate; searches distinguish historical raw artifacts from current rules;
 the hierarchy has one owner for schema, item coverage, execution boundaries,
-machine mapping, and domain behavior; both reviewers close all findings.
+machine mapping, and domain behavior; agent governance rejects implementation-
+first intended behavior changes; both reviewers close all findings.
 
 ### Milestone 2: Ratify the canonical contract schema
 
@@ -230,9 +280,14 @@ register, contracts README/template/domain files, and the finite developer docs
 named by this plan. Raw review artifacts are immutable evidence, are never
 validator inputs, and must not be rewritten to remove historical vocabulary.
 
-Keep GOV-01's base-revision diffing, shared-producer fan-out, and same-change
-source enforcement out of this package. Record the exact schema/interface GOV-01
-will consume so the later package does not reverse-engineer prose.
+Keep GOV-01's base-revision diffing, shared-producer fan-out, contract-decision
+ancestry enforcement, and later implementation-source enforcement out of this
+package. Record the exact interface GOV-01 will consume: child ID, decision
+artifact, starting revision, contract revision, applicable contract keys,
+operator decision, both contract-review outcomes, classification, and urgent-
+restoration authorization when applicable. The later package must not
+reverse-engineer these fields from prose or accept same-change presence as proof
+of ordering.
 
 Milestone acceptance: positive fixtures pass; each required negative fixture
 fails for the intended reason; documentation lint passes; dual reviewers agree
@@ -298,6 +353,11 @@ one is changed to `candidate`. The canonical template must expose every layer
 from rendered DOM through reload and require explicit N/A rationale where a
 layer does not apply.
 
+A fresh agent must also be directed to identify and, when intent changes, amend
+the applicable contract before touching UI or RQ implementation. Review must
+treat code-first contract changes and implementation-as-specification reasoning
+as blocking governance failures.
+
 The package is accepted only when the normative README, template, authority
 links, and governance checks agree; both independent reviews are dispositioned;
 and documentation/test commands pass. Ratification is not runtime verification:
@@ -329,6 +389,9 @@ ledger is the reviewed discovery/source/host/producer projection and must
 key-reconcile exactly. The child register owns execution boundaries and state;
 domain contract files own normative behavior and detailed evidence; GOV-01's
 future manifest owns source/contract/test/shared-consumer mapping only.
+`docs/standards/contract-first-change-standard.md` owns the finite pre-cutover
+authority set, checkpoint/ancestor protocol, conflict handling, and urgent-
+restoration boundary.
 
 No new external dependency is authorized. Use repository Markdown tooling,
 small repository-owned checks, Jest/pytest only where relevant, and `wctl`
@@ -336,3 +399,6 @@ wrappers for canonical validation.
 
 Revision note (2026-07-17): Initial GOV-00A ExecPlan authored from the
 operator's direction that all registered Pure UI items are contractual now.
+
+Revision note (2026-07-17): Added the operator's contract-first authority rule
+and began the bounded Milestone 1 agent-governance slice.
