@@ -12,7 +12,11 @@
 - `wepppy/weppcloud/feature_registry/specification.md`, governing role/backend visibility, prerequisites, persisted mod state, and UI consumption.
 - `wepppy/weppcloud/feature_registry/feature_registry.yaml`, preserving `omni_contrasts` as `internal`, `min_role: dev`, and `requires_features: [omni]`.
 
-No RQ response, CSRF, output-scope, NoDb concurrency, or feature-export manifest contract changes apply.
+No authorized-flow RQ response/payload/queue behavior, CSRF, output-scope, NoDb concurrency, or
+feature-export manifest contract changes apply. The existing contrast RQ entry
+points are in scope only to enforce the same Dev/Root authorization boundary
+already governing contrast activation. The CAP-gated contrast report is in
+scope only to add canonical run access and that Dev/Root boundary.
 
 ## Discrepancy Classification
 
@@ -37,7 +41,13 @@ The feature-registry contract distinguishes menu discoverability from enablement
 - checkbox `enabled` requires authorization and satisfied prerequisites, except
   that an authorized already-active legacy feature remains enabled for cleanup;
 - section, preflight navigation, and dynamic loading require the feature's own
-  persisted id, authorization, a usable shared controller, and a non-child run.
+  persisted id, its persisted prerequisites, authorization, a usable shared
+  controller, and a non-child run;
+- contrast-result bootstrap metadata is false for callers/runs where the
+  contrast section is not authorized and active; and
+- contrast run, dry-run, and delete entry points require Dev or Root in
+  addition to their existing JWT scope and run-access boundaries; the report
+  requires CAP, canonical run access, and Dev or Root.
 
 Enabling `omni` may add its declared `treatments` dependency, but it must never add `omni_contrasts`. When `omni` becomes active, an authorized contrast checkbox becomes enabled but remains unchecked; the contrasts section and preflight entry remain inactive. Explicitly enabling `omni_contrasts` still requires `omni`. Disabling `omni` while contrasts is active must be rejected so persisted state cannot violate that prerequisite.
 
@@ -51,13 +61,17 @@ The change is backward compatible for valid run states. Existing runs with only 
 
 ## Security Impact
 
-Security impact is high because the package crosses registered authorization and persisted-state boundaries. The internal `min_role: dev` enable and dynamic-load gates remain unchanged. Unauthorized users may see only the disabled menu option and `Not Authorized`; they must not enable, dynamically load, or render the contrast section/preflight control.
+Security impact is high because the package crosses registered authorization and persisted-state boundaries. The internal `min_role: dev` enable, dynamic-load, action, and report-data gates remain mandatory. Unauthorized users may see only the disabled menu option and `Not Authorized`; they must not enable, dynamically load, render the contrast section/preflight control, invoke contrast actions, receive contrast-result bootstrap metadata, or view contrast reports.
 
 ## Proposed Regression Evidence
 
 - Registry/runtime/template: every user sees Omni Contrasts; ordinary users get disabled `Not Authorized`; authorized users without scenarios get disabled `Enable Omni Scenarios first`.
 - Project endpoint: enabling Omni Scenarios does not add contrasts; enabling contrasts without scenarios fails; disabling scenarios while contrasts is active fails.
 - Authorization: ordinary users cannot POST the contrasts toggle or GET its dynamic section, with no persisted or active-DOM mutation.
+- Action/data authorization: User, PowerUser, and Admin contrast run, dry-run,
+  delete, and report requests are rejected before domain mutation/read; Dev and
+  Root retain their valid RQ flows only with existing JWT scope and run access;
+  the report retains CAP and requires newly added canonical run access.
 - Role matrix: User, PowerUser, and Admin are denied POST/dynamic GET; Dev and
   Root are allowed when prerequisites and run authorization are satisfied.
 - Legacy cleanup: persisted contrasts without scenarios, with and without the
@@ -79,3 +93,9 @@ ancestor before implementation begins.
 Both reviewers approved the corrected ancestor after disposition with no
 remaining high- or medium-severity findings. Implementation remains pending
 until the standalone ancestor is committed.
+
+The first final security review then found that direct contrast RQ and report
+entry points did not enforce the ADR's Dev/Root action/data boundary. The
+operator's direction to expand and complete REM-01 authorizes this finite
+security scope amendment, but the new boundary must receive dual review and a
+second standalone docs-only ancestor before those production routes are edited.

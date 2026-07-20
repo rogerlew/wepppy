@@ -107,11 +107,12 @@ GOV-01 machine-readable manifest. GOV-99 is intentionally absent from all sets.
 
 | ID | Dated package | Borrowed owners | Exact defect boundary | Depends on | Security | State |
 | --- | --- | --- | --- | --- | --- | --- |
-| REM-01 | `20260720_omni_mod_state_sync` | DOM-02, DOM-25A, DOM-25B | Omni Scenarios/Contrasts feature-registry menu availability; Mods checkbox and reason markup; `Ron.mods` enable/disable guards; runs-page section/preflight visibility; dynamic shared Omni controller remount; focused tests and generated controller bundle only | GOV-00A-M1A | `high`: role-gated dynamic load and persisted mod mutation | contracted / implementation pending |
+| REM-01 | `20260720_omni_mod_state_sync` | DOM-02, DOM-25A, DOM-25B | Omni Scenarios/Contrasts feature-registry menu availability; Mods checkbox and reason markup; `Ron.mods` enable/disable guards; runs-page section/preflight visibility and metadata; dynamic shared Omni controller remount; Dev/Root gates on contrast run/dry-run/delete plus canonical run access and Dev/Root on the CAP-gated report; focused tests and generated controller bundle only | GOV-00A-M1A | `high`: role-gated dynamic load, persisted mod mutation, contrast actions, and report data | security scope amendment ratifying |
 
-REM-01 excludes Omni scenario/contrast payloads, uploads, RQ execution,
-artifacts, reports, overlays, deletion, model parameters, and all non-Omni
-Project shell behavior. Its final evidence is inherited as an input to the
+REM-01 excludes Omni scenario/contrast payload shapes, uploads, queue wiring or
+execution semantics, artifacts, report content/formatting, overlays, deletion
+semantics beyond the contrast endpoint's authorization gate, model parameters,
+and all non-Omni Project shell behavior. Its final evidence is inherited as an input to the
 later DOM-02, DOM-25A, and DOM-25B audits without changing their planned state.
 
 The exact REM-01 source boundary is limited to:
@@ -119,12 +120,19 @@ The exact REM-01 source boundary is limited to:
 - `wepppy/weppcloud/feature_registry/{schema.py,runtime.py,feature_registry.yaml,specification.md}`;
 - `wepppy/weppcloud/routes/nodb_api/project_bp.py` and
   `wepppy/weppcloud/routes/run_0/run_0_bp.py`;
+- only the Dev/Root authorization boundary of
+  `wepppy/microservices/rq_engine/omni_routes.py` contrast run, dry-run, and
+  delete entry points; and only canonical run access plus Dev/Root
+  authorization in the CAP-gated
+  `wepppy/weppcloud/routes/nodb_api/omni_bp.py` contrast-report entry point;
 - `wepppy/weppcloud/templates/header/_run_header_fixed.htm`,
   `wepppy/weppcloud/routes/run_0/templates/{runs0_pure.htm,run_page_bootstrap.js.j2}`;
 - `wepppy/weppcloud/controllers_js/project.js` and the generated
   `wepppy/weppcloud/static/js/controllers-gl.js`;
-- focused registry, project-route, run-render, and Project-controller tests
-  named by the REM-01 ExecPlan; and
+- focused registry, project-route, run-render, Project-controller,
+  `tests/microservices/test_rq_engine_omni_routes.py`, and
+  `tests/weppcloud/routes/test_omni_bp_routes.py` tests named by the REM-01
+  ExecPlan; and
 - REM-01/GOV-00A documentation, review, tracker, and security artifacts.
 
 ## Run-Domain Packages

@@ -18,11 +18,13 @@ list, checkbox, section, and preflight entry—agree immediately and after refre
 - [x] (2026-07-20 21:08 UTC) Created the contract decision and amended the feature-registry specification.
 - [x] (2026-07-20 21:22 UTC) Obtained and dispositioned two independent contract reviews; both found blocking registered-ownership and contract-conflict issues.
 - [x] (2026-07-20 21:23 UTC) Operator authorized GOV-00A expansion, REM-01 registration, and visible-to-all disabled semantics.
-- [ ] Obtain and disposition two independent reviews of the governance and contract amendments.
-- [ ] Commit a ratified contract checkpoint as a standalone ancestor and record its revision.
-- [ ] Implement registry, backend guard, run-page/bootstrap, and dynamic controller synchronization.
-- [ ] Add targeted pytest and Jest regressions.
-- [ ] Rebuild the controller bundle and run targeted validation.
+- [x] (2026-07-20 21:40 UTC) Obtain and disposition two independent reviews of the governance and contract amendments.
+- [x] (2026-07-20 21:42 UTC) Commit ratified contract checkpoint `1afa57fd6d63b93688057143ec5c45daa6f3170f` as the standalone ancestor.
+- [x] (2026-07-20 21:51 UTC) Implement registry, backend guard, run-page/bootstrap, and dynamic controller synchronization.
+- [x] (2026-07-20 21:51 UTC) Add targeted pytest and Jest regressions.
+- [x] (2026-07-20 21:52 UTC) Rebuild the controller bundle and run targeted validation.
+- [ ] Dual-review and commit the direct-action/report security scope amendment.
+- [ ] Enforce Dev/Root on contrast RQ/report entry points and add role regressions.
 - [ ] Dispatch two independent final reviews, disposition findings, and close the package.
 
 ## Surprises & Discoveries
@@ -33,6 +35,18 @@ list, checkbox, section, and preflight entry—agree immediately and after refre
   Evidence: Refreshing an `omni`-only run can render contrasts while its Mods checkbox remains unchecked.
 - Observation: The dynamic project controller has an Omni Scenarios bootstrap mapping but no `omni_contrasts` mapping, even though both sections share the Omni controller.
   Evidence: Explicit async loading of a contrasts section cannot remount the controller to bind the newly inserted form.
+- Observation: The generated controller bundle is ignored rather than tracked,
+  so a successful rebuild updates the local runtime asset without producing a
+  Git diff.
+  Evidence: The rebuilt `static/js/controllers-gl.js` contains the new
+  `omni_contrasts` bootstrap and availability logic while `git status` reports
+  only its tracked source module.
+- Observation: Direct contrast run/dry-run/delete routes retained JWT scope and
+  run access but lacked the embargo role gate; the CAP-gated contrast report
+  lacked both run access and the role gate.
+  Evidence: The first final security review found no `require_roles` call in
+  the three rq-engine entry points and neither `authorize(runid, config)` nor a
+  feature-role check on the Flask report.
 - Observation: The new contract-first standard assigns this change across
   DOM-02, DOM-25A, and DOM-25B, whose registered dependencies are not complete.
   Evidence: Dual review cited the child-package register rows and independently
@@ -68,10 +82,11 @@ list, checkbox, section, and preflight entry—agree immediately and after refre
 
 ## Outcomes & Retrospective
 
-Discovery, package creation, and the first dual-review disposition are complete.
-The operator authorized a bounded GOV-00A remediation mechanism and REM-01 is
-now ratifying. No production code has been changed. Implementation remains
-gated only on fresh dual review and a standalone ancestor commit.
+The bounded contract was dual-reviewed and sealed at standalone ancestor
+`1afa57fd6d63b93688057143ec5c45daa6f3170f`. The registered implementation and
+focused regressions are complete. Targeted Python and Jest suites, full frontend
+lint/tests, broad-exception enforcement, and bundle rebuilding pass; the broad
+Python sweep and final dual review remain in progress.
 
 ## Context and Orientation
 
@@ -93,6 +108,13 @@ with authorization and prerequisite availability represented separately.
 
 In `run_0_bp.py`, derive `show_omni_contrasts` from the persisted `omni_contrasts` id, the internal role gate, a usable shared Omni controller, and the non-child-run constraint. Preserve `show_omni` as the scenarios-only state. In `run_page_bootstrap.js.j2`, serialize an explicit `omni_contrasts` flag and include it in the test-only load-all path. The existing `runs0_pure.htm` nav and section wrappers then follow the corrected context.
 
+Before route security edits, dual-review and commit the finite amendment that
+adds only Dev/Root authorization gates to the existing contrast run, dry-run,
+and delete entry points, plus canonical run access and Dev/Root to the existing
+CAP-gated report. Preserve all request payloads, authorized-flow response
+shapes, queue wiring, report rendering, and underlying domain behavior; new
+denials use the canonical boundary-specific authorization response.
+
 In `_run_header_fixed.htm`, render the disabled reason directly below the label
 and serialize authorization plus prerequisite metadata on the checkbox. In
 `project.js`, independently recompute checked state, enable availability, and
@@ -104,6 +126,13 @@ states; do not add enable propagation
 between the Omni ids.
 
 Add regressions to `tests/weppcloud/routes/test_feature_registry_runtime.py`, `tests/weppcloud/routes/test_project_bp.py`, `tests/weppcloud/routes/test_run_0_openet_admin_gate.py`, `tests/weppcloud/routes/test_pure_controls_render.py`, and `wepppy/weppcloud/controllers_js/__tests__/project.test.js` as needed. Rebuild `wepppy/weppcloud/static/js/controllers-gl.js` with the canonical builder after the controller source changes.
+
+Add full role-matrix authorization regressions to
+`tests/microservices/test_rq_engine_omni_routes.py` and
+`tests/weppcloud/routes/test_omni_bp_routes.py`. Denied tests must prove the
+domain operation is not entered.
+Also prove JWT scope and run access still deny RQ requests carrying Dev/Root,
+and that the Flask CAP and run-access gates remain mandatory alongside role.
 
 ## Concrete Steps
 
@@ -117,7 +146,7 @@ Review and commit the checkpoint before implementation:
 
 Run targeted backend and render tests during implementation:
 
-    wctl run-pytest tests/weppcloud/routes/test_feature_registry_runtime.py tests/weppcloud/routes/test_project_bp.py tests/weppcloud/routes/test_run_0_openet_admin_gate.py tests/weppcloud/routes/test_pure_controls_render.py --maxfail=1
+    wctl run-pytest tests/weppcloud/routes/test_feature_registry_runtime.py tests/weppcloud/routes/test_project_bp.py tests/weppcloud/routes/test_run_0_openet_admin_gate.py tests/weppcloud/routes/test_pure_controls_render.py tests/microservices/test_rq_engine_omni_routes.py tests/weppcloud/routes/test_omni_bp_routes.py --maxfail=1
 
 Run frontend checks and rebuild the generated bundle:
 
@@ -147,6 +176,11 @@ The bootstrap render test must extract distinct `omni` and `omni_contrasts` bool
 Add a full role matrix: User, PowerUser, and Admin see the disabled menu entry
 but are denied both the mutation POST and dynamic-section GET with no persisted
 or DOM mutation; Dev and Root are allowed when prerequisites are satisfied.
+For each contrast run, dry-run, delete, and report entry point, User,
+PowerUser, and Admin are denied before any contrast domain operation while Dev
+and Root retain authorized flows. RQ Dev/Root requests without the required JWT
+scope or run access remain denied. The Flask report retains its CAP gate and
+denies Dev/Root without run access; every denial stops before report data is read.
 Add legacy contrasts-only cases with and without `omni.nodb`: an authorized
 user sees the checkbox checked and enabled for cleanup, section/preflight stay
 unavailable, disable succeeds, and refresh shows the id removed. Add parity

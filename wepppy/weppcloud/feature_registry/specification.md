@@ -190,6 +190,9 @@ Registry file order is authoritative for display order in MVP.
   compare those concrete audiences, so neither can broaden the other. The field
   changes menu discoverability only and never grants enable or dynamic-section
   authorization.
+- For a `publication_embargo` feature, `min_role` also governs every action or
+  data entry point registered by that feature's accepted domain/remediation
+  contract. Menu discoverability never satisfies this server authorization.
 - `adr_reference` (when present) must be repo-relative, remain under `docs/adrs/`, reference a `.md` file, and reference an existing file.
 - feature `requires_features` and `enable_dependencies` entries must reference known run-mod ids (registry feature ids or `internal_prerequisites`).
 - feature `section_template` must be repo-relative, remain under `wepppy/weppcloud/templates/`, and reference an existing file.
@@ -201,6 +204,10 @@ Registry file order is authoritative for display order in MVP.
 
 - `project_bp.py` uses `feature_registry` for labels and feature-allow checks.
 - `run_0_bp.py` uses `feature_registry` for feature visibility decisions.
+- Publication-embargo action/data routes registered by an accepted domain or
+  remediation contract enforce the same `min_role` audience in addition to
+  every applicable/additive JWT scope, run-access, CAP, session, and CSRF
+  boundary named by that contract.
 - `_run_header_fixed.htm` uses registry-derived mod option lists, maturity labels, and role gating.
 - `runs0_pure.htm` section/nav layout remains template-defined in MVP; visibility and maturity metadata are registry-driven via `run_0_bp.py` context.
 - `weppcloud_site.py` computes role-aware config visibility and maturity labels from `config_registry`.

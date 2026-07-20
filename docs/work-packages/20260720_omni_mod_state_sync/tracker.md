@@ -6,9 +6,9 @@
 
 **Timezone**: UTC
 **Started**: 2026-07-20 21:08 UTC
-**Current phase**: REM-01 contract accepted; ancestor commit pending
-**Last updated**: 2026-07-20 21:40 UTC
-**Next milestone**: Commit the standalone ratification ancestor, then implement.
+**Current phase**: Security scope amendment ratification
+**Last updated**: 2026-07-20 22:15 UTC
+**Next milestone**: Commit the second docs-only ancestor, then implement route gates.
 **Security impact**: high
 **Dedicated security review**: yes
 **Security artifact**: `docs/work-packages/20260720_omni_mod_state_sync/artifacts/2026-07-20_security_review.md`
@@ -17,14 +17,13 @@
 
 ### Ready / Backlog
 
-- [ ] Implement registry, route, bootstrap, and controller synchronization.
-- [ ] Add and run targeted pytest/Jest regressions.
+- [ ] Implement and test contrast action/report authorization gates.
 - [ ] Dispatch two independent final code reviews and disposition findings.
 - [ ] Close documentation and package.
 
 ### In Progress
 
-- [ ] Commit the dual-reviewed GOV-00A-M1A/REM-01 standalone ancestor.
+- [ ] Dual-review and commit the security scope amendment as a standalone ancestor.
 
 ### Blocked
 
@@ -39,6 +38,14 @@
   discoverable-disabled `Not Authorized` UX (2026-07-20 21:23 UTC).
 - [x] Completed two independent ratification reviews, dispositioned every
   finding, and received both post-fix approvals (2026-07-20 21:40 UTC).
+- [x] Committed the standalone contract ancestor at
+  `1afa57fd6d63b93688057143ec5c45daa6f3170f` (2026-07-20 21:42 UTC).
+- [x] Implemented registry, route, template/bootstrap, and controller state
+  synchronization (2026-07-20 21:50 UTC).
+- [x] Added and passed focused Python/Jest regressions; rebuilt the ignored
+  generated controller bundle (2026-07-20 21:52 UTC).
+- [x] Accepted the first final-review action/report authorization finding and
+  drafted the operator-authorized finite security amendment (2026-07-20 22:15 UTC).
 
 ## Timeline
 
@@ -47,6 +54,13 @@
 - **2026-07-20 21:23 UTC** – Operator authorized bounded cross-owner ratification; REM-01 registration and contract amendments drafted.
 - **2026-07-20 21:40 UTC** – Both independent reviewers approved the corrected
   GOV-00A-M1A/REM-01 contract ancestor with no unresolved high/medium findings.
+- **2026-07-20 21:42 UTC** – Sealed the reviewed authority in standalone commit
+  `1afa57fd6d63b93688057143ec5c45daa6f3170f`.
+- **2026-07-20 21:52 UTC** – Focused implementation complete; 196 targeted
+  Python tests and 27 Project-controller Jest tests pass, followed by full
+  frontend lint and 638-test Jest validation.
+- **2026-07-20 22:15 UTC** – Corrected the security amendment to add canonical
+  run access plus Dev/Root to the CAP-gated report and require additive-boundary tests.
 
 ## Decisions Log
 
@@ -96,10 +110,10 @@ the existing Dev/Root server gates remain mandatory.
 
 ### Code Quality
 
-- [ ] Targeted tests passing.
-- [ ] Frontend tests passing.
-- [ ] Frontend lint clean.
-- [ ] Broad exception changed-file enforcement clean.
+- [x] Targeted tests passing.
+- [x] Frontend tests passing.
+- [x] Frontend lint clean.
+- [x] Broad exception changed-file enforcement clean.
 
 ### Security
 
@@ -116,10 +130,12 @@ the existing Dev/Root server gates remain mandatory.
 
 ### Testing
 
-- [ ] Registry visibility regression.
-- [ ] Backend dependency and independence regressions.
-- [ ] Run-page/bootstrap active-state regressions.
-- [ ] Dynamic controller regression.
+- [x] Registry visibility regression.
+- [x] Backend dependency and independence regressions.
+- [x] Run-page/bootstrap active-state regressions.
+- [x] Dynamic controller regression.
+- [ ] RQ contrast action role, JWT scope, and run-access regressions.
+- [ ] Flask contrast report CAP, run-access, and role regressions.
 
 ## Progress Notes
 
@@ -185,8 +201,10 @@ standalone ancestor, and begin implementation.
 ## Watch List
 
 - **Dirty worktree**: Unrelated active contract-ratification and PATH-CE files must remain untouched.
-- **Scope containment**: REM-01 cannot alter Omni payloads, RQ, outputs,
-  overlays, reports, deletion, model parameters, or non-Omni Project behavior.
+- **Scope containment**: REM-01 may add only the ratified authorization gates;
+  it cannot alter Omni payload parsing, authorized response shapes, queue/RQ
+  execution, outputs, overlays, report content/formatting, deletion semantics,
+  model parameters, or non-Omni Project behavior.
 
 ## Communication Log
 

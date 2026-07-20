@@ -1,7 +1,7 @@
 # Omni Mod State Synchronization
 
 **Stable ID**: REM-01
-**Status**: Contract accepted; implementation pending (2026-07-20)
+**Status**: Partially implemented; security scope amendment ratifying (2026-07-20)
 **Timezone**: UTC
 
 ## Overview
@@ -27,12 +27,15 @@ authority for the Mods checkbox, run-page section, and preflight navigation.
 
 - Feature-registry visibility and dependency semantics.
 - Run-header, runs-page, preflight-navigation, and dynamic controller state.
+- Dev/Root authorization gates only for contrast run, dry-run, and delete;
+  canonical run access plus Dev/Root on the CAP-gated report endpoint. Authorized
+  payloads, queue behavior, and report formatting remain unchanged.
 - Targeted pytest and Jest regression coverage.
 - Contract checkpoint, dual-review artifacts, and final disposition.
 
 ### Explicitly Out of Scope
 
-- Omni computation, RQ orchestration, output schemas, and maturity promotion.
+- Omni computation, RQ orchestration semantics, output schemas, and maturity promotion.
 - Changes to the publication embargo or its role requirement.
 - Production deployment or mutation of the reported run.
 
@@ -51,6 +54,9 @@ authority for the Mods checkbox, run-page section, and preflight navigation.
   checkbox with a simple prerequisite reason.
 - [ ] Enabling Omni Scenarios does not enable, check, render, or preflight Omni Contrasts.
 - [ ] Enabling Omni Contrasts explicitly keeps its checkbox, section, preflight entry, and persisted mod state aligned across refresh.
+- [ ] Contrast run, dry-run, delete, and report reject User, PowerUser, and
+  Admin before domain behavior; Dev and Root pass only with the applicable JWT
+  scope/run-access or CAP/run-access boundaries satisfied.
 - [ ] Targeted pytest and Jest checks pass.
 - [ ] Both independent reviews are dispositioned with no unresolved high- or medium-severity findings.
 
@@ -87,7 +93,10 @@ authority for the Mods checkbox, run-page section, and preflight navigation.
 
 - **Security impact triage**: high
 - **Dedicated security review required**: yes
-- **Triage rationale**: Although the intended Dev/Root gate is unchanged, the package crosses the registered DOM-02 and DOM-25A/B authorization and persisted-state mutation boundaries.
+- **Triage rationale**: The package restores the existing Dev/Root policy at
+  direct action/data entry points and adds missing canonical report run access,
+  while crossing registered DOM-02 and DOM-25A/B authorization and
+  persisted-state mutation boundaries.
 - **Security review artifact**: `docs/work-packages/20260720_omni_mod_state_sync/artifacts/2026-07-20_security_review.md`
 
 ## Hardening and Callus Softening
