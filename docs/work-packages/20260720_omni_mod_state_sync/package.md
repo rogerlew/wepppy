@@ -1,7 +1,7 @@
 # Omni Mod State Synchronization
 
 **Stable ID**: REM-01
-**Status**: Partially implemented; security scope amendment ratifying (2026-07-20)
+**Status**: Complete; implemented, validated, and dual-approved (2026-07-20)
 **Timezone**: UTC
 
 ## Overview
@@ -48,17 +48,18 @@ authority for the Mods checkbox, run-page section, and preflight navigation.
 
 ## Success Criteria
 
-- [ ] Every user sees Omni Contrasts; unauthorized users see a disabled
+- [x] Every user sees Omni Contrasts; unauthorized users see a disabled
   checkbox with `Not Authorized` directly below the label.
-- [ ] An authorized user missing Omni Scenarios sees a disabled unchecked
+- [x] An authorized user missing Omni Scenarios sees a disabled unchecked
   checkbox with a simple prerequisite reason.
-- [ ] Enabling Omni Scenarios does not enable, check, render, or preflight Omni Contrasts.
-- [ ] Enabling Omni Contrasts explicitly keeps its checkbox, section, preflight entry, and persisted mod state aligned across refresh.
-- [ ] Contrast run, dry-run, delete, and report reject User, PowerUser, and
+- [x] Enabling Omni Scenarios does not enable, check, render, or preflight Omni Contrasts.
+- [x] Enabling Omni Contrasts explicitly keeps its checkbox, section, preflight entry, and persisted mod state aligned across refresh.
+- [x] Contrast run, dry-run, delete, and report reject User, PowerUser, and
   Admin before domain behavior; Dev and Root pass only with the applicable JWT
   scope/run-access or CAP/run-access boundaries satisfied.
-- [ ] Targeted pytest and Jest checks pass.
-- [ ] Both independent reviews are dispositioned with no unresolved high- or medium-severity findings.
+- [x] Targeted pytest and Jest checks pass.
+- [x] Both independent reviews are dispositioned with no unresolved high- or medium-severity findings.
+- [x] The stable-tree repository-wide Python sweep passes.
 
 ## Parameterization ADR Gate
 

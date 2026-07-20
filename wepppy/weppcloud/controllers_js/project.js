@@ -74,7 +74,8 @@ var Project = (function () {
     var MOD_STICKY_FALSE_FLAGS = {
         openet_ts: true,
         rusle: true,
-        debris_flow: true
+        debris_flow: true,
+        omni_contrasts: true
     };
     var MOD_DIAGNOSTIC_SECRET_KEY_PATTERN = new RegExp(
         "^(?:" + MOD_DIAGNOSTIC_SECRET_KEYS_ALT + ")$",
@@ -870,6 +871,10 @@ var Project = (function () {
             omni: function (ctx) {
                 bootstrapControllerSymbol(window.Omni, ctx, { forceRemount: true });
             },
+            omni_contrasts: function (ctx) {
+                bootstrapControllerSymbol(window.Omni, ctx, { forceRemount: true });
+                bootstrapControllerSymbol(window.OmniContrastOverlays, ctx, { forceRemount: true });
+            },
             dss_export: function (ctx) {
                 bootstrapControllerSymbol(window.DssExport, ctx);
             },
@@ -1166,7 +1171,7 @@ var Project = (function () {
                 enabledMods[modName] = true;
             });
 
-            function isModVisible(modName) {
+            function isModActiveVisible(modName) {
                 if (!enabledMods[modName]) {
                     return false;
                 }
@@ -1179,15 +1184,55 @@ var Project = (function () {
                 return true;
             }
 
+            function syncModAvailability(modInput, modName) {
+                var authorized = modInput.getAttribute("data-project-mod-authorized") !== "false";
+                var required = (modInput.getAttribute("data-project-mod-requires") || "")
+                    .split(",")
+                    .map(function (token) { return token.trim(); })
+                    .filter(Boolean);
+                var active = Boolean(enabledMods[modName]);
+                var missing = required.filter(function (requiredMod) {
+                    return !enabledMods[requiredMod];
+                });
+                var reason = "";
+                if (!authorized) {
+                    reason = "Not Authorized";
+                } else if (!active && missing.length) {
+                    reason = "Enable " + missing.map(function (requiredMod) {
+                        var requiredInput = document.querySelector(
+                            '[data-project-mod="' + requiredMod + '"]'
+                        );
+                        if (requiredInput && requiredInput.parentElement) {
+                            var label = requiredInput.parentElement.querySelector("span span");
+                            if (label && label.textContent) {
+                                return label.textContent.trim();
+                            }
+                        }
+                        return requiredMod.replace(/_/g, " ").replace(/\b\w/g, function (char) {
+                            return char.toUpperCase();
+                        });
+                    }).join(", ") + " first";
+                }
+                modInput.disabled = !authorized || (!active && missing.length > 0);
+                var reasonNode = document.querySelector(
+                    '[data-project-mod-reason="' + modName + '"]'
+                );
+                if (reasonNode) {
+                    reasonNode.textContent = reason;
+                    reasonNode.hidden = !reason;
+                }
+            }
+
             Array.prototype.forEach.call(document.querySelectorAll(MOD_SELECTOR), function (modInput) {
                 var modName = modInput.getAttribute("data-project-mod");
                 if (!modName) {
                     return;
                 }
-                modInput.checked = isModVisible(modName);
+                modInput.checked = Boolean(enabledMods[modName]);
+                syncModAvailability(modInput, modName);
             });
             collectKnownModNames().forEach(function (modName) {
-                toggleModNav(modName, isModVisible(modName));
+                toggleModNav(modName, isModActiveVisible(modName));
             });
         }
 
@@ -1579,24 +1624,18 @@ var Project = (function () {
             }
             var desiredState = Boolean(enabled);
             var input = options.input || null;
-            var priorEnabled = (window.runContext
-                && window.runContext.mods
-                && window.runContext.mods.flags
-                && typeof window.runContext.mods.flags[normalized] === "boolean")
-                ? window.runContext.mods.flags[normalized]
-                : Boolean(!desiredState);
             var reconciledMods = [];
             var effectiveEnabled = desiredState;
             var priorMods = normalizeModList(
                 (window.runContext && window.runContext.mods && window.runContext.mods.list) || []
             );
+            var priorEnabled = priorMods.indexOf(normalized) !== -1;
 
             function restoreInput() {
-                if (!input) {
-                    return;
+                syncModInputsAndNav(priorMods);
+                if (input) {
+                    input.checked = Boolean(priorEnabled);
                 }
-                input.disabled = false;
-                input.checked = Boolean(priorEnabled);
             }
 
             function reportFailure(phase, response, error, fallbackMessage, context) {
@@ -1854,10 +1893,6 @@ var Project = (function () {
                 }
 
                 applyUI(undefined, { emitUpdated: true });
-                if (input) {
-                    input.checked = Boolean(effectiveEnabled);
-                    input.disabled = false;
-                }
                 if (options.notify !== false) {
                     var verb = effectiveEnabled ? "enabled" : "disabled";
                     project.notifyCommandBar(label + " " + verb + ".");

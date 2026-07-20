@@ -45,7 +45,9 @@ evidence; they cannot silently redefine intended behavior.
   remediation mechanism and REM-01 registration for the Omni mod-state defect.
 - [x] (2026-07-20 21:40 UTC) Complete dual review for the bounded remediation
   amendment with no unresolved high/medium findings.
-- [ ] Complete the standalone ancestor commit for the bounded remediation amendment.
+- [x] (2026-07-20 22:42 UTC) Complete both standalone REM-01 ancestor commits
+  and close the bounded remediation after implementation, dual final review,
+  and broad validation.
 - [ ] Ratify authority hierarchy and lifecycle vocabulary.
 - [ ] Publish the normative README and reusable contract template.
 - [ ] Add deterministic governance validation and negative fixtures.
@@ -128,6 +130,13 @@ Milestone 1 is partially executed: contract-first precedence is now recorded in
 agent governance, but the canonical schema, registry, and template are not yet
 ratified. No canonical schema or template may be described as ratified until the
 remaining milestones, validation, disposition, and post-fix reviews are complete.
+
+The bounded REM-01 mechanism is ratified and exercised. Ancestors
+`1afa57fd6d63b93688057143ec5c45daa6f3170f` and
+`57ea1a3e2e71073f65e45c4af1cc607b2323ef37` preceded the implementation;
+dual final reviews reported no findings and the stable-tree sweep passed 5,070
+tests with 58 skipped. REM-01 is closed, while GOV-00A schema ratification and
+the planned DOM-02, DOM-25A, and DOM-25B packages remain open.
 
 At closure, summarize the exact authorities created, validation behavior,
 review findings, deliberately deferred GOV-01 enforcement, and any unresolved

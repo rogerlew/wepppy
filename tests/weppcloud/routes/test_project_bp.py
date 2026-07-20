@@ -363,6 +363,113 @@ def test_set_mod_openet_allows_root(project_client) -> None:
     assert "openet_ts" in controller.mods
 
 
+def test_enabling_omni_does_not_enable_omni_contrasts(project_client) -> None:
+    client, RonStub, _, run_dir, _ = project_client
+    controller = RonStub.getInstance(run_dir)
+
+    response = client.post(
+        f"/runs/{RUN_ID}/{CONFIG}/tasks/set_mod",
+        json={"mod": "omni", "enabled": True},
+    )
+
+    assert response.status_code == 200
+    payload = response.get_json()["Content"]
+    assert payload["mods"] == ["omni", "treatments"]
+    assert "omni_contrasts" not in controller.mods
+
+
+@pytest.mark.parametrize("roles", [set(), {"PowerUser"}, {"Admin"}])
+def test_omni_contrasts_mutation_denied_below_dev(
+    project_client,
+    roles: set[str],
+) -> None:
+    client, RonStub, dispatched, run_dir, _ = project_client
+    dispatched["current_user"].roles = roles
+    controller = RonStub.getInstance(run_dir)
+    controller._mods = ["omni", "treatments"]
+
+    response = client.post(
+        f"/runs/{RUN_ID}/{CONFIG}/tasks/set_mod",
+        json={"mod": "omni_contrasts", "enabled": True},
+    )
+
+    payload = response.get_json()
+    assert "restricted to Dev users" in payload["error"]["message"]
+    assert controller.mods == ["omni", "treatments"]
+
+
+@pytest.mark.parametrize("role", ["Dev", "Root"])
+def test_omni_contrasts_mutation_allowed_for_internal_roles(
+    project_client,
+    role: str,
+) -> None:
+    client, RonStub, dispatched, run_dir, _ = project_client
+    dispatched["current_user"].roles = {role}
+    controller = RonStub.getInstance(run_dir)
+    controller._mods = ["omni", "treatments"]
+
+    response = client.post(
+        f"/runs/{RUN_ID}/{CONFIG}/tasks/set_mod",
+        json={"mod": "omni_contrasts", "enabled": True},
+    )
+
+    assert response.get_json()["Content"]["mods"] == [
+        "omni",
+        "treatments",
+        "omni_contrasts",
+    ]
+
+
+def test_omni_contrasts_requires_omni_scenarios(project_client) -> None:
+    client, RonStub, dispatched, run_dir, _ = project_client
+    dispatched["current_user"].roles = {"Dev"}
+    controller = RonStub.getInstance(run_dir)
+
+    response = client.post(
+        f"/runs/{RUN_ID}/{CONFIG}/tasks/set_mod",
+        json={"mod": "omni_contrasts", "enabled": True},
+    )
+
+    assert "requires Omni Scenarios" in response.get_json()["error"]["message"]
+    assert controller.mods == []
+
+
+def test_disabling_omni_is_blocked_while_contrasts_active(project_client) -> None:
+    client, RonStub, _, run_dir, _ = project_client
+    controller = RonStub.getInstance(run_dir)
+    controller._mods = ["omni", "treatments", "omni_contrasts"]
+
+    response = client.post(
+        f"/runs/{RUN_ID}/{CONFIG}/tasks/set_mod",
+        json={"mod": "omni", "enabled": False},
+    )
+
+    assert "Disable Omni Contrasts" in response.get_json()["error"]["message"]
+    assert "omni" in controller.mods
+
+
+@pytest.mark.parametrize("has_omni_state", [False, True])
+def test_dev_can_remove_legacy_contrasts_without_omni_prerequisite(
+    project_client,
+    has_omni_state: bool,
+) -> None:
+    client, RonStub, dispatched, run_dir, _ = project_client
+    dispatched["current_user"].roles = {"Dev"}
+    controller = RonStub.getInstance(run_dir)
+    controller._mods = ["omni_contrasts"]
+    omni_state_path = Path(run_dir) / "omni.nodb"
+    if has_omni_state:
+        omni_state_path.write_text("legacy omni state", encoding="utf-8")
+
+    response = client.post(
+        f"/runs/{RUN_ID}/{CONFIG}/tasks/set_mod",
+        json={"mod": "omni_contrasts", "enabled": False},
+    )
+
+    assert response.get_json()["Content"]["mods"] == []
+    assert omni_state_path.exists() is has_omni_state
+
+
 def test_set_mod_debris_flow_requires_poweruser_or_higher(project_client) -> None:
     client, RonStub, _, run_dir, _ = project_client
     controller = RonStub.getInstance(run_dir)

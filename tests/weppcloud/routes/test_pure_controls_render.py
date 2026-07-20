@@ -1121,6 +1121,16 @@ def test_runs0_template_places_ag_fields_between_observed_and_roads() -> None:
     assert observed_section_index < ag_fields_section_index < roads_section_index
 
 
+def test_runs0_contrasts_fallback_fails_closed_without_explicit_visibility() -> None:
+    source = (RUN_0_TEMPLATE_ROOT / "runs0_pure.htm").read_text(encoding="utf-8")
+    assignment = next(
+        line for line in source.splitlines()
+        if line.startswith("{% set show_omni_contrasts =")
+    )
+
+    assert "else false" in assignment
+
+
 def test_ag_fields_control_renders_required_dom_contract(jinja_env: Environment) -> None:
     template = jinja_env.get_template("controls/ag_fields_pure.htm")
     rendered = template.render(
@@ -1228,6 +1238,38 @@ def test_run_header_includes_features_export_mod_toggle(jinja_env: Environment) 
     )
 
     assert 'data-project-mod="features_export"' in rendered
+
+
+def test_run_header_renders_unauthorized_omni_contrasts_reason_below_label(
+    jinja_env: Environment,
+) -> None:
+    template = jinja_env.get_template("header/_run_header_fixed.htm")
+    auth_user = SimpleNamespace(has_role=lambda role: False, roles=[], is_authenticated=True)
+    request = SimpleNamespace(view_args={"runid": "test-run", "config": "test-config"})
+
+    rendered = template.render(
+        user=auth_user,
+        current_user=auth_user,
+        request=request,
+        current_ron_mods=[],
+        header_mod_options=[
+            {
+                "id": "omni_contrasts",
+                "label": "Omni Contrasts",
+                "authorized": False,
+                "requires_features": ["omni"],
+                "toggle_enabled": False,
+                "disabled_reason": "Not Authorized",
+            }
+        ],
+    )
+
+    assert 'data-project-mod="omni_contrasts"' in rendered
+    assert 'data-project-mod-authorized="false"' in rendered
+    assert 'data-project-mod-requires="omni"' in rendered
+    assert 'data-project-mod-reason="omni_contrasts"' in rendered
+    assert "disabled" in rendered
+    assert rendered.index("Omni Contrasts") < rendered.index("Not Authorized")
 
 
 def test_run_header_includes_geneva_mod_toggle(jinja_env: Environment) -> None:

@@ -14,8 +14,111 @@ pytestmark = pytest.mark.microservice
 
 
 def _stub_auth(monkeypatch: pytest.MonkeyPatch) -> None:
-    monkeypatch.setattr(omni_routes, "require_jwt", lambda request, required_scopes=None: {})
+    monkeypatch.setattr(
+        omni_routes,
+        "require_jwt",
+        lambda request, required_scopes=None: {"roles": ["Dev"]},
+    )
     monkeypatch.setattr(omni_routes, "authorize_run_access", lambda claims, runid: None)
+
+
+_CONTRAST_AUTH_CASES = (
+    ("/api/runs/run-1/cfg/run-omni-contrasts", "_run_omni_contrasts"),
+    ("/api/runs/run-1/cfg/run-omni-contrasts-dry-run", "_dry_run_omni_contrasts"),
+    ("/api/runs/run-1/cfg/delete-omni-contrasts", "_delete_omni_contrasts"),
+)
+
+
+@pytest.mark.parametrize("path,domain_name", _CONTRAST_AUTH_CASES)
+@pytest.mark.parametrize(
+    "roles,expected_status",
+    [
+        (["User"], 403),
+        (["PowerUser"], 403),
+        (["Admin"], 403),
+        (["Dev"], 200),
+        (["Root"], 200),
+    ],
+)
+def test_contrast_routes_enforce_role_before_domain_behavior(
+    monkeypatch: pytest.MonkeyPatch,
+    path: str,
+    domain_name: str,
+    roles: list[str],
+    expected_status: int,
+) -> None:
+    entered = {"value": False}
+
+    monkeypatch.setattr(
+        omni_routes,
+        "require_jwt",
+        lambda request, required_scopes=None: {"roles": roles},
+    )
+    monkeypatch.setattr(omni_routes, "authorize_run_access", lambda claims, runid: None)
+
+    async def _domain_stub(*args, **kwargs):
+        entered["value"] = True
+        return omni_routes.JSONResponse({"ok": True}, status_code=200)
+
+    monkeypatch.setattr(omni_routes, domain_name, _domain_stub)
+
+    with TestClient(rq_engine.app) as client:
+        response = client.post(path, json={})
+
+    assert response.status_code == expected_status
+    assert entered["value"] is (expected_status == 200)
+    if expected_status == 403:
+        assert response.json()["error"]["code"] == "forbidden"
+
+
+@pytest.mark.parametrize("path,domain_name", _CONTRAST_AUTH_CASES)
+@pytest.mark.parametrize("boundary", ["jwt_scope", "run_access"])
+def test_contrast_routes_preserve_jwt_scope_and_run_access_denials(
+    monkeypatch: pytest.MonkeyPatch,
+    path: str,
+    domain_name: str,
+    boundary: str,
+) -> None:
+    entered = {"value": False}
+
+    if boundary == "jwt_scope":
+        def _deny_scope(request, required_scopes=None):
+            raise omni_routes.AuthError(
+                "Token missing required scope",
+                status_code=403,
+                code="forbidden",
+            )
+
+        monkeypatch.setattr(omni_routes, "require_jwt", _deny_scope)
+        monkeypatch.setattr(omni_routes, "authorize_run_access", lambda claims, runid: None)
+    else:
+        monkeypatch.setattr(
+            omni_routes,
+            "require_jwt",
+            lambda request, required_scopes=None: {"roles": ["Root"]},
+        )
+
+        def _deny_run_access(claims, runid):
+            raise omni_routes.AuthError(
+                "Run access denied",
+                status_code=403,
+                code="forbidden",
+            )
+
+        monkeypatch.setattr(omni_routes, "authorize_run_access", _deny_run_access)
+
+    async def _domain_stub(*args, **kwargs):
+        entered["value"] = True
+        return omni_routes.JSONResponse({"ok": True}, status_code=200)
+
+    monkeypatch.setattr(omni_routes, domain_name, _domain_stub)
+
+    with TestClient(rq_engine.app) as client:
+        response = client.post(path, json={})
+
+    assert response.status_code == 403
+    assert response.json()["error"]["code"] == "forbidden"
+    assert entered["value"] is False
 
 
 def _stub_queue(monkeypatch: pytest.MonkeyPatch, *, job_id: str = "job-123") -> None:

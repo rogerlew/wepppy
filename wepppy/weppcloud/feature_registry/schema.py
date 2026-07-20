@@ -10,6 +10,14 @@ VALID_INTERNAL_REASON = {"compute", "api_constrained", "beta", "publication_emba
 VALID_MIN_ROLE = {"user", "poweruser", "dev", "admin", "root"}
 VALID_BACKEND = {"any", "wbt", "topaz"}
 
+ROLE_AUDIENCES = {
+    "user": frozenset({"User", "PowerUser", "Dev", "Admin", "Root"}),
+    "poweruser": frozenset({"PowerUser", "Dev", "Admin", "Root"}),
+    "dev": frozenset({"Dev", "Root"}),
+    "admin": frozenset({"Admin", "Root"}),
+    "root": frozenset({"Root"}),
+}
+
 
 class FeatureRegistryValidationError(ValueError):
     """Raised when feature/config registry payloads fail contract validation."""
@@ -24,6 +32,7 @@ class FeatureSpec:
     embargo_until: str | None
     adr_reference: str | None
     min_role: str
+    menu_min_role: str | None
     requires_backend: str
     requires_features: tuple[str, ...]
     section_template: str
@@ -180,6 +189,26 @@ def _validate_internal_min_role(*, min_role: str, maturity: str, context: str) -
         )
 
 
+def _optional_role(value: Any, context: str) -> str | None:
+    if value is None:
+        return None
+    return _require_enum(value, context, VALID_MIN_ROLE)
+
+
+def _validate_menu_role_audience(
+    *,
+    min_role: str,
+    menu_min_role: str | None,
+    context: str,
+) -> None:
+    if menu_min_role is None:
+        return
+    if not ROLE_AUDIENCES[min_role].issubset(ROLE_AUDIENCES[menu_min_role]):
+        raise FeatureRegistryValidationError(
+            f"{context} audience must include every {min_role!r} authorized role"
+        )
+
+
 def _expect_version(payload: Mapping[str, Any], context: str) -> None:
     version = payload.get("version")
     if version != 1:
@@ -290,6 +319,15 @@ def validate_feature_registry_payload(
             maturity=maturity,
             context=f"{context}.min_role",
         )
+        menu_min_role = _optional_role(
+            item.get("menu_min_role"),
+            f"{context}.menu_min_role",
+        )
+        _validate_menu_role_audience(
+            min_role=min_role,
+            menu_min_role=menu_min_role,
+            context=f"{context}.menu_min_role",
+        )
         requires_backend = _require_enum(
             item.get("requires_backend"),
             f"{context}.requires_backend",
@@ -330,6 +368,7 @@ def validate_feature_registry_payload(
                 embargo_until=embargo_until,
                 adr_reference=adr_reference,
                 min_role=min_role,
+                menu_min_role=menu_min_role,
                 requires_backend=requires_backend,
                 requires_features=requires_features,
                 section_template=section_template,

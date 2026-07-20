@@ -4,7 +4,7 @@ import json
 import logging
 import os
 from pathlib import Path
-from typing import Any
+from typing import Any, Mapping
 from uuid import uuid4
 
 import redis
@@ -27,7 +27,7 @@ from wepppy.rq.omni_rq import (
 from wepppy.rq.wepp_rq_stage_helpers import recover_mixed_nodir_roots as _recover_mixed_nodir_roots
 from wepppy.weppcloud.utils.helpers import get_wd
 
-from .auth import AuthError, authorize_run_access, require_jwt
+from .auth import AuthError, authorize_run_access, require_jwt, require_roles
 from .openapi import agent_route_responses, rq_operation_id
 from .payloads import parse_request_payload
 from .responses import error_response, error_response_with_traceback
@@ -47,6 +47,20 @@ CONTRAST_SELECTION_MODE_DEFAULT = "cumulative"
 SCENARIO_FILTER_MIN_SLOPE_FIELD = "filter_hill_min_slope_pct"
 SCENARIO_FILTER_MAX_SLOPE_FIELD = "filter_hill_max_slope_pct"
 SCENARIO_FILTER_BURN_FIELD = "filter_burn_severities"
+
+
+def _require_omni_contrasts_role(claims: Mapping[str, Any]) -> None:
+    for role in ("Dev", "Root"):
+        try:
+            require_roles(claims, [role])
+            return
+        except AuthError:
+            continue
+    raise AuthError(
+        "Token missing required role: Dev or Root",
+        status_code=403,
+        code="forbidden",
+    )
 
 
 def _maybe_nodir_error_response(exc: Exception):
@@ -923,7 +937,8 @@ async def run_omni(runid: str, config: str, request: Request) -> JSONResponse:
     "/runs/{runid}/{config}/run-omni-contrasts",
     summary="Run OMNI contrasts",
     description=(
-        "Requires JWT Bearer scope `rq:enqueue` and run access via `authorize_run_access`. "
+        "Requires JWT Bearer scope `rq:enqueue`, run access via `authorize_run_access`, "
+        "and a Dev or Root role. "
         "Validates OMNI contrast inputs, mutates contrast configuration, and, outside batch mode, "
         "asynchronously enqueues contrast processing."
     ),
@@ -944,6 +959,7 @@ async def run_omni_contrasts(runid: str, config: str, request: Request) -> JSONR
     try:
         claims = require_jwt(request, required_scopes=RQ_ENQUEUE_SCOPES)
         authorize_run_access(claims, runid)
+        _require_omni_contrasts_role(claims)
     except AuthError as exc:
         return error_response(exc.message, status_code=exc.status_code, code=exc.code)
     except Exception:  # broad-except: boundary contract
@@ -964,7 +980,8 @@ async def run_omni_contrasts(runid: str, config: str, request: Request) -> JSONR
     "/runs/{runid}/{config}/run-omni-contrasts-dry-run",
     summary="Dry-run OMNI contrasts",
     description=(
-        "Requires JWT Bearer scope `rq:enqueue` and run access via `authorize_run_access`. "
+        "Requires JWT Bearer scope `rq:enqueue`, run access via `authorize_run_access`, "
+        "and a Dev or Root role. "
         "Validates OMNI contrast inputs and synchronously returns a dry-run contrast report; no queue enqueue."
     ),
     tags=["rq-engine", "runs"],
@@ -981,6 +998,7 @@ async def run_omni_contrasts_dry_run(runid: str, config: str, request: Request) 
     try:
         claims = require_jwt(request, required_scopes=RQ_ENQUEUE_SCOPES)
         authorize_run_access(claims, runid)
+        _require_omni_contrasts_role(claims)
     except AuthError as exc:
         return error_response(exc.message, status_code=exc.status_code, code=exc.code)
     except Exception:  # broad-except: boundary contract
@@ -1001,7 +1019,8 @@ async def run_omni_contrasts_dry_run(runid: str, config: str, request: Request) 
     "/runs/{runid}/{config}/delete-omni-contrasts",
     summary="Delete OMNI contrasts",
     description=(
-        "Requires JWT Bearer scope `rq:enqueue` and run access via `authorize_run_access`. "
+        "Requires JWT Bearer scope `rq:enqueue`, run access via `authorize_run_access`, "
+        "and a Dev or Root role. "
         "Asynchronously enqueues OMNI contrast deletion and returns the queued job metadata."
     ),
     tags=["rq-engine", "runs"],
@@ -1015,6 +1034,7 @@ async def delete_omni_contrasts(runid: str, config: str, request: Request) -> JS
     try:
         claims = require_jwt(request, required_scopes=RQ_ENQUEUE_SCOPES)
         authorize_run_access(claims, runid)
+        _require_omni_contrasts_role(claims)
     except AuthError as exc:
         return error_response(exc.message, status_code=exc.status_code, code=exc.code)
     except Exception:  # broad-except: boundary contract

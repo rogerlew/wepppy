@@ -6,7 +6,7 @@
 - **Reviewer**: Codex, informed by independent security/regression review
 - **Date**: 2026-07-20
 - **Scope reviewed**: Feature menu authorization, project mod mutation, dynamic section authorization, persisted/UI synchronization, contrast RQ action authorization, and contrast report access
-- **Commit/branch context**: standalone contract ancestor `1afa57fd6d63b93688057143ec5c45daa6f3170f`; implementation under final review with unrelated PATH-CE files excluded
+- **Commit/branch context**: standalone contract ancestors `1afa57fd6d63b93688057143ec5c45daa6f3170f` and `57ea1a3e2e71073f65e45c4af1cc607b2323ef37`; completed implementation with unrelated PATH-CE files excluded
 - **Related artifacts**:
   - Contract authority review: `artifacts/2026-07-20_contract_authority_review.md`
   - Security/regression review: `artifacts/2026-07-20_security_and_regression_review.md`
@@ -31,26 +31,25 @@
 | SEC-01 | High | Contract ownership | The first package draft was not registered to alter DOM-02/DOM-25A/DOM-25B auth and state boundaries. | GOV-00A-M1A bounded-remediation amendment and REM-01 exact source register | Commit the dual-reviewed standalone ancestor before implementation. | Resolved in design |
 | SEC-02 | Medium | Role authorization | The first test plan did not prove all unauthorized role classes were denied toggle and dynamic load. | Updated contract/ExecPlan role matrix | Require User/PowerUser/Admin denial and Dev/Root allowance evidence before release. | Resolved in design |
 | SEC-03 | Medium | State integrity | Legacy and rejected-action states could leave checkbox, DOM, and preflight inconsistent. | Independent checked/enabled/render predicates and legacy cleanup matrix | Require focused endpoint/render/Jest evidence before release. | Resolved in design |
-| SEC-04 | High | Direct action/data authorization | First final review found contrast RQ actions lacked the ADR-required Dev/Root role gate, while the Flask report lacked both run access and the role gate. | `omni_routes.py`, `omni_bp.py`, and `requires_cap` inspection | Ratify the finite scope amendment, then add the missing gates and additive-boundary regressions. | Accepted; amendment ratifying |
+| SEC-04 | High | Direct action/data authorization | First final review found contrast RQ actions lacked the ADR-required Dev/Root role gate, while the Flask report lacked both run access and the role gate. | `omni_routes.py`, `omni_bp.py`, and `requires_cap` inspection | Ratify the finite scope amendment, then add the missing gates and additive-boundary regressions. | Resolved and verified |
 
 ## Verdict
 
-- **Gate status**: hold pending security scope amendment
+- **Gate status**: pass
 - **Unresolved findings**:
-  - High: 1
+  - High: 0
   - Medium: 0
   - Low: 0
-- **Release recommendation**: contract ancestor may proceed after dual-review
-  confirmation; production release remains held until implementation evidence
-  satisfies every unchecked surface check below.
+- **Release recommendation**: implementation is security-approved and the
+  repository-wide validation sweep passed; REM-01 may close.
 
 ## Surface Checks
 
 ### 1) Auth, Session, and Authorization
 
-- [ ] Entry points enforce expected authn/authz checks for changed routes/services.
-- [ ] Role checks and scope checks are explicit, least-privilege, and regression-tested; disabled discoverability grants no route authority.
-- [ ] CAP, CSRF, and session protections are proven additive and unchanged.
+- [x] Entry points enforce expected authn/authz checks for changed routes/services.
+- [x] Role checks and scope checks are explicit, least-privilege, and regression-tested; disabled discoverability grants no route authority.
+- [x] CAP, CSRF, and session protections are proven additive and unchanged.
 
 ### 2) Secrets and Credential Handling
 
@@ -91,22 +90,23 @@
 ## Validation Evidence
 
 - Automated checks run:
-  - Four focused pytest suites - 196 passed
-  - `wctl run-npm test -- project` - 27 passed
+  - Six focused pytest suites - 292 passed
+  - `wctl run-npm test -- project` - 28 passed
   - `wctl run-npm lint` - passed
-  - Full `wctl run-npm test` - 85 suites / 638 tests passed
-  - `python3 tools/check_broad_exceptions.py --enforce-changed --base-ref 1afa57fd6` - passed
+  - Full `wctl run-npm test` - 85 suites / 639 tests passed
+  - Stable-tree `wctl run-pytest tests --maxfail=1` - 5,070 passed, 58 skipped
+  - `python3 tools/check_broad_exceptions.py --enforce-changed --base-ref 57ea1a3e2` - passed
   - Controller bundle rebuilt with `.venv/bin/python wepppy/weppcloud/controllers_js/build_controllers_js.py`
 - Manual checks run:
   - Dual ratification review and post-fix confirmations - passed
-  - Final implementation/security reviews - pending
+  - Dual final implementation/security reviews and post-fix confirmations - passed
 
 ## Residual Risk
 
-- **Accepted residual risks**: None; package closure remains held for final dual review.
+- **Accepted residual risks**: None within REM-01.
 - **Follow-up packages/issues**: Borrowed owners DOM-02, DOM-25A, and DOM-25B remain unadvanced for all work outside REM-01.
 
 ## Sign-off
 
-- **Security reviewer**: Codex, 2026-07-20 (design pass; implementation verification required)
-- **Package owner**: Codex, 2026-07-20 (ancestor permitted after dual confirmation; release held)
+- **Security reviewer**: Codex, 2026-07-20 (implementation verified; pass)
+- **Package owner**: Codex, 2026-07-20 (package closed after broad validation)

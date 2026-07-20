@@ -46,6 +46,7 @@
 
     {% set ash_enabled = show_ash if show_ash is defined else ((('ash' in mods_list) and (ash is defined) and (ash is not none)) or playwright_load_all) %}
     {% set show_omni = show_omni if show_omni is defined else ('omni' in mods_list or playwright_load_all) %}
+    {% set show_omni_contrasts = show_omni_contrasts if show_omni_contrasts is defined else false %}
     {% set show_roads = show_roads if show_roads is defined else ('roads' in mods_list or playwright_load_all) %}
     {% set show_geneva = show_geneva if show_geneva is defined else ('geneva' in mods_list or playwright_load_all) %}
     {% set show_features_export = show_features_export if show_features_export is defined else ('features_export' in mods_list or playwright_load_all) %}
@@ -108,6 +109,7 @@
                 "rangeland_cover": 'rangeland_cover' in mods_list,
                 "ash": ash_enabled,
                 "omni": show_omni,
+                "omni_contrasts": show_omni_contrasts,
                 "rhem": 'rhem' in mods_list,
                 "dss_export": show_dss_export,
                 "path_ce": show_path_ce,
@@ -173,7 +175,7 @@
             },
             "omni": {
                 "hasRanScenarios": omni_has_ran_scenarios,
-                "hasRanContrasts": omni_has_ran_contrasts
+                "hasRanContrasts": omni_has_ran_contrasts if show_omni_contrasts else false
             },
             "rhem": {
                 "hasRun": rhem_has_run
@@ -192,7 +194,7 @@
             "outlet": {},
             "disturbed": {"mode": disturbed_mode, "uniformSeverity": disturbed_uniform},
             "baer": {"mode": baer_mode, "uniformSeverity": baer_uniform},
-            "omni": {"hasRanScenarios": omni_has_ran_scenarios, "hasRanContrasts": omni_has_ran_contrasts},
+            "omni": {"hasRanScenarios": omni_has_ran_scenarios, "hasRanContrasts": omni_has_ran_contrasts if show_omni_contrasts else false},
             "geneva": {"stateAuthority": "rq_engine"}
         },
         "ui": {
@@ -248,6 +250,7 @@
             modFlags.disturbed = true;
             modFlags.rangeland_cover = true;
             modFlags.omni = true;
+            modFlags.omni_contrasts = true;
             modFlags.rhem = true;
             modFlags.ash = true;
             modFlags.path_ce = true;
@@ -322,6 +325,8 @@
         }
         if (modFlags.omni) {
             add("omni", typeof Omni !== "undefined" ? Omni : null);
+        }
+        if (modFlags.omni_contrasts) {
             add("omniContrastOverlays", typeof OmniContrastOverlays !== "undefined" ? OmniContrastOverlays : null);
         }
         if (modFlags.rhem) {

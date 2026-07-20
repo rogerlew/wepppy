@@ -107,7 +107,7 @@ GOV-01 machine-readable manifest. GOV-99 is intentionally absent from all sets.
 
 | ID | Dated package | Borrowed owners | Exact defect boundary | Depends on | Security | State |
 | --- | --- | --- | --- | --- | --- | --- |
-| REM-01 | `20260720_omni_mod_state_sync` | DOM-02, DOM-25A, DOM-25B | Omni Scenarios/Contrasts feature-registry menu availability; Mods checkbox and reason markup; `Ron.mods` enable/disable guards; runs-page section/preflight visibility and metadata; dynamic shared Omni controller remount; Dev/Root gates on contrast run/dry-run/delete plus canonical run access and Dev/Root on the CAP-gated report; focused tests and generated controller bundle only | GOV-00A-M1A | `high`: role-gated dynamic load, persisted mod mutation, contrast actions, and report data | security scope amendment ratifying |
+| REM-01 | `20260720_omni_mod_state_sync` | DOM-02, DOM-25A, DOM-25B | Omni Scenarios/Contrasts feature-registry menu availability; Mods checkbox and reason markup; `Ron.mods` enable/disable guards; runs-page section/preflight visibility and metadata; dynamic shared Omni controller remount; Dev/Root gates on contrast run/dry-run/delete plus canonical run access and Dev/Root on the CAP-gated report; focused tests and generated controller bundle only | GOV-00A-M1A | `high`: role-gated dynamic load, persisted mod mutation, contrast actions, and report data | completed / dual-reviewed |
 
 REM-01 excludes Omni scenario/contrast payload shapes, uploads, queue wiring or
 execution semantics, artifacts, report content/formatting, overlays, deletion

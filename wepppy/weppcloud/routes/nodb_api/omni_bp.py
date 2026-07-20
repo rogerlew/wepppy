@@ -226,6 +226,24 @@ def query_omni_scenarios_report(runid, config):
 @omni_bp.route('/runs/<string:runid>/<config>/report/omni_contrasts/')
 @requires_cap(gate_reason="Complete verification to view Omni reports.")
 def query_omni_contrasts_report(runid, config):
+    from werkzeug.exceptions import HTTPException
+    from wepppy.weppcloud.feature_registry.runtime import (
+        feature_registry_by_id,
+        user_meets_min_role,
+    )
+
+    try:
+        authorize(runid, config)
+    except HTTPException as exc:
+        return error_factory(
+            exc.description,
+            status_code=exc.code or 403,
+            code="forbidden",
+        )
+    contrast_spec = feature_registry_by_id()["omni_contrasts"]
+    if not user_meets_min_role(current_user, contrast_spec.min_role):
+        return error_factory("Not Authorized", status_code=403, code="forbidden")
+
     try:
         wd = get_wd(runid)
         omni = Omni.getInstance(wd)
@@ -318,5 +336,5 @@ def query_omni_contrasts_report(runid, config):
                                watershed=Watershed.getInstance(wd),
                                report=report)
 
-    except Exception as exc:
+    except Exception as exc:  # broad-except: boundary contract
         return exception_factory(msg=exc, runid=runid, details=traceback.format_exc())

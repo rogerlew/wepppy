@@ -21,7 +21,7 @@
 {% set show_ash = show_ash if show_ash is defined else ((('ash' in mods_list) and (ash is defined) and (ash is not none)) or playwright_load_all) %}
 {% set show_rhem = show_rhem if show_rhem is defined else ('rhem' in mods_list or playwright_load_all) %}
 {% set show_omni = show_omni if show_omni is defined else ((('omni' in mods_list) and (omni is defined) and (omni is not none)) or playwright_load_all) %}
-{% set show_omni_contrasts = show_omni_contrasts if show_omni_contrasts is defined else show_omni %}
+{% set show_omni_contrasts = show_omni_contrasts if show_omni_contrasts is defined else false %}
 {% set show_observed = show_observed if show_observed is defined else ('observed' in mods_list or playwright_load_all) %}
 {% set show_ag_fields = show_ag_fields if show_ag_fields is defined else ('ag_fields' in mods_list or playwright_load_all) %}
 {% set allow_debris_flow = allow_debris_flow if allow_debris_flow is defined else playwright_load_all %}

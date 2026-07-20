@@ -107,11 +107,23 @@
               {% for mod_item in header_mod_options %}
               {% set mod_id = mod_item.id %}
               {% set mod_text = mod_item.label %}
+              {% set mod_authorized = mod_item.authorized if mod_item.authorized is defined else true %}
+              {% set mod_requires = mod_item.requires_features if mod_item.requires_features is defined else [] %}
+              {% set mod_toggle_enabled = mod_item.toggle_enabled if mod_item.toggle_enabled is defined else true %}
+              {% set mod_disabled_reason = mod_item.disabled_reason if mod_item.disabled_reason is defined else none %}
               <label class="wc-run-header__toggle">
                 <input type="checkbox"
                        data-project-mod="{{ mod_id }}"
+                       data-project-mod-authorized="{{ 'true' if mod_authorized else 'false' }}"
+                       data-project-mod-requires="{{ mod_requires | join(',') }}"
+                       {% if not mod_toggle_enabled %}disabled{% endif %}
                        {% if mod_id in current_mods %}checked{% endif %}>
-                <span>{{ mod_text }}</span>
+                <span style="display: flex; flex-direction: column">
+                  <span>{{ mod_text }}</span>
+                  <small class="wc-field__help"
+                         data-project-mod-reason="{{ mod_id }}"
+                         {% if not mod_disabled_reason %}hidden{% endif %}>{{ mod_disabled_reason or '' }}</small>
+                </span>
               </label>
               {% endfor %}
               <hr>

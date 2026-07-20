@@ -52,8 +52,9 @@ field-id tests can miss a real payload regression.
   cross-owner remediation REM-01 for the Omni mod-state defect.
 - [x] (2026-07-20 21:40 UTC) Complete dual review for REM-01 with no unresolved
   high/medium findings.
-- [ ] Commit the standalone REM-01 ancestor, then execute only its registered
-  defect boundary.
+- [x] (2026-07-20 22:42 UTC) Commit the two standalone REM-01 ancestors,
+  execute only its registered defect boundary, complete dual final review, and
+  close it after the 5,070-pass repository sweep.
 - [ ] Ratify `docs/ui-docs/contracts/README.md` and its evidence levels.
 - [ ] Execute and close the WATAR/Ash pilot child package.
 - [ ] Use pilot findings to add a stable contract-coverage check.
@@ -260,6 +261,14 @@ population/boundary evidence rather than the current total.
 GOV-00A Milestone 1 is now partially active. Root, WEPPcloud, controller, and
 rq-engine agent governance records contract-first precedence; canonical schema
 and registry publication plus dual review remain open.
+
+REM-01 is complete. Its contract checkpoints are
+`1afa57fd6d63b93688057143ec5c45daa6f3170f` and
+`57ea1a3e2e71073f65e45c4af1cc607b2323ef37`; its final contract/state and
+security/regression reviewers approved with no findings, and its stable-tree
+repository sweep passed 5,070 tests with 58 skipped. This completion supplies
+evidence to the later DOM-02, DOM-25A, and DOM-25B audits but leaves all three
+owners planned.
 
 At final closure, summarize total in-scope controllers, verified/excluded counts,
 defects found, tests added, compatibility decisions, packages closed, review

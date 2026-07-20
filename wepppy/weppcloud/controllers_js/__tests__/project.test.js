@@ -171,6 +171,8 @@ describe("Project controller", () => {
         delete global.url_for_run;
         delete global.setGlobalUnitizerPreference;
         delete window.Geneva;
+        delete window.Omni;
+        delete window.OmniContrastOverlays;
         delete window.runContext;
 
         document.body.innerHTML = "";
@@ -383,6 +385,144 @@ describe("Project controller", () => {
         expect(document.querySelector('[data-mod-section="ag_fields"]').hidden).toBe(false);
     });
 
+    test("enabling Omni Scenarios leaves Omni Contrasts unchecked and hidden", async () => {
+        window.runContext = {
+            mods: {
+                list: [],
+                flags: { omni: false, omni_contrasts: false, treatments: false }
+            }
+        };
+        document.getElementById("project-fixture").insertAdjacentHTML("beforeend", `
+            <li data-mod-nav="omni" hidden></li>
+            <li data-mod-nav="omni_contrasts" hidden></li>
+            <div data-mod-section="omni" hidden></div>
+            <div data-mod-section="omni_contrasts" hidden></div>
+            <label><input type="checkbox" data-project-mod="omni"
+                          data-project-mod-authorized="true" data-project-mod-requires=""><span><span>Omni Scenarios</span></span></label>
+            <label><input type="checkbox" data-project-mod="omni_contrasts"
+                          data-project-mod-authorized="true" data-project-mod-requires="omni" disabled><span><span>Omni Contrasts</span><small data-project-mod-reason="omni_contrasts">Enable Omni Scenarios first</small></span></label>
+        `);
+
+        const omniBootstrap = jest.fn();
+        const overlayBootstrap = jest.fn();
+        window.Omni = { remount: jest.fn(() => ({ bootstrap: omniBootstrap })) };
+        window.OmniContrastOverlays = {
+            remount: jest.fn(() => ({ bootstrap: overlayBootstrap }))
+        };
+        requestMock.mockResolvedValueOnce({
+            body: { Content: { label: "Omni Scenarios", mods: ["omni", "treatments"] } }
+        });
+        getJsonMock.mockResolvedValueOnce({
+            Content: { html: "<section id='omni-scenarios'>Omni scenarios</section>" }
+        });
+
+        const omniInput = document.querySelector('[data-project-mod="omni"]');
+        const result = project.set_mod("omni", true, { input: omniInput, notify: false });
+        await flushPromises();
+        await new Promise((resolve) => setTimeout(resolve, 0));
+        await result;
+
+        const contrastInput = document.querySelector('[data-project-mod="omni_contrasts"]');
+        const contrastReason = document.querySelector('[data-project-mod-reason="omni_contrasts"]');
+        expect(window.runContext.mods.list).toEqual(["omni", "treatments"]);
+        expect(contrastInput.checked).toBe(false);
+        expect(contrastInput.disabled).toBe(false);
+        expect(contrastReason.hidden).toBe(true);
+        expect(document.querySelector('[data-mod-nav="omni_contrasts"]').hidden).toBe(true);
+        expect(document.querySelector('[data-mod-section="omni_contrasts"]').hidden).toBe(true);
+        expect(omniBootstrap).toHaveBeenCalledWith(window.runContext);
+        expect(overlayBootstrap).not.toHaveBeenCalled();
+        expect(getJsonMock).toHaveBeenCalledTimes(1);
+    });
+
+    test("explicit Omni Contrasts enable synchronizes persisted state, DOM, and shared controllers", async () => {
+        window.runContext = {
+            mods: {
+                list: ["omni", "treatments"],
+                flags: { omni: true, omni_contrasts: false, treatments: true }
+            }
+        };
+        document.getElementById("project-fixture").insertAdjacentHTML("beforeend", `
+            <li data-mod-nav="omni_contrasts" hidden></li>
+            <div data-mod-section="omni_contrasts" hidden></div>
+            <label><input type="checkbox" data-project-mod="omni"
+                          data-project-mod-authorized="true" data-project-mod-requires="" checked><span><span>Omni Scenarios</span></span></label>
+            <label><input type="checkbox" data-project-mod="omni_contrasts"
+                          data-project-mod-authorized="true" data-project-mod-requires="omni"><span><span>Omni Contrasts</span><small data-project-mod-reason="omni_contrasts" hidden></small></span></label>
+        `);
+
+        const omniBootstrap = jest.fn();
+        const overlayBootstrap = jest.fn();
+        window.Omni = { remount: jest.fn(() => ({ bootstrap: omniBootstrap })) };
+        window.OmniContrastOverlays = {
+            remount: jest.fn(() => ({ bootstrap: overlayBootstrap }))
+        };
+        requestMock.mockResolvedValueOnce({
+            body: {
+                Content: {
+                    label: "Omni Contrasts",
+                    mods: ["omni", "treatments", "omni_contrasts"]
+                }
+            }
+        });
+        getJsonMock.mockResolvedValueOnce({
+            Content: { html: "<section id='omni-contrasts'>Omni contrasts</section>" }
+        });
+
+        const contrastInput = document.querySelector('[data-project-mod="omni_contrasts"]');
+        const result = project.set_mod("omni_contrasts", true, {
+            input: contrastInput,
+            notify: false
+        });
+        await flushPromises();
+        await new Promise((resolve) => setTimeout(resolve, 0));
+        await result;
+
+        expect(window.runContext.mods.list).toContain("omni_contrasts");
+        expect(window.runContext.mods.flags.omni_contrasts).toBe(true);
+        expect(contrastInput.checked).toBe(true);
+        expect(contrastInput.disabled).toBe(false);
+        expect(document.querySelector('[data-mod-nav="omni_contrasts"]').hidden).toBe(false);
+        expect(document.querySelector('[data-mod-section="omni_contrasts"]').hidden).toBe(false);
+        expect(omniBootstrap).toHaveBeenCalledWith(window.runContext);
+        expect(overlayBootstrap).toHaveBeenCalledWith(window.runContext);
+    });
+
+    test("legacy contrasts-only disable stays unchecked and prerequisite-disabled", async () => {
+        window.runContext = {
+            mods: {
+                list: ["omni_contrasts"],
+                flags: { omni: false, omni_contrasts: false }
+            }
+        };
+        document.getElementById("project-fixture").insertAdjacentHTML("beforeend", `
+            <li data-mod-nav="omni_contrasts" hidden></li>
+            <div data-mod-section="omni_contrasts" hidden></div>
+            <label><input type="checkbox" data-project-mod="omni"
+                          data-project-mod-authorized="true" data-project-mod-requires=""><span><span>Omni Scenarios</span></span></label>
+            <label><input type="checkbox" data-project-mod="omni_contrasts"
+                          data-project-mod-authorized="true" data-project-mod-requires="omni" checked><span><span>Omni Contrasts</span><small data-project-mod-reason="omni_contrasts" hidden></small></span></label>
+        `);
+        requestMock.mockResolvedValueOnce({
+            body: { Content: { label: "Omni Contrasts", mods: [] } }
+        });
+
+        const contrastInput = document.querySelector('[data-project-mod="omni_contrasts"]');
+        await project.set_mod("omni_contrasts", false, {
+            input: contrastInput,
+            notify: false
+        });
+
+        const reason = document.querySelector('[data-project-mod-reason="omni_contrasts"]');
+        expect(window.runContext.mods.list).toEqual([]);
+        expect(contrastInput.checked).toBe(false);
+        expect(contrastInput.disabled).toBe(true);
+        expect(reason.textContent).toBe("Enable Omni Scenarios first");
+        expect(reason.hidden).toBe(false);
+        expect(document.querySelector('[data-mod-nav="omni_contrasts"]').hidden).toBe(true);
+        expect(document.querySelector('[data-mod-section="omni_contrasts"]').hidden).toBe(true);
+    });
+
     test("set_mod reconciles authoritative backend mods and syncs dependent toggles", async () => {
         window.runContext = { mods: { list: [], flags: { geneva: false, roads: false } } };
         document.getElementById("project-fixture").insertAdjacentHTML("beforeend", `
@@ -478,7 +618,7 @@ describe("Project controller", () => {
         expect(window.runContext.mods.flags.openet_ts).toBe(false);
         expect(window.runContext.mods.flags.geneva).toBe(true);
         expect(window.runContext.mods.flags.roads).toBe(true);
-        expect(document.querySelector('[data-project-mod="openet_ts"]').checked).toBe(false);
+        expect(document.querySelector('[data-project-mod="openet_ts"]').checked).toBe(true);
         expect(document.querySelector('[data-project-mod="roads"]').checked).toBe(true);
         expect(document.querySelector('[data-mod-nav="openet_ts"]').hidden).toBe(true);
         expect(document.querySelector('[data-mod-nav="geneva"]').hidden).toBe(false);
@@ -530,7 +670,7 @@ describe("Project controller", () => {
         await resultPromise;
 
         expect(window.runContext.mods.flags.openet_ts).toBe(false);
-        expect(document.querySelector('[data-project-mod="openet_ts"]').checked).toBe(false);
+        expect(document.querySelector('[data-project-mod="openet_ts"]').checked).toBe(true);
         expect(document.querySelector('[data-mod-nav="openet_ts"]').hidden).toBe(true);
         expect(window.runContext.mods.flags.roads).toBe(true);
         expect(document.querySelector('[data-project-mod="roads"]').checked).toBe(true);
@@ -582,7 +722,7 @@ describe("Project controller", () => {
         await resultPromise;
 
         expect(window.runContext.mods.flags.openet_ts).toBe(false);
-        expect(document.querySelector('[data-project-mod="openet_ts"]').checked).toBe(false);
+        expect(document.querySelector('[data-project-mod="openet_ts"]').checked).toBe(true);
         expect(document.querySelector('[data-mod-nav="openet_ts"]').hidden).toBe(true);
         expect(window.runContext.mods.flags.roads).toBe(true);
         expect(document.querySelector('[data-project-mod="roads"]').checked).toBe(true);

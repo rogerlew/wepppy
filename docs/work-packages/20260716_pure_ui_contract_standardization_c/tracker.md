@@ -6,9 +6,9 @@
 
 **Timezone**: UTC
 **Started**: 2026-07-17 00:30 UTC
-**Current phase**: Milestone 1 - REM-01 ancestor commit
-**Last updated**: 2026-07-20 21:40 UTC
-**Next milestone**: commit accepted REM-01 authority, then implement REM-01
+**Current phase**: Milestone 1 - GOV-00A schema ratification
+**Last updated**: 2026-07-20 22:42 UTC
+**Next milestone**: Continue GOV-00A canonical schema and derived index work.
 **Security impact**: `none` for scaffold; child packages reassess
 **Dedicated security review**: `no`
 **Security artifact**: N/A
@@ -27,8 +27,6 @@
 ### In Progress
 
 - [ ] Execute GOV-00A and ratify the canonical contract schema.
-- [ ] Commit and execute bounded remediation REM-01 without advancing its
-  borrowed DOM owners.
 
 ### Blocked
 
@@ -49,6 +47,9 @@
   exact DOM-02/DOM-25A/DOM-25B defect boundary (2026-07-20 21:23 UTC).
 - [x] Dual-reviewed and accepted the bounded GOV-00A-M1A/REM-01 ancestor with
   no unresolved high/medium findings (2026-07-20 21:40 UTC).
+- [x] Committed both REM-01 contract ancestors, executed its finite boundary,
+  passed dual final review and broad validation, and closed the remediation
+  without advancing DOM-02, DOM-25A, or DOM-25B (2026-07-20 22:42 UTC).
 - [x] Identified, corrected, dual-reviewed, and froze the 70-unit execution
   register with no unresolved high/medium findings (2026-07-17).
 - [x] Began GOV-00A Milestone 1 by adding contract-first precedence to root and

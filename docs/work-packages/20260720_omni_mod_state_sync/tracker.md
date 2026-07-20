@@ -6,9 +6,9 @@
 
 **Timezone**: UTC
 **Started**: 2026-07-20 21:08 UTC
-**Current phase**: Security scope amendment ratification
-**Last updated**: 2026-07-20 22:15 UTC
-**Next milestone**: Commit the second docs-only ancestor, then implement route gates.
+**Current phase**: Complete
+**Last updated**: 2026-07-20 22:42 UTC
+**Next milestone**: Operator deployment and smoke validation when requested.
 **Security impact**: high
 **Dedicated security review**: yes
 **Security artifact**: `docs/work-packages/20260720_omni_mod_state_sync/artifacts/2026-07-20_security_review.md`
@@ -17,13 +17,11 @@
 
 ### Ready / Backlog
 
-- [ ] Implement and test contrast action/report authorization gates.
-- [ ] Dispatch two independent final code reviews and disposition findings.
-- [ ] Close documentation and package.
+- None.
 
 ### In Progress
 
-- [ ] Dual-review and commit the security scope amendment as a standalone ancestor.
+- None.
 
 ### Blocked
 
@@ -46,6 +44,14 @@
   generated controller bundle (2026-07-20 21:52 UTC).
 - [x] Accepted the first final-review action/report authorization finding and
   drafted the operator-authorized finite security amendment (2026-07-20 22:15 UTC).
+- [x] Committed the dual-approved security amendment ancestor
+  `57ea1a3e2e71073f65e45c4af1cc607b2323ef37` (2026-07-20 22:18 UTC).
+- [x] Implemented and tested RQ/report gates plus legacy-state cleanup and
+  fail-closed template behavior (2026-07-20 22:30 UTC).
+- [x] Dispositioned all final contract/security findings; both reviewers issued
+  fresh approval with no remaining findings (2026-07-20 22:32 UTC).
+- [x] Passed the stable-tree repository-wide Python sweep with 5,070 passed and
+  58 skipped, then closed REM-01 (2026-07-20 22:42 UTC).
 
 ## Timeline
 
@@ -61,6 +67,13 @@
   frontend lint and 638-test Jest validation.
 - **2026-07-20 22:15 UTC** – Corrected the security amendment to add canonical
   run access plus Dev/Root to the CAP-gated report and require additive-boundary tests.
+- **2026-07-20 22:18 UTC** – Sealed the second standalone contract ancestor at
+  `57ea1a3e2e71073f65e45c4af1cc607b2323ef37`.
+- **2026-07-20 22:32 UTC** – Six focused pytest suites passed 292 tests; Project
+  Jest passed 28 tests; full frontend passed 85 suites/639 tests; dual final
+  review closed with no findings.
+- **2026-07-20 22:42 UTC** – Stable-tree repository-wide Python validation
+  passed 5,070 tests with 58 skipped; package closure completed.
 
 ## Decisions Log
 
@@ -101,9 +114,9 @@ the existing Dev/Root server gates remain mandatory.
 
 | Risk | Severity | Likelihood | Mitigation | Status |
 |------|----------|------------|------------|--------|
-| Internal role gate accidentally broadened | High | Low | Preserve `min_role: dev`; add role and dynamic-route denial tests | Open |
-| Dynamic contrast section loads without controller remount | Medium | Medium | Add Jest coverage for explicit contrast enable | Open |
-| Preflight remains visible from stale DOM state | Medium | Medium | Assert own-id route/bootstrap flags and navigation synchronization | Open |
+| Internal role gate accidentally broadened | High | Low | Preserve `min_role: dev`; add role and dynamic-route denial tests | Mitigated and verified |
+| Dynamic contrast section loads without controller remount | Medium | Medium | Add Jest coverage for explicit contrast enable | Mitigated and verified |
+| Preflight remains visible from stale DOM state | Medium | Medium | Assert own-id route/bootstrap flags and navigation synchronization | Mitigated and verified |
 | Cross-domain remediation expands beyond REM-01 | High | Low | Enforce exact register exclusions and dual review | Mitigated by accepted contract |
 
 ## Verification Checklist
@@ -119,13 +132,13 @@ the existing Dev/Root server gates remain mandatory.
 
 - [x] Security impact triage recorded with rationale.
 - [x] Existing internal role gate remains a required acceptance condition.
-- [ ] Review confirms no authorization bypass.
-- [ ] Formal security gate passes with no unresolved medium/high findings.
+- [x] Review confirms no authorization bypass.
+- [x] Formal security gate passes with no unresolved medium/high findings.
 
 ### Documentation
 
 - [x] Authoritative behavior accepted by dual review for the registered REM-01 ancestor.
-- [ ] Work package closure notes complete.
+- [x] Work package closure notes complete.
 - [x] No parameterization ADR required.
 
 ### Testing
@@ -134,8 +147,9 @@ the existing Dev/Root server gates remain mandatory.
 - [x] Backend dependency and independence regressions.
 - [x] Run-page/bootstrap active-state regressions.
 - [x] Dynamic controller regression.
-- [ ] RQ contrast action role, JWT scope, and run-access regressions.
-- [ ] Flask contrast report CAP, run-access, and role regressions.
+- [x] RQ contrast action role, JWT scope, and run-access regressions.
+- [x] Flask contrast report CAP, run-access, and role regressions.
+- [x] Stable-tree repository-wide Python sweep (5,070 passed, 58 skipped).
 
 ## Progress Notes
 

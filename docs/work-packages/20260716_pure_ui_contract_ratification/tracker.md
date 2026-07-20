@@ -6,9 +6,9 @@
 
 **Timezone**: UTC
 **Started**: 2026-07-17 01:48 UTC
-**Current phase**: Milestone 1 - bounded remediation ancestor commit
-**Last updated**: 2026-07-20 21:40 UTC
-**Next milestone**: Commit the approved GOV-00A-M1A/REM-01 ancestor
+**Current phase**: Milestone 1 - canonical schema ratification
+**Last updated**: 2026-07-20 22:42 UTC
+**Next milestone**: Continue the canonical schema, template, and obligation registry.
 **Security impact**: `none`
 **Dedicated security review**: `no`
 **Security artifact**: N/A
@@ -28,7 +28,6 @@
 
 - [ ] Complete Milestone 1 canonical README and obligation registry after the
   contract-first agent-governance slice.
-- [ ] Commit the accepted bounded cross-owner remediation mechanism and REM-01 registration.
 
 ### Blocked
 
@@ -49,6 +48,11 @@
   (2026-07-20 21:23 UTC).
 - [x] Dual-reviewed and accepted GOV-00A-M1A and REM-01 with no unresolved
   high/medium findings (2026-07-20 21:40 UTC).
+- [x] Sealed the REM-01 authority in standalone ancestors
+  `1afa57fd6d63b93688057143ec5c45daa6f3170f` and
+  `57ea1a3e2e71073f65e45c4af1cc607b2323ef37`, then closed REM-01 after dual
+  final review and broad validation without advancing its borrowed owners
+  (2026-07-20 22:42 UTC).
 - [x] Recorded contract-first authority and sequencing in root, WEPPcloud,
   controller, NoDb, rq-engine, and direct RQ agent governance (2026-07-17).
 - [x] Dispositioned two high/three medium authority findings and two high/four

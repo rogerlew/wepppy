@@ -23,9 +23,11 @@ list, checkbox, section, and preflight entry—agree immediately and after refre
 - [x] (2026-07-20 21:51 UTC) Implement registry, backend guard, run-page/bootstrap, and dynamic controller synchronization.
 - [x] (2026-07-20 21:51 UTC) Add targeted pytest and Jest regressions.
 - [x] (2026-07-20 21:52 UTC) Rebuild the controller bundle and run targeted validation.
-- [ ] Dual-review and commit the direct-action/report security scope amendment.
-- [ ] Enforce Dev/Root on contrast RQ/report entry points and add role regressions.
-- [ ] Dispatch two independent final reviews, disposition findings, and close the package.
+- [x] (2026-07-20 22:18 UTC) Dual-review and commit direct-action/report security scope amendment ancestor `57ea1a3e2e71073f65e45c4af1cc607b2323ef37`.
+- [x] (2026-07-20 22:25 UTC) Enforce Dev/Root on contrast RQ/report entry points and add role regressions.
+- [x] (2026-07-20 22:32 UTC) Dispatch two independent final reviews and disposition every finding; both reviewers approve with no findings.
+- [x] (2026-07-20 22:42 UTC) Complete the stable-tree repository-wide Python
+  sweep (5,070 passed, 58 skipped) and close the package.
 
 ## Surprises & Discoveries
 
@@ -47,6 +49,11 @@ list, checkbox, section, and preflight entry—agree immediately and after refre
   Evidence: The first final security review found no `require_roles` call in
   the three rq-engine entry points and neither `authorize(runid, config)` nor a
   feature-role check on the Flask report.
+- Observation: Template fallbacks that infer contrast visibility cannot prove
+  authorization or child-run state when route context is omitted.
+  Evidence: Final contract review rejected the first implementation until both
+  template fallbacks failed closed and the production five-predicate helper had
+  direct behavioral matrix coverage.
 - Observation: The new contract-first standard assigns this change across
   DOM-02, DOM-25A, and DOM-25B, whose registered dependencies are not complete.
   Evidence: Dual review cited the child-package register rows and independently
@@ -83,10 +90,14 @@ list, checkbox, section, and preflight entry—agree immediately and after refre
 ## Outcomes & Retrospective
 
 The bounded contract was dual-reviewed and sealed at standalone ancestor
-`1afa57fd6d63b93688057143ec5c45daa6f3170f`. The registered implementation and
+`1afa57fd6d63b93688057143ec5c45daa6f3170f`; its direct-action/report security
+amendment was dual-reviewed and sealed at
+`57ea1a3e2e71073f65e45c4af1cc607b2323ef37`. The registered implementation and
 focused regressions are complete. Targeted Python and Jest suites, full frontend
-lint/tests, broad-exception enforcement, and bundle rebuilding pass; the broad
-Python sweep and final dual review remain in progress.
+lint/tests, broad-exception enforcement, bundle rebuilding, and the stable-tree
+repository-wide Python sweep all pass. The broad sweep closed at 5,070 passed
+and 58 skipped. Both final reviewers approve with no findings, so REM-01 is
+complete without advancing DOM-02, DOM-25A, or DOM-25B.
 
 ## Context and Orientation
 

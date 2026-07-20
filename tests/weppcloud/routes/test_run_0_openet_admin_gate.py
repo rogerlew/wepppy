@@ -294,6 +294,61 @@ def test_view_mod_section_openet_allows_dev(
     ]
 
 
+@pytest.mark.parametrize(
+    ("roles", "allowed"),
+    [
+        (set(), False),
+        ({"PowerUser"}, False),
+        ({"Admin"}, False),
+        ({"Dev"}, True),
+        ({"Root"}, True),
+    ],
+)
+def test_view_mod_section_omni_contrasts_enforces_full_role_matrix(
+    run0_client,
+    monkeypatch: pytest.MonkeyPatch,
+    roles: set[str],
+    allowed: bool,
+) -> None:
+    client, module = run0_client
+    monkeypatch.setattr(module, "current_user", _RoleUser(roles))
+    monkeypatch.setattr(
+        module,
+        "_build_runs0_context",
+        lambda runid, config, playwright_load_all=False: {
+            "mod_visibility": {"omni_contrasts": True},
+        },
+    )
+    monkeypatch.setattr(module, "render_template", lambda template_name, **kwargs: template_name)
+
+    response = client.get("/runs/run-1/cfg/view/mod/omni_contrasts")
+    payload = response.get_json()
+
+    if allowed:
+        assert payload["Content"]["mod"] == "omni_contrasts"
+    else:
+        assert payload["error"]["message"] == "Omni Contrasts is restricted to Dev users"
+
+
+def test_view_mod_section_omni_contrasts_rejects_inactive_legacy_state(
+    run0_client,
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    client, module = run0_client
+    monkeypatch.setattr(module, "current_user", _RoleUser({"Dev"}))
+    monkeypatch.setattr(
+        module,
+        "_build_runs0_context",
+        lambda runid, config, playwright_load_all=False: {
+            "mod_visibility": {"omni_contrasts": False},
+        },
+    )
+
+    response = client.get("/runs/run-1/cfg/view/mod/omni_contrasts")
+
+    assert response.get_json()["error"]["message"] == "Module is not enabled for this run"
+
+
 def test_view_mod_section_geneva_renders_module_template(
     run0_client,
     monkeypatch: pytest.MonkeyPatch,
@@ -484,6 +539,48 @@ def test_build_runs0_context_gates_ag_fields_by_registry_role(run0_module) -> No
     assert "'ag_fields' in mods_list" in visibility_block.group(0)
 
 
+@pytest.mark.parametrize(
+    (
+        "mods",
+        "has_omni_state",
+        "authorized",
+        "is_omni_child",
+        "expected",
+    ),
+    [
+        ({"omni", "treatments"}, True, True, False, False),
+        ({"omni", "treatments", "omni_contrasts"}, True, True, False, True),
+        ({"omni_contrasts"}, False, True, False, False),
+        ({"omni_contrasts"}, True, True, False, False),
+        ({"omni", "treatments", "omni_contrasts"}, True, False, False, False),
+        ({"omni", "treatments", "omni_contrasts"}, True, True, True, False),
+    ],
+)
+def test_omni_contrasts_visibility_behavior_matrix(
+    run0_module,
+    monkeypatch: pytest.MonkeyPatch,
+    mods: set[str],
+    has_omni_state: bool,
+    authorized: bool,
+    is_omni_child: bool,
+    expected: bool,
+) -> None:
+    monkeypatch.setattr(
+        run0_module,
+        "_feature_role_enabled",
+        lambda mod_name, *, playwright_load_all: authorized,
+    )
+
+    visible = run0_module._omni_contrasts_visible(
+        mods,
+        object() if has_omni_state else None,
+        is_omni_child=is_omni_child,
+        playwright_load_all=False,
+    )
+
+    assert visible is expected
+
+
 def test_run_page_bootstrap_serializes_wepp_controller_job_id(run0_template_app) -> None:
     context = _bootstrap_context(set())
     context["wepp"].job_id = "wepp-job-42"
@@ -589,6 +686,71 @@ def test_run_page_bootstrap_ag_fields_flag_true_when_enabled(run0_template_app) 
 
     assert _extract_mod_flag(js, "ag_fields") == "true"
     assert 'add("agFields", typeof AgFields !== "undefined" ? AgFields : null)' in js
+
+
+def test_run_page_bootstrap_omni_scenarios_does_not_activate_contrasts(
+    run0_template_app,
+) -> None:
+    context = _bootstrap_context({"Dev"})
+    context["ron"].mods = ["omni", "treatments"]
+    context["show_omni"] = True
+    context["show_omni_contrasts"] = False
+    with run0_template_app.app_context():
+        js = render_template("run_page_bootstrap.js.j2", **context)
+
+    assert _extract_mod_flag(js, "omni") == "true"
+    assert _extract_mod_flag(js, "omni_contrasts") == "false"
+
+
+def test_run_page_bootstrap_omni_contrasts_uses_own_active_flag(
+    run0_template_app,
+) -> None:
+    context = _bootstrap_context({"Dev"})
+    context["ron"].mods = ["omni", "treatments", "omni_contrasts"]
+    context["show_omni"] = True
+    context["show_omni_contrasts"] = True
+    with run0_template_app.app_context():
+        js = render_template("run_page_bootstrap.js.j2", **context)
+
+    assert _extract_mod_flag(js, "omni_contrasts") == "true"
+    assert 'if (modFlags.omni_contrasts)' in js
+
+
+@pytest.mark.parametrize("has_omni_state", [False, True])
+def test_run_page_bootstrap_hides_legacy_contrasts_without_omni_prerequisite(
+    run0_template_app,
+    has_omni_state: bool,
+) -> None:
+    context = _bootstrap_context({"Dev"})
+    context["ron"].mods = ["omni_contrasts"]
+    context["omni"] = SimpleNamespace(has_ran_contrasts=True) if has_omni_state else None
+    context["omni_has_ran_contrasts"] = True
+    with run0_template_app.app_context():
+        js = render_template("run_page_bootstrap.js.j2", **context)
+
+    assert _extract_mod_flag(js, "omni_contrasts") == "false"
+    assert js.count('"hasRanContrasts": false') == 2
+
+
+@pytest.mark.parametrize(
+    ("roles", "is_omni_child"),
+    [(set(), False), ({"Dev"}, True)],
+)
+def test_run_page_bootstrap_omitted_visibility_fails_closed_for_role_or_child(
+    run0_template_app,
+    roles: set[str],
+    is_omni_child: bool,
+) -> None:
+    context = _bootstrap_context(roles)
+    context["ron"].mods = ["omni", "treatments", "omni_contrasts"]
+    context["omni"] = SimpleNamespace(has_ran_contrasts=True)
+    context["omni_has_ran_contrasts"] = True
+    context["is_omni_child"] = is_omni_child
+    with run0_template_app.app_context():
+        js = render_template("run_page_bootstrap.js.j2", **context)
+
+    assert _extract_mod_flag(js, "omni_contrasts") == "false"
+    assert js.count('"hasRanContrasts": false') == 2
 
 
 def test_run_page_bootstrap_features_export_flag_true_when_enabled(run0_template_app) -> None:

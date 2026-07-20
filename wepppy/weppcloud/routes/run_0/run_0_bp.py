@@ -178,6 +178,25 @@ def _feature_role_enabled(mod_name: str, *, playwright_load_all: bool) -> bool:
     return user_meets_min_role(current_user, spec.min_role)
 
 
+def _omni_contrasts_visible(
+    mods_list,
+    omni,
+    *,
+    is_omni_child: bool,
+    playwright_load_all: bool,
+) -> bool:
+    return (
+        (('omni_contrasts' in mods_list) or playwright_load_all)
+        and (('omni' in mods_list) or playwright_load_all)
+        and _feature_role_enabled(
+            "omni_contrasts",
+            playwright_load_all=playwright_load_all,
+        )
+        and ((omni is not None) or playwright_load_all)
+        and not is_omni_child
+    )
+
+
 def _feature_role_restriction_message(mod_name: str) -> str:
     spec = _feature_spec(mod_name)
     if spec is None:
@@ -1850,8 +1869,10 @@ def _build_runs0_context(runid, config, playwright_load_all):
         and ((omni is not None) or playwright_load_all)
         and not is_omni_child
     )
-    show_omni_contrasts = show_omni and _feature_role_enabled(
-        "omni_contrasts",
+    show_omni_contrasts = _omni_contrasts_visible(
+        mods_list,
+        omni,
+        is_omni_child=is_omni_child,
         playwright_load_all=playwright_load_all,
     )
     show_observed = (observed is not None) or playwright_load_all

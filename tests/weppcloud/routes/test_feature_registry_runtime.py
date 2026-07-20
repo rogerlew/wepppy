@@ -124,6 +124,68 @@ def test_build_header_mod_options_allows_internal_features_for_dev_role() -> Non
     assert "ag_fields" in option_ids
 
 
+@pytest.mark.parametrize("roles", [set(), {"PowerUser"}, {"Admin"}])
+def test_omni_contrasts_is_discoverable_but_unauthorized_for_non_dev_roles(
+    roles: set[str],
+) -> None:
+    options = build_header_mod_options(
+        active_mods=set(),
+        user=_User(roles),
+        is_wbt=True,
+    )
+    contrast = next(option for option in options if option["id"] == "omni_contrasts")
+
+    assert contrast["authorized"] is False
+    assert contrast["toggle_enabled"] is False
+    assert contrast["disabled_reason"] == "Not Authorized"
+    assert contrast["requires_features"] == ["omni"]
+
+
+def test_omni_contrasts_dev_availability_tracks_prerequisite_without_activation() -> None:
+    without_omni = build_header_mod_options(
+        active_mods=set(),
+        user=_User({"Dev"}),
+        is_wbt=True,
+    )
+    contrast = next(option for option in without_omni if option["id"] == "omni_contrasts")
+    assert contrast["authorized"] is True
+    assert contrast["toggle_enabled"] is False
+    assert contrast["disabled_reason"] == "Enable Omni Scenarios first"
+
+    with_omni = build_header_mod_options(
+        active_mods={"omni"},
+        user=_User({"Dev"}),
+        is_wbt=True,
+    )
+    contrast = next(option for option in with_omni if option["id"] == "omni_contrasts")
+    assert contrast["toggle_enabled"] is True
+    assert contrast["disabled_reason"] is None
+
+
+def test_active_legacy_omni_contrasts_remains_enabled_for_dev_cleanup() -> None:
+    options = build_header_mod_options(
+        active_mods={"omni_contrasts"},
+        user=_User({"Dev"}),
+        is_wbt=True,
+    )
+    contrast = next(option for option in options if option["id"] == "omni_contrasts")
+
+    assert contrast["toggle_enabled"] is True
+    assert contrast["disabled_reason"] is None
+
+
+def test_default_prerequisite_visibility_contract_remains_unchanged() -> None:
+    options = build_header_mod_options(
+        active_mods=set(),
+        user=_User(set()),
+        is_wbt=True,
+    )
+    option_ids = {entry["id"] for entry in options}
+
+    assert "rap_ts" in option_ids
+    assert "rusle" not in option_ids
+
+
 def test_build_header_mod_options_hides_path_ce_without_wbt_backend() -> None:
     user = _User({"Dev"})
 
@@ -313,6 +375,30 @@ def test_schema_validates_disable_blocker_references() -> None:
     mutated["features"][0]["disable_blockers"] = ["does-not-exist"]
 
     with pytest.raises(FeatureRegistryValidationError, match="references unknown disable blocker"):
+        validate_feature_registry_payload(mutated, registry_dir=registry_dir)
+
+
+def test_schema_rejects_unknown_menu_min_role() -> None:
+    registry_dir = Path(registry_runtime.__file__).resolve().parent
+    payload = yaml.safe_load((registry_dir / "feature_registry.yaml").read_text(encoding="utf-8"))
+    mutated = copy.deepcopy(payload)
+    mutated["features"][0]["menu_min_role"] = "operator"
+
+    with pytest.raises(FeatureRegistryValidationError, match="menu_min_role must be one of"):
+        validate_feature_registry_payload(mutated, registry_dir=registry_dir)
+
+
+def test_schema_rejects_menu_audience_that_excludes_authorized_role() -> None:
+    registry_dir = Path(registry_runtime.__file__).resolve().parent
+    payload = yaml.safe_load((registry_dir / "feature_registry.yaml").read_text(encoding="utf-8"))
+    mutated = copy.deepcopy(payload)
+    contrast = next(entry for entry in mutated["features"] if entry["id"] == "omni_contrasts")
+    contrast["menu_min_role"] = "admin"
+
+    with pytest.raises(
+        FeatureRegistryValidationError,
+        match="audience must include every 'dev' authorized role",
+    ):
         validate_feature_registry_payload(mutated, registry_dir=registry_dir)
 
 

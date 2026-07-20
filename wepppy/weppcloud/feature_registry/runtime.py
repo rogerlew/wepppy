@@ -22,15 +22,6 @@ _REGISTRY_DIR = Path(__file__).resolve().parent
 _FEATURE_REGISTRY_PATH = _REGISTRY_DIR / "feature_registry.yaml"
 _CONFIG_REGISTRY_PATH = _REGISTRY_DIR / "config_registry.yaml"
 
-_ROLE_RANK = {
-    "user": 0,
-    "poweruser": 1,
-    "dev": 2,
-    "admin": 2,
-    "root": 3,
-}
-
-
 def _repository_root() -> Path:
     return _REGISTRY_DIR.parents[2]
 
@@ -205,17 +196,48 @@ def build_header_mod_options(
     include_all: bool = False,
 ) -> list[dict[str, Any]]:
     options: list[dict[str, Any]] = []
+    registry = feature_registry_by_id()
     for entry in load_feature_registry():
+        authorized = include_all or user_meets_min_role(user, entry.min_role)
+        backend_available = include_all or backend_matches_requirement(
+            entry.requires_backend,
+            is_wbt=is_wbt,
+        )
+        missing_prerequisites = [
+            feature_id
+            for feature_id in entry.requires_features
+            if feature_id not in active_mods
+        ]
         if include_all:
             visible = True
-        else:
+        elif entry.menu_min_role is not None:
             visible = (
-                user_meets_min_role(user, entry.min_role)
-                and backend_matches_requirement(entry.requires_backend, is_wbt=is_wbt)
-                and set(entry.requires_features).issubset(active_mods)
+                user_meets_min_role(user, entry.menu_min_role)
+                and backend_available
             )
+        else:
+            visible = authorized and backend_available and not missing_prerequisites
         if not visible:
             continue
+
+        active = entry.id in active_mods
+        toggle_enabled = include_all or (
+            authorized
+            and backend_available
+            and (active or not missing_prerequisites)
+        )
+        disabled_reason = None
+        if not toggle_enabled:
+            if not authorized:
+                disabled_reason = "Not Authorized"
+            elif missing_prerequisites:
+                labels = [
+                    registry[feature_id].label
+                    if feature_id in registry
+                    else feature_id.replace("_", " ").title()
+                    for feature_id in missing_prerequisites
+                ]
+                disabled_reason = f"Enable {', '.join(labels)} first"
 
         options.append(
             {
@@ -224,6 +246,10 @@ def build_header_mod_options(
                 "maturity": entry.maturity,
                 "maturity_badge": feature_maturity_badge(entry),
                 "min_role": entry.min_role,
+                "authorized": authorized,
+                "requires_features": list(entry.requires_features),
+                "toggle_enabled": toggle_enabled,
+                "disabled_reason": disabled_reason,
             }
         )
     return options
