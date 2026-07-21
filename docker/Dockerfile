@@ -158,12 +158,26 @@ RUN set -euxo pipefail; \
     printf "/workdir/f-esri/\n" > "${SITE_PACKAGES}/f_esri.pth"; \
     printf "/workdir/wepppyo3/release/linux/py312/\n" > "${SITE_PACKAGES}/wepppyo3.pth"
 
+# Quarto CLI for PATH-CE HTML report rendering (in-worker; ADR-0023 / D1).
+# Kernelspec registration lets Quarto's jupyter engine resolve `python3`.
+ARG QUARTO_VERSION=1.9.38
+ARG QUARTO_SHA256=bd0d73c1042fc5f719fb87753f0874c11344e516ee2cfbe4fe3ed4e4458c3988
+RUN curl -fsSL "https://github.com/quarto-dev/quarto-cli/releases/download/v${QUARTO_VERSION}/quarto-${QUARTO_VERSION}-linux-amd64.deb" -o /tmp/quarto.deb && \
+    echo "${QUARTO_SHA256}  /tmp/quarto.deb" | sha256sum -c - && \
+    apt-get update && \
+    apt-get install -y --no-install-recommends /tmp/quarto.deb && \
+    rm -f /tmp/quarto.deb && \
+    rm -rf /var/lib/apt/lists/* && \
+    /opt/venv/bin/python -m ipykernel install --prefix /opt/venv --name python3 && \
+    quarto --version
+
 ENV VIRTUAL_ENV=/opt/venv
 ENV PATH="/opt/venv/bin:$PATH"
 ENV PROJ_LIB=/usr/share/proj
 ENV GDAL_DATA=/usr/share/gdal
 ENV PYTHONUNBUFFERED=1
 ENV MPLCONFIGDIR=/tmp/matplotlib
+ENV QUARTO_PYTHON=/opt/venv/bin/python
 
 RUN set -euxo pipefail; \
     GROUP_NAME="${APP_GROUP}"; \

@@ -1,181 +1,110 @@
 # PATH Cost-Effective (PathCE) NoDb Module
 
-> Select the most cost-effective set of post-fire hillslope treatments (currently mulch presets) that meets user-defined sediment-yield and discharge targets, using Omni scenario outputs as the data source.
+> Select the most cost-effective set of post-fire hillslope treatments that meets
+> user-defined sediment-yield and outlet-discharge thresholds, by binary integer
+> programming over Omni scenario/contrast outputs. Vendored from Jackson Nakae's
+> PATH-cost-effective (upstream commit `4e3b4a6`), parquet-native, with an
+> interactive Quarto HTML report.
 
-> **See also:** [AGENTS.md](../../AGENTS.md) for NoDb locking, persistence, and debugging conventions.
+> **See also:** `../../AGENTS.md` for NoDb conventions;
+> `docs/adrs/ADR-0023-path-ce-v2-parameterization.md` for the parameterization
+> contract; `docs/work-packages/20260720_path_ce_v2/` for provenance, reference
+> goldens, review dispositions, and the security review.
 
-## Overview
+## Model
 
-PATH Cost-Effective (“PathCE”) is a NoDb-backed optimization workflow used in WEPPcloud to rank candidate hillslope treatments by cost while enforcing sediment reduction targets.
+The primary model minimizes treatment cost subject to: at most one treatment per
+hillslope (or contrast group); per-hillslope sediment-yield reduction
+requirements derived from `sdyd_threshold`; and a watershed outlet
+sediment-discharge constraint derived from `sddc_threshold` against Omni outlet
+contrast deltas. When the primary model is infeasible, a secondary model
+maximizes total discharge reduction under the same per-hillslope constraints
+(reported as `primary_status = 0`). Hillslopes whose yield increases under every
+treatment are force-excluded and reported as a distinct untreatable class.
 
-At a high level:
+Faithfulness: `path_ce_solver.ce_select_sites_flexible`, `data_prep`, and
+`threshold_sweep` are faithful extractions of upstream — keep them diffable when
+syncing; wepppy-specific behavior lives in the seams (`prepare_solver_inputs`,
+`run_path_cost_effective_solver`, module docstrings enumerate the deltas). The
+solver seam converts the hectare-valued area column to acres so costs are
+`area (ac) × unit_cost ($/ac) × quantity (tons/ac)`, and realigns treatment
+vectors to the frame's reduction-column order (the core pairs positionally).
 
-- Omni runs a fixed scenario package (baseline SBS, mulch intensities, undisturbed).
-- `data_loader.py` reads Omni Parquet summaries + watershed metadata and builds a solver-ready table.
-- `path_ce_solver.py` solves a binary linear program (PuLP) to select, per hillslope, at most one treatment option.
-- `PathCostEffective` persists the results to `<wd>/path/*.parquet` and stores a small JSON summary in `path_ce.nodb` for fast API/UI access.
+## Module map
 
-## Workflow
+- `path_ce_solver.py` — faithful core + wepppy seam wrapper (`SolverResult`).
+- `data_prep.py` — faithful aggregation/preparation; consumes run artifacts in
+  place; grouped (psv) and cumulative (contrast_topaz_id) schema modes.
+- `threshold_sweep.py` — feasibility-range binary search + bounded threshold
+  grid sweep (powers the report's sliders and cost surface); plot helpers.
+- `presets.py` — treatment-vector contract and defaults; labels derive from
+  scenario names (`mulch_15_sbs_map` → `0.5 tons/acre`) and mismatches are
+  rejected — labels key the prepared-frame columns.
+- `preconditions.py` — validates user-provisioned Omni artifacts (D3: PATH never
+  provisions); actionable errors name what to run. psv contrast ids absent from
+  `contrasts.out.parquet` are legitimate (`landuse_unchanged` skips); coverage
+  means each configured treatment has completed `sbs_map`-control contrasts.
+- `path_cost_effective.py` — `PathCostEffective` NoDb controller: config
+  normalization, stage methods (validate → prepare_data → solve → run_sweep →
+  render), results/status persistence, sweep cache (config + frame hash keyed).
+- `report_service.py` — stages and renders the Quarto HTML report in-worker
+  (pinned Quarto CLI in the image; payload delivered via env var), publishes to
+  `<wd>/path/report/` with a near-atomic rename swap.
+- `report/` — vendored QMD (anchor-splicing builder in the work package keeps
+  upstream sections byte-identical; WEPPPY-SEAM markers) + static JS/CSS
+  (deck.gl/papaparse vendored; plotly.js staged from the Python package).
 
-1. **Enable the mod** for a run (WEPPcloud “Mods” → “Path CE”).
-2. **Configure thresholds and mulch costs** (web UI or API).
-3. **Launch the RQ task** (web UI button → enqueue).
-4. **RQ task provisions and runs Omni scenarios**, then calls `PathCostEffective.run()`.
-5. **Controller writes artifacts** under `<wd>/path/` and stores `results/status/progress` in `path_ce.nodb`.
+## Configuration (`path_ce.nodb`)
 
-## Inputs / Outputs
+`sdyd_threshold` (tonnes/acre — matches the prepared-data unit),
+`sddc_threshold` (tonne/yr — matches the Omni outlet artifact unit),
+`slope_range` (degrees, either bound nullable), `severity_filter`
+(High/Moderate/Low subset or null; group-mode caveat in ADR-0023 §5),
+`treatments` (list of label/scenario/unit_cost `$/acre`/quantity/fixed_cost).
+Normalization is strict: non-finite, negative, mismatched-label, duplicate, or
+unknown-scenario payloads are rejected. The HTML report always renders (the
+retired `render_reports` flag is dropped from stale payloads on normalization).
 
-### Required inputs (working directory artifacts)
+## Preconditions (user-provisioned, D3)
 
-PathCE expects these artifacts to exist under the run working directory (`wd`):
+Before running PATH-CE the run must carry: Omni scenario summaries covering
+`sbs_map`, `undisturbed`, and every configured treatment scenario; Omni outlet
+contrasts (treatment vs `sbs_map` control) for every configured treatment;
+`omni/contrast_id_definitions.psv` for grouped runs; `omni/scenarios.out.parquet`;
+`watershed/hillslopes.parquet`. WGS geojson exports are required only for the
+report (missing → run completes, report skipped with a recorded reason).
 
-| Artifact | Required | Produced by |
-|---|---:|---|
-| `omni/scenarios.hillslope_summaries.parquet` | yes | Omni scenarios |
-| `omni/contrasts.out.parquet` | no (best-effort) | Omni contrasts |
-| `watershed/hillslopes.parquet` | yes | watershed build |
+## Pipeline and artifacts
 
-If required inputs are missing or malformed, the loader raises `PathCEDataError`.
+The RQ task (`wepppy.rq.path_ce_rq`, channel `{runid}:path_ce`) runs the
+controller stages against one config snapshot. Artifacts under `<wd>/path/`:
+prepared frame + aggregation tables (`path_ce_*.parquet`), `selection.parquet`
+(per-site treatment + acre-based cost), `hillslope_sdyd.parquet`,
+`untreatable.parquet`, `untreatable_increase.parquet`, `sweep.parquet`
+(per-cell results incl. JSON-encoded selections and error column) +
+`sweep_manifest.json`, and `report/` (self-contained HTML tree + download CSVs).
 
-### Configuration payload
+## Report serving
 
-The controller stores a normalized config dict (unknown keys are ignored):
+The browse microservice serves `<wd>/path/report/` inline at
+`runs/{runid}/{config}/report/path_ce/` with a sandbox CSP (opaque origin — no
+cookies or credentialed API reach), inline media-type allowlist, and strict
+subtree/symlink containment. See the package security review for the full
+surface analysis.
 
-| Key | Type | Default | Meaning |
-|---|---|---|---|
-| `post_fire_scenario` | `str` | `sbs_map` | Omni scenario key treated as the post-fire baseline. |
-| `undisturbed_scenario` | `str \| None` | `undisturbed` | Optional reference scenario key. |
-| `sddc_threshold` | `float` | `0.0` | Watershed discharge threshold (see caveat below). |
-| `sdyd_threshold` | `float` | `0.0` | Per-hillslope sediment yield threshold (tons). |
-| `slope_range` | `[min,max]` | `[None, None]` | Optional slope filter in degrees. |
-| `severity_filter` | `list[str] \| None` | `None` | Optional burn severity filter (e.g. `["High","Moderate"]`). |
-| `mulch_costs` | `dict[str,float]` | presets → `0.0` | Unit costs keyed by mulch scenario key (UI supplies `$/ha`). |
-| `treatment_options` | `list[dict]` | derived | Derived from `mulch_costs` + preset scenarios (not user-extensible today). |
+## Testing
 
-### Outputs (artifacts + NoDb state)
+`tests/nodb/mods/path_ce/` (solver/data-prep parity against upstream goldens,
+seam contracts, controller stages, preconditions, report service, plus a real
+Quarto render integration test gated on the CLI), `tests/rq/test_path_ce_rq.py`,
+`tests/weppcloud/routes/test_path_ce_bp.py`,
+`tests/microservices/test_browse_report_routes.py`. Fixtures and goldens live in
+`tests/data/path_ce/`; regeneration scripts and provenance in the work package.
 
-Artifacts written under `<wd>/path/`:
+## Known upstream flags (reported to Jackson)
 
-| Path | Contents |
-|---|---|
-| `path/analysis_frame.parquet` | Solver-ready merged table including post-fire metrics, post-treatment metrics, reductions, slope/area, severity. |
-| `path/hillslope_sdyd.parquet` | Per-hillslope final sediment yield (`wepp_id`, `final_Sdyd`). |
-| `path/untreatable_hillslopes.parquet` | Subset of hillslopes whose `final_Sdyd` remains above `sdyd_threshold`. |
-
-NoDb file:
-
-| Path | Contents |
-|---|---|
-| `path_ce.nodb` | `config`, `results`, `status`, `status_message`, `progress`. |
-
-The controller result payload (returned by `run()` and exposed via `/api/path_ce/results`) includes:
-`selected_hillslopes`, `treatment_hillslopes`, `total_cost`, `total_fixed_cost`,
-`total_sddc_reduction`, `final_sddc`, `used_secondary`, plus artifact paths relative to `wd`.
-
-## Quick Start / Examples
-
-### Web/API (typical production path)
-
-Configure and launch a run through the WEPPcloud endpoints (exact base URL depends on your deployment):
-
-```bash
-# Update config (thresholds/costs). Replace RUNID and CONFIG.
-curl -sS -X POST \
-  "/runs/RUNID/CONFIG/api/path_ce/config" \
-  -H "Content-Type: application/json" \
-  -d '{
-    "sddc_threshold": 10.0,
-    "sdyd_threshold": 0.5,
-    "slope_min": 10,
-    "slope_max": 45,
-    "severity_filter": ["High", "Moderate"],
-    "mulch_costs": {
-      "mulch_15_sbs_map": 250,
-      "mulch_30_sbs_map": 400,
-      "mulch_60_sbs_map": 700
-    }
-  }'
-
-# Enqueue the RQ job (runs Omni + solver).
-curl -sS -X POST "/runs/RUNID/CONFIG/tasks/path_cost_effective_run"
-
-# Poll status/results.
-curl -sS "/runs/RUNID/CONFIG/api/path_ce/status"
-curl -sS "/runs/RUNID/CONFIG/api/path_ce/results"
-```
-
-### Python (direct controller usage)
-
-This is useful for local debugging when Omni artifacts already exist:
-
-```python
-from wepppy.nodb.mods.path_ce import PathCostEffective
-
-wd = "/wc1/runs/<runid>/<config>"
-controller = PathCostEffective.getInstance(wd)
-
-controller.config = {
-    "sdyd_threshold": 0.5,
-    "sddc_threshold": 10.0,
-    "slope_range": [10, 45],
-    "severity_filter": ["High", "Moderate"],
-    "mulch_costs": {
-        "mulch_15_sbs_map": 250.0,
-        "mulch_30_sbs_map": 400.0,
-        "mulch_60_sbs_map": 700.0,
-    },
-}
-
-result = controller.run()
-print(result["total_cost"], result["selected_hillslopes"][:10])
-```
-
-### Reading parquet artifacts
-
-```python
-from pathlib import Path
-import pandas as pd
-
-wd = Path("/wc1/runs/<runid>/<config>")
-analysis = pd.read_parquet(wd / "path" / "analysis_frame.parquet")
-sdyd = pd.read_parquet(wd / "path" / "hillslope_sdyd.parquet")
-```
-
-## Integration Points
-
-- **RQ orchestration**: `wepppy/rq/path_ce_rq.py` provisions required Omni scenarios (via `build_path_omni_scenarios`) and then runs the controller.
-- **Flask API/task endpoints**: `wepppy/weppcloud/routes/nodb_api/path_ce_bp.py` exposes `/api/path_ce/*` and `/tasks/path_cost_effective_run`.
-- **UI panel**: `wepppy/weppcloud/templates/controls/path_cost_effective_pure.htm` (threshold/cost form, unit expectations).
-- **Upstream data dependency**: Omni scenario outputs; see `wepppy/nodb/mods/omni/README.md`.
-
-## Developer Notes
-
-### Code organization
-
-- `path_cost_effective.py`: `PathCostEffective` NoDb controller (config/status/results, persistence to `<wd>/path/`).
-- `data_loader.py`: validates and prepares `SolverInputs` from Omni + watershed Parquet artifacts.
-- `path_ce_solver.py`: PuLP-based optimization and post-processing (`SolverResult`).
-- `presets.py`: scenario keys and mulch presets (`PATH_CE_MULCH_PRESETS`, `build_path_omni_scenarios`).
-
-### Solver model (what is optimized)
-
-- Decision variables: binary `x[treatment,hillslope]` (apply treatment or not), plus binary `B[treatment]` to activate fixed costs.
-- Objective (primary): minimize total cost = `area * unit_cost * quantity` + fixed costs.
-- Constraints:
-  - At most one treatment per hillslope (primary model).
-  - Total “water quality” reduction meets a threshold derived from `sddc_threshold`.
-  - Each hillslope meets `sdyd_threshold` if possible; otherwise it is forced to its maximum achievable reduction.
-
-### Caveats / current limitations
-
-- `sddc_threshold` is currently enforced using the `NTU post-fire` / `NTU reduction *` columns (see `path_ce_solver.py`). The loader also computes outlet sediment discharge (`Sddc *`) columns, but the solver does not consume them yet.
-- `treatment_options` are effectively limited to the mulch presets in `presets.py`; custom treatment catalogs are not supported through `PathCostEffective.config` today.
-- Burn severity labels are inferred from landuse codes using `DEFAULT_SEVERITY_MAP` in `data_loader.py`. If your landuse coding differs, severity filtering may not behave as expected.
-
-## Further Reading
-
-- Design notes: `integration_plan.md`, `implementation_plan.md`
-- Preset scenarios: `presets.py`
-- Omni background: `../omni/README.md`
-
-## Jackson Nakae's Development repository https://github.com/jackson-nakae/PATH-cost-effective
+Upstream multiplies $/acre rates against hectare areas (wepppy corrects at the
+seam); "tons" labels denote metric tonnes in the artifacts; the prepared-data
+yield unit is the mixed tonne/acre; upstream's report QMD had a vestigial
+ipywidgets import, an infeasible-fallback type bug, and dead per-treatment
+extraction in the 3D surface cell (all corrected in the vendored copy).

@@ -1,0 +1,149 @@
+{
+ "upstream_commit": "4e3b4a6",
+ "source": "run austere-inaction (disturbed9002_wbt, grouped contrasts, 3 mulch treatments)",
+ "env": {
+  "pandas": "2.2.2",
+  "numpy": "1.26.0"
+ },
+ "treatments": [
+  "0.5 tons/acre",
+  "1 tons/acre",
+  "2 tons/acre"
+ ],
+ "treatment_cost": [
+  2475.0,
+  2475.0,
+  2475.0
+ ],
+ "treatment_quantity": [
+  0.5,
+  1.0,
+  2.0
+ ],
+ "fixed_cost": [
+  500.0,
+  1000.0,
+  1500.0
+ ],
+ "cases": [
+  {
+   "sdyd_threshold": 15,
+   "sddc_threshold": 48.3,
+   "primary_status": 1,
+   "selected_hillslopes": [],
+   "treatment_hillslopes": [
+    [],
+    [],
+    []
+   ],
+   "total_cost": 0.0,
+   "total_fixed_cost": 0.0,
+   "total_sddc_reduction": 0.0,
+   "final_sddc": 48.3,
+   "untreatable_ids": [],
+   "untreatable_increase_ids": [],
+   "sdyd_final": [
+    [
+     12,
+     0.000568
+    ],
+    [
+     15,
+     0.001098
+    ],
+    [
+     18,
+     0.000142
+    ]
+   ],
+   "cost_vector_sums": {
+    "0.5 tons/acre": 460758.13,
+    "1 tons/acre": 921516.25,
+    "2 tons/acre": 1843032.51
+   },
+   "syrt_sum": 0.0
+  },
+  {
+   "sdyd_threshold": 15,
+   "sddc_threshold": 48.2,
+   "primary_status": 1,
+   "selected_hillslopes": [
+    12
+   ],
+   "treatment_hillslopes": [
+    [
+     12
+    ],
+    [],
+    []
+   ],
+   "total_cost": 207714.38,
+   "total_fixed_cost": 500.0,
+   "total_sddc_reduction": 0.1,
+   "final_sddc": 48.2,
+   "untreatable_ids": [],
+   "untreatable_increase_ids": [],
+   "sdyd_final": [
+    [
+     12,
+     0.000538
+    ],
+    [
+     15,
+     0.001098
+    ],
+    [
+     18,
+     0.000142
+    ]
+   ],
+   "cost_vector_sums": {
+    "0.5 tons/acre": 460758.13,
+    "1 tons/acre": 921516.25,
+    "2 tons/acre": 1843032.51
+   },
+   "syrt_sum": 0.0
+  },
+  {
+   "sdyd_threshold": 15,
+   "sddc_threshold": 48.0,
+   "primary_status": 0,
+   "selected_hillslopes": [
+    12
+   ],
+   "treatment_hillslopes": [
+    [],
+    [],
+    [
+     12
+    ]
+   ],
+   "total_cost": 830857.5,
+   "total_fixed_cost": 3000.0,
+   "total_sddc_reduction": 0.1,
+   "final_sddc": 48.2,
+   "untreatable_ids": [],
+   "untreatable_increase_ids": [],
+   "sdyd_final": [
+    [
+     12,
+     0.000459
+    ],
+    [
+     15,
+     0.001098
+    ],
+    [
+     18,
+     0.000142
+    ]
+   ],
+   "cost_vector_sums": {
+    "0.5 tons/acre": 460758.13,
+    "1 tons/acre": 921516.25,
+    "2 tons/acre": 1843032.51
+   },
+   "syrt_sum": 0.0
+  }
+ ]
+}

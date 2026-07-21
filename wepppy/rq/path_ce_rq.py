@@ -1,19 +1,24 @@
-"""RQ task wrappers for PATH cost-effective optimization workflows."""
+"""RQ task wrapper for the PATH cost-effective pipeline (v2).
+
+Omni provisioning was removed per D3/ADR-0023: the user runs Omni
+scenarios and contrasts before PATH-CE; this task validates preconditions
+and fails with actionable messages when artifacts are missing. Stage
+transitions stream on the ``{runid}:path_ce`` channel via the controller's
+status callback.
+"""
 
 from __future__ import annotations
 
 import inspect
 import logging
-from collections import OrderedDict
-from typing import Any, Dict, Iterable, List, Tuple
+from typing import Any, Dict
 
 import redis
 from rq import get_current_job
 
 from wepppy.nodb.base import clear_nodb_file_cache
-from wepppy.nodb.mods.omni.omni import Omni, OmniScenario, _scenario_name_from_scenario_definition
 from wepppy.nodb.mods.path_ce import PathCostEffective
-from wepppy.nodb.mods.path_ce.presets import PATH_CE_BASELINE_SCENARIO, build_path_omni_scenarios
+from wepppy.nodb.mods.path_ce.preconditions import PathCEPreconditionError
 from wepppy.runtime_paths.fs import resolve as nodir_resolve
 from wepppy.nodb.redis_prep import RedisPrep, TaskEnum
 from wepppy.nodb.status_messenger import StatusMessenger
@@ -25,62 +30,12 @@ TIMEOUT: int = 43_200
 logger = logging.getLogger(__name__)
 
 
-def _hydrate_existing_scenarios(omni: Omni) -> List[Tuple[OmniScenario, Dict[str, Any]]]:
-    hydrated: List[Tuple[OmniScenario, Dict[str, Any]]] = []
-    for scenario_def in omni.scenarios:
-        scenario_type = scenario_def.get("type")
-        try:
-            scenario_enum = OmniScenario.parse(scenario_type)
-        except KeyError:
-            continue
-        hydrated.append((scenario_enum, dict(scenario_def)))
-    return hydrated
-
-
-def _hydrate_required_scenarios(base_scenario: str) -> List[Tuple[OmniScenario, Dict[str, Any]]]:
-    required: List[Tuple[OmniScenario, Dict[str, Any]]] = []
-    for payload in build_path_omni_scenarios(base_scenario):
-        scenario_type = payload.get("type")
-        scenario_enum = OmniScenario.parse(scenario_type)
-        scenario_payload = dict(payload)
-        scenario_payload["type"] = scenario_type
-        required.append((scenario_enum, scenario_payload))
-    return required
-
-
-def _merge_scenario_sets(
-    existing: Iterable[Tuple[OmniScenario, Dict[str, Any]]],
-    required: Iterable[Tuple[OmniScenario, Dict[str, Any]]],
-) -> List[Tuple[OmniScenario, Dict[str, Any]]]:
-    merged: "OrderedDict[str, Tuple[OmniScenario, Dict[str, Any]]]" = OrderedDict()
-    for entry in existing:
-        scenario_enum, payload = entry
-        try:
-            scenario_name = _scenario_name_from_scenario_definition(payload)
-        except (KeyError, TypeError, ValueError) as exc:
-            logger.warning(
-                "path_ce: skipping scenario with invalid definition (%s): %s",
-                scenario_enum,
-                exc,
-            )
-            continue
-        merged[scenario_name] = (scenario_enum, payload)
-    for entry in required:
-        scenario_enum, payload = entry
-        scenario_name = _scenario_name_from_scenario_definition(payload)
-        merged[scenario_name] = (scenario_enum, payload)
-    return list(merged.values())
-
-
 @with_exception_logging
 def run_path_cost_effective_rq(runid: str) -> Dict[str, Any]:
-    """Run the PATH cost-effective optimization workflow for the given project.
+    """Run the PATH cost-effective pipeline for the given project.
 
-    Args:
-        runid: Identifier used to locate the working directory.
-
-    Returns:
-        Serialized solver payload including cost summaries and artifact paths.
+    Stages: validate preconditions → data prep → solve → threshold sweep →
+    render the HTML report → persist artifacts under ``<wd>/path/``.
     """
     job = get_current_job()
     func_name = inspect.currentframe().f_code.co_name
@@ -101,56 +56,23 @@ def run_path_cost_effective_rq(runid: str) -> Dict[str, Any]:
                 exc,
             )
 
-    clear_nodb_file_cache(runid, pup_relpath="path_ce.nodb")
-    controller = PathCostEffective.getInstance(wd)
-
+    # Root/precondition rejection must precede cache invalidation and
+    # mutable hydration (NoDb mutation-cache-guard ordering).
     try:
         for root in ("climate", "watershed", "landuse", "soils"):
             nodir_resolve(wd, root, view="effective")
+    except Exception:
+        StatusMessenger.publish(status_channel, f"rq:{job.id} EXCEPTION {func_name}({runid})")
+        raise
 
-        clear_nodb_file_cache(runid, pup_relpath="omni.nodb")
-        omni = Omni.getInstance(wd)
+    clear_nodb_file_cache(runid, pup_relpath="path_ce.nodb")
+    controller = PathCostEffective.getInstance(wd)
 
-        StatusMessenger.publish(status_channel, f"rq:{job.id} STATUS Provisioning Omni scenarios for PATH")
+    def _emit(message: str) -> None:
+        StatusMessenger.publish(status_channel, f"rq:{job.id} STATUS {message}")
 
-        if prep is not None:
-            try:
-                prep.remove_timestamp(TaskEnum.run_omni_scenarios)
-            except (redis.exceptions.RedisError, OSError, ValueError, TypeError) as exc:
-                logger.warning(
-                    "path_ce: failed to remove prep timestamp (runid=%s job_id=%s task=%s): %s",
-                    runid,
-                    job.id,
-                    TaskEnum.run_omni_scenarios,
-                    exc,
-                )
-
-        controller.set_status("running", message="Provisioning Omni scenarios", progress=0.05)
-        base_scenario = str(controller.config.get("post_fire_scenario") or PATH_CE_BASELINE_SCENARIO)
-
-        existing = _hydrate_existing_scenarios(omni)
-        required = _hydrate_required_scenarios(base_scenario)
-        omni_inputs = _merge_scenario_sets(existing, required)
-        omni.parse_scenarios(omni_inputs)
-
-        StatusMessenger.publish(status_channel, f"rq:{job.id} STATUS Running Omni scenarios for PATH")
-        controller.set_status("running", message="Running Omni scenarios", progress=0.2)
-        omni.run_omni_scenarios()
-
-        if prep is not None:
-            try:
-                prep.timestamp(TaskEnum.run_omni_scenarios)
-            except (redis.exceptions.RedisError, OSError, ValueError, TypeError) as exc:
-                logger.warning(
-                    "path_ce: failed to record prep timestamp (runid=%s job_id=%s task=%s): %s",
-                    runid,
-                    job.id,
-                    TaskEnum.run_omni_scenarios,
-                    exc,
-                )
-
-        StatusMessenger.publish(status_channel, f"rq:{job.id} STATUS Preparing PATH Cost-Effective inputs")
-        result = controller.run()
+    try:
+        result = controller.run(status_callback=_emit)
 
         if prep is not None:
             try:
@@ -167,6 +89,12 @@ def run_path_cost_effective_rq(runid: str) -> Dict[str, Any]:
         StatusMessenger.publish(status_channel, f"rq:{job.id} COMPLETED {func_name}({runid})")
         StatusMessenger.publish(status_channel, f"rq:{job.id} TRIGGER path_ce PATH_CE_RUN_COMPLETE")
         return result
+    except PathCEPreconditionError as exc:
+        # controller.run() already set status=failed with the report message
+        for error in exc.report.errors:
+            StatusMessenger.publish(status_channel, f"rq:{job.id} STATUS PRECONDITION {error}")
+        StatusMessenger.publish(status_channel, f"rq:{job.id} EXCEPTION {func_name}({runid})")
+        raise
     except Exception as exc:
         try:
             controller.set_status("failed", message=str(exc))

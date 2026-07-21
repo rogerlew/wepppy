@@ -1,11 +1,13 @@
-{# Doc: controllers_js/README.md — Path CE Controller Reference (2025 helper migration) #}
+{# Doc: controllers_js/README.md — Path CE Controller Reference (PATH-CE v2) #}
 {% import "controls/_pure_macros.html" as ui with context %}
 {% from "shared/console_macros.htm" import button_row %}
 
 {% set description %}
   <p class="wc-text-muted">
-    Configure PATH Cost-Effective thresholds and treatment options, then launch the optimization.
-    Results stream through the run status panel and persist under the run’s <code>path/</code> directory.
+    PATH identifies the most cost-effective hillslope treatments by binary integer programming,
+    subject to sediment yield and outlet discharge thresholds. Configure the parameters below,
+    then launch the optimization. Results, the threshold sweep, and the interactive HTML report
+    persist under the run's <code>path/</code> directory.
   </p>
 {% endset %}
 
@@ -20,7 +22,7 @@
      "braille_id": "path_ce_braille"
      },
      summary_panel_options={
-       "body_html": '<div class="wc-summary-pane"><dl class="wc-summary-pane__list" id="path_ce_summary"></dl></div>'
+       "body_html": '<div class="wc-summary-pane"><dl class="wc-summary-pane__list" id="path_ce_summary"></dl></div><section id="path_ce_results_panel" class="wc-stack" hidden><h4 class="wc-heading wc-heading--sm">Run Results</h4><div id="path_ce_links" class="wc-stack"></div></section>'
      },
      stacktrace_panel_options={
        "panel_id": "path_ce_stacktrace_panel",
@@ -30,31 +32,83 @@
    ) %}
 
   <style>
-    #path_ce_cost_table .path-ce-cost-field {
+    .path-ce-field--wide {
+      max-width: none;
+    }
+    #path_ce_treatments_table {
+      width: 100%;
+    }
+    #path_ce_treatments_table input,
+    #path_ce_treatments_table select {
+      width: 100%;
+      min-width: 5.5rem;
+    }
+    #path_ce_treatments_table input[readonly] {
+      border: none;
+      background: transparent;
+      color: inherit;
+      cursor: default;
+    }
+    #path_ce_treatments_table td {
+      vertical-align: middle;
+    }
+    #path_ce_links .wc-field__help {
+      margin: 0 0 0.35rem;
+    }
+    .path-ce-unitized {
       display: flex;
       align-items: center;
       gap: 0.65rem;
     }
-
-    #path_ce_cost_table .path-ce-cost-field input {
+    .path-ce-unitized input {
       flex: 1;
     }
-
-    #path_ce_cost_table .path-ce-cost-unit {
+    .path-ce-unit-label {
       font-weight: 600;
       white-space: nowrap;
     }
   </style>
 
   <fieldset class="wc-fieldset">
+    <legend class="wc-fieldset__legend">Omni Preconditions</legend>
+    <div class="wc-field path-ce-field--wide">
+      <p class="wc-field__help">
+        PATH consumes Omni artifacts you provision <strong>before</strong> running it:
+        Omni scenarios for the post-fire baseline (<code>sbs_map</code>), <code>undisturbed</code>,
+        and each configured mulch treatment, plus Omni <em>contrasts</em> (treatment vs
+        post-fire control) — the outlet sediment-discharge constraint is built from contrast
+        deltas, so contrasts are required. Missing artifacts fail the run with a message naming
+        what to provision.
+      </p>
+      <p class="wc-field__help">
+        Note: on runs with grouped contrasts, the burn-severity filter uses each group's dominant
+        landuse class and can be unmapped when unburned hillslopes dominate a group — prefer it
+        on per-hillslope runs.
+      </p>
+      <div id="path_ce_preconditions" class="wc-field__help" aria-live="polite"></div>
+    </div>
+  </fieldset>
+
+  <fieldset class="wc-fieldset">
     <legend class="wc-fieldset__legend">Thresholds</legend>
     <div class="wc-field wc-field--inline">
-      <label class="wc-field__label" for="path_ce_sddc_threshold">Sediment Discharge Threshold (tons)</label>
-      <input id="path_ce_sddc_threshold" name="sddc_threshold" class="pure-input-1" type="number" step="any" min="0" placeholder="0">
+      <label class="wc-field__label" for="path_ce_sddc_threshold">Outlet Sediment Discharge Threshold</label>
+      <div class="path-ce-unitized" data-unitizer-category="weight-annual">
+        <input
+          id="path_ce_sddc_threshold"
+          name="sddc_threshold"
+          class="pure-input-1"
+          type="number" step="any" min="0" placeholder="0"
+          data-unitizer-category="weight-annual"
+          data-unitizer-unit="tonne/yr">
+        <span class="path-ce-unit-label" data-unitizer-label data-unitizer-category="weight-annual" data-unitizer-unit="tonne/yr">tonne/yr</span>
+      </div>
+      <p class="wc-field__help">Maximum allowed average-annual sediment discharge at the outlet after treatment. Set at or above the post-fire value to relax the outlet constraint.</p>
     </div>
     <div class="wc-field wc-field--inline">
-      <label class="wc-field__label" for="path_ce_sdyd_threshold">Sediment Yield Threshold (tons)</label>
-      <input id="path_ce_sdyd_threshold" name="sdyd_threshold" class="pure-input-1" type="number" step="any" min="0" placeholder="0">
+      <label class="wc-field__label" for="path_ce_sdyd_threshold">Hillslope Sediment Yield Threshold (tonnes/acre)</label>
+      <input id="path_ce_sdyd_threshold" name="sdyd_threshold" class="pure-input-1" type="number" step="any" min="0" placeholder="15">
+      <p class="wc-field__help">Per-hillslope yield ceiling; hillslopes above it must be treated. Units follow PATH's prepared data (tonnes per acre).</p>
     </div>
   </fieldset>
 
@@ -82,114 +136,32 @@
   </fieldset>
 
   <fieldset class="wc-fieldset">
-    <legend class="wc-fieldset__legend">Scenario Package</legend>
-    <div class="wc-field">
-      <p class="wc-field__help">
-        PATH provisions a fixed Omni bundle before each run. The solver compares the post-fire SBS baseline,
-        three mulch intensities, and the undisturbed reference scenario.
-      </p>
-      <ul class="wc-list">
-        <li><strong>SBS Map (`sbs_map`)</strong>: current post-fire baseline.</li>
-        <li><strong>Mulch 0.5 tons/acre (`mulch_15_sbs_map`)</strong>: +15% ground cover.</li>
-        <li><strong>Mulch 1.0 tons/acre (`mulch_30_sbs_map`)</strong>: +30% ground cover.</li>
-        <li><strong>Mulch 2.0 tons/acre (`mulch_60_sbs_map`)</strong>: +60% ground cover.</li>
-        <li><strong>Undisturbed (`undisturbed`)</strong>: pre-fire reference run.</li>
-      </ul>
-    </div>
-  </fieldset>
-
-  <fieldset class="wc-fieldset">
-    <legend class="wc-fieldset__legend">Mulch Costs</legend>
-    <div class="wc-field">
-      <table class="wc-table" id="path_ce_cost_table" aria-describedby="path_ce_cost_help">
+    <legend class="wc-fieldset__legend">Treatments</legend>
+    <div class="wc-field path-ce-field--wide">
+      <table class="wc-table" id="path_ce_treatments_table" aria-describedby="path_ce_treatments_help">
         <thead>
           <tr>
             <th scope="col">Label</th>
-            <th scope="col">Scenario Key</th>
-            <th scope="col">Cost</th>
+            <th scope="col">Omni Scenario</th>
+            <th scope="col">Rate (tons/acre)</th>
+            <th scope="col">Unit Cost (<span class="path-ce-unit-label" data-unitizer-label data-unitizer-category="currency-area" data-unitizer-unit="$/acre">$/acre</span>)</th>
+            <th scope="col">Fixed Cost ($)</th>
+            <th scope="col"></th>
           </tr>
         </thead>
-        <tbody>
-          <tr>
-            <td>Mulch 0.5 tons/acre</td>
-            <td><code>mulch_15_sbs_map</code></td>
-            <td>
-              <div class="path-ce-cost-field" data-unitizer-category="currency-area">
-                <input
-                  type="number"
-                  class="pure-input-1"
-                  step="any"
-                  min="0"
-                  name="mulch_costs[mulch_15_sbs_map]"
-                  data-pathce-cost="mulch_15_sbs_map"
-                  data-unitizer-category="currency-area"
-                  data-unitizer-unit="$/ha"
-                  placeholder="0"
-                >
-                <span
-                  class="path-ce-cost-unit"
-                  data-unitizer-label
-                  data-unitizer-category="currency-area"
-                  data-unitizer-unit="$/ha"
-                >$/ha</span>
-              </div>
-            </td>
-          </tr>
-          <tr>
-            <td>Mulch 1.0 tons/acre</td>
-            <td><code>mulch_30_sbs_map</code></td>
-            <td>
-              <div class="path-ce-cost-field" data-unitizer-category="currency-area">
-                <input
-                  type="number"
-                  class="pure-input-1"
-                  step="any"
-                  min="0"
-                  name="mulch_costs[mulch_30_sbs_map]"
-                  data-pathce-cost="mulch_30_sbs_map"
-                  data-unitizer-category="currency-area"
-                  data-unitizer-unit="$/ha"
-                  placeholder="0"
-                >
-                <span
-                  class="path-ce-cost-unit"
-                  data-unitizer-label
-                  data-unitizer-category="currency-area"
-                  data-unitizer-unit="$/ha"
-                >$/ha</span>
-              </div>
-            </td>
-          </tr>
-          <tr>
-            <td>Mulch 2.0 tons/acre</td>
-            <td><code>mulch_60_sbs_map</code></td>
-            <td>
-              <div class="path-ce-cost-field" data-unitizer-category="currency-area">
-                <input
-                  type="number"
-                  class="pure-input-1"
-                  step="any"
-                  min="0"
-                  name="mulch_costs[mulch_60_sbs_map]"
-                  data-pathce-cost="mulch_60_sbs_map"
-                  data-unitizer-category="currency-area"
-                  data-unitizer-unit="$/ha"
-                  placeholder="0"
-                >
-                <span
-                  class="path-ce-cost-unit"
-                  data-unitizer-label
-                  data-unitizer-category="currency-area"
-                  data-unitizer-unit="$/ha"
-                >$/ha</span>
-              </div>
-            </td>
-          </tr>
-        </tbody>
+        <tbody></tbody>
       </table>
-      <p id="path_ce_cost_help" class="wc-field__help">
-        Enter treatment costs in USD per hectare (or acre if English units are selected). PATH multiplies by Omni hillslope areas to build the solver cost vector.
+      <p id="path_ce_treatments_help" class="wc-field__help">
+        Unit costs are stored in USD per acre (displayed per hectare when SI units are selected);
+        per-hillslope cost = area × unit cost × rate. The label and mulch rate derive from the
+        selected Omni scenario (<code>mulch_15_sbs_map</code> → <code>0.5 tons/acre</code>).
+        Each treatment's Omni scenario and contrasts must exist before running.
       </p>
+      {% call button_row() %}
+        <button type="button" class="pure-button disable-readonly" data-pathce-action="add-treatment">
+          Add Treatment
+        </button>
+      {% endcall %}
     </div>
   </fieldset>
 

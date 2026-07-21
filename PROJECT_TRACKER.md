@@ -1,8 +1,8 @@
 # PROJECT_TRACKER.md
 > Kanban board for wepppy work packages and vision items
 
-**Last Updated**: 2026-07-16
-**Active Packages**: 13
+**Last Updated**: 2026-07-20
+**Active Packages**: 16
 **Quick Links**: [Work Packages Directory](docs/work-packages/) | [God-Tier Prompting Strategy](docs/god-tier-prompting-strategy.md)
 
 ## Purpose
@@ -275,7 +275,22 @@ When resuming Kubernetes work:
 
 Currently active work packages. Limit to 2-4 packages to maintain focus.
 
-**Current WIP Count**: 14 packages
+**Current WIP Count**: 16 packages
+
+### PATH-CE v2: Jackson Model Resync, Parquet-Native Pipeline, Full UI + Reports
+**Started**: 2026-07-20
+**Status**: Complete — owner accepted (security accepted-risk rows acknowledged 2026-07-21); committed
+**Size**: 3-4 focused weeks across 5 phases (executed 2026-07-20 → 2026-07-21)
+**Owner**: Claude Code (explicit executor assignment)
+**Priority**: High
+**Link**: [docs/work-packages/20260720_path_ce_v2/](docs/work-packages/20260720_path_ce_v2/)
+**Description**: Resync the vendored PATH Cost-Effective mod to Jackson Nakae's current codebase (Sddc-based constraint, contrast-group aggregation, threshold sweep, Quarto HTML report), consuming wepppy parquet artifacts directly (no CSV interchange, no pre-v2 compatibility), with a reworked UI exposing the full parameter contract and in-browser report links.
+
+**Current Status**:
+- Faithful vendored model core with upstream-golden parity tests; precondition-validating controller/RQ orchestration (no Omni auto-provisioning per D3); in-worker Quarto HTML report (image carries pinned Quarto 1.9.38); sandbox-CSP inline report serving via the browse microservice; full-parameter UI with unitized inputs. Four Codex review passes (40 findings) dispositioned; security review gate PASS ship-with-conditions (`artifacts/2026-07-21_security_review.md`). Platform side-catch: wepppy's ton→tonne unitizer factor was 25.4 (inch→mm) — fixed at source with regression tests. ADR-0023 Accepted.
+- Follow-up packages spawned by ratified scope: threshold-sweep parallelization (D5); PDF report (D2); folium asset vendoring (SEC-10).
+
+**Next Steps**: None — package closed. Follow-up packages (sweep parallelization, PDF report, folium vendoring) open as separate initiatives when prioritized.
 
 ---
 

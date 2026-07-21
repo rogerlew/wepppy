@@ -90,6 +90,7 @@ from starlette.responses import (
 )
 from starlette.routing import Route
 from wepppy.microservices.browse._download import create_routes as create_download_routes
+from wepppy.microservices.browse.report import create_routes as create_report_routes
 from wepppy.microservices.browse.dtale import (
     DTALE_SUPPORTED_SUFFIXES,
     build_handlers as build_dtale_handlers,
@@ -1600,6 +1601,7 @@ def create_app():
 
     routes.extend(create_download_routes(_prefix_path))
     routes.extend(create_gdalinfo_routes(_prefix_path))
+    routes.extend(create_report_routes(_prefix_path))
 
     exception_handlers = {
         HTTPException: browse_http_exception_handler,

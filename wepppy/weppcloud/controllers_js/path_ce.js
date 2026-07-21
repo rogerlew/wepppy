@@ -24,9 +24,30 @@ var PathCE = (function () {
     };
 
     var TREATMENT_FIELDS = ["label", "scenario", "quantity", "unit_cost", "fixed_cost"];
+    var DEFAULT_TREATMENTS = [
+        { label: "0.5 tons/acre", scenario: "mulch_15_sbs_map", unit_cost: 2475, quantity: 0.5, fixed_cost: 500 },
+        { label: "1 tons/acre", scenario: "mulch_30_sbs_map", unit_cost: 2475, quantity: 1, fixed_cost: 1000 },
+        { label: "2 tons/acre", scenario: "mulch_60_sbs_map", unit_cost: 2475, quantity: 2, fixed_cost: 1500 }
+    ];
+    var MULCH_SCENARIOS = ["mulch_15_sbs_map", "mulch_30_sbs_map", "mulch_60_sbs_map"];
+    var MULCH_SCENARIO_RE = /^mulch_(\d+)_sbs_map$/;
+
+    // label and rate are load-bearing derivations from the scenario name
+    // (mirrors presets.label_for_scenario: mulch_{n}_sbs_map -> n/30 tons/acre)
+    function rateForScenario(scenario) {
+        var match = MULCH_SCENARIO_RE.exec(String(scenario || ""));
+        if (!match) {
+            return null;
+        }
+        return Number(match[1]) / 30;
+    }
+
+    function labelForScenario(scenario) {
+        var rate = rateForScenario(scenario);
+        return rate === null ? null : String(rate) + " tons/acre";
+    }
     var EVENT_NAMES = [
         "pathce:config:loaded",
-        "pathce:config:saved",
         "pathce:config:error",
         "pathce:treatment:added",
         "pathce:treatment:removed",
@@ -160,6 +181,61 @@ var PathCE = (function () {
         };
     }
 
+    function setUnitizedValue(input, value) {
+        if (!input) {
+            return;
+        }
+        var hasValue = value !== null && value !== undefined && value !== "";
+        input.value = hasValue ? String(value) : "";
+        if (input.dataset) {
+            input.dataset.unitizerCanonicalValue = hasValue ? String(value) : "";
+            if (!input.dataset.unitizerActiveUnit) {
+                var canonicalUnit = input.getAttribute("data-unitizer-unit");
+                if (canonicalUnit) {
+                    input.dataset.unitizerActiveUnit = canonicalUnit;
+                }
+            }
+        }
+    }
+
+    function readUnitizedValue(input) {
+        if (!input) {
+            return null;
+        }
+        // UnitizerClient maintains the canonical dataset as the user edits the
+        // (possibly display-converted) field; without it the raw value IS the
+        // canonical value and the dataset may be stale.
+        var unitizerActive = typeof window !== "undefined" && Boolean(window.UnitizerClient);
+        var canonical = unitizerActive && input.dataset ? input.dataset.unitizerCanonicalValue : null;
+        var sourceValue = canonical && canonical !== "" ? canonical : input.value;
+        return toNumber(sourceValue);
+    }
+
+    function refreshUnitizer(scope) {
+        if (typeof window !== "undefined" && window.UnitizerClient && typeof window.UnitizerClient.ready === "function") {
+            window.UnitizerClient.ready()
+                .then(function (client) {
+                    // registration (not just update) is required for dynamic
+                    // inputs: it attaches the input/change handlers that keep
+                    // dataset.unitizerCanonicalValue current as the user edits
+                    if (client && typeof client.registerNumericInputs === "function") {
+                        client.registerNumericInputs(scope || undefined);
+                    }
+                    if (client && typeof client.updateNumericFields === "function") {
+                        client.updateNumericFields(scope || undefined);
+                    }
+                    // keep [data-unitizer-label] spans (e.g. the treatment
+                    // table's Unit Cost header) on the active display unit
+                    if (client && typeof client.updateUnitLabels === "function") {
+                        client.updateUnitLabels(scope || undefined);
+                    }
+                })
+                .catch(function () {
+                    /* noop */
+                });
+        }
+    }
+
     function applyFormValues(forms, formElement, values) {
         if (forms && typeof forms.applyValues === "function") {
             forms.applyValues(formElement, values);
@@ -234,6 +310,36 @@ var PathCE = (function () {
         return num.toFixed(2);
     }
 
+    // Sddc values are stored canonically in tonne/yr (weight-annual); the
+    // summary swaps in the unitizer's multi-unit blocks when the client is up
+    function applyUnitizedSummaryValues(controller) {
+        var summaryElement = controller.summaryElement;
+        if (!summaryElement || typeof window === "undefined" || !window.UnitizerClient
+            || typeof window.UnitizerClient.ready !== "function") {
+            return;
+        }
+        window.UnitizerClient.ready()
+            .then(function (client) {
+                if (!client || typeof client.renderValue !== "function") {
+                    return;
+                }
+                var nodes = summaryElement.querySelectorAll("[data-pathce-canonical]");
+                Array.prototype.forEach.call(nodes, function (node) {
+                    var html = client.renderValue(
+                        node.getAttribute("data-pathce-canonical"),
+                        node.getAttribute("data-pathce-canonical-unit") || "tonne/yr",
+                        { includeUnits: true }
+                    );
+                    if (html) {
+                        node.innerHTML = html;
+                    }
+                });
+            })
+            .catch(function () {
+                /* noop — fallback canonical text already rendered */
+            });
+    }
+
     function renderSummary(controller, results) {
         var summaryElement = controller.summaryElement;
         if (!summaryElement) {
@@ -256,13 +362,18 @@ var PathCE = (function () {
             summaryElement.appendChild(emptyItem);
             return;
         }
+        var solverLabel = data.primary_status === 1 ? "Optimal" : "Second-best (thresholds infeasible)";
+        var sweep = data.sweep || {};
         var rows = [
-            ["Status", data.status || "unknown"],
-            ["Used Secondary Solver", data.used_secondary ? "Yes" : "No"],
-            ["Total Cost (variable)", formatNumber(data.total_cost)],
-            ["Total Fixed Cost", formatNumber(data.total_fixed_cost)],
-            ["Total Sddc Reduction", formatNumber(data.total_sddc_reduction)],
-            ["Final Sddc", formatNumber(data.final_sddc)]
+            ["Solution", solverLabel],
+            ["Schema", data.schema_mode || "—"],
+            ["Selected Hillslopes", Array.isArray(data.selected_hillslopes) ? String(data.selected_hillslopes.length) : "—"],
+            ["Total Cost (variable, $)", formatNumber(data.total_cost)],
+            ["Total Fixed Cost ($)", formatNumber(data.total_fixed_cost)],
+            ["Total Sddc Reduction", formatNumber(data.total_sddc_reduction), data.total_sddc_reduction],
+            ["Final Sddc", formatNumber(data.final_sddc), data.final_sddc],
+            ["Untreatable (threshold not met)", data.n_untreatable !== undefined ? String(data.n_untreatable) : "—"],
+            ["Sweep Cells", sweep.n_cells !== undefined && sweep.n_cells !== null ? String(sweep.n_cells) + (sweep.n_errors ? " (" + sweep.n_errors + " failed)" : "") : "—"]
         ];
         var fragment = doc.createDocumentFragment();
         rows.forEach(function (entry) {
@@ -273,50 +384,206 @@ var PathCE = (function () {
             dt.textContent = entry[0];
             var dd = doc.createElement("dd");
             dd.className = "wc-summary-pane__definition";
-            dd.textContent = entry[1];
+            var canonical = entry.length > 2 ? toNumber(entry[2]) : null;
+            if (canonical !== null) {
+                // fallback text shows the canonical unit; the unitizer
+                // enhancement below replaces it with preference-aware blocks
+                dd.textContent = entry[1] + " tonne/yr";
+                dd.setAttribute("data-pathce-canonical", String(canonical));
+                dd.setAttribute("data-pathce-canonical-unit", "tonne/yr");
+            } else {
+                dd.textContent = entry[1];
+            }
             item.appendChild(dt);
             item.appendChild(dd);
             fragment.appendChild(item);
         });
         summaryElement.appendChild(fragment);
+        applyUnitizedSummaryValues(controller);
     }
 
-    function readMulchCosts(costInputs) {
-        var costs = {};
-        var list = Array.isArray(costInputs) ? costInputs : [];
-        list.forEach(function (input) {
-            if (!input || typeof input.getAttribute !== "function") {
+    var RESULT_RESOURCES = [
+        {
+            key: "report",
+            label: "Interactive Report",
+            hint: "Treatment selection map, threshold analysis with sliders, and the 3D cost surface (Quarto HTML)."
+        },
+        {
+            key: "selection",
+            label: "Selection CSV",
+            hint: "Selected hillslopes with their assigned treatment, area, and acre-based cost."
+        },
+        {
+            key: "sdyd",
+            label: "Final Sdyd CSV",
+            hint: "Post-treatment sediment yield for every hillslope in the analysis."
+        },
+        {
+            key: "untreatable",
+            label: "Untreatable CSV",
+            hint: "Hillslopes that cannot meet the yield threshold with any configured treatment."
+        },
+        {
+            key: "sweep",
+            label: "Threshold Sweep CSV",
+            hint: "Solver results across the threshold grid — the data behind the report's sliders and cost surface."
+        }
+    ];
+
+    function renderLinks(controller, results) {
+        var linksElement = controller.linksElement;
+        var panelElement = controller.resultsPanelElement;
+        if (!linksElement) {
+            return;
+        }
+        linksElement.textContent = "";
+        var doc = window.document;
+        var data = results && typeof results === "object" ? results : {};
+        var report = data.report || {};
+        var artifacts = data.artifacts || {};
+        var entryCount = 0;
+
+        function addEntry(href, label, hint) {
+            var item = doc.createElement("div");
+            var anchor = doc.createElement("a");
+            anchor.className = "wc-link wc-link--file";
+            anchor.href = href;
+            anchor.target = "_blank";
+            anchor.rel = "noopener";
+            anchor.textContent = label;
+            item.appendChild(anchor);
+            var help = doc.createElement("p");
+            help.className = "wc-field__help";
+            help.textContent = hint;
+            item.appendChild(help);
+            linksElement.appendChild(item);
+            entryCount += 1;
+        }
+
+        RESULT_RESOURCES.forEach(function (resource) {
+            if (resource.key === "report") {
+                if (report.html) {
+                    addEntry(endpoint("report/path_ce/"), resource.label, resource.hint);
+                } else if (report.skipped_reason) {
+                    var note = doc.createElement("p");
+                    note.className = "wc-field__help";
+                    note.textContent = "Report not rendered: " + report.skipped_reason;
+                    linksElement.appendChild(note);
+                    entryCount += 1;
+                }
                 return;
             }
-            var scenario = input.getAttribute("data-pathce-cost");
-            if (!scenario) {
-                return;
+            var relpath = artifacts[resource.key];
+            if (relpath) {
+                addEntry(endpoint("download/" + relpath + "?as_csv=1"), resource.label, resource.hint);
             }
-            var canonicalAttr = input.dataset ? input.dataset.unitizerCanonicalValue : null;
-            var sourceValue = canonicalAttr && canonicalAttr !== "" ? canonicalAttr : input.value;
-            var value = toNumber(sourceValue);
-            costs[scenario] = value === null ? 0 : value;
         });
-        return costs;
+
+        if (panelElement) {
+            panelElement.hidden = entryCount === 0;
+        }
+    }
+
+    function renderPreconditions(controller, statusData) {
+        var element = controller.preconditionsElement;
+        if (!element) {
+            return;
+        }
+        var statusName = statusData && typeof statusData.status === "string" ? statusData.status.toLowerCase() : "";
+        element.textContent = "";
+        element.classList.remove("wc-field__help--error");
+
+        var doc = window.document;
+        // prefer the structured list surfaced by the status endpoint; fall
+        // back to prose parsing for older payloads
+        var structured = statusData && Array.isArray(statusData.precondition_errors)
+            ? statusData.precondition_errors.filter(function (item) { return item; })
+            : [];
+        var lines = structured;
+        if (!lines.length) {
+            var message = statusData && statusData.status_message ? String(statusData.status_message) : "";
+            var isPreconditionFailure = statusName === "failed" && /run Omni|Omni scenario|Omni contrast|precondition|unreadable|re-run watershed/i.test(message);
+            if (!isPreconditionFailure) {
+                return;
+            }
+            lines = message.split(";").map(function (part) { return part.trim(); }).filter(Boolean);
+        }
+        if (!lines.length) {
+            return;
+        }
+        element.classList.add("wc-field__help--error");
+        lines.forEach(function (line) {
+            var paragraph = doc.createElement("p");
+            paragraph.textContent = String(line);
+            element.appendChild(paragraph);
+        });
+    }
+
+    function syncDerivedTreatmentFields(row) {
+        if (!row) {
+            return;
+        }
+        var scenarioField = row.querySelector('[data-pathce-field="scenario"]');
+        var labelField = row.querySelector('[data-pathce-field="label"]');
+        var quantityField = row.querySelector('[data-pathce-field="quantity"]');
+        var scenario = scenarioField ? scenarioField.value : "";
+        var label = labelForScenario(scenario);
+        var rate = rateForScenario(scenario);
+        if (labelField) {
+            labelField.value = label === null ? "" : label;
+        }
+        if (quantityField) {
+            quantityField.value = rate === null ? "" : String(rate);
+        }
     }
 
     function createTreatmentRow(option) {
         var doc = window.document;
         var row = doc.createElement("tr");
+        var scenario = option && option.scenario ? String(option.scenario) : MULCH_SCENARIOS[0];
         TREATMENT_FIELDS.forEach(function (field) {
             var cell = doc.createElement("td");
-            var input = doc.createElement("input");
-            input.setAttribute("data-pathce-field", field);
-            if (field === "label" || field === "scenario") {
-                input.type = "text";
+            var control;
+            if (field === "scenario") {
+                control = doc.createElement("select");
+                var scenarios = MULCH_SCENARIOS.slice();
+                // keep a stored scenario visible even if it is not a stock option
+                if (scenario && scenarios.indexOf(scenario) === -1) {
+                    scenarios.push(scenario);
+                }
+                scenarios.forEach(function (name) {
+                    var opt = doc.createElement("option");
+                    opt.value = name;
+                    opt.textContent = name;
+                    control.appendChild(opt);
+                });
+                control.value = scenario;
             } else {
-                input.type = "number";
-                input.step = "any";
-                input.min = "0";
+                control = doc.createElement("input");
+                if (field === "label") {
+                    control.type = "text";
+                } else {
+                    control.type = "number";
+                    control.step = "any";
+                    control.min = "0";
+                }
+                var value = option && Object.prototype.hasOwnProperty.call(option, field) ? option[field] : "";
+                if (field === "unit_cost") {
+                    // stored $/acre (D4); unitizer converts the display when SI is active
+                    control.setAttribute("data-unitizer-category", "currency-area");
+                    control.setAttribute("data-unitizer-unit", "$/acre");
+                    setUnitizedValue(control, value === null || value === undefined ? "" : value);
+                } else {
+                    control.value = value === null || value === undefined ? "" : String(value);
+                }
             }
-            var value = option && Object.prototype.hasOwnProperty.call(option, field) ? option[field] : "";
-            input.value = value === null || value === undefined ? "" : String(value);
-            cell.appendChild(input);
+            if (field === "label" || field === "quantity") {
+                // derived from the scenario; not user-editable
+                control.readOnly = true;
+                control.tabIndex = -1;
+            }
+            control.setAttribute("data-pathce-field", field);
+            cell.appendChild(control);
             row.appendChild(cell);
         });
         var actionCell = doc.createElement("td");
@@ -326,15 +593,16 @@ var PathCE = (function () {
         removeButton.textContent = "Remove";
         actionCell.appendChild(removeButton);
         row.appendChild(actionCell);
+        syncDerivedTreatmentFields(row);
         return row;
     }
 
     function renderTreatmentOptions(controller, options) {
         var body = controller.treatmentsBody;
-        var list = Array.isArray(options) ? options : [];
+        var list = Array.isArray(options) && options.length ? options : DEFAULT_TREATMENTS;
         if (!body) {
             if (controller.state && controller.state.config) {
-                controller.state.config.treatment_options = list.slice();
+                controller.state.config.treatments = list.slice();
             }
             return;
         }
@@ -342,6 +610,7 @@ var PathCE = (function () {
         list.forEach(function (option) {
             body.appendChild(createTreatmentRow(option));
         });
+        refreshUnitizer(controller.form);
     }
 
     function appendTreatmentRow(controller, option) {
@@ -349,9 +618,27 @@ var PathCE = (function () {
         if (!body) {
             return null;
         }
-        var row = createTreatmentRow(option || {});
+        var seed = option || {};
+        if (!seed.scenario) {
+            // default to the first scenario not already configured (duplicates
+            // are rejected server-side), prefilled with that tier's defaults
+            var used = Array.prototype.map.call(
+                body.querySelectorAll('[data-pathce-field="scenario"]'),
+                function (field) { return field.value; }
+            );
+            var unused = MULCH_SCENARIOS.filter(function (name) {
+                return used.indexOf(name) === -1;
+            });
+            var scenario = unused.length ? unused[0] : MULCH_SCENARIOS[0];
+            var defaults = DEFAULT_TREATMENTS.filter(function (entry) {
+                return entry.scenario === scenario;
+            })[0];
+            seed = Object.assign({}, defaults || { scenario: scenario }, seed);
+        }
+        var row = createTreatmentRow(seed);
         body.appendChild(row);
-        emitEvent(controller, "pathce:treatment:added", { option: option || {}, row: row });
+        refreshUnitizer(controller.form);
+        emitEvent(controller, "pathce:treatment:added", { option: seed, row: row });
         return row;
     }
 
@@ -369,25 +656,32 @@ var PathCE = (function () {
     function harvestTreatmentOptions(controller) {
         var body = controller.treatmentsBody;
         if (!body) {
-            if (controller.state && controller.state.config && Array.isArray(controller.state.config.treatment_options)) {
-                return controller.state.config.treatment_options.slice();
+            if (controller.state && controller.state.config && Array.isArray(controller.state.config.treatments)) {
+                return controller.state.config.treatments.slice();
             }
             return [];
         }
         var rows = body.querySelectorAll("tr");
         var options = [];
         Array.prototype.slice.call(rows).forEach(function (row) {
+            var getInput = function (name) {
+                return row.querySelector('[data-pathce-field="' + name + '"]');
+            };
             var getField = function (name) {
-                var input = row.querySelector('[data-pathce-field="' + name + '"]');
+                var input = getInput(name);
                 return input ? input.value : "";
             };
-            var label = String(getField("label") || "").trim();
             var scenario = String(getField("scenario") || "").trim();
+            // label and rate are derived from the scenario, not read from the
+            // (readonly) fields — guarantees the server's derivation contract
+            var derivedLabel = labelForScenario(scenario);
+            var label = derivedLabel !== null ? derivedLabel : String(getField("label") || "").trim();
             if (!label && !scenario) {
                 return;
             }
-            var quantity = toNumber(getField("quantity"));
-            var unitCost = toNumber(getField("unit_cost"));
+            var derivedRate = rateForScenario(scenario);
+            var quantity = derivedRate !== null ? derivedRate : toNumber(getField("quantity"));
+            var unitCost = readUnitizedValue(getInput("unit_cost"));
             var fixedCost = toNumber(getField("fixed_cost"));
             options.push({
                 label: label,
@@ -401,65 +695,50 @@ var PathCE = (function () {
         return options;
     }
 
-    function applyMulchCosts(costInputs, costMap) {
-        var list = Array.isArray(costInputs) ? costInputs : [];
-        var formScope = null;
-        list.forEach(function (input) {
-            if (!input || typeof input.getAttribute !== "function") {
-                return;
-            }
-            var scenario = input.getAttribute("data-pathce-cost");
-            if (!scenario) {
-                return;
-            }
-            var value = costMap && Object.prototype.hasOwnProperty.call(costMap, scenario)
-                ? costMap[scenario]
-                : null;
-            var hasValue = value !== null && value !== undefined && value !== "";
-            input.value = hasValue ? String(value) : "";
-            if (input.dataset) {
-                input.dataset.unitizerCanonicalValue = hasValue ? String(value) : "";
-                if (!input.dataset.unitizerActiveUnit) {
-                    var canonicalUnit = input.getAttribute("data-unitizer-unit");
-                    if (canonicalUnit) {
-                        input.dataset.unitizerActiveUnit = canonicalUnit;
-                    }
-                }
-            }
-            if (!formScope && typeof input.closest === "function") {
-                formScope = input.closest("form");
-            }
-        });
-
-        if (typeof window !== "undefined" && window.UnitizerClient && typeof window.UnitizerClient.ready === "function") {
-            window.UnitizerClient.ready()
-                .then(function (client) {
-                    if (client && typeof client.updateNumericFields === "function") {
-                        client.updateNumericFields(formScope || undefined);
-                    }
-                })
-                .catch(function () {
-                    /* noop */
-                });
-        }
-    }
-
     function buildPayload(forms, controller) {
         var formElement = controller.form;
         var values = forms.serializeForm(formElement, { format: "json" }) || {};
         var severity = normalizeSeverity(values.severity_filter);
         var slopeMin = toNumber(values.slope_min);
         var slopeMax = toNumber(values.slope_max);
-        var sddc = toNumber(values.sddc_threshold);
+        // the Sddc input is unitized: read the canonical (tonne/yr) value, not
+        // the possibly display-converted field value
+        var sddc = readUnitizedValue(controller.sddcInput);
+        if (sddc === null) {
+            sddc = toNumber(values.sddc_threshold);
+        }
         var sdyd = toNumber(values.sdyd_threshold);
-        return {
-            sddc_threshold: sddc === null ? 0 : sddc,
-            sdyd_threshold: sdyd === null ? 0 : sdyd,
+        var payload = {
             slope_range: [slopeMin, slopeMax],
             severity_filter: severity,
-            mulch_costs: readMulchCosts(controller.mulchCostInputs),
-            treatment_options: harvestTreatmentOptions(controller)
+            treatments: harvestTreatmentOptions(controller)
         };
+        // blank thresholds are omitted so the server's partial-merge keeps the
+        // currently configured values instead of silently resetting to 0
+        if (sddc !== null) {
+            payload.sddc_threshold = sddc;
+        }
+        if (sdyd !== null) {
+            payload.sdyd_threshold = sdyd;
+        }
+        return payload;
+    }
+
+    function extractErrorMessage(response) {
+        if (!response || typeof response !== "object") {
+            return null;
+        }
+        var error = response.error;
+        if (!error) {
+            return null;
+        }
+        if (typeof error === "string") {
+            return error;
+        }
+        if (typeof error === "object" && error.message) {
+            return String(error.message);
+        }
+        return "Request failed.";
     }
 
     function updateStatusMessage(controller, message) {
@@ -534,10 +813,11 @@ var PathCE = (function () {
         controller.messageElement = messageElement;
         controller.brailleElement = brailleElement;
         controller.command_btn_id = ["path_ce_run"];
-        controller.mulchCostInputs = Array.prototype.slice.call(
-            formElement.querySelectorAll("[data-pathce-cost]")
-        );
         controller.treatmentsBody = treatmentsBody || null;
+        controller.linksElement = dom.qs("#path_ce_links");
+        controller.resultsPanelElement = dom.qs("#path_ce_results_panel");
+        controller.preconditionsElement = dom.qs("#path_ce_preconditions");
+        controller.sddcInput = dom.qs("#path_ce_sddc_threshold");
 
         var baseTriggerEvent = controller.triggerEvent.bind(controller);
         controller.triggerEvent = function (eventName, payload) {
@@ -551,8 +831,8 @@ var PathCE = (function () {
             state.config = Object.assign({}, config || {});
             var values = buildFormValues(state.config);
             applyFormValues(forms, formElement, values);
-            applyMulchCosts(controller.mulchCostInputs, state.config.mulch_costs || {});
-            renderTreatmentOptions(controller, state.config.treatment_options || []);
+            setUnitizedValue(controller.sddcInput, values.sddc_threshold);
+            renderTreatmentOptions(controller, state.config.treatments || []);
             emitEvent(controller, "pathce:config:loaded", { config: state.config });
         }
 
@@ -595,6 +875,7 @@ var PathCE = (function () {
             updateStatusMessage(controller, data.status || "");
             setMessage(controller, data.status_message || "", statusName === "failed");
             updateBraille(controller, data.progress);
+            renderPreconditions(controller, data);
 
             emitEvent(controller, "pathce:status:update", { status: data });
 
@@ -630,6 +911,7 @@ var PathCE = (function () {
         function applyResults(payload) {
             var results = payload && payload.results ? payload.results : {};
             renderSummary(controller, results);
+            renderLinks(controller, results);
             emitEvent(controller, "pathce:results:update", { results: results });
         }
 
@@ -671,17 +953,11 @@ var PathCE = (function () {
                 });
         }
 
-        function handleSave(event) {
-            event.preventDefault();
-            controller.saveConfig();
-        }
-
         function handleRun(event) {
             event.preventDefault();
             controller.run();
         }
 
-        dom.delegate(formElement, "click", "[data-pathce-action='save-config']", handleSave);
         dom.delegate(formElement, "click", "[data-pathce-action='run']", handleRun);
         dom.delegate(formElement, "click", "[data-pathce-action='add-treatment']", function (event) {
             event.preventDefault();
@@ -693,6 +969,13 @@ var PathCE = (function () {
                 ? event.target.closest("tr")
                 : null;
             removeTreatmentRow(controller, row);
+        });
+        dom.delegate(formElement, "change", "select[data-pathce-field='scenario']", function (event) {
+            var row = event && event.target && typeof event.target.closest === "function"
+                ? event.target.closest("tr")
+                : null;
+            syncDerivedTreatmentFields(row);
+            emitEvent(controller, "pathce:treatment:updated", { row: row });
         });
 
         controller.fetchConfig = function () {
@@ -709,29 +992,6 @@ var PathCE = (function () {
                 })
                 .catch(function (error) {
                     setMessage(controller, "Failed to load configuration.", true);
-                    controller.pushErrorStacktrace(controller, error);
-                    emitEvent(controller, "pathce:config:error", { error: error });
-                    throw error;
-                });
-        };
-
-        controller.saveConfig = function () {
-            var payload = buildPayload(forms, controller);
-            setMessage(controller, "Saving configuration…");
-            return http.postJson(ENDPOINTS.config(), payload, { form: formElement })
-                .then(function (result) {
-                    var response = result && result.body !== undefined ? result.body : result;
-                    var nextConfig = response && response.config ? response.config : payload;
-                    applyConfig(nextConfig);
-                    setMessage(controller, "Configuration saved.");
-                    if (controller.stacktrace && typeof controller.stacktrace.empty === "function") {
-                        controller.stacktrace.empty();
-                    }
-                    emitEvent(controller, "pathce:config:saved", { config: state.config, response: response });
-                    return response;
-                })
-                .catch(function (error) {
-                    setMessage(controller, "Failed to save configuration.", true);
                     controller.pushErrorStacktrace(controller, error);
                     emitEvent(controller, "pathce:config:error", { error: error });
                     throw error;
@@ -762,6 +1022,23 @@ var PathCE = (function () {
             return http.postJson(ENDPOINTS.run(), payload, { form: formElement })
                 .then(function (result) {
                     var response = result && result.body !== undefined ? result.body : result;
+                    // error_factory responses arrive as HTTP 200 with an error body
+                    var errorMessage = extractErrorMessage(response);
+                    if (errorMessage) {
+                        setMessage(controller, errorMessage, true);
+                        if (typeof controller.stop_job_status_polling === "function") {
+                            controller.stop_job_status_polling(controller);
+                        }
+                        if (typeof controller.reset_status_spinner === "function") {
+                            controller.reset_status_spinner(controller);
+                        }
+                        state.lastEmittedStatus = "error";
+                        emitEvent(controller, "pathce:run:error", { error: errorMessage });
+                        controller.triggerEvent("job:error", { task: "pathce:run", error: errorMessage });
+                        var runError = new Error(errorMessage);
+                        runError.pathceHandled = true;
+                        throw runError;
+                    }
                     var jobId = response && response.job_id;
                     state.lastJobId = jobId || null;
                     state.lastEmittedStatus = "running";
@@ -782,6 +1059,9 @@ var PathCE = (function () {
                     return response;
                 })
                 .catch(function (error) {
+                    if (error && error.pathceHandled) {
+                        throw error;
+                    }
                     setMessage(controller, "Failed to enqueue PATH Cost-Effective run.", true);
                     controller.pushErrorStacktrace(controller, error);
                     // Preserve the last job_id hint so users can still inspect the previous attempt.

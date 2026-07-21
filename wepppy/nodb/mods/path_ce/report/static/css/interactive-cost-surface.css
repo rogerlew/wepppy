@@ -1,0 +1,38 @@
+.costsurface-root {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.costsurface-plot {
+  border: 1px solid #d3d3d3;
+  border-radius: 6px;
+  overflow: hidden;
+  background: #ffffff;
+}
+
+.costsurface-status {
+  display: flex;
+  gap: 24px;
+  flex-wrap: wrap;
+  padding: 10px 12px;
+  background: #fafafa;
+  border: 1px solid #d3d3d3;
+  border-radius: 6px;
+  font-size: 13px;
+  color: #2a2a2a;
+}
+
+.costsurface-status-item {
+  display: flex;
+  gap: 6px;
+  align-items: baseline;
+}
+
+.costsurface-status-label {
+  color: #6b6b6b;
+}
+
+.costsurface-status-item strong {
+  font-size: 14px;
+}
