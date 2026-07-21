@@ -261,6 +261,9 @@ ksat_r = rosetta_ks / 8.64  # cm/day -> um/s
 
 2. **Rosetta pedotransfer** (fallback)
    - Uses Rosetta2 or Rosetta3 predicted values
+   - Receives total sand and clay from SSURGO; silt is derived as
+     `100 - sandtotal_r - claytotal_r`. `sandvf_r` is very-fine sand and is
+     not a Rosetta silt input.
    - **Build Note:** `"field_cap estimated from rosetta2"`
 
 3. **Invalid-value sanitization** (guardrail)

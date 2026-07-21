@@ -6,7 +6,8 @@ from types import SimpleNamespace
 import pytest
 
 import wepppy.soils.ssurgo.ssurgo as ssurgo_module
-from wepppy.soils.ssurgo.ssurgo import WeppSoil
+from rosetta import Rosetta2, Rosetta3
+from wepppy.soils.ssurgo.ssurgo import Horizon, WeppSoil
 
 pytestmark = pytest.mark.unit
 
@@ -129,3 +130,37 @@ def test_affected_mukey_horizon_rejects_invalid_rosetta_fc_wp(
             _affected_layer(1385512),
             defaults={},
         )
+
+
+def test_horizon_derives_rosetta_silt_instead_of_using_very_fine_sand() -> None:
+    layer = _affected_layer(1385512)
+    expected = Rosetta3().predict_kwargs(sand=55.0, silt=25.0, clay=20.0, bd=1.52)
+
+    horizon = Horizon(layer["chkey"], layer, defaults={})
+
+    assert horizon.field_cap == pytest.approx(expected["fc"])
+    assert horizon.wilt_pt == pytest.approx(expected["wp"])
+
+
+def test_horizon_defaults_derive_rosetta_silt_for_missing_ssurgo_texture() -> None:
+    layer = _affected_layer(1385512)
+    layer.update(
+        sandtotal_r=None,
+        claytotal_r=None,
+        sandvf_r=None,
+        dbthirdbar_r=None,
+        wthirdbar_r=None,
+        wfifteenbar_r=None,
+    )
+    defaults = {
+        "sandtotal_r": 66.8,
+        "claytotal_r": 7.0,
+        "sandvf_r": 10.0,
+        "smr": 55.5,
+    }
+    expected = Rosetta2().predict_kwargs(sand=66.8, silt=26.2, clay=7.0)
+
+    horizon = Horizon(layer["chkey"], layer, defaults=defaults)
+
+    assert horizon.field_cap == pytest.approx(expected["fc"])
+    assert horizon.wilt_pt == pytest.approx(expected["wp"])

@@ -39,7 +39,11 @@ from concurrent.futures import ProcessPoolExecutor, wait, FIRST_COMPLETED
 
 from wepppy.all_your_base import try_parse, try_parse_float, isfloat, isint
 
-from wepppy.wepp.soils import HorizonMixin, estimate_bulk_density
+from wepppy.wepp.soils import (
+    HorizonMixin,
+    estimate_bulk_density,
+    rosetta_texture_fractions,
+)
 from wepppy.wepp.soils.utils import simple_texture, soil_texture
 from wepppy.wepp.soils.utils.utils import _quote_wepp_text
 
@@ -522,20 +526,20 @@ class Horizon(HorizonMixin):
 
         clay = _as_finite_float(self.claytotal_r, context=f"{chkey}::claytotal_r")
         sand = _as_finite_float(self.sandtotal_r, context=f"{chkey}::sandtotal_r")
-        vfs = _as_finite_float(self.sandvf_r, context=f"{chkey}::sandvf_r")
+        sand, silt, clay = rosetta_texture_fractions(sand=sand, clay=clay)
         bd = self.dbthirdbar_r
 
         if _is_finite_float(bd):
             bd = float(bd)
             r3 = Rosetta3()
             rosetta_model = "rosetta3"
-            res_dict = r3.predict_kwargs(sand=sand, silt=vfs, clay=clay, bd=bd)
+            res_dict = r3.predict_kwargs(sand=sand, silt=silt, clay=clay, bd=bd)
             # {'theta_r': 0.07949616246974722, 'theta_s': 0.3758162328532708, 'alpha': 0.0195926196444751,
             # 'npar': 1.5931548676406013, 'ks': 40.19261619137084, 'wp': 0.08967567432339575, 'fc': 0.1877343793032436}
         else:
             rosetta_model = "rosetta2"
             r2 = Rosetta2()
-            res_dict = r2.predict_kwargs(sand=sand, silt=vfs, clay=clay)
+            res_dict = r2.predict_kwargs(sand=sand, silt=silt, clay=clay)
 
         if not _is_finite_float(self.ksat_r):
             # Rosetta returns Ks in cm/day; SSURGO ksat_r is stored as um/s.
@@ -584,10 +588,10 @@ class Horizon(HorizonMixin):
 
         if not _is_finite_float(self.dbthirdbar_r):
             self.horizon_build_notes.append(
-                f"  {chkey}::bd estimated from sand, vfs, and clay"
+                f"  {chkey}::bd estimated from sand, silt, and clay"
             )
             self.dbthirdbar_r = estimate_bulk_density(
-                sand_percent=sand, silt_percent=vfs, clay_percent=clay
+                sand_percent=sand, silt_percent=silt, clay_percent=clay
             )
 
         self._computeAnisotropy()

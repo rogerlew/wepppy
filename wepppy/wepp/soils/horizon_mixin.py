@@ -2,8 +2,8 @@
 
 from __future__ import annotations
 
-from math import exp
-from typing import Any, Dict, Optional
+from math import exp, isfinite
+from typing import Any, Dict, Optional, Tuple
 
 from wepppy.all_your_base import isfloat
 
@@ -11,6 +11,7 @@ __all__ = [
     "estimate_bulk_density",
     "compute_conductivity",
     "compute_erodibilities",
+    "rosetta_texture_fractions",
     "HorizonMixin",
 ]
 
@@ -39,6 +40,39 @@ def estimate_bulk_density(sand_percent: float, silt_percent: float, clay_percent
         + (clay_percent * clay_density)
         + (remainder_percent * remainder_density)
     ) / 100.0
+
+
+def rosetta_texture_fractions(*, sand: Any, clay: Any) -> Tuple[float, float, float]:
+    """Return finite sand, silt, and clay percentages for a Rosetta call.
+
+    SSURGO provides total sand and clay, so silt is their remainder.  Its
+    ``sandvf_r`` field is very-fine sand, not silt, and must not be passed to
+    Rosetta as the third texture fraction.
+    """
+    try:
+        sand_percent = float(sand)
+        clay_percent = float(clay)
+    except (TypeError, ValueError, OverflowError) as exc:
+        raise ValueError(
+            f"Rosetta texture inputs must be numeric, got sand={sand!r}, clay={clay!r}."
+        ) from exc
+
+    silt_percent = 100.0 - sand_percent - clay_percent
+    if not (
+        isfinite(sand_percent)
+        and isfinite(silt_percent)
+        and isfinite(clay_percent)
+        and 0.0 <= sand_percent <= 100.0
+        and 0.0 <= silt_percent <= 100.0
+        and 0.0 <= clay_percent <= 100.0
+    ):
+        raise ValueError(
+            "Rosetta texture fractions must be finite percentages that sum to 100 "
+            f"with non-negative silt, got sand={sand_percent}, "
+            f"silt={silt_percent}, clay={clay_percent}."
+        )
+
+    return sand_percent, silt_percent, clay_percent
 
 
 def compute_conductivity(clay: float, sand: float, cec: float) -> Optional[float]:
@@ -137,6 +171,7 @@ class HorizonMixin(object):
         assert isfloat(clay), clay
         assert isfloat(sand), sand
         assert isfloat(vfs), vfs
+        sand, silt, clay = rosetta_texture_fractions(sand=sand, clay=clay)
 
         #if isfloat(bd) and isfloat(th33) and isfloat(th1500):
         #    r5 = Rosetta5()
@@ -144,13 +179,13 @@ class HorizonMixin(object):
 
         if isfloat(bd):
             r3 = Rosetta3()
-            res_dict = r3.predict_kwargs(sand=sand, silt=vfs, clay=clay, bd=bd)
+            res_dict = r3.predict_kwargs(sand=sand, silt=silt, clay=clay, bd=bd)
             #{'theta_r': 0.07949616246974722, 'theta_s': 0.3758162328532708, 'alpha': 0.0195926196444751,
             # 'npar': 1.5931548676406013, 'ks': 40.19261619137084, 'wp': 0.08967567432339575, 'fc': 0.1877343793032436}
 
         else:
             r2 = Rosetta2()
-            res_dict = r2.predict_kwargs(sand=sand, silt=vfs, clay=clay)
+            res_dict = r2.predict_kwargs(sand=sand, silt=silt, clay=clay)
 
         self.ks = res_dict['ks']  # Rosetta Ks output in cm/day.
         self.wilt_pt = res_dict['wp']  # Volumetric water content (cm3/cm3).
