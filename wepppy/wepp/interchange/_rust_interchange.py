@@ -8,6 +8,9 @@ from ._utils import _ensure_cli_parquet
 from .versioning import INTERCHANGE_VERSION
 
 
+LOGGER = logging.getLogger(__name__)
+
+
 REQUIRED_WEPPPYO3_INTERCHANGE_API = frozenset(
     {
         "ag_fields_hillslope_ebe_files_to_parquet",
@@ -83,13 +86,29 @@ def call_wepppyo3_interchange(operation: str, symbol: str, /, *args, **kwargs):
     module = require_wepppyo3_interchange(operation, symbol)
     native_call = getattr(module, symbol)
     try:
-        return native_call(*args, **kwargs)
+        result = native_call(*args, **kwargs)
     except Exception as exc:  # broad-except: required Python/native execution boundary
         # This is the deliberate Python/native execution boundary. PyO3 maps
         # parse, I/O, Arrow, and signature failures to multiple Python classes.
         raise WeppInterchangeExecutionError(
             f"WEPPpyo3 interchange operation {operation!r} failed via {symbol}: {exc}"
         ) from exc
+
+    if isinstance(result, dict):
+        LOGGER.info(
+            "WEPP interchange completed operation=%s symbol=%s input=%s output=%s "
+            "candidates=%s accepted=%s rejected=%s rows_written=%s row_groups=%s",
+            operation,
+            symbol,
+            args[0] if args else None,
+            args[1] if len(args) > 1 else None,
+            result.get("candidate_records", result.get("rows_written")),
+            result.get("accepted_records", result.get("rows_written")),
+            result.get("rejected_records", 0),
+            result.get("rows_written"),
+            result.get("row_groups"),
+        )
+    return result
 
 
 def version_args() -> tuple[int, int]:

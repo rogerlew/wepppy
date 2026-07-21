@@ -58,6 +58,27 @@ def test_native_execution_failure_has_stable_error_and_cause(monkeypatch: pytest
     assert raised.value.__cause__ is cause
 
 
+def test_native_summary_is_logged_with_record_counts(
+    monkeypatch: pytest.MonkeyPatch, caplog: pytest.LogCaptureFixture
+) -> None:
+    module = SimpleNamespace(
+        writer=lambda: {
+            "candidate_records": 27,
+            "accepted_records": 27,
+            "rejected_records": 0,
+            "rows_written": 27,
+            "row_groups": 1,
+        }
+    )
+    monkeypatch.setattr(native, "_import_wepppyo3_interchange", lambda: module)
+
+    with caplog.at_level("INFO", logger=native.LOGGER.name):
+        result = native.call_wepppyo3_interchange("test writer", "writer")
+
+    assert result["rows_written"] == 27
+    assert "input=None output=None candidates=27 accepted=27 rejected=0 rows_written=27 row_groups=1" in caplog.text
+
+
 def test_complete_required_api_can_be_preflighted(monkeypatch: pytest.MonkeyPatch) -> None:
     module = SimpleNamespace(
         **{name: (lambda: None) for name in native.REQUIRED_WEPPPYO3_INTERCHANGE_API}

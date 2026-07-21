@@ -275,7 +275,7 @@ When resuming Kubernetes work:
 
 Currently active work packages. Limit to 2-4 packages to maintain focus.
 
-**Current WIP Count**: 16 packages
+**Current WIP Count**: 15 packages
 
 ### PATH-CE v2: Jackson Model Resync, Parquet-Native Pipeline, Full UI + Reports
 **Started**: 2026-07-20
@@ -601,6 +601,22 @@ Currently active work packages. Limit to 2-4 packages to maintain focus.
 ## ✅ Done
 
 Recently completed work packages. Archived immediately upon completion.
+
+### Interchange Parser Observability Contract (2026-07-21)
+
+**Status**: ✅ **COMPLETE; RELEASE DEPLOYMENT PENDING**
+
+**Link**: [docs/work-packages/20260721_interchange_observability_contract/](docs/work-packages/20260721_interchange_observability_contract/)
+
+**Lifecycle**: In Progress -> Done (2026-07-21)
+
+**Summary**: Restored current 27-field CHNWB conversion; repaired ten native
+silent candidate-loss paths; exposed parser accounting at the Python boundary;
+and added the interchange observability standard. A disposable reparse of the
+affected source produced all 34,192,070 expected rows without overwriting the
+production artifact.
+
+---
 
 ### Omni Mod State Synchronization (2026-07-20)
 
