@@ -115,7 +115,7 @@ GOV-01 machine-readable manifest. GOV-99 is intentionally absent from all sets.
 | ID | Dated package | Borrowed owners | Exact defect boundary | Depends on | Security | State |
 | --- | --- | --- | --- | --- | --- | --- |
 | REM-01 | `20260720_omni_mod_state_sync` | DOM-02, DOM-25A, DOM-25B | Omni Scenarios/Contrasts feature-registry menu availability; Mods checkbox and reason markup; `Ron.mods` enable/disable guards; runs-page section/preflight visibility and metadata; dynamic shared Omni controller remount; Dev/Root gates on contrast run/dry-run/delete plus canonical run access and Dev/Root on the CAP-gated report; focused tests and generated controller bundle only | GOV-00A-M1A | `high`: role-gated dynamic load, persisted mod mutation, contrast actions, and report data | completed / dual-reviewed |
-| REM-02 | `20260721_runs_ttl_deletion_catalog` | SURF-06 | Read-only TTL policy/expiry projection for already-authorized catalog rows; one lifecycle table cell; dedicated Usersum documentation and focused catalog/template/doc tests only | GOV-00A-M1B | `high`: authenticated run-metadata presentation; no new access path or mutation | ratification in progress |
+| REM-02 | `20260721_runs_ttl_deletion_catalog` | SURF-06 | Read-only TTL policy/expiry projection for already-authorized catalog rows; one lifecycle table cell; dedicated Usersum documentation and focused catalog/template/doc tests only | GOV-00A-M1B | `high`: authenticated run-metadata presentation; no new access path or mutation | completed / dual-reviewed |
 
 REM-01 excludes Omni scenario/contrast payload shapes, uploads, queue wiring or
 execution semantics, artifacts, report content/formatting, overlays, deletion
@@ -155,7 +155,7 @@ The exact REM-02 source boundary is limited to:
   `wepppy/weppcloud/templates/user/runs2.html`;
 - the read-only `read_ttl_state` consumption boundary in
   `wepppy/weppcloud/utils/run_ttl.py` (without modifying TTL policy logic);
-- `wepppy/weppcloud/routes/usersum/docs_manifest.yaml`,
+- `wepppy/weppcloud/routes/usersum/{docs_manifest.yaml,nav_tree.yaml}`,
   `wepppy/weppcloud/routes/usersum/usersum.py`, and
   `wepppy/weppcloud/routes/usersum/weppcloud/run-ttl-deletion.md`;
 - validation generator `python3 tools/usersum_docs_tool.py build-index --write
@@ -165,7 +165,11 @@ The exact REM-02 source boundary is limited to:
 - `tests/weppcloud/routes/test_user_meta_boundaries.py`,
   `tests/weppcloud/routes/test_user_runs_admin_scope.py`,
   `tests/weppcloud/routes/test_usersum_bp.py`, and
-  `tests/weppcloud/test_usersum_template_wiring.py`; and
+  `tests/weppcloud/test_usersum_template_wiring.py`;
+- `tests/weppcloud/utils/test_run_ttl.py` for read-only malformed-payload
+  regression evidence; and
+- `wepppy/weppcloud/controllers_js/__tests__/runs_lifecycle_template.test.js`
+  for executable Runs lifecycle DOM rendering evidence; and
 - REM-02/GOV-00A documentation, review, tracker, and security artifacts.
 
 ## Run-Domain Packages

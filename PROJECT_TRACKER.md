@@ -273,24 +273,9 @@ When resuming Kubernetes work:
 
 ## 🚧 In Progress
 
-### Runs TTL Deletion Catalog (REM-02)
-
-**Status**: Contract ratification in progress
-
-**Link**: [docs/work-packages/20260721_runs_ttl_deletion_catalog/](docs/work-packages/20260721_runs_ttl_deletion_catalog/)
-
-**Scope**: Show active TTL deletion time in the authenticated Runs catalog,
-preserve Last Modified when TTL deletion is disabled, and publish a dedicated
-Usersum guide. This bounded remediation borrows only SURF-06's read-only
-metadata-presentation boundary; it cannot change TTL policy, deletion, catalog
-authorization, or RQ behavior.
-
-**Next Steps**: Complete independent ratification/security reviews, commit the
-standalone contract ancestor, then implement focused route/template/doc tests.
-
 Currently active work packages. Limit to 2-4 packages to maintain focus.
 
-**Current WIP Count**: 16 packages
+**Current WIP Count**: 15 packages
 
 ### PATH-CE v2: Jackson Model Resync, Parquet-Native Pipeline, Full UI + Reports
 **Started**: 2026-07-20
@@ -616,6 +601,23 @@ Currently active work packages. Limit to 2-4 packages to maintain focus.
 ## ✅ Done
 
 Recently completed work packages. Archived immediately upon completion.
+
+### Runs TTL Deletion Catalog (REM-02) (2026-07-21)
+
+**Status**: ✅ **COMPLETE; PRODUCTION DEPLOYMENT PENDING**
+
+**Link**: [docs/work-packages/20260721_runs_ttl_deletion_catalog/](docs/work-packages/20260721_runs_ttl_deletion_catalog/)
+
+**Lifecycle**: In Progress -> Done (2026-07-21)
+
+**Summary**: The authenticated Runs catalog now shows a sortable TTL Deletion
+column for active rolling TTL runs, with a focused Usersum policy guide. Runs
+whose TTL deletion is disabled retain their Last Modified time. The TTL reader
+is read-only and malformed payloads fall back safely without altering metadata.
+The dedicated guide is user-resolvable; final contract and security reviewers
+approved with no unresolved high/medium findings. This does not advance SURF-06.
+
+---
 
 ### Interchange Parser Observability Contract (2026-07-21)
 

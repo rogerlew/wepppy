@@ -7,7 +7,7 @@
 **Timezone**: UTC
 **Started**: 2026-07-17 00:30 UTC
 **Current phase**: Milestone 1 - GOV-00A schema ratification
-**Last updated**: 2026-07-21 22:15 UTC
+**Last updated**: 2026-07-21 23:15 UTC
 **Next milestone**: Continue GOV-00A canonical schema and derived index work.
 **Security impact**: `none` for scaffold; child packages reassess
 **Dedicated security review**: `no`
@@ -50,9 +50,9 @@
 - [x] Committed both REM-01 contract ancestors, executed its finite boundary,
   passed dual final review and broad validation, and closed the remediation
   without advancing DOM-02, DOM-25A, or DOM-25B (2026-07-20 22:42 UTC).
-- [ ] REM-02 is registered for ratification: expose read-only TTL deletion
-  timing in already-authorized Runs catalog rows, preserve Last Modified for
-  disabled TTL, and publish a dedicated Usersum guide (2026-07-21 22:15 UTC).
+- [x] Closed REM-02's separately ratified read-only TTL catalog presentation
+  boundary after final dual review; SURF-06 remains planned and unadvanced
+  (2026-07-21 23:15 UTC).
 - [x] Identified, corrected, dual-reviewed, and froze the 70-unit execution
   register with no unresolved high/medium findings (2026-07-17).
 - [x] Began GOV-00A Milestone 1 by adding contract-first precedence to root and
@@ -77,7 +77,7 @@ the corresponding stable ID starts.
 
 Total: 73 independently closable execution units. GOV-00 is this existing
 umbrella; GOV-00A is the active ratification child; REM-01 is complete and
-REM-02 is in ratification. The remaining units receive dated directories when
+REM-02 is complete. The remaining units receive dated directories when
 started. DOM-01 is the WATAR/Ash pilot.
 
 Every new child package must be added here and to `PROJECT_TRACKER.md` before
@@ -90,7 +90,7 @@ be dispositioned.
 | Time (UTC) | Agent/role | Scope | Edit authority | Outcome |
 | --- | --- | --- | --- | --- |
 | 2026-07-17 00:30 | Controller inventory auditor | Enumerate Pure UI controller/template/route/test coverage and grouping | Read-only | Complete; found 33 run-page bootstrap entries, 26 main panels, and Batch Runner as a separate Pure surface |
-| 2026-07-21 22:15 | Primary Codex | REM-02 TTL catalog contract checkpoint and registration | Documentation only | In progress; implementation blocked pending independent ratification review and standalone ancestor |
+| 2026-07-21 22:15 | Primary Codex | REM-02 TTL catalog contract checkpoint and registration | Documentation only | Completed at 23:15 after standalone ancestor, bounded implementation, validation, and final dual review |
 | 2026-07-17 00:30 | Contract governance reviewer | Challenge schema, package protocol, review gate, and risk controls | Read-only | Complete; recommended canonical contracts directory, normative/observed split, and independent semantic/QA gates |
 | 2026-07-17 00:39 | Reviewer A | Final contract/source review of the authored scaffold | Read-only | One medium and three low findings; all accepted and fixed |
 | 2026-07-17 00:39 | Reviewer B | Final regression/governance review of the authored scaffold | Read-only | One high, three medium, and three low findings; all accepted and fixed |

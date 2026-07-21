@@ -121,7 +121,7 @@ def _load_payload(path: Path) -> Optional[Dict[str, Any]]:
     try:
         with path.open("r", encoding="utf-8") as handle:
             payload = json.load(handle)
-    except (OSError, json.JSONDecodeError):
+    except (OSError, UnicodeDecodeError, json.JSONDecodeError):
         return None
     if not isinstance(payload, dict):
         return None

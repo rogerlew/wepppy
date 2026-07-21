@@ -226,12 +226,28 @@ def test_runs2_template_requests_catalog_with_ron_meta() -> None:
 
     assert "function buildRunsCatalogUrl()" in template
     assert "params.set('include_ron_meta', '1');" in template
+    assert "{{ sortable_header('TTL Deletion', 'last_modified') }}" in template
+    assert "runsTtlDeletionHelpUrl" in template
+    assert "TTL Deletion: " in template
+    assert "Last Modified: " in template
+    assert "document.createElement('time')" in template
     assert 'id="runs-map-canvas" class="wc-map__canvas" role="application"' not in template
     assert 'id="runs-map-canvas" class="wc-map__canvas" aria-label="Runs map viewport"' in template
 
 
-def test_runs_catalog_ignores_alias_for_non_admin(runs_scope_client) -> None:
+def test_runs_catalog_ignores_alias_for_non_admin(
+    runs_scope_client,
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
     client = runs_scope_client["client"]
+    module = runs_scope_client["module"]
+    ttl_reads: list[str] = []
+
+    def _read_ttl_state(wd: str):
+        ttl_reads.append(wd)
+        return None
+
+    monkeypatch.setattr(module.run_ttl, "read_ttl_state", _read_ttl_state)
     _login(client, runs_scope_client["owner_id"])
 
     response = client.get(f"/runs/catalog?alias={runs_scope_client['other_id']}")
@@ -240,6 +256,53 @@ def test_runs_catalog_ignores_alias_for_non_admin(runs_scope_client) -> None:
     payload = response.get_json()
     runids = {run["runid"] for run in payload["runs"]}
     assert runids == {"owner-run"}
+    assert ttl_reads == [str(Path(module.get_wd("owner-run")))]
+
+
+def test_runs_catalog_reads_ttl_for_selected_admin_alias(
+    runs_scope_client,
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    client = runs_scope_client["client"]
+    module = runs_scope_client["module"]
+    ttl_reads: list[str] = []
+    monkeypatch.setattr(
+        module.run_ttl,
+        "read_ttl_state",
+        lambda wd: ttl_reads.append(wd) or {
+            "policy": module.run_ttl.POLICY_ROLLING,
+            "expires_at": "2026-12-31T00:00:00Z",
+        },
+    )
+    _login(client, runs_scope_client["admin_id"])
+
+    response = client.get(f"/runs/catalog?alias={runs_scope_client['other_id']}")
+
+    assert response.status_code == 200
+    payload = response.get_json()
+    assert payload["runs"][0]["runid"] == "other-run"
+    assert payload["runs"][0]["ttl_deletion_at"] == "2026-12-31T00:00:00Z"
+    assert ttl_reads == [str(Path(module.get_wd("other-run")))]
+
+
+def test_runs_catalog_falls_back_without_writing_invalid_utf8_ttl(runs_scope_client) -> None:
+    client = runs_scope_client["client"]
+    module = runs_scope_client["module"]
+    ttl_file = Path(module.get_wd("owner-run")) / module.run_ttl.TTL_FILENAME
+    ttl_file.parent.mkdir()
+    ttl_file.write_bytes(b"\xff\xfeinvalid")
+    before = ttl_file.stat()
+
+    _login(client, runs_scope_client["owner_id"])
+    response = client.get("/runs/catalog")
+
+    assert response.status_code == 200
+    payload = response.get_json()
+    assert payload["runs"][0]["ttl_deletion_at"] is None
+    assert payload["runs"][0]["last_modified"] is not None
+    after = ttl_file.stat()
+    assert after.st_mtime_ns == before.st_mtime_ns
+    assert ttl_file.read_bytes() == b"\xff\xfeinvalid"
 
 
 def test_runs_catalog_applies_alias_for_admin(runs_scope_client) -> None:

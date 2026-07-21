@@ -218,6 +218,8 @@ roots:
         doc_id: usersum.weppcloud.profile_jwt_dataset_access_python_r
       - key: usersum.weppcloud.rq_engine
         doc_id: usersum.weppcloud.rq_engine
+      - key: usersum.weppcloud.run_ttl_deletion
+        doc_id: usersum.weppcloud.run_ttl_deletion
       - key: usersum.weppcloud.models.batch_runs
         doc_id: usersum.weppcloud.models.batch_runs
       - key: usersum.weppcloud.controls

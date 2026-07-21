@@ -57,6 +57,20 @@ def test_read_ttl_state_preserves_existing_expires_at(tmp_path) -> None:
     assert state["expires_at"] == "2026-12-31T00:00:00Z"
 
 
+def test_read_ttl_state_returns_none_without_writing_invalid_utf8_payload(tmp_path) -> None:
+    wd = tmp_path / "run"
+    wd.mkdir()
+    ttl_file = wd / run_ttl.TTL_FILENAME
+    ttl_file.write_bytes(b"\xff\xfeinvalid")
+    before = ttl_file.stat()
+
+    assert run_ttl.read_ttl_state(str(wd)) is None
+
+    after = ttl_file.stat()
+    assert after.st_mtime_ns == before.st_mtime_ns
+    assert ttl_file.read_bytes() == b"\xff\xfeinvalid"
+
+
 def test_ensure_ttl_state_creates_missing_ttl(tmp_path) -> None:
     wd = tmp_path / "run"
     wd.mkdir()

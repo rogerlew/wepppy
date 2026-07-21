@@ -252,6 +252,15 @@ docs:
     audience_tags: [operator, developer]
     status: active
     nav_key: usersum.weppcloud.rq_engine
+  - doc_id: usersum.weppcloud.run_ttl_deletion
+    source: local
+    rel_path: wepppy/weppcloud/routes/usersum/weppcloud/run-ttl-deletion.md
+    title: Project TTL Deletion
+    min_role: user
+    category: weppcloud
+    audience_tags: [user]
+    status: active
+    nav_key: usersum.weppcloud.run_ttl_deletion
   - doc_id: usersum.weppcloud.sbs_map_preparation
     source: local
     rel_path: wepppy/weppcloud/routes/usersum/weppcloud/sbs-map-preparation.md

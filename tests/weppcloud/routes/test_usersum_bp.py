@@ -9,6 +9,8 @@ pytest.importorskip("flask")
 from flask import Blueprint, Flask
 
 from wepppy.weppcloud.routes.usersum import usersum_bp
+from wepppy.weppcloud.routes.usersum import usersum as usersum_routes
+from wepppy.weppcloud.usersum_docs import runtime_catalog
 
 pytestmark = pytest.mark.routes
 
@@ -227,6 +229,36 @@ def test_usersum_doc_route_renders_wepp_run_results(usersum_client) -> None:
     assert "which result should I open first?" in body
     assert "Fork Project and Run Undisturbed" in body
     assert "wepppy/weppcloud/routes/usersum/weppcloud/wepp-run-results.md" in body
+
+
+def test_usersum_doc_route_renders_run_ttl_deletion_guide_from_manifest(
+    usersum_client,
+    monkeypatch: pytest.MonkeyPatch,
+    tmp_path: Path,
+) -> None:
+    monkeypatch.setattr(runtime_catalog, "_doc_index_path", lambda _base_dir: tmp_path / "missing-index.json")
+    usersum_routes._catalog.cache_clear()
+    try:
+        response = usersum_client.get("/usersum/doc/usersum.weppcloud.run_ttl_deletion")
+    finally:
+        usersum_routes._catalog.cache_clear()
+
+    assert response.status_code == 200
+    body = response.get_data(as_text=True)
+    assert "Project TTL Deletion" in body
+    assert "Last Modified" in body
+
+
+def test_usersum_doc_route_renders_run_ttl_deletion_guide_for_privileged_user(
+    usersum_client,
+    set_usersum_current_user,
+) -> None:
+    set_usersum_current_user(roles=("PowerUser",))
+
+    response = usersum_client.get("/usersum/doc/usersum.weppcloud.run_ttl_deletion")
+
+    assert response.status_code == 200
+    assert "Project TTL Deletion" in response.get_data(as_text=True)
 
 
 def test_usersum_doc_route_renders_weppcloud_calibration_guidance(usersum_client) -> None:

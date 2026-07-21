@@ -19,9 +19,9 @@ does not imply it will be deleted.
 - [x] (2026-07-21 22:55 UTC) Obtain post-fix confirmation from two independent
   ratification reviewers and commit GOV-00A-M1B ancestor
   `d3380287ca706360879240c3d203c5e7cc2be9ef`.
-- [ ] Add read-only TTL metadata to catalog rows and render the two states.
-- [ ] Publish Usersum content, update its manifest/index, and add regressions.
-- [ ] Run validation, final reviews, disposition, and closeout.
+- [x] Add read-only TTL metadata to catalog rows and render the two states.
+- [x] Publish Usersum content, update its manifest/index, and add regressions.
+- [x] Run validation, final reviews, disposition, and closeout.
 
 ## Surprises & Discoveries
 
@@ -29,6 +29,10 @@ does not imply it will be deleted.
   row construction currently returns only `last_modified`.
   Evidence: `wepppy/weppcloud/utils/run_ttl.py` and
   `wepppy/weppcloud/routes/user.py`.
+- Observation: Host execution of the Usersum index tool lacked its YAML
+  dependency; the documented container environment completed the validation.
+  The generator leaves `generated/docs_index.json` dirty, which the root AGENTS
+  instruction intentionally excludes from this change set.
 
 ## Decision Log
 
@@ -37,10 +41,19 @@ does not imply it will be deleted.
   Rationale: TTL remains filesystem-backed; the existing endpoint already
   builds per-run metadata, and additive fields preserve compatibility.
   Date/Author: 2026-07-21 / Codex.
+- Decision: retain the `last_modified` sort key for the renamed lifecycle
+  header; the column's displayed semantics change, not catalog sorting.
+  Rationale: preserves the existing Runs interaction contract.
+  Date/Author: 2026-07-21 / Codex.
 
 ## Outcomes & Retrospective
 
-Pending implementation.
+Implemented the bounded lifecycle projection, safe DOM rendering, and dedicated
+Usersum guide. Focused Python tests passed (84), frontend lint passed, and Jest
+passed (86 suites / 653 tests). Broad-exception enforcement, documentation lint,
+and diff hygiene passed. Two final independent reviews approved closure with no
+unresolved high/medium findings. The generated Usersum index was validated but
+left uncommitted as required by root AGENTS.
 
 ## Context and Orientation
 

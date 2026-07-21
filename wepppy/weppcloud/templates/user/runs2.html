@@ -131,7 +131,7 @@
               {{ sortable_header('Config', 'config') }}
               <th scope="col">Link</th>
               {{ sortable_header('Creation date', 'date_created') }}
-              {{ sortable_header('Last modified', 'last_modified') }}
+              {{ sortable_header('TTL Deletion', 'last_modified') }}
               <th scope="col" class="wc-text-muted" title="Do not add columns that normalize casing in headers.">Select</th>
             </tr>
           </thead>
@@ -218,6 +218,7 @@
   const runsCatalogUrl = {{ url_for('user.runs_catalog') | tojson }};
   const runsMapDataUrl = {{ url_for('user.runs_map_data') | tojson }};
   const runsUsersUrl = {{ url_for('user.runs_users') | tojson }};
+  const runsTtlDeletionHelpUrl = {{ url_for('usersum.view_doc', doc_id='usersum.weppcloud.run_ttl_deletion') | tojson }};
   let runsCatalog = [];
   let runsFiltered = [];
   let runsCatalogLoaded = false;
@@ -402,7 +403,26 @@
     row.appendChild(linkCell);
 
     appendCell(formatOptionalValue(run.date_created));
-    appendCell(formatOptionalValue(run.last_modified));
+
+    const lifecycleCell = document.createElement('td');
+    const lifecycleTime = document.createElement('time');
+    if (run.ttl_deletion_at) {
+      lifecycleCell.append('TTL Deletion: ');
+      lifecycleTime.dateTime = String(run.ttl_deletion_at);
+      lifecycleTime.textContent = formatOptionalValue(run.ttl_deletion_at);
+      lifecycleCell.appendChild(lifecycleTime);
+      lifecycleCell.append(' ');
+      const ttlHelpLink = document.createElement('a');
+      ttlHelpLink.href = runsTtlDeletionHelpUrl;
+      ttlHelpLink.textContent = 'Learn More';
+      lifecycleCell.appendChild(ttlHelpLink);
+    } else {
+      lifecycleCell.append('Last Modified: ');
+      lifecycleTime.dateTime = run.last_modified ? String(run.last_modified) : '';
+      lifecycleTime.textContent = formatOptionalValue(run.last_modified);
+      lifecycleCell.appendChild(lifecycleTime);
+    }
+    row.appendChild(lifecycleCell);
 
     const selectCell = document.createElement('td');
     const checkbox = document.createElement('input');

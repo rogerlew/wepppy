@@ -53,9 +53,10 @@
   `57ea1a3e2e71073f65e45c4af1cc607b2323ef37`, then closed REM-01 after dual
   final review and broad validation without advancing its borrowed owners
   (2026-07-20 22:42 UTC).
-- [ ] Ratify GOV-00A-M1B for REM-02's finite SURF-06 TTL-deletion catalog
-  presentation boundary; it is separate from the REM-01-only M1A ancestor
-  (2026-07-21 22:15 UTC).
+- [x] Ratified GOV-00A-M1B for REM-02's finite SURF-06 TTL-deletion catalog
+  presentation boundary in standalone ancestor
+  `d3380287ca706360879240c3d203c5e7cc2be9ef`; REM-02 subsequently closed after
+  final dual review without advancing SURF-06 (2026-07-21 23:15 UTC).
 - [x] Recorded contract-first authority and sequencing in root, WEPPcloud,
   controller, NoDb, rq-engine, and direct RQ agent governance (2026-07-17).
 - [x] Dispositioned two high/three medium authority findings and two high/four

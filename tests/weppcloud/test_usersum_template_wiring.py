@@ -86,6 +86,15 @@ def test_wepp_reports_template_links_to_wepp_run_results_usersum_doc() -> None:
     assert "WEPP Run Results guidance" in contents
 
 
+def test_runs_template_uses_the_ttl_deletion_usersum_doc_id() -> None:
+    root = Path(__file__).resolve().parents[2]
+    template = root / "wepppy" / "weppcloud" / "templates" / "user" / "runs2.html"
+    contents = _read(template)
+
+    assert "usersum.weppcloud.run_ttl_deletion" in contents
+    assert "runsTtlDeletionHelpUrl" in contents
+
+
 def test_theme_switcher_labels_aa_checked_and_sensory_preference_themes() -> None:
     root = Path(__file__).resolve().parents[2]
     header = root / "wepppy" / "weppcloud" / "templates" / "header" / "_theme_switcher.htm"

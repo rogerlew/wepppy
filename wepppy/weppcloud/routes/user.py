@@ -1,8 +1,10 @@
 """Routes for user blueprint extracted from app.py."""
 
+import json
 import logging
 import math
 import os
+from datetime import datetime, timezone
 from pathlib import Path
 from typing import Any, Dict, List, Optional
 
@@ -27,6 +29,7 @@ from wepppy.nodb.mods.ash_transport import Ash
 from wepppy.nodb.mods.rangeland_cover import RangelandCover
 from wepppy.nodb.mods.rhem import Rhem
 from wepppy.weppcloud.utils import auth_tokens
+from wepppy.weppcloud.utils import run_ttl
 
 from concurrent.futures import ThreadPoolExecutor, as_completed
 
@@ -269,7 +272,41 @@ def _catalog_meta_from_row(row: Dict[str, Any]) -> Dict[str, Any]:
         "last_modified": row.get("last_modified"),
         "owner_id": row.get("owner_id"),
         "config": row.get("config"),
+        "ttl_deletion_at": _ttl_deletion_at(row.get("wd")),
     }
+
+
+def _ttl_deletion_at(wd: str | None) -> Optional[str]:
+    """Return a normalized active TTL expiration without modifying run state."""
+    if not wd:
+        return None
+
+    try:
+        state = run_ttl.read_ttl_state(wd)
+    except (OSError, UnicodeDecodeError, json.JSONDecodeError):
+        logger.warning("Unable to read TTL metadata for runs catalog: %s", wd, exc_info=True)
+        return None
+    if not isinstance(state, dict) or state.get("policy") != run_ttl.POLICY_ROLLING:
+        return None
+
+    expires_at = state.get("expires_at")
+    if not isinstance(expires_at, str):
+        return None
+
+    raw_expiration = expires_at.strip()
+    if not raw_expiration:
+        return None
+    if raw_expiration.endswith("Z"):
+        raw_expiration = f"{raw_expiration[:-1]}+00:00"
+
+    try:
+        expiration = datetime.fromisoformat(raw_expiration)
+    except (TypeError, ValueError):
+        return None
+    if expiration.tzinfo is None:
+        return None
+
+    return expiration.astimezone(timezone.utc).isoformat().replace("+00:00", "Z")
 
 
 def _collect_metas_for_runs(runs) -> List[dict]:
@@ -653,6 +690,7 @@ def _build_meta(wd, attrs: dict):
         readonly=ron.readonly,
     )
     meta.update(attrs)
+    meta["ttl_deletion_at"] = _ttl_deletion_at(wd)
 
     return meta
 
