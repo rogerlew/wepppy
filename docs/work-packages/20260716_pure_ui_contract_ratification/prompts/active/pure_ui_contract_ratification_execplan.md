@@ -48,6 +48,9 @@ evidence; they cannot silently redefine intended behavior.
 - [x] (2026-07-20 22:42 UTC) Complete both standalone REM-01 ancestor commits
   and close the bounded remediation after implementation, dual final review,
   and broad validation.
+- [ ] (2026-07-21 22:15 UTC) Ratify GOV-00A-M1B for REM-02's finite SURF-06
+  TTL-deletion catalog presentation boundary, with independent review and its
+  own standalone ancestor.
 - [ ] Ratify authority hierarchy and lifecycle vocabulary.
 - [ ] Publish the normative README and reusable contract template.
 - [ ] Add deterministic governance validation and negative fixtures.
@@ -86,6 +89,12 @@ historical discoveries when later evidence changes a decision.
   but it also must not imply DOM-02, DOM-25A, or DOM-25B is executed or exempt
   unrelated work from the dependency spine.
   Date/Author: 2026-07-20 / Operator direction, recorded by Codex.
+
+- Decision: Do not reuse the REM-01-only GOV-00A-M1A ancestor for REM-02.
+  Rationale: The bounded-remediation rule requires a milestone that names the
+  concrete remediation and its exact boundary; reusing M1A would silently widen
+  accepted authority.
+  Date/Author: 2026-07-21 / Operator direction, recorded by Codex.
 
 - Decision: Use three independent dimensions: contractual scope, evidence
   grade, and package execution state.
@@ -137,6 +146,10 @@ The bounded REM-01 mechanism is ratified and exercised. Ancestors
 dual final reviews reported no findings and the stable-tree sweep passed 5,070
 tests with 58 skipped. REM-01 is closed, while GOV-00A schema ratification and
 the planned DOM-02, DOM-25A, and DOM-25B packages remain open.
+
+GOV-00A-M1B is proposed only for REM-02. It may not reuse M1A's authority or
+advance SURF-06. Its contract decision and two independent review artifacts must
+be committed as a standalone ancestor before its implementation files are edited.
 
 At closure, summarize the exact authorities created, validation behavior,
 review findings, deliberately deferred GOV-01 enforcement, and any unresolved

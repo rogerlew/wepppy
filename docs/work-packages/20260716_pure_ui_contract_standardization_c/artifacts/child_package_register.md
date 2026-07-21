@@ -1,10 +1,10 @@
 # Pure UI Contract Child Package Register
 
 **Register version**: 1.2 contractual baseline
-**Last updated**: 2026-07-20 UTC
+**Last updated**: 2026-07-21 UTC
 **Authority**: Stable IDs define package boundaries; dated package directories
 are created only when work starts.
-**Total**: 72 execution units: 4 governance, 1 bounded remediation, 39
+**Total**: 73 execution units: 4 governance, 2 bounded remediations, 39
 run-domain, 9 shared-foundation, and 19 non-run/stateful surface packages.
 GOV-00 is the existing umbrella at
 `docs/work-packages/20260716_pure_ui_contract_standardization_c/`; GOV-00A is the
@@ -12,7 +12,9 @@ active ratification child at
 `docs/work-packages/20260716_pure_ui_contract_ratification/`; the remaining 69
 receive dated directories only when started. REM-01 is the operator-authorized
 bounded remediation at
-`docs/work-packages/20260720_omni_mod_state_sync/`.
+`docs/work-packages/20260720_omni_mod_state_sync/`. REM-02 is the
+operator-authorized bounded remediation at
+`docs/work-packages/20260721_runs_ttl_deletion_catalog/`.
 
 ## Boundary and Review Rules
 
@@ -76,6 +78,11 @@ does not waive their dependencies for any other work.
 milestone. Its accepted standalone ancestor is sufficient only for REM-01; the
 remaining GOV-00A deliverables stay open.
 
+`GOV-00A-M1B` is the separately closable bounded-remediation governance
+milestone proposed only for REM-02. It requires its own dual review, disposition,
+and standalone ancestor. It borrows no authority from M1A, and it cannot advance
+SURF-06 or any other package.
+
 Dependency shorthand expands exactly as follows:
 
 - `SHR-01..04B` = SHR-01, SHR-02, SHR-03A, SHR-03B, SHR-04A, SHR-04B.
@@ -108,12 +115,19 @@ GOV-01 machine-readable manifest. GOV-99 is intentionally absent from all sets.
 | ID | Dated package | Borrowed owners | Exact defect boundary | Depends on | Security | State |
 | --- | --- | --- | --- | --- | --- | --- |
 | REM-01 | `20260720_omni_mod_state_sync` | DOM-02, DOM-25A, DOM-25B | Omni Scenarios/Contrasts feature-registry menu availability; Mods checkbox and reason markup; `Ron.mods` enable/disable guards; runs-page section/preflight visibility and metadata; dynamic shared Omni controller remount; Dev/Root gates on contrast run/dry-run/delete plus canonical run access and Dev/Root on the CAP-gated report; focused tests and generated controller bundle only | GOV-00A-M1A | `high`: role-gated dynamic load, persisted mod mutation, contrast actions, and report data | completed / dual-reviewed |
+| REM-02 | `20260721_runs_ttl_deletion_catalog` | SURF-06 | Read-only TTL policy/expiry projection for already-authorized catalog rows; one lifecycle table cell; dedicated Usersum documentation and focused catalog/template/doc tests only | GOV-00A-M1B | `high`: authenticated run-metadata presentation; no new access path or mutation | ratification in progress |
 
 REM-01 excludes Omni scenario/contrast payload shapes, uploads, queue wiring or
 execution semantics, artifacts, report content/formatting, overlays, deletion
 semantics beyond the contrast endpoint's authorization gate, model parameters,
 and all non-Omni Project shell behavior. Its final evidence is inherited as an input to the
 later DOM-02, DOM-25A, and DOM-25B audits without changing their planned state.
+
+REM-02 excludes TTL duration/calculation, access touching, policy toggling, GC,
+run deletion, database/schema changes, catalog filtering/sorting, maps, delete
+or poll controls, all permission/CSRF/RQ behavior, and deployment. Its final
+evidence is inherited by SURF-06 without advancing the owner beyond this finite
+presentation defect.
 
 The exact REM-01 source boundary is limited to:
 
@@ -134,6 +148,25 @@ The exact REM-01 source boundary is limited to:
   `tests/weppcloud/routes/test_omni_bp_routes.py` tests named by the REM-01
   ExecPlan; and
 - REM-01/GOV-00A documentation, review, tracker, and security artifacts.
+
+The exact REM-02 source boundary is limited to:
+
+- `wepppy/weppcloud/routes/user.py` and
+  `wepppy/weppcloud/templates/user/runs2.html`;
+- the read-only `read_ttl_state` consumption boundary in
+  `wepppy/weppcloud/utils/run_ttl.py` (without modifying TTL policy logic);
+- `wepppy/weppcloud/routes/usersum/docs_manifest.yaml`,
+  `wepppy/weppcloud/routes/usersum/usersum.py`, and
+  `wepppy/weppcloud/routes/usersum/weppcloud/run-ttl-deletion.md`;
+- validation generator `python3 tools/usersum_docs_tool.py build-index --write
+  --require-vendor-files`; ignore any dirty
+  `wepppy/weppcloud/routes/usersum/generated/docs_index.json` unless separately
+  authorized under the root AGENTS instruction;
+- `tests/weppcloud/routes/test_user_meta_boundaries.py`,
+  `tests/weppcloud/routes/test_user_runs_admin_scope.py`,
+  `tests/weppcloud/routes/test_usersum_bp.py`, and
+  `tests/weppcloud/test_usersum_template_wiring.py`; and
+- REM-02/GOV-00A documentation, review, tracker, and security artifacts.
 
 ## Run-Domain Packages
 

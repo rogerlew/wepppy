@@ -55,6 +55,8 @@ field-id tests can miss a real payload regression.
 - [x] (2026-07-20 22:42 UTC) Commit the two standalone REM-01 ancestors,
   execute only its registered defect boundary, complete dual final review, and
   close it after the 5,070-pass repository sweep.
+- [ ] (2026-07-21 22:15 UTC) Ratify GOV-00A-M1B and REM-02's finite SURF-06
+  TTL-deletion catalog presentation boundary before implementation.
 - [ ] Ratify `docs/ui-docs/contracts/README.md` and its evidence levels.
 - [ ] Execute and close the WATAR/Ash pilot child package.
 - [ ] Use pilot findings to add a stable contract-coverage check.
@@ -253,8 +255,8 @@ binding `contractual / unverified` obligation now; missing child/contract/
 manifest/revision evidence limits conformance claims but never makes scope
 optional.
 
-The current register contains 72 execution units because GOV-00A is the fourth
-governance unit and REM-01 is a bounded remediation unit. GOV-00A ratifies the contractual/evidence/execution model
+The current register contains 73 execution units because GOV-00A is the fourth
+governance unit and REM-01 plus REM-02 are bounded remediation units. GOV-00A ratifies the contractual/evidence/execution model
 before shared foundations begin; the prior 70-unit review remains historical
 population/boundary evidence rather than the current total.
 
@@ -269,6 +271,10 @@ security/regression reviewers approved with no findings, and its stable-tree
 repository sweep passed 5,070 tests with 58 skipped. This completion supplies
 evidence to the later DOM-02, DOM-25A, and DOM-25B audits but leaves all three
 owners planned.
+
+REM-02 is proposed under its own GOV-00A-M1B authority milestone. It may not
+reuse M1A or advance SURF-06; its contract decision and independent reviews must
+be committed as a standalone ancestor before implementation begins.
 
 At final closure, summarize total in-scope controllers, verified/excluded counts,
 defects found, tests added, compatibility decisions, packages closed, review

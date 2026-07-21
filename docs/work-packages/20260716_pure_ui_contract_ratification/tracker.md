@@ -7,7 +7,7 @@
 **Timezone**: UTC
 **Started**: 2026-07-17 01:48 UTC
 **Current phase**: Milestone 1 - canonical schema ratification
-**Last updated**: 2026-07-20 22:42 UTC
+**Last updated**: 2026-07-21 22:15 UTC
 **Next milestone**: Continue the canonical schema, template, and obligation registry.
 **Security impact**: `none`
 **Dedicated security review**: `no`
@@ -53,6 +53,9 @@
   `57ea1a3e2e71073f65e45c4af1cc607b2323ef37`, then closed REM-01 after dual
   final review and broad validation without advancing its borrowed owners
   (2026-07-20 22:42 UTC).
+- [ ] Ratify GOV-00A-M1B for REM-02's finite SURF-06 TTL-deletion catalog
+  presentation boundary; it is separate from the REM-01-only M1A ancestor
+  (2026-07-21 22:15 UTC).
 - [x] Recorded contract-first authority and sequencing in root, WEPPcloud,
   controller, NoDb, rq-engine, and direct RQ agent governance (2026-07-17).
 - [x] Dispositioned two high/three medium authority findings and two high/four
@@ -94,6 +97,19 @@ does not advance the borrowed owners.
 
 **Impact**: REM-01 may complete only its exact defect boundary before GOV-01;
 all unrelated DOM-02/DOM-25A/DOM-25B work remains planned and dependency-gated.
+
+### 2026-07-21 22:15 UTC: Create GOV-00A-M1B for REM-02
+
+**Context**: The Runs TTL-deletion presentation request is a finite SURF-06
+defect, but GOV-00A-M1A is expressly sufficient only for REM-01.
+
+**Decision**: Register a separately reviewed GOV-00A-M1B milestone for REM-02.
+It permits only read-only TTL projection after existing catalog authorization,
+one lifecycle cell, and a public-user Usersum guide. It inherits high security,
+requires two independent reviews and a standalone ancestor, and cannot advance
+SURF-06 or authorize TTL, catalog-access, deletion, RQ, or policy behavior.
+
+**Impact**: REM-02 is blocked until M1B's reviews and ancestor are complete.
 
 ### 2026-07-17 01:48 UTC: Separate obligation from evidence
 

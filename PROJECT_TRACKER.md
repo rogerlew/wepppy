@@ -1,7 +1,7 @@
 # PROJECT_TRACKER.md
 > Kanban board for wepppy work packages and vision items
 
-**Last Updated**: 2026-07-20
+**Last Updated**: 2026-07-21
 **Active Packages**: 16
 **Quick Links**: [Work Packages Directory](docs/work-packages/) | [God-Tier Prompting Strategy](docs/god-tier-prompting-strategy.md)
 
@@ -37,7 +37,7 @@ This tracker makes all work visible at a glance, helping agents coordinate and a
 ### 2. Limit Work in Progress
 **Target**: 2-4 active packages maximum to maintain focus and ensure packages complete rather than stall.
 
-**Current WIP**: 13 packages (above target range)
+**Current WIP**: 16 packages (above target range)
 
 ### 3. Manage Flow
 Monitor how long packages spend in each column:
@@ -273,9 +273,24 @@ When resuming Kubernetes work:
 
 ## 🚧 In Progress
 
+### Runs TTL Deletion Catalog (REM-02)
+
+**Status**: Contract ratification in progress
+
+**Link**: [docs/work-packages/20260721_runs_ttl_deletion_catalog/](docs/work-packages/20260721_runs_ttl_deletion_catalog/)
+
+**Scope**: Show active TTL deletion time in the authenticated Runs catalog,
+preserve Last Modified when TTL deletion is disabled, and publish a dedicated
+Usersum guide. This bounded remediation borrows only SURF-06's read-only
+metadata-presentation boundary; it cannot change TTL policy, deletion, catalog
+authorization, or RQ behavior.
+
+**Next Steps**: Complete independent ratification/security reviews, commit the
+standalone contract ancestor, then implement focused route/template/doc tests.
+
 Currently active work packages. Limit to 2-4 packages to maintain focus.
 
-**Current WIP Count**: 15 packages
+**Current WIP Count**: 16 packages
 
 ### PATH-CE v2: Jackson Model Resync, Parquet-Native Pipeline, Full UI + Reports
 **Started**: 2026-07-20
@@ -297,7 +312,7 @@ Currently active work packages. Limit to 2-4 packages to maintain focus.
 ### Pure UI Controller Contract Standardization
 **Started**: 2026-07-16
 **Status**: Milestone 1 package register frozen; canonical contract standard next
-**Size**: 72 execution units over a multi-year umbrella; each child limited to 1-4 focused weeks
+**Size**: 73 execution units over a multi-year umbrella; each child limited to 1-4 focused weeks
 **Owner**: Codex
 **Priority**: High
 **Link**: [docs/work-packages/20260716_pure_ui_contract_standardization_c/](docs/work-packages/20260716_pure_ui_contract_standardization_c/)
@@ -306,8 +321,8 @@ Currently active work packages. Limit to 2-4 packages to maintain focus.
 **Current Status**:
 - Initial package, active ExecPlan, audit register, and reusable child-package prompt are authored.
 - Production reconnaissance found 33 run-page bootstrap controller entries, 26 main Pure panels plus four supporting templates, 56 bundled modules, and separate route-local Pure consoles that require explicit classification.
-- The current register separates 39 run-domain, 9 shared-foundation, 19 non-run/stateful, and 4 governance execution units. GOV-00 is the existing umbrella, GOV-00A is the active ratification child, and 69 later directories are created only when started. The credible full-program estimate remains 24-36 months serial or 12-20 months with separately authorized isolated worktrees and at most two disjoint writers after the shared foundation.
-- The 70-unit population/boundary register passed two independent reviews with no unresolved high/medium findings. Operator clarification then made every included row immediately contractual and added GOV-00A as the 71st governance unit. REM-01 is the 72nd, bounded remediation unit; it does not advance its borrowed DOM owners. GOV-00A Milestone 1 is active.
+- The current register separates 39 run-domain, 9 shared-foundation, 19 non-run/stateful, 4 governance, and 2 bounded-remediation execution units. GOV-00 is the existing umbrella, GOV-00A is the active ratification child, and 69 later directories are created only when started. The credible full-program estimate remains 24-36 months serial or 12-20 months with separately authorized isolated worktrees and at most two disjoint writers after the shared foundation.
+- The 70-unit population/boundary register passed two independent reviews with no unresolved high/medium findings. Operator clarification then made every included row immediately contractual and added GOV-00A as the 71st governance unit. REM-01 is the 72nd completed bounded remediation; REM-02 is the 73rd and is separately blocked on GOV-00A-M1B. Neither advances its borrowed owner. GOV-00A Milestone 1 is active.
 
 **Next Steps**: Execute GOV-00A to ratify the canonical schema and derived `docs/ui-docs/contracts/README.md`, execute SHR-01 through SHR-04B, then instantiate DOM-01 WATAR/Ash.
 
