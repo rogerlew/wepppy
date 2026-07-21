@@ -1,9 +1,27 @@
 from __future__ import annotations
 
-from typing import Optional
 import sys
+from types import ModuleType
+from typing import Optional
 
-import typer
+
+def _load_typer() -> ModuleType:
+    try:
+        import typer
+    except ModuleNotFoundError as exc:
+        if exc.name != "typer":
+            raise
+        print(
+            "wctl requires the 'typer' package for the current python3 interpreter.\n"
+            "Install it with:\n"
+            "  python3 -m pip install --user --break-system-packages typer",
+            file=sys.stderr,
+        )
+        raise SystemExit(1) from None
+    return typer
+
+
+typer = _load_typer()
 
 from .commands import passthrough as passthrough_cmd
 from .commands import register as register_commands

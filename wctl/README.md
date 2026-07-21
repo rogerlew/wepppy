@@ -119,7 +119,9 @@ All commands print the HTTP target and payload to stderr before streaming the se
 ### **Troubleshooting**
 
 - Ensure `python3` is available and matches the runtime used inside the Docker images (3.11+).
-- If Python cannot locate the Typer package, confirm the shim was installed via `./wctl/install.sh` so that `PYTHONPATH` includes both the repository root and `tools/`.
+- If `wctl` reports that the `typer` package is missing, install it for the `python3` interpreter selected by your shell:
+  `python3 -m pip install --user --break-system-packages typer`.
+  This can occur when `python3` resolves to a Homebrew interpreter while APT installed `python3-typer` for the system interpreter.
 - For compose passthrough issues, re-run with `wctl --log-level DEBUG docker compose …` to surface more detail (Typer accepts the global `--log-level` option before the command name).
 
 ### **Next Steps**
