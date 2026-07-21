@@ -71,6 +71,7 @@
   - [15.7 Industry Has Moved Toward Ephemeral Workers, Not Persistent Ones](#157-industry-has-moved-toward-ephemeral-workers-not-persistent-ones)
   - [15.8 The Architectures That Do Work on HPC](#158-the-architectures-that-do-work-on-hpc)
   - [15.9 Synthesis: What the Evidence Demands](#159-synthesis-what-the-evidence-demands)
+  - [15.10 Container Execution Paradigms: Docker vs. Apptainer](#1510-container-execution-paradigms-docker-vs-apptainer)
 - [16. Detailed Phase Execution Specs](#detailed-phase-execution-specs)
   - [16.1 Phase 0: Preconditions (6 Weeks, Apr 20-May 29, 2026)](#161-phase-0-preconditions-6-weeks-apr-20-may-29-2026)
     - [Objective](#objective)
@@ -1017,6 +1018,27 @@ The consensus is unanimous across three independent axes:
 If the I-CREWS governance review chooses to proceed with the Lemhi path despite this evidence, the plan above is the minimum-viable engineering program. If the review chooses not to re-derive what the HPC community has already established, procurement of dedicated WEPPcloud-aligned servers is the correct path.
 
 There is no documented third option that is fast, cheap, and safe.
+
+### 15.10 Container Execution Paradigms: Docker vs. Apptainer
+
+A common architectural fallacy when bridging web platforms and HPC environments is treating **Docker** and **Apptainer** (formerly Singularity) as universally interchangeable at runtime. While it is true that Apptainer is OCI-compliant and can seamlessly *pull and convert* a Docker image into an Apptainer `.sif` image, this guarantees **Image Format Compatibility**, not **Runtime Environment Compatibility**.
+
+If a container architecture proposes building a single monolithic container (e.g., encapsulating a complex environmental model, generation logic, and an `rq-worker` microservice) and deploying it interchangeably on a persistent Docker host and an HPC job scheduler, it will encounter fatal runtime conflicts across three domains:
+
+1. **Root vs. Unprivileged Execution (The Security Model):**
+   * **Docker** relies on a root-owned background daemon. Processes inside a Docker container operate with a pseudo-root context, allowing them to install packages, write to system logs, and assume administrative privileges.
+   * **Apptainer** is designed for shared HPC systems. It strips all root privileges and enforces strict user-space isolation. The container executes exactly as the unprivileged user who launched it (e.g., via Slurm). Any container initialization scripts expecting root access will instantly fail with `Permission denied`.
+
+2. **Writable Union Filesystems vs. Read-Only Images:**
+   * **Docker** utilizes a writable union filesystem. Containers can freely download, unpack, and write temporary files anywhere within their isolated filesystems.
+   * **Apptainer** converts Docker layers into a single, highly compressed `.sif` file which is **strictly read-only** at runtime. Unless complex and often restricted persistent overlays are used, if a container attempts to write to a path other than explicitly bound host directories (like `$HOME` or `/scratch`), the container will crash.
+
+3. **Persistent Orchestration vs. Single-Shot Batch Execution:**
+   * **Docker** (often via Docker Compose) orchestrates persistent, always-on microservices communicating over private internal networks. It is designed to host long-running daemons like an `rq-worker` waiting for web requests.
+   * **Apptainer** *does* technically support a daemon-like mode via the `apptainer instance start` command, but this feature is largely unusable for persistent services in an HPC environment. HPC clusters are governed by job schedulers (like Slurm) that enforce strict wall-time limits. Even if an Apptainer instance is spun up to act as a persistent worker, Slurm will forcefully terminate the container and reclaim the node as soon as the job's time limit expires. Furthermore, HPC policies actively discourage "squatting" on compute nodes to wait for web requests. Consequently, Apptainer is effectively restricted to single-shot batch execution: Slurm wakes the container, runs the computation, and terminates it.
+
+**Conclusion:** 
+A container built to function as an always-on, writable, orchestrator-coupled Docker worker cannot simply be dropped onto an HPC cluster. Slurm and Apptainer will force it into a read-only, unprivileged, single-shot batch context where it will fundamentally fail to operate as a microservice. Valid architectures must either run natively as Docker on a dedicated VM, or act as an orchestrated thin-client that dispatches explicitly bounded Apptainer bundles to the HPC.
 
 ## 16. Detailed Phase Execution Specs
 
