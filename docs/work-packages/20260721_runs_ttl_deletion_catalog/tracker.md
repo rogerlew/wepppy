@@ -4,7 +4,7 @@
 
 **Timezone**: UTC  
 **Started**: 2026-07-21 22:15 UTC  
-**Current phase**: Contract ratification  
+**Current phase**: Implementation
 **Security impact**: high  
 **Dedicated security review**: yes
 
@@ -13,12 +13,16 @@
 ### In Progress
 
 - [x] Record the operator-approved contract decision and register REM-02.
-- [ ] Obtain post-fix confirmation from two independent read-only reviewers.
+- [x] Obtain post-fix confirmation from two independent read-only reviewers.
+- [ ] Implement the bounded route/template/Usersum/test changes.
+
+### Done
+
+- [x] Commit the accepted GOV-00A-M1B contract ancestor
+  `d3380287ca706360879240c3d203c5e7cc2be9ef` before production implementation.
 
 ### Pending
 
-- [ ] Commit the accepted contract ancestor before production implementation.
-- [ ] Implement the bounded route/template/Usersum/test changes.
 - [ ] Validate, obtain final independent reviews, and close the package.
 
 ## Source Matrix
@@ -69,3 +73,10 @@ reused. The corrected checkpoint registers GOV-00A-M1B, names exact files,
 requires a Jinja deployment-aware link, defines timestamp and
 malformed-state fallback behavior, and adds owner-filtering/no-read evidence.
 Post-fix confirmation is now required before the standalone ancestor commit.
+
+### 2026-07-21 22:55 UTC: Contract ancestor accepted
+
+Both independent reviewers approved the corrected checkpoint. The documentation-
+only GOV-00A-M1B ancestor was committed at
+`d3380287ca706360879240c3d203c5e7cc2be9ef`; implementation may now begin only
+within REM-02's exact source boundary.

@@ -1,7 +1,7 @@
 # Runs Catalog TTL Deletion Contract
 
 **Owner**: REM-02 bounded remediation of SURF-06  
-**Status**: Proposed; pending GOV-00A-M1B review and standalone ancestor  
+**Status**: Ratified by GOV-00A-M1B at `d3380287ca706360879240c3d203c5e7cc2be9ef`; implementation evidence pending
 **Security tier**: high (inherited authenticated run-metadata surface)
 
 ## Purpose and Scope

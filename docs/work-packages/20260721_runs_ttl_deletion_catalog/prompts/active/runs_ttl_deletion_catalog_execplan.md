@@ -16,8 +16,9 @@ does not imply it will be deleted.
   and focused test seams.
 - [x] (2026-07-21 22:15 UTC) Drafted REM-02, its decision checkpoint, security
   triage, and canonical UI contract.
-- [ ] Obtain post-fix confirmation from two independent ratification reviewers
-  and commit the accepted GOV-00A-M1B documentation ancestor.
+- [x] (2026-07-21 22:55 UTC) Obtain post-fix confirmation from two independent
+  ratification reviewers and commit GOV-00A-M1B ancestor
+  `d3380287ca706360879240c3d203c5e7cc2be9ef`.
 - [ ] Add read-only TTL metadata to catalog rows and render the two states.
 - [ ] Publish Usersum content, update its manifest/index, and add regressions.
 - [ ] Run validation, final reviews, disposition, and closeout.

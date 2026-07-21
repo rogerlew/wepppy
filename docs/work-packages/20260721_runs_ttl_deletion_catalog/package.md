@@ -1,7 +1,7 @@
 # Runs TTL Deletion Catalog
 
 **Stable ID**: REM-02  
-**Status**: Contract ratification in progress  
+**Status**: Implementation in progress after contract ancestor `d3380287ca706360879240c3d203c5e7cc2be9ef`
 **Timezone**: UTC
 
 ## Overview
