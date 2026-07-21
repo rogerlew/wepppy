@@ -23,8 +23,25 @@ def _load_typer() -> ModuleType:
 
 typer = _load_typer()
 
-from .commands import passthrough as passthrough_cmd
-from .commands import register as register_commands
+
+def _load_commands() -> tuple[ModuleType, object]:
+    try:
+        from .commands import passthrough
+        from .commands import register
+    except ModuleNotFoundError as exc:
+        if exc.name != "requests":
+            raise
+        print(
+            "wctl requires the 'requests' package for the current python3 interpreter.\n"
+            "Install it with:\n"
+            "  python3 -m pip install --user --break-system-packages requests",
+            file=sys.stderr,
+        )
+        raise SystemExit(1) from None
+    return passthrough, register
+
+
+passthrough_cmd, register_commands = _load_commands()
 from .context import CLIContext
 
 CONTEXT_SETTINGS = {"help_option_names": ["-h", "--help"], "allow_extra_args": True, "ignore_unknown_options": True}
