@@ -40,6 +40,14 @@ configs:
     min_role: user
     requires_backend: wbt
 
+  - id: canada-wbt-mofe
+    label: Disturbed + WBT Multiple OFE (Canada)
+    cfg_path: wepppy/nodb/configs/canada-wbt-mofe.cfg
+    maturity: preview
+    internal_reason: null
+    min_role: user
+    requires_backend: wbt
+
   - id: reveg
     label: Revegetation (CONUS)
     cfg_path: wepppy/nodb/configs/reveg.cfg

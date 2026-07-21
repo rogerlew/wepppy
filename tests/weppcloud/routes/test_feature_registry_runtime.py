@@ -69,6 +69,7 @@ def test_config_registry_loads_expected_entries() -> None:
     assert "disturbed9002" in config_ids
     assert "disturbed9002_wbt" in config_ids
     assert "disturbed9002-wbt-mofe" in config_ids
+    assert "canada-wbt-mofe" in config_ids
     assert "reveg" in config_ids
 
 
@@ -238,10 +239,26 @@ def test_multi_ofe_configs_are_forced_to_preview_maturity() -> None:
         if normalized in configparser.ConfigParser.BOOLEAN_STATES and configparser.ConfigParser.BOOLEAN_STATES[normalized]:
             multi_ofe_ids.add(entry.id)
             assert entry.maturity == "preview"
+            assert parser.getint("watershed", "mofe_max_ofes") == 5
 
     assert "reveg-mofe" in multi_ofe_ids
     assert "reveg-10m-mofe" in multi_ofe_ids
     assert "disturbed9002-wbt-mofe" in multi_ofe_ids
+    assert "canada-wbt-mofe" in multi_ofe_ids
+
+
+def test_all_mofe_configuration_files_declare_the_five_ofe_cap() -> None:
+    repo_root = Path(__file__).resolve().parents[3]
+    config_dir = repo_root / "wepppy" / "nodb" / "configs"
+    mofe_configs = sorted(config_dir.glob("*mofe.cfg"))
+
+    assert mofe_configs
+    for cfg_path in mofe_configs:
+        parser = configparser.ConfigParser(interpolation=None)
+        parser.read(cfg_path, encoding="utf-8")
+
+        assert parser.getboolean("wepp", "multi_ofe") is True
+        assert parser.getint("watershed", "mofe_max_ofes") == 5
 
 
 def test_config_registry_declares_multi_ofe_preview_override_rule() -> None:
