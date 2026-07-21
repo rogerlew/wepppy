@@ -84,11 +84,11 @@ converters: ConverterRegistry = {
     },
     'weight': {
         ('tonne', 'ton'): lambda v: v * 1.10231,
-        ('ton', 'tonne'): lambda v: v * 25.4
+        ('ton', 'tonne'): lambda v: v * 0.90718474
     },
     'weight-annual': {
         ('tonne/yr', 'ton/yr'): lambda v: v * 1.10231,
-        ('ton/yr', 'tonne/yr'): lambda v: v * 25.4
+        ('ton/yr', 'tonne/yr'): lambda v: v * 0.90718474
     },
     'concentration': {
         ('g/L', 'ppm'): lambda v: v * 1000.0,

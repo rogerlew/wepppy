@@ -363,7 +363,7 @@
         {
           "from": "ton",
           "offset": 0.0,
-          "scale": 25.4,
+          "scale": 0.90718474,
           "to": "tonne"
         },
         {
@@ -398,7 +398,7 @@
         {
           "from": "ton/yr",
           "offset": 0.0,
-          "scale": 25.4,
+          "scale": 0.90718474,
           "to": "tonne/yr"
         },
         {
