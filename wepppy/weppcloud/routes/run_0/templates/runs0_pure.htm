@@ -56,28 +56,6 @@
 {% endblock %}
 
 {% block body_container %}
-{# Safari browser compatibility warning - Safari has known issues with WebSocket job status updates #}
-<div id="safari-warning" class="wc-alert wc-alert--warning wc-alert--banner" role="alert" style="display: none;">
-  <span class="wc-alert__body">
-    <strong>⚠️ Browser Compatibility Notice:</strong>
-    Safari may have issues displaying job status and completion messages due to WebSocket limitations.
-    For the best experience, we recommend using <strong>Chrome</strong> or <strong>Firefox</strong>.
-  </span>
-  <button type="button" class="wc-alert__dismiss" onclick="this.parentElement.style.display='none'" aria-label="Dismiss">&times;</button>
-</div>
-<script>
-(function() {
-  // Detect Safari: includes Safari string but excludes Chrome/Chromium-based browsers
-  var isSafari = /^((?!chrome|android).)*safari/i.test(navigator.userAgent);
-  if (isSafari) {
-    var warning = document.getElementById('safari-warning');
-    if (warning) {
-      warning.style.display = 'flex';
-    }
-  }
-})();
-</script>
-
 {% include 'command-bar.htm' %}
 {% include 'controls/poweruser_panel.htm' %}
 {% include 'controls/disturbed_modal.htm' %}
