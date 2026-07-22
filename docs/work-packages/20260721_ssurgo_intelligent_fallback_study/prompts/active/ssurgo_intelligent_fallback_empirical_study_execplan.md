@@ -52,6 +52,10 @@ unchanged.
 - [x] Milestone 3.5 first-ring ranker: evaluate first appearance, first-ring
   support, and elevation tie-breaking across the fixed eleven-case and
   322-case cohorts; reject strict ring-first selection (2026-07-26).
+- [x] Milestone 3.5 shallow-mineral vector: validate and match nontexture
+  shallow-mineral profile vectors across fixed eleven-case and 322-case
+  masked-valid cohorts, including a byte-identical one-worker repeat
+  (2026-07-26).
 - [ ] Milestone 4: seek an ADR only if evidence supports opt-in production
   selection, then observe a shadow/opt-in rollout before default promotion.
 - [ ] Add deterministic fixtures for all observed primary failure classes.
@@ -125,6 +129,12 @@ unchanged.
   Evidence: the 322-case four-worker artifact was byte-identical to the
   one-worker artifact and completed in 19.49 s versus 21.17 s. Per-withheld
   MUKEY batching limits the available concurrent source requests.
+- Observation: shallow-mineral profile similarity is a substantially stronger
+  masked-valid selection signal than map-only rankers.
+  Evidence: after non-organic and parameter validation, the nontexture vector
+  ranker selected a locally feature-closer donor in 10 of 11 fixed discovery
+  misses and 287 of 322 larger-cohort cases; geometry-plus-terrain selected
+  185 of the latter. The one/four-worker larger artifacts were byte-identical.
 
 ## Decision Log
 
@@ -215,6 +225,14 @@ unchanged.
   Ring membership remains diagnostic candidate evidence, not a selection
   priority. The next comparison must be predeclared and held out.
   Date/Author: 2026-07-26 / Codex.
+- Decision: Evaluate shallowest validated non-organic layer vectors as the
+  next profile-aware ranker, excluding texture fields.
+  Rationale: map-only signals expose broad candidate-set headroom but do not
+  identify the better outer candidate. The ranker is explicitly unavailable to
+  profile-free/nonphysical failure classes and requires three jointly valid
+  parameters; masked-valid use is a simulation, not permission to trust
+  inferred source fields in production.
+  Date/Author: 2026-07-26 / user and Codex.
 
 ## Outcomes & Retrospective
 
@@ -260,6 +278,14 @@ research variant across 322 cases. The candidate horizon is useful, but M4
 remains HOLD until a predeclared hybrid ranker and abstention proxy show
 geographically held-out benefit. The evaluator must also batch independent
 withheld-MUKEY requests more effectively before expanding the cohort.
+
+Validated shallow-mineral vector matching is the first profile-aware ranker to
+show strong masked-valid evidence: 287 local top-one wins in 322 cases and 10
+in the fixed eleven-case discovery-miss cohort. It excludes texture and cannot
+apply to the dominant profile-free failure classes. M4 remains HOLD until real
+partial-profile invalid soils demonstrate source-field provenance and the
+ranker succeeds on geographically held-out runs with a predeclared abstention
+rule.
 
 ## Context and Orientation
 

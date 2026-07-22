@@ -8,9 +8,9 @@
 **Started**: 2026-07-21 18:00 UTC
 **Current phase**: M4 evidence hold
 **Last updated**: 2026-07-26
-**Next milestone**: Predeclare and evaluate a hybrid outer-ring ranker and a
-confidence/abstention proxy on geographically held-out cases; improve
-independent-withheld request batching before a larger cohort.
+**Next milestone**: Build real partial-profile invalid-soil provenance and
+evaluate the validated shallow-mineral vector ranker plus abstention proxy on
+geographically held-out cases; retain profile-free global fallback behavior.
 **Security impact**: none
 **Dedicated security review**: no
 **Security artifact**: N/A
@@ -93,6 +93,10 @@ independent-withheld request batching before a larger cohort.
   322-case local oracle to 305, but top-one wins were 168 versus 185 for the
   existing geometry-plus-terrain research variant; one/four-worker output was
   byte-identical (2026-07-26).
+- [x] Completed validated shallow-mineral vector experiment: nontexture
+  top-one local wins were 10/11 fixed discovery misses and 287/322 in the
+  larger masked-valid cohort; one/four-worker output was byte-identical
+  (2026-07-26).
 
 ## Timeline
 

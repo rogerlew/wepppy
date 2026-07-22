@@ -208,3 +208,43 @@ def test_ring_rankers_keep_radius_primary_and_terrain_tertiary() -> None:
     assert variants["ring_support"]["selected_mukey"] == "20"
     assert variants["ring_support_terrain"]["selected_mukey"] == "30"
     assert [candidate["mukey"] for candidate in variants["ring_support_terrain"]["candidates"]] == ["30", "20", "40"]
+
+
+def test_shallow_mineral_vector_skips_organic_and_invalid_parameters() -> None:
+    module = runpy.run_path(str(Path(__file__).resolve().parents[2] / "tools/ssurgo_masked_valid_evaluation.py"))
+    horizon = module["validated_shallow_mineral_horizon"](
+        [
+            {"orgmat": 25.0, "bd": 1.1, "ksat": 10.0, "fc": 0.3, "wp": 0.1, "cec": 20.0, "rfg": 5.0, "solthk": 30.0},
+            {"orgmat": 2.0, "bd": 1.2, "ksat": 12.0, "fc": 0.31, "wp": 0.12, "cec": 18.0, "rfg": 4.0, "solthk": 80.0},
+        ]
+    )
+
+    assert horizon == {
+        "horizon_index": 1,
+        "organic_matter_pct": 2.0,
+        "validated_fields": {"bd": 1.2, "ksat": 12.0, "fc": 0.31, "wp": 0.12, "cec": 18.0, "rfg": 4.0, "solthk": 80.0},
+        "rejected_fields": [],
+    }
+
+
+def test_shallow_mineral_vector_requires_permitted_evidence_and_shared_fields() -> None:
+    module = runpy.run_path(str(Path(__file__).resolve().parents[2] / "tools/ssurgo_masked_valid_evaluation.py"))
+    source = {"horizon_index": 1, "validated_fields": {"bd": 1.2, "ksat": 12.0, "fc": 0.31, "wp": 0.12}}
+    candidates = {
+        "20": {"horizon_index": 0, "validated_fields": {"bd": 1.21, "ksat": 12.5, "fc": 0.30, "wp": 0.12}},
+        "30": {"horizon_index": 0, "validated_fields": {"bd": 1.8, "ksat": 40.0, "fc": 0.45, "wp": 0.20}},
+        "40": {"horizon_index": 0, "validated_fields": {"bd": 1.2, "ksat": 12.0}},
+    }
+    geometry = [(20, 4, 1), (30, 5, 2), (40, 9, 0)]
+
+    result = module["score_shallow_mineral_vectors"](
+        source, candidates, geometry, {"20": 8.0, "30": 1.0, "40": 0.0}, source_evidence_class="masked_valid_simulation"
+    )
+    blocked = module["score_shallow_mineral_vectors"](
+        source, candidates, geometry, {}, source_evidence_class="no_horizons"
+    )
+
+    assert result["selected_mukey"] == "20"
+    assert result["candidates"][0]["vector_fields"] == ["bd", "fc", "ksat", "wp"]
+    assert "40" not in [candidate["mukey"] for candidate in result["candidates"]]
+    assert blocked == {"selected_mukey": None, "reason": "profile_evidence_not_permitted", "candidates": []}

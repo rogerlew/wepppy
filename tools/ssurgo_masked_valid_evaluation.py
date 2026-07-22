@@ -16,6 +16,17 @@ from typing import Any, Mapping, Sequence
 SCHEMA_VERSION = 1
 DEFAULT_NED1_VRT = Path("/wc1/geodata/ned1/2024/.vrt")
 TERRAIN_WEIGHTS = (0.0, 0.1, 0.2, 0.3)
+SHALLOW_MINERAL_MAX_ORGANIC_MATTER_PCT = 20.0
+SHALLOW_MINERAL_MIN_VECTOR_FIELDS = 3
+SHALLOW_MINERAL_VECTOR_RANGES = {
+    "bd": (0.5, 3.0),
+    "ksat": (0.0, 100_000.0),
+    "fc": (0.0, 1.0),
+    "wp": (0.0, 1.0),
+    "cec": (0.0, 200.0),
+    "rfg": (0.0, 100.0),
+    "solthk": (1.0, 10_000.0),
+}
 PROFILE_EXCLUDED_FAILURE_CLASSES = frozenset({
     "no_components",
     "no_horizons",
@@ -149,6 +160,8 @@ def evaluate_masked_case(case: Mapping[str, Any]) -> dict[str, Any]:
         "global_elevation_delta_m",
         "geometry_candidates",
         "candidate_ring_evidence",
+        "shallow_mineral_source",
+        "shallow_mineral_candidates",
     ):
         if field in case:
             result[field] = case[field]
@@ -219,6 +232,107 @@ def _finite_features(soil: Any) -> dict[str, float]:
         if math.isfinite(numeric):
             features[key] = numeric
     return features
+
+
+def validated_shallow_mineral_horizon(horizons: Sequence[Mapping[str, Any]]) -> dict[str, Any] | None:
+    """Return the shallowest non-organic WEPP horizon with validated nontexture fields."""
+    for index, horizon in enumerate(horizons):
+        try:
+            organic_matter = float(horizon["orgmat"])
+        except (KeyError, TypeError, ValueError):
+            continue
+        if not math.isfinite(organic_matter) or not 0.0 <= organic_matter <= SHALLOW_MINERAL_MAX_ORGANIC_MATTER_PCT:
+            continue
+        values: dict[str, float] = {}
+        rejected_fields: list[str] = []
+        for field, (minimum, maximum) in SHALLOW_MINERAL_VECTOR_RANGES.items():
+            try:
+                value = float(horizon[field])
+            except (KeyError, TypeError, ValueError):
+                rejected_fields.append(field)
+                continue
+            if math.isfinite(value) and minimum <= value <= maximum:
+                values[field] = value
+            else:
+                rejected_fields.append(field)
+        if "fc" in values and "wp" in values and values["wp"] > values["fc"]:
+            values.pop("fc")
+            values.pop("wp")
+            rejected_fields.extend(("fc", "wp"))
+        if len(values) >= SHALLOW_MINERAL_MIN_VECTOR_FIELDS:
+            return {
+                "horizon_index": index,
+                "organic_matter_pct": organic_matter,
+                "validated_fields": values,
+                "rejected_fields": sorted(set(rejected_fields)),
+            }
+    return None
+
+
+def _shallow_mineral_horizon(soil: Any) -> dict[str, Any] | None:
+    return validated_shallow_mineral_horizon(soil.get_weppsoilutil().obj["ofes"][0]["horizons"])
+
+
+def score_shallow_mineral_vectors(
+    source: Mapping[str, Any] | None,
+    candidates: Mapping[str, Mapping[str, Any]],
+    geometry: Sequence[tuple[int, int, int]],
+    elevation_deltas: Mapping[str, float | None],
+    *,
+    source_evidence_class: str,
+) -> dict[str, Any]:
+    """Rank permitted candidates by validated shallow-mineral vector similarity."""
+    if source_evidence_class not in {"masked_valid_simulation", *PROFILE_SUPPORTED_FAILURE_CLASSES}:
+        return {"selected_mukey": None, "reason": "profile_evidence_not_permitted", "candidates": []}
+    if source is None:
+        return {"selected_mukey": None, "reason": "no_validated_shallow_mineral_source", "candidates": []}
+    source_values = source["validated_fields"]
+    geometry_by_mukey = {str(mukey): (support, shared_edges) for mukey, support, shared_edges in geometry}
+    eligible: dict[str, tuple[Mapping[str, Any], list[str]]] = {}
+    for mukey, candidate in candidates.items():
+        fields = sorted(set(source_values) & set(candidate["validated_fields"]))
+        if len(fields) >= SHALLOW_MINERAL_MIN_VECTOR_FIELDS and mukey in geometry_by_mukey:
+            eligible[mukey] = (candidate, fields)
+    if not eligible:
+        return {"selected_mukey": None, "reason": "insufficient_validated_shallow_mineral_vectors", "candidates": []}
+    field_scales: dict[str, float] = {}
+    for field in sorted({field for _, fields in eligible.values() for field in fields}):
+        values = [float(source_values[field])]
+        values.extend(float(candidate["validated_fields"][field]) for candidate, fields in eligible.values() if field in fields)
+        median = statistics.median(values)
+        mad = statistics.median(abs(value - median) for value in values)
+        field_scales[field] = max(1.4826 * mad, abs(median) * 0.05, 1.0e-6)
+    scored = []
+    for mukey, (candidate, fields) in eligible.items():
+        vector_distance = sum(
+            abs(float(source_values[field]) - float(candidate["validated_fields"][field])) / field_scales[field]
+            for field in fields
+        ) / len(fields)
+        support, shared_edges = geometry_by_mukey[mukey]
+        elevation_delta = elevation_deltas.get(mukey)
+        scored.append({
+            "mukey": mukey,
+            "score": -vector_distance,
+            "vector_distance": vector_distance,
+            "vector_fields": fields,
+            "candidate_horizon_index": candidate["horizon_index"],
+            "support_pixels": support,
+            "shared_edges": shared_edges,
+            "elevation_delta_m": elevation_delta,
+        })
+    scored.sort(key=lambda candidate: (
+        candidate["vector_distance"], -candidate["shared_edges"],
+        candidate["elevation_delta_m"] is None, candidate["elevation_delta_m"] if candidate["elevation_delta_m"] is not None else math.inf,
+        int(candidate["mukey"]),
+    ))
+    return {
+        "selected_mukey": scored[0]["mukey"],
+        "reason": "validated_shallow_mineral_vector",
+        "source_horizon_index": source["horizon_index"],
+        "source_validated_fields": sorted(source_values),
+        "field_scales": field_scales,
+        "candidates": scored,
+    }
 
 
 def _global_baseline(
@@ -778,6 +892,7 @@ def build_run_cases(
     dem_path: Path,
     requested_case_ids: set[str] | None = None,
     candidate_ring_m: Sequence[float] | None = None,
+    shallow_mineral_vector: bool = False,
 ) -> tuple[list[dict[str, Any]], dict[str, Any]]:
     """Build read-only masked-valid cases from one completed gridded SSURGO run."""
     import rasterio
@@ -898,6 +1013,21 @@ def build_run_cases(
             if candidate_ring_evidence:
                 score_variants.update(score_ring_candidates(candidate_ring_evidence, candidate_elevation_deltas))
             summary_mukeys = {withheld_mukey, global_mukey, *(str(mukey) for mukey, _, _ in geometry)}
+            shallow_mineral_source = _shallow_mineral_horizon(soil_by_mukey[withheld_mukey]) if shallow_mineral_vector else None
+            shallow_mineral_candidates = {
+                mukey: horizon
+                for mukey in summary_mukeys
+                if mukey != withheld_mukey and mukey in soil_by_mukey
+                if (horizon := _shallow_mineral_horizon(soil_by_mukey[mukey])) is not None
+            } if shallow_mineral_vector else {}
+            if shallow_mineral_vector:
+                score_variants["shallow_mineral_vector"] = score_shallow_mineral_vectors(
+                    shallow_mineral_source,
+                    shallow_mineral_candidates,
+                    geometry,
+                    candidate_elevation_deltas,
+                    source_evidence_class="masked_valid_simulation",
+                )
             cases.append(
                 {
                     "case_id": f"{run_path.name}:{topaz_id}",
@@ -922,6 +1052,8 @@ def build_run_cases(
                         for mukey, support_pixels, shared_edges in geometry
                     ],
                     **({"candidate_ring_evidence": candidate_ring_evidence} if candidate_ring_evidence else {}),
+                    **({"shallow_mineral_source": shallow_mineral_source} if shallow_mineral_source else {}),
+                    **({"shallow_mineral_candidates": shallow_mineral_candidates} if shallow_mineral_candidates else {}),
                     "score_variants": score_variants,
                 }
             )
@@ -934,6 +1066,7 @@ def build_run_cases(
         "max_radius_m": max_radius_m,
         "requested_case_count": len(requested_case_ids) if requested_case_ids else None,
         "candidate_rings_m": list(candidate_ring_m) if candidate_ring_m else None,
+        "shallow_mineral_vector": shallow_mineral_vector,
         **dem_metadata,
     }
     return cases, metadata
@@ -958,14 +1091,19 @@ def main(argv: Sequence[str] | None = None) -> int:
         help="Force and compare bounded candidate windows; repeat in ascending order and end at --max-radius-m.",
     )
     parser.add_argument(
+        "--shallow-mineral-vector",
+        action="store_true",
+        help="Evaluate validated shallow-mineral vector matching in masked-valid run mode.",
+    )
+    parser.add_argument(
         "--case-id",
         action="append",
         help="Restrict run mode to a stable '<run-name>:<topaz-id>' masked-valid case; repeatable.",
     )
     args = parser.parse_args(argv)
     if args.input is not None:
-        if args.case_id or args.candidate_ring_m:
-            parser.error("--case-id and --candidate-ring-m are only available with --run")
+        if args.case_id or args.candidate_ring_m or args.shallow_mineral_vector:
+            parser.error("--case-id, --candidate-ring-m, and --shallow-mineral-vector are only available with --run")
         cases = json.loads(args.input.read_text(encoding="utf-8"))
         results: Any = [evaluate_masked_case(case) for case in cases]
     else:
@@ -989,6 +1127,7 @@ def main(argv: Sequence[str] | None = None) -> int:
                 dem_path=args.dem_vrt,
                 requested_case_ids=set(args.case_id) if args.case_id else None,
                 candidate_ring_m=candidate_ring_m,
+                shallow_mineral_vector=args.shallow_mineral_vector,
             )
             cases.extend(run_cases)
             cohorts.append(metadata)
