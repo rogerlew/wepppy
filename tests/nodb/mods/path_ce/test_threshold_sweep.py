@@ -21,6 +21,7 @@ np = pytest.importorskip("numpy")
 
 from wepppy.nodb.mods.path_ce.path_ce_solver import clean_solver_frame
 from wepppy.nodb.mods.path_ce.threshold_sweep import all_thresholds, find_threshold_ranges
+import wepppy.nodb.mods.path_ce.threshold_sweep as threshold_sweep_module
 
 GOLDENS = Path(__file__).resolve().parents[3] / "data" / "path_ce" / "goldens"
 
@@ -52,6 +53,36 @@ def test_find_threshold_ranges_austere(austere_frame):
     assert sdyd_max == 1
 
 
+def test_find_threshold_ranges_uses_post_fire_when_post_treat_columns_are_absent(
+    austere_frame, monkeypatch
+):
+    frame = austere_frame.drop(
+        columns=[column for column in austere_frame.columns if column.startswith("Sdyd post-treat ")]
+    )
+    monkeypatch.setattr(
+        threshold_sweep_module,
+        "ce_select_sites_flexible",
+        lambda **_kwargs: (1,),
+    )
+
+    _, sdyd_rng, _, _ = find_threshold_ranges(frame, TREATMENTS, COST, QTY, FIXED)
+
+    assert sdyd_rng[0] == int(frame["Sdyd post-fire"].min())
+
+
+def test_find_threshold_ranges_treats_solver_errors_as_infeasible(austere_frame, monkeypatch):
+    def _solver_error(**_kwargs):
+        raise threshold_sweep_module.PulpSolverError("CBC unavailable")
+
+    monkeypatch.setattr(threshold_sweep_module, "ce_select_sites_flexible", _solver_error)
+
+    sddc_rng, _, sddc_min_feasible, _ = find_threshold_ranges(
+        austere_frame, TREATMENTS, COST, QTY, FIXED
+    )
+
+    assert sddc_min_feasible == sddc_rng[1]
+
+
 def test_all_thresholds_austere(austere_frame):
     results_df = all_thresholds(
         austere_frame, TREATMENTS, COST, QTY, FIXED,
@@ -78,3 +109,25 @@ def test_all_thresholds_includes_anchor_values(austere_frame):
     )
     assert 45 in set(results_df["sddc_threshold"])
     assert set(results_df["sdyd_threshold"]) == {0, 1}
+
+
+def test_all_thresholds_records_solver_errors(austere_frame, monkeypatch):
+    def _solver_error(**_kwargs):
+        raise threshold_sweep_module.PulpSolverError("CBC unavailable")
+
+    monkeypatch.setattr(threshold_sweep_module, "ce_select_sites_flexible", _solver_error)
+
+    results_df = all_thresholds(
+        austere_frame,
+        TREATMENTS,
+        COST,
+        QTY,
+        FIXED,
+        sdyd_threshold_range=(0, 0),
+        sddc_threshold_range=(49, 49),
+        sdyd_threshold=0,
+        sddc_threshold=49,
+    )
+
+    assert results_df.loc[0, "model_primary_status"] is None
+    assert "PulpSolverError" in results_df.loc[0, "error"]

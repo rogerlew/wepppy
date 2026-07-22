@@ -27,6 +27,7 @@ from contextlib import redirect_stderr, redirect_stdout
 
 import numpy as np
 import pandas as pd
+from pulp import PulpSolverError
 
 from .path_ce_solver import ce_select_sites_flexible
 
@@ -64,9 +65,10 @@ def find_threshold_ranges(data, treatments, treatment_cost, treatment_quantity,
         sdyd_treatments.append(sdyd_treatment)
 
     max_sdyd_val = int(data["Sdyd post-fire"].max()) + 1
-    try:
-        min_sdyd_val = data[sdyd_treatments].min().min()
-    except Exception:
+    available_sdyd_treatments = [column for column in sdyd_treatments if column in data.columns]
+    if available_sdyd_treatments:
+        min_sdyd_val = data[available_sdyd_treatments].min().min()
+    else:
         # Fallback if post-treat columns differ; use post-fire min.
         min_sdyd_val = data["Sdyd post-fire"].min()
     min_sdyd_round = int(min_sdyd_val)
@@ -93,7 +95,7 @@ def find_threshold_ranges(data, treatments, treatment_cost, treatment_quantity,
             if result is None:
                 return None
             return result[0]
-        except Exception:
+        except PulpSolverError:
             return None
 
     # We search for the minimum feasible SDDC threshold (status == 1).
@@ -259,7 +261,7 @@ def all_thresholds(
                 })
             except KeyboardInterrupt:
                 raise
-            except Exception as e:
+            except PulpSolverError as exc:
                 results.append({
                     'sddc_threshold': int(sddc_thr),
                     'sdyd_threshold': int(sdyd_thr),
@@ -274,7 +276,7 @@ def all_thresholds(
                     'total_cost': np.nan,
                     'total_fixed_cost': np.nan,
                     'untreatable_sdyd_increase': None,
-                    'error': repr(e),
+                    'error': repr(exc),
                 })
     results_df = pd.DataFrame(results)
     return results_df
