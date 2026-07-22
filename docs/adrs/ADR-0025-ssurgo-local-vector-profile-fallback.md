@@ -105,7 +105,9 @@ New behavior:
   hillslopes still have residual-invalid dominant MUKEYs.
 - Choose a local donor by the approved shallow-profile vector policy where
   sufficient direct source evidence and a buildable local donor exist.
-- Use the watershed-global valid MUKEY as the explicit last SSURGO fallback.
+- Use the watershed-global valid MUKEY as the explicit last SSURGO fallback;
+  calculate it from valid primary-collection MUKEYs only, never from added
+  padded-map candidates.
 
 ## Rationale
 

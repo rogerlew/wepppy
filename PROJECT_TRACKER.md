@@ -2,7 +2,7 @@
 > Kanban board for wepppy work packages and vision items
 
 **Last Updated**: 2026-07-22
-**Active Packages**: 17
+**Active Packages**: 18
 **Quick Links**: [Work Packages Directory](docs/work-packages/) | [God-Tier Prompting Strategy](docs/god-tier-prompting-strategy.md)
 
 ## Purpose
@@ -37,7 +37,7 @@ This tracker makes all work visible at a glance, helping agents coordinate and a
 ### 2. Limit Work in Progress
 **Target**: 2-4 active packages maximum to maintain focus and ensure packages complete rather than stall.
 
-**Current WIP**: 16 packages (above target range)
+**Current WIP**: 17 packages (above target range)
 
 ### 3. Manage Flow
 Monitor how long packages spend in each column:
@@ -275,11 +275,12 @@ When resuming Kubernetes work:
 
 Currently active work packages. Limit to 2-4 packages to maintain focus.
 
-**Current WIP Count**: 16 packages
+**Current WIP Count**: 17 packages
 
 ### SSURGO Intelligent Fallback Empirical Study
 **Started**: 2026-07-21
-**Status**: Initial mapped-area pilot complete; expanded complementary cohorts approved
+**Status**: Empirical study and ADR-0025 policy gate complete; implementation
+delegated to the M4 rollout package
 **Size**: Medium (1-2 focused weeks)
 **Owner**: Codex
 **Priority**: High
@@ -291,7 +292,32 @@ Currently active work packages. Limit to 2-4 packages to maintain focus.
 - Initial 2,048-draw mapped-area pilot: 40 unbuildable draws (1.95%; 95% Wilson interval 1.44%-2.65%); no-component/no-horizon cases dominate, with a smaller missing/inconsistent-texture group.
 - User approved a 12,288-draw mapped-area cohort and a separately reported 2,048-draw unweighted-MUKEY cohort.
 
-**Next Steps**: Execute the approved cohorts, create fixtures from observed failure types, then assess raster-region adjacency and aligned elevation in masked-valid candidate trials. No production fallback behavior changes until a later ADR.
+**Next Steps**: Retain as the empirical evidence record; execute the approved
+policy in `20260722_ssurgo_intelligent_fallback_rollout`.
+
+---
+
+### SSURGO Intelligent Fallback M4 Rollout
+**Started**: 2026-07-22
+**Status**: Independent scaffold review dispositioned; M1 implementation pending
+**Size**: High (2-4 focused sessions)
+**Owner**: Codex
+**Priority**: High
+**Link**: [docs/work-packages/20260722_ssurgo_intelligent_fallback_rollout/](docs/work-packages/20260722_ssurgo_intelligent_fallback_rollout/)
+**Description**: Faithfully implement ADR-0025's recovery -> local
+vector-profile -> global fallback order. Padded candidate work is conditional
+on an affected watershed and the local RQ `build_soils` task for
+`plastic-bundling` provides generated-output acceptance evidence.
+
+**Current Status**:
+- ADR-0025 and the authoritative fallback specification are committed.
+- Package includes high-impact RQ/filesystem security review, independent code
+  and QA reviews, and a final finding-disposition gate.
+- Agents may restart the local Docker Compose stack during the RQ proof.
+
+**Next Steps**: Implement conditional candidate preparation and additive
+provenance, then run the hermetic fixture corpus and RQ `plastic-bundling`
+build through job completion before review.
 
 ---
 

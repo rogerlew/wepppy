@@ -46,14 +46,18 @@ For an affected run:
    outcome for MUKEYs already in the project map and build every added MUKEY
    with the same SSURGO source version, converter settings, defaults, and
    initial saturation. Together, these outcomes cover every padded MUKEY.
-4. Keep this candidate collection separate from primary project soils. A
-   candidate is eligible only if its added build produced a valid `WeppSoil`.
-   Materialize only donors actually selected by stage 2 into the final run soil
-   set.
+4. Keep the candidate collection separate from primary project soils. A
+   MUKEY is eligible when it has a valid outcome in the current build: its
+   primary-collection outcome when it is in the project map, otherwise its
+   added-candidate outcome. Collection origin must not exclude a MUKEY.
+   Materialize only selected **added** donors into the final run soil set;
+   selected primary donors are already materialized by the primary build.
 
 The persisted padded map is the only selection raster. Do not query the
-national VRT or unpadded project map during donor selection. Missing raster or
-candidate-build evidence skips stage 2 for that record and enters stage 3.
+national VRT or unpadded project map during donor selection. Missing, corrupt,
+or provenance-mismatched raster or candidate-build evidence skips stage 2 for
+that record and enters stage 3. The global donor is calculated solely from
+valid primary-collection MUKEYs; candidate outcomes never change that baseline.
 
 ## Local Candidate Set
 
@@ -126,20 +130,39 @@ adds the following evidence without removing old keys:
 | `fallback_reason` | Explicit disposition/failure reason |
 
 `soils/soils.parquet` receives nullable additive representations of the same
-evidence. Legacy NoDb instances hydrate absent additive fields to null/empty
-values, and existing consumers of the original substitution keys remain
-compatible. A successful stage-1 source recovery keeps the raw MUKEY and
-needs no substitution record; its ordinary build diagnostics remain the
-recovery evidence.
+evidence. The source location, candidate raster, support, and profile fields
+are JSON values in NoDb and nullable JSON-encoded strings in Parquet; scalar
+policy, MUKEY, radius, and reason fields retain their scalar types. Legacy NoDb
+instances hydrate absent additive fields to null/empty values, and existing
+consumers of the original substitution keys remain compatible. A successful
+stage-1 source recovery keeps the raw MUKEY and needs no substitution record;
+its ordinary build diagnostics remain the recovery evidence.
 
 ## Failure, Rollback, and Verification
 
 No fallback stage may select an unbuilt donor or silently replace the specified
-algorithm. A missing native categorical-support dependency is an explicit build
-error. An operator rollback disables stage 2, leaving stage 1 recovery and
-stage 3 watershed-global substitution intact.
+algorithm. Candidate preparation uses a configured canonical source resolver:
+the resolved regular, readable source must be inside the approved gNATSGO 2025
+root and no request, NoDb value, or caller-supplied path may select it. A source
+mount symlink is permitted only when its resolved file remains inside that
+root; candidate output symlinks are never permitted. The persisted map and
+metadata are fixed relative paths
+`soils/ssurgo_candidate_mukey.tif` and
+`soils/ssurgo_candidate_mukey.metadata.json`; reject path traversal and
+symlink escapes, write a same-directory temporary file, fsync, atomically
+replace, then checksum and validate before publishing provenance. A source
+identity/version, bounds, CRS, or checksum mismatch makes the candidate
+unavailable and uses stage 3; never reuse a stale crop.
+All candidate preparation, replacement, candidate construction,
+materialization, and persistence occur under the existing soils lock. A missing
+native categorical-support dependency is an explicit build error. An operator
+rollback disables stage 2, leaving stage 1 recovery and stage 3
+watershed-global substitution intact.
 
 Required verification includes deterministic stage-order, radius, vector,
-texture-balance, tie, and unavailable-candidate tests; legacy NoDb/Parquet
-hydration; and a hermetic run that proves only selected added donors are
-materialized and all final assignment artifacts agree.
+texture-balance, tie, and unavailable-candidate tests; primary and added donor
+eligibility; legacy NoDb/Parquet hydration; and a hermetic run that proves only
+selected added donors are materialized and all final assignment artifacts
+agree. Failure injection must prove a donor-materialization failure leaves no
+partial `.sol` or dangling final mapping/provenance and returns stage 3, while
+a clean retry produces one coherent candidate checksum/provenance set.

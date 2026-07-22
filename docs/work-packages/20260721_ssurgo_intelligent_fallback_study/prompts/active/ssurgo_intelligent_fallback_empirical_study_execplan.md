@@ -76,8 +76,8 @@ implementation remains pending.
 - [x] Milestone 4 policy gate: ADR-0025 and the authoritative SSURGO fallback
   specification ratify source recovery, local vector-profile selection, and
   the global fallback order (2026-07-22).
-- [ ] Milestone 4 implementation: wire conditional padded candidate building,
-  vector-profile selection, provenance, and regression coverage.
+- [x] Milestone 4 implementation successor scaffolded as
+  `docs/work-packages/20260722_ssurgo_intelligent_fallback_rollout/` (2026-07-22).
 - [ ] Add deterministic fixtures for all observed primary failure classes.
 - [ ] Build and evaluate raster-region/elevation candidate evidence using
   masked-valid trials.

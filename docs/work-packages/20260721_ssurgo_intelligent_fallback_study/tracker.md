@@ -8,8 +8,9 @@
 **Started**: 2026-07-21 18:00 UTC
 **Current phase**: M4 vector-profile fallback policy and production wiring
 **Last updated**: 2026-07-26
-**Next milestone**: Wire ADR-0025's conditional padded candidate map, added
-MUKEY build set, vector-profile selection, and global-fallback audit evidence.
+**Next milestone**: Implementation is delegated to
+[`20260722_ssurgo_intelligent_fallback_rollout`](../20260722_ssurgo_intelligent_fallback_rollout/package.md);
+retain this package as the empirical evidence and policy record.
 **Security impact**: none
 **Dedicated security review**: no
 **Security artifact**: N/A
