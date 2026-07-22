@@ -30,7 +30,8 @@ compatibility, and RQ validation procedure.
 ### In Progress
 
 - [ ] M1: Implement the accepted-pending source/artifact, no-op, schema, and
-  config-binding requirements.
+config-binding requirements.
+**Contract checkpoint**: `2026-07-22_contract_decision.md` (commit pending)
 
 ### Blocked
 
@@ -118,3 +119,14 @@ and disposition ledger were updated; all findings are accepted-pending.
 beginning vector-selection wiring.
 
 **Test results**: Documentation review only; implementation remains unstarted.
+
+### 2026-07-22 UTC: M4 implementation contract checkpoint
+
+**Agent/Contributor**: Codex
+
+**Work completed**: Recorded the canonical authority, approved implementation
+delta, compatibility/security impact, and regression plan. The checkpoint must
+be committed as a standalone ancestor before implementation edits.
+
+**Next steps**: Commit this checkpoint, then implement M1 with independent
+verification running in parallel.

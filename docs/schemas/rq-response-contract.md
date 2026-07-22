@@ -117,6 +117,10 @@ Landuse first-class route notes (2026-04-24):
 - Use status-code-first semantics:
   - 4xx for validation/input errors.
   - 5xx for server errors.
+- A run-scoped mutable endpoint that includes a `{config}` path segment MUST
+  normalize that value and reject it before any controller, timestamp, or queue
+  mutation when it does not match the run's active config. The response is a
+  canonical 4xx error envelope; it must not enqueue a job or change run state.
 - `run-wepp` and `run-wepp-watershed` MUST fast-fail before enqueue when
   `watershed.subwta` is missing. This precondition applies in normal mode,
   batch mode, `_base` context, and payloads with
