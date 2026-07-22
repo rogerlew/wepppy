@@ -318,3 +318,14 @@ risk or deferral. The concurrent publication/retry test independently passed.
 for rollout under ADR-0025; its runtime behavior remains conditional, so padded
 candidate preparation and added-MUKEY building occur only for watersheds with
 residual-invalid dominant hillslopes.
+
+### 2026-07-22 UTC: User release authorization
+
+**Decision maker**: Product owner
+
+**Decision**: GO. The product owner concurs with the M5 disposition and
+authorizes release under ADR-0025.
+
+**Scope note**: This authorizes the completed release gate. No production
+deployment or remote push is implied by this record; those remain separate,
+explicit operations.

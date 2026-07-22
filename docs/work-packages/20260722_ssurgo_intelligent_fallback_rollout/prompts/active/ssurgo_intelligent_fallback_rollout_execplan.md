@@ -367,3 +367,8 @@ reviewer-visible evidence; no risks or deferrals were accepted. Final gates
 include the full sharded suite recorded at `8dac222df`, focused fallback and
 RQ suites, stubtest, documentation lint, the adversarial corpus, and changed
 file broad-exception enforcement.
+
+Updated 2026-07-22: The product owner concurred with the M5 GO disposition and
+authorized release under ADR-0025. This decision records release authorization
+only; a remote push or production deployment requires its own explicit
+operation.
