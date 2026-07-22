@@ -28,8 +28,8 @@ unchanged.
   and prove it with deterministic raster fixtures (five targeted Rust tests).
 - [x] Milestone 2: add a shadow-only WEPPpy collector that clusters invalid
   MUKEY bounds and persists proposed local-majority evidence (2026-07-22).
-- [ ] Milestone 3: evaluator scaffold and deterministic GeoTIFF fixture corpus
-  complete (2026-07-22); representative-run cohort remains.
+- [x] Milestone 3: evaluator, deterministic GeoTIFF fixture corpus, and a
+  read-only 298-case representative-run cohort complete (2026-07-22).
 - [ ] Milestone 4: seek an ADR only if evidence supports opt-in production
   selection, then observe a shadow/opt-in rollout before default promotion.
 - [ ] Add deterministic fixtures for all observed primary failure classes.
@@ -99,16 +99,28 @@ unchanged.
   storing its raster artifacts through the same clone/pull path avoids a later
   fixture migration.
   Date/Author: 2026-07-22 / user and Codex.
+- Decision: Hold Milestone 4 rather than propose an ADR from the first
+  representative masked-valid cohort.
+  Rationale: local candidates were elevation-closer in 235 of 298 cases and
+  had lower unweighted WEPP-feature distance in 108 versus 71 cases, but this
+  is only two local runs and no practical-effect threshold or production score
+  has been declared.
+  Date/Author: 2026-07-22 / Codex.
 
 ## Outcomes & Retrospective
 
-The expanded cohorts are complete but the package is not. The mapped-area
+The expanded and representative masked-valid cohorts are complete but the
+package is not. The mapped-area
 cohort found 244 unbuildable draws of 12,288 (1.99%; Wilson 95% 1.75%–2.25%):
 211 residual-invalid and 33 nonphysical-texture worker failures. The separate
 uniform-MUKEY cohort found 49 of 2,048 (2.39%; Wilson 95% 1.81%–3.15%): 46
 residual-invalid and three worker failures. No source-data access failures
 occurred. Fixture and masked-valid candidate evidence remain necessary before
-proposing a policy.
+proposing a policy. The masked-valid cohort queried 298 hillslopes across two
+local runs; all found a local candidate at 250 m. Local candidates were better
+on the declared unweighted WEPP-feature distance in 108 cases, global donors
+were better in 71, and 119 tied. Local donors were elevation-closer in 235
+cases versus 62. This is directional evidence only; Milestone 4 remains HOLD.
 
 ## Context and Orientation
 
@@ -181,9 +193,11 @@ dependencies. Results are stratified by fixture class and run, not pooled into
 a production claim.
 
 The scaffold records exact withheld-MUKEY recovery and distance on declared
-soil/WEPP summary features. Feature/WEPP similarity is the primary later
-interpretation metric, while exact recovery remains diagnostic. No observed
-improvement threshold is set before a future ADR.
+soil/WEPP summary features. Because masked-valid trials remove the withheld
+MUKEY from candidate eligibility, exact recovery is not interpretable in this
+protocol. Feature/WEPP similarity and aligned elevation comparison are the
+usable diagnostic evidence. No observed improvement threshold is set before a
+future ADR.
 
 Milestone 4 is conditional. A parameterization ADR is required before any
 production threshold or selection order changes. If approved, the policy is

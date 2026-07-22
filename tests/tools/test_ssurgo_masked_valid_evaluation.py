@@ -26,3 +26,28 @@ def test_masked_valid_evaluation_reports_both_recovery_and_distance() -> None:
     assert result["exact_local_recovery"] is False
     assert result["local_feature_distance"] < result["global_feature_distance"]
     assert result["distance_fields"] == ["clay", "sand"]
+
+
+def test_global_baseline_masks_withheld_mukey_before_selecting_mode() -> None:
+    module = runpy.run_path(str(Path(__file__).resolve().parents[2] / "tools/ssurgo_masked_valid_evaluation.py"))
+    baseline = module["_global_baseline"](
+        {"1": "10", "2": "10", "3": "20", "4": "30"},
+        {"10", "20", "30"},
+        ["10", "20", "30"],
+        "10",
+    )
+    assert baseline == "20"
+
+
+def test_cohort_summary_counts_paired_feature_and_elevation_outcomes() -> None:
+    module = runpy.run_path(str(Path(__file__).resolve().parents[2] / "tools/ssurgo_masked_valid_evaluation.py"))
+    summary = module["summarize_evaluations"](
+        [
+            {"run_path": "run-a", "local_majority_mukey": "20", "global_mukey": "30", "local_feature_distance": 1.0, "global_feature_distance": 2.0, "local_elevation_delta_m": 2.0, "global_elevation_delta_m": 1.0},
+            {"run_path": "run-a", "local_majority_mukey": "20", "global_mukey": "20", "local_feature_distance": 2.0, "global_feature_distance": 2.0, "local_elevation_delta_m": 1.0, "global_elevation_delta_m": 1.0},
+        ]
+    )
+    assert summary["all_runs"]["feature_local_better"] == 1
+    assert summary["all_runs"]["feature_tied"] == 1
+    assert summary["all_runs"]["elevation_global_better"] == 1
+    assert summary["by_run"]["run-a"]["proposal_disagreements"] == 1

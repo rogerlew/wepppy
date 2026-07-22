@@ -76,11 +76,12 @@ coverage.
   failures and a reported confidence interval for combined unbuildable rate.
 - [x] 2,048-draw unweighted-MUKEY cohort completes with separately reported
   MUKEY-prevalence results.
-- [ ] Milestone 1 returns deterministic local candidate pixel support from
+- [x] Milestone 1 returns deterministic local candidate pixel support from
   clustered bounds and proves it with synthetic raster fixtures.
 - [ ] Deterministic fixtures cover all observed primary failure classes.
-- [ ] A map-region/elevation candidate experiment compares the current global
-  fallback with local candidates in masked-valid trials.
+- [x] A map-region/elevation candidate experiment compares the current global
+  fallback with local candidates in masked-valid trials (298 local cases; M4
+  remains HOLD pending failure-class fixtures and an ADR-ready effect rule).
 - [ ] No production fallback behavior changes without a parameterization ADR.
 
 ## Parameterization ADR Gate

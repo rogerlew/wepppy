@@ -33,6 +33,46 @@ cases using the SSURGO map and, after validation, elevation.
 
 No production run, fallback assignment, or source raster was modified.
 
+## Masked-Valid Candidate Cohort (Milestone 3)
+
+The read-only evaluator ran every eligible hillslope in two completed local
+runs: three in `anaphylactic-vernacular` and 295 in `mammalian-ageism`. For
+each case it temporarily removed the raw dominant MUKEY from the valid donor
+set, recomputed the current global fallback baseline, and queried the smallest
+successful local SSURGO window. Every case found local candidates at the
+initial 250 m radius. The run SSURGO, subcatchment, and DEM rasters were
+identically aligned 30 m EPSG:32610 grids; elevation summaries were calculated
+with cropped, vectorized masks rather than iterating cells.
+
+| Comparison | All 298 cases | Large run (295 cases) |
+| --- | ---: | ---: |
+| Local proposal differs from global baseline | 194 | 194 |
+| Local has lower declared WEPP-feature distance | 108 | 108 |
+| Global has lower declared WEPP-feature distance | 71 | 71 |
+| Feature distance tie | 119 | 116 |
+| Local has smaller source-to-donor elevation difference | 235 | 234 |
+| Global has smaller source-to-donor elevation difference | 62 | 61 |
+| Elevation difference tie | 1 | 0 |
+
+The declared WEPP feature distance is the mean absolute difference over the
+jointly available first-profile bulk density, clay, field capacity, organic
+matter, rock fragments, sand, soil depth, and wilting point. It is an
+unweighted exploratory metric, not a parameterization score. Elevation is
+also diagnostic only: local donor elevation is its median within the successful
+candidate window, while the global donor uses its median across the run map.
+
+Exact withheld-MUKEY recovery is zero by construction because the experiment
+removes the withheld MUKEY from the valid donor set. It is therefore not an
+interpretable success metric for this protocol; feature and elevation
+comparisons are the usable evidence.
+
+**M4 decision: HOLD.** Local candidates show promising directional evidence,
+especially for elevation, but the evidence is limited to two local runs and
+does not define a normalized feature distance, a minimum practical effect, or
+a production selection rule. Deterministic fixtures for the observed converter
+failure classes also remain incomplete. No ADR or fallback-policy change is
+justified yet.
+
 ## Expanded Cohort Results
 
 | Cohort | Draws | Unique MUKEYs | Residual-invalid | Worker failed | Unbuildable | 95% Wilson interval |
@@ -162,10 +202,9 @@ The pilot supports the strategy's map-first direction.
   separate rerun.
 
 Next, build deterministic fixtures for the observed classes (no component, no
-horizons, missing required texture fields, and nonphysical texture balance),
-then construct raster-region adjacency and aligned elevation evidence for the
-invalid MUKEYs. Compare local map candidates against the watershed-global
-baseline in masked-valid trials before proposing a production score.
+horizons, missing required texture fields, and nonphysical texture balance).
+If those are complete, define a normalized feature comparison and an explicit
+minimum practical effect before reconsidering an ADR-governed opt-in policy.
 
 ## Reproducibility Artifacts
 
@@ -187,6 +226,11 @@ The local, non-versioned study directory is
   equal-probability MUKEY cohort and result.
 - `gnatsgo_2025_uniform_mukey_2048_diagnostic_summary.json` — validated
   reason aggregation for the uniform-MUKEY cohort.
+- `/tmp/ssurgo_masked_valid_20260722/cohort_full.json` — read-only
+  298-case masked-valid cohort with candidate support and elevation/feature
+  comparisons. It can be recreated with
+  `tools/ssurgo_masked_valid_evaluation.py --run <run> ...`; it is not
+  committed because it contains local run paths and date-scoped run evidence.
 
 The raw diagnostic JSONL is intentionally not committed: it is a large,
 date-sensitive external-data extract. The inventory and JSONL can be recreated

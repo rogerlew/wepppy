@@ -6,9 +6,9 @@
 
 **Timezone**: UTC
 **Started**: 2026-07-21 18:00 UTC
-**Current phase**: Masked-valid fixture evaluation
+**Current phase**: M4 evidence hold
 **Last updated**: 2026-07-22
-**Next milestone**: Execute representative read-only masked-valid cohorts using the clustered candidate kernel.
+**Next milestone**: Complete observed failure-class fixtures and define an ADR-ready practical-effect criterion.
 **Security impact**: none
 **Dedicated security review**: no
 **Security artifact**: N/A
@@ -17,11 +17,7 @@
 
 ### Ready / Backlog
 
-- [ ] Milestone 3: execute representative read-only masked-valid cohorts and
-  report local-majority versus global-baseline results by fixture/run.
 - [ ] Design deterministic fixtures from expanded-cohort failure classes.
-- [ ] Build raster-region adjacency and aligned elevation evidence for
-  masked-valid candidate trials.
 
 ### In Progress
 
@@ -66,6 +62,10 @@
 - [x] Completed Milestone 2 shadow collection with additive NoDb/Parquet
   evidence, legacy hydration coverage, and a read-only local-run proof with
   six invalid hillslopes in one cluster (2026-07-22).
+- [x] Completed Milestone 3 read-only masked-valid cohort: 298 hillslopes in
+  two local runs, local feature distance better in 108 versus 71 global wins
+  (119 ties), and local elevation difference better in 235 versus 62 global
+  wins (2026-07-22).
 
 ## Timeline
 
@@ -173,6 +173,14 @@ growing GeoTIFF fixture corpus with Git LFS.
 without treating an identifier match as the only good donor outcome. There is
 still no production threshold or fallback policy change.
 
+### 2026-07-22: Hold Milestone 4 after representative masked-valid evidence
+
+**Decision**: Do not author a parameterization ADR or opt-in fallback policy.
+
+**Impact**: The full 298-case local cohort supplies promising directional
+feature and elevation evidence, but two runs, an unweighted feature distance,
+and incomplete converter-failure fixtures do not support a production choice.
+
 ## Risks and Issues
 
 | Risk | Severity | Likelihood | Mitigation | Status |
@@ -213,6 +221,8 @@ still no production threshold or fallback policy change.
 - [ ] Fixture tests cover each observed primary failure class.
 - [x] Masked-valid candidate fixture corpus exercises the public native binding
   with direct, expansion, tie, exhaustion, and separated-cluster cases.
+- [x] Read-only representative cohort compares local/global donor feature and
+  aligned-elevation differences for all eligible hillslopes in two local runs.
 
 ## Progress Notes
 
