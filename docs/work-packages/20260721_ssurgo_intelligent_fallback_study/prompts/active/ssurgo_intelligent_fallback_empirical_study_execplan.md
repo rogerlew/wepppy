@@ -28,8 +28,8 @@ unchanged.
   and prove it with deterministic raster fixtures (five targeted Rust tests).
 - [ ] Milestone 2: add a shadow-only WEPPpy collector that clusters invalid
   MUKEY bounds and persists proposed local-majority evidence.
-- [ ] Milestone 3: evaluate local-majority against the current global fallback
-  with masked-valid and representative-run cohorts.
+- [ ] Milestone 3: evaluator scaffold and deterministic regression complete
+  (2026-07-22 04:05 UTC); fixture corpus and representative-run cohort remain.
 - [ ] Milestone 4: seek an ADR only if evidence supports opt-in production
   selection, then observe a shadow/opt-in rollout before default promotion.
 - [ ] Add deterministic fixtures for all observed primary failure classes.
