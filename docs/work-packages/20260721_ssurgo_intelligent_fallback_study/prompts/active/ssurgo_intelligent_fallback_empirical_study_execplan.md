@@ -46,6 +46,9 @@ unchanged.
 - [x] Milestone 3.5 larger cohort: execute ranked-candidate diagnostics on 18
   additional runs (322 cases), including a one-worker deterministic repeat
   (2026-07-25).
+- [x] Milestone 3.5 broader-ring slice: re-run the eleven 250 m local-oracle
+  misses at fixed 500 m, 1 km, and 2 km windows; the 2 km one/four-worker
+  artifacts are byte-identical (2026-07-26).
 - [ ] Milestone 4: seek an ADR only if evidence supports opt-in production
   selection, then observe a shadow/opt-in rollout before default promotion.
 - [ ] Add deterministic fixtures for all observed primary failure classes.
@@ -101,6 +104,13 @@ unchanged.
   Evidence: among 322 cases, local top one beat global 165 times, the local
   oracle 275 times, and global beat all local candidates 11 times. The
   one-worker and four-worker records/aggregates were exactly equal.
+- Observation: bounded broader rings recover local candidates in the
+  deliberately selected 250 m oracle-miss stratum, but shared-edge geometry
+  does not rank those outer candidates well.
+  Evidence: at 500 m, 1 km, and 2 km the local oracle beat global in 5, 8,
+  and 11 of 11 fixed cases respectively; at 2 km geometry top one won only
+  three and top three four. The 2 km one/four-worker JSON artifacts were
+  byte-identical.
 
 ## Decision Log
 
@@ -179,6 +189,12 @@ unchanged.
   not disappear from an aggregate through an implicit exclusion. It is not
   evidence for or against a donor policy.
   Date/Author: 2026-07-25 / Codex.
+- Decision: Isolate broader-ring candidate discovery before adding any new
+  profile or texture evidence.
+  Rationale: the fixed local-oracle-miss cohort directly distinguishes an
+  insufficient 250 m candidate set from an inadequate ranker. Texture was
+  not added to the score; no production rule changed.
+  Date/Author: 2026-07-26 / user and Codex.
 
 ## Outcomes & Retrospective
 
@@ -210,8 +226,12 @@ or broader candidate rings improve the relevant stratum.
 
 The 322-case larger cohort confirms that top-k/oracle diagnostics are useful,
 but it still does not choose a production shortlist length or score margin.
-The next research slice should compare a bounded broader candidate ring only
-for local-oracle misses and retain global fallback as the explicit baseline.
+The broader-ring slice then showed that every selected 250 m oracle miss has
+a better local candidate within 2 km, while the existing geometry rank selects
+only three of those candidates at top one. The next research slice must rank
+outer-ring candidates and define a confidence/abstention proxy before a
+conditional expansion can be evaluated. Global fallback remains the explicit
+baseline.
 
 ## Context and Orientation
 

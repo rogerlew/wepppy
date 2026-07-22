@@ -166,3 +166,11 @@ def test_candidate_study_separates_candidate_coverage_from_top_rank() -> None:
     assert summary["oracle_local_better"] == 1
     assert summary["global_in_local_candidate_set"] == 0
     assert study["by_candidate_count"]["2-3"]["geometry"]["comparable"] == 1
+
+
+def test_case_id_restriction_keeps_only_requested_run_topaz_pairs() -> None:
+    module = runpy.run_path(str(Path(__file__).resolve().parents[2] / "tools/ssurgo_masked_valid_evaluation.py"))
+    eligible = [("1", "10"), ("2", "20"), ("3", "30")]
+
+    assert module["_restrict_eligible_case_ids"](eligible, "fixture-run", {"fixture-run:2"}) == [("2", "20")]
+    assert module["_restrict_eligible_case_ids"](eligible, "fixture-run", None) == eligible

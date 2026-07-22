@@ -237,6 +237,19 @@ def _global_baseline(
     return next((mukey for mukey in valid_order if mukey in remaining), None)
 
 
+def _restrict_eligible_case_ids(
+    eligible: Sequence[tuple[str, str]], run_name: str, requested_case_ids: set[str] | None
+) -> list[tuple[str, str]]:
+    """Select a fixed masked-valid subset without changing its donor baseline."""
+    if not requested_case_ids:
+        return list(eligible)
+    return [
+        (topaz_id, mukey)
+        for topaz_id, mukey in eligible
+        if f"{run_name}:{topaz_id}" in requested_case_ids
+    ]
+
+
 def _median(values: Any) -> float | None:
     import numpy as np
 
@@ -691,6 +704,7 @@ def build_run_cases(
     max_radius_m: float,
     workers: int | None,
     dem_path: Path,
+    requested_case_ids: set[str] | None = None,
 ) -> tuple[list[dict[str, Any]], dict[str, Any]]:
     """Build read-only masked-valid cases from one completed gridded SSURGO run."""
     import rasterio
@@ -715,6 +729,7 @@ def build_run_cases(
         if _numeric_mukey(mukey) in valid_mukeys and len(valid_mukeys - {_numeric_mukey(mukey)}) > 0
     ]
     eligible.sort(key=lambda item: int(item[0]))
+    eligible = _restrict_eligible_case_ids(eligible, run_path.name, requested_case_ids)
     if max_cases <= 0:
         raise ValueError("max_cases must be positive")
     if len(eligible) > max_cases:
@@ -821,6 +836,7 @@ def build_run_cases(
         "seed": seed,
         "initial_radius_m": initial_radius_m,
         "max_radius_m": max_radius_m,
+        "requested_case_count": len(requested_case_ids) if requested_case_ids else None,
         **dem_metadata,
     }
     return cases, metadata
@@ -838,8 +854,15 @@ def main(argv: Sequence[str] | None = None) -> int:
     parser.add_argument("--max-radius-m", type=float, default=2000.0)
     parser.add_argument("--workers", type=int)
     parser.add_argument("--dem-vrt", type=Path, default=DEFAULT_NED1_VRT)
+    parser.add_argument(
+        "--case-id",
+        action="append",
+        help="Restrict run mode to a stable '<run-name>:<topaz-id>' masked-valid case; repeatable.",
+    )
     args = parser.parse_args(argv)
     if args.input is not None:
+        if args.case_id:
+            parser.error("--case-id is only available with --run")
         cases = json.loads(args.input.read_text(encoding="utf-8"))
         results: Any = [evaluate_masked_case(case) for case in cases]
     else:
@@ -854,6 +877,7 @@ def main(argv: Sequence[str] | None = None) -> int:
                 max_radius_m=args.max_radius_m,
                 workers=args.workers,
                 dem_path=args.dem_vrt,
+                requested_case_ids=set(args.case_id) if args.case_id else None,
             )
             cases.extend(run_cases)
             cohorts.append(metadata)

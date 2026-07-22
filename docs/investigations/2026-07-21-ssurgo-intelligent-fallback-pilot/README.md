@@ -196,6 +196,39 @@ The artifacts are
 byte-equivalent one-worker diagnostic counterpart
 `larger_candidate_study_workers1.json`.
 
+## Conditional Broader-Ring Experiment (Milestone 3.5)
+
+Texture is deliberately not an evidence family in this experiment. No
+texture-based score or fallback change was introduced. Instead, this slice
+isolates candidate discovery: it re-ran the eleven larger-cohort cases for
+which no 250 m local candidate matched or beat the current global fallback.
+The cases, global baseline, withheld soil, valid donor set, DEM, and feature
+distance were fixed. Each run forced one bounded local window at 500 m, 1 km,
+or 2 km, making the candidate sets nested rather than changing the search
+policy per case.
+
+| Forced local radius | Median candidates | Local oracle better | Global better | Tie |
+| --- | ---: | ---: | ---: | ---: |
+| 250 m baseline | 4 | 0 | 11 | 0 |
+| 500 m | 8 | 5 | 4 | 2 |
+| 1 km | 13 | 8 | 1 | 2 |
+| 2 km | 23 | 11 | 0 | 0 |
+
+The broader set closes the candidate-discovery gap for this deliberately
+selected stratum: every fixed 250 m oracle miss contains a feature-closer
+local candidate by 2 km. It does not establish a donor rule. The existing
+geometry rank selects a locally better top-one candidate in only three of the
+eleven 2 km cases (top three: four), and its median top-two score margin falls
+to 0.033. Outer-window candidates need ranking evidence beyond shared source
+edges before a conditional expansion can be considered for M4.
+
+The three four-worker artifacts are
+`/tmp/ssurgo_masked_valid_20260726/oracle_miss_500m.json`,
+`oracle_miss_1000m.json`, and `oracle_miss_2000m.json`. The 2 km one-worker
+repeat (`oracle_miss_2000m_workers1.json`) is byte-identical to the four-worker
+result. The evaluator's repeatable `--case-id <run-name>:<topaz-id>` filter
+pins that fixed cohort for subsequent ranking experiments.
+
 ## Expanded Cohort Results
 
 | Cohort | Draws | Unique MUKEYs | Residual-invalid | Worker failed | Unbuildable | 95% Wilson interval |

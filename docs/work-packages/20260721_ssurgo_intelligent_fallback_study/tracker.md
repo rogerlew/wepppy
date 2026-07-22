@@ -7,8 +7,10 @@
 **Timezone**: UTC
 **Started**: 2026-07-21 18:00 UTC
 **Current phase**: M4 evidence hold
-**Last updated**: 2026-07-25
-**Next milestone**: Compare broader local rings for local-oracle misses and complete an observed-invalid provenance review before defining an ADR-ready practical-effect criterion.
+**Last updated**: 2026-07-26
+**Next milestone**: Evaluate an outer-ring ranker and a confidence/abstention
+proxy on fixed 250 m oracle misses, then complete observed-invalid provenance
+review before defining an ADR-ready practical-effect criterion.
 **Security impact**: none
 **Dedicated security review**: no
 **Security artifact**: N/A
@@ -83,6 +85,10 @@
 - [x] Completed larger ranked-candidate cohort: 18 run manifests, 322 cases,
   275 local-oracle versus 165 top-one local wins, and exact one/four-worker
   parity (2026-07-25).
+- [x] Completed fixed broader-ring diagnostic: all eleven 250 m local-oracle
+  misses had a better local candidate by 2 km, while geometry top one found
+  only three; the 2 km one/four-worker artifacts are byte-identical
+  (2026-07-26).
 
 ## Timeline
 
