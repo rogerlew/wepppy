@@ -151,3 +151,24 @@ RQ acceptance sequence.
 tests passed 7/7 with the host PyO3 link argument; test-stub, broad-exception,
 and route-contract checks passed. Full M4 remains held pending generated-output,
 adversarial, and RQ evidence.
+
+### 2026-07-22 UTC: M3 Parquet evidence and M4 local preflight
+
+**Agent/Contributor**: Codex
+
+**Work completed**: Added a real `soils.parquet` round-trip test for a local
+selection: raw/final MUKEYs, JSON provenance, catalog publication, and the
+referenced selected donor `.sol` are checked together.
+
+**M4 preflight**: `wctl ps` reported all required local services up; `wctl
+rq-info` reported zero queued/executing jobs and idle workers. No restart was
+needed or performed.
+
+**Blocker**: The documented local dev-agent password login/token flow cannot
+be used because `/weppcloud/login` is OAuth-only in this stack. The API
+submission requires an authorized bearer or session-token path. No token was
+forged and no RQ mutation was submitted.
+
+**Next steps**: Supply/re-enable an approved local bearer/session-token path,
+then execute the discovered `rq_engine_build_soils` API sequence. Continue M3
+adversarial and broader scoring/radius evidence independently.

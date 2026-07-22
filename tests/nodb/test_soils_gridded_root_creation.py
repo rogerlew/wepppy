@@ -460,6 +460,70 @@ def test_subs_summary_includes_raw_and_substituted_mukey_columns() -> None:
     assert summary["590"]["shadow_cluster_id"] is None
 
 
+def test_dump_soils_parquet_round_trips_local_fallback_provenance(
+    tmp_path: Path,
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    import json
+
+    import pandas as pd
+
+    soils_dir = tmp_path / "run" / "soils"
+    soils_dir.mkdir(parents=True)
+    (soils_dir / "20.sol").write_text("selected donor", encoding="utf-8")
+    soils = Soils.__new__(Soils)
+    soils.wd = str(tmp_path / "run")
+    soils.logger = logging.getLogger("tests.nodb.soils_parquet_fallback")
+    soils.domsoil_d = {"573": "20"}
+    soils.raw_ssurgo_domsoil_d = {"573": "99"}
+    soils.ssurgo_candidate_shadow_d = {}
+    soils.ssurgo_substitution_d = {
+        "573": {
+            "raw_mukey": "99",
+            "replacement_mukey": "20",
+            "reason": "invalid_dominant_mukey",
+            "selection_policy": "ssurgo_local_vector_profile_v1",
+            "global_mukey": "10",
+            "source_location_wgs84": [-116.1, 47.1],
+            "candidate_raster": {"manifest": "ssurgo_candidate_mukey/active.json"},
+            "search_radius_m": 250.0,
+            "candidate_support": [["20", 6]],
+            "source_profile": {"direct_values": {"ksat_r": 8.0}},
+            "selected_profile": {"mukey": "20", "distance": 0.0},
+            "fallback_reason": None,
+        }
+    }
+
+    class _SoilSummaryStub:
+        @staticmethod
+        def as_dict() -> dict[str, object]:
+            return {"mukey": "20", "fname": "20.sol", "desc": "local donor"}
+
+    soils.soils = {"20": _SoilSummaryStub()}
+    monkeypatch.setattr(
+        Soils,
+        "watershed_instance",
+        property(lambda _self: SimpleNamespace(translator_factory=lambda: None)),
+    )
+    catalog_entries = []
+    monkeypatch.setattr(
+        "wepppy.nodb.core.soils.update_catalog_entry",
+        lambda wd, rel_path: catalog_entries.append((wd, rel_path)),
+    )
+
+    soils.dump_soils_parquet()
+
+    frame = pd.read_parquet(soils_dir / "soils.parquet")
+    assert frame.loc[0, "topaz_id"] == 573
+    assert frame.loc[0, "mukey"] == "20"
+    assert frame.loc[0, "raw_mukey"] == "99"
+    assert frame.loc[0, "substituted_mukey"] == "20"
+    assert json.loads(frame.loc[0, "source_location_wgs84_json"]) == [-116.1, 47.1]
+    assert json.loads(frame.loc[0, "candidate_raster_json"])["manifest"] == "ssurgo_candidate_mukey/active.json"
+    assert (soils_dir / f"{frame.loc[0, 'mukey']}.sol").is_file()
+    assert catalog_entries == [(str(tmp_path / "run"), "soils/soils.parquet")]
+
+
 def test_post_instance_loaded_backfills_ssurgo_fallback_provenance(
     tmp_path: Path,
 ) -> None:

@@ -72,6 +72,13 @@ Focused native/WEPPpy/RQ-route acceptance is green. M4 remains held: closure
 still requires adversarial/generated-output evidence, an RQ run, and complete
 review disposition.
 
+M3 now includes a real Parquet round-trip fixture for local fallback
+provenance and referenced `.sol` output. M4 preflight found an idle healthy
+local stack with no queued work. The documented local dev-agent password flow
+cannot presently mint a bearer token because the login surface is OAuth-only;
+do not bypass this authorization boundary. A valid local bearer/session-token
+path is required before the RQ submission step.
+
 ## Context and Orientation
 
 `wepppy/nodb/core/soils.py::Soils._build_gridded()` converts MUKEYs from the
