@@ -59,6 +59,9 @@ unchanged.
 - [x] Milestone 3.5 texture-inclusive vector: add separately validated
   sand/clay and re-run the fixed and 322-case cohorts; retain the nontexture
   vector as the control (2026-07-26).
+- [x] Milestone 3.5 real-invalid source audit: inspect direct shallow-layer
+  provenance for the retained-horizon residual-invalid sample and execute the
+  four-run geographic masked-valid holdout (2026-07-26).
 - [ ] Milestone 4: seek an ADR only if evidence supports opt-in production
   selection, then observe a shadow/opt-in rollout before default promotion.
 - [ ] Add deterministic fixtures for all observed primary failure classes.
@@ -144,6 +147,16 @@ unchanged.
   nontexture control, with global wins falling from 16 to 12. Both selected 10
   local wins in the fixed eleven-case cohort; the texture one/four-worker
   artifacts were byte-identical.
+- Observation: many residual-invalid MUKEYs retain directly observed
+  shallow-mineral evidence, but the current classifier cannot yet assign them
+  safely to the profile-supported production class.
+  Evidence: 12 of 13 retained-horizon residual-invalid MUKEYs had six direct
+  nontexture values in a non-organic shallow layer; all 13 remain recorded as
+  `residual_invalid_unclassified` by the empirical tool.
+- Observation: the existing geographically separated holdout is neutral for
+  shallow-mineral selection.
+  Evidence: in 29 cases both nontexture and texture vectors had six local
+  wins, six global wins, and 17 ties; neither supports a promotion threshold.
 
 ## Decision Log
 
@@ -249,6 +262,12 @@ unchanged.
   must be observed, bounded, and sum to no more than 100%; that failure class
   remains profile-ineligible.
   Date/Author: 2026-07-26 / user and Codex.
+- Decision: Retain M4 HOLD after real-invalid source auditing and the
+  geographic holdout.
+  Rationale: source eligibility is not a validated converter-failure class,
+  and the small held-out result is neutral. A provenance-preserving classifier
+  and real-invalid shadow cohort are required before any fallback policy ADR.
+  Date/Author: 2026-07-26 / Codex.
 
 ## Outcomes & Retrospective
 

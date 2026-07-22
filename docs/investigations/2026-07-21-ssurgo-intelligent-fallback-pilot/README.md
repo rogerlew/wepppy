@@ -312,6 +312,39 @@ provenance and parameter validation on real partial-profile invalid soils, and
 must repeat against geographically held-out runs before proposing a production
 abstention rule or parameterization ADR.
 
+## Real Residual-Invalid Source Audit and Geographic Holdout (Milestone 3.5)
+
+The expanded mapped-area diagnostic records supplied 13 residual-invalid
+MUKEYs with at least one retained horizon and at least one converter-eligible
+horizon. A fresh SSURGO source read inspected the shallowest directly observed
+non-organic layer without applying defaults. Twelve of the 13 have all six
+nontexture comparison values directly observed: bulk density, hydraulic
+conductivity, CEC, lower depth, and the two rock-fragment fields. One MUKEY
+has no qualifying shallow vector. This validates that the proposed source
+provenance gate can distinguish profile-bearing residual invalids from
+profile-free cases.
+
+The current empirical classifier labels these cases
+`residual_invalid_unclassified`; it does not yet prove that their failed
+converter paths are the narrower production class `partial_profile`. They are
+therefore source-eligibility evidence, not outcome evidence for a real-invalid
+donor selection. A future classifier must persist the direct source values,
+their observation/default status, and the converter failure path before such a
+selection can leave shadow mode.
+
+The four geographically separated held-out runs (29 masked-valid cases) do
+not reproduce the larger-cohort separation. Both shallow-mineral variants had
+six local wins, six global wins, and 17 ties; the local oracle had nine wins
+and 20 ties. Texture made no held-out selection change. This is neutral rather
+than contradictory evidence, but it means no practical-effect or abstention
+threshold is ready.
+
+The held-out artifact is
+`/tmp/ssurgo_masked_valid_20260726/shallow_mineral_geographic_holdout.json`.
+**M4 decision: HOLD.** The next required work is a provenance-preserving
+classifier and a real-invalid shadow cohort, followed by a larger geographic
+holdout; do not promote the masked-valid vector results to fallback behavior.
+
 ## Expanded Cohort Results
 
 | Cohort | Draws | Unique MUKEYs | Residual-invalid | Worker failed | Unbuildable | 95% Wilson interval |

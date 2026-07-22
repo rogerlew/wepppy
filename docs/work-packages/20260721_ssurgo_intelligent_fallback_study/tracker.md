@@ -8,9 +8,9 @@
 **Started**: 2026-07-21 18:00 UTC
 **Current phase**: M4 evidence hold
 **Last updated**: 2026-07-26
-**Next milestone**: Build real partial-profile invalid-soil provenance and
-evaluate the validated shallow-mineral vector ranker plus abstention proxy on
-geographically held-out cases; retain profile-free global fallback behavior.
+**Next milestone**: Build a provenance-preserving profile-bearing invalid
+classifier and real-invalid shadow cohort, then expand the neutral 29-case
+geographic holdout before setting an abstention criterion.
 **Security impact**: none
 **Dedicated security review**: no
 **Security artifact**: N/A
@@ -100,6 +100,10 @@ geographically held-out cases; retain profile-free global fallback behavior.
 - [x] Completed validated texture-inclusive vector comparison: top-one local
   wins improved from 287 to 292 of 322, while the fixed discovery-miss cohort
   remained 10/11; one/four-worker output was byte-identical (2026-07-26).
+- [x] Audited retained-horizon real residual invalids and executed geographic
+  holdout: 12/13 sources have direct shallow vectors, but all remain
+  unclassified; 29 held-out masked-valid cases were neutral at 6 local, 6
+  global, and 17 ties (2026-07-26).
 
 ## Timeline
 
