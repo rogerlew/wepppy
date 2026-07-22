@@ -31,6 +31,10 @@ def report_client(monkeypatch, tmp_path):
     import wepppy.microservices.browse.report as report_mod
     import wepppy.microservices.browse.browse as browse_mod
 
+    # Nearby browse tests reload auth to vary process configuration. Reload this
+    # dependent module so its imported BrowseAuthError remains the current class.
+    report_mod = importlib.reload(report_mod)
+
     run_root = tmp_path / RUNID
     report_dir = run_root / "path" / "report"
     (report_dir / "static" / "js" / "vendor").mkdir(parents=True)

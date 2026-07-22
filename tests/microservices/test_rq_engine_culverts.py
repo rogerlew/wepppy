@@ -346,8 +346,12 @@ def test_culvert_submit_browse_token_downloads_batch_skeleton_zip(
     skeleton_zip_path = culverts_root / batch_uuid / "weppcloud_run_skeletons.zip"
     skeleton_zip_path.write_bytes(b"zip-content")
 
+    import wepppy.microservices.browse._download as download_mod
     import wepppy.microservices.browse.browse as browse_mod
 
+    # Earlier browse tests reload auth. Keep the route module's imported
+    # BrowseAuthError aligned before constructing a fresh browse app.
+    importlib.reload(download_mod)
     browse_mod = importlib.reload(browse_mod)
     browse_app = browse_mod.create_app()
 

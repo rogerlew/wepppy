@@ -82,7 +82,9 @@ def test_masked_valid_geometry_keeps_sources_distinct_in_one_call() -> None:
 def test_full_ssurgo_wrapper_filters_bounded_support_to_valid_mukeys(tmp_path, monkeypatch) -> None:
     full_map_dir = tmp_path / "ssurgo" / "gNATSGSO" / "2025"
     full_map_dir.mkdir(parents=True)
-    (full_map_dir / ".vrt").symlink_to(FIXTURE_DIRECTORY / "direct_local.tif")
+    # The canonical source must resolve within its configured root. A regular
+    # fixture file models the supported production source-mount contract.
+    (full_map_dir / ".vrt").write_bytes((FIXTURE_DIRECTORY / "direct_local.tif").read_bytes())
     monkeypatch.setenv("GEODATA_DIR", str(tmp_path))
 
     assert full_ssurgo_mukey_raster_path() == str(full_map_dir / ".vrt")

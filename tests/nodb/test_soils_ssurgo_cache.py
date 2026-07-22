@@ -104,7 +104,9 @@ def test_all_soils_surgo_collection_calls_pass_project_cache_path() -> None:
         and node.func.id == "SurgoSoilCollection"
     ]
 
-    assert len(calls) == 5
+    # Includes the separate padded-candidate collection used by the local
+    # SSURGO fallback; all collection creation paths must share project cache.
+    assert len(calls) == 6
     assert all(
         any(keyword.arg == "cache_db_path" for keyword in call.keywords)
         for call in calls

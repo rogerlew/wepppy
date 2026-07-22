@@ -56,7 +56,7 @@ def test_culvert_batch_orchestration_writes_run_metadata(
     culverts_root = tmp_path / "culverts"
     monkeypatch.setenv("CULVERTS_ROOT", str(culverts_root))
 
-    batch_uuid = "batch-20250101"
+    batch_uuid = f"batch-20250101-{tmp_path.name}"
     batch_root = culverts_root / batch_uuid
     topo_dir = batch_root / "topo"
     culverts_dir = batch_root / "culverts"
@@ -77,8 +77,10 @@ def test_culvert_batch_orchestration_writes_run_metadata(
     _write_raster(landuse_dir / "nlcd.tif", dummy_raster, transform, crs)
     _write_raster(soils_dir / "ssurgo.tif", dummy_raster, transform, crs)
 
-    base_runid = "batch;;culvert_base;;_base"
-    base_src = tmp_path / "batch" / "culvert_base" / "_base"
+    base_project_name = f"culvert_base_{tmp_path.name}"
+    base_leaf_name = f"_base_{tmp_path.name}"
+    base_runid = f"batch;;{base_project_name};;{base_leaf_name}"
+    base_src = tmp_path / "batch" / base_project_name / base_leaf_name
     _init_base_project(base_src)
 
     def _fake_get_wd(runid: str, *args, **kwargs) -> str:
@@ -264,7 +266,7 @@ def test_culvert_run_seeds_outlet_on_no_outlet_error(
     culverts_root = tmp_path / "culverts"
     monkeypatch.setenv("CULVERTS_ROOT", str(culverts_root))
 
-    batch_uuid = "batch-seed"
+    batch_uuid = f"batch-seed-{tmp_path.name}"
     batch_root = culverts_root / batch_uuid
     topo_dir = batch_root / "topo"
     culverts_dir = batch_root / "culverts"
@@ -284,8 +286,10 @@ def test_culvert_run_seeds_outlet_on_no_outlet_error(
     _write_raster(landuse_dir / "nlcd.tif", dummy_raster, transform, crs)
     _write_raster(soils_dir / "ssurgo.tif", dummy_raster, transform, crs)
 
-    base_runid = "batch;;culvert_base;;_base"
-    base_src = tmp_path / "batch" / "culvert_base" / "_base"
+    base_project_name = f"culvert_base_{tmp_path.name}"
+    base_leaf_name = f"_base_{tmp_path.name}"
+    base_runid = f"batch;;{base_project_name};;{base_leaf_name}"
+    base_src = tmp_path / "batch" / base_project_name / base_leaf_name
     _init_base_project(base_src)
 
     def _fake_get_wd(runid: str, *args, **kwargs) -> str:

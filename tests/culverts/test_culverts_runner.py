@@ -204,13 +204,17 @@ def test_culverts_runner_creates_runs_and_get_wd(
     monkeypatch.setenv("CULVERTS_ROOT", str(culverts_root))
     monkeypatch.setattr(wepp_helpers, "redis_wd_cache_client", None)
 
-    base_runid = "batch;;culvert_base;;_base"
-    base_src = tmp_path / "batch" / "culvert_base" / "_base"
+    base_project_name = f"culvert_base_{tmp_path.name}"
+    base_leaf_name = f"_base_{tmp_path.name}"
+    base_runid = f"batch;;{base_project_name};;{base_leaf_name}"
+    base_src = tmp_path / "batch" / base_project_name / base_leaf_name
     _init_base_project(base_src)
     (base_src / "README.txt").write_text("base-default", encoding="utf-8")
 
-    override_runid = "batch;;culvert_override;;_base"
-    override_src = tmp_path / "batch" / "culvert_override" / "_base"
+    override_project_name = f"culvert_override_{tmp_path.name}"
+    override_leaf_name = f"_base_{tmp_path.name}"
+    override_runid = f"batch;;{override_project_name};;{override_leaf_name}"
+    override_src = tmp_path / "batch" / override_project_name / override_leaf_name
     _init_base_project(override_src, nlcd_db="nlcd/2021")
     (override_src / "README.txt").write_text("base-override", encoding="utf-8")
 
@@ -293,8 +297,10 @@ def test_culverts_runner_cleanup_relief_and_chnjnt(
     monkeypatch.setenv("CULVERTS_ROOT", str(culverts_root))
     monkeypatch.setattr(wepp_helpers, "redis_wd_cache_client", None)
 
-    base_runid = "batch;;culvert_cleanup;;_base"
-    base_src = tmp_path / "batch" / "culvert_cleanup" / "_base"
+    base_project_name = f"culvert_cleanup_{tmp_path.name}"
+    base_leaf_name = f"_base_{tmp_path.name}"
+    base_runid = f"batch;;{base_project_name};;{base_leaf_name}"
+    base_src = tmp_path / "batch" / base_project_name / base_leaf_name
     _init_base_project(base_src)
     wbt_dir = base_src / "dem" / "wbt"
     wbt_dir.mkdir(parents=True, exist_ok=True)
@@ -381,8 +387,10 @@ def test_culverts_runner_creates_vrt_cropped_run(
     monkeypatch.setenv("CULVERTS_ROOT", str(culverts_root))
     monkeypatch.setattr(wepp_helpers, "redis_wd_cache_client", None)
 
-    base_runid = "batch;;culvert_base;;_base"
-    base_src = tmp_path / "batch" / "culvert_base" / "_base"
+    base_project_name = f"culvert_base_{tmp_path.name}"
+    base_leaf_name = f"_base_{tmp_path.name}"
+    base_runid = f"batch;;{base_project_name};;{base_leaf_name}"
+    base_src = tmp_path / "batch" / base_project_name / base_leaf_name
     _init_base_project(base_src)
 
     def _fake_get_wd(runid: str, *args, **kwargs) -> str:
@@ -450,8 +458,10 @@ def test_culverts_runner_stream_fallback_uses_streams_map(
     monkeypatch.setenv("CULVERTS_ROOT", str(culverts_root))
     monkeypatch.setattr(wepp_helpers, "redis_wd_cache_client", None)
 
-    base_runid = "batch;;culvert_base;;_base"
-    base_src = tmp_path / "batch" / "culvert_base" / "_base"
+    base_project_name = f"culvert_base_{tmp_path.name}"
+    base_leaf_name = f"_base_{tmp_path.name}"
+    base_runid = f"batch;;{base_project_name};;{base_leaf_name}"
+    base_src = tmp_path / "batch" / base_project_name / base_leaf_name
     _init_base_project(base_src)
 
     def _fake_get_wd(runid: str, *args, **kwargs) -> str:
