@@ -1574,8 +1574,9 @@ class Soils(NoDbBase):
             (f"shadow-{'-'.join(group['members'])}", [int(raw_domsoil_d[member]) for member in group["members"]], group["bounds"])
             for group in groups
         ]
+        numeric_valid_mukeys = {int(str(mukey).split("-", 1)[0]) for mukey in valid_mukeys}
         results = local_mukey_candidates(
-            ssurgo_fn, clusters, {int(mukey) for mukey in valid_mukeys},
+            ssurgo_fn, clusters, numeric_valid_mukeys,
             initial_radius_m=250.0, max_radius_m=2000.0, min_candidates=1,
         )
         shadow: Dict[str, Dict[str, Any]] = {}
