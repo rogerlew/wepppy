@@ -209,6 +209,29 @@ percentages.
 
 ### Candidate Set
 
+Phase 2 candidate discovery uses a bounded cluster query, not a national
+MUKEY-adjacency graph. The caller groups spatially adjacent invalid MUKEYs and
+supplies the cluster's soil-map bounds in the raster CRS. The native kernel
+expands one crop per cluster until it finds valid already-built MUKEYs, then
+returns the same deterministic candidate set to every source MUKEY in that
+cluster. MUKEY values alone are insufficient because one MUKEY can occur in
+disconnected national locations.
+
+The research interface is batch-oriented:
+
+    local_mukey_candidates(raster_path, clusters, valid_mukeys,
+                           initial_radius_m, max_radius_m,
+                           min_candidates, workers)
+
+Each cluster has an immutable identifier, an ordered/deduplicated list of
+source MUKEYs, and `(min_x, min_y, max_x, max_y)` bounds in the source raster
+CRS. Each result records the cluster identifier, source MUKEYs, successful
+radius or exhaustion, sorted candidate MUKEYs, and crop-read provenance.
+Concurrent work must use worker-local GDAL dataset handles; it must not share
+one GDAL handle across threads. Benchmark clustered synthetic requests and
+representative gNATSGO windows before choosing a worker default or adding a
+precomputed tile-set index.
+
 Build the candidate set only from valid WEPP soils already generated in the
 same run and source context. Do not synthesize a new hybrid profile by copying
 individual parameters from an invalid soil during the first implementation.

@@ -7,8 +7,8 @@
 **Timezone**: UTC
 **Started**: 2026-07-21 18:00 UTC
 **Current phase**: Failure-class fixtures
-**Last updated**: 2026-07-22 02:40 UTC
-**Next milestone**: Build deterministic fixtures for the observed primary failure classes, then test raster-region/elevation candidates.
+**Last updated**: 2026-07-22 03:14 UTC
+**Next milestone**: Build deterministic failure fixtures and masked-valid trials using the clustered candidate kernel.
 **Security impact**: none
 **Dedicated security review**: no
 **Security artifact**: N/A
@@ -49,6 +49,11 @@
 - [x] Completed the 2,048-draw uniform-MUKEY cohort: 49 unbuildable MUKEYs
   (2.39%; Wilson 95% 1.81%–3.15%; zero data-access failures) (2026-07-22
   02:39 UTC).
+- [x] Scaffolded the concurrent clustered-bounds native candidate kernel in
+  WEPPpyo3; crate tests passed (2026-07-22 03:10 UTC).
+- [x] Benchmarked 16 adjacent synthetic clusters through a freshly built
+  extension: 174 ms / 86 ms / 47 ms at one / two / four workers (2026-07-22
+  03:14 UTC).
 
 ## Timeline
 
@@ -105,6 +110,20 @@ grid coverage impact.
 **Impact**: The similar point estimates provide confidence in the initial
 area-weighted pilot without claiming they estimate the same population.
 
+### 2026-07-22 03:10 UTC: Use clustered bounded-window discovery
+
+**Context**: Invalid MUKEYs in one final run are expected to be spatially
+close. A national adjacency graph or an individual national MUKEY lookup would
+not meet the required query cost.
+
+**Decision**: The Phase 2 native interface accepts adjacent source-MUKEY sets
+plus their run-local EPSG:5070 bounds, expands one window per cluster, and
+uses worker-local GDAL handles for concurrent clusters.
+
+**Impact**: Candidate discovery is proportional to bounded crops, not the
+national raster. This remains research tooling until benchmark and masked-valid
+evidence supports production wiring.
+
 ## Risks and Issues
 
 | Risk | Severity | Likelihood | Mitigation | Status |
@@ -121,6 +140,9 @@ area-weighted pilot without claiming they estimate the same population.
 - [x] Canonical targeted test passes: `wctl run-pytest
   tests/tools/test_ssurgo_empirical_study.py --maxfail=1` (4 passed).
 - [x] Expanded-cohort runner has atomic batch/resume/retry evidence.
+- [x] Native clustered-window kernel compiles and targeted crate tests pass:
+  `cargo test -p raster_characteristics_rust` (3 passed).
+- [x] Representative clustered-window benchmark records worker/crop evidence.
 - [ ] Full-suite validation considered before package closure.
 
 ### Security

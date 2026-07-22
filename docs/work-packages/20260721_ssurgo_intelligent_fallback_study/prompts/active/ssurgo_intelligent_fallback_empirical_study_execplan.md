@@ -21,6 +21,9 @@ unchanged.
   the current converter.
 - [x] (2026-07-22 02:39 UTC) Run and validate 2,048 uniformly sampled
   distinct-MUKEY draws and report it separately from the mapped-area result.
+- [x] (2026-07-22 03:14 UTC) Execute a representative clustered-window
+  benchmark through the freshly built native extension; it is research tooling
+  and is not wired into fallback selection.
 - [ ] Add deterministic fixtures for all observed primary failure classes.
 - [ ] Build and evaluate raster-region/elevation candidate evidence using
   masked-valid trials.
@@ -40,6 +43,15 @@ unchanged.
   Evidence: 244 of 12,288 draws were unbuildable (1.99%; Wilson 95%
   1.75%–2.25%), compared with 1.95% in the pilot; no cohort draw failed NRCS
   data access.
+- Observation: the existing raster-characteristics APIs read complete rasters.
+  Evidence: `Raster::<i32>::read()` loads `(0, 0, width, height)` before the
+  existing public aggregations; Phase 2 therefore has a separate GDAL-window
+  path with worker-local handles.
+- Observation: bounded worker concurrency materially reduced this synthetic
+  clustered workload's wall time.
+  Evidence: 16 adjacent 90 m-wide clusters around a mapped gNATSGO pixel read
+  6,400 pixels and completed in 174.344 ms (one worker), 85.852 ms (two), and
+  46.784 ms (four); every cluster found its deliberately supplied valid MUKEY.
 
 ## Decision Log
 
@@ -55,6 +67,12 @@ unchanged.
   Rationale: NRCS outages are not soil quality, and converter failures may be
   repair candidates rather than donor-selection cases.
   Date/Author: 2026-07-21 / Codex.
+- Decision: Query clustered invalid MUKEYs by supplied local bounds rather
+  than constructing national MUKEY regions or querying individual MUKEYs.
+  Rationale: a MUKEY has disconnected national occurrences, while final-run
+  invalid MUKEYs are spatially close; one bounded crop therefore serves the
+  adjacent group without a national scan.
+  Date/Author: 2026-07-22 / user and Codex.
 
 ## Outcomes & Retrospective
 
