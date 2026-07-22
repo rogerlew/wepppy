@@ -40,7 +40,7 @@
 - Standard location for active ExecPlans is `docs/work-packages/*/prompts/active/`.
 - Ad hoc ExecPlans may live under `docs/mini-work-packages/*.md` when explicitly designated by the user.
 - Current ad hoc active ExecPlan: `none`.
-- Current work-package active ExecPlan: `docs/work-packages/20260716_pure_ui_contract_ratification/prompts/active/pure_ui_contract_ratification_execplan.md` (umbrella coordinator: `docs/work-packages/20260716_pure_ui_contract_standardization_c/prompts/active/pure_ui_contract_standardization_execplan.md`).
+- Current work-package active ExecPlans: Pure UI ratification at `docs/work-packages/20260716_pure_ui_contract_ratification/prompts/active/pure_ui_contract_ratification_execplan.md` (umbrella: `docs/work-packages/20260716_pure_ui_contract_standardization_c/prompts/active/pure_ui_contract_standardization_execplan.md`); SSURGO study at `docs/work-packages/20260721_ssurgo_intelligent_fallback_study/prompts/active/ssurgo_intelligent_fallback_empirical_study_execplan.md`.
 - Before authoring or revising an ExecPlan, read `docs/prompt_templates/codex_exec_plans.md`.
 - Active plans are living documents: keep `Progress`, `Surprises & Discoveries`, `Decision Log`, and `Outcomes & Retrospective` current.
 - When asked to run a plan end-to-end, proceed milestone by milestone without pausing for extra confirmation unless blocked by an external dependency.

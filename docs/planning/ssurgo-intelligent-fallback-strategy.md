@@ -138,6 +138,52 @@ For the last code, retain the field-level subcodes (for example
 `missing_sandtotal_r`, `nonfinite_ksat_r`, `nonphysical_fc_wp`) rather than
 inventing one ambiguous primary cause. A reason can have more than one code.
 
+### Study Scaffold
+
+`tools/ssurgo_empirical_study.py` now provides the offline, non-production
+analysis boundary for this phase. It intentionally does not retrieve SSURGO
+tabular data, invoke the soil converter, or mutate any run. Its three commands
+are:
+
+```bash
+# Full streaming inventory; run as a batch because the supplied raster is large.
+python tools/ssurgo_empirical_study.py inventory \
+  --raster /wc1/geodata/ssurgo/gNATSGSO/2025/gNATSGO_mukey_202502.tif \
+  --output artifacts/gnatsgo_2025_mukey_inventory.json
+
+# A smoke test only: output is deliberately marked incomplete.
+python tools/ssurgo_empirical_study.py inventory \
+  --raster /wc1/geodata/ssurgo/gNATSGSO/2025/gNATSGO_mukey_202502.tif \
+  --max-windows 100 --output /tmp/gnatsgo_2025_smoke_inventory.json
+
+# Aggregate version-1 build records and join them to a complete inventory.
+python tools/ssurgo_empirical_study.py template \
+  --output artifacts/mukey_build_diagnostic_template.json
+python tools/ssurgo_empirical_study.py diagnostics \
+  --input artifacts/mukey_build_diagnostics.jsonl \
+  --output artifacts/mukey_build_diagnostic_summary.json
+python tools/ssurgo_empirical_study.py coverage \
+  --inventory artifacts/gnatsgo_2025_mukey_inventory.json \
+  --diagnostics artifacts/mukey_build_diagnostics.jsonl \
+  --output artifacts/gnatsgo_2025_coverage_summary.json
+```
+
+The `inventory` command reads the GeoTIFF in native blocks and emits pixel
+counts per MUKEY, CRS, raster dimensions, block shape, and pixel area. A
+limited inventory is never accepted by `coverage`, preventing accidental
+publication of a first-block sample as a national frequency. The `diagnostics`
+and `coverage` commands validate the required JSONL fields and preserve
+unobserved raster coverage separately from invalid coverage. `template` emits
+the version-1 required record shape, including all converter failure-evidence
+fields; it is the handoff contract for the future build-boundary collector.
+
+The next implementation step is a deliberately separate collector at the
+SSURGO build boundary. It must emit the version-1 `mukey_build` records above,
+including the full field-level diagnostics, before the empirical rate can be
+reported. Keeping that collector separate ensures the initial national raster
+inventory is reproducible and makes no production fallback or data-contract
+change.
+
 ### Analysis Outputs
 
 The empirical report must produce:
@@ -374,11 +420,18 @@ through to global fallback.
 
 - Current builder and provenance implementation:
   `wepppy/nodb/core/soils.py` (`Soils._build_gridded()`).
+- Empirical study scaffold:
+  `tools/ssurgo_empirical_study.py` and
+  `tests/tools/test_ssurgo_empirical_study.py`.
 - SSURGO converter and validity logic:
   `wepppy/soils/ssurgo/ssurgo.py` (`Horizon.valid()`, `WeppSoil.valid()`, and
   `SurgoSoilCollection.makeWeppSoils()`).
 - Existing fallback provenance documentation:
   `wepppy/soils/ssurgo/ssurgo.md#gridded-dominant-mukey-fallback-provenance`.
+- Initial mapped-area empirical evidence:
+  `docs/investigations/2026-07-21-ssurgo-intelligent-fallback-pilot/README.md`.
+- Active empirical-study package:
+  `docs/work-packages/20260721_ssurgo_intelligent_fallback_study/`.
 - Prior reclaimed-profile/fallback evidence:
   `docs/work-packages/20260622_ssurgo_reclaimed_soil_fallback/` and
   `docs/adrs/ADR-0008-ssurgo-reclaimed-soil-restrictive-layer-fallback.md`.

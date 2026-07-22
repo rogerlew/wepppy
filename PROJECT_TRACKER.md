@@ -1,8 +1,8 @@
 # PROJECT_TRACKER.md
 > Kanban board for wepppy work packages and vision items
 
-**Last Updated**: 2026-07-21
-**Active Packages**: 16
+**Last Updated**: 2026-07-22
+**Active Packages**: 17
 **Quick Links**: [Work Packages Directory](docs/work-packages/) | [God-Tier Prompting Strategy](docs/god-tier-prompting-strategy.md)
 
 ## Purpose
@@ -275,7 +275,25 @@ When resuming Kubernetes work:
 
 Currently active work packages. Limit to 2-4 packages to maintain focus.
 
-**Current WIP Count**: 15 packages
+**Current WIP Count**: 16 packages
+
+### SSURGO Intelligent Fallback Empirical Study
+**Started**: 2026-07-21
+**Status**: Initial mapped-area pilot complete; expanded complementary cohorts approved
+**Size**: Medium (1-2 focused weeks)
+**Owner**: Codex
+**Priority**: High
+**Link**: [docs/work-packages/20260721_ssurgo_intelligent_fallback_study/](docs/work-packages/20260721_ssurgo_intelligent_fallback_study/)
+**Description**: Measure residual SSURGO-to-WEPP soil invalidity and its causes before replacing the current watershed-global fallback. The work derives proximity from the gNATSGO map and evaluates elevation only as an aligned raster covariate.
+
+**Current Status**:
+- Complete 2025 gNATSGO VAT inventory: 320,669 MUKEYs and 8,745,483,151 mapped pixels.
+- Initial 2,048-draw mapped-area pilot: 40 unbuildable draws (1.95%; 95% Wilson interval 1.44%-2.65%); no-component/no-horizon cases dominate, with a smaller missing/inconsistent-texture group.
+- User approved a 12,288-draw mapped-area cohort and a separately reported 2,048-draw unweighted-MUKEY cohort.
+
+**Next Steps**: Execute the approved cohorts, create fixtures from observed failure types, then assess raster-region adjacency and aligned elevation in masked-valid candidate trials. No production fallback behavior changes until a later ADR.
+
+---
 
 ### PATH-CE v2: Jackson Model Resync, Parquet-Native Pipeline, Full UI + Reports
 **Started**: 2026-07-20
