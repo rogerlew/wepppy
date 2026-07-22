@@ -1,6 +1,8 @@
 # SSURGO Intelligent Fallback Strategy
 
-**Status:** Proposed research and implementation strategy; no selection behavior changes are authorized by this document.
+**Status:** Proposed research and implementation strategy; hierarchical
+heuristic scoring is approved for research evaluation only. No selection
+behavior changes are authorized by this document.
 
 ## Purpose
 
@@ -313,6 +315,38 @@ a distinct reason such as `low_confidence_global_fallback`. If no valid soil
 exists, retain the existing STATSGO behavior. Never silently choose a candidate
 because it happens to sort first.
 
+### Scoring Research Hypothesis
+
+The next experiment will score every eligible candidate, rather than compare
+only a local-majority candidate with the global baseline. It has three evidence
+families: retained trustworthy profile evidence, source-local map geometry, and
+aligned terrain. Failure class determines which families are allowed:
+
+- `no_components` and `no_horizons` use map geometry and terrain only.
+- Partially described profiles use only directly observed, non-defaulted,
+  non-estimated fields; missing evidence removes a dimension rather than
+  implying a zero difference.
+- Nonphysical texture is a converter-repair candidate first. If it remains
+  invalid, texture and derived values are excluded from scoring.
+- Residual-unclassified, urban/water-specialized, and no-valid-donor cases do
+  not enter the generic scorer and retain their current explicit paths.
+
+All continuous components must be robust-scaled inside a declared calibration
+cohort and persisted alongside their raw values. Initial research compares
+separate map-only, terrain-only, profile-only, and hierarchical variants; it
+does not lock production weights. The initial terrain sweep is a capped 0%,
+10%, 20%, or 30% contribution, with the remaining active weight assigned to
+map geometry and, where available, profile evidence. A held-out geographic
+cohort chooses no winner until the score margin and confidence behavior are
+specified in an ADR.
+
+Local-window pixel support is a prevalence signal, not proof of adjacency.
+Before a hybrid score can use map geometry, the native interface must return
+per-source results from each coalesced crop and distinguish shared raster edge,
+corner-only contact, local support, and distance. This preserves bounded
+window/set-decomposition performance without attributing one cluster's evidence
+to every hillslope in it.
+
 ## Phase 3: Fixture and Evaluation Design
 
 ### Deterministic Fixture Corpus
@@ -346,6 +380,12 @@ Each invalid fixture must explicitly state its failure code and which raw
 fields remain usable as comparison evidence. Include cases with omitted raw
 fields that existing defaults already repair, so the study does not mistake
 successful defaulting for residual invalidity.
+
+The scoring extension additionally requires fixtures for: shared-edge contact
+versus high local-window support without contact; a pair of sources in one
+coalesced crop with different correct donors; profile and terrain
+disambiguation; missing DEM behavior; failure-class evidence exclusion; a
+low-confidence global fallback; and score stability across worker counts.
 
 ### Evaluation Without Ground Truth for Truly Invalid Soils
 

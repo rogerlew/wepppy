@@ -18,6 +18,8 @@
 ### Ready / Backlog
 
 - [ ] Design deterministic fixtures from expanded-cohort failure classes.
+- [ ] Milestone 3.5: add per-source contact/terrain evidence and compare
+  failure-class-aware heuristic score variants on held-out runs.
 
 ### In Progress
 
@@ -180,6 +182,15 @@ still no production threshold or fallback policy change.
 **Impact**: The full 298-case local cohort supplies promising directional
 feature and elevation evidence, but two runs, an unweighted feature distance,
 and incomplete converter-failure fixtures do not support a production choice.
+
+### 2026-07-22: Evaluate heuristic scoring as a research policy family
+
+**Decision**: Score candidates with eligible profile, map-geometry, and terrain
+families after failure-class gating; compare weight variants on held-out runs.
+
+**Impact**: Pixel support remains a bounded-window prevalence feature, not a
+claim of shared-boundary adjacency. Production scoring remains blocked on
+per-source geometry evidence, deterministic fixtures, and an ADR.
 
 ## Risks and Issues
 

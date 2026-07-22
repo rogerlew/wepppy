@@ -30,6 +30,8 @@ unchanged.
   MUKEY bounds and persists proposed local-majority evidence (2026-07-22).
 - [x] Milestone 3: evaluator, deterministic GeoTIFF fixture corpus, and a
   read-only 298-case representative-run cohort complete (2026-07-22).
+- [ ] Milestone 3.5: evaluate failure-class-aware, per-candidate heuristic
+  scoring with contact-aware map geometry and aligned terrain; research only.
 - [ ] Milestone 4: seek an ADR only if evidence supports opt-in production
   selection, then observe a shadow/opt-in rollout before default promotion.
 - [ ] Add deterministic fixtures for all observed primary failure classes.
@@ -106,6 +108,13 @@ unchanged.
   is only two local runs and no practical-effect threshold or production score
   has been declared.
   Date/Author: 2026-07-22 / Codex.
+- Decision: Evaluate hierarchical heuristic scoring as the next research
+  policy family.
+  Rationale: case-by-case review found that local-window support, retained
+  profile evidence, and terrain are distinct signals whose availability varies
+  by failure class. Weights are hypotheses to compare on held-out runs, not a
+  production parameterization decision.
+  Date/Author: 2026-07-22 / user and Codex.
 
 ## Outcomes & Retrospective
 
