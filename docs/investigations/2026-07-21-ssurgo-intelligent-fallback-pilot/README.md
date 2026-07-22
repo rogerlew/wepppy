@@ -169,6 +169,33 @@ The executed artifacts are
 `/tmp/ssurgo_masked_valid_20260724/initial_candidate_study.json` and
 `/tmp/ssurgo_masked_valid_20260724/heldout_candidate_study.json`.
 
+## Larger Ranked-Candidate Cohort (Milestone 3.5)
+
+The next read-only cohort supplied 18 additional completed runs and evaluated
+322 masked-valid cases. Two runs had zero eligible hillslopes and remain in the
+cohort manifest as explicit zero-case records rather than being silently
+dropped. A one-worker repeat reproduced the four-worker result records and
+every aggregate exactly.
+
+For geometry-only ranking, top one beat global in 165 cases, top two in 242,
+top three in 261, and the best available local candidate in 275. Conversely,
+global beat every local candidate in 11 cases. This confirms both diagnostic
+paths at meaningful scale: 110 cases have local-oracle headroom beyond the
+top-ranked donor, while 11 need a broader candidate set or an abstention to the
+global fallback.
+
+Candidate count makes the distinction visible. In 24 one-candidate cases, the
+local oracle could not improve on ranking by definition. In 73 two-to-three
+candidate cases, local top one won 39 times but the oracle won 66; in 225
+four-or-more candidate cases, the same counts were 117 and 200. A future
+shortlist/abstention experiment should therefore report these buckets
+separately, not use one pooled score threshold.
+
+The artifacts are
+`/tmp/ssurgo_masked_valid_20260725/larger_candidate_study.json` and its
+byte-equivalent one-worker diagnostic counterpart
+`larger_candidate_study_workers1.json`.
+
 ## Expanded Cohort Results
 
 | Cohort | Draws | Unique MUKEYs | Residual-invalid | Worker failed | Unbuildable | 95% Wilson interval |

@@ -7,8 +7,8 @@
 **Timezone**: UTC
 **Started**: 2026-07-21 18:00 UTC
 **Current phase**: M4 evidence hold
-**Last updated**: 2026-07-24
-**Next milestone**: Expand the geographically separated ranked-candidate cohort and complete an observed-invalid provenance review before defining an ADR-ready practical-effect criterion.
+**Last updated**: 2026-07-25
+**Next milestone**: Compare broader local rings for local-oracle misses and complete an observed-invalid provenance review before defining an ADR-ready practical-effect criterion.
 **Security impact**: none
 **Dedicated security review**: no
 **Security artifact**: N/A
@@ -80,6 +80,9 @@
 - [x] Completed ranked candidate-set study: 298-case oracle 183 versus 131
   top-one local wins; 29-case held-out oracle 6 versus 2 top-one wins
   (2026-07-24).
+- [x] Completed larger ranked-candidate cohort: 18 run manifests, 322 cases,
+  275 local-oracle versus 165 top-one local wins, and exact one/four-worker
+  parity (2026-07-25).
 
 ## Timeline
 
@@ -231,6 +234,14 @@ rings or score weights.
 
 **Impact**: The study can now distinguish a ranker miss from a local-set miss.
 No margin threshold or production shortlist has been selected.
+
+### 2026-07-25: Preserve larger-cohort discovery and ranking diagnostics
+
+**Decision**: Keep zero-eligible runs in the cohort manifest and use local
+oracle misses to target the next broader-ring experiment.
+
+**Impact**: The study now distinguishes 110 ranker-headroom cases from 11
+local-candidate-set misses without setting a production cutoff.
 
 ## Risks and Issues
 

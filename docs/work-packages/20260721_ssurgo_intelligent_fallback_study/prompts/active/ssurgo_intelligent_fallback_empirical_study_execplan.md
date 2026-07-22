@@ -43,6 +43,9 @@ unchanged.
 - [x] Milestone 3.5 ranked candidate-set slice: measure top-1/top-2/top-3
   and local-oracle evidence across the original and held-out cohorts
   (2026-07-24).
+- [x] Milestone 3.5 larger cohort: execute ranked-candidate diagnostics on 18
+  additional runs (322 cases), including a one-worker deterministic repeat
+  (2026-07-25).
 - [ ] Milestone 4: seek an ADR only if evidence supports opt-in production
   selection, then observe a shadow/opt-in rollout before default promotion.
 - [ ] Add deterministic fixtures for all observed primary failure classes.
@@ -93,6 +96,11 @@ unchanged.
   top-one wins; in held-out data it beat global 6 times versus 2 top-one wins,
   while all three `feline-wrangler` cases had no local candidate better than
   global.
+- Observation: ranked-candidate headroom persists in a substantially larger
+  cohort and grows with candidate-set size.
+  Evidence: among 322 cases, local top one beat global 165 times, the local
+  oracle 275 times, and global beat all local candidates 11 times. The
+  one-worker and four-worker records/aggregates were exactly equal.
 
 ## Decision Log
 
@@ -166,6 +174,11 @@ unchanged.
   is already locally available. A raw score margin is recorded for later ADR
   calibration; no confidence threshold is selected here.
   Date/Author: 2026-07-24 / user and Codex.
+- Decision: Preserve zero-eligible runs in the larger cohort manifest.
+  Rationale: a zero-case run is evidence about cohort applicability and must
+  not disappear from an aggregate through an implicit exclusion. It is not
+  evidence for or against a donor policy.
+  Date/Author: 2026-07-25 / Codex.
 
 ## Outcomes & Retrospective
 
@@ -194,6 +207,11 @@ cohort has substantial ranking headroom, while the held-out cohort contains
 both rank misses and a local-candidate-discovery miss. M4 stays HOLD until a
 larger geographic cohort establishes whether a shortlist, an abstention gate,
 or broader candidate rings improve the relevant stratum.
+
+The 322-case larger cohort confirms that top-k/oracle diagnostics are useful,
+but it still does not choose a production shortlist length or score margin.
+The next research slice should compare a bounded broader candidate ring only
+for local-oracle misses and retain global fallback as the explicit baseline.
 
 ## Context and Orientation
 
@@ -408,3 +426,6 @@ four-run held-out result; both preserve the M4 HOLD decision.
 
 Updated 2026-07-24: added ranked candidate-set/oracle diagnostics to separate
 candidate discovery from ranking before any future parameterization ADR.
+
+Updated 2026-07-25: recorded the 18-run ranked-candidate cohort, zero-case
+manifest records, and worker-count determinism evidence.
