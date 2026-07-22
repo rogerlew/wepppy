@@ -142,6 +142,33 @@ and observed-invalid cases still need a stratified plausibility review with
 source-field provenance. The full run artifacts are non-versioned under
 `/tmp/ssurgo_masked_valid_20260723/`.
 
+## Ranked Candidate-Set Study (Milestone 3.5)
+
+The evaluator now retains every local candidate's withheld-soil feature
+distance, rank order, and raw top-one/top-two score margin. This distinguishes
+candidate discovery from ranking without treating a top-k set as a production
+substitution. It reports the local-candidate oracle, top 1/2/3 potential,
+candidate-count bucket, global-donor membership in the local set, run, and
+failure class.
+
+The original 298-case cohort has a substantial ranking gap: the geometry-only
+top one was better than global in 131 cases, but the best available local
+candidate was better in 183. Top-two and top-three coverage rises to 162 and
+177 cases. The local candidate set contained the watershed-global donor in
+228 cases, which explains many ties but does not remove the ranking signal.
+
+The 29-case held-out cohort has both discovery and ranking limits. Its top one
+was better in 2 cases, the local oracle in 6, and top three recovered all 6.
+`old-fluorosis` and `juvenile-separatist` supply the ranking misses. In contrast,
+all three `feline-wrangler` cases had a global donor better than every local
+candidate, so a better local ranker cannot solve that regime. These results
+support testing a shortlist and an abstention/confidence policy, but do not
+support a fixed threshold yet.
+
+The executed artifacts are
+`/tmp/ssurgo_masked_valid_20260724/initial_candidate_study.json` and
+`/tmp/ssurgo_masked_valid_20260724/heldout_candidate_study.json`.
+
 ## Expanded Cohort Results
 
 | Cohort | Draws | Unique MUKEYs | Residual-invalid | Worker failed | Unbuildable | 95% Wilson interval |

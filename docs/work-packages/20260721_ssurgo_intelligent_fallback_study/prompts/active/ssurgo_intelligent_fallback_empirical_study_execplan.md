@@ -40,6 +40,9 @@ unchanged.
 - [x] Milestone 3.5 held-out check: execute four independent local runs (29
   masked-valid cases) and retain the unfavorable/non-discriminating result
   rather than selecting a heuristic winner (2026-07-23).
+- [x] Milestone 3.5 ranked candidate-set slice: measure top-1/top-2/top-3
+  and local-oracle evidence across the original and held-out cohorts
+  (2026-07-24).
 - [ ] Milestone 4: seek an ADR only if evidence supports opt-in production
   selection, then observe a shadow/opt-in rollout before default promotion.
 - [ ] Add deterministic fixtures for all observed primary failure classes.
@@ -85,6 +88,11 @@ unchanged.
   generalize to the next four available independent runs.
   Evidence: 29 held-out cases yielded 2 local wins, 3 global wins, and 24 ties
   for geometry-only; terrain variants produced at most 2 local wins.
+- Observation: candidate discovery and ranking are separable limitations.
+  Evidence: in 298 cases, the local oracle beat global 183 times versus 131
+  top-one wins; in held-out data it beat global 6 times versus 2 top-one wins,
+  while all three `feline-wrangler` cases had no local candidate better than
+  global.
 
 ## Decision Log
 
@@ -151,6 +159,13 @@ unchanged.
   current global baseline, and no observed-invalid provenance review or ADR
   confidence gate exists.
   Date/Author: 2026-07-23 / Codex.
+- Decision: Evaluate ranked local candidate sets before modifying candidate
+  discovery or tuning another weight matrix.
+  Rationale: top-k and oracle comparisons identify whether a failure comes
+  from an inadequate local set, an inadequate ranker, or a baseline donor that
+  is already locally available. A raw score margin is recorded for later ADR
+  calibration; no confidence threshold is selected here.
+  Date/Author: 2026-07-24 / user and Codex.
 
 ## Outcomes & Retrospective
 
@@ -173,6 +188,12 @@ check did not reproduce the first cohort's improvement. The next evidence
 step is therefore a larger geographically separated masked-valid cohort and a
 stratified observed-invalid provenance review, not an ADR or production shadow
 rollout.
+
+The ranked candidate study adds a concrete intermediate diagnostic. The first
+cohort has substantial ranking headroom, while the held-out cohort contains
+both rank misses and a local-candidate-discovery miss. M4 stays HOLD until a
+larger geographic cohort establishes whether a shortlist, an abstention gate,
+or broader candidate rings improve the relevant stratum.
 
 ## Context and Orientation
 
@@ -384,3 +405,6 @@ and created the dedicated work package.
 
 Updated 2026-07-23: recorded deterministic failure-class score gates and the
 four-run held-out result; both preserve the M4 HOLD decision.
+
+Updated 2026-07-24: added ranked candidate-set/oracle diagnostics to separate
+candidate discovery from ranking before any future parameterization ADR.

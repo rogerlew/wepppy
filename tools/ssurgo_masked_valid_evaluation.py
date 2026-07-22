@@ -9,6 +9,7 @@ import json
 import math
 from pathlib import Path
 import random
+import statistics
 from typing import Any, Mapping, Sequence
 
 
@@ -113,6 +114,12 @@ def evaluate_masked_case(case: Mapping[str, Any]) -> dict[str, Any]:
     reference = summaries.get(withheld, {})
     local_distance, fields = _numeric_distance(reference, summaries.get(local_mukey, {})) if local_mukey else (None, [])
     global_distance, _ = _numeric_distance(reference, summaries.get(global_mukey, {}))
+    candidate_ids = {mukey for mukey, _ in support}
+    candidate_ids.update(str(candidate["mukey"]) for candidate in case.get("geometry_candidates", []))
+    candidate_feature_distances = {
+        mukey: _numeric_distance(reference, summaries.get(mukey, {}))[0]
+        for mukey in sorted(candidate_ids, key=int)
+    }
     result = {
         "schema_version": SCHEMA_VERSION,
         "record_type": "ssurgo_masked_valid_evaluation",
@@ -125,6 +132,9 @@ def evaluate_masked_case(case: Mapping[str, Any]) -> dict[str, Any]:
         "exact_global_recovery": global_mukey == withheld,
         "local_feature_distance": local_distance,
         "global_feature_distance": global_distance,
+        "candidate_feature_distances": candidate_feature_distances,
+        "candidate_count": len(candidate_ids),
+        "failure_class": str(case.get("failure_class", "masked_valid_all_features")),
         "distance_fields": fields,
         "reason": "local_candidate" if local_mukey else "no_local_candidate",
     }
@@ -177,7 +187,6 @@ def evaluate_masked_case(case: Mapping[str, Any]) -> dict[str, Any]:
             "selected_feature_distance": selected_distance,
             "selected_distance_fields": selected_fields,
         }
-        result["failure_class"] = str(case["failure_class"])
     return result
 
 
@@ -581,6 +590,98 @@ def summarize_score_variants(results: Sequence[Mapping[str, Any]]) -> dict[str, 
     return summary
 
 
+def _candidate_count_bucket(count: int) -> str:
+    if count == 0:
+        return "0"
+    if count == 1:
+        return "1"
+    if count <= 3:
+        return "2-3"
+    return "4+"
+
+
+def _candidate_study_group(results: Sequence[Mapping[str, Any]]) -> dict[str, dict[str, Any]]:
+    """Separate local candidate-set coverage from the ranking outcome."""
+    variant_names = sorted({name for row in results for name in row.get("score_variants", {})})
+    summary: dict[str, dict[str, Any]] = {}
+    for name in variant_names:
+        comparable = []
+        for row in results:
+            variant = row.get("score_variants", {}).get(name)
+            global_distance = row.get("global_feature_distance")
+            distances = row.get("candidate_feature_distances", {})
+            if variant is None or global_distance is None or not distances:
+                continue
+            ranked = [str(candidate["mukey"]) for candidate in variant.get("candidates", [])]
+            local_distances = {
+                mukey: distance for mukey, distance in distances.items()
+                if distance is not None and math.isfinite(float(distance))
+            }
+            if not ranked or not local_distances:
+                continue
+            comparable.append((row, variant, float(global_distance), local_distances, ranked))
+
+        def outcome(distance: float, global_distance: float) -> str:
+            if distance < global_distance:
+                return "local_better"
+            if global_distance < distance:
+                return "global_better"
+            return "tied"
+
+        counts = Counter()
+        candidate_counts: list[int] = []
+        margins: list[float] = []
+        for row, variant, global_distance, local_distances, ranked in comparable:
+            candidate_counts.append(len(ranked))
+            counts[f"oracle_{outcome(min(local_distances.values()), global_distance)}"] += 1
+            counts["global_in_local_candidate_set"] += int(str(row["global_mukey"]) in local_distances)
+            for top_k in (1, 2, 3):
+                top_distances = [local_distances[mukey] for mukey in ranked[:top_k] if mukey in local_distances]
+                if top_distances:
+                    counts[f"top_{top_k}_{outcome(min(top_distances), global_distance)}"] += 1
+            scores = [float(candidate["score"]) for candidate in variant.get("candidates", [])]
+            if len(scores) > 1:
+                margins.append(scores[0] - scores[1])
+        summary[name] = {
+            "comparable": len(comparable),
+            "median_candidate_count": statistics.median(candidate_counts) if candidate_counts else None,
+            "global_in_local_candidate_set": counts["global_in_local_candidate_set"],
+            "oracle_local_better": counts["oracle_local_better"],
+            "oracle_global_better": counts["oracle_global_better"],
+            "oracle_tied": counts["oracle_tied"],
+            "median_score_margin": statistics.median(margins) if margins else None,
+            "zero_score_margin": sum(margin == 0.0 for margin in margins),
+            **{
+                f"top_{top_k}_{outcome_name}": counts[f"top_{top_k}_{outcome_name}"]
+                for top_k in (1, 2, 3)
+                for outcome_name in ("local_better", "global_better", "tied")
+            },
+        }
+    return summary
+
+
+def summarize_candidate_study(results: Sequence[Mapping[str, Any]]) -> dict[str, Any]:
+    """Stratify candidate-set coverage and ranking evidence without selecting policy."""
+    groupings = {
+        "by_run": lambda row: str(row.get("run_path", "input")),
+        "by_candidate_count": lambda row: _candidate_count_bucket(int(row.get("candidate_count", 0))),
+        "by_global_local_candidate": lambda row: str(
+            str(row.get("global_mukey")) in row.get("candidate_feature_distances", {})
+        ).lower(),
+        "by_failure_class": lambda row: str(row.get("failure_class", "masked_valid_all_features")),
+    }
+    return {
+        "all_runs": _candidate_study_group(results),
+        **{
+            name: {
+                value: _candidate_study_group([row for row in results if key(row) == value])
+                for value in sorted({key(row) for row in results})
+            }
+            for name, key in groupings.items()
+        },
+    }
+
+
 def build_run_cases(
     run_path: Path,
     *,
@@ -764,6 +865,7 @@ def main(argv: Sequence[str] | None = None) -> int:
         }
         results["summary"] = summarize_evaluations(results["results"])
         results["scoring_summary"] = summarize_score_variants(results["results"])
+        results["candidate_study"] = summarize_candidate_study(results["results"])
     args.output.parent.mkdir(parents=True, exist_ok=True)
     args.output.write_text(json.dumps(results, indent=2, sort_keys=True) + "\n", encoding="utf-8")
     return 0

@@ -127,3 +127,42 @@ def test_evaluation_persists_failure_aware_component_evidence() -> None:
     assert result["failure_aware_score"]["profile_fields"] == ["clay_pct", "sand_pct"]
     assert result["failure_aware_score"]["selected_feature_distance"] < result["global_feature_distance"]
     assert result["geometry_candidates"][0]["shared_edges"] == 8
+
+
+def test_candidate_study_separates_candidate_coverage_from_top_rank() -> None:
+    module = runpy.run_path(str(Path(__file__).resolve().parents[2] / "tools/ssurgo_masked_valid_evaluation.py"))
+    result = module["evaluate_masked_case"](
+        {
+            "case_id": "rank-misses-local-oracle",
+            "run_path": "heldout-run",
+            "withheld_mukey": "10",
+            "global_mukey": "99",
+            "candidate_support": [[20, 8], [30, 2]],
+            "soil_summaries": {
+                "10": {"sand": 50.0},
+                "20": {"sand": 80.0},
+                "30": {"sand": 51.0},
+                "99": {"sand": 60.0},
+            },
+            "geometry_candidates": [
+                {"mukey": "20", "support_pixels": 8, "shared_edges": 8},
+                {"mukey": "30", "support_pixels": 2, "shared_edges": 2},
+            ],
+            "score_variants": {
+                "geometry": {
+                    "selected_mukey": "20",
+                    "candidates": [{"mukey": "20", "score": 0.8}, {"mukey": "30", "score": 0.2}],
+                }
+            },
+        }
+    )
+    study = module["summarize_candidate_study"]([result])
+    summary = study["all_runs"]["geometry"]
+
+    assert result["candidate_feature_distances"] == {"20": 30.0, "30": 1.0}
+    assert summary["top_1_global_better"] == 1
+    assert summary["top_2_local_better"] == 1
+    assert summary["top_3_local_better"] == 1
+    assert summary["oracle_local_better"] == 1
+    assert summary["global_in_local_candidate_set"] == 0
+    assert study["by_candidate_count"]["2-3"]["geometry"]["comparable"] == 1
