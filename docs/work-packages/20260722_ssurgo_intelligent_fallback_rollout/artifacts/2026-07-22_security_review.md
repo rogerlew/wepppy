@@ -50,3 +50,26 @@
 - **Release recommendation**: resolve and verify SEC-01, SEC-02, and OPS-01
   before M1 implementation; no M4 RQ proof until the corrected procedure and
   config-binding disposition are complete.
+
+## M5 Implementation Re-review
+
+- **Reviewer**: `m5_security_review` (independent read-only agent)
+- **Review date**: 2026-07-22 UTC
+- **Review turn**: independent M5 implementation review and SEC-01 delta
+  verification
+- **Reviewed base**: `8dac222dfdd7d54eead918526dc9c6bb488191d0`
+- **Supplemental evidence commit**: `a334ced452ce707123acf920f0ac3d62352a219e`
+- **Validation**: independently ran `wctl run-pytest
+  tests/soils/test_ssurgo_fallback.py::test_candidate_preparation_concurrent_retry_leaves_valid_active_artifact
+  --maxfail=1` (1 passed).
+
+**Result**: SEC-01 is closed. Three simultaneous publishers synchronize inside
+the crop boundary, one injected `OSError` fails before publication, two complete,
+and a retry completes. The test proves a loadable active artifact, complete
+immutable map/metadata pairs, and no temporary files. Existing source
+containment/provenance, RQ config-binding, and RQ acceptance evidence resolve
+SEC-02, SEC-03, OPS-01, and OPS-02. GOV-01 is resolved by the current
+append-only ledger.
+
+**M5 recommendation**: GO; no unresolved critical, high, or medium security /
+operations finding.

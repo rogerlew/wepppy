@@ -70,3 +70,54 @@ argument, deployable py312 release import, test-stub check, changed-file
 broad-exception check, and RQ route-contract check all pass. This lifts the
 implementation hold through M3 only. It does not resolve the M3/M4 findings in
 the table, so the release/RQ hold remains in force.
+
+## M5 Final Disposition (2026-07-22 UTC)
+
+**Disposition owner**: Codex implementation owner
+
+**M5 reviewed base**: `8dac222dfdd7d54eead918526dc9c6bb488191d0`
+
+**Supplemental implementation/evidence commit**:
+`a334ced452ce707123acf920f0ac3d62352a219e`
+**Independent reviewers**: `m5_code_review`, `m5_qa_review`, and
+`m5_security_review` (all read-only). Their reviewer, turn, base, evidence,
+and results are recorded in the companion review artifacts.
+
+The following entries supersede the initial scaffold statuses above. No finding
+is accepted as a risk or deferred. `resolved` means the reviewer observed the
+implementation and its cited executable evidence; all required implementation
+commits are descendants of contract checkpoint `bf5f2e62c`.
+
+| Review | ID | Severity | Owner | Status | Reviewer-visible verification and implementation evidence |
+| --- | --- | --- | --- | --- | --- |
+| Code | CR-01 | High | Codex | resolved | Primary-only global selection and origin-neutral candidates: `1dcce3bba`; focused suite / adversarial corpus. |
+| Code | CR-02 | High | Codex | resolved | Primary and added candidate eligibility plus selected-only materialization: `1dcce3bba`; M2/M3 fixtures. |
+| Code | CR-03 | High | Codex | resolved | Validated persisted raster, checksum/provenance, and materialization-failure recovery: `91ad300e4`, `2d0eebdfe`. |
+| Code | CR-04 | Medium | Codex | resolved | Residual-invalid dominant-only trigger and no-op matrix: `1dcce3bba`, `2d0eebdfe`; M4 all-valid RQ evidence. |
+| Code | CR-05 | Medium | Codex | resolved | Profile/range/texture/scale/radius/support/numeric-tie matrix: `1dcce3bba`, `791198bc2`. |
+| Code | CR-06 | Medium | Codex | resolved | Additive nullable provenance, Parquet, hydration, and generated-output proof: `33087ccfa`, `2d0eebdfe`. |
+| Code | CR-07 | Medium | Codex | resolved | Explicit native dependency failure, nonbuildable exclusion, and atomic retry: `1dcce3bba`, `a334ced45`. |
+| Code | CR-08 | Medium | Codex | resolved | Per-occurrence WGS84 locations and disconnected-location selection fixtures: `1dcce3bba`, `2d0eebdfe`. |
+| QA | QA-01 | High | Codex | resolved | Origin-neutral primary/added eligibility: `1dcce3bba`; QA 42/42 evidence. |
+| QA | QA-02 | High | Codex | resolved | Materialization failure, clean retry, and global provenance: `2d0eebdfe`; QA 42/42 evidence. |
+| QA | QA-03 | High | Codex | resolved | All-valid RQ `not_attempted`, no artifact, unchanged assignments: M4 acceptance record, `6a0e053e7`. |
+| QA | QA-04 | Medium | Codex | resolved | Collection-unavailable versus nonbuildable versus missing-native matrix: `1dcce3bba`, `2d0eebdfe`. |
+| QA | QA-05 | Medium | Codex | resolved | Cross-artifact helper and hermetic/RQ propagation evidence: `33087ccfa`, `2d0eebdfe`. |
+| QA | QA-06 | Medium | Codex | resolved | This append-only ledger plus three M5 review records provide reviewer, base, evidence, result, and zero-unresolved closure. |
+| QA | QA-07 | Medium | Codex | resolved | Traceable scoring fixture matrix and adversarial corpus: `791198bc2`, `2d0eebdfe`. |
+| Security | SEC-01 | High | Codex | resolved | Root-contained manifest-last publication, stale/symlink checks, and independently run concurrent failure/retry test: `a334ced45` (1 passed). |
+| Security | SEC-02 | High | Codex | resolved | Canonical configured-root resolver and source-containment tests: `1dcce3bba`; security review. |
+| Security | OPS-01 | High | Codex | resolved | Correct RQ operation, poll, redacted acceptance transcript: `6a0e053e7`; M4 RQ acceptance artifact. |
+| Security | SEC-03 | Medium | Codex | resolved | Normalized config-match precondition with no-mutation error test: `1dcce3bba`; RQ route suite. |
+| Security | OPS-02 | Medium | Codex | resolved | Targeted local RQ preflight/recovery and health evidence: M4 RQ acceptance artifact. |
+| Security | GOV-01 | Medium | Codex | resolved | This append-only disposition names all findings and M5 independent reviewer metadata, evidence, results, and gate calculation. |
+
+## M5 Final Gate
+
+- **Code review**: GO; zero unresolved critical/high/medium findings.
+- **QA review**: GO; zero unresolved critical/high/medium findings.
+- **Security review**: GO; zero unresolved critical/high/medium findings.
+- **Disposition complete**: yes; 21 of 21 findings resolved, zero accepted
+  risks or deferrals.
+- **Package close recommendation**: GO, subject to the recorded final release
+  gates.

@@ -32,9 +32,9 @@ local RQ `plastic-bundling` job proves the same worker path used in normal runs.
 - [x] M3: Scaffolded and executed a committed synthetic selection corpus and
   explicit release-evidence runner (10/10 passed); add the remaining artifact
   and materialization fault cases before closing M3.
-- [ ] (2026-07-22 UTC) M5: Independent code, QA, and security review plus
-  finding disposition and release gates (in progress; baseline reconciled at
-  `8dac222df`).
+- [x] (2026-07-22 UTC) M5: Independent code, QA, and security review plus
+  finding disposition and release gates (three independent GO reviews; 21/21
+  prior high/medium findings resolved).
 
 ## Surprises & Discoveries
 
@@ -360,3 +360,10 @@ Updated 2026-07-22: Added a direct concurrent candidate-publication and retry
 regression. Three overlapping publishers include one injected crop failure;
 the successful publishers and subsequent retry leave no temporary files and a
 loadable active manifest. The focused fallback module passed 15 tests.
+
+Updated 2026-07-22: M5 independent code, QA, and security re-reviews are GO.
+The append-only disposition resolves all 21 initial high/medium findings with
+reviewer-visible evidence; no risks or deferrals were accepted. Final gates
+include the full sharded suite recorded at `8dac222df`, focused fallback and
+RQ suites, stubtest, documentation lint, the adversarial corpus, and changed
+file broad-exception enforcement.

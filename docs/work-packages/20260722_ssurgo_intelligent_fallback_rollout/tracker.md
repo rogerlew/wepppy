@@ -6,10 +6,9 @@
 
 **Timezone**: UTC
 **Started**: 2026-07-22 UTC
-**Current phase**: M5 independent review and disposition in progress
+**Current phase**: M5 complete; release gate passed
 **Last updated**: 2026-07-22 UTC
-**Next milestone**: Complete M5 review disposition and release gates before
-considering the release lift.
+**Next milestone**: Handoff for production rollout under ADR-0025.
 **Security impact**: high
 **Dedicated security review**: yes
 **Security artifact**: `artifacts/2026-07-22_security_review.md`
@@ -27,8 +26,8 @@ considering the release lift.
   capture all-valid no-op evidence.
 - [x] M4 runtime: Run a true-current-invalid watershed through RQ and capture
   local-vector donor-selection evidence.
-- [ ] M5: Complete independent reviews, disposition, and release gates
-  (in progress 2026-07-22 UTC).
+- [x] M5: Complete independent reviews, disposition, and release gates
+  (complete 2026-07-22 UTC; GO).
 
 ### In Progress
 
@@ -305,3 +304,17 @@ tests/soils/test_ssurgo_fallback.py --maxfail=1` passed 15 tests.
 **Disposition impact**: Resolves the security review's missing concurrent
 candidate-publication/retry evidence gap, pending its independent re-check and
 final append-only review disposition.
+
+### 2026-07-22 UTC: M5 release disposition
+
+**Agent/Contributor**: Codex with independent code, QA, and security reviewers
+
+**Result**: GO. The independent re-reviews found no unresolved critical, high,
+or medium finding. The append-only ledger resolves all 21 initial findings with
+reviewer-visible executable evidence, implementation commits, and no accepted
+risk or deferral. The concurrent publication/retry test independently passed.
+
+**Release status**: The M5 release hold is lifted. The implementation is ready
+for rollout under ADR-0025; its runtime behavior remains conditional, so padded
+candidate preparation and added-MUKEY building occur only for watersheds with
+residual-invalid dominant hillslopes.

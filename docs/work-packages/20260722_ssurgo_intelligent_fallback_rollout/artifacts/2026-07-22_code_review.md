@@ -31,3 +31,24 @@
 - **Unresolved medium findings**: 5
 - **Release recommendation**: do not begin M1 implementation until all high
   findings are reflected in the active implementation contract.
+
+## M5 Implementation Re-review
+
+- **Reviewer**: `m5_code_review` (independent read-only agent)
+- **Review date**: 2026-07-22 UTC
+- **Review turn**: independent M5 implementation review and committed delta
+  review
+- **Reviewed base**: `8dac222dfdd7d54eead918526dc9c6bb488191d0`
+- **Supplemental evidence commit**: `a334ced452ce707123acf920f0ac3d62352a219e`
+- **Scope**: fallback implementation, NoDb propagation, RQ config guard,
+  ADR/specification, M3/M4 evidence, and the concurrent-publication delta.
+- **Validation**: fallback/NoDb/masked-valid suite 41 passed; RQ route suite
+  6 passed; adversarial corpus 10/10 passed; the committed concurrent retry
+  regression passed independently.
+
+**Result**: No new critical, high, or medium code finding. CR-01 through CR-08
+are resolved by the reviewed implementation and executable evidence. The delta
+has deterministic overlapping publishers, one injected crop failure, immutable
+completed artifacts, no temporary files, and a clean active-manifest retry.
+
+**M5 recommendation**: GO.
