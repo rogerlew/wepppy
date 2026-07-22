@@ -26,8 +26,8 @@ unchanged.
   and is not wired into fallback selection.
 - [x] (2026-07-22 03:28 UTC) Milestone 1: return local candidate pixel support
   and prove it with deterministic raster fixtures (five targeted Rust tests).
-- [ ] Milestone 2: add a shadow-only WEPPpy collector that clusters invalid
-  MUKEY bounds and persists proposed local-majority evidence.
+- [x] Milestone 2: add a shadow-only WEPPpy collector that clusters invalid
+  MUKEY bounds and persists proposed local-majority evidence (2026-07-22).
 - [ ] Milestone 3: evaluator scaffold and deterministic GeoTIFF fixture corpus
   complete (2026-07-22); representative-run cohort remains.
 - [ ] Milestone 4: seek an ADR only if evidence supports opt-in production

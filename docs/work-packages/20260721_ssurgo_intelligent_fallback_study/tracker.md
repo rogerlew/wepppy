@@ -63,6 +63,9 @@
 - [x] Corrected native `exhausted` evidence so a successful maximum-radius
   search is not reported as unresolved; crate tests remain 5 passed
   (2026-07-22).
+- [x] Completed Milestone 2 shadow collection with additive NoDb/Parquet
+  evidence, legacy hydration coverage, and a read-only local-run proof with
+  six invalid hillslopes in one cluster (2026-07-22).
 
 ## Timeline
 
