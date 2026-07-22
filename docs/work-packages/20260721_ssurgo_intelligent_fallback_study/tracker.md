@@ -23,7 +23,8 @@
 
 ### In Progress
 
-- [ ] Milestone 1: add candidate pixel support and synthetic raster fixtures.
+- [x] Milestone 1: candidate pixel support and synthetic raster fixtures
+  complete; native crate tests: 5 passed (2026-07-22 03:28 UTC).
 - [ ] Build deterministic fixtures from the expanded-cohort failure classes.
 
 ### Blocked

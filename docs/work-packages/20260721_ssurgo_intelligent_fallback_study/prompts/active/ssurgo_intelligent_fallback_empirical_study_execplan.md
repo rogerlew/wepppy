@@ -24,8 +24,8 @@ unchanged.
 - [x] (2026-07-22 03:14 UTC) Execute a representative clustered-window
   benchmark through the freshly built native extension; it is research tooling
   and is not wired into fallback selection.
-- [ ] Milestone 1: return local candidate pixel support and prove it with
-  deterministic raster fixtures.
+- [x] (2026-07-22 03:28 UTC) Milestone 1: return local candidate pixel support
+  and prove it with deterministic raster fixtures (five targeted Rust tests).
 - [ ] Milestone 2: add a shadow-only WEPPpy collector that clusters invalid
   MUKEY bounds and persists proposed local-majority evidence.
 - [ ] Milestone 3: evaluate local-majority against the current global fallback
