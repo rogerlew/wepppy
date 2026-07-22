@@ -1,3 +1,4 @@
+import json
 from pathlib import Path
 import runpy
 
@@ -67,3 +68,62 @@ def test_scoring_summary_compares_each_variant_with_global() -> None:
         "global_better": 1,
         "tied": 0,
     }
+
+
+def test_failure_aware_scoring_fixture_corpus_gates_evidence_by_failure_class() -> None:
+    module = runpy.run_path(str(Path(__file__).resolve().parents[2] / "tools/ssurgo_masked_valid_evaluation.py"))
+    cases = json.loads(
+        (Path(__file__).resolve().parents[1] / "data" / "ssurgo_masked_valid" / "scoring_cases.json")
+        .read_text(encoding="utf-8")
+    )
+
+    for case in cases:
+        geometry = [
+            (int(candidate["mukey"]), candidate["support_pixels"], candidate["shared_edges"])
+            for candidate in case["geometry_candidates"]
+        ]
+        result = module["score_failure_aware_candidates"](
+            geometry,
+            case["candidate_elevation_deltas"],
+            failure_class=case["failure_class"],
+            source_profile=case.get("source_profile"),
+            candidate_profiles=case.get("candidate_profiles"),
+        )
+
+        assert result["selected_mukey"] == case["expected_mukey"], case["id"]
+        assert result["profile_fields"] == case["expected_profile_fields"], case["id"]
+        if "expected_reason" in case:
+            assert result["reason"] == case["expected_reason"]
+
+
+def test_evaluation_persists_failure_aware_component_evidence() -> None:
+    module = runpy.run_path(str(Path(__file__).resolve().parents[2] / "tools/ssurgo_masked_valid_evaluation.py"))
+    result = module["evaluate_masked_case"](
+        {
+            "case_id": "partial-profile",
+            "withheld_mukey": "10",
+            "global_mukey": "20",
+            "candidate_support": [[20, 8], [30, 2]],
+            "soil_summaries": {
+                "10": {"sand_pct": 50.0, "clay_pct": 20.0},
+                "20": {"sand_pct": 80.0, "clay_pct": 5.0},
+                "30": {"sand_pct": 51.0, "clay_pct": 20.0},
+            },
+            "failure_class": "partial_profile",
+            "geometry_candidates": [
+                {"mukey": "20", "support_pixels": 8, "shared_edges": 8},
+                {"mukey": "30", "support_pixels": 2, "shared_edges": 2},
+            ],
+            "candidate_elevation_deltas": {"20": 5.0, "30": 5.0},
+            "source_profile": {"sand_pct": 50.0, "clay_pct": 20.0},
+            "candidate_profiles": {
+                "20": {"sand_pct": 80.0, "clay_pct": 5.0},
+                "30": {"sand_pct": 51.0, "clay_pct": 20.0},
+            },
+        }
+    )
+
+    assert result["failure_aware_score"]["selected_mukey"] == "30"
+    assert result["failure_aware_score"]["profile_fields"] == ["clay_pct", "sand_pct"]
+    assert result["failure_aware_score"]["selected_feature_distance"] < result["global_feature_distance"]
+    assert result["geometry_candidates"][0]["shared_edges"] == 8

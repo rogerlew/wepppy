@@ -34,6 +34,12 @@ unchanged.
   scoring with contact-aware map geometry and aligned terrain; research only.
 - [x] Milestone 3.5 geometry/terrain slice: execute 0%–30% terrain variants
   against 298 read-only masked-valid cases with NED1 (2026-07-22).
+- [x] Milestone 3.5 failure-class fixture slice: add deterministic profile
+  gates, explicit global-fallback controls, and classifier coverage for the
+  dominant `no_components`/`no_horizons` classes (2026-07-23).
+- [x] Milestone 3.5 held-out check: execute four independent local runs (29
+  masked-valid cases) and retain the unfavorable/non-discriminating result
+  rather than selecting a heuristic winner (2026-07-23).
 - [ ] Milestone 4: seek an ADR only if evidence supports opt-in production
   selection, then observe a shadow/opt-in rollout before default promotion.
 - [ ] Add deterministic fixtures for all observed primary failure classes.
@@ -75,6 +81,10 @@ unchanged.
   Evidence: the fixture corpus initially exposed `exhausted=True` for a
   successful one-radius query; the native contract now reports exhaustion only
   when the candidate minimum was not met at the maximum radius.
+- Observation: the first cohort's geometry/terrain advantage does not
+  generalize to the next four available independent runs.
+  Evidence: 29 held-out cases yielded 2 local wins, 3 global wins, and 24 ties
+  for geometry-only; terrain variants produced at most 2 local wins.
 
 ## Decision Log
 
@@ -129,6 +139,18 @@ unchanged.
   adds remote I/O and resampling without useful additional terrain detail for
   this categorical-map experiment.
   Date/Author: 2026-07-22 / user and Codex.
+- Decision: Gate profile use by failure class and keep the initial 55/30/15
+  profile/geometry/terrain blend fixture-scoped.
+  Rationale: `no_components` and `no_horizons` retain no trustworthy profile
+  evidence, while nonphysical texture must not contribute texture-derived
+  fields. The blend makes the partial-profile fixture inspectable without
+  turning an uncalibrated research value into a production default.
+  Date/Author: 2026-07-23 / Codex.
+- Decision: Retain M4 as HOLD after the held-out check.
+  Rationale: the four held-out runs do not show a stable improvement over the
+  current global baseline, and no observed-invalid provenance review or ADR
+  confidence gate exists.
+  Date/Author: 2026-07-23 / Codex.
 
 ## Outcomes & Retrospective
 
@@ -144,6 +166,13 @@ local runs; all found a local candidate at 250 m. Local candidates were better
 on the declared unweighted WEPP-feature distance in 108 cases, global donors
 were better in 71, and 119 tied. Local donors were elevation-closer in 235
 cases versus 62. This is directional evidence only; Milestone 4 remains HOLD.
+
+The scoring corpus now proves failure-class evidence exclusion and explicit
+fallback behavior without production writes. The subsequent 29-case held-out
+check did not reproduce the first cohort's improvement. The next evidence
+step is therefore a larger geographically separated masked-valid cohort and a
+stratified observed-invalid provenance review, not an ADR or production shadow
+rollout.
 
 ## Context and Orientation
 
@@ -352,3 +381,6 @@ Data Access client already used by `ssurgo.py`; do not add dependencies.
 
 Updated 2026-07-22: recorded user approval for expanded complementary cohorts
 and created the dedicated work package.
+
+Updated 2026-07-23: recorded deterministic failure-class score gates and the
+four-run held-out result; both preserve the M4 HOLD decision.

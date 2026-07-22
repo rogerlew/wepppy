@@ -198,3 +198,33 @@ def test_cohort_targets_and_draw_weighted_summary_are_deterministic() -> None:
     }
     assert summary["soil_observed_draw_count"] == 17
     assert summary["soil_unbuildable_rate"] == pytest.approx(5 / 17)
+
+
+def test_residual_reason_codes_keep_no_components_and_no_horizons_distinct() -> None:
+    module = _module()
+    reason_codes = module["_residual_reason_codes"]
+    no_components = reason_codes(
+        {
+            "component_count": 0,
+            "eligible_component_count": 0,
+            "horizon_count": 0,
+            "post_default_valid_horizon_count": 0,
+            "emitted_wepp_layer_count": 0,
+        },
+        {},
+    )
+    no_horizons = reason_codes(
+        {
+            "component_count": 1,
+            "eligible_component_count": 1,
+            "horizon_count": 0,
+            "post_default_valid_horizon_count": 0,
+            "emitted_wepp_layer_count": 0,
+        },
+        {},
+    )
+
+    assert "no_components" in no_components
+    assert "no_horizons" in no_components
+    assert "no_components" not in no_horizons
+    assert "no_horizons" in no_horizons

@@ -15,6 +15,21 @@ from typing import Any, Mapping, Sequence
 SCHEMA_VERSION = 1
 DEFAULT_NED1_VRT = Path("/wc1/geodata/ned1/2024/.vrt")
 TERRAIN_WEIGHTS = (0.0, 0.1, 0.2, 0.3)
+PROFILE_EXCLUDED_FAILURE_CLASSES = frozenset({
+    "no_components",
+    "no_horizons",
+    "nonphysical_texture_balance",
+    "no_valid_horizons",
+    "zero_wepp_layers",
+})
+PROFILE_SUPPORTED_FAILURE_CLASSES = frozenset({"partial_profile", "missing_required_attributes"})
+UNSUPPORTED_FAILURE_CLASSES = frozenset({
+    "residual_invalid_unclassified",
+    "no_eligible_component",
+    "urban",
+    "water",
+    "no_valid_donor",
+})
 
 
 def _numeric_distance(reference: Mapping[str, Any], candidate: Mapping[str, Any]) -> tuple[float | None, list[str]]:
@@ -30,6 +45,61 @@ def _numeric_distance(reference: Mapping[str, Any], candidate: Mapping[str, Any]
             deltas.append(abs(left - right))
             used.append(field)
     return (sum(deltas) / len(deltas), used) if deltas else (None, used)
+
+
+def _finite_profile_fields(
+    source_profile: Mapping[str, Any], candidate_profiles: Mapping[str, Mapping[str, Any]], failure_class: str
+) -> list[str]:
+    """Return directly observed profile fields permitted for one failure class."""
+    if failure_class in PROFILE_EXCLUDED_FAILURE_CLASSES | UNSUPPORTED_FAILURE_CLASSES:
+        return []
+    if failure_class not in PROFILE_SUPPORTED_FAILURE_CLASSES:
+        return []
+    fields = set(source_profile)
+    for profile in candidate_profiles.values():
+        fields &= set(profile)
+    allowed = []
+    for field in sorted(fields):
+        try:
+            values = [float(source_profile[field]), *(float(profile[field]) for profile in candidate_profiles.values())]
+        except (KeyError, TypeError, ValueError):
+            continue
+        if all(math.isfinite(value) for value in values):
+            allowed.append(field)
+    return allowed
+
+
+def _profile_components(
+    source_profile: Mapping[str, Any], candidate_profiles: Mapping[str, Mapping[str, Any]], fields: Sequence[str]
+) -> tuple[dict[str, float | None], dict[str, dict[str, float]]]:
+    """Return fixture-local robust profile similarity and the persisted scale evidence."""
+    if not fields:
+        return {mukey: None for mukey in candidate_profiles}, {}
+    import numpy as np
+
+    calibration: dict[str, dict[str, float]] = {}
+    distances: dict[str, float] = {mukey: 0.0 for mukey in candidate_profiles}
+    for field in fields:
+        values = np.asarray(
+            [float(source_profile[field]), *(float(profile[field]) for profile in candidate_profiles.values())], dtype=float
+        )
+        median = float(np.median(values))
+        iqr = float(np.percentile(values, 75) - np.percentile(values, 25))
+        mad = float(np.median(np.abs(values - median)))
+        scale = max(iqr, 1.4826 * mad, 1.0)
+        calibration[field] = {"median": median, "iqr": iqr, "mad": mad, "scale": scale}
+        source_value = float(source_profile[field])
+        for mukey, profile in candidate_profiles.items():
+            distances[mukey] += abs(source_value - float(profile[field])) / scale
+    mean_distances = {mukey: distance / len(fields) for mukey, distance in distances.items()}
+    minimum = min(mean_distances.values())
+    maximum = max(mean_distances.values())
+    if maximum == minimum:
+        return {mukey: 1.0 for mukey in candidate_profiles}, calibration
+    return {
+        mukey: 1.0 - (distance - minimum) / (maximum - minimum)
+        for mukey, distance in mean_distances.items()
+    }, calibration
 
 
 def evaluate_masked_case(case: Mapping[str, Any]) -> dict[str, Any]:
@@ -67,6 +137,7 @@ def evaluate_masked_case(case: Mapping[str, Any]) -> dict[str, Any]:
         "pixels_read",
         "local_elevation_delta_m",
         "global_elevation_delta_m",
+        "geometry_candidates",
     ):
         if field in case:
             result[field] = case[field]
@@ -84,6 +155,29 @@ def evaluate_masked_case(case: Mapping[str, Any]) -> dict[str, Any]:
                 "selected_distance_fields": selected_fields,
             }
         result["score_variants"] = score_variants
+    if "failure_class" in case and "geometry_candidates" in case:
+        geometry = [
+            (int(candidate["mukey"]), int(candidate["support_pixels"]), int(candidate["shared_edges"]))
+            for candidate in case["geometry_candidates"]
+        ]
+        failure_aware = score_failure_aware_candidates(
+            geometry,
+            case.get("candidate_elevation_deltas", {}),
+            failure_class=str(case["failure_class"]),
+            source_profile=case.get("source_profile"),
+            candidate_profiles=case.get("candidate_profiles"),
+        )
+        selected_mukey = failure_aware["selected_mukey"]
+        selected_distance, selected_fields = (
+            _numeric_distance(reference, summaries.get(str(selected_mukey), {}))
+            if selected_mukey is not None else (None, [])
+        )
+        result["failure_aware_score"] = {
+            **failure_aware,
+            "selected_feature_distance": selected_distance,
+            "selected_distance_fields": selected_fields,
+        }
+        result["failure_class"] = str(case["failure_class"])
     return result
 
 
@@ -301,6 +395,112 @@ def score_geometry_terrain_candidates(
             "geometry_basis": "shared_edges" if edge_total else "support_pixels",
         }
     return variants
+
+
+def score_failure_aware_candidates(
+    candidates: Sequence[tuple[int, int, int]],
+    elevation_deltas: Mapping[str, float | None],
+    *,
+    failure_class: str,
+    source_profile: Mapping[str, Any] | None = None,
+    candidate_profiles: Mapping[str, Mapping[str, Any]] | None = None,
+) -> dict[str, Any]:
+    """Return one transparent research heuristic subject to failure-class gates.
+
+    This function is deliberately independent of hillslope topology. It accepts
+    only source-region map evidence, aligned terrain deltas, and the raw fields
+    explicitly declared as retained for a simulated partial-profile failure.
+    Its weights are fixture-research hypotheses, not production parameters.
+    """
+    source_profile = source_profile or {}
+    candidate_profiles = candidate_profiles or {}
+    if failure_class in UNSUPPORTED_FAILURE_CLASSES:
+        return {
+            "failure_class": failure_class,
+            "selected_mukey": None,
+            "reason": "unsupported_failure_class_global_fallback",
+            "profile_fields": [],
+            "candidates": [],
+        }
+    if not candidates:
+        return {
+            "failure_class": failure_class,
+            "selected_mukey": None,
+            "reason": "no_local_candidate_global_fallback",
+            "profile_fields": [],
+            "candidates": [],
+        }
+
+    candidate_ids = [str(mukey) for mukey, _, _ in candidates]
+    scoped_profiles = {mukey: candidate_profiles[mukey] for mukey in candidate_ids if mukey in candidate_profiles}
+    profile_fields = _finite_profile_fields(source_profile, scoped_profiles, failure_class)
+    if len(scoped_profiles) != len(candidate_ids):
+        profile_fields = []
+    profile_components, profile_calibration = _profile_components(source_profile, scoped_profiles, profile_fields)
+
+    edge_total = sum(shared_edges for _, _, shared_edges in candidates)
+    support_total = sum(support for _, support, _ in candidates)
+    geometry_denominator = edge_total if edge_total else support_total
+    finite_terrain = [
+        float(delta)
+        for mukey, delta in elevation_deltas.items()
+        if mukey in candidate_ids and delta is not None and math.isfinite(float(delta))
+    ]
+    terrain_minimum = min(finite_terrain) if finite_terrain else None
+    terrain_maximum = max(finite_terrain) if finite_terrain else None
+    terrain_available = terrain_minimum is not None and terrain_maximum is not None
+
+    if profile_fields:
+        weights = {"profile": 0.55, "geometry": 0.30, "terrain": 0.15 if terrain_available else 0.0}
+        if not terrain_available:
+            weights["geometry"] = 0.45
+    elif terrain_available:
+        weights = {"profile": 0.0, "geometry": 0.70, "terrain": 0.30}
+    else:
+        weights = {"profile": 0.0, "geometry": 1.0, "terrain": 0.0}
+
+    scored = []
+    for mukey, support, shared_edges in candidates:
+        mukey_id = str(mukey)
+        geometry = (shared_edges if edge_total else support) / geometry_denominator if geometry_denominator else 0.0
+        elevation_delta = elevation_deltas.get(mukey_id)
+        if elevation_delta is not None and not math.isfinite(float(elevation_delta)):
+            elevation_delta = None
+        if elevation_delta is None or not terrain_available:
+            terrain = None
+        elif terrain_maximum == terrain_minimum:
+            terrain = 1.0
+        else:
+            terrain = 1.0 - (elevation_delta - terrain_minimum) / (terrain_maximum - terrain_minimum)
+        profile = profile_components.get(mukey_id)
+        score = weights["geometry"] * geometry
+        if profile is not None:
+            score += weights["profile"] * profile
+        if terrain is not None:
+            score += weights["terrain"] * terrain
+        scored.append(
+            {
+                "mukey": mukey_id,
+                "score": score,
+                "geometry_component": geometry,
+                "terrain_component": terrain,
+                "profile_component": profile,
+                "support_pixels": support,
+                "shared_edges": shared_edges,
+                "elevation_delta_m": elevation_delta,
+            }
+        )
+    scored.sort(key=lambda candidate: (-candidate["score"], int(candidate["mukey"])))
+    return {
+        "failure_class": failure_class,
+        "selected_mukey": scored[0]["mukey"],
+        "reason": "failure_aware_local_candidate",
+        "geometry_basis": "shared_edges" if edge_total else "support_pixels",
+        "profile_fields": profile_fields,
+        "profile_calibration": profile_calibration,
+        "weights": weights,
+        "candidates": scored,
+    }
 
 
 def summarize_evaluations(results: Sequence[Mapping[str, Any]]) -> dict[str, Any]:

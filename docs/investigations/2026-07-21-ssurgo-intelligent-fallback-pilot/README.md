@@ -106,6 +106,42 @@ still covers only two local runs, does not evaluate retained-profile score
 components by failure class, and does not yet use one coalesced crop to serve
 multiple source requests. Production fallback behavior remains unchanged.
 
+## Failure-Class Gates and Held-Out Check (Milestone 3.5)
+
+The deterministic scoring corpus now exercises the primary profile-free
+classes: `no_components` and `no_horizons` use only source-region geometry and
+aligned terrain. It separately demonstrates a partial-profile choice using
+only explicitly supplied fields, excludes profile features for a nonphysical
+texture failure, and pins missing-DEM, stable tie, no-local-candidate, and
+residual-unclassified behavior. The latter two retain an explicit global
+fallback rather than selecting the first sorted donor.
+
+The partial-profile fixture uses a transparent research hypothesis of 55%
+profile, 30% geometry, and 15% terrain when all three evidence families are
+available. Without permitted profile evidence it uses 70% geometry and 30%
+terrain; absent terrain reassigns its weight to the available evidence. These
+weights are fixture-scoped research values, not a production parameterization
+or an ADR proposal.
+
+Four runs not used in the initial 298-case cohort provided a small held-out
+check: `juvenile-separatist` (16 cases), `old-fluorosis` (7),
+`feline-wrangler` (3), and `forced-bop` (3). All 29 had shared-edge geometry
+at the 250 m window. Their result does not reproduce the initial apparent
+advantage:
+
+| Variant | Local feature-distance better | Global better | Tie |
+| --- | ---: | ---: | ---: |
+| Geometry only | 2 | 3 | 24 |
+| Geometry + 10% terrain | 1 | 3 | 25 |
+| Geometry + 20% terrain | 2 | 3 | 24 |
+| Geometry + 30% terrain | 2 | 3 | 24 |
+
+This is valuable negative evidence. M4/ADR consideration remains **HOLD**:
+the score has no consistent held-out improvement, the held-out sample is small,
+and observed-invalid cases still need a stratified plausibility review with
+source-field provenance. The full run artifacts are non-versioned under
+`/tmp/ssurgo_masked_valid_20260723/`.
+
 ## Expanded Cohort Results
 
 | Cohort | Draws | Unique MUKEYs | Residual-invalid | Worker failed | Unbuildable | 95% Wilson interval |

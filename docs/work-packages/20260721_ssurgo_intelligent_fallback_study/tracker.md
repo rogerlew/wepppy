@@ -7,8 +7,8 @@
 **Timezone**: UTC
 **Started**: 2026-07-21 18:00 UTC
 **Current phase**: M4 evidence hold
-**Last updated**: 2026-07-22
-**Next milestone**: Complete observed failure-class fixtures and define an ADR-ready practical-effect criterion.
+**Last updated**: 2026-07-23
+**Next milestone**: Expand the geographically separated masked-valid cohort and complete an observed-invalid provenance review before defining an ADR-ready practical-effect criterion.
 **Security impact**: none
 **Dedicated security review**: no
 **Security artifact**: N/A
@@ -17,9 +17,10 @@
 
 ### Ready / Backlog
 
-- [ ] Design deterministic fixtures from expanded-cohort failure classes.
-- [ ] Milestone 3.5: add per-source contact/terrain evidence and compare
-  failure-class-aware heuristic score variants on held-out runs.
+- [ ] Expand the geographically separated masked-valid cohort beyond the
+  current 29-case held-out check.
+- [ ] Conduct a stratified observed-invalid review with source-field
+  provenance, candidate evidence, and explicit fallback disposition.
 
 ### In Progress
 
@@ -71,6 +72,11 @@
 - [x] Completed M3.5 geometry/terrain scoring slice with NED1: geometry-only
   131 local versus 58 global feature-distance wins; 30% terrain 140 versus 62
   (2026-07-22). Profile/failure-class score families remain.
+- [x] Completed M3.5 deterministic failure-class gate corpus: profile-free
+  dominant classes, partial-profile evidence, nonphysical exclusion, missing
+  DEM, stable tie, and explicit global-fallback controls (2026-07-23).
+- [x] Completed four-run held-out scoring check (29 cases): geometry-only 2
+  local, 3 global, 24 tied; M4 remains HOLD (2026-07-23).
 
 ## Timeline
 
@@ -203,6 +209,16 @@ SSURGO grid for external elevation evidence.
 **Impact**: The 1 arc-second product matches the 30 m scoring scale. NED13 is
 not used because its finer source resolution would be resampled away while
 increasing remote VRT I/O.
+
+### 2026-07-23: Retain M4 HOLD after failure-class and held-out evidence
+
+**Decision**: Do not seek a parameterization ADR or implement a production
+shadow policy from the present heuristic evidence.
+
+**Impact**: The deterministic fixtures establish safe score-family gates, but
+the four held-out runs do not demonstrate a consistent improvement over the
+global fallback. Next work must enlarge geographic evaluation and review real
+residual-invalid provenance before defining a confidence threshold.
 
 ## Risks and Issues
 
