@@ -47,6 +47,8 @@ coverage.
 - Raster-region adjacency and aligned elevation evidence design.
 - Milestone 2 shadow-only, additive candidate evidence in `Soils` and
   `soils/soils.parquet`; final soil assignments remain unchanged.
+- Milestone 3 read-only masked-valid evaluation rows and deterministic raster
+  fixtures comparing local-majority evidence to the current global baseline.
 
 ### Explicitly Out of Scope
 

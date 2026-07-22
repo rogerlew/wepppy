@@ -17,6 +17,8 @@
 
 ### Ready / Backlog
 
+- [ ] Milestone 3: implement read-only masked-valid evaluation rows and report
+  local-majority versus global-baseline results by fixture/run.
 - [ ] Design deterministic fixtures from expanded-cohort failure classes.
 - [ ] Build raster-region adjacency and aligned elevation evidence for
   masked-valid candidate trials.
@@ -144,6 +146,14 @@ columns. Cluster invalid hillslope bounds after a 250 m expansion.
 **Impact**: Existing final assignments and substitution fields remain
 unchanged. Consumer review found current report, export, DuckDB, and migration
 paths project known parquet fields and remain compatible with additive columns.
+
+### 2026-07-22 03:55 UTC: Scaffold masked-valid evaluation
+
+**Decision**: Milestone 3 evaluates read-only local-majority proposals against
+the present global baseline; it does not set a production promotion threshold.
+
+**Impact**: Exact-MUKEY recovery and declared soil/WEPP summary distance can
+be reported side by side before an ADR chooses an acceptance criterion.
 
 ## Risks and Issues
 

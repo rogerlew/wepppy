@@ -144,6 +144,27 @@ MUKEY with the greatest count in the smallest successful local window; equal
 counts break by numeric MUKEY. It reports availability, disagreement,
 determinism, and withheld-soil similarity.
 
+### Milestone 3 Evaluation Scaffold
+
+Milestone 3 is read-only. A masked-valid case starts with a successfully built
+raw dominant MUKEY, removes that MUKEY from the valid candidate set for the
+query, and compares the shadow local-majority proposal with the current
+watershed-global dominant baseline. It writes a versioned evaluation row with
+the withheld MUKEY, cluster bounds, candidate support, both proposals, and
+their available soil/WEPP summary values. It never changes `domsoil_d` or
+generates a new model run.
+
+The fixture corpus must include direct local success, expansion, tie, no-local
+candidate, and geographically separated clusters. Representative local runs
+are read-only evidence sources and are never test dependencies. Results are
+stratified by fixture class and run, not pooled into a production claim.
+
+Two decisions remain deliberately open before interpreting results: whether
+the primary metric is exact withheld-MUKEY recovery or distance on declared
+soil/WEPP summary features, and what observed improvement would justify an
+ADR. The scaffold records both available measures where possible and sets no
+promotion threshold.
+
 Milestone 4 is conditional. A parameterization ADR is required before any
 production threshold or selection order changes. If approved, the policy is
 first shadowed or opt-in with preserved global fallback and explicit rollback.
