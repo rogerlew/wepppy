@@ -86,6 +86,16 @@ def test_inventory_streams_mukey_counts_and_marks_smoke_runs_incomplete(tmp_path
     assert smoke_inventory["windows_read"] == 1
 
 
+def test_locator_returns_first_bounds_for_requested_mukeys(tmp_path: Path) -> None:
+    module = _module()
+    raster_path = tmp_path / "mukey.tif"
+    _write_mukey_raster(raster_path)
+    located = module["locate_mukeys_in_raster"](raster_path, [1002, 1003])
+    assert located["complete"] is True
+    assert located["locations"]["1002"]["row"] == 0
+    assert located["locations"]["1002"]["col"] == 3
+
+
 def test_diagnostic_and_coverage_summaries_preserve_unobserved_coverage(tmp_path: Path) -> None:
     module = _module()
     inventory_mukey_raster = module["inventory_mukey_raster"]

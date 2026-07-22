@@ -6,11 +6,10 @@
 
 **Timezone**: UTC
 **Started**: 2026-07-21 18:00 UTC
-**Current phase**: M4 evidence hold
+**Current phase**: M4 vector-profile fallback policy and production wiring
 **Last updated**: 2026-07-26
-**Next milestone**: Build a provenance-preserving profile-bearing invalid
-classifier and real-invalid shadow cohort, then expand the neutral 29-case
-geographic holdout before setting an abstention criterion.
+**Next milestone**: Wire ADR-0025's conditional padded candidate map, added
+MUKEY build set, vector-profile selection, and global-fallback audit evidence.
 **Security impact**: none
 **Dedicated security review**: no
 **Security artifact**: N/A
@@ -31,6 +30,9 @@ geographic holdout before setting an abstention criterion.
 - [x] Added Git-LFS-backed deterministic masked-valid raster corpus: direct
   local candidate, expansion, numeric tie, no candidate, and separated
   clusters; public-binding test passes (2026-07-22).
+- [x] Padded-candidate provenance shadow evaluator: no assignment changes;
+  the 2 km `improvident-dyslexia` crop built all 410 MUKEYs in an isolated
+  cache and emitted 447 real-invalid hillslope records (2026-07-22).
 
 ### Blocked
 
@@ -108,6 +110,28 @@ geographic holdout before setting an abstention criterion.
   classifier: 12 profile-bearing residuals retain direct source evidence and
   one is explicitly profile-free/unusable; no donor assignment occurs
   (2026-07-26).
+- [x] Executed the first padded-candidate provenance shadow run on
+  `improvident-dyslexia`: 34 historical invalid MUKEYs across 447 hillslopes,
+  410 padded-map MUKEYs built in the isolated cache, 42 distinct shadow
+  proposals, and only eight matching the historical global donor (2026-07-22).
+  The current source/cache rebuilds every historical invalid MUKEY, so the
+  result is mechanics/provenance evidence only; M4 remains HOLD.
+- [x] Retired historical-failure reconstruction as the study acceptance path.
+  Current-build invalids and current padded-candidate buildability are the
+  authoritative inputs for future fallback evaluation (2026-07-22).
+- [x] Executed the current-build dual cohort on `improvident-dyslexia`: all 410
+  padded MUKEYs built, yielding zero real-invalid seeds; 50 deterministic
+  masked-valid holdouts produced 33 distinct shadow proposals (2026-07-22).
+  On the accepted shallow-profile vector objective, 29 of 33 directly
+  comparable proposals improved on the global donor, four tied, and none were
+  worse (median improvement: 1.95 normalized vector-distance points; 100%
+  median relative reduction). The 17 records without a direct global vector
+  need audit completion because the global donor fell outside the local set.
+  This is sufficient to proceed to an ADR-governed M4 implementation.
+- [x] Accepted ADR-0025 and the authoritative SSURGO fallback specification:
+  recovery remains first, vector-profile selection applies to eligible local
+  residual failures, and watershed-global substitution is last resort. Padded
+  candidate work is conditional on an affected watershed (2026-07-22).
 
 ## Timeline
 
@@ -177,6 +201,22 @@ uses worker-local GDAL handles for concurrent clusters.
 **Impact**: Candidate discovery is proportional to bounded crops, not the
 national raster. This remains research tooling until benchmark and masked-valid
 evidence supports production wiring.
+
+### 2026-07-22: Use a padded project candidate map
+
+**Context**: Run-cropped SSURGO maps cannot supply spatial context beyond a
+watershed boundary.
+
+**Decision**: Retrieve a padded candidate raster from the full
+`$GEODATA_DIR/ssurgo/gNATSGSO/2025/.vrt` source, persist it with the run, and
+run bounded support extraction against that artifact. Reuse primary build
+outcomes and build every added MUKEY so every padded-raster MUKEY has a current
+build outcome before candidate filtering; the production query never uses an
+unpadded project map.
+
+**Impact**: Candidate evidence is locally complete, reproducible with the
+run, and limited to donors already proven buildable under that run's settings.
+This does not change the existing global fallback or select a production donor.
 
 ### 2026-07-22 03:20 UTC: Stage candidate selection as four milestones
 

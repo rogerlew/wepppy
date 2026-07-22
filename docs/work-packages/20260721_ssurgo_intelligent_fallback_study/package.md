@@ -10,7 +10,8 @@ run with the most common valid MUKEY. This package builds the evidence needed
 to replace that watershed-global heuristic safely. It measures how often the
 current converter cannot build a WEPP soil, separates missing-data and
 nonphysical-input failures from profile-absence failures, and then evaluates
-map-derived candidate evidence before any production fallback policy changes.
+map-derived candidate evidence. ADR-0025 now authorizes the production policy;
+the implementation remains pending.
 
 The completed pilot establishes a mapped-area baseline from the 2025 gNATSGO
 raster: 40 of 2,048 area-weighted draws (1.95%) were unbuildable. The user has
@@ -29,8 +30,8 @@ coverage.
 - Turn observed failure classes into deterministic fixtures and masked-valid
   candidate-selection experiments based on the SSURGO raster, not hillslope
   topology.
-- Preserve existing fallback behavior until an ADR-approved policy has
-  demonstrated improvement over the current watershed-global baseline.
+- Preserve existing fallback behavior until the ADR-0025 implementation lands,
+  then apply its recovery → local-vector → global order.
 
 ## Scope
 
@@ -80,18 +81,21 @@ coverage.
   clustered bounds and proves it with synthetic raster fixtures.
 - [ ] Deterministic fixtures cover all observed primary failure classes.
 - [x] A map-region/elevation candidate experiment compares the current global
-  fallback with local candidates in masked-valid trials (298 local cases; M4
-  remains HOLD pending failure-class fixtures and an ADR-ready effect rule).
-- [ ] No production fallback behavior changes without a parameterization ADR.
+  fallback with local candidates in masked-valid trials; later vector evidence
+  supplied the accepted M4 policy objective.
+- [x] ADR-0025 authorizes the production fallback parameterization before any
+  implementation change.
 
 ## Parameterization ADR Gate
 
-- **Parameterization change present**: no.
-- **ADR required**: no for this research package; yes before any changed
-  fallback policy, score, threshold, or repair rule.
-- **ADR link(s)**: TBD if a production policy is proposed.
-- **Decision provenance captured**: user approved expanded cohorts on
-  2026-07-21 Pacific time; implementation records remain research-only.
+- **Parameterization change present**: approved, not yet implemented.
+- **ADR required**: yes; accepted before implementation.
+- **ADR link(s)**:
+  [`ADR-0025`](../../adrs/ADR-0025-ssurgo-local-vector-profile-fallback.md).
+- **Decision provenance captured**: the WEPPcloud operator/user approved the
+  recovery → local vector-profile → global order in the 2026-07-22 Pacific
+  Codex operator session. The exact contract is
+  [`wepppy/soils/ssurgo/fallback.md`](../../../wepppy/soils/ssurgo/fallback.md).
 
 Reference: `docs/standards/parameterization-adr-standard.md`.
 
@@ -182,7 +186,7 @@ the shadow fields for an affected fixture run.
 - Initial and expanded cohort reports with non-versioned raw artifacts and
   versioned aggregate evidence.
 - Deterministic failure fixtures and candidate-policy evaluation harness.
-- A parameterization ADR only if evidence supports a future production policy.
+- ADR-0025 and the authoritative fallback specification.
 
 ## Follow-up Work
 

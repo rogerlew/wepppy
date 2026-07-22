@@ -449,6 +449,12 @@ The historical behavior in `ssurgo.py` has changed multiple times; key milestone
 
 ### Gridded Dominant MUKEY Fallback Provenance
 
+The approved replacement policy is specified in
+[`fallback.md`](fallback.md) and ratified by
+[ADR-0025](../../../docs/adrs/ADR-0025-ssurgo-local-vector-profile-fallback.md).
+Until that implementation lands, the behavior below remains the current
+runtime behavior.
+
 `wepppy.nodb.core.soils.Soils._build_gridded()` computes a raw dominant raster
 MUKEY for each hillslope, then replaces any dominant MUKEY that failed WEPP soil
 generation with the run's most common valid generated MUKEY. The final
@@ -461,6 +467,16 @@ When substitutions occur, the raw raster-selected map is retained in
 `reason`. Generated soil summaries and `soils.parquet` include nullable
 `raw_mukey`, `substituted_mukey`, and `substitution_reason` columns when
 available.
+
+The read-only candidate-support helper
+`wepppy.soils.ssurgo.full_ssurgo_candidate_support()` always reads the full
+2025 gNATSGO MUKEY VRT at
+`$GEODATA_DIR/ssurgo/gNATSGSO/2025/.vrt`; it does not accept a run-cropped
+SSURGO raster. It requires EPSG:5070 bounds, excludes the supplied invalid
+MUKEY cluster, and returns only caller-declared buildable MUKEYs with pixel
+support. It is low-level evidence support, not a donor-selection policy. The
+approved policy will query a persisted 2 km padded project candidate raster,
+and only for runs with residual-invalid dominant MUKEYs.
 
 ### 8. Horizon Depth Adjustments
 

@@ -6,6 +6,7 @@ from pathlib import Path
 import pytest
 
 from wepppyo3.raster_characteristics import local_mukey_candidates, local_mukey_geometry
+from wepppy.soils.ssurgo import full_ssurgo_candidate_support, full_ssurgo_mukey_raster_path
 
 
 pytestmark = pytest.mark.unit
@@ -76,3 +77,20 @@ def test_masked_valid_geometry_keeps_sources_distinct_in_one_call() -> None:
     # a candidate can therefore have regional support but no shared edge.
     assert results["left"][2] == [(20, 4, 2), (30, 1, 0)]
     assert results["right"][2] == [(20, 1, 1), (30, 4, 2)]
+
+
+def test_full_ssurgo_wrapper_filters_bounded_support_to_valid_mukeys(tmp_path, monkeypatch) -> None:
+    full_map_dir = tmp_path / "ssurgo" / "gNATSGSO" / "2025"
+    full_map_dir.mkdir(parents=True)
+    (full_map_dir / ".vrt").symlink_to(FIXTURE_DIRECTORY / "direct_local.tif")
+    monkeypatch.setenv("GEODATA_DIR", str(tmp_path))
+
+    assert full_ssurgo_mukey_raster_path() == str(full_map_dir / ".vrt")
+    support = full_ssurgo_candidate_support(
+        (0.0, 0.0, 90.0, 90.0),
+        1.0,
+        {"10"},
+        {"20", "30", "999"},
+    )
+
+    assert support == [("20", 3), ("30", 2)]

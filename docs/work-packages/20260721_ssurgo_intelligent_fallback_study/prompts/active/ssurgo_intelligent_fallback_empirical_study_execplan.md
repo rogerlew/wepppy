@@ -8,8 +8,8 @@ This work gives maintainers measured evidence about the SSURGO MUKEYs that do
 not produce a WEPP soil. After the work, a maintainer can distinguish the
 mapped-area impact from the unique-MUKEY prevalence, see what input is absent
 or physically inconsistent, and design a local map-based fallback without
-guessing. The work is research-only: the current production fallback remains
-unchanged.
+guessing. The research is complete enough to ratify ADR-0025; its production
+implementation remains pending.
 
 ## Progress
 
@@ -65,13 +65,35 @@ unchanged.
 - [x] Milestone 3.5 real-invalid source shadow classifier: preserve direct
   shallow-layer evidence as `profile_bearing_residual` without changing the
   converter outcome or assigning a donor (2026-07-26).
-- [ ] Milestone 4: seek an ADR only if evidence supports opt-in production
-  selection, then observe a shadow/opt-in rollout before default promotion.
+- [x] Milestone 3.5 padded-candidate provenance shadow evaluator (2026-07-22):
+  materialized and built the 2 km padded crop for `improvident-dyslexia` in an
+  isolated cache, emitting 447 per-hillslope shadow records without changing
+  the run. The result is diagnostic only because all 34 historically invalid
+  MUKEYs rebuild successfully with the current source/cache state.
+- [x] Milestone 3.5 current-build real/holdout cohort (2026-07-22): the same
+  padded crop had zero current invalid MUKEYs; 50 deterministic masked-valid
+  seeds emitted shadow records without changing the run.
+- [x] Milestone 4 policy gate: ADR-0025 and the authoritative SSURGO fallback
+  specification ratify source recovery, local vector-profile selection, and
+  the global fallback order (2026-07-22).
+- [ ] Milestone 4 implementation: wire conditional padded candidate building,
+  vector-profile selection, provenance, and regression coverage.
 - [ ] Add deterministic fixtures for all observed primary failure classes.
 - [ ] Build and evaluate raster-region/elevation candidate evidence using
   masked-valid trials.
 
 ## Surprises & Discoveries
+
+- Observation: a completed run's historical invalidity is not reproducible
+  from current SSURGO source data and converter inputs alone.
+  Evidence: `improvident-dyslexia` has 34 raw dominant MUKEYs absent from its
+  historical built-soil set. Its 2 km padded crop contains 410 MUKEYs; all 410
+  build successfully in an isolated 2026-07-22 study cache. The 447 shadow
+  records therefore describe a current-data counterfactual, not validated
+  replacements for the historical failures.
+- Observation: the current padded build can have no real fallback seeds.
+  Evidence: all 410 MUKEYs in the `improvident-dyslexia` padded crop built;
+  the real-invalid cohort is empty while the 50-case masked-valid cohort runs.
 
 - Observation: the companion gNATSGO VAT contains complete MUKEY pixel counts.
   Evidence: it reports 320,669 MUKEYs and 8,745,483,151 mapped pixels; using
@@ -186,6 +208,14 @@ unchanged.
   invalid MUKEYs are spatially close; one bounded crop therefore serves the
   adjacent group without a national scan.
   Date/Author: 2026-07-22 / user and Codex.
+- Decision: Retrieve a padded project-local candidate raster from the full
+  2025 gNATSGO source, then run bounded candidate queries against that
+  persisted raster.
+  Rationale: padding by the maximum candidate radius preserves complete local
+  context while making the run self-contained and allowing every candidate
+  MUKEY to be built under the run's conversion settings before selection. The
+  source map remains authoritative; a run-cropped unpadded map is insufficient.
+  Date/Author: 2026-07-22 / user and Codex.
 - Decision: Record exact withheld-MUKEY recovery as a diagnostic, but use
   declared soil/WEPP feature distance as the primary later interpretation
   metric.
@@ -276,6 +306,49 @@ unchanged.
   and the small held-out result is neutral. A provenance-preserving classifier
   and real-invalid shadow cohort are required before any fallback policy ADR.
   Date/Author: 2026-07-26 / Codex.
+- Decision: Evaluate the padded-raster production shape in an isolated study
+  cache before wiring it into a run build.
+  Rationale: the study must prove that candidate MUKEYs can be built under the
+  same converter settings while preserving a completed run and its existing
+  SSURGO cache. A shadow artifact can therefore expose the true eligible set
+  and its source provenance without changing `domsoil_d`.
+  Date/Author: 2026-07-22 / user and Codex.
+- Decision: Retain M4 HOLD after the first padded real-invalid shadow run.
+  Rationale: the evaluator proves the padded-map/build-all mechanics but the
+  historical invalid sources now build successfully. Selection agreement or
+  profile-vector outcomes cannot establish replacement quality without a
+  frozen failure snapshot that includes source rows and converter provenance.
+  Date/Author: 2026-07-22 / Codex.
+- Decision: Do not pursue historical-failure reconstruction as an acceptance
+  path; evaluate and handle only failures observed in the current build.
+  Rationale: SSURGO responses, local caches, and converter behavior can drift,
+  making an archived invalid result an unreliable counterfactual. A production
+  build already has the authoritative current invalid set and can build its
+  padded candidate MUKEYs under identical settings before fallback selection.
+  Date/Author: 2026-07-22 / user and Codex.
+- Decision: Adopt validated shallow-profile vector distance as the quality
+  objective for the next fallback policy, rather than requiring it to predict
+  a separate downstream outcome before initial shipment.
+  Rationale: the user has chosen profile similarity itself as the acceptance
+  criterion. In the current-build 50-seed masked-valid cohort, 29 of the 33
+  directly comparable proposals strictly improved on the watershed-global
+  donor, four tied, and none were worse; median absolute improvement was
+  1.95 normalized vector-distance points (100% median relative reduction).
+  The remaining 17 records did not include a direct global profile because
+  the global donor was outside the local candidate list; that is an audit
+  instrumentation gap, not evidence of a loss. This comparison optimizes its
+  stated objective by design, so it supports policy adoption but not a claim
+  about unmeasured WEPP outcomes. The ADR must make the fields, normalization,
+  eligibility gates, deterministic ties, and global escape hatch explicit.
+  Date/Author: 2026-07-22 / user and Codex.
+- Decision: Authorize the full recovery → local-vector → global fallback order
+  in ADR-0025 and `wepppy/soils/ssurgo/fallback.md`.
+  Rationale: ordinary source recovery remains preferred; local vector matching
+  is applied only to its residual failures with direct source evidence; the
+  existing global donor protects every remaining case. Padded-map retrieval and
+  added-MUKEY construction are conditional on an affected watershed, avoiding
+  additional work for all-valid builds.
+  Date/Author: 2026-07-22 / user and Codex.
 
 ## Outcomes & Retrospective
 
@@ -439,9 +512,11 @@ disambiguation, missing DEM, and stable ties. Report every component and score
 variant on held-out runs. Any no-edge/no-terrain or insufficient-margin case
 retains the explicit global fallback in a future production policy.
 
-Milestone 4 is conditional. A parameterization ADR is required before any
-production threshold or selection order changes. If approved, the policy is
-first shadowed or opt-in with preserved global fallback and explicit rollback.
+Milestone 4 is authorized by ADR-0025. Implement the approved full rollout:
+ordinary source recovery, conditional padded-candidate construction only for
+affected watersheds, local vector-profile selection where evidence permits,
+and the preserved global fallback otherwise. Include explicit rollback and
+full provenance.
 
 First, run the expanded mapped-area cohort from the VAT population with a fixed
 seed and bounded batches. Reuse the current converter settings (`initial_sat`
@@ -546,3 +621,7 @@ candidate discovery from ranking before any future parameterization ADR.
 
 Updated 2026-07-25: recorded the 18-run ranked-candidate cohort, zero-case
 manifest records, and worker-count determinism evidence.
+
+Updated 2026-07-22: ADR-0025 and `wepppy/soils/ssurgo/fallback.md` authorize
+the full recovery → local-vector → global production order. The remaining M4
+work is implementation and regression coverage, not additional policy gating.

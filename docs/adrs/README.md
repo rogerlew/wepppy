@@ -72,3 +72,4 @@ Each ADR should normally include:
 - `ADR-0022`: [Alex Static Ash-Transport Increment](ADR-0022-alex-static-ash-transport-increment.md) (Accepted, 2026-07-18)
 - `ADR-0023`: [SSURGO Rosetta Silt Input](ADR-0023-ssurgo-rosetta-silt-input.md) (Accepted, 2026-07-21)
 - `ADR-0024`: [MOFE Configuration Cap of Five OFEs](ADR-0024-mofe-configuration-max-ofes.md) (Accepted, 2026-07-21)
+- `ADR-0025`: [SSURGO Recovery, Local Vector-Profile, and Global Fallback Order](ADR-0025-ssurgo-local-vector-profile-fallback.md) (Accepted, 2026-07-22)

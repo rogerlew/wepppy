@@ -257,6 +257,72 @@ def inventory_mukey_raster(
     return summary
 
 
+def locate_mukeys_in_raster(
+    raster_path: Path | str, mukeys: Sequence[int], *, max_windows: int | None = None
+) -> dict[str, Any]:
+    """Locate first raster occurrence per MUKEY by deterministic block scan."""
+    import numpy as np
+    import rasterio
+
+    wanted = {int(mukey) for mukey in mukeys}
+    if not wanted:
+        raise ValueError("at least one MUKEY is required")
+    found: dict[str, dict[str, Any]] = {}
+    with rasterio.open(raster_path) as dataset:
+        windows_read = 0
+        for _, window in dataset.block_windows(1):
+            values = dataset.read(1, window=window)
+            rows, cols = np.nonzero(np.isin(values, tuple(wanted)))
+            for row, col in zip(rows, cols):
+                mukey = int(values[row, col])
+                if str(mukey) not in found:
+                    absolute_row = int(window.row_off + row)
+                    absolute_col = int(window.col_off + col)
+                    pixel_window = rasterio.windows.Window(absolute_col, absolute_row, 1, 1)
+                    found[str(mukey)] = {
+                        "row": absolute_row,
+                        "col": absolute_col,
+                        "bounds": list(rasterio.windows.bounds(pixel_window, dataset.transform)),
+                    }
+            windows_read += 1
+            if len(found) == len(wanted) or (max_windows is not None and windows_read >= max_windows):
+                break
+    return {"raster_path": str(Path(raster_path)), "locations": found, "windows_read": windows_read,
+            "complete": len(found) == len(wanted)}
+
+
+def run_mukey_locator(*, raster_path: Path | str, mukeys: Sequence[int], checkpoint: Path | str, max_windows: int) -> dict[str, Any]:
+    """Resume a block-indexed MUKEY locator and atomically checkpoint progress."""
+    if max_windows < 1:
+        raise ValueError("max_windows must be positive")
+    import numpy as np
+    import rasterio
+
+    requested = [str(mukey) for mukey in sorted({int(mukey) for mukey in mukeys})]
+    state_path = Path(checkpoint)
+    state = json.loads(state_path.read_text()) if state_path.is_file() else {"next_window": 0, "locations": {}}
+    if state.get("requested_mukeys", requested) != requested:
+        raise ValueError("locator checkpoint requested MUKEYs do not match")
+    locations = dict(state.get("locations", {})); start = int(state.get("next_window", 0)); wanted = {int(x) for x in requested}
+    with rasterio.open(raster_path) as dataset:
+        for index, (_, window) in enumerate(dataset.block_windows(1)):
+            if index < start:
+                continue
+            values = dataset.read(1, window=window); rows, cols = np.nonzero(np.isin(values, tuple(wanted)))
+            for row, col in zip(rows, cols):
+                mukey = str(int(values[row, col]))
+                if mukey not in locations:
+                    pixel = rasterio.windows.Window(int(window.col_off + col), int(window.row_off + row), 1, 1)
+                    locations[mukey] = {"bounds": list(rasterio.windows.bounds(pixel, dataset.transform))}
+            start = index + 1
+            if start - int(state.get("next_window", 0)) >= max_windows or len(locations) == len(wanted):
+                break
+    result = {"raster_path": str(Path(raster_path)), "requested_mukeys": requested, "locations": locations,
+              "next_window": start, "complete": len(locations) == len(wanted)}
+    _write_json(state_path, result)
+    return result
+
+
 def summarize_diagnostics(records: Sequence[Mapping[str, Any]]) -> dict[str, Any]:
     """Summarize validated records without assigning any soil replacement."""
     outcomes: Counter[str] = Counter()
@@ -837,6 +903,12 @@ def _parser() -> argparse.ArgumentParser:
         help="smoke-test limit; the resulting inventory is incomplete",
     )
 
+    locator = subparsers.add_parser("locate", help="resume a block-indexed MUKEY location scan")
+    locator.add_argument("--raster", required=True, type=Path)
+    locator.add_argument("--mukey", required=True, action="append", type=int)
+    locator.add_argument("--checkpoint", required=True, type=Path)
+    locator.add_argument("--max-windows", required=True, type=int)
+
     diagnostics = subparsers.add_parser("diagnostics", help="summarize MUKEY build diagnostic JSONL")
     diagnostics.add_argument("--input", required=True, type=Path)
     diagnostics.add_argument("--output", required=True, type=Path)
@@ -869,6 +941,10 @@ def main(argv: Sequence[str] | None = None) -> int:
     args = _parser().parse_args(argv)
     if args.command == "inventory":
         _write_json(args.output, inventory_mukey_raster(args.raster, max_windows=args.max_windows))
+    elif args.command == "locate":
+        run_mukey_locator(
+            raster_path=args.raster, mukeys=args.mukey, checkpoint=args.checkpoint, max_windows=args.max_windows
+        )
     elif args.command == "diagnostics":
         _write_json(args.output, summarize_diagnostics(list(read_diagnostic_records(args.input))))
     elif args.command == "coverage":

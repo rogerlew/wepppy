@@ -1,8 +1,9 @@
 # SSURGO Intelligent Fallback Strategy
 
-**Status:** Proposed research and implementation strategy; hierarchical
-heuristic scoring is approved for research evaluation only. No selection
-behavior changes are authorized by this document.
+**Status:** Research strategy and evidence record. The approved production
+policy is [ADR-0025](../adrs/ADR-0025-ssurgo-local-vector-profile-fallback.md)
+and the authoritative
+[SSURGO fallback specification](../../wepppy/soils/ssurgo/fallback.md).
 
 ## Purpose
 
@@ -75,10 +76,10 @@ MUKEY remains unusable.
    soil comparable to the withheld soil without reducing build continuity or
    producing unstable ties?
 
-No score weights, distance thresholds, data imputation rules, or confidence
-cutoffs are decided here. Those alter model input parameterization and require
-an ADR under `docs/standards/parameterization-adr-standard.md` before an
-implementation changes production assignments.
+No additional score weights, distance thresholds, data imputation rules, or
+confidence cutoffs are decided here. ADR-0025 fixes the v1 policy; changes to
+it require an ADR amendment under
+`docs/standards/parameterization-adr-standard.md`.
 
 ## Phase 1: Empirical Study
 
