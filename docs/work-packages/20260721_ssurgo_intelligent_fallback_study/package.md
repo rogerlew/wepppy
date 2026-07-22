@@ -45,6 +45,8 @@ coverage.
 - Fixture design for observed `no_components`, `no_horizons`, missing required
   attributes, and nonphysical texture-balance cases.
 - Raster-region adjacency and aligned elevation evidence design.
+- Milestone 2 shadow-only, additive candidate evidence in `Soils` and
+  `soils/soils.parquet`; final soil assignments remain unchanged.
 
 ### Explicitly Out of Scope
 
@@ -89,6 +91,26 @@ coverage.
   2026-07-21 Pacific time; implementation records remain research-only.
 
 Reference: `docs/standards/parameterization-adr-standard.md`.
+
+## Milestone 2 Compatibility Plan
+
+Milestone 2 adds `Soils.ssurgo_candidate_shadow_d`, a nullable mapping keyed
+by string TOPAZ ID. Each record contains `raw_mukey`, `cluster_id`, cluster
+bounds in EPSG:5070, `search_radius_m`, ordered `(mukey, pixel_count)` local
+candidate support, `proposed_mukey`, `current_global_mukey`, and an explicit
+exhaustion/reason value. Old `soils.nodb` files hydrate this field as an empty
+mapping. `domsoil_d`, `ssurgo_domsoil_d`, `raw_ssurgo_domsoil_d`, and
+`ssurgo_substitution_d` retain their current meanings and are never rewritten
+by shadow evaluation.
+
+`soils/soils.parquet` gains nullable additive columns representing the same
+per-hillslope evidence. Existing consumers, including reports, DuckDB helpers,
+exports, RQ dependency artifacts, and migration tools, locate the stable
+logical parquet path and select required columns; they do not require an exact
+closed schema. Regression coverage must prove old NoDb hydration defaults,
+existing parquet columns/values are unchanged, new columns are null for
+non-SSURGO or non-substituted hillslopes, and the generated sidecar contains
+the shadow fields for an affected fixture run.
 
 ## Dependencies
 

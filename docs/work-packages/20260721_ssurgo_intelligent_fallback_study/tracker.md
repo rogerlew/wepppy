@@ -135,6 +135,16 @@ then consider an ADR-governed production policy.
 **Impact**: Selection remains explainable and testable; no score or fallback
 behavior is introduced during Milestone 1.
 
+### 2026-07-22 03:35 UTC: Ratify shadow evidence storage and clustering
+
+**Decision**: Persist additive per-hillslope shadow evidence in
+`ssurgo_candidate_shadow_d` and matching nullable `soils/soils.parquet`
+columns. Cluster invalid hillslope bounds after a 250 m expansion.
+
+**Impact**: Existing final assignments and substitution fields remain
+unchanged. Consumer review found current report, export, DuckDB, and migration
+paths project known parquet fields and remain compatible with additive columns.
+
 ## Risks and Issues
 
 | Risk | Severity | Likelihood | Mitigation | Status |

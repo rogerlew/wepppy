@@ -129,6 +129,15 @@ nearby invalid MUKEY bounds before calling the native kernel and records the
 cluster, candidate counts, proposed local-majority MUKEY, and present global
 fallback. It never changes the final assignment.
 
+The shadow mapping is `Soils.ssurgo_candidate_shadow_d`, keyed by string
+TOPAZ ID, with legacy hydration default `{}`. Each entry records raw MUKEY,
+cluster identifier/bounds, 250 m initial search radius and final radius,
+ordered local `(mukey, pixel_count)` support, proposed local-majority MUKEY,
+current global replacement, and exhaustion/reason. `soils/soils.parquet` gains
+matching nullable additive columns. Existing final maps and current
+substitution provenance are immutable to this computation; tests must show old
+NoDb hydration and unaffected parquet columns retain their behavior.
+
 Milestone 3 runs masked-valid fixtures and representative run cohorts. The
 comparison is the current watershed-global dominant MUKEY versus the valid
 MUKEY with the greatest count in the smallest successful local window; equal
