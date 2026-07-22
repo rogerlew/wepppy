@@ -194,3 +194,16 @@ was performed.
 
 **Next steps**: M3 local-selection/adversarial evidence and M5 zero-unresolved
 review disposition remain required to lift the package release hold.
+
+### 2026-07-22 UTC: Historical-invalid watershed recheck
+
+**Agent/Contributor**: Codex
+
+**Work completed**: Used the operator-supplied scoped JWT to submit and poll
+`build-soils` for `improvident-dyslexia` / `disturbed9002_wbt`.
+
+**Result**: PASS for current recovery/no-op behavior. The 3,597 raw/final
+assignments agree; no current substitutions or local selections occurred;
+candidate preparation was not attempted. This historical-invalid watershed
+therefore cannot furnish true-current-invalid local-selection acceptance.
+Evidence is appended to `artifacts/2026-07-22_rq_acceptance.md`.

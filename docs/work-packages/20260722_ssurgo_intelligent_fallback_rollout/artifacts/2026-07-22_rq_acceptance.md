@@ -50,3 +50,23 @@ runtime acceptance claim; it is not evidence that the committed guard failed.
 selection because the watershed had no residual-invalid dominant MUKEY. The
 package/release hold remains until the M3 adversarial/scoring corpus and M5
 review-disposition closure are complete.
+
+## Historical-Invalid Watershed Recheck
+
+The operator supplied a separate short-lived scoped JWT for
+`improvident-dyslexia`, the study's historical-invalid watershed. Its active
+run config is `disturbed9002_wbt`.
+
+- Discovery/defaults: HTTP 200; `initial_sat=0.75`, `sol_ver=9002.0`, and
+  `clear_ssurgo_cache_on_rebuild=false`.
+- POST `build-soils`: HTTP 200; correlation ID
+  `ssurgo-fallback-known-invalid-20260722`; job ID redacted as `7f4a…6f0a`.
+- Polling: terminal `finished` at 2026-07-22T18:39:01Z.
+- Current result: 3,597 raw/final assignments agree; substitutions and local
+  selections are both zero; `candidate_preparation=not_attempted`; no candidate
+  manifest exists; all final MUKEYs have referenced soil files.
+
+This confirms the empirical study's finding that the historical failures are
+not reproducible under the current SSURGO source/cache/converter state. It is
+runtime evidence for ordinary recovery and all-valid no-op behavior, **not** a
+true-current-invalid local-vector-selection acceptance case.
