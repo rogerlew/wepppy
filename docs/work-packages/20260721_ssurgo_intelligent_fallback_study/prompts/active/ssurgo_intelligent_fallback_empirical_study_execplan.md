@@ -62,6 +62,9 @@ unchanged.
 - [x] Milestone 3.5 real-invalid source audit: inspect direct shallow-layer
   provenance for the retained-horizon residual-invalid sample and execute the
   four-run geographic masked-valid holdout (2026-07-26).
+- [x] Milestone 3.5 real-invalid source shadow classifier: preserve direct
+  shallow-layer evidence as `profile_bearing_residual` without changing the
+  converter outcome or assigning a donor (2026-07-26).
 - [ ] Milestone 4: seek an ADR only if evidence supports opt-in production
   selection, then observe a shadow/opt-in rollout before default promotion.
 - [ ] Add deterministic fixtures for all observed primary failure classes.
@@ -157,6 +160,11 @@ unchanged.
   shallow-mineral selection.
   Evidence: in 29 cases both nontexture and texture vectors had six local
   wins, six global wins, and 17 ties; neither supports a promotion threshold.
+- Observation: a provenance-preserving shadow class separates usable source
+  evidence from profile-free residuals without asserting a converter cause.
+  Evidence: the 13-MUKEY source shadow cohort classified 12 as
+  `profile_bearing_residual` and one as `profile_free_or_unusable_residual`,
+  while retaining `converter_failure_class: unclassified` for all records.
 
 ## Decision Log
 

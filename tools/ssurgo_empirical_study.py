@@ -49,6 +49,14 @@ REQUIRED_FAILURE_EVIDENCE_FIELDS = (
     "emitted_wepp_layer_count",
     "restrictive_layer_state",
 )
+DIRECT_SHALLOW_PROFILE_FIELDS = {
+    "dbthirdbar_r": (0.5, 3.0),
+    "ksat_r": (0.0, 100_000.0),
+    "cec7_r": (0.0, 200.0),
+    "hzdepb_r": (0.1, 1_000.0),
+    "fraggt10_r": (0.0, 100.0),
+    "frag3to10_r": (0.0, 100.0),
+}
 
 
 def _normalize_mukey(value: object) -> str:
@@ -489,6 +497,42 @@ def _residual_reason_codes(
         if count and field_state.endswith(":missing"):
             reasons.append(f"missing_{field_state.removesuffix(':missing')}")
     return sorted(set(reasons or ["residual_invalid_unclassified"]))
+
+
+def classify_profile_bearing_residual(layers: Sequence[Mapping[str, Any]]) -> dict[str, Any]:
+    """Preserve direct shallow-layer provenance without relabeling converter failure."""
+    for index, layer in enumerate(layers):
+        if _classify_raw_value("om_r", layer.get("om_r")) != "present":
+            continue
+        organic_matter = float(layer["om_r"])
+        if not 0.0 <= organic_matter <= 20.0:
+            continue
+        values: dict[str, float] = {}
+        rejected: list[str] = []
+        for field, (minimum, maximum) in DIRECT_SHALLOW_PROFILE_FIELDS.items():
+            if _classify_raw_value(field, layer.get(field)) != "present":
+                rejected.append(field)
+                continue
+            value = float(layer[field])
+            if minimum <= value <= maximum:
+                values[field] = value
+            else:
+                rejected.append(field)
+        if len(values) >= 3:
+            return {
+                "classification": "profile_bearing_residual",
+                "source_horizon_index": index,
+                "source_chkey": layer.get("chkey"),
+                "source_hzname": layer.get("hzname"),
+                "organic_matter_pct": organic_matter,
+                "direct_values": values,
+                "rejected_fields": sorted(set(rejected)),
+                "converter_failure_class": "unclassified",
+            }
+    return {
+        "classification": "profile_free_or_unusable_residual",
+        "converter_failure_class": "unclassified",
+    }
 
 
 def _build_configuration(

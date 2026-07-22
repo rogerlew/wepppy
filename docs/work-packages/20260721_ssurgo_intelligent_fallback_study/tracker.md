@@ -104,6 +104,10 @@ geographic holdout before setting an abstention criterion.
   holdout: 12/13 sources have direct shallow vectors, but all remain
   unclassified; 29 held-out masked-valid cases were neutral at 6 local, 6
   global, and 17 ties (2026-07-26).
+- [x] Added and executed provenance-preserving real-invalid source shadow
+  classifier: 12 profile-bearing residuals retain direct source evidence and
+  one is explicitly profile-free/unusable; no donor assignment occurs
+  (2026-07-26).
 
 ## Timeline
 

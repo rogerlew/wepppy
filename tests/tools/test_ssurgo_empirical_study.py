@@ -228,3 +228,17 @@ def test_residual_reason_codes_keep_no_components_and_no_horizons_distinct() -> 
     assert "no_horizons" in no_components
     assert "no_components" not in no_horizons
     assert "no_horizons" in no_horizons
+
+
+def test_profile_bearing_residual_classifier_preserves_direct_source_provenance() -> None:
+    module = _module()
+    classify = module["classify_profile_bearing_residual"]
+    result = classify([
+        {"chkey": 1, "hzname": "O", "om_r": 25.0},
+        {"chkey": 2, "hzname": "A", "om_r": 2.0, "dbthirdbar_r": 1.3, "ksat_r": 9.0,
+         "cec7_r": 18.0, "hzdepb_r": 20.0, "fraggt10_r": 0.0, "frag3to10_r": 1.0},
+    ])
+    assert result["classification"] == "profile_bearing_residual"
+    assert result["source_chkey"] == 2
+    assert result["direct_values"]["cec7_r"] == 18.0
+    assert result["converter_failure_class"] == "unclassified"

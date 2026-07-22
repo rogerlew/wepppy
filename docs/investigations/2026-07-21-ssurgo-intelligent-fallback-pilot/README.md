@@ -332,6 +332,14 @@ donor selection. A future classifier must persist the direct source values,
 their observation/default status, and the converter failure path before such a
 selection can leave shadow mode.
 
+The provenance-preserving classifier now creates the narrower research class
+`profile_bearing_residual`, without rewriting the converter outcome. Its
+real-invalid source shadow cohort contains 12 `profile_bearing_residual`
+MUKEYs and one `profile_free_or_unusable_residual`; every included record
+retains source horizon index, `chkey`, horizon name, organic matter, direct
+values, rejected fields, and `converter_failure_class: unclassified`. It
+makes no donor assignment.
+
 The four geographically separated held-out runs (29 masked-valid cases) do
 not reproduce the larger-cohort separation. Both shallow-mineral variants had
 six local wins, six global wins, and 17 ties; the local oracle had nine wins
@@ -341,9 +349,9 @@ threshold is ready.
 
 The held-out artifact is
 `/tmp/ssurgo_masked_valid_20260726/shallow_mineral_geographic_holdout.json`.
-**M4 decision: HOLD.** The next required work is a provenance-preserving
-classifier and a real-invalid shadow cohort, followed by a larger geographic
-holdout; do not promote the masked-valid vector results to fallback behavior.
+**M4 decision: HOLD.** The next required work is local-candidate evidence for
+the real-invalid shadow cohort, followed by a larger geographic holdout; do
+not promote the masked-valid vector results to fallback behavior.
 
 ## Expanded Cohort Results
 
