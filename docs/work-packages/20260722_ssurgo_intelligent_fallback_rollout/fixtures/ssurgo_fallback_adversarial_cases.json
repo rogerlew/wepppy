@@ -1,0 +1,122 @@
+{
+  "schema_version": 1,
+  "description": "Committed, synthetic M3 selection corpus. Each case uses production shallow-profile and vector-selection code but no external SSURGO or raster data.",
+  "cases": [
+    {
+      "case_id": "primary_donor_wins_over_added_candidate",
+      "source_mukey": "900",
+      "global_mukey": "100",
+      "source_profile": {"direct_values": {"dbthirdbar_r": 1.1, "ksat_r": 8.0, "cec7_r": 10.0}},
+      "candidate_profiles": {
+        "100": {"direct_values": {"dbthirdbar_r": 1.2, "ksat_r": 20.0, "cec7_r": 10.0}},
+        "110": {"direct_values": {"dbthirdbar_r": 1.1, "ksat_r": 8.0, "cec7_r": 10.0}},
+        "120": {"direct_values": {"dbthirdbar_r": 1.3, "ksat_r": 30.0, "cec7_r": 11.0}}
+      },
+      "rings": [{"radius_m": 250.0, "support": [["110", 4], ["120", 11]]}],
+      "expected": {"policy": "ssurgo_local_vector_profile_v1", "mukey": "110", "radius_m": 250.0, "fallback_reason": null}
+    },
+    {
+      "case_id": "padded_donor_wins_over_primary_candidate",
+      "source_mukey": "901",
+      "global_mukey": "100",
+      "source_profile": {"direct_values": {"dbthirdbar_r": 1.1, "ksat_r": 8.0, "cec7_r": 10.0}},
+      "candidate_profiles": {
+        "100": {"direct_values": {"dbthirdbar_r": 1.2, "ksat_r": 20.0, "cec7_r": 10.0}},
+        "110": {"direct_values": {"dbthirdbar_r": 1.3, "ksat_r": 30.0, "cec7_r": 11.0}},
+        "120": {"direct_values": {"dbthirdbar_r": 1.1, "ksat_r": 8.0, "cec7_r": 10.0}}
+      },
+      "rings": [{"radius_m": 250.0, "support": [["110", 11], ["120", 4]]}],
+      "expected": {"policy": "ssurgo_local_vector_profile_v1", "mukey": "120", "radius_m": 250.0, "fallback_reason": null}
+    },
+    {
+      "case_id": "first_supported_ring_escalates_to_500m",
+      "source_mukey": "902",
+      "global_mukey": "100",
+      "source_profile": {"direct_values": {"dbthirdbar_r": 1.1, "ksat_r": 8.0, "cec7_r": 10.0}},
+      "candidate_profiles": {"120": {"direct_values": {"dbthirdbar_r": 1.1, "ksat_r": 8.0, "cec7_r": 10.0}}},
+      "rings": [
+        {"radius_m": 250.0, "support": []},
+        {"radius_m": 500.0, "support": [["120", 4]]}
+      ],
+      "expected": {"policy": "ssurgo_local_vector_profile_v1", "mukey": "120", "radius_m": 500.0, "fallback_reason": null}
+    },
+    {
+      "case_id": "support_breaks_equal_vector_distance",
+      "source_mukey": "903",
+      "global_mukey": "100",
+      "source_profile": {"direct_values": {"dbthirdbar_r": 1.0, "ksat_r": 10.0, "cec7_r": 20.0}},
+      "candidate_profiles": {
+        "701": {"direct_values": {"dbthirdbar_r": 1.1, "ksat_r": 10.0, "cec7_r": 20.0}},
+        "702": {"direct_values": {"dbthirdbar_r": 0.9, "ksat_r": 10.0, "cec7_r": 20.0}}
+      },
+      "rings": [{"radius_m": 250.0, "support": [["701", 9], ["702", 3]]}],
+      "expected": {"policy": "ssurgo_local_vector_profile_v1", "mukey": "701", "radius_m": 250.0, "fallback_reason": null}
+    },
+    {
+      "case_id": "numeric_mukey_breaks_complete_tie",
+      "source_mukey": "904",
+      "global_mukey": "100",
+      "source_profile": {"direct_values": {"dbthirdbar_r": 1.0, "ksat_r": 10.0, "cec7_r": 20.0}},
+      "candidate_profiles": {
+        "801": {"direct_values": {"dbthirdbar_r": 1.1, "ksat_r": 10.0, "cec7_r": 20.0}},
+        "802": {"direct_values": {"dbthirdbar_r": 1.1, "ksat_r": 10.0, "cec7_r": 20.0}}
+      },
+      "rings": [{"radius_m": 250.0, "support": [["801", 5], ["802", 5]]}],
+      "expected": {"policy": "ssurgo_local_vector_profile_v1", "mukey": "801", "radius_m": 250.0, "fallback_reason": null}
+    },
+    {
+      "case_id": "fewer_than_three_shared_fields_uses_global",
+      "source_mukey": "905",
+      "global_mukey": "100",
+      "source_profile": {"direct_values": {"dbthirdbar_r": 1.1, "ksat_r": 8.0, "cec7_r": 10.0}},
+      "candidate_profiles": {"120": {"direct_values": {"dbthirdbar_r": 1.1, "ksat_r": 8.0}}},
+      "rings": [{"radius_m": 250.0, "support": [["120", 4]]}],
+      "expected": {"policy": "watershed_global", "mukey": "100", "radius_m": 250.0, "fallback_reason": "no_comparable_local_donor"}
+    },
+    {
+      "case_id": "invalid_source_horizon_uses_global",
+      "source_mukey": "906",
+      "global_mukey": "100",
+      "source_profile": {"layers": [{"om_r": 30.0, "dbthirdbar_r": 1.1, "ksat_r": 8.0, "cec7_r": 10.0}]},
+      "candidate_profiles": {"120": {"direct_values": {"dbthirdbar_r": 1.1, "ksat_r": 8.0, "cec7_r": 10.0}}},
+      "rings": [{"radius_m": 250.0, "support": [["120", 4]]}],
+      "expected": {"policy": "watershed_global", "mukey": "100", "radius_m": 250.0, "fallback_reason": "no_comparable_local_donor"}
+    },
+    {
+      "case_id": "invalid_texture_candidate_is_skipped",
+      "source_mukey": "907",
+      "global_mukey": "100",
+      "source_profile": {"direct_values": {"dbthirdbar_r": 1.1, "ksat_r": 8.0, "cec7_r": 10.0}},
+      "candidate_profiles": {
+        "120": {"layers": [{"om_r": 3.0, "dbthirdbar_r": 1.1, "ksat_r": 8.0, "sandtotal_r": 80.0, "claytotal_r": 30.0}]},
+        "121": {"direct_values": {"dbthirdbar_r": 1.1, "ksat_r": 8.0, "cec7_r": 10.0}}
+      },
+      "rings": [{"radius_m": 250.0, "support": [["120", 100], ["121", 1]]}],
+      "expected": {"policy": "ssurgo_local_vector_profile_v1", "mukey": "121", "radius_m": 250.0, "fallback_reason": null}
+    },
+    {
+      "case_id": "disconnected_location_a_for_same_source_mukey",
+      "source_mukey": "908",
+      "global_mukey": "100",
+      "source_profile": {"direct_values": {"dbthirdbar_r": 1.1, "ksat_r": 8.0, "cec7_r": 10.0}},
+      "candidate_profiles": {
+        "120": {"direct_values": {"dbthirdbar_r": 1.1, "ksat_r": 8.0, "cec7_r": 10.0}},
+        "121": {"direct_values": {"dbthirdbar_r": 1.4, "ksat_r": 24.0, "cec7_r": 11.0}}
+      },
+      "rings": [{"radius_m": 250.0, "support": [["120", 4]]}],
+      "expected": {"policy": "ssurgo_local_vector_profile_v1", "mukey": "120", "radius_m": 250.0, "fallback_reason": null}
+    },
+    {
+      "case_id": "disconnected_location_b_for_same_source_mukey",
+      "source_mukey": "908",
+      "global_mukey": "100",
+      "source_profile": {"direct_values": {"dbthirdbar_r": 1.1, "ksat_r": 8.0, "cec7_r": 10.0}},
+      "candidate_profiles": {
+        "120": {"direct_values": {"dbthirdbar_r": 1.4, "ksat_r": 24.0, "cec7_r": 11.0}},
+        "121": {"direct_values": {"dbthirdbar_r": 1.1, "ksat_r": 8.0, "cec7_r": 10.0}}
+      },
+      "rings": [{"radius_m": 250.0, "support": [["121", 4]]}],
+      "expected": {"policy": "ssurgo_local_vector_profile_v1", "mukey": "121", "radius_m": 250.0, "fallback_reason": null}
+    }
+  ]
+}

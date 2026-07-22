@@ -232,3 +232,25 @@ regression test. Full redacted evidence is in
 
 **Next steps**: Complete remaining M3 adversarial/generated-output evidence
 and M5 review disposition; these remain the release-hold gates.
+
+### 2026-07-22 UTC: Committed M3 adversarial selection corpus
+
+**Agent/Contributor**: Codex
+
+**Work completed**: Added a small synthetic JSON corpus and explicit runner
+that call the production shallow-profile and vector-selection functions without
+external SSURGO, raster, or RQ dependencies. It covers primary and padded
+donor eligibility, radius escalation, deterministic ties, insufficient shared
+fields, invalid source/candidate profiles, and disconnected source locations.
+
+**Decision**: The corpus is deliberately not collected by pytest. It is a
+reviewer-invoked release-evidence command; narrow pytest tests continue to
+cover filesystem publication, builder failure injection, and persistence.
+
+**Result**: Initial execution passed all 10 cases. The draft texture case
+revealed that an invalid sand/clay pair does not invalidate an otherwise
+three-field profile; the committed scenario instead proves that the candidate
+is skipped when removal leaves fewer than three usable fields.
+
+**Next steps**: Add/verify the remaining M3 artifact, materialization,
+legacy-hydration, and generated-output evidence.

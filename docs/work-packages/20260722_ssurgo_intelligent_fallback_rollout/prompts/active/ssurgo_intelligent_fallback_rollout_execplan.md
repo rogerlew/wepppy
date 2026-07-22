@@ -27,6 +27,9 @@ local RQ `plastic-bundling` job proves the same worker path used in normal runs.
   all-valid no-op evidence.
 - [x] M4: Ran `far-out-quiescence` / `disturbed9002_wbt` through RQ and
   captured true-current-invalid local-vector-selection evidence.
+- [x] M3: Scaffolded and executed a committed synthetic selection corpus and
+  explicit release-evidence runner (10/10 passed); add the remaining artifact
+  and materialization fault cases before closing M3.
 - [ ] M5: Complete code, QA, security review, finding disposition, and gates.
 
 ## Surprises & Discoveries
@@ -76,6 +79,12 @@ local RQ `plastic-bundling` job proves the same worker path used in normal runs.
   Rationale: the validator must remain exact; canonical persisted metadata
   prevents harmless serialization drift from degrading to global fallback.
   Date/Author: 2026-07-22 / Codex.
+- Decision: Use a compact committed JSON corpus and an explicit Python runner
+  for M3 adversarial selection acceptance; do not collect the corpus as pytest.
+  Rationale: it creates a stable, reviewer-runnable release artifact without
+  making normal developer test runs depend on an acceptance corpus. Existing
+  unit tests remain responsible for narrow failure injection and regressions.
+  Date/Author: 2026-07-22 / user and Codex.
 
 ## Outcomes & Retrospective
 
@@ -101,6 +110,16 @@ agreement. The first attempt revealed a crop-result versus persisted-GeoTIFF
 CRS-WKT serialization drift; publishing re-read persisted metadata corrected it
 without weakening validation and a dedicated regression test is green. See
 `artifacts/2026-07-22_rq_acceptance.md`.
+
+M3 now also has a committed synthetic selection corpus at
+`fixtures/ssurgo_fallback_adversarial_cases.json`, executed with
+`python tools/ssurgo_fallback_adversarial_corpus.py`. It deliberately calls
+the production profile and vector-selection functions while avoiding external
+SSURGO, GDAL, and RQ dependencies. Its initial cases cover primary and padded
+eligibility, ring escalation, deterministic ties, insufficient shared fields,
+invalid horizons/textures, and disconnected source locations. Artifact
+publication and donor-materialization fault injection remain narrow unit-test
+obligations because they require filesystem and builder failure boundaries.
 
 ## Context and Orientation
 
@@ -161,15 +180,16 @@ categorical dependency remains an explicit build error; a single nonbuildable
 candidate is excluded so another valid candidate may win.
 
 M3 adds unit, legacy-hydration, Parquet propagation, and hermetic generated-
-output tests. The helper verifies raw assignment preservation, final mapping /
-NoDb / Parquet agreement, a `.sol` for every final assignment, local-selection
-provenance, and absence of unused added donors. Add failure injection for
-materialization: no partial `.sol`, dangling final mapping, or published
-Parquet provenance; global selection has `donor_materialization_failed`; a
-clean retry is coherent. Cover primary and added donors, profile/range/texture/
-scale/radius/support/tie matrix, disconnected locations for one MUKEY, corrupt
-candidate collection, unavailable source, and missing native support. If RQ
-enqueue/dependency code changes, update
+output tests. The committed synthetic corpus covers the profile/range/texture/
+scale/radius/support/tie matrix and disconnected locations for one MUKEY; it
+is an explicit release-evidence command, not pytest collection. The helper
+verifies raw assignment preservation, final mapping / NoDb / Parquet agreement,
+a `.sol` for every final assignment, local-selection provenance, and absence
+of unused added donors. Add narrow failure injection for materialization: no
+partial `.sol`, dangling final mapping, or published Parquet provenance;
+global selection has `donor_materialization_failed`; a clean retry is
+coherent. Unit tests also cover corrupt candidate collection, unavailable
+source, and missing native support. If RQ enqueue/dependency code changes, update
 `wepppy/rq/job-dependencies-catalog.md`, run `wctl check-rq-graph`, and inspect
 the job tree. Run stub checks for changed public/stubbed surfaces.
 
@@ -206,6 +226,15 @@ Run from `/home/workdir/wepppy`.
        wctl run-stubtest wepppy.nodb.core.soils
        wctl check-test-stubs
        python3 tools/check_broad_exceptions.py --enforce-changed --base-ref origin/master
+
+   Run the committed M3 selection corpus explicitly; it writes no run data:
+
+       wctl run-python tools/ssurgo_fallback_adversarial_corpus.py \
+         --report /tmp/ssurgo_fallback_adversarial_report.json
+
+   Expect a report with `failed_count: 0`. Keep the report under `/tmp` or
+   another ignored path; the committed JSON fixture is the durable evidence
+   input and must remain small enough for ordinary Git storage.
 
 2. If queue wiring changes:
 
@@ -248,6 +277,18 @@ true-current-invalid local path. NoDb, Parquet, and generated soil references
 must agree. Candidate selection must read only the persisted, validated padded
 map. Reviews and disposition must be complete.
 
+The explicit synthetic corpus must return zero failures and demonstrate each
+committed selection outcome using the production profile/vector functions. It
+does not replace narrow unit tests for filesystem publication or donor write
+rollback, nor does it replace the two M4 RQ acceptance runs.
+
+Initial execution on 2026-07-22 returned 10 passed and 0 failed. Its draft
+texture case initially expected a candidate to be ineligible solely because its
+sand-plus-clay values were invalid. The production profile rule removes those
+two fields but retains any other three valid direct fields, so the case was
+corrected to leave fewer than three usable candidate fields. This validates the
+implemented rule rather than encoding a stricter unapproved one.
+
 ## Idempotence and Recovery
 
 Candidate map generation uses the root-containment and atomic-publish contract
@@ -277,3 +318,8 @@ Updated 2026-07-22: M1/M2 implementation completed; independent re-review
 allows advance to M3. M4 all-valid and true-current-invalid RQ acceptance are
 complete; M3 adversarial/generated-output evidence and M5 disposition remain
 the release-hold gates.
+
+Updated 2026-07-22: The user selected a small committed synthetic corpus as
+the M3 adversarial-selection evidence. The corpus is intentionally invoked by
+an explicit tool rather than pytest so it remains reviewer-visible and
+repeatable without expanding normal test collection.
