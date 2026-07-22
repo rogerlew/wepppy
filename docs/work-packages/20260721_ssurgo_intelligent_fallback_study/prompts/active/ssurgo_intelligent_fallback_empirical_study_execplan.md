@@ -17,10 +17,10 @@ unchanged.
 - [x] (2026-07-21 18:15 UTC) Run and report a 2,048-draw mapped-area pilot.
 - [x] (2026-07-22 01:59 UTC) Run canonical study-tool tests after container
   restart: 3 passed.
-- [ ] Run 12,288 mapped-pixel draws with the current converter and validate the
-  diagnostic JSONL.
-- [ ] Run 2,048 uniformly sampled distinct-MUKEY draws and report its result
-  separately from the mapped-area result.
+- [x] (2026-07-22 02:35 UTC) Run and validate 12,288 mapped-pixel draws with
+  the current converter.
+- [x] (2026-07-22 02:39 UTC) Run and validate 2,048 uniformly sampled
+  distinct-MUKEY draws and report it separately from the mapped-area result.
 - [ ] Add deterministic fixtures for all observed primary failure classes.
 - [ ] Build and evaluate raster-region/elevation candidate evidence using
   masked-valid trials.
@@ -36,6 +36,10 @@ unchanged.
   Evidence: direct reproduction raised `ValueError` because texture fractions
   implied negative silt; four cases combined defaulted/missing sand with high
   clay and one had measured sand plus clay above 100%.
+- Observation: the expanded mapped-area result agrees with the pilot.
+  Evidence: 244 of 12,288 draws were unbuildable (1.99%; Wilson 95%
+  1.75%–2.25%), compared with 1.95% in the pilot; no cohort draw failed NRCS
+  data access.
 
 ## Decision Log
 
@@ -54,10 +58,13 @@ unchanged.
 
 ## Outcomes & Retrospective
 
-The pilot is complete but the package is not. It found 40 unbuildable draws of
-2,048 (1.95%; Wilson 95% interval 1.44%-2.65%), including 35 residual-invalid
-profiles and five nonphysical texture-balance converter failures. The expanded
-cohorts and candidate tests remain necessary before proposing a policy.
+The expanded cohorts are complete but the package is not. The mapped-area
+cohort found 244 unbuildable draws of 12,288 (1.99%; Wilson 95% 1.75%–2.25%):
+211 residual-invalid and 33 nonphysical-texture worker failures. The separate
+uniform-MUKEY cohort found 49 of 2,048 (2.39%; Wilson 95% 1.81%–3.15%): 46
+residual-invalid and three worker failures. No source-data access failures
+occurred. Fixture and masked-valid candidate evidence remain necessary before
+proposing a policy.
 
 ## Context and Orientation
 

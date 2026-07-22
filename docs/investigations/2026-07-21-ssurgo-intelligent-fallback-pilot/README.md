@@ -1,11 +1,19 @@
-# SSURGO Intelligent Fallback Pilot
+# SSURGO Intelligent Fallback Empirical Study
 
 ## Summary
 
-This read-only pilot establishes an initial empirical baseline for the proposed
+This read-only study establishes an empirical baseline for the proposed
 intelligent SSURGO fallback. It uses the supplied 2025 gNATSGO MUKEY raster as
-the complete mapped-area population, then draws MUKEYs uniformly from mapped
-pixels and builds them through the current SSURGO-to-WEPP converter.
+the complete mapped-area population and builds samples through the current
+SSURGO-to-WEPP converter.
+
+The approved expansion completed two separate cohorts on 2026-07-22. The
+12,288-draw mapped-area cohort found 244 unbuildable draws (1.99%; 95% Wilson
+interval 1.75%–2.25%): 211 residual-invalid profiles and 33 converter worker
+failures. The 2,048-draw uniform-MUKEY cohort found 49 unbuildable map units
+(2.39%; 95% Wilson interval 1.81%–3.15%): 46 residual-invalid and three worker
+failures. Neither cohort had an NRCS data-access failure. These rates estimate
+different populations and must not be combined.
 
 Across 2,048 independent mapped-pixel draws, 40 draws (1.95%) could not
 produce a WEPP soil: 35 were residual-invalid profiles and 5 failed during
@@ -24,6 +32,30 @@ then select an existing valid local soil for the remaining residual-invalid
 cases using the SSURGO map and, after validation, elevation.
 
 No production run, fallback assignment, or source raster was modified.
+
+## Expanded Cohort Results
+
+| Cohort | Draws | Unique MUKEYs | Residual-invalid | Worker failed | Unbuildable | 95% Wilson interval |
+| --- | ---: | ---: | ---: | ---: | ---: | --- |
+| Mapped-area (IID pixels) | 12,288 | 10,676 | 211 (1.72%) | 33 (0.27%) | 244 (1.99%) | 1.75%–2.25% |
+| Uniform MUKEY | 2,048 | 2,048 | 46 (2.25%) | 3 (0.15%) | 49 (2.39%) | 1.81%–3.15% |
+
+The mapped-area cohort is the estimate relevant to gridded coverage. The
+uniform-MUKEY cohort intentionally gives rare map units equal weight and
+therefore answers a different prevalence question. The overlapping intervals
+do not establish a material sampling-frame difference; they do establish that
+the pilot's approximately 2% area-weighted rate was stable in the expanded
+cohort.
+
+The principal nonexclusive reason counts in the expanded mapped-area cohort
+were `no_horizons` (176 draws), `no_components` (83),
+`nonphysical_texture_balance` (33), `no_valid_horizons` (21), missing
+very-fine sand (18), and missing sand (17). The uniform-MUKEY cohort was also
+dominated by `no_horizons` (36) and `no_components` (8), with three
+nonphysical-texture worker failures. Thirteen mapped-area draws and eight
+uniform-MUKEY draws remained residual-invalid without a more specific
+source-row classifier; fixture work should resolve that class before policy
+design.
 
 ## Population and Method
 
@@ -147,6 +179,14 @@ The local, non-versioned study directory is
 - `gnatsgo_2025_area_weighted_pilot_2048_summary.json` — aggregate outcomes.
 - `gnatsgo_2025_area_weighted_pilot_2048_diagnostic_summary.json` — validated
   reason-code aggregation.
+- `gnatsgo_2025_area_weighted_12288.jsonl` and `_summary.json` — expanded
+  mapped-area cohort and draw-weighted result.
+- `gnatsgo_2025_area_weighted_12288_diagnostic_summary.json` — validated
+  unique-MUKEY reason aggregation for the expanded mapped-area cohort.
+- `gnatsgo_2025_uniform_mukey_2048.jsonl` and `_summary.json` — distinct,
+  equal-probability MUKEY cohort and result.
+- `gnatsgo_2025_uniform_mukey_2048_diagnostic_summary.json` — validated
+  reason aggregation for the uniform-MUKEY cohort.
 
 The raw diagnostic JSONL is intentionally not committed: it is a large,
 date-sensitive external-data extract. The inventory and JSONL can be recreated

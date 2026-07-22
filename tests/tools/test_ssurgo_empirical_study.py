@@ -102,6 +102,7 @@ def test_diagnostic_and_coverage_summaries_preserve_unobserved_coverage(tmp_path
     coverage = summarize_raster_coverage(inventory_mukey_raster(raster_path), records)
 
     assert diagnostics["outcome_counts"] == {
+        "data_access_failed": 0,
         "residual_invalid": 1,
         "valid": 1,
         "worker_failed": 0,
@@ -111,6 +112,7 @@ def test_diagnostic_and_coverage_summaries_preserve_unobserved_coverage(tmp_path
         "no_valid_horizons": 1,
     }
     assert coverage["outcome_pixel_counts"] == {
+        "data_access_failed": 0,
         "residual_invalid": 3,
         "valid": 2,
         "worker_failed": 0,
@@ -137,3 +139,62 @@ def test_cli_writes_inventory_and_diagnostic_summaries(tmp_path: Path) -> None:
     assert json.loads(inventory_path.read_text(encoding="utf-8"))["distinct_mukey_count"] == 3
     assert json.loads(diagnostics_output.read_text(encoding="utf-8"))["record_count"] == 1
     assert json.loads(template_path.read_text(encoding="utf-8"))["record_type"] == "mukey_build"
+
+
+def test_cohort_targets_and_draw_weighted_summary_are_deterministic() -> None:
+    module = _module()
+    cohort_targets = module["cohort_targets"]
+    summarize_cohort_records = module["summarize_cohort_records"]
+    inventory = {
+        "record_type": "mukey_raster_inventory",
+        "complete": True,
+        "raster_path": "/fixture/mukey.tif",
+        "valid_pixel_count": 10,
+        "mukey_pixel_counts": {"1001": 2, "1002": 3, "1003": 5},
+    }
+
+    area_targets = cohort_targets(
+        inventory, sampling_frame="area_weighted", draw_count=20, seed=7
+    )
+    assert area_targets == cohort_targets(
+        inventory, sampling_frame="area_weighted", draw_count=20, seed=7
+    )
+    assert sum(area_targets.values()) == 20
+    assert set(area_targets) <= {"1001", "1002", "1003"}
+
+    uniform_targets = cohort_targets(
+        inventory, sampling_frame="uniform_mukey", draw_count=2, seed=7
+    )
+    assert len(uniform_targets) == 2
+    assert set(uniform_targets.values()) == {1}
+    with pytest.raises(ValueError, match="exceeds"):
+        cohort_targets(inventory, sampling_frame="uniform_mukey", draw_count=4, seed=7)
+
+    records = []
+    for mukey, multiplicity, outcome, reasons in (
+        (1001, 12, "valid", []),
+        (1002, 5, "residual_invalid", ["no_horizons"]),
+        (1003, 3, "data_access_failed", ["ssurgo_data_access_failed"]),
+    ):
+        record = _record(mukey, outcome, reasons)
+        record["sample_draw_count"] = multiplicity
+        record["sampling_frame"] = "area_weighted"
+        records.append(record)
+    summary = summarize_cohort_records(
+        records,
+        cohort_id="fixture-cohort",
+        sampling_frame="area_weighted",
+        draw_count=20,
+        seed=7,
+        inventory=inventory,
+        batch_size=2,
+        max_workers=1,
+    )
+    assert summary["outcome_draw_counts"] == {
+        "data_access_failed": 3,
+        "residual_invalid": 5,
+        "valid": 12,
+        "worker_failed": 0,
+    }
+    assert summary["soil_observed_draw_count"] == 17
+    assert summary["soil_unbuildable_rate"] == pytest.approx(5 / 17)

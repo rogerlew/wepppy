@@ -6,9 +6,9 @@
 
 **Timezone**: UTC
 **Started**: 2026-07-21 18:00 UTC
-**Current phase**: Expanded empirical cohorts
-**Last updated**: 2026-07-22 02:00 UTC
-**Next milestone**: Run 12,288 mapped-pixel draws and 2,048 unweighted-MUKEY draws, then compare their failure distributions.
+**Current phase**: Failure-class fixtures
+**Last updated**: 2026-07-22 02:40 UTC
+**Next milestone**: Build deterministic fixtures for the observed primary failure classes, then test raster-region/elevation candidates.
 **Security impact**: none
 **Dedicated security review**: no
 **Security artifact**: N/A
@@ -23,8 +23,7 @@
 
 ### In Progress
 
-- [ ] Execute the approved 12,288-draw area-weighted cohort.
-- [ ] Execute the approved 2,048-draw unweighted-MUKEY cohort.
+- [ ] Build deterministic fixtures from the expanded-cohort failure classes.
 
 ### Blocked
 
@@ -42,6 +41,14 @@
 - [x] Classified five converter-worker failures as nonphysical texture-balance
   errors, not NRCS data-access failures (2026-07-21 18:18 UTC).
 - [x] Ran canonical study-tool tests: 3 passed (2026-07-22 01:59 UTC).
+- [x] Added and tested a resumable study cohort runner: 4 targeted tests passed
+  (2026-07-22 02:10 UTC).
+- [x] Completed the 12,288-draw mapped-area cohort: 244 unbuildable draws
+  (1.99%; Wilson 95% 1.75%–2.25%; zero data-access failures) (2026-07-22
+  02:35 UTC).
+- [x] Completed the 2,048-draw uniform-MUKEY cohort: 49 unbuildable MUKEYs
+  (2.39%; Wilson 95% 1.81%–3.15%; zero data-access failures) (2026-07-22
+  02:39 UTC).
 
 ## Timeline
 
@@ -87,6 +94,17 @@ roughly ±0.25 percentage-point 95% precision for the mapped-area rate; the
 second exposes rare-MUKEY failure prevalence. This is still research, not a
 production policy decision.
 
+### 2026-07-22 02:40 UTC: Preserve separate sampling-frame estimates
+
+**Context**: The expanded mapped-area cohort observed 244 unbuildable draws
+of 12,288, while the uniform-MUKEY cohort observed 49 of 2,048.
+
+**Decision**: Report the results separately and use the mapped-area result for
+grid coverage impact.
+
+**Impact**: The similar point estimates provide confidence in the initial
+area-weighted pilot without claiming they estimate the same population.
+
 ## Risks and Issues
 
 | Risk | Severity | Likelihood | Mitigation | Status |
@@ -101,8 +119,8 @@ production policy decision.
 ### Code Quality
 
 - [x] Canonical targeted test passes: `wctl run-pytest
-  tests/tools/test_ssurgo_empirical_study.py --maxfail=1` (3 passed).
-- [ ] Expanded-cohort runner has resume/retry evidence.
+  tests/tools/test_ssurgo_empirical_study.py --maxfail=1` (4 passed).
+- [x] Expanded-cohort runner has atomic batch/resume/retry evidence.
 - [ ] Full-suite validation considered before package closure.
 
 ### Security
@@ -114,7 +132,7 @@ production policy decision.
 
 - [x] Strategy and initial pilot report recorded.
 - [x] Active work package, tracker, and ExecPlan created.
-- [ ] Expanded-cohort aggregate report recorded.
+- [x] Expanded-cohort aggregate report recorded.
 - [ ] Fixture and masked-valid evidence recorded.
 
 ### Testing
@@ -149,3 +167,22 @@ production policy decision.
 - Turn the observed failure types into fixtures before considering candidates.
 
 **Test results**: canonical `wctl` targeted test passed: 3 passed.
+
+### 2026-07-22 02:40 UTC: Expanded cohort execution
+
+**Agent/Contributor**: Codex
+
+**Work completed**:
+
+- Added a research-only resumable cohort command with atomic JSONL batch
+  checkpoints and a distinct `data_access_failed` outcome.
+- Completed and schema-validated both approved cohorts against the 2025 VAT.
+- Recorded the separate rates, reason distributions, and zero NRCS access
+  failures in the investigation report and ExecPlan.
+
+**Next steps**:
+
+- Build fixtures for no component, no horizons, missing attributes,
+  nonphysical texture balance, and the residual-unclassified cases.
+
+**Test results**: canonical targeted test passed: 4 passed.
