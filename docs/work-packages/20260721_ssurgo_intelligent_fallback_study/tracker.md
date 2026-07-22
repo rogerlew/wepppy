@@ -23,6 +23,7 @@
 
 ### In Progress
 
+- [ ] Milestone 1: add candidate pixel support and synthetic raster fixtures.
 - [ ] Build deterministic fixtures from the expanded-cohort failure classes.
 
 ### Blocked
@@ -123,6 +124,15 @@ uses worker-local GDAL handles for concurrent clusters.
 **Impact**: Candidate discovery is proportional to bounded crops, not the
 national raster. This remains research tooling until benchmark and masked-valid
 evidence supports production wiring.
+
+### 2026-07-22 03:20 UTC: Stage candidate selection as four milestones
+
+**Decision**: First return local pixel support from the native candidate
+kernel, then shadow the simple local-majority proposal, evaluate it, and only
+then consider an ADR-governed production policy.
+
+**Impact**: Selection remains explainable and testable; no score or fallback
+behavior is introduced during Milestone 1.
 
 ## Risks and Issues
 

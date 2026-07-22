@@ -68,10 +68,12 @@ coverage.
   8,745,483,151 mapped pixels.
 - [x] Initial 2,048-draw mapped-area pilot reports outcomes, confidence
   interval, failure codes, and raw-field completeness.
-- [ ] 12,288-draw mapped-area cohort completes with no unclassified data-access
+- [x] 12,288-draw mapped-area cohort completes with no unclassified data-access
   failures and a reported confidence interval for combined unbuildable rate.
-- [ ] 2,048-draw unweighted-MUKEY cohort completes with separately reported
+- [x] 2,048-draw unweighted-MUKEY cohort completes with separately reported
   MUKEY-prevalence results.
+- [ ] Milestone 1 returns deterministic local candidate pixel support from
+  clustered bounds and proves it with synthetic raster fixtures.
 - [ ] Deterministic fixtures cover all observed primary failure classes.
 - [ ] A map-region/elevation candidate experiment compares the current global
   fallback with local candidates in masked-valid trials.

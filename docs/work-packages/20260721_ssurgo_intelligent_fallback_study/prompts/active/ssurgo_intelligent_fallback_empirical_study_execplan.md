@@ -24,6 +24,14 @@ unchanged.
 - [x] (2026-07-22 03:14 UTC) Execute a representative clustered-window
   benchmark through the freshly built native extension; it is research tooling
   and is not wired into fallback selection.
+- [ ] Milestone 1: return local candidate pixel support and prove it with
+  deterministic raster fixtures.
+- [ ] Milestone 2: add a shadow-only WEPPpy collector that clusters invalid
+  MUKEY bounds and persists proposed local-majority evidence.
+- [ ] Milestone 3: evaluate local-majority against the current global fallback
+  with masked-valid and representative-run cohorts.
+- [ ] Milestone 4: seek an ADR only if evidence supports opt-in production
+  selection, then observe a shadow/opt-in rollout before default promotion.
 - [ ] Add deterministic fixtures for all observed primary failure classes.
 - [ ] Build and evaluate raster-region/elevation candidate evidence using
   masked-valid trials.
@@ -109,6 +117,27 @@ findings belong in
 `docs/investigations/2026-07-21-ssurgo-intelligent-fallback-pilot/README.md`.
 
 ## Plan of Work
+
+Phase 2 proceeds in four independently verifiable milestones. Milestone 1
+extends `wepppyo3/raster_characteristics` so the smallest successful window
+returns `mukey -> pixel_count`, not merely membership. Its synthetic GeoTIFF
+fixtures prove expansion, valid filtering, support counts, exhaustion, and
+stable MUKEY tie order. This is a native research kernel only.
+
+Milestone 2 adds additive, nullable shadow evidence in WEPPpy. It groups
+nearby invalid MUKEY bounds before calling the native kernel and records the
+cluster, candidate counts, proposed local-majority MUKEY, and present global
+fallback. It never changes the final assignment.
+
+Milestone 3 runs masked-valid fixtures and representative run cohorts. The
+comparison is the current watershed-global dominant MUKEY versus the valid
+MUKEY with the greatest count in the smallest successful local window; equal
+counts break by numeric MUKEY. It reports availability, disagreement,
+determinism, and withheld-soil similarity.
+
+Milestone 4 is conditional. A parameterization ADR is required before any
+production threshold or selection order changes. If approved, the policy is
+first shadowed or opt-in with preserved global fallback and explicit rollback.
 
 First, run the expanded mapped-area cohort from the VAT population with a fixed
 seed and bounded batches. Reuse the current converter settings (`initial_sat`
