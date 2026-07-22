@@ -52,6 +52,7 @@ Warning:
 
 import os
 import inspect
+import json
 
 from os.path import join as _join
 from os.path import exists as _exists
@@ -115,6 +116,7 @@ try:
     import wepppyo3
     from wepppyo3.raster_characteristics import identify_mode_single_raster_key
     from wepppyo3.raster_characteristics import identify_mode_intersecting_raster_keys
+    from wepppyo3.raster_characteristics import local_mukey_candidates
 except ImportError:
     print("wepppyo3 not found, using fallback methods.")
     wepppyo3 = None
@@ -219,6 +221,7 @@ class Soils(NoDbBase):
             self.ssurgo_domsoil_d = None
             self.raw_ssurgo_domsoil_d = None
             self.ssurgo_substitution_d = {}
+            self.ssurgo_candidate_shadow_d = {}
 
             self.soils = None
             self._subs_summary = None
@@ -254,6 +257,8 @@ class Soils(NoDbBase):
             or instance.ssurgo_substitution_d is None
         ):
             instance.ssurgo_substitution_d = {}
+        if not hasattr(instance, "ssurgo_candidate_shadow_d") or instance.ssurgo_candidate_shadow_d is None:
+            instance.ssurgo_candidate_shadow_d = {}
 
         soils = getattr(instance, "soils", None)
         if not isinstance(soils, dict):
@@ -1518,6 +1523,78 @@ class Soils(NoDbBase):
         self.trigger(TriggerEvents.SOILS_BUILD_COMPLETE)
         self = type(self).getInstance(self.wd)  # reload instance from .nodb
 
+    def _build_ssurgo_candidate_shadow(
+        self, raw_domsoil_d: Dict[str, str], valid_mukeys: set[str], ssurgo_fn: str,
+        subwta_fn: str, current_global_mukey: str,
+    ) -> Dict[str, Dict[str, Any]]:
+        """Collect shadow-only local candidate evidence without changing assignments."""
+        if wepppyo3 is None:
+            return {}
+        import rasterio
+        from rasterio.windows import Window, bounds as window_bounds
+
+        invalid_ids = [topaz_id for topaz_id, mukey in raw_domsoil_d.items() if mukey not in valid_mukeys]
+        if not invalid_ids:
+            return {}
+        with rasterio.open(subwta_fn) as subwta:
+            values = subwta.read(1)
+            bounds_by_topaz: Dict[str, Tuple[float, float, float, float]] = {}
+            for topaz_id in invalid_ids:
+                rows, cols = (values == int(topaz_id)).nonzero()
+                if rows.size == 0:
+                    continue
+                window = Window(cols.min(), rows.min(), cols.max() - cols.min() + 1, rows.max() - rows.min() + 1)
+                bounds_by_topaz[topaz_id] = window_bounds(window, subwta.transform)
+
+        groups: List[Dict[str, Any]] = []
+        for topaz_id in sorted(bounds_by_topaz, key=int):
+            min_x, min_y, max_x, max_y = bounds_by_topaz[topaz_id]
+            expanded = (min_x - 250.0, min_y - 250.0, max_x + 250.0, max_y + 250.0)
+            matched = [group for group in groups if not (
+                expanded[2] < group["expanded"][0] or expanded[0] > group["expanded"][2]
+                or expanded[3] < group["expanded"][1] or expanded[1] > group["expanded"][3]
+            )]
+            if not matched:
+                groups.append({"members": [topaz_id], "bounds": bounds_by_topaz[topaz_id], "expanded": expanded})
+                continue
+            group = matched[0]
+            group["members"].append(topaz_id)
+            group["bounds"] = (
+                min(group["bounds"][0], min_x), min(group["bounds"][1], min_y),
+                max(group["bounds"][2], max_x), max(group["bounds"][3], max_y),
+            )
+            group["expanded"] = (
+                min(group["expanded"][0], expanded[0]), min(group["expanded"][1], expanded[1]),
+                max(group["expanded"][2], expanded[2]), max(group["expanded"][3], expanded[3]),
+            )
+            for duplicate in matched[1:]:
+                group["members"].extend(duplicate["members"])
+                groups.remove(duplicate)
+        clusters = [
+            (f"shadow-{'-'.join(group['members'])}", [int(raw_domsoil_d[member]) for member in group["members"]], group["bounds"])
+            for group in groups
+        ]
+        results = local_mukey_candidates(
+            ssurgo_fn, clusters, {int(mukey) for mukey in valid_mukeys},
+            initial_radius_m=250.0, max_radius_m=2000.0, min_candidates=1,
+        )
+        shadow: Dict[str, Dict[str, Any]] = {}
+        for group in groups:
+            cluster_id = f"shadow-{'-'.join(group['members'])}"
+            _, radius, support, exhausted, pixels_read = results[cluster_id]
+            ordered_support = sorted(((str(mukey), count) for mukey, count in support), key=lambda item: (-item[1], int(item[0])))
+            for topaz_id in group["members"]:
+                shadow[topaz_id] = {
+                "raw_mukey": raw_domsoil_d[topaz_id], "cluster_id": cluster_id,
+                "bounds_epsg5070": list(bounds_by_topaz[topaz_id]), "search_radius_m": radius,
+                "candidate_support": ordered_support,
+                "proposed_mukey": ordered_support[0][0] if ordered_support else None,
+                "current_global_mukey": current_global_mukey,
+                "exhausted": bool(exhausted), "pixels_read": pixels_read,
+                "reason": "local_candidate_shadow" if ordered_support else "no_local_valid_candidate",
+                }
+        return shadow
+
     def _build_gridded(
         self, 
         initial_sat: Optional[float] = None, 
@@ -1601,6 +1678,12 @@ class Soils(NoDbBase):
 
 
             failed = dom_mukey is None
+            ssurgo_candidate_shadow_d = {}
+
+            if not failed:
+                ssurgo_candidate_shadow_d = self._build_ssurgo_candidate_shadow(
+                    raw_domsoil_d, set(soils), ssurgo_fn, watershed.subwta, dom_mukey
+                )
 
             if not failed:
                 for topaz_id, mukey in domsoil_d.items():
@@ -1632,6 +1715,7 @@ class Soils(NoDbBase):
                     self.ssurgo_domsoil_d = deepcopy(domsoil_d)
                     self.raw_ssurgo_domsoil_d = raw_domsoil_d
                     self.ssurgo_substitution_d = ssurgo_substitution_d
+                    self.ssurgo_candidate_shadow_d = ssurgo_candidate_shadow_d
                     self.soils = {str(k): v for k, v in soils.items()}
 
         # fallback to statsgo if surgo failed
@@ -1717,12 +1801,19 @@ class Soils(NoDbBase):
         }
         raw_domsoil_d = getattr(self, "raw_ssurgo_domsoil_d", None) or {}
         ssurgo_substitution_d = getattr(self, "ssurgo_substitution_d", None) or {}
+        shadow_d = getattr(self, "ssurgo_candidate_shadow_d", None) or {}
         for topaz_id, soil_data in summary.items():
             str_topaz_id = str(topaz_id)
             raw_mukey = raw_domsoil_d.get(str_topaz_id)
             soil_data["raw_mukey"] = None if raw_mukey is None else str(raw_mukey)
 
             substitution = ssurgo_substitution_d.get(str_topaz_id)
+            shadow = shadow_d.get(str_topaz_id)
+            soil_data["shadow_cluster_id"] = None if shadow is None else shadow["cluster_id"]
+            soil_data["shadow_search_radius_m"] = None if shadow is None else shadow["search_radius_m"]
+            soil_data["shadow_proposed_mukey"] = None if shadow is None else shadow["proposed_mukey"]
+            soil_data["shadow_candidate_support_json"] = None if shadow is None else json.dumps(shadow["candidate_support"])
+            soil_data["shadow_reason"] = None if shadow is None else shadow["reason"]
             if substitution is None:
                 soil_data["substituted_mukey"] = None
                 soil_data["substitution_reason"] = None

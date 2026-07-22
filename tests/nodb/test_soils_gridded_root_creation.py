@@ -294,6 +294,15 @@ def test_subs_summary_includes_raw_and_substituted_mukey_columns() -> None:
             "reason": "invalid_dominant_mukey",
         },
     }
+    soils.ssurgo_candidate_shadow_d = {
+        "573": {
+            "cluster_id": "shadow-573-581",
+            "search_radius_m": 250.0,
+            "proposed_mukey": "2451115",
+            "candidate_support": [("2451115", 12)],
+            "reason": "local_candidate_shadow",
+        }
+    }
 
     class _SoilSummaryStub:
         @staticmethod
@@ -311,10 +320,16 @@ def test_subs_summary_includes_raw_and_substituted_mukey_columns() -> None:
     assert summary["573"]["raw_mukey"] == "3294459"
     assert summary["573"]["substituted_mukey"] == "2451115"
     assert summary["573"]["substitution_reason"] == "invalid_dominant_mukey"
+    assert summary["573"]["shadow_cluster_id"] == "shadow-573-581"
+    assert summary["573"]["shadow_search_radius_m"] == 250.0
+    assert summary["573"]["shadow_proposed_mukey"] == "2451115"
+    assert summary["573"]["shadow_candidate_support_json"] == '[["2451115", 12]]'
+    assert summary["573"]["shadow_reason"] == "local_candidate_shadow"
     assert summary["581"]["raw_mukey"] == "3294460"
     assert summary["590"]["raw_mukey"] == "2451115"
     assert summary["590"]["substituted_mukey"] is None
     assert summary["590"]["substitution_reason"] is None
+    assert summary["590"]["shadow_cluster_id"] is None
 
 
 def test_post_instance_loaded_backfills_ssurgo_fallback_provenance(
@@ -329,6 +344,7 @@ def test_post_instance_loaded_backfills_ssurgo_fallback_provenance(
     assert result is instance
     assert instance.raw_ssurgo_domsoil_d is None
     assert instance.ssurgo_substitution_d == {}
+    assert instance.ssurgo_candidate_shadow_d == {}
 
 
 def test_build_from_map_db_refreshes_existing_run_local_sol_from_db(
