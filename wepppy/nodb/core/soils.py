@@ -53,12 +53,14 @@ Warning:
 import os
 import inspect
 import json
+import tempfile
 
 from os.path import join as _join
 from os.path import exists as _exists
 from os.path import split as _split
 from typing import Optional, Dict, List, Any, Tuple
 from datetime import datetime
+from pathlib import Path
 import shutil
 from enum import IntEnum
 from copy import deepcopy
@@ -80,6 +82,7 @@ from wepppy.soils.ssurgo import (
     StatsgoSpatial,
     SurgoSoilCollection,
     SoilSummary,
+    SsurgoRequestError,
     surgo_cache_metadata_path,
 )
 from wepppy.topo.watershed_abstraction.support import is_channel
@@ -222,6 +225,7 @@ class Soils(NoDbBase):
             self.raw_ssurgo_domsoil_d = None
             self.ssurgo_substitution_d = {}
             self.ssurgo_candidate_shadow_d = {}
+            self.ssurgo_candidate_preparation = {"status": "not_attempted", "affected_hillslopes": 0}
 
             self.soils = None
             self._subs_summary = None
@@ -259,6 +263,8 @@ class Soils(NoDbBase):
             instance.ssurgo_substitution_d = {}
         if not hasattr(instance, "ssurgo_candidate_shadow_d") or instance.ssurgo_candidate_shadow_d is None:
             instance.ssurgo_candidate_shadow_d = {}
+        if not hasattr(instance, "ssurgo_candidate_preparation") or instance.ssurgo_candidate_preparation is None:
+            instance.ssurgo_candidate_preparation = {"status": "not_attempted", "affected_hillslopes": 0}
 
         soils = getattr(instance, "soils", None)
         if not isinstance(soils, dict):
@@ -1134,6 +1140,7 @@ class Soils(NoDbBase):
             self.ssurgo_domsoil_d = None
             self.raw_ssurgo_domsoil_d = None
             self.ssurgo_substitution_d = {}
+            self.ssurgo_candidate_preparation = {"status": "not_attempted", "affected_hillslopes": 0}
 
         if self._mode == SoilsMode.SpatialAPI:
             self._build_spatial_api()
@@ -1596,6 +1603,300 @@ class Soils(NoDbBase):
                 }
         return shadow
 
+    @staticmethod
+    def _ssurgo_direct_profile(collection: SurgoSoilCollection, mukey: str) -> Dict[str, Any]:
+        """Read direct raw profile evidence without using converter defaults."""
+        from wepppy.soils.ssurgo.fallback import direct_shallow_profile
+
+        for component in collection.get_components(int(mukey)):
+            profile = direct_shallow_profile(collection.get_layers(component["cokey"]))
+            if profile["direct_values"]:
+                return profile
+        return {"horizon_index": None, "chkey": None, "direct_values": {}}
+
+    def _materialize_added_ssurgo_donor(self, wepp_soil: Any, soils_dir: str) -> SoilSummary:
+        """Write one selected added donor before publishing any assignment to it."""
+        temporary_dir = tempfile.mkdtemp(prefix=".ssurgo-donor-", dir=soils_dir)
+        destination: Optional[Path] = None
+        published = False
+        try:
+            summary = wepp_soil.write(temporary_dir, overwrite=True)
+            filename = str(summary.fname)
+            if Path(filename).name != filename or not filename.endswith(".sol") or not filename[:-4].isdigit():
+                raise ValueError(f"candidate donor filename is invalid: {filename!r}")
+            temporary_root = Path(temporary_dir).resolve(strict=True)
+            soils_root = Path(soils_dir).resolve(strict=True)
+            source = (temporary_root / filename).resolve(strict=True)
+            destination = soils_root / filename
+            if (
+                not source.is_file()
+                or source.is_symlink()
+                or source.parent != temporary_root
+                or destination.is_symlink()
+                or destination.exists()
+                or destination.parent.resolve(strict=True) != soils_root
+            ):
+                raise OSError("candidate donor source or destination is not a new regular run-local soil")
+            with source.open("rb") as handle:
+                os.fsync(handle.fileno())
+            os.replace(source, destination)
+            published = True
+            directory_fd = os.open(soils_root, os.O_RDONLY | os.O_DIRECTORY)
+            try:
+                os.fsync(directory_fd)
+            finally:
+                os.close(directory_fd)
+            summary.soils_dir = soils_dir
+            return summary
+        except OSError:
+            if published and destination is not None and destination.exists() and not destination.is_symlink():
+                destination.unlink()
+                directory_fd = os.open(destination.parent, os.O_RDONLY | os.O_DIRECTORY)
+                try:
+                    os.fsync(directory_fd)
+                finally:
+                    os.close(directory_fd)
+            raise
+        finally:
+            shutil.rmtree(temporary_dir, ignore_errors=True)
+
+    def _select_ssurgo_intelligent_fallbacks(
+        self,
+        *,
+        soils_dir: str,
+        ssurgo_fn: str,
+        subwta_fn: str,
+        raw_domsoil_d: Dict[str, str],
+        primary_soils: Dict[str, SoilSummary],
+        primary_collection: SurgoSoilCollection,
+        global_mukey: str,
+        max_workers: Optional[int],
+    ) -> Tuple[Dict[str, str], Dict[str, Dict[str, Any]], Dict[str, SoilSummary], Dict[str, Any]]:
+        """Apply ADR-0025 local selection for residual-invalid dominant hillslopes."""
+        from wepppy.soils.ssurgo.fallback import (
+            CandidateRasterUnavailable,
+            candidate_raster_mukeys,
+            categorical_candidate_support_wgs84,
+            prepare_padded_candidate_raster,
+            raw_mukey_source_locations_wgs84,
+            select_vector_donor,
+        )
+
+        final_domsoil_d = deepcopy(raw_domsoil_d)
+        final_soils = dict(primary_soils)
+        residual_invalid = sorted(
+            {str(mukey) for mukey in raw_domsoil_d.values() if str(mukey) not in primary_soils},
+            key=int,
+        )
+        affected_topaz_ids = [
+            str(topaz_id) for topaz_id, mukey in raw_domsoil_d.items() if str(mukey) in set(residual_invalid)
+        ]
+        if not affected_topaz_ids:
+            return final_domsoil_d, {}, final_soils, {"status": "not_attempted", "affected_hillslopes": 0}
+
+        try:
+            artifact = prepare_padded_candidate_raster(soils_dir=soils_dir, primary_raster_path=ssurgo_fn)
+            padded_mukeys = candidate_raster_mukeys(artifact)
+            added_mukeys = sorted(padded_mukeys - {int(mukey) for mukey in primary_collection.mukeys})
+        except RuntimeError as exc:
+            # Native categorical support is a required dependency, not a fallback condition.
+            if "wepppyo3" in str(exc):
+                raise
+            self.logger.warning("SSURGO local candidate preparation unavailable: %s", exc)
+            return self._global_ssurgo_substitutions(
+                raw_domsoil_d, primary_soils, global_mukey, "candidate_preparation_unavailable"
+            ) + ({"status": "unavailable", "error": str(exc)},)
+        except (CandidateRasterUnavailable, FileNotFoundError, OSError, ValueError) as exc:
+            self.logger.warning("SSURGO local candidate preparation unavailable: %s", exc)
+            return self._global_ssurgo_substitutions(
+                raw_domsoil_d, primary_soils, global_mukey, "candidate_preparation_unavailable"
+            ) + ({"status": "unavailable", "error": str(exc)},)
+
+        try:
+            candidate_collection = SurgoSoilCollection(
+                added_mukeys,
+                cache_db_path=self._prepare_project_surgo_cache(use_statsgo=False),
+            )
+            candidate_collection.makeWeppSoils(
+                initial_sat=self.initial_sat,
+                ksflag=self.ksflag,
+                logger=self.logger,
+                max_workers=max_workers,
+            )
+            added_wepp_soils = candidate_collection.weppSoils or {}
+        except RuntimeError as exc:
+            if "wepppyo3" in str(exc):
+                raise
+            self.logger.exception("SSURGO local candidate build failed")
+            return self._global_ssurgo_substitutions(
+                raw_domsoil_d, primary_soils, global_mukey, "candidate_build_unavailable"
+            ) + ({"status": "build_unavailable", "error": str(exc)},)
+        except (SsurgoRequestError, OSError, ValueError) as exc:
+            self.logger.exception("SSURGO local candidate build failed")
+            return self._global_ssurgo_substitutions(
+                raw_domsoil_d, primary_soils, global_mukey, "candidate_build_unavailable"
+            ) + ({"status": "build_unavailable", "error": str(exc)},)
+
+        buildable_mukeys = set(primary_soils) | {str(mukey) for mukey in added_wepp_soils}
+        substitutions: Dict[str, Dict[str, Any]] = {}
+        candidate_identity = {
+            "manifest": str(artifact.manifest_path.relative_to(Path(soils_dir))),
+            "raster_sha256": artifact.metadata["raster_sha256"],
+            "source_identity": artifact.metadata["source"]["identity"],
+            "source_sha256": artifact.metadata["source"]["sha256"],
+            "bounds": artifact.metadata["bounds"],
+            "crs_wkt": artifact.metadata["crs_wkt"],
+        }
+        try:
+            source_locations = raw_mukey_source_locations_wgs84(
+                subwta_fn,
+                ssurgo_fn,
+                [(topaz_id, raw_domsoil_d[topaz_id]) for topaz_id in affected_topaz_ids],
+            )
+        except RuntimeError as exc:
+            if "wepppyo3" in str(exc):
+                raise
+            self.logger.warning("SSURGO raw-map source locations unavailable: %s", exc)
+            return self._global_ssurgo_substitutions(
+                raw_domsoil_d, primary_soils, global_mukey, "candidate_location_unavailable"
+            ) + ({"status": "location_unavailable", "error": str(exc)},)
+        except (OSError, ValueError) as exc:
+            self.logger.warning("SSURGO raw-map source locations unavailable: %s", exc)
+            return self._global_ssurgo_substitutions(
+                raw_domsoil_d, primary_soils, global_mukey, "candidate_location_unavailable"
+            ) + ({"status": "location_unavailable", "error": str(exc)},)
+        for topaz_id in affected_topaz_ids:
+            raw_mukey = str(raw_domsoil_d[topaz_id])
+            source_location = source_locations[topaz_id]
+            source_profile = self._ssurgo_direct_profile(primary_collection, raw_mukey)
+            selected = None
+            successful_radius = None
+            selected_support: list[tuple[str, int]] = []
+            candidate_support_error: Optional[str] = None
+            for radius_m in (250.0, 500.0, 1_000.0, 2_000.0):
+                try:
+                    support = categorical_candidate_support_wgs84(
+                        artifact.raster_path,
+                        source_location[0],
+                        source_location[1],
+                        radius_m,
+                        residual_invalid,
+                        buildable_mukeys,
+                    )
+                except RuntimeError as exc:
+                    if "wepppyo3" in str(exc):
+                        raise
+                    candidate_support_error = str(exc)
+                    break
+                except (OSError, ValueError) as exc:
+                    candidate_support_error = str(exc)
+                    break
+                if support:
+                    successful_radius = radius_m
+                    selected_support = support
+                    candidate_records = []
+                    for candidate_mukey, pixel_support in support:
+                        collection = primary_collection if candidate_mukey in primary_soils else candidate_collection
+                        candidate_records.append(
+                            {
+                                "mukey": candidate_mukey,
+                                "pixel_support": pixel_support,
+                                "profile": self._ssurgo_direct_profile(collection, candidate_mukey),
+                            }
+                        )
+                    selected = select_vector_donor(source_profile, candidate_records)
+                    break
+            if selected is None:
+                final_domsoil_d[topaz_id] = global_mukey
+                substitutions[topaz_id] = {
+                    "raw_mukey": raw_mukey,
+                    "replacement_mukey": global_mukey,
+                    "reason": "invalid_dominant_mukey",
+                    "selection_policy": "watershed_global",
+                    "global_mukey": global_mukey,
+                    "source_location_wgs84": list(source_location),
+                    "candidate_raster": candidate_identity,
+                    "search_radius_m": successful_radius,
+                    "candidate_support": [[mukey, support] for mukey, support in selected_support],
+                    "source_profile": source_profile,
+                    "selected_profile": None,
+                    "fallback_reason": (
+                        "candidate_support_unavailable"
+                        if candidate_support_error is not None
+                        else "no_comparable_local_donor"
+                    ),
+                }
+                continue
+            donor_mukey = str(selected["mukey"])
+            if donor_mukey not in final_soils:
+                try:
+                    final_soils[donor_mukey] = self._materialize_added_ssurgo_donor(
+                        added_wepp_soils[int(donor_mukey)], soils_dir
+                    )
+                except (KeyError, OSError, ValueError):
+                    self.logger.exception("SSURGO selected donor materialization failed: %s", donor_mukey)
+                    final_domsoil_d[topaz_id] = global_mukey
+                    substitutions[topaz_id] = {
+                        "raw_mukey": raw_mukey,
+                        "replacement_mukey": global_mukey,
+                        "reason": "invalid_dominant_mukey",
+                        "selection_policy": "watershed_global",
+                        "global_mukey": global_mukey,
+                        "source_location_wgs84": list(source_location),
+                        "candidate_raster": candidate_identity,
+                        "search_radius_m": successful_radius,
+                        "candidate_support": [[mukey, support] for mukey, support in selected_support],
+                        "source_profile": source_profile,
+                        "selected_profile": None,
+                        "fallback_reason": "donor_materialization_failed",
+                    }
+                    continue
+            final_domsoil_d[topaz_id] = donor_mukey
+            substitutions[topaz_id] = {
+                "raw_mukey": raw_mukey,
+                "replacement_mukey": donor_mukey,
+                "reason": "invalid_dominant_mukey",
+                "selection_policy": "ssurgo_local_vector_profile_v1",
+                "global_mukey": global_mukey,
+                "source_location_wgs84": list(source_location),
+                "candidate_raster": candidate_identity,
+                "search_radius_m": successful_radius,
+                "candidate_support": [[mukey, support] for mukey, support in selected_support],
+                "source_profile": source_profile,
+                "selected_profile": {
+                    "mukey": donor_mukey,
+                    "horizon_index": selected["profile"]["horizon_index"],
+                    "chkey": selected["profile"]["chkey"],
+                    "shared_fields": selected["shared_fields"],
+                    "scales": selected["scales"],
+                    "distance": selected["distance"],
+                },
+                "fallback_reason": None,
+            }
+        return final_domsoil_d, substitutions, final_soils, {
+            "status": "prepared",
+            "affected_hillslopes": len(affected_topaz_ids),
+            "manifest": candidate_identity["manifest"],
+        }
+
+    @staticmethod
+    def _global_ssurgo_substitutions(
+        raw_domsoil_d: Dict[str, str], primary_soils: Dict[str, SoilSummary], global_mukey: str, fallback_reason: str
+    ) -> Tuple[Dict[str, str], Dict[str, Dict[str, Any]], Dict[str, SoilSummary]]:
+        domsoil_d = deepcopy(raw_domsoil_d)
+        substitutions: Dict[str, Dict[str, Any]] = {}
+        for topaz_id, mukey in domsoil_d.items():
+            if str(mukey) not in primary_soils:
+                domsoil_d[topaz_id] = global_mukey
+                substitutions[str(topaz_id)] = {
+                    "raw_mukey": str(mukey), "replacement_mukey": global_mukey,
+                    "reason": "invalid_dominant_mukey", "selection_policy": "watershed_global",
+                    "global_mukey": global_mukey, "source_location_wgs84": None,
+                    "candidate_raster": None, "search_radius_m": None, "candidate_support": None,
+                    "source_profile": None, "selected_profile": None, "fallback_reason": fallback_reason,
+                }
+        return domsoil_d, substitutions, dict(primary_soils)
+
     def _build_gridded(
         self, 
         initial_sat: Optional[float] = None, 
@@ -1679,22 +1980,22 @@ class Soils(NoDbBase):
 
 
             failed = dom_mukey is None
-            ssurgo_candidate_shadow_d = {}
-
             if not failed:
-                ssurgo_candidate_shadow_d = self._build_ssurgo_candidate_shadow(
-                    raw_domsoil_d, set(soils), ssurgo_fn, watershed.subwta, dom_mukey
+                (
+                    domsoil_d,
+                    ssurgo_substitution_d,
+                    soils,
+                    ssurgo_candidate_preparation,
+                ) = self._select_ssurgo_intelligent_fallbacks(
+                    soils_dir=soils_dir,
+                    ssurgo_fn=ssurgo_fn,
+                    subwta_fn=watershed.subwta,
+                    raw_domsoil_d=raw_domsoil_d,
+                    primary_soils=soils,
+                    primary_collection=surgo_c,
+                    global_mukey=dom_mukey,
+                    max_workers=max_workers,
                 )
-
-            if not failed:
-                for topaz_id, mukey in domsoil_d.items():
-                    if mukey not in soils:
-                        domsoil_d[topaz_id] = dom_mukey
-                        ssurgo_substitution_d[str(topaz_id)] = {
-                            "raw_mukey": str(mukey),
-                            "replacement_mukey": str(dom_mukey),
-                            "reason": "invalid_dominant_mukey",
-                        }
 
                 # while we are at it we will calculate the pct coverage
                 # for the landcover types in the watershed
@@ -1716,7 +2017,8 @@ class Soils(NoDbBase):
                     self.ssurgo_domsoil_d = deepcopy(domsoil_d)
                     self.raw_ssurgo_domsoil_d = raw_domsoil_d
                     self.ssurgo_substitution_d = ssurgo_substitution_d
-                    self.ssurgo_candidate_shadow_d = ssurgo_candidate_shadow_d
+                    self.ssurgo_candidate_shadow_d = {}
+                    self.ssurgo_candidate_preparation = ssurgo_candidate_preparation
                     self.soils = {str(k): v for k, v in soils.items()}
 
         # fallback to statsgo if surgo failed
@@ -1818,10 +2120,28 @@ class Soils(NoDbBase):
             if substitution is None:
                 soil_data["substituted_mukey"] = None
                 soil_data["substitution_reason"] = None
+                soil_data["selection_policy"] = None
+                soil_data["global_mukey"] = None
+                soil_data["source_location_wgs84_json"] = None
+                soil_data["candidate_raster_json"] = None
+                soil_data["search_radius_m"] = None
+                soil_data["candidate_support_json"] = None
+                soil_data["source_profile_json"] = None
+                soil_data["selected_profile_json"] = None
+                soil_data["fallback_reason"] = None
                 continue
 
             soil_data["substituted_mukey"] = str(substitution["replacement_mukey"])
             soil_data["substitution_reason"] = str(substitution["reason"])
+            soil_data["selection_policy"] = substitution.get("selection_policy")
+            soil_data["global_mukey"] = None if substitution.get("global_mukey") is None else str(substitution["global_mukey"])
+            soil_data["source_location_wgs84_json"] = json.dumps(substitution.get("source_location_wgs84"))
+            soil_data["candidate_raster_json"] = json.dumps(substitution.get("candidate_raster"))
+            soil_data["search_radius_m"] = substitution.get("search_radius_m")
+            soil_data["candidate_support_json"] = json.dumps(substitution.get("candidate_support"))
+            soil_data["source_profile_json"] = json.dumps(substitution.get("source_profile"))
+            soil_data["selected_profile_json"] = json.dumps(substitution.get("selected_profile"))
+            soil_data["fallback_reason"] = substitution.get("fallback_reason")
 
         return summary
 
@@ -1883,7 +2203,24 @@ class Soils(NoDbBase):
         remaining = [c for c in df.columns if c not in preferred]
         df = df.loc[:, preferred + remaining]
 
-        df.to_parquet(_join(self.soils_dir, "soils.parquet"), index=False)
+        parquet_path = Path(self.soils_dir) / "soils.parquet"
+        with tempfile.NamedTemporaryFile(
+            prefix=".soils.parquet.", suffix=".tmp", dir=self.soils_dir, delete=False
+        ) as temporary:
+            temporary_path = Path(temporary.name)
+        try:
+            df.to_parquet(temporary_path, index=False)
+            with temporary_path.open("rb") as handle:
+                os.fsync(handle.fileno())
+            os.replace(temporary_path, parquet_path)
+            directory_fd = os.open(self.soils_dir, os.O_RDONLY | os.O_DIRECTORY)
+            try:
+                os.fsync(directory_fd)
+            finally:
+                os.close(directory_fd)
+        finally:
+            if temporary_path.exists():
+                temporary_path.unlink()
         update_catalog_entry(self.wd, 'soils/soils.parquet')
         
     def _post_dump_and_unlock(self):

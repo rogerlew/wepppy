@@ -150,6 +150,10 @@ def test_build_gridded_coverage_uses_hillslope_area_not_wsarea(
     assert (
         soils.soils["1001"].pct_coverage + soils.soils["1002"].pct_coverage
     ) == pytest.approx(100.0)
+    assert soils.ssurgo_candidate_preparation == {
+        "status": "not_attempted",
+        "affected_hillslopes": 0,
+    }
 
 
 def test_build_gridded_preserves_raw_mukey_for_invalid_fairpoint_fallback(
@@ -250,24 +254,148 @@ def test_build_gridded_preserves_raw_mukey_for_invalid_fairpoint_fallback(
         "590": "2451115",
     }
     assert soils.ssurgo_domsoil_d == soils.domsoil_d
-    assert soils.ssurgo_substitution_d == {
-        "573": {
-            "raw_mukey": "3294459",
-            "replacement_mukey": "2451115",
-            "reason": "invalid_dominant_mukey",
-        },
-        "581": {
-            "raw_mukey": "3294460",
-            "replacement_mukey": "2451115",
-            "reason": "invalid_dominant_mukey",
-        },
-        "582": {
-            "raw_mukey": "3294461",
-            "replacement_mukey": "2451115",
-            "reason": "invalid_dominant_mukey",
-        },
-    }
+    for topaz_id, raw_mukey in {"573": "3294459", "581": "3294460", "582": "3294461"}.items():
+        substitution = soils.ssurgo_substitution_d[topaz_id]
+        assert substitution["raw_mukey"] == raw_mukey
+        assert substitution["replacement_mukey"] == "2451115"
+        assert substitution["reason"] == "invalid_dominant_mukey"
+        assert substitution["selection_policy"] == "watershed_global"
+        assert substitution["global_mukey"] == "2451115"
+        assert substitution["fallback_reason"] == "candidate_preparation_unavailable"
     assert soils.soils["2451115"].pct_coverage == pytest.approx(100.0)
+
+
+def test_intelligent_fallback_selects_and_materializes_only_added_local_donor(
+    tmp_path: Path,
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    """Exercise primary-plus-padded candidates without a live SSURGO service."""
+    from wepppy.soils.ssurgo import fallback
+
+    soils_dir = tmp_path / "run" / "soils"
+    soils_dir.mkdir(parents=True)
+    manifest = soils_dir / "ssurgo_candidate_mukey" / "active.json"
+    manifest.parent.mkdir()
+    manifest.write_text("{}", encoding="utf-8")
+    artifact = SimpleNamespace(
+        raster_path=manifest.parent / "candidate.tif",
+        manifest_path=manifest,
+        metadata={
+            "raster_sha256": "candidate-sha",
+            "source": {"identity": "gNATSGO-2025-mukey-vrt", "sha256": "source-sha"},
+            "bounds": [0.0, 0.0, 1.0, 1.0],
+            "crs_wkt": "EPSG:5070",
+        },
+    )
+    monkeypatch.setattr(fallback, "prepare_padded_candidate_raster", lambda **_kwargs: artifact)
+    monkeypatch.setattr(fallback, "candidate_raster_mukeys", lambda _artifact: {10, 20})
+    monkeypatch.setattr(
+        fallback,
+        "raw_mukey_source_locations_wgs84",
+        lambda *_args: {"101": (-116.1, 47.1)},
+    )
+    monkeypatch.setattr(
+        fallback,
+        "categorical_candidate_support_wgs84",
+        lambda *_args: [("10", 4), ("20", 6)],
+    )
+
+    class _AddedCollection:
+        def __init__(self, mukeys, **_kwargs) -> None:
+            assert mukeys == [20]
+            self.weppSoils = {20: "added-wepp-soil"}
+
+        def makeWeppSoils(self, **_kwargs) -> None:
+            return None
+
+    monkeypatch.setattr("wepppy.nodb.core.soils.SurgoSoilCollection", _AddedCollection)
+
+    soils = Soils.__new__(Soils)
+    soils.logger = logging.getLogger("tests.nodb.local_ssurgo_fallback")
+    soils._prepare_project_surgo_cache = lambda **_kwargs: str(tmp_path / "surgo.sqlite")
+    profiles = {
+        "99": {"horizon_index": 0, "chkey": "raw", "direct_values": {"dbthirdbar_r": 1.1, "ksat_r": 8.0, "cec7_r": 10.0}},
+        "10": {"horizon_index": 0, "chkey": "primary", "direct_values": {"dbthirdbar_r": 1.1, "ksat_r": 30.0, "cec7_r": 10.0}},
+        "20": {"horizon_index": 0, "chkey": "added", "direct_values": {"dbthirdbar_r": 1.1, "ksat_r": 8.0, "cec7_r": 10.0}},
+    }
+    soils._ssurgo_direct_profile = lambda _collection, mukey: profiles[str(mukey)]
+    materialized = []
+    soils._materialize_added_ssurgo_donor = lambda wepp_soil, _dir: materialized.append(wepp_soil) or SimpleNamespace(fname="20.sol")
+
+    primary_collection = SimpleNamespace(mukeys=[10])
+    final_domsoils, substitutions, final_soils, preparation = soils._select_ssurgo_intelligent_fallbacks(
+        soils_dir=str(soils_dir),
+        ssurgo_fn=str(soils_dir / "ssurgo.tif"),
+        subwta_fn=str(tmp_path / "subwta.tif"),
+        raw_domsoil_d={"101": "99"},
+        primary_soils={"10": SimpleNamespace(fname="10.sol")},
+        primary_collection=primary_collection,
+        global_mukey="10",
+        max_workers=1,
+    )
+
+    assert final_domsoils == {"101": "20"}
+    assert final_soils["20"].fname == "20.sol"
+    assert materialized == ["added-wepp-soil"]
+    assert substitutions["101"]["selection_policy"] == "ssurgo_local_vector_profile_v1"
+    assert substitutions["101"]["source_location_wgs84"] == [-116.1, 47.1]
+    assert preparation == {"status": "prepared", "affected_hillslopes": 1, "manifest": "ssurgo_candidate_mukey/active.json"}
+
+    def _support_unavailable(*_args):
+        raise ValueError("injected native support read failure")
+
+    monkeypatch.setattr(fallback, "categorical_candidate_support_wgs84", _support_unavailable)
+    final_domsoils, substitutions, _final_soils, preparation = soils._select_ssurgo_intelligent_fallbacks(
+        soils_dir=str(soils_dir),
+        ssurgo_fn=str(soils_dir / "ssurgo.tif"),
+        subwta_fn=str(tmp_path / "subwta.tif"),
+        raw_domsoil_d={"101": "99"},
+        primary_soils={"10": SimpleNamespace(fname="10.sol")},
+        primary_collection=primary_collection,
+        global_mukey="10",
+        max_workers=1,
+    )
+    assert final_domsoils == {"101": "10"}
+    assert substitutions["101"]["fallback_reason"] == "candidate_support_unavailable"
+    assert preparation["status"] == "prepared"
+
+
+def test_added_donor_materialization_removes_failed_publication_and_retries(
+    tmp_path: Path,
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    import os
+
+    soils_dir = tmp_path / "soils"
+    soils_dir.mkdir()
+
+    class _WeppSoil:
+        @staticmethod
+        def write(directory: str, overwrite: bool) -> SimpleNamespace:
+            assert overwrite is True
+            (Path(directory) / "20.sol").write_text("candidate", encoding="utf-8")
+            return SimpleNamespace(fname="20.sol")
+
+    soils = Soils.__new__(Soils)
+    real_fsync = os.fsync
+    calls = 0
+
+    def _fail_directory_fsync(descriptor: int) -> None:
+        nonlocal calls
+        calls += 1
+        if calls == 2:
+            raise OSError("injected directory fsync failure")
+        real_fsync(descriptor)
+
+    monkeypatch.setattr("wepppy.nodb.core.soils.os.fsync", _fail_directory_fsync)
+    with pytest.raises(OSError, match="injected directory fsync failure"):
+        soils._materialize_added_ssurgo_donor(_WeppSoil(), str(soils_dir))
+    assert not (soils_dir / "20.sol").exists()
+
+    monkeypatch.setattr("wepppy.nodb.core.soils.os.fsync", real_fsync)
+    summary = soils._materialize_added_ssurgo_donor(_WeppSoil(), str(soils_dir))
+    assert (soils_dir / "20.sol").read_text(encoding="utf-8") == "candidate"
+    assert summary.soils_dir == str(soils_dir)
 
 
 def test_subs_summary_includes_raw_and_substituted_mukey_columns() -> None:

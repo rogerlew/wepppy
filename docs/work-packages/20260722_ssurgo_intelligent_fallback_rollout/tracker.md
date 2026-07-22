@@ -6,11 +6,10 @@
 
 **Timezone**: UTC
 **Started**: 2026-07-22 UTC
-**Current phase**: Scaffold review dispositioned; M1 implementation ready
+**Current phase**: M3 generated-output/adversarial validation in progress
 **Last updated**: 2026-07-22 UTC
-**Next milestone**: Resolve all M1 review requirements before implementation:
-canonical source/artifact contract, exact eligibility/baseline rule, schema
-compatibility, and RQ validation procedure.
+**Next milestone**: Complete M3 generated-output/adversarial evidence, then
+perform the local RQ acceptance sequence before considering M4 release lift.
 **Security impact**: high
 **Dedicated security review**: yes
 **Security artifact**: `artifacts/2026-07-22_security_review.md`
@@ -19,9 +18,9 @@ compatibility, and RQ validation procedure.
 
 ### Ready / Backlog
 
-- [ ] M1: Implement conditional padded-raster/candidate-build preparation and
+- [x] M1: Implement conditional padded-raster/candidate-build preparation and
   deterministic all-valid no-op coverage.
-- [ ] M2: Implement vector selection, global escape hatch, selected-donor
+- [x] M2: Implement vector selection, global escape hatch, selected-donor
   materialization, and additive provenance.
 - [ ] M3: Validate compatibility, generated outputs, and RQ contracts.
 - [ ] M4: Run `plastic-bundling` / `disturbed9002` through RQ, then complete
@@ -29,9 +28,8 @@ compatibility, and RQ validation procedure.
 
 ### In Progress
 
-- [ ] M1: Implement the accepted-pending source/artifact, no-op, schema, and
-config-binding requirements.
-**Contract checkpoint**: `2026-07-22_contract_decision.md` (commit pending)
+- [ ] M3: Add generated-output, adversarial artifact, and propagation evidence.
+**Contract checkpoint**: `2026-07-22_contract_decision.md` (commit `bf5f2e62c`)
 
 ### Blocked
 
@@ -130,3 +128,26 @@ be committed as a standalone ancestor before implementation edits.
 
 **Next steps**: Commit this checkpoint, then implement M1 with independent
 verification running in parallel.
+
+### 2026-07-22 UTC: M1/M2 implementation and independent re-review
+
+**Agent/Contributor**: Codex
+
+**Work completed**: Added canonical source validation, immutable candidate-map
+manifest publication, native crop/WGS84 support, raw-MUKEY/hillslope-intersected
+source locations, primary-only global baseline preservation, config-match RQ
+guard, vector selection, selected-added-donor publication/retry, and additive
+provenance wiring. Refreshed the deployable `wepppyo3` artifact in commits
+`3aedb43` and `6b05234`.
+
+**Review result**: Planck and Mendel: GO to M3; Newton: HOLD pending the final
+two narrow fallback guards, which were corrected and covered before this
+record. M4 remains HOLD pending M3/RQ evidence.
+
+**Next steps**: Add full generated-output/adversarial fixtures, then run the
+RQ acceptance sequence.
+
+**Test results**: 32 focused SSURGO/NoDb/RQ-route tests passed; native crate
+tests passed 7/7 with the host PyO3 link argument; test-stub, broad-exception,
+and route-contract checks passed. Full M4 remains held pending generated-output,
+adversarial, and RQ evidence.

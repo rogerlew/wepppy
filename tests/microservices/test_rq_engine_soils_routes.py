@@ -13,6 +13,11 @@ pytestmark = pytest.mark.microservice
 def _stub_auth(monkeypatch: pytest.MonkeyPatch) -> None:
     monkeypatch.setattr(soils_routes, "require_jwt", lambda request, required_scopes=None: {})
     monkeypatch.setattr(soils_routes, "authorize_run_access", lambda claims, runid: None)
+    monkeypatch.setattr(
+        soils_routes.Ron,
+        "getInstance",
+        lambda wd: type("RonStub", (), {"config_stem": "cfg"})(),
+    )
 
 
 def _stub_queue(monkeypatch: pytest.MonkeyPatch, *, job_id: str = "job-123") -> None:
@@ -156,3 +161,67 @@ def test_build_soils_propagates_nodir_preflight_errors(monkeypatch: pytest.Monke
 
     assert response.status_code == 500
     assert response.json()["error"]["code"] == "NODIR_INVALID_ARCHIVE"
+
+
+def test_build_soils_rejects_mismatched_config_before_mutation(
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    _stub_auth(monkeypatch)
+    prep_state = _stub_prep(monkeypatch)
+    monkeypatch.setattr(soils_routes, "get_wd", lambda runid: "/tmp/run")
+    monkeypatch.setattr(
+        soils_routes.Ron,
+        "getInstance",
+        lambda wd: type("RonStub", (), {"config_stem": "disturbed9002.cfg"})(),
+    )
+
+    class DummySoils:
+        run_group = "default"
+        mods: set[str] = set()
+        initial_sat = "unchanged"
+        clear_ssurgo_cache_on_rebuild = "unchanged"
+
+    soils = DummySoils()
+    monkeypatch.setattr(soils_routes.Soils, "getInstance", lambda wd: soils)
+
+    with TestClient(rq_engine.app) as client:
+        response = client.post(
+            "/api/runs/run-1/wrong-config/build-soils",
+            json={"initial_sat": 0.42},
+        )
+
+    assert response.status_code == 409
+    assert response.json()["error"]["code"] == "run_config_mismatch"
+    assert soils.initial_sat == "unchanged"
+    assert soils.clear_ssurgo_cache_on_rebuild == "unchanged"
+    assert prep_state == {"removed": [], "jobs": []}
+
+
+def test_build_soils_accepts_normalized_matching_config(monkeypatch: pytest.MonkeyPatch) -> None:
+    _stub_auth(monkeypatch)
+    _stub_queue(monkeypatch, job_id="job-88")
+    _stub_prep(monkeypatch)
+    monkeypatch.setattr(soils_routes, "get_wd", lambda runid: "/tmp/run")
+    monkeypatch.setattr(
+        soils_routes.Ron,
+        "getInstance",
+        lambda wd: type("RonStub", (), {"config_stem": "disturbed9002.cfg"})(),
+    )
+
+    class DummySoils:
+        run_group = "default"
+        mods: set[str] = set()
+        initial_sat = None
+        clear_ssurgo_cache_on_rebuild = None
+
+    soils = DummySoils()
+    monkeypatch.setattr(soils_routes.Soils, "getInstance", lambda wd: soils)
+
+    with TestClient(rq_engine.app) as client:
+        response = client.post(
+            "/api/runs/run-1/disturbed9002/build-soils",
+            json={"initial_sat": 0.42},
+        )
+
+    assert response.status_code == 200
+    assert response.json()["job_id"] == "job-88"

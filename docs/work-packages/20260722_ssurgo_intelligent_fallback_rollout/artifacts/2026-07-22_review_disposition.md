@@ -48,3 +48,25 @@ in addition to an owner and rationale.
 - **Package close recommendation**: HOLD. The minimum release condition is
   zero unresolved critical/high/medium findings, each with a reviewer-visible
   verification result and implementation commit SHA.
+
+## Implementation Re-review (2026-07-22 UTC)
+
+**Reviewed implementation**: WEPPpy working tree following contract checkpoint
+`bf5f2e62c`; wepppyo3 commits `3aedb43` and `6b05234`.
+
+- Planck (code): **GO to M3 / HOLD M4**. Verified raw-MUKEY/hillslope
+  intersection anchoring, primary-plus-added eligibility, primary-only global
+  donor, vector scoring, and selected-only donor publication.
+- Mendel (security/operations): **GO to M3 / HOLD M4**. Verified the native
+  release import/provenance, artifact checksums/metadata/path rules, and donor
+  cleanup/retry. Unreachable immutable files after a failed pre-manifest
+  publication are an operations retention follow-up, not a correctness block.
+- Newton (QA): reported two narrow M1/M2 blockers: exact primary-raster parent
+  validation and per-record support-read global fallback. Both are now
+  implemented and focused-tested; Newton confirmed **GO to M3 / HOLD M4**.
+
+Focused evidence: 32 WEPPpy tests, native crate 7/7 with the host PyO3 link
+argument, deployable py312 release import, test-stub check, changed-file
+broad-exception check, and RQ route-contract check all pass. This lifts the
+implementation hold through M3 only. It does not resolve the M3/M4 findings in
+the table, so the release/RQ hold remains in force.

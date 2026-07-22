@@ -10,7 +10,7 @@ from fastapi.responses import JSONResponse
 from rq import Queue
 
 from wepppy.config.redis_settings import RedisDB, redis_connection_kwargs
-from wepppy.nodb.core import Soils, WatershedNotAbstractedError
+from wepppy.nodb.core import Ron, Soils, WatershedNotAbstractedError
 from wepppy.nodb.mods.disturbed import Disturbed
 from wepppy.nodb.redis_prep import RedisPrep, TaskEnum
 from wepppy.runtime_paths.errors import NoDirError
@@ -62,6 +62,24 @@ def _to_float(value: Any) -> float:
     return float(value)
 
 
+def _normalize_config_token(value: str) -> str:
+    token = str(value or "").strip().lower()
+    return token[:-4] if token.endswith(".cfg") else token
+
+
+def _config_mismatch_response(wd: str, config: str) -> JSONResponse | None:
+    """Reject a mismatched mutable run/config route before any state change."""
+    actual_config = _normalize_config_token(getattr(Ron.getInstance(wd), "config_stem", ""))
+    requested_config = _normalize_config_token(config)
+    if requested_config and actual_config and requested_config != actual_config:
+        return error_response(
+            f"Run config mismatch: path config '{config}' does not match run config '{actual_config}'.",
+            status_code=409,
+            code="run_config_mismatch",
+        )
+    return None
+
+
 @router.post(
     "/runs/{runid}/{config}/build-soils",
     summary="Build soils inputs",
@@ -76,6 +94,7 @@ def _to_float(value: Any) -> float:
         success_description="Soils inputs accepted; returns batch update message or enqueued `job_id`.",
         extra={
             400: "Soils validation or precondition failed. Returns the canonical error payload.",
+            409: "Run config mismatch. Returns canonical `run_config_mismatch` without mutation.",
         },
     ),
 )
@@ -92,6 +111,10 @@ async def build_soils(runid: str, config: str, request: Request) -> JSONResponse
     try:
         wd = get_wd(runid)
         _require_directory_root(wd, "soils")
+
+        mismatch_response = _config_mismatch_response(wd, config)
+        if mismatch_response is not None:
+            return mismatch_response
 
         prep = RedisPrep.getInstance(wd)
         prep.remove_timestamp(TaskEnum.build_soils)

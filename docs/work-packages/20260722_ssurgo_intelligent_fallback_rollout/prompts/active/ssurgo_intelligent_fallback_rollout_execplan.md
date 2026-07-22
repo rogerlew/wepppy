@@ -16,11 +16,13 @@ local RQ `plastic-bundling` job proves the same worker path used in normal runs.
 - [x] (2026-07-22 UTC) Scaffolded package, tracker, review artifacts, and plan.
 - [x] (2026-07-22 UTC) Completed independent scaffold review and recorded
   accepted-pending findings; implementation is held pending M1 contracts.
-- [ ] M1: Record additive NoDb/Parquet compatibility; implement canonical,
-  atomic conditional padded-map preparation and all-valid no-op coverage.
-- [ ] M2: Implement vector selection, global fallback, donor materialization,
-  and provenance.
-- [ ] M3: Add generated-output and compatibility tests; validate RQ contracts.
+- [x] M1: Implemented compatibility contract, native padded crop/WGS84
+  geometry, canonical artifact publication, config binding, and all-valid
+  status coverage. Adversarial and generated-output fixtures move to M3.
+- [x] M2: Implemented vector selection, primary-only global fallback,
+  selected-donor materialization, and additive provenance.
+- [ ] M3: In progress — add generated-output/adversarial compatibility tests
+  and validate the complete RQ contract.
 - [ ] M4: Run `plastic-bundling` / `disturbed9002` through RQ and capture
   evidence.
 - [ ] M5: Complete code, QA, security review, finding disposition, and gates.
@@ -64,8 +66,11 @@ local RQ `plastic-bundling` job proves the same worker path used in normal runs.
 
 ## Outcomes & Retrospective
 
-Scaffolded only. No implementation or run mutation has occurred. Closure
-requires generated-output/RQ evidence and complete review disposition.
+M1/M2 are implemented and independently re-reviewed. The deployable py312
+native artifact is refreshed and its provenance is committed in wepppyo3.
+Focused native/WEPPpy/RQ-route acceptance is green. M4 remains held: closure
+still requires adversarial/generated-output evidence, an RQ run, and complete
+review disposition.
 
 ## Context and Orientation
 
@@ -238,5 +243,5 @@ building, profile scoring, and provenance belong in `wepppy/soils/ssurgo/`.
 `Soils` orchestrates persistence; `build_soils_rq` remains the worker boundary.
 No new dependency is authorized.
 
-Updated 2026-07-22: independent scaffold review dispositioned; M1 implementation
-is held on the documented high-severity contracts.
+Updated 2026-07-22: M1/M2 implementation completed; independent re-review
+allows advance to M3, while M4 remains held on its explicit acceptance evidence.

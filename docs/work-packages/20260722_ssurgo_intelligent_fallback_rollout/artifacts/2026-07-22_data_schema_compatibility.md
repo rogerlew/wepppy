@@ -1,6 +1,6 @@
 # Additive SSURGO Fallback Schema Compatibility
 
-**Status**: Required M1 contract; implementation pending
+**Status**: Implemented contract; M3 propagation evidence pending
 **Authority**: ADR-0025 and `wepppy/soils/ssurgo/fallback.md`
 
 ## Compatibility Rule
@@ -29,6 +29,11 @@ is permitted only where the policy has no evidence to report; it is not a
 replacement for a required scalar. Existing consumers that do not read these
 columns must continue unchanged.
 
+`ssurgo_candidate_preparation` is a separate additive NoDb status record. It
+is `{ "status": "not_attempted", "affected_hillslopes": 0 }` for all-valid
+primary builds; it does not alter substitution semantics or require a Parquet
+column.
+
 ## Required Propagation Evidence
 
 The M1/M3 test helper must assert for every final hillslope assignment that:
@@ -44,3 +49,11 @@ The M1/M3 test helper must assert for every final hillslope assignment that:
 Legacy fixtures must load missing fields as the values in the table. A
 disconnected same-MUKEY fixture must demonstrate that separate source locations
 can retain separate local donor evidence.
+
+## Implementation Checkpoint (2026-07-22 UTC)
+
+The implementation writes the nine provenance fields additively through
+`Soils._subs_summary_gen()` and records `ssurgo_candidate_preparation` on the
+NoDb controller. Targeted legacy/root-creation tests pass. M3 still must prove
+the complete generated NoDb, Parquet, and `.sol` agreement on a real fixture;
+this checkpoint does not claim that release evidence.
