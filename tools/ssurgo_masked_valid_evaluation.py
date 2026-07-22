@@ -27,6 +27,7 @@ SHALLOW_MINERAL_VECTOR_RANGES = {
     "rfg": (0.0, 100.0),
     "solthk": (1.0, 10_000.0),
 }
+SHALLOW_MINERAL_TEXTURE_RANGES = {"sand": (0.0, 100.0), "clay": (0.0, 100.0)}
 PROFILE_EXCLUDED_FAILURE_CLASSES = frozenset({
     "no_components",
     "no_horizons",
@@ -234,8 +235,10 @@ def _finite_features(soil: Any) -> dict[str, float]:
     return features
 
 
-def validated_shallow_mineral_horizon(horizons: Sequence[Mapping[str, Any]]) -> dict[str, Any] | None:
-    """Return the shallowest non-organic WEPP horizon with validated nontexture fields."""
+def validated_shallow_mineral_horizon(
+    horizons: Sequence[Mapping[str, Any]], *, include_texture: bool = False
+) -> dict[str, Any] | None:
+    """Return the shallowest non-organic WEPP horizon with validated requested fields."""
     for index, horizon in enumerate(horizons):
         try:
             organic_matter = float(horizon["orgmat"])
@@ -259,6 +262,22 @@ def validated_shallow_mineral_horizon(horizons: Sequence[Mapping[str, Any]]) -> 
             values.pop("fc")
             values.pop("wp")
             rejected_fields.extend(("fc", "wp"))
+        if include_texture:
+            texture: dict[str, float] = {}
+            for field, (minimum, maximum) in SHALLOW_MINERAL_TEXTURE_RANGES.items():
+                try:
+                    value = float(horizon[field])
+                except (KeyError, TypeError, ValueError):
+                    rejected_fields.append(field)
+                    continue
+                if math.isfinite(value) and minimum <= value <= maximum:
+                    texture[field] = value
+                else:
+                    rejected_fields.append(field)
+            if set(texture) == set(SHALLOW_MINERAL_TEXTURE_RANGES) and texture["sand"] + texture["clay"] <= 100.0:
+                values.update(texture)
+            else:
+                rejected_fields.extend(SHALLOW_MINERAL_TEXTURE_RANGES)
         if len(values) >= SHALLOW_MINERAL_MIN_VECTOR_FIELDS:
             return {
                 "horizon_index": index,
@@ -269,8 +288,10 @@ def validated_shallow_mineral_horizon(horizons: Sequence[Mapping[str, Any]]) -> 
     return None
 
 
-def _shallow_mineral_horizon(soil: Any) -> dict[str, Any] | None:
-    return validated_shallow_mineral_horizon(soil.get_weppsoilutil().obj["ofes"][0]["horizons"])
+def _shallow_mineral_horizon(soil: Any, *, include_texture: bool = False) -> dict[str, Any] | None:
+    return validated_shallow_mineral_horizon(
+        soil.get_weppsoilutil().obj["ofes"][0]["horizons"], include_texture=include_texture
+    )
 
 
 def score_shallow_mineral_vectors(
@@ -893,6 +914,7 @@ def build_run_cases(
     requested_case_ids: set[str] | None = None,
     candidate_ring_m: Sequence[float] | None = None,
     shallow_mineral_vector: bool = False,
+    shallow_mineral_include_texture: bool = False,
 ) -> tuple[list[dict[str, Any]], dict[str, Any]]:
     """Build read-only masked-valid cases from one completed gridded SSURGO run."""
     import rasterio
@@ -1028,6 +1050,21 @@ def build_run_cases(
                     candidate_elevation_deltas,
                     source_evidence_class="masked_valid_simulation",
                 )
+                if shallow_mineral_include_texture:
+                    texture_source = _shallow_mineral_horizon(soil_by_mukey[withheld_mukey], include_texture=True)
+                    texture_candidates = {
+                        mukey: horizon
+                        for mukey in summary_mukeys
+                        if mukey != withheld_mukey and mukey in soil_by_mukey
+                        if (horizon := _shallow_mineral_horizon(soil_by_mukey[mukey], include_texture=True)) is not None
+                    }
+                    score_variants["shallow_mineral_vector_with_texture"] = score_shallow_mineral_vectors(
+                        texture_source,
+                        texture_candidates,
+                        geometry,
+                        candidate_elevation_deltas,
+                        source_evidence_class="masked_valid_simulation",
+                    )
             cases.append(
                 {
                     "case_id": f"{run_path.name}:{topaz_id}",
@@ -1067,6 +1104,7 @@ def build_run_cases(
         "requested_case_count": len(requested_case_ids) if requested_case_ids else None,
         "candidate_rings_m": list(candidate_ring_m) if candidate_ring_m else None,
         "shallow_mineral_vector": shallow_mineral_vector,
+        "shallow_mineral_include_texture": shallow_mineral_include_texture,
         **dem_metadata,
     }
     return cases, metadata
@@ -1096,14 +1134,19 @@ def main(argv: Sequence[str] | None = None) -> int:
         help="Evaluate validated shallow-mineral vector matching in masked-valid run mode.",
     )
     parser.add_argument(
+        "--shallow-mineral-include-texture",
+        action="store_true",
+        help="Also evaluate a sand/clay-inclusive shallow-mineral vector after texture-balance validation.",
+    )
+    parser.add_argument(
         "--case-id",
         action="append",
         help="Restrict run mode to a stable '<run-name>:<topaz-id>' masked-valid case; repeatable.",
     )
     args = parser.parse_args(argv)
     if args.input is not None:
-        if args.case_id or args.candidate_ring_m or args.shallow_mineral_vector:
-            parser.error("--case-id, --candidate-ring-m, and --shallow-mineral-vector are only available with --run")
+        if args.case_id or args.candidate_ring_m or args.shallow_mineral_vector or args.shallow_mineral_include_texture:
+            parser.error("--case-id, --candidate-ring-m, and shallow-mineral options are only available with --run")
         cases = json.loads(args.input.read_text(encoding="utf-8"))
         results: Any = [evaluate_masked_case(case) for case in cases]
     else:
@@ -1114,6 +1157,8 @@ def main(argv: Sequence[str] | None = None) -> int:
                 parser.error("--candidate-ring-m values must be unique, ascending, and end at --max-radius-m")
             if candidate_ring_m[0] < args.initial_radius_m:
                 parser.error("--candidate-ring-m values must not be below --initial-radius-m")
+        if args.shallow_mineral_include_texture and not args.shallow_mineral_vector:
+            parser.error("--shallow-mineral-include-texture requires --shallow-mineral-vector")
         cases = []
         cohorts = []
         for run_path in args.run:
@@ -1128,6 +1173,7 @@ def main(argv: Sequence[str] | None = None) -> int:
                 requested_case_ids=set(args.case_id) if args.case_id else None,
                 candidate_ring_m=candidate_ring_m,
                 shallow_mineral_vector=args.shallow_mineral_vector,
+                shallow_mineral_include_texture=args.shallow_mineral_include_texture,
             )
             cases.extend(run_cases)
             cohorts.append(metadata)

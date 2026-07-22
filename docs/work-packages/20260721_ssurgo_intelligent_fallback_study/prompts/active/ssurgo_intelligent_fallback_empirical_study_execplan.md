@@ -56,6 +56,9 @@ unchanged.
   shallow-mineral profile vectors across fixed eleven-case and 322-case
   masked-valid cohorts, including a byte-identical one-worker repeat
   (2026-07-26).
+- [x] Milestone 3.5 texture-inclusive vector: add separately validated
+  sand/clay and re-run the fixed and 322-case cohorts; retain the nontexture
+  vector as the control (2026-07-26).
 - [ ] Milestone 4: seek an ADR only if evidence supports opt-in production
   selection, then observe a shadow/opt-in rollout before default promotion.
 - [ ] Add deterministic fixtures for all observed primary failure classes.
@@ -135,6 +138,12 @@ unchanged.
   ranker selected a locally feature-closer donor in 10 of 11 fixed discovery
   misses and 287 of 322 larger-cohort cases; geometry-plus-terrain selected
   185 of the latter. The one/four-worker larger artifacts were byte-identical.
+- Observation: validated sand/clay improve the shallow-mineral vector modestly
+  without changing the fixed discovery-miss result.
+  Evidence: texture-inclusive top-one wins were 292 of 322 versus 287 for the
+  nontexture control, with global wins falling from 16 to 12. Both selected 10
+  local wins in the fixed eleven-case cohort; the texture one/four-worker
+  artifacts were byte-identical.
 
 ## Decision Log
 
@@ -232,6 +241,13 @@ unchanged.
   profile-free/nonphysical failure classes and requires three jointly valid
   parameters; masked-valid use is a simulation, not permission to trust
   inferred source fields in production.
+  Date/Author: 2026-07-26 / user and Codex.
+- Decision: Evaluate sand/clay as a separately validated additive vector
+  variant, not as a replacement for the nontexture control.
+  Rationale: texture may be informative when physically consistent, but it is
+  implicated in the nonphysical-texture converter failure class. Both values
+  must be observed, bounded, and sum to no more than 100%; that failure class
+  remains profile-ineligible.
   Date/Author: 2026-07-26 / user and Codex.
 
 ## Outcomes & Retrospective

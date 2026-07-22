@@ -97,6 +97,9 @@ geographically held-out cases; retain profile-free global fallback behavior.
   top-one local wins were 10/11 fixed discovery misses and 287/322 in the
   larger masked-valid cohort; one/four-worker output was byte-identical
   (2026-07-26).
+- [x] Completed validated texture-inclusive vector comparison: top-one local
+  wins improved from 287 to 292 of 322, while the fixed discovery-miss cohort
+  remained 10/11; one/four-worker output was byte-identical (2026-07-26).
 
 ## Timeline
 

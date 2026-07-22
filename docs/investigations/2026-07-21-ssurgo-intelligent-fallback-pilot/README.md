@@ -274,10 +274,11 @@ withheld source and each candidate. Organic matter must be finite and at most
 20%; layer thickness, bulk density, hydraulic conductivity, field capacity,
 wilting point, cation exchange capacity, and rock fragments must be within
 conservative physical bounds. Field capacity below wilting point invalidates
-both values. Sand and clay are deliberately excluded. A candidate needs at
-least three jointly validated source/candidate parameters. The vector distance
-is robustly scaled per parameter; shared source contact and elevation resolve
-only exact vector-distance ties.
+both values. The baseline excludes sand and clay; the requested additive
+variant admits them only when both are finite, bounded 0%–100%, and total at
+most 100%. A candidate needs at least three jointly validated source/candidate
+parameters. The vector distance is robustly scaled per parameter; shared
+source contact and elevation resolve only exact vector-distance ties.
 
 This is permitted only for `partial_profile` and
 `missing_required_attributes` source evidence. Masked-valid trials use an
@@ -289,12 +290,21 @@ must retain nonprofile/global fallback behavior.
 | --- | ---: | ---: | ---: | ---: |
 | Fixed 250 m oracle-miss cases (11) | 10 | 1 | 0 | 10 |
 | Larger 2 km cohort (322) | 287 | 16 | 19 | 294 |
+| Larger 2 km cohort, validated sand/clay | 292 | 12 | 18 | 294 |
 | Larger 2 km geometry + 30% terrain | 185 | 62 | 75 | 276 |
 
 The 322-case one-worker artifact is byte-identical to its four-worker result.
 Artifacts are `/tmp/ssurgo_masked_valid_20260726/shallow_mineral_oracle_miss.json`
 and `shallow_mineral_larger_cohort.json` (with
 `shallow_mineral_larger_cohort_workers1.json` as the repeat).
+
+The texture-inclusive variant did not change the fixed 11-case result (10
+local wins, one global) but improved the larger cohort by five local top-one
+wins. Its four-worker artifact is
+`/tmp/ssurgo_masked_valid_20260726/shallow_mineral_texture_larger_cohort.json`;
+the one-worker repeat is byte-identical. This is additive evidence only: a
+future policy may use sand/clay only after the same source-provenance and
+physical-balance checks, never for the known nonphysical-texture failure class.
 
 This is strong **masked-valid** evidence for failure-class-gated profile
 matching, not an M4 decision. The study must next prove source-field

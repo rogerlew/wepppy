@@ -227,6 +227,22 @@ def test_shallow_mineral_vector_skips_organic_and_invalid_parameters() -> None:
     }
 
 
+def test_shallow_mineral_texture_is_opt_in_and_requires_a_physical_balance() -> None:
+    module = runpy.run_path(str(Path(__file__).resolve().parents[2] / "tools/ssurgo_masked_valid_evaluation.py"))
+    valid = {"orgmat": 2.0, "bd": 1.2, "ksat": 12.0, "fc": 0.31, "wp": 0.12, "cec": 18.0, "rfg": 4.0, "solthk": 80.0, "sand": 45.0, "clay": 25.0}
+    invalid_balance = {**valid, "sand": 85.0, "clay": 25.0}
+
+    without_texture = module["validated_shallow_mineral_horizon"]([valid])
+    with_texture = module["validated_shallow_mineral_horizon"]([valid], include_texture=True)
+    rejected_texture = module["validated_shallow_mineral_horizon"]([invalid_balance], include_texture=True)
+
+    assert "sand" not in without_texture["validated_fields"]
+    assert with_texture["validated_fields"]["sand"] == 45.0
+    assert with_texture["validated_fields"]["clay"] == 25.0
+    assert "sand" not in rejected_texture["validated_fields"]
+    assert {"sand", "clay"} <= set(rejected_texture["rejected_fields"])
+
+
 def test_shallow_mineral_vector_requires_permitted_evidence_and_shared_fields() -> None:
     module = runpy.run_path(str(Path(__file__).resolve().parents[2] / "tools/ssurgo_masked_valid_evaluation.py"))
     source = {"horizon_index": 1, "validated_fields": {"bd": 1.2, "ksat": 12.0, "fc": 0.31, "wp": 0.12}}
