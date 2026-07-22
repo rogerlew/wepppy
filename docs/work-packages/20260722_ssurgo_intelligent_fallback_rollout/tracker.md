@@ -8,8 +8,8 @@
 **Started**: 2026-07-22 UTC
 **Current phase**: M3 generated-output/adversarial validation in progress
 **Last updated**: 2026-07-22 UTC
-**Next milestone**: Complete M3 generated-output/adversarial evidence, then
-perform the local RQ acceptance sequence before considering M4 release lift.
+**Next milestone**: Complete M3 generated-output/adversarial evidence and M5
+review disposition before considering the release lift.
 **Security impact**: high
 **Dedicated security review**: yes
 **Security artifact**: `artifacts/2026-07-22_security_review.md`
@@ -25,6 +25,8 @@ perform the local RQ acceptance sequence before considering M4 release lift.
 - [ ] M3: Validate compatibility, generated outputs, and RQ contracts.
 - [x] M4 runtime: Run `plastic-bundling` / `disturbed9002` through RQ and
   capture all-valid no-op evidence.
+- [x] M4 runtime: Run a true-current-invalid watershed through RQ and capture
+  local-vector donor-selection evidence.
 - [ ] M5: Complete remaining M3 evidence, reviews, and disposition.
 
 ### In Progress
@@ -73,7 +75,7 @@ contract. The evidence gate would otherwise be unable to prove the policy.
 
 | Risk | Severity | Mitigation | Status |
 | --- | --- | --- | --- |
-| Candidate artifacts are stale, partial, or escape run scope | High | Fixed paths, resolved-root checks, atomic publish, checksum/provenance tests | Open |
+| Candidate artifacts are stale, partial, or escape run scope | High | Fixed paths, resolved-root checks, atomic publish, checksum/provenance tests; record metadata from persisted raster | Mitigated; adversarial closure remains |
 | Candidate source is untrusted or unavailable | High | Canonical root resolver, identity validation, explicit global fallback | Open |
 | RQ run escapes scope or races | High | Root lock, security review, run-tree checks, config binding test | Open |
 | Local stack is stale | Medium | Preflight active jobs/queue; prefer targeted recreation; health check after restart | Open |
@@ -84,7 +86,9 @@ contract. The evidence gate would otherwise be unable to prove the policy.
 - [ ] Additive NoDb/Parquet schema compatibility recorded before code edits.
 - [ ] ADR field/radius/normalization/tie contract matches implementation.
 - [ ] Legacy hydration and existing consumers pass.
-- [ ] `plastic-bundling` RQ job completes and artifacts are inspected.
+- [x] `plastic-bundling` RQ job completes and artifacts are inspected.
+- [x] Current-invalid RQ job completes with conditional candidate preparation,
+  local selection, and coherent generated output.
 - [ ] Code review: `artifacts/2026-07-22_code_review.md` complete.
 - [ ] QA review: `artifacts/2026-07-22_qa_review.md` complete.
 - [ ] Security review: `artifacts/2026-07-22_security_review.md` complete.
@@ -207,3 +211,24 @@ assignments agree; no current substitutions or local selections occurred;
 candidate preparation was not attempted. This historical-invalid watershed
 therefore cannot furnish true-current-invalid local-selection acceptance.
 Evidence is appended to `artifacts/2026-07-22_rq_acceptance.md`.
+
+### 2026-07-22 UTC: Current-invalid local donor RQ acceptance
+
+**Agent/Contributor**: Codex
+
+**Work completed**: Used the operator-supplied scoped JWT for
+far-out-quiescence / disturbed9002_wbt to discover the live API contract,
+submit the resolved build-soils request, poll its terminal result, and inspect
+candidate, NoDb, Parquet, and soil artifacts.
+
+**Result**: PASS for true-current-invalid local selection. Nine hillslopes
+whose raw MUKEY 2712917 remains non-buildable selected local vector-profile
+donors (eight 2712901, one 2712931) at 250 m or 500 m; none used the global
+donor 2712884. Candidate preparation was prepared and every final soil
+reference existed. The initial attempt exposed an exact CRS-WKT publication
+drift, fixed by recording metadata from the persisted raster and covered by a
+regression test. Full redacted evidence is in
+`artifacts/2026-07-22_rq_acceptance.md`.
+
+**Next steps**: Complete remaining M3 adversarial/generated-output evidence
+and M5 review disposition; these remain the release-hold gates.

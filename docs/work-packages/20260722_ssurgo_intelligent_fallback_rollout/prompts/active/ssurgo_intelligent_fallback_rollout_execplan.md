@@ -25,6 +25,8 @@ local RQ `plastic-bundling` job proves the same worker path used in normal runs.
   and validate the complete RQ contract.
 - [x] M4: Ran `plastic-bundling` / `disturbed9002` through RQ and captured
   all-valid no-op evidence.
+- [x] M4: Ran `far-out-quiescence` / `disturbed9002_wbt` through RQ and
+  captured true-current-invalid local-vector-selection evidence.
 - [ ] M5: Complete code, QA, security review, finding disposition, and gates.
 
 ## Surprises & Discoveries
@@ -41,6 +43,12 @@ local RQ `plastic-bundling` job proves the same worker path used in normal runs.
 - Observation: primary and added candidates are both eligible when valid;
   however, only valid primary outcomes calculate the global baseline.
   Evidence: independent code and QA reviews, CR-01 / CR-02 / QA-01.
+- Observation: GDAL/GeoTIFF CRS WKT serialization can differ between the crop
+  primitive's return value and the persisted raster despite identical spatial
+  meaning.
+  Evidence: the first current-invalid RQ build correctly rejected its candidate
+  artifact by strict provenance validation; re-reading the persisted raster
+  exposed the canonical WKT form.
 
 ## Decision Log
 
@@ -63,6 +71,11 @@ local RQ `plastic-bundling` job proves the same worker path used in normal runs.
   primary-versus-added eligibility, and the RQ procedure are correctness
   boundaries, not post-implementation polish.
   Date/Author: 2026-07-22 / Codex, after independent review.
+- Decision: Publish candidate metadata by re-reading the atomically persisted
+  raster, rather than trusting metadata returned by the crop operation.
+  Rationale: the validator must remain exact; canonical persisted metadata
+  prevents harmless serialization drift from degrading to global fallback.
+  Date/Author: 2026-07-22 / Codex.
 
 ## Outcomes & Retrospective
 
@@ -79,6 +92,15 @@ which enabled the documented discovery, wrong-config non-mutation, submission,
 polling, and output inspection sequence. The M4 all-valid no-op result passed;
 see `artifacts/2026-07-22_rq_acceptance.md`. M3 adversarial/scoring coverage
 and M5 review closure still hold the package release.
+
+The second RQ acceptance used a watershed with a current residual-invalid
+dominant MUKEY. It passed the complete local path: conditional padded map
+preparation, strict persisted-artifact provenance, bounded candidate support,
+local vector selection, donor materialization, and NoDb/Parquet/soil-reference
+agreement. The first attempt revealed a crop-result versus persisted-GeoTIFF
+CRS-WKT serialization drift; publishing re-read persisted metadata corrected it
+without weakening validation and a dedicated regression test is green. See
+`artifacts/2026-07-22_rq_acceptance.md`.
 
 ## Context and Orientation
 
@@ -220,11 +242,11 @@ Run from `/home/workdir/wepppy`.
 
 The hermetic invalid fixture must prove recovery first, local vector selection
 when eligible, primary and added donor eligibility, and global fallback for all
-insufficient-evidence cases. The local RQ run must complete and prove all-valid
-no-op behavior: no padded candidate artifact or added candidate collection.
-NoDb, Parquet, and generated soil references must agree. Candidate selection
-must read only the persisted, validated padded map. Reviews and disposition
-must be complete.
+insufficient-evidence cases. Local RQ runs must prove both all-valid no-op
+behavior (no padded candidate artifact or added candidate collection) and the
+true-current-invalid local path. NoDb, Parquet, and generated soil references
+must agree. Candidate selection must read only the persisted, validated padded
+map. Reviews and disposition must be complete.
 
 ## Idempotence and Recovery
 
@@ -252,4 +274,6 @@ building, profile scoring, and provenance belong in `wepppy/soils/ssurgo/`.
 No new dependency is authorized.
 
 Updated 2026-07-22: M1/M2 implementation completed; independent re-review
-allows advance to M3, while M4 remains held on its explicit acceptance evidence.
+allows advance to M3. M4 all-valid and true-current-invalid RQ acceptance are
+complete; M3 adversarial/generated-output evidence and M5 disposition remain
+the release-hold gates.

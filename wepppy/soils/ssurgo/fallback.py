@@ -161,7 +161,10 @@ def prepare_padded_candidate_raster(
         raise CandidateRasterUnavailable("candidate artifact root escapes the run soils directory")
 
     try:
-        from wepppyo3.raster_characteristics import crop_categorical_raster_to_padded_reference
+        from wepppyo3.raster_characteristics import (
+            categorical_raster_metadata,
+            crop_categorical_raster_to_padded_reference,
+        )
     except ImportError as exc:
         raise RuntimeError(
             "wepppyo3 categorical raster crop support is required for SSURGO fallback"
@@ -174,13 +177,13 @@ def prepare_padded_candidate_raster(
     metadata_path = _resolved_child(artifact_root, metadata_name)
     temporary_raster = raster_path.with_name(f".{raster_path.name}.{uuid.uuid4().hex}.tmp")
     try:
-        bounds = crop_categorical_raster_to_padded_reference(
+        crop_categorical_raster_to_padded_reference(
             str(source), str(primary), str(temporary_raster), padding_m, 1
         )
         _fsync_file(temporary_raster)
         os.replace(temporary_raster, raster_path)
         _fsync_directory(artifact_root)
-        lower_x, lower_y, upper_x, upper_y, crs_wkt, width, height = bounds
+        bounds, crs_wkt, width, height = categorical_raster_metadata(str(raster_path))
         metadata: dict[str, Any] = {
             "policy_version": POLICY_VERSION,
             "source": {
@@ -190,7 +193,7 @@ def prepare_padded_candidate_raster(
             "primary_raster_sha256": _sha256(primary),
             "primary_raster": "ssurgo.tif",
             "padding_m": padding_m,
-            "bounds": [lower_x, lower_y, upper_x, upper_y],
+            "bounds": [float(value) for value in bounds],
             "crs_wkt": crs_wkt,
             "width": int(width),
             "height": int(height),

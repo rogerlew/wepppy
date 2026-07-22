@@ -4,6 +4,8 @@ from __future__ import annotations
 
 import hashlib
 import json
+import sys
+import types
 from pathlib import Path
 
 import pytest
@@ -120,6 +122,38 @@ def test_candidate_preparation_rejects_nested_primary_raster(
 
     with pytest.raises(fallback.CandidateRasterUnavailable, match="run-contained"):
         fallback.prepare_padded_candidate_raster(soils_dir=soils, primary_raster_path=nested_primary)
+
+
+def test_candidate_preparation_records_persisted_raster_metadata(
+    monkeypatch: pytest.MonkeyPatch, tmp_path: Path
+) -> None:
+    """Publication must use the GeoTIFF's re-read CRS serialization."""
+    _configure_geodata(monkeypatch, tmp_path)
+    soils = tmp_path / "run" / "soils"
+    soils.mkdir(parents=True)
+    primary = soils / "ssurgo.tif"
+    primary.write_bytes(b"primary")
+
+    characteristics = types.ModuleType("wepppyo3.raster_characteristics")
+
+    def crop(
+        _source: str, _reference: str, destination: str, _padding: float, _band: int
+    ) -> tuple[object, ...]:
+        Path(destination).write_bytes(b"candidate")
+        return (0.0, 0.0, 1.0, 1.0, "crop-crs", 1, 1)
+
+    characteristics.crop_categorical_raster_to_padded_reference = crop
+    characteristics.categorical_raster_metadata = lambda _path: (
+        (0.0, 0.0, 1.0, 1.0), "persisted-crs", 1, 1
+    )
+    monkeypatch.setitem(sys.modules, "wepppyo3.raster_characteristics", characteristics)
+
+    artifact = fallback.prepare_padded_candidate_raster(soils_dir=soils, primary_raster_path=primary)
+
+    assert artifact.metadata["crs_wkt"] == "persisted-crs"
+    assert artifact.metadata["bounds"] == [0.0, 0.0, 1.0, 1.0]
+    loaded = fallback.load_active_candidate_raster(soils, primary_raster_path=primary)
+    assert loaded == artifact
 
 
 def test_direct_shallow_profile_uses_first_valid_raw_horizon_and_texture_balance() -> None:
