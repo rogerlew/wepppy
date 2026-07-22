@@ -68,6 +68,9 @@
   two local runs, local feature distance better in 108 versus 71 global wins
   (119 ties), and local elevation difference better in 235 versus 62 global
   wins (2026-07-22).
+- [x] Completed M3.5 geometry/terrain scoring slice with NED1: geometry-only
+  131 local versus 58 global feature-distance wins; 30% terrain 140 versus 62
+  (2026-07-22). Profile/failure-class score families remain.
 
 ## Timeline
 
@@ -191,6 +194,15 @@ families after failure-class gating; compare weight variants on held-out runs.
 **Impact**: Pixel support remains a bounded-window prevalence feature, not a
 claim of shared-boundary adjacency. Production scoring remains blocked on
 per-source geometry evidence, deterministic fixtures, and an ADR.
+
+### 2026-07-22: Select NED1 for the scoring experiment
+
+**Decision**: Use `/wc1/geodata/ned1/2024/.vrt` and bilinear warp to the run
+SSURGO grid for external elevation evidence.
+
+**Impact**: The 1 arc-second product matches the 30 m scoring scale. NED13 is
+not used because its finer source resolution would be resampled away while
+increasing remote VRT I/O.
 
 ## Risks and Issues
 

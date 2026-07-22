@@ -32,6 +32,8 @@ unchanged.
   read-only 298-case representative-run cohort complete (2026-07-22).
 - [ ] Milestone 3.5: evaluate failure-class-aware, per-candidate heuristic
   scoring with contact-aware map geometry and aligned terrain; research only.
+- [x] Milestone 3.5 geometry/terrain slice: execute 0%–30% terrain variants
+  against 298 read-only masked-valid cases with NED1 (2026-07-22).
 - [ ] Milestone 4: seek an ADR only if evidence supports opt-in production
   selection, then observe a shadow/opt-in rollout before default promotion.
 - [ ] Add deterministic fixtures for all observed primary failure classes.
@@ -62,6 +64,12 @@ unchanged.
   Evidence: 16 adjacent 90 m-wide clusters around a mapped gNATSGO pixel read
   6,400 pixels and completed in 174.344 ms (one worker), 85.852 ms (two), and
   46.784 ms (four); every cluster found its deliberately supplied valid MUKEY.
+- Observation: contact-aware geometry outperformed the crop-majority baseline
+  on the first scoring cohort, and terrain changed a material subset of donor
+  choices without making evaluation nondeterministic.
+  Evidence: geometry-only had 131 local feature-distance wins versus 58 global
+  wins; the 30% terrain variant had 140 versus 62. A 295-case repeat produced
+  equal result records at one and four workers in 6.08 s and 4.94 s.
 - Observation: `exhausted` must distinguish an unresolved search from a
   successful search that happens to use the maximum permitted radius.
   Evidence: the fixture corpus initially exposed `exhausted=True` for a
@@ -114,6 +122,12 @@ unchanged.
   profile evidence, and terrain are distinct signals whose availability varies
   by failure class. Weights are hypotheses to compare on held-out runs, not a
   production parameterization decision.
+  Date/Author: 2026-07-22 / user and Codex.
+- Decision: Select NED 1 arc-second 2024 as the external terrain source for
+  scoring experiments.
+  Rationale: it matches the approximately 30-m SSURGO scoring grid; NED13
+  adds remote I/O and resampling without useful additional terrain detail for
+  this categorical-map experiment.
   Date/Author: 2026-07-22 / user and Codex.
 
 ## Outcomes & Retrospective
@@ -207,6 +221,38 @@ MUKEY from candidate eligibility, exact recovery is not interpretable in this
 protocol. Feature/WEPP similarity and aligned elevation comparison are the
 usable diagnostic evidence. No observed improvement threshold is set before a
 future ADR.
+
+### Milestone 3.5 Scoring Experiment
+
+Milestone 3.5 is read-only and does not change `domsoil_d`. It introduces a
+WEPPpyo3 bounded-window geometry query keyed by individual source requests,
+not by a coalesced hillslope group. For every source request it returns valid
+candidate pixel support and four-neighbor shared raster-edge count separately.
+Support is local-window prevalence; it is never labeled or scored as shared
+boundary contact. The query remains worker-concurrent and reads only bounded
+crops.
+
+The first scoring experiment applies only source-local geometry and terrain to
+otherwise valid masked MUKEYs. It compares geometry-only and 0%, 10%, 20%, and
+30% terrain-weight variants; profile scoring waits for fixtures that preserve
+only the source fields available to each partial-invalid failure class. The
+geometry component prefers normalized shared edge and falls back to normalized
+local support only when no candidate shares an edge. The terrain component is
+rank-normalized source-to-candidate elevation difference. These are research
+variants, not production weights.
+
+Terrain queries use `/wc1/geodata/ned1/2024/.vrt` when an external source is
+needed. NED 1 arc-second is the selected source because its approximately
+30-m resolution matches the study grid; NED13 adds resampling and remote I/O
+without adding information at this scale. Run-aligned DEMs remain the
+hermetic fixture and local-run source; a NED1 query must record CRS,
+resampling, source path, and NoData behavior.
+
+Acceptance requires deterministic geometry fixtures for edge-versus-support,
+corner/no-edge, per-source results in a coalesced crop, elevation
+disambiguation, missing DEM, and stable ties. Report every component and score
+variant on held-out runs. Any no-edge/no-terrain or insufficient-margin case
+retains the explicit global fallback in a future production policy.
 
 Milestone 4 is conditional. A parameterization ADR is required before any
 production threshold or selection order changes. If approved, the policy is

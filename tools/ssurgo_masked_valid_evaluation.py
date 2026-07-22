@@ -13,6 +13,8 @@ from typing import Any, Mapping, Sequence
 
 
 SCHEMA_VERSION = 1
+DEFAULT_NED1_VRT = Path("/wc1/geodata/ned1/2024/.vrt")
+TERRAIN_WEIGHTS = (0.0, 0.1, 0.2, 0.3)
 
 
 def _numeric_distance(reference: Mapping[str, Any], candidate: Mapping[str, Any]) -> tuple[float | None, list[str]]:
@@ -68,6 +70,20 @@ def evaluate_masked_case(case: Mapping[str, Any]) -> dict[str, Any]:
     ):
         if field in case:
             result[field] = case[field]
+    if "score_variants" in case:
+        score_variants = {}
+        for name, variant in case["score_variants"].items():
+            selected_mukey = variant.get("selected_mukey")
+            selected_distance, selected_fields = (
+                _numeric_distance(reference, summaries.get(str(selected_mukey), {}))
+                if selected_mukey is not None else (None, [])
+            )
+            score_variants[name] = {
+                **variant,
+                "selected_feature_distance": selected_distance,
+                "selected_distance_fields": selected_fields,
+            }
+        result["score_variants"] = score_variants
     return result
 
 
@@ -125,31 +141,75 @@ def _median(values: Any) -> float | None:
     return float(np.median(finite)) if finite.size else None
 
 
-def _elevation_deltas(
-    labels: Any,
+def _read_aligned_dem(ssurgo_path: Path, dem_path: Path) -> tuple[Any, dict[str, Any]]:
+    """Read a DEM onto the SSURGO grid, warping only when alignment requires it."""
+    import numpy as np
+    import rasterio
+    from rasterio.enums import Resampling
+    from rasterio.vrt import WarpedVRT
+
+    with rasterio.open(ssurgo_path) as ssurgo, rasterio.open(dem_path) as dem:
+        aligned = (
+            dem.crs == ssurgo.crs
+            and dem.transform == ssurgo.transform
+            and dem.shape == ssurgo.shape
+        )
+        if aligned:
+            values = dem.read(1).astype(float)
+            if dem.nodata is not None:
+                values[values == dem.nodata] = math.nan
+            return values, {
+                "dem_path": str(dem_path),
+                "dem_resampling": "native_aligned",
+                "dem_crs": str(dem.crs),
+            }
+        with WarpedVRT(
+            dem,
+            crs=ssurgo.crs,
+            transform=ssurgo.transform,
+            width=ssurgo.width,
+            height=ssurgo.height,
+            resampling=Resampling.bilinear,
+            src_nodata=dem.nodata,
+            nodata=np.nan,
+            dtype="float32",
+        ) as warped:
+            return warped.read(1).astype(float), {
+                "dem_path": str(dem_path),
+                "dem_resampling": "bilinear_to_ssurgo_grid",
+                "dem_crs": str(dem.crs),
+            }
+
+
+def _candidate_elevation_deltas(
     mukeys: Any,
     elevation: Any,
     transform: Any,
     *,
-    topaz_id: str,
+    source_mukey: str,
     bounds: tuple[float, float, float, float],
     search_radius_m: float | None,
-    local_mukey: str | None,
-    global_mukey: str,
-    global_elevation_medians: Mapping[str, float | None],
-) -> tuple[float | None, float | None]:
-    """Compare source-hillslope elevation with vectorized local/global MUKEY masks."""
-    import numpy as np
+    candidates: Sequence[int],
+) -> dict[str, float | None]:
+    """Compare source-MUKEY and candidate elevations using cropped map windows."""
     from rasterio.windows import Window, from_bounds
 
-    source_median = _median(elevation[labels == int(topaz_id)])
-    if source_median is None:
-        return None, None
-    global_median = global_elevation_medians.get(global_mukey)
-    global_delta = abs(source_median - global_median) if global_median is not None else None
-    if local_mukey is None or search_radius_m is None:
-        return None, global_delta
     min_x, min_y, max_x, max_y = bounds
+    source_window = from_bounds(min_x, min_y, max_x, max_y, transform=transform).round_offsets().round_lengths()
+    full = Window(0, 0, mukeys.shape[1], mukeys.shape[0])
+    try:
+        source_window = source_window.intersection(full)
+    except ValueError:
+        return {str(candidate): None for candidate in candidates}
+    row_start, col_start = int(source_window.row_off), int(source_window.col_off)
+    row_stop, col_stop = row_start + int(source_window.height), col_start + int(source_window.width)
+    source_median = _median(
+        elevation[row_start:row_stop, col_start:col_stop][
+            mukeys[row_start:row_stop, col_start:col_stop] == int(source_mukey)
+        ]
+    )
+    if source_median is None or search_radius_m is None:
+        return {str(candidate): None for candidate in candidates}
     window = from_bounds(
         min_x - search_radius_m,
         min_y - search_radius_m,
@@ -157,20 +217,90 @@ def _elevation_deltas(
         max_y + search_radius_m,
         transform=transform,
     ).round_offsets().round_lengths()
-    full = Window(0, 0, mukeys.shape[1], mukeys.shape[0])
     try:
         window = window.intersection(full)
     except ValueError:
-        return None, global_delta
+        return {str(candidate): None for candidate in candidates}
     row_start, col_start = int(window.row_off), int(window.col_off)
     row_stop, col_stop = row_start + int(window.height), col_start + int(window.width)
-    local_median = _median(
+    local_mukeys = mukeys[row_start:row_stop, col_start:col_stop]
+    local_elevation = elevation[row_start:row_stop, col_start:col_stop]
+    return {
+        str(candidate): (
+            abs(source_median - candidate_median)
+            if (candidate_median := _median(local_elevation[local_mukeys == candidate])) is not None
+            else None
+        )
+        for candidate in candidates
+    }
+
+
+def _source_elevation_median(
+    mukeys: Any, elevation: Any, transform: Any, *, source_mukey: str, bounds: tuple[float, float, float, float]
+) -> float | None:
+    """Return the source-MUKEY elevation median inside its source-local bounds."""
+    from rasterio.windows import Window, from_bounds
+
+    min_x, min_y, max_x, max_y = bounds
+    window = from_bounds(min_x, min_y, max_x, max_y, transform=transform).round_offsets().round_lengths()
+    try:
+        window = window.intersection(Window(0, 0, mukeys.shape[1], mukeys.shape[0]))
+    except ValueError:
+        return None
+    row_start, col_start = int(window.row_off), int(window.col_off)
+    row_stop, col_stop = row_start + int(window.height), col_start + int(window.width)
+    return _median(
         elevation[row_start:row_stop, col_start:col_stop][
-            mukeys[row_start:row_stop, col_start:col_stop] == int(local_mukey)
+            mukeys[row_start:row_stop, col_start:col_stop] == int(source_mukey)
         ]
     )
-    local_delta = abs(source_median - local_median) if local_median is not None else None
-    return local_delta, global_delta
+
+
+def score_geometry_terrain_candidates(
+    candidates: Sequence[tuple[int, int, int]], elevation_deltas: Mapping[str, float | None]
+) -> dict[str, dict[str, Any]]:
+    """Score bounded local candidates across research terrain-weight variants."""
+    edge_total = sum(shared_edges for _, _, shared_edges in candidates)
+    support_total = sum(support for _, support, _ in candidates)
+    geometry_denominator = edge_total if edge_total else support_total
+    finite_deltas = [delta for delta in elevation_deltas.values() if delta is not None]
+    minimum_delta = min(finite_deltas) if finite_deltas else None
+    maximum_delta = max(finite_deltas) if finite_deltas else None
+    variants: dict[str, dict[str, Any]] = {}
+    for terrain_weight in TERRAIN_WEIGHTS:
+        scored = []
+        for mukey, support, shared_edges in candidates:
+            geometry = (shared_edges if edge_total else support) / geometry_denominator if geometry_denominator else 0.0
+            elevation_delta = elevation_deltas.get(str(mukey))
+            if elevation_delta is None or minimum_delta is None or maximum_delta is None:
+                terrain = None
+            elif maximum_delta == minimum_delta:
+                terrain = 1.0
+            else:
+                terrain = 1.0 - (elevation_delta - minimum_delta) / (maximum_delta - minimum_delta)
+            if terrain is None:
+                score = geometry
+            else:
+                score = (1.0 - terrain_weight) * geometry + terrain_weight * terrain
+            scored.append(
+                {
+                    "mukey": str(mukey),
+                    "score": score,
+                    "geometry_component": geometry,
+                    "terrain_component": terrain,
+                    "support_pixels": support,
+                    "shared_edges": shared_edges,
+                    "elevation_delta_m": elevation_delta,
+                }
+            )
+        scored.sort(key=lambda candidate: (-candidate["score"], int(candidate["mukey"])))
+        variants[f"terrain_{int(terrain_weight * 100):02d}pct"] = {
+            "terrain_weight": terrain_weight,
+            "selected_mukey": scored[0]["mukey"] if scored else None,
+            "candidates": scored,
+            "geometry_basis": "shared_edges" if edge_total else "support_pixels",
+        }
+    return variants
 
 
 def summarize_evaluations(results: Sequence[Mapping[str, Any]]) -> dict[str, Any]:
@@ -222,6 +352,35 @@ def summarize_evaluations(results: Sequence[Mapping[str, Any]]) -> dict[str, Any
     return {"all_runs": summarize(results), "by_run": by_run}
 
 
+def summarize_score_variants(results: Sequence[Mapping[str, Any]]) -> dict[str, dict[str, int]]:
+    """Compare every research score variant with the same global baseline."""
+    names = sorted({name for row in results for name in row.get("score_variants", {})})
+    summary = {}
+    for name in names:
+        comparable = [
+            row for row in results
+            if (variant := row.get("score_variants", {}).get(name)) is not None
+            and variant["selected_feature_distance"] is not None
+            and row["global_feature_distance"] is not None
+        ]
+        summary[name] = {
+            "comparable": len(comparable),
+            "local_better": sum(
+                row["score_variants"][name]["selected_feature_distance"] < row["global_feature_distance"]
+                for row in comparable
+            ),
+            "global_better": sum(
+                row["global_feature_distance"] < row["score_variants"][name]["selected_feature_distance"]
+                for row in comparable
+            ),
+            "tied": sum(
+                row["score_variants"][name]["selected_feature_distance"] == row["global_feature_distance"]
+                for row in comparable
+            ),
+        }
+    return summary
+
+
 def build_run_cases(
     run_path: Path,
     *,
@@ -230,12 +389,13 @@ def build_run_cases(
     initial_radius_m: float,
     max_radius_m: float,
     workers: int | None,
+    dem_path: Path,
 ) -> tuple[list[dict[str, Any]], dict[str, Any]]:
     """Build read-only masked-valid cases from one completed gridded SSURGO run."""
     import rasterio
 
     from wepppy.nodb.core.soils import Soils
-    from wepppyo3.raster_characteristics import local_mukey_candidates
+    from wepppyo3.raster_characteristics import local_mukey_geometry
 
     soils = Soils.getInstance(str(run_path))
     raw_domsoil_d = soils.raw_ssurgo_domsoil_d or {}
@@ -263,7 +423,6 @@ def build_run_cases(
     ssurgo_path = run_path / "soils" / "ssurgo.tif"
     with rasterio.open(subwta_path) as subwta:
         labels = subwta.read(1)
-        transform = subwta.transform
         bounds_by_topaz: dict[str, tuple[float, float, float, float]] = {}
         for topaz_id, _ in eligible:
             rows, cols = (labels == int(topaz_id)).nonzero()
@@ -274,26 +433,23 @@ def build_run_cases(
             )
             bounds_by_topaz[topaz_id] = rasterio.windows.bounds(window, subwta.transform)
 
-    with rasterio.open(ssurgo_path) as ssurgo, rasterio.open(run_path / "dem" / "dem.tif") as dem:
-        if ssurgo.shape != dem.shape or ssurgo.transform != dem.transform:
-            raise ValueError(f"unaligned SSURGO and DEM grids: {run_path}")
+    with rasterio.open(ssurgo_path) as ssurgo:
         mukey_grid = ssurgo.read(1)
-        elevation_grid = dem.read(1).astype(float)
-        if dem.nodata is not None:
-            elevation_grid[elevation_grid == dem.nodata] = math.nan
+        ssurgo_transform = ssurgo.transform
+    elevation_grid, dem_metadata = _read_aligned_dem(ssurgo_path, dem_path)
     global_elevation_medians = {
         mukey: _median(elevation_grid[mukey_grid == int(mukey)]) for mukey in valid_mukeys
     }
 
     selected = [(topaz_id, mukey) for topaz_id, mukey in eligible if topaz_id in bounds_by_topaz]
-    clusters = [(topaz_id, [int(mukey)], bounds_by_topaz[topaz_id]) for topaz_id, mukey in selected]
+    clusters = [(topaz_id, int(mukey), bounds_by_topaz[topaz_id]) for topaz_id, mukey in selected]
     cases: list[dict[str, Any]] = []
     for withheld_mukey in sorted({mukey for _, mukey in selected}, key=int):
         masked_valid = {int(mukey) for mukey in valid_mukeys - {withheld_mukey}}
         matching = [(topaz_id, mukey) for topaz_id, mukey in selected if mukey == withheld_mukey]
-        results = local_mukey_candidates(
+        results = local_mukey_geometry(
             raster_path=str(ssurgo_path),
-            clusters=[cluster for cluster in clusters if cluster[0] in {topaz_id for topaz_id, _ in matching}],
+            sources=[cluster for cluster in clusters if cluster[0] in {topaz_id for topaz_id, _ in matching}],
             valid_mukeys=masked_valid,
             initial_radius_m=initial_radius_m,
             max_radius_m=max_radius_m,
@@ -303,23 +459,34 @@ def build_run_cases(
         if global_mukey is None:
             continue
         for topaz_id, _ in matching:
-            _, radius_m, support, exhausted, pixels_read = results[topaz_id]
+            _, radius_m, geometry, exhausted, pixels_read = results[topaz_id]
+            support = [(mukey, support_pixels) for mukey, support_pixels, _ in geometry]
             local_mukey = _numeric_mukey(sorted(support, key=lambda item: (-item[1], item[0]))[0][0]) if support else None
-            local_elevation_delta_m, global_elevation_delta_m = _elevation_deltas(
-                labels,
+            candidate_elevation_deltas = _candidate_elevation_deltas(
                 mukey_grid,
                 elevation_grid,
-                transform,
-                topaz_id=topaz_id,
+                ssurgo_transform,
+                source_mukey=withheld_mukey,
                 bounds=bounds_by_topaz[topaz_id],
                 search_radius_m=radius_m,
-                local_mukey=local_mukey,
-                global_mukey=global_mukey,
-                global_elevation_medians=global_elevation_medians,
+                candidates=[mukey for mukey, _, _ in geometry],
             )
-            summary_mukeys = {withheld_mukey, global_mukey}
-            if local_mukey is not None:
-                summary_mukeys.add(local_mukey)
+            local_elevation_delta_m = candidate_elevation_deltas.get(local_mukey) if local_mukey else None
+            source_elevation_median = _source_elevation_median(
+                mukey_grid,
+                elevation_grid,
+                ssurgo_transform,
+                source_mukey=withheld_mukey,
+                bounds=bounds_by_topaz[topaz_id],
+            )
+            global_elevation_median = global_elevation_medians.get(global_mukey)
+            global_elevation_delta_m = (
+                abs(source_elevation_median - global_elevation_median)
+                if source_elevation_median is not None and global_elevation_median is not None
+                else None
+            )
+            score_variants = score_geometry_terrain_candidates(geometry, candidate_elevation_deltas)
+            summary_mukeys = {withheld_mukey, global_mukey, *(str(mukey) for mukey, _, _ in geometry)}
             cases.append(
                 {
                     "case_id": f"{run_path.name}:{topaz_id}",
@@ -339,6 +506,11 @@ def build_run_cases(
                     "pixels_read": pixels_read,
                     "local_elevation_delta_m": local_elevation_delta_m,
                     "global_elevation_delta_m": global_elevation_delta_m,
+                    "geometry_candidates": [
+                        {"mukey": str(mukey), "support_pixels": support_pixels, "shared_edges": shared_edges}
+                        for mukey, support_pixels, shared_edges in geometry
+                    ],
+                    "score_variants": score_variants,
                 }
             )
     metadata = {
@@ -348,6 +520,7 @@ def build_run_cases(
         "seed": seed,
         "initial_radius_m": initial_radius_m,
         "max_radius_m": max_radius_m,
+        **dem_metadata,
     }
     return cases, metadata
 
@@ -363,6 +536,7 @@ def main(argv: Sequence[str] | None = None) -> int:
     parser.add_argument("--initial-radius-m", type=float, default=250.0)
     parser.add_argument("--max-radius-m", type=float, default=2000.0)
     parser.add_argument("--workers", type=int)
+    parser.add_argument("--dem-vrt", type=Path, default=DEFAULT_NED1_VRT)
     args = parser.parse_args(argv)
     if args.input is not None:
         cases = json.loads(args.input.read_text(encoding="utf-8"))
@@ -378,6 +552,7 @@ def main(argv: Sequence[str] | None = None) -> int:
                 initial_radius_m=args.initial_radius_m,
                 max_radius_m=args.max_radius_m,
                 workers=args.workers,
+                dem_path=args.dem_vrt,
             )
             cases.extend(run_cases)
             cohorts.append(metadata)
@@ -388,6 +563,7 @@ def main(argv: Sequence[str] | None = None) -> int:
             "results": [evaluate_masked_case(case) for case in cases],
         }
         results["summary"] = summarize_evaluations(results["results"])
+        results["scoring_summary"] = summarize_score_variants(results["results"])
     args.output.parent.mkdir(parents=True, exist_ok=True)
     args.output.write_text(json.dumps(results, indent=2, sort_keys=True) + "\n", encoding="utf-8")
     return 0

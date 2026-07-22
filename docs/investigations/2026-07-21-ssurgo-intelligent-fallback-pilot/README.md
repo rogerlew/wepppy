@@ -73,6 +73,39 @@ a production selection rule. Deterministic fixtures for the observed converter
 failure classes also remain incomplete. No ADR or fallback-policy change is
 justified yet.
 
+## Geometry and Terrain Scoring Experiment (Milestone 3.5)
+
+The scoring experiment adds a concurrent WEPPpyo3 bounded-window query keyed
+by source MUKEY/bounds. It reports local candidate support and four-neighbor
+shared raster-edge counts separately, so crop abundance is not misrepresented
+as adjacency. Geometry-only selection uses normalized shared edge; it would
+use support only if no candidate shares an edge. Terrain variants add 0%, 10%,
+20%, or 30% of a rank-normalized source-to-candidate elevation difference.
+
+External elevation comes from `/wc1/geodata/ned1/2024/.vrt`, warped bilinearly
+from EPSG:4269 to the 30 m run SSURGO grid. NED 1 arc-second was selected over
+NED13 because its source resolution is already approximately 30 m; NED13 would
+increase remote I/O and resampling without increasing the information used by
+the categorical soil map. The source MUKEY's elevation is measured inside its
+own local map bounds, not from watershed topology.
+
+| Variant | Local feature-distance better | Global better | Tie |
+| --- | ---: | ---: | ---: |
+| Geometry only | 131 | 58 | 109 |
+| Geometry + 10% terrain | 132 | 60 | 106 |
+| Geometry + 20% terrain | 139 | 62 | 97 |
+| Geometry + 30% terrain | 140 | 62 | 96 |
+
+All 298 cases had shared-edge candidates. Terrain changed the geometry choice
+in 13, 33, and 51 cases at 10%, 20%, and 30% respectively. On the 295-case
+substantive run, worker-one execution took 6.08 s and worker-four took 4.94 s;
+their parsed result records and score summaries were identical.
+
+This is a GO for the **scoring research experiment**, not for M4. The cohort
+still covers only two local runs, does not evaluate retained-profile score
+components by failure class, and does not yet use one coalesced crop to serve
+multiple source requests. Production fallback behavior remains unchanged.
+
 ## Expanded Cohort Results
 
 | Cohort | Draws | Unique MUKEYs | Residual-invalid | Worker failed | Unbuildable | 95% Wilson interval |
@@ -231,6 +264,10 @@ The local, non-versioned study directory is
   comparisons. It can be recreated with
   `tools/ssurgo_masked_valid_evaluation.py --run <run> ...`; it is not
   committed because it contains local run paths and date-scoped run evidence.
+- `/tmp/ssurgo_masked_valid_20260722/scoring_ned1_full.json` — NED1-backed
+  geometry/terrain variant records and aggregate comparisons; the one- and
+  four-worker repeat artifacts use the matching `scoring_ned1_workers*.json`
+  names in the same non-versioned directory.
 
 The raw diagnostic JSONL is intentionally not committed: it is a large,
 date-sensitive external-data extract. The inventory and JSONL can be recreated

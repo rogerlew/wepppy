@@ -51,3 +51,19 @@ def test_cohort_summary_counts_paired_feature_and_elevation_outcomes() -> None:
     assert summary["all_runs"]["feature_tied"] == 1
     assert summary["all_runs"]["elevation_global_better"] == 1
     assert summary["by_run"]["run-a"]["proposal_disagreements"] == 1
+
+
+def test_scoring_summary_compares_each_variant_with_global() -> None:
+    module = runpy.run_path(str(Path(__file__).resolve().parents[2] / "tools/ssurgo_masked_valid_evaluation.py"))
+    summary = module["summarize_score_variants"](
+        [
+            {"global_feature_distance": 2.0, "score_variants": {"terrain_00pct": {"selected_feature_distance": 1.0}}},
+            {"global_feature_distance": 1.0, "score_variants": {"terrain_00pct": {"selected_feature_distance": 3.0}}},
+        ]
+    )
+    assert summary["terrain_00pct"] == {
+        "comparable": 2,
+        "local_better": 1,
+        "global_better": 1,
+        "tied": 0,
+    }
