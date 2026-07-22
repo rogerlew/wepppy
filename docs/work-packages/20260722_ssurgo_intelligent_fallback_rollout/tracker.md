@@ -23,8 +23,9 @@ perform the local RQ acceptance sequence before considering M4 release lift.
 - [x] M2: Implement vector selection, global escape hatch, selected-donor
   materialization, and additive provenance.
 - [ ] M3: Validate compatibility, generated outputs, and RQ contracts.
-- [ ] M4: Run `plastic-bundling` / `disturbed9002` through RQ, then complete
-  reviews and disposition.
+- [x] M4 runtime: Run `plastic-bundling` / `disturbed9002` through RQ and
+  capture all-valid no-op evidence.
+- [ ] M5: Complete remaining M3 evidence, reviews, and disposition.
 
 ### In Progress
 
@@ -169,6 +170,27 @@ be used because `/weppcloud/login` is OAuth-only in this stack. The API
 submission requires an authorized bearer or session-token path. No token was
 forged and no RQ mutation was submitted.
 
-**Next steps**: Supply/re-enable an approved local bearer/session-token path,
-then execute the discovered `rq_engine_build_soils` API sequence. Continue M3
-adversarial and broader scoring/radius evidence independently.
+**Next steps**: Continue M3 adversarial and broader scoring/radius evidence;
+the later entry records the now-complete RQ acceptance sequence.
+
+### 2026-07-22 UTC: M4 local RQ all-valid acceptance
+
+**Agent/Contributor**: Codex
+
+**Work completed**: Used the supplied scoped JWT to discover the live
+`rq_engine_build_soils` contract, prove the post-restart wrong-config request
+returns non-mutating `409 run_config_mismatch`, submit the resolved correct
+payload, poll terminal `finished`, and inspect NoDb/Parquet/soil artifacts.
+
+**Result**: PASS for the all-valid no-op path. Candidate preparation was
+`not_attempted`, the candidate manifest was absent, mappings were unchanged,
+and 63 Parquet rows/reference soil files were coherent. Redacted details are
+in `artifacts/2026-07-22_rq_acceptance.md`.
+
+**Operational note**: A stale rq-engine process accepted the first wrong-config
+probe. After the idle-queue preflight, targeted service recreation loaded the
+committed implementation; the re-run produced the required 409. No Redis flush
+was performed.
+
+**Next steps**: M3 local-selection/adversarial evidence and M5 zero-unresolved
+review disposition remain required to lift the package release hold.

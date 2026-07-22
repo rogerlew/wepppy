@@ -23,8 +23,8 @@ local RQ `plastic-bundling` job proves the same worker path used in normal runs.
   selected-donor materialization, and additive provenance.
 - [ ] M3: In progress — add generated-output/adversarial compatibility tests
   and validate the complete RQ contract.
-- [ ] M4: Run `plastic-bundling` / `disturbed9002` through RQ and capture
-  evidence.
+- [x] M4: Ran `plastic-bundling` / `disturbed9002` through RQ and captured
+  all-valid no-op evidence.
 - [ ] M5: Complete code, QA, security review, finding disposition, and gates.
 
 ## Surprises & Discoveries
@@ -74,10 +74,11 @@ review disposition.
 
 M3 now includes a real Parquet round-trip fixture for local fallback
 provenance and referenced `.sol` output. M4 preflight found an idle healthy
-local stack with no queued work. The documented local dev-agent password flow
-cannot presently mint a bearer token because the login surface is OAuth-only;
-do not bypass this authorization boundary. A valid local bearer/session-token
-path is required before the RQ submission step.
+local stack with no queued work. The operator supplied a short-lived scoped JWT,
+which enabled the documented discovery, wrong-config non-mutation, submission,
+polling, and output inspection sequence. The M4 all-valid no-op result passed;
+see `artifacts/2026-07-22_rq_acceptance.md`. M3 adversarial/scoring coverage
+and M5 review closure still hold the package release.
 
 ## Context and Orientation
 
