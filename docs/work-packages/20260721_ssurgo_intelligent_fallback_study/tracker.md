@@ -8,9 +8,9 @@
 **Started**: 2026-07-21 18:00 UTC
 **Current phase**: M4 evidence hold
 **Last updated**: 2026-07-26
-**Next milestone**: Evaluate an outer-ring ranker and a confidence/abstention
-proxy on fixed 250 m oracle misses, then complete observed-invalid provenance
-review before defining an ADR-ready practical-effect criterion.
+**Next milestone**: Predeclare and evaluate a hybrid outer-ring ranker and a
+confidence/abstention proxy on geographically held-out cases; improve
+independent-withheld request batching before a larger cohort.
 **Security impact**: none
 **Dedicated security review**: no
 **Security artifact**: N/A
@@ -89,6 +89,10 @@ review before defining an ADR-ready practical-effect criterion.
   misses had a better local candidate by 2 km, while geometry top one found
   only three; the 2 km one/four-worker artifacts are byte-identical
   (2026-07-26).
+- [x] Rejected strict first-ring selection: its 2 km candidate set raised the
+  322-case local oracle to 305, but top-one wins were 168 versus 185 for the
+  existing geometry-plus-terrain research variant; one/four-worker output was
+  byte-identical (2026-07-26).
 
 ## Timeline
 

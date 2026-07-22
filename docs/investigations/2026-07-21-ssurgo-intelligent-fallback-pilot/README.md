@@ -229,6 +229,44 @@ repeat (`oracle_miss_2000m_workers1.json`) is byte-identical to the four-worker
 result. The evaluator's repeatable `--case-id <run-name>:<topaz-id>` filter
 pins that fixed cohort for subsequent ranking experiments.
 
+## First-Appearance Ring Ranking (Milestone 3.5)
+
+The next read-only experiment kept the 2 km candidate horizon and derived
+each candidate's first appearance from forced 250 m, 500 m, 1 km, and 2 km
+windows. Its support evidence is a window-set difference: support in the
+candidate's first ring, rather than a pixel-distance calculation. The three
+predeclared rankers order candidates by (1) first ring, (2) first-ring support,
+and (3) elevation only when the first two keys tie. This respects proximity as
+the primary signal and does not use hillslope topology or texture.
+
+It is not a viable ranker. On the fixed eleven-case 250 m oracle-miss cohort,
+all three variants selected zero feature-closer top-one donors, despite the
+2 km candidate set containing one in every case. On the fixed 322-case larger
+cohort, the wider set raised the local oracle from 275 to 305 cases, but the
+ring rankers did not turn that discovery headroom into a better top-one rule:
+
+| Ranker | Top-one local better | Global better | Tie | Top-three local better |
+| --- | ---: | ---: | ---: | ---: |
+| 2 km geometry + 30% terrain | 185 | 62 | 75 | 276 |
+| First ring only | 168 | 83 | 71 | 256 |
+| First ring + support | 156 | 80 | 86 | 263 |
+| First ring + support + elevation | 156 | 80 | 86 | 263 |
+
+The elevation tertiary key made no selection change in this cohort. This is
+negative evidence against a strict earliest-window policy, not a reason to
+tune its weights after looking at these outcomes. The candidate-ring artifact
+is `/tmp/ssurgo_masked_valid_20260726/ring_ranker_larger_cohort.json`; its
+one-worker counterpart is byte-identical. It completed in 19.49 s with four
+workers versus 21.17 s with one. The modest speedup reflects the evaluator's
+current per-withheld-MUKEY batching, which limits concurrent work; it is a
+tooling limitation to address before any broader cohort execution.
+
+**M4 decision: HOLD.** A wider candidate set is now supported as discovery
+evidence, but strict ring proximity is rejected as its ranker. The next
+predeclared experiment should test a small hybrid family that treats ring as a
+soft feature alongside source-contact geometry and elevation, with a separate
+confidence/abstention proxy and geographically held-out evaluation.
+
 ## Expanded Cohort Results
 
 | Cohort | Draws | Unique MUKEYs | Residual-invalid | Worker failed | Unbuildable | 95% Wilson interval |

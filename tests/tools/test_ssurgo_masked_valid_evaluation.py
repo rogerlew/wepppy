@@ -174,3 +174,37 @@ def test_case_id_restriction_keeps_only_requested_run_topaz_pairs() -> None:
 
     assert module["_restrict_eligible_case_ids"](eligible, "fixture-run", {"fixture-run:2"}) == [("2", "20")]
     assert module["_restrict_eligible_case_ids"](eligible, "fixture-run", None) == eligible
+
+
+def test_ring_evidence_uses_first_window_and_support_set_difference() -> None:
+    module = runpy.run_path(str(Path(__file__).resolve().parents[2] / "tools/ssurgo_masked_valid_evaluation.py"))
+    evidence = module["derive_candidate_ring_evidence"](
+        {
+            250.0: [(20, 5, 3)],
+            500.0: [(20, 8, 3), (30, 4, 0)],
+            1000.0: [(20, 11, 3), (30, 7, 0), (40, 6, 0)],
+        }
+    )
+
+    assert evidence == [
+        {"mukey": "20", "first_radius_m": 250.0, "first_ring_support_pixels": 5, "support_pixels": 11, "shared_edges": 3},
+        {"mukey": "30", "first_radius_m": 500.0, "first_ring_support_pixels": 4, "support_pixels": 7, "shared_edges": 0},
+        {"mukey": "40", "first_radius_m": 1000.0, "first_ring_support_pixels": 6, "support_pixels": 6, "shared_edges": 0},
+    ]
+
+
+def test_ring_rankers_keep_radius_primary_and_terrain_tertiary() -> None:
+    module = runpy.run_path(str(Path(__file__).resolve().parents[2] / "tools/ssurgo_masked_valid_evaluation.py"))
+    variants = module["score_ring_candidates"](
+        [
+            {"mukey": "20", "first_radius_m": 250.0, "first_ring_support_pixels": 5, "support_pixels": 9, "shared_edges": 0},
+            {"mukey": "30", "first_radius_m": 250.0, "first_ring_support_pixels": 5, "support_pixels": 8, "shared_edges": 0},
+            {"mukey": "40", "first_radius_m": 500.0, "first_ring_support_pixels": 50, "support_pixels": 50, "shared_edges": 0},
+        ],
+        {"20": 10.0, "30": 1.0, "40": 0.0},
+    )
+
+    assert variants["ring_only"]["selected_mukey"] == "20"
+    assert variants["ring_support"]["selected_mukey"] == "20"
+    assert variants["ring_support_terrain"]["selected_mukey"] == "30"
+    assert [candidate["mukey"] for candidate in variants["ring_support_terrain"]["candidates"]] == ["30", "20", "40"]

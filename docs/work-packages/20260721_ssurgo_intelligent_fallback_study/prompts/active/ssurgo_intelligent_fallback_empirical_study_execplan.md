@@ -49,6 +49,9 @@ unchanged.
 - [x] Milestone 3.5 broader-ring slice: re-run the eleven 250 m local-oracle
   misses at fixed 500 m, 1 km, and 2 km windows; the 2 km one/four-worker
   artifacts are byte-identical (2026-07-26).
+- [x] Milestone 3.5 first-ring ranker: evaluate first appearance, first-ring
+  support, and elevation tie-breaking across the fixed eleven-case and
+  322-case cohorts; reject strict ring-first selection (2026-07-26).
 - [ ] Milestone 4: seek an ADR only if evidence supports opt-in production
   selection, then observe a shadow/opt-in rollout before default promotion.
 - [ ] Add deterministic fixtures for all observed primary failure classes.
@@ -111,6 +114,17 @@ unchanged.
   and 11 of 11 fixed cases respectively; at 2 km geometry top one won only
   three and top three four. The 2 km one/four-worker JSON artifacts were
   byte-identical.
+- Observation: first-appearance ring evidence improves candidate discovery
+  but fails as a strict selection priority.
+  Evidence: the 2 km candidate set raised the larger-cohort local oracle from
+  275 to 305 of 322 cases, while first-ring-only top one won 168 cases versus
+  185 for the existing 2 km geometry-plus-30%-terrain variant. It won none of
+  the eleven fixed 250 m oracle-miss cases.
+- Observation: worker concurrency is deterministic but has limited benefit
+  for the current ring-evaluation orchestration.
+  Evidence: the 322-case four-worker artifact was byte-identical to the
+  one-worker artifact and completed in 19.49 s versus 21.17 s. Per-withheld
+  MUKEY batching limits the available concurrent source requests.
 
 ## Decision Log
 
@@ -195,6 +209,12 @@ unchanged.
   insufficient 250 m candidate set from an inadequate ranker. Texture was
   not added to the score; no production rule changed.
   Date/Author: 2026-07-26 / user and Codex.
+- Decision: Reject strict earliest-ring ranking without post-hoc retuning.
+  Rationale: it loses to the existing 2 km geometry/terrain ranker on the
+  broad cohort and fails every deliberately selected 250 m discovery miss.
+  Ring membership remains diagnostic candidate evidence, not a selection
+  priority. The next comparison must be predeclared and held out.
+  Date/Author: 2026-07-26 / Codex.
 
 ## Outcomes & Retrospective
 
@@ -232,6 +252,14 @@ only three of those candidates at top one. The next research slice must rank
 outer-ring candidates and define a confidence/abstention proxy before a
 conditional expansion can be evaluated. Global fallback remains the explicit
 baseline.
+
+The first-ring ranker supplied the decisive negative check: its strict
+proximity ordering did not select a feature-closer donor in any of the eleven
+fixed discovery-miss cases and underperformed the current 2 km geometry/terrain
+research variant across 322 cases. The candidate horizon is useful, but M4
+remains HOLD until a predeclared hybrid ranker and abstention proxy show
+geographically held-out benefit. The evaluator must also batch independent
+withheld-MUKEY requests more effectively before expanding the cohort.
 
 ## Context and Orientation
 

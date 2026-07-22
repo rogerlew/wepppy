@@ -148,6 +148,7 @@ def evaluate_masked_case(case: Mapping[str, Any]) -> dict[str, Any]:
         "local_elevation_delta_m",
         "global_elevation_delta_m",
         "geometry_candidates",
+        "candidate_ring_evidence",
     ):
         if field in case:
             result[field] = case[field]
@@ -419,6 +420,77 @@ def score_geometry_terrain_candidates(
     return variants
 
 
+def derive_candidate_ring_evidence(
+    geometry_by_radius: Mapping[float, Sequence[tuple[int, int, int]]],
+) -> list[dict[str, Any]]:
+    """Describe first bounded-window appearance using support set differences."""
+    prior_support: dict[int, int] = {}
+    evidence: dict[int, dict[str, Any]] = {}
+    for radius_m in sorted(geometry_by_radius):
+        current = {
+            int(mukey): (int(support_pixels), int(shared_edges))
+            for mukey, support_pixels, shared_edges in geometry_by_radius[radius_m]
+        }
+        for mukey, (support_pixels, shared_edges) in current.items():
+            if mukey not in evidence:
+                evidence[mukey] = {
+                    "mukey": str(mukey),
+                    "first_radius_m": radius_m,
+                    "first_ring_support_pixels": support_pixels - prior_support.get(mukey, 0),
+                    "support_pixels": support_pixels,
+                    "shared_edges": shared_edges,
+                }
+            elif radius_m == max(geometry_by_radius):
+                evidence[mukey]["support_pixels"] = support_pixels
+                evidence[mukey]["shared_edges"] = shared_edges
+        prior_support = {mukey: support_pixels for mukey, (support_pixels, _) in current.items()}
+    return [evidence[mukey] for mukey in sorted(evidence)]
+
+
+def score_ring_candidates(
+    candidates: Sequence[Mapping[str, Any]], elevation_deltas: Mapping[str, float | None]
+) -> dict[str, dict[str, Any]]:
+    """Rank a fixed wider candidate set by ring, then support and terrain ties."""
+    def elevation_key(candidate: Mapping[str, Any]) -> tuple[bool, float]:
+        value = elevation_deltas.get(str(candidate["mukey"]))
+        return (value is None, float(value) if value is not None else math.inf)
+
+    def ordered(name: str, key: Any) -> dict[str, Any]:
+        ranked = sorted(candidates, key=key)
+        return {
+            "selection_basis": name,
+            "selected_mukey": str(ranked[0]["mukey"]) if ranked else None,
+            "candidates": [
+                {
+                    **candidate,
+                    "elevation_delta_m": elevation_deltas.get(str(candidate["mukey"])),
+                }
+                for candidate in ranked
+            ],
+        }
+
+    return {
+        "ring_only": ordered("first_radius_m", lambda candidate: (candidate["first_radius_m"], int(candidate["mukey"]))),
+        "ring_support": ordered(
+            "first_radius_m_then_first_ring_support",
+            lambda candidate: (
+                candidate["first_radius_m"],
+                -int(candidate["first_ring_support_pixels"]),
+                int(candidate["mukey"]),
+            ),
+        ),
+        "ring_support_terrain": ordered(
+            "first_radius_m_then_first_ring_support_then_elevation",
+            lambda candidate: (
+                candidate["first_radius_m"],
+                -int(candidate["first_ring_support_pixels"]),
+                elevation_key(candidate),
+                int(candidate["mukey"]),
+            ),
+        ),
+    }
+
+
 def score_failure_aware_candidates(
     candidates: Sequence[tuple[int, int, int]],
     elevation_deltas: Mapping[str, float | None],
@@ -652,8 +724,8 @@ def _candidate_study_group(results: Sequence[Mapping[str, Any]]) -> dict[str, di
                 top_distances = [local_distances[mukey] for mukey in ranked[:top_k] if mukey in local_distances]
                 if top_distances:
                     counts[f"top_{top_k}_{outcome(min(top_distances), global_distance)}"] += 1
-            scores = [float(candidate["score"]) for candidate in variant.get("candidates", [])]
-            if len(scores) > 1:
+            scores = [float(candidate["score"]) for candidate in variant.get("candidates", []) if "score" in candidate]
+            if len(scores) == len(ranked) and len(scores) > 1:
                 margins.append(scores[0] - scores[1])
         summary[name] = {
             "comparable": len(comparable),
@@ -705,6 +777,7 @@ def build_run_cases(
     workers: int | None,
     dem_path: Path,
     requested_case_ids: set[str] | None = None,
+    candidate_ring_m: Sequence[float] | None = None,
 ) -> tuple[list[dict[str, Any]], dict[str, Any]]:
     """Build read-only masked-valid cases from one completed gridded SSURGO run."""
     import rasterio
@@ -763,19 +836,39 @@ def build_run_cases(
     for withheld_mukey in sorted({mukey for _, mukey in selected}, key=int):
         masked_valid = {int(mukey) for mukey in valid_mukeys - {withheld_mukey}}
         matching = [(topaz_id, mukey) for topaz_id, mukey in selected if mukey == withheld_mukey]
-        results = local_mukey_geometry(
-            raster_path=str(ssurgo_path),
-            sources=[cluster for cluster in clusters if cluster[0] in {topaz_id for topaz_id, _ in matching}],
-            valid_mukeys=masked_valid,
-            initial_radius_m=initial_radius_m,
-            max_radius_m=max_radius_m,
-            workers=workers,
-        )
+        matching_sources = [cluster for cluster in clusters if cluster[0] in {topaz_id for topaz_id, _ in matching}]
+        if candidate_ring_m:
+            results_by_radius = {
+                radius_m: local_mukey_geometry(
+                    raster_path=str(ssurgo_path),
+                    sources=matching_sources,
+                    valid_mukeys=masked_valid,
+                    initial_radius_m=radius_m,
+                    max_radius_m=radius_m,
+                    workers=workers,
+                )
+                for radius_m in candidate_ring_m
+            }
+            results = results_by_radius[max(candidate_ring_m)]
+        else:
+            results = local_mukey_geometry(
+                raster_path=str(ssurgo_path),
+                sources=matching_sources,
+                valid_mukeys=masked_valid,
+                initial_radius_m=initial_radius_m,
+                max_radius_m=max_radius_m,
+                workers=workers,
+            )
         global_mukey = _global_baseline(raw_domsoil_d, valid_mukeys, valid_order, withheld_mukey)
         if global_mukey is None:
             continue
         for topaz_id, _ in matching:
             _, radius_m, geometry, exhausted, pixels_read = results[topaz_id]
+            geometry_by_radius = (
+                {candidate_radius: results_by_radius[candidate_radius][topaz_id][2] for candidate_radius in candidate_ring_m}
+                if candidate_ring_m else None
+            )
+            candidate_ring_evidence = derive_candidate_ring_evidence(geometry_by_radius) if geometry_by_radius else None
             support = [(mukey, support_pixels) for mukey, support_pixels, _ in geometry]
             local_mukey = _numeric_mukey(sorted(support, key=lambda item: (-item[1], item[0]))[0][0]) if support else None
             candidate_elevation_deltas = _candidate_elevation_deltas(
@@ -802,6 +895,8 @@ def build_run_cases(
                 else None
             )
             score_variants = score_geometry_terrain_candidates(geometry, candidate_elevation_deltas)
+            if candidate_ring_evidence:
+                score_variants.update(score_ring_candidates(candidate_ring_evidence, candidate_elevation_deltas))
             summary_mukeys = {withheld_mukey, global_mukey, *(str(mukey) for mukey, _, _ in geometry)}
             cases.append(
                 {
@@ -826,6 +921,7 @@ def build_run_cases(
                         {"mukey": str(mukey), "support_pixels": support_pixels, "shared_edges": shared_edges}
                         for mukey, support_pixels, shared_edges in geometry
                     ],
+                    **({"candidate_ring_evidence": candidate_ring_evidence} if candidate_ring_evidence else {}),
                     "score_variants": score_variants,
                 }
             )
@@ -837,6 +933,7 @@ def build_run_cases(
         "initial_radius_m": initial_radius_m,
         "max_radius_m": max_radius_m,
         "requested_case_count": len(requested_case_ids) if requested_case_ids else None,
+        "candidate_rings_m": list(candidate_ring_m) if candidate_ring_m else None,
         **dem_metadata,
     }
     return cases, metadata
@@ -855,17 +952,30 @@ def main(argv: Sequence[str] | None = None) -> int:
     parser.add_argument("--workers", type=int)
     parser.add_argument("--dem-vrt", type=Path, default=DEFAULT_NED1_VRT)
     parser.add_argument(
+        "--candidate-ring-m",
+        action="append",
+        type=float,
+        help="Force and compare bounded candidate windows; repeat in ascending order and end at --max-radius-m.",
+    )
+    parser.add_argument(
         "--case-id",
         action="append",
         help="Restrict run mode to a stable '<run-name>:<topaz-id>' masked-valid case; repeatable.",
     )
     args = parser.parse_args(argv)
     if args.input is not None:
-        if args.case_id:
-            parser.error("--case-id is only available with --run")
+        if args.case_id or args.candidate_ring_m:
+            parser.error("--case-id and --candidate-ring-m are only available with --run")
         cases = json.loads(args.input.read_text(encoding="utf-8"))
         results: Any = [evaluate_masked_case(case) for case in cases]
     else:
+        candidate_ring_m = None
+        if args.candidate_ring_m:
+            candidate_ring_m = tuple(args.candidate_ring_m)
+            if candidate_ring_m != tuple(sorted(set(candidate_ring_m))) or candidate_ring_m[-1] != args.max_radius_m:
+                parser.error("--candidate-ring-m values must be unique, ascending, and end at --max-radius-m")
+            if candidate_ring_m[0] < args.initial_radius_m:
+                parser.error("--candidate-ring-m values must not be below --initial-radius-m")
         cases = []
         cohorts = []
         for run_path in args.run:
@@ -878,6 +988,7 @@ def main(argv: Sequence[str] | None = None) -> int:
                 workers=args.workers,
                 dem_path=args.dem_vrt,
                 requested_case_ids=set(args.case_id) if args.case_id else None,
+                candidate_ring_m=candidate_ring_m,
             )
             cases.extend(run_cases)
             cohorts.append(metadata)
