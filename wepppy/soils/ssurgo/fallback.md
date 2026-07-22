@@ -145,14 +145,15 @@ algorithm. Candidate preparation uses a configured canonical source resolver:
 the resolved regular, readable source must be inside the approved gNATSGO 2025
 root and no request, NoDb value, or caller-supplied path may select it. A source
 mount symlink is permitted only when its resolved file remains inside that
-root; candidate output symlinks are never permitted. The persisted map and
-metadata are fixed relative paths
-`soils/ssurgo_candidate_mukey.tif` and
-`soils/ssurgo_candidate_mukey.metadata.json`; reject path traversal and
-symlink escapes, write a same-directory temporary file, fsync, atomically
-replace, then checksum and validate before publishing provenance. A source
-identity/version, bounds, CRS, or checksum mismatch makes the candidate
-unavailable and uses stage 3; never reuse a stale crop.
+root; candidate output symlinks are never permitted. The fixed active artifact
+is `soils/ssurgo_candidate_mukey/active.json`. It names immutable, same-directory
+versioned GeoTIFF and metadata siblings below that directory. Reject path
+traversal and symlink escapes, write each sibling to a same-directory temporary
+file, fsync, atomically replace it, then checksum and validate both before
+atomically replacing the active manifest. A failed publication therefore leaves
+the preceding active pair untouched. A source identity/version, bounds, CRS, or
+checksum mismatch makes the candidate unavailable and uses stage 3; never reuse
+a stale crop.
 All candidate preparation, replacement, candidate construction,
 materialization, and persistence occur under the existing soils lock. A missing
 native categorical-support dependency is an explicit build error. An operator

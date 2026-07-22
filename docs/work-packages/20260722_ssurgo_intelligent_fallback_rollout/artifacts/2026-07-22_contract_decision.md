@@ -40,8 +40,9 @@ The NoDb and Parquet change is additive as specified in the package compatibilit
 artifact. Existing global fallback remains available for unavailable/corrupt
 candidate data and failed donor materialization. A missing native categorical
 dependency remains an explicit build error. Candidate source and artifact paths
-are trusted/configured inputs only and remain inside their resolved roots;
-atomic map/metadata publication occurs under the existing soils lock.
+are trusted/configured inputs only and remain inside their resolved roots. A
+fixed active manifest switches only after immutable versioned map/metadata
+siblings validate under the existing soils lock.
 
 The RQ route gains only a pre-mutation validation check. It adds neither a route,
 authorization scope, queue dependency, nor payload key. The expected error uses

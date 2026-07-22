@@ -99,14 +99,14 @@ M1 defines one configured canonical gNATSGO 2025 source resolver. It accepts
 no caller or NoDb source path, resolves to a regular readable file inside the
 approved configured root, records a non-sensitive source identity/version, and
 permits a source mount symlink only when its resolved file remains inside that
-root. Candidate output symlinks are forbidden. Map and metadata use the fixed
-relative names `soils/ssurgo_candidate_mukey.tif` and
-`soils/ssurgo_candidate_mukey.metadata.json` below the resolved `soils/` root.
-Reject traversal and symlink escape; create same-directory temporary files,
-close/fsync, atomically replace, checksum, and validate map-plus-metadata
-before publishing candidate provenance. Source/version/bounds/checksum mismatch
-makes candidates unavailable for that record and selects the global path, never
-a stale crop. Keep source preparation, replacement, candidate build,
+root. Candidate output symlinks are forbidden. The fixed active artifact is
+`soils/ssurgo_candidate_mukey/active.json`; it names immutable versioned map
+and metadata siblings under that directory. Reject traversal and symlink escape;
+create same-directory temporary files, close/fsync, atomically replace each
+sibling, checksum/validate the pair, then atomically replace the active manifest.
+A failed publication preserves the preceding active pair. Source/version/bounds/
+checksum mismatch makes candidates unavailable for that record and selects the
+global path, never a stale crop. Keep source preparation, replacement, candidate build,
 selected-donor materialization, and persistence under the existing soils root
 lock. Add a normalized config-match precondition before the existing mutable
 RQ operation; a wrong config produces its canonical non-mutating error.
