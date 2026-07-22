@@ -2,9 +2,11 @@
 
 from __future__ import annotations
 
+from concurrent.futures import ThreadPoolExecutor
 import hashlib
 import json
 import sys
+import threading
 import types
 from pathlib import Path
 
@@ -154,6 +156,62 @@ def test_candidate_preparation_records_persisted_raster_metadata(
     assert artifact.metadata["bounds"] == [0.0, 0.0, 1.0, 1.0]
     loaded = fallback.load_active_candidate_raster(soils, primary_raster_path=primary)
     assert loaded == artifact
+
+
+def test_candidate_preparation_concurrent_retry_leaves_valid_active_artifact(
+    monkeypatch: pytest.MonkeyPatch, tmp_path: Path
+) -> None:
+    """Concurrent publication and a failed attempt cannot leave partial active state."""
+    _configure_geodata(monkeypatch, tmp_path)
+    soils = tmp_path / "run" / "soils"
+    soils.mkdir(parents=True)
+    primary = soils / "ssurgo.tif"
+    primary.write_bytes(b"primary")
+
+    characteristics = types.ModuleType("wepppyo3.raster_characteristics")
+    barrier = threading.Barrier(3)
+    crop_lock = threading.Lock()
+    crop_attempts = 0
+
+    def crop(
+        _source: str, _reference: str, destination: str, _padding: float, _band: int
+    ) -> tuple[object, ...]:
+        nonlocal crop_attempts
+        with crop_lock:
+            crop_attempts += 1
+            attempt = crop_attempts
+        if attempt <= 3:
+            barrier.wait(timeout=5)
+        if attempt == 1:
+            raise OSError("injected concurrent crop failure")
+        Path(destination).write_bytes(f"candidate-{attempt}".encode())
+        return (0.0, 0.0, 1.0, 1.0, "crop-crs", 1, 1)
+
+    characteristics.crop_categorical_raster_to_padded_reference = crop
+    characteristics.categorical_raster_metadata = lambda _path: (
+        (0.0, 0.0, 1.0, 1.0), "persisted-crs", 1, 1
+    )
+    monkeypatch.setitem(sys.modules, "wepppyo3.raster_characteristics", characteristics)
+
+    with ThreadPoolExecutor(max_workers=3) as executor:
+        futures = [
+            executor.submit(
+                fallback.prepare_padded_candidate_raster,
+                soils_dir=soils,
+                primary_raster_path=primary,
+            )
+            for _ in range(3)
+        ]
+    failures = [future.exception() for future in futures if future.exception() is not None]
+
+    assert len(failures) == 1
+    assert isinstance(failures[0], OSError)
+    retried = fallback.prepare_padded_candidate_raster(soils_dir=soils, primary_raster_path=primary)
+    artifact_dir = soils / fallback.CANDIDATE_ARTIFACT_DIRNAME
+    assert len(list(artifact_dir.glob("candidate-*.tif"))) == 3
+    assert len(list(artifact_dir.glob("candidate-*.json"))) == 3
+    assert not list(artifact_dir.glob(".*.tmp"))
+    assert fallback.load_active_candidate_raster(soils, primary_raster_path=primary) == retried
 
 
 def test_candidate_preparation_preserves_prior_active_manifest_on_crop_failure(

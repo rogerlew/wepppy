@@ -32,7 +32,9 @@ local RQ `plastic-bundling` job proves the same worker path used in normal runs.
 - [x] M3: Scaffolded and executed a committed synthetic selection corpus and
   explicit release-evidence runner (10/10 passed); add the remaining artifact
   and materialization fault cases before closing M3.
-- [ ] M5: Complete code, QA, security review, finding disposition, and gates.
+- [ ] (2026-07-22 UTC) M5: Independent code, QA, and security review plus
+  finding disposition and release gates (in progress; baseline reconciled at
+  `8dac222df`).
 
 ## Surprises & Discoveries
 
@@ -347,3 +349,14 @@ corpus, test-stub validation, and changed-file broad-exception enforcement are
 green. The required full repository regression sweep reached 310 passes and 17
 skips before an unrelated order-sensitive browse-auth test failure; that test
 passes in isolation. M5 review/disposition remains the release-hold gate.
+
+Updated 2026-07-22: M5 started from `8dac222df` after the complete four-worker
+repository sweep passed (5,289 tests, 53 skipped, zero failures). The accepted
+contract checkpoint `bf5f2e62c` is an ancestor. Fresh independent review,
+ledger disposition, and final release gates remain required before the hold can
+lift.
+
+Updated 2026-07-22: Added a direct concurrent candidate-publication and retry
+regression. Three overlapping publishers include one injected crop failure;
+the successful publishers and subsequent retry leave no temporary files and a
+loadable active manifest. The focused fallback module passed 15 tests.

@@ -6,10 +6,10 @@
 
 **Timezone**: UTC
 **Started**: 2026-07-22 UTC
-**Current phase**: M5 independent review and disposition
+**Current phase**: M5 independent review and disposition in progress
 **Last updated**: 2026-07-22 UTC
-**Next milestone**: Complete M5 review disposition before considering the
-release lift.
+**Next milestone**: Complete M5 review disposition and release gates before
+considering the release lift.
 **Security impact**: high
 **Dedicated security review**: yes
 **Security artifact**: `artifacts/2026-07-22_security_review.md`
@@ -27,7 +27,8 @@ release lift.
   capture all-valid no-op evidence.
 - [x] M4 runtime: Run a true-current-invalid watershed through RQ and capture
   local-vector donor-selection evidence.
-- [ ] M5: Complete reviews and disposition.
+- [ ] M5: Complete independent reviews, disposition, and release gates
+  (in progress 2026-07-22 UTC).
 
 ### In Progress
 
@@ -277,3 +278,30 @@ isolation.
 **Result**: M3 complete. The M4 all-valid and current-invalid RQ acceptances
 remain valid. M5 independent review/disposition is now the only release-hold
 phase.
+
+### 2026-07-22 UTC: M5 review and disposition start
+
+**Agent/Contributor**: Codex
+
+**Work started**: Reconciled the active ExecPlan, tracker, M3 committed corpus
+and generated-output evidence, M4 RQ acceptance artifact, and ancestor
+checkpoint `bf5f2e62c`. The implementation commits remain descendants of the
+accepted contract checkpoint.
+
+**Next steps**: Complete fresh code, QA, and security review records; update
+the append-only ledger with reviewer-visible verification; then run the M5
+release gates and issue a GO or HOLD recommendation.
+
+### 2026-07-22 UTC: M5 concurrent candidate-publication evidence
+
+**Agent/Contributor**: Codex
+
+**Evidence**: Added `test_candidate_preparation_concurrent_retry_leaves_valid_active_artifact`.
+It synchronizes three publishers, injects one crop failure, retries publication,
+and verifies that the active manifest remains loadable, immutable artifacts are
+complete, and temporary files are absent. `wctl run-pytest
+tests/soils/test_ssurgo_fallback.py --maxfail=1` passed 15 tests.
+
+**Disposition impact**: Resolves the security review's missing concurrent
+candidate-publication/retry evidence gap, pending its independent re-check and
+final append-only review disposition.
