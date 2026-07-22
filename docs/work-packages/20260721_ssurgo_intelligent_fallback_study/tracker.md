@@ -6,9 +6,9 @@
 
 **Timezone**: UTC
 **Started**: 2026-07-21 18:00 UTC
-**Current phase**: Failure-class fixtures
-**Last updated**: 2026-07-22 03:14 UTC
-**Next milestone**: Build deterministic failure fixtures and masked-valid trials using the clustered candidate kernel.
+**Current phase**: Masked-valid fixture evaluation
+**Last updated**: 2026-07-22
+**Next milestone**: Execute representative read-only masked-valid cohorts using the clustered candidate kernel.
 **Security impact**: none
 **Dedicated security review**: no
 **Security artifact**: N/A
@@ -17,8 +17,8 @@
 
 ### Ready / Backlog
 
-- [ ] Milestone 3: implement read-only masked-valid evaluation rows and report
-  local-majority versus global-baseline results by fixture/run.
+- [ ] Milestone 3: execute representative read-only masked-valid cohorts and
+  report local-majority versus global-baseline results by fixture/run.
 - [ ] Design deterministic fixtures from expanded-cohort failure classes.
 - [ ] Build raster-region adjacency and aligned elevation evidence for
   masked-valid candidate trials.
@@ -27,7 +27,9 @@
 
 - [x] Milestone 1: candidate pixel support and synthetic raster fixtures
   complete; native crate tests: 5 passed (2026-07-22 03:28 UTC).
-- [ ] Build deterministic fixtures from the expanded-cohort failure classes.
+- [x] Added Git-LFS-backed deterministic masked-valid raster corpus: direct
+  local candidate, expansion, numeric tie, no candidate, and separated
+  clusters; public-binding test passes (2026-07-22).
 
 ### Blocked
 
@@ -58,6 +60,9 @@
 - [x] Benchmarked 16 adjacent synthetic clusters through a freshly built
   extension: 174 ms / 86 ms / 47 ms at one / two / four workers (2026-07-22
   03:14 UTC).
+- [x] Corrected native `exhausted` evidence so a successful maximum-radius
+  search is not reported as unresolved; crate tests remain 5 passed
+  (2026-07-22).
 
 ## Timeline
 
@@ -155,6 +160,16 @@ the present global baseline; it does not set a production promotion threshold.
 **Impact**: Exact-MUKEY recovery and declared soil/WEPP summary distance can
 be reported side by side before an ADR chooses an acceptance criterion.
 
+### 2026-07-22: Make feature similarity primary and establish the fixture corpus
+
+**Decision**: Keep exact withheld-MUKEY recovery as a diagnostic, interpret
+declared soil/WEPP feature distance as the primary later metric, and track the
+growing GeoTIFF fixture corpus with Git LFS.
+
+**Impact**: The test suite has deterministic coverage for candidate discovery
+without treating an identifier match as the only good donor outcome. There is
+still no production threshold or fallback policy change.
+
 ## Risks and Issues
 
 | Risk | Severity | Likelihood | Mitigation | Status |
@@ -193,6 +208,8 @@ be reported side by side before an ADR chooses an acceptance criterion.
 - [x] Synthetic raster inventory and diagnostic aggregation tests pass.
 - [ ] Expanded cohort validates all diagnostic records against schema version 1.
 - [ ] Fixture tests cover each observed primary failure class.
+- [x] Masked-valid candidate fixture corpus exercises the public native binding
+  with direct, expansion, tie, exhaustion, and separated-cluster cases.
 
 ## Progress Notes
 

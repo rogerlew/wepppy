@@ -28,8 +28,8 @@ unchanged.
   and prove it with deterministic raster fixtures (five targeted Rust tests).
 - [ ] Milestone 2: add a shadow-only WEPPpy collector that clusters invalid
   MUKEY bounds and persists proposed local-majority evidence.
-- [ ] Milestone 3: evaluator scaffold and deterministic regression complete
-  (2026-07-22 04:05 UTC); fixture corpus and representative-run cohort remain.
+- [ ] Milestone 3: evaluator scaffold and deterministic GeoTIFF fixture corpus
+  complete (2026-07-22); representative-run cohort remains.
 - [ ] Milestone 4: seek an ADR only if evidence supports opt-in production
   selection, then observe a shadow/opt-in rollout before default promotion.
 - [ ] Add deterministic fixtures for all observed primary failure classes.
@@ -60,6 +60,11 @@ unchanged.
   Evidence: 16 adjacent 90 m-wide clusters around a mapped gNATSGO pixel read
   6,400 pixels and completed in 174.344 ms (one worker), 85.852 ms (two), and
   46.784 ms (four); every cluster found its deliberately supplied valid MUKEY.
+- Observation: `exhausted` must distinguish an unresolved search from a
+  successful search that happens to use the maximum permitted radius.
+  Evidence: the fixture corpus initially exposed `exhausted=True` for a
+  successful one-radius query; the native contract now reports exhaustion only
+  when the candidate minimum was not met at the maximum radius.
 
 ## Decision Log
 
@@ -80,6 +85,19 @@ unchanged.
   Rationale: a MUKEY has disconnected national occurrences, while final-run
   invalid MUKEYs are spatially close; one bounded crop therefore serves the
   adjacent group without a national scan.
+  Date/Author: 2026-07-22 / user and Codex.
+- Decision: Record exact withheld-MUKEY recovery as a diagnostic, but use
+  declared soil/WEPP feature distance as the primary later interpretation
+  metric.
+  Rationale: a spatially local donor can be a good parameterization substitute
+  without matching the original MUKEY identifier exactly. No promotion
+  threshold is set by this decision.
+  Date/Author: 2026-07-22 / user and Codex.
+- Decision: Keep the deterministic GeoTIFF corpus in Git LFS even though the
+  initial rasters are small.
+  Rationale: the corpus is expected to grow with representative map windows;
+  storing its raster artifacts through the same clone/pull path avoids a later
+  fixture migration.
   Date/Author: 2026-07-22 / user and Codex.
 
 ## Outcomes & Retrospective
@@ -154,16 +172,18 @@ the withheld MUKEY, cluster bounds, candidate support, both proposals, and
 their available soil/WEPP summary values. It never changes `domsoil_d` or
 generates a new model run.
 
-The fixture corpus must include direct local success, expansion, tie, no-local
-candidate, and geographically separated clusters. Representative local runs
-are read-only evidence sources and are never test dependencies. Results are
-stratified by fixture class and run, not pooled into a production claim.
+The fixture corpus includes direct local success, expansion, tie, no-local
+candidate, and geographically separated clusters. Its GeoTIFF files live in
+`tests/data/ssurgo_masked_valid/`, are tracked by a directory-local Git LFS
+rule, and are exercised through the public native binding with two workers.
+Representative local runs are read-only evidence sources and are never test
+dependencies. Results are stratified by fixture class and run, not pooled into
+a production claim.
 
-Two decisions remain deliberately open before interpreting results: whether
-the primary metric is exact withheld-MUKEY recovery or distance on declared
-soil/WEPP summary features, and what observed improvement would justify an
-ADR. The scaffold records both available measures where possible and sets no
-promotion threshold.
+The scaffold records exact withheld-MUKEY recovery and distance on declared
+soil/WEPP summary features. Feature/WEPP similarity is the primary later
+interpretation metric, while exact recovery remains diagnostic. No observed
+improvement threshold is set before a future ADR.
 
 Milestone 4 is conditional. A parameterization ADR is required before any
 production threshold or selection order changes. If approved, the policy is

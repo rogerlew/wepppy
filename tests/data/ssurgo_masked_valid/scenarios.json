@@ -1,0 +1,53 @@
+[
+  {
+    "id": "direct_local",
+    "raster": "direct_local.tif",
+    "valid_mukeys": [20, 30],
+    "initial_radius_m": 1,
+    "max_radius_m": 1,
+    "clusters": [
+      {"id": "direct", "source_mukeys": [10], "bounds": [0, 0, 90, 90], "expected_mukey": 20, "expected_radius_m": 1}
+    ]
+  },
+  {
+    "id": "expansion",
+    "raster": "expansion.tif",
+    "valid_mukeys": [20],
+    "initial_radius_m": 1,
+    "max_radius_m": 100,
+    "clusters": [
+      {"id": "expansion", "source_mukeys": [10], "bounds": [0, 120, 30, 150], "expected_mukey": 20, "expected_radius_m": 32}
+    ]
+  },
+  {
+    "id": "tie",
+    "raster": "tie.tif",
+    "valid_mukeys": [20, 30],
+    "initial_radius_m": 1,
+    "max_radius_m": 1,
+    "clusters": [
+      {"id": "tie", "source_mukeys": [10], "bounds": [0, 0, 90, 90], "expected_mukey": 20, "expected_radius_m": 1}
+    ]
+  },
+  {
+    "id": "no_local_candidate",
+    "raster": "no_local_candidate.tif",
+    "valid_mukeys": [20],
+    "initial_radius_m": 1,
+    "max_radius_m": 100,
+    "clusters": [
+      {"id": "no-candidate", "source_mukeys": [10], "bounds": [0, 0, 90, 90], "expected_mukey": null, "expected_radius_m": null}
+    ]
+  },
+  {
+    "id": "separated_clusters",
+    "raster": "separated_clusters.tif",
+    "valid_mukeys": [20, 30],
+    "initial_radius_m": 1,
+    "max_radius_m": 1,
+    "clusters": [
+      {"id": "left", "source_mukeys": [10], "bounds": [0, 0, 90, 90], "expected_mukey": 20, "expected_radius_m": 1},
+      {"id": "right", "source_mukeys": [11], "bounds": [90, 0, 180, 90], "expected_mukey": 30, "expected_radius_m": 1}
+    ]
+  }
+]
