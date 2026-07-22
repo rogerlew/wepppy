@@ -2135,12 +2135,27 @@ class Soils(NoDbBase):
             soil_data["substitution_reason"] = str(substitution["reason"])
             soil_data["selection_policy"] = substitution.get("selection_policy")
             soil_data["global_mukey"] = None if substitution.get("global_mukey") is None else str(substitution["global_mukey"])
-            soil_data["source_location_wgs84_json"] = json.dumps(substitution.get("source_location_wgs84"))
-            soil_data["candidate_raster_json"] = json.dumps(substitution.get("candidate_raster"))
+            source_location = substitution.get("source_location_wgs84")
+            candidate_raster = substitution.get("candidate_raster")
+            candidate_support = substitution.get("candidate_support")
+            source_profile = substitution.get("source_profile")
+            selected_profile = substitution.get("selected_profile")
+            soil_data["source_location_wgs84_json"] = (
+                None if source_location is None else json.dumps(source_location)
+            )
+            soil_data["candidate_raster_json"] = (
+                None if candidate_raster is None else json.dumps(candidate_raster)
+            )
             soil_data["search_radius_m"] = substitution.get("search_radius_m")
-            soil_data["candidate_support_json"] = json.dumps(substitution.get("candidate_support"))
-            soil_data["source_profile_json"] = json.dumps(substitution.get("source_profile"))
-            soil_data["selected_profile_json"] = json.dumps(substitution.get("selected_profile"))
+            soil_data["candidate_support_json"] = (
+                None if candidate_support is None else json.dumps(candidate_support)
+            )
+            soil_data["source_profile_json"] = (
+                None if source_profile is None else json.dumps(source_profile)
+            )
+            soil_data["selected_profile_json"] = (
+                None if selected_profile is None else json.dumps(selected_profile)
+            )
             soil_data["fallback_reason"] = substitution.get("fallback_reason")
 
         return summary

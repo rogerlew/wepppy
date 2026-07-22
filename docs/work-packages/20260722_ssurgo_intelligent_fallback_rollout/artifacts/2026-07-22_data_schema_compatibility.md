@@ -1,6 +1,6 @@
 # Additive SSURGO Fallback Schema Compatibility
 
-**Status**: Implemented contract; M3 propagation evidence pending
+**Status**: Implemented contract; M3 propagation evidence complete
 **Authority**: ADR-0025 and `wepppy/soils/ssurgo/fallback.md`
 
 ## Compatibility Rule
@@ -50,10 +50,20 @@ Legacy fixtures must load missing fields as the values in the table. A
 disconnected same-MUKEY fixture must demonstrate that separate source locations
 can retain separate local donor evidence.
 
-## Implementation Checkpoint (2026-07-22 UTC)
+## Implementation and M3 Propagation Evidence (2026-07-22 UTC)
 
 The implementation writes the nine provenance fields additively through
 `Soils._subs_summary_gen()` and records `ssurgo_candidate_preparation` on the
-NoDb controller. Targeted legacy/root-creation tests pass. M3 still must prove
-the complete generated NoDb, Parquet, and `.sol` agreement on a real fixture;
-this checkpoint does not claim that release evidence.
+NoDb controller. Missing legacy JSON evidence now remains nullable rather than
+being serialized as the literal string `"null"`.
+
+M3 evidence consists of the committed ten-case synthetic selection corpus,
+focused NoDb/SSURGO tests, and two local RQ generated-output acceptances. The
+focused fixture proves raw/final assignment preservation, local provenance
+round-trip through `soils.parquet`, selected-added-donor materialization,
+unselected nonbuildable donor exclusion, donor-write rollback/retry, and legacy
+nullable provenance fields. The RQ acceptance artifact proves the corresponding
+NoDb/Parquet/`.sol` agreement on both all-valid and current-invalid runs.
+
+This closes M3 implementation/propagation evidence. M5 still requires
+independent review and disposition of the previously accepted-pending findings.

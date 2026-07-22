@@ -21,8 +21,10 @@ local RQ `plastic-bundling` job proves the same worker path used in normal runs.
   status coverage. Adversarial and generated-output fixtures move to M3.
 - [x] M2: Implemented vector selection, primary-only global fallback,
   selected-donor materialization, and additive provenance.
-- [ ] M3: In progress — add generated-output/adversarial compatibility tests
-  and validate the complete RQ contract.
+- [x] M3: Completed generated-output/adversarial compatibility evidence:
+  committed selection corpus, artifact/source/native fault injection,
+  candidate-build and donor-materialization degradation, legacy nullable
+  provenance, Parquet propagation, and RQ contract/output acceptance.
 - [x] M4: Ran `plastic-bundling` / `disturbed9002` through RQ and captured
   all-valid no-op evidence.
 - [x] M4: Ran `far-out-quiescence` / `disturbed9002_wbt` through RQ and
@@ -52,6 +54,12 @@ local RQ `plastic-bundling` job proves the same worker path used in normal runs.
   Evidence: the first current-invalid RQ build correctly rejected its candidate
   artifact by strict provenance validation; re-reading the persisted raster
   exposed the canonical WKT form.
+- Observation: the required full repository test sweep stopped at 5% on
+  `tests/microservices/test_browse_report_routes.py::test_auth_denied_is_propagated`
+  after 310 passed and 17 skipped; the same test passed in isolation.
+  Evidence: `wctl run-pytest tests --maxfail=1` on 2026-07-22, followed by
+  the exact isolated test command. This is an order-sensitive unrelated suite
+  failure, not an M3-path regression.
 
 ## Decision Log
 
@@ -120,6 +128,16 @@ eligibility, ring escalation, deterministic ties, insufficient shared fields,
 invalid horizons/textures, and disconnected source locations. Artifact
 publication and donor-materialization fault injection remain narrow unit-test
 obligations because they require filesystem and builder failure boundaries.
+
+M3 now closes those narrow boundaries as well. The focused tests prove that a
+failed crop leaves the active manifest untouched; unavailable canonical source
+and missing native crop support are explicit errors; non-dominant invalid map
+MUKEYs do not prepare candidates; nonbuildable padded candidates are excluded;
+candidate-build, support-read, and selected-donor-write failures take the
+global path; and legacy optional JSON evidence remains null rather than the
+string `"null"`. A source-root error message was normalized during this work
+so it describes the canonical unavailable dataset rather than leaking a raw
+filesystem resolution error.
 
 ## Context and Orientation
 
@@ -323,3 +341,9 @@ Updated 2026-07-22: The user selected a small committed synthetic corpus as
 the M3 adversarial-selection evidence. The corpus is intentionally invoked by
 an explicit tool rather than pytest so it remains reviewer-visible and
 repeatable without expanding normal test collection.
+
+Updated 2026-07-22: M3 is complete. Focused SSURGO/NoDb tests, the committed
+corpus, test-stub validation, and changed-file broad-exception enforcement are
+green. The required full repository regression sweep reached 310 passes and 17
+skips before an unrelated order-sensitive browse-auth test failure; that test
+passes in isolation. M5 review/disposition remains the release-hold gate.

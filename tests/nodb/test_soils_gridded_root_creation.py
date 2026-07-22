@@ -118,7 +118,8 @@ def test_build_gridded_coverage_uses_hillslope_area_not_wsarea(
 
     class _SurgoMapStub:
         def __init__(self, _ssurgo_fn: str) -> None:
-            self.mukeys = [1001, 1002]
+            # 1003 is invalid but absent from the dominant-hillslope map.
+            self.mukeys = [1001, 1002, 1003]
 
         @staticmethod
         def build_soilgrid(_subwta: str) -> dict[str, str]:
@@ -142,6 +143,13 @@ def test_build_gridded_coverage_uses_hillslope_area_not_wsarea(
 
     monkeypatch.setattr("wepppy.nodb.core.soils.SurgoMap", _SurgoMapStub)
     monkeypatch.setattr("wepppy.nodb.core.soils.SurgoSoilCollection", _SurgoCollectionStub)
+    from wepppy.soils.ssurgo import fallback
+
+    monkeypatch.setattr(
+        fallback,
+        "prepare_padded_candidate_raster",
+        lambda **_kwargs: (_ for _ in ()).throw(AssertionError("non-dominant invalid MUKEY must not prepare candidates")),
+    )
 
     soils._build_gridded(retrieve_gridded_ssurgo=False, max_workers=1)
 
@@ -288,21 +296,21 @@ def test_intelligent_fallback_selects_and_materializes_only_added_local_donor(
         },
     )
     monkeypatch.setattr(fallback, "prepare_padded_candidate_raster", lambda **_kwargs: artifact)
-    monkeypatch.setattr(fallback, "candidate_raster_mukeys", lambda _artifact: {10, 20})
+    monkeypatch.setattr(fallback, "candidate_raster_mukeys", lambda _artifact: {10, 20, 30})
     monkeypatch.setattr(
         fallback,
         "raw_mukey_source_locations_wgs84",
         lambda *_args: {"101": (-116.1, 47.1)},
     )
-    monkeypatch.setattr(
-        fallback,
-        "categorical_candidate_support_wgs84",
-        lambda *_args: [("10", 4), ("20", 6)],
-    )
+    def _support(_path, _longitude, _latitude, _radius, _invalid, buildable):
+        assert set(buildable) == {"10", "20"}
+        return [("10", 4), ("20", 6)]
+
+    monkeypatch.setattr(fallback, "categorical_candidate_support_wgs84", _support)
 
     class _AddedCollection:
         def __init__(self, mukeys, **_kwargs) -> None:
-            assert mukeys == [20]
+            assert mukeys == [20, 30]
             self.weppSoils = {20: "added-wepp-soil"}
 
         def makeWeppSoils(self, **_kwargs) -> None:
@@ -340,6 +348,27 @@ def test_intelligent_fallback_selects_and_materializes_only_added_local_donor(
     assert substitutions["101"]["selection_policy"] == "ssurgo_local_vector_profile_v1"
     assert substitutions["101"]["source_location_wgs84"] == [-116.1, 47.1]
     assert preparation == {"status": "prepared", "affected_hillslopes": 1, "manifest": "ssurgo_candidate_mukey/active.json"}
+    assert "30" not in final_soils
+    assert "30.sol" not in {entry.name for entry in soils_dir.iterdir()}
+
+    def _materialization_failure(*_args):
+        raise OSError("injected selected donor write failure")
+
+    monkeypatch.setattr(soils, "_materialize_added_ssurgo_donor", _materialization_failure)
+    final_domsoils, substitutions, final_soils, preparation = soils._select_ssurgo_intelligent_fallbacks(
+        soils_dir=str(soils_dir),
+        ssurgo_fn=str(soils_dir / "ssurgo.tif"),
+        subwta_fn=str(tmp_path / "subwta.tif"),
+        raw_domsoil_d={"101": "99"},
+        primary_soils={"10": SimpleNamespace(fname="10.sol")},
+        primary_collection=primary_collection,
+        global_mukey="10",
+        max_workers=1,
+    )
+    assert final_domsoils == {"101": "10"}
+    assert final_soils == {"10": SimpleNamespace(fname="10.sol")}
+    assert substitutions["101"]["fallback_reason"] == "donor_materialization_failed"
+    assert preparation["status"] == "prepared"
 
     def _support_unavailable(*_args):
         raise ValueError("injected native support read failure")
@@ -358,6 +387,30 @@ def test_intelligent_fallback_selects_and_materializes_only_added_local_donor(
     assert final_domsoils == {"101": "10"}
     assert substitutions["101"]["fallback_reason"] == "candidate_support_unavailable"
     assert preparation["status"] == "prepared"
+
+    class _CandidateBuildUnavailable:
+        def __init__(self, _mukeys, **_kwargs) -> None:
+            self.weppSoils = {}
+
+        @staticmethod
+        def makeWeppSoils(**_kwargs) -> None:
+            raise OSError("injected candidate collection failure")
+
+    monkeypatch.setattr("wepppy.nodb.core.soils.SurgoSoilCollection", _CandidateBuildUnavailable)
+    final_domsoils, substitutions, final_soils, preparation = soils._select_ssurgo_intelligent_fallbacks(
+        soils_dir=str(soils_dir),
+        ssurgo_fn=str(soils_dir / "ssurgo.tif"),
+        subwta_fn=str(tmp_path / "subwta.tif"),
+        raw_domsoil_d={"101": "99"},
+        primary_soils={"10": SimpleNamespace(fname="10.sol")},
+        primary_collection=primary_collection,
+        global_mukey="10",
+        max_workers=1,
+    )
+    assert final_domsoils == {"101": "10"}
+    assert final_soils == {"10": SimpleNamespace(fname="10.sol")}
+    assert substitutions["101"]["fallback_reason"] == "candidate_build_unavailable"
+    assert preparation["status"] == "build_unavailable"
 
 
 def test_added_donor_materialization_removes_failed_publication_and_retries(
@@ -453,6 +506,18 @@ def test_subs_summary_includes_raw_and_substituted_mukey_columns() -> None:
     assert summary["573"]["shadow_proposed_mukey"] == "2451115"
     assert summary["573"]["shadow_candidate_support_json"] == '[["2451115", 12]]'
     assert summary["573"]["shadow_reason"] == "local_candidate_shadow"
+    for field in (
+        "selection_policy",
+        "global_mukey",
+        "source_location_wgs84_json",
+        "candidate_raster_json",
+        "search_radius_m",
+        "candidate_support_json",
+        "source_profile_json",
+        "selected_profile_json",
+        "fallback_reason",
+    ):
+        assert summary["581"][field] is None
     assert summary["581"]["raw_mukey"] == "3294460"
     assert summary["590"]["raw_mukey"] == "2451115"
     assert summary["590"]["substituted_mukey"] is None

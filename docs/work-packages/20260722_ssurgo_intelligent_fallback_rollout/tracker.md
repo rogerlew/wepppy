@@ -6,10 +6,10 @@
 
 **Timezone**: UTC
 **Started**: 2026-07-22 UTC
-**Current phase**: M3 generated-output/adversarial validation in progress
+**Current phase**: M5 independent review and disposition
 **Last updated**: 2026-07-22 UTC
-**Next milestone**: Complete M3 generated-output/adversarial evidence and M5
-review disposition before considering the release lift.
+**Next milestone**: Complete M5 review disposition before considering the
+release lift.
 **Security impact**: high
 **Dedicated security review**: yes
 **Security artifact**: `artifacts/2026-07-22_security_review.md`
@@ -22,16 +22,16 @@ review disposition before considering the release lift.
   deterministic all-valid no-op coverage.
 - [x] M2: Implement vector selection, global escape hatch, selected-donor
   materialization, and additive provenance.
-- [ ] M3: Validate compatibility, generated outputs, and RQ contracts.
+- [x] M3: Validate compatibility, generated outputs, and RQ contracts.
 - [x] M4 runtime: Run `plastic-bundling` / `disturbed9002` through RQ and
   capture all-valid no-op evidence.
 - [x] M4 runtime: Run a true-current-invalid watershed through RQ and capture
   local-vector donor-selection evidence.
-- [ ] M5: Complete remaining M3 evidence, reviews, and disposition.
+- [ ] M5: Complete reviews and disposition.
 
 ### In Progress
 
-- [ ] M3: Add generated-output, adversarial artifact, and propagation evidence.
+- [x] M3: Generated-output, adversarial artifact, and propagation evidence.
 **Contract checkpoint**: `2026-07-22_contract_decision.md` (commit `bf5f2e62c`)
 
 ### Blocked
@@ -254,3 +254,26 @@ is skipped when removal leaves fewer than three usable fields.
 
 **Next steps**: Add/verify the remaining M3 artifact, materialization,
 legacy-hydration, and generated-output evidence.
+
+### 2026-07-22 UTC: M3 adversarial and propagation closure
+
+**Agent/Contributor**: Codex
+
+**Work completed**: Closed the remaining M3 fault and compatibility boundaries.
+Tests cover failed candidate-crop publication preserving the prior manifest,
+canonical-source and native-support errors, non-dominant invalid-MUKEY no-op,
+nonbuildable padded candidate exclusion, candidate-build/support/donor-write
+global degradation, selected-donor rollback/retry, and nullable legacy JSON
+provenance. The source resolver now reports missing configured roots using its
+canonical error contract; legacy JSON evidence no longer becomes a literal
+`"null"` string.
+
+**Evidence**: Focused SSURGO/NoDb tests, the ten-case explicit corpus,
+test-stub validation, and changed-file broad-exception enforcement. The
+required full sweep reached 310 passed and 17 skipped before an unrelated
+order-sensitive browse-auth route test failed; that exact test passes in
+isolation.
+
+**Result**: M3 complete. The M4 all-valid and current-invalid RQ acceptances
+remain valid. M5 independent review/disposition is now the only release-hold
+phase.

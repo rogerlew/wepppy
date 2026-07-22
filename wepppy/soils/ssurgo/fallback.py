@@ -111,7 +111,13 @@ def _resolved_child(root: Path, relative_name: str, *, must_exist: bool = False)
 def canonical_full_ssurgo_mukey_raster() -> Path:
     """Resolve the configured, root-contained 2025 gNATSGO MUKEY VRT."""
     geodata_root = Path(os.environ.get("GEODATA_DIR", "/geodata")).resolve(strict=True)
-    approved_root = (geodata_root / FULL_SSURGO_DATASET).resolve(strict=True)
+    configured_root = geodata_root / FULL_SSURGO_DATASET
+    try:
+        approved_root = configured_root.resolve(strict=True)
+    except FileNotFoundError as exc:
+        raise FileNotFoundError(
+            f"Canonical 2025 gNATSGO root is unavailable: {configured_root}"
+        ) from exc
     if not _is_relative_to(approved_root, geodata_root) or not approved_root.is_dir():
         raise FileNotFoundError(f"Canonical 2025 gNATSGO root is unavailable: {approved_root}")
     source = (approved_root / ".vrt").resolve(strict=True)

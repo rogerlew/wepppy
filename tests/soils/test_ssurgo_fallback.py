@@ -156,6 +156,90 @@ def test_candidate_preparation_records_persisted_raster_metadata(
     assert loaded == artifact
 
 
+def test_candidate_preparation_preserves_prior_active_manifest_on_crop_failure(
+    monkeypatch: pytest.MonkeyPatch, tmp_path: Path
+) -> None:
+    """A failed new crop cannot replace the last published candidate identity."""
+    _configure_geodata(monkeypatch, tmp_path)
+    soils = tmp_path / "run" / "soils"
+    soils.mkdir(parents=True)
+    primary = soils / "ssurgo.tif"
+    primary.write_bytes(b"primary")
+    artifact_dir = soils / fallback.CANDIDATE_ARTIFACT_DIRNAME
+    artifact_dir.mkdir()
+    active_manifest = artifact_dir / fallback.CANDIDATE_ACTIVE_MANIFEST
+    active_manifest.write_text('{"raster":"prior.tif"}', encoding="utf-8")
+
+    characteristics = types.ModuleType("wepppyo3.raster_characteristics")
+
+    def crop(*_args: object) -> None:
+        raise OSError("injected crop failure")
+
+    characteristics.crop_categorical_raster_to_padded_reference = crop
+    characteristics.categorical_raster_metadata = lambda _path: None
+    monkeypatch.setitem(sys.modules, "wepppyo3.raster_characteristics", characteristics)
+
+    with pytest.raises(OSError, match="injected crop failure"):
+        fallback.prepare_padded_candidate_raster(soils_dir=soils, primary_raster_path=primary)
+
+    assert active_manifest.read_text(encoding="utf-8") == '{"raster":"prior.tif"}'
+    assert not list(artifact_dir.glob(".*.tmp"))
+
+
+def test_candidate_preparation_requires_canonical_source_before_native_crop(
+    monkeypatch: pytest.MonkeyPatch, tmp_path: Path
+) -> None:
+    """Missing configured gNATSGO data is explicit and does not enter native work."""
+    geodata = tmp_path / "geodata"
+    geodata.mkdir()
+    monkeypatch.setenv("GEODATA_DIR", str(geodata))
+    soils = tmp_path / "run" / "soils"
+    soils.mkdir(parents=True)
+    primary = soils / "ssurgo.tif"
+    primary.write_bytes(b"primary")
+
+    with pytest.raises(FileNotFoundError, match="gNATSGO"):
+        fallback.prepare_padded_candidate_raster(soils_dir=soils, primary_raster_path=primary)
+
+
+def test_candidate_preparation_requires_native_crop_support(
+    monkeypatch: pytest.MonkeyPatch, tmp_path: Path
+) -> None:
+    """A missing native crop primitive is an explicit required-dependency error."""
+    _configure_geodata(monkeypatch, tmp_path)
+    soils = tmp_path / "run" / "soils"
+    soils.mkdir(parents=True)
+    primary = soils / "ssurgo.tif"
+    primary.write_bytes(b"primary")
+    monkeypatch.setitem(sys.modules, "wepppyo3.raster_characteristics", types.ModuleType("native_missing_crop"))
+
+    with pytest.raises(RuntimeError, match="categorical raster crop support"):
+        fallback.prepare_padded_candidate_raster(soils_dir=soils, primary_raster_path=primary)
+
+
+def test_categorical_support_excludes_nonbuildable_candidates(
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    """Native spatial support is reduced to the current buildable MUKEY set."""
+    characteristics = types.ModuleType("wepppyo3.raster_characteristics")
+    characteristics.categorical_support_within_wgs84_radius = lambda *_args, **_kwargs: [
+        (30, 100),
+        (20, 6),
+    ]
+    monkeypatch.setitem(sys.modules, "wepppyo3.raster_characteristics", characteristics)
+
+    support = fallback.categorical_candidate_support_wgs84(
+        "candidate.tif",
+        -116.1,
+        47.1,
+        250.0,
+        invalid_mukeys={"99"},
+        valid_mukeys={"10", "20"},
+    )
+
+    assert support == [("20", 6)]
+
+
 def test_direct_shallow_profile_uses_first_valid_raw_horizon_and_texture_balance() -> None:
     layers = [
         {"chkey": "bad-om", "om_r": 30, "dbthirdbar_r": 1.2, "ksat_r": 9, "cec7_r": 12},
