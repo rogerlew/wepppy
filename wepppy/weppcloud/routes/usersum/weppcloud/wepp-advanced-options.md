@@ -58,6 +58,59 @@ Switches WEPP from daily water-balance seepage handling to an hourly path (`wepp
 - This is a structural simulation-path toggle, not just an output setting.
 - The file acts as an on/off trigger by presence; there are no numeric fields in `wepp_ui.txt`.
 
+### How deep percolation is calculated
+
+In current WEPP-Forest builds, the executable hourly calculation is a capped
+Darcy flux. It is not the exponential travel-time equation published as
+equations 1a–1e in
+[Dun et al. (2009)](https://doi.org/10.1016/j.jhydrol.2008.12.019).
+For each hourly pass through the bottom soil layer, the model effectively
+calculates:
+
+```text
+available = max(0, bottom-layer storage - field-capacity storage)
+Keff = effective conductivity at the bottom soil/restrictive-layer boundary
+hourly deep percolation = min(available / 24, 3,600 seconds * Keff)
+daily Dp = sum of the 24 hourly deep-percolation values
+```
+
+Frozen water modifies the available-water threshold. In hourly mode, the
+bottom-layer unsaturated-conductivity adjustment is forced to 1. When a
+restrictive layer is active, `Keff` is the thickness-weighted harmonic mean:
+
+```text
+Keff = (bottom-soil thickness + restrictive-layer thickness)
+       / (bottom-soil thickness / bottom-soil Ksat
+          + restrictive-layer thickness / restrictive-layer Ksat)
+```
+
+This has several practical consequences:
+
+- When available water remains above the conductivity capacity throughout the
+  day, `Dp` is approximately `86,400 seconds * Keff`. It can therefore remain
+  nearly constant even as daily precipitation varies.
+- Precipitation and infiltration still change soil storage. On sufficiently dry
+  days, the available-water limit becomes active and `Dp` declines.
+- The hourly water-limited branch removes `available / 24`, not all available
+  water in one hour. It should not be interpreted as
+  `min(available, 3,600 seconds * Keff)`.
+- `Dp` is water leaving the bottom of the modeled soil profile. The optional
+  groundwater/baseflow routine uses it as recharge but does not determine the
+  soil-profile percolation amount.
+
+The published Dun et al. equation has the exponential form:
+
+```text
+percolation = available * (1 - exp(-time step * Keff / available))
+```
+
+That expression remains visible in the legacy source as commented code, but
+current binaries execute the capped Darcy calculation above. Daily mode also
+differs from hourly mode: it retains a soil-saturation conductivity factor and
+uses an unweighted harmonic mean at an active restrictive boundary. Do not
+assume that enabling hourly seepage merely divides the daily result into 24
+equal reporting intervals.
+
 ## 2) Potential ET (PMET)
 
 ### What this section does
@@ -275,8 +328,15 @@ Overrides restrictive-layer hydraulic conductivity (`kslast`) in generated soil 
 
 ### Modeling impact
 
-- Lower `kslast` limits downward percolation at the restrictive layer, often increasing near-surface wetness, runoff potential, and erosion response.
-- Higher `kslast` allows more deep percolation and can reduce quick runoff response.
+- WEPP combines `kslast` with the bottom-soil conductivity. Hourly mode uses
+  the thickness-weighted harmonic mean described in
+  [How deep percolation is calculated](#how-deep-percolation-is-calculated);
+  daily mode uses an unweighted harmonic mean.
+- Lower `kslast` usually lowers the effective bottom-boundary conductivity,
+  limiting downward percolation and often increasing near-surface wetness,
+  runoff potential, and erosion response.
+- Higher `kslast` usually allows more deep percolation and can reduce quick
+  runoff response.
 - When a restrictive layer is active, this bottom-boundary conductivity can materially alter baseflow vs quickflow partitioning.
 
 ### When to adjust
@@ -286,6 +346,8 @@ Overrides restrictive-layer hydraulic conductivity (`kslast`) in generated soil 
 ### Cautions
 
 - This is a powerful structural soil-hydrology control; avoid using it as a generic calibration knob without field justification.
+- Do not compare `Dp` directly with raw `kslast * 24 hours`. Compare it with
+  the effective harmonic conductivity multiplied by the applicable timestep.
 - `kslast` (restrictive-layer conductivity) is separate from `ksflag`; changing
   `kslast` does not enable or disable frost routines.
 

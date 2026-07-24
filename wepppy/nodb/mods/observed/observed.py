@@ -400,9 +400,16 @@ class Observed(NoDbBase):
 
     def _load_channel_simulation(self, wsarea_m2, first_year):
         output_dir = Path(self.output_dir)
+        interchange_dir = output_dir / 'interchange'
         interchange = _interchange_module()
-        ebe_path = interchange.run_wepp_watershed_ebe_interchange(output_dir)
-        chan_path = interchange.run_wepp_watershed_chanwb_interchange(output_dir)
+
+        ebe_path = interchange_dir / 'ebe_pw0.parquet'
+        if not ebe_path.exists():
+            ebe_path = interchange.run_wepp_watershed_ebe_interchange(output_dir)
+
+        chan_path = interchange_dir / 'chanwb.parquet'
+        if not chan_path.exists():
+            chan_path = interchange.run_wepp_watershed_chanwb_interchange(output_dir)
 
         ebe_table = pq.read_table(ebe_path)
         ebe_df = ebe_table.to_pandas()
