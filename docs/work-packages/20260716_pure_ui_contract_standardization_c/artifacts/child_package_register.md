@@ -1,10 +1,10 @@
 # Pure UI Contract Child Package Register
 
 **Register version**: 1.2 contractual baseline
-**Last updated**: 2026-07-21 UTC
+**Last updated**: 2026-07-27 UTC
 **Authority**: Stable IDs define package boundaries; dated package directories
 are created only when work starts.
-**Total**: 73 execution units: 4 governance, 2 bounded remediations, 39
+**Total**: 74 execution units: 4 governance, 3 bounded remediations, 39
 run-domain, 9 shared-foundation, and 19 non-run/stateful surface packages.
 GOV-00 is the existing umbrella at
 `docs/work-packages/20260716_pure_ui_contract_standardization_c/`; GOV-00A is the
@@ -83,6 +83,11 @@ milestone proposed only for REM-02. It requires its own dual review, disposition
 and standalone ancestor. It borrows no authority from M1A, and it cannot advance
 SURF-06 or any other package.
 
+`GOV-00A-M1C` is the separately closable bounded-remediation governance
+milestone proposed only for REM-03. It requires its own dual review,
+disposition, and standalone ancestor. It borrows no authority from M1A or M1B
+and cannot advance the borrowed authentication owners.
+
 Dependency shorthand expands exactly as follows:
 
 - `SHR-01..04B` = SHR-01, SHR-02, SHR-03A, SHR-03B, SHR-04A, SHR-04B.
@@ -116,6 +121,7 @@ GOV-01 machine-readable manifest. GOV-99 is intentionally absent from all sets.
 | --- | --- | --- | --- | --- | --- | --- |
 | REM-01 | `20260720_omni_mod_state_sync` | DOM-02, DOM-25A, DOM-25B | Omni Scenarios/Contrasts feature-registry menu availability; Mods checkbox and reason markup; `Ron.mods` enable/disable guards; runs-page section/preflight visibility and metadata; dynamic shared Omni controller remount; Dev/Root gates on contrast run/dry-run/delete plus canonical run access and Dev/Root on the CAP-gated report; focused tests and generated controller bundle only | GOV-00A-M1A | `high`: role-gated dynamic load, persisted mod mutation, contrast actions, and report data | completed / dual-reviewed |
 | REM-02 | `20260721_runs_ttl_deletion_catalog` | SURF-06 | Read-only TTL policy/expiry projection for already-authorized catalog rows; one lifecycle table cell; dedicated Usersum documentation and focused catalog/template/doc tests only | GOV-00A-M1B | `high`: authenticated run-metadata presentation; no new access path or mutation | completed / dual-reviewed |
+| REM-03 | `20260727_auth_session_persistence_hardening` | SURF-13, SHR-02, SHR-04A | Password-login remember checkbox GET default and POST opt-out; rolling remember-cookie duration/refresh; login/logout cookie boundary; authentication-log redaction and append-only durable diagnostics; focused auth/config/logging tests and documentation only | GOV-00A-M1C | `high`: authentication persistence and credential-adjacent diagnostics | checkpoint review |
 
 REM-01 excludes Omni scenario/contrast payload shapes, uploads, queue wiring or
 execution semantics, artifacts, report content/formatting, overlays, deletion
@@ -128,6 +134,21 @@ run deletion, database/schema changes, catalog filtering/sorting, maps, delete
 or poll controls, all permission/CSRF/RQ behavior, and deployment. Its final
 evidence is inherited by SURF-06 without advancing the owner beyond this finite
 presentation defect.
+
+REM-03 excludes OAuth authorization behavior, account/role policy, credential
+storage, Redis session lifetime, CSRF policy, CAP verification policy, route
+prefixes, RQ behavior, database schemas, and unrelated templates. Its final
+evidence is inherited by SURF-13, SHR-02, and SHR-04A without advancing those
+owners.
+
+The exact REM-03 implementation boundary is limited to:
+
+- `wepppy/weppcloud/auth_forms.py`;
+- `wepppy/weppcloud/configuration.py`;
+- `wepppy/weppcloud/routes/_security/logging.py`;
+- host log-rotation configuration limited to the canonical security log;
+- focused tests for those surfaces; and
+- the REM-03 contract, ADR, incident, operator, and developer documentation.
 
 The exact REM-01 source boundary is limited to:
 

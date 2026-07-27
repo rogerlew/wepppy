@@ -75,3 +75,4 @@ Each ADR should normally include:
 - `ADR-0025`: [SSURGO Recovery, Local Vector-Profile, and Global Fallback Order](ADR-0025-ssurgo-local-vector-profile-fallback.md) (Accepted, 2026-07-22)
 - `ADR-0026`: [Partial-Year Observed Climate Restoration](ADR-0026-partial-year-observed-climate-restoration.md) (Accepted, 2026-07-26)
 - `ADR-0027`: [Click-Only Cap.js Challenge Parameterization](ADR-0027-cap-click-only-challenge.md) (Accepted, 2026-07-27)
+- `ADR-0028`: [Rolling 90-Day Remembered Login](ADR-0028-rolling-remembered-login.md) (Accepted, 2026-07-27)

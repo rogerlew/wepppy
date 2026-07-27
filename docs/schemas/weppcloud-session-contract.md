@@ -18,6 +18,22 @@
 - Does not redefine JWT claim rules; those remain in `docs/dev-notes/auth-token.spec.md`.
 - Does not redefine canonical error payloads; those remain in `docs/schemas/rq-response-contract.md`.
 
+## Product and UX Priority
+
+- WEPPcloud authentication architecture MUST minimize repeated authentication
+  and unnecessary user interaction during ordinary use.
+- Security controls MUST be proportionate to the documented threat model and
+  SHOULD NOT add user-visible friction unless they address a demonstrated
+  material risk.
+- Direct user feedback is authoritative product evidence when selecting
+  authentication defaults. Security review constrains how an accepted
+  experience is implemented; it does not silently replace the accepted product
+  objective with a lower-friction-independent objective.
+- Ordinary users SHOULD remain signed in across browser restarts and active use
+  without reentering credentials or completing another CAPTCHA.
+- Shared-device users MUST retain a clear opt-out at login and a reliable
+  explicit logout.
+
 ## Session Artifacts
 | Artifact | Authority | Storage | Primary Purpose |
 | --- | --- | --- | --- |
@@ -36,10 +52,65 @@
 - `SESSION_COOKIE_SECURE` MUST be `True`.
 - `SESSION_COOKIE_SAMESITE` MUST default to `Lax`; override via `SESSION_COOKIE_SAMESITE` is allowed.
 - OAuth login MUST call `login_user(..., remember=True)` so remember-me restoration remains available.
+- Password-login pages MUST render "Remember me on this device" selected by
+  default while preserving an explicit user opt-out.
+- Remembered-login cookies MUST default to a rolling 90-day browser inactivity
+  lifetime. An authenticated request carrying a valid remember cookie MUST
+  refresh its browser expiration. An ordinary authenticated session without a
+  remember cookie MUST NOT create one merely because a request occurred.
+- A password-login submission that opts out MUST neither issue nor retain a
+  remember cookie. If the browser already carries one, the response MUST expire
+  it using the configured name, path, and domain.
+- The duration MAY be changed by an explicit operator override. Configuration
+  documentation MUST identify the effective value and its security/UX tradeoff.
+- Explicit logout MUST clear both session and remember cookies using their
+  configured names, paths, domains, and security attributes.
+- Server-side Redis sessions MUST retain the rolling 12-hour inactivity window.
+  Remembered login restores identity after that session expires or the browser
+  session cookie is discarded.
+
+### Remember-Token Threat Boundary
+
+- The Flask-Login remember token is a signed bearer credential. In the pinned
+  implementation it contains no server-validated issuance timestamp.
+- The 90-day duration is therefore a browser-enforced inactivity policy, not a
+  cryptographic or server-side maximum for a copied raw token.
+- This residual replay risk is accepted for the ordinary WEPPcloud threat model
+  because remembered login materially reduces user friction and no production
+  evidence currently demonstrates a need for per-device server-side token
+  state.
+- Secure, HttpOnly, SameSite=Lax, TLS, secret redaction, and explicit logout
+  remain mandatory exposure controls.
+- Ordinary logout clears the requesting browser but does not revoke a copied
+  token. Suspected token theft MUST be contained by rotating the affected
+  user's `fs_uniquifier`; responders MUST understand that this also invalidates
+  that user's other active Flask-Security sessions.
+- A future server-side issuance, device, or revocation mechanism requires new
+  user evidence or a demonstrated material threat, its own compatibility and
+  UX analysis, an ADR, and an amended checkpoint. It MUST NOT be introduced as
+  an undocumented review preference.
 
 Source-of-truth implementation:
 - `wepppy/weppcloud/configuration.py`
 - `wepppy/weppcloud/routes/_security/oauth.py`
+
+## Authentication Logging Contract
+
+- Authentication logs MUST NOT include passwords, CSRF tokens, CAPTCHA tokens,
+  remember-cookie values, session-cookie values, OAuth tokens, or bearer tokens.
+- Authentication diagnostics MAY record whether Flask-Login scheduled a
+  remember-cookie set or clear action, but MUST NOT record the cookie value.
+- Production security logs MUST use a writable, persistent path. The canonical
+  container path is `/wc1/logs/weppcloud/security.log`.
+- Application workers MUST append without performing in-process rotation;
+  rotation and retention MUST be coordinated by the host. The directory and
+  file MUST be restricted to the WEPPcloud runtime account (`0700` directory,
+  `0600` file), and the directory MUST NOT be exposed by run-file routes.
+- Logging failures MUST remain visible in the main service log and MUST NOT
+  silently disable authentication event observability.
+
+Source-of-truth implementation:
+- `wepppy/weppcloud/routes/_security/logging.py`
 
 ## Session Durability Expectations (Redis)
 
@@ -104,12 +175,20 @@ Source-of-truth implementation:
 
 ## Conformance Tests (Required)
 The following suites MUST be updated when session contract behavior changes:
+- password-login form rendering and submitted opt-out tests;
+- successful login, remembered-request refresh, and logout cookie-boundary
+  tests;
+- authentication diagnostic redaction and persistence tests;
 - `tests/weppcloud/test_configuration.py`
 - `tests/weppcloud/routes/test_rq_engine_token_api.py`
 - `tests/microservices/test_rq_engine_session_routes.py`
 - `tests/microservices/test_rq_engine_fork_archive_routes.py`
 - `wepppy/weppcloud/controllers_js/__tests__/session_heartbeat.test.js`
 - `wepppy/weppcloud/controllers_js/__tests__/console_smoke.test.js`
+
+When a listed suite is unaffected, the work package MUST record a reviewed
+`N/A` rationale and run the suite as a regression gate rather than silently
+omitting it.
 
 ## Change Management
 - Any change to session TTLs, cookie defaults, heartbeat interval, stale-tab UX, or endpoint auth rules MUST update this contract and linked implementation docs in the same PR.

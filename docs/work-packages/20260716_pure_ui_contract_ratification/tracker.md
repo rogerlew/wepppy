@@ -7,7 +7,7 @@
 **Timezone**: UTC
 **Started**: 2026-07-17 01:48 UTC
 **Current phase**: Milestone 1 - canonical schema ratification
-**Last updated**: 2026-07-21 22:15 UTC
+**Last updated**: 2026-07-27 19:55 UTC
 **Next milestone**: Continue the canonical schema, template, and obligation registry.
 **Security impact**: `none`
 **Dedicated security review**: `no`
@@ -111,6 +111,20 @@ requires two independent reviews and a standalone ancestor, and cannot advance
 SURF-06 or authorize TTL, catalog-access, deletion, RQ, or policy behavior.
 
 **Impact**: REM-02 is blocked until M1B's reviews and ancestor are complete.
+
+### 2026-07-27 19:30 UTC: Create GOV-00A-M1C for REM-03
+
+**Context**: Authentication persistence and security logging span shared form,
+transport, and login-surface owners whose normal dependencies are incomplete.
+
+**Decision**: Register a separately reviewed GOV-00A-M1C milestone for REM-03.
+It permits only the checked-by-default password login with opt-out, a rolling
+90-day browser inactivity duration with opt-in-aware refresh, login/logout
+cookie evidence, and redacted append-only authentication logging. It inherits high
+security and requires two independent reviews plus a standalone ancestor.
+
+**Impact**: REM-03 remains blocked until M1C's reviews and ancestor are complete;
+the borrowed owners do not advance.
 
 ### 2026-07-17 01:48 UTC: Separate obligation from evidence
 
