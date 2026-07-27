@@ -1,13 +1,65 @@
 from __future__ import annotations
 
 import subprocess
+import stat
 from types import SimpleNamespace
 
+import pandas as pd
 import pytest
 
 import wepppy.climates.cligen.cligen as cligen_module
 
 pytestmark = pytest.mark.unit
+
+
+def test_df_to_prn_serializes_unpublished_future_values_as_missing_sentinels(tmp_path):
+    frame = pd.DataFrame(
+        {
+            "prcp": [1.0, float("nan")],
+            "tmax": [10.0, float("nan")],
+            "tmin": [0.0, float("nan")],
+        },
+        index=pd.to_datetime(["2026-07-23", "2026-07-24"]),
+    )
+    prn_path = tmp_path / "partial.prn"
+
+    cligen_module.df_to_prn(
+        frame,
+        str(prn_path),
+        "prcp",
+        "tmax",
+        "tmin",
+        pad_to_end_of_year=False,
+    )
+
+    future_fields = prn_path.read_text(encoding="ascii").splitlines()[1].split()
+    assert future_fields[3:] == ["9999", "9999", "9999"]
+
+
+def test_df_to_prn_rejects_internal_primary_variable_hole(tmp_path):
+    frame = pd.DataFrame(
+        {
+            "prcp": [1.0, float("nan"), 2.0],
+            "tmax": [10.0, 11.0, 12.0],
+            "tmin": [0.0, 1.0, 2.0],
+        },
+        index=pd.to_datetime(["2026-07-23", "2026-07-24", "2026-07-25"]),
+    )
+
+    with pytest.raises(
+        ValueError,
+        match=r"prcp contains an internal missing-data hole.*2026-07-24",
+    ):
+        cligen_module.df_to_prn(
+            frame,
+            str(tmp_path / "invalid.prn"),
+            "prcp",
+            "tmax",
+            "tmin",
+            reject_internal_missing=True,
+        )
+
+    assert not (tmp_path / "invalid.prn").exists()
 
 
 class _FakeObservedProcess:
@@ -53,6 +105,118 @@ def _make_cligen(tmp_path, monkeypatch):
         parpath=str(tmp_path / "or354811.par"),
     )
     return cligen
+
+
+def test_stage_station_parameter_file_replaces_partial_destination_atomically(tmp_path):
+    source_dir = tmp_path / "source"
+    run_dir = tmp_path / "run"
+    source_dir.mkdir()
+    run_dir.mkdir()
+    source_path = source_dir / "or354811.par"
+    destination_path = run_dir / source_path.name
+    source_path.write_bytes(b"complete station data\n" * 32)
+    destination_path.write_bytes(b"partial")
+    source_path.chmod(0o775)
+    destination_path.chmod(0o640)
+
+    cligen = object.__new__(cligen_module.Cligen)
+    cligen.wd = str(run_dir)
+    cligen.station = SimpleNamespace(
+        par=source_path.name,
+        parpath=str(source_path),
+    )
+
+    staged_path = cligen.stage_station_parameter_file()
+
+    assert staged_path == str(destination_path)
+    assert destination_path.read_bytes() == source_path.read_bytes()
+    assert stat.S_IMODE(destination_path.stat().st_mode) == 0o640
+    assert list(run_dir.glob(f".{source_path.name}.*")) == []
+
+
+def test_stage_station_parameter_file_reuses_complete_destination(tmp_path, monkeypatch):
+    source_dir = tmp_path / "source"
+    run_dir = tmp_path / "run"
+    source_dir.mkdir()
+    run_dir.mkdir()
+    source_path = source_dir / "or354811.par"
+    destination_path = run_dir / source_path.name
+    station_data = b"complete station data\n"
+    source_path.write_bytes(station_data)
+    destination_path.write_bytes(station_data)
+
+    cligen = object.__new__(cligen_module.Cligen)
+    cligen.wd = str(run_dir)
+    cligen.station = SimpleNamespace(
+        par=source_path.name,
+        parpath=str(source_path),
+    )
+    replace_calls = []
+    monkeypatch.setattr(cligen_module.os, "replace", lambda *_args: replace_calls.append(_args))
+
+    assert cligen.stage_station_parameter_file() == str(destination_path)
+    assert replace_calls == []
+
+
+def test_stage_station_parameter_file_first_create_does_not_copy_execute_bits(tmp_path):
+    source_dir = tmp_path / "source"
+    run_dir = tmp_path / "run"
+    source_dir.mkdir()
+    run_dir.mkdir()
+    source_path = source_dir / "or354811.par"
+    destination_path = run_dir / source_path.name
+    source_path.write_bytes(b"complete station data\n")
+    source_path.chmod(0o775)
+
+    cligen = object.__new__(cligen_module.Cligen)
+    cligen.wd = str(run_dir)
+    cligen.station = SimpleNamespace(
+        par=source_path.name,
+        parpath=str(source_path),
+    )
+
+    cligen.stage_station_parameter_file()
+
+    assert destination_path.read_bytes() == source_path.read_bytes()
+    assert stat.S_IMODE(destination_path.stat().st_mode) & 0o111 == 0
+
+
+def test_stage_station_parameter_file_preserves_old_copy_and_cleans_up_on_failure(
+    tmp_path,
+    monkeypatch,
+):
+    source_dir = tmp_path / "source"
+    run_dir = tmp_path / "run"
+    source_dir.mkdir()
+    run_dir.mkdir()
+    source_path = source_dir / "or354811.par"
+    destination_path = run_dir / source_path.name
+    source_path.write_bytes(b"complete station data\n" * 32)
+    destination_path.write_bytes(b"old complete station data\n")
+
+    cligen = object.__new__(cligen_module.Cligen)
+    cligen.wd = str(run_dir)
+    cligen.station = SimpleNamespace(
+        par=source_path.name,
+        parpath=str(source_path),
+    )
+    original_replace = cligen_module.os.replace
+
+    def _fail_replace(_source, _destination):
+        assert destination_path.read_bytes() == b"old complete station data\n"
+        raise OSError("simulated NAS replace failure")
+
+    monkeypatch.setattr(cligen_module.os, "replace", _fail_replace)
+
+    with pytest.raises(OSError, match="simulated NAS replace failure"):
+        cligen.stage_station_parameter_file()
+
+    assert destination_path.read_bytes() == b"old complete station data\n"
+    assert list(run_dir.glob(f".{source_path.name}.*")) == []
+
+    monkeypatch.setattr(cligen_module.os, "replace", original_replace)
+    assert cligen.stage_station_parameter_file() == str(destination_path)
+    assert destination_path.read_bytes() == source_path.read_bytes()
 
 
 def test_run_observed_retries_timeout_and_logs_flake(monkeypatch, tmp_path):

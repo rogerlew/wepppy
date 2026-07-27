@@ -470,8 +470,14 @@ def interpolate_daily_timeseries_for_location(
         df.to_parquet(_join(output_dir, f'daymet_observed_{topaz_id}_{start_year}-{end_year}.parquet'))
 
     if 'prn' in output_type:
-        df_to_prn(df, _join(output_dir, f'daymet_observed_{topaz_id}_{start_year}-{end_year}.prn'), 
-                    'prcp(mm/day)', 'tmax(degc)', 'tmin(degc)')
+        df_to_prn(
+            df,
+            _join(output_dir, f'daymet_observed_{topaz_id}_{start_year}-{end_year}.prn'),
+            'prcp(mm/day)',
+            'tmax(degc)',
+            'tmin(degc)',
+            reject_internal_missing=True,
+        )
     
     return topaz_id
 

@@ -85,6 +85,7 @@ class ClimateGridmetMultipleBuildService:
             ncpu=ncpu,
         )
 
+        cligen.stage_station_parameter_file()
         sub_par_fns, sub_cli_fns, cli_fn, any_quality_guard_bypassed = self._build_interpolated_cli_files(
             climate=climate,
             watershed=watershed,
@@ -229,22 +230,38 @@ class ClimateGridmetMultipleBuildService:
         sample_nc = ""
 
         for measure in measures:
-            date_offset = 0
             for year in range(start_year, end_year + 1):
                 nc_path = _join(cli_dir, f"{measure}_{year}.nc")
                 sample_nc = nc_path
                 ts, abbrv, units = read_nc(nc_path, measure)
                 ts = ts.transpose(2, 1, 0)  # reorder to longs, lats, dates
                 ts_len = ts.shape[2]
+                year_start = pd.Timestamp(year=year, month=1, day=1)
+                next_year_start = pd.Timestamp(year=year + 1, month=1, day=1)
+                expected_year_days = int((next_year_start - year_start).days)
+                date_offset = int(
+                    (year_start - pd.Timestamp(year=start_year, month=1, day=1)).days
+                )
+
+                if ts_len > expected_year_days:
+                    raise ValueError(
+                        f"GridMET {measure!r} year {year} returned {ts_len} days; "
+                        f"expected at most {expected_year_days}"
+                    )
+                if year < end_year and ts_len != expected_year_days:
+                    raise ValueError(
+                        f"GridMET {measure!r} year {year} returned {ts_len} days; "
+                        f"only the final requested year may have a trailing "
+                        f"unpublished suffix (expected {expected_year_days})"
+                    )
 
                 if year == start_year:
                     ncols = ts.shape[0]
                     nrows = ts.shape[1]
-                    raw_data[measure] = np.zeros((ncols, nrows, ndates))
+                    raw_data[measure] = np.full((ncols, nrows, ndates), np.nan)
                     columns[measure] = f"{abbrv}({units})"
 
                 raw_data[measure][:, :, date_offset : date_offset + ts_len] = ts
-                date_offset += ts_len
 
         raw_data_with_columns = {columns[k]: v for k, v in raw_data.items()}
 

@@ -170,8 +170,10 @@ def read_nc(fn, gridvariable):
     add_offset = getattr(variable, 'add_offset', 0.0)
 
     ts = variable[:]
-
-    ts = np.array(ts, dtype=np.float64)
+    if np.ma.isMaskedArray(ts):
+        ts = np.ma.asarray(ts, dtype=np.float64).filled(np.nan)
+    else:
+        ts = np.asarray(ts, dtype=np.float64)
 
 #    ts *= scale_factor
 #    ts += add_offset
@@ -244,10 +246,9 @@ def retrieve_timeseries(variables, locations, start_year, end_year, met_dir):
                         #ts = [int(x) for x in ts]
                         #d['{}-{}-{}'.format(abbrv, year, key)] = (ts, desc, units)
 
-                os.remove(fn)
-            except Exception:
-                os.remove(fn)
-                raise
+            finally:
+                if exists(fn):
+                    os.remove(fn)
     #return d
 
 
@@ -288,7 +289,8 @@ def interpolate_daily_timeseries_for_location(topaz_id, loc, dates,
 
     if 'prn' in output_type:
         df_to_prn(df, _join(output_dir, f'gridmet_observed_{topaz_id}_{start_year}-{end_year}.prn'), 
-                    'pr(mm)', 'tmmx(degc)', 'tmmn(degc)')
+                    'pr(mm)', 'tmmx(degc)', 'tmmn(degc)',
+                    reject_internal_missing=True)
     
     return topaz_id
 

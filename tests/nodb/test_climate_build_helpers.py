@@ -2,15 +2,52 @@ from __future__ import annotations
 
 import contextlib
 import logging
+from datetime import date, timedelta
 from pathlib import Path
 from types import SimpleNamespace
 
 import pandas as pd
 import pytest
 
+import wepppy.climates.daymet.daymet_singlelocation_client as daymet_client
 import wepppy.nodb.core.climate_build_helpers as helper_module
 
 pytestmark = pytest.mark.unit
+
+
+def test_daymet_interpolation_rejects_internal_primary_variable_hole(
+    tmp_path: Path,
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    dates = pd.date_range("2026-07-23", periods=3)
+    columns = {
+        "prcp(mm/day)": [1.0, float("nan"), 2.0],
+        "tmax(degc)": [20.0, 21.0, 22.0],
+        "tmin(degc)": [10.0, 11.0, 12.0],
+    }
+    raw_data = {
+        name: pd.Series(values, dtype=float).to_numpy().reshape(1, 1, len(dates))
+        for name, values in columns.items()
+    }
+    monkeypatch.setattr(
+        daymet_client,
+        "interpolate_geospatial",
+        lambda _easting, _northing, _eastings, _northings, values, _method, a_min=None: values[0, 0, :],
+    )
+
+    with pytest.raises(ValueError, match="prcp\\(mm/day\\).*internal missing-data hole"):
+        daymet_client.interpolate_daily_timeseries_for_location(
+            "p1",
+            {"easting": 1.0, "northing": 2.0},
+            dates,
+            pd.Series([1.0]).to_numpy(),
+            pd.Series([2.0]).to_numpy(),
+            raw_data,
+            {name: {"method": "nearest"} for name in columns},
+            str(tmp_path),
+            2026,
+            2026,
+        )
 
 
 class _WatershedStub:
@@ -141,6 +178,57 @@ class _ObservedDaymetCligenStub:
         return False
 
 
+class _FullYearObservedCligenStub:
+    def __init__(self, cli_dir: Path, year: int) -> None:
+        self.cli_dir = cli_dir
+        self.year = year
+
+    def run_observed(
+        self,
+        _prn_fn: str,
+        *,
+        cli_fn: str,
+        adjust_mx_pt5: bool,
+        silently_pass_quality_guard: bool,
+    ) -> bool:
+        _ = (adjust_mx_pt5, silently_pass_quality_guard)
+        lines = [
+            "5.32300",
+            "   1   0   0",
+            "  Station:  TEST ID                                        CLIGEN VER. 5.32300 -r:    0 -I: 2",
+            " Latitude Longitude Elevation (m) Obs. Years   Beginning year  Years simulated Command Line:",
+            f"    43.73  -111.12        1859          40        {self.year}             1          -itest.par -Ows.prn -owepp.cli",
+            " Observed monthly ave max temperature (C)",
+            "  -1.8   0.7   5.1  11.1  16.4  21.8  26.8  25.9  21.0  13.4   4.6  -1.2",
+            " Observed monthly ave min temperature (C)",
+            " -13.5 -11.8  -7.1  -2.9   1.2   5.0   8.4   7.3   3.0  -2.1  -7.5 -12.5",
+            " Observed monthly ave solar radiation (Langleys/day)",
+            " 129.0 207.0 330.0 440.0 540.0 602.0 630.0 530.0 404.0 267.0 149.0 103.0",
+            " Observed monthly ave precipitation (mm)",
+            "  28.5  18.9  26.5  33.1  47.8  32.0  26.8  25.5  24.3  30.6  27.4  32.2",
+            " da mo year  prcp  dur   tp     ip  tmax  tmin  rad  w-vl w-dir  tdew",
+            "             (mm)  (h)               (C)   (C) (l/d) (m/s)(Deg)   (C)",
+        ]
+        current = date(self.year, 1, 1)
+        while current.year == self.year:
+            lines.append(
+                f"{current.day:3d}{current.month:3d}{current.year:5d}"
+                "   0.0   0.0  0.0    0.0  10.0   0.0  200  3.0   180   1.0"
+            )
+            current += timedelta(days=1)
+        lines.append("")
+        (self.cli_dir / cli_fn).write_text("\n".join(lines), encoding="ascii")
+        return False
+
+
+class _RecordingOverlayClimate:
+    def __init__(self) -> None:
+        self.calls: list[tuple[str, list[object], list[object]]] = []
+
+    def replace_var(self, colname, dates, values) -> None:
+        self.calls.append((colname, list(dates), list(values)))
+
+
 class _FutureStub:
     def __init__(self, *, value=None, exc: Exception | None = None, done: bool = True) -> None:
         self._value = value
@@ -164,6 +252,67 @@ class _FutureStub:
 def test_baseline_sunmap_daily_potential_matches_wbval03_failure_bound() -> None:
     bound = helper_module._baseline_sunmap_horizontal_daily_potential_ly(49, 43.73)
     assert bound == pytest.approx(453.068716, rel=1.0e-6)
+
+
+def test_replace_finite_observed_prefix_preserves_generated_future_suffix() -> None:
+    climate = _RecordingOverlayClimate()
+    dates = pd.to_datetime(["2026-07-23", "2026-07-24", "2026-07-25"])
+
+    helper_module._replace_finite_observed_prefix(
+        climate,
+        "tdew",
+        dates,
+        [16.0, float("nan"), float("nan")],
+    )
+
+    assert climate.calls == [("tdew", [dates[0]], [16.0])]
+
+
+def test_replace_finite_observed_prefix_rejects_internal_hole() -> None:
+    climate = _RecordingOverlayClimate()
+    dates = pd.to_datetime(["2026-07-23", "2026-07-24", "2026-07-25"])
+
+    with pytest.raises(
+        ValueError,
+        match=r"tdew contains an internal missing-data hole.*2026-07-24",
+    ):
+        helper_module._replace_finite_observed_prefix(
+            climate,
+            "tdew",
+            dates,
+            [16.0, float("nan"), 17.0],
+        )
+
+    assert climate.calls == []
+
+
+def test_replace_finite_observed_prefix_retains_all_generated_values_when_unavailable() -> None:
+    climate = _RecordingOverlayClimate()
+    dates = pd.to_datetime(["2026-07-24", "2026-07-25"])
+
+    helper_module._replace_finite_observed_prefix(
+        climate,
+        "w-vl",
+        dates,
+        [float("nan"), float("nan")],
+    )
+
+    assert climate.calls == []
+
+
+def test_replace_finite_observed_prefix_rejects_infinite_value() -> None:
+    climate = _RecordingOverlayClimate()
+    dates = pd.to_datetime(["2026-07-23"])
+
+    with pytest.raises(ValueError, match=r"tdew contains a non-finite value.*2026-07-23"):
+        helper_module._replace_finite_observed_prefix(
+            climate,
+            "tdew",
+            dates,
+            [float("inf")],
+        )
+
+    assert climate.calls == []
 
 
 def test_daymet_radiation_normalization_clamps_over_toa_rows_and_writes_provenance(
@@ -339,6 +488,112 @@ def test_build_observed_daymet_interpolated_persists_radiation_normalization(
     assert exported["srad_toa_bound(l/day)"].iloc[1] == pytest.approx(453.068716, rel=1.0e-6)
     assert exported["srad_toa_publication_bound(l/day)"].iloc[1] == pytest.approx(453.0)
     assert (tmp_path / "daymet_radiation_toa_normalization_p1.csv").exists()
+
+
+@pytest.mark.parametrize(("year", "expected_days"), [(1990, 365), (1992, 366)])
+def test_build_observed_gridmet_interpolated_retains_full_generated_suffix(
+    tmp_path: Path,
+    year: int,
+    expected_days: int,
+) -> None:
+    dates = pd.date_range(f"{year}-01-01", f"{year}-12-31")
+    observed_prefix = [10.0, 11.0]
+    missing_suffix = [float("nan")] * (len(dates) - len(observed_prefix))
+    tdew_suffix = [float("nan")] * (len(dates) - 3)
+    wind_speed_suffix = [float("nan")] * (len(dates) - 4)
+    wind_direction_suffix = [float("nan")] * (len(dates) - 5)
+    df = pd.DataFrame(
+        {
+            "srad(l/day)": [300.0, 301.0, *missing_suffix],
+            "tdew(degc)": [5.0, 6.0, 7.0, *tdew_suffix],
+            "vs(m/s)": [1.0, 2.0, 2.5, 2.75, *wind_speed_suffix],
+            "th(DegreesClockwisefromnorth)": [
+                90.0,
+                91.0,
+                92.0,
+                93.0,
+                94.0,
+                *wind_direction_suffix,
+            ],
+        },
+        index=dates,
+    )
+    source_path = tmp_path / f"gridmet_observed_p1_{year}-{year}.parquet"
+    df.to_parquet(source_path)
+
+    topaz_id, bypassed = helper_module.build_observed_gridmet_interpolated(
+        _FullYearObservedCligenStub(tmp_path, year),
+        "p1",
+        -111.12,
+        43.73,
+        year,
+        year,
+        str(tmp_path),
+        "wepp.cli",
+        "ws.prn",
+    )
+
+    assert topaz_id == "p1"
+    assert bypassed is False
+    cli = helper_module.ClimateFile(str(tmp_path / "wepp.cli")).as_dataframe()
+    assert len(cli) == expected_days
+    assert cli.iloc[0]["tdew"] == pytest.approx(5.0)
+    assert cli.iloc[1]["tdew"] == pytest.approx(6.0)
+    assert cli.iloc[1]["rad"] == pytest.approx(301.0)
+    assert cli.iloc[2]["tdew"] == pytest.approx(7.0)
+    assert cli.iloc[2]["rad"] == pytest.approx(200.0)
+    assert cli.iloc[3]["w-vl"] == pytest.approx(2.8)
+    assert cli.iloc[4]["w-vl"] == pytest.approx(3.0)
+    assert cli.iloc[4]["w-dir"] == pytest.approx(94.0)
+    assert cli.iloc[5]["w-dir"] == pytest.approx(180.0)
+    assert cli.iloc[-1]["tdew"] == pytest.approx(1.0)
+    assert cli.iloc[-1]["rad"] == pytest.approx(200.0)
+    assert cli.iloc[-1]["w-vl"] == pytest.approx(3.0)
+    assert cli.iloc[-1]["w-dir"] == pytest.approx(180.0)
+
+
+def test_build_observed_daymet_interpolated_uses_independent_variable_prefixes(
+    tmp_path: Path,
+) -> None:
+    dates = pd.date_range("1990-01-01", "1990-12-31")
+
+    def _prefix(values):
+        return [*values, *([float("nan")] * (len(dates) - len(values)))]
+
+    df = pd.DataFrame(
+        {
+            "srad(l/day)": _prefix([100.0, 101.0]),
+            "tdew(degc)": _prefix([5.0, 6.0, 7.0]),
+        },
+        index=dates,
+    )
+    source_path = tmp_path / "daymet_observed_p1_1990-1990.parquet"
+    df.to_parquet(source_path)
+
+    helper_module.build_observed_daymet_interpolated(
+        _FullYearObservedCligenStub(tmp_path, 1990),
+        "p1",
+        -111.12,
+        43.73,
+        1990,
+        1990,
+        str(tmp_path),
+        "wepp.cli",
+        "ws.prn",
+        wind_vs=_prefix([1.0, 2.0, 2.5, 2.75]),
+        wind_dir=_prefix([90.0, 91.0, 92.0, 93.0, 94.0]),
+    )
+
+    cli = helper_module.ClimateFile(str(tmp_path / "wepp.cli")).as_dataframe()
+    assert len(cli) == 365
+    assert cli.iloc[1]["rad"] == pytest.approx(101.0)
+    assert cli.iloc[2]["rad"] == pytest.approx(200.0)
+    assert cli.iloc[2]["tdew"] == pytest.approx(7.0)
+    assert cli.iloc[3]["tdew"] == pytest.approx(1.0)
+    assert cli.iloc[3]["w-vl"] == pytest.approx(2.8)
+    assert cli.iloc[4]["w-vl"] == pytest.approx(3.0)
+    assert cli.iloc[4]["w-dir"] == pytest.approx(94.0)
+    assert cli.iloc[5]["w-dir"] == pytest.approx(180.0)
 
 
 class _ExecutorStub:
@@ -611,16 +866,22 @@ def test_run_observed_daymet_multiple_build_sets_final_outputs(
     climate.use_gridmet_wind_when_applicable = True
 
     captured_executor_workers: list[int] = []
+    events: list[str] = []
 
     class _ProcessPoolExecutorStub:
         def __init__(self, max_workers: int):
             captured_executor_workers.append(max_workers)
+            events.append("executor")
 
         def __enter__(self):
             return self
 
         def __exit__(self, exc_type, exc, tb):
             return False
+
+    class _StagedCligen:
+        def stage_station_parameter_file(self) -> None:
+            events.append("stage")
 
     monkeypatch.setattr(
         helper_module,
@@ -633,7 +894,7 @@ def test_run_observed_daymet_multiple_build_sets_final_outputs(
             2001,
             2002,
             "ws.par",
-            object(),
+            _StagedCligen(),
         ),
     )
     monkeypatch.setattr(helper_module, "_build_daymet_hillslope_locations", lambda *_args, **_kwargs: {"ws": {}})
@@ -652,6 +913,7 @@ def test_run_observed_daymet_multiple_build_sets_final_outputs(
     bypassed = helper_module.run_observed_daymet_multiple_build(climate, attrs={"mode": "daymet"})
 
     assert captured_executor_workers == [7]
+    assert events == ["stage", "executor"]
     assert bypassed is True
     assert climate.attrs_seen == [{"mode": "daymet"}]
     assert climate.monthlies == [1.0] * 12

@@ -71,6 +71,61 @@ class DaymetRadiationNormalizationResult:
     artifact_path: Optional[str]
 
 
+def _finite_observed_prefix(
+    dates: Any,
+    values: Any,
+    *,
+    variable_name: str,
+) -> tuple[list[Any], list[Any]]:
+    """Return the finite observed prefix and reject missing internal holes."""
+    date_list = list(dates)
+    value_list = list(values)
+    if len(date_list) != len(value_list):
+        raise ValueError(
+            f"{variable_name} date/value length mismatch: "
+            f"{len(date_list)} dates, {len(value_list)} values"
+        )
+
+    missing = []
+    for idx, value in enumerate(value_list):
+        is_missing = bool(pd.isna(value))
+        if not is_missing and not bool(np.isfinite(value)):
+            raise ValueError(
+                f"{variable_name} contains a non-finite value at "
+                f"date={date_list[idx]!r}: {value!r}"
+            )
+        missing.append(is_missing)
+    try:
+        first_missing = missing.index(True)
+    except ValueError:
+        return date_list, value_list
+
+    for idx in range(first_missing + 1, len(missing)):
+        if not missing[idx]:
+            raise ValueError(
+                f"{variable_name} contains an internal missing-data hole at "
+                f"date={date_list[first_missing]!r}; later finite value at "
+                f"date={date_list[idx]!r}"
+            )
+
+    return date_list[:first_missing], value_list[:first_missing]
+
+
+def _replace_finite_observed_prefix(
+    climate: ClimateFile,
+    colname: str,
+    dates: Any,
+    values: Any,
+) -> None:
+    observed_dates, observed_values = _finite_observed_prefix(
+        dates,
+        values,
+        variable_name=colname,
+    )
+    if observed_dates:
+        climate.replace_var(colname, observed_dates, observed_values)
+
+
 def _is_cligen_observed_quality_guard_error(exc: RuntimeError) -> bool:
     return "cligen run_observed quality guard tripped" in str(exc).lower()
 
@@ -466,14 +521,14 @@ def build_observed_daymet_interpolated(
         artifact_label=topaz_id,
     )
 
-    climate.replace_var("rad", dates, radiation.normalized_values)
-    climate.replace_var("tdew", dates, df["tdew(degc)"])
+    _replace_finite_observed_prefix(climate, "rad", dates, radiation.normalized_values)
+    _replace_finite_observed_prefix(climate, "tdew", dates, df["tdew(degc)"])
 
     if wind_vs is not None:
-        climate.replace_var("w-vl", dates, wind_vs)
+        _replace_finite_observed_prefix(climate, "w-vl", dates, wind_vs)
 
     if wind_dir is not None:
-        climate.replace_var("w-dir", dates, wind_dir)
+        _replace_finite_observed_prefix(climate, "w-dir", dates, wind_dir)
 
     df.to_parquet(_join(cli_dir, _parquet_fn))
     climate.write(cli_path)
@@ -630,10 +685,15 @@ def build_observed_gridmet_interpolated(
     cli_path = _join(cli_dir, cli_fn)
     climate = ClimateFile(cli_path)
 
-    climate.replace_var("rad", dates, df["srad(l/day)"])
-    climate.replace_var("tdew", dates, df["tdew(degc)"])
-    climate.replace_var("w-vl", dates, df["vs(m/s)"])
-    climate.replace_var("w-dir", dates, df["th(DegreesClockwisefromnorth)"])
+    _replace_finite_observed_prefix(climate, "rad", dates, df["srad(l/day)"])
+    _replace_finite_observed_prefix(climate, "tdew", dates, df["tdew(degc)"])
+    _replace_finite_observed_prefix(climate, "w-vl", dates, df["vs(m/s)"])
+    _replace_finite_observed_prefix(
+        climate,
+        "w-dir",
+        dates,
+        df["th(DegreesClockwisefromnorth)"],
+    )
 
     climate.write(cli_path)
     return topaz_id, bool(quality_guard_bypassed)
@@ -1400,6 +1460,7 @@ def run_observed_daymet_multiple_build(
         hillslope_locations = _build_daymet_hillslope_locations(watershed, ws_lng, ws_lat)
         _interpolate_daymet_hillslope_series(climate, cli_dir, hillslope_locations)
         wind_vs, wind_dir = _resolve_daymet_wind(climate, ws_lng, ws_lat, start_year, end_year)
+        cligen.stage_station_parameter_file()
 
         with ProcessPoolExecutor(max_workers=_resolve_daymet_worker_count()) as executor:
             futures, sub_par_fns, sub_cli_fns, cli_fn = _submit_daymet_futures(

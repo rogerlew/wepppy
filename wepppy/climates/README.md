@@ -77,7 +77,8 @@ The `wepppy.climates` package integrates diverse climate data sources into a uni
 - **Variables**: Precipitation, tmax, tmin, wind speed, wind direction, humidity, solar radiation, vapor pressure
 - **Usage Pattern**: Download NetCDF for bounding box → interpolate to hillslope centroids → generate `.cli` files
 - **Strengths**: Near real-time, includes wind (critical for Daymet workflows), CONUS-wide coverage
-- **Limitations**: Coarser resolution than Daymet, CONUS only
+- **Partial-Year Behavior**: Unpublished trailing values remain missing in the observed input so CLIGEN generates the future portion of the complete calendar-year `.cli`; each available radiation, dewpoint, and wind series is overlaid independently
+- **Limitations**: Coarser resolution than Daymet, CONUS only; an internal missing-data hole fails rather than being treated as publication lag
 
 #### `prism/` - PRISM Climate Normals and Daily Data
 - **Purpose**: Parameter-elevation Regressions on Independent Slopes Model for climate normals and daily observations
@@ -284,6 +285,7 @@ stations = mgr.find_closest(lng=149.1, lat=-35.3, n=3)
 - **Purpose**: Human-readable intermediate format for CLIGEN observed data mode
 - **Structure**: CSV-like columns (date, prcp, tmax, tmin)
 - **Usage**: Convert Daymet/GridMET/PRISM dataframes → `.prn` → CLIGEN → `.cli`
+- **Missing Values**: `9999` asks CLIGEN to generate that field. This preserves complete WEPP years when a current-year source has an unpublished trailing interval.
 
 #### `.parquet` (Archive Format)
 - **Purpose**: Efficient storage and query of climate timeseries

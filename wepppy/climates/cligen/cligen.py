@@ -21,7 +21,7 @@ from os.path import join as _join
 from os.path import exists as _exists
 from os.path import split as _split
 
-import os, random, shlex, signal, time
+import os, random, shlex, signal, stat, time
 import subprocess
 from subprocess import Popen, PIPE, TimeoutExpired
 
@@ -607,6 +607,7 @@ def df_to_prn(
     tmax_key: str,
     tmin_key: str,
     pad_to_end_of_year: bool = True,
+    reject_internal_missing: bool = False,
 ) -> None:
     """Serialize a pandas DataFrame into CLIGEN's ``.prn`` format.
 
@@ -618,7 +619,24 @@ def df_to_prn(
         tmin_key: Column name for daily minimum temperature in Celsius.
         pad_to_end_of_year: When True, pad missing rows out to 31 Dec of the
             final year using CLIGEN's 9999 sentinel values.
+        reject_internal_missing: When True, allow missing values only as a
+            trailing unpublished suffix in each PRN variable.
     """
+
+    if reject_internal_missing:
+        for key in (p_key, tmax_key, tmin_key):
+            missing = list(pd.isna(df[key]))
+            try:
+                first_missing = missing.index(True)
+            except ValueError:
+                continue
+            for idx in range(first_missing + 1, len(missing)):
+                if not missing[idx]:
+                    raise ValueError(
+                        f"{key} contains an internal missing-data hole at "
+                        f"date={df.index[first_missing]!r}; later finite value "
+                        f"at date={df.index[idx]!r}"
+                    )
 
     if 'mm' in p_key:
         df[p_key] /= 25.4
@@ -2104,6 +2122,67 @@ class Cligen:
         assert _exists(self.cligen52), "Cannot find cligen52 executable"
         assert _exists(self.cligen52), "Cannot find cligen43 executable"
 
+    def stage_station_parameter_file(self) -> str:
+        """Atomically finalize the run-local station parameter file.
+
+        Multiple observed-climate workers share this destination. Copying it in
+        each worker can expose a partially written file on slow shared storage,
+        so multiple-build orchestrators call this method before starting their
+        process pool.
+        """
+        station_meta = self.station
+        source_path = station_meta.parpath
+        destination_path = _join(self.wd, station_meta.par)
+
+        source_size = os.path.getsize(source_path)
+        if _exists(destination_path) and os.path.getsize(destination_path) == source_size:
+            with open(source_path, "rb") as source, open(destination_path, "rb") as destination:
+                if source.read() == destination.read():
+                    return destination_path
+
+        temp_dir = tempfile.mkdtemp(
+            prefix=f".{station_meta.par}.",
+            dir=self.wd,
+        )
+        temp_path = _join(temp_dir, station_meta.par)
+        try:
+            with open(temp_path, "xb") as destination, open(source_path, "rb") as source:
+                shutil.copyfileobj(source, destination)
+                destination.flush()
+                os.fsync(destination.fileno())
+
+            if _exists(destination_path):
+                os.chmod(
+                    temp_path,
+                    stat.S_IMODE(os.stat(destination_path).st_mode),
+                )
+
+            if os.path.getsize(temp_path) != source_size:
+                raise OSError(
+                    f"incomplete CLIGEN station staging for {station_meta.par}: "
+                    f"expected {source_size} bytes, got {os.path.getsize(temp_path)}"
+                )
+
+            os.replace(temp_path, destination_path)
+
+            if os.path.getsize(destination_path) != source_size:
+                raise OSError(
+                    f"invalid finalized CLIGEN station file for {station_meta.par}: "
+                    f"expected {source_size} bytes, got {os.path.getsize(destination_path)}"
+                )
+            with open(source_path, "rb") as source, open(destination_path, "rb") as destination:
+                if source.read() != destination.read():
+                    raise OSError(
+                        f"content mismatch in finalized CLIGEN station file "
+                        f"{station_meta.par}"
+                    )
+            return destination_path
+        finally:
+            if _exists(temp_path):
+                os.remove(temp_path)
+            if _exists(temp_dir):
+                os.rmdir(temp_dir)
+
     def run_multiple_year(
         self,
         years: int,
@@ -2241,7 +2320,7 @@ class Cligen:
         par_fn = _join(self.wd, station_meta.par)
 
         if not _exists(par_fn):
-            shutil.copyfile(station_meta.parpath, par_fn)
+            self.stage_station_parameter_file()
 
         assert _exists(par_fn), par_fn
 

@@ -1,7 +1,7 @@
 # PROJECT_TRACKER.md
 > Kanban board for wepppy work packages and vision items
 
-**Last Updated**: 2026-07-22
+**Last Updated**: 2026-07-26
 **Active Packages**: 18
 **Quick Links**: [Work Packages Directory](docs/work-packages/) | [God-Tier Prompting Strategy](docs/god-tier-prompting-strategy.md)
 
@@ -645,6 +645,18 @@ build through job completion before review.
 ## ✅ Done
 
 Recently completed work packages. Archived immediately upon completion.
+
+### Partial-Year Climate and CLIGEN NAS Hardening (2026-07-27)
+
+**Status**: ✅ **COMPLETE; PRODUCTION DEPLOYMENT PENDING**
+
+**Link**: [docs/work-packages/20260726_climate_partial_year_cligen_hardening/](docs/work-packages/20260726_climate_partial_year_cligen_hardening/)
+
+**Summary**: Current partial Daymet/GridMET years now retain CLIGEN-generated
+future values independently per variable, reject internal data holes, and
+atomically stage the shared station file before multiple-interpolated workers
+start. Focused and NoDb gates pass; dual reviews approved after all findings
+were resolved.
 
 ### Runs TTL Deletion Catalog (REM-02) (2026-07-21)
 
