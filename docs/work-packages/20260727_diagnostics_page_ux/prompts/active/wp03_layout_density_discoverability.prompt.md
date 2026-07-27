@@ -38,7 +38,7 @@ The page reads as one coherent, compact diagnostic surface: readiness summary, c
 ### Files to Reference (Dependencies)
 - `wepppy/weppcloud/templates/base_pure.htm` — nav styling classes (`wc-nav__menu`, `wc-nav__menu-content`)
 - Existing `usersum_doc_link` macro usage in `interfaces.htm` — pattern for linking usersum docs from templates
-- `wepppy/weppcloud/static-src/tests/smoke/diagnostics/` — visual smoke specs that may assert on layout landmarks
+- `wepppy/weppcloud/routes/usersum/weppcloud/diagnostics.md` — the end-user doc (registered stub lands before this WP per the tracker sequencing; the link target must exist when this WP ships)
 
 ### Files to Avoid (Exclusions)
 - Shared UI primitives (`wc-stack`, card shell macro internals, chip styles) — density changes must be page-scoped; global spacing changes ripple across every pure-UI page
@@ -51,9 +51,9 @@ The page reads as one coherent, compact diagnostic surface: readiness summary, c
 2. Restructure the diagnostics template: single readiness header region, dense check list rows, report controls grouped on one line where the style guide permits, reset section compact. Preserve all data attributes, ARIA roles, and live-region semantics WP01/WP02 rely on.
 3. Scope spacing overrides to the diagnostics page root so shared primitives are untouched.
 4. In `interfaces.htm`, restructure the nav so the More dropdown exists in both auth branches: authenticated users keep their current entries plus Diagnostics; anonymous users get Login plus a More menu containing Diagnostics (or Diagnostics alongside Login if the style guide favors a flat link at that width — follow the guide).
-5. Add the usersum doc link to the diagnostics page via the established macro, targeting the WP04 doc filename recorded in the package tracker (coordinate: if WP04 has not landed, use the agreed filename and note it in the tracker so WP04 matches).
+5. Add the usersum doc link to the diagnostics page via the established macro, targeting `weppcloud`/`diagnostics.md` (the canonical filename recorded in the tracker; a registered stub lands before this WP, so verify the doc resolves rather than guessing a name).
 6. Amend the spec's layout and discoverability sections.
-7. Update route tests for the nav link in both auth states; refresh Playwright visual smoke expectations if landmarks moved.
+7. Update route tests for the nav link in both auth states. Do not touch `static-src/tests/smoke/diagnostics/` — it holds unrelated deck.gl/map-rendering diagnostics, not this page's tests.
 
 ## Validation Gates
 

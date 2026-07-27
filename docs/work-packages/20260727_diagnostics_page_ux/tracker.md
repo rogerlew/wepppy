@@ -6,8 +6,8 @@
 
 **Timezone**: UTC
 **Started**: 2026-07-27 20:20 UTC
-**Current phase**: Scoped / ready for implementation
-**Last updated**: 2026-07-27 20:20 UTC
+**Current phase**: Scoped / ready for implementation (scaffold reviewed by Codex, findings dispositioned)
+**Last updated**: 2026-07-27 20:55 UTC
 **Next milestone**: WP01 (run feedback + re-run) implemented and passing gates
 **Security impact**: `high` (scoped to WP02 reset endpoint auth posture)
 **Dedicated security review**: `yes` (WP02 only)
@@ -18,8 +18,9 @@
 ### Ready / Backlog
 - [ ] WP01 — Live run feedback + re-run control (Codex; `prompts/active/wp01_run_feedback_rerun.prompt.md`)
 - [ ] WP02 — Browser Session Reset relocation + anonymous auth posture (Codex; `prompts/active/wp02_browser_reset_relocation.prompt.md`; security review artifact required)
+- [ ] WP04a — Registered usersum stub at `weppcloud/diagnostics.md` per `enduser-stub-authoring-guide.md` (Claude Code; must land before WP03 so its link target exists)
 - [ ] WP03 — Card density + More-menu/usersum discoverability wiring (Codex; `prompts/active/wp03_layout_density_discoverability.prompt.md`)
-- [ ] WP04 — Author usersum end-user doc, register in manifest/nav, regenerate index (Claude Code; after WP01–WP03 land, or stub first per `enduser-stub-authoring-guide.md`)
+- [ ] WP04b — Full usersum end-user doc replacing the stub, index regenerated (Claude Code; after WP01–WP03 land)
 
 ### In Progress
 - (none)
@@ -32,9 +33,16 @@
 
 ## Sequencing
 
-WP01 → WP02 → WP03 → WP04, serially. WP01–WP03 all touch `diagnostics.htm`; serial execution avoids template merge conflicts. WP04 documents the shipped UX.
+WP01 → WP02 → WP04a (usersum stub) → WP03 → WP04b (full doc), serially. WP01–WP03 all touch `diagnostics.htm`; serial execution avoids template merge conflicts. The stub precedes WP03 so the page's usersum link never targets a missing doc; the full doc lands last so it describes the shipped UX. Canonical usersum doc path: `wepppy/weppcloud/routes/usersum/weppcloud/diagnostics.md` (category `weppcloud`, filename `diagnostics.md`).
 
 ## Decisions Log
+
+### 2026-07-27 20:55 UTC: Codex scaffold review — all 8 findings accepted and applied
+**Context**: Codex reviewed commit 783095311 (scaffold + spec 4.1) at Roger's request. Full findings and dispositions: `artifacts/2026-07-27_codex_scaffold_review.md`.
+
+**Decision**: All 8 findings accepted; fixes applied to the spec, all three WP prompts, package.md, and this tracker. Load-bearing corrections: check definitions gain a `description` field (WP01 now owns the check modules for that); spec `info` impact language no longer contradicts the fix-hint rule; WP02 must disposition `weppcloud-csrf-contract.md` / `weppcloud-session-contract.md` and confirm anonymous pages get a usable CSRF token before relaxing the 401; reset endpoint tests live in `test_rq_engine_token_api.py` and profile context tests in `test_user_profile_token.py`; a registered usersum stub (WP04a) precedes WP03; bandwidth budgets corrected to 4/12/12 s; `static-src/tests/smoke/diagnostics/` recorded as unrelated deck.gl diagnostics.
+
+**Impact**: Sequencing is now WP01 → WP02 → WP04a → WP03 → WP04b; scaffold verdict upgraded from "not fully executable as written" to executable.
 
 ### 2026-07-27 20:20 UTC: Reset control moves to diagnostics; endpoint posture decided in WP02
 **Context**: Browser Session Reset lives on the login-gated profile page, but its primary audience is users whose browser state is broken badly enough that login may fail. `POST /api/auth/reset-browser-state` currently 401s anonymous callers.
@@ -66,6 +74,7 @@ WP01 → WP02 → WP03 → WP04, serially. WP01–WP03 all touch `diagnostics.ht
 | Risk | Severity | Likelihood | Mitigation | Status |
 |------|----------|------------|------------|--------|
 | Anonymous reset endpoint becomes an annoyance vector (forced logout via CSRF) | Medium | Low | Retain same-origin POST check + CSRF token; security review verifies | Open |
+| Anonymous sessions may lack a usable CSRF token, making the relocated reset uncallable | Medium | Medium | WP02 step 2 verifies against the CSRF contract before shipping; contract amended if needed | Open |
 | WP01–WP03 template conflicts | Low | Medium | Serial execution per Sequencing | Open |
 | More-menu change on interfaces.htm regresses anonymous Cap/login flow | Low | Low | Keep Login link; menu addition is additive; manual smoke on anonymous view | Open |
 | Spec drift (`diagnostics-page.spec.md` not updated with behavior changes) | Medium | Medium | Each WP prompt includes a spec-amendment deliverable; verify at closure | Open |
@@ -94,6 +103,15 @@ WP01 → WP02 → WP03 → WP04, serially. WP01–WP03 all touch `diagnostics.ht
 - [ ] forest1 test-production smoke if applicable
 
 ## Progress Notes
+
+### 2026-07-27 20:55 UTC: Codex review dispositioned
+**Agent/Contributor**: Codex (review) + Claude Code (disposition)
+
+**Work completed**:
+- Codex's read-only review of commit 783095311 returned 8 findings (5 medium, 3 low); all accepted and applied. See `artifacts/2026-07-27_codex_scaffold_review.md`.
+- Files corrected: `docs/ui-docs/diagnostics-page.spec.md` (description field, info-language fix), all three WP prompts, `package.md`, this tracker.
+
+**Next steps**: unchanged — Codex executes WP01; note the revised sequencing places the WP04a usersum stub before WP03.
 
 ### 2026-07-27 20:20 UTC: Package scaffolded
 **Agent/Contributor**: Claude Code

@@ -24,7 +24,7 @@ The `/weppcloud/diagnostics/` page (route `GET /diagnostics/` on `weppcloud_site
 - "More" dropdown in `wepppy/weppcloud/templates/interfaces.htm`: render for anonymous users and add a Diagnostics entry for all users.
 - New usersum end-user doc for the diagnostics page, registered in `docs_manifest.yaml` / `nav_tree.yaml` with regenerated `docs_index.json`.
 - Amendments to the authoritative spec `docs/ui-docs/diagnostics-page.spec.md` for every behavior change.
-- Test updates: `tests/weppcloud/routes/test_diagnostics_page.py`, Jest suites under `wepppy/weppcloud/controllers_js/__tests__/` (diagnostics_*), Playwright smoke specs as applicable.
+- Test updates: `tests/weppcloud/routes/test_diagnostics_page.py`, `tests/weppcloud/routes/test_rq_engine_token_api.py` (owns the reset endpoint tests), `tests/weppcloud/routes/test_user_profile_token.py` (asserts the profile reset context variables), and Jest suites under `wepppy/weppcloud/controllers_js/__tests__/` (diagnostics_*). Note: `static-src/tests/smoke/diagnostics/` is unrelated deck.gl/map-rendering diagnostics, not this page's suite.
 
 ### Explicitly Out of Scope
 - Adding new diagnostic checks or changing check semantics/thresholds.
@@ -57,7 +57,7 @@ The `/weppcloud/diagnostics/` page (route `GET /diagnostics/` on `weppcloud_site
 - None. Builds on the shipped diagnostics page (spec and wave boards in `docs/ui-docs/diagnostics-page.*`).
 
 ### Blocks
-- WP04 (usersum doc) should land after WP01–WP03 so the doc describes the shipped UX; a stub per `enduser-stub-authoring-guide.md` may land earlier.
+- WP03's usersum link requires a registered doc target: a stub at `wepppy/weppcloud/routes/usersum/weppcloud/diagnostics.md` (per `enduser-stub-authoring-guide.md`) MUST land before WP03 so the page never links to a missing doc. The full WP04 doc lands after WP01–WP03 so it describes the shipped UX.
 
 ## Related Packages
 - **Related**: [20260727_auth_session_persistence_hardening](../20260727_auth_session_persistence_hardening/package.md) — same auth/session surface; the reset endpoint decision must not contradict the persistence contract ratified there.
@@ -86,7 +86,7 @@ The `/weppcloud/diagnostics/` page (route `GET /diagnostics/` on `weppcloud_site
 - `wepppy/weppcloud/templates/user/profile.html` — Browser Session Reset section + inline script (from ~line 107)
 - `wepppy/weppcloud/routes/user.py` — profile view passes `reset_browser_state_endpoint` / `reset_browser_state_login_url` (~lines 482–496)
 - `wepppy/weppcloud/templates/interfaces.htm` — `header_nav` block with auth-only "More" menu (~lines 24–77)
-- `wepppy/weppcloud/static/js/diagnostics/` — page.js (DOMContentLoaded runner), core.js (check registry/runner), bandwidth_checks.js (10 s default probe timeouts), diagnostics-realtime.js (probe windows), report.js
+- `wepppy/weppcloud/static/js/diagnostics/` — page.js (DOMContentLoaded runner), core.js (check registry/runner), bandwidth_checks.js (4 s RTT / 12 s download / 12 s upload probe budgets), diagnostics-realtime.js (20 s probe windows with reconnect retry), report.js
 - `wepppy/weppcloud/routes/usersum/weppcloud/enduser-authoring-guide.md` and `enduser-stub-authoring-guide.md` — doc authoring conventions
 - `tools/usersum_docs_tool.py` — manifest/nav validation and `docs_index.json` regeneration
 

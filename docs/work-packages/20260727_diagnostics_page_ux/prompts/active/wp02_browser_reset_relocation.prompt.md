@@ -29,6 +29,7 @@ An anonymous user on the diagnostics page can trigger Browser Session Reset: the
 - `wepppy/weppcloud/routes/weppcloud_site.py` — `reset_browser_state()`, `_clear_reset_browser_state_cookies()`, `_is_same_origin_post()`
 - `wepppy/weppcloud/routes/user.py` — profile view wiring of `reset_browser_state_endpoint` and `reset_browser_state_login_url`
 - `docs/ui-docs/diagnostics-page.spec.md` — where the reset section fits the page contract
+- `docs/schemas/weppcloud-csrf-contract.md` and `docs/schemas/weppcloud-session-contract.md` — canonical authorities for route CSRF classification and session semantics; changing the endpoint's anonymous posture touches both
 - `docs/work-packages/20260727_diagnostics_page_ux/tracker.md` — Decisions Log entry on the auth posture
 
 ### Files to Modify (Outputs)
@@ -38,7 +39,10 @@ An anonymous user on the diagnostics page can trigger Browser Session Reset: the
 - `wepppy/weppcloud/templates/user/profile.html` — remove the section and inline script; add a short pointer to the diagnostics page
 - `wepppy/weppcloud/routes/user.py` — drop now-unused context variables if nothing else consumes them
 - `docs/ui-docs/diagnostics-page.spec.md` — add the reset section to the page contract
-- `tests/weppcloud/routes/test_diagnostics_page.py` and the reset endpoint's route tests — cover the anonymous path, same-origin rejection, and profile removal
+- `docs/schemas/weppcloud-csrf-contract.md` / `weppcloud-session-contract.md` — amend the endpoint's route classification for the new anonymous posture, or record explicitly in the tracker that no normative amendment is required and why
+- `tests/weppcloud/routes/test_rq_engine_token_api.py` — owns the reset endpoint tests (`test_reset_browser_state_requires_auth` at ~line 947 asserts the anonymous 401 this WP removes; rework it and the cross-origin tests for the new posture)
+- `tests/weppcloud/routes/test_user_profile_token.py` — asserts the profile context variables (`reset_browser_state_endpoint` / `reset_browser_state_login_url`, ~line 380); update when the profile section and context wiring are removed
+- `tests/weppcloud/routes/test_diagnostics_page.py` — cover the reset section rendering on the diagnostics page
 - `docs/work-packages/20260727_diagnostics_page_ux/artifacts/<date>_security_review.md` — dedicated review artifact
 
 ### Files to Avoid (Exclusions)
@@ -48,7 +52,7 @@ An anonymous user on the diagnostics page can trigger Browser Session Reset: the
 ## Instructions
 
 1. Read the endpoint and inline script end to end; inventory exactly what is cleared server-side (cookies via the clear-targets helper, Flask session) and client-side (prefixed storage keys).
-2. Endpoint posture: allow anonymous callers. Retain the same-origin POST check and CSRF token handling. For anonymous callers the response must carry only the ok flag, login URL, and a generic message — no session key counts or any user-identifying detail. Confirm the operation only ever affects the caller's own cookies and session; there is no identifier parameter to abuse.
+2. Endpoint posture: allow anonymous callers. Retain the same-origin POST check and CSRF token handling — first confirm against `docs/schemas/weppcloud-csrf-contract.md` that anonymous sessions on this page receive a usable CSRF token; if they do not, resolve that (e.g., exempt-with-same-origin-enforcement per the contract's classification scheme) and amend the contract accordingly rather than shipping an endpoint anonymous users cannot actually call. For anonymous callers the response must carry only the ok flag, login URL, and a generic message — no session key counts or any user-identifying detail. Confirm the operation only ever affects the caller's own cookies and session; there is no identifier parameter to abuse.
 3. Extract the profile inline script into a static module under the diagnostics JS directory, preserving behavior: busy state, status messaging, storage clearing on success, redirect to the returned login URL. The module reads its endpoint and login URL from data attributes as the profile markup does today.
 4. Add the reset section to the diagnostics template with copy that states plainly: it clears WEPPcloud cookies and site storage for this browser and signs you out. If a diagnostics run is in progress, the control should still work — the reset is independent of check execution.
 5. Remove the profile section and script; leave a one-line pointer to the diagnostics page in its place. Clean up the profile view's context variables if now unused.
@@ -59,7 +63,8 @@ An anonymous user on the diagnostics page can trigger Browser Session Reset: the
 ## Validation Gates
 
 - `wctl run-pytest tests/weppcloud/routes/test_diagnostics_page.py`
-- `wctl run-pytest tests/weppcloud/` for the reset endpoint's suite
+- `wctl run-pytest tests/weppcloud/routes/test_rq_engine_token_api.py`
+- `wctl run-pytest tests/weppcloud/routes/test_user_profile_token.py`
 - `wctl run-npm lint` and `wctl run-npm test`
 - Manual in the dev stack: reset as an anonymous user (cookies present from a prior session) and as an authenticated user; confirm storage clearing and redirect in both cases.
 
