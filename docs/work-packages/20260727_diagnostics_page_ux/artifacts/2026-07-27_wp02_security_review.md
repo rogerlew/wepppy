@@ -110,10 +110,16 @@ Risk acceptance authority: no finding uses `Accepted-risk`.
 
 ## Residual Risk
 
-- **Accepted residual risks**:
-  - None. Same-origin and CSRF controls reduce forced-logout abuse to callers already executing in the WEPPcloud origin; repeated caller-local resets are low-cost and idempotent.
+> **Correction (2026-07-27, independent review)**: the original "Accepted residual risks: None" below was an overstatement. An independent read (`2026-07-27_independent_security_review.md`) surfaced pre-existing low-severity residual risks this self-review did not enumerate. The forced-logout/cross-user ship verdict stands, but the residual-risk accounting is corrected here.
+
+- **Accepted residual risks (corrected)**:
+  - Same-origin and CSRF controls reduce forced-logout abuse to callers already executing in the WEPPcloud origin; repeated caller-local resets are low-cost and idempotent. *(original, stands)*
+  - `_is_same_origin_post` treats `Sec-Fetch-Site: same-origin` as authoritative and trusts client `X-Forwarded-*` when building allowed origins — a latent property of the shared helper (also guards `issue_rq_engine_token`), not browser-exploitable because CSRF is independently required.
+  - `_clear_reset_browser_state_cookies` deletes generically named `csrf_token`/`csrftoken` cookies across parent-domain variants; could touch a sibling app's same-named cookie only where WEPPcloud shares a parent domain.
+  - The Copy JSON "redacted" report uses a denylist and can embed arbitrary backend error text and the full WebSocket hostname (pre-existing report.js behavior, unchanged by this WP).
+  - `browser_reset.js` clears all `wc-`/`wepp`-prefixed storage keys; the broad `wepp` prefix is **intentional and required** (production stores `weppcloud:fork-console:*` keys), so it is retained rather than tightened.
 - **Follow-up packages/issues**:
-  - None required.
+  - Shared same-origin-helper hardening, cookie-target scoping, and allowlist-based report redaction — enumerated in `2026-07-27_independent_security_review.md` § Follow-ups. Non-blocking; for a future security-hardening package.
 
 ## Sign-off
 

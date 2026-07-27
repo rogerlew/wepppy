@@ -38,6 +38,13 @@ WP01 → WP02 → WP04a (usersum stub) → WP03 → WP04b (full doc), serially. 
 
 ## Decisions Log
 
+### 2026-07-27 21:44 UTC: Independent security review — dispositioned, no blocker, no code change
+**Context**: The WP02 security artifact was implementer-authored. An independent pass (fresh Codex thread 019fa584, read-only) re-derived the anonymous-reset security surface and returned 11 findings (5 confirmed-safe, 5 low, 1 artifact critique). Full record + per-finding source verification: `artifacts/2026-07-27_independent_security_review.md`.
+
+**Decision**: Ship verdict stands; closure not reopened. Each finding verified against source before disposition. Findings 2/4/10 are pre-existing shared-helper / other-feature behavior the WP made anonymously reachable but did not introduce → logged as follow-ups for a future security-hardening package. Finding 6's recommended fix (tighten `wepp` → `wepp-`) was **rejected on evidence**: production stores `weppcloud:fork-console:*` keys that the narrower prefix would orphan, regressing the reset. Only doc action taken: corrected the WP02 artifact's "Accepted residual risks: None" overstatement.
+
+**Impact**: No code change. Four non-blocking follow-ups recorded for a future package. WP02 artifact residual-risk section corrected.
+
 ### 2026-07-27: WP02 anonymous CSRF and contract classification
 **Context**: WP02 requires anonymous callers on diagnostics to receive a usable CSRF token before `POST /api/auth/reset-browser-state` stops returning 401.
 
