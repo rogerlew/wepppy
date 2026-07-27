@@ -117,6 +117,15 @@ docs:
     audience_tags: [user]
     status: active
     nav_key: usersum.weppcloud.clearing_locks
+  - doc_id: usersum.weppcloud.diagnostics
+    source: local
+    rel_path: wepppy/weppcloud/routes/usersum/weppcloud/diagnostics.md
+    title: Browser Diagnostics
+    min_role: user
+    category: weppcloud
+    audience_tags: [user]
+    status: active
+    nav_key: usersum.weppcloud.diagnostics
   - doc_id: usersum.weppcloud.controls.channel_delineation
     source: local
     rel_path: wepppy/weppcloud/routes/usersum/weppcloud/controls/channel-delineation.md

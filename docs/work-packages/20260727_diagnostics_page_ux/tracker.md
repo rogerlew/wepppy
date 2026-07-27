@@ -16,20 +16,19 @@
 ## Task Board
 
 ### Ready / Backlog
-- [ ] WP01 — Live run feedback + re-run control (Codex; `prompts/active/wp01_run_feedback_rerun.prompt.md`)
 - [ ] WP02 — Browser Session Reset relocation + anonymous auth posture (Codex; `prompts/active/wp02_browser_reset_relocation.prompt.md`; security review artifact required)
-- [ ] WP04a — Registered usersum stub at `weppcloud/diagnostics.md` per `enduser-stub-authoring-guide.md` (Claude Code; must land before WP03 so its link target exists)
 - [ ] WP03 — Card density + More-menu/usersum discoverability wiring (Codex; `prompts/active/wp03_layout_density_discoverability.prompt.md`)
 - [ ] WP04b — Full usersum end-user doc replacing the stub, index regenerated (Claude Code; after WP01–WP03 land)
 
 ### In Progress
-- (none)
+- [ ] WP01 — Live run feedback + re-run control (Codex via MCP, dispatched 2026-07-27 ~20:57 UTC)
 
 ### Blocked
 - (none)
 
 ### Done
 - [x] Package scoped and scaffolded (2026-07-27 20:20 UTC)
+- [x] WP04a — usersum stub `weppcloud/diagnostics.md` authored, registered in manifest/nav, index rebuilt, doc-lint clean (2026-07-27 21:00 UTC; executed in parallel with WP01 — working sets disjoint, land-before-WP03 constraint preserved)
 
 ## Sequencing
 

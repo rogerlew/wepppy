@@ -84,6 +84,8 @@ roots:
         doc_id: usersum.path.quick_start
       - key: usersum.weppcloud.clearing_locks
         doc_id: usersum.weppcloud.clearing_locks
+      - key: usersum.weppcloud.diagnostics
+        doc_id: usersum.weppcloud.diagnostics
 
   - key: usersum.module_source_guides
     title: Module Guides (Source Stubs)
