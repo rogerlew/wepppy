@@ -21,6 +21,7 @@ DIAGNOSTICS_BANDWIDTH_JS = REPO_ROOT / "wepppy" / "weppcloud" / "static" / "js" 
 DIAGNOSTICS_REALTIME_JS = REPO_ROOT / "wepppy" / "weppcloud" / "static" / "js" / "diagnostics" / "diagnostics-realtime.js"
 DIAGNOSTICS_REPORT_JS = REPO_ROOT / "wepppy" / "weppcloud" / "static" / "js" / "diagnostics" / "report.js"
 DIAGNOSTICS_PAGE_JS = REPO_ROOT / "wepppy" / "weppcloud" / "static" / "js" / "diagnostics" / "page.js"
+DIAGNOSTICS_BROWSER_RESET_JS = REPO_ROOT / "wepppy" / "weppcloud" / "static" / "js" / "diagnostics" / "browser_reset.js"
 
 
 def _build_app() -> Flask:
@@ -78,12 +79,18 @@ def test_diagnostics_template_includes_base_and_noscript_blocker() -> None:
     assert "data-diagnostics-copy-json" in source
     assert "data-diagnostics-rerun" in source
     assert "data-diagnostics-progress" in source
+    assert "data-browser-reset-root" in source
+    assert "data-reset-endpoint" in source
+    assert "data-login-url" in source
+    assert "clears WEPPcloud cookies" in source
+    assert "signs you out" in source
     assert "static_url('js/diagnostics/core.js')" in source
     assert "static_url('js/diagnostics/auth_checks.js')" in source
     assert "static_url('js/diagnostics/bandwidth_checks.js')" in source
     assert "static_url('js/diagnostics/report.js')" in source
     assert "static_url('js/diagnostics/diagnostics-realtime.js')" in source
     assert "static_url('js/diagnostics/page.js')" in source
+    assert "static_url('js/diagnostics/browser_reset.js')" in source
 
     core_idx = source.index("static_url('js/diagnostics/core.js')")
     auth_idx = source.index("static_url('js/diagnostics/auth_checks.js')")
@@ -91,7 +98,8 @@ def test_diagnostics_template_includes_base_and_noscript_blocker() -> None:
     report_idx = source.index("static_url('js/diagnostics/report.js')")
     realtime_idx = source.index("static_url('js/diagnostics/diagnostics-realtime.js')")
     page_idx = source.index("static_url('js/diagnostics/page.js')")
-    assert core_idx < auth_idx < bandwidth_idx < report_idx < realtime_idx < page_idx
+    reset_idx = source.index("static_url('js/diagnostics/browser_reset.js')")
+    assert core_idx < auth_idx < bandwidth_idx < report_idx < realtime_idx < page_idx < reset_idx
 
 
 def test_diagnostics_core_js_uses_site_prefix_dataset_contract() -> None:
@@ -108,6 +116,7 @@ def test_diagnostics_assets_include_core_report_page_modules() -> None:
     assert DIAGNOSTICS_REALTIME_JS.exists()
     assert DIAGNOSTICS_REPORT_JS.exists()
     assert DIAGNOSTICS_PAGE_JS.exists()
+    assert DIAGNOSTICS_BROWSER_RESET_JS.exists()
 
 
 def test_diagnostics_realtime_js_includes_service_health_reachability_checks() -> None:

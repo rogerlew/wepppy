@@ -944,7 +944,9 @@ def test_session_heartbeat_blocks_missing_origin_and_referer(
     payload = response.get_json()
     assert payload["error"]["message"] == "Cross-origin request blocked."
 
-def test_reset_browser_state_requires_auth(monkeypatch: pytest.MonkeyPatch) -> None:
+def test_reset_browser_state_allows_anonymous_without_disclosing_session_detail(
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
     app = _build_app()
     monkeypatch.setattr(
         weppcloud_site_module,
@@ -954,14 +956,22 @@ def test_reset_browser_state_requires_auth(monkeypatch: pytest.MonkeyPatch) -> N
     )
 
     with app.test_client() as client:
+        with client.session_transaction() as sess:
+            sess["anonymous_state"] = "present"
         response = client.post(
             "/weppcloud/api/auth/reset-browser-state",
             headers={"Origin": "http://localhost"},
         )
+        with client.session_transaction() as sess:
+            assert len(sess.keys()) == 0
 
-    assert response.status_code == 401
+    assert response.status_code == 200
     payload = response.get_json()
-    assert payload["error"]["message"] == "Authentication required."
+    assert payload == {
+        "ok": True,
+        "login_url": "/login",
+        "message": "Browser state reset. Continue by signing in again.",
+    }
 
 
 def test_reset_browser_state_blocks_cross_origin(
@@ -971,7 +981,7 @@ def test_reset_browser_state_blocks_cross_origin(
     monkeypatch.setattr(
         weppcloud_site_module,
         "current_user",
-        SimpleNamespace(is_anonymous=False, is_authenticated=True),
+        SimpleNamespace(is_anonymous=True),
         raising=False,
     )
 
@@ -993,7 +1003,7 @@ def test_reset_browser_state_blocks_missing_origin_and_referer(
     monkeypatch.setattr(
         weppcloud_site_module,
         "current_user",
-        SimpleNamespace(is_anonymous=False, is_authenticated=True),
+        SimpleNamespace(is_anonymous=True),
         raising=False,
     )
 
@@ -1062,7 +1072,7 @@ def test_reset_browser_state_clears_session_and_auth_cookies(
         payload = response.get_json()
         assert payload["ok"] is True
         assert payload["login_url"] == "/login"
-        assert payload["cleared_session_keys"] >= 1
+        assert "cleared_session_keys" not in payload
 
         with client.session_transaction() as sess:
             assert len(sess.keys()) == 0

@@ -83,8 +83,8 @@ Report per the package tracker's Progress Notes convention. Explicitly state the
 
 ## Outcome (Complete this when retiring the prompt)
 
-**Completed**: YYYY-MM-DD
-**Agent**:
-**Result**:
-**Deviations**:
-**References**:
+**Completed**: 2026-07-27
+**Agent**: Codex
+**Result**: Browser Session Reset relocated to diagnostics for anonymous and authenticated callers; CSRF/same-origin posture verified; security gate passed.
+**Deviations**: None.
+**References**: `../../artifacts/2026-07-27_wp02_security_review.md`; `../../tracker.md`

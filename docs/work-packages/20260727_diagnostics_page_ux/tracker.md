@@ -6,12 +6,12 @@
 
 **Timezone**: UTC
 **Started**: 2026-07-27 20:20 UTC
-**Current phase**: Scoped / ready for implementation (scaffold reviewed by Codex, findings dispositioned)
-**Last updated**: 2026-07-27 20:55 UTC
-**Next milestone**: WP01 (run feedback + re-run) implemented and passing gates
+**Current phase**: WP02 complete in working tree; awaiting review
+**Last updated**: 2026-07-27 21:09 UTC
+**Next milestone**: WP02 working-tree review, then WP03
 **Security impact**: `high` (scoped to WP02 reset endpoint auth posture)
 **Dedicated security review**: `yes` (WP02 only)
-**Security artifact**: `docs/work-packages/20260727_diagnostics_page_ux/artifacts/<date>_security_review.md`
+**Security artifact**: `docs/work-packages/20260727_diagnostics_page_ux/artifacts/2026-07-27_wp02_security_review.md`
 
 ## Task Board
 
@@ -20,7 +20,7 @@
 - [ ] WP04b — Full usersum end-user doc replacing the stub, index regenerated (Claude Code; after WP01–WP03 land)
 
 ### In Progress
-- [ ] WP02 — Browser Session Reset relocation (Codex via MCP, dispatched 2026-07-27 ~21:10 UTC)
+- (none)
 
 ### Blocked
 - (none)
@@ -29,12 +29,20 @@
 - [x] Package scoped and scaffolded (2026-07-27 20:20 UTC)
 - [x] WP04a — usersum stub `weppcloud/diagnostics.md` authored, registered in manifest/nav, index rebuilt, doc-lint clean (2026-07-27 21:00 UTC; executed in parallel with WP01 — working sets disjoint, land-before-WP03 constraint preserved)
 - [x] WP01 — live check cards per spec 4.1/4.2, progress indicator, guarded Re-run; Codex-implemented, gates independently re-verified (pytest 6, Jest 656), prompt retired with outcome (2026-07-27 21:08 UTC)
+- [x] WP02 — Browser Session Reset relocated to diagnostics for anonymous/authenticated callers; CSRF + same-origin posture verified; security gate passed with zero unresolved findings (2026-07-27 21:09 UTC)
 
 ## Sequencing
 
 WP01 → WP02 → WP04a (usersum stub) → WP03 → WP04b (full doc), serially. WP01–WP03 all touch `diagnostics.htm`; serial execution avoids template merge conflicts. The stub precedes WP03 so the page's usersum link never targets a missing doc; the full doc lands last so it describes the shipped UX. Canonical usersum doc path: `wepppy/weppcloud/routes/usersum/weppcloud/diagnostics.md` (category `weppcloud`, filename `diagnostics.md`).
 
 ## Decisions Log
+
+### 2026-07-27: WP02 anonymous CSRF and contract classification
+**Context**: WP02 requires anonymous callers on diagnostics to receive a usable CSRF token before `POST /api/auth/reset-browser-state` stops returning 401.
+
+**Decision**: No normative amendment to `weppcloud-csrf-contract.md` or `weppcloud-session-contract.md` is required. Diagnostics extends `base_pure.htm`, whose CSRF meta tag invokes `csrf_token()` for anonymous and authenticated sessions; `browser_reset.js` submits that token as `X-CSRFToken`. Global `CSRFProtect` validates it before route dispatch, and the endpoint retains its explicit normalized same-origin gate. This conforms to the CSRF contract's existing cookie-authenticated mutator classification (validated token, with an additional same-origin gate). The session contract delegates route-level CSRF classification to that contract and does not define reset response fields or require authentication for caller-local session clearing.
+
+**Impact**: Anonymous and authenticated callers use the same protected path. The response is reduced to `ok`, `login_url`, and a generic message; reset has no identifier input and affects only the requesting browser's cookies and Flask session.
 
 ### 2026-07-27 20:55 UTC: Codex scaffold review — all 8 findings accepted and applied
 **Context**: Codex reviewed commit 783095311 (scaffold + spec 4.1) at Roger's request. Full findings and dispositions: `artifacts/2026-07-27_codex_scaffold_review.md`.
@@ -72,8 +80,8 @@ WP01 → WP02 → WP04a (usersum stub) → WP03 → WP04b (full doc), serially. 
 
 | Risk | Severity | Likelihood | Mitigation | Status |
 |------|----------|------------|------------|--------|
-| Anonymous reset endpoint becomes an annoyance vector (forced logout via CSRF) | Medium | Low | Retain same-origin POST check + CSRF token; security review verifies | Open |
-| Anonymous sessions may lack a usable CSRF token, making the relocated reset uncallable | Medium | Medium | WP02 step 2 verifies against the CSRF contract before shipping; contract amended if needed | Open |
+| Anonymous reset endpoint becomes an annoyance vector (forced logout via CSRF) | Medium | Low | Retain same-origin POST check + CSRF token; security review verifies | Mitigated |
+| Anonymous sessions may lack a usable CSRF token, making the relocated reset uncallable | Medium | Medium | WP02 step 2 verifies against the CSRF contract before shipping; contract amended if needed | Resolved |
 | WP01–WP03 template conflicts | Low | Medium | Serial execution per Sequencing | Open |
 | More-menu change on interfaces.htm regresses anonymous Cap/login flow | Low | Low | Keep Login link; menu addition is additive; manual smoke on anonymous view | Open |
 | Spec drift (`diagnostics-page.spec.md` not updated with behavior changes) | Medium | Medium | Each WP prompt includes a spec-amendment deliverable; verify at closure | Open |
@@ -81,27 +89,44 @@ WP01 → WP02 → WP04a (usersum stub) → WP03 → WP04b (full doc), serially. 
 ## Verification Checklist
 
 ### Code Quality
-- [ ] `wctl run-pytest tests/weppcloud/routes/test_diagnostics_page.py` passing
-- [ ] `wctl run-npm lint` clean
-- [ ] `wctl run-npm test` passing (diagnostics Jest suites updated)
-- [ ] Playwright smoke specs under `static-src/tests/smoke/diagnostics/` updated or confirmed unaffected
+- [x] `wctl run-pytest tests/weppcloud/routes/test_diagnostics_page.py` passing
+- [x] `wctl run-npm lint` clean
+- [x] `wctl run-npm test` passing (diagnostics Jest suites updated)
+- [x] Playwright smoke specs under `static-src/tests/smoke/diagnostics/` confirmed unrelated deck.gl diagnostics
 
 ### Security
-- [ ] WP02 security review artifact present and complete
-- [ ] No unresolved medium/high findings
-- [ ] Anonymous reset path: same-origin + CSRF verified, no session/user info in response, caller-only effect
+- [x] WP02 security review artifact present and complete
+- [x] No unresolved medium/high findings
+- [x] Anonymous reset path: same-origin + CSRF verified, no session/user info in response, caller-only effect
 
 ### Documentation
-- [ ] `docs/ui-docs/diagnostics-page.spec.md` amended for all shipped behavior
+- [x] `docs/ui-docs/diagnostics-page.spec.md` amended for WP01/WP02 behavior
 - [ ] usersum doc published, registered in `docs_manifest.yaml` / `nav_tree.yaml`, `docs_index.json` regenerated via `tools/usersum_docs_tool.py`
 - [ ] Diagnostics page links to the usersum doc
 - [ ] Package closure notes complete
 
 ### Deployment
-- [ ] Verified in docker-compose.dev stack (anonymous + authenticated sessions)
+- [x] Verified in docker-compose.dev stack (anonymous + authenticated sessions)
 - [ ] forest1 test-production smoke if applicable
 
 ## Progress Notes
+
+### 2026-07-27 21:09 UTC: WP02 Browser Session Reset relocation complete
+**Agent/Contributor**: Codex
+
+**Work completed**:
+- Moved Browser Session Reset and its client behavior from profile to diagnostics; the profile now links to diagnostics.
+- Allowed anonymous endpoint calls while retaining global CSRF validation and explicit same-origin validation; removed session-key counts from the fixed generic response.
+- Verified that anonymous diagnostics sessions receive a usable CSRF token from `base_pure.htm`; recorded why the existing CSRF/session contracts require no normative amendment.
+- Added route/template/storage regression coverage and amended diagnostics spec section 4.3.
+- Completed `artifacts/2026-07-27_wp02_security_review.md`: 3 findings (2 Medium, 1 Low), all resolved; zero unresolved High/Medium/Low findings.
+
+**Validation**:
+- Pytest: diagnostics 6 passed; reset/token API 38 passed; profile 15 passed.
+- Frontend: ESLint passed; Jest 87 suites / 657 tests passed.
+- Dev stack: anonymous CSRF success, missing-CSRF rejection, cross-origin rejection, browser storage clearing/redirect, and authenticated reset all verified.
+
+**Next steps**: Review the uncommitted WP02 working tree; execute WP03 after acceptance.
 
 ### 2026-07-27 20:55 UTC: Codex review dispositioned
 **Agent/Contributor**: Codex (review) + Claude Code (disposition)

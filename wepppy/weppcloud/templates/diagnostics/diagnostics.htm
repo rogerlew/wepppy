@@ -72,6 +72,39 @@
       </details>
     </section>
   {% endcall %}
+
+  {% call ui.card_shell(
+       title="Browser Session Reset",
+       description="Use this when damaged browser state prevents WEPPcloud sign-in or requests from working."
+     ) %}
+    <section
+      class="wc-stack"
+      data-browser-reset-root
+      data-reset-endpoint="{{ url_for('weppcloud_site.reset_browser_state') }}"
+      data-login-url="{{ url_for('security.login') }}">
+      <p>
+        Resetting clears WEPPcloud cookies and WEPPcloud site storage in this browser,
+        and signs you out. It does not change your account or runs.
+      </p>
+      <div
+        class="wc-alert wc-alert--info"
+        role="status"
+        aria-live="polite"
+        aria-atomic="true"
+        hidden
+        data-browser-reset-message>
+        <p class="wc-alert__body" data-browser-reset-message-body></p>
+      </div>
+      <div>
+        <button
+          type="button"
+          class="pure-button pure-button-secondary"
+          data-browser-reset-action="reset">
+          Reset browser state
+        </button>
+      </div>
+    </section>
+  {% endcall %}
 </div>
 {% endblock %}
 
@@ -83,4 +116,5 @@
   <script src="{{ static_url('js/diagnostics/report.js') }}" defer></script>
   <script src="{{ static_url('js/diagnostics/diagnostics-realtime.js') }}" defer></script>
   <script src="{{ static_url('js/diagnostics/page.js') }}" defer></script>
+  <script src="{{ static_url('js/diagnostics/browser_reset.js') }}" defer></script>
 {% endblock %}

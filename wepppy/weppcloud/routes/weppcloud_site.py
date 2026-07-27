@@ -873,16 +873,11 @@ def _clear_reset_browser_state_cookies(response) -> list[dict[str, Optional[str]
 
 @weppcloud_site_bp.route('/api/auth/reset-browser-state', methods=['POST'])
 def reset_browser_state():
-    if current_user.is_anonymous:
-        response = error_factory('Authentication required.')
-        response.status_code = 401
-        return response
     if not _is_same_origin_post():
         response = error_factory('Cross-origin request blocked.')
         response.status_code = 403
         return response
 
-    session_key_count = len(list(session.keys()))
     session.clear()
     session.modified = True
 
@@ -895,7 +890,6 @@ def reset_browser_state():
         {
             "ok": True,
             "login_url": login_url,
-            "cleared_session_keys": session_key_count,
             "message": "Browser state reset. Continue by signing in again.",
         }
     )

@@ -130,3 +130,31 @@ describe("diagnostics core lifecycle and page presentation", () => {
     expect(rootNode.querySelector("[data-diagnostics-rerun]").disabled).toBe(false);
   });
 });
+
+describe("diagnostics browser reset", () => {
+  beforeEach(() => {
+    jest.resetModules();
+    delete window.WEPPDiagnosticsBrowserReset;
+    document.body.innerHTML = "";
+    window.localStorage.clear();
+    window.sessionStorage.clear();
+  });
+
+  test("clears only WEPPcloud-prefixed storage keys, case-insensitively", async () => {
+    await import("../../static/js/diagnostics/browser_reset.js");
+    window.localStorage.setItem("wc-theme", "dark");
+    window.localStorage.setItem("WEPP-run", "state");
+    window.localStorage.setItem("other-site", "keep");
+    window.sessionStorage.setItem("WePpDiagnostics", "state");
+    window.sessionStorage.setItem("unrelated", "keep");
+
+    window.WEPPDiagnosticsBrowserReset.clearWeppStorage(window.localStorage);
+    window.WEPPDiagnosticsBrowserReset.clearWeppStorage(window.sessionStorage);
+
+    expect(window.localStorage.getItem("wc-theme")).toBeNull();
+    expect(window.localStorage.getItem("WEPP-run")).toBeNull();
+    expect(window.localStorage.getItem("other-site")).toBe("keep");
+    expect(window.sessionStorage.getItem("WePpDiagnostics")).toBeNull();
+    expect(window.sessionStorage.getItem("unrelated")).toBe("keep");
+  });
+});

@@ -2,6 +2,7 @@ from __future__ import annotations
 
 import importlib
 import logging
+from pathlib import Path
 import uuid
 
 import pytest
@@ -14,6 +15,18 @@ from flask_security.utils import hash_password, login_user
 from flask_sqlalchemy import SQLAlchemy
 
 pytestmark = pytest.mark.routes
+
+REPO_ROOT = Path(__file__).resolve().parents[3]
+PROFILE_TEMPLATE = REPO_ROOT / "wepppy" / "weppcloud" / "templates" / "user" / "profile.html"
+
+
+def test_profile_template_links_to_diagnostics_without_reset_control() -> None:
+    source = PROFILE_TEMPLATE.read_text(encoding="utf-8")
+
+    assert "weppcloud_site.diagnostics" in source
+    assert "data-browser-reset-root" not in source
+    assert "data-browser-reset-action" not in source
+    assert "reset_browser_state_endpoint" not in source
 
 
 def _configure_jwt_env(monkeypatch: pytest.MonkeyPatch, module) -> None:
@@ -377,8 +390,8 @@ def test_profile_hides_token_controls_without_privileged_role(
     assert response.status_code == 200
     assert response.get_data(as_text=True) == "token-controls-hidden"
     assert captured_context.get("can_mint_profile_token") is False
-    assert captured_context.get("reset_browser_state_endpoint") is None
-    assert captured_context.get("reset_browser_state_login_url") == "/login"
+    assert "reset_browser_state_endpoint" not in captured_context
+    assert "reset_browser_state_login_url" not in captured_context
 
 
 def test_profile_shows_token_controls_for_privileged_role(
@@ -405,8 +418,8 @@ def test_profile_shows_token_controls_for_privileged_role(
     assert response.status_code == 200
     assert response.get_data(as_text=True) == "data-profile-token-root"
     assert captured_context.get("can_mint_profile_token") is True
-    assert captured_context.get("reset_browser_state_endpoint") is None
-    assert captured_context.get("reset_browser_state_login_url") == "/login"
+    assert "reset_browser_state_endpoint" not in captured_context
+    assert "reset_browser_state_login_url" not in captured_context
 
 
 def test_profile_returns_500_json_error_when_template_render_raises(

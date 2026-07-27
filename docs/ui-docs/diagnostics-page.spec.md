@@ -105,6 +105,16 @@
 - At the start of every run, all cards reset to `queued`, overall readiness returns to an in-progress state, the generated timestamp and report preview return to their pre-report state, and `Copy JSON` is disabled.
 - After every successful run, a new report is assembled with a fresh `generated_at` value. `Copy JSON` is then enabled and copies only that latest report.
 
+### 4.3 Browser Session Reset
+- The page MUST provide Browser Session Reset to anonymous and authenticated users independently of diagnostics check execution.
+- The cautionary copy MUST state that reset clears WEPPcloud cookies and WEPPcloud-prefixed local/session storage in the current browser and signs the caller out.
+- The client MUST submit `POST /api/auth/reset-browser-state` with same-origin credentials and the CSRF token from `<meta name="csrf-token">`.
+- The server MUST accept anonymous and authenticated callers only after global CSRF validation and explicit same-origin validation. Missing-origin and cross-origin submissions MUST be rejected.
+- Reset MUST clear only the caller's Flask session and configured WEPPcloud authentication/CSRF cookies. The response MUST contain only `ok`, a login URL, and a generic message; it MUST NOT disclose session counts, user identity, or other session details.
+- After server success, the client MUST remove localStorage and sessionStorage keys whose case-normalized names begin with `wc-` or `wepp`, then redirect to the returned login URL.
+- The control MUST expose a busy state and status feedback. A failed request MUST retain browser storage and re-enable the control.
+- The authenticated profile page MUST link to diagnostics instead of rendering its own reset control.
+
 ## 5. `diagRunId` Contract (Status + Preflight)
 
 ### 5.1 Exact Requirements
