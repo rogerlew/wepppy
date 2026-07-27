@@ -84,7 +84,7 @@ def test_config_app_uses_uidaho_mail_defaults_when_zoho_is_unset(
     )
     assert app.config["SESSION_COOKIE_SAMESITE"] == "Lax"
     assert app.config["SESSION_REFRESH_EACH_REQUEST"] is True
-    assert app.config["REMEMBER_COOKIE_DURATION"] == timedelta(days=30)
+    assert app.config["REMEMBER_COOKIE_DURATION"] == timedelta(days=90)
     assert app.config["REMEMBER_COOKIE_SECURE"] is True
     assert app.config["REMEMBER_COOKIE_HTTPONLY"] is True
     assert app.config["REMEMBER_COOKIE_SAMESITE"] == "Lax"
@@ -222,3 +222,11 @@ def test_config_app_allows_remember_cookie_env_overrides(
     assert app.config["REMEMBER_COOKIE_HTTPONLY"] is False
     assert app.config["REMEMBER_COOKIE_REFRESH_EACH_REQUEST"] is False
     assert app.config["SESSION_REFRESH_EACH_REQUEST"] is False
+
+
+def test_global_remember_refresh_override_is_ignored(
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    monkeypatch.setenv("REMEMBER_COOKIE_REFRESH_EACH_REQUEST", "true")
+    app = _build_configured_app(monkeypatch)
+    assert app.config["REMEMBER_COOKIE_REFRESH_EACH_REQUEST"] is False

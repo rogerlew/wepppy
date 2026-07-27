@@ -3,7 +3,9 @@
 from __future__ import annotations
 
 import logging
-from logging.handlers import RotatingFileHandler
+import os
+import hashlib
+from logging.handlers import WatchedFileHandler
 from pathlib import Path
 from typing import Any, Dict, Optional
 
@@ -13,9 +15,18 @@ import flask_security.signals as fs_signals
 security_bp = Blueprint('security_logging', __name__)
 
 _SECURITY_LOGGER_NAME = "weppcloud.security"
-_DEFAULT_LOG_PATH = Path(".docker-data/weppcloud/logs/security.log")
-_DEFAULT_MAX_BYTES = 5 * 1024 * 1024  # 5 MiB
-_DEFAULT_BACKUP_COUNT = 5
+_DEFAULT_LOG_PATH = Path("/wc1/logs/weppcloud/security.log")
+
+
+class _VisibleWatchedFileHandler(WatchedFileHandler):
+    """Report post-startup write failures through the main service logger."""
+
+    def handleError(self, record):
+        logging.getLogger("gunicorn.error").error(
+            "Security logging: unable to write %s",
+            self.baseFilename,
+            exc_info=True,
+        )
 
 
 def _get_security_logger():
@@ -48,12 +59,15 @@ def _resolve_log_path(app) -> Path:
 
 
 def _configure_security_file_logging(app) -> Optional[Path]:
-    """Attach a rotating file handler to the security logger."""
+    """Attach an append-only handler; the host coordinates log rotation."""
     logger = _get_security_logger()
     log_path = _resolve_log_path(app)
 
     try:
         log_path.parent.mkdir(parents=True, exist_ok=True)
+        os.chmod(log_path.parent, 0o700)
+        log_path.touch(mode=0o600, exist_ok=True)
+        os.chmod(log_path, 0o600)
     except OSError as exc:
         logging.getLogger("gunicorn.error").warning(
             "Security logging: unable to create log directory %s: %s",
@@ -66,12 +80,15 @@ def _configure_security_file_logging(app) -> Optional[Path]:
         if getattr(handler, "_security_log_path", None) == log_path:
             break
     else:
-        handler = RotatingFileHandler(
-            log_path,
-            maxBytes=app.config.get("SECURITY_LOG_MAX_BYTES", _DEFAULT_MAX_BYTES),
-            backupCount=app.config.get("SECURITY_LOG_BACKUP_COUNT", _DEFAULT_BACKUP_COUNT),
-            encoding="utf-8",
-        )
+        try:
+            handler = _VisibleWatchedFileHandler(log_path, encoding="utf-8")
+        except OSError as exc:
+            logging.getLogger("gunicorn.error").warning(
+                "Security logging: unable to open %s: %s",
+                log_path,
+                exc,
+            )
+            return None
         handler.setFormatter(
             logging.Formatter("%(asctime)s %(levelname)s %(name)s %(message)s")
         )
@@ -92,6 +109,11 @@ def _session_snapshot() -> Dict[str, Any]:
         'new': getattr(session, 'new', None),
         'modified': session.modified,
         'permanent': session.permanent,
+        'remember_action': (
+            session.get('_remember')
+            if session.get('_remember') in {'set', 'clear'}
+            else None
+        ),
     }
 
 
@@ -170,6 +192,13 @@ def _extract_identity(user, login_form, extra: Dict[str, Any]):
     return None
 
 
+def _identity_label(identity) -> str:
+    if not identity:
+        return "<unknown>"
+    digest = hashlib.sha256(str(identity).encode("utf-8")).hexdigest()[:12]
+    return f"sha256:{digest}"
+
+
 def _sanitize_form(login_form):
     if login_form is None:
         return None
@@ -177,21 +206,16 @@ def _sanitize_form(login_form):
     data_attr = getattr(login_form, "data", None) or {}
     if not isinstance(data_attr, dict):
         return "<unavailable>"
-    data = dict(data_attr)
-
-    for sensitive in ('password', 'csrf_token'):
-        data.pop(sensitive, None)
-
-    return data
+    return {
+        "remember_selected": bool(data_attr.get("remember"))
+    }
 
 
 def _sanitize_extra(extra: Dict[str, Any]):
-    sanitized = {}
-    for key, value in extra.items():
-        if key in {'app', 'user', 'login_form'}:
-            continue
-        sanitized[key] = object.__repr__(value)
-    return sanitized
+    return sorted(
+        str(key) for key in extra
+        if key not in {'app', 'user', 'login_form'}
+    )
 
 
 def _log_event(event_name: str, *, user=None, login_form=None, extra: Optional[Dict[str, Any]] = None):
@@ -205,14 +229,12 @@ def _log_event(event_name: str, *, user=None, login_form=None, extra: Optional[D
         form_snapshot = _sanitize_form(login_form)
 
         logger.info(
-            "Security %s identity=%s user_id=%s active=%s ip=%s forwarded_for=%s next=%s session=%s extra=%s",
+            "Security %s identity=%s user_id=%s active=%s ip=%s session=%s extra_keys=%s",
             event_name,
-            identity or '<unknown>',
+            _identity_label(identity),
             getattr(user, 'id', None),
             getattr(user, 'is_active', None) if user else None,
             request.remote_addr,
-            request.headers.get('X-Forwarded-For'),
-            request.values.get('next'),
             session_snapshot,
             extra_summary,
         )
@@ -236,18 +258,14 @@ LOGOUT_ENDPOINTS = {'security.logout'}
 def _log_login_request():
     logger = _get_security_logger()
     if request.endpoint in LOGIN_ENDPOINTS and request.method == 'POST':
-        sanitized_form = request.form.to_dict(flat=True)
-        sanitized_form.pop('password', None)
-        sanitized_form.pop('csrf_token', None)
+        sanitized_form = {
+            "remember_selected": "remember" in request.form
+        }
         session_snapshot = _session_snapshot()
 
         logger.info(
-            "Security login POST received ip=%s forwarded_for=%s ua=%s referrer=%s next=%s has_session_cookie=%s session=%s form=%s",
+            "Security login POST received ip=%s has_session_cookie=%s session=%s form=%s",
             request.remote_addr,
-            request.headers.get('X-Forwarded-For'),
-            request.headers.get('User-Agent'),
-            request.headers.get('Referer'),
-            request.values.get('next'),
             session_snapshot.get('has_cookie'),
             session_snapshot,
             sanitized_form,
@@ -255,12 +273,9 @@ def _log_login_request():
     elif request.endpoint in LOGOUT_ENDPOINTS:
         session_snapshot = _session_snapshot()
         logger.info(
-            "Security logout request method=%s ip=%s forwarded_for=%s ua=%s referrer=%s has_session_cookie=%s session=%s",
+            "Security logout request method=%s ip=%s has_session_cookie=%s session=%s",
             request.method,
             request.remote_addr,
-            request.headers.get('X-Forwarded-For'),
-            request.headers.get('User-Agent'),
-            request.headers.get('Referer'),
             session_snapshot.get('has_cookie'),
             session_snapshot,
         )
@@ -277,23 +292,19 @@ def _log_login_response(response):
     logger = _get_security_logger()
 
     if endpoint in LOGIN_ENDPOINTS:
-        set_cookie_present = any(header[0].lower() == 'set-cookie' for header in response.headers.items())
         logger.info(
-            "Security login response method=%s status=%s location=%s set_cookie=%s mimetype=%s",
+            "Security login response method=%s status=%s remember_action=%s mimetype=%s",
             request.method,
             response.status,
-            response.headers.get('Location'),
-            set_cookie_present,
+            _session_snapshot().get("remember_action"),
             response.mimetype,
         )
     elif endpoint in LOGOUT_ENDPOINTS:
-        set_cookie_present = any(header[0].lower() == 'set-cookie' for header in response.headers.items())
         logger.info(
-            "Security logout response method=%s status=%s location=%s set_cookie=%s mimetype=%s",
+            "Security logout response method=%s status=%s remember_action=%s mimetype=%s",
             request.method,
             response.status,
-            response.headers.get('Location'),
-            set_cookie_present,
+            _session_snapshot().get("remember_action"),
             response.mimetype,
         )
 

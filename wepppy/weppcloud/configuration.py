@@ -342,7 +342,7 @@ def config_app(app: Any):
         "REMEMBER_COOKIE_SAMESITE", app.config["SESSION_COOKIE_SAMESITE"]
     )
     app.config["REMEMBER_COOKIE_DURATION"] = timedelta(
-        days=_get_env_int("REMEMBER_COOKIE_DAYS", 30, minimum=1)
+        days=_get_env_int("REMEMBER_COOKIE_DAYS", 90, minimum=1)
     )
     app.config["REMEMBER_COOKIE_SECURE"] = _get_env_bool(
         "REMEMBER_COOKIE_SECURE", True
@@ -351,9 +351,9 @@ def config_app(app: Any):
         "REMEMBER_COOKIE_HTTPONLY", True
     )
     app.config["REMEMBER_COOKIE_SAMESITE"] = remember_cookie_samesite
-    app.config["REMEMBER_COOKIE_REFRESH_EACH_REQUEST"] = _get_env_bool(
-        "REMEMBER_COOKIE_REFRESH_EACH_REQUEST", False
-    )
+    # Flask-Login's global refresh also creates remember cookies for users who
+    # explicitly opted out. WEPPcloud refreshes only a valid presented token.
+    app.config["REMEMBER_COOKIE_REFRESH_EACH_REQUEST"] = False
     app.config["WTF_CSRF_ENABLED"] = _get_env_bool("WTF_CSRF_ENABLED", True)
     app.config["WTF_CSRF_HEADERS"] = ["X-CSRFToken", "X-CSRF-Token"]
     csrf_time_limit = _get_env_optional_int("WTF_CSRF_TIME_LIMIT_SECONDS")

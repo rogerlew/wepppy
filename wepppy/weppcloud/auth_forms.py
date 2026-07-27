@@ -2,6 +2,7 @@
 
 from __future__ import annotations
 
+from flask import has_request_context, session
 from flask_security import LoginForm, RegisterForm
 from wtforms import StringField
 from wtforms.validators import DataRequired as Required, ValidationError
@@ -41,6 +42,21 @@ class ExtendedLoginForm(CapTokenFormMixin, LoginForm):
     """WEPPcloud login form with Cap.js verification."""
 
     cap_token = StringField("CAPTCHA Token")
+
+    def __init__(self, *args, **kwargs):
+        formdata = kwargs.get("formdata")
+        if args:
+            formdata = args[0]
+        super().__init__(*args, **kwargs)
+        if formdata is None:
+            self.remember.data = True
+
+    def validate(self, extra_validators=None):
+        valid = super().validate(extra_validators=extra_validators)
+        if valid and not self.remember.data and has_request_context():
+            # Flask-Login otherwise leaves a preexisting remember cookie intact.
+            session["_remember"] = "clear"
+        return valid
 
 
 class ExtendedRegisterForm(CapTokenFormMixin, RegisterForm):

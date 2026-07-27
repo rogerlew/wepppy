@@ -54,6 +54,7 @@ class _CaptchaOnlyForm(auth_forms.CapTokenFormMixin, Form):
 def auth_template_app(monkeypatch: pytest.MonkeyPatch) -> Flask:
     app = Flask(__name__, template_folder=str(TEMPLATE_ROOT))
     app.config.update(
+        SECRET_KEY="auth-form-test",
         CAP_BASE_URL="/cap/",
         CAP_ASSET_BASE_URL="/cap/assets/",
         CAP_SITE_KEY="/test-site-key/",
@@ -203,3 +204,35 @@ def test_cap_token_form_mixin_accepts_successful_verification(monkeypatch: pytes
 def test_extended_security_forms_include_cap_validation() -> None:
     assert issubclass(auth_forms.ExtendedLoginForm, auth_forms.CapTokenFormMixin)
     assert issubclass(auth_forms.ExtendedRegisterForm, auth_forms.CapTokenFormMixin)
+
+
+def test_extended_login_form_defaults_remember_only_without_formdata(
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    def _init(form, *args, **kwargs):
+        form.remember = SimpleNamespace(data=False)
+
+    monkeypatch.setattr(auth_forms.LoginForm, "__init__", _init)
+
+    get_form = auth_forms.ExtendedLoginForm(formdata=None)
+    post_form = auth_forms.ExtendedLoginForm(formdata=MultiDict({"email": "u@example.test"}))
+
+    assert get_form.remember.data is True
+    assert post_form.remember.data is False
+
+
+def test_extended_login_form_opt_out_schedules_existing_cookie_clear(
+    auth_template_app: Flask,
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    def _init(form, *args, **kwargs):
+        form.remember = SimpleNamespace(data=False)
+
+    monkeypatch.setattr(auth_forms.LoginForm, "__init__", _init)
+    monkeypatch.setattr(auth_forms.LoginForm, "validate", lambda *args, **kwargs: True)
+
+    with auth_template_app.test_request_context("/login", method="POST"):
+        form = auth_forms.ExtendedLoginForm(formdata=MultiDict({"email": "u@example.test"}))
+        assert form.validate()
+        from flask import session
+        assert session["_remember"] == "clear"

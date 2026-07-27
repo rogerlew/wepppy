@@ -24,11 +24,16 @@ container recreation and never contain credential or token values.
   the operator's UX-first decision and corrected GOV-00A-M1C authority.
 - [x] (2026-07-27 19:57 UTC) Committed reviewed contract checkpoint as
   standalone ancestor `4fd02a7e1`.
-- [ ] Implement remembered-login behavior and regression tests.
-- [ ] Implement secure persistent logging and regression tests.
-- [ ] Run focused and repository validation.
-- [ ] Obtain dual independent final reviews and resolve findings.
-- [ ] Close package documentation and commit implementation.
+- [x] (2026-07-27 20:31 UTC) Implemented remembered-login behavior and
+  regression tests.
+- [x] (2026-07-27 20:31 UTC) Implemented secure persistent logging and
+  regression tests.
+- [x] (2026-07-27 20:31 UTC) Ran focused and contract-listed regression
+  validation.
+- [x] (2026-07-27 20:35 UTC) Obtained dual independent final reviews with no
+  unresolved findings.
+- [x] (2026-07-27 20:35 UTC) Closed package documentation for implementation
+  commit.
 
 ## Surprises & Discoveries
 
@@ -70,7 +75,13 @@ container recreation and never contain credential or token values.
 
 ## Outcomes & Retrospective
 
-Pending.
+The implementation now follows the user-reported UX objective instead of
+treating security minimization as the product objective. Remembered login is
+selected by default and rolls only for valid presented tokens; explicit opt-out
+and logout clear both remember and server-session state. Authentication logs
+exclude untrusted values, persist under `/wc1`, and support external
+rename/create rotation. The accepted copied-token replay risk has a supported
+per-user containment command. Dual checkpoint and final reviews passed.
 
 ## Context and Orientation
 

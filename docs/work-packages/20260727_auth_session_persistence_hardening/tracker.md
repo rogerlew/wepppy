@@ -6,11 +6,11 @@
 
 **Started**: 2026-07-27 19:12 UTC
 
-**Current phase**: Contract checkpoint
+**Current phase**: Complete
 
-**Last updated**: 2026-07-27 19:50 UTC
+**Last updated**: 2026-07-27 20:31 UTC
 
-**Next milestone**: Dual independent checkpoint rereview
+**Next milestone**: Production deployment and observation through 2026-10-25
 
 **Security impact**: `high`
 
@@ -19,17 +19,6 @@
 **Security artifact**: `artifacts/2026-07-27_security_review.md`
 
 ## Task Board
-
-### In Progress
-
-- [ ] Obtain passing rereviews after disposition.
-
-### Ready
-
-- [ ] Commit checkpoint ancestor.
-- [ ] Implement form, configuration, and logging changes.
-- [ ] Add regression coverage and run validation.
-- [ ] Obtain and disposition dual final reviews.
 
 ### Done
 
@@ -43,6 +32,12 @@
 - [x] Dual checkpoint reviews passed with no unresolved findings and the
   standalone checkpoint ancestor was committed as `4fd02a7e1`
   (2026-07-27 19:57 UTC).
+- [x] Implemented remembered-login, logout, logging, rotation, and containment
+  changes with regression coverage (2026-07-27 20:31 UTC).
+- [x] Final security review passed with zero unresolved findings
+  (2026-07-27 20:28 UTC).
+- [x] Final correctness review passed with zero unresolved findings
+  (2026-07-27 20:35 UTC).
 
 ## Timeline
 
@@ -78,10 +73,10 @@ change, and logs survive container recreation.
 | Risk | Severity | Mitigation | Status |
 | --- | --- | --- | --- |
 | Copied-token replay | High | Exposure controls, redaction, explicit residual-risk acceptance, and `fs_uniquifier` containment | Accepted |
-| User opt-out ignored | High | POST regression test with omitted field | Open |
-| Tokens remain in logs | High | Central redaction set and negative tests | Open |
-| Persistent path unavailable | Medium | Startup test and visible warning | Open |
-| Misleading cookie telemetry | Medium | Log `_remember` action, never cookie values | Open |
+| User opt-out ignored | High | Real endpoint-ordering and deletion regressions | Closed |
+| Tokens remain in logs | High | Safe-field output and final-record sentinel tests | Closed |
+| Persistent path unavailable | Medium | Mode/write/reopen tests plus wepp1 uid 1002 probe | Closed |
+| Misleading cookie telemetry | Medium | Log `_remember` action, never cookie values | Closed |
 
 ## Checkpoint Review Disposition
 
@@ -101,20 +96,21 @@ change, and logs survive container recreation.
 
 - **Baseline**: 405 Redis sessions had TTL <=12 hours; login checkbox unchecked;
   file log disabled; CAPTCHA tokens present in container log.
-- **Post-change**: pending.
+- **Post-change**: 40 focused tests and 90 adjacent session tests pass; wepp1
+  uid 1002 created, reopened, and removed a canonical-path probe.
 - **Danger signals**: pending.
 - **Temporary callus register**: none.
 
 ## Verification Checklist
 
-- [ ] Focused Python tests.
-- [ ] Template rendering test.
-- [ ] Security logging negative secret tests.
-- [ ] Configuration tests.
-- [ ] Documentation lint.
-- [ ] Broad exception enforcement.
-- [ ] Compose configuration validation.
-- [ ] Dual final review.
+- [x] Focused Python tests.
+- [x] Template rendering test.
+- [x] Security logging negative secret tests.
+- [x] Configuration tests.
+- [x] Documentation lint.
+- [x] Broad exception enforcement.
+- [x] Compose and logrotate configuration validation.
+- [x] Dual final review.
 
 ## Progress Notes
 
@@ -123,6 +119,15 @@ change, and logs survive container recreation.
 Production inspection confirmed that configuration intent and rendered form
 behavior diverged. It also exposed a broken file-log path and incomplete token
 redaction. The operator authorized a work package and dual-agent verification.
+
+### 2026-07-27 20:35 UTC: Implementation closeout
+
+Implemented UX-led remembered login, real opt-out and logout boundaries,
+secret-safe durable logging, host rotation policy, and per-user token
+containment. Validation passed: 44 focused tests, 90 adjacent session tests, 15
+JavaScript tests, documentation lint, broad-exception enforcement, logrotate
+parsing, and the wepp1 uid 1002 canonical-path write/reopen probe. Both final
+reviewers passed with no unresolved findings.
 
 ## Communication Log
 

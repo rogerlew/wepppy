@@ -2,7 +2,7 @@
 
 ## Status
 
-In progress.
+Complete locally; production deployment pending.
 
 ## Objective
 

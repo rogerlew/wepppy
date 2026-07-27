@@ -1,0 +1,10 @@
+/wc1/logs/weppcloud/security.log {
+    daily
+    rotate 30
+    maxsize 20M
+    missingok
+    notifempty
+    compress
+    delaycompress
+    create 0600 roger roger
+}

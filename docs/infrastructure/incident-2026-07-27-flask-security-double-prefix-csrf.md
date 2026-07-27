@@ -184,9 +184,58 @@ needed rather than increasing end-user computation without evidence.
 Decision rationale, provenance, alternatives, and rollback are recorded in
 `docs/adrs/ADR-0027-cap-click-only-challenge.md`.
 
+## Related Authentication Persistence Change
+
+User reports also established that repeated authentication was a product
+defect. REM-03 amended the authoritative session contract so low-friction
+ordinary use governs the authentication architecture:
+
+- password login displays remembered login selected by default while preserving
+  opt-out;
+- opted-in browsers use a rolling 90-day inactivity window;
+- refresh occurs only when a valid remember token is already present, avoiding
+  Flask-Login's global-refresh behavior that defeats opt-out;
+- opting out clears a preexisting remember cookie, and logout clears both
+  session and remember cookies;
+- the 12-hour rolling Redis session remains unchanged; and
+- authentication diagnostics use safe-field allowlists and persist append-only
+  under `/wc1/logs/weppcloud/security.log`.
+
+Flask-Login's signed remember token has no server-validated issuance timestamp.
+The 90-day value is consequently a browser inactivity policy, not a server-side
+replay maximum. The operator accepted that residual risk in favor of the
+reported UX requirement; suspected token theft is contained by rotating the
+affected user's `fs_uniquifier`.
+
+### Remember-token containment runbook
+
+Use this only for a specific account with suspected remember-token theft:
+
+1. Record the affected user id and incident authorization.
+2. Preview the exact account with
+   `wctl exec weppcloud python tools/rotate_user_fs_uniquifier.py EMAIL`.
+3. Apply the rotation with
+   `wctl exec weppcloud python tools/rotate_user_fs_uniquifier.py EMAIL --apply`.
+4. Confirm the old remember token and existing browser session no longer
+   authenticate, then have the user sign in again.
+5. Record the rotation timestamp and affected account id without recording old
+   or new token values.
+
+This containment logs the user out on every device; it is intentionally scoped
+to an affected account rather than rotating the application secret for all
+users.
+
+Production hosts must install `docker/logrotate/weppcloud-security` at
+`/etc/logrotate.d/weppcloud-security`. The policy rotates daily or at 20 MiB,
+retains 30 compressed archives, and creates the replacement as mode `0600`.
+`WatchedFileHandler` makes each Gunicorn worker reopen the renamed file without
+the record-loss window introduced by `copytruncate`.
+
 ## Related Evidence
 
 - `docs/adrs/ADR-0027-cap-click-only-challenge.md`
+- `docs/adrs/ADR-0028-rolling-remembered-login.md`
+- `docs/schemas/weppcloud-session-contract.md`
 - `docs/schemas/weppcloud-csrf-contract.md`
 - `docs/dev-notes/wc-forest-bearhive-duck-dns-flask-security-installation.md`
 - `docs/ui-docs/manual-at-pass-20260331.md`
