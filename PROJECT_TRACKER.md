@@ -77,6 +77,25 @@ Feedback mechanisms:
 
 Work packages that are scoped but not yet started. Dependencies and prerequisites should be noted.
 
+### Diagnostics Page UX, Browser Reset Relocation, and Discoverability
+**Proposed**: 2026-07-27
+**Size**: Medium (2-4 focused sessions)
+**Priority**: Medium
+**Link**: [docs/work-packages/20260727_diagnostics_page_ux/](docs/work-packages/20260727_diagnostics_page_ux/)
+**Description**: Make the 30+ second `/weppcloud/diagnostics/` run legible (live per-check states, progress, re-run button), relocate Browser Session Reset from the login-gated profile page so logged-out users with broken browser state can self-serve (security-gated endpoint decision), tighten the loose card layout, and make the page discoverable via the interfaces "More" dropdown for all users plus a new usersum end-user doc.
+
+**Scope**:
+- WP01: live run feedback and re-run control in the diagnostics JS/template.
+- WP02: Browser Session Reset relocation with anonymous-access security review (`high` triage; artifact required).
+- WP03: card density per UI style guide; More-menu entry for anonymous and authenticated users; usersum link wiring.
+- WP04: usersum end-user doc authored by Claude Code, registered and indexed.
+
+**Dependencies**: None; coordinates with `20260727_auth_session_persistence_hardening` on the reset endpoint's auth posture.
+
+**Next Steps**: Codex executes WP01 per `prompts/active/wp01_run_feedback_rerun.prompt.md`, then WP02–WP03 serially; Claude Code authors the usersum doc last.
+
+---
+
 ### SSURGO Reclaimed Soil Conversion and Fallback Transparency
 **Proposed**: 2026-06-22
 **Size**: Medium-High (2-4 focused sessions)

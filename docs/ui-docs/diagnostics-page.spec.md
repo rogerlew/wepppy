@@ -80,6 +80,23 @@
 - Provide a `Copy JSON` action for the full report.
 - Report must not include secrets (JWT values, cookie values, auth headers).
 
+## 4.1 Check Card Presentation Contract
+- Each registered check renders exactly one card, created when the run starts and updated in place as the check progresses. Card lifecycle states: `queued`, `running`, then the settled `status` (`pass|fail|warn|skipped`).
+- The full card set MUST render immediately at run start (every check visible in `queued` state) so users can see what will run and watch progress through long probe windows; cards MUST NOT appear only after the whole run settles.
+- State-dependent card content:
+  - `queued`: check title plus a one-line plain-language description of what is being tested.
+  - `running`: same, plus a visible running indicator; probes with long windows SHOULD indicate the check may take up to its probe window.
+  - `pass`: pass chip and a concise one-line result. Severity labels and fix hints MUST NOT render on passing checks.
+  - `skipped`: skipped chip and a one-line reason (for example, sign in to run authenticated checks).
+  - `warn` / `fail`: status chip, a plain-language impact statement (derived from severity, see below), the `fix_hint`, and technical `evidence` de-emphasized or behind a disclosure.
+- Severity vocabulary: the internal values `blocker`, `degraded`, and `info` are failure-impact taxonomy for the JSON report and MUST NOT be rendered verbatim in user-facing card text. On `warn`/`fail`, translate severity to impact language:
+  - `blocker` → WEPPcloud cannot run in this browser until this is fixed.
+  - `degraded` → WEPPcloud will work, but the named capability (for example live status updates) may be limited.
+  - `info` → advisory only; no action required.
+- `fix_hint` renders only for `warn` and `fail` states.
+- Cards MUST update in place (no full-list teardown/re-render) with polite ARIA live semantics; a settled card keeps its final state until a re-run resets the whole set to `queued`.
+- The JSON report model in section 4 is unchanged by this contract: `severity`, `evidence`, and `fix_hint` remain in the report for every check regardless of status. This section governs on-page presentation only.
+
 ## 5. `diagRunId` Contract (Status + Preflight)
 
 ### 5.1 Exact Requirements
@@ -194,4 +211,6 @@
 - Bandwidth endpoints enforce payload caps, timeouts, rate limits, and bounded concurrency.
 - Bandwidth endpoint implementation is streaming/non-buffering for large payloads and does not consume Flask/Gunicorn worker capacity.
 - Diagnostics UI uses existing WEPPcloud UI conventions from `docs/ui-docs/ui-style-guide.md` and does not introduce a conflicting visual system.
+- Check cards render at run start and update live through queued/running/settled states per section 4.1.
+- Passing checks show no severity labels and no fix hints; warn/fail checks present severity as a plain-language impact statement plus fix hint, never the raw taxonomy words.
 - JSON report is copyable and redacted for sensitive values.
