@@ -20,9 +20,10 @@ container recreation and never contain credential or token values.
   and session-contract amendment.
 - [x] (2026-07-27 19:29 UTC) Obtained initial dual checkpoint reviews and
   dispositioned their findings.
-- [ ] Obtain passing dual checkpoint rereviews after the operator's UX-first
-  decision and the corrected GOV-00A-M1C authority.
-- [ ] Commit the reviewed contract checkpoint as a standalone ancestor.
+- [x] (2026-07-27 19:57 UTC) Obtained passing dual checkpoint rereviews after
+  the operator's UX-first decision and corrected GOV-00A-M1C authority.
+- [x] (2026-07-27 19:57 UTC) Committed reviewed contract checkpoint as
+  standalone ancestor `4fd02a7e1`.
 - [ ] Implement remembered-login behavior and regression tests.
 - [ ] Implement secure persistent logging and regression tests.
 - [ ] Run focused and repository validation.

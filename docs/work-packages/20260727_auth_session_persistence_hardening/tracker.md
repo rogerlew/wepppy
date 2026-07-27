@@ -40,11 +40,15 @@
   (2026-07-27 19:29 UTC).
 - [x] Operator made UX-first policy and copied-token residual-risk decision
   (2026-07-27 19:45 UTC).
+- [x] Dual checkpoint reviews passed with no unresolved findings and the
+  standalone checkpoint ancestor was committed as `4fd02a7e1`
+  (2026-07-27 19:57 UTC).
 
 ## Timeline
 
 - **2026-07-27 19:09 UTC** - Production inspection began on `wepp1`.
 - **2026-07-27 19:12 UTC** - Package and contract checkpoint drafted.
+- **2026-07-27 19:57 UTC** - Reviewed checkpoint committed at `4fd02a7e1`.
 
 ## Decision Log
 
