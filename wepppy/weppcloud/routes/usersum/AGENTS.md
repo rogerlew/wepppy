@@ -45,7 +45,7 @@
 - Add/update vendor sources in `wepppy/weppcloud/routes/usersum/vendors.yaml`.
 - For vendored docs in `docs_manifest.yaml`, use `source: vendor`, set `vendor_id`, and keep `rel_path` under the vendor `target_root`.
 - Current WEPP-Forest changelog publishing contract:
-  - source file: `/workdir/wepp-forest/change-log.md`
+  - source file: `/workdir/wepp-forest_260430_baseline/change-log.md`
   - vendored file: `wepppy/weppcloud/routes/usersum/vendor/wepp-forest/change-log.md`
   - doc id: `usersum.weppcloud.wepp_forest_change_log`
 - Preferred rebuild flow after vendor-repo updates:

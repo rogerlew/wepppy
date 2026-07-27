@@ -383,7 +383,7 @@ Initial vendor scope:
 
 - `/workdir/weppcloud-wbt/docs/hydroenforcement/culvert-web-app-hydroenforcement.md`
 - `/workdir/weppcloud-wbt/whitebox-tools-app/src/tools/hydro_analysis/hillslopes_topaz.spec.md`
-- `/workdir/wepp-forest/change-log.md`
+- `/workdir/wepp-forest_260430_baseline/change-log.md`
 
 ## Compatibility Contract
 

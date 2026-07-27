@@ -13,8 +13,8 @@ vendors:
     target_root: wepppy/weppcloud/routes/usersum/vendor/weppcloud-wbt
     route_prefix: /usersum/vendor/weppcloud-wbt
   - vendor_id: wepp-forest
-    source_repo_path: /workdir/wepp-forest
-    source_ref: main
+    source_repo_path: /workdir/wepp-forest_260430_baseline
+    source_ref: master
     include_globs:
       - change-log.md
       - release/wepp_*_release_notes.md
