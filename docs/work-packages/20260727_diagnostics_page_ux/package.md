@@ -1,6 +1,6 @@
 # Diagnostics Page UX, Browser Reset Relocation, and Discoverability
 
-**Status**: Open (2026-07-27)
+**Status**: Closed (2026-07-27)
 **Timezone**: UTC
 
 ## Overview
@@ -42,14 +42,14 @@ The `/weppcloud/diagnostics/` page (route `GET /diagnostics/` on `weppcloud_site
 
 ## Success Criteria
 
-- [ ] Within one second of page load, the check list shows every registered check with a pending/running state; states update live as each check starts and settles; an overall progress indicator (completed-of-total) is visible during the run.
-- [ ] A re-run control repeats all checks without a page reload, guards against overlapping runs, and re-gates Copy JSON until the new run settles.
-- [ ] Browser Session Reset is available on `/weppcloud/diagnostics/` for anonymous and authenticated users; the profile page section is removed and replaced with a link to diagnostics; the inline script is extracted to a shared static module.
-- [ ] The interfaces page "More" dropdown renders for anonymous users and includes a Diagnostics entry for all users.
-- [ ] A usersum end-user doc explains what the page is for, how to read blocker/degraded/info results, how to copy and share the report, and when to use Browser Session Reset; it is indexed and linked from the diagnostics page.
-- [ ] Card layout is denser per the UI style guide; spec updated to match.
-- [ ] `docs/ui-docs/diagnostics-page.spec.md` reflects all shipped behavior.
-- [ ] `wctl run-pytest tests/weppcloud/routes/test_diagnostics_page.py`, `wctl run-npm lint`, and `wctl run-npm test` pass.
+- [x] Within one second of page load, the check list shows every registered check with a pending/running state; states update live as each check starts and settles; an overall progress indicator (completed-of-total) is visible during the run.
+- [x] A re-run control repeats all checks without a page reload, guards against overlapping runs, and re-gates Copy JSON until the new run settles.
+- [x] Browser Session Reset is available on `/weppcloud/diagnostics/` for anonymous and authenticated users; the profile page section is removed and replaced with a link to diagnostics; the inline script is extracted to a shared static module.
+- [x] The interfaces page "More" dropdown renders for anonymous users and includes a Diagnostics entry for all users.
+- [x] A usersum end-user doc explains what the page is for, how to read blocker/degraded/info results, how to copy and share the report, and when to use Browser Session Reset; it is indexed and linked from the diagnostics page.
+- [x] Card layout is denser per the UI style guide; spec updated to match.
+- [x] `docs/ui-docs/diagnostics-page.spec.md` reflects all shipped behavior.
+- [x] `wctl run-pytest tests/weppcloud/routes/test_diagnostics_page.py`, `wctl run-npm lint`, and `wctl run-npm test` pass.
 
 ## Dependencies
 
@@ -91,7 +91,25 @@ The `/weppcloud/diagnostics/` page (route `GET /diagnostics/` on `weppcloud_site
 - `tools/usersum_docs_tool.py` — manifest/nav validation and `docs_index.json` regeneration
 
 ## Deliverables
-[Fill at closure]
+
+- Commits (master): `783095311` scaffold + spec 4.1 card contract; `2d9170307` Codex scaffold-review disposition; `280e7f9d5` WP04a usersum stub; `1503e1ece` WP01 live cards/re-run; `324169a37` WP02 reset relocation; `cdf73f2aa` WP03 density/discoverability; WP04b full guide + closure in the closing commit.
+- Spec: `docs/ui-docs/diagnostics-page.spec.md` sections 4.1 (card presentation contract) and 4.2 (run lifecycle/controls) plus layout/discoverability amendments.
+- Security artifact: `artifacts/2026-07-27_wp02_security_review.md` (3 findings, all resolved, gate pass); scaffold review artifact `artifacts/2026-07-27_codex_scaffold_review.md` (8 findings, all dispositioned).
+- New code surfaces: lifecycle-notifying core runner, `browser_reset.js` extracted module, `diagnostics_core_page.test.js` Jest suite; anonymous-capable `POST /api/auth/reset-browser-state`.
+- End-user doc: `usersum/weppcloud/diagnostics.md` (Browser Diagnostics guide), registered and indexed, linked from the page.
+- Test coverage: diagnostics route suite grew to card/nav assertions; reset endpoint suite reworked for anonymous posture; both-auth-state interface render coverage.
 
 ## Follow-up Work
-[Fill at closure]
+
+- forest1 test-production smoke on next deploy (operational; not blocking closure).
+- Phase-2 spec items remain open by design: server-assisted Redis pub/sub data-path validation (spec section 7) and websocket throughput probes (section 8.5).
+
+## Closure Notes
+
+**Closed**: 2026-07-27
+
+**Summary**: All five workstreams shipped same-day. Codex implemented WP01–WP03 via MCP under review; Claude Code authored the spec contracts, scaffold, dispositions, and usersum docs (WP04a/b). The package pivoted twice on review evidence: Codex's scaffold review (8 findings) corrected the working sets before implementation began, and Claude Code's WP03 review caught the `.wc-panel` min-height/margin carryover — the actual root cause of the original density complaint — before it shipped. WP02's anonymous posture landed with zero unresolved security findings; the CSRF contract needed no normative amendment because `base_pure.htm` already mints tokens for anonymous sessions.
+
+**Lessons Learned**: Review evidence classes matter — curl/jsdom gates cannot see computed CSS, so layout claims need either a live-browser check or an explicit reviewer pass over the cascade. The scaffold-review-then-execute pattern (review the plan with the implementing agent before dispatching it) caught contract gaps cheaply.
+
+**Archive Status**: All prompts retired to `prompts/completed/` with outcomes; both review artifacts retained in `artifacts/`.

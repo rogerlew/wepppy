@@ -6,9 +6,9 @@
 
 **Timezone**: UTC
 **Started**: 2026-07-27 20:20 UTC
-**Current phase**: WP03 complete in working tree; awaiting review
-**Last updated**: 2026-07-27 21:18 UTC
-**Next milestone**: WP03 working-tree review, then WP04b
+**Current phase**: Closed — all workstreams shipped
+**Last updated**: 2026-07-27 21:25 UTC
+**Next milestone**: forest1 test-production smoke on next deploy (operational follow-up, outside package scope)
 **Security impact**: `high` (scoped to WP02 reset endpoint auth posture)
 **Dedicated security review**: `yes` (WP02 only)
 **Security artifact**: `docs/work-packages/20260727_diagnostics_page_ux/artifacts/2026-07-27_wp02_security_review.md`
@@ -16,7 +16,7 @@
 ## Task Board
 
 ### Ready / Backlog
-- [ ] WP04b — Full usersum end-user doc replacing the stub, index regenerated (Claude Code; after WP01–WP03 land)
+- (none)
 
 ### In Progress
 - (none)
@@ -29,7 +29,8 @@
 - [x] WP04a — usersum stub `weppcloud/diagnostics.md` authored, registered in manifest/nav, index rebuilt, doc-lint clean (2026-07-27 21:00 UTC; executed in parallel with WP01 — working sets disjoint, land-before-WP03 constraint preserved)
 - [x] WP01 — live check cards per spec 4.1/4.2, progress indicator, guarded Re-run; Codex-implemented, gates independently re-verified (pytest 6, Jest 656), prompt retired with outcome (2026-07-27 21:08 UTC)
 - [x] WP02 — Browser Session Reset relocated to diagnostics for anonymous/authenticated callers; CSRF + same-origin posture verified; security gate passed with zero unresolved findings (2026-07-27 21:09 UTC)
-- [x] WP03 — compact diagnostics composition plus More-menu/usersum discoverability; anonymous live response and both auth-state template renders verified (2026-07-27 21:18 UTC)
+- [x] WP03 — compact diagnostics composition plus More-menu/usersum discoverability; anonymous live response and both auth-state template renders verified; review fix: neutralized `.wc-panel` min-height/margins on check rows (2026-07-27 21:18 UTC)
+- [x] WP04b — full Browser Diagnostics usersum guide replacing the stub (live cards, re-run, report sharing, Browser Session Reset); index rebuilt 72/72, doc-lint clean (2026-07-27 21:22 UTC)
 
 ## Sequencing
 
@@ -100,16 +101,26 @@ WP01 → WP02 → WP04a (usersum stub) → WP03 → WP04b (full doc), serially. 
 - [x] Anonymous reset path: same-origin + CSRF verified, no session/user info in response, caller-only effect
 
 ### Documentation
-- [x] `docs/ui-docs/diagnostics-page.spec.md` amended for WP01/WP02 behavior
-- [x] usersum stub published, registered in `docs_manifest.yaml` / `nav_tree.yaml`, `docs_index.json` regenerated via `tools/usersum_docs_tool.py`
+- [x] `docs/ui-docs/diagnostics-page.spec.md` amended for WP01/WP02/WP03 behavior
+- [x] usersum doc published (stub then full guide), registered in `docs_manifest.yaml` / `nav_tree.yaml`, `docs_index.json` regenerated via `tools/usersum_docs_tool.py`
 - [x] Diagnostics page links to the usersum doc
-- [ ] Package closure notes complete
+- [x] Package closure notes complete
 
 ### Deployment
 - [x] Verified in docker-compose.dev stack (anonymous + authenticated sessions)
-- [ ] forest1 test-production smoke if applicable
+- [ ] forest1 test-production smoke if applicable — operational follow-up on next deploy
 
 ## Progress Notes
+
+### 2026-07-27 21:25 UTC: WP04b complete; package closed
+**Agent/Contributor**: Claude Code
+
+**Work completed**:
+- Reviewed WP03 diff; caught and returned one review finding on-thread (`.wc-panel` min-height:256px + 2xl margins still applied to check rows — invisible to curl/jsdom validation); Codex fixed with page-scoped `min-height: 0; margin: 0` plus regression assertions; gates re-verified independently (pytest 72, Jest 657); committed as cdf73f2aa.
+- Expanded `usersum/weppcloud/diagnostics.md` from stub to full Browser Diagnostics guide covering live check rows, progress counter, re-run, impact/what-to-do/technical-detail reading, redacted report sharing, Browser Session Reset (including the signed-out rationale), and limits. Validator 72/72, doc-lint clean.
+- Closed package.md with deliverables and closure notes; PROJECT_TRACKER entry moved to Done.
+
+**Next steps**: none in-package. forest1 smoke on next deploy is the remaining operational step.
 
 ### 2026-07-27 21:18 UTC: WP03 density and discoverability complete
 **Agent/Contributor**: Codex
