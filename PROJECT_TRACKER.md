@@ -646,6 +646,18 @@ build through job completion before review.
 
 Recently completed work packages. Archived immediately upon completion.
 
+### WEPP LOSS Annual Hillslope-Area Repair (2026-07-27)
+
+**Status**: ✅ **COMPLETE; READY TO DEPLOY**
+
+**Link**: [docs/work-packages/20260726_wepp_loss_hillslope_area_repair/](docs/work-packages/20260726_wepp_loss_hillslope_area_repair/)
+
+**Summary**: WEPPpyo3 now parses uniform historical 11-field and current
+12-field annual hillslope LOSS layouts into one additive schema, using true
+null legacy area values and preserving current area/pollutant positions. The
+reviewed py312 release is pushed at `cee6ff1`; consumer gates and dual reviews
+passed.
+
 ### Partial-Year Climate and CLIGEN NAS Hardening (2026-07-27)
 
 **Status**: ✅ **COMPLETE; PRODUCTION DEPLOYMENT PENDING**

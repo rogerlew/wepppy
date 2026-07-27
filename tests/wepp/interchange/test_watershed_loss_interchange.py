@@ -85,7 +85,11 @@ def test_watershed_loss_interchange_outputs_expected_tables(tmp_path: Path) -> N
 
     hill_all = _read(expected_paths["all_years_hill"])
     assert sorted(hill_all["year"].unique()) == [2000, 2001, 2002, 2003, 2004, 2005]
-    assert hill_all.shape == (18, 12)
+    assert hill_all.shape == (18, 13)
+    assert "Hillslope Area" in hill_all.columns
+    assert hill_all["Hillslope Area"].isna().all()
+    legacy_table = pq.read_table(expected_paths["all_years_hill"])
+    assert legacy_table.column("Hillslope Area").null_count == legacy_table.num_rows
     hill_2001_2 = hill_all[(hill_all["year"] == 2001) & (hill_all["wepp_id"] == 2)].iloc[0]
     assert hill_2001_2["Baseflow Volume"] == pytest.approx(144.9)
 
@@ -107,3 +111,49 @@ def test_watershed_loss_interchange_outputs_expected_tables(tmp_path: Path) -> N
     class_year_match = class_all[(class_all["year"] == 2003) & (class_all["Class"] == 4)].iloc[0]
     assert class_year_match["Diameter"] == pytest.approx(0.3)
     assert class_year_match["Fraction In Flow Exiting"] == pytest.approx(0.255)
+
+
+def test_watershed_loss_interchange_maps_current_annual_hillslope_area(
+    tmp_path: Path,
+) -> None:
+    workdir = tmp_path / "output"
+    shutil.copytree(PROJECT_OUTPUT, workdir)
+    source = workdir / "loss_pw0.txt"
+    lines = source.read_text(encoding="ascii").splitlines()
+    annual_header = next(
+        idx
+        for idx, line in enumerate(lines)
+        if "ANNUAL SUMMARY FOR WATERSHED IN YEAR" in line
+    )
+    average_header = next(
+        idx
+        for idx, line in enumerate(lines)
+        if "YEAR AVERAGE ANNUAL VALUES FOR WATERSHED" in line
+    )
+    annual_hill_rows = [
+        idx
+        for idx in range(annual_header + 1, average_header)
+        if lines[idx].split()[:1] == ["Hill"]
+    ]
+    for idx in annual_hill_rows:
+        tokens = lines[idx].split()
+        tokens.insert(8, "1.000")
+        lines[idx] = " ".join(tokens)
+    lines[annual_hill_rows[0]] = (
+        "Hill 1 768.0 13741.4 118.0 0.0 -0.0 0.0 "
+        "1.539 0.1 0.2 0.3"
+    )
+    source.write_text("\n".join(lines) + "\n", encoding="ascii")
+
+    outputs = run_wepp_watershed_loss_interchange(workdir)
+
+    table = pq.read_table(outputs["all_years_hill"])
+    assert table.schema.metadata[b"schema_version"] == b"2"
+    assert table.schema.field("Hillslope Area").metadata == {b"units": b"ha"}
+    frame = table.to_pandas()
+    row = frame.iloc[0]
+    assert row["Sediment Yield"] == pytest.approx(0.0)
+    assert row["Hillslope Area"] == pytest.approx(1.539)
+    assert row["Solub. React. Pollutant"] == pytest.approx(0.1)
+    assert row["Particulate Pollutant"] == pytest.approx(0.2)
+    assert row["Total Pollutant"] == pytest.approx(0.3)
