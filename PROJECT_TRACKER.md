@@ -77,6 +77,28 @@ Feedback mechanisms:
 
 Work packages that are scoped but not yet started. Dependencies and prerequisites should be noted.
 
+### Web Same-Origin Guard Parity and Data-Boundary Hardening
+**Proposed**: 2026-07-27
+**Size**: Medium (2-4 focused sessions)
+**Priority**: Medium
+**Security impact**: `high` (changes CSRF/same-origin enforcement — dedicated review required)
+**Link**: [docs/work-packages/20260727_web_origin_guard_hardening/](docs/work-packages/20260727_web_origin_guard_hardening/)
+**Description**: Unify three divergent same-origin guards (Flask, rq-engine, query-engine) to one contract and harden two data-boundary behaviors. query-engine's guard lacks the `Sec-Fetch-Site` fast-path the other two have, so a same-origin upload POST returns `403 cross_origin_blocked` on deployments where TLS terminates upstream of Caddy (observed on `wc.bearhive.duckdns.org`; `wepp.cloud` is unaffected because Caddy terminates TLS there). Also scopes reset cookie clearing to WEPPcloud-owned cookies and rebuilds the diagnostics Copy JSON report from an allowlist.
+
+**Scope**:
+- WP01: same-origin contract + parity across all three guards (query-engine gains the fast-path; forwarded-header trust and Origin-conflict handling hardened).
+- WP02: scope `_clear_reset_browser_state_cookies` to owned names/domains.
+- WP03: allowlist-based diagnostics report redaction.
+- WP04: CSRF-enabled same-origin/header test matrix across all three surfaces.
+
+**Origin**: Independent security review of `20260727_diagnostics_page_ux` (findings 2/4/10) plus the upload-403 root-cause investigation.
+
+**Companions (out of scope)**: per-node Caddy `X-Forwarded-Proto` correction (operational; needs node-owner consent); diagnostics upload-probe UX relabel (follow-up to `20260727_diagnostics_page_ux`).
+
+**Next Steps**: Codex executes WP01 per `prompts/active/wp01_same_origin_parity.prompt.md`; Claude Code extends the CSRF contract doc alongside.
+
+---
+
 ### SSURGO Reclaimed Soil Conversion and Fallback Transparency
 **Proposed**: 2026-06-22
 **Size**: Medium-High (2-4 focused sessions)
