@@ -275,7 +275,7 @@ When resuming Kubernetes work:
 
 Currently active work packages. Limit to 2-4 packages to maintain focus.
 
-**Current WIP Count**: 17 packages
+**Current WIP Count**: 16 packages
 
 ### SSURGO Intelligent Fallback Empirical Study
 **Started**: 2026-07-21
@@ -643,6 +643,20 @@ build through job completion before review.
 ---
 
 ## ✅ Done
+
+### WEPP SOIL OFE Overflow and 260726 Release ✅
+
+**Completed**: 2026-07-27
+
+**Status**: ✅ **COMPLETE; READY TO DEPLOY**
+
+**Link**: [docs/work-packages/20260726_wepp_soil_ofe_overflow_release/](docs/work-packages/20260726_wepp_soil_ofe_overflow_release/)
+
+**Summary**: WEPP `wepp_260726` preserves numeric watershed SOIL OFE
+identifiers above 99, WEPPpyo3 strictly recovers historical `**` overflow
+files, and WEPPpy vendors the paired dated model binaries.
+
+---
 
 Recently completed work packages. Archived immediately upon completion.
 
