@@ -75,3 +75,23 @@ validation.
   `cbcfac30e484613c5314e7a91b694863d26138905fcf04947650bc2c6c148918`
 - `wepp_260727_hill`:
   `d79a4bfde31feab8e3aff5ea5ae5d14b898f85b5f8fae5e471bc43d4078eddcc`
+
+## Forest Production Regeneration
+
+- Persisted base-run binary: `wepp_260727`.
+- All 587 hillslopes regenerated with four workers; every runner result was
+  `status=True`.
+- All 587 hillslope runner traces recorded exact hill binary SHA
+  `d79a4bfde31feab8e3aff5ea5ae5d14b898f85b5f8fae5e471bc43d4078eddcc`.
+- The watershed runner trace recorded exact binary SHA
+  `cbcfac30e484613c5314e7a91b694863d26138905fcf04947650bc2c6c148918`
+  and a successful watershed completion marker.
+- Raw `loss_pw0.txt`: 4,109 Hill rows, 587 unique final-period hillslopes,
+  zero non-positive areas, minimum `0.020 ha`, hillslope 587 `0.080 ha`.
+- Native average-hillslope parquet: 587 rows, zero null or non-positive areas,
+  minimum `0.020 ha`, hillslope 587 `0.080 ha`.
+- `Omni.compile_hillslope_summaries()` completed with 587 baseline rows.
+  The locally synced run currently has no configured Omni scenarios, so there
+  were no scenario workspaces to regenerate.
+- A recoverable pre-mutation NoDb backup remains at
+  `wepp.nodb.bak.20260727_wepp260727`.

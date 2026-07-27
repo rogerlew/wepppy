@@ -18,7 +18,9 @@ Omni hillslope summaries without a final-row `NAType` failure.
 - [x] (2026-07-27 UTC) Validated WEPPpyo3 and WEPPpy consumers.
 - [x] (2026-07-27 UTC) Published and vendored the corrected release.
 - [x] (2026-07-27 UTC) Completed dual review and disposition.
-- [ ] Complete WEPPpy commit/push and Forest regeneration.
+- [x] (2026-07-27 UTC) Pushed WEPPpy vendor commit `37b4500ef`.
+- [x] (2026-07-27 UTC) Regenerated Forest hillslopes, watershed, interchange,
+  and baseline Omni summary with exact release artifacts.
 
 ## Surprises & Discoveries
 
@@ -47,7 +49,13 @@ Omni hillslope summaries without a final-row `NAType` failure.
 
 ## Outcomes & Retrospective
 
-Pending completion.
+The repair eliminated the final zero-area hillslope at its source without
+changing LOSS or HBP schemas. Exact-release scratch and Forest runs both
+produced 4,109 positive raw Hill rows; native parquet and baseline Omni summary
+generation completed. Dual review caught and closed an executable-test gap,
+mixed-build replay evidence, and incorrect sidecar schema metadata. Bounded
+four-worker production regeneration completed 587 of 587 hillslopes on the
+slow NAS.
 
 ## Context and Orientation
 

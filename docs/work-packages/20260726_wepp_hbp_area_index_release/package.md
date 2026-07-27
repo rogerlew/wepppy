@@ -1,6 +1,6 @@
 # WEPP Direct-HBP Hillslope Area Index Repair
 
-**Status**: Active
+**Status**: Complete
 **Started**: 2026-07-27 UTC
 **Security impact**: none; no dedicated security review is required.
 
@@ -41,7 +41,8 @@ substitution, worker deployment, and stack-wide restarts are excluded.
   summaries.
 - A uniquely named WEPP release is vendored with provenance and changelogs.
 - Independent code and QA reviews have dispositions for every finding.
-- All three repositories are committed and pushed.
+- All changed repositories are committed and pushed; WEPPpyo3 remains clean
+  at its already-pushed parser release.
 
 ## Hardening Lifecycle
 

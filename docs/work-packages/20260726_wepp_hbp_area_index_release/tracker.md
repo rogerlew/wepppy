@@ -3,20 +3,11 @@
 ## Quick Status
 
 **Timezone**: UTC
-**Current phase**: Forest regeneration
+**Current phase**: Complete
 **Last updated**: 2026-07-27 UTC
-**Next milestone**: Production output validation
+**Next milestone**: 30-day production observation
 
 ## Task Board
-
-### In Progress
-
-- [ ] Regenerate the Forest base and Omni watershed outputs sequentially.
-
-### Ready
-
-- [x] Complete QA review and disposition.
-- [ ] Commit and push the WEPPpy vendoring and work package.
 
 ### Done
 
@@ -29,6 +20,13 @@
 - [x] Published the uniquely named WEPP source release and tag.
 - [x] Received independent code-review approval after closing its test gap.
 - [x] Closed the QA same-build replay and HBP sidecar metadata findings.
+- [x] Pushed WEPP source commit `ca47d1fc` and WEPPpy vendor commit
+  `37b4500ef`; confirmed WEPPpyo3 is clean and already pushed.
+- [x] Regenerated all 587 Forest base HBP shards with `wepp_260727_hill`.
+- [x] Reran Forest watershed aggregation and native interchange with
+  `wepp_260727`.
+- [x] Proved 4,109 raw Hill rows and 587 parquet rows have positive areas.
+- [x] Compiled the configured baseline Omni hillslope summary: 587 rows.
 
 ## Decisions
 

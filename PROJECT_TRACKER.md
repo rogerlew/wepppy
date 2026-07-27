@@ -275,23 +275,7 @@ When resuming Kubernetes work:
 
 Currently active work packages. Limit to 2-4 packages to maintain focus.
 
-**Current WIP Count**: 16 packages
-
-### WEPP Direct-HBP Hillslope Area Index Repair
-
-**Started**: 2026-07-27
-**Status**: Candidate replay passed; release and Forest regeneration in progress
-**Size**: Small, high-risk release correction
-**Owner**: Codex
-**Priority**: Critical
-**Link**: [docs/work-packages/20260726_wepp_hbp_area_index_release/](docs/work-packages/20260726_wepp_hbp_area_index_release/)
-
-**Description**: Correct the zero-based/one-based Fortran array association
-that shifted direct-HBP hillslope areas and left the final watershed LOSS row
-at zero. Publish and vendor a new immutable WEPP release, validate WEPPpyo3 and
-WEPPpy consumers, and regenerate the Forest incident run.
-
----
+**Current WIP Count**: 15 packages
 
 ### SSURGO Intelligent Fallback Empirical Study
 **Started**: 2026-07-21
@@ -659,6 +643,21 @@ build through job completion before review.
 ---
 
 ## ✅ Done
+
+### WEPP Direct-HBP Hillslope Area Index Repair ✅
+
+**Completed**: 2026-07-27
+
+**Status**: ✅ **COMPLETE; DEPLOYED ON FOREST**
+
+**Link**: [docs/work-packages/20260726_wepp_hbp_area_index_release/](docs/work-packages/20260726_wepp_hbp_area_index_release/)
+
+**Summary**: WEPP `wepp_260727` fixes one-based HBP metadata association.
+Forest regenerated 587 matching-version HBP shards and watershed output;
+all 4,109 raw LOSS Hill rows and all 587 parquet areas are positive, and the
+baseline Omni hillslope summary compiles.
+
+---
 
 ### WEPP SOIL OFE Overflow and 260726 Release ✅
 
