@@ -277,6 +277,22 @@ Currently active work packages. Limit to 2-4 packages to maintain focus.
 
 **Current WIP Count**: 16 packages
 
+### WEPP Direct-HBP Hillslope Area Index Repair
+
+**Started**: 2026-07-27
+**Status**: Candidate replay passed; release and Forest regeneration in progress
+**Size**: Small, high-risk release correction
+**Owner**: Codex
+**Priority**: Critical
+**Link**: [docs/work-packages/20260726_wepp_hbp_area_index_release/](docs/work-packages/20260726_wepp_hbp_area_index_release/)
+
+**Description**: Correct the zero-based/one-based Fortran array association
+that shifted direct-HBP hillslope areas and left the final watershed LOSS row
+at zero. Publish and vendor a new immutable WEPP release, validate WEPPpyo3 and
+WEPPpy consumers, and regenerate the Forest incident run.
+
+---
+
 ### SSURGO Intelligent Fallback Empirical Study
 **Started**: 2026-07-21
 **Status**: Empirical study and ADR-0025 policy gate complete; implementation
