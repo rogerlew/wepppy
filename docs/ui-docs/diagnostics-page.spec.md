@@ -22,6 +22,15 @@
 - Accessibility and interaction semantics (headings, labels, status messaging, keyboard usability, ARIA where needed) MUST align with the style guide and current WEPPcloud component conventions.
 - Diagnostic severity presentation (`blocker`, `degraded`, `info`) SHOULD reuse existing status/alert visual language so diagnostics remains visually consistent with the rest of WEPPcloud.
 
+## 2.2 Layout and Discoverability
+- The introduction, overall readiness, live check roster, and report controls MUST compose as one compact diagnostics surface.
+- The check roster MUST use dense, page-scoped rows with a check title, one-line description or evidence, and state chip arranged for scanning. Rows MAY stack at narrow viewports.
+- Report controls SHOULD share an inline toolbar where space permits, and the JSON preview MUST remain collapsed by default.
+- Browser Session Reset MUST remain a separate, compact card so its session-clearing action is not confused with running checks or copying a report.
+- Density overrides MUST be scoped beneath the diagnostics page root and MUST NOT modify shared stack, card, panel, status-chip, or navigation primitives.
+- The page MUST link to the registered usersum document at category `weppcloud`, filename `diagnostics.md`.
+- The interfaces page `More` menu MUST include a Diagnostics link for anonymous and authenticated visitors. Anonymous visitors MUST retain the separate Login link; authenticated visitors MUST retain their role-appropriate menu entries.
+
 ## 3. Required Checks
 
 ### 3.1 Blocking Checks
@@ -229,6 +238,9 @@
 - Bandwidth endpoints enforce payload caps, timeouts, rate limits, and bounded concurrency.
 - Bandwidth endpoint implementation is streaming/non-buffering for large payloads and does not consume Flask/Gunicorn worker capacity.
 - Diagnostics UI uses existing WEPPcloud UI conventions from `docs/ui-docs/ui-style-guide.md` and does not introduce a conflicting visual system.
+- Diagnostics introduction, readiness, live checks, and report controls render as one compact surface; reset remains a separate compact card.
+- Interfaces `More` navigation exposes Diagnostics in anonymous and authenticated states without removing Login or authenticated role-specific entries.
+- The diagnostics page links to the registered Browser Diagnostics usersum document.
 - Check cards render at run start and update live through queued/running/settled states per section 4.1.
 - Passing checks show no severity labels and no fix hints; warn/fail checks present severity as a plain-language impact statement plus fix hint, never the raw taxonomy words.
 - JSON report is copyable and redacted for sensitive values.

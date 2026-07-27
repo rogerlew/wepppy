@@ -3,15 +3,107 @@
 
 {% block title %}WEPPcloud Diagnostics{% endblock %}
 
+{% block head_extras %}
+  {{ super() }}
+  <style>
+    #diagnostics_page_root {
+      gap: var(--wc-space-md);
+    }
+
+    #diagnostics_page_root .wc-control__body {
+      gap: var(--wc-space-md);
+    }
+
+    #diagnostics_page_root :is(p, ol) {
+      margin-bottom: 0;
+    }
+
+    #diagnostics_page_root .diagnostics-summary {
+      display: grid;
+      grid-template-columns: minmax(0, 1fr) auto;
+      align-items: center;
+      gap: var(--wc-space-sm) var(--wc-space-md);
+    }
+
+    #diagnostics_page_root .diagnostics-summary__status {
+      display: flex;
+      flex-wrap: wrap;
+      align-items: center;
+      gap: var(--wc-space-xs) var(--wc-space-sm);
+    }
+
+    #diagnostics_page_root .diagnostics-summary__meta {
+      display: flex;
+      flex-wrap: wrap;
+      gap: var(--wc-space-xs) var(--wc-space-md);
+    }
+
+    #diagnostics_page_root .diagnostics-actions {
+      padding: 0;
+    }
+
+    #diagnostics_page_root [data-diagnostics-check-list] {
+      list-style: none;
+      margin: 0;
+      padding: 0;
+      gap: var(--wc-space-sm);
+    }
+
+    #diagnostics_page_root [data-diagnostics-check-list] > li {
+      grid-template-columns: minmax(12rem, 0.8fr) minmax(16rem, 1.4fr) auto;
+      align-items: center;
+      gap: var(--wc-space-xs) var(--wc-space-md);
+      padding: var(--wc-space-sm) var(--wc-space-md);
+      min-height: 0;
+      margin: 0;
+    }
+
+    #diagnostics_page_root [data-check-role] {
+      margin: 0;
+    }
+
+    #diagnostics_page_root [data-check-role="status"] {
+      justify-self: end;
+      white-space: nowrap;
+    }
+
+    #diagnostics_page_root [data-check-detail] {
+      grid-column: 1 / -1;
+    }
+
+    #diagnostics_page_root .diagnostics-report {
+      gap: var(--wc-space-sm);
+      padding-top: var(--wc-space-sm);
+      border-top: 1px solid var(--wc-color-border);
+    }
+
+    #diagnostics_page_root .diagnostics-reset {
+      gap: var(--wc-space-sm);
+    }
+
+    @media (max-width: 760px) {
+      #diagnostics_page_root .diagnostics-summary,
+      #diagnostics_page_root [data-diagnostics-check-list] > li {
+        grid-template-columns: minmax(0, 1fr);
+      }
+
+      #diagnostics_page_root [data-check-role="status"] {
+        justify-self: start;
+      }
+    }
+  </style>
+{% endblock %}
+
 {% block body %}
 <div class="wc-stack" id="diagnostics_page_root" data-diagnostics-root>
   <h1 class="wc-sr-only">WEPPcloud Diagnostics</h1>
   {% call ui.card_shell(
        title="WEPPcloud Diagnostics",
-       description="Use this page to verify whether the current browser session can run WEPPcloud requirements."
+       description="Verify whether this browser session can run WEPPcloud and generate a redacted support report."
      ) %}
     <p class="wc-text-muted">
-      Diagnostics checks are grouped as blockers, degraded capabilities, and informational signals.
+      Checks cover required browser features, degraded capabilities, and informational signals.
+      {{ usersum_doc_link('weppcloud', 'diagnostics.md', 'Read the Browser Diagnostics guide') }}.
     </p>
     <noscript>
       <div class="wc-alert wc-alert--error" role="alert">
@@ -20,23 +112,16 @@
         </p>
       </div>
     </noscript>
-  {% endcall %}
 
-  {% call ui.card_shell(
-       title="Diagnostics Results",
-       description="Core browser/storage checks run on page load and produce a copyable redacted report."
-     ) %}
-    <section class="wc-stack" aria-live="polite" aria-atomic="true">
-      <p>
-        Overall readiness:
+    <section class="diagnostics-summary" aria-live="polite" aria-atomic="true">
+      <div class="diagnostics-summary__status">
+        <strong>Overall readiness:</strong>
         <span data-diagnostics-overall-chip>
           <span class="wc-status-chip" data-state="info">pending</span>
         </span>
         <span data-diagnostics-overall-value>not generated</span>
-      </p>
-      <p class="wc-text-muted" data-diagnostics-report-generated>Report not generated yet.</p>
-      <p data-diagnostics-progress role="status">0 of 0 checks complete.</p>
-      <div>
+      </div>
+      <div class="wc-toolbar diagnostics-actions">
         <button
           type="button"
           class="pure-button pure-button-secondary"
@@ -44,6 +129,10 @@
           disabled>
           Re-run diagnostics
         </button>
+      </div>
+      <div class="diagnostics-summary__meta">
+        <span data-diagnostics-progress role="status">0 of 0 checks complete.</span>
+        <span class="wc-text-muted" data-diagnostics-report-generated>Report not generated yet.</span>
       </div>
     </section>
 
@@ -53,8 +142,8 @@
       </ol>
     </section>
 
-    <section class="wc-stack" aria-label="Diagnostics report">
-      <div>
+    <section class="wc-stack diagnostics-report" aria-label="Diagnostics report">
+      <div class="wc-toolbar diagnostics-actions">
         <button
           type="button"
           class="pure-button pure-button-secondary"
@@ -78,7 +167,7 @@
        description="Use this when damaged browser state prevents WEPPcloud sign-in or requests from working."
      ) %}
     <section
-      class="wc-stack"
+      class="wc-stack diagnostics-reset"
       data-browser-reset-root
       data-reset-endpoint="{{ url_for('weppcloud_site.reset_browser_state') }}"
       data-login-url="{{ url_for('security.login') }}">
@@ -95,7 +184,7 @@
         data-browser-reset-message>
         <p class="wc-alert__body" data-browser-reset-message-body></p>
       </div>
-      <div>
+      <div class="wc-toolbar diagnostics-actions">
         <button
           type="button"
           class="pure-button pure-button-secondary"

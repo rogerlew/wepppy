@@ -774,6 +774,37 @@ def test_interfaces_template_hides_login_bypass_banner_for_authenticated_user(ji
     assert 'name="rq_token"' not in rendered
 
 
+@pytest.mark.parametrize("is_authenticated", [False, True])
+def test_interfaces_template_links_diagnostics_from_more_menu_for_all_users(
+    jinja_env: Environment,
+    is_authenticated: bool,
+) -> None:
+    template = jinja_env.get_template("interfaces.htm")
+    current_user = SimpleNamespace(
+        has_role=lambda role: False,
+        roles=[],
+        is_authenticated=is_authenticated,
+    )
+
+    def _url_for(endpoint: str, **values) -> str:
+        if endpoint == "weppcloud_site.diagnostics":
+            return "/diagnostics/"
+        return f"/mock/{endpoint}"
+
+    rendered = template.render(
+        user=current_user,
+        current_user=current_user,
+        url_for=_url_for,
+        rq_engine_token="token",
+    )
+
+    assert '<summary class="wc-nav__menu-button">More</summary>' in rendered
+    assert 'href="/diagnostics/"' in rendered
+    assert re.search(r'href="/diagnostics/">\s*Diagnostics\s*</a>', rendered)
+    if not is_authenticated:
+        assert 'href="/mock/security.login">Login</a>' in rendered
+
+
 def test_interfaces_template_renders_earth_launch_card(jinja_env: Environment) -> None:
     template = jinja_env.get_template("interfaces.htm")
     auth_user = SimpleNamespace(has_role=lambda role: False, roles=[], is_authenticated=True)

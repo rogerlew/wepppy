@@ -76,8 +76,10 @@ Report per the package tracker's Progress Notes convention, including before/aft
 
 ## Outcome (Complete this when retiring the prompt)
 
-**Completed**: YYYY-MM-DD
-**Agent**:
-**Result**:
-**Deviations**:
-**References**:
+**Completed**: 2026-07-27
+**Agent**: Codex
+**Result**: Consolidated the diagnostics introduction, readiness summary, live check roster, and report controls into one compact surface; retained Browser Session Reset as a separate compact card; added the registered Browser Diagnostics usersum link; exposed More → Diagnostics while preserving anonymous Login and authenticated role-aware entries; added anonymous/authenticated render coverage and amended the page specification.
+**Deviations**: The anonymous composition was verified against the live dev stack. The authenticated navigation branch was verified through the real Jinja template render suite rather than a live signed-in browser session. No screenshots were requested or added.
+**References**: `wepppy/weppcloud/templates/diagnostics/diagnostics.htm`; `wepppy/weppcloud/templates/interfaces.htm`; `docs/ui-docs/diagnostics-page.spec.md`; `tests/weppcloud/routes/test_diagnostics_page.py`; `tests/weppcloud/routes/test_pure_controls_render.py`
+
+**Review finding (Claude Code)**: Initial submission left `.wc-panel`'s `min-height: 256px` and `--wc-space-2xl` vertical margins active on every check row — the exact density complaint this WP targets; invisible to curl/jsdom validation. Returned on-thread; Codex added `min-height: 0; margin: 0` to the page-scoped row override with regression assertions. Gates re-verified after the fix (pytest 72 across both route suites, Jest 657).

@@ -6,9 +6,9 @@
 
 **Timezone**: UTC
 **Started**: 2026-07-27 20:20 UTC
-**Current phase**: WP02 complete in working tree; awaiting review
-**Last updated**: 2026-07-27 21:09 UTC
-**Next milestone**: WP02 working-tree review, then WP03
+**Current phase**: WP03 complete in working tree; awaiting review
+**Last updated**: 2026-07-27 21:18 UTC
+**Next milestone**: WP03 working-tree review, then WP04b
 **Security impact**: `high` (scoped to WP02 reset endpoint auth posture)
 **Dedicated security review**: `yes` (WP02 only)
 **Security artifact**: `docs/work-packages/20260727_diagnostics_page_ux/artifacts/2026-07-27_wp02_security_review.md`
@@ -16,7 +16,6 @@
 ## Task Board
 
 ### Ready / Backlog
-- [ ] WP03 — Card density + More-menu/usersum discoverability wiring (Codex; `prompts/active/wp03_layout_density_discoverability.prompt.md`)
 - [ ] WP04b — Full usersum end-user doc replacing the stub, index regenerated (Claude Code; after WP01–WP03 land)
 
 ### In Progress
@@ -30,6 +29,7 @@
 - [x] WP04a — usersum stub `weppcloud/diagnostics.md` authored, registered in manifest/nav, index rebuilt, doc-lint clean (2026-07-27 21:00 UTC; executed in parallel with WP01 — working sets disjoint, land-before-WP03 constraint preserved)
 - [x] WP01 — live check cards per spec 4.1/4.2, progress indicator, guarded Re-run; Codex-implemented, gates independently re-verified (pytest 6, Jest 656), prompt retired with outcome (2026-07-27 21:08 UTC)
 - [x] WP02 — Browser Session Reset relocated to diagnostics for anonymous/authenticated callers; CSRF + same-origin posture verified; security gate passed with zero unresolved findings (2026-07-27 21:09 UTC)
+- [x] WP03 — compact diagnostics composition plus More-menu/usersum discoverability; anonymous live response and both auth-state template renders verified (2026-07-27 21:18 UTC)
 
 ## Sequencing
 
@@ -82,9 +82,9 @@ WP01 → WP02 → WP04a (usersum stub) → WP03 → WP04b (full doc), serially. 
 |------|----------|------------|------------|--------|
 | Anonymous reset endpoint becomes an annoyance vector (forced logout via CSRF) | Medium | Low | Retain same-origin POST check + CSRF token; security review verifies | Mitigated |
 | Anonymous sessions may lack a usable CSRF token, making the relocated reset uncallable | Medium | Medium | WP02 step 2 verifies against the CSRF contract before shipping; contract amended if needed | Resolved |
-| WP01–WP03 template conflicts | Low | Medium | Serial execution per Sequencing | Open |
-| More-menu change on interfaces.htm regresses anonymous Cap/login flow | Low | Low | Keep Login link; menu addition is additive; manual smoke on anonymous view | Open |
-| Spec drift (`diagnostics-page.spec.md` not updated with behavior changes) | Medium | Medium | Each WP prompt includes a spec-amendment deliverable; verify at closure | Open |
+| WP01–WP03 template conflicts | Low | Medium | Serial execution per Sequencing | Resolved |
+| More-menu change on interfaces.htm regresses anonymous Cap/login flow | Low | Low | Keep Login link; menu addition is additive; manual smoke on anonymous view | Resolved |
+| Spec drift (`diagnostics-page.spec.md` not updated with behavior changes) | Medium | Medium | Each WP prompt includes a spec-amendment deliverable; verify at closure | Resolved |
 
 ## Verification Checklist
 
@@ -101,8 +101,8 @@ WP01 → WP02 → WP04a (usersum stub) → WP03 → WP04b (full doc), serially. 
 
 ### Documentation
 - [x] `docs/ui-docs/diagnostics-page.spec.md` amended for WP01/WP02 behavior
-- [ ] usersum doc published, registered in `docs_manifest.yaml` / `nav_tree.yaml`, `docs_index.json` regenerated via `tools/usersum_docs_tool.py`
-- [ ] Diagnostics page links to the usersum doc
+- [x] usersum stub published, registered in `docs_manifest.yaml` / `nav_tree.yaml`, `docs_index.json` regenerated via `tools/usersum_docs_tool.py`
+- [x] Diagnostics page links to the usersum doc
 - [ ] Package closure notes complete
 
 ### Deployment
@@ -110,6 +110,24 @@ WP01 → WP02 → WP04a (usersum stub) → WP03 → WP04b (full doc), serially. 
 - [ ] forest1 test-production smoke if applicable
 
 ## Progress Notes
+
+### 2026-07-27 21:18 UTC: WP03 density and discoverability complete
+**Agent/Contributor**: Codex
+
+**Work completed**:
+- Consolidated the intro, readiness summary, live check roster, and report controls into one compact diagnostics surface while keeping Browser Session Reset separate.
+- Scoped all density CSS beneath `#diagnostics_page_root`; used style-guide spacing tokens, existing status chips, panels, buttons, and toolbar utilities without changing shared primitives.
+- Added the registered `weppcloud/diagnostics.md` usersum link.
+- Made More → Diagnostics available for anonymous and authenticated interface navigation while retaining anonymous Login and authenticated role-aware entries.
+- Added both-auth-state template coverage and amended the normative layout/discoverability contract.
+
+**Validation**:
+- Pytest: diagnostics 6 passed; interface template selection 7 passed; interface route 2 passed.
+- Frontend: ESLint passed; Jest 87 suites / 657 tests passed.
+- Docs: diagnostics spec doc-lint passed with 0 errors and 0 warnings; uk2us preview had no changes.
+- Dev stack: anonymous `/interfaces/` and `/diagnostics/` returned 200; rendered Login, More → Diagnostics, compact diagnostics root, reset card, and resolved usersum link. Authenticated navigation was verified by Jinja render coverage rather than a live signed-in browser session.
+
+**Next steps**: Review the uncommitted WP03 working tree; execute WP04b after acceptance.
 
 ### 2026-07-27 21:09 UTC: WP02 Browser Session Reset relocation complete
 **Agent/Contributor**: Codex

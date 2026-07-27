@@ -84,6 +84,10 @@ def test_diagnostics_template_includes_base_and_noscript_blocker() -> None:
     assert "data-login-url" in source
     assert "clears WEPPcloud cookies" in source
     assert "signs you out" in source
+    assert "usersum_doc_link('weppcloud', 'diagnostics.md'" in source
+    assert "#diagnostics_page_root" in source
+    assert "min-height: 0;" in source
+    assert "margin: 0;" in source
     assert "static_url('js/diagnostics/core.js')" in source
     assert "static_url('js/diagnostics/auth_checks.js')" in source
     assert "static_url('js/diagnostics/bandwidth_checks.js')" in source
