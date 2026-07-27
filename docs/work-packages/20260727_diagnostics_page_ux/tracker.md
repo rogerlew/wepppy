@@ -16,12 +16,11 @@
 ## Task Board
 
 ### Ready / Backlog
-- [ ] WP02 — Browser Session Reset relocation + anonymous auth posture (Codex; `prompts/active/wp02_browser_reset_relocation.prompt.md`; security review artifact required)
 - [ ] WP03 — Card density + More-menu/usersum discoverability wiring (Codex; `prompts/active/wp03_layout_density_discoverability.prompt.md`)
 - [ ] WP04b — Full usersum end-user doc replacing the stub, index regenerated (Claude Code; after WP01–WP03 land)
 
 ### In Progress
-- [ ] WP01 — Live run feedback + re-run control (Codex via MCP, dispatched 2026-07-27 ~20:57 UTC)
+- [ ] WP02 — Browser Session Reset relocation (Codex via MCP, dispatched 2026-07-27 ~21:10 UTC)
 
 ### Blocked
 - (none)
@@ -29,6 +28,7 @@
 ### Done
 - [x] Package scoped and scaffolded (2026-07-27 20:20 UTC)
 - [x] WP04a — usersum stub `weppcloud/diagnostics.md` authored, registered in manifest/nav, index rebuilt, doc-lint clean (2026-07-27 21:00 UTC; executed in parallel with WP01 — working sets disjoint, land-before-WP03 constraint preserved)
+- [x] WP01 — live check cards per spec 4.1/4.2, progress indicator, guarded Re-run; Codex-implemented, gates independently re-verified (pytest 6, Jest 656), prompt retired with outcome (2026-07-27 21:08 UTC)
 
 ## Sequencing
 

@@ -200,14 +200,16 @@
   var authChecks = [
     {
       id: "session-heartbeat",
-      title: "Authenticated session heartbeat",
+      title: "Signed-in session",
+      description: "Checks that your current WEPPcloud sign-in is still active.",
       severity: "blocker",
       fix_hint: "Sign in and retry diagnostics if this check does not pass.",
       run: runSessionHeartbeat
     },
     {
       id: "rq-engine-token",
-      title: "RQ-engine token mint endpoint",
+      title: "Job service access",
+      description: "Checks that this signed-in session can start background work.",
       severity: "blocker",
       fix_hint: "Sign in and retry diagnostics if this check does not pass.",
       run: runRqEngineToken

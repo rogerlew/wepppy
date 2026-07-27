@@ -122,6 +122,7 @@ describe("diagnostics realtime module", () => {
       "status-health-reachability",
       "preflight-health-reachability"
     ]);
+    expect(bundle.checks.every((check) => check.description.length > 0)).toBe(true);
     expect(api.createStatusHealthUrl()).toBe("/weppcloud-microservices/status/health");
     expect(api.createPreflightHealthUrl()).toBe("/weppcloud-microservices/preflight/health");
   });

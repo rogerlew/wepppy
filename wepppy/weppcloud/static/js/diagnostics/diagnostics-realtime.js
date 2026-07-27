@@ -470,7 +470,8 @@
   function createStatusRealtimeCheck(shared) {
     return {
       id: DEFAULT_STATUS_CHECK_ID,
-      title: "Status websocket connectivity",
+      title: "Live status updates",
+      description: "Checks that WEPPcloud can send live progress updates to this browser.",
       severity: "degraded",
       run: async function () {
         var SocketCtor = resolveSocketConstructor(shared);
@@ -526,7 +527,8 @@
   function createPreflightRealtimeCheck(shared) {
     return {
       id: DEFAULT_PREFLIGHT_CHECK_ID,
-      title: "Preflight websocket connectivity",
+      title: "Live setup checks",
+      description: "Checks that WEPPcloud can stream setup-readiness updates to this browser.",
       severity: "degraded",
       run: async function () {
         var SocketCtor = resolveSocketConstructor(shared);
@@ -653,7 +655,8 @@
   function createStatusHealthCheck(shared) {
     return {
       id: DEFAULT_STATUS_HEALTH_CHECK_ID,
-      title: "Status service health reachability",
+      title: "Status service",
+      description: "Checks that the service providing live progress updates is reachable.",
       severity: "degraded",
       run: async function () {
         var result = await runHealthReachabilityProbe({
@@ -684,7 +687,8 @@
   function createPreflightHealthCheck(shared) {
     return {
       id: DEFAULT_PREFLIGHT_HEALTH_CHECK_ID,
-      title: "Preflight service health reachability",
+      title: "Setup-check service",
+      description: "Checks that the service providing setup-readiness updates is reachable.",
       severity: "degraded",
       run: async function () {
         var result = await runHealthReachabilityProbe({
@@ -774,6 +778,9 @@
     }
     if (window.WCDiagnostics && typeof window.WCDiagnostics === "object") {
       return window.WCDiagnostics;
+    }
+    if (window.WEPPDiagnosticsCore && typeof window.WEPPDiagnosticsCore === "object") {
+      return window.WEPPDiagnosticsCore;
     }
     return null;
   }

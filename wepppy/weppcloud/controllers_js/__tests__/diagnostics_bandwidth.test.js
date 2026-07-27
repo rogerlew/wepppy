@@ -64,6 +64,7 @@ describe("diagnostics bandwidth checks module", () => {
       "bandwidth-upload"
     ]);
     expect(checks.map((check) => check.severity)).toEqual(["info", "info", "info"]);
+    expect(checks.every((check) => check.description.length > 0)).toBe(true);
   });
 
   test("queues checks when diagnostics core is unavailable", async () => {

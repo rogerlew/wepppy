@@ -3,7 +3,7 @@
 > **Purpose**: Make the 30+ second diagnostics run legible (live per-check states, overall progress) and repeatable in place (re-run button).
 > **Target**: Codex
 > **Created**: 2026-07-27
-> **Status**: Active
+> **Status**: Completed (2026-07-27)
 
 ## Context
 
@@ -77,8 +77,13 @@ Report per the package tracker's Progress Notes convention: changes made, files 
 
 ## Outcome (Complete this when retiring the prompt)
 
-**Completed**: YYYY-MM-DD
-**Agent**:
-**Result**:
-**Deviations**:
-**References**:
+**Completed**: 2026-07-27
+**Agent**: Codex (via MCP, danger-full-access), dispatched and reviewed by Claude Code
+
+**Result**: Implemented in full. Core runner emits ordered `registered`/`started`/`settled` lifecycle notifications; all check definitions (core, auth, bandwidth, realtime) gained plain-language `description` fields and de-jargoned titles; realtime checks now register with the core runner instead of running outside it; page renders one card per check that updates in place through queued/running/settled states per spec 4.1 (pass cards: chip + one-line result only; warn/fail: impact statement + "What to do" hint + muted technical evidence; skipped: reason only); completed-of-total progress indicator; guarded Re-run control resetting cards, readiness chip, report preview, timestamp, and Copy JSON gating. Spec amended with section 4.2 (Run Lifecycle and Controls). New Jest lifecycle suite `diagnostics_core_page.test.js`.
+
+**Gates**: Codex's run reported lint clean, Jest 87 suites/656 tests passed, pytest route suite 6 passed, live Caddy request to the page OK. Claude Code independently re-ran `wctl run-pytest tests/weppcloud/routes/test_diagnostics_page.py` (6 passed) and `wctl run-npm test` (656 passed).
+
+**Deviations**: Manual browser lifecycle validation was not possible from Codex's environment (headless Chromium could not reach host/Docker endpoints); lifecycle behavior is covered by jsdom tests instead. `report.js` needed no change (fresh timestamp per build already). Skipped cards omit fix hints (consistent with the fix-hint state rule; recorded here as a 4.1 interpretation).
+
+**References**: Committed with this prompt retirement; Codex thread 019fa55d-1ea5-7c93-922b-e0e1ea619902.

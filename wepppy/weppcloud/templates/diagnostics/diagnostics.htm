@@ -35,11 +35,21 @@
         <span data-diagnostics-overall-value>not generated</span>
       </p>
       <p class="wc-text-muted" data-diagnostics-report-generated>Report not generated yet.</p>
+      <p data-diagnostics-progress role="status">0 of 0 checks complete.</p>
+      <div>
+        <button
+          type="button"
+          class="pure-button pure-button-secondary"
+          data-diagnostics-rerun
+          disabled>
+          Re-run diagnostics
+        </button>
+      </div>
     </section>
 
     <section aria-label="Diagnostics checks">
       <ol id="diagnostics_check_list" class="wc-stack" data-diagnostics-check-list>
-        <li class="wc-text-muted">Running diagnostics...</li>
+        <li class="wc-text-muted">Preparing diagnostics...</li>
       </ol>
     </section>
 

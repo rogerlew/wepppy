@@ -467,21 +467,24 @@
   var bandwidthChecks = [
     {
       id: "bandwidth-rtt",
-      title: "RTT probe (approximate)",
+      title: "Connection response time",
+      description: "Measures how quickly a small request reaches WEPPcloud and returns.",
       severity: "info",
       fix_hint: "Bandwidth probes are informational and environment-dependent.",
       run: runRttProbe
     },
     {
       id: "bandwidth-download",
-      title: "Bandwidth download probe (approximate)",
+      title: "Download speed",
+      description: "Estimates how quickly this browser can receive data from WEPPcloud.",
       severity: "info",
       fix_hint: "Bandwidth probes are informational and environment-dependent.",
       run: runDownloadProbe
     },
     {
       id: "bandwidth-upload",
-      title: "Bandwidth upload probe (approximate)",
+      title: "Upload speed",
+      description: "Estimates how quickly this browser can send data to WEPPcloud.",
       severity: "info",
       fix_hint: "Bandwidth probes are informational and environment-dependent.",
       run: runUploadProbe

@@ -98,6 +98,13 @@
 - Cards MUST update in place (no full-list teardown/re-render) with polite ARIA live semantics; a settled card keeps its final state until a re-run resets the whole set to `queued`.
 - The JSON report model in section 4 is unchanged by this contract: `severity`, `evidence`, and `fix_hint` remain in the report for every check regardless of status. This section governs on-page presentation only.
 
+### 4.2 Run Lifecycle and Controls
+- The page starts one diagnostics run after its scripts are ready. Before the first check executes, the core runner MUST publish the complete registered roster in registration order, followed by a `started` and `settled` lifecycle notification for each check.
+- A visible completed-of-total indicator starts at zero when the roster is published, increments only when a check settles, and remains at total-of-total after completion.
+- A `Re-run diagnostics` control repeats the complete registered roster in place without reloading the page. It MUST be disabled while a run is active, and attempts to start a second overlapping run MUST be ignored.
+- At the start of every run, all cards reset to `queued`, overall readiness returns to an in-progress state, the generated timestamp and report preview return to their pre-report state, and `Copy JSON` is disabled.
+- After every successful run, a new report is assembled with a fresh `generated_at` value. `Copy JSON` is then enabled and copies only that latest report.
+
 ## 5. `diagRunId` Contract (Status + Preflight)
 
 ### 5.1 Exact Requirements

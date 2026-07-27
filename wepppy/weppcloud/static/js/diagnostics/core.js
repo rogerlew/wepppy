@@ -8,31 +8,36 @@
   var CHECK_DEFINITIONS = [
     {
       id: "javascript-execution",
-      title: "JavaScript execution sentinel",
+      title: "JavaScript support",
+      description: "Checks that this page can run the code WEPPcloud needs.",
       severity: "blocker",
       fix_hint: "Enable JavaScript for this site, then reload diagnostics."
     },
     {
       id: "browser-api-baseline",
       title: "Browser API baseline",
+      description: "Checks that this browser provides the standard features WEPPcloud uses.",
       severity: "blocker",
       fix_hint: "Upgrade to a modern browser that supports the WEPPcloud baseline APIs."
     },
     {
       id: "cookie-storage",
-      title: "Cookie write/read/delete",
+      title: "Cookie storage",
+      description: "Checks that this site can save and remove a first-party cookie.",
       severity: "blocker",
       fix_hint: "Allow first-party cookies for this site and retry diagnostics."
     },
     {
       id: "local-storage",
-      title: "localStorage write/read/delete",
+      title: "Local browser storage",
+      description: "Checks that this browser can save temporary site preferences.",
       severity: "info",
       fix_hint: "Enable persistent site data if you need local browser caching features."
     },
     {
       id: "abort-controller",
-      title: "AbortController availability",
+      title: "Request cancellation",
+      description: "Checks that this browser can safely cancel requests that take too long.",
       severity: "info",
       fix_hint: "Use an up-to-date browser for better request cancellation support."
     }
@@ -109,6 +114,7 @@
     return {
       id: definition.id,
       title: definition.title,
+      description: definition.description,
       severity: definition.severity,
       fix_hint: definition.fix_hint
     };
@@ -263,6 +269,7 @@
     return {
       id: id,
       title: String(rawDefinition.title || id),
+      description: String(rawDefinition.description || ""),
       severity: severity,
       fix_hint: String(rawDefinition.fix_hint || "Review browser settings and retry diagnostics."),
       run: rawDefinition.run
@@ -352,7 +359,13 @@
     return results;
   }
 
-  function runExtensionChecks(context) {
+  function notifyLifecycle(subscriber, event) {
+    if (typeof subscriber === "function") {
+      subscriber(event);
+    }
+  }
+
+  function runExtensionChecks(context, subscriber) {
     var results = [];
     var sequence = Promise.resolve();
     var extensionIdx;
@@ -360,25 +373,39 @@
     for (extensionIdx = 0; extensionIdx < EXTENSION_CHECKS.length; extensionIdx += 1) {
       (function (definition) {
         sequence = sequence.then(function () {
+          notifyLifecycle(subscriber, {
+            type: "started",
+            check: cloneCheckDefinition(definition)
+          });
           return Promise.resolve()
             .then(function () {
               return definition.run(context);
             })
             .then(function (rawResult) {
-              results.push(normalizeExtensionResult(definition, rawResult));
+              var result = normalizeExtensionResult(definition, rawResult);
+              results.push(result);
+              notifyLifecycle(subscriber, {
+                type: "settled",
+                check: cloneCheckDefinition(definition),
+                result: result
+              });
             })
             .catch(function (error) {
               var reason = "Unexpected diagnostics check error.";
               if (error && error.message) {
                 reason = String(error.message);
               }
-              results.push(
-                normalizeExtensionResult(definition, {
+              var result = normalizeExtensionResult(definition, {
                   status: "fail",
                   evidence: reason,
                   fix_hint: definition.fix_hint
-                })
-              );
+                });
+              results.push(result);
+              notifyLifecycle(subscriber, {
+                type: "settled",
+                check: cloneCheckDefinition(definition),
+                result: result
+              });
             });
         });
       })(EXTENSION_CHECKS[extensionIdx]);
@@ -389,11 +416,42 @@
     });
   }
 
-  function runAllChecks() {
+  function runAllChecks(options) {
+    var subscriber = options && typeof options.onLifecycle === "function"
+      ? options.onLifecycle
+      : null;
     var context = buildContext();
-    var coreResults = runCoreChecks();
+    var definitions = getCheckDefinitions();
+    var coreResults = [];
+    var coreRunners = [
+      runJavascriptExecutionCheck,
+      runBrowserApiBaselineCheck,
+      runCookieCheck,
+      runLocalStorageCheck,
+      runAbortControllerCheck
+    ];
 
-    return runExtensionChecks(context).then(function (extensionResults) {
+    notifyLifecycle(subscriber, {
+      type: "registered",
+      checks: definitions
+    });
+
+    for (var coreIdx = 0; coreIdx < CHECK_DEFINITIONS.length; coreIdx += 1) {
+      var definition = CHECK_DEFINITIONS[coreIdx];
+      notifyLifecycle(subscriber, {
+        type: "started",
+        check: cloneCheckDefinition(definition)
+      });
+      var result = coreRunners[coreIdx](definition);
+      coreResults.push(result);
+      notifyLifecycle(subscriber, {
+        type: "settled",
+        check: cloneCheckDefinition(definition),
+        result: result
+      });
+    }
+
+    return runExtensionChecks(context, subscriber).then(function (extensionResults) {
       return coreResults.concat(extensionResults);
     });
   }

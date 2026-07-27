@@ -76,6 +76,8 @@ def test_diagnostics_template_includes_base_and_noscript_blocker() -> None:
     assert "data-diagnostics-root" in source
     assert "data-diagnostics-check-list" in source
     assert "data-diagnostics-copy-json" in source
+    assert "data-diagnostics-rerun" in source
+    assert "data-diagnostics-progress" in source
     assert "static_url('js/diagnostics/core.js')" in source
     assert "static_url('js/diagnostics/auth_checks.js')" in source
     assert "static_url('js/diagnostics/bandwidth_checks.js')" in source
