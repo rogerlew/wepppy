@@ -315,7 +315,9 @@ def config_app(app: Any):
     app.config["EMAIL_SUBJECT_PASSWORD_RESET"] = "Reset your WEPPcloud password"
     app.config["EMAIL_SUBJECT_PASSWORD_NOTICE"] = "Your WEPPcloud password was reset"
     app.config["EMAIL_SUBJECT_PASSWORD_CHANGE_NOTICE"] = "Your WEPPcloud password was changed"
-    app.config["SECURITY_URL_PREFIX"] = app.config["SITE_PREFIX"]
+    # Caddy strips SITE_PREFIX before proxying and supplies it as
+    # X-Forwarded-Prefix. Flask-Security routes therefore remain unprefixed.
+    app.config["SECURITY_URL_PREFIX"] = ""
     app.config["SECURITY_LOGIN_USER_TEMPLATE"] = "security/login_user.html"
     app.config["SECURITY_POST_LOGIN_VIEW"] = "security_ui.welcome"
     app.config["SECURITY_POST_LOGOUT_VIEW"] = "security_ui.goodbye"

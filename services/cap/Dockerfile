@@ -13,7 +13,7 @@ RUN apk add --no-cache git ca-certificates && \
 COPY services/cap/package.json services/cap/package-lock.json ./
 RUN npm ci --omit=dev
 
-COPY services/cap/server.js ./
+COPY services/cap/server.js services/cap/config.js ./
 
 ENV NODE_ENV=production
 

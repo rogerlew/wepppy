@@ -74,3 +74,4 @@ Each ADR should normally include:
 - `ADR-0024`: [MOFE Configuration Cap of Five OFEs](ADR-0024-mofe-configuration-max-ofes.md) (Accepted, 2026-07-21)
 - `ADR-0025`: [SSURGO Recovery, Local Vector-Profile, and Global Fallback Order](ADR-0025-ssurgo-local-vector-profile-fallback.md) (Accepted, 2026-07-22)
 - `ADR-0026`: [Partial-Year Observed Climate Restoration](ADR-0026-partial-year-observed-climate-restoration.md) (Accepted, 2026-07-26)
+- `ADR-0027`: [Click-Only Cap.js Challenge Parameterization](ADR-0027-cap-click-only-challenge.md) (Accepted, 2026-07-27)

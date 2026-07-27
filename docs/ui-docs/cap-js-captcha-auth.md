@@ -29,6 +29,8 @@ Required:
 Optional:
 - `CAP_PORT` (default `3000`)
 - `CAP_CORS_ORIGIN` (comma-separated allowlist or `*`)
+- `CAP_CHALLENGE_COUNT` (default `1`)
+- `CAP_CHALLENGE_DIFFICULTY` (default `1`)
 - `CAP_DATA_DIR` (default `/var/lib/cap`)
 - `CAP_ASSET_ROOT` (default `/workdir/cap`)
 - `CAP_WIDGET_PATH` (defaults to `widget/src/cap.min.js`)
@@ -155,6 +157,9 @@ Operational notes:
 - `CAP_BASE_URL`, `CAP_SITE_KEY`, and `CAP_SECRET` must be configured for local password login and registration to work.
 - Do not add a silent bypass for missing Cap configuration; auth forms should fail closed.
 - Browser smoke helpers should solve the login-page Cap prompt when `input[name="cap_token"]` is present before submitting the `dev-agent` credentials.
+- The default one-challenge, difficulty-one parameterization makes the proof of
+  work effectively click-only. Because the Cap service is shared, overrides
+  affect every WEPPcloud Cap-protected workflow, not only local login.
 
 ## Troubleshooting
 - If the widget never appears: confirm the prompt trigger has `data-cap-floating` and is not disabled.

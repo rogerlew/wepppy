@@ -208,6 +208,8 @@ Weppcloud + Cap service config (typically `docker/.env`):
 | `CAP_SECRET` | *(required)* | Private key used for server verification |
 | `CAP_SESSION_TTL_SECONDS` | `1200` | Anonymous session lifetime for invisible CAPTCHA gating |
 | `CAP_CORS_ORIGIN` | `*` | Cap service CORS allowlist |
+| `CAP_CHALLENGE_COUNT` | `1` | Proof-of-work challenges per CAPTCHA interaction |
+| `CAP_CHALLENGE_DIFFICULTY` | `1` | Difficulty of each proof-of-work challenge |
 | `CAP_ASSET_ROOT` | `/workdir/cap` | Cap service asset root (must include widget + wasm bundles) |
 | `CAP_DATA_DIR` | `/var/lib/cap` | Cap service state storage |
 | `CAP_PORT` | `3000` | Cap service port |

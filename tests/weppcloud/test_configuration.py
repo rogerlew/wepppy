@@ -91,6 +91,19 @@ def test_config_app_uses_uidaho_mail_defaults_when_zoho_is_unset(
     assert app.config["REMEMBER_COOKIE_REFRESH_EACH_REQUEST"] is False
 
 
+@pytest.mark.parametrize("site_prefix", ["/weppcloud", "/alternate-mount"])
+def test_config_app_keeps_security_routes_unprefixed_behind_proxy(
+    monkeypatch: pytest.MonkeyPatch, site_prefix: str
+) -> None:
+    monkeypatch.setenv("SITE_PREFIX", site_prefix)
+
+    app = _build_configured_app(monkeypatch)
+
+    assert app.config["APPLICATION_ROOT"] == site_prefix
+    assert app.config["SITE_PREFIX"] == site_prefix
+    assert app.config["SECURITY_URL_PREFIX"] == ""
+
+
 def test_config_app_uses_uidaho_mail_defaults_when_zoho_password_missing(
     monkeypatch: pytest.MonkeyPatch,
 ) -> None:

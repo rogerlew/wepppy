@@ -2,6 +2,7 @@ const express = require("express");
 const path = require("node:path");
 const fs = require("node:fs");
 const Cap = require("@cap.js/server");
+const { loadChallengeConfig } = require("./config");
 
 const PORT = Number(process.env.CAP_PORT || process.env.PORT || 3000);
 const SITE_KEY = process.env.CAP_SITE_KEY;
@@ -18,6 +19,7 @@ if (!SECRET && SECRET_PATH) {
 const CORS_ORIGIN = process.env.CAP_CORS_ORIGIN || "*";
 const DATA_DIR = process.env.CAP_DATA_DIR || "/var/lib/cap";
 const ASSET_ROOT = process.env.CAP_ASSET_ROOT || "/workdir/cap";
+const CHALLENGE_CONFIG = loadChallengeConfig();
 
 const WIDGET_PATH =
   process.env.CAP_WIDGET_PATH || path.join(ASSET_ROOT, "widget/src/cap.min.js");
@@ -123,7 +125,7 @@ app.post("/cap/:siteKey/challenge", async (req, res) => {
     return;
   }
   try {
-    const challenge = await cap.createChallenge();
+    const challenge = await cap.createChallenge(CHALLENGE_CONFIG);
     res.json(challenge);
   } catch (error) {
     console.error("[cap] challenge error", error);

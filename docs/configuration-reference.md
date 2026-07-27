@@ -134,6 +134,8 @@ Consolidated configuration surfaces discovered from:
 | `CAP_SECRET` | required | `wepppy.microservices.rq_engine.project_routes`; `wepppy.microservices.rq_engine.fork_archive_routes` | CAPTCHA secret (secret; prefers `CAP_SECRET_FILE`). |
 | `CAP_SECRET_FILE` | — | `wepppy.config.secrets`; compose (`cap`, `weppcloud`, `rq-engine`) | Path to CAPTCHA secret file (Docker secret). |
 | `CAP_CORS_ORIGIN` | `compose(dev|prod): *` | compose (`cap`) | Allowed CORS origin(s) for CAP service. |
+| `CAP_CHALLENGE_COUNT` | `compose(dev|prod): 1` | compose (`cap`) | Number of proof-of-work challenges issued per CAPTCHA interaction. |
+| `CAP_CHALLENGE_DIFFICULTY` | `compose(dev|prod): 1` | compose (`cap`) | Proof-of-work difficulty for each CAPTCHA challenge. |
 | `CAP_ASSET_ROOT` | `compose(dev|prod): /opt/cap` | compose (`cap`) | CAP asset root directory inside the CAP container. |
 | `CAP_DATA_DIR` | `compose(dev|prod): /var/lib/cap` | compose (`cap`) | CAP writable data directory inside the CAP container. |
 | `CAP_REPO` | `compose(dev|prod): https://github.com/tiagozip/cap` | compose (build arg; `cap`) | CAP build source repo. |

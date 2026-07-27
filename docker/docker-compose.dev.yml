@@ -205,6 +205,8 @@ services:
       CAP_SITE_KEY: ${CAP_SITE_KEY}
       CAP_SECRET_FILE: /run/secrets/cap_secret
       CAP_CORS_ORIGIN: ${CAP_CORS_ORIGIN:-*}
+      CAP_CHALLENGE_COUNT: ${CAP_CHALLENGE_COUNT:-1}
+      CAP_CHALLENGE_DIFFICULTY: ${CAP_CHALLENGE_DIFFICULTY:-1}
       CAP_ASSET_ROOT: /opt/cap
       CAP_DATA_DIR: /var/lib/cap
     volumes:

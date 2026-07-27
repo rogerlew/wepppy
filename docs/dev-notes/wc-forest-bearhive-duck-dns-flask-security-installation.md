@@ -7,7 +7,7 @@ Environment: `forest.bearhive.internal` behind pfSense/HAProxy terminating TLS a
 * **Blueprint prefixing** — because HAProxy forwards `/weppcloud/*`, Flask must treat `/weppcloud` as the application root. We set:
   * `APPLICATION_ROOT = '/weppcloud'`
   * `SITE_PREFIX = '/weppcloud'`
-  * `SECURITY_URL_PREFIX = '/weppcloud'`
+  * `SECURITY_URL_PREFIX = ''` because the proxy owns the external mount prefix.
   * Custom post-login/logout redirect endpoints (`security_ui.welcome` / `security_ui.goodbye`).
   * `SECURITY_LOGIN_USER_TEMPLATE = 'security/login_user.html'` for the branded template.
 
