@@ -3,13 +3,15 @@ from __future__ import annotations
 import importlib
 import logging
 from pathlib import Path
+from types import SimpleNamespace
 import uuid
 
 import pytest
+from jinja2 import DictLoader, Environment
 from werkzeug.exceptions import Forbidden
 
 pytest.importorskip("flask")
-from flask import Flask
+from flask import Blueprint, Flask
 from flask_security import RoleMixin, SQLAlchemyUserDatastore, Security, UserMixin
 from flask_security.utils import hash_password, login_user
 from flask_sqlalchemy import SQLAlchemy
@@ -40,7 +42,10 @@ def _configure_jwt_env(monkeypatch: pytest.MonkeyPatch, module) -> None:
 
 @pytest.fixture()
 def profile_auth_client(monkeypatch: pytest.MonkeyPatch):
-    app = Flask(__name__)
+    app = Flask(
+        __name__,
+        template_folder=str(REPO_ROOT / "wepppy" / "weppcloud" / "templates"),
+    )
     app.config.update(
         SECRET_KEY="profile-secret",
         SQLALCHEMY_DATABASE_URI="sqlite://",
@@ -101,6 +106,13 @@ def profile_auth_client(monkeypatch: pytest.MonkeyPatch):
         user_id = user.id
 
     user_module = importlib.reload(importlib.import_module("wepppy.weppcloud.routes.user"))
+    site_bp = Blueprint("weppcloud_site", __name__)
+
+    @site_bp.get("/diagnostics/", endpoint="diagnostics")
+    def diagnostics():
+        return "diagnostics"
+
+    app.register_blueprint(site_bp, url_prefix="/weppcloud")
     app.register_blueprint(user_module.user_bp)
 
     with app.test_client() as client:
@@ -130,6 +142,40 @@ def _grant_role(profile_auth_client, role_name: str) -> None:
         assert user is not None
         user_datastore.add_role_to_user(user, role)
         user_datastore.commit()
+
+
+def test_rendered_profile_links_to_diagnostics_route(profile_auth_client) -> None:
+    app = profile_auth_client["app"]
+    template_source = PROFILE_TEMPLATE.read_text(encoding="utf-8")
+    env = Environment(
+        loader=DictLoader({
+            "security/_layout.html": "{% block content %}{% endblock %}",
+            "security/_macros.html": (
+                "{% macro render_field_with_errors() %}{% endmacro %}"
+                "{% macro render_checkbox_with_errors() %}{% endmacro %}"
+                "{% macro render_field() %}{% endmacro %}"
+            ),
+            "user/profile.html": template_source,
+        })
+    )
+    user = SimpleNamespace(
+        oauth_accounts=SimpleNamespace(all=lambda: []),
+        first_name="Test",
+        last_name="User",
+        email="user@example.com",
+        roles=[],
+        has_role=lambda _role: False,
+    )
+    with app.test_request_context():
+        env.globals.update(
+            url_for=app.jinja_env.globals["url_for"],
+            user=user,
+            oauth_providers={},
+            can_mint_profile_token=False,
+        )
+        rendered = env.get_template("user/profile.html").render()
+
+    assert 'href="/weppcloud/diagnostics/"' in rendered
 
 
 def test_profile_token_mint_requires_login(profile_auth_client) -> None:

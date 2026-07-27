@@ -241,20 +241,22 @@
     var completed = 0;
     var total = 0;
 
-    return root.WEPPDiagnosticsCore.runAllChecks({
-      onLifecycle: function (event) {
-        if (event.type === "registered") {
-          total = event.checks.length;
-          renderRoster(event.checks, rootNode);
-          setProgress(rootNode, 0, total);
-        } else if (event.type === "started") {
-          updateCard(event.check.id, "running", null, rootNode);
-        } else if (event.type === "settled") {
-          completed += 1;
-          updateCard(event.check.id, event.result.status, event.result, rootNode);
-          setProgress(rootNode, completed, total);
+    return Promise.resolve().then(function () {
+      return root.WEPPDiagnosticsCore.runAllChecks({
+        onLifecycle: function (event) {
+          if (event.type === "registered") {
+            total = event.checks.length;
+            renderRoster(event.checks, rootNode);
+            setProgress(rootNode, 0, total);
+          } else if (event.type === "started") {
+            updateCard(event.check.id, "running", null, rootNode);
+          } else if (event.type === "settled") {
+            completed += 1;
+            updateCard(event.check.id, event.result.status, event.result, rootNode);
+            setProgress(rootNode, completed, total);
+          }
         }
-      }
+      });
     }).then(function (checks) {
       currentReport = root.WEPPDiagnosticsReport.buildReport(checks, {
         checkOrder: root.WEPPDiagnosticsCore.getCheckOrder(),

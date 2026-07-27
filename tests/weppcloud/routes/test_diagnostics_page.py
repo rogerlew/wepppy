@@ -2,8 +2,10 @@ from __future__ import annotations
 
 from importlib import import_module
 from pathlib import Path
+import re
 
 import pytest
+from jinja2 import DictLoader, Environment
 
 pytest.importorskip("flask")
 from flask import Flask
@@ -85,9 +87,14 @@ def test_diagnostics_template_includes_base_and_noscript_blocker() -> None:
     assert "clears WEPPcloud cookies" in source
     assert "signs you out" in source
     assert "usersum_doc_link('weppcloud', 'diagnostics.md'" in source
-    assert "#diagnostics_page_root" in source
-    assert "min-height: 0;" in source
-    assert "margin: 0;" in source
+    check_card_rule = re.search(
+        r"#diagnostics_page_root \[data-diagnostics-check-list\] > li\s*\{(?P<body>.*?)\}",
+        source,
+        re.DOTALL,
+    )
+    assert check_card_rule is not None
+    assert "min-height: 0;" in check_card_rule.group("body")
+    assert "margin: 0;" in check_card_rule.group("body")
     assert "static_url('js/diagnostics/core.js')" in source
     assert "static_url('js/diagnostics/auth_checks.js')" in source
     assert "static_url('js/diagnostics/bandwidth_checks.js')" in source
@@ -104,6 +111,40 @@ def test_diagnostics_template_includes_base_and_noscript_blocker() -> None:
     page_idx = source.index("static_url('js/diagnostics/page.js')")
     reset_idx = source.index("static_url('js/diagnostics/browser_reset.js')")
     assert core_idx < auth_idx < bandwidth_idx < report_idx < realtime_idx < page_idx < reset_idx
+
+
+def test_diagnostics_template_renders_registered_usersum_document_url() -> None:
+    app = _build_app()
+
+    @app.get("/usersum/view/<category>/<path:filename>", endpoint="usersum.view_markdown")
+    def _usersum_document(category: str, filename: str) -> str:
+        return f"{category}/{filename}"
+
+    template_source = DIAGNOSTICS_TEMPLATE.read_text(encoding="utf-8")
+    env = Environment(
+        loader=DictLoader({
+            "base_pure.htm": (
+                "{% block body %}{% endblock %}{% block scripts %}{% endblock %}"
+            ),
+            "controls/_pure_macros.html": (
+                '{% macro card_shell(title="", description="") %}{{ caller() }}{% endmacro %}'
+            ),
+            "diagnostics/diagnostics.htm": template_source,
+        })
+    )
+    with app.test_request_context():
+        env.globals.update(
+            url_for=lambda endpoint, **_values: f"/mock/{endpoint}",
+            usersum_doc_link=lambda category, filename, label: (
+                f'<a href="{weppcloud_site_module.url_for("usersum.view_markdown", category=category, filename=filename)}">'
+                f"{label}</a>"
+            ),
+            static_url=lambda filename: f"/static/{filename}",
+            user=type("User", (), {"is_authenticated": False})(),
+        )
+        rendered = env.get_template("diagnostics/diagnostics.htm").render()
+
+    assert 'href="/usersum/view/weppcloud/diagnostics.md"' in rendered
 
 
 def test_diagnostics_core_js_uses_site_prefix_dataset_contract() -> None:

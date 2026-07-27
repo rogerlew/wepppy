@@ -805,6 +805,58 @@ def test_interfaces_template_links_diagnostics_from_more_menu_for_all_users(
         assert 'href="/mock/security.login">Login</a>' in rendered
 
 
+@pytest.mark.parametrize(
+    ("role", "present_entries", "absent_entries"),
+    [
+        (
+            "Admin",
+            ["RQ Info", "Run Sync", "Create Batch Run", "Runid Query", "Logout"],
+            ["Usermod"],
+        ),
+        (
+            "Root",
+            ["RQ Info", "Usermod", "Runid Query", "Logout"],
+            ["Run Sync", "Create Batch Run"],
+        ),
+        (
+            "Dev",
+            ["Runid Query", "Logout"],
+            ["RQ Info", "Run Sync", "Create Batch Run", "Usermod"],
+        ),
+    ],
+)
+def test_interfaces_more_menu_retains_role_specific_entries(
+    jinja_env: Environment,
+    role: str,
+    present_entries: list[str],
+    absent_entries: list[str],
+) -> None:
+    template = jinja_env.get_template("interfaces.htm")
+    current_user = SimpleNamespace(
+        has_role=lambda requested: requested == role,
+        roles=[SimpleNamespace(name=role)],
+        is_authenticated=True,
+    )
+    rendered = template.render(
+        user=current_user,
+        current_user=current_user,
+        url_for=lambda endpoint, **_values: f"/mock/{endpoint}",
+        rq_engine_token="token",
+    )
+    menu = re.search(
+        r'<details class="wc-nav__menu">(?P<body>.*?)</details>',
+        rendered,
+        re.DOTALL,
+    )
+
+    assert menu is not None
+    menu_body = menu.group("body")
+    for entry in present_entries:
+        assert re.search(rf">\s*{re.escape(entry)}\s*</a>", menu_body)
+    for entry in absent_entries:
+        assert not re.search(rf">\s*{re.escape(entry)}\s*</a>", menu_body)
+
+
 def test_interfaces_template_renders_earth_launch_card(jinja_env: Environment) -> None:
     template = jinja_env.get_template("interfaces.htm")
     auth_user = SimpleNamespace(has_role=lambda role: False, roles=[], is_authenticated=True)

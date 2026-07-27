@@ -347,18 +347,6 @@
     };
   }
 
-  function runCoreChecks() {
-    var results = [];
-
-    results.push(runJavascriptExecutionCheck(CHECK_DEFINITIONS[0]));
-    results.push(runBrowserApiBaselineCheck(CHECK_DEFINITIONS[1]));
-    results.push(runCookieCheck(CHECK_DEFINITIONS[2]));
-    results.push(runLocalStorageCheck(CHECK_DEFINITIONS[3]));
-    results.push(runAbortControllerCheck(CHECK_DEFINITIONS[4]));
-
-    return results;
-  }
-
   function notifyLifecycle(subscriber, event) {
     if (typeof subscriber === "function") {
       subscriber(event);
@@ -489,7 +477,6 @@
     buildContext: buildContext,
     getCheckOrder: getCheckOrder,
     getCheckDefinitions: getCheckDefinitions,
-    runCoreChecks: runCoreChecks,
     runAllChecks: runAllChecks,
     registerCheck: registerCheck,
     registerChecks: registerChecks

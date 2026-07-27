@@ -38,6 +38,13 @@ WP01 → WP02 → WP04a (usersum stub) → WP03 → WP04b (full doc), serially. 
 
 ## Decisions Log
 
+### 2026-07-27 21:55 UTC: Full post-implementation WP review — 9 findings, all fixed
+**Context**: Independent post-implementation review (fresh Codex thread 019fa58a, read-only; security excluded as separately covered) of the shipped implementation. Full record + per-finding disposition: `artifacts/2026-07-27_full_wp_review.md`.
+
+**Decision**: All 9 findings accepted; fixes applied by Codex (thread 019fa58f) and dispatched by Claude Code with scope guardrails. One real correctness bug (finding 1): `runDiagnostics` left the `activeRun` latch set if the lifecycle subscriber threw synchronously, permanently disabling Re-run — a violation of the spec 4.2 recoverability contract. Fix (promise boundary so synchronous throws release the latch) read and confirmed by Claude Code. Remaining eight: dead-code removal (`runCoreChecks`) and test-coverage hardening of behaviors that were asserted vacuously. No finding rejected. Gates were NOT re-run by Claude Code at the user's request — CI on push is the verification of record; Codex's fix run reported lint pass, Jest 658, pytest 92.
+
+**Impact**: Success criterion 2 (re-run guards + gating), previously only partially met because the guard could latch and was untested, is restored to fully met by finding 1's fix plus the finding-4/5 re-run/progress tests.
+
 ### 2026-07-27 21:44 UTC: Independent security review — dispositioned, no blocker, no code change
 **Context**: The WP02 security artifact was implementer-authored. An independent pass (fresh Codex thread 019fa584, read-only) re-derived the anonymous-reset security surface and returned 11 findings (5 confirmed-safe, 5 low, 1 artifact critique). Full record + per-finding source verification: `artifacts/2026-07-27_independent_security_review.md`.
 
