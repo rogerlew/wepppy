@@ -1803,6 +1803,7 @@ def test_ag_fields_control_renders_required_dom_contract(jinja_env: Environment)
     assert "Show on Map" not in rendered
     assert "wepp_dcc52a6" in rendered
     assert 'class="pure-button button-error agfields-clear-button"' in rendered
+    assert "Use the project UTM EPSG shown in the header for best precision" in rendered
 
 
 def test_ag_fields_control_renders_boundary_schema_and_subfield_contract(
@@ -1852,7 +1853,54 @@ def test_ag_fields_control_renders_plant_database_and_mapping_contract(
     assert 'data-role="mapping-table-body"' in rendered
     assert 'data-action="save-mapping"' in rendered
     assert 'data-role="unused-mappings"' in rendered
-    assert "Use the project UTM EPSG shown in the header for best precision" in rendered
+
+
+def test_wepp_control_renders_core_run_and_lifecycle_contract(jinja_env: Environment) -> None:
+    class TemplateValue:
+        def __getattr__(self, _name: str) -> "TemplateValue":
+            return self
+
+        def __bool__(self) -> bool:
+            return False
+
+        def __iter__(self):
+            return iter(())
+
+        def __round__(self, _ndigits=None) -> int:
+            return 0
+
+        def __int__(self) -> int:
+            return 0
+
+        def __float__(self) -> float:
+            return 0.0
+
+        def __str__(self) -> str:
+            return ""
+
+    jinja_env.globals["isfloat"] = lambda _value: False
+    jinja_env.globals["hasattr"] = lambda _value, _name: False
+    template = jinja_env.get_template("controls/wepp_pure.htm")
+    rendered = template.render(
+        wepp=TemplateValue(),
+        soils=TemplateValue(),
+        watershed=SimpleNamespace(clip_hillslopes=False, clip_hillslope_length=0),
+        wepp_bin_options=[("wepp_260514", "WEPP 260514")],
+        swat=False,
+        reveg=False,
+    )
+
+    assert 'id="wepp_form"' in rendered
+    assert 'id="btn_run_wepp"' in rendered
+    assert 'data-wepp-action="run"' in rendered
+    assert 'id="wepp_bin"' in rendered
+    assert 'name="wepp_bin"' in rendered
+    assert 'data-wepp-routine="wepp_watershed"' in rendered
+    assert 'data-wepp-action="prep-watershed"' in rendered
+    assert 'data-wepp-action="run-watershed"' in rendered
+    assert 'id="hint_run_wepp"' in rendered
+    assert 'id="wepp_status_panel"' in rendered
+    assert 'id="wepp_stacktrace_panel"' in rendered
 
 
 def test_run_header_includes_features_export_mod_toggle(jinja_env: Environment) -> None:
