@@ -1609,6 +1609,13 @@ def test_disturbed_baer_sbs_control_renders_joint_owner_contract(jinja_env: Envi
         assert marker in rendered
 
 
+def test_rangeland_cover_control_renders_modes_defaults_and_build(jinja_env: Environment) -> None:
+    cover = SimpleNamespace(mode=2, mods={"rap"}, rap_year=2022, bunchgrass_cover_default=1, forbs_cover_default=2, sodgrass_cover_default=3, shrub_cover_default=4, basal_cover_default=5, rock_cover_default=6, litter_cover_default=7, cryptogams_cover_default=8)
+    rendered = jinja_env.get_template("controls/rangeland_cover_pure.htm").render(rangeland_cover=cover)
+    for marker in ('name="rangeland_cover_mode"', 'name="rap_year"', 'name="input_bunchgrass_cover"', 'name="input_cryptogams_cover"', 'data-rangeland-action="build"'):
+        assert marker in rendered
+
+
 def test_run_header_hides_rusle_mod_when_disturbed_not_enabled(jinja_env: Environment) -> None:
     template = jinja_env.get_template("header/_run_header_fixed.htm")
     auth_user = SimpleNamespace(has_role=lambda role: False, roles=[], is_authenticated=True)

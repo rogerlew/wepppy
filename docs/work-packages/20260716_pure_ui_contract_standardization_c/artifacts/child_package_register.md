@@ -295,7 +295,7 @@ domain package.
 | DOM-21 | `20260728_rap_timeseries_ui_contract` | `rapTs` | RAP controller/form/routes, `RAP_TS`, fetch/analyze RQ | DOM-04A | `high`: egress and queue/worker | verified |
 | DOM-22 | `20260728_openet_timeseries_ui_contract` | `openetTs` | OpenET controller/form/routes, `OpenET_TS`, external fetch/analyze RQ | DOM-04A | `high`: admin gate, egress, queue/worker | verified |
 | DOM-23 | `20260728_disturbed_baer_ui_contract` | `disturbed`, `baer` shared SBS surface | both controllers, one shared template/route/state owner, SBS uploads and invalidation; joint boundary confirmed | DOM-04A, DOM-08A, DOM-10 | `high`: upload/files, route/state mutations | verified |
-| DOM-24 | `rangeland_cover_ui_contract` | `rangelandCover`, `rangelandCoverModify` | controller/form/modifier, rangeland routes/state/build RQ | DOM-04A, DOM-08A | `high`: route/state mutation and queue | planned |
+| DOM-24 | `20260728_rangeland_cover_ui_contract` | `rangelandCover`, `rangelandCoverModify` | controller/form/modifier, rangeland routes/state/build RQ | DOM-04A, DOM-08A | `high`: route/state mutation and queue | verified |
 | DOM-25A | `omni_scenarios_ui_contract` | `omni`: scenarios | Omni controller/scenario form/routes/state, multipart staging/run RQ | DOM-14A, DOM-23 | `high`: upload/files and queue/worker | planned |
 | DOM-25B | `omni_contrasts_ui_contract` | `omni`, `omniContrastOverlays`: contrasts | contrast form/overlay/routes/state/run/delete RQ | DOM-25A, DOM-04A, DOM-04B | `high`: upload/files, delete, queue/worker | planned |
 | DOM-26 | `rhem_ui_contract` | `rhem` | RHEM controller/form/routes, `Rhem`/`RhemPost`, run RQ | DOM-07, DOM-11A | `high`: route and queue/worker | planned |

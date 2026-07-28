@@ -65,6 +65,9 @@ generator, manifest, or new CI system.
   existing role/browser/RQ-engine evidence passed without repair.
 - [x] (2026-07-28 UTC) Executed DOM-23; confirmed joint SBS ownership and actual
   mode/upload/uniform/fire-date rendering with downstream evidence.
+- [x] (2026-07-28 UTC) Executed DOM-24; actual Rangeland Cover modes/defaults/
+  build rendering and existing controller/modifier/route evidence passed
+  without repair.
 - [ ] Execute all remaining run-domain packages in the dependency-aware order.
 - [ ] Resolve each encountered hold through its owning package or a bounded
   operator decision.
@@ -178,6 +181,10 @@ rendering; 160 focused Python tests, 3 Jest tests, lint, and docs lint passed.
 
 DOM-23: no mismatch and no production patch. Added actual joint SBS rendering;
 154 focused Python tests, 20 Disturbed/BAER Jest tests, lint, and docs lint passed.
+
+DOM-24: no mismatch and no production patch. Added actual modes, RAP year,
+cover defaults, and build render evidence; 103 focused Python tests, 13
+Rangeland Cover/Modifier Jest tests, lint, and docs lint passed.
 
 ## Context and Orientation
 
