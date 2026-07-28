@@ -387,6 +387,54 @@ def test_build_channels_rq_applies_optional_wbt_conditioning_before_build(
     assert run_wd.exists()
 
 
+def test_build_channels_rq_persists_all_wbt_options_before_build(
+    monkeypatch: pytest.MonkeyPatch,
+    tmp_path: Path,
+) -> None:
+    _run_wd, _set_archive_roots, _call_roots = _stub_rq_context(monkeypatch, tmp_path)
+    events: list[tuple] = []
+    _record_cache_clears(monkeypatch, events)
+    _record_prep_timestamps(monkeypatch, events)
+
+    class DummyWatershed:
+        delineation_backend_is_topaz = False
+        delineation_backend_is_wbt = True
+
+        def __init__(self) -> None:
+            self.stream_pruning_method = "ifolp"
+            self.wbt_fill_or_breach = "fill"
+            self.wbt_blc_dist = 1000
+
+        def __setattr__(self, name: str, value: object) -> None:
+            if name in {"stream_pruning_method", "wbt_fill_or_breach", "wbt_blc_dist"} and hasattr(self, name):
+                events.append((f"set_{name}", value))
+            super().__setattr__(name, value)
+
+        def build_channels(self, csa: float, mcl: float) -> None:
+            events.append(("build_channels", csa, mcl))
+
+    watershed = DummyWatershed()
+    monkeypatch.setattr(project_rq.Watershed, "getInstance", lambda _wd: watershed)
+
+    project_rq.build_channels_rq(
+        "demo",
+        csa=7.0,
+        mcl=61.0,
+        stream_pruning_method="remove_short_streams",
+        wbt_fill_or_breach="breach_least_cost",
+        wbt_blc_dist=777,
+    )
+
+    build_event = ("build_channels", 7.0, 61.0)
+    assert build_event in events
+    for event in (
+        ("set_stream_pruning_method", "remove_short_streams"),
+        ("set_wbt_fill_or_breach", "breach_least_cost"),
+        ("set_wbt_blc_dist", 777),
+    ):
+        assert events.index(event) < events.index(build_event)
+
+
 def test_build_channels_rq_preserves_applied_wbt_conditioning_when_build_fails(
     monkeypatch: pytest.MonkeyPatch,
     tmp_path: Path,

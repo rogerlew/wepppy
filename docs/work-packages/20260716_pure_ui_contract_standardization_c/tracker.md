@@ -70,6 +70,11 @@
   with no remaining high/medium findings; DOM-01 is ready (2026-07-28 10:20 UTC).
 - [x] Closed DOM-01 WATAR/Ash through actual-render and applicable downstream
   tests without a production mismatch or patch (2026-07-28 10:45 UTC).
+- [x] Activated DOM-05 Channel Delineation as the next sequential controller
+  audit; REM-05 remains inherited one-field evidence (2026-07-28 UTC).
+- [x] Closed DOM-05 Channel Delineation with actual-render, legacy/GL payload,
+  and RQ persistence-order coverage; no production mismatch or patch
+  (2026-07-28 UTC).
 
 ## Child Package Register
 
@@ -81,7 +86,7 @@ is active at a time.
 | --- | --- | --- | --- | --- |
 | GOV-00 | Standard/population/register foundation | 1 | auditing | In progress |
 | GOV-00A | Concise controller test convention | 1 | closed | Review passed |
-| DOM-01..DOM-29 (including A-D facets) | Run-domain controller packages | 39 | DOM-01 closed; remainder backlog | Review actual production patches |
+| DOM-01..DOM-29 (including A-D facets) | Run-domain controller packages | 39 | DOM-01 and DOM-05 closed; remainder backlog | Review actual production patches |
 | GOV-01 | Maintenance-tooling value evaluation | 1 | deferred pending five-controller evidence | Explicit operator approval |
 | SHR-01..SHR-07 (including A/B facets) | Shared-foundation inventory | 9 | deferred; test when encountered | Based on actual shared patch |
 | SURF-01..SURF-18 (including A/B facets) | Non-run/stateful Pure surfaces | 19 | backlog | Review actual production patches |

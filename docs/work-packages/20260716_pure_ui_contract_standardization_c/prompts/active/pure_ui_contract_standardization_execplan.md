@@ -31,6 +31,8 @@ is not a contract registry or enforcement platform.
   proportional independent review.
 - [x] (2026-07-28) Executed and closed DOM-01 WATAR/Ash with direct regression
   tests and no production mismatch.
+- [x] (2026-07-28) Executed and closed DOM-05 Channel Delineation with direct
+  regression tests and no production mismatch.
 - [ ] Continue with one controller package at a time.
 - [ ] Review measured value after five controllers.
 - [ ] Close the initiative when the registered inventory has executable
@@ -190,3 +192,10 @@ false tooling failure. Preserve the initial scaffold as superseded history in
 git rather than current authority. At each five-controller review, record
 whether the loop remains net-positive and whether any tooling proposal passes
 the simplicity budget.
+
+DOM-05 closed with actual-render, legacy/GL payload, and RQ persistence-order
+coverage; REM-05 supplied its already-fixed depression-smoothing seam. The
+affected Python set (124 tests), frontend lint, and the full frontend suite (88
+suites, 662 tests) passed. It introduced no helper, false tooling failure, or
+production patch. Its audit ledger remains `documented` until the work receives
+a named revision.

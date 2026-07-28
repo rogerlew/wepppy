@@ -288,7 +288,11 @@ describe("ChannelDelineation GL controller", () => {
         const channel = window.ChannelDelineation.getInstance();
 
         requestMock.mockResolvedValueOnce({ body: { job_id: "job-99" } });
-        document.getElementById("input_wbt_fill_or_breach").value = "fill";
+        document.getElementById("input_mcl").value = "61";
+        document.getElementById("input_csa").value = "7";
+        document.getElementById("stream_pruning_method").value = "remove_short_streams";
+        document.getElementById("input_wbt_fill_or_breach").value = "breach_least_cost";
+        document.getElementById("wbt_blc_dist").value = "777";
         const result = await channel.build();
 
         expect(result).toMatchObject({ job_id: "job-99" });
@@ -303,10 +307,11 @@ describe("ChannelDelineation GL controller", () => {
         const jsonPayload = requestMock.mock.calls[0][1].json;
         expect(jsonPayload.map_center).toEqual([-117.52, 46.88]);
         expect(jsonPayload.map_bounds).toEqual([-118.0, 46.5, -117.0, 47.0]);
-        expect(jsonPayload.mcl).toBe(60);
-        expect(jsonPayload.csa).toBe(5);
-        expect(jsonPayload.stream_pruning_method).toBe("ifolp");
-        expect(jsonPayload.wbt_fill_or_breach).toBe("fill");
+        expect(jsonPayload.mcl).toBe(61);
+        expect(jsonPayload.csa).toBe(7);
+        expect(jsonPayload.stream_pruning_method).toBe("remove_short_streams");
+        expect(jsonPayload.wbt_fill_or_breach).toBe("breach_least_cost");
+        expect(jsonPayload.wbt_blc_dist).toBe(777);
         expect(jsonPayload.set_extent_mode).toBe(0);
         expect(jsonPayload.map_object).toBeNull();
 

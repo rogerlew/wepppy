@@ -386,7 +386,7 @@ build through job completion before review.
 
 ### Pure UI Controller Contract Standardization
 **Started**: 2026-07-16
-**Status**: Simplified tests-first execution model; DOM-01 closed
+**Status**: Simplified tests-first execution model; DOM-01 and DOM-05 closed
 **Size**: One controller active at a time; inventory size is not a schedule
 **Owner**: Codex
 **Priority**: High
@@ -399,7 +399,7 @@ build through job completion before review.
 - The current register separates 39 run-domain, 9 shared-foundation, 19 non-run/stateful, 4 governance, and 5 bounded-remediation inventory units. The count does not create an infrastructure milestone or projected multi-year schedule.
 - The 70-unit population/boundary register passed two independent reviews with no unresolved high/medium findings. Operator clarification then made every included row immediately contractual and added GOV-00A as the 71st governance unit; REM-01 through REM-05 bring the current register to 76 units without advancing their borrowed owners.
 - The platform-first registry/enforcement scaffold was superseded before commit or implementation. Seven speculative package directories were removed. The active [controller test roadmap](docs/work-packages/20260716_pure_ui_contract_standardization_c/artifacts/controller_contract_test_roadmap.md) requires actual-render tests, focused downstream tests, minimal mismatch patches, and existing broad gates one controller at a time.
-- [DOM-01 WATAR/Ash](docs/work-packages/20260727_watar_ui_contract_pilot/) closed with actual-render and applicable downstream regression coverage; the historical selector mismatch was already repaired, so no production patch was needed. Shared packages are tested when encountered, not prerequisites. GOV-01 is deferred until five-controller evidence demonstrates measured need and the operator explicitly approves a proposal.
+- [DOM-01 WATAR/Ash](docs/work-packages/20260727_watar_ui_contract_pilot/) closed with actual-render and applicable downstream regression coverage; the historical selector mismatch was already repaired, so no production patch was needed. [DOM-05 Channel Delineation](docs/work-packages/20260728_channel_delineation_ui_contract/) closed with actual-render, legacy/GL payload, and RQ persistence-order coverage; it inherited REM-05's one-field smoothing evidence and found no additional production mismatch. Shared packages are tested when encountered, not prerequisites. GOV-01 is deferred until five-controller evidence demonstrates measured need and the operator explicitly approves a proposal.
 
 **Next Steps**: Select the next single controller, execute its bounded test-and-repair loop, and record the same value/runtime/helper evidence.
 

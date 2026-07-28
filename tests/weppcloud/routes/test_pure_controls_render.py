@@ -253,25 +253,67 @@ def test_ash_template_submits_canonical_model_selector_names(jinja_env: Environm
     )
 
 
-def test_channel_template_submits_and_hydrates_depression_smoothing(
+def test_channel_template_submits_and_hydrates_channel_configuration(
     jinja_env: Environment,
 ) -> None:
     template = jinja_env.get_template("controls/channel_delineation_pure.htm")
     rendered = template.render(
         watershed=SimpleNamespace(
-            uploaded_dem_filename=None,
-            set_extent_mode=0,
+            uploaded_dem_filename="uploaded-dem.tif",
+            set_extent_mode=3,
             map_bounds_text="",
             delineation_backend_is_topaz=False,
             delineation_backend_is_wbt=True,
-            mcl=60.0,
-            csa=5.0,
-            stream_pruning_method="ifolp",
-            wbt_fill_or_breach="fill",
-            wbt_blc_dist=1000,
+            mcl=61.0,
+            csa=7.0,
+            stream_pruning_method="remove_short_streams",
+            wbt_fill_or_breach="breach_least_cost",
+            wbt_blc_dist=777,
         )
     )
 
+    for field_name in (
+        "map_center",
+        "map_zoom",
+        "map_bounds",
+        "map_distance",
+        "map_bounds_text",
+        "map_object",
+        "input_upload_dem",
+        "input_mcl",
+        "input_csa",
+        "stream_pruning_method",
+        "input_wbt_fill_or_breach",
+        "wbt_blc_dist",
+    ):
+        assert re.search(rf'<(?:input|select|textarea)[^>]*id="{field_name}"[^>]*>', rendered)
+
+    for field_name in (
+        "map_center",
+        "map_zoom",
+        "map_bounds",
+        "map_distance",
+        "map_bounds_text",
+        "map_object",
+        "input_upload_dem",
+        "wbt_blc_dist",
+    ):
+        assert re.search(
+            rf'<(?:input|textarea)[^>]*id="{field_name}"[^>]*name="{field_name}"',
+            rendered,
+        )
+
+    assert re.search(r'<input[^>]*id="input_upload_dem"[^>]*name="input_upload_dem"', rendered)
+    assert 'accept=".tif"' in rendered
+    assert "uploaded-dem.tif" in rendered
+    assert re.search(r'<input[^>]*id="set_extent_mode_upload_dem"[^>]*checked', rendered)
+    assert re.search(r'<input[^>]*id="input_mcl"[^>]*name="input_mcl"[^>]*value="61"', rendered)
+    assert re.search(r'<input[^>]*id="input_csa"[^>]*name="input_csa"[^>]*value="7"', rendered)
+    assert re.search(
+        r'<select[^>]*id="stream_pruning_method"[^>]*name="stream_pruning_method"',
+        rendered,
+    )
+    assert re.search(r'<option value="remove_short_streams" selected>', rendered)
     assert re.search(
         r'<select[^>]*id="input_wbt_fill_or_breach"'
         r'[^>]*name="wbt_fill_or_breach"'
@@ -280,7 +322,8 @@ def test_channel_template_submits_and_hydrates_depression_smoothing(
         re.DOTALL,
     )
     assert 'name="input_wbt_fill_or_breach"' not in rendered
-    assert re.search(r'<option value="fill" selected>Fill</option>', rendered)
+    assert re.search(r'<option value="breach_least_cost" selected>Breach \(Least Cost\)</option>', rendered)
+    assert re.search(r'<input[^>]*id="wbt_blc_dist"[^>]*name="wbt_blc_dist"[^>]*value="777"', rendered)
 
 
 @pytest.mark.parametrize(
