@@ -834,6 +834,20 @@ def test_omni_contrasts_template_shows_user_defined_limit_hint(jinja_env: Enviro
     rendered = template.render(omni_user_defined_contrast_limit=200)
 
     assert "capped at 200 total contrast runs (contrast pairs x groups)." in rendered
+    for marker in (
+        'form id="omni_contrasts_form"',
+        'data-omni-contrast-role="selection-mode"',
+        'data-omni-contrast-role="control-scenario"',
+        'data-omni-contrast-role="contrast-scenario"',
+        'name="omni_contrast_pairs"',
+        'data-omni-contrast-action="add-pair"',
+        'data-omni-contrast-role="geojson-path"',
+        'data-omni-contrast-action="run-contrasts"',
+        'data-omni-contrast-action="dry-run"',
+        'data-omni-contrast-action="delete-contrasts"',
+        'data-omni-contrast-action="confirm-delete-contrasts"',
+    ):
+        assert marker in rendered
 
 
 def test_omni_scenarios_control_renders_actions_lifecycle_and_delete_modal(
