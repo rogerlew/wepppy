@@ -7,6 +7,7 @@ import pytest
 pytest.importorskip("flask")
 from flask import Flask
 
+from tests.web_origin_vectors import SAME_ORIGIN_VECTORS, vector_headers
 import wepppy.weppcloud.routes.weppcloud_site as weppcloud_site_module
 from wepppy.weppcloud.routes.weppcloud_site import weppcloud_site_bp
 from wepppy.weppcloud.utils import auth_tokens
@@ -25,6 +26,24 @@ def _build_app() -> Flask:
 def _reset_operator_rate_limit_state() -> None:
     with weppcloud_site_module._OPERATOR_TOKEN_RATE_LIMIT_LOCK:
         weppcloud_site_module._OPERATOR_TOKEN_RATE_LIMIT_BUCKETS.clear()
+
+
+@pytest.mark.parametrize(
+    "vector",
+    SAME_ORIGIN_VECTORS,
+    ids=[vector["name"] for vector in SAME_ORIGIN_VECTORS],
+)
+def test_same_origin_guard_shared_vectors(vector) -> None:
+    app = _build_app()
+    if vector.get("external_host"):
+        app.config["OAUTH_REDIRECT_HOST"] = vector["external_host"]
+        app.config["OAUTH_REDIRECT_SCHEME"] = vector.get("external_scheme", "https")
+    with app.test_request_context(
+        "/weppcloud/api/auth/reset-browser-state",
+        base_url=vector["base_url"],
+        headers=vector_headers(vector),
+    ):
+        assert weppcloud_site_module._is_same_origin_post() is vector["expected"]
 
 
 def test_issue_rq_engine_token_requires_auth(monkeypatch: pytest.MonkeyPatch) -> None:
@@ -113,11 +132,8 @@ def test_issue_rq_engine_token_accepts_default_https_port_equivalence(
     with app.test_client() as client:
         response = client.post(
             "/weppcloud/api/auth/rq-engine-token",
-            headers={
-                "Origin": "https://localhost",
-                "X-Forwarded-Proto": "https",
-                "X-Forwarded-Host": "localhost:443",
-            },
+            base_url="https://localhost",
+            headers={"Origin": "https://localhost"},
         )
 
     assert response.status_code == 200
@@ -1088,11 +1104,83 @@ def test_reset_browser_state_clears_session_and_auth_cookies(
         header for header in set_cookie_headers if header.startswith("wc_session=;")
     ]
     assert any("Path=/weppcloud" in header for header in wc_session_headers)
-    assert any("Path=/weppcloud/" in header for header in wc_session_headers)
     remember_headers = [
         header for header in set_cookie_headers if header.startswith("remember_me=;")
     ]
     assert any("Domain=example.com" in header for header in remember_headers)
     assert any("Path=/weppcloud" in header for header in remember_headers)
-    assert any("Path=/weppcloud/" in header for header in remember_headers)
-    assert len(remember_headers) >= 2
+    assert len(remember_headers) == 1
+    assert not any(header.startswith("csrf_token=;") for header in set_cookie_headers)
+    assert not any(header.startswith("csrftoken=;") for header in set_cookie_headers)
+
+
+def test_reset_cookie_targets_are_exact_and_keep_remember_domain_host_only() -> None:
+    app = _build_app()
+    app.config.update(
+        SESSION_COOKIE_NAME="wc_session",
+        SESSION_COOKIE_PATH="/weppcloud/",
+        SESSION_COOKIE_DOMAIN=".example.com",
+        REMEMBER_COOKIE_NAME="remember_me",
+        REMEMBER_COOKIE_PATH=None,
+        REMEMBER_COOKIE_DOMAIN=None,
+    )
+
+    class RecordingResponse:
+        def __init__(self) -> None:
+            self.calls: list[tuple[str, str, str | None]] = []
+
+        def delete_cookie(
+            self,
+            name: str,
+            *,
+            path: str,
+            domain: str | None,
+        ) -> None:
+            self.calls.append((name, path, domain))
+
+    response = RecordingResponse()
+    with app.test_request_context("/weppcloud/api/auth/reset-browser-state"):
+        cleared = weppcloud_site_module._clear_reset_browser_state_cookies(response)
+
+    assert response.calls == [
+        ("wc_session", "/weppcloud/", ".example.com"),
+        ("remember_me", "/", None),
+    ]
+    assert cleared == [
+        {"name": "wc_session", "path": "/weppcloud/", "domain": ".example.com"},
+        {"name": "remember_me", "path": "/", "domain": None},
+    ]
+
+
+def test_reset_cookie_targets_keep_same_name_with_distinct_owned_tuples() -> None:
+    app = _build_app()
+    app.config.update(
+        SESSION_COOKIE_NAME="shared_name",
+        SESSION_COOKIE_PATH="/session/",
+        SESSION_COOKIE_DOMAIN=".example.com",
+        REMEMBER_COOKIE_NAME="shared_name",
+        REMEMBER_COOKIE_PATH="/remember/",
+        REMEMBER_COOKIE_DOMAIN=None,
+    )
+
+    class RecordingResponse:
+        def __init__(self) -> None:
+            self.calls: list[tuple[str, str, str | None]] = []
+
+        def delete_cookie(
+            self,
+            name: str,
+            *,
+            path: str,
+            domain: str | None,
+        ) -> None:
+            self.calls.append((name, path, domain))
+
+    response = RecordingResponse()
+    with app.test_request_context("/weppcloud/api/auth/reset-browser-state"):
+        weppcloud_site_module._clear_reset_browser_state_cookies(response)
+
+    assert response.calls == [
+        ("shared_name", "/session/", ".example.com"),
+        ("shared_name", "/remember/", None),
+    ]

@@ -159,12 +159,25 @@ def _bandwidth_probe_bytes(value: str | None) -> tuple[int | None, JSONResponse 
 
 def _normalized_origin(origin: str) -> tuple[str, str, int] | None:
     parsed = urlparse(origin)
+    if (
+        parsed.username is not None
+        or parsed.password is not None
+        or parsed.path not in {"", "/"}
+        or parsed.params
+        or parsed.query
+        or parsed.fragment
+    ):
+        return None
     if not parsed.scheme or not parsed.hostname:
         return None
     scheme = parsed.scheme.lower()
     host = parsed.hostname.lower()
-    if parsed.port is not None:
-        port = parsed.port
+    try:
+        parsed_port = parsed.port
+    except ValueError:
+        return None
+    if parsed_port is not None:
+        port = parsed_port
     elif scheme == "https":
         port = 443
     elif scheme == "http":
@@ -174,43 +187,104 @@ def _normalized_origin(origin: str) -> tuple[str, str, int] | None:
     return scheme, host, port
 
 
+def _request_origin(request: StarletteRequest) -> tuple[str, str, int] | None:
+    if not request.url.hostname:
+        return None
+    try:
+        port = request.url.port
+    except ValueError:
+        return None
+    scheme = (request.url.scheme or "").strip().lower()
+    if port is None:
+        if scheme == "https":
+            port = 443
+        elif scheme == "http":
+            port = 80
+        else:
+            return None
+    return scheme, request.url.hostname.lower(), int(port)
+
+
+def _external_origin_scheme(request: StarletteRequest) -> str:
+    for env_key in ("OAUTH_REDIRECT_SCHEME", "EXTERNAL_SCHEME"):
+        token = (os.getenv(env_key) or "").strip().lower()
+        if token in {"https", "http"}:
+            return token
+    return (request.url.scheme or "").strip().lower() or "https"
+
+
 def _request_allowed_origins(request: StarletteRequest) -> set[tuple[str, str, int]]:
     origins: set[tuple[str, str, int]] = set()
-    if request.url.hostname:
-        port = request.url.port
-        if port is None:
-            if request.url.scheme == "https":
-                port = 443
-            elif request.url.scheme == "http":
-                port = 80
-        if port is not None:
-            origins.add((request.url.scheme.lower(), request.url.hostname.lower(), port))
+    request_origin = _request_origin(request)
+    if request_origin is not None:
+        origins.add(request_origin)
 
     host = (request.headers.get("host") or "").strip()
     if host:
-        scheme = (request.headers.get("x-forwarded-proto") or request.url.scheme or "http").split(",")[0].strip()
+        scheme = (request.url.scheme or "http").strip()
         candidate = _normalized_origin(f"{scheme}://{host}")
         if candidate is not None:
             origins.add(candidate)
 
-    forwarded_host = (request.headers.get("x-forwarded-host") or "").split(",")[0].strip()
-    if forwarded_host:
-        forwarded_scheme = (request.headers.get("x-forwarded-proto") or request.url.scheme or "http").split(",")[0].strip()
-        candidate = _normalized_origin(f"{forwarded_scheme}://{forwarded_host}")
-        if candidate is not None:
-            origins.add(candidate)
+    for env_key in ("OAUTH_REDIRECT_HOST", "EXTERNAL_HOST"):
+        host_value = (os.getenv(env_key) or "").strip()
+        if host_value:
+            candidate = _normalized_origin(
+                f"{_external_origin_scheme(request)}://{host_value}"
+            )
+            if candidate is not None:
+                origins.add(candidate)
 
     return origins
 
 
-def _is_same_origin_request(request: StarletteRequest) -> bool:
-    origin = (request.headers.get("origin") or "").strip()
-    if not origin:
-        return True
-    normalized_origin = _normalized_origin(origin)
-    if normalized_origin is None:
+def _is_upstream_tls_same_origin_bridge(
+    request: StarletteRequest,
+    normalized_origin: tuple[str, str, int],
+    allowed_origins: set[tuple[str, str, int]],
+) -> bool:
+    request_origin = _request_origin(request)
+    if request_origin is None:
         return False
-    return normalized_origin in _request_allowed_origins(request)
+    return (
+        request_origin[0] == "http"
+        and request_origin[2] == 80
+        and normalized_origin[0] == "https"
+        and normalized_origin[2] == 443
+        and normalized_origin[1] in {origin[1] for origin in allowed_origins}
+    )
+
+
+def _is_same_origin_request(request: StarletteRequest) -> bool:
+    fetch_site = (request.headers.get("sec-fetch-site") or "").strip().lower()
+    if fetch_site in {"cross-site", "cross-origin"}:
+        return False
+
+    origin = (request.headers.get("origin") or "").strip()
+    if origin:
+        allowed_origins = _request_allowed_origins(request)
+        normalized_origin = _normalized_origin(origin)
+        if normalized_origin is None:
+            return False
+        if normalized_origin in allowed_origins:
+            return True
+        return fetch_site == "same-origin" and _is_upstream_tls_same_origin_bridge(
+            request,
+            normalized_origin,
+            allowed_origins,
+        )
+
+    if fetch_site == "same-origin":
+        return True
+
+    referer = (request.headers.get("referer") or "").strip()
+    if not referer:
+        return False
+    parsed = urlparse(referer)
+    if not parsed.scheme or not parsed.netloc:
+        return False
+    normalized_referer = _normalized_origin(f"{parsed.scheme}://{parsed.netloc}")
+    return normalized_referer in _request_allowed_origins(request)
 
 
 def _trusted_client_host(request: StarletteRequest) -> str:

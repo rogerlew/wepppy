@@ -7,12 +7,74 @@ import pytest
 TestClient = pytest.importorskip("fastapi.testclient").TestClient
 
 import wepppy.microservices.rq_engine as rq_engine
+from tests.web_origin_vectors import SAME_ORIGIN_VECTORS, vector_headers
 from wepppy.microservices.rq_engine import auth as rq_auth
 from wepppy.microservices.rq_engine import debug_routes, session_routes
 from wepppy.weppcloud.utils import auth_tokens
 
 
 pytestmark = pytest.mark.microservice
+
+
+def _asgi_request_for_origin_vector(vector):
+    from urllib.parse import urlsplit
+
+    parsed = urlsplit(vector["base_url"])
+    port = parsed.port or (443 if parsed.scheme == "https" else 80)
+    host = parsed.hostname or "guard.test"
+    host_header = host if parsed.port is None else f"{host}:{parsed.port}"
+    headers = {"Host": host_header, **vector_headers(vector)}
+    scope = {
+        "type": "http",
+        "method": "POST",
+        "scheme": parsed.scheme,
+        "path": "/api/runs/run-1/cfg/session-token",
+        "raw_path": b"/api/runs/run-1/cfg/session-token",
+        "query_string": b"",
+        "headers": [
+            (key.lower().encode("latin-1"), value.encode("latin-1"))
+            for key, value in headers.items()
+        ],
+        "server": (host, port),
+        "client": ("127.0.0.1", 12345),
+    }
+    return session_routes.Request(scope)
+
+
+@pytest.mark.parametrize(
+    "vector",
+    SAME_ORIGIN_VECTORS,
+    ids=[vector["name"] for vector in SAME_ORIGIN_VECTORS],
+)
+def test_same_origin_cookie_guard_shared_vectors(
+    monkeypatch: pytest.MonkeyPatch,
+    vector,
+) -> None:
+    monkeypatch.setenv(session_routes.TRUST_FORWARDED_ORIGIN_HEADERS_ENV, "true")
+    if vector.get("external_host"):
+        monkeypatch.setenv("OAUTH_REDIRECT_HOST", vector["external_host"])
+        monkeypatch.setenv(
+            "OAUTH_REDIRECT_SCHEME",
+            vector.get("external_scheme", "https"),
+        )
+    request = _asgi_request_for_origin_vector(vector)
+    assert session_routes._is_same_origin_cookie_request(request) is vector["expected"]
+
+
+def test_same_origin_cookie_guard_rejects_malformed_host_port() -> None:
+    scope = {
+        "type": "http",
+        "method": "POST",
+        "scheme": "https",
+        "path": "/",
+        "raw_path": b"/",
+        "query_string": b"",
+        "headers": [(b"host", b"guard.test:not-a-port")],
+        "server": ("guard.test", 443),
+        "client": ("127.0.0.1", 12345),
+    }
+    request = session_routes.Request(scope)
+    assert session_routes._is_same_origin_cookie_request(request) is False
 
 
 def _issue_token(monkeypatch: pytest.MonkeyPatch, *, runs: list[str] | None = None) -> str:
@@ -685,7 +747,7 @@ def test_session_token_cookie_path_rejects_untrusted_forwarded_origin_aliases(
     assert payload["error"]["message"] == "Cross-origin request blocked."
 
 
-def test_session_token_cookie_path_can_opt_in_to_forwarded_origin_aliases(
+def test_session_token_cookie_path_legacy_forwarded_origin_opt_in_is_inert(
     monkeypatch: pytest.MonkeyPatch,
 ) -> None:
     monkeypatch.setattr(session_routes, "_run_is_public", lambda runid: True)
@@ -704,10 +766,10 @@ def test_session_token_cookie_path_can_opt_in_to_forwarded_origin_aliases(
             },
         )
 
-    assert response.status_code == 200
+    assert response.status_code == 403
     payload = response.json()
-    assert payload["token_class"] == "session"
-    assert payload["runid"] == "run-1"
+    assert payload["error"]["code"] == "forbidden"
+    assert payload["error"]["message"] == "Cross-origin request blocked."
 
 
 def test_session_token_cookie_path_allows_configured_external_origin(

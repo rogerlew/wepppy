@@ -4,7 +4,7 @@
 > each surface's distinct outer security controls.
 > **Target**: Codex
 > **Created**: 2026-07-27
-> **Status**: Active
+> **Status**: Complete
 > **Security gate**: Part of a `high`-triage package; this WP is the regression backstop the security review relies on.
 > **Hard dependency**: WP00-WP03 must be complete, and the WP00 checkpoint
 > revision must be an ancestor of `HEAD`.
@@ -82,8 +82,9 @@ Report per the tracker's Progress Notes convention; include the vector table and
 
 ## Outcome (Complete this when retiring the prompt)
 
-**Completed**: YYYY-MM-DD
-**Agent**:
-**Result**:
-**Deviations**:
-**References**:
+**Completed**: 2026-07-28
+**Agent**: Codex
+**Result**: A shared 19-vector origin matrix now exercises every predicate,
+with separate Flask-WTF, rq-engine session, and query-engine boundary coverage.
+**Deviations**: None.
+**References**: `tests/web_origin_vectors.py`; focused backend suite (157 passed).

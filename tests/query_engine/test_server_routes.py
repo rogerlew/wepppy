@@ -12,9 +12,75 @@ pytest.importorskip("starlette")
 from starlette.testclient import TestClient
 
 from wepppy.query_engine.formatter import QueryResult
+from tests.web_origin_vectors import SAME_ORIGIN_VECTORS, vector_headers
 
 _CORRELATION_HEADER = "X-Correlation-ID"
 _CORRELATION_ID_PATTERN = re.compile(r"^[A-Za-z0-9][A-Za-z0-9._:-]{0,127}$")
+
+
+def _query_request_for_origin_vector(vector):
+    from urllib.parse import urlsplit
+    from wepppy.query_engine.app import server
+
+    parsed = urlsplit(vector["base_url"])
+    port = parsed.port or (443 if parsed.scheme == "https" else 80)
+    host = parsed.hostname or "guard.test"
+    host_header = host if parsed.port is None else f"{host}:{parsed.port}"
+    headers = {"Host": host_header, **vector_headers(vector)}
+    scope = {
+        "type": "http",
+        "method": "POST",
+        "scheme": parsed.scheme,
+        "path": "/diagnostics/bandwidth/upload",
+        "raw_path": b"/diagnostics/bandwidth/upload",
+        "query_string": b"",
+        "headers": [
+            (key.lower().encode("latin-1"), value.encode("latin-1"))
+            for key, value in headers.items()
+        ],
+        "server": (host, port),
+        "client": ("127.0.0.1", 12345),
+    }
+    return server.StarletteRequest(scope)
+
+
+@pytest.mark.parametrize(
+    "vector",
+    SAME_ORIGIN_VECTORS,
+    ids=[vector["name"] for vector in SAME_ORIGIN_VECTORS],
+)
+def test_same_origin_query_guard_shared_vectors(
+    monkeypatch: pytest.MonkeyPatch,
+    vector,
+) -> None:
+    from wepppy.query_engine.app import server
+
+    if vector.get("external_host"):
+        monkeypatch.setenv("OAUTH_REDIRECT_HOST", vector["external_host"])
+        monkeypatch.setenv(
+            "OAUTH_REDIRECT_SCHEME",
+            vector.get("external_scheme", "https"),
+        )
+    request = _query_request_for_origin_vector(vector)
+    assert server._is_same_origin_request(request) is vector["expected"]
+
+
+def test_same_origin_query_guard_rejects_malformed_host_port() -> None:
+    from wepppy.query_engine.app import server
+
+    scope = {
+        "type": "http",
+        "method": "POST",
+        "scheme": "https",
+        "path": "/",
+        "raw_path": b"/",
+        "query_string": b"",
+        "headers": [(b"host", b"guard.test:not-a-port")],
+        "server": ("guard.test", 443),
+        "client": ("127.0.0.1", 12345),
+    }
+    request = server.StarletteRequest(scope)
+    assert server._is_same_origin_request(request) is False
 
 
 @pytest.mark.unit
@@ -309,6 +375,10 @@ def _reset_bandwidth_rate_limit_state(server_module) -> None:
         server_module._BANDWIDTH_RATE_LIMIT_BUCKETS.clear()
 
 
+def _bandwidth_client(app) -> TestClient:
+    return TestClient(app, headers={"Sec-Fetch-Site": "same-origin"})
+
+
 @pytest.mark.unit
 def test_diagnostics_bandwidth_download_returns_deterministic_payload() -> None:
     from wepppy.query_engine.app import server
@@ -316,7 +386,7 @@ def test_diagnostics_bandwidth_download_returns_deterministic_payload() -> None:
     _reset_bandwidth_rate_limit_state(server)
 
     app = server.create_app()
-    client = TestClient(app)
+    client = _bandwidth_client(app)
 
     response = client.get("/diagnostics/bandwidth/download?bytes=4096")
 
@@ -335,7 +405,7 @@ def test_diagnostics_bandwidth_download_blocks_cross_origin() -> None:
     _reset_bandwidth_rate_limit_state(server)
 
     app = server.create_app()
-    client = TestClient(app)
+    client = _bandwidth_client(app)
 
     response = client.get(
         "/diagnostics/bandwidth/download?bytes=1024",
@@ -354,7 +424,7 @@ def test_diagnostics_bandwidth_download_rejects_invalid_bytes() -> None:
     _reset_bandwidth_rate_limit_state(server)
 
     app = server.create_app()
-    client = TestClient(app)
+    client = _bandwidth_client(app)
 
     invalid_response = client.get("/diagnostics/bandwidth/download?bytes=zero")
     assert invalid_response.status_code == 400
@@ -377,7 +447,7 @@ def test_diagnostics_bandwidth_download_busy_path(monkeypatch: pytest.MonkeyPatc
     monkeypatch.setattr(server, "_BANDWIDTH_SEMAPHORE", asyncio.Semaphore(0))
 
     app = server.create_app()
-    client = TestClient(app)
+    client = _bandwidth_client(app)
 
     response = client.get("/diagnostics/bandwidth/download?bytes=1024")
     assert response.status_code == 503
@@ -392,7 +462,7 @@ def test_diagnostics_bandwidth_upload_reports_bytes_received() -> None:
     _reset_bandwidth_rate_limit_state(server)
 
     app = server.create_app()
-    client = TestClient(app)
+    client = _bandwidth_client(app)
 
     payload = b"x" * 2048
     response = client.post(
@@ -416,7 +486,7 @@ def test_diagnostics_bandwidth_upload_blocks_cross_origin() -> None:
     _reset_bandwidth_rate_limit_state(server)
 
     app = server.create_app()
-    client = TestClient(app)
+    client = _bandwidth_client(app)
 
     response = client.post(
         "/diagnostics/bandwidth/upload",
@@ -441,7 +511,7 @@ def test_diagnostics_bandwidth_upload_rejects_oversized_payload(monkeypatch: pyt
     monkeypatch.setattr(server, "_BANDWIDTH_MAX_BYTES", 1024)
 
     app = server.create_app()
-    client = TestClient(app)
+    client = _bandwidth_client(app)
 
     response = client.post(
         "/diagnostics/bandwidth/upload",
@@ -462,7 +532,7 @@ def test_diagnostics_bandwidth_upload_timeout(monkeypatch: pytest.MonkeyPatch) -
     monkeypatch.setattr(server, "_BANDWIDTH_REQUEST_TIMEOUT_SECONDS", 0)
 
     app = server.create_app()
-    client = TestClient(app)
+    client = _bandwidth_client(app)
 
     response = client.post(
         "/diagnostics/bandwidth/upload",
@@ -484,7 +554,7 @@ def test_diagnostics_bandwidth_rate_limit(monkeypatch: pytest.MonkeyPatch) -> No
     monkeypatch.setattr(server, "_BANDWIDTH_RATE_LIMIT_WINDOW_SECONDS", 60)
 
     app = server.create_app()
-    client = TestClient(app)
+    client = _bandwidth_client(app)
 
     first = client.get("/diagnostics/bandwidth/download?bytes=1024")
     second = client.get("/diagnostics/bandwidth/download?bytes=1024")
@@ -505,7 +575,7 @@ def test_diagnostics_bandwidth_upload_rate_limit(monkeypatch: pytest.MonkeyPatch
     monkeypatch.setattr(server, "_BANDWIDTH_RATE_LIMIT_WINDOW_SECONDS", 60)
 
     app = server.create_app()
-    client = TestClient(app)
+    client = _bandwidth_client(app)
 
     first = client.post(
         "/diagnostics/bandwidth/upload",

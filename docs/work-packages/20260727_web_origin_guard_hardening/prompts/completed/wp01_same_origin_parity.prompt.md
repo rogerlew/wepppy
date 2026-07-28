@@ -3,7 +3,7 @@
 > **Purpose**: Make one normative same-origin contract that all three WEPPcloud request guards implement identically, so a genuinely same-origin POST is authorized regardless of proxy TLS-termination topology.
 > **Target**: Codex
 > **Created**: 2026-07-27
-> **Status**: Active
+> **Status**: Complete
 > **Security gate**: This package is triaged `high`. A dedicated security review artifact is required before closure; do not weaken any guard.
 > **Hard dependency**: WP00 must be complete and its reviewed standalone
 > checkpoint revision must be recorded in the tracker before this prompt edits
@@ -88,8 +88,10 @@ Report per the tracker's Progress Notes convention: changes per file, the final 
 
 ## Outcome (Complete this when retiring the prompt)
 
-**Completed**: YYYY-MM-DD
-**Agent**:
-**Result**:
-**Deviations**:
-**References**:
+**Completed**: 2026-07-28
+**Agent**: Codex
+**Result**: All three guards now enforce the reviewed decision order, strict
+origin parsing, explicit configured public origins, and the narrow upstream-TLS
+bridge without trusting raw forwarded-origin aliases.
+**Deviations**: None.
+**References**: `tests/web_origin_vectors.py`; focused backend suite (157 passed).

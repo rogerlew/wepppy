@@ -26,12 +26,12 @@ Conflicting origins and cross-site requests remain rejected on every surface.
   decision and canonical contract amendments, obtain two independent reviews,
   disposition findings, and commit standalone checkpoint ancestor
   `736198ce8a4b68b83a9c77860a52da574f2cc98d`.
-- [ ] Execute WP01: conform all three same-origin guards and add focused tests.
-- [ ] Execute WP02: restrict reset cookie deletion to owned cookie tuples.
-- [ ] Execute WP03: make copied diagnostics reports allowlist-based.
-- [ ] Execute WP04: run the shared same-origin and CSRF matrix across all three
+- [x] (2026-07-28) Execute WP01: conform all three same-origin guards and add focused tests.
+- [x] (2026-07-28) Execute WP02: restrict reset cookie deletion to owned cookie tuples.
+- [x] (2026-07-28) Execute WP03: make copied diagnostics reports allowlist-based.
+- [x] (2026-07-28) Execute WP04: run the shared same-origin and CSRF matrix across all three
   surfaces.
-- [ ] Run focused and broad validation, complete independent final security and
+- [x] (2026-07-28) Run focused and broad validation, complete independent final security and
   correctness reviews, disposition findings, and close the package.
 
 ## Surprises & Discoveries
@@ -45,6 +45,12 @@ Conflicting origins and cross-site requests remain rejected on every surface.
   Evidence: `_is_same_origin_request` returns `True` for an empty origin in
   `wepppy/query_engine/app/server.py`; the other predicates return `False` when
   both browser signals are absent. WP00 must decide this divergence normatively.
+- Observation: the monolithic Python suite has a pre-existing test-isolation
+  defect: the Daymet client test replaces `cf_units.units` process-wide, causing
+  a later GridMET test to fail because its fake object lacks `degC`.
+  Evidence: the monolithic run stopped at 44% with 2450 passed and one failure;
+  the GridMET test passes alone, and the suite passes when the Daymet file is
+  run separately.
 
 ## Decision Log
 
@@ -62,11 +68,17 @@ Conflicting origins and cross-site requests remain rejected on every surface.
 
 ## Outcomes & Retrospective
 
-The scaffold is now executable in ordered phases. No production implementation
-has begun. WP00 contracts and reviews pass with zero findings and are sealed by
-ancestor `736198ce8a4b68b83a9c77860a52da574f2cc98d`; closure remains
-contingent on the checkpoint ancestor, all four
-implementation work packages, full validation, and independent final review.
+The package is complete. All three guards implement the reviewed decision
+matrix, browser-state reset deletes only configured WEPPcloud cookie tuples,
+and copied diagnostics reports are constructed from a fixed allowlist. Shared
+vectors and surface-specific security tests cover the restored and rejected
+paths. The checkpoint is sealed by ancestor
+`736198ce8a4b68b83a9c77860a52da574f2cc98d`; independent final correctness and
+security rereviews both passed with zero remaining findings. Focused Python and
+all JavaScript gates passed. Broad Python validation was split only to isolate
+the unrelated Daymet process-pollution defect recorded above: the main
+partition passed 5347 tests with 58 skipped, and the isolated Daymet partition
+passed 2 tests.
 
 ## Context and Orientation
 

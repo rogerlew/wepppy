@@ -169,6 +169,78 @@ def test_rq_engine_token_accepts_valid_csrf(monkeypatch: pytest.MonkeyPatch) -> 
     assert response.get_json() == {"token": "rq-user-token"}
 
 
+def test_reset_browser_state_accepts_valid_csrf_for_anonymous_user(
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    app = _build_site_app()
+    monkeypatch.setattr(
+        weppcloud_site_module,
+        "current_user",
+        type("U", (), {"is_anonymous": True, "is_authenticated": False})(),
+        raising=False,
+    )
+
+    with app.test_client() as client:
+        token = _csrf_token(client)
+        response = client.post(
+            "/weppcloud/api/auth/reset-browser-state",
+            headers={
+                "Origin": "http://localhost",
+                "X-CSRFToken": token,
+            },
+        )
+
+    assert response.status_code == 200
+    assert response.get_json()["ok"] is True
+
+
+@pytest.mark.parametrize("token", [None, "invalid-csrf-token"])
+def test_reset_browser_state_rejects_missing_or_invalid_csrf(
+    monkeypatch: pytest.MonkeyPatch,
+    token: str | None,
+) -> None:
+    app = _build_site_app()
+    monkeypatch.setattr(
+        weppcloud_site_module,
+        "current_user",
+        type("U", (), {"is_anonymous": True, "is_authenticated": False})(),
+        raising=False,
+    )
+    headers = {"Origin": "http://localhost"}
+    if token is not None:
+        headers["X-CSRFToken"] = token
+
+    with app.test_client() as client:
+        response = client.post(
+            "/weppcloud/api/auth/reset-browser-state",
+            headers=headers,
+        )
+
+    assert response.status_code == 400
+    assert response.get_json() == {"error": {"message": "csrf failed"}}
+
+
+def test_reset_browser_state_csrf_rejects_before_origin_guard(
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    app = _build_site_app()
+    monkeypatch.setattr(
+        weppcloud_site_module,
+        "current_user",
+        type("U", (), {"is_anonymous": True, "is_authenticated": False})(),
+        raising=False,
+    )
+
+    with app.test_client() as client:
+        response = client.post(
+            "/weppcloud/api/auth/reset-browser-state",
+            headers={"Origin": "https://evil.example"},
+        )
+
+    assert response.status_code == 400
+    assert response.get_json() == {"error": {"message": "csrf failed"}}
+
+
 def test_operator_rq_engine_token_is_csrf_exempt(monkeypatch: pytest.MonkeyPatch) -> None:
     app = _build_site_app()
 

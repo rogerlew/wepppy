@@ -6,26 +6,20 @@
 
 **Timezone**: UTC
 **Started**: 2026-07-27 23:40 UTC
-**Current phase**: WP01 same-origin parity
-**Last updated**: 2026-07-28 00:50 UTC
-**Next milestone**: Implement WP01 against the reviewed contract
+**Current phase**: Complete
+**Last updated**: 2026-07-28
+**Next milestone**: Post-deployment observation (outside this package)
 **Security impact**: `high`
 **Dedicated security review**: `yes`
-**Security artifact**: `docs/work-packages/20260727_web_origin_guard_hardening/artifacts/<date>_security_review.md`
+**Security artifact**: `artifacts/2026-07-28_security_review.md`
 
 ## Task Board
 
 ### Ready / Backlog
-- [ ] WP01 — Same-origin guard parity: normative contract + align all three guards; query-engine gains the `Sec-Fetch-Site` fast-path (fixes the bearhive upload 403); harden forwarded-header trust and `Origin` conflict handling; shared test vectors (Codex; `prompts/active/wp01_same_origin_parity.prompt.md`)
-- [ ] WP02 — Scope reset cookie-clear targets to WEPPcloud-owned names/domains (Codex; `prompts/active/wp02_cookie_clear_scoping.prompt.md`)
-- [ ] WP03 — Allowlist-based diagnostics Copy JSON report; drop arbitrary backend error text and absolute WS hostname (Codex; `prompts/active/wp03_report_redaction_allowlist.prompt.md`)
-- [ ] WP04 — CSRF-enabled same-origin/header test matrix across all three surfaces (Codex; `prompts/active/wp04_same_origin_test_matrix.prompt.md`)
-- [ ] Security review artifact (Codex or Claude Code) before closure
-- [ ] Contract doc extension in `docs/schemas/weppcloud-csrf-contract.md` (Claude Code; can land with WP01)
+- (none)
 
 ### In Progress
-- [ ] Umbrella execution governed by
-  `prompts/active/web_origin_guard_hardening_execplan.md`
+- (none)
 
 ### Blocked
 - (none)
@@ -38,6 +32,12 @@
   `736198ce8a4b68b83a9c77860a52da574f2cc98d` (2026-07-28 00:50 UTC)
 - [x] WP00 prompt retired to
   `prompts/completed/wp00_contract_checkpoint.prompt.md`
+- [x] WP01-WP04 implemented with shared regression coverage (2026-07-28)
+- [x] Focused backend, frontend lint/test, diagnostics, documentation, and
+  changed broad-exception gates passed (2026-07-28)
+- [x] Independent correctness and security rereviews passed with zero remaining
+  findings (2026-07-28)
+- [x] WP01-WP04 and umbrella prompts retired to `prompts/completed/`
 
 ## Sequencing
 
@@ -81,35 +81,57 @@ contract-first standard. Implementation remains blocked until WP00 completes.
 
 | Risk | Severity | Likelihood | Mitigation | Status |
 |------|----------|------------|------------|--------|
-| Parity change weakens a guard (too-permissive Sec-Fetch-Site, forwarded-header spoofing) | High | Low | Security review gate; contract requires Origin-conflict rejection and proxy-normalized origins | Open |
-| Behavioral drift between three implementations after change | Medium | Medium | Shared test vectors (WP04) asserted against all three | Open |
-| query-engine change regresses other bandwidth/query endpoints | Low | Low | Change scoped to the same-origin helper; run query-engine suite | Open |
+| Parity change weakens a guard (too-permissive Sec-Fetch-Site, forwarded-header spoofing) | High | Low | Security review gate; contract requires Origin-conflict rejection and proxy-normalized origins | Closed |
+| Behavioral drift between three implementations after change | Medium | Medium | Shared test vectors (WP04) asserted against all three | Closed |
+| query-engine change regresses other bandwidth/query endpoints | Low | Low | Change scoped to the same-origin helper; run query-engine suite | Closed |
 | Canonical session contract retained legacy raw forwarded-origin trust | High | Low | Reconciled contracts; legacy switch inert; required negative regression | Closed by dual rereview |
 
 ## Verification Checklist
 
 ### Code Quality
-- [ ] `wctl run-pytest` for affected weppcloud + query-engine + rq-engine suites
-- [ ] `wctl run-npm lint` / `wctl run-npm test`
+- [x] `wctl run-pytest` for affected weppcloud + query-engine + rq-engine suites
+- [x] `wctl run-npm lint` / `wctl run-npm test`
 
 ### Security
-- [ ] Dedicated security review artifact present and complete
-- [ ] No guard accepts a request whose `Origin` conflicts with the page origin
-- [ ] Forwarded-header trust cannot admit an attacker-supplied origin
-- [ ] No unresolved medium/high findings
+- [x] Dedicated security review artifact present and complete
+- [x] No guard accepts a request whose `Origin` conflicts with the page origin
+- [x] Forwarded-header trust cannot admit an attacker-supplied origin
+- [x] No unresolved medium/high findings
 
 ### Documentation
-- [ ] Contract-decision artifact complete
-- [ ] Bounded remediation registered in Pure UI governance artifacts
-- [ ] Two independent checkpoint reviews passed and dispositioned
-- [ ] Standalone checkpoint revision recorded and verified as ancestor
-- [ ] `docs/schemas/weppcloud-csrf-contract.md` extended with the same-origin contract + test vectors
-- [ ] Package closure notes complete
+- [x] Contract-decision artifact complete
+- [x] Bounded remediation registered in Pure UI governance artifacts
+- [x] Two independent checkpoint reviews passed and dispositioned
+- [x] Standalone checkpoint revision recorded and verified as ancestor
+- [x] `docs/schemas/weppcloud-csrf-contract.md` extended with the same-origin contract + test vectors
+- [x] Package closure notes complete
 
 ### Deployment
-- [ ] Verified on a local stack and on an upstream-TLS topology (or a simulated one) that same-origin POST is authorized
+- [x] Verified with framework-level simulated upstream-TLS topology that same-origin POST is authorized
 
 ## Progress Notes
+
+### 2026-07-28: REM-04 implemented and independently reviewed
+
+**Agent/Contributor**: Codex
+
+**Work completed**:
+- Conformed all three origin guards, narrowed cookie deletion, and changed
+  copied diagnostics reports to a fixed allowlist.
+- Added a 19-vector shared matrix plus surface-specific CSRF/authentication
+  tests; focused backend validation passed 157 tests.
+- Passed frontend lint and all 88 suites/660 tests, diagnostics route tests,
+  documentation lint, broad-exception enforcement, and diff checks.
+- Resolved every initial final-review finding; correctness and security
+  rereviews each report zero remaining findings.
+- Broad Python validation exposed an unrelated order-dependent Daymet test
+  pollution issue after 2450 passes. The failing GridMET test passes alone;
+  validation was split around the polluting Daymet file. The main partition
+  passed 5347 tests with 58 skipped in 620.30 seconds; the isolated Daymet
+  partition passed both tests.
+
+**Next steps**: Commit the implementation and closure records. Track the
+Daymet isolation repair and production observation separately.
 
 ### 2026-07-28 00:00 UTC: Scaffold made contract-first executable
 

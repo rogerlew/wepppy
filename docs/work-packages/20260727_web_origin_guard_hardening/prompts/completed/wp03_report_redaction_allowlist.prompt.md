@@ -3,7 +3,7 @@
 > **Purpose**: Rebuild the diagnostics Copy JSON report from an allowlist of fixed diagnostic codes/messages so it cannot leak arbitrary backend error text or internal hostnames.
 > **Target**: Codex
 > **Created**: 2026-07-27
-> **Status**: Active
+> **Status**: Complete
 > **Security gate**: Part of a `high`-triage package; covered by the package security review.
 > **Hard dependency**: WP00 and WP01 must be complete, and the WP00 checkpoint
 > revision must be an ancestor of `HEAD`.
@@ -68,8 +68,11 @@ Report per the tracker's Progress Notes convention; include the allowlist defini
 
 ## Outcome (Complete this when retiring the prompt)
 
-**Completed**: YYYY-MM-DD
-**Agent**:
-**Result**:
-**Deviations**:
-**References**:
+**Completed**: 2026-07-28
+**Agent**: Codex
+**Result**: Copied JSON is assembled from the immutable known-check catalog and
+fixed status text; unknown checks, raw evidence, arbitrary fix text, and
+absolute hostnames are excluded.
+**Deviations**: None.
+**References**: `diagnostics_report.test.js`; full frontend suite (88 suites,
+660 tests).

@@ -3,7 +3,7 @@
 > **Purpose**: Limit `POST /api/auth/reset-browser-state` cookie deletion to cookies WEPPcloud actually owns, instead of emitting generic `csrf_token`/`csrftoken` deletions across parent-domain variants.
 > **Target**: Codex
 > **Created**: 2026-07-27
-> **Status**: Active
+> **Status**: Complete
 > **Security gate**: Part of a `high`-triage package; covered by the package security review.
 > **Hard dependency**: WP00 and WP01 must be complete, and the WP00 checkpoint
 > revision must be an ancestor of `HEAD`.
@@ -69,8 +69,11 @@ Report per the tracker's Progress Notes convention, listing the before/after tar
 
 ## Outcome (Complete this when retiring the prompt)
 
-**Completed**: YYYY-MM-DD
-**Agent**:
-**Result**:
-**Deviations**:
-**References**:
+**Completed**: 2026-07-28
+**Agent**: Codex
+**Result**: Reset now deletes exactly the configured session and remember
+cookie name/path/domain tuples, preserving configured paths and excluding
+generic CSRF cookies and derived sibling-domain variants.
+**Deviations**: None.
+**References**: `tests/weppcloud/routes/test_csrf_rollout.py`;
+`docs/schemas/weppcloud-session-contract.md`.

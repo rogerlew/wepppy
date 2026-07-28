@@ -18,6 +18,42 @@
     info: true
   };
 
+  var REPORT_CHECK_CATALOG = Object.freeze([
+    Object.freeze({ id: "javascript-execution", title: "JavaScript support", severity: "blocker" }),
+    Object.freeze({ id: "browser-api-baseline", title: "Browser API baseline", severity: "blocker" }),
+    Object.freeze({ id: "cookie-storage", title: "Cookie storage", severity: "blocker" }),
+    Object.freeze({ id: "local-storage", title: "Local browser storage", severity: "info" }),
+    Object.freeze({ id: "abort-controller", title: "Request cancellation", severity: "info" }),
+    Object.freeze({ id: "session-heartbeat", title: "Signed-in session", severity: "blocker" }),
+    Object.freeze({ id: "rq-engine-token", title: "Job service access", severity: "blocker" }),
+    Object.freeze({ id: "bandwidth-rtt", title: "Connection response time", severity: "info" }),
+    Object.freeze({ id: "bandwidth-download", title: "Download speed", severity: "info" }),
+    Object.freeze({ id: "bandwidth-upload", title: "Upload speed", severity: "info" }),
+    Object.freeze({ id: "realtime-status-websocket", title: "Live status updates", severity: "degraded" }),
+    Object.freeze({ id: "realtime-preflight-websocket", title: "Live setup checks", severity: "degraded" }),
+    Object.freeze({ id: "status-health-reachability", title: "Status service", severity: "degraded" }),
+    Object.freeze({ id: "preflight-health-reachability", title: "Setup-check service", severity: "degraded" })
+  ]);
+
+  var FIXED_STATUS_TEXT = Object.freeze({
+    pass: Object.freeze({
+      evidence: "Check completed successfully.",
+      fix_hint: ""
+    }),
+    fail: Object.freeze({
+      evidence: "Check did not complete successfully.",
+      fix_hint: "Review this check on the diagnostics page and retry."
+    }),
+    warn: Object.freeze({
+      evidence: "Check completed with an advisory result.",
+      fix_hint: "Review this check on the diagnostics page and retry."
+    }),
+    skipped: Object.freeze({
+      evidence: "Check was not run.",
+      fix_hint: "Review this check's prerequisites on the diagnostics page and retry."
+    })
+  });
+
   function normalizePrefix(value) {
     if (!value) {
       return "";
@@ -131,14 +167,24 @@
     return text;
   }
 
-  function redactCheck(check) {
+  function normalizeCopiedPrefix(value) {
+    var prefix = normalizePrefix(value);
+    if (!prefix || !/^\/[A-Za-z0-9/_-]*$/.test(prefix)) {
+      return "";
+    }
+    return prefix;
+  }
+
+  function redactCheck(check, catalogEntry) {
+    var status = ALLOWED_STATUSES[check.status] ? check.status : "fail";
+    var fixedText = FIXED_STATUS_TEXT[status];
     return {
-      id: String(check.id || "unknown-check"),
-      title: String(check.title || "Unnamed check"),
-      severity: ALLOWED_SEVERITIES[check.severity] ? check.severity : "info",
-      status: ALLOWED_STATUSES[check.status] ? check.status : "fail",
-      evidence: redactText(check.evidence),
-      fix_hint: redactText(check.fix_hint)
+      id: catalogEntry.id,
+      title: catalogEntry.title,
+      severity: catalogEntry.severity,
+      status: status,
+      evidence: redactText(fixedText.evidence),
+      fix_hint: redactText(fixedText.fix_hint)
     };
   }
 
@@ -158,19 +204,31 @@
 
   function redactReport(report) {
     var source = report || {};
-    var checks = source.checks || [];
+    var checks = Array.isArray(source.checks) ? source.checks : [];
+    var firstCheckById = {};
     var redactedChecks = [];
     var idx;
 
     for (idx = 0; idx < checks.length; idx += 1) {
-      redactedChecks.push(redactCheck(checks[idx]));
+      var check = checks[idx] || {};
+      var id = String(check.id || "");
+      if (id && !Object.prototype.hasOwnProperty.call(firstCheckById, id)) {
+        firstCheckById[id] = check;
+      }
+    }
+
+    for (idx = 0; idx < REPORT_CHECK_CATALOG.length; idx += 1) {
+      var catalogEntry = REPORT_CHECK_CATALOG[idx];
+      if (Object.prototype.hasOwnProperty.call(firstCheckById, catalogEntry.id)) {
+        redactedChecks.push(redactCheck(firstCheckById[catalogEntry.id], catalogEntry));
+      }
     }
 
     return {
-      overall: String(source.overall || "not_ready"),
+      overall: computeOverallStatus(redactedChecks),
       checks: redactedChecks,
-      generated_at: String(source.generated_at || ""),
-      site_prefix: normalizePrefix(source.site_prefix || "")
+      generated_at: new Date().toISOString(),
+      site_prefix: normalizeCopiedPrefix(source.site_prefix || "")
     };
   }
 
@@ -182,6 +240,7 @@
     buildReport: buildReport,
     computeOverallStatus: computeOverallStatus,
     sortChecksDeterministically: sortChecksDeterministically,
+    reportCheckCatalog: REPORT_CHECK_CATALOG,
     redactReport: redactReport,
     toRedactedJson: toRedactedJson
   };

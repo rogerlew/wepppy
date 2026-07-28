@@ -1,6 +1,6 @@
 # Web Same-Origin Guard Parity and Data-Boundary Hardening
 
-**Status**: Open - contract checkpoint required before implementation
+**Status**: Complete
 **Timezone**: UTC
 
 ## Overview
@@ -21,7 +21,7 @@ The observable symptom: on deployments where TLS is terminated **upstream** of C
 This package is UI-coupled and governed by
 `docs/standards/contract-first-change-standard.md`. Execute the active umbrella
 ExecPlan at
-`prompts/active/web_origin_guard_hardening_execplan.md`.
+`prompts/completed/web_origin_guard_hardening_execplan.md`.
 
 WP00 is a hard prerequisite. It must register this package as a bounded
 remediation, finalize and amend the canonical contracts, obtain two independent
@@ -59,16 +59,16 @@ Diagnostics exclusion.
 - **Implementation**: Codex (code + tests). **Contract docs**: Claude Code.
 
 ## Success Criteria
-- [ ] A single documented same-origin contract; all three guards conform, verified by shared test vectors.
-- [ ] A genuinely same-origin POST is authorized regardless of whether TLS terminates at or upstream of the proxy (query-engine gains the `Sec-Fetch-Site` fast-path; the bearhive upload probe passes).
-- [ ] `Sec-Fetch-Site: same-origin` is not treated as authoritative when a conflicting `Origin` is present; forwarded-origin candidates derive from proxy-normalized data or a configured public origin, not blindly-trusted client `X-Forwarded-*`.
-- [ ] Reset cookie clearing targets only WEPPcloud-owned names/domains; no generic parent-domain `csrf_token`/`csrftoken` deletion unless documented as owned.
-- [ ] Copy JSON report is assembled from fixed diagnostic codes/messages; no arbitrary backend exception text or absolute WS hostname leaks; denylist retained only as defense-in-depth.
-- [ ] Shared predicate tests cover missing signals, `Origin: null`,
+- [x] A single documented same-origin contract; all three guards conform, verified by shared test vectors.
+- [x] A genuinely same-origin POST is authorized regardless of whether TLS terminates at or upstream of the proxy (query-engine gains the `Sec-Fetch-Site` fast-path; the bearhive upload probe passes).
+- [x] `Sec-Fetch-Site: same-origin` is not treated as authoritative when a conflicting `Origin` is present; forwarded-origin candidates derive from proxy-normalized data or a configured public origin, not blindly-trusted client `X-Forwarded-*`.
+- [x] Reset cookie clearing targets only WEPPcloud-owned names/domains; no generic parent-domain `csrf_token`/`csrftoken` deletion unless documented as owned.
+- [x] Copy JSON report is assembled from fixed diagnostic codes/messages; no arbitrary backend exception text or absolute WS hostname leaks; denylist retained only as defense-in-depth.
+- [x] Shared predicate tests cover missing signals, `Origin: null`,
   scheme/port/subdomain mismatch, and cross-site on all three guards; separate
   tests cover valid/missing/invalid Flask-WTF tokens, rq-engine cookie/session
   authentication, and query-engine boundary controls.
-- [ ] `wctl run-pytest` (affected suites), `wctl run-npm lint`, `wctl run-npm test` pass.
+- [x] `wctl run-pytest` (affected suites), `wctl run-npm lint`, `wctl run-npm test` pass.
 
 ## Security Impact and Review Gate
 - **Security impact triage**: `high`
@@ -113,4 +113,11 @@ Diagnostics exclusion.
 - Closure notes and archived completed prompts.
 
 ## Follow-up Work
-[Fill at closure]
+
+- Correct the pre-existing test isolation in
+  `tests/climates/daymet/test_daymet_singlelocation_client.py`, which replaces
+  `cf_units.units` process-wide and can break later GridMET tests. This was
+  isolated during broad validation and is outside REM-04.
+- Perform the separately authorized Caddy correction and post-deployment
+  observation on affected upstream-TLS nodes; deployment is outside this
+  package.

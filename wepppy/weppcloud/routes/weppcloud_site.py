@@ -309,11 +309,23 @@ def _normalized_origin(value: str) -> tuple[str, str, int] | None:
     if not candidate:
         return None
     parsed = urlparse(candidate)
+    if (
+        parsed.username is not None
+        or parsed.password is not None
+        or parsed.path not in {"", "/"}
+        or parsed.params
+        or parsed.query
+        or parsed.fragment
+    ):
+        return None
     scheme = (parsed.scheme or "").strip().lower()
     host = (parsed.hostname or "").strip().lower()
     if not scheme or not host:
         return None
-    port = parsed.port
+    try:
+        port = parsed.port
+    except ValueError:
+        return None
     if port is None:
         if scheme == "https":
             port = 443
@@ -335,13 +347,6 @@ def _allowed_origin_set() -> set[tuple[str, str, int]]:
     _add(request.host_url)
     _add(f"{request.scheme}://{request.host}")
 
-    forwarded_proto = (request.headers.get("X-Forwarded-Proto") or "").split(",")[0].strip().lower()
-    forwarded_host = (request.headers.get("X-Forwarded-Host") or "").split(",")[0].strip()
-    if forwarded_proto and request.host:
-        _add(f"{forwarded_proto}://{request.host}")
-    if forwarded_host:
-        _add(f"{forwarded_proto or request.scheme}://{forwarded_host}")
-
     external_host = (
         current_app.config.get("OAUTH_REDIRECT_HOST")
         or current_app.config.get("EXTERNAL_HOST")
@@ -354,18 +359,42 @@ def _allowed_origin_set() -> set[tuple[str, str, int]]:
     return origins
 
 
+def _is_upstream_tls_same_origin_bridge(
+    normalized_origin: tuple[str, str, int],
+    allowed_origins: set[tuple[str, str, int]],
+) -> bool:
+    request_origin = _normalized_origin(f"{request.scheme}://{request.host}")
+    if request_origin is None:
+        return False
+    return (
+        request_origin[0] == "http"
+        and request_origin[2] == 80
+        and normalized_origin[0] == "https"
+        and normalized_origin[2] == 443
+        and normalized_origin[1] in {origin[1] for origin in allowed_origins}
+    )
+
+
 def _is_same_origin_post() -> bool:
     fetch_site = (request.headers.get("Sec-Fetch-Site") or "").strip().lower()
-    if fetch_site == "same-origin":
-        return True
-    if fetch_site in {"cross-site"}:
+    if fetch_site in {"cross-site", "cross-origin"}:
         return False
 
     allowed_origins = _allowed_origin_set()
     origin = request.headers.get("Origin", "").strip()
     if origin:
         normalized_origin = _normalized_origin(origin)
-        return normalized_origin in allowed_origins
+        if normalized_origin is None:
+            return False
+        if normalized_origin in allowed_origins:
+            return True
+        return fetch_site == "same-origin" and _is_upstream_tls_same_origin_bridge(
+            normalized_origin,
+            allowed_origins,
+        )
+
+    if fetch_site == "same-origin":
+        return True
 
     referer = request.headers.get("Referer", "").strip()
     if not referer:
@@ -738,35 +767,7 @@ def _normalized_cookie_path(value: Optional[str]) -> str:
     path = str(value or "").strip()
     if not path:
         return "/"
-    if not path.startswith("/"):
-        path = f"/{path}"
-    if len(path) > 1 and path.endswith("/"):
-        path = path.rstrip("/")
-    return path or "/"
-
-
-def _path_variants(value: Optional[str]) -> list[str]:
-    candidates: list[str] = []
-    raw = str(value or "").strip()
-    if raw:
-        candidates.append(raw)
-    normalized = _normalized_cookie_path(value)
-    candidates.append(normalized)
-    if normalized != "/":
-        candidates.append(f"{normalized}/")
-
-    variants: list[str] = []
-    for candidate in candidates:
-        normalized_candidate = _normalized_cookie_path(candidate)
-        if normalized_candidate not in variants:
-            variants.append(normalized_candidate)
-        if (
-            normalized_candidate != "/"
-            and not normalized_candidate.endswith("/")
-            and f"{normalized_candidate}/" not in variants
-        ):
-            variants.append(f"{normalized_candidate}/")
-    return variants
+    return path
 
 
 def _normalized_cookie_domain(value: Optional[str]) -> Optional[str]:
@@ -780,50 +781,16 @@ def _normalized_cookie_domain(value: Optional[str]) -> Optional[str]:
     return token
 
 
-def _domain_variants(configured_domain: Optional[str]) -> list[Optional[str]]:
-    variants: list[Optional[str]] = []
-
-    def _add(value: Optional[str]) -> None:
-        normalized = _normalized_cookie_domain(value)
-        if not normalized:
-            return
-        base = normalized.lstrip(".")
-        for candidate in (base, f".{base}"):
-            if candidate and candidate not in variants:
-                variants.append(candidate)
-
-    _add(configured_domain)
-    _add(request.host)
-    _add(current_app.config.get("OAUTH_REDIRECT_HOST"))
-    _add(current_app.config.get("EXTERNAL_HOST"))
-
-    variants.append(None)
-    return variants
-
-
 def _cookie_clear_targets(
     configured_path: Optional[str],
     configured_domain: Optional[str],
 ) -> list[tuple[str, Optional[str]]]:
-    targets: list[tuple[str, Optional[str]]] = []
-    path_values = [
-        configured_path,
-        current_app.config.get("APPLICATION_ROOT"),
-        "/",
+    return [
+        (
+            _normalized_cookie_path(configured_path),
+            _normalized_cookie_domain(configured_domain),
+        )
     ]
-
-    path_variants: list[str] = []
-    for path_value in path_values:
-        for variant in _path_variants(path_value):
-            if variant not in path_variants:
-                path_variants.append(variant)
-
-    for path in path_variants:
-        for domain in _domain_variants(configured_domain):
-            target = (path, domain)
-            if target not in targets:
-                targets.append(target)
-    return targets
 
 
 def _clear_reset_browser_state_cookies(response) -> list[dict[str, Optional[str]]]:
@@ -838,29 +805,21 @@ def _clear_reset_browser_state_cookies(response) -> list[dict[str, Optional[str]
         (
             remember_cookie_name,
             current_app.config.get("REMEMBER_COOKIE_PATH"),
-            current_app.config.get("REMEMBER_COOKIE_DOMAIN")
-            or current_app.config.get("SESSION_COOKIE_DOMAIN"),
-        ),
-        (
-            "csrf_token",
-            current_app.config.get("SESSION_COOKIE_PATH"),
-            current_app.config.get("SESSION_COOKIE_DOMAIN"),
-        ),
-        (
-            "csrftoken",
-            current_app.config.get("SESSION_COOKIE_PATH"),
-            current_app.config.get("SESSION_COOKIE_DOMAIN"),
+            current_app.config.get("REMEMBER_COOKIE_DOMAIN"),
         ),
     ]
 
     cleared: list[dict[str, Optional[str]]] = []
-    seen_names: set[str] = set()
+    seen_targets: set[tuple[str, str, Optional[str]]] = set()
     for cookie_name, cookie_path, cookie_domain in cookie_specs:
         normalized_name = str(cookie_name or "").strip()
-        if not normalized_name or normalized_name in seen_names:
+        if not normalized_name:
             continue
-        seen_names.add(normalized_name)
         for path, domain in _cookie_clear_targets(cookie_path, cookie_domain):
+            target = (normalized_name, path, domain)
+            if target in seen_targets:
+                continue
+            seen_targets.add(target)
             response.delete_cookie(normalized_name, path=path, domain=domain)
             cleared.append(
                 {

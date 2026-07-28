@@ -98,10 +98,6 @@ def _session_use_signer() -> bool:
     return _bool_env("SESSION_USE_SIGNER", default=True)
 
 
-def _trust_forwarded_origin_headers() -> bool:
-    return _bool_env(TRUST_FORWARDED_ORIGIN_HEADERS_ENV, default=False)
-
-
 def _secret_key() -> str:
     secret = get_secret("SECRET_KEY")
     if not secret:
@@ -214,11 +210,23 @@ def _normalized_origin(value: str) -> tuple[str, str, int] | None:
     if not candidate:
         return None
     parsed = urlparse(candidate)
+    if (
+        parsed.username is not None
+        or parsed.password is not None
+        or parsed.path not in {"", "/"}
+        or parsed.params
+        or parsed.query
+        or parsed.fragment
+    ):
+        return None
     scheme = (parsed.scheme or "").strip().lower()
     host = (parsed.hostname or "").strip().lower()
     if not scheme or not host:
         return None
-    port = parsed.port
+    try:
+        port = parsed.port
+    except ValueError:
+        return None
     if port is None:
         if scheme == "https":
             port = 443
@@ -235,7 +243,10 @@ def _request_origin(request: Request) -> str:
         return ""
     scheme = (url.scheme or "").strip().lower()
     host = (url.hostname or "").strip().lower()
-    port = url.port
+    try:
+        port = url.port
+    except ValueError:
+        return ""
     if not scheme or not host:
         return ""
     if port is None:
@@ -271,15 +282,6 @@ def _allowed_origin_set(request: Request) -> set[tuple[str, str, int]]:
         scheme = (request.url.scheme or "").strip().lower() or "https"
         _add(f"{scheme}://{host_header}")
 
-    forwarded_proto = ""
-    if _trust_forwarded_origin_headers():
-        forwarded_proto = (request.headers.get("X-Forwarded-Proto") or "").split(",")[0].strip().lower()
-        forwarded_host = (request.headers.get("X-Forwarded-Host") or "").split(",")[0].strip()
-        if forwarded_proto and host_header:
-            _add(f"{forwarded_proto}://{host_header}")
-        if forwarded_host:
-            _add(f"{forwarded_proto or request.url.scheme}://{forwarded_host}")
-
     for env_key in ("OAUTH_REDIRECT_HOST", "EXTERNAL_HOST"):
         host_value = (os.getenv(env_key) or "").strip()
         if host_value:
@@ -288,18 +290,44 @@ def _allowed_origin_set(request: Request) -> set[tuple[str, str, int]]:
     return origins
 
 
+def _is_upstream_tls_same_origin_bridge(
+    request: Request,
+    normalized_origin: tuple[str, str, int],
+    allowed_origins: set[tuple[str, str, int]],
+) -> bool:
+    request_origin = _normalized_origin(_request_origin(request))
+    if request_origin is None:
+        return False
+    return (
+        request_origin[0] == "http"
+        and request_origin[2] == 80
+        and normalized_origin[0] == "https"
+        and normalized_origin[2] == 443
+        and normalized_origin[1] in {origin[1] for origin in allowed_origins}
+    )
+
+
 def _is_same_origin_cookie_request(request: Request) -> bool:
     fetch_site = (request.headers.get("Sec-Fetch-Site") or "").strip().lower()
-    if fetch_site == "same-origin":
-        return True
-    if fetch_site in {"cross-site"}:
+    if fetch_site in {"cross-site", "cross-origin"}:
         return False
 
     allowed_origins = _allowed_origin_set(request)
     origin = (request.headers.get("Origin") or "").strip()
     if origin:
         normalized_origin = _normalized_origin(origin)
-        return normalized_origin in allowed_origins
+        if normalized_origin is None:
+            return False
+        if normalized_origin in allowed_origins:
+            return True
+        return fetch_site == "same-origin" and _is_upstream_tls_same_origin_bridge(
+            request,
+            normalized_origin,
+            allowed_origins,
+        )
+
+    if fetch_site == "same-origin":
+        return True
 
     referer = (request.headers.get("Referer") or "").strip()
     if not referer:
