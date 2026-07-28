@@ -869,6 +869,20 @@ def test_omni_scenarios_control_renders_actions_lifecycle_and_delete_modal(
         assert marker in rendered
 
 
+def test_rhem_control_renders_run_and_lifecycle_targets(jinja_env: Environment) -> None:
+    rendered = jinja_env.get_template("controls/rhem_pure.htm").render()
+
+    for marker in (
+        'form id="rhem_form"',
+        'id="rhem_status_panel"',
+        'id="rhem_stacktrace_panel"',
+        'id="btn_run_rhem"',
+        'data-rhem-action="run"',
+        'id="hint_run_rhem"',
+    ):
+        assert marker in rendered
+
+
 def test_landuse_template_disables_single_mode_for_mofe(jinja_env: Environment) -> None:
     template = jinja_env.get_template("controls/landuse_pure.htm")
     rendered = template.render(

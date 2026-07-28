@@ -298,7 +298,7 @@ domain package.
 | DOM-24 | `20260728_rangeland_cover_ui_contract` | `rangelandCover`, `rangelandCoverModify` | controller/form/modifier, rangeland routes/state/build RQ | DOM-04A, DOM-08A | `high`: route/state mutation and queue | verified |
 | DOM-25A | `20260728_omni_scenarios_ui_contract` | `omni`: scenarios | Omni controller/scenario form/routes/state, multipart staging/run RQ | DOM-14A, DOM-23 | `high`: upload/files and queue/worker | verified |
 | DOM-25B | `20260728_omni_contrasts_ui_contract` | `omni`, `omniContrastOverlays`: contrasts | contrast form/overlay/routes/state/run/delete RQ | DOM-25A, DOM-04A, DOM-04B | `high`: upload/files, delete, queue/worker | verified |
-| DOM-26 | `rhem_ui_contract` | `rhem` | RHEM controller/form/routes, `Rhem`/`RhemPost`, run RQ | DOM-07, DOM-11A | `high`: route and queue/worker | planned |
+| DOM-26 | `20260728_rhem_ui_contract` | `rhem` | RHEM controller/form/routes, `Rhem`/`RhemPost`, run RQ | DOM-07, DOM-11A | `high`: route and queue/worker | verified |
 | DOM-27 | `geneva_ui_contract` | `geneva` control | Geneva config, task, status/results/frequency-panel, and CN-table route functions/state plus chained RQ; summary query/report functions are SURF-11 consumers of `geneva_bp.py` | DOM-04A, DOM-14A | `high`: route and chained queues/workers | planned |
 | DOM-28 | `pathce_ui_contract` | `pathCe` | PathCE controller/form/Flask route, `PathCostEffective`, run RQ | DOM-04A, DOM-07 | `high`: role gate, route, queue/worker | planned |
 | DOM-29 | `rusle_ui_contract` | `rusle` | RUSLE controller/form/routes, `Rusle`, build RQ | DOM-07, DOM-23 | `high`: routes, queue/worker, generated outputs | planned |

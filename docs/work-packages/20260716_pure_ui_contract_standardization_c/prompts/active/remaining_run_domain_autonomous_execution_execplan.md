@@ -84,6 +84,8 @@ generator, manifest, or new CI system.
   without repair.
 - [x] (2026-07-28 UTC) Executed DOM-25B; expanded actual contrast mode/action
   rendering and existing lifecycle/overlay evidence passed without repair.
+- [x] (2026-07-28 UTC) Executed DOM-26; actual RHEM run/lifecycle rendering and
+  existing model/route/worker/results/reload evidence passed without repair.
 - [ ] Execute all remaining run-domain packages in the dependency-aware order.
 - [ ] Resolve each encountered hold through its owning package or a bounded
   operator decision.
@@ -231,6 +233,11 @@ DOM-25B: no mismatch and no production patch. Expanded actual mode, scenario,
 pair, GeoJSON, run/dry-run/delete rendering; controller, route, state, rq-engine,
 worker, artifact, reload, authorization, and map-overlay evidence passed; 184
 focused Python tests, 15 Omni Jest tests, lint, and docs lint passed.
+
+DOM-26: no mismatch and no production patch. Added actual run, status, hint,
+and error rendering; controller, route, Rhem/RhemPost, rq-engine, worker,
+results, reload, and authorization evidence passed; 105 focused Python tests,
+7 RHEM Jest tests, lint, and docs lint passed.
 
 ## Context and Orientation
 
