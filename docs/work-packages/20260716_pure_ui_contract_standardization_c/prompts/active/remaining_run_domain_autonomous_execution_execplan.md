@@ -63,6 +63,8 @@ generator, manifest, or new CI system.
   existing browser/RQ-engine evidence passed without repair.
 - [x] (2026-07-28 UTC) Executed DOM-22; actual range/action rendering and
   existing role/browser/RQ-engine evidence passed without repair.
+- [x] (2026-07-28 UTC) Executed DOM-23; confirmed joint SBS ownership and actual
+  mode/upload/uniform/fire-date rendering with downstream evidence.
 - [ ] Execute all remaining run-domain packages in the dependency-aware order.
 - [ ] Resolve each encountered hold through its owning package or a bounded
   operator decision.
@@ -173,6 +175,9 @@ rendering; 95 focused Python tests, 6 Jest tests, lint, and docs lint passed.
 
 DOM-22: no mismatch and no production patch. Added actual OpenET range/action
 rendering; 160 focused Python tests, 3 Jest tests, lint, and docs lint passed.
+
+DOM-23: no mismatch and no production patch. Added actual joint SBS rendering;
+154 focused Python tests, 20 Disturbed/BAER Jest tests, lint, and docs lint passed.
 
 ## Context and Orientation
 

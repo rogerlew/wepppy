@@ -1598,6 +1598,17 @@ def test_openet_ts_control_renders_acquisition_contract(jinja_env: Environment) 
     assert "2000 - 2025" in rendered
 
 
+def test_disturbed_baer_sbs_control_renders_joint_owner_contract(jinja_env: Environment) -> None:
+    rendered = jinja_env.get_template("controls/disturbed_sbs_pure.htm").render(
+        disturbed=SimpleNamespace(sbs_mode=1, uniform_severity=2, disturbed_fn="sbs.tif", fire_date="05 01 24"),
+        baer=None,
+        ron=SimpleNamespace(mods={"disturbed"}),
+        climate=SimpleNamespace(mods={"rap_ts"}),
+    )
+    for marker in ('name="sbs_mode"', 'name="input_upload_sbs"', 'data-sbs-action="remove"', 'data-sbs-uniform="2"', 'name="firedate"', 'data-sbs-action="set-firedate"'):
+        assert marker in rendered
+
+
 def test_run_header_hides_rusle_mod_when_disturbed_not_enabled(jinja_env: Environment) -> None:
     template = jinja_env.get_template("header/_run_header_fixed.htm")
     auth_user = SimpleNamespace(has_role=lambda role: False, roles=[], is_authenticated=True)
