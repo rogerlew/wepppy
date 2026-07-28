@@ -48,6 +48,8 @@ is not a contract registry or enforcement platform.
   normalization evidence and no production mismatch.
 - [ ] Continue with one controller package at a time.
 - [x] (2026-07-28) Reviewed measured value after five controller domains.
+- [x] (2026-07-28) Registered the autonomous serial remaining run-domain
+  execution plan with a per-package commit restore point.
 - [ ] Close the initiative when the registered inventory has executable
   regression coverage or explicit operator-approved exclusions.
 
@@ -91,6 +93,15 @@ shared patch. Narrow or defer the shared patch when coverage is unavailable.
 **Decision**: Direct assertions first. Extract a stateless test helper after at
 least two repeated tests. Defer GOV-01 until five controllers show a measured
 miss or repeated burden and the operator explicitly approves a proposal.
+
+### 2026-07-28: Autonomous run-domain execution remains serial
+
+**Decision**: Execute the remaining run-domain packages under
+`prompts/active/remaining_run_domain_autonomous_execution_execplan.md`, with
+one active child and a commit after every closeout.
+
+**Rationale**: The operator authorized autonomous completion and restore
+points; serial execution preserves low regression risk and clear ownership.
 
 ## Context and Orientation
 

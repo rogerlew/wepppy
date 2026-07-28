@@ -26,6 +26,8 @@
 - [x] Registered and dual-reviewed REM-05 under GOV-00A-M1E without advancing
   DOM-05; checkpoint ancestor
   `44d3b93c8e3bc7d5e89151cbb9677db374411c53`.
+- [ ] Execute the autonomous remaining run-domain sequence; DOM-08B is the
+  sole next active controller package.
 
 ### Blocked
 
