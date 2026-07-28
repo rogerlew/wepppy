@@ -301,7 +301,7 @@ domain package.
 | DOM-26 | `20260728_rhem_ui_contract` | `rhem` | RHEM controller/form/routes, `Rhem`/`RhemPost`, run RQ | DOM-07, DOM-11A | `high`: route and queue/worker | verified |
 | DOM-27 | `20260728_geneva_ui_contract` | `geneva` control | Geneva config, task, status/results/frequency-panel, and CN-table route functions/state plus chained RQ; summary query/report functions are SURF-11 consumers of `geneva_bp.py` | DOM-04A, DOM-14A | `high`: route and chained queues/workers | verified |
 | DOM-28 | `20260728_pathce_ui_contract` | `pathCe` | PathCE controller/form/Flask route, `PathCostEffective`, run RQ | DOM-04A, DOM-07 | `high`: role gate, route, queue/worker | verified |
-| DOM-29 | `rusle_ui_contract` | `rusle` | RUSLE controller/form/routes, `Rusle`, build RQ | DOM-07, DOM-23 | `high`: routes, queue/worker, generated outputs | planned |
+| DOM-29 | `20260728_rusle_ui_contract` | `rusle` | RUSLE controller/form/routes, `Rusle`, build RQ | DOM-07, DOM-23 | `high`: routes, queue/worker, generated outputs | verified |
 
 The 33 bootstrap keys have exactly one primary package owner. Facet packages may
 share source or state, but they cannot claim a second primary bootstrap owner.

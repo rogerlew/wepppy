@@ -905,6 +905,35 @@ def test_path_ce_control_renders_thresholds_treatments_and_lifecycle(
         assert marker in rendered
 
 
+def test_rusle_control_renders_modes_defaults_and_build(jinja_env: Environment) -> None:
+    rendered = jinja_env.get_template("controls/rusle_pure.htm").render(
+        rusle=None,
+        rusle_rap_year_options=[2021, 2022],
+    )
+
+    for marker in (
+        'form id="rusle_form"',
+        'name="r_mode"',
+        'value="cligen_static"',
+        'value="momm2025_county_region"',
+        'value="canonical_rusle2"',
+        'name="c_mode"',
+        'value="observed_rap"',
+        'value="scenario_sbs"',
+        'name="rap_year"',
+        'name="rock_fraction_of_rap_bare"',
+        'name="rock_fraction_of_sbs_bare"',
+        'name="k_modes"',
+        'value="polaris_nomograph"',
+        'value="polaris_epic"',
+        'data-rusle-input="max-slope-length"',
+        'data-rusle-input="p-value"',
+        'data-rusle-action="run"',
+        'id="rusle-results"',
+    ):
+        assert marker in rendered
+
+
 def test_landuse_template_disables_single_mode_for_mofe(jinja_env: Environment) -> None:
     template = jinja_env.get_template("controls/landuse_pure.htm")
     rendered = template.render(

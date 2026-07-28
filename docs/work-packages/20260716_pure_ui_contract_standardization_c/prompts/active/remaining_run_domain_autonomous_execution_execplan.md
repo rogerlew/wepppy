@@ -92,6 +92,9 @@ generator, manifest, or new CI system.
 - [x] (2026-07-28 UTC) Executed DOM-28; actual PathCE field/action/lifecycle
   rendering and existing route/config/solver/worker/report/reload evidence
   passed without repair.
+- [x] (2026-07-28 UTC) Executed DOM-29; actual RUSLE mode/default/action
+  rendering and existing route/state/factor/worker/output/reload evidence
+  passed without repair.
 - [ ] Execute all remaining run-domain packages in the dependency-aware order.
 - [ ] Resolve each encountered hold through its owning package or a bounded
   operator decision.
@@ -257,6 +260,12 @@ severity, treatment, run, results, and error rendering; controller, route,
 configuration, precondition, solver, report, rq-engine, worker, artifact,
 reload, role, and authorization evidence passed; 206 focused Python tests, 16
 PathCE Jest tests, lint, and docs lint passed.
+
+DOM-29: no mismatch and no production patch. Added actual R/C/K mode tokens,
+RAP/rock/default-K/slope/P inputs, build, and results rendering; controller,
+rq-engine route, Rusle, factor integration, worker, generated-output, reload,
+feature-gate, and authorization evidence passed; 157 focused Python tests, 12
+RUSLE/controller-dashboard Jest tests, lint, and docs lint passed.
 
 ## Context and Orientation
 
