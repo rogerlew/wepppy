@@ -836,6 +836,25 @@ def test_omni_contrasts_template_shows_user_defined_limit_hint(jinja_env: Enviro
     assert "capped at 200 total contrast runs (contrast pairs x groups)." in rendered
 
 
+def test_omni_scenarios_control_renders_actions_lifecycle_and_delete_modal(
+    jinja_env: Environment,
+) -> None:
+    rendered = jinja_env.get_template("controls/omni_scenarios_pure.htm").render()
+
+    for marker in (
+        'form id="omni_form"',
+        'id="scenario-container"',
+        'data-omni-action="add-scenario"',
+        'data-omni-action="delete-selected"',
+        'data-omni-action="run-scenarios"',
+        'id="hint_run_omni"',
+        'id="omni-delete-modal"',
+        'data-omni-role="delete-list"',
+        'data-omni-action="confirm-delete"',
+    ):
+        assert marker in rendered
+
+
 def test_landuse_template_disables_single_mode_for_mofe(jinja_env: Environment) -> None:
     template = jinja_env.get_template("controls/landuse_pure.htm")
     rendered = template.render(

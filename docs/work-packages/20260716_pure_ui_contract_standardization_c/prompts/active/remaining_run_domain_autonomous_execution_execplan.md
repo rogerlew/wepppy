@@ -79,6 +79,9 @@ generator, manifest, or new CI system.
 - [x] (2026-07-28 UTC) Executed DOM-20B; existing actual enqueue/status/results/
   warnings/artifact/download rendering and downstream evidence passed without
   repair.
+- [x] (2026-07-28 UTC) Executed DOM-25A; actual Omni scenario action/lifecycle
+  rendering and existing controller/route/state/worker/reload evidence passed
+  without repair.
 - [ ] Execute all remaining run-domain packages in the dependency-aware order.
 - [ ] Resolve each encountered hold through its owning package or a bounded
   operator decision.
@@ -216,6 +219,11 @@ DOM-20B: no mismatch and no production patch. Existing actual action, job,
 results, warnings, artifact, download, and error rendering plus controller,
 rq-engine, cache, service, manifest, worker, and reload evidence passed; 104
 focused Python tests, 22 Features Export Jest tests, lint, and docs lint passed.
+
+DOM-25A: no mismatch and no production patch. Added actual dynamic-host,
+add/delete/run, job-hint, and delete-modal rendering; controller, route, state,
+rq-engine, worker, artifact, reload, upload, and authorization evidence passed;
+198 focused Python tests, 15 Omni Jest tests, lint, and docs lint passed.
 
 ## Context and Orientation
 
