@@ -1577,6 +1577,17 @@ def test_feature_control_shell_defaults_maturity_pill_link(jinja_env: Environmen
     assert 'href="#feature-maturity-labels"' in rendered
 
 
+def test_rap_ts_control_renders_acquisition_and_schedule_contract(jinja_env: Environment) -> None:
+    rendered = jinja_env.get_template("controls/rap_ts_pure.htm").render(
+        rap_schedule=[{"year": 2020}],
+    )
+    assert 'id="rap_ts_form"' in rendered
+    assert 'data-rap-action="run"' in rendered
+    assert 'id="hint_build_rap_ts"' in rendered
+    assert 'id="rap_ts_schedule_data"' in rendered
+    assert '&#34;year&#34;: 2020' in rendered or '"year": 2020' in rendered
+
+
 def test_run_header_hides_rusle_mod_when_disturbed_not_enabled(jinja_env: Environment) -> None:
     template = jinja_env.get_template("header/_run_header_fixed.htm")
     auth_user = SimpleNamespace(has_role=lambda role: False, roles=[], is_authenticated=True)

@@ -292,7 +292,7 @@ domain package.
 | DOM-19 | `20260728_roads_ui_contract` | `roads`, `roadsMapOverlay` | roads controller/form/overlay/routes, `Roads`, uploads/prepare/run RQ | DOM-04A, DOM-04B, DOM-07 | `high`: upload, files, routes, queues | verified |
 | DOM-20A | `features_export_selection_ui_contract` | `featuresExport`: dynamic catalog, selectors, profiles | controller/form, catalog/planner/service inputs; no NoDb singleton | DOM-04A, DOM-14A | `high` if public/download routes change | planned |
 | DOM-20B | `features_export_execution_ui_contract` | `featuresExport`: enqueue, cache, artifacts, download | export routes/service/cache/RQ/output contracts | DOM-20A | `high`: queue, files, downloads | planned |
-| DOM-21 | `rap_timeseries_ui_contract` | `rapTs` | RAP controller/form/routes, `RAP_TS`, fetch/analyze RQ | DOM-04A | `high`: egress and queue/worker | planned |
+| DOM-21 | `20260728_rap_timeseries_ui_contract` | `rapTs` | RAP controller/form/routes, `RAP_TS`, fetch/analyze RQ | DOM-04A | `high`: egress and queue/worker | verified |
 | DOM-22 | `openet_timeseries_ui_contract` | `openetTs` | OpenET controller/form/routes, `OpenET_TS`, external fetch/analyze RQ | DOM-04A | `high`: admin gate, egress, queue/worker | planned |
 | DOM-23 | `disturbed_baer_ui_contract` | `disturbed`, `baer` shared SBS surface | both controllers, one shared template/route/state owner, SBS uploads and invalidation; boundary probe must confirm joint closure | DOM-04A, DOM-08A, DOM-10 | `high`: upload/files, route/state mutations | planned |
 | DOM-24 | `rangeland_cover_ui_contract` | `rangelandCover`, `rangelandCoverModify` | controller/form/modifier, rangeland routes/state/build RQ | DOM-04A, DOM-08A | `high`: route/state mutation and queue | planned |
