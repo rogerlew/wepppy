@@ -1921,6 +1921,24 @@ def test_pmet_advanced_template_renders_payload_and_routine_contract(
     assert 'data-wepp-routine="pmet"' in rendered
 
 
+def test_revegetation_advanced_template_renders_cover_transform_contract(
+    jinja_env: Environment,
+) -> None:
+    template = jinja_env.get_template("controls/wepp_pure_advanced_options/revegetation.htm")
+    rendered = template.render(
+        reveg=SimpleNamespace(
+            cover_transform_fn="",
+            user_defined_cover_transform=True,
+            cover_transform_options=[("forest", "Forest")],
+        )
+    )
+
+    assert 'id="reveg_scenario"' in rendered
+    assert 'name="reveg_scenario"' in rendered
+    assert 'id="user_defined_cover_transform_container"' in rendered
+    assert 'data-wepp-action="upload-cover-transform"' in rendered
+
+
 def test_run_header_includes_features_export_mod_toggle(jinja_env: Environment) -> None:
     template = jinja_env.get_template("header/_run_header_fixed.htm")
     auth_user = SimpleNamespace(has_role=lambda role: False, roles=[], is_authenticated=True)

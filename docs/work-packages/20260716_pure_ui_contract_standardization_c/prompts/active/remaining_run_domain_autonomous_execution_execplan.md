@@ -47,6 +47,8 @@ generator, manifest, or new CI system.
   rendering and existing browser/Flask/RQ-engine evidence passed without repair.
 - [x] (2026-07-28 UTC) Executed DOM-14B; actual advanced-option partial
   rendering and existing parser/browser/RQ-engine evidence passed without repair.
+- [x] (2026-07-28 UTC) Executed DOM-14C; actual cover-transform rendering and
+  existing browser/RQ-engine evidence passed without repair.
 - [ ] Execute all remaining run-domain packages in the dependency-aware order.
 - [ ] Resolve each encountered hold through its owning package or a bounded
   operator decision.
@@ -131,6 +133,10 @@ tests, the full 88-suite/663-test frontend sweep, lint, and docs lint passed.
 DOM-14B: no mismatch and no production patch. Added PMET partial render
 evidence; 150 focused Python tests, the full 88-suite/663-test frontend sweep,
 lint, and docs lint passed.
+
+DOM-14C: no mismatch and no production patch. Added cover-transform render
+evidence; focused render and RQ-engine tests plus the 88-suite/663-test frontend
+sweep and docs lint passed.
 
 ## Context and Orientation
 
