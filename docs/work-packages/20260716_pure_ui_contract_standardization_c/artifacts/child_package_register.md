@@ -264,7 +264,7 @@ domain package.
 | ID | Package path / proposed slug | Bootstrap/controller scope | Primary source boundary | Depends on | Expected remediation security | State |
 | --- | --- | --- | --- | --- | --- | --- |
 | DOM-01 | `20260727_watar_ui_contract_pilot` | `ash` | `ash.js`, `ash_pure.htm`, WATAR/ash route, `Ash`, `run_ash_rq` | GOV-00A concise test convention | Test/docs `none`; re-triage actual patch | closed |
-| DOM-02 | `project_shell_ui_contract` | `project` | `project.js`, run header, Project routes, `Ron`, SQL Run, readonly RQ; consumes SHR-05 Unitizer preferences | SHR-01..04B, SHR-05 context | `high`: auth, readonly/public state, mutation/RQ | planned |
+| DOM-02 | `20260728_project_shell_ui_contract` | `project` | `project.js`, run header, Project routes, `Ron`, SQL Run, readonly RQ; consumes SHR-05 Unitizer preferences | SHR-01..04B, SHR-05 context | `high`: auth, readonly/public state, mutation/RQ | verified |
 | DOM-03 | `team_collaboration_ui_contract` | `team` | `team.js`, team modal/form, project/team routes, SQL ownership | SHR-01..04B context | `high`: owner/collaborator auth mutations | planned |
 | DOM-04A | `20260728_map_orchestration_ui_contract` | `map`: orchestration, center/search/elevation/drilldown and public API | `map_gl.js`, map host, elevation/query routes; consumes SHR-01 `selection_utils.js` | SHR-01..04B context | `low`; `high` if public query routes change | verified |
 | DOM-04B | `20260728_map_layers_feature_ui_contract` | `map`: layer/scale/feature UI and model visualization partials | four `map_gl_*` helpers, layer resources, legends/overlays | DOM-04A | `low`; `high` if file/resource routes change | verified |

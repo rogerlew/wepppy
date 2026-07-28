@@ -1442,6 +1442,33 @@ def test_run_header_shows_team_public_readonly_for_authenticated_user(jinja_env:
     assert 'id="checkbox_public"' in rendered
 
 
+def test_run_header_renders_project_mutation_contract(jinja_env: Environment) -> None:
+    template = jinja_env.get_template("header/_run_header_fixed.htm")
+    user = SimpleNamespace(has_role=lambda role: role == "PowerUser", roles=["PowerUser"], is_authenticated=True)
+    request = SimpleNamespace(view_args={"runid": "test-run", "config": "test-config"})
+    ron = SimpleNamespace(
+        mods=["disturbed"], runid="test-run", config_stem="test-config",
+        nodb_version=3, name="Project A", scenario="Baseline", readonly=True,
+        public=True, srid=None,
+    )
+    rendered = template.render(
+        user=user, current_user=user, request=request, current_ron=ron, ron=ron,
+        current_ttl=SimpleNamespace(user_disabled=True),
+        header_mod_options=[{"id": "disturbed", "label": "Disturbed"}],
+    )
+
+    assert 'id="input_name"' in rendered
+    assert 'name="input_name"' in rendered
+    assert 'data-project-field="name"' in rendered
+    assert 'id="input_scenario"' in rendered
+    assert 'name="input_scenario"' in rendered
+    assert 'data-project-field="scenario"' in rendered
+    assert 'data-project-mod="disturbed"' in rendered
+    assert re.search(r'id="checkbox_readonly"[^>]*checked', rendered)
+    assert re.search(r'id="checkbox_public"[^>]*checked', rendered)
+    assert re.search(r'id="checkbox_ttl_disabled"[^>]*checked', rendered)
+
+
 def test_run_header_renders_interface_maturity_badge_without_mod_dropdown_badges(jinja_env: Environment) -> None:
     template = jinja_env.get_template("header/_run_header_fixed.htm")
     auth_user = SimpleNamespace(has_role=lambda role: role == "Admin", roles=["Admin"], is_authenticated=True)

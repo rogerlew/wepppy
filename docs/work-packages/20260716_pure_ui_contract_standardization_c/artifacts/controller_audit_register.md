@@ -86,7 +86,7 @@ explicit planning assertion to verify, not permission to omit reload evidence.
 
 | Key / package | Source and rendered host | Route, state, and RQ boundary | Focused evidence / config / security | Contract scope | Evidence grade |
 | --- | --- | --- | --- | --- | --- |
-| `project` / DOM-02 | `C/project.js`; run header | `R/nodb_api/project_bp.py`, `Ron`/SQL Run, project RQ | `J/project.test.js`; all runs; high | contractual | unverified |
+| `project` / DOM-02 | `C/project.js`; run header | `R/nodb_api/project_bp.py`, `Ron`/SQL Run, project RQ | Actual header state/action render plus controller and auth/role-gate route evidence; high | contractual | verified |
 | `team` / DOM-03 | `C/team.js`; `T/team_pure.htm` | project/team routes, SQL owner/collaborator; no RQ expected | `J/team.test.js`; auth variants; high | contractual | unverified |
 | `map` / DOM-04A/04B | `C/map_gl.js` + four `C/map_gl_*` helpers; `T/map_pure_gl.htm` | `R/nodb_api/watershed_bp.py` and public map/query routes; map state; no RQ expected | DOM-04A: actual render, coordinate/search/drilldown, exact elevation payload, service/report tests; DOM-04B: actual layer defaults/legend hosts and layer/scale/SBS/feature Jest evidence; low, public-route change high | contractual | verified |
 | `channel` / DOM-05 | `C/channel_gl.js`; `T/channel_delineation_pure.htm` | `R/nodb_api/watershed_bp.py`, Watershed; delineation/build RQ | `J/channel_gl.test.js`; actual render, payload, and RQ persistence order; high | contractual | documented |

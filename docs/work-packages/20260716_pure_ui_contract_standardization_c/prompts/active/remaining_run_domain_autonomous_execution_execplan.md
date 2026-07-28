@@ -33,6 +33,8 @@ generator, manifest, or new CI system.
   existing route/state/worker evidence passed without repair.
 - [x] (2026-07-28 UTC) Executed DOM-12; repaired a saved model-source selected
   state mismatch with direct render/browser/route evidence.
+- [x] (2026-07-28 UTC) Executed DOM-02; actual project header rendering and
+  existing auth/state/module-gate evidence passed without repair.
 - [ ] Execute all remaining run-domain packages in the dependency-aware order.
 - [ ] Resolve each encountered hold through its owning package or a bounded
   operator decision.
@@ -94,6 +96,10 @@ evidence; 80 render tests, 15 Climate Jest tests, 71 upload/scaling/worker tests
 DOM-12: fixed `checked` versus `selected` macro input so saved SWAT state
 renders selected. Focused render/route (86), Observed Jest (4), lint, and docs
 lint passed; no authorization, payload, or queue behavior changed.
+
+DOM-02: no mismatch and no production patch. Added actual project header
+rendering; 123 render/route tests, 28 Project Jest tests, lint, and docs lint
+passed.
 
 ## Context and Orientation
 
