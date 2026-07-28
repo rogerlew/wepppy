@@ -438,7 +438,7 @@ docs:
     source: vendor
     vendor_id: wepp-forest
     rel_path: wepppy/weppcloud/routes/usersum/vendor/wepp-forest/docs/20260504-stakeholder-watbalance.md
-    title: "Stakeholder Brief: Modernizing the WEPP Water Balance"
+    title: "Technical Reference: WEPP-Forest Water-Balance Modernization"
     min_role: user
     category: weppcloud
     audience_tags: [user, operator]

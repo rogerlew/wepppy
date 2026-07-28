@@ -1,496 +1,114 @@
-# Stakeholder Brief: Modernizing the WEPP Water Balance — What Changed, Why, and What to Expect
+# Technical Reference: WEPP-Forest Water-Balance Modernization
 
-Date: 2026-05-04
+Original date: 2026-05-04
+
+Revised: 2026-07-28
+
 Audience: Hydrologists, land managers, program staff, and analysts who use WEPP results
 
-## The short version
-
-WEPP's water-balance physics has not changed. What changed is how the water balance is *organized* in the source code and how strictly its accounting can be audited. For roughly thirty years the water-balance code has been a pair of large fixed-form FORTRAN routines (`watbal.for` for the daily path and `watbal_hourly.for` for the hourly path) that mixed two very different jobs together: the **physics** of how water moves through canopy, snowpack, soil layers, and runoff; and the **accounting** of where each drop of water came from and where it went. That mixing made it nearly impossible to answer the most basic question a hydrologic model can be asked — *did this run conserve mass?* — without trusting the same code that produced the answer.
-
-We did not rewrite the physics. We **re-architected the water balance as a small set of independently testable process kernels** (canopy, snowpack, soil moisture, runoff, percolation, evapotranspiration), wired together by a thin **adapter** that exchanges state with the rest of WEPP and emits a closure residual against the terms exported to `H.wat` and `H.pass`. A closure audit can now be run on any hillslope, any day, any Overland Flow Element in any production output, and answer the conservation question definitively, without re-running the model.
-
-That re-instrumentation surfaced six real defects: four that the legacy code had carried for years, and two in the new process kernels that were caught by the dual-basis gate before release promotion.
-
-1. A **transport-capacity bypass** in the hourly path that allowed the bottom Overland Flow Element of multi-element hillslopes to discharge runoff in excess of its hydraulic limit. *(legacy defect)*
-2. A **snowmelt double-count** in the conservation basis used to audit the model, where snowpack release was being counted both as an external input and as an internal storage decrease. *(legacy defect)*
-3. A **missing storage export**, in which water held in live plant interception and surface residue was a real model state but was not being written to `H.wat`, so any audit that read the file saw that water disappear. *(legacy defect)*
-4. A **process-kernel storage and runoff reconciliation** error in which the new code, on a zero-input day, was emitting non-zero outputs without a compensating storage change; the runtime process guard caught it before any operational run was issued against the new kernels. *(new-code defect, caught at the gate)*
-5. A **rain-routing conflation in the legacy winter aggregator**, in which rain water that fell during rain-on-snow events was being routed into the snowmelt accounting stream instead of the rain stream and then suppressed when the snowpack ran out, producing closure-failure exit stops on the `insensible-aliquot/p26` operational replay. *(legacy defect, surfaced by the runtime guard)*
-6. A **baseflow-preservation interaction in the new process kernels**, in which two physically reasonable refinements added during the modernization — capping snowmelt input by available snowpack, and preserving baseflow output when other fluxes are scaled — were not specified for the case when both fired in the same step, producing un-reconciled mass on 47 of 477 hillslopes in the test cohort. *(new-code defect, caught at the gate)*
-
-The first three and the fifth had been silently producing wrong-but-plausible numbers in the legacy binary; none was reported as an error because the audit machinery to detect them did not yet exist. Once it did — once the new architecture made it cheap to ask the question — three appeared on the first sweep across our four-project forest corpus, and the rain-routing conflation appeared on a later production-style replay against the runtime conservation guard. The fourth and the sixth were defects in the new code itself; that both were caught at the gate, on the same residual threshold, before either could ship is the clearest demonstration that the dual-basis architecture works as designed. All six are repaired and regression-tested; closure on the originally-failing test tuples is at floating-point noise (approximately ±5 × 10⁻¹⁵ mm), and a structural-pattern fail-fast (Phase 3) now enforces the same invariant at runtime, halting any future run that exhibits the clamp-plus-preserve pattern with non-trivial input suppression.
-
-The trade-off, as with any closure-first repair, is real: in the small set of boundary situations where the old code was producing physically impossible numbers (negative residuals of hundreds to thousands of millimeters per OFE per day, on snowmelt days and on high-coverage forest hillslopes), the new outputs will read differently. They will read **correctly**. Aggregate water balance over a long simulation tightens by an amount that depends on how often a run hit those boundary conditions; well-conditioned runs are essentially unchanged.
-
-## How we investigate each defect: closure audits
-
-Where the compiler-fragility program ran ablation campaigns on individual crashes, the water-balance program runs **closure audits** on the model's accounting itself. A closure audit asks one question, at the smallest auditable unit:
-
-> For this hillslope, on this day, on this OFE — does the sum of inputs, minus the sum of outputs, equal the change in storage?
-
-If the answer is yes (within a small tolerance the program calls the **material non-closure threshold**), the audited unit is **closed**. If the answer is no, the unit is **flagged as a defect seed** and queued for investigation. The audit reads only the exported terms in `H.wat`, `H.pass`, and a small number of companion files; it does not call the model and does not depend on intermediate state. That independence is what makes it trustworthy: an audit and the model cannot quietly agree on a wrong answer, because the audit is computing a residual the model never sees.
-
-Each campaign is a formal **work package** owned by a coding agent and supervised through a structured protocol. The discipline is the same every time:
-
-1. **Reproduce the defect from raw exported terms.** If a residual cannot be reconstructed from `H.wat` and `H.pass` alone, the symptom may be a postprocessing artifact rather than a real conservation failure. Investigations do not proceed on artifacts.
-2. **Compute closure at the smallest failing unit.** A daily hillslope-level residual tells you something is wrong; a per-OFE residual on a specific day tells you *where* it is wrong. The program always drives down to the OFE/day level before hypothesizing a cause.
-3. **Form evidence-backed hypotheses.** Every hypothesis must cite a specific term: a divergence between inputs and outputs, a transfer that does not balance between adjacent OFEs, a storage state that is not exported at all.
-4. **Repair at the smallest mechanism boundary.** A daily-residual problem caused by a missing storage term is repaired by adding the term, not by relaxing the audit. A transport-cap bypass is repaired in the kernel that owns transport capacity, not by tuning a downstream coefficient.
-5. **Lock the repair into a regression test that asserts closure**, not non-closure. A test that codifies a defect as "expected behavior" is treated by the program as an inverted test and is rejected on review.
-6. **Re-run the audit across the entire corpus**, not just the seed that triggered the investigation. A repair that closes one hillslope but opens three others is rolled back.
-7. **Publish the evidence.** Every campaign produces a self-contained work-package folder under `docs/work-packages/` containing the closure residual data, the per-OFE term breakdown, the source diff, the regression test, and a disposition note that names the trigger, the mechanism, and the residual risk.
-
-An independent reviewer can open any work-package folder, re-run the closure audit on the cited hillslope, observe the same residual in the legacy binary, apply the documented repair, and observe the residual collapse to within tolerance.
-
-## Acceptance: dual-basis closure
-
-A repair that closes mass at the *exported* terms is only half the story. Before any repair is accepted, it must close on **both** of two independent bases:
-
-- **Kernel closure** — the per-step residual emitted by the new process kernels themselves, in 64-bit arithmetic, evaluated as the model is running. This is the strict normative basis: the physics, as implemented, must conserve mass within numerical noise.
-- **Interchange closure** — the residual recomputed from the exported `H.wat`/`H.pass` terms after the run completes. This is the diagnostic basis: a downstream consumer reading the published outputs must be able to reconstruct conservation without trusting the model.
-
-If a repair closes the kernel but not the interchange residual, the *export contract* is wrong (a real internal state is not being written out). If it closes the interchange but not the kernel, the *physics* is wrong (the model is conserving on paper but not in the math). Both must close before a repair is accepted. Each acceptance band, residual threshold, and metric family is recorded in the program's frozen acceptance manifest, and any change to that manifest goes through formal contract change-control rather than silent edit.
-
-## Before the rewrite: why targeted patches did not hold
-
-The architectural rewrite was not the first response to the closure problem. It was the response *after* the targeted-patch path was tried, taken to its limit, and found insufficient. Stakeholders who saw earlier release notes claiming a defect class had been resolved were not misled — those releases were issued in good faith on the evidence available at the time. The audit that came next showed the evidence was not yet broad enough.
-
-The first concrete defect surfaced on 2026-04-30 as a closure spike of about 180 mm on a single OFE on a single day of one forest hillslope (H2637, OFE 19, year 1987 day 44). It was investigated under exactly the same ablation discipline used by the compiler-fragility program: reproduce in isolation, observe, hypothesize, and patch at the smallest mechanism that resolves the residual. The investigation walked through eleven sequential candidate patches inside the existing `watbal_hourly` routine, each one trying to plug the residual at a different point in the legacy accounting:
-
-- A write-time correction (`U2`) reduced the target residual but did not generalize to a sibling hillslope (`H2649` OFE 18).
-- Widened-gate variants (`U2C`, `U2D`) over-corrected and produced large residual artifacts on non-terminal OFEs.
-- Internal-state exploratory lanes (`U3A`, `U3B`, `U3C`, `U4A`) either regressed control hillslopes broadly or did not move the residual at all.
-- A reconciled-accounting variant (`U5A`) produced catastrophic negative regressions on every test hillslope and was rejected immediately.
-- A state-side available-water cap (`U6A`) substantially reduced the anomaly but did not reach the closure target.
-- A loss-aware refinement of that cap (`U6B`) trapped a floating-point exception in a downstream sediment routine (`sloss.for:315`) and was rejected on runtime safety.
-- A bounded non-subtractive cap (`U6C`) closed the anomaly and ran cleanly, but failed the control-side day-44 drift envelope on three baseline hillslopes by margins outside the program's then-frozen ±0.05 mm tolerance.
-- Narrowed-predicate variants (`U6D`, `U6E`) reduced the control-side regression but failed the strict <1 mm anomaly closure target.
-- A bounded soft-limiter (`U6F`) passed the one-sided anomaly closure gate but failed the symmetric-closure robustness rubric, leaving a 68 mm residual on a sibling hillslope (`H2649` OFE 13) under the same gate parameters.
-
-What eventually cleared the acceptance gate, after activating a governance-path widening of the control-side drift envelope, was `U6C` — built and released as `wepp_260501` / `wepp_260501_hill` on 2026-05-01. The release was vendored into the production binary slot but was not promoted into operational use; a stakeholder brief drafted at the release point described the fix as resolving the multi-OFE water-balance defect class on the evidence then available.
-
-Two days later, when the closure audit was extended to a second forest project (`cochlear-beriberi`), the released binary itself failed. `wepp_260501_hill` produced an 814 mm residual on the `H285` defect family — contradicting the released-baseline premise the brief had been drafted under. Because the release had not yet been turned on for production runs, no user-facing simulations were issued against the regressed binary; the audit caught the failure inside the program's own gate. Six additional candidate patches (`U7A` through `U7F`) were attempted on top of the released baseline. The threshold-only ladder (`U7A1` through `U7A4`) demonstrated that the trade-off between two competing hillslopes (`H71` and `H285`) was structural, not tunable: no setting of the storm-cap threshold could simultaneously satisfy both. A factor-augmented variant (`U7C`) closed both defect families but was not released-baseline-compatible. The released-baseline-compatible variants (`U7D`, `U7E`, `U7F`) preserved the H2637 anomaly hillslopes but failed jointly on the new defect families. The campaign disposition, in unusually plain language for an incident report, reads:
-
-> external review/redirection required; do not extend parameter space silently.
-
-That sentence is the moment the rewrite became the correct response. The patch space inside the existing routine had not produced an inconsistent answer once or twice; it had produced an inconsistent answer at every promotion boundary, across roughly fifteen candidate patches, two months of structured investigation, and two distinct forest projects, with each patch trading one defect family for another. The defects were not isolated arithmetic leaks that could be plugged at the routine level. They were symptoms of an accounting structure that mixed too many concerns to separate cleanly.
-
-The Jim Frankenberger flagged this exact problem fourteen years earlier. The legacy routine carries this comment, present in the source since 2012-02-15:
-
-```
-c     This code needs work, it has not been tested with the new winter or subsurface code
-c     and has not kept up with other changes in watbal. Watbal also needs to be written -
-c     it has too many special conditions and is too large. JRF = 2/15/2012
-```
-
-Two things in that comment matter for stakeholders. First, it sat visible in the source for fourteen years, and the technical debt it named was real: each candidate patch above is, in effect, a measurement of how much that debt had accumulated. Second, the comment specifically calls out the interaction with "the new winter or subsurface code" — exactly the regime where the program-wide closure audit later flagged all 1,166 forest hillslopes on snowmelt days, and exactly the regime where the OR-H0066 interception-storage defect was finally isolated. The drift the original author flagged in 2012 is the same drift the closure audit observed in 2026.
-
-The rewrite, then, is not a preference for new code over old. It is the conclusion of a measurement: that the existing routine's mixed accounting could not be patched into closure without trading defects, that an explicit author note had named the same problem more than a decade earlier, and that the only response that closes the audit without re-introducing the trade-off is to separate physics from accounting at the architecture boundary.
-
-## Why this is a re-architecture, not a rewrite
-
-Three things made the legacy water-balance routines hard to audit, and none of them was the physics:
-
-1. **Two near-identical code paths** (`watbal` for the daily case, `watbal_hourly` for the hourly case) duplicated most physics terms but not quite all of them, and over time small drifts accumulated between the two. Defects fixed in one path were not always mirrored in the other (this is exactly how fix #13 in the compiler-fragility brief surfaced — the same divide-by-zero existed in the unguarded sibling).
-2. **Common-block state passed silently in and out**, so it was impossible to enumerate the inputs and outputs of any one piece of the calculation. That made unit testing essentially impossible: you cannot test a function whose inputs are not declared.
-3. **No closure residual was emitted**, so a defect could only be discovered by watching aggregate outputs over many runs and noticing that the long-term balance drifted. That detection threshold is much coarser than the per-day, per-OFE granularity at which closure failures actually occur.
-
-When we rebuilt the water balance as a process-based architecture, three things happened:
-
-1. The daily and hourly paths now share the same physics kernels. The hourly path adds one extra policy surface (transport-capacity enforcement) on top, instead of duplicating the entire calculation. Defects in shared physics can no longer go unmirrored.
-2. Every kernel declares its full input set, full output set, and an explicit conservation residual. Unit tests, once impossible, are now mechanical to write.
-3. The adapter emits a closure residual on every step. The closure-audit machinery described above is the natural consumer of that residual.
-
-The legacy `watbal.for` and `watbal_hourly.for` routines remain in the source tree for historical traceability and rollback, but the water-balance release path now has a single-trajectory process ownership posture: production rows and downstream-readable water-balance state are owned by one coherent trajectory rather than by a mix of process fluxes and legacy storage. WB-08 initially attempted that cutover and correctly failed its closure gate when it produced hybrid rows (`1166` replay rows, only `27` closed). WB-08A repaired that state-coupling failure, aligned the runtime kernel and export guards on the same trajectory, re-closed the full forest surface (`1166/1166`), and produced the date-versioned `wepp_260504` / `wepp_260504_hill` release artifacts. The legacy binary remains available as a tagged rollback/reproducibility posture, not as the correctness target.
-
-## How the rewrite was built: specifications, modern Fortran, lint gates, and unit tests
-
-The architectural picture above — kernels, adapter, dual-basis closure — describes *what* the rewrite is. This section describes *how* it was built. The engineering discipline is what prevents the next fourteen years of accumulated drift from happening to the new code in the same way it happened to the old.
-
-### Specifications were frozen before any code was written
-
-The program is structured as a fixed sequence of work packages, each gated on the previous one's specification being formally accepted before any production source is touched. The sequence was deliberate:
-
-- **Contracts and acceptance bands first (WB-02).** Before the new architecture was designed, the program froze the output schema, the acceptance-band manifest, the dual-basis closure policy, and the divergence-disposition rules. Any change to those frozen artifacts after the freeze date must run through formal change-control. The new optional `InterceptionStorage` column in `H.wat` described later in this brief is the first such change since the freeze; it carries a contract-change-control entry on file (`WB02-CC-20260504-02`), not a silent edit.
-- **Process architecture and unit-test matrix next (WB-03).** Before any kernel was implemented, the program published a process-architecture specification that named every kernel, declared its full input set and output set, declared its conservation invariant, and named the adapter boundary that prevents common-block state from leaking into kernels. Alongside the architecture, a unit-test matrix named every test file, every test vector class, and every assertion **before a single line of kernel code was written**.
-- **Implementation in test-first order (WB-04, WB-05).** Each kernel was implemented in a fixed test-first sequence: tests for kernel `K` were added (and ran failing, because the kernel did not yet exist) before kernel `K`'s implementation landed; once the implementation was in, the tests passed. The hourly transport-capacity test was added before the q-cap kernel implementation, even though the WB-01 baseline corpus did not yet contain a q-cap binding event — exactly the gap that the H2637 OFE19 incident later filled with real production evidence.
-
-The sequence is not bureaucratic ceremony. It is what prevents the drift the 2012 source comment named. A kernel cannot be modified to support a new behavior without that modification being visible at its declared contract boundary; a contract cannot be changed without the change-control workflow recording it; an acceptance band cannot be widened without a memo and a reviewer. The legacy routine drifted for fourteen years because none of those gates existed. The new architecture has them, and the same coding agent that wrote the rewrite is bound to honor them.
-
-### Modern Fortran (free-form `.f90`, `implicit none`, modules, derived types, 64-bit precision)
-
-The legacy routines are **fixed-form Fortran 77**: column-7 statement starts, column-72 line termination, comments marked by `c` in column 1, default implicit typing (any undeclared variable starting with `i`–`n` is implicitly an integer, anything else is implicitly a real), no module system, and no built-in mechanism for declaring the difference between an integer flag, an integer index, and an integer count. A typo in a variable name in F77 introduces a new, silently-typed variable; a positional argument to a subroutine has no name visible at the call site; and a variable's *meaning* lives in a comment somewhere else in the file rather than in the declaration.
-
-The new code is **free-form Fortran 90**, written under four conventions enforced on every file:
-
-- **`implicit none`.** Every variable must be declared. The class of typo that produced silent state in F77 produces a compile error in the new code.
-- **Modules with explicit interfaces.** Each kernel is a module; each adapter is a module. Calling a kernel goes through a declared interface, so an arity or type mismatch is caught at compile time instead of producing a stack-corruption symptom that surfaces hundreds of timesteps later.
-- **Derived types for state.** Closure state, flux state, and per-kernel status are passed as named derived types (`wb_closure_state`, `wb_flux_state`, `wb_process_status`). The meaning of each field is visible at every call site instead of being a positional argument that has to be cross-referenced against a separate header file.
-- **64-bit precision (`real64`) for conservation arithmetic.** Single-precision rounding error is the natural noise floor of any long simulation, and the program holds the conservation residual cleanly below that floor by running every kernel and the closure audit in 64-bit. The adapter performs the precision conversion at the boundary into and out of legacy single-precision storage; the audit never sees the legacy precision loss.
-
-Why F90 instead of just modernizing the F77? Because the structural fixes — explicit modules, derived types, declared interfaces — are F90 features. Without them, the kernel/adapter boundary cannot be enforced; you are back to the common-block leakage that made the legacy routine impossible to audit. The legacy `.for` routines remain in the source tree for traceability and rollback while the new `.f90` kernels build under the modern Fortran package manager (`fpm`) for development and testing and are linked by the production makefile for release builds. After WB-08A, the accepted release posture is no longer "process observability beside legacy production." It is single-trajectory process ownership for the water-balance accounting path, with rollback served by tagged binaries.
-
-### Lint and unit-test gates run on every change
-
-Two automated gates run on every touched file before any change can be merged:
-
-- **Static analysis (`fortitude check`).** Fortitude is the modern Fortran linter — the analog of `flake8` for Python or `eslint` for JavaScript — and is the same lint gate the compiler-fragility program runs on its `.f90` SIGFPE guards. It catches missing `implicit none`, unused variables, ambiguous interfaces, type mismatches, and several patterns that historically produced undefined behavior in long-lived Fortran codebases. It must pass clean on every touched `.f90` file before review.
-- **Kernel unit tests (`fpm test`).** Every kernel has a test file under `fpm-test/` that asserts the kernel's conservation residual is zero within 64-bit numerical noise on a battery of canonical input vectors, that documented edge cases (zero precipitation, zero canopy, fully frozen layer, zero field capacity) produce the documented behavior rather than a NaN, and that any new test vector added during a repair (the q-cap binding event from H2637, the interception-storage carryover day from OR-H0066) is checked in as part of the repair commit. The full test suite ran clean on every step of WB-04, WB-05, WB-05A, and WB-05E.
-
-The forest closure sweep described later in this brief is the integration-scale extension of the same discipline: 1,166 hillslopes, run end-to-end against the production binary, audited against an external residual that the model itself never sees. Lint plus kernel unit tests plus closure audit plus contract change-control is a four-layer gate. None of the four alone is sufficient — lint catches typos, unit tests catch kernel logic errors, the closure audit catches accounting-structure errors, and change-control catches scope creep — but the four together are how the program promises that the 2012 comment will not need to be written again.
-
-## What we actually fixed
-
-Each fix below came out of a structured closure investigation that isolated the exact accounting term and the exact code path responsible for the residual, repaired it at the smallest possible scope, and proved the repair across the entire 1,166-hillslope forest corpus. None of these changes alter WEPP's hydrologic physics. They repair specific accounting and export defects so the model's conservation can be verified.
-
-### 1. Transport-capacity bypass in the hourly path (`watbal_hourly` / WB-05A — H2637 OFE19 incident)
-
-WEPP represents a hillslope as one or more **Overland Flow Elements** (OFEs) — strips of land arranged downslope of one another, each with its own soil and management. Surface runoff generated on an upslope OFE flows onto the next OFE down, where it can either re-infiltrate or continue downslope. The hourly path applies a **transport capacity** ("q-cap") to each OFE: a maximum rate at which surface flow can move across the strip given its slope, length, and surface roughness. If runoff arrives faster than the q-cap allows, the excess is supposed to be held back as ponded surface storage, not passed straight through.
-
-The defect was that the q-cap was only being enforced when an OFE's *effective* flow length exceeded its *physical* slope length. That condition is rarely true at the bottom OFE of a long hillslope: the effective length is usually shorter than the slope length there, because flow has been progressively concentrated. So at the bottom OFE — exactly the place where the largest cumulative runoff arrives — the q-cap was being **bypassed entirely**. The model would happily route runoff at any rate, no matter how unphysical, because the gate that was supposed to catch the violation was wired to the wrong condition.
-
-The defect surfaced on a real production hillslope, H2637, on its 19th and bottom OFE, where the discrepancy between modeled discharge and the q-cap reached catastrophic levels (positive q-cap margins of hundreds of millimeters of water per hour). The repair restores the hard-cap behavior in every condition where the q-cap is supposed to apply, and reserves the soft-limiter behavior for the geometric span case where it actually belongs.
-
-Impact: hourly-path runs that include long, multi-OFE hillslopes now respect transport capacity at every OFE. Aggregate event totals may shift on hillslopes that were previously routing past their physical cap; for hillslopes that never violated the cap, results are unchanged.
-
-### 2. Snowmelt double-count in the closure basis (WB-05E — global accounting repair)
-
-The water-balance audit asks whether `inputs − outputs − Δstorage = 0`. The legacy convention was to use the term **`RM`** (rainfall plus snowmelt) as the input, and to track soil moisture plus snowpack water (`Snow-Water`) as the storage. That convention is internally inconsistent: snowmelt is **not** an external input, it is an **internal transfer** from the snowpack to the liquid-water pool. Counting it on both the input side (in `RM`) and the storage side (as a decrease in `Snow-Water`) double-counts melt water on every snowmelt day.
-
-For a watershed with no snow, the inconsistency was invisible — `RM` equaled rainfall and the snow term was zero. For a forest hillslope with persistent snowpack and large melt events, the inconsistency produced exactly the residual signature the audit was reporting: large negative daily closure residuals on melt days, scaling with melt volume, in the same hillslopes year after year. Across the four-project forest corpus, **all 1,166 hillslopes** were flagged on first audit because every one of them had melt-day residuals exceeding the program's 1.0 mm material non-closure threshold.
-
-The repair changes the audit's external-input definition to **precipitation plus irrigation** (`P + Irr`) only, and lets snowpack accumulation and melt show up where they physically belong — as changes in `Snow-Water` storage. This is not a tuning change, and it is not a relaxation of the audit. It is the recognition that a quantity already accounted for as storage cannot also be accounted for as input. The repair was simultaneously applied to the closure-audit tool and to the new process kernels, so the two now agree on what counts as external water.
-
-Impact: closure residuals on snowmelt days collapse from hundreds of millimeters to numerical noise. Production `H.wat`/`H.pass` outputs are unchanged. Any downstream consumer that was computing a residual using `RM` as the external input was implicitly inheriting the same double-count and should now compute it using `P + Irr` with `Snow-Water` in the storage delta.
-
-### 3. Missing interception-storage export (`H.wat` / WB-05E — OR-H0066 incident)
-
-WEPP carries two storage states for water that has fallen on plants or surface residue but has not yet reached the soil:
-
-- **`pintlv`** — water held on the canopy of living vegetation (interception by leaves and stems), evaporated back to the atmosphere on subsequent dry hours.
-- **`resint`** — water held on surface residue (litter, mulch, slash), with the same fate.
-
-Both are real model states. Both persist across timesteps. Both can hold a non-trivial amount of water on a forest hillslope with high canopy cover and heavy residue — for the OR-H0066 hillslope on the day this defect was isolated, **interception storage held 1.13 mm of water** that the rest of the model knew about.
-
-The defect was that neither of these terms was written to `H.wat`. Closure audits, which read only the exported terms, saw input and output but had no way to see that 1.13 mm of water sitting in canopy and litter storage. From the audit's point of view, that water vanished — it appeared on the input side as precipitation, never appeared on the output side as runoff or ET (because it was still in the canopy waiting to evaporate), and never appeared in the storage delta (because the relevant storage term was not exported). The audit's residual carried the entire 1.13 mm as unexplained non-closure.
-
-This was the **last remaining seed** out of 1,166 after the snowmelt repair landed. It was also the diagnostic case that proved the closure-first discipline works: a sub-2 mm residual on a single hillslope, on a single day, on a single OFE, was traced through the per-OFE term breakdown to a missing storage term, and the term was added rather than the residual being explained away. The post-repair residual on the same hillslope/day/OFE is **0.0009 mm**.
-
-The repair adds an optional trailing column, `InterceptionStorage`, to `H.wat`, populated as `pintlv + resint` for the OFE/day. The column is documented in the WEPP output schema and is gated by a contract-change-control entry (`WB02-CC-20260504-02`). Downstream parsers that key on column count or column name will need to declare whether they expect the new column; parsers that key on column header are unaffected.
-
-Impact: the last unresolved closure failure across the entire forest corpus closes with a real defect repair, not a threshold relaxation. `H.wat` gains one optional column. Closure audits computed using the new column conserve mass at the OFE/day level across all 1,166 audited hillslopes.
-
-### 4. Process-kernel storage and runoff reconciliation (`watbal_process_kernels` / WB-05F — H0001 process-guard incident)
-
-This is the first defect described in this brief that lived in the *new process kernels themselves*, not in the legacy accounting. It is also the clearest demonstration that the dual-basis closure gate works as designed: the gate catches errors on both sides of the architectural transition, in the legacy code being phased out and in the new code coming in.
-
-After the WB-05E repairs landed, the program added a **runtime process guard** on top of the post-hoc closure audit. As the model runs, both kernel and interchange residuals are evaluated on every replayed seed, and the guard trips fast if either residual exceeds the 1.0 mm material threshold. On the first scoreboard run with the runtime guard active, hillslope `H0001` from the cochlear-beriberi project tripped immediately — both residuals reading −15.8066 mm. The fact that **kernel and interchange residuals were equal** is the diagnostic signature: the new kernels were producing internally consistent but non-conserving outputs, and the export was faithfully writing those non-conserving outputs to `H.wat`. Both bases agreed; both were wrong. Exactly the case the dual-basis gate is designed to surface.
-
-The defect localized to two places in the new kernel flow. First, on a day with zero external input (no precipitation, no irrigation, no melt), the adapter was emitting non-zero output fluxes while storage was being held flat — flux ascribed to nothing, no compensating storage change, residual carrying the full mismatch. Second, the per-OFE runoff mapping in the new code was reconciling against a watershed-summed `q` rather than the OFE-local `qofe`, which inflated the apparent flux on multi-OFE chains. The repair makes the kernel-flow storage update operate against the same closure basis the audit uses (so flux without a storage change is no longer representable), and reconciles `q`/`qofe` to OFE-local values consistent across the chain. The 1.0 mm fail-fast threshold on the runtime guard was kept unchanged.
-
-Impact: H0001 closes with both residuals within numerical noise. The full WB-05B forest corpus now closes under the **runtime process-guard gate** with `1166/1166` rows passing on the same 1.0 mm threshold WB-05E used. The post-repair residual envelope is materially tighter than the WB-05E close: maximum absolute daily residual `0.92 mm`, maximum target-OFE residual `0.02 mm`, maximum any-OFE residual `0.51 mm` — all comfortably under the 1.0 mm threshold and well under WB-02's frozen 40 mm single-OFE acceptance band. WB-05F retired the last closure-defect blocker before cutover execution. WB-08 later found a separate hybrid state-coupling problem during cutover; WB-08A repaired it and accepted the release-ready single-trajectory posture.
-
-### 5. Built-in process-kernel observability and runtime conservation guard
-
-Concurrent with the four repairs above, the new process-based kernels are now linked into both the watershed binary (`wepp`) and the hillslope binary (`wepp_hill`) under an opt-in observability flag. When the flag is present, every step emits a provenance record showing which kernel ran and what residual it produced. WB-05F added a **runtime process guard** on top of the same observability path: instead of just emitting residuals for after-the-fact audit, the guard evaluates kernel and interchange residuals as the run proceeds and trips fast if either crosses the 1.0 mm threshold. This is the same observability discipline the compiler-fragility program uses for SIGFPE incidents, applied to conservation, with a fail-fast added so a non-conserving run cannot complete cleanly and produce a wrong-but-plausible output file. It is what caught fixes #4 and #6 — the first new-code defect ten days before release, and the rain-routing legacy defect ten days after.
-
-The observability layer was extended on 2026-05-14 with a **structural-pattern fail-fast** (Phase 3). The existing residual guard catches a defect when its symptom (a closure residual above threshold) becomes visible at a step. The structural-pattern fail-fast catches the same defect class earlier, by watching for the structural pattern that produces the symptom — an input being clamped while a corresponding output is preserved — and halting on the pattern itself rather than waiting for the residual to manifest. The full description of this gate is in fix #8 above. Together, the residual guard and the structural-pattern fail-fast form the runtime correctness-over-completion enforcement layer.
-
-Observability of the per-kernel provenance record remains opt-in. The runtime conservation guard and the structural-pattern fail-fast are always-on by default. In the accepted release posture, observability-only kernels do not claim trajectory ownership by themselves; trajectory ownership begins when a kernel drives production output, production state, or downstream-readable side effects.
-
-### 6. Rain-routing conflation in legacy winter aggregator (`insensible-aliquot/p26` incident — Candidate 1 fix)
-
-WEPP keeps separate water-balance accounting for water from different sources: rain water flows through one accounting stream, snowmelt flows through another, and the closure audit relies on each source staying in its declared stream throughout the day. Inside the legacy daily winter routine, this separation was being silently violated. When rain fell during hours that snow was on the ground, the rain water was being added to a daily snowmelt accumulator and broadcast at end-of-day as if it had been melt rather than rain. A correlated change elsewhere in the legacy code zeroed out the rain stream on those same days, so the rain water disappeared from the rain channel entirely and re-emerged through the melt channel.
-
-For days when the snowpack survived the rainfall, the misrouting produced a small but incorrect attribution that was not visible at the daily aggregate level. For days when the rain itself was heavy enough to melt the rest of the snowpack — the rain-on-snow event that ends with bare ground — the end-of-day total was large (the full day's rainfall, reported as snowmelt), but no snowpack remained to support it. The runtime conservation guard correctly caught this: it sees the kernel being told to accept large "snowmelt" input against zero available snow, caps the input to zero by physical availability, then sees output water leaving the system with no corresponding input source. The guard tripped on the `insensible-aliquot/p26` test run with a residual of −3.95 mm on March 25 of year 1 of the simulation.
-
-The repair — recorded as the program's "Candidate 1 rain-routing contract" — corrects the misrouting at its source. Rain water now always enters the kernel through the rain stream, regardless of snowpack state. The snowmelt stream carries only actual energy-balance snowmelt produced by the snowpack itself. The rain-on-snow energy interactions (rain warming the snowpack, accelerated melt, refreeze) are modeled within the snowpack's own energy-balance update, not by aliasing rain mass into the melt stream. Post-repair residuals on the originally-failing test tuples are at floating-point noise (approximately ±5 × 10⁻¹⁵ mm), and the 50-year `p26` replay completes cleanly under the runtime guard.
-
-Impact: rain-on-snow days in forest runs that exhaust the snowpack mid-day no longer trip the runtime conservation guard. Production `H.wat`/`H.pass` outputs will read differently on those days — rain water now appears in the rain stream where it physically belongs, and the snowmelt stream reports only true energy-balance melt — but the total liquid input to the soil profile on each day is unchanged. Well-conditioned runs without rain-on-snow events are unchanged.
-
-Candidate 1 closed the immediately-failing `p26` test tuple but did not by itself close the broader test cohort. The remaining 47 failures on that same cohort were a separate but related defect class, addressed by the Shape A fix described below.
-
-### 7. Baseflow-preservation interaction in new process kernels (`watbal_process_kernels.f90` WB-30 — Shape A fix)
-
-After Candidate 1 closed the `p26` rain-routing defect, the broader 477-run test cohort on the same forest project still showed 47 hillslopes failing with the same closure-failure exit code, on different dates than the original `p26` failure. These were not rain-on-snow events; they were a different mechanism with the same fingerprint, surfaced by the same audit. The investigation identified the source as an interaction between two unrelated refinements added during the modernization program.
-
-The first refinement (work package WB-18) added a physical safeguard at the kernel boundary: snowmelt water arriving at the kernel cannot exceed the snowpack mass available to produce it, so the kernel caps the melt input at the snowpack mass. This is correct physics — water cannot melt from snow that does not exist — and is a defensive guard against producer-side over-computation.
-
-The second refinement (WB-30) added an accounting partition on the output side: when the kernel needs to scale down its output fluxes to balance a reduced input (a "shortfall" correction, fired when storage capacity cannot absorb the difference), the baseflow component — the slow groundwater return flow that feeds streamflow between rain events — is held at its full value rather than scaled with the rest. The reasoning is that baseflow is governed by deeper, slower groundwater dynamics with its own timescale, so it should not auto-scale with rapid surface fluxes.
-
-Both refinements are physically reasonable in isolation. But the interaction between them was not specified: when the snowmelt cap fires (reducing the kernel's input) and the kernel applies its shortfall correction (which preserves baseflow at full value), the closure equation is left with more water leaving the system than entering, with no compensating storage change to absorb the difference. This produced the 47-hillslope cohort of closure failures.
-
-The repair — recorded as the "Shape A" fix at the WB-30 site, and the program's first concrete enforcement of the new [clamp-plus-preserve mass-closure invariant](contracts/wbk08-clamp-preserve-mass-closure-invariant.md) — relaxes the baseflow preservation specifically when its precondition (an unmodified input) is no longer true. Under normal operation, baseflow stays preserved (the WB-30 partition is correct). When the snowmelt cap fires, the shortfall correction scales baseflow along with the other outputs, restoring mass closure at the cost of the partition under that specific failure condition. The full 477-run cohort now closes at zero failures; the surveillance counter that recorded the original residual cohort on `p26` post-Candidate-1 now reports zero events across all magnitude buckets.
-
-Impact: the 47-hillslope regression cohort closes cleanly. Production `H.wat`/`H.pass` outputs will read slightly differently on the specific days where the snowmelt cap fires (typically late-winter or early-spring melt-with-rain days when the snowpack is at the edge of exhaustion), because the baseflow attribution on those days now reflects the reduced-input balance. Total water input and total water output across the simulation are unchanged in aggregate; the partition between flux channels is more conservatively distributed on the affected days.
-
-### 8. Phase 3 fail-fast enforcement: correctness over completion
-
-Concurrent with the WB-30 Shape A repair, the program promoted its detection mechanism from passive recording to active enforcement. The clamp-plus-preserve surveillance counter introduced during the `p26` investigation watches for the structural pattern that produces residuals — an input being clamped while a corresponding output is preserved — rather than waiting for the residual itself to exceed threshold. As of 2026-05-14, that counter has been promoted to runtime fail-fast: when the pattern fires in a single step and the suppressed input exceeds a small noise-floor threshold (0.1 mm), the run halts immediately with a dedicated error code (206) and emits a structured one-line message naming the hillslope, day, Overland Flow Element, status pair, and the magnitude of suppressed input.
-
-This is correctness-over-completion enforcement, and it represents a deliberate philosophical shift. Legacy WEPP, in its long history, prioritized completion: a run that hit unexpected conditions would silently produce numbers that compensated at the aggregate level but were locally wrong, and the model would terminate successfully. The new gate makes that impossible. A future producer-side defect that produces a clamped input alongside a preserved output now surfaces as an immediate stop, naming the exact step and the violating quantity, rather than as a small residual that has to be discovered later by post-hoc audit.
-
-The 0.1 mm threshold is anchored to empirical evidence from the surveillance counter's distribution; the program's contract record explicitly prohibits tuning the threshold to suppress firings, because a firing is information, not noise to be hidden. The counter remains in place underneath the fail-fast as a passive observational channel — sub-threshold events still get recorded — but events above the threshold are now treated as errors that must be investigated, not residuals that can be averaged away.
-
-### 9. QOFE per-OFE runoff accounting on multi-OFE hillslopes (`watbal.for` / `watbal_hourly.for` / `outfil.for` — carved-letter MOFE closure-anomaly investigation)
-
-A multi-OFE hillslope is one that has been split into several Overland Flow Elements running top-to-bottom — used when soil, vegetation, or land treatment changes along the slope, so each segment is modeled with its own properties. For each OFE, WEPP writes two runoff-related columns to the daily water-balance output (`H.wat`): `Q`, which is the day's runoff expressed as a depth averaged over the contributing area down to and including that OFE, and `QOFE`, which is intended to be the day's runoff expressed as a depth over that single OFE's footprint. On a single-OFE hillslope the two numbers are identical because the contributing area is the OFE's area. On a multi-OFE hillslope they should differ — the bottom OFE's `Q` reflects the whole-hillslope average, its `QOFE` reflects the local depth — but they should describe the same physical water moving through the same place, just measured against different denominators.
-
-A 2026-05-15 closure audit of the carved-letter forest project, run under multi-OFE configuration, flagged `113` of `370` hillslopes as having physically impossible per-OFE water balances. The audit said too much water was leaving each OFE on those hillslopes to be explained by the rain, snowmelt, and upslope inflow entering it. Tracing the residuals back to the original water-balance numbers showed the same pattern on every flagged hillslope: each OFE's `QOFE` value was exactly `n` times its `Q` value, where `n` is the OFE's position counted from the top of the slope (so the second OFE from the top reads `QOFE = 2 × Q`, the third reads `3 × Q`, and the bottom of a 14-OFE hillslope reads `14 × Q`). No physical mechanism produces that pattern. It is the signature of dividing the same volume of water by the wrong slope-length denominator: the OFE's own length instead of the cumulative length to the bottom of the OFE.
-
-Reading the source confirmed it. The `Q` write at `watbal.for:1262` divides by `totlen` — the cumulative slope length down to the OFE — while the `QOFE` write four lines below divides by `slplen` — the OFE's own length. A 2008 comment in the same source file documents that someone had deliberately changed the `Q` line to use the cumulative length, noting the reason ("efflen may span OFE's"); the parallel change to the neighboring `QOFE` line was never made, and the inconsistency stayed in place for 18 years. It was invisible until production runs began using multi-OFE configurations regularly, because on a single-OFE hillslope `slplen` equals `totlen` and the two write expressions collapse to the same number.
-
-The fix is one substitution applied twice: change `slplen` to `totlen` on the `QOFE` write at `watbal.for:1267` and on the matching line in the hourly path at `watbal_hourly.for:1356`. After the fix, `QOFE` equals `Q` exactly on every OFE on every day. The `QOFE` header text in `outfil.for:631,667` was updated to document the equivalence. A separate issue surfaced during the same investigation: on rare days when no surface runoff is generated anywhere on the hillslope but subsurface lateral flow (`latqcc`) cascades downslope through saturated soil, the closure-audit diagnostic was firing as if the lateral flow were a surface anomaly. The audit was hardened to skip the surface-pulse check on days where no OFE produced surface runoff.
-
-The carved-letter MOFE closure audit's per-OFE closure formula is mass-conservative under the post-fix `QOFE = Q` semantics. This is the empirical evidence that drove the lane (b) decision: the C009 candidate-replay across all `370` hillslopes found that the closure equation balances when `QOFE` is read as a `Q`-alias and does not balance under the as-emitted legacy interpretation. Consumer code that aggregates `QOFE` to recover hillslope-scale totals is affected by the fix in predictable, derivable ways — discussed in the QOFE canonical-definition section below. The fix changes the numerical values published in the per-OFE `QOFE` column on multi-OFE hillslopes; analyses that re-aggregate post-fix `H.wat` files to derive hillslope-scale runoff volumes must use the post-fix recipe described below.
-
-A note is warranted on which audit caught this defect, since `wepp_260514` does carry the runtime conservation guards introduced in §5 and §8. The `113` flagged hillslopes were detected by the **external closure audit** described in *How we investigate each defect: closure audits* above — the post-run reader of `H.wat` and `H.pass` that asks, at every OFE on every day, whether the sum of inputs minus the sum of outputs equals the change in storage. The runtime conservation guards (`ERROR STOP 205`, `ERROR STOP 206`, `WBK08_PHASE3_FAILFAST`) did not fire on any of these runs, and they were not supposed to. Those guards evaluate residuals against WEPP's own internal water-balance state and against whole-hillslope daily totals — both of which were correct on every flagged hillslope. The model's internal runoff variable, the `Q` column it wrote to `H.wat`, and the canonical hillslope runoff volume it wrote to `H.pass` were all using the correct cumulative-length normalization. The defect lived only in the per-OFE `QOFE` value, which is generated by a separate write expression that no internal physics check reads back. From the model's own perspective every conservation invariant balanced; the inconsistency became visible only when an outside reader interpreted the per-OFE column as a downstream consumer would. This is the class of defect the external audit was specifically designed to catch: one that is correct in the model's internal physics, correct at the hillslope aggregate, and wrong only in how a per-OFE detail is presented to users and downstream tools. The audit catches it because it computes residuals against published values the model never reads back — exactly the independence property described in §*How we investigate each defect*. The defect's 18-year survival is consistent with this audit-layer distinction: until the external audit existed and was applied per-OFE, no automated check ever read the per-OFE `QOFE` column back as a quantity that had to balance against other published terms.
-
-Impact: the carved-letter multi-OFE closure-anomaly cohort drops from `113` flagged hillslopes to `0` under `wepp_260516`. A second forest project (`orthographic-progesterone`) run from the same physical inputs but built earlier in the binary lineage reproduces `0/370` as well, which is the regression-quality check that the fix is the cause rather than a coincidence of one run. The canonical hillslope runoff totals reported in `H.pass.runvol` (the values consumed by channel routing and watershed-level reports) are unchanged by the fix. The numbers that *do* change are the published `QOFE` values on every OFE of every multi-OFE hillslope. The defect was structural and silent because of an algebraic coincidence at the bottom-OFE row: the pre-fix `QOFE(bottom)` was inflated by exactly the factor that the per-OFE `Area(bottom)` is smaller than the total hillslope area, so any consumer or audit diagnostic that computed runoff volume as `QOFE(bottom) × Area(bottom) × 0.001` got the right answer even with the wrong per-row depth. The two factors of the OFE count cancelled. That cancellation is why the inconsistency survived undetected through the single-OFE production era — and why a few diagnostic and reporting formulas that exploited the cancellation read differently against post-fix data and have to be updated alongside the source fix. The full list and the post-fix recipe are in the next section. A separate amplifier in the rainfall-to-runoff path, first surfaced between the April 30 and May 14 builds and tracked under the same incident package, is independent of this fix and remains an open follow-up.
-
-## QOFE: canonical definition
-
-`H.wat` reports two runoff-related depth columns per Overland Flow Element (OFE) per day, plus an area column. Their canonical interpretation, before and after the lane (b) fix in §9, is given here so that legacy and post-`wepp_260516` files can be read unambiguously.
-
-### Columns
-
-- **`Q` (mm)** — Daily runoff at the bottom of the OFE, normalized to the cumulative slope length down to that point. At the bottom OFE — where the cumulative slope length equals the total hillslope length — `Q` equals the canonical hillslope-average daily runoff depth, the same quantity given by `H.pass.runvol / total_hillslope_area`. The `Q` formula is unchanged between legacy and `wepp_260516`.
-- **`QOFE` (mm)** — In `wepp_260516` and later, identical to `Q` in every row. In legacy builds (`wepp_260514` and earlier), `QOFE` used the OFE's own slope length as denominator rather than the cumulative length, producing the inflated pattern described in §9 — `QOFE_legacy(i) = i × Q(i)` for equal-length OFEs, with slight off-integer drift on unequal-length OFEs.
-- **`Area` (m²)** — `slplen(i) × fwidth(i)`. The OFE's own footprint: its slope length times the hillslope's flow width. For equal-length OFEs, every row reports the same `Area`. Total hillslope area is the sum of `Area` across the day's OFE rows for a given hillslope, equivalently `n_ofe × Area(any row)` for equal-length OFEs.
-
-### Single-OFE hillslopes (`n_ofe = 1`)
-
-The cumulative slope length down to the bottom of the OFE *is* the OFE's own slope length. `Q` and `QOFE` reduce to the same expression in both legacy and post-fix builds, and both equal the canonical hillslope-average runoff depth. `Area` equals the total hillslope area. `QOFE × Area × 0.001` gives the canonical daily runoff volume from `H.pass.runvol`. Single-OFE production runs are bitwise unaffected by lane (b); historical single-OFE data needs no reinterpretation.
-
-### Multi-OFE hillslopes (`n_ofe ≥ 2`)
-
-Let `n = n_ofe`, `Q_canonical` be the canonical daily hillslope-average runoff depth (mm), and `A_total` be the total hillslope area (m²). For equal-length OFEs each row reports `Area = A_total / n`.
-
-In **`wepp_260516` and later**, the bottom-OFE row has `Q = QOFE = Q_canonical`. Intermediate OFE rows have `Q = QOFE` smaller than `Q_canonical`, reflecting the cumulative runoff routed past that OFE's bottom edge normalized by the cumulative contributing length above. To recover the canonical hillslope runoff *volume* from `H.wat` alone, the post-fix recipe is:
-
-> `canonical_volume_m³ = Q(bottom) × A_total × 0.001 = QOFE(bottom) × A_total × 0.001`
-
-— not `Q(bottom) × Area(bottom)`, which gives only `1/n` of the canonical volume. `H.pass.runvol` gives the same answer directly without any per-OFE arithmetic.
-
-In **legacy builds (`wepp_260514` and earlier)**, the bottom-OFE row has `QOFE = n × Q = n × Q_canonical`. The pre-fix recipe `QOFE(bottom) × Area(bottom) × 0.001` evaluated to the canonical hillslope volume by an algebraic coincidence: the `n×` inflation in `QOFE` cancelled the `1/n` deflation in per-OFE `Area`. The same recipe applied to post-fix data is off by a factor of `n`.
-
-Summing `QOFE × Area` (or equivalently `Q × Area` post-fix) across all OFE rows of a multi-OFE hillslope does *not* recover the canonical runoff volume under either build. Under legacy data the sum inflates by approximately `(n+1)/2`; under post-fix data the sum produces a different value still not equal to the canonical total. The per-OFE `Q` values are not per-OFE-incremental contributions; they are cumulative routing values that overlap if summed.
-
-### Audit and consumer formulas that change between builds
-
-Three diagnostic and reporting formulas exploit (intentionally or otherwise) the legacy `QOFE × per_OFE_Area` cancellation and therefore read differently against `wepp_260516` outputs. Each is a known consequence of the fix tracked under the carved-letter incident package as a follow-up to the WEPP source change:
-
-1. **Hillslope MOFE closure audit outlet reconciliation** — `tools/hillslope_mofe_daily_closure_audit.py::_compute_outlet_qofe_reconciliation` computes `audit_outlet_qofe_m3 = QOFE(bottom) × 0.001 × Area(bottom)` and asserts agreement with `H.pass.runvol`. Pre-fix this residual sat at floating-point noise (max-abs ≈ 13 m³ across a 6-year H182 simulation); post-fix it will read consistently around `(n-1)/n × canonical_volume` until the diagnostic is updated to multiply by `A_total` instead of `Area(bottom)`.
-2. **`totalwatsed3.py:658`** — `SUM(QOFE * 0.001 * Area)` aggregated across OFEs per day. Legacy outputs and post-fix outputs both produce non-canonical values from this expression. Post-fix this consumer should either pick the bottom-OFE value × `A_total`, or consume `Q × A_total` directly, or take its runoff totals from `H.pass.runvol`.
-3. **`hillslope_watbal.py:237`** — pandas `groupby` with `"QOFE": "sum"`. Same observation as above. The "Surface Runoff (mm)" series in the hillslope water-balance report is affected by the change in published `QOFE` values; the report should be reconciled against `H.pass.runvol`-derived totals.
-
-The audit's **per-OFE closure check** that drives `requires_scientific_review` is mass-conservative under the post-fix `QOFE = Q` semantics; this is the empirical finding from the C009 candidate replay that justified lane (b). That check does not need updating. Only the diagnostics and aggregations above — which were not load-bearing on the `requires_scientific_review` predicate, but which several downstream WEPPcloud reports depend on — need the small follow-up edits.
-
-For any post-`wepp_260516` analysis that needs canonical hillslope runoff volume, prefer `H.pass.runvol` directly; it is the authoritative source under both legacy and post-fix builds.
-
-### 10. Rain-event admission on cascade-tail hillslopes (`contin.for` / `sumrun.for` — R01 producer-contract completion)
-
-This is a follow-up to the rain-routing conflation repair in §6. Section 6 fixed the *delivery* side: rain water on rain-on-snow days now flows down the rain channel into the soil-water kernel where it physically belongs, rather than being misrouted into the snowmelt channel. What §6 did *not* update was the small piece of daily-summary code that *counts* runoff events. That code was written years before rain-on-snow routing was its own thing; it decides "did this Overland Flow Element have a runoff event today?" by checking whether the OFE's local rain bucket held any water at the end of the day. Pre-§6, the rain bucket was zeroed out on rain-on-snow days, so on those days the counter naturally said "no rain event." Post-§6, the rain bucket retains the day's actual rain (which is correct — rain water needs to stay accessible to the kernel), and the legacy counter started saying "yes, rain event" on rain-on-snow days that pre-§6 it would have skipped.
-
-For a single-OFE hillslope this matters very little: a few more rain events get counted, but each one carries the right amount of runoff and the total is consistent with the rainfall. For a hillslope with many OFEs stacked top-to-bottom in a cascade — water that runs off an upper OFE flows into the next OFE down as additional rainfall-equivalent input — the over-counting compounds. Each cascade-tail OFE sees rain water from the storm plus runoff from every OFE upstream of it; the legacy counter sees all of that as "rain in the bucket" and fires the rain-event accumulator more often than the physics warrants. On the carved-letter forest project's H347 hillslope (a 16-OFE cascade in a high-runoff disturbed-forest setting), the legacy counter fired roughly 80 percent more rain-event accumulator entries at the bottom OFE than the equivalent run on an older binary. The accumulator added up over six years to a reported runoff total of about 14,100 mm — slightly more than the 14,045 mm of precipitation that fell on the same hillslope over the same period. **More runoff than precipitation is physically impossible**: water has to come from somewhere, and the only "somewhere" available is precipitation plus snowmelt minus everything else (evapotranspiration, deep percolation, storage change). A reported runoff that exceeds precipitation tells you the counter is over-counting.
-
-The repair attempt, recorded as the program's "R01 producer-correctness Gate 0" fix, makes the rain-event counter ask the producer instead of guessing from the bucket. The winter-routine code that delivers water to the kernel already knows whether each delivery should be classified as a rain event or a melt event — it has to know that to route the water through the right channel under the §6 contract. R01 makes that classification explicit (a small integer flag, set to `0` for melt admission and `1` for rain admission at the producer side), passes it through the daily-summary call site, and has the rain-event counter gate on the classification flag rather than on the residual rain volume in the bucket. The change is small in line count — a couple of conditional rewrites in `contin.for`, one new parameter on the `sumrun` subroutine signature, and a one-line gate substitution in `sumrun.for`.
-
-On the three probe hillslopes used to develop and validate the fix, R01 behaved as intended. H347's reported six-year runoff drops from approximately 14,100 mm to approximately 10,970 mm — comfortably under the 14,045 mm precipitation total, physically possible again. The p26 rain-on-snow fix from §6 is preserved (R01 does not alter the rain water's delivery to the kernel; it alters only how the post-kernel counter reads back the producer's classification). H16, the normal-baseline hillslope, stays stable within ±5%.
-
-Then we attempted to promote R01 to a production binary, which required testing the fix on a broader 40-hillslope sample drawn from the four-project forest closure-sweep cohort (10 hillslopes per project). The broader test produced a result we did not expect from the three-hillslope validation: **30 of the 40 sampled hillslopes showed catastrophic mass-closure regressions** under R01, with daily closure residuals jumping from sub-1-mm (effectively closed) to hundreds of millimetres (unphysical). The failures were concentrated in three of the four projects (`cochlear-beriberi`, `moth-eaten-blackhead`, `ordained-incentive`); only `uninsured-deformation` passed cleanly at 10/10. The conclusion is clear: the tri-hillslope validation surface, while it covered the original failure mode well, did not represent the diversity of climate and land-use contexts present in the broader production forest cohort. R01's admission-gate change interacts with code paths that the tri-hillslope set never exercised, and the interaction breaks mass closure in ways the audit caught immediately at cohort scale.
-
-**R01 is therefore held in experimental status and is not vendored to a production binary.** The source changes remain in a research worktree only. R01 is treated as an open scientific problem requiring its own follow-up investigation: either the fix needs to be re-scoped to apply only under conditions where it does not cause cohort regression, or the broader cohort needs to be analyzed to understand why R01's producer-classification handoff destabilizes their closure. That investigation has not been started yet; it is sequenced behind the dry-day defect work described next.
-
-Impact for downstream users: production binaries do **not** carry R01. The cascade-tail rain-event over-counting that R01 was designed to address remains present in production; H347-class hillslopes will continue to report the inflated rain-event accumulator counts described above. This is a known limitation of the current production release, documented here, and reflects the discipline that the water-balance program will not vendor a fix that fails its own cohort-regression gate — even when the fix passes its narrow validation set.
-
-R01 was not the end of the carved-letter water-balance picture either. A separate defect — a small per-OFE mass-balance violation that fires on dry days (days with no rain anywhere on the hillslope) — was surfaced by the same investigation and is being addressed under a follow-up package, `docs/ablation/20260516_carved-letter_hillslope_dry-day-mass-balance-defect/`. That follow-up will also likely explain the dry-spell recession dips observed at the carved-letter watershed outlet, which an earlier package had tentatively attributed to a watershed-side routing path until the investigation cross-link showed the upstream evidence pointed to the hillslope kernel. The dry-day defect is independent of R01 (it predates R01 and persists in the current production binary at the same magnitude); it is being investigated as its own scoped lane under the same closure-audit discipline as the §6–§9 work.
-
-The R01 outcome is itself an institutional lesson worth recording: three-hillslope validation is sufficient to localize and characterize a defect class, but it is **not** sufficient to gate a production release. The cohort-regression check at vendoring time is the gate that catches generalization failures that a small validation set will miss. The water-balance program treats both lessons as load-bearing — the three-hillslope phase localizes; the cohort-sample phase decides whether the fix ships.
-
-## Going on offense: the forest closure sweep
-
-The four fixes above came out of **proactive** auditing rather than reactive bug reports. No user complained that `H.wat` was missing an interception column; no analyst noticed that snowmelt days had wrong residuals; no operational run was ever issued against the H0001 zero-input non-conservation in the new kernels because the runtime guard tripped before any production replay completed against it. The audit, the dual-basis residual, and the runtime guard went looking for the defects and found them.
-
-The mechanism is the **forest closure sweep**: a campaign that runs the closure audit at hillslope/day/OFE granularity across an entire production project, not just one hillslope at a time. Where the compiler-fragility program runs generative input fuzzing to find inputs that crash the model, the water-balance program runs **exhaustive closure auditing** to find runs that complete cleanly but conserve mass incorrectly. The two programs are structurally analogous: both stratify across a real production corpus, both assert a strict invariant (no SIGFPE for one, closure within threshold for the other), both classify residuals into mechanism families before attempting fixes, and both refuse to relax the invariant to make the campaign pass.
-
-The first sweep covered four forest projects:
-
-| project | hillslopes audited | initial residual range | post-repair status |
-|---|---:|---|---|
-| `cochlear-beriberi` | 520 | up to 2,927 mm | all closed |
-| `moth-eaten-blackhead` | 209 | up to 78 mm | all closed |
-| `ordained-incentive` | 333 | up to 1,003 mm | all closed |
-| `uninsured-deformation` | 104 | up to 42 mm | all closed |
-| **total** | **1,166** | **up to 2,927 mm** | **1,166 closed** |
-
-The maximum residual of 2,927 mm — roughly three meters of unaccounted water on a single OFE on a single day — is a useful illustration of why a closure audit is more sensitive than aggregate-balance reasoning. A residual that large can hide inside a season's worth of fluxes if you only look at totals, because it averages out against the tens of meters of cumulative precipitation, ET, and runoff that pass through the same OFE over a year. At the daily, per-OFE level it stands out instantly.
-
-Once each of the four defects was repaired — the three legacy-accounting defects in WB-05E and the process-kernel reconciliation defect in WB-05F — the sweep was rerun in full and **all 1,166 hillslopes closed within the 1.0 mm threshold**, with the residual distribution now concentrated near numerical noise. The post-WB-05F scoreboard envelope is tighter still: maximum absolute daily residual `0.92 mm`, maximum target-OFE residual `0.02 mm`, maximum any-OFE residual `0.51 mm`, with process-kernel provenance observed on every audited row. Multi-project closure of this kind across a real production corpus, on both the post-hoc audit and the runtime guard, is the strongest evidence we have so far that no further water-balance defect lives in the four-project forest portfolio.
-
-The sweep is now a standing program asset. Future repairs to the water balance — whether defensive guards in the legacy `.for` paths or extensions to the process kernels — must clear the same closure-sweep gate before promotion. Adding a project to the corpus extends the gate; it does not change the rule.
-
-## Why you may see slightly different numbers
-
-For the vast majority of simulations, outputs are unchanged. Where they do change, the pattern is consistent and explainable:
-
-- **Forest hillslopes with snow cover** will look different on melt days because the legacy `H.wat` was producing residuals that the audit read as wrong-by-RM-double-count. Production `H.wat` columns are not changing values — what is changing is the residual computed from them. If you maintain a downstream water-balance check, it should now be computed using `P + Irr` with `Snow-Water` in the storage delta.
-- **Forest hillslopes with high canopy or heavy surface residue** will gain the new optional `InterceptionStorage` column in `H.wat`. Existing columns are unchanged. If your parser reads `H.wat` by named column it is unaffected; if it reads by positional column it should declare whether it expects the new column.
-- **Long, multi-OFE hourly-path hillslopes** may show slightly different per-event runoff and erosion totals on the bottom OFE, because the q-cap is now enforced at every event rather than only on a subset. Hillslopes that never violated the cap are unchanged. The pattern of "boundary days, not whole runs" applies here in the same way it does for the compiler-fragility fixes.
-- **Rain-on-snow days where the snowpack exhausts mid-day** will route rain water through the rain channel rather than through the snowmelt channel. For hillslopes with persistent rain-on-snow patterns this changes the per-channel attribution on those specific days; the total liquid input to the soil profile is the same. Runs without rain-on-snow events are unchanged.
-- **Late-winter and early-spring melt-with-rain days** on hillslopes where the snowmelt cap fires will show slightly different baseflow attribution. Total water input and total water output across the simulation are unchanged in aggregate; the partition between flux channels (baseflow vs. surface runoff vs. evapotranspiration) is more conservatively distributed on the affected days where the cap is active.
-- **Long-horizon aggregates** typically shift by a small fraction of a percent. The shifts concentrate on the boundary days where the legacy code was producing physically impossible numbers; on well-conditioned days, the new and old paths agree to numerical precision.
-
-If you have a calibration tied to a specific historical aggregate from a forest watershed, check it against the new output. In most cases nothing will need to change. In the cases where it does, recalibrating against the closure-correct output gives you a more defensible result than calibrating against numbers that depended on a known accounting defect.
-
-## What this means for using WEPP going forward
-
-- **Default for legacy parity.** If your workflow needs to reproduce historical forest-watershed outputs bit-for-bit, the legacy `wepp_dcc52a6` binary remains available and is unchanged. It still carries the three accounting defects described above; that is part of what "legacy parity" means.
-- **Default for new work.** Use the date-versioned modern builds. The current release artifacts are `wepp_260516` and `wepp_260516_hill`, which extend `wepp_260514` with the QOFE per-OFE accounting denominator alignment (§9 above) and the concurrent MOFE closure-audit predicate hardening. `wepp_260516` carries all the `wepp_260514` correctness properties — pinned `/usr/bin/gfortran`, validated through smoke, watchlist, manual watershed replay, readelf, release fast-lane pytest, and broad Phase 3 sweep evidence (`1166/1166` across the four-project forest cohort, zero `205`, zero `206`) — plus the carved-letter MOFE closure-anomaly resolution (`113/370` → `0/370` on both carved-letter and the orthographic-progesterone fork). `wepp_260514` and `wepp_260514_hill` remain available as a tagged rollback posture (commit `64b86eaf`, tag `wb-p26-shapeA-functional`) for any workflow that needs the pre-MOFE-alignment behavior; they still carry the `QOFE = i × Q` identity on multi-OFE hillslopes. All modern builds produce the same `H.wat`/`H.pass` shape as before plus the optional `InterceptionStorage` column, route hourly q-cap correctly at every OFE, and emit process-kernel conservation residuals on demand for diagnostic runs.
-- **Closure auditing as a routine check.** Any analyst who wants to verify that a particular run conserved mass can now do so directly from the run's exported outputs, without re-running the model. The audit tools are documented in the work-package folders linked below.
-- **The cutover.** WB-08 attempted the promotion from observability to authoritative production and blocked correctly when its first cutover mixed process fluxes with legacy state/storage. WB-08A is the recovery package that fixed that hybrid trajectory failure. It aligned runtime kernel and export guards, re-closed the full `1166/1166` forest surface, validated `wepp_260504` / `wepp_260504_hill`, and marked WB-09 readiness. Vendoring and operational promotion remain operator-controlled release steps.
-
-## How we decide what to ship
-
-Every repair in this brief went through the same discipline:
-
-1. Start from a closure residual on a specific hillslope/day/OFE on a specific binary.
-2. Reproduce the residual from raw exported terms before forming a hypothesis.
-3. Drive the investigation to the smallest accounting boundary that can be repaired.
-4. Apply the smallest possible repair at that boundary — a missing term added, a bypassed gate restored, a double-count removed.
-5. Confirm the repair closes the seed, locks in a regression test that asserts closure (not non-closure), and does not open new residuals across the rest of the corpus.
-6. Document the trigger, the mechanism, the residual risk, and the rollback plan.
-
-We do not bundle unrelated changes, we do not relax the closure threshold to make a residual go away, and we do not accept a repair that changes physics we were not asked to change. The goal is the minimum set of changes that lets the water balance be audited as conserving mass on the corpus we have, with the discipline in place to extend the audit to the next corpus.
-
-## Where to find the evidence
-
-Each step of the program has a corresponding work package under `docs/work-packages/`:
-
-- [WB-00 — Program bootstrap, governance, and orchestration board](work-packages/20260503-wb00-waterbalance-program-bootstrap/package.md)
-- [WB-01 — Baseline characterization of legacy water-balance behavior](work-packages/20260503-wb01-waterbalance-baseline-characterization/package.md)
-- [WB-02 — Spec freeze: contracts, acceptance bands, dual-basis closure policy](work-packages/20260503-wb02-waterbalance-spec-freeze/package.md)
-- [WB-03 — Process architecture and unit-test matrix](work-packages/20260503-wb03-waterbalance-process-architecture-unit-tests/package.md)
-- [WB-04 — Daily shared core (`ui_run=0`)](work-packages/20260503-wb04-waterbalance-daily-shared-core/package.md)
-- [WB-05 — Hourly adapter (`ui_run=1`)](work-packages/20260503-wb05-waterbalance-hourly-adapter/package.md)
-- [WB-05A — H2637 OFE19 hourly q-cap bypass repair](work-packages/20260503-wb05a-h2637-ofe19-hourly-qcap-resolution/package.md)
-- [WB-05B — Forest hillslope closure sweep (1,166 hillslopes)](work-packages/20260503-wb05b-forest-hillslope-closure-sweep/package.md)
-- [WB-05E — Goblin-mode global closure repair (snowmelt double-count + interception export)](work-packages/20260503-wb05e-goblin-mode-global-closure-repair/package.md)
-- [WB-05F — Process-guard replay closure repair (process-kernel storage and runoff reconciliation)](work-packages/20260504-wb05f-process-guard-replay-closure-repair/package.md)
-- [WB-06 — Downstream contract integration (`InterceptionStorage` parser/report compatibility)](work-packages/20260504-wb06-waterbalance-downstream-contract-integration/package.md)
-- [WB-07 — Performance and observability hardening](work-packages/20260504-wb07-waterbalance-performance-observability-hardening/package.md)
-- [WB-08 — Cutover attempt and no-go evidence](work-packages/20260504-wb08-waterbalance-cutover-retirement/package.md)
-- [WB-08A — Release-readiness recovery and `wepp_260504` evidence](work-packages/20260504-wb08a-waterbalance-release-readiness-recovery/package.md)
-
-The pre-program patch path that the rewrite supersedes is preserved under [docs/ablation/](ablation/) for reviewers who want to walk the trade-off evidence directly:
-
-- [H2637 day-44 closure-spike attribution (binary-lineage replay)](ablation/20260430_uncapped-spectacular_h2637_hillslope_closure-spike/incident.md)
-- [H2637 OFE19 root-cause campaign (eleven candidate patches `U1`–`U6F`, U6C governance-path promotion as `wepp_260501`)](ablation/20260430_uncapped-spectacular_h2637_ofe19-root-cause/incident.md)
-- [Cochlear-beriberi D2b2 / D4 extension (six candidate patches `U7A`–`U7F` on top of the deployed baseline; campaign closeout: external redirection required)](ablation/20260502_cochlear-beriberi_hillslope_d2b2-d4-h2637-extension/incident.md)
-- [Carved-letter MOFE closure-anomaly scientific-review cohort (QOFE per-OFE denominator inconsistency isolated, lane (b) fix released as `wepp_260516`)](ablation/20260515_carved-letter_hillslope_closure-anomaly-scireview113-redo/incident.md)
-
-## Running log of stakeholder-visible changes
-
-### 2026-04-30 to 2026-05-02 — Targeted-patch path on legacy `watbal_hourly` exhausted
-Investigated the H2637 OFE19 closure spike under the same ablation discipline used by the compiler-fragility program. Eleven sequential candidate patches inside the existing `watbal_hourly` routine were tested, classified, and (with one governance-path exception) rejected on either anomaly closure, control regression, runtime safety, or symmetric closure. The exception, `U6C`, was promoted under a widened acceptance gate and released as `wepp_260501` / `wepp_260501_hill`. The release was vendored into the production binary slot but was held before being turned on for operational runs; while it sat in that pre-deployment state, the closure audit was extended to a second forest project (`cochlear-beriberi`), and the released binary failed on a different defect family (`H285`, ~814 mm residual). Six further candidate patches (`U7A` through `U7F`) on top of the released baseline could not jointly close both defect families. The campaign disposition recorded that "external review/redirection [is] required; do not extend parameter space silently." Because the release had not been promoted into operational use, no user-facing runs were issued against the regressed binary — the audit caught the failure inside the program's own gate, not in the field. This is the moment the program transitioned from per-defect patching to the architectural rewrite described below. The original author had flagged the same technical debt in a 2012-02-15 source comment ("Watbal also needs to be written — it has too many special conditions and is too large. JRF = 2/15/2012"); the patch-path exhaustion is the measurement that confirmed it.
-
-### 2026-05-03 — Program bootstrap published
-Established the working policy: closure is the authority, legacy parity is diagnostic, dual-basis closure (kernel + interchange) is mandatory, and any repair that closes one residual must not open another. Published the orchestration board, governance policy, and risk/dependency register.
-
-### 2026-05-03 — Baseline characterization complete
-Replayed the legacy water-balance binary across the program's reference corpus. Recorded source/binary provenance, exact replay commands, observed-invariant ranges, and a list of legacy behaviors (including two SIGFPE signatures inherited from the compiler-fragility program) flagged for `BUG_FIXED` disposition. The baseline is the evidence basis for the contract freeze; it is not the correctness target.
-
-### 2026-05-03 — Contracts and acceptance bands frozen
-Adjudicated the WB-01 question queue, froze the schema set, and published the dual-basis closure policy and acceptance-band manifest. Acceptance is closure-first: kernel residual is normative for physics acceptance, interchange residual is the diagnostic basis a downstream consumer can compute from exported outputs. Both must close before a repair is accepted.
-
-### 2026-05-03 — Process architecture accepted
-Replaced the original "mechanical fixed-form-to-free-form translation" scope with a process-based architecture: nine kernels (canopy, snowpack, soil moisture, runoff, percolation, ET, transport-capacity policy, etc.), an explicit adapter boundary with no common-block leakage into kernels, and a unit-test matrix that names every test before any kernel implementation begins. Daily and hourly schedulers now share kernels rather than duplicating physics.
-
-### 2026-05-03 — Daily shared core implemented
-Implemented the daily-path process kernels and adapter, with unit tests written before each kernel. Ran the daily replay/audit gates on the WB-01 baseline corpus and confirmed all kernels close kernel-residual within the WB-02 acceptance bands. No edits to the legacy fixed-form `watbal.for` accounting; the daily process kernels run alongside under the observability flag.
-
-### 2026-05-03 — Hourly adapter implemented
-Implemented the hourly-path adapter on top of the accepted daily kernels, plus the transport-capacity policy kernel. Ran the hourly replay/audit gates and confirmed kernel closure across the WB-01 hourly corpus. Documented one corpus limitation — the WB-01 hourly corpus contained no q-cap binding events naturally — and carried that forward as an explicit open item.
-
-### 2026-05-03 — H2637 OFE19 q-cap bypass repaired
-Reproduced the OFE19 q-cap violation on the H2637 hillslope under the modern hourly path, isolated the bypass to a misplaced `efflen <= slplen` condition that disabled the hard cap on the bottom OFE of every multi-OFE hillslope, and repaired the gate to enforce the cap in every condition where it is supposed to apply. Catastrophic q-cap violations (positive margins of hundreds of millimeters) reduced to zero at the 0.1 mm tolerance; daily-path behavior on the same hillslope unchanged. This is the binding-event evidence that was missing from the WB-05 carry-forward, supplied by a real production hillslope.
-
-### 2026-05-03 — Forest closure sweep run; defect surface enumerated
-Audited 1,166 hillslopes across four forest projects (`cochlear-beriberi`, `moth-eaten-blackhead`, `ordained-incentive`, `uninsured-deformation`) at hillslope/day/OFE granularity. **Every audited hillslope** exceeded the 1.0 mm material non-closure threshold, with residuals as large as 2,927 mm on a single OFE on a single day. The universal failure pattern indicated a shared accounting defect rather than per-hillslope variation, and the program proceeded to repair rather than to per-seed adjudication.
-
-### 2026-05-04 — Snowmelt double-count and interception export defects repaired
-Diagnosed the universal closure failure as two distinct accounting defects: (a) snowmelt was being counted both as an external input via `RM` and as a storage decrease via `Snow-Water`, and (b) live plant and surface-residue interception storage was a real model state but was not being exported in `H.wat`. Repaired both: the closure-audit basis was changed to `P + Irr` external input with `Snow-Water` in the storage delta, and a new optional `InterceptionStorage` column was added to `H.wat` populated as `pintlv + resint` per OFE/day. Reran the forest closure sweep in full: **1,166 of 1,166 hillslopes close within the 1.0 mm threshold**, with the last residual on `OR-H0066` collapsing from 1.131 mm to 0.001 mm. Process-kernel provenance observed on every audited row. The contract-change-control entry for `InterceptionStorage` is filed as `WB02-CC-20260504-02`.
-
-### 2026-05-04 — Process-kernel storage and runoff reconciliation repaired (runtime process guard active)
-Wired a runtime conservation guard on top of the WB-05E observability path: as the model runs, both kernel and interchange residuals are evaluated on every replayed seed and the run trips fast if either exceeds the 1.0 mm material threshold. On the first scoreboard run with the guard active, hillslope `H0001` from the cochlear-beriberi project tripped immediately with both residuals at −15.8066 mm. Localized the defect to the new process kernel flow itself: on zero-input days the adapter was emitting non-zero outputs without a compensating storage change, and the per-OFE runoff mapping was reconciling against a watershed-summed `q` instead of the OFE-local `qofe`. Repaired both. Reran the runtime process-guard scoreboard: **1,166 of 1,166 rows pass**, with envelope `max_abs_daily = 0.92 mm`, `max_abs_target_ofe = 0.02 mm`, `max_abs_any_ofe = 0.51 mm`. This is the first defect surfaced in the new kernels themselves; it was caught at the gate before any operational run was issued against the new accounting. WB-05F retired the last closure-defect blocker before cutover execution; WB-08 later exposed a separate hybrid state-coupling failure that WB-08A repaired.
-
-### 2026-05-04 — Downstream contract integration accepted (WB-06)
-Verified that WEPPpy-facing consumers (`H.wat` parsers, `chnwb` reports, `totalwatsed3` aggregations, audit tooling) handle the new optional `InterceptionStorage` column correctly and that no other downstream contract drift was introduced by the WB-05E/WB-05F repairs. Parsers that key on column header are unaffected; parsers that key on positional column count are documented in the WB-06 compatibility report. WB-06 is `completed`; the cutover (WB-08) inherits the WB-06 compatibility evidence directly.
-
-### 2026-05-04 — Performance and observability hardening accepted (WB-07)
-Measured the cost of the water-balance observability path and preserved the operational rule that full provenance is opt-in, not default amplification. The observability-off and observability-on lanes both closed the known forest surface (`1166/1166`) with no timeouts; the enabled lane is retained as a diagnostic/deep replay mode rather than the normal release path. WB-07 also captured the warning vocabulary, alias/deprecation plan, and near-band sentinel evidence needed to keep future diagnostics readable.
-
-### 2026-05-14 — `insensible-aliquot/p26` runtime guard trip; rain-routing conflation isolated
-An operational replay of the `insensible-aliquot/p26` run against `wepp_260513_hill` tripped the runtime conservation guard with `ERROR STOP 205` on year 1 day 84, OFE 1, residual −3.95 mm. Opened incident package `docs/ablation/20260514_insensible-aliquot_p26_hillslope_watbal-process-closure-205-ablation/`. Investigation proceeded under the standard closure-audit discipline: reproduce from raw exported terms, drive to the smallest auditable unit, form evidence-backed hypotheses, repair at the smallest mechanism boundary. Phase 1 of the investigation added a non-fatal clamp+preserve co-occurrence surveillance counter, then Track 1 inventoried the sixteen producer sites that write `wmelt(iplane)`, Track 1B falsified the rain-on-snow conflation hypothesis numerically (rain water dominates `wmelt` at the broadcast site, with 100% attribution on day 83 and 82–95% on day 84 and year-7/day-347), and Track 1C established the kernel-side routing contract via direct source-read of `watbal_process_kernels.f90` (the kernel consumes `rain + wmelt + irrigation + runon`, not `precipitation_input`). The chain of diagnosis was kept strictly to **diagnosis only**, with no source fix attempted before the contract had been determined.
-
-### 2026-05-14 — Rain-routing conflation repaired under Candidate 1 contract
-Applied the Candidate 1 rain-routing contract (rain → rain channel, snowmelt → energy-balance melt only) as the structural fix. The rain-on-snow misrouting in the legacy winter routine was removed and replaced with a separate rain-channel write, and the correlated rain-suppression site was removed so rain remains in its declared channel throughout the day. Post-fix residuals on all four originally-failing tuples are at floating-point noise (±5 × 10⁻¹⁵ mm). The `p26` replay completes cleanly under the runtime guard. The new architectural invariant note at [`docs/contracts/wbk08-clamp-preserve-mass-closure-invariant.md`](contracts/wbk08-clamp-preserve-mass-closure-invariant.md) captures the clamp-plus-preserve mass-closure rule and four review gates (Gate 0 producer correctness, Gate 1 clamp propagation, Gate 2 preserve-path safety, Gate 3 closure-on-normalized-domain) with a Phase 1 → Phase 2 → Phase 3 phasing model for surveillance promotion. Candidate 1 closes the immediately-failing `p26` tuple but leaves a broader 47-hillslope cohort on the same test project still failing — the WB-30 baseflow-preservation interaction described next.
-
-### 2026-05-14 — Shape A Gate-2 fix at WB-30 (broader cohort closure restored)
-The 47-hillslope cohort failing on the same exit code as `p26` was traced via sentinel bisection to WB-30 (`163d4914`) as the first-bad commit, with WB-18 (`dcadfbe1`) as the enabling co-factor. The mechanism is a previously-unspecified interaction between two refinements: the WB-18 snowmelt cap (which limits melt input by available snowpack) and the WB-30 baseflow preservation (which holds baseflow output at full value when other outputs are scaled down). When both fire in the same step, the closure equation is left with more water leaving than entering. The Shape A repair scales baseflow alongside the other outputs whenever the snowmelt cap fires, restoring Gate 2 conservation. Full 477-run cohort post-repair: **477 ok / 0 failed**. Phase 1 surveillance counter post-repair on the representative subset: **zero events across all magnitude buckets**.
-
-### 2026-05-14 — Phase 3 fail-fast enforcement landed (correctness over completion)
-Promoted the clamp-plus-preserve surveillance counter from passive recording to runtime fail-fast. When a clamp event and a preserve event co-occur in the same step and the suppressed input exceeds the 0.1 mm noise floor, the run halts with exit code 206 and a structured tuple report. The 0.1 mm threshold is anchored to empirical evidence from the surveillance counter's distribution; the architecture note explicitly prohibits tuning the threshold to suppress firings — a firing is information, not noise to be hidden. This is the program's correctness-over-completion gate at the runtime level. Legacy WEPP took the completion-over-correctness path; future producer-side defects in this class now surface as immediate stops with the exact failing tuple identified, rather than as silent compensating errors that have to be discovered by post-hoc audit. Full 477-run cohort under the fail-fast-enabled binary: 477 ok / 0 failed / 0 ERROR STOP 206.
-
-### 2026-05-14 — Functional-state tag created
-Created and pushed annotated git tag `wb-p26-shapeA-functional` at commit `64b86eaf`, capturing the functional state: Candidate 1 rain-routing fix landed, Shape A Gate-2 enforcement landed, Phase 3 fail-fast active, 477-run test cohort closes at zero failures, surveillance counter zero on representative subset. The tag is the rollback anchor for subsequent producer-correctness work. The previously-vendored `wepp_260513` test binary remains in place for historical reference but does not include either of the new fixes and is not the current functional state.
-
-### 2026-05-14 — Broader Phase 3 sweep executed and `wepp_260514` release artifacts rebuilt
-Executed the broader WB-05B forest sweep against the Phase 3-enabled binary at commit `64b86eaf` across all numeric hillslope runs in the four target projects (`cochlear-beriberi`, `moth-eaten-blackhead`, `ordained-incentive`, `uninsured-deformation`): **1,166 of 1,166 runs returned `0`**, with **zero** `ERROR STOP 205`, **zero** `ERROR STOP 206`, and **zero** `WBK08_PHASE3_FAILFAST` firings. Rebuilt release artifacts from the same commit/tag anchor as `wepp_260514` / `wepp_260514_hill` and generated sidecar manifests:
-- `wepp_260514` sha256 `364ee4e83be687444e835d3ca78fb3f9b56b8fb4842b32fc5504d136cc6b68d3`
-- `wepp_260514_hill` sha256 `cc08f4941684ff61c20ad13e938dfdc468515acf57ea90067a32c3c0857e3086`
-Validation lane executed on this rebuild: host smoke (watershed + hillslope), hillslope watchlist (`14/14` pass), manual `reconciled-condenser` watershed replay (`rc=0`, no parse/runtime signatures), ELF interpreter check (`/lib64/ld-linux-x86-64.so.2` for all four binaries), release-sidecar pytest, and broad sweep evidence.
-
-### 2026-05-04 to 2026-05-05 — Cutover attempted, blocked, and recovered (WB-08/WB-08A)
-WB-08 attempted to make process accounting authoritative. The attempt deliberately preserved rollback and ran the release gates, but the closure scoreboard failed (`rows=1166`, `closed=27`, `failed=1139`). The failure was not a new hydrologic defect; it was a **trajectory ownership defect**. Process fluxes had been written into production output slots while legacy storage/state still owned part of the row, creating invalid hybrid output. The rollback evidence held, and the package closed no-go rather than shipping a mixed trajectory.
-
-WB-08A repaired that failure under the trajectory ownership contract: process mode owns the complete water-balance row and downstream-readable state, runtime kernel/export guards evaluate the same trajectory, field-by-field production cutover is prohibited, and rollback is served as a tagged binary posture rather than an indefinite production toggle. WB-08A re-ran the full known forest surface and accepted release readiness (`1166/1166` closed), rechecked downstream compatibility and observability guardrails, and built the date-versioned `wepp_260504` / `wepp_260504_hill` release artifacts. The release hashes are recorded in the WB-08A release packet:
-
-- `wepp_260504`: `efb38304a860e3ed73431268032660fd36b360783b5db1d97b53d886e546811a`
-- `wepp_260504_hill`: `5c705a376c78f4ddd8be7bb6f1e16db884de31e15c1443e0df5fa580f256948d`
-
-### 2026-05-15 — Carved-letter MOFE closure-anomaly investigation; QOFE per-OFE accounting defect isolated
-An operational replay of the carved-letter forest project under multi-OFE configuration was audited for water-balance closure on every hillslope. The audit flagged `113` of `370` hillslopes as failing the per-OFE closure check — too much water leaving each OFE to be explained by the rain, snowmelt, and upslope inflow entering it — even though no run had crashed and no runtime conservation guard had tripped. Opened incident package `docs/ablation/20260515_carved-letter_hillslope_closure-anomaly-scireview113-redo/`.
-
-Tracing the residuals back to the original water-balance numbers showed the same pattern on every flagged hillslope: each OFE's `QOFE` value was exactly `n` times its `Q` value, where `n` is the OFE's position counted from the top of the slope. A 14-OFE hillslope reported `QOFE` fourteen times larger than `Q` at the bottom; the second OFE from the top reported `QOFE = 2 × Q`; and so on. No physical mechanism produces that pattern. Reading the source confirmed the cause: the `Q` write divides runoff by the cumulative slope length down to the OFE (`totlen`), but the `QOFE` write four lines below divides by the OFE's own length (`slplen`). A 2008 comment in the same source file documents that the `Q` write had been deliberately changed to use the cumulative length "because efflen may span OFE's"; the parallel change to the neighboring `QOFE` write was never made, and the inconsistency had been in place for 18 years. Cross-fork comparison against an `orthographic-progesterone` run built with an older binary confirmed both binaries carry the same identity, so this is legacy behavior, not a recent regression. The defect was invisible in single-OFE production runs (where the two slope-length denominators are equal) and only surfaced now that forest-watershed teams have begun using multi-OFE configurations.
-
-A full-cohort replay of the closure audit under three candidate interpretations of `QOFE` ("per-OFE incremental runoff," "alias of `Q`," and "cumulative-rescaled as-emitted by the current code") produced only one interpretation under which the audit's per-OFE closure equation balances mass: the `Q`-alias reading. Under that interpretation, `111` of the `113` flagged hillslopes clear automatically. The remaining `2` (`H136` on 2024-11-21 and `H274` on 2025-03-17) were determined to be days with no surface runoff anywhere on the hillslope but heavy subsurface lateral flow cascading downslope through saturated soil — days where the audit's own surface-pulse diagnostic was over-reaching. A decision memo authored under the package's audit-trail discipline records the three candidates, the empirical replay results, and the recommended fix (apply the 2008-era parallel substitution to the `QOFE` write that had been missed at the time).
-
-### 2026-05-16 — QOFE per-OFE alignment and closure-audit hardening released as `wepp_260516`
-Applied the recommended fix to WEPP source: changed the per-OFE slope-length denominator on the `QOFE` write at `watbal.for:1267` from `slplen` to `totlen`, matching the `Q` write four lines above and completing the 2008 parallel-fix that had been left half-applied. The same one-character substitution was applied to the corresponding line in the hourly path at `watbal_hourly.for:1356`. After this change, `QOFE` equals `Q` exactly on every OFE on every day — which is the relationship the downstream WEPPcloud reports and the closure audit have always assumed. The `QOFE` header text in `outfil.for` was updated to document the equivalence. Concurrently hardened the multi-OFE closure-audit diagnostic so that on days with no surface runoff anywhere on the hillslope, the surface-pulse check skips rather than firing on subsurface lateral flow. Built new release artifacts `wepp_260516` and `wepp_260516_hill`.
-
-Carved-letter regression after the fix: the multi-OFE closure-anomaly cohort drops from `113/370` flagged hillslopes (under `wepp_260514_hill`) to `0/370` (under `wepp_260516_hill`). The `orthographic-progesterone` second-fork regression collapses identically to `0/370` from the same physical inputs, confirming the result is reproducible across forks and not a happenstance of one run's stochastic conditions. The canonical hillslope runoff totals in `H.pass.runvol` are unchanged by the fix at all `370` hillslopes — the canonical check that the watershed-routing scale of the simulation is not disturbed. The maximum per-row difference between `Q` and `QOFE` across the full carved-letter water-balance file dropped from approximately `14,071` mm pre-fix to less than `10⁻⁶` mm post-fix, confirming that the new write expressions are algebraically identical on every row. The legacy outlet reconciliation diagnostic (`QOFE(bottom) × per_OFE_area_at_bottom` against `H.pass.runvol`), which exploited the legacy two-factors-cancel coincidence to read near zero, now produces a predictable residual proportional to `(n_ofe − 1) / n_ofe` until the diagnostic is updated to use total hillslope area; this is a tracked downstream consequence of the source fix and is not a regression in the underlying physics. The canonical hillslope-watchlist regression gate passed with no comparator-pass case becoming a candidate fail and no new failure signature family introduced.
-
-The hillslope multi-OFE water-balance contract documentation at `docs/dev-notes/hillslope_mofe_water_balance_contract.md` was updated with a "Lane (b) effective from `wepp_260516`" section, plus clarifying notes on diagnostic terms whose previous behavior had depended on the denominator inconsistency. A separate amplifier in the rainfall-to-runoff path between the April 30 and May 14 builds, first surfaced under the same incident package, remains independently detectable post-fix in the `59` hillslopes that flagged in the May 14 build but not the April 30 build — confirming that the `QOFE` alignment did not mask the amplifier track. That amplifier is preserved as an open follow-up under the same incident package. The carved-letter incident moved to status `resolved`.
-
-### 2026-05-16 — R01 producer-contract completion attempted; tri-hillslope validated, vendoring blocked by cohort regression
-
-An H347 hillslope replay against `wepp_260516fc1_hill` produced a physically-impossible reported runoff of `14,098 mm` over 6 years against `14,045 mm` of precipitation — runoff exceeding rainfall is impossible at the hillslope scale. Opened the carved-letter amplifier investigation as a follow-up to §6's rain-routing repair, under the same closure-audit discipline. Phase 1 (call-site grep) showed the §6 fix had correctly enforced rain delivery to the kernel but had not updated the daily-summary rain-event counter, which still gated on the residual rain bucket rather than on the producer's event classification. The mismatch over-counted rain events at cascade-tail OFEs on multi-OFE hillslopes (a counting gap, not a physics gap: the kernel was receiving the right water and computing the right per-event runoff, but the daily accumulator was firing more often than it should).
-
-The R01 producer-contract completion fix made the rain-event counter consume the producer's explicit classification flag (rain admission vs. melt admission) rather than guessing from the rain bucket. The fix surface is small: a couple of conditional rewrites in `contin.for`, a new integer parameter on the `sumrun` subroutine, and a one-line gate substitution in `sumrun.for`. Three probe hillslopes were used for development and tri-hillslope validation: H347 (the carved-letter amplifier exemplar), p26 (the §6 fix beneficiary), and H16 (a normal-baseline hillslope at the median OFE count). On the tri-hillslope set, R01 behaved as intended: H347's six-year reported runoff drops from `14,098 mm` to `10,969 mm` (now under precipitation, physically possible); p26 stays closed with residuals at floating-point noise; H16 stays stable within ±5%.
-
-The Phase 6 vendoring attempt required a broader 40-hillslope sample from the four-project WB-05B forest cohort (10 per project) for cross-cohort regression non-regression. The broader test produced an unexpected result: **10/40 pass; 30/40 catastrophic regressions** with daily closure residuals jumping from sub-1-mm to hundreds of millimetres. Failures were concentrated in three projects (`cochlear-beriberi`, `moth-eaten-blackhead`, `ordained-incentive` — all 0/10); only `uninsured-deformation` passed cleanly (10/10). The cohort-regression gate fired; per the program's discipline, **R01 was not vendored to master**. The R01 source changes remain in a research worktree (`/tmp/wepp-forest-r01-current/`) and are tracked as an open scientific problem requiring re-investigation (either re-scoping the fix or analyzing why three projects' code paths destabilize under R01's admission-gate change).
-
-Implication for downstream users: the production binary line continues from `wepp_260516fc1` directly to subsequent dated releases without R01. The cascade-tail rain-event over-counting at H347-class hillslopes remains an open known limitation, documented in §10. The R01 ablation package is at status `vendoring-blocked-cohort-regression`; the package is preserved in full with the audit trail (Phase 1 through Phase 6) including the 40-sample regression report.
-
-A separable dry-day mass-balance violation was surfaced by the same R01 investigation: on days with no rain anywhere on a hillslope, the current source state produces a small per-OFE residual that does not appear in older binaries. The defect pre-dates R01 (it appears in production binaries at the same magnitude) and persists at master HEAD (independent of R01). The dry-day residual aligns temporally with the dry-spell recession dips observed at the carved-letter watershed outlet — an earlier package had tentatively attributed those dips to a watershed-side routing path, but cross-package evidence pointed upstream to the hillslope kernel. The dry-day defect is being investigated under a new package, `docs/ablation/20260516_carved-letter_hillslope_dry-day-mass-balance-defect/`, with the carved-letter outlet recession-dip evidence inherited. The earlier watershed-side recession-dips package was retired in favor of this hillslope-side investigation.
-
-H347 is not promoted to the hillslope watchlist under R01 (R01 was not vendored) and the dry-day defect work has not produced a vendorable fix yet either. p26 and H16 remain at their pre-R01 production baselines. The dry-day follow-up package is at status `active`; the watchlist will be updated when (and if) the dry-day work produces a vendored fix that passes its own cohort-regression gate.
-
-### 2026-05-16 — Winter day-end melt aggregation math defect (`winter.for`) vendored as commit `03fee455`
-
-Independent of the R01 work, a Dun-dissertation crosswalk of the winter routines identified a math defect in the daily melt aggregation block at `winter.for:441-464`: a signed-magnitude comparison and a multiplier-sign error that, on days with mixed thaw + refreeze hourly melt values, would amplify positive melt instead of reducing it to absorb the negative. Source verification confirmed the math defect. A 1166-hillslope cohort scan across the same four-project WB-05B forest set found `class3` (mixed-melt) day population = **0** across 21.7M winter-active OFE-day rows: `snowd` does not produce negative `hrmlt` in current production data for this cohort, so the defective branch is empirically unreachable. The fix is correct-when-it-fires and a no-op otherwise. Applied the two-line math correction; 20-hillslope WB-05B parity validation showed `20/20` bit-identical outputs (as expected — the branch is dead in current cohorts). Vendored to master at commit `03fee455` and released as a dated build binary on the shelf; wepppy-side vendoring is a separate operator step. Package status: `resolved-latent`.
+## Current status
+
+This brief originally described the May 2026 `wepp-forest` process-kernel
+rewrite as the intended production direction. That is no longer accurate.
+
+On 2026-06-05, the project:
+
+1. abandoned the process-kernel rewrite as the forward development line;
+2. returned the legacy comparator to the `wepp_260430` lineage;
+3. ported only the corrected negative-melt calculation into that comparator;
+   and
+4. promoted [openWEPP](https://github.com/rogerlew/openWEPP) as the forward
+   development path for WEPP architecture and science.
+
+The May work remains useful as investigation history. Its closure audits,
+failure cases, and regression evidence still identify important risks. Its
+claims about the process kernels being the current release architecture,
+however, are superseded.
+
+## What the May campaign established
+
+The campaign showed that WEPP's large fixed-form `watbal.for` and
+`watbal_hourly.for` routines make water accounting difficult to isolate and
+test. Daily, hourly, snow, interception, runoff, and storage behavior share
+implicit state and partially duplicated code paths.
+
+Fine-grained closure audits exposed several accounting and integration
+problems, including:
+
+- an hourly transport-capacity bypass;
+- a snowmelt double-count in an audit basis;
+- missing interception-storage export;
+- rain and melt routing ambiguity;
+- inconsistent per-OFE `QOFE` accounting on multi-OFE hillslopes; and
+- defects introduced by the experimental process-kernel implementation itself.
+
+The campaign also demonstrated why a successful test cohort is not sufficient
+authority for a broad hydrologic rewrite. Some repairs closed their seed cases
+but failed on wider cohorts, and the new kernel path accumulated its own
+trajectory and state-ownership problems.
+
+## Why the project reverted
+
+The process-kernel line had become a second implementation of WEPP physics
+inside the legacy Fortran codebase. That created dual authority: the old
+routines still defined much of the operational behavior while the new kernels
+attempted to replace selected portions of it. Comparator agreement, closure,
+and physical correctness could then point in different directions.
+
+The project preserved that line for archaeology under the
+`kernel-rewrite-abandoned-20260605` tag. It did not promote the line as the
+long-term production architecture.
+
+Instead, the active legacy reference was re-anchored to `wepp_260430` plus one
+isolated correction for the negative-melt sign defect:
+
+- branch: `wepp_260430_negmeltfix_comparator`
+- tag: `wepp_260430_negmeltfix_comparator_47ac4c32faee`
+- commit: `47ac4c32faeea81bb99081f955a14c38b815ef4d`
+- source change: the negative-melt branch in `src/winter.for`
+
+This comparator is a reproducible investigation aid, not a universal
+correctness oracle. A difference from it is a signal to investigate units,
+lineage, conservation, and governing science; it is not automatically an
+openWEPP defect.
+
+## Forward development
+
+[openWEPP](https://github.com/rogerlew/openWEPP) is the active development
+project for a modern WEPP engine. It provides a clean architecture in which
+process ownership, state transitions, units, conservation contracts, and
+output schemas can be explicit rather than layered into the legacy Fortran
+runtime.
+
+The division of responsibility is:
+
+- **WEPP-Forest `wepp_260430` plus the negative-melt fix:** stable legacy
+  provenance and comparator behavior.
+- **openWEPP:** forward model architecture, science implementation, validation,
+  and new engine development.
+- **wepppy/WEPPcloud:** orchestration, run management, integration, and user
+  delivery.
+
+New scientific behavior should be developed and validated in openWEPP.
+WEPP-Forest changes should remain narrow, auditable compatibility or comparator
+work unless a later decision explicitly changes this posture.
+
+## Practical guidance
+
+- Do not select the May process-kernel builds merely because the original
+  version of this brief described them as the modern path.
+- Use an explicitly identified legacy binary when reproducibility against
+  historical WEPP-Forest behavior is required.
+- Use the corrected `wepp_260430` comparator when investigating negative-melt
+  behavior.
+- Treat comparator differences as evidence to adjudicate, not values that
+  openWEPP must reproduce without independent scientific support.
+- Follow openWEPP contracts, conservation checks, and validation evidence for
+  forward-development decisions.
 
 ## Bottom line
 
-The water-balance physics you know is the same physics. It is now organized into independently auditable pieces and instrumented to emit a conservation residual on every step. That instrumentation has already exposed and repaired seven real defects: five in the legacy accounting — a transport-capacity bypass that let the bottom OFE discharge runoff above its physical limit, a snowmelt double-count that made every forest hillslope read as non-conserving on melt days, a missing storage export that made interception water disappear from any audit that read `H.wat`, a rain-routing conflation that aliased rain water into the snowmelt channel on rain-on-snow days, and a per-OFE bookkeeping defect that emitted `QOFE` values too large by a factor of the OFE's position from the top of the slope on every multi-OFE hillslope, kept invisible by the fact that single-OFE production runs collapse the inconsistency to nothing — plus two in the new process kernels themselves: a zero-input storage-and-runoff reconciliation error caught at the WB-05F runtime guard before any operational run was issued, and a baseflow-preservation interaction between two physically-reasonable refinements (WB-18 snowmelt cap + WB-30 baseflow preservation) caught on a 47-hillslope cohort during the `p26` investigation. The closure-audit diagnostic that surfaced the per-OFE bookkeeping defect was hardened in the same release pass so that rare days with no surface runoff anywhere on a hillslope no longer mis-fire as surface anomalies. All seven defects are repaired and regression-tested at floating-point noise on their originally-failing tuples; the rain-routing and baseflow-preservation fixes together close the full 477-run test cohort at zero failures, the broader four-project forest sweep closes at `1166/1166` with zero Phase 3 firings, and the carved-letter and orthographic-progesterone MOFE projects both close at `0/370` flagged hillslopes under `wepp_260516`. All repairs were structural — not threshold relaxations — and all were caught by the dual-basis architecture's own gates before reaching production output. As of 2026-05-14, the architecture program has extended its runtime gate from residual-magnitude tripping to structural-pattern fail-fast: a producer-side defect that produces a clamp-plus-preserve pattern with non-trivial input suppression now halts the run immediately and identifies the failing tuple, rather than allowing the run to complete with a small compensating residual. WB-08A repaired the earlier cutover-specific hybrid trajectory failure, and the current release artifacts are now `wepp_260516` / `wepp_260516_hill`, extending `wepp_260514` (commit `64b86eaf`, tag `wb-p26-shapeA-functional`) with the QOFE per-OFE accounting denominator alignment and the concurrent MOFE closure-audit predicate hardening described in §9. The legacy binary remains available for historical reproducibility; WB-09 owns operator-controlled vendoring/release promotion.
+The May 2026 campaign produced valuable diagnostics, but its proposed
+process-kernel architecture was not retained. WEPP-Forest reverted to the
+`wepp_260430` lineage with the corrected negative-melt calculation, and
+openWEPP became the forward development path.
