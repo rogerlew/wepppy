@@ -80,6 +80,10 @@
 - [x] Closed DOM-04A Map Orchestration with actual-render actions/targets and
   exact elevation request evidence; no production mismatch or patch
   (2026-07-28 UTC).
+- [x] Activated DOM-04B Map Layers and Feature UI as the next bounded Map
+  helper audit (2026-07-28 UTC).
+- [x] Closed DOM-04B Map Layers and Feature UI with actual layer-default and
+  legend-host evidence; no production mismatch or patch (2026-07-28 UTC).
 
 ## Child Package Register
 

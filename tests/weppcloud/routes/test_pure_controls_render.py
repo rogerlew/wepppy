@@ -1656,6 +1656,16 @@ def test_map_template_renders_orchestration_actions_and_targets(jinja_env: Envir
     assert rendered.index('data-map-action="find-topaz"') < rendered.index('data-map-action="find-wepp"')
 
 
+def test_map_template_renders_layer_defaults_and_legend_hosts(jinja_env: Environment) -> None:
+    rendered = jinja_env.get_template("controls/map_pure_gl.htm").render()
+
+    assert '<input type="checkbox" id="sbs_color_shift_toggle">' in rendered
+    assert 'id="sbs_color_shift_toggle" checked' not in rendered
+    assert re.search(r'id="sub_cmap_radio_default"[^>]*checked', rendered)
+    assert 'id="sub_legend" class="wc-map-legend" aria-live="polite"' in rendered
+    assert 'id="sbs_legend" class="wc-map-legend" aria-live="polite"' in rendered
+
+
 def test_placeholder_only_controls_have_explicit_accessible_names() -> None:
     command_bar_source = (COMMAND_BAR_TEMPLATE_ROOT / "command-bar.htm").read_text(encoding="utf-8")
     browse_directory_source = (

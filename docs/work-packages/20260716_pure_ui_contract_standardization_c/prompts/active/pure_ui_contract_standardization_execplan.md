@@ -36,6 +36,8 @@ is not a contract registry or enforcement platform.
 - [x] (2026-07-28) Executed and closed DOM-04A Map Orchestration with direct
   rendered-action and exact elevation-request regression tests and no
   production mismatch.
+- [x] (2026-07-28) Executed and closed DOM-04B Map Layers and Feature UI with
+  direct rendered-default/legend regression evidence and no production mismatch.
 - [ ] Continue with one controller package at a time.
 - [ ] Review measured value after five controllers.
 - [ ] Close the initiative when the registered inventory has executable
@@ -212,3 +214,9 @@ tooling failure, or production patch; DOM-04B remains the layer/feature owner.
 The repository-wide Python sweep stopped after 2,451 passes and 40 skips on an
 unrelated GridMET `_FakeUnits.degC` fixture failure; DOM-04A's focused 121-test
 Python evidence passed.
+
+DOM-04B closed with actual-render evidence for the SBS toggle, default
+subcatchment colormap, and legend hosts. Existing Map helper tests conformed
+for layers, SBS presentation, scale, and feature-modal accessibility. Focused
+Python (72 tests), lint, focused Map Jest (38 tests), and full frontend results
+passed. It introduced no helper or production patch.
