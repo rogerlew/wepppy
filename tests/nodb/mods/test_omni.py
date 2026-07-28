@@ -3253,7 +3253,11 @@ def test_omni_clone_sibling_rejects_archive_landuse_and_soils(tmp_path: Path, om
     assert "migration" in exc_info.value.message.lower()
 
 
-def test_run_contrast_skips_archive_landuse_and_soils(tmp_path: Path, omni_module, monkeypatch):
+def test_run_contrast_skips_archives_and_inherits_parent_wepp_bin(
+    tmp_path: Path,
+    omni_module,
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
     wd = tmp_path / "run"
     (wd / "climate").mkdir(parents=True)
     (wd / "watershed").mkdir(parents=True)
@@ -3303,7 +3307,15 @@ def test_run_contrast_skips_archive_landuse_and_soils(tmp_path: Path, omni_modul
 
     import wepppy.nodb.core as nodb_core
 
-    monkeypatch.setattr(nodb_core.Wepp, "getInstance", lambda run_wd: DummyWepp(run_wd))
+    wepp_instances: dict[str, DummyWepp] = {}
+
+    def _get_wepp_instance(run_wd: str) -> DummyWepp:
+        instance = wepp_instances.setdefault(run_wd, DummyWepp(run_wd))
+        if Path(run_wd) == wd:
+            instance.wepp_bin = "wepp_260727"
+        return instance
+
+    monkeypatch.setattr(nodb_core.Wepp, "getInstance", _get_wepp_instance)
 
     new_wd = Path(
         omni_module._run_contrast(
@@ -3321,6 +3333,7 @@ def test_run_contrast_skips_archive_landuse_and_soils(tmp_path: Path, omni_modul
     assert list((new_wd / "landuse").iterdir()) == []
     assert (new_wd / "soils").is_dir()
     assert list((new_wd / "soils").iterdir()) == []
+    assert wepp_instances[str(new_wd)].wepp_bin == "wepp_260727"
 
 def test_run_contrast_copies_directory_landuse_and_soils(tmp_path: Path, omni_module, monkeypatch):
     wd = tmp_path / "run"

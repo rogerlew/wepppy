@@ -441,7 +441,7 @@ def _run_contrast(
     runid: str,
     control_scenario_key: str,
     contrast_scenario_key: str,
-    wepp_bin: str = 'wepp_dcc52a6',
+    wepp_bin: Optional[str] = None,
     output_options: Optional[Dict[str, bool]] = None,
 ) -> str:
     return _OMNI_CLONE_CONTRAST_SERVICE.run_contrast(

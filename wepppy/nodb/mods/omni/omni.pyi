@@ -54,7 +54,7 @@ def _run_contrast(
     runid: str,
     control_scenario_key: str,
     contrast_scenario_key: str,
-    wepp_bin: str = ...,
+    wepp_bin: Optional[str] = ...,
     output_options: Dict[str, bool] | None = ...,
 ) -> str: ...
 

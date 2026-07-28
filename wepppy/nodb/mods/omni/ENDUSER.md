@@ -202,6 +202,7 @@ When interpreting contrasts, remember that the result reflects both:
 - Scenarios compare whole-run alternatives. Contrasts compare targeted treatment placement and should not be confused with whole-watershed treatment scenarios.
 - For a burned-versus-unburned comparison, Omni `undisturbed` is usually a better workflow than creating a separate forked run, because it keeps the runs inside one comparison system.
 - Contrasts are more advanced and easier to misinterpret if the control scenario, treatment scenario, or selection mode is poorly chosen.
+- Contrast child runs use the same WEPP executable selected for the parent project.
 - User-defined area contrasts use hillslope inclusion rules, not exact partial-area treatment fractions.
 - Scenario and contrast outputs are modeled estimates, not field measurements. They still require professional judgment.
 

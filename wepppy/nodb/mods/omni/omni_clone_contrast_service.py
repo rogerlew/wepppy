@@ -220,7 +220,7 @@ class OmniCloneContrastService:
         if wepp_bin is not None:
             wepp.wepp_bin = wepp_bin
         else:
-            wepp.wepp_bin = self.wepp_instance.wepp_bin,
+            wepp.wepp_bin = Wepp.getInstance(wd).wepp_bin
         wepp.clean()
 
         og_runs_dir = _join(wd, "wepp", "runs/")

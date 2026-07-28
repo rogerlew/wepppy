@@ -204,6 +204,11 @@ Prescribed fire scenarios require an **undisturbed** clone context (no SBS map).
 
 ## Contrast Analysis Modes
 
+Omni contrast child runs inherit the parent project's persisted WEPP executable
+selection from `wepp.nodb`. Internal callers may provide an explicit executable
+override for a specialized replay; otherwise the parent selection remains the
+provenance source for every contrast.
+
 ### Cumulative Contribution
 
 Automatically selects hillslopes that contribute the most to your chosen metric (runoff or soil loss):
