@@ -52,6 +52,9 @@ is not a contract registry or enforcement platform.
 - [x] (2026-07-28) Executed and closed DOM-09 Landuse Modifier with actual
   selection/value/action rendering and exact synchronous mutation evidence; no
   production mismatch.
+- [x] (2026-07-28) Executed and closed DOM-10 Soils with actual
+  mode/selection/option/lifecycle rendering and downstream state/queue evidence;
+  no production mismatch.
 - [ ] Continue with one controller package at a time.
 - [x] (2026-07-28) Reviewed measured value after five controller domains.
 - [x] (2026-07-28) Registered the autonomous serial remaining run-domain
@@ -287,3 +290,9 @@ submission, authorization, validation, and synchronous Landuse mutation.
 Focused Python (138 tests), lint, focused Jest (3 tests), and documentation lint
 passed; the unchanged frontend tree's preceding full sweep passed 88 suites and
 663 tests. It introduced no helper or production patch.
+
+DOM-10 closed with actual Soil mode, selection, option, and lifecycle rendering.
+Existing controller, route, schema, enqueue, worker, and reload evidence
+conformed. Focused Python (204 tests), lint, focused Jest (7 tests), and docs
+lint passed; the unchanged frontend tree's preceding full sweep passed 88
+suites/663 tests. It introduced no helper or production patch.

@@ -154,6 +154,36 @@ def test_soil_pure_template_renders_ssurgo_cache_checkbox(jinja_env: Environment
     assert 'name="clear_ssurgo_cache_on_rebuild"' in rendered
     assert "Clear SSURGO cache on rebuild" in rendered
     assert re.search(r'id="clear_ssurgo_cache_on_rebuild"[^>]*checked', rendered)
+    for mode in ("0", "1", "2"):
+        assert re.search(
+            rf'<input[^>]*id="soil_mode{mode}"[^>]*name="soil_mode"'
+            rf'[^>]*value="{mode}"',
+            rendered,
+        )
+    assert re.search(
+        r'<input[^>]*id="soil_initial_sat"[^>]*name="initial_sat"'
+        r'[^>]*value="0.75"',
+        rendered,
+    )
+    assert re.search(
+        r'<input[^>]*id="soil_single_selection"[^>]*'
+        r'name="soil_single_selection"[^>]*value="0"',
+        rendered,
+    )
+    assert re.search(
+        r'<select[^>]*id="soil_single_dbselection"[^>]*'
+        r'name="soil_single_dbselection"',
+        rendered,
+    )
+    assert re.search(
+        r'<input[^>]*id="checkbox_ksflag"[^>]*name="checkbox_ksflag"'
+        r'[^>]*checked',
+        rendered,
+    )
+    assert 'id="btn_build_soil"' in rendered
+    assert 'id="hint_build_soil"' in rendered
+    assert 'id="soil_status_panel"' in rendered
+    assert 'id="soil_stacktrace_panel"' in rendered
 
 
 def test_ash_template_submits_canonical_model_selector_names(jinja_env: Environment) -> None:

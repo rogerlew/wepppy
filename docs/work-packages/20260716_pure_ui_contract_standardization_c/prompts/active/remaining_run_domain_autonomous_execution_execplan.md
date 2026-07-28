@@ -25,6 +25,8 @@ generator, manifest, or new CI system.
 - [x] (2026-07-28 UTC) Executed DOM-09; actual modifier rendering and existing
   exact-payload/synchronous-mutation evidence passed without a production
   repair.
+- [x] (2026-07-28 UTC) Executed DOM-10; actual Soil rendering and existing
+  state/queue/worker evidence passed without a production repair.
 - [ ] Execute all remaining run-domain packages in the dependency-aware order.
 - [ ] Resolve each encountered hold through its owning package or a bounded
   operator decision.
@@ -70,6 +72,10 @@ DOM-09: no mismatch and no production patch. Added actual-render selection,
 value, action, and lifecycle evidence; 138 focused Python tests, lint, 3 focused
 Jest tests, and package documentation lint passed. The preceding full frontend
 sweep remained applicable because no frontend source changed.
+
+DOM-10: no mismatch and no production patch. Expanded actual-render mode,
+selection, option, and lifecycle evidence; 204 focused Python tests, lint, 7
+focused Jest tests, and docs lint passed. No helper was introduced.
 
 ## Context and Orientation
 
