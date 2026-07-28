@@ -76,6 +76,9 @@ generator, manifest, or new CI system.
 - [x] (2026-07-28 UTC) Executed DOM-20A; existing actual Features Export
   catalog/selector/profile/config rendering and downstream evidence passed
   without repair.
+- [x] (2026-07-28 UTC) Executed DOM-20B; existing actual enqueue/status/results/
+  warnings/artifact/download rendering and downstream evidence passed without
+  repair.
 - [ ] Execute all remaining run-domain packages in the dependency-aware order.
 - [ ] Resolve each encountered hold through its owning package or a bounded
   operator decision.
@@ -208,6 +211,11 @@ DOM-20A: no mismatch and no production patch. Existing actual catalog,
 selector, profile, settings, validation, and action rendering plus controller,
 catalog, profile, planner, and run-page evidence passed; 125 focused Python
 tests, 22 Features Export Jest tests, lint, and docs lint passed.
+
+DOM-20B: no mismatch and no production patch. Existing actual action, job,
+results, warnings, artifact, download, and error rendering plus controller,
+rq-engine, cache, service, manifest, worker, and reload evidence passed; 104
+focused Python tests, 22 Features Export Jest tests, lint, and docs lint passed.
 
 ## Context and Orientation
 
