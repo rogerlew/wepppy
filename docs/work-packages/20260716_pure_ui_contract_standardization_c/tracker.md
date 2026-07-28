@@ -27,8 +27,9 @@
 ### In Progress
 
 - [ ] Execute GOV-00A and ratify the canonical contract schema.
-- [ ] Register and dual-review REM-05 under GOV-00A-M1E without advancing
-  DOM-05; commit its documentation-only checkpoint ancestor before code edits.
+- [x] Registered and dual-reviewed REM-05 under GOV-00A-M1E without advancing
+  DOM-05; checkpoint ancestor
+  `44d3b93c8e3bc7d5e89151cbb9677db374411c53`.
 
 ### Blocked
 

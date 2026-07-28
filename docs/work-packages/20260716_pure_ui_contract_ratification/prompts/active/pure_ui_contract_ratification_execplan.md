@@ -54,8 +54,9 @@ evidence; they cannot silently redefine intended behavior.
 - [x] (2026-07-28 00:45 UTC) Ratify and dual-review GOV-00A-M1D for REM-04
   browser-origin guard hardening with zero unresolved findings; its standalone
   ancestor is the next atomic action.
-- [ ] (2026-07-28 06:10 UTC) Ratify and dual-review GOV-00A-M1E for REM-05's
-  finite DOM-05 depression-smoothing selector propagation boundary.
+- [x] (2026-07-28 06:45 UTC) Ratified and dual-reviewed GOV-00A-M1E for REM-05's
+  finite DOM-05 depression-smoothing selector propagation boundary; sealed
+  ancestor `44d3b93c8e3bc7d5e89151cbb9677db374411c53`.
 - [ ] Ratify authority hierarchy and lifecycle vocabulary.
 - [ ] Publish the normative README and reusable contract template.
 - [ ] Add deterministic governance validation and negative fixtures.

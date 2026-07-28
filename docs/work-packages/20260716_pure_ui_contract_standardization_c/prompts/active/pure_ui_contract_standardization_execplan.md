@@ -57,8 +57,9 @@ field-id tests can miss a real payload regression.
   close it after the 5,070-pass repository sweep.
 - [ ] (2026-07-21 22:15 UTC) Ratify GOV-00A-M1B and REM-02's finite SURF-06
   TTL-deletion catalog presentation boundary before implementation.
-- [ ] (2026-07-28 06:10 UTC) Ratify GOV-00A-M1E and REM-05's finite DOM-05
-  depression-smoothing propagation boundary before implementation.
+- [x] (2026-07-28 06:45 UTC) Ratified GOV-00A-M1E and REM-05's finite DOM-05
+  depression-smoothing propagation boundary in ancestor
+  `44d3b93c8e3bc7d5e89151cbb9677db374411c53`.
 - [ ] Ratify `docs/ui-docs/contracts/README.md` and its evidence levels.
 - [ ] Execute and close the WATAR/Ash pilot child package.
 - [ ] Use pilot findings to add a stable contract-coverage check.

@@ -3,7 +3,7 @@
 **Remediation**: REM-05
 **Timezone**: UTC
 **Status**: In Progress
-**Current phase**: Contract checkpoint
+**Current phase**: Implementation
 **Security impact**: High (inherited)
 **Dedicated security review**:
 `artifacts/2026-07-28_security_review.md`
@@ -12,7 +12,7 @@
 
 ### In Progress
 
-- [ ] Commit the dual-reviewed documentation-only checkpoint ancestor.
+- [ ] Apply and validate the bounded implementation.
 
 ### Ready
 
@@ -28,6 +28,8 @@
   findings.
 - [x] Operations/security reviewer returned post-fix PASS with no
   blocking/medium findings.
+- [x] Committed standalone documentation-only checkpoint ancestor
+  `44d3b93c8e3bc7d5e89151cbb9677db374411c53`.
 
 ## Decision Log
 
@@ -58,6 +60,14 @@ containment, and rollback evidence; repaired umbrella lifecycle prose.
 
 **Next step**: Obtain both post-fix confirmations, then commit the standalone
 documentation-only ancestor.
+
+### 2026-07-28 06:45 UTC: Checkpoint ancestor sealed
+
+**Work completed**: Both reviews passed and the complete contract checkpoint was
+committed as `44d3b93c8e3bc7d5e89151cbb9677db374411c53`.
+
+**Next step**: Apply only the registered template, render-test, worker
+characterization, and Usersum changes.
 
 ## Dispatch Log
 

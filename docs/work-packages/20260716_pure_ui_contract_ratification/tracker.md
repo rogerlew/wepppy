@@ -28,7 +28,8 @@
 
 - [ ] Complete Milestone 1 canonical README and obligation registry after the
   contract-first agent-governance slice.
-- [ ] Complete GOV-00A-M1E/REM-05 checkpoint review and standalone ancestor.
+- [x] Complete GOV-00A-M1E/REM-05 checkpoint review and standalone ancestor
+  `44d3b93c8e3bc7d5e89151cbb9677db374411c53`.
 
 ### Blocked
 
@@ -64,6 +65,8 @@
   (2026-07-28 00:45 UTC).
 - [x] Recorded operator authorization and drafted GOV-00A-M1E/REM-05 for the
   finite DOM-05 depression-smoothing propagation defect (2026-07-28 06:10 UTC).
+- [x] Dual-reviewed GOV-00A-M1E/REM-05 with no blocking/medium findings and
+  sealed its standalone ancestor (2026-07-28 06:45 UTC).
 - [x] Recorded contract-first authority and sequencing in root, WEPPcloud,
   controller, NoDb, rq-engine, and direct RQ agent governance (2026-07-17).
 - [x] Dispositioned two high/three medium authority findings and two high/four

@@ -19,8 +19,9 @@ token without altering channel algorithms or defaults.
   arguments, logs, and rendered-template/controller name mismatch.
 - [x] (2026-07-28 06:10 UTC) Recorded the bounded REM-05 contract decision and
   implementation boundary.
-- [ ] Register GOV-00A-M1E/REM-05, obtain two independent checkpoint reviews,
-  disposition findings, and commit the documentation-only ancestor.
+- [x] (2026-07-28 06:45 UTC) Registered GOV-00A-M1E/REM-05, obtained two
+  independent post-fix PASS reviews, and committed documentation-only ancestor
+  `44d3b93c8e3bc7d5e89151cbb9677db374411c53`.
 - [ ] Apply the one-field template conformance fix and actual-template
   regression test.
 - [ ] Run focused frontend and documentation validation.
@@ -79,7 +80,8 @@ render/serialize/persist/reload path and leaves DOM-05 planned and unverified.
 First register REM-05 and GOV-00A-M1E in the parent authority documents. Obtain
 one independent governance/correctness review and one independent
 security/operations review. Resolve all findings and commit only documentation
-as a standalone ancestor.
+as standalone ancestor
+`44d3b93c8e3bc7d5e89151cbb9677db374411c53`.
 
 Then add `field_name="wbt_fill_or_breach"` to the existing macro invocation.
 Extend the actual-template pytest fixture with the minimal Watershed attributes
