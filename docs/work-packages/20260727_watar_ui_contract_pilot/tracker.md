@@ -4,10 +4,9 @@
 
 **Timezone**: UTC
 **Started**: 2026-07-28 06:50 UTC
-**Current phase**: Planned
+**Current phase**: Ready
 **Last updated**: 2026-07-28 UTC
-**Next milestone**: Start actual-render and field-contract tests after GOV-00A
-publishes the concise test convention.
+**Next milestone**: Start actual-render and field-contract tests.
 **Security impact**: `none` for current test/documentation scope
 **Dedicated security review**: `no`; re-triage any production patch
 **Security artifact**: N/A
@@ -30,13 +29,14 @@ publishes the concise test convention.
 
 ### Blocked
 
-- [ ] Waiting only for GOV-00A's concise test convention; no shared package or
-  enforcement gate blocks the controller.
+- None.
 
 ### Done
 
 - [x] Replaced the platform-first pilot with the one-controller test loop
   (2026-07-28 UTC).
+- [x] GOV-00A published and independently reviewed the concise convention;
+  no shared package or enforcement gate blocks execution (2026-07-28 10:20 UTC).
 
 ## Decisions Log
 

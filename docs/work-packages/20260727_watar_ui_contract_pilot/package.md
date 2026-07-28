@@ -1,7 +1,7 @@
 # WATAR/Ash Controller Contract Tests
 
 **Stable ID**: DOM-01
-**Status**: Planned (2026-07-28 UTC)
+**Status**: Ready (2026-07-28 UTC)
 **Timezone**: UTC
 
 ## Overview
@@ -46,8 +46,10 @@ registry or enforcement platform.
 
 - [ ] The historical rendered-id/submitted-name mismatch is represented by a
   test that fails when reintroduced.
-- [ ] Every risk-bearing field has actual-render coverage for name, token,
-  selected/default state, and relevant absence/disabled behavior.
+- [ ] Every field whose value can change a submitted payload, persisted/reloaded
+  state, queued work, or visible workflow state has actual-render coverage for
+  name, token, selected/default state, and relevant absence/disabled behavior;
+  reviewed exclusions and their reasons are recorded.
 - [ ] Persisted values have focused parser/save/reload evidence.
 - [ ] RQ tests are added only for values or lifecycle behavior that cross the
   worker boundary.

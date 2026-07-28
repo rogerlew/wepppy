@@ -386,7 +386,7 @@ build through job completion before review.
 
 ### Pure UI Controller Contract Standardization
 **Started**: 2026-07-16
-**Status**: Simplified tests-first execution model; GOV-00A then DOM-01
+**Status**: Simplified tests-first execution model; DOM-01 ready
 **Size**: One controller active at a time; inventory size is not a schedule
 **Owner**: Codex
 **Priority**: High
@@ -401,13 +401,13 @@ build through job completion before review.
 - The platform-first registry/enforcement scaffold was superseded before commit or implementation. Seven speculative package directories were removed. The active [controller test roadmap](docs/work-packages/20260716_pure_ui_contract_standardization_c/artifacts/controller_contract_test_roadmap.md) requires actual-render tests, focused downstream tests, minimal mismatch patches, and existing broad gates one controller at a time.
 - [DOM-01 WATAR/Ash](docs/work-packages/20260727_watar_ui_contract_pilot/) is the first controller. Shared packages are tested when encountered, not prerequisites. GOV-01 is deferred until five-controller evidence demonstrates measured need and the operator explicitly approves a proposal.
 
-**Next Steps**: Close the concise GOV-00A convention, execute DOM-01, record value/runtime/helper evidence, then select the next single controller.
+**Next Steps**: Execute DOM-01, record value/runtime/helper evidence, then select the next single controller.
 
 ---
 
 ### Pure UI Contract Ratification (GOV-00A)
 **Started**: 2026-07-16
-**Status**: Simplifying to the concise controller test convention
+**Status**: Closed — concise controller test convention published
 **Size**: One focused documentation/review slice
 **Owner**: Codex
 **Priority**: High
@@ -416,7 +416,7 @@ build through job completion before review.
 
 **Current Status**:
 - Every included parent-ledger row is now `contractual / unverified`; evidence maturity no longer controls whether the obligation exists.
-- Package brief, tracker, and active ExecPlan now reflect the controller-first
+- Package brief, tracker, and completed ExecPlan reflect the controller-first
   simplicity budget.
 - Root and UI/RQ/NoDb agent governance now routes intended behavior changes
   through a finite canonical-authority set and accepted standalone ancestor
@@ -426,7 +426,7 @@ build through job completion before review.
 - Obligation registries, generated indexes, manifests, change classifiers,
   consumer graphs, attestations, and new CI workflows are out of scope.
 
-**Next Steps**: Publish and review the concise convention, reconcile current guidance, close GOV-00A, and begin DOM-01.
+**Next Steps**: None — DOM-01 is ready to begin under the reviewed convention.
 
 ---
 

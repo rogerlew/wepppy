@@ -48,7 +48,11 @@ Read the nearest subsystem and test instructions, then inspect:
 - current focused tests; and
 - current canonical intent.
 
-For each risk-bearing field or action, record only:
+A field or action is risk-bearing when its rendered value or use can change a
+submitted payload, persisted or reloaded state, queued work, or visible
+workflow state. Record any reviewed field/action excluded from that set and the
+reason in the controller package or field matrix. For each included field or
+action, record only:
 
 | Contract value | Required evidence |
 | --- | --- |

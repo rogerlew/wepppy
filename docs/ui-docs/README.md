@@ -3,6 +3,9 @@
 The `ui-docs/` folder centralizes documentation for the web UI. Use these references when you need to understand controller behavior, styling expectations, or front-end workflows.
 
 ## Contents
+- `controller-contract.md` — Current controller contract and the concise
+  one-controller tests-first convention: render actual fields, trace only
+  applicable downstream seams, and repair confirmed mismatches minimally.
 - `accessiblity.md` — Unified accessibility map plus Section 508 strategy, including manual-gate test flow and axe setup plan.
 - `control-ui-styling/` — Behavioral notes and styling guides for individual controls (for example, SBS controls, map panels).
 - `ui-style-guide.md` — Core styling conventions and reusable snippets for controls, summary panes, and typography.

@@ -1,7 +1,7 @@
 # Pure UI Controller Test Convention
 
 **Stable ID**: GOV-00A
-**Status**: Open (2026-07-17)
+**Status**: Closed (2026-07-28)
 **Timezone**: UTC
 
 ## Overview
@@ -72,16 +72,16 @@ coverage; otherwise they are narrowed or deferred.
 
 ## Success Criteria
 
-- [ ] Current guidance explains the one-controller loop without a registry.
-- [ ] Actual-render evidence is mandatory for template-defined fields.
-- [ ] Downstream testing is required only where the field/action applies.
-- [ ] Production patches are tests-first, minimal, and compatibility-preserving.
-- [ ] Test/documentation work begins with security impact `none`.
-- [ ] One independent correctness review applies to a production patch; extra
+- [x] Current guidance explains the one-controller loop without a registry.
+- [x] Actual-render evidence is mandatory for template-defined fields.
+- [x] Downstream testing is required only where the field/action applies.
+- [x] Production patches are tests-first, minimal, and compatibility-preserving.
+- [x] Test/documentation work begins with security impact `none`.
+- [x] One independent correctness review applies to a production patch; extra
   security/review gates follow actual risk.
-- [ ] Stop-loss rules and the five-controller value review are documented.
-- [ ] DOM-01 is unblocked without SHR or GOV-01 completion.
-- [ ] Documentation lint, spelling preview, references, and diff checks pass.
+- [x] Stop-loss rules and the five-controller value review are documented.
+- [x] DOM-01 is unblocked without SHR or GOV-01 completion.
+- [x] Documentation lint, spelling preview, references, and diff checks pass.
 
 ## Dependencies
 

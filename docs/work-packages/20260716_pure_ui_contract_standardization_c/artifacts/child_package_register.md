@@ -9,7 +9,7 @@ one controller.
 run-domain, 9 shared-foundation, and 19 non-run/stateful surface packages.
 GOV-00 is the existing umbrella at
 `docs/work-packages/20260716_pure_ui_contract_standardization_c/`; GOV-00A is the
-active ratification child at
+closed convention child at
 `docs/work-packages/20260716_pure_ui_contract_ratification/`; a planned entry
 receives a dated directory when it is selected as the next one-at-a-time
 package, before tests begin. REM-01 is the operator-authorized
@@ -131,7 +131,7 @@ engine is planned. GOV-99 is intentionally absent from all sets.
 | ID | Package path / proposed slug | Scope | Depends on | Risk / expected security | State |
 | --- | --- | --- | --- | --- | --- |
 | GOV-00 | Existing `20260716_pure_ui_contract_standardization_c` | Current umbrella: complete population, exclusions, contractual coverage, and frozen execution register | None | High contract risk; docs-only `none` | auditing |
-| GOV-00A | Existing `20260716_pure_ui_contract_ratification` | Publish the concise one-controller tests-first convention, simplicity budget, and stop-loss rules | GOV-00 | Docs-only `none` | auditing |
+| GOV-00A | Existing `20260716_pure_ui_contract_ratification` | Publish the concise one-controller tests-first convention, simplicity budget, and stop-loss rules | GOV-00 | Docs-only `none` | closed |
 | GOV-01 | `pure_ui_contract_maintenance_gate_evaluation` | After at least five controllers, evaluate measured misses, repetition, runtime, false failures, and operator cost; add tooling only with explicit approval | Five completed controller packages and measured need | Risk determined by proposed tooling | deferred; no scaffold |
 | GOV-99 | `pure_ui_contract_authority_cutover` | Final coverage audit, stale-link replacement, current AGENTS/README/catalog authority cutover, archived-plan labels, and umbrella closeout | GOV-00, GOV-00A, ALL-DOM, ALL-SHR, ALL-SURF | Medium; docs-only `none` | planned |
 
@@ -263,7 +263,7 @@ domain package.
 
 | ID | Package path / proposed slug | Bootstrap/controller scope | Primary source boundary | Depends on | Expected remediation security | State |
 | --- | --- | --- | --- | --- | --- | --- |
-| DOM-01 | `20260727_watar_ui_contract_pilot` | `ash` | `ash.js`, `ash_pure.htm`, WATAR/ash route, `Ash`, `run_ash_rq` | GOV-00A concise test convention | Test/docs `none`; re-triage actual patch | planned |
+| DOM-01 | `20260727_watar_ui_contract_pilot` | `ash` | `ash.js`, `ash_pure.htm`, WATAR/ash route, `Ash`, `run_ash_rq` | GOV-00A concise test convention | Test/docs `none`; re-triage actual patch | ready |
 | DOM-02 | `project_shell_ui_contract` | `project` | `project.js`, run header, Project routes, `Ron`, SQL Run, readonly RQ; consumes SHR-05 Unitizer preferences | SHR-01..04B, SHR-05 context | `high`: auth, readonly/public state, mutation/RQ | planned |
 | DOM-03 | `team_collaboration_ui_contract` | `team` | `team.js`, team modal/form, project/team routes, SQL ownership | SHR-01..04B context | `high`: owner/collaborator auth mutations | planned |
 | DOM-04A | `map_orchestration_ui_contract` | `map`: orchestration, center/search/elevation/drilldown and public API | `map_gl.js`, map host, elevation/query routes; consumes SHR-01 `selection_utils.js` | SHR-01..04B context | `low`; `high` if public query routes change | planned |

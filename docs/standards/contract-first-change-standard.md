@@ -11,7 +11,7 @@ explain behavior; they do not create normative intent.
 
 A contract is current and canonical only when it is in one of these finite sets:
 
-1. Before Pure UI registry cutover:
+1. Before GOV-00A convention cutover:
    - `docs/schemas/rq-response-contract.md`;
    - `docs/schemas/weppcloud-csrf-contract.md`;
    - `docs/schemas/output-scope-contract.md`;
@@ -26,7 +26,7 @@ A contract is current and canonical only when it is in one of these finite sets:
      for Omni Contrasts maturity, embargo, and disabled discoverability;
    - an operator-approved contract-decision checkpoint in the registered child
      package that owns the affected Pure UI obligation.
-2. After GOV-00A registry cutover:
+2. After GOV-00A convention cutover:
    - the cross-cutting contracts above;
    - `docs/ui-docs/controller-contract.md`, for the tests-first controller
      convention; and
@@ -130,7 +130,7 @@ an independently reviewed milestone before the rest of GOV-00A closes. The
 register must name that milestone as the remediation dependency, and the
 standalone ancestor must include the milestone decision, standard/register
 amendments, reviews, and disposition. Closing that milestone does not ratify or
-close any other open GOV-00A schema, registry, template, or tooling deliverable.
+close the remaining GOV-00A controller-test convention deliverable.
 
 ## Conformance Fixes and Urgent Restoration
 

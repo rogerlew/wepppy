@@ -50,6 +50,10 @@
 - Tests for template- or macro-defined controls must inspect actual rendered
   HTML. Hand-authored Jest DOM is useful for controller logic but cannot prove
   the production submitted name or selected/default state.
+- A field or action is risk-bearing when its rendered value or use can change a
+  submitted payload, persisted or reloaded state, queued work, or visible
+  workflow state. Record any reviewed field/action excluded from that set and
+  the reason in the controller package or field matrix.
 - For each risk-bearing field, test only the downstream seams it reaches:
   serialization, route parsing, persistence/reload, and RQ input/lifecycle where
   applicable.

@@ -39,16 +39,24 @@ See `docs/dev-notes/controller_foundations.md` for the canonical vision. Key pil
 
 ## Standard Workflow
 See also: `docs/dev-notes/frontend-change-checklist.md` (unified end-to-end checklist for controller JS changes).
-Follow `docs/dev-notes/module_refactor_workflow.md` for end-to-end instructions. Highlights:
+When modernization or a module refactor is separately in scope, follow
+`docs/dev-notes/module_refactor_workflow.md`; a contract mismatch repair does
+not imply that broader scope. For ordinary controller work:
 1. **Contract**: follow the contract-first standard and identify every applicable
    current canonical domain and shared/cross-cutting contract before editing.
    For an intended behavior change, complete the accepted checkpoint and amend
    those contracts in its ancestor revision. If no canonical
    domain contract exists, create or ratify it through the registered contract
    work package before changing controller, template, or route behavior.
-2. **Scope**: audit jQuery usage, templates, backend routes, and supporting documentation.
-3. **Plan**: decide which helpers (`WCDom`, `WCForms`, `WCHttp`, `WCEvents`, `controlBase`) you need and whether payloads switch to JSON.
-4. **Implement**:
+2. **Test one controller**: render the actual Jinja template and assert
+   risk-bearing field ids, submitted names, tokens, and selected/default state.
+   Add focused JavaScript, parser, persistence/reload, and RQ tests only for
+   seams the value actually crosses. Prefer direct assertions.
+3. **Repair confirmed mismatches**: retain the regression test and make the
+   smallest backward-compatible patch. Do not combine cleanup, redesign,
+   defaults, or unrelated shared changes. Extract a stateless test helper only
+   after at least two tests repeat the same logic and it makes failures clearer.
+4. **Implement intended modernization when separately in scope**:
    - Use helper namespaces instead of direct DOM APIs; keep controllers wrapped in IIFEs that attach to `window`.
    - Update paired Flask routes in the same change using `parse_request_payload`; normalize booleans/arrays and adjust NoDb methods to read native types.
    - Remove inline jQuery bootstrap from templates; rely on module-level init or `DOMContentLoaded`.

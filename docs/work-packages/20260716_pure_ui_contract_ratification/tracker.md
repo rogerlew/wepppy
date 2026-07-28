@@ -6,9 +6,9 @@
 
 **Timezone**: UTC
 **Started**: 2026-07-17 01:48 UTC
-**Current phase**: Concise controller test convention
+**Current phase**: Closed
 **Last updated**: 2026-07-28 UTC
-**Next milestone**: Publish the minimal convention and unblock DOM-01 WATAR/Ash.
+**Next milestone**: None; DOM-01 WATAR/Ash is ready.
 **Security impact**: `none`
 **Dedicated security review**: `no`
 **Security artifact**: N/A
@@ -17,17 +17,11 @@
 
 ### Ready / Backlog
 
-- [ ] Publish the concise one-controller test convention.
-- [ ] Reconcile current umbrella, register, prompt, and developer guidance.
-- [ ] Validate docs and complete one proportional independent review.
-- [ ] Close GOV-00A and begin DOM-01.
+- None.
 
 ### In Progress
 
-- [ ] Remove current-authority requirements for the rejected registry,
-  manifest, change-aware gate, and shared prerequisite spine.
-- [x] Complete GOV-00A-M1E/REM-05 checkpoint review and standalone ancestor
-  `44d3b93c8e3bc7d5e89151cbb9677db374411c53`.
+- None.
 
 ### Blocked
 
@@ -73,6 +67,9 @@
 - [x] Replaced the registry/enforcement architecture with the operator-directed
   one-controller tests-first loop; removed seven speculative scaffolds and made
   GOV-01 a deferred value evaluation (2026-07-28 UTC).
+- [x] Published and independently reviewed the concise convention, reconciled
+  current developer guidance, removed remaining platform requirements, and
+  unblocked DOM-01 (2026-07-28 10:20 UTC).
 
 ## Dispatch Log
 
@@ -86,6 +83,8 @@
 | 2026-07-17 03:46 | Regression/maintenance reviewer | Challenge enforceability, missing-contract behavior, and code-first loopholes | Read-only | Two high and four medium findings; all accepted/fixed, post-fix pending |
 | 2026-07-17 04:01 | Contract authority reviewer | Final post-fix confirmation | Read-only | Closure-ready; no remaining high/medium findings |
 | 2026-07-17 04:01 | Regression/maintenance reviewer | Final post-fix confirmation | Read-only | Closure-ready; no remaining high/medium findings |
+| 2026-07-28 10:17 | Independent correctness reviewer | Review concise convention for executability, regression risk, and platform creep | Read-only | One medium and one low finding; both accepted and fixed |
+| 2026-07-28 10:20 | Independent correctness reviewer | Confirm finding disposition | Read-only | PASS; no remaining high/medium findings |
 
 ## Timeline
 
@@ -95,6 +94,8 @@
 - **2026-07-17** - Operator required agents to treat contracts as authoritative
   and amend them before intended UI or RQ behavior changes; bounded Milestone 1
   governance execution began.
+- **2026-07-28 10:20 UTC** - Concise convention passed independent review;
+  GOV-00A closed and DOM-01 became ready.
 
 ## Decisions Log
 
@@ -223,11 +224,11 @@ before new UI-coupled RQ behavior is introduced.
 
 | Risk | Severity | Likelihood | Mitigation | Status |
 | --- | --- | --- | --- | --- |
-| `unverified` is treated as optional | High | Medium | Binding inventory plus sequential controller tracker | Open |
-| Convention grows into a platform | High | Medium | Explicit exclusions, simplicity budget, stop-loss rules | Open |
-| Test convention is too vague | High | Medium | Exact rendered/downstream seam and DOM-01 proof | Open |
+| `unverified` is treated as optional | High | Medium | Binding inventory plus sequential controller tracker | Mitigated |
+| Convention grows into a platform | High | Medium | Explicit exclusions, simplicity budget, stop-loss rules | Mitigated |
+| Test convention is too vague | High | Medium | Exact rendered/downstream seam and DOM-01 proof | Mitigated |
 | Ratification expands into controller audits | Medium | Medium | DOM-01 owns the first controller evidence | Mitigated |
-| Historical docs retain current-authority wording | Medium | High | Source/reference inventory and explicit redirect policy | Open |
+| Historical docs retain current-authority wording | Medium | High | Current guidance reconciled; historical artifacts remain labeled by context | Mitigated |
 | Code is edited before intent is known | High | Medium | Establish concise intent, tests first, stop on ambiguity | Mitigated |
 
 ## Verification Checklist
@@ -242,13 +243,13 @@ before new UI-coupled RQ behavior is introduced.
 
 ### Package Closeout
 
-- [ ] All included rows are contractual; no included `candidate` status remains.
-- [ ] The concise one-controller test convention is current authority.
-- [ ] Actual-render and applicable downstream evidence are defined clearly.
-- [ ] Direct-assertion, helper-extraction, simplicity, and stop-loss rules agree.
-- [ ] DOM-01 has no shared-package or GOV-01 prerequisite.
-- [ ] One proportional independent review has no unresolved high/medium finding.
-- [ ] Active ExecPlan is moved to `prompts/completed/` with outcomes.
+- [x] All included rows are contractual; no included `candidate` status remains.
+- [x] The concise one-controller test convention is current authority.
+- [x] Actual-render and applicable downstream evidence are defined clearly.
+- [x] Direct-assertion, helper-extraction, simplicity, and stop-loss rules agree.
+- [x] DOM-01 has no shared-package or GOV-01 prerequisite.
+- [x] One proportional independent review has no unresolved high/medium finding.
+- [x] Active ExecPlan is moved to `prompts/completed/` with outcomes.
 
 ## Progress Notes
 
@@ -320,6 +321,24 @@ reconciliation and proportional review.
 - Begin DOM-01 actual-render and downstream tests.
 
 **Test results**: Pending final documentation validation.
+
+### 2026-07-28 10:20 UTC: Close the concise convention
+
+**Agent/Contributor**: Codex
+
+**Work completed**:
+
+- Published the finite risk-bearing inclusion/exclusion rule.
+- Reconciled controller README/agent guidance and the contract-first standard.
+- Dispositioned the proportional review with no remaining high/medium findings.
+- Marked DOM-01 ready without shared or GOV-01 prerequisites.
+
+**Blockers encountered**: None.
+
+**Next steps**: Execute DOM-01 actual-render and applicable downstream tests.
+
+**Test results**: Scoped documentation lint, root AGENTS size gate, spelling
+preview, reference checks, and `git diff --check` passed.
 
 ## Watch List
 

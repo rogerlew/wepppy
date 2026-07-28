@@ -24,10 +24,12 @@ workflow.
   REM-05 governance milestones without advancing borrowed controllers.
 - [x] (2026-07-28) Operator replaced the platform-first architecture with a
   controller-by-controller tests-first loop.
-- [ ] Publish the concise controller test convention.
-- [ ] Reconcile umbrella, reusable prompt, register, and developer guidance.
-- [ ] Run documentation validation and one proportional independent review.
-- [ ] Close GOV-00A and unblock DOM-01 WATAR/Ash.
+- [x] (2026-07-28 10:20Z) Published the concise controller test convention.
+- [x] (2026-07-28 10:20Z) Reconciled umbrella, reusable prompt, register, and
+  developer guidance.
+- [x] (2026-07-28 10:20Z) Passed documentation validation and one proportional
+  independent review with no remaining high/medium findings.
+- [x] (2026-07-28 10:20Z) Closed GOV-00A and unblocked DOM-01 WATAR/Ash.
 
 ## Surprises & Discoveries
 
@@ -175,6 +177,20 @@ operator explicitly approves the proposed component.
 
 ## Outcomes & Retrospective
 
-Pending. At closure record the final convention path, removed platform
-requirements, validation results, reviewer verdict, and the exact DOM-01 start
-condition.
+GOV-00A closed with `docs/ui-docs/controller-contract.md` as the current concise
+convention. It requires actual rendered evidence, defines the finite
+risk-bearing inclusion/exclusion rule, limits downstream tests to seams a value
+reaches, and requires tests-first minimal compatible repair.
+
+No obligation registry, generated index, manifest, change classifier, consumer
+graph, attestation, or new CI workflow was created. Scoped documentation lint,
+spelling preview, reference checks, the root AGENTS size gate, and
+`git diff --check` passed. Independent review initially found one medium
+definition gap and one low scope ambiguity; both were fixed, and the final
+verdict was PASS with no remaining high/medium findings.
+
+DOM-01 can start immediately. It has no SHR or GOV-01 prerequisite.
+
+Revision note (2026-07-28): Closed the plan after publishing and reviewing the
+operator-directed concise convention; recorded the outcome and DOM-01 start
+condition so the completed plan is self-contained.

@@ -27,7 +27,8 @@ is not a contract registry or enforcement platform.
   a low-regression, controller-by-controller tests-and-repair loop.
 - [x] (2026-07-28) Removed seven speculative shared/enforcement scaffolds,
   retained DOM-01 as the first controller, and deferred GOV-01.
-- [ ] Close the simplified GOV-00A test convention.
+- [x] (2026-07-28 10:20Z) Closed the simplified GOV-00A test convention after
+  proportional independent review.
 - [ ] Execute DOM-01 WATAR/Ash.
 - [ ] Continue with one controller package at a time.
 - [ ] Review measured value after five controllers.

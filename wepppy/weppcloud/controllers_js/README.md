@@ -6,6 +6,21 @@
 
 This note explains how the controller JavaScript in `wepppy/weppcloud` is organized, how individual controller modules cooperate with the shared infrastructure, and what needs to happen when you extend the system.
 
+## Controller Contract Test Workflow
+
+Audit and repair one controller at a time. Establish intended behavior, render
+the actual Jinja template, and assert the field `id`, submitted `name`, option
+tokens, and selected/default state. Add focused JavaScript, route, persistence/
+reload, and RQ tests only for seams the value actually crosses.
+
+When a test confirms a mismatch, keep the regression and make the smallest
+backward-compatible repair. Start with direct assertions; extract a stateless
+test helper only after at least two tests repeat the same logic and the helper
+makes the mapping clearer. Do not build a registry, manifest, dependency engine,
+or new CI workflow for this loop. See the
+[controller contract](../../../docs/ui-docs/controller-contract.md) for the
+complete convention.
+
 ## Layout and Bundling
 - Authoring happens in `wepppy/weppcloud/controllers_js/*.js` (one file per controller plus shared helpers such as `dom.js`, `http.js`, `forms.js`, `events.js`, `control_base.js`, and `status_stream.js`).
 - The browser still downloads a single bundle, `wepppy/weppcloud/static/js/controllers-gl.js`. The bundle is rendered from `controllers_js/templates/controllers.js.j2`, which now loops over the discovered `.js` files automatically; simply dropping a new controller file into the directory is enough for it to be included.
