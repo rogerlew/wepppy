@@ -75,6 +75,9 @@ is not a contract registry or enforcement platform.
 - [x] (2026-07-28) Executed SHR-05 with rendered/client/Project/route/NoDb/map
   evidence; repaired Unitizer global selection, selector, and event ownership
   and passed independent security review.
+- [x] (2026-07-28) Executed SURF-11 with direct Geneva summary rendering,
+  controller lifecycle, route/service/map/Unitizer evidence, and independent
+  security review; no production repair was retained.
 - [ ] Close the initiative when the registered inventory has executable
   regression coverage or explicit operator-approved exclusions.
 
@@ -113,6 +116,11 @@ is not a contract registry or enforcement platform.
 - Observation: SHR-05 found source/generated selector drift and duplicate
   legacy event ownership that could race preference persistence; direct
   rendering plus single-dispatch tests exposed both without changing units.
+
+- Observation: SURF-11's independent review caught a proposed second
+  initialization owner that direct template-string inspection could not see.
+  Lifecycle ownership must be tested at the loaded controller boundary when a
+  deferred bundle already registers document events.
 
 ## Decision Log
 
@@ -189,6 +197,15 @@ handlers.
 
 **Rationale**: One event owner prevents redundant asynchronous persistence and
 stale-state races while preserving reload hydration and public hooks.
+
+### 2026-07-28: Geneva controller owns report initialization
+
+**Decision**: Preserve `geneva_summary_report.js` as the sole
+`DOMContentLoaded` initialization owner and test its listener registration
+directly.
+
+**Rationale**: A second template bootstrap would call non-idempotent `init()`
+twice and duplicate filter and map request handlers.
 
 ## Context and Orientation
 
@@ -374,3 +391,12 @@ Existing controller, route, schema, enqueue, worker, and reload evidence
 conformed. Focused Python (204 tests), lint, focused Jest (7 tests), and docs
 lint passed; the unchanged frontend tree's preceding full sweep passed 88
 suites/663 tests. It introduced no helper or production patch.
+
+SURF-11 closed with direct Geneva summary payload/filter/URL/map/accessibility
+rendering, one controller-owned initialization regression, and retained route,
+service, Unitizer, selection, and map evidence. Focused Python passed 144
+tests across the render/route and service sets; focused Jest passed 7 tests;
+frontend lint and the full 89-suite/671-test frontend sweep passed. Independent
+review caught and rejected a proposed duplicate template bootstrap before
+commit, then passed the corrected test-only closeout with zero unresolved
+findings. No production repair was retained.

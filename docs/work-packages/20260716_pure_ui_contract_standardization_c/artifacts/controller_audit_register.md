@@ -139,7 +139,7 @@ revisions are retained as controller-iteration evidence.
 | PowerUser scripts/templates | SHR-07 | privileged run header | role/action/web-push evidence; high | contractual | unverified |
 | `batch_runner.js` | SURF-02A | Batch create/manage roots; SURF-02B consumes the producer contract for execution | `J/batch_runner.test.js`; high | contractual | unverified |
 | `run_sync_dashboard.js` | SURF-05 | Run Sync root | no direct Jest suite; high | contractual | unverified |
-| `geneva_summary_report.js` | SURF-11 | Geneva summary template | `J/geneva_summary_report.test.js`; high if remediation | contractual | unverified |
+| `geneva_summary_report.js` | SURF-11 | Geneva summary template | direct render + 7 focused Jest; one controller-owned initializer; map/Unitizer/selection evidence; high review passed | contractual | verified |
 | `interfaces_captcha.js` | SURF-01 | public create/CAP templates | direct CAPTCHA gap; high | contractual | unverified |
 
 This reconciles all 56 modules selected by `_collect_controller_modules()`: 37
@@ -159,7 +159,7 @@ run-support files, 15 shared/global files, and four standalone files.
 | Run migration status | SURF-08 | `R/run_0/templates/run_0/rq-migration-status.htm` | high | contractual | unverified |
 | README editor | SURF-09 | `R/readme_md/templates/{readme_editor,readme_view}.htm` | high | contractual | unverified |
 | Disturbed CSV editor | SURF-10 | `T/edit_csv.htm` | high | contractual | unverified |
-| Geneva summary | SURF-11 | `templates/reports/geneva/summary.htm`; `R/nodb_api/geneva_bp.py::{query_geneva_summary,query_geneva_hru_map_rows,query_geneva_hru_map_features,report_geneva_summary}` | high if remediated | contractual | unverified |
+| Geneva summary | SURF-11 | `templates/reports/geneva/summary.htm`; `R/nodb_api/geneva_bp.py::{query_geneva_summary,query_geneva_hru_map_rows,query_geneva_hru_map_features,report_geneva_summary}`; 133 render/route + 11 service tests; no-store/run/auth/validation evidence | high review passed | contractual | verified |
 | Report shell | SURF-12 | both report-shell producers; 19 direct consumers; run/readonly/PUP/runtime renders; Project + 124 route tests | low | contractual | verified |
 | Security/auth forms | SURF-13 | `templates/security/*.html` through `_layout.html` | high | contractual | unverified |
 | User profile/session | SURF-14 | `templates/user/profile.html` | high | contractual | unverified |

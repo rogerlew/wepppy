@@ -1925,6 +1925,95 @@ def test_report_shell_consumer_inventory_has_explicit_content_blocks() -> None:
             assert "{% block report_content %}" in source
 
 
+def test_geneva_summary_report_renders_filters_and_map_targets(
+    jinja_env: Environment,
+) -> None:
+    template = jinja_env.get_template("reports/geneva/summary.htm")
+    auth_user = SimpleNamespace(has_role=lambda role: False, roles=[], is_authenticated=True)
+    ron = SimpleNamespace(
+        mods={"geneva"},
+        runid="geneva-run",
+        config_stem="geneva-cfg",
+        nodb_version=4,
+        name="Geneva project",
+        scenario="Summary",
+        readonly=False,
+        public=False,
+        srid=4326,
+    )
+    summary_payload = {
+        "schema_version": 1,
+        "filters": {
+            "datasource_id": "cligen_freq",
+            "ari_years": [25],
+            "measure": "runoff_depth",
+        },
+        "filter_options": {
+            "datasource_ids": ["all", "cligen_freq", "noaa14_pds"],
+            "datasource_availability": {"cligen_freq": True, "noaa14_pds": False},
+            "ari_years": [10, 25],
+            "measures": ["peak_discharge", "runoff_depth", "runoff_volume"],
+            "duration_minutes": [30],
+        },
+        "assumptions": {},
+        "storm_parameters": {},
+        "chart": {"series": []},
+        "selected_storm_id": None,
+        "event_table": [],
+        "warnings": [],
+        "errors": [],
+    }
+    rendered = template.render(
+        runid="geneva-run",
+        config="geneva-cfg",
+        ron=ron,
+        current_ron=ron,
+        user=auth_user,
+        current_user=auth_user,
+        request=SimpleNamespace(view_args={"runid": "geneva-run", "config": "geneva-cfg"}),
+        summary_payload=summary_payload,
+        unitizer_nodb=SimpleNamespace(is_english=False, preferences={}),
+        precisions={},
+        site_prefix="/weppcloud",
+        static_url=lambda path: f"/static/{path}",
+    )
+
+    for token in (
+        "<title>Geneva Summary - Geneva project</title>",
+        'data-geneva-summary-root',
+        'data-query-url="/weppcloud/runs/geneva-run/geneva-cfg/query/geneva/summary"',
+        'data-map-features-url="/weppcloud/runs/geneva-run/geneva-cfg/query/geneva/hru_map_features"',
+        'data-map-rows-url="/weppcloud/runs/geneva-run/geneva-cfg/query/geneva/hru_map_rows"',
+        'id="geneva-summary-payload"',
+        'type="application/json"',
+        'id="geneva-summary-datasource"',
+        'id="geneva-summary-ari"',
+        'id="geneva-summary-measure"',
+        'value="cligen_freq" selected',
+        'value="25" selected',
+        'value="runoff_depth" selected',
+        'data-geneva-summary-chart',
+        'data-geneva-summary-chart-empty',
+        'id="geneva-summary-map-measure"',
+        'data-geneva-summary-map-refresh',
+        'id="geneva-summary-map-canvas"',
+        'aria-label="Geneva HRU choropleth map viewport"',
+        'data-geneva-summary-map-empty',
+        'data-geneva-summary-map-error',
+        'id="geneva-summary-event-table"',
+        'data-geneva-summary-events-empty',
+    ):
+        assert token in rendered
+
+    embedded_payload = re.search(
+        r'<script id="geneva-summary-payload" type="application/json">(.*?)</script>',
+        rendered,
+        re.DOTALL,
+    )
+    assert embedded_payload is not None
+    assert json.loads(embedded_payload.group(1)) == summary_payload
+
+
 def test_run_header_hides_team_public_readonly_for_anonymous(jinja_env: Environment) -> None:
     template = jinja_env.get_template("header/_run_header_fixed.htm")
     anon_user = SimpleNamespace(has_role=lambda role: False, roles=[], is_authenticated=False)

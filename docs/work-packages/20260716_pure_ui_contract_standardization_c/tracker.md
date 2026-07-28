@@ -6,13 +6,13 @@
 
 **Timezone**: UTC
 **Started**: 2026-07-17 00:30 UTC
-**Current phase**: Sequential controller backlog
+**Current phase**: Select the next registered package
 **Last updated**: 2026-07-28 UTC
-**Next milestone**: Select the next registered package.
-**Security impact**: `none` for tracker closeout
-**Dedicated security review**: `yes` for SHR-05
+**Next milestone**: Recommend the next package from the verified dependency order.
+**Security impact**: `high` for the latest closed authenticated query surface
+**Dedicated security review**: `yes` for SHR-05 and SURF-11
 **Security artifact**:
-`../20260728_pure_ui_unitizer_preferences_contract/artifacts/2026-07-28_security_review.md`
+`../20260728_pure_ui_geneva_summary_report_contract/artifacts/2026-07-28_security_review.md`
 
 ## Task Board
 
@@ -24,7 +24,6 @@
 
 ### In Progress
 
-- None.
 - [x] Registered and dual-reviewed REM-05 under GOV-00A-M1E without advancing
   DOM-05; checkpoint ancestor
   `44d3b93c8e3bc7d5e89151cbb9677db374411c53`.
@@ -37,6 +36,10 @@
 
 ### Done
 
+- [x] Closed SURF-11 with direct rendered query/map/filter targets,
+  controller-owned initialization, route/service/map/Unitizer evidence, and a
+  passing independent security review; no production repair was retained
+  (2026-07-28 UTC).
 - [x] Closed SHR-05 with direct rendered/client/Project/route/NoDb/map evidence;
   repaired global selection/selector/event ownership and passed independent
   security review with no unresolved findings (2026-07-28 UTC).

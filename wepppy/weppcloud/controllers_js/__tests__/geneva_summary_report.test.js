@@ -178,6 +178,23 @@ describe("Geneva summary report interactions", () => {
         `;
     });
 
+    test("owns one DOMContentLoaded initializer", async () => {
+        const addEventListener = jest.spyOn(document, "addEventListener");
+
+        await import("../geneva_summary_report.js");
+
+        const initializers = addEventListener.mock.calls.filter(
+            ([eventName]) => eventName === "DOMContentLoaded"
+        );
+        expect(initializers).toHaveLength(1);
+        expect(document.querySelector("[data-geneva-summary-params-body]").children).toHaveLength(0);
+
+        initializers[0][1]();
+
+        expect(document.querySelector("[data-geneva-summary-params-body]").children).toHaveLength(6);
+        addEventListener.mockRestore();
+    });
+
     test("marker click selects and focuses matching event table row", async () => {
         const scrollIntoView = jest.fn();
         Element.prototype.scrollIntoView = scrollIntoView;
