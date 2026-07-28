@@ -434,6 +434,42 @@ def test_landuse_map_template_renders_snapshot_and_mutation_contract(
     assert 'id="landuse-map-rows"' in rendered
 
 
+def test_landuse_modifier_template_renders_selection_and_submit_contract(
+    jinja_env: Environment,
+) -> None:
+    template = jinja_env.get_template("controls/modify_landuse.htm")
+    rendered = template.render(
+        landuseoptions=[
+            {"Key": "42", "Description": "Forest"},
+            {"Key": "202", "Description": "Developed"},
+        ]
+    )
+
+    assert re.search(
+        r'<input[^>]*id="checkbox_modify_landuse"[^>]*'
+        r'name="checkbox_modify_landuse"[^>]*'
+        r'data-landuse-modify-action="toggle-selection"',
+        rendered,
+    )
+    assert re.search(
+        r'<textarea[^>]*id="textarea_modify_landuse"[^>]*'
+        r'name="textarea_modify_landuse"[^>]*'
+        r'data-landuse-modify-field="topaz-ids"',
+        rendered,
+    )
+    assert re.search(
+        r'<select[^>]*id="selection_modify_landuse"[^>]*'
+        r'name="selection_modify_landuse"[^>]*'
+        r'data-landuse-modify-field="landuse-code"',
+        rendered,
+    )
+    assert '<option value="202">202 — Developed</option>' in rendered
+    assert 'id="btn_modify_landuse"' in rendered
+    assert 'data-landuse-modify-action="submit"' in rendered
+    assert 'id="modify_landuse_status_panel"' in rendered
+    assert 'id="modify_landuse_stacktrace_panel"' in rendered
+
+
 def test_roads_template_uses_standard_control_shell_layout(jinja_env: Environment) -> None:
     template = jinja_env.get_template("controls/roads_pure.htm")
     rendered = template.render()

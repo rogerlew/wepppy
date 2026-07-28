@@ -273,7 +273,7 @@ domain package.
 | DOM-07 | `20260728_subcatchment_ui_contract` | `subcatchment` | `subcatchments_gl.js`, subcatchments template, abstraction routes/RQ | DOM-04A, DOM-05, DOM-06 | `high`: route mutation and queue/worker | verified |
 | DOM-08A | `20260728_landuse_build_ui_contract` | `landuse`: modes, build/upload and reload | landuse controller/base form/routes, `Landuse`, build RQ | SHR-01..04B context | `high`: upload, route, queue/worker | verified |
 | DOM-08B | `20260728_landuse_catalog_editor_ui_contract` | `landuse`: user-defined catalog and map editor | user-defined/map templates and catalog/mapping routes | DOM-08A | `high`: file/catalog/mapping mutation | verified |
-| DOM-09 | `landuse_modifier_ui_contract` | `landuseModify` adjunct | `landuse_modify_gl.js`, modify template, map selection and route mutation | DOM-04A, DOM-08A | `high`: route/state mutation | planned |
+| DOM-09 | `20260728_landuse_modifier_ui_contract` | `landuseModify` adjunct | `landuse_modify_gl.js`, modify template, map selection and synchronous route mutation | DOM-04A, DOM-08A | `high`: route/state mutation | verified |
 | DOM-10 | `soils_ui_contract` | `soil` | soil controller/template, soils routes, `Soils`, build RQ | SHR-01..04B context | `high`: uploads/files, route, queue/worker | planned |
 | DOM-11A | `climate_catalog_build_ui_contract` | `climate`: catalog/station/mode/build lifecycle | climate controller/base form/routes, `Climate`, build RQ | SHR-01..04B context | `high`: egress, route, queue/worker | planned |
 | DOM-11B | `climate_upload_scaling_ui_contract` | `climate`: upload, scaling, GridMET/MXPT5 and auxiliary modes | upload/aux form sections and route families | DOM-11A | `high`: upload, egress, persisted options | planned |

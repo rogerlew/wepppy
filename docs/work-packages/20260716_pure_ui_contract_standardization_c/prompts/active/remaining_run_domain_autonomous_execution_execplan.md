@@ -22,6 +22,9 @@ generator, manifest, or new CI system.
 - [x] (2026-07-28 UTC) Scaffolded and executed DOM-08B; actual catalog/map
   rendering and existing browser/RQ-engine persistence evidence passed without
   a production repair.
+- [x] (2026-07-28 UTC) Executed DOM-09; actual modifier rendering and existing
+  exact-payload/synchronous-mutation evidence passed without a production
+  repair.
 - [ ] Execute all remaining run-domain packages in the dependency-aware order.
 - [ ] Resolve each encountered hold through its owning package or a bounded
   operator decision.
@@ -62,6 +65,11 @@ DOM-08B: no mismatch and no production patch. Added actual-render endpoint,
 upload/control, and snapshot-precondition evidence; 169 focused Python tests,
 frontend lint, 4 focused Jest tests, the full 88-suite/663-test frontend sweep,
 and package documentation lint passed. No hold or helper was introduced.
+
+DOM-09: no mismatch and no production patch. Added actual-render selection,
+value, action, and lifecycle evidence; 138 focused Python tests, lint, 3 focused
+Jest tests, and package documentation lint passed. The preceding full frontend
+sweep remained applicable because no frontend source changed.
 
 ## Context and Orientation
 

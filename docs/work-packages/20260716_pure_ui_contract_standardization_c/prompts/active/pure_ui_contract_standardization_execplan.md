@@ -49,6 +49,9 @@ is not a contract registry or enforcement platform.
 - [x] (2026-07-28) Executed and closed DOM-08B Landuse Catalog and Map Editor
   with actual endpoint/upload/control/precondition rendering and existing
   browser/RQ-engine mutation evidence; no production mismatch.
+- [x] (2026-07-28) Executed and closed DOM-09 Landuse Modifier with actual
+  selection/value/action rendering and exact synchronous mutation evidence; no
+  production mismatch.
 - [ ] Continue with one controller package at a time.
 - [x] (2026-07-28) Reviewed measured value after five controller domains.
 - [x] (2026-07-28) Registered the autonomous serial remaining run-domain
@@ -277,3 +280,10 @@ authenticated upload/edit/delete, save/conflict/clear, atomic persistence, and
 refreshed state. Focused Python (169 tests), lint, focused inline Jest (4 tests),
 and the full frontend suite (88 suites, 663 tests) passed. It introduced no
 helper or production patch.
+
+DOM-09 closed with actual selection/value/action/lifecycle rendering. Existing
+Jest and RQ-engine tests proved map selection, exact `{topaz_ids, landuse}`
+submission, authorization, validation, and synchronous Landuse mutation.
+Focused Python (138 tests), lint, focused Jest (3 tests), and documentation lint
+passed; the unchanged frontend tree's preceding full sweep passed 88 suites and
+663 tests. It introduced no helper or production patch.
