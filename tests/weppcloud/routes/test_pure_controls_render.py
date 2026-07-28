@@ -1803,6 +1803,34 @@ def test_ag_fields_control_renders_required_dom_contract(jinja_env: Environment)
     assert "Show on Map" not in rendered
     assert "wepp_dcc52a6" in rendered
     assert 'class="pure-button button-error agfields-clear-button"' in rendered
+
+
+def test_ag_fields_control_renders_boundary_schema_and_subfield_contract(
+    jinja_env: Environment,
+) -> None:
+    """Keep the upload/schema/build browser vocabulary aligned with its route API."""
+    template = jinja_env.get_template("controls/ag_fields_pure.htm")
+    rendered = template.render(
+        ron=SimpleNamespace(mods={"ag_fields"}),
+        feature_maturity_labels={"ag_fields": "Experimental"},
+        wepp_bin_options=[],
+    )
+
+    assert 'id="agfields_geojson"' in rendered
+    assert 'name="field_boundaries"' in rendered
+    assert 'accept=".geojson,.json"' in rendered
+    assert 'data-action="upload-boundaries"' in rendered
+    assert 'id="agfields_field_id_key"' in rendered
+    assert 'name="field_id_key"' in rendered
+    assert 'id="agfields_rotation_accessor"' in rendered
+    assert 'name="rotation_accessor"' in rendered
+    assert 'data-action="confirm-schema"' in rendered
+    assert 'id="agfields_min_area"' in rendered
+    assert 'name="agfields_min_area"' in rendered
+    assert 'data-action="build-subfields"' in rendered
+    assert 'data-role="boundary-summary"' in rendered
+    assert 'data-role="schema-status"' in rendered
+    assert 'data-role="subfields-summary"' in rendered
     assert "Use the project UTM EPSG shown in the header for best precision" in rendered
 
 

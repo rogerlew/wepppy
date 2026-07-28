@@ -37,6 +37,9 @@ generator, manifest, or new CI system.
   existing auth/state/module-gate evidence passed without repair.
 - [x] (2026-07-28 UTC) Executed DOM-03; actual invite rendering and existing
   collaboration authorization evidence passed without repair.
+- [x] (2026-07-28 UTC) Executed DOM-13A; actual boundary/schema/sub-field
+  rendering and existing browser/RQ-engine state and enqueue evidence passed
+  without repair.
 - [ ] Execute all remaining run-domain packages in the dependency-aware order.
 - [ ] Resolve each encountered hold through its owning package or a bounded
   operator decision.
@@ -105,6 +108,10 @@ passed.
 
 DOM-03: no mismatch and no production patch. Added actual invite rendering; 92
 render/route tests, 4 Team Jest tests, lint, and docs lint passed.
+
+DOM-13A: no mismatch and no production patch. Added actual multipart boundary,
+schema, and sub-field render evidence; 129 render/RQ-engine tests, 21 AgFields
+Jest tests, lint, and docs lint passed.
 
 ## Context and Orientation
 
