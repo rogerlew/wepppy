@@ -1588,6 +1588,16 @@ def test_rap_ts_control_renders_acquisition_and_schedule_contract(jinja_env: Env
     assert '&#34;year&#34;: 2020' in rendered or '"year": 2020' in rendered
 
 
+def test_openet_ts_control_renders_acquisition_contract(jinja_env: Environment) -> None:
+    rendered = jinja_env.get_template("controls/openet_ts_pure.htm").render(
+        openet_ts=SimpleNamespace(first_year_available=2000, last_year_available=2025),
+    )
+    assert 'id="openet_ts_form"' in rendered
+    assert 'data-openet-action="run"' in rendered
+    assert 'id="hint_build_openet_ts"' in rendered
+    assert "2000 - 2025" in rendered
+
+
 def test_run_header_hides_rusle_mod_when_disturbed_not_enabled(jinja_env: Environment) -> None:
     template = jinja_env.get_template("header/_run_header_fixed.htm")
     auth_user = SimpleNamespace(has_role=lambda role: False, roles=[], is_authenticated=True)

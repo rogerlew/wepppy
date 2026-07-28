@@ -61,6 +61,8 @@ generator, manifest, or new CI system.
   route/RQ/worker/overlay evidence passed without repair.
 - [x] (2026-07-28 UTC) Executed DOM-21; actual action/schedule rendering and
   existing browser/RQ-engine evidence passed without repair.
+- [x] (2026-07-28 UTC) Executed DOM-22; actual range/action rendering and
+  existing role/browser/RQ-engine evidence passed without repair.
 - [ ] Execute all remaining run-domain packages in the dependency-aware order.
 - [ ] Resolve each encountered hold through its owning package or a bounded
   operator decision.
@@ -168,6 +170,9 @@ and 120 focused Python tests, 19 Jest tests, lint, and docs lint passed.
 
 DOM-21: no mismatch and no production patch. Added actual RAP action/schedule
 rendering; 95 focused Python tests, 6 Jest tests, lint, and docs lint passed.
+
+DOM-22: no mismatch and no production patch. Added actual OpenET range/action
+rendering; 160 focused Python tests, 3 Jest tests, lint, and docs lint passed.
 
 ## Context and Orientation
 
