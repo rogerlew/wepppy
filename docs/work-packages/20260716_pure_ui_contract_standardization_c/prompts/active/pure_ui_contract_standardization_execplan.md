@@ -38,6 +38,8 @@ is not a contract registry or enforcement platform.
   production mismatch.
 - [x] (2026-07-28) Executed and closed DOM-04B Map Layers and Feature UI with
   direct rendered-default/legend regression evidence and no production mismatch.
+- [x] (2026-07-28) Executed and closed DOM-06 Outlet with direct rendered-mode
+  and manual-entry payload regression evidence and no production mismatch.
 - [ ] Continue with one controller package at a time.
 - [ ] Review measured value after five controllers.
 - [ ] Close the initiative when the registered inventory has executable
@@ -220,3 +222,9 @@ subcatchment colormap, and legend hosts. Existing Map helper tests conformed
 for layers, SBS presentation, scale, and feature-modal accessibility. Focused
 Python (72 tests), lint, focused Map Jest (38 tests), and full frontend results
 passed. It introduced no helper or production patch.
+
+DOM-06 closed with actual-render outlet mode/lifecycle evidence and an exact
+manual-entry coordinate payload regression. Existing cursor, route validation/
+enqueue, worker mutation, and reload evidence conformed. Focused Python (167
+tests), lint, focused Outlet Jest (5 tests), and full frontend results passed.
+It introduced no helper or production patch.

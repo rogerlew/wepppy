@@ -152,6 +152,28 @@ describe("Outlet GL controller", () => {
         expect(outlet.cursorSelectionOn).toBe(false);
     });
 
+    test("manual entry submits canonical numeric coordinates", async () => {
+        outlet.bootstrap({});
+        global.WCHttp.requestWithSessionToken.mockResolvedValueOnce({ body: { job_id: "job-entry" } });
+
+        const mode = document.getElementById("set_outlet_mode_entry");
+        mode.checked = true;
+        mode.dispatchEvent(new Event("change", { bubbles: true }));
+        document.getElementById("input_set_outlet_entry").value = "-120.3, 45.1";
+        document.getElementById("btn_set_outlet_entry").click();
+        await Promise.resolve();
+        await Promise.resolve();
+
+        expect(global.WCHttp.requestWithSessionToken).toHaveBeenCalledWith(
+            "/rq-engine/api/runs/test/cfg/set-outlet",
+            expect.objectContaining({
+                method: "POST",
+                json: { latitude: 45.1, longitude: -120.3 },
+                form: expect.any(HTMLFormElement),
+            })
+        );
+    });
+
     test("completion clears temp layers", async () => {
         outlet.bootstrap({});
         outlet.setCursorSelection(true);

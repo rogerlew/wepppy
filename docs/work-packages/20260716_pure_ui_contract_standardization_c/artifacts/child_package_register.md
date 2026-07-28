@@ -269,7 +269,7 @@ domain package.
 | DOM-04A | `20260728_map_orchestration_ui_contract` | `map`: orchestration, center/search/elevation/drilldown and public API | `map_gl.js`, map host, elevation/query routes; consumes SHR-01 `selection_utils.js` | SHR-01..04B context | `low`; `high` if public query routes change | verified |
 | DOM-04B | `20260728_map_layers_feature_ui_contract` | `map`: layer/scale/feature UI and model visualization partials | four `map_gl_*` helpers, layer resources, legends/overlays | DOM-04A | `low`; `high` if file/resource routes change | verified |
 | DOM-05 | `20260728_channel_delineation_ui_contract` | `channel` | `channel_gl.js`, channel template, watershed routes, DEM upload/build RQ | DOM-04A context | `high`: upload, route, queue/worker | closed |
-| DOM-06 | `outlet_ui_contract` | `outlet` | `outlet_gl.js`, outlet template, watershed route, `set_outlet_rq` | DOM-04A | `high`: route mutation and queue | planned |
+| DOM-06 | `20260728_outlet_ui_contract` | `outlet` | `outlet_gl.js`, outlet template, watershed route, `set_outlet_rq` | DOM-04A | `high`: route mutation and queue | verified |
 | DOM-07 | `subcatchment_ui_contract` | `subcatchment` | `subcatchments_gl.js`, subcatchments template, abstraction routes/RQ | DOM-04A, DOM-05, DOM-06 | `high`: route mutation and queue/worker | planned |
 | DOM-08A | `landuse_build_ui_contract` | `landuse`: modes, catalog, build/upload and reload | landuse controller/base form/routes, `Landuse`, build RQ | SHR-01..04B context | `high`: upload, route, queue/worker | planned |
 | DOM-08B | `landuse_catalog_editor_ui_contract` | `landuse`: user-defined catalog and map editor | user-defined/map templates and catalog/mapping routes | DOM-08A | `high`: file/catalog/mapping mutation | planned |

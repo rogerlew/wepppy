@@ -1666,6 +1666,29 @@ def test_map_template_renders_layer_defaults_and_legend_hosts(jinja_env: Environ
     assert 'id="sbs_legend" class="wc-map-legend" aria-live="polite"' in rendered
 
 
+def test_outlet_template_renders_selection_modes_and_lifecycle_targets(jinja_env: Environment) -> None:
+    rendered = jinja_env.get_template("controls/set_outlet_pure.htm").render()
+
+    for token in (
+        'form id="set_outlet_form"',
+        'name="set_outlet_mode"',
+        'id="set_outlet_mode_cursor"',
+        'id="set_outlet_mode_entry"',
+        'data-outlet-action="cursor-toggle"',
+        'data-outlet-action="entry-submit"',
+        'id="input_set_outlet_entry"',
+        'data-outlet-entry-field=""',
+        'id="hint_set_outlet_cursor"',
+        'id="set_outlet_status_panel"',
+        'id="set_outlet_stacktrace_panel"',
+    ):
+        assert token in rendered
+
+    assert re.search(r'id="set_outlet_mode_cursor"[^>]*checked', rendered)
+    assert 'id="set_outlet_mode_entry" checked' not in rendered
+    assert re.search(r'id="set_outlet_mode1_controls"[^>]*hidden', rendered)
+
+
 def test_placeholder_only_controls_have_explicit_accessible_names() -> None:
     command_bar_source = (COMMAND_BAR_TEMPLATE_ROOT / "command-bar.htm").read_text(encoding="utf-8")
     browse_directory_source = (

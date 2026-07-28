@@ -84,6 +84,10 @@
   helper audit (2026-07-28 UTC).
 - [x] Closed DOM-04B Map Layers and Feature UI with actual layer-default and
   legend-host evidence; no production mismatch or patch (2026-07-28 UTC).
+- [x] Activated DOM-06 Outlet as the next bounded watershed controller audit
+  (2026-07-28 UTC).
+- [x] Closed DOM-06 Outlet with actual-render modes/lifecycle and manual-entry
+  payload evidence; no production mismatch or patch (2026-07-28 UTC).
 
 ## Child Package Register
 
