@@ -1034,6 +1034,11 @@ describe("Map GL controller", () => {
         deckInstance.props.onHover({ coordinate: [-120.6, 45.35] });
 
         expect(global.WCHttp.postJson).toHaveBeenCalledTimes(1);
+        expect(global.WCHttp.postJson).toHaveBeenCalledWith(
+            "/runs/test-run/cfg/elevationquery/",
+            { lat: 45.25, lng: -120.5 },
+            expect.objectContaining({ signal: expect.anything() }),
+        );
         expect(emittedEvents.some((evt) => evt.name === "map:elevation:requested")).toBe(true);
 
         await Promise.resolve();

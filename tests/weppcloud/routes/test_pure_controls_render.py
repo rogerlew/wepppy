@@ -1636,6 +1636,26 @@ def test_map_templates_do_not_use_application_role_for_canvas() -> None:
     assert 'id="runs-map-canvas" class="wc-map__canvas" aria-label="Runs map viewport"' in runs_template
 
 
+def test_map_template_renders_orchestration_actions_and_targets(jinja_env: Environment) -> None:
+    rendered = jinja_env.get_template("controls/map_pure_gl.htm").render()
+
+    for token in (
+        'form id="setloc_form"',
+        'id="input_centerloc"',
+        'name="input_centerloc"',
+        'data-map-action="go"',
+        'data-map-action="find-topaz"',
+        'data-map-action="find-wepp"',
+        'id="mapid" class="wc-map__canvas" aria-label="Watershed map viewport"',
+        'id="drilldown"',
+        'id="mouseelev"',
+    ):
+        assert token in rendered
+
+    assert rendered.index('id="input_centerloc"') < rendered.index('data-map-action="go"')
+    assert rendered.index('data-map-action="find-topaz"') < rendered.index('data-map-action="find-wepp"')
+
+
 def test_placeholder_only_controls_have_explicit_accessible_names() -> None:
     command_bar_source = (COMMAND_BAR_TEMPLATE_ROOT / "command-bar.htm").read_text(encoding="utf-8")
     browse_directory_source = (
