@@ -10,8 +10,9 @@
 **Last updated**: 2026-07-28 UTC
 **Next milestone**: Select the next registered package.
 **Security impact**: `none` for tracker closeout
-**Dedicated security review**: `no`
-**Security artifact**: N/A
+**Dedicated security review**: `yes` for SHR-05
+**Security artifact**:
+`../20260728_pure_ui_unitizer_preferences_contract/artifacts/2026-07-28_security_review.md`
 
 ## Task Board
 
@@ -36,6 +37,9 @@
 
 ### Done
 
+- [x] Closed SHR-05 with direct rendered/client/Project/route/NoDb/map evidence;
+  repaired global selection/selector/event ownership and passed independent
+  security review with no unresolved findings (2026-07-28 UTC).
 - [x] Closed SURF-12 with direct Pure/legacy report-shell, readonly/PUP/runtime,
   finite-consumer, Project, and route evidence; no production mismatch or patch
   (2026-07-28 UTC).

@@ -13,6 +13,7 @@ class MockElement {
     this.value = attrs.value ? String(attrs.value) : "";
     this.listeners = {};
     this.parent = null;
+    this.checked = false;
   }
 
   getAttribute(name) {
@@ -54,6 +55,14 @@ class MockDocument {
         (el) =>
           el.getAttribute("data-unitizer-category") &&
           el.getAttribute("data-unitizer-unit")
+      );
+    }
+    const nameMatch = selector.match(/^input\[name='([^']+)'\]\[value='([^']+)'\]$/);
+    if (nameMatch) {
+      return this.elements.filter(
+        (el) =>
+          el.getAttribute("name") === nameMatch[1] &&
+          el.value === nameMatch[2]
       );
     }
     return [];
@@ -149,6 +158,17 @@ async function runTests() {
   document.registerElement(blankInput);
   document.registerElement(populatedInput);
 
+  const globalMetric = new MockElement("global-metric", {
+    name: "unit_main_selector",
+    value: "0",
+  });
+  const globalEnglish = new MockElement("global-english", {
+    name: "unit_main_selector",
+    value: "1",
+  });
+  document.registerElement(globalMetric);
+  document.registerElement(globalEnglish);
+
   client.registerNumericInputs(document);
 
   assert.strictEqual(blankInput.dataset.unitizerCanonicalValue, "");
@@ -177,6 +197,10 @@ async function runTests() {
   assert.strictEqual(populatedInput.dataset.unitizerActiveUnit, "kg_ha");
   assert.strictEqual(populatedInput.value, "20");
   assert.strictEqual(populatedInput.dataset.unitizerCanonicalValue, "10");
+
+  client.applyGlobalRadio(1, document);
+  assert.strictEqual(globalEnglish.checked, true);
+  assert.strictEqual(globalMetric.checked, false);
 
   console.log("unitizer_client tests passed");
 }

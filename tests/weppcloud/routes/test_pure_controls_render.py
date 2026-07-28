@@ -1585,6 +1585,63 @@ def test_base_report_uses_modal_manager_hooks_for_disturbed_controls(jinja_env: 
     assert "toggleLegacyModal(" not in rendered
 
 
+def test_unitizer_modal_renders_persisted_global_and_category_contract(
+    jinja_env: Environment,
+) -> None:
+    template = jinja_env.get_template("controls/unitizer_modal.htm")
+    unitizer = SimpleNamespace(
+        is_english=None,
+        preferences={
+            "temperature": "degf",
+            "area": "ha",
+        },
+    )
+    precisions = {
+        "temperature": {"degc": 2, "degf": 2},
+        "area": {"ha": 2, "acre": 2},
+    }
+    rendered = template.render(
+        unitizer_nodb=unitizer,
+        precisions=precisions,
+        cls_units=lambda value: str(value).replace("/", "_"),
+        str_units=lambda value: str(value),
+    )
+
+    assert 'id="unitizerModal"' in rendered
+    assert 'role="dialog"' in rendered
+    assert 'aria-labelledby="unitizerModalTitle"' in rendered
+    assert rendered.count('data-modal-dismiss') == 3
+    assert rendered.count('name="unit_main_selector"') == 2
+    assert 'data-project-unitizer="global"' in rendered
+    assert re.search(r'name="unit_main_selector"\s+data-project-unitizer="global"\s+value="0"', rendered)
+    assert re.search(r'name="unit_main_selector"\s+data-project-unitizer="global"\s+value="1"', rendered)
+    assert not re.search(r'name="unit_main_selector"[^>]*checked', rendered)
+
+    for category in precisions:
+        assert f'data-unitizer-category="{category}"' in rendered
+        assert rendered.count(f'name="unitizer_{category}_radio"') == len(precisions[category])
+        assert f'aria-labelledby="unitizer_{category}_label"' in rendered
+
+    assert re.search(r'name="unitizer_temperature_radio"[^>]*value="degf"[^>]*checked', rendered)
+    assert re.search(r'name="unitizer_area_radio"[^>]*value="ha"[^>]*checked', rendered)
+    assert not re.search(r'name="unitizer_temperature_radio"[^>]*value="degc"[^>]*checked', rendered)
+    assert not re.search(r'name="unitizer_area_radio"[^>]*value="acre"[^>]*checked', rendered)
+
+    unitizer_consumers = (
+        TEMPLATE_ROOT / "reports/_base_report.htm",
+        TEMPLATE_ROOT / "reports/_page_container.htm",
+        RUN_0_TEMPLATE_ROOT / "run_page_bootstrap.js.j2",
+    )
+    for consumer in unitizer_consumers:
+        source = consumer.read_text(encoding="utf-8")
+        assert "uni_main_selector" not in source
+    for shell in unitizer_consumers[:2]:
+        source = shell.read_text(encoding="utf-8")
+        assert "querySelectorAll('[name^=\"unitizer_\"]')" not in source
+        assert "querySelectorAll('[name=\"unit_main_selector\"]')" not in source
+    assert "unit_main_selector" in unitizer_consumers[2].read_text(encoding="utf-8")
+
+
 def test_base_report_renders_run_readonly_navigation_and_runtime_contract(
     jinja_env: Environment,
 ) -> None:

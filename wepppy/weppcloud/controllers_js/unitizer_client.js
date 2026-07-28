@@ -523,7 +523,7 @@
 
         function applyGlobalRadio(index, root) {
             var context = root || document;
-            var selector = "input[name='uni_main_selector'][value='" + index + "']";
+            var selector = "input[name='unit_main_selector'][value='" + index + "']";
             var radios = context.querySelectorAll(selector);
             if (!radios || radios.length === 0) {
                 return;

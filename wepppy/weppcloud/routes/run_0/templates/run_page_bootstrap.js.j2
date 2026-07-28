@@ -711,7 +711,7 @@
             }, 300);
         }
 
-        var unitPreferenceElement = document.querySelector("input[name='uni_main_selector']:checked");
+        var unitPreferenceElement = document.querySelector("input[name='unit_main_selector']:checked");
         var pref = unitPreferenceElement ? parseInt(unitPreferenceElement.value, 10) : undefined;
         if (typeof setGlobalUnitizerPreference === "function") {
             try {

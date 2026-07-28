@@ -72,6 +72,9 @@ is not a contract registry or enforcement platform.
 - [x] (2026-07-28) Executed SURF-12 with direct Pure/legacy report-shell,
   readonly/PUP/runtime and all 19 direct-consumer evidence; no production
   mismatch was found.
+- [x] (2026-07-28) Executed SHR-05 with rendered/client/Project/route/NoDb/map
+  evidence; repaired Unitizer global selection, selector, and event ownership
+  and passed independent security review.
 - [ ] Close the initiative when the registered inventory has executable
   regression coverage or explicit operator-approved exclusions.
 
@@ -106,6 +109,10 @@ is not a contract registry or enforcement platform.
 - Observation: Report-shell conformance was provable with five direct
   regressions plus retained Project and route suites; no producer registry or
   domain-test duplication was needed.
+
+- Observation: SHR-05 found source/generated selector drift and duplicate
+  legacy event ownership that could race preference persistence; direct
+  rendering plus single-dispatch tests exposed both without changing units.
 
 ## Decision Log
 
@@ -173,6 +180,15 @@ owners.
 
 **Rationale**: Direct shell, Project, and route evidence proves readonly and
 runtime contracts without creating a second owner for domain outputs.
+
+### 2026-07-28: Project exclusively owns Unitizer change events
+
+**Decision**: Retain report-shell initial preference synchronization but remove
+shell-local change listeners in favor of Project's delegated global/category
+handlers.
+
+**Rationale**: One event owner prevents redundant asynchronous persistence and
+stale-state races while preserving reload hydration and public hooks.
 
 ## Context and Orientation
 

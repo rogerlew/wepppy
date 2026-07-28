@@ -134,7 +134,7 @@ revisions are retained as controller-iteration evidence.
 | `bootstrap.js`, `bootstrap_observability.js` | SHR-03B | run bootstrap and generated bundle | `J/bootstrap.test.js`, `bootstrap_observability.test.js`, `controllers_gl_stale_check.test.js`; high | contractual | unverified |
 | Pure bases/macros | SHR-04A | every direct/transitive Pure template | direct base/shell/field/choice/card/tab/table/slot/scale renders plus completed DOM consumers; 105 passed; no production mismatch | contractual | verified |
 | `modal.js`, `details_menu.js`, `theme.js`, `console_utils.js` | SHR-04B | run modals, Browse/README hosts, Archive/Fork consoles | direct state/focus/menu/theme/config/duplicate-load Jest plus console/table/modal/theme renders; duplicate-init and table-caller repairs | contractual | verified |
-| `unitizer_client.js` + generated map | SHR-05 | modal, Project, Geneva report | generated-map/backend round-trip gap; high | contractual | unverified |
+| `unitizer_client.js` + generated map | SHR-05 | modal, Project, reports, Geneva | direct render/client/map/Project/route/NoDb evidence; selector/event-owner repairs | contractual | verified |
 | Command Bar scripts/templates | SHR-06 | run and Browse/README hosts | WebSocket/token/command evidence; high | contractual | unverified |
 | PowerUser scripts/templates | SHR-07 | privileged run header | role/action/web-push evidence; high | contractual | unverified |
 | `batch_runner.js` | SURF-02A | Batch create/manage roots; SURF-02B consumes the producer contract for execution | `J/batch_runner.test.js`; high | contractual | unverified |

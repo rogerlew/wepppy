@@ -277,6 +277,59 @@ describe("Project controller", () => {
         expect(document.querySelector('[data-project-unitizer="global"][value="1"]').checked).toBe(true);
     });
 
+    test("global radio change follows one authoritative delegated persistence path", async () => {
+        const handler = jest.spyOn(project, "handleGlobalUnitPreference");
+        const english = document.querySelector('[data-project-unitizer="global"][value="1"]');
+
+        english.checked = true;
+        english.dispatchEvent(new Event("change", { bubbles: true }));
+        await flushPromises();
+        await flushPromises();
+
+        expect(handler).toHaveBeenCalledTimes(1);
+        expect(handler).toHaveBeenCalledWith("1");
+        expect(postJsonMock).toHaveBeenCalledTimes(1);
+        handler.mockRestore();
+    });
+
+    test("category unit preference syncs the complete DOM-derived map", async () => {
+        unitizerClient.getPreferencePayload.mockReturnValue({
+            discharge: "english",
+            area: "acre"
+        });
+
+        await project.handleUnitPreferenceChange();
+
+        expect(unitizerClient.syncPreferencesFromDom).toHaveBeenCalledWith(document);
+        expect(postJsonMock).toHaveBeenCalledWith(
+            "runs/run-123/config-a/tasks/set_unit_preferences/",
+            { discharge: "english", area: "acre" }
+        );
+        expect(unitizerClient.updateUnitLabels).toHaveBeenCalledWith(document);
+        expect(unitizerClient.updateNumericFields).toHaveBeenCalledWith(document);
+        expect(unitizerClient.dispatchPreferenceChange).toHaveBeenCalled();
+    });
+
+    test("unit preference request failure emits failed and completed lifecycle", async () => {
+        const failed = jest.fn();
+        const completed = jest.fn();
+        project.events.on("project:unitizer:sync:failed", failed);
+        project.events.on("project:unitizer:sync:completed", completed);
+        postJsonMock.mockRejectedValueOnce(new Error("network unavailable"));
+
+        const result = await project.handleUnitPreferenceChange();
+
+        expect(result).toBeNull();
+        expect(failed).toHaveBeenCalledWith(expect.objectContaining({
+            error: expect.any(Error),
+            preferences: { discharge: "metric" },
+            source: "category"
+        }));
+        expect(completed).toHaveBeenCalledWith(expect.objectContaining({
+            source: "category"
+        }));
+    });
+
     test("global setGlobalUnitizerPreference delegates to controller", async () => {
         const spy = jest.spyOn(project, "handleGlobalUnitPreference").mockResolvedValue(undefined);
         await global.setGlobalUnitizerPreference(0);

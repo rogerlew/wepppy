@@ -232,20 +232,6 @@
       ? window.Project.getInstance()
       : null;
 
-    document.querySelectorAll('[name^="unitizer_"]').forEach((el) => {
-      el.addEventListener('change', triggerUnitChange);
-    });
-
-    document.querySelectorAll('[name="uni_main_selector"]').forEach((el) => {
-      el.addEventListener('change', () => {
-        const pref = parseInt(document.querySelector('input[name="uni_main_selector"]:checked')?.value || '', 10);
-        if (!Number.isNaN(pref) && typeof window.setGlobalUnitizerPreference === 'function') {
-          window.setGlobalUnitizerPreference(pref);
-        }
-        triggerUnitChange();
-      });
-    });
-
     triggerUnitChange();
   });
 

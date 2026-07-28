@@ -30,31 +30,6 @@
         // Units
         //
 
-        document.querySelectorAll('[name^="unitizer_"]').forEach((element) => {
-            element.addEventListener('change', () => {
-                console.log("name^=unitizer_");
-                project.unitChangeEvent();
-            });
-        });
-
-        document.querySelectorAll('[name="uni_main_selector"]').forEach((element) => {
-            element.addEventListener('change', () => {
-                console.log("name=uni_main_selector");
-
-                const selected = document.querySelector("input[name='uni_main_selector']:checked");
-                const pref = selected ? parseInt(selected.value, 10) : NaN;
-
-                // this lives in the controller/unitizer.js template
-                // so it can be generated dynamically
-                if (!Number.isNaN(pref)) {
-                    setGlobalUnitizerPreference(pref);
-                }
-
-                // sync with server
-                project.unitChangeEvent();
-            });
-        });
-
         project.unitChangeEvent();
     });
 
