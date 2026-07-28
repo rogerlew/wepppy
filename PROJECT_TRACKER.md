@@ -386,7 +386,7 @@ build through job completion before review.
 
 ### Pure UI Controller Contract Standardization
 **Started**: 2026-07-16
-**Status**: Simplified tests-first execution model; DOM-01, DOM-04A/B, DOM-05, DOM-06, DOM-07, and DOM-08A closed
+**Status**: All 39 run-domain packages verified; shared and non-run inventory remains separately registered
 **Size**: One controller active at a time; inventory size is not a schedule
 **Owner**: Codex
 **Priority**: High
@@ -405,10 +405,14 @@ build through job completion before review.
 - [DOM-06 Outlet](docs/work-packages/20260728_outlet_ui_contract/) closed with actual rendered modes/lifecycle and manual-entry coordinate payload evidence; it found no production mismatch. Existing route/RQ/reload tests cover the remaining outlet boundary.
 - [DOM-07 Subcatchment](docs/work-packages/20260728_subcatchment_ui_contract/) closed with actual WBT/MOFE field identities, exact GL payload, route update, and ordered build/abstraction child-job evidence; it found no production mismatch.
 - [DOM-08A Landuse Build](docs/work-packages/20260728_landuse_build_ui_contract/) closed with actual upload-mode field identities, exact multipart payload, and route normalization evidence; it found no production mismatch. Catalog/editor/map work remains DOM-08B.
-- The remaining run-domain packages now run under an autonomous serial
-  [execution plan](docs/work-packages/20260716_pure_ui_contract_standardization_c/prompts/active/remaining_run_domain_autonomous_execution_execplan.md): one child package at a time, with a commit after every closeout. DOM-08B is next.
+- The autonomous serial
+  [execution plan](docs/work-packages/20260716_pure_ui_contract_standardization_c/prompts/active/remaining_run_domain_autonomous_execution_execplan.md)
+  closed all 39 run-domain packages with one child commit per closeout. The
+  register now marks every run bootstrap row verified; shared and non-run
+  surfaces retain their independent states.
 
-**Next Steps**: Select the next single controller, execute its bounded test-and-repair loop, and record the same value/runtime/helper evidence.
+**Next Steps**: Prioritize separately registered shared or non-run surface work;
+the remaining-run controller plan has no next controller milestone.
 
 ---
 

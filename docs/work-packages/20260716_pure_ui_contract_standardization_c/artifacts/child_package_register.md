@@ -263,12 +263,12 @@ domain package.
 
 | ID | Package path / proposed slug | Bootstrap/controller scope | Primary source boundary | Depends on | Expected remediation security | State |
 | --- | --- | --- | --- | --- | --- | --- |
-| DOM-01 | `20260727_watar_ui_contract_pilot` | `ash` | `ash.js`, `ash_pure.htm`, WATAR/ash route, `Ash`, `run_ash_rq` | GOV-00A concise test convention | Test/docs `none`; re-triage actual patch | closed |
+| DOM-01 | `20260727_watar_ui_contract_pilot` | `ash` | `ash.js`, `ash_pure.htm`, WATAR/ash route, `Ash`, `run_ash_rq` | GOV-00A concise test convention | Test/docs `none`; re-triage actual patch | verified |
 | DOM-02 | `20260728_project_shell_ui_contract` | `project` | `project.js`, run header, Project routes, `Ron`, SQL Run, readonly RQ; consumes SHR-05 Unitizer preferences | SHR-01..04B, SHR-05 context | `high`: auth, readonly/public state, mutation/RQ | verified |
 | DOM-03 | `20260728_team_collaboration_ui_contract` | `team` | `team.js`, team modal/form, project/team routes, SQL ownership | SHR-01..04B context | `high`: owner/collaborator auth mutations | verified |
 | DOM-04A | `20260728_map_orchestration_ui_contract` | `map`: orchestration, center/search/elevation/drilldown and public API | `map_gl.js`, map host, elevation/query routes; consumes SHR-01 `selection_utils.js` | SHR-01..04B context | `low`; `high` if public query routes change | verified |
 | DOM-04B | `20260728_map_layers_feature_ui_contract` | `map`: layer/scale/feature UI and model visualization partials | four `map_gl_*` helpers, layer resources, legends/overlays | DOM-04A | `low`; `high` if file/resource routes change | verified |
-| DOM-05 | `20260728_channel_delineation_ui_contract` | `channel` | `channel_gl.js`, channel template, watershed routes, DEM upload/build RQ | DOM-04A context | `high`: upload, route, queue/worker | closed |
+| DOM-05 | `20260728_channel_delineation_ui_contract` | `channel` | `channel_gl.js`, channel template, watershed routes, DEM upload/build RQ | DOM-04A context | `high`: upload, route, queue/worker | verified |
 | DOM-06 | `20260728_outlet_ui_contract` | `outlet` | `outlet_gl.js`, outlet template, watershed route, `set_outlet_rq` | DOM-04A | `high`: route mutation and queue | verified |
 | DOM-07 | `20260728_subcatchment_ui_contract` | `subcatchment` | `subcatchments_gl.js`, subcatchments template, abstraction routes/RQ | DOM-04A, DOM-05, DOM-06 | `high`: route mutation and queue/worker | verified |
 | DOM-08A | `20260728_landuse_build_ui_contract` | `landuse`: modes, build/upload and reload | landuse controller/base form/routes, `Landuse`, build RQ | SHR-01..04B context | `high`: upload, route, queue/worker | verified |

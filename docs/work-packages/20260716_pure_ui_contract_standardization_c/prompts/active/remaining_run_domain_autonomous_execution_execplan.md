@@ -95,9 +95,10 @@ generator, manifest, or new CI system.
 - [x] (2026-07-28 UTC) Executed DOM-29; actual RUSLE mode/default/action
   rendering and existing route/state/factor/worker/output/reload evidence
   passed without repair.
-- [ ] Execute all remaining run-domain packages in the dependency-aware order.
-- [ ] Resolve each encountered hold through its owning package or a bounded
-  operator decision.
+- [x] (2026-07-28 UTC) Executed all remaining run-domain packages in the
+  dependency-aware order with one clean commit boundary per child.
+- [x] (2026-07-28 UTC) Resolved the hold task: no unresolved contract hold or
+  operator decision remained after the owning packages completed.
 
 ## Surprises & Discoveries
 
@@ -106,6 +107,14 @@ generator, manifest, or new CI system.
   without shared infrastructure.
   Evidence: DOM-05 retained the depression-smoothing seam, DOM-07 added the
   build-before-abstraction edge, and DOM-08A added multipart normalization.
+- Observation: Most later controllers already had strong downstream tests but
+  lacked a small actual-template assertion; closing that seam required no
+  shared helper, registry, production refactor, or new dependency.
+  Evidence: DOM-24 through DOM-29 closed with direct assertions and retained
+  focused suites; only DOM-12 required a production-template repair.
+- Observation: Final reconciliation found stale DOM-05 and 33-row summary
+  status prose after named evidence already existed.
+  Evidence: DOM-05 and every run bootstrap row now read `verified`.
 
 ## Decision Log
 
@@ -123,6 +132,12 @@ generator, manifest, or new CI system.
   Rationale: The concise convention requires direct consumer evidence and the
   five-domain value review found no need for a helper or registry.
   Date/Author: 2026-07-28 / Codex.
+
+- Decision: Close the autonomous run-domain plan without advancing shared or
+  non-run surface packages.
+  Rationale: Those packages remain separately registered boundaries; Geneva
+  SURF-11 ownership was explicitly preserved.
+  Date/Author: 2026-07-28 / Codex with operator authority.
 
 ## Outcomes & Retrospective
 
@@ -267,6 +282,27 @@ rq-engine route, Rusle, factor integration, worker, generated-output, reload,
 feature-gate, and authorization evidence passed; 157 focused Python tests, 12
 RUSLE/controller-dashboard Jest tests, lint, and docs lint passed.
 
+Final comparison: the complete remaining sequence confirmed the five-controller
+checkpoint. Direct render plus existing focused downstream tests remained
+net-positive, generally completed in seconds to under a minute per package,
+introduced no helper lines or false tooling failures, and found one production
+template mismatch (DOM-12) without motivating a registry or generator. Every
+selected child has an independent commit restore point. Final broad validation
+completed as follows:
+
+- all focused child Python and Jest suites passed;
+- frontend lint passed;
+- the full frontend sweep passed: 88 suites and 663 tests;
+- parent, `PROJECT_TRACKER.md`, and all eleven new child documentation lint
+  scopes passed;
+- `git diff --check` passed;
+- the full Python sweep reached 2,452 passes and 40 skips before the known,
+  unrelated GridMET `_FakeUnits.degC` fixture failure stopped execution after
+  414.08 seconds; and
+- no controller source, enqueue/dependency wiring, stub surface, or security
+  boundary changed, so controller build, RQ graph, stub, and security gates
+  were not applicable.
+
 ## Context and Orientation
 
 The authoritative backlog is `artifacts/child_package_register.md`; detailed
@@ -276,10 +312,9 @@ test renders the Jinja template and asserts browser-visible id/name/value/state.
 RQ is the Redis-backed job queue; test it only when a controller value crosses
 enqueue/dependency/lifecycle behavior.
 
-Remaining boundaries are DOM-02, DOM-03, DOM-08B, DOM-09, DOM-10, DOM-11A/B,
-DOM-12, DOM-13A-D, DOM-14A-C, DOM-15 through DOM-29, including DOM-20A/B and
-DOM-25A/B. DOM-08B owns the Landuse catalog/editor/map, distinct from DOM-08A's
-already-verified build form.
+The finite remaining boundaries named by this plan are complete. Shared
+foundation and non-run/stateful surface packages remain independent umbrella
+inventory and are not reopened by this closeout.
 
 ## Plan of Work
 

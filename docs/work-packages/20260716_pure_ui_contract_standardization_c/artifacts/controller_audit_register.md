@@ -89,7 +89,7 @@ explicit planning assertion to verify, not permission to omit reload evidence.
 | `project` / DOM-02 | `C/project.js`; run header | `R/nodb_api/project_bp.py`, `Ron`/SQL Run, project RQ | Actual header state/action render plus controller and auth/role-gate route evidence; high | contractual | verified |
 | `team` / DOM-03 | `C/team.js`; `T/team_pure.htm` | project/team routes, SQL owner/collaborator; no RQ expected | Actual invite render plus browser and authorization/idempotence route evidence; high | contractual | verified |
 | `map` / DOM-04A/04B | `C/map_gl.js` + four `C/map_gl_*` helpers; `T/map_pure_gl.htm` | `R/nodb_api/watershed_bp.py` and public map/query routes; map state; no RQ expected | DOM-04A: actual render, coordinate/search/drilldown, exact elevation payload, service/report tests; DOM-04B: actual layer defaults/legend hosts and layer/scale/SBS/feature Jest evidence; low, public-route change high | contractual | verified |
-| `channel` / DOM-05 | `C/channel_gl.js`; `T/channel_delineation_pure.htm` | `R/nodb_api/watershed_bp.py`, Watershed; delineation/build RQ | `J/channel_gl.test.js`; actual render, payload, and RQ persistence order; high | contractual | documented |
+| `channel` / DOM-05 | `C/channel_gl.js`; `T/channel_delineation_pure.htm` | `R/nodb_api/watershed_bp.py`, Watershed; delineation/build RQ | `J/channel_gl.test.js`; actual render, payload, RQ persistence order, and named child revision; high | contractual | verified |
 | `outlet` / DOM-06 | `C/outlet_gl.js`; `T/set_outlet_pure.htm` | `R/nodb_api/watershed_bp.py`, Watershed; outlet RQ | Actual rendered modes/lifecycle, cursor/manual payload, route validation/enqueue, and RQ mutation/reload; high | contractual | verified |
 | `subcatchment` / DOM-07 | `C/subcatchments_gl.js`; `T/subcatchments_pure.htm` | `R/nodb_api/watershed_bp.py`, Watershed; abstraction RQ | Actual WBT/MOFE render, exact GL payload, route coercion/update, and ordered build/abstract RQ children; high | contractual | verified |
 | `landuse` / DOM-08A/08B | `C/landuse.js`; `T/landuse_pure.htm`, `landuse_map.htm`, `landuse_user_defined.htm` | `R/nodb_api/landuse_bp.py`, Landuse; build RQ | DOM-08A: actual upload-mode render, exact FormData, multipart normalization, build/reload; DOM-08B: actual catalog/map endpoint, upload/control and snapshot-precondition render plus browser and RQ-engine mutation/persistence evidence; high | contractual | verified |
@@ -120,10 +120,9 @@ explicit planning assertion to verify, not permission to omit reload evidence.
 | `pathCe` / DOM-28 | `C/path_ce.js`; `T/path_cost_effective_pure.htm` | `R/nodb_api/path_ce_bp.py`, PathCostEffective; `path_ce_rq.py` | Actual field/action/lifecycle render plus controller/route/config/precondition/solver/worker/report/reload/role evidence; high | contractual | verified |
 | `rusle` / DOM-29 | `C/rusle.js`; `T/rusle_pure.htm` | rq-engine RUSLE routes, Rusle; build RQ | Actual mode/default/action render plus controller/route/state/factor/worker/output/reload/gate evidence; high | contractual | verified |
 
-All 33 rows are `contractual / unverified`. Their future child package, concise
-intent matrix, exact tests, endpoint/function expansion, and verified
-revision/date are controller-iteration evidence; their absence cannot remove or
-weaken the contract obligation.
+All 33 run bootstrap rows are `contractual / verified`. Their child packages,
+concise intent matrices, exact tests, endpoint/function expansions, and named
+revisions are retained as controller-iteration evidence.
 
 ### Bundled shared and standalone items
 

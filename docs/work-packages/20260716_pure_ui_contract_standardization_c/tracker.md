@@ -6,9 +6,9 @@
 
 **Timezone**: UTC
 **Started**: 2026-07-17 00:30 UTC
-**Current phase**: Select next controller
+**Current phase**: Remaining run-domain sequence complete
 **Last updated**: 2026-07-28 UTC
-**Next milestone**: Complete remaining-run validation and parent closeout.
+**Next milestone**: None for the remaining-run ExecPlan.
 **Security impact**: `none` for scaffold; child packages reassess
 **Dedicated security review**: `no`
 **Security artifact**: N/A
@@ -17,9 +17,9 @@
 
 ### Ready / Backlog
 
-- [ ] Select and execute the next controller, then continue one at a time.
-- [ ] Review measured value after five controllers.
-- [ ] Consolidate or redirect stale controller documentation.
+- [x] Select and execute each remaining run-domain controller serially.
+- [x] Review measured value after five controllers.
+- [x] Reconcile stale run-domain register and umbrella-plan progress.
 
 ### In Progress
 
@@ -179,6 +179,11 @@
 - [x] Completed the first five-controller-domain value checkpoint: direct tests
   found no new mismatch in the completed audits, introduced no helper or
   registry, and produced no false tooling failures.
+- [x] Completed final remaining-run validation: all focused suites, frontend
+  lint, 88-suite/663-test frontend sweep, scoped documentation lint, and
+  `git diff --check` passed. The broad Python sweep stopped after 2,452 passes
+  and 40 skips on the plan-permitted unrelated GridMET `_FakeUnits.degC`
+  fixture failure (2026-07-28 UTC).
 
 ## Child Package Register
 
@@ -188,20 +193,20 @@ is active at a time.
 
 | Stable IDs | Package class | Count | State | Review gate |
 | --- | --- | --- | --- | --- |
-| GOV-00 | Standard/population/register foundation | 1 | auditing | In progress |
+| GOV-00 | Standard/population/register foundation | 1 | run-domain complete; other registered classes remain | In progress |
 | GOV-00A | Concise controller test convention | 1 | closed | Review passed |
-| DOM-01..DOM-29 (including A-D facets) | Run-domain controller packages | 39 | DOM-01, DOM-04A/B, DOM-05, DOM-06, DOM-07, and DOM-08A closed; remainder backlog | Review actual production patches |
+| DOM-01..DOM-29 (including A-D facets) | Run-domain controller packages | 39 | all verified | Review completed production patches |
 | GOV-01 | Maintenance-tooling value evaluation | 1 | deferred pending five-controller evidence | Explicit operator approval |
 | SHR-01..SHR-07 (including A/B facets) | Shared-foundation inventory | 9 | deferred; test when encountered | Based on actual shared patch |
 | SURF-01..SURF-18 (including A/B facets) | Non-run/stateful Pure surfaces | 19 | backlog | Review actual production patches |
 | GOV-99 | Authority cutover and closeout | 1 | planned | Two independent final reviews |
 | REM-01..REM-05 | Bounded defect remediations | 5 | mixed | Two independent reviews each |
 
-Total: 76 independently closable inventory boundaries. GOV-00 is this existing
-umbrella; GOV-00A is the closed convention child; REM-01 and REM-02 are
-complete, while REM-03 through REM-05 retain their recorded states. DOM-01 is
-the closed first controller package with a dated directory. Shared packages are
-not prerequisites, and GOV-01 has no scaffold.
+Total: 76 independently closable inventory boundaries. All 39 run-domain
+packages are verified. GOV-00 remains the umbrella for separately registered
+shared, surface, governance, and remediation inventory; GOV-00A is closed,
+REM-01 and REM-02 are complete, and REM-03 through REM-05 retain their recorded
+states. Shared packages are not prerequisites, and GOV-01 has no scaffold.
 
 Every new child package must be added here and to `PROJECT_TRACKER.md` before
 implementation begins. A package closes through executable controller evidence,

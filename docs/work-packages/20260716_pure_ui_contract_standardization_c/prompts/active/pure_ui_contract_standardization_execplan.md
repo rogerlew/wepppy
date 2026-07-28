@@ -20,8 +20,8 @@ is not a contract registry or enforcement platform.
 - [x] (2026-07-17) Created and independently reviewed the controller inventory
   and bounded package register.
 - [x] (2026-07-17 through 2026-07-28) Recorded contract-first governance and
-  completed bounded-remediation milestones REM-01 through REM-05 as documented
-  in their trackers.
+  bounded-remediation milestones REM-01 through REM-05 at their independently
+  documented states.
 - [x] (2026-07-28) Scaffolded a registry/enforcement dependency platform.
 - [x] (2026-07-28) Operator rejected that platform-first direction and required
   a low-regression, controller-by-controller tests-and-repair loop.
@@ -55,10 +55,14 @@ is not a contract registry or enforcement platform.
 - [x] (2026-07-28) Executed and closed DOM-10 Soils with actual
   mode/selection/option/lifecycle rendering and downstream state/queue evidence;
   no production mismatch.
-- [ ] Continue with one controller package at a time.
+- [x] (2026-07-28) Completed all 39 run-domain controller packages with direct
+  rendered-template and applicable downstream evidence.
 - [x] (2026-07-28) Reviewed measured value after five controller domains.
 - [x] (2026-07-28) Registered the autonomous serial remaining run-domain
   execution plan with a per-package commit restore point.
+- [x] (2026-07-28) Reconciled the run-domain registers and completed broad
+  closeout validation; the known unrelated GridMET `_FakeUnits.degC` fixture
+  failure recurred after 2,452 passes and 40 skips.
 - [ ] Close the initiative when the registered inventory has executable
   regression coverage or explicit operator-approved exclusions.
 
@@ -78,6 +82,10 @@ is not a contract registry or enforcement platform.
 - Observation: The useful loop is independent of controller count and can be
   applied sequentially with existing Jinja, Jest/jsdom, pytest, controller
   build, and stale-bundle checks.
+
+- Observation: The full run-domain sequence confirmed that direct assertions
+  and existing focused suites were sufficient; it introduced no shared helper,
+  registry, generator, or false tooling failure.
 
 ## Decision Log
 
@@ -111,6 +119,14 @@ one active child and a commit after every closeout.
 
 **Rationale**: The operator authorized autonomous completion and restore
 points; serial execution preserves low regression risk and clear ownership.
+
+### 2026-07-28: Run-domain inventory is complete
+
+**Decision**: Mark all 39 DOM packages verified while leaving SHR, SURF,
+governance, and remediation packages at their independently recorded states.
+
+**Rationale**: Completion of the finite run-domain queue does not imply
+completion or exclusion of separately owned non-run inventory.
 
 ## Context and Orientation
 
