@@ -1831,6 +1831,27 @@ def test_ag_fields_control_renders_boundary_schema_and_subfield_contract(
     assert 'data-role="boundary-summary"' in rendered
     assert 'data-role="schema-status"' in rendered
     assert 'data-role="subfields-summary"' in rendered
+
+
+def test_ag_fields_control_renders_plant_database_and_mapping_contract(
+    jinja_env: Environment,
+) -> None:
+    template = jinja_env.get_template("controls/ag_fields_pure.htm")
+    rendered = template.render(
+        ron=SimpleNamespace(mods={"ag_fields"}),
+        feature_maturity_labels={"ag_fields": "Experimental"},
+        wepp_bin_options=[],
+    )
+
+    assert 'id="agfields_plantdb"' in rendered
+    assert 'name="plant_database"' in rendered
+    assert 'accept=".zip"' in rendered
+    assert 'data-action="upload-plantdb"' in rendered
+    assert 'data-action="open-mapping"' in rendered
+    assert 'id="agfields_rotation_modal"' in rendered
+    assert 'data-role="mapping-table-body"' in rendered
+    assert 'data-action="save-mapping"' in rendered
+    assert 'data-role="unused-mappings"' in rendered
     assert "Use the project UTM EPSG shown in the header for best precision" in rendered
 
 
