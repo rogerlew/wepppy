@@ -70,6 +70,9 @@ generator, manifest, or new CI system.
   without repair.
 - [x] (2026-07-28 UTC) Executed DOM-13C; existing actual stage-4 rendering and
   controller/rq-engine/worker/reload evidence passed without repair.
+- [x] (2026-07-28 UTC) Executed DOM-13D; existing actual watershed schemes,
+  suite/results/clear rendering and downstream lifecycle evidence passed
+  without repair.
 - [ ] Execute all remaining run-domain packages in the dependency-aware order.
 - [ ] Resolve each encountered hold through its owning package or a bounded
   operator decision.
@@ -192,6 +195,11 @@ DOM-13C: no mismatch and no production patch. Existing actual sub-field WEPP
 run/executable/results/clear rendering and downstream controller, rq-engine,
 worker, persistence, and reload evidence passed; 155 focused Python tests, 21
 AgFields Jest tests, lint, and docs lint passed.
+
+DOM-13D: no mismatch and no production patch. Existing actual scheme/run/
+results/clear rendering and controller, rq-engine, suite-worker, artifact,
+persistence, reload, and scoped deletion evidence passed; the DOM-13C focused
+155-test Python and 21-test Jest sweeps cover this shared controller and passed.
 
 ## Context and Orientation
 
