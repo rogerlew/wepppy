@@ -29,7 +29,8 @@ is not a contract registry or enforcement platform.
   retained DOM-01 as the first controller, and deferred GOV-01.
 - [x] (2026-07-28 10:20Z) Closed the simplified GOV-00A test convention after
   proportional independent review.
-- [ ] Execute DOM-01 WATAR/Ash.
+- [x] (2026-07-28) Executed and closed DOM-01 WATAR/Ash with direct regression
+  tests and no production mismatch.
 - [ ] Continue with one controller package at a time.
 - [ ] Review measured value after five controllers.
 - [ ] Close the initiative when the registered inventory has executable
@@ -181,7 +182,11 @@ not completion gates.
 
 ## Outcomes & Retrospective
 
-Pending controller execution. Preserve the initial scaffold as superseded
-history in git rather than current authority. At each five-controller review,
-record whether the loop remains net-positive and whether any tooling proposal
-passes the simplicity budget.
+DOM-01 closed with actual-render, controller, route, persistence, and RQ
+coverage; its historical selector mismatch was already fixed, so it needed no
+production repair. The affected Python set (111 tests), frontend lint, and full
+frontend suite (88 suites, 662 tests) passed. It introduced no test helper or
+false tooling failure. Preserve the initial scaffold as superseded history in
+git rather than current authority. At each five-controller review, record
+whether the loop remains net-positive and whether any tooling proposal passes
+the simplicity budget.

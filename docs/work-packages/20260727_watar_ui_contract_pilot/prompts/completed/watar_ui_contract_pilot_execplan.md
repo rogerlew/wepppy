@@ -16,12 +16,15 @@ platform.
 
 - [x] (2026-07-28 UTC) Reframed DOM-01 around tests-first, minimal repair, and
   measured helper value.
-- [ ] Confirm the concise GOV-00A test convention.
-- [ ] Record intended and observed risk-bearing fields.
-- [ ] Add actual-render tests and reproduce the historical mismatch.
-- [ ] Add only the downstream tests applicable to each field.
-- [ ] Patch confirmed mismatches one at a time.
-- [ ] Run existing gates, review production patches, and close.
+- [x] (2026-07-28 10:30Z) Confirmed the concise GOV-00A test convention.
+- [x] (2026-07-28 10:30Z) Recorded intended and observed risk-bearing fields.
+- [x] (2026-07-28 10:30Z) Added actual-render evidence and retained the
+  historical selector-name regression.
+- [x] (2026-07-28 10:30Z) Added only applicable downstream evidence, including
+  the dedicated wind-toggle persistence path.
+- [x] (2026-07-28 10:30Z) Found no new production mismatch; no patch is needed.
+- [x] (2026-07-28 10:45Z) Ran applicable frontend and backend gates and closed
+  DOM-01 without a production patch.
 
 ## Surprises & Discoveries
 
@@ -29,6 +32,11 @@ platform.
   that a registry or dependency platform is necessary.
 - Observation: Hand-authored Jest DOM can agree with controller assumptions
   while the actual Jinja template submits a different field name.
+- Observation: The historical selector mismatch was already repaired before
+  DOM-01 started, but its actual-template regression was narrow.
+  Evidence: `test_ash_template_submits_canonical_model_selector_names` existed
+  at the start; DOM-01 expanded it to the rendered WATAR field set and paired
+  canonical selector persistence with the existing legacy-alias test.
 
 ## Decision Log
 
@@ -36,6 +44,10 @@ platform.
   Rationale: tests should reveal which shared behavior matters.
 - Decision: Direct assertions precede helper extraction.
   Rationale: tooling must demonstrate reduced repetition and clearer evidence.
+- Decision: Close without a production patch if actual rendered and downstream
+  behavior conforms.
+  Rationale: DOM-01 is a conformance audit; inventing a repair would create
+  regression risk without fixing a confirmed defect.
 
 ## Context and Orientation
 
@@ -49,6 +61,10 @@ state, and ash/WEPP RQ paths. Existing tests include:
 - `tests/microservices/test_rq_engine_ash_routes.py`;
 - `tests/rq/test_project_rq_ash.py`; and
 - `tests/nodb/mods/test_ash_transport_run_ash.py`.
+
+The current field matrix is `artifacts/field_matrix.md`. The historical
+selector test is in `tests/weppcloud/routes/test_pure_controls_render.py`; it
+must continue to assert that DOM ids are not submitted names.
 
 Read the nearest WEPPcloud, controller, NoDb, RQ, microservice, and test
 instructions before editing their files.
@@ -103,10 +119,12 @@ closeout run:
 
     wctl run-npm lint
     wctl run-npm test
-    wctl run-pytest tests/weppcloud/routes/test_watar_bp.py \
+    wctl run-pytest tests/weppcloud/routes/test_pure_controls_render.py \
+      tests/weppcloud/routes/test_watar_bp.py \
       tests/microservices/test_rq_engine_ash_routes.py \
       tests/rq/test_project_rq_ash.py \
       tests/nodb/mods/test_ash_transport_run_ash.py --maxfail=1
+    # Only after controller source changes:
     python wepppy/weppcloud/controllers_js/build_controllers_js.py
     git diff --check
 
@@ -138,12 +156,24 @@ a helper after repetition; they do not authorize a maintenance platform.
 
 ## Outcomes & Retrospective
 
-At closeout record:
+Closed 2026-07-28. DOM-01 found no new production mismatch. It added direct
+tests, not helpers, for actual rendered WATAR field identity, canonical and
+legacy selector persistence, and wind-toggle persistence. No controller source,
+route, NoDb, RQ, parameterization, authorization, or upload behavior changed.
 
-- mismatches found and fixed;
-- tests that fail when defects are reintroduced;
-- focused and broad runtime;
-- helper lines versus controller-test lines;
-- tooling-caused false failures;
-- remaining uncovered WATAR behavior; and
-- the next single controller recommended for execution.
+Validation passed: 111 affected Python tests; frontend lint; and the full
+frontend test suite (88 suites, 662 tests). Both the child and umbrella
+documentation trees linted with zero warnings, and `git diff --check` passed.
+The generated-controller build was not applicable because no controller source
+changed. The audit added zero helper lines and encountered zero false tooling
+failures. No correctness or security review was required because there was no
+production patch. Select the next controller from the register before starting
+another audit.
+
+Post-close review closed two low coverage gaps by exercising both wind boolean
+values and both rendered reload states. This DOM-01 revision advances the audit
+ledger to `verified`, as required by the parent register.
+
+Revision note (2026-07-28): Closed after final validation; records the field
+matrix, already-fixed historical mismatch, no-patch decision, and measured
+gate results.

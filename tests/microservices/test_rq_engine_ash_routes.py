@@ -287,8 +287,17 @@ def test_run_ash_batch_multipart_returns_input_message_without_enqueue(
     assert queue_called["called"] is False
 
 
-def test_run_ash_normalizes_legacy_selector_names_before_parsing(
+@pytest.mark.parametrize(
+    "selector_fields",
+    [
+        {"ash_model": "alex", "transport_mode": "static"},
+        {"ash_model_select": "alex", "ash_transport_mode_select": "static"},
+    ],
+    ids=["canonical-rendered-names", "legacy-selector-names"],
+)
+def test_run_ash_normalizes_canonical_and_legacy_selector_names_before_parsing(
     monkeypatch: pytest.MonkeyPatch,
+    selector_fields: dict[str, str],
 ) -> None:
     _stub_auth(monkeypatch)
     monkeypatch.setattr(ash_routes, "get_wd", lambda runid: "/tmp/run")
@@ -344,8 +353,7 @@ def test_run_ash_normalizes_legacy_selector_names_before_parsing(
                 "ash_depth_mode": "1",
                 "ini_black_depth": "5",
                 "ini_white_depth": "5",
-                "ash_model_select": "alex",
-                "ash_transport_mode_select": "static",
+                **selector_fields,
                 "white_initranscap": "2.0",
                 "black_initranscap": "2.0",
                 "white_depletcoeff": "0.1",

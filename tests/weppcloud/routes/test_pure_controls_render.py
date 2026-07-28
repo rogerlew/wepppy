@@ -175,8 +175,7 @@ def test_ash_template_submits_canonical_model_selector_names(jinja_env: Environm
         return SimpleNamespace(**values, to_dict=lambda: dict(values))
 
     template = jinja_env.get_template("controls/ash_pure.htm")
-    rendered = template.render(
-        ash=SimpleNamespace(
+    ash = SimpleNamespace(
             ash_depth_mode=1,
             fire_date="8/4",
             ini_black_ash_depth_mm=5.0,
@@ -193,8 +192,8 @@ def test_ash_template_submits_canonical_model_selector_names(jinja_env: Environm
             anu_black_ash_model_pars=model_params(ini_bulk_den=0.22),
             alex_white_ash_model_pars=model_params(),
             alex_black_ash_model_pars=model_params(ini_bulk_den=0.22, org_mat=0.065),
-        )
     )
+    rendered = template.render(ash=ash)
 
     assert re.search(
         r'<select[^>]*id="ash_model_select"[^>]*name="ash_model"',
@@ -208,6 +207,50 @@ def test_ash_template_submits_canonical_model_selector_names(jinja_env: Environm
     )
     assert 'name="ash_model_select"' not in rendered
     assert 'name="ash_transport_mode_select"' not in rendered
+
+    for field_name in (
+        "fire_date",
+        "ini_black_depth",
+        "ini_white_depth",
+        "ini_black_load",
+        "ini_white_load",
+        "input_upload_ash_load",
+        "input_upload_ash_type_map",
+        "field_black_bulkdensity",
+        "field_white_bulkdensity",
+        "checkbox_run_wind_transport",
+        "white_ini_bulk_den",
+        "black_ini_bulk_den",
+        "white_fin_bulk_den",
+        "black_fin_bulk_den",
+        "white_initranscap",
+        "black_initranscap",
+        "white_depletcoeff",
+        "black_depletcoeff",
+    ):
+        assert re.search(
+            rf'<(?:input|select)[^>]*(?=id="{field_name}")'
+            rf'(?=[^>]*name="{field_name}")[^>]*>',
+            rendered,
+            re.DOTALL,
+        )
+
+    assert re.search(r'<input[^>]*id="ash_depth_mode_depth"[^>]*checked', rendered)
+    assert re.search(r'<option value="alex" selected>Watanabe2025</option>', rendered)
+    assert re.search(r'<option value="static" selected>Static</option>', rendered)
+    assert 'accept=".tif,.tiff,.img"' in rendered
+    unchecked_wind = re.search(
+        r'<input[^>]*id="checkbox_run_wind_transport"[^>]*>', rendered
+    )
+    assert unchecked_wind is not None
+    assert "checked" not in unchecked_wind.group(0)
+
+    ash.run_wind_transport = True
+    rendered_with_wind = template.render(ash=ash)
+    assert re.search(
+        r'<input[^>]*id="checkbox_run_wind_transport"[^>]*checked',
+        rendered_with_wind,
+    )
 
 
 def test_channel_template_submits_and_hydrates_depression_smoothing(

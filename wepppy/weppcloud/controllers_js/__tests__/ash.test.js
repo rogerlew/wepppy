@@ -301,6 +301,19 @@ describe("Ash controller", () => {
         ]));
     });
 
+    test.each([true, false])("wind toggle posts %s through the dedicated route", async (state) => {
+        const windCheckbox = document.getElementById("checkbox_run_wind_transport");
+        windCheckbox.checked = state;
+        windCheckbox.dispatchEvent(new Event("change", { bubbles: true }));
+        await Promise.resolve();
+
+        expect(postJsonMock).toHaveBeenCalledWith(
+            "tasks/set_ash_wind_transport/",
+            { run_wind_transport: state },
+            { form: expect.any(HTMLFormElement) }
+        );
+    });
+
     test("run handles message-only responses without undefined job id", async () => {
         global.WCHttp.requestWithSessionToken = jest.fn(() =>
             Promise.resolve({ body: { message: "Set ash inputs for batch processing" } })

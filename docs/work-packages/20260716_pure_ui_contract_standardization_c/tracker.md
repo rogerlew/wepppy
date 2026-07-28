@@ -6,9 +6,9 @@
 
 **Timezone**: UTC
 **Started**: 2026-07-17 00:30 UTC
-**Current phase**: DOM-01 ready
+**Current phase**: Select next controller
 **Last updated**: 2026-07-28 UTC
-**Next milestone**: Execute WATAR/Ash actual-render and downstream tests.
+**Next milestone**: Select one next controller and execute its bounded audit.
 **Security impact**: `none` for scaffold; child packages reassess
 **Dedicated security review**: `no`
 **Security artifact**: N/A
@@ -17,7 +17,7 @@
 
 ### Ready / Backlog
 
-- [ ] Execute DOM-01, then continue one controller at a time.
+- [ ] Select and execute the next controller, then continue one at a time.
 - [ ] Review measured value after five controllers.
 - [ ] Consolidate or redirect stale controller documentation.
 
@@ -68,6 +68,8 @@
   (2026-07-28 UTC).
 - [x] Closed GOV-00A after the concise convention passed independent review
   with no remaining high/medium findings; DOM-01 is ready (2026-07-28 10:20 UTC).
+- [x] Closed DOM-01 WATAR/Ash through actual-render and applicable downstream
+  tests without a production mismatch or patch (2026-07-28 10:45 UTC).
 
 ## Child Package Register
 
@@ -79,7 +81,7 @@ is active at a time.
 | --- | --- | --- | --- | --- |
 | GOV-00 | Standard/population/register foundation | 1 | auditing | In progress |
 | GOV-00A | Concise controller test convention | 1 | closed | Review passed |
-| DOM-01..DOM-29 (including A-D facets) | Run-domain controller packages | 39 | DOM-01 ready; remainder backlog | Review actual production patches |
+| DOM-01..DOM-29 (including A-D facets) | Run-domain controller packages | 39 | DOM-01 closed; remainder backlog | Review actual production patches |
 | GOV-01 | Maintenance-tooling value evaluation | 1 | deferred pending five-controller evidence | Explicit operator approval |
 | SHR-01..SHR-07 (including A/B facets) | Shared-foundation inventory | 9 | deferred; test when encountered | Based on actual shared patch |
 | SURF-01..SURF-18 (including A/B facets) | Non-run/stateful Pure surfaces | 19 | backlog | Review actual production patches |
@@ -89,7 +91,7 @@ is active at a time.
 Total: 76 independently closable inventory boundaries. GOV-00 is this existing
 umbrella; GOV-00A is the closed convention child; REM-01 and REM-02 are
 complete, while REM-03 through REM-05 retain their recorded states. DOM-01 is
-the ready controller package with a dated directory. Shared packages are
+the closed first controller package with a dated directory. Shared packages are
 not prerequisites, and GOV-01 has no scaffold.
 
 Every new child package must be added here and to `PROJECT_TRACKER.md` before

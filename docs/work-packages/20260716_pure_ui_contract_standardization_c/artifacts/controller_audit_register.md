@@ -116,7 +116,7 @@ explicit planning assertion to verify, not permission to omit reload evidence.
 | `omniContrastOverlays` / DOM-25B | `C/omni_contrasts_gl.js`; `T/omni_contrasts_pure.htm` | Omni routes/state/artifacts; contrast run/delete RQ | `J/omni_contrasts_gl.test.js`; contrast modes; high | contractual | unverified |
 | `rhem` / DOM-26 | `C/rhem.js`; `T/rhem_pure.htm` | `R/nodb_api/rhem_bp.py`, Rhem/RhemPost; run RQ | `J/rhem.test.js`; gate/config matrix; high | contractual | unverified |
 | `geneva` / DOM-27 | `C/geneva.js`; `T/geneva_pure.htm` | `R/nodb_api/geneva_bp.py` config/task/status/results/frequency/CN functions, Geneva; `geneva_rq.py` chain; SURF-11 owns four summary query/report functions | `J/geneva.test.js`; gate/config matrix; high | contractual | unverified |
-| `ash` / DOM-01 | `C/ash.js`; `T/ash_pure.htm` | `R/nodb_api/watar_bp.py`, Ash; ash/WEPP RQ | `J/ash.test.js`; WATAR model/mode/files; high | contractual | unverified |
+| `ash` / DOM-01 | `C/ash.js`; `T/ash_pure.htm` | `R/nodb_api/watar_bp.py`, Ash; ash/WEPP RQ | `J/ash.test.js`; WATAR model/mode/files; high | contractual | verified |
 | `pathCe` / DOM-28 | `C/path_ce.js`; `T/path_cost_effective_pure.htm` | `R/nodb_api/path_ce_bp.py`, PathCostEffective; `path_ce_rq.py` | `J/path_ce.test.js`; role/config gates; high | contractual | unverified |
 | `rusle` / DOM-29 | `C/rusle.js`; `T/rusle_pure.htm` | `R/run_0/run_0_bp.py`, Rusle; build RQ | `J/rusle.test.js`; gate/mode matrix; high | contractual | unverified |
 

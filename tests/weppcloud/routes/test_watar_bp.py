@@ -180,3 +180,17 @@ def test_hillslope0_ash_handles_nodir_locked(
     assert payload["error"]["code"] == "NODIR_LOCKED"
     assert payload["error"]["message"] == "root is locked"
     assert climate_file_paths == []
+
+
+@pytest.mark.parametrize("state", [True, False])
+def test_set_ash_wind_transport_persists_boolean_state(watar_client, state: bool):
+    client, run_dir, _climate_file_paths = watar_client
+
+    response = client.post(
+        f"/runs/{RUN_ID}/{CONFIG}/tasks/set_ash_wind_transport/",
+        json={"run_wind_transport": state},
+    )
+
+    assert response.status_code == 200
+    ash = watar_module.Ash.getInstance(str(run_dir))
+    assert ash.run_wind_transport is state
