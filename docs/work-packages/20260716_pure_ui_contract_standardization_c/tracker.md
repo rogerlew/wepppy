@@ -8,7 +8,7 @@
 **Started**: 2026-07-17 00:30 UTC
 **Current phase**: Select next controller
 **Last updated**: 2026-07-28 UTC
-**Next milestone**: Execute DOM-13C AgFields staged sub-field WEPP.
+**Next milestone**: Execute DOM-13D AgFields watershed integration.
 **Security impact**: `none` for scaffold; child packages reassess
 **Dedicated security review**: `no`
 **Security artifact**: N/A
@@ -26,7 +26,7 @@
 - [x] Registered and dual-reviewed REM-05 under GOV-00A-M1E without advancing
   DOM-05; checkpoint ancestor
   `44d3b93c8e3bc7d5e89151cbb9677db374411c53`.
-- [ ] Execute the autonomous remaining run-domain sequence; DOM-13C is the sole
+- [ ] Execute the autonomous remaining run-domain sequence; DOM-13D is the sole
   next active controller package.
 
 ### Blocked
@@ -87,6 +87,9 @@
 - [x] Closed DOM-24 Rangeland Cover and its map modifier with actual
   modes/defaults/build rendering and controller/modifier/route evidence; no
   production mismatch or patch (2026-07-28 UTC).
+- [x] Closed DOM-13C AgFields staged sub-field WEPP with existing direct-render
+  and controller/rq-engine/worker/reload evidence; no production mismatch or
+  patch (2026-07-28 UTC).
 - [x] Recorded explicit operator authority for bounded subagent dispatch and
   mandatory dual independent review (2026-07-17 00:30 UTC).
 - [x] Dispositioned the first inventory-review findings by broadening route-local

@@ -68,6 +68,8 @@ generator, manifest, or new CI system.
 - [x] (2026-07-28 UTC) Executed DOM-24; actual Rangeland Cover modes/defaults/
   build rendering and existing controller/modifier/route evidence passed
   without repair.
+- [x] (2026-07-28 UTC) Executed DOM-13C; existing actual stage-4 rendering and
+  controller/rq-engine/worker/reload evidence passed without repair.
 - [ ] Execute all remaining run-domain packages in the dependency-aware order.
 - [ ] Resolve each encountered hold through its owning package or a bounded
   operator decision.
@@ -185,6 +187,11 @@ DOM-23: no mismatch and no production patch. Added actual joint SBS rendering;
 DOM-24: no mismatch and no production patch. Added actual modes, RAP year,
 cover defaults, and build render evidence; 103 focused Python tests, 13
 Rangeland Cover/Modifier Jest tests, lint, and docs lint passed.
+
+DOM-13C: no mismatch and no production patch. Existing actual sub-field WEPP
+run/executable/results/clear rendering and downstream controller, rq-engine,
+worker, persistence, and reload evidence passed; 155 focused Python tests, 21
+AgFields Jest tests, lint, and docs lint passed.
 
 ## Context and Orientation
 
