@@ -250,6 +250,57 @@ def test_climate_template_renders_catalog_station_and_build_contract(
     assert 'id="climate_status_panel"' in rendered
 
 
+def test_climate_template_renders_upload_and_scaling_contract(
+    jinja_env: Environment,
+) -> None:
+    template = jinja_env.get_template("controls/climate_pure.htm")
+    climate = SimpleNamespace(
+        catalog_id="user_defined_cli",
+        climate_mode=SimpleNamespace(value=12),
+        climatestation_mode=SimpleNamespace(value=4),
+        climate_spatialmode=SimpleNamespace(value=0),
+        uses_tenerife_station_catalog=False,
+        is_single_storm=False,
+        datasetMap={},
+        input_years=30,
+        observed_start_year=1981,
+        observed_end_year=2024,
+        future_start_year=2030,
+        future_end_year=2060,
+        cli_fn="cli/custom.cli",
+        orig_cli_fn=None,
+        climate_daily_temp_ds="gridmet",
+        use_gridmet_wind_when_applicable=True,
+        adjust_mx_pt5=True,
+        silent_pass_observed_quality_guard=True,
+        precip_scaling_mode=SimpleNamespace(value=2),
+        precip_scale_factor=1.1,
+        precip_monthly_scale_factors=[1.0] * 12,
+        precip_scale_reference="prism",
+        precip_scale_factor_map=None,
+    )
+    catalog = [{
+        "catalog_id": "user_defined_cli", "label": "User CLI", "description": "",
+        "help_text": "", "group": "User-Defined", "group_hint": "",
+        "climate_mode": 12, "ui_exposed": True,
+    }]
+    rendered = template.render(climate=climate, climate_catalog=catalog)
+
+    assert 'id="input_upload_cli"' in rendered
+    assert 'name="input_upload_cli"' in rendered
+    assert 'id="btn_upload_cli"' in rendered
+    assert 'data-climate-action="upload-cli"' in rendered
+    assert 'id="hint_upload_cli"' in rendered
+    assert 'id="checkbox_use_gridmet_wind_when_applicable"' in rendered
+    assert 'id="checkbox_adjust_mx_pt5"' in rendered
+    assert 'id="checkbox_silent_pass_observed_quality_guard"' in rendered
+    assert 'id="climate_precipscaling_mode2"' in rendered
+    assert 'name="precip_scaling_mode"' in rendered
+    assert 'id="climate_precipscaling_mode2_controls"' in rendered
+    assert 'id="precip_monthly_scale_factors_0"' in rendered
+    assert 'name="precip_monthly_scale_factors_11"' in rendered
+
+
 def test_ash_template_submits_canonical_model_selector_names(jinja_env: Environment) -> None:
     def model_params(**overrides: float) -> SimpleNamespace:
         values: dict[str, float] = {

@@ -29,6 +29,8 @@ generator, manifest, or new CI system.
   state/queue/worker evidence passed without a production repair.
 - [x] (2026-07-28 UTC) Executed DOM-11A; actual climate catalog/station/build
   rendering and existing state/parser/enqueue evidence passed without repair.
+- [x] (2026-07-28 UTC) Executed DOM-11B; actual upload/scaling rendering and
+  existing route/state/worker evidence passed without repair.
 - [ ] Execute all remaining run-domain packages in the dependency-aware order.
 - [ ] Resolve each encountered hold through its owning package or a bounded
   operator decision.
@@ -82,6 +84,10 @@ focused Jest tests, and docs lint passed. No helper was introduced.
 DOM-11A: no mismatch and no production patch. Added catalog/station/spatial/
 build actual-render evidence; 79 render tests, 15 Climate Jest tests, 41
 Flask/RQ-engine/parser/catalog tests, lint, and docs lint passed.
+
+DOM-11B: no mismatch and no production patch. Added upload/scaling actual-render
+evidence; 80 render tests, 15 Climate Jest tests, 71 upload/scaling/worker tests,
+21 upload-schema tests, lint, and docs lint passed.
 
 ## Context and Orientation
 
