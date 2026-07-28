@@ -86,6 +86,9 @@ generator, manifest, or new CI system.
   rendering and existing lifecycle/overlay evidence passed without repair.
 - [x] (2026-07-28 UTC) Executed DOM-26; actual RHEM run/lifecycle rendering and
   existing model/route/worker/results/reload evidence passed without repair.
+- [x] (2026-07-28 UTC) Executed DOM-27; existing actual Geneva config/workflow/
+  lifecycle rendering and route/state/chained-worker evidence passed without
+  repair; SURF-11 ownership remained unchanged.
 - [ ] Execute all remaining run-domain packages in the dependency-aware order.
 - [ ] Resolve each encountered hold through its owning package or a bounded
   operator decision.
@@ -238,6 +241,13 @@ DOM-26: no mismatch and no production patch. Added actual run, status, hint,
 and error rendering; controller, route, Rhem/RhemPost, rq-engine, worker,
 results, reload, and authorization evidence passed; 105 focused Python tests,
 7 RHEM Jest tests, lint, and docs lint passed.
+
+DOM-27: no mismatch and no production patch. Existing actual configuration,
+workflow, job-hint, status, error, and results rendering plus controller,
+Flask/rq-engine route, state, collaborator, chained-worker, frequency-panel,
+CN-table, artifact, and reload evidence passed; 213 focused Python tests, 14
+Geneva/Geneva-summary Jest tests, lint, and docs lint passed. SURF-11 remained
+separate.
 
 ## Context and Orientation
 
