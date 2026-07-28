@@ -73,7 +73,14 @@ describe("SubcatchmentDelineation GL controller", () => {
             isHttpError: jest.fn().mockReturnValue(false),
         };
         global.WCForms = {
-            serializeForm: jest.fn(() => ({ clip_hillslopes: true })),
+            serializeForm: jest.fn(() => ({
+                pkcsa: "-1",
+                pkcsa_en: "-1",
+                mofe_target_length: "80",
+                mofe_max_ofes: "9",
+                mofe_buffer: true,
+                mofe_buffer_length: "35",
+            })),
         };
 
         ({ base: baseInstance } = createControlBaseStub({
@@ -220,7 +227,14 @@ describe("SubcatchmentDelineation GL controller", () => {
         expect(baseInstance.connect_status_stream).toHaveBeenCalledWith(sub);
         expect(postJsonMock).toHaveBeenCalledWith(
             "/rq-engine/api/runs/test/cfg/build-subcatchments-and-abstract-watershed",
-            expect.any(Object),
+            {
+                pkcsa: "-1",
+                pkcsa_en: "-1",
+                mofe_target_length: "80",
+                mofe_max_ofes: "9",
+                mofe_buffer: true,
+                mofe_buffer_length: "35",
+            },
             expect.objectContaining({ form: expect.any(HTMLFormElement) }),
         );
         expect(baseInstance.set_rq_job_id).toHaveBeenCalledWith(sub, "job-123");

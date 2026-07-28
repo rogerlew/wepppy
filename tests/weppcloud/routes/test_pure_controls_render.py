@@ -581,6 +581,37 @@ def test_landuse_template_disables_single_mode_for_mofe(jinja_env: Environment) 
     assert "disabled" in single_select.group(0)
 
 
+def test_subcatchments_template_preserves_wbt_and_mofe_build_contract(jinja_env: Environment) -> None:
+    template = jinja_env.get_template("controls/subcatchments_pure.htm")
+    rendered = template.render(
+        watershed=SimpleNamespace(
+            delineation_backend_is_topaz=False,
+            delineation_backend_is_wbt=True,
+            abstraction_backend_is_peridot=False,
+            mofe_target_length=80,
+            mofe_max_ofes=9,
+            mofe_buffer=True,
+            mofe_buffer_length=35,
+        ),
+        wepp=SimpleNamespace(multi_ofe=True),
+    )
+
+    assert 'id="build_subcatchments_form"' in rendered
+    assert 'id="input_pkcsa" value="-1" name="pkcsa"' in rendered
+    assert 'id="input_pkcsa_en" value="-1" name="pkcsa_en"' in rendered
+    assert 'id="input_mofe_target_length"' in rendered
+    assert 'name="mofe_target_length"' in rendered
+    assert 'id="input_mofe_max_ofes"' in rendered
+    assert 'name="mofe_max_ofes"' in rendered
+    assert 'id="checkbox_mofe_buffer"' in rendered
+    assert 'name="mofe_buffer"' in rendered
+    assert 'id="input_mofe_buffer_length"' in rendered
+    assert 'name="mofe_buffer_length"' in rendered
+    assert 'id="btn_build_subcatchments"' in rendered
+    assert 'data-subcatchment-action="build"' in rendered
+    assert 'id="hint_build_subcatchments"' in rendered
+
+
 def test_frost_advanced_template_renders_wepp_variable_labels(jinja_env: Environment) -> None:
     template = jinja_env.get_template("controls/wepp_pure_advanced_options/frost.htm")
     wepp = SimpleNamespace(

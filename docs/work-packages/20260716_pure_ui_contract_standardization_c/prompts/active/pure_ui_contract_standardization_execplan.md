@@ -40,6 +40,9 @@ is not a contract registry or enforcement platform.
   direct rendered-default/legend regression evidence and no production mismatch.
 - [x] (2026-07-28) Executed and closed DOM-06 Outlet with direct rendered-mode
   and manual-entry payload regression evidence and no production mismatch.
+- [x] (2026-07-28) Executed and closed DOM-07 Subcatchment with direct
+  WBT/MOFE rendered identity, exact payload, and ordered worker-chain evidence
+  and no production mismatch.
 - [ ] Continue with one controller package at a time.
 - [ ] Review measured value after five controllers.
 - [ ] Close the initiative when the registered inventory has executable
@@ -228,3 +231,10 @@ manual-entry coordinate payload regression. Existing cursor, route validation/
 enqueue, worker mutation, and reload evidence conformed. Focused Python (167
 tests), lint, focused Outlet Jest (5 tests), and full frontend results passed.
 It introduced no helper or production patch.
+
+DOM-07 closed with actual WBT/MOFE rendered identity and exact GL payload
+evidence. Existing route tests proved coercion and grouped updates before parent
+enqueue; a direct worker test now proves subcatchment build precedes dependent
+abstraction. Focused Python (169 tests), lint, focused Subcatchment Jest (12
+tests), and the full frontend suite (88 suites, 663 tests) passed. It introduced
+no helper or production patch.

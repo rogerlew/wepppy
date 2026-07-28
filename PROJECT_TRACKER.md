@@ -386,7 +386,7 @@ build through job completion before review.
 
 ### Pure UI Controller Contract Standardization
 **Started**: 2026-07-16
-**Status**: Simplified tests-first execution model; DOM-01, DOM-04A/B, DOM-05, and DOM-06 closed
+**Status**: Simplified tests-first execution model; DOM-01, DOM-04A/B, DOM-05, DOM-06, and DOM-07 closed
 **Size**: One controller active at a time; inventory size is not a schedule
 **Owner**: Codex
 **Priority**: High
@@ -403,6 +403,7 @@ build through job completion before review.
 - [DOM-04A Map Orchestration](docs/work-packages/20260728_map_orchestration_ui_contract/) closed with actual-render map action/target and exact elevation request coverage; it found no production mismatch. DOM-04B remains the owner of layers, legends, scales, and feature UI.
 - [DOM-04B Map Layers & Feature UI](docs/work-packages/20260728_map_layers_feature_ui_contract/) closed with actual layer-default/legend-host and existing helper evidence; it found no production mismatch. The Map controller is now verified across DOM-04A and DOM-04B without route or remote-resource changes.
 - [DOM-06 Outlet](docs/work-packages/20260728_outlet_ui_contract/) closed with actual rendered modes/lifecycle and manual-entry coordinate payload evidence; it found no production mismatch. Existing route/RQ/reload tests cover the remaining outlet boundary.
+- [DOM-07 Subcatchment](docs/work-packages/20260728_subcatchment_ui_contract/) closed with actual WBT/MOFE field identities, exact GL payload, route update, and ordered build/abstraction child-job evidence; it found no production mismatch.
 
 **Next Steps**: Select the next single controller, execute its bounded test-and-repair loop, and record the same value/runtime/helper evidence.
 

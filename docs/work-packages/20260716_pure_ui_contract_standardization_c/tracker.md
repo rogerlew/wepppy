@@ -88,6 +88,9 @@
   (2026-07-28 UTC).
 - [x] Closed DOM-06 Outlet with actual-render modes/lifecycle and manual-entry
   payload evidence; no production mismatch or patch (2026-07-28 UTC).
+- [x] Closed DOM-07 Subcatchment with actual WBT/MOFE rendering, exact GL
+  payload, route update, and ordered RQ-child evidence; no production mismatch
+  or patch (2026-07-28 UTC).
 
 ## Child Package Register
 
@@ -99,7 +102,7 @@ is active at a time.
 | --- | --- | --- | --- | --- |
 | GOV-00 | Standard/population/register foundation | 1 | auditing | In progress |
 | GOV-00A | Concise controller test convention | 1 | closed | Review passed |
-| DOM-01..DOM-29 (including A-D facets) | Run-domain controller packages | 39 | DOM-01, DOM-04A, and DOM-05 closed; remainder backlog | Review actual production patches |
+| DOM-01..DOM-29 (including A-D facets) | Run-domain controller packages | 39 | DOM-01, DOM-04A/B, DOM-05, DOM-06, and DOM-07 closed; remainder backlog | Review actual production patches |
 | GOV-01 | Maintenance-tooling value evaluation | 1 | deferred pending five-controller evidence | Explicit operator approval |
 | SHR-01..SHR-07 (including A/B facets) | Shared-foundation inventory | 9 | deferred; test when encountered | Based on actual shared patch |
 | SURF-01..SURF-18 (including A/B facets) | Non-run/stateful Pure surfaces | 19 | backlog | Review actual production patches |

@@ -295,6 +295,49 @@ def test_fetch_dem_and_build_channels_rq_preserves_uploaded_dem_for_upload_mode(
     assert dummy_watershed.uploaded_dem_filename == "uploaded.tif"
 
 
+def test_build_subcatchments_and_abstract_watershed_rq_enqueues_ordered_children(
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    events: list[tuple] = []
+
+    class DummyRedis:
+        def __init__(self, **_kwargs) -> None:
+            pass
+
+        def __enter__(self):
+            return self
+
+        def __exit__(self, *_args) -> None:
+            return None
+
+    class DummyQueue:
+        def __init__(self, connection) -> None:
+            self.connection = connection
+
+        def enqueue_call(self, func, args, depends_on=None, timeout=None):
+            child_id = f"child-{len(events)}"
+            events.append((func.__name__, args, getattr(depends_on, "id", None), timeout))
+            return SimpleNamespace(id=child_id)
+
+    current_job = SimpleNamespace(id="job-guard", meta={}, save=lambda: None)
+    monkeypatch.setattr(project_rq, "get_current_job", lambda: current_job)
+    monkeypatch.setattr(project_rq.StatusMessenger, "publish", lambda *_args, **_kwargs: None)
+    monkeypatch.setattr(project_rq, "redis_connection_kwargs", lambda _db: {})
+    monkeypatch.setattr(project_rq.redis, "Redis", DummyRedis)
+    monkeypatch.setattr(project_rq, "Queue", DummyQueue)
+
+    project_rq.build_subcatchments_and_abstract_watershed_rq("demo")
+
+    assert events == [
+        ("build_subcatchments_rq", ("demo", {}), None, project_rq.TIMEOUT),
+        ("abstract_watershed_rq", ("demo",), "child-0", project_rq.TIMEOUT),
+    ]
+    assert current_job.meta == {
+        "jobs:0,func:build_subcatchments_rq": "child-0",
+        "jobs:1,func:abstract_watershed_rq": "child-1",
+    }
+
+
 def test_build_channels_rq_rejects_archive_form_root(
     monkeypatch: pytest.MonkeyPatch,
     tmp_path: Path,
