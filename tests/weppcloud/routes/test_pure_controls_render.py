@@ -301,6 +301,25 @@ def test_climate_template_renders_upload_and_scaling_contract(
     assert 'name="precip_monthly_scale_factors_11"' in rendered
 
 
+def test_observed_template_renders_model_fit_contract(jinja_env: Environment) -> None:
+    template = jinja_env.get_template("controls/observed_pure.htm")
+    rendered = template.render(
+        ron=SimpleNamespace(mods={"swat"}),
+        observed=SimpleNamespace(model_source="swat"),
+    )
+
+    assert 'id="observed_form"' in rendered
+    assert 'id="observed_text"' in rendered
+    assert 'name="observed_text"' in rendered
+    assert 'name="observed_model_source"' in rendered
+    assert re.search(r'<input[^>]*name="observed_model_source"[^>]*value="swat"[^>]*checked', rendered)
+    assert 'id="btn_run_observed"' in rendered
+    assert 'data-action="observed-run"' in rendered
+    assert 'id="hint_run_observed"' in rendered
+    assert 'id="observed_status_panel"' in rendered
+    assert 'id="observed_stacktrace_panel"' in rendered
+
+
 def test_ash_template_submits_canonical_model_selector_names(jinja_env: Environment) -> None:
     def model_params(**overrides: float) -> SimpleNamespace:
         values: dict[str, float] = {
