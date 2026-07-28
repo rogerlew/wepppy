@@ -63,6 +63,9 @@ is not a contract registry or enforcement platform.
 - [x] (2026-07-28) Reconciled the run-domain registers and completed broad
   closeout validation; the known unrelated GridMET `_FakeUnits.degC` fixture
   failure recurred after 2,452 passes and 40 skips.
+- [x] (2026-07-28) Executed SHR-04A from measured DOM evidence, adding direct
+  base and material macro-family render coverage; 105 tests pass and no
+  production mismatch was found.
 - [ ] Close the initiative when the registered inventory has executable
   regression coverage or explicit operator-approved exclusions.
 
@@ -86,6 +89,9 @@ is not a contract registry or enforcement platform.
 - Observation: The full run-domain sequence confirmed that direct assertions
   and existing focused suites were sufficient; it introduced no shared helper,
   registry, generator, or false tooling failure.
+
+- Observation: The same direct-assertion approach scaled to the 1,227-line
+  shared macro producer without requiring a registry or production repair.
 
 ## Decision Log
 
@@ -127,6 +133,15 @@ governance, and remediation packages at their independently recorded states.
 
 **Rationale**: Completion of the finite run-domain queue does not imply
 completion or exclusion of separately owned non-run inventory.
+
+### 2026-07-28: SHR-04A is verified without producer changes
+
+**Decision**: Retain the direct producer matrix in the existing rendered
+template suite and leave conforming base/macro APIs unchanged.
+
+**Rationale**: The 105-test suite proves exact metadata, identity, state, ARIA,
+lifecycle, structural, and empty-state output while preserving completed-DOM
+consumer behavior.
 
 ## Context and Orientation
 

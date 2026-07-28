@@ -6,10 +6,10 @@
 
 **Timezone**: UTC
 **Started**: 2026-07-17 00:30 UTC
-**Current phase**: Remaining run-domain sequence complete
+**Current phase**: SHR-04A closed; shared/non-run backlog available
 **Last updated**: 2026-07-28 UTC
-**Next milestone**: None for the remaining-run ExecPlan.
-**Security impact**: `none` for scaffold; child packages reassess
+**Next milestone**: Select the next separately registered shared or non-run package.
+**Security impact**: `none` for SHR-04A; future children reassess
 **Dedicated security review**: `no`
 **Security artifact**: N/A
 
@@ -23,6 +23,7 @@
 
 ### In Progress
 
+- None.
 - [x] Registered and dual-reviewed REM-05 under GOV-00A-M1E without advancing
   DOM-05; checkpoint ancestor
   `44d3b93c8e3bc7d5e89151cbb9677db374411c53`.
@@ -35,6 +36,9 @@
 
 ### Done
 
+- [x] Closed SHR-04A Pure base/macro shell contracts with 105 direct producer
+  and completed-DOM consumer render tests; no production mismatch or patch
+  (2026-07-28 UTC).
 - [x] Created umbrella package, active ExecPlan, child-package audit prompt, and
   initial audit register (2026-07-17 00:30 UTC).
 - [x] Closed DOM-08B Landuse Catalog and Map Editor with actual-render and

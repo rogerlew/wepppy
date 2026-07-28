@@ -135,6 +135,235 @@ def test_pure_control_renders(template_name: str, jinja_env: Environment) -> Non
     template.render()
 
 
+def test_base_pure_renders_document_metadata_blocks_and_assets(jinja_env: Environment) -> None:
+    template = jinja_env.from_string(
+        """
+        {% extends "base_pure.htm" %}
+        {% block title %}Contract fixture{% endblock %}
+        {% block head_extras %}<meta name="fixture-head" content="ready">{% endblock %}
+        {% block body %}<div id="fixture-body">Body</div>{% endblock %}
+        {% block footer %}<footer id="fixture-footer">Footer</footer>{% endblock %}
+        {% block script_extras %}<script id="fixture-script"></script>{% endblock %}
+        """
+    )
+    rendered = template.render(
+        csrf_token=lambda: "csrf-fixture",
+        static_url=lambda path: f"/static/{path}",
+        current_user=SimpleNamespace(is_authenticated=True),
+        site_prefix="/fixture",
+        controllers_gl_expected_build_id="build-fixture",
+    )
+
+    for token in (
+        '<html lang="en" class="wc-page">',
+        '<meta name="csrf-token" content="csrf-fixture"',
+        'data-user-authenticated="true"',
+        'data-site-prefix="/fixture"',
+        'data-controllers-gl-expected-build-id="build-fixture"',
+        "<title>Contract fixture</title>",
+        'name="fixture-head"',
+        'id="fixture-body"',
+        'id="fixture-footer"',
+        'id="fixture-script"',
+        '/static/vendor/purecss/pure-min.css',
+        "/static/css/ui-foundation.css",
+        "/static/css/themes/all-themes.css",
+        "/static/js/csrf_bootstrap.js",
+        "/static/js/theme.js",
+        "/static/js/session_heartbeat.js",
+        "/static/js/button_tab_order.js",
+    ):
+        assert token in rendered
+
+
+def test_pure_control_shell_renders_form_and_lifecycle_contract(jinja_env: Environment) -> None:
+    template = jinja_env.from_string(
+        """
+        {% import "controls/_pure_macros.html" as ui with context %}
+        {% call ui.control_shell(
+          "fixture_form",
+          "Fixture control",
+          collapsible=false,
+          description="<p>Fixture description</p>",
+          toolbar="<button id='fixture-action'>Run</button>",
+          form_class="fixture-form",
+          form_attrs={"data-controller": "fixture", "novalidate": true},
+          status_panel_options={"job_id": "fixture_job", "braille_id": "fixture_braille",
+                                "log_id": "fixture_status"},
+          summary_panel_options={"summary_id": "fixture_info"},
+          stacktrace_panel_options={"body_id": "fixture_stacktrace"}
+        ) %}
+          <input id="fixture_input" name="fixture_value" value="ready">
+          {{ ui.job_hint("fixture_hint", attrs={"data-job-kind": "fixture"}) }}
+        {% endcall %}
+        """
+    )
+    rendered = template.render()
+
+    for token in (
+        'form id="fixture_form"',
+        'action="javascript:void(0);"',
+        'enctype="multipart/form-data"',
+        "fixture-form",
+        'data-controller="fixture"',
+        "novalidate",
+        'id="fixture_input"',
+        'name="fixture_value"',
+        'value="ready"',
+        'data-status-panel',
+        'id="fixture_job"',
+        'id="fixture_braille"',
+        'id="fixture_status"',
+        'data-status-log',
+        'id="fixture_info"',
+        'data-stacktrace-panel',
+        'id="fixture_stacktrace"',
+        'id="fixture_hint"',
+        'data-job-hint',
+        'data-job-kind="fixture"',
+    ):
+        assert token in rendered
+
+    assert rendered.index('id="fixture_input"') < rendered.index("data-status-panel")
+
+
+def test_pure_field_macros_preserve_identity_values_state_and_aria(jinja_env: Environment) -> None:
+    template = jinja_env.from_string(
+        """
+        {% import "controls/_pure_macros.html" as ui with context %}
+        {{ ui.text_field("fixture_text", "Text", value="alpha", help="Text help",
+                         error="Text error", attrs={"data-parser-key": "text_key"}) }}
+        {{ ui.select_field("fixture_select", "Select", [("a", "Alpha"), ("b", "Beta")],
+                           selected="b", field_name="select_value") }}
+        {{ ui.numeric_field("fixture_number", "Number", value=2.5, precision=0.5,
+                            min=0, max=5, required=true, nullable=true,
+                            unit_label="m", unit_category="length", unit_name="meter") }}
+        {{ ui.file_upload("fixture_file", "File", accept=".csv", field_name="upload_value",
+                          current_filename="existing.csv") }}
+        {{ ui.textarea_field("fixture_notes", "Notes", value="saved notes", rows=6,
+                             placeholder="Enter notes") }}
+        """
+    )
+    rendered = template.render()
+
+    assert re.search(
+        r'id="fixture_text"[^>]*name="fixture_text"[^>]*value="alpha"'
+        r'[^>]*aria-invalid="true"[^>]*aria-describedby="fixture_text_help fixture_text_error"',
+        rendered,
+    )
+    assert 'data-parser-key="text_key"' in rendered
+    assert re.search(r'<option value="b" selected>Beta</option>', rendered)
+    assert re.search(r'id="fixture_select"[^>]*name="select_value"', rendered)
+    assert re.search(
+        r'id="fixture_number"[^>]*name="fixture_number"[^>]*type="number"'
+        r'[^>]*value="2.5"[^>]*step="0.5"[^>]*min="0"[^>]*max="5"'
+        r'[^>]*required[^>]*data-nullable="true"',
+        rendered,
+    )
+    assert 'data-unitizer-category="length"' in rendered
+    assert 'data-unitizer-unit="meter"' in rendered
+    assert re.search(
+        r'id="fixture_file"[^>]*name="upload_value"[^>]*type="file"[^>]*accept="\.csv"',
+        rendered,
+    )
+    assert "existing.csv" in rendered
+    assert re.search(
+        r'id="fixture_notes"[^>]*name="fixture_notes"[^>]*rows="6"'
+        r'[^>]*placeholder="Enter notes"[^>]*>saved notes</textarea>',
+        rendered,
+    )
+
+
+def test_pure_choice_and_structural_macros_preserve_state_and_targets(jinja_env: Environment) -> None:
+    template = jinja_env.from_string(
+        """
+        {% import "controls/_pure_macros.html" as ui with context %}
+        {{ ui.radio_group(
+          "fixture_mode", label="Mode", layout="grid", grid_columns=2,
+          options=[
+            {"id": "fixture_mode_a", "value": "a", "label": "Alpha", "selected": true},
+            {"id": "fixture_mode_b", "value": "b", "label": "Beta", "disabled": true}
+          ],
+          help="Choose a mode", mode_help={"a": "<strong>Alpha help</strong>"}
+        ) }}
+        {{ ui.checkbox_field("fixture_enabled", "Enabled", checked=true, help="Toggle help") }}
+        {{ ui.tabset([
+          {"id": "fixture_tab_a", "label": "First", "content": "<p>A</p>"},
+          {"id": "fixture_tab_b", "label": "Second", "content": "<p>B</p>", "active": true}
+        ]) }}
+        {{ ui.table_block(
+          [{"key": "name", "label": "Name"}, {"key": "value", "label": "Value"}],
+          [{"name": "row-a", "value": "42"}],
+          caption="Fixture table"
+        ) }}
+        {{ ui.dynamic_slot("fixture_slot", help="Dynamic help",
+                           attrs={"data-slot-kind": "fixture"}) }}
+        {{ ui.color_scale("fixture_range", "fixture_canvas", "fixture_min", "fixture_max",
+                          label="Scale", units_id="fixture_units",
+                          range_attrs={"min": 1, "max": 9, "value": 4}) }}
+        """
+    )
+    rendered = template.render()
+
+    assert re.search(
+        r'id="fixture_mode_a"[^>]*name="fixture_mode"[^>]*value="a"[^>]*checked',
+        rendered,
+    )
+    assert re.search(
+        r'id="fixture_mode_b"[^>]*name="fixture_mode"[^>]*value="b"'
+        r'[^>]*disabled[^>]*aria-disabled="true"',
+        rendered,
+    )
+    assert 'data-choice-help-root="fixture_mode"' in rendered
+    assert 'data-choice-help-target="a"' in rendered
+    assert re.search(r'id="fixture_enabled"[^>]*name="fixture_enabled"[^>]*checked', rendered)
+    assert re.search(
+        r'id="fixture_tab_b_tab"[\s\S]*?aria-selected="true"[\s\S]*?tabindex="0"',
+        rendered,
+    )
+    assert re.search(r'id="fixture_tab_a"[\s\S]*?role="tabpanel"[\s\S]*?hidden', rendered)
+    assert "<caption>Fixture table</caption>" in rendered
+    assert "<td>\n            \n              \n            \n            row-a" in rendered
+    assert 'id="fixture_slot"' in rendered
+    assert 'data-slot-kind="fixture"' in rendered
+    for target in ("fixture_range", "fixture_canvas", "fixture_min", "fixture_max", "fixture_units"):
+        assert f'id="{target}"' in rendered
+    assert re.search(r'id="fixture_range"[\s\S]*?min="1"[\s\S]*?max="9"[\s\S]*?value="4"', rendered)
+
+
+def test_pure_card_and_empty_state_macros_render_structure(jinja_env: Environment) -> None:
+    template = jinja_env.from_string(
+        """
+        {% import "controls/_pure_macros.html" as ui with context %}
+        {% call ui.card_shell("Shell card", collapsible=true, open=false,
+                              attrs={"data-card-kind": "shell"}) %}
+          {% call ui.fieldset("Fixture legend", "Fixture description") %}
+            <span id="fieldset-content">Content</span>
+          {% endcall %}
+        {% endcall %}
+        {% call ui.card("Content card", footer="<button id='card-footer'>Done</button>",
+                        attrs={"data-card-kind": "content"}) %}
+          {{ ui.text_display("Result", "<strong>Ready</strong>",
+                             actions=["<a id='result-action'>Open</a>"]) }}
+        {% endcall %}
+        {{ ui.table_block([{"key": "name", "label": "Name"}], [],
+                          empty_message="Nothing here") }}
+        """
+    )
+    rendered = template.render()
+
+    assert re.search(r'<details class="wc-control wc-control--collapsible"[^>]*data-card-kind="shell"', rendered)
+    assert not re.search(r'<details class="wc-control wc-control--collapsible"[^>]*\sopen', rendered)
+    assert "<legend class=\"wc-fieldset__legend\">Fixture legend</legend>" in rendered
+    assert 'id="fieldset-content"' in rendered
+    assert re.search(r'<section class="wc-card"[^>]*data-card-kind="content"', rendered)
+    assert "card-footer" in rendered
+    assert "<strong>Ready</strong>" in rendered
+    assert "result-action" in rendered
+    assert '<td colspan="1">' in rendered
+    assert "<em>Nothing here</em>" in rendered
+
+
 def test_soil_pure_template_renders_ssurgo_cache_checkbox(jinja_env: Environment) -> None:
     template = jinja_env.get_template("controls/soil_pure.htm")
     rendered = template.render(

@@ -386,7 +386,7 @@ build through job completion before review.
 
 ### Pure UI Controller Contract Standardization
 **Started**: 2026-07-16
-**Status**: All 39 run-domain packages verified; shared and non-run inventory remains separately registered
+**Status**: All 39 run-domain packages and SHR-04A verified
 **Size**: One controller active at a time; inventory size is not a schedule
 **Owner**: Codex
 **Priority**: High
@@ -394,6 +394,9 @@ build through job completion before review.
 **Description**: Establish one evidence-backed contract standard and execute an iterative series of bounded work packages to audit every Pure UI controller from rendered fields through JavaScript payloads, route parsing, persistence, RQ behavior, and reload.
 
 **Current Status**:
+- [SHR-04A](docs/work-packages/20260728_pure_ui_base_macro_shell_contracts/)
+  closed with direct base/material-macro producer coverage and the completed
+  DOM consumer suite; no production mismatch or patch was required.
 - Initial package, active ExecPlan, audit register, and reusable child-package prompt are authored.
 - Production reconnaissance found 33 run-page bootstrap controller entries, 26 main Pure panels plus four supporting templates, 56 bundled modules, and separate route-local Pure consoles that require explicit classification.
 - The current register separates 39 run-domain, 9 shared-foundation, 19 non-run/stateful, 4 governance, and 5 bounded-remediation inventory units. The count does not create an infrastructure milestone or projected multi-year schedule.
