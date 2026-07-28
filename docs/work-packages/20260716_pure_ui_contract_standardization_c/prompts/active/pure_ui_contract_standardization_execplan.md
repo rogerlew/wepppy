@@ -43,8 +43,11 @@ is not a contract registry or enforcement platform.
 - [x] (2026-07-28) Executed and closed DOM-07 Subcatchment with direct
   WBT/MOFE rendered identity, exact payload, and ordered worker-chain evidence
   and no production mismatch.
+- [x] (2026-07-28) Executed and closed DOM-08A Landuse Build with direct
+  upload-mode rendered identity, exact multipart payload, and route
+  normalization evidence and no production mismatch.
 - [ ] Continue with one controller package at a time.
-- [ ] Review measured value after five controllers.
+- [x] (2026-07-28) Reviewed measured value after five controller domains.
 - [ ] Close the initiative when the registered inventory has executable
   regression coverage or explicit operator-approved exclusions.
 
@@ -238,3 +241,18 @@ enqueue; a direct worker test now proves subcatchment build precedes dependent
 abstraction. Focused Python (169 tests), lint, focused Subcatchment Jest (12
 tests), and the full frontend suite (88 suites, 663 tests) passed. It introduced
 no helper or production patch.
+
+Five-controller-domain value checkpoint: WATAR/Ash, Channel, Map, Outlet, and
+Subcatchment completed with direct template/controller/downstream tests. The
+audit loop has retained regressions at each observed seam, introduced no shared
+helper or registry, and had no false tooling failure. Focused Python sets took
+roughly 11--16 seconds; full frontend validation took roughly 7--8 seconds.
+The observed result supports continuing the same direct-test loop, not adding
+tooling.
+
+DOM-08A closed with actual upload-mode render and exact browser multipart
+payload evidence. Existing mode, user-defined upload, grouped update, worker
+cache/timestamp, and completion reload tests conformed; a route regression now
+proves multipart boolean normalization before persistence. Focused Python (190
+tests), lint, focused Landuse Jest (29 tests), and the full frontend suite (88
+suites, 663 tests) passed. It introduced no helper or production patch.

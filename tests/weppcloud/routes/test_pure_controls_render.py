@@ -581,6 +581,44 @@ def test_landuse_template_disables_single_mode_for_mofe(jinja_env: Environment) 
     assert "disabled" in single_select.group(0)
 
 
+def test_landuse_template_renders_upload_build_fields_and_lifecycle(jinja_env: Environment) -> None:
+    template = jinja_env.get_template("controls/landuse_pure.htm")
+    rendered = template.render(
+        landuse=SimpleNamespace(
+            mode=SimpleNamespace(value=4),
+            nlcd_db="nlcd/2024",
+            single_selection="42",
+            mofe_buffer_selection="42",
+            user_defined_landcover_fn="landcover.tif",
+            mapping="disturbed",
+        ),
+        landuseoptions=[{"Key": "42", "Description": "Forest"}],
+        landuse_management_mapping_options=[{"Key": "disturbed", "Description": "Disturbed"}],
+        landcover_datasets=[SimpleNamespace(key="nlcd/2024", label="NLCD", description=None, management_file=None)],
+        wepp=SimpleNamespace(multi_ofe=False),
+        ron=SimpleNamespace(mods={"disturbed"}),
+        disturbed=SimpleNamespace(burn_shrubs=True, burn_grass=False),
+    )
+
+    upload_mode = re.search(r'id="landuse_mode4"[^>]*>', rendered)
+    assert upload_mode is not None
+    assert 'name="landuse_mode"' in upload_mode.group(0)
+    assert 'value="4"' in upload_mode.group(0)
+    assert "checked" in upload_mode.group(0)
+    assert 'id="input_upload_landuse"' in rendered
+    assert 'name="input_upload_landuse"' in rendered
+    assert 'accept=".img,.tif"' in rendered
+    assert 'id="landuse_management_mapping_selection"' in rendered
+    assert 'name="landuse_management_mapping_selection"' in rendered
+    assert 'id="checkbox_burn_shrubs"' in rendered
+    assert 'name="checkbox_burn_shrubs"' in rendered
+    assert 'id="checkbox_burn_grass"' in rendered
+    assert 'name="checkbox_burn_grass"' in rendered
+    assert 'id="btn_build_landuse"' in rendered
+    assert 'data-landuse-action="build"' in rendered
+    assert 'id="hint_build_landuse"' in rendered
+
+
 def test_subcatchments_template_preserves_wbt_and_mofe_build_contract(jinja_env: Environment) -> None:
     template = jinja_env.get_template("controls/subcatchments_pure.htm")
     rendered = template.render(

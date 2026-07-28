@@ -29,13 +29,19 @@ describe("Landuse controller", () => {
                 <div id="landuse_mode4_controls" hidden></div>
                 <input type="radio" id="landuse_mode0" name="landuse_mode" value="0" data-landuse-role="mode" data-landuse-mode="0" checked>
                 <input type="radio" id="landuse_mode1" name="landuse_mode" value="1" data-landuse-role="mode" data-landuse-mode="1">
-                <select id="landuse_db" data-landuse-role="db">
+                <select id="landuse_db" name="landuse_db" data-landuse-role="db">
                     <option value="nlcd">NLCD</option>
                 </select>
-                <select id="landuse_single_selection" data-landuse-role="single-selection">
+                <select id="landuse_single_selection" name="landuse_single_selection" data-landuse-role="single-selection">
                     <option value="101">Option 101</option>
                     <option value="202">Option 202</option>
                 </select>
+                <input id="input_upload_landuse" name="input_upload_landuse" type="file" accept=".img,.tif">
+                <select id="landuse_management_mapping_selection" name="landuse_management_mapping_selection">
+                    <option value="disturbed">Disturbed</option>
+                </select>
+                <input id="checkbox_burn_shrubs" name="checkbox_burn_shrubs" type="checkbox" checked>
+                <input id="checkbox_burn_grass" name="checkbox_burn_grass" type="checkbox">
                 <button type="button" id="btn_build_landuse" data-landuse-action="build">Build</button>
             </form>
             <div id="hint_build_landuse"></div>
@@ -184,6 +190,14 @@ describe("Landuse controller", () => {
         }));
         const requestOptions = httpRequestMock.mock.calls[0][1];
         expect(requestOptions.body).toBeInstanceOf(FormData);
+        expect(Array.from(requestOptions.body.entries())).toEqual(expect.arrayContaining([
+            ["landuse_mode", "0"],
+            ["landuse_db", "nlcd"],
+            ["landuse_single_selection", "101"],
+            ["landuse_management_mapping_selection", "disturbed"],
+            ["checkbox_burn_shrubs", "on"],
+        ]));
+        expect(requestOptions.body.has("checkbox_burn_grass")).toBe(false);
         expect(baseInstance.connect_status_stream).toHaveBeenCalledWith(expect.any(Object));
         expect(baseInstance.set_rq_job_id).toHaveBeenCalledWith(landuse, "job-1");
         expect(pollCompletionValues).toEqual(["LANDUSE_BUILD_TASK_COMPLETED"]);

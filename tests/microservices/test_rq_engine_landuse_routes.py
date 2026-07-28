@@ -273,6 +273,55 @@ def test_build_landuse_disturbed_omitted_burn_fields_forwards_false_kwargs(
     assert disturbed.grouped_update_calls == [{"burn_shrubs": False, "burn_grass": False}]
 
 
+def test_build_landuse_parses_multipart_mofe_and_disturbance_fields(monkeypatch: pytest.MonkeyPatch) -> None:
+    _stub_auth(monkeypatch)
+    monkeypatch.setattr(landuse_routes, "get_wd", lambda runid: "/tmp/run")
+
+    class DummyLanduse:
+        run_group = "batch"
+        mods = {"disturbed"}
+        mode = landuse_routes.LanduseMode.Gridded
+        lc_dir = "/tmp"
+        lc_fn = "/tmp/lc.tif"
+
+        def __init__(self) -> None:
+            self.payloads: list[object] = []
+
+        def parse_inputs(self, payload) -> None:
+            self.payloads.append(payload)
+
+    class DummyDisturbed:
+        def __init__(self) -> None:
+            self.grouped_update_calls: list[dict[str, bool]] = []
+
+        def apply_build_landuse_updates(self, **kwargs) -> None:
+            self.grouped_update_calls.append(kwargs)
+
+    landuse = DummyLanduse()
+    disturbed = DummyDisturbed()
+    monkeypatch.setattr(landuse_routes.Landuse, "getInstance", lambda wd: landuse)
+    monkeypatch.setattr(landuse_routes.Disturbed, "getInstance", lambda wd: disturbed)
+
+    with TestClient(rq_engine.app) as client:
+        response = client.post(
+            "/api/runs/run-1/cfg/build-landuse",
+            data={
+                "mofe_buffer_selection": "42",
+                "checkbox_burn_shrubs": "on",
+                "checkbox_burn_grass": "false",
+            },
+        )
+
+    assert response.status_code == 200
+    assert response.json() == {"message": "Set landuse inputs for batch processing"}
+    assert landuse.payloads == [{
+        "mofe_buffer_selection": "42",
+        "checkbox_burn_shrubs": True,
+        "checkbox_burn_grass": False,
+    }]
+    assert disturbed.grouped_update_calls == [{"burn_shrubs": True, "burn_grass": False}]
+
+
 def test_build_landuse_maps_nodb_lock_conflict_from_parse_inputs(
     monkeypatch: pytest.MonkeyPatch,
 ) -> None:
