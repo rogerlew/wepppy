@@ -51,6 +51,8 @@ generator, manifest, or new CI system.
   existing browser/RQ-engine evidence passed without repair.
 - [x] (2026-07-28 UTC) Executed DOM-15; actual privileged lifecycle rendering
   and existing browser/auth/RQ-engine evidence passed without repair.
+- [x] (2026-07-28 UTC) Executed DOM-16; actual export-form rendering and
+  existing browser/RQ-engine evidence passed without repair.
 - [ ] Execute all remaining run-domain packages in the dependency-aware order.
 - [ ] Resolve each encountered hold through its owning package or a bounded
   operator decision.
@@ -143,6 +145,9 @@ sweep and docs lint passed.
 DOM-15: no mismatch and no production patch. Added Bootstrap privileged
 lifecycle render evidence; 132 focused Python tests, 2 Bootstrap Jest tests,
 lint, and docs lint passed.
+
+DOM-16: no mismatch and no production patch. Added actual DSS export form
+evidence; 92 focused Python tests, 11 DSS Jest tests, lint, and docs lint passed.
 
 ## Context and Orientation
 

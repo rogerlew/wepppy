@@ -1953,6 +1953,15 @@ def test_bootstrap_control_renders_privileged_lifecycle_contract(jinja_env: Envi
         assert marker in rendered
 
 
+def test_dss_export_control_renders_mode_and_enqueue_contract(jinja_env: Environment) -> None:
+    template = jinja_env.get_template("controls/dss_export_pure.htm")
+    rendered = template.render(
+        wepp=SimpleNamespace(dss_export_mode=2, dss_start_date="01/01/1", dss_end_date="", dss_export_channel_ids=[12], dss_excluded_channel_orders=[2, 4])
+    )
+    for marker in ('name="dss_export_mode"', 'name="dss_export_channel_ids"', 'name="dss_export_exclude_order_2"', 'data-action="dss-export-run"', 'id="hint_export_dss"'):
+        assert marker in rendered
+
+
 def test_run_header_includes_features_export_mod_toggle(jinja_env: Environment) -> None:
     template = jinja_env.get_template("header/_run_header_fixed.htm")
     auth_user = SimpleNamespace(has_role=lambda role: False, roles=[], is_authenticated=True)
