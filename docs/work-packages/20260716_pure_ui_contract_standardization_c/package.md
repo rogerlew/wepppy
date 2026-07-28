@@ -11,27 +11,28 @@ distributed among source code, migration-era inventories, archived plans, and
 module READMEs. That drift allowed a rendered field name to diverge from the
 server parser without a contract test detecting it.
 
-This package establishes the governance, standard, inventory, and iterative
-execution protocol for auditing every Pure UI controller. It is an umbrella
-package: implementation proceeds through bounded child work packages, each of
-which produces current canonical documentation, regression evidence, and two
-independent review dispositions.
+This package maintains the inventory and the one-controller execution protocol.
+Each child writes tests against actual rendered and downstream behavior,
+repairs confirmed mismatches minimally, and retains the regression coverage
+before the next controller begins. Tooling is extracted only from repeated test
+work.
 
 ## Objectives
 
-- Define one canonical, evidence-backed documentation schema for a Pure UI
-  controller's complete browser-to-persistence contract.
+- Define a concise test convention for a controller's rendered-to-persistence
+  contract.
 - Establish a complete, versioned register of Pure UI controllers and supporting
   components, including explicit inclusions, exclusions, owners, and audit state.
 - Make every included register row a binding contractual obligation immediately;
   track implementation evidence separately from scope.
 - Execute bounded child work packages until every in-scope controller has a
   current canonical contract and contract-focused regression coverage.
-- Require the accepted contract-decision checkpoint and ancestor revision before
-  intended changes to templates, controllers, routes, NoDb inputs, RQ behavior,
-  or persisted state; keep implementation evidence and supporting docs together.
-- Require two independent subagent reviews and a finding-disposition artifact
-  for the umbrella package and every child work package.
+- Write actual-render and focused downstream tests before patching confirmed
+  mismatches when practical.
+- Keep production patches small, backward-compatible, and free of unrelated
+  cleanup or redesign.
+- Extract test helpers only after repeated controller tests demonstrate that
+  they improve clarity and accuracy.
 - Register operator-authorized bounded remediation packages without treating
   borrowed future owner packages as executed or dependency-complete.
 
@@ -49,13 +50,12 @@ independent review dispositions.
 - Current tests and missing regression tests for the documented contract.
 - Shared Pure controller infrastructure when it defines a cross-controller
   contract, documented once and referenced by domain contracts.
-- Canonical documentation under `docs/ui-docs/contracts/`, a coverage register,
-  and maintenance guidance in the nearest developer documentation.
+- Concise controller contract/field matrices, the reviewed inventory, and
+  maintenance guidance in the nearest developer documentation.
 - Child work packages that correct confirmed contract defects discovered by an
   audit, provided each correction stays within the audited controller boundary.
-- Bounded cross-owner remediation packages ratified through GOV-00A when a
-  concrete production defect spans planned owners before their normal
-  dependency order is complete.
+- Existing bounded remediation history; future controller work uses the ordinary
+  one-controller test loop unless the operator explicitly broadens scope.
 
 ### Explicitly Out of Scope
 
@@ -68,6 +68,9 @@ independent review dispositions.
   rules as part of a documentation audit.
 - Broad route, queue, or NoDb refactors merely because an audit finds an awkward
   but internally consistent interface.
+- Machine obligation registries, generated contract indexes, source/test
+  manifests, change classifiers, consumer dependency engines, attestations, or
+  new CI workflows without measured need and explicit operator approval.
 - `wepppy/weppcloud/routes/usersum/generated/docs_index.json`, which remains an
   ignored generated artifact unless separately requested.
 
@@ -75,24 +78,23 @@ independent review dispositions.
 
 - **Fidelity target**: `contract-first conformance audit`
 - **Normative authority paths**: applicable current canonical shared/cross-
-  cutting contracts and each domain path registered by GOV-00A; until a domain
-  contract is ratified, its registered child package records operator-approved
-  intent and may not infer it from implementation
+  cutting contracts plus the concise intent/field matrix recorded by the
+  controller package; intent may not be inferred from implementation
 - **Implementation evidence paths**: `wepppy/weppcloud/templates/`,
   `wepppy/weppcloud/controllers_js/`, paired WEPPcloud/rq-engine routes, NoDb
   controllers, RQ workers, and focused tests are authoritative only for observed
   behavior and conformance evidence; they cannot define intended behavior
-- **Cutover proof required**: every canonical contract is linked from the
-  coverage register and is backed by an automated rendered-template or request
-  boundary test for its risk-bearing fields; documentation-only source reading
-  is not sufficient for a completed audit.
+- **Cutover proof required**: every completed controller has automated
+  actual-render and applicable downstream tests for risk-bearing fields;
+  documentation-only source reading is insufficient.
 - **Acceptance evidence type**: `both`
 
 ## Stakeholders
 
 - **Primary**: WEPPcloud frontend, NoDb, and rq-engine maintainers
-- **Reviewers**: two independent subagents per package: one contract/code
-  reviewer and one regression/QA reviewer
+- **Reviewers**: one independent correctness reviewer for a production patch; a
+  second review only for high-risk behavior changes, material shared fan-out,
+  or explicit operator request
 - **Security Reviewer**: assigned by a child package when its audit remediation
   changes a high-impact surface
 - **Informed**: forest and production operators, domain-controller owners
@@ -106,11 +108,9 @@ test execution, and independent review. The primary agent remains responsible
 for scope control, shared-worktree coordination, evidence verification, finding
 disposition, and all final claims.
 
-Every package must record each dispatch in its tracker with the agent or role,
-bounded task, edit authority, and outcome. At least two reviewers must be
-independent of the authoring agent and of one another. Review agents are
-read-only unless the primary agent explicitly reassigns a finding for
-implementation; an agent that implements a finding cannot approve its own fix.
+Every package records any dispatch in its tracker with the bounded task, edit
+authority, and outcome. Reviewers remain independent of the production patch
+they review; an implementer cannot approve their own fix.
 
 This authority does not authorize scope expansion, branch creation/switching,
 commits or pushes, deployment, production mutation, secret access, destructive
@@ -120,24 +120,22 @@ repository gates permit it.
 
 ## Success Criteria
 
-- [ ] `docs/ui-docs/contracts/README.md` defines the canonical schema, derived
-  published reader index, evidence levels, ownership rules, and contract-first
-  checkpoint policy without becoming a competing status authority.
+- [ ] The reusable prompt defines the concise one-controller, tests-first loop
+  and its simplicity budget.
 - [ ] The audit register contains every in-scope Pure UI controller and every
   shared component that can alter a submitted or hydrated value; exclusions
   include a rationale and evidence path.
-- [ ] Every in-scope controller reaches `verified` status through a closed child
-  work package and a canonical contract under `docs/ui-docs/contracts/`.
+- [ ] Every in-scope controller reaches `verified` through a closed child
+  package with retained executable regression coverage.
 - [ ] Each verified contract traces rendered DOM names/ids through JavaScript,
   request parsing, server mutation, persisted state, reload behavior, events,
   errors, and relevant RQ completion behavior.
 - [ ] Risk-bearing field names, enum selectors, disabled/hidden semantics, and
   legacy aliases have automated contract-focused regression coverage.
-- [ ] A source-to-contract manifest maps every controller and shared producer to
-  its contracts and contract tests; a change-aware gate rejects unmaintained
-  source changes or requires an independently reviewed no-impact attestation.
-- [ ] Every child package contains two raw independent review artifacts plus a
-  primary-agent disposition artifact with no unresolved high/medium findings.
+- [ ] Tooling remains test-only, stateless, extracted from repetition, and
+  smaller than the controller tests using it.
+- [ ] Production patches have required correctness/security review with no
+  unresolved high/medium findings.
 - [ ] Coverage and documentation lint checks pass, controller bundles rebuild
   when source changes, and relevant frontend/backend test gates pass.
 - [ ] `controllers_js/AGENTS.md`, `controllers_js/README.md`, and affected domain
@@ -183,13 +181,11 @@ parameterization behavior.
 
 ## Timeline Estimate
 
-- **Expected duration**: 18-32 serial weeks for GOV-00, GOV-00A, SHR-01 through
-  SHR-04B, the WATAR pilot, and maintenance gate; 24-36 months for all 72 execution units
-  with one authoring package active at a time, or roughly 12-20 months with
-  separately authorized isolated worktrees and at most two disjoint writers
-  after the shared foundation
-- **Complexity**: High
-- **Risk level**: Medium
+- **Expected duration**: measured one controller at a time; reassess after five
+  completed controllers rather than projecting from inventory size
+- **Complexity**: Low per iteration
+- **Risk level**: Low when tests precede minimal compatible patches; re-triage
+  actual security or parameterization changes
 
 ## Security Impact and Review Gate
 
@@ -209,13 +205,10 @@ and RQ boundaries and may uncover mismatches whose repair affects live projects.
 The highest regression risk is making stale prose look authoritative or fixing
 one layer without proving end-to-end propagation.
 
-Mitigation is structural: preserve current behavior until a mismatch is proven;
-capture rendered request evidence before editing; use one bounded controller or
-cohesive low-risk family per child package; add the exact failing regression;
-verify persisted and reloaded state; require two independent reviews; and keep
-deployment outside the package unless separately authorized. These controls
-reduce risk materially but do not make it zero, especially for configuration-
-specific controls and legacy aliases exercised only by old saved runs.
+Mitigation is direct: test actual rendered markup, reproduce a mismatch before
+repair when practical, patch only that mismatch, preserve compatibility, run
+focused tests before existing broad gates, and review actual production changes.
+Stop-loss rules prevent test tooling from becoming a second product.
 
 ## References
 
@@ -230,16 +223,11 @@ specific controls and legacy aliases exercised only by old saved runs.
 ## Deliverables
 
 - Active umbrella ExecPlan and reusable child-package audit prompt.
-- Auditable controller coverage register plus the stable 71-unit execution
-  register and status; GOV-00 is this umbrella, GOV-00A is the active
-  ratification child, and the other 69 dated package directories are created
-  only when started.
-- `docs/ui-docs/contracts/contract-obligations.json` as the sole machine
-  obligation/evidence-summary authority after GOV-00A ratification.
-- Canonical Pure UI contract standard/coverage index and per-controller
-  contracts.
-- Source-to-contract manifest and change-aware maintenance gate.
-- Focused regression tests and review dispositions produced by child packages.
+- Auditable controller inventory and one-at-a-time execution status.
+- Concise controller contract/field matrices.
+- Actual-render and focused downstream regression tests.
+- Minimal confirmed mismatch repairs and proportional review evidence.
+- Five-controller value assessment before any maintenance-tooling proposal.
 
 ## Follow-up Work
 

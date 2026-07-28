@@ -6,9 +6,9 @@
 
 **Timezone**: UTC
 **Started**: 2026-07-17 01:48 UTC
-**Current phase**: Milestone 1 - canonical schema ratification
-**Last updated**: 2026-07-28 06:10 UTC
-**Next milestone**: Continue the canonical schema, template, and obligation registry.
+**Current phase**: Concise controller test convention
+**Last updated**: 2026-07-28 UTC
+**Next milestone**: Publish the minimal convention and unblock DOM-01 WATAR/Ash.
 **Security impact**: `none`
 **Dedicated security review**: `no`
 **Security artifact**: N/A
@@ -17,17 +17,15 @@
 
 ### Ready / Backlog
 
-- [ ] Ratify authority hierarchy and three-dimension lifecycle vocabulary.
-- [ ] Publish the canonical schema, contract template, and derived reader index.
-- [ ] Add `contract-obligations.json` and deterministic positive/negative
-  governance validation.
-- [ ] Reconcile umbrella, developer, and historical-authority links.
-- [ ] Complete implementation reviews, disposition, and closeout.
+- [ ] Publish the concise one-controller test convention.
+- [ ] Reconcile current umbrella, register, prompt, and developer guidance.
+- [ ] Validate docs and complete one proportional independent review.
+- [ ] Close GOV-00A and begin DOM-01.
 
 ### In Progress
 
-- [ ] Complete Milestone 1 canonical README and obligation registry after the
-  contract-first agent-governance slice.
+- [ ] Remove current-authority requirements for the rejected registry,
+  manifest, change-aware gate, and shared prerequisite spine.
 - [x] Complete GOV-00A-M1E/REM-05 checkpoint review and standalone ancestor
   `44d3b93c8e3bc7d5e89151cbb9677db374411c53`.
 
@@ -72,6 +70,9 @@
 - [x] Dispositioned two high/three medium authority findings and two high/four
   medium regression findings; both reviewers confirmed closure-ready with no
   remaining high/medium findings (2026-07-17 04:01 UTC).
+- [x] Replaced the registry/enforcement architecture with the operator-directed
+  one-controller tests-first loop; removed seven speculative scaffolds and made
+  GOV-01 a deferred value evaluation (2026-07-28 UTC).
 
 ## Dispatch Log
 
@@ -96,6 +97,20 @@
   governance execution began.
 
 ## Decisions Log
+
+### 2026-07-28 UTC: Replace platform ratification with a test convention
+
+**Context**: The proposed registry/enforcement architecture reproduced the
+TESTGATE pattern: substantial governance machinery preceded the first useful
+controller regression test.
+
+**Decision**: GOV-00A publishes only the concise one-controller tests-first
+convention. It does not create an obligation registry, generated index,
+manifest, change classifier, consumer graph, attestation, or CI workflow.
+
+**Impact**: DOM-01 begins after the convention closes. Shared packages do not
+block it. GOV-01 requires five-controller measured evidence and explicit
+operator approval.
 
 ### 2026-07-20 21:23 UTC: Register bounded cross-owner remediation
 
@@ -186,6 +201,9 @@ schema before they can produce canonical contracts.
 **Impact**: Shared foundations and WATAR cannot claim contract completion
 against an unratified vocabulary.
 
+**Superseded**: On 2026-07-28, shared packages ceased to be prerequisites.
+GOV-00A now publishes only the concise test convention needed by DOM-01.
+
 ### 2026-07-17: Contracts precede implementation
 
 **Context**: A same-change documentation rule does not prevent an agent from
@@ -205,12 +223,12 @@ before new UI-coupled RQ behavior is introduced.
 
 | Risk | Severity | Likelihood | Mitigation | Status |
 | --- | --- | --- | --- | --- |
-| `unverified` is treated as optional | High | Medium | Binding `contractual` axis, negative validation, review examples | Open |
-| Reader index becomes competing authority | High | Medium | Make it derived; ledger/manifest/domain files retain named authority | Open |
-| Schema is too vague for later automation | High | Medium | Exact fields, fixtures, negative tests, GOV-01 handoff | Open |
-| Ratification expands into controller audits | Medium | Medium | Documentation/governance-only scope; domain evidence stays in registered children | Mitigated |
+| `unverified` is treated as optional | High | Medium | Binding inventory plus sequential controller tracker | Open |
+| Convention grows into a platform | High | Medium | Explicit exclusions, simplicity budget, stop-loss rules | Open |
+| Test convention is too vague | High | Medium | Exact rendered/downstream seam and DOM-01 proof | Open |
+| Ratification expands into controller audits | Medium | Medium | DOM-01 owns the first controller evidence | Mitigated |
 | Historical docs retain current-authority wording | Medium | High | Source/reference inventory and explicit redirect policy | Open |
-| Code is edited before intent is ratified | High | Medium | Finite authority, ancestor checkpoint, manual dual review, future GOV-01 enforcement | Mitigated; governance slice reviewed |
+| Code is edited before intent is known | High | Medium | Establish concise intent, tests first, stop on ambiguity | Mitigated |
 
 ## Verification Checklist
 
@@ -225,12 +243,11 @@ before new UI-coupled RQ behavior is introduced.
 ### Package Closeout
 
 - [ ] All included rows are contractual; no included `candidate` status remains.
-- [ ] Normative README and contract template are complete.
-- [ ] Authority and derived-index rules are deterministic.
-- [ ] Agent governance and canonical schema agree that contracts precede UI/RQ
-  implementation changes.
-- [ ] Positive/negative governance checks pass.
-- [ ] Both implementation reviews close without unresolved high/medium findings.
+- [ ] The concise one-controller test convention is current authority.
+- [ ] Actual-render and applicable downstream evidence are defined clearly.
+- [ ] Direct-assertion, helper-extraction, simplicity, and stop-loss rules agree.
+- [ ] DOM-01 has no shared-package or GOV-01 prerequisite.
+- [ ] One proportional independent review has no unresolved high/medium finding.
 - [ ] Active ExecPlan is moved to `prompts/completed/` with outcomes.
 
 ## Progress Notes
@@ -282,13 +299,36 @@ behavior changes rather than treating current code as a substitute.
 governance/package files, and `git diff --check` pass. Regression reviewer also
 reported frontend lint and 85 Jest suites / 636 tests passing.
 
+### 2026-07-28: Simplify before controller execution
+
+**Agent/Contributor**: Codex
+
+**Work completed**:
+
+- Replaced the registry/enforcement scope with the concise tests-first
+  convention.
+- Removed seven uncommitted speculative work-package scaffolds.
+- Made DOM-01 the first controller without shared/GOV-01 prerequisites.
+- Deferred tooling evaluation until five controllers provide measured evidence.
+
+**Blockers encountered**: None beyond completing current-authority
+reconciliation and proportional review.
+
+**Next steps**:
+
+- Validate and close GOV-00A.
+- Begin DOM-01 actual-render and downstream tests.
+
+**Test results**: Pending final documentation validation.
+
 ## Watch List
 
 - **Vocabulary drift**: reject reintroduction of optional-sounding included
   statuses such as `candidate`.
-- **Authority drift**: the reader index is derived, not a parallel status table.
-- **Evidence drift**: the obligation registry is the sole grade/revision summary
-  authority; promotions and demotions update it atomically with domain evidence.
+- **Platform drift**: reject new registries, manifests, indexes, change engines,
+  or workflows without measured need and explicit operator approval.
+- **Tooling drift**: helpers must emerge from repeated tests and remain smaller
+  and clearer than direct assertions.
 - **Scope drift**: controller-specific conformance evidence belongs to later
   child packages.
 - **Implementation-first drift**: reject changes that infer normative behavior

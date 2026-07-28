@@ -44,8 +44,8 @@ Coverage obligation and evidence maturity are separate axes:
   generated/runtime evidence, or tests are incomplete.
 - `documented`: a canonical normative contract exists, but one or more required
   verification gates remain incomplete.
-- `verified`: generated/runtime evidence, tests, named revision, and both
-  reviews establish the documented behavior.
+- `verified`: actual-render and applicable downstream tests plus a named
+  revision establish the documented behavior.
 
 Package execution states such as `planned`, `auditing`, and `blocked` live in
 the child-package register and trackers. They never weaken `contractual` scope.
@@ -63,14 +63,14 @@ future work. Before its evidence grade advances to `documented`, record:
 - browser/session and rq-engine endpoints;
 - NoDb or server mutation owner and RQ worker when applicable;
 - frontend/backend tests and known coverage gaps;
-- canonical contract path and child-package path;
-- source-to-contract manifest key, mapped source globs, and contract test paths;
+- concise intent/field matrix and child-package path;
+- exact actual-render and focused downstream test paths;
 - security triage, risk tier, status, last verified commit/date;
 - parent contract for helpers or an exclusion rationale.
 
-The GOV-00A ratification package standardizes these fields and publishes the
-canonical schema. Missing detail is a required-work gap owned by the registered
-package, never a reason to treat the row as non-contractual.
+GOV-00A publishes the concise test convention. Missing detail is work for the
+one-controller package, never a reason to treat the row as non-contractual or
+to create a machine registry.
 
 ## Reconciled Coverage Ledger
 
@@ -120,10 +120,10 @@ explicit planning assertion to verify, not permission to omit reload evidence.
 | `pathCe` / DOM-28 | `C/path_ce.js`; `T/path_cost_effective_pure.htm` | `R/nodb_api/path_ce_bp.py`, PathCostEffective; `path_ce_rq.py` | `J/path_ce.test.js`; role/config gates; high | contractual | unverified |
 | `rusle` / DOM-29 | `C/rusle.js`; `T/rusle_pure.htm` | `R/run_0/run_0_bp.py`, Rusle; build RQ | `J/rusle.test.js`; gate/mode matrix; high | contractual | unverified |
 
-All 33 rows are `contractual / unverified`. Their future child package and
-contract paths, manifest keys/globs, endpoint/function expansion, and verified
-revision/date are mandatory ratification evidence; their absence cannot remove
-or weaken the contract obligation.
+All 33 rows are `contractual / unverified`. Their future child package, concise
+intent matrix, exact tests, endpoint/function expansion, and verified
+revision/date are controller-iteration evidence; their absence cannot remove or
+weaken the contract obligation.
 
 ### Bundled shared and standalone items
 
@@ -240,10 +240,9 @@ Each child package expands its rows into an exact matrix. At minimum:
   `subcatchments_gl.js`/`subcatchment_delineation.js` evidence ambiguity.
 - [ ] Expand rendered-template coverage beyond the current small subset in
   `tests/weppcloud/routes/test_pure_controls_render.py`.
-- [ ] Add a machine-checkable register representation only after the pilot
-  proves which metadata is stable enough to enforce.
-- [ ] Add source-to-contract/test mappings and shared-producer consumer fan-out.
-- [ ] Prove the change-aware gate fails when a mapped source changes without its
-  contract/test or a dual-reviewed no-impact attestation.
+- [ ] Execute one controller at a time and retain its actual-render and
+  applicable downstream tests.
+- [ ] After five controllers, measure mismatch yield, runtime, helper size,
+  false tooling failures, and operator effort before proposing more tooling.
 - [x] Have both independent reviewers confirm population completeness and the
   two proposed exclusions.

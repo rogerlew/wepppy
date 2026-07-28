@@ -1,244 +1,163 @@
-# Execute one Pure UI controller contract audit child package
+# Test and repair one Pure UI controller contract
 
-> **Purpose**: Reusable protocol for creating, executing, reviewing, and closing
-> one bounded child package from the umbrella audit register.
-> **Target**: Primary Codex agent with operator-authorized subagent dispatch
-> **Created**: 2026-07-16
-> **Status**: Active
+> **Purpose**: Reusable protocol for one bounded controller iteration.
+> **Target**: Primary Codex agent.
+> **Status**: Active.
 
-## Authority and Boundary
+## Boundary
 
-The operator has authorized the primary agent to dispatch subagents for bounded
-inventory, tracing, implementation, testing, and independent review within this
-initiative. Record every dispatch in the child tracker. This authority does not
-authorize scope expansion, branch creation/switching, commits or pushes,
-deployment, production mutation, secret access, destructive git operations,
-external writes/publication, or broader write ownership unless the primary
-agent explicitly assigns that bounded action and existing operator/repository
-gates permit it.
+Select exactly one controller or one inseparable controller facet from
+`artifacts/controller_audit_register.md`. The controller inventory is a backlog,
+not a dependency graph and not a reason to combine work.
 
-Select exactly one controller or a small cohesive family from
-`artifacts/controller_audit_register.md`. Do not combine unrelated controllers
-to reduce package count. A high-risk controller involving uploads, auth, public
-routes, queue wiring, or complex persisted state should receive its own package.
+One iteration must:
 
-## Required Package Creation
+1. establish intended behavior;
+2. test actual rendered and downstream seams;
+3. identify mismatches;
+4. patch only confirmed mismatches;
+5. run existing applicable gates; and
+6. retain the regression tests before moving on.
 
-Create a standard work package using `docs/work-packages/README.md` and
-`docs/prompt_templates/`. The child package must include:
+Do not build initiative-wide registries, manifests, change classifiers,
+dependency engines, attestations, or CI workflows during a controller
+iteration.
 
-- `package.md` with faithful-extraction scope, security triage, risk assessment,
-  exact controller boundary, and success criteria;
-- `tracker.md` with dispatch log, source matrix, decisions, tests, and review
-  status;
-- `prompts/active/<scope>_execplan.md` following
-  `docs/prompt_templates/codex_exec_plans.md`;
-- `artifacts/<date>_baseline_contract_evidence.md`;
-- `artifacts/<date>_contract_decision.md` with the pre-implementation checkpoint
-  required by `docs/standards/contract-first-change-standard.md`;
-- `artifacts/<date>_contract_review.md` containing the first reviewer's raw or
-  verbatim findings and identity;
-- `artifacts/<date>_regression_qa_review.md` containing the second reviewer's raw
-  or verbatim findings and identity;
-- `artifacts/<date>_review_disposition.md` owned by the primary agent;
-- a security review artifact when child triage is `high`.
+## Package Setup
 
-Add the child package to the umbrella tracker, the audit register, and
-`PROJECT_TRACKER.md` before implementation begins.
+Use the standard work-package layout:
 
-## Required Inputs
+- `package.md` for the exact controller boundary and exclusions;
+- `tracker.md` for fields, mismatches, tests, patches, runtime, and decisions;
+- one active ExecPlan; and
+- a concise contract or field matrix.
 
-Read all applicable nearest `AGENTS.md` files and at least:
+Add security or independent-review artifacts only when an actual production
+patch triggers them. Test/documentation-only work begins with security impact
+`none`.
 
-- `docs/standards/contract-first-change-standard.md`;
-- the umbrella `package.md`, `tracker.md`, active ExecPlan, and audit register;
-- `docs/ui-docs/contracts/README.md` after Milestone 1 creates it;
-- `docs/ui-docs/controller-contract.md`;
-- `wepppy/weppcloud/controllers_js/AGENTS.md` and `README.md`;
-- the controller source, Pure template/macro calls, generated host context, paired
-  browser/rq-engine routes, mutation owner, RQ worker, and focused tests;
-- historical/domain docs only as leads, never as presumed-current authority.
+## Before Production Edits
 
-## Baseline Before Editing
+Read the nearest subsystem and test instructions, then inspect:
 
-1. Record the starting commit and worktree state. Preserve unrelated changes.
-2. Render or obtain representative HTML for every relevant config gate. Record
-   the exact form id, input id, submitted name, option value, checked/disabled/
-   hidden state, and `data-*` hook for every state-changing field.
-3. Capture the controller's actual serialized FormData/JSON and request URL,
-   method, encoding, auth/session/CSRF behavior, and file handling.
-4. Trace every canonical key through route parsing and normalization, NoDb or
-   server mutation, lock/dump/invalidation, RQ handoff, persisted representation,
-   and bootstrap/reload hydration.
-5. Record current tests and demonstrate each material gap. For a confirmed bug,
-   add a failing regression before the fix when practical.
+- the actual controller source and generated/runtime relationship;
+- the actual Jinja template and relevant macro calls;
+- the route parser and normalization;
+- the persistence owner and reload/bootstrap path;
+- RQ code only for values or lifecycle behavior that reach it;
+- current focused tests; and
+- current canonical intent.
 
-Do not edit code until the baseline evidence distinguishes current behavior,
-documented intent, and confirmed mismatch. Canonical contracts are normative,
-not descriptions inferred from code. For a conformance fix, keep the contract's
-normative behavior unchanged and add regression evidence. For an intended
-behavior change, first obtain explicit operator approval, then amend every
-applicable contract with the approved behavior, rationale, compatibility impact,
-and an open discrepancy status; only then edit UI, route, NoDb, or RQ
-implementation. If intent is missing, unclear, or conflicts across contracts,
-stop and create or ratify the resolution instead of selecting behavior from code.
+For each risk-bearing field or action, record only:
 
-The contract-decision artifact records the starting implementation revision,
-applicable contracts, normative delta, rationale, compatibility/security impact,
-classification, operator decision, and both independent contract-review outcomes.
-Commit it with the contract amendments and review disposition as a standalone
-ancestor revision. Record that revision in the child tracker. Implementation
-begins only after the accepted ancestor exists. Use the standard's urgent-
-restoration path only with explicit operator authorization, unchanged intent,
-and its own committed standalone urgent ancestor before code edits.
+| Contract value | Required evidence |
+| --- | --- |
+| DOM id and submitted name | Actual rendered HTML |
+| Type, option token, default, selected/disabled/hidden state | Actual render plus focused browser behavior |
+| Serialized key/value | Focused JavaScript test |
+| Parser key/type/default/alias | Focused route test |
+| Persisted attribute and reload value | Focused NoDb/save/reload test |
+| RQ input or lifecycle | Focused worker/RQ test when applicable |
 
-Build a per-field, per-mode, and per-configuration evidence matrix. Every value
-that is submitted, hydrated, persisted, enum/file-bearing, sensitive to hidden
-or disabled state, or controls RQ execution/completion is material/risk-bearing
-by default. Excluding a value or variant requires a written rationale and both
-independent reviewers' approval. Untested material variants may be
-`documented`; they cannot be `verified`.
+If intent is missing or conflicting, stop for a bounded decision. Do not infer
+desired behavior from code.
 
-## Canonical Contract Output
+## Tests First
 
-Create or update `docs/ui-docs/contracts/<controller>.md` and its authoritative
-manifest/register metadata. Regenerate or verify the derived published reader
-entry in `docs/ui-docs/contracts/README.md`; do not hand-maintain a competing
-coverage status there. The controller file must contain:
+Write the cheapest test that crosses the suspected mismatch. Prefer:
 
-1. **Identity and scope** - user purpose, configs/mods, controller singleton,
-   source/template/route/state owners, security and risk tier.
-2. **Prerequisites and lifecycle** - bootstrap, absent-section behavior,
-   upstream readiness, dynamic loading, completion authority, reload.
-3. **DOM and interaction matrix** - ids, submitted names, types, defaults,
-   labels/units, `data-*` hooks, visibility/disabled semantics, actions.
-4. **Client state and events** - seed data, caches, capture/restore behavior,
-   emitted and consumed events, idempotence.
-5. **Transport contract** - endpoints, methods, encodings, canonical payload
-   schema, enum tokens, files, auth/session/CSRF, errors.
-6. **Server normalization and mutation** - parser/defaults, aliases and conflict
-   precedence, validation, state owner, locks/dumps, invalidation/timestamps.
-7. **RQ and outputs** - enqueue/dependencies, job hints, terminal state, error
-   propagation, produced/readiness artifacts when applicable.
-8. **Persistence and compatibility** - stored representation, old-run behavior,
-   round-trip evidence, deprecations and removal gates.
-9. **Verification** - exact tests, rendered/runtime evidence, accessibility
-   evidence where applicable, manual matrix, last verified commit and UTC date.
-10. **Discrepancy ledger** - for every mismatch, explicit `Observed`,
-    `Normative`, `Authority/rationale`, `Discrepancy status`, and `Disposition
-    evidence` fields. State `none found` only after completing the evidence
-    matrix. A material unresolved discrepancy blocks `verified`.
-11. **Known gaps** - unresolved low-risk limitations and linked follow-up work;
-    name every untested configuration and keep the contract `documented` when a
-    material variant lacks evidence.
+- actual-template render assertions over hand-authored DOM;
+- direct assertions over generic helpers;
+- focused JavaScript tests over browser orchestration when both prove the same
+  seam;
+- focused route/persistence tests over full job execution when RQ is not
+  involved; and
+- existing test commands over new runners or workflows.
 
-Reference shared invariants rather than duplicating them. If actual behavior is
-defective, label it as a defect; do not write desired behavior as if deployed.
+For a confirmed mismatch, demonstrate the regression fails before the patch
+when practical. If behavior already conforms, retain the new test and continue.
 
-## Change Discipline
+## Minimal Repair
 
-- Make the smallest change that repairs a confirmed mismatch.
-- Preserve public payload keys and persisted fields by default. Additive aliases
-  require explicit precedence, warning/deprecation behavior, and tests.
-- Do not silently accept both a canonical and legacy field with ambiguous
-  last-write-wins behavior.
-- Treat macro changes as cross-controller until all call sites are audited.
-- Do not edit generated controller bundles directly; rebuild them from source.
-- Amend the authoritative contract before implementing an intended behavior
-  change through the accepted standalone ancestor checkpoint. Keep later
-  implementation, regression evidence, and supporting documentation in the same
-  final implementation change set.
-- If parameter defaults, formulas, units, thresholds, or fallbacks would change,
-  satisfy the parameterization ADR gate before implementation.
-- Immediately repeat security triage before implementing any discovered
-  remediation. Auth/session/JWT/CSRF/OAuth, secrets, public route handlers,
-  uploads/downloads, file/path handling, queue wiring, worker subprocess/shell,
-  CI/CD permissions, deployment wiring, or external egress changes are `high` by
-  default and require the child security artifact before implementation.
-- If RQ enqueue sites or dependency edges change, update
-  `wepppy/rq/job-dependencies-catalog.md`, run `wctl check-rq-graph`, and manually
-  validate a live job tree.
+Make one small compatible repair at a time. Preserve public payload keys,
+aliases, persisted state, defaults, parameterization, authorization, upload
+handling, queue wiring, and unrelated behavior by default.
 
-## Required Regression Evidence
+Do not combine:
 
-At minimum, add or identify tests proving:
+- refactoring or cleanup;
+- visual redesign;
+- new features;
+- new defaults or compatibility policy;
+- broad shared-helper modernization; or
+- unrelated documentation rewrites.
 
-- rendered field `name` values match parser keys independently of DOM ids;
-- JavaScript emits the documented payload and enum values;
-- route parsing normalizes types, defaults, missing values, and files correctly;
-- mutation reaches the documented NoDb/server attributes;
-- persisted values survive dump/reload and rehydrate the controller where state
-  is durable;
-- legacy alias/conflict behavior is deterministic when supported;
-- RQ-backed actions expose correct enqueue and terminal/error semantics.
+Change a shared macro/helper only when a controller-local repair would be
+incorrect. First add regression coverage for the affected controller and the
+direct consumers identified by repository search. If that coverage is not
+practical, narrow or defer the shared change.
 
-Run the narrowest applicable tests during iteration, then the standard frontend
-gates for source changes:
+## Tooling Rule
 
-```bash
-wctl run-npm lint
-wctl run-npm test
-python wepppy/weppcloud/controllers_js/build_controllers_js.py
-```
+Tooling must make existing tests easier and more accurate.
 
-Run paired backend tests with `wctl run-pytest`, documentation lint for every
-changed Markdown file, `git diff --check`, broad-exception enforcement when
-production Python changes, and the full suite before package closeout unless the
-child ExecPlan documents a justified, operator-approved alternative.
+- Start with direct assertions.
+- Extract a helper only after at least two tests repeat the same logic.
+- Keep helpers stateless, test-only, and smaller than the tests using them.
+- A helper must expose the field mapping in failure messages.
+- Do not create a separate tooling package.
+- Do not add a schema, generator, registry, manifest, planner, diff engine, or
+  workflow without a measured missed defect or repeated burden and explicit
+  operator approval.
 
-## Mandatory Dual Independent Review
+## Validation
 
-After implementation and validation, dispatch two reviewers who did not author
-the changes:
+Run focused tests while iterating. After controller JavaScript changes:
 
-- **Reviewer A - contract/code**: independently trace template -> controller ->
-  transport -> parser -> mutation -> RQ/persistence and identify incorrect,
-  missing, or ambiguous contract claims.
-- **Reviewer B - regression/QA**: challenge rendered coverage, config variants,
-  hidden/disabled/absent semantics, old-run compatibility, error/completion
-  behavior, test quality, and documentation maintenance hooks.
+    wctl run-npm lint
+    wctl run-npm test
+    python wepppy/weppcloud/controllers_js/build_controllers_js.py
 
-Both reviewers are read-only. Record reviewer identities, scope, commands or
-evidence, severity, recommendation, and residual risk. The primary agent records
-every finding in the separate review disposition artifact as accepted-fixed,
-rejected-with-evidence, accepted-follow-up, or operator-accepted residual risk.
-High/medium findings must be fixed and reviewer-confirmed before closure;
-deferral requires explicit operator acceptance with an owner/date/rationale, not
-agent judgment alone. Any behavior-changing disposition reruns affected gates.
+After Python changes, run the exact affected pytest modules and the appropriate
+broader suite. Run `wctl check-rq-graph` only if enqueue sites or dependencies
+change. Run documentation lint for changed docs and `git diff --check`.
 
-## Closure Gate
+Do not run expensive RQ or full-repository gates before cheap render, syntax,
+lint, and focused contract tests.
 
-The child package is complete only when:
+## Review and Security
 
-- the canonical contract and audit-register row are `verified` at a named
-  commit/date;
-- source-to-contract manifest mappings are current, and the change-aware gate
-  confirms that mapped source and contract-test maintenance obligations are met;
-- executable evidence covers every risk-bearing field and state transition;
-- relevant tests and docs checks pass;
-- both raw/verbatim independent review artifacts, post-fix confirmations, and
-  the primary disposition are complete;
-- security review is complete when required;
-- child and umbrella trackers plus `PROJECT_TRACKER.md` are current;
-- the active child ExecPlan is moved to `prompts/completed/` with outcomes.
+- Test/documentation-only iterations need normal package review, not a
+  hypothetical high-security artifact.
+- A production patch receives one independent correctness review.
+- A dedicated security review is required only when the actual patch changes an
+  attack surface such as auth/session/CSRF, upload/path handling, protected
+  output, queue authorization, subprocess behavior, secrets, or egress.
+- A second independent review is reserved for high-risk behavior changes,
+  shared-producer patches with material fan-out, or explicit operator request.
 
-Report truthfully when config coverage, fixtures, or manual evidence is partial.
-Partial audit evidence may advance a row to `documented`; it cannot advance it
-to `verified`.
+Unresolved high/medium findings block the production patch. Review artifacts
+must remain proportional to the change.
 
-## Anti-Patterns
+## Closure
 
-- Do not copy field tables from `control-inventory.md` without re-verification.
-- Do not test only the DOM id when the browser submits the `name`.
-- Do not treat a successful enqueue as proof that values persisted or were used.
-- Do not infer saved-run compatibility from constructor defaults.
-- Do not let a reviewer edit and then approve the same fix.
-- Do not close a package with an unwritten "looks good" review.
-- Do not expand one controller audit into a general UI redesign.
+Close the controller iteration when:
 
-## Handoff Format
+- intended and observed behavior are distinguished;
+- actual-render tests cover risk-bearing field identities and state;
+- applicable serialization, parser, persistence/reload, and RQ seams are tested;
+- confirmed mismatches have minimal patches and retained regression tests;
+- focused and existing applicable broad gates pass;
+- generated assets are current when source changed;
+- required review/security gates for the actual patch are complete; and
+- runtime, mismatches, helper value, remaining gaps, and the next controller are
+  recorded.
 
-Report the child package, canonical contract, verified commit/date, tests,
-rendered/runtime evidence, both raw review artifacts and their disposition,
-security status, remaining low-risk gaps, and the next register entry recommended
-for execution.
+Do not require a machine registry or maintenance gate for closure.
+
+## Stop-Loss
+
+Stop and simplify if test tooling fails twice, metadata maintenance exceeds test
+work, a controller repair creates more governance files than product/test files,
+or a cheap deterministic failure appears after a broad test run. Continuing
+past a stop-loss requires an explicit operator decision.

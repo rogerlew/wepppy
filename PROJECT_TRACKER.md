@@ -386,8 +386,8 @@ build through job completion before review.
 
 ### Pure UI Controller Contract Standardization
 **Started**: 2026-07-16
-**Status**: Milestone 1 package register frozen; canonical contract standard next
-**Size**: 74 execution units over a multi-year umbrella; each child limited to 1-4 focused weeks
+**Status**: Simplified tests-first execution model; GOV-00A then DOM-01
+**Size**: One controller active at a time; inventory size is not a schedule
 **Owner**: Codex
 **Priority**: High
 **Link**: [docs/work-packages/20260716_pure_ui_contract_standardization_c/](docs/work-packages/20260716_pure_ui_contract_standardization_c/)
@@ -396,33 +396,37 @@ build through job completion before review.
 **Current Status**:
 - Initial package, active ExecPlan, audit register, and reusable child-package prompt are authored.
 - Production reconnaissance found 33 run-page bootstrap controller entries, 26 main Pure panels plus four supporting templates, 56 bundled modules, and separate route-local Pure consoles that require explicit classification.
-- The current register separates 39 run-domain, 9 shared-foundation, 19 non-run/stateful, 4 governance, and 2 bounded-remediation execution units. GOV-00 is the existing umbrella, GOV-00A is the active ratification child, and 69 later directories are created only when started. The credible full-program estimate remains 24-36 months serial or 12-20 months with separately authorized isolated worktrees and at most two disjoint writers after the shared foundation.
-- The 70-unit population/boundary register passed two independent reviews with no unresolved high/medium findings. Operator clarification then made every included row immediately contractual and added GOV-00A as the 71st governance unit. REM-01 is the 72nd completed bounded remediation; REM-02 is the 73rd; REM-03 is the 74th and is blocked on GOV-00A-M1C. None advances its borrowed owner. GOV-00A Milestone 1 is active.
+- The current register separates 39 run-domain, 9 shared-foundation, 19 non-run/stateful, 4 governance, and 5 bounded-remediation inventory units. The count does not create an infrastructure milestone or projected multi-year schedule.
+- The 70-unit population/boundary register passed two independent reviews with no unresolved high/medium findings. Operator clarification then made every included row immediately contractual and added GOV-00A as the 71st governance unit; REM-01 through REM-05 bring the current register to 76 units without advancing their borrowed owners.
+- The platform-first registry/enforcement scaffold was superseded before commit or implementation. Seven speculative package directories were removed. The active [controller test roadmap](docs/work-packages/20260716_pure_ui_contract_standardization_c/artifacts/controller_contract_test_roadmap.md) requires actual-render tests, focused downstream tests, minimal mismatch patches, and existing broad gates one controller at a time.
+- [DOM-01 WATAR/Ash](docs/work-packages/20260727_watar_ui_contract_pilot/) is the first controller. Shared packages are tested when encountered, not prerequisites. GOV-01 is deferred until five-controller evidence demonstrates measured need and the operator explicitly approves a proposal.
 
-**Next Steps**: Execute GOV-00A to ratify the canonical schema and derived `docs/ui-docs/contracts/README.md`, execute SHR-01 through SHR-04B, then instantiate DOM-01 WATAR/Ash.
+**Next Steps**: Close the concise GOV-00A convention, execute DOM-01, record value/runtime/helper evidence, then select the next single controller.
 
 ---
 
 ### Pure UI Contract Ratification (GOV-00A)
 **Started**: 2026-07-16
-**Status**: Milestone 1 in progress; contract-first governance review closed
-**Size**: 2-4 focused weeks
+**Status**: Simplifying to the concise controller test convention
+**Size**: One focused documentation/review slice
 **Owner**: Codex
 **Priority**: High
 **Link**: [docs/work-packages/20260716_pure_ui_contract_ratification/](docs/work-packages/20260716_pure_ui_contract_ratification/)
-**Description**: Ratify the binding Pure UI coverage model, canonical contract schema/template, authority hierarchy, compatibility/evidence rules, and deterministic governance validation before shared-foundation and domain audits.
+**Description**: Publish the minimum convention needed to test actual rendered and downstream controller behavior, patch confirmed mismatches minimally, and extract test helpers only from demonstrated repetition.
 
 **Current Status**:
 - Every included parent-ledger row is now `contractual / unverified`; evidence maturity no longer controls whether the obligation exists.
-- Package brief, tracker, and self-contained active ExecPlan are scaffolded.
+- Package brief, tracker, and active ExecPlan now reflect the controller-first
+  simplicity budget.
 - Root and UI/RQ/NoDb agent governance now routes intended behavior changes
   through a finite canonical-authority set and accepted standalone ancestor
   checkpoint before implementation.
 - Documentation-only security triage is `none`; later behavior remediation repeats triage.
-- Two independent read-only scaffold reviews are dispositioned and both
-  reviewers confirmed closure-ready with no remaining high/medium findings.
+- Historical scaffold and remediation reviews remain preserved.
+- Obligation registries, generated indexes, manifests, change classifiers,
+  consumer graphs, attestations, and new CI workflows are out of scope.
 
-**Next Steps**: Execute authority/lifecycle ratification, publish the normative README/template/obligation registry, and add positive and negative governance checks.
+**Next Steps**: Publish and review the concise convention, reconcile current guidance, close GOV-00A, and begin DOM-01.
 
 ---
 

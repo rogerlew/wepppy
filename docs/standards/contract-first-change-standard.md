@@ -27,9 +27,11 @@ A contract is current and canonical only when it is in one of these finite sets:
    - an operator-approved contract-decision checkpoint in the registered child
      package that owns the affected Pure UI obligation.
 2. After GOV-00A registry cutover:
-   - the cross-cutting contracts above; and
-   - domain/shared contracts listed by the ratified
-     `docs/ui-docs/contracts/contract-obligations.json` registry.
+   - the cross-cutting contracts above;
+   - `docs/ui-docs/controller-contract.md`, for the tests-first controller
+     convention; and
+   - the controller-specific canonical contract or concise intent matrix cited
+     by the active registered child package.
 
 This finite-set rule is exclusive only within this standard's Pure UI/UI-coupled
 scope. Outside it, current canonical specifications explicitly named by the
@@ -84,8 +86,9 @@ If commit authority has not been granted for the child package, stop after the
 accepted checkpoint is prepared and request that authority. Do not begin
 implementation merely because the checkpoint is present in an uncommitted diff.
 
-GOV-01 change-aware enforcement must preserve this distinction. Same-change file
-presence is not evidence of contract-first ordering.
+Any future automated enforcement must preserve this distinction. GOV-01 is
+currently deferred pending measured controller-test evidence and explicit
+operator approval.
 
 ## Bounded Cross-Owner Remediation
 
@@ -132,9 +135,17 @@ close any other open GOV-00A schema, registry, template, or tooling deliverable.
 ## Conformance Fixes and Urgent Restoration
 
 When current code contradicts an unchanged canonical contract and no intent is
-changing, classify the work as a conformance fix. The checkpoint identifies the
-contract, discrepancy, starting revision, and regression plan; normative contract
-behavior remains unchanged.
+changing, classify the work as a conformance fix. Record the unchanged contract,
+discrepancy, and regression plan concisely in the controller package or tracker;
+write the failing regression before the patch when practical. A routine
+conformance fix does not require a standalone contract-decision ancestor or two
+pre-implementation reviews because no normative decision is being made.
+Normative contract behavior remains unchanged.
+
+Make the smallest compatible patch, run the applicable focused and existing
+broad tests, and obtain one independent correctness review for a production
+change. Repeat security review only when the actual patch changes an attack
+surface. Intended behavior changes still require the full checkpoint above.
 
 For an urgent service restoration, the operator may defer the two independent
 pre-implementation reviews only when the change strictly restores already-
@@ -167,8 +178,8 @@ When contracts conflict:
 5. obtain explicit operator approval and two independent reviews; and
 6. commit the disposition in the pre-implementation ancestor revision.
 
-Where conflicts are machine-representable, the GOV-00A/GOV-01 validators must
-include a negative fixture or deterministic rejection.
+Where conflicts recur in executable controller behavior, retain a regression
+test. Do not build a validator solely to encode a hypothetical conflict.
 
 ## Review and Documentation Gate
 

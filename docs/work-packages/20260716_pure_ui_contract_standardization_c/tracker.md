@@ -6,9 +6,9 @@
 
 **Timezone**: UTC
 **Started**: 2026-07-17 00:30 UTC
-**Current phase**: Milestone 1 - GOV-00A schema ratification
-**Last updated**: 2026-07-21 23:15 UTC
-**Next milestone**: Continue GOV-00A canonical schema and derived index work.
+**Current phase**: Concise test convention, then DOM-01
+**Last updated**: 2026-07-28 UTC
+**Next milestone**: Close simplified GOV-00A and execute WATAR/Ash tests.
 **Security impact**: `none` for scaffold; child packages reassess
 **Dedicated security review**: `no`
 **Security artifact**: N/A
@@ -17,16 +17,14 @@
 
 ### Ready / Backlog
 
-- [ ] Execute Milestone 1: freeze inventory and ratify the canonical contract
-  standard.
-- [ ] Create and execute the WATAR pilot child package.
-- [ ] Execute child packages in dependency/risk order.
-- [ ] Add coverage enforcement after the pilot proves the metadata contract.
+- [ ] Publish the concise one-controller test convention.
+- [ ] Execute DOM-01, then continue one controller at a time.
+- [ ] Review measured value after five controllers.
 - [ ] Consolidate or redirect stale controller documentation.
 
 ### In Progress
 
-- [ ] Execute GOV-00A and ratify the canonical contract schema.
+- [ ] Execute simplified GOV-00A and remove current platform requirements.
 - [x] Registered and dual-reviewed REM-05 under GOV-00A-M1E without advancing
   DOM-05; checkpoint ancestor
   `44d3b93c8e3bc7d5e89151cbb9677db374411c53`.
@@ -64,35 +62,39 @@
   register with no unresolved high/medium findings (2026-07-17).
 - [x] Began GOV-00A Milestone 1 by adding contract-first precedence to root and
   UI/RQ subsystem agent governance (2026-07-17; bounded review pending).
+- [x] Published the registry/enforcement roadmap and scaffolded SHR-01 through
+  SHR-04B, DOM-01, and GOV-01 with active ExecPlans and required high-security
+  review shells (2026-07-28 06:50 UTC).
+- [x] Superseded that platform-first scaffold, removed seven speculative
+  packages, retained DOM-01, and adopted the one-controller tests-first loop
+  (2026-07-28 UTC).
 
 ## Child Package Register
 
-Detailed scope, dependencies, risk, security triggers, bootstrap allocation, and
-exclusions are authoritative in
-`artifacts/child_package_register.md`. Dated package paths are assigned only when
-the corresponding stable ID starts.
+Detailed inventory, bounded scope, directly related runtime context, and state
+are maintained in `artifacts/child_package_register.md`. One controller package
+is active at a time.
 
 | Stable IDs | Package class | Count | State | Review gate |
 | --- | --- | --- | --- | --- |
 | GOV-00 | Standard/population/register foundation | 1 | auditing | In progress |
-| GOV-00A | Contract schema and lifecycle ratification | 1 | auditing | Contract-first governance reviewed; schema artifacts open |
-| DOM-01..DOM-29 (including A-D facets) | Run-domain controller packages | 39 | planned | Two independent reviews each |
-| GOV-01 | Change-aware maintenance enforcement | 1 | planned | Two independent reviews |
-| SHR-01..SHR-07 (including A/B facets) | Shared-foundation packages | 9 | planned | Two independent reviews each |
-| SURF-01..SURF-18 (including A/B facets) | Non-run/stateful Pure surfaces | 19 | planned | Two independent reviews each |
+| GOV-00A | Concise controller test convention | 1 | auditing | One proportional independent review |
+| DOM-01..DOM-29 (including A-D facets) | Run-domain controller packages | 39 | DOM-01 planned; remainder backlog | Review actual production patches |
+| GOV-01 | Maintenance-tooling value evaluation | 1 | deferred pending five-controller evidence | Explicit operator approval |
+| SHR-01..SHR-07 (including A/B facets) | Shared-foundation inventory | 9 | deferred; test when encountered | Based on actual shared patch |
+| SURF-01..SURF-18 (including A/B facets) | Non-run/stateful Pure surfaces | 19 | backlog | Review actual production patches |
 | GOV-99 | Authority cutover and closeout | 1 | planned | Two independent final reviews |
 | REM-01..REM-05 | Bounded defect remediations | 5 | mixed | Two independent reviews each |
 
-Total: 76 independently closable execution units. GOV-00 is this existing
+Total: 76 independently closable inventory boundaries. GOV-00 is this existing
 umbrella; GOV-00A is the active ratification child; REM-01 and REM-02 are
-complete, while REM-03 through REM-05 retain their recorded states. Planned
-units receive dated directories when
-started. DOM-01 is the WATAR/Ash pilot.
+complete, while REM-03 through REM-05 retain their recorded states. DOM-01 is
+the only planned controller package with a dated directory. Shared packages are
+not prerequisites, and GOV-01 has no scaffold.
 
 Every new child package must be added here and to `PROJECT_TRACKER.md` before
-implementation begins. A package is not closed merely because documentation was
-written; both independent review columns must be complete and all findings must
-be dispositioned.
+implementation begins. A package closes through executable controller evidence,
+passing applicable gates, and review proportional to any production patch.
 
 ## Dispatch Log
 
@@ -148,6 +150,35 @@ repository gates permit it.
   contracts to be authoritative and amended before intended UI/RQ code changes.
 
 ## Decisions Log
+
+### 2026-07-28 UTC: Supersede the enforcement spine
+
+**Context**: The platform scaffold created governance work before the first
+controller regression test and repeated the negative-value TESTGATE trajectory.
+
+**Decision**: Remove the seven speculative SHR/GOV-01 scaffolds. Execute one
+controller at a time, beginning with DOM-01. Extract only small test helpers from
+repeated assertions. Defer GOV-01 until five-controller measured evidence and
+explicit operator approval.
+
+**Impact**: The controller count remains inventory only. Current work is GOV-00A
+then DOM-01; no shared or enforcement platform blocks useful tests.
+
+### 2026-07-28 06:50 UTC: Scaffold the enforcement spine without starting audits
+
+**Context**: The operator requested a roadmap and work-package scaffolds for the
+Pure UI registry/enforcement scope.
+
+**Decision**: Create dated planning packages for SHR-01 through SHR-04B, DOM-01,
+and GOV-01, but retain parent state `planned` until each package's dependencies
+close and its tracker records active evidence work.
+
+**Impact**: Every enforcement-stage unit has an executable plan, explicit
+security gate, and exact path. GOV-00A remains the sole active dependency; the
+scaffolds do not consume parallel implementation WIP.
+
+**Superseded**: Reversed by the 2026-07-28 decision above before implementation
+or commit.
 
 ### 2026-07-20 21:23 UTC: Register REM-01 without advancing borrowed owners
 
@@ -252,6 +283,10 @@ approve their own fix.
 separate primary-agent disposition. Reviewer identity and post-fix confirmation
 are retained; unresolved high/medium findings block closure.
 
+**Superseded**: On 2026-07-28, routine controller test packages moved to review
+proportional to actual production risk. Historical remediation reviews remain
+valid.
+
 ### 2026-07-17 00:47 UTC: Enforce contract maintenance
 
 **Context**: A coverage check that validates only file existence and headings
@@ -268,6 +303,10 @@ consumer.
 **Impact**: The initiative enforces maintenance behavior, not merely initial
 documentation coverage.
 
+**Superseded**: On 2026-07-28, the operator deferred GOV-01 until five completed
+controllers demonstrate measured need. No manifest or change-aware gate is
+current scope.
+
 ### 2026-07-17: Freeze coverage and execution authorities separately
 
 **Context**: The initial draft could have left three editable status sources:
@@ -282,6 +321,10 @@ execution boundaries; the contracts README index is generated from the JSON.
 **Impact**: Package state, machine obligation status, detailed domain evidence,
 and the reader index have distinct owners and deterministic reconciliation.
 
+**Superseded**: On 2026-07-28, the obligation JSON and generated reader index
+were removed from current scope. The reviewed register remains human backlog
+inventory; controller tests provide conformance evidence.
+
 ### 2026-07-17: Expand and pre-split the register to 70 execution units
 
 **Context**: Independent review found omitted inherited security/account pages,
@@ -292,21 +335,21 @@ WEPP/SWAT, bootstrap/shell, and Batch boundaries.
 stateful-surface units. Give every bootstrap key one primary owner and express
 secondary work as facets/consumers.
 
-**Impact**: The plan is longer (24-36 months serial) but each unit has a
-credible four-week maximum boundary and an independent review gate.
+**Impact**: The register remains useful inventory. Its size no longer defines a
+timeline, dependency platform, or uniform review burden.
 
 ## Risks and Issues
 
 | Risk | Severity | Likelihood | Mitigation | Status |
 | --- | --- | --- | --- | --- |
 | Stale prose is promoted as authority | High | Medium | Derive contracts from rendered/runtime evidence; record verified commit/date and tests | Open |
-| Audit fixes one layer and breaks another | High | Medium | End-to-end field matrix, exact regressions, persistence/reload tests, dual review | Open |
+| Audit fixes one layer and breaks another | High | Medium | Actual-render plus applicable downstream tests; minimal patch; existing broad gates | Open |
 | Scope grows into controller redesign | Medium | High | Faithful-extraction target; confirmed mismatch only; spin off broader work | Mitigated |
 | Low-use/config-gated controls are omitted | High | Medium | Complete source-derived register with explicit exclusions and configuration evidence | Open |
-| Review becomes ceremonial | Medium | Medium | Independent roles, written findings, dispositions, and re-review after fixes | Mitigated |
+| Review becomes ceremonial | Medium | Medium | Review actual production patches proportionally; no hypothetical artifacts | Mitigated |
 | Legacy saved runs use undocumented aliases | High | Medium | Search history/tests, document aliases/conflict precedence, exercise old-state fixtures where available | Open |
-| Too many concurrent edits collide | Medium | Medium | One author per child package, read-only reviewers, bounded dispatch log, shared-worktree checks | Mitigated |
-| Source changes leave an existing contract stale | High | Medium | Source-to-contract manifest, change-aware gate, reviewed no-impact attestations, shared-helper fan-out | Open |
+| Too many concurrent edits collide | Medium | Low | One active controller package at a time | Mitigated |
+| Tooling becomes a second product | High | Medium | Direct assertions first, simplicity budget, stop-loss, five-controller value review | Open |
 
 ## Verification Checklist
 
@@ -347,12 +390,12 @@ credible four-week maximum boundary and an independent review gate.
 - [ ] Canonical standard and audit register are complete.
 - [ ] Every in-scope register row is `verified` or has an operator-approved,
   documented exclusion.
-- [ ] Every child package has two independent reviews and no unresolved
-  high/medium findings.
-- [ ] Contract coverage enforcement passes.
-- [ ] Change-aware maintenance enforcement passes against the selected base
-  revision, including shared producer fan-out.
+- [ ] Every completed controller has actual-render and applicable downstream
+  regression coverage.
+- [ ] Production patches have proportional correctness/security review with no
+  unresolved high/medium findings.
 - [ ] Required frontend, backend, and full-suite gates are recorded.
+- [ ] Five-controller value reviews show the loop remains net-positive.
 - [ ] Shared and domain documentation no longer points at missing or archived
   plans as current authority.
 - [ ] Active ExecPlan is moved to `prompts/completed/` with outcomes recorded.

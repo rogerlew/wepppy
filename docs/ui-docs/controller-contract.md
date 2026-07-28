@@ -42,6 +42,22 @@
 - Use `WCHttp` and `url_for_run()` for every in-run endpoint (`rq-engine/api/*`, `tasks/*`, `query/*`, `resources/*`). Never hardcode `/weppcloud/...` or bare paths.
 - Include `form` when posting FormData so CSRF tokens are attached automatically.
 
+### Field identity and round trip
+
+- DOM `id`, submitted `name`, option token, parser key, persisted attribute, and
+  reload value are distinct contract values. Never assume that matching one
+  proves the others.
+- Tests for template- or macro-defined controls must inspect actual rendered
+  HTML. Hand-authored Jest DOM is useful for controller logic but cannot prove
+  the production submitted name or selected/default state.
+- For each risk-bearing field, test only the downstream seams it reaches:
+  serialization, route parsing, persistence/reload, and RQ input/lifecycle where
+  applicable.
+- When a mismatch is found, retain a failing regression before the production
+  repair when practical, then make the smallest backward-compatible patch.
+- Do not combine mismatch repair with refactoring, redesign, new defaults,
+  compatibility changes, or unrelated shared-helper cleanup.
+
 ### Events
 - Expose `controller.events = WCEvents.useEventMap([...])` for internal listeners and tests.
 - Still call `controlBase.triggerEvent(...)` when legacy consumers require it, but keep new logic on the event map.
@@ -86,6 +102,15 @@
 ## Testing notes
 - Jest: stub `controlBase` with `reset_panel_state`, `set_rq_job_id`, `pushResponseStacktrace`, and `attach_status_stream`.
 - Playwright: `controller-regression` assumes stacktrace bodies exist and job hints are populated (or deliberately empty for controllers that don’t surface hints). Ensure selectors in templates match the cases listed in `static-src/tests/smoke/controller-cases.js`.
+- Work through one controller at a time. Begin with direct actual-render and
+  focused downstream assertions.
+- Extract a test helper only after at least two tests repeat the same logic. A
+  helper must be stateless, smaller than the tests using it, and make the exact
+  field mapping visible in failures.
+- Run cheap render, syntax, lint, and focused tests before existing broad
+  frontend, Python, or RQ suites.
+- Do not create a registry, manifest, change classifier, dependency engine, or
+  CI workflow merely because the controller inventory is large.
 
 Keep this contract lean—controllers and templates should stay predictable so status streaming, stacktraces, and job hints behave the same everywhere.
 

@@ -1,4 +1,4 @@
-# Pure UI Contract Ratification
+# Pure UI Controller Test Convention
 
 **Stable ID**: GOV-00A
 **Status**: Open (2026-07-17)
@@ -6,219 +6,116 @@
 
 ## Overview
 
-The Pure UI coverage register is binding, but the canonical contract schema and
-authority hierarchy are not yet published under `docs/ui-docs/contracts/`.
-This child package ratifies the rule that every included register item is
-contractual now while keeping implementation-conformance evidence on a separate
-`unverified` → `documented` → `verified` axis.
+Publish the minimum shared convention needed to test and repair Pure UI
+controllers one at a time. The convention separates intended behavior from
+observed behavior, requires actual rendered evidence, and keeps tooling and
+review proportional to demonstrated controller work.
 
-Ratification prevents agents from treating incomplete evidence as permission to
-ignore a controller. It also gives every later domain package one standard for
-DOM fields, payloads, route normalization, persistence, RQ behavior, reload,
-compatibility, security, and review evidence.
-
-Canonical domain and repository contracts are normative authority. UI, route,
-worker, and test code is conformance evidence. An intended behavior change must
-amend every applicable contract before implementation begins; restoring code to
-an existing contract does not rewrite the contract's normative behavior.
+Earlier GOV-00A remediation milestones remain historical authority for REM-01
+through REM-05. They do not require the rejected registry/enforcement platform.
 
 ## Objectives
 
-- Publish a normative Pure UI contract schema and authority hierarchy.
-- Make `contractual` the binding status for every included coverage row.
-- Separate contractual scope, evidence grade, and package execution state.
-- Ratify contract-first sequencing for UI, WEPPcloud/rq-engine route, and RQ
-  worker changes.
-- Provide one reusable canonical contract template and derived reader-index
-  policy.
-- Ratify compatibility, discrepancy, security, and dual-review requirements
-  before shared-foundation and domain audits begin.
-- Ratify a bounded cross-owner remediation mechanism for finite production
-  defects discovered before the normal domain dependency spine is complete.
+- Define the risk-bearing field/action values a controller test records.
+- Require actual Jinja render coverage where templates or macros define fields.
+- Require only the downstream tests applicable to a value.
+- Establish tests-first, minimal, backward-compatible mismatch repair.
+- Define a strict simplicity budget for reusable test helpers.
+- Unblock DOM-01 without shared-foundation or GOV-01 prerequisites.
 
 ## Scope
 
 ### Included
 
-- `docs/ui-docs/contracts/README.md` as the normative schema, lifecycle policy,
-  and derived reader index.
-- `docs/ui-docs/contracts/_contract_template.md` as the reusable template.
-- `docs/ui-docs/contracts/contract-obligations.json` as the sole machine
-  authority for obligation scope, execution owner, evidence grade, canonical
-  contract path, and verified revision/date summary.
-- `tools/ui_contract_ratification.py` with `check` and `write-index` commands,
-  plus `tests/tools/test_ui_contract_ratification.py` and fixtures under
-  `tests/fixtures/ui_contract_ratification/`.
-- `docs/standards/contract-first-change-standard.md` as immediate contract-first
-  governance, including the finite pre-cutover authority set, checkpoint, and
-  bounded cross-owner remediation rules.
-- Targeted updates to the finite authority set:
-  `docs/ui-docs/controller-contract.md`, `docs/ui-docs/README.md`,
-  `wepppy/weppcloud/controllers_js/README.md`,
-  `AGENTS.md`, `wepppy/weppcloud/AGENTS.md`,
-  `wepppy/weppcloud/controllers_js/AGENTS.md`,
-  `wepppy/microservices/rq_engine/AGENTS.md`, `wepppy/nodb/AGENTS.md`,
-  `wepppy/rq/AGENTS.md`, the parent package/ledger/register/ExecPlan/tracker, this child package, and
-  `PROJECT_TRACKER.md`.
-- Reconciliation of the umbrella coverage ledger, execution register, child
-  prompt, and future manifest specification with the ratified vocabulary.
-- Deterministic documentation/schema checks appropriate to a governance-only
-  package.
-- Two independent read-only reviews and a primary disposition with post-fix
-  confirmation.
+- A concise convention in `docs/ui-docs/controller-contract.md` or one small
+  linked current-authority document.
+- Reconciliation of the umbrella roadmap, child prompt, register, tracker,
+  active ExecPlan, and `PROJECT_TRACKER.md`.
+- Preservation of completed REM-01 through REM-05 governance history.
+- Documentation validation and one proportional independent review.
 
 ### Explicitly Out of Scope
 
-- Auditing or verifying any one domain controller's complete runtime behavior.
-- Implementing GOV-01's change-aware source/contract/test enforcement.
-- Editing controller JavaScript, templates, routes, NoDb state, RQ workers, or
-  generated bundles.
-- Changing UI behavior, model parameters, defaults, units, formulas, or
-  compatibility aliases.
-- Deploying to forest or production.
+- `contract-obligations.json`.
+- Generated contract indexes.
+- Source/contract/test manifests.
+- Base-revision diff or change-classification engines.
+- Shared-consumer dependency graphs.
+- No-impact attestations or machine ancestry checks.
+- New CI workflows, receipts, recovery, or attestation systems.
+- Auditing or patching a controller; DOM-01 performs the first iteration.
 
-## Implementation Fidelity and Evidence
+## Controller Test Convention
 
-- **Fidelity target**: `faithful extraction` of the operator-approved governance
-  contract and existing repository invariants
-- **Normative governance authority paths**:
-  `docs/standards/contract-first-change-standard.md`, this active package, and
-  the parent contractual/execution registers
-- **Schema evidence paths**: `docs/ui-docs/controller-contract.md` for shared
-  invariants and Pure controller/template sources as representational examples;
-  neither source code nor historical prose defines domain intent
-- **Cutover proof required**: every enumerated obligation has exactly
-  `contract_scope="contractual"`, one allowed evidence grade, and one registered
-  execution owner in `contract-obligations.json`; current documentation points
-  to the ratified authority; deterministic positive/negative checks and both
-  reviews pass
-- **Acceptance evidence type**: `both` repository-source reconciliation and
-  executable documentation/schema validation
+For each risk-bearing field or action, record only applicable values:
 
-## Stakeholders
+- intended DOM id, submitted name, type, token, and default/state;
+- parser key/type/default/alias;
+- persisted attribute and reload value;
+- RQ input or lifecycle only when the value reaches RQ; and
+- exact actual-render and focused downstream tests.
 
-- **Primary**: WEPPcloud frontend, route, NoDb, and RQ maintainers
-- **Reviewers**: two independent subagents, one contract/authority reviewer and
-  one regression/maintainability reviewer
-- **Security Reviewer**: not required for this documentation-only package;
-  later remediation packages repeat security triage
-- **Informed**: forest and production operators and domain-controller owners
+Tests precede production repair when practical. Each confirmed mismatch receives
+the smallest compatible patch. Shared code changes require direct-consumer
+coverage; otherwise they are narrowed or deferred.
 
-## Operator-Authorized Subagent Dispatch
+## Tooling and Value Rules
 
-The operator's umbrella authorization applies to bounded inventory, drafting,
-validation, and independent review for GOV-00A. The primary agent records every
-dispatch in `tracker.md`, owns integration and disposition, and does not infer
-deployment, production mutation, branch creation, external publication, or
-secret access. Reviewers remain read-only and independent unless explicitly
-reassigned; an implementer cannot approve their own work.
+- Direct assertions first.
+- Extract a helper after at least two repeated tests.
+- Helpers are stateless, test-only, smaller than the tests using them, and
+  expose field mappings in failures.
+- No separate tooling package.
+- Review value after five controllers using mismatches found, regression
+  sensitivity, runtime, helper size, false tooling failures, and operator time.
+- GOV-01 remains deferred without measured need and explicit approval.
 
 ## Success Criteria
 
-- [ ] Every included coverage row is normatively `contractual`; missing evidence
-  is represented only by its evidence grade.
-- [ ] `docs/ui-docs/contracts/README.md` defines authority, required sections,
-  lifecycle, compatibility, security, review, and derived-index policy.
-- [ ] A canonical contract template distinguishes DOM id, submitted name,
-  labels, enum tokens, parser keys, persisted attributes, and reload values.
-- [ ] The standard defines absent/hidden/disabled/unchecked/file semantics,
-  aliases/conflict precedence, RQ completion/error behavior, and configuration
-  evidence.
-- [ ] `docs/ui-docs/controller-contract.md`, umbrella artifacts, child prompt,
-  and tracker links agree with the ratified authority.
-- [ ] Agent governance requires contract identification before implementation,
-  contract amendment before intended behavior changes, and regression evidence
-  when restoring code to an unchanged contract.
-- [ ] Intended behavior changes require an operator-approved, dual-reviewed
-  contract-decision artifact committed as an ancestor before implementation.
-- [ ] A bounded cross-owner remediation is registered, inherits the highest
-  borrowed-owner security impact, remains defect-scoped, and cannot advance or
-  bypass the borrowed owners' normal execution state.
-- [ ] Governance checks positively enumerate every obligation and require
-  contractual scope, allowed evidence grade, registered owner, and uniqueness.
-- [ ] Negative fixtures cover missing, blank, optional, improperly excluded,
-  duplicate, unknown-scope, unknown-grade, and unknown-owner records plus
-  missing required sections and derived-index drift.
-- [ ] Two independent reviews are dispositioned with no unresolved high/medium
-  findings and post-fix confirmations are recorded.
-- [ ] Canonical documentation lint and `git diff --check` pass.
-
-## Parameterization ADR Gate
-
-- **Parameterization change present**: `no`
-- **ADR required**: `no`
-- **ADR link(s)**: N/A
-- **Decision provenance captured**: `yes` — operator direction is recorded in
-  the umbrella and this package
+- [ ] Current guidance explains the one-controller loop without a registry.
+- [ ] Actual-render evidence is mandatory for template-defined fields.
+- [ ] Downstream testing is required only where the field/action applies.
+- [ ] Production patches are tests-first, minimal, and compatibility-preserving.
+- [ ] Test/documentation work begins with security impact `none`.
+- [ ] One independent correctness review applies to a production patch; extra
+  security/review gates follow actual risk.
+- [ ] Stop-loss rules and the five-controller value review are documented.
+- [ ] DOM-01 is unblocked without SHR or GOV-01 completion.
+- [ ] Documentation lint, spelling preview, references, and diff checks pass.
 
 ## Dependencies
 
-### Prerequisites
-
-- GOV-00 population and execution register:
+- **Parent**:
   `docs/work-packages/20260716_pure_ui_contract_standardization_c/`
-- Existing shared invariant document: `docs/ui-docs/controller-contract.md`
+- **Blocks**: only publication of the concise convention before DOM-01 begins.
+- **Does not block**: speculative shared packages or a maintenance platform.
 
-### Blocks
+## Security and Parameterization
 
-- SHR-01 through SHR-04B shared-foundation contract packages.
-- DOM-01 WATAR/Ash contract pilot.
-- GOV-01 change-aware maintenance gate.
+- **Security impact**: `none`; documentation and test convention only.
+- **Dedicated security review**: `no`.
+- **Parameterization change**: `no`.
 
-## Related Packages
-
-- **Parent**: `docs/work-packages/20260716_pure_ui_contract_standardization_c/`
-- **Follow-up**: SHR-01 through SHR-04B, DOM-01, and GOV-01 as registered in the
-  parent's child-package register
-- **Historical context**: `docs/work-packages/20251023_controller_modernization/`
-
-## Timeline Estimate
-
-- **Expected duration**: 2-4 focused weeks
-- **Complexity**: Medium
-- **Risk level**: Medium contract-governance risk; low repository mutation risk
-
-## Security Impact and Review Gate
-
-- **Security impact triage**: `none`
-- **Dedicated security review required**: `no`
-- **Triage rationale**: this package changes documentation, validation, and
-  governance only. It does not change an attack surface. Any later change to
-  auth/session/CSRF/CAP, public routes, uploads/downloads, files/paths, queues,
-  workers, secrets, or egress is high by default and requires re-triage.
-- **Security review artifact**: N/A
+Actual controller patches repeat security and ADR triage based on the files and
+behavior they change.
 
 ## Risk Assessment
 
-The primary risk is semantic: a vague standard could make stale prose look
-authoritative, or let `unverified` be misread as optional. The mitigation is an
-explicit three-dimension model, positive enumeration, deterministic negative
-checks, one authority hierarchy, exact contract fields, and dual independent
-review. This package deliberately
-does not claim that implementation behavior is verified; it ratifies the
-obligation and the evidence needed to make that later claim.
+The primary risk is process expansion. The simplicity budget, controller-first
+ordering, direct-assertion rule, stop-loss conditions, and measured value review
+keep governance subordinate to executable regression coverage.
 
 ## References
 
-- `docs/prompt_templates/codex_exec_plans.md`
-- `docs/work-packages/README.md`
 - `docs/ui-docs/controller-contract.md`
-- `docs/work-packages/20260716_pure_ui_contract_standardization_c/artifacts/controller_audit_register.md`
-- `docs/work-packages/20260716_pure_ui_contract_standardization_c/artifacts/child_package_register.md`
+- `docs/standards/contract-first-change-standard.md`
+- `docs/work-packages/20260716_pure_ui_contract_standardization_c/artifacts/controller_contract_test_roadmap.md`
+- `docs/work-packages/20260716_pure_ui_contract_standardization_c/prompts/active/controller_contract_audit_iteration_prompt.md`
+- `/workdir/openWEPP/docs/work-packages/20260723-testgate-incompatible-recovery-receipt-001/artifacts/testgate-trajectory-and-value-assessment.md`
 
 ## Deliverables
 
-- Active ratification ExecPlan and tracker.
-- Normative contracts README, reusable contract template, and contractual
-  obligation registry.
-- `tools/ui_contract_ratification.py`, focused tests, and isolated fixtures.
-- Ratified lifecycle/authority updates across umbrella and developer docs.
-- Deterministic governance validation evidence.
-- Two raw independent reviews and primary disposition.
-
-## Follow-up Work
-
-After ratification, execute shared-foundation packages in dependency order,
-then the DOM-01 WATAR/Ash pilot. GOV-01 implements machine-readable fan-out,
-contract-decision ancestry enforcement, and subsequent implementation-evidence
-maintenance after the pilot proves stable metadata.
+- Concise current-authority controller test convention.
+- Reconciled one-controller roadmap and child protocol.
+- DOM-01 start condition.
+- Validation and proportional review evidence.

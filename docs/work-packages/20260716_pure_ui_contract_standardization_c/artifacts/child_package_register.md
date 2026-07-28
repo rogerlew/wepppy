@@ -1,16 +1,18 @@
 # Pure UI Contract Child Package Register
 
-**Register version**: 1.2 contractual baseline
+**Register version**: 1.4 sequential controller-test execution
 **Last updated**: 2026-07-28 UTC
-**Authority**: Stable IDs define package boundaries; dated package directories
-are created only when work starts.
-**Total**: 76 execution units: 4 governance, 5 bounded remediations, 39
+**Authority**: Stable IDs define bounded inventory. They do not require a
+registry platform or make shared/governance packages prerequisites for testing
+one controller.
+**Total**: 76 inventory boundaries: 4 governance, 5 bounded remediations, 39
 run-domain, 9 shared-foundation, and 19 non-run/stateful surface packages.
 GOV-00 is the existing umbrella at
 `docs/work-packages/20260716_pure_ui_contract_standardization_c/`; GOV-00A is the
 active ratification child at
-`docs/work-packages/20260716_pure_ui_contract_ratification/`; planned entries
-receive dated directories only when started. REM-01 is the operator-authorized
+`docs/work-packages/20260716_pure_ui_contract_ratification/`; a planned entry
+receives a dated directory when it is selected as the next one-at-a-time
+package, before tests begin. REM-01 is the operator-authorized
 bounded remediation at
 `docs/work-packages/20260720_omni_mod_state_sync/`. REM-02 is the
 operator-authorized bounded remediation at
@@ -23,15 +25,17 @@ selector remediation at
 ## Boundary and Review Rules
 
 Every row is a contractually registered, independently closable boundary. Each
-package must use the reusable child-package prompt, create an active ExecPlan,
-repeat security triage, retain two raw/verbatim independent reviews, and record
-a separate primary-agent disposition with post-fix confirmation.
+controller package uses the reusable one-controller prompt and an active
+ExecPlan. Test/documentation work starts with security impact `none`; re-triage
+an actual production patch. One independent correctness review is required for
+a production patch. A second review is reserved for high-risk behavior changes,
+material shared-producer fan-out, or explicit operator request.
 
 Registration is binding now. `planned` means execution has not started; it does
 not mean the contract is optional. Evidence grades such as `unverified`,
 `documented`, and `verified` describe implementation conformance only. Removing
 or excluding a registered obligation requires explicit operator approval and
-dual independent review.
+review proportional to the change.
 
 Audit-only documentation normally starts with security impact `none`. Before a
 discovered remediation is implemented, re-triage immediately. Auth/session/
@@ -42,7 +46,8 @@ worker subprocesses, CI/deployment, secrets, tokens, and external egress are
 Split a registered package before implementation when:
 
 - more than one unrelated high-security remediation is required;
-- a shared macro/helper change fans out beyond the package's mapped consumers;
+- a shared macro/helper change cannot be covered safely through direct
+  consumers;
 - baseline and contract work cannot finish within four focused weeks;
 - separate route/state owners require independent compatibility decisions; or
 - one member cannot reach the same evidence grade as the rest of the package.
@@ -51,26 +56,27 @@ An audit may close a contract as `documented` when material evidence is missing,
 but it cannot mark that contract `verified`. The package must register the
 bounded follow-up needed to obtain the evidence.
 
-## Dependency Spine
+## Execution Model
 
-The required control-plane order is:
+Execute one controller package at a time:
 
-    GOV-00 population and register
-      -> GOV-00A contractual standard ratification
-      -> SHR-01 through SHR-04B shared foundations
-      -> DOM-01 WATAR pilot
-      -> GOV-01 change-aware maintenance gate
-      -> remaining domain/shared/surface packages
-      -> GOV-99 authority cutover and closeout
+    establish intent
+      -> render and trace actual behavior
+      -> add focused tests
+      -> reproduce mismatch
+      -> patch minimally
+      -> run existing gates
+      -> close and select the next controller
 
-Read-only reconnaissance may run ahead. The WATAR contract is not marked
-`verified` until SHR-01 through SHR-04B are complete and their conclusions are
-exercised by the pilot. Later implementation packages do not bypass the
-standard, WATAR pilot, maintenance gate, or applicable shared foundations.
-Every row after GOV-01 therefore inherits GOV-00, GOV-00A, GOV-01, and its applicable
-shared-foundation dependencies; row-level dependencies name additional ordering
-constraints. GOV-00A, SHR-01 through SHR-04B, and DOM-01 are the deliberate
-pre-GOV-01 ratification/foundation/pilot exceptions shown explicitly.
+GOV-00A supplies a concise test convention. DOM-01 WATAR/Ash is first because it
+has a known historical mismatch. Shared packages are not prerequisites: shared
+behavior is tested when a controller exposes it. GOV-01 is a deferred evaluation
+that requires measured evidence and explicit operator approval; it is not a
+gate for later controller work.
+
+The `Depends on` column records domain/runtime context worth tracing. It does
+not require completion of speculative shared or governance tooling before
+controller tests can begin.
 
 REM-01 is a second, defect-scoped pre-GOV-01 exception authorized on 2026-07-20
 under `docs/standards/contract-first-change-standard.md` section "Bounded
@@ -117,17 +123,17 @@ Dependency shorthand expands exactly as follows:
   SURF-06, SURF-07, SURF-08, SURF-09, SURF-10, SURF-11, SURF-12, SURF-13,
   SURF-14, SURF-15, SURF-16, SURF-17, SURF-18.
 
-Named sets are register metadata and must be expanded to concrete edges by the
-GOV-01 machine-readable manifest. GOV-99 is intentionally absent from all sets.
+Named sets are inventory shorthand only. No machine expansion or dependency
+engine is planned. GOV-99 is intentionally absent from all sets.
 
 ## Governance Packages
 
-| ID | Proposed slug | Scope | Depends on | Risk / expected security | State |
+| ID | Package path / proposed slug | Scope | Depends on | Risk / expected security | State |
 | --- | --- | --- | --- | --- | --- |
 | GOV-00 | Existing `20260716_pure_ui_contract_standardization_c` | Current umbrella: complete population, exclusions, contractual coverage, and frozen execution register | None | High contract risk; docs-only `none` | auditing |
-| GOV-00A | Existing `20260716_pure_ui_contract_ratification` | Ratify canonical schema, contractual/evidence axes, contract-first authority, compatibility policy, contract template, and derived reader-index rules | GOV-00 | High contract risk; docs-only `none` | auditing |
-| GOV-01 | `pure_ui_contract_maintenance_gate` | Source/contract/test manifest; full and change-aware checks; shared fan-out; reviewed no-impact attestations | GOV-00A, SHR-01..04B, DOM-01 | High regression risk; `low` unless CI/permissions change | planned |
-| GOV-99 | `pure_ui_contract_authority_cutover` | Final coverage audit, stale-link replacement, current AGENTS/README/catalog authority cutover, archived-plan labels, and umbrella closeout | GOV-00, GOV-00A, GOV-01, ALL-DOM, ALL-SHR, ALL-SURF | Medium; docs-only `none` | planned |
+| GOV-00A | Existing `20260716_pure_ui_contract_ratification` | Publish the concise one-controller tests-first convention, simplicity budget, and stop-loss rules | GOV-00 | Docs-only `none` | auditing |
+| GOV-01 | `pure_ui_contract_maintenance_gate_evaluation` | After at least five controllers, evaluate measured misses, repetition, runtime, false failures, and operator cost; add tooling only with explicit approval | Five completed controller packages and measured need | Risk determined by proposed tooling | deferred; no scaffold |
+| GOV-99 | `pure_ui_contract_authority_cutover` | Final coverage audit, stale-link replacement, current AGENTS/README/catalog authority cutover, archived-plan labels, and umbrella closeout | GOV-00, GOV-00A, ALL-DOM, ALL-SHR, ALL-SURF | Medium; docs-only `none` | planned |
 
 ## Bounded Remediation Packages
 
@@ -255,21 +261,21 @@ These packages account for all 33 production entries in
 Adjuncts that share one state/route boundary remain parented to the relevant
 domain package.
 
-| ID | Proposed slug | Bootstrap/controller scope | Primary source boundary | Depends on | Expected remediation security | State |
+| ID | Package path / proposed slug | Bootstrap/controller scope | Primary source boundary | Depends on | Expected remediation security | State |
 | --- | --- | --- | --- | --- | --- | --- |
-| DOM-01 | `watar_ui_contract_pilot` | `ash` | `ash.js`, `ash_pure.htm`, WATAR/ash route, `Ash`, `run_ash_rq` | GOV-00A, SHR-01..04B | `high`: uploads, route, queue, persisted parameters | planned |
-| DOM-02 | `project_shell_ui_contract` | `project` | `project.js`, run header, Project routes, `Ron`, SQL Run, readonly RQ; consumes SHR-05 Unitizer preferences | GOV-01, SHR-01..04B, SHR-05 | `high`: auth, readonly/public state, mutation/RQ | planned |
-| DOM-03 | `team_collaboration_ui_contract` | `team` | `team.js`, team modal/form, project/team routes, SQL ownership | GOV-01, SHR-01..04B | `high`: owner/collaborator auth mutations | planned |
-| DOM-04A | `map_orchestration_ui_contract` | `map`: orchestration, center/search/elevation/drilldown and public API | `map_gl.js`, map host, elevation/query routes; consumes SHR-01 `selection_utils.js` | GOV-01, SHR-01..04B | `low`; `high` if public query routes change | planned |
+| DOM-01 | `20260727_watar_ui_contract_pilot` | `ash` | `ash.js`, `ash_pure.htm`, WATAR/ash route, `Ash`, `run_ash_rq` | GOV-00A concise test convention | Test/docs `none`; re-triage actual patch | planned |
+| DOM-02 | `project_shell_ui_contract` | `project` | `project.js`, run header, Project routes, `Ron`, SQL Run, readonly RQ; consumes SHR-05 Unitizer preferences | SHR-01..04B, SHR-05 context | `high`: auth, readonly/public state, mutation/RQ | planned |
+| DOM-03 | `team_collaboration_ui_contract` | `team` | `team.js`, team modal/form, project/team routes, SQL ownership | SHR-01..04B context | `high`: owner/collaborator auth mutations | planned |
+| DOM-04A | `map_orchestration_ui_contract` | `map`: orchestration, center/search/elevation/drilldown and public API | `map_gl.js`, map host, elevation/query routes; consumes SHR-01 `selection_utils.js` | SHR-01..04B context | `low`; `high` if public query routes change | planned |
 | DOM-04B | `map_layers_feature_ui_contract` | `map`: layer/scale/feature UI and model visualization partials | four `map_gl_*` helpers, layer resources, legends/overlays | DOM-04A | `low`; `high` if file/resource routes change | planned |
 | DOM-05 | `channel_delineation_ui_contract` | `channel` | `channel_gl.js`, channel template, watershed routes, DEM upload/build RQ | DOM-04A | `high`: upload, route, queue/worker | planned |
 | DOM-06 | `outlet_ui_contract` | `outlet` | `outlet_gl.js`, outlet template, watershed route, `set_outlet_rq` | DOM-04A | `high`: route mutation and queue | planned |
 | DOM-07 | `subcatchment_ui_contract` | `subcatchment` | `subcatchments_gl.js`, subcatchments template, abstraction routes/RQ | DOM-04A, DOM-05, DOM-06 | `high`: route mutation and queue/worker | planned |
-| DOM-08A | `landuse_build_ui_contract` | `landuse`: modes, catalog, build/upload and reload | landuse controller/base form/routes, `Landuse`, build RQ | GOV-01, SHR-01..04B | `high`: upload, route, queue/worker | planned |
+| DOM-08A | `landuse_build_ui_contract` | `landuse`: modes, catalog, build/upload and reload | landuse controller/base form/routes, `Landuse`, build RQ | SHR-01..04B context | `high`: upload, route, queue/worker | planned |
 | DOM-08B | `landuse_catalog_editor_ui_contract` | `landuse`: user-defined catalog and map editor | user-defined/map templates and catalog/mapping routes | DOM-08A | `high`: file/catalog/mapping mutation | planned |
 | DOM-09 | `landuse_modifier_ui_contract` | `landuseModify` adjunct | `landuse_modify_gl.js`, modify template, map selection and route mutation | DOM-04A, DOM-08A | `high`: route/state mutation | planned |
-| DOM-10 | `soils_ui_contract` | `soil` | soil controller/template, soils routes, `Soils`, build RQ | GOV-01, SHR-01..04B | `high`: uploads/files, route, queue/worker | planned |
-| DOM-11A | `climate_catalog_build_ui_contract` | `climate`: catalog/station/mode/build lifecycle | climate controller/base form/routes, `Climate`, build RQ | GOV-01, SHR-01..04B | `high`: egress, route, queue/worker | planned |
+| DOM-10 | `soils_ui_contract` | `soil` | soil controller/template, soils routes, `Soils`, build RQ | SHR-01..04B context | `high`: uploads/files, route, queue/worker | planned |
+| DOM-11A | `climate_catalog_build_ui_contract` | `climate`: catalog/station/mode/build lifecycle | climate controller/base form/routes, `Climate`, build RQ | SHR-01..04B context | `high`: egress, route, queue/worker | planned |
 | DOM-11B | `climate_upload_scaling_ui_contract` | `climate`: upload, scaling, GridMET/MXPT5 and auxiliary modes | upload/aux form sections and route families | DOM-11A | `high`: upload, egress, persisted options | planned |
 | DOM-12 | `observed_ui_contract` | `observed` | observed controller/template/routes, `Observed`, Climate observed state | DOM-11A | `high` if upload/public route changes; otherwise `low` | planned |
 | DOM-13A | `agfields_boundary_schema_ui_contract` | `agFields`: boundary, schema, subfield inventory | AgFields controller/form and boundary/schema/subfield routes/state | DOM-04A, DOM-08A, DOM-10, DOM-11A | `high`: uploads and geospatial files | planned |
@@ -343,21 +349,21 @@ exceed the evidence/review boundary.
 
 ## Shared-Foundation Packages
 
-| ID | Proposed slug | Scope | Depends on | Risk / expected security | State |
+| ID | Package path / proposed slug | Scope | Depends on | Risk / expected security | State |
 | --- | --- | --- | --- | --- | --- |
-| SHR-01 | `pure_ui_dom_form_serialization_contracts` | `dom.js`, `events.js`, `forms.js`, `utils.js`, and authoritative producer ownership of `selection_utils.js`; selector, serialization, selection, submit, absent/disabled semantics | GOV-00A | High / `low` | planned |
-| SHR-02 | `pure_ui_transport_session_recorder_contracts` | `http.js`, recorder interceptor, CSRF bootstrap, session heartbeat, canonical request/error transport | SHR-01 | High / `high` | planned |
-| SHR-03A | `pure_ui_status_control_contracts` | `status_stream.js`, `control_base.js`, terminal/error mapping, duplicate-load/idempotence behavior | SHR-01, SHR-02 | High / `high` | planned |
-| SHR-03B | `pure_ui_bootstrap_observability_contracts` | `bootstrap.js`, `bootstrap_observability.js`, registry/config gates, stale/generated-bundle contract | SHR-01, SHR-02, SHR-03A | High / `high` | planned |
-| SHR-04A | `pure_ui_base_macro_shell_contracts` | `base_pure.htm`, Pure macros, shell ordering, field rendering, tabs and absent-DOM behavior | SHR-01 | High / `low` | planned |
-| SHR-04B | `pure_ui_modal_details_theme_console_contracts` | `modal.js`, `details_menu.js`, `theme.js`, authoritative `console_utils.js` ownership, console/table macros and duplicate-load behavior | SHR-01, SHR-04A | High / `low` | planned |
+| SHR-01 | `pure_ui_dom_form_serialization_contracts` | `dom.js`, `events.js`, `forms.js`, `utils.js`, and authoritative producer ownership of `selection_utils.js`; selector, serialization, selection, submit, absent/disabled semantics | Controller evidence identifying shared work | High / re-triage actual patch | deferred; test when encountered |
+| SHR-02 | `pure_ui_transport_session_recorder_contracts` | `http.js`, recorder interceptor, CSRF bootstrap, session heartbeat, canonical request/error transport | Controller evidence identifying shared work | High / re-triage actual patch | deferred; test when encountered |
+| SHR-03A | `pure_ui_status_control_contracts` | `status_stream.js`, `control_base.js`, terminal/error mapping, duplicate-load/idempotence behavior | Controller evidence identifying shared work | High / re-triage actual patch | deferred; test when encountered |
+| SHR-03B | `pure_ui_bootstrap_observability_contracts` | `bootstrap.js`, `bootstrap_observability.js`, registry/config gates, stale/generated-bundle contract | Controller evidence identifying shared work | High / re-triage actual patch | deferred; test when encountered |
+| SHR-04A | `pure_ui_base_macro_shell_contracts` | `base_pure.htm`, Pure macros, shell ordering, field rendering, tabs and absent-DOM behavior | Controller evidence identifying shared work | High / re-triage actual patch | deferred; test when encountered |
+| SHR-04B | `pure_ui_modal_details_theme_console_contracts` | `modal.js`, `details_menu.js`, `theme.js`, authoritative `console_utils.js` ownership, console/table macros and duplicate-load behavior | Controller evidence identifying shared work | High / re-triage actual patch | deferred; test when encountered |
 | SHR-05 | `pure_ui_unitizer_preferences_contract` | `unitizer_client.js`, generated map/modal, Project bridge, authenticated backend preferences and persisted round trip | SHR-01, SHR-02, SHR-04A, SHR-04B | High / `high`; ADR if conversion/default behavior changes | planned |
 | SHR-06 | `pure_ui_command_bar_contract` | Command Bar template/JS/routes, chat/token/download/commands/WebSocket/StatusStream | SHR-02, SHR-03A, SHR-03B, SHR-04A, SHR-04B | High / `high` | planned |
 | SHR-07 | `pure_ui_poweruser_panel_contract` | PowerUser panel, web push/service worker, clear-lock and recorder-promotion actions | SHR-02, SHR-04A, SHR-04B, DOM-02 | High / `high` | planned |
 
 ## Non-Run and Stateful Surface Packages
 
-| ID | Proposed slug | Scope | Depends on | Risk / expected security | State |
+| ID | Package path / proposed slug | Scope | Depends on | Risk / expected security | State |
 | --- | --- | --- | --- | --- | --- |
 | SURF-01 | `pure_ui_public_creation_cap_contract` | Interfaces/create and `locations/{joh,portland,seattle,spu}/index.htm` forms, `interfaces_captcha.js`, CAP widgets and duplicate-handler safeguards | SHR-01, SHR-02, SHR-04A, SHR-04B | High / `high` | planned |
 | SURF-02A | `pure_ui_batch_runner_creation_contract` | Batch create/manage templates, bootstrap/controller, schema and persisted run set | SHR-01..04B; `docs/work-packages/20260630_batch_runner_durability/` must be closed and name its verified closeout revision before this unit starts | High / `high` | planned |
@@ -440,24 +446,22 @@ All exclusions must be confirmed in GOV-00 by both independent reviewers.
 
 Every registered package must provide, where applicable:
 
-- exact controller/template/route/state/test matrix;
-- per-field, per-mode, and per-configuration evidence matrix;
-- rendered page DOM and actual serialized request evidence;
-- server normalization and persistence/reload or explicit statelessness proof;
-- RQ enqueue plus terminal/error evidence;
-- observed/normative discrepancy ledger and compatibility decisions;
-- source/contract/test manifest updates and change-aware gate results;
-- targeted frontend/backend tests, generated-bundle stale check where relevant,
-  and live dev/job-tree evidence for stateful or RQ packages;
-- formal security artifact when remediation crosses a high-security boundary;
-- two raw independent reviews, primary disposition, and post-fix confirmation.
+- a concise intended-versus-observed field/action matrix;
+- actual-render evidence for template-defined names, values, and state;
+- focused serialization, parser, persistence/reload, and RQ tests only where
+  those boundaries apply;
+- a failing regression for each confirmed mismatch when practical;
+- the smallest compatible production patch for each mismatch;
+- focused tests first, then existing applicable broad gates;
+- generated-bundle freshness when controller source changes;
+- security review only when the actual patch changes an attack surface; and
+- one independent correctness review for a production patch.
 
-An inapplicable acceptance item requires a written `N/A` rationale confirmed by
-both reviewers; silence does not count. Governance packages substitute
-deterministic inventory/count fixtures, manifest-schema and negative-gate tests,
-documentation/link/lifecycle checks, and dual review for runtime DOM/RQ evidence.
-An operator-accepted residual risk is recorded with owner, rationale, and date;
-it is not relabeled as a resolved review finding.
+Test/documentation-only packages do not create hypothetical security artifacts
+or dual-review files. A second independent review is reserved for high-risk
+behavior changes, material shared-producer fan-out, or explicit operator
+request. Record remaining gaps plainly without constructing N/A evidence for
+layers that do not apply.
 
 Queue-edge changes additionally require the RQ dependency catalog and
 `wctl check-rq-graph`. Parameter/default/formula/unit/fallback changes require
@@ -465,38 +469,28 @@ the parameterization ADR gate.
 
 ## Estimate and Boundary Preflight
 
-Unless listed below, a row is estimated at 1-3 focused weeks. This default plus
-the exception table gives every registered ID an explicit estimate; estimates
-are planning ranges, not deadlines.
+Each controller iteration is expected to fit one focused work package. On the
+first day, confirm:
 
-| IDs | Estimate | Required first-day boundary probe |
-| --- | --- | --- |
-| GOV-00 | 2-4 weeks | Freeze deterministic coverage ledger and exclusions |
-| GOV-00A | 2-4 weeks | Ratify binding status/evidence semantics, contract-first authority, and canonical contract schema |
-| GOV-01 | 2-4 weeks | Prove manifest schema and one negative source-drift fixture |
-| GOV-99 | 2-3 weeks | Freeze finite dependency and authority-cutover checklist |
-| DOM-04A, DOM-08A, DOM-11A, DOM-13A, DOM-13C, DOM-13D, DOM-14A, DOM-14B, DOM-14C, DOM-23, DOM-25A, DOM-25B | 2-4 weeks | Confirm one route/state owner and that every member can reach one evidence grade |
-| SHR-01, SHR-02, SHR-03A, SHR-03B, SHR-04A, SHR-04B | 2-4 weeks | Freeze producer/consumer fan-out before editing shared code or macros |
-| SURF-02A, SURF-02B, SURF-06, SURF-12, SURF-13 | 2-4 weeks | Confirm finite surface/template/route list and one security boundary |
-| All other registered IDs | 1-3 weeks | Confirm source matrix, state owner, discrepancy authority and acceptance evidence |
+- one controller or inseparable facet;
+- actual template and controller sources;
+- direct route/state/RQ owners;
+- exact focused tests;
+- risk-bearing fields/actions; and
+- exclusions preventing cleanup or redesign.
 
-The probe exits only when the matrix fits within four weeks, has one accountable
-state boundary, and has one authority for each discrepancy. Otherwise the
-package is split in this register and reviewed before implementation.
+Split or narrow the package if one controller contains multiple unrelated
+security boundaries or cannot be tested and repaired incrementally. Do not
+expand infrastructure to make a broad package appear manageable.
 
 ## Capacity and Timeline
 
-This register is deliberately finer than the original waves because independent
-upload, queue, auth, and persistence boundaries should not share one regression
-review. At 72 execution units, even an uninterrupted one-week-per-unit sequence
-has a theoretical serial floor above 18 months once foundation and review gates
-are included. A truthful serial planning range is 24-36 months. After GOV-00,
-GOV-00A, SHR-01 through SHR-04B, DOM-01, and GOV-01, separately authorized isolated
-worktrees with at most two disjoint writers have a theoretical floor near 10
-months and a more credible range of 12-20 months. Current staffing and competing
-work are not assumed in either range.
+The register size does not create an up-front schedule or infrastructure
+milestone. Execute one controller at a time and report observed duration after
+each package. After five controllers, review mismatches found, runtime, helper
+size, false tooling failures, and operator effort. Continue while the loop
+provides positive measured value.
 
-The first milestone is limited to GOV-00, GOV-00A, SHR-01 through SHR-04B,
-DOM-01, and GOV-01. Its likely duration is 18-32 serial weeks, or 14-22 weeks
-only when authorized disjoint documentation/evidence work can proceed
-concurrently. It is not the timeline for the full initiative.
+GOV-01 remains deferred unless that five-controller evidence demonstrates a
+specific miss or repeated burden that existing tests and a small helper cannot
+solve. The default is continued controller testing, not platform construction.
