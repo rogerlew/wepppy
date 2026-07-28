@@ -6,9 +6,9 @@
 
 **Timezone**: UTC
 **Started**: 2026-07-27 23:40 UTC
-**Current phase**: Contract checkpoint commit
-**Last updated**: 2026-07-28 00:45 UTC
-**Next milestone**: Record WP00 standalone checkpoint revision, then WP01
+**Current phase**: WP01 same-origin parity
+**Last updated**: 2026-07-28 00:50 UTC
+**Next milestone**: Implement WP01 against the reviewed contract
 **Security impact**: `high`
 **Dedicated security review**: `yes`
 **Security artifact**: `docs/work-packages/20260727_web_origin_guard_hardening/artifacts/<date>_security_review.md`
@@ -16,10 +16,6 @@
 ## Task Board
 
 ### Ready / Backlog
-- [ ] WP00 - Register the bounded remediation; finalize the contract decision
-  and canonical amendments; obtain dual independent checkpoint reviews;
-  disposition findings; commit and record the documentation-only ancestor
-  (`prompts/active/wp00_contract_checkpoint.prompt.md`)
 - [ ] WP01 — Same-origin guard parity: normative contract + align all three guards; query-engine gains the `Sec-Fetch-Site` fast-path (fixes the bearhive upload 403); harden forwarded-header trust and `Origin` conflict handling; shared test vectors (Codex; `prompts/active/wp01_same_origin_parity.prompt.md`)
 - [ ] WP02 — Scope reset cookie-clear targets to WEPPcloud-owned names/domains (Codex; `prompts/active/wp02_cookie_clear_scoping.prompt.md`)
 - [ ] WP03 — Allowlist-based diagnostics Copy JSON report; drop arbitrary backend error text and absolute WS hostname (Codex; `prompts/active/wp03_report_redaction_allowlist.prompt.md`)
@@ -38,6 +34,10 @@
 - [x] Package scoped and scaffolded (2026-07-27 23:40 UTC)
 - [x] WP00 governance registration, contracts, dual independent reviews, and
   disposition passed with zero unresolved findings (2026-07-28 00:45 UTC)
+- [x] Standalone documentation-only checkpoint committed as
+  `736198ce8a4b68b83a9c77860a52da574f2cc98d` (2026-07-28 00:50 UTC)
+- [x] WP00 prompt retired to
+  `prompts/completed/wp00_contract_checkpoint.prompt.md`
 
 ## Sequencing
 
@@ -46,9 +46,10 @@ only after the checkpoint revision is recorded below. WP02/WP03 are independent
 after WP01. WP04 lands last so its matrix exercises final behavior. Independent
 final security and correctness reviews follow WP01-WP04, before closure.
 
-**Checkpoint revision**: pending
+**Checkpoint revision**:
+`736198ce8a4b68b83a9c77860a52da574f2cc98d`
 
-**Bounded-remediation authority**: REM-04 / GOV-00A-M1D (checkpoint candidate)
+**Bounded-remediation authority**: REM-04 / GOV-00A-M1D (effective)
 
 ## Decisions Log
 

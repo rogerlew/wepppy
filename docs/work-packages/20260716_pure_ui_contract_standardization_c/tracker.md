@@ -51,7 +51,8 @@
   passed dual final review and broad validation, and closed the remediation
 - [x] Register and dual-review REM-04 under GOV-00A-M1D without advancing
   SURF-13, SHR-02, SHR-04A, or the excluded Diagnostics surface; standalone
-  ancestor pending (2026-07-28 00:45 UTC).
+  ancestor `736198ce8a4b68b83a9c77860a52da574f2cc98d`
+  (2026-07-28 00:50 UTC).
   without advancing DOM-02, DOM-25A, or DOM-25B (2026-07-20 22:42 UTC).
 - [x] Closed REM-02's separately ratified read-only TTL catalog presentation
   boundary after final dual review; SURF-06 remains planned and unadvanced

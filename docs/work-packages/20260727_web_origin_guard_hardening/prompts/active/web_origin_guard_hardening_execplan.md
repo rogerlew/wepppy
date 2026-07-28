@@ -22,10 +22,10 @@ Conflicting origins and cross-site requests remain rejected on every surface.
 - [x] (2026-07-27 23:40 UTC) Scoped the four implementation work packages.
 - [x] (2026-07-28 00:00 UTC) Added this umbrella ExecPlan and a contract-first
   checkpoint phase to make the package executable.
-- [x] (2026-07-28 00:45 UTC) Execute WP00: register the bounded remediation, finalize the contract
+- [x] (2026-07-28 00:50 UTC) Execute WP00: register the bounded remediation, finalize the contract
   decision and canonical contract amendments, obtain two independent reviews,
-  and disposition findings. Standalone checkpoint commit is the next atomic
-  action.
+  disposition findings, and commit standalone checkpoint ancestor
+  `736198ce8a4b68b83a9c77860a52da574f2cc98d`.
 - [ ] Execute WP01: conform all three same-origin guards and add focused tests.
 - [ ] Execute WP02: restrict reset cookie deletion to owned cookie tuples.
 - [ ] Execute WP03: make copied diagnostics reports allowlist-based.
@@ -63,7 +63,8 @@ Conflicting origins and cross-site requests remain rejected on every surface.
 ## Outcomes & Retrospective
 
 The scaffold is now executable in ordered phases. No production implementation
-has begun. WP00 contracts and reviews pass with zero findings; closure remains
+has begun. WP00 contracts and reviews pass with zero findings and are sealed by
+ancestor `736198ce8a4b68b83a9c77860a52da574f2cc98d`; closure remains
 contingent on the checkpoint ancestor, all four
 implementation work packages, full validation, and independent final review.
 
@@ -90,7 +91,7 @@ and commit those documents alone as a standalone ancestor.
 
 ## Plan of Work
 
-First execute `wp00_contract_checkpoint.prompt.md`. Do not edit production code
+First execute `../completed/wp00_contract_checkpoint.prompt.md`. Do not edit production code
 or implementation tests during WP00. Record the resulting ancestor revision in
 this plan and the tracker.
 

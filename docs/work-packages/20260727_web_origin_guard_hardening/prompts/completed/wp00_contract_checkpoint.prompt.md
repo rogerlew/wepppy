@@ -72,7 +72,8 @@ their implementation.
 
 **Completed**: 2026-07-28
 **Agent**: Codex with two independent reviewers
-**Checkpoint revision**: Pending commit; record immediately after commit
+**Checkpoint revision**:
+`736198ce8a4b68b83a9c77860a52da574f2cc98d`
 **Review artifacts**:
 `2026-07-28_checkpoint_security_governance_review.md` and
 `2026-07-28_checkpoint_correctness_compatibility_review.md`
