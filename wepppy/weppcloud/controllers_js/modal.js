@@ -15,6 +15,11 @@
 (function (global) {
     "use strict";
 
+    if (global.__wcModalManagerBound) {
+        return;
+    }
+    global.__wcModalManagerBound = true;
+
     var ACTIVE_CLASS = "is-visible";
     var BODY_ACTIVE_CLASS = "wc-modal-open";
 

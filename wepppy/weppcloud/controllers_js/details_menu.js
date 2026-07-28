@@ -5,6 +5,11 @@
     var SELECTORS = [".wc-run-header__menu", ".wc-nav__menu"];
     var bound = false;
 
+    if (global.__wcDetailsMenuBound) {
+        return;
+    }
+    global.__wcDetailsMenuBound = true;
+
     function closeMenus(target) {
         if (!doc || !doc.querySelectorAll) {
             return;

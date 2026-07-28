@@ -11,6 +11,11 @@
 (function (global) {
     "use strict";
 
+    if (global.__wcThemeSwitcherBound) {
+        return;
+    }
+    global.__wcThemeSwitcherBound = true;
+
     var STORAGE_KEY = "wc-theme";
     var SELECTOR = "[data-theme-select]";
     var root = global.document ? global.document.documentElement : null;

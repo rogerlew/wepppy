@@ -66,6 +66,9 @@ is not a contract registry or enforcement platform.
 - [x] (2026-07-28) Executed SHR-04A from measured DOM evidence, adding direct
   base and material macro-family render coverage; 105 tests pass and no
   production mismatch was found.
+- [x] (2026-07-28) Executed SHR-04B with direct modal/details/theme/console
+  JavaScript and rendered-template evidence; repaired three duplicate
+  initializers and one dropped table-page caller.
 - [ ] Close the initiative when the registered inventory has executable
   regression coverage or explicit operator-approved exclusions.
 
@@ -92,6 +95,10 @@ is not a contract registry or enforcement platform.
 
 - Observation: The same direct-assertion approach scaled to the 1,227-line
   shared macro producer without requiring a registry or production repair.
+
+- Observation: Direct duplicate-execution tests found real singleton defects
+  in three shared browser producers, and direct rendering found a nested Jinja
+  caller defect in the unused-but-contractual table macro.
 
 ## Decision Log
 
@@ -142,6 +149,14 @@ template suite and leave conforming base/macro APIs unchanged.
 **Rationale**: The 105-test suite proves exact metadata, identity, state, ARIA,
 lifecycle, structural, and empty-state output while preserving completed-DOM
 consumer behavior.
+
+### 2026-07-28: SHR-04B restores shared idempotence and table content
+
+**Decision**: Keep public APIs unchanged, add producer-local duplicate-load
+guards, and capture table-page caller content before nested macro calls.
+
+**Rationale**: These are the smallest repairs to canonical singleton behavior
+and the existing macro signature; direct regressions fail without them.
 
 ## Context and Orientation
 

@@ -6,10 +6,10 @@
 
 **Timezone**: UTC
 **Started**: 2026-07-17 00:30 UTC
-**Current phase**: SHR-04A closed; shared/non-run backlog available
+**Current phase**: SHR-04B closed; shared/non-run backlog available
 **Last updated**: 2026-07-28 UTC
 **Next milestone**: Select the next separately registered shared or non-run package.
-**Security impact**: `none` for SHR-04A; future children reassess
+**Security impact**: `none` for SHR-04B conformance repairs
 **Dedicated security review**: `no`
 **Security artifact**: N/A
 
@@ -36,6 +36,9 @@
 
 ### Done
 
+- [x] Closed SHR-04B with direct modal/details/theme/console JavaScript and
+  rendered producer evidence; repaired duplicate initialization and
+  `table_page` caller loss (2026-07-28 UTC).
 - [x] Closed SHR-04A Pure base/macro shell contracts with 105 direct producer
   and completed-DOM consumer render tests; no production mismatch or patch
   (2026-07-28 UTC).

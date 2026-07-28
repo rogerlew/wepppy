@@ -364,6 +364,103 @@ def test_pure_card_and_empty_state_macros_render_structure(jinja_env: Environmen
     assert "<em>Nothing here</em>" in rendered
 
 
+def test_shared_console_and_table_macros_render_actions_and_structure(jinja_env: Environment) -> None:
+    template = jinja_env.from_string(
+        """
+        {% import "shared/console_macros.htm" as console %}
+        {% import "shared/table_macros.htm" as tables %}
+        {% call console.console_page(data_controller="fixture-console", classes="fixture-page") %}
+          {{ console.console_header(
+            run_link="/runs/fixture/config",
+            run_label="fixture",
+            title="Console",
+            subtitle="Console subtitle",
+            actions=[
+              {"element": "button", "id": "console-refresh", "label": "Refresh",
+               "variant": "pure-button-primary", "disabled": true},
+              {"id": "console-help", "label": "Help", "href": "/help",
+               "target": "_blank", "rel": "noopener"}
+            ]
+          ) }}
+          {% call console.button_row(form_controls=true, full_width=true,
+                                     extra_class="fixture-actions") %}
+            <button id="console-submit" type="submit">Submit</button>
+          {% endcall %}
+        {% endcall %}
+        {% call tables.table_page(title="Records", data_controller="fixture-table",
+                                  classes="fixture-table-page") %}
+          {% call tables.table_panel("Results", "Result description") %}
+            <table id="fixture-table"><tbody><tr><td>ready</td></tr></tbody></table>
+          {% endcall %}
+        {% endcall %}
+        """
+    )
+    rendered = template.render()
+
+    for token in (
+        'data-controller="fixture-console"',
+        "fixture-page",
+        'href="/runs/fixture/config"',
+        'target="_blank"',
+        'rel="noopener"',
+        "Console subtitle",
+        'id="console-refresh"',
+        "pure-button-primary",
+        "disabled",
+        'id="console-help"',
+        'href="/help"',
+        "wc-controls-left",
+        "wc-button-row--full",
+        "fixture-actions",
+        'id="console-submit"',
+        'data-controller="fixture-table"',
+        "wc-table-page",
+        "fixture-table-page",
+        "wc-table-wrapper",
+        'id="fixture-table"',
+    ):
+        assert token in rendered
+
+
+def test_shared_modal_and_theme_templates_render_accessible_hooks(jinja_env: Environment) -> None:
+    team_modal = jinja_env.get_template("controls/team_modal.htm").render(
+        modal_id="fixtureTeamModal",
+        modal_title="Fixture team",
+    )
+    theme_switcher = jinja_env.get_template("header/_theme_switcher.htm").render()
+
+    for token in (
+        'id="fixtureTeamModal"',
+        "data-modal",
+        "hidden",
+        "data-modal-dismiss",
+        'role="dialog"',
+        'aria-modal="true"',
+        'aria-labelledby="fixtureTeamModalTitle"',
+        'id="fixtureTeamModalTitle"',
+        'aria-label="Close team manager"',
+    ):
+        assert token in team_modal
+
+    assert 'id="wc-theme-switcher-select"' in theme_switcher
+    assert "data-theme-select" in theme_switcher
+    assert 'aria-label="Interface theme"' in theme_switcher
+    for theme in ("default", "light-high-contrast", "ayu-mirage", "cursor-dark-midnight"):
+        assert f'value="{theme}"' in theme_switcher
+
+
+def test_generated_theme_bundle_matches_authoritative_source() -> None:
+    source = (
+        REPO_ROOT / "wepppy" / "weppcloud" / "controllers_js" / "theme.js"
+    ).read_text(encoding="utf-8")
+    generated = (
+        REPO_ROOT / "wepppy" / "weppcloud" / "static" / "js" / "theme.js"
+    ).read_text(encoding="utf-8")
+
+    assert "Theme Switcher standalone bundle" in generated
+    assert generated.endswith(source)
+
+
 def test_soil_pure_template_renders_ssurgo_cache_checkbox(jinja_env: Environment) -> None:
     template = jinja_env.get_template("controls/soil_pure.htm")
     rendered = template.render(

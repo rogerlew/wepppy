@@ -2,12 +2,13 @@
 
 {% macro table_page(title='', subtitle=None, actions=None, include_command_bar=False, data_controller=None, classes='') %}
   {% set page_classes = 'wc-table-page' %}
+  {% set page_content = caller() if caller is defined else '' %}
   {% if classes %}
     {% set page_classes = page_classes + ' ' + classes %}
   {% endif %}
   {% call console_macros.console_page(data_controller=data_controller, include_command_bar=include_command_bar, classes=page_classes) %}
     {% call console_macros.console_header(title=title, subtitle=subtitle, actions=actions, run_target='_self', run_rel=None) %}{% endcall %}
-    {% if caller is defined %}{{ caller() }}{% endif %}
+    {{ page_content }}
   {% endcall %}
 {% endmacro %}
 
