@@ -283,7 +283,7 @@ domain package.
 | DOM-13C | `agfields_wepp_stage_ui_contract` | `agFields`: staged subfield WEPP execution | stages 1-4 UI/routes/state and RQ chain | DOM-13B, DOM-14A | `high`: multi-stage queues/workers | planned |
 | DOM-13D | `agfields_watershed_ui_contract` | `agFields`: watershed schemes, suite jobs, overlays/results/clear | watershed/suite routes, state, artifacts and deletion | DOM-13C, DOM-04B | `high`: queues, artifacts, deletion | planned |
 | DOM-14A | `20260728_wepp_core_ui_contract` | `wepp`: core payload, run lifecycle, job hints, base reports | `wepp.js`, base WEPP form/routes, `Wepp`, run/prep RQ | DOM-07, DOM-08A, DOM-10, DOM-11A | `high`: queue/worker and model persistence | verified |
-| DOM-14B | `wepp_advanced_options_ui_contract` | `wepp`: WEPP advanced option partials and parsers | WEPP advanced templates/parsers/routes/state | DOM-14A | `high`: stored model options and queue inputs | planned |
+| DOM-14B | `20260728_wepp_advanced_options_ui_contract` | `wepp`: WEPP advanced option partials and parsers | WEPP advanced templates/parsers/routes/state | DOM-14A | `high`: stored model options and queue inputs | verified |
 | DOM-14C | `swat_cover_transform_ui_contract` | `wepp`: SWAT advanced options and cover-transform upload | SWAT partials/routes/state and upload path | DOM-14A, DOM-14B | `high`: upload, queue/worker, stored options | planned |
 | DOM-15 | `bootstrap_control_ui_contract` | `bootstrap` | bootstrap controller/embedded form/routes, enable/checkout/disable RQ | DOM-14A | `high`: admin/auth, git refs/tokens, queues | planned |
 | DOM-16 | `dss_export_ui_contract` | `dssExport` | DSS controller/form/routes, persisted `Wepp` fields, export RQ/zip | DOM-14A | `high`: queue, files, download | planned |

@@ -45,6 +45,8 @@ generator, manifest, or new CI system.
   without repair.
 - [x] (2026-07-28 UTC) Executed DOM-14A; actual core run/executable/lifecycle
   rendering and existing browser/Flask/RQ-engine evidence passed without repair.
+- [x] (2026-07-28 UTC) Executed DOM-14B; actual advanced-option partial
+  rendering and existing parser/browser/RQ-engine evidence passed without repair.
 - [ ] Execute all remaining run-domain packages in the dependency-aware order.
 - [ ] Resolve each encountered hold through its owning package or a bounded
   operator decision.
@@ -125,6 +127,10 @@ lint, and docs lint passed.
 DOM-14A: no mismatch and no production patch. Added actual core WEPP run,
 executable, watershed action, and lifecycle render evidence; 194 focused Python
 tests, the full 88-suite/663-test frontend sweep, lint, and docs lint passed.
+
+DOM-14B: no mismatch and no production patch. Added PMET partial render
+evidence; 150 focused Python tests, the full 88-suite/663-test frontend sweep,
+lint, and docs lint passed.
 
 ## Context and Orientation
 

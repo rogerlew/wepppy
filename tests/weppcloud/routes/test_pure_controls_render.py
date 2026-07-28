@@ -1903,6 +1903,24 @@ def test_wepp_control_renders_core_run_and_lifecycle_contract(jinja_env: Environ
     assert 'id="wepp_stacktrace_panel"' in rendered
 
 
+def test_pmet_advanced_template_renders_payload_and_routine_contract(
+    jinja_env: Environment,
+) -> None:
+    jinja_env.globals["isfloat"] = lambda value: isinstance(value, (int, float))
+    template = jinja_env.get_template("controls/wepp_pure_advanced_options/pmet.htm")
+    rendered = template.render(
+        ron=SimpleNamespace(mods=set()),
+        wepp=SimpleNamespace(pmet_kcb=0.95, pmet_rawp=0.8, run_pmet=True),
+    )
+
+    assert 'id="pmet_kcb"' in rendered
+    assert 'name="pmet_kcb"' in rendered
+    assert 'id="pmet_rawp"' in rendered
+    assert 'name="pmet_rawp"' in rendered
+    assert 'id="checkbox_wepp_pmet"' in rendered
+    assert 'data-wepp-routine="pmet"' in rendered
+
+
 def test_run_header_includes_features_export_mod_toggle(jinja_env: Environment) -> None:
     template = jinja_env.get_template("header/_run_header_fixed.htm")
     auth_user = SimpleNamespace(has_role=lambda role: False, roles=[], is_authenticated=True)
