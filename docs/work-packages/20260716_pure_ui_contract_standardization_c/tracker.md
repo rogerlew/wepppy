@@ -8,7 +8,7 @@
 **Started**: 2026-07-17 00:30 UTC
 **Current phase**: Select next controller
 **Last updated**: 2026-07-28 UTC
-**Next milestone**: Execute DOM-20A Features Export catalog/selectors/profiles.
+**Next milestone**: Execute DOM-20B Features Export execution.
 **Security impact**: `none` for scaffold; child packages reassess
 **Dedicated security review**: `no`
 **Security artifact**: N/A
@@ -26,7 +26,7 @@
 - [x] Registered and dual-reviewed REM-05 under GOV-00A-M1E without advancing
   DOM-05; checkpoint ancestor
   `44d3b93c8e3bc7d5e89151cbb9677db374411c53`.
-- [ ] Execute the autonomous remaining run-domain sequence; DOM-20A is the sole
+- [ ] Execute the autonomous remaining run-domain sequence; DOM-20B is the sole
   next active controller package.
 
 ### Blocked
@@ -93,6 +93,9 @@
 - [x] Closed DOM-13D AgFields watershed integration with existing actual
   scheme/action/lifecycle rendering and suite/artifact/clear evidence; no
   production mismatch or patch (2026-07-28 UTC).
+- [x] Closed DOM-20A Features Export selection with existing actual catalog,
+  selector, profile, settings, and validation rendering plus controller/planner
+  evidence; no production mismatch or patch (2026-07-28 UTC).
 - [x] Recorded explicit operator authority for bounded subagent dispatch and
   mandatory dual independent review (2026-07-17 00:30 UTC).
 - [x] Dispositioned the first inventory-review findings by broadening route-local

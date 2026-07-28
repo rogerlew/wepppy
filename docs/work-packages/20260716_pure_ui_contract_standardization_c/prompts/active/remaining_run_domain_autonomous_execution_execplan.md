@@ -73,6 +73,9 @@ generator, manifest, or new CI system.
 - [x] (2026-07-28 UTC) Executed DOM-13D; existing actual watershed schemes,
   suite/results/clear rendering and downstream lifecycle evidence passed
   without repair.
+- [x] (2026-07-28 UTC) Executed DOM-20A; existing actual Features Export
+  catalog/selector/profile/config rendering and downstream evidence passed
+  without repair.
 - [ ] Execute all remaining run-domain packages in the dependency-aware order.
 - [ ] Resolve each encountered hold through its owning package or a bounded
   operator decision.
@@ -200,6 +203,11 @@ DOM-13D: no mismatch and no production patch. Existing actual scheme/run/
 results/clear rendering and controller, rq-engine, suite-worker, artifact,
 persistence, reload, and scoped deletion evidence passed; the DOM-13C focused
 155-test Python and 21-test Jest sweeps cover this shared controller and passed.
+
+DOM-20A: no mismatch and no production patch. Existing actual catalog,
+selector, profile, settings, validation, and action rendering plus controller,
+catalog, profile, planner, and run-page evidence passed; 125 focused Python
+tests, 22 Features Export Jest tests, lint, and docs lint passed.
 
 ## Context and Orientation
 
