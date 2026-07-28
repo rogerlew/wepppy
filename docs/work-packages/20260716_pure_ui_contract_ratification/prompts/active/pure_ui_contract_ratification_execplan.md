@@ -51,6 +51,9 @@ evidence; they cannot silently redefine intended behavior.
 - [ ] (2026-07-21 22:15 UTC) Ratify GOV-00A-M1B for REM-02's finite SURF-06
   TTL-deletion catalog presentation boundary, with independent review and its
   own standalone ancestor.
+- [x] (2026-07-28 00:45 UTC) Ratify and dual-review GOV-00A-M1D for REM-04
+  browser-origin guard hardening with zero unresolved findings; its standalone
+  ancestor is the next atomic action.
 - [ ] Ratify authority hierarchy and lifecycle vocabulary.
 - [ ] Publish the normative README and reusable contract template.
 - [ ] Add deterministic governance validation and negative fixtures.
@@ -95,6 +98,13 @@ historical discoveries when later evidence changes a decision.
   concrete remediation and its exact boundary; reusing M1A would silently widen
   accepted authority.
   Date/Author: 2026-07-21 / Operator direction, recorded by Codex.
+
+- Decision: Allocate GOV-00A-M1D only to REM-04's existing same-origin guards,
+  WEPPcloud-owned reset cookies, and copied diagnostics allowlist.
+  Rationale: The defects form one finite high-security browser boundary, while
+  Caddy, deployment, new endpoints, and broader Diagnostics ownership remain
+  excluded.
+  Date/Author: 2026-07-28 / Operator direction, recorded by Codex.
 
 - Decision: Use three independent dimensions: contractual scope, evidence
   grade, and package execution state.

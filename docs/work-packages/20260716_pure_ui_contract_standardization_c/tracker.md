@@ -49,6 +49,9 @@
   no unresolved high/medium findings (2026-07-20 21:40 UTC).
 - [x] Committed both REM-01 contract ancestors, executed its finite boundary,
   passed dual final review and broad validation, and closed the remediation
+- [x] Register and dual-review REM-04 under GOV-00A-M1D without advancing
+  SURF-13, SHR-02, SHR-04A, or the excluded Diagnostics surface; standalone
+  ancestor pending (2026-07-28 00:45 UTC).
   without advancing DOM-02, DOM-25A, or DOM-25B (2026-07-20 22:42 UTC).
 - [x] Closed REM-02's separately ratified read-only TTL catalog presentation
   boundary after final dual review; SURF-06 remains planned and unadvanced
@@ -164,6 +167,17 @@ or deletion operations.
 
 **Impact**: REM-02 must complete the same high-security checkpoint, reviews,
 and standalone ancestor as every bounded remediation. SURF-06 remains planned.
+
+### 2026-07-28 00:15 UTC: Register REM-04 web-origin guard remediation
+
+**Context**: A finite defect spans existing session mutation, cross-service
+browser transport, cookie deletion, and copied diagnostics boundaries.
+
+**Decision**: Add REM-04 under a separately reviewed GOV-00A-M1D milestone with
+the exact source boundary recorded in the child-package register.
+
+**Impact**: The remediation can proceed only after its checkpoint ancestor. It
+does not advance the borrowed owners or change the Diagnostics exclusion.
 
 ### 2026-07-17 00:30 UTC: Use an umbrella ExecPlan with bounded child packages
 

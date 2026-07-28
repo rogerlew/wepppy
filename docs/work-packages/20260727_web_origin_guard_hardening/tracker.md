@@ -6,9 +6,9 @@
 
 **Timezone**: UTC
 **Started**: 2026-07-27 23:40 UTC
-**Current phase**: Scoped / ready for implementation
-**Last updated**: 2026-07-27 23:40 UTC
-**Next milestone**: WP01 (same-origin guard parity) implemented behind the security-review gate
+**Current phase**: Contract checkpoint commit
+**Last updated**: 2026-07-28 00:45 UTC
+**Next milestone**: Record WP00 standalone checkpoint revision, then WP01
 **Security impact**: `high`
 **Dedicated security review**: `yes`
 **Security artifact**: `docs/work-packages/20260727_web_origin_guard_hardening/artifacts/<date>_security_review.md`
@@ -16,6 +16,10 @@
 ## Task Board
 
 ### Ready / Backlog
+- [ ] WP00 - Register the bounded remediation; finalize the contract decision
+  and canonical amendments; obtain dual independent checkpoint reviews;
+  disposition findings; commit and record the documentation-only ancestor
+  (`prompts/active/wp00_contract_checkpoint.prompt.md`)
 - [ ] WP01 — Same-origin guard parity: normative contract + align all three guards; query-engine gains the `Sec-Fetch-Site` fast-path (fixes the bearhive upload 403); harden forwarded-header trust and `Origin` conflict handling; shared test vectors (Codex; `prompts/active/wp01_same_origin_parity.prompt.md`)
 - [ ] WP02 — Scope reset cookie-clear targets to WEPPcloud-owned names/domains (Codex; `prompts/active/wp02_cookie_clear_scoping.prompt.md`)
 - [ ] WP03 — Allowlist-based diagnostics Copy JSON report; drop arbitrary backend error text and absolute WS hostname (Codex; `prompts/active/wp03_report_redaction_allowlist.prompt.md`)
@@ -24,19 +28,41 @@
 - [ ] Contract doc extension in `docs/schemas/weppcloud-csrf-contract.md` (Claude Code; can land with WP01)
 
 ### In Progress
-- (none)
+- [ ] Umbrella execution governed by
+  `prompts/active/web_origin_guard_hardening_execplan.md`
 
 ### Blocked
 - (none)
 
 ### Done
 - [x] Package scoped and scaffolded (2026-07-27 23:40 UTC)
+- [x] WP00 governance registration, contracts, dual independent reviews, and
+  disposition passed with zero unresolved findings (2026-07-28 00:45 UTC)
 
 ## Sequencing
 
-WP01 first (it defines the contract the others reference and resolves the live 403). WP02/WP03 are independent and may run in parallel after WP01's contract lands. WP04 lands last so its matrix exercises the final behavior of all three guards. Security review artifact after WP01-WP04, before closure.
+WP00 first; it creates the mandatory reviewed contract ancestor. WP01 begins
+only after the checkpoint revision is recorded below. WP02/WP03 are independent
+after WP01. WP04 lands last so its matrix exercises final behavior. Independent
+final security and correctness reviews follow WP01-WP04, before closure.
+
+**Checkpoint revision**: pending
+
+**Bounded-remediation authority**: REM-04 / GOV-00A-M1D (checkpoint candidate)
 
 ## Decisions Log
+
+### 2026-07-28 00:00 UTC: Add the missing contract-first execution phase
+
+**Context**: The initial scaffold introduced new normative origin, cookie, and
+report behavior but contained no contract-decision artifact, bounded-remediation
+registration, dual checkpoint review, or standalone ancestor.
+
+**Decision**: Add WP00 and an umbrella ExecPlan. Make the recorded checkpoint
+revision a hard dependency of every production edit.
+
+**Impact**: The package is executable without bypassing the repository's
+contract-first standard. Implementation remains blocked until WP00 completes.
 
 ### 2026-07-27 23:40 UTC: Query-engine is the outlier; align to a single contract rather than three ad-hoc guards
 **Context**: Three same-origin guards exist — Flask `_is_same_origin_post`, rq-engine `_is_same_origin_cookie_request`, query-engine `_is_same_origin_request`. The first two accept `Sec-Fetch-Site: same-origin` up front; query-engine does not, so a same-origin upload POST 403s behind upstream TLS (verified on `wc.bearhive.duckdns.org`; passes on `wepp.cloud` only because Caddy terminates TLS there and `{scheme}` = `https`).
@@ -57,6 +83,7 @@ WP01 first (it defines the contract the others reference and resolves the live 4
 | Parity change weakens a guard (too-permissive Sec-Fetch-Site, forwarded-header spoofing) | High | Low | Security review gate; contract requires Origin-conflict rejection and proxy-normalized origins | Open |
 | Behavioral drift between three implementations after change | Medium | Medium | Shared test vectors (WP04) asserted against all three | Open |
 | query-engine change regresses other bandwidth/query endpoints | Low | Low | Change scoped to the same-origin helper; run query-engine suite | Open |
+| Canonical session contract retained legacy raw forwarded-origin trust | High | Low | Reconciled contracts; legacy switch inert; required negative regression | Closed by dual rereview |
 
 ## Verification Checklist
 
@@ -71,6 +98,10 @@ WP01 first (it defines the contract the others reference and resolves the live 4
 - [ ] No unresolved medium/high findings
 
 ### Documentation
+- [ ] Contract-decision artifact complete
+- [ ] Bounded remediation registered in Pure UI governance artifacts
+- [ ] Two independent checkpoint reviews passed and dispositioned
+- [ ] Standalone checkpoint revision recorded and verified as ancestor
 - [ ] `docs/schemas/weppcloud-csrf-contract.md` extended with the same-origin contract + test vectors
 - [ ] Package closure notes complete
 
@@ -78,6 +109,22 @@ WP01 first (it defines the contract the others reference and resolves the live 4
 - [ ] Verified on a local stack and on an upstream-TLS topology (or a simulated one) that same-origin POST is authorized
 
 ## Progress Notes
+
+### 2026-07-28 00:00 UTC: Scaffold made contract-first executable
+
+**Agent/Contributor**: Codex
+
+**Work completed**:
+- Added an active umbrella ExecPlan with ordered milestones and acceptance
+  evidence.
+- Added WP00 for governance registration, contract amendment, dual review,
+  disposition, and the standalone ancestor.
+- Added a draft contract-decision artifact that identifies the unresolved
+  decisions without claiming implementation authority.
+- Made WP01-WP04 explicitly dependent on the recorded checkpoint revision.
+
+**Next steps**: Execute WP00. Do not edit implementation files until its reviewed
+checkpoint commit is recorded here.
 
 ### 2026-07-27 23:40 UTC: Package scaffolded
 **Agent/Contributor**: Claude Code

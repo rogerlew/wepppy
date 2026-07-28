@@ -166,10 +166,21 @@ Source-of-truth implementation:
 - Page-specific workflows that submit to rq-engine (fork, archive, reports, readme actions, other ancillary run pages) SHOULD treat explicit auth failures (`401`, `403`, `unauthorized`, `forbidden`) as stale-session signals and prompt reload/sign-in.
 
 ## Same-Origin and Security Contract
-- `POST /weppcloud/api/auth/session-heartbeat` and `POST /weppcloud/api/auth/rq-engine-token` MUST use same-origin checks (`Origin` or `Referer`), compared against the effective WEPPcloud origin (request host plus trusted forwarded/configured external host aliases).
-- Requests missing both `Origin` and `Referer` headers MUST be rejected for these endpoints.
-- `POST /rq-engine/api/runs/{runid}/{config}/session-token` (cookie-auth path) MUST ignore forwarded-origin aliases (`X-Forwarded-Proto`, `X-Forwarded-Host`) unless `RQ_ENGINE_TRUST_FORWARDED_ORIGIN_HEADERS=true`.
-- Deployments that need external-origin aliases for rq-engine cookie-path checks SHOULD prefer explicit host/scheme config (`OAUTH_REDIRECT_HOST`, `OAUTH_REDIRECT_SCHEME`, `EXTERNAL_HOST`, `EXTERNAL_SCHEME`) over forwarded-header trust.
+- The normative decision order and origin normalization for
+  `POST /weppcloud/api/auth/session-heartbeat`,
+  `POST /weppcloud/api/auth/rq-engine-token`, and the cookie-auth path of
+  `POST /rq-engine/api/runs/{runid}/{config}/session-token` are defined by
+  `docs/schemas/weppcloud-csrf-contract.md` section "Browser Same-Origin Guard
+  Contract."
+- Requests missing Fetch Metadata, `Origin`, and `Referer` MUST reject.
+- `RQ_ENGINE_TRUST_FORWARDED_ORIGIN_HEADERS` is retained as an accepted legacy
+  environment variable for deployment compatibility but is inert for
+  same-origin authorization after REM-04. Raw forwarded headers MUST NOT add an
+  allowed origin even when it is `true`.
+- Deployments that need an external rq-engine origin MUST configure
+  `OAUTH_REDIRECT_HOST`/`OAUTH_REDIRECT_SCHEME` or
+  `EXTERNAL_HOST`/`EXTERNAL_SCHEME`. Operators previously relying on the legacy
+  forwarded-origin switch MUST set those values before deploying REM-04.
 - Anonymous or stale session-token claims MUST NOT bypass CAPTCHA/public-run gates in anonymous flows.
 - Private-run session-token issuance via cookie-auth path MUST enforce run authorization from server-side owner/role state.
 
@@ -178,6 +189,8 @@ The following suites MUST be updated when session contract behavior changes:
 - password-login form rendering and submitted opt-out tests;
 - successful login, remembered-request refresh, and logout cookie-boundary
   tests;
+- rq-engine same-origin tests proving the legacy forwarded-origin environment
+  switch cannot authorize raw `X-Forwarded-Proto` or `X-Forwarded-Host`;
 - authentication diagnostic redaction and persistence tests;
 - `tests/weppcloud/test_configuration.py`
 - `tests/weppcloud/routes/test_rq_engine_token_api.py`

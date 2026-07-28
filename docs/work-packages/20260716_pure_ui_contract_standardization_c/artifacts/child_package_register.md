@@ -88,6 +88,11 @@ milestone proposed only for REM-03. It requires its own dual review,
 disposition, and standalone ancestor. It borrows no authority from M1A or M1B
 and cannot advance the borrowed authentication owners.
 
+`GOV-00A-M1D` is the separately closable bounded-remediation governance
+milestone proposed only for REM-04. It requires its own dual review,
+disposition, and standalone ancestor. It borrows no authority from earlier
+milestones and cannot advance the borrowed browser/session owners.
+
 Dependency shorthand expands exactly as follows:
 
 - `SHR-01..04B` = SHR-01, SHR-02, SHR-03A, SHR-03B, SHR-04A, SHR-04B.
@@ -122,6 +127,7 @@ GOV-01 machine-readable manifest. GOV-99 is intentionally absent from all sets.
 | REM-01 | `20260720_omni_mod_state_sync` | DOM-02, DOM-25A, DOM-25B | Omni Scenarios/Contrasts feature-registry menu availability; Mods checkbox and reason markup; `Ron.mods` enable/disable guards; runs-page section/preflight visibility and metadata; dynamic shared Omni controller remount; Dev/Root gates on contrast run/dry-run/delete plus canonical run access and Dev/Root on the CAP-gated report; focused tests and generated controller bundle only | GOV-00A-M1A | `high`: role-gated dynamic load, persisted mod mutation, contrast actions, and report data | completed / dual-reviewed |
 | REM-02 | `20260721_runs_ttl_deletion_catalog` | SURF-06 | Read-only TTL policy/expiry projection for already-authorized catalog rows; one lifecycle table cell; dedicated Usersum documentation and focused catalog/template/doc tests only | GOV-00A-M1B | `high`: authenticated run-metadata presentation; no new access path or mutation | completed / dual-reviewed |
 | REM-03 | `20260727_auth_session_persistence_hardening` | SURF-13, SHR-02, SHR-04A | Password-login remember checkbox GET default and POST opt-out; rolling remember-cookie duration/refresh; login/logout cookie boundary; authentication-log redaction and append-only durable diagnostics; focused auth/config/logging tests and documentation only | GOV-00A-M1C | `high`: authentication persistence and credential-adjacent diagnostics | checkpoint review |
+| REM-04 | `20260727_web_origin_guard_hardening` | SURF-13, SHR-02, SHR-04A | Existing Flask, rq-engine, and query-engine same-origin guards; reset deletion of configured WEPPcloud session/remember cookies; copied diagnostics report allowlist; focused origin/CSRF/cookie/report tests and documentation only | GOV-00A-M1D | `high`: CSRF-adjacent origin authorization, cookie deletion, and report disclosure | checkpoint review |
 
 REM-01 excludes Omni scenario/contrast payload shapes, uploads, queue wiring or
 execution semantics, artifacts, report content/formatting, overlays, deletion
@@ -140,6 +146,28 @@ storage, Redis session lifetime, CSRF policy, CAP verification policy, route
 prefixes, RQ behavior, database schemas, and unrelated templates. Its final
 evidence is inherited by SURF-13, SHR-02, and SHR-04A without advancing those
 owners.
+
+REM-04 excludes new guarded endpoints, authentication and role policy, OAuth
+behavior, Caddy configuration, deployment, queue wiring, project data schemas,
+model parameterization, diagnostics card presentation, and unrelated UI work.
+Its final evidence is inherited by SURF-13, SHR-02, and SHR-04A without
+advancing those owners. The register's Diagnostics exclusion remains unchanged:
+REM-04 is a defect-scoped exception and does not enroll Diagnostics in the Pure
+UI initiative.
+
+The exact REM-04 implementation boundary is limited to:
+
+- the existing same-origin helpers in
+  `wepppy/weppcloud/routes/weppcloud_site.py`,
+  `wepppy/microservices/rq_engine/session_routes.py`, and
+  `wepppy/query_engine/app/server.py`;
+- reset cookie-target construction in
+  `wepppy/weppcloud/routes/weppcloud_site.py`;
+- copied-report construction in
+  `wepppy/weppcloud/static/js/diagnostics/report.js` and structured safe result
+  codes in adjacent diagnostics probes only when required;
+- focused tests for those exact surfaces; and
+- REM-04/GOV-00A contracts, reviews, tracker, and security artifacts.
 
 The exact REM-03 implementation boundary is limited to:
 

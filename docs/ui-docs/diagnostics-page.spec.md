@@ -226,6 +226,57 @@
 - Do not render secrets in UI or JSON report.
 - Keep mutating checks same-origin and CSRF-compliant.
 - Avoid cross-origin probes and third-party network calls from diagnostics.
+- The Copy JSON artifact MUST be assembled from an allowlist and MUST NOT copy
+  raw `evidence`, `fix_hint`, backend error messages, URLs, hostnames, run
+  identifiers, probe payloads, or extension fields from check results.
+- The report-level allowlist is `overall`, `checks`, `generated_at`, and
+  normalized path-only `site_prefix`. Each copied check contains only `id`, `title`,
+  `severity`, `status`, `evidence`, and `fix_hint`.
+- A check is copyable only when its `id` is one of the fixed diagnostics
+  identifiers below. The report layer owns one immutable catalog; runtime
+  definitions cannot register or override copied values. Duplicate runtime IDs
+  collapse to the first catalog-ordered occurrence. Unknown identifiers are
+  omitted.
+- Copied `status` is limited to `pass`, `fail`, `warn`, or `skipped`. Copied
+  evidence and fix hints are fixed messages selected by status:
+  - `pass`: evidence `Check completed successfully.` and an empty fix hint;
+  - `fail`: evidence `Check did not complete successfully.` and fix hint
+    `Review this check on the diagnostics page and retry.`;
+  - `warn`: evidence `Check completed with an advisory result.` and the same
+    review-and-retry fix hint;
+  - `skipped`: evidence `Check was not run.` and fix hint
+    `Review this check's prerequisites on the diagnostics page and retry.`
+- The fixed copied-check catalog is:
+
+| ID | Copied title | Copied severity |
+| --- | --- | --- |
+| `javascript-execution` | JavaScript support | `blocker` |
+| `browser-api-baseline` | Browser API baseline | `blocker` |
+| `cookie-storage` | Cookie storage | `blocker` |
+| `local-storage` | Local browser storage | `info` |
+| `abort-controller` | Request cancellation | `info` |
+| `session-heartbeat` | Signed-in session | `blocker` |
+| `rq-engine-token` | Job service access | `blocker` |
+| `bandwidth-rtt` | Connection response time | `info` |
+| `bandwidth-download` | Download speed | `info` |
+| `bandwidth-upload` | Upload speed | `info` |
+| `realtime-status-websocket` | Live status updates | `degraded` |
+| `realtime-preflight-websocket` | Live setup checks | `degraded` |
+| `status-health-reachability` | Status service | `degraded` |
+| `preflight-health-reachability` | Setup-check service | `degraded` |
+
+- `overall` MUST be recomputed from catalog-sanitized checks and is limited to
+  `ready`, `ready_with_degraded_realtime`, or `not_ready`.
+  `generated_at` MUST be generated locally by the report layer at copy time as
+  an ISO 8601 UTC timestamp; an input report timestamp is never copied.
+  `site_prefix` MUST be normalized to an empty string or an absolute path made
+  only of ASCII letters, digits, `/`, `_`, and `-`; invalid input becomes empty.
+- Tests MUST inject hostile runtime title, severity, overall, timestamp,
+  site-prefix, duplicate ID, and unknown ID values and prove none enters copied
+  JSON.
+- Token/cookie/JWT denylist replacement remains a final defense-in-depth pass
+  over the fixed output; it is not the report's primary disclosure boundary.
+- Implementation conformance to this copied-report allowlist is pending REM-04.
 
 ## 10. Acceptance Criteria
 - `/diagnostics/` loads without authentication.

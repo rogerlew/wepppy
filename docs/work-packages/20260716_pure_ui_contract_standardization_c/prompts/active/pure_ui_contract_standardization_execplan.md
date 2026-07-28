@@ -139,6 +139,12 @@ historical observations when later evidence changes the design.
   the register must make its exception and exclusions explicit.
   Date/Author: 2026-07-20 / Operator direction, recorded by Codex.
 
+- Decision: Register REM-04 under GOV-00A-M1D without changing the excluded
+  status of Diagnostics or advancing SURF-13, SHR-02, or SHR-04A.
+  Rationale: This is a finite production defect across existing browser request
+  and safe-report boundaries, not a general Pure UI package.
+  Date/Author: 2026-07-28 / Operator direction, recorded by Codex.
+
 - Decision: Use one umbrella ExecPlan to create and execute bounded child work
   packages rather than one monolithic controller audit.
   Rationale: The controller population crosses frontend, route, NoDb, and RQ

@@ -5,6 +5,9 @@
 > **Created**: 2026-07-27
 > **Status**: Active
 > **Security gate**: This package is triaged `high`. A dedicated security review artifact is required before closure; do not weaken any guard.
+> **Hard dependency**: WP00 must be complete and its reviewed standalone
+> checkpoint revision must be recorded in the tracker before this prompt edits
+> implementation or test files.
 
 ## Context
 
@@ -26,6 +29,10 @@ Two problems to fix together:
 Author a normative same-origin contract and conform all three guards to it. A same-origin browser POST (which carries `Sec-Fetch-Site: same-origin`) is authorized on every proxy topology; a cross-origin request, an `Origin` conflicting with the page origin, or a spoofed forwarded header is rejected exactly as today or more strictly.
 
 **Success looks like**: the bearhive upload probe passes; no test asserting cross-origin rejection regresses; all three guards pass the same shared test vectors.
+
+Before any implementation work, verify that the tracker names a full WP00
+checkpoint revision and that revision is an ancestor of `HEAD`. Stop if either
+condition fails.
 
 ## Working Set
 
@@ -49,17 +56,25 @@ Author a normative same-origin contract and conform all three guards to it. A sa
 - The diagnostics upload-probe UX (relabeling a 403) — related follow-up on the diagnostics package.
 - Any endpoint that does not currently enforce same-origin — do not broaden coverage.
 
-## Contract (normative intent for the doc + implementations)
+## Contract
 
-1. Decision order: (a) if `Sec-Fetch-Site` is present and `cross-site`/`cross-origin` → reject; (b) if `Sec-Fetch-Site: same-origin` AND no conflicting `Origin` → accept; (c) else evaluate `Origin` against the allowed set; (d) else fall back to `Referer` origin against the allowed set; (e) absent all signals → the guard's documented default (reset/query bandwidth: reject cross, accept same per existing tests).
-2. `Sec-Fetch-Site: same-origin` MUST NOT override a present `Origin` that fails the allowed-set check.
-3. Allowed-origin candidates derive from proxy-normalized request data or a configured public origin; do not trust raw client `X-Forwarded-*` beyond the documented trusted-proxy hop count.
-4. Scheme/host/port compared exactly after normalization; no subdomain/scheme/port coercion.
+The reviewed normative contract is
+`docs/schemas/weppcloud-csrf-contract.md` section "Browser Same-Origin Guard
+Contract." Do not use this prompt's historical context as authority.
+
+Implement its exact decision order, including missing-signal rejection, raw
+forwarded-header non-authority, and the sole HTTP:80 application to HTTPS:443
+same-host bridge under `Sec-Fetch-Site: same-origin`. The legacy rq-engine
+forwarded-origin environment variable remains accepted but inert.
 
 ## Validation Gates
 - `wctl run-pytest` for the weppcloud, query-engine, and rq-engine suites touching these guards.
 - `wctl run-npm lint` / `wctl run-npm test`.
-- Manual or simulated upstream-TLS check: a request with `Origin: https://host`, `Sec-Fetch-Site: same-origin`, and `X-Forwarded-Proto: http` is authorized; the same with `Sec-Fetch-Site: cross-site` or a conflicting `Origin` is rejected.
+- Simulated upstream-TLS check: construct an authoritative application request
+  tuple of HTTP:80 with `Origin: https://host:443` and
+  `Sec-Fetch-Site: same-origin`; expect authorization. Raw
+  `X-Forwarded-Proto`/`X-Forwarded-Host` alone must not create an allowed
+  origin. Cross-site or conflicting host/explicit port must reject.
 
 ## Deliverables
 1. Three conforming guards; query-engine same-origin POST authorized behind upstream TLS.

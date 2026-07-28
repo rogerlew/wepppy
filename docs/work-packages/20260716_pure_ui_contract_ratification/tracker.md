@@ -57,6 +57,9 @@
   presentation boundary in standalone ancestor
   `d3380287ca706360879240c3d203c5e7cc2be9ef`; REM-02 subsequently closed after
   final dual review without advancing SURF-06 (2026-07-21 23:15 UTC).
+- [x] Complete dual review for GOV-00A-M1D / REM-04 with zero unresolved
+  findings; standalone ancestor commit pending as the next atomic action
+  (2026-07-28 00:45 UTC).
 - [x] Recorded contract-first authority and sequencing in root, WEPPcloud,
   controller, NoDb, rq-engine, and direct RQ agent governance (2026-07-17).
 - [x] Dispositioned two high/three medium authority findings and two high/four
@@ -125,6 +128,21 @@ security and requires two independent reviews plus a standalone ancestor.
 
 **Impact**: REM-03 remains blocked until M1C's reviews and ancestor are complete;
 the borrowed owners do not advance.
+
+### 2026-07-28 00:15 UTC: Create GOV-00A-M1D for REM-04
+
+**Context**: Same-origin decisions diverge across three browser-facing services,
+reset deletion crosses sibling cookie boundaries, and copied diagnostics can
+contain raw backend evidence.
+
+**Decision**: Register a separately reviewed GOV-00A-M1D milestone for REM-04.
+It permits only the three existing origin guards, configured WEPPcloud
+session/remember cookie deletion, allowlist-built copied diagnostics, focused
+tests, and their contracts. It inherits high security and requires two
+independent reviews plus a standalone ancestor.
+
+**Impact**: REM-04 remains blocked until M1D's reviews and ancestor are complete;
+the borrowed owners and the Diagnostics exclusion do not advance.
 
 ### 2026-07-17 01:48 UTC: Separate obligation from evidence
 

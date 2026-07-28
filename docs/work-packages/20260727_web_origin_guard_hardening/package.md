@@ -1,6 +1,6 @@
 # Web Same-Origin Guard Parity and Data-Boundary Hardening
 
-**Status**: Open (2026-07-27)
+**Status**: Open - contract checkpoint required before implementation
 **Timezone**: UTC
 
 ## Overview
@@ -16,6 +16,24 @@ The observable symptom: on deployments where TLS is terminated **upstream** of C
 - Diagnostics Copy JSON report built from an allowlist, not a denylist.
 - A shared same-origin/CSRF test matrix that actually exercises the failure modes.
 
+## Execution Authority and Sequencing
+
+This package is UI-coupled and governed by
+`docs/standards/contract-first-change-standard.md`. Execute the active umbrella
+ExecPlan at
+`prompts/active/web_origin_guard_hardening_execplan.md`.
+
+WP00 is a hard prerequisite. It must register this package as a bounded
+remediation, finalize and amend the canonical contracts, obtain two independent
+checkpoint reviews, disposition their findings, and create a standalone
+documentation-only ancestor commit. WP01-WP04 must not edit implementation
+files until that full revision is recorded in the tracker and is an ancestor of
+the implementation.
+
+The bounded-remediation registration is REM-04 under GOV-00A-M1D. It borrows
+only SURF-13, SHR-02, and SHR-04A and does not change the Pure UI register's
+Diagnostics exclusion.
+
 ## Scope
 
 ### Included
@@ -25,7 +43,8 @@ The observable symptom: on deployments where TLS is terminated **upstream** of C
   - query-engine `wepppy/query_engine/app/server.py` `_is_same_origin_request` (`:206`) / `_request_allowed_origins` (`:177`) — **no `Sec-Fetch-Site` fast-path** (Origin-only); the outlier that 403s same-origin POSTs behind upstream TLS.
 - **Cookie-clear scoping**: `_clear_reset_browser_state_cookies` (`weppcloud_site.py:829`) emits generic `csrf_token`/`csrftoken` deletions across parent-domain variants (`_domain_variants` `:783`).
 - **Report redaction**: `wepppy/weppcloud/static/js/diagnostics/report.js` `redactText` (`:123`) is a four-pattern denylist; `auth_checks.js` copies arbitrary backend error text into evidence; realtime evidence embeds the full WebSocket hostname.
-- **Test matrix**: CSRF-enabled same-origin/header integration tests across all three surfaces.
+- **Test matrix**: one shared origin-predicate matrix plus per-surface
+  CSRF/authentication/boundary integration tests.
 - Contract documentation: extend `docs/schemas/weppcloud-csrf-contract.md` (or a new same-origin sub-contract) with the normative rules and shared test vectors.
 
 ### Explicitly Out of Scope
@@ -45,7 +64,10 @@ The observable symptom: on deployments where TLS is terminated **upstream** of C
 - [ ] `Sec-Fetch-Site: same-origin` is not treated as authoritative when a conflicting `Origin` is present; forwarded-origin candidates derive from proxy-normalized data or a configured public origin, not blindly-trusted client `X-Forwarded-*`.
 - [ ] Reset cookie clearing targets only WEPPcloud-owned names/domains; no generic parent-domain `csrf_token`/`csrftoken` deletion unless documented as owned.
 - [ ] Copy JSON report is assembled from fixed diagnostic codes/messages; no arbitrary backend exception text or absolute WS hostname leaks; denylist retained only as defense-in-depth.
-- [ ] CSRF-enabled integration tests cover valid token, absent token, missing Origin+Referer, `Origin: null`, scheme/port/subdomain mismatch, and `Sec-Fetch-Site: cross-site` on all three surfaces.
+- [ ] Shared predicate tests cover missing signals, `Origin: null`,
+  scheme/port/subdomain mismatch, and cross-site on all three guards; separate
+  tests cover valid/missing/invalid Flask-WTF tokens, rq-engine cookie/session
+  authentication, and query-engine boundary controls.
 - [ ] `wctl run-pytest` (affected suites), `wctl run-npm lint`, `wctl run-npm test` pass.
 
 ## Security Impact and Review Gate
@@ -82,7 +104,13 @@ The observable symptom: on deployments where TLS is terminated **upstream** of C
 - `docker/caddy/Caddyfile`, `docker/caddy/Caddyfile.wepp1` — proxy scheme handling.
 
 ## Deliverables
-[Fill at closure]
+
+- Active umbrella ExecPlan and living tracker.
+- Contract decision, bounded-remediation registration, canonical amendments,
+  dual checkpoint reviews, disposition, and standalone checkpoint ancestor.
+- WP01-WP04 implementation and regression evidence.
+- Dedicated final security review and independent correctness review.
+- Closure notes and archived completed prompts.
 
 ## Follow-up Work
 [Fill at closure]

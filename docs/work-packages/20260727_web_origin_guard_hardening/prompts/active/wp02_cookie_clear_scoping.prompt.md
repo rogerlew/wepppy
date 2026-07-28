@@ -5,6 +5,8 @@
 > **Created**: 2026-07-27
 > **Status**: Active
 > **Security gate**: Part of a `high`-triage package; covered by the package security review.
+> **Hard dependency**: WP00 and WP01 must be complete, and the WP00 checkpoint
+> revision must be an ancestor of `HEAD`.
 
 ## Context
 
@@ -17,13 +19,16 @@ Independent-review finding 4: where WEPPcloud shares a parent domain with a sibl
 
 ## Objective
 
-Reset clears exactly the cookies WEPPcloud sets (session, remember, and WEPPcloud's own CSRF cookie under its own path/domain), and no generic parent-domain cookie that could belong to a sibling app — while still fully clearing WEPPcloud state so the reset remains effective.
+Reset clears exactly the session and remember cookies WEPPcloud sets, and no
+generic parent-domain cookie that could belong to a sibling app. Flask-WTF CSRF
+state is stored inside the session and is removed with the session cookie.
 
 ## Working Set
 
 ### Files to Read (Inputs)
 - `wepppy/weppcloud/routes/weppcloud_site.py:783-872` — the cookie-clear helpers and specs.
-- `wepppy/weppcloud/configuration.py` — the actual configured cookie names, paths, and domains (`SESSION_COOKIE_*`, `REMEMBER_COOKIE_*`, CSRF cookie config).
+- `wepppy/weppcloud/configuration.py` — the configured session and remember
+  cookie names, paths, and domains.
 - `docs/schemas/weppcloud-csrf-contract.md`, `weppcloud-session-contract.md` — where the owned-cookie set should be documented.
 
 ### Files to Modify (Outputs)
@@ -36,16 +41,21 @@ Reset clears exactly the cookies WEPPcloud sets (session, remember, and WEPPclou
 - Do not change what the reset clears server-side (Flask session) or the client storage clearing.
 
 ## Instructions
+0. Verify the tracker records the WP00 checkpoint revision and WP01 completion.
+   Stop if the checkpoint is not an ancestor of `HEAD`.
 1. Enumerate WEPPcloud's actually-configured cookies from `configuration.py`. Decide, per the contract, which the reset owns and at what path/domain.
-2. Narrow `_clear_reset_browser_state_cookies` to those. If WEPPcloud's CSRF cookie is genuinely owned, keep it at WEPPcloud's own path/domain only — not parent-domain variants shared with siblings.
-3. Keep the reset effective: after the change, a WEPPcloud session/remember/CSRF cookie is still fully removed for the caller's browser.
+2. Narrow `_clear_reset_browser_state_cookies` to the resolved session and
+   remember tuples only. Do not retain either generic CSRF cookie name.
+3. Keep the reset effective: the session deletion removes Flask-WTF state and
+   the remember deletion removes remembered identity.
 4. Document the owned-cookie set in the contract.
 5. Test the exact target enumeration.
 
 ## Validation Gates
 - `wctl run-pytest tests/weppcloud/routes/test_rq_engine_token_api.py`
 - `wctl run-npm lint` / `wctl run-npm test`
-- Manual: reset in a dev session still clears WEPPcloud session/remember/CSRF cookies.
+- Manual: reset in a dev session clears WEPPcloud session and remember cookies;
+  subsequent Flask-WTF state is fresh because the session was removed.
 
 ## Deliverables
 1. Scoped cookie-clear targets; no generic parent-domain deletion.

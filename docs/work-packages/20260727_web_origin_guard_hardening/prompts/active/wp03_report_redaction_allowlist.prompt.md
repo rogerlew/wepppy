@@ -5,6 +5,8 @@
 > **Created**: 2026-07-27
 > **Status**: Active
 > **Security gate**: Part of a `high`-triage package; covered by the package security review.
+> **Hard dependency**: WP00 and WP01 must be complete, and the WP00 checkpoint
+> revision must be an ancestor of `HEAD`.
 
 ## Context
 
@@ -41,6 +43,8 @@ The redacted report contains only allowlisted fields and fixed message text keye
 - On-card rendering behavior (section 4.1) — this WP governs the copied JSON, not the live card display.
 
 ## Instructions
+0. Verify the tracker records the WP00 checkpoint revision and WP01 completion.
+   Stop if the checkpoint is not an ancestor of `HEAD`.
 1. Define the allowlist: which fields and which fixed messages the copied report may contain per check status/outcome.
 2. Reshape report assembly so free-form backend `evidence` is not copied verbatim; map known outcomes to fixed strings; drop or route unknown text to a generic placeholder.
 3. Remove absolute WS hostnames from the copied evidence (route-only or omitted).
