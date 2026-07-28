@@ -27,6 +27,8 @@ generator, manifest, or new CI system.
   repair.
 - [x] (2026-07-28 UTC) Executed DOM-10; actual Soil rendering and existing
   state/queue/worker evidence passed without a production repair.
+- [x] (2026-07-28 UTC) Executed DOM-11A; actual climate catalog/station/build
+  rendering and existing state/parser/enqueue evidence passed without repair.
 - [ ] Execute all remaining run-domain packages in the dependency-aware order.
 - [ ] Resolve each encountered hold through its owning package or a bounded
   operator decision.
@@ -76,6 +78,10 @@ sweep remained applicable because no frontend source changed.
 DOM-10: no mismatch and no production patch. Expanded actual-render mode,
 selection, option, and lifecycle evidence; 204 focused Python tests, lint, 7
 focused Jest tests, and docs lint passed. No helper was introduced.
+
+DOM-11A: no mismatch and no production patch. Added catalog/station/spatial/
+build actual-render evidence; 79 render tests, 15 Climate Jest tests, 41
+Flask/RQ-engine/parser/catalog tests, lint, and docs lint passed.
 
 ## Context and Orientation
 

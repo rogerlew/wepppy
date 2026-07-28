@@ -186,6 +186,70 @@ def test_soil_pure_template_renders_ssurgo_cache_checkbox(jinja_env: Environment
     assert 'id="soil_stacktrace_panel"' in rendered
 
 
+def test_climate_template_renders_catalog_station_and_build_contract(
+    jinja_env: Environment,
+) -> None:
+    template = jinja_env.get_template("controls/climate_pure.htm")
+    climate = SimpleNamespace(
+        catalog_id="prism_stochastic",
+        climate_mode=SimpleNamespace(value=5),
+        climatestation_mode=SimpleNamespace(value=-1),
+        climate_spatialmode=SimpleNamespace(value=0),
+        uses_tenerife_station_catalog=False,
+        is_single_storm=False,
+        datasetMap={},
+        input_years=30,
+        observed_start_year=1981,
+        observed_end_year=2024,
+        future_start_year=2030,
+        future_end_year=2060,
+        cli_fn=None,
+        orig_cli_fn=None,
+        climate_daily_temp_ds="null",
+        use_gridmet_wind_when_applicable=True,
+        adjust_mx_pt5=False,
+        silent_pass_observed_quality_guard=False,
+        precip_scaling_mode=SimpleNamespace(value=0),
+        precip_scale_factor=None,
+        precip_monthly_scale_factors=None,
+        precip_scale_reference=None,
+        precip_scale_factor_map=None,
+    )
+    catalog = [
+        {
+            "catalog_id": "prism_stochastic",
+            "label": "PRISM stochastic",
+            "description": "Test catalog",
+            "help_text": "Test help",
+            "group": "Stochastic",
+            "group_hint": "",
+            "climate_mode": 5,
+            "ui_exposed": True,
+        }
+    ]
+    rendered = template.render(climate=climate, climate_catalog=catalog)
+
+    assert 'id="climate_catalog_data"' in rendered
+    assert 'id="climate_catalog_id"' in rendered
+    assert 'name="climate_catalog_id"' in rendered
+    assert 'id="climate_mode"' in rendered
+    assert 'name="climate_mode"' in rendered
+    assert 'id="climate_dataset_prism_stochastic"' in rendered
+    assert 'data-climate-action="dataset"' in rendered
+    assert 'id="climatestation_mode_auto"' in rendered
+    assert 'name="climatestation_mode"' in rendered
+    assert 'id="climate_station_selection"' in rendered
+    assert 'name="climate_station_selection"' in rendered
+    assert 'id="climate_spatialmode0"' in rendered
+    assert 'name="climate_spatialmode"' in rendered
+    assert 'id="input_years"' in rendered
+    assert 'name="input_years"' in rendered
+    assert 'id="btn_build_climate"' in rendered
+    assert 'data-climate-action="build"' in rendered
+    assert 'id="hint_build_climate"' in rendered
+    assert 'id="climate_status_panel"' in rendered
+
+
 def test_ash_template_submits_canonical_model_selector_names(jinja_env: Environment) -> None:
     def model_params(**overrides: float) -> SimpleNamespace:
         values: dict[str, float] = {
