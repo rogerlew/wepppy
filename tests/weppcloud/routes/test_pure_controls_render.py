@@ -320,6 +320,21 @@ def test_observed_template_renders_model_fit_contract(jinja_env: Environment) ->
     assert 'id="observed_stacktrace_panel"' in rendered
 
 
+def test_team_template_renders_collaboration_contract(jinja_env: Environment) -> None:
+    template = jinja_env.get_template("controls/team_pure.htm")
+    rendered = template.render()
+
+    assert 'id="team_form"' in rendered
+    assert 'id="adduser-email"' in rendered
+    assert 'name="adduser-email"' in rendered
+    assert 'data-team-field="email"' in rendered
+    assert 'id="btn_adduser"' in rendered
+    assert 'data-team-action="invite"' in rendered
+    assert 'id="hint_run_team"' in rendered
+    assert 'id="team_status_panel"' in rendered
+    assert 'id="team_stacktrace_panel"' in rendered
+
+
 def test_ash_template_submits_canonical_model_selector_names(jinja_env: Environment) -> None:
     def model_params(**overrides: float) -> SimpleNamespace:
         values: dict[str, float] = {

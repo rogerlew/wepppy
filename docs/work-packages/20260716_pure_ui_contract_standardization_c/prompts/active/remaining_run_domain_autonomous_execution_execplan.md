@@ -35,6 +35,8 @@ generator, manifest, or new CI system.
   state mismatch with direct render/browser/route evidence.
 - [x] (2026-07-28 UTC) Executed DOM-02; actual project header rendering and
   existing auth/state/module-gate evidence passed without repair.
+- [x] (2026-07-28 UTC) Executed DOM-03; actual invite rendering and existing
+  collaboration authorization evidence passed without repair.
 - [ ] Execute all remaining run-domain packages in the dependency-aware order.
 - [ ] Resolve each encountered hold through its owning package or a bounded
   operator decision.
@@ -100,6 +102,9 @@ lint passed; no authorization, payload, or queue behavior changed.
 DOM-02: no mismatch and no production patch. Added actual project header
 rendering; 123 render/route tests, 28 Project Jest tests, lint, and docs lint
 passed.
+
+DOM-03: no mismatch and no production patch. Added actual invite rendering; 92
+render/route tests, 4 Team Jest tests, lint, and docs lint passed.
 
 ## Context and Orientation
 

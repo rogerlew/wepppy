@@ -8,7 +8,7 @@
 **Started**: 2026-07-17 00:30 UTC
 **Current phase**: Select next controller
 **Last updated**: 2026-07-28 UTC
-**Next milestone**: Execute DOM-03 Team Collaboration.
+**Next milestone**: Execute DOM-13A AgFields Boundary/Schema.
 **Security impact**: `none` for scaffold; child packages reassess
 **Dedicated security review**: `no`
 **Security artifact**: N/A
@@ -26,7 +26,7 @@
 - [x] Registered and dual-reviewed REM-05 under GOV-00A-M1E without advancing
   DOM-05; checkpoint ancestor
   `44d3b93c8e3bc7d5e89151cbb9677db374411c53`.
-- [ ] Execute the autonomous remaining run-domain sequence; DOM-03 is the sole
+- [ ] Execute the autonomous remaining run-domain sequence; DOM-13A is the sole
   next active controller package.
 
 ### Blocked
@@ -53,6 +53,8 @@
   browser/route evidence (2026-07-28 UTC).
 - [x] Closed DOM-02 Project Shell with actual header and auth/state/module-gate
   evidence; no production mismatch or patch (2026-07-28 UTC).
+- [x] Closed DOM-03 Team Collaboration with actual invite and collaboration
+  authorization evidence; no production mismatch or patch (2026-07-28 UTC).
 - [x] Recorded explicit operator authority for bounded subagent dispatch and
   mandatory dual independent review (2026-07-17 00:30 UTC).
 - [x] Dispositioned the first inventory-review findings by broadening route-local
