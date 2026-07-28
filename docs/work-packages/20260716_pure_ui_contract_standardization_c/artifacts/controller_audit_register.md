@@ -117,7 +117,7 @@ explicit planning assertion to verify, not permission to omit reload evidence.
 | `rhem` / DOM-26 | `C/rhem.js`; `T/rhem_pure.htm` | `R/nodb_api/rhem_bp.py`, Rhem/RhemPost; run RQ | Actual run/lifecycle render plus controller/route/model/worker/results/reload evidence; high | contractual | verified |
 | `geneva` / DOM-27 | `C/geneva.js`; `T/geneva_pure.htm` | `R/nodb_api/geneva_bp.py` config/task/status/results/frequency/CN functions, Geneva; `geneva_rq.py` chain; SURF-11 owns four summary query/report functions | Actual config/workflow/lifecycle render plus controller/route/state/chained-worker/artifact/reload evidence; high | contractual | verified |
 | `ash` / DOM-01 | `C/ash.js`; `T/ash_pure.htm` | `R/nodb_api/watar_bp.py`, Ash; ash/WEPP RQ | `J/ash.test.js`; WATAR model/mode/files; high | contractual | verified |
-| `pathCe` / DOM-28 | `C/path_ce.js`; `T/path_cost_effective_pure.htm` | `R/nodb_api/path_ce_bp.py`, PathCostEffective; `path_ce_rq.py` | `J/path_ce.test.js`; role/config gates; high | contractual | unverified |
+| `pathCe` / DOM-28 | `C/path_ce.js`; `T/path_cost_effective_pure.htm` | `R/nodb_api/path_ce_bp.py`, PathCostEffective; `path_ce_rq.py` | Actual field/action/lifecycle render plus controller/route/config/precondition/solver/worker/report/reload/role evidence; high | contractual | verified |
 | `rusle` / DOM-29 | `C/rusle.js`; `T/rusle_pure.htm` | `R/run_0/run_0_bp.py`, Rusle; build RQ | `J/rusle.test.js`; gate/mode matrix; high | contractual | unverified |
 
 All 33 rows are `contractual / unverified`. Their future child package, concise

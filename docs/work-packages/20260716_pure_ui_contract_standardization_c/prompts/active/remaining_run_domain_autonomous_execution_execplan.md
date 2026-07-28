@@ -89,6 +89,9 @@ generator, manifest, or new CI system.
 - [x] (2026-07-28 UTC) Executed DOM-27; existing actual Geneva config/workflow/
   lifecycle rendering and route/state/chained-worker evidence passed without
   repair; SURF-11 ownership remained unchanged.
+- [x] (2026-07-28 UTC) Executed DOM-28; actual PathCE field/action/lifecycle
+  rendering and existing route/config/solver/worker/report/reload evidence
+  passed without repair.
 - [ ] Execute all remaining run-domain packages in the dependency-aware order.
 - [ ] Resolve each encountered hold through its owning package or a bounded
   operator decision.
@@ -248,6 +251,12 @@ Flask/rq-engine route, state, collaborator, chained-worker, frequency-panel,
 CN-table, artifact, and reload evidence passed; 213 focused Python tests, 14
 Geneva/Geneva-summary Jest tests, lint, and docs lint passed. SURF-11 remained
 separate.
+
+DOM-28: no mismatch and no production patch. Added actual threshold, slope,
+severity, treatment, run, results, and error rendering; controller, route,
+configuration, precondition, solver, report, rq-engine, worker, artifact,
+reload, role, and authorization evidence passed; 206 focused Python tests, 16
+PathCE Jest tests, lint, and docs lint passed.
 
 ## Context and Orientation
 

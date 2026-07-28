@@ -883,6 +883,28 @@ def test_rhem_control_renders_run_and_lifecycle_targets(jinja_env: Environment) 
         assert marker in rendered
 
 
+def test_path_ce_control_renders_thresholds_treatments_and_lifecycle(
+    jinja_env: Environment,
+) -> None:
+    rendered = jinja_env.get_template("controls/path_cost_effective_pure.htm").render()
+
+    for marker in (
+        'form id="path_ce_form"',
+        'name="sddc_threshold"',
+        'name="sdyd_threshold"',
+        'name="slope_min"',
+        'name="slope_max"',
+        'name="severity_filter"',
+        '<option value="High">High</option>',
+        'id="path_ce_treatments_table"',
+        'data-pathce-action="add-treatment"',
+        'id="path_ce_run"',
+        'id="path_ce_results_panel"',
+        'id="path_ce_stacktrace_panel"',
+    ):
+        assert marker in rendered
+
+
 def test_landuse_template_disables_single_mode_for_mofe(jinja_env: Environment) -> None:
     template = jinja_env.get_template("controls/landuse_pure.htm")
     rendered = template.render(
