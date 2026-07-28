@@ -362,6 +362,78 @@ def test_landuse_editor_templates_render_run_link_in_title_meta(
     assert 'href="/runs/demo-run/demo-config"' in rendered
 
 
+def test_landuse_catalog_template_renders_transport_and_upload_contract(
+    jinja_env: Environment,
+) -> None:
+    template = jinja_env.get_template("controls/landuse_user_defined.htm")
+    rendered = template.render(
+        runid="demo-run",
+        config="demo-config",
+        list_url="/rq-engine/api/runs/demo-run/demo-config/landuse-user-defined/catalog",
+        upload_url="/rq-engine/api/runs/demo-run/demo-config/landuse-user-defined/upload",
+        delete_url="/rq-engine/api/runs/demo-run/demo-config/landuse-user-defined/delete",
+        update_description_url="/rq-engine/api/runs/demo-run/demo-config/landuse-user-defined/update-description",
+        session_token_url="/rq-engine/api/runs/demo-run/demo-config/session-token",
+        catalog_items=[{"filename": "forest.man", "description": "Forest"}],
+    )
+
+    assert 'id="landuse-user-defined-config"' in rendered
+    assert 'data-list-url="/rq-engine/api/runs/demo-run/demo-config/landuse-user-defined/catalog"' in rendered
+    assert 'data-upload-url="/rq-engine/api/runs/demo-run/demo-config/landuse-user-defined/upload"' in rendered
+    assert 'data-delete-url="/rq-engine/api/runs/demo-run/demo-config/landuse-user-defined/delete"' in rendered
+    assert (
+        'data-update-description-url="/rq-engine/api/runs/demo-run/demo-config/'
+        'landuse-user-defined/update-description"' in rendered
+    )
+    assert 'data-session-token-url="/rq-engine/api/runs/demo-run/demo-config/session-token"' in rendered
+    assert '"filename": "forest.man"' in rendered
+    assert re.search(
+        r'<input[^>]*id="catalog-upload-input"[^>]*name="management_upload"'
+        r'[^>]*type="file"[^>]*accept="\.man,\.zip"',
+        rendered,
+    )
+    assert re.search(
+        r'<input[^>]*id="catalog-upload-replace"[^>]*name="replace"'
+        r'[^>]*type="checkbox"[^>]*value="true"',
+        rendered,
+    )
+    assert 'id="catalog-refresh"' in rendered
+    assert 'id="catalog-rows"' in rendered
+
+
+def test_landuse_map_template_renders_snapshot_and_mutation_contract(
+    jinja_env: Environment,
+) -> None:
+    template = jinja_env.get_template("controls/landuse_map.htm")
+    rendered = template.render(
+        runid="demo-run",
+        config="demo-config",
+        snapshot_url="/rq-engine/api/runs/demo-run/demo-config/landuse-map/snapshot",
+        save_url="/rq-engine/api/runs/demo-run/demo-config/landuse-map/save",
+        clear_override_url="/rq-engine/api/runs/demo-run/demo-config/landuse-map/clear-override",
+        session_token_url="/rq-engine/api/runs/demo-run/demo-config/session-token",
+        snapshot={
+            "rows": [{"key": "21", "management_file": "forest.man"}],
+            "management_options": [{"management_file": "forest.man"}],
+            "lookup_sha256": "sha-before-save",
+        },
+    )
+
+    assert 'id="landuse-map-config"' in rendered
+    assert 'data-snapshot-url="/rq-engine/api/runs/demo-run/demo-config/landuse-map/snapshot"' in rendered
+    assert 'data-save-url="/rq-engine/api/runs/demo-run/demo-config/landuse-map/save"' in rendered
+    assert (
+        'data-clear-override-url="/rq-engine/api/runs/demo-run/demo-config/'
+        'landuse-map/clear-override"' in rendered
+    )
+    assert 'data-session-token-url="/rq-engine/api/runs/demo-run/demo-config/session-token"' in rendered
+    assert '"lookup_sha256": "sha-before-save"' in rendered
+    assert 'id="landuse-map-save"' in rendered
+    assert 'id="landuse-map-refresh"' in rendered
+    assert 'id="landuse-map-clear"' in rendered
+    assert 'id="landuse-map-rows"' in rendered
+
+
 def test_roads_template_uses_standard_control_shell_layout(jinja_env: Environment) -> None:
     template = jinja_env.get_template("controls/roads_pure.htm")
     rendered = template.render()

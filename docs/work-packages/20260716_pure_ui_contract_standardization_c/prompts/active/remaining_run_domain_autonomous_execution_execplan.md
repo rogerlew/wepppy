@@ -19,7 +19,9 @@ generator, manifest, or new CI system.
   DOM-08A before this sequence.
 - [x] (2026-07-28 UTC) Created the autonomous serial plan and per-package
   commit rule.
-- [ ] Scaffold and execute DOM-08B, the sole next active package.
+- [x] (2026-07-28 UTC) Scaffolded and executed DOM-08B; actual catalog/map
+  rendering and existing browser/RQ-engine persistence evidence passed without
+  a production repair.
 - [ ] Execute all remaining run-domain packages in the dependency-aware order.
 - [ ] Resolve each encountered hold through its owning package or a bounded
   operator decision.
@@ -55,6 +57,11 @@ Append every closeout here: package ID, mismatch disposition, validation,
 production-patch status, commit, and any hold resolution. On final closure,
 compare value/runtime with the existing five-controller checkpoint and do not
 propose tooling without a measured unresolved burden and operator approval.
+
+DOM-08B: no mismatch and no production patch. Added actual-render endpoint,
+upload/control, and snapshot-precondition evidence; 169 focused Python tests,
+frontend lint, 4 focused Jest tests, the full 88-suite/663-test frontend sweep,
+and package documentation lint passed. No hold or helper was introduced.
 
 ## Context and Orientation
 
