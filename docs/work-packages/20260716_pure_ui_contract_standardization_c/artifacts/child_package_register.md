@@ -285,7 +285,7 @@ domain package.
 | DOM-14A | `20260728_wepp_core_ui_contract` | `wepp`: core payload, run lifecycle, job hints, base reports | `wepp.js`, base WEPP form/routes, `Wepp`, run/prep RQ | DOM-07, DOM-08A, DOM-10, DOM-11A | `high`: queue/worker and model persistence | verified |
 | DOM-14B | `20260728_wepp_advanced_options_ui_contract` | `wepp`: WEPP advanced option partials and parsers | WEPP advanced templates/parsers/routes/state | DOM-14A | `high`: stored model options and queue inputs | verified |
 | DOM-14C | `20260728_swat_cover_transform_ui_contract` | `wepp`: SWAT advanced options and cover-transform upload | SWAT partials/routes/state and upload path | DOM-14A, DOM-14B | `high`: upload, queue/worker, stored options | verified |
-| DOM-15 | `bootstrap_control_ui_contract` | `bootstrap` | bootstrap controller/embedded form/routes, enable/checkout/disable RQ | DOM-14A | `high`: admin/auth, git refs/tokens, queues | planned |
+| DOM-15 | `20260728_bootstrap_control_ui_contract` | `bootstrap` | bootstrap controller/embedded form/routes, enable/checkout/disable RQ | DOM-14A | `high`: admin/auth, git refs/tokens, queues | verified |
 | DOM-16 | `dss_export_ui_contract` | `dssExport` | DSS controller/form/routes, persisted `Wepp` fields, export RQ/zip | DOM-14A | `high`: queue, files, download | planned |
 | DOM-17 | `treatments_ui_contract` | `treatments` | treatments controller/form/routes, `Treatments`, map upload/build RQ | DOM-08A, DOM-10 | `high`: upload, route, queue/worker | planned |
 | DOM-18 | `debris_flow_ui_contract` | `debrisFlow` | debris controller/form/routes, `DebrisFlow`, run RQ | DOM-07, DOM-11A | `high`: role gate, route, queue/worker | planned |

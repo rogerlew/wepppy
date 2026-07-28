@@ -8,7 +8,7 @@
 **Started**: 2026-07-17 00:30 UTC
 **Current phase**: Select next controller
 **Last updated**: 2026-07-28 UTC
-**Next milestone**: Execute DOM-15 Bootstrap Control.
+**Next milestone**: Execute DOM-16 DSS Export.
 **Security impact**: `none` for scaffold; child packages reassess
 **Dedicated security review**: `no`
 **Security artifact**: N/A
@@ -26,7 +26,7 @@
 - [x] Registered and dual-reviewed REM-05 under GOV-00A-M1E without advancing
   DOM-05; checkpoint ancestor
   `44d3b93c8e3bc7d5e89151cbb9677db374411c53`.
-- [ ] Execute the autonomous remaining run-domain sequence; DOM-15 is the sole
+- [ ] Execute the autonomous remaining run-domain sequence; DOM-16 is the sole
   next active controller package.
 
 ### Blocked
@@ -68,6 +68,8 @@
   RQ-engine parser evidence; no production mismatch or patch (2026-07-28 UTC).
 - [x] Closed DOM-14C SWAT/Cover Transform with actual cover-transform rendering
   and controller/RQ-engine evidence; no production mismatch or patch (2026-07-28 UTC).
+- [x] Closed DOM-15 Bootstrap Control with actual privileged lifecycle rendering
+  and controller/auth/RQ-engine evidence; no production mismatch or patch (2026-07-28 UTC).
 - [x] Recorded explicit operator authority for bounded subagent dispatch and
   mandatory dual independent review (2026-07-17 00:30 UTC).
 - [x] Dispositioned the first inventory-review findings by broadening route-local

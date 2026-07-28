@@ -1939,6 +1939,20 @@ def test_revegetation_advanced_template_renders_cover_transform_contract(
     assert 'data-wepp-action="upload-cover-transform"' in rendered
 
 
+def test_bootstrap_control_renders_privileged_lifecycle_contract(jinja_env: Environment) -> None:
+    template = jinja_env.get_template("controls/bootstrap_pure.htm")
+    admin = SimpleNamespace(has_role=lambda role: role == "Admin")
+    rendered = template.render(user=admin, swat=True)
+
+    for marker in (
+        'data-bootstrap-action="enable"', 'data-bootstrap-action="mint"',
+        'data-bootstrap-action="checkout"', 'data-bootstrap-action="disable"',
+        'data-wepp-action="run-noprep"', 'data-wepp-action="run-swat-noprep"',
+        'id="bootstrap_clone_command"', 'id="bootstrap_commit_select"',
+    ):
+        assert marker in rendered
+
+
 def test_run_header_includes_features_export_mod_toggle(jinja_env: Environment) -> None:
     template = jinja_env.get_template("header/_run_header_fixed.htm")
     auth_user = SimpleNamespace(has_role=lambda role: False, roles=[], is_authenticated=True)
