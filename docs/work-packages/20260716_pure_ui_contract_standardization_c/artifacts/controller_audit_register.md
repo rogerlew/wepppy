@@ -160,7 +160,7 @@ run-support files, 15 shared/global files, and four standalone files.
 | README editor | SURF-09 | `R/readme_md/templates/{readme_editor,readme_view}.htm` | high | contractual | unverified |
 | Disturbed CSV editor | SURF-10 | `T/edit_csv.htm` | high | contractual | unverified |
 | Geneva summary | SURF-11 | `templates/reports/geneva/summary.htm`; `R/nodb_api/geneva_bp.py::{query_geneva_summary,query_geneva_hru_map_rows,query_geneva_hru_map_features,report_geneva_summary}` | high if remediated | contractual | unverified |
-| Report shell | SURF-12 | `templates/reports/_base_report.htm` and finite domain consumers in child register | low | contractual | unverified |
+| Report shell | SURF-12 | both report-shell producers; 19 direct consumers; run/readonly/PUP/runtime renders; Project + 124 route tests | low | contractual | verified |
 | Security/auth forms | SURF-13 | `templates/security/*.html` through `_layout.html` | high | contractual | unverified |
 | User profile/session | SURF-14 | `templates/user/profile.html` | high | contractual | unverified |
 | Root user modification | SURF-15 | `templates/user/usermod.html` | high | contractual | unverified |

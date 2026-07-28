@@ -69,6 +69,9 @@ is not a contract registry or enforcement platform.
 - [x] (2026-07-28) Executed SHR-04B with direct modal/details/theme/console
   JavaScript and rendered-template evidence; repaired three duplicate
   initializers and one dropped table-page caller.
+- [x] (2026-07-28) Executed SURF-12 with direct Pure/legacy report-shell,
+  readonly/PUP/runtime and all 19 direct-consumer evidence; no production
+  mismatch was found.
 - [ ] Close the initiative when the registered inventory has executable
   regression coverage or explicit operator-approved exclusions.
 
@@ -99,6 +102,10 @@ is not a contract registry or enforcement platform.
 - Observation: Direct duplicate-execution tests found real singleton defects
   in three shared browser producers, and direct rendering found a nested Jinja
   caller defect in the unused-but-contractual table macro.
+
+- Observation: Report-shell conformance was provable with five direct
+  regressions plus retained Project and route suites; no producer registry or
+  domain-test duplication was needed.
 
 ## Decision Log
 
@@ -157,6 +164,15 @@ guards, and capture table-page caller content before nested macro calls.
 
 **Rationale**: These are the smallest repairs to canonical singleton behavior
 and the existing macro signature; direct regressions fail without them.
+
+### 2026-07-28: SURF-12 verifies shell presentation without domain duplication
+
+**Decision**: Verify the two report producers and their finite direct-consumer
+inheritance while retaining report-body behavior under its existing DOM/SURF
+owners.
+
+**Rationale**: Direct shell, Project, and route evidence proves readonly and
+runtime contracts without creating a second owner for domain outputs.
 
 ## Context and Orientation
 

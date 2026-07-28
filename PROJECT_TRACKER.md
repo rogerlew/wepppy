@@ -386,7 +386,7 @@ build through job completion before review.
 
 ### Pure UI Controller Contract Standardization
 **Started**: 2026-07-16
-**Status**: All 39 run-domain packages and SHR-04A/04B verified
+**Status**: All 39 run-domain packages, SHR-04A/04B, and SURF-12 verified
 **Size**: One controller active at a time; inventory size is not a schedule
 **Owner**: Codex
 **Priority**: High
@@ -394,6 +394,9 @@ build through job completion before review.
 **Description**: Establish one evidence-backed contract standard and execute an iterative series of bounded work packages to audit every Pure UI controller from rendered fields through JavaScript payloads, route parsing, persistence, RQ behavior, and reload.
 
 **Current Status**:
+- [SURF-12](docs/work-packages/20260728_pure_ui_report_shell_readonly_contract/)
+  closed with direct Pure/legacy shell, readonly/PUP/runtime, finite-consumer,
+  Project, and route evidence; no production repair was required.
 - [SHR-04B](docs/work-packages/20260728_pure_ui_modal_details_theme_console_contracts/)
   closed with direct shared-producer evidence and minimal duplicate-init/
   table-caller repairs.

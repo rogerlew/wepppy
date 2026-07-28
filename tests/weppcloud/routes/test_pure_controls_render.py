@@ -1585,6 +1585,181 @@ def test_base_report_uses_modal_manager_hooks_for_disturbed_controls(jinja_env: 
     assert "toggleLegacyModal(" not in rendered
 
 
+def test_base_report_renders_run_readonly_navigation_and_runtime_contract(
+    jinja_env: Environment,
+) -> None:
+    template = jinja_env.from_string(
+        """
+        {% extends "reports/_base_report.htm" %}
+        {% block report_title %}Fixture report{% endblock %}
+        {% block report_content %}<article id="fixture-report-content">Ready</article>{% endblock %}
+        """
+    )
+    auth_user = SimpleNamespace(
+        has_role=lambda role: role in {"PowerUser", "Admin"},
+        roles=["PowerUser", "Admin"],
+        is_authenticated=True,
+    )
+    ron = SimpleNamespace(
+        mods={"disturbed"},
+        runid="fixture-run",
+        config_stem="fixture-config",
+        nodb_version=4,
+        name="Fixture project",
+        scenario="Readonly scenario",
+        readonly=True,
+        public=True,
+        srid=32611,
+    )
+
+    def _url_for_run(endpoint: str, **values) -> str:
+        return f"/run/{endpoint}/{values.get('runid', '')}/{values.get('config', '')}"
+
+    def _url_for(endpoint: str, **values) -> str:
+        if endpoint == "static":
+            return f"/static/{values['filename']}"
+        return f"/mock/{endpoint}"
+
+    rendered = template.render(
+        ron=ron,
+        current_ron=ron,
+        user=auth_user,
+        current_user=auth_user,
+        request=SimpleNamespace(
+            view_args={"runid": "fixture-run", "config": "fixture-config"},
+        ),
+        current_ttl=SimpleNamespace(user_disabled=True),
+        pup_relpath=None,
+        get_last_modified=lambda runid: SimpleNamespace(
+            strftime=lambda fmt: "2026-07-28 12:34:56",
+            timestamp=lambda: 1785267296,
+        ),
+        url_for_run=_url_for_run,
+        url_for=_url_for,
+        static_url=lambda path: f"/static/{path}",
+        site_prefix="/weppcloud",
+    )
+
+    for token in (
+        "<title>Fixture report - Fixture project</title>",
+        "wc-container wc-container--fluid",
+        'href="/run/run_0.runs0/fixture-run/fixture-config"',
+        "fixture-run",
+        "fixture-config",
+        "NoDb v4",
+        'data-project-projection="EPSG:32611"',
+        'data-run-last-modified="1785267296"',
+        'id="input_name"',
+        'name="name"',
+        'value="Fixture project"',
+        'data-project-field="name"',
+        'id="input_scenario"',
+        'name="scenario"',
+        'value="Readonly scenario"',
+        'data-project-field="scenario"',
+        "disable-readonly",
+        'id="checkbox_readonly"',
+        'id="checkbox_public"',
+        'id="checkbox_ttl_disabled"',
+        'data-modal-open="puModal"',
+        'data-modal-open="disturbedModal"',
+        'data-modal-open="unitizerModal"',
+        'id="fixture-report-content"',
+        'id="unitizerModal"',
+        'id="disturbedModal"',
+        "/static/js/controllers-gl.js",
+        "/static/js/controllers_gl_stale_check.js",
+        "/static/js/report_csv.js",
+        "/static/js/link_target_pref.js",
+        "/static/js/sorttable.js",
+        "window.runid = runid",
+        "window.runId = runid",
+        "window.config = config",
+    ):
+        assert token in rendered
+
+    assert re.search(r'id="checkbox_readonly"[^>]*checked', rendered)
+    assert re.search(r'id="checkbox_public"[^>]*checked', rendered)
+    assert re.search(r'id="checkbox_ttl_disabled"[^>]*checked', rendered)
+    assert rendered.index("/static/js/controllers-gl.js") < rendered.index(
+        'id="fixture-report-content"',
+    )
+
+
+def test_base_report_pup_context_hides_parent_actions_and_scopes_requests(
+    jinja_env: Environment,
+) -> None:
+    template = jinja_env.from_string(
+        """
+        {% extends "reports/_base_report.htm" %}
+        {% block report_title %}Child report{% endblock %}
+        {% block report_content %}<p id="child-report">Child</p>{% endblock %}
+        """
+    )
+    anon_user = SimpleNamespace(has_role=lambda role: False, roles=[], is_authenticated=False)
+    ron = SimpleNamespace(
+        mods=set(),
+        runid="batch;;child",
+        config_stem="cfg",
+        nodb_version=4,
+        name="",
+        scenario="",
+        readonly=False,
+        public=False,
+        srid=None,
+    )
+    rendered = template.render(
+        ron=ron,
+        current_ron=ron,
+        user=anon_user,
+        current_user=anon_user,
+        request=SimpleNamespace(view_args={"runid": "batch;;child", "config": "cfg"}),
+        pup_relpath="children/child",
+        site_prefix="/weppcloud",
+    )
+
+    assert ">FORK</a>" not in rendered
+    assert ">ARCHIVE</a>" not in rendered
+    assert 'id="child-report"' in rendered
+    assert 'const pupRelPath = "children/child"' in rendered
+    assert "url.includes(';;')" in rendered
+    assert "url.toLowerCase().includes('%3b%3b')" in rendered
+    assert "url.includes('elevationquery')" in rendered
+    assert "window.fetch = function(input, init)" in rendered
+    assert "XMLHttpRequest.prototype.open = function" in rendered
+
+
+def test_report_shell_falls_back_to_global_header_without_run_view(
+    jinja_env: Environment,
+) -> None:
+    template = jinja_env.from_string(
+        """
+        {% extends "reports/_base_report.htm" %}
+        {% block report_title %}Global report{% endblock %}
+        {% block report_content %}<p id="global-report">Global</p>{% endblock %}
+        """
+    )
+    anon_user = SimpleNamespace(has_role=lambda role: False, roles=[], is_authenticated=False)
+    ron = SimpleNamespace(
+        mods=set(),
+        runid="fixture-run",
+        config_stem="cfg",
+        name="",
+        scenario="",
+    )
+    rendered = template.render(
+        ron=ron,
+        current_ron=None,
+        user=anon_user,
+        current_user=anon_user,
+        pup_relpath=None,
+    )
+
+    assert 'id="global-report"' in rendered
+    assert '<header class="wc-header wc-run-header"' not in rendered
+    assert '<header class="wc-header">' in rendered
+
+
 def test_page_container_includes_disturbed_modal(jinja_env: Environment) -> None:
     template = jinja_env.get_template("reports/_page_container.htm")
     rendered = template.render(
@@ -1603,6 +1778,94 @@ def test_page_container_includes_disturbed_modal(jinja_env: Environment) -> None
     )
 
     assert 'id="disturbedModal"' in rendered
+
+
+def test_legacy_report_shell_renders_content_state_and_shared_runtime(
+    jinja_env: Environment,
+) -> None:
+    template = jinja_env.from_string(
+        """
+        {% extends "reports/_page_container.htm" %}
+        {% block report_title %}Legacy fixture{% endblock %}
+        {% block report_content %}<article id="legacy-report-content">Legacy</article>{% endblock %}
+        """
+    )
+    auth_user = SimpleNamespace(has_role=lambda role: False, roles=[], is_authenticated=True)
+    ron = SimpleNamespace(
+        mods={"disturbed"},
+        runid="fixture-run",
+        config_stem="cfg",
+        nodb_version=3,
+        name="Legacy project",
+        scenario="Legacy scenario",
+        readonly=True,
+        public=True,
+        srid=None,
+        pup_relpath=None,
+    )
+    rendered = template.render(
+        ron=ron,
+        current_ron=ron,
+        user=auth_user,
+        current_user=auth_user,
+        request=SimpleNamespace(view_args={"runid": "fixture-run", "config": "cfg"}),
+        controllers_gl_expected_build_id="legacy-build",
+        static_url=lambda path: f"/static/{path}",
+    )
+
+    for token in (
+        '<html lang="en">',
+        "<title>Legacy fixture - Legacy project</title>",
+        'data-controllers-gl-expected-build-id="legacy-build"',
+        "/static/js/controllers-gl.js",
+        "/static/js/controllers_gl_stale_check.js",
+        'id="input_name"',
+        'data-project-field="name"',
+        'id="checkbox_readonly"',
+        'id="checkbox_public"',
+        'id="legacy-report-content"',
+        'id="unitizerModal"',
+        'id="disturbedModal"',
+        "/weppcloud/static/js/sorttable.js",
+        "Project.getInstance()",
+    ):
+        assert token in rendered
+    assert re.search(r'id="checkbox_readonly"[^>]*checked', rendered)
+    assert re.search(r'id="checkbox_public"[^>]*checked', rendered)
+
+
+def test_report_shell_consumer_inventory_has_explicit_content_blocks() -> None:
+    consumers = {
+        "reports/_base_report.htm": (
+            "reports/ash/ash_contaminant.htm",
+            "reports/ash/ash_hillslope.htm",
+            "reports/ash/ash_watershed.htm",
+            "reports/debris_flow.htm",
+            "reports/geneva/summary.htm",
+            "reports/storm_event_analyzer.htm",
+            "reports/wepp/avg_annual_watbal.htm",
+            "reports/wepp/avg_annuals_by_landuse.htm",
+            "reports/wepp/daily_streamflow_graph.htm",
+            "reports/wepp/observed.htm",
+            "reports/wepp/return_periods.htm",
+            "reports/wepp/sediment_characteristics.htm",
+            "reports/wepp/summary.htm",
+            "reports/wepp/yearly_watbal.htm",
+        ),
+        "reports/_page_container.htm": (
+            "reports/rhem/avg_annual_summary.htm",
+            "reports/rhem/return_periods.htm",
+            "reports/wepp/frq_flood.htm",
+            "reports/wepp/log.htm",
+            "reports/wepp/prep_details.htm",
+        ),
+    }
+
+    for parent, template_names in consumers.items():
+        for template_name in template_names:
+            source = (TEMPLATE_ROOT / template_name).read_text(encoding="utf-8")
+            assert f'{{% extends "{parent}" %}}' in source
+            assert "{% block report_content %}" in source
 
 
 def test_run_header_hides_team_public_readonly_for_anonymous(jinja_env: Environment) -> None:
