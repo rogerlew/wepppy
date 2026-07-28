@@ -1962,6 +1962,18 @@ def test_dss_export_control_renders_mode_and_enqueue_contract(jinja_env: Environ
         assert marker in rendered
 
 
+def test_treatments_control_renders_selection_upload_and_build_contract(jinja_env: Environment) -> None:
+    template = jinja_env.get_template("controls/treatments_pure.htm")
+    rendered = template.render(
+        treatments=SimpleNamespace(mode=SimpleNamespace(value=4), treatments_lookup={"Thin": 1}),
+        treatmentoptions=[{"Key": "thin", "Description": "Thin"}],
+        landuse_management_mapping_options=[{"Key": "map", "Description": "Map"}],
+        landuse=SimpleNamespace(mapping="map"),
+    )
+    for marker in ('name="treatments_mode"', 'name="input_upload_landuse"', 'accept=".tif,.img"', 'name="landuse_management_mapping_selection"', 'data-treatments-action="build"'):
+        assert marker in rendered
+
+
 def test_run_header_includes_features_export_mod_toggle(jinja_env: Environment) -> None:
     template = jinja_env.get_template("header/_run_header_fixed.htm")
     auth_user = SimpleNamespace(has_role=lambda role: False, roles=[], is_authenticated=True)

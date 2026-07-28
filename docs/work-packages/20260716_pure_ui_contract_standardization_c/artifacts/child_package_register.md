@@ -287,7 +287,7 @@ domain package.
 | DOM-14C | `20260728_swat_cover_transform_ui_contract` | `wepp`: SWAT advanced options and cover-transform upload | SWAT partials/routes/state and upload path | DOM-14A, DOM-14B | `high`: upload, queue/worker, stored options | verified |
 | DOM-15 | `20260728_bootstrap_control_ui_contract` | `bootstrap` | bootstrap controller/embedded form/routes, enable/checkout/disable RQ | DOM-14A | `high`: admin/auth, git refs/tokens, queues | verified |
 | DOM-16 | `20260728_dss_export_ui_contract` | `dssExport` | DSS controller/form/routes, persisted `Wepp` fields, export RQ/zip | DOM-14A | `high`: queue, files, download | verified |
-| DOM-17 | `treatments_ui_contract` | `treatments` | treatments controller/form/routes, `Treatments`, map upload/build RQ | DOM-08A, DOM-10 | `high`: upload, route, queue/worker | planned |
+| DOM-17 | `20260728_treatments_ui_contract` | `treatments` | treatments controller/form/routes, `Treatments`, map upload/build RQ | DOM-08A, DOM-10 | `high`: upload, route, queue/worker | verified |
 | DOM-18 | `debris_flow_ui_contract` | `debrisFlow` | debris controller/form/routes, `DebrisFlow`, run RQ | DOM-07, DOM-11A | `high`: role gate, route, queue/worker | planned |
 | DOM-19 | `roads_ui_contract` | `roads`, `roadsMapOverlay` | roads controller/form/overlay/routes, `Roads`, uploads/prepare/run RQ | DOM-04A, DOM-04B, DOM-07 | `high`: upload, files, routes, queues | planned |
 | DOM-20A | `features_export_selection_ui_contract` | `featuresExport`: dynamic catalog, selectors, profiles | controller/form, catalog/planner/service inputs; no NoDb singleton | DOM-04A, DOM-14A | `high` if public/download routes change | planned |
