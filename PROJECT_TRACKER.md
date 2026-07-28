@@ -2,7 +2,7 @@
 > Kanban board for wepppy work packages and vision items
 
 **Last Updated**: 2026-07-27
-**Active Packages**: 19
+**Active Packages**: 20
 **Quick Links**: [Work Packages Directory](docs/work-packages/) | [God-Tier Prompting Strategy](docs/god-tier-prompting-strategy.md)
 
 ## Purpose
@@ -37,7 +37,7 @@ This tracker makes all work visible at a glance, helping agents coordinate and a
 ### 2. Limit Work in Progress
 **Target**: 2-4 active packages maximum to maintain focus and ensure packages complete rather than stall.
 
-**Current WIP**: 18 packages (above target range)
+**Current WIP**: 19 packages (above target range)
 
 ### 3. Manage Flow
 Monitor how long packages spend in each column:
@@ -294,6 +294,20 @@ When resuming Kubernetes work:
 ---
 
 ## 🚧 In Progress
+
+### Channel Depression Smoothing Propagation Fix (REM-05)
+
+**Started**: 2026-07-28
+**Size**: Small
+**Priority**: Urgent production defect
+**Security impact**: `high` (inherited DOM-05 browser-to-RQ boundary)
+**Link**: [docs/work-packages/20260728_channel_depression_smoothing_fix/](docs/work-packages/20260728_channel_depression_smoothing_fix/)
+**Description**: Restore the Channel Delineation depression-smoothing selector's
+canonical submitted name so Fill/Breach selections reach RQ, persist, and
+survive reload. The finite REM-05 package excludes algorithms, defaults, route
+parsing, queue wiring, schemas, and unrelated DOM-05 behavior.
+
+---
 
 ### Authentication Session Persistence Hardening
 **Started**: 2026-07-27

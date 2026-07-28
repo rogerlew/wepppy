@@ -54,6 +54,8 @@ evidence; they cannot silently redefine intended behavior.
 - [x] (2026-07-28 00:45 UTC) Ratify and dual-review GOV-00A-M1D for REM-04
   browser-origin guard hardening with zero unresolved findings; its standalone
   ancestor is the next atomic action.
+- [ ] (2026-07-28 06:10 UTC) Ratify and dual-review GOV-00A-M1E for REM-05's
+  finite DOM-05 depression-smoothing selector propagation boundary.
 - [ ] Ratify authority hierarchy and lifecycle vocabulary.
 - [ ] Publish the normative README and reusable contract template.
 - [ ] Add deterministic governance validation and negative fixtures.
@@ -104,6 +106,13 @@ historical discoveries when later evidence changes a decision.
   Rationale: The defects form one finite high-security browser boundary, while
   Caddy, deployment, new endpoints, and broader Diagnostics ownership remain
   excluded.
+  Date/Author: 2026-07-28 / Operator direction, recorded by Codex.
+
+- Decision: Allocate GOV-00A-M1E only to REM-05's depression-smoothing
+  rendered-name and existing request/persist/reload path.
+  Rationale: The production defect is a single macro field-name mismatch. The
+  full planned DOM-05 audit and its map/upload/RQ dependencies remain out of
+  scope.
   Date/Author: 2026-07-28 / Operator direction, recorded by Codex.
 
 - Decision: Use three independent dimensions: contractual scope, evidence
@@ -434,3 +443,6 @@ operator's direction that all registered Pure UI items are contractual now.
 
 Revision note (2026-07-17): Added the operator's contract-first authority rule
 and began the bounded Milestone 1 agent-governance slice.
+
+Revision note (2026-07-28): Registered the proposed GOV-00A-M1E checkpoint for
+the operator-authorized REM-05 production restoration.

@@ -57,6 +57,8 @@ field-id tests can miss a real payload regression.
   close it after the 5,070-pass repository sweep.
 - [ ] (2026-07-21 22:15 UTC) Ratify GOV-00A-M1B and REM-02's finite SURF-06
   TTL-deletion catalog presentation boundary before implementation.
+- [ ] (2026-07-28 06:10 UTC) Ratify GOV-00A-M1E and REM-05's finite DOM-05
+  depression-smoothing propagation boundary before implementation.
 - [ ] Ratify `docs/ui-docs/contracts/README.md` and its evidence levels.
 - [ ] Execute and close the WATAR/Ash pilot child package.
 - [ ] Use pilot findings to add a stable contract-coverage check.
@@ -143,6 +145,12 @@ historical observations when later evidence changes the design.
   status of Diagnostics or advancing SURF-13, SHR-02, or SHR-04A.
   Rationale: This is a finite production defect across existing browser request
   and safe-report boundaries, not a general Pure UI package.
+  Date/Author: 2026-07-28 / Operator direction, recorded by Codex.
+
+- Decision: Register REM-05 under GOV-00A-M1E without advancing DOM-05.
+  Rationale: The production failure is a finite rendered-name mismatch with an
+  already-existing canonical worker key, not authority to execute the complete
+  Channel Delineation audit.
   Date/Author: 2026-07-28 / Operator direction, recorded by Codex.
 
 - Decision: Use one umbrella ExecPlan to create and execute bounded child work

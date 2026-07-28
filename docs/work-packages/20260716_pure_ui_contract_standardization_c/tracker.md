@@ -27,6 +27,8 @@
 ### In Progress
 
 - [ ] Execute GOV-00A and ratify the canonical contract schema.
+- [ ] Register and dual-review REM-05 under GOV-00A-M1E without advancing
+  DOM-05; commit its documentation-only checkpoint ancestor before code edits.
 
 ### Blocked
 
@@ -49,11 +51,11 @@
   no unresolved high/medium findings (2026-07-20 21:40 UTC).
 - [x] Committed both REM-01 contract ancestors, executed its finite boundary,
   passed dual final review and broad validation, and closed the remediation
+  without advancing DOM-02, DOM-25A, or DOM-25B (2026-07-20 22:42 UTC).
 - [x] Register and dual-review REM-04 under GOV-00A-M1D without advancing
   SURF-13, SHR-02, SHR-04A, or the excluded Diagnostics surface; standalone
   ancestor `736198ce8a4b68b83a9c77860a52da574f2cc98d`
   (2026-07-28 00:50 UTC).
-  without advancing DOM-02, DOM-25A, or DOM-25B (2026-07-20 22:42 UTC).
 - [x] Closed REM-02's separately ratified read-only TTL catalog presentation
   boundary after final dual review; SURF-06 remains planned and unadvanced
   (2026-07-21 23:15 UTC).
@@ -78,10 +80,12 @@ the corresponding stable ID starts.
 | SHR-01..SHR-07 (including A/B facets) | Shared-foundation packages | 9 | planned | Two independent reviews each |
 | SURF-01..SURF-18 (including A/B facets) | Non-run/stateful Pure surfaces | 19 | planned | Two independent reviews each |
 | GOV-99 | Authority cutover and closeout | 1 | planned | Two independent final reviews |
+| REM-01..REM-05 | Bounded defect remediations | 5 | mixed | Two independent reviews each |
 
-Total: 73 independently closable execution units. GOV-00 is this existing
-umbrella; GOV-00A is the active ratification child; REM-01 is complete and
-REM-02 is complete. The remaining units receive dated directories when
+Total: 76 independently closable execution units. GOV-00 is this existing
+umbrella; GOV-00A is the active ratification child; REM-01 and REM-02 are
+complete, while REM-03 through REM-05 retain their recorded states. Planned
+units receive dated directories when
 started. DOM-01 is the WATAR/Ash pilot.
 
 Every new child package must be added here and to `PROJECT_TRACKER.md` before
@@ -179,6 +183,17 @@ the exact source boundary recorded in the child-package register.
 
 **Impact**: The remediation can proceed only after its checkpoint ancestor. It
 does not advance the borrowed owners or change the Diagnostics exclusion.
+
+### 2026-07-28 06:10 UTC: Register REM-05 channel smoothing remediation
+
+**Context**: Production evidence proves the rendered selector drops the user's
+chosen WBT conditioning token before the RQ boundary.
+
+**Decision**: Add REM-05 under separately reviewed GOV-00A-M1E and borrow only
+the finite DOM-05 render/request/persist/reload path.
+
+**Impact**: The one-field restoration may proceed after its documentation-only
+ancestor. DOM-05 remains planned and unverified.
 
 ### 2026-07-17 00:30 UTC: Use an umbrella ExecPlan with bounded child packages
 

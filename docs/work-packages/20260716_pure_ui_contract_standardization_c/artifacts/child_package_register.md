@@ -1,20 +1,24 @@
 # Pure UI Contract Child Package Register
 
 **Register version**: 1.2 contractual baseline
-**Last updated**: 2026-07-27 UTC
+**Last updated**: 2026-07-28 UTC
 **Authority**: Stable IDs define package boundaries; dated package directories
 are created only when work starts.
-**Total**: 74 execution units: 4 governance, 3 bounded remediations, 39
+**Total**: 76 execution units: 4 governance, 5 bounded remediations, 39
 run-domain, 9 shared-foundation, and 19 non-run/stateful surface packages.
 GOV-00 is the existing umbrella at
 `docs/work-packages/20260716_pure_ui_contract_standardization_c/`; GOV-00A is the
 active ratification child at
-`docs/work-packages/20260716_pure_ui_contract_ratification/`; the remaining 69
+`docs/work-packages/20260716_pure_ui_contract_ratification/`; planned entries
 receive dated directories only when started. REM-01 is the operator-authorized
 bounded remediation at
 `docs/work-packages/20260720_omni_mod_state_sync/`. REM-02 is the
 operator-authorized bounded remediation at
 `docs/work-packages/20260721_runs_ttl_deletion_catalog/`.
+REM-03 and REM-04 are the registered authentication/session and browser-origin
+hardening remediations. REM-05 is the operator-authorized Channel Delineation
+selector remediation at
+`docs/work-packages/20260728_channel_depression_smoothing_fix/`.
 
 ## Boundary and Review Rules
 
@@ -93,6 +97,11 @@ milestone proposed only for REM-04. It requires its own dual review,
 disposition, and standalone ancestor. It borrows no authority from earlier
 milestones and cannot advance the borrowed browser/session owners.
 
+`GOV-00A-M1E` is the separately closable bounded-remediation governance
+milestone proposed only for REM-05. It requires its own dual review,
+disposition, and standalone ancestor. It borrows only the finite DOM-05
+depression-smoothing propagation boundary and cannot advance DOM-05.
+
 Dependency shorthand expands exactly as follows:
 
 - `SHR-01..04B` = SHR-01, SHR-02, SHR-03A, SHR-03B, SHR-04A, SHR-04B.
@@ -128,6 +137,7 @@ GOV-01 machine-readable manifest. GOV-99 is intentionally absent from all sets.
 | REM-02 | `20260721_runs_ttl_deletion_catalog` | SURF-06 | Read-only TTL policy/expiry projection for already-authorized catalog rows; one lifecycle table cell; dedicated Usersum documentation and focused catalog/template/doc tests only | GOV-00A-M1B | `high`: authenticated run-metadata presentation; no new access path or mutation | completed / dual-reviewed |
 | REM-03 | `20260727_auth_session_persistence_hardening` | SURF-13, SHR-02, SHR-04A | Password-login remember checkbox GET default and POST opt-out; rolling remember-cookie duration/refresh; login/logout cookie boundary; authentication-log redaction and append-only durable diagnostics; focused auth/config/logging tests and documentation only | GOV-00A-M1C | `high`: authentication persistence and credential-adjacent diagnostics | checkpoint review |
 | REM-04 | `20260727_web_origin_guard_hardening` | SURF-13, SHR-02, SHR-04A | Existing Flask, rq-engine, and query-engine same-origin guards; reset deletion of configured WEPPcloud session/remember cookies; copied diagnostics report allowlist; focused origin/CSRF/cookie/report tests and documentation only | GOV-00A-M1D | `high`: CSRF-adjacent origin authorization, cookie deletion, and report disclosure | checkpoint review |
+| REM-05 | `20260728_channel_depression_smoothing_fix` | DOM-05 | Depression-smoothing selector rendered name, canonical request token, existing worker mutation/persistence, reload hydration, actual-template regression, Usersum note, and production verification only | GOV-00A-M1E | `high`: inherited browser-to-RQ persisted mutation boundary; no new input or queue behavior | checkpoint review |
 
 REM-01 excludes Omni scenario/contrast payload shapes, uploads, queue wiring or
 execution semantics, artifacts, report content/formatting, overlays, deletion
@@ -154,6 +164,23 @@ Its final evidence is inherited by SURF-13, SHR-02, and SHR-04A without
 advancing those owners. The register's Diagnostics exclusion remains unchanged:
 REM-04 is a defect-scoped exception and does not enroll Diagnostics in the Pure
 UI initiative.
+
+REM-05 excludes algorithms, defaults, enum tokens, map behavior, DEM uploads,
+route parsing, queue wiring, NoDb schema, authorization, CSRF, and every other
+DOM-05 field. Its evidence is inherited by DOM-05 without advancing that owner.
+
+The exact REM-05 implementation boundary is limited to:
+
+- the `input_wbt_fill_or_breach` macro invocation in
+  `wepppy/weppcloud/templates/controls/channel_delineation_pure.htm`;
+- actual-template regression coverage in
+  `tests/weppcloud/routes/test_pure_controls_render.py`;
+- worker non-null/null/failure characterization in
+  `tests/rq/test_project_rq_mutation_guards.py`;
+- paired channel controller fixtures/assertions only if needed to prove the
+  existing canonical request token;
+- the Channel Delineation Usersum guide; and
+- REM-05/GOV-00A contracts, reviews, trackers, and deployment evidence.
 
 The exact REM-04 implementation boundary is limited to:
 

@@ -7,7 +7,7 @@
 **Timezone**: UTC
 **Started**: 2026-07-17 01:48 UTC
 **Current phase**: Milestone 1 - canonical schema ratification
-**Last updated**: 2026-07-27 19:55 UTC
+**Last updated**: 2026-07-28 06:10 UTC
 **Next milestone**: Continue the canonical schema, template, and obligation registry.
 **Security impact**: `none`
 **Dedicated security review**: `no`
@@ -28,6 +28,7 @@
 
 - [ ] Complete Milestone 1 canonical README and obligation registry after the
   contract-first agent-governance slice.
+- [ ] Complete GOV-00A-M1E/REM-05 checkpoint review and standalone ancestor.
 
 ### Blocked
 
@@ -61,6 +62,8 @@
   findings; standalone ancestor
   `736198ce8a4b68b83a9c77860a52da574f2cc98d`
   (2026-07-28 00:45 UTC).
+- [x] Recorded operator authorization and drafted GOV-00A-M1E/REM-05 for the
+  finite DOM-05 depression-smoothing propagation defect (2026-07-28 06:10 UTC).
 - [x] Recorded contract-first authority and sequencing in root, WEPPcloud,
   controller, NoDb, rq-engine, and direct RQ agent governance (2026-07-17).
 - [x] Dispositioned two high/three medium authority findings and two high/four
@@ -102,6 +105,19 @@ does not advance the borrowed owners.
 
 **Impact**: REM-01 may complete only its exact defect boundary before GOV-01;
 all unrelated DOM-02/DOM-25A/DOM-25B work remains planned and dependency-gated.
+
+### 2026-07-28 06:10 UTC: Create GOV-00A-M1E for REM-05
+
+**Context**: The production Channel Delineation form submits a null
+depression-smoothing value because the rendered form name differs from the
+controller's canonical payload key.
+
+**Decision**: Register REM-05 as a finite borrower of DOM-05. It may correct
+only the selector name and add exact render/request/persist/reload evidence.
+
+**Impact**: REM-05 inherits high security, requires dual review and a standalone
+ancestor, and cannot change algorithms, defaults, routes, queues, schemas, or
+advance DOM-05.
 
 ### 2026-07-21 22:15 UTC: Create GOV-00A-M1B for REM-02
 
