@@ -12,12 +12,11 @@
 
 ### In Progress
 
-- [ ] Apply and validate the bounded implementation.
+- [ ] Commit, push, deploy, and verify wepp1.
 
 ### Ready
 
-- [ ] Apply the template and actual-render regression fix.
-- [ ] Validate, complete final reviews, commit, push, and deploy wepp1.
+- [ ] Record deployment evidence and close the package.
 
 ### Done
 
@@ -30,6 +29,12 @@
   blocking/medium findings.
 - [x] Committed standalone documentation-only checkpoint ancestor
   `44d3b93c8e3bc7d5e89151cbb9677db374411c53`.
+- [x] Applied the canonical template name and render/controller/worker
+  regression coverage.
+- [x] Passed focused Python (123), full frontend (660), frontend lint, scoped
+  docs lint, broad-exception enforcement, and diff checks.
+- [x] Completed final correctness and security reviews with no high/medium
+  findings.
 
 ## Decision Log
 
@@ -69,6 +74,20 @@ committed as `44d3b93c8e3bc7d5e89151cbb9677db374411c53`.
 **Next step**: Apply only the registered template, render-test, worker
 characterization, and Usersum changes.
 
+### 2026-07-28 07:00 UTC: Implementation and review complete
+
+**Work completed**: Added the one-line macro fix, actual-template hydration
+assertion, both controller Fill-payload assertions, and worker
+non-null/null/failure characterization. Both final reviewers returned PASS.
+
+**Validation**: 123 focused Python tests and all 660 frontend tests passed;
+frontend lint, docs lint, broad-exception enforcement, and `git diff --check`
+passed. A full Python sweep was stopped at 2% because its runtime was
+disproportionate; this is retained as residual validation risk.
+
+**Next step**: Commit, push all local commits, gate wepp1 queues, deploy, and
+verify read-only.
+
 ## Dispatch Log
 
 | Time (UTC) | Reviewer | Scope | Outcome |
@@ -76,3 +95,5 @@ characterization, and Usersum changes.
 | 2026-07-28 06:15 | Governance control agent | Authority, contract, compatibility, and regression checkpoint | Initial FAIL: three blocking and two medium findings; all corrected |
 | 2026-07-28 06:15 | Operations/security control agent | Security, RQ/NoDb integrity, deployment containment, rollback | Initial FAIL: two blocking and four medium findings; all corrected |
 | 2026-07-28 06:40 | Both checkpoint reviewers | Post-fix confirmation | PASS; no blocking or medium findings |
+| 2026-07-28 07:00 | Correctness reviewer | Final implementation correctness and regression review | PASS; no blocking/high/medium findings |
+| 2026-07-28 07:00 | Security reviewer | Final implementation security/operations review | PASS; no high/medium findings |

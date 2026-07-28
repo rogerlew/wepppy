@@ -328,6 +328,96 @@ def test_build_channels_rq_rejects_archive_form_root(
     assert call_roots == ["watershed"]
 
 
+@pytest.mark.parametrize(
+    ("override", "expected"),
+    [
+        ("fill", "fill"),
+        (None, "breach_least_cost"),
+    ],
+)
+def test_build_channels_rq_applies_optional_wbt_conditioning_before_build(
+    monkeypatch: pytest.MonkeyPatch,
+    tmp_path: Path,
+    override: str | None,
+    expected: str,
+) -> None:
+    run_wd, _set_archive_roots, _call_roots = _stub_rq_context(monkeypatch, tmp_path)
+    events: list[tuple] = []
+    _record_cache_clears(monkeypatch, events)
+    _record_prep_timestamps(monkeypatch, events)
+
+    class DummyWatershed:
+        delineation_backend_is_topaz = False
+        delineation_backend_is_wbt = True
+
+        def __init__(self) -> None:
+            self._wbt_fill_or_breach = "breach_least_cost"
+
+        @property
+        def wbt_fill_or_breach(self) -> str:
+            return self._wbt_fill_or_breach
+
+        @wbt_fill_or_breach.setter
+        def wbt_fill_or_breach(self, value: str) -> None:
+            events.append(("set_wbt_fill_or_breach", value))
+            self._wbt_fill_or_breach = value
+
+        def build_channels(self, csa: float, mcl: float) -> None:
+            events.append(("build_channels", csa, mcl, self.wbt_fill_or_breach))
+
+    watershed = DummyWatershed()
+    monkeypatch.setattr(project_rq.Watershed, "getInstance", lambda _wd: watershed)
+
+    project_rq.build_channels_rq(
+        "demo",
+        csa=5.0,
+        mcl=60.0,
+        stream_pruning_method=None,
+        wbt_fill_or_breach=override,
+        wbt_blc_dist=None,
+    )
+
+    assert ("build_channels", 5.0, 60.0, expected) in events
+    if override is None:
+        assert not any(event[0] == "set_wbt_fill_or_breach" for event in events)
+    else:
+        assert events.index(("set_wbt_fill_or_breach", override)) < events.index(
+            ("build_channels", 5.0, 60.0, expected)
+        )
+    assert run_wd.exists()
+
+
+def test_build_channels_rq_preserves_applied_wbt_conditioning_when_build_fails(
+    monkeypatch: pytest.MonkeyPatch,
+    tmp_path: Path,
+) -> None:
+    _run_wd, _set_archive_roots, _call_roots = _stub_rq_context(monkeypatch, tmp_path)
+    _record_cache_clears(monkeypatch, [])
+
+    class DummyWatershed:
+        delineation_backend_is_topaz = False
+        delineation_backend_is_wbt = True
+        wbt_fill_or_breach = "breach_least_cost"
+
+        def build_channels(self, _csa: float, _mcl: float) -> None:
+            raise RuntimeError("channel build failed")
+
+    watershed = DummyWatershed()
+    monkeypatch.setattr(project_rq.Watershed, "getInstance", lambda _wd: watershed)
+
+    with pytest.raises(RuntimeError, match="channel build failed"):
+        project_rq.build_channels_rq(
+            "demo",
+            csa=5.0,
+            mcl=60.0,
+            stream_pruning_method=None,
+            wbt_fill_or_breach="fill",
+            wbt_blc_dist=None,
+        )
+
+    assert watershed.wbt_fill_or_breach == "fill"
+
+
 def test_build_landuse_rq_rejects_archive_form_root(
     monkeypatch: pytest.MonkeyPatch,
     tmp_path: Path,

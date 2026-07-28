@@ -124,3 +124,11 @@
 test is registered in both authoritative scope lists, and all initial findings
 are corrected and dispositioned. The documentation-only checkpoint is safe to
 commit as the standalone pre-implementation ancestor.
+
+## Final Implementation Review
+
+The independent final security review returned PASS with no high or medium
+findings. Its raw review is retained in
+`2026-07-28_final_security_review.md`. The only low residual is the pre-existing
+direct invalid-token path assigned to later DOM-05 hardening; REM-05 does not
+widen it.

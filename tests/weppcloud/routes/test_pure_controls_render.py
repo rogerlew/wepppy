@@ -210,6 +210,36 @@ def test_ash_template_submits_canonical_model_selector_names(jinja_env: Environm
     assert 'name="ash_transport_mode_select"' not in rendered
 
 
+def test_channel_template_submits_and_hydrates_depression_smoothing(
+    jinja_env: Environment,
+) -> None:
+    template = jinja_env.get_template("controls/channel_delineation_pure.htm")
+    rendered = template.render(
+        watershed=SimpleNamespace(
+            uploaded_dem_filename=None,
+            set_extent_mode=0,
+            map_bounds_text="",
+            delineation_backend_is_topaz=False,
+            delineation_backend_is_wbt=True,
+            mcl=60.0,
+            csa=5.0,
+            stream_pruning_method="ifolp",
+            wbt_fill_or_breach="fill",
+            wbt_blc_dist=1000,
+        )
+    )
+
+    assert re.search(
+        r'<select[^>]*id="input_wbt_fill_or_breach"'
+        r'[^>]*name="wbt_fill_or_breach"'
+        r'[^>]*data-channel-role="wbt-fill"',
+        rendered,
+        re.DOTALL,
+    )
+    assert 'name="input_wbt_fill_or_breach"' not in rendered
+    assert re.search(r'<option value="fill" selected>Fill</option>', rendered)
+
+
 @pytest.mark.parametrize(
     ("template_name", "title_text", "run_link_class"),
     [

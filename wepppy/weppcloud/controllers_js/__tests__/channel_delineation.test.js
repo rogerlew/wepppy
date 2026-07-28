@@ -203,6 +203,7 @@ describe("Channel Delineation controller", () => {
     test("build posts JSON payload and records job id", async () => {
         const events = [];
         channel.events.on("channel:build:started", (payload) => events.push({ type: "started", payload }));
+        document.getElementById("input_wbt_fill_or_breach").value = "fill";
 
         const result = await channel.build();
 
@@ -221,6 +222,7 @@ describe("Channel Delineation controller", () => {
         expect(jsonPayload.mcl).toBe(60);
         expect(jsonPayload.csa).toBe(5);
         expect(jsonPayload.stream_pruning_method).toBe("ifolp");
+        expect(jsonPayload.wbt_fill_or_breach).toBe("fill");
         expect(jsonPayload.set_extent_mode).toBe(0);
         expect(jsonPayload.map_object).toBeNull();
 

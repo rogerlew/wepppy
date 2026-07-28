@@ -22,10 +22,12 @@ token without altering channel algorithms or defaults.
 - [x] (2026-07-28 06:45 UTC) Registered GOV-00A-M1E/REM-05, obtained two
   independent post-fix PASS reviews, and committed documentation-only ancestor
   `44d3b93c8e3bc7d5e89151cbb9677db374411c53`.
-- [ ] Apply the one-field template conformance fix and actual-template
-  regression test.
-- [ ] Run focused frontend and documentation validation.
-- [ ] Complete independent final security/correctness reviews and close REM-05.
+- [x] (2026-07-28 07:00 UTC) Applied the one-field template conformance fix,
+  actual-template/controller assertions, and worker characterization.
+- [x] (2026-07-28 07:00 UTC) Passed 123 focused Python tests, frontend lint,
+  all 660 frontend tests, scoped docs lint, and diff/exception checks.
+- [x] (2026-07-28 07:00 UTC) Completed independent final security/correctness
+  reviews with no high/medium findings; deployment closeout remains.
 - [ ] Push all local commits, gate production queues, pull and deploy on wepp1,
   and verify service and rendered contract.
 
@@ -60,7 +62,12 @@ token without altering channel algorithms or defaults.
 
 ## Outcomes & Retrospective
 
-Pending implementation and deployment.
+Implementation is complete and independently reviewed. The browser now submits
+the canonical selected token, and regression coverage spans actual rendering,
+both browser controllers, worker override/null/failure behavior, and reload
+hydration. Focused Python and full frontend gates passed. The full Python sweep
+was stopped at 2% because its runtime was disproportionate; deployment remains
+the only open milestone.
 
 ## Context and Orientation
 

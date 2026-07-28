@@ -49,6 +49,8 @@ Calibration guidance: WEPP in WEPPcloud has been calibrated with CSA < 10 ha and
   - Fill: fills sinks before routing.
   - Breach: removes barriers by breaching.
   - Breach (Least Cost): preferred for rugged terrain; uses a cost-based breach.
+  - A successful **Build Channels** saves the selected algorithm; reloading the
+    run shows the algorithm used for the build.
 - **Breach distance**
   - Only used with Breach (Least Cost).
   - Units: meters.

@@ -288,6 +288,7 @@ describe("ChannelDelineation GL controller", () => {
         const channel = window.ChannelDelineation.getInstance();
 
         requestMock.mockResolvedValueOnce({ body: { job_id: "job-99" } });
+        document.getElementById("input_wbt_fill_or_breach").value = "fill";
         const result = await channel.build();
 
         expect(result).toMatchObject({ job_id: "job-99" });
@@ -305,6 +306,7 @@ describe("ChannelDelineation GL controller", () => {
         expect(jsonPayload.mcl).toBe(60);
         expect(jsonPayload.csa).toBe(5);
         expect(jsonPayload.stream_pruning_method).toBe("ifolp");
+        expect(jsonPayload.wbt_fill_or_breach).toBe("fill");
         expect(jsonPayload.set_extent_mode).toBe(0);
         expect(jsonPayload.map_object).toBeNull();
 
