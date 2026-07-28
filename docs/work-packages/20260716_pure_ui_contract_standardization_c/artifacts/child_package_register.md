@@ -288,7 +288,7 @@ domain package.
 | DOM-15 | `20260728_bootstrap_control_ui_contract` | `bootstrap` | bootstrap controller/embedded form/routes, enable/checkout/disable RQ | DOM-14A | `high`: admin/auth, git refs/tokens, queues | verified |
 | DOM-16 | `20260728_dss_export_ui_contract` | `dssExport` | DSS controller/form/routes, persisted `Wepp` fields, export RQ/zip | DOM-14A | `high`: queue, files, download | verified |
 | DOM-17 | `20260728_treatments_ui_contract` | `treatments` | treatments controller/form/routes, `Treatments`, map upload/build RQ | DOM-08A, DOM-10 | `high`: upload, route, queue/worker | verified |
-| DOM-18 | `debris_flow_ui_contract` | `debrisFlow` | debris controller/form/routes, `DebrisFlow`, run RQ | DOM-07, DOM-11A | `high`: role gate, route, queue/worker | planned |
+| DOM-18 | `20260728_debris_flow_ui_contract` | `debrisFlow` | debris controller/form/routes, `DebrisFlow`, run RQ | DOM-07, DOM-11A | `high`: role gate, route, queue/worker | verified |
 | DOM-19 | `roads_ui_contract` | `roads`, `roadsMapOverlay` | roads controller/form/overlay/routes, `Roads`, uploads/prepare/run RQ | DOM-04A, DOM-04B, DOM-07 | `high`: upload, files, routes, queues | planned |
 | DOM-20A | `features_export_selection_ui_contract` | `featuresExport`: dynamic catalog, selectors, profiles | controller/form, catalog/planner/service inputs; no NoDb singleton | DOM-04A, DOM-14A | `high` if public/download routes change | planned |
 | DOM-20B | `features_export_execution_ui_contract` | `featuresExport`: enqueue, cache, artifacts, download | export routes/service/cache/RQ/output contracts | DOM-20A | `high`: queue, files, downloads | planned |

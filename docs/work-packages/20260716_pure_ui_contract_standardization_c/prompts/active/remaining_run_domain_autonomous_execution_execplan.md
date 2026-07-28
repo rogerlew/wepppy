@@ -55,6 +55,8 @@ generator, manifest, or new CI system.
   existing browser/RQ-engine evidence passed without repair.
 - [x] (2026-07-28 UTC) Executed DOM-17; actual selection/upload/build rendering
   and existing browser/RQ-engine evidence passed without repair.
+- [x] (2026-07-28 UTC) Executed DOM-18; actual override/run rendering and
+  existing browser/route/RQ/worker evidence passed without repair.
 - [ ] Execute all remaining run-domain packages in the dependency-aware order.
 - [ ] Resolve each encountered hold through its owning package or a bounded
   operator decision.
@@ -153,6 +155,9 @@ evidence; 92 focused Python tests, 11 DSS Jest tests, lint, and docs lint passed
 
 DOM-17: no mismatch and no production patch. Added actual Treatments render
 evidence; 99 focused Python tests, 8 Treatments Jest tests, lint, and docs lint passed.
+
+DOM-18: no mismatch and no production patch. Added actual Debris Flow render
+evidence; 102 focused Python tests, 7 Jest tests, lint, and docs lint passed.
 
 ## Context and Orientation
 

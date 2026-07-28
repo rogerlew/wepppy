@@ -1974,6 +1974,16 @@ def test_treatments_control_renders_selection_upload_and_build_contract(jinja_en
         assert marker in rendered
 
 
+def test_debris_flow_control_renders_override_and_run_contract(jinja_env: Environment) -> None:
+    template = jinja_env.get_template("controls/debris_flow_pure.htm")
+    rendered = template.render(
+        debris_flow=SimpleNamespace(volume=None, datasources=["NOAA"], datasource="NOAA"),
+        soils=SimpleNamespace(clay_pct=12.5, liquid_limit=28.0),
+    )
+    for marker in ('name="clay_pct"', 'name="liquid_limit"', 'name="datasource"', 'data-debris-action="run"', 'id="hint_run_debris_flow"'):
+        assert marker in rendered
+
+
 def test_run_header_includes_features_export_mod_toggle(jinja_env: Environment) -> None:
     template = jinja_env.get_template("header/_run_header_fixed.htm")
     auth_user = SimpleNamespace(has_role=lambda role: False, roles=[], is_authenticated=True)
