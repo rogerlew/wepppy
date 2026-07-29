@@ -81,6 +81,10 @@ is not a contract registry or enforcement platform.
 - [x] (2026-07-28) Executed SURF-16 with direct ERMiT launcher/client,
   route/session/RQ/worker evidence; repaired rejected-token retry recovery and
   passed independent security review.
+- [x] (2026-07-28) Executed SURF-09 with direct README viewer/editor renders,
+  real inline-client, route/Redis/filesystem/reload evidence; repaired
+  authority, path, concurrency, resource-boundary, Jinja, and client response
+  contracts and passed independent security review.
 - [ ] Close the initiative when the registered inventory has executable
   regression coverage or explicit operator-approved exclusions.
 

@@ -18,12 +18,14 @@
       "type": "button",
       "disabled": True
     },
-    {
+  ] %}
+  {% if can_edit and not ron.readonly %}
+    {% set header_actions = header_actions + [{
       "href": url_for_run('readme.readme_editor', runid=runid, config=config),
       "label": "Edit",
       "variant": "pure-button-secondary"
-    }
-  ] %}
+    }] %}
+  {% endif %}
   {% set subtitle = None %}
   {% if ron.name %}
     {% set subtitle = ron.name %}

@@ -6,13 +6,13 @@
 
 **Timezone**: UTC
 **Started**: 2026-07-17 00:30 UTC
-**Current phase**: SURF-08 closed; next package selection
+**Current phase**: SURF-09 verified; next package selection pending
 **Last updated**: 2026-07-28 UTC
-**Next milestone**: Select the next dependency-valid Pure UI package.
-**Security impact**: `high` run mutation, polling token, archive, and readonly surface
-**Dedicated security review**: `yes` for SHR-05, SURF-07, SURF-08, SURF-11, and SURF-16
+**Next milestone**: Select the next bounded registered package.
+**Security impact**: `high` authenticated filesystem mutation, concurrency, and rendered Markdown
+**Dedicated security review**: `yes` for SHR-05, SURF-07, SURF-08, SURF-09, SURF-11, and SURF-16
 **Security artifact**:
-`../20260728_pure_ui_run_migration_status_contract/artifacts/2026-07-28_security_review.md`
+`../20260728_pure_ui_readme_editor_contract/artifacts/2026-07-28_security_review.md`
 
 ## Task Board
 
@@ -24,6 +24,7 @@
 
 ### In Progress
 
+- None.
 - [x] Registered and dual-reviewed REM-05 under GOV-00A-M1E without advancing
   DOM-05; checkpoint ancestor
   `44d3b93c8e3bc7d5e89151cbb9677db374411c53`.
@@ -36,6 +37,12 @@
 
 ### Done
 
+- [x] Closed SURF-09 with direct viewer/editor rendering, real inline-client,
+  route/Redis/filesystem/reload evidence, authority/path/concurrency/size/Jinja
+  and response-handling repairs, and passing independent security review
+  (2026-07-28 UTC). Focused Python passed 186 tests; the full frontend passed
+  93 suites/687 tests and lint; broad Python reached 2,462 passes and 40 skips
+  before the known unrelated GridMET `_FakeUnits.degC` fixture failure.
 - [x] Closed SURF-08 with permission-aware rendering, real inline
   enqueue/poll/backoff/terminal evidence, direct route/worker tests, and
   auth/lock/token/archive/readonly conformance repairs with passing independent

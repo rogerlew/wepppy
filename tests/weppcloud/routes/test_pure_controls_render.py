@@ -20,6 +20,7 @@ RUN_0_TEMPLATE_ROOT = REPO_ROOT / "wepppy" / "weppcloud" / "routes" / "run_0" / 
 RQ_JOB_DASHBOARD_TEMPLATE_ROOT = (
     REPO_ROOT / "wepppy" / "weppcloud" / "routes" / "rq" / "job_dashboard" / "templates"
 )
+README_TEMPLATE_ROOT = REPO_ROOT / "wepppy" / "weppcloud" / "routes" / "readme_md" / "templates"
 PURE_TEMPLATES = [
     "controls/ag_fields_pure.htm",
     "controls/path_cost_effective_pure.htm",
@@ -29,6 +30,8 @@ PURE_TEMPLATES = [
     "controls/roads_pure.htm",
     "reports/storm_event_analyzer.htm",
     "run_0/rq-migration-status.htm",
+    "readme_editor.htm",
+    "readme_view.htm",
 ]
 
 pytestmark = pytest.mark.routes
@@ -43,6 +46,7 @@ def jinja_env() -> Environment:
                 str(COMMAND_BAR_TEMPLATE_ROOT),
                 str(RUN_0_TEMPLATE_ROOT),
                 str(RQ_JOB_DASHBOARD_TEMPLATE_ROOT),
+                str(README_TEMPLATE_ROOT),
             ]
         ),
         undefined=DebugUndefined,
@@ -129,6 +133,12 @@ def jinja_env() -> Environment:
         is_readonly=False,
         is_owner=True,
         is_admin=False,
+        initial_markdown="# Initial README",
+        initial_html="<h1>Initial README</h1>",
+        editor_client_uuid="client-fixture",
+        readme_html="<h1>README View</h1>",
+        generated=None,
+        can_edit=True,
     )
     return env
 
@@ -137,6 +147,52 @@ def jinja_env() -> Environment:
 def test_pure_control_renders(template_name: str, jinja_env: Environment) -> None:
     template = jinja_env.get_template(template_name)
     template.render()
+
+
+def test_readme_editor_renders_fixed_actions_state_and_safe_bootstrap(
+    jinja_env: Environment,
+) -> None:
+    rendered = jinja_env.get_template("readme_editor.htm").render(
+        runid='run-</script><script id="run-injection">',
+        config='cfg-";window.configInjection=true;//',
+        initial_markdown="# Project notes",
+        initial_html="<h1>Project notes</h1>",
+        editor_client_uuid='client-</script><script id="uuid-injection">',
+        ron=SimpleNamespace(name="Named run", scenario="Base"),
+    )
+
+    assert 'id="readme-editor"' in rendered
+    assert 'id="readme-preview"' in rendered
+    assert 'id="readme-lock-overlay"' in rendered
+    assert 'id="readme-lock-reload"' in rendered
+    assert "># Project notes</textarea>" in rendered
+    assert "<h1>Project notes</h1>" in rendered
+    assert 'const runid = "run-\\u003c/script\\u003e' in rendered
+    assert 'const clientUuid = "client-\\u003c/script\\u003e' in rendered
+    assert "Changes are saved automatically and on Ctrl+S." in rendered
+
+
+def test_readme_view_renders_permission_aware_action_and_safe_html(
+    jinja_env: Environment,
+) -> None:
+    rendered = jinja_env.get_template("readme_view.htm").render(
+        readme_html="<h1>Safe rendered README</h1>",
+        can_edit=True,
+        ron=SimpleNamespace(name="Named run", scenario="Scenario"),
+    )
+
+    assert "<h1>Safe rendered README</h1>" in rendered
+    assert "README.md" in rendered
+    assert ">Edit</a>" in rendered
+    assert "Named run" in rendered
+    assert "Scenario" in rendered
+
+    view_only = jinja_env.get_template("readme_view.htm").render(
+        readme_html="<p>View only</p>",
+        can_edit=False,
+        ron=SimpleNamespace(name="", scenario="", readonly=True),
+    )
+    assert ">Edit</a>" not in view_only
 
 
 def test_base_pure_renders_document_metadata_blocks_and_assets(jinja_env: Environment) -> None:

@@ -83,6 +83,7 @@
   let currentRonName = initialRonName;
   let currentRonScenario = initialRonScenario;
   let invalidated = false;
+  let saveRevision = 0;
 
   let commandProject = null;
 
@@ -144,7 +145,13 @@
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({ markdown: editor.value, uuid: clientUuid })
     })
-      .then(resp => resp.json())
+      .then(async resp => {
+        const body = await resp.json();
+        if (!resp.ok) {
+          throw new Error((body.error && body.error.message) || 'Preview failed');
+        }
+        return body;
+      })
       .then(body => {
         if (body && typeof body.html === 'string') {
           previewEl.innerHTML = body.html;
@@ -164,21 +171,49 @@
     if (invalidated) {
       return;
     }
+    saveRevision += 1;
+    const revision = saveRevision;
     fetch(saveUrl, {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ markdown: editor.value, uuid: clientUuid })
+      body: JSON.stringify({
+        markdown: editor.value,
+        uuid: clientUuid,
+        revision: revision
+      })
     })
-      .then(resp => resp.json())
-      .then(body => {
-        if (body && body.status === 'locked') {
+      .then(async resp => {
+        const body = await resp.json();
+        if (body && body.invalidated) {
           invalidateEditor();
+          return null;
+        }
+        if (!resp.ok) {
+          throw new Error((body.error && body.error.message) || 'Save failed');
+        }
+        return body;
+      })
+      .then(body => {
+        if (!body) {
           return;
         }
-        if (body && body.ron_name !== undefined) {
-          currentRonName = body.ron_name;
-          currentRonScenario = body.ron_scenario;
+        if (body.ronUpdate) {
+          if (body.ronUpdate.name !== undefined) {
+            currentRonName = body.ronUpdate.name;
+          }
+          if (body.ronUpdate.scenario !== undefined) {
+            currentRonScenario = body.ronUpdate.scenario;
+          }
           updateDocumentTitle();
+          const project = resolveCommandProject();
+          if (project && body.ronUpdate.name !== undefined &&
+              typeof project.set_name === 'function') {
+            project.set_name(body.ronUpdate.name);
+          }
+          if (project && body.ronUpdate.scenario !== undefined &&
+              typeof project.set_scenario === 'function') {
+            project.set_scenario(body.ronUpdate.scenario);
+          }
         }
         notify('README saved.');
       })
@@ -219,7 +254,13 @@
 
   function pollLock() {
     fetch(rawUrl, { headers: { 'X-Readme-Client': clientUuid } })
-      .then(resp => resp.json())
+      .then(async resp => {
+        const body = await resp.json();
+        if (!resp.ok) {
+          throw new Error('README lock poll failed');
+        }
+        return body;
+      })
       .then(body => {
         if (body && body.locked_out) {
           invalidateEditor();
