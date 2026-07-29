@@ -467,6 +467,12 @@ describe("Fork console smoke", () => {
             if (url === "http://localhost/weppcloud/rq/job-dashboard/job-456") {
                 return Promise.resolve({ ok: true, text: () => Promise.resolve("") });
             }
+            if (url === "http://localhost/weppcloud/runs/demo-run/cfg/rq-fork-console/readiness/job-456/demo-run-new") {
+                return Promise.resolve({
+                    ok: true,
+                    json: () => Promise.resolve({ ready: true, missing: [] }),
+                });
+            }
             return Promise.reject(new Error(`Unexpected fetch: ${url} (${JSON.stringify(options)})`));
         });
         global.fetch = fetchMock;
@@ -715,9 +721,261 @@ describe("Fork console smoke", () => {
         expect(window.sessionStorage.getItem("weppcloud:fork-console:demo-run:cfg")).not.toBeNull();
 
         poller.triggerEvent("FORK_COMPLETE", { source: "poll", status: { status: "finished" } });
+        await flushPromises();
 
         expect(document.getElementById("the_console").dataset.state).toBe("positive");
         expect(window.sessionStorage.getItem("weppcloud:fork-console:demo-run:cfg")).toBeNull();
+    });
+
+    test("waits for destination readiness before exposing the load link", async () => {
+        let readinessCalls = 0;
+        let scheduledRetry = null;
+        fetchMock.mockImplementation((url) => {
+            if (url === "http://localhost/rq-engine/api/runs/demo-run/cfg/session-token") {
+                return Promise.resolve({
+                    ok: true,
+                    json: () => Promise.resolve({ token: "session-token" }),
+                });
+            }
+            if (url === "http://localhost/rq-engine/api/runs/demo-run/cfg/fork") {
+                return Promise.resolve({
+                    ok: true,
+                    text: () => Promise.resolve(JSON.stringify({
+                        job_id: "job-456",
+                        new_runid: "demo-run-new",
+                    })),
+                });
+            }
+            if (url === "http://localhost/weppcloud/runs/demo-run/cfg/rq-fork-console/readiness/job-456/demo-run-new") {
+                readinessCalls += 1;
+                return Promise.resolve({
+                    ok: true,
+                    json: () => Promise.resolve({
+                        ready: readinessCalls >= 2,
+                        missing: readinessCalls >= 2 ? [] : ["ron.nodb"],
+                    }),
+                });
+            }
+            return Promise.reject(new Error(`Unexpected fetch: ${url}`));
+        });
+
+        document.getElementById("fork_form").dispatchEvent(
+            new Event("submit", { bubbles: true, cancelable: true })
+        );
+        await flushPromises();
+        expect(document.getElementById("the_console").querySelector("a")).toBeNull();
+        const timeoutSpy = jest.spyOn(window, "setTimeout").mockImplementation((callback) => {
+            scheduledRetry = callback;
+            return 1;
+        });
+        try {
+            poller.triggerEvent("FORK_COMPLETE", {
+                source: "poll",
+                status: { status: "finished" },
+            });
+            for (let index = 0; index < 20 && scheduledRetry === null; index += 1) {
+                await Promise.resolve();
+            }
+
+            expect(document.getElementById("the_console").querySelector("a")).toBeNull();
+            expect(window.sessionStorage.getItem("weppcloud:fork-console:demo-run:cfg")).not.toBeNull();
+            expect(scheduledRetry).not.toBeNull();
+            expect(document.getElementById("cancel_button").hidden).toBe(true);
+            expect(document.getElementById("cancel_button").disabled).toBe(true);
+
+            scheduledRetry();
+            for (
+                let index = 0;
+                index < 20 && document.getElementById("the_console").dataset.state !== "positive";
+                index += 1
+            ) {
+                await Promise.resolve();
+            }
+
+            expect(readinessCalls).toBe(2);
+            expect(document.getElementById("the_console").dataset.state).toBe("positive");
+            expect(document.getElementById("the_console").querySelector("a").textContent).toContain(
+                "Load demo-run-new project"
+            );
+            expect(window.sessionStorage.getItem("weppcloud:fork-console:demo-run:cfg")).toBeNull();
+        } finally {
+            timeoutSpy.mockRestore();
+        }
+    });
+
+    test("bounds unavailable-destination checks and keeps a manual retry", async () => {
+        let readinessCalls = 0;
+        let destinationReady = false;
+        fetchMock.mockImplementation((url) => {
+            if (url === "http://localhost/rq-engine/api/runs/demo-run/cfg/session-token") {
+                return Promise.resolve({
+                    ok: true,
+                    json: () => Promise.resolve({ token: "session-token" }),
+                });
+            }
+            if (url === "http://localhost/rq-engine/api/runs/demo-run/cfg/fork") {
+                return Promise.resolve({
+                    ok: true,
+                    text: () => Promise.resolve(JSON.stringify({
+                        job_id: "job-456",
+                        new_runid: "demo-run-new",
+                    })),
+                });
+            }
+            if (url === "http://localhost/weppcloud/runs/demo-run/cfg/rq-fork-console/readiness/job-456/demo-run-new") {
+                readinessCalls += 1;
+                return Promise.resolve({
+                    ok: true,
+                    json: () => Promise.resolve({
+                        ready: destinationReady,
+                        missing: destinationReady ? [] : ["ron.nodb"],
+                    }),
+                });
+            }
+            return Promise.reject(new Error(`Unexpected fetch: ${url}`));
+        });
+
+        document.getElementById("fork_form").dispatchEvent(
+            new Event("submit", { bubbles: true, cancelable: true })
+        );
+        await flushPromises();
+        const timeoutSpy = jest.spyOn(window, "setTimeout").mockImplementation((callback) => {
+            callback();
+            return 1;
+        });
+        try {
+            poller.triggerEvent("FORK_COMPLETE", {
+                source: "poll",
+                status: { status: "finished" },
+            });
+            for (
+                let index = 0;
+                index < 300
+                    && document.getElementById("the_console").querySelector("button") === null;
+                index += 1
+            ) {
+                await Promise.resolve();
+            }
+
+            const consoleBlock = document.getElementById("the_console");
+            const retryButton = consoleBlock.querySelector("button");
+            expect(readinessCalls).toBe(30);
+            expect(consoleBlock.querySelector("a")).toBeNull();
+            expect(retryButton.textContent).toBe("Check project readiness");
+            expect(window.sessionStorage.getItem("weppcloud:fork-console:demo-run:cfg")).not.toBeNull();
+            expect(document.getElementById("cancel_button").hidden).toBe(true);
+            expect(document.getElementById("cancel_button").disabled).toBe(true);
+
+            destinationReady = true;
+            retryButton.click();
+            for (
+                let index = 0;
+                index < 20 && consoleBlock.dataset.state !== "positive";
+                index += 1
+            ) {
+                await Promise.resolve();
+            }
+
+            expect(readinessCalls).toBe(31);
+            expect(consoleBlock.querySelector("a").textContent).toContain(
+                "Load demo-run-new project"
+            );
+            expect(window.sessionStorage.getItem("weppcloud:fork-console:demo-run:cfg")).toBeNull();
+        } finally {
+            timeoutSpy.mockRestore();
+        }
+    });
+
+    test("readiness authorization failure retains tracking and prompts reload", async () => {
+        fetchMock.mockImplementation((url) => {
+            if (url === "http://localhost/rq-engine/api/runs/demo-run/cfg/session-token") {
+                return Promise.resolve({
+                    ok: true,
+                    json: () => Promise.resolve({ token: "session-token" }),
+                });
+            }
+            if (url === "http://localhost/rq-engine/api/runs/demo-run/cfg/fork") {
+                return Promise.resolve({
+                    ok: true,
+                    text: () => Promise.resolve(JSON.stringify({
+                        job_id: "job-456",
+                        new_runid: "demo-run-new",
+                    })),
+                });
+            }
+            if (url === "http://localhost/weppcloud/runs/demo-run/cfg/rq-fork-console/readiness/job-456/demo-run-new") {
+                return Promise.resolve({
+                    ok: false,
+                    status: 403,
+                    json: () => Promise.resolve({
+                        error: { code: "forbidden", message: "Destination access denied" },
+                    }),
+                });
+            }
+            return Promise.reject(new Error(`Unexpected fetch: ${url}`));
+        });
+
+        document.getElementById("fork_form").dispatchEvent(
+            new Event("submit", { bubbles: true, cancelable: true })
+        );
+        await flushPromises();
+        poller.triggerEvent("FORK_COMPLETE", {
+            source: "poll",
+            status: { status: "finished" },
+        });
+        await flushPromises();
+
+        const consoleBlock = document.getElementById("the_console");
+        expect(consoleBlock.dataset.state).toBe("critical");
+        expect(consoleBlock.textContent).toContain("Destination access denied");
+        expect(consoleBlock.querySelector("a")).toBeNull();
+        expect(global.alert).toHaveBeenCalledTimes(1);
+        expect(window.sessionStorage.getItem("weppcloud:fork-console:demo-run:cfg")).not.toBeNull();
+        expect(document.getElementById("cancel_button").hidden).toBe(true);
+    });
+
+    test("readiness transport failure retains tracking and offers manual retry", async () => {
+        fetchMock.mockImplementation((url) => {
+            if (url === "http://localhost/rq-engine/api/runs/demo-run/cfg/session-token") {
+                return Promise.resolve({
+                    ok: true,
+                    json: () => Promise.resolve({ token: "session-token" }),
+                });
+            }
+            if (url === "http://localhost/rq-engine/api/runs/demo-run/cfg/fork") {
+                return Promise.resolve({
+                    ok: true,
+                    text: () => Promise.resolve(JSON.stringify({
+                        job_id: "job-456",
+                        new_runid: "demo-run-new",
+                    })),
+                });
+            }
+            if (url === "http://localhost/weppcloud/runs/demo-run/cfg/rq-fork-console/readiness/job-456/demo-run-new") {
+                return Promise.reject(new Error("readiness offline"));
+            }
+            return Promise.reject(new Error(`Unexpected fetch: ${url}`));
+        });
+
+        document.getElementById("fork_form").dispatchEvent(
+            new Event("submit", { bubbles: true, cancelable: true })
+        );
+        await flushPromises();
+        poller.triggerEvent("FORK_COMPLETE", {
+            source: "poll",
+            status: { status: "finished" },
+        });
+        await flushPromises();
+
+        const consoleBlock = document.getElementById("the_console");
+        expect(consoleBlock.dataset.state).toBe("critical");
+        expect(consoleBlock.textContent).toContain("readiness offline");
+        expect(consoleBlock.querySelector("a")).toBeNull();
+        expect(consoleBlock.querySelector("button").textContent).toBe(
+            "Check project readiness"
+        );
+        expect(window.sessionStorage.getItem("weppcloud:fork-console:demo-run:cfg")).not.toBeNull();
+        expect(document.getElementById("cancel_button").hidden).toBe(true);
     });
 
     test("heartbeat updates replaceable progress instead of the log", async () => {
@@ -776,9 +1034,7 @@ describe("Fork console smoke", () => {
         const consoleBlock = document.getElementById("the_console");
         expect(consoleBlock.textContent).toContain('restored-run"><img data-injected src=x>');
         expect(consoleBlock.querySelector("[data-injected]")).toBeNull();
-        expect(consoleBlock.querySelector("a").getAttribute("href")).toContain(
-            "restored-run%22%3E%3Cimg%20data-injected%20src%3Dx%3E"
-        );
+        expect(consoleBlock.querySelector("a")).toBeNull();
     });
 
     test("submitting fork form uses rq-engine token when provided", async () => {

@@ -790,6 +790,22 @@ the remaining-run controller plan has no next controller milestone.
 
 ## ✅ Done
 
+### Fork Destination Readiness Hardening ✅
+
+**Completed**: 2026-07-29
+
+**Status**: ✅ **CLOSED LOCALLY; DEPLOYMENT DEFERRED**
+
+**Link**: [docs/work-packages/20260729_fork_destination_readiness_hardening/](docs/work-packages/20260729_fork_destination_readiness_hardening/)
+
+**Summary**: Fork RQ completion now begins a bounded, authorized,
+exact-job-bound destination-readiness check. No load link appears until
+WEPPcloud sees the core destination state; exhaustion and transport failures
+remain visible and retryable. Local broad validation and dual review passed.
+The operator will perform local integration testing and may reopen the package.
+
+---
+
 ### Diagnostics Page UX, Browser Reset Relocation, and Discoverability ✅
 
 **Completed**: 2026-07-27

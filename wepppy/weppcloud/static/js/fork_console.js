@@ -5,6 +5,8 @@
   var STATUS_RENDER_BATCH_MS = 100;
   var FORK_HEARTBEAT_PREFIX = "FORK_HEARTBEAT ";
   var FORK_STORAGE_PREFIX = "weppcloud:fork-console:";
+  var READINESS_RETRY_DELAY_MS = 1000;
+  var READINESS_MAX_ATTEMPTS = 30;
 
   function ready(fn) {
     if (document.readyState === "loading") {
@@ -222,7 +224,8 @@
     var jobId = "";
     var newRunId = "";
     var poller = null;
-    var completionState = { completed: false, failed: false };
+    var completionState = { completed: false, failed: false, finalizing: false };
+    var readinessGeneration = 0;
     var authRecoveryTriggered = false;
 
     function storageKey() {
@@ -302,17 +305,12 @@
       liveProgress.hidden = !message;
     }
 
-    function appendNewRunLink(target, prefix) {
+    function appendNewRunIdentifier(target, prefix) {
       if (!target) {
         return;
       }
       target.appendChild(document.createTextNode(prefix));
-      var link = document.createElement("a");
-      link.href = origin + "/weppcloud/runs/" + encodeURIComponent(newRunId) + "/cfg";
-      link.target = "_blank";
-      link.rel = "noopener";
-      link.textContent = newRunId;
-      target.appendChild(link);
+      target.appendChild(document.createTextNode(newRunId));
     }
 
     function formatForkStatus(message) {
@@ -549,8 +547,10 @@
     }
 
     function resetCompletionState() {
+      readinessGeneration += 1;
       completionState.completed = false;
       completionState.failed = false;
+      completionState.finalizing = false;
     }
 
     function resetJobStatus() {
@@ -604,6 +604,7 @@
     }
 
     function handleForkComplete() {
+      completionState.finalizing = false;
       clearTrackedForkRecord();
       jobId = "";
       setLiveProgress("");
@@ -634,6 +635,8 @@
     }
 
     function handleForkFailed() {
+      readinessGeneration += 1;
+      completionState.finalizing = false;
       clearTrackedForkRecord();
       jobId = "";
       setLiveProgress("");
@@ -652,13 +655,115 @@
       appendStatus("Fork job failed.");
     }
 
+    function readinessUrl() {
+      return origin
+        + "/weppcloud/runs/" + encodeURIComponent(runId)
+        + "/" + encodeURIComponent(config)
+        + "/rq-fork-console/readiness/" + encodeURIComponent(jobId)
+        + "/" + encodeURIComponent(newRunId);
+    }
+
+    function showReadinessRetry(message) {
+      completionState.finalizing = false;
+      setLiveProgress("");
+      if (!consoleBlock) {
+        return;
+      }
+      consoleBlock.dataset.state = "critical";
+      consoleBlock.textContent = message + " ";
+      var retryButton = document.createElement("button");
+      retryButton.type = "button";
+      retryButton.className = "pure-button pure-button-secondary";
+      retryButton.textContent = "Check project readiness";
+      retryButton.addEventListener("click", function () {
+        beginReadinessCheck();
+      });
+      consoleBlock.appendChild(retryButton);
+    }
+
+    function checkDestinationReadiness(generation, attempt) {
+      if (generation !== readinessGeneration || !completionState.finalizing) {
+        return;
+      }
+      fetch(readinessUrl(), {
+        method: "GET",
+        headers: { Accept: "application/json" }
+      })
+        .then(function (resp) {
+          return resp.json().catch(function () {
+            return null;
+          }).then(function (body) {
+            if (!resp.ok) {
+              var message = resolveErrorMessage(body, "Project readiness check failed.");
+              var error = new Error(message);
+              error.status = resp.status;
+              error.body = body;
+              throw error;
+            }
+            return body;
+          });
+        })
+        .then(function (body) {
+          if (generation !== readinessGeneration || !completionState.finalizing) {
+            return;
+          }
+          if (body && body.ready === true) {
+            handleForkComplete();
+            return;
+          }
+          if (attempt >= READINESS_MAX_ATTEMPTS) {
+            var exhausted = "Fork completed, but the project is not yet available.";
+            appendStatus(exhausted);
+            showReadinessRetry(exhausted);
+            return;
+          }
+          window.setTimeout(function () {
+            checkDestinationReadiness(generation, attempt + 1);
+          }, READINESS_RETRY_DELAY_MS);
+        })
+        .catch(function (error) {
+          if (generation !== readinessGeneration || !completionState.finalizing) {
+            return;
+          }
+          var message = error && error.message
+            ? error.message
+            : "Project readiness check failed.";
+          if (error && (error.status === 401 || error.status === 403)) {
+            completionState.finalizing = false;
+            handleStaleAuth(message);
+            return;
+          }
+          appendStatus(message);
+          showReadinessRetry(message);
+        });
+    }
+
+    function beginReadinessCheck() {
+      if (!newRunId || completionState.finalizing) {
+        return;
+      }
+      readinessGeneration += 1;
+      completionState.finalizing = true;
+      var generation = readinessGeneration;
+      setLiveProgress("Fork completed; confirming project availability...");
+      if (cancelButton) {
+        cancelButton.hidden = true;
+        cancelButton.disabled = true;
+      }
+      if (consoleBlock) {
+        consoleBlock.dataset.state = "attention";
+        consoleBlock.textContent = "Fork completed; finalizing project availability...";
+      }
+      checkDestinationReadiness(generation, 1);
+    }
+
     function markCompleted(detail) {
       if (completionState.completed) {
         return;
       }
       completionState.completed = true;
       completionState.failed = false;
-      handleForkComplete(detail);
+      beginReadinessCheck(detail);
     }
 
     function markFailed(detail) {
@@ -769,7 +874,7 @@
         consoleBlock.dataset.state = "attention";
         if (restored) {
           consoleBlock.innerHTML = "";
-          appendNewRunLink(consoleBlock, "Restored fork job for ");
+          appendNewRunIdentifier(consoleBlock, "Restored fork job for ");
           consoleBlock.appendChild(document.createTextNode("."));
         }
       }
@@ -967,7 +1072,7 @@
           if (consoleBlock) {
             consoleBlock.dataset.state = "attention";
             consoleBlock.innerHTML = "";
-            appendNewRunLink(consoleBlock, "New runid: ");
+            appendNewRunIdentifier(consoleBlock, "New runid: ");
             consoleBlock.appendChild(document.createElement("br"));
             consoleBlock.appendChild(document.createTextNode("Undisturbify: " + undisturbifyFlag));
             consoleBlock.appendChild(document.createElement("br"));

@@ -4,7 +4,7 @@
 > **Related:** [weppcloud-project-archiving.md](weppcloud-project-archiving.md), [controller-contract.md](controller-contract.md), [trigger-refactor.md](../mini-work-packages/completed/trigger-refactor.md)
 
 ## Introduction
-The forking system clones an existing WEPPcloud run into a new run directory. The fork console lets users submit a fork job, monitor live status output, and open the new run when the job completes. Forking can optionally "undisturbify" the run by clearing disturbance artifacts, rebuilding landuse/soils, and rerunning WEPP.
+The forking system clones an existing WEPPcloud run into a new run directory. The fork console lets users submit a fork job, monitor live status output, and open the new run after the job completes and WEPPcloud confirms the destination is visible. Forking can optionally "undisturbify" the run by clearing disturbance artifacts, rebuilding landuse/soils, and rerunning WEPP.
 
 ## Fork Console UI
 Template: `wepppy/weppcloud/routes/fork_console/templates/rq-fork-console.htm`  
@@ -25,7 +25,15 @@ Script: `wepppy/weppcloud/static/js/fork_console.js`
   - `set_rq_job_id(...)` polls `/rq-engine/api/jobstatus/<job_id>` for status/started/ended timestamps.
   - Polling failures fetch `/rq-engine/api/jobinfo/<job_id>` to populate stacktraces.
   - WebSocket `FORK_COMPLETE`/`FORK_FAILED` triggers request immediate job-status reconciliation but do not terminate the UI by themselves.
-  - Poll-origin `job:completed`/`job:error` handlers perform the idempotent terminal UI transition.
+  - Poll-origin `job:completed` begins destination-readiness reconciliation;
+    `job:error` performs the idempotent failure transition.
+- Checks the source-and-destination-authorized WEPPcloud readiness route once
+  per second for at most 30 attempts after RQ success. The route also binds the
+  exact finished `fork_rq` job to those run IDs. The load link appears only
+  after the route sees the destination plus `ron.nodb`, `wepp.nodb`,
+  `landuse.nodb`, and `soils.nodb`.
+- Retains the tracked fork and presents a manual readiness retry if the bounded
+  check is exhausted or a non-authorization transport error occurs.
 - Stores source/config/job/destination identifiers (never tokens) in `sessionStorage` so same-tab reload restores polling.
 - Reconciles status immediately on `visibilitychange`, `focus`, and `pageshow` after browser throttling or suspension.
 - Retains at most 400 append-only messages and uses the shared StatusStream batched renderer; important lifecycle/error messages are discarded only after ordinary entries.
@@ -39,6 +47,10 @@ Module: `wepppy/weppcloud/routes/fork_console/fork_console.py`
 - Blueprint name: `fork`.
 - Route:
   - `rq_fork_console`: renders the console template, parses optional `undisturbify` and `skip_wepp_runs_output` query params, and authorizes the run.
+  - `fork_destination_readiness`: authorizes the source and destination runs,
+    verifies that the finished fork job binds those exact run IDs, and reports
+    whether WEPPcloud can resolve the destination's core root NoDb state. It is
+    read-only and does not declare model-output readiness.
 
 ## RQ API
 Module: `wepppy/microservices/rq_engine/fork_archive_routes.py`
@@ -102,6 +114,13 @@ leaf controllers depend on that identity inside their native Batch Runner contex
 
 ## Additional Details
 - Status messages and triggers are published on the source run channel `<runid>:fork`.
-- Fork completion is signaled by both StatusStream and polling. `/jobstatus/<job_id>` is authoritative; stream triggers accelerate reconciliation and guarded handlers prevent duplicate terminal flows.
-- The new run ID is surfaced via both the status panel link and the console action panel.
+- Fork worker completion is signaled by both StatusStream and polling.
+  `/jobstatus/<job_id>` is authoritative for worker success; stream triggers
+  accelerate reconciliation and guarded handlers prevent duplicate terminal
+  flows. Worker success does not expose the load link until the WEPPcloud
+  destination-readiness route succeeds.
+- The new run ID is plain text while the fork is pending. Readiness adds the
+  sole destination link to the console action panel.
 - Operational thresholds and rationale are recorded in `docs/adrs/ADR-0021-fork-console-status-backpressure-thresholds.md`.
+- Destination-readiness retry thresholds and rationale are recorded in
+  `docs/adrs/ADR-0031-fork-destination-readiness-retry-budget.md`.
