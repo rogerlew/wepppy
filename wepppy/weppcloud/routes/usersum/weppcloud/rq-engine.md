@@ -67,6 +67,11 @@ Admin debugging routes require bearer JWT + admin role:
 These power the admin snapshot page at:
 - `/weppcloud/rq/info-details`
 
+The snapshot is available only to Admin and Root users. It is static until
+refreshed. Active work is separated into one panel per requested queue; the
+default view shows `default` first and `batch` second. Recently completed and
+failed jobs remain combined tables with a Queue column.
+
 ## Common User Workflows
 ### 1. Standard WEPPcloud UI run
 1. Configure controls in the UI.

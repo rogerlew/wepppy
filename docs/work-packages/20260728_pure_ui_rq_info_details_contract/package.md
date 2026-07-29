@@ -1,6 +1,6 @@
 # SURF-17 Pure UI RQ Info Details Contract
 
-**Status**: Active
+**Status**: Verified
 **Package ID**: SURF-17
 **Security impact**: `high`
 **Dedicated security review**: required for any production patch

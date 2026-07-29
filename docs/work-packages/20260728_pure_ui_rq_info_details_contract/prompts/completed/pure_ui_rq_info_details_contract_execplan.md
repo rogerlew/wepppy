@@ -15,13 +15,13 @@ the existing completed and failed tables.
 ## Progress
 
 - [x] (2026-07-28 UTC) Scaffolded SURF-17 and recorded operator approval.
-- [ ] Complete two independent contract reviews and commit the checkpoint.
-- [ ] Trace authorization, Redis/RQ listing, hydration, rendering, navigation,
+- [x] (2026-07-28 UTC) Completed two independent contract reviews and committed checkpoint `cf20ef0b0`.
+- [x] (2026-07-28 UTC) Traced authorization, Redis/RQ listing, hydration, rendering, navigation,
   and existing tests.
-- [ ] Add direct render, authorization, grouping, filtering, failure, and
+- [x] (2026-07-28 UTC) Added direct render, authorization, grouping, filtering, failure, and
   retained-producer evidence.
-- [ ] Implement the ratified server-owned active queue grouping.
-- [ ] Complete security review, focused/broad validation, records, commits, and
+- [x] (2026-07-28 UTC) Implemented the ratified server-owned active queue grouping.
+- [x] (2026-07-28 UTC) Completed security review, focused/broad validation, records, commits, and
   clean closeout.
 
 ## Surprises & Discoveries
@@ -29,6 +29,17 @@ the existing completed and failed tables.
 - Observation: The existing route already accepts an ordered `queues` query and
   the listing payload already labels every active job with its queue.
   Evidence: `_parse_queues`, `list_active_jobs`, and the current Queue column.
+
+- Observation: Existing admin-route tests mocked the listing producer and could
+  not prove its queue label or read-only behavior.
+  Evidence: the new `tests/rq/test_job_listings.py` exercises the real producer
+  with fake RQ read APIs.
+
+- Observation: Autoescaping needed explicit evidence for both text and quoted
+  attribute/link contexts.
+  Evidence: hostile queue, worker, function, submitter, job, and run values are
+  rendered through an autoescaped actual template without executable markup or
+  injected attributes.
 
 ## Decision Log
 
@@ -43,7 +54,15 @@ the existing completed and failed tables.
 
 ## Outcomes & Retrospective
 
-Pending execution.
+SURF-17 now renders one active panel per requested queue in exact request order,
+with first-occurrence duplicate handling, case-sensitive isolation, and an
+explicit empty state. The default view separates `default` from `batch`.
+Recently completed and failed tables, authorization, lookbacks, metadata,
+navigation, and read-only behavior remain unchanged. Focused Python passed 134
+tests; all 93 frontend suites and 687 tests plus lint passed. Independent
+correctness and security reviews passed with no unresolved findings. Broad
+Python reached 2,462 passes and 40 skips before the known unrelated GridMET
+`_FakeUnits.degC` fixture failure.
 
 ## Context and Orientation
 

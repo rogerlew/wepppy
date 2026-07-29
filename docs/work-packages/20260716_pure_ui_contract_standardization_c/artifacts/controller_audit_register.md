@@ -165,7 +165,7 @@ run-support files, 15 shared/global files, and four standalone files.
 | User profile/session | SURF-14 | `templates/user/profile.html` | high | contractual | unverified |
 | Root user modification | SURF-15 | `templates/user/usermod.html` | high | contractual | unverified |
 | ERMiT export/download | SURF-16 | direct launcher render + inline token/submit/poll/download/retry Jest + Flask/session/rq-engine/worker evidence; rejected-token retry repair; security review passed | high | contractual | verified |
-| RQ Info Details | SURF-17 | `R/rq/info_details/templates/info_details.htm`; `R/rq/info_details/routes.py::rq_info_details`; `tests/weppcloud/routes/test_rq_info_details.py` | high: Admin/Root Redis/RQ and submitter metadata | contractual | unverified |
+| RQ Info Details | SURF-17 | `R/rq/info_details/templates/info_details.htm`; Admin/Root route + real producer + actual render; ordered isolated active queue panels; 134 focused Python | high review passed | contractual | verified |
 | DEVAL loading | SURF-18 | `templates/reports/deval_loading.htm`; `R/weppcloudr.py::{deval_details,_determine_job,_enqueue_deval_job}`; `wepppy/rq/weppcloudr_rq.py::render_deval_details_rq`; no focused template/poll suite yet | high: CAP, queue, job state and generated report | contractual | unverified |
 
 Direct report-container consumers are itemized rather than hidden under

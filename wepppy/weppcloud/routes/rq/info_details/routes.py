@@ -144,6 +144,27 @@ def _filter_jobs_within_lookback(
     return filtered
 
 
+def _group_active_jobs_by_queue(
+    queue_names: Sequence[str],
+    active_jobs: Sequence[dict[str, Any]],
+) -> list[dict[str, Any]]:
+    groups: list[dict[str, Any]] = []
+    seen_names: set[str] = set()
+    for raw_name in queue_names:
+        name = str(raw_name).strip()
+        if not name or name in seen_names:
+            continue
+        seen_names.add(name)
+        jobs = [
+            job
+            for job in active_jobs
+            if isinstance(job.get("queue"), str)
+            and job["queue"].strip() == name
+        ]
+        groups.append({"name": name, "jobs": jobs})
+    return groups
+
+
 @rq_info_details_bp.route("/rq/info-details", strict_slashes=False)
 @login_required
 @roles_accepted("Admin", "Root")
@@ -172,6 +193,7 @@ def rq_info_details():
             _hydrate_submitter(job, user_cache=user_cache, run_owner_cache=run_owner_cache)
         for job in active_jobs:
             _hydrate_submitter(job, user_cache=user_cache, run_owner_cache=run_owner_cache)
+        active_job_groups = _group_active_jobs_by_queue(queue_names, active_jobs)
 
         actions = [
             {
@@ -197,7 +219,7 @@ def rq_info_details():
             failed_lookback_seconds=failed_lookback_seconds,
             recent_jobs=recent_jobs,
             failed_jobs=failed_jobs,
-            active_jobs=active_jobs,
+            active_job_groups=active_job_groups,
         )
     except Exception:
         current_app.logger.exception("Failed to load RQ info details page")

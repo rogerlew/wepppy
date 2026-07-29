@@ -85,6 +85,10 @@ is not a contract registry or enforcement platform.
   real inline-client, route/Redis/filesystem/reload evidence; repaired
   authority, path, concurrency, resource-boundary, Jinja, and client response
   contracts and passed independent security review.
+- [x] (2026-07-28) Executed SURF-17 with Admin/Root route, real RQ producer,
+  hostile render, queue-isolation, empty-state, and failure evidence; separated
+  default and batch active panels under checkpoint `cf20ef0b0` and passed
+  independent correctness and security reviews.
 - [ ] Close the initiative when the registered inventory has executable
   regression coverage or explicit operator-approved exclusions.
 

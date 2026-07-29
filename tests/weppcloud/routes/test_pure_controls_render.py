@@ -21,6 +21,9 @@ RQ_JOB_DASHBOARD_TEMPLATE_ROOT = (
     REPO_ROOT / "wepppy" / "weppcloud" / "routes" / "rq" / "job_dashboard" / "templates"
 )
 README_TEMPLATE_ROOT = REPO_ROOT / "wepppy" / "weppcloud" / "routes" / "readme_md" / "templates"
+RQ_INFO_DETAILS_TEMPLATE_ROOT = (
+    REPO_ROOT / "wepppy" / "weppcloud" / "routes" / "rq" / "info_details" / "templates"
+)
 PURE_TEMPLATES = [
     "controls/ag_fields_pure.htm",
     "controls/path_cost_effective_pure.htm",
@@ -32,6 +35,7 @@ PURE_TEMPLATES = [
     "run_0/rq-migration-status.htm",
     "readme_editor.htm",
     "readme_view.htm",
+    "info_details.htm",
 ]
 
 pytestmark = pytest.mark.routes
@@ -47,6 +51,7 @@ def jinja_env() -> Environment:
                 str(RUN_0_TEMPLATE_ROOT),
                 str(RQ_JOB_DASHBOARD_TEMPLATE_ROOT),
                 str(README_TEMPLATE_ROOT),
+                str(RQ_INFO_DETAILS_TEMPLATE_ROOT),
             ]
         ),
         undefined=DebugUndefined,
@@ -139,6 +144,12 @@ def jinja_env() -> Environment:
         readme_html="<h1>README View</h1>",
         generated=None,
         can_edit=True,
+        subtitle="Static snapshot",
+        actions=[],
+        active_job_groups=[],
+        recent_jobs=[],
+        failed_jobs=[],
+        failed_lookback_seconds=86400,
     )
     return env
 
@@ -193,6 +204,64 @@ def test_readme_view_renders_permission_aware_action_and_safe_html(
         ron=SimpleNamespace(name="", scenario="", readonly=True),
     )
     assert ">Edit</a>" not in view_only
+
+
+def test_rq_info_details_renders_separate_queue_panels_and_escaped_metadata(
+    jinja_env: Environment,
+) -> None:
+    hostile = '<script id="rq-injection">alert(1)</script>'
+    hostile_attribute = 'default" onmouseover="alert(1)'
+    hostile_job_id = 'job-default" onclick="alert(1)'
+    hostile_runid = 'run-default" onclick="alert(1)'
+    rendered = jinja_env.overlay(autoescape=True).get_template("info_details.htm").render(
+        subtitle="Static snapshot",
+        actions=[],
+        active_job_groups=[
+            {
+                "name": hostile_attribute,
+                "jobs": [
+                    {
+                        "state": "started",
+                        "queue": hostile_attribute,
+                        "worker": hostile,
+                        "job_id": hostile_job_id,
+                        "func_name": hostile,
+                        "runid": hostile_runid,
+                        "submitter": hostile,
+                        "enqueued_at": "2026-07-28T10:00:00Z",
+                        "started_at": "2026-07-28T10:01:00Z",
+                    }
+                ],
+            },
+            {"name": "batch", "jobs": []},
+        ],
+        recent_jobs=[],
+        failed_jobs=[],
+        failed_lookback_seconds=86400,
+        url_for_run=lambda endpoint, **kwargs: (
+            f"/job/{kwargs['job_id']}"
+            if "job_id" in kwargs
+            else f"/run/{kwargs['runid']}"
+        ),
+    )
+
+    assert 'data-active-queue="default&#34; onmouseover=&#34;alert(1)"' in rendered
+    assert rendered.index("data-active-queue=") < rendered.index(
+        'data-active-queue="batch"'
+    )
+    assert "Active Jobs - <code>default&#34; onmouseover=&#34;alert(1)</code> Queue" in rendered
+    assert "Active Jobs - <code>batch</code> Queue" in rendered
+    assert 'href="/job/job-default&#34; onclick=&#34;alert(1)"' in rendered
+    assert 'href="/run/run-default&#34; onclick=&#34;alert(1)"' in rendered
+    assert '" onmouseover="' not in rendered
+    assert '" onclick="' not in rendered
+    assert hostile not in rendered
+    assert "&lt;script id=&#34;rq-injection&#34;&gt;" in rendered
+    assert 'target="_blank" rel="noopener"' in rendered
+    batch_panel = rendered.split('data-active-queue="batch"', 1)[1]
+    assert "(none)" in batch_panel
+    assert "<h2>Recently Completed Jobs</h2>" in rendered
+    assert "<h2>Failed Jobs (Last 24 Hours)</h2>" in rendered
 
 
 def test_base_pure_renders_document_metadata_blocks_and_assets(jinja_env: Environment) -> None:
