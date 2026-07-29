@@ -386,7 +386,7 @@ build through job completion before review.
 
 ### Pure UI Controller Contract Standardization
 **Started**: 2026-07-16
-**Status**: SURF-09 verified; next package selection pending
+**Status**: SURF-17 contract checkpoint review
 **Size**: One controller active at a time; inventory size is not a schedule
 **Owner**: Codex
 **Priority**: High
@@ -394,6 +394,9 @@ build through job completion before review.
 **Description**: Establish one evidence-backed contract standard and execute an iterative series of bounded work packages to audit every Pure UI controller from rendered fields through JavaScript payloads, route parsing, persistence, RQ behavior, and reload.
 
 **Current Status**:
+- [SURF-17](docs/work-packages/20260728_pure_ui_rq_info_details_contract/)
+  is active for privileged RQ snapshot evidence and the operator-approved
+  separation of active default and batch queue panels.
 - [SURF-09](docs/work-packages/20260728_pure_ui_readme_editor_contract/)
   closed with direct rendering, real inline-client, route/Redis/filesystem/
   reload evidence, authority/path/concurrency/size/Jinja and client-response

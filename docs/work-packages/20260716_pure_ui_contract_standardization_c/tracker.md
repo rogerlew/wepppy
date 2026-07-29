@@ -6,13 +6,14 @@
 
 **Timezone**: UTC
 **Started**: 2026-07-17 00:30 UTC
-**Current phase**: SURF-09 verified; next package selection pending
+**Current phase**: SURF-17 contract checkpoint review
 **Last updated**: 2026-07-28 UTC
-**Next milestone**: Select the next bounded registered package.
-**Security impact**: `high` authenticated filesystem mutation, concurrency, and rendered Markdown
-**Dedicated security review**: `yes` for SHR-05, SURF-07, SURF-08, SURF-09, SURF-11, and SURF-16
+**Next milestone**: Commit the reviewed SURF-17 contract checkpoint.
+**Security impact**: `high` privileged Redis/RQ, run, worker, and submitter metadata
+**Dedicated security review**: `yes` for SHR-05, SURF-07, SURF-08, SURF-09, SURF-11, SURF-16, and SURF-17
 **Security artifact**:
-`../20260728_pure_ui_readme_editor_contract/artifacts/2026-07-28_security_review.md`
+`../20260728_pure_ui_rq_info_details_contract/artifacts/2026-07-28_security_review.md`
+(pending final implementation review)
 
 ## Task Board
 
@@ -24,7 +25,8 @@
 
 ### In Progress
 
-- None.
+- [ ] Execute SURF-17 Admin/Root RQ Info Details evidence and the
+  operator-approved active-job queue separation.
 - [x] Registered and dual-reviewed REM-05 under GOV-00A-M1E without advancing
   DOM-05; checkpoint ancestor
   `44d3b93c8e3bc7d5e89151cbb9677db374411c53`.
