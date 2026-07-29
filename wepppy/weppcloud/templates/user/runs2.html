@@ -370,6 +370,12 @@
     return String(value);
   }
 
+  function buildRunUrl(runid, config, suffix = '') {
+    const runSegment = encodeURIComponent(String(runid ?? ''));
+    const configSegment = encodeURIComponent(String(config ?? ''));
+    return `${sitePrefix}/runs/${runSegment}/${configSegment}/${suffix}`;
+  }
+
   function buildRunRow(run) {
     const row = document.createElement('tr');
     row.dataset.runRow = 'true';
@@ -395,7 +401,7 @@
     const linkCell = document.createElement('td');
     const link = document.createElement('a');
     link.className = 'pure-button pure-button-secondary';
-    link.href = `${sitePrefix}/runs/${run.runid}/${run.config}/`;
+    link.href = buildRunUrl(run.runid, run.config);
     link.target = '_blank';
     link.rel = 'noopener';
     link.textContent = 'Open';
@@ -428,6 +434,7 @@
     const checkbox = document.createElement('input');
     checkbox.type = 'checkbox';
     checkbox.value = run.runid || '';
+    checkbox.dataset.config = String(run.config ?? '');
     checkbox.disabled = !!run.readonly;
     checkbox.setAttribute('aria-label', `Select ${run.runid || ''}`);
     checkbox.addEventListener('change', updateDeleteState);
@@ -642,10 +649,11 @@
     }
   }
 
-  async function deleteRun(runid) {
+  async function deleteRun(runid, config) {
     try {
-      const response = await fetch(`${sitePrefix}/runs/${runid}/0/tasks/delete/`, {
+      const response = await fetch(buildRunUrl(runid, config, 'tasks/delete/'), {
         method: 'POST',
+        credentials: 'same-origin',
         headers: csrfHeaders(),
       });
       const payload = await response.json().catch(() => null);
@@ -662,7 +670,6 @@
     } catch (error) {
       deleteTracker.failed += 1;
       updateDeleteSummary();
-      console.error('Failed to delete run', runid, error);
     }
   }
 
@@ -904,14 +911,20 @@
     if (!checks.length) {
       return;
     }
-    const runids = checks.map((el) => el.value);
+    const runsToDelete = checks.map((el) => ({
+      runid: el.value,
+      config: el.dataset.config || '',
+    }));
+    const runids = runsToDelete.map((run) => run.runid);
     const confirmed = window.confirm(`Delete ${runids.join(', ')}?`);
     if (!confirmed) {
       return;
     }
     deleteTracker.total += runids.length;
     updateDeleteSummary();
-    await Promise.all(runids.map((runid) => deleteRun(runid)));
+    await Promise.all(
+      runsToDelete.map((run) => deleteRun(run.runid, run.config))
+    );
   }
 
   function setRunsView(view) {
@@ -1117,7 +1130,7 @@
       .map((run) => ({
         ...run,
         label: formatRunLabel(run),
-        url: `${sitePrefix}/runs/${run.runid}/${run.config}/`,
+        url: buildRunUrl(run.runid, run.config),
       }));
 
     if (!runs.length) {

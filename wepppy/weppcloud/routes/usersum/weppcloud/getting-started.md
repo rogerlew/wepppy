@@ -312,6 +312,12 @@ by Root operators from the separate User Management page rather than from the
 profile page. That page permits only the existing PowerUser, Admin, Dev, and
 Root assignments and prevents an operator from removing their own Root role.
 
+The Runs dashboard supports table and map views, search, sorting, and
+pagination. Admin and Root users can explicitly scope it to another account.
+Deletion is irreversible: readonly runs cannot be selected, and a selected row
+remains visible until the queued deletion job finishes. A failed deletion
+remains visible with an error so it can be retried or investigated.
+
 <!-- ![More menu dropdown](static/getting-started/more-menu.png) -->
 
 ---

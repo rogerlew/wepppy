@@ -7,13 +7,16 @@ const { resolve } = require("node:path");
 
 const templatePath = resolve(globalThis.process.cwd(), "../templates/user/runs2.html");
 const templateSource = readFileSync(templatePath, "utf-8");
+const buildRunUrlMatch = templateSource.match(
+    /\s{2}function buildRunUrl\(runid, config, suffix = ''\) \{[\s\S]*?\n\s{2}\}/
+);
 const buildRunRowMatch = templateSource.match(
     /\s{2}function buildRunRow\(run\) \{[\s\S]*?\n\s{2}\}\n\n\s{2}function getTotalPages/
 );
 
 function loadBuildRunRow() {
-    if (!buildRunRowMatch) {
-        throw new Error("Unable to locate buildRunRow in the Runs template");
+    if (!buildRunUrlMatch || !buildRunRowMatch) {
+        throw new Error("Unable to locate Runs URL or row builders in the Runs template");
     }
     const buildRunRowSource = buildRunRowMatch[0].replace(/\n\n\s{2}function getTotalPages$/, "");
     return new Function(
@@ -22,7 +25,7 @@ function loadBuildRunRow() {
         "showOwner",
         "sitePrefix",
         "updateDeleteState",
-        `${buildRunRowSource}\nreturn buildRunRow;`
+        `${buildRunUrlMatch[0]}\n${buildRunRowSource}\nreturn buildRunRow;`
     )(
         (value) => (value === null || value === undefined || value === "" ? "—" : String(value)),
         "/weppcloud/usersum/doc/usersum.weppcloud.run_ttl_deletion",

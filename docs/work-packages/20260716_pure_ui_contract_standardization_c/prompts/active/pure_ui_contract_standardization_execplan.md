@@ -106,6 +106,11 @@ is not a contract registry or enforcement platform.
   empty rendering, real inline client, CSRF/validation/datastore/reload
   evidence; repaired Root authority, strict request types, self-Root
   protection, HTTP errors, and visible safe feedback; security review passed.
+- [x] (2026-07-28) Executed SURF-06 with actual ordinary/Admin rendering,
+  actual inline catalog/deletion/poll execution, ownership/catalog/map/
+  delete/RQ/worker evidence; repaired encoded exact stored run/config actions,
+  explicit credentials, readonly HTTP status, and safe failure feedback;
+  security review passed.
 - [ ] Close the initiative when the registered inventory has executable
   regression coverage or explicit operator-approved exclusions.
 
@@ -166,7 +171,20 @@ is not a contract registry or enforcement platform.
   roles, not either role, and that a disabled privilege checkbox must have a
   matching server invariant.
 
+- Observation: SURF-06 showed that display identity can remain correct while a
+  destructive action silently substitutes a default configuration. Stored
+  composite identity must be asserted at every action boundary.
+
 ## Decision Log
+
+### 2026-07-28: Runs actions preserve encoded catalog identity
+
+**Decision**: Open and Delete consume the exact stored `(runid, config)` pair
+and encode each path segment. Readonly deletion uses an HTTP error status, and
+rows disappear only after a finished deletion job.
+
+This preserves existing ownership, queue, and retention behavior while making
+the browser, route, and worker agree on the target.
 
 ### 2026-07-28: Controller count is inventory
 
@@ -491,3 +509,12 @@ repairs aligned GET authority with Root ownership, required strict JSON and
 boolean inputs, prevented self-Root removal, returned canonical 400 errors, and
 replaced console-only results with escaped live feedback and rollback.
 Dedicated security review passed with no unresolved findings.
+
+SURF-06 closed with actual ordinary/Admin rendering, real inline-client
+execution, and retained ownership/catalog/map/delete/RQ/worker evidence.
+Focused Python passed 65 tests; focused Jest passed 4; frontend lint and the
+full 98-suite/703-test sweep passed; broad Python passed 5,540 tests with 58
+skips. Repairs preserve and encode the catalog's stored run/config identity,
+send same-origin deletion credentials, return readonly failure as HTTP 400,
+and keep failures visibly actionable without console identifier disclosure.
+The high-impact security review passed with no unresolved high/medium finding.

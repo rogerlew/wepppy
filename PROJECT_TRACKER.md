@@ -386,7 +386,7 @@ build through job completion before review.
 
 ### Pure UI Controller Contract Standardization
 **Started**: 2026-07-16
-**Status**: Next package selection pending
+**Status**: Next package selection
 **Size**: One controller active at a time; inventory size is not a schedule
 **Owner**: Codex
 **Priority**: High
@@ -394,6 +394,11 @@ build through job completion before review.
 **Description**: Establish one evidence-backed contract standard and execute an iterative series of bounded work packages to audit every Pure UI controller from rendered fields through JavaScript payloads, route parsing, persistence, RQ behavior, and reload.
 
 **Current Status**:
+- [SURF-06](docs/work-packages/20260728_pure_ui_runs_catalog_contract/)
+  closed with actual ordinary/Admin rendering, real inline-client,
+  ownership/catalog/map/delete/RQ/worker evidence, and terminal reload.
+  Encoded exact stored run/config actions, readonly error status, credential,
+  and safe-feedback defects were repaired; security review passed.
 - [SURF-15](docs/work-packages/20260728_pure_ui_root_usermod_contract/)
   closed with Root/Admin, hostile/empty/selected rendering, actual client,
   CSRF, strict validation, datastore persistence/reload, and self-Root

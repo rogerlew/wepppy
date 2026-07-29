@@ -6,13 +6,13 @@
 
 **Timezone**: UTC
 **Started**: 2026-07-17 00:30 UTC
-**Current phase**: Next package selection pending
+**Current phase**: Next package selection
 **Last updated**: 2026-07-28 UTC
-**Next milestone**: Select the next registered package.
-**Security impact**: `high` privileged account-role mutation
-**Dedicated security review**: `yes` for SHR-05, SURF-07, SURF-08, SURF-09, SURF-11, SURF-13, SURF-14, SURF-15, SURF-16, SURF-17, and SURF-18
+**Next milestone**: Select the next dependency-ready registered package.
+**Security impact**: `none` for documentation-only parent reconciliation
+**Dedicated security review**: `yes` for SHR-05, SURF-06, SURF-07, SURF-08, SURF-09, SURF-11, SURF-13, SURF-14, SURF-15, SURF-16, SURF-17, and SURF-18
 **Security artifact**:
-`../20260728_pure_ui_root_usermod_contract/artifacts/2026-07-28_security_review.md`
+`../20260728_pure_ui_runs_catalog_contract/artifacts/2026-07-28_security_review.md`
 
 ## Task Board
 
@@ -37,6 +37,14 @@
 
 ### Done
 
+- [x] Closed SURF-06 with actual ordinary/Admin renders, actual inline-client,
+  ownership/catalog/map/delete/RQ/worker evidence, and exact terminal states.
+  Repaired encoded run/config actions, stored-config deletion, explicit
+  same-origin credentials, readonly HTTP status, and safe visible failure
+  feedback. Focused Python passed 65 tests; focused Jest passed 4; frontend
+  lint and all 98 suites/703 tests passed; broad Python passed 5,540 tests
+  with 58 skips; security review passed with no unresolved high/medium finding
+  (2026-07-28 UTC).
 - [x] Closed SURF-15 with actual Root/Admin, inventory, hostile, empty,
   selected, self-disabled, client, CSRF, validation, datastore, persistence,
   and reload evidence. Repaired GET authority, strict JSON/boolean validation,

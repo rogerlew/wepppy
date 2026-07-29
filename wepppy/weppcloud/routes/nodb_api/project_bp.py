@@ -278,7 +278,7 @@ def delete_run(runid, config):
     wd = str(ctx.active_root)
     ron = Ron.getInstance(wd)
     if ron.readonly:
-        return error_factory('cannot delete readonly project')
+        return error_factory('cannot delete readonly project', status_code=400)
 
     try:
         try:

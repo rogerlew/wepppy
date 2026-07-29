@@ -8,6 +8,7 @@ import pytest
 
 pytest.importorskip("flask")
 from flask import Flask
+from flask_login import LoginManager
 from werkzeug.exceptions import Forbidden
 
 import wepppy.weppcloud.routes.nodb_api.project_bp as project_module
@@ -37,6 +38,11 @@ def project_client(
 
     helpers = __import__("wepppy.weppcloud.utils.helpers", fromlist=["authorize"])
     monkeypatch.setattr(helpers, "authorize", lambda runid, config, require_owner=False: None)
+    monkeypatch.setattr(
+        project_module,
+        "authorize",
+        lambda runid, config, require_owner=False: None,
+    )
 
     class _CurrentUserStub:
         def __init__(self) -> None:
@@ -52,6 +58,11 @@ def project_client(
 
     current_user_stub = _CurrentUserStub()
     monkeypatch.setattr(project_module, "current_user", current_user_stub)
+    login_manager = LoginManager(app)
+
+    @login_manager.request_loader
+    def load_test_user(_request):
+        return current_user_stub
 
     class DummyContext:
         def __init__(self, root_path: str) -> None:
@@ -226,6 +237,60 @@ def test_set_readonly_enqueues_background_job(project_client):
     assert queue_call.func is project_rq.set_run_readonly_rq
     assert queue_call.args == (RUN_ID, True)
     assert queue_call.timeout == 42
+
+
+def test_delete_run_enqueues_exact_context_and_marks_ttl(
+    project_client,
+    monkeypatch: pytest.MonkeyPatch,
+):
+    client, RonStub, _, run_dir, env = project_client
+    cleanup_calls: list[str] = []
+    mark_calls: list[tuple[str, str, str]] = []
+    monkeypatch.setattr(
+        project_module.NoDbBase,
+        "cleanup_run_instances",
+        lambda wd: cleanup_calls.append(wd),
+    )
+    ttl_module = __import__(
+        "wepppy.weppcloud.utils.run_ttl",
+        fromlist=["mark_delete_state"],
+    )
+    monkeypatch.setattr(
+        ttl_module,
+        "mark_delete_state",
+        lambda wd, state, *, touched_by: mark_calls.append(
+            (wd, state, touched_by)
+        ),
+    )
+    project_rq = __import__(
+        "wepppy.rq.project_rq",
+        fromlist=["delete_run_rq"],
+    )
+    delete_worker = lambda runid, wd: None
+    monkeypatch.setattr(project_rq, "delete_run_rq", delete_worker)
+
+    response = client.post(f"/runs/{RUN_ID}/{CONFIG}/tasks/delete/")
+
+    assert response.status_code == 200
+    assert response.get_json() == {"Content": {"job_id": "job-123"}}
+    assert cleanup_calls == [run_dir]
+    assert mark_calls == [(run_dir, "queued", "delete_request")]
+    queue_call = env.recorder.queue_calls[0]
+    assert queue_call.func is delete_worker
+    assert queue_call.args == (RUN_ID, run_dir)
+    assert queue_call.timeout == 42
+    assert RonStub.getInstance(run_dir).readonly is False
+
+
+def test_delete_run_rejects_readonly_without_enqueue(project_client):
+    client, RonStub, _, run_dir, env = project_client
+    RonStub.getInstance(run_dir).readonly = True
+
+    response = client.post(f"/runs/{RUN_ID}/{CONFIG}/tasks/delete/")
+
+    assert response.status_code == 400
+    assert response.get_json()["error"]["message"] == "cannot delete readonly project"
+    assert env.recorder.queue_calls == []
 
 
 def test_clear_nodb_cache_runtime_error_returns_error_id(

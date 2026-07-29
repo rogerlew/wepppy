@@ -154,7 +154,7 @@ run-support files, 15 shared/global files, and four standalone files.
 | Archive console | SURF-03 | `R/archive_dashboard/templates/rq-archive-dashboard.htm` | high | contractual | unverified |
 | Fork console | SURF-04 | `R/fork_console/templates/rq-fork-console.htm` | high | contractual | unverified |
 | Run Sync | SURF-05 | `R/run_sync_dashboard/templates/rq-run-sync-dashboard.htm` | high | contractual | unverified |
-| Runs catalog | SURF-06 | `templates/user/runs2.html` | high | contractual | unverified |
+| Runs catalog | SURF-06 | `templates/user/runs2.html`; direct ordinary/Admin render + actual inline client + ownership/catalog/map/delete/RQ/worker tests; encoded exact stored run/config and readonly HTTP repairs | high review passed | contractual | verified |
 | RQ job dashboard | SURF-07 | `R/rq/job_dashboard/templates/dashboard_pure.htm`; direct render + 4 real inline Jest + 268 route/session/rq-engine/payload tests; required poll-auth fallback repair | high review passed | contractual | verified |
 | Run migration status | SURF-08 | `R/run_0/templates/run_0/rq-migration-status.htm`; 225 focused Python + 7 inline Jest; auth/token-class/lock/persistence/token/archive/readonly repairs | high review passed | contractual | verified |
 | README editor | SURF-09 | `R/readme_md/templates/{readme_editor,readme_view}.htm`; direct host renders + real inline client + route/Redis/filesystem/reload evidence; authority/path/locking/revision/size/Jinja/client repairs | high review passed | contractual | verified |
