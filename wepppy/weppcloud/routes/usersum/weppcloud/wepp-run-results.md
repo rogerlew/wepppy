@@ -117,7 +117,7 @@ These links download shareable run artifacts. They are not live report pages, an
 
 - **What it is for:** A batch-input CSV describing hillslope setup for ERMiT and Disturbed WEPP workflows.
 - **When to use it:** Use it when you need to hand off hillslope inputs to the ERMiT/Disturbed WEPP batch-processing spreadsheet workflow.
-- **Cautions and limits:** The file is generated from the current run state by an rq-engine export job. Keep the export page open until the job finishes and the download starts. Rerun or rebuild the project first if inputs changed.
+- **Cautions and limits:** The file is generated from the current run state by an rq-engine export job. Keep the export page open until the job finishes and the download starts. If a temporary request failure appears, use `Retry Export` to start a fresh authenticated attempt. Rerun or rebuild the project first if inputs changed.
 - **Do not confuse it with:** The post-WEPP GIS exports, which package spatial layers and WEPP summary outputs rather than ERMiT batch inputs.
 
 ### `Prep Details`

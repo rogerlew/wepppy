@@ -386,7 +386,7 @@ build through job completion before review.
 
 ### Pure UI Controller Contract Standardization
 **Started**: 2026-07-16
-**Status**: SURF-11 closed; next registered package pending selection
+**Status**: SURF-16 closed; next registered package pending selection
 **Size**: One controller active at a time; inventory size is not a schedule
 **Owner**: Codex
 **Priority**: High
@@ -394,6 +394,9 @@ build through job completion before review.
 **Description**: Establish one evidence-backed contract standard and execute an iterative series of bounded work packages to audit every Pure UI controller from rendered fields through JavaScript payloads, route parsing, persistence, RQ behavior, and reload.
 
 **Current Status**:
+- [SURF-16](docs/work-packages/20260728_pure_ui_ermit_export_contract/)
+  closed with direct launcher/client/route/session/RQ/worker evidence, a
+  rejected-token retry repair, and a passing independent security review.
 - [SURF-11](docs/work-packages/20260728_pure_ui_geneva_summary_report_contract/)
   closed with direct summary rendering, single-owner initialization,
   route/service/map/Unitizer evidence, and a passing independent security

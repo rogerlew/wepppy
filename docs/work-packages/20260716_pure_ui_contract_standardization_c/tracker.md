@@ -9,10 +9,10 @@
 **Current phase**: Select the next registered package
 **Last updated**: 2026-07-28 UTC
 **Next milestone**: Recommend the next package from the verified dependency order.
-**Security impact**: `high` for the latest closed authenticated query surface
-**Dedicated security review**: `yes` for SHR-05 and SURF-11
+**Security impact**: `high` for the latest closed protected export surface
+**Dedicated security review**: `yes` for SHR-05, SURF-11, and SURF-16
 **Security artifact**:
-`../20260728_pure_ui_geneva_summary_report_contract/artifacts/2026-07-28_security_review.md`
+`../20260728_pure_ui_ermit_export_contract/artifacts/2026-07-28_security_review.md`
 
 ## Task Board
 
@@ -36,6 +36,10 @@
 
 ### Done
 
+- [x] Closed SURF-16 with direct launcher, inline token/submit/poll/download/
+  retry, route/session/RQ/worker, and protected-artifact evidence; repaired
+  rejected-token retry recovery and passed independent security review
+  (2026-07-28 UTC).
 - [x] Closed SURF-11 with direct rendered query/map/filter targets,
   controller-owned initialization, route/service/map/Unitizer evidence, and a
   passing independent security review; no production repair was retained

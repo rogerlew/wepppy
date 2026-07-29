@@ -164,7 +164,7 @@ run-support files, 15 shared/global files, and four standalone files.
 | Security/auth forms | SURF-13 | `templates/security/*.html` through `_layout.html` | high | contractual | unverified |
 | User profile/session | SURF-14 | `templates/user/profile.html` | high | contractual | unverified |
 | Root user modification | SURF-15 | `templates/user/usermod.html` | high | contractual | unverified |
-| ERMiT export/download | SURF-16 | `templates/reports/ermit_export_download.htm`; `R/nodb_api/wepp_bp.py`; `wepppy/microservices/rq_engine/export_routes.py`; `wepppy/rq/ermit_export_rq.py`; `tests/weppcloud/routes/test_pure_controls_render.py`, `test_wepp_bp.py`, and `tests/microservices/test_rq_engine_export_routes.py` | high | contractual | unverified |
+| ERMiT export/download | SURF-16 | direct launcher render + inline token/submit/poll/download/retry Jest + Flask/session/rq-engine/worker evidence; rejected-token retry repair; security review passed | high | contractual | verified |
 | RQ Info Details | SURF-17 | `R/rq/info_details/templates/info_details.htm`; `R/rq/info_details/routes.py::rq_info_details`; `tests/weppcloud/routes/test_rq_info_details.py` | high: Admin/Root Redis/RQ and submitter metadata | contractual | unverified |
 | DEVAL loading | SURF-18 | `templates/reports/deval_loading.htm`; `R/weppcloudr.py::{deval_details,_determine_job,_enqueue_deval_job}`; `wepppy/rq/weppcloudr_rq.py::render_deval_details_rq`; no focused template/poll suite yet | high: CAP, queue, job state and generated report | contractual | unverified |
 

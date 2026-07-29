@@ -212,6 +212,7 @@
         window.clearTimeout(pollTimer);
         pollTimer = null;
       }
+      tokenPromise = null;
       errorPanel.hidden = true;
       actions.hidden = true;
       setSpinner(true);

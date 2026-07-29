@@ -1153,6 +1153,25 @@ def test_ermit_export_download_template_exposes_rq_engine_contract(jinja_env: En
     assert '"/rq-engine/api/runs/test-run/test-config/export/ermit"' in rendered
     assert '"/rq-engine/api/runs/test-run/test-config/session-token"' in rendered
     assert "Download ERMiT Export" in rendered
+    assert "Run ID: <code>test-run</code>" in rendered
+    assert "Configuration: <code>test-config</code>" in rendered
+    assert 'id="ermitExportStatusChip"' in rendered
+    assert 'data-state="queued">QUEUED</div>' in rendered
+    assert 'id="ermitExportStatusNote"' in rendered
+    assert 'data-state="active"' in rendered
+    assert 'id="ermitExportSpinner"' in rendered
+    assert 'aria-hidden="true"' in rendered
+    assert 'id="ermitExportActions"' in rendered
+    assert 'id="ermitExportDownloadLink"' in rendered
+    assert 'href="#" download' in rendered
+    assert 'href="/runs/test-run/test-config/report/wepp/results/"' in rendered
+    assert 'id="ermitExportErrorPanel"' in rendered
+    assert 'data-state="error" hidden' in rendered
+    assert 'id="ermitExportErrorMessage"' in rendered
+    assert 'id="ermitExportRetry"' in rendered
+    assert 'type="button"' in rendered
+    assert "JavaScript is required to run and download" in rendered
+    assert "retryButton.addEventListener(\"click\", startExport)" in rendered
 
 
 def test_omni_contrasts_template_shows_user_defined_limit_hint(jinja_env: Environment) -> None:

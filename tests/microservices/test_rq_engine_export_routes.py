@@ -152,6 +152,28 @@ def test_export_ermit_submit_enqueues_rq_job(tmp_path: Path, monkeypatch: pytest
     assert enqueued["args"] == (runid, "cfg", str(run_root))
 
 
+def test_export_ermit_submit_preserves_auth_error(
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    monkeypatch.setattr(
+        export_routes,
+        "require_jwt",
+        lambda request, required_scopes=None: (_ for _ in ()).throw(
+            export_routes.AuthError(
+                "Missing Authorization header",
+                status_code=401,
+                code="unauthorized",
+            )
+        ),
+    )
+
+    with TestClient(rq_engine.app) as client:
+        response = client.post("/api/runs/private-run/cfg/export/ermit")
+
+    assert response.status_code == 401
+    assert response.json()["error"]["code"] == "unauthorized"
+
+
 def test_export_ermit_download_returns_finished_job_artifact(
     tmp_path: Path,
     monkeypatch: pytest.MonkeyPatch,
@@ -185,6 +207,62 @@ def test_export_ermit_download_returns_finished_job_artifact(
     assert response.status_code == 200
     assert response.content == b"ermit-zip"
     assert "ERMiT_input_demo.zip" in response.headers.get("content-disposition", "")
+
+
+@pytest.mark.parametrize(
+    ("job_info", "expected_status", "expected_message"),
+    [
+        (
+            {
+                "job_id": "ermit-job-3",
+                "runid": "other-run",
+                "status": "finished",
+                "result": {
+                    "artifact_relpath": "export/ERMiT_input_demo.zip",
+                    "filename": "ERMiT_input_demo.zip",
+                },
+            },
+            404,
+            "ERMiT export artifact mapping not found for job.",
+        ),
+        (
+            {"job_id": "ermit-job-3", "runid": "demo-run", "status": "started"},
+            409,
+            "ERMiT export job is not finished.",
+        ),
+    ],
+)
+def test_export_ermit_download_rejects_wrong_run_or_unfinished_job(
+    tmp_path: Path,
+    monkeypatch: pytest.MonkeyPatch,
+    job_info: dict[str, str],
+    expected_status: int,
+    expected_message: str,
+) -> None:
+    run_root = tmp_path / "demo-run"
+    run_root.mkdir()
+    artifact_path = run_root / "export" / "ERMiT_input_demo.zip"
+    artifact_path.parent.mkdir()
+    artifact_path.write_bytes(b"ermit")
+    _stub_auth(monkeypatch)
+    monkeypatch.setattr(
+        export_routes,
+        "get_wd",
+        lambda runid, prefer_active=False: str(run_root),
+    )
+    monkeypatch.setattr(
+        export_routes,
+        "get_wepppy_rq_job_info",
+        lambda job_id: job_info,
+    )
+
+    with TestClient(rq_engine.app) as client:
+        response = client.get(
+            "/api/runs/demo-run/cfg/export/ermit/job/ermit-job-3/download"
+        )
+
+    assert response.status_code == expected_status
+    assert response.json()["error"]["message"] == expected_message
 
 
 def test_export_geodatabase_propagates_nodir_errors(

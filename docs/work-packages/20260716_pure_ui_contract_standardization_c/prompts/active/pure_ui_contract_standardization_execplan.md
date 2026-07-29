@@ -78,6 +78,9 @@ is not a contract registry or enforcement platform.
 - [x] (2026-07-28) Executed SURF-11 with direct Geneva summary rendering,
   controller lifecycle, route/service/map/Unitizer evidence, and independent
   security review; no production repair was retained.
+- [x] (2026-07-28) Executed SURF-16 with direct ERMiT launcher/client,
+  route/session/RQ/worker evidence; repaired rejected-token retry recovery and
+  passed independent security review.
 - [ ] Close the initiative when the registered inventory has executable
   regression coverage or explicit operator-approved exclusions.
 
@@ -121,6 +124,10 @@ is not a contract registry or enforcement platform.
   initialization owner that direct template-string inspection could not see.
   Lifecycle ownership must be tested at the loaded controller boundary when a
   deferred bundle already registers document events.
+
+- Observation: SURF-16's visible Retry button was not evidence of recovery;
+  executing the real inline script showed that a rejected cached token promise
+  made every later attempt fail without another request.
 
 ## Decision Log
 
@@ -206,6 +213,14 @@ directly.
 
 **Rationale**: A second template bootstrap would call non-idempotent `init()`
 twice and duplicate filter and map request handlers.
+
+### 2026-07-28: ERMiT tokens are cached per explicit attempt
+
+**Decision**: Clear the launcher token-promise cache when `startExport()` begins
+and reuse the resulting token only within that submit/poll/download attempt.
+
+**Rationale**: Retry must recover from a rejected token request without
+changing token scopes, claims, route authorization, or queue behavior.
 
 ## Context and Orientation
 
@@ -400,3 +415,12 @@ frontend lint and the full 89-suite/671-test frontend sweep passed. Independent
 review caught and rejected a proposed duplicate template bootstrap before
 commit, then passed the corrected test-only closeout with zero unresolved
 findings. No production repair was retained.
+
+SURF-16 closed with direct ERMiT launcher targets, real inline token/submit/
+poll/download/retry execution, Flask and rq-engine authorization/run/job-state
+tests, and worker artifact-metadata evidence. Focused render/Flask tests passed
+161; backend route/session/worker tests passed 63; focused Jest passed 2; and
+frontend lint plus the full 90-suite/673-test frontend sweep passed. The
+one-line production repair makes an explicit Retry mint a fresh token after a
+rejected token promise while retaining one token within an attempt. Independent
+security review passed with zero unresolved findings.
