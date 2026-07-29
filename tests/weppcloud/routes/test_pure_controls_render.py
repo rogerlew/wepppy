@@ -3446,3 +3446,39 @@ def test_edit_csv_template_honors_theme_system_assets() -> None:
     assert "js/theme.js" in edit_csv_source
     assert 'localStorage.getItem("wc-theme")' in edit_csv_source
     assert "pure-button pure-button-primary" in edit_csv_source
+
+
+def test_edit_csv_template_renders_run_scoped_shared_editor_contract(
+    jinja_env: Environment,
+) -> None:
+    rendered = jinja_env.overlay(autoescape=True).get_template("controls/edit_csv.htm").render(
+        runid='run-1"><script>alert(1)</script>',
+        config="cfg&variant",
+        csv_url="/runs/run-1/cfg/download/disturbed/lookup.csv?lookup=base&x=1",
+        save_url="/runs/run-1/cfg/tasks/modify_disturbed?lookup=base&x=1",
+        lookup_meta_url="/runs/run-1/cfg/api/disturbed/lookup_meta?lookup=base&x=1",
+        lookup_snapshot_url="/runs/run-1/cfg/api/disturbed/lookup_snapshot?lookup=base&x=1",
+        session_token_url="/rq-engine/api/runs/run-1/cfg/session-token?x=1&y=2",
+        csrf_token=lambda: "csrf-token",
+    )
+
+    assert 'meta name="csrf-token" content="csrf-token"' in rendered
+    assert 'data-runid="run-1&#34;&gt;&lt;script&gt;alert(1)&lt;/script&gt;"' in rendered
+    assert 'data-config="cfg&amp;variant"' in rendered
+    assert (
+        'data-save-url="/runs/run-1/cfg/tasks/modify_disturbed?lookup=base&amp;x=1"'
+        in rendered
+    )
+    assert (
+        'data-lookup-snapshot-url="/runs/run-1/cfg/api/disturbed/lookup_snapshot'
+        "?lookup=base&amp;x=1\""
+    ) in rendered
+    assert 'data-session-token-url="/rq-engine/api/runs/run-1/cfg/session-token?x=1&amp;y=2"' in rendered
+    assert 'id="status-banner"' in rendered
+    assert 'role="status"' in rendered
+    assert 'aria-live="polite"' in rendered
+    assert 'id="save"' in rendered and "disabled" in rendered
+    assert 'id="reload-current"' in rendered
+    assert "https://bossanova.uk/jspreadsheet/v4/jexcel.js" in rendered
+    assert "https://jsuites.net/v4/jsuites.js" in rendered
+    assert '<script>alert(1)</script>' not in rendered

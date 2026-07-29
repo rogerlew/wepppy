@@ -10,7 +10,7 @@
 **Last updated**: 2026-07-28 UTC
 **Next milestone**: Select the next dependency-ready registered package.
 **Security impact**: `none` for documentation-only parent reconciliation
-**Dedicated security review**: `yes` for SHR-05, SURF-06, SURF-07, SURF-08, SURF-09, SURF-11, SURF-13, SURF-14, SURF-15, SURF-16, SURF-17, and SURF-18
+**Dedicated security review**: `yes` for SHR-05, SURF-06, SURF-07, SURF-08, SURF-09, SURF-10, SURF-11, SURF-13, SURF-14, SURF-15, SURF-16, SURF-17, and SURF-18
 **Security artifact**:
 `../20260728_pure_ui_runs_catalog_contract/artifacts/2026-07-28_security_review.md`
 
@@ -37,6 +37,13 @@
 
 ### Done
 
+- [x] Closed SURF-10 with actual hostile-value rendering, four executable
+  inline-client tests, optimistic concurrency, variant-confined mutation,
+  failed-recovery lock retention, and visible missing-CDN-runtime evidence.
+  Focused route/render passed 195 tests, lookup contracts passed 31, frontend
+  lint and all 99 suites/707 tests passed, broad Python passed 5,541 with 58
+  skips, and security review passed with no unresolved finding; no production
+  repair was required (2026-07-28 UTC).
 - [x] Closed SURF-06 with actual ordinary/Admin renders, actual inline-client,
   ownership/catalog/map/delete/RQ/worker evidence, and exact terminal states.
   Repaired encoded run/config actions, stored-config deletion, explicit

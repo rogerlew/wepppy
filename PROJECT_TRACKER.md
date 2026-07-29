@@ -427,6 +427,11 @@ build through job completion before review.
   closed with direct rendering, real inline-client, route/Redis/filesystem/
   reload evidence, authority/path/concurrency/size/Jinja and client-response
   repairs, and passing independent security review.
+- [SURF-10](docs/work-packages/20260728_pure_ui_disturbed_csv_editor_contract/)
+  closed with actual rendering, four executable inline-client tests, 195
+  route/render and 31 lookup tests covering optimistic concurrency,
+  variant-confined mutation, recovery, and visible runtime/CDN failure;
+  security review passed and no production repair was required.
 - [SURF-08](docs/work-packages/20260728_pure_ui_run_migration_status_contract/)
   closed with permission-aware rendering, real inline enqueue/poll/backoff/
   terminal tests, direct route/worker evidence, auth/lock/token/archive/readonly

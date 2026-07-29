@@ -85,6 +85,10 @@ is not a contract registry or enforcement platform.
   real inline-client, route/Redis/filesystem/reload evidence; repaired
   authority, path, concurrency, resource-boundary, Jinja, and client response
   contracts and passed independent security review.
+- [x] (2026-07-28) Executed SURF-10 with actual shared-editor rendering, four
+  production-inline client tests, route/NoDb optimistic-concurrency and
+  variant evidence, and passing security review; no production repair was
+  retained.
 - [x] (2026-07-28) Executed SURF-17 with Admin/Root route, real RQ producer,
   hostile render, queue-isolation, empty-state, and failure evidence; separated
   default and batch active panels under checkpoint `cf20ef0b0` and passed
@@ -174,6 +178,11 @@ is not a contract registry or enforcement platform.
 - Observation: SURF-06 showed that display identity can remain correct while a
   destructive action silently substitutes a default configuration. Stored
   composite identity must be asserted at every action boundary.
+
+- Observation: SURF-10 inherited strong route/NoDb concurrency hardening but
+  lacked executable browser evidence for polling, recovery, and dependency
+  failure. Four direct inline tests closed that gap without adding a browser
+  framework or changing production behavior.
 
 ## Decision Log
 
@@ -473,6 +482,13 @@ Existing controller, route, schema, enqueue, worker, and reload evidence
 conformed. Focused Python (204 tests), lint, focused Jest (7 tests), and docs
 lint passed; the unchanged frontend tree's preceding full sweep passed 88
 suites/663 tests. It introduced no helper or production patch.
+
+SURF-10 closed with actual hostile-value rendering and four executable inline
+tests for authorization-before-load, SHA-bound save, stale lock/recovery, and
+visible missing-runtime failure. Focused route/render passed 195, lookup
+contracts passed 31, frontend passed 99 suites/707 tests, and repository Python
+passed 5,541 with 58 skips. Security review passed; no production repair was
+required.
 
 SURF-11 closed with direct Geneva summary payload/filter/URL/map/accessibility
 rendering, one controller-owned initialization regression, and retained route,
