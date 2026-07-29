@@ -167,6 +167,15 @@
         var statusPollTimer = null;
         var statusPollIntervalMs = 10000;
         var lastStatusRefreshError = null;
+        var submitButton = null;
+        var submissionActive = false;
+
+        function setSubmissionActive(active) {
+            submissionActive = active;
+            if (submitButton) {
+                submitButton.disabled = active;
+            }
+        }
 
         function ensureSummaryElement(container) {
             if (!summaryElement && container) {
@@ -257,6 +266,8 @@
             }
             completionState.completed = true;
             completionState.failed = false;
+            activeJobId = null;
+            setSubmissionActive(false);
             updateSummarySuccess(runId, config);
             appendStatus("Sync job completed.");
             if (typeof refreshStatusFn === "function") {
@@ -270,6 +281,8 @@
             }
             completionState.failed = true;
             completionState.completed = false;
+            activeJobId = null;
+            setSubmissionActive(false);
             updateSummaryFailure(message);
             if (message) {
                 appendStatus("Sync job failed: " + message);
@@ -508,6 +521,7 @@
             stacktracePanel = container.querySelector("[data-stacktrace-panel]");
             stacktraceBody = container.querySelector("[data-stacktrace-body]") || container.querySelector("#stacktrace");
             summaryElement = container.querySelector("#run_sync_summary");
+            submitButton = container.querySelector("#run_sync_submit");
 
             function buildAuthHeaders() {
                 if (!rqEngineToken) {
@@ -557,11 +571,15 @@
                     appendStatus("Missing rq-engine token; reload after signing in.");
                     return;
                 }
+                if (submissionActive) {
+                    return;
+                }
                 var payload = buildPayload(form, defaults);
                 if (!payload.runid) {
                     appendStatus("runid is required.");
                     return;
                 }
+                setSubmissionActive(true);
                 resetCompletionState();
                 activeRunId = payload.runid;
                 activeConfig = normalizeConfig(payload.config);
@@ -575,6 +593,9 @@
                             throw new Error(body.message || "Run sync submit failed.");
                         }
                         var syncJobId = body && (body.sync_job_id || body.job_id) ? (body.sync_job_id || body.job_id) : "";
+                        if (!syncJobId) {
+                            throw new Error("Run sync response did not include a job id.");
+                        }
                         appendStatus("Job enqueued: " + syncJobId);
                         startStream(container, payload.runid, statusChannel);
                         if (poller && typeof poller.connect_status_stream === "function") {
@@ -584,6 +605,7 @@
                         refreshStatus();
                     })
                     .catch(function (error) {
+                        setSubmissionActive(false);
                         appendStatus("Run sync submit failed: " + (error.message || error));
                         if (global.console && console.error) {
                             console.error(error);

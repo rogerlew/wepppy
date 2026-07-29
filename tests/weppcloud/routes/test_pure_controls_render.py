@@ -30,6 +30,9 @@ FORK_CONSOLE_TEMPLATE_ROOT = (
 ARCHIVE_CONSOLE_TEMPLATE_ROOT = (
     REPO_ROOT / "wepppy" / "weppcloud" / "routes" / "archive_dashboard" / "templates"
 )
+RUN_SYNC_CONSOLE_TEMPLATE_ROOT = (
+    REPO_ROOT / "wepppy" / "weppcloud" / "routes" / "run_sync_dashboard" / "templates"
+)
 PURE_TEMPLATES = [
     "controls/ag_fields_pure.htm",
     "controls/path_cost_effective_pure.htm",
@@ -61,6 +64,7 @@ def jinja_env() -> Environment:
                 str(RQ_INFO_DETAILS_TEMPLATE_ROOT),
                 str(FORK_CONSOLE_TEMPLATE_ROOT),
                 str(ARCHIVE_CONSOLE_TEMPLATE_ROOT),
+                str(RUN_SYNC_CONSOLE_TEMPLATE_ROOT),
             ]
         ),
         undefined=DebugUndefined,
@@ -2568,6 +2572,52 @@ def test_archive_console_renders_exact_authorized_urls_and_escaped_identity(
     assert "/static/js/console_utils.js" in rendered
     assert "/static/js/status_stream.js" in rendered
     assert "/static/js/archive_console.js" in rendered
+
+
+def test_run_sync_console_renders_exact_admin_contract_and_escaped_config(
+    jinja_env: Environment,
+) -> None:
+    token = 'token"><img data-token src=x>'
+    target_root = '/wc1/runs"><script data-root>alert(1)</script>'
+    rendered = jinja_env.overlay(autoescape=True).get_template(
+        "rq-run-sync-dashboard.htm"
+    ).render(
+        default_target_root=target_root,
+        status_channel_suffix="run_sync",
+        migrations_channel_suffix="migrations",
+        rq_engine_token=token,
+        static_url=lambda path: f"/static/{path}",
+    )
+
+    assert '<img data-token src=x>' not in rendered
+    assert "<script data-root>alert(1)</script>" not in rendered
+    assert 'data-controller="run-sync-dashboard"' in rendered
+    assert 'data-api-url="/rq-engine/api/run-sync"' in rendered
+    assert 'data-status-url="/rq-engine/api/run-sync/status"' in rendered
+    assert 'data-default-host="wepp.cloud"' in rendered
+    assert 'data-status-channel="run_sync"' in rendered
+    assert 'data-migrations-channel="migrations"' in rendered
+    assert "token&#34;&gt;&lt;img data-token src=x&gt;" in rendered
+    assert 'id="source_host"' in rendered
+    assert 'name="source_host"' in rendered
+    assert 'value="wepp.cloud"' in rendered
+    assert 'id="runid"' in rendered
+    assert 'name="runid"' in rendered
+    assert 'id="target_root"' in rendered
+    assert 'name="target_root"' in rendered
+    assert "/wc1/runs&#34;&gt;&lt;script data-root&gt;alert(1)&lt;/script&gt;" in rendered
+    assert 'id="owner_email"' in rendered
+    assert 'name="owner_email"' in rendered
+    assert 'id="source_run_token"' in rendered
+    assert 'name="source_run_token"' in rendered
+    assert 'autocomplete="off"' in rendered
+    assert 'id="run_migrations"' in rendered
+    assert 'name="run_migrations"' in rendered
+    assert 'id="archive_before"' in rendered
+    assert 'name="archive_before"' in rendered
+    assert 'id="run_sync_submit"' in rendered
+    assert "/static/js/controllers-gl.js" in rendered
+    assert "/static/js/controllers_gl_stale_check.js" in rendered
 
 
 def test_interfaces_template_hides_login_bypass_banner_for_authenticated_user(jinja_env: Environment) -> None:

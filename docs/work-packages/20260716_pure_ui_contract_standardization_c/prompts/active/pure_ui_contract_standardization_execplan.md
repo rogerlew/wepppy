@@ -126,6 +126,9 @@ is not a contract registry or enforcement platform.
 - [x] (2026-07-29) Executed SURF-03 with exact hostile rendering, nine direct
   archive-client cases, retained API/RQ/filesystem evidence, a repaired
   sibling-mutation request race, and a passing security review.
+- [x] (2026-07-29) Executed SURF-05 with exact Admin rendering, eight direct
+  Run Sync client tests, retained source-token/dependent-RQ/worker evidence, a
+  repaired duplicate-submission window, and a passing security review.
 - [ ] Close the initiative when the registered inventory has executable
   regression coverage or explicit operator-approved exclusions.
 
@@ -145,6 +148,10 @@ is not a contract registry or enforcement platform.
 - Observation: SURF-03's shared active-job slot did not protect the request
   window: restore and delete left sibling mutation controls enabled until the
   server response. Direct pending-request execution exposed the race.
+
+- Observation: SURF-05 likewise admitted duplicate browser submissions before
+  the first request or active job completed; a direct pending-promise test made
+  the enqueue window visible.
 
 - Observation: The controller count created planning anxiety and caused an
   architecture with two registries, a generated index, a manifest, change-aware
