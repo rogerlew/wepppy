@@ -38,3 +38,11 @@ def test_cancel_job_surfaces_response_message_and_refreshes_dashboard() -> None:
     assert "const token = await getCancelAuthToken();" in template
     assert "alert(message);" in template
     assert "fetchJobStatus();" in template
+
+
+def test_dashboard_loads_controller_stale_check_and_qr_assets() -> None:
+    template = _template_text()
+
+    assert "static_url('js/controllers-gl.js')" in template
+    assert "static_url('js/controllers_gl_stale_check.js')" in template
+    assert "static_url('js/qrcode.js')" in template

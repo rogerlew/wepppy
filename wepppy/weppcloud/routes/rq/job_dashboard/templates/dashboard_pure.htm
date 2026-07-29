@@ -491,10 +491,13 @@
     return { payload, parseFailed };
   }
 
-  async function requestJson(url) {
+  async function requestJson(url, options = {}) {
     let response;
     try {
-      response = await fetch(url, { credentials: "same-origin" });
+      response = await fetch(url, {
+        credentials: "same-origin",
+        ...options
+      });
     } catch (err) {
       const error = new Error("Request failed");
       error.payload = { error: { message: "Request failed" } };
@@ -704,7 +707,19 @@
   }
 
     try {
-      const data = await requestJson(primaryUrl);
+      let data;
+      try {
+        data = await requestJson(primaryUrl);
+      } catch (error) {
+        const statusCode = error && typeof error.status === "number" ? error.status : 0;
+        if (statusCode !== 401 && statusCode !== 403) {
+          throw error;
+        }
+        const token = await fetchRqEngineToken();
+        data = await requestJson(primaryUrl, {
+          headers: { Authorization: `Bearer ${token}` }
+        });
+      }
       handleSuccess(data);
     } catch (error) {
       handleError(error);

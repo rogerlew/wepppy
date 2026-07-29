@@ -372,7 +372,7 @@ exceed the evidence/review boundary.
 | SURF-04 | `pure_ui_fork_console_contract` | Fork console CAP/session/localStorage recovery/cancel/copy ownership; consumes SHR-04B `console_utils.js` | SURF-01, SHR-02, SHR-03A, SHR-04A, SHR-04B, DOM-02, DOM-03 | High / `high` | planned |
 | SURF-05 | `pure_ui_run_sync_console_contract` | Run Sync host/root/token/options/status/RQ lifecycle | SHR-02, SHR-03A, SHR-03B, SHR-04A, SHR-04B | High / `high` | planned |
 | SURF-06 | `pure_ui_runs_catalog_contract` | Runs catalog/users/map/delete/poll controls and persistence/permission behavior | SHR-01..04B, DOM-02, DOM-03 | High / `high` | planned |
-| SURF-07 | `pure_ui_rq_job_dashboard_contract` | Minted token, job tree/poll/jobinfo/cancel and terminal/error mapping | SHR-02, SHR-03A, SHR-03B, SHR-04A, SHR-04B | High / `high` | planned |
+| SURF-07 | `20260728_pure_ui_rq_job_dashboard_contract` | Job tree/poll/jobinfo/cancel and terminal/error mapping; 268 focused Python + 4 inline Jest; required poll-auth fallback repair; security review passed | SHR-02, SHR-03A, SHR-03B, SHR-04A, SHR-04B | High / `high` | verified |
 | SURF-08 | `pure_ui_run_migration_status_contract` | Old-run migration mutation, retry/skip and terminal state | SHR-02..04B, SURF-07 | High / `high` | planned |
 | SURF-09 | `pure_ui_readme_editor_contract` | README save/preview/raw, auth/path/CSRF, tab lock/concurrency, safe markdown rendering | SHR-02, SHR-04A, SHR-04B, DOM-02 | High / `high` | planned |
 | SURF-10 | `pure_ui_disturbed_csv_editor_contract` | Edit CSV optimistic concurrency, disturbed lookup mutation, runtime/CDN failure | DOM-23, SHR-01, SHR-02, SHR-04A, SHR-04B | High / `high` | planned |

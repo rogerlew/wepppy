@@ -17,6 +17,9 @@ REPO_ROOT = Path(__file__).resolve().parents[3]
 TEMPLATE_ROOT = REPO_ROOT / "wepppy" / "weppcloud" / "templates"
 COMMAND_BAR_TEMPLATE_ROOT = REPO_ROOT / "wepppy" / "weppcloud" / "routes" / "command_bar" / "templates"
 RUN_0_TEMPLATE_ROOT = REPO_ROOT / "wepppy" / "weppcloud" / "routes" / "run_0" / "templates"
+RQ_JOB_DASHBOARD_TEMPLATE_ROOT = (
+    REPO_ROOT / "wepppy" / "weppcloud" / "routes" / "rq" / "job_dashboard" / "templates"
+)
 PURE_TEMPLATES = [
     "controls/ag_fields_pure.htm",
     "controls/path_cost_effective_pure.htm",
@@ -39,6 +42,7 @@ def jinja_env() -> Environment:
                 str(TEMPLATE_ROOT),
                 str(COMMAND_BAR_TEMPLATE_ROOT),
                 str(RUN_0_TEMPLATE_ROOT),
+                str(RQ_JOB_DASHBOARD_TEMPLATE_ROOT),
             ]
         ),
         undefined=DebugUndefined,
@@ -3139,6 +3143,33 @@ def test_outlet_template_renders_selection_modes_and_lifecycle_targets(jinja_env
     assert re.search(r'id="set_outlet_mode_cursor"[^>]*checked', rendered)
     assert 'id="set_outlet_mode_entry" checked' not in rendered
     assert re.search(r'id="set_outlet_mode1_controls"[^>]*hidden', rendered)
+
+
+def test_rq_job_dashboard_renders_identity_actions_and_lifecycle_targets(
+    jinja_env: Environment,
+) -> None:
+    rendered = jinja_env.get_template("dashboard_pure.htm").render(
+        job_id="job-123",
+        site_prefix="/weppcloud",
+    )
+
+    for token in (
+        'data-controller="rq-job-dashboard"',
+        'id="job-id"',
+        'id="run-id"',
+        'id="job-summary"',
+        'id="query-count"',
+        'id="query-interval"',
+        'id="cancel-job"',
+        'id="job-dashboard-qr"',
+        'id="job-overall-progress"',
+        'id="job-dashboard"',
+    ):
+        assert token in rendered
+
+    assert '<dd class="wc-summary-pane__definition" id="job-id">job-123</dd>' in rendered
+    assert 'const jobId = "job-123";' in rendered
+    assert 'const sitePrefix = "/weppcloud";' in rendered
 
 
 def test_placeholder_only_controls_have_explicit_accessible_names() -> None:

@@ -155,7 +155,7 @@ run-support files, 15 shared/global files, and four standalone files.
 | Fork console | SURF-04 | `R/fork_console/templates/rq-fork-console.htm` | high | contractual | unverified |
 | Run Sync | SURF-05 | `R/run_sync_dashboard/templates/rq-run-sync-dashboard.htm` | high | contractual | unverified |
 | Runs catalog | SURF-06 | `templates/user/runs2.html` | high | contractual | unverified |
-| RQ job dashboard | SURF-07 | `R/rq/job_dashboard/templates/dashboard_pure.htm` | high | contractual | unverified |
+| RQ job dashboard | SURF-07 | `R/rq/job_dashboard/templates/dashboard_pure.htm`; direct render + 4 real inline Jest + 268 route/session/rq-engine/payload tests; required poll-auth fallback repair | high review passed | contractual | verified |
 | Run migration status | SURF-08 | `R/run_0/templates/run_0/rq-migration-status.htm` | high | contractual | unverified |
 | README editor | SURF-09 | `R/readme_md/templates/{readme_editor,readme_view}.htm` | high | contractual | unverified |
 | Disturbed CSV editor | SURF-10 | `T/edit_csv.htm` | high | contractual | unverified |
