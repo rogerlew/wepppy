@@ -102,6 +102,10 @@ is not a contract registry or enforcement platform.
   OAuth, CSRF, token, cookie/session, logout, and Diagnostics evidence; removed
   the misowned Dev role mutation, repaired proxy-prefix password navigation,
   and passed independent correctness/security reviews.
+- [x] (2026-07-28) Executed SURF-15 with actual Root/Admin/inventory/hostile/
+  empty rendering, real inline client, CSRF/validation/datastore/reload
+  evidence; repaired Root authority, strict request types, self-Root
+  protection, HTTP errors, and visible safe feedback; security review passed.
 - [ ] Close the initiative when the registered inventory has executable
   regression coverage or explicit operator-approved exclusions.
 
@@ -158,6 +162,10 @@ is not a contract registry or enforcement platform.
   the `/weppcloud` deployment prefix and that visible privilege controls must
   be checked against the owning route's role boundary.
 
+- Observation: SURF-15 showed that `roles_required('Admin', 'Root')` means both
+  roles, not either role, and that a disabled privilege checkbox must have a
+  matching server invariant.
+
 ## Decision Log
 
 ### 2026-07-28: Controller count is inventory
@@ -187,6 +195,12 @@ miss or repeated burden and the operator explicitly approves a proposal.
 **Decision**: Keep the user profile read-only and leave role/account mutation
 to the Root-only SURF-15 boundary. Generate security continuations from their
 Flask endpoints so proxy prefixes remain authoritative.
+
+### 2026-07-28: Privileged mutation types are literal
+
+**Decision**: SURF-15 accepts only a JSON object, allowlisted role, valid
+target, and literal boolean state; its Root authority and self-Root protection
+are enforced by the server rather than inferred from visible controls.
 
 ### 2026-07-28: Autonomous run-domain execution remains serial
 
@@ -468,3 +482,12 @@ suites/695 tests passed; broad Python passed 5,522 tests with 58 skips. The
 profile's Dev-visible PowerUser mutation was removed because its route is
 Root-only and owned by SURF-15; the password link was made proxy-prefix aware.
 Independent correctness/security reviews passed with no unresolved findings.
+
+SURF-15 closed with actual Root/Admin, inventory, hostile, empty, selected,
+self-disabled, client, CSRF, validation, datastore, persistence, and reload
+evidence. Focused Python passed 28 tests, frontend lint plus all 97 suites/699
+tests passed, and broad Python passed 5,534 tests with 58 skips. Production
+repairs aligned GET authority with Root ownership, required strict JSON and
+boolean inputs, prevented self-Root removal, returned canonical 400 errors, and
+replaced console-only results with escaped live feedback and rollback.
+Dedicated security review passed with no unresolved findings.

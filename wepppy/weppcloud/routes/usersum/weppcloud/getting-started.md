@@ -308,7 +308,9 @@ For administrators, the Actions column also includes **Mint Run Token**, which i
 Quick links to your **user profile** (read-only account details, linked
 providers, password and logout actions, and role-gated API tokens) and your
 **runs dashboard** (a list of all your projects). Role assignments are managed
-by authorized administrators rather than from the profile page.
+by Root operators from the separate User Management page rather than from the
+profile page. That page permits only the existing PowerUser, Admin, Dev, and
+Root assignments and prevents an operator from removing their own Root role.
 
 <!-- ![More menu dropdown](static/getting-started/more-menu.png) -->
 

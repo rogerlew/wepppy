@@ -9,10 +9,10 @@
 **Current phase**: Next package selection pending
 **Last updated**: 2026-07-28 UTC
 **Next milestone**: Select the next registered package.
-**Security impact**: `high` identity, token, provider, CSRF, and session boundary
-**Dedicated security review**: `yes` for SHR-05, SURF-07, SURF-08, SURF-09, SURF-11, SURF-13, SURF-14, SURF-16, SURF-17, and SURF-18
+**Security impact**: `high` privileged account-role mutation
+**Dedicated security review**: `yes` for SHR-05, SURF-07, SURF-08, SURF-09, SURF-11, SURF-13, SURF-14, SURF-15, SURF-16, SURF-17, and SURF-18
 **Security artifact**:
-`../20260728_pure_ui_user_profile_session_contract/artifacts/2026-07-28_security_review.md`
+`../20260728_pure_ui_root_usermod_contract/artifacts/2026-07-28_security_review.md`
 
 ## Task Board
 
@@ -37,6 +37,13 @@
 
 ### Done
 
+- [x] Closed SURF-15 with actual Root/Admin, inventory, hostile, empty,
+  selected, self-disabled, client, CSRF, validation, datastore, persistence,
+  and reload evidence. Repaired GET authority, strict JSON/boolean validation,
+  self-Root protection, HTTP error status, and visible safe client feedback.
+  Focused Python passed 28 tests; frontend lint and all 97 suites/699 tests
+  passed; broad Python passed 5,534 tests with 58 skips; security review passed
+  with no unresolved findings (2026-07-28 UTC).
 - [x] Closed SURF-14 with direct ordinary/privileged/provider/empty/hostile
   renders, actual token mint/copy/fallback/error execution, and retained OAuth,
   CSRF, token, cookie/session, logout, and Diagnostics evidence. Removed the

@@ -52,7 +52,7 @@ def runid_query():
   
 
 @admin_bp.route('/usermod', strict_slashes=False)
-@roles_required('Admin', 'Root')
+@roles_required('Root')
 @handle_with_exception_factory
 def usermod():
     return render_template('user/usermod.html', user=current_user)
@@ -64,27 +64,44 @@ def usermod():
 def task_usermod():
     from sqlalchemy import func
     from wepppy.weppcloud.app import db, user_datastore, Role, User
-    user_id = request.json.get('user_id')
-    user_email = request.json.get('user_email')
-    role = request.json.get('role')
-    role_state = request.json.get('role_state')
+    payload = request.get_json(silent=True)
+    if not isinstance(payload, dict):
+        return error_factory("JSON object required", status_code=400)
+
+    user_id = payload.get('user_id')
+    user_email = payload.get('user_email')
+    role = payload.get('role')
+    role_state = payload.get('role_state')
 
     if role not in _USERMOD_ALLOWED_ROLES:
-        return error_factory(f"unsupported role '{role}'")
+        return error_factory(f"unsupported role '{role}'", status_code=400)
+    if not isinstance(role_state, bool):
+        return error_factory("role_state must be a boolean", status_code=400)
 
     user = None
     if user_id is not None:
+        if isinstance(user_id, bool) or not isinstance(user_id, int):
+            return error_factory("user_id must be an integer", status_code=400)
         user = User.query.filter(User.id == user_id).first()
     else:
-        if not user_email:
-            return error_factory("user_id or user_email required")
+        if not isinstance(user_email, str) or not user_email.strip():
+            return error_factory("user_id or user_email required", status_code=400)
         user = User.query.filter(func.lower(User.email) == user_email.lower()).first()
 
     if user is None:
-        return error_factory("user not found")
+        return error_factory("user not found", status_code=400)
+
+    if role == "Root" and not role_state and user.id == current_user.id:
+        return error_factory(
+            "cannot remove your own Root role",
+            status_code=400,
+        )
 
     if user.has_role(role) == role_state:
-        return error_factory(f'{user.email} role {role} already is {role_state}')
+        return error_factory(
+            f'{user.email} role {role} already is {role_state}',
+            status_code=400,
+        )
 
     if role_state:
         role_obj = Role.query.filter(Role.name == role).first()

@@ -17,6 +17,7 @@
   </header>
 
   <section class="wc-panel wc-stack">
+    <p class="wc-alert" data-usermod-status aria-live="polite" hidden></p>
     <div class="wc-table-wrapper">
       <table class="wc-table wc-table--striped wc-table--compact" id="allusers">
         <thead>
@@ -90,10 +91,23 @@ document.querySelectorAll('input[name^="usermod_"]').forEach(checkbox => {
     const userId = parseInt(parts[2], 10);
     const role = parts[1];
     const roleState = this.checked;
+    const status = document.querySelector('[data-usermod-status]');
+    const wasDisabled = this.disabled;
 
+    function showStatus(message, state) {
+      if (!status) {
+        return;
+      }
+      status.textContent = message;
+      status.className = `wc-alert wc-alert--${state}`;
+      status.hidden = false;
+    }
+
+    this.disabled = true;
     try {
       const response = await fetch('{{ url_for("admin.task_usermod") }}', {
         method: 'POST',
+        credentials: 'same-origin',
         headers: csrfHeaders({
           'Content-Type': 'application/json'
         }),
@@ -103,16 +117,19 @@ document.querySelectorAll('input[name^="usermod_"]').forEach(checkbox => {
           role_state: roleState
         })
       });
-      const data = await response.json();
-      if (data.error) {
-        console.error('Error:', data.error);
-        this.checked = !this.checked; // Revert on error
-      } else {
-        console.log('Role updated:', data);
+      const data = await response.json().catch(() => ({}));
+      if (!response.ok || data.error) {
+        const message = data.error && data.error.message
+          ? data.error.message
+          : 'Role update failed.';
+        throw new Error(message);
       }
+      showStatus('Role updated.', 'success');
     } catch (error) {
-      console.error('Request failed:', error);
       this.checked = !this.checked; // Revert on error
+      showStatus(error.message || 'Role update failed.', 'error');
+    } finally {
+      this.disabled = wasDisabled;
     }
   });
 });
