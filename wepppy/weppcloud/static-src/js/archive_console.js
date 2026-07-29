@@ -649,6 +649,9 @@
       if (!restoreApiUrl) {
         return;
       }
+      if (archiveButton) {
+        archiveButton.disabled = true;
+      }
       setRestoreButtonsDisabled(true);
       setDeleteButtonsDisabled(true);
       appendStatus("Restoring archive " + name + "...");
@@ -669,6 +672,9 @@
         })
         .catch(function (err) {
           appendStatus("ERROR: " + (err.message || err));
+          if (archiveButton) {
+            archiveButton.disabled = false;
+          }
           setRestoreButtonsDisabled(false);
           setDeleteButtonsDisabled(false);
         });
@@ -689,6 +695,10 @@
       if (!deleteApiUrl) {
         return;
       }
+      if (archiveButton) {
+        archiveButton.disabled = true;
+      }
+      setRestoreButtonsDisabled(true);
       setDeleteButtonsDisabled(true);
       appendStatus("Deleting archive " + name + "...");
       fetchWithSessionToken(deleteApiUrl, {
@@ -709,6 +719,9 @@
         })
         .finally(function () {
           if (!currentJobId) {
+            if (archiveButton) {
+              archiveButton.disabled = false;
+            }
             setRestoreButtonsDisabled(false);
             setDeleteButtonsDisabled(false);
           }

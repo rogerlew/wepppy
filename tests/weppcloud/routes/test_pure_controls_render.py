@@ -27,6 +27,9 @@ RQ_INFO_DETAILS_TEMPLATE_ROOT = (
 FORK_CONSOLE_TEMPLATE_ROOT = (
     REPO_ROOT / "wepppy" / "weppcloud" / "routes" / "fork_console" / "templates"
 )
+ARCHIVE_CONSOLE_TEMPLATE_ROOT = (
+    REPO_ROOT / "wepppy" / "weppcloud" / "routes" / "archive_dashboard" / "templates"
+)
 PURE_TEMPLATES = [
     "controls/ag_fields_pure.htm",
     "controls/path_cost_effective_pure.htm",
@@ -57,6 +60,7 @@ def jinja_env() -> Environment:
                 str(README_TEMPLATE_ROOT),
                 str(RQ_INFO_DETAILS_TEMPLATE_ROOT),
                 str(FORK_CONSOLE_TEMPLATE_ROOT),
+                str(ARCHIVE_CONSOLE_TEMPLATE_ROOT),
             ]
         ),
         undefined=DebugUndefined,
@@ -2516,6 +2520,54 @@ def test_fork_console_renders_exact_auth_cap_and_option_contract(
         assert "disabled" in rendered
         assert "/cap/assets/widget.js" in rendered
         assert "/cap/assets/floating.js" in rendered
+
+
+def test_archive_console_renders_exact_authorized_urls_and_escaped_identity(
+    jinja_env: Environment,
+) -> None:
+    current_user = SimpleNamespace(
+        is_authenticated=True,
+        is_anonymous=False,
+        has_role=lambda role: False,
+        roles=[],
+    )
+    runid = 'source"><img data-injected src=x>'
+    config = 'cfg"><script>alert(1)</script>'
+    rendered = jinja_env.overlay(autoescape=True).get_template(
+        "rq-archive-dashboard.htm"
+    ).render(
+        current_user=current_user,
+        user=current_user,
+        runid=runid,
+        config=config,
+        static_url=lambda path: f"/static/{path}",
+        url_for=lambda endpoint, **values: f"/static/{values.get('filename', '')}",
+        url_for_run=lambda endpoint, **values: (
+            f"/runs/{values['runid']}/{values['config']}/archives"
+            if endpoint == "archive.rq_archive_list"
+            else f"/runs/{values['runid']}/{values['config']}"
+        ),
+    )
+
+    escaped_runid = runid.replace('"', "&#34;").replace("<", "&lt;").replace(">", "&gt;")
+    assert '<img data-injected src=x>' not in rendered
+    assert "<script>alert(1)</script>" not in rendered
+    assert 'data-controller="archive-dashboard"' in rendered
+    assert f'data-runid="{escaped_runid}"' in rendered
+    assert 'data-user-anonymous="false"' in rendered
+    assert "/rq-engine/api/runs/source&#34;&gt;&lt;img data-injected src=x&gt;/" in rendered
+    assert "/archive" in rendered
+    assert "/restore-archive" in rendered
+    assert "/delete-archive" in rendered
+    assert 'id="archive_comment"' in rendered
+    assert 'maxlength="40"' in rendered
+    assert 'id="archive_button"' in rendered
+    assert 'id="refresh_button"' in rendered
+    assert "/static/js/controllers-gl.js" in rendered
+    assert "/static/js/controllers_gl_stale_check.js" in rendered
+    assert "/static/js/console_utils.js" in rendered
+    assert "/static/js/status_stream.js" in rendered
+    assert "/static/js/archive_console.js" in rendered
 
 
 def test_interfaces_template_hides_login_bypass_banner_for_authenticated_user(jinja_env: Environment) -> None:

@@ -151,7 +151,7 @@ run-support files, 15 shared/global files, and four standalone files.
 | --- | --- | --- | --- | --- | --- |
 | Public creation/CAP | SURF-01 | `templates/interfaces.htm`, `templates/run_0/create_index.htm`, `templates/cap_gate.htm`, `templates/locations/{joh,portland,seattle,spu}/index.htm`; exact render, 7 direct Jest, 147 route/render/CAP, and 11 rq-engine tests; no production repair | high review passed | contractual | verified |
 | Batch creation/execution | SURF-02A/02B | `R/batch_runner/templates/{create,manage_pure,batch_runner_pure}.htm` | high | contractual | unverified |
-| Archive console | SURF-03 | `R/archive_dashboard/templates/rq-archive-dashboard.htm` | high | contractual | unverified |
+| Archive console | SURF-03 | `R/archive_dashboard/templates/rq-archive-dashboard.htm`; exact hostile render plus 9 direct client, 166 route/render, and 32 API/RQ tests; sibling-mutation exclusion repaired | high review passed | contractual | verified |
 | Fork console | SURF-04 | `R/fork_console/templates/rq-fork-console.htm`; exact route/render plus 15 direct client, 168 render/template, and 89 API/cancel/RQ tests; no production repair | high review passed | contractual | verified |
 | Run Sync | SURF-05 | `R/run_sync_dashboard/templates/rq-run-sync-dashboard.htm` | high | contractual | unverified |
 | Runs catalog | SURF-06 | `templates/user/runs2.html`; direct ordinary/Admin render + actual inline client + ownership/catalog/map/delete/RQ/worker tests; encoded exact stored run/config and readonly HTTP repairs | high review passed | contractual | verified |

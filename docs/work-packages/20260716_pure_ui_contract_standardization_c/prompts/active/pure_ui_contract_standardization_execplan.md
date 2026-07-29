@@ -123,6 +123,9 @@ is not a contract registry or enforcement platform.
   fifteen direct real-client tests, retained CAP/auth/cancel/API/RQ evidence,
   predecessor reconciliation, and a passing security review. No production
   repair was required.
+- [x] (2026-07-29) Executed SURF-03 with exact hostile rendering, nine direct
+  archive-client cases, retained API/RQ/filesystem evidence, a repaired
+  sibling-mutation request race, and a passing security review.
 - [ ] Close the initiative when the registered inventory has executable
   regression coverage or explicit operator-approved exclusions.
 
@@ -138,6 +141,10 @@ is not a contract registry or enforcement platform.
 - Observation: SURF-04 inherited a completed fork-copy implementation whose
   package records remained open; its only deferred route-to-client option
   propagation gap could be closed directly without reopening backend behavior.
+
+- Observation: SURF-03's shared active-job slot did not protect the request
+  window: restore and delete left sibling mutation controls enabled until the
+  server response. Direct pending-request execution exposed the race.
 
 - Observation: The controller count created planning anxiety and caused an
   architecture with two registries, a generated index, a manifest, change-aware

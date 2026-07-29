@@ -8,6 +8,7 @@ describe("Archive console smoke", () => {
     let originalReadyStateDescriptor;
     let fetchMock;
     let statusStreamInstance;
+    let poller;
 
     beforeEach(async () => {
         jest.resetModules();
@@ -26,6 +27,12 @@ describe("Archive console smoke", () => {
             attach: jest.fn(() => statusStreamInstance),
             disconnect: jest.fn(),
         };
+        poller = {
+            set_rq_job_id: jest.fn((self, jobId) => {
+                self.rq_job_id = jobId;
+            }),
+        };
+        global.controlBase = jest.fn(() => poller);
 
         fetchMock = jest.fn((url, options = {}) => {
             if (url === "/runs/demo/config/archive-list") {
@@ -93,7 +100,9 @@ describe("Archive console smoke", () => {
         }
         document.body.innerHTML = "";
         delete global.StatusStream;
+        delete global.controlBase;
         delete global.fetch;
+        delete global.confirm;
     });
 
     test("clicking create archive posts the archive job", async () => {
@@ -120,6 +129,287 @@ describe("Archive console smoke", () => {
 
         expect(statusStreamInstance.append).toHaveBeenCalledWith("Submitting archive job...");
         expect(statusStreamInstance.append).toHaveBeenCalledWith("Archive job submitted: job-123");
+        expect(poller.set_rq_job_id).toHaveBeenCalledWith(poller, "job-123");
+    });
+
+    test("renders hostile archive metadata as text with server-owned download URL", async () => {
+        fetchMock.mockImplementation((url) => {
+            if (url === "/runs/demo/config/archive-list") {
+                return Promise.resolve({
+                    ok: true,
+                    json: () => Promise.resolve({
+                        archives: [{
+                            name: 'snapshot"><img data-injected src=x>.zip',
+                            comment: '<script data-comment>alert(1)</script>',
+                            size: 1024,
+                            modified: "2026-07-29 12:00:00",
+                            download_url: "/runs/demo/config/download/archives/snapshot.zip",
+                        }],
+                        in_progress: false,
+                    }),
+                });
+            }
+            throw new Error(`Unexpected fetch: ${url}`);
+        });
+
+        document.getElementById("refresh_button").click();
+        await flushPromises();
+
+        const row = document.querySelector("#archives_table tbody tr");
+        expect(row.textContent).toContain('snapshot"><img data-injected src=x>.zip');
+        expect(row.textContent).toContain("<script data-comment>alert(1)</script>");
+        expect(row.querySelector("[data-injected]")).toBeNull();
+        expect(row.querySelector("[data-comment]")).toBeNull();
+        expect(row.querySelector("a").getAttribute("href")).toBe(
+            "/runs/demo/config/download/archives/snapshot.zip"
+        );
+        expect(row.querySelector('button[data-role="restore"]').disabled).toBe(false);
+        expect(row.querySelector('button[data-role="delete"]').disabled).toBe(false);
+    });
+
+    test("restore confirms and submits the exact listed archive with one active job", async () => {
+        global.confirm = jest.fn(() => true);
+        fetchMock.mockImplementation((url, options = {}) => {
+            if (url === "/runs/demo/config/archive-list") {
+                return Promise.resolve({
+                    ok: true,
+                    json: () => Promise.resolve({
+                        archives: [{
+                            name: "snapshot.zip",
+                            comment: "",
+                            size: 1,
+                            modified: "now",
+                            download_url: "/download/snapshot.zip",
+                        }],
+                        in_progress: false,
+                    }),
+                });
+            }
+            if (url === "/rq-engine/api/runs/demo/config/session-token") {
+                return Promise.resolve({
+                    ok: true,
+                    json: () => Promise.resolve({ token: "session-token" }),
+                });
+            }
+            if (url === "/rq-engine/api/runs/demo/config/restore-archive") {
+                return Promise.resolve({
+                    ok: true,
+                    json: () => Promise.resolve({ job_id: "restore-job" }),
+                });
+            }
+            throw new Error(`Unexpected fetch: ${url} (${JSON.stringify(options)})`);
+        });
+
+        document.getElementById("refresh_button").click();
+        await flushPromises();
+        fetchMock.mockClear();
+        document.querySelector('button[data-role="restore"]').click();
+        await flushPromises();
+
+        expect(global.confirm).toHaveBeenCalledWith(
+            'Restore archive "snapshot.zip"?\nThis replaces current project files.'
+        );
+        expect(fetchMock.mock.calls[1]).toEqual([
+            "/rq-engine/api/runs/demo/config/restore-archive",
+            {
+                method: "POST",
+                headers: {
+                    "Content-Type": "application/json",
+                    Authorization: "Bearer session-token",
+                },
+                body: JSON.stringify({ archive_name: "snapshot.zip" }),
+            },
+        ]);
+        expect(poller.poll_completion_event).toBe("RESTORE_COMPLETE");
+        expect(poller.set_rq_job_id).toHaveBeenCalledWith(poller, "restore-job");
+        expect(document.getElementById("archive_button").disabled).toBe(true);
+        expect(document.querySelector('button[data-role="delete"]').disabled).toBe(true);
+    });
+
+    test("delete confirms, submits the exact listed archive, and refreshes", async () => {
+        global.confirm = jest.fn(() => true);
+        let listCalls = 0;
+        fetchMock.mockImplementation((url) => {
+            if (url === "/runs/demo/config/archive-list") {
+                listCalls += 1;
+                return Promise.resolve({
+                    ok: true,
+                    json: () => Promise.resolve({
+                        archives: listCalls === 1 ? [{
+                            name: "snapshot.zip",
+                            comment: "",
+                            size: 1,
+                            modified: "now",
+                            download_url: "/download/snapshot.zip",
+                        }] : [],
+                        in_progress: false,
+                    }),
+                });
+            }
+            if (url === "/rq-engine/api/runs/demo/config/session-token") {
+                return Promise.resolve({
+                    ok: true,
+                    json: () => Promise.resolve({ token: "session-token" }),
+                });
+            }
+            if (url === "/rq-engine/api/runs/demo/config/delete-archive") {
+                return Promise.resolve({
+                    ok: true,
+                    json: () => Promise.resolve({ status: "ok" }),
+                });
+            }
+            throw new Error(`Unexpected fetch: ${url}`);
+        });
+
+        document.getElementById("refresh_button").click();
+        await flushPromises();
+        fetchMock.mockClear();
+        document.querySelector('button[data-role="delete"]').click();
+        await flushPromises();
+
+        expect(fetchMock.mock.calls[1][0]).toBe(
+            "/rq-engine/api/runs/demo/config/delete-archive"
+        );
+        expect(fetchMock.mock.calls[1][1].body).toBe(
+            JSON.stringify({ archive_name: "snapshot.zip" })
+        );
+        expect(listCalls).toBe(2);
+        expect(document.getElementById("archive_empty").hidden).toBe(false);
+    });
+
+    test("delete disables all mutation controls until the request settles", async () => {
+        global.confirm = jest.fn(() => true);
+        let resolveDelete;
+        fetchMock.mockImplementation((url) => {
+            if (url === "/runs/demo/config/archive-list") {
+                return Promise.resolve({
+                    ok: true,
+                    json: () => Promise.resolve({
+                        archives: [{
+                            name: "snapshot.zip",
+                            comment: "",
+                            size: 1,
+                            modified: "now",
+                            download_url: "/download/snapshot.zip",
+                        }],
+                        in_progress: false,
+                    }),
+                });
+            }
+            if (url === "/rq-engine/api/runs/demo/config/session-token") {
+                return Promise.resolve({
+                    ok: true,
+                    json: () => Promise.resolve({ token: "session-token" }),
+                });
+            }
+            if (url === "/rq-engine/api/runs/demo/config/delete-archive") {
+                return new Promise((resolve) => {
+                    resolveDelete = resolve;
+                });
+            }
+            throw new Error(`Unexpected fetch: ${url}`);
+        });
+
+        document.getElementById("refresh_button").click();
+        await flushPromises();
+        document.querySelector('button[data-role="delete"]').click();
+        await flushPromises();
+
+        expect(document.getElementById("archive_button").disabled).toBe(true);
+        expect(document.querySelector('button[data-role="restore"]').disabled).toBe(true);
+        expect(document.querySelector('button[data-role="delete"]').disabled).toBe(true);
+
+        resolveDelete({
+            ok: true,
+            json: () => Promise.resolve({ status: "ok" }),
+        });
+        await flushPromises();
+        await flushPromises();
+
+        expect(document.getElementById("archive_button").disabled).toBe(false);
+        expect(document.querySelector('button[data-role="restore"]').disabled).toBe(false);
+        expect(document.querySelector('button[data-role="delete"]').disabled).toBe(false);
+    });
+
+    test("declining restore confirmation performs no mutation", async () => {
+        global.confirm = jest.fn(() => false);
+        fetchMock.mockImplementation((url) => {
+            if (url === "/runs/demo/config/archive-list") {
+                return Promise.resolve({
+                    ok: true,
+                    json: () => Promise.resolve({
+                        archives: [{
+                            name: "snapshot.zip",
+                            comment: "",
+                            size: 1,
+                            modified: "now",
+                            download_url: "/download/snapshot.zip",
+                        }],
+                    }),
+                });
+            }
+            throw new Error(`Unexpected fetch: ${url}`);
+        });
+
+        document.getElementById("refresh_button").click();
+        await flushPromises();
+        fetchMock.mockClear();
+        document.querySelector('button[data-role="restore"]').click();
+
+        expect(global.confirm).toHaveBeenCalledTimes(1);
+        expect(fetchMock).not.toHaveBeenCalled();
+    });
+
+    test("poll terminal completion refreshes the list and enables actions", async () => {
+        document.getElementById("archive_button").click();
+        await flushPromises();
+        fetchMock.mockClear();
+
+        poller.triggerEvent("ARCHIVE_COMPLETE", { source: "poll" });
+        await flushPromises();
+
+        expect(statusStreamInstance.append).toHaveBeenCalledWith("Archive job completed.");
+        expect(fetchMock).toHaveBeenCalledWith(
+            "/runs/demo/config/archive-list",
+            { cache: "no-store" }
+        );
+        expect(document.getElementById("archive_button").disabled).toBe(false);
+    });
+
+    test("submission failure is visible and restores available actions", async () => {
+        fetchMock.mockImplementation((url) => {
+            if (url === "/rq-engine/api/runs/demo/config/session-token") {
+                return Promise.resolve({
+                    ok: true,
+                    json: () => Promise.resolve({ token: "session-token" }),
+                });
+            }
+            if (url === "/rq-engine/api/runs/demo/config/archive") {
+                return Promise.resolve({
+                    ok: false,
+                    json: () => Promise.resolve({
+                        error: { message: "Archive is locked" },
+                    }),
+                });
+            }
+            throw new Error(`Unexpected fetch: ${url}`);
+        });
+
+        document.getElementById("archive_button").click();
+        await flushPromises();
+
+        expect(statusStreamInstance.append).toHaveBeenCalledWith("ERROR: Archive is locked");
+        expect(document.getElementById("archive_button").disabled).toBe(false);
+    });
+
+    test("repeated script execution retains one create owner", async () => {
+        jest.resetModules();
+        await import("../../static/js/archive_console.js");
+
+        document.getElementById("archive_button").click();
+        await flushPromises();
+
+        expect(fetchMock).toHaveBeenCalledTimes(2);
     });
 });
 

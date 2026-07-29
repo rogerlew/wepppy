@@ -55,6 +55,8 @@ Module: `wepppy/rq/project_rq.py`
 ## Additional Details
 - Lock enforcement uses `wepppy.nodb.base.lock_statuses(runid)` to detect locked `.nodb` files before destructive operations.
 - Archive + restore share a single websocket channel: `<runid>:archive`.
+- Create, restore, and delete controls are mutually disabled while any archive
+  mutation request or archive/restore job is active.
 - Archive metadata comments are UTF-8 encoded and limited to 40 characters (zip comment constraint).
 - Restore keeps `archives/` intact and blocks path traversal by validating zip entry destinations.
 - Dedicated archive download service health is observable through `download.complete` logs with status, bytes, duration, range metadata, request id, and sanitized archive basename.

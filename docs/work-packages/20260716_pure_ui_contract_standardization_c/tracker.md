@@ -10,7 +10,7 @@
 **Last updated**: 2026-07-29 UTC
 **Next milestone**: Select the next dependency-ready registered package.
 **Security impact**: `none` for documentation-only parent reconciliation
-**Dedicated security review**: `yes` for SHR-05, SURF-01, SURF-04, SURF-06, SURF-07, SURF-08, SURF-09, SURF-10, SURF-11, SURF-13, SURF-14, SURF-15, SURF-16, SURF-17, and SURF-18
+**Dedicated security review**: `yes` for SHR-05, SURF-01, SURF-03, SURF-04, SURF-06, SURF-07, SURF-08, SURF-09, SURF-10, SURF-11, SURF-13, SURF-14, SURF-15, SURF-16, SURF-17, and SURF-18
 **Security artifact**:
 `../20260728_pure_ui_runs_catalog_contract/artifacts/2026-07-28_security_review.md`
 
@@ -37,6 +37,14 @@
 
 ### Done
 
+- [x] Closed SURF-03 with exact hostile rendering, nine direct archive-client
+  cases, and retained route, authorization, active-job, worker, and filesystem
+  evidence. Repaired a request-window race by mutually disabling create,
+  restore, and delete during destructive submissions. Focused route/render
+  passed 166 tests, API/RQ passed 32, security-focused evidence passed 17, and
+  all 23 console tests plus frontend lint passed. Full frontend passed 101
+  suites/727 tests and repository Python passed 5,556 tests with 58 skips.
+  Security review passed with no unresolved finding (2026-07-29 UTC).
 - [x] Closed SURF-04 with exact route/render option identity, fifteen direct
   real-client tests, and retained CAP/auth/cancel/API/RQ worker evidence.
   Focused render/template passed 168 tests, API/cancel/RQ passed 89,
