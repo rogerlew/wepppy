@@ -49,3 +49,41 @@ def test_security_email_templates_render() -> None:
         for template_name in templates:
             rendered = render_template(template_name, **context)
             assert rendered.strip()
+
+
+def test_security_html_email_templates_escape_identity_values() -> None:
+    template_root = Path(__file__).resolve().parents[2] / "wepppy" / "weppcloud" / "templates"
+    app = Flask(__name__, template_folder=str(template_root))
+    app.jinja_env.globals["url_for_security"] = (
+        lambda endpoint, _external=True: f"https://wepp.cloud/weppcloud/{endpoint}"
+    )
+    hostile = '<img src=x onerror="window.pwned=true">'
+    context = {
+        "user": SimpleNamespace(email=hostile, username=hostile),
+        "security": SimpleNamespace(confirmable=True, recoverable=True),
+        "confirmation_link": "https://wepp.cloud/confirm/token",
+        "reset_link": "https://wepp.cloud/reset/token",
+        "recovery_link": "https://wepp.cloud/forgot",
+        "email": hostile,
+        "username": hostile,
+    }
+    templates = {
+        "security/email/change_notice.html": (),
+        "security/email/confirmation_instructions.html": (
+            context["confirmation_link"],
+        ),
+        "security/email/reset_instructions.html": (context["reset_link"],),
+        "security/email/reset_notice.html": (),
+        "security/email/welcome.html": (context["confirmation_link"],),
+        "security/email/welcome_existing.html": (context["recovery_link"],),
+        "security/email/welcome_existing_username.html": (),
+    }
+
+    with app.app_context():
+        for template_name, required_links in templates.items():
+            rendered = render_template(template_name, **context)
+            assert hostile not in rendered
+            assert "&lt;img src=x onerror=" in rendered
+            assert "window.pwned=true" in rendered
+            for required_link in required_links:
+                assert required_link in rendered

@@ -161,7 +161,7 @@ run-support files, 15 shared/global files, and four standalone files.
 | Disturbed CSV editor | SURF-10 | `T/edit_csv.htm` | high | contractual | unverified |
 | Geneva summary | SURF-11 | `templates/reports/geneva/summary.htm`; `R/nodb_api/geneva_bp.py::{query_geneva_summary,query_geneva_hru_map_rows,query_geneva_hru_map_features,report_geneva_summary}`; 133 render/route + 11 service tests; no-store/run/auth/validation evidence | high review passed | contractual | verified |
 | Report shell | SURF-12 | both report-shell producers; 19 direct consumers; run/readonly/PUP/runtime renders; Project + 124 route tests | low | contractual | verified |
-| Security/auth forms | SURF-13 | `templates/security/*.html` through `_layout.html` | high | contractual | unverified |
+| Security/auth forms | SURF-13 | all form/email families; exact field/action/CSRF/CAP renders, real login/register CSRF-before-CAP submissions and inline scripts, cookie/session/OAuth/log-redaction evidence; security review passed | high | contractual | verified |
 | User profile/session | SURF-14 | `templates/user/profile.html` | high | contractual | unverified |
 | Root user modification | SURF-15 | `templates/user/usermod.html` | high | contractual | unverified |
 | ERMiT export/download | SURF-16 | direct launcher render + inline token/submit/poll/download/retry Jest + Flask/session/rq-engine/worker evidence; rejected-token retry repair; security review passed | high | contractual | verified |

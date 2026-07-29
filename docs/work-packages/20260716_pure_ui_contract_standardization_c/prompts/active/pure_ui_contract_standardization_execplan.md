@@ -93,6 +93,10 @@ is not a contract registry or enforcement platform.
   client execution, CAP plus run authorization, parent-owned PUP tracking,
   owned-job validation, fail-closed status/error behavior, confined worker and
   artifact paths, and independent correctness/security reviews.
+- [x] (2026-07-28) Executed SURF-13 with direct evidence for every security
+  form/email family, actual CAP/password-toggle script execution, and retained
+  CSRF, cookie/session, OAuth, configuration, and log-redaction evidence;
+  independent review passed and no production repair was required.
 - [ ] Close the initiative when the registered inventory has executable
   regression coverage or explicit operator-approved exclusions.
 
@@ -140,6 +144,10 @@ is not a contract registry or enforcement platform.
 - Observation: SURF-16's visible Retry button was not evidence of recovery;
   executing the real inline script showed that a rejected cached token promise
   made every later attempt fail without another request.
+
+- Observation: SURF-13 showed that direct framework-owned form coverage must
+  assert positive field and escaped-value presence; absence-only XSS checks can
+  pass when required output disappears.
 
 ## Decision Log
 
