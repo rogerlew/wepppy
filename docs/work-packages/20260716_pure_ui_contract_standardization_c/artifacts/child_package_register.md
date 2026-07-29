@@ -359,7 +359,7 @@ exceed the evidence/review boundary.
 | SHR-04B | `20260728_pure_ui_modal_details_theme_console_contracts` | `modal.js`, `details_menu.js`, `theme.js`, authoritative `console_utils.js` ownership, console/table macros and duplicate-load behavior | 4 direct Jest + 108 producer/consumer renders | Low / `none`; duplicate-init and table-caller repairs | verified |
 | SHR-05 | `20260728_pure_ui_unitizer_preferences_contract` | `unitizer_client.js`, generated map/modal, Project bridge, authenticated backend preferences and persisted round trip | 114 renders + 16 focused Python/Node + 31 Project Jest; selector/event-owner repairs | High / `high`; security review passed | verified |
 | SHR-06 | `pure_ui_command_bar_contract` | Command Bar template/JS/routes, chat/token/download/commands/WebSocket/StatusStream | SHR-02, SHR-03A, SHR-03B, SHR-04A, SHR-04B | High / `high` | planned |
-| SHR-07 | `pure_ui_poweruser_panel_contract` | PowerUser panel, web push/service worker, clear-lock and recorder-promotion actions | SHR-02, SHR-04A, SHR-04B, DOM-02 | High / `high` | planned |
+| SHR-07 | `20260729_pure_ui_poweruser_panel_contract` | PowerUser panel, web push/service worker, clear-lock and recorder-promotion actions | 187 render/route + 34 focused Jest + 29 retained backend; role/POST/side-effect repairs | High / `high`; security review passed | verified |
 
 ## Non-Run and Stateful Surface Packages
 

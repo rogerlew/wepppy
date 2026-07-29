@@ -1629,7 +1629,7 @@
     "notes": [],
     "queue_name": "default",
     "source_function": "delete_run",
-    "source_lineno": 306,
+    "source_lineno": 307,
     "source_module": "wepppy/weppcloud/routes/nodb_api/project_bp.py"
   },
   {
@@ -1639,7 +1639,7 @@
     "notes": [],
     "queue_name": "default",
     "source_function": "task_set_readonly",
-    "source_lineno": 658,
+    "source_lineno": 659,
     "source_module": "wepppy/weppcloud/routes/nodb_api/project_bp.py"
   },
   {

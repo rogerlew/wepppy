@@ -36,6 +36,10 @@
   {% endif %}
 {%- endmacro %}
 
+{% set can_use_poweruser_panel = current_user.has_role('PowerUser')
+    or current_user.has_role('Admin')
+    or current_user.has_role('Root') %}
+{% if can_use_poweruser_panel %}
 <div class="wc-modal" id="puModal" data-modal hidden>
   <style>
     .pu-modal__dialog {
@@ -288,7 +292,7 @@
                     data-project-action="clear-locks">
               Clear Locks
             </button>
-            {% if ron.profile_recorder_assembler_enabled and current_user.has_role('Admin') %}
+            {% if ron.profile_recorder_assembler_enabled and current_user.has_role('PowerUser') %}
               <button type="button"
                       class="pure-button pure-button-secondary"
                       data-project-action="recorder-promote">
@@ -497,9 +501,6 @@
 
   // ---- wire up your toggle ----
   document.addEventListener("DOMContentLoaded", async () => {
-    // Kick off SW registration and (if permitted) backend upsert
-    try { await initPush(); } catch (e) { console.warn("[wepppush] initPush:", e); }
-
     const toggle = document.getElementById("notificationToggle");
     const toggleLabel = document.getElementById("notificationToggleLabel");
 
@@ -507,6 +508,10 @@
       console.warn("[wepppush] Notification toggle elements not present; skipping toggle wiring");
       return;
     }
+
+    // Kick off SW registration and (if permitted) backend upsert only when the
+    // corresponding run control is actually present.
+    try { await initPush(); } catch (e) { console.warn("[wepppush] initPush:", e); }
 
     const subId = localStorage.getItem(SUB_ID_KEY);
     if (!subId || !RUN_ID) {
@@ -570,9 +575,10 @@
 <script type="text/javascript">
 document.addEventListener('DOMContentLoaded', function() {
     var root = document.querySelector('[data-run-token-root]');
-    if (!root) {
+    if (!root || root.dataset.runTokenInitialized === 'true') {
         return;
     }
+    root.dataset.runTokenInitialized = 'true';
 
     var mintEndpoint = root.getAttribute('data-mint-endpoint');
     var message = root.querySelector('[data-run-token-message]');
@@ -722,4 +728,5 @@ document.addEventListener('DOMContentLoaded', function() {
     }
 });
 </script>
+{% endif %}
 {% endif %}

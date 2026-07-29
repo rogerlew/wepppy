@@ -28,6 +28,16 @@
     ];
     const ABSOLUTE_URL_PATTERN = /^([a-z][a-z\d+\-.]*:)?\/\//i;
 
+    function csrfHeaders(baseHeaders = {}) {
+        const headers = { ...baseHeaders };
+        const meta = document.querySelector('meta[name="csrf-token"]');
+        const token = meta ? String(meta.getAttribute('content') || '').trim() : '';
+        if (token && !headers['X-CSRFToken'] && !headers['X-CSRF-Token']) {
+            headers['X-CSRFToken'] = token;
+        }
+        return headers;
+    }
+
     function inferSitePrefix() {
         if (typeof window === 'undefined' || !window.location) {
             return '';
@@ -1698,7 +1708,11 @@
             }
             const targetUrl = this.projectBaseUrl + 'tasks/clear_locks';
 
-            return fetch(targetUrl, { method: 'GET', cache: 'no-store', headers: { 'Accept': 'application/json' } })
+            return fetch(targetUrl, {
+                method: 'POST',
+                credentials: 'same-origin',
+                headers: csrfHeaders({ 'Accept': 'application/json' })
+            })
                 .then((response) => response.json().catch(() => ({})).then((data) => ({ response, data })))
                 .then(({ response, data }) => {
                     if (!response.ok || hasErrorPayload(data)) {

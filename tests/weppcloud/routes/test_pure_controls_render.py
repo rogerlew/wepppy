@@ -1643,6 +1643,11 @@ def test_poweruser_panel_parquet_table_links_do_not_append_trailing_slash(
     jinja_env: Environment,
 ) -> None:
     template = jinja_env.get_template("controls/poweruser_panel.htm")
+    poweruser = SimpleNamespace(
+        has_role=lambda role: role == "PowerUser",
+        roles=["PowerUser"],
+        is_authenticated=True,
+    )
 
     def _url_for_run(endpoint: str, **values) -> str:
         if endpoint != "browse.browse_tree":
@@ -1659,6 +1664,8 @@ def test_poweruser_panel_parquet_table_links_do_not_append_trailing_slash(
         browse_watershed_channels_parquet="watershed/channels.parquet",
         browse_landuse_parquet="landuse/landuse.parquet",
         browse_soils_parquet="soils/soils.parquet",
+        current_user=poweruser,
+        user=poweruser,
     )
 
     assert 'href="/weppcloud/runs/test-run/test-config/browse/watershed/hillslopes.parquet"' in rendered
@@ -1698,8 +1705,44 @@ def test_poweruser_panel_hides_run_token_controls_for_non_admin(jinja_env: Envir
     assert 'data-run-token-action="mint"' not in rendered
 
 
+def test_poweruser_panel_is_not_rendered_for_ordinary_user(jinja_env: Environment) -> None:
+    template = jinja_env.get_template("controls/poweruser_panel.htm")
+    ordinary_user = SimpleNamespace(
+        has_role=lambda role: False,
+        roles=["User"],
+        is_authenticated=True,
+    )
+
+    rendered = template.render(current_user=ordinary_user, user=ordinary_user)
+
+    assert 'id="puModal"' not in rendered
+    assert 'data-project-action="clear-locks"' not in rendered
+    assert "navigator.serviceWorker.register" not in rendered
+
+
+def test_poweruser_panel_renders_for_poweruser_without_admin_only_token(
+    jinja_env: Environment,
+) -> None:
+    template = jinja_env.get_template("controls/poweruser_panel.htm")
+    poweruser = SimpleNamespace(
+        has_role=lambda role: role == "PowerUser",
+        roles=["PowerUser"],
+        is_authenticated=True,
+    )
+    rendered = template.render(current_user=poweruser, user=poweruser)
+
+    assert 'id="puModal"' in rendered
+    assert 'data-project-action="clear-locks"' in rendered
+    assert "Mint Run Token" not in rendered
+
+
 def test_poweruser_panel_renders_landuse_catalog_and_map_links(jinja_env: Environment) -> None:
     template = jinja_env.get_template("controls/poweruser_panel.htm")
+    poweruser = SimpleNamespace(
+        has_role=lambda role: role == "PowerUser",
+        roles=["PowerUser"],
+        is_authenticated=True,
+    )
 
     def _url_for_run(endpoint: str, **values) -> str:
         return f"/runs/{values.get('runid', 'test-run')}/{values.get('config', 'test-config')}/{endpoint}"
@@ -1708,6 +1751,8 @@ def test_poweruser_panel_renders_landuse_catalog_and_map_links(jinja_env: Enviro
         runid="test-run",
         config="test-config",
         url_for_run=_url_for_run,
+        current_user=poweruser,
+        user=poweruser,
     )
 
     assert "Landuse User-Defined" in rendered
@@ -1742,6 +1787,30 @@ def test_poweruser_panel_shows_run_token_controls_for_admin(jinja_env: Environme
     assert 'data-mint-endpoint="/runs/test-run/test-config/mint-run-token"' in rendered
     assert 'data-run-token-action="mint"' in rendered
     assert 'data-run-token-action="copy-token"' in rendered
+
+
+def test_poweruser_panel_inline_clients_are_guarded_and_idempotent() -> None:
+    source = (TEMPLATE_ROOT / "controls/poweruser_panel.htm").read_text(encoding="utf-8")
+    toggle_lookup = source.index('const toggle = document.getElementById("notificationToggle");')
+    absent_toggle_guard = source.index("if (!toggle || !toggleLabel)", toggle_lookup)
+    push_initialization = source.index("await initPush()", absent_toggle_guard)
+
+    assert toggle_lookup < absent_toggle_guard < push_initialization
+    assert "root.dataset.runTokenInitialized === 'true'" in source
+    assert "root.dataset.runTokenInitialized = 'true'" in source
+
+
+def test_command_bar_clear_locks_uses_csrf_protected_post() -> None:
+    source = (
+        Path(__file__).parents[3]
+        / "wepppy/weppcloud/routes/command_bar/static/command-bar.js"
+    ).read_text(encoding="utf-8")
+    clear_locks = source[source.index("clearLocks() {"):source.index("clearDirectoryLocks() {")]
+
+    assert "method: 'POST'" in clear_locks
+    assert "credentials: 'same-origin'" in clear_locks
+    assert "headers: csrfHeaders(" in clear_locks
+    assert "method: 'GET'" not in clear_locks
 
 
 def test_disturbed_modal_renders_requested_controls(jinja_env: Environment) -> None:
@@ -2852,6 +2921,16 @@ def test_run_header_shows_team_public_readonly_for_authenticated_user(jinja_env:
     assert 'data-modal-open="teamModal"' in rendered
     assert 'id="checkbox_readonly"' in rendered
     assert 'id="checkbox_public"' in rendered
+
+
+def test_run_header_hides_poweruser_launcher_for_ordinary_user(jinja_env: Environment) -> None:
+    template = jinja_env.get_template("header/_run_header_fixed.htm")
+    ordinary_user = SimpleNamespace(has_role=lambda role: False, roles=["User"], is_authenticated=True)
+    request = SimpleNamespace(view_args={"runid": "test-run", "config": "test-config"})
+
+    rendered = template.render(user=ordinary_user, current_user=ordinary_user, request=request)
+
+    assert 'data-modal-open="puModal"' not in rendered
 
 
 def test_run_header_renders_project_mutation_contract(jinja_env: Environment) -> None:

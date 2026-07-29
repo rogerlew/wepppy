@@ -242,7 +242,8 @@ def set_project_mod_state(runid: str, config: str, mod_name: str, enabled: bool)
     }
 
 
-@project_bp.route('/runs/<string:runid>/<config>/tasks/clear_locks')
+@project_bp.route('/runs/<string:runid>/<config>/tasks/clear_locks', methods=['POST'])
+@roles_accepted('Admin', 'Root', 'PowerUser')
 @authorize_and_handle_with_exception_factory
 def clear_locks(runid, config):
     """

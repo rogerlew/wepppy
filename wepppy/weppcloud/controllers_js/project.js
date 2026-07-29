@@ -1907,10 +1907,7 @@ var Project = (function () {
         };
 
         project.clear_locks = function () {
-            return http.request(url_for_run("tasks/clear_locks"), {
-                method: "GET",
-                params: { _: Date.now() }
-            }).then(function (result) {
+            return http.postJson(url_for_run("tasks/clear_locks"), {}).then(function (result) {
                 var response = unpackResponse(result);
                 if (isSuccess(response)) {
                     window.alert("Locks have been cleared");

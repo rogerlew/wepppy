@@ -313,7 +313,7 @@ is active at a time.
 | GOV-00A | Concise controller test convention | 1 | closed | Review passed |
 | DOM-01..DOM-29 (including A-D facets) | Run-domain controller packages | 39 | all verified | Review completed production patches |
 | GOV-01 | Maintenance-tooling value evaluation | 1 | deferred pending five-controller evidence | Explicit operator approval |
-| SHR-01..SHR-07 (including A/B facets) | Shared-foundation inventory | 9 | deferred; test when encountered | Based on actual shared patch |
+| SHR-01..SHR-07 (including A/B facets) | Shared-foundation inventory | 9 | SHR-04A, SHR-04B, SHR-05, and SHR-07 verified; remainder deferred | Based on actual shared patch |
 | SURF-01..SURF-18 (including A/B facets) | Non-run/stateful Pure surfaces | 19 | SURF-01 and listed peers verified; remainder backlog | Review actual production patches |
 | GOV-99 | Authority cutover and closeout | 1 | planned | Two independent final reviews |
 | REM-01..REM-05 | Bounded defect remediations | 5 | mixed | Two independent reviews each |
@@ -323,6 +323,11 @@ packages are verified. GOV-00 remains the umbrella for separately registered
 shared, surface, governance, and remediation inventory; GOV-00A is closed,
 REM-01 and REM-02 are complete, and REM-03 through REM-05 retain their recorded
 states. Shared packages are not prerequisites, and GOV-01 has no scaffold.
+
+SHR-07 is verified with privileged render/action parity, POST-only
+role-protected lock recovery, finite-consumer propagation, side-effect-free
+absent notification UI, idempotent token ownership, full frontend/Python
+validation, and a passing security review (2026-07-29 UTC).
 
 Every new child package must be added here and to `PROJECT_TRACKER.md` before
 implementation begins. A package closes through executable controller evidence,

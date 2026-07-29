@@ -75,6 +75,10 @@ is not a contract registry or enforcement platform.
 - [x] (2026-07-28) Executed SHR-05 with rendered/client/Project/route/NoDb/map
   evidence; repaired Unitizer global selection, selector, and event ownership
   and passed independent security review.
+- [x] (2026-07-29) Executed SHR-07 with privileged render/action parity,
+  POST-only role-protected lock recovery, absent-notification no-op behavior,
+  idempotent token ownership, complete frontend/Python validation, and a
+  passing security review.
 - [x] (2026-07-28) Executed SURF-11 with direct Geneva summary rendering,
   controller lifecycle, route/service/map/Unitizer evidence, and independent
   security review; no production repair was retained.

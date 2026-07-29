@@ -155,12 +155,14 @@
                  data-open-tab-pref>
                 Browse
               </a>
-              <button type="button"
-                      class="pure-button"
-                      data-toggle="modal"
-                      data-modal-open="puModal">
-                PowerUser
-              </button>
+              {% if user.has_role('PowerUser') or user.has_role('Admin') or user.has_role('Root') %}
+                <button type="button"
+                        class="pure-button"
+                        data-toggle="modal"
+                        data-modal-open="puModal">
+                  PowerUser
+                </button>
+              {% endif %}
               {% if 'disturbed' in current_mods %}
               <button type="button"
                       class="pure-button"

@@ -147,6 +147,18 @@ def test_setname_accepts_json_payload(project_client):
     assert controller.name == "Watershed Scenario"
 
 
+def test_clear_locks_requires_privileged_role_and_post(project_client, monkeypatch: pytest.MonkeyPatch):
+    client, _, _, _, _ = project_client
+    url = f"/runs/{RUN_ID}/{CONFIG}/tasks/clear_locks"
+
+    assert client.get(url).status_code == 405
+    source = Path(project_module.__file__).read_text(encoding="utf-8")
+    assert (
+        "@project_bp.route('/runs/<string:runid>/<config>/tasks/clear_locks', methods=['POST'])\n"
+        "@roles_accepted('Admin', 'Root', 'PowerUser')\n"
+        "@authorize_and_handle_with_exception_factory"
+    ) in source
+
 def test_setname_defaults_to_untitled_when_blank(project_client):
     client, RonStub, _, run_dir, _ = project_client
 

@@ -136,9 +136,9 @@ revisions are retained as controller-iteration evidence.
 | `modal.js`, `details_menu.js`, `theme.js`, `console_utils.js` | SHR-04B | run modals, Browse/README hosts, Archive/Fork consoles | direct state/focus/menu/theme/config/duplicate-load Jest plus console/table/modal/theme renders; duplicate-init and table-caller repairs | contractual | verified |
 | `unitizer_client.js` + generated map | SHR-05 | modal, Project, reports, Geneva | direct render/client/map/Project/route/NoDb evidence; selector/event-owner repairs | contractual | verified |
 | Command Bar scripts/templates | SHR-06 | run and Browse/README hosts | WebSocket/token/command evidence; high | contractual | unverified |
-| PowerUser scripts/templates | SHR-07 | privileged run header | role/action/web-push evidence; high | contractual | unverified |
+| PowerUser scripts/templates | SHR-07 | privileged run header | 187 render/route + 34 focused Jest + 29 retained backend; role/POST/side-effect repairs; high review passed | contractual | verified |
 | `batch_runner.js` | SURF-02A | Batch create/manage roots; SURF-02B consumes the producer contract for execution | `J/batch_runner.test.js`; high | contractual | unverified |
-| `run_sync_dashboard.js` | SURF-05 | Run Sync root | no direct Jest suite; high | contractual | unverified |
+| `run_sync_dashboard.js` | SURF-05 | Run Sync root | exact Admin render plus 8 direct client, 166 render/route, and 10 API/RQ tests; duplicate submission repaired; high review passed | contractual | verified |
 | `geneva_summary_report.js` | SURF-11 | Geneva summary template | direct render + 7 focused Jest; one controller-owned initializer; map/Unitizer/selection evidence; high review passed | contractual | verified |
 | `interfaces_captcha.js` | SURF-01 | public create/CAP templates | 4 direct Jest prove section isolation, block/submit, absent DOM, and repeated execution; high review passed | contractual | verified |
 

@@ -41,6 +41,7 @@ describe("Project controller", () => {
             </div>
         `;
         document.title = "Base Title";
+        window.alert = jest.fn();
 
         global.site_prefix = "/weppcloud";
         global.runid = "run-123";
@@ -177,6 +178,16 @@ describe("Project controller", () => {
 
         document.body.innerHTML = "";
         document.title = "";
+    });
+
+    test("clear_locks uses the CSRF-aware POST transport", async () => {
+        postJsonMock.mockResolvedValueOnce({ body: { Content: {} } });
+
+        await project.clear_locks();
+
+        expect(postJsonMock).toHaveBeenCalledWith("tasks/clear_locks", {});
+        expect(requestMock).not.toHaveBeenCalled();
+        expect(window.alert).toHaveBeenCalledWith("Locks have been cleared");
     });
 
     test("setName updates DOM and emits project:name:updated", async () => {
