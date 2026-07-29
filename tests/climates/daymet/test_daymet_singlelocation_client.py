@@ -179,10 +179,11 @@ if "rasterio.transform" not in sys.modules:
     transform_module.rowcol = lambda *args, **kwargs: (0, 0)
     sys.modules["rasterio.transform"] = transform_module
 
-if "metpy" not in sys.modules:
-    sys.modules["metpy"] = types.ModuleType("metpy")
-
-if "metpy.calc" not in sys.modules:
+try:
+    import metpy.calc  # noqa: F401
+    import metpy.units  # noqa: F401
+except ImportError:
+    sys.modules.setdefault("metpy", types.ModuleType("metpy"))
     calc_module = types.ModuleType("metpy.calc")
 
     class _FakeDewPoint:
@@ -197,7 +198,6 @@ if "metpy.calc" not in sys.modules:
     calc_module.dewpoint_from_relative_humidity = lambda *args, **kwargs: _FakeDewPoint(0.0)
     sys.modules["metpy.calc"] = calc_module
 
-if "metpy.units" not in sys.modules:
     units_module = types.ModuleType("metpy.units")
 
     class _FakeUnits:
