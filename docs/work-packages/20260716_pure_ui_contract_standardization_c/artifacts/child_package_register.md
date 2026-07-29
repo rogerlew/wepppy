@@ -365,7 +365,7 @@ exceed the evidence/review boundary.
 
 | ID | Package path / proposed slug | Scope | Depends on | Risk / expected security | State |
 | --- | --- | --- | --- | --- | --- |
-| SURF-01 | `pure_ui_public_creation_cap_contract` | Interfaces/create and `locations/{joh,portland,seattle,spu}/index.htm` forms, `interfaces_captcha.js`, CAP widgets and duplicate-handler safeguards | SHR-01, SHR-02, SHR-04A, SHR-04B | High / `high` | planned |
+| SURF-01 | `20260729_pure_ui_public_creation_cap_contract` | Interfaces/create and regional exact renders plus 7 direct CAP Jest, 147 route/render/CAP, and 11 rq-engine creation tests; no production repair; security review passed | SHR-01, SHR-02, SHR-04A, SHR-04B | High / `high` | verified |
 | SURF-02A | `pure_ui_batch_runner_creation_contract` | Batch create/manage templates, bootstrap/controller, schema and persisted run set | SHR-01..04B; `docs/work-packages/20260630_batch_runner_durability/` must be closed and name its verified closeout revision before this unit starts | High / `high` | planned |
 | SURF-02B | `pure_ui_batch_runner_execution_contract` | Batch upload, launch, RQ progress/error/completion and durability behavior | SURF-02A, SHR-02, SHR-03A, SHR-03B | High / `high` | planned |
 | SURF-03 | `pure_ui_archive_console_contract` | Archive console/list/create/restore/delete; consumes SHR-04B `console_utils.js` and SHR-03A StatusStream | SHR-02, SHR-03A, SHR-04A, SHR-04B, DOM-02 | High / `high` | planned |

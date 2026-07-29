@@ -140,7 +140,7 @@ revisions are retained as controller-iteration evidence.
 | `batch_runner.js` | SURF-02A | Batch create/manage roots; SURF-02B consumes the producer contract for execution | `J/batch_runner.test.js`; high | contractual | unverified |
 | `run_sync_dashboard.js` | SURF-05 | Run Sync root | no direct Jest suite; high | contractual | unverified |
 | `geneva_summary_report.js` | SURF-11 | Geneva summary template | direct render + 7 focused Jest; one controller-owned initializer; map/Unitizer/selection evidence; high review passed | contractual | verified |
-| `interfaces_captcha.js` | SURF-01 | public create/CAP templates | direct CAPTCHA gap; high | contractual | unverified |
+| `interfaces_captcha.js` | SURF-01 | public create/CAP templates | 4 direct Jest prove section isolation, block/submit, absent DOM, and repeated execution; high review passed | contractual | verified |
 
 This reconciles all 56 modules selected by `_collect_controller_modules()`: 37
 run-support files, 15 shared/global files, and four standalone files.
@@ -149,7 +149,7 @@ run-support files, 15 shared/global files, and four standalone files.
 
 | Surface | Package | Exact host boundary | Security | Contract scope | Evidence grade |
 | --- | --- | --- | --- | --- | --- |
-| Public creation/CAP | SURF-01 | `templates/interfaces.htm`, `templates/run_0/create_index.htm`, `templates/cap_gate.htm`, `templates/locations/{joh,portland,seattle,spu}/index.htm` | high | contractual | unverified |
+| Public creation/CAP | SURF-01 | `templates/interfaces.htm`, `templates/run_0/create_index.htm`, `templates/cap_gate.htm`, `templates/locations/{joh,portland,seattle,spu}/index.htm`; exact render, 7 direct Jest, 147 route/render/CAP, and 11 rq-engine tests; no production repair | high review passed | contractual | verified |
 | Batch creation/execution | SURF-02A/02B | `R/batch_runner/templates/{create,manage_pure,batch_runner_pure}.htm` | high | contractual | unverified |
 | Archive console | SURF-03 | `R/archive_dashboard/templates/rq-archive-dashboard.htm` | high | contractual | unverified |
 | Fork console | SURF-04 | `R/fork_console/templates/rq-fork-console.htm` | high | contractual | unverified |

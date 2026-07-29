@@ -394,6 +394,10 @@ build through job completion before review.
 **Description**: Establish one evidence-backed contract standard and execute an iterative series of bounded work packages to audit every Pure UI controller from rendered fields through JavaScript payloads, route parsing, persistence, RQ behavior, and reload.
 
 **Current Status**:
+- [SURF-01](docs/work-packages/20260729_pure_ui_public_creation_cap_contract/)
+  closed with exact public/authenticated/regional/presentation renders, seven
+  executable CAPTCHA tests, retained verification/session/rq-engine creation
+  evidence, and a passing security review; no production repair was required.
 - [SURF-06](docs/work-packages/20260728_pure_ui_runs_catalog_contract/)
   closed with actual ordinary/Admin rendering, real inline-client,
   ownership/catalog/map/delete/RQ/worker evidence, and terminal reload.

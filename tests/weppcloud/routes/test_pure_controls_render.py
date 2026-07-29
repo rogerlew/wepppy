@@ -2247,6 +2247,206 @@ def test_interfaces_template_shows_login_bypass_banner_for_anonymous_user(jinja_
     assert 'name="rq_token"' not in rendered
 
 
+def test_interfaces_template_renders_exact_anonymous_cap_creation_contract(
+    jinja_env: Environment,
+) -> None:
+    template = jinja_env.overlay(autoescape=True).get_template("interfaces.htm")
+    anon_user = SimpleNamespace(has_role=lambda role: False, roles=[], is_authenticated=False)
+
+    rendered = template.render(
+        user=anon_user,
+        current_user=anon_user,
+        url_for=lambda endpoint, **values: (
+            f"/static/{values.get('filename', '')}"
+            if endpoint == "static"
+            else f"/mock/{endpoint}"
+        ),
+        static_url=lambda path: f"/static/{path}",
+        cap_base_url="/cap",
+        cap_asset_base_url="/cap/assets",
+        cap_site_key='site-key"><script>alert(1)</script>',
+        visible_config_ids={"disturbed9002"},
+        config_registry_map={"disturbed9002": SimpleNamespace(id="disturbed9002")},
+        config_maturity_labels={"disturbed9002": "Stable"},
+        maturity_definition_href="/guide#maturity",
+    )
+
+    assert rendered.count('name="config" value="disturbed9002"') == 1
+    assert 'method="post" action="/rq-engine/create/"' in rendered
+    assert 'data-cap-section="disturbed" data-cap-required="true"' in rendered
+    assert 'name="cap_token" value="" data-cap-token' in rendered
+    assert 'name="unitizer:is_english" value="" data-unitizer-input' in rendered
+    assert 'type="button"' in rendered
+    assert 'data-run-action="/rq-engine/create/"' in rendered
+    assert 'aria-disabled="true" disabled' in rendered
+    assert '/cap/assets/widget.js' in rendered
+    assert '/cap/assets/floating.js' in rendered
+    assert 'window.CAP_CUSTOM_WASM_URL = "/cap/assets/cap_wasm.js";' in rendered
+    assert '<script>alert(1)</script>' not in rendered
+
+
+@pytest.mark.parametrize(
+    ("template_name", "section", "configs"),
+    [
+        (
+            "locations/portland/index.htm",
+            "locations-portland",
+            [
+                "portland-wepp_bd16b69_snow",
+                "portland-simfire-eagle-snow",
+                "portland-simfire-norse-snow",
+            ],
+        ),
+        (
+            "locations/seattle/index.htm",
+            "locations-seattle",
+            [
+                "seattle-snow",
+                "seattle-simfire-eagle-snow",
+                "seattle-simfire-norse-snow",
+            ],
+        ),
+        (
+            "locations/spu/index.htm",
+            "locations-spu",
+            [
+                "seattle-snow",
+                "seattle-simfire-eagle-snow",
+                "seattle-simfire-norse-snow",
+            ],
+        ),
+    ],
+)
+def test_regional_templates_render_exact_anonymous_creation_contract(
+    jinja_env: Environment,
+    template_name: str,
+    section: str,
+    configs: list[str],
+) -> None:
+    anon_user = SimpleNamespace(
+        has_role=lambda role: False,
+        roles=[],
+        is_authenticated=False,
+    )
+    rendered = jinja_env.overlay(autoescape=True).get_template(template_name).render(
+        current_user=anon_user,
+        user=anon_user,
+        url_for=lambda endpoint, **values: f"/mock/{endpoint}/{values.get('file', '')}",
+        static_url=lambda path: f"/static/{path}",
+        cap_base_url="/cap",
+        cap_asset_base_url="/cap/assets",
+        cap_site_key="regional-site-key",
+        rq_engine_token=None,
+    )
+
+    creation_forms = re.findall(
+        r'<form\b[^>]*\baction="/rq-engine/create/"[^>]*>',
+        rendered,
+        re.DOTALL,
+    )
+    assert len(creation_forms) == len(configs)
+    assert rendered.count(f'data-cap-section="{section}" data-cap-required="true"') == len(
+        configs
+    )
+    assert rendered.count('name="cap_token" value="" data-cap-token') == len(configs)
+    assert rendered.count('aria-disabled="true" disabled') >= len(configs)
+    for config in configs:
+        assert f'name="config" value="{config}"' in rendered
+    assert '/cap/assets/widget.js' in rendered
+    assert '/cap/assets/floating.js' in rendered
+
+
+def test_joh_location_template_remains_presentation_only(jinja_env: Environment) -> None:
+    rendered = jinja_env.get_template("locations/joh/index.htm").render(
+        current_user=SimpleNamespace(is_authenticated=False),
+        url_for=lambda endpoint, **values: f"/mock/{endpoint}/{values.get('file', '')}",
+        static_url=lambda path: f"/static/{path}",
+    )
+
+    assert "<form" not in rendered
+    assert 'action="/rq-engine/create/"' not in rendered
+    assert "cap-widget" not in rendered
+
+
+def test_authenticated_create_index_renders_exact_server_owned_variants(
+    jinja_env: Environment,
+) -> None:
+    auth_user = SimpleNamespace(
+        has_role=lambda role: False,
+        roles=[],
+        is_authenticated=True,
+        is_anonymous=False,
+    )
+    rows = [
+        {
+            "config": "disturbed9002",
+            "variants": [
+                {
+                    "label": "disturbed9002",
+                    "overrides": {},
+                    "config": "disturbed9002",
+                    "action_url": "/rq-engine/create/",
+                },
+                {
+                    "label": "disturbed9002 ned1/2016",
+                    "overrides": {"general:dem_db": "ned1/2016"},
+                    "config": "disturbed9002",
+                    "action_url": "/rq-engine/create/",
+                },
+                {
+                    "label": "disturbed9002 WhiteBoxTools",
+                    "overrides": {"watershed:delineation_backend": "wbt"},
+                    "config": "disturbed9002",
+                    "action_url": "/rq-engine/create/",
+                },
+            ],
+        }
+    ]
+
+    rendered = jinja_env.overlay(autoescape=True).get_template(
+        "run_0/create_index.htm"
+    ).render(
+        current_user=auth_user,
+        user=auth_user,
+        rows=rows,
+        rq_engine_token="<rq-token>",
+        static_url=lambda path: f"/static/{path}",
+    )
+
+    assert rendered.count('method="post" action="/rq-engine/create/"') == 3
+    assert rendered.count('name="config" value="disturbed9002"') == 3
+    assert 'name="general:dem_db" value="ned1/2016"' in rendered
+    assert 'name="watershed:delineation_backend" value="wbt"' in rendered
+    assert rendered.count('name="rq_token" value="&lt;rq-token&gt;"') == 3
+    assert 'name="cap_token"' not in rendered
+    assert "cap-widget" not in rendered
+
+
+def test_cap_gate_renders_escaped_continuation_reason_and_runtime_config(
+    jinja_env: Environment,
+) -> None:
+    rendered = jinja_env.overlay(autoescape=True).get_template("cap_gate.htm").render(
+        current_user=SimpleNamespace(is_authenticated=False),
+        user=SimpleNamespace(is_authenticated=False),
+        cap_reason='<img src=x onerror="alert(1)">',
+        cap_next="/interfaces/?next=<unsafe>",
+        cap_verify_url="/cap/verify",
+        cap_api_endpoint="/cap/",
+        cap_asset_base_url="/cap/assets",
+        url_for=lambda endpoint, **values: f"/login?next={values.get('next', '')}",
+        static_url=lambda path: f"/static/{path}",
+        csrf_token=lambda: "csrf-1",
+    )
+
+    assert "&lt;img src=x onerror=&#34;alert(1)&#34;&gt;" in rendered
+    assert '<img src=x onerror="alert(1)">' not in rendered
+    assert 'var nextUrl = "/interfaces/?next=\\u003cunsafe\\u003e";' in rendered
+    assert 'var verifyUrl = "/cap/verify";' in rendered
+    assert 'var apiEndpoint = "/cap/";' in rendered
+    assert 'window.CAP_CUSTOM_WASM_URL = "/cap/assets/cap_wasm.js";' in rendered
+    assert 'src="/cap/assets/widget.js"' in rendered
+
+
 def test_interfaces_template_hides_login_bypass_banner_for_authenticated_user(jinja_env: Environment) -> None:
     template = jinja_env.get_template("interfaces.htm")
     auth_user = SimpleNamespace(has_role=lambda role: False, roles=[], is_authenticated=True)

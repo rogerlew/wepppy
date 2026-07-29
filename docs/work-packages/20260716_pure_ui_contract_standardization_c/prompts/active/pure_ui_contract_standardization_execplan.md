@@ -115,6 +115,10 @@ is not a contract registry or enforcement platform.
   delete/RQ/worker evidence; repaired encoded exact stored run/config actions,
   explicit credentials, readonly HTTP status, and safe failure feedback;
   security review passed.
+- [x] (2026-07-29) Executed SURF-01 with exact anonymous, authenticated,
+  regional, hostile, and JOH presentation-only rendering; seven executable CAP
+  client tests; retained route/session/rq-engine creation evidence; and a
+  passing security review. No production repair was required.
 - [ ] Close the initiative when the registered inventory has executable
   regression coverage or explicit operator-approved exclusions.
 
@@ -122,6 +126,10 @@ is not a contract registry or enforcement platform.
 
 - Observation: WATAR and channel depression smoothing both failed because tests
   did not cross actual rendered name/value into downstream parsing and reload.
+
+- Observation: SURF-01's authenticated create-index route makes its template's
+  anonymous CAP branch defensive rather than currently reachable, while the
+  interfaces and regional pages own public creation.
 
 - Observation: The controller count created planning anxiety and caused an
   architecture with two registries, a generated index, a manifest, change-aware
@@ -534,3 +542,12 @@ skips. Repairs preserve and encode the catalog's stored run/config identity,
 send same-origin deletion credentials, return readonly failure as HTTP 400,
 and keep failures visibly actionable without console identifier disclosure.
 The high-impact security review passed with no unresolved high/medium finding.
+
+SURF-01 closed with exact registry-filtered public, authenticated catalog,
+Portland, Seattle, SPU, JOH, and hostile CAP-gate rendering. Four direct
+interfaces-client and three direct CAP-gate tests prove section isolation,
+block/submit/repeat/failure behavior; 147 route/render/CAP tests and 11
+rq-engine project-route tests retain the creation boundary. Frontend lint and
+all 101 suites/714 tests passed; repository Python passed 5,548 tests with 58
+skips. Security review passed with no unresolved finding, and no production
+repair was required.

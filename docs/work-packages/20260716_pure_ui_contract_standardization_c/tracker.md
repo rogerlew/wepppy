@@ -7,10 +7,10 @@
 **Timezone**: UTC
 **Started**: 2026-07-17 00:30 UTC
 **Current phase**: Next package selection
-**Last updated**: 2026-07-28 UTC
+**Last updated**: 2026-07-29 UTC
 **Next milestone**: Select the next dependency-ready registered package.
 **Security impact**: `none` for documentation-only parent reconciliation
-**Dedicated security review**: `yes` for SHR-05, SURF-06, SURF-07, SURF-08, SURF-09, SURF-10, SURF-11, SURF-13, SURF-14, SURF-15, SURF-16, SURF-17, and SURF-18
+**Dedicated security review**: `yes` for SHR-05, SURF-01, SURF-06, SURF-07, SURF-08, SURF-09, SURF-10, SURF-11, SURF-13, SURF-14, SURF-15, SURF-16, SURF-17, and SURF-18
 **Security artifact**:
 `../20260728_pure_ui_runs_catalog_contract/artifacts/2026-07-28_security_review.md`
 
@@ -37,6 +37,13 @@
 
 ### Done
 
+- [x] Closed SURF-01 with exact anonymous, authenticated, Portland, Seattle,
+  SPU, JOH, and hostile CAP-gate rendering; four direct interfaces-client and
+  three direct CAP-gate tests; and retained route/session/rq-engine creation
+  evidence. Focused route/render/CAP passed 147 tests, rq-engine creation
+  passed 11, frontend lint and all 101 suites/714 tests passed, and security
+  review passed with no unresolved finding. Repository Python passed 5,548
+  tests with 58 skips; no production repair was required (2026-07-29 UTC).
 - [x] Closed SURF-10 with actual hostile-value rendering, four executable
   inline-client tests, optimistic concurrency, variant-confined mutation,
   failed-recovery lock retention, and visible missing-CDN-runtime evidence.
@@ -283,7 +290,7 @@ is active at a time.
 | DOM-01..DOM-29 (including A-D facets) | Run-domain controller packages | 39 | all verified | Review completed production patches |
 | GOV-01 | Maintenance-tooling value evaluation | 1 | deferred pending five-controller evidence | Explicit operator approval |
 | SHR-01..SHR-07 (including A/B facets) | Shared-foundation inventory | 9 | deferred; test when encountered | Based on actual shared patch |
-| SURF-01..SURF-18 (including A/B facets) | Non-run/stateful Pure surfaces | 19 | backlog | Review actual production patches |
+| SURF-01..SURF-18 (including A/B facets) | Non-run/stateful Pure surfaces | 19 | SURF-01 and listed peers verified; remainder backlog | Review actual production patches |
 | GOV-99 | Authority cutover and closeout | 1 | planned | Two independent final reviews |
 | REM-01..REM-05 | Bounded defect remediations | 5 | mixed | Two independent reviews each |
 
