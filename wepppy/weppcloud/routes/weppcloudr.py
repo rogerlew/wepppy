@@ -5,6 +5,7 @@ import io
 import pathlib
 from pathlib import Path
 from subprocess import Popen, PIPE
+from urllib.parse import quote
 
 from typing import Optional
 
@@ -311,40 +312,59 @@ ACTIVE_JOB_STATUSES = {'queued', 'started', 'deferred', 'scheduled'}
 
 
 def _deval_output_path(ctx: RunContext, runid: str) -> Path:
-    export_root = Path(ctx.active_root) / "export" / "WEPPcloudR"
-    return export_root / f"deval_{runid}.htm"
+    active_root = Path(ctx.active_root).resolve()
+    export_parent = active_root / "export"
+    export_root = export_parent / "WEPPcloudR"
+    for component in (export_parent, export_root):
+        if component.is_symlink():
+            abort(404, description="DEVAL report path is invalid")
+    try:
+        export_root.resolve().relative_to(active_root)
+    except ValueError:
+        abort(404, description="DEVAL report path is invalid")
+    output_path = export_root / f"deval_{runid}.htm"
+    if output_path.is_symlink():
+        abort(404, description="DEVAL report path is invalid")
+    return output_path
 
 
 def _normalize_job_key_component(value: str) -> str:
-    return (
-        value.replace('/', '__')
-        .replace('\\', '__')
-        .replace(':', '_')
-        .replace(' ', '_')
-    )
+    return quote(value, safe="")
 
 
 def _deval_job_key(ctx: RunContext) -> str:
-    parts = ['deval_details']
+    parts = ['deval_details', _normalize_job_key_component(ctx.config)]
     if ctx.pup_relpath:
         parts.append(_normalize_job_key_component(ctx.pup_relpath))
-    elif ctx.config:
-        parts.append(_normalize_job_key_component(ctx.config))
-    return '_'.join(parts)
+    return ':'.join(parts)
 
 
 def _resolve_prep(ctx: RunContext) -> Optional[RedisPrep]:
-    prep = RedisPrep.tryGetInstance(str(ctx.active_root))
-    if prep is None:
-        prep = RedisPrep.tryGetInstance(str(ctx.run_root))
-    return prep
+    return RedisPrep.tryGetInstance(str(ctx.run_root))
 
 
-def _lookup_job_status(redis_conn: redis.Redis, job_id: str) -> str:
+def _lookup_job_status(
+    redis_conn: redis.Redis,
+    job_id: str,
+    runid: str,
+    config: str,
+    active_root: Path,
+) -> str:
     try:
         job = Job.fetch(job_id, connection=redis_conn)
     except NoSuchJobError:
         return 'not_found'
+    expected_func = (
+        f"{render_deval_details_rq.__module__}."
+        f"{render_deval_details_rq.__name__}"
+    )
+    args = tuple(job.args or ())
+    if (
+        job.func_name != expected_func
+        or len(args) < 3
+        or args[:3] != (runid, config, str(active_root))
+    ):
+        return 'foreign'
     status = job.get_status()
     return status or 'unknown'
 
@@ -384,7 +404,13 @@ def _enqueue_deval_job(
                 existing_job_id = None
 
         if existing_job_id:
-            existing_status = _lookup_job_status(redis_conn, existing_job_id)
+            existing_status = _lookup_job_status(
+                redis_conn,
+                existing_job_id,
+                runid,
+                config,
+                ctx.active_root,
+            )
             if existing_status in ACTIVE_JOB_STATUSES:
                 return existing_job_id, existing_status
             if prep:
@@ -447,7 +473,18 @@ def _determine_job(
                 job_id = None
 
         if job_id:
-            job_status = _lookup_job_status(redis_conn, job_id)
+            job_status = _lookup_job_status(
+                redis_conn,
+                job_id,
+                runid,
+                config,
+                ctx.active_root,
+            )
+            if job_status in {'foreign', 'not_found'}:
+                if prep:
+                    _clear_tracked_job(prep, job_key)
+                job_id = None
+                job_status = None
         else:
             job_status = None
 
@@ -488,6 +525,7 @@ def _serve_deval_file(path: Path) -> Response:
 @weppcloudr_bp.route('/runs/<string:runid>/<config>/report/deval_details/')
 @requires_cap(gate_reason="Complete verification to view report details.")
 def deval_details(runid, config):
+    authorize(runid, config)
     ctx = load_run_context(runid, config)
     try:
         _ensure_interchange(ctx)

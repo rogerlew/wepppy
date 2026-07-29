@@ -386,7 +386,7 @@ build through job completion before review.
 
 ### Pure UI Controller Contract Standardization
 **Started**: 2026-07-16
-**Status**: SURF-17 verified; next package selection pending
+**Status**: SURF-18 verified; next package selection pending
 **Size**: One controller active at a time; inventory size is not a schedule
 **Owner**: Codex
 **Priority**: High
@@ -394,6 +394,10 @@ build through job completion before review.
 **Description**: Establish one evidence-backed contract standard and execute an iterative series of bounded work packages to audit every Pure UI controller from rendered fields through JavaScript payloads, route parsing, persistence, RQ behavior, and reload.
 
 **Current Status**:
+- [SURF-18](docs/work-packages/20260728_pure_ui_deval_loading_contract/)
+  closed with direct render/client, CAP and run authorization, parent-owned PUP
+  tracking, owned-job validation, fail-closed polling, confined worker/artifact,
+  reload, and passing independent security review.
 - [SURF-17](docs/work-packages/20260728_pure_ui_rq_info_details_contract/)
   closed with Admin/Root authorization, real read-only RQ producer, hostile
   render, failure/logging, and ordered queue-isolation evidence; active default

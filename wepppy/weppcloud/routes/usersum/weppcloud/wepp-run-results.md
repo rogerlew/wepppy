@@ -85,7 +85,11 @@ Use these links after a successful WEPP run to answer different kinds of questio
 
 - **What it is for:** A rendered visualization report that packages run results into a more presentation-oriented detail view than the standard WEPP tables.
 - **When to use it:** Use it when you want a richer visual narrative for review, communication, or exploratory interpretation beyond the built-in summary tables.
-- **Cautions and limits:** It may take time to render and can refresh asynchronously. Treat it as a derived presentation surface and confirm important planning numbers against the core WEPP reports.
+- **Cautions and limits:** It may take time to render and refreshes automatically
+  only after the renderer reports completion. A visible failure means the
+  report was not produced; retry from the run summary or request a fresh render
+  with `?no-cache=1`. Treat it as a derived presentation surface and confirm
+  important planning numbers against the core WEPP reports.
 - **Do not confuse it with:** `GL Dashboard`, which is interactive and map-based, or the CSV downloads, which are raw analysis tables.
 
 ### `GL Dashboard`

@@ -131,7 +131,6 @@ _RUN_CONTEXT_BLUEPRINT_ATTRS = {
     "watar_bp",
     "watershed_bp",
     "wepp_bp",
-    "weppcloudr_bp",
     "rq_job_dashboard_bp",
 }
 

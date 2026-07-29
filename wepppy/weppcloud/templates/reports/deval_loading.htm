@@ -58,6 +58,7 @@
   const jobStatusPrimaryUrl = jobId ? `/rq-engine/api/jobstatus/${encodeURIComponent(jobId)}` : null;
   const refreshUrl = {{ refresh_url|tojson }};
   const ACTIVE_STATES = new Set(["queued", "started", "deferred", "scheduled"]);
+  const SUCCESS_STATES = new Set(["finished"]);
   const FAILURE_STATES = new Set(["failed", "stopped", "canceled"]);
   const statusChip = document.getElementById("statusChip");
   const errorPanel = document.getElementById("errorPanel");
@@ -132,6 +133,26 @@
     }
   }
 
+  function failureMessage(payload) {
+    if (!payload || typeof payload !== "object") {
+      return "";
+    }
+    if (typeof payload.description === "string") {
+      return payload.description;
+    }
+    if (typeof payload.error === "string") {
+      return payload.error;
+    }
+    if (
+      payload.error
+      && typeof payload.error === "object"
+      && typeof payload.error.message === "string"
+    ) {
+      return payload.error.message;
+    }
+    return "";
+  }
+
   async function fetchJobStatusJson() {
     if (!jobId || !jobStatusPrimaryUrl) {
       throw new Error("Job could not be enqueued.");
@@ -190,9 +211,14 @@
     }
     try {
       const payload = await fetchJobStatusJson();
-      const state = payload.status || payload.job_status || 'unknown';
+      const rawState = payload && (payload.status || payload.job_status);
+      const state = typeof rawState === "string" ? rawState.trim().toLowerCase() : "";
       consecutiveErrors = 0; // Reset error counter on successful poll
       pollIntervalMs = POLL_INTERVAL_MS;
+      if (!state) {
+        handleFailure("failed", "Response was missing job status.");
+        return;
+      }
       if (state === lastState) {
         scheduleNextPoll();
         return;
@@ -204,14 +230,22 @@
         return;
       }
       if (FAILURE_STATES.has(state)) {
-        handleFailure(state, payload.description || payload.error || '' );
+        handleFailure(state, failureMessage(payload));
         if (pollTimer) {
           window.clearTimeout(pollTimer);
           pollTimer = null;
         }
         return;
       }
-      handleSuccess();
+      if (SUCCESS_STATES.has(state)) {
+        handleSuccess();
+        if (pollTimer) {
+          window.clearTimeout(pollTimer);
+          pollTimer = null;
+        }
+        return;
+      }
+      handleFailure("failed", `Unexpected job status: ${state}`);
       if (pollTimer) {
         window.clearTimeout(pollTimer);
         pollTimer = null;
@@ -234,7 +268,7 @@
       
       // Only fail permanently after multiple consecutive errors
       if (consecutiveErrors >= MAX_POLL_ERRORS) {
-        handleFailure('failed', `Unable to reach the job status endpoint after ${MAX_POLL_ERRORS} attempts. ${error.message || ''}`);
+        handleFailure('failed', `Unable to reach the job status endpoint after ${MAX_POLL_ERRORS} attempts.`);
         if (pollTimer) {
           window.clearTimeout(pollTimer);
           pollTimer = null;
@@ -257,8 +291,10 @@
     scheduleNextPoll(POLL_INTERVAL_MS);
   } else if (FAILURE_STATES.has(initialStatus)) {
     handleFailure(initialStatus, 'Renderer reported a failure before polling began.');
-  } else {
+  } else if (SUCCESS_STATES.has(initialStatus)) {
     handleSuccess();
+  } else {
+    handleFailure('failed', `Unexpected initial job status: ${initialStatus}`);
   }
 </script>
 {% endblock %}

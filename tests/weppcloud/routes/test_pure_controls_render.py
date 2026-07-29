@@ -36,6 +36,7 @@ PURE_TEMPLATES = [
     "readme_editor.htm",
     "readme_view.htm",
     "info_details.htm",
+    "reports/deval_loading.htm",
 ]
 
 pytestmark = pytest.mark.routes
@@ -150,6 +151,11 @@ def jinja_env() -> Environment:
         recent_jobs=[],
         failed_jobs=[],
         failed_lookback_seconds=86400,
+        job_status="queued",
+        job_id="job-fixture",
+        job_dashboard_url="/rq/job/job-fixture",
+        refresh_url="/runs/test-run/test-config/report/deval_details",
+        skip_cache=False,
     )
     return env
 
@@ -262,6 +268,43 @@ def test_rq_info_details_renders_separate_queue_panels_and_escaped_metadata(
     assert "(none)" in batch_panel
     assert "<h2>Recently Completed Jobs</h2>" in rendered
     assert "<h2>Failed Jobs (Last 24 Hours)</h2>" in rendered
+
+
+def test_deval_loading_renders_safe_identity_actions_and_lifecycle_targets(
+    jinja_env: Environment,
+) -> None:
+    rendered = jinja_env.overlay(autoescape=True).get_template(
+        "reports/deval_loading.htm"
+    ).render(
+        runid='run-</script><script id="run-injection">',
+        config='cfg-" onmouseover="alert(1)',
+        job_id='job-</script><script id="job-injection">',
+        job_status="queued",
+        job_dashboard_url='/rq/job/" onclick="alert(1)',
+        refresh_url='/runs/run-1/cfg/report/deval_details?x="</script>',
+        skip_cache=True,
+    )
+
+    for token in (
+        'id="statusChip"',
+        'data-state="queued"',
+        'id="statusNote"',
+        'id="statusSpinner"',
+        'id="statusText"',
+        'id="errorPanel"',
+        'id="errorMessage"',
+        "Fresh render requested.",
+        'target="_blank" rel="noopener"',
+        "const ACTIVE_STATES",
+        "const FAILURE_STATES",
+        "const MAX_POLL_ERRORS = 5",
+    ):
+        assert token in rendered
+    assert "<script id=\"run-injection\">" not in rendered
+    assert "<script id=\"job-injection\">" not in rendered
+    assert '" onmouseover="' not in rendered
+    assert '" onclick="' not in rendered
+    assert "\\u003c/script\\u003e" in rendered
 
 
 def test_base_pure_renders_document_metadata_blocks_and_assets(jinja_env: Environment) -> None:

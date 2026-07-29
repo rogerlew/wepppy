@@ -6,13 +6,13 @@
 
 **Timezone**: UTC
 **Started**: 2026-07-17 00:30 UTC
-**Current phase**: SURF-17 verified; next package selection pending
+**Current phase**: SURF-18 verified; next package selection pending
 **Last updated**: 2026-07-28 UTC
 **Next milestone**: Select the next bounded registered package.
-**Security impact**: `high` privileged Redis/RQ, run, worker, and submitter metadata
-**Dedicated security review**: `yes` for SHR-05, SURF-07, SURF-08, SURF-09, SURF-11, SURF-16, and SURF-17
+**Security impact**: `high` run authorization, CAP, RQ job metadata, worker, and generated artifact
+**Dedicated security review**: `yes` for SHR-05, SURF-07, SURF-08, SURF-09, SURF-11, SURF-16, SURF-17, and SURF-18
 **Security artifact**:
-`../20260728_pure_ui_rq_info_details_contract/artifacts/2026-07-28_security_review.md`
+`../20260728_pure_ui_deval_loading_contract/artifacts/2026-07-28_security_review.md`
 
 ## Task Board
 
@@ -24,7 +24,6 @@
 
 ### In Progress
 
-- None.
 - [x] Registered and dual-reviewed REM-05 under GOV-00A-M1E without advancing
   DOM-05; checkpoint ancestor
   `44d3b93c8e3bc7d5e89151cbb9677db374411c53`.
@@ -37,6 +36,13 @@
 
 ### Done
 
+- [x] Closed SURF-18 with direct rendering, real inline polling/backoff/error
+  execution, CAP plus run authorization, parent-owned PUP tracking, owned-job
+  validation, cache/enqueue/worker/reload evidence, and confined report/log
+  paths. Focused Python passed 157 tests; full frontend passed 94 suites/692
+  tests and lint; broad Python reached 2,462 passes and 40 skips before the
+  known unrelated GridMET fixture failure; independent correctness/security
+  reviews passed (2026-07-28 UTC).
 - [x] Closed SURF-17 with Admin/Root authorization, real RQ listing, hostile
   render, failure/logging, and ordered isolated active-queue evidence; the
   default and batch active panels are now separate. Focused Python passed 134

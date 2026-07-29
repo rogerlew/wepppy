@@ -383,7 +383,7 @@ exceed the evidence/review boundary.
 | SURF-15 | `pure_ui_root_usermod_contract` | `user/usermod.html`, root-admin user lookup and role/account mutation | SURF-13, SHR-01, SHR-02, SHR-04A | High / `high`: privileged account mutation | planned |
 | SURF-16 | `20260728_pure_ui_ermit_export_contract` | `reports/ermit_export_download.htm`, RQ session token, export submit/poll/error, protected download and return navigation | 161 render/Flask + 63 backend + 2 inline Jest; rejected-token retry repair; security review passed | High / `high` | verified |
 | SURF-17 | `20260728_pure_ui_rq_info_details_contract` | Admin/Root static RQ snapshot; ordered isolated active panels by queue; 134 focused Python; security review passed | SHR-04A, SURF-07 | High / `high`: privileged operational metadata | verified |
-| SURF-18 | `pure_ui_deval_loading_contract` | `reports/deval_loading.htm`, CAP-gated enqueue/cache decision, job tracking/poll/backoff/error/refresh and generated report handoff | SHR-03A, SHR-04A, DOM-14A, SURF-07 | High / `high`: CAP, queue, job metadata and generated artifact | planned |
+| SURF-18 | `20260728_pure_ui_deval_loading_contract` | DEVAL authorization/CAP, parent-owned PUP tracking, owned-job validation, fail-closed polling, confined worker/artifact, and reload; 157 focused Python + 5 Jest | high security review passed | High / `high`: CAP, queue, job metadata and generated artifact | verified |
 
 ## Complete 56-Module Reconciliation
 

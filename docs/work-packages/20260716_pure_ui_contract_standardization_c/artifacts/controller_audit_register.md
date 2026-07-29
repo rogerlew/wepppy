@@ -166,7 +166,7 @@ run-support files, 15 shared/global files, and four standalone files.
 | Root user modification | SURF-15 | `templates/user/usermod.html` | high | contractual | unverified |
 | ERMiT export/download | SURF-16 | direct launcher render + inline token/submit/poll/download/retry Jest + Flask/session/rq-engine/worker evidence; rejected-token retry repair; security review passed | high | contractual | verified |
 | RQ Info Details | SURF-17 | `R/rq/info_details/templates/info_details.htm`; Admin/Root route + real producer + actual render; ordered isolated active queue panels; 134 focused Python | high review passed | contractual | verified |
-| DEVAL loading | SURF-18 | `templates/reports/deval_loading.htm`; `R/weppcloudr.py::{deval_details,_determine_job,_enqueue_deval_job}`; `wepppy/rq/weppcloudr_rq.py::render_deval_details_rq`; no focused template/poll suite yet | high: CAP, queue, job state and generated report | contractual | unverified |
+| DEVAL loading | SURF-18 | direct render + 5 inline Jest + 157 focused route/RQ/worker tests; authorization, parent/PUP tracking, owned jobs, status/error, path confinement, artifact reload; security review passed | high: CAP, queue, job state and generated report | contractual | verified |
 
 Direct report-container consumers are itemized rather than hidden under
 SURF-12: Ash report pages are DOM-01; `debris_flow.htm` is DOM-18;

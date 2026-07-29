@@ -89,6 +89,10 @@ is not a contract registry or enforcement platform.
   hostile render, queue-isolation, empty-state, and failure evidence; separated
   default and batch active panels under checkpoint `cf20ef0b0` and passed
   independent correctness and security reviews.
+- [x] (2026-07-28) Executed SURF-18 with direct DEVAL rendering and inline
+  client execution, CAP plus run authorization, parent-owned PUP tracking,
+  owned-job validation, fail-closed status/error behavior, confined worker and
+  artifact paths, and independent correctness/security reviews.
 - [ ] Close the initiative when the registered inventory has executable
   regression coverage or explicit operator-approved exclusions.
 

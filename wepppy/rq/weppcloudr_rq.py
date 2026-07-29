@@ -55,6 +55,30 @@ def _write_command_logs(output_dir: Path, job_id: str, stdout: str, stderr: str)
         pass
 
 
+def _secure_deval_paths(active_path: Path, runid: str, job_id: str) -> tuple[Path, Path]:
+    """Return confined report/log directories, rejecting symlink redirects."""
+    export_parent = active_path / "export"
+    export_dir = export_parent / "WEPPcloudR"
+    for component in (export_parent, export_dir):
+        if component.is_symlink():
+            raise WeppcloudRError("DEVAL report path contains a symlink.")
+    export_dir.mkdir(parents=True, exist_ok=True)
+    try:
+        export_dir.resolve().relative_to(active_path)
+    except ValueError as exc:
+        raise WeppcloudRError("DEVAL report path escapes the active run root.") from exc
+
+    output_path = export_dir / f"deval_{runid}.htm"
+    if output_path.is_symlink():
+        raise WeppcloudRError("DEVAL report artifact is a symlink.")
+    if Path(job_id).name != job_id:
+        raise WeppcloudRError("Invalid DEVAL job identifier.")
+    for suffix in ("stdout", "stderr"):
+        if (export_dir / f"render_deval_{job_id}.{suffix}").is_symlink():
+            raise WeppcloudRError("DEVAL command log is a symlink.")
+    return export_dir, output_path
+
+
 def _assert_no_retired_root_resources(active_path: Path) -> None:
     retired = list_existing_retired_root_resources(active_path)
     if not retired:
@@ -130,10 +154,7 @@ def render_deval_details_rq(
 
         _assert_no_retired_root_resources(active_path)
 
-        export_dir = active_path / "export" / "WEPPcloudR"
-        export_dir.mkdir(parents=True, exist_ok=True)
-
-        output_path = export_dir / f"deval_{runid}.htm"
+        export_dir, output_path = _secure_deval_paths(active_path, runid, job_id)
 
         skip_cache_flag = _coerce_bool(skip_cache)
         if skip_cache_flag and output_path.exists():

@@ -29,16 +29,16 @@ def _validate_pup_root(run_root: Path, pup_relpath: str) -> Path:
 
     pups_root = (run_root / "_pups").resolve()
     if not pups_root.is_dir():
-        abort(404, description=f"0 Unknown pup project: run_root:{run_root}\tpup_relpath:{pup_relpath}")
+        abort(404, description="Unknown pup project")
 
     candidate = (pups_root / pup_relpath).resolve()
     try:
         candidate.relative_to(pups_root)
     except ValueError:
-        abort(404, description=f"1 Unknown pup project: run_root:{run_root}\tpup_relpath:{pup_relpath}\tcandidate:{candidate}")
+        abort(404, description="Unknown pup project")
 
     if not candidate.is_dir():
-        abort(404, description=f"2 Unknown pup project: run_root:{run_root}\tpup_relpath:{pup_relpath}\tcandidate:{candidate}")
+        abort(404, description="Unknown pup project")
 
     return candidate
 
