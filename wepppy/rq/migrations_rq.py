@@ -114,7 +114,7 @@ def migrations_rq(
             except Exception as e:
                 publish_and_log("ARCHIVE_FAILED", str(e))
                 file_logger.error(f"Archive failed: {e}", exc_info=True)
-                # Continue with migrations even if archive fails - just log the warning
+                raise
         
         # Import migration runner
         from wepppy.tools.migrations.runner import run_all_migrations, MigrationResult
@@ -161,6 +161,7 @@ def migrations_rq(
             except Exception as restore_err:
                 publish_and_log("READONLY_RESTORE_FAILED", str(restore_err))
                 file_logger.error(f"Failed to restore readonly state: {restore_err}", exc_info=True)
+                raise
         
         publish_and_log("TRIGGER", "migrations MIGRATION_COMPLETE")
         

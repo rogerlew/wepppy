@@ -2122,12 +2122,12 @@ def migration_page(runid, config):
     is_admin = False
     try:
         owners = get_run_owners(runid)
-        is_owner = current_user in owners if owners else True
+        is_owner = current_user in owners if owners else False
         is_admin = current_user.has_role('Admin') if hasattr(current_user, 'has_role') else False
     except Exception:
         # Boundary catch: preserve contract behavior while logging unexpected failures.
         __import__("logging").getLogger(__name__).exception("Boundary exception at wepppy/weppcloud/routes/run_0/run_0_bp.py:857", extra={"runid": locals().get("runid"), "config": locals().get("config"), "job_id": locals().get("job_id")})
-        is_owner = True  # Allow if we can't determine ownership
+        is_owner = False
     
     can_migrate = is_owner or is_admin
     is_readonly = ron.readonly

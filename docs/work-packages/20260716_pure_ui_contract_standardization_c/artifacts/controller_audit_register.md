@@ -156,7 +156,7 @@ run-support files, 15 shared/global files, and four standalone files.
 | Run Sync | SURF-05 | `R/run_sync_dashboard/templates/rq-run-sync-dashboard.htm` | high | contractual | unverified |
 | Runs catalog | SURF-06 | `templates/user/runs2.html` | high | contractual | unverified |
 | RQ job dashboard | SURF-07 | `R/rq/job_dashboard/templates/dashboard_pure.htm`; direct render + 4 real inline Jest + 268 route/session/rq-engine/payload tests; required poll-auth fallback repair | high review passed | contractual | verified |
-| Run migration status | SURF-08 | `R/run_0/templates/run_0/rq-migration-status.htm` | high | contractual | unverified |
+| Run migration status | SURF-08 | `R/run_0/templates/run_0/rq-migration-status.htm`; 225 focused Python + 7 inline Jest; auth/token-class/lock/persistence/token/archive/readonly repairs | high review passed | contractual | verified |
 | README editor | SURF-09 | `R/readme_md/templates/{readme_editor,readme_view}.htm` | high | contractual | unverified |
 | Disturbed CSV editor | SURF-10 | `T/edit_csv.htm` | high | contractual | unverified |
 | Geneva summary | SURF-11 | `templates/reports/geneva/summary.htm`; `R/nodb_api/geneva_bp.py::{query_geneva_summary,query_geneva_hru_map_rows,query_geneva_hru_map_features,report_geneva_summary}`; 133 render/route + 11 service tests; no-store/run/auth/validation evidence | high review passed | contractual | verified |

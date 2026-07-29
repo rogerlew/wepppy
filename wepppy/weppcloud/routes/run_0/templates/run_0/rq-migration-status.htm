@@ -304,8 +304,8 @@
 
       {% if is_readonly %}
       <div class="alert alert-info mt-2">
-        <strong>Note:</strong> This project is read-only. The migration process will temporarily 
-        remove read-only protection, apply migrations, and then restore the read-only state.
+        <strong>Note:</strong> This project is read-only. The migration process
+        preserves its read-only state while applying required data updates.
       </div>
       {% endif %}
     </div>
@@ -357,8 +357,8 @@
 <script src="{{ static_url('js/controllers-gl.js') }}" defer></script>
 <script src="{{ static_url('js/controllers_gl_stale_check.js') }}" defer></script>
 <script>
-const runid = '{{ runid }}';
-const config = '{{ config }}';
+const runid = {{ runid | tojson }};
+const config = {{ config | tojson }};
 let pollInterval = null;
 let lastStatus = null;
 const MIGRATION_POLL_BASE_INTERVAL_MS = 5000;
@@ -643,7 +643,10 @@ async function runMigrations() {
     if (!jobId) {
       throw new Error('Failed to queue migration job: missing job id.');
     }
-    const statusUrl = data.status_url || `/rq-engine/api/jobstatus/${encodeURIComponent(jobId)}`;
+    const canonicalStatusUrl = `/rq-engine/api/jobstatus/${encodeURIComponent(jobId)}`;
+    const statusUrl = data.status_url === canonicalStatusUrl
+      ? data.status_url
+      : canonicalStatusUrl;
     const dashboardUrl = `/weppcloud/rq/job-dashboard/${encodeURIComponent(jobId)}`;
     const wasReadonly = data.result && data.result.was_readonly;
     const safeJobId = escapeHtml(jobId);
@@ -681,9 +684,13 @@ async function runMigrations() {
 async function fetchJobInfo(jobId) {
   const http = resolveHttpClient();
   const url = `/rq-engine/api/jobinfo/${encodeURIComponent(jobId)}`;
-  if (http && typeof http.getJson === 'function') {
+  if (http && typeof http.requestWithSessionToken === 'function') {
     try {
-      return await http.getJson(url);
+      const response = await http.requestWithSessionToken(url, {
+        runId: runid,
+        config: config
+      });
+      return response ? response.body : null;
     } catch (error) {
       console.error('Failed to fetch job info:', error);
       return null;
@@ -698,10 +705,14 @@ async function fetchJobInfo(jobId) {
 
 async function fetchJobStatus(statusUrl) {
   const http = resolveHttpClient();
-  const bust = { params: { _: Date.now() } };
-  if (http && typeof http.getJson === 'function') {
+  if (http && typeof http.requestWithSessionToken === 'function') {
     try {
-      return await http.getJson(statusUrl, bust);
+      const response = await http.requestWithSessionToken(statusUrl, {
+        runId: runid,
+        config: config,
+        params: { _: Date.now() }
+      });
+      return response ? response.body : null;
     } catch (error) {
       if (http.isHttpError && http.isHttpError(error) && error.body) {
         if (typeof error.body === 'string') {
@@ -844,6 +855,14 @@ function onMigrationComplete(result) {
   const btnText = document.getElementById('btn-text');
   const btnSpinner = document.getElementById('btn-spinner');
   const resultDiv = document.getElementById('migration-result');
+
+  if (result && result.success === false) {
+    const errors = result.errors && typeof result.errors === 'object'
+      ? Object.values(result.errors).map(normalizeErrorValue).filter(Boolean).join('\n')
+      : '';
+    onMigrationFailed(errors || 'Migration worker reported failure.');
+    return;
+  }
   
   btnSpinner.classList.add('hidden');
   btnText.textContent = 'Complete!';

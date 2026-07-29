@@ -36,7 +36,7 @@
     "notes": [],
     "queue_name": "default",
     "source_function": "run_ash",
-    "source_lineno": 269,
+    "source_lineno": 316,
     "source_module": "wepppy/microservices/rq_engine/ash_routes.py"
   },
   {
@@ -269,8 +269,8 @@
     "job_meta_stage": null,
     "notes": [],
     "queue_name": "default",
-    "source_function": "migrate_run",
-    "source_lineno": 145,
+    "source_function": "_enqueue_migration_job",
+    "source_lineno": 134,
     "source_module": "wepppy/microservices/rq_engine/migration_routes.py"
   },
   {
@@ -280,7 +280,7 @@
     "notes": [],
     "queue_name": "batch",
     "source_function": "_delete_omni_contrasts",
-    "source_lineno": 868,
+    "source_lineno": 882,
     "source_module": "wepppy/microservices/rq_engine/omni_routes.py"
   },
   {
@@ -290,7 +290,7 @@
     "notes": [],
     "queue_name": "batch",
     "source_function": "_run_omni",
-    "source_lineno": 608,
+    "source_lineno": 622,
     "source_module": "wepppy/microservices/rq_engine/omni_routes.py"
   },
   {
@@ -300,7 +300,7 @@
     "notes": [],
     "queue_name": "batch",
     "source_function": "_run_omni_contrasts",
-    "source_lineno": 732,
+    "source_lineno": 746,
     "source_module": "wepppy/microservices/rq_engine/omni_routes.py"
   },
   {
@@ -392,7 +392,7 @@
     "notes": [],
     "queue_name": "default",
     "source_function": "build_soils",
-    "source_lineno": 128,
+    "source_lineno": 151,
     "source_module": "wepppy/microservices/rq_engine/soils_routes.py"
   },
   {
@@ -1619,7 +1619,7 @@
     "notes": [],
     "queue_name": "default",
     "source_function": "run_path_cost_effective",
-    "source_lineno": 213,
+    "source_lineno": 219,
     "source_module": "wepppy/weppcloud/routes/nodb_api/path_ce_bp.py"
   },
   {

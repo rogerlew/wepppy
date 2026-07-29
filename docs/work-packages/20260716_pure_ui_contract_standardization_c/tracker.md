@@ -6,13 +6,13 @@
 
 **Timezone**: UTC
 **Started**: 2026-07-17 00:30 UTC
-**Current phase**: SURF-07 closed; next package selection
+**Current phase**: SURF-08 closed; next package selection
 **Last updated**: 2026-07-28 UTC
 **Next milestone**: Select the next dependency-valid Pure UI package.
-**Security impact**: `high` polling token, job metadata, and cancellation surface
-**Dedicated security review**: `yes` for SHR-05, SURF-07, SURF-11, and SURF-16
+**Security impact**: `high` run mutation, polling token, archive, and readonly surface
+**Dedicated security review**: `yes` for SHR-05, SURF-07, SURF-08, SURF-11, and SURF-16
 **Security artifact**:
-`../20260728_pure_ui_rq_job_dashboard_contract/artifacts/2026-07-28_security_review.md`
+`../20260728_pure_ui_run_migration_status_contract/artifacts/2026-07-28_security_review.md`
 
 ## Task Board
 
@@ -36,6 +36,10 @@
 
 ### Done
 
+- [x] Closed SURF-08 with permission-aware rendering, real inline
+  enqueue/poll/backoff/terminal evidence, direct route/worker tests, and
+  auth/lock/token/archive/readonly conformance repairs with passing independent
+  security review (2026-07-28 UTC).
 - [x] Closed SURF-07 with direct rendering, real inline poll/tree/rate-limit/
   token/cancel evidence, 268 focused Python tests, a bounded required poll-auth
   fallback repair, and passing independent security review (2026-07-28 UTC).

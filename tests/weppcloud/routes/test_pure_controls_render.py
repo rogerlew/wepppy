@@ -3172,6 +3172,57 @@ def test_rq_job_dashboard_renders_identity_actions_and_lifecycle_targets(
     assert 'const sitePrefix = "/weppcloud";' in rendered
 
 
+def test_run_migration_status_renders_inventory_permissions_and_safe_bootstrap(
+    jinja_env: Environment,
+) -> None:
+    rendered = jinja_env.get_template("run_0/rq-migration-status.htm").render(
+        runid="run-1",
+        config="cfg",
+        can_migrate=True,
+        is_readonly=True,
+    )
+
+    for token in (
+        'data-controller="migration-status"',
+        'class="migration-item needs-migration"',
+        'id="create-archive"',
+        'id="run-migrations-btn"',
+        'id="btn-text"',
+        'id="btn-spinner"',
+        'id="migration-result"',
+        "Load Without Migrating",
+        "preserves its read-only state",
+    ):
+        assert token in rendered
+
+    assert 'id="create-archive" checked' not in rendered
+    assert 'const runid = "run-1";' in rendered
+    assert 'const config = "cfg";' in rendered
+
+    hostile_rendered = jinja_env.get_template("run_0/rq-migration-status.htm").render(
+        runid="</script><script>alert(1)</script>",
+        config='cfg";alert(2);//',
+        can_migrate=True,
+        is_readonly=False,
+    )
+    assert (
+        'const runid = "\\u003c/script\\u003e\\u003cscript\\u003e'
+        'alert(1)\\u003c/script\\u003e";'
+    ) in hostile_rendered
+    assert 'const config = "cfg\\";alert(2);//";' in hostile_rendered
+    inline_script = hostile_rendered[hostile_rendered.rfind("<script>") :]
+    assert "</script><script>alert(1)</script>" not in inline_script
+
+    readonly_rendered = jinja_env.get_template("run_0/rq-migration-status.htm").render(
+        runid="run-1",
+        config="cfg",
+        can_migrate=False,
+        is_readonly=True,
+    )
+    assert 'id="run-migrations-btn"' not in readonly_rendered
+    assert "Load Without Migrating (Read-Only)" in readonly_rendered
+
+
 def test_placeholder_only_controls_have_explicit_accessible_names() -> None:
     command_bar_source = (COMMAND_BAR_TEMPLATE_ROOT / "command-bar.htm").read_text(encoding="utf-8")
     browse_directory_source = (

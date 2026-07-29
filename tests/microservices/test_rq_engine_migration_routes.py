@@ -18,9 +18,13 @@ def _stub_queue(monkeypatch: pytest.MonkeyPatch, *, job_id: str = "job-123") -> 
             pass
 
         def enqueue_call(self, *args, **kwargs):
+            DummyJob.id = kwargs.get("job_id", job_id)
             return DummyJob()
 
     class DummyRedis:
+        def __init__(self) -> None:
+            self.values: dict[str, str] = {}
+
         def __enter__(self):
             return self
 
@@ -29,6 +33,18 @@ def _stub_queue(monkeypatch: pytest.MonkeyPatch, *, job_id: str = "job-123") -> 
 
         def close(self) -> None:
             return None
+
+        def set(self, key, value, **kwargs):
+            if kwargs.get("nx") and key in self.values:
+                return False
+            self.values[key] = value
+            return True
+
+        def get(self, key):
+            return self.values.get(key)
+
+        def delete(self, key):
+            self.values.pop(key, None)
 
     monkeypatch.setattr(migration_routes, "Queue", DummyQueue)
     monkeypatch.setattr(migration_routes.redis, "Redis", lambda **kwargs: DummyRedis())
@@ -72,7 +88,38 @@ def test_migrate_run_requires_run_claim_for_service_token(
     assert response.status_code == 403
     payload = response.json()
     assert payload["error"]["code"] == "forbidden"
-    assert "Token not authorized" in payload["error"]["details"]
+    assert "Only user or session tokens" in payload["error"]["details"]
+
+
+@pytest.mark.parametrize("token_class", ["service", "mcp", "unexpected"])
+def test_migrate_run_rejects_machine_or_unknown_owner_identity(
+    monkeypatch: pytest.MonkeyPatch,
+    token_class: str,
+) -> None:
+    monkeypatch.setattr(
+        migration_routes,
+        "require_jwt",
+        lambda request, required_scopes=None: {
+            "token_class": token_class,
+            "runs": ["run-1"],
+            "sub": "17",
+            "email": "owner@example.com",
+        },
+    )
+    monkeypatch.setattr(
+        migration_routes,
+        "get_run_owners_lazy",
+        lambda runid: [type("Owner", (), {"id": 17, "email": "owner@example.com"})()],
+    )
+
+    with TestClient(rq_engine.app) as client:
+        response = client.post(
+            "/api/runs/run-1/cfg/migrate-run",
+            headers={"Authorization": "Bearer token"},
+        )
+
+    assert response.status_code == 403
+    assert "Only user or session tokens" in response.json()["error"]["message"]
 
 
 def test_migrate_run_allows_admin_without_run_claim(
@@ -103,12 +150,12 @@ def test_migrate_run_allows_admin_without_run_claim(
 
     assert response.status_code == 202
     payload = response.json()
-    assert payload["job_id"] == "job-55"
-    assert payload["status_url"] == "/rq-engine/api/jobstatus/job-55"
+    assert payload["job_id"]
+    assert payload["status_url"] == f"/rq-engine/api/jobstatus/{payload['job_id']}"
     assert payload["result"]["was_readonly"] is True
 
 
-def test_migrate_run_allows_session_token(
+def test_migrate_run_allows_owner_session_token(
     monkeypatch: pytest.MonkeyPatch, tmp_path
 ) -> None:
     run_dir = tmp_path / "run"
@@ -126,12 +173,18 @@ def test_migrate_run_allows_session_token(
             "token_class": "session",
             "runid": "run-1",
             "session_id": "session-1",
+            "user_id": 17,
         },
     )
     monkeypatch.setattr(migration_routes, "require_session_marker", _require_session_marker)
     monkeypatch.setattr(migration_routes, "get_wd", lambda runid: str(run_dir))
     monkeypatch.setattr(migration_routes, "lock_statuses", lambda runid: {})
     monkeypatch.setattr(migration_routes.StatusMessenger, "publish", lambda *args, **kwargs: None)
+    monkeypatch.setattr(
+        migration_routes,
+        "get_run_owners_lazy",
+        lambda runid: [type("Owner", (), {"id": 17, "email": "owner@example.com"})()],
+    )
 
     _stub_ron(monkeypatch, readonly=False)
     _stub_prep(monkeypatch)
@@ -145,8 +198,41 @@ def test_migrate_run_allows_session_token(
 
     assert response.status_code == 202
     payload = response.json()
-    assert payload["job_id"] == "job-99"
+    assert payload["job_id"]
     assert called["value"] is True
+
+
+def test_migrate_run_rejects_non_owner_session_token(
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    monkeypatch.setattr(
+        migration_routes,
+        "require_jwt",
+        lambda request, required_scopes=None: {
+            "token_class": "session",
+            "runid": "run-1",
+            "session_id": "anonymous-session",
+        },
+    )
+    monkeypatch.setattr(
+        migration_routes,
+        "require_session_marker",
+        lambda claims, runid: None,
+    )
+    monkeypatch.setattr(
+        migration_routes,
+        "get_run_owners_lazy",
+        lambda runid: [type("Owner", (), {"id": 17, "email": "owner@example.com"})()],
+    )
+
+    with TestClient(rq_engine.app) as client:
+        response = client.post(
+            "/api/runs/run-1/cfg/migrate-run",
+            headers={"Authorization": "Bearer token"},
+        )
+
+    assert response.status_code == 403
+    assert "owner or administrator" in response.json()["error"]["message"]
 
 
 def test_migrate_run_returns_not_found(monkeypatch: pytest.MonkeyPatch, tmp_path) -> None:
@@ -169,3 +255,203 @@ def test_migrate_run_returns_not_found(monkeypatch: pytest.MonkeyPatch, tmp_path
     payload = response.json()
     assert payload["error"]["code"] == "not_found"
     assert "Run run-1 not found" in payload["error"]["details"]
+
+
+def test_migrate_run_rejects_existing_active_job(
+    monkeypatch: pytest.MonkeyPatch,
+    tmp_path,
+) -> None:
+    run_dir = tmp_path / "run"
+    run_dir.mkdir()
+
+    monkeypatch.setattr(
+        migration_routes,
+        "require_jwt",
+        lambda request, required_scopes=None: {
+            "token_class": "service",
+            "roles": ["Admin"],
+        },
+    )
+    monkeypatch.setattr(migration_routes, "get_wd", lambda runid: str(run_dir))
+    monkeypatch.setattr(migration_routes, "lock_statuses", lambda runid: {})
+    _stub_ron(monkeypatch)
+
+    class ActivePrep:
+        def get_rq_job_ids(self) -> dict[str, str]:
+            return {"migrations": "active-job"}
+
+    class ActiveJob:
+        def get_status(self, *, refresh: bool) -> str:
+            assert refresh is True
+            return "started"
+
+    class DummyRedis:
+        def __init__(self) -> None:
+            self.values: dict[str, str] = {}
+
+        def __enter__(self):
+            return self
+
+        def __exit__(self, exc_type, exc, tb):
+            return False
+
+        def set(self, key, value, **kwargs):
+            self.values[key] = value
+            return True
+
+        def get(self, key):
+            return self.values.get(key)
+
+        def delete(self, key):
+            self.values.pop(key, None)
+
+    monkeypatch.setattr(
+        migration_routes.RedisPrep,
+        "getInstance",
+        lambda wd: ActivePrep(),
+    )
+    monkeypatch.setattr(
+        migration_routes.redis,
+        "Redis",
+        lambda **kwargs: DummyRedis(),
+    )
+    monkeypatch.setattr(
+        migration_routes.Job,
+        "fetch",
+        lambda job_id, connection: ActiveJob(),
+    )
+
+    with TestClient(rq_engine.app) as client:
+        response = client.post(
+            "/api/runs/run-1/cfg/migrate-run",
+            headers={"Authorization": "Bearer token"},
+            json={"create_archive": True},
+        )
+
+    assert response.status_code == 409
+    assert "already running" in response.json()["error"]["message"]
+
+
+def test_migrate_run_rejects_concurrent_submission_lock(
+    monkeypatch: pytest.MonkeyPatch,
+    tmp_path,
+) -> None:
+    run_dir = tmp_path / "run"
+    run_dir.mkdir()
+    monkeypatch.setattr(
+        migration_routes,
+        "require_jwt",
+        lambda request, required_scopes=None: {
+            "token_class": "service",
+            "roles": ["Admin"],
+        },
+    )
+    monkeypatch.setattr(migration_routes, "get_wd", lambda runid: str(run_dir))
+    monkeypatch.setattr(migration_routes, "lock_statuses", lambda runid: {})
+    _stub_ron(monkeypatch, readonly=True)
+    _stub_prep(monkeypatch)
+
+    class BusyLock:
+        def __enter__(self):
+            return self
+
+        def __exit__(self, exc_type, exc, tb):
+            return False
+
+        def set(self, *args, **kwargs):
+            return False
+
+    monkeypatch.setattr(
+        migration_routes.redis,
+        "Redis",
+        lambda **kwargs: BusyLock(),
+    )
+
+    with TestClient(rq_engine.app) as client:
+        response = client.post(
+            "/api/runs/run-1/cfg/migrate-run",
+            headers={"Authorization": "Bearer token"},
+        )
+
+    assert response.status_code == 409
+    assert "submission is in progress" in response.json()["error"]["message"]
+
+
+def test_migrate_run_does_not_enqueue_when_job_id_persistence_fails(
+    monkeypatch: pytest.MonkeyPatch,
+    tmp_path,
+) -> None:
+    run_dir = tmp_path / "run"
+    run_dir.mkdir()
+    enqueue_calls = {"count": 0}
+
+    monkeypatch.setattr(
+        migration_routes,
+        "require_jwt",
+        lambda request, required_scopes=None: {
+            "token_class": "service",
+            "roles": ["Admin"],
+        },
+    )
+    monkeypatch.setattr(migration_routes, "get_wd", lambda runid: str(run_dir))
+    monkeypatch.setattr(migration_routes, "lock_statuses", lambda runid: {})
+    _stub_ron(monkeypatch)
+
+    class FailingPrep:
+        def get_rq_job_ids(self) -> dict[str, str]:
+            return {}
+
+        def set_rq_job_id(self, key: str, job_id: str) -> None:
+            raise OSError("persistence unavailable")
+
+    class DummyJob:
+        id = "should-not-exist"
+
+    class TrackingQueue:
+        def __init__(self, *args, **kwargs) -> None:
+            pass
+
+        def enqueue_call(self, *args, **kwargs):
+            enqueue_calls["count"] += 1
+            return DummyJob()
+
+    class DummyRedis:
+        def __init__(self) -> None:
+            self.values: dict[str, str] = {}
+
+        def __enter__(self):
+            return self
+
+        def __exit__(self, exc_type, exc, tb):
+            return False
+
+        def set(self, key, value, **kwargs):
+            self.values[key] = value
+            return True
+
+        def get(self, key):
+            return self.values.get(key)
+
+        def delete(self, key):
+            self.values.pop(key, None)
+
+    monkeypatch.setattr(
+        migration_routes.RedisPrep,
+        "getInstance",
+        lambda wd: FailingPrep(),
+    )
+    monkeypatch.setattr(migration_routes, "Queue", TrackingQueue)
+    monkeypatch.setattr(
+        migration_routes.redis,
+        "Redis",
+        lambda **kwargs: DummyRedis(),
+    )
+
+    with TestClient(rq_engine.app, raise_server_exceptions=False) as client:
+        response = client.post(
+            "/api/runs/run-1/cfg/migrate-run",
+            headers={"Authorization": "Bearer token"},
+        )
+
+    assert response.status_code == 500
+    assert enqueue_calls["count"] == 0

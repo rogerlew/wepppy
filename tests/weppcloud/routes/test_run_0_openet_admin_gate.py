@@ -128,6 +128,67 @@ def _extract_mod_flag(js_text: str, flag_name: str) -> str:
     return match.group(1)
 
 
+@pytest.mark.parametrize("owner_lookup", ["empty", "error"])
+def test_migration_page_fails_closed_without_confirmed_owner(
+    run0_client,
+    monkeypatch: pytest.MonkeyPatch,
+    tmp_path: Path,
+    owner_lookup: str,
+) -> None:
+    client, module = run0_client
+    run_dir = tmp_path / "run"
+    run_dir.mkdir()
+    captured: dict[str, object] = {}
+
+    monkeypatch.setattr(module, "authorize", lambda runid, config: None)
+    monkeypatch.setattr(module, "get_wd", lambda runid: str(run_dir))
+    monkeypatch.setattr(module, "_exists", lambda path: True)
+    monkeypatch.setattr(
+        module.Ron,
+        "getInstance",
+        lambda wd: SimpleNamespace(readonly=False),
+    )
+
+    from wepppy.tools.migrations import runner
+    from wepppy.weppcloud import app as app_module
+
+    monkeypatch.setattr(
+        runner,
+        "check_migrations_needed",
+        lambda wd: {
+            "needs_migration": True,
+            "migrations": [
+                {
+                    "name": "nodb_version",
+                    "description": "Update version",
+                    "would_apply": True,
+                    "message": "Required",
+                }
+            ],
+        },
+    )
+    if owner_lookup == "error":
+        monkeypatch.setattr(
+            app_module,
+            "get_run_owners",
+            lambda runid: (_ for _ in ()).throw(RuntimeError("owner lookup failed")),
+        )
+    else:
+        monkeypatch.setattr(app_module, "get_run_owners", lambda runid: [])
+
+    def _capture_template(template_name: str, **context):
+        captured.update(context)
+        return "migration page"
+
+    monkeypatch.setattr(module, "render_template", _capture_template)
+
+    response = client.get("/runs/run-1/cfg/migrate")
+
+    assert response.status_code == 200
+    assert captured["is_owner"] is False
+    assert captured["can_migrate"] is False
+
+
 def test_ag_fields_preflight_contract_uses_corn_emoji(run0_module) -> None:
     assert run0_module.TOC_TASK_ANCHOR_TO_TASK["#ag-fields"] is run0_module.TaskEnum.run_ag_fields
     assert run0_module.TOC_TASK_EMOJI_MAP["#ag-fields"] == "🌽"
