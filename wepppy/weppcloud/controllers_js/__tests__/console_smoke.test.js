@@ -188,6 +188,7 @@ describe("Fork console smoke", () => {
                      data-runid="demo-run"
                      data-config="cfg"
                      data-undisturbify="false"
+                     data-skip-wepp-runs-output="false"
                      hidden></div>
                 <div id="fork_status_panel">
                     <div id="fork_status_log" data-status-log></div>
@@ -197,6 +198,7 @@ describe("Fork console smoke", () => {
                 <form id="fork_form">
                     <input id="runid_input" value="demo-run" />
                     <input id="undisturbify_checkbox" type="checkbox" />
+                    <input id="skip_wepp_runs_output_checkbox" type="checkbox" />
                     <button id="submit_button" type="submit">Fork project</button>
                     <button id="cancel_button" type="button" hidden>Cancel</button>
                 </form>
@@ -279,6 +281,136 @@ describe("Fork console smoke", () => {
             jobId: "job-456",
             newRunId: "demo-run-new",
         }));
+    });
+
+    test("propagates rendered true option defaults into the exact submit payload", async () => {
+        document.body.innerHTML = `
+            <section data-controller="fork-console">
+                <div data-fork-console-config
+                     data-runid="demo-run"
+                     data-config="cfg"
+                     data-undisturbify="true"
+                     data-skip-wepp-runs-output="true"
+                     hidden></div>
+                <div id="fork_status_panel"><div id="fork_status_log"></div></div>
+                <div id="fork_stacktrace_panel"><pre data-stacktrace-body></pre></div>
+                <form id="fork_form">
+                    <input id="runid_input" value="demo-run" />
+                    <input id="undisturbify_checkbox" type="checkbox" />
+                    <input id="skip_wepp_runs_output_checkbox" type="checkbox" />
+                    <button id="submit_button" type="submit">Fork project</button>
+                    <button id="cancel_button" type="button" hidden>Cancel</button>
+                </form>
+                <div id="the_console"></div>
+            </section>
+        `;
+        jest.resetModules();
+        await import("../../static/js/console_utils.js");
+        await import("../../static/js/fork_console.js");
+        await flushPromises();
+        fetchMock.mockClear();
+
+        expect(document.getElementById("undisturbify_checkbox").checked).toBe(true);
+        expect(document.getElementById("skip_wepp_runs_output_checkbox").checked).toBe(true);
+
+        document.getElementById("fork_form").dispatchEvent(
+            new Event("submit", { bubbles: true, cancelable: true })
+        );
+        await flushPromises();
+
+        expect(fetchMock.mock.calls[1][1].body).toBe(
+            "undisturbify=true&skip_wepp_runs_output=true"
+        );
+    });
+
+    test("repeated script execution retains one submit owner", async () => {
+        jest.resetModules();
+        await import("../../static/js/fork_console.js");
+
+        document.getElementById("fork_form").dispatchEvent(
+            new Event("submit", { bubbles: true, cancelable: true })
+        );
+        await flushPromises();
+
+        expect(fetchMock).toHaveBeenCalledTimes(2);
+    });
+
+    test("removes a cross-scope tracked record instead of restoring it", async () => {
+        window.sessionStorage.setItem("weppcloud:fork-console:demo-run:cfg", JSON.stringify({
+            version: 1,
+            runId: "other-run",
+            config: "cfg",
+            jobId: "job-other",
+            newRunId: "other-new",
+        }));
+        document.querySelector('[data-controller="fork-console"]').__forkConsoleInit = false;
+        jest.resetModules();
+        await import("../../static/js/fork_console.js");
+        await flushPromises();
+
+        expect(window.sessionStorage.getItem("weppcloud:fork-console:demo-run:cfg")).toBeNull();
+        expect(poller.set_rq_job_id).not.toHaveBeenCalledWith(poller, "job-other");
+    });
+
+    test("anonymous CAP blocks before solve and submits the solved token directly", async () => {
+        document.body.innerHTML = `
+            <section data-controller="fork-console">
+                <div data-fork-console-config
+                     data-runid="demo-run"
+                     data-config="cfg"
+                     data-undisturbify="false"
+                     data-skip-wepp-runs-output="true"
+                     data-cap-required="true"
+                     data-cap-section="fork"
+                     hidden></div>
+                <div class="wc-cap-prompt" data-cap-section="fork">
+                    <button type="button" data-cap-trigger></button>
+                    <span data-cap-status></span>
+                </div>
+                <cap-widget data-cap-section="fork"></cap-widget>
+                <div id="fork_status_panel"><div id="fork_status_log"></div></div>
+                <div id="fork_stacktrace_panel"><pre data-stacktrace-body></pre></div>
+                <form id="fork_form">
+                    <input id="runid_input" value="demo-run" />
+                    <input id="undisturbify_checkbox" type="checkbox" />
+                    <input id="skip_wepp_runs_output_checkbox" type="checkbox" />
+                    <input name="cap_token" value="" data-cap-token />
+                    <button id="submit_button" type="submit" disabled>Fork project</button>
+                    <button id="cancel_button" type="button" hidden>Cancel</button>
+                </form>
+                <div id="the_console"></div>
+            </section>
+        `;
+        const trigger = document.querySelector("[data-cap-trigger]");
+        trigger.click = jest.fn();
+        document.querySelector('[data-controller="fork-console"]').__forkConsoleInit = false;
+        jest.resetModules();
+        await import("../../static/js/fork_console.js");
+        await flushPromises();
+        fetchMock.mockClear();
+
+        document.getElementById("fork_form").dispatchEvent(
+            new Event("submit", { bubbles: true, cancelable: true })
+        );
+        expect(trigger.click).toHaveBeenCalledTimes(1);
+        expect(fetchMock).not.toHaveBeenCalled();
+
+        document.querySelector("cap-widget").dispatchEvent(
+            new CustomEvent("solve", { detail: { token: "<cap-token>" } })
+        );
+        document.getElementById("fork_form").dispatchEvent(
+            new Event("submit", { bubbles: true, cancelable: true })
+        );
+        await flushPromises();
+
+        expect(fetchMock).toHaveBeenCalledTimes(1);
+        expect(fetchMock.mock.calls[0][0]).toBe(
+            "http://localhost/rq-engine/api/runs/demo-run/cfg/fork"
+        );
+        expect(fetchMock.mock.calls[0][1]).toMatchObject({
+            method: "POST",
+            body: "undisturbify=false&skip_wepp_runs_output=true&cap_token=%3Ccap-token%3E",
+        });
     });
 
     test("stream completion requests authoritative status before completing", async () => {
@@ -438,6 +570,57 @@ describe("Fork console smoke", () => {
 
         expect(document.getElementById("submit_button").disabled).toBe(false);
         expect(document.getElementById("submit_button").hidden).toBe(false);
+    });
+
+    test("cancel targets only the accepted tracked job with renewable authorization", async () => {
+        fetchMock.mockImplementation((url) => {
+            if (url === "http://localhost/rq-engine/api/runs/demo-run/cfg/session-token") {
+                return Promise.resolve({
+                    ok: true,
+                    json: () => Promise.resolve({ token: "session-token" }),
+                });
+            }
+            if (url === "http://localhost/rq-engine/api/runs/demo-run/cfg/fork") {
+                return Promise.resolve({
+                    ok: true,
+                    text: () => Promise.resolve(JSON.stringify({
+                        job_id: "job-456",
+                        new_runid: "demo-run-new",
+                        undisturbify: false,
+                        skip_wepp_runs_output: false,
+                    })),
+                });
+            }
+            if (url === "/rq-engine/api/canceljob/job-456") {
+                return Promise.resolve({
+                    ok: true,
+                    text: () => Promise.resolve(JSON.stringify({ status: "ok" })),
+                });
+            }
+            return Promise.reject(new Error(`Unexpected fetch: ${url}`));
+        });
+
+        document.getElementById("fork_form").dispatchEvent(
+            new Event("submit", { bubbles: true, cancelable: true })
+        );
+        await flushPromises();
+        fetchMock.mockClear();
+
+        document.getElementById("cancel_button").click();
+        await flushPromises();
+
+        expect(fetchMock).toHaveBeenCalledTimes(2);
+        expect(fetchMock.mock.calls[0][0]).toBe(
+            "http://localhost/rq-engine/api/runs/demo-run/cfg/session-token"
+        );
+        expect(fetchMock.mock.calls[1]).toEqual([
+            "/rq-engine/api/canceljob/job-456",
+            {
+                method: "POST",
+                headers: { Authorization: "Bearer session-token" },
+            },
+        ]);
+        expect(global.alert).toHaveBeenCalledWith("Job canceled");
     });
 
     test("stale auth prompts reload when fork returns unauthorized", async () => {

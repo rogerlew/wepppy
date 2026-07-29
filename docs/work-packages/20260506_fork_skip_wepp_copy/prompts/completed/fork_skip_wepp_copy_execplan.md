@@ -47,6 +47,10 @@ Users can verify the behavior by submitting a fork with the new option, observin
 
 Implementation, focused validation, and subagent review disposition are complete for this session. Reviewers surfaced medium/low coverage gaps; all medium findings were fixed in the same change set and retested.
 
+The package was administratively closed on 2026-07-29. Its one accepted
+route-to-template-to-client propagation gap is inherited by SURF-04 at
+`docs/work-packages/20260729_pure_ui_fork_console_contract/`.
+
 ## Context and Orientation
 
 Fork UI and submit flow:
@@ -125,3 +129,8 @@ If queue-graph drift appears after future enqueue signature edits, run:
 ## Interfaces and Dependencies
 
 No new external dependencies are introduced. Existing fork API response keys remain compatible. The request schema grows by one optional boolean field and one resolved default entry.
+
+## Revision Notes
+
+2026-07-29: Moved the completed plan out of the active directory and linked its
+remaining UI propagation evidence to SURF-04; no historical outcome changed.

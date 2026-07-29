@@ -1,6 +1,6 @@
 # Fork Copy Optimization for `wepp/runs` and `wepp/output`
 
-**Status**: Open (2026-05-06)  
+**Status**: Closed (2026-07-29; implementation complete 2026-05-06)
 **Timezone**: UTC
 
 ## Overview
@@ -102,4 +102,7 @@ It also verifies and codifies the existing undisturbify path behavior so undistu
 
 ## Follow-up Work
 
+- Route-to-rendered-config-to-client propagation is inherited and verified by
+  SURF-04:
+  `docs/work-packages/20260729_pure_ui_fork_console_contract/`.
 - Optional future enhancement: expose fork-size estimates and expected speed-up hints in UI before submission.

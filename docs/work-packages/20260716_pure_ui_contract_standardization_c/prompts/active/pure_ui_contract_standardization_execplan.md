@@ -119,6 +119,10 @@ is not a contract registry or enforcement platform.
   regional, hostile, and JOH presentation-only rendering; seven executable CAP
   client tests; retained route/session/rq-engine creation evidence; and a
   passing security review. No production repair was required.
+- [x] (2026-07-29) Executed SURF-04 with exact route/render option identity,
+  fifteen direct real-client tests, retained CAP/auth/cancel/API/RQ evidence,
+  predecessor reconciliation, and a passing security review. No production
+  repair was required.
 - [ ] Close the initiative when the registered inventory has executable
   regression coverage or explicit operator-approved exclusions.
 
@@ -130,6 +134,10 @@ is not a contract registry or enforcement platform.
 - Observation: SURF-01's authenticated create-index route makes its template's
   anonymous CAP branch defensive rather than currently reachable, while the
   interfaces and regional pages own public creation.
+
+- Observation: SURF-04 inherited a completed fork-copy implementation whose
+  package records remained open; its only deferred route-to-client option
+  propagation gap could be closed directly without reopening backend behavior.
 
 - Observation: The controller count created planning anxiety and caused an
   architecture with two registries, a generated index, a manifest, change-aware
@@ -551,3 +559,12 @@ rq-engine project-route tests retain the creation boundary. Frontend lint and
 all 101 suites/714 tests passed; repository Python passed 5,548 tests with 58
 skips. Security review passed with no unresolved finding, and no production
 repair was required.
+
+SURF-04 closed with exact authenticated/anonymous/query-selected/hostile
+rendering and fifteen direct real-client tests for option payloads, CAP,
+duplicate execution, scoped recovery, renewable auth, cancellation, and
+authoritative terminal state. Focused render/template passed 168 tests,
+API/cancel/RQ passed 89, and security-focused evidence passed 29. Frontend lint
+and all 101 suites/719 tests passed. The stale fork-copy predecessor was closed
+and its deferred UI propagation gap resolved. Repository Python passed 5,555
+tests with 58 skips; no production repair was required.

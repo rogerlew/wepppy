@@ -10,7 +10,7 @@
 **Last updated**: 2026-07-29 UTC
 **Next milestone**: Select the next dependency-ready registered package.
 **Security impact**: `none` for documentation-only parent reconciliation
-**Dedicated security review**: `yes` for SHR-05, SURF-01, SURF-06, SURF-07, SURF-08, SURF-09, SURF-10, SURF-11, SURF-13, SURF-14, SURF-15, SURF-16, SURF-17, and SURF-18
+**Dedicated security review**: `yes` for SHR-05, SURF-01, SURF-04, SURF-06, SURF-07, SURF-08, SURF-09, SURF-10, SURF-11, SURF-13, SURF-14, SURF-15, SURF-16, SURF-17, and SURF-18
 **Security artifact**:
 `../20260728_pure_ui_runs_catalog_contract/artifacts/2026-07-28_security_review.md`
 
@@ -37,6 +37,14 @@
 
 ### Done
 
+- [x] Closed SURF-04 with exact route/render option identity, fifteen direct
+  real-client tests, and retained CAP/auth/cancel/API/RQ worker evidence.
+  Focused render/template passed 168 tests, API/cancel/RQ passed 89,
+  security-focused evidence passed 29, frontend lint and all 101 suites/719
+  tests passed, and repository Python passed 5,555 tests with 58 skips.
+  Security review passed with no unresolved finding. The stale fork-copy
+  predecessor was closed and its deferred UI propagation gap resolved; no
+  production repair was required (2026-07-29 UTC).
 - [x] Closed SURF-01 with exact anonymous, authenticated, Portland, Seattle,
   SPU, JOH, and hostile CAP-gate rendering; four direct interfaces-client and
   three direct CAP-gate tests; and retained route/session/rq-engine creation

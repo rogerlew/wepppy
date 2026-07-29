@@ -24,6 +24,9 @@ README_TEMPLATE_ROOT = REPO_ROOT / "wepppy" / "weppcloud" / "routes" / "readme_m
 RQ_INFO_DETAILS_TEMPLATE_ROOT = (
     REPO_ROOT / "wepppy" / "weppcloud" / "routes" / "rq" / "info_details" / "templates"
 )
+FORK_CONSOLE_TEMPLATE_ROOT = (
+    REPO_ROOT / "wepppy" / "weppcloud" / "routes" / "fork_console" / "templates"
+)
 PURE_TEMPLATES = [
     "controls/ag_fields_pure.htm",
     "controls/path_cost_effective_pure.htm",
@@ -53,6 +56,7 @@ def jinja_env() -> Environment:
                 str(RQ_JOB_DASHBOARD_TEMPLATE_ROOT),
                 str(README_TEMPLATE_ROOT),
                 str(RQ_INFO_DETAILS_TEMPLATE_ROOT),
+                str(FORK_CONSOLE_TEMPLATE_ROOT),
             ]
         ),
         undefined=DebugUndefined,
@@ -2445,6 +2449,73 @@ def test_cap_gate_renders_escaped_continuation_reason_and_runtime_config(
     assert 'var apiEndpoint = "/cap/";' in rendered
     assert 'window.CAP_CUSTOM_WASM_URL = "/cap/assets/cap_wasm.js";' in rendered
     assert 'src="/cap/assets/widget.js"' in rendered
+
+
+@pytest.mark.parametrize(
+    ("authenticated", "undisturbify", "skip_wepp_runs_output"),
+    [
+        (True, False, False),
+        (True, True, True),
+        (False, False, True),
+    ],
+)
+def test_fork_console_renders_exact_auth_cap_and_option_contract(
+    jinja_env: Environment,
+    authenticated: bool,
+    undisturbify: bool,
+    skip_wepp_runs_output: bool,
+) -> None:
+    current_user = SimpleNamespace(
+        is_authenticated=authenticated,
+        has_role=lambda role: False,
+        roles=[],
+    )
+    rendered = jinja_env.overlay(autoescape=True).get_template(
+        "rq-fork-console.htm"
+    ).render(
+        current_user=current_user,
+        user=current_user,
+        runid='source"><img data-injected src=x>',
+        config='cfg"><script>alert(1)</script>',
+        undisturbify=undisturbify,
+        skip_wepp_runs_output=skip_wepp_runs_output,
+        rq_engine_token="<rq-token>" if authenticated else None,
+        cap_base_url="/cap",
+        cap_asset_base_url="/cap/assets",
+        cap_site_key="<site-key>",
+        static_url=lambda path: f"/static/{path}",
+        url_for_run=lambda *args, **kwargs: "/runs/source/cfg",
+    )
+
+    assert '<img data-injected src=x>' not in rendered
+    assert "<script>alert(1)</script>" not in rendered
+    expected_undisturbify = "true" if undisturbify else "false"
+    assert f'data-undisturbify="{expected_undisturbify}"' in rendered
+    expected_skip = "true" if skip_wepp_runs_output else "false"
+    assert f'data-skip-wepp-runs-output="{expected_skip}"' in rendered
+    undisturbify_checked = re.search(
+        r'<input\b[^>]*id="undisturbify_checkbox"[^>]*\bchecked\b',
+        rendered,
+    )
+    skip_checked = re.search(
+        r'<input\b[^>]*id="skip_wepp_runs_output_checkbox"[^>]*\bchecked\b',
+        rendered,
+    )
+    assert bool(undisturbify_checked) is undisturbify
+    assert bool(skip_checked) is skip_wepp_runs_output
+    if authenticated:
+        assert 'data-rq-engine-token="&lt;rq-token&gt;"' in rendered
+        assert 'data-cap-required="false"' in rendered
+        assert 'name="cap_token"' not in rendered
+        assert "/cap/assets/widget.js" not in rendered
+    else:
+        assert 'data-rq-engine-token=""' in rendered
+        assert 'data-cap-required="true"' in rendered
+        assert 'name="cap_token" value="" data-cap-token' in rendered
+        assert 'id="submit_button"' in rendered
+        assert "disabled" in rendered
+        assert "/cap/assets/widget.js" in rendered
+        assert "/cap/assets/floating.js" in rendered
 
 
 def test_interfaces_template_hides_login_bypass_banner_for_authenticated_user(jinja_env: Environment) -> None:

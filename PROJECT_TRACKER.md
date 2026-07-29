@@ -394,6 +394,10 @@ build through job completion before review.
 **Description**: Establish one evidence-backed contract standard and execute an iterative series of bounded work packages to audit every Pure UI controller from rendered fields through JavaScript payloads, route parsing, persistence, RQ behavior, and reload.
 
 **Current Status**:
+- [SURF-04](docs/work-packages/20260729_pure_ui_fork_console_contract/)
+  closed with exact fork defaults/options, CAP/auth submission, scoped recovery,
+  cancellation, authoritative terminal status, worker copy/destination
+  evidence, and a passing security review; no production repair was required.
 - [SURF-01](docs/work-packages/20260729_pure_ui_public_creation_cap_contract/)
   closed with exact public/authenticated/regional/presentation renders, seven
   executable CAPTCHA tests, retained verification/session/rq-engine creation
