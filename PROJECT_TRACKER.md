@@ -394,6 +394,12 @@ build through job completion before review.
 **Description**: Establish one evidence-backed contract standard and execute an iterative series of bounded work packages to audit every Pure UI controller from rendered fields through JavaScript payloads, route parsing, persistence, RQ behavior, and reload.
 
 **Current Status**:
+- [SURF-14](docs/work-packages/20260728_pure_ui_user_profile_session_contract/)
+  closed with direct profile/provider/hostile rendering, actual token
+  mint/copy/fallback/error execution, and retained OAuth, CSRF, token,
+  cookie/session, logout, and Diagnostics evidence. The misowned Dev role
+  mutation was removed and password navigation made proxy-prefix aware;
+  independent correctness and security reviews passed.
 - [SURF-13](docs/work-packages/20260728_pure_ui_security_auth_forms_contract/)
   closed with every security form/email family directly rendered, real
   CAP/password-toggle scripts, retained CSRF/cookie/session/OAuth/logging

@@ -97,6 +97,11 @@ is not a contract registry or enforcement platform.
   form/email family, actual CAP/password-toggle script execution, and retained
   CSRF, cookie/session, OAuth, configuration, and log-redaction evidence;
   independent review passed and no production repair was required.
+- [x] (2026-07-28) Executed SURF-14 with direct profile/provider/hostile
+  rendering, actual token mint/copy/fallback/error execution, and retained
+  OAuth, CSRF, token, cookie/session, logout, and Diagnostics evidence; removed
+  the misowned Dev role mutation, repaired proxy-prefix password navigation,
+  and passed independent correctness/security reviews.
 - [ ] Close the initiative when the registered inventory has executable
   regression coverage or explicit operator-approved exclusions.
 
@@ -149,6 +154,10 @@ is not a contract registry or enforcement platform.
   assert positive field and escaped-value presence; absence-only XSS checks can
   pass when required output disappears.
 
+- Observation: SURF-14 showed that browser-relative links can silently escape
+  the `/weppcloud` deployment prefix and that visible privilege controls must
+  be checked against the owning route's role boundary.
+
 ## Decision Log
 
 ### 2026-07-28: Controller count is inventory
@@ -172,6 +181,12 @@ shared patch. Narrow or defer the shared patch when coverage is unavailable.
 **Decision**: Direct assertions first. Extract a stateless test helper after at
 least two repeated tests. Defer GOV-01 until five controllers show a measured
 miss or repeated burden and the operator explicitly approves a proposal.
+
+### 2026-07-28: Profile is not a role-mutation owner
+
+**Decision**: Keep the user profile read-only and leave role/account mutation
+to the Root-only SURF-15 boundary. Generate security continuations from their
+Flask endpoints so proxy prefixes remain authoritative.
 
 ### 2026-07-28: Autonomous run-domain execution remains serial
 
@@ -444,3 +459,12 @@ frontend lint plus the full 90-suite/673-test frontend sweep passed. The
 one-line production repair makes an explicit Retry mint a fresh token after a
 rejected token promise while retaining one token within an attempt. Independent
 security review passed with zero unresolved findings.
+
+SURF-14 closed with ordinary, privileged, linked-provider, empty, hostile, and
+proxy-prefixed actual renders; real token mint/copy/fallback/error execution;
+and retained OAuth, CSRF, token, cookie/session, logout, and Diagnostics
+evidence. Focused Python passed 70 tests, and frontend lint plus all 96
+suites/695 tests passed; broad Python passed 5,522 tests with 58 skips. The
+profile's Dev-visible PowerUser mutation was removed because its route is
+Root-only and owned by SURF-15; the password link was made proxy-prefix aware.
+Independent correctness/security reviews passed with no unresolved findings.

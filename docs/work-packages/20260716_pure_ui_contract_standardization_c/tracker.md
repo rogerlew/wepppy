@@ -8,11 +8,11 @@
 **Started**: 2026-07-17 00:30 UTC
 **Current phase**: Next package selection pending
 **Last updated**: 2026-07-28 UTC
-**Next milestone**: Select the next unverified registered package.
-**Security impact**: `high` run authorization, CAP, RQ job metadata, worker, and generated artifact
-**Dedicated security review**: `yes` for SHR-05, SURF-07, SURF-08, SURF-09, SURF-11, SURF-13, SURF-16, SURF-17, and SURF-18
+**Next milestone**: Select the next registered package.
+**Security impact**: `high` identity, token, provider, CSRF, and session boundary
+**Dedicated security review**: `yes` for SHR-05, SURF-07, SURF-08, SURF-09, SURF-11, SURF-13, SURF-14, SURF-16, SURF-17, and SURF-18
 **Security artifact**:
-`../20260728_pure_ui_security_auth_forms_contract/artifacts/2026-07-28_security_review.md`
+`../20260728_pure_ui_user_profile_session_contract/artifacts/2026-07-28_security_review.md`
 
 ## Task Board
 
@@ -24,6 +24,7 @@
 
 ### In Progress
 
+- None.
 - [x] Registered and dual-reviewed REM-05 under GOV-00A-M1E without advancing
   DOM-05; checkpoint ancestor
   `44d3b93c8e3bc7d5e89151cbb9677db374411c53`.
@@ -36,6 +37,14 @@
 
 ### Done
 
+- [x] Closed SURF-14 with direct ordinary/privileged/provider/empty/hostile
+  renders, actual token mint/copy/fallback/error execution, and retained OAuth,
+  CSRF, token, cookie/session, logout, and Diagnostics evidence. Removed the
+  misowned Dev role-mutation control and repaired proxy-prefix password
+  navigation. Focused Python passed 70 tests; frontend lint and all 96
+  suites/695 tests passed; broad Python passed 5,522 tests with 58 skips;
+  independent correctness/security reviews passed with no unresolved findings
+  (2026-07-28 UTC).
 - [x] Closed SURF-13 with all material form/email families directly rendered,
   actual CAP/password-toggle scripts executed, and retained CSRF, CAP,
   cookie/session, OAuth, configuration, and redacted-logging evidence. Focused

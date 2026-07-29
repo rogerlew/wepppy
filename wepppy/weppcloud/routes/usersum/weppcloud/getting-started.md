@@ -305,7 +305,10 @@ For administrators, the Actions column also includes **Mint Run Token**, which i
 
 ### Profile and Runs
 
-Quick links to your **user profile** (account settings, API tokens) and your **runs dashboard** (a list of all your projects).
+Quick links to your **user profile** (read-only account details, linked
+providers, password and logout actions, and role-gated API tokens) and your
+**runs dashboard** (a list of all your projects). Role assignments are managed
+by authorized administrators rather than from the profile page.
 
 <!-- ![More menu dropdown](static/getting-started/more-menu.png) -->
 

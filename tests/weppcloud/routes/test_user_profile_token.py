@@ -12,6 +12,8 @@ from werkzeug.exceptions import Forbidden
 
 pytest.importorskip("flask")
 from flask import Blueprint, Flask
+from flask_wtf import CSRFProtect
+from flask_wtf.csrf import CSRFError, generate_csrf
 from flask_security import RoleMixin, SQLAlchemyUserDatastore, Security, UserMixin
 from flask_security.utils import hash_password, login_user
 from flask_sqlalchemy import SQLAlchemy
@@ -168,7 +170,11 @@ def test_rendered_profile_links_to_diagnostics_route(profile_auth_client) -> Non
     )
     with app.test_request_context():
         env.globals.update(
-            url_for=app.jinja_env.globals["url_for"],
+            url_for=lambda endpoint, **values: (
+                "/change"
+                if endpoint == "security.change_password"
+                else app.jinja_env.globals["url_for"](endpoint, **values)
+            ),
             user=user,
             oauth_providers={},
             can_mint_profile_token=False,
@@ -184,6 +190,36 @@ def test_profile_token_mint_requires_login(profile_auth_client) -> None:
     response = client.post("/profile/mint-token")
 
     assert response.status_code == 401
+
+
+def test_profile_token_mint_enforces_csrf_before_role_gate(
+    profile_auth_client,
+) -> None:
+    app = profile_auth_client["app"]
+    client = profile_auth_client["client"]
+    user_id = profile_auth_client["user_id"]
+
+    @app.errorhandler(CSRFError)
+    def handle_csrf_error(error):
+        return {"error": error.description}, 400
+
+    CSRFProtect(app)
+
+    @app.get("/test-csrf")
+    def test_csrf() -> str:
+        return generate_csrf()
+
+    client.get(f"/test-login/{user_id}")
+    missing_csrf = client.post("/profile/mint-token")
+    assert missing_csrf.status_code == 400
+
+    csrf_token = client.get("/test-csrf").get_data(as_text=True)
+    valid_csrf = client.post(
+        "/profile/mint-token",
+        headers={"X-CSRFToken": csrf_token},
+    )
+    assert valid_csrf.status_code == 403
+    assert "requires one of these roles" in valid_csrf.get_json()["error"]["message"]
 
 
 def test_run_token_mint_requires_login(profile_auth_client) -> None:

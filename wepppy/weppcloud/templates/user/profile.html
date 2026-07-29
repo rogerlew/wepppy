@@ -33,7 +33,7 @@ User Profile
     </dl>
 
     <div class="wc-profile__actions">
-      <a class="wc-profile__action" href="../change">Change Password</a>
+      <a class="wc-profile__action" href="{{ url_for('security.change_password') }}">Change Password</a>
       <br>
       <a class="wc-profile__action" href="{{ url_for('security.logout') }}">Logout</a>
     </div>
@@ -317,65 +317,4 @@ document.addEventListener('DOMContentLoaded', function() {
 </script>
   {% endif %}
 
-  {% if user.has_role('Dev') %}
-  <section class="wc-profile-dev">
-    <h3 class="wc-profile__subheading">Developer Settings</h3>
-    <p>Modify PowerUser Role</p>
-    <div class="wc-profile-dev__control">
-      <input type="checkbox"
-             name="usermod_PowerUser_{{ user.id }}"
-             id="usermod_PowerUser_{{ user.id }}"
-             {% if user.has_role('PowerUser') %}checked{% endif %}>
-      <label class="form-check-label" for="usermod_PowerUser_{{ user.id }}">Is PowerUser</label>
-    </div>
-  </section>
-
-<script type="text/javascript">
-document.addEventListener('DOMContentLoaded', function() {
-    function csrfHeaders(baseHeaders) {
-        var headers = Object.assign({}, baseHeaders || {});
-        var meta = document.querySelector('meta[name="csrf-token"]');
-        var token = meta ? String(meta.getAttribute('content') || '').trim() : '';
-        if (token && !headers['X-CSRFToken'] && !headers['X-CSRF-Token']) {
-            headers['X-CSRFToken'] = token;
-        }
-        return headers;
-    }
-
-    document.querySelectorAll("input[name^='usermod_']").forEach(function(input) {
-        input.addEventListener('change', function() {
-            var res = this.name.split("_");
-            console.log(res);
-            var user_id = parseInt(res[2], 10);
-            var role = res[1];
-            var role_state = this.checked;
-
-            fetch("/tasks/usermod/", {
-                method: "POST",
-                headers: csrfHeaders({
-                    "Content-Type": "application/json; charset=utf-8"
-                }),
-                body: JSON.stringify({
-                    user_id: user_id,
-                    role: role,
-                    role_state: role_state
-                })
-            })
-                .then(function(response) {
-                    if (!response.ok) {
-                        throw new Error("Request failed");
-                    }
-                    return response.json();
-                })
-                .then(function(data) {
-                    console.log(data);
-                })
-                .catch(function(error) {
-                    console.log(error);
-                });
-        });
-    });
-});
-</script>
-  {% endif %}
 {% endblock %}
