@@ -2681,9 +2681,7 @@ a.wc-maturity-pill:focus-visible {
 }
 
 .wc-user-preferences__status {
-  min-height: 1.5rem;
   margin-block: var(--wc-space-md);
-  color: var(--wc-color-text-muted);
 }
 
 .wc-user-preferences__error {

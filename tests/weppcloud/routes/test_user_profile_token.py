@@ -189,6 +189,8 @@ def test_preferences_get_renders_exact_choices(profile_auth_client, monkeypatch)
     assert "changes display units for you only" in body
     assert "choose a different outlet or enlarge the project extent" in body
     assert 'data-user-preferences-status' in body
+    assert 'data-user-preferences-status-message' in body
+    assert 'wc-alert--info wc-user-preferences__status' in body
     assert 'data-user-preferences-error' in body
     assert 'class="wc-user-preferences__fields"' in body
     assert 'src="/static/js/user_preferences.js"' in body

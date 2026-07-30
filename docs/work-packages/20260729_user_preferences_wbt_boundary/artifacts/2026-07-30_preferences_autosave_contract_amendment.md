@@ -22,6 +22,9 @@ all project nonmutation rules remain unchanged.
 - The page exposes a persistent polite live region. It announces
   `Saving preferences…` while a save is active and `Preferences saved.` after
   the latest selection is confirmed.
+- Confirmed success uses the standard prominent success-alert treatment,
+  rather than muted helper text. The text remains in the polite live region
+  so confirmation is both visually salient and announced.
 - A failed save exposes a visible assertive error message and leaves the
   person's current selection available for correction or retry. It must not
   claim that unsaved values succeeded.

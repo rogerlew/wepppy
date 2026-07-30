@@ -15,6 +15,9 @@
             )
         );
         var status = form.querySelector("[data-user-preferences-status]");
+        var statusMessage = form.querySelector(
+            "[data-user-preferences-status-message]"
+        );
         var error = form.querySelector("[data-user-preferences-error]");
         var errorMessage = form.querySelector(
             "[data-user-preferences-error-message]"
@@ -23,14 +26,30 @@
         var saving = false;
         var pending = false;
 
-        if (fields.length !== 2 || !status || !error || !errorMessage || !retry) {
+        if (
+            fields.length !== 2 ||
+            !status ||
+            !statusMessage ||
+            !error ||
+            !errorMessage ||
+            !retry
+        ) {
             return;
         }
 
         form.dataset.userPreferencesReady = "true";
 
+        function showStatus(message, kind) {
+            status.className = (
+                "wc-alert wc-alert--" + kind +
+                " wc-user-preferences__status"
+            );
+            statusMessage.textContent = message;
+            status.hidden = false;
+        }
+
         function showError(message) {
-            status.textContent = "";
+            status.hidden = true;
             errorMessage.textContent = message;
             error.hidden = false;
         }
@@ -50,7 +69,7 @@
             pending = false;
             clearError();
             form.setAttribute("aria-busy", "true");
-            status.textContent = "Saving preferences…";
+            showStatus("Saving preferences…", "info");
 
             try {
                 var response = await window.fetch(form.action, {
@@ -71,7 +90,10 @@
                         "Preferences could not be saved. Try again."
                     );
                 }
-                status.textContent = payload.message || "Preferences saved.";
+                showStatus(
+                    payload.message || "Preferences saved.",
+                    "success"
+                );
             } catch (requestError) {
                 showError(
                     requestError && requestError.message

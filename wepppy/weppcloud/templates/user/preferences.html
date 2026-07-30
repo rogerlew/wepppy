@@ -53,11 +53,15 @@
       ) }}
     </div>
 
-    <p class="wc-user-preferences__status"
-       data-user-preferences-status
-       role="status"
-       aria-live="polite"
-       aria-atomic="true">Changes save automatically.</p>
+    <div class="wc-alert wc-alert--info wc-user-preferences__status"
+         data-user-preferences-status
+         role="status"
+         aria-live="polite"
+         aria-atomic="true"
+         hidden>
+      <p class="wc-alert__body"
+         data-user-preferences-status-message>Changes save automatically.</p>
+    </div>
     <div class="wc-user-preferences__error"
          data-user-preferences-error
          role="alert"

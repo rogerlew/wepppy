@@ -231,6 +231,10 @@ enlarge the project extent.
   1,253 WEPPcloud Python tests, frontend lint, all 105 frontend suites and 748
   tests, test-stub completeness, Usersum validation, documentation lint,
   broad-exception enforcement, and diff checks.
+- [x] (2026-07-30 15:40 UTC) Restored salient save confirmation by promoting
+  the live save status to the standard informational alert while active and
+  the standard success alert when confirmed. Focused template tests,
+  frontend lint, and all 105 frontend suites with 749 tests pass.
 
 ## Surprises & Discoveries
 
@@ -380,6 +384,13 @@ enlarge the project extent.
   Rationale: the behavior is an intentional typed guard, not an uncontrolled
   crash.
   Date/Author: 2026-07-30 / requesting operator.
+
+- Decision: Present confirmed auto-saves with the standard success alert,
+  while retaining the polite live-region announcement.
+  Rationale: muted helper text made confirmation too easy to miss; the alert
+  restores the salience of the prior save feedback without reintroducing a
+  manual Save button.
+  Date/Author: 2026-07-30 / requesting operator and Codex.
 
 - Superseded decision: Use explicit creation input > account preference >
   project config.

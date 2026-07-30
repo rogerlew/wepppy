@@ -347,8 +347,19 @@ config or explicit user preference can choose fail-closed handling.
   accessible save/error/retry feedback, increased field spacing, current
   guidance, and the repaired WBT Usersum runtime-catalog entry
   (2026-07-30 15:38 UTC).
+- [x] Restored salient save feedback with the standard informational and
+  success alert treatments while retaining polite live announcements
+  (2026-07-30 15:40 UTC).
 
 ## Progress Notes
+
+### 2026-07-30 15:40 UTC: Salient save confirmation
+
+The muted status line was too easy to miss. Saving now reveals the standard
+informational alert, and confirmation promotes the same live region to the
+standard success alert with `Preferences saved.` Error and retry behavior are
+unchanged. Focused template tests, frontend lint, and all 105 frontend suites
+with 749 tests pass.
 
 ### 2026-07-30 15:38 UTC: Preference auto-save and Usersum repair
 

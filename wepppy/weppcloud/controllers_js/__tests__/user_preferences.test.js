@@ -40,7 +40,13 @@ describe("user preferences auto-save", () => {
               <option value="warn">Warn</option>
               <option value="error">Error</option>
             </select>
-            <p data-user-preferences-status>Changes save automatically.</p>
+            <div class="wc-alert wc-alert--info wc-user-preferences__status"
+                 data-user-preferences-status hidden>
+              <p class="wc-alert__body"
+                 data-user-preferences-status-message>
+                Changes save automatically.
+              </p>
+            </div>
             <div data-user-preferences-error hidden>
               <span data-user-preferences-error-message></span>
               <button type="button" data-user-preferences-retry>Retry</button>
@@ -70,8 +76,13 @@ describe("user preferences auto-save", () => {
 
         expect(document.querySelector("form").getAttribute("aria-busy"))
             .toBe("true");
+        var status = document.querySelector("[data-user-preferences-status]");
+        expect(status.hidden).toBe(false);
+        expect(status.classList.contains("wc-alert--info")).toBe(true);
         expect(
-            document.querySelector("[data-user-preferences-status]").textContent
+            document.querySelector(
+                "[data-user-preferences-status-message]"
+            ).textContent
         ).toBe("Saving preferences…");
 
         await flushPromises();
@@ -84,8 +95,11 @@ describe("user preferences auto-save", () => {
         expect(request[1].body.get("unit_system")).toBe("si");
         expect(request[1].body.get("wbt_boundary_touch_behavior"))
             .toBe("config");
+        expect(status.classList.contains("wc-alert--success")).toBe(true);
         expect(
-            document.querySelector("[data-user-preferences-status]").textContent
+            document.querySelector(
+                "[data-user-preferences-status-message]"
+            ).textContent
         ).toBe("Preferences saved.");
         expect(document.querySelector("form").hasAttribute("aria-busy"))
             .toBe(false);
@@ -136,7 +150,9 @@ describe("user preferences auto-save", () => {
         await flushPromises();
 
         var error = document.querySelector("[data-user-preferences-error]");
+        var status = document.querySelector("[data-user-preferences-status]");
         expect(error.hidden).toBe(false);
+        expect(status.hidden).toBe(true);
         expect(error.textContent).toContain("Could not save preferences.");
 
         document.querySelector("[data-user-preferences-retry]").click();
