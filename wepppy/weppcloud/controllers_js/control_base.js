@@ -979,7 +979,12 @@ function controlBase() {
 
             const errorMessage = resolveErrorMessage(response);
             if (errorMessage !== null && errorMessage !== undefined) {
-                appendHtml(self.stacktrace, "<h6>" + escapeHtml(String(errorMessage)) + "</h6>");
+                appendHtml(
+                    self.stacktrace,
+                    '<h6 class="wc-stacktrace__message">'
+                        + escapeHtml(String(errorMessage))
+                        + "</h6>"
+                );
             }
 
             const stackLines = resolveStacktrace(response);

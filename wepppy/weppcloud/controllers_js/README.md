@@ -161,7 +161,8 @@ Bundled modules remain global so legacy controllers can incrementally migrate aw
   instructional summary, with the correlation `error_id` when present.
   `controlBase` and `StatusStream` do not substitute a raw traceback for that
   guidance; ordinary unstructured failures retain the existing stacktrace
-  behavior.
+  behavior. Instructional messages use `.wc-stacktrace__message` so they wrap
+  inside the otherwise preformatted stacktrace body.
 - Together, these two components are the contract for any control that launches asynchronous work: provide the DOM IDs, call `set_rq_job_id`, and the infrastructure handles the rest.
 - Controllers with domain-specific active-task latches (for example multi-action queue buttons) must treat bootstrap job IDs as hints only and reconcile stale local latches against authoritative server status before blocking user actions.
 - The Project controller applies the same contract when readonly toggles queue `set_run_readonly_rq`; the worker now pushes human-readable updates to `<runid>:command`, which the command bar consumes directly to surface messages such as `manifest.db creation finished` without extra wiring.

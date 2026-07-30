@@ -2165,6 +2165,12 @@ a.wc-maturity-pill:focus-visible {
   white-space: pre;
 }
 
+.wc-stacktrace__message {
+  font-family: var(--wc-font-sans);
+  white-space: normal;
+  overflow-wrap: anywhere;
+}
+
 .wc-run-layout {
   display: grid;
   gap: var(--wc-space-xl);

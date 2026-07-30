@@ -7,7 +7,7 @@
 **Timezone**: UTC
 **Started**: 2026-07-30 17:11 UTC
 **Current phase**: Validation / rollout handoff
-**Last updated**: 2026-07-30 17:37 UTC
+**Last updated**: 2026-07-30 18:10 UTC
 **Next milestone**: Deploy WEPPpy and WBT together to Forest for a canary
 **Security impact**: `low`
 **Dedicated security review**: `no`
@@ -63,6 +63,9 @@
   no canonical output (2026-07-30 17:37 UTC).
 - [x] Targeted pytest passed (83 tests), full Jest passed (750 tests), ESLint
   passed, and test-stub validation passed (2026-07-30 17:37 UTC).
+- [x] Corrected controlled guidance wrapping inside the preformatted
+  stacktrace container; targeted frontend and CSS tests pass
+  (2026-07-30 18:10 UTC).
 
 ## Decisions Log
 
@@ -205,6 +208,14 @@ change parameters or algorithms.
 
 - Repeated broad pytest passed: 5,745 passed, 58 skipped, 1,024 warnings in
   639.07 seconds.
+
+### 2026-07-30 18:10 UTC: Instructional summary wrapping follow-up
+
+The live controlled message exposed that the outer stacktrace body is a
+`<pre>` with `white-space: pre`, causing the long guidance to render on one
+line. Controlled/error headings now use `.wc-stacktrace__message`, which
+restores normal wrapping and permits long identifiers to break without
+changing nested traceback formatting.
 
 ## Watch List
 

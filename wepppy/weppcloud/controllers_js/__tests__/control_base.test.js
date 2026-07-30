@@ -251,6 +251,9 @@ describe("controlBase job status error handling", () => {
         );
         expect(document.getElementById("info").textContent).toContain("controlled-123");
         expect(document.getElementById("stacktrace").textContent).not.toContain("Traceback");
+        expect(
+            document.querySelector("#stacktrace .wc-stacktrace__message")
+        ).not.toBeNull();
     });
 
     test("pushResponseStacktrace links clearing-lock docs with site prefix from url_for_run", () => {

@@ -300,3 +300,8 @@ guidance without using a traceback as the primary summary.
 The WBT source and runtime commits are pushed. WEPPpy deployment and the
 post-deployment observation window remain operator handoff items; this
 execution did not mutate Forest or production.
+
+A live controlled failure subsequently revealed that the instructional
+heading inherited `white-space: pre` from the stacktrace container. The
+heading now carries a dedicated wrapping class; ordinary traceback blocks
+remain preformatted.
