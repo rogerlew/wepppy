@@ -255,7 +255,8 @@ def clear_locks(runid, config):
     return success_factory()
 
 
-@project_bp.route('/runs/<string:runid>/<config>/tasks/clear_nodb_cache')
+@project_bp.route('/runs/<string:runid>/<config>/tasks/clear_nodb_cache', methods=['POST'])
+@roles_accepted('Admin', 'Root', 'PowerUser')
 @authorize_and_handle_with_exception_factory
 def clear_nodb_cache(runid, config):
     """Clear cached NoDb payloads for the active run."""

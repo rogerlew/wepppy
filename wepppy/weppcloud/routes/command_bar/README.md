@@ -14,8 +14,18 @@ The command bar provides a keyboard-driven palette for common actions on project
   3. Update `SET_HELP_LINES` or other user-facing help text so `:help` remains accurate.
   4. Register a Flask endpoint (usually under `command_bar_bp`) that responds with `{ Content?: {...} }` for success or `{ error: { message, code?, details? }, errors?: [...] }` for failures and wire it into the handler.
 - **Routes** – Network-backed actions expect `projectBaseUrl = /runs/<runid>/<config>/`. Concatenate the relative path (for example `command_bar/loglevel`) to reach the matching backend endpoint.
-- **Lock Ops** – `get locks` reports NoDb file locks, `get directory_locks` reports runtime directory locks, `clear locks` clears NoDb locks, and `clear directory_locks` clears runtime Redis directory locks.
-- **Query Engine Tokens** – The `get query_engine_mcp_token` command calls `command_bar_bp.issue_query_engine_mcp_token`. The handler uses `weppcloud.utils.auth_tokens.issue_token` to mint a run-scoped JWT (scopes: `runs:read`, `queries:validate`, `queries:execute`). The response includes expiration, suggested workflows (ChatGPT Custom GPT, Gemini Extension, Claude tool use), and instructions to send the token as `Authorization: Bearer <token>`. The generated `_query_engine/mcp_integration_instructions.md` file stores setup steps but redacts the token so it is not persisted to disk. Ensure `WEPP_AUTH_JWT_SECRET` is set in the environment; otherwise the endpoint returns a configuration error.
+- **Lock Ops** - `get locks` reports NoDb file locks and
+  `get directory_locks` reports runtime directory locks. `clear locks`,
+  `clear nodb_cache`, and `clear directory_locks` are
+  PowerUser/Admin/Root-only POST operations. Raw browser mutations use
+  same-origin credentials and the rendered CSRF token.
+- **Query Engine Tokens** - The authenticated, run-authorized
+  `get query_engine_mcp_token` command calls
+  `command_bar_bp.issue_query_engine_mcp_token`. The handler uses
+  `weppcloud.utils.auth_tokens.issue_token` to mint a run-scoped JWT with the
+  documented query scopes. The generated
+  `_query_engine/mcp_integration_instructions.md` stores setup steps but
+  redacts the token so it is not persisted to disk.
 
 ## `data-usersum` Hover Previews
 - The browse blueprint (and any other renderer) can wrap parameter names in `<span data-usersum="<parameter>">` to opt into hover previews.
@@ -25,5 +35,6 @@ The command bar provides a keyboard-driven palette for common actions on project
 
 ## Shared Tips
 - Use `commandBar.showResult()` to surface diagnostic messages in the output panel instead of `alert()` or console logging.
-- When adding network traffic, prefer `fetch()` with `{ cache: 'no-store' }` and consistent JSON responses so UI handlers stay predictable.
+- Browser-session mutations must use same-origin credentials and
+  `csrfHeaders(...)`; safe GET requests may use `cache: 'no-store'`.
 - If a command should remain active (e.g., toggling a mode that expects further input), add its verb to `STAY_ACTIVE_COMMANDS` to keep the palette open after execution.

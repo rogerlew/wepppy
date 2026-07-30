@@ -429,6 +429,12 @@ build through job completion before review.
 **Description**: Establish one evidence-backed contract standard and execute an iterative series of bounded work packages to audit every Pure UI controller from rendered fields through JavaScript payloads, route parsing, persistence, RQ behavior, and reload.
 
 **Current Status**:
+- [SHR-06](docs/work-packages/20260729_pure_ui_command_bar_contract/)
+  closed with direct keyboard/history/request, privileged recovery, MCP
+  secrecy, Wojak/StatusStream, and hostile-content evidence; repaired
+  authority, CSRF, and sanitization contradictions, passed all 104 frontend
+  suites/739 tests and 5,570 repository Python tests, and passed security
+  review.
 - [SHR-07](docs/work-packages/20260729_pure_ui_poweruser_panel_contract/)
   closed with privileged render/action parity, POST-only role-protected lock
   recovery, recorder role alignment, idempotent run-token minting,

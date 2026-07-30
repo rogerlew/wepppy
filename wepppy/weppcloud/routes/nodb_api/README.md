@@ -213,7 +213,7 @@ Each blueprint section below documents:
 | Route | Methods | NoDb interactions | Notes |
 | --- | --- | --- | --- |
 | `/runs/<string:runid>/<config>/tasks/clear_locks` | `POST` | NoDbBase.clear_locks | PowerUser/Admin/Root-only mutation; calls `wepppy.nodb.base.clear_locks()` after loading run context |
-| `/runs/<string:runid>/<config>/tasks/clear_nodb_cache` | `GET` | NoDbBase.clear_nodb_file_cache | Clears cached `.nodb` payloads via `clear_nodb_file_cache()` |
+| `/runs/<string:runid>/<config>/tasks/clear_nodb_cache` | `POST` | NoDbBase.clear_nodb_file_cache | PowerUser/Admin/Root-only; clears cached `.nodb` payloads |
 | `/runs/<string:runid>/<config>/tasks/delete[/]` | `POST` | Ron.readonly | Deletes working directory then removes run from user datastore |
 | `/runs/<string:runid>/<config>/meta/subcatchments.WGS.json[/]` | `GET` | Ron.export_dir | Runs `wepppy.export.arc_export` before streaming GeoJSON |
 | `/runs/<string:runid>/<config>/tasks/adduser[/]` | `POST` | — | — |

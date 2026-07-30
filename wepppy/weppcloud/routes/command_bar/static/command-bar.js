@@ -363,8 +363,32 @@
                 doc.querySelectorAll('script, style, iframe, object, embed, link, meta, form').forEach((node) => node.remove());
                 doc.body.querySelectorAll('*').forEach((element) => {
                     [...element.attributes].forEach((attr) => {
-                        if (attr.name && attr.name.startsWith('on')) {
+                        if (attr.name && (
+                            attr.name.startsWith('on')
+                            || attr.name === 'style'
+                            || attr.name === 'srcdoc'
+                            || attr.name === 'ping'
+                        )) {
                             element.removeAttribute(attr.name);
+                        }
+                    });
+                    ['href', 'src', 'action', 'formaction', 'xlink:href'].forEach((attributeName) => {
+                        const value = element.getAttribute(attributeName);
+                        if (!value) {
+                            return;
+                        }
+                        let protocol = '';
+                        try {
+                            protocol = new URL(value, window.location.href).protocol.toLowerCase();
+                        } catch {
+                            element.removeAttribute(attributeName);
+                            return;
+                        }
+                        const isAllowedProtocol = protocol === 'http:'
+                            || protocol === 'https:'
+                            || (attributeName === 'href' && protocol === 'mailto:');
+                        if (!isAllowedProtocol) {
+                            element.removeAttribute(attributeName);
                         }
                     });
                     if (element.tagName === 'A') {
@@ -472,9 +496,10 @@
             try {
                 const response = await fetch(this.buildRunUrl('agent/chat'), {
                     method: 'POST',
-                    headers: {
+                    credentials: 'same-origin',
+                    headers: csrfHeaders({
                         'Content-Type': 'application/json'
-                    },
+                    }),
                     body: JSON.stringify({})
                 });
                 const payload = await this.parseResponse(response);
@@ -523,9 +548,10 @@
             try {
                 const response = await fetch(this.buildRunUrl(`agent/chat/${encodeURIComponent(this.sessionData.session_id)}`), {
                     method: 'POST',
-                    headers: {
+                    credentials: 'same-origin',
+                    headers: csrfHeaders({
                         'Content-Type': 'application/json'
-                    },
+                    }),
                     body: JSON.stringify({ message })
                 });
                 await this.parseResponse(response);
@@ -731,7 +757,9 @@
             this.stopButton.disabled = true;
             try {
                 const response = await fetch(this.buildRunUrl(`agent/chat/${encodeURIComponent(this.sessionData.session_id)}`), {
-                    method: 'DELETE'
+                    method: 'DELETE',
+                    credentials: 'same-origin',
+                    headers: csrfHeaders()
                 });
                 await this.parseResponse(response);
                 this.setStatus('Wojak session terminated.');
@@ -1740,9 +1768,9 @@
             const targetUrl = this.projectBaseUrl + 'command_bar/clear_directory_locks';
 
             return fetch(targetUrl, {
-                method: 'GET',
-                cache: 'no-store',
-                headers: { 'Accept': 'application/json' }
+                method: 'POST',
+                credentials: 'same-origin',
+                headers: csrfHeaders({ 'Accept': 'application/json' })
             })
                 .then((response) => response.json().catch(() => ({})).then((data) => ({ response, data })))
                 .then(({ response, data }) => {
@@ -1781,7 +1809,11 @@
             }
             const targetUrl = this.projectBaseUrl + 'tasks/clear_nodb_cache';
 
-            return fetch(targetUrl, { method: 'GET', cache: 'no-store', headers: { 'Accept': 'application/json' } })
+            return fetch(targetUrl, {
+                method: 'POST',
+                credentials: 'same-origin',
+                headers: csrfHeaders({ 'Accept': 'application/json' })
+            })
                 .then((response) => response.json().catch(() => ({})).then((data) => ({ response, data })))
                 .then(({ response, data }) => {
                     if (!response.ok || hasErrorPayload(data)) {
@@ -2334,10 +2366,11 @@
             return fetch(targetUrl, {
                 method: 'POST',
                 cache: 'no-store',
-                headers: {
+                credentials: 'same-origin',
+                headers: csrfHeaders({
                     'Accept': 'application/json',
                     'Content-Type': 'application/json'
-                },
+                }),
                 body: JSON.stringify({})
             })
                 .then((response) => response.json().catch(() => ({})).then((data) => ({ response, data })))
@@ -2375,10 +2408,11 @@
             return fetch(targetUrl, {
                 method: 'POST',
                 cache: 'no-store',
-                headers: {
+                credentials: 'same-origin',
+                headers: csrfHeaders({
                     'Content-Type': 'application/json',
                     'Accept': 'application/json'
-                },
+                }),
                 body: JSON.stringify(payload)
             }).then((response) => response.json().catch(() => ({})).then((data) => ({ response, data })))
                 .then(({ response, data }) => {
@@ -2622,10 +2656,11 @@
             const targetUrl = `${this.projectBaseUrl}command_bar/loglevel`;
             return fetch(targetUrl, {
                 method: 'POST',
-                headers: {
+                credentials: 'same-origin',
+                headers: csrfHeaders({
                     'Content-Type': 'application/json',
                     'Accept': 'application/json'
-                },
+                }),
                 body: JSON.stringify({ level })
             }).then((response) => {
                 if (!response.ok) {

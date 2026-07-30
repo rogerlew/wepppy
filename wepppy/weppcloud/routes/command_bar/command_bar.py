@@ -48,11 +48,30 @@ command_bar_bp = Blueprint(
 )
 
 _ALLOWED_LEVELS = {level.name.lower(): level for level in LogLevel}
+_PRIVILEGED_ROLES = ("PowerUser", "Admin", "Root")
+
+
+def _authenticated_user_error():
+    if not bool(getattr(current_user, "is_authenticated", False)):
+        return jsonify({'error': {'message': 'Authentication is required.'}}), 403
+    return None
+
+
+def _privileged_user_error():
+    authentication_error = _authenticated_user_error()
+    if authentication_error is not None:
+        return authentication_error
+    if not any(current_user.has_role(role) for role in _PRIVILEGED_ROLES):
+        return jsonify({'error': {'message': 'PowerUser, Admin, or Root role is required.'}}), 403
+    return None
 
 
 @command_bar_bp.route('/runs/<string:runid>/<config>/command_bar/loglevel', methods=['POST'])
 def set_log_level(runid, config):
     authorize(runid, config)
+    authorization_error = _privileged_user_error()
+    if authorization_error is not None:
+        return authorization_error
     load_run_context(runid, config)
 
     payload = request.get_json(silent=True) or {}
@@ -146,9 +165,12 @@ def get_directory_lock_statuses(runid, config):
     })
 
 
-@command_bar_bp.route('/runs/<string:runid>/<config>/command_bar/clear_directory_locks', methods=['GET'])
+@command_bar_bp.route('/runs/<string:runid>/<config>/command_bar/clear_directory_locks', methods=['POST'])
 def clear_directory_lock_statuses(runid, config):
     authorize(runid, config)
+    authorization_error = _privileged_user_error()
+    if authorization_error is not None:
+        return authorization_error
     load_run_context(runid, config)
 
     try:
@@ -226,6 +248,9 @@ def _build_mcp_markdown(
 @command_bar_bp.route('/runs/<string:runid>/<config>/command_bar/query_engine_mcp_token', methods=['POST'])
 def issue_query_engine_mcp_token(runid, config):
     authorize(runid, config)
+    authentication_error = _authenticated_user_error()
+    if authentication_error is not None:
+        return authentication_error
     context = load_run_context(runid, config)
 
     subject = None

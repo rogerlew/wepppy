@@ -215,6 +215,7 @@ def test_readme_view_renders_permission_aware_action_and_safe_html(
     assert ">Edit</a>" in rendered
     assert "Named run" in rendered
     assert "Scenario" in rendered
+    assert rendered.count('data-command-bar') == 1
 
     view_only = jinja_env.get_template("readme_view.htm").render(
         readme_html="<p>View only</p>",
@@ -3890,6 +3891,37 @@ def test_placeholder_only_controls_have_explicit_accessible_names() -> None:
     assert 'aria-label="Run ID to compare"' in browse_directory_source
     assert 'id="runIdInput"' in browse_not_found_source
     assert 'aria-label="Run ID to compare"' in browse_not_found_source
+
+
+def test_command_bar_template_renders_one_initialized_accessible_owner(
+    jinja_env: Environment,
+) -> None:
+    rendered = jinja_env.get_template("command-bar.htm").render()
+    source = (COMMAND_BAR_TEMPLATE_ROOT / "command-bar.htm").read_text(encoding="utf-8")
+
+    assert rendered.count('data-command-bar') == 1
+    assert rendered.count('data-command-input') == 2
+    assert source.count("command-bar.js") == 1
+    assert rendered.count("window.initializeCommandBar();") == 1
+    assert 'aria-label="Command bar input"' in rendered
+    assert 'aria-label="Wojak chat input"' in rendered
+
+
+def test_agent_routes_retain_login_and_exact_run_authorization() -> None:
+    source = (
+        REPO_ROOT / "wepppy/weppcloud/routes/agent.py"
+    ).read_text(encoding="utf-8")
+
+    for route in (
+        '@agent_bp.route("/runs/<runid>/<config>/agent/chat", methods=["POST"])',
+        '@agent_bp.route("/runs/<runid>/<config>/agent/chat/<session_id>", methods=["POST"])',
+        '@agent_bp.route("/runs/<runid>/<config>/agent/chat/<session_id>", methods=["DELETE"])',
+    ):
+        route_index = source.index(route)
+        function_index = source.index("\ndef ", route_index)
+        decorators = source[route_index:function_index]
+        assert "@login_required" in decorators
+        assert "@authorize_and_handle_with_exception_factory" in decorators
 
 
 def test_standalone_templates_include_lang_and_iframe_titles() -> None:

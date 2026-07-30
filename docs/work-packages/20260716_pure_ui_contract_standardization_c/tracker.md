@@ -10,7 +10,7 @@
 **Last updated**: 2026-07-29 UTC
 **Next milestone**: Select the next dependency-ready registered package.
 **Security impact**: `none` for documentation-only parent reconciliation
-**Dedicated security review**: `yes` for SHR-05, SURF-01, SURF-03, SURF-04, SURF-05, SURF-06, SURF-07, SURF-08, SURF-09, SURF-10, SURF-11, SURF-13, SURF-14, SURF-15, SURF-16, SURF-17, and SURF-18
+**Dedicated security review**: `yes` for SHR-05, SHR-06, SURF-01, SURF-03, SURF-04, SURF-05, SURF-06, SURF-07, SURF-08, SURF-09, SURF-10, SURF-11, SURF-13, SURF-14, SURF-15, SURF-16, SURF-17, and SURF-18
 **Security artifact**:
 `../20260728_pure_ui_runs_catalog_contract/artifacts/2026-07-28_security_review.md`
 
@@ -36,6 +36,15 @@
 
 ### Done
 
+- [x] Closed SHR-06 with one initialized Command Bar, direct keyboard/history,
+  exact CSRF request, privileged recovery, MCP secrecy, agent lifecycle,
+  StatusStream teardown, and hostile-content evidence. Repaired destructive
+  GET and role boundaries, anonymous token issuance, raw mutation CSRF,
+  log-level authority, and unsafe Markdown URLs/attributes. Focused Python
+  passed 198 tests, focused shared Jest passed 5 suites/40 tests, frontend lint
+  and all 104 suites/739 tests passed, repository Python passed 5,570 tests and
+  12 subtests with 58 skips, and security review passed with no unresolved
+  finding (2026-07-29 UTC).
 - [x] Closed SURF-05 with exact Admin rendering, eight direct real-controller
   tests, and retained token, dependent-enqueue, status, migration, worker,
   provenance, and filesystem evidence. Repaired duplicate submission during
@@ -316,7 +325,7 @@ is active at a time.
 | GOV-00A | Concise controller test convention | 1 | closed | Review passed |
 | DOM-01..DOM-29 (including A-D facets) | Run-domain controller packages | 39 | all verified | Review completed production patches |
 | GOV-01 | Maintenance-tooling value evaluation | 1 | deferred pending five-controller evidence | Explicit operator approval |
-| SHR-01..SHR-07 (including A/B facets) | Shared-foundation inventory | 9 | SHR-04A, SHR-04B, SHR-05, and SHR-07 verified; remainder deferred | Based on actual shared patch |
+| SHR-01..SHR-07 (including A/B facets) | Shared-foundation inventory | 9 | SHR-04A, SHR-04B, SHR-05, SHR-06, and SHR-07 verified; remainder deferred | Based on actual shared patch |
 | SURF-01..SURF-18 (including A/B facets) | Non-run/stateful Pure surfaces | 19 | SURF-01 and listed peers verified; remainder backlog | Review actual production patches |
 | GOV-99 | Authority cutover and closeout | 1 | planned | Two independent final reviews |
 | REM-01..REM-05 | Bounded defect remediations | 5 | mixed | Two independent reviews each |
@@ -326,6 +335,11 @@ packages are verified. GOV-00 remains the umbrella for separately registered
 shared, surface, governance, and remediation inventory; GOV-00A is closed,
 REM-01 and REM-02 are complete, and REM-03 through REM-05 retain their recorded
 states. Shared packages are not prerequisites, and GOV-01 has no scaffold.
+
+SHR-06 is verified with direct Command Bar lifecycle, command, request, MCP,
+agent, StatusStream, and hostile-content evidence; minimal authority, CSRF, and
+sanitization repairs; full frontend/Python validation; and a passing security
+review (2026-07-29 UTC).
 
 SHR-07 is verified with privileged render/action parity, POST-only
 role-protected lock recovery, finite-consumer propagation, side-effect-free

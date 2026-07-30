@@ -135,7 +135,7 @@ revisions are retained as controller-iteration evidence.
 | Pure bases/macros | SHR-04A | every direct/transitive Pure template | direct base/shell/field/choice/card/tab/table/slot/scale renders plus completed DOM consumers; 105 passed; no production mismatch | contractual | verified |
 | `modal.js`, `details_menu.js`, `theme.js`, `console_utils.js` | SHR-04B | run modals, Browse/README hosts, Archive/Fork consoles | direct state/focus/menu/theme/config/duplicate-load Jest plus console/table/modal/theme renders; duplicate-init and table-caller repairs | contractual | verified |
 | `unitizer_client.js` + generated map | SHR-05 | modal, Project, reports, Geneva | direct render/client/map/Project/route/NoDb evidence; selector/event-owner repairs | contractual | verified |
-| Command Bar scripts/templates | SHR-06 | run and Browse/README hosts | WebSocket/token/command evidence; high | contractual | unverified |
+| Command Bar scripts/templates | SHR-06 | run and Browse/README hosts | one direct complete-client case + 198 focused Python + 40 shared Jest; authority/request/hostile-content repairs; high review passed | contractual | verified |
 | PowerUser scripts/templates | SHR-07 | privileged run header | 187 render/route + 34 focused Jest + 29 retained backend; role/POST/side-effect repairs; high review passed | contractual | verified |
 | `batch_runner.js` | SURF-02A | Batch create/manage roots; SURF-02B consumes the producer contract for execution | `J/batch_runner.test.js`; high | contractual | unverified |
 | `run_sync_dashboard.js` | SURF-05 | Run Sync root | exact Admin render plus 8 direct client, 166 render/route, and 10 API/RQ tests; duplicate submission repaired; high review passed | contractual | verified |

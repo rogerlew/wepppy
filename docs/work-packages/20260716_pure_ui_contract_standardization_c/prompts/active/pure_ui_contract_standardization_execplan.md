@@ -83,6 +83,9 @@ is not a contract registry or enforcement platform.
   POST-only role-protected lock recovery, absent-notification no-op behavior,
   idempotent token ownership, complete frontend/Python validation, and a
   passing security review.
+- [x] (2026-07-29) Executed SHR-06 with direct Command Bar lifecycle, keyboard,
+  request, MCP, agent, StatusStream, and hostile-content evidence; repaired
+  authority, CSRF, and sanitization contradictions and passed security review.
 - [x] (2026-07-28) Executed SURF-11 with direct Geneva summary rendering,
   controller lifecycle, route/service/map/Unitizer evidence, and independent
   security review; no production repair was retained.
@@ -191,6 +194,10 @@ is not a contract registry or enforcement platform.
 - Observation: SHR-05 found source/generated selector drift and duplicate
   legacy event ownership that could race preference persistence; direct
   rendering plus single-dispatch tests exposed both without changing units.
+
+- Observation: SHR-06 found that a viewer-visible shared command surface
+  crossed several backend boundaries whose role, method, CSRF, token, and
+  content-sanitization controls must be asserted together.
 
 - Observation: SURF-11's independent review caught a proposed second
   initialization owner that direct template-string inspection could not see.
