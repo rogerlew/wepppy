@@ -27,8 +27,11 @@ def test_anchor_primary_pure_buttons_use_theme_variables() -> None:
 def test_controlled_error_summary_separates_message_and_metadata() -> None:
     css = UI_FOUNDATION_CSS.read_text(encoding="utf-8")
 
+    assert ".wc-control__error-card" in css
+    assert "background: var(--wc-error-bg)" in css
     assert ".wc-control__error-summary" in css
     assert ".wc-control__error-meta" in css
     assert "flex-wrap: wrap" in css
     assert ".wc-control__error-meta dd" in css
     assert "overflow-wrap: anywhere" in css
+    assert ".wc-control__error-id" in css

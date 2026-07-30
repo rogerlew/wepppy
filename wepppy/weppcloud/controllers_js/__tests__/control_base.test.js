@@ -245,6 +245,10 @@ describe("controlBase job status error handling", () => {
             "/rq-engine/api/jobinfo/job-controlled",
             { params: undefined }
         );
+        expect(
+            document.querySelector("#info .wc-control__error-card")
+                .getAttribute("role")
+        ).toBe("alert");
         expect(document.getElementById("info").textContent).toContain(guidance);
         const metadataItems = Array.from(
             document.querySelectorAll("#info .wc-control__error-meta-item")
@@ -254,6 +258,9 @@ describe("controlBase job status error handling", () => {
             "Unresolved depressions3",
             "Error IDcontrolled-123"
         ]);
+        expect(
+            document.querySelector("#info .wc-control__error-id").textContent
+        ).toBe("controlled-123");
         expect(document.getElementById("stacktrace").textContent).toBe("");
         expect(document.getElementById("stacktrace").hidden).toBe(true);
     });

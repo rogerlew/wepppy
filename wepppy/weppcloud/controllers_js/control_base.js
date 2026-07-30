@@ -821,10 +821,15 @@ function controlBase() {
 
         setTextContent(targetElement, "");
 
+        const summaryCard = document.createElement("div");
+        summaryCard.className = "wc-control__error-card";
+        summaryCard.setAttribute("role", "alert");
+        targetElement.appendChild(summaryCard);
+
         const messageElement = document.createElement("p");
         messageElement.className = "wc-control__error-summary";
         messageElement.textContent = message;
-        targetElement.appendChild(messageElement);
+        summaryCard.appendChild(messageElement);
 
         const details = payload.details || {};
         const metadata = [];
@@ -859,11 +864,14 @@ function controlBase() {
 
             const value = document.createElement("dd");
             value.textContent = entry[1];
+            if (entry[0] === "Error ID") {
+                value.className = "wc-control__error-id";
+            }
             item.appendChild(value);
 
             metadataElement.appendChild(item);
         });
-        targetElement.appendChild(metadataElement);
+        summaryCard.appendChild(metadataElement);
     }
 
     function resolveButtons(self) {

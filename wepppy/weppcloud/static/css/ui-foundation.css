@@ -2048,6 +2048,14 @@ a.wc-maturity-pill:focus-visible {
   color: var(--wc-color-text);
 }
 
+.wc-control__error-card {
+  padding: var(--wc-space-md);
+  border-left: 0.25rem solid var(--wc-error);
+  border-radius: var(--wc-radius-sm);
+  background: var(--wc-error-bg);
+  color: var(--wc-error-text);
+}
+
 .wc-control__error-summary {
   margin: 0;
   line-height: 1.5;
@@ -2074,6 +2082,11 @@ a.wc-maturity-pill:focus-visible {
 .wc-control__error-meta dd {
   margin: 0;
   overflow-wrap: anywhere;
+}
+
+.wc-control__error-id {
+  font-family: var(--wc-font-mono);
+  font-size: var(--wc-font-size-xs);
 }
 
 .wc-control__stacktrace {
