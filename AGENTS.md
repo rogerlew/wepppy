@@ -58,7 +58,7 @@
 - When user conversation establishes or changes behavior/UX/data contracts, update the authoritative spec/work-package doc in the same change.
 - Capture both normative contract and concise rationale (why this choice, what alternatives were rejected) for conversation-derived decisions.
 - In handoff notes, cite the exact file/section where the decision was documented.
-- Add regression coverage for the exact failure mode.
+- Add regression coverage for exact failure modes with durable value; do not add a dedicated test solely to pin a literal config default when parse/provenance checks suffice.
 - For project data/schema mutations (run-scoped CSV/parquet/NoDb contracts), write a brief compatibility and regression plan before editing.
 - Default to additive/backward-compatible evolution; do not rename or remove user-visible keys/columns without explicit operator approval.
 - For data/schema mutations, validate downstream propagation to generated run artifacts (for example `wepp/runs/*`) in addition to regression tests.
