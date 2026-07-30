@@ -349,13 +349,29 @@ describe("ChannelDelineation GL controller", () => {
 
     test("triggerEvent handles completion once and emits report + layer", async () => {
         const channel = window.ChannelDelineation.getInstance();
+        channel.rq_job_id = "root-job";
 
         channel.show = jest.fn(() => Promise.resolve());
         channel.report = jest.fn(() => Promise.resolve());
 
-        channel.triggerEvent("BUILD_CHANNELS_TASK_COMPLETED", { payload: "ok" });
+        channel.triggerEvent("BUILD_CHANNELS_TASK_COMPLETED", {
+            status: {
+                conditioning_diagnostics: {
+                    schema_version: 1,
+                    root_job_id: "root-job",
+                    producer_job_id: "producer-job",
+                    operation_id: "0123456789abcdef0123456789abcdef",
+                    method: "fill",
+                    elevation_unit: "m",
+                    maximum_raise: 379,
+                    maximum_cut: 0,
+                    summary: "Fill completed. Maximum terrain raise: 379 m; maximum terrain cut: 0.00 m."
+                }
+            }
+        });
         channel.triggerEvent("BUILD_CHANNELS_TASK_COMPLETED", { payload: "ok" });
 
+        expect(document.getElementById("status").textContent).toContain("379 m");
         expect(channel.show).toHaveBeenCalledTimes(1);
         expect(channel.report).toHaveBeenCalledTimes(1);
         const completionEvents = emittedEvents.filter((evt) => evt.name === "channel:build:completed");
@@ -364,6 +380,29 @@ describe("ChannelDelineation GL controller", () => {
             "job:completed",
             expect.objectContaining({ task: "channel:build" }),
         );
+    });
+
+    test("required diagnostics fail closed when the payload is invalid", () => {
+        const channel = window.ChannelDelineation.getInstance();
+        channel.rq_job_id = "root-job";
+        channel.show = jest.fn();
+        channel.report = jest.fn();
+
+        channel.triggerEvent("BUILD_CHANNELS_TASK_COMPLETED", {
+            status: {
+                conditioning_diagnostics_required: true,
+                conditioning_diagnostics: {
+                    schema_version: 1,
+                    root_job_id: "wrong-root",
+                    summary: "invalid"
+                }
+            }
+        });
+
+        expect(channel.show).not.toHaveBeenCalled();
+        expect(channel.report).not.toHaveBeenCalled();
+        expect(channel._completion_seen).toBe(false);
+        expect(document.getElementById("status").textContent).toContain("could not be verified");
     });
 
     test("triggerEvent emits job:error on failure", async () => {

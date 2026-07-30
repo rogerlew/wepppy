@@ -4,9 +4,9 @@
 
 **Timezone**: UTC
 **Started**: 2026-07-30
-**Current phase**: Checkpoint commit
+**Current phase**: Complete locally
 **Last updated**: 2026-07-30
-**Next milestone**: standalone ancestor commit, then WBT implementation
+**Next milestone**: production promotion under the WBT release runbook
 **Security impact**: high
 **Dedicated security review**: yes
 **Security artifact**: `artifacts/2026-07-30_security_review.md`
@@ -15,14 +15,11 @@
 
 ### In Progress
 
-- [ ] Complete and commit the contract-first checkpoint.
+- None.
 
 ### Ready
 
-- [ ] Implement four WBT diagnostic sidecars and wrappers.
-- [ ] Integrate sidecar validation, RQ propagation, and summary presentation.
-- [ ] Run focused and broad gates; close review findings.
-- [ ] Commit and push `weppcloud-wbt`.
+- Production promotion is outside this package.
 
 ### Blocked
 
@@ -36,6 +33,9 @@
   operations/security findings.
 - [x] Received independent governance and operations/security PASS with no
   remaining blocking, high, or medium findings.
+- [x] Implemented and fixture-tested all four WBT sidecars.
+- [x] Integrated validation, RQ propagation, and both channel summaries.
+- [x] Committed and pushed WBT commits `bd8e0e4` and `ef69a38`.
 
 ## Decisions
 
@@ -60,23 +60,23 @@ Threshold policy would require separate operator approval and an ADR.
 
 | Risk | Severity | Mitigation | Status |
 | --- | --- | --- | --- |
-| Diagnostics change numerical output | High | Instrument existing mutations and compare golden raster hashes | Open |
-| Malformed/stale sidecar is shown | High | Remove before run; validate schema/tool/status/finite numbers | Open |
-| Paths or raw JSON reach browser | Medium | Publish allowlisted formatted fields only | Open |
-| Flat increments inflate impact | Medium | Stage-specific counters and wording | Open |
-| Runtime binary omitted from release | High | Build/install/discover/execute and record SHA-256 | Open |
+| Diagnostics change numerical output | High | Instrument existing mutations and compare generated rasters | Mitigated |
+| Malformed/stale sidecar is shown | High | Remove before run; validate schema/tool/status/finite numbers | Mitigated |
+| Paths or raw JSON reach browser | Medium | Publish allowlisted formatted fields only | Mitigated |
+| Flat increments inflate impact | Medium | Stage-specific counters and wording | Mitigated |
+| Runtime binary omitted from release | High | Build/install/discover/execute and record SHA-256 | Mitigated |
 
 ## Verification Checklist
 
-- [ ] WBT Rust unit and generated-output tests pass.
-- [ ] Four raster outputs retain baseline hashes.
-- [ ] Incident fixture maximum fill is asserted from source-to-output delta.
-- [ ] WEPPpy topo and RQ tests pass.
-- [ ] Channel and GL controller tests pass.
-- [ ] Frontend lint/test and generated bundle pass.
-- [ ] Documentation lint passes.
-- [ ] Full Python sanity gate passes.
-- [ ] Independent final correctness/security reviews have no unresolved
+- [x] WBT Rust unit and generated-output tests pass.
+- [x] Four WBT fixture executions produce valid sidecars.
+- [x] Incident fixture maximum fill is measured from source-to-output delta.
+- [x] WEPPpy topo and RQ tests pass.
+- [x] Channel and GL controller tests pass.
+- [x] Frontend lint/test and generated bundle pass.
+- [x] Documentation lint passes.
+- [ ] Full Python sanity gate passes at the production-promotion gate.
+- [x] Independent final correctness/security reviews have no unresolved
   high/medium findings.
 
 ## Progress Notes

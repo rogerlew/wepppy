@@ -103,7 +103,7 @@ Landuse first-class route notes (2026-04-24):
 
 ## Job polling responses
 - Job status (jobstatus):
-  - `{job_id, runid, status, started_at, ended_at, conditioning_diagnostics?}`
+  - `{job_id, runid, status, started_at, ended_at, conditioning_diagnostics?, error?, error_id?}`
   - For registered trees, any queued/started/deferred/scheduled descendant keeps
     the aggregate non-terminal. Failed/stopped/canceled takes precedence only
     after no descendant remains active.
@@ -111,6 +111,8 @@ Landuse first-class route notes (2026-04-24):
     delineation and follows
     `docs/schemas/wbt-conditioning-diagnostics-contract.md`. A terminal WBT
     tree cannot report success when this field is absent or invalid.
+  - `error` and `error_id` are present for a controlled terminal aggregate
+    failure, including invalid required WBT diagnostics.
 - Job info (jobinfo):
   - `{job_id, runid, status, result, started_at, ended_at, description, elapsed_s, exc_info, children, auth_actor, culvert_batch_uuid, error, error_id}`
   - `auth_actor` is optional and only includes non-PII identifiers (no JWTs, no email).
@@ -175,7 +177,7 @@ retain their existing traceback behavior.
 
 ### WBT conditioning successful completion
 
-DOM-05B implementation conformance is pending. On successful WBT channel
+DOM-05B local implementation conformance is complete. On successful WBT channel
 delineation, the build-channel job metadata, aggregate status response, and
 `BUILD_CHANNELS_TASK_COMPLETED` trigger carry the same additive
 `conditioning_diagnostics` object using the exact schema, encoding,

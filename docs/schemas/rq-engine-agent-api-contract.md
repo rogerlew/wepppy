@@ -176,7 +176,8 @@ Submission/command responses:
 
 Polling responses:
 - `jobstatus`:
-  `{job_id, runid, status, started_at, ended_at, conditioning_diagnostics?}`.
+  `{job_id, runid, status, started_at, ended_at, conditioning_diagnostics?,
+  error?, error_id?}`.
   The optional field is present only for successful WBT channel delineation
   and follows `docs/schemas/wbt-conditioning-diagnostics-contract.md`; a
   terminal WBT tree cannot report success with missing or invalid diagnostics.

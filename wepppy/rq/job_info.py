@@ -3,6 +3,9 @@ from __future__ import annotations
 """Helpers for introspecting RQ job trees and reporting aggregated status."""
 
 from datetime import datetime, timezone
+import hashlib
+import math
+import re
 from typing import Any, Dict, List, MutableMapping, Sequence, Tuple
 
 import redis
@@ -84,6 +87,15 @@ def recursive_get_job_details(job: Job, redis_conn: redis.Redis, now: datetime) 
         error_id = job.meta.get("error_id")
         if error_id:
             job_info["error_id"] = str(error_id)
+    conditioning_diagnostics = (
+        job.meta.get("conditioning_diagnostics")
+        if isinstance(job.meta, dict)
+        else None
+    )
+    if isinstance(conditioning_diagnostics, dict):
+        job_info["_conditioning_diagnostics"] = conditioning_diagnostics
+    if job.meta.get("conditioning_diagnostics_required") is True:
+        job_info["_conditioning_diagnostics_required"] = True
 
     for key, child_job_id in job.meta.items():
         if key.startswith('jobs:'):
@@ -128,7 +140,12 @@ def get_wepppy_rq_job_info(job_id: str) -> Dict[str, Any]:
         if not job:
             return {"job_id": job_id, "status": "not_found"}
 
-        return recursive_get_job_details(job, redis_conn, now)
+        details = recursive_get_job_details(job, redis_conn, now)
+        _strip_private_conditioning_metadata(details)
+        _overlay_conditioning_diagnostics_failure(
+            details, get_wepppy_rq_job_status(job_id)
+        )
+        return details
 
 
 def get_wepppy_rq_jobs_info(job_ids: Sequence[str]) -> Dict[str, Dict[str, Any]]:
@@ -177,7 +194,12 @@ def get_wepppy_rq_jobs_info(job_ids: Sequence[str]) -> Dict[str, Dict[str, Any]]
                 continue
 
             try:
-                results[job_id] = recursive_get_job_details(job, redis_conn, now)
+                details = recursive_get_job_details(job, redis_conn, now)
+                _strip_private_conditioning_metadata(details)
+                _overlay_conditioning_diagnostics_failure(
+                    details, get_wepppy_rq_job_status(job_id)
+                )
+                results[job_id] = details
             except Exception as exc:  # pragma: no cover - defensive guard
                 # Boundary catch: preserve contract behavior while logging unexpected failures.
                 __import__("logging").getLogger(__name__).exception("Boundary exception at wepppy/rq/job_info.py:120", extra={"runid": locals().get("runid"), "config": locals().get("config"), "job_id": locals().get("job_id")})
@@ -188,6 +210,32 @@ def get_wepppy_rq_jobs_info(job_ids: Sequence[str]) -> Dict[str, Dict[str, Any]]
                 }
 
     return results
+
+
+def _strip_private_conditioning_metadata(job_info: MutableMapping[str, Any]) -> None:
+    job_info.pop("_conditioning_diagnostics", None)
+    job_info.pop("_conditioning_diagnostics_required", None)
+    for group in job_info.get("children", {}).values():
+        for child in group:
+            if isinstance(child, MutableMapping):
+                _strip_private_conditioning_metadata(child)
+
+
+def _overlay_conditioning_diagnostics_failure(
+    job_info: MutableMapping[str, Any],
+    status: MutableMapping[str, Any],
+) -> None:
+    error = status.get("error")
+    if not (
+        status.get("status") == "failed"
+        and isinstance(error, dict)
+        and error.get("code") == "wbt_conditioning_diagnostics_invalid"
+    ):
+        return
+    job_info["status"] = "failed"
+    job_info["error"] = error
+    job_info["error_id"] = status.get("error_id")
+    job_info["exc_info"] = None
 
 
 def _flatten_job_tree(job_info: MutableMapping[str, Any]) -> Tuple[List[Any], List[Any], List[Any]]:
@@ -283,7 +331,7 @@ def get_wepppy_rq_job_status(job_id: str) -> Dict[str, Any]:
         progress_total = max(1, total_jobs_count)
         progress_updated_at = _latest_timestamp_iso(*valid_end_times, *valid_started_times) or UNKNOWN_PROGRESS_UPDATED_AT
 
-        return {
+        response = {
             "job_id": job.id,
             "runid": _resolve_runid(job),
             "status": aggregated_status,
@@ -297,3 +345,94 @@ def get_wepppy_rq_job_status(job_id: str) -> Dict[str, Any]:
                 "updated_at": progress_updated_at,
             },
         }
+        diagnostics = []
+        diagnostics_required = False
+        registered_job_ids = set()
+        stack = [all_jobs_tree]
+        while stack:
+            detail = stack.pop()
+            detail_job_id = detail.get("job_id")
+            if isinstance(detail_job_id, str):
+                registered_job_ids.add(detail_job_id)
+            diagnostics_required = (
+                diagnostics_required
+                or detail.get("_conditioning_diagnostics_required") is True
+            )
+            candidate = detail.get("_conditioning_diagnostics")
+            if isinstance(candidate, dict):
+                diagnostics.append(
+                    (
+                        candidate,
+                        detail.get("job_id"),
+                        detail.get("_conditioning_diagnostics_required") is True,
+                    )
+                )
+            for group in detail.get("children", {}).values():
+                stack.extend(child for child in group if isinstance(child, dict))
+        if len(diagnostics) == 1:
+            candidate, owner_job_id, owner_requires_diagnostics = diagnostics[0]
+            expected_keys = {
+                "schema_version", "root_job_id", "producer_job_id",
+                "operation_id", "method", "elevation_unit", "maximum_raise",
+                "maximum_cut", "summary",
+            }
+            if (
+                set(candidate) == expected_keys
+                and candidate.get("schema_version") == 1
+                and candidate.get("root_job_id") == job.id
+                and candidate.get("producer_job_id") in registered_job_ids
+                and candidate.get("producer_job_id") == owner_job_id
+                and owner_requires_diagnostics
+                and isinstance(candidate.get("operation_id"), str)
+                and re.fullmatch(r"[0-9a-f]{32}", candidate["operation_id"]) is not None
+                and candidate.get("method") in {"fill", "breach", "breach_least_cost", "topaz"}
+                and candidate.get("elevation_unit") == "m"
+                and all(
+                    not isinstance(candidate.get(key), bool)
+                    and isinstance(candidate.get(key), (int, float))
+                    and math.isfinite(float(candidate[key]))
+                    and candidate[key] >= 0
+                    for key in ("maximum_raise", "maximum_cut")
+                )
+                and isinstance(candidate.get("summary"), str)
+                and 1 <= len(candidate["summary"]) <= 1000
+                and all(char.isprintable() or char == " " for char in candidate["summary"])
+            ):
+                if aggregated_status == "finished":
+                    response["conditioning_diagnostics"] = candidate
+            elif diagnostics_required and aggregated_status == "finished":
+                error_id = hashlib.sha256(
+                    f"{job.id}:wbt_conditioning_diagnostics_invalid".encode()
+                ).hexdigest()[:32]
+                response["status"] = "failed"
+                response["error"] = {
+                    "code": "wbt_conditioning_diagnostics_invalid",
+                    "message": "Channel delineation stopped because terrain-conditioning diagnostics could not be verified. No successful channel result was published. Build channels again; if the problem continues, contact support with the Error ID.",
+                    "details": {"reason": "inconsistent"},
+                }
+                response["error_id"] = error_id
+                __import__("logging").getLogger(__name__).error(
+                    "Invalid aggregate WBT diagnostics [error_id=%s job_id=%s reason=inconsistent]",
+                    error_id,
+                    job.id,
+                )
+        elif diagnostics_required and aggregated_status == "finished":
+            error_id = hashlib.sha256(
+                f"{job.id}:wbt_conditioning_diagnostics_invalid".encode()
+            ).hexdigest()[:32]
+            response["status"] = "failed"
+            response["error"] = {
+                "code": "wbt_conditioning_diagnostics_invalid",
+                "message": "Channel delineation stopped because terrain-conditioning diagnostics could not be verified. No successful channel result was published. Build channels again; if the problem continues, contact support with the Error ID.",
+                "details": {
+                    "reason": "missing" if not diagnostics else "inconsistent"
+                },
+            }
+            response["error_id"] = error_id
+            __import__("logging").getLogger(__name__).error(
+                "Invalid aggregate WBT diagnostics [error_id=%s job_id=%s reason=%s]",
+                error_id,
+                job.id,
+                response["error"]["details"]["reason"],
+            )
+        return response

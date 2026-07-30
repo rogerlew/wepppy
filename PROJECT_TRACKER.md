@@ -295,18 +295,6 @@ When resuming Kubernetes work:
 
 ## 🚧 In Progress
 
-### WBT Conditioning Success Diagnostics (DOM-05B)
-**Started**: 2026-07-30
-**Status**: Contract checkpoint
-**Priority**: High
-**Security impact**: `high`
-**Link**: [docs/work-packages/20260730_wbt_conditioning_success_diagnostics/](docs/work-packages/20260730_wbt_conditioning_success_diagnostics/)
-**Description**: Add versioned diagnostics sidecars to all four WBT depression
-conditioning methods and propagate an interpretable maximum raise/cut summary
-through successful channel delineation completion.
-
----
-
 ### WBT Least-Cost Unresolved-Depression Fail-Fast Guidance
 
 **Started**: 2026-07-30
@@ -861,6 +849,23 @@ the remaining-run controller plan has no next controller milestone.
 ---
 
 ## ✅ Done
+
+### WBT Conditioning Success Diagnostics (DOM-05B) ✅
+
+**Completed**: 2026-07-30
+
+**Status**: ✅ **COMPLETE LOCALLY; PRODUCTION PROMOTION SEPARATE**
+
+**Link**: [docs/work-packages/20260730_wbt_conditioning_success_diagnostics/](docs/work-packages/20260730_wbt_conditioning_success_diagnostics/)
+
+**Summary**: All four WBT conditioning tools emit versioned diagnostics
+sidecars, and successful WBT channel builds present one plain-language summary
+with maximum terrain raise/cut and method-specific effects. Exact validation,
+fail-closed RQ/browser propagation, cleanup, focused regression gates, and
+independent governance/security reviews passed. WBT commits `bd8e0e4` and
+`ef69a38` are pushed; production promotion remains separate.
+
+---
 
 ### Topaz Conditioning WEPPpy Integration (DOM-05A) ✅
 

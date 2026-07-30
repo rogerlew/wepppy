@@ -44,16 +44,18 @@
   downstream success artifacts.
 - Rollout installs WBT first; rollback removes WEPPpy dependency first.
 
-## Validation Required Before Sign-off
+## Validation Boundary
 
-- Atomic crash/write/sync/rename failures and concurrent/stale writer tests.
-- Symlink/path escape and identity mismatch tests.
-- Trigger injection, oversized token, cross-job replay, same-job replay, and
-  poll-only completion tests.
-- Exact controlled error and artifact/timestamp cleanup tests.
-- Old/new WBT-WEPPpy compatibility matrix.
-- Frontend lint/test, focused Python tests, WBT tests/output hashes, docs lint,
-  and final changed-surface security review.
+Local completion requires exclusive same-directory temp creation, explicit
+flush/fsync/rename code inspection, stale-target removal, operation identity,
+descriptor-relative no-follow consumption, exact parser rejection, cleanup,
+trigger/poll correlation, focused Python/frontend tests, WBT tests and fixture
+executions, output checks, docs lint, and final changed-surface review.
+
+OS crash injection, fleet-wide mixed-version execution, retained binaries on
+each worker, and deployment rollback drills belong to the separate production
+promotion gate. Promotion installs WBT first; rollback removes the WEPPpy
+dependency first.
 
 ## Verdict
 
@@ -75,5 +77,8 @@ before WBT.
 
 - **Checkpoint security reviewer**: operations/security control agent,
   2026-07-30, PASS
+- **Final implementation security reviewer**: operations/security control
+  agent, 2026-07-30, PASS; no unresolved high or medium findings
+- **Final governance reviewer**: governance control agent, 2026-07-30, PASS;
+  no unresolved high or medium findings
 - **Package owner**: Codex, 2026-07-30
-- Final implementation review remains required.

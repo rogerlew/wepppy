@@ -1,6 +1,6 @@
 # WBT Conditioning Success Diagnostics
 
-**Status**: Open (2026-07-30)
+**Status**: Complete locally; production promotion separate (2026-07-30)
 **Timezone**: UTC
 **Package ID**: DOM-05B
 **Parent owner**: DOM-05 Channel Delineation
@@ -54,20 +54,21 @@ attribution, RQ propagation, and plain-text rendering.
 
 ## Success Criteria
 
-- [ ] A standalone documentation-only checkpoint is independently reviewed and
+- [x] A standalone documentation-only checkpoint is independently reviewed and
   committed before implementation.
-- [ ] Every successful method reports maximum terrain raise and cut, including
+- [x] Every successful method reports maximum terrain raise and cut, including
   zero values, with explicit units.
-- [ ] Fill diagnostics expose the incident-scale maximum raise; fixture evidence
+- [x] Fill diagnostics expose the incident-scale maximum raise; fixture evidence
   records the measured value.
-- [ ] Least-cost diagnostics distinguish breach results from fallback filling.
-- [ ] TOPAZ diagnostics separate FILDEP changes from synthetic RELIEF.
-- [ ] Channel completion presents one concise paragraph without duplicate
+- [x] Least-cost diagnostics distinguish breach results from fallback filling.
+- [x] TOPAZ diagnostics separate FILDEP changes from synthetic RELIEF.
+- [x] Channel completion presents one concise paragraph without duplicate
   summary/detail or stacktrace styling.
-- [ ] Focused WBT, Python, RQ, frontend, docs, and generated-output gates pass.
-- [ ] `weppcloud-wbt` changes are committed and pushed.
+- [x] Focused WBT, Python, RQ, frontend, docs, and generated-output gates pass.
+- [x] `weppcloud-wbt` changes are committed and pushed.
 
-Implementation conformance is pending the reviewed standalone checkpoint.
+Implementation conformance is complete. Production deployment remains a
+separate operator action.
 
 ## Parameterization ADR Gate
 

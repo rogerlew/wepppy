@@ -3,13 +3,16 @@
 from __future__ import annotations
 
 import inspect
+import errno
 import json
 import logging
 import math
 import os
 import re
+import stat
 import subprocess
 import time
+import uuid
 from collections import defaultdict, deque
 from functools import wraps
 from os.path import exists as _exists, join as _join, split as _split
@@ -69,6 +72,271 @@ WBT_UNRESOLVED_DEPRESSION_MESSAGE = (
     "inspect DEM and NoData boundaries, or choose another conditioning method, "
     "then build channels again."
 )
+WBT_CONDITIONING_DIAGNOSTICS_FILENAME = "relief.diagnostics.json"
+WBT_CONDITIONING_DIAGNOSTICS_MAX_BYTES = 65536
+WBT_CONDITIONING_METHOD_TO_TOOL = {
+    "fill": "FillDepressions",
+    "breach": "BreachDepressions",
+    "breach_least_cost": "BreachDepressionsLeastCost",
+    "topaz": "TopazConditionDem",
+}
+WBT_DIAGNOSTICS_TOP_LEVEL_KEYS = {
+    "schema_version", "tool", "status", "operation_id", "input_name",
+    "output_name", "units", "terrain_change", "conditioning", "parameters",
+}
+WBT_DIAGNOSTICS_TERRAIN_KEYS = {
+    "valid_cell_count", "raised_cell_count", "lowered_cell_count",
+    "raised_area", "lowered_area", "maximum_raise", "maximum_cut",
+    "fill_volume", "cut_volume",
+}
+WBT_DIAGNOSTICS_METHOD_KEYS = {
+    "fill": (
+        {"detected_low_point_count", "filled_depression_count", "skipped_depression_count", "flat_gradient_applied"},
+        {"fix_flats", "flat_increment", "max_depth"},
+    ),
+    "breach": (
+        {"breached_depression_count", "longest_breach_path_cells", "longest_breach_path", "single_cell_pits_filled", "residual_fill_used", "residual_depression_count"},
+        {"fill_pits", "flat_increment", "max_depth", "max_length_cells"},
+    ),
+    "breach_least_cost": (
+        {"detected_low_point_count", "resolved_low_point_count", "unresolved_low_point_count", "longest_breach_path_cells", "longest_breach_path", "fallback_fill_used", "fallback_filled_low_point_count"},
+        {"search_distance_cells", "search_distance", "max_cost", "minimize_distance", "flat_increment", "fill", "fail_on_unresolved"},
+    ),
+    "topaz": (
+        {"depression_count", "flat_count", "filled_cell_count", "lowered_cell_count", "synthetic_relief_cell_count", "obstruction_adjustments_width_1", "obstruction_adjustments_width_2", "maximum_fildep_fill", "maximum_fildep_cut", "maximum_synthetic_relief"},
+        {"max_obstruction_width"},
+    ),
+}
+
+
+class WbtConditioningDiagnosticsError(RuntimeError):
+    """A successful WBT process did not produce verifiable diagnostics."""
+
+    code = "wbt_conditioning_diagnostics_invalid"
+    public_message = (
+        "Channel delineation stopped because terrain-conditioning diagnostics "
+        "could not be verified. No successful channel result was published. "
+        "Build channels again; if the problem continues, contact support with "
+        "the Error ID."
+    )
+
+    def __init__(self, reason: str) -> None:
+        self.reason = reason
+        super().__init__(self.public_message)
+
+
+def _format_measure(value: float) -> str:
+    if value >= 100:
+        return f"{value:.0f}"
+    if value >= 10:
+        return f"{value:.1f}"
+    return f"{value:.2f}"
+
+
+def load_conditioning_diagnostics(
+    path: str,
+    *,
+    method: str,
+    operation_id: Optional[str],
+    input_name: str,
+    output_name: str,
+    root_dir: Optional[str] = None,
+) -> Dict[str, Any]:
+    """Load and validate a successful WBT conditioning sidecar."""
+    if os.path.basename(path) != WBT_CONDITIONING_DIAGNOSTICS_FILENAME:
+        raise WbtConditioningDiagnosticsError("path")
+    if root_dir is not None:
+        absolute_root = os.path.abspath(root_dir)
+        resolved_root = os.path.realpath(root_dir)
+        resolved_path = os.path.realpath(path)
+        if (
+            absolute_root != resolved_root
+            or os.path.commonpath((resolved_root, resolved_path)) != resolved_root
+            or os.path.dirname(resolved_path) != resolved_root
+        ):
+            raise WbtConditioningDiagnosticsError("path")
+    def _object_without_duplicates(pairs: list[tuple[str, Any]]) -> Dict[str, Any]:
+        result: Dict[str, Any] = {}
+        for key, value in pairs:
+            if key in result:
+                raise WbtConditioningDiagnosticsError("schema")
+            result[key] = value
+        return result
+
+    try:
+        if root_dir is not None:
+            parent_fd = os.open(
+                root_dir,
+                os.O_RDONLY | os.O_DIRECTORY | getattr(os, "O_NOFOLLOW", 0),
+            )
+            try:
+                file_fd = os.open(
+                    WBT_CONDITIONING_DIAGNOSTICS_FILENAME,
+                    os.O_RDONLY | getattr(os, "O_NOFOLLOW", 0),
+                    dir_fd=parent_fd,
+                )
+            finally:
+                os.close(parent_fd)
+            file_stat = os.fstat(file_fd)
+            if not stat.S_ISREG(file_stat.st_mode):
+                os.close(file_fd)
+                raise WbtConditioningDiagnosticsError("path")
+            if file_stat.st_size > WBT_CONDITIONING_DIAGNOSTICS_MAX_BYTES:
+                os.close(file_fd)
+                raise WbtConditioningDiagnosticsError("oversized")
+            stream_context = os.fdopen(file_fd, encoding="utf-8")
+        else:
+            if not _exists(path):
+                raise WbtConditioningDiagnosticsError("missing")
+            if os.path.islink(path):
+                raise WbtConditioningDiagnosticsError("path")
+            if os.path.getsize(path) > WBT_CONDITIONING_DIAGNOSTICS_MAX_BYTES:
+                raise WbtConditioningDiagnosticsError("oversized")
+            stream_context = open(path, encoding="utf-8")
+        with stream_context as stream:
+            payload = json.load(stream, object_pairs_hook=_object_without_duplicates)
+    except FileNotFoundError as exc:
+        raise WbtConditioningDiagnosticsError("missing") from exc
+    except OSError as exc:
+        reason = "path" if exc.errno in (errno.ELOOP, errno.ENOTDIR) else "malformed"
+        raise WbtConditioningDiagnosticsError(reason) from exc
+    except (UnicodeError, json.JSONDecodeError) as exc:
+        raise WbtConditioningDiagnosticsError("malformed") from exc
+    if not isinstance(payload, dict):
+        raise WbtConditioningDiagnosticsError("schema")
+    if set(payload) != WBT_DIAGNOSTICS_TOP_LEVEL_KEYS:
+        raise WbtConditioningDiagnosticsError("schema")
+    expected_tool = WBT_CONDITIONING_METHOD_TO_TOOL.get(method)
+    payload_operation_id = payload.get("operation_id")
+    if not isinstance(payload_operation_id, str) or re.fullmatch(r"[0-9a-f]{32}", payload_operation_id) is None:
+        raise WbtConditioningDiagnosticsError("identity")
+    if (
+        payload.get("schema_version") != 1
+        or payload.get("status") != "success"
+        or payload.get("tool") != expected_tool
+        or (operation_id is not None and payload_operation_id != operation_id)
+        or payload.get("input_name") != os.path.basename(input_name)
+        or payload.get("output_name") != os.path.basename(output_name)
+    ):
+        raise WbtConditioningDiagnosticsError("identity")
+    units = payload.get("units")
+    terrain = payload.get("terrain_change")
+    conditioning = payload.get("conditioning")
+    if units != {"elevation": "m", "horizontal": "m", "area": "m2", "volume": "m3"}:
+        raise WbtConditioningDiagnosticsError("schema")
+    if not isinstance(terrain, dict) or not isinstance(conditioning, dict):
+        raise WbtConditioningDiagnosticsError("schema")
+    parameters = payload.get("parameters")
+    method_keys = WBT_DIAGNOSTICS_METHOD_KEYS.get(method)
+    if (
+        set(terrain) != WBT_DIAGNOSTICS_TERRAIN_KEYS
+        or not isinstance(parameters, dict)
+        or method_keys is None
+        or set(conditioning) != method_keys[0]
+        or set(parameters) != method_keys[1]
+    ):
+        raise WbtConditioningDiagnosticsError("schema")
+    for key in ("valid_cell_count", "raised_cell_count", "lowered_cell_count"):
+        value = terrain[key]
+        if isinstance(value, bool) or not isinstance(value, int) or value < 0:
+            raise WbtConditioningDiagnosticsError("schema")
+    if terrain["raised_cell_count"] + terrain["lowered_cell_count"] > terrain["valid_cell_count"]:
+        raise WbtConditioningDiagnosticsError("inconsistent")
+    for key in ("raised_area", "lowered_area", "maximum_raise", "maximum_cut", "fill_volume", "cut_volume"):
+        value = terrain.get(key)
+        if isinstance(value, bool) or not isinstance(value, (int, float)):
+            raise WbtConditioningDiagnosticsError("schema")
+        if not math.isfinite(float(value)) or float(value) < 0:
+            raise WbtConditioningDiagnosticsError("inconsistent")
+
+    boolean_keys = {
+        "flat_gradient_applied", "residual_fill_used", "fallback_fill_used",
+        "fix_flats", "fill_pits", "minimize_distance", "fill",
+        "fail_on_unresolved",
+    }
+    nullable_number_keys = {"max_depth", "max_length_cells", "max_cost"}
+    for key, value in {**conditioning, **parameters}.items():
+        if key in boolean_keys:
+            if not isinstance(value, bool):
+                raise WbtConditioningDiagnosticsError("schema")
+        elif key in nullable_number_keys and value is None:
+            continue
+        elif key.endswith("_count") or key.endswith("_cells") or key == "max_obstruction_width":
+            if isinstance(value, bool) or not isinstance(value, int) or value < 0:
+                raise WbtConditioningDiagnosticsError("schema")
+        elif (
+            isinstance(value, bool)
+            or not isinstance(value, (int, float))
+            or not math.isfinite(float(value))
+            or float(value) < 0
+        ):
+            raise WbtConditioningDiagnosticsError("schema")
+
+    if method == "fill":
+        if conditioning["filled_depression_count"] + conditioning["skipped_depression_count"] > conditioning["detected_low_point_count"]:
+            raise WbtConditioningDiagnosticsError("inconsistent")
+    elif method == "breach":
+        if not conditioning["residual_fill_used"] and conditioning["residual_depression_count"] != 0:
+            raise WbtConditioningDiagnosticsError("inconsistent")
+    elif method == "breach_least_cost":
+        if conditioning["resolved_low_point_count"] + conditioning["unresolved_low_point_count"] != conditioning["detected_low_point_count"]:
+            raise WbtConditioningDiagnosticsError("inconsistent")
+        if not conditioning["fallback_fill_used"] and conditioning["fallback_filled_low_point_count"] != 0:
+            raise WbtConditioningDiagnosticsError("inconsistent")
+        if parameters["search_distance_cells"] <= 0 or parameters["search_distance"] <= 0:
+            raise WbtConditioningDiagnosticsError("inconsistent")
+        if parameters["fill"] or not parameters["fail_on_unresolved"] or conditioning["fallback_fill_used"]:
+            raise WbtConditioningDiagnosticsError("inconsistent")
+    elif parameters["max_obstruction_width"] not in (0, 1, 2):
+        raise WbtConditioningDiagnosticsError("inconsistent")
+    return payload
+
+
+def summarize_conditioning_diagnostics(payload: Dict[str, Any], method: str) -> str:
+    """Build the plain-language successful conditioning summary."""
+    terrain = payload["terrain_change"]
+    conditioning = payload["conditioning"]
+    maximum_raise = float(terrain["maximum_raise"])
+    maximum_cut = float(terrain["maximum_cut"])
+    labels = {
+        "fill": "Fill",
+        "breach": "Breach",
+        "breach_least_cost": "Breach (Least Cost)",
+        "topaz": "TOPAZ conditioning",
+    }
+    summary = (
+        f"{labels[method]} completed. Maximum terrain raise: "
+        f"{_format_measure(maximum_raise)} m; maximum terrain cut: "
+        f"{_format_measure(maximum_cut)} m."
+    )
+    if method == "fill":
+        valid = max(1, int(terrain.get("valid_cell_count", 0)))
+        percent = 100.0 * int(terrain.get("raised_cell_count", 0)) / valid
+        summary += f" Terrain was raised across {percent:.1f}% of the DEM."
+    elif method == "breach":
+        summary += (
+            f" {int(conditioning.get('single_cell_pits_filled', 0))} isolated "
+            "low cells were filled before breaching. "
+            f"Residual filling was {'used' if conditioning.get('residual_fill_used') else 'not used'}."
+        )
+    elif method == "breach_least_cost":
+        resolved = int(conditioning.get("resolved_low_point_count", 0))
+        detected = int(conditioning.get("detected_low_point_count", 0))
+        summary += (
+            f" Least-cost paths resolved {resolved} of {detected} detected "
+            "low points; no fallback filling was used. The longest breach path "
+            f"was {_format_measure(float(conditioning.get('longest_breach_path', 0)))} m "
+            f"within a {_format_measure(float(payload['parameters'].get('search_distance', 0)))} m search distance."
+        )
+    else:
+        summary += (
+            f" Filled {int(conditioning.get('depression_count', 0))} depressions "
+            f"and adjusted {int(conditioning.get('obstruction_adjustments_width_1', 0)) + int(conditioning.get('obstruction_adjustments_width_2', 0))} "
+            "narrow barriers. Tiny flat-routing adjustments affected "
+            f"{int(conditioning.get('synthetic_relief_cell_count', 0))} cells, "
+            f"with a maximum adjustment of {_format_measure(float(conditioning.get('maximum_synthetic_relief', 0)))} m."
+        )
+    return summary
 
 
 class WbtUnresolvedDepressionsError(RuntimeError):
@@ -330,6 +598,10 @@ class WhiteboxToolsTopazEmulator:
         """
         ext = "vrt" if self.flovec_netful_relief_are_vrt else "tif"
         return _join(self.wbt_wd, f"relief.{ext}")
+
+    @property
+    def conditioning_diagnostics(self) -> str:
+        return _join(self.wbt_wd, WBT_CONDITIONING_DIAGNOSTICS_FILENAME)
 
     @property
     def flovec(self):
@@ -615,11 +887,20 @@ class WhiteboxToolsTopazEmulator:
         relief_fn = self.relief
 
         remove_if_exists(relief_fn)
+        diagnostics_fn = self.conditioning_diagnostics
+        remove_if_exists(diagnostics_fn)
+        diagnostics_id = uuid.uuid4().hex
+        diagnostics_kwargs = {
+            "diagnostics": diagnostics_fn,
+            "diagnostics_id": diagnostics_id,
+        }
 
         if fill_or_breach == "fill":
-            ret = self.wbt.fill_depressions(dem=self.dem, output=relief_fn)
+            ret = self.wbt.fill_depressions(dem=self.dem, output=relief_fn, **diagnostics_kwargs)
         elif fill_or_breach == "breach":
-            ret = self.wbt.breach_depressions(dem=self.dem, output=relief_fn, fill_pits=True)
+            ret = self.wbt.breach_depressions(
+                dem=self.dem, output=relief_fn, fill_pits=True, **diagnostics_kwargs
+            )
         elif fill_or_breach == "breach_least_cost":
             dist_cells = self._resolve_blc_dist_cells(blc_dist)
             kwargs: Dict[str, Any] = {
@@ -628,6 +909,7 @@ class WhiteboxToolsTopazEmulator:
                 "dist": dist_cells,
                 "fill": bool(blc_fill),
                 "fail_on_unresolved": bool(blc_fail_on_unresolved),
+                **diagnostics_kwargs,
             }
             if blc_max_cost is not None:
                 kwargs["max_cost"] = float(blc_max_cost)
@@ -648,6 +930,7 @@ class WhiteboxToolsTopazEmulator:
                 dem=self.dem,
                 output=relief_fn,
                 max_obstruction_width=TOPAZ_CONDITION_MAX_OBSTRUCTION_WIDTH,
+                **diagnostics_kwargs,
                 timeout=TOPAZ_CONDITION_TIMEOUT_SECONDS,
             )
         else:
@@ -658,6 +941,20 @@ class WhiteboxToolsTopazEmulator:
 
         if not _exists(relief_fn):
             raise Exception(f"Relief file was not created: {relief_fn}, ret = {ret}")
+        try:
+            diagnostics_payload = load_conditioning_diagnostics(
+                diagnostics_fn,
+                method=fill_or_breach,
+                operation_id=diagnostics_id,
+                input_name=self.dem,
+                output_name=relief_fn,
+                root_dir=self.wbt_wd,
+            )
+        except WbtConditioningDiagnosticsError:
+            remove_if_exists(diagnostics_fn)
+            remove_if_exists(relief_fn)
+            raise
+        self._conditioning_diagnostics_payload = diagnostics_payload
 
         if self.verbose:
             print(f"Relief file created successfully: {relief_fn}")
@@ -943,7 +1240,7 @@ class WhiteboxToolsTopazEmulator:
                 blc_fail_on_unresolved=fail_on_unresolved,
                 logger=logger,
             )
-        except WbtUnresolvedDepressionsError:
+        except (WbtUnresolvedDepressionsError, WbtConditioningDiagnosticsError):
             self._remove_stale_channel_products_after_conditioning_failure()
             raise
         self._create_flow_vector(logger=logger)

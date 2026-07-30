@@ -370,6 +370,7 @@ var ChannelDelineation = (function () {
         channel.glLayer = null;
         channel.labels = L.layerGroup();
         channel._completion_seen = false;
+        channel._conditioning_diagnostics_token_seen = false;
         var uploadDemState = {
             ready: !!(formElement && formElement.dataset && formElement.dataset.uploadedDem === "true"),
             extent: null,
@@ -876,11 +877,104 @@ var ChannelDelineation = (function () {
 
         initializeUI();
 
+        function conditioningDiagnosticsFromCompletion(payload) {
+            var candidate = payload && payload.status
+                ? payload.status.conditioning_diagnostics
+                : null;
+            var triggerProducerId = null;
+            var liveTokenSeen = false;
+            if (!candidate && payload && Array.isArray(payload.tokens)) {
+                var rqToken = payload.tokens.find(function (value) {
+                    return String(value).indexOf("rq:") === 0;
+                });
+                triggerProducerId = rqToken ? String(rqToken).slice(3) : null;
+                var token = payload.tokens.find(function (value) {
+                    return String(value).indexOf("DIAGNOSTICS_V1:") === 0;
+                });
+                if (token) {
+                    liveTokenSeen = true;
+                    channel._conditioning_diagnostics_token_seen = true;
+                    try {
+                        var encoded = token.slice("DIAGNOSTICS_V1:".length)
+                            .replace(/-/g, "+").replace(/_/g, "/");
+                        if (encoded.length > 5464) {
+                            return null;
+                        }
+                        while (encoded.length % 4) {
+                            encoded += "=";
+                        }
+                        var decoded = window.atob(encoded);
+                        if (decoded.length > 4096) {
+                            return null;
+                        }
+                        candidate = JSON.parse(decoded);
+                    } catch (error) {
+                        console.warn("Invalid conditioning diagnostics trigger", error);
+                    }
+                }
+            }
+            var expectedKeys = [
+                "elevation_unit", "maximum_cut", "maximum_raise", "method",
+                "operation_id", "producer_job_id", "root_job_id",
+                "schema_version", "summary"
+            ];
+            var candidateKeys = candidate && typeof candidate === "object"
+                ? Object.keys(candidate).sort() : [];
+            var validMethod = candidate
+                && ["fill", "breach", "breach_least_cost", "topaz"].indexOf(candidate.method) !== -1;
+            if (!candidate || JSON.stringify(candidateKeys) !== JSON.stringify(expectedKeys)
+                    || candidate.schema_version !== 1
+                    || candidate.root_job_id !== channel.rq_job_id
+                    || typeof candidate.producer_job_id !== "string"
+                    || (liveTokenSeen
+                        && candidate.producer_job_id !== triggerProducerId)
+                    || !/^[0-9a-f]{32}$/.test(candidate.operation_id)
+                    || !validMethod || candidate.elevation_unit !== "m"
+                    || typeof candidate.maximum_raise !== "number"
+                    || !Number.isFinite(candidate.maximum_raise) || candidate.maximum_raise < 0
+                    || typeof candidate.maximum_cut !== "number"
+                    || !Number.isFinite(candidate.maximum_cut) || candidate.maximum_cut < 0
+                    || typeof candidate.summary !== "string"
+                    || candidate.summary.length < 1 || candidate.summary.length > 1000
+                    || candidate.summary.split("").some(function (character) {
+                        var code = character.charCodeAt(0);
+                        return code < 32 || code === 127;
+                    })) {
+                return null;
+            }
+            return candidate;
+        }
+
         var baseTriggerEvent = channel.triggerEvent.bind(channel);
         channel.triggerEvent = function (eventName, payload) {
             var normalized = eventName ? String(eventName).toUpperCase() : "";
             if (normalized === "BUILD_CHANNELS_TASK_COMPLETED") {
                 if (!channel._completion_seen) {
+                    var conditioningDiagnostics = conditioningDiagnosticsFromCompletion(payload);
+                    var diagnosticsRequired = !!(payload && payload.status
+                        && payload.status.conditioning_diagnostics_required)
+                        || channel._conditioning_diagnostics_token_seen === true
+                        || !!(wbtFillSelect && [
+                            "fill", "breach", "breach_least_cost", "topaz"
+                        ].indexOf(wbtFillSelect.value) !== -1);
+                    if (diagnosticsRequired && !conditioningDiagnostics) {
+                        if (statusAdapter) {
+                            statusAdapter.text("Channel delineation stopped because terrain-conditioning diagnostics could not be verified.");
+                        }
+                        emit("channel:build:error", {
+                            reason: "wbt_conditioning_diagnostics_invalid",
+                            payload: payload || {}
+                        });
+                        baseTriggerEvent("job:error", {
+                            job_id: channel.rq_job_id,
+                            task: "channel:build",
+                            payload: payload || {}
+                        });
+                        return;
+                    }
+                    if (conditioningDiagnostics && statusAdapter) {
+                        statusAdapter.text(conditioningDiagnostics.summary);
+                    }
                     channel._completion_seen = true;
                     channel.disconnect_status_stream(channel);
                     channel.show();
@@ -967,6 +1061,7 @@ var ChannelDelineation = (function () {
 
             channel.remove();
             channel._completion_seen = false;
+            channel._conditioning_diagnostics_token_seen = false;
             try {
                 Outlet.getInstance().remove();
             } catch (err) {

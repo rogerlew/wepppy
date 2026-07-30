@@ -5,7 +5,7 @@
 This schema governs successful DEM-conditioning sidecars produced by
 `FillDepressions`, `BreachDepressions`, `BreachDepressionsLeastCost`, and
 `TopazConditionDem`, plus the reduced payload WEPPcloud publishes for channel
-delineation. DOM-05B implementation conformance is pending.
+delineation. DOM-05B implementation conformance was completed on 2026-07-30.
 
 ## Sidecar Schema Version 1
 

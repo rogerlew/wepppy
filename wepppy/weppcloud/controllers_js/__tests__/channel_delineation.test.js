@@ -257,6 +257,88 @@ describe("Channel Delineation controller", () => {
         expect(requestMock.mock.calls[0][1].json.wbt_fill_or_breach).toBe("topaz");
     });
 
+    test("successful diagnostics render one plain-text summary", () => {
+        channel.rq_job_id = "root-job";
+        channel.show = jest.fn(() => Promise.resolve());
+        channel.report = jest.fn(() => Promise.resolve());
+
+        channel.triggerEvent("BUILD_CHANNELS_TASK_COMPLETED", {
+            status: {
+                conditioning_diagnostics: {
+                    schema_version: 1,
+                    root_job_id: "root-job",
+                    producer_job_id: "producer-job",
+                    operation_id: "0123456789abcdef0123456789abcdef",
+                    method: "fill",
+                    elevation_unit: "m",
+                    maximum_raise: 379,
+                    maximum_cut: 0,
+                    summary: "Fill completed. Maximum terrain raise: 379 m; maximum terrain cut: 0.00 m."
+                }
+            }
+        });
+
+        expect(document.getElementById("status").textContent).toContain("379 m");
+        expect(document.getElementById("status").querySelector("*")).toBeNull();
+    });
+
+    test("required diagnostics fail closed when the payload is missing", () => {
+        channel.rq_job_id = "root-job";
+        channel.show = jest.fn();
+        channel.report = jest.fn();
+
+        channel.triggerEvent("BUILD_CHANNELS_TASK_COMPLETED", {
+            status: { conditioning_diagnostics_required: true }
+        });
+
+        expect(channel.show).not.toHaveBeenCalled();
+        expect(channel.report).not.toHaveBeenCalled();
+        expect(channel._completion_seen).toBe(false);
+        expect(document.getElementById("status").textContent).toContain("could not be verified");
+    });
+
+    test("malformed live diagnostics token cannot publish completion", () => {
+        channel.rq_job_id = "root-job";
+        channel.show = jest.fn();
+        channel.report = jest.fn();
+
+        channel.triggerEvent("BUILD_CHANNELS_TASK_COMPLETED", {
+            tokens: ["DIAGNOSTICS_V1:not-json"]
+        });
+
+        expect(channel.show).not.toHaveBeenCalled();
+        expect(channel.report).not.toHaveBeenCalled();
+        expect(channel._completion_seen).toBe(false);
+    });
+
+    test("live diagnostics producer must match the trigger job", () => {
+        channel.rq_job_id = "root-job";
+        channel.show = jest.fn();
+        channel.report = jest.fn();
+        const diagnostic = {
+            schema_version: 1,
+            root_job_id: "root-job",
+            producer_job_id: "producer-job",
+            operation_id: "0123456789abcdef0123456789abcdef",
+            method: "fill",
+            elevation_unit: "m",
+            maximum_raise: 379,
+            maximum_cut: 0,
+            summary: "Fill completed."
+        };
+        const encoded = window.btoa(JSON.stringify(diagnostic))
+            .replace(/\+/g, "-").replace(/\//g, "_").replace(/=+$/, "");
+
+        channel.triggerEvent("BUILD_CHANNELS_TASK_COMPLETED", {
+            tokens: ["rq:different-job", "TRIGGER", `DIAGNOSTICS_V1:${encoded}`,
+                "channel_delineation", "BUILD_CHANNELS_TASK_COMPLETED"]
+        });
+
+        expect(channel.show).not.toHaveBeenCalled();
+        expect(channel.report).not.toHaveBeenCalled();
+        expect(channel._completion_seen).toBe(false);
+    });
+
     test("map changes keep job hint when a job is active", () => {
         channel.rq_job_id = "job-99";
         channel.render_job_hint(channel);

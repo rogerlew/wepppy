@@ -9,6 +9,7 @@ emitting status updates for the front-end while coordinating NoDb controllers.
 """
 
 import errno
+import base64
 import copy
 from contextlib import ExitStack
 import hashlib
@@ -47,6 +48,10 @@ from wepppy.weppcloud.user_preferences import (
     WbtBoundaryPolicyApplyError,
     WbtBoundaryPolicySnapshotError,
     validate_wbt_boundary_policy_snapshot,
+)
+from wepppy.topo.wbt.wbt_topaz_emulator import (
+    WbtConditioningDiagnosticsError,
+    summarize_conditioning_diagnostics,
 )
 
 from wepppy.nodb.base import clear_locks, clear_nodb_file_cache, lock_statuses
@@ -1313,6 +1318,7 @@ def build_channels_rq(
     stream_pruning_method: Optional[str],
     wbt_fill_or_breach: Optional[str],
     wbt_blc_dist: Optional[int],
+    root_job_id: Optional[str] = None,
 ) -> None:
     """Delineate channels for the watershed using configured thresholds.
 
@@ -1323,6 +1329,7 @@ def build_channels_rq(
         stream_pruning_method: Optional stream-pruning selection (`ifolp` or `remove_short_streams`).
         wbt_fill_or_breach: Optional override for Whitebox fill/breach strategy.
         wbt_blc_dist: Optional breaching distance when Whitebox backend is used.
+        root_job_id: Aggregate submission job used to correlate diagnostics.
 
     Raises:
         Exception: Propagates errors from watershed delineation.
@@ -1333,11 +1340,19 @@ def build_channels_rq(
         func_name = inspect.currentframe().f_code.co_name
         status_channel = f'{runid}:channel_delineation'
         StatusMessenger.publish(status_channel, f'rq:{job.id} STARTED {func_name}({runid})')
+        watershed_holder: dict[str, Any] = {}
         def _mutate_watershed() -> None:
             clear_nodb_file_cache(runid, pup_relpath="watershed.nodb")
             watershed = Watershed.getInstance(wd)
+            watershed_holder["value"] = watershed
             if watershed.delineation_backend_is_topaz:
                 clear_nodb_file_cache(runid, pup_relpath="topaz.nodb")
+            has_wbt_diagnostics = (
+                watershed.delineation_backend_is_wbt and hasattr(watershed, "wbt_wd")
+            )
+            if has_wbt_diagnostics:
+                job.meta["conditioning_diagnostics_required"] = True
+                job.save_meta()
             if watershed.delineation_backend_is_wbt:
                 if stream_pruning_method is not None:
                     StatusMessenger.publish(
@@ -1353,6 +1368,16 @@ def build_channels_rq(
                     watershed.wbt_blc_dist = wbt_blc_dist
             StatusMessenger.publish(status_channel, f'Building channels with csa={csa}, mcl={mcl}')
             watershed.build_channels(csa, mcl)
+            if has_wbt_diagnostics:
+                method = watershed.wbt_fill_or_breach
+                diagnostics = getattr(
+                    getattr(watershed, "_wbt", None),
+                    "_conditioning_diagnostics_payload",
+                    None,
+                )
+                if not isinstance(diagnostics, dict):
+                    raise WbtConditioningDiagnosticsError("missing")
+                watershed_holder["diagnostics"] = (method, diagnostics)
 
         _run_with_directory_root_lock(
             wd,
@@ -1360,8 +1385,35 @@ def build_channels_rq(
             _mutate_watershed,
             purpose="build-channels-rq",
         )
+        watershed = watershed_holder["value"]
+        has_wbt_diagnostics = "diagnostics" in watershed_holder
+        if has_wbt_diagnostics:
+            method, diagnostics = watershed_holder["diagnostics"]
+            diagnostics_root_job_id = str(root_job_id or job.meta.get("root_job_id") or job.id)
+            reduced = {
+                "schema_version": 1,
+                "root_job_id": diagnostics_root_job_id,
+                "producer_job_id": job.id,
+                "operation_id": diagnostics["operation_id"],
+                "method": method,
+                "elevation_unit": "m",
+                "maximum_raise": diagnostics["terrain_change"]["maximum_raise"],
+                "maximum_cut": diagnostics["terrain_change"]["maximum_cut"],
+                "summary": summarize_conditioning_diagnostics(diagnostics, method),
+            }
+            job.meta["conditioning_diagnostics"] = reduced
+            job.save_meta()
         StatusMessenger.publish(status_channel, f'rq:{job.id} COMPLETED {func_name}({runid})')
-        StatusMessenger.publish(status_channel, f'rq:{job.id} TRIGGER   channel_delineation BUILD_CHANNELS_TASK_COMPLETED')
+        trigger_payload = ""
+        if has_wbt_diagnostics:
+            encoded = base64.urlsafe_b64encode(
+                json.dumps(reduced, separators=(",", ":"), sort_keys=True).encode("utf-8")
+            ).decode("ascii").rstrip("=")
+            trigger_payload = f" DIAGNOSTICS_V1:{encoded}"
+        StatusMessenger.publish(
+            status_channel,
+            f'rq:{job.id} TRIGGER{trigger_payload} channel_delineation BUILD_CHANNELS_TASK_COMPLETED',
+        )
         
         prep = RedisPrep.getInstance(wd)
         prep.timestamp(TaskEnum.build_channels)
@@ -1400,6 +1452,24 @@ def build_channels_rq(
             status_channel,
             f"rq:{job.id} FAILED {func_name}({runid}) "
             f"{WBT_UNRESOLVED_DEPRESSION_MESSAGE}",
+        )
+        raise
+    except WbtConditioningDiagnosticsError as exc:
+        error_id = uuid.uuid4().hex
+        job.meta["error"] = {
+            "code": exc.code,
+            "message": exc.public_message,
+            "details": {"reason": exc.reason},
+        }
+        job.meta["error_id"] = error_id
+        job.meta.pop("exc_string", None)
+        job.save_meta()
+        __import__("logging").getLogger(__name__).error(
+            "Controlled WBT conditioning diagnostics failure "
+            "[error_id=%s runid=%s reason=%s]",
+            error_id,
+            runid,
+            exc.reason,
         )
         raise
     except Exception:
@@ -1475,6 +1545,7 @@ def fetch_dem_and_build_channels_rq(
                         stream_pruning_method,
                         wbt_fill_or_breach,
                         wbt_blc_dist,
+                        job.id,
                     ),
                     timeout=build_channels_timeout,
                 )
@@ -1498,6 +1569,7 @@ def fetch_dem_and_build_channels_rq(
                         stream_pruning_method,
                         wbt_fill_or_breach,
                         wbt_blc_dist,
+                        job.id,
                     ),
                     timeout=build_channels_timeout,
                     depends_on=ajob,

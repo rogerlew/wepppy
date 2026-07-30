@@ -222,6 +222,25 @@ Retry only after choosing an appropriate correction:
 
 WEPPcloud does not choose one of these alternatives automatically.
 
+### Review successful terrain changes
+
+After successful WBT conditioning, the channel delineation summary states the
+largest elevation increase and cut. This is especially important for **Fill**,
+which can raise a broad enclosed area to its spill elevation. For example:
+
+> Fill completed. Maximum terrain raise: 379 m; maximum terrain cut: 0.00 m.
+> Terrain was raised across 10.7% of the DEM.
+
+**Breach** reports its deepest cut and any isolated low cells raised before
+breaching. **Breach (Least Cost)** reports how many detected low points were
+resolved and confirms that WEPPcloud did not use fallback filling. **Topaz
+Conditioning Algorithm** reports depression fills and narrow-barrier cuts while
+keeping tiny flat-routing adjustments separate.
+
+These measurements describe how the raster changed; they do not classify a
+change as safe or unsafe. Compare unusually large changes with the source DEM,
+expected drainage, map extent, and NoData boundary.
+
 ## Build the Channels
 
 1. Select an **Extent mode** and provide its required extent or DEM input.

@@ -15,13 +15,13 @@ while technical diagnostics remain available in a run-local JSON sidecar.
 - [x] (2026-07-30) Inspected all four fork algorithms, wrappers, WEPPpy
   dispatch, RQ completion, controllers, and existing TOPAZ diagnostics.
 - [x] (2026-07-30) Measured the incident fixture across Fill, Breach, and TOPAZ.
-- [ ] Commit the reviewed contract checkpoint (both independent post-fix
+- [x] Commit the reviewed contract checkpoint (both independent post-fix
   reviews passed).
-- [ ] Implement WBT schema and instrumentation without raster-output changes.
-- [ ] Build/install the WBT binary and validate four generated sidecars.
-- [ ] Implement WEPPpy validation, formatting, RQ propagation, and UI summary.
-- [ ] Complete regression gates, reviews, documentation, and package closure.
-- [ ] Commit and push `weppcloud-wbt`.
+- [x] Implement WBT schema and instrumentation without raster-output changes.
+- [x] Build/install the WBT binary and validate four generated sidecars.
+- [x] Implement WEPPpy validation, formatting, RQ propagation, and UI summary.
+- [x] Complete regression gates, reviews, documentation, and package closure.
+- [x] Commit and push `weppcloud-wbt`.
 
 ## Surprises & Discoveries
 
@@ -97,4 +97,12 @@ disposition. Move this plan to `prompts/completed/` and close the package.
 
 ## Outcomes & Retrospective
 
-Pending execution.
+All four WBT algorithms now emit a common versioned sidecar, and WEPPcloud
+validates and reduces it into one plain-language successful completion
+paragraph. The incident fixture's direct Fill run measured a 379.02 m maximum
+raise, demonstrating that the summary exposes the extreme terrain change.
+
+WBT commits `bd8e0e4` and `ef69a38` were pushed to `origin/master`; the
+installed binary SHA-256 is
+`491f892aabf83a6ecde7639473f94c63004935b275f3d846f9eddaee1c5cb14f`.
+Production promotion remains separate.

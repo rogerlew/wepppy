@@ -306,3 +306,107 @@ def test_get_job_status_keeps_failed_allow_failure_tree_nonterminal_until_childr
     assert payload["ended_at"] == (
         "2026-07-15T20:00:05Z" if second_child_status == "finished" else None
     )
+
+
+@pytest.mark.parametrize("case", ["missing", "multiple", "wrong_root", "valid"])
+def test_terminal_required_conditioning_diagnostics_fail_closed(
+    monkeypatch: pytest.MonkeyPatch,
+    case: str,
+) -> None:
+    root_job = _FakeJob(id="root", meta={"runid": "run-1"}, status="finished")
+    diagnostic = {
+        "schema_version": 1,
+        "root_job_id": "wrong" if case == "wrong_root" else "root",
+        "producer_job_id": "child",
+        "operation_id": "0123456789abcdef0123456789abcdef",
+        "method": "fill",
+        "elevation_unit": "m",
+        "maximum_raise": 379.0,
+        "maximum_cut": 0.0,
+        "summary": "Fill completed.",
+    }
+    child = {
+        "job_id": "child",
+        "status": "finished",
+        "started_at": "2026-07-30T00:00:00Z",
+        "ended_at": "2026-07-30T00:00:01Z",
+        "children": {},
+        "_conditioning_diagnostics_required": True,
+    }
+    if case != "missing":
+        child["_conditioning_diagnostics"] = diagnostic
+    children = [child]
+    if case == "multiple":
+        children.append({**child, "job_id": "child-2"})
+
+    class _FakeRedisContext:
+        def __init__(self, *args: Any, **kwargs: Any) -> None:
+            return None
+
+        def __enter__(self) -> object:
+            return object()
+
+        def __exit__(self, exc_type: Any, exc: Any, tb: Any) -> bool:
+            return False
+
+    monkeypatch.setattr(job_info.redis, "Redis", _FakeRedisContext)
+    monkeypatch.setattr(job_info.Job, "fetch", lambda job_id, connection: root_job)
+    monkeypatch.setattr(
+        job_info,
+        "recursive_get_job_details",
+        lambda job, redis_conn, now: {
+            "job_id": "root",
+            "runid": "run-1",
+            "status": "finished",
+            "started_at": "2026-07-30T00:00:00Z",
+            "ended_at": "2026-07-30T00:00:01Z",
+            "children": {"0": children},
+        },
+    )
+
+    payload = job_info.get_wepppy_rq_job_status("root")
+
+    if case == "valid":
+        assert payload["status"] == "finished"
+        assert payload["conditioning_diagnostics"] == diagnostic
+    else:
+        assert payload["status"] == "failed"
+        assert payload["error"]["code"] == "wbt_conditioning_diagnostics_invalid"
+        assert len(payload["error_id"]) == 32
+
+
+def test_private_conditioning_metadata_is_removed_from_jobinfo_tree() -> None:
+    tree = {
+        "_conditioning_diagnostics_required": True,
+        "children": {
+            "0": [{
+                "_conditioning_diagnostics": {"schema_version": 1},
+                "children": {},
+            }]
+        },
+    }
+
+    job_info._strip_private_conditioning_metadata(tree)
+
+    assert "_conditioning_diagnostics_required" not in tree
+    assert "_conditioning_diagnostics" not in tree["children"]["0"][0]
+
+
+def test_jobinfo_overlays_aggregate_conditioning_failure() -> None:
+    details = {"status": "finished", "exc_info": "stale"}
+    status = {
+        "status": "failed",
+        "error": {
+            "code": "wbt_conditioning_diagnostics_invalid",
+            "message": "Diagnostics invalid.",
+            "details": {"reason": "missing"},
+        },
+        "error_id": "0123456789abcdef0123456789abcdef",
+    }
+
+    job_info._overlay_conditioning_diagnostics_failure(details, status)
+
+    assert details["status"] == "failed"
+    assert details["error"] == status["error"]
+    assert details["error_id"] == status["error_id"]
+    assert details["exc_info"] is None
