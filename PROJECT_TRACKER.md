@@ -295,6 +295,27 @@ When resuming Kubernetes work:
 
 ## 🚧 In Progress
 
+### Account User Preferences and WBT Boundary Policy (SURF-14A)
+
+**Started**: 2026-07-30
+**Size**: Medium-High
+**Priority**: High
+**Security impact**: `high` (authenticated mutation, database migration,
+creation propagation, and RQ failure behavior)
+**Link**: [docs/work-packages/20260729_user_preferences_wbt_boundary/](docs/work-packages/20260729_user_preferences_wbt_boundary/)
+**Description**: Add a Profile-linked, PureCSS User Preferences page for
+new-project unit defaults and configurable WBT DEM-boundary handling. Effective
+values are snapshotted into new runs; existing/shared/forked runs remain
+stable. The `Stop with an error` mode raises an actionable typed failure rather
+than accepting a clipped watershed. Contract checkpoint and reviews precede
+implementation; the operator authorized the reviewed additive migration on
+Forest after local validation and final review.
+
+**Next Steps**: Complete two independent checkpoint reviews, disposition
+findings, and commit the documentation-only ancestor before implementation.
+
+---
+
 ### Channel Depression Smoothing Propagation Fix (REM-05)
 
 **Started**: 2026-07-28
@@ -321,7 +342,7 @@ authentication tokens from logs, restore persistent security logging under
 
 Currently active work packages. Limit to 2-4 packages to maintain focus.
 
-**Current WIP Count**: 15 packages
+**Current WIP Count**: 16 packages
 
 ### SSURGO Intelligent Fallback Empirical Study
 **Started**: 2026-07-21
