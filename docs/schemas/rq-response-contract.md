@@ -103,10 +103,14 @@ Landuse first-class route notes (2026-04-24):
 
 ## Job polling responses
 - Job status (jobstatus):
-  - `{job_id, runid, status, started_at, ended_at}`
+  - `{job_id, runid, status, started_at, ended_at, conditioning_diagnostics?}`
   - For registered trees, any queued/started/deferred/scheduled descendant keeps
     the aggregate non-terminal. Failed/stopped/canceled takes precedence only
     after no descendant remains active.
+  - `conditioning_diagnostics` is present only for successful WBT channel
+    delineation and follows
+    `docs/schemas/wbt-conditioning-diagnostics-contract.md`. A terminal WBT
+    tree cannot report success when this field is absent or invalid.
 - Job info (jobinfo):
   - `{job_id, runid, status, result, started_at, ended_at, description, elapsed_s, exc_info, children, auth_actor, culvert_batch_uuid, error, error_id}`
   - `auth_actor` is optional and only includes non-PII identifiers (no JWTs, no email).
@@ -150,6 +154,7 @@ Whitebox fill fallback. The `build_channels_rq` child fails with:
 - `error.code="wbt_unresolved_depressions"`;
 - the exact actionable message:
   `Channel delineation stopped because Breach (Least Cost) could not resolve all depressions within the selected search distance. WEPPcloud did not fill the unresolved depressions because filling can substantially raise terrain and reroute flow. Increase the breach distance, enlarge or reposition the DEM so the expected outlet is within the Breach (Least Cost) distance, inspect DEM and NoData boundaries, or choose another conditioning method, then build channels again.`;
+
 - `error.details.unresolved_depression_count` as a positive integer;
 - `error.details.search_distance_m` as a positive number;
 - `error.details.search_distance_cells` as a positive integer; and
@@ -167,6 +172,31 @@ completion is not timestamped, no fallback-filled `relief.tif` is accepted,
 and a new submission may retry with a larger distance, changed DEM extent, or
 different explicit conditioning method. Unrelated WBT and unexpected failures
 retain their existing traceback behavior.
+
+### WBT conditioning successful completion
+
+DOM-05B implementation conformance is pending. On successful WBT channel
+delineation, the build-channel job metadata, aggregate status response, and
+`BUILD_CHANNELS_TASK_COMPLETED` trigger carry the same additive
+`conditioning_diagnostics` object using the exact schema, encoding,
+correlation, replay, and size rules in
+`docs/schemas/wbt-conditioning-diagnostics-contract.md`. Filesystem paths and
+raw sidecar JSON are excluded. Existing consumers may ignore the object.
+
+The channel UI renders one plain-text paragraph from the validated `summary`.
+It must not duplicate summary/detail text, interpret magnitudes as safe or
+unsafe, combine synthetic flat relief with substantive fill/cut measures, or
+render diagnostic content as HTML.
+
+Invalid diagnostics use the controlled
+`wbt_conditioning_diagnostics_invalid` failure defined by that schema;
+completion trigger and build timestamp are not published.
+
+Open `jobinfo` returns `exc_info=null` for diagnostics-invalid failures and
+exposes only the allowlisted error reason and `error_id`. Open `jobstatus`
+surfaces the terminal failure but never the raw sidecar. A new submission may
+retry; unrelated WBT and unexpected failures retain existing traceback
+behavior.
 
 ### WBT initiating-user policy snapshot
 

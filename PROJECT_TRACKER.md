@@ -2,7 +2,7 @@
 > Kanban board for wepppy work packages and vision items
 
 **Last Updated**: 2026-07-30
-**Active Packages**: 20
+**Active Packages**: 21
 **Quick Links**: [Work Packages Directory](docs/work-packages/) | [God-Tier Prompting Strategy](docs/god-tier-prompting-strategy.md)
 
 ## Purpose
@@ -294,6 +294,18 @@ When resuming Kubernetes work:
 ---
 
 ## 🚧 In Progress
+
+### WBT Conditioning Success Diagnostics (DOM-05B)
+**Started**: 2026-07-30
+**Status**: Contract checkpoint
+**Priority**: High
+**Security impact**: `high`
+**Link**: [docs/work-packages/20260730_wbt_conditioning_success_diagnostics/](docs/work-packages/20260730_wbt_conditioning_success_diagnostics/)
+**Description**: Add versioned diagnostics sidecars to all four WBT depression
+conditioning methods and propagate an interpretable maximum raise/cut summary
+through successful channel delineation completion.
+
+---
 
 ### WBT Least-Cost Unresolved-Depression Fail-Fast Guidance
 

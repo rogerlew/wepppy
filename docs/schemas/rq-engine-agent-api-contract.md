@@ -175,7 +175,11 @@ Submission/command responses:
 - Keys use `lower_snake_case`.
 
 Polling responses:
-- `jobstatus`: `{job_id, runid, status, started_at, ended_at}`
+- `jobstatus`:
+  `{job_id, runid, status, started_at, ended_at, conditioning_diagnostics?}`.
+  The optional field is present only for successful WBT channel delineation
+  and follows `docs/schemas/wbt-conditioning-diagnostics-contract.md`; a
+  terminal WBT tree cannot report success with missing or invalid diagnostics.
 - `jobinfo`: `{job_id, runid, status, result, started_at, ended_at, description, elapsed_s, exc_info, children, auth_actor?, culvert_batch_uuid?}`
 - Canonical `status` values in successful polling payloads:
   - non-terminal: `queued`, `started`, `deferred`, `scheduled`
