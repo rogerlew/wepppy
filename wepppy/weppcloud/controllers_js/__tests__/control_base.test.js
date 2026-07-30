@@ -246,10 +246,14 @@ describe("controlBase job status error handling", () => {
             { params: undefined }
         );
         expect(document.getElementById("info").textContent).toContain(guidance);
-        expect(document.getElementById("info").textContent).toContain(
-            "Selected breach distance 1000 m; unresolved depressions 3."
-        );
-        expect(document.getElementById("info").textContent).toContain("controlled-123");
+        const metadataItems = Array.from(
+            document.querySelectorAll("#info .wc-control__error-meta-item")
+        ).map((item) => item.textContent);
+        expect(metadataItems).toEqual([
+            "Breach distance1,000 m",
+            "Unresolved depressions3",
+            "Error IDcontrolled-123"
+        ]);
         expect(document.getElementById("stacktrace").textContent).toBe("");
         expect(document.getElementById("stacktrace").hidden).toBe(true);
     });

@@ -218,6 +218,11 @@ uppercase presentation. Controlled failures now publish `FAILED` rather than
 empty and collapsed. Unexpected failures retain their existing traceback
 presentation.
 
+The final presentation keeps the instructional message as a paragraph and
+places breach distance, unresolved count, and error ID in a separate labeled
+metadata row. Outlet guidance now says the DEM should be positioned so the
+expected outlet is within the Breach (Least Cost) distance.
+
 ## Watch List
 
 - **Current `disturbed9002_wbt` default**: This configuration now defaults to

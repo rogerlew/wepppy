@@ -214,7 +214,8 @@ Retry only after choosing an appropriate correction:
 
 - increase **Breach least cost distance** when the expected drainage target is
   farther away;
-- enlarge or reposition the DEM extent so the expected outlet is represented;
+- enlarge or reposition the DEM so the expected outlet is within the
+  **Breach (Least Cost)** distance;
 - inspect the DEM crop and NoData mask for a closed or missing edge; or
 - deliberately select another conditioning method when its terrain changes
   better match the modeling intent.

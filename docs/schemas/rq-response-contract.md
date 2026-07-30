@@ -149,15 +149,16 @@ Whitebox fill fallback. The `build_channels_rq` child fails with:
 
 - `error.code="wbt_unresolved_depressions"`;
 - the exact actionable message:
-  `Channel delineation stopped because Breach (Least Cost) could not resolve all depressions within the selected search distance. WEPPcloud did not fill the unresolved depressions because filling can substantially raise terrain and reroute flow. Increase the breach distance, enlarge or reposition the DEM to include the expected outlet, inspect DEM and NoData boundaries, or choose another conditioning method, then build channels again.`;
+  `Channel delineation stopped because Breach (Least Cost) could not resolve all depressions within the selected search distance. WEPPcloud did not fill the unresolved depressions because filling can substantially raise terrain and reroute flow. Increase the breach distance, enlarge or reposition the DEM so the expected outlet is within the Breach (Least Cost) distance, inspect DEM and NoData boundaries, or choose another conditioning method, then build channels again.`;
 - `error.details.unresolved_depression_count` as a positive integer;
 - `error.details.search_distance_m` as a positive number;
 - `error.details.search_distance_cells` as a positive integer; and
 - a correlation `error_id`.
 
-Clients should append the validated search distance, unresolved count, and
-correlation identifier to the primary summary as plain text. These additions
-must not replace or truncate the exact instructional message.
+Clients should present the validated search distance, unresolved count, and
+correlation identifier as labeled metadata below the primary summary. These
+details must not be appended to, replace, or truncate the exact instructional
+message.
 
 Open `jobinfo` returns `exc_info=null` for this expected failure and exposes
 only the allowlisted error, numeric details, and `error_id`. The aggregate

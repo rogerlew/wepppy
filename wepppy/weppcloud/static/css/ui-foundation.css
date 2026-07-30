@@ -2048,6 +2048,34 @@ a.wc-maturity-pill:focus-visible {
   color: var(--wc-color-text);
 }
 
+.wc-control__error-summary {
+  margin: 0;
+  line-height: 1.5;
+}
+
+.wc-control__error-meta {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--wc-space-sm) var(--wc-space-xl);
+  margin: var(--wc-space-md) 0 0;
+  color: var(--wc-color-text-muted);
+  font-size: var(--wc-font-size-sm);
+}
+
+.wc-control__error-meta-item {
+  display: grid;
+  gap: var(--wc-space-2xs);
+}
+
+.wc-control__error-meta dt {
+  font-weight: var(--wc-font-weight-semibold);
+}
+
+.wc-control__error-meta dd {
+  margin: 0;
+  overflow-wrap: anywhere;
+}
+
 .wc-control__stacktrace {
   font-family: var(--wc-font-mono);
   font-size: var(--wc-font-size-sm);

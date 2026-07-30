@@ -92,16 +92,7 @@
             return null;
         }
         if (payload.error && typeof payload.error === "object" && payload.error.message) {
-            var details = payload.error.details || {};
-            var diagnostic = (
-                Number.isFinite(Number(details.search_distance_m))
-                && Number.isInteger(Number(details.unresolved_depression_count))
-            )
-                ? " (Selected breach distance " + Number(details.search_distance_m)
-                    + " m; unresolved depressions " + Number(details.unresolved_depression_count) + ".)"
-                : "";
-            var errorId = payload.error_id ? " [Error ID " + payload.error_id + "]" : "";
-            return String(payload.error.message) + diagnostic + errorId;
+            return null;
         }
         if (payload.exc_info) {
             return payload.exc_info;

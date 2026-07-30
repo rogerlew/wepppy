@@ -415,17 +415,12 @@ function controlBase() {
         Promise.resolve(fetchJobInfo)
             .then(function (payload) {
                 if (payload && payload.error && typeof payload.error === "object" && payload.error.message) {
-                    const details = payload.error.details || {};
-                    const diagnostic = (
-                        Number.isFinite(Number(details.search_distance_m))
-                        && Number.isInteger(Number(details.unresolved_depression_count))
-                    )
-                        ? ` (Selected breach distance ${Number(details.search_distance_m)} m; unresolved depressions ${Number(details.unresolved_depression_count)}.)`
-                        : "";
-                    const errorId = payload.error_id ? ` [Error ID ${payload.error_id}]` : "";
-                    errorPayload.error.message = String(payload.error.message) + diagnostic + errorId;
                     clearStacktrace(self.stacktrace);
-                    updateErrorSummary(self, errorPayload);
+                    renderControlledErrorSummary(self, {
+                        message: payload.error.message,
+                        details: payload.error.details,
+                        errorId: payload.error_id,
+                    });
                     emitFailure();
                     return;
                 }
@@ -809,6 +804,66 @@ function controlBase() {
             return;
         }
         setTextContent(target, summary);
+    }
+
+    function renderControlledErrorSummary(self, payload) {
+        const target = resolveSummaryTarget(self);
+        if (!target) {
+            return;
+        }
+
+        const message = String(payload.message || "");
+        const targetElement = unwrapElement(target);
+        if (!targetElement || typeof document === "undefined") {
+            setTextContent(target, message);
+            return;
+        }
+
+        setTextContent(targetElement, "");
+
+        const messageElement = document.createElement("p");
+        messageElement.className = "wc-control__error-summary";
+        messageElement.textContent = message;
+        targetElement.appendChild(messageElement);
+
+        const details = payload.details || {};
+        const metadata = [];
+        if (Number.isFinite(Number(details.search_distance_m))) {
+            metadata.push([
+                "Breach distance",
+                `${Number(details.search_distance_m).toLocaleString()} m`,
+            ]);
+        }
+        if (Number.isInteger(Number(details.unresolved_depression_count))) {
+            metadata.push([
+                "Unresolved depressions",
+                Number(details.unresolved_depression_count).toLocaleString(),
+            ]);
+        }
+        if (payload.errorId) {
+            metadata.push(["Error ID", String(payload.errorId)]);
+        }
+        if (metadata.length === 0) {
+            return;
+        }
+
+        const metadataElement = document.createElement("dl");
+        metadataElement.className = "wc-control__error-meta";
+        metadata.forEach(function (entry) {
+            const item = document.createElement("div");
+            item.className = "wc-control__error-meta-item";
+
+            const term = document.createElement("dt");
+            term.textContent = entry[0];
+            item.appendChild(term);
+
+            const value = document.createElement("dd");
+            value.textContent = entry[1];
+            item.appendChild(value);
+
+            metadataElement.appendChild(item);
+        });
+        targetElement.appendChild(metadataElement);
     }
 
     function resolveButtons(self) {

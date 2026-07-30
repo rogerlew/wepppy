@@ -22,3 +22,13 @@ def test_anchor_primary_pure_buttons_use_theme_variables() -> None:
     assert "--wc-button-primary-text" in rule
     assert "background-color: var(--wc-button-primary-bg" in rule
     assert "border-color: var(--wc-button-primary-bg" in rule
+
+
+def test_controlled_error_summary_separates_message_and_metadata() -> None:
+    css = UI_FOUNDATION_CSS.read_text(encoding="utf-8")
+
+    assert ".wc-control__error-summary" in css
+    assert ".wc-control__error-meta" in css
+    assert "flex-wrap: wrap" in css
+    assert ".wc-control__error-meta dd" in css
+    assert "overflow-wrap: anywhere" in css

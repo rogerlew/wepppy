@@ -170,7 +170,8 @@ Suggested public summary content, subject to contract approval:
 > or more depressions within the selected search distance. WEPPcloud did not
 > fill them because that could substantially raise terrain and reroute flow.
 > Increase the breach distance, enlarge or reposition the DEM so the expected
-> outlet is inside an open edge, inspect DEM/NoData boundaries, or choose
+> outlet is within the Breach (Least Cost) distance, inspect DEM/NoData
+> boundaries, or choose
 > another conditioning method, then build channels again.
 
 Include the selected distance and unresolved count only if they are reliable

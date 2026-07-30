@@ -65,8 +65,9 @@ WBT_UNRESOLVED_DEPRESSION_MESSAGE = (
     "all depressions within the selected search distance. WEPPcloud did not fill "
     "the unresolved depressions because filling can substantially raise terrain "
     "and reroute flow. Increase the breach distance, enlarge or reposition the "
-    "DEM to include the expected outlet, inspect DEM and NoData boundaries, or "
-    "choose another conditioning method, then build channels again."
+    "DEM so the expected outlet is within the Breach (Least Cost) distance, "
+    "inspect DEM and NoData boundaries, or choose another conditioning method, "
+    "then build channels again."
 )
 
 
