@@ -314,7 +314,8 @@ and final review.
 
 **Checkpoint**: Original documentation-only ancestor `1b412d61a`,
 user-context ancestor `4d2ef5838`, and atomic queue-admission ancestor
-`b1f1f99c8` are committed. Final post-canary review is pending.
+`b1f1f99c8` are committed. Release `363ab8ac3` and immutable rollback
+`0517bb8de` are published with final zero-finding reviews.
 
 **Implementation**: Request-local viewing-user Unitizer overlays and
 initiating-user WBT snapshots are implemented and pass local two-user
@@ -322,8 +323,10 @@ acceptance without durable project mutation. Strict failed-create cleanup
 purges and verifies Redis DB 0/11/13 and preserves correlated failure
 diagnostics. Local PostgreSQL is on merge head `c91f6b2a4d7e`.
 
-**Next Steps**: Complete frozen-source broad validation and final reviews, then
-run the operator-authorized Forest migration/canary.
+**Next Steps**: Forest preflight is blocked by unrelated dirty Command Bar/Pure
+UI work in the shared bind-mounted checkout. Once its owner makes the checkout
+clean, restart the exact backup/quiesce/migration/canary runbook from the
+beginning.
 
 ---
 

@@ -6,11 +6,11 @@
 
 **Started**: 2026-07-30 04:10 UTC
 
-**Current phase**: Forest preflight
+**Current phase**: Forest preflight blocked
 
 **Last updated**: 2026-07-30 14:05 UTC
 
-**Next milestone**: operator-authorized Forest migration and canary
+**Next milestone**: clean shared checkout, then restart Forest preflight
 
 **Security impact**: `high`
 
@@ -29,8 +29,8 @@ out-of-scope deletion. If the canary runs on 2026-07-30, review is due
 
 ### In Progress
 
-- [ ] Apply and verify the operator-authorized migration on Forest, then run
-  the reviewed authenticated canary.
+- [ ] Preserve release readiness while the shared Forest checkout is made
+  clean by the owner of the unrelated Command Bar/Pure UI work.
 
 ### Ready
 
@@ -38,7 +38,9 @@ out-of-scope deletion. If the canary runs on 2026-07-30, review is due
 
 ### Blocked
 
-- None.
+- Forest preflight is blocked by unrelated dirty work in the bind-mounted
+  `/home/workdir/wepppy` checkout. The exact runbook forbids proceeding until
+  it is clean; SURF-14A did not stash, commit, reset, or alter that work.
 
 ### Done
 
@@ -199,6 +201,14 @@ out-of-scope deletion. If the canary runs on 2026-07-30, review is due
 - [x] Received final governance/correctness and operations/security PASS
   reviews for exact fingerprint `4aa271981f...`, both with zero findings
   (2026-07-30 14:50 UTC).
+- [x] Committed and pushed release `363ab8ac3`; independently reviewed,
+  published, and verified rollback `0517bb8de` at the immutable dedicated
+  rollback ref (2026-07-30 15:30 UTC).
+- [x] Began read-only Forest preflight and proved the active workspace and
+  `ssh forest` are the same host/index. Release and migration heads are
+  current, queues are empty, and all ten workers are idle; stopped before
+  mutation because unrelated work makes the checkout dirty
+  (2026-07-30 15:40 UTC).
 
 ## Decisions
 

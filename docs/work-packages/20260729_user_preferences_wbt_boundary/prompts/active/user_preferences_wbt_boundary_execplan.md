@@ -189,7 +189,15 @@ enlarge the project extent.
 - [x] (2026-07-30 14:50 UTC) Received final governance/correctness and
   operations/security PASS reviews for exact fingerprint `4aa271981f...`,
   both with zero findings.
-- [ ] Apply and validate the authorized Forest migration and canary.
+- [x] (2026-07-30 15:30 UTC) Committed and pushed release `363ab8ac3`.
+  Constructed and independently reviewed the forward revert `0517bb8de`,
+  published it non-force at the reconciled immutable rollback ref, verified
+  the exact remote OID, and removed the detached temporary worktree.
+- [ ] Apply and validate the authorized Forest migration and canary. Read-only
+  preflight proved the active workspace is host `forest`, with release and
+  migration heads current, empty queues, and ten idle workers. The step is
+  blocked before mutation because unrelated Command Bar/Pure UI work makes the
+  shared bind-mounted checkout dirty.
 
 ## Surprises & Discoveries
 
