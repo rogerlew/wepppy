@@ -13,7 +13,6 @@ from wepppy.topo.wbt.wbt_topaz_emulator import (
     WBT_CONDITIONING_DIAGNOSTICS_FILENAME,
     WbtConditioningDiagnosticsError,
     load_conditioning_diagnostics,
-    summarize_conditioning_diagnostics,
 )
 from wepppy.topo.watershed_abstraction import ChannelRoutingError
 from wepppy.weppcloud.utils.helpers import authorize, authorize_and_handle_with_exception_factory
@@ -23,7 +22,23 @@ watershed_bp = Blueprint('watershed', __name__)
 logger = logging.getLogger(__name__)
 
 
-def _conditioning_summary_for_report(wd: str, method: str) -> str | None:
+def _format_diagnostic_measure(value: float) -> str:
+    if value == 0:
+        return "0.00"
+    if value >= 100:
+        return f"{value:.0f}"
+    if value >= 10:
+        return f"{value:.1f}"
+    if value >= 1:
+        return f"{value:.2f}"
+    if value >= 0.01:
+        return f"{value:.3f}"
+    return f"{value:.4f}"
+
+
+def _conditioning_diagnostics_for_report(
+    wd: str, method: str
+) -> dict[str, list[dict[str, str]]] | None:
     wbt_dir = Path(wd) / "dem" / "wbt"
     diagnostics_path = wbt_dir / WBT_CONDITIONING_DIAGNOSTICS_FILENAME
     if not diagnostics_path.is_file():
@@ -43,7 +58,153 @@ def _conditioning_summary_for_report(wd: str, method: str) -> str | None:
             extra={"run_root": wd, "reason": exc.reason},
         )
         return None
-    return summarize_conditioning_diagnostics(diagnostics, method)
+
+    terrain = diagnostics["terrain_change"]
+    conditioning = diagnostics["conditioning"]
+    parameters = diagnostics["parameters"]
+    valid_cells = max(1, int(terrain["valid_cell_count"]))
+
+    def affected_area(cell_count: int) -> str:
+        percent = 100.0 * cell_count / valid_cells
+        return f"{percent:.1f}% of DEM ({cell_count:,} cells)"
+
+    rows = [
+        {
+            "label": "Conditioning method",
+            "value": {
+                "fill": "Fill",
+                "breach": "Breach",
+                "breach_least_cost": "Breach (Least Cost)",
+                "topaz": "TOPAZ conditioning",
+            }[method],
+        },
+        {
+            "label": "Maximum terrain raise",
+            "value": f"{_format_diagnostic_measure(float(terrain['maximum_raise']))} m",
+        },
+        {
+            "label": "Maximum terrain cut",
+            "value": f"{_format_diagnostic_measure(float(terrain['maximum_cut']))} m",
+        },
+        {
+            "label": "DEM area raised",
+            "value": affected_area(int(terrain["raised_cell_count"])),
+        },
+        {
+            "label": "DEM area lowered",
+            "value": affected_area(int(terrain["lowered_cell_count"])),
+        },
+    ]
+
+    if method == "fill":
+        rows.extend([
+            {
+                "label": "Detected low points",
+                "value": f"{int(conditioning['detected_low_point_count']):,}",
+            },
+            {
+                "label": "Depressions filled",
+                "value": f"{int(conditioning['filled_depression_count']):,}",
+            },
+            {
+                "label": "Depressions skipped",
+                "value": f"{int(conditioning['skipped_depression_count']):,}",
+            },
+            {
+                "label": "Flat-gradient adjustment",
+                "value": (
+                    "Applied" if conditioning["flat_gradient_applied"]
+                    else "Not applied"
+                ),
+            },
+        ])
+    elif method == "breach":
+        rows.extend([
+            {
+                "label": "Depressions breached",
+                "value": f"{int(conditioning['breached_depression_count']):,}",
+            },
+            {
+                "label": "Longest breach path",
+                "value": (
+                    f"{_format_diagnostic_measure(float(conditioning['longest_breach_path']))} m"
+                ),
+            },
+            {
+                "label": "Isolated low cells filled",
+                "value": f"{int(conditioning['single_cell_pits_filled']):,}",
+            },
+            {
+                "label": "Residual filling",
+                "value": "Used" if conditioning["residual_fill_used"] else "Not used",
+            },
+        ])
+    elif method == "breach_least_cost":
+        rows.extend([
+            {
+                "label": "Detected low points",
+                "value": f"{int(conditioning['detected_low_point_count']):,}",
+            },
+            {
+                "label": "Low points resolved",
+                "value": f"{int(conditioning['resolved_low_point_count']):,}",
+            },
+            {
+                "label": "Low points unresolved",
+                "value": f"{int(conditioning['unresolved_low_point_count']):,}",
+            },
+            {
+                "label": "Longest breach path",
+                "value": (
+                    f"{_format_diagnostic_measure(float(conditioning['longest_breach_path']))} m"
+                ),
+            },
+            {
+                "label": "Search distance",
+                "value": (
+                    f"{_format_diagnostic_measure(float(parameters['search_distance']))} m"
+                ),
+            },
+            {
+                "label": "Fallback filling",
+                "value": "Used" if conditioning["fallback_fill_used"] else "Not used",
+            },
+        ])
+    else:
+        barrier_adjustments = (
+            int(conditioning["obstruction_adjustments_width_1"])
+            + int(conditioning["obstruction_adjustments_width_2"])
+        )
+        rows.extend([
+            {
+                "label": "Depressions filled",
+                "value": f"{int(conditioning['depression_count']):,}",
+            },
+            {
+                "label": "Cells filled",
+                "value": f"{int(conditioning['filled_cell_count']):,}",
+            },
+            {
+                "label": "Cells lowered",
+                "value": f"{int(conditioning['lowered_cell_count']):,}",
+            },
+            {
+                "label": "Narrow barriers adjusted",
+                "value": f"{barrier_adjustments:,}",
+            },
+            {
+                "label": "Tiny flat-routing adjustments",
+                "value": f"{int(conditioning['synthetic_relief_cell_count']):,} cells",
+            },
+            {
+                "label": "Maximum flat-routing adjustment",
+                "value": (
+                    f"{_format_diagnostic_measure(float(conditioning['maximum_synthetic_relief']))} m"
+                ),
+            },
+        ])
+
+    return {"rows": rows}
 
 @watershed_bp.route('/runs/<string:runid>/<config>/query/delineation_pass')
 @watershed_bp.route('/runs/<string:runid>/<config>/query/delineation_pass/')
@@ -107,7 +268,7 @@ def report_channel(runid, config):
         runid=runid,
         config=config,
         map=Ron.getInstance(wd).map,
-        conditioning_summary=_conditioning_summary_for_report(
+        conditioning_diagnostics=_conditioning_diagnostics_for_report(
             wd, watershed.wbt_fill_or_breach
         ),
     )

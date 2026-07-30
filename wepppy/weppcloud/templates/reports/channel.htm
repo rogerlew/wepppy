@@ -1,11 +1,5 @@
 <div class="wc-summary-pane">
   <dl class="wc-summary-pane__list">
-    {% if conditioning_summary %}
-    <div class="wc-summary-pane__item">
-      <dt class="wc-summary-pane__term">Terrain conditioning</dt>
-      <dd class="wc-summary-pane__definition">{{ conditioning_summary }}</dd>
-    </div>
-    {% endif %}
     <div class="wc-summary-pane__item">
       <dt class="wc-summary-pane__term">Extent (xmin, ymax, xmax, ymin)</dt>
       <dd class="wc-summary-pane__definition">{{map.extent[0]}}, {{map.extent[1]}}, {{map.extent[2]}}, {{map.extent[3]}}</dd>
@@ -28,3 +22,16 @@
     </div>
   </dl>
 </div>
+{% if conditioning_diagnostics %}
+<div class="wc-summary-pane">
+  <h4 class="wc-heading wc-heading--sm">Terrain Conditioning Diagnostics</h4>
+  <dl class="wc-summary-pane__list">
+    {% for diagnostic in conditioning_diagnostics.rows %}
+    <div class="wc-summary-pane__item">
+      <dt class="wc-summary-pane__term">{{ diagnostic.label }}</dt>
+      <dd class="wc-summary-pane__definition">{{ diagnostic.value }}</dd>
+    </div>
+    {% endfor %}
+  </dl>
+</div>
+{% endif %}

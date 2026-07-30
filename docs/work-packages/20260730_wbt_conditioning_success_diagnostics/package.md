@@ -19,8 +19,8 @@ depression filling raises terrain by hundreds of metres.
   `TopazConditionDem` sidecar with the shared contract.
 - Retain stage attribution so filling, cutting, pit filling, fallback filling,
   and synthetic flat relief are not conflated.
-- Publish one concise, interpretable completion summary through the existing
-  channel delineation status channel.
+- Publish interpretable, labeled diagnostic measures with the durable channel
+  summary report.
 - Preserve conditioning outputs, defaults, thresholds, and fallback behavior.
 
 ## Scope
@@ -62,8 +62,8 @@ attribution, RQ propagation, and plain-text rendering.
   records the measured value.
 - [x] Least-cost diagnostics distinguish breach results from fallback filling.
 - [x] TOPAZ diagnostics separate FILDEP changes from synthetic RELIEF.
-- [x] Channel completion presents one concise paragraph without duplicate
-  summary/detail or stacktrace styling.
+- [x] The channel report presents separate labeled measures without duplicate
+  prose or stacktrace styling.
 - [x] Focused WBT, Python, RQ, frontend, docs, and generated-output gates pass.
 - [x] `weppcloud-wbt` changes are committed and pushed.
 

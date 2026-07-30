@@ -132,7 +132,10 @@ Live/poll payloads require `root_job_id` to equal the active submission and
 oversized, unsupported, or cross-job payloads are ignored and logged.
 For a terminal WBT success, ignored/missing diagnostics instead convert client
 completion to a visible controlled error rather than a success event. Same-job
-replay is idempotent. Controllers render only `summary` as text.
+replay is idempotent. Controllers validate the reduced completion payload but
+do not render its prose `summary`. The durable channel report independently
+revalidates the run-scoped sidecar and renders allowlisted measures as separate
+labeled fields.
 
 ## Controlled Consumer Failure
 

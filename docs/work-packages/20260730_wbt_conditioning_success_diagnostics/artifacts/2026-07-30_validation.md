@@ -49,3 +49,8 @@ ships with the summary report independently of RQ metadata retention.
 - Full frontend suite: 105 suites and 755 tests passed.
 - Frontend lint, generated controller bundle, documentation lint, and changed
   broad-exception enforcement: pass.
+
+The final presentation uses separate labeled fields rather than a prose
+diagnostic paragraph. Live-run verification produced method, maximum raise/cut,
+affected DEM area, resolution counts, breach-path length, search distance, and
+fallback-fill status as distinct report rows.

@@ -41,8 +41,8 @@
 
 ### 2026-07-30: Show effects, not implementation jargon
 
-The primary summary always states the method, maximum raise, and maximum cut.
-Method-specific actions follow in plain language. Pit counts are labelled
+The report always shows method, maximum raise, and maximum cut as separate
+fields. Method-specific measures follow as labeled rows. Pit counts are labeled
 “detected low points” for least-cost output. Volumes remain secondary details.
 
 ### 2026-07-30: Preserve stage attribution
@@ -108,7 +108,14 @@ schema, threshold, or numerical behavior changes.
 
 Operator review clarified that successful conditioning diagnostics belong in
 the durable channel Summary Panel, not the transient status panel. The
-`report/channel` route now revalidates the run-scoped sidecar and supplies one
-escaped plain-text summary to `reports/channel.htm`. Controllers continue to
-validate completion diagnostics but use the ordinary status panel only for
-progress.
+`report/channel` now revalidates the run-scoped sidecar and supplies allowlisted
+diagnostic measures to `reports/channel.htm`. Controllers continue to validate
+completion diagnostics but use the ordinary status panel only for progress.
+
+### 2026-07-30: Separate diagnostics from map summary
+
+Operator review further clarified the report layout: terrain-conditioning
+diagnostics render as separate labeled measures immediately below the map
+Summary. The diagnostics section reuses the Summary component classes, remains
+conditional on validated diagnostics, and keeps common terrain changes and
+method-specific outcomes scannable without changing numerical behavior.
