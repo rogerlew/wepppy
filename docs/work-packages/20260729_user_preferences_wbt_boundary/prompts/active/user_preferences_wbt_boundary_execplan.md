@@ -71,6 +71,10 @@ different outlet or enlarge the project extent.
   pass. Restarted the locally version-skewed web/workers, verified authenticated
   Profile/Preferences rendering, and recovered the one affected RQ tree to
   3/3 finished.
+- [x] (2026-07-30 07:15 UTC) Committed implementation checkpoint
+  `e861aae36`, then used an isolated worktree to expose and repair stale
+  line-only RQ graph metadata and relocated legacy broad-catch suppressions;
+  the graph, broad-exception gate, and 68 affected WBT/RQ tests now pass.
 - [ ] Complete broad validation, documentation, final reviews, and local E2E.
 - [ ] Apply and validate the authorized Forest migration and canary.
 
@@ -128,6 +132,13 @@ different outlet or enlarge the project extent.
   `wasxfail` field unconditionally. Both tooling defects now have regression
   coverage and the scoped gate is genuinely clean.
 
+- Observation: the generated RQ dependency catalog includes source line
+  numbers, and the broad-exception allowlist is also line-sensitive.
+  Evidence: the isolated `e861aae36` release check found no dependency-edge
+  change but reported seven stale line references and two preexisting boundary
+  catches displaced by this package. Regeneration plus explicit inline
+  boundary suppressions restored both gates without changing runtime behavior.
+
 ## Decision Log
 
 - Decision: Use canonical tokens `config|si|english` and
@@ -168,9 +179,11 @@ incident recovery evidence is retained in
 selection passed 243 tests, the complete Python suite passed 5,675 tests with
 58 skips, frontend lint and all 745 JavaScript tests passed, both stubs and
 test-stub completeness passed, package docs passed, and the corrected
-isolation gate passed two order runs plus every per-file run. Immutable-revision
-graph/broad-exception gates and independent re-reviews remain mandatory.
-Acceptance E2E mutation and Forest rollout remain blocked.
+isolation gate passed two order runs plus every per-file run. The first
+immutable-revision check exposed line-sensitive RQ graph and broad-catch
+metadata; those repairs and 68 affected tests now pass. A replacement immutable
+checkpoint and independent re-reviews remain mandatory. Acceptance E2E
+mutation and Forest rollout remain blocked.
 
 ## Context and Orientation
 

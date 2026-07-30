@@ -1104,7 +1104,7 @@ class Watershed(WatershedOperationsMixin, WatershedLookupMixin, NoDbBase):
         if rebuilt is not None:
             try:
                 self._write_structure_json(rebuilt)
-            except Exception as exc:
+            except Exception as exc:  # broad-except: legacy structure persistence boundary
                 self.logger.debug("Failed to persist rebuilt structure.json: %s", exc)
             return rebuilt
 

@@ -8,7 +8,7 @@
 
 **Current phase**: Broad validation and final review
 
-**Last updated**: 2026-07-30 07:10 UTC
+**Last updated**: 2026-07-30 07:15 UTC
 
 **Next milestone**: post-remediation broad gates and independent re-reviews
 
@@ -91,6 +91,10 @@
   web/worker runtime, verified authenticated Profile/Preferences rendering,
   and recovered the affected RQ tree to 3/3 finished
   (2026-07-30 07:10 UTC).
+- [x] Checked implementation commit `e861aae36` in an isolated worktree,
+  regenerated its line-only RQ graph metadata, annotated the two displaced
+  legacy broad-catch boundaries, and passed the graph, broad-exception, and
+  68-test affected WBT/RQ gates (2026-07-30 07:15 UTC).
 
 ## Decisions
 
@@ -172,7 +176,7 @@ config or explicit user preference can choose fail-closed handling.
 - [x] Post-remediation `wctl run-pytest tests --maxfail=1` passes (5,675
   passed, 58 skipped).
 - [x] Post-remediation frontend lint and all 745 JavaScript tests pass.
-- [ ] Stub, test-stub, test-isolation, broad-exception, docs, and RQ graph gates
+- [x] Stub, test-stub, test-isolation, broad-exception, docs, and RQ graph gates
   pass as applicable.
 - [ ] Local stack E2E proves preference save and new-run effective snapshot.
 - [ ] Forest preflight records current migration head and database backup

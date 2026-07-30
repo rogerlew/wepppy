@@ -1926,7 +1926,7 @@ def fetch_and_analyze_openet_ts_rq(runid: str, payload: Mapping[str, Any] | None
         if options:
             try:
                 openet_ts.logger.info('OpenET_TS job options: %s', json.dumps(options, sort_keys=True))
-            except Exception:
+            except Exception:  # broad-except: optional RQ option-logging boundary
                 # Boundary catch: preserve contract behavior while logging unexpected failures.
                 __import__("logging").getLogger(__name__).exception("Boundary exception at wepppy/rq/project_rq.py:1257", extra={"runid": locals().get("runid"), "config": locals().get("config"), "job_id": locals().get("job_id")})
                 openet_ts.logger.info('OpenET_TS job options provided (%d keys)', len(options))

@@ -462,7 +462,7 @@
     "notes": [],
     "queue_name": "default",
     "source_function": "_handle_run_wepp_request",
-    "source_lineno": 161,
+    "source_lineno": 177,
     "source_module": "wepppy/microservices/rq_engine/wepp_routes.py"
   },
   {
@@ -608,7 +608,7 @@
     "notes": [],
     "queue_name": "default",
     "source_function": "build_subcatchments_and_abstract_watershed_rq",
-    "source_lineno": 1048,
+    "source_lineno": 1125,
     "source_module": "wepppy/rq/project_rq.py"
   },
   {
@@ -620,7 +620,7 @@
     "notes": [],
     "queue_name": "default",
     "source_function": "build_subcatchments_and_abstract_watershed_rq",
-    "source_lineno": 1056,
+    "source_lineno": 1133,
     "source_module": "wepppy/rq/project_rq.py"
   },
   {
@@ -630,7 +630,7 @@
     "notes": [],
     "queue_name": "default",
     "source_function": "fetch_dem_and_build_channels_rq",
-    "source_lineno": 808,
+    "source_lineno": 834,
     "source_module": "wepppy/rq/project_rq.py"
   },
   {
@@ -640,7 +640,7 @@
     "notes": [],
     "queue_name": "default",
     "source_function": "fetch_dem_and_build_channels_rq",
-    "source_lineno": 823,
+    "source_lineno": 849,
     "source_module": "wepppy/rq/project_rq.py"
   },
   {
@@ -652,7 +652,7 @@
     "notes": [],
     "queue_name": "default",
     "source_function": "fetch_dem_and_build_channels_rq",
-    "source_lineno": 831,
+    "source_lineno": 857,
     "source_module": "wepppy/rq/project_rq.py"
   },
   {
@@ -664,7 +664,7 @@
     "notes": [],
     "queue_name": "default",
     "source_function": "fork_rq",
-    "source_lineno": 1751,
+    "source_lineno": 1828,
     "source_module": "wepppy/rq/project_rq.py"
   },
   {
