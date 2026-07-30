@@ -37,6 +37,8 @@ def _resolve_runid(job: Job) -> str | None:
 
 def _extract_exc_info(job: Job) -> str | None:
     meta = job.meta if isinstance(job.meta, dict) else {}
+    if isinstance(meta.get("error"), dict):
+        return None
     exc_info = meta.get("exc_string")
     if isinstance(exc_info, str) and exc_info.strip():
         return exc_info
@@ -77,6 +79,12 @@ def recursive_get_job_details(job: Job, redis_conn: redis.Redis, now: datetime) 
         ),
         "children": {}
     }
+    controlled_error = job.meta.get("error") if isinstance(job.meta, dict) else None
+    if isinstance(controlled_error, dict):
+        job_info["error"] = controlled_error
+        error_id = job.meta.get("error_id")
+        if error_id:
+            job_info["error_id"] = str(error_id)
 
     for key, child_job_id in job.meta.items():
         if key.startswith('jobs:'):
@@ -87,6 +95,24 @@ def recursive_get_job_details(job: Job, redis_conn: redis.Redis, now: datetime) 
             except NoSuchJobError:
                 child_job_info = None
             job_info.setdefault("children", {}).setdefault(job_order, []).append(child_job_info)
+
+    child_details = [
+        detail
+        for group in job_info["children"].values()
+        for detail in group
+        if isinstance(detail, dict)
+    ]
+    failed_children = [detail for detail in child_details if detail.get("status") == "failed"]
+    if failed_children:
+        job_info["status"] = "failed"
+        controlled_child = next(
+            (detail for detail in failed_children if isinstance(detail.get("error"), dict)),
+            None,
+        )
+        if controlled_child is not None:
+            job_info["error"] = controlled_child["error"]
+            job_info["error_id"] = controlled_child.get("error_id")
+            job_info["exc_info"] = None
 
     return job_info
 

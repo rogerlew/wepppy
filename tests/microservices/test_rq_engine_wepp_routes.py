@@ -1,4 +1,5 @@
 import contextlib
+import json
 
 import pytest
 
@@ -45,6 +46,9 @@ def _stub_queue(monkeypatch: pytest.MonkeyPatch, *, job_id: str = "job-123") -> 
 
 def _stub_prep(monkeypatch: pytest.MonkeyPatch) -> None:
     class DummyPrep:
+        def __getitem__(self, key):
+            return "2026-07-30T00:00:00Z"
+
         def remove_timestamp(self, *args, **kwargs) -> None:
             return None
 
@@ -63,6 +67,18 @@ def _stub_wepp_stack(
     watershed_has_subcatchments: bool = True,
     capture: dict[str, object] | None = None,
 ) -> None:
+    class ReadyPrep:
+        def __getitem__(self, key):
+            return "2026-07-30T00:00:00Z"
+
+        def remove_timestamp(self, *args, **kwargs) -> None:
+            return None
+
+        def set_rq_job_id(self, *args, **kwargs) -> None:
+            return None
+
+    monkeypatch.setattr(wepp_routes.RedisPrep, "getInstance", lambda wd: ReadyPrep())
+
     class DummyRon:
         mods = []
 
@@ -133,6 +149,46 @@ def _assert_invalid_watershed_abstraction_response(response) -> None:
     assert payload["error"]["details"] == wepp_routes.WATERSHED_ABSTRACTION_INVALID_MESSAGE
     assert payload["error"]["code"] == wepp_routes.WATERSHED_ABSTRACTION_INVALID_CODE
     assert "job_id" not in payload
+
+
+@pytest.mark.parametrize(
+    ("build_timestamp", "abstract_timestamp"),
+    ((None, "done"), ("done", None), (None, None)),
+)
+def test_wepp_preflight_rejects_raster_until_both_timestamps_exist(
+    monkeypatch: pytest.MonkeyPatch,
+    build_timestamp,
+    abstract_timestamp,
+) -> None:
+    class WatershedWithRaster:
+        has_subcatchments = True
+
+    class Prep:
+        def __getitem__(self, key):
+            if key == str(wepp_routes.TaskEnum.build_subcatchments):
+                return build_timestamp
+            if key == str(wepp_routes.TaskEnum.abstract_watershed):
+                return abstract_timestamp
+            raise KeyError(key)
+
+    monkeypatch.setattr(
+        wepp_routes.Watershed,
+        "getInstance",
+        lambda _wd: WatershedWithRaster(),
+    )
+    monkeypatch.setattr(wepp_routes.RedisPrep, "getInstance", lambda _wd: Prep())
+
+    response = wepp_routes._watershed_abstraction_state_response(
+        "/tmp/run",
+        route_label="test",
+    )
+
+    assert response is not None
+    assert response.status_code == 409
+    payload = json.loads(response.body)
+    assert payload["error"]["code"] == (
+        wepp_routes.WATERSHED_ABSTRACTION_INVALID_CODE
+    )
 
 
 def test_run_wepp_enqueues_job(monkeypatch: pytest.MonkeyPatch) -> None:

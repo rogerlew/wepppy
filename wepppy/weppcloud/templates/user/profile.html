@@ -33,6 +33,8 @@ User Profile
     </dl>
 
     <div class="wc-profile__actions">
+      <a class="wc-profile__action" href="{{ url_for('user.preferences') }}">User Preferences</a>
+      <br>
       <a class="wc-profile__action" href="{{ url_for('security.change_password') }}">Change Password</a>
       <br>
       <a class="wc-profile__action" href="{{ url_for('security.logout') }}">Logout</a>

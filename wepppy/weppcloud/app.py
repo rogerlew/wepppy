@@ -339,6 +339,61 @@ class User(db.Model, UserMixin):
         lazy="dynamic",
         cascade="all, delete-orphan",
     )
+    user_preferences = db.relationship(
+        "UserPreferences",
+        back_populates="user",
+        uselist=False,
+        cascade="all, delete-orphan",
+        passive_deletes=True,
+    )
+
+
+class UserPreferences(db.Model):
+    __tablename__ = "user_preferences"
+
+    user_id = db.Column(
+        db.Integer(),
+        db.ForeignKey("user.id", ondelete="CASCADE"),
+        primary_key=True,
+    )
+    unit_system = db.Column(
+        db.String(16),
+        nullable=False,
+        default="config",
+        server_default="config",
+    )
+    wbt_boundary_touch_behavior = db.Column(
+        db.String(16),
+        nullable=False,
+        default="config",
+        server_default="config",
+    )
+    created_at = db.Column(
+        db.DateTime(timezone=True),
+        nullable=False,
+        default=utc_now,
+        server_default=db.func.now(),
+    )
+    updated_at = db.Column(
+        db.DateTime(timezone=True),
+        nullable=False,
+        default=utc_now,
+        onupdate=utc_now,
+        server_default=db.func.now(),
+    )
+
+    user = db.relationship("User", back_populates="user_preferences")
+
+    __table_args__ = (
+        db.CheckConstraint(
+            "unit_system IN ('config', 'si', 'english')",
+            name="ck_user_preferences_unit_system",
+        ),
+        db.CheckConstraint(
+            "wbt_boundary_touch_behavior IN ('config', 'warn', 'error')",
+            name="ck_user_preferences_wbt_boundary_touch_behavior",
+        ),
+    )
 
 def get_all_runs():
     return [run for run in Run.query.order_by(Run.date_created).all()]

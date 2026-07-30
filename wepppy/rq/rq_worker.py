@@ -223,7 +223,23 @@ class WepppyRqWorker(Worker):
         exc_string: str = '',
     ) -> None:
         """Publish job failure events while preserving the superclass behavior."""
-        super().handle_job_failure(job, queue, started_job_registry)
+        controlled_error = (
+            job.meta.get("error")
+            if isinstance(job.meta, dict)
+            else None
+        )
+        if isinstance(controlled_error, dict):
+            sanitized = str(controlled_error.get("message") or "Controlled job failure")
+            super().handle_job_failure(
+                job,
+                queue,
+                started_job_registry,
+                exc_string=sanitized,
+            )
+            job.meta["exc_string"] = sanitized
+            job.save_meta()
+        else:
+            super().handle_job_failure(job, queue, started_job_registry)
         StatusMessenger.publish('f{runid}:rq', json.dumps({'job': job.id, 'status': 'failed'}))
         print(f"Job {job.id} Failed")
 
@@ -239,12 +255,44 @@ class WepppyRqWorker(Worker):
         
     def handle_exception(self, job: Job, *exc_info) -> None:
         """Publish exception details before delegating back to the superclass."""
-        super().handle_exception(job, *exc_info)
+        controlled_error = (
+            job.meta.get("error")
+            if isinstance(job.meta, dict)
+            else None
+        )
+        if isinstance(controlled_error, dict):
+            message = str(controlled_error.get("message") or "Controlled job failure")
+            error_id = str(job.meta.get("error_id") or "")
+            edge_ids = (
+                controlled_error.get("details", {}).get("edge_hillslope_ids", [])
+                if isinstance(controlled_error.get("details"), dict)
+                else []
+            )
+            runid = _extract_runid(job)
+            self.log.error(
+                "Controlled RQ failure "
+                "[error_id=%s job_id=%s runid=%s edge_hillslope_ids=%s]: %s",
+                error_id,
+                job.id,
+                runid,
+                edge_ids,
+                message,
+                extra={
+                    "error_id": error_id,
+                    "job_id": job.id,
+                    "runid": runid,
+                    "edge_hillslope_ids": edge_ids,
+                },
+            )
+            job.meta["exc_string"] = message
+            job.save_meta()
+        else:
+            super().handle_exception(job, *exc_info)
+            exc_string = ''.join(traceback.format_exception(*exc_info))
+            job.meta['exc_string'] = exc_string
+            job.save()
         StatusMessenger.publish('f{runid}:rq', json.dumps({'job': job.id, 'status': 'exception'}))
         print(f"Job {job.id} Raised Exception")
-        exc_string = ''.join(traceback.format_exception(*exc_info))
-        job.meta['exc_string'] = exc_string
-        job.save()
 
 
 def start_worker() -> None:

@@ -4,10 +4,12 @@ import asyncio
 import logging
 import os
 from typing import Any, Mapping, Sequence
+import uuid
 
 import requests
 from fastapi import APIRouter, Request
 from fastapi.responses import RedirectResponse, Response
+from sqlalchemy.exc import SQLAlchemyError
 
 from wepppy.config.secrets import get_secret
 from wepppy.nodb.core import Ron
@@ -15,11 +17,20 @@ from wepppy.weppcloud.routes.readme_md import ensure_readme_on_create
 from wepppy.weppcloud.utils import auth_tokens
 from wepppy.weppcloud.utils.helpers import get_wd
 from wepppy.weppcloud.utils.runid import generate_runid
+from wepppy.weppcloud.user_preferences import (
+    PreferenceIdentityError,
+    PreferenceValidationError,
+    StoredPreferenceError,
+    apply_creation_preference_overrides,
+    cleanup_new_run_directory,
+    register_owned_run,
+    resolve_creation_preferences,
+)
 
 from .auth import AuthError, _check_revocation, require_jwt
 from .openapi import agent_route_responses, rq_operation_id
 from .payloads import parse_request_payload
-from .responses import error_response, error_response_with_traceback
+from .responses import error_response
 
 logger = logging.getLogger(__name__)
 
@@ -30,6 +41,14 @@ RQ_CREATE_SCOPES = ["rq:enqueue"]
 
 class CapVerificationError(RuntimeError):
     """Raised when CAPTCHA verification fails or cannot be performed."""
+
+
+def _creation_error_id() -> str:
+    return uuid.uuid4().hex
+
+
+def _log_creation_exception(message: str, error_id: str) -> None:
+    logger.exception(message, extra={"error_id": error_id})
 
 
 def _normalize_prefix(prefix: str | None) -> str:
@@ -181,53 +200,19 @@ def _create_run_dir(user_email: str | None) -> tuple[str, str]:
         return runid, wd
 
 
-def _resolve_user_from_claims(claims: Mapping[str, Any] | None) -> Any | None:
-    if not claims:
-        return None
-
-    subject = claims.get("sub")
-    email = claims.get("email")
-
-    try:
-        from wepppy.weppcloud.app import User, app as flask_app
-    except ImportError:
-        logger.exception("Unable to import weppcloud app for user lookup")
-        return None
-
-    with flask_app.app_context():
-        user = None
-        if subject:
-            subject_str = str(subject).strip()
-            if subject_str:
-                if subject_str.isdigit():
-                    user = User.query.get(int(subject_str))
-                if user is None:
-                    user = User.query.filter_by(fs_uniquifier=subject_str).first()
-        if user is None and email:
-            user = User.query.filter_by(email=str(email)).first()
-        return user
-
-
-def _register_run_owner(runid: str, config: str, user: Any | None) -> None:
-    if user is None:
-        return
-    try:
-        from wepppy.weppcloud.app import user_datastore, app as flask_app
-    except ImportError:
-        logger.exception("Unable to import weppcloud app for run ownership")
-        return
-
-    with flask_app.app_context():
-        user_datastore.create_run(runid, config, user)
-
-
-def _collect_overrides(payload: Mapping[str, Any], query_params: Mapping[str, Any]) -> str:
+def _merge_creation_values(
+    payload: Mapping[str, Any],
+    query_params: Mapping[str, Any],
+) -> dict[str, Any]:
     data: dict[str, Any] = {}
     for key, value in query_params.items():
         data[key] = value
     for key, value in payload.items():
         data[key] = value
+    return data
 
+
+def _collect_overrides(data: Mapping[str, Any]) -> str:
     overrides: list[str] = []
     for key, value in data.items():
         if key in {"cap_token", "rq_token", "config"}:
@@ -267,8 +252,16 @@ async def create(request: Request) -> Response:
     try:
         payload = await parse_request_payload(request)
     except Exception:  # broad-except: boundary contract
-        logger.exception("rq-engine create payload parse failed")
-        return error_response_with_traceback("Invalid payload", status_code=400)
+        error_id = _creation_error_id()
+        _log_creation_exception("rq-engine create payload parse failed", error_id)
+        return error_response(
+            "Invalid payload",
+            status_code=400,
+            code="validation_error",
+            details="The request payload could not be parsed.",
+            error_id=error_id,
+            log_exception=False,
+        )
 
     config = str(payload.get("config") or "").strip()
     if not config:
@@ -298,8 +291,19 @@ async def create(request: Request) -> Response:
                     details=exc.message,
                 )
             except Exception:  # broad-except: boundary contract
-                logger.exception("rq-engine create session reauth failed")
-                return error_response_with_traceback("Failed to authorize request", status_code=401)
+                error_id = _creation_error_id()
+                _log_creation_exception(
+                    "rq-engine create session reauth failed",
+                    error_id,
+                )
+                return error_response(
+                    "Failed to authorize request",
+                    status_code=401,
+                    code="unauthorized",
+                    details="Authorization failed.",
+                    error_id=error_id,
+                    log_exception=False,
+                )
     elif "authorization" in {key.lower() for key in request.headers.keys()}:
         try:
             claims = await asyncio.to_thread(
@@ -310,8 +314,16 @@ async def create(request: Request) -> Response:
         except AuthError as exc:
             return error_response(exc.message, status_code=exc.status_code, code=exc.code)
         except Exception:  # broad-except: boundary contract
-            logger.exception("rq-engine create auth failed")
-            return error_response_with_traceback("Failed to authorize request", status_code=401)
+            error_id = _creation_error_id()
+            _log_creation_exception("rq-engine create auth failed", error_id)
+            return error_response(
+                "Failed to authorize request",
+                status_code=401,
+                code="unauthorized",
+                details="Authorization failed.",
+                error_id=error_id,
+                log_exception=False,
+            )
     else:
         if cap_token:
             try:
@@ -334,41 +346,105 @@ async def create(request: Request) -> Response:
                     return error_response("CAPTCHA token is required.", status_code=403)
                 return error_response(exc.message, status_code=exc.status_code, code=exc.code)
             except Exception:  # broad-except: boundary contract
-                logger.exception("rq-engine create session-cookie auth failed")
-                return error_response_with_traceback("Failed to authorize request", status_code=401)
+                error_id = _creation_error_id()
+                _log_creation_exception(
+                    "rq-engine create session-cookie auth failed",
+                    error_id,
+                )
+                return error_response(
+                    "Failed to authorize request",
+                    status_code=401,
+                    code="unauthorized",
+                    details="Authorization failed.",
+                    error_id=error_id,
+                    log_exception=False,
+                )
 
-    cfg = f"{config}.cfg"
-    overrides = _collect_overrides(payload, request.query_params)
-    if overrides:
-        cfg = f"{cfg}?{overrides}"
+    merged_values = _merge_creation_values(payload, request.query_params)
+    try:
+        base_values = apply_creation_preference_overrides(merged_values, None)
+    except PreferenceValidationError:
+        return error_response(
+            "unitizer:is_english must be exactly true or false.",
+            status_code=400,
+            code="invalid_unitizer_override",
+        )
 
     def _create_run_blocking() -> str | Response:
-        user = None
         try:
-            user = _resolve_user_from_claims(claims)
-        except Exception:  # broad-except: boundary contract
-            logger.exception("rq-engine create user lookup failed")
+            snapshot = resolve_creation_preferences(claims)
+            effective_values = apply_creation_preference_overrides(
+                base_values,
+                snapshot,
+            )
+        except (
+            PreferenceIdentityError,
+            PreferenceValidationError,
+            StoredPreferenceError,
+            SQLAlchemyError,
+        ):
+            error_id = _creation_error_id()
+            _log_creation_exception(
+                "rq-engine create preference resolution failed",
+                error_id,
+            )
+            return error_response(
+                "Could not resolve account preferences.",
+                code="preference_resolution_failed",
+                error_id=error_id,
+                log_exception=False,
+            )
+
+        cfg = f"{config}.cfg"
+        overrides = _collect_overrides(effective_values)
+        if overrides:
+            cfg = f"{cfg}?{overrides}"
 
         try:
-            runid, wd = _create_run_dir(getattr(user, "email", None) if user else None)
-        except PermissionError as exc:
-            logger.exception("rq-engine create run directory permission error")
+            runid, wd = _create_run_dir(snapshot.email if snapshot else None)
+        except PermissionError:
+            error_id = _creation_error_id()
+            _log_creation_exception(
+                "rq-engine create run directory permission error",
+                error_id,
+            )
             return error_response(
                 "Could not create run directory. NAS may be down.",
-                details=str(exc),
+                code="run_directory_failed",
+                error_id=error_id,
+                log_exception=False,
             )
-        except Exception as exc:  # broad-except: boundary contract
-            logger.exception("rq-engine create run directory failed")
+        except Exception:  # broad-except: boundary contract
+            error_id = _creation_error_id()
+            _log_creation_exception(
+                "rq-engine create run directory failed",
+                error_id,
+            )
             return error_response(
                 "Could not create run directory.",
-                details=str(exc),
+                code="run_directory_failed",
+                error_id=error_id,
+                log_exception=False,
             )
 
         try:
             Ron(wd, cfg)
         except Exception:  # broad-except: boundary contract
-            logger.exception("rq-engine create Ron failed")
-            return error_response("Could not create run")
+            error_id = _creation_error_id()
+            _log_creation_exception("rq-engine create Ron failed", error_id)
+            try:
+                cleanup_new_run_directory(runid, wd)
+            except (OSError, RuntimeError, ValueError):
+                logger.exception(
+                    "rq-engine create Ron cleanup failed",
+                    extra={"error_id": error_id, "runid": runid},
+                )
+            return error_response(
+                "Could not create run",
+                code="run_initialization_failed",
+                error_id=error_id,
+                log_exception=False,
+            )
 
         try:
             from wepppy.weppcloud.utils.run_ttl import initialize_ttl
@@ -377,10 +453,28 @@ async def create(request: Request) -> Response:
         except Exception:  # broad-except: boundary contract
             logger.exception("rq-engine create TTL initialization failed")
 
-        try:
-            _register_run_owner(runid, config, user)
-        except Exception:  # broad-except: boundary contract
-            logger.exception("rq-engine create run owner failed")
+        if snapshot is not None:
+            try:
+                register_owned_run(runid, config, snapshot.user_id)
+            except (PreferenceIdentityError, SQLAlchemyError):
+                error_id = _creation_error_id()
+                _log_creation_exception(
+                    "rq-engine create run owner failed",
+                    error_id,
+                )
+                try:
+                    cleanup_new_run_directory(runid, wd)
+                except (OSError, RuntimeError, ValueError):
+                    logger.exception(
+                        "rq-engine create directory cleanup failed",
+                        extra={"error_id": error_id, "runid": runid},
+                    )
+                return error_response(
+                    "Could not register project ownership.",
+                    code="run_ownership_failed",
+                    error_id=error_id,
+                    log_exception=False,
+                )
 
         try:
             ensure_readme_on_create(runid, config)

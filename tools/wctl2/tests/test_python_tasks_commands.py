@@ -77,6 +77,46 @@ def test_check_rq_graph_runs_guard_script(monkeypatch: pytest.MonkeyPatch, temp_
     ]
 
 
+def test_check_test_isolation_uses_container_venv_and_forwards_args(
+    monkeypatch: pytest.MonkeyPatch,
+    temp_project,
+) -> None:
+    runner = CliRunner()
+    recorded: List[Tuple[str, str, bool, bool]] = []
+
+    def fake_compose_exec(context, service, exec_command, tty=True, check=True):
+        recorded.append((service, exec_command, tty, check))
+        return DummyResult()
+
+    monkeypatch.setattr(
+        "tools.wctl2.commands.python_tasks.compose_exec",
+        fake_compose_exec,
+    )
+
+    result = runner.invoke(
+        app,
+        [
+            "--project-dir",
+            str(temp_project),
+            "check-test-isolation",
+            "tests/example.py",
+            "--quick",
+        ],
+    )
+
+    assert result.exit_code == 0
+    assert recorded == [
+        (
+            "weppcloud",
+            "cd /workdir/wepppy && "
+            "/opt/venv/bin/python tools/check_test_isolation.py "
+            "tests/example.py --quick",
+            True,
+            False,
+        )
+    ]
+
+
 def test_run_pytest_sharded_defaults_to_tests(monkeypatch: pytest.MonkeyPatch, temp_project) -> None:
     runner = CliRunner()
     recorded: List[Tuple[str, str, bool, bool]] = []

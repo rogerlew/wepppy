@@ -29,6 +29,9 @@ from os.path import join as _join
 
 import redis
 from rq import Queue, get_current_job
+from rq.exceptions import InvalidJobOperation, NoSuchJobError
+from rq.job import Job
+from rq.registry import DeferredJobRegistry
 from wepppy.config.redis_settings import (
     RedisDB,
     redis_connection_kwargs,
@@ -49,6 +52,10 @@ from wepppy.nodb.core import (
     Watershed,
     WatershedCentroidStateError,
     Wepp,
+)
+from wepppy.nodb.core.watershed_errors import (
+    WATERSHED_BOUNDARY_TOUCH_MESSAGE,
+    WatershedBoundaryTouchesEdgeError,
 )
 from wepppy.nodb.mods.disturbed import Disturbed
 from wepppy.nodb.mods.ash_transport import Ash
@@ -185,6 +192,25 @@ def _run_with_directory_root_lock(
             )
             if retry_delay_seconds > 0:
                 time.sleep(retry_delay_seconds)
+
+
+def _cancel_deferred_job(job: Job) -> None:
+    """Atomically cancel a deferred job and detach its dependency membership."""
+    dependency_keys = job.connection.smembers(job.dependencies_key)
+    with job.connection.pipeline() as pipeline:
+        DeferredJobRegistry(
+            job.origin,
+            connection=job.connection,
+            job_class=job.__class__,
+            serializer=job.serializer,
+        ).remove(job, pipeline=pipeline)
+        for dependency_id in dependency_keys:
+            if isinstance(dependency_id, bytes):
+                dependency_id = dependency_id.decode("utf-8")
+            pipeline.srem(job.dependents_key_for(dependency_id), job.id)
+        pipeline.delete(job.dependencies_key)
+        job.cancel(pipeline=pipeline)
+        pipeline.execute()
 
 
 def _run_with_directory_roots_lock(
@@ -895,7 +921,6 @@ def set_outlet_rq(runid: str, outlet_lng: float, outlet_lat: float) -> None:
         StatusMessenger.publish(status_channel, f'rq:{job.id} EXCEPTION {func_name}({runid})')
         raise
 
-@with_exception_logging
 def build_subcatchments_rq(runid: str, updates: dict[str, Any] | None = None) -> None:
     """Delineate subcatchments after channel extraction is complete.
 
@@ -934,6 +959,19 @@ def build_subcatchments_rq(runid: str, updates: dict[str, Any] | None = None) ->
                         watershed._bieger2015_widths = bool(updates['bieger2015_widths'])  # type: ignore[attr-defined]
             watershed.build_subcatchments()
             wait_for_path(watershed.subwta, logger=watershed.logger)
+            if (
+                watershed.delineation_backend_is_wbt
+                and watershed.edge_hillslopes
+                and watershed.wbt_boundary_touch_behavior == "warn"
+            ):
+                warning = (
+                    f"{WATERSHED_BOUNDARY_TOUCH_MESSAGE} "
+                    f"Edge hillslope IDs: {watershed.edge_hillslopes}."
+                )
+                StatusMessenger.publish(
+                    status_channel,
+                    f'rq:{job.id} WARNING {func_name}({runid}) {warning}',
+                )
 
         _run_with_directory_root_lock(
             wd,
@@ -943,6 +981,45 @@ def build_subcatchments_rq(runid: str, updates: dict[str, Any] | None = None) ->
         )
         StatusMessenger.publish(status_channel, f'rq:{job.id} COMPLETED {func_name}({runid})')
         StatusMessenger.publish(status_channel, f'rq:{job.id} TRIGGER   subcatchment_delineation BUILD_SUBCATCHMENTS_TASK_COMPLETED')
+    except WatershedBoundaryTouchesEdgeError as exc:
+        error_id = __import__("uuid").uuid4().hex
+        job.meta["error"] = {
+            "code": exc.code,
+            "message": WATERSHED_BOUNDARY_TOUCH_MESSAGE,
+            "details": {"edge_hillslope_ids": exc.edge_hillslope_ids},
+        }
+        job.meta["error_id"] = error_id
+        job.meta.pop("exc_string", None)
+        job.save_meta()
+        for dependent_id in sorted(job.dependent_ids):
+            try:
+                dependent = Job.fetch(dependent_id, connection=job.connection)
+                _cancel_deferred_job(dependent)
+            except (InvalidJobOperation, NoSuchJobError):
+                _logger.warning(
+                    "Dependent abstraction job disappeared while handling "
+                    "controlled WBT boundary failure (job_id=%s dependent_id=%s)",
+                    job.id,
+                    dependent_id,
+                )
+        _logger.error(
+            "Controlled WBT boundary failure "
+            "[error_id=%s runid=%s edge_hillslope_ids=%s]",
+            error_id,
+            runid,
+            exc.edge_hillslope_ids,
+            extra={
+                "error_id": error_id,
+                "runid": runid,
+                "edge_hillslope_ids": exc.edge_hillslope_ids,
+            },
+        )
+        StatusMessenger.publish(
+            status_channel,
+            f'rq:{job.id} EXCEPTION {func_name}({runid}) '
+            f'{WATERSHED_BOUNDARY_TOUCH_MESSAGE}',
+        )
+        raise
     except Exception:
         # Boundary catch: preserve contract behavior while logging unexpected failures.
         __import__("logging").getLogger(__name__).exception("Boundary exception at wepppy/rq/project_rq.py:691", extra={"runid": locals().get("runid"), "config": locals().get("config"), "job_id": locals().get("job_id")})

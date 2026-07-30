@@ -9,6 +9,7 @@ from pathlib import Path
 from typing import Any, Dict, List, Optional
 
 from sqlalchemy.exc import SQLAlchemyError
+from flask import flash
 from werkzeug.exceptions import HTTPException
 
 import wepppy
@@ -29,6 +30,15 @@ from wepppy.nodb.mods.rangeland_cover import RangelandCover
 from wepppy.nodb.mods.rhem import Rhem
 from wepppy.weppcloud.utils import auth_tokens
 from wepppy.weppcloud.utils import run_ttl
+from wepppy.weppcloud.user_preferences import (
+    PreferenceIdentityError,
+    StoredPreferenceError,
+    UNIT_SYSTEM_VALUES,
+    WBT_BOUNDARY_TOUCH_BEHAVIOR_VALUES,
+    UserPreferenceValues,
+    load_user_preferences,
+    save_user_preferences,
+)
 
 from concurrent.futures import ThreadPoolExecutor, as_completed
 
@@ -484,6 +494,77 @@ def profile():
         )
     except Exception:
         logger.exception("user.profile failed")
+        return exception_factory()
+
+
+_UNIT_SYSTEM_OPTIONS = (
+    ('config', 'Auto — use project configuration'),
+    ('si', 'SI — metric defaults'),
+    ('english', 'English — US customary defaults'),
+)
+_WBT_BOUNDARY_OPTIONS = (
+    ('config', 'Auto — use project configuration'),
+    ('warn', 'Warn and continue'),
+    ('error', 'Stop with an error'),
+)
+
+
+def _render_preferences(
+    values: UserPreferenceValues,
+    errors: Optional[Dict[str, str]] = None,
+    *,
+    status_code: int = 200,
+):
+    return (
+        render_template(
+            'user/preferences.html',
+            values=values,
+            errors=errors or {},
+            unit_system_options=_UNIT_SYSTEM_OPTIONS,
+            wbt_boundary_options=_WBT_BOUNDARY_OPTIONS,
+        ),
+        status_code,
+    )
+
+
+@user_bp.route('/preferences', methods=['GET', 'POST'], strict_slashes=False)
+@login_required
+def preferences():
+    user_id = getattr(current_user, 'id', None)
+    if user_id is None:
+        return error_factory('Current user is missing an id.', status_code=400)
+
+    try:
+        if request.method == 'GET':
+            return _render_preferences(load_user_preferences(int(user_id)))
+
+        unit_system = str(request.form.get('unit_system') or '')
+        boundary_behavior = str(
+            request.form.get('wbt_boundary_touch_behavior') or ''
+        )
+        errors: Dict[str, str] = {}
+        if unit_system not in UNIT_SYSTEM_VALUES:
+            errors['unit_system'] = 'Select a valid default unit system.'
+        if boundary_behavior not in WBT_BOUNDARY_TOUCH_BEHAVIOR_VALUES:
+            errors['wbt_boundary_touch_behavior'] = (
+                'Select a valid WBT DEM-boundary behavior.'
+            )
+        submitted = UserPreferenceValues(
+            unit_system=unit_system,
+            wbt_boundary_touch_behavior=boundary_behavior,
+        )
+        if errors:
+            return _render_preferences(submitted, errors, status_code=400)
+
+        save_user_preferences(
+            int(user_id),
+            unit_system,
+            boundary_behavior,
+        )
+        flash('User preferences saved.', 'success')
+        return redirect(url_for('user.preferences'))
+    except (PreferenceIdentityError, StoredPreferenceError, SQLAlchemyError):
+        logger.exception("user.preferences failed")
         return exception_factory()
 
 

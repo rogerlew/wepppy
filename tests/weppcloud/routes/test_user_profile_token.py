@@ -28,6 +28,7 @@ def test_profile_template_links_to_diagnostics_without_reset_control() -> None:
     source = PROFILE_TEMPLATE.read_text(encoding="utf-8")
 
     assert "weppcloud_site.diagnostics" in source
+    assert "url_for('user.preferences')" in source
     assert "data-browser-reset-root" not in source
     assert "data-browser-reset-action" not in source
     assert "reset_browser_state_endpoint" not in source
@@ -83,6 +84,8 @@ def profile_auth_client(monkeypatch: pytest.MonkeyPatch):
 
     user_datastore = SQLAlchemyUserDatastore(db, User, Role)
     Security(app, user_datastore)
+    app.jinja_env.globals["static_url"] = lambda path: f"/static/{path}"
+    app.jinja_env.globals["csrf_token"] = lambda: "test-csrf-token"
 
     @app.login_manager.unauthorized_handler
     def unauthorized():
@@ -109,6 +112,10 @@ def profile_auth_client(monkeypatch: pytest.MonkeyPatch):
 
     user_module = importlib.reload(importlib.import_module("wepppy.weppcloud.routes.user"))
     site_bp = Blueprint("weppcloud_site", __name__)
+
+    @site_bp.get("/", endpoint="index")
+    def index():
+        return "index"
 
     @site_bp.get("/diagnostics/", endpoint="diagnostics")
     def diagnostics():
@@ -146,6 +153,113 @@ def _grant_role(profile_auth_client, role_name: str) -> None:
         user_datastore.commit()
 
 
+def test_preferences_requires_login(profile_auth_client) -> None:
+    response = profile_auth_client["client"].get("/preferences")
+
+    assert response.status_code == 401
+
+
+def test_preferences_get_renders_exact_choices(profile_auth_client, monkeypatch) -> None:
+    client = profile_auth_client["client"]
+    module = profile_auth_client["module"]
+    user_id = profile_auth_client["user_id"]
+    monkeypatch.setattr(
+        module,
+        "load_user_preferences",
+        lambda _user_id: module.UserPreferenceValues("si", "error"),
+    )
+    client.get(f"/test-login/{user_id}")
+
+    response = client.get("/preferences")
+
+    assert response.status_code == 200
+    body = response.get_data(as_text=True)
+    assert "Auto — use project configuration" in body
+    assert "SI — metric defaults" in body
+    assert "English — US customary defaults" in body
+    assert "Warn and continue" in body
+    assert "Stop with an error" in body
+    assert 'value="si" selected' in body
+    assert 'value="error" selected' in body
+
+
+def test_preferences_invalid_post_reports_both_fields_without_write(
+    profile_auth_client,
+    monkeypatch,
+) -> None:
+    client = profile_auth_client["client"]
+    module = profile_auth_client["module"]
+    user_id = profile_auth_client["user_id"]
+    writes = []
+    monkeypatch.setattr(module, "save_user_preferences", lambda *args: writes.append(args))
+    client.get(f"/test-login/{user_id}")
+
+    response = client.post(
+        "/preferences",
+        data={
+            "unit_system": "<invalid>",
+            "wbt_boundary_touch_behavior": "",
+        },
+    )
+
+    assert response.status_code == 400
+    assert writes == []
+    body = response.get_data(as_text=True)
+    assert "Select a valid default unit system." in body
+    assert "Select a valid WBT DEM-boundary behavior." in body
+    assert "<invalid>" not in body
+    assert 'aria-invalid="true"' in body
+
+
+def test_preferences_success_uses_prg_and_atomic_save(
+    profile_auth_client,
+    monkeypatch,
+) -> None:
+    client = profile_auth_client["client"]
+    module = profile_auth_client["module"]
+    user_id = profile_auth_client["user_id"]
+    writes = []
+    monkeypatch.setattr(module, "save_user_preferences", lambda *args: writes.append(args))
+    client.get(f"/test-login/{user_id}")
+
+    response = client.post(
+        "/preferences",
+        data={
+            "unit_system": "english",
+            "wbt_boundary_touch_behavior": "error",
+        },
+    )
+
+    assert response.status_code == 302
+    assert response.headers["Location"].endswith("/preferences")
+    assert writes == [(user_id, "english", "error")]
+    with client.session_transaction() as session:
+        assert ("success", "User preferences saved.") in session["_flashes"]
+
+
+def test_preferences_post_enforces_csrf(profile_auth_client) -> None:
+    app = profile_auth_client["app"]
+    client = profile_auth_client["client"]
+    user_id = profile_auth_client["user_id"]
+
+    @app.errorhandler(CSRFError)
+    def handle_preferences_csrf_error(error):
+        return {"error": error.description}, 400
+
+    CSRFProtect(app)
+    client.get(f"/test-login/{user_id}")
+
+    response = client.post(
+        "/preferences",
+        data={
+            "unit_system": "si",
+            "wbt_boundary_touch_behavior": "error",
+        },
+    )
+
+    assert response.status_code == 400
+
+
 def test_rendered_profile_links_to_diagnostics_route(profile_auth_client) -> None:
     app = profile_auth_client["app"]
     template_source = PROFILE_TEMPLATE.read_text(encoding="utf-8")
@@ -173,6 +287,8 @@ def test_rendered_profile_links_to_diagnostics_route(profile_auth_client) -> Non
             url_for=lambda endpoint, **values: (
                 "/change"
                 if endpoint == "security.change_password"
+                else "/preferences"
+                if endpoint == "user.preferences"
                 else app.jinja_env.globals["url_for"](endpoint, **values)
             ),
             user=user,

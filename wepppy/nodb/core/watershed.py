@@ -122,6 +122,10 @@ from wepppy.nodb.duckdb_agents import (
 )
 
 from .topaz import Topaz
+from .watershed_errors import (
+    WATERSHED_BOUNDARY_TOUCH_MESSAGE,
+    WatershedBoundaryTouchesEdgeError,
+)
 from .watershed_mixins import WatershedOperationsMixin, WatershedLookupMixin
 
 from wepppy.all_your_base import NCPU
@@ -140,6 +144,7 @@ WBT_FILL_OR_BREACH_VALUES = frozenset(
         "topaz",
     }
 )
+WBT_BOUNDARY_TOUCH_BEHAVIOR_VALUES = frozenset({"warn", "error"})
 
 __all__ = [
     'NCPU',
@@ -152,6 +157,9 @@ __all__ = [
     'process_subcatchment',
     'TRANSIENT_FIELDS',
     'WBT_FILL_OR_BREACH_VALUES',
+    'WBT_BOUNDARY_TOUCH_BEHAVIOR_VALUES',
+    'WATERSHED_BOUNDARY_TOUCH_MESSAGE',
+    'WatershedBoundaryTouchesEdgeError',
     'Watershed',
     'Outlet',
 ]
@@ -333,6 +341,16 @@ class Watershed(WatershedOperationsMixin, WatershedLookupMixin, NoDbBase):
                 self._wbt_blc_dist = self.config_get_int(
                     "watershed.wbt", "blc_dist", 1000
                 )
+                boundary_touch_behavior = self.config_get_str(
+                    "watershed.wbt", "boundary_touch_behavior", "warn"
+                )
+                boundary_touch_behavior = str(boundary_touch_behavior)
+                if boundary_touch_behavior not in WBT_BOUNDARY_TOUCH_BEHAVIOR_VALUES:
+                    raise ValueError(
+                        "Invalid watershed.wbt boundary_touch_behavior: "
+                        f"{boundary_touch_behavior}"
+                    )
+                self._wbt_boundary_touch_behavior = boundary_touch_behavior
                 stream_pruning_method = self.config_get_str(
                     "watershed.wbt",
                     "stream_pruning_method",
@@ -366,6 +384,7 @@ class Watershed(WatershedOperationsMixin, WatershedLookupMixin, NoDbBase):
         """Exclude live WhiteboxTools instances from persisted NoDb payloads."""
         state = super().__getstate__()
         state.pop("_wbt", None)
+        state.setdefault("_wbt_boundary_touch_behavior", "warn")
         return state
 
     @property
@@ -537,6 +556,18 @@ class Watershed(WatershedOperationsMixin, WatershedLookupMixin, NoDbBase):
     @nodb_setter
     def wbt_blc_dist(self, value: int) -> None:
         self._wbt_blc_dist = value
+
+    @property
+    def wbt_boundary_touch_behavior(self) -> str:
+        return getattr(self, "_wbt_boundary_touch_behavior", "warn")
+
+    @wbt_boundary_touch_behavior.setter
+    @nodb_setter
+    def wbt_boundary_touch_behavior(self, value: str) -> None:
+        behavior = str(value)
+        if behavior not in WBT_BOUNDARY_TOUCH_BEHAVIOR_VALUES:
+            raise ValueError(f"Invalid wbt_boundary_touch_behavior value: {value}")
+        self._wbt_boundary_touch_behavior = behavior
 
     @property
     def stream_pruning_method(self) -> str:

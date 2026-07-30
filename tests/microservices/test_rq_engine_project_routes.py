@@ -1,7 +1,6 @@
 from __future__ import annotations
 
 from pathlib import Path
-from types import SimpleNamespace
 from typing import Any, Dict, Tuple
 
 import pytest
@@ -11,11 +10,25 @@ TestClient = pytest.importorskip("fastapi.testclient").TestClient
 import wepppy.microservices.rq_engine as rq_engine
 from wepppy.microservices.rq_engine import project_routes
 from wepppy.weppcloud.utils import auth_tokens
+from wepppy.weppcloud.user_preferences import (
+    CreationPreferenceSnapshot,
+    PreferenceIdentityError,
+    UserPreferenceValues,
+)
+from sqlalchemy.exc import SQLAlchemyError
 
 pytestmark = pytest.mark.microservice
 
 RUN_ID = "cap-run"
 CONFIG = "disturbed9002"
+
+
+def _preference_snapshot() -> CreationPreferenceSnapshot:
+    return CreationPreferenceSnapshot(
+        user_id=42,
+        email="tester@example.com",
+        preferences=UserPreferenceValues(),
+    )
 
 
 def _issue_token(monkeypatch: pytest.MonkeyPatch) -> str:
@@ -147,17 +160,20 @@ def test_create_accepts_rq_token(create_client, monkeypatch: pytest.MonkeyPatch)
     client, captured = create_client
 
     token = _issue_token(monkeypatch)
-    stub_user = SimpleNamespace(email="tester@example.com")
     owner_calls: Dict[str, Any] = {}
 
-    monkeypatch.setattr(project_routes, "_resolve_user_from_claims", lambda claims: stub_user)
+    monkeypatch.setattr(
+        project_routes,
+        "resolve_creation_preferences",
+        lambda claims: _preference_snapshot(),
+    )
 
-    def fake_register(runid: str, config: str, user: Any) -> None:
+    def fake_register(runid: str, config: str, user_id: int) -> None:
         owner_calls["runid"] = runid
         owner_calls["config"] = config
-        owner_calls["user_email"] = getattr(user, "email", None)
+        owner_calls["user_id"] = user_id
 
-    monkeypatch.setattr(project_routes, "_register_run_owner", fake_register)
+    monkeypatch.setattr(project_routes, "register_owned_run", fake_register)
     monkeypatch.setattr(project_routes, "_check_revocation", lambda jti: None)
 
     response = client.post(
@@ -169,7 +185,298 @@ def test_create_accepts_rq_token(create_client, monkeypatch: pytest.MonkeyPatch)
     assert response.status_code == 303
     assert owner_calls["runid"] == RUN_ID
     assert owner_calls["config"] == CONFIG
-    assert owner_calls["user_email"] == "tester@example.com"
+    assert owner_calls["user_id"] == 42
+
+
+def test_create_snapshots_account_defaults_before_ron(
+    create_client,
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    client, captured = create_client
+    token = _issue_token(monkeypatch)
+    monkeypatch.setattr(project_routes, "_check_revocation", lambda _jti: None)
+    monkeypatch.setattr(
+        project_routes,
+        "resolve_creation_preferences",
+        lambda _claims: CreationPreferenceSnapshot(
+            user_id=42,
+            email="tester@example.com",
+            preferences=UserPreferenceValues("english", "error"),
+        ),
+    )
+    monkeypatch.setattr(project_routes, "register_owned_run", lambda *_args: None)
+
+    response = client.post(
+        "/create/",
+        data={"config": CONFIG, "rq_token": token},
+        follow_redirects=False,
+    )
+
+    assert response.status_code == 303
+    assert "unitizer:is_english=true" in captured["cfg"]
+    assert "watershed.wbt:boundary_touch_behavior=error" in captured["cfg"]
+
+
+def test_create_payload_unit_override_wins_query_and_account(
+    create_client,
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    client, captured = create_client
+    token = _issue_token(monkeypatch)
+    monkeypatch.setattr(project_routes, "_check_revocation", lambda _jti: None)
+    monkeypatch.setattr(
+        project_routes,
+        "resolve_creation_preferences",
+        lambda _claims: CreationPreferenceSnapshot(
+            user_id=42,
+            email="tester@example.com",
+            preferences=UserPreferenceValues("english", "config"),
+        ),
+    )
+    monkeypatch.setattr(project_routes, "register_owned_run", lambda *_args: None)
+
+    response = client.post(
+        "/create/?unitizer:is_english=true",
+        data={
+            "config": CONFIG,
+            "rq_token": token,
+            "unitizer:is_english": "false",
+        },
+        follow_redirects=False,
+    )
+
+    assert response.status_code == 303
+    assert captured["cfg"].count("unitizer:is_english=false") == 1
+    assert "unitizer:is_english=true" not in captured["cfg"]
+
+
+def test_create_invalid_explicit_unit_fails_before_run_directory(
+    create_client,
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    client, captured = create_client
+    monkeypatch.setattr(
+        project_routes,
+        "_verify_cap_token",
+        lambda _request, _token: {"success": True},
+    )
+
+    response = client.post(
+        "/create/",
+        data={
+            "config": CONFIG,
+            "cap_token": "good-token",
+            "unitizer:is_english": "yes",
+        },
+    )
+
+    assert response.status_code == 400
+    assert response.json()["error"]["code"] == "invalid_unitizer_override"
+    assert captured == {}
+
+
+def test_create_payload_failure_does_not_disclose_traceback_or_path(
+    create_client,
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    client, captured = create_client
+
+    async def _raise_payload_error(_request):
+        raise RuntimeError("Traceback at /private/parser.py")
+
+    monkeypatch.setattr(project_routes, "parse_request_payload", _raise_payload_error)
+
+    response = client.post("/create/", data={"config": CONFIG})
+
+    assert response.status_code == 400
+    assert response.json()["error_id"]
+    assert "Traceback" not in response.text
+    assert "/private/parser.py" not in response.text
+    assert captured == {}
+
+
+def test_create_run_directory_failure_does_not_disclose_path(
+    create_client,
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    client, captured = create_client
+    monkeypatch.setattr(
+        project_routes,
+        "_verify_cap_token",
+        lambda _request, _token: {"success": True},
+    )
+    monkeypatch.setattr(
+        project_routes,
+        "_create_run_dir",
+        lambda _email: (_ for _ in ()).throw(
+            RuntimeError("/private/runs/secret failed")
+        ),
+    )
+
+    response = client.post(
+        "/create/",
+        data={"config": CONFIG, "cap_token": "good-token"},
+    )
+
+    assert response.status_code == 500
+    assert response.json()["error_id"]
+    assert "/private/runs" not in response.text
+    assert captured == {}
+
+
+@pytest.mark.parametrize("auth_path", ("bearer", "session", "expired_reauth"))
+def test_create_unexpected_auth_failure_is_sanitized(
+    create_client,
+    monkeypatch: pytest.MonkeyPatch,
+    auth_path: str,
+) -> None:
+    client, captured = create_client
+    headers: dict[str, str] = {}
+    data = {"config": CONFIG}
+
+    if auth_path == "bearer":
+        headers["Authorization"] = "Bearer opaque"
+        monkeypatch.setattr(
+            project_routes,
+            "require_jwt",
+            lambda *_args, **_kwargs: (_ for _ in ()).throw(
+                RuntimeError("Traceback /private/bearer.py")
+            ),
+        )
+    elif auth_path == "session":
+        monkeypatch.setattr(
+            project_routes,
+            "_claims_from_session_cookie",
+            lambda _request: (_ for _ in ()).throw(
+                RuntimeError("Traceback /private/session.py")
+            ),
+        )
+    else:
+        data["rq_token"] = "expired"
+        monkeypatch.setattr(
+            project_routes,
+            "_require_rq_token",
+            lambda *_args, **_kwargs: (_ for _ in ()).throw(
+                project_routes.AuthError("Token has expired")
+            ),
+        )
+        monkeypatch.setattr(
+            project_routes,
+            "_claims_from_session_cookie",
+            lambda _request: (_ for _ in ()).throw(
+                RuntimeError("Traceback /private/reauth.py")
+            ),
+        )
+
+    response = client.post("/create/", data=data, headers=headers)
+
+    assert response.status_code == 401
+    assert response.json()["error_id"]
+    assert "Traceback" not in response.text
+    assert "/private/" not in response.text
+    assert captured == {}
+
+
+def test_create_preference_lookup_failure_creates_no_directory(
+    create_client,
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    client, captured = create_client
+    token = _issue_token(monkeypatch)
+    monkeypatch.setattr(project_routes, "_check_revocation", lambda _jti: None)
+    monkeypatch.setattr(
+        project_routes,
+        "resolve_creation_preferences",
+        lambda _claims: (_ for _ in ()).throw(
+            PreferenceIdentityError("unknown user")
+        ),
+    )
+
+    response = client.post(
+        "/create/",
+        data={"config": CONFIG, "rq_token": token},
+    )
+
+    assert response.status_code == 500
+    assert response.json()["error"]["code"] == "preference_resolution_failed"
+    assert response.json()["error_id"]
+    assert captured == {}
+
+
+def test_create_owner_failure_compensates_directory(
+    create_client,
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    client, _captured = create_client
+    token = _issue_token(monkeypatch)
+    cleanups: list[tuple[str, str]] = []
+    monkeypatch.setattr(project_routes, "_check_revocation", lambda _jti: None)
+    monkeypatch.setattr(
+        project_routes,
+        "resolve_creation_preferences",
+        lambda _claims: _preference_snapshot(),
+    )
+    monkeypatch.setattr(
+        project_routes,
+        "register_owned_run",
+        lambda *_args: (_ for _ in ()).throw(SQLAlchemyError("owner write failed")),
+    )
+    monkeypatch.setattr(
+        project_routes,
+        "cleanup_new_run_directory",
+        lambda runid, wd: cleanups.append((runid, wd)),
+    )
+
+    response = client.post(
+        "/create/",
+        data={"config": CONFIG, "rq_token": token},
+    )
+
+    assert response.status_code == 500
+    assert response.json()["error"]["code"] == "run_ownership_failed"
+    assert cleanups and cleanups[0][0] == RUN_ID
+
+
+def test_create_cleanup_failure_log_uses_response_error_id(
+    create_client,
+    monkeypatch: pytest.MonkeyPatch,
+    caplog: pytest.LogCaptureFixture,
+) -> None:
+    client, _captured = create_client
+    token = _issue_token(monkeypatch)
+    monkeypatch.setattr(project_routes, "_check_revocation", lambda _jti: None)
+    monkeypatch.setattr(
+        project_routes,
+        "resolve_creation_preferences",
+        lambda _claims: _preference_snapshot(),
+    )
+    monkeypatch.setattr(
+        project_routes,
+        "register_owned_run",
+        lambda *_args: (_ for _ in ()).throw(SQLAlchemyError("owner failed")),
+    )
+    monkeypatch.setattr(
+        project_routes,
+        "cleanup_new_run_directory",
+        lambda *_args: (_ for _ in ()).throw(OSError("cleanup failed")),
+    )
+
+    with caplog.at_level("ERROR", logger=project_routes.__name__):
+        response = client.post(
+            "/create/",
+            data={"config": CONFIG, "rq_token": token},
+        )
+
+    error_id = response.json()["error_id"]
+    cleanup_records = [
+        record
+        for record in caplog.records
+        if record.getMessage() == "rq-engine create directory cleanup failed"
+    ]
+    assert response.status_code == 500
+    assert len(cleanup_records) == 1
+    assert cleanup_records[0].error_id == error_id
+    assert cleanup_records[0].runid == RUN_ID
 
 
 def test_create_reauths_expired_rq_token_with_session_cookie(
@@ -177,7 +484,6 @@ def test_create_reauths_expired_rq_token_with_session_cookie(
     monkeypatch: pytest.MonkeyPatch,
 ):
     client, _ = create_client
-    stub_user = SimpleNamespace(email="tester@example.com")
     owner_calls: Dict[str, Any] = {}
 
     def _raise_expired_token(*_args, **_kwargs):
@@ -193,14 +499,18 @@ def test_create_reauths_expired_rq_token_with_session_cookie(
         "_claims_from_session_cookie",
         lambda request: {"sub": "42", "token_class": "user", "email": "tester@example.com"},
     )
-    monkeypatch.setattr(project_routes, "_resolve_user_from_claims", lambda claims: stub_user)
+    monkeypatch.setattr(
+        project_routes,
+        "resolve_creation_preferences",
+        lambda claims: _preference_snapshot(),
+    )
 
-    def fake_register(runid: str, config: str, user: Any) -> None:
+    def fake_register(runid: str, config: str, user_id: int) -> None:
         owner_calls["runid"] = runid
         owner_calls["config"] = config
-        owner_calls["user_email"] = getattr(user, "email", None)
+        owner_calls["user_id"] = user_id
 
-    monkeypatch.setattr(project_routes, "_register_run_owner", fake_register)
+    monkeypatch.setattr(project_routes, "register_owned_run", fake_register)
 
     response = client.post(
         "/create/",
@@ -211,7 +521,7 @@ def test_create_reauths_expired_rq_token_with_session_cookie(
     assert response.status_code == 303
     assert owner_calls["runid"] == RUN_ID
     assert owner_calls["config"] == CONFIG
-    assert owner_calls["user_email"] == "tester@example.com"
+    assert owner_calls["user_id"] == 42
 
 
 def test_create_non_expired_rq_token_error_does_not_reauth(
@@ -250,7 +560,6 @@ def test_create_accepts_session_cookie_auth_without_rq_token(
     monkeypatch: pytest.MonkeyPatch,
 ):
     client, _ = create_client
-    stub_user = SimpleNamespace(email="tester@example.com")
     owner_calls: Dict[str, Any] = {}
 
     monkeypatch.setattr(
@@ -258,14 +567,18 @@ def test_create_accepts_session_cookie_auth_without_rq_token(
         "_claims_from_session_cookie",
         lambda request: {"sub": "42", "token_class": "user", "email": "tester@example.com"},
     )
-    monkeypatch.setattr(project_routes, "_resolve_user_from_claims", lambda claims: stub_user)
+    monkeypatch.setattr(
+        project_routes,
+        "resolve_creation_preferences",
+        lambda claims: _preference_snapshot(),
+    )
 
-    def fake_register(runid: str, config: str, user: Any) -> None:
+    def fake_register(runid: str, config: str, user_id: int) -> None:
         owner_calls["runid"] = runid
         owner_calls["config"] = config
-        owner_calls["user_email"] = getattr(user, "email", None)
+        owner_calls["user_id"] = user_id
 
-    monkeypatch.setattr(project_routes, "_register_run_owner", fake_register)
+    monkeypatch.setattr(project_routes, "register_owned_run", fake_register)
 
     response = client.post(
         "/create/",
@@ -276,7 +589,7 @@ def test_create_accepts_session_cookie_auth_without_rq_token(
     assert response.status_code == 303
     assert owner_calls["runid"] == RUN_ID
     assert owner_calls["config"] == CONFIG
-    assert owner_calls["user_email"] == "tester@example.com"
+    assert owner_calls["user_id"] == 42
 
 
 def test_create_does_not_enable_default_nodir_roots_marker_without_opt_in(

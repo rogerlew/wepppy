@@ -212,6 +212,8 @@ roots:
     title: Advanced and Operations
     collapsible: true
     children:
+      - key: usersum.weppcloud.user_preferences
+        doc_id: usersum.weppcloud.user_preferences
       - key: usersum.weppcloud.enduser_authoring_guide
         doc_id: usersum.weppcloud.enduser_authoring_guide
       - key: usersum.weppcloud.enduser_stub_authoring_guide

@@ -314,8 +314,12 @@ Forest after local validation and final review.
 **Checkpoint**: Dual governance and operations/security review passed;
 documentation-only ancestor `1b412d61a` is committed.
 
-**Next Steps**: Implement the typed model/merge migration/preferences page,
-creation snapshot resolver, and WBT boundary policy, then run full validation.
+**Implementation**: Focused account/page, creation, WBT/RQ,
+migration, and Usersum suites pass. Local PostgreSQL is on merge head
+`c91f6b2a4d7e`.
+
+**Next Steps**: Run broad validation and final reviews, then local E2E and the
+operator-authorized Forest migration/canary.
 
 ---
 

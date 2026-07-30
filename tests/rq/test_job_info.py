@@ -57,6 +57,51 @@ def test_recursive_job_details_exc_info_none_when_missing() -> None:
     assert payload["exc_info"] is None
 
 
+def test_recursive_job_details_suppresses_traceback_for_controlled_error() -> None:
+    now = datetime.now(timezone.utc)
+    error = {
+        "code": "watershed_boundary_touches_dem_edge",
+        "message": "boundary",
+        "details": {"edge_hillslope_ids": [1, 2]},
+    }
+    job = _FakeJob(
+        meta={"runid": "run-1", "error": error, "error_id": "error-1"},
+        exc_info="raw traceback",
+    )
+
+    payload = recursive_get_job_details(job, redis_conn=object(), now=now)  # type: ignore[arg-type]
+
+    assert payload["exc_info"] is None
+    assert payload["error"] == error
+    assert payload["error_id"] == "error-1"
+
+
+def test_recursive_job_details_aggregates_controlled_child_failure(monkeypatch) -> None:
+    now = datetime.now(timezone.utc)
+    root = _FakeJob(id="root", status="finished", meta={"jobs:0,func:build": "child"})
+    child = _FakeJob(
+        id="child",
+        status="failed",
+        meta={
+            "error": {
+                "code": "watershed_boundary_touches_dem_edge",
+                "message": "boundary",
+                "details": {"edge_hillslope_ids": [2]},
+            },
+            "error_id": "error-2",
+        },
+        exc_info="raw traceback",
+    )
+    monkeypatch.setattr(job_info.Job, "fetch", lambda job_id, connection: child)
+
+    payload = recursive_get_job_details(root, redis_conn=object(), now=now)  # type: ignore[arg-type]
+
+    assert payload["status"] == "failed"
+    assert payload["exc_info"] is None
+    assert payload["error"]["code"] == "watershed_boundary_touches_dem_edge"
+    assert payload["error_id"] == "error-2"
+
+
 def test_recursive_job_details_falls_back_to_runid_from_first_arg() -> None:
     now = datetime.now(timezone.utc)
     job = _FakeJob(meta={}, args=("run-from-arg", "other"))

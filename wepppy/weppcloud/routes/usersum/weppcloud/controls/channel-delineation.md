@@ -64,6 +64,20 @@ New projects created with the `disturbed9002_wbt` configuration select
 **Topaz Conditioning Algorithm** by default. Existing projects retain their
 saved selection, and other configurations keep their configured defaults.
 
+### Watershed reaches the DEM boundary
+
+After WBT delineates subcatchments, WEPPcloud checks all four raster edges for
+positive hillslope identifiers. The project configuration can either warn and
+continue or stop with an error. Signed-in users can choose an account default
+on the [User Preferences](../user-preferences.md) page; that choice is copied
+into new projects only.
+
+When **Stop with an error** is active, WEPPcloud removes the clipped
+subcatchment raster and does not run watershed abstraction. Select a different
+outlet or enlarge the project extent, rebuild channels, and delineate again.
+The error lists the edge hillslope identifiers to help diagnose which part of
+the watershed reached the boundary.
+
 ## Set Map Object Mode
 Use this when you want the **exact** grid from another run.
 
@@ -108,6 +122,9 @@ These outputs drive subcatchments, hillslopes, and later WEPP steps.
 - **Channels fail after upload**
   - Confirm the DEM is Float32/Float64 and UTM-compatible.
   - Verify the DEM is <= 1024 x 1024 pixels.
+- **Watershed reaches the DEM boundary**
+  - Enlarge the map extent or choose an outlet farther inside the DEM.
+  - Rebuild channels before delineating subcatchments again.
 
 ## Tips
 - For repeatable runs, **Set Map Object** ensures identical grid geometry.

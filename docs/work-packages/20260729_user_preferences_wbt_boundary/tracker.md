@@ -6,11 +6,11 @@
 
 **Started**: 2026-07-30 04:10 UTC
 
-**Current phase**: Account persistence and page implementation
+**Current phase**: Broad validation and final review
 
-**Last updated**: 2026-07-30 06:55 UTC
+**Last updated**: 2026-07-30 07:10 UTC
 
-**Next milestone**: model, merge migration, service, and preferences page
+**Next milestone**: post-remediation broad gates and independent re-reviews
 
 **Security impact**: `high`
 
@@ -21,15 +21,11 @@
 
 ### In Progress
 
-- [ ] Implement the typed account model, merge migration, service, and page.
+- [ ] Complete focused and broad validation, final reviews, documentation, and
+  local E2E.
 
 ### Ready
 
-- [ ] Wire effective preference snapshotting into every supported creation
-  path while preserving explicit input, anonymous creation, and fork behavior.
-- [ ] Implement and test WBT `warn`/`error` boundary policy.
-- [ ] Complete focused and broad validation, final reviews, documentation, and
-  local E2E.
 - [ ] Apply and verify the operator-authorized migration on Forest, then run an
   authenticated new-project canary.
 
@@ -66,6 +62,35 @@
   (2026-07-30 06:50 UTC).
 - [x] Committed the reviewed documentation-only checkpoint as standalone
   ancestor `1b412d61a` (2026-07-30 06:55 UTC).
+- [x] Implemented and focused-tested the typed model, merge migration,
+  preferences service/page, exact creation precedence, and failure-atomic
+  ownership for regular and HUC-fire creation (2026-07-30 07:30 UTC).
+- [x] Implemented and focused-tested WBT warn/error behavior, deterministic
+  edge diagnostics, readiness cleanup, controlled RQ failure, dependent stop,
+  and sanitized aggregate jobinfo (2026-07-30 07:30 UTC).
+- [x] Added and validated User Preferences and Channel Delineation Usersum
+  guidance and rebuilt the generated search index (2026-07-30 07:30 UTC).
+- [x] Passed the complete Python suite (5,643 passed, 58 skipped), frontend
+  lint, and all 745 JavaScript tests before final-review remediation
+  (2026-07-30 06:05 UTC).
+- [x] Retained independent final-review FAIL artifacts and blocked Forest/E2E
+  on two governance High/four Medium and four operations/security High/four
+  Medium findings (2026-07-30 06:15 UTC).
+- [x] Remediated creation disclosure and cleanup confinement/correlation,
+  WBT stale readiness and exception identity, controlled RQ retention and
+  dependent lifecycle, plus HUC service/MCP compatibility
+  (2026-07-30 06:40 UTC).
+- [x] Added real PostgreSQL concurrency/identity/ownership tests, disposable
+  two-head PostgreSQL migration evidence, persisted NoDb snapshot coverage,
+  and real Redis worker/tree/HTTP/retry coverage
+  (2026-07-30 06:40 UTC).
+- [x] Passed 243 focused tests, the post-remediation full Python suite (5,675
+  passed, 58 skipped), frontend lint, 745 JavaScript tests, stubs, test-stub
+  completeness, and package documentation lint (2026-07-30 07:10 UTC).
+- [x] Repaired and passed the scoped isolation gate, restored the mixed local
+  web/worker runtime, verified authenticated Profile/Preferences rendering,
+  and recovered the affected RQ tree to 3/3 finished
+  (2026-07-30 07:10 UTC).
 
 ## Decisions
 
@@ -105,48 +130,48 @@ config or explicit user preference can choose fail-closed handling.
 
 | Risk | Severity | Mitigation | Status |
 | --- | --- | --- | --- |
-| Preference silently changes existing/shared runs | High | Resolve only during new-project initialization; forks copy source | Open |
-| Explicit unit selection is overwritten | High | Enforce explicit input > account > config precedence | Open |
-| DB/preference lookup failure silently falls back | High | Explicit creation failure and failure-atomic run-directory cleanup | Open |
-| Invalid enum bypasses UI | High | Exact route/service enums plus DB check constraints | Open |
-| Boundary error leaves stale ready output | High | Invalidate readiness and canonical clipped output before typed failure | Open |
+| Preference silently changes existing/shared runs | High | Resolve only during new-project initialization; forks copy source | Mitigated and focused-tested |
+| Explicit unit selection is overwritten | High | Enforce explicit input > account > config precedence | Mitigated and focused-tested |
+| DB/preference lookup failure silently falls back | High | Explicit creation failure and failure-atomic run-directory cleanup | Mitigated and focused-tested |
+| Invalid enum bypasses UI | High | Exact route/service enums plus DB check constraints | Mitigated and focused-tested |
+| Boundary error leaves stale ready output | High | Invalidate readiness and canonical clipped output before typed failure | Mitigated and focused-tested |
 | Migration deploys before compatible code | High | Contract, test, review, and Forest preflight gates | Open |
-| Concurrent preference saves lose one field | Medium | Validate complete form and update both fields in one transaction | Open |
-| Authenticated creation leaves an ownerless/public run | High | User-only subject binding, atomic owner association, compensating SQL/filesystem cleanup | Contract-defined |
-| Public job status discloses an internal traceback | High | Sanitized boundary-error status with message/code/error_id; operator diagnostics remain restricted | Contract-defined |
-| Dual Alembic heads produce an unsafe Forest rollout | High | Merge revision over both heads, fresh/two-head PostgreSQL tests, schema-first coordinated restart | Contract-defined |
+| Concurrent preference saves lose one field | Medium | Validate complete form, lock existing row, retry first-insert race, and update both fields in one transaction | Mitigated and PostgreSQL-tested |
+| Authenticated creation leaves an ownerless/public run | High | User-only subject binding, atomic owner association, exact receipt-bound SQL compensation, and confined filesystem cleanup | Mitigated and PostgreSQL-tested |
+| Public job status discloses an internal traceback | High | Sanitize retained RQ state and public tree/HTTP payload; preserve structured correlated diagnostics | Mitigated and real-Redis-tested |
+| Dual Alembic heads produce an unsafe Forest rollout | High | Merge revision over both heads, representative PostgreSQL cycle, schema-first coordinated restart | Mitigated locally; Forest pending |
 
 ## Verification Checklist
 
 ### Contract and review
 
-- [ ] Two independent checkpoint reviews pass with findings dispositioned.
-- [ ] Documentation-only checkpoint is a standalone ancestor.
-- [ ] ADR-0033 is accepted with complete provenance.
+- [x] Two independent checkpoint reviews pass with findings dispositioned.
+- [x] Documentation-only checkpoint is a standalone ancestor.
+- [x] ADR-0033 is accepted with complete provenance.
 - [ ] Final governance and operations/security reviews pass with no unresolved
   high/medium findings.
 
 ### Backend and migration
 
-- [ ] Model, constraints, migration upgrade/downgrade/upgrade, missing-row
+- [x] Model, constraints, migration upgrade/downgrade/upgrade, missing-row
   compatibility, and concurrent update tests pass.
-- [ ] GET/POST login, CSRF, exact enum, atomic save, PRG, hostile-value, and
+- [x] GET/POST login, CSRF, exact enum, atomic save, PRG, hostile-value, and
   prefix-aware link tests pass.
-- [ ] Creation precedence, failure atomicity, anonymous, token identity,
+- [x] Creation precedence, failure atomicity, anonymous, token identity,
   explicit input, existing run, shared run, and fork tests pass.
 
 ### WBT behavior
 
-- [ ] Config parser and persisted Watershed enum tests pass.
-- [ ] Synthetic no-edge, warn, error, invalid-value, actionable message,
+- [x] Config parser and persisted Watershed enum tests pass.
+- [x] Synthetic no-edge, warn, error, invalid-value, actionable message,
   stale-readiness, and deterministic edge-ID tests pass.
-- [ ] rq-engine response preserves the canonical typed error contract.
+- [x] rq-engine response preserves the canonical typed error contract.
 
 ### Broad and deployment
 
-- [ ] `wctl run-pytest tests --maxfail=1` passes.
-- [ ] `wctl run-npm lint` and `wctl run-npm test` pass if frontend sources are
-  affected.
+- [x] Post-remediation `wctl run-pytest tests --maxfail=1` passes (5,675
+  passed, 58 skipped).
+- [x] Post-remediation frontend lint and all 745 JavaScript tests pass.
 - [ ] Stub, test-stub, test-isolation, broad-exception, docs, and RQ graph gates
   pass as applicable.
 - [ ] Local stack E2E proves preference save and new-run effective snapshot.
@@ -195,3 +220,14 @@ fresh backup, blocks all enqueue surfaces, proves default/batch queues drained,
 stops idle workers gracefully, re-checks registries, and asserts User count
 plus all four named constraints before restart. Final OPS-04 confirmation is
 pending.
+
+### 2026-07-30 06:40 UTC: Final-review remediation
+
+Both independent final reviews rejected the first implementation. All
+reported implementation controls were remediated locally, and durable
+PostgreSQL/Redis evidence was added under
+`artifacts/2026-07-30_local_postgresql_redis_evidence.md`. The focused
+post-remediation selection reached 242 passes with one test-only structured
+log field assertion failure; that logging field was added and its focused
+rerun passed. Broad gates and immutable-revision re-review remain pending, so
+Forest and acceptance E2E remain blocked.

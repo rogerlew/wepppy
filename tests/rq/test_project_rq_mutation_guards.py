@@ -8,6 +8,7 @@ import pytest
 
 import wepppy.rq.project_rq as project_rq
 from wepppy.runtime_paths.errors import NoDirError
+from wepppy.nodb.core.watershed_errors import WatershedBoundaryTouchesEdgeError
 
 pytestmark = pytest.mark.unit
 
@@ -64,6 +65,72 @@ def _record_prep_timestamps(monkeypatch: pytest.MonkeyPatch, events: list[tuple]
             return "job-guard"
 
     monkeypatch.setattr(project_rq.RedisPrep, "getInstance", lambda _wd: DummyPrep())
+
+
+def test_build_subcatchments_rq_records_controlled_boundary_error_and_stops_dependent(
+    monkeypatch: pytest.MonkeyPatch,
+    tmp_path: Path,
+) -> None:
+    _run_wd, _set_archive_roots, _call_roots = _stub_rq_context(monkeypatch, tmp_path)
+    messages: list[str] = []
+
+    class _Job:
+        id = "child-build"
+        meta: dict = {}
+        dependent_ids = ["child-abstract"]
+        connection = object()
+
+        def save_meta(self) -> None:
+            return None
+
+    class _Dependent:
+        status = None
+
+        def set_status(self, status) -> None:
+            self.status = status
+
+        def save(self) -> None:
+            return None
+
+    job = _Job()
+    dependent = _Dependent()
+    canceled: list[object] = []
+    monkeypatch.setattr(project_rq, "get_current_job", lambda: job)
+    monkeypatch.setattr(
+        project_rq.StatusMessenger,
+        "publish",
+        lambda _channel, message: messages.append(message),
+    )
+    monkeypatch.setattr(project_rq, "clear_nodb_file_cache", lambda *_args, **_kwargs: None)
+    monkeypatch.setattr(project_rq.Job, "fetch", lambda _job_id, connection: dependent)
+    monkeypatch.setattr(
+        project_rq,
+        "_cancel_deferred_job",
+        lambda candidate: canceled.append(candidate),
+    )
+
+    class _Watershed:
+        delineation_backend_is_topaz = False
+
+        def build_subcatchments(self) -> None:
+            raise WatershedBoundaryTouchesEdgeError([2, 1, 2])
+
+    monkeypatch.setattr(project_rq.Watershed, "getInstance", lambda _wd: _Watershed())
+
+    with pytest.raises(WatershedBoundaryTouchesEdgeError):
+        project_rq.build_subcatchments_rq("demo")
+
+    assert job.meta["error"] == {
+        "code": "watershed_boundary_touches_dem_edge",
+        "message": (
+            "The delineated watershed reaches the DEM boundary and may be clipped. "
+            "Select a different outlet or enlarge the project extent, then delineate again."
+        ),
+        "details": {"edge_hillslope_ids": [1, 2]},
+    }
+    assert job.meta["error_id"]
+    assert canceled == [dependent]
+    assert any("EXCEPTION build_subcatchments_rq(demo)" in message for message in messages)
 
 
 @pytest.mark.parametrize(

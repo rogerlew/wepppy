@@ -152,7 +152,10 @@ def register(app: typer.Typer) -> None:
     def check_test_isolation(ctx: typer.Context) -> None:
         context = _context(ctx)
         quoted = quote_args(list(ctx.args))
-        command = "cd /workdir/wepppy && python tools/check_test_isolation.py"
+        command = (
+            "cd /workdir/wepppy && "
+            "/opt/venv/bin/python tools/check_test_isolation.py"
+        )
         if quoted:
             command = f"{command} {quoted}"
         result = compose_exec(context, "weppcloud", command, check=False)

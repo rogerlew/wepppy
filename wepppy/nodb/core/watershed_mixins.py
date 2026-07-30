@@ -74,6 +74,10 @@ from wepppy.nodb.duckdb_agents import (
 )
 
 from .topaz import Topaz
+from .watershed_errors import (
+    WATERSHED_BOUNDARY_TOUCH_MESSAGE,
+    WatershedBoundaryTouchesEdgeError,
+)
 
 # Debris-flow routines need the portion of the basin with slopes steeper than 30%.
 # ``hillslopes.parquet`` stores slope as a rise/run ratio, so 30% equals 0.30.
@@ -520,6 +524,13 @@ class WatershedOperationsMixin:
 
         assert not self.islocked()
 
+        try:
+            prep = RedisPrep.getInstance(self.wd)
+            prep.remove_timestamp(TaskEnum.build_subcatchments)
+            prep.remove_timestamp(TaskEnum.abstract_watershed)
+        except FileNotFoundError:
+            prep = None
+
         if _exists(self.subwta):
             self.logger.info(f' Removing subcatchment: {self.subwta}')
             os.remove(self.subwta)
@@ -529,9 +540,22 @@ class WatershedOperationsMixin:
             Topaz.getInstance(self.wd).build_subcatchments()
         elif self.delineation_backend_is_wbt:
             self.logger.info(f' delineation_backend_is_wbt')
+            with self.locked():
+                self._edge_hillslopes = []
             wbt = self._ensure_wbt()
             wbt.delineate_subcatchments(self.logger)
             self.identify_edge_hillslopes()
+            edge_ids = self.edge_hillslopes
+            if edge_ids:
+                warning = (
+                    f"{WATERSHED_BOUNDARY_TOUCH_MESSAGE} "
+                    f"Edge hillslope IDs: {edge_ids}."
+                )
+                if self.wbt_boundary_touch_behavior == "error":
+                    if _exists(self.subwta):
+                        os.remove(self.subwta)
+                    raise WatershedBoundaryTouchesEdgeError(edge_ids)
+                self.logger.warning(warning)
         else:
             self.logger.info(f' delineation_backend_is_taudem')
             with self.locked():
@@ -540,7 +564,7 @@ class WatershedOperationsMixin:
             self._taudem_build_subcatchments()
 
         try:
-            prep = RedisPrep.getInstance(self.wd)
+            prep = prep or RedisPrep.getInstance(self.wd)
             prep.timestamp(TaskEnum.build_subcatchments)
         except FileNotFoundError:
             pass
@@ -554,11 +578,15 @@ class WatershedOperationsMixin:
         self.logger.info(f'{self.class_name}.{func_name}()')
 
         if self.readonly:
-            self._edge_hillslopes = identify_edge_hillslopes(self.subwta, self.logger)
+            self._edge_hillslopes = sorted(
+                {int(value) for value in identify_edge_hillslopes(self.subwta, self.logger)}
+            )
             return
             
         with self.locked():
-            self._edge_hillslopes = identify_edge_hillslopes(self.subwta, self.logger)
+            self._edge_hillslopes = sorted(
+                {int(value) for value in identify_edge_hillslopes(self.subwta, self.logger)}
+            )
 
 
     @property

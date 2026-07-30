@@ -519,7 +519,7 @@ class RecorderPlugin:
                 )
             elif report.skipped:
                 self.skips.append(nodeid)
-            elif report.wasxfail:
+            elif getattr(report, "wasxfail", False):
                 self.xfails.append(nodeid)
         elif report.failed:
             self.errors.append(

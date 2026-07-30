@@ -37,9 +37,40 @@ different outlet or enlarge the project extent.
   governance and operations/security passed with no unresolved finding.
 - [x] (2026-07-30 06:55 UTC) Committed the dual-reviewed documentation-only
   checkpoint as standalone ancestor `1b412d61a`.
-- [ ] Implement and test account persistence plus the User Preferences page.
-- [ ] Implement and test new-run effective-value resolution and snapshotting.
-- [ ] Implement and test WBT boundary warning/error behavior.
+- [x] (2026-07-30 07:30 UTC) Implemented and focused-tested account
+  persistence, merge migration, Profile link, and User Preferences GET/POST.
+- [x] (2026-07-30 07:30 UTC) Implemented and focused-tested exact creation
+  precedence, fail-closed identity lookup, atomic ownership, and compensating
+  cleanup for regular and HUC-fire creation.
+- [x] (2026-07-30 07:30 UTC) Implemented and focused-tested WBT boundary
+  warning/error behavior, deterministic diagnostics, stale readiness cleanup,
+  dependent stop, and sanitized aggregate jobinfo.
+- [x] (2026-07-30 06:05 UTC) Completed the initial broad validation: the full
+  Python suite passed with 5,643 tests and 58 skips; frontend lint and all 745
+  JavaScript tests passed. This evidence predates final-review remediation and
+  does not replace the pending final gate rerun.
+- [x] (2026-07-30 06:15 UTC) Retained both independent final-review FAIL
+  artifacts. Governance reported two High and four Medium findings;
+  operations/security reported four High and four Medium findings. Forest and
+  acceptance E2E remained blocked.
+- [x] (2026-07-30 06:40 UTC) Remediated response disclosure, exact-provenance
+  SQL cleanup, symlink-resistant filesystem cleanup, cleanup correlation,
+  service/MCP compatibility, stale WBT diagnostics/readiness, canonical
+  exception identity, controlled RQ retention, and deferred dependency
+  lifecycle findings.
+- [x] (2026-07-30 06:40 UTC) Added real PostgreSQL model/concurrency/identity/
+  ownership evidence, a disposable two-head PostgreSQL migration cycle,
+  persisted Ron snapshot evidence, and a real Redis/worker/root/HTTP/retry
+  lifecycle test.
+- [x] (2026-07-30 07:10 UTC) Passed the post-remediation focused selection
+  (243 tests), full Python suite (5,675 passed, 58 skipped), frontend lint,
+  all 745 JavaScript tests, stubs, test-stub completeness, and documentation
+  lint.
+- [x] (2026-07-30 07:10 UTC) Corrected the isolation wrapper's virtualenv and
+  Pytest 9 recorder defects; two package-order runs and all four per-file runs
+  pass. Restarted the locally version-skewed web/workers, verified authenticated
+  Profile/Preferences rendering, and recovered the one affected RQ tree to
+  3/3 finished.
 - [ ] Complete broad validation, documentation, final reviews, and local E2E.
 - [ ] Apply and validate the authorized Forest migration and canary.
 
@@ -77,6 +108,26 @@ different outlet or enlarge the project extent.
   Evidence: repository revisions `7b3c068e7a1d` and `b7d9c3e2f1a4`; the new
   preference revision must merge both.
 
+- Observation: Alembic reports an ambiguous walk for a relative downgrade
+  directly from an unlabeled two-parent merge revision.
+  Evidence: local `flask db downgrade -- -1` rejected the walk. The migration
+  body therefore has a disposable upgrade/downgrade/upgrade test, while local
+  PostgreSQL upgrade and exact schema introspection validate the real dialect.
+
+- Observation: the original repository migration history cannot bootstrap an
+  empty PostgreSQL database because its first revision alters a preexisting
+  `user` table.
+  Evidence: disposable `flask db upgrade` failed at revision `28e48afd0090`
+  with `relation "user" does not exist`. The retained migration evidence uses
+  a representative application schema stamped at both real merge parents.
+
+- Observation: `wctl check-test-isolation` previously produced five identical
+  internal failures followed by a false clean result.
+  Evidence: the wrapper selected system Python without pytest; after selecting
+  `/opt/venv/bin/python`, the recorder accessed an optional Pytest 9
+  `wasxfail` field unconditionally. Both tooling defects now have regression
+  coverage and the scoped gate is genuinely clean.
+
 ## Decision Log
 
 - Decision: Use canonical tokens `config|si|english` and
@@ -109,9 +160,17 @@ different outlet or enlarge the project extent.
 
 ## Outcomes & Retrospective
 
-The package is scaffolded and implementation conformance is pending. Update
-this section after each milestone with actual test counts, migration revisions,
-E2E evidence, deviations, and remaining rollout work.
+The implementation and remediation pass are complete. Real PostgreSQL and
+Redis evidence is retained in
+`artifacts/2026-07-30_local_postgresql_redis_evidence.md`; local restart and
+incident recovery evidence is retained in
+`artifacts/2026-07-30_local_runtime_smoke.md`. The post-remediation focused
+selection passed 243 tests, the complete Python suite passed 5,675 tests with
+58 skips, frontend lint and all 745 JavaScript tests passed, both stubs and
+test-stub completeness passed, package docs passed, and the corrected
+isolation gate passed two order runs plus every per-file run. Immutable-revision
+graph/broad-exception gates and independent re-reviews remain mandatory.
+Acceptance E2E mutation and Forest rollout remain blocked.
 
 ## Context and Orientation
 

@@ -172,7 +172,13 @@ class SelectedOutletCellNotChannelCellError(Exception):
 
     __name__ = 'Selected Outlet Cell Not Channel Cell Error'
 
-class WatershedBoundaryTouchesEdgeError(Exception):
+WATERSHED_BOUNDARY_TOUCH_MESSAGE = (
+    "The delineated watershed reaches the DEM boundary and may be clipped. "
+    "Select a different outlet or enlarge the project extent, then delineate again."
+)
+
+
+class WatershedBoundaryTouchesEdgeError(RuntimeError):
     """
     THE WATERSHED BOUNDARY TOUCHES THE EDGE OF THE DEM.
     IT IS POSSIBLE THAT THE ACTUAL WATERSHED EXTENDS BEYOND THE EDGE OF THE DEM.
@@ -182,6 +188,18 @@ class WatershedBoundaryTouchesEdgeError(Exception):
     """
 
     __name__ = 'Watershed Boundary Touches Edge Error'
+    code = "watershed_boundary_touches_dem_edge"
+
+    def __init__(self, edge_hillslope_ids=None):
+        self.edge_hillslope_ids = sorted(
+            {int(value) for value in (edge_hillslope_ids or [])}
+        )
+        message = (
+            WATERSHED_BOUNDARY_TOUCH_MESSAGE
+            if edge_hillslope_ids is not None
+            else "Watershed Boundary Touches Edge Error"
+        )
+        super().__init__(message)
 
 
 class MinimumChannelLengthTooShortError(Exception):

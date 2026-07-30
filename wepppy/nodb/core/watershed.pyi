@@ -6,6 +6,7 @@ from typing import Any, ClassVar, Dict, Generator, List, Optional, Tuple, Union
 from wepppy.all_your_base import NCPU as NCPU
 from wepppy.nodb.base import NoDbBase
 from wepppy.topo.peridot.flowpath import PeridotChannel, PeridotHillslope
+from wepppy.topo.topaz import WatershedBoundaryTouchesEdgeError as WatershedBoundaryTouchesEdgeError
 from wepppy.topo.watershed_abstraction import WatershedAbstraction, WeppTopTranslator
 from wepppy.topo.watershed_abstraction.support import ChannelSummary, HillSummary
 from wepppy.topo.watershed_collection import WatershedFeature
@@ -21,6 +22,9 @@ __all__ = [
     'process_subcatchment',
     'TRANSIENT_FIELDS',
     'WBT_FILL_OR_BREACH_VALUES',
+    'WBT_BOUNDARY_TOUCH_BEHAVIOR_VALUES',
+    'WATERSHED_BOUNDARY_TOUCH_MESSAGE',
+    'WatershedBoundaryTouchesEdgeError',
     'Watershed',
     'Outlet',
 ]
@@ -51,7 +55,6 @@ class NoOutletFoundError(Exception):
     message: str
     def __init__(self, message: str = 'No outlet stream cell found for watershed') -> None: ...
 
-
 def process_channel(args: Tuple[WatershedAbstraction, int]) -> Tuple[int, ChannelSummary, Any]: ...
 
 def process_subcatchment(args: Tuple[WatershedAbstraction, int, bool, float, int]) -> Tuple[int, HillSummary, Dict[str, Any]]: ...
@@ -61,6 +64,8 @@ TRANSIENT_FIELDS: List[str]
 DEFAULT_STREAM_PRUNING_METHOD: str
 SUPPORTED_STREAM_PRUNING_METHODS: tuple[str, str]
 WBT_FILL_OR_BREACH_VALUES: frozenset[str]
+WBT_BOUNDARY_TOUCH_BEHAVIOR_VALUES: frozenset[str]
+WATERSHED_BOUNDARY_TOUCH_MESSAGE: str
 
 
 class Outlet:
@@ -102,6 +107,10 @@ class Watershed(NoDbBase):
     def wbt_blc_dist(self) -> int: ...
     @wbt_blc_dist.setter
     def wbt_blc_dist(self, value: int) -> None: ...
+    @property
+    def wbt_boundary_touch_behavior(self) -> str: ...
+    @wbt_boundary_touch_behavior.setter
+    def wbt_boundary_touch_behavior(self, value: str) -> None: ...
     @property
     def stream_pruning_method(self) -> str: ...
     @stream_pruning_method.setter

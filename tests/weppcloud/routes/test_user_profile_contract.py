@@ -74,6 +74,7 @@ def profile_renderer() -> tuple[Flask, Environment]:
                 ),
                 "weppcloud_site.diagnostics": "/diagnostics/",
                 "user.mint_profile_token": "/profile/mint-token",
+                "user.preferences": "/preferences",
             }[endpoint]
         ),
     )
@@ -122,6 +123,7 @@ def test_profile_renders_escaped_readonly_identity_and_owned_navigation(
     assert 'href="/change"' in rendered
     assert 'href="/logout"' in rendered
     assert 'href="/diagnostics/"' in rendered
+    assert 'href="/preferences"' in rendered
     assert "data-profile-token-root" not in rendered
 
 

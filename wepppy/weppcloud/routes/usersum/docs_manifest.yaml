@@ -225,6 +225,15 @@ docs:
     audience_tags: [developer, operator]
     status: active
     nav_key: usersum.weppcloud.profile_jwt_dataset_access_python_r
+  - doc_id: usersum.weppcloud.user_preferences
+    source: local
+    rel_path: wepppy/weppcloud/routes/usersum/weppcloud/user-preferences.md
+    title: User Preferences
+    min_role: user
+    category: weppcloud
+    audience_tags: [user, operator]
+    status: active
+    nav_key: usersum.weppcloud.user_preferences
   - doc_id: usersum.weppcloud.enduser_authoring_guide
     source: local
     rel_path: wepppy/weppcloud/routes/usersum/weppcloud/enduser-authoring-guide.md

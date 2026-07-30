@@ -79,9 +79,25 @@ def _nodb_lock_conflict_response(*, route_label: str) -> JSONResponse:
 
 def _watershed_abstraction_state_response(wd: str, *, route_label: str) -> JSONResponse | None:
     watershed = Watershed.getInstance(wd)
-    if bool(getattr(watershed, "has_subcatchments", False)):
+    ready = bool(getattr(watershed, "has_subcatchments", False))
+    if ready:
+        try:
+            prep = RedisPrep.getInstance(wd)
+            ready = all(
+                prep[str(task)] is not None
+                for task in (
+                    TaskEnum.build_subcatchments,
+                    TaskEnum.abstract_watershed,
+                )
+            )
+        except FileNotFoundError:
+            ready = False
+    if ready:
         return None
-    logger.warning("rq-engine %s rejected because watershed.subwta is missing", route_label)
+    logger.warning(
+        "rq-engine %s rejected because watershed abstraction is not ready",
+        route_label,
+    )
     return error_response(
         WATERSHED_ABSTRACTION_INVALID_MESSAGE,
         status_code=409,

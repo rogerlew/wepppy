@@ -3,14 +3,27 @@ from __future__ import annotations
 import logging
 import os
 from pathlib import Path
+import uuid
 
 from fastapi import APIRouter, Request
 from fastapi.responses import JSONResponse
+from sqlalchemy.exc import SQLAlchemyError
 from starlette.datastructures import UploadFile
 from werkzeug.utils import secure_filename
 
 from wepppy.nodb.core import Ron
 from wepppy.nodb.mods.disturbed import Disturbed
+from wepppy.weppcloud.user_preferences import (
+    PreferenceIdentityError,
+    PreferenceValidationError,
+    RunRegistrationReceipt,
+    StoredPreferenceError,
+    apply_creation_preference_overrides,
+    cleanup_new_run_directory,
+    delete_registered_run,
+    register_owned_run,
+    resolve_creation_preferences,
+)
 
 from .auth import AuthError, require_jwt
 from .responses import error_response
@@ -32,49 +45,27 @@ def _extract_upload(form, key: str) -> UploadFile | None:
     return None
 
 
-def _validation_reason(exc: Exception) -> str:
-    detail = str(exc).strip()
-    if detail:
-        return detail
-    return exc.__class__.__name__
-
-
-def _resolve_user_from_claims(claims: dict[str, object]) -> tuple[object | None, object | None, object | None]:
-    from wepppy.weppcloud.utils.helpers import get_user_models
-    from wepppy.weppcloud.app import app as flask_app
-
-    Run, User, user_datastore = get_user_models()
-    user = None
-    sub = claims.get("sub")
-    email = claims.get("email")
-
-    with flask_app.app_context():
-        if sub is not None:
-            try:
-                user_id = int(str(sub))
-            except (TypeError, ValueError):
-                user_id = None
-            if user_id is not None:
-                user = User.query.filter(User.id == user_id).first()
-
-        if user is None and email:
-            if hasattr(user_datastore, "find_user"):
-                try:
-                    user = user_datastore.find_user(email=str(email))
-                except Exception:  # broad-except: boundary contract
-                    # Boundary catch: preserve contract behavior while logging unexpected failures.
-                    __import__("logging").getLogger(__name__).exception("Boundary exception at wepppy/microservices/rq_engine/upload_huc_fire_routes.py:56", extra={"runid": locals().get("runid"), "config": locals().get("config"), "job_id": locals().get("job_id")})
-                    user = None
-
-        if user is None and email:
-            try:
-                user = User.query.filter(User.email == str(email)).first()
-            except Exception:  # broad-except: boundary contract
-                # Boundary catch: preserve contract behavior while logging unexpected failures.
-                __import__("logging").getLogger(__name__).exception("Boundary exception at wepppy/microservices/rq_engine/upload_huc_fire_routes.py:62", extra={"runid": locals().get("runid"), "config": locals().get("config"), "job_id": locals().get("job_id")})
-                user = None
-
-    return user, user_datastore, flask_app
+def _cleanup_failed_run(
+    receipt: RunRegistrationReceipt | None,
+    runid: str,
+    wd: str,
+    error_id: str,
+) -> None:
+    if receipt is not None:
+        try:
+            delete_registered_run(receipt)
+        except (PreferenceIdentityError, SQLAlchemyError):
+            logger.exception(
+                "rq-engine huc-fire SQL cleanup failed",
+                extra={"error_id": error_id, "runid": runid},
+            )
+    try:
+        cleanup_new_run_directory(runid, wd)
+    except (OSError, RuntimeError, ValueError):
+        logger.exception(
+            "rq-engine huc-fire directory cleanup failed",
+            extra={"error_id": error_id, "runid": runid},
+        )
 
 
 @router.post("/huc-fire/tasks/upload-sbs/")
@@ -89,6 +80,9 @@ async def upload_huc_fire_sbs(request: Request) -> JSONResponse:
         logger.exception("rq-engine huc-fire upload auth failed")
         return error_response("Failed to authorize request", status_code=401, code="unauthorized")
 
+    runid: str | None = None
+    wd: str | None = None
+    receipt: RunRegistrationReceipt | None = None
     try:
         from wepppy.weppcloud.routes.run_0.run_0_bp import create_run_dir
 
@@ -103,16 +97,57 @@ async def upload_huc_fire_sbs(request: Request) -> JSONResponse:
         if not filename:
             return upload_failure("Could not obtain filename")
 
-        user, user_datastore, flask_app = _resolve_user_from_claims(claims)
-        if user is None or user_datastore is None or flask_app is None:
-            return error_response("User not found", status_code=403, code="forbidden")
+        try:
+            snapshot = resolve_creation_preferences(claims)
+            token_class = str(claims.get("token_class") or "")
+            if snapshot is None and token_class not in {"service", "mcp"}:
+                raise PreferenceIdentityError("Authenticated user identity is required.")
+            effective_values = apply_creation_preference_overrides({}, snapshot)
+        except (
+            PreferenceIdentityError,
+            PreferenceValidationError,
+            StoredPreferenceError,
+            SQLAlchemyError,
+        ):
+            error_id = uuid.uuid4().hex
+            logger.exception(
+                "rq-engine huc-fire preference resolution failed",
+                extra={"error_id": error_id},
+            )
+            return error_response(
+                "Could not resolve account preferences.",
+                code="preference_resolution_failed",
+                error_id=error_id,
+                log_exception=False,
+            )
 
-        runid, wd = create_run_dir(user)
+        runid, wd = create_run_dir(snapshot)
 
         config = "disturbed9002"
         cfg = f"{config}.cfg"
+        overrides = [
+            f"{key}={value}"
+            for key, value in effective_values.items()
+            if value is not None and value != ""
+        ]
+        if overrides:
+            cfg = f"{cfg}?{'&'.join(overrides)}"
 
-        Ron(wd, cfg)
+        try:
+            Ron(wd, cfg)
+        except Exception:  # broad-except: initialization boundary
+            error_id = uuid.uuid4().hex
+            logger.exception(
+                "rq-engine huc-fire Ron initialization failed",
+                extra={"error_id": error_id, "runid": runid},
+            )
+            _cleanup_failed_run(receipt, runid, wd, error_id)
+            return error_response(
+                "Could not create run",
+                code="run_initialization_failed",
+                error_id=error_id,
+                log_exception=False,
+            )
 
         try:
             from wepppy.weppcloud.utils.run_ttl import initialize_ttl
@@ -121,8 +156,22 @@ async def upload_huc_fire_sbs(request: Request) -> JSONResponse:
         except Exception:  # broad-except: boundary contract
             logger.exception("rq-engine huc-fire TTL initialization failed")
 
-        with flask_app.app_context():
-            user_datastore.create_run(runid, config, user)
+        if snapshot is not None:
+            try:
+                receipt = register_owned_run(runid, config, snapshot.user_id)
+            except (PreferenceIdentityError, SQLAlchemyError):
+                error_id = uuid.uuid4().hex
+                logger.exception(
+                    "rq-engine huc-fire ownership registration failed",
+                    extra={"error_id": error_id, "runid": runid},
+                )
+                _cleanup_failed_run(None, runid, wd, error_id)
+                return error_response(
+                    "Could not register project ownership.",
+                    code="run_ownership_failed",
+                    error_id=error_id,
+                    log_exception=False,
+                )
 
         disturbed = Disturbed.getInstance(wd)
         file_path = os.path.join(disturbed.disturbed_dir, filename)
@@ -137,21 +186,50 @@ async def upload_huc_fire_sbs(request: Request) -> JSONResponse:
             )
         except UploadError as exc:
             status_code = int(getattr(exc, "status_code", 400))
-            return upload_failure(str(exc), status=status_code)
+            error_id = uuid.uuid4().hex
+            _cleanup_failed_run(receipt, runid, wd, error_id)
+            return error_response(
+                str(exc),
+                status_code=status_code,
+                error_id=error_id,
+                log_exception=False,
+            )
 
         try:
             disturbed.validate(filename, mode=0)
         except Exception as exc:  # broad-except: validation boundary
-            logger.exception("rq-engine huc-fire disturbed validation failed")
+            error_id = uuid.uuid4().hex
+            logger.exception(
+                "rq-engine huc-fire disturbed validation failed",
+                extra={"error_id": error_id, "runid": runid},
+            )
             os.remove(file_path)
-            reason = _validation_reason(exc)
-            return error_response(f"SBS validation failed: {reason}", status_code=400)
+            _cleanup_failed_run(receipt, runid, wd, error_id)
+            return error_response(
+                "SBS validation failed.",
+                status_code=400,
+                code="validation_error",
+                details="The uploaded SBS raster did not pass validation.",
+                error_id=error_id,
+                log_exception=False,
+            )
 
         return JSONResponse({"runid": runid})
-    except Exception as exc:  # broad-except: boundary contract
-        logger.exception("rq-engine huc-fire upload failed")
-        reason = _validation_reason(exc)
-        return error_response(f"Could not save file: {reason}", status_code=500)
+    except Exception:  # broad-except: boundary contract
+        error_id = uuid.uuid4().hex
+        logger.exception(
+            "rq-engine huc-fire upload failed",
+            extra={"error_id": error_id, "runid": runid},
+        )
+        if runid is not None and wd is not None:
+            _cleanup_failed_run(receipt, runid, wd, error_id)
+        return error_response(
+            "Could not save file.",
+            status_code=500,
+            code="upload_failed",
+            error_id=error_id,
+            log_exception=False,
+        )
 
 
 __all__ = ["router"]

@@ -7,6 +7,24 @@ from tools import check_test_isolation as cti
 
 pytestmark = pytest.mark.unit
 
+
+class _Report:
+    nodeid = "tests/example.py::test_example"
+    when = "call"
+    failed = False
+    skipped = False
+
+
+def test_recorder_accepts_passing_pytest9_report_without_wasxfail() -> None:
+    recorder = cti.RecorderPlugin()
+
+    recorder.pytest_runtest_logreport(_Report())
+
+    assert recorder.failures == []
+    assert recorder.skips == []
+    assert recorder.xfails == []
+
+
 def test_module_diff_flags_stub_pollution() -> None:
     before = {
         "wepppy.real_module": {
