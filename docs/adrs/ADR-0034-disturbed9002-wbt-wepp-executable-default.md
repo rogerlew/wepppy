@@ -80,6 +80,7 @@ already persisted `wepp_260727`.
 
 ## Implementation Notes
 
-Add a config-level regression test proving the exact new default and that the
-referenced watershed and hillslope binaries plus metadata files exist. Keep
-the change limited to the one configuration.
+Keep the implementation limited to the one configuration. Validate the edited
+configuration parses to the exact requested value and retain the binary
+provenance check as release evidence; no dedicated regression-test module is
+required for this single config-line default.
