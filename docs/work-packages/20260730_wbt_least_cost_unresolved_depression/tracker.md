@@ -63,8 +63,8 @@
   no canonical output (2026-07-30 17:37 UTC).
 - [x] Targeted pytest passed (83 tests), full Jest passed (750 tests), ESLint
   passed, and test-stub validation passed (2026-07-30 17:37 UTC).
-- [x] Corrected controlled guidance wrapping inside the preformatted
-  stacktrace container; targeted frontend and CSS tests pass
+- [x] Removed duplicate controlled guidance from the preformatted stacktrace
+  container; the normal summary is now the sole instructional presentation
   (2026-07-30 18:10 UTC).
 
 ## Decisions Log
@@ -209,13 +209,14 @@ change parameters or algorithms.
 - Repeated broad pytest passed: 5,745 passed, 58 skipped, 1,024 warnings in
   639.07 seconds.
 
-### 2026-07-30 18:10 UTC: Instructional summary wrapping follow-up
+### 2026-07-30 18:10 UTC: Single instructional summary follow-up
 
-The live controlled message exposed that the outer stacktrace body is a
-`<pre>` with `white-space: pre`, causing the long guidance to render on one
-line. Controlled/error headings now use `.wc-stacktrace__message`, which
-restores normal wrapping and permits long identifiers to break without
-changing nested traceback formatting.
+The live controlled message exposed that guidance appeared both in the normal
+summary and in the preformatted stacktrace body, where heading styles forced
+uppercase presentation. Controlled failures now publish `FAILED` rather than
+`EXCEPTION`, render once in the normal summary, and leave the details panel
+empty and collapsed. Unexpected failures retain their existing traceback
+presentation.
 
 ## Watch List
 

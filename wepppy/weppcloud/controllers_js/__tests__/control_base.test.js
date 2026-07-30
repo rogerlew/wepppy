@@ -250,10 +250,8 @@ describe("controlBase job status error handling", () => {
             "Selected breach distance 1000 m; unresolved depressions 3."
         );
         expect(document.getElementById("info").textContent).toContain("controlled-123");
-        expect(document.getElementById("stacktrace").textContent).not.toContain("Traceback");
-        expect(
-            document.querySelector("#stacktrace .wc-stacktrace__message")
-        ).not.toBeNull();
+        expect(document.getElementById("stacktrace").textContent).toBe("");
+        expect(document.getElementById("stacktrace").hidden).toBe(true);
     });
 
     test("pushResponseStacktrace links clearing-lock docs with site prefix from url_for_run", () => {

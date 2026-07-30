@@ -22,15 +22,3 @@ def test_anchor_primary_pure_buttons_use_theme_variables() -> None:
     assert "--wc-button-primary-text" in rule
     assert "background-color: var(--wc-button-primary-bg" in rule
     assert "border-color: var(--wc-button-primary-bg" in rule
-
-
-def test_stacktrace_instructional_message_wraps_inside_pre_container() -> None:
-    css = UI_FOUNDATION_CSS.read_text(encoding="utf-8")
-
-    selector = ".wc-stacktrace__message"
-    rule_start = css.index(selector)
-    rule_end = css.index("}", rule_start)
-    rule = css[rule_start:rule_end]
-
-    assert "white-space: normal" in rule
-    assert "overflow-wrap: anywhere" in rule

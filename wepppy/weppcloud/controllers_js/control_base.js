@@ -424,7 +424,8 @@ function controlBase() {
                         : "";
                     const errorId = payload.error_id ? ` [Error ID ${payload.error_id}]` : "";
                     errorPayload.error.message = String(payload.error.message) + diagnostic + errorId;
-                    self.pushResponseStacktrace(self, errorPayload);
+                    clearStacktrace(self.stacktrace);
+                    updateErrorSummary(self, errorPayload);
                     emitFailure();
                     return;
                 }
@@ -979,12 +980,7 @@ function controlBase() {
 
             const errorMessage = resolveErrorMessage(response);
             if (errorMessage !== null && errorMessage !== undefined) {
-                appendHtml(
-                    self.stacktrace,
-                    '<h6 class="wc-stacktrace__message">'
-                        + escapeHtml(String(errorMessage))
-                        + "</h6>"
-                );
+                appendHtml(self.stacktrace, "<h6>" + escapeHtml(String(errorMessage)) + "</h6>");
             }
 
             const stackLines = resolveStacktrace(response);

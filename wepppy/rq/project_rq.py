@@ -1398,7 +1398,7 @@ def build_channels_rq(
         )
         StatusMessenger.publish(
             status_channel,
-            f"rq:{job.id} EXCEPTION {func_name}({runid}) "
+            f"rq:{job.id} FAILED {func_name}({runid}) "
             f"{WBT_UNRESOLVED_DEPRESSION_MESSAGE}",
         )
         raise

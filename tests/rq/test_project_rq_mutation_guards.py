@@ -896,6 +896,8 @@ def test_build_channels_rq_records_controlled_unresolved_depression_failure(
     }
     assert job.meta["error_id"]
     assert any(WBT_UNRESOLVED_DEPRESSION_MESSAGE in message for message in messages)
+    assert any(" FAILED " in message for message in messages)
+    assert all(" EXCEPTION " not in message for message in messages)
 
 
 def test_build_landuse_rq_rejects_archive_form_root(
