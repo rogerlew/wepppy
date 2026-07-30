@@ -11,7 +11,6 @@ emitting status updates for the front-end while coordinating NoDb controllers.
 import errno
 import copy
 from contextlib import ExitStack
-import hashlib
 import inspect
 import logging
 import json
@@ -20,7 +19,6 @@ import re
 import shutil
 import socket
 import time
-import uuid
 import zipfile
 from glob import glob
 from subprocess import call
@@ -32,9 +30,8 @@ from os.path import join as _join
 import redis
 from rq import Queue, get_current_job
 from rq.exceptions import InvalidJobOperation, NoSuchJobError
-from rq.job import Dependency, Job, JobStatus
-from rq.registry import DeferredJobRegistry, StartedJobRegistry
-from redis.exceptions import WatchError
+from rq.job import Job
+from rq.registry import DeferredJobRegistry
 from wepppy.config.redis_settings import (
     RedisDB,
     redis_connection_kwargs,
@@ -42,12 +39,6 @@ from wepppy.config.redis_settings import (
 )
 
 from wepppy.weppcloud.utils.helpers import get_wd, get_primary_wd
-from wepppy.weppcloud.user_preferences import (
-    WBT_BOUNDARY_POLICY_SNAPSHOT_KEY,
-    WbtBoundaryPolicyApplyError,
-    WbtBoundaryPolicySnapshotError,
-    validate_wbt_boundary_policy_snapshot,
-)
 
 from wepppy.nodb.base import clear_locks, clear_nodb_file_cache, lock_statuses
 from wepppy.runtime_paths.errors import NoDirError
@@ -104,28 +95,6 @@ DIRECTORY_ROOT_LOCK_RETRY_SECONDS: float = 1.0
 LANDUSE_MAPPING_BATCH_MAX_EDITS: int = 500
 LANDUSE_MAPPING_MAX_KEY_LENGTH: int = 128
 LANDUSE_MAPPING_CONTROL_CHAR_RE = re.compile(r"[\x00-\x1f\x7f]")
-WBT_BOUNDARY_POLICY_SNAPSHOT_INVALID_MESSAGE = (
-    "The WBT boundary policy snapshot is invalid. Submit delineation again."
-)
-WBT_BOUNDARY_POLICY_APPLY_FAILED_MESSAGE = (
-    "The WBT boundary policy could not be applied. Submit delineation again."
-)
-WBT_SUBCATCHMENT_TREE_LOCK_TTL_SECONDS = TIMEOUT + 300
-WBT_SUBCATCHMENT_ADMISSION_RETRY_ATTEMPTS = 5
-_WBT_BUILD_LINK_KEY = "jobs:0,func:build_subcatchments_rq"
-_WBT_RECEIPT_LINK_KEY = "jobs:1,func:abstract_watershed_rq"
-_WBT_ADMISSION_FINGERPRINT_KEY = "wbt_subcatchment_admission_fingerprint"
-_WBT_ADMISSION_ROOT_KEY = "wbt_subcatchment_admission_root"
-_WBT_ADMISSION_BUILD_KEY = "wbt_subcatchment_admission_build"
-_WBT_ADMISSION_RECEIPT_KEY = "wbt_subcatchment_admission_receipt"
-_WBT_ADMISSION_PREVIOUS_KEY = "wbt_subcatchment_admission_previous"
-_COMPARE_AND_DELETE_TAIL_SCRIPT = """
-local current = redis.call('GET', KEYS[1])
-if current == ARGV[1] then
-  return redis.call('DEL', KEYS[1])
-end
-return 0
-""".strip()
 
 _clean_env_for_system_tools = _fork_helpers._clean_env_for_system_tools
 _build_fork_rsync_cmd = _fork_helpers._build_fork_rsync_cmd
@@ -201,7 +170,6 @@ def _run_with_directory_root_lock(
     callback,
     *,
     purpose: str,
-    lock_ttl_seconds: int | None = None,
 ):
     retry_attempts = max(1, int(DIRECTORY_ROOT_LOCK_RETRY_ATTEMPTS))
     retry_delay_seconds = max(0.0, float(DIRECTORY_ROOT_LOCK_RETRY_SECONDS))
@@ -209,17 +177,7 @@ def _run_with_directory_root_lock(
     for attempt in range(1, retry_attempts + 1):
         _require_directory_root(wd, root)
         try:
-            lock_kwargs = (
-                {}
-                if lock_ttl_seconds is None
-                else {"ttl_seconds": lock_ttl_seconds}
-            )
-            with nodir_maintenance_lock(
-                wd,
-                root,
-                purpose=purpose,
-                **lock_kwargs,
-            ):
+            with nodir_maintenance_lock(wd, root, purpose=purpose):
                 _require_directory_root(wd, root)
                 return callback()
         except NoDirError as exc:
@@ -253,558 +211,6 @@ def _cancel_deferred_job(job: Job) -> None:
         pipeline.delete(job.dependencies_key)
         job.cancel(pipeline=pipeline)
         pipeline.execute()
-
-
-def _cancel_policy_dependents(job: Job) -> None:
-    for dependent_id in sorted(job.dependent_ids):
-        try:
-            dependent = Job.fetch(dependent_id, connection=job.connection)
-            if dependent.meta.get("wbt_completion_receipt_for") != job.id:
-                continue
-            _cancel_deferred_job(dependent)
-        except (InvalidJobOperation, NoSuchJobError):
-            _logger.warning(
-                "WBT policy dependent disappeared "
-                "(job_id=%s dependent_id=%s)",
-                job.id,
-                dependent_id,
-            )
-
-
-def _record_wbt_policy_failure(
-    job: Job,
-    *,
-    runid: str,
-    code: str,
-    message: str,
-    cancel_dependents: bool,
-) -> str:
-    error_id = __import__("uuid").uuid4().hex
-    job.meta["error"] = {"code": code, "message": message}
-    job.meta["error_id"] = error_id
-    job.meta.pop("exc_string", None)
-    job.save_meta()
-    if cancel_dependents:
-        _cancel_policy_dependents(job)
-    _logger.error(
-        "Controlled WBT policy failure "
-        "[error_id=%s runid=%s code=%s job_id=%s]",
-        error_id,
-        runid,
-        code,
-        job.id,
-        extra={
-            "error_id": error_id,
-            "runid": runid,
-            "error_code": code,
-            "job_id": job.id,
-        },
-    )
-    return error_id
-
-
-def _validate_optional_wbt_policy(
-    job: Job,
-    runid: str,
-    boundary_policy: dict[str, Any] | None,
-):
-    job_meta = getattr(job, "meta", None)
-    raw_snapshot = (
-        job_meta.get(WBT_BOUNDARY_POLICY_SNAPSHOT_KEY)
-        if isinstance(job_meta, dict)
-        else None
-    )
-    if boundary_policy is None and raw_snapshot is None:
-        return None
-    if boundary_policy is None or raw_snapshot is None:
-        raise WbtBoundaryPolicySnapshotError(
-            "WBT boundary snapshot metadata and argument must both be present."
-        )
-    return validate_wbt_boundary_policy_snapshot(
-        raw_snapshot,
-        boundary_policy,
-        expected_runid=runid,
-    )
-
-
-def _subcatchment_tail_key(runid: str) -> str:
-    return f"rq:subcatchment-mutation-tail:{runid}"
-
-
-def _decode_redis_text(value: Any) -> str | None:
-    if value is None:
-        return None
-    if isinstance(value, bytes):
-        return value.decode("utf-8")
-    return str(value)
-
-
-def _subcatchment_admission_fingerprint(
-    *,
-    parent_job_id: str,
-    queue_name: str,
-    runid: str,
-    updates: dict[str, Any],
-    boundary_policy: dict[str, Any] | None,
-) -> str:
-    payload = {
-        "boundary_policy": boundary_policy,
-        "parent_job_id": parent_job_id,
-        "queue_name": queue_name,
-        "runid": runid,
-        "updates": updates,
-    }
-    encoded = json.dumps(
-        payload,
-        sort_keys=True,
-        separators=(",", ":"),
-        ensure_ascii=True,
-    ).encode("utf-8")
-    return hashlib.sha256(encoded).hexdigest()
-
-
-def _fetch_job_or_none(job_id: str | None, redis_conn) -> Job | None:
-    if not job_id:
-        return None
-    try:
-        return Job.fetch(job_id, connection=redis_conn)
-    except NoSuchJobError:
-        return None
-
-
-def _is_terminal_job(job: Job) -> bool:
-    return job.get_status(refresh=True) in {
-        JobStatus.CANCELED,
-        JobStatus.FAILED,
-        JobStatus.FINISHED,
-        JobStatus.STOPPED,
-    }
-
-
-def _stored_dependency_ids(job: Job) -> set[str]:
-    return {
-        decoded
-        for raw in job.connection.smembers(job.dependencies_key)
-        if (decoded := _decode_redis_text(raw)) is not None
-    }
-
-
-def _active_job_has_execution_location(job: Job) -> bool:
-    origin = getattr(job, "origin", None)
-    if not isinstance(origin, str) or not origin:
-        return False
-    status = job.get_status(refresh=True)
-    if status == JobStatus.QUEUED:
-        queue = Queue(
-            origin,
-            connection=job.connection,
-            job_class=job.__class__,
-        )
-        intermediate_ids = {
-            decoded
-            for raw in job.connection.lrange(
-                queue.intermediate_queue_key,
-                0,
-                -1,
-            )
-            if (decoded := _decode_redis_text(raw)) is not None
-        }
-        return job.id in queue.get_job_ids() or job.id in intermediate_ids
-    if status == JobStatus.DEFERRED:
-        return job.id in DeferredJobRegistry(
-            origin,
-            connection=job.connection,
-            job_class=job.__class__,
-        ).get_job_ids()
-    if status == JobStatus.STARTED:
-        return job.id in StartedJobRegistry(
-            origin,
-            connection=job.connection,
-            job_class=job.__class__,
-        ).get_job_ids()
-    return False
-
-
-def _active_job_location_keys(job: Job) -> tuple[str, ...]:
-    origin = getattr(job, "origin", None)
-    if not isinstance(origin, str) or not origin:
-        return ()
-    status = job.get_status(refresh=False)
-    if status == JobStatus.QUEUED:
-        queue = Queue(
-            origin,
-            connection=job.connection,
-            job_class=job.__class__,
-        )
-        return (queue.key, queue.intermediate_queue_key)
-    if status == JobStatus.DEFERRED:
-        return (
-            DeferredJobRegistry(
-                origin,
-                connection=job.connection,
-                job_class=job.__class__,
-            ).key,
-        )
-    if status == JobStatus.STARTED:
-        return (
-            StartedJobRegistry(
-                origin,
-                connection=job.connection,
-                job_class=job.__class__,
-            ).key,
-        )
-    return ()
-
-
-def _load_exact_subcatchment_tree(
-    redis_conn,
-    queue: Queue,
-    *,
-    parent_job: Job,
-    fingerprint: str,
-    tail_key: str,
-    require_current_tail: bool,
-) -> tuple[Job, Job] | None:
-    """Return an already committed tree only when all bounded links agree."""
-    build_id = parent_job.meta.get(_WBT_BUILD_LINK_KEY)
-    receipt_id = parent_job.meta.get(_WBT_RECEIPT_LINK_KEY)
-    stored_fingerprint = parent_job.meta.get(_WBT_ADMISSION_FINGERPRINT_KEY)
-    if build_id is None and receipt_id is None and stored_fingerprint is None:
-        return None
-    if not (
-        isinstance(build_id, str)
-        and isinstance(receipt_id, str)
-        and stored_fingerprint == fingerprint
-    ):
-        raise RuntimeError(
-            "WBT subcatchment root contains an incomplete or mismatched "
-            "admission tree."
-        )
-
-    build = _fetch_job_or_none(build_id, redis_conn)
-    receipt = _fetch_job_or_none(receipt_id, redis_conn)
-    if build is None or receipt is None:
-        raise RuntimeError(
-            "WBT subcatchment root references a missing admission job."
-        )
-
-    expected_common = {
-        _WBT_ADMISSION_FINGERPRINT_KEY: fingerprint,
-        _WBT_ADMISSION_ROOT_KEY: parent_job.id,
-    }
-    if any(build.meta.get(key) != value for key, value in expected_common.items()):
-        raise RuntimeError("WBT subcatchment build linkage does not match its root.")
-    if any(receipt.meta.get(key) != value for key, value in expected_common.items()):
-        raise RuntimeError("WBT subcatchment receipt linkage does not match its root.")
-    if build.meta.get(_WBT_ADMISSION_RECEIPT_KEY) != receipt.id:
-        raise RuntimeError("WBT subcatchment build does not link to its receipt.")
-    if receipt.meta.get(_WBT_ADMISSION_BUILD_KEY) != build.id:
-        raise RuntimeError("WBT subcatchment receipt does not link to its build.")
-    if receipt.meta.get("wbt_completion_receipt_for") != build.id:
-        raise RuntimeError("WBT completion receipt identifies the wrong build.")
-
-    deferred_ids = set(
-        DeferredJobRegistry(
-            queue.name,
-            connection=redis_conn,
-            job_class=queue.job_class,
-            serializer=queue.serializer,
-        ).get_job_ids()
-    )
-    queued_ids = set(queue.get_job_ids())
-    intermediate_ids = {
-        decoded
-        for raw in redis_conn.lrange(queue.intermediate_queue_key, 0, -1)
-        if (decoded := _decode_redis_text(raw)) is not None
-    }
-    started_ids = set(
-        StartedJobRegistry(
-            queue.name,
-            connection=redis_conn,
-            job_class=queue.job_class,
-            serializer=queue.serializer,
-        ).get_job_ids()
-    )
-
-    receipt_dependencies = _stored_dependency_ids(receipt)
-    receipt_status = receipt.get_status(refresh=True)
-    if receipt_status == JobStatus.DEFERRED:
-        if receipt_dependencies != {build.id}:
-            raise RuntimeError("WBT completion receipt dependency is incomplete.")
-        if receipt.id not in deferred_ids or receipt.id not in build.dependent_ids:
-            raise RuntimeError(
-                "WBT completion receipt registry linkage is incomplete."
-            )
-    elif (
-        receipt_status == JobStatus.QUEUED
-        and receipt.id not in queued_ids
-        and receipt.id not in intermediate_ids
-    ):
-        raise RuntimeError("WBT completion receipt is absent from its queue.")
-    elif receipt_status == JobStatus.STARTED and receipt.id not in started_ids:
-        raise RuntimeError("WBT completion receipt is absent from its started registry.")
-    elif receipt_status not in {
-        JobStatus.QUEUED,
-        JobStatus.STARTED,
-        JobStatus.CANCELED,
-        JobStatus.FAILED,
-        JobStatus.FINISHED,
-        JobStatus.STOPPED,
-    }:
-        raise RuntimeError("WBT completion receipt has an unsupported status.")
-    if receipt_status != JobStatus.DEFERRED:
-        if receipt_dependencies:
-            raise RuntimeError(
-                "WBT completion receipt retains a stale dependency."
-            )
-        if receipt.id in build.dependent_ids:
-            raise RuntimeError(
-                "WBT build retains a stale completion-receipt link."
-            )
-
-    previous_id = build.meta.get(_WBT_ADMISSION_PREVIOUS_KEY)
-    build_dependencies = _stored_dependency_ids(build)
-    build_status = build.get_status(refresh=True)
-    if previous_id is None:
-        if build_dependencies:
-            raise RuntimeError("WBT build has an unexpected prior dependency.")
-    elif build_status == JobStatus.DEFERRED:
-        if build_dependencies != {previous_id}:
-            raise RuntimeError("WBT build prior dependency is incomplete.")
-        previous = _fetch_job_or_none(previous_id, redis_conn)
-        if previous is None or build.id not in previous.dependent_ids:
-            raise RuntimeError("WBT build reverse dependency is incomplete.")
-    elif build_status not in {
-        JobStatus.QUEUED,
-        JobStatus.STARTED,
-        JobStatus.CANCELED,
-        JobStatus.FAILED,
-        JobStatus.FINISHED,
-        JobStatus.STOPPED,
-    }:
-        raise RuntimeError("WBT build has an unsupported status.")
-    if build_status != JobStatus.DEFERRED:
-        if build_dependencies:
-            raise RuntimeError("WBT build retains a stale prior dependency.")
-        if previous_id is not None:
-            previous = _fetch_job_or_none(previous_id, redis_conn)
-            if previous is not None and build.id in previous.dependent_ids:
-                raise RuntimeError(
-                    "WBT prior build retains a stale dependent link."
-                )
-    if build_status == JobStatus.DEFERRED and build.id not in deferred_ids:
-        raise RuntimeError("WBT build is absent from its deferred registry.")
-    if (
-        build_status == JobStatus.QUEUED
-        and build.id not in queued_ids
-        and build.id not in intermediate_ids
-    ):
-        raise RuntimeError("WBT build is absent from its queue.")
-    if build_status == JobStatus.STARTED and build.id not in started_ids:
-        raise RuntimeError("WBT build is absent from its started registry.")
-
-    if require_current_tail:
-        current_tail = _decode_redis_text(redis_conn.get(tail_key))
-        if current_tail != build.id:
-            raise RuntimeError("WBT admission tail does not identify the exact tree.")
-    return build, receipt
-
-
-def _register_deferred_job(job: Job, pipeline) -> None:
-    job.set_status(JobStatus.DEFERRED, pipeline=pipeline)
-    job.register_dependency(pipeline=pipeline)
-    job.save(pipeline=pipeline)
-    job.cleanup(ttl=job.ttl, pipeline=pipeline)
-
-
-def _enqueue_serial_subcatchment_tree(
-    redis_conn,
-    queue: Queue,
-    *,
-    runid: str,
-    updates: dict[str, Any],
-    boundary_policy: dict[str, Any] | None,
-    child_meta: dict[str, Any] | None,
-    receipt_meta: dict[str, Any],
-    parent_job: Job,
-) -> tuple[Job, Job]:
-    """Atomically admit one serialized mutation and its completion receipt."""
-    tail_key = _subcatchment_tail_key(runid)
-    fingerprint = _subcatchment_admission_fingerprint(
-        parent_job_id=parent_job.id,
-        queue_name=queue.name,
-        runid=runid,
-        updates=updates,
-        boundary_policy=boundary_policy,
-    )
-    existing = _load_exact_subcatchment_tree(
-        redis_conn,
-        queue,
-        parent_job=parent_job,
-        fingerprint=fingerprint,
-        tail_key=tail_key,
-        require_current_tail=False,
-    )
-    if existing is not None:
-        return existing
-
-    child_id = uuid.uuid4().hex
-    receipt_id = uuid.uuid4().hex
-    original_parent_meta = dict(parent_job.meta)
-
-    for attempt in range(WBT_SUBCATCHMENT_ADMISSION_RETRY_ATTEMPTS):
-        pipeline = redis_conn.pipeline()
-        try:
-            pipeline.watch(tail_key, parent_job.key)
-            previous_tail_id = _decode_redis_text(pipeline.get(tail_key))
-            previous_tail = _fetch_job_or_none(previous_tail_id, redis_conn)
-            if previous_tail is not None:
-                pipeline.watch(previous_tail.key)
-                previous_tail.refresh()
-                if _is_terminal_job(previous_tail):
-                    previous_tail_id = None
-                    previous_tail = None
-                else:
-                    location_keys = _active_job_location_keys(previous_tail)
-                    if location_keys:
-                        pipeline.watch(*location_keys)
-                if (
-                    previous_tail is not None
-                    and not _active_job_has_execution_location(previous_tail)
-                ):
-                    # Validate that the watched tail/job remained unchanged
-                    # before diagnosing an orphan instead of a live transition.
-                    pipeline.multi()
-                    pipeline.exists(previous_tail.key)
-                    pipeline.execute()
-                    raise RuntimeError(
-                        "WBT subcatchment admission found a nonterminal "
-                        "tail outside every valid execution registry."
-                    )
-            else:
-                previous_tail_id = None
-
-            dependency = (
-                None
-                if previous_tail_id is None
-                else Dependency(
-                    jobs=[previous_tail_id],
-                    allow_failure=True,
-                )
-            )
-            registered_child_meta = dict(child_meta or {})
-            registered_child_meta.update(
-                {
-                    _WBT_ADMISSION_FINGERPRINT_KEY: fingerprint,
-                    _WBT_ADMISSION_ROOT_KEY: parent_job.id,
-                    _WBT_ADMISSION_RECEIPT_KEY: receipt_id,
-                    _WBT_ADMISSION_PREVIOUS_KEY: previous_tail_id,
-                }
-            )
-            registered_receipt_meta = dict(receipt_meta)
-            registered_receipt_meta.update(
-                {
-                    "wbt_completion_receipt_for": child_id,
-                    _WBT_ADMISSION_FINGERPRINT_KEY: fingerprint,
-                    _WBT_ADMISSION_ROOT_KEY: parent_job.id,
-                    _WBT_ADMISSION_BUILD_KEY: child_id,
-                }
-            )
-            child = queue.create_job(
-                build_subcatchments_rq,
-                args=(runid, updates, boundary_policy, True),
-                timeout=TIMEOUT,
-                depends_on=dependency,
-                job_id=child_id,
-                meta=registered_child_meta,
-            )
-            receipt = queue.create_job(
-                abstract_watershed_rq,
-                args=(runid, True),
-                timeout=TIMEOUT,
-                depends_on=child,
-                job_id=receipt_id,
-                meta=registered_receipt_meta,
-            )
-
-            # Prime version caches before MULTI so every subsequent operation
-            # contributes only commands to the one admission transaction.
-            queue.get_redis_server_version()
-            child.get_redis_server_version()
-            receipt.get_redis_server_version()
-
-            parent_job.meta[_WBT_BUILD_LINK_KEY] = child.id
-            parent_job.meta[_WBT_RECEIPT_LINK_KEY] = receipt.id
-            parent_job.meta[_WBT_ADMISSION_FINGERPRINT_KEY] = fingerprint
-
-            pipeline.multi()
-            if dependency is None:
-                queue._enqueue_job(child, pipeline=pipeline)
-            else:
-                _register_deferred_job(child, pipeline)
-            _register_deferred_job(receipt, pipeline)
-            parent_job.save(pipeline=pipeline)
-            pipeline.set(tail_key, child.id)
-            pipeline.execute()
-            return child, receipt
-        except WatchError:
-            parent_job.meta = dict(original_parent_meta)
-            parent_job.refresh()
-            exact = _load_exact_subcatchment_tree(
-                redis_conn,
-                queue,
-                parent_job=parent_job,
-                fingerprint=fingerprint,
-                tail_key=tail_key,
-                require_current_tail=False,
-            )
-            if exact is not None:
-                return exact
-            original_parent_meta = dict(parent_job.meta)
-            if attempt + 1 >= WBT_SUBCATCHMENT_ADMISSION_RETRY_ATTEMPTS:
-                raise RuntimeError(
-                    "WBT subcatchment admission conflicted five times; "
-                    "no work was created."
-                )
-        except redis.RedisError:
-            try:
-                exact = _load_exact_subcatchment_tree(
-                    redis_conn,
-                    queue,
-                    parent_job=parent_job,
-                    fingerprint=fingerprint,
-                    tail_key=tail_key,
-                    require_current_tail=True,
-                )
-            except (NoSuchJobError, redis.RedisError, RuntimeError):
-                parent_job.meta = dict(original_parent_meta)
-                raise RuntimeError(
-                    "WBT subcatchment admission result is ambiguous and "
-                    "could not be reconciled exactly."
-                )
-            if exact is None:
-                parent_job.meta = dict(original_parent_meta)
-                raise RuntimeError(
-                    "WBT subcatchment admission failed before commit."
-                )
-            return exact
-        finally:
-            pipeline.reset()
-
-    raise AssertionError("unreachable WBT subcatchment admission state")
-
-
-def _release_subcatchment_tail(
-    redis_conn,
-    runid: str,
-    expected_job_id: str,
-) -> None:
-    redis_conn.eval(
-        _COMPARE_AND_DELETE_TAIL_SCRIPT,
-        1,
-        _subcatchment_tail_key(runid),
-        expected_job_id,
-    )
 
 
 def _run_with_directory_roots_lock(
@@ -1515,57 +921,7 @@ def set_outlet_rq(runid: str, outlet_lng: float, outlet_lat: float) -> None:
         StatusMessenger.publish(status_channel, f'rq:{job.id} EXCEPTION {func_name}({runid})')
         raise
 
-def _abstract_watershed_locked(
-    runid: str,
-    wd: str,
-    watershed: Watershed | None = None,
-) -> None:
-    if watershed is None:
-        clear_nodb_file_cache(runid, pup_relpath="watershed.nodb")
-        watershed = Watershed.getInstance(wd)
-        wait_for_path(watershed.subwta, logger=watershed.logger)
-
-    watershed.abstract_watershed()
-
-    persisted = Watershed.load_detached(wd, allow_nonexistent=True)
-    persisted_centroid = (
-        None
-        if persisted is None
-        else Watershed._coerce_centroid(getattr(persisted, "centroid", None))
-    )
-    if persisted_centroid is not None:
-        return
-
-    watershed.logger.warning(
-        "Watershed centroid durability check failed after abstraction for runid=%s; "
-        "attempting one bounded repair",
-        runid,
-    )
-    watershed.require_centroid()
-
-    repaired = Watershed.load_detached(wd, allow_nonexistent=True)
-    repaired_centroid = (
-        None
-        if repaired is None
-        else Watershed._coerce_centroid(getattr(repaired, "centroid", None))
-    )
-    if repaired_centroid is None:
-        raise WatershedCentroidStateError(
-            runid=runid,
-            wd=wd,
-            detail=(
-                "post-abstraction durability verification failed after one repair attempt; "
-                "persisted centroid remains unavailable"
-            ),
-        )
-
-
-def build_subcatchments_rq(
-    runid: str,
-    updates: dict[str, Any] | None = None,
-    boundary_policy: dict[str, Any] | None = None,
-    abstract_after_build: bool = False,
-) -> None:
+def build_subcatchments_rq(runid: str, updates: dict[str, Any] | None = None) -> None:
     """Delineate subcatchments after channel extraction is complete.
 
     Args:
@@ -1574,7 +930,6 @@ def build_subcatchments_rq(
     Raises:
         Exception: Propagates failures from watershed delineation.
     """
-    phase = {"wbt_started": False}
     try:
         job = get_current_job()
         wd = get_wd(runid)
@@ -1582,59 +937,32 @@ def build_subcatchments_rq(
         status_channel = f'{runid}:subcatchment_delineation'
         StatusMessenger.publish(status_channel, f'rq:{job.id} STARTED {func_name}({runid})')
         def _mutate_watershed() -> None:
-            try:
-                clear_nodb_file_cache(runid, pup_relpath="watershed.nodb")
-                watershed = Watershed.getInstance(wd)
-            except (FileNotFoundError, OSError, RuntimeError, ValueError) as exc:
-                raise WbtBoundaryPolicyApplyError(
-                    "Could not hydrate Watershed for WBT policy application."
-                ) from exc
-
-            snapshot = _validate_optional_wbt_policy(
-                job,
-                runid,
-                boundary_policy,
-            )
-            execution_policy = (
-                snapshot.effective_policy if snapshot is not None else None
-            )
+            clear_nodb_file_cache(runid, pup_relpath="watershed.nodb")
+            watershed = Watershed.getInstance(wd)
             if watershed.delineation_backend_is_topaz:
                 clear_nodb_file_cache(runid, pup_relpath="topaz.nodb")
             if updates:
-                try:
-                    with watershed.locked():
-                        if 'clip_hillslopes' in updates:
-                            watershed._clip_hillslopes = bool(updates['clip_hillslopes'])  # type: ignore[attr-defined]
-                        if 'walk_flowpaths' in updates:
-                            watershed._walk_flowpaths = bool(updates['walk_flowpaths'])  # type: ignore[attr-defined]
-                        if 'clip_hillslope_length' in updates:
-                            watershed._clip_hillslope_length = float(updates['clip_hillslope_length'])  # type: ignore[attr-defined]
-                        if 'mofe_target_length' in updates:
-                            watershed._mofe_target_length = float(updates['mofe_target_length'])  # type: ignore[attr-defined]
-                        if 'mofe_buffer' in updates:
-                            watershed._mofe_buffer = bool(updates['mofe_buffer'])  # type: ignore[attr-defined]
-                        if 'mofe_buffer_length' in updates:
-                            watershed._mofe_buffer_length = float(updates['mofe_buffer_length'])  # type: ignore[attr-defined]
-                        if 'bieger2015_widths' in updates:
-                            watershed._bieger2015_widths = bool(updates['bieger2015_widths'])  # type: ignore[attr-defined]
-                except (OSError, RuntimeError, ValueError) as exc:
-                    raise WbtBoundaryPolicyApplyError(
-                        "Could not apply subcatchment execution settings."
-                    ) from exc
-            phase["wbt_started"] = True
-            watershed.build_subcatchments(
-                boundary_touch_behavior=execution_policy,
-            )
+                with watershed.locked():
+                    if 'clip_hillslopes' in updates:
+                        watershed._clip_hillslopes = bool(updates['clip_hillslopes'])  # type: ignore[attr-defined]
+                    if 'walk_flowpaths' in updates:
+                        watershed._walk_flowpaths = bool(updates['walk_flowpaths'])  # type: ignore[attr-defined]
+                    if 'clip_hillslope_length' in updates:
+                        watershed._clip_hillslope_length = float(updates['clip_hillslope_length'])  # type: ignore[attr-defined]
+                    if 'mofe_target_length' in updates:
+                        watershed._mofe_target_length = float(updates['mofe_target_length'])  # type: ignore[attr-defined]
+                    if 'mofe_buffer' in updates:
+                        watershed._mofe_buffer = bool(updates['mofe_buffer'])  # type: ignore[attr-defined]
+                    if 'mofe_buffer_length' in updates:
+                        watershed._mofe_buffer_length = float(updates['mofe_buffer_length'])  # type: ignore[attr-defined]
+                    if 'bieger2015_widths' in updates:
+                        watershed._bieger2015_widths = bool(updates['bieger2015_widths'])  # type: ignore[attr-defined]
+            watershed.build_subcatchments()
             wait_for_path(watershed.subwta, logger=watershed.logger)
-            effective_policy = (
-                execution_policy
-                if execution_policy is not None
-                else watershed.wbt_boundary_touch_behavior
-            )
             if (
                 watershed.delineation_backend_is_wbt
                 and watershed.edge_hillslopes
-                and effective_policy == "warn"
+                and watershed.wbt_boundary_touch_behavior == "warn"
             ):
                 warning = (
                     f"{WATERSHED_BOUNDARY_TOUCH_MESSAGE} "
@@ -1644,56 +972,15 @@ def build_subcatchments_rq(
                     status_channel,
                     f'rq:{job.id} WARNING {func_name}({runid}) {warning}',
                 )
-            if abstract_after_build:
-                _abstract_watershed_locked(runid, wd, watershed)
 
         _run_with_directory_root_lock(
             wd,
             "watershed",
             _mutate_watershed,
             purpose="build-subcatchments-rq",
-            lock_ttl_seconds=(
-                WBT_SUBCATCHMENT_TREE_LOCK_TTL_SECONDS
-                if abstract_after_build
-                else None
-            ),
         )
         StatusMessenger.publish(status_channel, f'rq:{job.id} COMPLETED {func_name}({runid})')
         StatusMessenger.publish(status_channel, f'rq:{job.id} TRIGGER   subcatchment_delineation BUILD_SUBCATCHMENTS_TASK_COMPLETED')
-        if abstract_after_build:
-            StatusMessenger.publish(
-                status_channel,
-                f'rq:{job.id} TRIGGER   subcatchment_delineation '
-                "WATERSHED_ABSTRACTION_TASK_COMPLETED",
-            )
-    except WbtBoundaryPolicySnapshotError:
-        _record_wbt_policy_failure(
-            job,
-            runid=runid,
-            code="wbt_boundary_policy_snapshot_invalid",
-            message=WBT_BOUNDARY_POLICY_SNAPSHOT_INVALID_MESSAGE,
-            cancel_dependents=True,
-        )
-        StatusMessenger.publish(
-            status_channel,
-            f'rq:{job.id} EXCEPTION {func_name}({runid}) '
-            f'{WBT_BOUNDARY_POLICY_SNAPSHOT_INVALID_MESSAGE}',
-        )
-        raise
-    except WbtBoundaryPolicyApplyError:
-        _record_wbt_policy_failure(
-            job,
-            runid=runid,
-            code="wbt_boundary_policy_apply_failed",
-            message=WBT_BOUNDARY_POLICY_APPLY_FAILED_MESSAGE,
-            cancel_dependents=True,
-        )
-        StatusMessenger.publish(
-            status_channel,
-            f'rq:{job.id} EXCEPTION {func_name}({runid}) '
-            f'{WBT_BOUNDARY_POLICY_APPLY_FAILED_MESSAGE}',
-        )
-        raise
     except WatershedBoundaryTouchesEdgeError as exc:
         error_id = __import__("uuid").uuid4().hex
         job.meta["error"] = {
@@ -1704,7 +991,17 @@ def build_subcatchments_rq(
         job.meta["error_id"] = error_id
         job.meta.pop("exc_string", None)
         job.save_meta()
-        _cancel_policy_dependents(job)
+        for dependent_id in sorted(job.dependent_ids):
+            try:
+                dependent = Job.fetch(dependent_id, connection=job.connection)
+                _cancel_deferred_job(dependent)
+            except (InvalidJobOperation, NoSuchJobError):
+                _logger.warning(
+                    "Dependent abstraction job disappeared while handling "
+                    "controlled WBT boundary failure (job_id=%s dependent_id=%s)",
+                    job.id,
+                    dependent_id,
+                )
         _logger.error(
             "Controlled WBT boundary failure "
             "[error_id=%s runid=%s edge_hillslope_ids=%s]",
@@ -1723,35 +1020,15 @@ def build_subcatchments_rq(
             f'{WATERSHED_BOUNDARY_TOUCH_MESSAGE}',
         )
         raise
-    except Exception as exc:
-        if boundary_policy is not None and not phase["wbt_started"]:
-            apply_exc = WbtBoundaryPolicyApplyError(
-                "WBT policy application failed before delineation."
-            )
-            _record_wbt_policy_failure(
-                job,
-                runid=runid,
-                code="wbt_boundary_policy_apply_failed",
-                message=WBT_BOUNDARY_POLICY_APPLY_FAILED_MESSAGE,
-                cancel_dependents=True,
-            )
-            StatusMessenger.publish(
-                status_channel,
-                f'rq:{job.id} EXCEPTION {func_name}({runid}) '
-                f'{WBT_BOUNDARY_POLICY_APPLY_FAILED_MESSAGE}',
-            )
-            raise apply_exc from exc
-        if abstract_after_build:
-            _cancel_policy_dependents(job)
+    except Exception:
         # Boundary catch: preserve contract behavior while logging unexpected failures.
         __import__("logging").getLogger(__name__).exception("Boundary exception at wepppy/rq/project_rq.py:691", extra={"runid": locals().get("runid"), "config": locals().get("config"), "job_id": locals().get("job_id")})
         StatusMessenger.publish(status_channel, f'rq:{job.id} EXCEPTION {func_name}({runid})')
         raise
+
+
 @with_exception_logging
-def abstract_watershed_rq(
-    runid: str,
-    mutation_already_completed: bool = False,
-) -> None:
+def abstract_watershed_rq(runid: str) -> None:
     """Run the watershed abstraction step after subcatchments exist.
 
     Args:
@@ -1766,48 +1043,66 @@ def abstract_watershed_rq(
         func_name = inspect.currentframe().f_code.co_name
         status_channel = f'{runid}:subcatchment_delineation'
         StatusMessenger.publish(status_channel, f'rq:{job.id} STARTED {func_name}({runid})')
-        if not mutation_already_completed:
-            _run_with_directory_root_lock(
-                wd,
-                "watershed",
-                lambda: _abstract_watershed_locked(runid, wd),
-                purpose="abstract-watershed-rq",
+        def _mutate_watershed() -> None:
+            clear_nodb_file_cache(runid, pup_relpath="watershed.nodb")
+            watershed = Watershed.getInstance(wd)
+            wait_for_path(watershed.subwta, logger=watershed.logger)
+            watershed.abstract_watershed()
+
+            persisted = Watershed.load_detached(wd, allow_nonexistent=True)
+            persisted_centroid = (
+                None
+                if persisted is None
+                else Watershed._coerce_centroid(getattr(persisted, "centroid", None))
             )
+            if persisted_centroid is not None:
+                return
+
+            watershed.logger.warning(
+                "Watershed centroid durability check failed after abstraction for runid=%s; "
+                "attempting one bounded repair",
+                runid,
+            )
+            watershed.require_centroid()
+
+            repaired = Watershed.load_detached(wd, allow_nonexistent=True)
+            repaired_centroid = (
+                None
+                if repaired is None
+                else Watershed._coerce_centroid(getattr(repaired, "centroid", None))
+            )
+            if repaired_centroid is None:
+                raise WatershedCentroidStateError(
+                    runid=runid,
+                    wd=wd,
+                    detail=(
+                        "post-abstraction durability verification failed after one repair attempt; "
+                        "persisted centroid remains unavailable"
+                    ),
+                )
+
+        _run_with_directory_root_lock(
+            wd,
+            "watershed",
+            _mutate_watershed,
+            purpose="abstract-watershed-rq",
+        )
         StatusMessenger.publish(status_channel, f'rq:{job.id} COMPLETED {func_name}({runid})')
-        if not mutation_already_completed:
-            StatusMessenger.publish(status_channel, f'rq:{job.id} TRIGGER   subcatchment_delineation WATERSHED_ABSTRACTION_TASK_COMPLETED')
-            prep = RedisPrep.getInstance(wd)
-            prep.timestamp(TaskEnum.abstract_watershed)
+        StatusMessenger.publish(status_channel, f'rq:{job.id} TRIGGER   subcatchment_delineation WATERSHED_ABSTRACTION_TASK_COMPLETED')
+
+        prep = RedisPrep.getInstance(wd)
+        prep.timestamp(TaskEnum.abstract_watershed)
     except Exception:
         # Boundary catch: preserve contract behavior while logging unexpected failures.
         __import__("logging").getLogger(__name__).exception("Boundary exception at wepppy/rq/project_rq.py:723", extra={"runid": locals().get("runid"), "config": locals().get("config"), "job_id": locals().get("job_id")})
         StatusMessenger.publish(status_channel, f'rq:{job.id} EXCEPTION {func_name}({runid})')
         raise
-    finally:
-        if mutation_already_completed and "job" in locals():
-            build_job_id = job.meta.get(_WBT_ADMISSION_BUILD_KEY)
-            if isinstance(build_job_id, str):
-                try:
-                    _release_subcatchment_tail(
-                        job.connection,
-                        runid,
-                        build_job_id,
-                    )
-                except redis.RedisError:
-                    _logger.exception(
-                        "Could not release subcatchment mutation tail "
-                        "(runid=%s build_job_id=%s receipt_job_id=%s)",
-                        runid,
-                        build_job_id,
-                        job.id,
-                    )
 
 
 @with_exception_logging
 def build_subcatchments_and_abstract_watershed_rq(
     runid: str,
     updates: dict[str, Any] | None = None,
-    boundary_policy: dict[str, Any] | None = None,
 ) -> None:
     """Enqueue subcatchment building followed by watershed abstraction.
 
@@ -1823,46 +1118,23 @@ def build_subcatchments_and_abstract_watershed_rq(
         status_channel = f'{runid}:subcatchment_delineation'
         StatusMessenger.publish(status_channel, f'rq:{job.id} STARTED {func_name}({runid})')
 
-        snapshot = _validate_optional_wbt_policy(job, runid, boundary_policy)
-        child_meta: dict[str, Any] = {}
-        if snapshot is not None:
-            child_meta[WBT_BOUNDARY_POLICY_SNAPSHOT_KEY] = snapshot.to_meta()
-        auth_actor = job.meta.get("auth_actor")
-        if isinstance(auth_actor, dict):
-            child_meta["auth_actor"] = dict(auth_actor)
-
         conn_kwargs = redis_connection_kwargs(RedisDB.RQ)
         with redis.Redis(**conn_kwargs) as redis_conn:
             q = Queue(connection=redis_conn)
-            receipt_meta: dict[str, Any] = {}
-            if isinstance(auth_actor, dict):
-                receipt_meta["auth_actor"] = dict(auth_actor)
-            _enqueue_serial_subcatchment_tree(
-                redis_conn,
-                q,
-                runid=runid,
-                updates=updates or {},
-                boundary_policy=boundary_policy,
-                child_meta=child_meta or None,
-                receipt_meta=receipt_meta,
-                parent_job=job,
+            
+            ajob = q.enqueue_call(
+                build_subcatchments_rq,
+                (runid, updates or {}),
+                timeout=TIMEOUT,
             )
+            job.meta['jobs:0,func:build_subcatchments_rq'] = ajob.id
+            job.save()
 
+            bjob = q.enqueue_call(abstract_watershed_rq, (runid,), timeout=TIMEOUT, depends_on=ajob)
+            job.meta['jobs:1,func:abstract_watershed_rq'] = bjob.id
+            job.save()
+        
         StatusMessenger.publish(status_channel, f'rq:{job.id} COMPLETED {func_name}({runid})')
-    except WbtBoundaryPolicySnapshotError:
-        _record_wbt_policy_failure(
-            job,
-            runid=runid,
-            code="wbt_boundary_policy_snapshot_invalid",
-            message=WBT_BOUNDARY_POLICY_SNAPSHOT_INVALID_MESSAGE,
-            cancel_dependents=False,
-        )
-        StatusMessenger.publish(
-            status_channel,
-            f'rq:{job.id} EXCEPTION {func_name}({runid}) '
-            f'{WBT_BOUNDARY_POLICY_SNAPSHOT_INVALID_MESSAGE}',
-        )
-        raise
     except Exception:
         # Boundary catch: preserve contract behavior while logging unexpected failures.
         __import__("logging").getLogger(__name__).exception("Boundary exception at wepppy/rq/project_rq.py:764", extra={"runid": locals().get("runid"), "config": locals().get("config"), "job_id": locals().get("job_id")})
@@ -2050,7 +1322,7 @@ def modify_landuse_mapping_rq(
             original_domlc_mofe_d = copy.deepcopy(domlc_mofe_d) if isinstance(domlc_mofe_d, dict) else None
             try:
                 original_managements = copy.deepcopy(landuse.managements)
-            except Exception:  # broad-except: optional RQ option-logging boundary
+            except Exception:
                 original_managements = None
 
             with landuse.locked():
@@ -2109,7 +1381,7 @@ def modify_landuse_mapping_rq(
             status_channel,
             f"rq:{job.id} TRIGGER   landuse LANDUSE_MODIFY_MAPPING_TASK_COMPLETED",
         )
-    except Exception:  # broad-except: RQ task boundary preserves terminal status contract
+    except Exception:
         # Boundary catch: preserve contract behavior while logging unexpected failures.
         __import__("logging").getLogger(__name__).exception("Boundary exception at wepppy/rq/project_rq.py:859", extra={"runid": locals().get("runid"), "config": locals().get("config"), "job_id": locals().get("job_id")})
         StatusMessenger.publish(status_channel, f"rq:{job.id} EXCEPTION {func_name}({runid})")
@@ -2610,7 +1882,7 @@ def fetch_and_analyze_rap_ts_rq(runid: str, payload: Mapping[str, Any] | None = 
         if options:
             try:
                 rap_ts.logger.info('RAP_TS job options: %s', json.dumps(options, sort_keys=True))
-            except Exception:  # broad-except: optional RQ option-logging boundary
+            except Exception:
                 # Boundary catch: preserve contract behavior while logging unexpected failures.
                 __import__("logging").getLogger(__name__).exception("Boundary exception at wepppy/rq/project_rq.py:1218", extra={"runid": locals().get("runid"), "config": locals().get("config"), "job_id": locals().get("job_id")})
                 rap_ts.logger.info('RAP_TS job options provided (%d keys)', len(options))
@@ -2624,7 +1896,7 @@ def fetch_and_analyze_rap_ts_rq(runid: str, payload: Mapping[str, Any] | None = 
         prep = RedisPrep.getInstance(wd)
         prep.timestamp(TaskEnum.run_rhem)
 
-    except Exception:  # broad-except: RQ task boundary preserves terminal status contract
+    except Exception:
         # Boundary catch: preserve contract behavior while logging unexpected failures.
         __import__("logging").getLogger(__name__).exception("Boundary exception at wepppy/rq/project_rq.py:1230", extra={"runid": locals().get("runid"), "config": locals().get("config"), "job_id": locals().get("job_id")})
         StatusMessenger.publish(status_channel, f'rq:{job.id} EXCEPTION {func_name}({runid})')

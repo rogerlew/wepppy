@@ -15,11 +15,14 @@ from wepppy.nodb.core import Ron
 from wepppy.nodb.mods.disturbed import Disturbed
 from wepppy.weppcloud.user_preferences import (
     PreferenceIdentityError,
+    PreferenceValidationError,
     RunRegistrationReceipt,
+    StoredPreferenceError,
+    apply_creation_preference_overrides,
     cleanup_new_run_directory,
     delete_registered_run,
     register_owned_run,
-    resolve_creation_actor,
+    resolve_creation_preferences,
 )
 
 from .auth import AuthError, require_jwt
@@ -95,27 +98,40 @@ async def upload_huc_fire_sbs(request: Request) -> JSONResponse:
             return upload_failure("Could not obtain filename")
 
         try:
-            actor = resolve_creation_actor(claims)
+            snapshot = resolve_creation_preferences(claims)
             token_class = str(claims.get("token_class") or "")
-            if actor is None and token_class not in {"service", "mcp"}:
+            if snapshot is None and token_class not in {"service", "mcp"}:
                 raise PreferenceIdentityError("Authenticated user identity is required.")
-        except (PreferenceIdentityError, SQLAlchemyError):
+            effective_values = apply_creation_preference_overrides({}, snapshot)
+        except (
+            PreferenceIdentityError,
+            PreferenceValidationError,
+            StoredPreferenceError,
+            SQLAlchemyError,
+        ):
             error_id = uuid.uuid4().hex
             logger.exception(
-                "rq-engine huc-fire owner resolution failed",
+                "rq-engine huc-fire preference resolution failed",
                 extra={"error_id": error_id},
             )
             return error_response(
-                "Could not resolve project owner.",
-                code="run_ownership_failed",
+                "Could not resolve account preferences.",
+                code="preference_resolution_failed",
                 error_id=error_id,
                 log_exception=False,
             )
 
-        runid, wd = create_run_dir(actor)
+        runid, wd = create_run_dir(snapshot)
 
         config = "disturbed9002"
         cfg = f"{config}.cfg"
+        overrides = [
+            f"{key}={value}"
+            for key, value in effective_values.items()
+            if value is not None and value != ""
+        ]
+        if overrides:
+            cfg = f"{cfg}?{'&'.join(overrides)}"
 
         try:
             Ron(wd, cfg)
@@ -140,9 +156,9 @@ async def upload_huc_fire_sbs(request: Request) -> JSONResponse:
         except Exception:  # broad-except: boundary contract
             logger.exception("rq-engine huc-fire TTL initialization failed")
 
-        if actor is not None:
+        if snapshot is not None:
             try:
-                receipt = register_owned_run(runid, config, actor.user_id)
+                receipt = register_owned_run(runid, config, snapshot.user_id)
             except (PreferenceIdentityError, SQLAlchemyError):
                 error_id = uuid.uuid4().hex
                 logger.exception(

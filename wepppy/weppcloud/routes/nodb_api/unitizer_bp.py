@@ -3,11 +3,6 @@
 from .._common import *  # noqa: F401,F403
 
 from wepppy.nodb.unitizer import Unitizer
-from wepppy.weppcloud.user_preferences import (
-    PreferenceResolutionError,
-    preference_resolution_error_response,
-    resolve_unitizer_presentation,
-)
 from wepppy.weppcloud.utils.cap_guard import requires_cap
 
 
@@ -30,7 +25,7 @@ def task_set_unit_preferences(runid, config):
         }
         res = unitizer.set_preferences(preferences, strict=False)
         return success_factory({'preferences': res})
-    except Exception:  # broad-except: boundary contract
+    except Exception:
         # Boundary catch: preserve contract behavior while logging unexpected failures.
         __import__("logging").getLogger(__name__).exception("Boundary exception at wepppy/weppcloud/routes/nodb_api/unitizer_bp.py:28", extra={"runid": locals().get("runid"), "config": locals().get("config"), "job_id": locals().get("job_id")})
         return exception_factory('Error setting unit preferences', runid=runid)
@@ -44,7 +39,7 @@ def unitizer_route(runid, config):
     try:
         ctx = load_run_context(runid, config)
         wd = str(ctx.active_root)
-        unitizer = resolve_unitizer_presentation(wd)
+        unitizer = Unitizer.getInstance(wd)
 
         value = request.args.get('value')
         in_units = request.args.get('in_units')
@@ -53,9 +48,7 @@ def unitizer_route(runid, config):
         contents = ctx_processer['unitizer'](float(value), in_units)
         return success_factory(contents)
 
-    except PreferenceResolutionError:
-        return preference_resolution_error_response(runid)
-    except Exception:  # broad-except: boundary contract
+    except Exception:
         # Boundary catch: preserve contract behavior while logging unexpected failures.
         __import__("logging").getLogger(__name__).exception("Boundary exception at wepppy/weppcloud/routes/nodb_api/unitizer_bp.py:49", extra={"runid": locals().get("runid"), "config": locals().get("config"), "job_id": locals().get("job_id")})
         return exception_factory(runid=runid)
@@ -69,7 +62,7 @@ def unitizer_units_route(runid, config):
     try:
         ctx = load_run_context(runid, config)
         wd = str(ctx.active_root)
-        unitizer = resolve_unitizer_presentation(wd)
+        unitizer = Unitizer.getInstance(wd)
 
         in_units = request.args.get('in_units')
         ctx_processer = unitizer.context_processor_package()
@@ -77,9 +70,7 @@ def unitizer_units_route(runid, config):
         contents = ctx_processer['unitizer_units'](in_units)
         return success_factory(contents)
 
-    except PreferenceResolutionError:
-        return preference_resolution_error_response(runid)
-    except Exception:  # broad-except: boundary contract
+    except Exception:
         # Boundary catch: preserve contract behavior while logging unexpected failures.
         __import__("logging").getLogger(__name__).exception("Boundary exception at wepppy/weppcloud/routes/nodb_api/unitizer_bp.py:69", extra={"runid": locals().get("runid"), "config": locals().get("config"), "job_id": locals().get("job_id")})
         return exception_factory(runid=runid)

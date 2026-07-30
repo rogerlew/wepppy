@@ -72,46 +72,6 @@ def orchestrate(runid):
     assert all(edge["queue_name"] == "default" for edge in edges)
 
 
-def test_dependency_graph_extractor_tracks_precreated_job_activation(
-    tmp_path: Path,
-) -> None:
-    source_file = tmp_path / "wepppy" / "rq" / "sample_precreated.py"
-    source_file.parent.mkdir(parents=True)
-    source_file.write_text(
-        """
-from rq import Queue
-
-
-def orchestrate(runid):
-    q = Queue(connection=redis_conn)
-    child = q.create_job(_build_rq, args=(runid,))
-    child.save()
-    receipt = q.enqueue_call(_receipt_rq, (runid,), depends_on=child)
-    parent.meta["jobs:0,func:_build_rq"] = child.id
-    parent.meta["jobs:1,func:_receipt_rq"] = receipt.id
-    parent.save()
-    q.enqueue_job(child)
-""".strip()
-        + "\n",
-        encoding="utf-8",
-    )
-
-    edges = extract_dependency_edges(
-        repo_root=tmp_path,
-        source_files=[source_file],
-    )
-
-    assert [edge["enqueue_target"] for edge in edges] == [
-        "_build_rq",
-        "_receipt_rq",
-    ]
-    assert [edge["job_meta_stage"] for edge in edges] == [
-        "jobs:0",
-        "jobs:1",
-    ]
-    assert edges[1]["depends_on"] == ["_build_rq"]
-
-
 def test_dependency_graph_extractor_handles_enqueue_wrapper_calls(tmp_path: Path) -> None:
     source_file = tmp_path / "wepppy" / "rq" / "sample_wrapper.py"
     source_file.parent.mkdir(parents=True)

@@ -86,11 +86,7 @@ def watar_client(monkeypatch: pytest.MonkeyPatch, tmp_path: Path):
             return {"topaz_id": str(top)}
 
     monkeypatch.setattr(watar_module, "Ron", RonStub)
-    monkeypatch.setattr(
-        watar_module,
-        "resolve_unitizer_presentation",
-        UnitizerStub.getInstance,
-    )
+    monkeypatch.setattr(watar_module, "Unitizer", UnitizerStub)
     monkeypatch.setattr(watar_module, "Watershed", WatershedStub)
     monkeypatch.setattr(watar_module, "Climate", ClimateStub)
     monkeypatch.setattr(watar_module, "Wepp", WeppStub)

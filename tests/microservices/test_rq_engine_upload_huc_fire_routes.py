@@ -11,8 +11,9 @@ TestClient = pytest.importorskip("fastapi.testclient").TestClient
 import wepppy.microservices.rq_engine as rq_engine
 from wepppy.microservices.rq_engine import upload_huc_fire_routes
 from wepppy.weppcloud.user_preferences import (
-    CreationActor,
+    CreationPreferenceSnapshot,
     RunRegistrationReceipt,
+    UserPreferenceValues,
 )
 
 
@@ -29,8 +30,9 @@ def _post_upload_sbs(
     upload_bytes: bytes = b"data",
     validate_error: Exception | None = None,
     include_upload: bool = True,
+    unit_preference: str = "config",
+    boundary_preference: str = "config",
     expected_cfg_parts: tuple[str, ...] = (),
-    absent_cfg_parts: tuple[str, ...] = (),
     token_class: str = "user",
     preference_error: Exception | None = None,
     create_run_error: Exception | None = None,
@@ -53,9 +55,13 @@ def _post_upload_sbs(
     )
 
     snapshot = (
-        CreationActor(
+        CreationPreferenceSnapshot(
             user_id=42,
             email="tester@example.com",
+            preferences=UserPreferenceValues(
+                unit_preference,
+                boundary_preference,
+            ),
         )
         if token_class == "user"
         else None
@@ -63,13 +69,13 @@ def _post_upload_sbs(
     if preference_error is None:
         monkeypatch.setattr(
             upload_huc_fire_routes,
-            "resolve_creation_actor",
+            "resolve_creation_preferences",
             lambda claims: snapshot,
         )
     else:
         monkeypatch.setattr(
             upload_huc_fire_routes,
-            "resolve_creation_actor",
+            "resolve_creation_preferences",
             lambda claims: (_ for _ in ()).throw(preference_error),
         )
     receipt = RunRegistrationReceipt(7, "new-run", "disturbed9002", 42)
@@ -160,8 +166,6 @@ def _post_upload_sbs(
 
     for expected_part in expected_cfg_parts:
         assert expected_part in captured["cfg"]
-    for absent_part in absent_cfg_parts:
-        assert absent_part not in captured["cfg"]
     return response, run_dir
 
 
@@ -179,7 +183,7 @@ def test_huc_fire_upload_sbs_creates_run_without_nodir_marker_by_default(
     assert not marker_path.exists()
 
 
-def test_huc_fire_does_not_apply_account_preferences_to_durable_config(
+def test_huc_fire_snapshots_account_preferences(
     monkeypatch: pytest.MonkeyPatch,
     tmp_path: Path,
 ) -> None:
@@ -187,9 +191,11 @@ def test_huc_fire_does_not_apply_account_preferences_to_durable_config(
         monkeypatch,
         tmp_path,
         apply_nodir=False,
-        absent_cfg_parts=(
-            "unitizer:is_english",
-            "watershed.wbt:boundary_touch_behavior",
+        unit_preference="si",
+        boundary_preference="error",
+        expected_cfg_parts=(
+            "unitizer:is_english=false",
+            "watershed.wbt:boundary_touch_behavior=error",
         ),
     )
 
@@ -230,7 +236,7 @@ def test_huc_fire_rejects_session_token_before_creation(
     )
 
 
-def test_huc_fire_unknown_actor_fails_before_run_creation(
+def test_huc_fire_unknown_user_fails_before_run_creation(
     monkeypatch: pytest.MonkeyPatch,
     tmp_path: Path,
 ) -> None:
@@ -245,7 +251,7 @@ def test_huc_fire_unknown_actor_fails_before_run_creation(
 
     assert response.status_code == 500
     payload = response.json()
-    assert payload["error"]["code"] == "run_ownership_failed"
+    assert payload["error"]["code"] == "preference_resolution_failed"
     assert payload["error_id"]
     assert "/private/db" not in response.text
 

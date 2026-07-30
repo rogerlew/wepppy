@@ -6,39 +6,35 @@
 
 **Started**: 2026-07-30 04:10 UTC
 
-**Current phase**: Forest preflight
+**Current phase**: Queue-sequencing contract checkpoint
 
-**Last updated**: 2026-07-30 14:05 UTC
+**Last updated**: 2026-07-30 11:05 UTC
 
-**Next milestone**: operator-authorized Forest migration and canary
+**Next milestone**: approve and commit atomic-admission contract amendment
 
 **Security impact**: `high`
 
 **Dedicated security review**:
 `artifacts/2026-07-30_security_review.md`
 
-**Hardening observation owner**: requesting operator with the WEPPcloud
-maintainer.
-
-**Hardening closure criterion**: 14 days after the Forest canary, close only
-with zero reported exact DB-0/11/13 residue, uncorrelated cleanup failure, or
-out-of-scope deletion. If the canary runs on 2026-07-30, review is due
-2026-08-13 UTC.
-
 ## Task Board
 
 ### In Progress
 
-- [ ] Apply and verify the operator-authorized migration on Forest, then run
-  the reviewed authenticated canary.
+- [ ] Approve and commit the revised atomic Redis admission contract as a
+  standalone documentation ancestor.
+- [ ] Complete focused and broad validation, final reviews, documentation, and
+  local E2E.
 
 ### Ready
 
-- None.
+- [ ] Apply and verify the operator-authorized migration on Forest, then run an
+  authenticated two-user same-project canary.
 
 ### Blocked
 
-- None.
+- Forest migration is blocked until implementation, migration tests, full
+  validation, and final reviews pass.
 
 ### Done
 
@@ -147,13 +143,6 @@ out-of-scope deletion. If the canary runs on 2026-07-30, review is due
   rejected the unfenced admission lease and saved-but-never-activated orphan
   window, then revised the contract to atomic optimistic Redis admission with
   full parameter provenance and rollback (2026-07-30 11:05 UTC).
-- [x] Obtained final governance and operations/security PASS reviews and
-  committed the exact atomic-admission contract as standalone ancestor
-  `b1f1f99c8` (2026-07-30 11:05 UTC).
-- [x] Implemented one-transaction admission, bounded WATCH retry, exact-tree
-  idempotency and ambiguous-response reconciliation; passed 205 focused tests
-  plus pre/post-EXEC fault injection, actual RQ retry, and policy-apply cleanup
-  evidence (2026-07-30 11:20 UTC).
 - [x] Implemented request-local viewing-user units without durable Unitizer
   mutation, removed account defaults from creation, and added sanitized
   preference-resolution failures across the contracted report inventory
@@ -164,41 +153,6 @@ out-of-scope deletion. If the canary runs on 2026-07-30, review is due
 - [x] Passed the focused creation, Profile, PostgreSQL two-user Unitizer,
   report inventory, WBT NoDb/RQ, real-Redis failure-tree, and jobinfo
   selections (2026-07-30 09:25 UTC).
-- [x] Closed atomic root-retry, child-tail timing, intermediate-queue,
-  orphan-tail, and exact dependency-residue findings; passed the 371-test
-  affected suite and regenerated the RQ graph (2026-07-30 12:05 UTC).
-- [x] Passed final source-freeze validation: 5,721 Python tests passed with
-  58 skipped, frontend lint and 745 JavaScript tests passed, and stub,
-  test-stub, isolation, broad-exception, docs, RQ graph, and diff gates were
-  clean (2026-07-30 12:20 UTC).
-- [x] Received independent source-freeze governance and operations/security
-  PASS reviews with zero unresolved findings (2026-07-30 12:25 UTC).
-- [x] Restarted the complete local stack and passed a real two-user,
-  same-project canary for SI/English/Auto presentation, byte-stable Unitizer,
-  `error`/`warn` WBT snapshots, redaction, durable-field stability, exact
-  cleanup, and healthy queues/workers (2026-07-30 12:50 UTC).
-- [x] Corrected real Create-page token subject binding from `fs_uniquifier` to
-  the numeric User ID required by fail-closed ownership resolution; the exact
-  regression plus project-route suite pass (2026-07-30 12:50 UTC).
-- [x] Found and removed exact DB-0/11/13 state for six disposable acceptance
-  runs, then verified those IDs absent across DB 0/2/9/11/13/14/15
-  (2026-07-30 14:05 UTC).
-- [x] Scope-reduced failed-create recovery to the existing public error
-  envelope and added strict DB-0/11/13 plus filesystem cleanup postconditions
-  with correlated internal `error_id`/run-ID diagnostics
-  (2026-07-30 14:05 UTC).
-- [x] Repeated the local two-user canary on Users 341/342 and run
-  `pain-free-prospectus`; all functional and strict Redis/SQL cleanup checks
-  passed. The harness reported NFS cleanup pending, and exact directory cleanup
-  completed after restarting only the two handle-owning services
-  (2026-07-30 14:20 UTC).
-- [x] Passed frozen-source validation: 5,732 Python tests with 58 skipped;
-  frontend lint and 104 suites/745 tests; three stubtests; test-stub, RQ graph,
-  broad-exception, documentation, and vulture gates; plus two-seed and
-  per-file isolation for the remediation modules (2026-07-30 14:40 UTC).
-- [x] Received final governance/correctness and operations/security PASS
-  reviews for exact fingerprint `4aa271981f...`, both with zero findings
-  (2026-07-30 14:50 UTC).
 
 ## Decisions
 
@@ -252,9 +206,9 @@ config or explicit user preference can choose fail-closed handling.
 
 | Risk | Severity | Mitigation | Status |
 | --- | --- | --- | --- |
-| One user's preference leaks into project or another user | High | Request-local Unitizer view, immutable WBT job snapshot, and no durable account-derived project policy | Mitigated and source-freeze tested |
-| Explicit project unit selection is overwritten | High | Keep project creation account-independent; apply account units only to a request-local presentation view | Mitigated and source-freeze tested |
-| DB/preference lookup failure silently falls back | High | Fail the authorized view/submission with a sanitized correlated error before project or queue mutation | Mitigated and source-freeze tested |
+| One user's preference leaks into project or another user | High | Request-local Unitizer view, immutable WBT job snapshot, and no durable account-derived project policy | Amendment pending re-review |
+| Explicit project unit selection is overwritten | High | Keep project creation account-independent; apply account units only to a request-local presentation view | Amendment pending re-review |
+| DB/preference lookup failure silently falls back | High | Fail the authorized view/submission with a sanitized correlated error before project or queue mutation | Amendment pending re-review |
 | Invalid enum bypasses UI | High | Exact route/service enums plus DB check constraints | Mitigated and focused-tested |
 | Boundary error leaves stale ready output | High | Invalidate readiness and canonical clipped output before typed failure | Mitigated and focused-tested |
 | Migration deploys before compatible code | High | Contract, test, review, and Forest preflight gates | Open |
@@ -262,8 +216,7 @@ config or explicit user preference can choose fail-closed handling.
 | Authenticated creation leaves an ownerless/public run | High | Historical creation hardening remains covered; the superseding preference contract makes no creation-time account lookup or mutation | Mitigated and PostgreSQL-tested |
 | Public job status discloses an internal traceback | High | Sanitize retained RQ state and public tree/HTTP payload; preserve structured correlated diagnostics | Mitigated and real-Redis-tested |
 | Dual Alembic heads produce an unsafe Forest rollout | High | Merge revision over both heads, representative PostgreSQL cycle, schema-first coordinated restart | Mitigated locally; Forest pending |
-| Initiating user gets stale or another user's WBT behavior | High | Synchronous initiating-user resolution, exact private RQ snapshot, and no durable account-derived project policy | Mitigated and source-freeze tested |
-| Failed create/canary leaves Redis or filesystem residue | High | Close run instances, strictly purge and verify DB 0/11/13, remove only the canonical run directory, and correlate any failure by `error_id` | Remediation validation in progress |
+| Initiating user gets stale or another user's WBT behavior | High | Synchronous initiating-user resolution, exact private RQ snapshot, and no durable account-derived project policy | Contract amendment pending re-review |
 
 ## Verification Checklist
 
@@ -273,9 +226,9 @@ config or explicit user preference can choose fail-closed handling.
   is `1b412d61a`; its creation/owner lifetime interpretation is superseded.
 - [x] ADR-0033's original persistence/configuration decision is accepted with
   complete provenance.
-- [x] Post-remediation governance/correctness and operations/security reviews
-  pass with no unresolved findings for exact fingerprint `4aa271981f...`.
-- [x] User-context amendment has two independent checkpoint approvals,
+- [ ] Final governance and operations/security reviews pass with no unresolved
+  high/medium findings.
+- [ ] User-context amendment has two independent checkpoint approvals,
   findings disposition, and a standalone ancestor.
 
 ### Backend and migration
@@ -296,13 +249,12 @@ config or explicit user preference can choose fail-closed handling.
 
 ### Broad and deployment
 
-- [x] Frozen-source `wctl run-pytest tests --maxfail=1` passes
-  (5,732 passed, 58 skipped).
+- [x] Post-remediation `wctl run-pytest tests --maxfail=1` passes (5,675
+  passed, 58 skipped).
 - [x] Post-remediation frontend lint and all 745 JavaScript tests pass.
-- [x] Stub, test-stub, broad-exception, docs, and RQ graph gates pass.
-- [x] Exact remediation-module isolation passes seeds 42 and 123 plus isolated
-  per-file runs; the earlier complete-source isolation gate also passed.
-- [x] Local stack E2E proves two distinct unit views and `error`/`warn` WBT
+- [x] Stub, test-stub, test-isolation, broad-exception, docs, and RQ graph gates
+  pass as applicable.
+- [ ] Local stack E2E proves two distinct unit views and `error`/`warn` WBT
   behavior for two users on one byte-stable project.
 - [ ] Forest preflight records current migration head and database backup
   readiness.

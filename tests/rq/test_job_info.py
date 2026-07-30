@@ -57,34 +57,6 @@ def test_recursive_job_details_exc_info_none_when_missing() -> None:
     assert payload["exc_info"] is None
 
 
-def test_recursive_job_details_redacts_actor_and_private_wbt_snapshot() -> None:
-    now = datetime.now(timezone.utc)
-    job = _FakeJob(
-        meta={
-            "auth_actor": {
-                "token_class": "session",
-                "session_id": "private-session",
-                "user_id": 42,
-            },
-            "wbt_boundary_policy_snapshot": {
-                "schema_version": 1,
-                "runid": "run-1",
-                "actor_token_class": "session",
-                "actor_user_id": 42,
-                "config_policy": "warn",
-                "effective_policy": "error",
-                "source": "user_preference",
-            },
-        }
-    )
-
-    payload = recursive_get_job_details(job, redis_conn=object(), now=now)  # type: ignore[arg-type]
-
-    assert payload["auth_actor"] is None
-    assert "wbt_boundary_policy_snapshot" not in payload
-    assert "private-session" not in str(payload)
-
-
 def test_recursive_job_details_suppresses_traceback_for_controlled_error() -> None:
     now = datetime.now(timezone.utc)
     error = {

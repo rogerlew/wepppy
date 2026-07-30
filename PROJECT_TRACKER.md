@@ -312,18 +312,16 @@ typed failure rather than accepting a clipped watershed. The operator
 authorized the reviewed additive migration on Forest after local validation
 and final review.
 
-**Checkpoint**: Original documentation-only ancestor `1b412d61a`,
-user-context ancestor `4d2ef5838`, and atomic queue-admission ancestor
-`b1f1f99c8` are committed. Final post-canary review is pending.
+**Checkpoint**: Original documentation-only ancestor `1b412d61a` is committed;
+the superseding user-context amendment awaits dual review and a standalone
+ancestor.
 
-**Implementation**: Request-local viewing-user Unitizer overlays and
-initiating-user WBT snapshots are implemented and pass local two-user
-acceptance without durable project mutation. Strict failed-create cleanup
-purges and verifies Redis DB 0/11/13 and preserves correlated failure
-diagnostics. Local PostgreSQL is on merge head `c91f6b2a4d7e`.
+**Implementation**: Original creation-time behavior passed focused gates but
+is superseded and must be replaced. Local PostgreSQL is on merge head
+`c91f6b2a4d7e`.
 
-**Next Steps**: Complete frozen-source broad validation and final reviews, then
-run the operator-authorized Forest migration/canary.
+**Next Steps**: Run broad validation and final reviews, then local E2E and the
+operator-authorized Forest migration/canary.
 
 ---
 

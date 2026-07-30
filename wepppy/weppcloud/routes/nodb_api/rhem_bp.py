@@ -8,12 +8,8 @@ from .._common import *  # noqa: F401,F403
 
 from wepppy.nodb.core import Ron
 from wepppy.nodb.mods.rhem import RhemPost
+from wepppy.nodb.unitizer import Unitizer
 from wepppy.nodb.unitizer import precisions as UNITIZER_PRECISIONS
-from wepppy.weppcloud.user_preferences import (
-    PreferenceResolutionError,
-    preference_resolution_error_response,
-    resolve_unitizer_presentation,
-)
 from wepppy.weppcloud.utils.helpers import (
     exception_factory,
     get_wd,
@@ -34,7 +30,7 @@ def report_rhem_results(runid, config):
         return render_template('controls/rhem_reports.htm',
                                runid=runid,
                                config=config)
-    except Exception:  # broad-except: boundary contract
+    except Exception:
         # Boundary catch: preserve contract behavior while logging unexpected failures.
         __import__("logging").getLogger(__name__).exception("Boundary exception at wepppy/weppcloud/routes/nodb_api/rhem_bp.py:33", extra={"runid": locals().get("runid"), "config": locals().get("config"), "job_id": locals().get("job_id")})
         return exception_factory('Error building reports template', runid=runid)
@@ -60,7 +56,7 @@ def report_rhem_run_summary(runid, config):
             rhempost=rhempost,
             ron=ron,
         )
-    except Exception:  # broad-except: boundary contract
+    except Exception:
         # Boundary catch: preserve contract behavior while logging unexpected failures.
         __import__("logging").getLogger(__name__).exception("Boundary exception at wepppy/weppcloud/routes/nodb_api/rhem_bp.py:57", extra={"runid": locals().get("runid"), "config": locals().get("config"), "job_id": locals().get("job_id")})
         return exception_factory('Error building reports template', runid=runid)
@@ -76,7 +72,7 @@ def report_rhem_avg_annuals(runid, config):
         wd = get_wd(runid)
         ron = Ron.getInstance(wd)
         rhempost = RhemPost.getInstance(wd)
-        unitizer = resolve_unitizer_presentation(wd)
+        unitizer = Unitizer.getInstance(wd)
 
         return render_template(
             'reports/rhem/avg_annual_summary.htm',
@@ -88,9 +84,7 @@ def report_rhem_avg_annuals(runid, config):
             precisions=UNITIZER_PRECISIONS,
             user=current_user,
         )
-    except PreferenceResolutionError:
-        return preference_resolution_error_response(runid)
-    except Exception:  # broad-except: boundary contract
+    except Exception:
         # Boundary catch: preserve contract behavior while logging unexpected failures.
         __import__("logging").getLogger(__name__).exception("Boundary exception at wepppy/weppcloud/routes/nodb_api/rhem_bp.py:83", extra={"runid": locals().get("runid"), "config": locals().get("config"), "job_id": locals().get("job_id")})
         return exception_factory('Error running report_rhem_avg_annuals', runid=runid)
@@ -106,7 +100,7 @@ def report_rhem_return_periods(runid, config):
         wd = get_wd(runid)
         ron = Ron.getInstance(wd)
         rhempost = RhemPost.getInstance(wd)
-        unitizer = resolve_unitizer_presentation(wd)
+        unitizer = Unitizer.getInstance(wd)
 
         return render_template(
             'reports/rhem/return_periods.htm',
@@ -118,9 +112,7 @@ def report_rhem_return_periods(runid, config):
             ron=ron,
             user=current_user,
         )
-    except PreferenceResolutionError:
-        return preference_resolution_error_response(runid)
-    except Exception:  # broad-except: boundary contract
+    except Exception:
         # Boundary catch: preserve contract behavior while logging unexpected failures.
         __import__("logging").getLogger(__name__).exception("Boundary exception at wepppy/weppcloud/routes/nodb_api/rhem_bp.py:109", extra={"runid": locals().get("runid"), "config": locals().get("config"), "job_id": locals().get("job_id")})
         return exception_factory('Error running report_rhem_return_periods', runid=runid)
@@ -135,7 +127,7 @@ def query_rhem_sub_runoff(runid, config):
         rhempost = RhemPost.getInstance(wd)
         return jsonify(rhempost.query_sub_val('runoff'))
 
-    except Exception:  # broad-except: boundary contract
+    except Exception:
         # Boundary catch: preserve contract behavior while logging unexpected failures.
         __import__("logging").getLogger(__name__).exception("Boundary exception at wepppy/weppcloud/routes/nodb_api/rhem_bp.py:122", extra={"runid": locals().get("runid"), "config": locals().get("config"), "job_id": locals().get("job_id")})
         return exception_factory('Error querying RHEM subcatchments runoff', runid=runid)

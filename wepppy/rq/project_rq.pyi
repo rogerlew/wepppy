@@ -6,10 +6,6 @@ _hostname: str
 REDIS_HOST: str
 RQ_DB: int
 TIMEOUT: int
-WBT_BOUNDARY_POLICY_SNAPSHOT_INVALID_MESSAGE: str
-WBT_BOUNDARY_POLICY_APPLY_FAILED_MESSAGE: str
-WBT_SUBCATCHMENT_TREE_LOCK_TTL_SECONDS: int
-WBT_SUBCATCHMENT_ADMISSION_RETRY_ATTEMPTS: int
 FETCH_DEM_AND_BUILD_CHANNELS_CHILD_TIMEOUT: int
 TOPAZ_BUILD_CHANNELS_CHILD_TIMEOUT_MINIMUM: int
 DEFAULT_ZOOM: int
@@ -85,22 +81,13 @@ def fetch_dem_and_build_channels_rq(
 
 def set_outlet_rq(runid: str, outlet_lng: float, outlet_lat: float) -> None: ...
 
-def build_subcatchments_rq(
-    runid: str,
-    updates: dict[str, Any] | None = ...,
-    boundary_policy: dict[str, Any] | None = ...,
-    abstract_after_build: bool = ...,
-) -> None: ...
+def build_subcatchments_rq(runid: str, updates: dict[str, Any] | None = ...) -> None: ...
 
-def abstract_watershed_rq(
-    runid: str,
-    mutation_already_completed: bool = ...,
-) -> None: ...
+def abstract_watershed_rq(runid: str) -> None: ...
 
 def build_subcatchments_and_abstract_watershed_rq(
     runid: str,
     updates: dict[str, Any] | None = ...,
-    boundary_policy: dict[str, Any] | None = ...,
 ) -> None: ...
 
 def build_rangeland_cover_rq(

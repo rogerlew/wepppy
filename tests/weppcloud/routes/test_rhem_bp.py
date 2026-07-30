@@ -96,11 +96,7 @@ def rhem_client(monkeypatch: pytest.MonkeyPatch, tmp_path) -> Tuple[Any, Dict[st
                 cls._instances[wd] = instance
             return instance
 
-    monkeypatch.setattr(
-        rhem_module,
-        "resolve_unitizer_presentation",
-        DummyUnitizer.getInstance,
-    )
+    monkeypatch.setattr(rhem_module, "Unitizer", DummyUnitizer)
     monkeypatch.setattr(rhem_module, "UNITIZER_PRECISIONS", {"depth": 2})
     monkeypatch.setattr(rhem_module, "current_user", SimpleNamespace(name="tester"))
 

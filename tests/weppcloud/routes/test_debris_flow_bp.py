@@ -80,11 +80,7 @@ def debris_flow_client(monkeypatch: pytest.MonkeyPatch, tmp_path):
                 cls._instances[wd] = instance
             return instance
 
-    monkeypatch.setattr(
-        debris_flow_module,
-        "resolve_unitizer_presentation",
-        DummyUnitizer.getInstance,
-    )
+    monkeypatch.setattr(debris_flow_module, "Unitizer", DummyUnitizer)
 
     def fake_render_template(template: str, **context: Any) -> str:
         captured["template"] = template

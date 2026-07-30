@@ -6,7 +6,6 @@ import os
 from typing import Any, Mapping, Sequence
 import uuid
 
-import redis
 import requests
 from fastapi import APIRouter, Request
 from fastapi.responses import RedirectResponse, Response
@@ -21,10 +20,11 @@ from wepppy.weppcloud.utils.runid import generate_runid
 from wepppy.weppcloud.user_preferences import (
     PreferenceIdentityError,
     PreferenceValidationError,
+    StoredPreferenceError,
+    apply_creation_preference_overrides,
     cleanup_new_run_directory,
     register_owned_run,
-    resolve_creation_actor,
-    validate_creation_values,
+    resolve_creation_preferences,
 )
 
 from .auth import AuthError, _check_revocation, require_jwt
@@ -362,7 +362,7 @@ async def create(request: Request) -> Response:
 
     merged_values = _merge_creation_values(payload, request.query_params)
     try:
-        creation_values = validate_creation_values(merged_values)
+        base_values = apply_creation_preference_overrides(merged_values, None)
     except PreferenceValidationError:
         return error_response(
             "unitizer:is_english must be exactly true or false.",
@@ -372,27 +372,36 @@ async def create(request: Request) -> Response:
 
     def _create_run_blocking() -> str | Response:
         try:
-            actor = resolve_creation_actor(claims)
-        except (PreferenceIdentityError, SQLAlchemyError):
+            snapshot = resolve_creation_preferences(claims)
+            effective_values = apply_creation_preference_overrides(
+                base_values,
+                snapshot,
+            )
+        except (
+            PreferenceIdentityError,
+            PreferenceValidationError,
+            StoredPreferenceError,
+            SQLAlchemyError,
+        ):
             error_id = _creation_error_id()
             _log_creation_exception(
-                "rq-engine create owner resolution failed",
+                "rq-engine create preference resolution failed",
                 error_id,
             )
             return error_response(
-                "Could not resolve project owner.",
-                code="run_ownership_failed",
+                "Could not resolve account preferences.",
+                code="preference_resolution_failed",
                 error_id=error_id,
                 log_exception=False,
             )
 
         cfg = f"{config}.cfg"
-        overrides = _collect_overrides(creation_values)
+        overrides = _collect_overrides(effective_values)
         if overrides:
             cfg = f"{cfg}?{overrides}"
 
         try:
-            runid, wd = _create_run_dir(actor.email if actor else None)
+            runid, wd = _create_run_dir(snapshot.email if snapshot else None)
         except PermissionError:
             error_id = _creation_error_id()
             _log_creation_exception(
@@ -425,7 +434,7 @@ async def create(request: Request) -> Response:
             _log_creation_exception("rq-engine create Ron failed", error_id)
             try:
                 cleanup_new_run_directory(runid, wd)
-            except (OSError, redis.RedisError, RuntimeError, ValueError):
+            except (OSError, RuntimeError, ValueError):
                 logger.exception(
                     "rq-engine create Ron cleanup failed",
                     extra={"error_id": error_id, "runid": runid},
@@ -444,9 +453,9 @@ async def create(request: Request) -> Response:
         except Exception:  # broad-except: boundary contract
             logger.exception("rq-engine create TTL initialization failed")
 
-        if actor is not None:
+        if snapshot is not None:
             try:
-                register_owned_run(runid, config, actor.user_id)
+                register_owned_run(runid, config, snapshot.user_id)
             except (PreferenceIdentityError, SQLAlchemyError):
                 error_id = _creation_error_id()
                 _log_creation_exception(
@@ -455,7 +464,7 @@ async def create(request: Request) -> Response:
                 )
                 try:
                     cleanup_new_run_directory(runid, wd)
-                except (OSError, redis.RedisError, RuntimeError, ValueError):
+                except (OSError, RuntimeError, ValueError):
                     logger.exception(
                         "rq-engine create directory cleanup failed",
                         extra={"error_id": error_id, "runid": runid},

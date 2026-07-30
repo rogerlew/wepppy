@@ -16,8 +16,8 @@ from wepppy.nodb.core import Ron
 from wepppy.nodb.core.ron import RonViewModel
 from wepppy.nodb.mods.geneva import Geneva, GenevaNoDbError, GenevaValidationError
 from wepppy.nodb.redis_prep import RedisPrep, TaskEnum
+from wepppy.nodb.unitizer import Unitizer
 from wepppy.nodb.unitizer import precisions as UNITIZER_PRECISIONS
-from wepppy.weppcloud.user_preferences import resolve_unitizer_presentation
 from wepppy.nodb.mods.geneva.collaborators.cn_table_service import (
     CN_TABLE_CONTRACT_PATH,
     GENEVA_CN_TABLE_SCHEMA_VERSION,
@@ -96,8 +96,8 @@ def _resolve_report_shell_context(wd: str, runid: str, config: str) -> tuple[Any
 
 def _resolve_report_unitizer_context(wd: str) -> Any:
     try:
-        return resolve_unitizer_presentation(wd)
-    except (FileNotFoundError, OSError, ValueError):
+        return Unitizer.getInstance(wd)
+    except (FileNotFoundError, OSError, RuntimeError, ValueError):
         # Boundary fallback for report shell rendering when unitizer state cannot load.
         preference_map = {
             unit_class: next(iter(unit_options.keys()))

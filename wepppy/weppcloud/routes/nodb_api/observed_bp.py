@@ -5,7 +5,7 @@ import traceback
 from .._common import *  # noqa: F401,F403
 
 from wepppy.nodb.core import Ron
-from wepppy.weppcloud.user_preferences import resolve_unitizer_presentation
+from wepppy.nodb.unitizer import Unitizer
 from wepppy.nodb.unitizer import precisions as UNITIZER_PRECISIONS
 from wepppy.nodb.mods.observed import Observed
 from wepppy.weppcloud.utils.helpers import authorize_and_handle_with_exception_factory
@@ -67,7 +67,7 @@ def report_observed(runid, config):
     wd = get_wd(runid)
     observed = Observed.getInstance(wd)
     ron = Ron.getInstance(wd)
-    unitizer = resolve_unitizer_presentation(wd)
+    unitizer = Unitizer.getInstance(wd)
 
     results = observed.results
     stat_names = observed.stat_names if results else []

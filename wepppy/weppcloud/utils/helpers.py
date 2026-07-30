@@ -878,13 +878,6 @@ def authorize_and_handle_with_exception_factory(
             # Preserve Flask/Werkzeug HTTP errors such as abort(403).
             raise
         except Exception as exc:  # broad-except: boundary contract
-            from wepppy.weppcloud.user_preferences import (
-                PreferenceResolutionError,
-                preference_resolution_error_response,
-            )
-
-            if isinstance(exc, PreferenceResolutionError):
-                return preference_resolution_error_response(runid)
             # For unexpected errors, return the standard exception payload with details.
             stacktrace = traceback.format_exc()
             return exception_factory(
@@ -927,15 +920,6 @@ def handle_with_exception_factory(
             # Preserve deliberate HTTP errors such as abort(404) / abort(403).
             raise
         except Exception as exc:  # broad-except: boundary contract
-            from wepppy.weppcloud.user_preferences import (
-                PreferenceResolutionError,
-                preference_resolution_error_response,
-            )
-
-            if isinstance(exc, PreferenceResolutionError):
-                return preference_resolution_error_response(
-                    str(runid) if runid is not None else None
-                )
             # Anything else becomes our standard error response, optionally tagged with runid.
             stacktrace = traceback.format_exc()
             return exception_factory(
