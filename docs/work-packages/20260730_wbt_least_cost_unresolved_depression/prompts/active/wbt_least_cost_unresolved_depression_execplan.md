@@ -169,9 +169,9 @@ Suggested public summary content, subject to contract approval:
 > Channel delineation stopped because Breach (Least Cost) could not drain one
 > or more depressions within the selected search distance. WEPPcloud did not
 > fill them because that could substantially raise terrain and reroute flow.
-> Increase the breach distance, enlarge or reposition the DEM so the expected
-> outlet is within the Breach (Least Cost) distance, inspect DEM/NoData
-> boundaries, or choose
+> Increase the breach distance so the search can reach a lower drainage path
+> beyond the depression, enlarge or reposition the DEM if its edge clips the
+> depression or likely drainage path, inspect DEM/NoData boundaries, or choose
 > another conditioning method, then build channels again.
 
 Include the selected distance and unresolved count only if they are reliable

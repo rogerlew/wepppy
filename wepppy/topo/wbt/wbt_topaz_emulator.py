@@ -67,10 +67,11 @@ WBT_UNRESOLVED_DEPRESSION_MESSAGE = (
     "Channel delineation stopped because Breach (Least Cost) could not resolve "
     "all depressions within the selected search distance. WEPPcloud did not fill "
     "the unresolved depressions because filling can substantially raise terrain "
-    "and reroute flow. Increase the breach distance, enlarge or reposition the "
-    "DEM so the expected outlet is within the Breach (Least Cost) distance, "
-    "inspect DEM and NoData boundaries, or choose another conditioning method, "
-    "then build channels again."
+    "and reroute flow. Increase the breach distance so the search can reach a "
+    "lower drainage path beyond the depression, enlarge or reposition the DEM "
+    "if its edge clips the depression or likely drainage path, inspect DEM and "
+    "NoData boundaries, or choose another conditioning method, then build "
+    "channels again."
 )
 WBT_CONDITIONING_DIAGNOSTICS_FILENAME = "relief.diagnostics.json"
 WBT_CONDITIONING_DIAGNOSTICS_MAX_BYTES = 65536

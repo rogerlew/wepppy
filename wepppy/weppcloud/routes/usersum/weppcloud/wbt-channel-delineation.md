@@ -212,10 +212,10 @@ flow.
 
 Retry only after choosing an appropriate correction:
 
-- increase **Breach least cost distance** when the expected drainage target is
-  farther away;
-- enlarge or reposition the DEM so the expected outlet is within the
-  **Breach (Least Cost)** distance;
+- increase **Breach least cost distance** when the search must extend farther
+  across or beyond the depression to reach a lower drainage path;
+- enlarge or reposition the DEM when its edge clips the depression or likely
+  drainage path;
 - inspect the DEM crop and NoData mask for a closed or missing edge; or
 - deliberately select another conditioning method when its terrain changes
   better match the modeling intent.

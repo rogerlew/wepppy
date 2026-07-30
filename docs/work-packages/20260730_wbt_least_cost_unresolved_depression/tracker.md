@@ -220,8 +220,10 @@ presentation.
 
 The final presentation keeps the instructional message as a paragraph and
 places breach distance, unresolved count, and error ID in a separate labeled
-metadata row. Outlet guidance now says the DEM should be positioned so the
-expected outlet is within the Breach (Least Cost) distance.
+metadata row. A later wording correction clarifies that the search distance
+limits how far WBT can look from a depression for a lower drainage path; the
+DEM guidance applies when its edge clips the depression or likely path, not
+because the project outlet must be within that distance.
 
 ## Watch List
 
