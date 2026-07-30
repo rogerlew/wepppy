@@ -135,6 +135,15 @@ docs:
     audience_tags: [operator, developer]
     status: active
     nav_key: usersum.weppcloud.controls.channel_delineation
+  - doc_id: usersum.weppcloud.controls.wbt_channel_delineation
+    source: local
+    rel_path: wepppy/weppcloud/routes/usersum/weppcloud/wbt-channel-delineation.md
+    title: WBT Channel Delineation
+    min_role: user
+    category: weppcloud
+    audience_tags: [user]
+    status: active
+    nav_key: usersum.weppcloud.controls.wbt_channel_delineation
   - doc_id: usersum.weppcloud.data_attribution
     source: local
     rel_path: wepppy/weppcloud/routes/usersum/weppcloud/data-attribution.md

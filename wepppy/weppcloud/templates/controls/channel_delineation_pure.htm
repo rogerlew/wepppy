@@ -5,6 +5,17 @@
 {% call ui.control_shell(
      form_id="build_channels_form",
      title="Channel Delineation",
+     description=(
+       'Choose the terrain extent and channel-building options; see '
+       ~ usersum_doc_link(
+           'weppcloud',
+           'wbt-channel-delineation.md',
+           'WBT Channel Delineation guidance'
+         )
+       ~ '.'
+       if watershed.delineation_backend_is_wbt
+       else none
+     ),
      collapsible=True,
      form_attrs={
        "data-uploaded-dem": "true" if has_uploaded_dem else "false"

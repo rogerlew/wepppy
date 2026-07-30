@@ -232,6 +232,8 @@ roots:
         children:
           - key: usersum.weppcloud.controls.channel_delineation
             doc_id: usersum.weppcloud.controls.channel_delineation
+          - key: usersum.weppcloud.controls.wbt_channel_delineation
+            doc_id: usersum.weppcloud.controls.wbt_channel_delineation
 
   - key: vendor.weppcloud_wbt
     title: Platform Vendor Docs

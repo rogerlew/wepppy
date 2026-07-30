@@ -1025,6 +1025,24 @@ def test_channel_template_submits_and_hydrates_channel_configuration(
         rendered,
     )
     assert re.search(r'<input[^>]*id="wbt_blc_dist"[^>]*name="wbt_blc_dist"[^>]*value="777"', rendered)
+    assert 'class="wc-control__description"' in rendered
+    assert "/usersum/view/weppcloud/wbt-channel-delineation.md" in rendered
+    assert "WBT Channel Delineation guidance" in rendered
+
+    rendered_topaz = template.render(
+        watershed=SimpleNamespace(
+            uploaded_dem_filename=None,
+            set_extent_mode=0,
+            map_bounds_text="",
+            delineation_backend_is_topaz=True,
+            delineation_backend_is_wbt=False,
+            mcl=61.0,
+            csa=7.0,
+            pkcsa=7.0,
+        )
+    )
+    assert 'class="wc-control__description"' not in rendered_topaz
+    assert "wbt-channel-delineation.md" not in rendered_topaz
 
 
 @pytest.mark.parametrize(

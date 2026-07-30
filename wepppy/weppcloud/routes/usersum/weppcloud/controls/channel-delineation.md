@@ -22,7 +22,7 @@ Channel delineation extracts channels from a DEM using either TOPAZ or Weppcloud
 Your DEM must meet all of the following:
 - GeoTIFF (`.tif`) with a valid spatial reference.
 - Floating point data (`Float32` or `Float64`).
-- No larger than **1024 x 1024** pixels.
+- No larger than **2560 x 2560** pixels.
 - North-up with **no rotation**.
 - **Square pixels** (equal x and y resolution).
 
@@ -45,6 +45,10 @@ If any requirement fails, the upload is rejected with a specific error message.
 
 Calibration guidance: WEPP in WEPPcloud has been calibrated with CSA < 10 ha and MCL < 100 m. Avoid grossly exceeding these values unless you have a specific justification and understand the impacts on channel density and routing.
 ### Weppcloud-WBT Options
+
+See the [WBT Channel Delineation guide](../wbt-channel-delineation.md) for
+end-user guidance on all WBT inputs and choices.
+
 - **Depression smoothing**
   - Fill: fills sinks before routing.
   - Breach: removes barriers by breaching.
@@ -123,7 +127,7 @@ These outputs drive subcatchments, hillslopes, and later WEPP steps.
   - Reproject or resample to square pixels with north-up orientation.
 - **Channels fail after upload**
   - Confirm the DEM is Float32/Float64 and UTM-compatible.
-  - Verify the DEM is <= 1024 x 1024 pixels.
+  - Verify the DEM is <= 2560 x 2560 pixels.
 - **Watershed reaches the DEM boundary**
   - Enlarge the map extent or choose an outlet farther inside the DEM.
   - Rebuild channels before delineating subcatchments again.
