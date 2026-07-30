@@ -2406,6 +2406,12 @@ def _build_run_operations(runtime: RuntimeState) -> dict[str, dict[str, Any]]:
                         "wbt_fill_or_breach": {
                             "type": "string",
                             "constraint_mode": "static",
+                            "enum": [
+                                "fill",
+                                "breach",
+                                "breach_least_cost",
+                                "topaz",
+                            ],
                         },
                         "stream_pruning_method": {
                             "type": "string",

@@ -11,6 +11,8 @@ _point_template_geojson: str
 DEFAULT_STREAM_PRUNING_METHOD: str
 SUPPORTED_STREAM_PRUNING_METHODS: tuple[str, str]
 DEFAULT_STREAM_PRUNING_MAX_JUNCTIONS: int
+TOPAZ_CONDITION_MAX_OBSTRUCTION_WIDTH: int
+TOPAZ_CONDITION_TIMEOUT_SECONDS: int
 
 
 def isfloat(value: Any) -> bool: ...
@@ -154,6 +156,8 @@ class WhiteboxToolsTopazEmulator:
         self,
         fill_or_breach: str = ...,
         blc_dist: Optional[int] = ...,
+        blc_max_cost: Optional[float] = ...,
+        blc_fill: bool = ...,
         logger: Optional[logging.Logger] = None,
     ) -> None: ...
 

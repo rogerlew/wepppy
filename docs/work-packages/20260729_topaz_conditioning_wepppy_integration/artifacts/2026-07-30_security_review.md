@@ -8,8 +8,10 @@
 - **Date**: 2026-07-30
 - **Scope**: additive channel enum across UI, rq-engine, NoDb, worker, WBT
   subprocess wrapper, run-scoped raster output, and release rollback
-- **Revision context**: documentation-only checkpoint based on
-  `efd526ef72d13a893b7d3b88dc4aab02a34d6eea`
+- **Revision context**: contract ancestor
+  `5754a1e06798a2f116a04b5eff4601402e143962`; WBT release commits
+  `0f226804e568c12bb698795f352c47ecbc324769` and
+  `47ca8e44730c0691cfcf8ac2bfa106e792254b36`
 
 ## Security Triage
 
@@ -42,22 +44,27 @@ blocking, high, or medium checkpoint findings.
   the normative delta.
 - [x] The checkpoint requires all four values to be allowlisted before any
   mutation/enqueue and again at the defensive NoDb boundary.
-- [ ] Wrapper invocation uses fixed arguments without shell interpolation.
-- [ ] Output remains the run-scoped `relief.tif`.
-- [ ] Native binary provenance and discovery are verified after installation.
-- [ ] Failure is explicit; no silent algorithm fallback exists.
-- [ ] NoDb locking/dump/cache behavior remains unchanged.
+- [x] Wrapper invocation uses fixed arguments without shell interpolation.
+- [x] Output remains the run-scoped `relief.tif`.
+- [x] Native binary provenance and discovery are verified after installation.
+- [x] Failure is explicit; no silent algorithm fallback exists.
+- [x] NoDb locking/dump/cache behavior remains unchanged.
 - [x] Rollback is staged to preserve persisted `topaz`; full removal requires
   separate authorization, auditable migration, and zero-residual proof.
 - [x] No secrets, external egress, or new dependency is introduced.
-- [ ] Forced timeout proves process-group termination, wait/reap, and no
+- [x] Forced timeout proves process-group termination, wait/reap, and no
   surviving native child.
-- [ ] Config mismatch and invalid enum prove no controller/timestamp/persistence
+- [x] Config mismatch and invalid enum prove no controller/timestamp/persistence
   or enqueue mutation in normal and batch/base paths.
-- [ ] Relevant frontend, RQ, Python, binary, and docs gates pass.
+- [x] Relevant frontend, RQ, Python, binary, and docs gates pass.
 
 ## Verdict
 
-- **Gate status**: checkpoint PASS; implementation controls remain pending
-- **Release recommendation**: hold until reviewed checkpoint and final
-  implementation evidence pass
+- **Gate status**: PASS
+- **Release recommendation**: approve local release and E2E. Production
+  promotion remains conditional on publishing the reviewed WBT commits,
+  building the production image from that state, and repeating worker
+  path/hash/disposable-execution verification.
+
+Final evidence is retained in `2026-07-30_final_validation.md` and
+`2026-07-30_final_ops_security_review.md`.

@@ -81,6 +81,7 @@ TIMEOUT: int = 43_200
 FETCH_DEM_AND_BUILD_CHANNELS_CHILD_TIMEOUT: int = int(
     os.getenv("RQ_ENGINE_FETCH_DEM_BUILD_CHANNELS_TIMEOUT", "600")
 )
+TOPAZ_BUILD_CHANNELS_CHILD_TIMEOUT_MINIMUM: int = 600
 DEFAULT_ZOOM: int = 12
 DIRECTORY_ROOT_LOCK_RETRY_ATTEMPTS: int = 5
 DIRECTORY_ROOT_LOCK_RETRY_SECONDS: float = 1.0
@@ -97,6 +98,22 @@ _estimate_archive_required_bytes = _archive_helpers._estimate_archive_required_b
 _assert_sufficient_disk_space = _archive_helpers._assert_sufficient_disk_space
 _calculate_run_payload_bytes = _archive_helpers._calculate_run_payload_bytes
 _collect_restore_members = _archive_helpers._collect_restore_members
+
+
+def _build_channels_child_timeout(
+    watershed: Watershed,
+    requested_fill_or_breach: Optional[str],
+) -> int:
+    """Return a child timeout that preserves the Topaz cleanup margin."""
+    effective_fill_or_breach = requested_fill_or_breach
+    if effective_fill_or_breach is None:
+        effective_fill_or_breach = getattr(watershed, "wbt_fill_or_breach", None)
+    if effective_fill_or_breach == "topaz":
+        return max(
+            FETCH_DEM_AND_BUILD_CHANNELS_CHILD_TIMEOUT,
+            TOPAZ_BUILD_CHANNELS_CHILD_TIMEOUT_MINIMUM,
+        )
+    return FETCH_DEM_AND_BUILD_CHANNELS_CHILD_TIMEOUT
 
 
 def _delete_runtime() -> _delete_helpers.DeleteRuntime:
@@ -780,6 +797,10 @@ def fetch_dem_and_build_channels_rq(
         if int(set_extent_mode) != 3:
             watershed.uploaded_dem_filename = None
 
+        build_channels_timeout = _build_channels_child_timeout(
+            watershed,
+            wbt_fill_or_breach,
+        )
         conn_kwargs = redis_connection_kwargs(RedisDB.RQ)
         with redis.Redis(**conn_kwargs) as redis_conn:
             q = Queue(connection=redis_conn)
@@ -794,7 +815,7 @@ def fetch_dem_and_build_channels_rq(
                         wbt_fill_or_breach,
                         wbt_blc_dist,
                     ),
-                    timeout=FETCH_DEM_AND_BUILD_CHANNELS_CHILD_TIMEOUT,
+                    timeout=build_channels_timeout,
                 )
                 job.meta['jobs:0,func:build_channels_rq'] = bjob.id
                 job.save()
@@ -817,7 +838,7 @@ def fetch_dem_and_build_channels_rq(
                         wbt_fill_or_breach,
                         wbt_blc_dist,
                     ),
-                    timeout=FETCH_DEM_AND_BUILD_CHANNELS_CHILD_TIMEOUT,
+                    timeout=build_channels_timeout,
                     depends_on=ajob,
                 )
                 job.meta['jobs:1,func:build_channels_rq'] = bjob.id

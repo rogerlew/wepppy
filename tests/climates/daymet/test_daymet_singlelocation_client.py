@@ -15,6 +15,8 @@ import pytest
 
 from tests.stubs import ensure_geopandas_stub
 
+pytestmark = pytest.mark.unit
+
 module = sys.modules.get("wepppy")
 if module is None or getattr(module, "__name__", "") != "wepppy" or not hasattr(module, "__path__"):
     sys.modules.pop("wepppy", None)
@@ -99,11 +101,11 @@ else:
 if not hasattr(imageio_module, "imread"):
     imageio_module.imread = lambda *args, **kwargs: None
 
-if "whitebox_tools" not in sys.modules:
+try:
+    import whitebox_tools as whitebox_module
+except ModuleNotFoundError:
     whitebox_module = types.ModuleType("whitebox_tools")
     sys.modules["whitebox_tools"] = whitebox_module
-else:
-    whitebox_module = sys.modules["whitebox_tools"]
 
 if not hasattr(whitebox_module, "WhiteboxTools"):
     class _WhiteboxTools:

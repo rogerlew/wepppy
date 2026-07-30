@@ -956,7 +956,7 @@ def test_channel_template_submits_and_hydrates_channel_configuration(
             mcl=61.0,
             csa=7.0,
             stream_pruning_method="remove_short_streams",
-            wbt_fill_or_breach="breach_least_cost",
+            wbt_fill_or_breach="topaz",
             wbt_blc_dist=777,
         )
     )
@@ -1011,7 +1011,19 @@ def test_channel_template_submits_and_hydrates_channel_configuration(
         re.DOTALL,
     )
     assert 'name="input_wbt_fill_or_breach"' not in rendered
-    assert re.search(r'<option value="breach_least_cost" selected>Breach \(Least Cost\)</option>', rendered)
+    for value, label in (
+        ("fill", "Fill"),
+        ("breach", "Breach"),
+        ("breach_least_cost", r"Breach \(Least Cost\)"),
+    ):
+        assert re.search(
+            rf'<option value="{value}">{label}</option>',
+            rendered,
+        )
+    assert re.search(
+        r'<option value="topaz" selected>Topaz Conditioning Algorithm</option>',
+        rendered,
+    )
     assert re.search(r'<input[^>]*id="wbt_blc_dist"[^>]*name="wbt_blc_dist"[^>]*value="777"', rendered)
 
 

@@ -49,6 +49,9 @@ Calibration guidance: WEPP in WEPPcloud has been calibrated with CSA < 10 ha and
   - Fill: fills sinks before routing.
   - Breach: removes barriers by breaching.
   - Breach (Least Cost): preferred for rugged terrain; uses a cost-based breach.
+  - Topaz Conditioning Algorithm: reproduces TOPAZ FILDEP/RELIEF depression
+    filling, narrow-obstruction adjustment, and flat resolution before the
+    normal Weppcloud-WBT flow and channel steps.
   - A successful **Build Channels** saves the selected algorithm; reloading the
     run shows the algorithm used for the build.
 - **Breach distance**
@@ -56,6 +59,10 @@ Calibration guidance: WEPP in WEPPcloud has been calibrated with CSA < 10 ha and
   - Units: meters.
 
 TOPAZ uses only **MCL** and **CSA**.
+
+New projects created with the `disturbed9002_wbt` configuration select
+**Topaz Conditioning Algorithm** by default. Existing projects retain their
+saved selection, and other configurations keep their configured defaults.
 
 ## Set Map Object Mode
 Use this when you want the **exact** grid from another run.

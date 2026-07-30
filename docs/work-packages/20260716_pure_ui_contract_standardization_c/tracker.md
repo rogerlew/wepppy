@@ -24,9 +24,6 @@
 
 ### In Progress
 
-- [ ] DOM-05A is executing as a separately reviewed additive amendment for the
-  `topaz` conditioning token and `disturbed9002_wbt` new-run default. DOM-05
-  remains closed and REM-05 is not reopened.
 - [x] Registered and dual-reviewed REM-05 under GOV-00A-M1E without advancing
   DOM-05; checkpoint ancestor
   `44d3b93c8e3bc7d5e89151cbb9677db374411c53`.
@@ -275,9 +272,10 @@
 - [x] Closed DOM-05 Channel Delineation with actual-render, legacy/GL payload,
   and RQ persistence-order coverage; no production mismatch or patch
   (2026-07-28 UTC).
-- [ ] Registered DOM-05A as an operator-approved intended-behavior amendment;
-  implementation is blocked on its dual-reviewed standalone checkpoint
-  ancestor (2026-07-30 UTC).
+- [x] Closed DOM-05A as an operator-approved intended-behavior amendment after
+  standalone checkpoint ancestor `5754a1e06`, WBT release, full-suite and dual
+  review PASS, and local project-scoped E2E; DOM-05 remains closed and REM-05
+  was not reopened (2026-07-30 UTC).
 - [x] Activated DOM-04A Map Orchestration as the next one-controller audit with
   direct rendered action and request evidence (2026-07-28 UTC).
 - [x] Closed DOM-04A Map Orchestration with actual-render actions/targets and

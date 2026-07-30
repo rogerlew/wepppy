@@ -132,6 +132,15 @@ NCPU = multiprocessing.cpu_count() - 2
 # `hillslopes.parquet` stores slope as a rise/run ratio, so 30% equals 0.30.
 _SLOPE_RATIO_THRESHOLD = 0.30
 
+WBT_FILL_OR_BREACH_VALUES = frozenset(
+    {
+        "fill",
+        "breach",
+        "breach_least_cost",
+        "topaz",
+    }
+)
+
 __all__ = [
     'NCPU',
     'DelineationBackend',
@@ -142,6 +151,7 @@ __all__ = [
     'process_channel',
     'process_subcatchment',
     'TRANSIENT_FIELDS',
+    'WBT_FILL_OR_BREACH_VALUES',
     'Watershed',
     'Outlet',
 ]
@@ -515,11 +525,8 @@ class Watershed(WatershedOperationsMixin, WatershedLookupMixin, NoDbBase):
     @wbt_fill_or_breach.setter
     @nodb_setter
     def wbt_fill_or_breach(self, value: str) -> None:
-        assert value in [
-            "fill",
-            "breach",
-            "breach_least_cost",
-        ], f"Invalid wbt_fill_or_breach value: {value}"
+        if value not in WBT_FILL_OR_BREACH_VALUES:
+            raise ValueError(f"Invalid wbt_fill_or_breach value: {value}")
         self._wbt_fill_or_breach = value
 
     @property

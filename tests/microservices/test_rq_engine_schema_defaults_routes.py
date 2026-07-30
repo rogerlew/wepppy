@@ -573,6 +573,12 @@ def test_fetch_dem_and_build_channels_schema_marks_bounds_required_for_modes_0_1
     }
     assert request_fields["map_center"]["derived_if_missing"]["field"] == "map_bounds"
     assert request_fields["map_zoom"]["derived_if_missing"]["field"] == "map_bounds"
+    assert request_fields["wbt_fill_or_breach"]["enum"] == [
+        "fill",
+        "breach",
+        "breach_least_cost",
+        "topaz",
+    ]
     assert "mcl" in payload["request"]["required"]
     assert "csa" in payload["request"]["required"]
 

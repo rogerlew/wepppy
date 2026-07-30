@@ -1,6 +1,6 @@
 # Topaz Conditioning WEPPpy Integration
 
-**Status**: Active
+**Status**: Complete
 
 **Timezone**: UTC
 
@@ -27,7 +27,9 @@ conformance repairs on the same mutation path.
 
 This package does not change queue topology, endpoints, authentication, CSRF,
 NoDb serialization shape, D8/stream algorithms after conditioning, global WBT
-defaults, other WEPPcloud configurations, or existing run state.
+defaults, or other WEPPcloud configurations. After the planned reviews, the
+operator separately authorized local E2E mutation of run `austere-inaction`;
+that run's downstream watershed steps were invalidated as expected.
 
 ## Fidelity and Evidence
 
@@ -42,17 +44,17 @@ defaults, other WEPPcloud configurations, or existing run state.
 
 ## Success Criteria
 
-- [ ] A standalone documentation-only contract checkpoint is independently
+- [x] A standalone documentation-only contract checkpoint is independently
   reviewed and committed before implementation.
-- [ ] The select renders `Topaz Conditioning Algorithm` with token `topaz`,
+- [x] The select renders `Topaz Conditioning Algorithm` with token `topaz`,
   persists it, and hydrates it on reload.
-- [ ] `topaz` invokes WBT `TopazConditionDem` with explicit obstruction width
+- [x] `topaz` invokes WBT `TopazConditionDem` with explicit obstruction width
   2; legacy tokens retain their existing implementations.
-- [ ] `disturbed9002_wbt.cfg` defaults new runs to `topaz`; existing persisted
+- [x] `disturbed9002_wbt.cfg` defaults new runs to `topaz`; existing persisted
   projects do not migrate.
-- [ ] The installed WBT release binary exposes and executes the tool from the
+- [x] The installed WBT release binary exposes and executes the tool from the
   WEPPpy runtime.
-- [ ] Contract, Python, frontend, documentation, and generated-output gates
+- [x] Contract, Python, frontend, documentation, and generated-output gates
   pass.
 
 ## Security and Parameterization

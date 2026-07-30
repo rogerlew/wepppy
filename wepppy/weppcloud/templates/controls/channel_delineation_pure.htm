@@ -241,10 +241,11 @@
          [
            ("fill", "Fill"),
            ("breach", "Breach"),
-           ("breach_least_cost", "Breach (Least Cost)")
+           ("breach_least_cost", "Breach (Least Cost)"),
+           ("topaz", "Topaz Conditioning Algorithm")
          ],
          selected=watershed.wbt_fill_or_breach,
-         help="Specify whether the DEM should be filled or breached before channel extraction.",
+         help="Choose how the DEM is hydrologically conditioned before channel extraction.",
          attrs={"data-channel-role": "wbt-fill"},
          field_name="wbt_fill_or_breach",
          extra_control_class="disable-readonly"

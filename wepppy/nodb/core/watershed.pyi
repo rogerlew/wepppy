@@ -20,6 +20,7 @@ __all__ = [
     'process_channel',
     'process_subcatchment',
     'TRANSIENT_FIELDS',
+    'WBT_FILL_OR_BREACH_VALUES',
     'Watershed',
     'Outlet',
 ]
@@ -59,6 +60,7 @@ def process_subcatchment(args: Tuple[WatershedAbstraction, int, bool, float, int
 TRANSIENT_FIELDS: List[str]
 DEFAULT_STREAM_PRUNING_METHOD: str
 SUPPORTED_STREAM_PRUNING_METHODS: tuple[str, str]
+WBT_FILL_OR_BREACH_VALUES: frozenset[str]
 
 
 class Outlet:

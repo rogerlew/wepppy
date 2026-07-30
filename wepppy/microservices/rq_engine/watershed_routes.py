@@ -26,6 +26,7 @@ from wepppy.nodb.core import (
     Watershed,
     WatershedBoundaryTouchesEdgeError,
 )
+from wepppy.nodb.core.watershed import WBT_FILL_OR_BREACH_VALUES
 from wepppy.nodb.redis_prep import RedisPrep, TaskEnum
 from wepppy.runtime_paths.errors import NoDirError
 from wepppy.runtime_paths.fs import resolve as _nodir_resolve
@@ -94,6 +95,28 @@ def _is_base_project_context(runid: str, config: str) -> bool:
     runid_leaf = runid.split(";;")[-1].strip().lower() if runid else ""
     config_token = str(config).strip().lower() if config is not None else ""
     return runid_leaf == "_base" or config_token == "_base"
+
+
+def _normalize_config_token(value: str) -> str:
+    token = str(value or "").strip().lower()
+    return token[:-4] if token.endswith(".cfg") else token
+
+
+def _config_mismatch_response(wd: str, config: str) -> JSONResponse | None:
+    """Reject a mismatched mutable run/config route before any state change."""
+    actual_config = _normalize_config_token(
+        getattr(Ron.getInstance(wd), "config_stem", "")
+    )
+    requested_config = _normalize_config_token(config)
+    if requested_config == "_base":
+        return None
+    if requested_config != actual_config:
+        return error_response(
+            f"Run config mismatch: path config '{config}' does not match run config '{actual_config}'.",
+            status_code=409,
+            code="run_config_mismatch",
+        )
+    return None
 
 
 def _parse_map_change(payload: dict[str, Any]) -> tuple[JSONResponse | None, list[Any] | None]:
@@ -212,6 +235,18 @@ def _parse_map_change(payload: dict[str, Any]) -> tuple[JSONResponse | None, lis
             wbt_fill_or_breach = None
         else:
             wbt_fill_or_breach = str(wbt_fill_or_breach_raw)
+        if (
+            wbt_fill_or_breach is not None
+            and wbt_fill_or_breach not in WBT_FILL_OR_BREACH_VALUES
+        ):
+            return (
+                error_response(
+                    "Invalid wbt_fill_or_breach value.",
+                    status_code=400,
+                    code="invalid_wbt_fill_or_breach",
+                ),
+                None,
+            )
 
         if isinstance(stream_pruning_method_raw, (list, tuple)):
             stream_pruning_method = next(
@@ -625,6 +660,7 @@ async def upload_dem(runid: str, config: str, request: Request) -> JSONResponse:
         success_description="Watershed inputs accepted; returns batch update message or enqueued `job_id`.",
         extra={
             400: "Watershed map/change validation failed. Returns the canonical error payload.",
+            409: "Run config mismatch. Returns canonical `run_config_mismatch` without mutation.",
         },
     ),
 )
@@ -661,6 +697,9 @@ async def fetch_dem_and_build_channels(
         ) = args
 
         wd = get_wd(runid)
+        mismatch_response = _config_mismatch_response(wd, config)
+        if mismatch_response is not None:
+            return mismatch_response
         _preflight_watershed_mutation_root(wd)
         watershed = Watershed.getInstance(wd)
         if int(set_extent_mode) == 3:

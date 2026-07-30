@@ -162,6 +162,7 @@ def test_fetch_dem_and_build_channels_rq_clears_watershed_cache_before_enqueue(
     class DummyWatershed:
         def __init__(self) -> None:
             self.uploaded_dem_filename = "uploaded.tif"
+            self.wbt_fill_or_breach = "topaz"
 
     dummy_watershed = DummyWatershed()
 
@@ -171,6 +172,11 @@ def test_fetch_dem_and_build_channels_rq_clears_watershed_cache_before_enqueue(
         return dummy_watershed
 
     monkeypatch.setattr(project_rq.Watershed, "getInstance", _get_watershed)
+    monkeypatch.setattr(
+        project_rq,
+        "FETCH_DEM_AND_BUILD_CHANNELS_CHILD_TIMEOUT",
+        120,
+    )
 
     class DummyRedis:
         def __init__(self, **_kwargs) -> None:
@@ -218,11 +224,26 @@ def test_fetch_dem_and_build_channels_rq_clears_watershed_cache_before_enqueue(
     enqueue_events = [event for event in events if event[0] == "enqueue"]
     assert [event[4] for event in enqueue_events] == [
         project_rq.FETCH_DEM_AND_BUILD_CHANNELS_CHILD_TIMEOUT,
-        project_rq.FETCH_DEM_AND_BUILD_CHANNELS_CHILD_TIMEOUT,
+        project_rq.TOPAZ_BUILD_CHANNELS_CHILD_TIMEOUT_MINIMUM,
     ]
     assert current_job.meta["jobs:0,func:fetch_dem_rq"] == "child-0"
     assert current_job.meta["jobs:1,func:build_channels_rq"] == "child-1"
     assert dummy_watershed.uploaded_dem_filename is None
+
+
+def test_topaz_build_channels_enforces_cleanup_margin_for_short_configured_timeout(
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    monkeypatch.setattr(
+        project_rq,
+        "FETCH_DEM_AND_BUILD_CHANNELS_CHILD_TIMEOUT",
+        120,
+    )
+    watershed = SimpleNamespace(wbt_fill_or_breach="topaz")
+
+    assert project_rq._build_channels_child_timeout(watershed, None) == 600
+    assert project_rq._build_channels_child_timeout(watershed, "topaz") == 600
+    assert project_rq._build_channels_child_timeout(watershed, "fill") == 120
 
 
 def test_fetch_dem_and_build_channels_rq_preserves_uploaded_dem_for_upload_mode(
@@ -375,6 +396,7 @@ def test_build_channels_rq_rejects_archive_form_root(
     ("override", "expected"),
     [
         ("fill", "fill"),
+        ("topaz", "topaz"),
         (None, "breach_least_cost"),
     ],
 )

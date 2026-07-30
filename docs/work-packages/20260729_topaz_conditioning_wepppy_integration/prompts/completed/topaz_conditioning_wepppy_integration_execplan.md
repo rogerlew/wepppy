@@ -24,11 +24,20 @@ to the existing WBT flow and channel stack. New projects using
   reviews; both initially returned FAIL with blocking/high/medium findings.
 - [x] (2026-07-30 02:16 UTC) Both reviewers returned post-fix PASS after all
   blocking/high/medium findings were dispositioned.
-- [ ] Commit the documentation-only checkpoint as a standalone ancestor.
-- [ ] Build and atomically install the WBT release binary.
-- [ ] Implement the additive `topaz` token and config-scoped default.
-- [ ] Add/update contract, unit, integration, and generated-output tests.
-- [ ] Run final gates/reviews, publish evidence, and close the package.
+- [x] (2026-07-30 02:24 UTC) Committed the documentation-only checkpoint as
+  standalone ancestor `5754a1e06798a2f116a04b5eff4601402e143962`.
+- [x] (2026-07-30 02:47 UTC) Built, atomically installed, validated, and
+  committed WBT release
+  `0f226804e568c12bb698795f352c47ecbc324769`; required containment follow-up
+  `47ca8e44730c0691cfcf8ac2bfa106e792254b36` closes the early-output-EOF
+  timeout bypass.
+- [x] (2026-07-30 03:12 UTC) Implemented the additive `topaz` token,
+  prerequisite validation/containment, and config-scoped default.
+- [x] (2026-07-30 03:12 UTC) Added/updated contract, unit, integration, and
+  generated-output tests; focused gates pass.
+- [x] (2026-07-30 03:20 UTC) Passed final gates/reviews, restarted the local
+  stack, completed the operator-authorized `austere-inaction` E2E, and
+  published closure evidence.
 
 ## Surprises & Discoveries
 
@@ -51,6 +60,24 @@ to the existing WBT flow and channel stack. New projects using
   bounded process-group cleanup on timeout.
   Evidence: independent operations/security checkpoint review and
   `WBT/whitebox_tools.py`.
+
+- Observation: `_base` is a canonical sentinel rather than a persisted config
+  stem, so the new config guard must preserve that special path while rejecting
+  mismatches for ordinary config tokens.
+  Evidence: retained base-context route test and
+  `_is_base_project_context`.
+
+- Observation: a legacy Daymet test installed a fake `whitebox_tools` module
+  during collection whenever no earlier test had imported the real module.
+  Evidence: the first full suite reached the native Topaz integration after
+  4,055 passes and failed on the incomplete fake class; importing the installed
+  module before the fallback stub fixed both test orders and the full suite.
+
+- Observation: `wctl check-test-isolation` can print a successful summary after
+  pytest exit code 3.
+  Evidence: the independent operations/security review reproduced the
+  contradictory result. This package relies on explicit order tests and the
+  full suite instead.
 
 ## Decision Log
 
@@ -83,10 +110,41 @@ to the existing WBT flow and channel stack. New projects using
   fail-open or unbounded behavior on the same path.
   Date/Author: 2026-07-30 / Codex, dispositioning independent review.
 
+- Decision: Bound `TopazConditionDem` to 540 seconds.
+  Rationale: The existing child RQ timeout is 600 seconds; the 60-second margin
+  lets the wrapper terminate and reap the process group before RQ abandons the
+  worker job. For an effective Topaz selection, elevate a lower configured
+  child timeout to 600 seconds while honoring higher values; legacy methods
+  retain the configured timeout.
+  Date/Author: 2026-07-30 / Codex implementation safety parameter, accepted
+  through the operator-authorized work package and independent release review.
+
+- Decision: Mutate local run `austere-inaction` for final E2E after tests and
+  reviews.
+  Rationale: The operator explicitly authorized this project-scoped validation
+  after the original no-run-mutation plan. Contract discovery supplied the
+  existing extent/CSA/MCL; only the conditioning token changed.
+  Date/Author: 2026-07-30 / operator.
+
 ## Outcomes & Retrospective
 
-Active. Record the installed WBT hash, exact test results, generated-output
-evidence, compatibility result, and remaining release risks at closure.
+Complete. The integration shipped locally with exact UI/API/NoDb/RQ/WBT
+contracts, config-scoped defaulting, bounded process cleanup, and no silent
+fallback. The definitive suite passed 5,598 tests with 58 skips; frontend,
+stub, docs, graph, WBT, containment, and seven-case parity gates passed.
+
+After restart, all three Python service roles resolved installed binary
+SHA-256
+`e5b33364b788f0046db15760320c7b03c6412fda99987f2bbe3ac76ba53b4cd0`.
+The authorized `austere-inaction` E2E finished parent job
+`30df3081-bed5-4cf1-b75d-63e792d03448` and both children, persisted `topaz`,
+and generated relief SHA-256
+`b96715730cc157261e894a36140a9bf1bf017733a35eff82616a4d0b733db074`.
+
+Production promotion remains separate: publish both WBT commits, build the
+production image from that state, and repeat per-worker path/hash/disposable
+execution checks. The known `wctl check-test-isolation` false-success defect is
+a tooling follow-up, not a release blocker for this package.
 
 ## Context and Orientation
 

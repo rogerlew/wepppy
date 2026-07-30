@@ -432,7 +432,7 @@
     "notes": [],
     "queue_name": "default",
     "source_function": "build_subcatchments_and_abstract_watershed",
-    "source_lineno": 974,
+    "source_lineno": 1013,
     "source_module": "wepppy/microservices/rq_engine/watershed_routes.py"
   },
   {
@@ -442,7 +442,7 @@
     "notes": [],
     "queue_name": "default",
     "source_function": "fetch_dem_and_build_channels",
-    "source_lineno": 710,
+    "source_lineno": 749,
     "source_module": "wepppy/microservices/rq_engine/watershed_routes.py"
   },
   {
@@ -452,7 +452,7 @@
     "notes": [],
     "queue_name": "default",
     "source_function": "set_outlet",
-    "source_lineno": 822,
+    "source_lineno": 861,
     "source_module": "wepppy/microservices/rq_engine/watershed_routes.py"
   },
   {
@@ -608,7 +608,7 @@
     "notes": [],
     "queue_name": "default",
     "source_function": "build_subcatchments_and_abstract_watershed_rq",
-    "source_lineno": 1027,
+    "source_lineno": 1048,
     "source_module": "wepppy/rq/project_rq.py"
   },
   {
@@ -620,7 +620,7 @@
     "notes": [],
     "queue_name": "default",
     "source_function": "build_subcatchments_and_abstract_watershed_rq",
-    "source_lineno": 1035,
+    "source_lineno": 1056,
     "source_module": "wepppy/rq/project_rq.py"
   },
   {
@@ -630,7 +630,7 @@
     "notes": [],
     "queue_name": "default",
     "source_function": "fetch_dem_and_build_channels_rq",
-    "source_lineno": 787,
+    "source_lineno": 808,
     "source_module": "wepppy/rq/project_rq.py"
   },
   {
@@ -640,7 +640,7 @@
     "notes": [],
     "queue_name": "default",
     "source_function": "fetch_dem_and_build_channels_rq",
-    "source_lineno": 802,
+    "source_lineno": 823,
     "source_module": "wepppy/rq/project_rq.py"
   },
   {
@@ -652,7 +652,7 @@
     "notes": [],
     "queue_name": "default",
     "source_function": "fetch_dem_and_build_channels_rq",
-    "source_lineno": 810,
+    "source_lineno": 831,
     "source_module": "wepppy/rq/project_rq.py"
   },
   {
@@ -664,7 +664,7 @@
     "notes": [],
     "queue_name": "default",
     "source_function": "fork_rq",
-    "source_lineno": 1730,
+    "source_lineno": 1751,
     "source_module": "wepppy/rq/project_rq.py"
   },
   {

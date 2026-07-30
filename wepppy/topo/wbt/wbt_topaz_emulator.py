@@ -53,6 +53,9 @@ _multi_outlet_template_geojson = """{{
 _point_template_geojson = """{{ "type": "Feature", "properties": {{ "Id": {id} }}, 
    "geometry": {{ "type": "Point", "coordinates": [ {easting}, {northing} ] }} }}"""
 
+TOPAZ_CONDITION_MAX_OBSTRUCTION_WIDTH = 2
+TOPAZ_CONDITION_TIMEOUT_SECONDS = 540
+
 
 def isfloat(value: Any) -> bool:
     """Return whether ``value`` can be losslessly converted to ``float``.
@@ -527,7 +530,8 @@ class WhiteboxToolsTopazEmulator:
 
         Args:
             fill_or_breach: Strategy to enforce drainage. Accepted values are
-                ``"fill"``, ``"breach"``, and ``"breach_least_cost"``.
+                ``"fill"``, ``"breach"``, ``"breach_least_cost"``, and
+                ``"topaz"``.
             blc_dist: Search distance used by ``breach_least_cost`` (meters).
             blc_max_cost: Optional cumulative breach cost limit.
             blc_fill: Whether least-cost breach should fill unresolved pits.
@@ -562,8 +566,18 @@ class WhiteboxToolsTopazEmulator:
             if blc_max_cost is not None:
                 kwargs["max_cost"] = float(blc_max_cost)
             ret = self.wbt.breach_depressions_least_cost(**kwargs)
+        elif fill_or_breach == "topaz":
+            ret = self.wbt.topaz_condition_dem(
+                dem=self.dem,
+                output=relief_fn,
+                max_obstruction_width=TOPAZ_CONDITION_MAX_OBSTRUCTION_WIDTH,
+                timeout=TOPAZ_CONDITION_TIMEOUT_SECONDS,
+            )
         else:
-            raise ValueError("fill_or_breach must be either 'fill', 'breach' or 'breach_least_cost'")
+            raise ValueError(
+                "fill_or_breach must be one of 'fill', 'breach', "
+                "'breach_least_cost', or 'topaz'"
+            )
 
         if not _exists(relief_fn):
             raise Exception(f"Relief file was not created: {relief_fn}, ret = {ret}")

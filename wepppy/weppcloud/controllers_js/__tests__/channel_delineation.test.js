@@ -58,6 +58,7 @@ describe("Channel Delineation controller", () => {
                     <option value="fill">Fill</option>
                     <option value="breach" selected>Breach</option>
                     <option value="breach_least_cost">Breach (Least Cost)</option>
+                    <option value="topaz">Topaz Conditioning Algorithm</option>
                 </select>
 
                 <input id="input_mcl" name="mcl" value="60">
@@ -246,6 +247,14 @@ describe("Channel Delineation controller", () => {
         expect(document.getElementById("status").textContent).toContain("Set watershed inputs for batch processing");
         expect(baseInstance.set_rq_job_id).toHaveBeenCalledWith(channel, null);
         expect(baseInstance.pushResponseStacktrace).not.toHaveBeenCalled();
+    });
+
+    test("build serializes Topaz conditioning", async () => {
+        document.getElementById("input_wbt_fill_or_breach").value = "topaz";
+
+        await channel.build();
+
+        expect(requestMock.mock.calls[0][1].json.wbt_fill_or_breach).toBe("topaz");
     });
 
     test("map changes keep job hint when a job is active", () => {

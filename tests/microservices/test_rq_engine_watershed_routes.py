@@ -15,6 +15,11 @@ pytestmark = pytest.mark.microservice
 def _stub_auth(monkeypatch: pytest.MonkeyPatch) -> None:
     monkeypatch.setattr(watershed_routes, "require_jwt", lambda request, required_scopes=None: {})
     monkeypatch.setattr(watershed_routes, "authorize_run_access", lambda claims, runid: None)
+    monkeypatch.setattr(
+        watershed_routes.Ron,
+        "getInstance",
+        lambda wd: type("RonStub", (), {"config_stem": "cfg"})(),
+    )
 
 
 def _stub_queue(monkeypatch: pytest.MonkeyPatch, *, job_id: str = "job-123") -> None:
@@ -127,6 +132,123 @@ def test_parse_map_change_rejects_unknown_stream_pruning_method() -> None:
     assert args is None
     body = error.body.decode("utf-8")
     assert "stream_pruning_method must be one of" in body
+
+
+@pytest.mark.parametrize(
+    "path",
+    (
+        "/api/runs/run-1/cfg/fetch-dem-and-build-channels",
+        "/api/runs/batch%3B%3Brun-1%3B%3B_base/cfg/fetch-dem-and-build-channels",
+    ),
+)
+def test_fetch_dem_rejects_invalid_conditioning_before_any_mutation_or_queue(
+    monkeypatch: pytest.MonkeyPatch,
+    path: str,
+) -> None:
+    _stub_auth(monkeypatch)
+    monkeypatch.setattr(
+        watershed_routes,
+        "get_wd",
+        lambda runid: pytest.fail("get_wd must not run for an invalid enum"),
+    )
+    monkeypatch.setattr(
+        watershed_routes,
+        "Queue",
+        lambda *args, **kwargs: pytest.fail("Queue must not be created"),
+    )
+
+    payload = {
+        "map_bounds": [-118.0, 46.5, -117.0, 47.0],
+        "mcl": 60,
+        "csa": 5,
+        "set_extent_mode": 0,
+        "wbt_fill_or_breach": "../../hostile",
+    }
+
+    with TestClient(rq_engine.app) as client:
+        response = client.post(path, json=payload)
+
+    assert response.status_code == 400
+    assert response.json()["error"]["code"] == "invalid_wbt_fill_or_breach"
+
+
+@pytest.mark.parametrize(
+    ("path", "actual_config"),
+    (
+        (
+            "/api/runs/run-1/cfg/fetch-dem-and-build-channels",
+            "other.cfg",
+        ),
+        (
+            "/api/runs/run-1/cfg/fetch-dem-and-build-channels",
+            "",
+        ),
+        (
+            "/api/runs/batch%3B%3Brun-1%3B%3Bchild/cfg/fetch-dem-and-build-channels",
+            "other.cfg",
+        ),
+    ),
+)
+def test_fetch_dem_rejects_config_mismatch_before_watershed_or_queue_mutation(
+    monkeypatch: pytest.MonkeyPatch,
+    path: str,
+    actual_config: str,
+) -> None:
+    _stub_auth(monkeypatch)
+    monkeypatch.setattr(watershed_routes, "get_wd", lambda runid: "/tmp/run")
+    calls = {"preflight": 0, "watershed": 0, "queue": 0}
+    monkeypatch.setattr(
+        watershed_routes.Ron,
+        "getInstance",
+        lambda wd: type("RonStub", (), {"config_stem": actual_config})(),
+    )
+
+    def preflight(wd: str) -> None:
+        calls["preflight"] += 1
+
+    monkeypatch.setattr(
+        watershed_routes,
+        "_preflight_watershed_mutation_root",
+        preflight,
+    )
+
+    def get_watershed(wd: str):
+        calls["watershed"] += 1
+        return type("WatershedStub", (), {"run_group": "default"})()
+
+    monkeypatch.setattr(
+        watershed_routes.Watershed,
+        "getInstance",
+        get_watershed,
+    )
+
+    class QueueStub:
+        def __init__(self, *args, **kwargs) -> None:
+            calls["queue"] += 1
+
+    monkeypatch.setattr(
+        watershed_routes,
+        "Queue",
+        QueueStub,
+    )
+
+    payload = {
+        "map_bounds": [-118.0, 46.5, -117.0, 47.0],
+        "mcl": 60,
+        "csa": 5,
+        "set_extent_mode": 0,
+        "wbt_fill_or_breach": "topaz",
+    }
+
+    with TestClient(rq_engine.app) as client:
+        response = client.post(
+            path,
+            json=payload,
+        )
+
+    assert response.status_code == 409
+    assert response.json()["error"]["code"] == "run_config_mismatch"
+    assert calls == {"preflight": 0, "watershed": 0, "queue": 0}
 
 
 def test_fetch_dem_bounds_only_derives_center_and_zoom(monkeypatch: pytest.MonkeyPatch) -> None:
@@ -249,6 +371,7 @@ def test_fetch_dem_upload_mode_topaz_rejects_nodata_dem(monkeypatch: pytest.Monk
         delineation_backend_is_topaz = True
 
     class DummyRon:
+        config_stem = "cfg"
         map = object()
         has_dem = True
         dem_fn = "/tmp/run/dem/dem.vrt"
@@ -291,6 +414,7 @@ def test_fetch_dem_upload_mode_topaz_enqueues_when_dem_has_no_nodata(
         delineation_backend_is_topaz = True
 
     class DummyRon:
+        config_stem = "cfg"
         map = object()
         has_dem = True
         dem_fn = "/tmp/run/dem/dem.vrt"
@@ -344,6 +468,7 @@ def test_fetch_dem_upload_mode_topaz_rejects_nodata_dem_for_batch_context(
             yield self
 
     class DummyRon:
+        config_stem = "cfg"
         map = object()
         has_dem = True
         dem_fn = "/tmp/run/dem/dem.vrt"
@@ -382,6 +507,7 @@ def test_fetch_dem_upload_mode_topaz_returns_400_when_dem_scan_fails(
         delineation_backend_is_topaz = True
 
     class DummyRon:
+        config_stem = "cfg"
         map = object()
         has_dem = True
         dem_fn = "/tmp/run/dem/dem.vrt"
@@ -1041,6 +1167,7 @@ def test_fetch_dem_batch_upload_mode_preserves_uploaded_dem_filename(
             yield self
 
     class DummyRon:
+        config_stem = "cfg"
         map = object()
         has_dem = True
         dem_fn = "/tmp/run/dem/dem.vrt"

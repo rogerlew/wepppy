@@ -18,7 +18,12 @@ irregular NoData and an NLCD-water-masked production DEM.
 Add `topaz` as an explicit Channel Delineation conditioning value backed by WBT
 `TopazConditionDem`. Use its default maximum obstruction width of 2. Change the
 new-project default only in `disturbed9002_wbt.cfg` from
-`breach_least_cost` to `topaz`.
+`breach_least_cost` to `topaz`. Bound this native conditioning call to 540
+seconds so the wrapper has 60 seconds to terminate and reap its process group
+before the channel child-job timeout. For an effective `topaz` selection,
+enforce a child-job minimum of 600 seconds even when
+`RQ_ENGINE_FETCH_DEM_BUILD_CHANNELS_TIMEOUT` is configured lower; higher
+configured values remain effective.
 
 ## Decision Provenance
 
@@ -27,8 +32,12 @@ retained in the DOM-05A contract decision
 
 Participants Present: requesting WEPPcloud operator; Codex
 
-Decision Owner(s): requesting WEPPcloud operator (personal identity and
-external issue identifier not exposed to the agent by the API context)
+Decision Owner(s): the requesting WEPPcloud operator owns the algorithm,
+label, obstruction width, and config-scoped default. Codex selected the
+540/600-second native/parent timeout pair as an implementation safety
+constraint under the accepted contract and independent release review
+(personal identity and external issue identifier were not exposed by the API
+context).
 
 Implementer(s): Codex
 
@@ -66,7 +75,9 @@ New `disturbed9002_wbt` channel builds may produce different drainage,
 watersheds, and derived model inputs than least-cost breach. That change is
 intentional. Existing artifacts and persisted project selections do not change.
 The runtime now requires a WBT binary containing `TopazConditionDem`, and the
-integration pins `max_obstruction_width=2` explicitly.
+integration pins `max_obstruction_width=2` and a 540-second native timeout
+explicitly. The Topaz build-channel child receives at least 600 seconds so a
+lower deployment override cannot remove the cleanup margin.
 
 ## Evidence
 
