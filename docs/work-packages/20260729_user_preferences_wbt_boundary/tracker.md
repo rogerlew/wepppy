@@ -32,6 +32,8 @@ out-of-scope deletion. If the canary runs on 2026-07-30, review is due
 - [ ] Obtain explicit operator reconfirmation and designation of the
   requesting-operator account plus a second pre-existing active account, then
   review and run a Forest-specific corrected canary.
+- [ ] Implement the accepted User Preferences auto-save interaction and repair
+  the WBT Usersum runtime-catalog link.
 
 ### Ready
 

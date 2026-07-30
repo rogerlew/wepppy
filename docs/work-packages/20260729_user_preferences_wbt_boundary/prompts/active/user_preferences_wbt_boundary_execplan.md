@@ -217,6 +217,12 @@ enlarge the project extent.
   independently reviewed Forest-specific procedure, no identity/role/
   credential/synthetic-session mutation, exact cleanup, and renewed dual
   review. Do not reuse the local disposable-user harness.
+- [x] (2026-07-30 15:25 UTC) Accepted the operator's page-interaction
+  amendment: both preferences save on change with serialized complete-form
+  writes, accessible progress/success/error feedback, clearer spacing, and a
+  `noscript` POST fallback. Recorded the missing Usersum runtime-index entry
+  behind the WBT guide 404. Implementation follows the standalone
+  contract-first checkpoint.
 
 ## Surprises & Discoveries
 

@@ -51,9 +51,10 @@ blob, or run-scoped NoDb file is the account-level source of truth.
 
 Authenticated GET and POST requests use `/preferences`. The Profile page links
 to that endpoint with `url_for('user.preferences')`. The page extends the
-existing PureCSS account layout and uses the existing Pure form macros. The
-server renders and validates the complete form; no new browser controller is
-required.
+existing PureCSS account layout and uses the existing Pure form macros. Each
+select change saves the complete two-field record automatically through one
+same-origin, CSRF-protected request. Saves are serialized and replay the latest
+complete selection after an active request finishes.
 
 The Default units choices are:
 
@@ -69,9 +70,12 @@ The When a WBT watershed reaches the DEM boundary choices are:
 
 POST is login-required, same-origin CSRF-protected, and accepts only the two
 named fields with exact enum values. Invalid or missing input produces visible
-field errors and no database mutation. Successful submission commits both
-values in one transaction and follows a POST/Redirect/GET flow with a visible
-success message.
+field errors and no database mutation. Successful auto-save commits both
+values in one transaction and returns bounded JSON when JSON is requested.
+The page announces saving and saved states through a polite live region and
+uses an assertive visible message for failures. Ordinary form POST retains
+POST/Redirect/GET as a `noscript` fallback; the enhanced page does not show a
+general Save preferences button.
 
 ### User-context resolution and run compatibility
 
