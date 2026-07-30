@@ -193,11 +193,30 @@ enlarge the project extent.
   Constructed and independently reviewed the forward revert `0517bb8de`,
   published it non-force at the reconciled immutable rollback ref, verified
   the exact remote OID, and removed the detached temporary worktree.
-- [ ] Apply and validate the authorized Forest migration and canary. Read-only
-  preflight proved the active workspace is host `forest`, with release and
-  migration heads current, empty queues, and ten idle workers. The step is
-  blocked before mutation because unrelated Command Bar/Pure UI work makes the
-  shared bind-mounted checkout dirty.
+- [x] (2026-07-30 15:10 UTC) Committed and pushed the shared Command Bar/Pure
+  UI work, independently approved and published replacement forward rollback
+  `d5944a3dc`, created a fresh validated Forest backup, completed exact
+  quiescence and schema checks, and ran the two-user canary. Distinct units,
+  initiating-user WBT policy, config/service fallback, redaction, durable byte
+  stability, and SQL/Redis cleanup passed. Known NFS handles cleared after the
+  two owning services stopped; the exact empty canary directory was removed
+  with `rmdir`. Forest returned healthy at release `718dd6fc9`, merge head
+  `c91f6b2a4d7e`, empty queues, and ten idle workers.
+- [ ] (2026-07-30 15:13 UTC) Post-action closure is rejected pending
+  disposition of OPS-PA-01. The canary incorrectly used the local harness,
+  which created and deleted disposable Users 361/362, instead of the
+  requesting operator and a second pre-existing operator-designated account.
+  All technical and cleanup postconditions passed and operations/security
+  advised leaving the healthy release deployed. Governance incident
+  disposition and renewed dual review remain required.
+- [ ] (2026-07-30 15:16 UTC) Governance confirmed OPS-PA-01 as High and
+  superseded its earlier post-action PASS. Technical exposure is contained;
+  process remediation remains open. A corrected canary requires explicit
+  operator reconfirmation and designation of the requesting operator plus a
+  second pre-existing active User, exact prior-state preflight, an
+  independently reviewed Forest-specific procedure, no identity/role/
+  credential/synthetic-session mutation, exact cleanup, and renewed dual
+  review. Do not reuse the local disposable-user harness.
 
 ## Surprises & Discoveries
 

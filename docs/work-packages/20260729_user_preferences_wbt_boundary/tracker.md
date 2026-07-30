@@ -6,11 +6,11 @@
 
 **Started**: 2026-07-30 04:10 UTC
 
-**Current phase**: Forest preflight blocked
+**Current phase**: Forest healthy; post-action authority incident
 
-**Last updated**: 2026-07-30 14:05 UTC
+**Last updated**: 2026-07-30 15:10 UTC
 
-**Next milestone**: clean shared checkout, then restart Forest preflight
+**Next milestone**: operator designation, reviewed corrected canary, dual review
 
 **Security impact**: `high`
 
@@ -29,8 +29,9 @@ out-of-scope deletion. If the canary runs on 2026-07-30, review is due
 
 ### In Progress
 
-- [ ] Preserve release readiness while the shared Forest checkout is made
-  clean by the owner of the unrelated Command Bar/Pure UI work.
+- [ ] Obtain explicit operator reconfirmation and designation of the
+  requesting-operator account plus a second pre-existing active account, then
+  review and run a Forest-specific corrected canary.
 
 ### Ready
 
@@ -38,9 +39,9 @@ out-of-scope deletion. If the canary runs on 2026-07-30, review is due
 
 ### Blocked
 
-- Forest preflight is blocked by unrelated dirty work in the bind-mounted
-  `/home/workdir/wepppy` checkout. The exact runbook forbids proceeding until
-  it is clean; SURF-14A did not stash, commit, reset, or alter that work.
+- Post-action closure is blocked pending explicit operator reconfirmation and
+  account designation, a reviewed corrected canary, and renewed dual review.
+  The healthy Forest release remains deployed.
 
 ### Done
 
@@ -209,6 +210,30 @@ out-of-scope deletion. If the canary runs on 2026-07-30, review is due
   current, queues are empty, and all ten workers are idle; stopped before
   mutation because unrelated work makes the checkout dirty
   (2026-07-30 15:40 UTC).
+- [x] Committed and pushed the shared Command Bar/Pure UI work, independently
+  approved replacement rollback `d5944a3dc`, and published its immutable ref
+  while retaining the earlier rollback ref unchanged
+  (2026-07-30 15:02 UTC).
+- [x] Created and validated a fresh Forest backup, quiesced enqueue surfaces,
+  proved empty queues and idle workers, stopped workers gracefully, verified
+  the merge head, four constraints, and unchanged User count, then restarted
+  the coordinated service set (2026-07-30 15:06 UTC).
+- [x] Passed the Forest two-user canary for request-local units and
+  initiating-user WBT behavior. Exact SQL/Redis cleanup passed; known NFS
+  handles cleared after stopping only their two owning services, and the
+  empty receipt-bound directory was removed with `rmdir`. Final services,
+  queues, workers, schema, counts, and release HEAD are healthy
+  (2026-07-30 15:10 UTC).
+- [x] Operations/security independently verified the healthy technical state
+  but rejected closure with High finding OPS-PA-01: Forest identity procedure
+  required two pre-existing designated accounts, while the local harness
+  created and deleted disposable Users 361/362. Exact cleanup does not cure
+  the authority deviation (2026-07-30 15:13 UTC).
+- [x] Governance confirmed OPS-PA-01 as High, superseded its earlier PASS,
+  found the technical exposure contained, and required a corrected canary
+  using two explicitly designated pre-existing active accounts. Rollback is
+  not warranted because it cannot cure the historical authority deviation
+  (2026-07-30 15:16 UTC).
 
 ## Decisions
 
@@ -314,9 +339,9 @@ config or explicit user preference can choose fail-closed handling.
   per-file runs; the earlier complete-source isolation gate also passed.
 - [x] Local stack E2E proves two distinct unit views and `error`/`warn` WBT
   behavior for two users on one byte-stable project.
-- [ ] Forest preflight records current migration head and database backup
+- [x] Forest preflight records current migration head and database backup
   readiness.
-- [ ] Forest migration, schema verification, service restart if required, and
+- [x] Forest migration, schema verification, service restart if required, and
   authenticated two-user same-project canary pass.
 
 ## Progress Notes
