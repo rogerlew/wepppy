@@ -175,6 +175,17 @@ REM-05 excludes algorithms, defaults, enum tokens, map behavior, DEM uploads,
 route parsing, queue wiring, NoDb schema, authorization, CSRF, and every other
 DOM-05 field. Its evidence is inherited by DOM-05 without advancing that owner.
 
+## Domain Amendment Packages
+
+| ID | Dated package | Owner | Exact intended delta | Security | State |
+| --- | --- | --- | --- | --- | --- |
+| DOM-05A | `20260729_topaz_conditioning_wepppy_integration` | DOM-05 | Add Topaz Conditioning Algorithm/`topaz`, dispatch it to released WBT `TopazConditionDem` width 2, and make it the new-run default only for `disturbed9002_wbt`; preserve legacy tokens, persisted runs, other configs, queue/auth/schema, and downstream flow/channel behavior | `high`: authenticated browser-to-RQ persisted enum and native geospatial worker dispatch | checkpoint PASS; ancestor pending |
+
+DOM-05A is an operator-approved intended behavior amendment, not a conformance
+fix and not a reopening of REM-05. Its contract, ADR, dual reviews, security
+artifact, and disposition must form a standalone ancestor before source,
+template, config, test, generated bundle, or WBT runtime artifacts change.
+
 The exact REM-05 implementation boundary is limited to:
 
 - the `input_wbt_fill_or_breach` macro invocation in

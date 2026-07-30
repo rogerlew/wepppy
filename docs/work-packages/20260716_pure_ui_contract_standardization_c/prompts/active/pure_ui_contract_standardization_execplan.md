@@ -33,6 +33,10 @@ is not a contract registry or enforcement platform.
   tests and no production mismatch.
 - [x] (2026-07-28) Executed and closed DOM-05 Channel Delineation with direct
   regression tests and no production mismatch.
+- [ ] (2026-07-30) Execute DOM-05A as an operator-approved additive amendment:
+  release `TopazConditionDem`, add the `topaz` conditioning token, and change
+  only the `disturbed9002_wbt` new-run default after its reviewed checkpoint
+  ancestor.
 - [x] (2026-07-28) Executed and closed DOM-04A Map Orchestration with direct
   rendered-action and exact elevation-request regression tests and no
   production mismatch.
@@ -452,6 +456,11 @@ affected Python set (124 tests), frontend lint, and the full frontend suite (88
 suites, 662 tests) passed. It introduced no helper, false tooling failure, or
 production patch. Its audit ledger remains `documented` until the work receives
 a named revision.
+
+DOM-05A is a separately authorized amendment and does not reopen that audit or
+REM-05. It owns only the additive `topaz` token, released WBT conditioning
+dispatch, prerequisite guards/containment, and the config-scoped new-run
+default recorded in its own checkpoint.
 
 DOM-04A closed with actual-render map action/target coverage and exact
 run-scoped elevation `{lat, lng}` request evidence. Existing coordinate,

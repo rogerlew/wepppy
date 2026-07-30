@@ -295,6 +295,19 @@ When resuming Kubernetes work:
 
 ## 🚧 In Progress
 
+### Topaz Conditioning WEPPpy Integration (DOM-05A)
+**Started**: 2026-07-29
+**Size**: Medium
+**Priority**: High
+**Security impact**: `high` (browser-to-RQ persisted enum and WBT worker)
+**Link**: [docs/work-packages/20260729_topaz_conditioning_wepppy_integration/](docs/work-packages/20260729_topaz_conditioning_wepppy_integration/)
+**Description**: Release the source-faithful WBT `TopazConditionDem`, add
+Topaz Conditioning Algorithm/`topaz` to Channel Delineation, preserve existing
+tokens and persisted runs, and make it the new-run default only for
+`disturbed9002_wbt`.
+
+---
+
 ### Channel Depression Smoothing Propagation Fix (REM-05)
 
 **Started**: 2026-07-28
