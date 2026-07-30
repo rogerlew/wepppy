@@ -80,10 +80,18 @@ Compare scenarios side-by-side to see how treatments affect erosion and runoff a
 
 **Where to find output files:**
 
-Omni stores all scenario data under the `_pups/omni/` directory in your project:
+Omni stores aggregate data and its generated documentation under `omni/`. Complete scenario and contrast child runs live separately under `_pups/omni/`:
 
 ```
 your_project/
+├── omni/
+│   ├── scenarios.out.parquet                  # Watershed scenario metrics
+│   ├── scenarios.hillslope_summaries.parquet # Per-hillslope scenario data
+│   ├── scenarios.channel_summaries.parquet   # Per-channel scenario data
+│   ├── contrasts.out.parquet                  # Watershed contrast metrics
+│   ├── contrast_id_definitions.psv            # Contrast-to-hillslope mapping
+│   ├── README.scenarios.md                    # Generated scenario data guide
+│   └── README.contrasts.md                    # Generated contrast data guide
 └── _pups/
     └── omni/
         ├── scenarios/
@@ -98,9 +106,6 @@ your_project/
         │   ├── 1/                    # Each contrast run directory
         │   ├── 2/
         │   └── ...
-        ├── scenarios.out.parquet           # Aggregated scenario metrics
-        ├── scenarios.hillslope_summaries.parquet  # Per-hillslope data
-        └── contrasts.out.parquet           # Aggregated contrast metrics
 ```
 
 **Aggregated output files:**
@@ -109,10 +114,13 @@ your_project/
 |------|----------|
 | `scenarios.out.parquet` | Watershed-level metrics for all scenarios (outlet discharge, total soil loss) |
 | `scenarios.hillslope_summaries.parquet` | Per-hillslope metrics for all scenarios |
+| `scenarios.channel_summaries.parquet` | Per-channel metrics for all scenarios |
 | `contrasts.out.parquet` | Control vs. treatment comparisons with computed differences |
 | `contrast_id_definitions.psv` | Canonical `contrast_id -> selected topaz_id list` mappings (`<contrast_id>|<topaz_id_1>,<topaz_id_2>,...`; empty selections are encoded as `<contrast_id>|`) |
+| `README.scenarios.md` | Generated schemas, column descriptions, metric-key definitions, and sample rows for the scenario Parquet files currently present |
+| `README.contrasts.md` | Generated schema, column descriptions, metric-key definitions, sign convention, and sample rows for `contrasts.out.parquet` |
 
-These Parquet files can be opened in Python (pandas), R, or tools like DuckDB for custom analysis. CSV exports are also available through the web reports.
+These Parquet files can be opened in Python (pandas), R, or tools like DuckDB for custom analysis. CSV exports are also available through the web reports. Omni regenerates the two documentation files whenever it rebuilds the corresponding aggregate artifacts, so optional files and columns are documented from the schemas actually written.
 
 ### Running Contrast Analyses
 

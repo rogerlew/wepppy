@@ -81,6 +81,7 @@ def test_scenarios_report_compiles_base_and_scenario_outputs(
     ]
     assert written and written[0].endswith("omni/scenarios.out.parquet")
     assert omni.refreshed == ["omni/scenarios.out.parquet"]
+    assert (tmp_path / "omni" / "README.scenarios.md").exists()
 
 
 def test_contrasts_report_computes_control_minus_contrast(
@@ -123,6 +124,7 @@ def test_contrasts_report_computes_control_minus_contrast(
     assert report["control-contrast_v"].iloc[0] == 2.0
     assert written and written[0].endswith("omni/contrasts.out.parquet")
     assert omni.refreshed[-1] == "omni/contrasts.out.parquet"
+    assert (tmp_path / "omni" / "README.contrasts.md").exists()
 
 
 def test_compile_hillslope_summaries_generates_derived_columns(
@@ -174,6 +176,7 @@ def test_compile_hillslope_summaries_generates_derived_columns(
     assert "NTU (g/L)" in report.columns
     assert ron.readonly is True
     assert omni.refreshed[-1] == "omni/scenarios.hillslope_summaries.parquet"
+    assert (tmp_path / "omni" / "README.scenarios.md").exists()
 
 
 def test_compile_channel_summaries_restores_readonly_and_writes_output(
@@ -212,6 +215,7 @@ def test_compile_channel_summaries_restores_readonly_and_writes_output(
     assert list(report["scenario"].unique()) == [str(omni_module.OmniScenario.Undisturbed)]
     assert ron.readonly is True
     assert omni.refreshed[-1] == "omni/scenarios.channel_summaries.parquet"
+    assert (tmp_path / "omni" / "README.scenarios.md").exists()
 
 
 def test_build_contrast_ids_geojson_stream_order_empty_fallback_without_gis_deps(

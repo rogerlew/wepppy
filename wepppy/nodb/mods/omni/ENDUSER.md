@@ -175,7 +175,11 @@ Useful scenario outputs include:
 - hillslope summaries,
 - scenario report tables,
 - `scenarios.out.parquet`,
-- `scenarios.hillslope_summaries.parquet`.
+- `scenarios.hillslope_summaries.parquet`,
+- `scenarios.channel_summaries.parquet`,
+- `README.scenarios.md`, which describes the scenario files and columns actually present.
+
+These aggregate files are under the project `omni/` directory. Complete scenario child runs are under `_pups/omni/scenarios/`.
 
 ### Contrast Results
 
@@ -189,7 +193,10 @@ Useful contrast outputs include:
 
 - contrast report tables,
 - per-contrast run outputs under `_pups/omni/contrasts/`,
-- `contrasts.out.parquet`.
+- `contrasts.out.parquet`,
+- `README.contrasts.md`, which describes the contrast columns, metric keys, and difference sign convention.
+
+The aggregate contrast file, its generated README, and `contrast_id_definitions.psv` are under the project `omni/` directory.
 
 When interpreting contrasts, remember that the result reflects both:
 

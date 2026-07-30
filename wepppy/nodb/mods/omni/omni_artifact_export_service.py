@@ -9,6 +9,11 @@ from typing import TYPE_CHECKING, Any, Dict, Iterable, List, Optional, Set, Tupl
 
 import pandas as pd
 
+from wepppy.nodb.mods.omni.omni_documentation import (
+    generate_omni_contrasts_documentation,
+    generate_omni_scenarios_documentation,
+)
+
 if TYPE_CHECKING:
     from wepppy.nodb.mods.omni.omni import Omni, Ron
 
@@ -478,6 +483,7 @@ class OmniArtifactExportService:
         out_path = _join(omni.omni_dir, "scenarios.out.parquet")
         combined.to_parquet(out_path)
         omni._refresh_catalog(os.path.relpath(out_path, omni.wd))
+        generate_omni_scenarios_documentation(omni.omni_dir)
         return combined
 
     def contrasts_report(self, omni: "Omni") -> pd.DataFrame:
@@ -600,6 +606,7 @@ class OmniArtifactExportService:
         out_path = _join(omni.omni_dir, "contrasts.out.parquet")
         combined.to_parquet(out_path)
         omni._refresh_catalog(os.path.relpath(out_path, omni.wd))
+        generate_omni_contrasts_documentation(omni.omni_dir)
         return combined
 
     def compile_hillslope_summaries(self, omni: "Omni") -> pd.DataFrame:
@@ -657,6 +664,7 @@ class OmniArtifactExportService:
         out_path = _join(omni.omni_dir, "scenarios.hillslope_summaries.parquet")
         combined.to_parquet(out_path)
         omni._refresh_catalog(os.path.relpath(out_path, omni.wd))
+        generate_omni_scenarios_documentation(omni.omni_dir)
         return combined
 
     def compile_channel_summaries(self, omni: "Omni") -> pd.DataFrame:
@@ -698,4 +706,5 @@ class OmniArtifactExportService:
         out_path = _join(omni.omni_dir, "scenarios.channel_summaries.parquet")
         combined.to_parquet(out_path)
         omni._refresh_catalog(os.path.relpath(out_path, omni.wd))
+        generate_omni_scenarios_documentation(omni.omni_dir)
         return combined
