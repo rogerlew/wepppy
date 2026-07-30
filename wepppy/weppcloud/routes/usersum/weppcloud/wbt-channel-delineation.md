@@ -148,28 +148,59 @@ the DEM before WEPPcloud calculates flow direction and extracts channels.
 
 | Option | How it changes the DEM | When it is useful |
 | --- | --- | --- |
-| **Fill** | Raises depressions to create drainage across them | A conservative starting point when filling depth is acceptable and cut paths are not desired |
-| **Breach** | Cuts through barriers to establish drainage, then fills unresolved pits | Terrain where fills would create unrealistic raised areas |
-| **Breach (Least Cost)** | Searches for a low-cost cut path within the allowed distance and fills unresolved pits | Rugged or obstructed terrain where the breach route should minimize terrain modification |
-| **Topaz Conditioning Algorithm** | Applies TOPAZ-compatible FILDEP depression handling and RELIEF flat resolution, including narrow-obstruction adjustment | WEPP/TOPAZ-compatible workflows and projects calibrated around TOPAZ-style drainage |
+| **Fill** | Raises every depression to its lowest recognized spill elevation and adds a small gradient across resulting flats | Cases where depressions are known artifacts and the required fill depths are acceptable |
+| **Breach** | Uses Whitebox's legacy hybrid breach-first, fill-second method; cuts drainage paths with effectively unrestricted depth and length unless the caller supplies limits | Reproducing earlier WBT runs or testing whether an unrestricted breach can connect a large depression to lower terrain |
+| **Breach (Least Cost)** | Searches within the configured distance for a path that minimizes excavation; WEPPcloud then fills depressions the bounded search does not resolve | The preferred general-purpose WBT option, especially for road embankments and other narrow barriers |
+| **Topaz Conditioning Algorithm** | Applies TOPAZ-compatible FILDEP filling and one- or two-cell obstruction adjustment, followed by RELIEF flat resolution | WEPP/TOPAZ-compatible workflows and projects calibrated around TOPAZ drainage behavior |
 
 No conditioning method is universally best. Compare the resulting channels
 with known drainage and inspect areas containing roads, reservoirs, quarries,
 large flats, or DEM gaps. A conditioning choice can reroute flow even when CSA
 and MCL remain unchanged.
 
+**Fill** avoids excavating artificial channels, but it is not necessarily the
+least disruptive option. A deep or extensive closed depression can be raised
+to a distant saddle, producing a large flat or an implausibly deep fill. See
+the WhiteboxTools manual entry for
+[FillDepressions](https://jblindsay.github.io/wbt_book/available_tools/hydrological_analysis.html#filldepressions).
+
+Despite its shorter name, **Breach** is not generally the faster or
+lower-impact breaching option. Whitebox documents it as a legacy method that
+often produces longer or deeper cuts and can be less efficient than
+**Breach (Least Cost)**. Its unrestricted search may nevertheless find a
+distant raster-edge outlet that a bounded least-cost search cannot reach. See
+[BreachDepressions](https://jblindsay.github.io/wbt_book/available_tools/hydrological_analysis.html#breachdepressions)
+and
+[BreachDepressionsLeastCost](https://jblindsay.github.io/wbt_book/available_tools/hydrological_analysis.html#breachdepressionsleastcost).
+
+**Topaz Conditioning Algorithm** is for numerical and workflow compatibility,
+not a guarantee of the smallest terrain change. It can lower a qualifying
+one- or two-cell obstruction, but wider obstructions and closed depressions are
+filled. It also treats NoData next to valid terrain as an open lower boundary
+and allows raster-edge cells to act as outlets. Consequently, changing the DEM
+crop or NoData mask can turn a valley into an edge outlet—or enclose it—and can
+substantially change the fill depth. Compare algorithms using the same aligned
+DEM extent and NoData mask.
+
 ### Breach least cost distance
 
 **Breach least cost distance** appears only for **Breach (Least Cost)**. It is
-the maximum search distance, in meters, for finding a breach route.
+the maximum search distance, in meters, for finding a breach route. WEPPcloud
+converts this distance to raster cells before calling WhiteboxTools.
 
 - A larger distance allows the algorithm to search farther for a viable path,
   but can increase runtime and permit longer cuts.
 - A smaller distance restricts the search near each depression, but may leave
-  more pits to be filled.
+  more depressions unresolved by breaching.
+- WEPPcloud enables the tool's fill fallback. An unresolved depression is
+  therefore filled; it is not preserved unchanged.
+- A larger search distance does not force drainage to the raster edge. The
+  algorithm may select a nearer, lower-cost target instead.
 
 Use the displayed default unless inspection shows that important barriers
-cannot be resolved within that distance. The value must be greater than zero.
+cannot be resolved within that distance. If a plausible outlet lies farther
+away, increase the distance and inspect both the resulting breach and any
+remaining filled areas. The value must be greater than zero.
 
 ## Build the Channels
 
