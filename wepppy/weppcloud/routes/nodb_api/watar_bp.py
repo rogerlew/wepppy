@@ -19,7 +19,11 @@ from wepppy.nodb.core import (
 )
 from wepppy.nodb.base import *
 
-from wepppy.nodb.unitizer import Unitizer
+from wepppy.weppcloud.user_preferences import (
+    PreferenceResolutionError,
+    preference_resolution_error_response,
+    resolve_unitizer_presentation,
+)
 from wepppy.nodb.mods.ash_transport import Ash, AshPost
 from wepppy.nodb.mods.disturbed import Disturbed
 from wepppy.runtime_paths.errors import NoDirError
@@ -87,7 +91,7 @@ def hillslope0_ash(runid, config, topaz_id):
         if not _exists(ash_dir):
             os.mkdir(ash_dir)
 
-        unitizer = Unitizer.getInstance(wd)
+        unitizer = resolve_unitizer_presentation(wd)
         watershed = Watershed.getInstance(wd)
         translator = watershed.translator_factory()
         wepp_id = translator.wepp(top=topaz_id)
@@ -152,6 +156,8 @@ def hillslope0_ash(runid, config, topaz_id):
                                ron=ron,
                                user=current_user)
 
+    except PreferenceResolutionError:
+        return preference_resolution_error_response(runid)
     except NoDirError as exc:
         return error_factory(exc.message, status_code=exc.http_status, code=exc.code)
     except Exception:
@@ -221,7 +227,7 @@ def report_ash(runid, config):
         fire_date = ash.fire_date
         ini_white_ash_depth_mm = ash.ini_white_ash_depth_mm
         ini_black_ash_depth_mm = ash.ini_black_ash_depth_mm
-        unitizer = Unitizer.getInstance(wd)
+        unitizer = resolve_unitizer_presentation(wd)
 
         disturbed = None
         try:
@@ -255,6 +261,8 @@ def report_ash(runid, config):
                                ron=ron,
                                user=current_user)
 
+    except PreferenceResolutionError:
+        return preference_resolution_error_response(runid)
     except Exception:
         # Boundary catch: preserve contract behavior while logging unexpected failures.
         __import__("logging").getLogger(__name__).exception("Boundary exception at wepppy/weppcloud/routes/nodb_api/watar_bp.py:247", extra={"runid": locals().get("runid"), "config": locals().get("config"), "job_id": locals().get("job_id")})
@@ -313,7 +321,7 @@ def report_contaminant(runid, config):
             ash.parse_cc_inputs(dict(request.form))
             ash = Ash.getInstance(wd)
 
-        unitizer = Unitizer.getInstance(wd)
+        unitizer = resolve_unitizer_presentation(wd)
 
         # if not ash.has_watershed_summaries:
         #     ash.report()
@@ -336,6 +344,8 @@ def report_contaminant(runid, config):
                                ron=ron,
                                user=current_user)
 
+    except PreferenceResolutionError:
+        return preference_resolution_error_response(runid)
     except Exception:
         # Boundary catch: preserve contract behavior while logging unexpected failures.
         __import__("logging").getLogger(__name__).exception("Boundary exception at wepppy/weppcloud/routes/nodb_api/watar_bp.py:324", extra={"runid": locals().get("runid"), "config": locals().get("config"), "job_id": locals().get("job_id")})

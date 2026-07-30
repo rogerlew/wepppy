@@ -11,9 +11,8 @@ import wepppy.microservices.rq_engine as rq_engine
 from wepppy.microservices.rq_engine import project_routes
 from wepppy.weppcloud.utils import auth_tokens
 from wepppy.weppcloud.user_preferences import (
-    CreationPreferenceSnapshot,
+    CreationActor,
     PreferenceIdentityError,
-    UserPreferenceValues,
 )
 from sqlalchemy.exc import SQLAlchemyError
 
@@ -23,11 +22,10 @@ RUN_ID = "cap-run"
 CONFIG = "disturbed9002"
 
 
-def _preference_snapshot() -> CreationPreferenceSnapshot:
-    return CreationPreferenceSnapshot(
+def _creation_actor() -> CreationActor:
+    return CreationActor(
         user_id=42,
         email="tester@example.com",
-        preferences=UserPreferenceValues(),
     )
 
 
@@ -164,8 +162,8 @@ def test_create_accepts_rq_token(create_client, monkeypatch: pytest.MonkeyPatch)
 
     monkeypatch.setattr(
         project_routes,
-        "resolve_creation_preferences",
-        lambda claims: _preference_snapshot(),
+        "resolve_creation_actor",
+        lambda claims: _creation_actor(),
     )
 
     def fake_register(runid: str, config: str, user_id: int) -> None:
@@ -188,7 +186,7 @@ def test_create_accepts_rq_token(create_client, monkeypatch: pytest.MonkeyPatch)
     assert owner_calls["user_id"] == 42
 
 
-def test_create_snapshots_account_defaults_before_ron(
+def test_create_does_not_apply_account_preferences_to_durable_config(
     create_client,
     monkeypatch: pytest.MonkeyPatch,
 ) -> None:
@@ -197,12 +195,8 @@ def test_create_snapshots_account_defaults_before_ron(
     monkeypatch.setattr(project_routes, "_check_revocation", lambda _jti: None)
     monkeypatch.setattr(
         project_routes,
-        "resolve_creation_preferences",
-        lambda _claims: CreationPreferenceSnapshot(
-            user_id=42,
-            email="tester@example.com",
-            preferences=UserPreferenceValues("english", "error"),
-        ),
+        "resolve_creation_actor",
+        lambda _claims: _creation_actor(),
     )
     monkeypatch.setattr(project_routes, "register_owned_run", lambda *_args: None)
 
@@ -213,11 +207,11 @@ def test_create_snapshots_account_defaults_before_ron(
     )
 
     assert response.status_code == 303
-    assert "unitizer:is_english=true" in captured["cfg"]
-    assert "watershed.wbt:boundary_touch_behavior=error" in captured["cfg"]
+    assert "unitizer:is_english" not in captured["cfg"]
+    assert "watershed.wbt:boundary_touch_behavior" not in captured["cfg"]
 
 
-def test_create_payload_unit_override_wins_query_and_account(
+def test_create_payload_unit_override_wins_query(
     create_client,
     monkeypatch: pytest.MonkeyPatch,
 ) -> None:
@@ -226,12 +220,8 @@ def test_create_payload_unit_override_wins_query_and_account(
     monkeypatch.setattr(project_routes, "_check_revocation", lambda _jti: None)
     monkeypatch.setattr(
         project_routes,
-        "resolve_creation_preferences",
-        lambda _claims: CreationPreferenceSnapshot(
-            user_id=42,
-            email="tester@example.com",
-            preferences=UserPreferenceValues("english", "config"),
-        ),
+        "resolve_creation_actor",
+        lambda _claims: _creation_actor(),
     )
     monkeypatch.setattr(project_routes, "register_owned_run", lambda *_args: None)
 
@@ -377,7 +367,7 @@ def test_create_unexpected_auth_failure_is_sanitized(
     assert captured == {}
 
 
-def test_create_preference_lookup_failure_creates_no_directory(
+def test_create_actor_lookup_failure_creates_no_directory(
     create_client,
     monkeypatch: pytest.MonkeyPatch,
 ) -> None:
@@ -386,7 +376,7 @@ def test_create_preference_lookup_failure_creates_no_directory(
     monkeypatch.setattr(project_routes, "_check_revocation", lambda _jti: None)
     monkeypatch.setattr(
         project_routes,
-        "resolve_creation_preferences",
+        "resolve_creation_actor",
         lambda _claims: (_ for _ in ()).throw(
             PreferenceIdentityError("unknown user")
         ),
@@ -398,7 +388,7 @@ def test_create_preference_lookup_failure_creates_no_directory(
     )
 
     assert response.status_code == 500
-    assert response.json()["error"]["code"] == "preference_resolution_failed"
+    assert response.json()["error"]["code"] == "run_ownership_failed"
     assert response.json()["error_id"]
     assert captured == {}
 
@@ -413,8 +403,8 @@ def test_create_owner_failure_compensates_directory(
     monkeypatch.setattr(project_routes, "_check_revocation", lambda _jti: None)
     monkeypatch.setattr(
         project_routes,
-        "resolve_creation_preferences",
-        lambda _claims: _preference_snapshot(),
+        "resolve_creation_actor",
+        lambda _claims: _creation_actor(),
     )
     monkeypatch.setattr(
         project_routes,
@@ -437,18 +427,26 @@ def test_create_owner_failure_compensates_directory(
     assert cleanups and cleanups[0][0] == RUN_ID
 
 
+@pytest.mark.parametrize(
+    "cleanup_error",
+    (
+        OSError("cleanup failed"),
+        project_routes.redis.RedisError("redis cleanup failed"),
+    ),
+)
 def test_create_cleanup_failure_log_uses_response_error_id(
     create_client,
     monkeypatch: pytest.MonkeyPatch,
     caplog: pytest.LogCaptureFixture,
+    cleanup_error: BaseException,
 ) -> None:
     client, _captured = create_client
     token = _issue_token(monkeypatch)
     monkeypatch.setattr(project_routes, "_check_revocation", lambda _jti: None)
     monkeypatch.setattr(
         project_routes,
-        "resolve_creation_preferences",
-        lambda _claims: _preference_snapshot(),
+        "resolve_creation_actor",
+        lambda _claims: _creation_actor(),
     )
     monkeypatch.setattr(
         project_routes,
@@ -458,7 +456,7 @@ def test_create_cleanup_failure_log_uses_response_error_id(
     monkeypatch.setattr(
         project_routes,
         "cleanup_new_run_directory",
-        lambda *_args: (_ for _ in ()).throw(OSError("cleanup failed")),
+        lambda *_args: (_ for _ in ()).throw(cleanup_error),
     )
 
     with caplog.at_level("ERROR", logger=project_routes.__name__):
@@ -474,6 +472,7 @@ def test_create_cleanup_failure_log_uses_response_error_id(
         if record.getMessage() == "rq-engine create directory cleanup failed"
     ]
     assert response.status_code == 500
+    assert RUN_ID not in response.text
     assert len(cleanup_records) == 1
     assert cleanup_records[0].error_id == error_id
     assert cleanup_records[0].runid == RUN_ID
@@ -501,8 +500,8 @@ def test_create_reauths_expired_rq_token_with_session_cookie(
     )
     monkeypatch.setattr(
         project_routes,
-        "resolve_creation_preferences",
-        lambda claims: _preference_snapshot(),
+        "resolve_creation_actor",
+        lambda claims: _creation_actor(),
     )
 
     def fake_register(runid: str, config: str, user_id: int) -> None:
@@ -569,8 +568,8 @@ def test_create_accepts_session_cookie_auth_without_rq_token(
     )
     monkeypatch.setattr(
         project_routes,
-        "resolve_creation_preferences",
-        lambda claims: _preference_snapshot(),
+        "resolve_creation_actor",
+        lambda claims: _creation_actor(),
     )
 
     def fake_register(runid: str, config: str, user_id: int) -> None:

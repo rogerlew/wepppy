@@ -186,6 +186,30 @@ def test_wbt_boundary_behavior_setter_rejects_invalid_value(tmp_path) -> None:
         Watershed.wbt_boundary_touch_behavior.fset(watershed, "stop")  # type: ignore[union-attr]
 
 
+def test_legacy_config_baseline_is_read_only_until_explicitly_persisted() -> None:
+    class _LegacyWatershed(Watershed):
+        def config_get_str(self, section, option, default):
+            assert (section, option, default) == (
+                "watershed.wbt",
+                "boundary_touch_behavior",
+                "warn",
+            )
+            return "error"
+
+        def locked(self):
+            return nullcontext()
+
+    watershed = object.__new__(_LegacyWatershed)
+    baseline_property = Watershed.wbt_boundary_touch_config_behavior
+    assert baseline_property.fget is not None
+
+    assert baseline_property.fget(watershed) == "error"
+    assert not hasattr(watershed, "_wbt_boundary_touch_config_behavior")
+
+    assert Watershed.persist_wbt_boundary_touch_config_behavior(watershed) == "error"
+    assert watershed._wbt_boundary_touch_config_behavior == "error"
+
+
 def test_wbt_pre_detection_failure_replaces_stale_edge_ids(
     tmp_path,
     monkeypatch,

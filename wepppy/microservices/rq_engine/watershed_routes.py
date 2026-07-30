@@ -15,6 +15,7 @@ from starlette.datastructures import UploadFile
 import utm
 from werkzeug.utils import secure_filename
 from osgeo import gdal, osr
+from sqlalchemy.exc import SQLAlchemyError
 
 from wepppy.config.redis_settings import RedisDB, redis_connection_kwargs
 from wepppy.all_your_base.geo import utm_srid
@@ -37,6 +38,15 @@ from wepppy.rq.project_rq import (
     set_outlet_rq,
 )
 from wepppy.weppcloud.utils.helpers import get_wd
+from wepppy.weppcloud.user_preferences import (
+    PreferenceIdentityError,
+    StoredPreferenceError,
+    WBT_BOUNDARY_POLICY_SNAPSHOT_KEY,
+    WbtBoundaryPolicySnapshotError,
+    build_wbt_boundary_policy_snapshot,
+    resolve_account_preferences,
+    validate_wbt_boundary_policy_snapshot,
+)
 
 from .auth import AuthError, authorize_run_access, require_jwt
 from .openapi import agent_route_responses, rq_operation_id
@@ -893,6 +903,7 @@ async def set_outlet(runid: str, config: str, request: Request) -> JSONResponse:
 async def build_subcatchments_and_abstract_watershed(
     runid: str, config: str, request: Request
 ) -> JSONResponse:
+    claims: dict[str, Any]
     try:
         claims = require_jwt(request, required_scopes=RQ_ENQUEUE_SCOPES)
         authorize_run_access(claims, runid)
@@ -956,6 +967,67 @@ async def build_subcatchments_and_abstract_watershed(
         wd = get_wd(runid)
         _preflight_watershed_mutation_root(wd)
         watershed = Watershed.getInstance(wd)
+        is_batch_context = (
+            watershed.run_group == "batch"
+            or _is_base_project_context(runid, config)
+        )
+        boundary_snapshot = None
+        boundary_argument = None
+        account_preferences = None
+        if (
+            bool(getattr(watershed, "delineation_backend_is_wbt", False))
+            and not is_batch_context
+        ):
+            try:
+                account_preferences = resolve_account_preferences(claims)
+            except (
+                PreferenceIdentityError,
+                StoredPreferenceError,
+                SQLAlchemyError,
+            ):
+                error_id = __import__("uuid").uuid4().hex
+                logger.exception(
+                    "rq-engine WBT user preference resolution failed",
+                    extra={"error_id": error_id, "runid": runid},
+                )
+                return error_response(
+                    "Could not resolve user preferences.",
+                    status_code=500,
+                    code="preference_resolution_failed",
+                    error_id=error_id,
+                    log_exception=False,
+                )
+        if (
+            bool(getattr(watershed, "delineation_backend_is_wbt", False))
+            and not is_batch_context
+            and account_preferences is not None
+        ):
+            try:
+                boundary_snapshot = build_wbt_boundary_policy_snapshot(
+                    runid,
+                    watershed.wbt_boundary_touch_config_behavior,
+                    account_preferences,
+                )
+                boundary_argument = boundary_snapshot.to_argument()
+                validate_wbt_boundary_policy_snapshot(
+                    boundary_snapshot.to_meta(),
+                    boundary_argument,
+                    expected_runid=runid,
+                )
+                watershed.persist_wbt_boundary_touch_config_behavior()
+            except (ValueError, WbtBoundaryPolicySnapshotError):
+                error_id = __import__("uuid").uuid4().hex
+                logger.exception(
+                    "rq-engine WBT policy snapshot resolution failed",
+                    extra={"error_id": error_id, "runid": runid},
+                )
+                return error_response(
+                    "Could not resolve user preferences.",
+                    status_code=500,
+                    code="preference_resolution_failed",
+                    error_id=error_id,
+                    log_exception=False,
+                )
 
         updates: dict[str, Any] = {}
         if "clip_hillslopes" in payload:
@@ -1000,7 +1072,7 @@ async def build_subcatchments_and_abstract_watershed(
 
         watershed.apply_build_subcatchment_updates(**updates)
 
-        if watershed.run_group == "batch" or _is_base_project_context(runid, config):
+        if is_batch_context:
             return JSONResponse({"message": "Set subcatchment inputs for batch processing"})
 
         prep = RedisPrep.getInstance(wd)
@@ -1012,8 +1084,13 @@ async def build_subcatchments_and_abstract_watershed(
             q = Queue(connection=redis_conn)
             job = q.enqueue_call(
                 build_subcatchments_and_abstract_watershed_rq,
-                (runid,),
+                (runid, {}, boundary_argument),
                 timeout=RQ_TIMEOUT,
+                meta=(
+                    {WBT_BOUNDARY_POLICY_SNAPSHOT_KEY: boundary_snapshot.to_meta()}
+                    if boundary_snapshot is not None
+                    else None
+                ),
             )
             prep.set_rq_job_id("build_subcatchments_and_abstract_watershed_rq", job.id)
         return JSONResponse({"job_id": job.id})

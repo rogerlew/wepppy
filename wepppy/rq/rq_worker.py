@@ -240,6 +240,27 @@ class WepppyRqWorker(Worker):
             job.save_meta()
         else:
             super().handle_job_failure(job, queue, started_job_registry)
+        if isinstance(job.meta, dict):
+            try:
+                from wepppy.rq.project_rq import (
+                    _WBT_ADMISSION_RECEIPT_KEY,
+                    _release_subcatchment_tail,
+                )
+
+                if isinstance(job.meta.get(_WBT_ADMISSION_RECEIPT_KEY), str):
+                    runid = _extract_runid(job)
+                    if runid is not None:
+                        _release_subcatchment_tail(
+                            job.connection,
+                            runid,
+                            job.id,
+                        )
+            except redis.RedisError:
+                LOGGER.exception(
+                    "Could not release failed WBT subcatchment mutation tail "
+                    "(job_id=%s)",
+                    job.id,
+                )
         StatusMessenger.publish('f{runid}:rq', json.dumps({'job': job.id, 'status': 'failed'}))
         print(f"Job {job.id} Failed")
 

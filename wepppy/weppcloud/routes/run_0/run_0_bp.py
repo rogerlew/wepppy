@@ -41,6 +41,11 @@ from wepppy.nodb.core import (
     Wepp,
 )
 from wepppy.nodb.unitizer import Unitizer
+from wepppy.weppcloud.user_preferences import (
+    PreferenceResolutionError,
+    preference_resolution_error_response,
+    resolve_unitizer_presentation,
+)
 from wepppy.nodb.mods.observed import Observed
 from wepppy.nodb.mods.rangeland_cover import RangelandCover
 from wepppy.nodb.mods.rhem import Rhem
@@ -1755,7 +1760,7 @@ def _build_runs0_context(runid, config, playwright_load_all):
     climate = Climate.getInstance(wd)
     wepp = Wepp.getInstance(wd)
     watershed = Watershed.getInstance(wd)
-    unitizer = Unitizer.getInstance(wd)
+    unitizer = resolve_unitizer_presentation(wd)
     site_prefix = current_app.config['SITE_PREFIX']
 
     # Browse links should follow truth-on-disk: prefer canonical WD-level sidecars,
@@ -2094,6 +2099,8 @@ def runs0(runid, config):
         return render_template('runs0_pure.htm', **context)
     except HTTPException:
         raise
+    except PreferenceResolutionError:
+        return preference_resolution_error_response(runid)
     except Exception as exc:
         stacktrace = traceback.format_exc()
         # Reuse exception_factory for logging + run exception log side effects.
@@ -2257,15 +2264,13 @@ def create_run_dir(current_user):
 
 
 def _issue_rq_engine_token() -> str:
-    subject = None
-    if hasattr(current_user, "get_id"):
-        subject = current_user.get_id()
-    if not subject:
-        subject = getattr(current_user, "id", None)
-    if not subject:
-        subject = getattr(current_user, "email", None)
-    if not subject:
-        raise RuntimeError("Unable to resolve user subject for rq-engine token")
+    # Creation ownership and user preferences bind to the canonical positive
+    # database User ID, not Flask-Security's fs_uniquifier session identity.
+    subject = getattr(current_user, "id", None)
+    if type(subject) is not int or subject <= 0:
+        raise RuntimeError(
+            "Unable to resolve a positive numeric user subject for rq-engine token"
+        )
 
     roles = [
         str(getattr(role, "name", role)).strip()

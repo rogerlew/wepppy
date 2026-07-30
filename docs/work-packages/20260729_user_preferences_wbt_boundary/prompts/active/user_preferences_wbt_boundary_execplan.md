@@ -126,9 +126,69 @@ enlarge the project extent.
   FAIL artifacts. Both rejected the leased multi-step admission because a
   hard interruption could orphan a saved non-runnable child; governance also
   required complete queue parameter provenance and rollback.
-- [ ] Obtain two independent approvals and a standalone documentation
-  ancestor for the revised atomic Redis transaction admission contract.
-- [ ] Complete broad validation, documentation, final reviews, and local E2E.
+- [x] (2026-07-30 11:05 UTC) Obtained final governance and
+  operations/security PASS reviews with no finding and committed the exact
+  atomic Redis admission contract as standalone ancestor `b1f1f99c8`.
+- [x] (2026-07-30 11:20 UTC) Replaced the leased multi-step admission with one
+  watched Redis transaction. Added bounded conflict retry, exact-tree
+  idempotency, ambiguous-response reconciliation, active/missing/terminal tail
+  handling, and atomic root/job/dependency/registry/tail persistence.
+- [x] (2026-07-30 11:20 UTC) Passed 205 focused preference, PostgreSQL,
+  Profile, Unitizer, WBT route/NoDb/RQ, and real-Redis tests. Added fault
+  injection before/after `EXEC`, conflict exhaustion, actual root RQ retry,
+  stored-invalid preference, unauthorized lookup ordering, and terminal policy
+  apply-failure cleanup evidence.
+- [x] (2026-07-30 12:05 UTC) Closed final-review atomic-admission findings:
+  root WATCH conflicts reconcile a competing exact commit; live tails require
+  queued/intermediate/deferred/started registry membership; exact replay
+  rejects stale dependency residue; success receipts and post-terminal worker
+  failure handling compare-delete only their own current tail.
+- [x] (2026-07-30 12:20 UTC) Passed the final source-freeze validation:
+  371 affected tests; the full Python suite with 5,721 passed and 58 skipped;
+  frontend lint and all 745 JavaScript tests; stubs, test-stub completeness,
+  isolation, RQ graph, broad-exception, documentation, and diff gates.
+- [x] (2026-07-30 12:25 UTC) Received independent source-freeze governance
+  and operations/security PASS reviews with zero unresolved findings.
+- [x] (2026-07-30 12:50 UTC) Preserved the initial post-acceptance FAIL
+  reviews. They rejected incomplete cleanup, nonnumeric Create-subject
+  fallback, missing fallback rows, and stale source-freeze evidence.
+- [x] (2026-07-30 13:00 UTC) Removed the email-subject fallback and hardened
+  the canary's incremental job, session, access-log, count, and cleanup
+  receipts. A proposed public failed-cleanup receipt was rejected during
+  governance review and removed before release.
+- [x] (2026-07-30 13:10 UTC) Repeated the two-user canary on disposable Users
+  312/313 and run `inflammatory-bilberry`: distinct SI/English presentation,
+  Auto and accountless project units, user `error`/`warn`, Auto/config and
+  service WBT fallback, private redaction, byte-stable Unitizer, and unchanged
+  durable WBT fields all passed. Exact SQL/Redis cleanup passed; the operator
+  completed the reported NFS directory cleanup after restarting only the two
+  handle-owning services.
+- [x] (2026-07-30 13:25 UTC) Passed the corrected source's full Python suite
+  with 5,727 passed and 58 skipped, plus affected stubtest, stub completeness,
+  RQ graph, documentation, broad-exception, and diff checks.
+- [x] (2026-07-30 13:35 UTC) Fresh ops review found six exact stale DB-11
+  working-directory cache keys across acceptance attempts. Deleted only those
+  named keys, verified them absent, and added exact WD-cache deletion and
+  assertion to the harness.
+- [x] (2026-07-30 14:05 UTC) Verified the same six disposable run IDs absent
+  from Redis DB 0/2/9/11/13/14/15. Expanded the product cleanup boundary to
+  close run instances, strictly purge and verify DB 0/11/13, preserve the
+  existing public error envelope, and correlate cleanup failures internally by
+  `error_id` and run ID.
+- [x] (2026-07-30 14:20 UTC) Repeated the local two-user canary with exact
+  Users 341/342 and run `pain-free-prospectus`. Functional, redaction,
+  byte-stability, SQL, and Redis postconditions passed. The harness emitted a
+  structured cleanup-pending receipt for NFS-held files; exact directory
+  cleanup completed after restarting only WEPPcloud and rq-engine, and both
+  workers returned healthy.
+- [x] (2026-07-30 14:40 UTC) Passed frozen-source validation: 5,732 Python
+  tests with 58 skipped; frontend lint and 104 suites/745 tests; three
+  stubtests; test-stub, RQ graph, broad-exception, documentation, and vulture
+  gates; and exact two-seed plus per-file isolation for the remediation
+  modules.
+- [x] (2026-07-30 14:50 UTC) Received final governance/correctness and
+  operations/security PASS reviews for exact fingerprint `4aa271981f...`,
+  both with zero findings.
 - [ ] Apply and validate the authorized Forest migration and canary.
 
 ## Surprises & Discoveries
@@ -234,6 +294,12 @@ enlarge the project extent.
   links, tail replacement, and queued/deferred membership one optimistic
   Redis transaction with no pre-commit durable state.
 
+- Observation: RQ 1.16 exposes `Job.dependency_ids` as Redis job keys rather
+  than plain IDs, while the dependency sets themselves contain plain IDs.
+  Evidence: ambiguous-response reconciliation initially rejected a correctly
+  committed receipt. Reading and normalizing the canonical dependency set now
+  makes exact-tree validation agree with RQ's persisted representation.
+
 ## Decision Log
 
 - Decision: Serialize build plus abstraction as one mutable child under one
@@ -331,7 +397,9 @@ defines request-local units, initiating-user enqueue snapshotting,
 nonpersistent account-derived policy, supported dependent cancellation, and
 the reproducible explicit-target migration graph cycle. It requires two
 independent approvals and a standalone ancestor before runtime edits.
-Acceptance E2E mutation and Forest rollout remain blocked.
+The implementation and source-freeze validation are complete. Acceptance E2E
+mutation and Forest rollout remain gated on the final review artifacts and
+the local two-user canary.
 
 ## Context and Orientation
 

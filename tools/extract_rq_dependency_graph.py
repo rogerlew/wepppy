@@ -20,7 +20,7 @@ SOURCE_GLOBS: tuple[str, ...] = (
     "wepppy/weppcloud/routes/**/*.py",
     "wepppy/weppcloud/bootstrap/*.py",
 )
-ENQUEUE_METHODS = {"enqueue", "enqueue_call"}
+ENQUEUE_METHODS = {"create_job", "enqueue", "enqueue_call"}
 ENQUEUE_WRAPPER_FUNCTIONS = {"_enqueue", "enqueue_log_complete"}
 _JOBS_STAGE_RE = re.compile(r"jobs:([^,]+)")
 
@@ -267,7 +267,7 @@ def _enqueue_target_expr(call: ast.Call) -> ast.AST | None:
     method = call.func.attr
     if method not in ENQUEUE_METHODS:
         return None
-    if method == "enqueue_call":
+    if method in {"create_job", "enqueue_call"}:
         explicit = _keyword_value(call, "func")
         if explicit is not None:
             return explicit

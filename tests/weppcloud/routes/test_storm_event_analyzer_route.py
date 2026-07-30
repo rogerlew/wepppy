@@ -72,7 +72,11 @@ def storm_event_analyzer_client(monkeypatch: pytest.MonkeyPatch, tmp_path):
             return object()
 
     monkeypatch.setattr(storm_module, "Ron", DummyRon)
-    monkeypatch.setattr(storm_module, "Unitizer", DummyUnitizer)
+    monkeypatch.setattr(
+        storm_module,
+        "resolve_unitizer_presentation",
+        DummyUnitizer.getInstance,
+    )
     monkeypatch.setattr(storm_module, "RonViewModel", lambda ron: object())
 
     captured: dict[str, object] = {}
