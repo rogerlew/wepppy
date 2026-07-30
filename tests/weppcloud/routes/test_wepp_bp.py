@@ -898,11 +898,7 @@ def test_wepp_loss_summary_supports_roads_output_scope(wepp_client, monkeypatch:
 
     monkeypatch.setattr(wepp_module, "Climate", DummyClimate)
     monkeypatch.setattr(wepp_module, "Ron", DummyRon)
-    monkeypatch.setattr(
-        wepp_module,
-        "resolve_unitizer_presentation",
-        DummyUnitizer.getInstance,
-    )
+    monkeypatch.setattr(wepp_module, "Unitizer", DummyUnitizer)
     monkeypatch.setattr(wepp_module, "RonViewModel", lambda _ron: object())
 
     captured_scopes: Dict[str, Any] = {}
@@ -987,11 +983,7 @@ def test_avg_annual_watbal_supports_roads_output_scope(wepp_client, monkeypatch:
             return object()
 
     monkeypatch.setattr(wepp_module, "Ron", DummyRon)
-    monkeypatch.setattr(
-        wepp_module,
-        "resolve_unitizer_presentation",
-        DummyUnitizer.getInstance,
-    )
+    monkeypatch.setattr(wepp_module, "Unitizer", DummyUnitizer)
     monkeypatch.setattr(wepp_module, "Wepp", DummyWepp)
 
     captured_template: Dict[str, Any] = {}
@@ -1042,11 +1034,7 @@ def test_yearly_watbal_supports_roads_output_scope(wepp_client, monkeypatch: pyt
         return DummyTotWatBal()
 
     monkeypatch.setattr(wepp_module, "Ron", DummyRon)
-    monkeypatch.setattr(
-        wepp_module,
-        "resolve_unitizer_presentation",
-        DummyUnitizer.getInstance,
-    )
+    monkeypatch.setattr(wepp_module, "Unitizer", DummyUnitizer)
     monkeypatch.setattr(wepp_module, "TotalWatbalReport", _totwatbal)
 
     captured_template: Dict[str, Any] = {}
@@ -1086,11 +1074,7 @@ def test_streamflow_supports_roads_output_scope(wepp_client, monkeypatch: pytest
             return object()
 
     monkeypatch.setattr(wepp_module, "Ron", DummyRon)
-    monkeypatch.setattr(
-        wepp_module,
-        "resolve_unitizer_presentation",
-        DummyUnitizer.getInstance,
-    )
+    monkeypatch.setattr(wepp_module, "Unitizer", DummyUnitizer)
     monkeypatch.setattr(wepp_module, "_exists", lambda path: True)
     monkeypatch.setattr(wepp_module, "resolve_run_context", lambda *_args, **_kwargs: object())
     monkeypatch.setattr(wepp_module, "QueryRequest", lambda **kwargs: kwargs)
@@ -1171,11 +1155,7 @@ def test_return_periods_supports_roads_output_scope(wepp_client, monkeypatch: py
 
     monkeypatch.setattr(wepp_module, "Climate", DummyClimate)
     monkeypatch.setattr(wepp_module, "Ron", DummyRon)
-    monkeypatch.setattr(
-        wepp_module,
-        "resolve_unitizer_presentation",
-        DummyUnitizer.getInstance,
-    )
+    monkeypatch.setattr(wepp_module, "Unitizer", DummyUnitizer)
     monkeypatch.setattr(wepp_module, "Watershed", DummyWatershed)
     monkeypatch.setattr(wepp_module, "Wepp", DummyWepp)
     monkeypatch.setattr(wepp_module, "parse_rec_intervals", lambda *_args, **_kwargs: [2, 5])
@@ -1371,11 +1351,7 @@ def test_get_wepp_prep_details_passes_disturbed_preview_context(
         return "rendered"
 
     monkeypatch.setattr(wepp_module, "Ron", DummyRon)
-    monkeypatch.setattr(
-        wepp_module,
-        "resolve_unitizer_presentation",
-        DummyUnitizer.getInstance,
-    )
+    monkeypatch.setattr(wepp_module, "Unitizer", DummyUnitizer)
     monkeypatch.setattr(wepp_module, "render_template", fake_render_template)
 
     response = client.get(f"/runs/{RUN_ID}/{CONFIG}/report/wepp/prep_details/")

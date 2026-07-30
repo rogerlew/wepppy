@@ -8,7 +8,6 @@ pytest.importorskip("flask")
 from flask import Flask
 
 import wepppy.weppcloud.routes.nodb_api.unitizer_bp as unitizer_module
-from wepppy.weppcloud.user_preferences import PreferenceResolutionError
 
 RUN_ID = "test-run"
 CONFIG = "cfg"
@@ -91,31 +90,3 @@ def test_set_unit_preferences_accepts_form_payload(unitizer_client):
 
     controller = DummyUnitizer.getInstance(run_dir)
     assert controller.preferences == {"discharge": "units-english"}
-
-
-def test_unitizer_view_preference_failure_is_sanitized(
-    unitizer_client,
-    monkeypatch: pytest.MonkeyPatch,
-) -> None:
-    client, _DummyUnitizer, _run_dir = unitizer_client
-    monkeypatch.setattr(
-        unitizer_module,
-        "resolve_unitizer_presentation",
-        lambda _wd: (_ for _ in ()).throw(
-            PreferenceResolutionError("private database failure")
-        ),
-    )
-
-    response = client.get(
-        f"/runs/{RUN_ID}/{CONFIG}/unitizer/?value=1&in_units=m"
-    )
-
-    assert response.status_code == 500
-    payload = response.get_json()
-    assert payload["error"] == {
-        "message": "Could not resolve user preferences.",
-        "code": "preference_resolution_failed",
-    }
-    assert payload["error_id"]
-    assert "details" not in payload["error"]
-    assert "private database failure" not in response.get_data(as_text=True)

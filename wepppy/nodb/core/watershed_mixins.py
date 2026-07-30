@@ -518,27 +518,11 @@ class WatershedOperationsMixin:
     #
     # build subcatchments
     #
-    def build_subcatchments(
-        self,
-        pkcsa: Optional[str] = None,
-        boundary_touch_behavior: Optional[str] = None,
-    ) -> None:
+    def build_subcatchments(self, pkcsa: Optional[str] = None) -> None:
         func_name = inspect.currentframe().f_code.co_name  # type: ignore
-        self.logger.info(
-            f'{self.class_name}.{func_name}('
-            f'pkcsa={pkcsa}, boundary_touch_behavior={boundary_touch_behavior})'
-        )
+        self.logger.info(f'{self.class_name}.{func_name}(pkcsa={pkcsa})')
 
         assert not self.islocked()
-
-        effective_boundary_touch_behavior = self.wbt_boundary_touch_behavior
-        if boundary_touch_behavior is not None:
-            effective_boundary_touch_behavior = str(boundary_touch_behavior)
-            if effective_boundary_touch_behavior not in {"warn", "error"}:
-                raise ValueError(
-                    "Invalid execution boundary_touch_behavior value: "
-                    f"{boundary_touch_behavior}"
-                )
 
         try:
             prep = RedisPrep.getInstance(self.wd)
@@ -567,7 +551,7 @@ class WatershedOperationsMixin:
                     f"{WATERSHED_BOUNDARY_TOUCH_MESSAGE} "
                     f"Edge hillslope IDs: {edge_ids}."
                 )
-                if effective_boundary_touch_behavior == "error":
+                if self.wbt_boundary_touch_behavior == "error":
                     if _exists(self.subwta):
                         os.remove(self.subwta)
                     raise WatershedBoundaryTouchesEdgeError(edge_ids)

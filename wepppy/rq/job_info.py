@@ -59,6 +59,7 @@ def recursive_get_job_details(job: Job, redis_conn: redis.Redis, now: datetime) 
         else:
             elapsed_s = (now - job.started_at).total_seconds()
 
+    auth_actor = job.meta.get("auth_actor") if isinstance(job.meta, dict) else None
     culvert_batch_uuid = (
         job.meta.get("culvert_batch_uuid") if isinstance(job.meta, dict) else None
     )
@@ -72,7 +73,7 @@ def recursive_get_job_details(job: Job, redis_conn: redis.Redis, now: datetime) 
         "description": job.description,
         "elapsed_s": elapsed_s,
         "exc_info": _extract_exc_info(job),
-        "auth_actor": None,
+        "auth_actor": auth_actor if isinstance(auth_actor, dict) else None,
         "culvert_batch_uuid": (
             str(culvert_batch_uuid) if culvert_batch_uuid else None
         ),

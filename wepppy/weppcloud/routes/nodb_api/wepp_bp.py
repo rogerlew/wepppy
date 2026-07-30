@@ -27,8 +27,7 @@ from wepppy.nodb.mods.features_export.service import (
     resolve_published_artifact_path,
     resolve_published_profile_request,
 )
-from wepppy.nodb.unitizer import precisions, converters
-from wepppy.weppcloud.user_preferences import resolve_unitizer_presentation
+from wepppy.nodb.unitizer import Unitizer, precisions, converters
 from wepppy.nodb.redis_prep import RedisPrep
 from wepppy.wepp import management
 from wepppy.wepp.reports import ChannelSummaryReport, HillSummaryReport, OutletSummaryReport
@@ -961,7 +960,7 @@ def get_wepp_prep_details(runid, config):
     subcatchments_summary = ron.subs_summary(abbreviated=True)
     channels_summary = ron.chns_summary(abbreviated=True)
 
-    unitizer = resolve_unitizer_presentation(wd)
+    unitizer = Unitizer.getInstance(wd)
     disturbed_preview_context = _build_disturbed_preview_context(getattr(ron, "mods", ()))
 
     return render_template('reports/wepp/prep_details.htm', runid=runid, config=config,
@@ -1047,7 +1046,7 @@ def report_wepp_loss(runid, config):
         __import__("logging").getLogger(__name__).exception("Boundary exception at wepppy/weppcloud/routes/nodb_api/wepp_bp.py:620", extra={"runid": locals().get("runid"), "config": locals().get("config"), "job_id": locals().get("job_id")})
         chn_rpt = None
     
-    unitizer = resolve_unitizer_presentation(wd)
+    unitizer = Unitizer.getInstance(wd)
     ron = Ron.getInstance(wd)
 
     if _wants_csv():
@@ -1129,7 +1128,7 @@ def report_wepp_yearly_watbal(runid, config):
 
     totwatbal = TotalWatbalReport(wd, exclude_yr_indxs=exclude_yr_indxs, output_scope=output_scope)
 
-    unitizer = resolve_unitizer_presentation(wd)
+    unitizer = Unitizer.getInstance(wd)
 
     if _wants_csv():
         return _render_report_csv(
@@ -1160,7 +1159,7 @@ def report_wepp_avg_annual_by_landuse(runid, config):
     ron = Ron.getInstance(wd)
 
     wepp = Wepp.getInstance(wd)
-    unitizer = resolve_unitizer_presentation(wd)
+    unitizer = Unitizer.getInstance(wd)
     report = AverageAnnualsByLanduseReport(wd)
 
     if _wants_csv():
@@ -1199,7 +1198,7 @@ def report_wepp_avg_annual_watbal(runid, config):
     except FileNotFoundError:
         chn_rpt = None
 
-    unitizer = resolve_unitizer_presentation(wd)
+    unitizer = Unitizer.getInstance(wd)
 
     if _wants_csv():
         table_key = (request.args.get('table') or 'hillslopes').lower()
@@ -1322,7 +1321,7 @@ def plot_wepp_streamflow(runid, config):
         return exception_factory('Error serializing query engine response', runid=runid)
 
     ron = Ron.getInstance(wd)
-    unitizer = resolve_unitizer_presentation(wd)
+    unitizer = Unitizer.getInstance(wd)
     return render_template(
         'reports/wepp/daily_streamflow_graph.htm',
         runid=runid,
@@ -1404,7 +1403,7 @@ def report_wepp_return_periods(runid, config):
     )
 
     translator = Watershed.getInstance(wd).translator_factory()
-    unitizer = resolve_unitizer_presentation(wd)
+    unitizer = Unitizer.getInstance(wd)
 
     measure_order = list(_RETURN_PERIOD_CORE_METRICS)
     for key in _RETURN_PERIOD_METRIC_ORDER:
@@ -1469,7 +1468,7 @@ def report_wepp_frq_flood(runid, config):
     report = Wepp.getInstance(wd).report_frq_flood()
     translator = Watershed.getInstance(wd).translator_factory()
 
-    unitizer = resolve_unitizer_presentation(wd)
+    unitizer = Unitizer.getInstance(wd)
 
     return render_template('reports/wepp/frq_flood.htm', runid=runid, config=config,
                             unitizer_nodb=unitizer,
@@ -1490,7 +1489,7 @@ def report_wepp_sediment_delivery(runid, config):
     sediment = Wepp.getInstance(wd).report_sediment_delivery()
     translator = Watershed.getInstance(wd).translator_factory()
 
-    unitizer = resolve_unitizer_presentation(wd)
+    unitizer = Unitizer.getInstance(wd)
 
     if _wants_csv():
         table_key = request.args.get('table') or 'class-info'

@@ -351,7 +351,6 @@ class Watershed(WatershedOperationsMixin, WatershedLookupMixin, NoDbBase):
                         f"{boundary_touch_behavior}"
                     )
                 self._wbt_boundary_touch_behavior = boundary_touch_behavior
-                self._wbt_boundary_touch_config_behavior = boundary_touch_behavior
                 stream_pruning_method = self.config_get_str(
                     "watershed.wbt",
                     "stream_pruning_method",
@@ -569,35 +568,6 @@ class Watershed(WatershedOperationsMixin, WatershedLookupMixin, NoDbBase):
         if behavior not in WBT_BOUNDARY_TOUCH_BEHAVIOR_VALUES:
             raise ValueError(f"Invalid wbt_boundary_touch_behavior value: {value}")
         self._wbt_boundary_touch_behavior = behavior
-
-    @property
-    def wbt_boundary_touch_config_behavior(self) -> str:
-        stored = getattr(self, "_wbt_boundary_touch_config_behavior", None)
-        if stored is not None:
-            behavior = str(stored)
-        else:
-            behavior = str(
-                self.config_get_str(
-                    "watershed.wbt",
-                    "boundary_touch_behavior",
-                    "warn",
-                )
-            )
-        if behavior not in WBT_BOUNDARY_TOUCH_BEHAVIOR_VALUES:
-            raise ValueError(
-                "Invalid wbt_boundary_touch_config_behavior value: "
-                f"{behavior}"
-            )
-        return behavior
-
-    def persist_wbt_boundary_touch_config_behavior(self) -> str:
-        behavior = self.wbt_boundary_touch_config_behavior
-        if hasattr(self, "_wbt_boundary_touch_config_behavior"):
-            return behavior
-        with self.locked():
-            if not hasattr(self, "_wbt_boundary_touch_config_behavior"):
-                self._wbt_boundary_touch_config_behavior = behavior
-        return behavior
 
     @property
     def stream_pruning_method(self) -> str:

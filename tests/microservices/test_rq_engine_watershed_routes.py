@@ -1,20 +1,12 @@
 import contextlib
 import pytest
 import numpy as np
-from sqlalchemy.exc import SQLAlchemyError
 
 TestClient = pytest.importorskip("fastapi.testclient").TestClient
 
 import wepppy.microservices.rq_engine as rq_engine
 from wepppy.microservices.rq_engine import watershed_routes
 from wepppy.runtime_paths.errors import NoDirError
-from wepppy.weppcloud.user_preferences import (
-    AccountPreferenceSnapshot,
-    PreferenceIdentityError,
-    StoredPreferenceError,
-    UserPreferenceValues,
-)
-import wepppy.weppcloud.user_preferences as preferences_module
 
 
 pytestmark = pytest.mark.microservice
@@ -61,91 +53,6 @@ def _stub_prep(monkeypatch: pytest.MonkeyPatch) -> None:
             return None
 
     monkeypatch.setattr(watershed_routes.RedisPrep, "getInstance", lambda wd: DummyPrep())
-
-
-def _install_wbt_submission_harness(
-    monkeypatch: pytest.MonkeyPatch,
-    *,
-    claims: dict,
-    resolver,
-) -> tuple[list[dict], object]:
-    captured: list[dict] = []
-    monkeypatch.setattr(
-        watershed_routes,
-        "require_jwt",
-        lambda request, required_scopes=None: dict(claims),
-    )
-    monkeypatch.setattr(
-        watershed_routes,
-        "authorize_run_access",
-        lambda request_claims, runid: None,
-    )
-    monkeypatch.setattr(
-        watershed_routes,
-        "resolve_account_preferences",
-        resolver,
-    )
-    monkeypatch.setattr(watershed_routes, "get_wd", lambda runid: "/tmp/run")
-    monkeypatch.setattr(
-        watershed_routes,
-        "_preflight_watershed_mutation_root",
-        lambda _wd: None,
-    )
-    _stub_prep(monkeypatch)
-
-    class DummyJob:
-        id = "root-policy"
-
-    class DummyQueue:
-        def __init__(self, *args, **kwargs) -> None:
-            pass
-
-        def enqueue_call(self, func, args, **kwargs):
-            captured.append(
-                {
-                    "func": func,
-                    "args": args,
-                    "meta": kwargs.get("meta"),
-                }
-            )
-            return DummyJob()
-
-    class DummyRedis:
-        def __enter__(self):
-            return self
-
-        def __exit__(self, exc_type, exc, tb):
-            return False
-
-    class DummyWatershed:
-        run_group = "default"
-        delineation_backend_is_wbt = True
-        wbt_boundary_touch_config_behavior = "warn"
-        wbt_boundary_touch_behavior = "warn"
-
-        def __init__(self) -> None:
-            self.persist_calls = 0
-            self.grouped_update_calls = []
-
-        def persist_wbt_boundary_touch_config_behavior(self) -> None:
-            self.persist_calls += 1
-
-        def apply_build_subcatchment_updates(self, **kwargs) -> None:
-            self.grouped_update_calls.append(kwargs)
-
-    watershed = DummyWatershed()
-    monkeypatch.setattr(watershed_routes, "Queue", DummyQueue)
-    monkeypatch.setattr(
-        watershed_routes.redis,
-        "Redis",
-        lambda **kwargs: DummyRedis(),
-    )
-    monkeypatch.setattr(
-        watershed_routes.Watershed,
-        "getInstance",
-        lambda wd: watershed,
-    )
-    return captured, watershed
 
 
 def test_fetch_dem_missing_payload_returns_400(monkeypatch: pytest.MonkeyPatch) -> None:
@@ -941,7 +848,6 @@ def test_build_subcatchments_enqueues_job_and_caps_mofe_max_ofes(monkeypatch: py
 
     class DummyWatershed:
         run_group = "default"
-        delineation_backend_is_wbt = False
 
         def __init__(self) -> None:
             self.grouped_update_calls = []
@@ -959,13 +865,6 @@ def test_build_subcatchments_enqueues_job_and_caps_mofe_max_ofes(monkeypatch: py
         "getInstance",
         lambda wd: dummy_watershed,
     )
-    monkeypatch.setattr(
-        watershed_routes,
-        "resolve_account_preferences",
-        lambda _claims: (_ for _ in ()).throw(
-            AssertionError("Topaz paths must not resolve WBT preferences")
-        ),
-    )
 
     with TestClient(rq_engine.app) as client:
         response = client.post(
@@ -979,336 +878,6 @@ def test_build_subcatchments_enqueues_job_and_caps_mofe_max_ofes(monkeypatch: py
     assert dummy_watershed.grouped_update_calls[0]["clip_hillslopes"] is True
     assert dummy_watershed.grouped_update_calls[0]["mofe_max_ofes"] == 42
     assert dummy_watershed.mofe_max_ofes == 19
-
-
-def test_build_subcatchments_snapshots_initiating_users_boundary_preference(
-    monkeypatch: pytest.MonkeyPatch,
-) -> None:
-    captured: list[dict] = []
-    claims_by_user = {
-        23: {"token_class": "user", "sub": "23"},
-        24: {"token_class": "user", "sub": "24"},
-    }
-    claims_iter = iter(claims_by_user.values())
-    monkeypatch.setattr(
-        watershed_routes,
-        "require_jwt",
-        lambda request, required_scopes=None: next(claims_iter),
-    )
-    monkeypatch.setattr(
-        watershed_routes,
-        "authorize_run_access",
-        lambda request_claims, runid: None,
-    )
-    monkeypatch.setattr(
-        watershed_routes,
-        "resolve_account_preferences",
-        lambda request_claims: AccountPreferenceSnapshot(
-            actor_token_class="user",
-            user_id=int(request_claims["sub"]),
-            preferences=UserPreferenceValues(
-                "si",
-                "error" if request_claims["sub"] == "23" else "warn",
-            ),
-        ),
-    )
-    monkeypatch.setattr(watershed_routes, "get_wd", lambda runid: "/tmp/run")
-    _stub_prep(monkeypatch)
-
-    class DummyJob:
-        id = "root-policy"
-
-    class DummyQueue:
-        def __init__(self, *args, **kwargs) -> None:
-            pass
-
-        def enqueue_call(self, func, args, **kwargs):
-            captured.append(
-                {
-                    "func": func,
-                    "args": args,
-                    "meta": kwargs.get("meta"),
-                }
-            )
-            return DummyJob()
-
-    class DummyRedis:
-        def __enter__(self):
-            return self
-
-        def __exit__(self, exc_type, exc, tb):
-            return False
-
-    class DummyWatershed:
-        run_group = "default"
-        delineation_backend_is_wbt = True
-        wbt_boundary_touch_config_behavior = "warn"
-        wbt_boundary_touch_behavior = "error"
-
-        def __init__(self) -> None:
-            self.persist_calls = 0
-            self.grouped_update_calls = []
-
-        def persist_wbt_boundary_touch_config_behavior(self) -> None:
-            self.persist_calls += 1
-
-        def apply_build_subcatchment_updates(self, **kwargs) -> None:
-            self.grouped_update_calls.append(kwargs)
-
-    watershed = DummyWatershed()
-    monkeypatch.setattr(watershed_routes, "Queue", DummyQueue)
-    monkeypatch.setattr(
-        watershed_routes.redis,
-        "Redis",
-        lambda **kwargs: DummyRedis(),
-    )
-    monkeypatch.setattr(
-        watershed_routes.Watershed,
-        "getInstance",
-        lambda wd: watershed,
-    )
-
-    with TestClient(rq_engine.app) as client:
-        first_response = client.post(
-            "/api/runs/shared-run/cfg/build-subcatchments-and-abstract-watershed",
-            json={"clip_hillslopes": True},
-        )
-        second_response = client.post(
-            "/api/runs/shared-run/cfg/build-subcatchments-and-abstract-watershed",
-            json={"clip_hillslopes": True},
-        )
-
-    assert first_response.status_code == 200
-    assert second_response.status_code == 200
-    assert captured[0]["args"] == (
-        "shared-run",
-        {},
-        {
-            "schema_version": 1,
-            "effective_policy": "error",
-            "source": "user_preference",
-        },
-    )
-    assert captured[0]["meta"] == {
-        watershed_routes.WBT_BOUNDARY_POLICY_SNAPSHOT_KEY: {
-            "schema_version": 1,
-            "runid": "shared-run",
-            "actor_token_class": "user",
-            "actor_user_id": 23,
-            "config_policy": "warn",
-            "effective_policy": "error",
-            "source": "user_preference",
-        }
-    }
-    assert captured[1]["args"] == (
-        "shared-run",
-        {},
-        {
-            "schema_version": 1,
-            "effective_policy": "warn",
-            "source": "user_preference",
-        },
-    )
-    assert captured[1]["meta"] == {
-        watershed_routes.WBT_BOUNDARY_POLICY_SNAPSHOT_KEY: {
-            "schema_version": 1,
-            "runid": "shared-run",
-            "actor_token_class": "user",
-            "actor_user_id": 24,
-            "config_policy": "warn",
-            "effective_policy": "warn",
-            "source": "user_preference",
-        }
-    }
-    assert captured[0]["args"][2]["effective_policy"] == "error"
-    assert watershed.wbt_boundary_touch_behavior == "error"
-    assert watershed.wbt_boundary_touch_config_behavior == "warn"
-    assert watershed.persist_calls == 2
-
-
-def test_build_subcatchments_snapshots_account_session_identity(
-    monkeypatch: pytest.MonkeyPatch,
-) -> None:
-    captured, watershed = _install_wbt_submission_harness(
-        monkeypatch,
-        claims={"token_class": "session", "user_id": 31},
-        resolver=lambda _claims: AccountPreferenceSnapshot(
-            actor_token_class="session",
-            user_id=31,
-            preferences=UserPreferenceValues("config", "error"),
-        ),
-    )
-
-    with TestClient(rq_engine.app) as client:
-        response = client.post(
-            "/api/runs/session-run/cfg/build-subcatchments-and-abstract-watershed",
-            json={},
-        )
-
-    assert response.status_code == 200
-    assert captured[0]["args"][2] == {
-        "schema_version": 1,
-        "effective_policy": "error",
-        "source": "user_preference",
-    }
-    assert captured[0]["meta"][
-        watershed_routes.WBT_BOUNDARY_POLICY_SNAPSHOT_KEY
-    ]["actor_token_class"] == "session"
-    assert captured[0]["meta"][
-        watershed_routes.WBT_BOUNDARY_POLICY_SNAPSHOT_KEY
-    ]["actor_user_id"] == 31
-    assert watershed.persist_calls == 1
-
-
-@pytest.mark.parametrize(
-    "claims",
-    (
-        {"token_class": "service", "sub": "service-1"},
-        {"token_class": "mcp", "sub": "mcp-1"},
-        {"token_class": "session"},
-    ),
-)
-def test_build_subcatchments_non_account_identity_uses_project_policy(
-    monkeypatch: pytest.MonkeyPatch,
-    claims: dict,
-) -> None:
-    captured, watershed = _install_wbt_submission_harness(
-        monkeypatch,
-        claims=claims,
-        resolver=preferences_module.resolve_account_preferences,
-    )
-
-    with TestClient(rq_engine.app) as client:
-        response = client.post(
-            "/api/runs/fallback-run/cfg/build-subcatchments-and-abstract-watershed",
-            json={},
-        )
-
-    assert response.status_code == 200
-    assert captured[0]["args"] == ("fallback-run", {}, None)
-    assert captured[0]["meta"] is None
-    assert watershed.persist_calls == 0
-
-
-@pytest.mark.parametrize(
-    "failure",
-    (
-        PreferenceIdentityError("inactive or deleted user"),
-        PreferenceIdentityError("malformed session user_id"),
-        StoredPreferenceError("stored preference token is invalid"),
-        SQLAlchemyError("preference database unavailable"),
-    ),
-)
-def test_build_subcatchments_preference_resolution_failure_creates_no_job(
-    monkeypatch: pytest.MonkeyPatch,
-    failure: Exception,
-) -> None:
-    captured, watershed = _install_wbt_submission_harness(
-        monkeypatch,
-        claims={"token_class": "user", "sub": "41"},
-        resolver=lambda _claims: (_ for _ in ()).throw(failure),
-    )
-
-    with TestClient(rq_engine.app) as client:
-        response = client.post(
-            "/api/runs/failure-run/cfg/build-subcatchments-and-abstract-watershed",
-            json={},
-        )
-
-    assert response.status_code == 500
-    payload = response.json()
-    assert payload["error"]["code"] == "preference_resolution_failed"
-    assert payload["error"]["message"] == "Could not resolve user preferences."
-    assert payload["error_id"]
-    assert captured == []
-    assert watershed.persist_calls == 0
-    assert watershed.grouped_update_calls == []
-
-
-def test_build_subcatchments_denied_access_never_reads_user_preferences(
-    monkeypatch: pytest.MonkeyPatch,
-) -> None:
-    monkeypatch.setattr(
-        watershed_routes,
-        "require_jwt",
-        lambda request, required_scopes=None: {
-            "token_class": "user",
-            "sub": "63",
-        },
-    )
-    monkeypatch.setattr(
-        watershed_routes,
-        "authorize_run_access",
-        lambda _claims, _runid: (_ for _ in ()).throw(
-            watershed_routes.AuthError(
-                "Run access denied.",
-                status_code=403,
-                code="forbidden",
-            )
-        ),
-    )
-    monkeypatch.setattr(
-        watershed_routes,
-        "resolve_account_preferences",
-        lambda _claims: (_ for _ in ()).throw(
-            AssertionError("preferences must be read only after authorization")
-        ),
-    )
-
-    with TestClient(rq_engine.app) as client:
-        response = client.post(
-            "/api/runs/private-run/cfg/build-subcatchments-and-abstract-watershed",
-            json={},
-        )
-
-    assert response.status_code == 403
-    assert response.json()["error"]["code"] == "forbidden"
-
-
-def test_build_subcatchments_fresh_submission_refreshes_same_users_preference(
-    monkeypatch: pytest.MonkeyPatch,
-) -> None:
-    preferences = iter(
-        (
-            UserPreferenceValues("config", "error"),
-            UserPreferenceValues("config", "warn"),
-        )
-    )
-    captured, watershed = _install_wbt_submission_harness(
-        monkeypatch,
-        claims={"token_class": "user", "sub": "52"},
-        resolver=lambda _claims: AccountPreferenceSnapshot(
-            actor_token_class="user",
-            user_id=52,
-            preferences=next(preferences),
-        ),
-    )
-
-    with TestClient(rq_engine.app) as client:
-        first = client.post(
-            "/api/runs/fresh-run/cfg/build-subcatchments-and-abstract-watershed",
-            json={},
-        )
-        second = client.post(
-            "/api/runs/fresh-run/cfg/build-subcatchments-and-abstract-watershed",
-            json={},
-        )
-
-    assert first.status_code == 200
-    assert second.status_code == 200
-    first_meta = captured[0]["meta"][
-        watershed_routes.WBT_BOUNDARY_POLICY_SNAPSHOT_KEY
-    ]
-    second_meta = captured[1]["meta"][
-        watershed_routes.WBT_BOUNDARY_POLICY_SNAPSHOT_KEY
-    ]
-    assert first_meta["actor_user_id"] == second_meta["actor_user_id"] == 52
-    assert first_meta["effective_policy"] == "error"
-    assert second_meta["effective_policy"] == "warn"
-    assert captured[0]["args"][2]["effective_policy"] == "error"
-    assert captured[1]["args"][2]["effective_policy"] == "warn"
-    assert watershed.wbt_boundary_touch_behavior == "warn"
-    assert watershed.persist_calls == 2
 
 
 def test_build_subcatchments_forwards_all_grouped_update_fields_with_coercion(
@@ -1470,7 +1039,6 @@ def test_build_subcatchments_batch_returns_input_message_without_enqueue(
 
     class DummyWatershed:
         run_group = "batch"
-        delineation_backend_is_wbt = True
 
         def __init__(self) -> None:
             self.grouped_update_calls = []
@@ -1486,13 +1054,6 @@ def test_build_subcatchments_batch_returns_input_message_without_enqueue(
         watershed_routes.Watershed,
         "getInstance",
         lambda wd: dummy_watershed,
-    )
-    monkeypatch.setattr(
-        watershed_routes,
-        "resolve_account_preferences",
-        lambda _claims: (_ for _ in ()).throw(
-            AssertionError("Batch paths must not resolve WBT preferences")
-        ),
     )
 
     with TestClient(rq_engine.app) as client:

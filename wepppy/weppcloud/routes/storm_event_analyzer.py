@@ -3,7 +3,7 @@
 from __future__ import annotations
 
 from flask import Response, request
-from wepppy.weppcloud.user_preferences import resolve_unitizer_presentation
+from wepppy.nodb.unitizer import Unitizer
 from wepppy.nodb.unitizer import precisions as UNITIZER_PRECISIONS
 from wepppy.wepp.reports.output_scope import normalize_output_scope, scoped_dataset_path
 
@@ -57,7 +57,7 @@ def storm_event_analyzer(runid: str, config: str) -> Response:
     ctx = load_run_context(runid, config)
     wd = str(ctx.active_root)
     ron = Ron.getInstance(wd)
-    unitizer = resolve_unitizer_presentation(wd)
+    unitizer = Unitizer.getInstance(wd)
     is_omni_child = is_omni_child_run(runid, wd=wd, pup_relpath=ctx.pup_relpath)
     omni_scenarios = None if is_omni_child else _get_omni_scenarios(wd)
     base_scenario_label = "Burned" if ron.has_sbs else "Undisturbed"

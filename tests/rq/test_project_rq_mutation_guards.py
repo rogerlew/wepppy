@@ -1,6 +1,5 @@
 from __future__ import annotations
 
-import copy
 from contextlib import contextmanager
 from pathlib import Path
 from types import SimpleNamespace
@@ -86,7 +85,6 @@ def test_build_subcatchments_rq_records_controlled_boundary_error_and_stops_depe
 
     class _Dependent:
         status = None
-        meta = {"wbt_completion_receipt_for": "child-build"}
 
         def set_status(self, status) -> None:
             self.status = status
@@ -114,7 +112,7 @@ def test_build_subcatchments_rq_records_controlled_boundary_error_and_stops_depe
     class _Watershed:
         delineation_backend_is_topaz = False
 
-        def build_subcatchments(self, *, boundary_touch_behavior=None) -> None:
+        def build_subcatchments(self) -> None:
             raise WatershedBoundaryTouchesEdgeError([2, 1, 2])
 
     monkeypatch.setattr(project_rq.Watershed, "getInstance", lambda _wd: _Watershed())
@@ -249,25 +247,13 @@ def test_fetch_dem_and_build_channels_rq_clears_watershed_cache_before_enqueue(
 
     class DummyRedis:
         def __init__(self, **_kwargs) -> None:
-            self.values = {}
+            pass
 
         def __enter__(self):
             return self
 
         def __exit__(self, *_args) -> None:
             return None
-
-        def lock(self, *_args, **_kwargs):
-            return self
-
-        def get(self, key):
-            return self.values.get(key)
-
-        def set(self, key, value, **_kwargs):
-            self.values[key] = value
-
-        def delete(self, key):
-            self.values.pop(key, None)
 
     class DummyQueue:
         def __init__(self, connection) -> None:
@@ -276,10 +262,7 @@ def test_fetch_dem_and_build_channels_rq_clears_watershed_cache_before_enqueue(
         def enqueue_call(self, func, args, depends_on=None, timeout=None):
             child_id = f"child-{len([event for event in events if event[0] == 'enqueue'])}"
             events.append(("enqueue", func.__name__, args, getattr(depends_on, "id", None), timeout))
-            return SimpleNamespace(
-                id=child_id,
-                get_status=lambda refresh=True: "queued",
-            )
+            return SimpleNamespace(id=child_id)
 
     current_job = SimpleNamespace(id="job-guard", meta={}, save=lambda: events.append(("save", dict(current_job.meta))))
     monkeypatch.setattr(project_rq, "get_current_job", lambda: current_job)
@@ -419,42 +402,10 @@ def test_build_subcatchments_and_abstract_watershed_rq_enqueues_ordered_children
         def __init__(self, connection) -> None:
             self.connection = connection
 
-    def _enqueue_tree(
-        _redis_conn,
-        _queue,
-        *,
-        runid,
-        updates,
-        boundary_policy,
-        child_meta,
-        receipt_meta,
-        parent_job,
-    ):
-        events.extend(
-            [
-                (
-                    "build_subcatchments_rq",
-                    (runid, updates, boundary_policy, True),
-                    None,
-                    project_rq.TIMEOUT,
-                    child_meta,
-                ),
-                (
-                    "abstract_watershed_rq",
-                    (runid, True),
-                    "child-0",
-                    project_rq.TIMEOUT,
-                    {
-                        **receipt_meta,
-                        "wbt_completion_receipt_for": "child-0",
-                    },
-                ),
-            ]
-        )
-        parent_job.meta["jobs:0,func:build_subcatchments_rq"] = "child-0"
-        parent_job.meta["jobs:1,func:abstract_watershed_rq"] = "child-1"
-        parent_job.save()
-        return SimpleNamespace(id="child-0"), SimpleNamespace(id="child-1")
+        def enqueue_call(self, func, args, depends_on=None, timeout=None):
+            child_id = f"child-{len(events)}"
+            events.append((func.__name__, args, getattr(depends_on, "id", None), timeout))
+            return SimpleNamespace(id=child_id)
 
     current_job = SimpleNamespace(id="job-guard", meta={}, save=lambda: None)
     monkeypatch.setattr(project_rq, "get_current_job", lambda: current_job)
@@ -462,205 +413,17 @@ def test_build_subcatchments_and_abstract_watershed_rq_enqueues_ordered_children
     monkeypatch.setattr(project_rq, "redis_connection_kwargs", lambda _db: {})
     monkeypatch.setattr(project_rq.redis, "Redis", DummyRedis)
     monkeypatch.setattr(project_rq, "Queue", DummyQueue)
-    monkeypatch.setattr(
-        project_rq,
-        "_enqueue_serial_subcatchment_tree",
-        _enqueue_tree,
-    )
 
     project_rq.build_subcatchments_and_abstract_watershed_rq("demo")
 
     assert events == [
-        (
-            "build_subcatchments_rq",
-            ("demo", {}, None, True),
-            None,
-            project_rq.TIMEOUT,
-            None,
-        ),
-        (
-            "abstract_watershed_rq",
-            ("demo", True),
-            "child-0",
-            project_rq.TIMEOUT,
-            {"wbt_completion_receipt_for": "child-0"},
-        ),
+        ("build_subcatchments_rq", ("demo", {}), None, project_rq.TIMEOUT),
+        ("abstract_watershed_rq", ("demo",), "child-0", project_rq.TIMEOUT),
     ]
     assert current_job.meta == {
         "jobs:0,func:build_subcatchments_rq": "child-0",
         "jobs:1,func:abstract_watershed_rq": "child-1",
     }
-
-
-def test_build_subcatchments_root_validates_and_copies_private_policy_snapshot(
-    monkeypatch: pytest.MonkeyPatch,
-) -> None:
-    events: list[tuple] = []
-    snapshot = {
-        "schema_version": 1,
-        "runid": "demo",
-        "actor_token_class": "user",
-        "actor_user_id": 17,
-        "config_policy": "warn",
-        "effective_policy": "error",
-        "source": "user_preference",
-    }
-    argument = {
-        "schema_version": 1,
-        "effective_policy": "error",
-        "source": "user_preference",
-    }
-
-    class DummyRedis:
-        def __init__(self, **_kwargs) -> None:
-            self.values = {}
-
-        def __enter__(self):
-            return self
-
-        def __exit__(self, *_args) -> None:
-            return None
-
-        def lock(self, *_args, **_kwargs):
-            return self
-
-        def get(self, key):
-            return self.values.get(key)
-
-        def set(self, key, value, **_kwargs):
-            self.values[key] = value
-
-        def delete(self, key):
-            self.values.pop(key, None)
-
-    class DummyQueue:
-        def __init__(self, connection) -> None:
-            self.connection = connection
-
-    def _enqueue_tree(
-        _redis_conn,
-        _queue,
-        *,
-        runid,
-        updates,
-        boundary_policy,
-        child_meta,
-        receipt_meta,
-        parent_job,
-    ):
-        build = SimpleNamespace(id="child-0")
-        receipt = SimpleNamespace(id="child-1")
-        events.append(
-            (
-                project_rq.build_subcatchments_rq,
-                (runid, updates, boundary_policy, True),
-                None,
-                child_meta,
-            )
-        )
-        events.append(
-            (
-                project_rq.abstract_watershed_rq,
-                (runid, True),
-                build,
-                {
-                    **receipt_meta,
-                    "wbt_completion_receipt_for": build.id,
-                },
-            )
-        )
-        parent_job.meta["jobs:0,func:build_subcatchments_rq"] = build.id
-        parent_job.meta["jobs:1,func:abstract_watershed_rq"] = receipt.id
-        parent_job.save()
-        return build, receipt
-
-    current_job = SimpleNamespace(
-        id="root",
-        meta={
-            project_rq.WBT_BOUNDARY_POLICY_SNAPSHOT_KEY: snapshot,
-            "auth_actor": {"token_class": "user", "user_id": 17},
-        },
-        save=lambda: None,
-    )
-    monkeypatch.setattr(project_rq, "get_current_job", lambda: current_job)
-    monkeypatch.setattr(project_rq.StatusMessenger, "publish", lambda *_args: None)
-    monkeypatch.setattr(project_rq, "redis_connection_kwargs", lambda _db: {})
-    monkeypatch.setattr(project_rq.redis, "Redis", DummyRedis)
-    monkeypatch.setattr(project_rq, "Queue", DummyQueue)
-    monkeypatch.setattr(
-        project_rq,
-        "_enqueue_serial_subcatchment_tree",
-        _enqueue_tree,
-    )
-
-    project_rq.build_subcatchments_and_abstract_watershed_rq(
-        "demo",
-        boundary_policy=argument,
-    )
-    first_child_argument = copy.deepcopy(events[0][1])
-    first_child_meta = copy.deepcopy(events[0][3])
-    project_rq.build_subcatchments_and_abstract_watershed_rq(
-        "demo",
-        boundary_policy=argument,
-    )
-
-    assert events[0][1] == ("demo", {}, argument, True)
-    assert events[0][3] == {
-        project_rq.WBT_BOUNDARY_POLICY_SNAPSHOT_KEY: snapshot,
-        "auth_actor": {"token_class": "user", "user_id": 17},
-    }
-    assert len(events) == 4
-    assert events[1][1] == ("demo", True)
-    assert events[1][2].id == "child-0"
-    assert events[1][3] == {
-        "wbt_completion_receipt_for": "child-0",
-        "auth_actor": {"token_class": "user", "user_id": 17},
-    }
-    assert events[2][1] == first_child_argument
-    assert events[2][3] == first_child_meta
-
-
-def test_build_subcatchments_root_rejects_mismatched_policy_without_children(
-    monkeypatch: pytest.MonkeyPatch,
-) -> None:
-    snapshot = {
-        "schema_version": 1,
-        "runid": "demo",
-        "actor_token_class": "user",
-        "actor_user_id": 17,
-        "config_policy": "warn",
-        "effective_policy": "error",
-        "source": "user_preference",
-    }
-
-    class NeverQueue:
-        def __init__(self, *args, **kwargs) -> None:
-            raise AssertionError("invalid snapshots must not create a queue")
-
-    current_job = SimpleNamespace(
-        id="root",
-        meta={project_rq.WBT_BOUNDARY_POLICY_SNAPSHOT_KEY: snapshot},
-        dependent_ids=[],
-        save_meta=lambda: None,
-    )
-    monkeypatch.setattr(project_rq, "get_current_job", lambda: current_job)
-    monkeypatch.setattr(project_rq.StatusMessenger, "publish", lambda *_args: None)
-    monkeypatch.setattr(project_rq, "Queue", NeverQueue)
-
-    with pytest.raises(project_rq.WbtBoundaryPolicySnapshotError):
-        project_rq.build_subcatchments_and_abstract_watershed_rq(
-            "demo",
-            boundary_policy={
-                "schema_version": 1,
-                "effective_policy": "warn",
-                "source": "user_preference",
-            },
-        )
-
-    assert current_job.meta["error"]["code"] == (
-        "wbt_boundary_policy_snapshot_invalid"
-    )
-    assert "details" not in current_job.meta["error"]
 
 
 def test_build_channels_rq_rejects_archive_form_root(
@@ -1769,7 +1532,6 @@ def test_watershed_mutation_rqs_clear_scoped_cache_before_hydration(
     class DummyWatershed:
         delineation_backend_is_topaz = True
         delineation_backend_is_wbt = False
-        wbt_boundary_touch_behavior = "warn"
         subwta = "watershed/SUBWTA.ARC"
         logger = SimpleNamespace(warning=lambda *_args, **_kwargs: None)
 
@@ -1785,7 +1547,7 @@ def test_watershed_mutation_rqs_clear_scoped_cache_before_hydration(
         def set_outlet(self, outlet_lng: float, outlet_lat: float) -> None:
             events.append(("set_outlet", outlet_lng, outlet_lat))
 
-        def build_subcatchments(self, *, boundary_touch_behavior=None) -> None:
+        def build_subcatchments(self) -> None:
             events.append(("build_subcatchments", None))
 
         def abstract_watershed(self) -> None:
