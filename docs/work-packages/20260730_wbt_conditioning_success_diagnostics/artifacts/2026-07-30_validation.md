@@ -28,3 +28,13 @@ it is not claimed as local completion evidence.
 
 Independent final governance and operations/security reviews passed with no
 unresolved high- or medium-severity findings.
+
+## Completion-summary overwrite follow-up
+
+- Live root job: `ea906fe3-bb11-4268-bfe7-b63a38274614`.
+- Producer child: `f26c3083-b3ff-4aaf-bfb1-198d633f863b`.
+- Aggregate `jobstatus` correctly returned the validated fill diagnostic with
+  maximum raise `379.22729369142326 m`.
+- The controller wrote that summary before `channel.show()` replaced it with
+  layer-loading status. The conformance fix preserves the validated summary as
+  the terminal status after the asynchronous layer refresh.

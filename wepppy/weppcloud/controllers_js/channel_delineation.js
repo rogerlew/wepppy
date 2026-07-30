@@ -371,6 +371,7 @@ var ChannelDelineation = (function () {
         channel.labels = L.layerGroup();
         channel._completion_seen = false;
         channel._conditioning_diagnostics_token_seen = false;
+        channel._conditioning_diagnostics_summary = null;
         var uploadDemState = {
             ready: !!(formElement && formElement.dataset && formElement.dataset.uploadedDem === "true"),
             extent: null,
@@ -973,6 +974,7 @@ var ChannelDelineation = (function () {
                         return;
                     }
                     if (conditioningDiagnostics && statusAdapter) {
+                        channel._conditioning_diagnostics_summary = conditioningDiagnostics.summary;
                         statusAdapter.text(conditioningDiagnostics.summary);
                     }
                     channel._completion_seen = true;
@@ -1062,6 +1064,7 @@ var ChannelDelineation = (function () {
             channel.remove();
             channel._completion_seen = false;
             channel._conditioning_diagnostics_token_seen = false;
+            channel._conditioning_diagnostics_summary = null;
             try {
                 Outlet.getInstance().remove();
             } catch (err) {
@@ -1255,7 +1258,11 @@ var ChannelDelineation = (function () {
                     }
 
                     if (statusAdapter && typeof statusAdapter.html === "function") {
-                        statusAdapter.html(taskMsg + "... Success");
+                        if (channel._conditioning_diagnostics_summary) {
+                            statusAdapter.text(channel._conditioning_diagnostics_summary);
+                        } else {
+                            statusAdapter.html(taskMsg + "... Success");
+                        }
                     }
                 })
                 .catch(function (error) {
@@ -1295,7 +1302,9 @@ var ChannelDelineation = (function () {
                     }
 
                     if (statusAdapter && typeof statusAdapter.text === "function") {
-                        statusAdapter.text(taskMsg + " – done");
+                        statusAdapter.text(
+                            channel._conditioning_diagnostics_summary || taskMsg + " – done"
+                        );
                     }
 
                     emit("channel:layers:loaded", { mode: 1 });
@@ -1369,7 +1378,10 @@ var ChannelDelineation = (function () {
                     }
 
                     if (statusAdapter && typeof statusAdapter.text === "function") {
-                        statusAdapter.text("Displaying SUBWTA channels – done");
+                        statusAdapter.text(
+                            channel._conditioning_diagnostics_summary
+                                || "Displaying SUBWTA channels – done"
+                        );
                     }
 
                     emit("channel:layers:loaded", { mode: 2 });

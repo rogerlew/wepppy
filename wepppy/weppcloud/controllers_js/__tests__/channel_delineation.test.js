@@ -282,6 +282,35 @@ describe("Channel Delineation controller", () => {
         expect(document.getElementById("status").querySelector("*")).toBeNull();
     });
 
+    test("successful diagnostics remain after channel layers refresh", async () => {
+        channel.rq_job_id = "root-job";
+        channel.report = jest.fn(() => Promise.resolve());
+        requestMock.mockResolvedValueOnce({ body: "1" });
+
+        channel.triggerEvent("BUILD_CHANNELS_TASK_COMPLETED", {
+            status: {
+                conditioning_diagnostics: {
+                    schema_version: 1,
+                    root_job_id: "root-job",
+                    producer_job_id: "producer-job",
+                    operation_id: "0123456789abcdef0123456789abcdef",
+                    method: "fill",
+                    elevation_unit: "m",
+                    maximum_raise: 379,
+                    maximum_cut: 0,
+                    summary: "Fill completed. Maximum terrain raise: 379 m; maximum terrain cut: 0.00 m."
+                }
+            }
+        });
+
+        await Promise.resolve();
+        await Promise.resolve();
+        await Promise.resolve();
+
+        expect(document.getElementById("status").textContent).toContain("379 m");
+        expect(document.getElementById("status").textContent).not.toContain("Displaying Channel Map");
+    });
+
     test("required diagnostics fail closed when the payload is missing", () => {
         channel.rq_job_id = "root-job";
         channel.show = jest.fn();

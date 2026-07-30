@@ -93,3 +93,13 @@ Initial reviews found underspecified schema, correlation, atomicity, failure,
 fallback, and rollback behavior. The exact diagnostics schema now defines those
 boundaries and amends both canonical jobstatus documents. Both independent
 post-fix reviews passed with no remaining blocking/high/medium findings.
+
+### 2026-07-30: Completion-summary overwrite conformance fix
+
+Live job `ea906fe3-bb11-4268-bfe7-b63a38274614` confirmed that the worker and
+aggregate `jobstatus` response carried the validated fill diagnostic (maximum
+raise `379.22729369142326 m`). Both channel controllers rendered it and then
+overwrote it during their asynchronous layer refresh. The unchanged contract
+requires the diagnostic to remain the successful completion summary. Regression
+coverage now verifies the terminal summary after layer refresh; no payload,
+schema, threshold, or numerical behavior changes.
