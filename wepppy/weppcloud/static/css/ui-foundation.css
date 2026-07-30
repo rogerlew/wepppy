@@ -2674,6 +2674,27 @@ a.wc-maturity-pill:focus-visible {
   border-color: var(--wc-color-accent);
 }
 
+.wc-user-preferences__fields {
+  display: grid;
+  gap: var(--wc-space-xl);
+  margin-block: var(--wc-space-lg);
+}
+
+.wc-user-preferences__status {
+  min-height: 1.5rem;
+  margin-block: var(--wc-space-md);
+  color: var(--wc-color-text-muted);
+}
+
+.wc-user-preferences__error {
+  margin-block: var(--wc-space-md);
+  color: var(--wc-color-critical);
+}
+
+.wc-user-preferences__error .pure-button {
+  margin-inline-start: var(--wc-space-sm);
+}
+
 .wc-auth-form .pure-controls {
   margin-top: var(--wc-space-xl);
   padding: 0;

@@ -535,6 +535,7 @@ def preferences():
         return error_factory('Current user is missing an id.', status_code=400)
 
     try:
+        wants_json = request.accept_mimetypes.best == 'application/json'
         if request.method == 'GET':
             return _render_preferences(load_user_preferences(int(user_id)))
 
@@ -554,13 +555,30 @@ def preferences():
             wbt_boundary_touch_behavior=boundary_behavior,
         )
         if errors:
+            if wants_json:
+                return jsonify({
+                    'ok': False,
+                    'message': 'Correct the highlighted preference values.',
+                    'errors': errors,
+                }), 400
             return _render_preferences(submitted, errors, status_code=400)
 
-        save_user_preferences(
+        saved = save_user_preferences(
             int(user_id),
             unit_system,
             boundary_behavior,
         )
+        if wants_json:
+            return jsonify({
+                'ok': True,
+                'message': 'Preferences saved.',
+                'preferences': {
+                    'unit_system': saved.unit_system,
+                    'wbt_boundary_touch_behavior': (
+                        saved.wbt_boundary_touch_behavior
+                    ),
+                },
+            })
         flash('User preferences saved.', 'success')
         return redirect(url_for('user.preferences'))
     except (PreferenceIdentityError, StoredPreferenceError, SQLAlchemyError):

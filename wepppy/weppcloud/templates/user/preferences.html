@@ -6,42 +6,82 @@
 {% block content %}
 <section class="wc-user-preferences">
   <p>
-    These defaults apply when you create a new project. Existing, shared, and
-    forked projects keep their saved settings.
+    These preferences follow your account when you use an authorized project.
+    They do not change the project's saved units or WBT configuration.
+    Changes save automatically.
+  </p>
+  <p>
+    {{ usersum_doc_link(
+      'weppcloud',
+      'user-preferences.md',
+      'Learn how user preferences affect projects'
+    ) }}.
   </p>
 
   <form method="post"
         action="{{ url_for('user.preferences') }}"
-        class="pure-form pure-form-stacked">
+        class="pure-form pure-form-stacked"
+        data-user-preferences-form>
     <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
 
-    {{ ui.select_field(
-      "unit_system",
-      "Default units",
-      unit_system_options,
-      selected=values.unit_system,
-      help="Auto uses the selected project configuration.",
-      error=errors.get("unit_system"),
-      field_name="unit_system"
-    ) }}
+    <div class="wc-user-preferences__fields">
+      {{ ui.select_field(
+        "unit_system",
+        "Default units",
+        unit_system_options,
+        selected=values.unit_system,
+        help=(
+          "Auto uses each project's saved configuration. SI or English "
+          "changes display units for you only."
+        ),
+        error=errors.get("unit_system"),
+        field_name="unit_system"
+      ) }}
 
-    {{ ui.select_field(
-      "wbt_boundary_touch_behavior",
-      "When a WBT watershed reaches the DEM boundary",
-      wbt_boundary_options,
-      selected=values.wbt_boundary_touch_behavior,
-      help="This default is saved into new projects that use WBT delineation.",
-      error=errors.get("wbt_boundary_touch_behavior"),
-      field_name="wbt_boundary_touch_behavior"
-    ) }}
+      {{ ui.select_field(
+        "wbt_boundary_touch_behavior",
+        "When a WBT watershed reaches the DEM boundary",
+        wbt_boundary_options,
+        selected=values.wbt_boundary_touch_behavior,
+        help=(
+          "Auto uses the project's configured behavior. Warn may return a "
+          "boundary-touching watershed with a warning. Stop with an error "
+          "lets you choose a different outlet or enlarge the project extent."
+        ),
+        error=errors.get("wbt_boundary_touch_behavior"),
+        field_name="wbt_boundary_touch_behavior"
+      ) }}
+    </div>
+
+    <p class="wc-user-preferences__status"
+       data-user-preferences-status
+       role="status"
+       aria-live="polite"
+       aria-atomic="true">Changes save automatically.</p>
+    <div class="wc-user-preferences__error"
+         data-user-preferences-error
+         role="alert"
+         hidden>
+      <span data-user-preferences-error-message></span>
+      <button type="button"
+              class="pure-button pure-button-secondary"
+              data-user-preferences-retry>Retry save</button>
+    </div>
 
     <div class="wc-button-row">
-      <button type="submit" class="pure-button pure-button-primary">
-        Save preferences
-      </button>
+      <noscript>
+        <button type="submit" class="pure-button pure-button-primary">
+          Save preferences
+        </button>
+      </noscript>
       <a class="pure-button pure-button-secondary"
          href="{{ url_for('user.profile') }}">Back to Profile</a>
     </div>
   </form>
 </section>
+{% endblock %}
+
+{% block script_extras %}
+  {{ super() }}
+  <script src="{{ static_url('js/user_preferences.js') }}" defer></script>
 {% endblock %}

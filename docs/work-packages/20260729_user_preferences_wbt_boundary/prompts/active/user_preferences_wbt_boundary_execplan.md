@@ -223,11 +223,22 @@ enlarge the project extent.
   `noscript` POST fallback. Recorded the missing Usersum runtime-index entry
   behind the WBT guide 404. Implementation follows the standalone
   contract-first checkpoint.
+- [x] (2026-07-30 15:35 UTC) Implemented the preference JSON response,
+  serialized auto-save controller, live status/error/retry feedback, clearer
+  copy and spacing, and `noscript` fallback. Rebuilt the Usersum runtime index
+  and added regression coverage for the exact legacy WBT guide URL.
+- [x] (2026-07-30 15:38 UTC) Passed the final interaction validation: all
+  1,253 WEPPcloud Python tests, frontend lint, all 105 frontend suites and 748
+  tests, test-stub completeness, Usersum validation, documentation lint,
+  broad-exception enforcement, and diff checks.
 
 ## Surprises & Discoveries
 
 - Observation: `Unitizer` preferences are currently run-scoped, not
   account-scoped.
+- Observation: The WBT channel-delineation Markdown and manifest entry were
+  present, but the generated Usersum runtime index had not been rebuilt.
+  Runtime routing therefore returned 404 until the catalog was regenerated.
   Evidence: `wepppy/nodb/unitizer.py` persists `unitizer.nodb` under each run.
 
 - Observation: new-project creation already supports an explicit

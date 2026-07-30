@@ -32,8 +32,6 @@ out-of-scope deletion. If the canary runs on 2026-07-30, review is due
 - [ ] Obtain explicit operator reconfirmation and designation of the
   requesting-operator account plus a second pre-existing active account, then
   review and run a Forest-specific corrected canary.
-- [ ] Implement the accepted User Preferences auto-save interaction and repair
-  the WBT Usersum runtime-catalog link.
 
 ### Ready
 
@@ -345,8 +343,27 @@ config or explicit user preference can choose fail-closed handling.
   readiness.
 - [x] Forest migration, schema verification, service restart if required, and
   authenticated two-user same-project canary pass.
+- [x] Implemented the contract-first User Preferences auto-save interaction,
+  accessible save/error/retry feedback, increased field spacing, current
+  guidance, and the repaired WBT Usersum runtime-catalog entry
+  (2026-07-30 15:38 UTC).
 
 ## Progress Notes
+
+### 2026-07-30 15:38 UTC: Preference auto-save and Usersum repair
+
+Both preference selectors now save the complete form immediately on change.
+Requests are serialized so a later change is replayed after an active request,
+and the page exposes polite saving/success status plus an assertive error and
+retry action. The ordinary Save button remains only as a `noscript` fallback.
+The stale explanatory copy and spacing were corrected.
+
+The WBT guide source and manifest entry already existed; its 404 came from a
+stale generated runtime index. The index was rebuilt and the exact legacy URL
+now has route regression coverage. The complete WEPPcloud test selection
+passes with 1,253 tests, and the frontend, documentation, Usersum, test-stub,
+broad-exception, and diff gates pass. OPS-PA-01 and its corrected Forest
+canary remain independently open.
 
 ### 2026-07-30 04:10 UTC: Scaffold
 

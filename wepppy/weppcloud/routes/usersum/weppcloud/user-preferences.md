@@ -40,10 +40,14 @@ user, not the project owner, and does not become another user's preference.
 
 ## Save and verify
 
-Select both defaults and choose **Save preferences**. A confirmation appears
-after the page reloads. Your next authorized project view and next WBT
-delineation submission use the saved choices. Work already queued keeps the
-snapshot it received when submitted.
+Each selection saves as soon as you change it. The page shows
+**Saving preferences…** while the request is active and
+**Preferences saved.** when the latest choices are stored. If saving fails,
+the page keeps your selections, shows the error, and provides **Retry save**.
+
+Your next authorized project view and next WBT delineation submission use the
+saved choices. Work already queued keeps the snapshot it received when
+submitted.
 
 See [Channel Delineation](controls/channel-delineation.md) for extent,
 conditioning, and boundary troubleshooting.

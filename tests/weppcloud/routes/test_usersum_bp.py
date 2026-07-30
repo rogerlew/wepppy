@@ -69,6 +69,19 @@ def test_usersum_view_rewrites_cross_category_markdown_links(usersum_client) -> 
     assert 'href="/usersum/doc/usersum.input_file_specifications.cligenparms"' in body
 
 
+def test_usersum_view_renders_wbt_channel_delineation_alias(usersum_client) -> None:
+    usersum_routes._catalog.cache_clear()
+    try:
+        response = usersum_client.get(
+            "/usersum/view/weppcloud/wbt-channel-delineation.md"
+        )
+    finally:
+        usersum_routes._catalog.cache_clear()
+
+    assert response.status_code == 200
+    assert "WBT Channel Delineation" in response.get_data(as_text=True)
+
+
 def test_usersum_view_footer_exposes_doc_source_links(usersum_client) -> None:
     response = usersum_client.get("/usersum/view/db/climate_file.parameters.md")
     assert response.status_code == 200

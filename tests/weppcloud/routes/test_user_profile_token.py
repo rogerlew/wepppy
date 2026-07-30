@@ -86,6 +86,9 @@ def profile_auth_client(monkeypatch: pytest.MonkeyPatch):
     Security(app, user_datastore)
     app.jinja_env.globals["static_url"] = lambda path: f"/static/{path}"
     app.jinja_env.globals["csrf_token"] = lambda: "test-csrf-token"
+    app.jinja_env.globals["usersum_doc_link"] = (
+        lambda _category, _filename, label: label
+    )
 
     @app.login_manager.unauthorized_handler
     def unauthorized():
@@ -181,6 +184,15 @@ def test_preferences_get_renders_exact_choices(profile_auth_client, monkeypatch)
     assert "Stop with an error" in body
     assert 'value="si" selected' in body
     assert 'value="error" selected' in body
+    assert "These preferences follow your account" in body
+    assert "Changes save automatically." in body
+    assert "changes display units for you only" in body
+    assert "choose a different outlet or enlarge the project extent" in body
+    assert 'data-user-preferences-status' in body
+    assert 'data-user-preferences-error' in body
+    assert 'class="wc-user-preferences__fields"' in body
+    assert 'src="/static/js/user_preferences.js"' in body
+    assert "<noscript>" in body
 
 
 def test_preferences_invalid_post_reports_both_fields_without_write(
@@ -235,6 +247,81 @@ def test_preferences_success_uses_prg_and_atomic_save(
     assert writes == [(user_id, "english", "error")]
     with client.session_transaction() as session:
         assert ("success", "User preferences saved.") in session["_flashes"]
+
+
+def test_preferences_json_success_returns_saved_complete_record(
+    profile_auth_client,
+    monkeypatch,
+) -> None:
+    client = profile_auth_client["client"]
+    module = profile_auth_client["module"]
+    user_id = profile_auth_client["user_id"]
+    writes = []
+
+    def save_preferences(*args):
+        writes.append(args)
+        return module.UserPreferenceValues("english", "warn")
+
+    monkeypatch.setattr(module, "save_user_preferences", save_preferences)
+    client.get(f"/test-login/{user_id}")
+
+    response = client.post(
+        "/preferences",
+        data={
+            "unit_system": "english",
+            "wbt_boundary_touch_behavior": "warn",
+        },
+        headers={"Accept": "application/json"},
+    )
+
+    assert response.status_code == 200
+    assert writes == [(user_id, "english", "warn")]
+    assert response.get_json() == {
+        "ok": True,
+        "message": "Preferences saved.",
+        "preferences": {
+            "unit_system": "english",
+            "wbt_boundary_touch_behavior": "warn",
+        },
+    }
+
+
+def test_preferences_json_validation_error_is_bounded_and_does_not_write(
+    profile_auth_client,
+    monkeypatch,
+) -> None:
+    client = profile_auth_client["client"]
+    module = profile_auth_client["module"]
+    user_id = profile_auth_client["user_id"]
+    writes = []
+    monkeypatch.setattr(
+        module,
+        "save_user_preferences",
+        lambda *args: writes.append(args),
+    )
+    client.get(f"/test-login/{user_id}")
+
+    response = client.post(
+        "/preferences",
+        data={
+            "unit_system": "invalid",
+            "wbt_boundary_touch_behavior": "",
+        },
+        headers={"Accept": "application/json"},
+    )
+
+    assert response.status_code == 400
+    assert writes == []
+    assert response.get_json() == {
+        "ok": False,
+        "message": "Correct the highlighted preference values.",
+        "errors": {
+            "unit_system": "Select a valid default unit system.",
+            "wbt_boundary_touch_behavior": (
+                "Select a valid WBT DEM-boundary behavior."
+            ),
+        },
+    }
 
 
 def test_preferences_post_enforces_csrf(profile_auth_client) -> None:
