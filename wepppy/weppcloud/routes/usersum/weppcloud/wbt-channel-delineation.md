@@ -150,7 +150,7 @@ the DEM before WEPPcloud calculates flow direction and extracts channels.
 | --- | --- | --- |
 | **Fill** | Raises every depression to its lowest recognized spill elevation and adds a small gradient across resulting flats | Cases where depressions are known artifacts and the required fill depths are acceptable |
 | **Breach** | Uses Whitebox's legacy hybrid breach-first, fill-second method; cuts drainage paths with effectively unrestricted depth and length unless the caller supplies limits | Reproducing earlier WBT runs or testing whether an unrestricted breach can connect a large depression to lower terrain |
-| **Breach (Least Cost)** | Searches within the configured distance for a path that minimizes excavation; WEPPcloud then fills depressions the bounded search does not resolve | The preferred general-purpose WBT option, especially for road embankments and other narrow barriers |
+| **Breach (Least Cost)** | Searches within the configured distance for a path that minimizes excavation; WEPPcloud stops instead of filling depressions the bounded search cannot resolve | Useful for road embankments and other narrow barriers when unresolved depressions should require review |
 | **Topaz Conditioning Algorithm** | Applies TOPAZ-compatible FILDEP filling and one- or two-cell obstruction adjustment, followed by RELIEF flat resolution | WEPP/TOPAZ-compatible workflows and projects calibrated around TOPAZ drainage behavior |
 
 No conditioning method is universally best. Compare the resulting channels
@@ -192,15 +192,34 @@ converts this distance to raster cells before calling WhiteboxTools.
   but can increase runtime and permit longer cuts.
 - A smaller distance restricts the search near each depression, but may leave
   more depressions unresolved by breaching.
-- WEPPcloud enables the tool's fill fallback. An unresolved depression is
-  therefore filled; it is not preserved unchanged.
+- WEPPcloud disables the tool's fill fallback and requires every depression to
+  be resolved by the bounded search. If any remain unresolved, channel
+  delineation stops before accepting the conditioned DEM.
 - A larger search distance does not force drainage to the raster edge. The
   algorithm may select a nearer, lower-cost target instead.
 
 Use the displayed default unless inspection shows that important barriers
 cannot be resolved within that distance. If a plausible outlet lies farther
-away, increase the distance and inspect both the resulting breach and any
-remaining filled areas. The value must be greater than zero.
+away, increase the distance and inspect the resulting breach. The value must
+be greater than zero.
+
+### If least-cost breaching cannot resolve a depression
+
+The channel delineation summary reports the unresolved-depression count and
+the selected search distance. WEPPcloud does not fill the remaining
+depressions because a deep fill can substantially raise terrain and reroute
+flow.
+
+Retry only after choosing an appropriate correction:
+
+- increase **Breach least cost distance** when the expected drainage target is
+  farther away;
+- enlarge or reposition the DEM extent so the expected outlet is represented;
+- inspect the DEM crop and NoData mask for a closed or missing edge; or
+- deliberately select another conditioning method when its terrain changes
+  better match the modeling intent.
+
+WEPPcloud does not choose one of these alternatives automatically.
 
 ## Build the Channels
 

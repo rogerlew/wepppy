@@ -141,6 +141,32 @@ log keyed by `error_id` plus the existing login- and Admin/Root-protected
 HTTP and requires authenticated SSH plus Docker permission. This exception
 does not change traceback behavior for unrelated unexpected job failures.
 
+### WBT unresolved least-cost depression controlled failure
+
+When channel delineation selects `breach_least_cost` and the bounded native
+search leaves one or more depressions unresolved, WEPPcloud does not apply the
+Whitebox fill fallback. The `build_channels_rq` child fails with:
+
+- `error.code="wbt_unresolved_depressions"`;
+- the exact actionable message:
+  `Channel delineation stopped because Breach (Least Cost) could not resolve all depressions within the selected search distance. WEPPcloud did not fill the unresolved depressions because filling can substantially raise terrain and reroute flow. Increase the breach distance, enlarge or reposition the DEM to include the expected outlet, inspect DEM and NoData boundaries, or choose another conditioning method, then build channels again.`;
+- `error.details.unresolved_depression_count` as a positive integer;
+- `error.details.search_distance_m` as a positive number;
+- `error.details.search_distance_cells` as a positive integer; and
+- a correlation `error_id`.
+
+Clients should append the validated search distance, unresolved count, and
+correlation identifier to the primary summary as plain text. These additions
+must not replace or truncate the exact instructional message.
+
+Open `jobinfo` returns `exc_info=null` for this expected failure and exposes
+only the allowlisted error, numeric details, and `error_id`. The aggregate
+orchestration root surfaces the same terminal child failure. Channel-build
+completion is not timestamped, no fallback-filled `relief.tif` is accepted,
+and a new submission may retry with a larger distance, changed DEM extent, or
+different explicit conditioning method. Unrelated WBT and unexpected failures
+retain their existing traceback behavior.
+
 ### WBT initiating-user policy snapshot
 
 SURF-14A may attach private root/child metadata named

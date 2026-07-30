@@ -10,6 +10,10 @@ import pytest
 import wepppy.rq.project_rq as project_rq
 from wepppy.runtime_paths.errors import NoDirError
 from wepppy.nodb.core.watershed_errors import WatershedBoundaryTouchesEdgeError
+from wepppy.topo.wbt import (
+    WBT_UNRESOLVED_DEPRESSION_MESSAGE,
+    WbtUnresolvedDepressionsError,
+)
 
 pytestmark = pytest.mark.unit
 
@@ -833,6 +837,65 @@ def test_build_channels_rq_preserves_applied_wbt_conditioning_when_build_fails(
         )
 
     assert watershed.wbt_fill_or_breach == "fill"
+
+
+def test_build_channels_rq_records_controlled_unresolved_depression_failure(
+    monkeypatch: pytest.MonkeyPatch,
+    tmp_path: Path,
+) -> None:
+    _run_wd, _set_archive_roots, _call_roots = _stub_rq_context(monkeypatch, tmp_path)
+    messages: list[str] = []
+
+    class _Job:
+        id = "build-channels-controlled"
+        meta: dict = {}
+
+        def save_meta(self) -> None:
+            return None
+
+    job = _Job()
+    monkeypatch.setattr(project_rq, "get_current_job", lambda: job)
+    monkeypatch.setattr(
+        project_rq.StatusMessenger,
+        "publish",
+        lambda _channel, message: messages.append(message),
+    )
+    monkeypatch.setattr(project_rq, "clear_nodb_file_cache", lambda *_args, **_kwargs: None)
+
+    class _Watershed:
+        delineation_backend_is_topaz = False
+        delineation_backend_is_wbt = True
+
+        def build_channels(self, _csa: float, _mcl: float) -> None:
+            raise WbtUnresolvedDepressionsError(
+                unresolved_depression_count=377,
+                search_distance_m=1000,
+                search_distance_cells=33,
+            )
+
+    monkeypatch.setattr(project_rq.Watershed, "getInstance", lambda _wd: _Watershed())
+
+    with pytest.raises(WbtUnresolvedDepressionsError):
+        project_rq.build_channels_rq(
+            "demo",
+            csa=5.0,
+            mcl=60.0,
+            stream_pruning_method=None,
+            wbt_fill_or_breach=None,
+            wbt_blc_dist=None,
+        )
+
+    assert job.meta["error"] == {
+        "code": "wbt_unresolved_depressions",
+        "message": WBT_UNRESOLVED_DEPRESSION_MESSAGE,
+        "details": {
+            "unresolved_depression_count": 377,
+            "search_distance_m": 1000.0,
+            "search_distance_cells": 33,
+        },
+    }
+    assert job.meta["error_id"]
+    assert any(WBT_UNRESOLVED_DEPRESSION_MESSAGE in message for message in messages)
 
 
 def test_build_landuse_rq_rejects_archive_form_root(

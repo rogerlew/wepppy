@@ -66,6 +66,10 @@ from wepppy.nodb.core.watershed_errors import (
     WATERSHED_BOUNDARY_TOUCH_MESSAGE,
     WatershedBoundaryTouchesEdgeError,
 )
+from wepppy.topo.wbt import (
+    WBT_UNRESOLVED_DEPRESSION_MESSAGE,
+    WbtUnresolvedDepressionsError,
+)
 from wepppy.nodb.mods.disturbed import Disturbed
 from wepppy.nodb.mods.ash_transport import Ash
 from wepppy.nodb.mods.debris_flow import DebrisFlow
@@ -1361,6 +1365,43 @@ def build_channels_rq(
         
         prep = RedisPrep.getInstance(wd)
         prep.timestamp(TaskEnum.build_channels)
+    except WbtUnresolvedDepressionsError as exc:
+        error_id = __import__("uuid").uuid4().hex
+        job.meta["error"] = {
+            "code": exc.code,
+            "message": WBT_UNRESOLVED_DEPRESSION_MESSAGE,
+            "details": {
+                "unresolved_depression_count": exc.unresolved_depression_count,
+                "search_distance_m": exc.search_distance_m,
+                "search_distance_cells": exc.search_distance_cells,
+            },
+        }
+        job.meta["error_id"] = error_id
+        job.meta.pop("exc_string", None)
+        job.save_meta()
+        __import__("logging").getLogger(__name__).error(
+            "Controlled WBT unresolved-depression failure "
+            "[error_id=%s runid=%s unresolved_depression_count=%s "
+            "search_distance_m=%s search_distance_cells=%s]",
+            error_id,
+            runid,
+            exc.unresolved_depression_count,
+            exc.search_distance_m,
+            exc.search_distance_cells,
+            extra={
+                "error_id": error_id,
+                "runid": runid,
+                "unresolved_depression_count": exc.unresolved_depression_count,
+                "search_distance_m": exc.search_distance_m,
+                "search_distance_cells": exc.search_distance_cells,
+            },
+        )
+        StatusMessenger.publish(
+            status_channel,
+            f"rq:{job.id} EXCEPTION {func_name}({runid}) "
+            f"{WBT_UNRESOLVED_DEPRESSION_MESSAGE}",
+        )
+        raise
     except Exception:
         # Boundary catch: preserve contract behavior while logging unexpected failures.
         __import__("logging").getLogger(__name__).exception("Boundary exception at wepppy/rq/project_rq.py:540", extra={"runid": locals().get("runid"), "config": locals().get("config"), "job_id": locals().get("job_id")})

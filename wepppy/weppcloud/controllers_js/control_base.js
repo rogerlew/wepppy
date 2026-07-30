@@ -414,6 +414,20 @@ function controlBase() {
 
         Promise.resolve(fetchJobInfo)
             .then(function (payload) {
+                if (payload && payload.error && typeof payload.error === "object" && payload.error.message) {
+                    const details = payload.error.details || {};
+                    const diagnostic = (
+                        Number.isFinite(Number(details.search_distance_m))
+                        && Number.isInteger(Number(details.unresolved_depression_count))
+                    )
+                        ? ` (Selected breach distance ${Number(details.search_distance_m)} m; unresolved depressions ${Number(details.unresolved_depression_count)}.)`
+                        : "";
+                    const errorId = payload.error_id ? ` [Error ID ${payload.error_id}]` : "";
+                    errorPayload.error.message = String(payload.error.message) + diagnostic + errorId;
+                    self.pushResponseStacktrace(self, errorPayload);
+                    emitFailure();
+                    return;
+                }
                 const stacktrace = extractJobInfoStacktrace(payload);
                 if (stacktrace) {
                     const stackLines = splitStacktrace(stacktrace);

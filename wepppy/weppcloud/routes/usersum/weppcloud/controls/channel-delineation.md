@@ -52,7 +52,8 @@ end-user guidance on all WBT inputs and choices.
 - **Depression smoothing**
   - Fill: fills sinks before routing.
   - Breach: removes barriers by breaching.
-  - Breach (Least Cost): preferred for rugged terrain; uses a cost-based breach.
+  - Breach (Least Cost): uses a bounded cost-based breach and stops with
+    guidance when the selected distance leaves depressions unresolved.
   - Topaz Conditioning Algorithm: reproduces TOPAZ FILDEP/RELIEF depression
     filling, narrow-obstruction adjustment, and flat resolution before the
     normal Weppcloud-WBT flow and channel steps.
@@ -61,6 +62,10 @@ end-user guidance on all WBT inputs and choices.
 - **Breach distance**
   - Only used with Breach (Least Cost).
   - Units: meters.
+  - If the search cannot resolve every depression, channel building fails
+    without filling the unresolved areas. The summary recommends increasing
+    the distance, adjusting the DEM extent, inspecting DEM/NoData boundaries,
+    or deliberately selecting another conditioning method.
 
 TOPAZ uses only **MCL** and **CSA**.
 

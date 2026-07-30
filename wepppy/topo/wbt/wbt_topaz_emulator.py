@@ -7,6 +7,7 @@ import json
 import logging
 import math
 import os
+import re
 import subprocess
 import time
 from collections import defaultdict, deque
@@ -29,7 +30,7 @@ from wepppy.topo.watershed_abstraction.support import (
 )
 from wepppy.topo.wbt.wbt_documentation import generate_wbt_documentation
 
-from whitebox_tools import WhiteboxTools
+from whitebox_tools import WhiteboxAppError, WhiteboxTools
 
 _outlet_template_geojson = """{{
 "type": "FeatureCollection",
@@ -55,6 +56,52 @@ _point_template_geojson = """{{ "type": "Feature", "properties": {{ "Id": {id} }
 
 TOPAZ_CONDITION_MAX_OBSTRUCTION_WIDTH = 2
 TOPAZ_CONDITION_TIMEOUT_SECONDS = 540
+WBT_UNRESOLVED_DEPRESSION_PATTERN = re.compile(
+    r"WBT_UNRESOLVED_DEPRESSIONS count=(?P<count>\d+) "
+    r"max_dist_cells=(?P<max_dist_cells>\d+)"
+)
+WBT_UNRESOLVED_DEPRESSION_MESSAGE = (
+    "Channel delineation stopped because Breach (Least Cost) could not resolve "
+    "all depressions within the selected search distance. WEPPcloud did not fill "
+    "the unresolved depressions because filling can substantially raise terrain "
+    "and reroute flow. Increase the breach distance, enlarge or reposition the "
+    "DEM to include the expected outlet, inspect DEM and NoData boundaries, or "
+    "choose another conditioning method, then build channels again."
+)
+
+
+class WbtUnresolvedDepressionsError(RuntimeError):
+    """A bounded least-cost search left depressions unresolved."""
+
+    code = "wbt_unresolved_depressions"
+
+    def __init__(
+        self,
+        *,
+        unresolved_depression_count: int,
+        search_distance_m: float,
+        search_distance_cells: int,
+    ) -> None:
+        self.unresolved_depression_count = int(unresolved_depression_count)
+        self.search_distance_m = float(search_distance_m)
+        self.search_distance_cells = int(search_distance_cells)
+        super().__init__(WBT_UNRESOLVED_DEPRESSION_MESSAGE)
+
+    @classmethod
+    def from_whitebox_error(
+        cls,
+        error: WhiteboxAppError,
+        *,
+        search_distance_m: float,
+    ) -> "WbtUnresolvedDepressionsError | None":
+        match = WBT_UNRESOLVED_DEPRESSION_PATTERN.search(str(error))
+        if match is None:
+            return None
+        return cls(
+            unresolved_depression_count=int(match.group("count")),
+            search_distance_m=search_distance_m,
+            search_distance_cells=int(match.group("max_dist_cells")),
+        )
 
 
 def isfloat(value: Any) -> bool:
@@ -524,6 +571,7 @@ class WhiteboxToolsTopazEmulator:
         blc_dist: Optional[int] = None,
         blc_max_cost: Optional[float] = None,
         blc_fill: bool = True,
+        blc_fail_on_unresolved: bool = False,
         logger: Optional[logging.Logger] = None,
     ) -> None:
         """Generate the hydrologically conditioned DEM.
@@ -535,17 +583,33 @@ class WhiteboxToolsTopazEmulator:
             blc_dist: Search distance used by ``breach_least_cost`` (meters).
             blc_max_cost: Optional cumulative breach cost limit.
             blc_fill: Whether least-cost breach should fill unresolved pits.
+            blc_fail_on_unresolved: Whether least-cost breach should fail before
+                writing output when depressions remain unresolved.
             logger: Optional logger used for debug messages.
         """
         if logger is not None:
             func_name = inspect.currentframe().f_code.co_name
             logger.info(
-                f"WhiteBoxToolsTopazEmulator.{func_name}(fill_or_breach={fill_or_breach}, blc_dist={blc_dist}, blc_max_cost={blc_max_cost}, blc_fill={blc_fill})"
+                "WhiteBoxToolsTopazEmulator.%s(fill_or_breach=%s, "
+                "blc_dist=%s, blc_max_cost=%s, blc_fill=%s, "
+                "blc_fail_on_unresolved=%s)",
+                func_name,
+                fill_or_breach,
+                blc_dist,
+                blc_max_cost,
+                blc_fill,
+                blc_fail_on_unresolved,
             )
         if blc_max_cost is not None and float(blc_max_cost) <= 0:
             raise ValueError("blc_max_cost must be greater than zero when provided")
         if not isinstance(blc_fill, bool):
             raise ValueError("blc_fill must be a boolean")
+        if not isinstance(blc_fail_on_unresolved, bool):
+            raise ValueError("blc_fail_on_unresolved must be a boolean")
+        if blc_fill and blc_fail_on_unresolved:
+            raise ValueError(
+                "blc_fill and blc_fail_on_unresolved cannot both be enabled"
+            )
 
         relief_fn = self.relief
 
@@ -562,10 +626,22 @@ class WhiteboxToolsTopazEmulator:
                 "output": relief_fn,
                 "dist": dist_cells,
                 "fill": bool(blc_fill),
+                "fail_on_unresolved": bool(blc_fail_on_unresolved),
             }
             if blc_max_cost is not None:
                 kwargs["max_cost"] = float(blc_max_cost)
-            ret = self.wbt.breach_depressions_least_cost(**kwargs)
+            try:
+                ret = self.wbt.breach_depressions_least_cost(**kwargs)
+            except WhiteboxAppError as exc:
+                unresolved = WbtUnresolvedDepressionsError.from_whitebox_error(
+                    exc,
+                    search_distance_m=(
+                        1000.0 if blc_dist is None else float(blc_dist)
+                    ),
+                )
+                if unresolved is not None:
+                    raise unresolved from exc
+                raise
         elif fill_or_breach == "topaz":
             ret = self.wbt.topaz_condition_dem(
                 dem=self.dem,
@@ -596,6 +672,21 @@ class WhiteboxToolsTopazEmulator:
             raise ValueError("cellsize must be greater than zero before converting blc_dist to cells")
 
         return max(1, int(round(blc_dist_m / cellsize_m)))
+
+    def _remove_stale_channel_products_after_conditioning_failure(self) -> None:
+        """Remove canonical products that belong to an earlier channel build."""
+        for artifact_path in (
+            self.relief,
+            self.flovec,
+            self.flovec_wgs,
+            self.floaccum,
+            self.netful0,
+            self.netful,
+            self.netful_json,
+            self.netful_wgs_json,
+            self.chnjnt,
+        ):
+            remove_if_exists(artifact_path)
 
     @build_step("flow_vector")
     def _create_flow_vector(self, logger: Optional[logging.Logger] = None) -> None:
@@ -842,7 +933,18 @@ class WhiteboxToolsTopazEmulator:
                 )
             remove_if_exists(bound_fn)
 
-        self._create_relief(fill_or_breach, blc_dist=blc_dist, logger=logger)
+        fail_on_unresolved = fill_or_breach == "breach_least_cost"
+        try:
+            self._create_relief(
+                fill_or_breach,
+                blc_dist=blc_dist,
+                blc_fill=not fail_on_unresolved,
+                blc_fail_on_unresolved=fail_on_unresolved,
+                logger=logger,
+            )
+        except WbtUnresolvedDepressionsError:
+            self._remove_stale_channel_products_after_conditioning_failure()
+            raise
         self._create_flow_vector(logger=logger)
         self._create_flow_accumulation(logger=logger)
         self._extract_streams(logger=logger)

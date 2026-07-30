@@ -1,7 +1,7 @@
 # PROJECT_TRACKER.md
 > Kanban board for wepppy work packages and vision items
 
-**Last Updated**: 2026-07-27
+**Last Updated**: 2026-07-30
 **Active Packages**: 20
 **Quick Links**: [Work Packages Directory](docs/work-packages/) | [God-Tier Prompting Strategy](docs/god-tier-prompting-strategy.md)
 
@@ -294,6 +294,25 @@ When resuming Kubernetes work:
 ---
 
 ## 🚧 In Progress
+
+### WBT Least-Cost Unresolved-Depression Fail-Fast Guidance
+
+**Started**: 2026-07-30
+**Priority**: High
+**Security impact**: `low`
+**Link**: [docs/work-packages/20260730_wbt_least_cost_unresolved_depression/](docs/work-packages/20260730_wbt_least_cost_unresolved_depression/)
+**Status**: Implementation and local validation complete; rollout remains.
+**Description**: Least-cost channel delineation now fails before writing an
+extreme fallback fill when the bounded WBT search leaves depressions
+unresolved. WBT source and runtime commits are pushed; WEPPpy supplies a typed
+controlled RQ failure, stale-artifact cleanup, and instructional retry
+guidance.
+
+**Next Steps**: Deploy WEPPpy with WBT runtime commit
+`b4d8774e3375ffd86a487c172f84e0d3f8a6cc50`, run a Forest canary, and begin
+the 30-day observation window.
+
+---
 
 ### Account User Preferences and WBT Boundary Policy (SURF-14A)
 

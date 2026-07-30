@@ -210,6 +210,49 @@ describe("controlBase job status error handling", () => {
         );
     });
 
+    test("renders controlled jobinfo guidance and error id without traceback", async () => {
+        const guidance = "Increase the breach distance and build channels again.";
+        window.WCHttp = {
+            getJson: jest.fn().mockResolvedValue({
+                status: "failed",
+                error: {
+                    code: "wbt_unresolved_depressions",
+                    message: guidance,
+                    details: {
+                        unresolved_depression_count: 3,
+                        search_distance_m: 1000,
+                        search_distance_cells: 33
+                    }
+                },
+                error_id: "controlled-123",
+                exc_info: null
+            }),
+            request: jest.fn(),
+            requestWithSessionToken: jest.fn()
+        };
+        base.rq_job_id = "job-controlled";
+        base.triggerEvent = jest.fn();
+        base.should_continue_polling = jest.fn(() => false);
+
+        base.handle_job_status_response(base, {
+            job_id: "job-controlled",
+            status: "failed"
+        });
+        await flushPromises();
+        await flushPromises();
+
+        expect(window.WCHttp.getJson).toHaveBeenCalledWith(
+            "/rq-engine/api/jobinfo/job-controlled",
+            { params: undefined }
+        );
+        expect(document.getElementById("info").textContent).toContain(guidance);
+        expect(document.getElementById("info").textContent).toContain(
+            "Selected breach distance 1000 m; unresolved depressions 3."
+        );
+        expect(document.getElementById("info").textContent).toContain("controlled-123");
+        expect(document.getElementById("stacktrace").textContent).not.toContain("Traceback");
+    });
+
     test("pushResponseStacktrace links clearing-lock docs with site prefix from url_for_run", () => {
         const urlForRun = jest.fn(() => "/weppcloud/usersum/doc/usersum.weppcloud.clearing_locks");
         window.url_for_run = urlForRun;
