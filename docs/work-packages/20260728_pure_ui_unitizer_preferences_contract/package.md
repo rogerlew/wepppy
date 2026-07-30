@@ -44,11 +44,13 @@ defaults, endpoint paths, response shapes, or stored keys. Such a change would
 require an operator-approved contract checkpoint and, for parameterization, an
 ADR before implementation.
 
-SURF-14A adds account-level defaults for new projects only. It does not reuse
-or alter SHR-05's run-scoped complete category map, modal endpoint, conversion
-tables, precision, or reload contract. The effective account choice is
-translated to the existing new-run configuration before `Unitizer`
-initialization; subsequent SHR-05 edits remain confined to that run. See
+SURF-14A adds a request-local account presentation overlay. Auto exposes this
+SHR-05 run-scoped complete category map; SI/English presents canonical metric
+or customary defaults without changing the cached controller or
+`unitizer.nodb`. It does not change SHR-05's project mutation endpoint,
+conversion tables, precision, stored map, or reload contract. Subsequent
+SHR-05 edits remain confined to that run and become visible to an account
+viewer when they select Auto. See
 `../20260729_user_preferences_wbt_boundary/`.
 
 ## Acceptance

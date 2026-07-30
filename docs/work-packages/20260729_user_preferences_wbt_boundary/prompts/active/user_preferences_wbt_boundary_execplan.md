@@ -1,4 +1,4 @@
-# Add account defaults and fail-closed WBT boundary handling
+# Add user-context units and fail-closed WBT boundary handling
 
 This ExecPlan is a living document governed by
 `docs/prompt_templates/codex_exec_plans.md`. Keep `Progress`, `Surprises &
@@ -8,10 +8,13 @@ is active.
 ## Purpose / Big Picture
 
 An authenticated user can open User Preferences from Profile and select
-default units plus what happens when a WBT watershed reaches the DEM boundary.
-New projects snapshot those defaults. Choosing `Stop with an error` prevents a
-clipped WBT watershed from appearing successful and tells the user to select a
-different outlet or enlarge the project extent.
+their presentation units plus what happens when their WBT delineation reaches
+the DEM boundary. SI/English follows the viewing user without changing project
+Unitizer state. Each account-bearing submission snapshots the initiating
+user's current boundary choice before enqueue without persisting it as project
+policy. Choosing `Stop with an error` prevents a clipped WBT watershed from
+appearing successful and tells the user to select a different outlet or
+enlarge the project extent.
 
 ## Progress
 
@@ -44,7 +47,7 @@ different outlet or enlarge the project extent.
   cleanup for regular and HUC-fire creation.
 - [x] (2026-07-30 07:30 UTC) Implemented and focused-tested WBT boundary
   warning/error behavior, deterministic diagnostics, stale readiness cleanup,
-  dependent stop, and sanitized aggregate jobinfo.
+  dependent cancellation, and sanitized aggregate jobinfo.
 - [x] (2026-07-30 06:05 UTC) Completed the initial broad validation: the full
   Python suite passed with 5,643 tests and 58 skips; frontend lint and all 745
   JavaScript tests passed. This evidence predates final-review remediation and
@@ -75,6 +78,27 @@ different outlet or enlarge the project extent.
   `e861aae36`, then used an isolated worktree to expose and repair stale
   line-only RQ graph metadata and relocated legacy broad-catch suppressions;
   the graph, broad-exception gate, and 68 affected WBT/RQ tests now pass.
+- [x] (2026-07-30 07:35 UTC) Retained immutable governance and
+  operations/security re-review FAIL artifacts. Governance left three Medium
+  gaps; operations/security left one migration Medium and found one new High
+  from live existing-run behavior.
+- [x] (2026-07-30 07:40 UTC) Diagnosed root job
+  `0734dcbc-dd03-4c28-98f4-cb42ea64170c`: its run was created before the
+  preference page was operational, persisted `warn`, found eight edge
+  hillslopes, and finished despite the owner's later `error` preference.
+- [x] (2026-07-30 07:51 UTC) Diagnosed the reverse live case: run
+  `depleted-hyperlink` persisted creation-time `error`, the owner changed to
+  `warn`, and root job `4b81f2cb-0b6f-4743-a152-5e7f9b658541` failed on seven
+  edge hillslopes. Repaired that exact run to persisted `warn` for retry.
+- [x] (2026-07-30 07:55 UTC) Retained the first amendment checkpoint FAIL
+  reviews and scope-reduced the next revision to owner-initiated behavior with
+  exact owner/session binding, private snapshot schema, immutable config
+  baseline, and failure-atomic NoDb ordering.
+- [x] (2026-07-30 08:15 UTC) Recorded the operator's superseding decision that
+  both preferences follow the authenticated user, with request-local
+  nonmutating units and initiating-user WBT job input.
+- [ ] Obtain two independent approvals and a standalone ancestor for the
+  delineation-snapshot contract amendment before implementation.
 - [ ] Complete broad validation, documentation, final reviews, and local E2E.
 - [ ] Apply and validate the authorized Forest migration and canary.
 
@@ -139,6 +163,20 @@ different outlet or enlarge the project extent.
   catches displaced by this package. Regeneration plus explicit inline
   boundary suppressions restored both gates without changing runtime behavior.
 
+- Observation: the original new-run-only WBT snapshot does not meet the
+  operator's clarified existing-run expectation.
+  Evidence: root job `0734dcbc-dd03-4c28-98f4-cb42ea64170c` and both children
+  finished after finding eight edge hillslopes because
+  `rock-ribbed-triplicate` persisted `warn`; the active owner preference was
+  `error`, and the operator explicitly said the run should stop.
+
+- Observation: an explicit Alembic merge-parent target removes the ambiguity
+  seen with relative `-1`.
+  Evidence: a fresh disposable representative PostgreSQL database completed
+  both parents -> `c91f6b2a4d7e` -> explicit `7b3c068e7a1d` (restoring both
+  parents) -> `c91f6b2a4d7e`, then proved constraints, missing-row defaults,
+  persistence, cascade, and teardown.
+
 ## Decision Log
 
 - Decision: Use canonical tokens `config|si|english` and
@@ -152,16 +190,19 @@ different outlet or enlarge the project extent.
   crash.
   Date/Author: 2026-07-30 / requesting operator.
 
-- Decision: Use explicit creation input > account preference > project config.
-  Rationale: an explicit action for one project must beat an account default;
-  a default may override configuration only when the user selected it.
+- Superseded decision: Use explicit creation input > account preference >
+  project config.
+  Rationale: this was the original creation-time interpretation.
   Date/Author: 2026-07-30 / proposed by Codex and approved by the requesting
   operator through the instruction to execute this documented package.
 
-- Decision: Apply account preferences only when creating a new project.
+- Superseded decision: Apply account preferences only when creating a new
+  project.
   Rationale: existing/shared runs and asynchronous jobs must not depend on
   mutable viewer profile state. Forks preserve the source run.
   Date/Author: 2026-07-30 / requesting operator and Codex.
+  Superseded on 2026-07-30 for both fields by the operator's explicit
+  user-context and nonmutating-unit clarification.
 
 - Decision: Run the schema migration on Forest only after local tests and final
   reviews.
@@ -169,9 +210,31 @@ different outlet or enlarge the project extent.
   keeps incompatible application/schema states out of the canary environment.
   Date/Author: 2026-07-30 / requesting operator and Codex.
 
+- Superseded decision: Resolve WBT boundary preference from the initiating run
+  owner.
+  Rationale: the operator demonstrated both `warn -> error` and
+  `error -> warn` on owned runs. Restricting lookup to an initiating actor who
+  exactly matches `Run.owner_id` avoids unapproved cross-user behavior.
+  Date/Author: 2026-07-30 / Codex draft; superseded by the requesting
+  operator's explicit "track the user, not the owner" clarification.
+
+- Decision: Resolve both fields from the authenticated viewing/initiating
+  User, independent of run ownership.
+  Rationale: the operator explicitly stated that these are user preferences.
+  Unit choice is a request-local presentation overlay; WBT choice is an
+  enqueue-time action snapshot.
+  Date/Author: 2026-07-30 / requesting operator and Codex.
+
+- Decision: Snapshot the bounded initiating-user WBT policy before enqueue and
+  pass it unchanged through RQ without durable account-derived project policy.
+  Rationale: worker-time database lookup would make preference edits and
+  retries timing-dependent.
+  Date/Author: 2026-07-30 / Codex; pending independent checkpoint approval.
+
 ## Outcomes & Retrospective
 
-The implementation and remediation pass are complete. Real PostgreSQL and
+The original creation-time implementation and remediation pass completed but
+is now superseded by the user-context decision. Real PostgreSQL and
 Redis evidence is retained in
 `artifacts/2026-07-30_local_postgresql_redis_evidence.md`; local restart and
 incident recovery evidence is retained in
@@ -182,8 +245,12 @@ test-stub completeness passed, package docs passed, and the corrected
 isolation gate passed two order runs plus every per-file run. The first
 immutable-revision check exposed line-sensitive RQ graph and broad-catch
 metadata; those repairs and 68 affected tests now pass. A replacement immutable
-checkpoint and independent re-reviews remain mandatory. Acceptance E2E
-mutation and Forest rollout remain blocked.
+checkpoint re-reviews rejected release. A documentation-only amendment now
+defines request-local units, initiating-user enqueue snapshotting,
+nonpersistent account-derived policy, supported dependent cancellation, and
+the reproducible explicit-target migration graph cycle. It requires two
+independent approvals and a standalone ancestor before runtime edits.
+Acceptance E2E mutation and Forest rollout remain blocked.
 
 ## Context and Orientation
 
@@ -195,10 +262,10 @@ Profile route/template are `wepppy/weppcloud/routes/user.py` and
 
 `wepppy/nodb/unitizer.py` reads `[unitizer] is_english` when a new run is
 initialized and then persists the resulting category map in `unitizer.nodb`.
-`wepppy/microservices/rq_engine/project_routes.py` resolves the authenticated
-creator, builds a configuration override string, and initializes `Ron`;
-`Ron` constructs Unitizer and Watershed state. That boundary is where account
-defaults must be converted into run configuration, before NoDb construction.
+Project creation and `Ron` initialization remain account-preference
+independent. Account units are resolved only after view authorization into a
+request-local presentation adapter; they never become run configuration or
+durable Unitizer state.
 
 `wepppy/nodb/core/watershed.py` reads WBT configuration and owns persisted
 Watershed fields. `wepppy/nodb/core/watershed_mixins.py` delineates WBT
@@ -221,8 +288,8 @@ Add an Alembic merge migration whose parents are repository heads
 `7b3c068e7a1d` and `b7d9c3e2f1a4` and which cleanly downgrades. Implement a
 small typed preference service that returns defaults
 for a missing row, validates exact tokens, performs one atomic upsert/update,
-and resolves effective creation overrides without silently swallowing database
-errors.
+and resolves immutable request/job snapshots without silently swallowing
+database errors.
 
 Add login-required GET/POST `/preferences` routes in the existing user
 blueprint. Render a server-side form through the existing security/Pure shell
@@ -230,24 +297,45 @@ and Pure form macros, add a Profile link, enforce CSRF, display field errors,
 and use POST/Redirect/GET on success. Avoid new JavaScript unless direct
 evidence proves it necessary.
 
-At the project-creation boundary, resolve the authenticated User once. Preserve
-an explicit non-empty `unitizer:is_english` input; otherwise translate
-`si`/`english` into the configuration override. Translate a non-`config`
-boundary preference into `watershed.wbt:boundary_touch_behavior`. Anonymous
-creation uses config. An authenticated database/preference failure must abort
-and clean up any newly created empty run directory. Ensure fork/archive
-ownership registration cannot apply destination-user defaults to copied run
-state.
+Remove account preference parameterization from regular and HUC-fire creation.
+Explicit `unitizer:is_english` and selected configuration alone determine
+durable project state. Add a request-local Unitizer presentation resolver for
+authorized Flask views and conversion/browser initialization endpoints. Auto
+returns exact project selections; SI/English returns a detached/read-only
+metric or customary view without changing cache, locks, or `unitizer.nodb`.
+Adopt it across the finite inventory in the amendment: run shell, storm event
+analyzer, Geneva, observed, debris flow, WATAR, WEPP, RHEM, Unitizer GET
+conversion endpoints, and rendered Unitizer/UnitizerClient initialization.
+Leave the explicit project Unitizer POST mutation endpoint unchanged.
 
 Add `boundary_touch_behavior = "warn"` to the WBT configuration defaults or
 the canonical default-loading path and validate `warn|error` when Watershed
-initializes. Persist the effective value with a guarded setter and hydrate
-legacy missing state to `warn`. After WBT edge identification, publish an
-actionable warning for `warn`; for `error`, delete canonical `subwta.tif`,
-clear build and abstraction completion state, retain deterministic diagnostic
-edge IDs, and raise
+initializes. Persist only the project policy and immutable configuration
+baseline with guarded setters; account-derived effective values remain
+execution-only. Hydrate legacy missing project/config state to `warn`. After
+WBT edge identification, publish an actionable warning for `warn`; for
+`error`, delete canonical `subwta.tif`, clear build and abstraction completion
+state, retain deterministic diagnostic edge IDs, and raise
 `WatershedBoundaryTouchesEdgeError` with the contract message and deterministic
 edge identifiers.
+
+After the amendment ancestor, add an initiating-user policy resolver at
+`watershed_routes.build_subcatchments_and_abstract_watershed`. It must bind
+the initiating positive numeric active User after ordinary run authorization,
+resolve that user's preference or immutable per-run config baseline, validate
+the exact private RQ snapshot, and finish before any NoDb/Redis/queue mutation.
+Only after that successful validation may a legacy missing baseline persist
+the computed configuration value under the Watershed lock, before every other
+route mutation. Public sessions without a user, service/MCP, direct, and batch
+paths retain project state; shared/admin account-bearing users use their own
+preference.
+
+Pass only the bounded schema version, effective policy, and source to the
+child. In the child, clear the NoDb cache, hydrate durable state, validate,
+construct a nonpersistent execution policy, then enter existing WBT attempt
+invalidation/delineation. Add structured audit fields without exposing the
+private snapshot through open jobinfo. Mixed-version deployment must
+quiesce enqueue, drain jobs, and restart rq-engine/workers together.
 
 Write model/migration, route/render/security, resolution, NoDb, synthetic
 raster, RQ error, and compatibility tests before broad validation. Update the
@@ -255,10 +343,20 @@ Profile/User Preferences user guide, Channel Delineation guide, config/developer
 documentation, ADR, package records, stubs, and generated artifacts only when
 their owning source changes.
 
-After local tests and final reviews pass, restart the local stack and create a
-disposable authenticated project for E2E. Confirm saved preferences, effective
-run state, config-mode behavior, and the WBT error message without retaining
-test credentials.
+After implementation gates, obtain pre-acceptance governance and
+operations/security approval. Then restart the complete local stack. Prove the
+exact local-only emails `surf14a-local-a@example.invalid` and
+`surf14a-local-b@example.invalid` are absent before creating two disposable
+User-role receipts; stop on collision rather than reuse an account. Keep
+credentials only in the gitignored local test-secret boundary. Create one
+ordinary authenticated project and one exact `runs_users` sharing receipt.
+Prove distinct SI/English views over byte-stable project Unitizer state and
+distinct `error`/`warn` submissions on the same unchanged run. Prove
+Auto/config, anonymous/public-session/service fallback, private snapshot
+redaction, and unchanged durable boundary fields. Remove only the receipt-bound
+association, run, preferences, role associations, Users, and credentials;
+assert their absence and unchanged unrelated table counts. Obtain
+post-acceptance confirmation before Forest.
 
 Finally execute the authorized schema-first Forest canary. Record the code
 revision, current Alembic head, backup/preflight evidence, and migration SQL
@@ -266,9 +364,16 @@ scope. Confirm old code with the additive schema before starting new code. Run
 the reviewed `flask db upgrade` command inside the Forest application
 container with explicit `FLASK_APP=wepppy.weppcloud.app:app`, verify the new
 merge head/table/constraints, restart WEPPcloud/rq-engine/affected workers
-together, exercise an authenticated preference save plus new-project snapshot,
-clean up the disposable canary, and complete a post-action dual audit. Do not
-migrate production/wepp1.
+together, then resolve the requesting operator and a second existing
+operator-designated active test User. Record both numeric IDs and both exact
+prior preference-row states. Stop for operator direction if the second User
+does not already exist; do not create a User or alter roles. Exercise both
+users' distinct units and WBT behavior on one disposable canary shared through
+one recorded `runs_users` association without durable account-derived project
+mutation. Remove only that run and association, restore both preference rows
+exactly (deleting one only if it was absent before), prove both Users and all
+unrelated rows remain, and complete a post-action dual audit. Do not migrate
+production/wepp1.
 
 ## Concrete Steps
 
@@ -279,12 +384,16 @@ Run development commands from `/home/workdir/wepppy`:
     wctl doc-lint --path \
       docs/adrs/ADR-0033-user-defaults-and-wbt-boundary-policy.md
 
-    wctl run-pytest tests/weppcloud/routes/test_user_preferences.py \
-      tests/weppcloud/routes/test_user_profile_contract.py \
+    wctl run-pytest tests/weppcloud/test_user_preferences.py \
+      tests/weppcloud/test_user_preferences_postgres.py \
+      tests/weppcloud/routes/test_user_profile_token.py \
+      tests/weppcloud/routes/test_unitizer_user_preferences.py \
       tests/microservices/test_rq_engine_project_routes.py \
-      tests/nodb/test_unitizer_preferences.py \
-      tests/nodb/test_watershed.py \
-      tests/microservices/test_rq_engine_watershed_routes.py --maxfail=1
+      tests/microservices/test_rq_engine_upload_huc_fire_routes.py \
+      tests/microservices/test_rq_engine_watershed_routes.py \
+      tests/nodb/test_wbt_boundary_touch_behavior.py \
+      tests/rq/test_project_rq_mutation_guards.py \
+      tests/rq/test_wbt_controlled_failure_integration.py --maxfail=1
 
     wctl run-stubtest wepppy.weppcloud.user_preferences
     wctl check-test-stubs
@@ -298,8 +407,10 @@ Run development commands from `/home/workdir/wepppy`:
     git diff --check
 
 Forest uses the exact target and Compose identity below. Set
-`SURF14A_RELEASE_SHA` to the reviewed release commit and record the previous
-SHA. The checkout must be clean. Create and validate a fresh backup, block
+`SURF14A_RELEASE_SHA` to the reviewed release commit and
+`SURF14A_ROLLBACK_SHA` to a pre-reviewed forward revert commit that descends
+from it. Record the previous SHA. The checkout must be clean. Create and
+validate a fresh backup, block
 enqueue, prove both queues and all workers idle, stop workers gracefully, then
 change the bind-mounted tree. Run migration in a one-off container and do not
 restart on any failure:
@@ -308,10 +419,17 @@ restart on any failure:
     cd /home/workdir/wepppy
     set -euo pipefail
     export SURF14A_RELEASE_SHA=<reviewed-release-sha>
+    export SURF14A_ROLLBACK_SHA=<reviewed-forward-revert-sha>
     export SURF14A_BACKUP_PATH="/backups/weppcloud-surf14a-$(date -u +%Y%m%d-%H%M%S).dump"
     git status --short
     test -z "$(git status --porcelain)"
     git rev-parse HEAD
+    test "$(git rev-parse "$SURF14A_RELEASE_SHA^{commit}")" = \
+      "$SURF14A_RELEASE_SHA"
+    test "$(git rev-parse "$SURF14A_ROLLBACK_SHA^{commit}")" = \
+      "$SURF14A_ROLLBACK_SHA"
+    git merge-base --is-ancestor "$SURF14A_RELEASE_SHA" \
+      "$SURF14A_ROLLBACK_SHA"
     docker compose -p docker -f docker/docker-compose.dev.yml run \
       --rm --no-deps -e SURF14A_BACKUP_PATH="$SURF14A_BACKUP_PATH" \
       postgres-backup bash -lc '
@@ -370,6 +488,7 @@ restart on any failure:
     )"
     git fetch origin
     git merge --ff-only "$SURF14A_RELEASE_SHA"
+    test "$(git rev-parse HEAD)" = "$SURF14A_RELEASE_SHA"
     docker compose -p docker -f docker/docker-compose.dev.yml run \
       --rm --no-deps -e FLASK_APP=wepppy.weppcloud.app:app \
       weppcloud flask db current
@@ -406,6 +525,19 @@ stopped; both drain assertions prove zero queued/executing work, and the second
 User-count checks run before `up`. If any command fails, leave the five
 services stopped; do not downgrade or start the new checkout.
 
+If application rollback is required, first repeat the exact enqueue-stop,
+queue-drain, worker-idle, graceful worker-stop, and zero-registry commands
+above. Then move only to the preflight-recorded forward revert and assert the
+target before restarting:
+
+    git fetch origin
+    git merge --ff-only "$SURF14A_ROLLBACK_SHA"
+    test "$(git rev-parse HEAD)" = "$SURF14A_ROLLBACK_SHA"
+    docker compose -p docker -f docker/docker-compose.dev.yml up \
+      -d --no-deps weppcloud rq-engine rq-worker rq-worker-batch
+    docker compose -p docker -f docker/docker-compose.dev.yml up \
+      -d --no-deps scheduler
+
 Do not put database passwords, session cookies, JWTs, or preference-form CSRF
 tokens into work-package artifacts.
 
@@ -419,13 +551,25 @@ upgrade/downgrade/upgrade. Route/render tests must prove login, CSRF, exact
 tokens, visible errors, no partial mutation, escaped values, selected state,
 Pure macros, prefix-aware Profile navigation, and PRG success.
 
-Creation tests must cover every row and constructor disposition in
-`artifacts/2026-07-30_contract_decision.md`, including regular and HUC-fire
-creation, payload-over-query precedence, anonymous CAP creation,
-user-token/session identity, negative token/identity cases, canonical lookup
-failures, owner-association/cleanup failures, existing/shared runs, and forks.
-The run's persisted Unitizer and Watershed values—not only the configuration
-string—are acceptance evidence.
+Creation tests must prove regular and HUC-fire creation ignore account
+preferences and preserve explicit-input/config durable Unitizer and WBT state.
+Presentation tests cover Auto, SI, English, mixed project selections,
+owner/shared/admin/public authorized users, anonymous and session-without-user
+fallback, server-rendered reports, conversion endpoints, and browser initial
+payload. They assert byte/mtime/cache identity/lock stability for
+`unitizer.nodb` and simultaneous distinct views for two users.
+
+Delineation-route tests cover user and account-bearing session identity,
+missing/malformed session `user_id`, inactive/deleted User, shared/admin/public
+authorized User, public session without User, service/MCP, direct/batch,
+fork/archive/restore, missing/invalid preference, and database failure. Config
+tests cover both users choosing Auto, legacy baseline hydration, and copied
+project state. Failure tests assert byte-stable NoDb/readiness/queue state
+before resolution and snapshot validation succeed.
+RQ tests validate exact private metadata, open jobinfo redaction, bounded child
+arguments, cache/hydrate/validate/execution-view ordering, preference change
+after enqueue, same-snapshot retry, a distinct fresh resubmission, terminal
+snapshot/apply failures, and no persisted account-derived policy.
 
 Synthetic rasters must cover every edge, corners, nodata/non-positive edges,
 no-edge, multiple deterministic identifiers, `warn`, `error`, invalid config,
@@ -436,24 +580,28 @@ not allow downstream readiness.
 Forest acceptance requires the reviewed application revision, exact target
 and database identity, repository/database head agreement, restore owner/point,
 the reviewed merge head, exact new table/constraints, unchanged user count, no
-required backfill, preference save/reload, one new project with effective
-snapshot values, canary cleanup, healthy services, post-action review, and a
-documented nondestructive application rollback. Production remains untouched.
+required backfill, preference save/reload, two users' distinct presentation
+units over one unchanged project, user A `error`, user B `warn`, Auto/config
+fallback on the same unchanged run, private snapshot redaction, canary
+cleanup, healthy services, post-action review, and a documented
+nondestructive application rollback.
+Production remains untouched.
 
 ## Idempotence and Recovery
 
 Local tests and documentation checks are repeatable. The migration must be
 additive and safe to rerun through Alembic head detection. A failed preference
 save rolls back its transaction. A failed authenticated preference lookup
-cannot leave a registered or usable partial run.
+cannot mutate presentation, project, readiness, or queue state.
 
 Before Forest apply, confirm both expected current revisions and a database
 backup or approved restore point. If migration apply fails, stop, preserve logs, and do
 not repeatedly mutate the database without diagnosing the exact revision. If
-the schema succeeds but the application canary fails, roll back application
-code first when the additive table is harmless; downgrade the migration only
-when the reviewed rollback says it is necessary and no preference rows need
-preservation.
+the schema succeeds but the application canary fails, first stop enqueue
+surfaces, drain queued/executing work, prove workers idle, stop both worker
+services, and prove the registry empty. Only then move to reviewed old code
+and restart the four changed services together before `scheduler`. Preserve
+the additive table; downgrade only with separate reviewed authority.
 
 ## Artifacts and Notes
 
@@ -468,10 +616,10 @@ Use existing Flask-SQLAlchemy, Flask-Migrate/Alembic, Flask-Security login,
 global CSRF enforcement, PureCSS shell/macros, NoDb locking, RQ response
 envelopes, and the owned WBT edge detector. Add no external dependency.
 
-Expose stable Python enums or literal-validated constants for the six tokens
-and a typed resolver that accepts an optional explicit unit override, account
-preferences, and config values. Keep account persistence independent of
-run-scoped Unitizer mutation. Reuse
+Expose stable Python enums or literal-validated constants for the six tokens,
+a typed account resolver, a request-local Unitizer presentation view, and a
+bounded WBT snapshot validator. Keep account persistence independent of
+run-scoped Unitizer and Watershed policy mutation. Reuse
 `WatershedBoundaryTouchesEdgeError`; do not add a generic exception or silent
 fallback wrapper.
 
@@ -480,3 +628,8 @@ fallback wrapper.
 2026-07-30: Initial scaffold records the operator-approved label, typed storage
 decision, precedence, reproducibility boundary, WBT policy, contract/review
 gates, and scoped Forest migration authority.
+
+2026-07-30: Revised after both live WBT incidents. The operator clarified that
+both preferences follow the authenticated user rather than the owner;
+non-Auto units are presentation-only and WBT is an enqueue-time action
+snapshot. The plan retains all review/Forest gates.

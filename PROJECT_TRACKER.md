@@ -301,21 +301,23 @@ When resuming Kubernetes work:
 **Size**: Medium-High
 **Priority**: High
 **Security impact**: `high` (authenticated mutation, database migration,
-creation propagation, and RQ failure behavior)
+per-user presentation, and RQ failure behavior)
 **Link**: [docs/work-packages/20260729_user_preferences_wbt_boundary/](docs/work-packages/20260729_user_preferences_wbt_boundary/)
 **Description**: Add a Profile-linked, PureCSS User Preferences page for
-new-project unit defaults and configurable WBT DEM-boundary handling. Effective
-values are snapshotted into new runs; existing/shared/forked runs remain
-stable. The `Stop with an error` mode raises an actionable typed failure rather
-than accepting a clipped watershed. Contract checkpoint and reviews precede
-implementation; the operator authorized the reviewed additive migration on
-Forest after local validation and final review.
+request-local user unit presentation and initiating-user WBT DEM-boundary
+handling. SI/English changes the authorized user's view without mutating
+project units; Warn/Stop is snapshotted into that user's submitted job without
+becoming project policy. The `Stop with an error` mode raises an actionable
+typed failure rather than accepting a clipped watershed. The operator
+authorized the reviewed additive migration on Forest after local validation
+and final review.
 
-**Checkpoint**: Dual governance and operations/security review passed;
-documentation-only ancestor `1b412d61a` is committed.
+**Checkpoint**: Original documentation-only ancestor `1b412d61a` is committed;
+the superseding user-context amendment awaits dual review and a standalone
+ancestor.
 
-**Implementation**: Focused account/page, creation, WBT/RQ,
-migration, and Usersum suites pass. Local PostgreSQL is on merge head
+**Implementation**: Original creation-time behavior passed focused gates but
+is superseded and must be replaced. Local PostgreSQL is on merge head
 `c91f6b2a4d7e`.
 
 **Next Steps**: Run broad validation and final reviews, then local E2E and the

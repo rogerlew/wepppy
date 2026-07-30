@@ -6,11 +6,11 @@
 
 **Started**: 2026-07-30 04:10 UTC
 
-**Current phase**: Broad validation and final review
+**Current phase**: Contract amendment checkpoint
 
-**Last updated**: 2026-07-30 07:15 UTC
+**Last updated**: 2026-07-30 08:15 UTC
 
-**Next milestone**: post-remediation broad gates and independent re-reviews
+**Next milestone**: dual-review and commit delineation-snapshot amendment
 
 **Security impact**: `high`
 
@@ -23,11 +23,13 @@
 
 - [ ] Complete focused and broad validation, final reviews, documentation, and
   local E2E.
+- [ ] Approve and commit the documentation-only delineation-snapshot
+  amendment before its runtime implementation.
 
 ### Ready
 
 - [ ] Apply and verify the operator-authorized migration on Forest, then run an
-  authenticated new-project canary.
+  authenticated two-user same-project canary.
 
 ### Blocked
 
@@ -66,7 +68,8 @@
   preferences service/page, exact creation precedence, and failure-atomic
   ownership for regular and HUC-fire creation (2026-07-30 07:30 UTC).
 - [x] Implemented and focused-tested WBT warn/error behavior, deterministic
-  edge diagnostics, readiness cleanup, controlled RQ failure, dependent stop,
+  edge diagnostics, readiness cleanup, controlled RQ failure, dependent
+  cancellation,
   and sanitized aggregate jobinfo (2026-07-30 07:30 UTC).
 - [x] Added and validated User Preferences and Channel Delineation Usersum
   guidance and rebuilt the generated search index (2026-07-30 07:30 UTC).
@@ -95,6 +98,35 @@
   regenerated its line-only RQ graph metadata, annotated the two displaced
   legacy broad-catch boundaries, and passed the graph, broad-exception, and
   68-test affected WBT/RQ gates (2026-07-30 07:15 UTC).
+- [x] Retained immutable re-review FAIL artifacts: governance closed its
+  Highs but left three Medium gaps; operations/security left one migration
+  Medium and added one High for undefined existing-run preference authority
+  (2026-07-30 07:35 UTC).
+- [x] Diagnosed the operator's live job: the existing run persisted `warn`,
+  found eight edge hillslopes, and finished despite the owner's current
+  `error` preference; recorded the clarified expectation in a contract
+  amendment (2026-07-30 07:40 UTC).
+- [x] Proved an explicit-target PostgreSQL Alembic graph cycle from both
+  parents through upgrade/downgrade/re-upgrade plus constraints,
+  missing-row defaults, persistence, cascade, and cleanup
+  (2026-07-30 07:40 UTC).
+- [x] Retained the first delineation-amendment checkpoint FAIL reviews
+  (governance: two High/three Medium; operations/security: two High/five
+  Medium) without changing runtime code (2026-07-30 07:53 UTC).
+- [x] Diagnosed the reverse live transition: `depleted-hyperlink` retained
+  creation-time `error` after its owner selected `warn`; its root job failed on
+  seven edge hillslopes. Repaired that exact run to persisted `warn`
+  (2026-07-30 07:51 UTC).
+- [x] Scope-reduced the first amendment to exact initiating-owner behavior and
+  added
+  singular owner/session binding, immutable config baseline, exact private RQ
+  schema/redaction, cache/lock/readiness sequencing, and two-phase local
+  acceptance review (2026-07-30 07:55 UTC). This owner-only interpretation was
+  superseded by the user-context decision below.
+- [x] Recorded the operator's superseding user-context decision: both
+  preferences follow the authenticated user; non-Auto units are
+  presentation-only and WBT is an initiating-user job snapshot
+  (2026-07-30 08:15 UTC).
 
 ## Decisions
 
@@ -107,13 +139,27 @@ cookies, JSON, generic key/value state, or run-scoped NoDb.
 small stable enums. Typed columns and database constraints make migration,
 validation, audit, and compatibility behavior explicit.
 
-### 2026-07-30 04:10 UTC: Snapshot preferences into new runs
+### 2026-07-30 04:10 UTC: Snapshot preferences into new runs (superseded)
 
-**Decision**: Resolve explicit project input, then account preference, then
-configuration before `Ron` initialization and persist the effective run state.
+**Historical decision**: Resolve explicit project input, then account
+preference, then configuration before `Ron` initialization and persist the
+effective run state.
 
-**Rationale**: RQ execution must not depend on live profile state; existing,
-shared, and forked projects must remain reproducible.
+**Superseded 2026-07-30 08:15 UTC**: Account units are request-local
+presentation and never parameterize project creation. WBT behavior is resolved
+from the initiating user and snapshotted into that submission without
+persisting account-derived project policy.
+
+### 2026-07-30 08:15 UTC: Preferences follow the active user
+
+**Decision**: Non-Auto units follow the authenticated viewing user through an
+immutable presentation overlay. Non-Auto WBT behavior follows the
+authenticated initiating user through a validated job snapshot.
+
+**Rationale**: A preference belongs to the person using the project, not the
+project owner or the durable project. Two authorized users must be able to use
+the same byte-stable project with different presentation and submission
+choices.
 
 ### 2026-07-30 04:10 UTC: Label failure as Stop with an error
 
@@ -134,26 +180,30 @@ config or explicit user preference can choose fail-closed handling.
 
 | Risk | Severity | Mitigation | Status |
 | --- | --- | --- | --- |
-| Preference silently changes existing/shared runs | High | Resolve only during new-project initialization; forks copy source | Mitigated and focused-tested |
-| Explicit unit selection is overwritten | High | Enforce explicit input > account > config precedence | Mitigated and focused-tested |
-| DB/preference lookup failure silently falls back | High | Explicit creation failure and failure-atomic run-directory cleanup | Mitigated and focused-tested |
+| One user's preference leaks into project or another user | High | Request-local Unitizer view, immutable WBT job snapshot, and no durable account-derived project policy | Amendment pending re-review |
+| Explicit project unit selection is overwritten | High | Keep project creation account-independent; apply account units only to a request-local presentation view | Amendment pending re-review |
+| DB/preference lookup failure silently falls back | High | Fail the authorized view/submission with a sanitized correlated error before project or queue mutation | Amendment pending re-review |
 | Invalid enum bypasses UI | High | Exact route/service enums plus DB check constraints | Mitigated and focused-tested |
 | Boundary error leaves stale ready output | High | Invalidate readiness and canonical clipped output before typed failure | Mitigated and focused-tested |
 | Migration deploys before compatible code | High | Contract, test, review, and Forest preflight gates | Open |
 | Concurrent preference saves lose one field | Medium | Validate complete form, lock existing row, retry first-insert race, and update both fields in one transaction | Mitigated and PostgreSQL-tested |
-| Authenticated creation leaves an ownerless/public run | High | User-only subject binding, atomic owner association, exact receipt-bound SQL compensation, and confined filesystem cleanup | Mitigated and PostgreSQL-tested |
+| Authenticated creation leaves an ownerless/public run | High | Historical creation hardening remains covered; the superseding preference contract makes no creation-time account lookup or mutation | Mitigated and PostgreSQL-tested |
 | Public job status discloses an internal traceback | High | Sanitize retained RQ state and public tree/HTTP payload; preserve structured correlated diagnostics | Mitigated and real-Redis-tested |
 | Dual Alembic heads produce an unsafe Forest rollout | High | Merge revision over both heads, representative PostgreSQL cycle, schema-first coordinated restart | Mitigated locally; Forest pending |
+| Initiating user gets stale or another user's WBT behavior | High | Synchronous initiating-user resolution, exact private RQ snapshot, and no durable account-derived project policy | Contract amendment pending re-review |
 
 ## Verification Checklist
 
 ### Contract and review
 
-- [x] Two independent checkpoint reviews pass with findings dispositioned.
-- [x] Documentation-only checkpoint is a standalone ancestor.
-- [x] ADR-0033 is accepted with complete provenance.
+- [x] Original checkpoint reviews passed and its documentation-only ancestor
+  is `1b412d61a`; its creation/owner lifetime interpretation is superseded.
+- [x] ADR-0033's original persistence/configuration decision is accepted with
+  complete provenance.
 - [ ] Final governance and operations/security reviews pass with no unresolved
   high/medium findings.
+- [ ] User-context amendment has two independent checkpoint approvals,
+  findings disposition, and a standalone ancestor.
 
 ### Backend and migration
 
@@ -178,11 +228,12 @@ config or explicit user preference can choose fail-closed handling.
 - [x] Post-remediation frontend lint and all 745 JavaScript tests pass.
 - [x] Stub, test-stub, test-isolation, broad-exception, docs, and RQ graph gates
   pass as applicable.
-- [ ] Local stack E2E proves preference save and new-run effective snapshot.
+- [ ] Local stack E2E proves two distinct unit views and `error`/`warn` WBT
+  behavior for two users on one byte-stable project.
 - [ ] Forest preflight records current migration head and database backup
   readiness.
 - [ ] Forest migration, schema verification, service restart if required, and
-  authenticated canary pass.
+  authenticated two-user same-project canary pass.
 
 ## Progress Notes
 

@@ -12,12 +12,12 @@ Delineation, and DOM-05A Topaz Conditioning
 
 ## Overview
 
-Add an authenticated User Preferences page where a person can choose the
-default unit system for new projects and decide whether a WBT watershed that
-reaches the DEM boundary may continue with a warning or must stop with an
-actionable error. Preferences are account-scoped PostgreSQL state, while the
-effective values are snapshotted into each new run so later account changes do
-not silently change an existing project's behavior.
+Add an authenticated User Preferences page where a person can choose how
+authorized projects are presented in units and whether their WBT delineation
+may continue when it reaches the DEM boundary. Preferences are account-scoped
+PostgreSQL state and follow the initiating/viewing user. They do not become
+project defaults: units are a request-local presentation overlay, while the
+boundary choice is an immutable job snapshot.
 
 This package is a registered, bounded cross-owner feature. It does not reopen
 the verified SURF-14 profile, SHR-05 run-scoped Unitizer, or DOM-05 Channel
@@ -73,56 +73,45 @@ field errors and no database mutation. Successful submission commits both
 values in one transaction and follows a POST/Redirect/GET flow with a visible
 success message.
 
-### Effective-value precedence and run compatibility
+### User-context resolution and run compatibility
 
-For new projects, explicit per-project creation input has highest precedence,
-then a non-`config` account preference, then the selected project
-configuration. The existing explicit `unitizer:is_english` creation override
-therefore remains authoritative when supplied. There is no explicit
-per-project boundary-policy input in this package.
+Existing authorization first decides whether an identity may view or mutate a
+run. A verified active User then resolves their own preference; `Run.owner_id`
+and `runs_users` do not choose whose preference applies. User tokens,
+cookie-authenticated requests, and run sessions with verified positive numeric
+`user_id` are account-bearing. Anonymous/CAP, public sessions without
+`user_id`, service/MCP, direct worker, and batch paths use project/config
+state. Invalid account-bearing identity, stored state, or database access
+fails closed with `preference_resolution_failed`.
 
-The effective values are resolved before `Ron` initializes the run and are
-snapshotted into the run's existing configuration/NoDb state:
+For presentation, `config` exposes the project's exact persisted Unitizer
+selections. `si` or `english` creates a request-local read-only Unitizer view
+using metric or US customary defaults. It must not mutate the cached
+controller, acquire its persistence lock, or write `unitizer.nodb`. The
+overlay applies to authorized existing, shared, public, restored, forked, and
+new projects. Two users may view the same unchanged project in different
+units.
 
-1. `si` maps to `unitizer:is_english=false`;
-2. `english` maps to `unitizer:is_english=true`;
-3. `config` preserves `[unitizer] is_english`;
-4. boundary `warn` or `error` overrides
-   `[watershed.wbt] boundary_touch_behavior`;
-5. boundary `config` preserves that configuration value.
+Profile units no longer participate in project creation. Explicit creation
+input and project configuration continue to define durable project Unitizer
+state. Existing Unitizer project-mutation controls retain their contract; a
+non-Auto account overlay remains the viewing user's presentation until they
+choose Auto.
 
-Anonymous/CAP creation and an authenticated identity without a preference row
-use the project configuration. An invalid persisted value, database error, or
-authenticated preference-resolution failure is explicit and must not silently
-create a project with different defaults.
+For WBT submission, `warn|error` controls only the initiating user's job.
+`config` uses the immutable project config baseline. The effective choice is
+not persisted as project policy, so a later authorized user's submission
+resolves independently. Retry retains its original snapshot; a new submission
+refreshes the current user preference.
 
-Preference edits affect only projects created afterward. Existing runs retain
-their persisted Unitizer selections and WBT boundary policy. Forks copy the
-source run's effective values and do not re-resolve the destination owner's
-account preferences. Shared-run viewers do not dynamically alter run behavior.
+A separate `_wbt_boundary_touch_config_behavior` stores the configuration
+baseline and is copied by archive/restore and fork. Legacy runs resolve and
+persist it once under the Watershed lock only after read-only snapshot
+validation. Account-derived effective behavior is never the baseline.
 
-SURF-01 public, regional, and authenticated forms converge on rq-engine
-`POST /create/`; authenticated HUC-fire upload is the second included
-creation path. Both use the same resolver and failure-atomic ownership helper.
-Batch, playback, dataset, test-support, culvert, and internal child-run
-constructors do not resolve account defaults. The finite identity/precedence
-matrix, canonical failure response, concurrent-write contract, and exact
-Forest rollout are normative in
-`artifacts/2026-07-30_contract_decision.md`.
-
-Only `token_class=user` and authenticated cookie-session identities can resolve
-preferences. Subject binding accepts numeric User ID or exact
-`fs_uniquifier`, never email fallback; unknown, inactive, service, MCP, and
-run-session identities cannot impersonate an account. Existing authorized
-service/MCP creation remains config-only with no preference lookup; unknown or
-inactive `user` identities fail closed. Authenticated account creation cannot
-return success until atomic run ownership succeeds, and compensating cleanup
-removes partial SQL/filesystem state.
-
-Legacy `watershed.nodb` payloads lack
-`_wbt_boundary_touch_behavior`. Missing state hydrates to `warn`, independent
-of later account/config changes, and archive/restore or fork copies that
-effective compatibility value rather than resolving a destination account.
+The exact identity, overlay, RQ, failure, concurrency, and Forest contracts are
+normative in
+`artifacts/2026-07-30_contract_amendment_delineation_snapshot.md`.
 
 ### WBT DEM-boundary behavior
 
@@ -155,6 +144,19 @@ subcatchment child prevents dependent abstraction, the root becomes terminal
 failed, and retry remains available. No silent fallback from `error` to `warn`
 is permitted.
 
+For account-bearing submissions, the route first verifies ordinary run
+mutation authority and then resolves the initiating user's preference. That
+preference outranks the immutable per-run config baseline.
+Resolution and validation finish before any NoDb, Redis, readiness, or queue
+mutation. A legacy missing config baseline may then persist only the validated
+configuration value under the Watershed lock before any other route mutation;
+a failed write stops the request. Non-account-bearing paths retain project
+policy. The root stores the exact private snapshot schema defined by the
+canonical RQ contract; the child receives only its bounded policy/source
+argument. It clears cache, hydrates durable state, validates, constructs a
+nonpersistent execution-policy view, and only then begins WBT. Preference
+changes after enqueue cannot alter the job or retry.
+
 Every worker/direct/batch attempt clears prior build/abstraction timestamps,
 removes prior canonical `subwta.tif`, and replaces prior edge identifiers.
 `warn` retains the new raster, logs and publishes the warning on
@@ -169,8 +171,8 @@ timestamps are rebuilt.
   migration.
 - Add the authenticated, contract-tested PureCSS User Preferences page and
   Profile link.
-- Resolve and snapshot defaults for every supported new-project creation path
-  without changing explicit creation choices, existing runs, or forks.
+- Apply per-user unit presentation without durable project mutation and
+  deterministically snapshot the initiating user's WBT boundary preference.
 - Add the WBT configuration parameter and fail-closed boundary behavior.
 - Run focused and full regression gates, independent reviews, a local E2E, and
   an authorized Forest migration/canary.
@@ -181,21 +183,24 @@ timestamps are rebuilt.
 
 - SQLAlchemy model, relationship, validation service, and Alembic migration.
 - User Preferences GET/POST routes, template, Profile link, CSRF, and tests.
-- Authenticated new-project preference resolution and run snapshotting.
+- Request-local user Unitizer presentation for authorized project views and
+  conversion endpoints without durable mutation.
+- Authorized WBT initiating-user policy resolution and deterministic RQ
+  snapshotting for existing, shared, public, and forked runs.
 - WBT configuration parsing, persisted Watershed state, warning/error behavior,
   typed exception propagation, diagnostics, and tests.
 - User, developer, configuration, operator, and migration documentation.
-- A Forest schema migration and authenticated new-project canary after local
-  tests and review gates pass.
+- A Forest schema migration and authenticated two-user same-project canary
+  after local tests and review gates pass.
 
 ### Explicitly Out of Scope
 
-- Dynamic per-viewer units for existing/shared projects.
-- Retroactive migration of existing runs or users.
+- Worker-time live preference lookup.
+- Bulk retroactive migration of existing runs or users.
 - Re-resolving preferences when a run is forked.
 - New Channel Delineation form fields for the boundary policy.
-- Changing Unitizer conversion formulas, categories, precisions, or the
-  run-scoped Unitizer modal contract.
+- Changing Unitizer conversion formulas, categories, precisions, canonical
+  stored values, or explicit project-mutation controls.
 - Changing TOPAZ boundary behavior or WBT edge-detection geometry.
 - Production/wepp1 deployment or database migration without separate
   authorization.
@@ -214,22 +219,27 @@ timestamps are rebuilt.
 - [ ] The contract checkpoint predates all implementation changes.
 - [ ] Existing users require no backfill and resolve to `config`/`config`.
 - [ ] The page persists only exact enum values under login and CSRF protection.
-- [ ] Explicit creation units outrank account preferences; account preferences
-  outrank configuration; anonymous and fork behavior matches this contract.
-- [ ] New runs persist effective unit and WBT boundary values.
+- [ ] Explicit creation/config units alone determine durable project state;
+  account SI/English changes presentation without a Unitizer write.
+- [ ] Two authorized users view one byte-stable project in different units.
+- [ ] Each account-bearing WBT submission uses the initiating user's current
+  boundary preference with a deterministic RQ snapshot and no durable
+  account-derived project policy.
 - [ ] Synthetic WBT edge fixtures prove `warn`, `error`, no-edge, invalid
   configuration, stale-readiness, determinism, and actionable error behavior.
 - [ ] Focused, frontend, stub, RQ graph when applicable, broad Python,
   documentation, migration upgrade/downgrade/upgrade, and review gates pass.
 - [ ] Forest migration and canary evidence show the new table, constraints,
-  missing-row compatibility, preference save/reload, and one new-run snapshot.
+  missing-row compatibility, preference save/reload, two-user unit views, and
+  distinct WBT behavior on one unchanged run.
 
 ## Parameterization ADR Gate
 
 - **Parameterization change present**: yes.
 - **ADR required**: yes.
 - **ADR**:
-  `docs/adrs/ADR-0033-user-defaults-and-wbt-boundary-policy.md` (Accepted).
+  `docs/adrs/ADR-0033-user-defaults-and-wbt-boundary-policy.md` (original
+  decision accepted; user-context amendment pending).
 - **Decision provenance captured**: yes; the ADR distinguishes the requesting
   operator and Codex from Mariana, whose quoted user need was relayed but who
   was not present in the decision venue.
@@ -256,8 +266,9 @@ timestamps are rebuilt.
 - **Security impact triage**: `high`.
 - **Dedicated security review required**: yes.
 - **Rationale**: this adds authenticated account mutation, CSRF-sensitive form
-  handling, database schema/state, creation-path preference propagation, and
-  failure behavior on an RQ worker path.
+  handling, database schema/state, removal of creation-path preference
+  propagation with compatibility coverage, per-user presentation, and failure
+  behavior on an RQ worker path.
 - **Security artifact**:
   `artifacts/2026-07-30_security_review.md`.
 

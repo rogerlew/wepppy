@@ -129,7 +129,8 @@ policy `error` rejects a delineation:
   `error.code="watershed_boundary_touches_dem_edge"`, the exact actionable
   boundary message, `error.details.edge_hillslope_ids` as sorted unique
   integers, and `error_id`;
-- the failed subcatchment child stops its abstraction dependent, and the
+- the failed subcatchment child cancels its never-started abstraction
+  dependent through RQ's supported deferred-job cancellation state, and the
   aggregate root surfaces the same error only after descendants are terminal;
 - the open polling surface never returns raw traceback or paths for this
   expected failure, and its RQ traceback fields contain only sanitized text.
@@ -139,6 +140,79 @@ log keyed by `error_id` plus the existing login- and Admin/Root-protected
 `/weppcloud/rq/info-details` identity/status page. Host log access is outside
 HTTP and requires authenticated SSH plus Docker permission. This exception
 does not change traceback behavior for unrelated unexpected job failures.
+
+### WBT initiating-user policy snapshot
+
+SURF-14A may attach private root/child metadata named
+`wbt_boundary_policy_snapshot`. Open `jobstatus` and `jobinfo` never return
+this value. Open `jobinfo` also projects generic `auth_actor` as `null` for
+every job; actor details remain available only through existing
+Admin/Root-protected operations surfaces and server logs. This prevents a
+session identifier or service/MCP subject from leaking through adjacent
+metadata. Its exact schema is:
+
+```json
+{
+  "schema_version": 1,
+  "runid": "canonical-run-id",
+  "actor_token_class": "user",
+  "actor_user_id": 1,
+  "config_policy": "warn",
+  "effective_policy": "error",
+  "source": "user_preference"
+}
+```
+
+`actor_token_class` is exactly `user|session`; policies are exactly
+`warn|error`; source is exactly `user_preference|project_config`;
+`schema_version` is the integer `1`; `actor_user_id` is a positive integer;
+Boolean values are rejected for both integer fields; `runid` must equal the
+canonical route/job run ID; every key is required and extra keys are rejected.
+`config_policy` is exactly the durable
+`_wbt_boundary_touch_config_behavior`, not
+`_wbt_boundary_touch_behavior`. When `source=project_config`,
+`effective_policy` equals `config_policy`; when `source=user_preference`,
+`effective_policy` is the initiating user's exact `warn|error` value and may
+differ from `config_policy`.
+The child function argument contains only
+`{schema_version, effective_policy, source}` with the same enum rules.
+Missing, malformed, mismatched, or extra snapshot data fails before WBT or
+readiness mutation. The route supplies the complete snapshot as root metadata
+and the bounded argument as the root function argument. The root validates
+both for exact consistency before enqueueing children and attaches the same
+complete private snapshot plus bounded argument to the subcatchment child.
+The child validates its metadata and argument for exact consistency before
+applying policy. For same-run submissions, the complete mutable child
+operation—cache clear, hydration, snapshot validation, execution-policy
+construction, readiness invalidation, and WBT delineation—runs inside the
+existing watershed directory-root lock. Concurrent users' jobs serialize and
+must not communicate effective policy through cached or durable controller
+state.
+
+A route-time user/preference/snapshot-resolution failure returns HTTP 500
+with sanitized code `preference_resolution_failed`, exact public message
+`Could not resolve user preferences.`, and an `error_id`; it creates no job.
+Missing, malformed, extra, or inconsistent root/child snapshot state uses
+sanitized code `wbt_boundary_policy_snapshot_invalid`, exact public message
+`The WBT boundary policy snapshot is invalid. Submit delineation again.`, and
+an `error_id`. A cache, hydration, directory-root lock, or execution-policy
+construction/application failure uses sanitized code
+`wbt_boundary_policy_apply_failed`, exact public message
+`The WBT boundary policy could not be applied. Submit delineation again.`, and
+an `error_id`. A root validation failure leaves the raw root job `failed` and
+creates no children.
+A child validation/apply failure leaves that child `failed`, cancels the
+deferred abstraction child, and makes the public aggregate root `failed`
+after every created descendant is terminal. The raw orchestration root may
+already be `finished` after creating its children; polling must report the
+aggregate failure, never success or a permanently nonterminal tree. Open
+polling exposes only the allowlisted code, exact message, and `error_id`;
+`details` is absent for these three preference/policy infrastructure errors.
+
+This feature adds no session identifier. Private RQ metadata may retain the
+existing sanitized generic `auth_actor` for worker propagation and protected
+operator diagnostics, but open polling must apply the `auth_actor=null`
+projection above.
 
 ## Error responses
 - Use status-code-first semantics:

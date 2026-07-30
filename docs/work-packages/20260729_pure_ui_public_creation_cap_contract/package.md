@@ -52,11 +52,12 @@ feature-registry specification. This package does not add a configuration,
 location, CAPTCHA provider, authentication method, creation field, route,
 queue edge, fallback, or parameter default.
 
-SURF-14A is the bounded exception for authenticated new-project account
-defaults at the rq-engine create handoff. Anonymous/CAP launches continue to
-use explicit form input and project configuration without account lookup. All
-public, regional, and authenticated forms still converge on the same
-`POST /create/` endpoint. See
+SURF-14A does not alter the rq-engine create handoff. Anonymous/CAP and
+authenticated launches continue to use explicit form input and project
+configuration without account-preference lookup. Account units are resolved
+later as request-local presentation, and WBT behavior is resolved when an
+account-bearing user submits delineation. All public, regional, and
+authenticated forms still converge on the same `POST /create/` endpoint. See
 `../20260729_user_preferences_wbt_boundary/`.
 
 ## Acceptance

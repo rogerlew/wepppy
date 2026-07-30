@@ -1,6 +1,7 @@
 # SURF-14A Contract Decision
 
-**Status**: Accepted; dual-reviewed, standalone ancestor commit pending
+**Status**: Original checkpoint accepted at `1b412d61a`; superseding
+user-context amendment pending review
 
 **Starting implementation revision**:
 `715417f7081ea12e168e10426603445ec5140520`
@@ -21,6 +22,7 @@ accepting a clipped watershed. Mariana was not present in this decision venue.
 - `docs/schemas/weppcloud-csrf-contract.md`;
 - `docs/schemas/rq-response-contract.md`;
 - `docs/schemas/nodb-persistence-concurrency-contract.md`;
+- `docs/standards/rq-scoped-nodb-mutation-cache-guard-standard.md`;
 - SURF-14 Profile/Session concise intent contract;
 - SHR-05 Unitizer Preferences concise intent contract;
 - SURF-01 public/authenticated creation contract;
@@ -43,20 +45,25 @@ behavior change, not a conformance fix.
 2. Add login/CSRF-protected `/preferences` GET/POST routes and a Profile link,
    using the existing PureCSS account shell and form macros.
 3. Use the exact boundary label `Stop with an error`.
-4. Resolve new-project values using explicit project input, then account
-   preference, then project config, and snapshot the result into run state.
-5. Preserve existing runs, shared runs, anonymous creation, and source values
-   on forks.
+4. Resolve non-Auto units from the authenticated viewing user into a
+   request-local presentation overlay without changing durable project units.
+5. Resolve WBT boundary behavior from the authenticated initiating user,
+   using their preference then the immutable per-run config baseline, and
+   carry a deterministic bounded snapshot through the RQ tree without
+   persisting account-derived project policy.
 6. Add `[watershed.wbt] boundary_touch_behavior = "warn"` with exact
    `warn|error` validation.
 7. For WBT edge contact, warn and continue or raise the existing typed edge
    exception with an actionable message and no consumable stale success state.
 
-The operator's 2026-07-29 request to execute this named package approves this
-complete normative delta as documented here, including the typed storage
-model, exact enums, precedence, missing-row defaults, snapshot/fork behavior,
-`warn` configuration default, WBT failure semantics, and the scoped Forest
-migration/canary. The approval does not expand the package or waive any gate.
+The operator's 2026-07-29 request approved typed storage, enums, defaults,
+failure behavior, and a scoped Forest canary. On 2026-07-30 the operator
+demonstrated both WBT transitions, then explicitly corrected the authority and
+lifetime: preferences follow the authenticated user rather than the owner;
+non-Auto units change that user's view without mutating project units. This
+supersedes creation-time account unit snapshotting and the draft owner-only
+WBT rule. Neither approval waives a contract, review, acceptance, or Forest
+gate.
 
 ## Rationale and Rejected Alternatives
 
@@ -66,9 +73,13 @@ serve RQ workers or multiple browsers. Run NoDb state has the wrong lifetime.
 A JSON blob or generic key/value table weakens database validation and makes
 contract evolution less visible.
 
-Live profile resolution during every view/job was rejected because it would
-make shared and historical runs depend on the current viewer and mutable
-account state. Snapshotting during project creation preserves reproducibility.
+Live profile resolution by an RQ worker is rejected because it makes
+execution timing-dependent. Unit preference is intentionally resolved at an
+authorized request/view boundary into a nonpersistent presentation object.
+WBT boundary behavior is resolved synchronously for the initiating
+account-bearing user and then passed as an immutable RQ snapshot.
+Non-account-bearing public sessions, service/MCP, direct, and batch paths use
+project/config state.
 
 `Warn` as the account default was rejected because it would override a config
 set to `error` for every existing user. Account default `config` plus config
@@ -80,92 +91,72 @@ controlled typed job failure.
 ## Compatibility
 
 The database migration is additive. Existing users have no required row and
-resolve to `config`/`config`. Existing projects and persisted Unitizer maps are
-unchanged. A legacy `watershed.nodb` without
-`_wbt_boundary_touch_behavior` hydrates to `warn`; that compatibility value is
-independent of later account or configuration changes and is copied by
-archive/restore and fork operations. New runs persist the resolved value in
-`_wbt_boundary_touch_behavior`. Anonymous projects use config. WBT keeps its
-current warning behavior unless a config or account preference explicitly
-selects `error`. TOPAZ and DOM-05A conditioning are unchanged.
+resolve to `config`/`config`. Existing projects and persisted Unitizer maps
+are unchanged. Account units do not modify creation state. A separate
+`_wbt_boundary_touch_config_behavior` records the project baseline; an
+account-derived effective choice is execution-only. Archive/restore and fork
+copy project state, while each later account-bearing view/submission resolves
+that user independently. TOPAZ and DOM-05A conditioning are unchanged.
 
-## Exact Creation Resolution and Identity Matrix
+## Creation and Presentation Compatibility
 
-Every public, regional, and authenticated create form governed by SURF-01
-converges on `POST /create/` in
-`wepppy.microservices.rq_engine.project_routes.create`. The authenticated
-HUC-fire upload at `POST /huc-fire/tasks/upload-sbs/` is also included. Both
-must use the same typed resolver and failure-atomic ownership helper.
+Account preferences do not parameterize `Ron(...)` or project creation.
+Existing explicit `unitizer:is_english` input and selected configuration
+continue to determine durable Unitizer state. WBT configuration determines
+the durable project baseline. Regular, HUC-fire, anonymous/CAP, service/MCP,
+batch, playback, dataset, culvert, internal-child, fork, and archive/restore
+creation paths therefore preserve their pre-amendment parameterization.
 
-Only a `token_class=user` bearer/RQ token or an authenticated cookie session
-may resolve account preferences. The resolver binds `sub` only to a numeric
-User ID or exact `fs_uniquifier`; it does not fall back to email. Service,
-MCP, run-session, unknown, inactive, or conflicting subject/email identities
-cannot impersonate an account. Service/MCP creation that the existing route
-otherwise authorizes remains config-only and performs no account lookup.
-Unknown or inactive `user` identities fail closed. User lookup and preference
-snapshot occur in one Flask/database context and return immutable primitives.
+After ordinary view authorization, an active account-bearing viewer resolves
+their Unitizer presentation:
 
-Unit resolution for authenticated new runs is:
-
-| Explicit `unitizer:is_english` | Account unit | Effective unit |
+| Viewer preference | Presentation | Durable project mutation |
 | --- | --- | --- |
-| exact `true` or `false` | any valid value | explicit bool |
-| absent | `si` | false |
-| absent | `english` | true |
-| absent | `config` or missing row | project configuration |
-| any other nonempty explicit value | any | HTTP 400 `invalid_unitizer_override`; no run |
-| absent | invalid persisted value / lookup failure | HTTP 500 `preference_resolution_failed`; no run |
+| `config` or missing row | exact project category selections | none |
+| `si` | metric defaults for every category | none |
+| `english` | US customary defaults for every category | none |
+| invalid identity/value or DB failure | sanitized failure | none |
+| anonymous/non-account-bearing | exact project category selections | none |
 
-Boundary resolution for authenticated new runs is independent:
+The request-local overlay covers rendered reports/controls, conversion
+endpoints, and initial browser preference payload. It never changes cached or
+on-disk Unitizer state. Project-specific Unitizer mutation remains an explicit
+separate operation.
 
-| Account boundary | Effective boundary |
-| --- | --- |
-| `warn` | warn |
-| `error` | error |
-| `config` or missing row | project configuration |
-| invalid persisted value / lookup failure | HTTP 500 `preference_resolution_failed`; no run |
+### Initiating-user WBT delineation matrix
 
-Tests cover the Cartesian product of all successful authenticated unit rows
-and all successful boundary rows, plus each failure row. Identity/operation
-behavior is:
+The existing authorization check remains mandatory before preference
+resolution. The route snapshots the effective policy before enqueue; the
+worker does not query account state.
 
-| Identity / operation | Account lookup | Resolution |
+| Initiator / run | Controlling value | Result |
 | --- | --- | --- |
-| Anonymous/CAP new run | none | valid explicit unit or project config; boundary config |
-| Authorized service/MCP new run | none | valid explicit unit or project config; boundary config |
-| Unknown/inactive authenticated User | required and fails | canonical 5xx; no run |
-| Existing/shared run | none | persisted state |
-| Fork/archive restore | none | copied source state |
+| Active authorized user token or session with numeric `user_id` | initiating user's non-`config` boundary, else immutable config baseline | bounded snapshot enqueued |
+| Authorized shared/admin/public-run User | that initiating user's preference | bounded snapshot enqueued |
+| Account-bearing inactive/missing User, invalid preference, or baseline failure | none | sanitized `preference_resolution_failed`; no mutation |
+| Public session without numeric `user_id` | project policy | no account lookup |
+| Service or MCP | persisted run policy | no account lookup |
+| Direct/batch worker | persisted run policy | no account lookup |
+| Fork/archive/restore | current initiating user's preference | copied project state remains unchanged |
 
-Payload values override same-named query values under the existing creation
-merge contract. Preference-derived overrides may add only
-`unitizer:is_english` and
-`watershed.wbt:boundary_touch_behavior`. A resolved authenticated identity
-whose active User row cannot be found returns a generic 5xx with code
-`preference_resolution_failed` and an `error_id`. A database or preference
-failure uses the same response. DB details, paths, query text, and stack traces
-remain server-side, and no run directory is created.
-
-Authenticated creation is successful only after filesystem/`Ron`
-initialization and atomic `Run` plus `runs_users` owner association succeed.
-No authenticated `303` or HUC-fire success may reference an ownerless run.
-Failure compensates by rolling back both SQL records and removing only the
-newly created, validated run directory; cleanup failure is logged with the
-same `error_id` and still fails closed.
-
-The other in-repository `Ron(...)` constructors are explicitly excluded:
-batch `_base` and child copies use batch configuration; profile playback,
-dataset tooling, test-support, and culvert fixtures are non-user production
-tools; `land_and_soil_rq` initializes an internal child run. None resolves
-viewer account defaults. Fork/archive operations copy source state and never
-invoke this resolver.
+Existing authorization remains authoritative for access. It does not select
+the preference account. Account-bearing session means a verified positive
+numeric `user_id` claim. The exact private root metadata schema and bounded
+child argument are defined in the amendment and canonical RQ contract.
+Changing the account after enqueue does not change that job or retry.
+Resolution and snapshot validation finish before any NoDb/Redis/queue
+mutation. A legacy missing config baseline may then persist only the validated
+configuration value under the Watershed lock before any other route mutation.
+Child cache invalidation, hydration, snapshot validation, construction of a
+nonpersistent execution policy, and only then WBT attempt entry are mandatory.
 
 ## Exact WBT State and Asynchronous Transitions
 
-The persisted run field is `_wbt_boundary_touch_behavior`; its public property
-accepts only `warn|error`. Missing legacy state reads and then persists as
-`warn` on the next Watershed mutation.
+The persisted run field `_wbt_boundary_touch_behavior` remains project policy
+and accepts only `warn|error`. Missing legacy state reads as `warn`.
+`_wbt_boundary_touch_config_behavior` is the immutable config baseline.
+Account-derived effective policy is execution-only and never replaces either
+field.
 
 At every WBT worker/direct/batch subcatchment attempt, the
 `build_subcatchments` and `abstract_watershed` RedisPrep timestamps are
@@ -191,7 +182,7 @@ later successful rerun replaces the edge IDs, recreates `subwta.tif`, writes
 the build timestamp, and permits abstraction to restore its timestamp.
 
 For the normal two-child RQ tree, the subcatchment child becomes `failed`, the
-dependent abstraction child never runs and becomes `stopped`, and the
+dependent abstraction child never runs and becomes `canceled`, and the
 aggregate root reports `failed` after no descendant remains active.
 `GET /rq-engine/api/jobstatus/<job_id>` retains its canonical status-only
 payload. `GET /rq-engine/api/jobinfo/<root-or-child-job-id>` returns HTTP 200
@@ -226,7 +217,9 @@ regeneration, `wctl check-rq-graph`, and live-tree evidence.
 
 The page is a complete-form, whole-record last-committed-write-wins contract.
 `user_id` is the primary/unique key and both columns update in one transaction.
-Existing rows are selected for update. Two concurrent first saves may race;
+Both saves and request/job resolution lock the User row before preference
+access; existing preference rows are then selected for update. Two concurrent
+first saves may race;
 the unique-key loser rolls back and performs one bounded select-for-update
 retry with the complete form. No field-level merge occurs. Deterministic
 create-race and update-serialization tests are required.
@@ -234,10 +227,10 @@ create-race and update-serialization tests are required.
 ## Security and Operations Impact
 
 Security impact is high because the feature adds authenticated database
-mutation, CSRF-sensitive form handling, account-to-run propagation, and an RQ
+mutation, CSRF-sensitive form handling, per-user presentation, and an RQ
 failure policy. Exact allowlists, atomic transactions, DB constraints,
-failure-atomic project creation, escaped rendering, no secret logging, typed
-errors, and no silent fallback are mandatory.
+request-local isolation, escaped rendering, no secret logging, typed errors,
+and no silent fallback are mandatory.
 
 The operator authorizes the reviewed additive migration and disposable
 authenticated canary on Forest after the contract ancestor, implementation,
@@ -247,8 +240,11 @@ does not authorize production/wepp1 migration.
 The repository currently has Alembic heads `7b3c068e7a1d` and
 `b7d9c3e2f1a4`. The preference revision must be a merge revision whose
 `down_revision` names both heads; no separate empty merge is required.
-Validation covers fresh upgrade and a database already at both heads through
-upgrade/downgrade/upgrade.
+Because the historical base assumes an existing application `user` table,
+fresh validation means a newly created disposable PostgreSQL database
+initialized to the representative application schema with the new table
+absent and both real parents recorded. It must run graph-level upgrade,
+explicit-target downgrade back to both parents, and re-upgrade.
 
 The migration names its four constraints `pk_user_preferences`,
 `fk_user_preferences_user_id_user`, `ck_user_preferences_unit_system`, and
@@ -271,28 +267,47 @@ surfaces `weppcloud`, `rq-engine`, and `scheduler`; prove default/batch queues
 have zero queued/executing jobs and every registered worker is idle; stop
 `rq-worker` and `rq-worker-batch` with a 30-minute graceful timeout; and verify
 the post-stop registries remain empty. Only then fast-forward the clean Forest
-checkout to the exact reviewed release SHA. Run Alembic from one disposable
+checkout to the exact reviewed release SHA and assert the resulting HEAD
+equals it. Before apply, record and verify an exact reviewed forward revert
+commit as the application rollback target; it must be a commit descendant of
+the release commit so rollback itself is a fast-forward. Run Alembic from one
+disposable
 `weppcloud` container while every long-lived changed-code consumer remains
 stopped. Start the four changed services together and then `scheduler` only
 after schema, constraints, and unchanged User count verify. The requesting
 operator owns restore authorization; Codex may verify the restore point and
-must abort rather than initiate a restore without new approval. The canary uses
-the requesting operator's authenticated account, records its generated run ID,
-and deletes only that exact disposable run plus the temporary preference row
-after evidence is captured. Preflight records repository heads, database
-revisions, new revision, restore point, canary identity, cleanup target, and
-restart set.
+must abort rather than initiate a restore without new approval. The canary
+uses the requesting operator's authenticated account plus a second existing
+operator-designated active test account. Preflight records both numeric User
+IDs and each exact prior preference-row state; it must stop for operator
+direction rather than create an account or change roles if the second account
+is absent. The operator creates one exact disposable run through the ordinary
+authenticated path and grants the second account access through the existing
+`runs_users` association. Evidence records the generated run and association
+identifiers. Cleanup removes only that association and run, restores both
+prior preference rows exactly, and deletes a preference row only when it was
+absent before the canary. It never deletes a User or alters roles.
+Post-cleanup checks prove both Users remain and no unrelated preference or
+association changed. Preflight records repository heads, database revisions,
+new revision, restore point, both canary identities, prior preference state,
+cleanup targets, and restart set.
 It aborts on any revision/target mismatch, missing restore point, unexpected
 SQL, failed constraint inspection, changed existing-user count, unhealthy
 service, or failed canary. After migration, Compose services `weppcloud`,
 `rq-engine`, `rq-worker`, and `rq-worker-batch` restart together; `scheduler`
 is the only additional service authorized for quiesce/restart and starts
-afterward. The exact commands live in the
+afterwards. The exact commands live in the
 ExecPlan and set `FLASK_APP=wepppy.weppcloud.app:app`. On migration failure,
 keep all five stopped and do not start new code; preserve logs and await
-operator disposition. Application rollback uses a reviewed revert commit and
-preserves the additive table. Destructive downgrade after rows exist requires
-a backup and separate operator approval. A post-action dual audit reviews the
+operator disposition. Application rollback uses the exact preflight-recorded
+reviewed forward revert commit and preserves the additive table. Before moving
+to rollback code, repeat the same
+enqueue stop, queue drain, worker-idle check, graceful worker stop, and
+zero-worker registry verification used for apply. Fast-forward to the recorded
+rollback commit and assert `git rev-parse HEAD` equals it before restarting the
+four changed services together and `scheduler`; never run rollback workers
+against new-signature jobs. Destructive downgrade after rows exist requires a
+backup and separate operator approval. A post-action dual audit reviews the
 redacted transcript before closure.
 
 ## Regression Evidence Required
@@ -301,26 +316,30 @@ redacted transcript before closure.
   upgrade/downgrade/upgrade against disposable PostgreSQL;
 - actual preference-page/Profile rendering and prefix-aware navigation;
 - login, CSRF, exact enum, hostile input, PRG, and no-partial-write routes;
-- complete precedence, explicit input, anonymous, identity failure, existing,
-  shared, and fork creation matrices;
-- persisted Unitizer and Watershed snapshot evidence;
+- project creation remains independent of account preferences;
+- two-user request-local Unitizer overlays with byte-stable cached/on-disk
+  project state across reports, conversions, and browser initialization;
 - synthetic WBT no-edge/all-edge/corner/nodata, warn/error, deterministic IDs,
   actionable message, stale-readiness, and rerun recovery;
-- canonical rq-engine error-envelope evidence;
+- initiating-user/shared/admin/session/service fallback, immutable RQ
+  snapshot, nonpersistent boundary policy, and canonical error evidence;
 - full Python/frontend/docs/stub/graph gates as applicable;
-- local E2E and Forest migration/canary artifacts.
+- local E2E and Forest migration/canary artifacts proving two users on one
+  unchanged project.
 
 ## Operator Approval
 
 The requesting operator explicitly approved `Stop with an error`, requested
 the work-package scaffold, granted authority to run the package's reviewed
-database migration on Forest, and then instructed Codex to execute this named
-package. That execution instruction approves the complete Exact Normative
-Delta and contained disposable Forest canary recorded above. Approval does not
-waive contract-first reviews, the standalone ancestor, tests, post-action
-audit, or final review gates.
+database migration on Forest, and instructed Codex to execute the original
+package. On 2026-07-30 the operator separately corrected the final lifetime:
+both preferences track the authenticated user, non-Auto units do not mutate
+project units, and WBT uses the initiating user rather than the owner. That
+statement supersedes the original creation-time unit delta and owner-only
+draft. Approval does not waive contract-first reviews, the standalone
+amendment ancestor, tests, post-action audit, or final review gates.
 
-## Checkpoint Gate
+## Original Checkpoint Gate (superseded for preference lifetime and authority)
 
 - [x] Starting revision and normative delta recorded.
 - [x] Operator decision and scoped Forest authority recorded.
@@ -331,3 +350,12 @@ audit, or final review gates.
 - [x] Findings disposition complete.
 - [x] Documentation-only standalone ancestor committed and recorded as
   `1b412d61a`.
+
+## User-Context Amendment Checkpoint
+
+- [x] Operator's superseding viewing-user/initiating-user decision recorded.
+- [ ] Independent governance/correctness review passes.
+- [ ] Independent operations/security review passes.
+- [ ] User-context findings disposition is complete.
+- [ ] Superseding documentation-only standalone ancestor is committed and
+  recorded.

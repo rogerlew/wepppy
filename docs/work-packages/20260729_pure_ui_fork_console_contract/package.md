@@ -52,8 +52,10 @@ parameter default, or compatibility alias.
 
 SURF-14A explicitly preserves this copy contract: a fork copies the source
 run's Unitizer and WBT boundary-policy state, including the `warn`
-compatibility value for legacy source state, and never resolves the destination
-owner's account defaults. See `../20260729_user_preferences_wbt_boundary/`.
+compatibility value for legacy source state, and never resolves account
+preferences while copying. Authorized views and WBT submissions resolve the
+current user's request/action overlay only afterward. See
+`../20260729_user_preferences_wbt_boundary/`.
 
 ## Acceptance
 

@@ -69,8 +69,10 @@ saved selection, and other configurations keep their configured defaults.
 After WBT delineates subcatchments, WEPPcloud checks all four raster edges for
 positive hillslope identifiers. The project configuration can either warn and
 continue or stop with an error. Signed-in users can choose an account default
-on the [User Preferences](../user-preferences.md) page; that choice is copied
-into new projects only.
+on the [User Preferences](../user-preferences.md) page. That choice follows
+the authenticated user who submits delineation; it is not selected from the
+run owner and does not become another user's preference. Auto uses the project
+configuration.
 
 When **Stop with an error** is active, WEPPcloud removes the clipped
 subcatchment raster and does not run watershed abstraction. Select a different
