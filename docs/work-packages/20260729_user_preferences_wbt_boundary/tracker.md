@@ -350,8 +350,36 @@ config or explicit user preference can choose fail-closed handling.
 - [x] Restored salient save feedback with the standard informational and
   success alert treatments while retaining polite live announcements
   (2026-07-30 15:40 UTC).
+- [x] Rehearsed the production migration on `forest1` with a validated backup,
+  queue/worker quiescence, exact Alembic/schema/count assertions, coordinated
+  recovery, and live health checks (2026-07-30 15:55 UTC).
 
 ## Progress Notes
+
+### 2026-07-30 15:55 UTC: Forest1 production migration rehearsal
+
+The clean `forest1` checkout and deployed image were both revision
+`12ca3990e`. Before mutation, both queues had zero queued or executing jobs and
+all ten workers were idle. The rehearsal created and validated
+`/backups/weppcloud-user-preferences-rehearsal-20260730-155226.dump`
+(`PGDMP`, `pg_restore -l`, 710,782 bytes, mode 600), then stopped WEPPcloud,
+rq-engine, scheduler, and both worker services. A post-stop probe proved both
+queues empty and zero registered workers.
+
+Alembic upgraded parents `7b3c068e7a1d` and `b7d9c3e2f1a4` to merge head
+`c91f6b2a4d7e`. Postconditions proved all four named constraints, seven
+unchanged User rows, and zero preference rows, so the additive migration
+performed no backfill. The five services restarted successfully; WEPPcloud,
+PostgreSQL, and the backup sidecar are healthy, all ten workers are idle, both
+queues remain empty, the public root returns 200, and unauthenticated
+Preferences correctly redirects to login.
+
+Two no-mutation command probes exposed production-runbook friction. The
+production container requires explicit
+`FLASK_APP=wepppy.weppcloud.app:app`, and a one-off container must call
+`/opt/venv/bin/flask` rather than relying on `PATH`. The current `forest1`
+stack also requires `docker-compose.prod.yml`; the older development-Compose
+Forest example must not be copied into a production deployment.
 
 ### 2026-07-30 15:40 UTC: Salient save confirmation
 

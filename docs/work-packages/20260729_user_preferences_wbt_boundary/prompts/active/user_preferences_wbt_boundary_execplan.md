@@ -235,6 +235,13 @@ enlarge the project extent.
   the live save status to the standard informational alert while active and
   the standard success alert when confirmed. Focused template tests,
   frontend lint, and all 105 frontend suites with 749 tests pass.
+- [x] (2026-07-30 15:55 UTC) Rehearsed the migration against the production
+  Compose stack on `forest1` at deployed revision `12ca3990e`. A validated
+  mode-600 backup preceded quiescence; both empty queues and ten idle workers
+  were proven before stop. Alembic merged both parents to `c91f6b2a4d7e`,
+  all four constraints exist, seven User rows are unchanged, and no preference
+  rows were backfilled. All five services recovered, the web container is
+  healthy, ten workers are idle, queues remain empty, and HTTP returns 200.
 
 ## Surprises & Discoveries
 
@@ -243,6 +250,11 @@ enlarge the project extent.
 - Observation: The WBT channel-delineation Markdown and manifest entry were
   present, but the generated Usersum runtime index had not been rebuilt.
   Runtime routing therefore returned 404 until the catalog was regenerated.
+- Observation: A production one-off `weppcloud` container does not put
+  `flask` on `PATH` and does not preset `FLASK_APP`. Production migration
+  commands must set `FLASK_APP=wepppy.weppcloud.app:app` and invoke
+  `/opt/venv/bin/flask`. The earlier development-Compose Forest command is not
+  suitable for the current `forest1` production stack.
   Evidence: `wepppy/nodb/unitizer.py` persists `unitizer.nodb` under each run.
 
 - Observation: new-project creation already supports an explicit
