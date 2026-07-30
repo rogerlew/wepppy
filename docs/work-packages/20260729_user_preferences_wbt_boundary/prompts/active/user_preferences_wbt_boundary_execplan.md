@@ -20,7 +20,21 @@ different outlet or enlarge the project extent.
   and migration surfaces.
 - [x] (2026-07-30 04:10 UTC) Scaffolded SURF-14A and recorded the operator's
   UI-label decision and Forest migration authority.
-- [ ] Complete two independent checkpoint reviews and disposition all findings.
+- [x] (2026-07-30 05:20 UTC) Completed two independent initial checkpoint
+  reviews; both rejected the scaffold and implementation remained blocked.
+- [x] (2026-07-30 05:30 UTC) Dispositioned all authority, ownership, identity,
+  creation inventory, legacy state, error-state, asynchronous RQ, concurrency,
+  migration-topology, and Forest-containment findings in the contract.
+- [x] (2026-07-30 06:10 UTC) Completed first re-review and amended its five
+  remaining findings: canonical field matrix, Cartesian precedence, exact
+  warning/jobinfo contract, canonical RQ schema, and bind-mount-contained
+  Forest commands.
+- [x] (2026-07-30 06:35 UTC) Governance passed. The second operations review
+  closed SEC-03 and retained OPS-04; added a verified one-off backup, enqueue
+  quiesce, queue/worker drain, graceful stop, post-stop registry, and exact
+  schema/User-count assertions.
+- [x] (2026-07-30 06:50 UTC) Completed both independent checkpoint reviews;
+  governance and operations/security passed with no unresolved finding.
 - [ ] Commit the documentation-only checkpoint before implementation.
 - [ ] Implement and test account persistence plus the User Preferences page.
 - [ ] Implement and test new-run effective-value resolution and snapshotting.
@@ -52,6 +66,16 @@ different outlet or enlarge the project extent.
   package can preserve the typed response contract instead of inventing an
   error envelope.
 
+- Observation: the existing exception catch is enqueue-time, while real WBT
+  edge detection fails asynchronously in the subcatchment child job.
+  Evidence: the operations/security review traced
+  `watershed_routes.py` to `project_rq.py`; the contract now governs the actual
+  child/dependency/root and sanitized public-status lifecycle.
+
+- Observation: Alembic has two heads rather than one.
+  Evidence: repository revisions `7b3c068e7a1d` and `b7d9c3e2f1a4`; the new
+  preference revision must merge both.
+
 ## Decision Log
 
 - Decision: Use canonical tokens `config|si|english` and
@@ -68,7 +92,8 @@ different outlet or enlarge the project extent.
 - Decision: Use explicit creation input > account preference > project config.
   Rationale: an explicit action for one project must beat an account default;
   a default may override configuration only when the user selected it.
-  Date/Author: 2026-07-30 / Codex, derived from the existing creation contract.
+  Date/Author: 2026-07-30 / proposed by Codex and approved by the requesting
+  operator through the instruction to execute this documented package.
 
 - Decision: Apply account preferences only when creating a new project.
   Rationale: existing/shared runs and asynchronous jobs must not depend on
@@ -119,8 +144,9 @@ the tracker.
 
 Next add a `UserPreferences` SQLAlchemy model with a one-to-one User
 relationship, exact string constraints, timestamps, and cascading foreign key.
-Add an Alembic migration that upgrades from the current head and cleanly
-downgrades. Implement a small typed preference service that returns defaults
+Add an Alembic merge migration whose parents are repository heads
+`7b3c068e7a1d` and `b7d9c3e2f1a4` and which cleanly downgrades. Implement a
+small typed preference service that returns defaults
 for a missing row, validates exact tokens, performs one atomic upsert/update,
 and resolves effective creation overrides without silently swallowing database
 errors.
@@ -142,10 +168,11 @@ state.
 
 Add `boundary_touch_behavior = "warn"` to the WBT configuration defaults or
 the canonical default-loading path and validate `warn|error` when Watershed
-initializes. Persist the effective value with a guarded setter. After WBT edge
-identification, publish an actionable warning for `warn`; for `error`, remove
-or invalidate canonical ready output as required by actual preflight semantics,
-clear stale completion state, and raise
+initializes. Persist the effective value with a guarded setter and hydrate
+legacy missing state to `warn`. After WBT edge identification, publish an
+actionable warning for `warn`; for `error`, delete canonical `subwta.tif`,
+clear build and abstraction completion state, retain deterministic diagnostic
+edge IDs, and raise
 `WatershedBoundaryTouchesEdgeError` with the contract message and deterministic
 edge identifiers.
 
@@ -160,12 +187,15 @@ disposable authenticated project for E2E. Confirm saved preferences, effective
 run state, config-mode behavior, and the WBT error message without retaining
 test credentials.
 
-Finally execute the authorized Forest canary. Record the deployed code
+Finally execute the authorized schema-first Forest canary. Record the code
 revision, current Alembic head, backup/preflight evidence, and migration SQL
-scope. Run the reviewed `flask db upgrade` command inside the Forest
-application container, verify the new head/table/constraints, restart only
-services that require it, and exercise an authenticated preference save plus
-new-project snapshot. Do not migrate production/wepp1.
+scope. Confirm old code with the additive schema before starting new code. Run
+the reviewed `flask db upgrade` command inside the Forest application
+container with explicit `FLASK_APP=wepppy.weppcloud.app:app`, verify the new
+merge head/table/constraints, restart WEPPcloud/rq-engine/affected workers
+together, exercise an authenticated preference save plus new-project snapshot,
+clean up the disposable canary, and complete a post-action dual audit. Do not
+migrate production/wepp1.
 
 ## Concrete Steps
 
@@ -194,28 +224,133 @@ Run development commands from `/home/workdir/wepppy`:
     wctl run-pytest tests --maxfail=1
     git diff --check
 
-Before Forest migration, replace placeholders with the actual reviewed compose
-files and service names discovered on that host. The canonical container-side
-migration form is:
+Forest uses the exact target and Compose identity below. Set
+`SURF14A_RELEASE_SHA` to the reviewed release commit and record the previous
+SHA. The checkout must be clean. Create and validate a fresh backup, block
+enqueue, prove both queues and all workers idle, stop workers gracefully, then
+change the bind-mounted tree. Run migration in a one-off container and do not
+restart on any failure:
 
-    docker compose <forest compose arguments> exec weppcloud flask db current
-    docker compose <forest compose arguments> exec weppcloud flask db upgrade
-    docker compose <forest compose arguments> exec weppcloud flask db current
+    ssh forest
+    cd /home/workdir/wepppy
+    set -euo pipefail
+    export SURF14A_RELEASE_SHA=<reviewed-release-sha>
+    export SURF14A_BACKUP_PATH="/backups/weppcloud-surf14a-$(date -u +%Y%m%d-%H%M%S).dump"
+    git status --short
+    test -z "$(git status --porcelain)"
+    git rev-parse HEAD
+    docker compose -p docker -f docker/docker-compose.dev.yml run \
+      --rm --no-deps -e SURF14A_BACKUP_PATH="$SURF14A_BACKUP_PATH" \
+      postgres-backup bash -lc '
+        set -euo pipefail
+        umask 077
+        password="$(cat /run/secrets/postgres_password)"
+        pgpass_file="$(mktemp)"
+        trap "rm -f \"$pgpass_file\"" EXIT
+        printf "%s:%s:%s:%s:%s\n" \
+          "$PGHOST" "$PGPORT" "$PGDATABASE" "$PGUSER" "$password" \
+          > "$pgpass_file"
+        export PGPASSFILE="$pgpass_file"
+        tmp_path="${SURF14A_BACKUP_PATH}.tmp"
+        pg_dump -h "$PGHOST" -U "$PGUSER" -d "$PGDATABASE" \
+          -Fc -f "$tmp_path"
+        test "$(head -c 5 "$tmp_path")" = "PGDMP"
+        pg_restore -l "$tmp_path" >/dev/null
+        mv "$tmp_path" "$SURF14A_BACKUP_PATH"
+        printf "verified_backup=%s\n" "$SURF14A_BACKUP_PATH"
+      '
+    docker compose -p docker -f docker/docker-compose.dev.yml stop \
+      --timeout 120 weppcloud rq-engine scheduler
+    docker compose -p docker -f docker/docker-compose.dev.yml ps --all \
+      weppcloud rq-engine scheduler
+    export SURF14A_RQ_DRAIN_LOG="$(mktemp)"
+    wctl rq-info --raw > "$SURF14A_RQ_DRAIN_LOG"
+    test "$(grep -Ec '^queue (default|batch) 0, 0 executing' \
+      "$SURF14A_RQ_DRAIN_LOG")" -eq 2
+    export SURF14A_WORKER_COUNT="$(
+      awk '/^worker / {count++} END {print count + 0}' \
+        "$SURF14A_RQ_DRAIN_LOG"
+    )"
+    test "$SURF14A_WORKER_COUNT" -gt 0
+    test "$(awk '/^worker .* idle / {count++} END {print count + 0}' \
+      "$SURF14A_RQ_DRAIN_LOG")" \
+      -eq "$SURF14A_WORKER_COUNT"
+    docker compose -p docker -f docker/docker-compose.dev.yml stop \
+      --timeout 1800 rq-worker rq-worker-batch
+    docker compose -p docker -f docker/docker-compose.dev.yml ps \
+      --all weppcloud rq-engine rq-worker rq-worker-batch scheduler
+    docker compose -p docker -f docker/docker-compose.dev.yml run \
+      --rm --no-deps rq-worker bash -lc '
+        set -euo pipefail
+        redis_url="$(PYTHONPATH=/workdir/wepppy /opt/venv/bin/python -c \
+          "from wepppy.config.redis_settings import RedisDB, redis_url; print(redis_url(RedisDB.RQ))")"
+        /opt/venv/bin/rq info -u "$redis_url" default batch --raw
+      ' > "$SURF14A_RQ_DRAIN_LOG.post-stop"
+    test "$(grep -Ec '^queue (default|batch) 0, 0 executing' \
+      "$SURF14A_RQ_DRAIN_LOG.post-stop")" -eq 2
+    test "$(awk '/^worker / {count++} END {print count + 0}' \
+      "$SURF14A_RQ_DRAIN_LOG.post-stop")" -eq 0
+    export SURF14A_USER_COUNT_BEFORE="$(
+      docker compose -p docker -f docker/docker-compose.dev.yml exec -T \
+        postgres psql -U wepppy -d wepppy -Atc \
+        'SELECT count(*) FROM "user";'
+    )"
+    git fetch origin
+    git merge --ff-only "$SURF14A_RELEASE_SHA"
+    docker compose -p docker -f docker/docker-compose.dev.yml run \
+      --rm --no-deps -e FLASK_APP=wepppy.weppcloud.app:app \
+      weppcloud flask db current
+    docker compose -p docker -f docker/docker-compose.dev.yml run \
+      --rm --no-deps -e FLASK_APP=wepppy.weppcloud.app:app \
+      weppcloud flask db upgrade
+    docker compose -p docker -f docker/docker-compose.dev.yml run \
+      --rm --no-deps -e FLASK_APP=wepppy.weppcloud.app:app \
+      weppcloud flask db current
+    test "$(
+      docker compose -p docker -f docker/docker-compose.dev.yml exec -T \
+        postgres psql -U wepppy -d wepppy -Atc \
+        "SELECT count(*) = 4 FROM pg_constraint WHERE conrelid = \
+        'user_preferences'::regclass AND conname = ANY (ARRAY[ \
+        'pk_user_preferences', \
+        'fk_user_preferences_user_id_user', \
+        'ck_user_preferences_unit_system', \
+        'ck_user_preferences_wbt_boundary_touch_behavior']);"
+    )" = "t"
+    test "$SURF14A_USER_COUNT_BEFORE" = "$(
+      docker compose -p docker -f docker/docker-compose.dev.yml exec -T \
+        postgres psql -U wepppy -d wepppy -Atc \
+        'SELECT count(*) FROM "user";'
+    )"
+    docker compose -p docker -f docker/docker-compose.dev.yml up \
+      -d --no-deps weppcloud rq-engine rq-worker rq-worker-batch
+    docker compose -p docker -f docker/docker-compose.dev.yml up \
+      -d --no-deps scheduler
+
+The backup output records its exact path only after `PGDMP` header and
+`pg_restore -l` validation. The first `ps --all` proves enqueue surfaces
+stopped; both drain assertions prove zero queued/executing work, and the second
+`ps --all` proves all five services stopped before `git merge`. Constraint and
+User-count checks run before `up`. If any command fails, leave the five
+services stopped; do not downgrade or start the new checkout.
 
 Do not put database passwords, session cookies, JWTs, or preference-form CSRF
 tokens into work-package artifacts.
 
 ## Validation and Acceptance
 
-The model test must prove one row per user, both check constraints, cascade
-delete, missing-row defaults, atomic two-field updates, and migration
+Model tests against disposable PostgreSQL must prove one row per user, both
+check constraints, cascade delete, missing-row defaults, atomic two-field
+updates, whole-record last-committed-write-wins behavior, one bounded
+first-create race retry, and fresh/two-head migration
 upgrade/downgrade/upgrade. Route/render tests must prove login, CSRF, exact
 tokens, visible errors, no partial mutation, escaped values, selected state,
 Pure macros, prefix-aware Profile navigation, and PRG success.
 
-Creation tests must cover all nine meaningful precedence combinations plus an
-explicit unit choice, missing row, anonymous CAP creation, user-token/session
-identity, preference lookup failure, existing runs, shared runs, and forks.
+Creation tests must cover every row and constructor disposition in
+`artifacts/2026-07-30_contract_decision.md`, including regular and HUC-fire
+creation, payload-over-query precedence, anonymous CAP creation,
+user-token/session identity, negative token/identity cases, canonical lookup
+failures, owner-association/cleanup failures, existing/shared runs, and forks.
 The run's persisted Unitizer and Watershed values—not only the configuration
 string—are acceptance evidence.
 
@@ -225,11 +360,12 @@ stale prior completion state, and rerun recovery. The error case must expose
 the contract message through the existing rq-engine error envelope and must
 not allow downstream readiness.
 
-Forest acceptance requires the reviewed application revision, one migration
-head, the exact new table/constraints, unchanged existing user count, no
+Forest acceptance requires the reviewed application revision, exact target
+and database identity, repository/database head agreement, restore owner/point,
+the reviewed merge head, exact new table/constraints, unchanged user count, no
 required backfill, preference save/reload, one new project with effective
-snapshot values, healthy services, and a documented rollback. Production
-remains untouched.
+snapshot values, canary cleanup, healthy services, post-action review, and a
+documented nondestructive application rollback. Production remains untouched.
 
 ## Idempotence and Recovery
 
@@ -238,8 +374,8 @@ additive and safe to rerun through Alembic head detection. A failed preference
 save rolls back its transaction. A failed authenticated preference lookup
 cannot leave a registered or usable partial run.
 
-Before Forest apply, capture the current head and confirm a database backup or
-approved restore point. If migration apply fails, stop, preserve logs, and do
+Before Forest apply, confirm both expected current revisions and a database
+backup or approved restore point. If migration apply fails, stop, preserve logs, and do
 not repeatedly mutate the database without diagnosing the exact revision. If
 the schema succeeds but the application canary fails, roll back application
 code first when the additive table is harmless; downgrade the migration only

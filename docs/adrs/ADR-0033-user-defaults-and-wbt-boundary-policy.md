@@ -1,6 +1,6 @@
 # ADR-0033: Account Defaults and WBT DEM-Boundary Policy
 
-**Status**: Draft
+**Status**: Accepted
 
 **Date**: 2026-07-30
 
@@ -27,6 +27,12 @@ For new projects, precedence is explicit per-project creation input, then a
 non-`config` account preference, then project configuration. Snapshot the
 effective values into the new run before NoDb initialization. Existing runs
 and forks do not re-resolve account preferences.
+
+Persist the new-run WBT choice as
+`Watershed._wbt_boundary_touch_behavior`. Legacy Watershed state missing this
+field hydrates to `warn` and preserves that compatibility value through
+archive/restore and forks regardless of later configuration or account
+changes.
 
 Add `[watershed.wbt] boundary_touch_behavior` with accepted values `warn` and
 `error` and default `warn`. `warn` preserves current behavior. `error` raises
@@ -61,6 +67,12 @@ Mariana was not present.
 Decision Owner(s): requesting WEPPcloud operator
 
 Implementer(s): Codex/WEPPcloud maintainers
+
+The operator first approved the `Stop with an error` label, scaffold, and
+Forest migration, then instructed Codex to execute the named SURF-14A package.
+That instruction approves the complete documented delta: typed storage, enums,
+precedence, missing-row behavior, snapshot/fork compatibility, `warn` default,
+failure semantics, and the contained Forest canary.
 
 ## Rationale
 

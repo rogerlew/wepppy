@@ -4,7 +4,8 @@
 
 - **Package**:
   `docs/work-packages/20260729_user_preferences_wbt_boundary/`
-- **Reviewer**: pending independent operations/security reviewer
+- **Reviewer**: independent operations/security agent; checkpoint re-review
+  pending
 - **Date**: 2026-07-30
 - **Scope**: authenticated preference GET/POST, SQLAlchemy/Alembic state,
   creation-time propagation, run NoDb snapshot, WBT edge policy, rq-engine
@@ -30,7 +31,12 @@ arbitrary configuration keys.
 
 | ID | Severity | Surface | Description | Required action | Status |
 | --- | --- | --- | --- | --- | --- |
-| SEC-01 | Pending | Checkpoint | Independent review has not run | Complete review and disposition | Open |
+| SEC-01 | High | Identity/ownership | Account lookup and ownership could fail open | Restrict identity/subject binding; atomic ownership and cleanup; generic errors | Contract-fixed; re-review pending |
+| SEC-02 | High | Creation inventory | HUC-fire and other constructors were not dispositioned | Include regular/HUC-fire; explicitly exclude all others | Contract-fixed; re-review pending |
+| SEC-03 | High | Async errors | Enqueue-time catch was not the worker failure/public status path | Exact jobinfo schema/redaction/diagnostic contract and canonical RQ amendment | Second re-review pending |
+| OPS-04 | High | Migration | Repository has two heads; bind-mounted rollout and active workers/backup were unsafe | Fresh validated backup; quiesce enqueue; drain; graceful worker stop; post-stop registry; one-off migration | Contract review PASS |
+| OPS-05 | Medium | Stale state | Worker/direct/batch invalidation and retry were incomplete | Exact raster/timestamp/preflight/retry contract | Contract-fixed; re-review pending |
+| SEC-06 | Medium | Concurrency | Simultaneous insert/update behavior was ambiguous | Complete-form last-write-wins and bounded collision retry | Contract-fixed; re-review pending |
 
 ## Required Surface Checks
 
@@ -66,17 +72,17 @@ Pending implementation. Required evidence is enumerated in `package.md`,
 
 ## Verdict
 
-- **Gate status**: pending
+- **Gate status**: checkpoint PASS; implementation validation and final review
+  remain pending
 - **Unresolved findings**:
-  - High: pending review
-  - Medium: pending review
-  - Low: pending review
-- **Release recommendation**: hold implementation until the checkpoint passes;
-  hold Forest migration until implementation, full validation, and final
-  reviews pass.
+  - High: none unresolved
+  - Medium: none unresolved
+  - Low: none
+- **Release recommendation**: implementation may begin after the standalone
+  checkpoint commit; hold Forest migration until implementation, full
+  validation, and final reviews pass.
 
 ## Sign-off
 
-- **Security reviewer**: pending
-- **Package owner**: requesting WEPPcloud operator / Codex implementation
-  agent, pending
+- **Security reviewer**: independent operations/security agent, checkpoint PASS
+- **Package owner**: requesting WEPPcloud operator / Codex implementation agent

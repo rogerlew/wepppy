@@ -44,6 +44,13 @@ defaults, endpoint paths, response shapes, or stored keys. Such a change would
 require an operator-approved contract checkpoint and, for parameterization, an
 ADR before implementation.
 
+SURF-14A adds account-level defaults for new projects only. It does not reuse
+or alter SHR-05's run-scoped complete category map, modal endpoint, conversion
+tables, precision, or reload contract. The effective account choice is
+translated to the existing new-run configuration before `Unitizer`
+initialization; subsequent SHR-05 edits remain confined to that run. See
+`../20260729_user_preferences_wbt_boundary/`.
+
 ## Acceptance
 
 Direct rendering proves identities, values, checked state, labels, modal

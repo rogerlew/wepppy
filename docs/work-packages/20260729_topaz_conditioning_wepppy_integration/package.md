@@ -31,6 +31,12 @@ defaults, or other WEPPcloud configurations. After the planned reviews, the
 operator separately authorized local E2E mutation of run `austere-inaction`;
 that run's downstream watershed steps were invalidated as expected.
 
+SURF-14A is a later bounded amendment for WBT post-delineation DEM-boundary
+handling. Its `warn|error` policy does not modify `TopazConditionDem`,
+obstruction width, depression smoothing, flow vectors, outlet selection, or
+the `topaz` token/default governed here. See
+`../20260729_user_preferences_wbt_boundary/`.
+
 ## Fidelity and Evidence
 
 - **Target**: faithful wired integration.

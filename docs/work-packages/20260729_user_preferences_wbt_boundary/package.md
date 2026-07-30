@@ -7,7 +7,8 @@
 **Package ID**: SURF-14A
 
 **Parent owners**: SURF-14 User Profile/Session, SHR-05 Unitizer Preferences,
-and DOM-05 Channel Delineation
+SURF-01 creation, SURF-04 fork, DOM-02 Project Shell, DOM-05 Channel
+Delineation, and DOM-05A Topaz Conditioning
 
 ## Overview
 
@@ -100,6 +101,29 @@ their persisted Unitizer selections and WBT boundary policy. Forks copy the
 source run's effective values and do not re-resolve the destination owner's
 account preferences. Shared-run viewers do not dynamically alter run behavior.
 
+SURF-01 public, regional, and authenticated forms converge on rq-engine
+`POST /create/`; authenticated HUC-fire upload is the second included
+creation path. Both use the same resolver and failure-atomic ownership helper.
+Batch, playback, dataset, test-support, culvert, and internal child-run
+constructors do not resolve account defaults. The finite identity/precedence
+matrix, canonical failure response, concurrent-write contract, and exact
+Forest rollout are normative in
+`artifacts/2026-07-30_contract_decision.md`.
+
+Only `token_class=user` and authenticated cookie-session identities can resolve
+preferences. Subject binding accepts numeric User ID or exact
+`fs_uniquifier`, never email fallback; unknown, inactive, service, MCP, and
+run-session identities cannot impersonate an account. Existing authorized
+service/MCP creation remains config-only with no preference lookup; unknown or
+inactive `user` identities fail closed. Authenticated account creation cannot
+return success until atomic run ownership succeeds, and compensating cleanup
+removes partial SQL/filesystem state.
+
+Legacy `watershed.nodb` payloads lack
+`_wbt_boundary_touch_behavior`. Missing state hydrates to `warn`, independent
+of later account/config changes, and archive/restore or fork copies that
+effective compatibility value rather than resolving a destination account.
+
 ### WBT DEM-boundary behavior
 
 `[watershed.wbt] boundary_touch_behavior` accepts exactly `warn` or `error` and
@@ -114,8 +138,9 @@ present:
 - `warn` records the edge identifiers, publishes an actionable warning, and
   permits the clipped result to continue;
 - `error` raises `WatershedBoundaryTouchesEdgeError` with an actionable message,
-  does not mark subcatchment construction complete, and leaves no stale
-  ready-state that downstream work can consume.
+  deletes canonical WBT `subwta.tif`, leaves build and abstraction timestamps
+  absent, retains sorted edge identifiers as diagnostics, publishes no
+  completion trigger, and leaves no ready state downstream work can consume.
 
 The user-visible error is:
 
@@ -123,8 +148,20 @@ The user-visible error is:
 > a different outlet or enlarge the project extent, then delineate again.
 
 The error is an intentional job failure, not a process crash. Existing
-rq-engine typed error handling remains the response authority. No silent
-fallback from `error` to `warn` is permitted.
+rq-engine orchestration remains the job-state authority, while the public
+status surface exposes only a sanitized code, the actionable message, and an
+`error_id`; internal tracebacks remain operator diagnostics. The failed
+subcatchment child prevents dependent abstraction, the root becomes terminal
+failed, and retry remains available. No silent fallback from `error` to `warn`
+is permitted.
+
+Every worker/direct/batch attempt clears prior build/abstraction timestamps,
+removes prior canonical `subwta.tif`, and replaces prior edge identifiers.
+`warn` retains the new raster, logs and publishes the warning on
+`<runid>:subcatchment_delineation`, and timestamps success. A later successful
+rerun after `error` restores the raster/readiness lifecycle. Older derived
+files may remain on disk but downstream preflight must reject them until the
+timestamps are rebuilt.
 
 ## Objectives
 
@@ -192,7 +229,7 @@ fallback from `error` to `warn` is permitted.
 - **Parameterization change present**: yes.
 - **ADR required**: yes.
 - **ADR**:
-  `docs/adrs/ADR-0033-user-defaults-and-wbt-boundary-policy.md` (draft).
+  `docs/adrs/ADR-0033-user-defaults-and-wbt-boundary-policy.md` (Accepted).
 - **Decision provenance captured**: yes; the ADR distinguishes the requesting
   operator and Codex from Mariana, whose quoted user need was relayed but who
   was not present in the decision venue.
@@ -201,7 +238,11 @@ fallback from `error` to `warn` is permitted.
 
 - **Depends on**:
   [SURF-14](../20260728_pure_ui_user_profile_session_contract/package.md),
-  [SHR-05](../20260728_pure_ui_unitizer_preferences_contract/package.md), and
+  [SHR-05](../20260728_pure_ui_unitizer_preferences_contract/package.md),
+  [SURF-01](../20260729_pure_ui_public_creation_cap_contract/package.md),
+  [SURF-04](../20260729_pure_ui_fork_console_contract/package.md),
+  [DOM-02](../20260728_project_shell_ui_contract/package.md),
+  [DOM-05](../20260728_channel_delineation_ui_contract/package.md), and
   [DOM-05A](../20260729_topaz_conditioning_wepppy_integration/package.md).
 - **Governed by**:
   `docs/standards/contract-first-change-standard.md`,
@@ -230,12 +271,14 @@ fallback from `error` to `warn` is permitted.
 ## Forest Migration Authority
 
 The requesting operator explicitly authorized Codex to run the additive
-database migration on Forest. This authority is scoped to the reviewed
-`user_preferences` migration from this package and does not authorize
-production/wepp1 migration or unrelated deployment changes. The Forest
-migration remains gated on a committed contract checkpoint, completed
-implementation, passing local migration/full-suite tests, and final
-governance/security reviews.
+database migration and disposable authenticated canary on Forest. This
+authority is scoped to the reviewed `user_preferences` merge revision and
+exact canary from this package and does not authorize production/wepp1
+migration or unrelated deployment changes. The schema-first rollout, target
+discovery, restore, coordinated restart, abort, cleanup, and post-action audit
+gates are defined in the contract decision. Forest remains gated on a
+committed checkpoint, completed implementation, passing disposable-PostgreSQL
+migration/full-suite tests, and final governance/security reviews.
 
 ## References
 

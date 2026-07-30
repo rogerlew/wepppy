@@ -1,6 +1,6 @@
 # Channel Delineation Controller Contract
 
-**Status**: In progress
+**Status**: Closed; SURF-14A bounded amendment pending
 **Timezone**: UTC
 **Package ID**: DOM-05
 **Parent**: `20260716_pure_ui_contract_standardization_c`
@@ -42,3 +42,13 @@ are excluded unless a focused test proves a production conformance mismatch.
 The operator authorized a sequential DOM-05 audit on 2026-07-28. This package
 uses direct tests and no registry, generated manifest, or shared helper unless
 repetition demonstrates a smaller, clearer test aid is necessary.
+
+## Bounded Amendments
+
+DOM-05A is complete and supplies the released Topaz conditioning selector and
+dispatch contract. SURF-14A separately proposes a run-persisted WBT
+DEM-boundary `warn|error` policy after subcatchment edge detection. It does not
+change DOM-05A conditioning, depression-smoothing tokens, D8 flow, channel
+extraction, outlet selection, or edge geometry. See
+`../20260729_topaz_conditioning_wepppy_integration/` and
+`../20260729_user_preferences_wbt_boundary/`.

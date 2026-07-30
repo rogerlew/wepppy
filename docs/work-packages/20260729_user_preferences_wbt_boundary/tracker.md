@@ -6,11 +6,11 @@
 
 **Started**: 2026-07-30 04:10 UTC
 
-**Current phase**: Contract checkpoint scaffold
+**Current phase**: Reviewed checkpoint ready to commit
 
-**Last updated**: 2026-07-30 04:10 UTC
+**Last updated**: 2026-07-30 06:50 UTC
 
-**Next milestone**: independent review and standalone contract ancestor
+**Next milestone**: standalone contract ancestor
 
 **Security impact**: `high`
 
@@ -21,8 +21,7 @@
 
 ### In Progress
 
-- [ ] Complete and independently review the contract decision, package
-  contract, ADR, registration, and security plan.
+- [ ] Commit the dual-reviewed documentation-only checkpoint.
 
 ### Ready
 
@@ -54,6 +53,23 @@
   migration authority (2026-07-30 04:10 UTC).
 - [x] Scaffolded SURF-14A package, active ExecPlan, contract decision, ADR, and
   security review artifact (2026-07-30 04:10 UTC).
+- [x] Received independent governance and operations/security checkpoint FAIL
+  reviews and retained both artifacts (2026-07-30 05:20 UTC).
+- [x] Dispositioned authority, owner cross-links, legacy state, exact WBT
+  cleanup, identity/ownership, creation inventory, async failure, concurrency,
+  dual-head migration, and Forest containment findings in the normative
+  contract (2026-07-30 05:30 UTC).
+- [x] First re-review closed ten findings and retained GOV-02/07/08, SEC-03,
+  and OPS-04; amended the field matrix, Cartesian precedence, canonical RQ
+  polling schema, and exact bind-mount-safe Forest commands
+  (2026-07-30 06:10 UTC).
+- [x] Governance second re-review passed. Operations/security closed SEC-03
+  and retained only OPS-04; added executable backup verification, enqueue
+  quiesce, worker drain/graceful stop/post-stop registry evidence, and exact
+  schema assertions (2026-07-30 06:35 UTC).
+- [x] Operations/security final confirmation passed OPS-04; both independent
+  checkpoint reviews now pass with no unresolved finding
+  (2026-07-30 06:50 UTC).
 
 ## Decisions
 
@@ -100,6 +116,9 @@ config or explicit user preference can choose fail-closed handling.
 | Boundary error leaves stale ready output | High | Invalidate readiness and canonical clipped output before typed failure | Open |
 | Migration deploys before compatible code | High | Contract, test, review, and Forest preflight gates | Open |
 | Concurrent preference saves lose one field | Medium | Validate complete form and update both fields in one transaction | Open |
+| Authenticated creation leaves an ownerless/public run | High | User-only subject binding, atomic owner association, compensating SQL/filesystem cleanup | Contract-defined |
+| Public job status discloses an internal traceback | High | Sanitized boundary-error status with message/code/error_id; operator diagnostics remain restricted | Contract-defined |
+| Dual Alembic heads produce an unsafe Forest rollout | High | Merge revision over both heads, fresh/two-head PostgreSQL tests, schema-first coordinated restart | Contract-defined |
 
 ## Verification Checklist
 
@@ -152,3 +171,31 @@ unrelated Pure UI and Command Bar changes; those remain outside this package.
 Next, obtain the two required read-only checkpoint reviews, disposition every
 finding, and commit only the documentation checkpoint before touching
 implementation files.
+
+### 2026-07-30 05:30 UTC: Initial checkpoint review disposition
+
+Both independent reviewers rejected the scaffold revision. Their findings were
+accepted and retained under `artifacts/`. The amended contract now records the
+operator's execution approval, every affected owner and `Ron(...)` path,
+identity and ownership fail-closed rules, legacy field hydration, exact WBT
+state/asynchronous transitions, complete-form concurrency, the two-head
+Alembic merge, and schema-first Forest containment. No implementation file has
+changed. Re-review remains the blocking next step.
+
+### 2026-07-30 06:10 UTC: First re-review
+
+Both reviewers narrowed the remaining checkpoint gaps. The second amendment
+round makes the warning/status payload literal, adds the bounded jobinfo schema
+to the canonical RQ response contract, factors precedence into a tested
+Cartesian product, corrects the DOM-05 field matrix, and stops every
+bind-mounted consumer before Forest checkout/migration. Second re-review is
+pending; implementation remains untouched and blocked.
+
+### 2026-07-30 06:35 UTC: Second re-review
+
+Governance passed. Operations/security accepted the async RQ contract and
+retained only deployment quiescence. The plan now creates and validates a
+fresh backup, blocks all enqueue surfaces, proves default/batch queues drained,
+stops idle workers gracefully, re-checks registries, and asserts User count
+plus all four named constraints before restart. Final OPS-04 confirmation is
+pending.

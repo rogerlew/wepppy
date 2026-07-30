@@ -1,6 +1,7 @@
 # DOM-05 Channel Delineation Field Matrix
 
-**Status**: Canonical DOM-05 contract; DOM-05A amendment pending implementation
+**Status**: Canonical DOM-05 contract; DOM-05A complete; SURF-14A bounded
+amendment pending
 **Date**: 2026-07-28 UTC
 
 | Field group | Intended rendered/request contract | Durable boundary | Initial evidence |
@@ -21,11 +22,18 @@ NoDb schema, and downstream WBT flow/channel algorithms remain unchanged.
 Read-only map presentation belongs to DOM-04A/DOM-04B unless it directly
 changes this form's submitted configuration.
 
+SURF-14A is a separate bounded post-delineation amendment. It adds persisted
+WBT `boundary_touch_behavior = warn|error` after subcatchment edge detection,
+with legacy missing state hydrating to `warn`. It does not change this matrix's
+conditioning choices, Topaz width, config default, D8/channel algorithms,
+outlet, or edge geometry. See
+`../../20260729_user_preferences_wbt_boundary/`.
+
 ## Result
 
 DOM-05 found no new production mismatch. Direct tests cover the actual rendered
 form, both controller payloads, and the worker's persistence order for the
 scoped durable values. REM-05 remains the inherited depression-smoothing
 conformance repair. DOM-05A is the additive contract authority for TOPAZ
-conditioning; implementation conformance remains pending until its reviewed
-checkpoint ancestor and release evidence exist.
+conditioning and is complete with its reviewed checkpoint and release
+evidence. SURF-14A remains pending as the bounded boundary-policy authority.

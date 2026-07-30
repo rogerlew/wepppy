@@ -108,10 +108,37 @@ Landuse first-class route notes (2026-04-24):
     the aggregate non-terminal. Failed/stopped/canceled takes precedence only
     after no descendant remains active.
 - Job info (jobinfo):
-  - `{job_id, runid, status, result, started_at, ended_at, description, elapsed_s, exc_info, children, auth_actor, culvert_batch_uuid}`
+  - `{job_id, runid, status, result, started_at, ended_at, description, elapsed_s, exc_info, children, auth_actor, culvert_batch_uuid, error, error_id}`
   - `auth_actor` is optional and only includes non-PII identifiers (no JWTs, no email).
   - `culvert_batch_uuid` is optional verified job metadata used to constrain the
     legacy `culvert:batch:submit` cancellation scope to Culvert jobs.
+  - `error` and `error_id` are optional sanitized asynchronous-failure fields.
+    When present, `error` uses `{code, message, details}` and `error_id` is a
+    stable UUID-like correlation identifier. A registered tree root surfaces
+    a terminal failed descendant's same sanitized error after no descendant
+    remains active.
+
+### WBT DEM-boundary controlled failure
+
+SURF-14A defines one bounded sanitized job-info failure. When WBT boundary
+policy `error` rejects a delineation:
+
+- `GET /rq-engine/api/jobstatus/<job_id>` retains the status-only schema;
+- `GET /rq-engine/api/jobinfo/<root-or-child-job-id>` returns HTTP 200,
+  `status="failed"`, `exc_info=null`,
+  `error.code="watershed_boundary_touches_dem_edge"`, the exact actionable
+  boundary message, `error.details.edge_hillslope_ids` as sorted unique
+  integers, and `error_id`;
+- the failed subcatchment child stops its abstraction dependent, and the
+  aggregate root surfaces the same error only after descendants are terminal;
+- the open polling surface never returns raw traceback or paths for this
+  expected failure, and its RQ traceback fields contain only sanitized text.
+
+No new operator HTTP endpoint is added. Diagnostics use the structured server
+log keyed by `error_id` plus the existing login- and Admin/Root-protected
+`/weppcloud/rq/info-details` identity/status page. Host log access is outside
+HTTP and requires authenticated SSH plus Docker permission. This exception
+does not change traceback behavior for unrelated unexpected job failures.
 
 ## Error responses
 - Use status-code-first semantics:

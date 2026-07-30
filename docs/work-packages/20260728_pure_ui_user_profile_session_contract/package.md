@@ -31,6 +31,12 @@ the Diagnostics page and REM-04. SURF-14 adds no profile-editing field, role,
 token scope/lifetime, provider operation, cookie/session default, or account
 deletion behavior.
 
+SURF-14A is the bounded, operator-approved exception that adds the separate
+`/preferences` account-default page and one Profile navigation link. Its typed
+persistence, CSRF, creation snapshot, and migration contract is authoritative
+only within `../20260729_user_preferences_wbt_boundary/`; it does not alter
+SURF-14 token, provider, role, or session behavior.
+
 ## Scope
 
 - `wepppy/weppcloud/templates/user/profile.html`;

@@ -52,6 +52,13 @@ feature-registry specification. This package does not add a configuration,
 location, CAPTCHA provider, authentication method, creation field, route,
 queue edge, fallback, or parameter default.
 
+SURF-14A is the bounded exception for authenticated new-project account
+defaults at the rq-engine create handoff. Anonymous/CAP launches continue to
+use explicit form input and project configuration without account lookup. All
+public, regional, and authenticated forms still converge on the same
+`POST /create/` endpoint. See
+`../20260729_user_preferences_wbt_boundary/`.
+
 ## Acceptance
 
 Actual renders prove exact action/method/config/override/CAP/widget/asset/

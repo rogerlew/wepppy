@@ -50,6 +50,11 @@ owns public creation CAP behavior. This package does not add a fork option,
 authorization rule, token class, storage field, route, queue edge, copy rule,
 parameter default, or compatibility alias.
 
+SURF-14A explicitly preserves this copy contract: a fork copies the source
+run's Unitizer and WBT boundary-policy state, including the `warn`
+compatibility value for legacy source state, and never resolves the destination
+owner's account defaults. See `../20260729_user_preferences_wbt_boundary/`.
+
 ## Acceptance
 
 Actual route/template renders prove exact run/config/default/token/CAP and asset
