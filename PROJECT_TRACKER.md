@@ -311,8 +311,11 @@ than accepting a clipped watershed. Contract checkpoint and reviews precede
 implementation; the operator authorized the reviewed additive migration on
 Forest after local validation and final review.
 
-**Next Steps**: Complete two independent checkpoint reviews, disposition
-findings, and commit the documentation-only ancestor before implementation.
+**Checkpoint**: Dual governance and operations/security review passed;
+documentation-only ancestor `1b412d61a` is committed.
+
+**Next Steps**: Implement the typed model/merge migration/preferences page,
+creation snapshot resolver, and WBT boundary policy, then run full validation.
 
 ---
 

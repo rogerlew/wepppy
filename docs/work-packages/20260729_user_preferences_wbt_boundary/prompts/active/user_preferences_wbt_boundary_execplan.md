@@ -35,7 +35,8 @@ different outlet or enlarge the project extent.
   schema/User-count assertions.
 - [x] (2026-07-30 06:50 UTC) Completed both independent checkpoint reviews;
   governance and operations/security passed with no unresolved finding.
-- [ ] Commit the documentation-only checkpoint before implementation.
+- [x] (2026-07-30 06:55 UTC) Committed the dual-reviewed documentation-only
+  checkpoint as standalone ancestor `1b412d61a`.
 - [ ] Implement and test account persistence plus the User Preferences page.
 - [ ] Implement and test new-run effective-value resolution and snapshotting.
 - [ ] Implement and test WBT boundary warning/error behavior.

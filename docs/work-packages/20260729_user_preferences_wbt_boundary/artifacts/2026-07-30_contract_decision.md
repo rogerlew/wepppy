@@ -329,4 +329,5 @@ audit, or final review gates.
 - [x] Independent governance/correctness review passed.
 - [x] Independent operations/security review passed.
 - [x] Findings disposition complete.
-- [ ] Documentation-only standalone ancestor committed and recorded.
+- [x] Documentation-only standalone ancestor committed and recorded as
+  `1b412d61a`.

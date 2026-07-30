@@ -6,11 +6,11 @@
 
 **Started**: 2026-07-30 04:10 UTC
 
-**Current phase**: Reviewed checkpoint ready to commit
+**Current phase**: Account persistence and page implementation
 
-**Last updated**: 2026-07-30 06:50 UTC
+**Last updated**: 2026-07-30 06:55 UTC
 
-**Next milestone**: standalone contract ancestor
+**Next milestone**: model, merge migration, service, and preferences page
 
 **Security impact**: `high`
 
@@ -21,14 +21,10 @@
 
 ### In Progress
 
-- [ ] Commit the dual-reviewed documentation-only checkpoint.
+- [ ] Implement the typed account model, merge migration, service, and page.
 
 ### Ready
 
-- [ ] Commit the reviewed documentation-only checkpoint as a standalone
-  ancestor before implementation.
-- [ ] Implement the typed account model, migration, validation/resolution
-  service, and route/page.
 - [ ] Wire effective preference snapshotting into every supported creation
   path while preserving explicit input, anonymous creation, and fork behavior.
 - [ ] Implement and test WBT `warn`/`error` boundary policy.
@@ -39,8 +35,6 @@
 
 ### Blocked
 
-- Implementation is blocked until the reviewed contract checkpoint is a
-  standalone ancestor commit.
 - Forest migration is blocked until implementation, migration tests, full
   validation, and final reviews pass.
 
@@ -70,6 +64,8 @@
 - [x] Operations/security final confirmation passed OPS-04; both independent
   checkpoint reviews now pass with no unresolved finding
   (2026-07-30 06:50 UTC).
+- [x] Committed the reviewed documentation-only checkpoint as standalone
+  ancestor `1b412d61a` (2026-07-30 06:55 UTC).
 
 ## Decisions
 
