@@ -185,10 +185,13 @@ correlation, replay, and size rules in
 `docs/schemas/wbt-conditioning-diagnostics-contract.md`. Filesystem paths and
 raw sidecar JSON are excluded. Existing consumers may ignore the object.
 
-The channel UI renders one plain-text paragraph from the validated `summary`.
-It must not duplicate summary/detail text, interpret magnitudes as safe or
-unsafe, combine synthetic flat relief with substantive fill/cut measures, or
-render diagnostic content as HTML.
+The channel UI renders one plain-text paragraph from the validated `summary`
+inside the durable channel Summary Panel returned by `report/channel`; it is
+not rendered in the transient status panel. The report revalidates the
+run-scoped sidecar and remains the presentation source after RQ metadata
+expires. It must not duplicate summary/detail text, interpret magnitudes as
+safe or unsafe, combine synthetic flat relief with substantive fill/cut
+measures, or render diagnostic content as HTML.
 
 Invalid diagnostics use the controlled
 `wbt_conditioning_diagnostics_invalid` failure defined by that schema;

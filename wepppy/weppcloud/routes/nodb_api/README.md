@@ -332,7 +332,7 @@ Each blueprint section below documents:
 | `/runs/<string:runid>/<config>/query/delineation_pass[/]` | `GET` | Watershed.has_channels, Watershed.has_subcatchments | — |
 | `/runs/<string:runid>/<config>/resources/channels.json` | `GET` | Ron.name, Watershed.channels_shp | Loads shapefile, injects project name before returning JSON |
 | `/runs/<string:runid>/<config>/query/extent[/]` | `GET` | Ron.extent | — |
-| `/runs/<string:runid>/<config>/report/channel` | `GET` | Ron.map | Renders `reports/channel.htm` with `Ron.map` |
+| `/runs/<string:runid>/<config>/report/channel` | `GET` | Ron.map, Watershed.wbt_fill_or_breach | Renders `reports/channel.htm`; revalidates the run-scoped WBT sidecar and includes terrain conditioning in the Summary Panel |
 | `/runs/<string:runid>/<config>/query/outlet[/]` | `GET` | Watershed.outlet | — |
 | `/runs/<string:runid>/<config>/report/outlet[/]` | `GET` | Watershed.outlet | — |
 | `/runs/<string:runid>/<config>/query/has_dem[/]` | `GET` | Ron.has_dem | — |

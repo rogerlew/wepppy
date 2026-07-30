@@ -103,3 +103,12 @@ overwrote it during their asynchronous layer refresh. The unchanged contract
 requires the diagnostic to remain the successful completion summary. Regression
 coverage now verifies the terminal summary after layer refresh; no payload,
 schema, threshold, or numerical behavior changes.
+
+### 2026-07-30: Make the Summary Panel authoritative
+
+Operator review clarified that successful conditioning diagnostics belong in
+the durable channel Summary Panel, not the transient status panel. The
+`report/channel` route now revalidates the run-scoped sidecar and supplies one
+escaped plain-text summary to `reports/channel.htm`. Controllers continue to
+validate completion diagnostics but use the ordinary status panel only for
+progress.

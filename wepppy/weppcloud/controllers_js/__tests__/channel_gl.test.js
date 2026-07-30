@@ -371,7 +371,7 @@ describe("ChannelDelineation GL controller", () => {
         });
         channel.triggerEvent("BUILD_CHANNELS_TASK_COMPLETED", { payload: "ok" });
 
-        expect(document.getElementById("status").textContent).toContain("379 m");
+        expect(document.getElementById("status").textContent).not.toContain("379 m");
         expect(channel.show).toHaveBeenCalledTimes(1);
         expect(channel.report).toHaveBeenCalledTimes(1);
         const completionEvents = emittedEvents.filter((evt) => evt.name === "channel:build:completed");

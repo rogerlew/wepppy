@@ -224,9 +224,11 @@ WEPPcloud does not choose one of these alternatives automatically.
 
 ### Review successful terrain changes
 
-After successful WBT conditioning, the channel delineation summary states the
-largest elevation increase and cut. This is especially important for **Fill**,
-which can raise a broad enclosed area to its spill elevation. For example:
+After successful WBT conditioning, the channel **Summary Panel** includes a
+**Terrain conditioning** entry stating the largest elevation increase and cut.
+It ships with the channel summary report and remains available after the job
+finishes. This is especially important for **Fill**, which can raise a broad
+enclosed area to its spill elevation. For example:
 
 > Fill completed. Maximum terrain raise: 379 m; maximum terrain cut: 0.00 m.
 > Terrain was raised across 10.7% of the DEM.

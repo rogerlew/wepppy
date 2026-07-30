@@ -1,6 +1,7 @@
 """Routes for watershed blueprint extracted from app.py."""
 
 import math
+import logging
 from pathlib import Path
 from typing import Any, Mapping
 
@@ -8,11 +9,41 @@ from .._common import *  # noqa: F401,F403
 
 from wepppy.nodb.core import Ron, Watershed
 from wepppy.topo.wbt import TerrainConfig, TerrainProcessor, TerrainProcessorRuntimeError
+from wepppy.topo.wbt.wbt_topaz_emulator import (
+    WBT_CONDITIONING_DIAGNOSTICS_FILENAME,
+    WbtConditioningDiagnosticsError,
+    load_conditioning_diagnostics,
+    summarize_conditioning_diagnostics,
+)
 from wepppy.topo.watershed_abstraction import ChannelRoutingError
 from wepppy.weppcloud.utils.helpers import authorize, authorize_and_handle_with_exception_factory
 from wepppy.weppcloud.utils.cap_guard import requires_cap
 
 watershed_bp = Blueprint('watershed', __name__)
+logger = logging.getLogger(__name__)
+
+
+def _conditioning_summary_for_report(wd: str, method: str) -> str | None:
+    wbt_dir = Path(wd) / "dem" / "wbt"
+    diagnostics_path = wbt_dir / WBT_CONDITIONING_DIAGNOSTICS_FILENAME
+    if not diagnostics_path.is_file():
+        return None
+    try:
+        diagnostics = load_conditioning_diagnostics(
+            str(diagnostics_path),
+            method=method,
+            operation_id=None,
+            input_name="dem.tif",
+            output_name="relief.tif",
+            root_dir=str(wbt_dir),
+        )
+    except WbtConditioningDiagnosticsError as exc:
+        logger.warning(
+            "Omitting invalid terrain-conditioning diagnostics from channel report",
+            extra={"run_root": wd, "reason": exc.reason},
+        )
+        return None
+    return summarize_conditioning_diagnostics(diagnostics, method)
 
 @watershed_bp.route('/runs/<string:runid>/<config>/query/delineation_pass')
 @watershed_bp.route('/runs/<string:runid>/<config>/query/delineation_pass/')
@@ -70,9 +101,16 @@ def query_extent(runid, config):
 def report_channel(runid, config):
     ctx = load_run_context(runid, config)
     wd = str(ctx.active_root)
-    return render_template('reports/channel.htm', 
-                           runid=runid, config=config,
-                           map=Ron.getInstance(wd).map)
+    watershed = Watershed.getInstance(wd)
+    return render_template(
+        'reports/channel.htm',
+        runid=runid,
+        config=config,
+        map=Ron.getInstance(wd).map,
+        conditioning_summary=_conditioning_summary_for_report(
+            wd, watershed.wbt_fill_or_breach
+        ),
+    )
 
 
 @watershed_bp.route('/runs/<string:runid>/<config>/query/outlet')

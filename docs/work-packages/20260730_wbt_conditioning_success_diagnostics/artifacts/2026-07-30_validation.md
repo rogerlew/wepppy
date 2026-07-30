@@ -38,3 +38,14 @@ unresolved high- or medium-severity findings.
 - The controller wrote that summary before `channel.show()` replaced it with
   layer-loading status. The conformance fix preserves the validated summary as
   the terminal status after the asynchronous layer refresh.
+
+Operator review subsequently corrected the presentation boundary: the durable
+channel Summary Panel, rather than the transient status panel, owns this text.
+The report route revalidates the sidecar on every render, so the diagnostic
+ships with the summary report independently of RQ metadata retention.
+
+- Channel-report route/template regressions: 3 passed.
+- Focused watershed route suite: 6 passed.
+- Full frontend suite: 105 suites and 755 tests passed.
+- Frontend lint, generated controller bundle, documentation lint, and changed
+  broad-exception enforcement: pass.

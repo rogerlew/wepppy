@@ -912,7 +912,6 @@ var ChannelDelineation = (function () {
         channel.hoverLabelKey = null;
         channel._completion_seen = false;
         channel._conditioning_diagnostics_token_seen = false;
-        channel._conditioning_diagnostics_summary = null;
         var uploadDemState = {
             ready: !!(formElement && formElement.dataset && formElement.dataset.uploadedDem === "true"),
             extent: null,
@@ -1488,10 +1487,6 @@ var ChannelDelineation = (function () {
                         });
                         return;
                     }
-                    if (conditioningDiagnostics && statusAdapter) {
-                        channel._conditioning_diagnostics_summary = conditioningDiagnostics.summary;
-                        statusAdapter.text(conditioningDiagnostics.summary);
-                    }
                     channel._completion_seen = true;
                     channel.disconnect_status_stream(channel);
                     channel.show();
@@ -1665,7 +1660,6 @@ var ChannelDelineation = (function () {
             channel.remove();
             channel._completion_seen = false;
             channel._conditioning_diagnostics_token_seen = false;
-            channel._conditioning_diagnostics_summary = null;
             try {
                 if (window.Outlet && typeof window.Outlet.getInstance === "function") {
                     window.Outlet.getInstance().remove();
@@ -1947,11 +1941,7 @@ var ChannelDelineation = (function () {
                 })
                 .then(function (layer) {
                     if (layer && statusAdapter && typeof statusAdapter.html === "function") {
-                        if (channel._conditioning_diagnostics_summary) {
-                            statusAdapter.text(channel._conditioning_diagnostics_summary);
-                        } else {
-                            statusAdapter.html(taskMsg + "... Success");
-                        }
+                        statusAdapter.html(taskMsg + "... Success");
                     }
                     return layer;
                 })
