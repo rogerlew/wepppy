@@ -6,11 +6,11 @@
 
 **Started**: 2026-07-30 04:10 UTC
 
-**Current phase**: Contract amendment checkpoint
+**Current phase**: Queue-sequencing contract checkpoint
 
-**Last updated**: 2026-07-30 08:15 UTC
+**Last updated**: 2026-07-30 11:05 UTC
 
-**Next milestone**: dual-review and commit delineation-snapshot amendment
+**Next milestone**: approve and commit atomic-admission contract amendment
 
 **Security impact**: `high`
 
@@ -21,10 +21,10 @@
 
 ### In Progress
 
+- [ ] Approve and commit the revised atomic Redis admission contract as a
+  standalone documentation ancestor.
 - [ ] Complete focused and broad validation, final reviews, documentation, and
   local E2E.
-- [ ] Approve and commit the documentation-only delineation-snapshot
-  amendment before its runtime implementation.
 
 ### Ready
 
@@ -127,6 +127,32 @@
   preferences follow the authenticated user; non-Auto units are
   presentation-only and WBT is an initiating-user job snapshot
   (2026-07-30 08:15 UTC).
+- [x] Passed both independent user-context checkpoint reviews and committed
+  the exact documentation-only amendment as standalone ancestor `4d2ef5838`
+  (2026-07-30 08:35 UTC).
+- [x] Serialized each same-run WBT build-plus-abstraction mutation behind a
+  persistent per-run tail, extended the watershed lock beyond the RQ timeout,
+  retained abstraction as a nonmutating completion receipt, and guaranteed
+  receipt plus root-link persistence before child activation
+  (2026-07-30 10:20 UTC).
+- [x] Added and passed both-order PostgreSQL read/save tests, simultaneous
+  two-user byte-stable Unitizer views, an account-identity matrix, a production
+  Unitizer adoption inventory, and real-Redis opposite-policy ordering with
+  terminal receipt/dependency cleanup (2026-07-30 10:20 UTC).
+- [x] Retained both independent queue-sequencing checkpoint FAIL artifacts;
+  rejected the unfenced admission lease and saved-but-never-activated orphan
+  window, then revised the contract to atomic optimistic Redis admission with
+  full parameter provenance and rollback (2026-07-30 11:05 UTC).
+- [x] Implemented request-local viewing-user units without durable Unitizer
+  mutation, removed account defaults from creation, and added sanitized
+  preference-resolution failures across the contracted report inventory
+  (2026-07-30 09:25 UTC).
+- [x] Implemented initiating-user WBT private snapshots through route, root,
+  child, and execution-only Watershed policy with public actor/snapshot
+  redaction (2026-07-30 09:25 UTC).
+- [x] Passed the focused creation, Profile, PostgreSQL two-user Unitizer,
+  report inventory, WBT NoDb/RQ, real-Redis failure-tree, and jobinfo
+  selections (2026-07-30 09:25 UTC).
 
 ## Decisions
 

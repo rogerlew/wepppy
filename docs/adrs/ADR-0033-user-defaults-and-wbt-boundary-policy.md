@@ -64,6 +64,107 @@ are presentation/action overlays.
 No conversion formula, precision, measurement category, raster-edge test,
 conditioning algorithm, or hydrologic threshold changes.
 
+Same-run WBT submissions are serialized through their complete mutable
+build-plus-abstraction child. Its watershed directory-root lock lasts for the
+43,200-second RQ task timeout plus a 300-second cleanup margin. Admission uses
+an optimistic Redis transaction, a non-expiring per-run tail, and at most five
+`WATCH` conflict retries. These are operational coordination parameters, not
+hydrologic parameters: the long directory lock prevents a valid job from
+outliving its mutation exclusion, while the short transaction atomically
+registers the job tree without a fallible admission lease. The persistent tail
+prevents queue delay from silently dropping ordering; compare-and-delete
+release and stale missing/terminal-job cleanup prevent an older job from
+erasing a newer reservation or creating a dependency that can no longer emit
+a completion transition.
+
+The abstraction job-tree node is a nonmutating completion receipt. Admission
+atomically registers that receipt, both dependency directions, both root
+links, the tail, and the mutable child's queued/deferred membership. This
+preserves observable tree shape without duplicate abstraction, orphaned
+prepared jobs, or failure/registration and execution/trace races.
+
+The requesting WEPPcloud operator owns the user-visible outcome and release
+decision. Codex/WEPPcloud maintainers own the queue mechanism and evidence;
+independent governance and operations/security reviewers approve its control
+contract. Rejected alternatives were a post-activation receipt, a
+time-limited admission mutex without fencing, a worker-blocking execution
+mutex, and a saved dormant child with later activation. Each has an
+unrecoverable race, worker-capacity cost, or hard-interruption orphan window.
+
+Required evidence includes forced concurrent admission conflicts, hard-stop
+boundaries before and after transaction commit, exact root/child/receipt/tail
+linkage, same-run opposite-policy execution in both orders, terminal stale-tail
+recovery, ambiguous-response reconciliation, idempotent root retry, receipt
+cancellation, and empty dependency registries. Release rollback first stops
+enqueue surfaces, drains workers, and moves all web/worker consumers to the
+reviewed revert together. Existing tail keys and terminal jobs are inert; the
+revert runbook may remove only a verified tail whose referenced job is
+missing/terminal. Revoke or change these parameters only through a new ADR
+amendment and the same independent checkpoint gate.
+
+### Queue-revision provenance
+
+- **Decision venue**: Codex API workspace thread, 2026-07-30 10:59 UTC
+  (America/Los_Angeles: 03:59 PDT).
+- **Participants present**: requesting WEPPcloud operator and Codex.
+- **Outcome decision owner**: requesting WEPPcloud operator, through the
+  instruction to execute this work package and deliver user-following
+  preferences without project mutation.
+- **Queue-control decision owner and implementer**: Codex/WEPPcloud
+  maintainers. The atomic-admission revision is an implementation control that
+  preserves the operator-approved behavior after the leased design failed
+  checkpoint review.
+- **Independent checkpoint decision**: the operations/security reviewer
+  approved the revised documentation on 2026-07-30 UTC; governance approval
+  remains required before the standalone ancestor and implementation.
+
+### Queue-revision evidence
+
+Evidence that motivated and bounded the decision:
+
+- the accepted user-context reviews specify both forced same-run policy orders
+  and complete mutable-state isolation:
+  [governance](../work-packages/20260729_user_preferences_wbt_boundary/artifacts/2026-07-30_user_context_checkpoint_governance_review.md)
+  and
+  [operations/security](../work-packages/20260729_user_preferences_wbt_boundary/artifacts/2026-07-30_user_context_checkpoint_ops_security_review.md);
+- the retained
+  [governance FAIL](../work-packages/20260729_user_preferences_wbt_boundary/artifacts/2026-07-30_queue_sequencing_checkpoint_governance_review.md)
+  and
+  [operations/security FAIL](../work-packages/20260729_user_preferences_wbt_boundary/artifacts/2026-07-30_queue_sequencing_checkpoint_ops_security_review.md)
+  identify the dormant-child orphan and unfenced-lease failures in the
+  superseded design;
+- the revised
+  [operations/security PASS](../work-packages/20260729_user_preferences_wbt_boundary/artifacts/2026-07-30_queue_sequencing_checkpoint_ops_security_rereview.md)
+  accepts the no-pre-`EXEC` atomic admission contract; and
+- the existing forced-order and real-Redis evidence lives in
+  `tests/rq/test_wbt_controlled_failure_integration.py`. The harder
+  transaction-conflict, hard-stop, ambiguous-response, and exact-state matrix
+  listed above remains a pre-final-review implementation obligation, not
+  evidence already claimed as complete.
+
+### Residual risks and revert triggers
+
+The selected design still depends on Redis transaction semantics and RQ's
+queued/deferred registry representation. Revert or withhold release when any
+of these observable conditions occurs:
+
+- five `WATCH` conflicts are exhausted under ordinary non-adversarial load;
+- an ambiguous Redis response cannot reconcile the exact tail, root links,
+  child/receipt IDs, dependency directions, and registry membership;
+- a tail references a nonterminal job that is absent from every valid
+  queued/deferred/started execution location;
+- receipt cancellation leaves deferred-registry or dependency-set residue;
+- opposite-policy same-run execution changes final durable policy or output
+  according to arrival/worker timing rather than serialized order; or
+- all enqueue surfaces and worker consumers cannot be quiesced and moved to
+  one reviewed revision together.
+
+An isolated conflict-exhaustion response fails without work and may be retried
+after diagnosis. Any non-exact reconciliation, orphan, dependency residue, or
+cross-user state leak requires stopping affected enqueue surfaces, draining
+workers, preserving Redis/job evidence, and moving all consumers to the
+reviewed forward revert before reopening delineation.
+
 ## Decision Provenance
 
 Decision Venue: Codex API workspace thread, 2026-07-29 through 2026-07-30.

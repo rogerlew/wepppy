@@ -246,12 +246,46 @@ clear readiness or start WBT. Concurrent submissions for the same run are
 therefore serialized for their complete mutable child operation; no effective
 policy may live in shared cached or durable controller state between jobs.
 
+The complete mutable child includes both subcatchment construction and
+watershed abstraction under one watershed directory-root lock. The lock TTL is
+the 43,200-second RQ task timeout plus a 300-second cleanup margin. The
+historical abstraction child remains visible in the job tree as a nonmutating
+completion receipt; it must never repeat abstraction or write readiness.
+
+Per-run admission uses an optimistic Redis transaction that watches a
+persistent tail containing the latest complete mutable child ID. It retries a
+tail conflict at most five times and otherwise fails without creating work. A
+later submission depends on a still-active prior child with failure allowed,
+so it starts only after the previous build-plus-abstraction operation reaches
+a terminal state and is not canceled with the previous receipt. A
+missing/terminal stale tail is replaced without adding a dependency. The tail
+has no expiry while work is pending, and each child releases only its own
+still-current tail with compare-and-delete.
+
+One Redis `MULTI`/`EXEC` transaction atomically persists the mutable child and
+nonmutating receipt, registers both dependency directions, records both child
+IDs on the root, replaces the per-run tail, and puts the mutable child in its
+queued or deferred registry. Nothing is durable before `EXEC`. Therefore a
+hard interruption leaves either no admission state or a complete runnable
+tree; it cannot leave a saved-but-never-activated child. Failure cannot
+precede receipt registration, and mutation cannot outrun its public root
+trace.
+
+Both children carry bounded linkage to the root and each other. A retry first
+validates and reuses an already committed exact tree from the root links.
+After an ambiguous Redis response, admission returns that tree only when the
+tail, both jobs, both links, and dependency state match; otherwise it fails
+closed for operator diagnosis rather than enqueueing a duplicate mutation. A
+controlled or unexpected child failure cancels only its matching completion
+receipt and leaves no deferred-registry or dependency-set residue.
+
 The existing edge result contract remains:
 
 - `warn` retains output, publishes the caution, and permits abstraction;
 - `error` raises `WatershedBoundaryTouchesEdgeError`, deletes canonical
   `subwta.tif`, leaves build/abstraction timestamps absent, retains sorted edge
-  diagnostics, fails the subcatchment child, and cancels abstraction.
+  diagnostics, fails the complete mutable child, and cancels its nonmutating
+  abstraction receipt.
 
 ## Compatibility and Regression Evidence
 

@@ -97,8 +97,37 @@ enlarge the project extent.
 - [x] (2026-07-30 08:15 UTC) Recorded the operator's superseding decision that
   both preferences follow the authenticated user, with request-local
   nonmutating units and initiating-user WBT job input.
-- [ ] Obtain two independent approvals and a standalone ancestor for the
-  delineation-snapshot contract amendment before implementation.
+- [x] (2026-07-30 08:35 UTC) Passed the independent user-context governance
+  and operations/security reviews with no finding and committed their exact
+  documentation-only checkpoint as standalone ancestor `4d2ef5838`.
+- [x] (2026-07-30 09:25 UTC) Removed account preferences from durable project
+  creation, implemented immutable viewing-user Unitizer overlays, adopted
+  them across the contracted run/report inventory, and added sanitized
+  fail-closed preference errors.
+- [x] (2026-07-30 09:25 UTC) Implemented exact initiating-user WBT root/child
+  snapshots, immutable configuration baselines, execution-only worker policy,
+  open-jobinfo redaction, and compatibility paths for non-account-bearing and
+  batch submissions.
+- [x] (2026-07-30 09:25 UTC) Passed focused creation, PostgreSQL two-user
+  no-mutation, Profile, report, WBT NoDb, route, RQ, real-Redis controlled
+  failure, and public jobinfo selections (more than 500 collected tests
+  across the retained focused runs).
+- [x] (2026-07-30 10:20 UTC) Closed same-run policy leakage and job-tree races:
+  one serialized build-plus-abstraction child now holds the watershed lock,
+  its nonmutating receipt and root links exist before activation, and a
+  persistent compare-delete tail orders fresh submissions after either
+  predecessor outcome.
+- [x] (2026-07-30 10:20 UTC) Added both-order PostgreSQL read/save
+  serialization, simultaneous two-user Unitizer presentation, production
+  adoption inventory, exact identity fallback, pre-activation receipt/root
+  linkage, and real-Redis same-run `error`/`warn` order evidence. The latest
+  focused runs passed 138 and 44 tests respectively.
+- [x] (2026-07-30 11:05 UTC) Retained independent queue-sequencing checkpoint
+  FAIL artifacts. Both rejected the leased multi-step admission because a
+  hard interruption could orphan a saved non-runnable child; governance also
+  required complete queue parameter provenance and rollback.
+- [ ] Obtain two independent approvals and a standalone documentation
+  ancestor for the revised atomic Redis transaction admission contract.
 - [ ] Complete broad validation, documentation, final reviews, and local E2E.
 - [ ] Apply and validate the authorized Forest migration and canary.
 
@@ -177,7 +206,59 @@ enlarge the project extent.
   parents) -> `c91f6b2a4d7e`, then proved constraints, missing-row defaults,
   persistence, cascade, and teardown.
 
+- Observation: several report tests patched a route-local `Unitizer` symbol
+  and therefore could not exercise the new viewing-user resolver.
+  Evidence: the first report-inventory run failed at fixture setup after the
+  durable imports were removed. Updating those fixtures to patch
+  `resolve_unitizer_presentation` made all 83 affected report tests pass and
+  now verifies the actual integration seam.
+
+- Observation: a directory-root lock around only subcatchment construction
+  still allowed another submission to replace shared Watershed state before
+  abstraction.
+  Evidence: forced opposite-policy same-run scheduling showed the mutable
+  lifetime must include abstraction and must be ordered before queue execution.
+
+- Observation: enqueueing the abstraction receipt after activating its build
+  has a failure-registration race, and activating either child before saving
+  root links has a traceability race.
+  Evidence: independent operations/security review identified both
+  interleavings. The first remediation pre-registered a dormant build and
+  receipt before activation; the atomic-admission revision below supersedes
+  that multi-step sequence while preserving its ordering guarantees.
+
+- Observation: pre-registering a dormant child under a time-limited admission
+  mutex still has a hard-interruption orphan window.
+  Evidence: both independent queue-sequencing checkpoint reviews rejected the
+  design. The revised contract makes tree persistence, dependencies, root
+  links, tail replacement, and queued/deferred membership one optimistic
+  Redis transaction with no pre-commit durable state.
+
 ## Decision Log
+
+- Decision: Serialize build plus abstraction as one mutable child under one
+  watershed directory-root lock. Preserve the historical abstraction node as
+  a nonmutating receipt, register it and both root links before activation,
+  and order fresh same-run submissions with a persistent compare-delete tail.
+  Rationale: per-user WBT policy is safe only when submissions cannot observe
+  each other's intermediate NoDb/cache state; pre-registration guarantees a
+  failing child has a receipt to cancel and a durable public root trace.
+  Date/Author: 2026-07-30 / Codex, following independent operations/security
+  race analysis.
+
+- Superseded decision: Use a 30-second Redis admission mutex, save a dormant
+  mutable child, register its receipt/root links, and activate it afterward.
+  Rationale: this closed execution races but not lease expiry or host loss
+  between save and activation.
+  Date/Author: 2026-07-30 / Codex; rejected by both independent checkpoint
+  reviewers.
+
+- Decision: Admit the entire tree with one optimistic Redis transaction and a
+  persistent watched tail, retrying conflicts at most five times.
+  Rationale: `MULTI`/`EXEC` makes a crash pre-commit/no-state or
+  post-commit/complete-tree, while the watched tail serializes concurrent
+  admissions without an unfenced lease.
+  Date/Author: 2026-07-30 / Codex, pending independent checkpoint approval.
 
 - Decision: Use canonical tokens `config|si|english` and
   `config|warn|error`.
