@@ -3,6 +3,10 @@
 Status: Accepted
 Date: 2026-07-30
 
+Default update: ADR-0037 supersedes only this ADR's statement that the
+configured default distance remains 1,000 m. The fail-on-unresolved behavior
+and all incident evidence recorded here remain accepted.
+
 ## Context
 
 WhiteboxTools `BreachDepressionsLeastCost` searches only within its configured

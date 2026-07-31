@@ -78,3 +78,4 @@ Each ADR should normally include:
 - `ADR-0028`: [Rolling 90-Day Remembered Login](ADR-0028-rolling-remembered-login.md) (Accepted, 2026-07-27)
 - `ADR-0029`: [Omni Contrast WEPP Executable Inheritance](ADR-0029-omni-contrast-wepp-executable-inheritance.md) (Accepted, 2026-07-28)
 - `ADR-0036`: [Restore disturbed9002 Least-Cost Breach Default](ADR-0036-disturbed9002-least-cost-breach-default.md) (Accepted, 2026-07-30)
+- `ADR-0037`: [Increase WBT Least-Cost Breach Distance Default](ADR-0037-wbt-least-cost-breach-distance-default.md) (Accepted, 2026-07-30)
