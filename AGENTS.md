@@ -58,7 +58,7 @@
 - When user conversation establishes or changes behavior/UX/data contracts, update the authoritative spec/work-package doc in the same change.
 - Capture both normative contract and concise rationale (why this choice, what alternatives were rejected) for conversation-derived decisions.
 - In handoff notes, cite the exact file/section where the decision was documented.
-- Add regression coverage for exact failure modes with durable value; do not add a dedicated test solely to pin a literal config default when parse/provenance checks suffice.
+- For a user-requested literal config-value edit, change only the requested value and required provenance docs; do not add, rewrite, or delete tests merely to assert the literal, and validate only by direct readback or an existing parser/schema check unless the user explicitly requests tests or executable logic changed.
 - For project data/schema mutations (run-scoped CSV/parquet/NoDb contracts), write a brief compatibility and regression plan before editing.
 - Default to additive/backward-compatible evolution; do not rename or remove user-visible keys/columns without explicit operator approval.
 - For data/schema mutations, validate downstream propagation to generated run artifacts (for example `wepp/runs/*`) in addition to regression tests.
@@ -93,7 +93,7 @@
 
 ## Validation Entry Points
 - Iteration loop: `wctl run-pytest tests/<path or module>`
-- Pre-handoff sanity: `wctl run-pytest tests --maxfail=1`
+- Pre-handoff sanity for substantive code changes: `wctl run-pytest tests --maxfail=1`; never use this for literal-only config edits unless the user explicitly requests it.
 - Frontend changes: `wctl run-npm lint` and `wctl run-npm test`
 - Stub/API surface changes: `wctl run-stubtest <module>` and `wctl check-test-stubs`
 - RQ queue wiring changes: `wctl check-rq-graph`

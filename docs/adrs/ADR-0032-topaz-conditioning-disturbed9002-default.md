@@ -4,6 +4,10 @@ Status: Accepted
 
 Date: 2026-07-30
 
+Default update: ADR-0036 supersedes only this ADR's decision to make `topaz`
+the `disturbed9002_wbt.cfg` default. The `topaz` token, implementation, and
+runtime safeguards specified here remain accepted.
+
 ## Context
 
 The WBT channel pipeline currently offers generic fill, breach, and least-cost

@@ -22,9 +22,14 @@ Human contributors rely on `tests/README.md` for the quick-start view. This file
 ## Execution Strategy
 
 - **Always run through the Docker wrapper.** `wctl run-pytest …` guarantees Redis stubs, optional dependencies, and env variables match production images.
-- **Target first, then full sweep.**
+- **Target first; use a full sweep only when proportionate.**
   - Example focused run: `wctl run-pytest tests/weppcloud/routes/test_climate_bp.py`
-  - Mandatory pre-handoff sweep: `wctl run-pytest tests --maxfail=1`
+  - Full pre-handoff sweep for substantive code changes:
+    `wctl run-pytest tests --maxfail=1`
+- **Literal config edits are not test work.** Do not create, modify, or delete a
+  test merely to pin a requested config string/number/boolean. Do not run
+  pytest, including the full sweep, for a literal-only config edit unless the
+  user explicitly requests tests or executable logic also changed.
 - **CI vs local parity.** Add new fixtures or stubs so tests pass with no network access and without real Redis/WEPP executables. If a test needs large artifacts, drop them under `tests/data/` and reference them relative to `Path(__file__).parent`.
 - **Frontend harness.** When controller changes require Jest or other npm scripts, invoke them via `wctl run-npm <script>` so the `npm --prefix wepppy/weppcloud/static-src` prefix is handled consistently (for example, `wctl run-npm test`).
 - **Smoke auth accounts.** For Playwright smoke/axe account provisioning and credential file conventions, read `wepppy/weppcloud/static-src/tests/smoke/AGENTS.md`.
@@ -158,7 +163,7 @@ app.register_blueprint(climate_module.climate_bp)
 2. Put fixtures under `tests/data/<area>/` to avoid collisions.
 3. Update `tests/__init__.py` or `tests/README.md` only if new top-level directories are added.
 4. Document the new suite in this file under “Test Taxonomy”.
-5. Run:
+5. For substantive production-code or test-harness changes, run:
    ```bash
    wctl run-pytest tests/<path>/...
    wctl run-pytest tests --maxfail=1

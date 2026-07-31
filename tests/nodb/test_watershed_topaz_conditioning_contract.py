@@ -1,6 +1,5 @@
 from __future__ import annotations
 
-import configparser
 from pathlib import Path
 
 import jsonpickle
@@ -14,31 +13,10 @@ from wepppy.nodb.core.watershed import (
 pytestmark = pytest.mark.unit
 
 
-REPO_ROOT = Path(__file__).resolve().parents[2]
-CONFIG_DIR = REPO_ROOT / "wepppy" / "nodb" / "configs"
-
-
-def _read_config(name: str) -> configparser.ConfigParser:
-    parser = configparser.ConfigParser(interpolation=None)
-    parser.read(CONFIG_DIR / name)
-    return parser
-
-
 def _call_conditioning_setter(watershed: Watershed, value: str) -> None:
     setter = Watershed.wbt_fill_or_breach.fset
     assert setter is not None
     setter.__wrapped__(watershed, value)
-
-
-def test_disturbed9002_wbt_is_the_only_representative_topaz_default() -> None:
-    disturbed = _read_config("disturbed9002_wbt.cfg")
-    sibling = _read_config("disturbed9002-10m-wbt.cfg")
-    general = _read_config("0-wbt.cfg")
-
-    assert disturbed.get("watershed.wbt", "fill_or_breach") == '"topaz"'
-    assert sibling.get("watershed.wbt", "fill_or_breach") == '"breach_least_cost"'
-    assert general.get("watershed.wbt", "fill_or_breach") == '"breach_least_cost"'
-
 
 @pytest.mark.parametrize("value", sorted(WBT_FILL_OR_BREACH_VALUES))
 def test_watershed_conditioning_setter_accepts_all_canonical_values(
