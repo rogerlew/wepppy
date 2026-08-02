@@ -69,6 +69,15 @@ incidental `os.walk`/`zipfile` behavior.
   stable run and mask data loss.
   Date/Author: 2026-08-02 / Codex.
 
+- Decision: Canonical Omni child links to shared inputs are location-relative,
+  and every fork retargets recognized legacy links into the destination run.
+  Legacy normalization derives the new link from its scenario/contrast role,
+  not solely from the immediate source prefix.
+  Rationale: relative internal links remain correct through arbitrary fork
+  depth; prefix replacement cannot repair a source that already inherited a
+  link to its own parent or grandparent.
+  Date/Author: 2026-08-02 / operator direction recorded by Codex.
+
 ## Outcomes & Retrospective
 
 Pending implementation and observation. At package creation, the production
@@ -97,6 +106,15 @@ all symlinks may break legacy and current workflows. Conversely, following
 arbitrary links can disclose unrelated data. The contract checkpoint must
 resolve that tension with exact containment, authorization, ZIP representation,
 and restore rules.
+
+Production evidence shows a multi-generation lineage: scenarios built in
+`mdobre-facile-deviousness` retained absolute links when copied into
+`strategic-eloquence`; scenarios later built in `strategic-eloquence` linked to
+that run; both generations were then preserved in `mdobre-intensive-darling`.
+Therefore fork repair cannot be implemented as only
+`source_run_prefix -> destination_run_prefix`. Recognized child link roles must
+be reconstructed to destination-owned targets even when the copied link names
+an older ancestor.
 
 ## Milestone 1: Discovery and characterization
 
@@ -127,6 +145,8 @@ evidence. The decision must define:
   acquisition order, TTL/renewal, cancellation, conflict, and recovery rules;
 - the exact participant boundary and how future mutators opt in;
 - allowed symlink targets and representation in ZIPs;
+- canonical relative Omni shared-input link forms and the allowlisted,
+  role-based fork normalization matrix for legacy absolute links;
 - preflight versus read-time revalidation and typed failure details;
 - atomic publication, cleanup, and restore symmetry;
 - user/operator messaging and RQ response compatibility.
@@ -170,6 +190,14 @@ preflight, and ZIP traversal. Enforce approved containment before reading a
 target and handle read-time invalidation according to the contract. Keep final
 ZIP publication atomic and failure cleanup explicit.
 
+Change Omni child creation to emit canonical location-relative links for
+allowlisted shared inputs. Add a post-copy fork normalization phase that uses
+`lstat`/`readlink` without following targets, recognizes only contract-listed
+Omni link locations, atomically replaces each with the destination-relative
+canonical link, and rejects ambiguous or escaping entries explicitly. Do not
+rewrite arbitrary symlinks or depend on the old target existing. Validate every
+normalized link against the destination run before reporting fork success.
+
 Update the RQ response/error contract and operator/developer documentation as
 required. Update the RQ dependency catalog only if enqueue or dependency edges
 change.
@@ -211,6 +239,8 @@ Acceptance requires behavioral evidence, not only successful unit tests:
   publication;
 - disappearing targets cannot result in a successful inconsistent ZIP;
 - valid approved legacy links produce the contract-defined contents;
+- one- and multi-generation forks leave every canonical Omni shared-input link
+  resolving inside the newest destination run;
 - failures and cancellation clean temporary artifacts, job identifiers, and
   coordination state;
 - restore behavior matches the chosen representation;
@@ -256,5 +286,9 @@ acquisition, release, traversal classification, and target invalidation so
 regressions do not depend on real Redis, NFS, or sleeps.
 
 Plan revision note (2026-08-02): Initial plan created from the confirmed
-`wepp1` incident. It deliberately defers lock and symlink representation choices
-to the required contract-first checkpoint.
+`wepp1` incident. It defers archive representation and lock choices to the
+required contract-first checkpoint.
+
+Plan revision note (2026-08-02): Recorded operator direction that forks retarget
+Omni links. The plan now requires relative canonical child links and role-based
+legacy normalization capable of repairing multi-generation inherited links.

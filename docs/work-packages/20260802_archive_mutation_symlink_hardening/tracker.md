@@ -19,6 +19,8 @@
   points; classify participants, lock order, queue, duration, and cancellation.
 - [ ] Characterize archive contents for ordinary files, valid directory/file
   symlinks, broken links, cross-run links, and disappearing entries.
+- [ ] Inventory canonical Omni shared-input link roles and specify fork-time
+  normalization of legacy absolute links to destination-relative links.
 - [ ] Draft `artifacts/2026-08-02_contract_decision.md` and all required
   canonical contract amendments.
 - [ ] Obtain operator approval and two independent contract reviews; disposition
@@ -82,6 +84,13 @@
 - **2026-08-02 17:25 UTC** – Require deterministic synchronization seams in
   tests instead of sleep-based races. Rationale: the regression must prove
   ordering without becoming flaky.
+- **2026-08-02 17:25 UTC** – Operator direction: forks must retarget Omni
+  scenario symlinks. New canonical shared-input links will be relative within
+  the owning run, and fork normalization will rebuild recognized legacy links
+  from their semantic role into the destination rather than performing only an
+  immediate source-prefix substitution. Rationale: relative internal links
+  survive arbitrary fork depth, while role-based legacy normalization repairs
+  inherited links that already point to a grandparent run.
 
 ## Risks and Owners
 

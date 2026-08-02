@@ -322,6 +322,19 @@ When resuming Kubernetes work:
 
 ## 🚧 In Progress
 
+### Omni Fork Symlink Retarget Hardening (SURF-04A)
+
+**Started**: 2026-08-02
+**Priority**: High
+**Security impact**: `high`
+**Link**: [docs/work-packages/20260802_omni_fork_symlink_retarget_hardening/](docs/work-packages/20260802_omni_fork_symlink_retarget_hardening/)
+**Description**: Keep `rsync -a` while making recognized Omni links
+destination-relative and repairing inherited ancestor links after copy.
+**Next Steps**: Dual-review and commit the checkpoint ancestor, then implement
+and validate the focused worker/Omni changes.
+
+---
+
 ### WBT Least-Cost Unresolved-Depression Fail-Fast Guidance
 
 **Started**: 2026-07-30

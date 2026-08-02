@@ -99,3 +99,11 @@ worker evidence, and a passing high-impact security review. The fork-copy
 predecessor's deferred route-to-client propagation gap is closed. No production
 repair, bundle rebuild, queue change, parameter change, or compatibility
 behavior was required.
+
+## SURF-04A Fork-Copy Amendment
+
+The operator-approved follow-up at
+`../20260802_omni_fork_symlink_retarget_hardening/` requires recognized Omni
+shared-input links in a completed fork to resolve inside the destination. New
+links are relative; copied legacy links are normalized by role after rsync and
+before success. Unrelated links remain unchanged.

@@ -51,6 +51,12 @@ without redesigning Omni storage or general NoDb locking.
   section.
 - Add deterministic preflight and traversal behavior for valid, broken,
   dangling-during-read, internal, and run-root-crossing symlinks.
+- Make newly created Omni child-run links to shared parent inputs relative to
+  the child workspace, so copying the complete run retargets them naturally.
+- During fork, normalize recognized legacy Omni shared-input links to canonical
+  relative links within the destination run. Derive the destination from the
+  link's role and location, not by replacing only the immediate source-run
+  prefix, so multi-generation inherited links are repaired as well.
 - Preserve atomic publication: only a complete validated archive may replace
   the final archive path, and `.tmp` files must be cleaned after failure.
 - Add exact race and symlink regression tests, operator diagnostics, durable
@@ -84,8 +90,10 @@ The checkpoint must decide, rather than infer from current code:
    lock, or an equivalent run-scoped lease protocol is used.
 2. Which mutations participate and what happens when archive or mutation is
    already active: bounded wait, explicit conflict, or queue dependency.
-3. Whether each allowed symlink is rejected, represented as a link, or
-   materialized, including containment and restore behavior.
+3. The archive representation of canonical internal links and the treatment of
+   non-canonical links, including containment and restore behavior. Operator
+   direction already fixes the fork contract: canonical Omni shared-input links
+   are location-relative and point within the destination run after a fork.
 4. The canonical typed RQ/API failure payload and user/operator remediation for
    broken links and consistency conflicts.
 
@@ -99,6 +107,9 @@ The checkpoint must decide, rather than infer from current code:
   and reported with run-relative link and target context.
 - [ ] Symlinks cannot cause archive creation to read outside contract-approved
   run roots or leak unrelated run data.
+- [ ] A forked Omni scenario's canonical shared-input links resolve inside the
+  destination run, including when the source inherited absolute links through
+  multiple prior forks.
 - [ ] A target disappearing between preflight and read is handled according to
   the same explicit consistency contract, with no published partial archive.
 - [ ] Exact regressions reproduce the production overlap and broken-link
@@ -119,6 +130,8 @@ The checkpoint must decide, rather than infer from current code:
 - Keep evolution additive and fail explicitly; do not silently discard files or
   links to make an archive appear successful.
 - Characterize current valid symlink behavior before choosing the new policy.
+- Characterize and migrate legacy absolute Omni shared-input links without
+  following arbitrary or unrecognized links during fork normalization.
 - Test old runs containing valid cross-run Omni links and broken links, plus
   ordinary runs without symlinks.
 - Validate resulting ZIP contents and restore behavior, not only job status.
