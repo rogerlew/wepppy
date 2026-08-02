@@ -2,13 +2,13 @@
 
 ## Quick Status
 
-**Timezone**: UTC  
-**Started**: 2026-08-02 17:25 UTC  
-**Current phase**: Contract discovery and decision  
-**Last updated**: 2026-08-02 17:25 UTC  
-**Next milestone**: Ratify and commit the contract checkpoint before code edits  
-**Security impact**: `high`  
-**Dedicated security review**: `yes`  
+**Timezone**: UTC
+**Started**: 2026-08-02 17:25 UTC
+**Current phase**: Contract discovery and decision
+**Last updated**: 2026-08-02 17:25 UTC
+**Next milestone**: Ratify and commit the contract checkpoint before code edits
+**Security impact**: `high`
+**Dedicated security review**: `yes`
 **Security artifact**: `artifacts/2026-08-02_security_review.md`
 
 ## Task Board
@@ -157,4 +157,3 @@
 - Existing semantics for valid directory symlinks, which `os.walk` may classify
   differently from broken links.
 - Whether restore must reproduce allowed links or only materialized content.
-

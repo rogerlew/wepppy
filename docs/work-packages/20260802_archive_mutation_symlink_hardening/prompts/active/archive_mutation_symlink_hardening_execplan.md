@@ -258,4 +258,3 @@ regressions do not depend on real Redis, NFS, or sleeps.
 Plan revision note (2026-08-02): Initial plan created from the confirmed
 `wepp1` incident. It deliberately defers lock and symlink representation choices
 to the required contract-first checkpoint.
-

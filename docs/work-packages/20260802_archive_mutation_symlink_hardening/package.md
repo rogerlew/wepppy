@@ -239,4 +239,3 @@ consistency boundary between whole-run archive reads and filesystem mutations.
 - Deterministic unit/integration regressions and generated ZIP evidence.
 - Operator/developer documentation and rollout/rollback instructions.
 - Code, QA, and security review artifacts with finding disposition.
-
