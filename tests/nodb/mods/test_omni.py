@@ -632,11 +632,11 @@ def test_omni_clone_links_directory_shared_inputs(tmp_path: Path, omni_module) -
     scenario_wd = Path(omni_module._omni_clone(scenario_def, str(base_wd), runid="run-123"))
 
     assert (scenario_wd / "dem").is_symlink()
-    assert os.readlink(scenario_wd / "dem") == str(base_wd / "dem")
+    assert os.readlink(scenario_wd / "dem") == "../../../../dem"
     assert (scenario_wd / "climate").is_symlink()
-    assert os.readlink(scenario_wd / "climate") == str(base_wd / "climate")
+    assert os.readlink(scenario_wd / "climate") == "../../../../climate"
     assert (scenario_wd / "watershed").is_symlink()
-    assert os.readlink(scenario_wd / "watershed") == str(base_wd / "watershed")
+    assert os.readlink(scenario_wd / "watershed") == "../../../../watershed"
     assert not (scenario_wd / "climate.nodir").exists()
     assert not (scenario_wd / "watershed.nodir").exists()
     assert not (scenario_wd / "climate.wepp_cli.parquet").exists()

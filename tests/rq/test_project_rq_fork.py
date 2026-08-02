@@ -60,6 +60,445 @@ def test_build_fork_rsync_cmd_adds_skip_wepp_runs_output_excludes() -> None:
     assert cmd[-2:] == [".", "/tmp/target/"]
 
 
+@pytest.mark.skipif(not hasattr(os, "symlink"), reason="symlink not supported")
+def test_normalize_fork_omni_links_retargets_missing_grandparent(tmp_path: Path) -> None:
+    import wepppy.rq.project_rq_fork as fork_helpers
+
+    destination = tmp_path / "destination"
+    scenario = destination / "_pups" / "omni" / "scenarios" / "prescribed_fire"
+    scenario.mkdir(parents=True)
+    (destination / "climate").mkdir()
+    (destination / "watershed").mkdir()
+    (destination / "dem").mkdir()
+    (destination / "climate.nodb").write_text("{}", encoding="utf-8")
+    (scenario / "climate").symlink_to("/wc1/runs/missing-grandparent/climate")
+    (scenario / "climate.nodb").symlink_to("/wc1/runs/missing-grandparent/climate.nodb")
+    unrelated = scenario / "unrelated"
+    unrelated.symlink_to("/some/intentional/external/target")
+
+    normalized = fork_helpers._normalize_fork_omni_links(str(destination))
+
+    assert normalized == 2
+    assert os.readlink(scenario / "climate") == "../../../../climate"
+    assert os.readlink(scenario / "climate.nodb") == "../../../../climate.nodb"
+    assert os.readlink(unrelated) == "/some/intentional/external/target"
+    assert (scenario / "climate").resolve() == destination / "climate"
+
+
+@pytest.mark.skipif(not hasattr(os, "symlink"), reason="symlink not supported")
+def test_normalize_fork_omni_links_rejects_symlinked_child_without_touching_outside(
+    tmp_path: Path,
+) -> None:
+    import wepppy.rq.project_rq_fork as fork_helpers
+
+    destination = tmp_path / "destination"
+    scenarios = destination / "_pups" / "omni" / "scenarios"
+    scenarios.mkdir(parents=True)
+    outside = tmp_path / "outside"
+    outside.mkdir()
+    sentinel = outside / "sentinel"
+    sentinel.write_text("unchanged", encoding="utf-8")
+    (scenarios / "malicious").symlink_to(outside, target_is_directory=True)
+
+    with pytest.raises(OSError):
+        fork_helpers._normalize_fork_omni_links(str(destination))
+
+    assert sentinel.read_text(encoding="utf-8") == "unchanged"
+    assert not list(outside.glob("*.fork-link-*.tmp"))
+
+
+@pytest.mark.skipif(not hasattr(os, "symlink"), reason="symlink not supported")
+def test_normalize_fork_omni_links_handles_contrast_wepp_runs(tmp_path: Path) -> None:
+    import wepppy.rq.project_rq_fork as fork_helpers
+
+    destination = tmp_path / "destination"
+    root_runs = destination / "wepp" / "runs"
+    root_runs.mkdir(parents=True)
+    (root_runs / "p1.cli").write_text("climate", encoding="utf-8")
+    contrast_runs = destination / "_pups" / "omni" / "contrasts" / "1" / "wepp" / "runs"
+    contrast_runs.mkdir(parents=True)
+    (contrast_runs / "p1.cli").symlink_to("/wc1/runs/old/wepp/runs/p1.cli")
+
+    assert fork_helpers._normalize_fork_omni_links(str(destination)) == 1
+    assert os.readlink(contrast_runs / "p1.cli") == "../../../../../../wepp/runs/p1.cli"
+    assert (contrast_runs / "p1.cli").resolve() == root_runs / "p1.cli"
+
+
+@pytest.mark.skipif(not hasattr(os, "symlink"), reason="symlink not supported")
+def test_normalize_fork_omni_links_skip_removes_only_contrast_run_links(
+    tmp_path: Path,
+) -> None:
+    import wepppy.rq.project_rq_fork as fork_helpers
+
+    destination = tmp_path / "destination"
+    contrast_runs = destination / "_pups" / "omni" / "contrasts" / "1" / "wepp" / "runs"
+    contrast_runs.mkdir(parents=True)
+    copied_link = contrast_runs / "p1.cli"
+    copied_link.symlink_to("/wc1/runs/old/wepp/runs/p1.cli")
+    materialized = contrast_runs / "p2.cli"
+    materialized.write_text("retained", encoding="utf-8")
+
+    assert fork_helpers._normalize_fork_omni_links(
+        str(destination), skip_wepp_runs_output=True
+    ) == 1
+    assert not copied_link.exists()
+    assert not copied_link.is_symlink()
+    assert materialized.read_text(encoding="utf-8") == "retained"
+    assert not list(contrast_runs.glob("*.fork-quarantine-*.tmp"))
+
+
+@pytest.mark.parametrize("collection", ["scenarios", "contrasts"])
+def test_normalize_fork_omni_links_preserves_collection_metadata(
+    tmp_path: Path, collection: str
+) -> None:
+    import wepppy.rq.project_rq_fork as fork_helpers
+
+    destination = tmp_path / "destination"
+    collection_dir = destination / "_pups" / "omni" / collection
+    collection_dir.mkdir(parents=True)
+    report = collection_dir / "build_report.ndjson"
+    payload = b'{"status":"ok"}\n\x00exact-bytes'
+    report.write_bytes(payload)
+
+    assert fork_helpers._normalize_fork_omni_links(str(destination)) == 0
+    assert report.read_bytes() == payload
+
+
+@pytest.mark.parametrize("collection", ["scenarios", "contrasts"])
+def test_normalize_fork_omni_links_rejects_other_collection_regular_file(
+    tmp_path: Path, collection: str
+) -> None:
+    import wepppy.rq.project_rq_fork as fork_helpers
+
+    destination = tmp_path / "destination"
+    collection_dir = destination / "_pups" / "omni" / collection
+    collection_dir.mkdir(parents=True)
+    (collection_dir / "unexpected.txt").write_text("foreign", encoding="utf-8")
+
+    with pytest.raises(NotADirectoryError):
+        fork_helpers._normalize_fork_omni_links(str(destination))
+
+
+@pytest.mark.parametrize("collection", ["scenarios", "contrasts"])
+@pytest.mark.parametrize("entry_type", ["symlink", "fifo"])
+def test_normalize_fork_omni_links_rejects_nonregular_collection_metadata(
+    tmp_path: Path, collection: str, entry_type: str
+) -> None:
+    import wepppy.rq.project_rq_fork as fork_helpers
+
+    destination = tmp_path / "destination"
+    collection_dir = destination / "_pups" / "omni" / collection
+    collection_dir.mkdir(parents=True)
+    report = collection_dir / "build_report.ndjson"
+    if entry_type == "symlink":
+        report.symlink_to("/outside/metadata")
+    else:
+        os.mkfifo(report)
+
+    with pytest.raises(NotADirectoryError):
+        fork_helpers._normalize_fork_omni_links(str(destination))
+
+
+@pytest.mark.skipif(not hasattr(os, "symlink"), reason="symlink not supported")
+def test_normalize_fork_omni_links_rejects_symlinked_target_ancestor(
+    tmp_path: Path,
+) -> None:
+    import wepppy.rq.project_rq_fork as fork_helpers
+
+    destination = tmp_path / "destination"
+    contrast_runs = destination / "_pups" / "omni" / "contrasts" / "1" / "wepp" / "runs"
+    contrast_runs.mkdir(parents=True)
+    copied_link = contrast_runs / "p1.cli"
+    original = "/wc1/runs/old/wepp/runs/p1.cli"
+    copied_link.symlink_to(original)
+    outside = tmp_path / "outside"
+    outside.mkdir()
+    sentinel = outside / "p1.cli"
+    sentinel.write_text("unchanged", encoding="utf-8")
+    (destination / "wepp").symlink_to(outside, target_is_directory=True)
+
+    with pytest.raises(OSError):
+        fork_helpers._normalize_fork_omni_links(str(destination))
+
+    assert os.readlink(copied_link) == original
+    assert sentinel.read_text(encoding="utf-8") == "unchanged"
+
+
+@pytest.mark.skipif(not hasattr(os, "symlink"), reason="symlink not supported")
+def test_normalize_fork_omni_links_detects_candidate_replacement_race(
+    monkeypatch: pytest.MonkeyPatch,
+    tmp_path: Path,
+) -> None:
+    import wepppy.rq.project_rq_fork as fork_helpers
+
+    destination = tmp_path / "destination"
+    scenario = destination / "_pups" / "omni" / "scenarios" / "one"
+    scenario.mkdir(parents=True)
+    (destination / "climate").mkdir()
+    link = scenario / "climate"
+    link.symlink_to("/wc1/runs/old/climate")
+    foreign = "/intentional/foreign/target"
+    original_check = fork_helpers._same_inventoried_link
+    raced = False
+
+    def _race(dir_fd: int, action) -> bool:
+        nonlocal raced
+        if not raced:
+            raced = True
+            os.unlink(action.name, dir_fd=dir_fd)
+            os.symlink(foreign, action.name, dir_fd=dir_fd)
+        return original_check(dir_fd, action)
+
+    monkeypatch.setattr(fork_helpers, "_same_inventoried_link", _race)
+
+    with pytest.raises(RuntimeError, match="changed after preflight"):
+        fork_helpers._normalize_fork_omni_links(str(destination))
+
+    assert os.readlink(link) == foreign
+
+
+@pytest.mark.skipif(not hasattr(os, "symlink"), reason="symlink not supported")
+def test_normalize_fork_omni_links_does_not_overwrite_post_capture_race(
+    monkeypatch: pytest.MonkeyPatch,
+    tmp_path: Path,
+) -> None:
+    import wepppy.rq.project_rq_fork as fork_helpers
+
+    destination = tmp_path / "destination"
+    scenario = destination / "_pups" / "omni" / "scenarios" / "one"
+    scenario.mkdir(parents=True)
+    (destination / "climate").mkdir()
+    link = scenario / "climate"
+    link.symlink_to("/wc1/runs/old/climate")
+    original_symlink = os.symlink
+    raced = False
+
+    def _race_after_capture(target: str, name: str, *, dir_fd=None) -> None:
+        nonlocal raced
+        if name == "climate" and not raced:
+            raced = True
+            fd = os.open(
+                name,
+                os.O_WRONLY | os.O_CREAT | os.O_EXCL,
+                0o600,
+                dir_fd=dir_fd,
+            )
+            try:
+                os.write(fd, b"foreign regular bytes")
+            finally:
+                os.close(fd)
+        original_symlink(target, name, dir_fd=dir_fd)
+
+    monkeypatch.setattr(fork_helpers.os, "symlink", _race_after_capture)
+
+    with pytest.raises(RuntimeError, match="rollback failed"):
+        fork_helpers._normalize_fork_omni_links(str(destination))
+
+    assert link.read_bytes() == b"foreign regular bytes"
+
+
+@pytest.mark.skipif(not hasattr(os, "symlink"), reason="symlink not supported")
+def test_normalize_fork_omni_links_quarantine_preserves_raced_regular_file(
+    monkeypatch: pytest.MonkeyPatch,
+    tmp_path: Path,
+) -> None:
+    import wepppy.rq.project_rq_fork as fork_helpers
+
+    destination = tmp_path / "destination"
+    contrast_runs = destination / "_pups" / "omni" / "contrasts" / "1" / "wepp" / "runs"
+    contrast_runs.mkdir(parents=True)
+    candidate = contrast_runs / "p1.cli"
+    candidate.symlink_to("/wc1/runs/old/wepp/runs/p1.cli")
+    original_rename = fork_helpers._rename_noreplace_at
+    raced = False
+
+    def _race_before_quarantine(
+        source_fd: int, src: str, destination_fd: int, dst: str
+    ) -> None:
+        nonlocal raced
+        if src == "p1.cli" and not raced:
+            raced = True
+            os.unlink(src, dir_fd=source_fd)
+            fd = os.open(
+                src,
+                os.O_WRONLY | os.O_CREAT | os.O_EXCL,
+                0o600,
+                dir_fd=source_fd,
+            )
+            try:
+                os.write(fd, b"foreign regular bytes")
+            finally:
+                os.close(fd)
+        original_rename(source_fd, src, destination_fd, dst)
+
+    monkeypatch.setattr(fork_helpers, "_rename_noreplace_at", _race_before_quarantine)
+
+    with pytest.raises(RuntimeError, match="changed before quarantine"):
+        fork_helpers._normalize_fork_omni_links(
+            str(destination), skip_wepp_runs_output=True
+        )
+
+    assert candidate.read_bytes() == b"foreign regular bytes"
+    assert not list(contrast_runs.glob("*.fork-quarantine-*.tmp"))
+
+
+@pytest.mark.skipif(not hasattr(os, "symlink"), reason="symlink not supported")
+def test_normalize_fork_omni_links_removal_rollback_restores_raw_target(
+    monkeypatch: pytest.MonkeyPatch,
+    tmp_path: Path,
+) -> None:
+    import wepppy.rq.project_rq_fork as fork_helpers
+
+    destination = tmp_path / "destination"
+    contrast_runs = destination / "_pups" / "omni" / "contrasts" / "1" / "wepp" / "runs"
+    contrast_runs.mkdir(parents=True)
+    candidate = contrast_runs / "p1.cli"
+    raw_target = "../../../../../../old-root/wepp/runs/p1.cli"
+    candidate.symlink_to(raw_target)
+    original_matches = fork_helpers._quarantined_link_matches
+    calls = 0
+
+    def _fail_validation(dir_fd: int, quarantine: str, action) -> bool:
+        nonlocal calls
+        calls += 1
+        if calls == 2:
+            return False
+        return original_matches(dir_fd, quarantine, action)
+
+    monkeypatch.setattr(fork_helpers, "_quarantined_link_matches", _fail_validation)
+
+    with pytest.raises(RuntimeError, match="quarantine changed"):
+        fork_helpers._normalize_fork_omni_links(
+            str(destination), skip_wepp_runs_output=True
+        )
+
+    assert os.readlink(candidate) == raw_target
+    assert not list(contrast_runs.glob("*.fork-quarantine-*.tmp"))
+
+
+@pytest.mark.parametrize(
+    ("undisturbify", "skip_wepp_runs_output", "expected"),
+    [(False, False, False), (False, True, True), (True, False, True), (True, True, True)],
+)
+def test_prepare_fork_run_passes_effective_skip_mode_to_omni_normalizer(
+    monkeypatch: pytest.MonkeyPatch,
+    tmp_path: Path,
+    undisturbify: bool,
+    skip_wepp_runs_output: bool,
+    expected: bool,
+) -> None:
+    import wepppy.rq.project_rq_fork as fork_helpers
+
+    source = tmp_path / "source"
+    destination = tmp_path / "destination"
+    source.mkdir()
+    observed: list[bool] = []
+
+    def _fake_rsync(**_kwargs) -> None:
+        destination.mkdir()
+
+    def _capture(_new_wd: str, *, skip_wepp_runs_output: bool = False) -> int:
+        observed.append(skip_wepp_runs_output)
+        raise RuntimeError("stop after mode capture")
+
+    monkeypatch.setattr(fork_helpers.shutil, "which", lambda _name: "/usr/bin/rsync")
+    monkeypatch.setattr(fork_helpers, "_run_rsync_with_bounded_output", _fake_rsync)
+    monkeypatch.setattr(fork_helpers, "_normalize_fork_omni_links", _capture)
+
+    with pytest.raises(RuntimeError, match="stop after mode capture"):
+        fork_helpers.prepare_fork_run(
+            "source-run",
+            "destination-run",
+            undisturbify=undisturbify,
+            skip_wepp_runs_output=skip_wepp_runs_output,
+            status_channel="source-run:fork",
+            publish_status=lambda _channel, _message: None,
+            get_wd=lambda _runid: str(source),
+            get_primary_wd=lambda _runid: str(destination),
+            wait_for_paths=lambda _paths, timeout_s=60.0: None,
+            ron_cls=object(),
+            disturbed_cls=object(),
+            landuse_cls=object(),
+            soils_cls=object(),
+            initialize_ttl=None,
+            clean_env_for_system_tools=lambda: {"PATH": "/usr/bin:/bin"},
+        )
+
+    assert observed == [expected]
+
+
+@pytest.mark.skipif(not hasattr(os, "symlink"), reason="symlink not supported")
+def test_normalize_fork_omni_links_rolls_back_after_publish_failure(
+    monkeypatch: pytest.MonkeyPatch,
+    tmp_path: Path,
+) -> None:
+    import wepppy.rq.project_rq_fork as fork_helpers
+
+    destination = tmp_path / "destination"
+    scenario = destination / "_pups" / "omni" / "scenarios" / "one"
+    scenario.mkdir(parents=True)
+    (destination / "climate").mkdir()
+    (destination / "watershed").mkdir()
+    originals = {
+        "climate": "/wc1/runs/old/climate",
+        "watershed": "/wc1/runs/old/watershed",
+    }
+    for name, target in originals.items():
+        (scenario / name).symlink_to(target)
+    original_symlink = os.symlink
+    calls = 0
+
+    def _fail_second(target: str, name: str, *, dir_fd=None) -> None:
+        nonlocal calls
+        calls += 1
+        if calls == 2:
+            raise OSError("injected publish failure")
+        original_symlink(target, name, dir_fd=dir_fd)
+
+    monkeypatch.setattr(fork_helpers.os, "symlink", _fail_second)
+
+    with pytest.raises(OSError, match="injected publish failure"):
+        fork_helpers._normalize_fork_omni_links(str(destination))
+
+    for name, target in originals.items():
+        assert os.readlink(scenario / name) == target
+    assert not list(destination.glob(".fork-omni-quarantine-*"))
+
+
+@pytest.mark.skipif(not hasattr(os, "symlink"), reason="symlink not supported")
+def test_normalize_fork_omni_links_revalidates_target_and_rolls_back(
+    monkeypatch: pytest.MonkeyPatch,
+    tmp_path: Path,
+) -> None:
+    import wepppy.rq.project_rq_fork as fork_helpers
+
+    destination = tmp_path / "destination"
+    scenario = destination / "_pups" / "omni" / "scenarios" / "one"
+    scenario.mkdir(parents=True)
+    target = destination / "climate"
+    target.mkdir()
+    link = scenario / "climate"
+    original = "/wc1/runs/old/climate"
+    link.symlink_to(original)
+    original_symlink = os.symlink
+    removed = False
+
+    def _remove_target_after_publish(link_target: str, name: str, *, dir_fd=None) -> None:
+        nonlocal removed
+        original_symlink(link_target, name, dir_fd=dir_fd)
+        if not removed:
+            removed = True
+            target.rmdir()
+
+    monkeypatch.setattr(fork_helpers.os, "symlink", _remove_target_after_publish)
+
+    with pytest.raises(FileNotFoundError):
+        fork_helpers._normalize_fork_omni_links(str(destination))
+
+    assert os.readlink(link) == original
+    assert not list(destination.glob(".fork-omni-quarantine-*"))
+
+
 def test_clean_env_for_system_tools_uses_sanitized_path(monkeypatch: pytest.MonkeyPatch) -> None:
     import wepppy.rq.project_rq as project
 
@@ -145,7 +584,7 @@ def test_fork_rq_reports_ttl_import_failures(
     monkeypatch.setattr(
         project._fork_helpers,
         "_run_rsync_with_bounded_output",
-        lambda **_kwargs: None,
+        lambda **_kwargs: target_wd.mkdir(parents=True),
     )
 
     # Simulate missing initialize_ttl symbol at import time.

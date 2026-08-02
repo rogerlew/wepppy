@@ -110,7 +110,7 @@ def _ensure_omni_shared_inputs(base_root: str, run_root: str) -> None:
             return
 
         try:
-            os.symlink(src, dst)
+            os.symlink(os.path.relpath(src, os.path.dirname(dst)), dst)
         except FileExistsError:
             return
         except OSError as exc:

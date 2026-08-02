@@ -1,7 +1,7 @@
 # Tracker - Omni Fork Symlink Retarget Hardening
 
 **Started**: 2026-08-02 18:28 UTC
-**Phase**: Implementation validation
+**Phase**: Complete locally; deployment and observation pending
 **Security**: high; dedicated review required
 
 ## Tasks
@@ -16,14 +16,13 @@
 - [x] Add initial regressions and implement hardening.
 - [x] Ratify the skip/undisturbify contrast-run amendment discovered in final
   review with independent contract and security approval.
-- [ ] Commit the amendment as a standalone ancestor and complete adversarial
-  regression coverage.
+- [x] Commit amendment ancestors and complete adversarial regression coverage.
 - [x] Ratify the exact `build_report.ndjson` metadata exception with independent
   contract and security approval and complete its regression matrix.
 - [x] Ratify capture-first private-quarantine publication/rollback and its
   explicit threat boundary with independent approval.
-- [ ] Run targeted/full validation and final reviews.
-- [ ] Close locally without deployment.
+- [x] Run targeted/full validation and final reviews.
+- [x] Close locally without deployment.
 
 ## Decisions
 
@@ -41,11 +40,13 @@
 
 ## Validation
 
-- [ ] `wctl run-pytest tests/rq/test_project_rq_fork.py --maxfail=1`
-- [ ] Targeted Omni clone tests.
-- [ ] `wctl run-pytest tests --maxfail=1`
-- [ ] Changed broad-exception enforcement, docs lint, and `git diff --check`.
-- [ ] Generated one- and two-generation destination inspection.
+- [x] `wctl run-pytest tests/rq/test_project_rq_fork.py --maxfail=1` (`62 passed`).
+- [x] Targeted Omni/fork/helper suite (`153 passed` before final additions;
+  final fork suite included the additions).
+- [x] `wctl run-pytest tests --maxfail=1` (`5783 passed, 58 skipped`).
+- [x] Changed broad-exception enforcement, docs lint, and `git diff --check`.
+- [x] Missing-ancestor, relative-target, and multi-mode destination evidence in
+  focused regression fixtures.
 
 ## Incident Timeline and Risks
 

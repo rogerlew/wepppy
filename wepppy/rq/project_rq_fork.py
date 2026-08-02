@@ -1,10 +1,15 @@
 from __future__ import annotations
 
+import ctypes
+import errno
 import os
+import secrets
 import shutil
+import stat
 import threading
 import time
 from collections import deque
+from dataclasses import dataclass
 from glob import glob
 import json
 from subprocess import PIPE, Popen
@@ -15,6 +20,476 @@ from typing import Any, Callable, TextIO
 FORK_RSYNC_HEARTBEAT_PREFIX = "FORK_HEARTBEAT "
 FORK_RSYNC_HEARTBEAT_SECONDS = 10.0
 FORK_RSYNC_TAIL_LINES = 200
+
+_OMNI_FIXED_LINK_ROLES: dict[str, dict[str, tuple[str, str]]] = {
+    "scenarios": {
+        "climate": ("climate", "dir"),
+        "watershed": ("watershed", "dir"),
+        "dem": ("dem", "dir"),
+        "climate.nodb": ("climate.nodb", "file"),
+        "dem.nodb": ("dem.nodb", "file"),
+        "watershed.nodb": ("watershed.nodb", "file"),
+        "climate.nodir": ("climate.nodir", "file"),
+        "watershed.nodir": ("watershed.nodir", "file"),
+    },
+    "contrasts": {
+        "climate": ("climate", "dir"),
+        "watershed": ("watershed", "dir"),
+        "climate.nodb": ("climate.nodb", "file"),
+        "watershed.nodb": ("watershed.nodb", "file"),
+        "landuse.nodb": ("landuse.nodb", "file"),
+        "soils.nodb": ("soils.nodb", "file"),
+        "unitizer.nodb": ("unitizer.nodb", "file"),
+        "treatments.nodb": ("treatments.nodb", "file"),
+        "climate.nodir": ("climate.nodir", "file"),
+        "watershed.nodir": ("watershed.nodir", "file"),
+    },
+}
+_OMNI_COLLECTION_METADATA = {"build_report.ndjson"}
+
+
+def _open_fork_dir(name: str, *, dir_fd: int | None = None) -> int:
+    flags = os.O_RDONLY | os.O_DIRECTORY
+    if hasattr(os, "O_NOFOLLOW"):
+        flags |= os.O_NOFOLLOW
+    return os.open(name, flags, dir_fd=dir_fd)
+
+
+def _open_optional_fork_dir(name: str, *, dir_fd: int) -> int | None:
+    try:
+        return _open_fork_dir(name, dir_fd=dir_fd)
+    except FileNotFoundError:
+        return None
+
+
+def _open_fork_chain(root_fd: int, parts: tuple[str, ...]) -> tuple[int, list[int]]:
+    parent_fd = root_fd
+    opened: list[int] = []
+    try:
+        for part in parts:
+            parent_fd = _open_fork_dir(part, dir_fd=parent_fd)
+            opened.append(parent_fd)
+        return parent_fd, opened
+    except OSError:
+        for fd in reversed(opened):
+            os.close(fd)
+        raise
+
+
+def _require_fork_target(root_fd: int, relpath: str, expected: str) -> None:
+    parts = tuple(part for part in relpath.split(os.sep) if part)
+    if not parts or any(not _valid_omni_child_name(part) for part in parts):
+        raise ValueError(f"Invalid fork Omni shared-input target: {relpath!r}")
+    parent_fd = root_fd
+    opened: list[int] = []
+    try:
+        if len(parts) > 1:
+            parent_fd, opened = _open_fork_chain(root_fd, parts[:-1])
+        target_stat = os.stat(parts[-1], dir_fd=parent_fd, follow_symlinks=False)
+        mode = target_stat.st_mode
+        valid = stat.S_ISDIR(mode) if expected == "dir" else stat.S_ISREG(mode)
+        if not valid:
+            raise ValueError(
+                f"Fork Omni shared-input target must be a non-symlink {expected}: {relpath}"
+            )
+    finally:
+        for fd in reversed(opened):
+            os.close(fd)
+
+
+def _supported_materialized_role(mode: int, expected: str) -> bool:
+    return stat.S_ISDIR(mode) if expected == "dir" else stat.S_ISREG(mode)
+
+
+def _rename_noreplace_at(
+    source_fd: int, source: str, destination_fd: int, destination: str
+) -> None:
+    """Rename without replacing an existing entry."""
+    libc = ctypes.CDLL(None, use_errno=True)
+    renameat2 = getattr(libc, "renameat2", None)
+    if renameat2 is None:
+        raise OSError(errno.ENOSYS, "renameat2 is required for safe Omni fork normalization")
+    result = renameat2(
+        source_fd,
+        os.fsencode(source),
+        destination_fd,
+        os.fsencode(destination),
+        1,  # RENAME_NOREPLACE
+    )
+    if result != 0:
+        error_number = ctypes.get_errno()
+        raise OSError(error_number, os.strerror(error_number), destination)
+
+
+def _valid_omni_child_name(name: str) -> bool:
+    return bool(name) and name not in {".", ".."} and "/" not in name and "\\" not in name and "\x00" not in name
+
+
+@dataclass(frozen=True)
+class _OmniLinkAction:
+    collection: str
+    child: str
+    subdirs: tuple[str, ...]
+    name: str
+    canonical: str | None
+    original: str
+    device: int
+    inode: int
+    target: str | None
+    expected: str | None
+
+
+@dataclass
+class _PublishedOmniAction:
+    action: _OmniLinkAction
+    quarantine: str
+    canonical_device: int | None = None
+    canonical_inode: int | None = None
+
+
+def _open_action_dir(root_fd: int, action: _OmniLinkAction) -> tuple[int, list[int]]:
+    return _open_fork_chain(
+        root_fd,
+        ("_pups", "omni", action.collection, action.child, *action.subdirs),
+    )
+
+
+def _same_inventoried_link(dir_fd: int, action: _OmniLinkAction) -> bool:
+    current = os.stat(action.name, dir_fd=dir_fd, follow_symlinks=False)
+    return (
+        stat.S_ISLNK(current.st_mode)
+        and current.st_dev == action.device
+        and current.st_ino == action.inode
+        and os.readlink(action.name, dir_fd=dir_fd) == action.original
+    )
+
+
+def _quarantined_link_matches(dir_fd: int, quarantine: str, action: _OmniLinkAction) -> bool:
+    moved = os.stat(quarantine, dir_fd=dir_fd, follow_symlinks=False)
+    return (
+        stat.S_ISLNK(moved.st_mode)
+        and moved.st_dev == action.device
+        and moved.st_ino == action.inode
+        and os.readlink(quarantine, dir_fd=dir_fd) == action.original
+    )
+
+
+def _restore_quarantined_link(
+    quarantine_fd: int,
+    quarantine: str,
+    action_fd: int,
+    name: str,
+) -> None:
+    _rename_noreplace_at(quarantine_fd, quarantine, action_fd, name)
+
+
+def _quarantine_link_at(
+    action_fd: int, quarantine_fd: int, action: _OmniLinkAction
+) -> str:
+    quarantine = secrets.token_hex(16)
+    _rename_noreplace_at(action_fd, action.name, quarantine_fd, quarantine)
+    try:
+        if not _quarantined_link_matches(quarantine_fd, quarantine, action):
+            _restore_quarantined_link(
+                quarantine_fd, quarantine, action_fd, action.name
+            )
+            raise RuntimeError(f"Fork Omni link changed before quarantine: {action.name}")
+    except (OSError, RuntimeError):
+        try:
+            os.stat(quarantine, dir_fd=quarantine_fd, follow_symlinks=False)
+        except FileNotFoundError:
+            pass
+        else:
+            try:
+                os.stat(action.name, dir_fd=action_fd, follow_symlinks=False)
+            except FileNotFoundError:
+                _restore_quarantined_link(
+                    quarantine_fd, quarantine, action_fd, action.name
+                )
+        raise
+    return quarantine
+
+
+def _normalize_fork_omni_links(new_wd: str, *, skip_wepp_runs_output: bool = False) -> int:
+    """Retarget recognized copied Omni links into *new_wd* without following old targets."""
+    root_fd = _open_fork_dir(new_wd)
+    held_fds: list[int] = [root_fd]
+    actions: list[_OmniLinkAction] = []
+    published: list[_PublishedOmniAction] = []
+    quarantine_dir: str | None = None
+    quarantine_fd: int | None = None
+    try:
+        pups_fd = _open_optional_fork_dir("_pups", dir_fd=root_fd)
+        if pups_fd is None:
+            return 0
+        held_fds.append(pups_fd)
+        omni_fd = _open_optional_fork_dir("omni", dir_fd=pups_fd)
+        if omni_fd is None:
+            return 0
+        held_fds.append(omni_fd)
+
+        for collection, roles in _OMNI_FIXED_LINK_ROLES.items():
+            collection_fd = _open_optional_fork_dir(collection, dir_fd=omni_fd)
+            if collection_fd is None:
+                continue
+            held_fds.append(collection_fd)
+            for child_name in os.listdir(collection_fd):
+                if not _valid_omni_child_name(child_name):
+                    raise ValueError(f"Invalid Omni {collection} child name: {child_name!r}")
+                child_stat = os.stat(child_name, dir_fd=collection_fd, follow_symlinks=False)
+                if stat.S_ISREG(child_stat.st_mode) and child_name in _OMNI_COLLECTION_METADATA:
+                    continue
+                if not stat.S_ISDIR(child_stat.st_mode):
+                    raise NotADirectoryError(
+                        f"Unsupported Omni {collection} child entry: {child_name}"
+                    )
+                child_fd = _open_fork_dir(child_name, dir_fd=collection_fd)
+                try:
+                    for role, (root_target, expected) in roles.items():
+                        try:
+                            role_stat = os.stat(role, dir_fd=child_fd, follow_symlinks=False)
+                        except FileNotFoundError:
+                            continue
+                        if stat.S_ISLNK(role_stat.st_mode):
+                            _require_fork_target(root_fd, root_target, expected)
+                            canonical = os.path.relpath(root_target, os.path.join("_pups", "omni", collection, child_name))
+                            actions.append(
+                                _OmniLinkAction(
+                                    collection, child_name, (), role, canonical,
+                                    os.readlink(role, dir_fd=child_fd), role_stat.st_dev,
+                                    role_stat.st_ino, root_target, expected,
+                                )
+                            )
+                        elif not _supported_materialized_role(role_stat.st_mode, expected):
+                            raise ValueError(f"Unsupported Omni fork entry type: {collection}/{child_name}/{role}")
+
+                    if collection == "contrasts":
+                        wepp_fd = _open_optional_fork_dir("wepp", dir_fd=child_fd)
+                        if wepp_fd is not None:
+                            try:
+                                runs_fd = _open_optional_fork_dir("runs", dir_fd=wepp_fd)
+                                if runs_fd is not None:
+                                    try:
+                                        for basename in os.listdir(runs_fd):
+                                            if not _valid_omni_child_name(basename):
+                                                raise ValueError(f"Invalid contrast WEPP run entry: {basename!r}")
+                                            entry_stat = os.stat(basename, dir_fd=runs_fd, follow_symlinks=False)
+                                            if stat.S_ISLNK(entry_stat.st_mode):
+                                                root_target = os.path.join("wepp", "runs", basename)
+                                                canonical = None
+                                                expected = None
+                                                if not skip_wepp_runs_output:
+                                                    _require_fork_target(root_fd, root_target, "file")
+                                                    canonical = os.path.relpath(
+                                                        root_target,
+                                                        os.path.join("_pups", "omni", collection, child_name, "wepp", "runs"),
+                                                    )
+                                                    expected = "file"
+                                                actions.append(
+                                                    _OmniLinkAction(
+                                                        collection, child_name, ("wepp", "runs"), basename,
+                                                        canonical, os.readlink(basename, dir_fd=runs_fd),
+                                                        entry_stat.st_dev, entry_stat.st_ino,
+                                                        None if skip_wepp_runs_output else root_target, expected,
+                                                    )
+                                                )
+                                            elif not stat.S_ISREG(entry_stat.st_mode):
+                                                raise ValueError(f"Unsupported contrast WEPP run entry type: {basename}")
+                                    finally:
+                                        os.close(runs_fd)
+                            finally:
+                                os.close(wepp_fd)
+                finally:
+                    os.close(child_fd)
+
+        if any(action.original != action.canonical for action in actions):
+            quarantine_dir = f".fork-omni-quarantine-{secrets.token_hex(16)}"
+            os.mkdir(quarantine_dir, mode=0o700, dir_fd=root_fd)
+            quarantine_fd = _open_fork_dir(quarantine_dir, dir_fd=root_fd)
+            held_fds.append(quarantine_fd)
+
+        for action in actions:
+            if action.original == action.canonical:
+                continue
+            action_fd, opened = _open_action_dir(root_fd, action)
+            try:
+                if not _same_inventoried_link(action_fd, action):
+                    raise RuntimeError(f"Fork Omni link changed after preflight: {action.name}")
+                if quarantine_fd is None:
+                    raise RuntimeError("Fork Omni quarantine was not initialized")
+                quarantine = _quarantine_link_at(action_fd, quarantine_fd, action)
+                publication = _PublishedOmniAction(action, quarantine)
+                published.append(publication)
+                if action.target is not None and action.expected is not None:
+                    _require_fork_target(root_fd, action.target, action.expected)
+                    os.symlink(action.canonical or "", action.name, dir_fd=action_fd)
+                    canonical_stat = os.stat(
+                        action.name, dir_fd=action_fd, follow_symlinks=False
+                    )
+                    publication.canonical_device = canonical_stat.st_dev
+                    publication.canonical_inode = canonical_stat.st_ino
+            finally:
+                for fd in reversed(opened):
+                    os.close(fd)
+
+        quarantines = {
+            publication.action: publication.quarantine
+            for publication in published
+        }
+        for action in actions:
+            action_fd, opened = _open_action_dir(root_fd, action)
+            try:
+                if action.canonical is None:
+                    try:
+                        os.stat(action.name, dir_fd=action_fd, follow_symlinks=False)
+                    except FileNotFoundError:
+                        quarantine = quarantines.get(action)
+                        if quarantine is None:
+                            continue
+                        if quarantine_fd is None or not _quarantined_link_matches(
+                            quarantine_fd, quarantine, action
+                        ):
+                            raise RuntimeError(
+                                f"Skipped fork artifact quarantine changed: {action.name}"
+                            )
+                        continue
+                    raise RuntimeError(f"Skipped fork artifact was not removed: {action.name}")
+                entry_stat = os.stat(action.name, dir_fd=action_fd, follow_symlinks=False)
+                if not stat.S_ISLNK(entry_stat.st_mode) or os.readlink(action.name, dir_fd=action_fd) != action.canonical:
+                    raise RuntimeError(f"Fork Omni link validation failed: {action.name}")
+                if action.target is not None and action.expected is not None:
+                    _require_fork_target(root_fd, action.target, action.expected)
+            finally:
+                for fd in reversed(opened):
+                    os.close(fd)
+        for publication in published:
+            action = publication.action
+            quarantine = publication.quarantine
+            action_fd, opened = _open_action_dir(root_fd, action)
+            try:
+                if quarantine_fd is None or not _quarantined_link_matches(
+                    quarantine_fd, quarantine, action
+                ):
+                    raise RuntimeError(
+                        f"Skipped fork artifact quarantine changed before cleanup: {action.name}"
+                    )
+                if action.canonical is None:
+                    try:
+                        os.stat(action.name, dir_fd=action_fd, follow_symlinks=False)
+                    except FileNotFoundError:
+                        pass
+                    else:
+                        raise RuntimeError(
+                            f"Skipped fork artifact recreated before commit: {action.name}"
+                        )
+                else:
+                    canonical_stat = os.stat(
+                        action.name, dir_fd=action_fd, follow_symlinks=False
+                    )
+                    if (
+                        not stat.S_ISLNK(canonical_stat.st_mode)
+                        or canonical_stat.st_dev != publication.canonical_device
+                        or canonical_stat.st_ino != publication.canonical_inode
+                        or os.readlink(action.name, dir_fd=action_fd) != action.canonical
+                    ):
+                        raise RuntimeError(
+                            f"Fork Omni link changed before commit: {action.name}"
+                        )
+                    if action.target is not None and action.expected is not None:
+                        _require_fork_target(root_fd, action.target, action.expected)
+                os.unlink(quarantine, dir_fd=quarantine_fd)
+            finally:
+                for fd in reversed(opened):
+                    os.close(fd)
+        if quarantine_dir is not None:
+            os.rmdir(quarantine_dir, dir_fd=root_fd)
+            quarantine_dir = None
+        return len(published)
+    except (OSError, RuntimeError, ValueError) as exc:
+        rollback_errors: list[str] = []
+        for publication in reversed(published):
+            action = publication.action
+            quarantine = publication.quarantine
+            try:
+                action_fd, opened = _open_action_dir(root_fd, action)
+                try:
+                    if action.canonical is None:
+                        try:
+                            os.stat(action.name, dir_fd=action_fd, follow_symlinks=False)
+                        except FileNotFoundError:
+                            try:
+                                if quarantine_fd is None:
+                                    raise RuntimeError("Fork Omni quarantine unavailable")
+                                _restore_quarantined_link(
+                                    quarantine_fd, quarantine, action_fd, action.name
+                                )
+                            except FileNotFoundError:
+                                os.symlink(action.original, action.name, dir_fd=action_fd)
+                        else:
+                            raise RuntimeError("entry recreated after normalization")
+                    else:
+                        if publication.canonical_inode is None:
+                            if quarantine_fd is None:
+                                raise RuntimeError("Fork Omni quarantine unavailable")
+                            _restore_quarantined_link(
+                                quarantine_fd, quarantine, action_fd, action.name
+                            )
+                            continue
+                        canonical_quarantine = (
+                            f".{action.name}.fork-canonical-{secrets.token_hex(8)}.tmp"
+                        )
+                        if quarantine_fd is None:
+                            raise RuntimeError("Fork Omni quarantine unavailable")
+                        _rename_noreplace_at(
+                            action_fd,
+                            action.name,
+                            quarantine_fd,
+                            canonical_quarantine,
+                        )
+                        current = os.stat(
+                            canonical_quarantine,
+                            dir_fd=quarantine_fd,
+                            follow_symlinks=False,
+                        )
+                        matches = (
+                            stat.S_ISLNK(current.st_mode)
+                            and current.st_dev == publication.canonical_device
+                            and current.st_ino == publication.canonical_inode
+                            and os.readlink(canonical_quarantine, dir_fd=quarantine_fd)
+                            == action.canonical
+                        )
+                        if not matches:
+                            _restore_quarantined_link(
+                                quarantine_fd,
+                                canonical_quarantine,
+                                action_fd,
+                                action.name,
+                            )
+                            raise RuntimeError("entry changed after normalization")
+                        try:
+                            _restore_quarantined_link(
+                                quarantine_fd, quarantine, action_fd, action.name
+                            )
+                        except FileNotFoundError:
+                            os.symlink(action.original, action.name, dir_fd=action_fd)
+                        os.unlink(canonical_quarantine, dir_fd=quarantine_fd)
+                finally:
+                    for fd in reversed(opened):
+                        os.close(fd)
+            except (OSError, RuntimeError) as rollback_exc:
+                rollback_errors.append(f"{action.name}: {rollback_exc}")
+        if not rollback_errors and quarantine_dir is not None:
+            try:
+                os.rmdir(quarantine_dir, dir_fd=root_fd)
+                quarantine_dir = None
+            except OSError as cleanup_exc:
+                rollback_errors.append(f"quarantine directory: {cleanup_exc}")
+        if rollback_errors:
+            raise RuntimeError(f"{exc}; fork Omni link rollback failed: {rollback_errors}") from exc
+        raise
+    finally:
+        for fd in reversed(held_fds):
+            os.close(fd)
 
 
 def _clean_env_for_system_tools() -> dict[str, str]:
@@ -459,6 +934,17 @@ def prepare_fork_run(
         env=env,
     )
     publish_status(status_channel, "Copying project files... done.")
+
+    normalize_started_at = time.monotonic()
+    normalized_omni_links = _normalize_fork_omni_links(
+        new_wd,
+        skip_wepp_runs_output=skip_wepp_copy,
+    )
+    normalize_elapsed = time.monotonic() - normalize_started_at
+    publish_status(
+        status_channel,
+        f"Normalized {normalized_omni_links} Omni shared-input links in {normalize_elapsed:.3f}s.",
+    )
 
     if skip_wepp_copy:
         _ensure_wepp_run_and_output_dirs(new_wd)

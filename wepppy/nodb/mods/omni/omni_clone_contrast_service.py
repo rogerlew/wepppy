@@ -13,6 +13,11 @@ from pathlib import Path
 from typing import Any, Dict, Optional
 
 
+def _symlink_relative_to_destination(src: str, dst: str) -> None:
+    """Create a relocatable link from *dst* to *src*."""
+    os.symlink(os.path.relpath(src, os.path.dirname(dst)), dst)
+
+
 def _rmtree_with_retry(
     path: str | Path,
     *,
@@ -147,7 +152,7 @@ class OmniCloneContrastService:
                 continue
             dst = _join(new_wd, dirname)
             if not _exists(dst):
-                os.symlink(src_dir, dst)
+                _symlink_relative_to_destination(src_dir, dst)
 
         for root in ("landuse", "soils"):
             resolved_root = nodir_resolve(wd, root, view="effective")
@@ -187,7 +192,7 @@ class OmniCloneContrastService:
                 src = _join(wd, fn)
                 dst = _join(new_wd, fn)
                 if not _exists(dst):
-                    os.symlink(src, dst)
+                    _symlink_relative_to_destination(src, dst)
 
         for nodb_fn in os.listdir(wd):
             if not nodb_fn.endswith(".nodb"):
@@ -234,7 +239,7 @@ class OmniCloneContrastService:
                 continue
             dst = _join(omni_runs_dir, fn)
             if not _exists(dst):
-                os.symlink(src, dst)
+                _symlink_relative_to_destination(src, dst)
 
         old_prefix = _join(wd, "omni")
         new_prefix = _join(wd, omni_rel_dir)
@@ -349,14 +354,14 @@ class OmniCloneContrastService:
                 continue
             dst = _join(new_wd, dirname)
             if not _exists(dst):
-                os.symlink(src_dir, dst)
+                _symlink_relative_to_destination(src_dir, dst)
 
         for fn in os.listdir(wd):
             if fn in ["dem", "climate.nodb", "dem.nodb", "watershed.nodb"]:
                 src = _join(wd, fn)
                 dst = _join(new_wd, fn)
                 if not _exists(dst):
-                    os.symlink(src, dst)
+                    _symlink_relative_to_destination(src, dst)
             elif fn in ["disturbed", "rap"]:
                 src = _join(wd, fn)
                 dst = _join(new_wd, fn)

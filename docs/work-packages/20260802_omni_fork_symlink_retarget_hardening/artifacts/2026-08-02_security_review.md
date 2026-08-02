@@ -1,14 +1,15 @@
 # Security Review - Omni Fork Symlink Retarget Hardening
 
-**Status**: Pending implementation review
+**Status**: Approved; no medium/high findings
 **Security impact**: high
 
-- [ ] Only allowlisted Omni child locations are rewritten.
-- [ ] Old targets are never followed.
-- [ ] Target calculation and child names cannot escape the destination.
-- [ ] Replacement is atomic and failure cannot publish success.
-- [ ] Unrelated links are preserved and cross-run data is not materialized.
-- [ ] RQ errors remain explicit and contract compliant.
+- [x] Only allowlisted Omni child locations are rewritten.
+- [x] Old targets are never followed.
+- [x] Target calculation and child names cannot escape the destination.
+- [x] Capture/publication is no-overwrite and failure cannot publish success.
+- [x] Unrelated links are preserved and cross-run data is not materialized.
+- [x] RQ errors remain explicit and contract compliant.
 
-Release gate: hold pending independent review.
-
+Independent final security review approved the descriptor-relative, no-follow,
+private-quarantine transaction under the ratified threat boundary. Deployment
+and production repair remain separately authorized.

@@ -1,6 +1,6 @@
 # Omni Fork Symlink Retarget Hardening
 
-**Status**: Open (2026-08-02)
+**Status**: Complete locally; deployment pending (2026-08-02)
 **Package ID**: SURF-04A
 **Timezone**: UTC
 **Security impact**: `high`
@@ -28,16 +28,16 @@ archive locking, queue wiring, production repair, and deployment are excluded.
 
 ## Acceptance
 
-- [ ] New Omni shared-input links are relative and resolve inside their run.
-- [ ] One- and multi-generation forks retarget recognized legacy links into the
+- [x] New Omni shared-input links are relative and resolve inside their run.
+- [x] One- and multi-generation forks retarget recognized legacy links into the
   newest destination without requiring old targets to exist.
-- [ ] Rsync flags, exclusions, heartbeat behavior, and unrelated links remain
+- [x] Rsync flags, exclusions, heartbeat behavior, and unrelated links remain
   unchanged.
-- [ ] Skip/undisturbify forks remove copied contrast-run symlinks whose root
+- [x] Skip/undisturbify forks remove copied contrast-run symlinks whose root
   targets were intentionally excluded, without deleting materialized files.
-- [ ] Unsafe or ambiguous recognized entries fail explicitly before fork
+- [x] Unsafe or ambiguous recognized entries fail explicitly before fork
   success; old targets are never followed or materialized.
-- [ ] Targeted and full tests, docs lint, correctness, QA, and security reviews
+- [x] Targeted and full tests, docs lint, correctness, QA, and security reviews
   pass with no unresolved medium/high findings.
 
 ## Compatibility, Security, and Signals

@@ -24,9 +24,10 @@ archives.
   plus fork normalization.
 - [x] (2026-08-02 20:15 UTC) Ratified the skip/undisturbify contrast-run
   amendment after independent contract and security approvals.
-- [ ] Commit the amendment ancestor and complete adversarial regressions
-  prompted by final review.
-- [ ] Validate, review, disposition, and close locally.
+- [x] (2026-08-02 21:00 UTC) Committed amendment ancestors and completed
+  adversarial regressions prompted by final review.
+- [x] (2026-08-02 21:45 UTC) Validated, independently reviewed, dispositioned,
+  and closed locally without deployment.
 
 ## Surprises & Discoveries
 
@@ -68,9 +69,12 @@ archives.
 
 ## Outcomes & Retrospective
 
-Pending implementation. No production code or data has been changed. The first
-checkpoint draft was not accepted; independent review materially improved the
-producer inventory, role matrix, transaction semantics, and test plan.
+Implementation is complete locally. New producers emit relative links; fork
+normalization repairs inherited links by role while retaining rsync. Independent
+review materially improved the producer inventory, role matrix, private
+capture-first transaction, rollback, metadata compatibility, and test plan.
+The final repository gate passed with 5,783 tests and 58 skips. No production
+code was deployed and no production data was repaired.
 
 ## Context and Orientation
 
