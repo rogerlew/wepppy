@@ -1,7 +1,5 @@
 from __future__ import annotations
 
-import ctypes
-import errno
 import os
 import secrets
 import shutil
@@ -101,24 +99,22 @@ def _supported_materialized_role(mode: int, expected: str) -> bool:
     return stat.S_ISDIR(mode) if expected == "dir" else stat.S_ISREG(mode)
 
 
-def _rename_noreplace_at(
+def _capture_to_quarantine(
     source_fd: int, source: str, destination_fd: int, destination: str
 ) -> None:
-    """Rename without replacing an existing entry."""
-    libc = ctypes.CDLL(None, use_errno=True)
-    renameat2 = getattr(libc, "renameat2", None)
-    if renameat2 is None:
-        raise OSError(errno.ENOSYS, "renameat2 is required for safe Omni fork normalization")
-    result = renameat2(
-        source_fd,
-        os.fsencode(source),
-        destination_fd,
-        os.fsencode(destination),
-        1,  # RENAME_NOREPLACE
+    """Move one entry into the newly-created private quarantine."""
+    try:
+        os.stat(destination, dir_fd=destination_fd, follow_symlinks=False)
+    except FileNotFoundError:
+        pass
+    else:
+        raise FileExistsError(destination)
+    os.rename(
+        source,
+        destination,
+        src_dir_fd=source_fd,
+        dst_dir_fd=destination_fd,
     )
-    if result != 0:
-        error_number = ctypes.get_errno()
-        raise OSError(error_number, os.strerror(error_number), destination)
 
 
 def _valid_omni_child_name(name: str) -> bool:
@@ -179,19 +175,54 @@ def _restore_quarantined_link(
     quarantine: str,
     action_fd: int,
     name: str,
+    *,
+    expected_device: int,
+    expected_inode: int,
+    expected_link: str | None,
 ) -> None:
-    _rename_noreplace_at(quarantine_fd, quarantine, action_fd, name)
+    os.link(
+        quarantine,
+        name,
+        src_dir_fd=quarantine_fd,
+        dst_dir_fd=action_fd,
+        follow_symlinks=False,
+    )
+    restored = os.stat(name, dir_fd=action_fd, follow_symlinks=False)
+    matches = restored.st_dev == expected_device and restored.st_ino == expected_inode
+    if expected_link is not None:
+        matches = (
+            matches
+            and stat.S_ISLNK(restored.st_mode)
+            and os.readlink(name, dir_fd=action_fd) == expected_link
+        )
+    if not matches:
+        raise RuntimeError(f"Restored fork Omni entry identity mismatch: {name}")
+    os.unlink(quarantine, dir_fd=quarantine_fd)
 
 
 def _quarantine_link_at(
     action_fd: int, quarantine_fd: int, action: _OmniLinkAction
 ) -> str:
     quarantine = secrets.token_hex(16)
-    _rename_noreplace_at(action_fd, action.name, quarantine_fd, quarantine)
+    _capture_to_quarantine(action_fd, action.name, quarantine_fd, quarantine)
     try:
         if not _quarantined_link_matches(quarantine_fd, quarantine, action):
+            captured = os.stat(
+                quarantine, dir_fd=quarantine_fd, follow_symlinks=False
+            )
+            captured_link = (
+                os.readlink(quarantine, dir_fd=quarantine_fd)
+                if stat.S_ISLNK(captured.st_mode)
+                else None
+            )
             _restore_quarantined_link(
-                quarantine_fd, quarantine, action_fd, action.name
+                quarantine_fd,
+                quarantine,
+                action_fd,
+                action.name,
+                expected_device=captured.st_dev,
+                expected_inode=captured.st_ino,
+                expected_link=captured_link,
             )
             raise RuntimeError(f"Fork Omni link changed before quarantine: {action.name}")
     except (OSError, RuntimeError):
@@ -204,7 +235,13 @@ def _quarantine_link_at(
                 os.stat(action.name, dir_fd=action_fd, follow_symlinks=False)
             except FileNotFoundError:
                 _restore_quarantined_link(
-                    quarantine_fd, quarantine, action_fd, action.name
+                    quarantine_fd,
+                    quarantine,
+                    action_fd,
+                    action.name,
+                    expected_device=action.device,
+                    expected_inode=action.inode,
+                    expected_link=action.original,
                 )
         raise
     return quarantine
@@ -421,7 +458,13 @@ def _normalize_fork_omni_links(new_wd: str, *, skip_wepp_runs_output: bool = Fal
                                 if quarantine_fd is None:
                                     raise RuntimeError("Fork Omni quarantine unavailable")
                                 _restore_quarantined_link(
-                                    quarantine_fd, quarantine, action_fd, action.name
+                                    quarantine_fd,
+                                    quarantine,
+                                    action_fd,
+                                    action.name,
+                                    expected_device=action.device,
+                                    expected_inode=action.inode,
+                                    expected_link=action.original,
                                 )
                             except FileNotFoundError:
                                 os.symlink(action.original, action.name, dir_fd=action_fd)
@@ -432,7 +475,13 @@ def _normalize_fork_omni_links(new_wd: str, *, skip_wepp_runs_output: bool = Fal
                             if quarantine_fd is None:
                                 raise RuntimeError("Fork Omni quarantine unavailable")
                             _restore_quarantined_link(
-                                quarantine_fd, quarantine, action_fd, action.name
+                                quarantine_fd,
+                                quarantine,
+                                action_fd,
+                                action.name,
+                                expected_device=action.device,
+                                expected_inode=action.inode,
+                                expected_link=action.original,
                             )
                             continue
                         canonical_quarantine = (
@@ -440,7 +489,7 @@ def _normalize_fork_omni_links(new_wd: str, *, skip_wepp_runs_output: bool = Fal
                         )
                         if quarantine_fd is None:
                             raise RuntimeError("Fork Omni quarantine unavailable")
-                        _rename_noreplace_at(
+                        _capture_to_quarantine(
                             action_fd,
                             action.name,
                             quarantine_fd,
@@ -464,11 +513,20 @@ def _normalize_fork_omni_links(new_wd: str, *, skip_wepp_runs_output: bool = Fal
                                 canonical_quarantine,
                                 action_fd,
                                 action.name,
+                                expected_device=publication.canonical_device,
+                                expected_inode=publication.canonical_inode,
+                                expected_link=action.canonical,
                             )
                             raise RuntimeError("entry changed after normalization")
                         try:
                             _restore_quarantined_link(
-                                quarantine_fd, quarantine, action_fd, action.name
+                                quarantine_fd,
+                                quarantine,
+                                action_fd,
+                                action.name,
+                                expected_device=action.device,
+                                expected_inode=action.inode,
+                                expected_link=action.original,
                             )
                         except FileNotFoundError:
                             os.symlink(action.original, action.name, dir_fd=action_fd)

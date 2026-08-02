@@ -27,7 +27,8 @@
   `c4a6e8cc-a2cf-48bc-9d77-e97e7727a53b` (`EINVAL` from NFS renameat2).
 - [x] Ratify an NFS-compatible capture/restore transaction with independent
   contract and security approval.
-- [ ] Implement and validate on a real NFS-backed path.
+- [x] Implement and validate the transaction on the `/wc1` NFSv4.2 mount
+  (`3 passed`; no temporary workspace residue).
 - [ ] Repeat final correctness, QA, and security gates.
 
 ## Decisions
@@ -46,10 +47,16 @@
 
 ## Validation
 
-- [x] `wctl run-pytest tests/rq/test_project_rq_fork.py --maxfail=1` (`62 passed`).
-- [x] Targeted Omni/fork/helper suite (`153 passed` before final additions;
-  final fork suite included the additions).
-- [x] `wctl run-pytest tests --maxfail=1` (`5783 passed, 58 skipped`).
+- [x] Historical pre-remediation fork suite: `62 passed`.
+- [x] Current remediation fork suite: `63 passed`.
+- [x] Current focused suite: `161 passed, 1 skipped` (explicit NFS case runs
+  separately).
+- [x] Actual `/wc1` NFSv4.2 integration: `3 passed` in `8.28s`, including
+  regular-file and directory pre-capture swaps.
+- [x] Live rq-engine fork/archive smoke: fork completed in `14.8065s` with 63
+  valid target-relative Omni links; 282 MB archive completed in `103.636748s`.
+- [x] Historical pre-remediation full suite: `5783 passed, 58 skipped`.
+- [ ] Current post-remediation `wctl run-pytest tests --maxfail=1`.
 - [x] Changed broad-exception enforcement, docs lint, and `git diff --check`.
 - [x] Missing-ancestor, relative-target, and multi-mode destination evidence in
   focused regression fixtures.

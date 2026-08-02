@@ -30,8 +30,13 @@ archives.
   and closed locally without deployment.
 - [x] (2026-08-02 22:15 UTC) Reopened after production NFSv4.2 returned
   `EINVAL` for `renameat2(RENAME_NOREPLACE)`.
-- [ ] Ratify and commit an NFS-compatible transaction checkpoint.
-- [ ] Implement, exercise on NFS, repeat all gates, and re-close.
+- [x] (2026-08-02 22:30 UTC) Ratified and committed NFS-compatible transaction
+  checkpoint `aa3ec3d5f`.
+- [x] (2026-08-02 22:50 UTC) Implemented the NFS-compatible transaction and
+  passed the explicit `/wc1` NFSv4.2 parity gate.
+- [x] (2026-08-02 20:16 UTC) Restarted the local stack and passed live
+  rq-engine fork/archive validation on `assisted-weakness`.
+- [ ] Repeat remaining gates/reviews and re-close.
 
 ## Surprises & Discoveries
 
@@ -81,7 +86,8 @@ archives.
 ## Outcomes & Retrospective
 
 The first implementation was incompatible with the production NFSv4.2 backing
-filesystem despite passing ext4 validation. Remediation is pending. Earlier
+filesystem despite passing ext4 validation. Remediation implementation and NFS
+parity are complete; broad regression and final QA closure remain. Earlier
 review improved the producer inventory, role matrix, private capture-first
 transaction, rollback, metadata compatibility, and test plan, but the package
 is not complete until the revised primitive passes actual-NFS evidence and all

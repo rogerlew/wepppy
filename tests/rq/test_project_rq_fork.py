@@ -309,7 +309,7 @@ def test_normalize_fork_omni_links_quarantine_preserves_raced_regular_file(
     contrast_runs.mkdir(parents=True)
     candidate = contrast_runs / "p1.cli"
     candidate.symlink_to("/wc1/runs/old/wepp/runs/p1.cli")
-    original_rename = fork_helpers._rename_noreplace_at
+    original_rename = fork_helpers._capture_to_quarantine
     raced = False
 
     def _race_before_quarantine(
@@ -331,7 +331,7 @@ def test_normalize_fork_omni_links_quarantine_preserves_raced_regular_file(
                 os.close(fd)
         original_rename(source_fd, src, destination_fd, dst)
 
-    monkeypatch.setattr(fork_helpers, "_rename_noreplace_at", _race_before_quarantine)
+    monkeypatch.setattr(fork_helpers, "_capture_to_quarantine", _race_before_quarantine)
 
     with pytest.raises(RuntimeError, match="changed before quarantine"):
         fork_helpers._normalize_fork_omni_links(
@@ -340,6 +340,65 @@ def test_normalize_fork_omni_links_quarantine_preserves_raced_regular_file(
 
     assert candidate.read_bytes() == b"foreign regular bytes"
     assert not list(contrast_runs.glob("*.fork-quarantine-*.tmp"))
+
+
+@pytest.mark.skipif(not hasattr(os, "symlink"), reason="symlink not supported")
+def test_normalize_fork_omni_links_confines_raced_directory_to_failed_destination(
+    monkeypatch: pytest.MonkeyPatch,
+    tmp_path: Path,
+) -> None:
+    import wepppy.rq.project_rq_fork as fork_helpers
+
+    destination = tmp_path / "destination"
+    contrast_runs = destination / "_pups" / "omni" / "contrasts" / "1" / "wepp" / "runs"
+    contrast_runs.mkdir(parents=True)
+    candidate = contrast_runs / "p1.cli"
+    candidate.symlink_to("/wc1/runs/old/wepp/runs/p1.cli")
+    outside = tmp_path / "outside"
+    outside.mkdir()
+    sentinel = outside / "sentinel"
+    sentinel.write_bytes(b"unchanged")
+    original_capture = fork_helpers._capture_to_quarantine
+    raced = False
+
+    def _race_before_capture(
+        source_fd: int, src: str, destination_fd: int, dst: str
+    ) -> None:
+        nonlocal raced
+        if src == "p1.cli" and not raced:
+            raced = True
+            os.unlink(src, dir_fd=source_fd)
+            os.mkdir(src, dir_fd=source_fd)
+            raced_dir_fd = os.open(
+                src, os.O_RDONLY | os.O_DIRECTORY, dir_fd=source_fd
+            )
+            try:
+                fd = os.open(
+                    "marker",
+                    os.O_WRONLY | os.O_CREAT | os.O_EXCL,
+                    0o600,
+                    dir_fd=raced_dir_fd,
+                )
+                os.close(fd)
+            finally:
+                os.close(raced_dir_fd)
+        original_capture(source_fd, src, destination_fd, dst)
+
+    monkeypatch.setattr(fork_helpers, "_capture_to_quarantine", _race_before_capture)
+
+    with pytest.raises(RuntimeError, match="rollback failed"):
+        fork_helpers._normalize_fork_omni_links(
+            str(destination), skip_wepp_runs_output=True
+        )
+
+    assert not candidate.exists()
+    quarantine_dirs = list(destination.glob(".fork-omni-quarantine-*"))
+    assert len(quarantine_dirs) == 1
+    captured = list(quarantine_dirs[0].iterdir())
+    assert len(captured) == 1
+    assert captured[0].is_dir()
+    assert (captured[0] / "marker").exists()
+    assert sentinel.read_bytes() == b"unchanged"
 
 
 @pytest.mark.skipif(not hasattr(os, "symlink"), reason="symlink not supported")
