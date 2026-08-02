@@ -1,7 +1,7 @@
 # Tracker - Omni Fork Symlink Retarget Hardening
 
 **Started**: 2026-08-02 18:28 UTC
-**Phase**: Complete locally; deployment and observation pending
+**Phase**: Reopened; NFS compatibility remediation
 **Security**: high; dedicated review required
 
 ## Tasks
@@ -23,6 +23,12 @@
   explicit threat boundary with independent approval.
 - [x] Run targeted/full validation and final reviews.
 - [x] Close locally without deployment.
+- [x] Capture production failure
+  `c4a6e8cc-a2cf-48bc-9d77-e97e7727a53b` (`EINVAL` from NFS renameat2).
+- [x] Ratify an NFS-compatible capture/restore transaction with independent
+  contract and security approval.
+- [ ] Implement and validate on a real NFS-backed path.
+- [ ] Repeat final correctness, QA, and security gates.
 
 ## Decisions
 
@@ -62,6 +68,13 @@ Open risks are parent-swap/link escape, partial normalization, legacy `.nodir`
 compatibility, and wall-time regression. Codex owns automated containment and
 rollback evidence; the operator owns later Forest/production latency evidence.
 No temporary callus is registered.
+
+### Reopen Note — 2026-08-02
+
+Production proved that Linux syscall availability is not equivalent to backing
+filesystem support. Ext4 tests accepted `RENAME_NOREPLACE`; the production
+NFSv4.2 export did not. The remediation must test the exact symlink capture,
+exclusive restore, and cleanup operations on NFS before closure.
 
 Final review discovered that root-only rsync exclusions can leave copied
 contrast-run symlinks dangling. The contract now makes their transactional

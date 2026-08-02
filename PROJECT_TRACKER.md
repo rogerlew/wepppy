@@ -330,11 +330,14 @@ When resuming Kubernetes work:
 **Link**: [docs/work-packages/20260802_omni_fork_symlink_retarget_hardening/](docs/work-packages/20260802_omni_fork_symlink_retarget_hardening/)
 **Description**: Keep `rsync -a` while making recognized Omni links
 destination-relative and repairing inherited ancestor links after copy.
-**Status**: Complete locally; production deployment and observation pending.
+**Status**: Reopened after production NFS compatibility failure.
 **Outcome**: Producers now create relative links and forks transactionally
 retarget the allowlisted legacy matrix without following old targets. Final
 validation passed (`5783 passed, 58 skipped`) with correctness, QA, and security
 approval and no unresolved medium/high findings.
+Production fork job `c4a6e8cc-a2cf-48bc-9d77-e97e7727a53b` then proved
+`renameat2(RENAME_NOREPLACE)` unsupported by the NFSv4.2 run filesystem. The
+package is replacing that primitive and adding an actual-NFS parity gate.
 
 ---
 

@@ -49,18 +49,27 @@ deployment and in-place repair remain separately authorized.
    other type fails. Contrast `wepp/runs` regular files are retained; symlinks
    are normalized by safe basename.
 10. Before either replacement or removal, each inventoried link is atomically
-    moved with Linux `renameat2(RENAME_NOREPLACE)` into a new random, mode-0700
-    quarantine directory beneath the destination root and identity-verified
-    there. Canonical publication then uses descriptor-relative exclusive
-    `os.symlink`, so it cannot overwrite a recreated entry. The brief absent
-    name is confined to the incomplete destination. Rollback captures and
-    verifies any published canonical link before restoring the original with
-    `RENAME_NOREPLACE`.
+    moved with descriptor-relative ordinary `os.rename` into a newly created
+    random, mode-0700 quarantine directory beneath the destination root and
+    identity-verified there. The private directory is empty at creation and
+    random quarantine names are unique within it under the clause 14 threat
+    boundary, so capture does not overwrite project data. Canonical publication
+    uses descriptor-relative exclusive `os.symlink`. Restoration uses
+    descriptor-relative `os.link(..., follow_symlinks=False)` from quarantine
+    to the absent project name, verifies identical device/inode/type/raw text,
+    then unlinks the private quarantine name. `EEXIST` fails closed without
+    overwriting a recreated entry. Rollback captures and verifies any published
+    canonical link before exclusive restoration of the original. If a covered
+    project-path race substitutes a directory or another object that NFS cannot
+    hard-link, normalization fails closed and retains the capture inside the
+    unpublished destination for whole-destination cleanup; it does not attempt
+    an overwriting rename-back or claim in-place restoration.
 11. The operation is transactional: preflight completes before the first
     replacement; original link text is recorded; a later failure rolls back
-    every published replacement in reverse order. Rollback failure is reported
-    with the primary error. A failed destination is not declared usable; normal
-    recovery is a fresh fork destination.
+    every published replacement in reverse order when exclusive restoration is
+    supported. Rollback failure or a non-hardlinkable raced capture is reported
+    with the primary error. A failed destination is never declared usable;
+    normal recovery discards it and allocates a fresh fork destination.
 12. Success follows descriptor-relative revalidation of every normalized link
     and confirmation that its canonical target exists with expected type inside
     the destination. Failures propagate through the existing exception boundary
@@ -76,7 +85,9 @@ deployment and in-place repair remain separately authorized.
     is restored without deleting the moved entry and fails the fork. Verified
     quarantines are retained through full validation, restored exactly during
     rollback, and deleted only at commit. No quarantine residue is permitted on
-    successful completion or an uncontended rollback.
+    successful completion or an uncontended rollback. A contested,
+    non-hardlinkable capture may remain only inside the failed unpublished
+    destination pending whole-destination cleanup.
 14. The private quarantine directory is not a project namespace and is never
     exposed through a completed fork. The concurrent-mutation threat model
     covers destination project paths but excludes actors that bypass mode-0700
@@ -84,6 +95,18 @@ deployment and in-place repair remain separately authorized.
     mutate random quarantine names. Cleanup revalidates through the held private
     directory descriptor immediately before unlink and removes the directory
     before success.
+15. Fork normalization must not depend on `renameat2` flags or another primitive
+    unsupported by the production NFSv4.2 export. Required parity evidence runs
+    ordinary cross-directory rename of a symlink, hard-link restoration of the
+    symlink object with `follow_symlinks=False`, collision refusal, raw-text and
+    inode identity checks, and cleanup on an actual NFS-backed path. Local ext4
+    evidence alone is insufficient.
+16. Regression evidence must deterministically replace an inventoried symlink
+    with both a regular file and a directory immediately before capture. The
+    regular object must be exclusively restorable without byte or inode loss.
+    The directory case must fail closed without overwriting a recreated name or
+    mutating anything outside the fresh destination; retained quarantine makes
+    the destination unusable and is reported for whole-destination cleanup.
 
 ## Exact Role Matrix
 

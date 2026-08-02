@@ -1,6 +1,6 @@
 # Omni Fork Symlink Retarget Hardening
 
-**Status**: Complete locally; deployment pending (2026-08-02)
+**Status**: Reopened after production NFS incompatibility (2026-08-02)
 **Package ID**: SURF-04A
 **Timezone**: UTC
 **Security impact**: `high`
@@ -18,6 +18,12 @@ multiple forks. Its `prescribed_fire/climate` link still named deleted ancestor
 `mdobre-facile-deviousness`, causing archive jobs
 `65717fb6-db0b-47e8-aa28-602dc798a18b` and
 `b4eeaff3-f2ff-4107-a0ff-418638cb15dd` to fail.
+
+The first implementation passed ext4 validation but production fork job
+`c4a6e8cc-a2cf-48bc-9d77-e97e7727a53b` failed because the NFSv4.2 run mount
+returned `EINVAL` for `renameat2(RENAME_NOREPLACE)`. The package is reopened to
+remove that unsupported filesystem primitive without weakening no-clobber
+behavior.
 
 Included work preserves the current rsync command, creates relative links for
 allowlisted Omni shared inputs, rebuilds copied legacy links from their semantic

@@ -28,6 +28,10 @@ archives.
   adversarial regressions prompted by final review.
 - [x] (2026-08-02 21:45 UTC) Validated, independently reviewed, dispositioned,
   and closed locally without deployment.
+- [x] (2026-08-02 22:15 UTC) Reopened after production NFSv4.2 returned
+  `EINVAL` for `renameat2(RENAME_NOREPLACE)`.
+- [ ] Ratify and commit an NFS-compatible transaction checkpoint.
+- [ ] Implement, exercise on NFS, repeat all gates, and re-close.
 
 ## Surprises & Discoveries
 
@@ -45,6 +49,8 @@ archives.
   their intentionally excluded targets unless normalization removes them.
 - Omni collections contain canonical `build_report.ndjson` metadata alongside
   child directories, requiring one exact regular-file exception.
+- `renameat2` may exist in libc and work on ext4 while the production NFSv4.2
+  backing filesystem rejects `RENAME_NOREPLACE` with `EINVAL`.
 
 ## Decision Log
 
@@ -66,15 +72,20 @@ archives.
   Rationale: root targets are intentionally excluded, so retargeting cannot
   satisfy the completed-fork no-dangling-link invariant.
   Date/Author: 2026-08-02 / final review discovery and Codex.
+- Decision: Replace `RENAME_NOREPLACE` with ordinary rename into a newly
+  created private quarantine plus exclusive hard-link restoration.
+  Rationale: NFS supports ordinary rename and link creation, while link creation
+  fails with `EEXIST` instead of overwriting a recreated project entry.
+  Date/Author: 2026-08-02 / production failure remediation.
 
 ## Outcomes & Retrospective
 
-Implementation is complete locally. New producers emit relative links; fork
-normalization repairs inherited links by role while retaining rsync. Independent
-review materially improved the producer inventory, role matrix, private
-capture-first transaction, rollback, metadata compatibility, and test plan.
-The final repository gate passed with 5,783 tests and 58 skips. No production
-code was deployed and no production data was repaired.
+The first implementation was incompatible with the production NFSv4.2 backing
+filesystem despite passing ext4 validation. Remediation is pending. Earlier
+review improved the producer inventory, role matrix, private capture-first
+transaction, rollback, metadata compatibility, and test plan, but the package
+is not complete until the revised primitive passes actual-NFS evidence and all
+gates. No production data was repaired.
 
 ## Context and Orientation
 
@@ -130,9 +141,12 @@ normalizer's keyword-only `skip_wepp_runs_output` boolean. Removal candidates
 must be atomically quarantined and identity-verified before deletion at commit;
 never unlink a candidate directly after a check.
 Use one random mode-0700 quarantine directory beneath the incomplete
-destination, held by descriptor. Capture and restore with Linux
-`renameat2(RENAME_NOREPLACE)` and publish canonical links exclusively; remove
-the empty private directory before success.
+destination, held by descriptor. Capture with ordinary descriptor-relative
+rename and restore hardlinkable objects exclusively with
+`os.link(..., follow_symlinks=False)`, followed by identity verification and
+private-name unlink. Publish canonical links exclusively. A raced directory is
+non-restorable in place: fail closed, retain it only inside the unpublished
+failed destination, and require whole-destination cleanup.
 
 ## Concrete Steps
 
@@ -141,6 +155,11 @@ From `/home/workdir/wepppy`:
     wctl run-pytest tests/rq/test_project_rq_fork.py --maxfail=1
     wctl run-pytest tests/nodb/mods/test_omni.py -k "clone or contrast" --maxfail=1
     wctl run-pytest tests/weppcloud/utils/test_helpers_paths.py --maxfail=1
+    wctl docker compose exec \
+      -e WEPPPY_NFS_TEST_ROOT=/wc1/benchmarks/omni-fork-nfs-parity \
+      weppcloud bash -lc 'cd /workdir/wepppy && \
+        PYTHONPATH=/workdir/wepppy /opt/venv/bin/pytest \
+        tests/rq/test_project_rq_fork_nfs.py -m integration -vv'
     wctl run-pytest tests --maxfail=1
     python3 tools/check_broad_exceptions.py --enforce-changed --base-ref origin/master
     wctl doc-lint --path docs/work-packages/20260802_omni_fork_symlink_retarget_hardening
@@ -160,6 +179,15 @@ case. All medium/high correctness, QA, and security findings must be resolved.
 Track normalization count and duration. A later Forest canary should compare
 fork wall time with rsync baseline and reject material p50/p95 regression before
 production deployment. Deployment remains separately authorized.
+
+The NFS parity test must first verify that `WEPPPY_NFS_TEST_ROOT` is on NFS and
+refuse to count ext4/tmpfs as evidence. It must exercise cross-directory rename
+of a symlink into private quarantine; symlink-object hard-link restoration;
+raw-text, type, device/inode identity; `EEXIST` collision refusal without
+overwrite; private cleanup; and deterministic regular-file and directory leaf
+swaps. Store the mount record, command, and transcript summary in
+`artifacts/2026-08-02_nfs_transaction_validation.md` and mirror the result in
+the package tracker.
 
 ## Idempotence and Recovery
 
@@ -193,3 +221,7 @@ hardening signals, and complete ExecPlan requirements.
 Plan revision note (2026-08-02): Final review exposed a skip/undisturbify
 interaction. Added an explicit transactional-removal contract and adversarial
 validation milestone before the implementation commit.
+
+Plan revision note (2026-08-02): Reopened after production NFS rejected the
+ext4-validated `RENAME_NOREPLACE` primitive. Added a backing-filesystem parity
+gate and an NFS-compatible capture/restore checkpoint.

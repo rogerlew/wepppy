@@ -68,13 +68,13 @@ Module: `wepppy/rq/project_rq.py`
 
 - `fork_rq(runid, new_runid, undisturbify, skip_wepp_runs_output)`:
   - Uses `rsync -a --stats` to clone the run directory without publishing per-file or per-progress output.
-  - **Implemented locally (SURF-04A):** after rsync, normalize contract-listed legacy Omni child symlinks to
+  - **Remediation in progress (SURF-04A):** after rsync, normalize contract-listed legacy Omni child symlinks to
     destination-relative shared inputs. Targets are derived from link roles, so
     multi-generation forks do not retain dependencies on older runs; unrelated
     links remain unchanged and old targets are never followed or materialized.
   - Publishes copy stage transitions, a replaceable elapsed-time heartbeat every 10 seconds, and bounded final summary/error tails to `<runid>:fork`.
   - When `skip_wepp_runs_output=True` (or when `undisturbify=True`), excludes `wepp/runs` and `wepp/output` from content copy, then creates those directories in the destination run.
-  - Implemented locally (SURF-04A): in that skip mode,
+  - Remediation in progress (SURF-04A): in that skip mode,
     remove copied Omni contrast `wepp/runs` symlinks whose root targets were
     intentionally excluded; regular materialized contrast files remain
     unchanged.
@@ -84,7 +84,7 @@ Module: `wepppy/rq/project_rq.py`
   - When `undisturbify=True`, clears active SBS metadata without deleting copied SBS rasters, rebuilds landuse/soils, and enqueues WEPP; completion is emitted by
     `_finish_fork_rq` after WEPP finishes.
   - Emits `FORK_COMPLETE` on success and `FORK_FAILED` on failure.
-  - **Implemented locally (SURF-04A):** report success only after recognized Omni links validate inside the
+  - **Remediation in progress (SURF-04A):** report success only after recognized Omni links validate inside the
     destination run.
 - `_finish_fork_rq(runid)`: publishes the final completion trigger once dependent jobs finish.
 
