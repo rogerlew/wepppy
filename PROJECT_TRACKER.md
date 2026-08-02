@@ -1,8 +1,8 @@
 # PROJECT_TRACKER.md
 > Kanban board for wepppy work packages and vision items
 
-**Last Updated**: 2026-07-30
-**Active Packages**: 21
+**Last Updated**: 2026-08-02
+**Active Packages**: 22
 **Quick Links**: [Work Packages Directory](docs/work-packages/) | [God-Tier Prompting Strategy](docs/god-tier-prompting-strategy.md)
 
 ## Purpose
@@ -76,6 +76,33 @@ Feedback mechanisms:
 ## 📋 Backlog
 
 Work packages that are scoped but not yet started. Dependencies and prerequisites should be noted.
+
+### Run Archive Consistency and Symlink Hardening
+
+**Proposed**: 2026-08-02
+**Size**: Medium-High (3-6 focused sessions plus observation)
+**Priority**: High
+**Security impact**: `high` (archive path traversal, cross-run symlinks, RQ
+coordination, and run-data integrity; dedicated review required)
+**Link**: [docs/work-packages/20260802_archive_mutation_symlink_hardening/](docs/work-packages/20260802_archive_mutation_symlink_hardening/)
+**Description**: Harden whole-run archive creation against concurrent
+filesystem mutation and unsafe/broken symlinks. The triggering `wepp1` archive
+overlapped Omni contrast deletion, while an earlier attempt proves its fatal
+broken scenario link was a separate pre-existing defect.
+
+**Scope**:
+
+- Ratify a contract-first stable-snapshot and mutation-exclusion boundary.
+- Give internal, cross-run, broken, escaping, and disappearing symlinks an
+  explicit secure archive/restore policy.
+- Add deterministic race and symlink regressions, atomic cleanup evidence,
+  operator diagnostics, and high-impact security review.
+
+**Next Steps**: Inventory mutation participants and current symlink behavior,
+then approve, independently review, and commit the standalone contract
+checkpoint before any production implementation edits.
+
+---
 
 ### Web Same-Origin Guard Parity and Data-Boundary Hardening
 **Proposed**: 2026-07-27
