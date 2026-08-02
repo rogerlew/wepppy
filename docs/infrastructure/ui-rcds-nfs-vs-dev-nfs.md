@@ -115,6 +115,63 @@ Apr 26 20:51:28 wepp1 kernel: NFS: Server wrote zero bytes, expected 65536.
 
 Operational takeaway: classify this signature as an infrastructure/NFS interruption unless additional model evidence says otherwise. Check Redis/RQ `exc_info` or `meta["exc_string"]`, run-scoped `exceptions.log` and `rq.log`, and host kernel logs before requeueing. In this run, a later post-processing job (`8617c691-8e7b-4707-8dcf-2e298370e35b`) failed separately because `/wc1/runs/me/mercuric-subcontract/dem/wbt/subwta.tif` was missing, so post-processing requeue would need the missing WBT raster restored or regenerated first.
 
+## Production Incident: Archive Worker Blocked in NFS RPC Wait (2026-08-02)
+
+On `wepp1`, archive job `7495a2a5-a651-4e8d-ae82-377b52f1e5fb`
+for run `strategic-eloquence` remained in RQ `started` state for more than five
+hours. At `2026-08-02T12:23:41-07:00` (`19:23:41Z`), the job had no traceback
+and its RQ heartbeat was current, but the child process had been blocked for
+approximately five hours:
+
+```text
+PID      STAT  ELAPSED   WCHAN
+1193073 D     05:10:48  rpc_wait_bit_killable
+```
+
+The run root itself still answered `stat`, while a recursive `du` traversal
+blocked. The production mount was:
+
+```text
+nas.rocket.net:/wepp on /geodata type nfs4
+vers=4.2,hard,proto=tcp,timeo=600,retrans=2,rsize=65536,wsize=65536
+```
+
+This signature means the job is alive from RQ's perspective but its executing
+process is blocked inside the kernel waiting for an NFS RPC. The worker parent
+can continue refreshing the RQ heartbeat, so heartbeat freshness alone does not
+prove application progress. A `D`-state process on a hard NFS mount may not
+respond to cancellation or signals until the RPC returns; the worker slot can
+therefore remain pinned indefinitely.
+
+Classify this first as an NFS client/server/storage-path incident, not an
+archive application hang. It does not by itself prove that the entire NAS is
+down: a root `stat` can succeed while traversal of one directory or inode
+blocks. Plausible underlying causes include NAS pool latency or saturation,
+NFS server-thread exhaustion, packet loss or a broken TCP session, and a
+pathological directory/inode, server-side lock, snapshot, or filesystem
+operation.
+
+Minimum read-only triage on the production host:
+
+```bash
+date --iso-8601=seconds
+docker exec docker-rq-worker-1 \
+  ps -eo pid,ppid,stat,etime,wchan:28,cmd
+findmnt -T /geodata/wc1 -o TARGET,SOURCE,FSTYPE,OPTIONS
+timeout 5 stat /geodata/wc1/runs/<prefix>/<runid>
+timeout 10 du -sh /geodata/wc1/runs/<prefix>/<runid>
+nfsstat -m
+dmesg --ctime | grep -iE 'nfs|rpc|not responding|server.*ok'
+```
+
+Pull Redis/RQ status, `last_heartbeat`, `exc_info`, worker name, and child PID as
+usual, but correlate them with process `STAT` and `WCHAN`. If the child is in
+`D` state with an NFS/RPC wait channel, do not assume that cancel, `SIGTERM`, or
+worker restart will immediately release it. Confirm NAS/network recovery first,
+then use the smallest targeted job/worker recovery action. Avoid stack-wide
+restarts: they do not repair a blocked hard-mount RPC and can strand additional
+work.
+
 ## Small-File Read/Write/Delete + Metadata Microbench (2026-02-10)
 
 This is a lightweight microbench intended to approximate UI pain on metadata-heavy paths (many small files).
