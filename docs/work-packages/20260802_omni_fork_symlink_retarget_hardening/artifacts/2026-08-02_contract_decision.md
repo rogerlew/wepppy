@@ -48,10 +48,14 @@ deployment and in-place repair remain separately authorized.
    materialized directory/file of the role's expected type is retained. Any
    other type fails. Contrast `wepp/runs` regular files are retained; symlinks
    are normalized by safe basename.
-10. Each replacement uses an exclusively named temporary sibling link created
-    through the held directory descriptor and atomically published with
-    descriptor-relative `os.replace`. Temporary entries are cleaned on every
-    path.
+10. Before either replacement or removal, each inventoried link is atomically
+    moved with Linux `renameat2(RENAME_NOREPLACE)` into a new random, mode-0700
+    quarantine directory beneath the destination root and identity-verified
+    there. Canonical publication then uses descriptor-relative exclusive
+    `os.symlink`, so it cannot overwrite a recreated entry. The brief absent
+    name is confined to the incomplete destination. Rollback captures and
+    verifies any published canonical link before restoring the original with
+    `RENAME_NOREPLACE`.
 11. The operation is transactional: preflight completes before the first
     replacement; original link text is recorded; a later failure rolls back
     every published replacement in reverse order. Rollback failure is reported
@@ -73,6 +77,13 @@ deployment and in-place repair remain separately authorized.
     quarantines are retained through full validation, restored exactly during
     rollback, and deleted only at commit. No quarantine residue is permitted on
     successful completion or an uncontended rollback.
+14. The private quarantine directory is not a project namespace and is never
+    exposed through a completed fork. The concurrent-mutation threat model
+    covers destination project paths but excludes actors that bypass mode-0700
+    permissions or run arbitrary code as the fork worker UID to guess and
+    mutate random quarantine names. Cleanup revalidates through the held private
+    directory descriptor immediately before unlink and removes the directory
+    before success.
 
 ## Exact Role Matrix
 

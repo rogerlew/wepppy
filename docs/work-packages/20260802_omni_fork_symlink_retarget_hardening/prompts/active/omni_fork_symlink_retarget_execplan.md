@@ -125,6 +125,10 @@ Pass the effective removal mode `undisturbify or skip_wepp_runs_output` as the
 normalizer's keyword-only `skip_wepp_runs_output` boolean. Removal candidates
 must be atomically quarantined and identity-verified before deletion at commit;
 never unlink a candidate directly after a check.
+Use one random mode-0700 quarantine directory beneath the incomplete
+destination, held by descriptor. Capture and restore with Linux
+`renameat2(RENAME_NOREPLACE)` and publish canonical links exclusively; remove
+the empty private directory before success.
 
 ## Concrete Steps
 

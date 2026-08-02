@@ -42,3 +42,12 @@ with no remaining medium/high findings after evidence was expanded to both
 collections, byte-exact retention, and rejection of other names, symlinks, and
 special entries. This addendum must be committed before the matching
 implementation.
+
+## Transaction Addendum
+
+Final correctness and security review replaced sibling check-and-replace with a
+capture-first transaction. Independent contract and security reviewers approved
+the private mode-0700 quarantine, fail-closed Linux
+`renameat2(RENAME_NOREPLACE)`, exclusive publication, no-overwrite rollback,
+and explicit same-worker-UID threat boundary with no remaining medium/high
+findings.

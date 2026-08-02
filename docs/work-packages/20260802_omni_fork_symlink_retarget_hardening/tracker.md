@@ -20,6 +20,8 @@
   regression coverage.
 - [x] Ratify the exact `build_report.ndjson` metadata exception with independent
   contract and security approval and complete its regression matrix.
+- [x] Ratify capture-first private-quarantine publication/rollback and its
+  explicit threat boundary with independent approval.
 - [ ] Run targeted/full validation and final reviews.
 - [ ] Close locally without deployment.
 
