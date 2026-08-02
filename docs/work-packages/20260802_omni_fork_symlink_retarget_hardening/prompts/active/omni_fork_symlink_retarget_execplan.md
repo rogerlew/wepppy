@@ -18,9 +18,14 @@ archives.
 - [x] (2026-08-02 18:45 UTC) Received two independent checkpoint reviews.
 - [x] (2026-08-02 18:50 UTC) Expanded producer/role inventory and no-follow
   transactional security contract in response to review.
-- [ ] Obtain post-fix confirmations, disposition findings, and commit ancestor.
-- [ ] Write exact failing regressions.
-- [ ] Implement producers and fork normalization.
+- [x] (2026-08-02 19:05 UTC) Obtained post-fix confirmations, dispositioned
+  findings, and committed checkpoint ancestor `9d437942f2c78ea54cb66e4bfd2cb454670d7995`.
+- [x] (2026-08-02 19:35 UTC) Wrote initial regressions and implemented producers
+  plus fork normalization.
+- [x] (2026-08-02 20:15 UTC) Ratified the skip/undisturbify contrast-run
+  amendment after independent contract and security approvals.
+- [ ] Commit the amendment ancestor and complete adversarial regressions
+  prompted by final review.
 - [ ] Validate, review, disposition, and close locally.
 
 ## Surprises & Discoveries
@@ -35,6 +40,8 @@ archives.
   `wepp/runs`; these require explicit roles rather than heuristic rewriting.
 - Lexical path checks alone do not prevent a symlinked/swapped ancestor from
   redirecting temporary-link creation or replacement outside the fork.
+- Root-only skip exclusions leave copied contrast `wepp/runs` symlinks without
+  their intentionally excluded targets unless normalization removes them.
 
 ## Decision Log
 
@@ -51,6 +58,11 @@ archives.
 - Decision: Preserve links outside the exact matrix.
   Rationale: generic rewriting could corrupt intentional unrelated links.
   Date/Author: 2026-08-02 / Codex.
+- Decision: Remove copied contrast-run symlinks in skip/undisturbify mode while
+  retaining regular materialized files.
+  Rationale: root targets are intentionally excluded, so retargeting cannot
+  satisfy the completed-fork no-dangling-link invariant.
+  Date/Author: 2026-08-02 / final review discovery and Codex.
 
 ## Outcomes & Retrospective
 
@@ -104,6 +116,10 @@ only immediate children, classify entries with descriptor-relative stat calls,
 preflight every action and target, create exclusive temporary siblings, replace
 atomically, validate, and rollback published links on failure. Publish bounded
 count/duration status without per-link output. Invoke immediately after rsync.
+Pass the effective removal mode `undisturbify or skip_wepp_runs_output` as the
+normalizer's keyword-only `skip_wepp_runs_output` boolean. Removal candidates
+must be atomically quarantined and identity-verified before deletion at commit;
+never unlink a candidate directly after a check.
 
 ## Concrete Steps
 
@@ -144,8 +160,9 @@ retry allocates a fresh destination. Source and foreign trees are never written.
 No external dependency is added. Use Python `os` descriptor-relative APIs,
 `stat`, `secrets` or equivalent collision-safe naming, and existing status
 publication. Keep helper interfaces private and typed. The producer helper
-accepts owning run root, child root, and role; the fork normalizer accepts only
-the destination root and returns a normalized count for status/telemetry.
+accepts owning run root, child root, and role. The fork normalizer accepts the
+destination root plus keyword-only effective `skip_wepp_runs_output: bool` mode
+and returns a normalized/removal count for status/telemetry.
 
 ## Artifacts
 
@@ -160,3 +177,6 @@ Plan revision note (2026-08-02): Expanded after independent checkpoint reviews
 to cover all producers/roles, no-follow ancestor safety, transactional rollback,
 hardening signals, and complete ExecPlan requirements.
 
+Plan revision note (2026-08-02): Final review exposed a skip/undisturbify
+interaction. Added an explicit transactional-removal contract and adversarial
+validation milestone before the implementation commit.

@@ -36,8 +36,12 @@ deployment and in-place repair remain separately authorized.
    descriptor; path-string check-then-use is insufficient.
 8. Before mutation, all candidates and root targets are preflighted. Root
    directory roles must be real non-symlink directories. Root `.nodb`/`.nodir`
-   and `wepp/runs/<basename>` targets must be regular non-symlink files. Missing,
+   and ordinary-mode `wepp/runs/<basename>` targets must be regular non-symlink
+   files. Missing,
    dangling, external, socket/device/FIFO, or symlink root targets fail.
+   Removal mode is the exception: the intentionally excluded root
+   `wepp/runs/<basename>` target is neither required nor accessed; preflight
+   verifies the child entry is a symlink and records its exact raw link text.
 9. At a recognized child role, a symlink is normalized. A supported
    materialized directory/file of the role's expected type is retained. Any
    other type fails. Contrast `wepp/runs` regular files are retained; symlinks
@@ -56,6 +60,17 @@ deployment and in-place repair remain separately authorized.
     the destination. Failures propagate through the existing exception boundary
     as a failed `fork_rq` job and `FORK_FAILED`; no response schema or queue edge
     changes.
+13. When `skip_wepp_runs_output=True` or `undisturbify=True`, rsync continues to
+    exclude root `wepp/runs` and `wepp/output`. Copied symlink entries below
+    `_pups/omni/contrasts/<child>/wepp/runs/` are therefore removed during the
+    same transaction instead of being retained as dangling links. Regular
+    materialized contrast-run files remain unchanged. Removal atomically moves
+    each candidate to a collision-safe quarantine name before verifying the
+    quarantined device, inode, symlink type, and exact raw link text. A mismatch
+    is restored without deleting the moved entry and fails the fork. Verified
+    quarantines are retained through full validation, restored exactly during
+    rollback, and deleted only at commit. No quarantine residue is permitted on
+    successful completion or an uncontended rollback.
 
 ## Exact Role Matrix
 
@@ -84,6 +99,8 @@ Every direct symlink entry
 `_pups/omni/contrasts/<child>/wepp/runs/<basename>` maps to root
 `wepp/runs/<basename>` and canonical target `../../../../../../wepp/runs/<basename>`.
 Basenames must be a single non-empty component other than `.` or `..`.
+In skip/undisturbify mode, those symlink entries are removed because their root
+targets are intentionally excluded; in ordinary forks they are retargeted.
 
 ## Compatibility and Rejected Alternatives
 
@@ -107,7 +124,14 @@ grandparent links. Rewriting every link widens disclosure/corruption risk.
 - Invalid child names/types, dangling/external/special root roles, supported
   materialized entries, unrelated links, temp collisions/residue, rollback,
   retry-to-fresh-destination, and ordering before NoDb rewrite.
+- Skip/undisturbify removal of copied contrast-run symlinks, retention of
+  regular materialized entries, no root-target access, and rollback restoring
+  exact raw link text. Cover effective removal mode separately for
+  `(skip=True, undisturbify=False)`, `(skip=False, undisturbify=True)`, and both
+  true, plus ordinary retargeting when both are false. Deterministically swap a
+  candidate symlink for a regular file immediately before quarantine; its bytes
+  and original name must survive, the fork must fail closed, earlier actions
+  must roll back, and no temporary/quarantine residue may remain.
 
 Two independent read-only reviews and disposition are required before this
 documentation-only checkpoint is committed as the implementation ancestor.
-

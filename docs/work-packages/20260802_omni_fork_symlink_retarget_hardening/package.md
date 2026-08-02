@@ -33,6 +33,8 @@ archive locking, queue wiring, production repair, and deployment are excluded.
   newest destination without requiring old targets to exist.
 - [ ] Rsync flags, exclusions, heartbeat behavior, and unrelated links remain
   unchanged.
+- [ ] Skip/undisturbify forks remove copied contrast-run symlinks whose root
+  targets were intentionally excluded, without deleting materialized files.
 - [ ] Unsafe or ambiguous recognized entries fail explicitly before fork
   success; old targets are never followed or materialized.
 - [ ] Targeted and full tests, docs lint, correctness, QA, and security reviews

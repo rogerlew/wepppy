@@ -74,6 +74,10 @@ Module: `wepppy/rq/project_rq.py`
     links remain unchanged and old targets are never followed or materialized.
   - Publishes copy stage transitions, a replaceable elapsed-time heartbeat every 10 seconds, and bounded final summary/error tails to `<runid>:fork`.
   - When `skip_wepp_runs_output=True` (or when `undisturbify=True`), excludes `wepp/runs` and `wepp/output` from content copy, then creates those directories in the destination run.
+  - Approved contract (SURF-04A; implementation pending): in that skip mode,
+    remove copied Omni contrast `wepp/runs` symlinks whose root targets were
+    intentionally excluded; regular materialized contrast files remain
+    unchanged.
   - Rewrites root `.nodb` paths, clears copied `_run_group`/`_group_name`
     identity for the interactive destination, removes copied Batch Runner
     `run_metadata.json`, and clears locks, `READONLY`, and `PUBLIC` markers.
