@@ -42,6 +42,8 @@ archives.
   redirecting temporary-link creation or replacement outside the fork.
 - Root-only skip exclusions leave copied contrast `wepp/runs` symlinks without
   their intentionally excluded targets unless normalization removes them.
+- Omni collections contain canonical `build_report.ndjson` metadata alongside
+  child directories, requiring one exact regular-file exception.
 
 ## Decision Log
 
@@ -103,6 +105,9 @@ multi-generation/missing-target repair, descriptor-relative containment,
 materialized entries, unrelated links, transaction rollback, no temp residue,
 old-target non-access, and ordering before NoDb rewrite. Use monkeypatchable
 helpers or synchronization events, never sleeps.
+Exercise the exact collection metadata exception in both collections: preserve
+regular `build_report.ndjson` byte-for-byte and reject other regular names plus
+same-name symlink and special entries.
 
 ## Milestone 3: Implementation
 

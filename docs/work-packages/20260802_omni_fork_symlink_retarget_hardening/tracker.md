@@ -18,6 +18,8 @@
   review with independent contract and security approval.
 - [ ] Commit the amendment as a standalone ancestor and complete adversarial
   regression coverage.
+- [x] Ratify the exact `build_report.ndjson` metadata exception with independent
+  contract and security approval and complete its regression matrix.
 - [ ] Run targeted/full validation and final reviews.
 - [ ] Close locally without deployment.
 
@@ -32,6 +34,8 @@
 - **2026-08-02 19:50 UTC** – In skip/undisturbify mode, remove copied contrast
   `wepp/runs` symlinks transactionally because their destination root targets
   are intentionally excluded; retain regular materialized files.
+- **2026-08-02 20:45 UTC** – Retain only the canonical collection metadata file
+  `build_report.ndjson`; reject all other non-directory collection entries.
 
 ## Validation
 

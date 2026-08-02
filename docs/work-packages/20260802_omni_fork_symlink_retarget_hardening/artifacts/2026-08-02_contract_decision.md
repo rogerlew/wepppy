@@ -29,7 +29,9 @@ deployment and in-place repair remain separately authorized.
    special entry.
 6. Inventory accepts only immediate child names returned by descriptor-relative
    directory iteration. `.`/`..`, slash, backslash, NUL, symlinked child
-   directories, and non-directory child entries are rejected.
+   directories, and non-directory child entries are rejected, except the
+   canonical regular metadata file `build_report.ndjson`, which is retained
+   unchanged. No other collection-level regular filename is allowed.
 7. Destination root and every ancestor are opened descriptor-relatively with
    directory and no-follow semantics. Candidate `lstat`, temporary-link
    creation, replacement, and validation use the held child directory
@@ -132,6 +134,9 @@ grandparent links. Rewriting every link widens disclosure/corruption risk.
   candidate symlink for a regular file immediately before quarantine; its bytes
   and original name must survive, the fork must fail closed, earlier actions
   must roll back, and no temporary/quarantine residue may remain.
+- Byte-for-byte retention of regular `build_report.ndjson` under both
+  collections; rejection of another regular filename and of same-name symlink
+  or special entries under both collections.
 
 Two independent read-only reviews and disposition are required before this
 documentation-only checkpoint is committed as the implementation ancestor.

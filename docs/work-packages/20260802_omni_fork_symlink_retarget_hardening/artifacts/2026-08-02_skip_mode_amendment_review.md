@@ -33,3 +33,12 @@ All checkpoint findings are accepted and incorporated into the normative
 contract, ExecPlan, package tracker, durable guide, and required evidence. The
 amendment is approved for a standalone documentation ancestor commit before
 its implementation is committed.
+
+## Metadata Exception Addendum
+
+Final review identified canonical `build_report.ndjson` files at collection
+level. Contract and security reviewers approved an exact regular-file allowlist
+with no remaining medium/high findings after evidence was expanded to both
+collections, byte-exact retention, and rejection of other names, symlinks, and
+special entries. This addendum must be committed before the matching
+implementation.
