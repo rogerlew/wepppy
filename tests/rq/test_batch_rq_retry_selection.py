@@ -369,6 +369,7 @@ def test_classify_batch_run_state_marks_base_climate_drift_retry_eligible(
         TaskEnum.fetch_openet_ts.value,
         TaskEnum.run_wepp_hillslopes.value,
         TaskEnum.run_wepp_watershed.value,
+        TaskEnum.run_watar.value,
         TaskEnum.run_omni_scenarios.value,
     ]
     assert summary["base_stale"] == 1
@@ -430,7 +431,8 @@ def test_run_batch_project_resyncs_base_climate_and_invalidates_downstream_times
         TaskEnum.fetch_openet_ts.value: 4,
         TaskEnum.run_wepp_hillslopes.value: 5,
         TaskEnum.run_wepp_watershed.value: 6,
-        TaskEnum.run_omni_scenarios.value: 7,
+        TaskEnum.run_watar.value: 7,
+        TaskEnum.run_omni_scenarios.value: 8,
     }
 
     monkeypatch.setattr(

@@ -207,7 +207,8 @@ describe("BatchRunner controller", () => {
             state: {
                 run_directives: [
                     { slug: "fetch_dem", label: "Fetch DEM", enabled: true },
-                    { slug: "build_channels", label: "Build Channels", enabled: false }
+                    { slug: "build_channels", label: "Build Channels", enabled: false },
+                    { slug: "run_watar", label: "Run WATAR", enabled: true }
                 ],
                 metadata: {},
                 resources: {}
@@ -344,12 +345,14 @@ describe("BatchRunner controller", () => {
             body: {
                 run_directives: [
                     { slug: "fetch_dem", label: "Fetch DEM", enabled: true },
-                    { slug: "build_channels", label: "Build Channels", enabled: true }
+                    { slug: "build_channels", label: "Build Channels", enabled: true },
+                    { slug: "run_watar", label: "Run WATAR", enabled: true }
                 ],
                 snapshot: {
                     run_directives: [
                         { slug: "fetch_dem", label: "Fetch DEM", enabled: true },
-                        { slug: "build_channels", label: "Build Channels", enabled: true }
+                        { slug: "build_channels", label: "Build Channels", enabled: true },
+                        { slug: "run_watar", label: "Run WATAR", enabled: true }
                     ],
                     metadata: {},
                     resources: {}
@@ -366,9 +369,18 @@ describe("BatchRunner controller", () => {
         expect(postJsonMock).toHaveBeenCalledWith("/batch/_/demo/run-directives", {
             run_directives: {
                 fetch_dem: true,
-                build_channels: true
+                build_channels: true,
+                run_watar: true
             }
         });
+    });
+
+    test("renders WATAR through the generic directive UI", () => {
+        const directive = controller.runDirectiveList.querySelector('input[data-run-directive="run_watar"]');
+
+        expect(directive).not.toBeNull();
+        expect(directive.checked).toBe(true);
+        expect(directive.closest("label").textContent).toContain("Run WATAR");
     });
 
     test("runBatch posts to RQ endpoint and emits start event", async () => {

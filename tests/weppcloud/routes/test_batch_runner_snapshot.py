@@ -2,6 +2,7 @@ from __future__ import annotations
 
 import pytest
 
+from wepppy.nodb.redis_prep import TaskEnum
 from wepppy.weppcloud.routes.batch_runner.batch_runner_bp import (
     _build_batch_runner_snapshot,
 )
@@ -38,3 +39,21 @@ def test_build_batch_runner_snapshot_minimal():
     ]
     assert snapshot["runid_template"] is None
     assert snapshot["resources"] == {}
+
+
+@pytest.mark.unit
+def test_build_batch_runner_snapshot_exposes_watar_directive():
+    class RunnerStub:
+        DEFAULT_TASKS = [TaskEnum.run_watar]
+        batch_name = "demo"
+        base_config = "disturbed9002_wbt"
+        geojson_state = None
+        runid_template_state = None
+        rq_job_ids = {}
+        run_directives = {TaskEnum.run_watar: True}
+
+    snapshot = _build_batch_runner_snapshot(RunnerStub())
+
+    assert snapshot["run_directives"] == [
+        {"slug": "run_watar", "label": "Run WATAR", "enabled": True}
+    ]

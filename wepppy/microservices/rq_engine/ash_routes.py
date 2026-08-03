@@ -11,6 +11,7 @@ from fastapi.responses import JSONResponse
 from rq import Queue
 from starlette.datastructures import FormData, UploadFile
 
+from wepppy.all_your_base.dateutils import YearlessDate
 from wepppy.config.redis_settings import RedisDB, redis_connection_kwargs
 from wepppy.nodb.mods.ash_transport import Ash, AshSpatialMode
 from wepppy.nodb.redis_prep import RedisPrep, TaskEnum
@@ -302,10 +303,20 @@ async def run_ash(runid: str, config: str, request: Request) -> JSONResponse:
             if ash.ash_load_fn is None:
                 return error_response("Expecting ashload map", status_code=400)
 
-        ash.ash_depth_mode = ash_depth_mode
-
-        if getattr(ash, "run_group", "") == "batch" or _is_base_project_context(runid, config):
+        is_batch_base = (
+            getattr(ash, "run_group", "") == "batch"
+            or _is_base_project_context(runid, config)
+        )
+        if is_batch_base:
+            with ash.locked():
+                if fire_date is not None:
+                    ash.fire_date = YearlessDate.from_string(str(fire_date))
+                ash.ini_white_ash_depth_mm = float(ini_white_ash_depth_mm)
+                ash.ini_black_ash_depth_mm = float(ini_black_ash_depth_mm)
+                ash._ash_depth_mode = ash_depth_mode
             return JSONResponse({"message": "Set ash inputs for batch processing"})
+
+        ash.ash_depth_mode = ash_depth_mode
 
         prep = RedisPrep.getInstance(wd)
         prep.remove_timestamp(TaskEnum.run_watar)

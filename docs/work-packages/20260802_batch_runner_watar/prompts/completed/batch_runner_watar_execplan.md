@@ -27,16 +27,15 @@ paths. Merely adding a directive or mocked call is not sufficient.
   `Ash.run_ash`, `run_ash_rq`, output, locking, and completion timestamp paths.
 - [x] (2026-08-03 01:33 UTC) Scaffolded the package, tracker, plan, security
   review placeholder, and backlog entry.
-- [ ] Complete and commit the contract-first checkpoint with operator approval
-  and two independent review dispositions. (Drafted at 2026-08-03 01:52 UTC;
-  dual reviews passed at 2026-08-03 02:20 UTC; ancestor commit pending.)
-- [ ] Add focused failing tests before production implementation.
-- [ ] Implement optional WATAR task registration, dependency enforcement,
+- [x] (2026-08-03 02:25 UTC) Completed and committed the operator-approved,
+  dual-reviewed contract-first checkpoint as standalone ancestor `7f69e6654`.
+- [x] (2026-08-03 02:56 UTC) Added focused failing tests before production implementation.
+- [x] (2026-08-03 02:56 UTC) Implemented optional WATAR task registration, dependency enforcement,
   Ash/AshPost execution, retry classification, and UI integration.
-- [ ] Update queue graph and job catalog if job wiring changes.
-- [ ] Run focused and broad validation, generated-output acceptance, staging
+- [x] (2026-08-03 02:56 UTC) Regenerated and validated the unchanged 144-edge RQ graph/catalog after the enqueue-site file changed.
+- [x] (2026-08-03 02:56 UTC) Ran focused and broad validation, generated-output acceptance, staging
   smoke, security review, and correctness review.
-- [ ] Update living documents and close or hand off the package.
+- [x] (2026-08-03 02:56 UTC) Updated living documents and closed the package with one low staging residual.
 
 ## Surprises & Discoveries
 
@@ -92,10 +91,16 @@ paths. Merely adding a directive or mocked call is not sufficient.
 
 ## Outcomes & Retrospective
 
-Discovery and planning are complete. The repository already contains most
-primitives needed for a small integration, but the intended UI/NoDb/RQ behavior
-must first be ratified under the contract-first standard. No production code has
-been changed. Generated-output and staging outcomes remain pending.
+The approved integration is complete. Batch Runner now treats WATAR plus
+AshPost as an optional post-WEPP stage, uses timestamp-authoritative retries,
+repairs and validates interchange inputs under ordered combined locks, persists
+batch-base runtime inputs, and exposes the existing generic directive in the
+UI. Generated acceptance produced current Ash/AshPost output for a burned leaf
+and cataloged null-state completion for an unburned leaf. The full Python and
+frontend suites, RQ graph, docs, exception policy, security review, and
+correctness review passed. The remaining low residual is that staging invoked
+the production leaf method directly with multiprocessing disabled rather than
+through a live RQ worker.
 
 ## Context and Orientation
 
@@ -365,3 +370,14 @@ Plan revision note, 2026-08-03 02:20 UTC: Both independent reviewers confirmed
 that the amended SURF-02C/GOV-00A-M1F checkpoint has no remaining high or medium
 findings. The standalone ancestor commit is the only remaining pre-implementation
 gate.
+
+Plan revision note, 2026-08-03 02:25 UTC: Committed the accepted checkpoint as
+standalone ancestor `7f69e6654`; tests-first production implementation is now
+authorized against that revision.
+
+Plan revision note, 2026-08-03 02:56 UTC: Completed implementation and
+generated-output acceptance. Independent review found and drove correction of
+batch-base runtime-input persistence and enqueue-site graph provenance. Final
+security and correctness verdicts pass with no open high/medium findings; full
+pytest passed (`5800 passed, 61 skipped`) and the package is closed with one low
+live-worker staging residual.

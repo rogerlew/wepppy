@@ -77,37 +77,6 @@ Feedback mechanisms:
 
 Work packages that are scoped but not yet started. Dependencies and prerequisites should be noted.
 
-### Batch Runner WATAR Integration
-
-**Proposed**: 2026-08-02
-**Size**: Medium-High (3-5 focused sessions plus staging verification)
-**Priority**: High
-**Security impact**: `high` (worker execution, retry/completion classification,
-run-tree mutation, locking, and possible RQ dependency changes)
-**Link**: [docs/work-packages/20260802_batch_runner_watar/](docs/work-packages/20260802_batch_runner_watar/)
-**Description**: Add ash transport (WATAR), including required AshPost
-aggregation/catalog publication, as an optional Batch Runner leaf stage.
-WATAR-enabled leaves run only after WEPP and its required interchange outputs
-complete, expose `Run WATAR` through the existing directive/progress UI, and
-participate in timestamp-based partial retry without affecting old or non-WATAR
-batches.
-
-**Scope**:
-
-- Register `TaskEnum.run_watar` in Batch Runner directives, optional completion,
-  runstate, and retry selection.
-- Keep Ash hillslope simulation plus AshPost aggregation/version/catalog output
-  in one completion stage; post failure must remain retry eligible.
-- Consume existing persisted `Ash` base-project inputs without changing model
-  parameterization.
-- Add dependency, interruption, backward-compatibility, UI, and generated-output
-  evidence.
-- Complete the contract-first ancestor, queue/security reviews, and staging
-  job-tree validation before rollout.
-
-**Next Steps**: Ratify and commit the operator-approved contract checkpoint with
-two independent reviews before any production implementation edits.
-
 ### Run Archive Consistency and Symlink Hardening
 
 **Proposed**: 2026-08-02
@@ -926,6 +895,27 @@ the remaining-run controller plan has no next controller milestone.
 ---
 
 ## ✅ Done
+
+### Batch Runner WATAR Integration ✅
+
+**Completed**: 2026-08-03
+
+**Status**: ✅ **COMPLETE; LIVE WORKER-POOL OBSERVATION IS A LOW RESIDUAL**
+
+**Link**: [docs/work-packages/20260802_batch_runner_watar/](docs/work-packages/20260802_batch_runner_watar/)
+
+**Summary**: Integrated WATAR plus AshPost as an optional post-WEPP Batch
+Runner stage with generic directive/progress UI support, timestamp-authoritative
+retry selection, ordered combined NoDir locks, interchange repair/validation,
+climate invalidation, old-state compatibility, and durable batch-base runtime
+inputs. Generated acceptance covered data-producing and legitimate no-data
+leaves with catalog/timestamp evidence and non-default inputs. Full Python and
+frontend suites, the current 144-edge RQ graph, documentation gates, and
+independent correctness/security reviews passed with no open high/medium
+findings. A live RQ worker-pool staging observation remains a low confidence
+follow-up; no new RQ topology was introduced.
+
+---
 
 ### WBT Conditioning Success Diagnostics (DOM-05B) ✅
 

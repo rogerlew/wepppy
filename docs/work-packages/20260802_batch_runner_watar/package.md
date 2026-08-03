@@ -1,6 +1,6 @@
 # Batch Runner WATAR Integration
 
-**Status**: Open (2026-08-03 UTC)
+**Status**: Closed (2026-08-03 UTC)
 **Timezone**: UTC
 **Stable ID**: SURF-02C / GOV-00A-M1F
 
@@ -86,27 +86,27 @@ WATAR timestamp is missing.
 
 ## Success Criteria
 
-- [ ] The accepted contract checkpoint defines WATAR eligibility, ordering,
+- [x] The accepted contract checkpoint defines WATAR eligibility, ordering,
   retries, backward compatibility, and UI behavior before production edits.
-- [ ] A WATAR-enabled base project exposes a `Run WATAR` directive in the Batch
+- [x] A WATAR-enabled base project exposes a `Run WATAR` directive in the Batch
   Runner UI; non-WATAR leaves do not become permanently retry eligible.
-- [ ] WATAR cannot execute unless required WEPP work and interchange artifacts
+- [x] WATAR cannot execute unless required WEPP work and interchange artifacts
   are complete, and an explicit diagnostic identifies dependency failure.
-- [ ] A leaf is not timestamped complete when `Ash.run_ash` succeeds only through
+- [x] A leaf is not timestamped complete when `Ash.run_ash` succeeds only through
   hillslope simulation but `AshPost.run_post` fails; retry regenerates or
   resumes WATAR-owned post outputs without rerunning completed WEPP work.
-- [ ] A timestamp-complete WATAR stage is skipped on retry; failed or
+- [x] A timestamp-complete WATAR stage is skipped on retry; failed or
   timestamp-missing WATAR work is selected and rerun without repeating unrelated
   completed upstream stages.
-- [ ] WATAR input changes made in the base project before leaf initialization
+- [x] WATAR input changes made in the base project before leaf initialization
   propagate through cloning; policy for changes after leaf initialization is
   explicitly ratified and regression-tested.
-- [ ] Generated leaf evidence includes `TaskEnum.run_watar`, per-hillslope ash
+- [x] Generated leaf evidence includes `TaskEnum.run_watar`, per-hillslope ash
   output, post-processing output, and runstate completion for a data-producing
   leaf, plus null-state/catalog success evidence for a no-data leaf.
-- [ ] Focused Python and JavaScript tests, full applicable quality gates, queue
+- [x] Focused Python and JavaScript tests, full applicable quality gates, queue
   graph validation, security review, and independent correctness review pass.
-- [ ] Batch Runner, ash transport, route, and operator documentation are current.
+- [x] Batch Runner, ash transport, route, and operator documentation are current.
 
 ## Parameterization ADR Gate
 
@@ -117,7 +117,8 @@ WATAR timestamp is missing.
 - **ADR links**: existing scientific context remains in
   `docs/adrs/ADR-0022-alex-static-ash-transport-increment.md`; this package does
   not amend it.
-- **Decision provenance captured**: pending contract-decision checkpoint.
+- **Decision provenance captured**: operator-approved SURF-02C checkpoint at
+  ancestor `7f69e6654`.
 
 ## Dependencies
 
@@ -198,5 +199,19 @@ WATAR timestamp is missing.
 
 ## Follow-up Work
 
-Record only discoveries that are outside the bounded integration. Do not absorb
-scientific parameter changes or general Batch Runner refactors into this package.
+- A low-severity staging gap remains: generated acceptance exercised the
+  production leaf stage directly with Ash multiprocessing disabled rather than
+  through a live RQ worker process. Unit, integration, full-suite, graph, and
+  independent review evidence passed; production observation can close that
+  operational confidence gap without changing this contract.
+
+## Closeout Summary
+
+Delivered optional `run_watar` Batch Runner execution after WEPP, combined
+NoDir locking and interchange validation, Ash/AshPost timestamp-authoritative
+retry semantics, generic UI integration, old-state compatibility, climate
+invalidation, and durable batch-base Ash runtime inputs. Generated acceptance
+covered both data-producing and legitimate no-data leaves, including
+non-default persisted inputs. Final gates passed with 5,800 tests and 61 skips,
+105 frontend suites and 756 tests, current 144-edge RQ graph artifacts, and no
+open high/medium correctness or security findings.

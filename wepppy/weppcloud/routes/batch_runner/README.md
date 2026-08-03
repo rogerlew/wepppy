@@ -33,6 +33,7 @@ The batch runner feature now lives as a proof-of-concept that stitches together 
 - Each batch child start clears NoDb cache and locks for its composite run id before loading `RedisPrep` and controllers, so stale controller locks from canceled attempts do not block reused-leaf retries.
 - Before enqueueing child jobs, the parent Run Batch clears exact path-scoped runtime locks for selected leaves after active-job preflight, so dead-worker locks do not block retry while same-named leaves in other batches are left untouched.
 - Before watershed execution, a retry ensures hillslope interchange outputs exist or can be rebuilt from raw hillslope outputs, so interrupted conversions do not leave `H.pass.parquet` or `H.wat.parquet` missing after the hillslope task timestamp is set.
+- When a leaf contains `ash.nodb`, the generic `Run WATAR` directive adds a post-WEPP stage. It repairs and validates the required hillslope/watershed interchange files, runs the persisted Ash configuration and AshPost, and remains retry eligible until `run_watar` is timestamped.
 - SBS uploads run `sbs_map_sanity_check` and capture burn-class pixel counts for display in the summary pane.
 
 ### `WatershedCollection`
@@ -53,7 +54,8 @@ The batch runner feature now lives as a proof-of-concept that stitches together 
 
 ## Current Constraints & Gaps
 - Progress reporting is intentionally coarse (run ID plus emoji state per task); per-run failure details surface in the status stream and `runs/<runid>/run_metadata.json`.
-- Runstate depends on `RedisPrep` status for each run directory and marks missing runs as retry-eligible. RAP/OpenET timestamps are required only when the corresponding optional NoDb files exist.
+- Runstate depends on `RedisPrep` status for each run directory and marks missing runs as retry-eligible. RAP/OpenET/WATAR timestamps are required only when the corresponding optional NoDb files exist.
+- Existing leaves do not resync Ash settings from `_base`; operators must enable **Remove existing files** after changing Ash inputs. Climate resync does invalidate `run_watar` because WATAR consumes WEPP results derived from climate.
 - Minimal input hardening: feature flag + admin check exist, but file validation stops at GeoJSON semantics.
 
 ## Next Steps (guided)

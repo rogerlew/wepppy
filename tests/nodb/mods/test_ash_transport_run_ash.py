@@ -207,7 +207,7 @@ def ash_runtime(monkeypatch: pytest.MonkeyPatch, tmp_path: Path, ash_module):
 
     class DummyPrep:
         def timestamp(self, _key) -> None:
-            return None
+            post_calls.append(("timestamp", _key))
 
     class DummyRedisPrep:
         @staticmethod
@@ -324,3 +324,46 @@ def test_run_ash_uses_direct_cli_when_path_outside_wd(ash_runtime, monkeypatch: 
 
     assert cli_reads == [outside_cli_path]
     assert ("run",) in post_calls
+
+
+def test_run_ash_does_not_timestamp_when_ashpost_fails(
+    ash_runtime,
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    ash_module, dummy_ash, wd, post_calls = ash_runtime
+
+    class DummyClimate:
+        cli_path = "/tmp/external/example.cli"
+        input_years = 3
+
+    class DummyClimateFile:
+        def __init__(self, _path: str):
+            pass
+
+        def as_dataframe(self, calc_peak_intensities: bool = False):
+            return object()
+
+    class FailingAshPost:
+        @classmethod
+        def getInstance(cls, _wd: str):
+            return cls()
+
+        def run_post(self) -> None:
+            raise RuntimeError("ash post failed")
+
+    import wepppy.nodb.mods.ash_transport as ash_pkg
+
+    monkeypatch.setattr(ash_module.Climate, "getInstance", lambda _wd: DummyClimate())
+    monkeypatch.setattr(ash_module, "ClimateFile", DummyClimateFile)
+    monkeypatch.setattr(ash_pkg, "AshPost", FailingAshPost)
+    (wd / "ashpost.nodb").touch()
+
+    with pytest.raises(RuntimeError, match="ash post failed"):
+        ash_module.Ash.run_ash(
+            dummy_ash,
+            fire_date="8/4",
+            ini_white_ash_depth_mm=3.0,
+            ini_black_ash_depth_mm=5.0,
+        )
+
+    assert not any(call[0] == "timestamp" for call in post_calls)

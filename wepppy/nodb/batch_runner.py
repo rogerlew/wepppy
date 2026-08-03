@@ -15,10 +15,11 @@ from os.path import split as _split
 
 import re
 from copy import deepcopy
+from contextlib import ExitStack
 from pathlib import Path
 import shutil
 import time
-from typing import Any, Dict, Iterable, List, Optional, Tuple, Mapping, ClassVar
+from typing import Any, Dict, Iterable, List, Optional, Tuple, Mapping, ClassVar, Sequence, Literal
 
 from wepppy.all_your_base.geo import raster_stacker
 from wepppy.topo.watershed_collection import WatershedCollection, WatershedFeature
@@ -34,6 +35,7 @@ from wepppy.nodb.core import (
 )
 from wepppy.nodb.mods.openet.openet_ts import OpenET_TS
 from wepppy.nodb.mods.rap.rap_ts import RAP_TS
+from wepppy.nodb.mods.ash_transport import Ash
 from wepppy.nodb.wepp_nodb_post_utils import (
     activate_query_engine_for_run,
     ensure_hillslope_interchange,
@@ -59,7 +61,7 @@ __all__ = [
 ]
 
 _SBS_UPDATE_UNSET = object()
-_BATCH_LOCK_SCOPE = "effective_root_path"
+_BATCH_LOCK_SCOPE: Literal["effective_root_path"] = "effective_root_path"
 _BATCH_LOCK_RETRY_ATTEMPTS = 3
 _BATCH_LOCK_RETRY_SECONDS = 1.0
 _MISSING_STATE_VALUE = object()
@@ -194,6 +196,47 @@ def _run_with_directory_root_lock(
             time.sleep(retry_delay_seconds * attempt)
 
 
+def _run_with_directory_roots_lock(
+    wd: str,
+    roots: Sequence[str],
+    callback,
+    *,
+    purpose: str,
+):
+    lock_roots = tuple(sorted({str(root) for root in roots}))
+    retry_attempts = max(1, int(_BATCH_LOCK_RETRY_ATTEMPTS))
+    retry_delay_seconds = max(0.0, float(_BATCH_LOCK_RETRY_SECONDS))
+
+    for attempt in range(1, retry_attempts + 1):
+        for root in lock_roots:
+            _require_directory_root(wd, root)
+        try:
+            with ExitStack() as stack:
+                for root in lock_roots:
+                    scope_token = nodir_maintenance_lock_scope_token(
+                        wd,
+                        root,
+                        scope=_BATCH_LOCK_SCOPE,
+                    )
+                    stack.enter_context(
+                        nodir_maintenance_lock(
+                            wd,
+                            root,
+                            purpose=f"{purpose}/{root}",
+                            scope=_BATCH_LOCK_SCOPE,
+                            scope_token=scope_token,
+                        )
+                    )
+                for root in lock_roots:
+                    _require_directory_root(wd, root)
+                return callback()
+        except NoDirError as exc:
+            if exc.code != "NODIR_LOCKED" or attempt >= retry_attempts:
+                raise
+            if retry_delay_seconds > 0:
+                time.sleep(retry_delay_seconds * attempt)
+
+
 def _nodb_state_payload(document: Dict[str, Any]) -> Dict[str, Any]:
     state = document.get("py/state")
     if isinstance(state, dict):
@@ -245,6 +288,7 @@ class BatchRunner(NoDbBase):
         TaskEnum.fetch_openet_ts,
         TaskEnum.run_wepp_hillslopes,
         TaskEnum.run_wepp_watershed,
+        TaskEnum.run_watar,
         TaskEnum.run_omni_scenarios,
         TaskEnum.run_omni_contrasts,
     )
@@ -297,6 +341,10 @@ class BatchRunner(NoDbBase):
             instance._run_directives = {
                 TaskEnum(k): v for k, v in instance._run_directives.items()
             }
+        else:
+            instance._run_directives = {}
+        for task in cls.DEFAULT_TASKS:
+            instance._run_directives.setdefault(task, True)
         return instance
 
     # ------------------------------------------------------------------
@@ -590,7 +638,66 @@ class BatchRunner(NoDbBase):
             )
             activate_query_engine_for_run(wepp, logger)
 
+        ash = Ash.tryGetInstance(runid_wd)
+        if ash is not None and self.is_task_enabled(TaskEnum.run_watar) \
+            and prep[str(TaskEnum.run_watar)] is None:
+            self._run_watar_stage(runid_wd, prep, ash, wepp, climate, logger)
+
         return tuple(locks_cleared) if locks_cleared else ()
+
+    def _run_watar_stage(
+        self,
+        runid_wd: str,
+        prep: RedisPrep,
+        ash: Ash,
+        wepp: Wepp,
+        climate: Climate,
+        logger: logging.Logger,
+    ) -> None:
+        required_tasks = (
+            TaskEnum.run_wepp_hillslopes,
+            TaskEnum.run_wepp_watershed,
+        )
+        missing_tasks = [task.value for task in required_tasks if prep[str(task)] is None]
+        if missing_tasks:
+            raise RuntimeError(
+                "WATAR requires completed WEPP tasks: " + ", ".join(missing_tasks)
+            )
+        if climate.is_single_storm:
+            raise RuntimeError("WATAR does not support single-storm climate runs")
+
+        def _run() -> None:
+            logger.info("ensuring WEPP interchange outputs before WATAR")
+            ensure_hillslope_interchange(wepp, climate, logger)
+            ensure_totalwatsed3(wepp, climate, logger)
+            ensure_watershed_interchange(wepp, climate, logger)
+
+            interchange_dir = Path(wepp.wepp_interchange_dir)
+            required_files = (
+                interchange_dir / "H.pass.parquet",
+                interchange_dir / "H.wat.parquet",
+                interchange_dir / "totalwatsed3.parquet",
+            )
+            missing_files = [str(path) for path in required_files if not path.exists()]
+            if missing_files:
+                raise RuntimeError(
+                    "WATAR requires completed WEPP interchange artifacts: "
+                    + ", ".join(missing_files)
+                )
+
+            logger.info("running WATAR and AshPost")
+            ash.run_ash(
+                str(ash.fire_date),
+                float(ash.ini_white_ash_depth_mm),
+                float(ash.ini_black_ash_depth_mm),
+            )
+
+        _run_with_directory_roots_lock(
+            runid_wd,
+            ("climate", "landuse", "watershed"),
+            _run,
+            purpose="batch-run-watar",
+        )
 
     def clear_retry_runtime_locks(
         self,
@@ -909,6 +1016,7 @@ class BatchRunner(NoDbBase):
     OPTIONAL_TASK_NODB_FILENAMES: ClassVar[Dict[TaskEnum, str]] = {
         TaskEnum.fetch_rap_ts: RAP_TS.filename,
         TaskEnum.fetch_openet_ts: OpenET_TS.filename,
+        TaskEnum.run_watar: Ash.filename,
     }
     BASE_PROJECT_RESYNC_RULES: ClassVar[Dict[str, Dict[str, Any]]] = {
         Climate.filename: {
@@ -943,6 +1051,7 @@ class BatchRunner(NoDbBase):
                 TaskEnum.fetch_openet_ts,
                 TaskEnum.run_wepp_hillslopes,
                 TaskEnum.run_wepp_watershed,
+                TaskEnum.run_watar,
                 TaskEnum.run_omni_scenarios,
             ),
         },

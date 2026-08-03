@@ -19,7 +19,12 @@ def _stub_auth(monkeypatch: pytest.MonkeyPatch) -> None:
     monkeypatch.setattr(ash_routes, "authorize_run_access", lambda claims, runid: None)
 
 
-def _stub_queue(monkeypatch: pytest.MonkeyPatch, *, job_id: str = "job-123") -> None:
+def _stub_queue(
+    monkeypatch: pytest.MonkeyPatch,
+    *,
+    job_id: str = "job-123",
+    enqueued_args: list[tuple] | None = None,
+) -> None:
     class DummyJob:
         id = job_id
 
@@ -28,6 +33,8 @@ def _stub_queue(monkeypatch: pytest.MonkeyPatch, *, job_id: str = "job-123") -> 
             pass
 
         def enqueue_call(self, *args, **kwargs):
+            if enqueued_args is not None:
+                enqueued_args.append(args[1])
             return DummyJob()
 
     class DummyRedis:
@@ -57,10 +64,14 @@ def _stub_ash(
     *,
     run_group: str = "",
     parsed_payload: dict | None = None,
-) -> None:
+):
     class DummyAsh:
         run_group = ""
         _ash_load_fn = None
+        fire_date = "8/4"
+        ini_white_ash_depth_mm = 5.0
+        ini_black_ash_depth_mm = 5.0
+        _ash_depth_mode = 1
 
         def parse_inputs(self, payload) -> None:
             if parsed_payload is not None:
@@ -76,7 +87,9 @@ def _stub_ash(
             return self._ash_load_fn
 
     DummyAsh.run_group = run_group
-    monkeypatch.setattr(ash_routes.Ash, "getInstance", lambda wd: DummyAsh())
+    ash = DummyAsh()
+    monkeypatch.setattr(ash_routes.Ash, "getInstance", lambda wd: ash)
+    return ash
 
 
 def test_run_ash_enqueues_job(monkeypatch: pytest.MonkeyPatch) -> None:
@@ -100,6 +113,33 @@ def test_run_ash_enqueues_job(monkeypatch: pytest.MonkeyPatch) -> None:
     assert response.json()["job_id"] == "job-55"
 
 
+def test_run_ash_standalone_missing_fire_date_preserves_worker_failure_input(
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    _stub_auth(monkeypatch)
+    enqueued_args: list[tuple] = []
+    _stub_queue(monkeypatch, enqueued_args=enqueued_args)
+    _stub_prep(monkeypatch)
+    ash = _stub_ash(monkeypatch)
+    monkeypatch.setattr(ash_routes, "get_wd", lambda runid: "/tmp/run")
+
+    with TestClient(rq_engine.app) as client:
+        response = client.post(
+            "/api/runs/run-1/cfg/run-ash",
+            json={
+                "ash_depth_mode": 1,
+                "ini_black_depth": 1.2,
+                "ini_white_depth": 2.3,
+            },
+        )
+
+    assert response.status_code == 200
+    assert enqueued_args == [("run-1", None, 2.3, 1.2)]
+    assert ash.fire_date == "8/4"
+    assert ash.ini_white_ash_depth_mm == 5.0
+    assert ash.ini_black_ash_depth_mm == 5.0
+
+
 def test_run_ash_requires_depth_mode(monkeypatch: pytest.MonkeyPatch) -> None:
     _stub_auth(monkeypatch)
     _stub_ash(monkeypatch)
@@ -120,7 +160,7 @@ def test_run_ash_batch_returns_input_message_without_enqueue(
     monkeypatch: pytest.MonkeyPatch,
 ) -> None:
     _stub_auth(monkeypatch)
-    _stub_ash(monkeypatch, run_group="batch")
+    ash = _stub_ash(monkeypatch, run_group="batch")
     monkeypatch.setattr(ash_routes, "get_wd", lambda runid: "/tmp/run")
 
     queue_called = {"called": False}
@@ -146,6 +186,7 @@ def test_run_ash_batch_returns_input_message_without_enqueue(
         response = client.post(
             "/api/runs/run-1/cfg/run-ash",
             json={
+                "fire_date": "9/17",
                 "ash_depth_mode": 1,
                 "ini_black_depth": 1.2,
                 "ini_white_depth": 2.3,
@@ -155,6 +196,38 @@ def test_run_ash_batch_returns_input_message_without_enqueue(
     assert response.status_code == 200
     assert response.json()["message"] == "Set ash inputs for batch processing"
     assert queue_called["called"] is False
+    assert str(ash.fire_date) == "9/17"
+    assert ash.ini_black_ash_depth_mm == 1.2
+    assert ash.ini_white_ash_depth_mm == 2.3
+    assert ash._ash_depth_mode == 1
+
+
+def test_run_ash_batch_persists_load_mode_as_normalized_depths(
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    _stub_auth(monkeypatch)
+    ash = _stub_ash(monkeypatch, run_group="batch")
+    monkeypatch.setattr(ash_routes, "get_wd", lambda runid: "/tmp/run")
+
+    with TestClient(rq_engine.app) as client:
+        response = client.post(
+            "/api/runs/run-1/cfg/run-ash",
+            json={
+                "fire_date": "7/11",
+                "ash_depth_mode": 0,
+                "ini_black_load": 2.2,
+                "ini_white_load": 6.2,
+                "field_black_bulkdensity": 0.22,
+                "field_white_bulkdensity": 0.31,
+            },
+        )
+
+    assert response.status_code == 200
+    assert response.json()["message"] == "Set ash inputs for batch processing"
+    assert str(ash.fire_date) == "7/11"
+    assert ash.ini_black_ash_depth_mm == pytest.approx(10.0)
+    assert ash.ini_white_ash_depth_mm == pytest.approx(20.0)
+    assert ash._ash_depth_mode == 0
 
 
 def test_run_ash_base_project_context_returns_input_message_without_enqueue(
