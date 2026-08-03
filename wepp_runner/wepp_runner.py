@@ -301,6 +301,12 @@ def _assert_hbp_supported_binary(binary_path, *, role):
 
 def _assert_pass_family_release_support(pass_family, *, wepp_bin):
     normalized = _normalize_pass_family(pass_family)
+    release_pass_family = infer_pass_family_for_wepp_bin(wepp_bin)
+    if release_pass_family == PASS_FAMILY_HBP:
+        # HBP-capable releases consume H*.hbp directly.  Treat their paired
+        # release sidecars as authoritative so stale persisted/config values
+        # cannot generate legacy H*.pass.dat run-file prompts.
+        return PASS_FAMILY_HBP
     if normalized != PASS_FAMILY_HBP:
         return normalized
 

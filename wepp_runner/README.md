@@ -56,6 +56,9 @@ Selection rule:
 - `wepp_runner` determines prompt contract from the selected watershed binary
   sidecar (`<binary>.json`).
 - sidecar absence implies legacy contract by default.
+- paired watershed/hillslope sidecars declaring `features.hbp_supported=true`
+  are authoritative for hillslope pass prompts: every run-file builder emits
+  `H*.hbp` even when a caller supplies a stale `legacy_ascii` setting.
 
 Implementation note:
 - this is implemented with one watershed template plus conditional placeholders

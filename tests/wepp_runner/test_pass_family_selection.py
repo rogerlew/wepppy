@@ -93,6 +93,34 @@ def test_infer_pass_family_returns_hbp_when_both_sidecars_declare_support(
     assert wepp_runner_module.infer_pass_family_for_wepp_bin("wepp_test") == "hbp"
 
 
+def test_hbp_release_sidecars_override_stale_legacy_pass_family(
+    tmp_path: Path, monkeypatch: pytest.MonkeyPatch
+) -> None:
+    bin_dir = tmp_path / "bin"
+    bin_dir.mkdir()
+    watershed_bin = bin_dir / "wepp_test"
+    hillslope_bin = bin_dir / "wepp_test_hill"
+    _write_binary(watershed_bin)
+    _write_binary(hillslope_bin)
+    _write_sidecar(watershed_bin, hbp_supported=True)
+    _write_sidecar(hillslope_bin, hbp_supported=True)
+    monkeypatch.setattr(wepp_runner_module, "wepp_bin_dir", str(bin_dir))
+
+    runs_dir = tmp_path / "runs"
+    runs_dir.mkdir()
+    wepp_runner_module.make_hillslope_run(
+        1,
+        10,
+        str(runs_dir),
+        pass_family="legacy_ascii",
+        wepp_bin="wepp_test",
+    )
+
+    lines = (runs_dir / "p1.run").read_text(encoding="ascii").splitlines()
+    assert "../output/H1.hbp" in lines
+    assert "../output/H1.pass.dat" not in lines
+
+
 def test_infer_pass_family_rejects_mixed_binary_support_flags(
     tmp_path: Path, monkeypatch: pytest.MonkeyPatch
 ) -> None:

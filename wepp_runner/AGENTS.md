@@ -137,3 +137,6 @@ python3 /workdir/wepp-forest/tools/compare_wepp_raw_outputs.py \
   - modern contract (`features.hbp_supported=true` sidecar): honors `features.mode2_master_pass_prompt_required` for the mode-2 master-pass prompt line, omits initial-condition placeholder, and includes impoundment output/data prompts (`pw0.imp`).
 - Prompt-contract selection is sidecar-driven and must remain deterministic:
   sidecar absence defaults to legacy behavior.
+- Paired watershed/hillslope sidecars declaring HBP support are authoritative
+  for pass-family selection. Run-file builders must emit `H*.hbp` even if a
+  persisted or configured caller value still says `legacy_ascii`.
