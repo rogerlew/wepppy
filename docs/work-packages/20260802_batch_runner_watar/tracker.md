@@ -6,9 +6,9 @@
 
 **Timezone**: UTC
 **Started**: 2026-08-03 01:33 UTC
-**Current phase**: Scoped / contract checkpoint pending
-**Last updated**: 2026-08-03 01:33 UTC
-**Next milestone**: Draft, approve, independently review, and commit the contract checkpoint
+**Current phase**: Contract checkpoint ready for standalone ancestor
+**Last updated**: 2026-08-03 02:20 UTC
+**Next milestone**: Commit checkpoint ancestor, then begin focused failing tests
 **Security impact**: high
 **Dedicated security review**: yes
 **Security artifact**: `docs/work-packages/20260802_batch_runner_watar/artifacts/2026-08-03_security_review.md`
@@ -34,12 +34,13 @@
 
 ### In Progress
 
-- [ ] None; implementation is blocked by the required contract-first ancestor.
+- [ ] Commit the accepted SURF-02C/GOV-00A-M1F checkpoint as a standalone ancestor.
 
 ### Blocked
 
 - [ ] Production edits are blocked until the operator-approved contract
   checkpoint and two review dispositions are committed as a standalone ancestor.
+- [ ] None after ancestor commit; production edits remain blocked until then.
 
 ### Done
 
@@ -50,11 +51,30 @@
   (2026-08-03 01:33 UTC)
 - [x] Scaffolded package, tracker, active ExecPlan, security placeholder, and
   project tracker entry. (2026-08-03 01:33 UTC)
+- [x] Drafted the contract decision and canonical field matrix under the
+  superseded REM-06 identity, then reclassified them as SURF-02C, with the
+  GOV-00A-M1F register amendment. (2026-08-03 01:52 UTC)
+- [x] Completed two independent read-only checkpoint reviews and recorded the
+  blocked disposition. (2026-08-03 02:00 UTC)
+- [x] Recorded Roger Lew's explicit authorization and amended governance,
+  timestamp-authoritative retry, no-data, old-state, exact prerequisite, lock,
+  and evidence contracts. (2026-08-03 02:10 UTC)
+- [x] Obtained dual post-fix confirmation with no remaining high/medium
+  findings. (2026-08-03 02:20 UTC)
 
 ## Timeline
 
 - **2026-08-03 01:33 UTC** - Package scoped from current Batch Runner and WATAR
   implementation evidence; no production code changed.
+- **2026-08-03 01:52 UTC** - Operator execution direction recorded; the
+  superseded REM-06/GOV-00A-M1F draft checkpoint entered dual review.
+- **2026-08-03 02:00 UTC** - Dual review found four blocking high issues:
+  enhancement authority, exact operator approval, retry authority, and AshPost
+  no-data semantics. Production implementation remains blocked.
+- **2026-08-03 02:10 UTC** - Roger Lew explicitly authorized the recommended
+  contract; all findings were amended for dual post-fix confirmation.
+- **2026-08-03 02:20 UTC** - Both independent reviewers confirmed no remaining
+  high/medium findings; checkpoint ready for standalone ancestor commit.
 
 ## Decisions Log
 

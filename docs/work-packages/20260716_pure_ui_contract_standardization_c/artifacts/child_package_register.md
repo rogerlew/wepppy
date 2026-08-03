@@ -1,7 +1,7 @@
 # Pure UI Contract Child Package Register
 
-**Register version**: 1.4 sequential controller-test execution
-**Last updated**: 2026-07-28 UTC
+**Register version**: 1.5 sequential controller-test execution
+**Last updated**: 2026-08-03 UTC
 **Authority**: Stable IDs define bounded inventory. They do not require a
 registry platform or make shared/governance packages prerequisites for testing
 one controller.
@@ -21,6 +21,8 @@ REM-03 and REM-04 are the registered authentication/session and browser-origin
 hardening remediations. REM-05 is the operator-authorized Channel Delineation
 selector remediation at
 `docs/work-packages/20260728_channel_depression_smoothing_fix/`.
+SURF-02C is the operator-authorized bounded Batch Runner WATAR enhancement at
+`docs/work-packages/20260802_batch_runner_watar/`.
 
 ## Boundary and Review Rules
 
@@ -108,6 +110,12 @@ milestone proposed only for REM-05. It requires its own dual review,
 disposition, and standalone ancestor. It borrows only the finite DOM-05
 depression-smoothing propagation boundary and cannot advance DOM-05.
 
+`GOV-00A-M1F` is the separately closable bounded-enhancement governance
+milestone proposed only for SURF-02C. It requires its own dual review,
+disposition, post-fix confirmation, and standalone ancestor. It composes only
+the finite DOM-01 and SURF-02A/B Batch Runner WATAR boundary and cannot advance
+or close those owners.
+
 Dependency shorthand expands exactly as follows:
 
 - `SHR-01..04B` = SHR-01, SHR-02, SHR-03A, SHR-03B, SHR-04A, SHR-04B.
@@ -180,11 +188,21 @@ DOM-05 field. Its evidence is inherited by DOM-05 without advancing that owner.
 | ID | Dated package | Owner | Exact intended delta | Security | State |
 | --- | --- | --- | --- | --- | --- |
 | DOM-05A | `20260729_topaz_conditioning_wepppy_integration` | DOM-05 | Add Topaz Conditioning Algorithm/`topaz`, dispatch it to released WBT `TopazConditionDem` width 2, and make it the new-run default only for `disturbed9002_wbt`; preserve legacy tokens, persisted runs, other configs, queue/auth/schema, and downstream flow/channel behavior | `high`: authenticated browser-to-RQ persisted enum and native geospatial worker dispatch | closed locally; ancestor `5754a1e06`; full suite, dual review, and E2E PASS |
+| SURF-02C | `20260802_batch_runner_watar` | DOM-01, SURF-02A, SURF-02B | Add one optional `run_watar` Batch Runner directive; eligibility by `ash.nodb`; exact WEPP-before-WATAR preflight; persisted leaf Ash inputs; Ash plus AshPost completion/no-data semantics; timestamp-authoritative partial retry/failure reporting; old-state normalization; focused UI/NoDb/RQ/generated-output evidence only | `high`: expensive worker execution, run-tree writes, retry/completion, and locking | GOV-00A-M1F checkpoint review |
 
 DOM-05A is an operator-approved intended behavior amendment, not a conformance
 fix and not a reopening of REM-05. Its contract, ADR, dual reviews, security
 artifact, and disposition must form a standalone ancestor before source,
 template, config, test, generated bundle, or WBT runtime artifacts change.
+
+SURF-02C is an operator-approved bounded cross-owner enhancement under
+`docs/standards/contract-first-change-standard.md`. Roger Lew explicitly
+authorized the recommended contract on 2026-08-03. It may compose only DOM-01
+and SURF-02A/B behavior named in its canonical matrix; it does not execute,
+advance, verify, or close those owners. It excludes ash formulas, defaults,
+units, thresholds, calibration, standalone WATAR field/payload changes,
+AshPost schema changes, auth/CSRF policy, new queue topology, selective
+base-to-leaf Ash resync, and unrelated Batch Runner stages.
 
 The exact REM-05 implementation boundary is limited to:
 

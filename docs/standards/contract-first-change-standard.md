@@ -132,6 +132,45 @@ standalone ancestor must include the milestone decision, standard/register
 amendments, reviews, and disposition. Closing that milestone does not ratify or
 close the remaining GOV-00A controller-test convention deliverable.
 
+## Bounded Cross-Owner Enhancements
+
+An operator may authorize one finite enhancement package that composes behavior
+owned by multiple registered packages before their normal audit sequence runs.
+This path is for a concrete requested capability with a small, exact source and
+contract boundary. It is not permission to execute, close, or raise the evidence
+grade of the composed owners, bypass their unrelated dependencies, or redesign
+their domains.
+
+Before a bounded cross-owner enhancement becomes a canonical checkpoint, all of
+the following are required:
+
+1. The child register assigns a stable amendment id, dated package, every
+   composed owner, exact normative and source boundary, exclusions, security
+   impact, and the operator's explicit authorization.
+2. The package records the starting revision, every applicable canonical
+   contract, exact intended delta, compatibility and data impact, regression
+   evidence, and observable generated-output acceptance where applicable.
+3. The operator explicitly approves the exact contract matrix and confirms that
+   the package may compose the named owners without advancing or closing them.
+4. Security impact is the highest expected impact of any composed owner. A
+   dedicated security artifact is mandatory when any owner or changed surface
+   is `high`.
+5. Two independent read-only reviews assess authority, scope containment,
+   security, compatibility, and regression evidence; the primary agent
+   dispositions every finding and obtains post-fix confirmation for resolved
+   high or medium findings.
+6. The standard/register amendment, checkpoint, canonical matrix, reviews, and
+   disposition are committed together as a standalone ancestor before
+   implementation files are edited.
+7. Implementation and final review remain limited to the registered
+   enhancement. Unlisted parameterization, schemas, queue topology, auth,
+   owners, and shared behavior remain blocked.
+
+The enhancement closes only its finite composition. Each composed owner later
+inherits the decision and evidence but retains its prior state and dependencies.
+GOV-01 must evaluate recurring enhancement use before any generalized workflow
+or enforcement is introduced.
+
 ## Conformance Fixes and Urgent Restoration
 
 When current code contradicts an unchanged canonical contract and no intent is

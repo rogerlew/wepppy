@@ -9,7 +9,8 @@ as work proceeds. Maintain it in accordance with
 
 After this work, an operator can configure ash transport on a Batch Runner base
 project, enable `Run WATAR`, and run the collection. Each eligible watershed
-will finish WEPP before WATAR begins, produce current ash and AshPost artifacts,
+will finish WEPP before WATAR begins, produce current ash and AshPost artifacts
+when ash-producing hillslopes exist, complete cataloged no-data leaves cleanly,
 and display WATAR completion in batch progress. Running the batch again will
 skip completed leaves and rerun a leaf whose WATAR stage failed or is incomplete,
 without requiring WATAR for configurations that do not have the ash mod.
@@ -27,7 +28,8 @@ paths. Merely adding a directive or mocked call is not sufficient.
 - [x] (2026-08-03 01:33 UTC) Scaffolded the package, tracker, plan, security
   review placeholder, and backlog entry.
 - [ ] Complete and commit the contract-first checkpoint with operator approval
-  and two independent review dispositions.
+  and two independent review dispositions. (Drafted at 2026-08-03 01:52 UTC;
+  dual reviews passed at 2026-08-03 02:20 UTC; ancestor commit pending.)
 - [ ] Add focused failing tests before production implementation.
 - [ ] Implement optional WATAR task registration, dependency enforcement,
   Ash/AshPost execution, retry classification, and UI integration.
@@ -159,7 +161,9 @@ WEPP completion, WATAR plus AshPost complete, and interrupted/failed WATAR or
 AshPost. Add a dependency
 test that prevents WATAR invocation when WEPP watershed or required interchange
 artifacts are incomplete. Add coverage for the ratified base-input
-resync/invalidation policy. Extend route snapshot and Jest tests to prove the
+resync/invalidation policy. Add an old serialized directive-map regression that
+disables, saves, and reloads the normalized `run_watar` key. Extend route
+snapshot and Jest tests to prove the
 generic UI exposes and persists the WATAR directive without special-case DOM.
 
 Milestone 3 implements the leaf integration. Add `TaskEnum.run_watar` to
@@ -173,9 +177,11 @@ the timestamp after hillslope simulation alone. Do
 not invent defaults: normalize only the existing stored types needed by the
 method signature. Do not duplicate the completion timestamp in Batch Runner;
 retain `Ash.run_ash` as its owner unless the accepted checkpoint explicitly
-changes that contract. If current NoDir projections require a lock boundary,
-reuse the narrow root-lock pattern from `run_ash_rq` without nesting a worker
-job or silently materializing archive roots.
+changes that contract. Acquire sorted combined NoDir maintenance locks for
+`climate`, `landuse`, and `watershed`, with directory-form preflight, the
+existing bounded Batch Runner retry/delay, and a post-acquisition form recheck.
+Do not nest `run_ash_rq` or silently materialize archive roots. Leaf-job
+exclusivity owns the `ash/` write boundary; do not invent a separate ash root.
 
 Implement the accepted policy for base `Ash` input changes. If selective
 resync is approved, list exact persisted input attributes in a Batch Runner
@@ -240,10 +246,12 @@ Create or use a small batch with at least two watershed features and an `_base`
 project containing `ash.nodb`. Configure WATAR through the normal base-project
 UI, then run the batch. For every selected leaf, logs or job evidence must show
 WEPP watershed completion and required interchange artifacts before WATAR
-starts. Each completed leaf must contain representative per-hillslope ash
-parquet and current `ash/post/` output, and its RedisPrep state must contain a
-non-null `run_watar` timestamp. The Batch Progress panel must show the WATAR
-glyph as complete.
+starts. Each completed data-producing leaf must contain representative
+per-hillslope ash parquet and current `ash/post/` output, and its RedisPrep state
+must contain a non-null `run_watar` timestamp. A separate legitimate no-data
+leaf must record null AshPost return-period state, update the catalog, omit
+normal datasets/version/docs, and still receive the timestamp. The Batch
+Progress panel must show the WATAR glyph as complete for both outcomes.
 
 Run the same batch again with `Remove existing files` disabled. Fully complete
 leaves must be skipped. Remove only the test leaf's `run_watar` timestamp using
@@ -262,8 +270,9 @@ batch finalizer must include the leaf in failure/incomplete counts.
 Also force `AshPost.run_post` to fail after representative per-hillslope ash
 files exist. `run_watar` must remain unset, the leaf must remain retry eligible,
 and retry must rebuild valid post outputs without rerunning completed WEPP.
-Acceptance requires the current AshPost dataset/version metadata and catalog
-entry, not only the presence of a hillslope ash file.
+Acceptance for a data-producing leaf requires the current AshPost
+dataset/version metadata and catalog entry, not only the presence of a hillslope
+ash file. No-data acceptance instead requires null-state and catalog evidence.
 
 The implementation is accepted only when focused suites, frontend gates, queue
 graph validation, broad tests, generated-output evidence, staging job-tree
@@ -323,8 +332,10 @@ new Batch Runner defaults. `Ash.run_ash` remains responsible for invoking
 `AshPost.run_post` and setting the completion timestamp afterwards. Preserve the
 standalone rq-engine `run-ash` request and `run_ash_rq` behavior.
 
-The dependency invariant is: an eligible WATAR stage may begin only after the
-same leaf's required WEPP watershed task and interchange artifacts are complete.
+The dependency invariant is: an eligible WATAR stage may begin only after
+non-null `run_wepp_hillslopes` and `run_wepp_watershed` timestamps on a
+non-single-storm climate. It must then run the three approved ensure helpers and
+require `H.pass.parquet`, `H.wat.parquet`, and `totalwatsed3.parquet` before Ash.
 If this is represented as an RQ edge rather than synchronous ordering, the leaf
 failure metadata and `_final_batch_complete_rq` must depend on the actual WATAR
 terminal job with explicit failure propagation, and the dependency catalog must
@@ -336,5 +347,21 @@ paths. The plan intentionally blocks production edits on the required
 contract-first checkpoint.
 
 Plan revision note, 2026-08-03 01:40 UTC: Clarified at operator request that
-AshPost aggregation, versioned documentation/output, and catalog publication are
-part of the single WATAR completion and retry contract.
+AshPost is part of the single WATAR completion contract. The later approved
+no-data amendment permits successful cataloged completion without normal
+datasets/version/docs when no ash-producing hillslopes exist.
+
+Plan revision note, 2026-08-03 01:52 UTC: Initially drafted the package under
+the superseded REM-06 identity and GOV-00A-M1F. The first review rejected the
+remediation classification; the accepted amendment now uses SURF-02C.
+
+Plan revision note, 2026-08-03 02:10 UTC: After dual review and Roger Lew's
+explicit authorization, reclassified the work as SURF-02C, added the bounded
+cross-owner enhancement authority path, and resolved timestamp, no-data,
+old-state, exact WEPP prerequisite, locking, and evidence findings. Dual
+post-fix confirmation and the standalone ancestor remain pending.
+
+Plan revision note, 2026-08-03 02:20 UTC: Both independent reviewers confirmed
+that the amended SURF-02C/GOV-00A-M1F checkpoint has no remaining high or medium
+findings. The standalone ancestor commit is the only remaining pre-implementation
+gate.

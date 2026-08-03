@@ -2,6 +2,7 @@
 
 **Status**: Open (2026-08-03 UTC)
 **Timezone**: UTC
+**Stable ID**: SURF-02C / GOV-00A-M1F
 
 ## Overview
 
@@ -12,9 +13,9 @@ for each watershed, expose that stage in the Batch Runner UI, and use the same
 RedisPrep timestamp-based retry selection as existing stages.
 
 This package is implementation scope, not a surrogate or research spike. It is
-not complete until a generated batch leaf contains WATAR outputs and a retry
-skips a completed WATAR stage while selecting a leaf whose WATAR timestamp or
-required output is missing.
+not complete until a generated data-producing batch leaf contains WATAR outputs
+and a retry skips a timestamp-complete WATAR stage while selecting a leaf whose
+WATAR timestamp is missing.
 
 ## Objectives
 
@@ -22,8 +23,9 @@ required output is missing.
 - Run WATAR only for leaves with the ash transport mod initialized and only
   after the required WEPP watershed/interchange work is complete.
 - Treat AshPost as part of WATAR completion: `run_watar` is not complete until
-  per-hillslope ash simulation, watershed aggregation, documentation/version
-  output, and query-engine catalog update all succeed.
+  the Ash/AshPost pipeline and query-engine catalog update succeed. A legitimate
+  no-data leaf completes without normal datasets/version/docs after AshPost
+  records null return-period state and updates the catalog.
 - Reuse persisted `Ash` inputs from the batch base project without changing ash
   formulas, defaults, units, or calibration parameters.
 - Preserve old batches and non-WATAR configurations without requiring an
@@ -93,14 +95,15 @@ required output is missing.
 - [ ] A leaf is not timestamped complete when `Ash.run_ash` succeeds only through
   hillslope simulation but `AshPost.run_post` fails; retry regenerates or
   resumes WATAR-owned post outputs without rerunning completed WEPP work.
-- [ ] A completed WATAR stage is skipped on retry; failed, interrupted, stale,
-  or missing WATAR work is selected and rerun without repeating unrelated
+- [ ] A timestamp-complete WATAR stage is skipped on retry; failed or
+  timestamp-missing WATAR work is selected and rerun without repeating unrelated
   completed upstream stages.
 - [ ] WATAR input changes made in the base project before leaf initialization
   propagate through cloning; policy for changes after leaf initialization is
   explicitly ratified and regression-tested.
 - [ ] Generated leaf evidence includes `TaskEnum.run_watar`, per-hillslope ash
-  output, post-processing output, and runstate completion.
+  output, post-processing output, and runstate completion for a data-producing
+  leaf, plus null-state/catalog success evidence for a no-data leaf.
 - [ ] Focused Python and JavaScript tests, full applicable quality gates, queue
   graph validation, security review, and independent correctness review pass.
 - [ ] Batch Runner, ash transport, route, and operator documentation are current.
@@ -124,6 +127,8 @@ required output is missing.
   `docs/work-packages/20260630_batch_runner_durability/`.
 - Existing WATAR controller contract evidence in
   `docs/work-packages/20260727_watar_ui_contract_pilot/`.
+- SURF-02C registration under GOV-00A-M1F in
+  `docs/work-packages/20260716_pure_ui_contract_standardization_c/artifacts/child_package_register.md`.
 - Existing `TaskEnum.run_watar`, `Ash.run_ash`, `AshPost.run_post`, and base
   project configuration behavior.
 - An operator-approved, independently reviewed contract checkpoint committed as
