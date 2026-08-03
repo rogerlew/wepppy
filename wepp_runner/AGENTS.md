@@ -39,6 +39,13 @@ pytest
 If any command fails, do not vendor.
 
 ## Vendoring Procedure
+Before copying binaries, resolve the source repository's remote-default branch
+with `git symbolic-ref refs/remotes/origin/HEAD`. Verify the release was built
+from that branch unless the operator explicitly authorized a non-default build.
+Every newly vendored binary must have a paired `<binary>.json` sidecar recording
+the exact `source_branch` and `source_commit`; a checkout directory name is not
+release-lineage evidence.
+
 From `/workdir/wepppy`:
 ```bash
 install -m 0755 /workdir/wepp-forest/src/wepp wepp_runner/bin/wepp_<tag>
