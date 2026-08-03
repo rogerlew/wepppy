@@ -37,6 +37,7 @@ chronological recovery sequence.
 | --- | ---: | ---: | ---: | ---: |
 | Low | 0.65-0.80 | 0.15-0.30 | 0.70 | 0.22 |
 | Moderate | 0.50-0.70 | 0.25-0.40 | 0.60 | 0.33 |
+| High | 0.40-0.60 | 0.30-0.45 | 0.50 | 0.38 |
 
 The total-ET envelope brackets the Sierra Nevada observation of a 31% first-
 year reduction after low-severity fire and a 50% reduction after high-severity
@@ -68,6 +69,7 @@ weighted year-34 value over the treated contributing area, the targets become:
 | --- | ---: | ---: | ---: | ---: |
 | Low | 308-379 | 46-114 | 73 | 259 |
 | Moderate | 237-332 | 59-133 | 94 | 190 |
+| High | 190-284 | 57-128 | 90 | 147 |
 
 The broad `Es` range reflects the joint ET and partition envelopes. Calibration
 should minimize distance from the central targets while remaining inside every

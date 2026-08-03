@@ -1,13 +1,13 @@
 # Tracker - Stevens Canyon Hillslope Water-Balance Attribution
 
 **Started:** 2026-08-03
-**Current phase:** Existing-output visualization
+**Current phase:** Complete
 **Security impact:** none
 
 ## In Progress
 
 - [x] Produced and visually validated paired water-flux figures for H49-H61.
-- [ ] Synthesize cross-hillslope mechanism patterns from the existing outputs.
+- [x] Synthesized cross-hillslope mechanism patterns from the existing outputs.
 - [x] Traced the active Penman-Monteith soil-evaporation dynamics and management
   parameter pathway.
 - [x] Specified joint annual `Es`, `Ep`, and total-ET diagnostic calibration
@@ -17,10 +17,13 @@
 
 ## To Do
 
-- [ ] Quantify focal-event and antecedent-period component differences.
-- [ ] Classify flashier-undisturbed events across the 100-year record.
-- [ ] Relate hillslope mechanisms to reaches 169, 172, 173, and the outlet.
-- [ ] Decide whether any additional hillslope-only runs are warranted.
+- [x] Quantified focal-event and antecedent-period component differences.
+- [x] Classified undisturbed-runoff-excess days across the 100-year record.
+- [x] Related hillslope mechanisms to reaches 169, 172, and 173; retained the
+  existing channel analysis for the outlet, where no direct hillslope depth is
+  defined.
+- [x] Chose a process-instrumented ET and runoff-threshold study as the next
+  step; no additional blind hillslope parameter ensemble is warranted.
 
 ## Decisions
 

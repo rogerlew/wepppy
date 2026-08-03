@@ -1,8 +1,8 @@
 # PROJECT_TRACKER.md
 > Kanban board for wepppy work packages and vision items
 
-**Last Updated**: 2026-08-03
-**Active Packages**: 23
+**Last Updated**: 2026-08-04
+**Active Packages**: 22
 **Quick Links**: [Work Packages Directory](docs/work-packages/) | [God-Tier Prompting Strategy](docs/god-tier-prompting-strategy.md)
 
 ## Purpose
@@ -37,7 +37,7 @@ This tracker makes all work visible at a glance, helping agents coordinate and a
 ### 2. Limit Work in Progress
 **Target**: 2-4 active packages maximum to maintain focus and ensure packages complete rather than stall.
 
-**Current WIP**: 20 packages (above target range)
+**Current WIP**: 19 packages (above target range)
 
 ### 3. Manage Flow
 Monitor how long packages spend in each column:
@@ -321,19 +321,6 @@ When resuming Kubernetes work:
 ---
 
 ## 🚧 In Progress
-
-### Stevens Canyon Hillslope Water-Balance Attribution
-
-**Started**: 2026-08-03
-**Priority**: High
-**Security impact**: `none`
-**Link**: [docs/work-packages/20260803_stevens_canyon_water_balance_attribution/](docs/work-packages/20260803_stevens_canyon_water_balance_attribution/)
-**Description**: Use existing paired daily hillslope outputs to identify whether
-surface runoff, subsurface lateral flow, percolation, or evapotranspiration
-carries the flashier-undisturbed response. The first milestone produces paired
-water-flux figures for H49-H61 without rerunning WEPP.
-
----
 
 ### Omni Fork Symlink Retarget Hardening (SURF-04A)
 
@@ -908,6 +895,19 @@ the remaining-run controller plan has no next controller milestone.
 ---
 
 ## ✅ Done
+
+### Stevens Canyon Hillslope Water-Balance Attribution
+
+**Completed**: 2026-08-04
+**Link**: [docs/work-packages/20260803_stevens_canyon_water_balance_attribution/](docs/work-packages/20260803_stevens_canyon_water_balance_attribution/)
+**Outcome**: Area-weighted H49-H61 accounting shows that surface runoff, not
+antecedent lateral flow, carries the focal inversion. Undisturbed runoff excess
+is rare, while burned and high-severity runs shift implausibly large fractions
+of ET into soil evaporation. The high-severity case misses the provisional
+annual ET target in all 100 paired years; the next study is direct ET and
+runoff-threshold instrumentation.
+
+---
 
 ### Stevens Canyon Contributor-Indexed `htcs` Ensemble
 

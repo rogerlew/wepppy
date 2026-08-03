@@ -465,6 +465,32 @@ cover does not directly attenuate soil evaporation in the active equations.
 The diagnostic acceptance envelopes are specified in [Post-Fire Annual ET
 Calibration Targets](artifacts/et-calibration-targets.md).
 
+## Cross-Hillslope Water-Balance Attribution
+
+The reproducible [area-weighted attribution](artifacts/water-balance-attribution.md)
+aggregates H49-H61 over the recursive contributing sets for reaches 169, 172,
+and 173. On year 34, day 203, reach 173 receives `10.85 mm` of undisturbed
+hillslope runoff versus `4.24 mm` burned. Lateral flow is only `0.26 mm` versus
+`0.03 mm`, and the preceding 30 days contain approximately zero lateral flow
+in either scenario. The inversion is therefore carried primarily by surface
+runoff generation, not by accumulated lateral subsurface delivery.
+
+Undisturbed area-weighted daily runoff exceeds burned on only 21 of 36,525
+days above reach 173. On those uncommon days the mean undisturbed-minus-burned
+differences are `+1.555 mm` for runoff, `+0.090 mm` for lateral flow,
+`+0.563 mm` for plant-side ET, and `-1.279 mm` for soil evaporation. This is
+consistent with the previously identified shallow-water mechanism: burned
+soil evaporation depletes the surface while undisturbed plant uptake draws
+more strongly from the rooted profile.
+
+Across the full record, total ET is nearly conserved between the mixed burned
+and undisturbed scenarios above reach 173 (`321.75` versus `328.65 mm/year`),
+despite the model moving about `100 mm/year` from plant-side ET into soil
+evaporation. The clean high-severity comparison above reach 169 has a median
+paired annual ET ratio of `0.877` and median `Es/ET` of `0.521`; none of 100
+years meets the provisional `0.40-0.60` high-severity ET-ratio target. Thus the
+high-severity extension confirms rather than resolves the ET-partition concern.
+
 ## Preliminary Conclusion
 
 The selected reaches are not hydrologically outside the fire. WEPP_ID 169 is
@@ -484,7 +510,12 @@ consistent cross-event trend, including among events with similar peak
 discharges, and appears to be part of this event's runoff-generation and
 hydrograph-synchronization response. Contributor-indexed `htcs` routing and 300
 spatial-variation realizations do not remove the inversion, and their outlet
-response is small. The strongest next study is process-level runoff-generation
-attribution with burned and undisturbed hillslope hydrographs routed through a
-common channel state. That would distinguish shallow saturation from residual
-routing effects before identifying any model defect.
+response is small. Area-weighted hillslope accounting shows that surface runoff
+rather than lateral flow carries the focal inversion. The strongest next study
+is therefore a process-instrumented `evappm` and infiltration/runoff experiment:
+trace potential ET, LAI partition coefficients, layer-specific extraction,
+surface saturation, and the exact runoff threshold under identical climate and
+soil states. Route the resulting hillslope hydrographs through a common channel
+state only as a validation step. Broad parameter mutation is premature until
+that trace distinguishes excessive soil evaporation from a runoff-threshold
+implementation defect.

@@ -19,8 +19,9 @@ difference without rerunning WEPP.
   scenario/hillslope file and matching paired calendars.
 - [x] (2026-08-03 23:30 UTC) Generated and visually inspected 13 paired year-34
   figures and Markdown sidecars.
-- [ ] Summarize focal-event and antecedent-window attribution.
-- [ ] Validate documentation and record the next analysis milestone.
+- [x] (2026-08-04 02:30 UTC) Summarized focal-event and antecedent-window attribution.
+- [x] (2026-08-04 02:40 UTC) Validated documentation and selected a
+  process-instrumented ET/runoff-threshold study as the next milestone.
 - [x] (2026-08-04 00:10 UTC) Traced active `evappm` dynamics and identified
   exponential LAI partitioning, reinforced by residue exposure, as the leading
   driver of the soil-evaporation contrast.
@@ -28,6 +29,9 @@ difference without rerunning WEPP.
   `Es/ET` envelopes with `Ep` derived by closure.
 - [x] (2026-08-04 01:35 UTC) Added and ran an additive canonical high-severity hillslope scenario for
   the forest-derived hillslopes, retaining unchanged non-forest controls.
+- [x] (2026-08-04 02:30 UTC) Produced a reproducible, area-weighted cross-hillslope attribution for
+  reaches 169, 172, and 173 and classify undisturbed-runoff-excess days over
+  the full record.
 
 ## Surprises & Discoveries
 
@@ -86,6 +90,14 @@ unnecessarily overrode `ksflag`; correcting it exposed an important distinction
 between WEPP's general internal Ksat flag and the forest-specific `ksatadj`
 path. The fixture now preserves the canonical input.
 
+The completed attribution shows that surface runoff carries the focal
+inversion while antecedent lateral flow is negligible. Undisturbed runoff
+excess occurs on only 21 days above reach 173. The clean high-severity
+comparison has a median paired annual ET ratio of `0.877` and misses the
+provisional `0.40-0.60` target in every year, while median `Es/ET` is `0.521`.
+The next package should instrument the ET partition and runoff threshold
+directly.
+
 ## Context and Orientation
 
 The paired replay root is
@@ -108,6 +120,12 @@ and matching scenario calendars, generate one two-panel PNG for every
 hillslope, and write a same-stem Markdown sidecar. Each sidecar will contain
 day-203, preceding 7-day, preceding 30-day, and year-34 totals. Add an index
 linking the figures and summarize what the visual set can and cannot establish.
+
+Complete the package with an area-weighted analysis over the fixed contributing
+hillslope sets. Report focal-event and antecedent-window fluxes, 100-year annual
+means, and counts and composite flux differences for days when undisturbed
+daily runoff exceeds burned. Daily hillslope output cannot diagnose subdaily
+flashiness, so keep channel peak-timing conclusions separate.
 
 ## Concrete Steps
 
