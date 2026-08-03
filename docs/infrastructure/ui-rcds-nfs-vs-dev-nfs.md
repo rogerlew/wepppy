@@ -172,6 +172,84 @@ then use the smallest targeted job/worker recovery action. Avoid stack-wide
 restarts: they do not repair a blocked hard-mount RPC and can strand additional
 work.
 
+### Concurrent Full-Output Fork and Loaded NAS Benchmark (2026-08-03)
+
+At `2026-08-03T06:03:57Z`, default-queue fork job
+`381be2e3-65a9-4882-87ca-46cbf4ecf86e` had been running for approximately
+80 minutes. The job copied `compositional-disorganization` to `velvet-kiloton`
+with `skip_wepp_runs_output=False`, so its `rsync` included the complete WEPP
+output tree:
+
+```text
+rsync -a --stats . /wc1/runs/ve/velvet-kiloton/
+```
+
+The job ran on `wepp2`, even though it appeared in the default queue viewed
+from `wepp1`; both hosts share the RQ backend and NAS. Its RQ heartbeat remained
+current and the worker container was healthy. Process inspection on `wepp2`
+showed two `rsync` processes blocked in the NFS RPC wait channel:
+
+```text
+PID     STAT  ELAPSED   WCHAN
+715423  D     01:19:46  rpc_wait_bit_killable
+715427  D     01:19:46  rpc_wait_bit_killable
+```
+
+Later samples showed the processes alternating between runnable and NFS-wait
+states while NAS traffic continued. This was a slow, active copy rather than a
+stale RQ job. It also confirms that a fresh heartbeat and `started` state do not
+establish healthy I/O progress.
+
+The canonical delete/recreate benchmark was run on `wepp1` while this
+full-output fork and the normal production workload were active. Unique targets
+were used and removed by the benchmark:
+
+```text
+python3 tools/benchmark_nfs_delete.py \
+  /geodata/wc1/benchmarks/delete-test-20260803T0602Z \
+  /tmp/delete-test-20260803T0602Z \
+  --fsync-files --fsync-dirs --sync
+```
+
+Results:
+
+```text
+delete_benchmark_results
+- root=/geodata/wc1/benchmarks/delete-test-20260803T0602Z files=3100 dirs=30 size_mb=12.11 create_s=57.451 delete_s=4.249 rewrite_s=56.910 sync_s=0.422
+- root=/tmp/delete-test-20260803T0602Z files=3100 dirs=30 size_mb=12.11 create_s=0.724 delete_s=0.093 rewrite_s=5.573 sync_s=0.361
+```
+
+Comparison with the historical production result in this document:
+
+| Phase | Historical production | Loaded 2026-08-03 | Ratio |
+|---|---:|---:|---:|
+| Create | 30.376 s | 57.451 s | 1.89x slower |
+| Delete | 4.980 s | 4.249 s | 0.85x |
+| Rewrite + file/directory fsync | 34.456 s | 56.910 s | 1.65x slower |
+| System-wide sync | 1.235 s | 0.422 s | 0.34x |
+
+Create, delete, and rewrite took `118.610 s` in the loaded run versus
+`69.812 s` historically, or `1.70x` longer. The `/tmp` control remained near
+its historical range, isolating the material slowdown to the NAS/NFS path
+rather than general host CPU performance. Do not use the `sync_s` ratio as a
+path-specific conclusion because `os.sync` flushes system-wide state.
+
+The production mount still matched the recommended NFSv4.2 profile and client
+RPC retransmissions were zero. No new server-not-responding, stale-handle, or
+zero-byte-write kernel messages were found. However, `nfsiostat` showed strong
+queuing. A post-benchmark interval included read operations with `35.626 ms`
+average RTT, `464.720 ms` average execution time, and `429.004 ms` average queue
+time.
+
+Assessment: during this observation window, the NAS was approximately
+`1.7x-1.9x` slower than the historical production baseline for the
+small-file create/rewrite workload that resembles WEPP preparation. The
+evidence supports active NAS saturation or contention, with the same-NAS
+full-output fork as a material contributor. It does not by itself establish a
+permanent hardware regression; repeat the benchmark after large copy and
+delete workloads drain to distinguish persistent degradation from load-driven
+contention.
+
 ## Small-File Read/Write/Delete + Metadata Microbench (2026-02-10)
 
 This is a lightweight microbench intended to approximate UI pain on metadata-heavy paths (many small files).
