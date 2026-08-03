@@ -2,7 +2,7 @@
 > Kanban board for wepppy work packages and vision items
 
 **Last Updated**: 2026-08-02
-**Active Packages**: 22
+**Active Packages**: 23
 **Quick Links**: [Work Packages Directory](docs/work-packages/) | [God-Tier Prompting Strategy](docs/god-tier-prompting-strategy.md)
 
 ## Purpose
@@ -321,6 +321,25 @@ When resuming Kubernetes work:
 ---
 
 ## 🚧 In Progress
+
+### WEPP Workflow Single-Flight Tracking
+
+**Started**: 2026-08-03
+**Status**: Contract recorded; implementation in progress
+**Size**: Medium (one focused session)
+**Priority**: Critical
+**Security impact**: `low`
+**Link**: [docs/work-packages/20260802_wepp_singleflight_tracking/](docs/work-packages/20260802_wepp_singleflight_tracking/)
+**Description**: Fixes the production admission gap where a short-lived WEPP
+orchestration root reached `finished` while its hillslope or watershed children
+were still active, allowing a second same-run workflow to enqueue and mutate the
+same NAS-backed inputs concurrently.
+
+**Next Steps**: Implement descendant-aware tracking, validate every hillslope
+and watershed orchestration key, run repository gates, and close independent
+code and QA reviews.
+
+---
 
 ### Omni Fork Symlink Retarget Hardening (SURF-04A)
 

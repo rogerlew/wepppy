@@ -295,6 +295,17 @@ projection above.
   That recovery action inherits its existing batch/`_base` no-queue behavior, so
   batch/`_base` callers must materialize `watershed.subwta` through their normal
   setup flow before retrying `run-wepp` endpoints.
+- WEPP submissions are single-flight per run across `run-wepp`,
+  `run-wepp-watershed`, `prep-wepp-watershed`, and their no-prep variants.
+  The submission guard MUST treat queued, started, scheduled, or still-viable
+  deferred descendants of the recorded orchestration job as active even after
+  that short-lived orchestration job has finished. A terminal failed, stopped,
+  or canceled descendant makes deferred jobs that depend on the failed
+  workflow non-viable; those stranded deferred jobs MUST NOT permanently block
+  a retry. If any descendant remains queued, started, or scheduled, the
+  workflow remains active regardless of failures elsewhere in its tree. A
+  conflicting submission returns the existing HTTP `409` single-flight error
+  and does not enqueue another WEPP workflow.
 - Canonical error payload:
 ```json
 {
