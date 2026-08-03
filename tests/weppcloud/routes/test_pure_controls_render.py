@@ -3574,6 +3574,9 @@ def test_run_header_renders_unauthorized_omni_contrasts_reason_below_label(
     assert 'data-project-mod-authorized="false"' in rendered
     assert 'data-project-mod-requires="omni"' in rendered
     assert 'data-project-mod-reason="omni_contrasts"' in rendered
+    assert 'class="wc-run-header__toggle wc-run-header__mod-toggle"' in rendered
+    assert 'class="wc-run-header__mod-copy"' in rendered
+    assert 'class="wc-run-header__mod-reason"' in rendered
     assert "disabled" in rendered
     assert rendered.index("Omni Contrasts") < rendered.index("Not Authorized")
 

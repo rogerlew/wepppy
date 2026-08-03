@@ -1747,6 +1747,28 @@ a.wc-maturity-pill:focus-visible {
   accent-color: var(--wc-color-accent);
 }
 
+.wc-run-header__mod-toggle {
+  align-items: flex-start;
+}
+
+.wc-run-header__mod-toggle > input {
+  flex: 0 0 auto;
+  margin-top: 0.1rem;
+}
+
+.wc-run-header__mod-copy {
+  display: flex;
+  flex-direction: column;
+}
+
+.wc-run-header__mod-reason {
+  font-size: var(--wc-font-size-xs);
+  font-style: italic;
+  font-weight: 400;
+  line-height: 1.25;
+  color: var(--wc-color-text-muted);
+}
+
 /* Navigation menu dropdown */
 .wc-nav {
   display: flex;
