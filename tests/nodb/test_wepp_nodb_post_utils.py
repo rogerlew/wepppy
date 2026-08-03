@@ -108,8 +108,8 @@ def test_ensure_watershed_interchange_skips_rebuild_but_still_runs_deferred_clea
     (interchange_dir / "pass_pw0.events.parquet").write_text("ready", encoding="utf-8")
     (interchange_dir / "pass_pw0.metadata.parquet").write_text("ready", encoding="utf-8")
     (interchange_dir / "ebe_pw0.parquet").write_text("ready", encoding="utf-8")
-    (interchange_dir / "chanwb.out.parquet").write_text("ready", encoding="utf-8")
-    (interchange_dir / "chan_peak.out.parquet").write_text("ready", encoding="utf-8")
+    (interchange_dir / "chanwb.parquet").write_text("ready", encoding="utf-8")
+    (interchange_dir / "chan.out.parquet").write_text("ready", encoding="utf-8")
     (interchange_dir / "loss_pw0.hill.parquet").write_text("ready", encoding="utf-8")
     (interchange_dir / "loss_pw0.out.parquet").write_text("ready", encoding="utf-8")
     (interchange_dir / "loss_pw0.chn.parquet").write_text("ready", encoding="utf-8")
@@ -154,6 +154,53 @@ def test_ensure_watershed_interchange_skips_rebuild_but_still_runs_deferred_clea
     post_utils.ensure_watershed_interchange(wepp, climate)
 
     assert cleanup_calls == [(output_dir, False, False, False)]
+
+
+def test_ensure_watershed_interchange_reuses_complete_hbp_outputs_after_source_cleanup(
+    tmp_path: Path,
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    output_dir = tmp_path / "wepp" / "output"
+    interchange_dir = output_dir / "interchange"
+    interchange_dir.mkdir(parents=True)
+    for filename in (
+        "pass_pw0.status.json",
+        "ebe_pw0.parquet",
+        "chanwb.parquet",
+        "chan.out.parquet",
+        "chnwb.parquet",
+        "soil_pw0.parquet",
+        "loss_pw0.hill.parquet",
+        "loss_pw0.out.parquet",
+        "loss_pw0.chn.parquet",
+        "loss_pw0.class_data.parquet",
+    ):
+        (interchange_dir / filename).write_text("ready", encoding="utf-8")
+
+    wepp = SimpleNamespace(
+        output_dir=str(output_dir),
+        wepp_interchange_dir=str(interchange_dir),
+        delete_after_interchange=True,
+        pass_family="hbp",
+    )
+    climate = SimpleNamespace(
+        is_single_storm=False,
+        calendar_start_year=2010,
+        delete_after_interchange=False,
+    )
+
+    monkeypatch.setattr(
+        post_utils,
+        "run_wepp_watershed_interchange",
+        lambda *_args, **_kwargs: (_ for _ in ()).throw(AssertionError("unexpected rebuild")),
+    )
+    monkeypatch.setattr(
+        post_utils,
+        "cleanup_hillslope_sources_for_completed_interchange",
+        lambda *_args, **_kwargs: None,
+    )
+
+    post_utils.ensure_watershed_interchange(wepp, climate)
 
 
 def test_ensure_watershed_interchange_hbp_status_only_does_not_skip_rebuild(

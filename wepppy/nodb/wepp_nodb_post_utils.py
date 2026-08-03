@@ -54,8 +54,8 @@ def _watershed_interchange_complete(
 ) -> bool:
     required_files = {
         "ebe_pw0.parquet",
-        "chanwb.out.parquet",
-        "chan_peak.out.parquet",
+        "chanwb.parquet",
+        "chan.out.parquet",
         "loss_pw0.hill.parquet",
         "loss_pw0.out.parquet",
         "loss_pw0.chn.parquet",
