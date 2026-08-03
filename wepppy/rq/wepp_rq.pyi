@@ -11,7 +11,11 @@ RQ_DB: int
 TIMEOUT: int
 WEPP_RQ_JOB_KEYS: tuple[str, ...]
 ACTIVE_RQ_JOB_STATUSES: frozenset[str]
+EXECUTABLE_RQ_JOB_STATUSES: frozenset[str]
+FAILED_RQ_JOB_STATUSES: frozenset[str]
 WEPP_SUBMIT_LOCK_TTL_SECONDS: int
+WEPP_LOCK_RETRY_ATTEMPTS: int
+WEPP_LOCK_RETRY_DELAY_SECONDS: float
 send_discord_message: Callable[[str], None] | None
 
 class WeppSingleFlightConflict(RuntimeError): ...

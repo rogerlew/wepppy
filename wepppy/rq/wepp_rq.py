@@ -119,6 +119,8 @@ WEPP_RQ_JOB_KEYS: tuple[str, ...] = (
     "run_wepp_watershed_noprep_rq",
 )
 ACTIVE_RQ_JOB_STATUSES: frozenset[str] = frozenset({"queued", "started", "deferred", "scheduled"})
+EXECUTABLE_RQ_JOB_STATUSES: frozenset[str] = frozenset({"queued", "started", "scheduled"})
+FAILED_RQ_JOB_STATUSES: frozenset[str] = frozenset({"failed", "stopped", "canceled"})
 WEPP_SUBMIT_LOCK_TTL_SECONDS: int = 30
 WEPP_LOCK_RETRY_ATTEMPTS: int = 25
 WEPP_LOCK_RETRY_DELAY_SECONDS: float = 0.2
@@ -229,6 +231,105 @@ def release_wepp_submit_lock(runid: str, owner: str) -> None:
         redis_conn.delete(key)
 
 
+def _rq_job_status(job: Job) -> str:
+    raw_status = job.get_status(refresh=False)
+    return str(getattr(raw_status, "value", raw_status) or "").lower()
+
+
+def _fetch_rq_job(job_id: str, redis_conn: redis.Redis) -> Job | None:
+    try:
+        return Job.fetch(job_id, connection=redis_conn)
+    except NoSuchJobError:
+        return None
+
+
+def _iter_linked_rq_jobs(root_job: Job, redis_conn: redis.Redis) -> list[Job]:
+    linked_jobs: list[Job] = []
+    pending_jobs = [root_job]
+    seen_ids = {str(root_job.id)}
+
+    while pending_jobs:
+        parent_job = pending_jobs.pop()
+        metadata = parent_job.meta if isinstance(parent_job.meta, dict) else {}
+        for link_key, raw_job_id in metadata.items():
+            if not str(link_key).startswith("jobs:") or not raw_job_id:
+                continue
+            child_id = str(raw_job_id)
+            if child_id in seen_ids:
+                continue
+            seen_ids.add(child_id)
+            child_job = _fetch_rq_job(child_id, redis_conn)
+            if child_job is None:
+                continue
+            linked_jobs.append(child_job)
+            pending_jobs.append(child_job)
+
+    return linked_jobs
+
+
+def _deferred_rq_job_is_viable(
+    job: Job,
+    redis_conn: redis.Redis,
+    *,
+    visiting: set[str] | None = None,
+) -> bool:
+    dependency_ids: list[str] = []
+    dependency_key_prefix = Job.redis_job_namespace_prefix
+    for raw_dependency_id in getattr(job, "dependency_ids", None) or []:
+        if isinstance(raw_dependency_id, bytes):
+            dependency_id = raw_dependency_id.decode("utf-8", errors="replace")
+        else:
+            dependency_id = str(raw_dependency_id)
+        if dependency_id.startswith(dependency_key_prefix):
+            dependency_id = dependency_id[len(dependency_key_prefix):]
+        dependency_ids.append(dependency_id)
+    if not dependency_ids:
+        return True
+
+    path = set() if visiting is None else set(visiting)
+    job_id = str(job.id)
+    if job_id in path:
+        return True
+    path.add(job_id)
+
+    for dependency_id in dependency_ids:
+        dependency = _fetch_rq_job(dependency_id, redis_conn)
+        if dependency is None:
+            # Expired dependency records are ambiguous. Preserve single-flight
+            # safety rather than allowing concurrent filesystem mutation.
+            continue
+        dependency_status = _rq_job_status(dependency)
+        if dependency_status in FAILED_RQ_JOB_STATUSES:
+            return False
+        if dependency_status == "deferred" and not _deferred_rq_job_is_viable(
+            dependency,
+            redis_conn,
+            visiting=path,
+        ):
+            return False
+
+    return True
+
+
+def _active_wepp_tree_job(root_job: Job, redis_conn: redis.Redis) -> Job | None:
+    if _rq_job_status(root_job) in ACTIVE_RQ_JOB_STATUSES:
+        return root_job
+
+    deferred_jobs: list[Job] = []
+    for linked_job in _iter_linked_rq_jobs(root_job, redis_conn):
+        status = _rq_job_status(linked_job)
+        if status in EXECUTABLE_RQ_JOB_STATUSES:
+            return linked_job
+        if status == "deferred":
+            deferred_jobs.append(linked_job)
+
+    for deferred_job in deferred_jobs:
+        if _deferred_rq_job_is_viable(deferred_job, redis_conn):
+            return deferred_job
+
+    return None
+
+
 def get_active_wepp_job(prep: RedisPrep | None, redis_conn: redis.Redis) -> dict[str, str] | None:
     if prep is None:
         return None
@@ -237,17 +338,16 @@ def get_active_wepp_job(prep: RedisPrep | None, redis_conn: redis.Redis) -> dict
         job_id = prep.get_rq_job_id(key)
         if not job_id:
             continue
-        try:
-            job = Job.fetch(job_id, connection=redis_conn)
-        except NoSuchJobError:
+        job = _fetch_rq_job(str(job_id), redis_conn)
+        if job is None:
             continue
 
-        status = str(job.get_status(refresh=False) or "").lower()
-        if status in ACTIVE_RQ_JOB_STATUSES:
+        active_job = _active_wepp_tree_job(job, redis_conn)
+        if active_job is not None:
             return {
                 "key": key,
-                "job_id": str(job_id),
-                "status": status,
+                "job_id": str(active_job.id),
+                "status": _rq_job_status(active_job),
             }
     return None
 

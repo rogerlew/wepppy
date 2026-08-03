@@ -2,7 +2,7 @@
 > Kanban board for wepppy work packages and vision items
 
 **Last Updated**: 2026-08-02
-**Active Packages**: 23
+**Active Packages**: 22
 **Quick Links**: [Work Packages Directory](docs/work-packages/) | [God-Tier Prompting Strategy](docs/god-tier-prompting-strategy.md)
 
 ## Purpose
@@ -322,24 +322,6 @@ When resuming Kubernetes work:
 
 ## 🚧 In Progress
 
-### WEPP Workflow Single-Flight Tracking
-
-**Started**: 2026-08-03
-**Status**: Contract recorded; implementation in progress
-**Size**: Medium (one focused session)
-**Priority**: Critical
-**Security impact**: `low`
-**Link**: [docs/work-packages/20260802_wepp_singleflight_tracking/](docs/work-packages/20260802_wepp_singleflight_tracking/)
-**Description**: Fixes the production admission gap where a short-lived WEPP
-orchestration root reached `finished` while its hillslope or watershed children
-were still active, allowing a second same-run workflow to enqueue and mutate the
-same NAS-backed inputs concurrently.
-
-**Next Steps**: Implement descendant-aware tracking, validate every hillslope
-and watershed orchestration key, run repository gates, and close independent
-code and QA reviews.
-
----
 
 ### Omni Fork Symlink Retarget Hardening (SURF-04A)
 
@@ -914,6 +896,26 @@ the remaining-run controller plan has no next controller milestone.
 ---
 
 ## ✅ Done
+
+### WEPP Workflow Single-Flight Tracking
+
+**Completed**: 2026-08-03
+
+**Status**: ✅ **COMPLETE; PRODUCTION OBSERVATION PENDING**
+
+**Link**: [docs/work-packages/20260802_wepp_singleflight_tracking/](docs/work-packages/20260802_wepp_singleflight_tracking/)
+
+**Summary**: Closed the same-run WEPP admission gap that allowed a short-lived
+orchestration root to finish while hillslope or watershed descendants remained
+active. The guard now normalizes pinned RQ 1.16.2 enums and byte dependency
+keys, follows the complete child tree for all five normal/prep/no-prep
+hillslope and watershed keys, and permits retry only for deferred jobs stranded
+by their own terminal dependency chain. Focused validation passed (`118
+passed`), stub and docs gates passed, and independent correctness/QA reviews
+closed with no unresolved High/Medium findings. A queue outage longer than the
+seven-day root-receipt retention is retained as low-probability residual debt.
+
+---
 
 ### Batch Runner WATAR Integration ✅
 

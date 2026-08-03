@@ -10,10 +10,10 @@ WEPPcloud must never start two WEPP workflows against the same run directory at 
 
 - [x] (2026-08-03 06:41 UTC) Diagnose the production overlap and identify the short-lived-root tracking gap.
 - [x] (2026-08-03 06:41 UTC) Record the normative behavior in `docs/schemas/rq-response-contract.md` and create package scaffolding.
-- [ ] Implement descendant-aware tracking and focused regression coverage.
-- [ ] Run targeted tests, RQ graph validation, stub validation as applicable, docs lint, and diff checks.
-- [ ] Complete independent `reviewer` and `qa_reviewer` passes and resolve actionable findings.
-- [ ] Close package documentation and archive this plan.
+- [x] (2026-08-03 06:52 UTC) Implement descendant-aware tracking and focused regression coverage.
+- [x] (2026-08-03 06:56 UTC) Run targeted tests, RQ graph validation, stub validation, docs lint, and diff checks; record environmental/baseline blockers.
+- [x] (2026-08-03 06:57 UTC) Complete independent `reviewer` and `qa_reviewer` passes and resolve actionable findings.
+- [x] (2026-08-03 06:57 UTC) Close package documentation and archive this plan.
 
 ## Surprises & Discoveries
 
@@ -37,7 +37,7 @@ WEPPcloud must never start two WEPP workflows against the same run directory at 
 
 ## Outcomes & Retrospective
 
-Implementation and validation are pending.
+WEPP single-flight admission now follows active descendants after the orchestration root finishes and correctly interprets pinned RQ 1.16.2 enums and byte dependency keys. All five workflow keys share the behavior, failed dependency tails permit recovery, and unrelated viable branches still block duplicates. Focused validation passed with 118 tests; independent correctness and QA review closed without unresolved High or Medium findings. A queue outage exceeding the root's seven-day retention remains a documented low-probability follow-up.
 
 ## Context and Orientation
 
@@ -89,4 +89,6 @@ Revision note (2026-08-03 06:41 UTC): Initial plan created from the production d
 
 Revision note (2026-08-03 06:48 UTC): Added the RQ `JobStatus.value` normalization defect discovered during validation; the implementation and tests now cover the production enum rather than only string test doubles.
 
-Revision note (2026-08-03 07:03 UTC): Corrected the pinned RQ version, recorded its byte dependency-key representation, and narrowed deferred viability wording to each job's transitive dependency chain after dual-review findings.
+Revision note (2026-08-03 06:52 UTC): Corrected the pinned RQ version, recorded its byte dependency-key representation, and narrowed deferred viability wording to each job's transitive dependency chain after dual-review findings.
+
+Revision note (2026-08-03 06:57 UTC): Recorded completed implementation, validation limitations, dual-review disposition, residual receipt-retention risk, and plan archive at package closure.

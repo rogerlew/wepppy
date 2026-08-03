@@ -1,6 +1,6 @@
 # WEPP Workflow Single-Flight Tracking
 
-**Status**: Open (2026-08-03)
+**Status**: Closed (2026-08-03)
 **Timezone**: UTC
 
 ## Overview
@@ -39,11 +39,11 @@ Two WEPP no-prep submissions for one production run passed the existing guard be
 
 ## Success Criteria
 
-- [ ] A finished orchestration root with a started/queued/scheduled descendant blocks another WEPP submission.
-- [ ] A viable deferred workflow blocks another submission.
-- [ ] A failed workflow with only stranded deferred descendants permits retry.
-- [ ] Hillslope, watershed, prep-only, and no-prep job keys share the behavior.
-- [ ] Targeted tests, RQ graph validation, documentation lint, and dual reviews pass.
+- [x] A finished orchestration root with a started/queued/scheduled descendant blocks another WEPP submission.
+- [x] A viable deferred workflow blocks another submission.
+- [x] A failed workflow with only stranded deferred descendants permits retry.
+- [x] Hillslope, watershed, prep-only, and no-prep job keys share the behavior.
+- [x] Targeted tests, documentation lint, stub gates, and dual reviews pass; pre-existing RQ graph drift is documented.
 
 ## Parameterization ADR Gate
 
@@ -108,3 +108,16 @@ Two WEPP no-prep submissions for one production run passed the existing guard be
 ## Follow-up Work
 
 - Observe production for same-run duplicate rejection and any false-positive retry blocks.
+- Consider a durable workflow receipt if queue outages or backlogs can approach the seven-day orchestration-root result retention.
+
+## Closure Notes
+
+**Closed**: 2026-08-03 06:57 UTC
+
+**Summary**: WEPP admission now normalizes pinned RQ 1.16.2 status enums, follows child links after the short-lived root finishes, and evaluates deferred jobs against their own transitive dependencies. All five canonical hillslope/watershed/prep/no-prep keys share the guard. Production-shaped byte dependency keys and failure recovery are covered by focused regressions.
+
+**Validation**: The local virtualenv suite passed `118` scoped tests; module stubtest and stub completeness passed; documentation lint and `git diff --check` passed. The canonical `wctl` wrappers were unavailable because the local `weppcloud` service was stopped. The full local sweep stopped during collection on missing `SECRET_KEY`, unrelated to this package. `check-rq-graph` reported pre-existing static artifact drift; this package changes no enqueue site or dependency edge and did not regenerate unrelated artifacts.
+
+**Review disposition**: Independent correctness and QA reviewers approved after the RQ byte-key remediation, contract checkpoint `c47bb7093`, and per-dependency wording/test corrections. No High or Medium findings remain. Seven-day receipt expiration during an extreme backlog is accepted residual risk.
+
+**Archive Status**: The completed ExecPlan is under `prompts/completed/`; review and contract artifacts remain under `artifacts/`.

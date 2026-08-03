@@ -11,6 +11,12 @@
 - **Queues & worker class.** All jobs run on Redis DB 9 (`RedisDB.RQ`) and are consumed by `WepppyRqWorker`, a thin wrapper around `rq.Worker` that (a) sets `default_result_ttl=604800`, (b) attaches per-run log files, (c) handles SIGUSR1 cancelations, and (d) publishes job lifecycle events to `<runid>:rq`.
 - **Status fan-out.** Tasks publish human-readable updates using `StatusMessenger`. Channels follow the `<runid>:<panel>` convention (`:wepp`, `:batch`, `:omni`, `:path_ce`, etc.) so the UI knows which dashboard panes to refresh. Long-running flows additionally trigger synthetic events (for example `TRIGGER omni END_BROADCAST`).
 - **Job metadata + cancellation.** Parent tasks stash child job ids under `job.meta["jobs:{order},..."]`. The `cancel_job` module relies on this ordering to propagate stop commands; `job_info.py` walks the same tree when the UI needs a recursive status snapshot.
+- **WEPP single-flight tracking.** WEPP submission routes retain the short-lived
+  orchestration root as the status and cancellation receipt, and admission
+  follows its `job.meta["jobs:..."]` descendants until executable work is
+  terminal. Failed dependencies do not turn stranded deferred descendants into
+  a permanent run lockout. All normal, watershed, prep-only, and no-prep WEPP
+  entry points share this per-run guard.
 - **RedisPrep integration.** Project-scoped tasks update `RedisPrep` timestamps (`TaskEnum.*`) to keep the progress bars in sync with what actually ran. New tasks must cooperate with these timestamps to avoid double-running expensive steps.
 - **Timeouts & observability.** Most jobs share a 12-hour timeout (43 200 s) to accommodate large WEPP runs. Modules fall back to deterministic logging (`cligen.log`, `render_deval_*.stderr`, etc.) so operators can debug failures outside of Redis.
 
