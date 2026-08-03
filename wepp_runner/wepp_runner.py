@@ -70,6 +70,7 @@ __all__ = [
     "linux_wepp_bin_opts",
     "get_linux_wepp_bin_opts",
     "infer_pass_family_for_wepp_bin",
+    "resolve_pass_family_for_wepp_bin",
     "make_flowpath_run",
     "make_ss_flowpath_run",
     "make_hillslope_run",
@@ -300,6 +301,11 @@ def _assert_hbp_supported_binary(binary_path, *, role):
 
 
 def _assert_pass_family_release_support(pass_family, *, wepp_bin):
+    return resolve_pass_family_for_wepp_bin(pass_family, wepp_bin=wepp_bin)
+
+
+def resolve_pass_family_for_wepp_bin(pass_family, *, wepp_bin=None):
+    """Resolve a requested pass family against the selected release contract."""
     normalized = _normalize_pass_family(pass_family)
     release_pass_family = infer_pass_family_for_wepp_bin(wepp_bin)
     if release_pass_family == PASS_FAMILY_HBP:

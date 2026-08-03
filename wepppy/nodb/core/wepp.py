@@ -129,6 +129,7 @@ except (FileNotFoundError, PermissionError) as exc:
 # wepppy
 from wepppy.climates.cligen import ClimateFile
 from wepp_runner.wepp_runner import (
+    resolve_pass_family_for_wepp_bin,
     make_hillslope_run,
     make_ss_hillslope_run,
     make_ss_batch_hillslope_run,
@@ -1294,9 +1295,8 @@ class Wepp(NoDbBase):
                 value = self.config_get_str("wepp", "pass_family", "legacy_ascii")
             else:
                 value = "legacy_ascii"
-        if value is None:
-            return "legacy_ascii"
-        return str(value).strip().lower() or "legacy_ascii"
+        requested = str(value).strip().lower() if value is not None else "legacy_ascii"
+        return resolve_pass_family_for_wepp_bin(requested or "legacy_ascii", wepp_bin=self.wepp_bin)
 
     @pass_family.setter
     @nodb_setter
