@@ -1,8 +1,8 @@
 # PROJECT_TRACKER.md
 > Kanban board for wepppy work packages and vision items
 
-**Last Updated**: 2026-08-02
-**Active Packages**: 22
+**Last Updated**: 2026-08-03
+**Active Packages**: 23
 **Quick Links**: [Work Packages Directory](docs/work-packages/) | [God-Tier Prompting Strategy](docs/god-tier-prompting-strategy.md)
 
 ## Purpose
@@ -37,7 +37,7 @@ This tracker makes all work visible at a glance, helping agents coordinate and a
 ### 2. Limit Work in Progress
 **Target**: 2-4 active packages maximum to maintain focus and ensure packages complete rather than stall.
 
-**Current WIP**: 19 packages (above target range)
+**Current WIP**: 20 packages (above target range)
 
 ### 3. Manage Flow
 Monitor how long packages spend in each column:
@@ -322,6 +322,18 @@ When resuming Kubernetes work:
 
 ## 🚧 In Progress
 
+### Stevens Canyon Hillslope Water-Balance Attribution
+
+**Started**: 2026-08-03
+**Priority**: High
+**Security impact**: `none`
+**Link**: [docs/work-packages/20260803_stevens_canyon_water_balance_attribution/](docs/work-packages/20260803_stevens_canyon_water_balance_attribution/)
+**Description**: Use existing paired daily hillslope outputs to identify whether
+surface runoff, subsurface lateral flow, percolation, or evapotranspiration
+carries the flashier-undisturbed response. The first milestone produces paired
+water-flux figures for H49-H61 without rerunning WEPP.
+
+---
 
 ### Omni Fork Symlink Retarget Hardening (SURF-04A)
 
@@ -896,6 +908,26 @@ the remaining-run controller plan has no next controller milestone.
 ---
 
 ## ✅ Done
+
+### Stevens Canyon Contributor-Indexed `htcs` Ensemble
+
+**Completed**: 2026-08-03
+**Link**: [docs/work-packages/20260803_stevens_canyon_htcs_ensemble/](docs/work-packages/20260803_stevens_canyon_htcs_ensemble/)
+**Outcome**: A paired 100-year source experiment and 300 corrected spatial
+realizations showed that contributor-indexed lateral-flow timing can alter
+upstream peaks but does not remove the focal inversion. Outlet sensitivity was
+small; figures and sidecars disclose rebuild and compact-fixture limitations.
+
+---
+
+### Stevens Canyon Hillslope Synchronization Sensitivity
+
+**Completed**: 2026-08-03
+**Link**: [docs/work-packages/20260803_stevens_canyon_synchronization/](docs/work-packages/20260803_stevens_canyon_synchronization/)
+**Outcome**: Three full-period, volume-preserving timing lanes showed moderate
+and non-monotonic channel-peak sensitivity without eliminating the day-203
+inversion. Three figures and Markdown sidecars document the results; source
+cleanup was verified.
 
 ### WEPP Workflow Single-Flight Tracking
 
