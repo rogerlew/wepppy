@@ -506,6 +506,9 @@ across `0.30-0.80` moved median ET ratios by only `0.01-0.03` at fixed `kcb`.
 The experiment therefore rejects `kcb` and `rawp` as sufficient controls for
 the full severity target matrix. No production values were changed.
 
+The resulting design alternatives and recommended development sequence are
+captured in [Forest and Post-Fire ET Model Options](artifacts/forest-et-model-options.md).
+
 ## Preliminary Conclusion
 
 The selected reaches are not hydrologically outside the fire. WEPP_ID 169 is
