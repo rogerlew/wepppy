@@ -1,7 +1,8 @@
-# Project-Owned Configuration Contract (Draft)
+# Project-Owned Configuration Contract
 
-> **Status:** Draft for operator review; non-canonical and not approved for
-> implementation.
+> **Status:** Ratified 2026-08-04 by WP00R for implementation on
+> `feature/project-owned-config`; noncanonical until roadmap promotion to
+> `master`.
 >
 > **Scope:** Project creation, configuration composition, NoDb configuration
 > resolution, capability presentation/enforcement, fork/archive preservation,
@@ -1166,17 +1167,19 @@ Implementation is not conformant until tests demonstrate:
 At least one representative project MUST be exercised through create, reopen,
 fork, archive, and restore before production rollout.
 
-## 16. Remaining Approval and Evidence Gates
+## 16. Approval and Evidence Gates
 
-The review cycle identified no remaining version 1 behavior decisions in this
-draft. Implementation remains blocked until:
+The review cycle identified no remaining version 1 behavior decisions. WP00R
+approved this contract for implementation on the noncanonical initiative
+branch. Runtime activation and promotion remain blocked until:
 
 1. the sanitization work package inventories the existing lexical forms and
    ratifies the type-specific canonical value encodings required by section
    8.1;
-2. the applicable contract-first work-package checkpoint approves this draft;
+2. each implementation package imports and closes its entries from the WP00R
+   [normative requirement checklist](../work-packages/20260804_project_config_contract_ratification/artifacts/normative_requirement_checklist.md);
    and
-3. the implementation records the required local and Forest evidence before
+3. implementation records the required local and Forest evidence before
    enabling writer feature flags or exposing a builder combination.
 
 Implementation sequencing, requirement ownership, cross-package leakage, and

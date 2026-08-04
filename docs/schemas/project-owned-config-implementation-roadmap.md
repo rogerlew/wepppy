@@ -1,7 +1,8 @@
 # Project-Owned Configuration Implementation Roadmap
 
-> **Status:** Draft implementation roadmap; package folders are proposed and
-> are created only when their execution begins.
+> **Status:** Ratified 2026-08-04 by WP00R for implementation on the
+> noncanonical initiative branch; package folders are created only when their
+> execution begins.
 >
 > **Noncanonical initiative branch:** `feature/project-owned-config`
 >
@@ -178,7 +179,7 @@ with one of the closure states in section 2.2.
 
 | Requirement ID | Contract scope | Closure owner | Contributing packages | Required closure evidence | Initial status |
 | --- | --- | --- | --- | --- | --- |
-| PC-00 | Contract-first ratification and exhaustive normative requirement mapping (contract status and section 16) | WP00R | Every package | Approval artifact plus checklist mapping every normative paragraph/regression bullet to a PC row and tracker task. | Contracted; approval pending |
+| PC-00 | Contract-first ratification and exhaustive normative requirement mapping (contract status and section 16) | WP00R | Every package | Approval artifact plus checklist mapping every normative paragraph/regression bullet to a PC row and tracker task. | Verified by WP00R, 2026-08-04 |
 | PC-01 | Project-owned file naming, flattened marker, and project-local authority (sections 5, 6.1, 7.1, 7.3) | WP02 | WP04, WP06 | Loader and creation fixtures for preset basename and builder `config.cfg`; no shared fallback after marker recognition. | Contracted |
 | PC-02 | Legacy local/shared fallback and dual defaults-name precedence (sections 6.2-6.3) | WP01 | WP02, WP11 | Full four-location precedence matrix and legacy reopen equivalence. | Contracted |
 | PC-03 | Shared `_defaults.cfg` move, relative symlink compatibility, and dual-name evidence (sections 14.1-14.3) | WP01 | WP02, WP11 | Move/symlink commit, older-reader proof, defaults compatibility Forest evidence, permanent project-local legacy reader test. | Contracted |

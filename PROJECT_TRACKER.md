@@ -912,6 +912,24 @@ the remaining-run controller plan has no next controller milestone.
 
 ## ✅ Done
 
+### Project-Owned Configuration Contract Ratification (WP00R) (2026-08-04)
+
+**Completed**: 2026-08-04
+**Security impact**: `high` - documentation checkpoint passed dedicated review
+**Initiative branch**: `feature/project-owned-config` (noncanonical)
+**Link**: [docs/work-packages/20260804_project_config_contract_ratification/](docs/work-packages/20260804_project_config_contract_ratification/)
+
+**Outcome**: Ratified the project-owned configuration contract and
+implementation roadmap for feature-branch execution. The package maps 107
+mandatory groups, 54 required regression bullets, and three advisory-only
+groups to PC-00-PC-21 ownership with no orphan. Governance and security reviews
+pass; PC-00 is verified while runtime implementation remains assigned to
+WP00A-WP13.
+
+**Next Steps**: Scaffold WP00A secret sanitization, WP00B source normalization,
+or WP01 defaults compatibility. Each successor must import its checklist task
+IDs and remain on the documented initiative branch.
+
 ### Stevens Canyon Focal-Event Attribution
 
 **Completed**: 2026-08-04
