@@ -896,6 +896,19 @@ the remaining-run controller plan has no next controller milestone.
 
 ## ✅ Done
 
+### Stevens–Palisades Peak Soil-Evaporation Counterfactual
+
+**Completed**: 2026-08-04
+**Status**: ✅ **COMPLETE**
+**Security impact**: `none`
+**Link**: [docs/work-packages/20260803_stevens_palisades_es_counterfactual/](docs/work-packages/20260803_stevens_palisades_es_counterfactual/)
+**Outcome**: The 278-Palisades/13-Stevens burned-PMET replay rejected the
+eightfold premise (peak ratio 1.28; p99 ratio 1.09). Perfect synchronization
+cannot explain the residual; Stevens instead combines higher realized daily
+evaporative throughput with available upper-layer water.
+
+---
+
 ### Palisades Four-Cell ET Attribution
 
 **Completed**: 2026-08-04

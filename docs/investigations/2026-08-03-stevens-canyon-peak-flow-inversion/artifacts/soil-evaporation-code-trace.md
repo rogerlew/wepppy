@@ -118,3 +118,13 @@ is responsible for the realized flux.
   coefficients, soil-water limits, and final fluxes.
 - Paired H59 management and output files under
   `/wc1/ablation/stevens-canyon-peak-flow-20260803-hillslopes`.
+
+## Cross-Site Peak Follow-up
+
+The completed Stevens–Palisades counterfactual package found canonical
+area-weighted burned-PMET maxima of 4.96 and 3.86 mm/day, not an eightfold
+contrast. Perfect hillslope synchronization cannot explain even that 1.28-fold
+difference. Stevens' top `Es` days instead have about twice the realized
+`Ep + Es` throughput and wetter modeled upper-layer conditions, while
+Palisades assigns the larger fraction of ET to `Es`. See the
+[`counterfactual results`](../../../work-packages/20260803_stevens_palisades_es_counterfactual/artifacts/results.md).

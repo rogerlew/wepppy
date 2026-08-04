@@ -1,0 +1,45 @@
+{
+  "observed_peak_ratio_stevens_to_palisades": 1.2835839913861664,
+  "sites": [
+    {
+      "site": "Stevens Canyon",
+      "hillslopes": 13,
+      "days": 36525,
+      "actual_peak_es_mm": 4.958814799184075,
+      "peak_year": 82,
+      "peak_julian": 156,
+      "p99_es_mm": 2.6372154181613583,
+      "perfect_sync_peak_es_mm": 5.181185200815924,
+      "synchronization_efficiency": 0.957081171003725,
+      "peak_day_P": 13.500000000000002,
+      "peak_day_RM": 13.500000000000002,
+      "peak_day_Ep": 5.781126116620947,
+      "peak_day_Es": 4.958814799184075,
+      "peak_day_Er": 0.0,
+      "peak_day_soil_water": 293.55853696279104,
+      "peak_day_soil_water_total": 293.55853696279104,
+      "peak_prior7_RM_mm": 31.0,
+      "peak_prior7_P_mm": 31.0
+    },
+    {
+      "site": "Palisades",
+      "hillslopes": 278,
+      "days": 16802,
+      "actual_peak_es_mm": 3.8632569683491904,
+      "peak_year": 2006,
+      "peak_julian": 144,
+      "p99_es_mm": 2.417521694585781,
+      "perfect_sync_peak_es_mm": 3.957649728668874,
+      "synchronization_efficiency": 0.9761492888984311,
+      "peak_day_P": 0.0,
+      "peak_day_RM": 0.0,
+      "peak_day_Ep": 1.1860991420423563,
+      "peak_day_Es": 3.8632569683491904,
+      "peak_day_Er": 0.0,
+      "peak_day_soil_water": 170.26803539650714,
+      "peak_day_soil_water_total": 170.26803539650714,
+      "peak_prior7_RM_mm": 48.87276446632821,
+      "peak_prior7_P_mm": 48.87276446632821
+    }
+  ]
+}

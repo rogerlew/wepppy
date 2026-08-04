@@ -1,6 +1,6 @@
 # Stevens Canyon Burned–Undisturbed Peak-Flow Investigation
 
-**Status: OPEN, MECHANISM NARROWED (`2026-08-03`).** The reported peak-flow
+**Status: OPEN, MECHANISM NARROWED (`2026-08-04`).** The reported peak-flow
 reversals are confirmed in raw WEPP channel output. The project-to-project
 channel-parameter mismatch hypothesis is ruled out. Hillslope replays support
 an antecedent shallow-soil saturation mechanism, while contradicting the
@@ -25,6 +25,16 @@ when their scenario peaks differ. The largest common reversal occurs in
 simulation year 34 on Julian day 203, a `58.7 mm` precipitation day. On that
 day, the undisturbed peak is higher at all three selected reaches and at the
 outlet.
+
+A subsequent cross-site soil-evaporation decomposition corrected an informal
+magnitude comparison with the Palisades fixture. Like-for-like burned-PMET,
+area-weighted daily `Es` peaks at `4.96 mm/day` in Stevens Canyon and
+`3.86 mm/day` in Palisades: a `1.28×` ratio, not `8×`. Their 99th-percentile
+ratio is only `1.09×`. Perfect synchronization of every hillslope's individual
+maximum cannot explain the residual contrast. Stevens instead combines about
+twice the realized `Ep + Es` throughput on high-`Es` days with available
+upper-layer water, even though Palisades assigns a larger fraction of ET to
+soil evaporation.
 
 The selected stream lines must not be classified as unaffected merely because
 the line geometry is outside the fire perimeter. WEPP routes runoff from the
@@ -508,6 +518,26 @@ the full severity target matrix. No production values were changed.
 
 The resulting design alternatives and recommended development sequence are
 captured in [Forest and Post-Fire ET Model Options](artifacts/forest-et-model-options.md).
+
+### Stevens–Palisades peak-`Es` counterfactual
+
+The completed
+[counterfactual work package](../../work-packages/20260803_stevens_palisades_es_counterfactual/artifacts/results.md)
+replayed all 278 Palisades burned-PMET hillslopes and parsed all 13 Stevens
+contributing hillslopes with the canonical `wepp_260803_hill` output. The exact
+perfect-synchronization bounds are `5.181 mm/day` Stevens and `3.958 mm/day`
+Palisades, compared with observed area-weighted peaks of `4.959` and
+`3.863 mm/day`. Synchronization therefore widens the site difference slightly
+and is a negative explanation.
+
+Across each site's top 100 `Es` days, median realized `Ep + Es` is
+`7.79 mm/day` Stevens and `3.62 mm/day` Palisades. Their median soil fractions
+are `0.455` and `0.770`, respectively. The higher absolute Stevens `Es` is thus
+carried by greater total evaporative throughput coincident with surface-water
+availability, not by a stronger cross-site PMET allocation to soil. Fully
+separating meteorological reference demand from water and vegetation limits
+would require output of the intermediate PMET terms; the current comparison
+does not claim that unresolved split.
 
 ### Legacy-ET model-form ablation
 

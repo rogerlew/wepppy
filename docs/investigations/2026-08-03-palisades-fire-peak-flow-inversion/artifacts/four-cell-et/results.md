@@ -98,6 +98,12 @@ Watershed-average burned PMET `Es` peaks at 3.86 mm/day, with a 99th percentile
 of 2.42 mm/day. No cell has a watershed-average `Es` day at or above 10 mm.
 This is not the Stevens Canyon 10--15 mm/day failure signature.
 
+A subsequent like-for-like replay supersedes that informal Stevens magnitude:
+the canonical area-weighted Stevens burned-PMET maximum is 4.96 mm/day versus
+3.86 mm/day here. The cross-site ratio is 1.28, not eight, and the corresponding
+99th-percentile ratio is only 1.09. See the
+[`counterfactual results`](../../../../work-packages/20260803_stevens_palisades_es_counterfactual/artifacts/results.md).
+
 ## Interpretation boundary
 
 This experiment diagnoses daily hillslope runoff generation, ET, and storage.
