@@ -1,0 +1,45 @@
+diff --git a/src/evappm.for b/src/evappm.for
+--- a/src/evappm.for
++++ b/src/evappm.for
+@@
+-     1    et(mxplan)
++     1    et(mxplan),resintobs
+@@
+       ep(iplane) =  etorc*etks*kcbcon*0.001
+       et(iplane) = es(iplane) + ep(iplane)
+-      call wepp_observe_pmet(year,sdate,iplane,crpindx,etorc,
+-     1  kcb(crpindx),rawp(crpindx),kcbadj,kcbcon,lai(iplane),
+-     1  rtd(iplane),tpdp,TAW,RAW,wftrp,etks,ep(iplane)*1000.,
+-     1  es(iplane)*1000.)
++      resintobs = resint(iplane)*1000.
+@@
+ 60    continue
++c
++c     Emit after the availability correction so ESMM is realized Es.
++      call wepp_observe_pmet(year,sdate,iplane,crpindx,etorc,
++     1  kcb(crpindx),rawp(crpindx),kcbadj,kcbcon,lai(iplane),
++     1  rtd(iplane),tpdp,TAW,RAW,wftrp,etks,ep(iplane)*1000.,
++     1  es(iplane)*1000.,etke,etkr,eaj,kcmax,kecon,wfevp,TEW,
++     1  REW,resintobs,fin*1000.,potes*1000.,
++     1  bpotes*1000.)
+diff --git a/src/wepp_observe.for b/src/wepp_observe.for
+--- a/src/wepp_observe.for
++++ b/src/wepp_observe.for
+@@
+-     1  taw,raw,wftrp,etks,epmm,esmm)
++     1  taw,raw,wftrp,etks,epmm,esmm,etke,etkr,eaj,kcmax,
++     1  kecon,wfevp,tew,rew,resintmm,finmm,potesmm,bpotesmm)
+@@
+       real tpdp,taw,raw,wftrp,etks,epmm,esmm
++      real etke,etkr,eaj,kcmax,kecon,wfevp,tew,rew
++      real resintmm,finmm,potesmm,bpotesmm
+@@
+-        inquire(file='wepp_observe.on',exist=obs_on_cached)
++        inquire(file='stevens_pmet_observe.on',exist=obs_on_cached)
+@@
+-     1  etks,epmm,esmm
++     1  etks,epmm,esmm,etke,etkr,eaj,kcmax,kecon,wfevp,tew,
++     1  rew,resintmm,finmm,potesmm,bpotesmm
+       return
+- 1000 format(i6,3(',',i6),14(',',1pe15.7))
++ 1000 format(i6,3(',',i6),26(',',1pe15.7))

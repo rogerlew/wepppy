@@ -557,6 +557,26 @@ ET response is shared across both model paths.
 
 ## Preliminary Conclusion
 
+### Focal-event process attribution
+
+The completed
+[year-34/day-203 attribution study](../../work-packages/20260803_stevens_event_attribution/artifacts/results.md)
+now identifies antecedent PMET soil evaporation as a material cause of the
+shallow-storage and runoff inversion. Over days 173–202, area-weighted burned
+`Es` is `28.21 mm` versus `2.32 mm` undisturbed, an excess loss of `25.89 mm`.
+That nearly closes against the independently measured `23.0 mm` undisturbed
+advantage in layers 1–3 before the storm.
+
+The paired climate supplies `84.4 mm` to both scenarios. Burned hillslopes
+actually receive `10.37 mm` more of the PMET wetting/infiltration term, while
+plant transpiration differs by only `1.06 mm`. Instrumented equation terms show
+that low LAI and reduced residue create the burned soil-evaporation request;
+surface-water limitation suppresses rather than creates it, and PMET reference
+demand is identical. This evidence upgrades PMET antecedent depletion from a
+plausible concern to a material event mechanism. It does not establish PMET as
+the exclusive cause because management simultaneously changes rooting, cover,
+interception, and infiltration.
+
 The selected reaches are not hydrologically outside the fire. WEPP_ID 169 is
 entirely supplied by hillslopes assigned low- or moderate-severity fire;
 WEPP_ID 172 receives a predominantly fire-parameterized contributing area; and
@@ -576,10 +596,10 @@ hydrograph-synchronization response. Contributor-indexed `htcs` routing and 300
 spatial-variation realizations do not remove the inversion, and their outlet
 response is small. Area-weighted hillslope accounting shows that surface runoff
 rather than lateral flow carries the focal inversion. The strongest next study
-is therefore a process-instrumented `evappm` and infiltration/runoff experiment:
-trace potential ET, LAI partition coefficients, layer-specific extraction,
-surface saturation, and the exact runoff threshold under identical climate and
-soil states. Route the resulting hillslope hydrographs through a common channel
-state only as a validation step. Broad parameter mutation is premature until
-that trace distinguishes excessive soil evaporation from a runoff-threshold
-implementation defect.
+was the process-instrumented `evappm` experiment now completed above. Its trace
+supports excess burned soil evaporation as the antecedent mechanism. The
+remaining highest-value causal test is a restart or state-swap experiment that
+holds the day-202 layer-water profile fixed while swapping management/runoff
+physics. Route resulting hillslope hydrographs through a common channel state
+only after that state intervention; broad parameter mutation remains
+premature.

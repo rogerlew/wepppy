@@ -896,6 +896,18 @@ the remaining-run controller plan has no next controller milestone.
 
 ## ✅ Done
 
+### Stevens Canyon Focal-Event Attribution
+
+**Completed**: 2026-08-04
+**Security impact**: `none`
+**Link**: [docs/work-packages/20260803_stevens_event_attribution/](docs/work-packages/20260803_stevens_event_attribution/)
+**Outcome**: Gated PMET traces from 26 paired hillslope runs attribute a
+material share of the focal inversion to 25.89 mm of excess antecedent burned
+soil evaporation, closely matching the 23.0 mm shallow-layer deficit. The
+disposable source worktree was removed and the baseline remained clean.
+
+---
+
 ### Stevens–Palisades Peak Soil-Evaporation Counterfactual
 
 **Completed**: 2026-08-04
