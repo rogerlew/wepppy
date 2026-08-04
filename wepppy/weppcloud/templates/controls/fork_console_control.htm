@@ -39,6 +39,7 @@
        )
      ) %}
     <fieldset>
+      <p class="wc-text-muted">Fork and archive operations run one at a time. Your accepted fork may remain queued before it starts. The fork copies the source project state available when the worker begins, so avoid editing the source while the job is queued or running.</p>
       {{ ui.text_field(
            'runid_input',
            'Source run ID',

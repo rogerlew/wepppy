@@ -1,8 +1,7 @@
 from __future__ import annotations
 
-from typing import Any
-
 import pytest
+from redis.exceptions import WatchError
 from rq.exceptions import InvalidJobOperation
 
 from wepppy.rq import cancel_job
@@ -21,13 +20,147 @@ class _FakeJob:
     def get_status(self) -> str:
         return self._status
 
-    def cancel(self) -> None:
+    def cancel(self, pipeline=None) -> None:
         self.cancel_calls += 1
         if self._status == "finished":
             raise InvalidJobOperation
 
     def save_meta(self) -> None:
         pass
+
+
+class _RedisContext:
+    def __init__(self, *, present: bool = True, race: bool = False) -> None:
+        self.present = present
+        self.race = race
+
+    def __enter__(self):
+        return self
+
+    def __exit__(self, exc_type, exc, tb):
+        return False
+
+    def pipeline(self):
+        return self
+
+    def watch(self, key):
+        return None
+
+    def lpos(self, key, job_id):
+        return 0 if self.present else None
+
+    def multi(self):
+        return None
+
+    def execute(self):
+        if self.race:
+            raise WatchError
+        return []
+
+
+def _patch_job(monkeypatch: pytest.MonkeyPatch, job, *, present: bool = True, race: bool = False) -> None:
+    context = _RedisContext(present=present, race=race)
+    monkeypatch.setattr(cancel_job.redis, "Redis", lambda **kwargs: context)
+    monkeypatch.setattr(cancel_job.Job, "fetch", lambda job_id, connection: job)
+
+
+def test_non_admin_cancels_fork_archive_only_while_queued(monkeypatch: pytest.MonkeyPatch) -> None:
+    class Job:
+        id = "job-1"
+        origin = "fork-archive"
+
+        def __init__(self):
+            self.canceled = False
+
+        def get_status(self):
+            return "queued"
+
+        serializer = None
+
+        def cancel(self, pipeline=None):
+            self.canceled = True
+
+    job = Job()
+    _patch_job(monkeypatch, job)
+
+    assert cancel_job.cancel_jobs("job-1", allow_started_fork_archive=False) == {"status": "ok"}
+    assert job.canceled is True
+
+
+@pytest.mark.parametrize("status", ["started", "intermediate"])
+def test_non_admin_never_stops_handed_off_fork_archive_job(
+    monkeypatch: pytest.MonkeyPatch, status: str
+) -> None:
+    class Job:
+        id = "job-2"
+        origin = "fork-archive"
+        serializer = None
+
+        def get_status(self):
+            return status
+
+    _patch_job(monkeypatch, Job())
+    monkeypatch.setattr(
+        cancel_job,
+        "send_stop_job_command",
+        lambda *args, **kwargs: pytest.fail("non-admin path issued stop"),
+    )
+
+    result = cancel_job.cancel_jobs("job-2", allow_started_fork_archive=False)
+    assert result["code"] == "forbidden"
+
+
+def test_non_admin_handoff_race_fails_closed_without_stop(monkeypatch: pytest.MonkeyPatch) -> None:
+    class Job:
+        id = "job-3"
+        origin = "fork-archive"
+        serializer = None
+
+        def get_status(self):
+            return "queued"
+
+        def cancel(self, pipeline=None):
+            return None
+
+    _patch_job(monkeypatch, Job(), race=True)
+    monkeypatch.setattr(
+        cancel_job,
+        "send_stop_job_command",
+        lambda *args, **kwargs: pytest.fail("handoff race issued stop"),
+    )
+
+    result = cancel_job.cancel_jobs("job-3", allow_started_fork_archive=False)
+    assert result["code"] == "forbidden"
+
+
+def test_non_admin_queued_status_but_missing_queue_entry_fails_closed(
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    class Job:
+        id = "job-4"
+        origin = "fork-archive"
+        serializer = None
+
+        def __init__(self):
+            self.canceled = False
+
+        def get_status(self):
+            return "queued"
+
+        def cancel(self, pipeline=None):
+            self.canceled = True
+
+    job = Job()
+    _patch_job(monkeypatch, job, present=False)
+    monkeypatch.setattr(
+        cancel_job,
+        "send_stop_job_command",
+        lambda *args, **kwargs: pytest.fail("handoff window issued stop"),
+    )
+
+    result = cancel_job.cancel_jobs("job-4", allow_started_fork_archive=False)
+    assert result["code"] == "forbidden"
+    assert job.canceled is False
 
 
 def test_cancel_finished_dispatch_parent_still_cancels_descendants(

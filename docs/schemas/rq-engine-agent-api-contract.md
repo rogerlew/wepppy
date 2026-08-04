@@ -228,6 +228,8 @@ Climate-parse validation contract:
    Cancellation requires access to the run resolved from job metadata for user,
    session, service, and MCP tokens. The legacy `culvert:batch:submit` scope is
    accepted only when job info carries verified `culvert_batch_uuid` metadata.
+   For `fork-archive` origin jobs, non-Admin/Root callers may cancel only while
+   the job remains queued; dispatch handoff or started state returns `403`.
 
 ## Climate Build Ordering (Operator Replication)
 For API-only replication flows, climate setup is order-sensitive:
@@ -402,8 +404,8 @@ frozen 114-route agent-facing checklist.
 
 | Method | Path | Purpose | Auth |
 |---|---|---|---|
-| `GET` | `/api/admin/recently-completed-jobs` | Recently completed jobs across `default` and `batch` queues (lookback/filter support). | JWT Bearer, `rq:status`, `Admin`/`Root` role |
-| `GET` | `/api/admin/jobs-detail` | Complete started + queued jobs across `default` and `batch` queues. | JWT Bearer, `rq:status`, `Admin`/`Root` role |
+| `GET` | `/api/admin/recently-completed-jobs` | Recently completed jobs across `default`, `batch`, and `fork-archive` queues (lookback/filter support). | JWT Bearer, `rq:status`, `Admin`/`Root` role |
+| `GET` | `/api/admin/jobs-detail` | Complete started + queued jobs across `default`, `batch`, and `fork-archive` queues. | JWT Bearer, `rq:status`, `Admin`/`Root` role |
 
 Inventory source of truth for these internal routes remains:
 `docs/work-packages/20260208_rq_engine_agent_usability/artifacts/endpoint_inventory_freeze_20260208.md`.

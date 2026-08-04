@@ -18,11 +18,11 @@ contract explicitly requires that service.
 | **Development** | `forest.local` | `wc.bearhive.duckdns.org` | `docker-compose.dev.yml` | Development with bind mounts |
 | **Prod Worker Pool** | (separate worker host) | — | `docker-compose.prod.worker.yml` | Dedicated RQ workers connected to an external Redis (no Redis/Postgres services). |
 
-The planned fork/archive serial queue uses an opt-in worker-only service on
-`wepp3`, which already has the production NFS mount and otherwise runs no
+The fork/archive serial queue uses `docker-compose.prod.wepp3.yml` on `wepp3`,
+which already has the production NFS mount and otherwise runs no
 containers. Development forest and Forest test production keep local consumers
 for behavioral parity; wepp1 and wepp2 must not consume the production serial
-queue. Track the unimplemented topology in the
+queue. Track rollout evidence in the
 [Fork/Archive Serial Queue Isolation work package](../docs/work-packages/20260803_fork_archive_serial_queue/package.md).
 
 ### Test Production (forest1.local)
@@ -34,6 +34,12 @@ cd /workdir/wepppy
 ./scripts/deploy-production.sh
 # Or manually:
 docker compose --env-file docker/.env -f docker/docker-compose.prod.yml up -d
+```
+
+Then explicitly start the profiled serial consumer on Forest:
+
+```bash
+docker compose --env-file docker/.env -f docker/docker-compose.prod.yml --profile fork-archive up -d rq-worker-fork-archive
 ```
 
 `deploy-production.sh` cleanup behavior:
@@ -214,7 +220,7 @@ chmod 600 docker/secrets/*
 One-time install (pins the default compose file for the host):
 
 ```bash
-./wctl/install.sh dev|prod|wepp1|worker
+./wctl/install.sh dev|prod|wepp1|wepp3|worker
 ```
 
 Common commands:
@@ -239,6 +245,7 @@ wctl docker compose config
 | `weppcloudr`   | R (Plumber) renderer for WEPPcloud reports | 8050 | Serves `/weppcloudr/*`; mounts R templates and run volumes; caches rendered HTML in run export dirs. |
 | `rq-worker`    | RQ worker pool servicing Redis queue DB 9 | — | Shares code volume; respects `UID`/`GID`. |
 | `rq-worker-batch` | RQ worker pool for batch queue (long-running jobs) | — | 4 workers, 8GB shm, higher resource limits. |
+| `rq-worker-fork-archive` | Single worker for fork, archive-create, and restore | — | One process; production runs only on wepp3. |
 | `redis`        | Redis 7.4 | 6379 | Dev: `.docker-data/redis`, Prod: `redis-data` volume |
 | `postgres`     | PostgreSQL 16 | 5432 | Dev: `.docker-data/postgres`, Prod: `postgres-data` volume |
 | `caddy`        | Reverse proxy + TLS terminator (dev: HTTP only) | 8080 | Serves static assets and forwards to upstream services. |

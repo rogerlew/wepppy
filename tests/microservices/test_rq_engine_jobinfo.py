@@ -306,7 +306,7 @@ def test_canceljob_accepts_valid_token(monkeypatch: pytest.MonkeyPatch) -> None:
         extra_claims={"token_class": "service", "runs": ["run-1"]},
     )
 
-    def fake_cancel(job_id: str) -> dict[str, str]:
+    def fake_cancel(job_id: str, **_kwargs) -> dict[str, str]:
         return {"status": "ok", "job_id": job_id}
 
     monkeypatch.setattr(
@@ -326,6 +326,44 @@ def test_canceljob_accepts_valid_token(monkeypatch: pytest.MonkeyPatch) -> None:
     assert response.json() == {"status": "ok", "job_id": "job-3"}
 
 
+@pytest.mark.parametrize(
+    ("roles", "allow_started"),
+    [([], False), (["Admin"], True), (["Root"], True), ([{"name": "Admin"}], True)],
+)
+def test_canceljob_passes_fork_archive_started_authority(
+    monkeypatch: pytest.MonkeyPatch,
+    roles: list[object],
+    allow_started: bool,
+) -> None:
+    monkeypatch.setattr(rq_auth, "_check_revocation", lambda jti: None)
+    token = _issue_rq_token(
+        monkeypatch,
+        extra_claims={"token_class": "service", "runs": ["run-1"], "roles": roles},
+    )
+    monkeypatch.setattr(
+        job_routes,
+        "get_wepppy_rq_job_info",
+        lambda job_id: {"job_id": job_id, "status": "started", "runid": "run-1"},
+    )
+    observed: list[bool] = []
+
+    def fake_cancel(job_id: str, *, allow_started_fork_archive: bool):
+        observed.append(allow_started_fork_archive)
+        if not allow_started_fork_archive:
+            return {"error": "Started fork/archive jobs require Admin or Root", "code": "forbidden"}
+        return {"status": "ok"}
+
+    monkeypatch.setattr(job_routes, "cancel_jobs", fake_cancel)
+    with TestClient(rq_engine.app) as client:
+        response = client.post(
+            "/api/canceljob/job-fork-archive",
+            headers={"Authorization": f"Bearer {token}"},
+        )
+
+    assert observed == [allow_started]
+    assert response.status_code == (200 if allow_started else 403)
+
+
 def test_canceljob_accepts_culvert_submit_scope(monkeypatch: pytest.MonkeyPatch) -> None:
     monkeypatch.setattr(rq_auth, "_check_revocation", lambda jti: None)
     token = _issue_rq_token(
@@ -343,7 +381,7 @@ def test_canceljob_accepts_culvert_submit_scope(monkeypatch: pytest.MonkeyPatch)
             "culvert_batch_uuid": "batch-1",
         },
     )
-    monkeypatch.setattr(job_routes, "cancel_jobs", lambda job_id: {"status": "ok", "job_id": job_id})
+    monkeypatch.setattr(job_routes, "cancel_jobs", lambda job_id, **kwargs: {"status": "ok", "job_id": job_id})
 
     with TestClient(rq_engine.app) as client:
         response = client.post(
@@ -376,7 +414,7 @@ def test_canceljob_accepts_dual_scope_culvert_token_without_run_claims(
     monkeypatch.setattr(
         job_routes,
         "cancel_jobs",
-        lambda job_id: {"status": "ok", "job_id": job_id},
+        lambda job_id, **kwargs: {"status": "ok", "job_id": job_id},
     )
 
     with TestClient(rq_engine.app) as client:
@@ -436,7 +474,7 @@ def test_canceljob_rejects_machine_token_with_wrong_run_scope(
         lambda job_id: {"job_id": job_id, "status": "started", "runid": "run-1"},
     )
     canceled = []
-    monkeypatch.setattr(job_routes, "cancel_jobs", lambda job_id: canceled.append(job_id))
+    monkeypatch.setattr(job_routes, "cancel_jobs", lambda job_id, **kwargs: canceled.append(job_id))
 
     with TestClient(rq_engine.app) as client:
         response = client.post(
@@ -569,7 +607,7 @@ def test_canceljob_accepts_session_with_marker(monkeypatch: pytest.MonkeyPatch) 
         lambda job_id: {"job_id": job_id, "status": "finished", "runid": "run-1"},
     )
     monkeypatch.setattr(rq_auth, "_check_session_marker", lambda session_id, runid: None)
-    monkeypatch.setattr(job_routes, "cancel_jobs", lambda job_id: {"status": "ok"})
+    monkeypatch.setattr(job_routes, "cancel_jobs", lambda job_id, **kwargs: {"status": "ok"})
 
     with TestClient(rq_engine.app) as client:
         response = client.post(

@@ -53,15 +53,23 @@ cutover/rollback, and a bounded wepp3 canary are demonstrated.
   cancellation amendment: queued authorized users; started Admin/Root only.
 - [x] (2026-08-04) Dispositioned two independent checkpoint reviews and obtained
   post-fix confirmation with no unresolved High or Medium findings.
-- [ ] Commit the checkpoint as a standalone ancestor and record its revision.
-- [ ] Add failing focused regressions for queue identity, worker topology,
+- [x] (2026-08-04) Committed the checkpoint as standalone ancestor
+  `bc996d336` and recorded its revision before implementation edits.
+- [x] (2026-08-04) Added focused regressions for queue identity, worker topology,
   operator listings, UI guidance, and dispatch-time safety.
-- [ ] Implement the route, compose, listing, UI, documentation, and graph
-  changes against the accepted ancestor.
-- [ ] Pass focused and broad local validation and live two-job serialization.
+- [x] (2026-08-04) Implemented the route, compose, listing, cancellation, UI,
+  documentation, and graph changes against the accepted ancestor.
+- [x] (2026-08-04) Pass broad local validation: full Python (5,828 passed/61
+  skipped), focused Python (including the final 53-test cancellation/restore/
+  compose set), graph (18), wctl (8), frontend lint/tests (105 suites/756),
+  all supported Compose renders, stubs, graph drift, broad exceptions, and
+  docs lint pass.
+- [ ] Run live two-job serialization acceptance; this requires a running
+  Forest/wepp3 deployment and is not represented by a synthetic D-state test.
 - [ ] Execute Forest drain-first cutover and rollback acceptance.
-- [ ] Complete security/correctness review, then execute a guarded wepp3 canary
-  and observation window.
+- [x] (2026-08-04) Complete independent security and correctness reviews with
+  no unresolved release-blocking findings.
+- [ ] Execute a guarded wepp3 canary and observation window.
 
 ## Surprises & Discoveries
 
@@ -131,12 +139,14 @@ cutover/rollback, and a bounded wepp3 canary are demonstrated.
 
 ## Outcomes & Retrospective
 
-The discovery milestone is complete. The proposal is technically small at the
-enqueue and compose layers, but safe delivery requires a bounded cross-owner
-contract amendment, restore dispatch revalidation, fork-destination
-characterization, operator-list updates, and a two-stage rollout. No production
-code or compose configuration has been changed. Update this section after each
-milestone and compare measured NAS/queue behavior with the purpose above.
+The repository implementation is complete and locally validated. The three
+top-level jobs route to one queue; the supported stacks expose one-process
+consumers with production isolated to wepp3; wepp1 fails closed at scale zero;
+operator/UI/cancellation/restore contracts and rollout guidance are covered by
+regressions. The remaining work is operational: Forest cutover/rollback, the
+wepp3 preflight/canary, and the 14-day observation window. Those steps require
+live host access and must record real evidence rather than simulate an NFS
+D-state event.
 
 ## Context and Orientation
 

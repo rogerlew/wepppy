@@ -372,6 +372,17 @@ def restore_archive_rq(runid: str, archive_name: str, *, runtime: ArchiveRuntime
                 disk_usage=runtime.disk_usage,
             )
 
+            locked = [
+                name
+                for name, state in runtime.lock_statuses(runid).items()
+                if name.endswith(".nodb") and state
+            ]
+            if locked:
+                raise RuntimeError(
+                    "Cannot restore while NoDb files are locked: "
+                    + ", ".join(locked)
+                )
+
             for entry in sorted(wd.iterdir()):
                 if entry.name == "archives":
                     continue

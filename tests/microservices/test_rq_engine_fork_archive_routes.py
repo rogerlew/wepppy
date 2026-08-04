@@ -19,13 +19,14 @@ def _stub_queue(
     *,
     job_id: str = "job-123",
     enqueue_calls: list[tuple[tuple[object, ...], dict[str, object]]] | None = None,
-) -> None:
+) -> list[tuple[tuple[object, ...], dict[str, object]]]:
+    constructor_calls: list[tuple[tuple[object, ...], dict[str, object]]] = []
     class DummyJob:
         id = job_id
 
     class DummyQueue:
         def __init__(self, *args, **kwargs) -> None:
-            pass
+            constructor_calls.append((args, kwargs))
 
         def enqueue_call(self, *args, **kwargs):
             if enqueue_calls is not None:
@@ -44,6 +45,7 @@ def _stub_queue(
 
     monkeypatch.setattr(fork_archive_routes, "Queue", DummyQueue)
     monkeypatch.setattr(fork_archive_routes.redis, "Redis", lambda **kwargs: DummyRedis())
+    return constructor_calls
 
 
 def _stub_prep(
@@ -224,7 +226,7 @@ def test_fork_enqueues_job(monkeypatch: pytest.MonkeyPatch, tmp_path) -> None:
     )
 
     enqueue_calls: list[tuple[tuple[object, ...], dict[str, object]]] = []
-    _stub_queue(monkeypatch, job_id="job-42", enqueue_calls=enqueue_calls)
+    constructor_calls = _stub_queue(monkeypatch, job_id="job-42", enqueue_calls=enqueue_calls)
     _stub_prep(monkeypatch)
 
     with TestClient(rq_engine.app) as client:
@@ -240,6 +242,7 @@ def test_fork_enqueues_job(monkeypatch: pytest.MonkeyPatch, tmp_path) -> None:
     assert payload["new_runid"] == "new-run"
     assert payload["undisturbify"] is True
     assert payload["skip_wepp_runs_output"] is True
+    assert constructor_calls[0][0] == ("fork-archive",)
     assert len(enqueue_calls) == 1
     enqueue_args, enqueue_kwargs = enqueue_calls[0]
     assert enqueue_args[0] is fork_archive_routes.fork_rq
@@ -876,7 +879,7 @@ def test_archive_enqueues_job(monkeypatch: pytest.MonkeyPatch, tmp_path) -> None
     monkeypatch.setattr(fork_archive_routes, "_exists", lambda path: True)
     monkeypatch.setattr(fork_archive_routes, "lock_statuses", lambda runid: {})
 
-    _stub_queue(monkeypatch, job_id="job-99")
+    constructor_calls = _stub_queue(monkeypatch, job_id="job-99")
     _stub_prep(monkeypatch)
     monkeypatch.setattr(fork_archive_routes.StatusMessenger, "publish", lambda *args, **kwargs: None)
 
@@ -890,6 +893,7 @@ def test_archive_enqueues_job(monkeypatch: pytest.MonkeyPatch, tmp_path) -> None
     assert response.status_code == 200
     payload = response.json()
     assert payload["job_id"] == "job-99"
+    assert constructor_calls[0][0] == ("fork-archive",)
 
 
 def test_archive_clears_stale_job_id_when_lookup_fails(
@@ -1011,7 +1015,7 @@ def test_restore_clears_stale_job_id_before_enqueue(
     monkeypatch.setattr(fork_archive_routes, "lock_statuses", lambda runid: {})
     monkeypatch.setattr(fork_archive_routes.Job, "fetch", lambda *args, **kwargs: (_ for _ in ()).throw(NoSuchJobError("missing")))
 
-    _stub_queue(monkeypatch, job_id="job-restore")
+    constructor_calls = _stub_queue(monkeypatch, job_id="job-restore")
     prep = _stub_prep(monkeypatch, archive_job_id="stale-restore")
     monkeypatch.setattr(fork_archive_routes.StatusMessenger, "publish", lambda *args, **kwargs: None)
 
@@ -1027,3 +1031,4 @@ def test_restore_clears_stale_job_id_before_enqueue(
     assert payload["job_id"] == "job-restore"
     assert prep.clear_calls == 1
     assert prep.archive_job_id == "job-restore"
+    assert constructor_calls[0][0] == ("fork-archive",)

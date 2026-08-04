@@ -21,7 +21,7 @@ def _expected_rq_info_command(extra: str = "") -> str:
         "set -euo pipefail; "
         f"{rq_command._compose_rq_registry_sync_command()}; "
         f'redis_url="$({rq_command._compose_rq_redis_url_command()})"; '
-        "exec /opt/venv/bin/rq info -u \"$redis_url\" default batch"
+        "exec /opt/venv/bin/rq info -u \"$redis_url\" default batch fork-archive"
     )
     if extra:
         return f"{base} {extra}"
@@ -132,7 +132,7 @@ def test_rq_info_detail_runs_summary(monkeypatch: pytest.MonkeyPatch, temp_proje
         ),
         (
             "rq-worker",
-            "cd /workdir/wepppy && PYTHONPATH=/workdir/wepppy /opt/venv/bin/python -m wepppy.rq.job_summary --queues default,batch --limit 50",
+            "cd /workdir/wepppy && PYTHONPATH=/workdir/wepppy /opt/venv/bin/python -m wepppy.rq.job_summary --queues default,batch,fork-archive --limit 50",
             True,
             False,
         ),
@@ -149,7 +149,21 @@ def test_rq_info_detail_limit(monkeypatch: pytest.MonkeyPatch, temp_project) -> 
     assert result.exit_code == 0
     assert recorded[-1] == (
         "rq-worker",
-        "cd /workdir/wepppy && PYTHONPATH=/workdir/wepppy /opt/venv/bin/python -m wepppy.rq.job_summary --queues default,batch --limit 10",
+        "cd /workdir/wepppy && PYTHONPATH=/workdir/wepppy /opt/venv/bin/python -m wepppy.rq.job_summary --queues default,batch,fork-archive --limit 10",
         True,
         False,
     )
+
+
+def test_rq_info_targets_selected_service(monkeypatch: pytest.MonkeyPatch, temp_project) -> None:
+    result, recorded = _run_command(
+        monkeypatch,
+        temp_project,
+        ["rq-info", "--service", "rq-worker-fork-archive", "--detail"],
+    )
+
+    assert result.exit_code == 0
+    assert [call[0] for call in recorded] == [
+        "rq-worker-fork-archive",
+        "rq-worker-fork-archive",
+    ]

@@ -45,8 +45,9 @@
            description="Latest exception details from archive jobs.",
            empty_state="No stack trace recorded."
          )
-       ) %}
+      ) %}
       <fieldset>
+        <p class="wc-text-muted">Fork, archive, and restore operations run one at a time. An accepted request may remain queued before it starts. Archive creation uses project state available when the worker begins. Restore replaces the current project files; do not edit the project while a restore is queued or running.</p>
         {{ ui.text_field(
              'archive_comment',
              'Archive comment',

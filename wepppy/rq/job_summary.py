@@ -12,10 +12,10 @@ from rq.registry import StartedJobRegistry
 
 from wepppy.config.redis_settings import RedisDB, redis_connection_kwargs
 
-DEFAULT_QUEUES = ("default", "batch")
+DEFAULT_QUEUES = ("default", "batch", "fork-archive")
 DEFAULT_STATES = ("started", "queued")
 DEFAULT_LIMIT = 50
-MAX_COLUMN_WIDTHS = (12, 8, 8, 20, 28, 32, 24)
+MAX_COLUMN_WIDTHS = (12, 12, 8, 20, 28, 32, 24)
 
 
 @dataclass(frozen=True)

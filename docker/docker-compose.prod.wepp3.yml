@@ -1,0 +1,40 @@
+x-wepppyo3-interchange-entrypoint: &wepppyo3-interchange-entrypoint
+  - /opt/venv/bin/python
+  - /workdir/wepppy/docker/wepppyo3-interchange-preflight.py
+  - --
+
+services:
+  rq-worker-fork-archive:
+    image: ${WEPPCLOUD_IMAGE:-wepppy:latest}
+    init: true
+    restart: unless-stopped
+    working_dir: /workdir/wepppy
+    env_file:
+      - ${WEPPPY_ENV_FILE:-defaults.env}
+    entrypoint: *wepppyo3-interchange-entrypoint
+    secrets:
+      - redis_password
+    environment:
+      PYTHONUNBUFFERED: "1"
+      MPLCONFIGDIR: /tmp/matplotlib
+      RQ_REDIS_URL: ${RQ_REDIS_URL:?Set RQ_REDIS_URL to production Redis DB 9}
+      REDIS_URL: ${RQ_REDIS_URL:?Set RQ_REDIS_URL to production Redis DB 9}
+      REDIS_PASSWORD_FILE: /run/secrets/redis_password
+      WC1_DIR: /wc1
+      GEODATA_DIR: /geodata
+      LOGLEVEL: INFO
+      RQ_LOGGING_LEVEL: INFO
+      RQ_REDIS_WAIT_TIMEOUT_SECONDS: ${RQ_REDIS_WAIT_TIMEOUT_SECONDS:-300}
+      RQ_REDIS_WAIT_INTERVAL_SECONDS: ${RQ_REDIS_WAIT_INTERVAL_SECONDS:-1}
+    volumes:
+      - /geodata/wc1:/wc1
+      - /geodata:/geodata:ro
+    command:
+      - bash
+      - -lc
+      - |
+        exec /workdir/wepppy/docker/rq-worker-startup.sh 1 fork-archive
+
+secrets:
+  redis_password:
+    file: ./secrets/redis_password

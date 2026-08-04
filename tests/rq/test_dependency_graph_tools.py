@@ -307,6 +307,29 @@ def orchestrate(runid, contrast_id):
     assert edges[0]["queue_name"] == "batch"
 
 
+def test_dependency_graph_extractor_resolves_module_queue_constant(tmp_path: Path) -> None:
+    source_file = tmp_path / "wepppy" / "rq" / "sample_constant.py"
+    source_file.parent.mkdir(parents=True)
+    source_file.write_text(
+        '''
+from rq import Queue
+
+SERIAL_QUEUE = "fork-archive"
+
+
+def orchestrate(runid):
+    q = Queue(SERIAL_QUEUE, connection=redis_conn)
+    q.enqueue_call(archive_rq, (runid,))
+'''.strip()
+        + "\n",
+        encoding="utf-8",
+    )
+
+    edges = extract_dependency_edges(repo_root=tmp_path, source_files=[source_file])
+    assert len(edges) == 1
+    assert edges[0]["queue_name"] == "fork-archive"
+
+
 def test_dependency_graph_renderer_replaces_only_managed_markers() -> None:
     edges = [
         {

@@ -149,6 +149,47 @@ def test_restore_archive_rq_validates_zip_integrity_before_removing_existing_fil
     assert prep_by_run["demo"].cleared == 1
 
 
+def test_restore_archive_rq_rechecks_locks_before_removing_existing_files(
+    archive_rq_environment,
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    project, tmp_path, _published, prep_by_run = archive_rq_environment
+    run_dir = tmp_path / "demo"
+    archives_dir = run_dir / "archives"
+    archives_dir.mkdir(parents=True)
+    current_file = run_dir / "current.txt"
+    current_file.write_text("keep-me", encoding="utf-8")
+    archive_path = archives_dir / "snapshot.zip"
+    with zipfile.ZipFile(archive_path, mode="w") as zf:
+        zf.writestr("restored.txt", "value")
+
+    monkeypatch.setattr(project, "lock_statuses", lambda runid: {"watershed.nodb": True})
+
+    with pytest.raises(RuntimeError, match="Cannot restore while NoDb files are locked"):
+        project.restore_archive_rq("demo", archive_path.name)
+
+    assert current_file.read_text(encoding="utf-8") == "keep-me"
+    assert prep_by_run["demo"].cleared == 1
+
+
+def test_restore_archive_rq_ignores_false_lock_entries(
+    archive_rq_environment,
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    project, tmp_path, _published, _prep_by_run = archive_rq_environment
+    run_dir = tmp_path / "demo"
+    archives_dir = run_dir / "archives"
+    archives_dir.mkdir(parents=True)
+    archive_path = archives_dir / "snapshot.zip"
+    with zipfile.ZipFile(archive_path, mode="w") as zf:
+        zf.writestr("restored.txt", "value")
+
+    monkeypatch.setattr(project, "lock_statuses", lambda runid: {"watershed.nodb": False})
+
+    project.restore_archive_rq("demo", archive_path.name)
+    assert (run_dir / "restored.txt").read_text(encoding="utf-8") == "value"
+
+
 def test_restore_archive_rq_restores_nodir_cache_entries(
     archive_rq_environment,
 ) -> None:

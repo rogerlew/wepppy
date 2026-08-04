@@ -209,9 +209,11 @@ def _collect_dep_refs(
     return [_expr_text(node)]
 
 
-def _queue_name_from_constructor(call: ast.Call) -> str:
+def _queue_name_from_constructor(call: ast.Call, string_constants: dict[str, str]) -> str:
     if call.args and isinstance(call.args[0], ast.Constant) and isinstance(call.args[0].value, str):
         return call.args[0].value
+    if call.args and isinstance(call.args[0], ast.Name):
+        return string_constants.get(call.args[0].id, _expr_text(call.args[0]))
     for keyword in call.keywords:
         if keyword.arg == "name":
             if isinstance(keyword.value, ast.Constant) and isinstance(keyword.value.value, str):
@@ -383,11 +385,12 @@ def _call_position_key(call: ast.Call) -> tuple[int, int, int | None, int | None
 
 
 class _Collector(ast.NodeVisitor):
-    def __init__(self) -> None:
+    def __init__(self, string_constants: dict[str, str]) -> None:
         self._function_stack: list[str] = ["<module>"]
         self._counter = 0
         self._seen_enqueue_calls: set[tuple[int, int, int | None, int | None]] = set()
         self.events: list[_Event] = []
+        self._string_constants = string_constants
 
     def _emit(self, *, kind: str, lineno: int, data: dict[str, Any]) -> None:
         self._counter += 1
@@ -469,7 +472,7 @@ class _Collector(ast.NodeVisitor):
                     lineno=node.lineno,
                     data={
                         "queue_var": name_target,
-                        "queue_name": _queue_name_from_constructor(value),
+                        "queue_name": _queue_name_from_constructor(value, self._string_constants),
                     },
                 )
                 return
@@ -559,7 +562,16 @@ def _group_events(events: list[_Event]) -> dict[str, list[_Event]]:
 def _extract_module_edges(*, module_path: Path, repo_root: Path) -> list[_EdgeRecord]:
     source_text = module_path.read_text(encoding="utf-8")
     tree = ast.parse(source_text, filename=str(module_path))
-    collector = _Collector()
+    string_constants: dict[str, str] = {}
+    for statement in tree.body:
+        if not isinstance(statement, (ast.Assign, ast.AnnAssign)):
+            continue
+        target = _assign_name_target(statement)
+        value = statement.value
+        if target and isinstance(value, ast.Constant) and isinstance(value.value, str):
+            string_constants[target] = value.value
+
+    collector = _Collector(string_constants)
     collector.visit(tree)
     grouped = _group_events(collector.events)
 

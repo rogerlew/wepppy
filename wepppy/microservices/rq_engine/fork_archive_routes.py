@@ -415,7 +415,7 @@ async def fork_project(runid: str, config: str, request: Request) -> JSONRespons
 
         conn_kwargs = redis_connection_kwargs(RedisDB.RQ)
         with redis.Redis(**conn_kwargs) as redis_conn:
-            q = Queue(connection=redis_conn)
+            q = Queue(FORK_ARCHIVE_QUEUE, connection=redis_conn)
             job = q.enqueue_call(
                 fork_rq,
                 (runid, new_runid, undisturbify, skip_wepp_runs_output),
@@ -498,7 +498,7 @@ async def archive_run(runid: str, config: str, request: Request) -> JSONResponse
 
         conn_kwargs = redis_connection_kwargs(RedisDB.RQ)
         with redis.Redis(**conn_kwargs) as redis_conn:
-            queue = Queue(connection=redis_conn)
+            queue = Queue(FORK_ARCHIVE_QUEUE, connection=redis_conn)
             job = queue.enqueue_call(archive_rq, (runid, comment), timeout=RQ_TIMEOUT)
 
         prep.set_archive_job_id(job.id)
@@ -569,7 +569,7 @@ async def restore_archive(runid: str, config: str, request: Request) -> JSONResp
 
         conn_kwargs = redis_connection_kwargs(RedisDB.RQ)
         with redis.Redis(**conn_kwargs) as redis_conn:
-            queue = Queue(connection=redis_conn)
+            queue = Queue(FORK_ARCHIVE_QUEUE, connection=redis_conn)
             job = queue.enqueue_call(
                 restore_archive_rq,
                 (runid, archive_name),
@@ -654,5 +654,6 @@ async def delete_archive(runid: str, config: str, request: Request) -> JSONRespo
         logger.exception("rq-engine delete-archive failed")
         return error_response_with_traceback("Error deleting archive", status_code=500)
 
+FORK_ARCHIVE_QUEUE = "fork-archive"
 
 __all__ = ["router"]

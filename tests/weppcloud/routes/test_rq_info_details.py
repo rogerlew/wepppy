@@ -97,7 +97,7 @@ def test_rq_info_details_route_wires_failed_jobs_context(monkeypatch: pytest.Mon
         queue_names: tuple[str, ...],
         lookback_seconds: int,
     ) -> list[dict[str, str]]:
-        assert queue_names == ("default", "batch")
+        assert queue_names == ("default", "batch", "fork-archive")
         lookback_calls.append(lookback_seconds)
         return completed_jobs
 

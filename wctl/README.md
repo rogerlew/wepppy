@@ -18,6 +18,8 @@ cd /workdir/wepppy
 # or
 ./wctl/install.sh wepp1   # prod + wepp1 override (adds docker/docker-compose.prod.wepp1.yml)
 # or
+./wctl/install.sh wepp3   # dedicated fork/archive serial worker only
+# or
 ./wctl/install.sh worker  # pin docker/docker-compose.prod.worker.yml
 
 # optional: install to a custom bin directory
@@ -27,7 +29,7 @@ WCTL_SYMLINK_PATH="$HOME/.local/bin/wctl" ./wctl/install.sh dev
 The legacy `hpc` selector and `docker/docker-compose.dev.hpc.yml` are being
 repurposed. Do not treat them as a supported WEPPcloud development or worker
 deployment preset. Their eventual runtime contract will be documented by the
-repurposing work; use `dev`, `prod`, `wepp1`, or `worker` for the currently
+repurposing work; use `dev`, `prod`, `wepp1`, `wepp3`, or `worker` for the currently
 supported stacks.
 
 After installation you can explore the CLI via:
@@ -56,7 +58,9 @@ All commands mirror the legacy behavior, but now live under the Typer dispatcher
 - `wctl check-rq-contracts` – runs rq-engine route/checklist drift guards (`tools/check_endpoint_inventory.py` and `tools/check_route_contract_checklist.py`) inside the container.
 - `wctl migrate-run` – run run-level migrations by run id (or `--wd` path) and skip already-migrated runs by default.
 - `wctl run-test-profile` / `run-fork-profile` / `run-archive-profile` – drive the profile playback FastAPI service, defaulting to the canonical `backed-globule` smoke profile when no overrides are supplied.
-- `wctl rq-info`: shows RQ stats for the default and batch queues (worker registry indexes are auto-healed before `rq info` runs).
+- `wctl rq-info`: shows RQ stats for the default, batch, and fork-archive queues
+  (worker registry indexes are auto-healed before `rq info` runs). Use
+  `--service rq-worker-fork-archive` on the dedicated wepp3 host.
 
 Every command supports `--help`, so discovery is as simple as `wctl run-pytest --help`.
 

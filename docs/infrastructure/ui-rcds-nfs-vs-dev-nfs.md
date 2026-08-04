@@ -341,15 +341,22 @@ permanent hardware regression; repeat the benchmark after large copy and
 delete workloads drain to distinguish persistent degradation from load-driven
 contention.
 
-Planned containment and rollout work is tracked in the
+Containment and rollout work is tracked in the
 [Fork/Archive Serial Queue Isolation work package](../work-packages/20260803_fork_archive_serial_queue/package.md).
 The proposal serializes top-level fork, archive-create, and restore jobs. Dev
 forest and Forest test production retain one local consumer for behavioral
 parity; the sole production consumer runs on otherwise-idle wepp3, which has
-the production NFS mount. This isolates worker signaling, remount, and host
+the production NFS mount via `docker/docker-compose.prod.wepp3.yml`. This
+isolates worker signaling, remount, and host
 fencing from wepp1 application services. The package also covers queued-wait
 guidance, operator visibility, restore dispatch safety, and drain-first
 rollback.
+
+The serial worker reduces concurrent NAS pressure and limits a rare D-state
+event to one otherwise-idle host; it does not make an uninterruptible NFS wait
+cancellable or justify a second worker. Use Redis queue inspection plus
+host-local process state, and fence wepp3 during recovery when the old process
+cannot be proven dead.
 
 ## Small-File Read/Write/Delete + Metadata Microbench (2026-02-10)
 

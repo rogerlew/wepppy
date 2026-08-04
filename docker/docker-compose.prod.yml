@@ -627,6 +627,31 @@ services:
       - |
         exec /workdir/wepppy/docker/rq-worker-startup.sh 4 batch
 
+  rq-worker-fork-archive:
+    <<: *wepppy-service
+    profiles: ["fork-archive"]
+    entrypoint: *wepppyo3-interchange-entrypoint
+    depends_on:
+      redis:
+        condition: service_healthy
+    secrets:
+      - redis_password
+    environment:
+      <<: *wepppy-env
+      LOGLEVEL: INFO
+      RQ_LOGGING_LEVEL: INFO
+      REDIS_URL: ${RQ_REDIS_URL:-redis://redis:6379/9}
+      RQ_REDIS_WAIT_TIMEOUT_SECONDS: ${RQ_REDIS_WAIT_TIMEOUT_SECONDS:-300}
+      RQ_REDIS_WAIT_INTERVAL_SECONDS: ${RQ_REDIS_WAIT_INTERVAL_SECONDS:-1}
+    volumes:
+      - /wc1:/wc1
+      - /wc1/geodata:/geodata
+    command:
+      - bash
+      - -lc
+      - |
+        exec /workdir/wepppy/docker/rq-worker-startup.sh 1 fork-archive
+
   status:
     image: ${WEPPCLOUD_STATUS_IMAGE:-wepppy-status:latest}
     build:

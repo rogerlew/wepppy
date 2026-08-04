@@ -659,6 +659,29 @@ services:
       redis:
         condition: service_started
 
+  rq-worker-fork-archive:
+    <<: *wepppy-service
+    entrypoint: *wepppyo3-interchange-entrypoint
+    container_name: wepppy-rq-worker-fork-archive
+    secrets:
+      - redis_password
+    command:
+      - bash
+      - -lc
+      - |
+        set -euo pipefail
+        REDIS_PASSWORD="$(cat /run/secrets/redis_password)"
+        exec /opt/venv/bin/rq worker-pool -n "1" -u "redis://:$$REDIS_PASSWORD@redis:6379/9" --logging-level INFO --worker-class wepppy.rq.WepppyRqWorker fork-archive
+    environment:
+      <<: *wepppy-env
+      LOGLEVEL: DEBUG
+      RQ_LOGGING_LEVEL: DEBUG
+      REDIS_HOST: redis
+      MPLCONFIGDIR: /tmp/matplotlib
+    depends_on:
+      redis:
+        condition: service_started
+
   webpush:
     <<: *wepppy-service
     container_name: wepppy-webpush

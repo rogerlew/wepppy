@@ -16,7 +16,7 @@ from rq.job import Job
 from rq.registry import FailedJobRegistry, FinishedJobRegistry, StartedJobRegistry
 from rq.utils import utcnow
 
-DEFAULT_QUEUES: tuple[str, ...] = ("default", "batch")
+DEFAULT_QUEUES: tuple[str, ...] = ("default", "batch", "fork-archive")
 DEFAULT_RECENT_LOOKBACK_SECONDS = 2 * 60 * 60  # 2 hours
 DEFAULT_RECENT_SCAN_LIMIT = 2000
 
@@ -257,4 +257,3 @@ __all__ = [
     "list_active_jobs",
     "list_recently_completed_jobs",
 ]
-

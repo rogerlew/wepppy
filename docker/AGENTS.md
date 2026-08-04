@@ -18,8 +18,8 @@ production worker deployment.
 - host: wepp1
 - domain: wepp.cloud
 
-## production fork/archive worker (planned)
+## production fork/archive worker
 - host: wepp3
-- compose source: `docker-compose.prod.worker.yml`
-- scope: opt-in `rq-worker-fork-archive` only; no other containers
+- compose source: `docker-compose.prod.wepp3.yml`
+- scope: `rq-worker-fork-archive` only; no other containers
 - contract: `docs/work-packages/20260803_fork_archive_serial_queue/package.md`

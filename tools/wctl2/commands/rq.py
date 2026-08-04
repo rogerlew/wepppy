@@ -10,7 +10,7 @@ from ..docker import compose_exec
 from ..util import quote_args
 
 _RQ_BINARY = "/opt/venv/bin/rq"
-_RQ_DEFAULT_QUEUES = ("default", "batch")
+_RQ_DEFAULT_QUEUES = ("default", "batch", "fork-archive")
 _PYTHON_BIN = "/opt/venv/bin/python"
 _RQ_DETAIL_MODULE = "wepppy.rq.job_summary"
 _RQ_REGISTRY_SYNC_SNIPPET = """
@@ -24,7 +24,7 @@ from rq.utils import utcformat, utcnow
 
 from wepppy.config.redis_settings import RedisDB, redis_connection_kwargs
 
-queue_names = ("default", "batch")
+queue_names = ("default", "batch", "fork-archive")
 conn = redis.Redis(**redis_connection_kwargs(RedisDB.RQ))
 prefix = Worker.redis_worker_namespace_prefix
 queue_prefix = worker_registration.WORKERS_BY_QUEUE_KEY.split("%s", 1)[0]
@@ -151,7 +151,7 @@ def register(app: typer.Typer) -> None:
     @app.command(
         "rq-info",
         context_settings={"allow_extra_args": True, "ignore_unknown_options": True},
-        help="Show RQ worker and queue stats for default and batch queues.",
+        help="Show RQ worker and queue stats for default, batch, and fork-archive queues.",
     )
     def rq_info(
         ctx: typer.Context,
@@ -165,10 +165,15 @@ def register(app: typer.Typer) -> None:
             "--detail-limit",
             help="Maximum jobs per state and queue for --detail (0 for unlimited).",
         ),
+        service: str = typer.Option(
+            "rq-worker",
+            "--service",
+            help="Compose service in which to run RQ inspection.",
+        ),
     ) -> None:
         context = _context(ctx)
         command = _compose_rq_info_command(list(ctx.args))
-        result = compose_exec(context, "rq-worker", command, check=False)
+        result = compose_exec(context, service, command, check=False)
         if result.returncode != 0:
             _exit_from_result(result)
 
@@ -183,6 +188,6 @@ def register(app: typer.Typer) -> None:
                 str(detail_limit),
             ]
             detail_command = _compose_python_command(detail_args)
-            detail_result = compose_exec(context, "rq-worker", detail_command, check=False)
+            detail_result = compose_exec(context, service, detail_command, check=False)
             _exit_from_result(detail_result)
         _exit_from_result(result)

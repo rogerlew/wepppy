@@ -28,6 +28,9 @@ x-wepppy-image: &wepppy-image
     <<: *wepppy-env
 
 services:
+  # Production fork/archive work is consumed only by the wepp3 stack.
+  rq-worker-fork-archive:
+    scale: 0
   fcgiwrap:
     build:
       context: ..

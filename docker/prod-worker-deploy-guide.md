@@ -5,21 +5,54 @@
 ## Scope
 This guide covers deploying the worker-only stack (`rq-worker`, `rq-worker-batch`, and optional `weppcloudr`) on a separate host that connects to the main WEPPcloud Redis instance.
 
-### Planned wepp3 serial worker
+### Wepp3 serial worker
 
-The Fork/Archive Serial Queue Isolation package proposes an opt-in
-`rq-worker-fork-archive` service from this compose file on wepp3. Wepp3 already
+The Fork/Archive Serial Queue Isolation package defines
+`rq-worker-fork-archive` in `docker-compose.prod.wepp3.yml`. Wepp3 already
 has the production NFS mount and otherwise runs no containers. The service must
 start alone, consume only `fork-archive`, and have no dependency on `rq-worker`,
-`rq-worker-batch`, `f-esri`, or `weppcloudr`. A normal wepp2 `wctl up -d` must
-not activate it, and wepp1 must remain a non-consumer.
+`rq-worker-batch`, `f-esri`, or `weppcloudr`. The wepp2 worker compose does not
+define it, and the wepp1 override forces its inherited service scale to zero.
 
-This topology is not implemented yet. Do not deploy the proposed service until
-the exact contract checkpoint and implementation in
-`docs/work-packages/20260803_fork_archive_serial_queue/` are accepted. The
+Do not deploy until the implementation gates in
+`docs/work-packages/20260803_fork_archive_serial_queue/` pass. The
 wepp3 preflight must verify Redis reachability/firewall scope, required secret
 files, image provenance, canonical NFS mounts and permissions, time
 synchronization, and out-of-band host fencing.
+
+Inspect Redis state inside the dedicated container with
+`wctl rq-info --service rq-worker-fork-archive --detail`. Independently inspect
+the host with `docker compose -f docker/docker-compose.prod.wepp3.yml ps`, `docker
+compose -f docker/docker-compose.prod.wepp3.yml top`, and `ps -eo pid,stat,wchan:32,cmd`
+so D-state diagnosis does not depend on Redis.
+
+On wepp3, install and start only the dedicated stack:
+
+```bash
+./wctl/install.sh wepp3
+wctl up -d rq-worker-fork-archive
+wctl rq-info --service rq-worker-fork-archive --detail
+```
+
+### Cutover and rollback controls
+
+Before changing enqueue routes, put fork/archive/restore submission behind the
+normal maintenance fence. Keep the old worker online and inspect both
+`default` and `fork-archive` queued, started, deferred, and scheduled
+registries until legacy fork/archive/restore jobs are terminal. Start the new
+consumer before recreating rq-engine/UI, then verify it is the only registered
+`fork-archive` worker and run a small two-job serialization check.
+
+For rollback, fence submissions first and leave the serial worker online while
+all `fork-archive` registries drain. If its process is in D-state, fence wepp3
+out of service or prove the old process dead before any replacement starts.
+Only then revert the enqueue routes to `default`, stop the serial worker, and
+reopen submissions. Never flush Redis DB 9 to manufacture a clean drain.
+
+Capture the output of `wctl rq-info --detail`, `wctl rq-info --service
+rq-worker-fork-archive --detail`, `wctl ps`, and `ps -eo
+pid,stat,wchan:32,cmd` in the rollout record before and after cutover or
+rollback.
 
 ## Prerequisites
 - Shared storage mounted on the worker node (same paths as the main host):

@@ -10,6 +10,10 @@ pytestmark = pytest.mark.unit
 _REPO_ROOT = Path(__file__).resolve().parents[3]
 _PROD_COMPOSE_PATH = _REPO_ROOT / "docker" / "docker-compose.prod.yml"
 _PROD_WORKER_COMPOSE_PATH = _REPO_ROOT / "docker" / "docker-compose.prod.worker.yml"
+_DEV_COMPOSE_PATH = _REPO_ROOT / "docker" / "docker-compose.dev.yml"
+_PROD_WEPP1_COMPOSE_PATH = _REPO_ROOT / "docker" / "docker-compose.prod.wepp1.yml"
+_PROD_WEPP3_COMPOSE_PATH = _REPO_ROOT / "docker" / "docker-compose.prod.wepp3.yml"
+_HPC_COMPOSE_PATH = _REPO_ROOT / "docker" / "docker-compose.dev.hpc.yml"
 _RQ_STARTUP_SCRIPT_PATH = _REPO_ROOT / "docker" / "rq-worker-startup.sh"
 _WAIT_ENV_KEYS = {
     "RQ_REDIS_WAIT_TIMEOUT_SECONDS",
@@ -104,3 +108,27 @@ def test_rq_worker_startup_script_uses_url_based_probe() -> None:
     assert "/opt/venv/bin/python - <<'PY'" in script_text
     assert '/opt/venv/bin/python - "$redis_url"' in script_text
     assert '/opt/venv/bin/python - "$startup_delay"' in script_text
+
+
+def test_fork_archive_worker_topology_is_single_process_and_host_scoped() -> None:
+    dev_services = _load_yaml(_DEV_COMPOSE_PATH)["services"]
+    forest_services = _load_yaml(_PROD_COMPOSE_PATH)["services"]
+    wepp3_services = _load_yaml(_PROD_WEPP3_COMPOSE_PATH)["services"]
+
+    assert "worker-pool -n \"1\"" in _command_block(dev_services["rq-worker-fork-archive"])
+    forest_worker = forest_services["rq-worker-fork-archive"]
+    assert forest_worker["profiles"] == ["fork-archive"]
+    assert "rq-worker-startup.sh 1 fork-archive" in _command_block(forest_worker)
+
+    assert set(wepp3_services) == {"rq-worker-fork-archive"}
+    wepp3_worker = wepp3_services["rq-worker-fork-archive"]
+    assert "rq-worker-startup.sh 1 fork-archive" in _command_block(wepp3_worker)
+    assert all("docker.sock" not in str(volume) for volume in wepp3_worker["volumes"])
+    assert wepp3_worker["secrets"] == ["redis_password"]
+    assert wepp3_worker["volumes"] == ["/geodata/wc1:/wc1", "/geodata:/geodata:ro"]
+
+    for path in (_PROD_WORKER_COMPOSE_PATH, _HPC_COMPOSE_PATH):
+        assert "rq-worker-fork-archive" not in _load_yaml(path).get("services", {})
+
+    wepp1_worker = _load_yaml(_PROD_WEPP1_COMPOSE_PATH)["services"]["rq-worker-fork-archive"]
+    assert wepp1_worker == {"scale": 0}

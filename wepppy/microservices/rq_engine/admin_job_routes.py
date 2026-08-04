@@ -192,7 +192,7 @@ def _hydrate_submitter_fields(jobs: list[dict[str, Any]]) -> None:
     summary="List recently completed RQ jobs (admin)",
     description=(
         "Admin-only debugging endpoint. Requires JWT Bearer scope `rq:status` plus role `Admin`/`Root`. "
-        "Returns jobs that ended within a lookback window across the default and batch queues."
+        "Returns jobs that ended within a lookback window across the default, batch, and fork-archive queues."
     ),
     tags=["rq-engine", "jobs"],
     operation_id=rq_operation_id("admin_recently_completed_jobs"),
@@ -248,7 +248,7 @@ def recently_completed_jobs(
     summary="List active RQ jobs (admin)",
     description=(
         "Admin-only debugging endpoint. Requires JWT Bearer scope `rq:status` plus role `Admin`/`Root`. "
-        "Returns the complete set of started + queued jobs across the default and batch queues."
+        "Returns the complete set of started + queued jobs across the default, batch, and fork-archive queues."
     ),
     tags=["rq-engine", "jobs"],
     operation_id=rq_operation_id("admin_jobs_detail"),

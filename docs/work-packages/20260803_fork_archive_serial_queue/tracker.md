@@ -6,9 +6,9 @@
 
 **Timezone**: UTC
 **Started**: 2026-08-04 05:38 UTC
-**Current phase**: GOV-00A-M1G standalone ancestor commit
-**Last updated**: 2026-08-04 06:13 UTC
-**Next milestone**: Commit the accepted checkpoint ancestor
+**Current phase**: live rollout pending after local implementation validation
+**Last updated**: 2026-08-04 08:03 UTC
+**Next milestone**: Execute Forest cutover/rollback and guarded wepp3 canary
 **Security impact**: `high`
 **Dedicated security review**: `yes`
 **Security artifact**: `docs/work-packages/20260803_fork_archive_serial_queue/artifacts/2026-08-04_security_review.md`
@@ -36,6 +36,11 @@
 
 - [x] Independent governance and operations/security checkpoint reviews passed
   after disposition and post-fix confirmation.
+- [x] Independent correctness re-review passed with no remaining major
+  correctness, authorization, locking, or contract findings.
+- [x] Independent operations/security re-review approved the repository
+  implementation with all High/Medium findings closed and no release-blocking
+  Low findings. Live rollout remains separately gated on host evidence.
 
 ### Blocked
 
@@ -45,6 +50,22 @@
 
 ### Done
 
+- [x] Implemented named queue routing, one-process dev/Forest workers, dedicated
+  minimal wepp3 compose, operator queue visibility/service selection, exact UI
+  guidance, restore lock recheck, and queue-specific cancellation authority.
+- [x] Regenerated the RQ graph/catalog; focused Python passed 227 tests, graph
+  tooling passed 18, wctl passed 8, and frontend lint plus 105 suites/756 tests
+  passed. Compose renders, stub checks, broad-exception enforcement, and docs
+  lint passed.
+- [x] Closed implementation-review findings: atomic queued-only user
+  cancellation, restored legacy cancellation regressions, truthy restore-lock
+  filtering, wepp1 scale-zero containment, installable wepp3 wctl preset,
+  Forest/wepp3 rollout commands, and untruncated queue visibility.
+- [x] Full repository Python sweep passed 5,828 tests with 61 skips; the final
+  focused set passed 53 tests, stubtest passed, six Compose paths rendered,
+  graph drift/broad-exception checks passed, and affected docs linted cleanly.
+- [x] Committed the accepted checkpoint as standalone ancestor
+  `bc996d336` before implementation edits. (2026-08-04 PDT)
 - [x] Read the NFS benchmark/incident note and isolated the archive D-state and
   loaded full-output fork evidence. (2026-08-04 05:38 UTC)
 - [x] Mapped current fork/archive/restore enqueue sites, worker pools, supported
@@ -208,34 +229,35 @@ preflight before deployment.
 
 ### Code Quality
 
-- [ ] Focused microservice, Docker, wctl, listing, route-render, and client tests pass.
-- [ ] `wctl run-pytest tests --maxfail=1` passes.
-- [ ] `wctl run-npm lint` and `wctl run-npm test` pass.
-- [ ] `wctl check-test-stubs` and changed broad-exception enforcement pass.
-- [ ] `wctl check-rq-graph` passes after graph regeneration.
+- [x] Focused microservice, Docker, wctl, listing, route-render, and client tests pass.
+- [x] `wctl run-pytest tests --maxfail=1` passes.
+- [x] `wctl run-npm lint` and `wctl run-npm test` pass.
+- [x] `wctl check-test-stubs` and changed broad-exception enforcement pass.
+- [x] `wctl check-rq-graph` passes after graph regeneration.
 
 ### Security
 
 - [x] Security impact triage recorded as `high`.
-- [ ] Accepted checkpoint ancestor exists before production edits.
-- [ ] Dedicated security review has no unresolved medium/high finding.
-- [ ] Queue, worker placement, filesystem, restore, cancellation, deploy, and
+- [x] Accepted checkpoint ancestor exists before production edits.
+- [x] Dedicated security review has no unresolved medium/high finding.
+- [x] Queue, worker placement, filesystem, restore, cancellation, deploy, and
   rollback surfaces are explicitly reviewed.
 
 ### Documentation
 
 - [ ] SURF-03, SURF-04, SURF-07, SURF-17, and GOV-00A register/checkpoint docs are current.
-- [ ] `docker/README.md`, `wctl/README.md`, and NFS/operator guidance are current.
-- [ ] RQ dependency catalog/static graph are current.
-- [ ] Package, tracker, ExecPlan, security review, and rollout evidence are current.
+- [x] `docker/README.md`, `wctl/README.md`, and NFS/operator guidance are current.
+- [x] RQ dependency catalog/static graph are current.
+- [x] Package, tracker, ExecPlan, and security review are current; live rollout
+  evidence remains pending.
 - [x] No parameterization ADR is required for the scoped queue topology.
 
 ### Testing and Deployment
 
-- [ ] Compose config validates for dev, Forest, prod+wepp1 non-consumption, and
+- [x] Compose config validates for dev, Forest, prod+wepp1 non-consumption, and
   the dedicated wepp3 service.
-- [ ] The repurposed HPC compose proves no `fork-archive` consumer.
-- [ ] Wepp2 compose excludes `fork-archive`; wepp3 compose starts exactly that
+- [x] The repurposed HPC compose proves no `fork-archive` consumer.
+- [x] Wepp2 compose excludes `fork-archive`; wepp3 compose starts exactly that
   one container.
 - [ ] Local two-job serialization acceptance passes.
 - [ ] Forest drain-first cutover, normal dispatch, queued wait, cancellation,

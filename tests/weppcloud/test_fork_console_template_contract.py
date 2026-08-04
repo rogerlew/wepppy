@@ -35,3 +35,14 @@ def test_fork_console_does_not_auto_connect_idle_status_stream() -> None:
 
     assert "autoConnect: false" in script
     assert "restoreTrackedJob();" in script
+
+
+def test_fork_and_archive_consoles_explain_serial_queue_wait() -> None:
+    controls = REPO_ROOT / "wepppy" / "weppcloud" / "templates" / "controls"
+    fork = (controls / "fork_console_control.htm").read_text(encoding="utf-8")
+    archive = (controls / "archive_console_control.htm").read_text(encoding="utf-8")
+
+    assert "Your accepted fork may remain queued before it starts" in fork
+    assert "source project state available when the worker begins" in fork
+    assert "An accepted request may remain queued before it starts" in archive
+    assert "do not edit the project while a restore is queued or running" in archive

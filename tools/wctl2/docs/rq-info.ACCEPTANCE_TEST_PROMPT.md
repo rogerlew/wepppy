@@ -10,7 +10,8 @@
 1. Run `wctl rq-info`.
    - Confirm the log line shows `docker compose exec rq-worker bash -lc ...`.
    - If Redis auth is enabled, confirm the command succeeds (no `Authentication required.` error) and the log does not echo raw credentials.
-   - Confirm output lists both queues (`default` and `batch`).
+   - Confirm output lists all default queues (`default`, `batch`, and
+     `fork-archive`).
    - If workers are running, confirm each worker line includes `jobs: X finished, X failed`.
 
 2. Run `wctl rq-info --interval 1`.
@@ -40,14 +41,14 @@
 ### Test 1: `wctl rq-info`
 **PASS**
 - Log line showed: `docker compose exec rq-worker bash -lc /opt/venv/bin/rq info -u redis://redis:6379/9 default batch`
-- Output listed both queues (`default` and `batch`)
+- Output listed all default queues (`default`, `batch`, and `fork-archive`)
 - Worker lines included `jobs: X finished, X failed` stats (for example, `jobs: 1 finished, 0 failed`)
 
 ### Test 2: `wctl rq-info --interval 1`
 **PASS**
 - Command passed `--interval 1` to `rq info`
 - Screen refreshed every second (verified timestamps 1 second apart)
-- Default queues (`default` and `batch`) still honored
+- Default queues (`default`, `batch`, and `fork-archive`) still honored
 
 ### Summary
 All pass criteria met.

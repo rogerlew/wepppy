@@ -6,6 +6,8 @@ import json
 from typing import Dict
 
 import redis
+from redis.exceptions import WatchError
+from rq import Queue
 from rq.command import send_stop_job_command
 from rq.exceptions import InvalidJobOperation, NoSuchJobError
 from rq.job import Job
@@ -18,6 +20,10 @@ from wepppy.config.redis_settings import (
 
 REDIS_HOST: str = redis_host()
 RQ_DB: int = int(RedisDB.RQ)
+_FORK_ARCHIVE_STARTED_FORBIDDEN = {
+    "error": "Started fork/archive jobs require Admin or Root",
+    "code": "forbidden",
+}
 
 
 def _cancel_job_recursive_unlocked(job: Job, redis_conn: redis.Redis) -> None:
@@ -54,11 +60,35 @@ def _cancel_job_recursive(job: Job, redis_conn: redis.Redis) -> None:
         _cancel_job_recursive_unlocked(job, redis_conn)
 
 
-def cancel_jobs(job_id: str) -> Dict[str, str]:
+def _cancel_queued_fork_archive(job: Job, redis_conn: redis.Redis) -> Dict[str, str]:
+    """Cancel only if ``job`` remains in the queue at transaction commit."""
+    queue = Queue(
+        job.origin,
+        connection=redis_conn,
+        job_class=job.__class__,
+        serializer=job.serializer,
+    )
+    with redis_conn.pipeline() as pipe:
+        try:
+            pipe.watch(queue.key)
+            if pipe.lpos(queue.key, job.id) is None:
+                return dict(_FORK_ARCHIVE_STARTED_FORBIDDEN)
+            pipe.multi()
+            job.cancel(pipeline=pipe)
+            pipe.execute()
+        except (WatchError, InvalidJobOperation):
+            return dict(_FORK_ARCHIVE_STARTED_FORBIDDEN)
+    return {"status": "ok"}
+
+
+def cancel_jobs(job_id: str, *, allow_started_fork_archive: bool = True) -> Dict[str, str]:
     """Cancel a job tree rooted at ``job_id``.
 
     Args:
         job_id: Identifier of the job to cancel.
+        allow_started_fork_archive: Whether the caller may stop an already
+            dispatched ``fork-archive`` job. When false, cancellation fails
+            closed unless the job remains queued.
 
     Returns:
         Status dictionary reporting success or any lookup error.
@@ -70,6 +100,11 @@ def cancel_jobs(job_id: str) -> Dict[str, str]:
             job = Job.fetch(job_id, connection=redis_conn)
         except NoSuchJobError:
             return {"error": "Job not found"}
+
+        if job.origin == "fork-archive" and not allow_started_fork_archive:
+            if job.get_status() != "queued":
+                return dict(_FORK_ARCHIVE_STARTED_FORBIDDEN)
+            return _cancel_queued_fork_archive(job, redis_conn)
 
         _cancel_job_recursive(job, redis_conn)
         return {"status": "ok"}

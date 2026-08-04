@@ -2,7 +2,10 @@
 
 ## Overview
 
-`wctl rq-info` wraps `rq info` for WEPPcloud's RQ pools, targeting Redis DB 9 and the `default` + `batch` queues by default. The command runs inside the `rq-worker` service so the output matches what operators expect from the container environment.
+`wctl rq-info` wraps `rq info` for WEPPcloud's RQ pools, targeting Redis DB 9
+and the `default`, `batch`, and `fork-archive` queues by default. The command
+runs inside `rq-worker` unless `--service` selects another worker container,
+such as `rq-worker-fork-archive` on wepp3.
 
 ## Goals
 
@@ -33,6 +36,8 @@ wctl rq-info --detail --detail-limit 10 [RQ_INFO_ARGS...]
 - Logs the docker compose exec invocation at INFO level (Redis URLs are redacted if present in the logged command).
 - `--detail` appends a job summary (runid, description, auth actor) using the RQ Python API.
 - `--detail-limit` caps the number of jobs per state and queue (default: 50; 0 = unlimited).
+- `--service` selects the Compose service used for both RQ and detail inspection
+  (default: `rq-worker`).
 
 ## Examples
 

@@ -40,6 +40,18 @@ _POLL_RATE_LIMIT_LOCK = threading.Lock()
 _POLL_RATE_LIMIT_BUCKETS: dict[str, deque[float]] = {}
 
 
+def _is_admin_or_root(claims: Mapping[str, Any]) -> bool:
+    raw_roles = claims.get("roles") or []
+    if isinstance(raw_roles, str):
+        roles = {role.strip().lower() for role in raw_roles.split(",")}
+    else:
+        roles = {
+            str(role.get("name") if isinstance(role, Mapping) else role).strip().lower()
+            for role in raw_roles
+        }
+    return bool(roles & {"admin", "root"})
+
+
 def _safe_int_env(name: str, *, default: int, minimum: int) -> int:
     raw = os.getenv(name)
     if raw is None:
@@ -428,9 +440,10 @@ async def jobinfo_batch(request: Request):
     "/canceljob/{job_id}",
     summary="Cancel a queued or running job",
     description=(
-        "Requires JWT Bearer scope `rq:status` or `culvert:batch:submit`. The rq:status path enforces "
-        "token-class-appropriate run access; the culvert scope is accepted only for jobs carrying verified "
-        "culvert batch metadata. Synchronously cancels existing job(s); no enqueue."
+        "Requires JWT `rq:status` and run access, or verified Culvert scope. For "
+        "`fork-archive`, authorized callers may cancel queued jobs; cancellation "
+        "after dispatch requires Admin or Root. Other queues retain existing "
+        "behavior. Synchronous; no enqueue."
     ),
     tags=["rq-engine", "jobs"],
     operation_id=rq_operation_id("canceljob"),
@@ -475,8 +488,17 @@ def canceljob(job_id: str, request: Request):
                 code="forbidden",
             )
 
-        payload = cancel_jobs(job_id)
+        payload = cancel_jobs(
+            job_id,
+            allow_started_fork_archive=_is_admin_or_root(claims),
+        )
         if "error" in payload:
+            if payload.get("code") == "forbidden":
+                return error_response(
+                    payload["error"],
+                    status_code=403,
+                    code="forbidden",
+                )
             return error_response(
                 payload["error"],
                 status_code=404,

@@ -124,6 +124,16 @@ Landuse first-class route notes (2026-04-24):
     a terminal failed descendant's same sanitized error after no descendant
     remains active.
 
+## Job cancellation
+
+- Cancellation retains run-access and scope checks.
+- For jobs whose RQ origin is `fork-archive`, an authorized project caller may
+  cancel only while the job remains queued. Dispatch handoff and started states
+  return canonical `403 forbidden` unless the caller has Admin or Root role;
+  the non-privileged path never issues a stop command after handoff.
+- Other queue origins, including verified Culvert jobs using the legacy scope,
+  retain their existing cancellation behavior.
+
 ### WBT DEM-boundary controlled failure
 
 SURF-14A defines one bounded sanitized job-info failure. When WBT boundary
