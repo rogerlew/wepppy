@@ -58,8 +58,9 @@ current shared-config behavior.
 
 - **Shared defaults:** The canonical
   `wepppy/nodb/configs/_defaults.cfg`. During compatibility rollout, the legacy
-  `_defaults.toml` alias contains the same INI-style content. Despite its old
-  suffix, `_defaults.toml` is parsed by `RawConfigParser`; it is not TOML.
+  shared `_defaults.toml` path is a relative symlink to `_defaults.cfg`, not a
+  second copy. Despite its old suffix, project-local legacy `_defaults.toml`
+  files are parsed by `RawConfigParser`; they are not TOML.
 - **Shared preset:** A named `.cfg` under `wepppy/nodb/configs/`.
 - **Component source:** A typed builder definition for a locale, DEM, terrain
   resolution, delineation backend, watershed representation, capability
@@ -92,9 +93,11 @@ flattened = true
 resolver_version = 1
 ```
 
-The project-owned config MUST contain every effective runtime option from all
-applicable sections. It MUST NOT require shared defaults, locale fragments, or
-builder component files to supply an omitted runtime value.
+The project-owned config MUST contain every effective runtime configuration
+option from all applicable sections. It MUST NOT require shared defaults,
+locale fragments, or builder component files to supply an omitted runtime
+configuration value. Runtime secrets and credentials are not configuration
+provenance and MUST NOT be copied into a project-owned config.
 
 The project-owned config MUST retain the resolved `[general] locales` value for
 provenance and existing locale-aware runtime behavior. Runtime capability
@@ -106,30 +109,44 @@ initialization. Ordinary controls MUST persist user/project state in their
 existing NoDb stores rather than editing the config. The only version 1
 post-creation edit is the registered additive amendment process below.
 
-### 5.1 Additive configuration evolution
+### 5.1 User-initiated additive configuration updates
 
-Flattened configs use lazy, additive amendments when software requests a
-registered configuration attribute that did not exist when the project was
-created. This is not a bulk migration framework and does not re-flatten the
-project against all current shared configuration.
+Flattened configs support explicit, user-initiated additive updates when the
+current parent build chain supplies registered configuration attributes that
+did not exist when the project was created. This is not a bulk migration
+framework and does not silently re-flatten a project when it is opened.
 
-When a `config_get_*` lookup cannot find `(section, option)` in a flattened
-project config, that first registered miss triggers one merge-only
-reconciliation of the complete recorded build chain. The resolver MUST:
+Page load MAY asynchronously call a read-only rq-engine availability endpoint.
+The check MUST NOT mutate the config or manifest. When an update is available,
+the run-page header MUST show a notice linking to an accessible modal panel.
+The panel MUST list every section, option, value, owning parent-chain source,
+and source revision that the merge would add. It MUST provide an explicit
+button to request the update and MUST explain that version 1 only adds missing
+attributes.
 
-1. determine whether the exact attribute is registered as amendable;
-2. reconstruct the project's config build chain from the immutable selections
-   and source identity in `config-manifest.json`;
-3. resolve the complete current attribute set for that recorded chain using its
+The availability response MUST include an opaque preview identity. The
+authenticated apply endpoint MUST re-resolve and revalidate the update under
+the project lock. If the preview no longer identifies the same complete merge,
+the endpoint MUST return a conflict and require the UI to refresh the preview;
+it MUST NOT apply an unreviewed delta. An accepted request MUST enqueue an
+rq-engine job that:
+
+1. reconstructs the project's parent build chain from the immutable selections
+   and source identities in `config-manifest.json`;
+2. resolves the complete current attribute set for that chain using its
    declared precedence;
-4. verify that every contributing component/mod is active for the project;
-5. acquire the project config amendment lock and re-read both files;
-6. calculate the set difference and add every applicable registered attribute
-   that remains absent, including newly introduced sections;
-7. validate the complete merged result;
-8. atomically replace the project-owned config; and
-9. append one batch amendment record and the new digest to the manifest as one
+3. verifies that every contributing component/mod remains active for the
+   project;
+4. acquires the project config amendment lock and re-reads both files;
+5. calculates the set difference and adds every applicable registered
+   attribute that remains absent, including newly introduced sections;
+6. validates the complete merged result;
+7. atomically replaces the project-owned config; and
+8. appends one batch amendment record and the new digest to the manifest as one
    crash-recoverable logical transaction.
+
+A missing `config_get_*` lookup MUST retain its existing explicit
+missing/default/error behavior. It MUST NOT trigger a configuration write.
 
 This is a merge-only operation: the process MUST never overwrite or remove an
 existing section or option. It MUST never add a new mod, capability, backend,
@@ -147,11 +164,17 @@ MUST NOT write a partial subset when another applicable missing attribute is
 ambiguous or invalid. The resolver MUST NOT search unrelated shared configs for
 values.
 
-The build-chain resolution may use component definitions introduced after
-project creation, but the amendment makes that fall-forward explicit and
-durable. Once written, later component/default changes MUST NOT alter the
-amended value. An additive amendment does not increment the config schema
-version.
+The parent-chain resolution uses current registered definitions. Historical
+registry documents do not need to remain executable or retrievable. Stable
+source IDs identify which current definitions to consult; the revisions in the
+manifest record what created the project and what supplied each later update.
+If a recorded source ID no longer resolves unambiguously, the system reports no
+applicable update and MUST NOT mutate the project. Once an added value is
+written, later source changes MUST NOT alter it. An additive update does not
+increment the config schema version.
+
+Overwrite and removal updates are reserved for a future contract. The version
+1 endpoint, preview, and job MUST reject them.
 
 ## 6. Resolution Modes
 
@@ -168,6 +191,20 @@ When `<working-directory>/<config>.cfg` exists and contains
 
 It MUST NOT silently fall back to shared configuration after recognizing a
 flattened project config.
+
+If the flattened config is valid but `config-manifest.json` is missing,
+malformed, or inconsistent with the config filename, ordinary project loading
+and existing model operations MUST continue with an operator-visible warning.
+Configuration update availability and apply operations MUST be disabled until
+the manifest is repaired through a separately authorized maintenance action.
+The loader MUST NOT synthesize a manifest or fall back to shared defaults. A
+malformed flattened config itself retains the explicit failure behavior above.
+
+Every reader supporting project-owned configs MUST continue reading manifest
+schema version 1. An unknown newer manifest schema is treated like an invalid
+manifest: a valid flattened config still loads, restore is not blocked solely
+for that reason, updates are disabled, and no shared fallback occurs. Removing
+version 1 reader support requires a separately ratified migration contract.
 
 ### 6.2 Legacy project-local mode
 
@@ -199,6 +236,28 @@ When no project-local config exists, the loader MUST retain current behavior:
 Missing or malformed shared files retain their existing explicit failure
 behavior. The new resolver MUST NOT mask those failures.
 
+### 6.4 Nested project and PUP authority
+
+The validated top-level project run root is the sole version 1 owner of a
+project-owned config, manifest, update history, and update lock. Nested/PUP
+working directories inherit that authority. The builder and update flow MUST
+NOT create a config or manifest inside `_pups` or another nested run directory.
+
+For a persisted nested controller, config resolution MUST preserve a
+preexisting legacy child-local config when present. Version 1 MUST NOT create a
+child-local flattened config. Otherwise the controller MUST resolve the config
+token against the validated top-level run root before using shared fallback.
+The parent lookup MUST use explicit run context or persisted `parent_wd`
+identity and MUST validate containment; it MUST NOT discover a parent by
+searching path strings. The equivalent parent-root lookup applies to legacy
+project-local defaults when the nested controller currently inherits them.
+
+A nested UI MAY display the top-level project's update notice, but preview and
+apply target the top-level authority. Fork, archive, and restore carry the one
+root-owned pair with the complete project tree. Independent nested composition,
+per-child updates, and reconciliation of intentionally divergent legacy child
+configs are out of scope for version 1.
+
 ## 7. Project-Creation Paths
 
 ### 7.1 Named-preset creation
@@ -215,25 +274,46 @@ Creating a new project from an existing named preset MUST:
 2. overlay the named shared preset;
 3. materialize supported config-token query overrides;
 4. validate the resulting effective configuration;
-5. write the flattened project-owned config and manifest atomically; and
+5. durably write the flattened project-owned config and manifest before
+   publishing project readiness; and
 6. initialize Ron and all other NoDb controllers only after both files are
    durable.
 
 The new project MUST NOT depend on later reads of the shared preset or shared
 defaults.
 
+The manifest MUST record the named preset's parent chain as canonical shared
+defaults followed by the named preset. Normalized supported query overrides are
+immutable selections applied after that chain; they are not source nodes. A
+later user-initiated additive update resolves the current versions of the same
+defaults and preset, then reapplies the project's recorded overrides.
+It adds missing registered attributes only. Developers who change shared
+defaults, a named preset, or a feature that consumes them are responsible for
+keeping every supported preset complete and compatible. The update mechanism
+MUST NOT infer a different component profile or silently repair an invalid
+preset.
+
+Each named preset MUST declare an explicit allowlist and validator for durable
+query overrides. Accepted overrides are normalized, materialized into the
+project-owned config, and recorded in `selections.overrides` with their key,
+effective serialized value, and source `query`. Unknown override keys MUST be
+rejected for flattened creation rather than silently persisted. Authentication,
+CAPTCHA, CSRF, routing, and transport fields are never configuration overrides.
+This narrowing applies only when the flattened writer is enabled; it MUST NOT
+silently change legacy project-creation behavior.
+
 ### 7.2 Builder creation
 
 The builder MUST accept typed, allowlisted selections rather than arbitrary
-configuration keys. Its initial component model SHOULD cover:
+configuration keys. Its initial component model MUST cover:
 
 - locale/profile, such as `continental-us`;
 - locale-supported DEM source and resolution, with an associated default cell
   size;
 - an authorized cell-size override from the closed set defined in section 7.5;
 - delineation backend, initially TOPAZ or WBT;
-- watershed representation, initially conventional/single-OFE or MOFE;
-- additional mods to initialize; and
+- watershed representation, initially conventional/single-OFE; and
+- additional mods after they are registered beyond the initial family; and
 - resolved climate, soil, land-cover, and related capability profiles.
 
 The builder MUST validate the complete combination before creating the project.
@@ -243,6 +323,36 @@ representation, capability, or mod.
 
 Component sources are creation-time inputs. They MUST NOT become runtime
 dependencies of the generated project.
+
+#### 7.2.1 Initial registered family
+
+Version 1 MUST launch with one conservative `continental-us` family. Stable
+IDs are semantic builder identifiers and are not shared preset filenames or
+route tokens. The initial matrix is:
+
+| Dimension | Stable IDs and resolved meaning |
+| --- | --- |
+| Locale | `continental-us`: explicit `[general] locales = ["us"]` and existing continental-US units/map behavior |
+| DEM | `usgs-ned1-2024`: `dem_db = "ned1/2024"`, default 30 m; `usgs-ned13-2022`: `dem_db = "ned13/2022"`, default 10 m |
+| Delineation | `topaz`; `wbt` |
+| Representation | `single-ofe`: `[wepp] multi_ofe = false` |
+| Soils | `ssurgo-gnatsgso-2025`: `soils_db = "ssurgo/gNATSGSO/2025"`, existing gridded mode |
+| Land use | `nlcd-2019`: `landuse_db = "nlcd/2019"`, existing gridded mode and general mapping |
+| Climate | `vanilla_cligen`; `prism_stochastic`; `observed_daymet`; `observed_gridmet` |
+| Mods | none |
+
+The cross-product of the two DEMs and two delineation backends is eligible only
+after all four combinations pass the Forest create/reopen/delineate/build gate.
+Dataset identifiers MUST be verified against the deployed services and mounts
+at that gate. Failure of one combination removes that combination from the
+initial registry rather than causing an inferred substitution.
+
+TauDEM, MOFE, alternate soil/land-use modes, event/upload/future climate modes,
+and optional NoDb mods are deferred from the initial matrix. They require
+separate registered definitions and representative validation before becoming
+builder-visible. This does not remove or change any Interfaces preset that
+already uses them. Later mod IDs SHOULD retain the exact stable tokens accepted
+by `[nodb] mods`; filesystem discovery alone MUST NOT register a mod.
 
 ### 7.3 Builder config naming
 
@@ -284,8 +394,8 @@ validation state, and errors remain discoverable and keyboard accessible.
   existing Interfaces path.
 - The builder MUST explain that it creates a project-owned `config.cfg` that
   users do not edit. Changing builder selections later requires creating a new
-  project; registered missing attributes may be amended internally as described
-  in section 5.1.
+  project; registered missing attributes may be added through the explicit
+  update flow described in section 5.1.
 - The UI MUST distinguish the project display name from the fixed config token
   `config`. Users MUST NOT enter or edit a config filename or route token.
 - Reloading or navigating back after a recoverable validation error SHOULD
@@ -300,8 +410,8 @@ The initial builder MUST present server-described controls for:
 3. the cell size associated with the selected DEM and, for authorized users,
    an optional override;
 4. delineation backend, initially TOPAZ or WBT;
-5. watershed representation, initially conventional/single-OFE or MOFE; and
-6. optional mods available for the resolved combination.
+5. watershed representation, initially conventional/single-OFE; and
+6. optional mods when at least one is registered for the resolved combination.
 
 Labels MUST be human-readable while submitted values use stable registered
 component IDs. Technical details such as dataset keys MAY be shown as secondary
@@ -357,6 +467,15 @@ invent or broaden capability lists.
 
 #### Submission and completion
 
+- Rq-engine MUST provide authenticated server routes for builder description,
+  validation, and creation as well as the configuration-update availability,
+  preview, and apply flow in section 5.1. Exact route paths remain an
+  implementation detail.
+- Builder description and validation responses MUST include one opaque
+  `registry_revision`. Creation MUST submit that revision. If it is no longer
+  current, the server MUST create no project and return canonical `409
+  stale_builder_schema`; the UI MUST reload the schema and require the user to
+  review the resolved summary again.
 - Submission MUST use the existing authenticated project-creation security
   boundary, including its CSRF/CAP/session behavior as applicable.
 - The Create action MUST prevent accidental duplicate submissions while a
@@ -367,8 +486,8 @@ invent or broaden capability lists.
   `config` and MUST identify the created run ID.
 - A failed response MUST retain the proposed selections, show an actionable
   error, and MUST NOT represent a partially initialized project as ready.
-- Retry behavior MUST not silently create multiple projects from one successful
-  request. The exact idempotency mechanism remains an implementation decision.
+- Retry behavior MUST follow section 7.6 and MUST NOT silently create multiple
+  projects from one successful request.
 
 #### Accessibility and responsive behavior
 
@@ -444,6 +563,35 @@ the DEM default, effective value, and source as `dem_default` or
 actor for a successful override without writing bearer tokens or other secrets
 to the manifest or logs.
 
+### 7.6 Creation idempotency and incomplete initialization
+
+Named-preset and builder submissions MUST include a client-generated,
+cryptographically random creation idempotency key of at most 200 characters.
+The server MUST reuse the existing bounded Redis `SET NX` idempotency pattern
+with a 24-hour retention window; version 1 MUST NOT add a project-creation
+database or resumable transaction service.
+
+The request fingerprint MUST include creation mode, preset/component IDs,
+normalized builder selections, normalized supported overrides, and builder
+registry revision. It MUST exclude credentials, CAPTCHA responses, bearer
+tokens, session material, and CSRF values. Authenticated keys are scoped to the
+actor. A creation path without a durable actor is scoped by its unguessable
+idempotency key and existing creation security boundary.
+
+For the same key and fingerprint, a completed replay returns the original
+run ID and redirect/location result. The same key with a different fingerprint
+returns canonical `409 idempotency_key_conflict`. A concurrent replay returns
+canonical `409 creation_in_progress` with `Retry-After`. Authentication and
+validation failures occur before reservation. Initialization or ownership
+failure releases the reservation so an explicit retry may allocate a fresh run.
+
+Creation remains synchronous at the existing project-creation boundary; it is
+not an RQ job in version 1. Success MUST be recorded before returning the
+existing `303` redirect or an equivalent synchronous JSON result. A failed or
+crashed initialization MUST never be published as ready. Existing scoped
+cleanup MAY remove its newly allocated directory; an undisclosed orphan is an
+operator cleanup concern, not a resumable project.
+
 ## 8. Composition and Precedence
 
 Composition MUST be deterministic and schema-driven. The conceptual order is:
@@ -457,15 +605,47 @@ Composition MUST be deterministic and schema-driven. The conceptual order is:
 7. capability profile; and
 8. explicit builder selections or supported named-preset overrides.
 
-This order does not grant arbitrary last-write-wins behavior. Each option MUST
-have an owning component or an explicitly declared override relationship.
-Conflicting assignments without such a relationship MUST fail validation.
+This order preserves the current build-chain writeover model. Components are
+ordered contributors, not exclusive option owners. A later applicable layer
+MAY overwrite a value written by an earlier layer, and the last writer
+determines the effective value. Each contributor MUST declare the keys it may
+write. A write outside that declaration or a collision outside the registered
+chain MUST fail validation. The manifest records the complete contributor
+order and the effective writer for each value added by an update.
 
 The resolver MUST produce the same canonical `.cfg` bytes for the same schema,
 component versions, and selections, excluding fields explicitly documented as
 non-deterministic. Timestamps belong in the manifest, not the `.cfg`.
 
-### 8.1 Component registry format and ownership
+### 8.1 Canonical `.cfg` serialization
+
+Byte identity applies to the resolved configuration map, not to source-file
+comments, whitespace, or insertion order. The canonical serializer MUST emit:
+
+- UTF-8 without a byte-order mark;
+- LF line endings and exactly one terminal LF;
+- case-sensitive section and option names;
+- sections and options in ascending Unicode code-point order;
+- section headers as `[section]` and options as `option = value`;
+- one empty line between sections and no other empty lines; and
+- no comments, multiline values, no-value options, interpolation, or
+  nondeterministic fields.
+
+The separate sanitization work package MUST inventory the currently accepted
+scalar/list forms, define one canonical lexical encoding for every supported
+schema type, normalize shared defaults and presets to those forms, and add
+golden round-trip and byte-identity fixtures before a flattened writer is
+enabled. At minimum it MUST reject duplicate case-sensitive keys/sections,
+case-only collisions, unsupported literals, inline comments that are part of a
+raw value, non-finite numbers, and secret/runtime-host-bound values. Two source
+chains that resolve to the same typed map MUST then produce identical bytes.
+
+This staged normalization is required because current configs contain mixed
+quoted/unquoted strings, list spacing, and inline-comment forms. The project-
+owned serializer MUST NOT canonicalize those forms by guessing their intended
+type.
+
+### 8.2 Component registry format and ownership
 
 Registered builder components and profiles MUST be declarative, real TOML
 documents parsed with Python's `tomllib` (or its supported compatibility
@@ -493,9 +673,9 @@ Each TOML document MUST declare a stable component ID, schema version, source
 revision identity, owned configuration attributes, constraints, and any
 references to other registered component or capability IDs. The typed Python
 registry MUST validate every document before exposing it to the builder or
-resolver. Invalid IDs, unknown references, duplicate ownership, malformed
-values, or contradictory constraints MUST fail explicitly; they MUST NOT be
-ignored or repaired through implicit defaults.
+resolver. Invalid IDs, unknown references, undeclared writes, malformed values,
+or contradictory constraints MUST fail explicitly; they MUST NOT be ignored or
+repaired through implicit defaults.
 
 The config-builder core owns:
 
@@ -524,9 +704,11 @@ Component IDs are durable provenance identifiers and MUST NOT be renamed or
 reused with incompatible semantics. A materially incompatible meaning requires
 a new ID, such as `continental-us-v2`. Compatible additions may retain the ID
 with an incremented source/schema revision and are eligible for the merge-only
-amendment rules in section 5.1. The manifest MUST record the exact IDs and
-revisions used to resolve the project so the build chain can be reconstructed
-without treating current registry contents as the project's original values.
+update rules in section 5.1. The immutable parent chain MUST record the exact
+IDs and revisions used to create the project. Amendment entries record the
+current source revisions used for later updates. Updates resolve the current
+definition registered under each stable ID; the registry is not required to
+retain executable historical definitions.
 
 ## 9. Capability Contract
 
@@ -566,7 +748,8 @@ mod, catalog, and route behavior.
 
 ## 10. Manifest Contract
 
-`config-manifest.json` MUST be UTF-8 JSON and SHOULD contain:
+`config-manifest.json` MUST be UTF-8 JSON. Schema version 1 MUST contain the
+following common fields; none are optional unless explicitly shown as nullable:
 
 ```json
 {
@@ -576,27 +759,56 @@ mod, catalog, and route behavior.
   "source_preset": null,
   "source_revision": "<git revision>",
   "resolved_at": "<RFC 3339 UTC timestamp>",
+  "parent_chain": [
+    {
+      "kind": "component",
+      "id": "continental-us",
+      "revision": "<source revision>"
+    }
+  ],
   "selections": {
     "locale": "continental-us",
-    "dem": "usgs-3dep-10m",
+    "dem": "usgs-ned13-2022",
     "dem_default_cellsize": 10,
     "cellsize": 10,
     "cellsize_source": "dem_default",
     "delineation_backend": "wbt",
-    "watershed_representation": "mofe",
-    "mods": ["disturbed"]
+    "watershed_representation": "single-ofe",
+    "mods": []
   },
   "config": {
-    "filename": "<config>.cfg",
+    "filename": "config.cfg",
     "sha256": "<lowercase SHA-256>"
   },
   "amendments": []
 }
 ```
 
-Named-preset creation MUST set `source_kind` to `preset` and record the preset
-name. The manifest MUST NOT contain secrets, bearer tokens, query credentials,
-or environment dumps.
+The required common fields are:
+
+- `schema_version`, `resolver_version`, `source_kind`, `source_preset`,
+  `source_revision`, and `resolved_at`;
+- ordered `parent_chain`, with non-empty `kind`, stable `id`, and source
+  `revision` for every source used to construct the original config;
+- `selections`, containing normalized creation selections and overrides;
+- `config.filename` and `config.sha256`; and
+- `amendments`, initially an empty array.
+
+Builder creation MUST set `source_kind` to `builder`, set `source_preset` to
+JSON `null`, record all submitted and derived selections shown in the example,
+and record the ordered registered component chain.
+
+Named-preset creation MUST set `source_kind` to `preset`, set `source_preset`
+to the preset basename, and record an ordered parent chain containing shared
+defaults and that preset. Its `selections` MUST contain normalized supported
+query overrides, or an empty `overrides` object when none were accepted. A fork
+MUST copy its parent's complete manifest and parent chain; it MUST NOT derive a
+new chain from the fork's route or filename.
+
+The manifest MUST NOT contain secrets, bearer tokens, query credentials, or
+environment dumps. Unknown top-level fields MAY be retained for forward
+compatibility, but missing or malformed required fields make the manifest
+invalid for configuration updates.
 
 In schema version 1, the digest is provenance evidence. A digest mismatch MUST
 produce an explicit operator-visible warning, but the mismatch alone MUST NOT
@@ -606,6 +818,13 @@ project data. Normal parsing, validation, authorization, and downstream model
 errors remain enforceable. This warning-only policy avoids bricking an
 otherwise usable project; the operation may succeed, or an actionable failure
 may surface at the subsystem that cannot use the changed configuration.
+
+The warning MUST be emitted as structured operator logging containing run ID,
+config filename, manifest-declared digest, and observed digest, without config
+contents or secrets. Authenticated run-page state MUST expose the same
+nonblocking warning. Implementations MUST avoid emitting it on every individual
+`config_get_*` call; the exact deduplication/rate-limit mechanism is not
+contractual.
 
 Each merge-only amendment MUST append one entry containing at least:
 
@@ -624,8 +843,12 @@ tokens.
 ## 11. Atomicity and Failure Behavior
 
 The config and manifest MUST be completely resolved and validated before NoDb
-controller initialization. Creation MUST use temporary files in the target
-working directory followed by atomic replacement.
+controller initialization. Each file MUST be written through a temporary file
+in the target working directory followed by atomic replacement. The project
+MUST NOT be marked or presented as ready until both final files are durable.
+The implementation MAY use the existing project-creation boundary and cleanup
+mechanisms; version 1 does not require a second two-file transaction protocol
+for initial creation.
 
 If resolution, validation, serialization, or persistence fails:
 
@@ -658,6 +881,11 @@ amendment entry.
 Project fork, archive creation, download, and archive restore MUST preserve the
 project-owned config and manifest as ordinary project-root artifacts.
 
+Before copying project artifacts, fork and archive creation MUST acquire the
+project config amendment lock and recover any pending amendment transaction.
+They MUST copy the config and manifest from one consistent state and MUST NOT
+archive a pending-amendment journal as the intended recovery mechanism.
+
 A fork MUST retain the source project's resolved config and manifest by default.
 Changing configuration during fork is a separate future contract and MUST NOT
 be inferred from the existence of the builder.
@@ -666,9 +894,11 @@ Restore MUST use the restored project-owned config when present. Restoring a
 legacy archive without one MUST retain shared fallback behavior.
 
 Read-only/public state MUST not change configuration resolution or permit user
-config mutation. A registered internal additive amendment may still occur so a
-project can be opened by newer software; it remains subject to the same lock,
-journal, and provenance requirements.
+config mutation. Opening or reading a project MUST NOT apply an additive
+configuration update. An authorized user may request an update only through
+the explicit preview-and-apply flow in section 5.1; read-only/public users may
+see update availability only if existing project-read authorization permits
+the underlying configuration metadata.
 
 ## 13. Security Boundary
 
@@ -682,21 +912,72 @@ roots and config path conventions. Generated files MUST not contain secrets.
 Project authorization for creation, read, fork, archive, and restore remains
 unchanged.
 
+Before any flattened-config writer is enabled, a separate configuration
+sanitization work package MUST inventory shared defaults and named presets,
+remove stale credentials, move any live secrets to the existing runtime secret
+boundary, and add an enforceable check preventing secret-bearing values from
+being materialized into project roots or archives. This contract does not
+perform that cleanup. Suspected staleness does not make a credential safe to
+copy.
+
+Rq-engine builder and configuration-update routes MUST enforce the existing
+project creation/read/mutation authorization boundaries as applicable. The
+asynchronous availability check is read-only. Preview and apply require
+an authenticated project owner or `Admin`/`Root`; ordinary public/ownerless run
+access is insufficient. Apply MUST recheck this authority both when enqueuing
+and when the worker begins execution, and it retains all existing
+read-only/public project restrictions. Service/session/MCP principals may
+mutate only when the existing project-mutation contract explicitly grants it.
+
 Cell-size override authorization is an additional builder-specific privilege.
 Possession of ordinary project-creation authority does not grant it. The server
 MUST enforce `PowerUser`/`Admin`/`Root` authorization at submission and audit a
 successful non-default override.
 
+### 13.1 Rq-engine response boundary
+
+All builder and update routes MUST use the canonical RQ response and error
+envelopes. Builder description/validation, update availability, and update
+preview are synchronous read operations. Builder creation remains synchronous
+as defined in section 7.6. Update apply is asynchronous and MUST return
+canonical `202` with `job_id`.
+
+The UI contract depends on these stable error codes:
+
+- `validation_error` (`400`) with field-addressable details;
+- `forbidden` (`403`);
+- `not_found` (`404`);
+- `idempotency_key_conflict` (`409`);
+- `creation_in_progress` (`409`);
+- `stale_builder_schema` (`409`);
+- `stale_config_preview` (`409`);
+- `config_update_unavailable` (`409`);
+- `config_update_in_progress` (`409`); and
+- `unsupported_config_schema` (`409`).
+
+Bearer-authenticated rq-engine calls remain outside the browser CSRF boundary.
+Cookie-backed calls MUST follow the canonical same-origin/CSRF contract. Exact
+route paths, cache implementation, and exception messages are not contractual.
+
 ## 14. Compatibility and Rollout
 
-### 14.1 Phase 1: Dual-name compatibility
+### 14.0 Prerequisite: configuration sanitization
 
-Add `_defaults.cfg` as the canonical shared defaults file while retaining a
-byte-equivalent `_defaults.toml`. Update the central resolver and direct
-consumers to use the project-local and shared precedence in section 6.2.
+Complete and validate the separate sanitization work package defined in
+section 13 before enabling either named-preset or builder flattened-config
+creation. Reader compatibility work may land earlier, but writer feature flags
+MUST remain disabled until the sanitization gate passes.
+
+### 14.1 Phase 1: Canonical move and symlink compatibility
+
+Move the tracked shared defaults file from `_defaults.toml` to `_defaults.cfg`.
+Create the shared `_defaults.toml` path as a relative symlink to
+`_defaults.cfg`; it MUST NOT be a second regular-file copy. Update the central
+resolver and direct consumers to use the project-local and shared precedence in
+section 6.2.
 
 All deployed versions MUST continue to operate during this phase. A bare rename
-without the compatibility reader is prohibited.
+without both the compatibility reader and symlink is prohibited.
 
 ### 14.2 Phase 2: Local automated validation
 
@@ -714,16 +995,18 @@ observation-only deployment.
 Forest acceptance MUST demonstrate:
 
 1. the stack starts with canonical shared `_defaults.cfg` present;
-2. a representative legacy project without project-local defaults reopens and
+2. shared `_defaults.toml` is a relative symlink resolving to that canonical
+   file and an older-reader fixture can load through the symlink;
+3. a representative legacy project without project-local defaults reopens and
    resolves the same effective values as before deployment;
-3. a fixture/project containing only project-local `_defaults.toml` continues
+4. a fixture/project containing only project-local `_defaults.toml` continues
    to prefer that file over shared `_defaults.cfg`;
-4. a fixture/project containing project-local `_defaults.cfg` prefers it over
+5. a fixture/project containing project-local `_defaults.cfg` prefers it over
    both `.toml` locations;
-5. a new named-preset project initializes with the same effective values as
+6. a new named-preset project initializes with the same effective values as
    before the defaults-name change;
-6. the representative project reopens after a stack restart; and
-7. normal climate, soils, delineation, and WEPP preparation paths complete for
+7. the representative project reopens after a stack restart; and
+8. normal climate, soils, delineation, and WEPP preparation paths complete for
    the representative configurations.
 
 Record the deployed revision, exact commands, project/config identifiers,
@@ -739,16 +1022,17 @@ revision.
 ### 14.4 Phase 4: Production rollout and shared-alias removal
 
 After Forest acceptance, deploy the compatibility reader and canonical
-`_defaults.cfg` to production. The shared `_defaults.toml` MUST remain through
-the mixed-version deployment window. Project-local `_defaults.toml` support is
-permanent for legacy archives and projects.
+`_defaults.cfg` to production. The shared `_defaults.toml` symlink MUST remain
+through Forest Phase 3, production validation, and the mixed-version deployment
+window. Project-local `_defaults.toml` support is permanent for legacy archives
+and projects.
 
-Maintaining two shared defaults files is an error trap and is not a permanent
-compatibility strategy. The shared `_defaults.toml` alias MUST be removed after
-Forest and production validation demonstrates that every deployed application
-revision and supported rollback target reads canonical shared `_defaults.cfg`.
-The removal MUST occur in the next planned release after that gate; it MUST NOT
-be deferred as optional cleanup.
+The symlink avoids divergent shared contents but the legacy shared name is not
+permanent. The shared `_defaults.toml` symlink MUST be removed after Forest and
+production validation demonstrates that every deployed application revision
+and supported rollback target reads canonical shared `_defaults.cfg`. The
+removal MUST occur in the next planned release after that gate; it MUST NOT be
+deferred as optional cleanup.
 
 This removal applies only to the shared alias. The reader MUST permanently
 retain support for project-local `_defaults.toml` in legacy projects and
@@ -758,58 +1042,93 @@ archives, with the precedence defined in section 6.2.
 
 After the defaults-name integration gate, continue in this order:
 
-1. Add flattened-config detection while preserving all legacy modes.
-2. Add deterministic resolution and snapshotting for newly created named-preset
+1. Deploy flattened-config detection to every web and RQ reader while
+   preserving all legacy modes; keep all flattened-config writers disabled.
+2. Verify every active worker and supported rollback revision can read a
+   flattened fixture without applying shared defaults.
+3. Complete the configuration sanitization gate in section 14.0.
+4. Add deterministic resolution and snapshotting for newly created named-preset
    projects.
-3. Add manifest generation and diagnostics.
-4. Add resolved capability reading without restricting legacy projects.
-5. Introduce one builder-supported configuration family.
-6. Exercise flattened create, reopen, fork, archive, and restore on Forest
+5. Add manifest generation and diagnostics.
+6. Add resolved capability reading without restricting legacy projects.
+7. Introduce one builder-supported configuration family.
+8. Exercise flattened create, reopen, fork, archive, and restore on Forest
    test production before enabling project-owned configs in production.
-7. Expand registered components and profiles incrementally.
+9. Enable writer feature flags only after compatible readers are deployed and
+   rollback to an incompatible reader is no longer a supported path.
+10. Expand registered components and profiles incrementally.
 
 There is no bulk backfill or general re-flattening. A shared config edit
 continues to affect legacy projects. Flattened projects stay pinned except when
-an accessed, registered missing attribute is resolved and durably recorded by
-the additive amendment process in section 5.1.
+an authorized user previews and applies a merge-only update through the process
+in section 5.1.
 
 ## 15. Required Regression Evidence
 
 Implementation is not conformant until tests demonstrate:
 
 - flattened project configs load without shared defaults;
+- differently ordered/formatted source chains that resolve to the same typed
+  map produce identical canonical `.cfg` bytes, and serialization is stable
+  across a parse/serialize round trip;
+- registered writeover follows contributor order and records the effective
+  writer, while undeclared writes fail validation;
 - legacy project-local configs retain defaults-plus-local layering;
 - projects without local configs retain shared fallback;
 - project-local `_defaults.cfg` wins over all legacy/shared names;
 - project-local `_defaults.toml` wins over both shared defaults names;
 - shared `_defaults.cfg` falls back to shared `_defaults.toml` when required by
   the compatibility window;
+- the compatibility `_defaults.toml` is a relative symlink to `_defaults.cfg`,
+  works for an older reader, and remains present through Forest and production
+  validation;
 - serialized NoDb payloads retain the config token without embedding a defaults
   filename;
 - named-preset query overrides are materialized into the flattened file;
+- unknown named-preset query overrides are rejected only on the flattened
+  writer path and transport/authentication values never enter the manifest;
+- every supported named preset passes schema and capability-completeness
+  validation before release;
 - later edits to shared defaults, presets, or locale profiles do not change a
   flattened project's effective values;
 - malformed flattened configs fail explicitly without shared fallback;
-- the first registered missing attribute resolves the complete recorded build
-  chain and adds all applicable missing attributes in one batch;
+- a valid flattened config with a missing, malformed, or inconsistent manifest
+  continues loading with a warning, does not use shared fallback, and disables
+  configuration updates;
+- a valid flattened config with a newer unknown manifest schema loads and can
+  be restored with updates disabled, while manifest schema version 1 remains
+  readable;
+- the async availability check performs no write and previews all applicable
+  missing attributes from the complete recorded parent chain;
+- only an authenticated, explicit apply request enqueues an update;
+- a stale preview is rejected without mutation and requires a refreshed
+  preview;
+- applying a current preview adds all reviewed missing attributes in one batch;
 - the amendment preserves every existing config value;
-- a second lookup for any attribute included in that batch performs no write;
+- an ordinary missing `config_get_*` lookup performs no configuration write;
 - an unregistered/misspelled attribute and an ambiguous or inapplicable chain
   result do not mutate either file;
 - amendment history records source, value, revisions, and prior/resulting
   digests without secrets;
 - config digest mismatch emits a warning without, by itself, blocking project
   loading, mutation, model execution, or a registered additive amendment;
-- concurrent lookups for missing attributes in the same build-chain delta
-  produce one batch amendment;
+- concurrent apply requests for the same parent-chain delta cannot bypass the
+  project lock or produce duplicate amendments;
 - failure before, during, and after either file replacement recovers to a
   consistent config/manifest pair without re-resolving a changed value;
 - registering a new mod does not enable it or inject a section into an older
   project;
 - an older project with an already-active mod may receive its newly introduced
   missing section/options through the merge-only build-chain amendment;
+- preset projects and their forks retain the recorded defaults/preset/override
+  parent chain, and updates never infer a replacement profile;
 - builder combinations validate locale/DEM/cell-size/backend/representation/mod
   constraints;
+- all four initial continental-US DEM/backend combinations pass the Forest gate
+  before they are exposed;
+- nested/PUP controllers without a child-local config resolve the validated
+  top-level project config before shared fallback, while preexisting legacy
+  child-local configs retain precedence;
 - the Interfaces path remains present and retains its original config tokens;
 - builder controls expose only server-described stable IDs and dependent
   choices;
@@ -824,27 +1143,41 @@ Implementation is not conformant until tests demonstrate:
 - invalidated downstream selections are removed from submitted payloads and
   explained to the user;
 - the review summary matches the server-resolved config and capabilities;
+- stale builder registry revisions fail with `stale_builder_schema` and create
+  no project;
 - duplicate submission is prevented while creation is pending;
+- idempotent success replay returns the original project, conflicting replay
+  returns `idempotency_key_conflict`, and failed initialization releases the
+  reservation without publishing a ready project;
 - builder validation errors preserve selections and focus/announce correctly;
 - the complete builder path passes keyboard, 200-percent zoom, and automated
   accessibility checks;
 - capability filtering and server enforcement use the same resolved IDs;
-- fork/archive/restore preserve config and manifest bytes;
+- update preview/apply reject public read authority and require the project
+  owner or `Admin`/`Root`, including worker-time reauthorization;
+- fork/archive recover any pending update and preserve a consistent config and
+  manifest pair;
 - initialization does not begin after config persistence failure; and
-- generated config and manifest contain no secrets.
+- reader-only deployment is compatible with flattened fixtures before writer
+  feature flags are enabled; and
+- the sanitization gate rejects secret-bearing generated config or manifest
+  content before it can enter a project root or archive.
 
 At least one representative project MUST be exercised through create, reopen,
 fork, archive, and restore before production rollout.
 
-## 16. Open Decisions Requiring Ratification
+## 16. Remaining Approval and Evidence Gates
 
-The following remain intentionally unresolved in this draft:
+The review cycle identified no remaining version 1 behavior decisions in this
+draft. Implementation remains blocked until:
 
-1. The exact stable IDs and initial matrices for soil, land-use, DEM, watershed
-   representation, and mods.
-2. The behavior of nested project/PUP working directories that need a distinct
-   configuration authority.
-3. The exact creation-request idempotency mechanism and retry window.
+1. the sanitization work package inventories the existing lexical forms and
+   ratifies the type-specific canonical value encodings required by section
+   8.1;
+2. the applicable contract-first work-package checkpoint approves this draft;
+   and
+3. the implementation records the required local and Forest evidence before
+   enabling writer feature flags or exposing a builder combination.
 
-No implementation should begin until these decisions are resolved through the
-applicable contract-first work-package checkpoint.
+An evidence failure removes or delays the affected builder combination; it does
+not authorize an inferred fallback or a change to Interfaces presets.
