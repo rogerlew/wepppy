@@ -30,6 +30,12 @@ docker compose --env-file docker/.env -f docker/docker-compose.prod.yml up -d
 - Does **not** prune volumes unless explicitly requested with `--docker-prune-volumes`.
 - Use `--skip-docker-prune` to disable the end-of-deploy runtime prune.
 
+Production Python services also fail startup unless the vendored
+`wepppyo3.wepp_interchange` shared object matches the SHA-256 pinned in
+`docker/wepppyo3-interchange-preflight.py`. Update that pin together with the
+canonical `wepppyo3/release/linux/py312` artifact whenever the native
+interchange is intentionally refreshed.
+
 ### Production Worker Pool (Dedicated RQ Hosts)
 
 Worker-only stacks (no Flask/Caddy/Redis/Postgres) use:

@@ -12,6 +12,9 @@ from typing import Sequence
 
 
 DEFAULT_RELEASE_ROOT = Path("/workdir/wepppyo3/release/linux/py312")
+EXPECTED_INTERCHANGE_SHA256 = (
+    "9607fb39ee82aca6f00946a8b9100932155a4ef8e3a78e7f2a483d9421c31a77"
+)
 
 
 def validate_wepppyo3_interchange() -> tuple[Path, str]:
@@ -63,6 +66,11 @@ def validate_wepppyo3_interchange() -> tuple[Path, str]:
         )
 
     artifact_sha256 = hashlib.sha256(extension.read_bytes()).hexdigest()
+    if artifact_sha256 != EXPECTED_INTERCHANGE_SHA256:
+        raise RuntimeError(
+            "service requires the WEPPpy-vendored WEPPpyo3 interchange artifact; "
+            f"expected SHA256 {EXPECTED_INTERCHANGE_SHA256}, found {artifact_sha256}"
+        )
     return extension, artifact_sha256
 
 

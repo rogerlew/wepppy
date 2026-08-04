@@ -92,6 +92,16 @@ def test_preflight_accepts_configured_release_and_reports_sha() -> None:
     assert "WEPPpyo3 interchange SHA256:" in completed.stdout
 
 
+def test_preflight_pins_vendored_interchange_artifact() -> None:
+    source = PREFLIGHT.read_text(encoding="utf-8")
+    assert (
+        'EXPECTED_INTERCHANGE_SHA256 = (\n'
+        '    "9607fb39ee82aca6f00946a8b9100932155a4ef8e3a78e7f2a483d9421c31a77"\n'
+        ")"
+    ) in source
+    assert "artifact_sha256 != EXPECTED_INTERCHANGE_SHA256" in source
+
+
 def test_preflight_rejects_extension_outside_configured_release(tmp_path: Path) -> None:
     env = os.environ.copy()
     env["WEPPPYO3_INTERCHANGE_RELEASE_ROOT"] = str(tmp_path)
