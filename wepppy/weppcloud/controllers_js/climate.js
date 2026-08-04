@@ -507,6 +507,8 @@ var Climate = (function () {
             }
             if (dataset.rap_compatible) {
                 lines.push("Compatible with RAP time-series workflows.");
+            } else {
+                lines.push("Not Compatible with RAP time-series workflows.");
             }
             if (dataset.ui_exposed === false) {
                 lines.push("This dataset is read-only in the Pure UI and managed through catalog metadata.");

@@ -105,7 +105,7 @@ _CLIMATE_DATASETS: Tuple[ClimateDataset, ...] = (
         default_spatial_mode=0,
         station_modes=(-1, 0, 1),
         inputs=("stochastic_years", "spatial_mode"),
-        rap_compatible=True,
+        rap_compatible=False,
         blocked_locales=_GHCN_ONLY_LOCALES,
     ),
     ClimateDataset(
