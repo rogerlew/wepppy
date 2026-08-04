@@ -1,0 +1,6 @@
+{
+  "runid": "upset-reckoning",
+  "undisturbed_scenario": "undisturbed",
+  "metric": "flash_index",
+  "note": "Peakflow partition is based on PASS hillslope event variable 'peakro' aggregated by day and disturbed_class using landuse/landuse.parquet. Interpret as a peak-runoff proxy at hillslope scale."
+}

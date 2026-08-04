@@ -1,0 +1,12 @@
+[project]
+name = "palisades-fire-2024-peakflow-analysis"
+version = "0.1.0"
+description = "Peak-flow / return-interval analysis for WEPPcloud run upset-reckoning (Palisades Fire 2024 case study)."
+readme = "README.md"
+requires-python = ">=3.12,<3.13"
+dependencies = [
+  "matplotlib>=3.8,<4",
+  "numpy>=1.26,<3",
+  "pandas>=2.2,<3",
+  "requests>=2.32,<3",
+]

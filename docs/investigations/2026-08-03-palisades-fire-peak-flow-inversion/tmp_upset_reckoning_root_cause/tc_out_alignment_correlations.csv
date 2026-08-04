@@ -1,0 +1,9 @@
+driver,label,pearson_r_with_abs_dlogQ,n
+tc_hr,$T_c$ (hr),0.16666271578500583,23
+storm_dur_hr,Storm duration (hr),0.14438852758072243,23
+storm_peak_hr,Storm peak time (hr),-0.2511717021967201,23
+storm_peak_minus_tc_hr,$t_{peak}-T_c$ (hr),-0.2649128861492891,23
+storm_peak_minus_tc_abs_hr,$|t_{peak}-T_c|$ (hr),-0.2557225443000659,23
+tc_over_dur,$T_c/\mathrm{dur}$,-0.13846795332326428,23
+peak_over_dur,$t_{peak}/\mathrm{dur}$,-0.35517086500461215,23
+peak_over_tc,$t_{peak}/T_c$,-0.23063093192609932,23

@@ -1,0 +1,4 @@
+interface:
+  display_name: "WEPPcloud Agent"
+  short_description: "Interpret and report WEPPcloud runs"
+  default_prompt: "Use $weppcloud-agent to interpret WEPPcloud results, compare scenarios, and draft a run report."

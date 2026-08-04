@@ -1,0 +1,18 @@
+{
+  "burned": {
+    "scenario": null,
+    "events": 16802,
+    "years": 46,
+    "events_per_year": 365.2608695652174,
+    "peak_p99": 24.350829600000942,
+    "peak_max": 281.18726
+  },
+  "undisturbed": {
+    "scenario": "undisturbed",
+    "events": 16802,
+    "years": 46,
+    "events_per_year": 365.2608695652174,
+    "peak_p99": 8.818584400000086,
+    "peak_max": 263.57799
+  }
+}

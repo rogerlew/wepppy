@@ -1,0 +1,44 @@
+{
+  "run_id": "upset-reckoning",
+  "binary": "/wc1/ablation/stevens-canyon-peak-flow-20260803-hillslopes/bin/wepp_260803_hill",
+  "cells": [
+    "burned_pmet",
+    "undisturbed_pmet",
+    "burned_legacy",
+    "undisturbed_legacy"
+  ],
+  "hillslopes": 278,
+  "expected_rows_per_run": 16802,
+  "pmet": {
+    "kcb": 0.95,
+    "rawp": 0.8
+  },
+  "sidecars": [
+    "gwcoeff.txt",
+    "snow.txt",
+    "wepp_ui.txt",
+    "chntyp.txt",
+    "tc.txt",
+    "chan.inp"
+  ],
+  "hashes": {
+    "/wc1/ablation/stevens-canyon-peak-flow-20260803-hillslopes/bin/wepp_260803_hill": "86ef065c8d8c6c1e644db40c022c7c850701c0c174d3c622dfa28f1d6da122e7",
+    "/wc1/runs/up/upset-reckoning/landuse/landuse.parquet": "bc96ab560a2255c1afa639bd6f8e7d1f82117da9673d12f8b6108dc0933d781f",
+    "/wc1/runs/up/upset-reckoning/soils/soils.parquet": "f9b381a33f85a446033472eb90d38b0a99fc281512dc2e1e9f2f56fd1baab59b",
+    "/wc1/runs/up/upset-reckoning/wepp/output/interchange/pass_pw0.metadata.parquet": "19d7d88c2e69f6306959b095f83a3efb426d6b0539ca93952d693e6efdfb0c73",
+    "/wc1/runs/up/upset-reckoning/wepp/runs/wepp_ui.txt": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "/workdir/wepppy/wepppy/wepp/management/data/UnDisturbed/Developed_Low_Intensity.man": "c547fe6ecc2753b886a57b6b3ca177e35a3b6162b93042ca66e6772f78dac25f",
+    "/workdir/wepppy/wepppy/wepp/management/data/UnDisturbed/Developed_Moderate_Intensity.man": "499abb37be714e97be7bd7f1aecf055ef00521dd674399e4d55a1f1588d8ac62",
+    "/workdir/wepppy/wepppy/wepp/management/data/UnDisturbed/Old_Forest.man": "ee361de0d9bb38fb91940b17d84e0160ec9968b5f5e3ec468cc6668bd3405306",
+    "/workdir/wepppy/wepppy/wepp/management/data/UnDisturbed/Shrub.man": "15b7620912be9e003fb5791f46ff53cffd049179ee3090186bec207aab3bba7f"
+  },
+  "undisturbed_reconstruction": {
+    "management_mapping": {
+      "forest": "Old_Forest.man",
+      "shrub": "Shrub.man",
+      "developed moderate intensity": "Developed_Moderate_Intensity.man",
+      "developed low intensity": "Developed_Low_Intensity.man"
+    },
+    "soil_rule": "original production soil file before the first disturbance suffix"
+  }
+}

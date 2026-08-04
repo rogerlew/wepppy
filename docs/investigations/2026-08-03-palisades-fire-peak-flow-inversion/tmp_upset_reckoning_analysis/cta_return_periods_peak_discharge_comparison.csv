@@ -1,0 +1,4 @@
+recurrence_years,date_key_burned,peak_discharge_m3s_burned,rank_burned,weibull_T_years_burned,date_key_undisturbed,peak_discharge_m3s_undisturbed,rank_undisturbed,weibull_T_years_undisturbed,peak_diff_undist_minus_burned
+2,1992-03-02,120.51982,23,2.0001190334483994,1992-03-02,120.51982,23,2.0001190334483994,0.0
+5,1980-02-15,165.64967,9,5.111415307701464,1980-02-15,165.64967,9,5.111415307701464,0.0
+10,2004-10-20,189.68129,5,9.200547553862636,2004-10-20,189.68129,5,9.200547553862636,0.0

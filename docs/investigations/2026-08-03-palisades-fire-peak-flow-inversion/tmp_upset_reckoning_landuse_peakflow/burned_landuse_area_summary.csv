@@ -1,0 +1,6 @@
+landuse_desc,disturbed_class,n,area_m2,classification,landuse_group,severity_group
+Shrub Moderate Severity Fire,shrub moderate sev fire,110,46134.000000000095,"('shrub', 'moderate')",shrub,moderate
+Moderate Severity Fire,forest moderate sev fire,89,26096.580000000024,"('forest', 'moderate')",forest,moderate
+Shrub Low Severity Fire,shrub low sev fire,50,9598.499999999998,"('shrub', 'low')",shrub,low
+High Severity Fire,forest high sev fire,14,265.86,"('forest', 'high')",forest,high
+Low Severity Fire,forest low sev fire,5,76.94999999999999,"('forest', 'low')",forest,low

@@ -1,0 +1,14 @@
+{
+  "burned": {
+    "events": 16802,
+    "years": 46,
+    "events_per_year": 365.2608695652174,
+    "peak_p99": 24.350829600000942
+  },
+  "undisturbed": {
+    "events": 16802,
+    "years": 46,
+    "events_per_year": 365.2608695652174,
+    "peak_p99": 24.350829600000942
+  }
+}

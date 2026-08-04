@@ -1,0 +1,6 @@
+{
+  "runid": "upset-reckoning",
+  "scenario": "undisturbed",
+  "top_n": 30,
+  "note": "These are proxy hydrographs (triangle assumption) using only event runoff volume, peak discharge, and time-to-peak from chan.out. They are meant for quick interpretation when full intra-storm hydrographs are not available."
+}

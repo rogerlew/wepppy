@@ -1,0 +1,4 @@
+landuse_desc,disturbed_class,n,area_m2,classification,landuse_group,severity_group
+Shrub/Scrub,shrub,160,97819.19999999988,"('shrub', 'undisturbed')",shrub,undisturbed
+Mixed Forest,forest,95,27163.35000000002,"('forest', 'undisturbed')",forest,undisturbed
+Evergreen Forest,forest,13,541.71,"('forest', 'undisturbed')",forest,undisturbed

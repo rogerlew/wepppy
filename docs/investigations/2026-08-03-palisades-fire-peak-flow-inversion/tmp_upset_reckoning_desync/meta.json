@@ -1,0 +1,17 @@
+{
+  "runid": "upset-reckoning",
+  "undisturbed_scenario": "undisturbed",
+  "topaz_ids": [
+    604,
+    324,
+    24
+  ],
+  "wepp_ids": [
+    400,
+    370,
+    343
+  ],
+  "outlet_wepp_id": 400,
+  "top_n": 30,
+  "generated": "2026-02-12T00:25:45-0800"
+}

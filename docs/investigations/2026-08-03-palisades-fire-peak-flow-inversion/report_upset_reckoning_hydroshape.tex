@@ -1,0 +1,608 @@
+\documentclass[11pt]{article}
+
+\usepackage[margin=1in]{geometry}
+\usepackage{graphicx}
+\usepackage{booktabs}
+\usepackage{amsmath}
+\usepackage{siunitx}
+\usepackage{float}
+\usepackage{hyperref}
+
+\sisetup{group-separator = {,}, group-minimum-digits = 4}
+\hypersetup{hypertexnames=false}
+
+\title{WEPPcloud Hydrograph-Shape Diagnostics: Burned vs.\ Undisturbed\\(Run: \texttt{upset-reckoning})}
+\author{Roger Lew\thanks{\href{mailto:rogerlew@uidaho.edu}{rogerlew@uidaho.edu}, University of Idaho}\\[4pt]
+\small with agentic co-author support from OpenAI GPT-5.2 and Anthropic Claude Opus 4}
+\date{\today}
+
+\begin{document}
+\maketitle
+
+% ------------------------------------------------------------------
+\begin{abstract}
+After wildfire, burned watersheds are generally expected to produce higher peak discharges than their undisturbed counterparts: fire reduces infiltration capacity, removes ground cover, and can induce soil hydrophobicity.
+For WEPPcloud run \texttt{upset-reckoning} (a homelab WEPPcloud server deployment), the opposite pattern appears at return-interval-relevant event ranks: the \textbf{undisturbed} scenario frequently produces a \textbf{higher peak discharge} than the \textbf{burned} scenario, even when total event runoff volume is similar or lower.
+
+This report traces the anomaly through five layers of progressively more direct evidence:
+\begin{enumerate}
+  \item Event-scale proxies show that undisturbed events are systematically ``flashier'' --- higher peak-to-volume ratio ($Q_p/V$) and shorter effective duration ($T_\mathrm{eff}$) for comparable volumes.
+  \item A management-template parameter audit rules out data-entry errors; all moderate-severity parameter changes are directionally consistent with a burn.
+  \item Uniform-severity control runs (every hillslope assigned the same severity) show that the anomaly persists even without spatial heterogeneity: moderate-severity fire is intrinsically less flashy than undisturbed, while high-severity fire is flashier, as conventionally expected.
+  \item Process-of-elimination testing against precipitation, antecedent soil moisture, and runoff-partitioning proxies shows that none of these explain the peak difference.
+  \item Sub-daily (5-minute) routed channel hydrographs directly confirm that the burned outlet response is broader and more attenuated, while the undisturbed scenario delivers a comparable volume in a narrower time window.
+\end{enumerate}
+
+The mechanism has two components.
+First, the moderate-severity management-template parameterization itself produces a less flashy response than undisturbed --- confirmed by the uniform-severity controls where spatial heterogeneity is absent.
+Second, in the heterogeneous burned scenario (SBS-derived severity mosaic), mixed burn severities further attenuate peaks through spatial desynchronization of tributary contributions.
+High-severity fire, by contrast, produces higher peaks than undisturbed --- consistent with conventional expectations --- so the anomaly is specific to moderate severity and to heterogeneous mosaics dominated by it.
+We recommend revisiting the moderate-severity template parameters so that moderate burn produces at least as flashy a response as undisturbed, consistent with field expectations.
+\end{abstract}
+
+% ------------------------------------------------------------------
+\section{Notation and Terminology}
+\label{sec:notation}
+
+Table~\ref{tab:notation} defines the key symbols and abbreviations used throughout this report.
+
+\begin{table}[H]
+  \centering
+  \caption{Symbols, abbreviations, and key terms.}
+  \label{tab:notation}
+  \begin{tabular}{l l}
+    \toprule
+    Symbol / Term & Definition \\
+    \midrule
+    $Q_p$           & Peak discharge (m\textsuperscript{3}/s) at the watershed outlet \\
+    $V$             & Event runoff volume (m\textsuperscript{3}) at the watershed outlet \\
+    $P$             & Daily precipitation depth (mm) \\
+    $T_\mathrm{eff}$& Effective duration $= V / Q_p / 3600$ (hours); smaller $\Rightarrow$ flashier \\
+    width50         & Duration (hr) that $Q(t)$ stays above $0.5\,Q_p$; smaller $\Rightarrow$ sharper peak \\
+    CTA             & Continuous-Time Analysis (partial-duration return-period method) \\
+    EBE             & Event-By-Event outlet summary dataset (\texttt{ebe\_pw0}) \\
+    PASS            & Per-hillslope (``pass-file'') event dataset (\texttt{pass\_pw0}) \\
+    TOPAZ           & Topographic Parameterization tool; its channel IDs label network elements \\
+    $f_\mathrm{eq}$ & Equivalent Darcy--Weisbach friction factor (rill + interrill composite) \\
+    subfrac         & Subsurface fraction of runoff volume (from PASS) \\
+    Flagged event   & Event where $Q_{p,U} > Q_{p,B}$ and $V_U / V_B \le 1.05$ \\
+    \bottomrule
+  \end{tabular}
+\end{table}
+
+% ------------------------------------------------------------------
+\section{Scope}
+\label{sec:scope}
+
+\subsection{Background and motivation}
+WEPPcloud is a web-based interface to the WEPP (Water Erosion Prediction Project) watershed model, widely used for post-fire erosion and runoff assessment on national forests in the western United States. A standard WEPPcloud analysis compares a \textbf{burned} scenario (with spatially distributed burn severities derived from satellite burn-severity maps) against an \textbf{undisturbed} baseline, and reports return-period peak discharges via Continuous-Time Analysis (CTA) for use in culvert sizing, road-drainage design, and other infrastructure decisions.
+
+Run \texttt{upset-reckoning} was generated on a homelab WEPPcloud server deployment. During review of the CTA results, a counterintuitive pattern was identified: the \textbf{undisturbed} scenario frequently exhibits a \textbf{higher peak discharge} than the \textbf{burned} scenario at return-interval-relevant event ranks, even when total event runoff volume is similar or lower.
+
+In standard post-fire hydrology, burning is expected to \emph{increase} peak flows through reduced infiltration, loss of ground cover, and soil hydrophobicity. The reversed pattern raises a practical concern: if undisturbed peaks exceed burned peaks, the CTA-based design flows for the burned scenario would be \emph{lower} than the pre-fire baseline, potentially leading to under-designed infrastructure.
+
+The goal of this report is to determine whether the reversed pattern is a modeling artifact (e.g., a template parameterization error) or a genuine consequence of the model physics, and if the latter, to identify the dominant mechanism and recommend corrective action.
+
+\subsection{CTA return periods (peak discharge)}
+Table~\ref{tab:cta_rp} reports peak-discharge return-period estimates from CTA for the burned and undisturbed scenarios. CTA is a partial-duration-series method that ranks all independent peak events across the simulation record and fits a frequency distribution. For each return period, the table lists the event date and peak discharge in both scenarios.
+
+An important caveat: the CTA selects \emph{different dates} for each scenario, so a ``2-year event'' in the burned scenario is not necessarily the same storm as the ``2-year event'' in the undisturbed scenario. This complicates direct comparison and motivates the same-date analysis below.
+\input{tmp_upset_reckoning_scope/cta_rp_table.tex}
+
+\subsection{Cross-scenario date comparison}
+To allow an apples-to-apples comparison of the \emph{same storm} in both scenarios, Table~\ref{tab:date_compare} takes the union of the six CTA-picked dates and shows precipitation, runoff volume, and peak discharge for each scenario on each date.
+\input{tmp_upset_reckoning_scope/date_compare_table.tex}
+
+On four of the six dates, \textbf{undisturbed peak discharge exceeds burned} while volumes are comparable or lower --- confirming that this is a systematic pattern, not a single-event outlier. Notably, precipitation is identical across scenarios on the same date (both scenarios use the same climate input), so the peak differences must arise from within-watershed processes: infiltration, routing, or spatial aggregation.
+
+\subsection{Rank plots (top-$N$ events)}
+\begin{figure}[H]
+  \centering
+  \includegraphics[width=0.95\textwidth]{tmp_upset_reckoning_hydroshape/runoff_volume_vs_rank_topN.png}
+  \caption{Runoff volume vs.\ rank for the top-$N$ runoff events (separate lines for burned and undisturbed).}
+\end{figure}
+
+\begin{figure}[H]
+  \centering
+  \includegraphics[width=0.95\textwidth]{tmp_upset_reckoning_hydroshape/peak_discharge_vs_rank_topN.png}
+  \caption{Peak discharge vs.\ rank for the top-$N$ peak-discharge events. Undisturbed consistently exceeds burned across most ranks, despite producing comparable or lower runoff volumes (previous figure).}
+\end{figure}
+
+% ------------------------------------------------------------------
+\section{Data Sources and Methods}
+\label{sec:data}
+
+We analyze the top-$N$ peakflow days (here $N=30$) using three WEPPcloud Query Engine datasets:
+\begin{itemize}
+  \item \textbf{EBE} (\texttt{wepp/output/interchange/ebe\_pw0.parquet}): event date, precipitation (mm), outlet runoff volume (m\textsuperscript{3}), and peak discharge (m\textsuperscript{3}/s).
+  \item \textbf{Channel output} (\texttt{wepp/output/interchange/chan.out.parquet}): time-to-peak (s) for the outlet element. After a targeted rerun with \texttt{dtchr=300} and \texttt{ichout=3}, this dataset also contains 5-minute routed hydrographs at selected TOPAZ channel IDs (Section~\ref{sec:desync}).
+  \item \textbf{PASS} (\texttt{wepp/output/interchange/pass\_pw0.events.parquet} joined with \texttt{pass\_pw0.metadata.parquet}): per-hillslope event variables, including area-weighted duration and runoff partition proxies.
+\end{itemize}
+
+\subsection{Derived proxies}
+\label{sec:proxies}
+Most of this report uses event-scale (daily) datasets that provide only totals ($V$, $Q_p$, $P$), not within-storm time series. We therefore rely on ``shape'' proxies:
+\begin{itemize}
+  \item \textbf{Effective duration} (hours): $T_\mathrm{eff} = V / (Q_p \cdot 3600)$. A smaller value means the runoff volume is concentrated into a shorter peak --- i.e., a flashier response.
+  \item \textbf{Proxy hydrograph} (triangle): a synthetic triangle hydrograph constructed to match each event's $V$ and $Q_p$, with the rising limb timed using \texttt{chan.out} time-to-peak. Useful for visualization but not a substitute for true sub-daily hydrographs.
+  \item \textbf{Approximate storm intensity} (mm/hr): $I \approx P / \mathrm{dur}$, where $P$ is daily precipitation and $\mathrm{dur}$ is the area-weighted event duration (s) from PASS.
+  \item \textbf{Subsurface fraction}: $\mathrm{subfrac} = \sum \mathrm{sbrunv} / \sum \mathrm{runvol}$ from PASS (watershed-aggregated). A higher value implies more of the runoff moves through slower subsurface pathways.
+\end{itemize}
+
+Section~\ref{sec:desync} supplements these proxies with true 5-minute routed channel hydrographs from the targeted rerun.
+
+% ------------------------------------------------------------------
+\section{Key Findings (Summary)}
+\label{sec:key_findings}
+
+This section previews the main results; the detailed evidence follows in Sections~\ref{sec:scatter}--\ref{sec:desync}.
+
+Across the flagged events (undisturbed peak higher, undisturbed volume not more than 5\% higher; see Table~\ref{tab:flagged}), three patterns stand out:
+\begin{enumerate}
+  \item \textbf{Higher peak-to-volume ratio in undisturbed} --- implying a shorter effective duration (flashier response) for similar volumes.
+  \item \textbf{Similar storm intensity} on the same dates --- ruling out precipitation differences as the primary driver.
+  \item \textbf{Narrower outlet hydrograph in undisturbed} (confirmed by 5-minute routed channel hydrographs) --- pointing to reduced attenuation/dispersion in routing, rather than more total runoff, as the dominant mechanism.
+\end{enumerate}
+
+Additionally, uniform-severity control runs (Section~\ref{sec:omni_homog_flashiness}) reveal a \textbf{non-monotonic relationship between burn severity and flashiness}: high-severity fire increases flashiness above undisturbed (as expected), but moderate-severity fire \emph{decreases} it. This means the anomaly is not purely a spatial-heterogeneity artifact --- it is rooted in the moderate-severity template parameterization itself.
+
+\subsection{Why does the undisturbed scenario peak higher with similar or lower volume?}
+\label{sec:why_higher}
+The short answer: the undisturbed scenario delivers its runoff \emph{more concentrated in time}. In the event-scale proxies, this appears as a higher $Q_p / V$ ratio (shorter $T_\mathrm{eff}$). In the sub-daily hydrographs (Section~\ref{sec:desync}), it appears as a narrower peak (smaller width50). The approximate intensity proxy ($P / \mathrm{dur}$) is nearly identical across scenarios on the same dates, which rules out precipitation forcing and points instead to within-watershed routing and attenuation differences.
+
+\subsection{Flagged events: ``peak higher, volume not higher''}
+Table~\ref{tab:flagged} lists the flagged events --- those where undisturbed peak discharge exceeds burned while volume is within 5\% --- ranked by undisturbed peak discharge within the top-30 peakflow days.
+
+\begin{table}[H]
+  \centering
+  \caption{Flagged events: undisturbed peak exceeds burned, volume within 5\%. $Q_p$: m\textsuperscript{3}/s; $V$: m\textsuperscript{3}; $T_\mathrm{eff}$: hours; $I$: mm/hr.}
+  \label{tab:flagged}
+  \resizebox{\textwidth}{!}{%
+  \begin{tabular}{lrrrrrrrrrrrr}
+    \toprule
+    Date & $Q_{p,B}$ & $Q_{p,U}$ & $\Delta Q_p$ & $V_B$ & $V_U$ & $V_U/V_B$ & $T_{\mathrm{eff},B}$ & $T_{\mathrm{eff},U}$ & $I_B$ & $I_U$ & subfrac$_B$ & subfrac$_U$ \\
+    \midrule
+    2024-02-04 & 149.25 & 263.58 & 114.33 & 1321912 & 1308855 & 0.990 & 2.46 & 1.38 & 16.42 & 16.42 & 0.057 & 0.068 \\
+    1980-02-15 & 165.65 & 217.94 & 52.29 & 1028898 & 1010427 & 0.982 & 1.73 & 1.29 & 15.30 & 15.30 & 0.112 & 0.113 \\
+    1996-02-20 & 129.53 & 215.37 & 85.84 & 826901 & 825128 & 0.998 & 1.77 & 1.06 & 14.84 & 14.84 & 0.065 & 0.050 \\
+    2004-12-29 & 120.36 & 182.43 & 62.07 & 708869 & 706615 & 0.997 & 1.64 & 1.08 & 31.62 & 31.62 & 0.074 & 0.039 \\
+    1983-03-01 & 116.91 & 179.63 & 62.73 & 1228989 & 1229888 & 1.001 & 2.92 & 1.90 & 14.67 & 14.83 & 0.177 & 0.175 \\
+    2005-01-10 & 118.42 & 169.08 & 50.66 & 864154 & 856238 & 0.991 & 2.03 & 1.41 & 29.03 & 29.66 & 0.308 & 0.380 \\
+    1992-02-10 & 160.22 & 166.80 & 6.59 & 706652 & 619104 & 0.876 & 1.23 & 1.03 & 8.86 & 8.86 & 0.199 & 0.189 \\
+    2005-02-19 & 118.73 & 152.81 & 34.08 & 517932 & 512442 & 0.989 & 1.21 & 0.93 & 16.27 & 16.38 & 0.158 & 0.199 \\
+    \bottomrule
+  \end{tabular}}
+\end{table}
+
+In every flagged event, $T_{\mathrm{eff},U} < T_{\mathrm{eff},B}$ (undisturbed is flashier), while the intensity proxy $I$ is nearly identical across scenarios --- a consistent signature of a routing/attenuation difference rather than a precipitation difference.
+
+% ------------------------------------------------------------------
+\section{Event-Scale Scatter and Proxy Hydrographs}
+\label{sec:scatter}
+
+\subsection{Peak discharge vs.\ runoff volume (top-$N$ events)}
+\begin{figure}[H]
+  \centering
+  \includegraphics[width=0.95\textwidth]{tmp_upset_reckoning_hydroshape/peak_vs_volume_scatter_topN.png}
+  \caption{Top-30 events: peak discharge vs.\ runoff volume, burned (red) vs.\ undisturbed (blue). For a given volume, undisturbed events tend to plot higher --- i.e., they achieve a higher peak per unit of runoff.}
+\end{figure}
+
+\subsection{Proxy hydrographs for flagged events}
+\begin{figure}[H]
+  \centering
+  \includegraphics[width=\textwidth]{tmp_upset_reckoning_hydroshape/proxy_hydrographs_top.png}
+  \caption{Triangle proxy hydrographs for selected flagged events. Each triangle is constructed to match the event's $V$ and $Q_p$, with time-to-peak from \texttt{chan.out}. A taller, narrower triangle indicates a flashier response. These are illustrative proxies, not true sub-daily hydrographs (see Section~\ref{sec:desync} for those).}
+\end{figure}
+
+% ------------------------------------------------------------------
+\section{Landuse-Level Flashiness and Shrub-Template Audit}
+\label{sec:landuse}
+
+The previous sections established the anomaly at the watershed outlet. This section asks: \emph{which landuse type is responsible?} We work at the hillslope scale using PASS event variables (peak runoff rate and runoff depth per hillslope), which indicate a landuse-specific \emph{propensity} for concentrated runoff response rather than directly explaining outlet peaks.
+
+\subsection{Flashiness proxy by landuse}
+We join PASS event rows to \texttt{landuse/landuse.parquet} by hillslope ID (\texttt{wepp\_id}) and aggregate by day and landuse class. For each day and class, we compute:
+\begin{itemize}
+  \item \textbf{Flashiness index}: $\mathrm{flash} = \texttt{peakro} / \texttt{runoff}$ (area-weighted means; larger = flashier).
+  \item \textbf{Effective-duration index}: $T_\mathrm{eff} = \texttt{runoff} / \texttt{peakro}$ (smaller = flashier).
+\end{itemize}
+These ratios are meaningful for \emph{comparisons} across landuse and scenario even when absolute units are uncertain.
+
+\subsection{Unburned vs.\ burned by landuse}
+To focus on return-interval-relevant events and avoid unstable ratios from tiny-runoff days, Table~\ref{tab:flash_summary} summarizes flashiness on outlet peak-discharge dates with \textbf{ranks 4--30} (within each scenario's top-30 $Q_p$ days).
+
+\begin{table}[H]
+  \centering
+  \caption{Flashiness by landuse and scenario (outlet top-event dates, ranks 4--30). Values are medians with interquartile ranges.}
+  \label{tab:flash_summary}
+  \begin{tabular}{l l r r r r r}
+    \toprule
+    Scenario & Landuse & $n$ & Median flash & IQR flash & Median $T_\mathrm{eff}$ & IQR $T_\mathrm{eff}$ \\
+    \midrule
+    Unburned (undisturbed) & Shrub  & 27 & 17.636 & 14.160--22.985 & 0.0567 & 0.0435--0.0706 \\
+    Unburned (undisturbed) & Forest & 27 & 13.074 & 9.805--17.644  & 0.0765 & 0.0570--0.1020 \\
+    Burned (all severities) & Shrub & 27 & 17.510 & 12.773--29.993 & 0.0571 & 0.0333--0.0783 \\
+    Burned (all severities) & Forest & 27 & 14.404 & 9.820--25.613  & 0.0694 & 0.0390--0.1019 \\
+    \bottomrule
+  \end{tabular}
+\end{table}
+
+Within the undisturbed scenario, \textbf{shrub is the flashier landuse} (higher median flash index, shorter $T_\mathrm{eff}$). If any landuse-specific parameterization is amplifying the anomaly, shrub hillslopes are the higher-priority place to look.
+
+\subsection{Burn-severity comparison (rank curves)}
+Figures~\ref{fig:shrub_flash_rank} and~\ref{fig:forest_flash_rank} plot the flashiness index (log $y$) vs.\ rank within each landuse group, comparing undisturbed against individual burned severities. The left side of each plot emphasizes the flashiest events. These curves can be sensitive to small-runoff events, so they should be read alongside the more stable medians in Table~\ref{tab:flash_summary}.
+
+\begin{figure}[H]
+  \centering
+  \includegraphics[width=0.98\textwidth]{tmp_upset_reckoning_landuse_peakflow/shrub_flash_index_vs_rank_by_severity.png}
+  \caption{Shrub hillslopes: flashiness-index rank curves, undisturbed vs.\ burned severities (log scale). Undisturbed shrub is among the flashiest classes at moderate ranks.}
+  \label{fig:shrub_flash_rank}
+\end{figure}
+
+\begin{figure}[H]
+  \centering
+  \includegraphics[width=0.98\textwidth]{tmp_upset_reckoning_landuse_peakflow/forest_flash_index_vs_rank_by_severity.png}
+  \caption{Forest hillslopes: flashiness-index rank curves, undisturbed vs.\ burned severities (log scale).}
+  \label{fig:forest_flash_rank}
+\end{figure}
+
+% ------------------------------------------------------------------
+\subsection{WEPP routing mechanics that control flashiness}
+\label{sec:wepp_forest_flashiness_mechanics}
+
+A higher peak discharge for similar runoff volume means runoff is being delivered \emph{more concentrated in time}. Within WEPP/WEPP-forest, two broad mechanisms control this:
+\begin{enumerate}
+  \item \textbf{Runoff generation (volume)}: how much rainfall becomes runoff (infiltration capacity, soil storage, partitioning between surface and subsurface flow).
+  \item \textbf{Runoff routing (timing/shape)}: how quickly that runoff travels to the outlet (kinematic-wave translation speed, effective friction, rill/interrill geometry).
+\end{enumerate}
+
+For cropland-style hillslopes --- which is how the shrub management templates in \texttt{wepppy} are encoded (see Section~\ref{sec:shrub_template_compare}) --- WEPP-forest computes an equivalent Darcy--Weisbach friction factor in \texttt{src/frcfac.for}. Let $r_\mathrm{illar} = \texttt{width} / \texttt{rspace}$ be the rill-area fraction (capped at 1). The composite friction factor used in routing is:
+\[
+  f_\mathrm{eq} = f_\mathrm{interrill} + r_\mathrm{illar}\,\bigl(f_\mathrm{rill} - f_\mathrm{interrill}\bigr).
+\]
+This feeds the kinematic-wave celerity coefficient $\alpha$ (in \texttt{src/rdat.for}):
+\[
+  \alpha \propto \sqrt{\frac{S}{f_\mathrm{eq}}}\,,
+\]
+so a \textbf{lower} $f_\mathrm{eq}$ (less friction) implies \textbf{faster translation} and a \textbf{flashier} hydrograph for comparable volume.
+
+Key parameters that influence these mechanisms:
+\begin{itemize}
+  \item \textbf{Cover fractions} (\texttt{cancov}, \texttt{inrcov}, \texttt{rilcov}): affect effective roughness, rainfall energy reaching the soil, and runoff generation.
+  \item \textbf{Rill geometry} (\texttt{rspace}, \texttt{width}, \texttt{rtyp}): controls $r_\mathrm{illar}$ and therefore the rill/interrill weighting of friction.
+  \item \textbf{Vegetation structure} (\texttt{xmxlai}, \texttt{hmax}): affects canopy interception, cover evolution, and hydraulic effects through WEPP's plant routines.
+\end{itemize}
+
+\paragraph{Implementation note.}
+In WEPP-forest continuous simulations (\texttt{src/infile.for}), when \textbf{temporary rills} (\texttt{rtyp}=1) have \texttt{width}$\le 0$, WEPP-forest assigns a \textbf{default rill width of \SI{0.15}{m}}. A template with \texttt{width}=0 therefore does \emph{not} mean ``no rills'' at runtime --- routing still uses a nonzero rill-area fraction. This affects absolute hydrograph timing in both scenarios.
+
+% ------------------------------------------------------------------
+\subsection{Template audit: \texttt{Shrub.man} vs.\ \texttt{Shrub\_Moderate\_Severity\_Fire.man}}
+\label{sec:shrub_template_compare}
+
+Before attributing the anomaly to model physics, it is important to rule out template parameterization errors (e.g., burned accidentally having higher cover than unburned). Tables~\ref{tab:shrub_ini_params} and~\ref{tab:shrub_plant_params} provide a complete parameter-by-parameter comparison of:
+\begin{itemize}
+  \item \texttt{Shrub.man} (unburned),
+  \item \texttt{Shrub\_Moderate\_Severity\_Fire.man} (burned, moderate severity).
+\end{itemize}
+
+\subsubsection{Summary of parameter differences}
+Only a small set of parameters differ between the two templates:
+\begin{itemize}
+  \item \textbf{Cover fractions}: \texttt{cancov} (0.70 $\rightarrow$ 0.27), \texttt{inrcov} (0.90 $\rightarrow$ 0.55), \texttt{rilcov} (0.90 $\rightarrow$ 0.55).
+  \item \textbf{Plant structure}: \texttt{xmxlai} (10 $\rightarrow$ 2), \texttt{hmax} (2 $\rightarrow$ 1), \texttt{rdmax} (0.5 $\rightarrow$ 0.2).
+\end{itemize}
+These changes are \textbf{directionally consistent} with a moderate-severity burn: reduced canopy and ground cover, reduced effective leaf-area index, and reduced maximum rooting depth and height. No sign errors are apparent.
+
+\subsubsection{Note on cropland-style encoding}
+Both shrub and forest templates in \texttt{wepppy} use cropland-format sections (with rill/interrill parameters). This encoding is consistent across landuse types and is not a source of the burned-vs-undisturbed anomaly.
+
+\subsubsection{Assumption worth further investigation}
+Both templates specify \texttt{rtyp}=1 (temporary) and \texttt{width}=0. In WEPP-forest continuous mode, \texttt{width} defaults to \SI{0.15}{m}, which implies a nonzero rill-area fraction in routing even when \texttt{width}=0 in the template. This default applies equally to both scenarios and does not explain \emph{differences} between them, but it does affect absolute routing speed and could interact nonlinearly with other parameters.
+
+\input{tmp_upset_reckoning_man_compare/shrub_ini_params_longtable.tex}
+\input{tmp_upset_reckoning_man_compare/shrub_plant_params_longtable.tex}
+
+% ------------------------------------------------------------------
+\section{Uniform-Severity Controls: Is Spatial Heterogeneity the Whole Story?}
+\label{sec:omni_homog_flashiness}
+
+The preceding sections showed that the heterogeneous burned scenario (SBS-based severity mosaic) produces lower, broader peaks than undisturbed, and attributed this to routing attenuation and spatial desynchronization. A natural follow-up question: \emph{if we remove spatial heterogeneity by applying a single burn severity uniformly across the watershed, does the anomaly disappear?}
+
+To test this, WEPPcloud was run in three \textbf{omni} (watershed-wide uniform) scenarios:
+\begin{itemize}
+  \item \textbf{Undisturbed} (\texttt{undisturbed}) --- no fire,
+  \item \textbf{Uniform moderate severity} (\texttt{uniform\_moderate}) --- every hillslope moderate burn,
+  \item \textbf{Uniform high severity} (\texttt{uniform\_high}) --- every hillslope high burn.
+\end{itemize}
+Because all hillslopes share the same severity, there is no spatial heterogeneity to desynchronize tributary contributions. Any remaining peak-discharge ordering differences must come from the management-template parameterization itself (cover, roughness, infiltration).
+
+\subsection{CTA return-period picks}
+Table~\ref{tab:cta_rp_omni_homog} reports 2-, 5-, and 10-year CTA picks for the three scenarios, using daily outlet peak discharge derived from the 5-minute \texttt{chan.out} hydrographs.
+
+\input{tmp_upset_reckoning_omni_homog/cta_return_periods_table.tex}
+
+The peak-discharge ordering at every return period is:
+\[
+  Q_{p,\,\mathrm{high}} \;>\; Q_{p,\,\mathrm{undisturbed}} \;>\; Q_{p,\,\mathrm{moderate}}.
+\]
+High-severity fire produces the highest peaks (183/248/282~m\textsuperscript{3}/s at 2/5/10~yr), consistent with conventional post-fire expectations. But \textbf{uniform moderate severity produces lower peaks than undisturbed} (127/175/226 vs.\ 161/200/233~m\textsuperscript{3}/s) --- the anomaly persists even without spatial heterogeneity.
+
+\subsection{Flashiness ranking (ranks 4--30)}
+Table~\ref{tab:flashiness_omni_homog_summary} and the rank curves below confirm that the peak ordering reflects a flashiness difference, not just a volume difference. The median $T_\mathrm{eff}$ and $Q_p/V$ at ranks 4--30:
+
+\input{tmp_upset_reckoning_omni_homog/flashiness_rank_4_30_summary_table.tex}
+
+The flashiness ordering mirrors the peak ordering: \textbf{uniform high is flashiest} (median $T_\mathrm{eff} = 0.64$~hr), \textbf{undisturbed is intermediate} (0.99~hr), and \textbf{uniform moderate is least flashy} (1.07~hr). The rank curves show this pattern holds across the top-100 peakflow days, not just at the median:
+
+\begin{figure}[H]
+  \centering
+  \includegraphics[width=0.95\textwidth]{tmp_upset_reckoning_omni_homog/teff_hr_vs_rank_topN_omni.png}
+  \caption{Effective duration ($T_\mathrm{eff}$) vs.\ rank for the three uniform scenarios (top-100 peakflow days). Uniform high (red) is consistently the flashiest (lowest $T_\mathrm{eff}$); uniform moderate (yellow) is the least flashy; undisturbed (blue) sits between them.}
+\end{figure}
+
+\begin{figure}[H]
+  \centering
+  \includegraphics[width=0.95\textwidth]{tmp_upset_reckoning_omni_homog/qp_over_v_vs_rank_topN_omni.png}
+  \caption{Peak-to-volume ratio ($Q_p/V$) vs.\ rank. Same ordering: uniform high produces the sharpest peaks per unit volume; uniform moderate the broadest; undisturbed is in between.}
+\end{figure}
+
+\subsection{Interpretation: a non-monotonic severity--flashiness relationship}
+
+The uniform-severity results reveal that \textbf{flashiness is not monotonic with burn severity}. High-severity fire increases flashiness above undisturbed (as conventionally expected), but moderate-severity fire \emph{decreases} it below undisturbed. This means the ``undisturbed peak $>$ burned peak'' anomaly has \textbf{two contributing factors}:
+
+\begin{enumerate}
+  \item \textbf{Moderate-severity parameterization effect}: the moderate-burn management templates produce a less flashy response than undisturbed, even when applied uniformly. This is intrinsic to the template parameters (cover, roughness, infiltration) and is not an artifact of spatial heterogeneity. Possible mechanisms include the reduced canopy cover allowing more rainfall energy to reach the soil surface (increasing effective roughness/retardance) or changes to infiltration dynamics from reduced rooting depth, though pinpointing the exact parameter requires further controlled experiments.
+  \item \textbf{Spatial-heterogeneity amplification}: in the original heterogeneous burned scenario (SBS mosaic), a mix of moderate, high, and undisturbed hillslopes introduces additional peak attenuation through desynchronization (Section~\ref{sec:desync}), compounding the moderate-severity flashiness reduction.
+\end{enumerate}
+
+The uniform-high result also provides a useful sanity check: high-severity fire \emph{does} produce higher peaks than undisturbed, consistent with conventional post-fire hydrology. The anomaly is specific to \textbf{moderate severity} (and by extension, heterogeneous mosaics dominated by moderate-severity hillslopes).
+
+\clearpage
+
+\section{Process-of-Elimination: What Drives the Peak Difference?}
+\label{sec:root_cause_processes}
+
+With the template audit showing no errors, the next question is: \emph{which hydrologic process explains the higher undisturbed peaks?} This section systematically tests candidate explanations using Query Engine proxies.
+
+\subsection{Candidate processes}
+For a higher $Q_p$ at similar $V$, runoff must arrive at the outlet more concentrated in time. Candidate mechanisms within WEPP/WEPP-forest:
+\begin{itemize}
+  \item \textbf{Rainfall temporal structure}: sub-daily intensity pattern (tested via $P / \mathrm{dur}$ proxy).
+  \item \textbf{Infiltration / runoff generation}: effective conductivity (\texttt{Keff}), suction (\texttt{Suct}), antecedent soil water (\texttt{Saturation}, \texttt{TSW}), and surface sealing.
+  \item \textbf{Surface roughness}: random roughness (\texttt{Rough}) and cover-dependent friction.
+  \item \textbf{Contributing area}: changes in the fraction of the watershed producing runoff on a given date.
+  \item \textbf{Runoff partitioning}: more subsurface flow broadens response (lower peaks); more surface quickflow sharpens peaks.
+  \item \textbf{Routing speed and synchronization}: kinematic-wave translation speed (controlled by $f_\mathrm{eq}$) and spatial heterogeneity of burn severities, which can desynchronize tributary contributions and reduce peaks even when total volume is comparable.
+\end{itemize}
+
+\subsection{Rank-based comparison (ranks 4--30)}
+\label{sec:rank_comparison}
+Table~\ref{tab:root_cause_rank_summary} summarizes the key proxies at \textbf{outlet event ranks 4--30} (return-interval-relevant events, excluding the very largest extremes and tiny events where ratios are unstable).
+
+The diagnostic signals:
+\begin{itemize}
+  \item \textbf{Undisturbed has shorter $T_\mathrm{eff}$} (higher $Q_p / V$) at these ranks --- confirming a systematically higher peak-to-volume ratio.
+  \item \textbf{Intensity proxy ($P / \mathrm{dur}$) is similar} across scenarios --- precipitation differences are not the primary explanation.
+  \item \textbf{Antecedent soil wetness differs only modestly}: undisturbed is slightly drier (lower saturation, slightly higher suction), which could marginally increase flashiness, but the magnitude is small relative to the $T_\mathrm{eff}$ signal.
+  \item \textbf{Subsurface fraction is higher in undisturbed}: this would typically \emph{reduce} peaks (broader response), so it \emph{opposes} a ``more quickflow'' explanation and points back to routing/synchronization as the dominant lever.
+\end{itemize}
+
+\input{tmp_upset_reckoning_root_cause/rank_summary_table.tex}
+
+\begin{figure}[H]
+  \centering
+  \includegraphics[width=0.95\textwidth]{tmp_upset_reckoning_root_cause/teff_outlet_hr_vs_rank.png}
+  \caption{Effective duration ($T_\mathrm{eff} = V / Q_p$) vs.\ rank. Undisturbed (blue) is systematically smaller (flashier) than burned (red) across ranks 4--30.}
+\end{figure}
+
+\begin{figure}[H]
+  \centering
+  \includegraphics[width=0.95\textwidth]{tmp_upset_reckoning_root_cause/qp_over_v_vs_rank.png}
+  \caption{Peak-to-volume ratio ($Q_p / V$) vs.\ rank. Undisturbed is systematically higher across ranks 4--30.}
+\end{figure}
+
+\begin{figure}[H]
+  \centering
+  \includegraphics[width=0.95\textwidth]{tmp_upset_reckoning_root_cause/subsurface_fraction_vs_rank.png}
+  \caption{Subsurface fraction of runoff volume vs.\ rank. Undisturbed has a \emph{higher} subsurface fraction, which would typically broaden (not sharpen) the hydrograph --- ruling out ``more quickflow'' as the explanation.}
+\end{figure}
+
+\begin{figure}[H]
+  \centering
+  \includegraphics[width=0.95\textwidth]{tmp_upset_reckoning_root_cause/soil_saturation_vs_rank.png}
+  \caption{Antecedent soil saturation vs.\ rank. Differences between scenarios are modest.}
+\end{figure}
+
+\begin{figure}[H]
+  \centering
+  \includegraphics[width=0.95\textwidth]{tmp_upset_reckoning_root_cause/soil_suction_vs_rank.png}
+  \caption{Soil suction vs.\ rank (log scale). Undisturbed is slightly higher (drier), but differences are small relative to the $T_\mathrm{eff}$ signal.}
+\end{figure}
+
+\subsection{Same-date diagnostic: what covaries with $\Delta Q_p$?}
+\label{sec:same_date}
+Because return-period ranks often correspond to different dates across scenarios (Table~\ref{tab:date_compare}), we also ask: \emph{on dates where both scenarios have an event, which proxy differences track $\Delta Q_p$?} Table~\ref{tab:root_cause_same_date_corr} reports Pearson correlations.
+
+\input{tmp_upset_reckoning_root_cause/same_date_union_driver_correlations_table.tex}
+
+\subsection{Storm-peak synchronization proxies}
+\label{sec:tc_out_sync}
+The \texttt{tc\_out} dataset reports outlet-level storm timing: time of concentration ($T_c$), storm duration, and storm peak time (all in hours). These are primarily storm/hyetograph descriptors, useful for testing whether certain storms are \emph{more sensitive} to small routing differences --- specifically, whether the storm peak aligns with $T_c$. When it does, even modest changes in routing/attenuation between scenarios can amplify $\Delta Q_p$.
+
+Table~\ref{tab:root_cause_tc_out_corr} shows correlations between $|\Delta \log(Q_p)|$ and storm-timing proxies. The relationships are modest compared to the $T_\mathrm{eff}$ signal but provide a supplementary test of the synchronization hypothesis.
+
+\input{tmp_upset_reckoning_root_cause/tc_out_alignment_correlations_table.tex}
+
+\begin{figure}[H]
+  \centering
+  \includegraphics[width=0.95\textwidth]{tmp_upset_reckoning_root_cause/abs_dlogq_vs_peak_minus_tc.png}
+  \caption{Peak-difference magnitude vs.\ storm-peak alignment ($t_\mathrm{peak} - T_c$). Values near zero indicate storms whose peak timing coincides with $T_c$, where small routing differences have the largest effect on $Q_p$.}
+\end{figure}
+
+\subsection{Process-of-elimination summary}
+The clearest statistical driver is $T_\mathrm{eff}$: undisturbed events are consistently sharper for similar volumes, and $\Delta T_\mathrm{eff}$ strongly tracks $\Delta \log(Q_p)$ on same dates. This supports a \textbf{routing/attenuation} explanation (Section~\ref{sec:wepp_forest_flashiness_mechanics}) over a precipitation or soil-moisture explanation. A modestly drier antecedent state in undisturbed is directionally consistent but too small to account for the peak-to-volume shift on its own.
+
+% ------------------------------------------------------------------
+\section{Direct Confirmation: 5-Minute Channel Hydrographs}
+\label{sec:desync}
+
+The preceding sections built a circumstantial case for routing/attenuation as the dominant mechanism. This section tests that hypothesis directly using \textbf{sub-daily routed channel hydrographs} from a targeted rerun (\texttt{dtchr=300}, \texttt{ichout=3}) at three mainstem TOPAZ channels: 604 (upper), 324 (mid), and 24 (outlet).
+
+\subsection{Event selection}
+From the union of the top-30 outlet-peakflow days in each scenario, we select:
+\begin{itemize}
+  \item \textbf{Flagged events}: $Q_{p,U} > Q_{p,B}$ with $V_U / V_B \le 1.05$ (undisturbed peak higher, volume similar/lower).
+  \item \textbf{Matched controls}: events where undisturbed peak is \emph{not} higher, matched to flagged events by nearest burned $Q_p$ (to control for event size).
+\end{itemize}
+
+\subsection{Hydrograph-shape metrics}
+For each event and scenario:
+\begin{itemize}
+  \item \textbf{width50}: duration (hr) that outlet $Q(t)$ stays above half its peak. Smaller = sharper, less attenuated peak.
+  \item \textbf{Upstream timing spread}: $|t_{pk,\mathrm{top}} - t_{pk,\mathrm{mid}}|$ (hr) --- how far apart the upper and middle channel peaks arrive.
+  \item \textbf{Translation lag}: $t_{pk,\mathrm{out}} - t_{pk,\mathrm{top}}$ (hr) --- total travel time from upper to outlet channel.
+  \item \textbf{Storm and soil-state context} from \texttt{tc\_out} and area-weighted \texttt{soil\_pw0}.
+\end{itemize}
+
+\subsection{Results: burned hydrograph is broader, undisturbed is sharper}
+Table~\ref{tab:desync_group_summary} summarizes group-level statistics. The primary signal: for \textbf{flagged events}, the burned outlet hydrograph is \textbf{broader} (larger width50) while the undisturbed outlet hydrograph is \textbf{sharper} (smaller width50). This is consistent with undisturbed achieving higher peaks at similar volumes via \emph{reduced attenuation/dispersion} --- not simply faster travel or more runoff.
+
+\input{tmp_upset_reckoning_desync/desync_group_summary_table.tex}
+
+\begin{figure}[H]
+  \centering
+  \includegraphics[width=0.92\textwidth]{tmp_upset_reckoning_desync/outlet_width50_undist_vs_burned.png}
+  \caption{Outlet width50: undisturbed vs.\ burned. Points below the 1:1 line have a sharper undisturbed hydrograph. Flagged events (undisturbed peak higher) cluster below the line.}
+\end{figure}
+
+\begin{figure}[H]
+  \centering
+  \includegraphics[width=0.92\textwidth]{tmp_upset_reckoning_desync/qp_ratio_vs_delta_width50.png}
+  \caption{Peak ratio ($Q_{p,U} / Q_{p,B}$) vs.\ change in width50 (undisturbed $-$ burned). Flagged events cluster in the upper-left quadrant: higher undisturbed peak \emph{and} sharper undisturbed hydrograph.}
+\end{figure}
+
+\begin{figure}[H]
+  \centering
+  \includegraphics[width=0.92\textwidth]{tmp_upset_reckoning_desync/lag_top_to_out_undist_vs_burned.png}
+  \caption{Translation lag (upper $\rightarrow$ outlet): undisturbed vs.\ burned. No large systematic shift in travel time is evident; the dominant difference is outlet \emph{sharpness} (width50), not uniform speed-up.}
+\end{figure}
+
+\subsection{Per-event diagnostics}
+Table~\ref{tab:desync_metrics} reports per-event metrics.
+
+\input{tmp_upset_reckoning_desync/desync_metrics_table.tex}
+
+\subsubsection{Representative flagged events}
+\begin{figure}[H]
+  \centering
+  \includegraphics[width=0.98\textwidth]{tmp_upset_reckoning_desync/flagged_1980-02-15_chan_wave_overlay.png}
+  \caption{1980-02-15 (flagged): burned vs.\ undisturbed hydrographs at three mainstem points. The burned outlet hydrograph is visibly broader; the undisturbed peak is taller and narrower despite similar volume.}
+\end{figure}
+
+\begin{figure}[H]
+  \centering
+  \includegraphics[width=0.98\textwidth]{tmp_upset_reckoning_desync/flagged_1996-02-20_chan_wave_overlay.png}
+  \caption{1996-02-20 (flagged): burned vs.\ undisturbed hydrographs. Same pattern --- undisturbed is sharper.}
+\end{figure}
+
+\subsubsection{Representative matched-control event}
+\begin{figure}[H]
+  \centering
+  \includegraphics[width=0.98\textwidth]{tmp_upset_reckoning_desync/control_1992-03-02_chan_wave_overlay.png}
+  \caption{1992-03-02 (control): burned vs.\ undisturbed hydrographs. Unlike the flagged events, the width50 difference is small and the peak ratio is near 1 --- consistent with the control classification.}
+\end{figure}
+
+\subsection{Interpretation: dispersion, not just speed}
+\label{sec:desync_interp}
+The sub-daily hydrographs show that the dominant effect is \textbf{reduced dispersion/attenuation in the undisturbed scenario}, not simply a uniform speed-up of travel time (translation lag differences are small). This is consistent with the $f_\mathrm{eq}$-based routing mechanism described in Section~\ref{sec:wepp_forest_flashiness_mechanics}: the spatially homogeneous undisturbed scenario (uniform landuse per hillslope) produces more synchronized tributary contributions, while the burned scenario's mixture of severities introduces spatial heterogeneity that desynchronizes contributions and broadens the outlet hydrograph.
+
+\subsection{Appendix: complete per-event overlays}
+\input{tmp_upset_reckoning_desync/flagged_event_figures.tex}
+\input{tmp_upset_reckoning_desync/control_event_figures.tex}
+
+% ------------------------------------------------------------------
+\section{How to Reproduce}
+\begin{verbatim}
+uv sync
+.venv/bin/python skills/weppcloud-agent/scripts/cta_scope_tables.py \
+  --runid upset-reckoning --undisturbed-scenario undisturbed \
+  --outlet-topaz-id 24 --recurrence 2,5,10 \
+  --out-dir tmp_upset_reckoning_scope \
+  --base-url https://wc.bearhive.duckdns.org/query-engine
+
+.venv/bin/python skills/weppcloud-agent/scripts/hydrograph_shape_compare.py \
+  --runid upset-reckoning --scenario undisturbed --top-n 30 \
+  --out-dir tmp_upset_reckoning_hydroshape \
+  --base-url https://wc.bearhive.duckdns.org/query-engine
+
+.venv/bin/python skills/weppcloud-agent/scripts/landuse_peakflow_partition.py \
+  --runid upset-reckoning --scenario undisturbed \
+  --out-dir tmp_upset_reckoning_landuse_peakflow \
+  --base-url https://wc.bearhive.duckdns.org/query-engine --metric flash_index --log-y
+
+.venv/bin/python skills/weppcloud-agent/scripts/compare_management_templates.py \
+  --unburned /Users/roger/src/wepppy/wepppy/wepp/management/data/UnDisturbed/Shrub.man \
+  --burned /Users/roger/src/wepppy/wepppy/wepp/management/data/UnDisturbed/Shrub_Moderate_Severity_Fire.man \
+  --out-dir tmp_upset_reckoning_man_compare
+
+.venv/bin/python skills/weppcloud-agent/scripts/flashiness_root_cause.py \
+  --runid upset-reckoning --rank-min 4 --rank-max 30 \
+  --out-dir tmp_upset_reckoning_root_cause \
+  --base-url https://wc.bearhive.duckdns.org/query-engine
+
+.venv/bin/python skills/weppcloud-agent/scripts/omni_homogeneous_flashiness.py \
+  --runid upset-reckoning \
+  --out-dir tmp_upset_reckoning_omni_homog \
+  --scenarios undisturbed,uniform_moderate,uniform_high \
+  --recurrence 2,5,10 --top-n 100 \
+  --base-url https://wc.bearhive.duckdns.org/query-engine
+
+.venv/bin/python skills/weppcloud-agent/scripts/desynchronization_analysis.py \
+  --runid upset-reckoning --undisturbed-scenario undisturbed --top-n 30 \
+  --topaz-ids "604 324 24" --outlet-topaz-id 24 \
+  --out-dir tmp_upset_reckoning_desync \
+  --base-url https://wc.bearhive.duckdns.org/query-engine
+\end{verbatim}
+
+% ------------------------------------------------------------------
+\section{Conclusions}
+\label{sec:conclusions}
+
+For WEPPcloud run \texttt{upset-reckoning}, the undisturbed scenario produces higher peak discharges than the burned scenario at return-interval-relevant ranks, despite similar or lower runoff volumes. This report traced the anomaly through five layers of analysis and identified a two-factor mechanism.
+
+\subsection{The anomaly is real model physics, not an artifact}
+The template-parameter audit (Section~\ref{sec:shrub_template_compare}) found no sign errors or data-entry mistakes: moderate-severity cover, LAI, and rooting-depth values are all directionally consistent with a burn. Process-of-elimination testing (Section~\ref{sec:root_cause_processes}) ruled out precipitation differences, antecedent soil moisture, and increased quickflow as primary drivers. The signal is in the \emph{timing} of runoff delivery, not its total amount.
+
+\subsection{Two-factor mechanism}
+\begin{enumerate}
+  \item \textbf{Moderate-severity parameterization produces an intrinsically less flashy response than undisturbed.} Uniform-severity control runs (Section~\ref{sec:omni_homog_flashiness}) confirm this: even when every hillslope is assigned moderate burn (eliminating spatial heterogeneity), undisturbed peaks higher. The severity--flashiness relationship is non-monotonic: high-severity fire increases flashiness above undisturbed (as conventionally expected), while moderate severity decreases it. The specific parameter(s) responsible --- likely cover-dependent roughness or infiltration dynamics from reduced rooting depth --- have not yet been isolated.
+  \item \textbf{Spatial heterogeneity of burn severity further attenuates burned peaks.} In the heterogeneous SBS-mosaic scenario, mixed severities desynchronize tributary contributions, broadening the outlet hydrograph. Sub-daily channel hydrographs (Section~\ref{sec:desync}) confirm this: for flagged events, the burned outlet response is systematically wider (larger width50) while the undisturbed response is sharper, with translation-lag differences remaining small.
+\end{enumerate}
+
+\subsection{What the anomaly is not}
+\begin{itemize}
+  \item Not a precipitation difference (intensity proxy nearly identical across scenarios on the same dates).
+  \item Not an antecedent soil-moisture effect (differences are modest and too small to explain the $T_\mathrm{eff}$ shift).
+  \item Not ``more quickflow'' in undisturbed (subsurface fraction is actually \emph{higher} in undisturbed, which would broaden peaks).
+  \item Not a template encoding issue (both shrub and forest use cropland-format sections consistently).
+\end{itemize}
+
+\subsection{Recommendation: revisit moderate-severity template parameters}
+The non-monotonic severity--flashiness pattern suggests that the current moderate-severity management templates may underestimate post-fire flashiness. In practice, moderate-severity fire is expected to increase --- not decrease --- peak-to-volume ratios relative to undisturbed conditions. We recommend reviewing the moderate-severity shrub (and potentially forest) templates to identify which parameter changes are suppressing flashiness, and adjusting them so that moderate burn produces a response that is at least as flashy as undisturbed, consistent with field expectations.
+
+\subsection{Open questions}
+\begin{itemize}
+  \item \textbf{Which moderate-severity parameters suppress flashiness?} The template audit identified cover fractions (\texttt{cancov}, \texttt{inrcov}, \texttt{rilcov}), plant structure (\texttt{xmxlai}, \texttt{hmax}), and rooting depth (\texttt{rdmax}) as the parameters that change. Controlled single-parameter experiments (varying one at a time) would isolate the dominant lever.
+  \item \textbf{Does the pattern generalize?} The non-monotonic severity--flashiness relationship was documented for run \texttt{upset-reckoning}. Whether it holds across other watersheds, climate regimes, and template sets is unknown. Testing on additional runs would clarify whether this is a template-specific issue or a broader structural property of the current moderate-severity parameterization.
+\end{itemize}
+
+% ------------------------------------------------------------------
+\section{Limitations and Next Steps}
+\begin{itemize}
+  \item Sections~\ref{sec:key_findings}--\ref{sec:root_cause_processes} rely on event-scale proxies ($V / Q_p$, triangle hydrographs) and cannot recover within-storm hyetograph structure.
+  \item The 5-minute hydrograph analysis (Section~\ref{sec:desync}) covers three mainstem channels (TOPAZ 604/324/24). A fuller spatial picture would require sub-daily outputs for a denser set of channel IDs.
+  \item The homogeneous-severity omni scenarios (Section~\ref{sec:omni_homog_flashiness}) provide a useful control on burn-severity spatial heterogeneity. A next step is to instrument additional channel IDs (sub-daily outputs) to directly quantify tributary synchrony under heterogeneous vs.\ homogeneous severity, rather than inferring it from three-point mainstem hydrographs.
+\end{itemize}
+
+\end{document}

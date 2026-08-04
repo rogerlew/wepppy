@@ -896,6 +896,18 @@ the remaining-run controller plan has no next controller milestone.
 
 ## ✅ Done
 
+### Palisades Four-Cell ET Attribution
+
+**Completed**: 2026-08-04
+**Status**: ✅ **COMPLETE**
+**Link**: [docs/work-packages/20260803_palisades_four_cell_et/](docs/work-packages/20260803_palisades_four_cell_et/)
+**Outcome**: All 1,112 production-derived hillslope runs passed. PMET changed
+`Es`/ET partitioning but increased, rather than suppressed, burned runoff and
+pre-event soil storage. Its runoff interaction was -1.56 mm/year, rejecting
+PMET antecedent drying as a material cause of the Palisades peak inversion.
+
+---
+
 ### Stevens Canyon Legacy-ET Burn Matrix
 
 **Completed**: 2026-08-04
