@@ -61,27 +61,39 @@ For federally funded work, this policy's governance evidence should be sufficien
 
 WEPPcloud outputs are model-based estimates. They depend on input data, assumptions, model structure, parameterization, and domain applicability. A feature being available does not mean every result is correct, validated everywhere, or appropriate for every decision.
 
-### 2. Use matures the system
+### 2. User responsibility is universal
+
+The [general WEPPcloud user contract](user-guide.md#legal-disclaimer) applies
+to every workflow and maturity state, including automated and default setup.
+Users are responsible for reviewing inputs, model configuration, and
+parameterization; determining domain and assumption suitability; independently
+validating outputs using evidence and professional judgment appropriate to the
+consequences of error; and deciding how results are interpreted, communicated,
+published, or applied. Availability, automation, successful completion, and a
+`stable` label do not certify calibration, validation, accuracy, or fitness for
+a particular purpose.
+
+### 3. Use matures the system
 
 Important defects and limitations are often discovered only when users apply WEPPcloud to diverse watersheds, climates, soils, burn severities, treatments, and management contexts. Functionality that is never exercised does not mature.
 
-### 3. Availability is not the same as maturity
+### 4. Availability is not the same as maturity
 
 A feature may be technically reachable, known to some users, or available in limited workflows without being stable, broadly supported, or publication-ready. Maturity status must be explicit.
 
-### 4. Restrictions need reasons and should be transparent
+### 5. Restrictions need reasons and should be transparent
 
 If a feature is internal, hidden, role-gated, deprecated, or publication-embargoed, the reason should be documented. Restrictions should not depend on memory, assumptions, or informal ownership claims. Restrictions and their reasons should be visible to users.
 
-### 5. Publication priority may be legitimate, but it must be time-limited
+### 6. Publication priority may be legitimate, but it must be time-limited
 
 Grant-funded teams may need a reasonable head start to analyze, write, and submit work based on major new functionality. That priority window must have a review date or expiration date. It should not become an indefinite veto over shared infrastructure.
 
-### 6. Runtime state and decision rationale are different things
+### 7. Runtime state and decision rationale are different things
 
 The feature/config registry defines the current executable state of WEPPcloud. Architecture Decision Records, issue threads, meeting notes, or work-package documents should capture why significant release decisions were made.
 
-### 7. Sponsor authority must be bounded and universal
+### 8. Sponsor authority must be bounded and universal
 
 Sponsors may legitimately influence funded scope, delivery priority, and time-limited publication-priority windows.
 
@@ -555,7 +567,7 @@ Before requesting PowerUser access, the user must acknowledge concise onboarding
 
 Suggested text:
 
-> PowerUser workflows may expose advanced WEPPcloud features, larger jobs, or less commonly used model configurations. WEPPcloud outputs are model-based estimates, not measurements or guarantees. Results depend on input data, assumptions, parameterization, model structure, and watershed/domain suitability. You are responsible for reviewing outputs, checking whether assumptions are appropriate for your use case, and documenting versions, inputs, and limitations when results are shared or published. Preview or experimental functionality may change, produce unexpected results, or require additional interpretation. Elevated access may be limited, reviewed, or removed to protect system reliability, storage, compute capacity, or scientific integrity. PowerUser access does not provide access to internal, publication-embargoed, or restricted features unless that access is separately granted.
+> PowerUser workflows may expose advanced WEPPcloud features, larger jobs, or less commonly used model configurations. The general WEPPcloud user contract continues to apply. WEPPcloud outputs are model-based estimates, not measurements or guarantees. Results depend on input data, assumptions, parameterization, model structure, and watershed/domain suitability. You are responsible for reviewing inputs, configuration, parameterization, assumptions, and outputs; independently validating results as appropriate for your use case; and documenting versions, inputs, and limitations when results are shared or published. Preview or experimental functionality may change, produce unexpected results, or require additional interpretation. Elevated access may be limited, reviewed, or removed to protect system reliability, storage, compute capacity, or scientific integrity. PowerUser access does not provide access to internal, publication-embargoed, or restricted features unless that access is separately granted.
 
 ### PowerUser Request
 
