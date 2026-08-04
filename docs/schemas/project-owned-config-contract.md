@@ -1179,5 +1179,9 @@ draft. Implementation remains blocked until:
 3. the implementation records the required local and Forest evidence before
    enabling writer feature flags or exposing a builder combination.
 
+Implementation sequencing, requirement ownership, cross-package leakage, and
+handoff evidence are defined in the companion
+[`Project-Owned Configuration Implementation Roadmap`](project-owned-config-implementation-roadmap.md).
+
 An evidence failure removes or delays the affected builder combination; it does
 not authorize an inferred fallback or a change to Interfaces presets.
