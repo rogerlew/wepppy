@@ -896,6 +896,18 @@ the remaining-run controller plan has no next controller milestone.
 
 ## ✅ Done
 
+### Stevens Canyon PMET Fire-Severity Calibration
+
+**Completed**: 2026-08-04
+**Link**: [docs/work-packages/20260804_stevens_canyon_pmet_calibration/](docs/work-packages/20260804_stevens_canyon_pmet_calibration/)
+**Outcome**: A 924-run, 100-year grid found only a marginal low-severity edge
+candidate and no defensible moderate- or high-severity `kcb`/`rawp` solution.
+`rawp` was weakly identifiable, all optima hit the lower `kcb` bound, and the
+high-severity `Es/ET` surface never intersected its target. PMET coefficients
+alone are insufficient; no production defaults changed.
+
+---
+
 ### Stevens Canyon Hillslope Water-Balance Attribution
 
 **Completed**: 2026-08-04

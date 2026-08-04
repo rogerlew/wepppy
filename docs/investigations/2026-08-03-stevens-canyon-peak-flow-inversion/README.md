@@ -491,6 +491,21 @@ paired annual ET ratio of `0.877` and median `Es/ET` of `0.521`; none of 100
 years meets the provisional `0.40-0.60` high-severity ET-ratio target. Thus the
 high-severity extension confirms rather than resolves the ET-partition concern.
 
+### PMET coefficient calibration
+
+A subsequent [924-run `kcb`/`rawp` calibration](artifacts/pmet-calibration-results.md)
+tested 42 coefficient pairs independently for low-, moderate-, and
+high-severity forest over all 100 climate years. Low severity came marginally
+close at `kcb=0.35`, `rawp=0.80` (ET ratio `0.837`, `Es/ET=0.317`), but only 4%
+of years met both envelopes. Moderate severity remained far too high in total
+ET at its best edge candidate. High severity remained far too soil-evaporation
+dominated (`Es/ET=0.617`) even when total ET approached its magnitude range.
+
+All best candidates were on the lowest `kcb` boundary, and changing `rawp`
+across `0.30-0.80` moved median ET ratios by only `0.01-0.03` at fixed `kcb`.
+The experiment therefore rejects `kcb` and `rawp` as sufficient controls for
+the full severity target matrix. No production values were changed.
+
 ## Preliminary Conclusion
 
 The selected reaches are not hydrologically outside the fire. WEPP_ID 169 is
