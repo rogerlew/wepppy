@@ -3,6 +3,8 @@
 > **Status:** Draft implementation roadmap; package folders are proposed and
 > are created only when their execution begins.
 >
+> **Noncanonical initiative branch:** `feature/project-owned-config`
+>
 > **Contract:**
 > [`project-owned-config-contract.md`](project-owned-config-contract.md)
 
@@ -31,7 +33,41 @@ begins. Each package MUST contain `package.md`, `tracker.md`, and an active
 ExecPlan. The ExecPlan MUST be written from the contract and this roadmap, not
 from chat history.
 
-### 2.1 Requirement closure ownership
+### 2.1 Initiative branch and promotion boundary
+
+All roadmap scaffolding and implementation MUST use the shared integration
+branch `feature/project-owned-config`. This branch is explicitly noncanonical:
+its presence on the remote does not mean its behavior is released, supported,
+or approved for production. `master` remains the canonical release branch.
+
+Every package `package.md`, `tracker.md`, active ExecPlan, handoff, and review
+artifact MUST state:
+
+```text
+Initiative branch: feature/project-owned-config
+Canonical branch: master
+Promotion policy: merge only at the roadmap promotion gate
+```
+
+Before editing or executing a package, its agent MUST verify and record that
+`git branch --show-current` returns `feature/project-owned-config` and that the
+local branch tracks `origin/feature/project-owned-config`. Package commits and
+pushes target that branch. Agents MUST NOT create a package-specific branch or
+merge package work into `master` unless this roadmap is amended by the operator.
+
+WP11 MUST deploy and record an exact commit from the feature branch for Forest
+acceptance. WP12 is the first promotion boundary: after all WP11 gates pass, it
+merges the reviewed feature-branch revision into `master` and deploys the
+resulting canonical revision to production. Before WP13 begins, the feature
+branch MUST be synchronized to that promoted `master` revision. WP13 performs
+shared-alias retirement on the same feature branch and uses a second reviewed
+merge into `master` for the later retirement release.
+
+A package may be complete on the feature branch while remaining unpromoted.
+Package status and evidence MUST distinguish `implemented on feature branch`,
+`Forest accepted`, and `promoted to master`.
+
+### 2.2 Requirement closure ownership
 
 - Every requirement has exactly one **closure owner** in section 5.
 - A closure owner is accountable for the final contract test, integration
@@ -53,7 +89,7 @@ from chat history.
   receiving-owner status. The source package cannot close on that disposition
   until the receiving owner explicitly accepts it in the receiving tracker.
 
-### 2.2 Cross-package leakage
+### 2.3 Cross-package leakage
 
 Implementation agents are authorized to make the smallest required change
 outside their package's primary subsystem when that change is necessary to
@@ -76,7 +112,7 @@ Behavior discovered during implementation that changes this contract MUST be
 ratified in the contract before the changed behavior ships. Package boundaries
 never authorize silent contract drift.
 
-### 2.3 Feature flags and promotion
+### 2.4 Feature flags and promotion
 
 - Reader compatibility lands before any flattened-config writer is enabled.
 - Every flattened-config writer remains disabled until secret sanitization,
@@ -131,14 +167,14 @@ No overlap changes the exit gates or closure ownership below.
 | WP09 | `20260804_project_config_update_ui` | Add async page-load availability check, run-header notice, authenticated nonblocking digest-warning state/UI, accessible preview modal, explicit apply/status/error flow, and nested-run linkage to the top-level authority. | WP08 | High | No read-triggered mutation occurs; users can review the full delta; digest warning is visible without blocking and is deduplicated at the page-load boundary; only authorized apply is offered; stale/conflict/job states and accessibility tests pass. |
 | WP10 | `20260804_project_config_lifecycle_integrity` | Integrate config/update locks with fork and archive; recover pending updates before consistent copy; preserve config/manifest through fork/download/restore; verify nested/PUP authority, invalid/newer manifest restore, read-only/public behavior, and byte preservation. | WP04, WP08 | High | Create/reopen/fork/archive/restore and concurrent-update fixtures prove one consistent authority; legacy archives retain fallback; no pending journal is used as archive recovery. |
 | WP11 | `20260804_project_config_forest_acceptance` | Deploy the complete default-off reader/writer stack to Forest; consume WP01 defaults evidence; validate mixed-version readers, all four initial DEM/backend combinations, named preset and builder flows, climate/soil/land-use paths, updates, restart, fork/archive/restore, rollback, and operator evidence. | WP00R, WP00A, WP00B, WP01, WP02, WP03, WP04, WP05, WP06, WP07, WP08, WP09, WP10 | High | Every contract regression item has evidence or an explicit blocking disposition; only validated combinations are enabled; deployed worker/revision and rollback-target compatibility are proven. |
-| WP12 | `20260804_project_config_production_cutover` | Production deployment, staged feature-flag enablement, health/danger observation, rollback verification, documentation/operator runbooks, and handoff of deployed/rollback revision inventory plus observation evidence. | WP11 | High | Production validation and observation pass; supported revisions read `_defaults.cfg`; project-owned writer/update flags are safely enabled; alias-retirement prerequisites are handed to WP13. |
-| WP13 | `20260804_defaults_toml_alias_retirement` | Revalidate deployed and supported rollback revisions in the next planned release; remove only the shared `_defaults.toml` symlink; retain project-local legacy-reader support; run final normative-checklist and requirement-ledger audit. | WP12 | High | Shared symlink is absent; project-local legacy `_defaults.toml` still resolves; every checklist item and PC row has an accepted closure state; roadmap is closed. |
+| WP12 | `20260804_project_config_production_cutover` | Merge the WP11-accepted feature-branch revision into `master`; deploy that canonical revision; perform staged feature-flag enablement, health/danger observation, rollback verification, documentation/operator runbooks, and handoff of deployed/rollback revision inventory plus observation evidence. | WP11 | High | The reviewed merge commit and production revision are recorded; production validation and observation pass; supported revisions read `_defaults.cfg`; project-owned writer/update flags are safely enabled; alias-retirement prerequisites are handed to WP13. |
+| WP13 | `20260804_defaults_toml_alias_retirement` | Synchronize the feature branch to promoted `master`; revalidate deployed and supported rollback revisions in the next planned release; remove only the shared `_defaults.toml` symlink on the feature branch; retain project-local legacy-reader support; run the final audits; merge the reviewed retirement revision into `master`. | WP12 | High | The retirement merge and production revision are recorded; shared symlink is absent; project-local legacy `_defaults.toml` still resolves; every checklist item and PC row has an accepted closure state; roadmap is closed. |
 
 ## 5. Requirement Ownership Ledger
 
 The status `contracted` means the behavior is specified but implementation
 evidence has not yet been accepted. Work-package trackers replace this status
-with one of the closure states in section 2.1.
+with one of the closure states in section 2.2.
 
 | Requirement ID | Contract scope | Closure owner | Contributing packages | Required closure evidence | Initial status |
 | --- | --- | --- | --- | --- | --- |
@@ -180,7 +216,8 @@ performs the final no-unmapped/no-unresolved audit.
 
 Each package MUST publish a handoff artifact or tracker section containing:
 
-- exact commit/revision and feature-flag state;
+- exact feature-branch commit/revision, upstream tracking state, and feature-
+  flag state;
 - requirement IDs implemented, partially implemented, or affected;
 - API/file/schema outputs delivered to downstream packages;
 - test commands and summarized results;
@@ -199,6 +236,8 @@ remediation; it does not silently weaken downstream acceptance.
 Every package applies the repository-standard checks relevant to its changes.
 In addition:
 
+- Package scaffolds, trackers, ExecPlans, and handoffs MUST name and verify the
+  initiative branch as required by section 2.1.
 - Pure UI or UI-coupled packages MUST preserve contract-first sequencing and
   run frontend lint/tests plus targeted browser accessibility checks.
 - Rq-engine or queue-wiring packages MUST update
