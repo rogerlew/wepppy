@@ -896,6 +896,17 @@ the remaining-run controller plan has no next controller milestone.
 
 ## ✅ Done
 
+### Stevens Canyon Legacy-ET Burn Matrix
+
+**Completed**: 2026-08-04
+**Link**: [docs/work-packages/20260804_stevens_canyon_legacy_et_ablation/](docs/work-packages/20260804_stevens_canyon_legacy_et_ablation/)
+**Outcome**: All 33 paired legacy-ET hillslope runs passed, but no severity had
+a year inside both annual ET targets. Low and moderate total ET stayed nearly
+equal to undisturbed; high ET remained too high. Undisturbed forest `Es` and
+`Er` were both zero, so disabling PMET is rejected as a production workaround.
+
+---
+
 ### Stevens Canyon PMET Fire-Severity Calibration
 
 **Completed**: 2026-08-04

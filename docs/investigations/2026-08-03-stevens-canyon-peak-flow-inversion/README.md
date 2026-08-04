@@ -509,6 +509,22 @@ the full severity target matrix. No production values were changed.
 The resulting design alternatives and recommended development sequence are
 captured in [Forest and Post-Fire ET Model Options](artifacts/forest-et-model-options.md).
 
+### Legacy-ET model-form ablation
+
+A paired [burn matrix without PMET](artifacts/legacy-et-ablation-results.md)
+ran all eleven forest hillslopes under undisturbed, burned, and high-severity
+inputs with `pmetpara.txt` absent but `wepp_ui.txt` and the other runtime
+sidecars preserved. No severity produced a year inside both diagnostic target
+envelopes. Median total-ET ratios were `0.990`, `0.997`, and `0.862` for low,
+moderate, and high severity, respectively.
+
+The legacy routine assigns undisturbed ET entirely to `Ep` (`Es=Er=0`) and
+then reallocates demand into `Es` and `Er` after canopy and residue loss. It
+changes the partition, particularly for low severity, but barely changes the
+total-ET response relative to the existing PMET fixture. This rules out simply
+disabling PMET as a credible post-fire correction and shows that the excessive
+ET response is shared across both model paths.
+
 ## Preliminary Conclusion
 
 The selected reaches are not hydrologically outside the fire. WEPP_ID 169 is
