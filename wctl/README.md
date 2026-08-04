@@ -14,9 +14,6 @@ Key design points:
 ```bash
 cd /workdir/wepppy
 ./wctl/install.sh dev     # pin docker/docker-compose.dev.yml (default)
-# or
-./wctl/install.sh hpc     # pin docker/docker-compose.dev.hpc.yml (HPC cpuset/storage profile)
-# or
 ./wctl/install.sh prod    # pin docker/docker-compose.prod.yml
 # or
 ./wctl/install.sh wepp1   # prod + wepp1 override (adds docker/docker-compose.prod.wepp1.yml)
@@ -26,6 +23,12 @@ cd /workdir/wepppy
 # optional: install to a custom bin directory
 WCTL_SYMLINK_PATH="$HOME/.local/bin/wctl" ./wctl/install.sh dev
 ```
+
+The legacy `hpc` selector and `docker/docker-compose.dev.hpc.yml` are being
+repurposed. Do not treat them as a supported WEPPcloud development or worker
+deployment preset. Their eventual runtime contract will be documented by the
+repurposing work; use `dev`, `prod`, `wepp1`, or `worker` for the currently
+supported stacks.
 
 After installation you can explore the CLI via:
 

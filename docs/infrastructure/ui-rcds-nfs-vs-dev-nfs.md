@@ -167,10 +167,101 @@ dmesg --ctime | grep -iE 'nfs|rpc|not responding|server.*ok'
 Pull Redis/RQ status, `last_heartbeat`, `exc_info`, worker name, and child PID as
 usual, but correlate them with process `STAT` and `WCHAN`. If the child is in
 `D` state with an NFS/RPC wait channel, do not assume that cancel, `SIGTERM`, or
-worker restart will immediately release it. Confirm NAS/network recovery first,
-then use the smallest targeted job/worker recovery action. Avoid stack-wide
-restarts: they do not repair a blocked hard-mount RPC and can strand additional
-work.
+worker restart will immediately release it. If the exact wait channel is
+`rpc_wait_bit_killable`, an exact-child `SIGKILL` is a supported first recovery
+attempt after evidence capture and queue fencing. Confirm that the process
+actually exits, then reconcile RQ state and partial output before dispatch
+resumes. Avoid stack-wide restarts: they do not diagnose the blocked RPC and
+can strand additional work.
+
+### D-State Recovery and Mitigation Options
+
+RQ timeout, ordinary cancellation, `SIGTERM`, and container restart are not
+sufficient recovery controls for a task blocked in the kernel NFS client. The
+exact wait path matters: `rpc_wait_bit_killable` uses a killable kernel wait,
+so `SIGKILL` can interrupt it on modern Linux, while another D-state path may
+remain uninterruptible. Use this ordered response:
+
+1. Fence the `fork-archive` queue before recovery. Stop new dispatch without
+   starting a replacement consumer; an old process that later resumes must not
+   overlap a new filesystem operation.
+2. Capture the job ID, RQ worker and child PID, process tree, `STAT`, `WCHAN`,
+   `/proc/<pid>/stack`, mount options, kernel messages, and partial output.
+   Preserve `/proc/self/mountstats` for a later delta and collect
+   `mountstats -x` plus a bounded `mountstats iostat` sample. The full kernel
+   stack distinguishes a wire RPC wait from NFSv4 state recovery or serialized
+   OPEN/CLOSE work; `WCHAN` alone does not identify the root cause.
+3. If the exact blocked child is in `rpc_wait_bit_killable`, send `SIGKILL` to
+   that PID and poll for actual exit. Do not equate successful signal delivery
+   with termination. If it exits, reconcile the RQ terminal state, fork/archive
+   markers, and any partial destination or archive before resuming dispatch.
+4. If the child survives or the problem recurs, restore and investigate the
+   client-to-NAS path. Correlate client and NAS timestamps; inspect NIC errors,
+   drops, TCP retransmissions, MTU, bonding/LACP, switch/firewall counters, NAS
+   server threads, pool latency/capacity, filesystem events, and NFS service
+   logs. Capture narrowly filtered NFS traffic simultaneously at the client and
+   NAS when the vendor can support that collection.
+5. Record client kernel, OS, `nfs-utils`, negotiated NFS minor version, pNFS
+   state, and NAS model/firmware. Check for a matching client or vendor defect
+   before changing NFS version, pNFS, transport, or mount behavior. A vmcore is
+   an escalation artifact when a kernel defect is suspected, not the first
+   diagnostic step.
+6. If service cannot recover, schedule a host maintenance window. Drain every
+   other NFS user and verify no valuable writes are in flight before considering
+   forced unmount/remount. `umount -f` is NFS-aware but may still hang and can
+   lose data. Use the canonical absolute mount path so `umount` does not trigger
+   additional blocking `stat` or `readlink` calls. A lazy unmount detaches the
+   namespace without releasing existing references; upstream guidance expects
+   a reboot soon after using it.
+7. Treat host reboot as the final client recovery, not a guaranteed graceful
+   action: shutdown itself can hang on a hard NFS mount with active I/O. A
+   dedicated worker host or VM should therefore have a tested out-of-band
+   fencing/reset path.
+
+Preventive and architectural options, in preferred order:
+
+- Keep the proposed one-worker queue and add an external watchdog that checks
+  queue depth, worker count, child `STAT`/`WCHAN`, elapsed time, and real copy or
+  archive progress. On a sustained D-state signal, fence dispatch, capture the
+  kernel stack and mount-statistics delta, and alert; do not rely on the RQ
+  heartbeat.
+- Give this worker a smaller failure domain. A dedicated host or VM with its
+  own NFS client mount lets operators reboot or remount that client without
+  disrupting the main WEPPcloud host. A container using the host's bind-mounted
+  NFS path does not provide that isolation.
+- Reduce long client-side tree traversals: stage archive construction on local
+  scratch and publish the completed artifact, exclude unnecessary fork output,
+  or use a NAS-supported server-side snapshot/clone when semantics and access
+  controls can be proven. Final publication to NFS can still block, but the
+  vulnerable RPC window and metadata load are smaller.
+- Evaluate NFS client/server redundancy or session trunking only with the NAS
+  vendor and representative failure tests. Extra network paths help only when
+  the server/export supports the corresponding failover semantics; they do not
+  cure a pathological inode or saturated storage pool.
+- Do not change the authoritative writable run mount from `hard` to `soft` as
+  a blanket fix. Linux NFS documentation warns that `soft`/`softerr` timeout
+  behavior can cause silent data corruption. Lower `timeo`/`retrans` values do
+  not create a final timeout on a hard mount and can amplify retries or false
+  outage messages under ordinary storage latency. A separate soft mount is
+  defensible only for read-only or reconstructible data whose error handling,
+  cache-sharing behavior, and mount isolation have been explicitly tested.
+  The legacy `intr` option is ignored by modern kernels; use the exact-child
+  `SIGKILL` path described above when the wait is killable.
+
+References: Linux [`nfs(5)`](https://man7.org/linux/man-pages/man5/nfs.5.html)
+documents hard/soft recovery behavior and the integrity warning; Linux
+[`umount(8)`](https://man7.org/linux/man-pages/man8/umount.8.html) documents
+forced/lazy unmount limitations; [`mountstats(8)`](https://man7.org/linux/man-pages/man8/mountstats.8.html)
+documents per-mount NFS/RPC transport and delta statistics; Red Hat documents
+the modern NFS
+[`SIGKILL` recovery path](https://access.redhat.com/solutions/157873) and
+[`client/network/server diagnostic workflow`](https://access.redhat.com/solutions/28211);
+and the kernel
+[`hung_task_timeout_secs`](https://docs.kernel.org/admin-guide/sysctl/kernel.html#hung-task-timeout-secs)
+interface can provide host-level D-state detection. Kernel
+[`TASK_KILLABLE` guidance](https://docs.kernel.org/next/driver-api/basics.html#c.wait_event_killable)
+explains why a fatal signal can interrupt the observed wait. Detection is
+diagnostic; it does not itself unblock the RPC.
 
 ### Concurrent Full-Output Fork and Loaded NAS Benchmark (2026-08-03)
 
@@ -249,6 +340,16 @@ full-output fork as a material contributor. It does not by itself establish a
 permanent hardware regression; repeat the benchmark after large copy and
 delete workloads drain to distinguish persistent degradation from load-driven
 contention.
+
+Planned containment and rollout work is tracked in the
+[Fork/Archive Serial Queue Isolation work package](../work-packages/20260803_fork_archive_serial_queue/package.md).
+The proposal serializes top-level fork, archive-create, and restore jobs. Dev
+forest and Forest test production retain one local consumer for behavioral
+parity; the sole production consumer runs on otherwise-idle wepp3, which has
+the production NFS mount. This isolates worker signaling, remount, and host
+fencing from wepp1 application services. The package also covers queued-wait
+guidance, operator visibility, restore dispatch safety, and drain-first
+rollback.
 
 ## Small-File Read/Write/Delete + Metadata Microbench (2026-02-10)
 

@@ -322,6 +322,22 @@ When resuming Kubernetes work:
 
 ## 🚧 In Progress
 
+### Fork/Archive Serial Queue Isolation (proposed SURF-03A)
+
+**Started**: 2026-08-03
+**Priority**: High
+**Security impact**: `high`
+**Link**: [docs/work-packages/20260803_fork_archive_serial_queue/](docs/work-packages/20260803_fork_archive_serial_queue/)
+**Description**: Isolate top-level fork, archive-create, and restore work on one
+FIFO RQ queue, with one local consumer in dev/Forest and the sole production
+consumer isolated on otherwise-idle wepp3. Includes queued-wait guidance,
+operator visibility, dispatch-time safety, and drain-first rollout/rollback.
+**Status**: Discovery complete and work package scaffolded. Exact bounded
+enhancement registration, operator-approved contract matrix, dual checkpoint
+review, and standalone ancestor are required before implementation.
+
+---
+
 ### Omni Fork Symlink Retarget Hardening (SURF-04A)
 
 **Started**: 2026-08-02

@@ -5,6 +5,22 @@
 ## Scope
 This guide covers deploying the worker-only stack (`rq-worker`, `rq-worker-batch`, and optional `weppcloudr`) on a separate host that connects to the main WEPPcloud Redis instance.
 
+### Planned wepp3 serial worker
+
+The Fork/Archive Serial Queue Isolation package proposes an opt-in
+`rq-worker-fork-archive` service from this compose file on wepp3. Wepp3 already
+has the production NFS mount and otherwise runs no containers. The service must
+start alone, consume only `fork-archive`, and have no dependency on `rq-worker`,
+`rq-worker-batch`, `f-esri`, or `weppcloudr`. A normal wepp2 `wctl up -d` must
+not activate it, and wepp1 must remain a non-consumer.
+
+This topology is not implemented yet. Do not deploy the proposed service until
+the exact contract checkpoint and implementation in
+`docs/work-packages/20260803_fork_archive_serial_queue/` are accepted. The
+wepp3 preflight must verify Redis reachability/firewall scope, required secret
+files, image provenance, canonical NFS mounts and permissions, time
+synchronization, and out-of-band host fencing.
+
 ## Prerequisites
 - Shared storage mounted on the worker node (same paths as the main host):
   - `/geodata` and `/geodata/wc1` (mapped to `/geodata` and `/wc1` in containers).

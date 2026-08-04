@@ -5,6 +5,11 @@
 This guide covers both the development (`docker-compose.dev.yml`) and production (`docker-compose.prod.yml`) Docker Compose stacks for WEPPcloud.
 It also covers the production worker pool stack (`docker-compose.prod.worker.yml`) used on dedicated RQ worker hosts.
 
+`docker-compose.dev.hpc.yml` is a legacy configuration that is being
+repurposed. It is not a supported WEPPcloud development or worker deployment
+target; do not extend new worker topology into it unless its replacement
+contract explicitly requires that service.
+
 ## Deployment Environments
 
 | Environment | Host | Domain | Compose File | Notes |
@@ -12,6 +17,13 @@ It also covers the production worker pool stack (`docker-compose.prod.worker.yml
 | **Test Production** | `forest1.local` | `wc-prod.bearhive.duckdns.org` | `docker-compose.prod.yml` | Primary test production server |
 | **Development** | `forest.local` | `wc.bearhive.duckdns.org` | `docker-compose.dev.yml` | Development with bind mounts |
 | **Prod Worker Pool** | (separate worker host) | — | `docker-compose.prod.worker.yml` | Dedicated RQ workers connected to an external Redis (no Redis/Postgres services). |
+
+The planned fork/archive serial queue uses an opt-in worker-only service on
+`wepp3`, which already has the production NFS mount and otherwise runs no
+containers. Development forest and Forest test production keep local consumers
+for behavioral parity; wepp1 and wepp2 must not consume the production serial
+queue. Track the unimplemented topology in the
+[Fork/Archive Serial Queue Isolation work package](../docs/work-packages/20260803_fork_archive_serial_queue/package.md).
 
 ### Test Production (forest1.local)
 
