@@ -6,10 +6,10 @@
 
 **Timezone**: UTC
 **Started**: 2026-07-17 00:30 UTC
-**Current phase**: Next package selection
-**Last updated**: 2026-07-29 UTC
-**Next milestone**: Select the next dependency-ready registered package.
-**Security impact**: `none` for documentation-only parent reconciliation
+**Current phase**: SURF-03A/GOV-00A-M1G checkpoint review
+**Last updated**: 2026-08-04 UTC
+**Next milestone**: Close SURF-03A dual review without advancing its owners.
+**Security impact**: `high` for the bounded SURF-03A amendment
 **Dedicated security review**: `yes` for SHR-05, SHR-06, SURF-01, SURF-03, SURF-04, SURF-05, SURF-06, SURF-07, SURF-08, SURF-09, SURF-10, SURF-11, SURF-13, SURF-14, SURF-15, SURF-16, SURF-17, and SURF-18
 **Security artifact**:
 `../20260728_pure_ui_runs_catalog_contract/artifacts/2026-07-28_security_review.md`
@@ -24,6 +24,8 @@
 
 ### In Progress
 
+- [ ] Complete the dual checkpoint review for registered amendment SURF-03A /
+  GOV-00A-M1G. SURF-03, SURF-04, SURF-07, and SURF-17 retain their prior states.
 - [x] Registered and dual-reviewed REM-05 under GOV-00A-M1E without advancing
   DOM-05; checkpoint ancestor
   `44d3b93c8e3bc7d5e89151cbb9677db374411c53`.

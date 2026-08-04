@@ -17,6 +17,10 @@ is not a contract registry or enforcement platform.
 
 ## Progress
 
+- [ ] (2026-08-04) SURF-03A/GOV-00A-M1G is registered as the bounded fork,
+  archive, and restore serial-queue amendment; its dual checkpoint review is
+  in progress and SURF-03, SURF-04, SURF-07, and SURF-17 remain at their prior
+  states.
 - [x] (2026-07-17) Created and independently reviewed the controller inventory
   and bounded package register.
 - [x] (2026-07-17 through 2026-07-28) Recorded contract-first governance and

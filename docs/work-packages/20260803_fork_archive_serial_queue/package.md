@@ -1,8 +1,8 @@
 # Fork/Archive Serial Queue Isolation
 
-**Status**: Open (2026-08-04 UTC)
+**Status**: GOV-00A-M1G checkpoint review (2026-08-04 UTC)
 **Timezone**: UTC
-**Proposed stable ID**: SURF-03A / GOV-00A-M1G (registration pending)
+**Stable ID**: SURF-03A / GOV-00A-M1G
 
 ## Overview
 
@@ -42,19 +42,23 @@ dedicated wepp3 consumer.
 
 - `wepppy/microservices/rq_engine/fork_archive_routes.py` queue selection for
   fork, archive creation, and archive restore.
+- `wepppy/microservices/rq_engine/job_routes.py` and
+  `wepppy/rq/cancel_job.py` for the `fork-archive`-specific queued-user versus
+  started-Admin/Root cancellation boundary.
 - `docker/docker-compose.dev.yml` and `docker/docker-compose.prod.yml` worker
   definitions for development and Forest test production.
-- An opt-in `rq-worker-fork-archive` service in
-  `docker/docker-compose.prod.worker.yml`, deployed alone on wepp3 without
+- A wepp3-specific `rq-worker-fork-archive` definition in
+  `docker/docker-compose.prod.wepp3.yml`, deployed alone without
   `rq-worker`, `rq-worker-batch`, `f-esri`, or `weppcloudr` dependencies.
-- Explicit non-consumer validation for
-  `docker/docker-compose.prod.wepp1.yml` on wepp1 and the normal worker-only
-  deployment on wepp2.
+- Explicit non-consumer validation for `docker/docker-compose.prod.wepp1.yml`
+  on wepp1 and `docker/docker-compose.prod.worker.yml` on wepp2.
 - Explicit exclusion of `docker/docker-compose.dev.hpc.yml`, which is being
   repurposed and is no longer a supported deployment target for this worker.
 - Queue visibility defaults in `wepppy/rq/job_listings.py`,
   `wepppy/rq/job_summary.py`, `tools/wctl2/commands/rq.py`, rq-engine Admin
   descriptions, WEPPcloud RQ info details, and their tests.
+- `wctl rq-info --service rq-worker-fork-archive` plus wepp3 host-local
+  container/process/D-state inspection documented independently of Redis.
 - RQ dependency graph/catalog regeneration and a live job-tree check.
 - Fork/archive console templates, source/built archive client parity when
   needed, exact render/client regressions, and user guidance covering queued
@@ -76,20 +80,23 @@ dedicated wepp3 consumer.
 - Adding a `fork-archive` consumer to wepp1 or wepp2, automatic failover,
   autoscaling, or a second worker.
 - A new queue abstraction or environment-configurable queue name.
-- A new archive-console cancellation action unless the contract checkpoint
-  explicitly expands scope after reviewing the longer queued-wait UX.
+- A new archive-console cancellation button or cancellation changes for queues
+  other than `fork-archive`.
 - Scientific parameters, formulas, units, thresholds, fallbacks, or project
   data/schema changes.
 
 ## Implementation Fidelity and Evidence
 
-- **Fidelity target**: faithful queue cutover preserving the current fork,
-  archive, restore, authorization, payload, copy/extraction, terminal-state,
-  and result contracts.
+- **Fidelity target**: faithful queue cutover preserving current submission
+  authorization, payload, copy/extraction, terminal-state, and result contracts,
+  with only the approved `fork-archive` cancellation authorization change.
 - **Authoritative source paths**:
   `wepppy/microservices/rq_engine/fork_archive_routes.py`,
+  `wepppy/microservices/rq_engine/job_routes.py`,
+  `wepppy/rq/cancel_job.py`,
   `wepppy/rq/project_rq_fork.py`,
-  `wepppy/rq/project_rq_archive.py`, and the SURF-03/SURF-04 concise contracts.
+  `wepppy/rq/project_rq_archive.py`, and the SURF-03/SURF-04/SURF-07/SURF-17
+  concise contracts.
 - **Cutover proof required**: live jobs submitted through each public action
   have origin `fork-archive`; only one registered worker services that queue;
   a second job remains `queued` until the first becomes terminal; ordinary
@@ -117,8 +124,8 @@ dedicated wepp3 consumer.
   `fork-archive`; delete and undisturbify child jobs retain existing behavior.
 - [ ] Dev and Forest test production compose render valid
   configurations with one worker process for `fork-archive`.
-- [ ] The worker-only compose renders an opt-in, dependency-minimal service that
-  can be launched alone on wepp3.
+- [ ] The wepp3-specific compose renders one dependency-minimal service and
+  does not mount the Docker socket or unrelated credentials.
 - [ ] Production evidence proves wepp3 is the sole consumer and wepp1/wepp2
   remain non-consumers.
 - [ ] Two submitted jobs demonstrate FIFO serialization: the second remains
@@ -133,6 +140,8 @@ dedicated wepp3 consumer.
   follow-up recorded before production rollout.
 - [ ] `wctl rq-info`, `--detail`, rq-engine Admin listings, and WEPPcloud RQ
   info details include the new queue by default.
+- [ ] `wctl rq-info --service rq-worker-fork-archive` targets the dedicated
+  container, and operator docs retain Redis-independent host-local checks.
 - [ ] The RQ dependency catalog and static graph name `fork-archive` for all
   three enqueue sites and `wctl check-rq-graph` passes.
 - [ ] Rollout drains or inventories legacy default-queue fork/archive/restore
@@ -146,14 +155,27 @@ dedicated wepp3 consumer.
 - **Parameterization change present**: no.
 - **ADR required**: no.
 - **ADR links**: none.
-- **Decision provenance captured**: pending the exact SURF-03A/GOV-00A-M1G
-  contract checkpoint. The operator requested a single fork/archive worker and
-  queued-wait UI guidance on 2026-08-03 PDT.
+- **Decision provenance captured**: yes. The operator requested a single
+  fork/archive worker and queued-wait UI guidance, selected wepp3 production
+  placement, explicitly approved the final matrix, superseded its cancellation
+  clause with the queue-specific queued-user/started-Admin-or-Root rule, and
+  directed execution on 2026-08-04 PDT. The canonical matrix is in
+  `artifacts/2026-08-04_contract_decision.md`.
 
 Queue topology is operational behavior, not scientific parameterization. Any
 new timeout, age threshold, retry heuristic, or fallback behavior must be
 re-triaged against `docs/standards/parameterization-adr-standard.md` before it
 is added.
+
+## Compatibility and Data Impact
+
+Routes, successful response shapes, archive formats, and project schemas remain
+unchanged. Queue origin changes for the three jobs. For `fork-archive` jobs
+only, a non-Admin/Root caller who could previously cancel after start now
+receives the canonical forbidden response; queued cancellation and every other
+queue retain existing behavior. A dispatch handoff race fails closed and never
+lets the non-Admin path issue a stop command. No project data migration is
+required.
 
 ## Dependencies
 
@@ -184,9 +206,8 @@ is added.
   `../20260802_omni_fork_symlink_retarget_hardening/`.
 - **Operational precedent**:
   `../20260619_dedicated_download_service/`.
-- **Follow-up**: queued archive/restore cancellation or stronger run-revision
-  conflict detection only if staging evidence and operator review justify a
-  separate bounded scope.
+- **Follow-up**: stronger run-revision conflict detection only if staging
+  evidence and operator review justify a separate bounded scope.
 
 ## Timeline Estimate
 
@@ -242,8 +263,10 @@ is added.
 - `docker/docker-compose.prod.yml` - Forest base production topology.
 - `docker/docker-compose.prod.wepp1.yml` - wepp1 application override that must
   remain a non-consumer.
-- `docker/docker-compose.prod.worker.yml` - shared worker-only definition whose
-  dedicated service is opt-in on wepp3 and inactive on wepp2.
+- `docker/docker-compose.prod.worker.yml` - wepp2 worker-only definition that
+  must remain a non-consumer.
+- `docker/docker-compose.prod.wepp3.yml` - sole production `fork-archive`
+  worker definition.
 - `wepppy/microservices/rq_engine/fork_archive_routes.py` - three enqueue sites.
 - `wepppy/rq/job-dependencies-catalog.md` - canonical enqueue/dependency
   inventory.

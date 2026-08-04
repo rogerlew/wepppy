@@ -58,3 +58,16 @@ metadata; job/run navigation; combined completed/failed tables; query-filter
 behavior; and explicit failure handling. Focused tests, broad tests, frontend
 lint/tests, documentation lint, security review, and `git diff --check` are
 recorded before closeout.
+
+## SURF-03A Fork/Archive Serial Queue Amendment
+
+The operator-approved bounded enhancement at
+`../20260803_fork_archive_serial_queue/` extends the default requested queue
+order from `default`, `batch` to `default`, `batch`, `fork-archive`. The page
+renders the third queue with the same exact grouping, escaping, empty-state,
+authorization, and read-only behavior. Explicit `queues` query values retain
+their existing control and order semantics.
+
+No job metadata, mutation, polling, lookback, retention, role, or Redis schema
+changes. SURF-17 remains verified; SURF-03A implementation conformance is
+pending its GOV-00A-M1G checkpoint ancestor.

@@ -107,3 +107,20 @@ The operator-approved follow-up at
 shared-input links in a completed fork to resolve inside the destination. New
 links are relative; copied legacy links are normalized by role after rsync and
 before success. Unrelated links remain unchanged.
+
+## SURF-03A Fork/Archive Serial Queue Amendment
+
+The operator-approved bounded enhancement at
+`../20260803_fork_archive_serial_queue/` routes the top-level fork worker,
+together with SURF-03 archive-create and restore, to one `fork-archive` queue.
+Static console guidance states that an accepted fork may wait and copies source
+state available when the worker begins. Existing destination creation and
+authorized catalog visibility before dispatch are retained; the console does
+not expose destination navigation until the existing readiness gate passes.
+
+Fork options, auth/CAP submission behavior, response and tracking storage,
+copy/identity rules, downstream undisturbify jobs, and terminal semantics remain
+unchanged. The existing cancel button remains. For `fork-archive` jobs only,
+authorized project users may cancel while queued, while started-job
+cancellation requires Admin or Root. SURF-04 stays closed; SURF-03A
+implementation conformance is pending its GOV-00A-M1G checkpoint ancestor.

@@ -116,6 +116,15 @@ disposition, post-fix confirmation, and standalone ancestor. It composes only
 the finite DOM-01 and SURF-02A/B Batch Runner WATAR boundary and cannot advance
 or close those owners.
 
+`GOV-00A-M1G` is the separately closable bounded-enhancement governance
+milestone proposed only for SURF-03A. It requires its own dual review,
+disposition, post-fix confirmation, and standalone ancestor. It composes only
+the finite SURF-03 archive/restore, SURF-04 fork, SURF-07 cancellation, and
+SURF-17 RQ-info queue boundary and cannot advance or close those owners. Its exact source-path
+boundary is incorporated from the `In Scope` section of
+`docs/work-packages/20260803_fork_archive_serial_queue/package.md`; paths not
+listed there remain excluded.
+
 Dependency shorthand expands exactly as follows:
 
 - `SHR-01..04B` = SHR-01, SHR-02, SHR-03A, SHR-03B, SHR-04A, SHR-04B.
@@ -189,6 +198,7 @@ DOM-05 field. Its evidence is inherited by DOM-05 without advancing that owner.
 | --- | --- | --- | --- | --- | --- |
 | DOM-05A | `20260729_topaz_conditioning_wepppy_integration` | DOM-05 | Add Topaz Conditioning Algorithm/`topaz`, dispatch it to released WBT `TopazConditionDem` width 2, and make it the new-run default only for `disturbed9002_wbt`; preserve legacy tokens, persisted runs, other configs, queue/auth/schema, and downstream flow/channel behavior | `high`: authenticated browser-to-RQ persisted enum and native geospatial worker dispatch | closed locally; ancestor `5754a1e06`; full suite, dual review, and E2E PASS |
 | SURF-02C | `20260802_batch_runner_watar` | DOM-01, SURF-02A, SURF-02B | Add one optional `run_watar` Batch Runner directive; eligibility by `ash.nodb`; exact WEPP-before-WATAR preflight; persisted leaf Ash inputs; Ash plus AshPost completion/no-data semantics; timestamp-authoritative partial retry/failure reporting; old-state normalization; focused UI/NoDb/RQ/generated-output evidence only | `high`: expensive worker execution, run-tree writes, retry/completion, and locking | GOV-00A-M1F checkpoint review |
+| SURF-03A | `20260803_fork_archive_serial_queue` | SURF-03, SURF-04, SURF-07, SURF-17 | Route top-level fork, archive-create, and restore to one `fork-archive` queue; one consumer in dev/Forest and sole production consumer on otherwise-idle wepp3; queued-wait/execution-time-state guidance; queued authorized-user cancellation but Admin/Root-only cancellation after start; restore dispatch lock recheck; queue visibility, graph/catalog, drain-first rollout/rollback, and focused evidence only | `high`: queue/deployment wiring, cancellation authorization, public/CAP fork, authenticated destructive restore, run-tree I/O, and privileged job telemetry | GOV-00A-M1G checkpoint review |
 
 DOM-05A is an operator-approved intended behavior amendment, not a conformance
 fix and not a reopening of REM-05. Its contract, ADR, dual reviews, security
@@ -203,6 +213,19 @@ advance, verify, or close those owners. It excludes ash formulas, defaults,
 units, thresholds, calibration, standalone WATAR field/payload changes,
 AshPost schema changes, auth/CSRF policy, new queue topology, selective
 base-to-leaf Ash resync, and unrelated Batch Runner stages.
+
+SURF-03A is an operator-approved bounded cross-owner enhancement under
+`docs/standards/contract-first-change-standard.md`. Roger Lew explicitly
+approved the final matrix and then superseded its cancellation clause: existing
+buttons remain; authorized project users may cancel queued `fork-archive` jobs;
+only Admin/Root may cancel them after start. It may compose only the registered
+SURF-03/SURF-04/SURF-07/SURF-17 queue, console, cancellation, and operator-
+visibility behavior without advancing those owners. It excludes
+archive delete/download/format, fork copy rules and downstream jobs, new
+cancellation buttons, cancellation changes for other queues, other auth/CAP/
+CSRF changes, project data/schema changes,
+scientific parameterization, NFS mount changes, autoscaling, automatic
+failover, and consumers on wepp1, wepp2, or the repurposed HPC compose.
 
 The exact REM-05 implementation boundary is limited to:
 

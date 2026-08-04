@@ -91,3 +91,22 @@ request-window race: restore and delete did not disable every sibling mutation
 before the server established the shared active job. The source and served
 clients now enforce mutual exclusion, and route, API, worker, auth/security,
 frontend, repository, graph, and documentation gates pass.
+
+## SURF-03A Fork/Archive Serial Queue Amendment
+
+The operator-approved bounded enhancement at
+`../20260803_fork_archive_serial_queue/` routes archive-create and restore,
+together with SURF-04 fork, to one `fork-archive` queue. Archive-create retains
+its worker-start `.nodb` lock check. Restore adds the same lock-status check
+after validation and immediately before destructive removal; an active lock
+fails without deleting current files. Static console guidance states that work
+may wait, archive creation observes project state when its worker begins, and
+the project must not be edited while restore is queued or running.
+
+Delete remains synchronous. Download, archive format, extraction rules,
+submission authorization, response shapes, active-job markers, and archive-
+console actions remain unchanged. No archive-console cancel button is added.
+For `fork-archive` jobs canceled through an existing shared surface, authorized
+project users may cancel while queued and started cancellation requires Admin
+or Root. SURF-03 stays closed; SURF-03A implementation conformance is pending
+its GOV-00A-M1G checkpoint ancestor.

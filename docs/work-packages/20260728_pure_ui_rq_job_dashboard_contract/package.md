@@ -62,3 +62,14 @@ confirmed mismatch: after an unauthenticated job-info request receives 401 or
 403, the dashboard obtains its existing authenticated `rq:status` fallback
 token and retries exactly once. Server policy, claims, routes, cancellation
 authority, and queue wiring are unchanged.
+
+## SURF-03A Fork/Archive Serial Queue Amendment
+
+The operator-approved bounded enhancement at
+`../20260803_fork_archive_serial_queue/` retains the dashboard cancellation
+button and all behavior for jobs outside `fork-archive`. For a job whose RQ
+origin is `fork-archive`, an authorized project user may cancel while it is
+queued; after it starts, rq-engine requires Admin or Root. This is a server-side
+authorization rule and the dashboard continues to display canonical forbidden
+responses. SURF-07 stays closed; SURF-03A implementation conformance is pending
+its GOV-00A-M1G checkpoint ancestor.

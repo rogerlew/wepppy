@@ -6,9 +6,9 @@
 
 **Timezone**: UTC
 **Started**: 2026-08-04 05:38 UTC
-**Current phase**: Contract checkpoint preparation
+**Current phase**: GOV-00A-M1G standalone ancestor commit
 **Last updated**: 2026-08-04 06:13 UTC
-**Next milestone**: Ratify and register the exact bounded enhancement contract
+**Next milestone**: Commit the accepted checkpoint ancestor
 **Security impact**: `high`
 **Dedicated security review**: `yes`
 **Security artifact**: `docs/work-packages/20260803_fork_archive_serial_queue/artifacts/2026-08-04_security_review.md`
@@ -17,13 +17,10 @@
 
 ### Ready / Backlog
 
-- [ ] Finalize the queue contract matrix and obtain explicit operator approval.
-- [ ] Register proposed SURF-03A/GOV-00A-M1G with SURF-03, SURF-04, and SURF-17
-  as the composed Pure UI owners.
 - [ ] Obtain two independent read-only checkpoint reviews, disposition every
   finding, and commit the accepted checkpoint as a standalone ancestor.
-- [ ] Add the single worker service to dev and Forest; add an opt-in,
-  dependency-minimal worker-only service for wepp3 while preserving the
+- [ ] Add the single worker service to dev and Forest; add a dedicated,
+  dependency-minimal wepp3 compose while preserving the
   repurposed HPC and wepp1/wepp2 non-consumer boundaries.
 - [ ] Route fork, archive-create, and restore to `fork-archive`; regenerate the
   RQ graph/catalog.
@@ -37,7 +34,8 @@
 
 ### In Progress
 
-- [ ] None; production implementation is gated by the contract checkpoint.
+- [x] Independent governance and operations/security checkpoint reviews passed
+  after disposition and post-fix confirmation.
 
 ### Blocked
 
@@ -65,6 +63,14 @@
 - [x] Recorded wepp3 production isolation across the package, contract draft,
   ExecPlan, security checklist, infrastructure map, Docker operator docs, and
   project tracker; documentation validation passed. (2026-08-04 06:13 UTC)
+- [x] Registered SURF-03A/GOV-00A-M1G, amended
+  SURF-03/SURF-04/SURF-07/SURF-17,
+  recorded starting revision `d63df477c887d59e813542a1c2f22730a7f75faa`,
+  and obtained explicit approval of the complete final matrix. The operator
+  later superseded its cancellation clause: existing buttons remain;
+  authorized project users may cancel queued `fork-archive` jobs; only
+  Admin/Root may cancel after start.
+  (2026-08-04 PDT)
 
 ## Timeline
 
@@ -73,8 +79,11 @@
   compose file changed.
 - **2026-08-04 05:50 UTC** - Documentation and baseline compose validation
   passed; implementation remains gated on the exact contract checkpoint.
-- **2026-08-04 06:13 UTC** - Replaced the wepp1 placement proposal with an
-  opt-in, dependency-minimal wepp3 production consumer and revalidated docs.
+- **2026-08-04 06:13 UTC** - Replaced the wepp1 placement proposal with a
+  dedicated, dependency-minimal wepp3 production consumer and revalidated docs.
+- **2026-08-04 PDT** - Operator explicitly approved the complete final matrix,
+  then superseded its cancellation clause with queue-specific queued-user and
+  started-Admin/Root authorization and directed Codex to proceed.
 
 ## Decisions Log
 
@@ -155,10 +164,10 @@ Forest test production. Wepp3 has the production NFS mount and no other running
 containers, so it provides a smaller production failure domain than wepp1.
 
 **Decision**: Development and Forest retain one local consumer for behavioral
-parity. Production runs the sole consumer on wepp3. Propose an opt-in service in
-`docker/docker-compose.prod.worker.yml` that starts alone and has no dependency
-on the normal workers, `f-esri`, or `weppcloudr`. Wepp1 and wepp2 remain
-non-consumers; there is no automatic failover.
+parity. Production runs the sole consumer on wepp3 from
+`docker/docker-compose.prod.wepp3.yml`, which contains no normal workers,
+`f-esri`, or `weppcloudr`. Wepp1 and wepp2 remain non-consumers; there is no
+automatic failover.
 
 **Impact**: An NFS-blocked serial worker can be signaled, remounted, or the host
 can be fenced without disrupting wepp1 application services. Wepp3 requires an
@@ -171,12 +180,12 @@ preflight before deployment.
 | --- | --- | --- | --- | --- |
 | Old default-queue job overlaps a new dedicated job during rollout. | High | Medium | Inventory/drain in-scope default jobs before route cutover; stage worker first. | Open |
 | Dedicated queue has jobs but no registered worker. | High | Medium | Include queue in all operator summaries; validate exactly one wepp3 worker. | Open |
-| A normal wepp2 worker deployment starts the opt-in service. | High | Low | Profile/target the service explicitly; structural test plus live host mapping proves wepp2 non-consumption. | Open |
+| A normal wepp2 worker deployment starts the service. | High | Low | Keep the service out of wepp2 compose; structural test plus live host mapping proves non-consumption. | Open |
 | Worker enters uninterruptible NFS D state and blocks the entire serial queue. | High | Medium | Preserve D-state triage; do not add a second worker reflexively; recover NAS first. | Open |
 | Queued restore starts after conflicting project mutation. | High | Medium | Ratify dispatch-time revalidation and characterize need for revision conflict detection. | Open |
 | Queued fork destination appears incomplete in another UI. | Medium | High | Characterize Runs catalog/direct URL; preserve readiness-gated console link; document outcome. | Open |
 | Users interpret a long queued state as failure and resubmit. | Medium | Medium | Static and live-status guidance; retain existing single-job guards and tracking. | Open |
-| Rollback strands `fork-archive` jobs after the service is removed. | High | Low | Route rollback first; keep worker until queue/registries drain; remove service last. | Open |
+| Rollback strands or overlaps `fork-archive` jobs. | High | Low | Fence admission, drain registries, fence any D-state host, then revert routing and remove the service. | Open |
 | Updating default queue lists misses wctl registry-repair internals. | Medium | Medium | Test command text, job summaries, API listings, and RQ info details together. | Open |
 
 ## Hardening Signal Log
@@ -215,7 +224,7 @@ preflight before deployment.
 
 ### Documentation
 
-- [ ] SURF-03, SURF-04, SURF-17, and GOV-00A register/checkpoint docs are current.
+- [ ] SURF-03, SURF-04, SURF-07, SURF-17, and GOV-00A register/checkpoint docs are current.
 - [ ] `docker/README.md`, `wctl/README.md`, and NFS/operator guidance are current.
 - [ ] RQ dependency catalog/static graph are current.
 - [ ] Package, tracker, ExecPlan, security review, and rollout evidence are current.
@@ -224,10 +233,10 @@ preflight before deployment.
 ### Testing and Deployment
 
 - [ ] Compose config validates for dev, Forest, prod+wepp1 non-consumption, and
-  the opt-in wepp3 worker-only service.
+  the dedicated wepp3 service.
 - [ ] The repurposed HPC compose proves no `fork-archive` consumer.
-- [ ] Default wepp2 worker deployment excludes `fork-archive`; explicit wepp3
-  service targeting starts exactly that one container.
+- [ ] Wepp2 compose excludes `fork-archive`; wepp3 compose starts exactly that
+  one container.
 - [ ] Local two-job serialization acceptance passes.
 - [ ] Forest drain-first cutover, normal dispatch, queued wait, cancellation,
   rollback, and worker placement pass.
