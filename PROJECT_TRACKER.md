@@ -912,6 +912,20 @@ the remaining-run controller plan has no next controller milestone.
 
 ## ✅ Done
 
+### Project Configuration Source Normalization (WP00B) (2026-08-05)
+
+**Completed**: 2026-08-05
+**Security impact**: `low`
+**Initiative branch**: `feature/project-owned-config` (noncanonical)
+**Link**: [docs/work-packages/20260804_project_config_source_normalization/](docs/work-packages/20260804_project_config_source_normalization/)
+
+**Outcome**: Ratified six canonical config value encodings, normalized 3,341
+assignments across the shared default and 128 active presets, and proved typed
+semantic parity against the starting revision. Added deterministic sorted
+serialization, strict ambiguity rejection, a checked-in golden fixture, and
+WP00A secret-gate integration. The full suite passed with 5,872 tests and 61
+skips; PC-05 is verified while WP03/WP04/WP10 retain integration evidence.
+
 ### Project Configuration Secret Sanitization (WP00A) (2026-08-05)
 
 **Completed**: 2026-08-05

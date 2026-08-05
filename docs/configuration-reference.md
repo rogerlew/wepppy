@@ -200,6 +200,13 @@ with `python tools/check_project_config_secrets.py [PATH ...]`. Findings are
 redacted and the command exits nonzero when secret-bearing or runtime-host-bound
 material is present.
 
+Canonical project config bytes are produced by
+`wepppy.project_config_serialization.serialize_config()`. The serializer sorts
+case-sensitive sections and options, emits one stable encoding per supported
+type, and invokes the secret gate before returning bytes. Validate active
+shared source spelling with `python tools/normalize_project_config_sources.py`;
+use `--write` only when intentionally normalizing those tracked sources.
+
 ## Docker / Infra (Compose)
 
 | Variable | Default | Used by | Description |

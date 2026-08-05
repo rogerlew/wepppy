@@ -90,10 +90,10 @@ only with `verified`, `accepted-existing`, `not-applicable`, or an acknowledged
 | N-057 | [L588](../../../schemas/project-owned-config-contract.md#L588) | PC-10 | WP04 | WP04-PC10-N057 | sync success/failure test | owned/incomplete |
 | N-058 | [L597](../../../schemas/project-owned-config-contract.md#L597) | PC-06 | WP03 | WP03-PC06-N058 | composition-order test | owned/incomplete |
 | N-059 | [L608](../../../schemas/project-owned-config-contract.md#L608) | PC-06 | WP03 | WP03-PC06-N059 | writeover/collision test | owned/incomplete |
-| N-060 | [L616](../../../schemas/project-owned-config-contract.md#L616) | PC-05 | WP00B | WP00B-PC05-N060 | byte determinism test | owned/incomplete |
-| N-061 | [L622](../../../schemas/project-owned-config-contract.md#L622) | PC-05 | WP00B | WP00B-PC05-N061 | canonical format golden | owned/incomplete |
-| N-062 | [L634](../../../schemas/project-owned-config-contract.md#L634) | PC-05 | WP00B | WP00B-PC05-N062 | lexical inventory/golden | owned/incomplete |
-| N-063 | [L643](../../../schemas/project-owned-config-contract.md#L643) | PC-05 | WP00B | WP00B-PC05-N063 | ambiguous-form rejection | owned/incomplete |
+| N-060 | [L616](../../../schemas/project-owned-config-contract.md#L616) | PC-05 | WP00B | WP00B-PC05-N060 | byte determinism test | verified by WP00B |
+| N-061 | [L622](../../../schemas/project-owned-config-contract.md#L622) | PC-05 | WP00B | WP00B-PC05-N061 | canonical format golden | verified by WP00B |
+| N-062 | [L634](../../../schemas/project-owned-config-contract.md#L634) | PC-05 | WP00B | WP00B-PC05-N062 | lexical inventory/golden | verified by WP00B; registry integration retained by WP03 |
+| N-063 | [L643](../../../schemas/project-owned-config-contract.md#L643) | PC-05 | WP00B | WP00B-PC05-N063 | ambiguous-form rejection | verified by WP00B |
 | N-064 | [L650](../../../schemas/project-owned-config-contract.md#L650) | PC-06 | WP03 | WP03-PC06-N064 | TOML parser test | owned/incomplete |
 | N-065 | [L672](../../../schemas/project-owned-config-contract.md#L672) | PC-06 | WP03 | WP03-PC06-N065 | descriptor validation | owned/incomplete |
 | N-066 | [L697](../../../schemas/project-owned-config-contract.md#L697) | PC-06 | WP03 | WP03-PC06-N066 | profile composition test | owned/incomplete |
@@ -144,7 +144,7 @@ only with `verified`, `accepted-existing`, `not-applicable`, or an acknowledged
 | ID | Contract source | PC row | Closure owner | Task | Evidence | Disposition |
 | --- | --- | --- | --- | --- | --- | --- |
 | R-001 | [L1070](../../../schemas/project-owned-config-contract.md#L1070) | PC-01 | WP02 | WP02-PC01-R001 | loader test | owned/incomplete |
-| R-002 | [L1071](../../../schemas/project-owned-config-contract.md#L1071) | PC-05 | WP00B | WP00B-PC05-R002 | golden bytes | owned/incomplete |
+| R-002 | [L1071](../../../schemas/project-owned-config-contract.md#L1071) | PC-05 | WP00B | WP00B-PC05-R002 | golden bytes | verified by WP00B; archive byte evidence retained by WP10 |
 | R-003 | [L1074](../../../schemas/project-owned-config-contract.md#L1074) | PC-06 | WP03 | WP03-PC06-R003 | writeover test | owned/incomplete |
 | R-004 | [L1076](../../../schemas/project-owned-config-contract.md#L1076) | PC-02 | WP01 | WP01-PC02-R004 | legacy layering | owned/incomplete |
 | R-005 | [L1077](../../../schemas/project-owned-config-contract.md#L1077) | PC-02 | WP01 | WP01-PC02-R005 | shared fallback | owned/incomplete |
