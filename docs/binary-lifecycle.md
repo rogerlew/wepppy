@@ -58,3 +58,15 @@ setting `WEPP_RUNNER_SKIP_BINARY_PROVENANCE_CHECK=1`.
 Legacy static binaries (`ldd` reports `not a dynamic executable`) are permitted for
 backward compatibility, but all dynamically linked binaries are enforced against the
 full provenance policy.
+
+## Withdrawn Releases
+
+- `wepp_260727` and `wepp_260727_hill` were removed from the WEPPpy vendor set
+  on 2026-08-05. Their sidecars select the HBP pass family exclusively, so the
+  generated `H*.hbp` files cannot participate in workflows that merge them with
+  legacy flat-file `H*.pass.dat` inputs, including AgFields integrated-watershed
+  assembly when another required source remains legacy-pass.
+- Do not mix pass families or silently substitute another executable. A project
+  that persisted `wepp_260727` must explicitly select an installed compatible
+  binary and regenerate the dependent hillslope/pass artifacts before watershed
+  integration.

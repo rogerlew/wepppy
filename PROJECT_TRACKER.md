@@ -1126,6 +1126,11 @@ Forest regenerated 587 matching-version HBP shards and watershed output;
 all 4,109 raw LOSS Hill rows and all 587 parquet areas are positive, and the
 baseline Omni hillslope summary compiles.
 
+**Withdrawal (2026-08-05)**: WEPPpy removed the `wepp_260727` watershed and
+hillslope pair plus sidecars. The release is HBP-only, and its pass files cannot
+be merged with legacy flat-file pass inputs used by AgFields integrated
+watershed assembly. Historical validation evidence remains intact.
+
 ---
 
 ### WEPP SOIL OFE Overflow and 260726 Release ✅

@@ -3312,7 +3312,7 @@ def test_run_contrast_skips_archives_and_inherits_parent_wepp_bin(
     def _get_wepp_instance(run_wd: str) -> DummyWepp:
         instance = wepp_instances.setdefault(run_wd, DummyWepp(run_wd))
         if Path(run_wd) == wd:
-            instance.wepp_bin = "wepp_260727"
+            instance.wepp_bin = "wepp_260803"
         return instance
 
     monkeypatch.setattr(nodb_core.Wepp, "getInstance", _get_wepp_instance)
@@ -3333,7 +3333,7 @@ def test_run_contrast_skips_archives_and_inherits_parent_wepp_bin(
     assert list((new_wd / "landuse").iterdir()) == []
     assert (new_wd / "soils").is_dir()
     assert list((new_wd / "soils").iterdir()) == []
-    assert wepp_instances[str(new_wd)].wepp_bin == "wepp_260727"
+    assert wepp_instances[str(new_wd)].wepp_bin == "wepp_260803"
 
 def test_run_contrast_copies_directory_landuse_and_soils(tmp_path: Path, omni_module, monkeypatch):
     wd = tmp_path / "run"

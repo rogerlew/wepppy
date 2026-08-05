@@ -1,8 +1,17 @@
 # ADR-0034: Disturbed9002 WBT WEPP Executable Default
 
-Status: Accepted
+Status: Superseded (2026-08-05)
 
 Date: 2026-07-30
+
+## Supersession
+
+This historical default decision is no longer active. The configuration now
+uses `wepp_260803`, and WEPPpy withdrew `wepp_260727` and
+`wepp_260727_hill` on 2026-08-05 because their HBP-only pass contract cannot be
+combined with legacy flat-file pass inputs. Existing projects are not silently
+migrated; they must select a compatible installed binary and regenerate
+dependent pass artifacts.
 
 ## Context
 
