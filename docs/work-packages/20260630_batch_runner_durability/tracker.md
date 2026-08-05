@@ -6,9 +6,9 @@
 
 **Timezone**: UTC
 **Started**: 2026-06-30 19:56 UTC
-**Current phase**: Implementation updated locally / rollout pending
-**Last updated**: 2026-07-01 19:54 UTC
-**Next milestone**: Production rollout preflight after active batch jobs finish or are canceled
+**Current phase**: Reviewed runtime station drift fix complete / rollout pending
+**Last updated**: 2026-08-05 23:19 UTC
+**Next milestone**: Production rollout preflight and targeted batch recovery
 **Security impact**: high
 **Dedicated security review**: yes
 **Security artifact**: `docs/work-packages/20260630_batch_runner_durability/artifacts/2026-06-30_security_review.md`
@@ -42,6 +42,7 @@
 - [x] Fixed parent Run Batch job failure caused by returning an unserializable RQ `Job` object. (2026-06-30 23:08 UTC)
 - [x] Fixed watershed retries resuming past interrupted hillslope interchange outputs. (2026-06-30 23:51 UTC)
 - [x] Fixed stale cloned base climate attributes by selecting drifted leaves, resyncing critical `_base/climate.nodb` fields, and invalidating climate/downstream timestamps. (2026-07-01 19:54 UTC)
+- [x] Fixed false runtime-resolved climate station drift, passed focused/full validation, and dispositioned independent review with no unresolved findings. (2026-08-05 23:19 UTC)
 
 ## Timeline
 
@@ -54,6 +55,8 @@
 - **2026-06-30 23:08 UTC** - Parent `run_batch_rq` dashboard status showed failed/canceled despite publishing `COMPLETED`; RQ recorded `Unserializable return value`, so the parent now returns a serializable summary dict.
 - **2026-06-30 23:51 UTC** - Local retry exposed missing `H.wat.parquet`/`H.pass.parquet` after an interrupted hillslope interchange conversion; watershed retries now ensure hillslope interchange outputs before watershed resumes.
 - **2026-07-01 19:54 UTC** - Production retry exposed leaves initialized before base observed climate years were set; classifier now marks base-climate drift as retry eligible and worker startup resyncs critical climate config from `_base`.
+- **2026-08-05 22:57 UTC** - Production WATAR retry exposed false drift when literal resync compared the base `FindClosestAtRuntime` sentinel against each leaf's legitimately resolved closest station; a bounded defect fix and regression review began.
+- **2026-08-05 23:19 UTC** - Runtime station drift fix completed; two medium serialization review findings were fixed and confirmed resolved, and both focused and full test suites passed.
 
 ## Decisions Log
 
@@ -176,6 +179,13 @@
 
 **Impact**: Corrected base observed years propagate to already-initialized leaves without full workspace replacement, while DEM, watershed, landuse, and soils artifacts remain valid.
 
+### 2026-08-05 22:57 UTC: Preserve runtime-resolved climate stations
+**Context**: The base project intentionally stores `_climatestation: null` and `_climatestation_mode: FindClosestAtRuntime`. Climate build resolves that policy per watershed by storing a station ID and changing the leaf mode to `Closest`. Literal resync treated this required lifecycle as configuration drift across all 93 production leaves and invalidated climate, WEPP, WATAR, and Omni task timestamps.
+
+**Decision**: Treat only the exact unresolved-base to resolved-leaf station pair as equivalent during both classification and worker resync. Explicit station-policy changes and malformed or unsupported station-state combinations remain drift.
+
+**Impact**: Completed leaves retain resolved station IDs and downstream timestamps when the base runtime-selection policy is unchanged. The patch does not alter station selection, climate parameterization, schemas, queue topology, authentication, or task invalidation for real base changes.
+
 ## Risks and Issues
 
 | Risk | Severity | Likelihood | Mitigation | Status |
@@ -196,6 +206,7 @@
 | Parent Run Batch job is marked failed after enqueue because its return value is not serializable. | Medium | High | Return a serializable summary dict instead of a live RQ `Job` object. | Mitigated |
 | Interrupted hillslope interchange leaves task timestamps complete but watershed parquet dependencies missing. | High | Medium | Ensure hillslope interchange before watershed resumes on retry. | Mitigated |
 | Completed leaves are skipped even though cloned climate settings drifted from `_base`. | High | Medium | Compare critical climate config fields during classification and resync/invalidate downstream timestamps at worker startup. | Mitigated |
+| Runtime-resolved leaf stations are mistaken for base configuration drift and invalidate downstream work. | High | High | Compare station policy semantically and accept only the exact `FindClosestAtRuntime` to resolved `Closest` lifecycle. | Mitigated |
 
 ## Hardening Signal Log
 
@@ -241,9 +252,12 @@
 - [x] Watershed retries ensure hillslope interchange outputs before `wepp.run_watershed()`.
 - [x] Leaves with stale cloned base climate attributes are retry eligible.
 - [x] Worker startup resyncs critical climate attributes from `_base` and invalidates only climate/downstream timestamps.
+- [x] Runtime-resolved station state is accepted in classifier and worker resync without clearing timestamps.
+- [x] Current, legacy, and raw station-mode representations are supported; foreign/malformed constructors fail closed.
+- [x] Independent review findings are dispositioned with post-fix confirmation and no unresolved findings.
 
 ### Deployment
-- [ ] Tested in docker-compose.dev.yml environment.
+- [x] Tested in docker-compose.dev.yml environment.
 - [ ] Production rollout plan records active-job preflight.
 - [ ] Post-rollout observation window started.
 
@@ -436,6 +450,30 @@
 - `python3 tools/check_broad_exceptions.py --enforce-changed --base-ref origin/master` - passed with net delta +0.
 - `git diff --check` - passed.
 
+### 2026-08-05 23:19 UTC: Runtime station drift defect fix
+**Agent/Contributor**: Codex
+
+**Work completed**:
+- Confirmed the false drift was the expected `null`/`FindClosestAtRuntime` base policy resolving to a per-leaf station/`Closest` state.
+- Added one semantic comparison helper shared by retry classification and worker-side resync.
+- Preserved drift detection for explicit station-policy changes and unsupported station states.
+- Added current, legacy, raw-integer, foreign-constructor, explicit-drift, classifier, resync, and timestamp-preservation regression coverage.
+- Dispatched independent correctness review, fixed both medium serialization findings, and obtained post-fix confirmation with no new findings.
+- Recorded the review disposition in `artifacts/2026-08-05_runtime_station_drift_review_disposition.md`.
+
+**Blockers encountered**:
+- None for implementation or review. Production deployment and batch recovery were not requested and were not performed.
+
+**Next steps**:
+- Commit and deploy through the normal production gate when authorized.
+- Before recovery, use a read-only classifier audit to confirm runtime station pairs no longer appear in `base_sync_changed_attributes`.
+
+**Test results**:
+- `wctl run-pytest tests/rq/test_batch_rq_retry_selection.py --maxfail=1` - 29 passed.
+- `wctl run-pytest tests --maxfail=1` - 5,839 passed, 61 skipped.
+- `python3 tools/check_broad_exceptions.py --enforce-changed --base-ref origin/master` - passed with net delta `+0`.
+- Independent post-fix review - both medium findings resolved, no new findings.
+
 ## Watch List
 
 - **Production active jobs**: `nasa-roses-202606-psbs` still had active queued jobs at the scoping sample. Re-check before any deployment or production verification.
@@ -453,3 +491,8 @@
 **Participants**: User, Codex
 **Question/Topic**: Production retry still failed because leaves were initialized before observed climate dates were set in the base project. User requested hardening that resyncs critical base attributes and an assessment of invalidation criteria.
 **Outcome**: Implemented climate-only base attribute drift detection/resync with targeted climate/downstream timestamp invalidation, and documented broader resync criteria.
+
+### 2026-08-05 23:19 UTC: Runtime station drift defect
+**Participants**: User, Codex, independent reviewer agent
+**Question/Topic**: The operator asked to fix false `_climatestation` and `_climatestation_mode` drift and dispatch review with disposition.
+**Outcome**: Implemented semantic runtime-station equivalence, fixed and closed two medium serialization review findings, passed focused and full tests, and recorded the final disposition artifact.

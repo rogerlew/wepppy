@@ -97,6 +97,33 @@ def _write_climate_state(path: Path, *, observed_start_year, observed_end_year) 
     )
 
 
+def _set_climate_station_state(
+    path: Path,
+    *,
+    mode: int,
+    station: str | None,
+    serialization: str = "current",
+) -> None:
+    state = json.loads(path.read_text(encoding="utf-8"))
+    if serialization == "raw":
+        state["_climatestation_mode"] = mode
+    else:
+        mode_type = {
+            "current": "wepppy.nodb.core.climate.ClimateStationMode",
+            "foreign": "example.ForeignMode",
+            "legacy": "wepppy.nodb.climate.ClimateStationMode",
+        }[serialization]
+        reduce_payload = [
+            {"py/type": mode_type},
+            {"py/tuple": [mode]},
+        ]
+        if serialization == "legacy":
+            reduce_payload.extend((None, None, None))
+        state["_climatestation_mode"] = {"py/reduce": reduce_payload}
+    state["_climatestation"] = station
+    path.write_text(json.dumps(state), encoding="utf-8")
+
+
 def test_batch_directory_root_lock_uses_effective_path_scope(
     monkeypatch: pytest.MonkeyPatch,
 ) -> None:
@@ -405,6 +432,178 @@ def test_classify_batch_run_state_ignores_leaf_generated_cligen_seed(
     assert state["status"] == "complete"
     assert state["retry_eligible"] is False
     assert state["base_sync_changed_attributes"] == []
+
+
+def test_classify_batch_run_state_accepts_runtime_resolved_climate_station(
+    tmp_path: Path,
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    runner = _runner(tmp_path, monkeypatch)
+    all_tasks = (
+        TaskEnum.fetch_dem,
+        TaskEnum.build_climate,
+        TaskEnum.run_wepp_hillslopes,
+        TaskEnum.run_wepp_watershed,
+    )
+    _set_timestamps(runner, "complete-with-runtime-station", all_tasks)
+    run_dir = Path(runner.batch_runs_dir) / "complete-with-runtime-station"
+    base_climate = Path(runner.base_wd) / "climate.nodb"
+    leaf_climate = run_dir / "climate.nodb"
+    _write_climate_state(base_climate, observed_start_year=1985, observed_end_year=2024)
+    _write_climate_state(leaf_climate, observed_start_year=1985, observed_end_year=2024)
+    _set_climate_station_state(base_climate, mode=-1, station=None)
+    _set_climate_station_state(leaf_climate, mode=0, station="or350897")
+
+    state = runner.classify_batch_run_state(_feature("complete-with-runtime-station"))
+
+    assert state["status"] == "complete"
+    assert state["retry_eligible"] is False
+    assert state["base_sync_changed_attributes"] == []
+
+
+@pytest.mark.parametrize("serialization", ("legacy", "raw"))
+def test_classify_batch_run_state_accepts_compatible_runtime_station_modes(
+    tmp_path: Path,
+    monkeypatch: pytest.MonkeyPatch,
+    serialization: str,
+) -> None:
+    runner = _runner(tmp_path, monkeypatch)
+    all_tasks = (
+        TaskEnum.fetch_dem,
+        TaskEnum.build_climate,
+        TaskEnum.run_wepp_hillslopes,
+        TaskEnum.run_wepp_watershed,
+    )
+    leaf = f"complete-with-{serialization}-station-mode"
+    _set_timestamps(runner, leaf, all_tasks)
+    run_dir = Path(runner.batch_runs_dir) / leaf
+    base_climate = Path(runner.base_wd) / "climate.nodb"
+    leaf_climate = run_dir / "climate.nodb"
+    _write_climate_state(base_climate, observed_start_year=1985, observed_end_year=2024)
+    _write_climate_state(leaf_climate, observed_start_year=1985, observed_end_year=2024)
+    _set_climate_station_state(
+        base_climate,
+        mode=-1,
+        station=None,
+        serialization=serialization,
+    )
+    _set_climate_station_state(
+        leaf_climate,
+        mode=0,
+        station="or350897",
+        serialization=serialization,
+    )
+
+    state = runner.classify_batch_run_state(_feature(leaf))
+
+    assert state["status"] == "complete"
+    assert state["retry_eligible"] is False
+    assert state["base_sync_changed_attributes"] == []
+
+
+def test_classify_batch_run_state_rejects_foreign_runtime_station_mode(
+    tmp_path: Path,
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    runner = _runner(tmp_path, monkeypatch)
+    all_tasks = (
+        TaskEnum.fetch_dem,
+        TaskEnum.build_climate,
+        TaskEnum.run_wepp_hillslopes,
+        TaskEnum.run_wepp_watershed,
+    )
+    leaf = "stale-foreign-station-mode"
+    _set_timestamps(runner, leaf, all_tasks)
+    run_dir = Path(runner.batch_runs_dir) / leaf
+    base_climate = Path(runner.base_wd) / "climate.nodb"
+    leaf_climate = run_dir / "climate.nodb"
+    _write_climate_state(base_climate, observed_start_year=1985, observed_end_year=2024)
+    _write_climate_state(leaf_climate, observed_start_year=1985, observed_end_year=2024)
+    _set_climate_station_state(base_climate, mode=-1, station=None)
+    _set_climate_station_state(
+        leaf_climate,
+        mode=0,
+        station="or350897",
+        serialization="foreign",
+    )
+
+    state = runner.classify_batch_run_state(_feature(leaf))
+
+    assert state["status"] == "incomplete"
+    assert state["retry_reason"] == "base_project_attributes_changed"
+    assert {
+        (change["file"], change["attribute"])
+        for change in state["base_sync_changed_attributes"]
+    } == {
+        ("climate.nodb", "_climatestation"),
+        ("climate.nodb", "_climatestation_mode"),
+    }
+
+
+def test_resync_preserves_runtime_resolved_climate_station_and_timestamps(
+    tmp_path: Path,
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    runner = _runner(tmp_path, monkeypatch)
+    run_dir = Path(runner.batch_runs_dir) / "runtime-station"
+    run_dir.mkdir(parents=True)
+    base_climate = Path(runner.base_wd) / "climate.nodb"
+    leaf_climate = run_dir / "climate.nodb"
+    _write_climate_state(base_climate, observed_start_year=1985, observed_end_year=2024)
+    _write_climate_state(leaf_climate, observed_start_year=1985, observed_end_year=2024)
+    _set_climate_station_state(base_climate, mode=-1, station=None)
+    _set_climate_station_state(leaf_climate, mode=0, station="or350897")
+    original_timestamps = {
+        TaskEnum.fetch_dem.value: 1,
+        TaskEnum.build_climate.value: 2,
+        TaskEnum.run_wepp_hillslopes.value: 3,
+        TaskEnum.run_wepp_watershed.value: 4,
+        TaskEnum.run_watar.value: 5,
+        TaskEnum.run_omni_scenarios.value: 6,
+    }
+    _FakeRedisPrep.timestamps_by_wd[str(run_dir)] = original_timestamps.copy()
+
+    result = runner.resync_base_project_attributes(
+        str(run_dir),
+        _FakeRedisPrep(str(run_dir)),
+        batch_runner_module.logging.getLogger("test.runtime_station_resync"),
+    )
+
+    leaf_state = json.loads(leaf_climate.read_text(encoding="utf-8"))
+    assert leaf_state["_climatestation"] == "or350897"
+    assert leaf_state["_climatestation_mode"]["py/reduce"][1]["py/tuple"] == [0]
+    assert result == {"changed_attributes": [], "errors": [], "invalidated_tasks": []}
+    assert _FakeRedisPrep.timestamps_by_wd[str(run_dir)] == original_timestamps
+
+
+def test_classify_batch_run_state_detects_explicit_climate_station_change(
+    tmp_path: Path,
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    runner = _runner(tmp_path, monkeypatch)
+    all_tasks = (
+        TaskEnum.fetch_dem,
+        TaskEnum.build_climate,
+        TaskEnum.run_wepp_hillslopes,
+        TaskEnum.run_wepp_watershed,
+    )
+    _set_timestamps(runner, "stale-explicit-station", all_tasks)
+    run_dir = Path(runner.batch_runs_dir) / "stale-explicit-station"
+    base_climate = Path(runner.base_wd) / "climate.nodb"
+    leaf_climate = run_dir / "climate.nodb"
+    _write_climate_state(base_climate, observed_start_year=1985, observed_end_year=2024)
+    _write_climate_state(leaf_climate, observed_start_year=1985, observed_end_year=2024)
+    _set_climate_station_state(base_climate, mode=0, station="station-a")
+    _set_climate_station_state(leaf_climate, mode=0, station="station-b")
+
+    state = runner.classify_batch_run_state(_feature("stale-explicit-station"))
+
+    assert state["status"] == "incomplete"
+    assert state["retry_reason"] == "base_project_attributes_changed"
+    assert {
+        (change["file"], change["attribute"])
+        for change in state["base_sync_changed_attributes"]
+    } == {("climate.nodb", "_climatestation")}
 
 
 def test_run_batch_project_resyncs_base_climate_and_invalidates_downstream_timestamps(

@@ -33,6 +33,7 @@ from wepppy.nodb.core import (
     Watershed,
     Wepp,
 )
+from wepppy.nodb.core.climate import ClimateStationMode
 from wepppy.nodb.mods.openet.openet_ts import OpenET_TS
 from wepppy.nodb.mods.rap.rap_ts import RAP_TS
 from wepppy.nodb.mods.ash_transport import Ash
@@ -65,6 +66,11 @@ _BATCH_LOCK_SCOPE: Literal["effective_root_path"] = "effective_root_path"
 _BATCH_LOCK_RETRY_ATTEMPTS = 3
 _BATCH_LOCK_RETRY_SECONDS = 1.0
 _MISSING_STATE_VALUE = object()
+_CLIMATE_STATION_ATTRIBUTES = frozenset({"_climatestation", "_climatestation_mode"})
+_CURRENT_CLIMATE_STATION_MODE_TYPE = (
+    f"{ClimateStationMode.__module__}.{ClimateStationMode.__qualname__}"
+)
+_LEGACY_CLIMATE_STATION_MODE_TYPE = "wepppy.nodb.climate.ClimateStationMode"
 
 
 def _is_valid_batch_leaf_runid(runid: str) -> bool:
@@ -264,6 +270,69 @@ def _write_nodb_document(path: Path, document: Dict[str, Any]) -> None:
 
 def _json_clone(value: Any) -> Any:
     return json.loads(json.dumps(value))
+
+
+def _serialized_climate_station_mode_value(value: Any) -> Optional[int]:
+    if type(value) is int:
+        return value
+    if not isinstance(value, dict):
+        return None
+
+    reduce_payload = value.get("py/reduce")
+    if not isinstance(reduce_payload, list) or len(reduce_payload) not in {2, 5}:
+        return None
+    enum_constructor = reduce_payload[0]
+    if not isinstance(enum_constructor, dict) or set(enum_constructor) != {"py/type"}:
+        return None
+    enum_type = enum_constructor["py/type"]
+    supported_shape = (
+        enum_type == _CURRENT_CLIMATE_STATION_MODE_TYPE
+        and len(reduce_payload) == 2
+    ) or (
+        enum_type == _LEGACY_CLIMATE_STATION_MODE_TYPE
+        and len(reduce_payload) == 5
+        and all(item is None for item in reduce_payload[2:])
+    )
+    if not supported_shape:
+        return None
+    enum_args = reduce_payload[1]
+    if not isinstance(enum_args, dict) or set(enum_args) != {"py/tuple"}:
+        return None
+    tuple_payload = enum_args.get("py/tuple")
+    if not isinstance(tuple_payload, list) or len(tuple_payload) != 1:
+        return None
+    enum_value = tuple_payload[0]
+    return enum_value if type(enum_value) is int else None
+
+
+def _base_project_resync_attributes(
+    filename: str,
+    attributes: Sequence[str],
+    base_state: Mapping[str, Any],
+    run_state: Mapping[str, Any],
+) -> Tuple[str, ...]:
+    if filename != Climate.filename:
+        return tuple(attributes)
+
+    base_station = base_state.get("_climatestation", _MISSING_STATE_VALUE)
+    run_station = run_state.get("_climatestation", _MISSING_STATE_VALUE)
+    base_station_mode = _serialized_climate_station_mode_value(
+        base_state.get("_climatestation_mode", _MISSING_STATE_VALUE)
+    )
+    run_station_mode = _serialized_climate_station_mode_value(
+        run_state.get("_climatestation_mode", _MISSING_STATE_VALUE)
+    )
+    runtime_station_resolved = (
+        base_station is None
+        and base_station_mode == ClimateStationMode.FindClosestAtRuntime.value
+        and isinstance(run_station, str)
+        and bool(run_station.strip())
+        and run_station_mode == ClimateStationMode.Closest.value
+    )
+    if not runtime_station_resolved:
+        return tuple(attributes)
+
+    return tuple(attr for attr in attributes if attr not in _CLIMATE_STATION_ATTRIBUTES)
 
 
 class BatchRunner(NoDbBase):
@@ -1114,7 +1183,13 @@ class BatchRunner(NoDbBase):
                 continue
 
             file_changed = False
-            for attr in rule["attributes"]:
+            attributes = _base_project_resync_attributes(
+                filename,
+                rule["attributes"],
+                base_state,
+                run_state,
+            )
+            for attr in attributes:
                 if attr not in base_state:
                     continue
                 base_value = base_state.get(attr)
@@ -1167,7 +1242,13 @@ class BatchRunner(NoDbBase):
                 continue
 
             file_changed = False
-            for attr in rule["attributes"]:
+            attributes = _base_project_resync_attributes(
+                filename,
+                rule["attributes"],
+                base_state,
+                run_state,
+            )
+            for attr in attributes:
                 if attr not in base_state:
                     continue
                 base_value = base_state.get(attr)
