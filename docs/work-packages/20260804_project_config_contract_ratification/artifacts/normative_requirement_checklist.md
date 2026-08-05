@@ -33,7 +33,7 @@ only with `verified`, `accepted-existing`, `not-applicable`, or an acknowledged
 | --- | --- | --- | --- | --- | --- | --- |
 | N-001 | [L79](../../../schemas/project-owned-config-contract.md#L79) | PC-01 | WP02 | WP02-PC01-N001 | unit + creation fixture | owned/incomplete |
 | N-002 | [L86](../../../schemas/project-owned-config-contract.md#L86) | PC-01 | WP02 | WP02-PC01-N002 | parser round trip | owned/incomplete |
-| N-003 | [L96](../../../schemas/project-owned-config-contract.md#L96) | PC-04 | WP00A | WP00A-PC04-N003 | inventory + secret gate | owned/incomplete |
+| N-003 | [L96](../../../schemas/project-owned-config-contract.md#L96) | PC-04 | WP00A | WP00A-PC04-N003 | inventory + secret gate | verified by WP00A |
 | N-004 | [L102](../../../schemas/project-owned-config-contract.md#L102) | PC-11 | WP05 | WP05-PC11-N004 | capability resolution | owned/incomplete |
 | N-005 | [L107](../../../schemas/project-owned-config-contract.md#L107) | PC-01 | WP02 | WP02-PC01-N005 | mutation boundary test | owned/incomplete |
 | N-006 | [L119](../../../schemas/project-owned-config-contract.md#L119) | PC-14 | WP08 | WP08-PC14-N006 | API + UI integration | owned/incomplete |
@@ -122,13 +122,13 @@ only with `verified`, `accepted-existing`, `not-applicable`, or an acknowledged
 | N-089 | [L893](../../../schemas/project-owned-config-contract.md#L893) | PC-17 | WP10 | WP10-PC17-N089 | restore fallback test | owned/incomplete |
 | N-090 | [L896](../../../schemas/project-owned-config-contract.md#L896) | PC-17 | WP10 | WP10-PC17-N090 | read-only/public test | owned/incomplete |
 | N-091 | [L905](../../../schemas/project-owned-config-contract.md#L905) | PC-12 | WP06 | WP06-PC12-N091 | input allowlist/security | owned/incomplete |
-| N-092 | [L910](../../../schemas/project-owned-config-contract.md#L910) | PC-04 | WP00A | WP00A-PC04-N092 | path/secret gate | owned/incomplete |
-| N-093 | [L915](../../../schemas/project-owned-config-contract.md#L915) | PC-04 | WP00A | WP00A-PC04-N093 | sanitization work package | owned/incomplete |
+| N-092 | [L910](../../../schemas/project-owned-config-contract.md#L910) | PC-04 | WP00A | WP00A-PC04-N092 | path/secret gate | verified by WP00A |
+| N-093 | [L915](../../../schemas/project-owned-config-contract.md#L915) | PC-04 | WP00A | WP00A-PC04-N093 | sanitization work package | verified by WP00A |
 | N-094 | [L923](../../../schemas/project-owned-config-contract.md#L923) | PC-15 | WP08 | WP08-PC15-N094 | auth/worker reauth test | owned/incomplete |
 | N-095 | [L932](../../../schemas/project-owned-config-contract.md#L932) | PC-12 | WP06 | WP06-PC12-N095 | override auth/audit test | owned/incomplete |
 | N-096 | [L939](../../../schemas/project-owned-config-contract.md#L939) | PC-12 | WP06 | WP06-PC12-N096 | canonical API responses | owned/incomplete |
 | N-097 | [L958](../../../schemas/project-owned-config-contract.md#L958) | PC-12 | WP06 | WP06-PC12-N097 | CSRF boundary test | owned/incomplete |
-| N-098 | [L966](../../../schemas/project-owned-config-contract.md#L966) | PC-04 | WP00A | WP00A-PC04-N098 | writer sanitization gate | owned/incomplete |
+| N-098 | [L966](../../../schemas/project-owned-config-contract.md#L966) | PC-04 | WP00A | WP00A-PC04-N098 | writer sanitization gate | verified by WP00A; invocation retained by writer owners |
 | N-099 | [L973](../../../schemas/project-owned-config-contract.md#L973) | PC-03 | WP01 | WP01-PC03-N099 | move/symlink test | owned/incomplete |
 | N-100 | [L979](../../../schemas/project-owned-config-contract.md#L979) | PC-03 | WP01 | WP01-PC03-N100 | mixed-reader compatibility | owned/incomplete |
 | N-101 | [L991](../../../schemas/project-owned-config-contract.md#L991) | PC-18 | WP11 | WP11-PC18-N101 | Forest deployment evidence | owned/incomplete |
@@ -196,7 +196,7 @@ only with `verified`, `accepted-existing`, `not-applicable`, or an acknowledged
 | R-051 | [L1158](../../../schemas/project-owned-config-contract.md#L1158) | PC-17 | WP10 | WP10-PC17-R051 | lifecycle recovery/copy | owned/incomplete |
 | R-052 | [L1160](../../../schemas/project-owned-config-contract.md#L1160) | PC-10 | WP04 | WP04-PC10-R052 | initialization ordering | owned/incomplete |
 | R-053 | [L1161](../../../schemas/project-owned-config-contract.md#L1161) | PC-18 | WP11 | WP11-PC18-R053 | reader-before-writer | owned/incomplete |
-| R-054 | [L1163](../../../schemas/project-owned-config-contract.md#L1163) | PC-04 | WP00A | WP00A-PC04-R054 | secret materialization gate | owned/incomplete |
+| R-054 | [L1163](../../../schemas/project-owned-config-contract.md#L1163) | PC-04 | WP00A | WP00A-PC04-R054 | secret materialization gate | verified by WP00A; lifecycle invocation retained by WP10 |
 
 ## Advisory-Only Paragraph Inventory
 

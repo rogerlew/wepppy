@@ -192,6 +192,14 @@ Consolidated configuration surfaces discovered from:
 | `wepppy/nodb/configs/_defaults.toml` | — | `wepppy.nodb.base` | Default configuration seed path (`get_default_config_path()`). |
 | `wepppy/nodb/configs/legacy/*.toml` | — | `wepppy.nodb.base` | Legacy configuration basenames (`get_legacy_configs()`). |
 
+Project-owned configuration writers must call
+`wepppy.project_config_sanitization.assert_materialization_safe()` before
+publishing generated config or manifest bytes. Operators and CI can scan the
+shared source corpus, a project directory, a manifest, or a ZIP/tar archive
+with `python tools/check_project_config_secrets.py [PATH ...]`. Findings are
+redacted and the command exits nonzero when secret-bearing or runtime-host-bound
+material is present.
+
 ## Docker / Infra (Compose)
 
 | Variable | Default | Used by | Description |

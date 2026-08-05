@@ -912,6 +912,19 @@ the remaining-run controller plan has no next controller milestone.
 
 ## ✅ Done
 
+### Project Configuration Secret Sanitization (WP00A) (2026-08-05)
+
+**Completed**: 2026-08-05
+**Security impact**: `high` - dedicated review passed
+**Initiative branch**: `feature/project-owned-config` (noncanonical)
+**Link**: [docs/work-packages/20260804_project_config_secret_sanitization/](docs/work-packages/20260804_project_config_secret_sanitization/)
+
+**Outcome**: Removed seven stale `w3w_api_key` assignments from the 270-file
+shared NoDb configuration corpus. Added a redacted, fail-closed config,
+manifest, project-directory, ZIP, and tar scanner with 16 focused tests. PC-04
+is verified; WP04/WP06 and WP10 retain their planned writer/archive invocation
+evidence obligations.
+
 ### Project-Owned Configuration Contract Ratification (WP00R) (2026-08-04)
 
 **Completed**: 2026-08-04
