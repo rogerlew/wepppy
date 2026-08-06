@@ -109,3 +109,12 @@ callus or sunset action.
 - `wepppy/rq/project_rq_fork.py`
 - `wepppy/nodb/mods/omni/omni_clone_contrast_service.py`
 - `wepppy/weppcloud/utils/helpers.py`
+
+## SURF-04B Skip-Omni Reset Amendment
+
+The bounded follow-up at `../20260806_fork_skip_omni_reset/` composes this
+package's checked fork-copy boundary with SURF-04 and DOM-25A/B. When explicitly
+selected, it excludes the two collection nodes themselves and creates fresh
+destination-only Omni state instead of normalizing copied child links. The
+unchecked SURF-04A normalization contract remains unchanged, and SURF-04A is
+not reopened or advanced.

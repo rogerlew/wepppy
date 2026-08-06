@@ -1,8 +1,8 @@
 # PROJECT_TRACKER.md
 > Kanban board for wepppy work packages and vision items
 
-**Last Updated**: 2026-08-05
-**Active Packages**: 22
+**Last Updated**: 2026-08-06
+**Active Packages**: 23
 **Quick Links**: [Work Packages Directory](docs/work-packages/) | [God-Tier Prompting Strategy](docs/god-tier-prompting-strategy.md)
 
 ## Purpose
@@ -76,6 +76,19 @@ Feedback mechanisms:
 ## 📋 Backlog
 
 Work packages that are scoped but not yet started. Dependencies and prerequisites should be noted.
+
+### Fork Skip Omni Scenarios/Contrasts and Reset
+
+**Proposed**: 2026-08-06
+**Size**: Medium (3-5 focused sessions)
+**Priority**: High
+**Security impact**: `high` (public RQ input plus conditional run-tree omission
+and destination NoDb/filesystem reset; dedicated review required)
+**Link**: [docs/work-packages/20260806_fork_skip_omni_reset/](docs/work-packages/20260806_fork_skip_omni_reset/)
+**Description**: Add an opt-in fork-console checkbox that excludes Omni scenario
+and contrast child projects, then resets the destination Omni controller and
+owned directories so the fork remains coherent. Contract-first checkpoint and
+exhaustive three-boolean property coverage are required before implementation.
 
 ### Run Archive Consistency and Symlink Hardening
 
