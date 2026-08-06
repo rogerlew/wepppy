@@ -1,5 +1,6 @@
 from __future__ import annotations
 
+import hashlib
 import json
 from contextlib import contextmanager
 from pathlib import Path
@@ -656,6 +657,108 @@ def test_run_batch_project_resyncs_base_climate_and_invalidates_downstream_times
     assert timestamps == {TaskEnum.fetch_dem.value: 1}
 
 
+def test_run_batch_project_watar_only_reuses_runtime_resolved_climate_and_wepp(
+    tmp_path: Path,
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    runner = _runner(tmp_path, monkeypatch)
+    for task in runner.DEFAULT_TASKS:
+        runner._run_directives[task] = task is TaskEnum.run_watar
+
+    leaf = "watar-only-runtime-station"
+    run_dir = Path(runner.batch_runs_dir) / leaf
+    run_dir.mkdir(parents=True)
+    base_climate = Path(runner.base_wd) / "climate.nodb"
+    leaf_climate = run_dir / "climate.nodb"
+    _write_climate_state(base_climate, observed_start_year=1986, observed_end_year=2024)
+    _write_climate_state(leaf_climate, observed_start_year=1986, observed_end_year=2024)
+    _set_climate_station_state(base_climate, mode=-1, station=None)
+    _set_climate_station_state(leaf_climate, mode=0, station="or350897")
+
+    interchange = run_dir / "wepp" / "output" / "interchange"
+    interchange.mkdir(parents=True)
+    for name in ("H.pass.parquet", "H.wat.parquet", "totalwatsed3.parquet"):
+        (interchange / name).write_bytes(f"persisted-{name}".encode())
+    wepp_output = run_dir / "wepp" / "output" / "loss_pw0.out"
+    wepp_output.write_text("persisted WEPP output\n", encoding="utf-8")
+
+    original_timestamps = {
+        TaskEnum.build_climate.value: 10,
+        TaskEnum.run_wepp_hillslopes.value: 20,
+        TaskEnum.run_wepp_watershed.value: 30,
+    }
+    _FakeRedisPrep.timestamps_by_wd[str(run_dir)] = original_timestamps.copy()
+
+    def _digest(path: Path) -> str:
+        return hashlib.sha256(path.read_bytes()).hexdigest()
+
+    evidence_paths = (leaf_climate, wepp_output, *(interchange.iterdir()))
+    before = {path: _digest(path) for path in evidence_paths}
+    ash_calls: list[tuple[str, float, float]] = []
+
+    def _run_ash(fire_date: str, white_depth: float, black_depth: float) -> None:
+        ash_calls.append((fire_date, white_depth, black_depth))
+        _FakeRedisPrep.timestamps_by_wd[str(run_dir)][TaskEnum.run_watar.value] = 40
+
+    ash = SimpleNamespace(
+        fire_date="9/12",
+        ini_white_ash_depth_mm=2.5,
+        ini_black_ash_depth_mm=4.5,
+        run_ash=_run_ash,
+    )
+    climate = SimpleNamespace(is_single_storm=False)
+    wepp = SimpleNamespace(wepp_interchange_dir=str(interchange))
+    inert = SimpleNamespace()
+
+    monkeypatch.setattr(
+        batch_runner_module,
+        "get_wd",
+        lambda runid: str(Path(runner.batch_runs_dir) / runid.split(";;")[-1]),
+    )
+    monkeypatch.setattr(batch_runner_module, "_clear_batch_leaf_nodb_state", lambda *_args: ())
+    monkeypatch.setattr(
+        runner,
+        "_get_run_logger",
+        lambda _runid: batch_runner_module.logging.getLogger("test.watar_only"),
+    )
+    monkeypatch.setattr(batch_runner_module.Ron, "getInstance", lambda _wd: inert)
+    monkeypatch.setattr(batch_runner_module.Watershed, "getInstance", lambda _wd: inert)
+    monkeypatch.setattr(batch_runner_module.Landuse, "getInstance", lambda _wd: inert)
+    monkeypatch.setattr(batch_runner_module.Soils, "getInstance", lambda _wd: inert)
+    monkeypatch.setattr(batch_runner_module.Climate, "getInstance", lambda _wd: climate)
+    monkeypatch.setattr(batch_runner_module.Wepp, "getInstance", lambda _wd: wepp)
+    monkeypatch.setattr(batch_runner_module.RAP_TS, "tryGetInstance", lambda _wd: None)
+    monkeypatch.setattr(batch_runner_module.OpenET_TS, "tryGetInstance", lambda _wd: None)
+    monkeypatch.setattr(batch_runner_module.Ash, "tryGetInstance", lambda _wd: ash)
+    for helper_name in (
+        "ensure_hillslope_interchange",
+        "ensure_totalwatsed3",
+        "ensure_watershed_interchange",
+    ):
+        monkeypatch.setattr(
+            batch_runner_module,
+            helper_name,
+            lambda *_args, **_kwargs: None,
+        )
+    monkeypatch.setattr(
+        batch_runner_module,
+        "_run_with_directory_roots_lock",
+        lambda _wd, _roots, callback, *, purpose: callback(),
+    )
+
+    runner.run_batch_project(_feature(leaf))
+
+    assert ash_calls == [("9/12", 2.5, 4.5)]
+    assert {path: _digest(path) for path in evidence_paths} == before
+    assert _FakeRedisPrep.timestamps_by_wd[str(run_dir)] == {
+        **original_timestamps,
+        TaskEnum.run_watar.value: 40,
+    }
+    leaf_state = json.loads(leaf_climate.read_text(encoding="utf-8"))
+    assert leaf_state["_climatestation"] == "or350897"
+    assert leaf_state["_climatestation_mode"]["py/reduce"][1]["py/tuple"] == [0]
+
+
 def test_clear_retry_runtime_locks_uses_child_path_scope(
     tmp_path: Path,
     monkeypatch: pytest.MonkeyPatch,
@@ -1208,6 +1311,58 @@ def test_run_batch_watershed_rq_writes_success_metadata(
     assert metadata["rq_job_id"] == "job-leaf"
     assert "error" not in metadata
     assert metadata["task_status"][TaskEnum.fetch_dem.value] == 1
+
+
+def test_run_batch_watershed_rq_writes_failed_metadata_and_returns_false(
+    tmp_path: Path,
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    run_dir = tmp_path / "WA-40"
+    run_dir.mkdir(parents=True)
+    published: list[str] = []
+
+    monkeypatch.setattr(batch_rq, "get_current_job", lambda: _DummyJob("job-failed-leaf"))
+    monkeypatch.setattr(batch_rq, "get_wd", lambda _runid: str(run_dir))
+    monkeypatch.setattr(
+        batch_rq.StatusMessenger,
+        "publish",
+        lambda _channel, message: published.append(message),
+    )
+
+    class _Runner:
+        base_wd = str(tmp_path / "_base")
+        rq_job_ids: dict[str, str] = {}
+
+        def run_batch_project(self, watershed_feature, job_id=None):
+            raise RuntimeError(
+                "WATAR requires completed WEPP tasks: run_wepp_hillslopes, "
+                "run_wepp_watershed"
+            )
+
+    monkeypatch.setattr(
+        batch_rq.BatchRunner,
+        "getInstanceFromBatchName",
+        lambda _batch_name: _Runner(),
+    )
+    monkeypatch.setattr(batch_rq.RedisPrep, "getInstance", _FakeRedisPrep.getInstance)
+    _FakeRedisPrep.timestamps_by_wd[str(run_dir)] = {}
+
+    status, elapsed = batch_rq.run_batch_watershed_rq("demo", _feature("WA-40"))
+
+    assert status is False
+    assert elapsed >= 0
+    metadata = json.loads((run_dir / "run_metadata.json").read_text(encoding="utf-8"))
+    assert metadata["status"] == "failed"
+    assert metadata["error"] == {
+        "type": "RuntimeError",
+        "message": (
+            "WATAR requires completed WEPP tasks: run_wepp_hillslopes, "
+            "run_wepp_watershed"
+        ),
+    }
+    assert metadata["rq_job_id"] == "job-failed-leaf"
+    assert any("EXCEPTION_JSON" in message for message in published)
+    assert any("BATCH_WATERSHED_TASK_COMPLETED" in message for message in published)
 
 
 def test_run_batch_watershed_rq_task_status_failure_is_metadata_warning(

@@ -929,6 +929,21 @@ the remaining-run controller plan has no next controller milestone.
 
 ## ✅ Done
 
+### Batch Runner WATAR-Only Retry Correctness (2026-08-06)
+
+**Lifecycle**: In Progress -> Done (2026-08-06)
+
+**Summary**: Confirmed the existing narrow runtime-station drift fix is correct
+and added complete WATAR-only leaf-path and durable-failure regressions. A
+disposable real-artifact run produced three WATAR and five AshPost parquets
+without changing climate/WEPP hashes or prerequisite timestamps. Focused,
+NoDb, and full Python validation passed; deployment and the production batch
+retry remain separately authorized operations.
+
+**Link**: [docs/work-packages/20260806_batch_runner_watar_only_retry/](docs/work-packages/20260806_batch_runner_watar_only_retry/)
+
+---
+
 ### Batch OMNI Multi-OFE Treatment Propagation (2026-08-06)
 
 **Lifecycle**: In Progress -> Done (2026-08-06)

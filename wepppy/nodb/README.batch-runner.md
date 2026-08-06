@@ -307,6 +307,15 @@ When climate resync changes a leaf, Batch Runner clears these timestamps only: `
 
 The stage uses the Ash controller's stored fire date and initial white/black ash depths. `Ash.run_ash()` owns AshPost execution and writes the `run_watar` timestamp only after AshPost returns successfully. An AshPost aggregation with no modeled data is a successful empty result: return-period state is cleared and the Ash catalog entry is refreshed, but normal version and dataset documentation are not published. Exceptions remain retryable because the timestamp stays absent.
 
+For a WATAR-only retry, disable every build and WEPP directive and leave
+`run_watar` enabled. Batch Runner reuses the existing climate, WEPP outputs,
+and interchange parquets only when both WEPP timestamps remain present. A
+leaf-resolved station is compatible with a base configured as
+`FindClosestAtRuntime`; that derived station and `Closest` mode do not
+invalidate completed work. A material climate change still clears the WEPP and
+WATAR timestamps, so WATAR-only then fails with an actionable prerequisite
+message instead of rerunning WEPP implicitly.
+
 Ash inputs are clone-only for existing leaves. After changing Ash settings in `_base`, enable **Remove existing files** to recreate existing leaf directories with the new configuration.
 
 Candidate future resync surfaces are landuse mode/mapping selections, soils mode/selection and build knobs, and WEPP run-control knobs. Add those only with explicit tests and task invalidation rules: landuse changes invalidate `build_landuse` and WEPP/Omni downstream tasks; soils changes invalidate `build_soils` and WEPP/Omni downstream tasks; WEPP configuration changes invalidate WEPP/Omni downstream tasks. Ron/watershed changes should generally require explicit full rerun via `Remove existing files` because they can alter the leaf geometry and early DEM/channel artifacts.
@@ -367,6 +376,10 @@ Test fixture: `tests/data/batch_runner/simple.geojson` (3 Point features).
 
 - Per-watershed failures are caught and logged to `runs/<runid>/run_metadata.json` with error type, message, and timing
 - Failures emit `EXCEPTION_JSON` on the status channel but do not abort sibling jobs
+- A leaf may therefore have RQ status `finished` while its application result
+  is failed. Treat `run_metadata.json`, the final run-state summary, and
+  `BATCH_RUN_COMPLETED_WITH_FAILURES` as the Batch Runner success contract; do
+  not infer application success from RQ transport status alone.
 - The finalizer job (`_final_batch_complete_rq`) runs after all watershed jobs reach a terminal state, including failed jobs, via a failure-tolerant RQ `Dependency(allow_failure=True)`. If dependencies are already terminal when the finalizer is created, the orchestrator releases the deferred finalizer immediately so batch summaries do not remain stuck behind failed leaves.
 
 ### Known Limitations
