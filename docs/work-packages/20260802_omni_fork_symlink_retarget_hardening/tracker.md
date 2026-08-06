@@ -64,7 +64,7 @@
 - [x] Live rq-engine fork/archive smoke: fork completed in `14.8065s` with 63
   valid target-relative Omni links; 282 MB archive completed in `103.636748s`.
 - [x] Historical pre-remediation full suite: `5783 passed, 58 skipped`.
-- [ ] Current post-remediation `wctl run-pytest tests --maxfail=1`.
+- [x] Current post-remediation full suite: `5844 passed, 61 skipped`.
 - [x] Access-log amendment focused suite: `65 passed`.
 - [x] Changed broad-exception enforcement, docs lint, and `git diff --check`.
 - [x] Missing-ancestor, relative-target, and multi-mode destination evidence in

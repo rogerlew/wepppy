@@ -276,6 +276,8 @@ def _normalize_fork_omni_links(new_wd: str, *, skip_wepp_runs_output: bool = Fal
                 child_stat = os.stat(child_name, dir_fd=collection_fd, follow_symlinks=False)
                 if stat.S_ISREG(child_stat.st_mode) and child_name in _OMNI_COLLECTION_METADATA:
                     continue
+                if child_name.startswith("."):
+                    continue
                 if not stat.S_ISDIR(child_stat.st_mode):
                     raise NotADirectoryError(
                         f"Unsupported Omni {collection} child entry: {child_name}"

@@ -165,6 +165,24 @@ def test_normalize_fork_omni_links_preserves_collection_metadata(
 
 
 @pytest.mark.parametrize("collection", ["scenarios", "contrasts"])
+def test_normalize_fork_omni_links_skips_dot_prefixed_collection_entry(
+    tmp_path: Path, collection: str
+) -> None:
+    import wepppy.rq.project_rq_fork as fork_helpers
+
+    destination = tmp_path / "destination"
+    collection_dir = destination / "_pups" / "omni" / collection
+    collection_dir.mkdir(parents=True)
+    (collection_dir / "mulch_15_sbs_map").mkdir()
+    access_log = collection_dir / ".mulch_15_sbs_map"
+    payload = b"user@example.com,192.0.2.1,2026-05-18 21:37:24.524732\n"
+    access_log.write_bytes(payload)
+
+    assert fork_helpers._normalize_fork_omni_links(str(destination)) == 0
+    assert access_log.read_bytes() == payload
+
+
+@pytest.mark.parametrize("collection", ["scenarios", "contrasts"])
 def test_normalize_fork_omni_links_rejects_other_collection_regular_file(
     tmp_path: Path, collection: str
 ) -> None:
