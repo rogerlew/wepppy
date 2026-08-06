@@ -72,6 +72,7 @@ Module: `wepppy/rq/project_rq.py`
     destination-relative shared inputs. Targets are derived from link roles, so
     multi-generation forks do not retain dependencies on older runs; unrelated
     links remain unchanged and old targets are never followed or materialized.
+    Dot-prefixed collection sidecars are ignored during link normalization.
   - Publishes copy stage transitions, a replaceable elapsed-time heartbeat every 10 seconds, and bounded final summary/error tails to `<runid>:fork`.
   - When `skip_wepp_runs_output=True` (or when `undisturbify=True`), excludes `wepp/runs` and `wepp/output` from content copy, then creates those directories in the destination run.
   - Remediation in progress (SURF-04A): in that skip mode,

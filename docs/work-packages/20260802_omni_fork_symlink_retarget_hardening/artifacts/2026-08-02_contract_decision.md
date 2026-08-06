@@ -11,6 +11,12 @@ The operator directed that forks retarget symlinks, elected to retain rsync for
 wall time, and asked Codex to scaffold and execute this package. Production
 deployment and in-place repair remain separately authorized.
 
+On 2026-08-06 the operator directed fork normalization to skip legacy Omni
+access-log sidecars after production job
+`8dda9f7a-310f-4a16-8bae-501a2d0106d6` failed on
+`scenarios/.mulch_15_sbs_map`. This amends clause 6 only for dot-prefixed
+collection entries.
+
 ## Normative Contract
 
 1. Fork copy continues using `rsync -a --stats` with current exclusions,
@@ -26,12 +32,15 @@ deployment and in-place repair remain separately authorized.
 5. Unrecognized links outside the matrix remain unchanged. The `_pups`, `omni`,
    `scenarios`/`contrasts`, and immediate child entries are security ancestors,
    not unrecognized links: each must be a real directory, never a symlink or
-   special entry.
+   special entry, except dot-prefixed collection entries excluded by clause 6.
 6. Inventory accepts only immediate child names returned by descriptor-relative
    directory iteration. `.`/`..`, slash, backslash, NUL, symlinked child
    directories, and non-directory child entries are rejected, except the
    canonical regular metadata file `build_report.ndjson`, which is retained
-   unchanged. No other collection-level regular filename is allowed.
+   unchanged. Every dot-prefixed entry is ignored without regard to type
+   because legacy access logging creates these sidecars; normalization does not
+   open, follow, rewrite, or delete it. Every other collection-level
+   non-directory entry is rejected.
 7. Destination root and every ancestor are opened descriptor-relatively with
    directory and no-follow semantics. Candidate `lstat`, temporary-link
    creation, replacement, and validation use the held child directory
@@ -144,6 +153,9 @@ Legacy `.nodir` compatibility remains supported by the composite-run helper.
 Materialized expected-type entries remain unchanged. Partial failed fork
 destinations are not reused; retries allocate a fresh destination. Unrelated
 and intentionally cross-run links outside the matrix remain unchanged.
+Legacy dot-prefixed access logs are preserved but excluded from link inventory.
+This intentionally also excludes any other dot-prefixed entry from inventory;
+rsync and archive behavior are unchanged.
 
 Replacing rsync lacks benchmark support. `--copy-links` materializes data;
 `--safe-links` can silently omit it. Source-prefix replacement misses inherited
@@ -171,6 +183,8 @@ grandparent links. Rewriting every link widens disclosure/corruption risk.
 - Byte-for-byte retention of regular `build_report.ndjson` under both
   collections; rejection of another regular filename and of same-name symlink
   or special entries under both collections.
+- Byte-for-byte retention of a dot-prefixed legacy access-log sidecar under
+  both collections.
 
 Two independent read-only reviews and disposition are required before this
 documentation-only checkpoint is committed as the implementation ancestor.
