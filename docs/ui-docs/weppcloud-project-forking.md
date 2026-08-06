@@ -4,14 +4,14 @@
 > **Related:** [weppcloud-project-archiving.md](weppcloud-project-archiving.md), [controller-contract.md](controller-contract.md), [trigger-refactor.md](../mini-work-packages/completed/trigger-refactor.md)
 
 ## Introduction
-The forking system clones an existing WEPPcloud run into a new run directory. The fork console lets users submit a fork job, monitor live status output, and open the new run after the job completes and WEPPcloud confirms the destination is visible. Forking can optionally "undisturbify" the run by clearing disturbance artifacts, rebuilding landuse/soils, and rerunning WEPP.
+The forking system clones an existing WEPPcloud run into a new run directory. The fork console lets users submit a fork job, monitor live status output, and open the new run after the job completes and WEPPcloud confirms the destination is visible. Forking can optionally "undisturbify" the run by clearing disturbance artifacts, rebuilding landuse/soils, and rerunning WEPP. It can also omit Omni scenario and contrast children while resetting the destination Omni controller to fresh state.
 
 ## Fork Console UI
 Template: `wepppy/weppcloud/routes/fork_console/templates/rq-fork-console.htm`  
 Control: `wepppy/weppcloud/templates/controls/fork_console_control.htm`
 
 - Uses `control_shell` with a console-style status panel and stacktrace panel.
-- Shows source run ID (read-only), an undisturbify checkbox, a `Skip wepp/runs and wepp/output` checkbox, and submit/cancel controls.
+- Shows source run ID (read-only), an undisturbify checkbox, a `Skip wepp/runs and wepp/output` checkbox, a `Skip Omni Scenarios/Contrasts and reset controllers` checkbox, and submit/cancel controls.
 - Emits bounded stage and heartbeat updates via the `<runid>:fork` StatusStream channel only while a job is tracked.
 - Renders authoritative job status plus start/end timestamps in the status panel (`#rq_job`) via polling.
 - Replaces copy-heartbeat text in a live status region instead of appending it to the console log.
@@ -20,7 +20,7 @@ Control: `wepppy/weppcloud/templates/controls/fork_console_control.htm`
 Script: `wepppy/weppcloud/static/js/fork_console.js`
 
 - Reads run context from `data-fork-console-config` and the form.
-- Submits the fork request with `fetch` to `/rq-engine/api/runs/<runid>/<config>/fork` (form-encoded `undisturbify` + `skip_wepp_runs_output`).
+- Submits the fork request with `fetch` to `/rq-engine/api/runs/<runid>/<config>/fork` with all three option booleans.
 - Starts StatusStream on channel `fork` only after submission or session restoration and uses `controlBase` polling to keep job status authoritative:
   - `set_rq_job_id(...)` polls `/rq-engine/api/jobstatus/<job_id>` for status/started/ended timestamps.
   - Polling failures fetch `/rq-engine/api/jobinfo/<job_id>` to populate stacktraces.
@@ -46,7 +46,7 @@ Module: `wepppy/weppcloud/routes/fork_console/fork_console.py`
 
 - Blueprint name: `fork`.
 - Route:
-  - `rq_fork_console`: renders the console template, parses optional `undisturbify` and `skip_wepp_runs_output` query params, and authorizes the run.
+  - `rq_fork_console`: renders the console template, parses the three optional boolean query parameters, and authorizes the run.
   - `fork_destination_readiness`: authorizes the source and destination runs,
     verifies that the finished fork job binds those exact run IDs, and reports
     whether WEPPcloud can resolve the destination's core root NoDb state. It is
@@ -56,17 +56,17 @@ Module: `wepppy/weppcloud/routes/fork_console/fork_console.py`
 Module: `wepppy/microservices/rq_engine/fork_archive_routes.py`
 
 - `fork` (POST): queues `fork_rq` for the source run.
-  - Payload: form fields `undisturbify`, `skip_wepp_runs_output`, and optional `target_runid`.
+  - Payload: form fields `undisturbify`, `skip_wepp_runs_output`, `skip_omni_scenarios_contrasts`, and optional `target_runid`.
   - Validates permissions (run owners, admin users, public runs, or ownerless runs).
   - Session tokens that cannot resolve to an authenticated user are treated as anonymous requests (public-run checks + CAPTCHA required).
   - Allocates a new run ID via `awesome_codename` when no target is supplied.
   - Registers the new run in the user database when owner/user context is available (authenticated `user` and authenticated `session` token classes).
-  - Responds with `{ job_id, new_runid, undisturbify, skip_wepp_runs_output }`.
+  - Responds with `{ job_id, new_runid, undisturbify, skip_wepp_runs_output, skip_omni_scenarios_contrasts }`.
 
 ## RQ Jobs
 Module: `wepppy/rq/project_rq.py`
 
-- `fork_rq(runid, new_runid, undisturbify, skip_wepp_runs_output)`:
+- `fork_rq(runid, new_runid, undisturbify, skip_wepp_runs_output, skip_omni_scenarios_contrasts)`:
   - Uses `rsync -a --stats` to clone the run directory without publishing per-file or per-progress output.
   - **Remediation in progress (SURF-04A):** after rsync, normalize contract-listed legacy Omni child symlinks to
     destination-relative shared inputs. Targets are derived from link roles, so
@@ -75,6 +75,7 @@ Module: `wepppy/rq/project_rq.py`
     Dot-prefixed collection sidecars are ignored during link normalization.
   - Publishes copy stage transitions, a replaceable elapsed-time heartbeat every 10 seconds, and bounded final summary/error tails to `<runid>:fork`.
   - When `skip_wepp_runs_output=True` (or when `undisturbify=True`), excludes `wepp/runs` and `wepp/output` from content copy, then creates those directories in the destination run.
+  - When `skip_omni_scenarios_contrasts=True`, excludes exactly `_pups/omni/scenarios` and `_pups/omni/contrasts`, recreates empty real collection and aggregate directories, resets only the destination Omni controller, clears its two completion timestamps, and invalidates copied query-engine catalog/cache.
   - Remediation in progress (SURF-04A): in that skip mode,
     remove copied Omni contrast `wepp/runs` symlinks whose root targets were
     intentionally excluded; regular materialized contrast files remain

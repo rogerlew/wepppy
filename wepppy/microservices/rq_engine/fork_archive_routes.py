@@ -2,9 +2,14 @@ from __future__ import annotations
 
 import logging
 import os
+import fcntl
 import shutil
+import stat
+import time
+import uuid
 from os.path import exists as _exists
 from typing import Any, Mapping
+from contextlib import contextmanager
 
 import redis
 from fastapi import APIRouter, Request
@@ -34,10 +39,122 @@ router = APIRouter()
 
 RQ_TIMEOUT = int(os.getenv("RQ_ENGINE_RQ_TIMEOUT", "216000"))
 RQ_ENQUEUE_SCOPES = ["rq:enqueue"]
+PROFILE_FORK_CLAIM_STALE_SECONDS = 900
 
 
 def _is_profile_target_runid(runid: str) -> bool:
-    return str(runid).startswith("profile;;")
+    parts = str(runid).split(";;")
+    return len(parts) == 3 and parts[0] == "profile" and parts[1] == "fork" and bool(parts[2])
+
+
+def _profile_fork_claim_path(target_wd: str) -> str:
+    target = target_wd.rstrip("/")
+    return os.path.join(os.path.dirname(target), f".{os.path.basename(target)}.fork-claim")
+
+
+@contextmanager
+def _profile_fork_claim_lock(target_wd: str):
+    lock_path = f"{_profile_fork_claim_path(target_wd)}.lock"
+    lock_fd = os.open(lock_path, os.O_RDWR | os.O_CREAT | os.O_NOFOLLOW, 0o600)
+    try:
+        fcntl.flock(lock_fd, fcntl.LOCK_EX)
+        yield
+    finally:
+        fcntl.flock(lock_fd, fcntl.LOCK_UN)
+        os.close(lock_fd)
+
+
+def _release_profile_fork_claim(target_wd: str, job_id: str) -> None:
+    with _profile_fork_claim_lock(target_wd):
+        claim_path = _profile_fork_claim_path(target_wd)
+        try:
+            with open(claim_path, encoding="utf-8") as claim_file:
+                if claim_file.read().strip() != job_id:
+                    return
+            os.unlink(claim_path)
+        except FileNotFoundError:
+            return
+
+
+def _recover_stale_profile_fork_claim(target_wd: str) -> bool:
+    claim_path = _profile_fork_claim_path(target_wd)
+    try:
+        claim_stat = os.stat(claim_path, follow_symlinks=False)
+        if not stat.S_ISREG(claim_stat.st_mode):
+            return False
+        if time.time() - claim_stat.st_mtime < PROFILE_FORK_CLAIM_STALE_SECONDS:
+            return False
+        with open(claim_path, encoding="utf-8") as claim_file:
+            job_id = claim_file.read().strip()
+        status = _archive_job_status(job_id)
+        if status == "deferred" and _recover_terminal_deferred_fork_finalizer(job_id):
+            os.unlink(claim_path)
+            return True
+        if status in _RUNNING_ARCHIVE_JOB_STATUSES or status == _ARCHIVE_JOB_STATUS_ERROR:
+            return False
+        os.unlink(claim_path)
+        return True
+    except FileNotFoundError:
+        return True
+
+
+def _recover_terminal_deferred_fork_finalizer(job_id: str) -> bool:
+    """Cancel/reap a deferred finalizer whose prerequisites are terminal or missing."""
+    conn_kwargs = redis_connection_kwargs(RedisDB.RQ)
+    with redis.Redis(**conn_kwargs) as redis_conn:
+        try:
+            finalizer = Job.fetch(job_id, connection=redis_conn)
+        except NoSuchJobError:
+            return True
+        configured_dependency_count = len(tuple(finalizer.dependency_ids or ()))
+        if configured_dependency_count == 0:
+            return False
+        dependencies = tuple(finalizer.fetch_dependencies() or ())
+        dependency_statuses: list[str] = []
+        for dependency in dependencies:
+            raw_status = dependency.get_status(refresh=True)
+            dependency_statuses.append(
+                str(getattr(raw_status, "value", raw_status)).lower()
+            )
+        dependency_statuses.extend(
+            "missing" for _ in range(configured_dependency_count - len(dependencies))
+        )
+        terminal = {"finished", "failed", "canceled", "cancelled", "stopped", "missing"}
+        if not all(status in terminal for status in dependency_statuses):
+            return False
+        finalizer.cancel(enqueue_dependents=False)
+        source_runid = str(finalizer.meta.get("fork_source_runid") or "").strip()
+        if source_runid:
+            StatusMessenger.publish(
+                f"{source_runid}:fork",
+                f"rq:{job_id} TRIGGER   fork FORK_FAILED",
+            )
+        return True
+
+
+async def _strict_request_boolean(request: Request, field: str) -> bool:
+    content_type = request.headers.get("content-type", "").lower()
+    if "application/json" in content_type:
+        raw = await request.json()
+        if not isinstance(raw, dict) or field not in raw:
+            return False
+        value = raw[field]
+        if not isinstance(value, bool):
+            raise ValueError(field)
+        return value
+
+    form = await request.form()
+    values = form.getlist(field)
+    if not values:
+        return False
+    if len(values) != 1 or not isinstance(values[0], str):
+        raise ValueError(field)
+    token = values[0].strip().lower()
+    if token in {"1", "true", "yes", "on"}:
+        return True
+    if token in {"0", "false", "no", "off"}:
+        return False
+    raise ValueError(field)
 
 
 def _resolve_bearer_claims(request: Request) -> Mapping[str, Any] | None:
@@ -228,6 +345,10 @@ def _verify_cap_token(request: Request, token: str) -> None:
     ),
 )
 async def fork_project(runid: str, config: str, request: Request) -> JSONResponse:
+    profile_claimed = False
+    profile_claim_handed_off = False
+    fork_job_id = ""
+    new_wd = ""
     try:
         claims = _resolve_bearer_claims(request)
         if claims is not None:
@@ -262,6 +383,18 @@ async def fork_project(runid: str, config: str, request: Request) -> JSONRespons
         if claims is None or is_anonymous_session:
             _ensure_anonymous_access(runid, wd)
 
+        try:
+            skip_omni_scenarios_contrasts = await _strict_request_boolean(
+                request,
+                "skip_omni_scenarios_contrasts",
+            )
+        except (ValueError, TypeError):
+            return error_response(
+                "Invalid skip_omni_scenarios_contrasts",
+                status_code=400,
+                code="validation_error",
+            )
+
         payload = await parse_request_payload(
             request,
             boolean_fields={"undisturbify", "skip_wepp_runs_output"},
@@ -281,6 +414,17 @@ async def fork_project(runid: str, config: str, request: Request) -> JSONRespons
                 requested_wd = get_wd(requested_runid, prefer_active=False)
             except ValueError:
                 return error_response("Invalid target_runid", status_code=400, code="validation_error")
+            if requested_runid.startswith("profile;;") and not _is_profile_target_runid(requested_runid):
+                return error_response("Invalid target_runid", status_code=400, code="validation_error")
+            if _is_profile_target_runid(requested_runid) and (claims is None or is_anonymous_session):
+                return error_response("Profile fork targets require authentication", status_code=403, code="forbidden")
+            if _is_profile_target_runid(requested_runid):
+                profile_root = os.path.realpath(
+                    os.path.dirname(get_wd("profile;;fork;;__root_probe__", prefer_active=False))
+                )
+                resolved_target = os.path.realpath(requested_wd)
+                if os.path.dirname(resolved_target) != profile_root:
+                    return error_response("Invalid target_runid", status_code=400, code="validation_error")
 
         if claims is None or is_anonymous_session:
             cap_token = payload.get("cap_token", "")
@@ -312,7 +456,34 @@ async def fork_project(runid: str, config: str, request: Request) -> JSONRespons
                     continue
                 dir_created = True
 
+        fork_job_id = uuid.uuid4().hex
         if requested_runid:
+            if _is_profile_target_runid(new_runid):
+                parent_dir = os.path.dirname(new_wd.rstrip("/"))
+                os.makedirs(parent_dir, exist_ok=True)
+                claim_path = _profile_fork_claim_path(new_wd)
+                with _profile_fork_claim_lock(new_wd):
+                    for attempt in range(2):
+                        try:
+                            claim_fd = os.open(
+                                claim_path,
+                                os.O_WRONLY | os.O_CREAT | os.O_EXCL | os.O_NOFOLLOW,
+                                0o600,
+                            )
+                            break
+                        except FileExistsError:
+                            if attempt == 0 and _recover_stale_profile_fork_claim(new_wd):
+                                continue
+                            return error_response(
+                                "target_runid is already being prepared",
+                                status_code=409,
+                                code="conflict",
+                            )
+                with os.fdopen(claim_fd, "w", encoding="utf-8") as claim_file:
+                    claim_file.write(fork_job_id)
+                    claim_file.flush()
+                    os.fsync(claim_file.fileno())
+                profile_claimed = True
             if _exists(new_wd):
                 if not _is_profile_target_runid(new_runid):
                     return error_response(
@@ -325,6 +496,9 @@ async def fork_project(runid: str, config: str, request: Request) -> JSONRespons
             if parent_dir:
                 os.makedirs(parent_dir, exist_ok=True)
             os.makedirs(new_wd, exist_ok=True)
+            if profile_claimed:
+                with open(os.path.join(new_wd, ".redisprep-run-id"), "x", encoding="utf-8") as namespace_file:
+                    namespace_file.write(new_runid)
         else:
             if _exists(new_wd):
                 raise RuntimeError(f"Run directory already exists: {new_wd}")
@@ -418,13 +592,23 @@ async def fork_project(runid: str, config: str, request: Request) -> JSONRespons
             q = Queue(FORK_ARCHIVE_QUEUE, connection=redis_conn)
             job = q.enqueue_call(
                 fork_rq,
-                (runid, new_runid, undisturbify, skip_wepp_runs_output),
+                (
+                    runid,
+                    new_runid,
+                    undisturbify,
+                    skip_wepp_runs_output,
+                    skip_omni_scenarios_contrasts,
+                ),
                 timeout=RQ_TIMEOUT,
+                job_id=fork_job_id,
             )
+            profile_claim_handed_off = profile_claimed
             prep.set_rq_job_id("fork_rq", job.id)
     except AuthError as exc:
         return error_response(exc.message, status_code=exc.status_code, code=exc.code)
     except Exception:
+        if profile_claimed and not profile_claim_handed_off:
+            _release_profile_fork_claim(new_wd, fork_job_id)
         logger.exception("rq-engine fork failed")
         return error_response_with_traceback("Error forking project", status_code=500)
 
@@ -434,6 +618,7 @@ async def fork_project(runid: str, config: str, request: Request) -> JSONRespons
             "new_runid": new_runid,
             "undisturbify": undisturbify,
             "skip_wepp_runs_output": skip_wepp_runs_output,
+            "skip_omni_scenarios_contrasts": skip_omni_scenarios_contrasts,
         }
     )
 

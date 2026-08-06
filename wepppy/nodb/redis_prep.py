@@ -4,6 +4,7 @@ from __future__ import annotations
 
 import json
 import os
+import stat
 import time
 from enum import Enum
 from os.path import exists as _exists
@@ -147,7 +148,20 @@ class RedisPrep:
         self.cfg_fn = cfg_fn
         self.redis = redis_client(RedisDB.LOCK, decode_responses=True)
         parent, run_id = _split(wd.rstrip('/'))
-        self.run_id = run_id
+        namespace_path = _join(wd, '.redisprep-run-id')
+        if _exists(namespace_path):
+            namespace_stat = os.lstat(namespace_path)
+            if not stat.S_ISREG(namespace_stat.st_mode):
+                raise ValueError(f'Invalid RedisPrep profile namespace file: {namespace_path}')
+            namespace_fd = os.open(namespace_path, os.O_RDONLY | os.O_NOFOLLOW)
+            with os.fdopen(namespace_fd, encoding='utf-8') as namespace_file:
+                profile_run_id = namespace_file.read().strip()
+            parts = profile_run_id.split(';;')
+            if len(parts) != 3 or parts[:2] != ['profile', 'fork'] or not parts[2]:
+                raise ValueError(f'Invalid RedisPrep profile namespace: {profile_run_id!r}')
+            self.run_id = profile_run_id
+        else:
+            self.run_id = run_id
         if not _exists(self.dump_filepath):
             self._set_bool_config('loaded', True)
 

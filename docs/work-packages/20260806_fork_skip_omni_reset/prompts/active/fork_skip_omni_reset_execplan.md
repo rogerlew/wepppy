@@ -28,10 +28,16 @@ is unchanged. Leaving the box unchecked behaves exactly as today.
   COR-03 and SEC-01 through SEC-07; zero medium/high findings remain.
 - [x] (2026-08-06 UTC) Ratified and committed standalone contract-first
   checkpoint `82e47916f`.
-- [ ] Implement the UI/API/RQ field without changing existing defaults.
-- [ ] Implement exact copy exclusion and one bounded destination reset operation.
-- [ ] Add exhaustive property and integration evidence.
-- [ ] Complete documentation, full validation, and independent final reviews.
+- [x] (2026-08-06 UTC) Implemented the default-false UI/API/RQ field through
+  render, serialization, schema, response, enqueue, worker, and readiness.
+- [x] (2026-08-06 UTC) Implemented exact copy exclusions and bounded,
+  destination-rooted Omni/query/RedisPrep reset operations.
+- [x] (2026-08-06 UTC) Added exhaustive three-boolean command/render evidence,
+  strict response/default checks, reset invariants, live-lock refusal, and
+  malicious symlink external-sentinel tests.
+- [x] (2026-08-06 UTC) Completed documentation, focused/backend/frontend gates,
+  RQ graph, broad-exception enforcement, three independent final PASS reviews,
+  and the full repository sweep (`5891 passed, 61 skipped`).
 
 ## Surprises & Discoveries
 
@@ -50,6 +56,11 @@ is unchanged. Leaving the box unchecked behaves exactly as today.
   copied symlink/special entries, and profile destination helpers can resolve
   different roots.
   Evidence: checkpoint security findings SEC-01, SEC-02, and SEC-05.
+- Observation: profile fork paths share a leaf basename with ordinary runs,
+  while legacy RedisPrep keys only by basename; RQ also leaves canceled
+  dependents deferred and filters expired dependencies from
+  `fetch_dependencies()`.
+  Evidence: final correctness, QA, and security review findings.
 
 ## Decision Log
 
@@ -95,12 +106,21 @@ is unchanged. Leaving the box unchecked behaves exactly as today.
   Rationale: copied nodes and concurrent writers must not redirect or race a
   public fork reset.
   Date/Author: 2026-08-06, security review disposition.
+- Decision: isolate profile RedisPrep with an additive destination marker and
+  serialize profile destination ownership with a persistent per-target claim
+  lock transferred through the failure-tolerant terminal finalizer.
+  Rationale: basename collision, concurrent replacement, canceled work, and
+  expired dependency records must not mutate a source namespace or strand a
+  destination.
+  Date/Author: 2026-08-06, final review disposition.
 
 ## Outcomes & Retrospective
 
-Scaffolding is complete. No production implementation has started. Closure
-requires a coherent checked fork, exact unchecked compatibility, and observable
-source immutability.
+The contract checkpoint and implementation are complete. Focused backend
+(`428 passed`), frontend (`105` suites / `756` tests), and full repository
+(`5891 passed, 61 skipped`) evidence passes. All three independent final
+reviews report zero medium/high findings. Residual debt is limited to real
+Redis/RQ recovery integration coverage beyond the current focused stubs.
 
 ## Context and Orientation
 
@@ -250,6 +270,17 @@ plan. Store dedicated security findings in
 `artifacts/2026-08-06_security_review.md`.
 
 ## Interfaces and Dependencies
+
+Compatibility note for profile destinations: profile fork paths share their
+leaf name with ordinary runs, while legacy `RedisPrep` uses only that leaf as
+its Redis hash key.  The implementation therefore adds a destination-local,
+additive `.redisprep-run-id` marker containing the full profile run ID.  Legacy
+runs without the marker retain basename lookup, and generated fork artifacts
+carry the marker so later workers resolve the isolated namespace.  Focused
+tests must prove both legacy fallback and profile isolation.  A sibling
+exclusive claim file owns profile destination replacement from API preparation
+through worker completion; this file is not part of the run artifact and is
+removed only by its owning job.
 
 The final public field is:
 

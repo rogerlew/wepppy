@@ -6,6 +6,13 @@
 
 ## Overview
 
+`Omni.reset_for_fork()` is the controller-owned reset used by checked fork
+jobs. It preserves destination identity and configuration while restoring all
+persisted Omni-owned fields to fresh-controller state in one canonical
+lock/dump transaction. Fork orchestration separately recreates empty child and
+aggregate directories; the operation never mutates the source controller and
+does not rebuild Omni outputs.
+
 Omni helps land managers and hydrologists answer critical post-fire planning questions:
 
 - **"What if we apply mulch at 1 ton/acre to high-severity burned areas?"**

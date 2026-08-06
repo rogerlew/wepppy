@@ -11,7 +11,8 @@ emitting status updates for the front-end while coordinating NoDb controllers.
 import errno
 import base64
 import copy
-from contextlib import ExitStack
+from contextlib import ExitStack, contextmanager
+import fcntl
 import hashlib
 import inspect
 import logging
@@ -76,6 +77,7 @@ from wepppy.topo.wbt import (
     WbtUnresolvedDepressionsError,
 )
 from wepppy.nodb.mods.disturbed import Disturbed
+from wepppy.nodb.mods.omni import Omni
 from wepppy.nodb.mods.ash_transport import Ash
 from wepppy.nodb.mods.debris_flow import DebrisFlow
 from wepppy.nodb.mods.rangeland_cover import RangelandCover
@@ -2570,13 +2572,27 @@ def run_rhem_rq(runid: str, *, payload: Optional[Mapping[str, Any]] = None) -> N
 # see docs/ui-docs/weppcloud-project-forking.md for fork console + backend architecture
 
 @with_exception_logging
-def _finish_fork_rq(runid: str) -> None:
+def _finish_fork_rq(
+    runid: str,
+    fork_target_runid: str | None = None,
+    dependency_job_id: str | None = None,
+) -> None:
     """Emit fork completion messages once dependent jobs finish."""
+    func_name = "_finish_fork_rq"
+    status_channel = f'{runid}:fork'
     try:
         job = get_current_job()
         wd = get_wd(runid)
-        func_name = inspect.currentframe().f_code.co_name
-        status_channel = f'{runid}:fork'
+        if fork_target_runid:
+            target_wd = _resolve_fork_destination_wd(fork_target_runid)
+            _verify_profile_fork_claim(fork_target_runid, target_wd, job.id)
+        if dependency_job_id:
+            dependency_job = Job.fetch(dependency_job_id, connection=job.connection)
+            dependency_status = dependency_job.get_status(refresh=True)
+            if dependency_status not in {JobStatus.FINISHED, JobStatus.FINISHED.value}:
+                raise RuntimeError(
+                    f"Fork WEPP dependency {dependency_job_id} ended as {dependency_status}"
+                )
         StatusMessenger.publish(status_channel, 'Running WEPP... done\n')
         StatusMessenger.publish(status_channel, f'rq:{job.id} COMPLETED {func_name}({runid})')
         StatusMessenger.publish(status_channel, f'rq:{job.id} TRIGGER   fork FORK_COMPLETE')
@@ -2586,19 +2602,33 @@ def _finish_fork_rq(runid: str) -> None:
         StatusMessenger.publish(status_channel, f'rq:{job.id} EXCEPTION {func_name}({runid})')
         StatusMessenger.publish(status_channel, f'rq:{job.id} TRIGGER   fork FORK_FAILED')
         raise
+    finally:
+        if fork_target_runid:
+            target_wd = _resolve_fork_destination_wd(fork_target_runid)
+            _release_profile_fork_claim(
+                fork_target_runid,
+                target_wd,
+                job.id,
+            )
 
 
-def _reset_forked_run_job_markers(new_runid: str, new_wd: str, status_channel: str) -> None:
+def _reset_forked_run_job_markers(
+    new_runid: str,
+    new_wd: str,
+    status_channel: str,
+    *,
+    reset_redisprep: bool = True,
+) -> None:
     """Clear inherited async job markers from a newly forked run."""
     StatusMessenger.publish(status_channel, "Clearing inherited job markers...\n")
 
-    clear_nodb_file_cache(new_runid, pup_relpath="wepp.nodb")
+    clear_nodb_file_cache(new_runid, pup_relpath="wepp.nodb", wd_override=new_wd)
     clear_locks(new_runid, pup_relpath="wepp.nodb")
     wepp = Wepp.tryGetInstance(new_wd)
     if wepp is not None:
         wepp.persist_job_hint(job_id=None, job_key=None)
 
-    prep = RedisPrep.tryGetInstance(new_wd)
+    prep = RedisPrep.tryGetInstance(new_wd) if reset_redisprep else None
     if prep is not None:
         queued_job_keys = tuple(prep.get_rq_job_ids().keys())
         for key in queued_job_keys:
@@ -2612,37 +2642,186 @@ def _reset_forked_run_job_markers(new_runid: str, new_wd: str, status_channel: s
     StatusMessenger.publish(status_channel, "Clearing inherited job markers... done.\n")
 
 
+def _reset_forked_omni(new_runid: str, new_wd: str, status_channel: str) -> None:
+    """Reset destination-only Omni controller and lifecycle metadata."""
+    StatusMessenger.publish(status_channel, "Resetting forked Omni state...\n")
+    clear_nodb_file_cache(new_runid, pup_relpath="omni.nodb", wd_override=new_wd)
+    omni = Omni.getInstance(new_wd)
+    omni.reset_for_fork()
+    clear_nodb_file_cache(new_runid, pup_relpath="omni.nodb", wd_override=new_wd)
+    Omni.load_detached(new_wd)
+
+    redisprep_payload = _fork_helpers._rewrite_fork_redisprep_dump(new_wd)
+    prep = RedisPrep(new_wd)
+    prep.redis.delete(prep.run_id)
+    for key, value in redisprep_payload.items():
+        prep.redis.hset(prep.run_id, key, value)
+
+    _fork_helpers._reset_fork_omni_directories(new_wd)
+    _fork_helpers._clear_query_engine_catalog_cache(
+        new_wd,
+        status_channel=status_channel,
+        publish_status=StatusMessenger.publish,
+    )
+    StatusMessenger.publish(status_channel, "Resetting forked Omni state... done.\n")
+
+
+def _resolve_fork_destination_wd(target_runid: str) -> str:
+    if target_runid.startswith("profile;;"):
+        parts = target_runid.split(";;")
+        if len(parts) != 3 or parts[:2] != ["profile", "fork"] or not parts[2]:
+            raise ValueError(f"Invalid profile fork target: {target_runid}")
+        target_wd = get_wd(target_runid, prefer_active=False)
+        profile_root = os.path.realpath(
+            os.path.dirname(get_wd("profile;;fork;;__root_probe__", prefer_active=False))
+        )
+        resolved_target = os.path.realpath(target_wd)
+        if os.path.dirname(resolved_target) != profile_root:
+            raise ValueError(f"Profile fork target escaped its root: {target_runid}")
+        return resolved_target
+    return get_primary_wd(target_runid)
+
+
+def _profile_fork_claim_path(target_wd: str) -> str:
+    target = target_wd.rstrip("/")
+    return os.path.join(os.path.dirname(target), f".{os.path.basename(target)}.fork-claim")
+
+
+@contextmanager
+def _profile_fork_claim_lock(target_wd: str):
+    lock_path = f"{_profile_fork_claim_path(target_wd)}.lock"
+    lock_fd = os.open(lock_path, os.O_RDWR | os.O_CREAT | os.O_NOFOLLOW, 0o600)
+    try:
+        fcntl.flock(lock_fd, fcntl.LOCK_EX)
+        yield
+    finally:
+        fcntl.flock(lock_fd, fcntl.LOCK_UN)
+        os.close(lock_fd)
+
+
+def _verify_profile_fork_claim(target_runid: str, target_wd: str, job_id: str) -> None:
+    if not target_runid.startswith("profile;;"):
+        return
+    with _profile_fork_claim_lock(target_wd):
+        with open(_profile_fork_claim_path(target_wd), encoding="utf-8") as claim_file:
+            if claim_file.read().strip() != job_id:
+                raise RuntimeError(f"Fork destination is not owned by job {job_id}")
+
+
+def _release_profile_fork_claim(target_runid: str, target_wd: str, job_id: str) -> None:
+    if not target_runid.startswith("profile;;"):
+        return
+    with _profile_fork_claim_lock(target_wd):
+        claim_path = _profile_fork_claim_path(target_wd)
+        try:
+            with open(claim_path, encoding="utf-8") as claim_file:
+                if claim_file.read().strip() != job_id:
+                    return
+            os.unlink(claim_path)
+        except FileNotFoundError:
+            return
+
+
+def _transfer_profile_fork_claim(
+    target_runid: str,
+    target_wd: str,
+    current_job_id: str,
+    next_job_id: str,
+) -> None:
+    if not target_runid.startswith("profile;;"):
+        return
+    with _profile_fork_claim_lock(target_wd):
+        claim_path = _profile_fork_claim_path(target_wd)
+        with open(claim_path, encoding="utf-8") as claim_file:
+            if claim_file.read().strip() != current_job_id:
+                raise RuntimeError(f"Fork destination is not owned by job {current_job_id}")
+        temp_path = os.path.join(
+            os.path.dirname(claim_path),
+            f".{os.path.basename(claim_path)}.{os.getpid()}.tmp",
+        )
+        temp_fd = os.open(temp_path, os.O_WRONLY | os.O_CREAT | os.O_EXCL | os.O_NOFOLLOW, 0o600)
+        try:
+            payload = next_job_id.encode("utf-8")
+            written = 0
+            while written < len(payload):
+                count = os.write(temp_fd, payload[written:])
+                if count <= 0:
+                    raise OSError("Short write while transferring fork claim")
+                written += count
+            os.fsync(temp_fd)
+        finally:
+            os.close(temp_fd)
+        try:
+            os.replace(temp_path, claim_path)
+        finally:
+            try:
+                os.unlink(temp_path)
+            except FileNotFoundError:
+                pass
+
+
+def _release_failure_tolerant_fork_finalizer(queue: Queue, finalizer_job: Job) -> None:
+    if finalizer_job.get_status(refresh=True) != JobStatus.DEFERRED:
+        return
+    if not finalizer_job.dependencies_are_met():
+        return
+    DeferredJobRegistry(queue=queue).remove(finalizer_job)
+    queue._enqueue_job(finalizer_job)
+
+
 @with_exception_logging
 def fork_rq(
     runid: str,
     new_runid: str,
     undisturbify: bool = False,
     skip_wepp_runs_output: bool = False,
+    skip_omni_scenarios_contrasts: bool = False,
 ) -> None:
     job = get_current_job()
     func_name = inspect.currentframe().f_code.co_name
     status_channel = f'{runid}:fork'
 
+    new_wd = ""
+    profile_claim_deferred = False
     try:
+        new_wd = _resolve_fork_destination_wd(new_runid)
+        _verify_profile_fork_claim(new_runid, new_wd, job.id)
         StatusMessenger.publish(
             status_channel, f'rq:{job.id} STARTED {func_name}({runid})'
         )
         StatusMessenger.publish(status_channel, f'undisturbify: {undisturbify}')
         StatusMessenger.publish(status_channel, f'skip_wepp_runs_output: {skip_wepp_runs_output}')
+        if skip_omni_scenarios_contrasts:
+            StatusMessenger.publish(status_channel, 'skip_omni_scenarios_contrasts: True')
 
         def _initialize_ttl(wd: str) -> None:
             from wepppy.weppcloud.utils.run_ttl import initialize_ttl
             initialize_ttl(wd)
+
+        def _fork_rsync_command(
+            run_right: str,
+            fork_undisturbify: bool,
+            fork_skip_wepp: bool,
+            fork_skip_omni: bool = False,
+        ) -> list[str]:
+            kwargs = {
+                "undisturbify": fork_undisturbify,
+                "skip_wepp_runs_output": fork_skip_wepp,
+            }
+            if fork_skip_omni:
+                kwargs["skip_omni_scenarios_contrasts"] = True
+            return _build_fork_rsync_cmd(run_right, **kwargs)
 
         new_wd = _fork_helpers.prepare_fork_run(
             runid,
             new_runid,
             undisturbify=undisturbify,
             skip_wepp_runs_output=skip_wepp_runs_output,
+            skip_omni_scenarios_contrasts=skip_omni_scenarios_contrasts,
             status_channel=status_channel,
             publish_status=StatusMessenger.publish,
             get_wd=get_wd,
-            get_primary_wd=get_primary_wd,
+            get_primary_wd=_resolve_fork_destination_wd,
             wait_for_paths=wait_for_paths,
             ron_cls=Ron,
             disturbed_cls=Disturbed,
@@ -2650,14 +2829,19 @@ def fork_rq(
             soils_cls=Soils,
             initialize_ttl=_initialize_ttl,
             format_ttl_failure=lambda exc: f'rq:{job.id} STATUS TTL initialization failed ({exc})',
-            build_rsync_cmd=lambda run_right, _undisturbify, _skip_wepp_runs_output: _build_fork_rsync_cmd(
-                run_right,
-                undisturbify=_undisturbify,
-                skip_wepp_runs_output=_skip_wepp_runs_output,
-            ),
+            build_rsync_cmd=_fork_rsync_command,
             clean_env_for_system_tools=_clean_env_for_system_tools,
         )
-        _reset_forked_run_job_markers(new_runid, new_wd, status_channel)
+        if skip_omni_scenarios_contrasts:
+            _reset_forked_omni(new_runid, new_wd, status_channel)
+            _reset_forked_run_job_markers(
+                new_runid,
+                new_wd,
+                status_channel,
+                reset_redisprep=False,
+            )
+        else:
+            _reset_forked_run_job_markers(new_runid, new_wd, status_channel)
 
         if undisturbify:
             StatusMessenger.publish(status_channel, 'Rerunning WEPP...\n')
@@ -2666,11 +2850,44 @@ def fork_rq(
             conn_kwargs = redis_connection_kwargs(RedisDB.RQ)
             with redis.Redis(**conn_kwargs) as redis_conn:
                 q = Queue(connection=redis_conn)
-                q.enqueue(
-                    _finish_fork_rq,
-                    args=[runid],
-                    depends_on=final_wepp_job,
+                finalizer_job_id = uuid.uuid4().hex
+                _transfer_profile_fork_claim(
+                    new_runid,
+                    new_wd,
+                    job.id,
+                    finalizer_job_id,
                 )
+                finalizer_enqueued = False
+                try:
+                    finalizer_job = q.enqueue(
+                        _finish_fork_rq,
+                        args=[runid, new_runid, final_wepp_job.id],
+                        depends_on=Dependency(
+                            jobs=[final_wepp_job.id],
+                            allow_failure=True,
+                        ),
+                        job_id=finalizer_job_id,
+                        meta={"fork_source_runid": runid},
+                    )
+                    finalizer_enqueued = True
+                    profile_claim_deferred = new_runid.startswith("profile;;")
+                    try:
+                        _release_failure_tolerant_fork_finalizer(q, finalizer_job)
+                    except (redis.RedisError, InvalidJobOperation, NoSuchJobError):
+                        logging.getLogger(__name__).warning(
+                            "Could not eagerly release fork finalizer %s; stale-claim recovery remains active",
+                            finalizer_job_id,
+                            exc_info=True,
+                        )
+                finally:
+                    if not finalizer_enqueued:
+                        _transfer_profile_fork_claim(
+                            new_runid,
+                            new_wd,
+                            finalizer_job_id,
+                            final_wepp_job.id,
+                        )
+                        profile_claim_deferred = new_runid.startswith("profile;;")
         else:
             StatusMessenger.publish(status_channel, f'rq:{job.id} COMPLETED {func_name}({runid})')
             StatusMessenger.publish(status_channel, f'rq:{job.id} TRIGGER   fork FORK_COMPLETE')
@@ -2681,6 +2898,9 @@ def fork_rq(
         StatusMessenger.publish(status_channel, f'rq:{job.id} EXCEPTION {func_name}({runid})')
         StatusMessenger.publish(status_channel, f'rq:{job.id} TRIGGER   fork FORK_FAILED')
         raise
+    finally:
+        if new_wd and not profile_claim_deferred:
+            _release_profile_fork_claim(new_runid, new_wd, job.id)
 
 
 @with_exception_logging

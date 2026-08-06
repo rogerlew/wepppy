@@ -166,7 +166,7 @@
     "notes": [],
     "queue_name": "fork-archive",
     "source_function": "archive_run",
-    "source_lineno": 502,
+    "source_lineno": 687,
     "source_module": "wepppy/microservices/rq_engine/fork_archive_routes.py"
   },
   {
@@ -176,7 +176,7 @@
     "notes": [],
     "queue_name": "fork-archive",
     "source_function": "fork_project",
-    "source_lineno": 419,
+    "source_lineno": 593,
     "source_module": "wepppy/microservices/rq_engine/fork_archive_routes.py"
   },
   {
@@ -186,7 +186,7 @@
     "notes": [],
     "queue_name": "fork-archive",
     "source_function": "restore_archive",
-    "source_lineno": 573,
+    "source_lineno": 758,
     "source_module": "wepppy/microservices/rq_engine/fork_archive_routes.py"
   },
   {
@@ -610,7 +610,7 @@
     "notes": [],
     "queue_name": "default",
     "source_function": "_enqueue_serial_subcatchment_tree",
-    "source_lineno": 722,
+    "source_lineno": 724,
     "source_module": "wepppy/rq/project_rq.py"
   },
   {
@@ -622,7 +622,7 @@
     "notes": [],
     "queue_name": "default",
     "source_function": "_enqueue_serial_subcatchment_tree",
-    "source_lineno": 730,
+    "source_lineno": 732,
     "source_module": "wepppy/rq/project_rq.py"
   },
   {
@@ -632,7 +632,7 @@
     "notes": [],
     "queue_name": "default",
     "source_function": "fetch_dem_and_build_channels_rq",
-    "source_lineno": 1539,
+    "source_lineno": 1541,
     "source_module": "wepppy/rq/project_rq.py"
   },
   {
@@ -642,7 +642,7 @@
     "notes": [],
     "queue_name": "default",
     "source_function": "fetch_dem_and_build_channels_rq",
-    "source_lineno": 1555,
+    "source_lineno": 1557,
     "source_module": "wepppy/rq/project_rq.py"
   },
   {
@@ -654,19 +654,19 @@
     "notes": [],
     "queue_name": "default",
     "source_function": "fetch_dem_and_build_channels_rq",
-    "source_lineno": 1563,
+    "source_lineno": 1565,
     "source_module": "wepppy/rq/project_rq.py"
   },
   {
     "depends_on": [
-      "final_wepp_job"
+      "Dependency(jobs=[final_wepp_job.id], allow_failure=True)"
     ],
     "enqueue_target": "_finish_fork_rq",
     "job_meta_stage": null,
     "notes": [],
     "queue_name": "default",
     "source_function": "fork_rq",
-    "source_lineno": 2669,
+    "source_lineno": 2862,
     "source_module": "wepppy/rq/project_rq.py"
   },
   {

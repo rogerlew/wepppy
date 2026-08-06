@@ -23,6 +23,34 @@ def _noop_lock():
     yield
 
 
+def test_reset_for_fork_restores_complete_fresh_omni_state(omni_module, monkeypatch):
+    fresh = omni_module.Omni.__new__(omni_module.Omni)
+    fresh._reset_omni_owned_state()
+
+    omni = omni_module.Omni.__new__(omni_module.Omni)
+    omni.wd = "/runs/destination"
+    omni.locked = _noop_lock
+    omni._scenarios = [{"type": "thinning"}]
+    omni._contrast_names = ["copied"]
+    omni._contrast_labels = {"copied": "Copied"}
+    omni._contrast_pairs = [{"control": "a", "contrast": "b"}]
+    omni._scenario_dependency_tree = {"copied": {}}
+    omni._contrast_dependency_tree = {"copied": {}}
+    omni._scenario_run_state = [{"scenario": "copied"}]
+    omni._use_rq_job_pool_concurrency = False
+    omni._scenario_legacy_optional = "remove"
+    durable = omni_module.Omni.__new__(omni_module.Omni)
+    durable.__dict__.update(omni.__dict__)
+    monkeypatch.setattr(omni_module.Omni, "load_detached", lambda wd: durable)
+
+    omni.reset_for_fork()
+
+    for key, value in fresh.__dict__.items():
+        assert omni.__dict__[key] == value
+    assert "_use_rq_job_pool_concurrency" not in omni.__dict__
+    assert "_scenario_legacy_optional" not in omni.__dict__
+
+
 class Rect:
     def __init__(self, xmin, ymin, xmax, ymax):
         self.xmin = xmin

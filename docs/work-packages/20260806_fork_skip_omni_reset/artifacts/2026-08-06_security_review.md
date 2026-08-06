@@ -6,8 +6,8 @@
 - **Reviewer**: independent security reviewer agent
 - **Date**: 2026-08-06
 - **Scope reviewed**: fork UI/API/RQ input, rsync exclusion, destination Omni
-  reset, NoDb cache/locks, source/destination run-tree containment
-- **Commit/branch context**: `master`; implementation not started
+  reset, NoDb cache/locks, profile ownership, and run-tree containment
+- **Commit/branch context**: `master`; implementation and final review complete
 
 ## Security Triage Decision
 
@@ -22,21 +22,21 @@
 
 ## Required Surface Checks
 
-- [ ] Boolean parsing cannot introduce arbitrary paths or modes.
-- [ ] Exclusions are anchored to the two exact destination-relative collections.
-- [ ] Reset never follows a source or destination symlink outside the run root.
-- [ ] Source model/Omni state, Omni timestamps, query-engine data, and all
+- [x] Boolean parsing cannot introduce arbitrary paths or modes.
+- [x] Exclusions are anchored to the two exact destination-relative collections.
+- [x] Reset never follows a source or destination symlink outside the run root.
+- [x] Source model/Omni state, Omni timestamps, query-engine data, and all
   source-tree content except the existing `redisprep.dump` fork-job tracking
   delta remain unchanged; no source reset/cache/lock helper is invoked.
-- [ ] NoDb mutation uses canonical locking, dump, cache, and lock invalidation.
-- [ ] Exactly the two Omni RedisPrep timestamps are removed; unrelated lifecycle
+- [x] NoDb mutation uses canonical locking, dump, cache, and lock invalidation.
+- [x] Exactly the two Omni RedisPrep timestamps are removed; unrelated lifecycle
   timestamps remain unchanged.
-- [ ] Copied query-engine catalog/cache cannot advertise removed Omni artifacts,
+- [x] Copied query-engine catalog/cache cannot advertise removed Omni artifacts,
   and regenerated discovery preserves unrelated datasets.
-- [ ] Failure cannot expose a destination as successfully ready.
-- [ ] Auth, CSRF/session-token, ownership, queue, cancellation, and error payload
+- [x] Failure cannot expose a destination as successfully ready.
+- [x] Auth, CSRF/session-token, ownership, queue, cancellation, and error payload
   behavior remain unchanged.
-- [ ] Property/integration tests cover all boolean combinations and malicious
+- [x] Property/integration tests cover all boolean combinations and malicious
   target-entry types.
 
 ## Findings
@@ -53,11 +53,12 @@
 
 ## Verdict
 
-- **Gate status**: pass after post-fix confirmation
+- **Gate status**: final PASS after implementation review
 - **Unresolved findings**: zero high; zero medium
-- **Release recommendation**: proceed after the standalone checkpoint commit
+- **Release recommendation**: proceed; full repository validation passed
 
 ## Sign-off
 
-- **Security reviewer**: independent security reviewer agent; final PASS
+- **Security reviewer**: independent security reviewer agent; implementation
+  final PASS with zero unresolved medium/high findings
 - **Package owner**: accepted final contract matrix on 2026-08-06

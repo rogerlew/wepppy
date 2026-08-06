@@ -919,11 +919,15 @@ def test_fork_endpoint_schema_and_defaults_include_skip_wepp_runs_output(
     assert request_properties["skip_wepp_runs_output"]["type"] == "boolean"
     assert request_properties["skip_wepp_runs_output"]["constraint_mode"] == "static"
     assert "skip_wepp_runs_output" in schema_payload["responses"]["success"]["required"]
+    assert request_properties["skip_omni_scenarios_contrasts"]["type"] == "boolean"
+    assert request_properties["skip_omni_scenarios_contrasts"]["constraint_mode"] == "static"
+    assert "skip_omni_scenarios_contrasts" in schema_payload["responses"]["success"]["required"]
 
     assert defaults_response.status_code == 200
     defaults_payload = defaults_response.json()
     assert defaults_payload["resolved_defaults"]["undisturbify"] is False
     assert defaults_payload["resolved_defaults"]["skip_wepp_runs_output"] is False
+    assert defaults_payload["resolved_defaults"]["skip_omni_scenarios_contrasts"] is False
 
 
 def test_run_endpoints_omit_upload_sbs_when_fire_mods_absent(monkeypatch: pytest.MonkeyPatch) -> None:

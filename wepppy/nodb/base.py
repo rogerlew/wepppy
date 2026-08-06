@@ -2687,13 +2687,21 @@ def lock_statuses(runid: str) -> defaultdict[str, bool]:
     return statuses
 
 
-def clear_nodb_file_cache(runid: str, pup_relpath: Optional[str] = None) -> list[Path]:
+def clear_nodb_file_cache(
+    runid: str,
+    pup_relpath: Optional[str] = None,
+    *,
+    wd_override: str | os.PathLike[str] | None = None,
+) -> list[Path]:
     """Clear Redis cache entries for `.nodb` files under a run (optionally scoped)."""
     redis_cache_client = _ensure_redis_nodb_cache_client()
 
-    from wepppy.weppcloud.utils.helpers import get_wd
+    if wd_override is None:
+        from wepppy.weppcloud.utils.helpers import get_wd
 
-    wd = Path(get_wd(runid)).resolve()
+        wd = Path(get_wd(runid)).resolve()
+    else:
+        wd = Path(wd_override).resolve()
     if not wd.exists():
         raise FileNotFoundError(f'Working directory not found for runid {runid}: {wd}')
 

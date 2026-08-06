@@ -786,37 +786,47 @@ class Omni(OmniStateContrastMixin, NoDbBase):
             if not _exists(self.omni_dir):
                 os.makedirs(self.omni_dir)
 
-            self._scenarios = []
-            self._contrasts = None
-            self._contrast_names = None
-            self._contrast_labels = None
+            self._reset_omni_owned_state()
 
-            self._contrast_scenario = None
-            self._control_scenario = None
-            self._contrast_object_param = None
-            self._contrast_cumulative_obj_param_threshold_fraction = None
-            self._contrast_hillslope_limit = None
-            self._contrast_hill_min_slope = None
-            self._contrast_hill_max_slope = None
-            self._contrast_select_burn_severities = None
-            self._contrast_select_topaz_ids = None
-            self._contrast_selection_mode = None
-            self._contrast_geojson_path = None
-            self._contrast_geojson_name_key = None
-            self._contrast_hillslope_groups = None
-            self._contrast_order_reduction_passes = None
-            self._contrast_batch_size = None
-            self._contrast_pairs = []
-            self._contrast_output_chan_out = False
-            self._contrast_output_tcr_out = False
-            self._contrast_output_chnwb = False
-            self._contrast_output_soil_pw0 = False
-            self._contrast_output_plot_pw0 = False
-            self._contrast_output_ebe_pw0 = True
+    def _reset_omni_owned_state(self) -> None:
+        """Assign the complete fresh persisted Omni-owned state."""
 
-            self._scenario_dependency_tree = {}
-            self._contrast_dependency_tree = {}
-            self._scenario_run_state = []
+        for key in tuple(self.__dict__):
+            if key.startswith(('_scenario', '_contrast', '_use_rq_job_pool')):
+                self.__dict__.pop(key, None)
+
+        self._scenarios = []
+        self._contrasts = None
+        self._contrast_names = None
+        self._contrast_labels = None
+
+        self._contrast_scenario = None
+        self._control_scenario = None
+        self._contrast_object_param = None
+        self._contrast_cumulative_obj_param_threshold_fraction = None
+        self._contrast_hillslope_limit = None
+        self._contrast_hill_min_slope = None
+        self._contrast_hill_max_slope = None
+        self._contrast_select_burn_severities = None
+        self._contrast_select_topaz_ids = None
+        self._contrast_selection_mode = None
+        self._contrast_geojson_path = None
+        self._contrast_geojson_name_key = None
+        self._contrast_hillslope_groups = None
+        self._contrast_order_reduction_passes = None
+        self._contrast_batch_size = None
+        self._contrast_pairs = []
+        self._contrast_output_chan_out = False
+        self._contrast_output_tcr_out = False
+        self._contrast_output_chnwb = False
+        self._contrast_output_soil_pw0 = False
+        self._contrast_output_plot_pw0 = False
+        self._contrast_output_ebe_pw0 = True
+
+        self._scenario_dependency_tree = {}
+        self._contrast_dependency_tree = {}
+        self._scenario_run_state = []
+        self.__dict__.pop('_use_rq_job_pool_concurrency', None)
 
     def __getstate__(self) -> dict[str, Any]:
         state = super().__getstate__()
@@ -826,6 +836,16 @@ class Omni(OmniStateContrastMixin, NoDbBase):
     def __setstate__(self, state: Dict[str, Any]) -> None:
         self.__dict__.update(state)
         self.__dict__.pop('_contrasts', None)
+
+    def reset_for_fork(self) -> None:
+        """Persist fresh Omni-owned state while preserving destination identity."""
+        with self.locked():
+            durable = type(self).load_detached(self.wd)
+            if durable is None:
+                raise FileNotFoundError(self._nodb)
+            self.__dict__.clear()
+            self.__dict__.update(durable.__dict__)
+            self._reset_omni_owned_state()
 
     def _refresh_catalog(self, rel_path: Optional[str] = None) -> None:
         """Best-effort catalog refresh for Omni artifacts."""

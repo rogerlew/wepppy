@@ -4,9 +4,9 @@
 
 **Timezone**: UTC
 **Started**: 2026-08-06 14:55 UTC
-**Current phase**: Test-first implementation
-**Last updated**: 2026-08-06 14:55 UTC
-**Next milestone**: Failing focused tests
+**Current phase**: Complete
+**Last updated**: 2026-08-06 18:34 UTC
+**Next milestone**: Worker-first deployment after draining fork/archive consumers
 **Security impact**: `high`
 **Dedicated security review**: `yes`
 **Security artifact**: `artifacts/2026-08-06_security_review.md`
@@ -19,9 +19,9 @@
   fresh-state comparison, and unconditional cache/lock sequence.
 - [x] Dispatch two independent contract reviews and disposition all findings.
 - [x] Commit the accepted contract/reviews as standalone ancestor `82e47916f`.
-- [ ] Implement UI, schema/default, route, enqueue, worker, copy, and reset flow.
-- [ ] Add exhaustive boolean-matrix and destination-invariant tests.
-- [ ] Complete documentation, validation, and final reviews.
+- [x] Implement UI, schema/default, route, enqueue, worker, copy, and reset flow.
+- [x] Add exhaustive boolean-matrix and destination-invariant tests.
+- [x] Complete documentation, validation, and final reviews.
 
 ### In Progress
 
@@ -30,8 +30,7 @@
 
 ### Blocked
 
-- [ ] Production implementation is blocked until the contract checkpoint is an
-  accepted standalone ancestor.
+- None. The contract checkpoint is accepted and all implementation gates pass.
 
 ### Done
 
@@ -91,6 +90,7 @@ examples.
 | Copied RedisPrep node redirects metadata mutation | High | Low | Reject symlink/special `redisprep.dump` before hydration | Open |
 | Live Omni lock is erased during reset | High | Low | Prove destination ownership and reject active locks | Open |
 | Profile target helpers resolve different trees | High | Low | Resolve one canonical destination for copy/cache/lock/controller operations | Open |
+| Profile claim outlives or races its RQ owner | High | Low | Per-target flock, atomic ownership transfer, failure-tolerant finalizer, terminal/missing recovery | Mitigated |
 
 ## Verification Checklist
 
@@ -103,19 +103,21 @@ examples.
 
 ### Testing
 
-- [ ] Jest property matrix covers initial state and serialized payload.
-- [ ] Route/schema property matrix covers parsing/default/response/enqueue args.
-- [ ] Worker property matrix covers exclusions and reset decision.
-- [ ] Checked tuples clear exactly two Omni timestamps and invalidate stale
+- [x] Jest/render property matrix covers initial state and serialized payload.
+- [x] Route/schema coverage proves parsing/default/response/enqueue args.
+- [x] Worker property matrix covers exclusions and reset decision.
+- [x] Checked tuples clear exactly two Omni timestamps and invalidate stale
   query-engine catalog/cache without losing unrelated state.
 - [ ] Integration tests prove empty coherent destination and unchanged source.
-- [ ] `wctl run-pytest tests/rq/test_project_rq_fork.py` passes.
-- [ ] `wctl run-pytest tests/microservices/test_rq_engine_fork_archive_routes.py` passes.
-- [ ] `wctl run-pytest tests/nodb/mods/test_omni.py` passes.
-- [ ] `wctl run-npm lint` and `wctl run-npm test` pass.
-- [ ] `wctl run-pytest tests --maxfail=1` passes.
-- [ ] `wctl check-rq-graph` passes if enqueue signatures/catalog change.
-- [ ] Docs lint and changed broad-exception enforcement pass.
+- [x] `wctl run-pytest tests/rq/test_project_rq_fork.py` passes.
+- [x] `wctl run-pytest tests/microservices/test_rq_engine_fork_archive_routes.py` passes.
+- [x] `wctl run-pytest tests/nodb/mods/test_omni.py` passes.
+- [x] `wctl run-npm lint` and `wctl run-npm test` pass.
+- [x] `wctl run-pytest tests --maxfail=1` passes (`5891 passed, 61 skipped`).
+- [x] `wctl check-rq-graph` passes after catalog regeneration.
+- [x] Docs lint and changed broad-exception enforcement pass.
+- [x] Final correctness, QA, and security reviews pass with zero unresolved
+  medium/high findings.
 
 ## Progress Notes
 

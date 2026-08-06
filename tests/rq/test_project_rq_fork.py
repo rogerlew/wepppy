@@ -1,6 +1,7 @@
 from __future__ import annotations
 
 import json
+import itertools
 import os
 import shutil
 import sys
@@ -58,6 +59,286 @@ def test_build_fork_rsync_cmd_adds_skip_wepp_runs_output_excludes() -> None:
     assert "wepp/runs" in excludes
     assert "wepp/output" in excludes
     assert cmd[-2:] == [".", "/tmp/target/"]
+
+
+@pytest.mark.parametrize(
+    ("undisturbify", "skip_wepp", "skip_omni"),
+    itertools.product((False, True), repeat=3),
+)
+def test_build_fork_rsync_cmd_preserves_three_boolean_matrix(
+    undisturbify: bool,
+    skip_wepp: bool,
+    skip_omni: bool,
+) -> None:
+    import wepppy.rq.project_rq as project
+
+    cmd = project._build_fork_rsync_cmd(
+        "/tmp/target/",
+        undisturbify=undisturbify,
+        skip_wepp_runs_output=skip_wepp,
+        skip_omni_scenarios_contrasts=skip_omni,
+    )
+    excludes = _extract_excludes(cmd)
+    assert ("wepp/runs" in excludes) is (undisturbify or skip_wepp)
+    assert ("wepp/output" in excludes) is (undisturbify or skip_wepp)
+    assert ("/_pups/omni/scenarios" in excludes) is skip_omni
+    assert ("/_pups/omni/contrasts" in excludes) is skip_omni
+
+
+def test_reset_fork_omni_directories_rejects_symlink_target(tmp_path: Path) -> None:
+    import wepppy.rq.project_rq_fork as fork_helpers
+
+    destination = tmp_path / "destination"
+    external = tmp_path / "external"
+    (destination / "_pups" / "omni").mkdir(parents=True)
+    external.mkdir()
+    sentinel = external / "sentinel.txt"
+    sentinel.write_text("keep", encoding="ascii")
+    (destination / "_pups" / "omni" / "scenarios").symlink_to(external, target_is_directory=True)
+    (destination / "_pups" / "omni" / "contrasts").mkdir()
+    (destination / "omni").mkdir()
+
+    with pytest.raises(ValueError, match="real directory"):
+        fork_helpers._reset_fork_omni_directories(str(destination))
+
+    assert sentinel.read_text(encoding="ascii") == "keep"
+
+
+def test_query_engine_cleanup_rejects_symlink_cache(tmp_path: Path) -> None:
+    import wepppy.rq.project_rq_fork as fork_helpers
+
+    destination = tmp_path / "destination"
+    query_engine = destination / "_query_engine"
+    external = tmp_path / "external"
+    query_engine.mkdir(parents=True)
+    external.mkdir()
+    sentinel = external / "sentinel.txt"
+    sentinel.write_text("keep", encoding="ascii")
+    (query_engine / "cache").symlink_to(external, target_is_directory=True)
+
+    with pytest.raises(ValueError, match="regular non-symlink dir"):
+        fork_helpers._clear_query_engine_catalog_cache(
+            str(destination),
+            status_channel="fork",
+            publish_status=lambda *_args: None,
+        )
+
+    assert sentinel.read_text(encoding="ascii") == "keep"
+
+
+def test_rewrite_fork_redisprep_dump_preserves_unrelated_state(tmp_path: Path) -> None:
+    import wepppy.rq.project_rq_fork as fork_helpers
+
+    payload = {
+        "timestamps:run_omni_scenarios": "1",
+        "timestamps:run_omni_contrasts": "2",
+        "timestamps:build_landuse": "3",
+        "rq:fork_rq": "old-job",
+        "archive:job_id": "old-archive",
+        "attrs:custom": "keep",
+    }
+    (tmp_path / "redisprep.dump").write_text(json.dumps(payload), encoding="utf-8")
+
+    rewritten = fork_helpers._rewrite_fork_redisprep_dump(str(tmp_path))
+
+    assert rewritten == {
+        "timestamps:build_landuse": "3",
+        "attrs:custom": "keep",
+        "attrs:loaded": "true",
+    }
+    assert json.loads((tmp_path / "redisprep.dump").read_text(encoding="utf-8")) == rewritten
+
+
+def test_rewrite_fork_redisprep_dump_rejects_symlink(tmp_path: Path) -> None:
+    import wepppy.rq.project_rq_fork as fork_helpers
+
+    external = tmp_path / "external.json"
+    external.write_text('{"attrs:custom": "keep"}', encoding="utf-8")
+    destination = tmp_path / "destination"
+    destination.mkdir()
+    (destination / "redisprep.dump").symlink_to(external)
+
+    with pytest.raises(OSError):
+        fork_helpers._rewrite_fork_redisprep_dump(str(destination))
+
+    assert external.read_text(encoding="utf-8") == '{"attrs:custom": "keep"}'
+
+
+def test_reset_forked_omni_clears_exact_destination_state(monkeypatch: pytest.MonkeyPatch) -> None:
+    import wepppy.rq.project_rq as project
+
+    calls: list[tuple[object, ...]] = []
+    monkeypatch.setattr(project, "clear_nodb_file_cache", lambda *args, **kwargs: calls.append(("cache", args, kwargs)))
+    monkeypatch.setattr(project.StatusMessenger, "publish", lambda *_args: None)
+
+    class DummyOmni:
+        def reset_for_fork(self) -> None:
+            calls.append(("reset",))
+
+    monkeypatch.setattr(project.Omni, "getInstance", lambda wd: calls.append(("load", wd)) or DummyOmni())
+    monkeypatch.setattr(project.Omni, "load_detached", lambda wd: calls.append(("reload", wd)))
+    monkeypatch.setattr(
+        project._fork_helpers,
+        "_rewrite_fork_redisprep_dump",
+        lambda wd: {
+            "attrs:loaded": "true",
+            "timestamps:build_landuse": "123",
+        },
+    )
+    monkeypatch.setattr(project._fork_helpers, "_reset_fork_omni_directories", lambda wd: calls.append(("dirs", wd)))
+    monkeypatch.setattr(project._fork_helpers, "_clear_query_engine_catalog_cache", lambda *args, **kwargs: calls.append(("query", args, kwargs)))
+
+    class DummyRedis:
+        def delete(self, *args) -> None:
+            calls.append(("delete", *args))
+
+        def hset(self, *args) -> None:
+            calls.append(("hset", *args))
+
+    class DummyPrep:
+        def __init__(self, wd: str) -> None:
+            self.run_id = "destination"
+            self.redis = DummyRedis()
+
+    monkeypatch.setattr(project, "RedisPrep", DummyPrep)
+
+    project._reset_forked_omni("destination", "/runs/destination", "fork")
+
+    assert calls.count(("reset",)) == 1
+    assert ("hset", "destination", "timestamps:build_landuse", "123") in calls
+    assert ("dirs", "/runs/destination") in calls
+
+
+def test_reset_forked_omni_lock_failure_precedes_destructive_cleanup(monkeypatch: pytest.MonkeyPatch) -> None:
+    import wepppy.rq.project_rq as project
+
+    monkeypatch.setattr(project.StatusMessenger, "publish", lambda *_args: None)
+    monkeypatch.setattr(project, "clear_nodb_file_cache", lambda *_args, **_kwargs: None)
+    destructive: list[str] = []
+
+    class LockedOmni:
+        def reset_for_fork(self) -> None:
+            raise RuntimeError("actively locked")
+
+    monkeypatch.setattr(project.Omni, "getInstance", lambda wd: LockedOmni())
+    monkeypatch.setattr(project._fork_helpers, "_reset_fork_omni_directories", lambda wd: destructive.append("dirs"))
+    monkeypatch.setattr(project._fork_helpers, "_clear_query_engine_catalog_cache", lambda *args, **kwargs: destructive.append("query"))
+
+    with pytest.raises(RuntimeError, match="actively locked"):
+        project._reset_forked_omni("destination", "/runs/destination", "fork")
+
+    assert destructive == []
+
+
+def test_resolve_fork_destination_restricts_profile_group(monkeypatch: pytest.MonkeyPatch) -> None:
+    import wepppy.rq.project_rq as project
+
+    monkeypatch.setattr(
+        project,
+        "get_wd",
+        lambda runid, prefer_active=False: f"/profile-fork/{runid.rsplit(';;', 1)[-1]}",
+    )
+    assert project._resolve_fork_destination_wd("profile;;fork;;leaf") == "/profile-fork/leaf"
+    for runid in ("profile;;tmp;;leaf", "profile;;archive;;leaf", "profile;;fork;;"):
+        with pytest.raises(ValueError):
+            project._resolve_fork_destination_wd(runid)
+
+
+def test_resolve_fork_destination_rejects_profile_cache_escape(
+    monkeypatch: pytest.MonkeyPatch, tmp_path: Path
+) -> None:
+    import wepppy.rq.project_rq as project
+
+    profile_root = tmp_path / "profiles" / "fork"
+    profile_root.mkdir(parents=True)
+    escaped = tmp_path / "outside" / "leaf"
+    monkeypatch.setattr(
+        project,
+        "get_wd",
+        lambda runid, prefer_active=False: str(
+            profile_root / "__root_probe__" if runid.endswith("__root_probe__") else escaped
+        ),
+    )
+
+    with pytest.raises(ValueError, match="escaped"):
+        project._resolve_fork_destination_wd("profile;;fork;;leaf")
+
+
+def test_profile_fork_claim_requires_matching_worker_job(tmp_path: Path) -> None:
+    import wepppy.rq.project_rq as project
+
+    target = tmp_path / "leaf"
+    target.mkdir()
+    claim = tmp_path / ".leaf.fork-claim"
+    claim.write_text("owner-job", encoding="utf-8")
+
+    with pytest.raises(RuntimeError, match="not owned"):
+        project._verify_profile_fork_claim("profile;;fork;;leaf", str(target), "other-job")
+    project._verify_profile_fork_claim("profile;;fork;;leaf", str(target), "owner-job")
+    project._transfer_profile_fork_claim(
+        "profile;;fork;;leaf",
+        str(target),
+        "owner-job",
+        "finalizer-job",
+    )
+    assert claim.read_text(encoding="utf-8") == "finalizer-job"
+    project._release_profile_fork_claim("profile;;fork;;leaf", str(target), "other-job")
+    assert claim.exists()
+    project._release_profile_fork_claim("profile;;fork;;leaf", str(target), "finalizer-job")
+    assert not claim.exists()
+
+
+def test_redisprep_profile_namespace_marker_is_additive(monkeypatch: pytest.MonkeyPatch, tmp_path: Path) -> None:
+    import wepppy.nodb.redis_prep as redis_prep
+
+    class DummyRedis:
+        pass
+
+    monkeypatch.setattr(redis_prep, "redis_client", lambda *args, **kwargs: DummyRedis())
+    (tmp_path / "redisprep.dump").write_text("{}", encoding="utf-8")
+    assert redis_prep.RedisPrep(str(tmp_path)).run_id == tmp_path.name
+
+    (tmp_path / ".redisprep-run-id").write_text("profile;;fork;;leaf", encoding="utf-8")
+    assert redis_prep.RedisPrep(str(tmp_path)).run_id == "profile;;fork;;leaf"
+
+
+def test_profile_namespace_rewrite_replaces_copied_source_identity(tmp_path: Path) -> None:
+    import wepppy.rq.project_rq_fork as fork_helpers
+
+    (tmp_path / ".redisprep-run-id").write_text("profile;;fork;;source", encoding="utf-8")
+    fork_helpers._write_fork_redisprep_namespace(str(tmp_path), "profile;;fork;;destination")
+    marker = tmp_path / ".redisprep-run-id"
+    assert not marker.is_symlink()
+    assert marker.read_text(encoding="utf-8") == "profile;;fork;;destination"
+
+
+def test_fork_finalizer_failed_dependency_emits_failure_and_releases_claim(
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    import wepppy.rq.project_rq as project
+
+    published: list[str] = []
+    released: list[tuple[str, str, str]] = []
+    finalizer_job = SimpleNamespace(id="finalizer-job", connection=object())
+    dependency_job = SimpleNamespace(get_status=lambda refresh=True: project.JobStatus.FAILED)
+    monkeypatch.setattr(project, "get_current_job", lambda: finalizer_job)
+    monkeypatch.setattr(project, "get_wd", lambda runid, **kwargs: "/source")
+    monkeypatch.setattr(project, "_resolve_fork_destination_wd", lambda runid: "/profile/leaf")
+    monkeypatch.setattr(project, "_verify_profile_fork_claim", lambda *args: None)
+    monkeypatch.setattr(project, "_release_profile_fork_claim", lambda *args: released.append(args))
+    monkeypatch.setattr(project.Job, "fetch", lambda job_id, connection: dependency_job)
+    monkeypatch.setattr(project.StatusMessenger, "publish", lambda _channel, message: published.append(message))
+
+    with pytest.raises(RuntimeError, match="ended as"):
+        project._finish_fork_rq(
+            "source-run",
+            "profile;;fork;;leaf",
+            "wepp-job",
+        )
+
+    assert any("FORK_FAILED" in message for message in published)
+    assert not any("FORK_COMPLETE" in message for message in published)
+    assert released == [("profile;;fork;;leaf", "/profile/leaf", "finalizer-job")]
 
 
 @pytest.mark.skipif(not hasattr(os, "symlink"), reason="symlink not supported")
@@ -603,9 +884,13 @@ def test_fork_rq_undisturbify_enqueues_finish_job(monkeypatch: pytest.MonkeyPatc
         lambda *args, **kwargs: "/tmp/forked-run",
     )
 
-    final_wepp_job = object()
+    final_wepp_job = SimpleNamespace(id="wepp-job")
     monkeypatch.setattr(project, "run_wepp_rq", lambda _runid: final_wepp_job)
     monkeypatch.setattr(project, "redis_connection_kwargs", lambda _db: {})
+    def _release_guard_failure(*_args) -> None:
+        raise project.redis.RedisError("registry offline")
+
+    monkeypatch.setattr(project, "_release_failure_tolerant_fork_finalizer", _release_guard_failure)
 
     class _RedisStub:
         def __init__(self, **_kwargs) -> None:
@@ -619,14 +904,14 @@ def test_fork_rq_undisturbify_enqueues_finish_job(monkeypatch: pytest.MonkeyPatc
 
     monkeypatch.setattr(project.redis, "Redis", _RedisStub)
 
-    enqueue_calls: list[tuple[object, list[str] | None, object]] = []
+    enqueue_calls: list[tuple[object, list[str] | None, object, str | None]] = []
 
     class _QueueStub:
         def __init__(self, connection=None) -> None:
             self.connection = connection
 
-        def enqueue(self, func, args=None, depends_on=None):
-            enqueue_calls.append((func, args, depends_on))
+        def enqueue(self, func, args=None, depends_on=None, job_id=None, meta=None):
+            enqueue_calls.append((func, args, depends_on, job_id))
             return SimpleNamespace(id="queued")
 
     monkeypatch.setattr(project, "Queue", _QueueStub)
@@ -634,10 +919,12 @@ def test_fork_rq_undisturbify_enqueues_finish_job(monkeypatch: pytest.MonkeyPatc
     project.fork_rq("source-run", "new-run", undisturbify=True)
 
     assert len(enqueue_calls) == 1
-    func, args, depends_on = enqueue_calls[0]
+    func, args, depends_on, finalizer_job_id = enqueue_calls[0]
     assert func is project._finish_fork_rq
-    assert args == ["source-run"]
-    assert depends_on is final_wepp_job
+    assert args == ["source-run", "new-run", "wepp-job"]
+    assert depends_on.dependencies == ["wepp-job"]
+    assert depends_on.allow_failure is True
+    assert isinstance(finalizer_job_id, str) and finalizer_job_id
 
 
 def test_fork_rq_reports_ttl_import_failures(
@@ -877,9 +1164,10 @@ def test_reset_forked_run_job_markers_clears_wepp_hints_and_redis_job_keys(
 
     prep_stub = _PrepStub()
 
-    def _clear_nodb_file_cache(runid: str, *, pup_relpath: str) -> None:
+    def _clear_nodb_file_cache(runid: str, *, pup_relpath: str, wd_override: str) -> None:
         call_order.append("clear_nodb_file_cache")
         clear_cache_calls.append((runid, str(pup_relpath)))
+        assert wd_override == "/tmp/forked-run"
 
     def _clear_locks(runid: str, *, pup_relpath: str) -> None:
         call_order.append("clear_locks")

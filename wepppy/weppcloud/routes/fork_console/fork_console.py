@@ -1,5 +1,8 @@
 """Fork console routes."""
 
+import os
+import stat
+
 import redis
 
 from rq.exceptions import NoSuchJobError
@@ -30,18 +33,48 @@ def _fetch_fork_job(job_id: str):
         return Job.fetch(job_id, connection=redis_conn)
 
 
+def _checked_omni_destination_ready(destination_wd: str) -> bool:
+    flags = os.O_RDONLY | os.O_DIRECTORY
+    if hasattr(os, "O_NOFOLLOW"):
+        flags |= os.O_NOFOLLOW
+    opened: list[int] = []
+    try:
+        root_fd = os.open(destination_wd, flags)
+        opened.append(root_fd)
+        omni_stat = os.stat("omni.nodb", dir_fd=root_fd, follow_symlinks=False)
+        if not stat.S_ISREG(omni_stat.st_mode):
+            return False
+        for parts in (("omni",), ("_pups", "omni", "scenarios"), ("_pups", "omni", "contrasts")):
+            parent_fd = root_fd
+            for part in parts:
+                parent_fd = os.open(part, flags, dir_fd=parent_fd)
+                opened.append(parent_fd)
+            if os.listdir(parent_fd):
+                return False
+        return True
+    except OSError:
+        return False
+    finally:
+        for fd in reversed(opened):
+            os.close(fd)
+
+
 @fork_bp.route('/runs/<string:runid>/<config>/rq-fork-console', strict_slashes=False)
 @fork_bp.route('/runs/<string:runid>/<config>/rq-fork-console/', strict_slashes=False)
 def rq_fork_console(runid, config):
     authorize(runid, config)
     undisturbify_arg = request.args.get('undisturbify')
     skip_wepp_runs_output_arg = request.args.get('skip_wepp_runs_output')
+    skip_omni_scenarios_contrasts_arg = request.args.get('skip_omni_scenarios_contrasts')
     undisturbify = False
     skip_wepp_runs_output = False
+    skip_omni_scenarios_contrasts = False
     if isinstance(undisturbify_arg, str):
         undisturbify = undisturbify_arg.strip().lower() in ('true', '1', 'yes', 'on')
     if isinstance(skip_wepp_runs_output_arg, str):
         skip_wepp_runs_output = skip_wepp_runs_output_arg.strip().lower() in ('true', '1', 'yes', 'on')
+    if isinstance(skip_omni_scenarios_contrasts_arg, str):
+        skip_omni_scenarios_contrasts = skip_omni_scenarios_contrasts_arg.strip().lower() in ('true', '1', 'yes', 'on')
 
     cap_base_url = (current_app.config.get('CAP_BASE_URL') or os.getenv('CAP_BASE_URL', '/cap')).rstrip('/')
     cap_asset_base_url = (
@@ -62,6 +95,7 @@ def rq_fork_console(runid, config):
         config=config,
         undisturbify=undisturbify,
         skip_wepp_runs_output=skip_wepp_runs_output,
+        skip_omni_scenarios_contrasts=skip_omni_scenarios_contrasts,
         cap_base_url=cap_base_url,
         cap_asset_base_url=cap_asset_base_url,
         cap_site_key=cap_site_key,
@@ -104,6 +138,8 @@ def fork_destination_readiness(runid, config, job_id, destination_runid):
         if not _exists(_join(destination_wd, name))
     ]
     ready = _exists(destination_wd) and not missing
+    if ready and len(args) == 5 and args[4] is True:
+        ready = _checked_omni_destination_ready(destination_wd)
     return jsonify(
         {'ready': ready}
     )

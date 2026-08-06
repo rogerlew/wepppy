@@ -1,7 +1,10 @@
 import contextlib
+import asyncio
+from types import SimpleNamespace
 
 import pytest
 from rq.exceptions import NoSuchJobError
+from starlette.datastructures import FormData
 
 TestClient = pytest.importorskip("fastapi.testclient").TestClient
 
@@ -12,6 +15,79 @@ from wepppy.weppcloud.utils import runid as runid_utils
 
 
 pytestmark = pytest.mark.microservice
+
+
+@pytest.mark.parametrize("value", [True, False])
+def test_strict_fork_omni_boolean_accepts_json_booleans(value: bool) -> None:
+    class Request:
+        headers = {"content-type": "application/json"}
+
+        async def json(self):
+            return {"skip_omni_scenarios_contrasts": value}
+
+    assert asyncio.run(
+        fork_archive_routes._strict_request_boolean(
+            Request(),
+            "skip_omni_scenarios_contrasts",
+        )
+    ) is value
+
+
+@pytest.mark.parametrize("value", [1, 0, [True], ["true"], {"value": True}, "garbage"])
+def test_strict_fork_omni_boolean_rejects_non_scalar_json(value: object) -> None:
+    class Request:
+        headers = {"content-type": "application/json"}
+
+        async def json(self):
+            return {"skip_omni_scenarios_contrasts": value}
+
+    with pytest.raises(ValueError):
+        asyncio.run(
+            fork_archive_routes._strict_request_boolean(
+                Request(),
+                "skip_omni_scenarios_contrasts",
+            )
+        )
+
+
+@pytest.mark.parametrize(
+    ("token", "expected"),
+    [(token, expected) for expected, tokens in ((True, ("1", "true", "YES", "on")), (False, ("0", "false", "NO", "off"))) for token in tokens],
+)
+def test_strict_fork_omni_boolean_accepts_form_tokens(token: str, expected: bool) -> None:
+    class Request:
+        headers = {"content-type": "application/x-www-form-urlencoded"}
+
+        async def form(self):
+            return FormData([("skip_omni_scenarios_contrasts", token)])
+
+    assert asyncio.run(
+        fork_archive_routes._strict_request_boolean(
+            Request(),
+            "skip_omni_scenarios_contrasts",
+        )
+    ) is expected
+
+
+def test_strict_fork_omni_boolean_rejects_repeated_form_values() -> None:
+    class Request:
+        headers = {"content-type": "application/x-www-form-urlencoded"}
+
+        async def form(self):
+            return FormData(
+                [
+                    ("skip_omni_scenarios_contrasts", "false"),
+                    ("skip_omni_scenarios_contrasts", "true"),
+                ]
+            )
+
+    with pytest.raises(ValueError):
+        asyncio.run(
+            fork_archive_routes._strict_request_boolean(
+                Request(),
+                "skip_omni_scenarios_contrasts",
+            )
+        )
 
 
 def _stub_queue(
@@ -233,7 +309,11 @@ def test_fork_enqueues_job(monkeypatch: pytest.MonkeyPatch, tmp_path) -> None:
         response = client.post(
             "/api/runs/run-1/cfg/fork",
             headers={"Authorization": "Bearer token"},
-            data={"undisturbify": "true", "skip_wepp_runs_output": "true"},
+            data={
+                "undisturbify": "true",
+                "skip_wepp_runs_output": "true",
+                "skip_omni_scenarios_contrasts": "true",
+            },
         )
 
     assert response.status_code == 200
@@ -242,11 +322,12 @@ def test_fork_enqueues_job(monkeypatch: pytest.MonkeyPatch, tmp_path) -> None:
     assert payload["new_runid"] == "new-run"
     assert payload["undisturbify"] is True
     assert payload["skip_wepp_runs_output"] is True
+    assert payload["skip_omni_scenarios_contrasts"] is True
     assert constructor_calls[0][0] == ("fork-archive",)
     assert len(enqueue_calls) == 1
     enqueue_args, enqueue_kwargs = enqueue_calls[0]
     assert enqueue_args[0] is fork_archive_routes.fork_rq
-    assert enqueue_args[1] == ("run-1", "new-run", True, True)
+    assert enqueue_args[1] == ("run-1", "new-run", True, True, True)
     assert "timeout" in enqueue_kwargs
 
 
@@ -332,7 +413,7 @@ def test_fork_skip_wepp_runs_output_defaults_false(
     assert len(enqueue_calls) == 1
     enqueue_args, _enqueue_kwargs = enqueue_calls[0]
     assert enqueue_args[0] is fork_archive_routes.fork_rq
-    assert enqueue_args[1] == ("run-1", "new-run", False, False)
+    assert enqueue_args[1] == ("run-1", "new-run", False, False, False)
 
 
 def test_fork_user_mdobre_email_generates_mdobre_prefix(
@@ -867,6 +948,148 @@ def test_fork_target_runid_refuses_overwrite_for_non_profile_run(
     payload = response.json()
     assert payload["error"]["message"] == "target_runid already exists"
     assert payload["error"]["code"] == "conflict"
+
+
+def test_profile_fork_target_has_exclusive_job_claim_and_redis_namespace(
+    monkeypatch: pytest.MonkeyPatch, tmp_path
+) -> None:
+    run_dir = tmp_path / "source"
+    run_dir.mkdir()
+    profile_root = tmp_path / "profiles" / "fork"
+    profile_root.mkdir(parents=True)
+    target_dir = profile_root / "leaf"
+
+    monkeypatch.setattr(
+        fork_archive_routes,
+        "_resolve_bearer_claims",
+        lambda request: {"token_class": "service"},
+    )
+    monkeypatch.setattr(fork_archive_routes, "authorize_run_access", lambda claims, runid: None)
+
+    def _get_wd(runid: str, prefer_active: bool = True) -> str:
+        if runid == "run-1":
+            return str(run_dir)
+        if runid == "profile;;fork;;__root_probe__":
+            return str(profile_root / "__root_probe__")
+        if runid == "profile;;fork;;leaf":
+            return str(target_dir)
+        raise ValueError(runid)
+
+    monkeypatch.setattr(fork_archive_routes, "get_wd", _get_wd)
+    monkeypatch.setattr(fork_archive_routes, "get_run_owners_lazy", lambda runid: [])
+
+    class DummyRon:
+        config_stem = "cfg"
+
+    monkeypatch.setattr(fork_archive_routes.Ron, "getInstance", lambda wd: DummyRon())
+    _stub_prep(monkeypatch)
+    enqueued: list[dict[str, object]] = []
+
+    class DummyJob:
+        def __init__(self, job_id: str) -> None:
+            self.id = job_id
+
+    class DummyQueue:
+        def __init__(self, *args, **kwargs) -> None:
+            pass
+
+        def enqueue_call(self, *args, **kwargs):
+            enqueued.append(kwargs)
+            return DummyJob(str(kwargs["job_id"]))
+
+    class DummyRedis:
+        def __enter__(self):
+            return self
+
+        def __exit__(self, exc_type, exc, tb):
+            return False
+
+    monkeypatch.setattr(fork_archive_routes, "Queue", DummyQueue)
+    monkeypatch.setattr(fork_archive_routes.redis, "Redis", lambda **kwargs: DummyRedis())
+    monkeypatch.setattr(fork_archive_routes, "redis_connection_kwargs", lambda db: {})
+
+    with TestClient(rq_engine.app) as client:
+        first = client.post(
+            "/api/runs/run-1/cfg/fork",
+            headers={"Authorization": "Bearer token"},
+            data={"target_runid": "profile;;fork;;leaf"},
+        )
+        second = client.post(
+            "/api/runs/run-1/cfg/fork",
+            headers={"Authorization": "Bearer token"},
+            data={"target_runid": "profile;;fork;;leaf"},
+        )
+
+    assert first.status_code == 200
+    job_id = first.json()["job_id"]
+    assert enqueued[0]["job_id"] == job_id
+    assert (target_dir / ".redisprep-run-id").read_text(encoding="utf-8") == "profile;;fork;;leaf"
+    assert (profile_root / ".leaf.fork-claim").read_text(encoding="utf-8") == job_id
+    assert second.status_code == 409
+
+
+def test_canceled_wepp_dependency_reaps_deferred_profile_finalizer(
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    canceled: list[bool] = []
+    published: list[tuple[str, str]] = []
+
+    class DummyRedis:
+        def __enter__(self):
+            return self
+
+        def __exit__(self, exc_type, exc, tb):
+            return False
+
+    finalizer = SimpleNamespace(
+        dependency_ids=[b"rq:job:wepp-job"],
+        fetch_dependencies=lambda: [dependency],
+        meta={"fork_source_runid": "source-run"},
+        cancel=lambda enqueue_dependents=False: canceled.append(enqueue_dependents),
+    )
+    dependency = SimpleNamespace(get_status=lambda refresh=True: "canceled")
+    monkeypatch.setattr(fork_archive_routes, "redis_connection_kwargs", lambda db: {})
+    monkeypatch.setattr(fork_archive_routes.redis, "Redis", lambda **kwargs: DummyRedis())
+    monkeypatch.setattr(
+        fork_archive_routes.Job,
+        "fetch",
+        lambda job_id, connection: finalizer if job_id == "finalizer-job" else dependency,
+    )
+    monkeypatch.setattr(
+        fork_archive_routes.StatusMessenger,
+        "publish",
+        lambda channel, message: published.append((channel, message)),
+    )
+
+    assert fork_archive_routes._recover_terminal_deferred_fork_finalizer("finalizer-job") is True
+    assert canceled == [False]
+    assert published == [("source-run:fork", "rq:finalizer-job TRIGGER   fork FORK_FAILED")]
+
+
+def test_missing_wepp_dependency_reaps_deferred_profile_finalizer(
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    canceled: list[bool] = []
+
+    class DummyRedis:
+        def __enter__(self):
+            return self
+
+        def __exit__(self, exc_type, exc, tb):
+            return False
+
+    finalizer = SimpleNamespace(
+        dependency_ids=[b"rq:job:expired-wepp-job"],
+        fetch_dependencies=lambda: [],
+        meta={},
+        cancel=lambda enqueue_dependents=False: canceled.append(enqueue_dependents),
+    )
+    monkeypatch.setattr(fork_archive_routes, "redis_connection_kwargs", lambda db: {})
+    monkeypatch.setattr(fork_archive_routes.redis, "Redis", lambda **kwargs: DummyRedis())
+    monkeypatch.setattr(fork_archive_routes.Job, "fetch", lambda job_id, connection: finalizer)
+
+    assert fork_archive_routes._recover_terminal_deferred_fork_finalizer("finalizer-job") is True
+    assert canceled == [False]
 
 
 def test_archive_enqueues_job(monkeypatch: pytest.MonkeyPatch, tmp_path) -> None:
