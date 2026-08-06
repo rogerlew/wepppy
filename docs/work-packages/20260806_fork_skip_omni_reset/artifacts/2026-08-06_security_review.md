@@ -3,8 +3,8 @@
 ## Metadata
 
 - **Package**: `docs/work-packages/20260806_fork_skip_omni_reset/`
-- **Reviewer**: pending independent security reviewer
-- **Date**: pending
+- **Reviewer**: independent security reviewer agent
+- **Date**: 2026-08-06
 - **Scope reviewed**: fork UI/API/RQ input, rsync exclusion, destination Omni
   reset, NoDb cache/locks, source/destination run-tree containment
 - **Commit/branch context**: `master`; implementation not started
@@ -25,7 +25,9 @@
 - [ ] Boolean parsing cannot introduce arbitrary paths or modes.
 - [ ] Exclusions are anchored to the two exact destination-relative collections.
 - [ ] Reset never follows a source or destination symlink outside the run root.
-- [ ] Source content and controller/cache state remain unchanged.
+- [ ] Source model/Omni state, Omni timestamps, query-engine data, and all
+  source-tree content except the existing `redisprep.dump` fork-job tracking
+  delta remain unchanged; no source reset/cache/lock helper is invoked.
 - [ ] NoDb mutation uses canonical locking, dump, cache, and lock invalidation.
 - [ ] Exactly the two Omni RedisPrep timestamps are removed; unrelated lifecycle
   timestamps remain unchanged.
@@ -41,15 +43,21 @@
 
 | ID | Severity | Surface | Description | Required action | Status |
 | --- | --- | --- | --- | --- | --- |
-| Pending | Pending | Pending | Independent review not yet performed | Dispatch reviewer after contract inventory | Open |
+| SEC-01 | High | Query engine | Path cleanup can follow copied `_query_engine` links outside the destination | Destination-rooted descriptor/no-follow cleanup and external sentinels | Resolved |
+| SEC-02 | High | RedisPrep | Copied `redisprep.dump` can redirect timestamp/job-marker mutation | Regular-file/no-follow verification and malicious-entry tests | Resolved |
+| SEC-03 | Medium | Request | Unknown/repeated values can become truthy | Enumerate accepted scalars; reject all others before registration/enqueue | Resolved |
+| SEC-04 | Medium | NoDb lock | Unconditional recovery could erase a live writer lock | Prove ownership, reject active locks, lock before refresh/mutation | Resolved |
+| SEC-05 | Medium | Path scope | Profile destination copy and cache/lock resolution can diverge | Resolve one canonical destination under the approved target root | Resolved |
+| SEC-06 | Medium | Persistence | “No replacement” conflicted with canonical atomic `os.replace` dump | Forbid controller substitution while requiring canonical atomic dump | Resolved |
+| SEC-07 | Medium | Source integrity | Existing fork-job tracking mutates source `redisprep.dump` | Name it as the sole allowed delta and hash/diff all other source state | Resolved |
 
 ## Verdict
 
-- **Gate status**: fail (pending review)
-- **Unresolved findings**: review not started
-- **Release recommendation**: hold implementation until checkpoint acceptance
+- **Gate status**: pass after post-fix confirmation
+- **Unresolved findings**: zero high; zero medium
+- **Release recommendation**: proceed after the standalone checkpoint commit
 
 ## Sign-off
 
-- **Security reviewer**: pending
-- **Package owner**: pending final contract acceptance
+- **Security reviewer**: independent security reviewer agent; final PASS
+- **Package owner**: accepted final contract matrix on 2026-08-06

@@ -1,8 +1,11 @@
 # Contract Decision - Fork Skip Omni Scenarios/Contrasts and Reset
 
-**Status**: Amended; implementation blocked pending follow-up reviews and checkpoint
-**Base revision**: `0ba059521`
+**Status**: Accepted; implementation blocked pending standalone checkpoint commit
+**Base revision**: `c44384cfc`
 **Operator direction date**: 2026-08-06
+**Final matrix acceptance**: operator authorized package execution on 2026-08-06;
+post-review amendments are containment, validation, persistence, and evidence
+clarifications that preserve the authorized user-visible matrix
 **Package ID**: SURF-04B
 **Composed owners**: SURF-04, SURF-04A, DOM-25A, DOM-25B
 
@@ -37,28 +40,38 @@ equivalent to `false` at every boundary.
    run identity, and version contract. Reset covers every persisted Omni-owned
    field initialized by `Omni.__init__`: scenarios, contrasts, labels,
    selection configuration, GeoJSON/upload references, pairs, batch/output
-   options, dependency trees, and run state. Comparisons exclude only
+   options, dependency trees, and run state. Reset also removes every additional
+   persisted Omni-owned key that is absent from a fresh controller, including
+   `_use_rq_job_pool_concurrency`; copied optional state must not survive merely
+   because `Omni.__init__` does not assign it. Comparisons exclude only
    documented volatile metadata such as timestamps, version/commit provenance,
    and file signatures. `_uploads` is not preserved. Implement one public
    `Omni.reset_for_fork()` operation that loads the already identity-rewritten
    destination controller using its persisted actual config, resets every
    Omni-owned field to the same values assigned by `Omni.__init__`, and persists
-   once with the canonical lock/dump transaction. It rewrites the existing
-   `omni.nodb`; it does not replace the file and is not `clear_contrasts()` plus
-   scenario deletion. Clear the destination cache before loading and again
+   once with the canonical lock/dump transaction. It mutates the copied
+   controller rather than substituting a separately initialized file, and its
+   dump uses the canonical temporary-file plus atomic `os.replace` protocol; it
+   is not `clear_contrasts()` plus scenario deletion. Clear the destination cache before loading and again
    after persistence, then reload once to prove persisted fresh equivalence.
 7. The checked sequence is: rsync exclusion; existing link normalization;
    existing root NoDb identity/path rewrite; inherited filesystem lock and
    visibility-marker cleanup; optional undisturbify destination mutations;
-   clear destination Omni in-process/Redis cache and exact Redis lock; perform
-   one destination-only Omni reset under the canonical NoDb lock/write
+   establish exclusive ownership of the new destination; reject an active Omni
+   lock and clear only a proven stale destination Omni cache/lock; acquire the
+   canonical Omni lock, refresh the durable mutation base while held, and
+   perform one destination-only Omni reset under that lock/write
    transaction; remove exactly the `run_omni_scenarios` and
    `run_omni_contrasts` RedisPrep timestamps; invalidate copied query-engine
-   `catalog.json` and `cache` with the existing bounded helper; reset inherited
+   `catalog.json` and `cache` with a destination-rooted, descriptor-relative
+   no-follow helper; reset inherited
    general job markers; then publish or enqueue terminal completion. Copied
    `omni.nodb` is never hydrated before destination identity rewrite. Unrelated
    RedisPrep timestamps and query-engine source data remain unchanged; normal
-   catalog regeneration rediscovers retained datasets.
+   catalog regeneration rediscovers retained datasets. Source model/Omni state,
+   Omni timestamps, and query-engine data remain unchanged. The existing source
+   `redisprep.dump` RQ tracking update from `set_rq_job_id("fork_rq", ...)` is
+   the sole permitted source-tree delta and is not broadened by this option.
 8. Reset is destination-only, idempotent for an unready destination, and must
    complete before success. Failure emits `FORK_FAILED`, never `FORK_COMPLETE`,
    and checked readiness remains false. Existing behavior may retain an unready
@@ -70,8 +83,9 @@ equivalent to `false` at every boundary.
 10. The option does not enqueue an Omni rebuild and does not reset any controller
     other than Omni. Removing the two Omni lifecycle timestamps is a narrowly
     scoped RedisPrep metadata mutation, not a general RedisPrep reset.
-11. Legacy four-argument job readiness remains unchanged. For a checked
-    five-argument job, readiness additionally requires regular `omni.nodb` and
+11. Legacy four-argument job readiness remains unchanged. For an exact
+    five-argument job whose fifth argument is the boolean `True`, readiness
+    additionally requires regular `omni.nodb` and
     real, empty `omni`, `_pups/omni/scenarios`, and `_pups/omni/contrasts`;
     symlink and special entries are rejected without following them.
 12. Deployment is worker-first. Drain/restart the fork/archive workers with the
@@ -79,6 +93,22 @@ equivalent to `false` at every boundary.
     producer. Omitted API fields and legacy four-argument jobs resolve to
     `false`. Update the RQ catalog and run `wctl check-rq-graph` even if graph
     topology is unchanged.
+13. The new boolean accepts only scalar JSON booleans and the form/query tokens
+    `1`, `0`, `true`, `false`, `yes`, `no`, `on`, and `off`, case-insensitively
+    with surrounding whitespace removed. Omission resolves to `false`. Numeric
+    JSON values, unknown strings, objects, arrays, and repeated form values are
+    rejected with the canonical validation-error response before destination
+    registration or enqueue.
+14. Before hydrating or mutating copied `redisprep.dump`, the worker verifies
+    it is a destination-owned regular non-symlink file under the same canonical
+    destination path used for copy, controller hydration, cache, and lock keys.
+    A symlink, directory, FIFO, socket, or other special entry fails without
+    reading or mutating its target. The same destination-rooted,
+    descriptor-relative no-follow rule applies to `_query_engine`, `cache`, and
+    `catalog.json`; verified directory descriptors remain held across
+    deletion/recreation to prevent path-swap races. Profile-prefixed targets
+    resolve once under the approved profile fork root and every subsequent
+    worker/cache/lock operation uses that resolved destination.
 
 ## Property and Regression Contract
 
@@ -93,7 +123,9 @@ combination they prove:
 - Omni exclusions/reset occur if and only if the new field is `true`;
 - WEPP exclusions occur if and only if the existing WEPP rule requires them;
 - undisturbify rerun behavior occurs if and only if `undisturbify` is `true`;
-- unrelated `_pups` sentinels and quiescent-fixture source hashes are invariant;
+- unrelated `_pups` sentinels and quiescent-fixture source hashes are invariant
+  after excluding only the existing source `redisprep.dump` fork-job tracking
+  delta;
 - no reset/cache/lock helper receives the source run ID or path.
 - exactly the two Omni RedisPrep timestamps are absent if and only if the new
   option is true, while unrelated timestamps are invariant;
@@ -102,26 +134,30 @@ combination they prove:
   datasets without stale Omni entries.
 
 Additional integration tests populate scenarios, contrasts, aggregate files,
-sidecars, `_uploads`, every persisted initialization field, stale destination
-cache/lock state for a reused `profile;;` target, and unrelated siblings. The checked fork
+sidecars, `_uploads`, every persisted initialization field, optional persisted
+Omni keys absent from fresh state, stale destination cache/lock state for a
+reused `profile;;` target, and unrelated siblings. The checked fork
 must load a fresh Omni controller and contain empty real collection/aggregate
 directories; the unchecked fork must retain the populated fixture. Injected
 reset failure must produce the canonical failed job behavior without a success
 trigger.
 
 Boundary properties cover omitted fields; all accepted boolean encodings;
-rejected malformed and repeated values according to the common parser contract;
+rejected numeric JSON, malformed, structured, and repeated values with no
+registration or enqueue side effect;
 absent/false/true/hostile query hydration; restored tracked-job sessions without
 checkbox inference; display of the returned resolved value; native checkbox
 label and keyboard accessibility; and legacy four-argument job/readiness
 inspection. Real-rsync tests cover ordinary, symlink, and special collection
 entries and prove only the two anchored nodes are excluded.
 
-Fresh-equivalence tests compare every Omni-owned persisted field assigned by
-`Omni.__init__` against a fresh controller created with the same destination
-working directory and config. Only named NoDb base/provenance metadata is
-excluded. Tests prove one rewrite/dump, pre-load and post-persist cache clears,
-exact destination lock use, and successful reload; file replacement is forbidden.
+Fresh-equivalence tests compare the entire persisted key set against a fresh
+controller created with the same destination working directory and config.
+Every copied Omni-owned key absent from fresh state, including
+`_use_rq_job_pool_concurrency`, must be absent after reset. Only named NoDb
+base/provenance metadata is excluded. Tests prove one canonical atomic dump,
+safe stale-cache/lock recovery, refusal to clear an active lock,
+lock-before-refresh, post-persist cache clearing, and successful reload.
 
 ## Compatibility and Rationale
 

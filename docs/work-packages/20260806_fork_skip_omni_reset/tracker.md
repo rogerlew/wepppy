@@ -4,9 +4,9 @@
 
 **Timezone**: UTC
 **Started**: 2026-08-06 14:55 UTC
-**Current phase**: Contract discovery and ratification
+**Current phase**: Accepted checkpoint commit
 **Last updated**: 2026-08-06 14:55 UTC
-**Next milestone**: Security and second independent checkpoint reviews
+**Next milestone**: Standalone checkpoint commit, then failing focused tests
 **Security impact**: `high`
 **Dedicated security review**: `yes`
 **Security artifact**: `artifacts/2026-08-06_security_review.md`
@@ -17,7 +17,7 @@
 
 - [x] Select rewrite-in-place `Omni.reset_for_fork()` contract, exact persisted
   fresh-state comparison, and unconditional cache/lock sequence.
-- [ ] Dispatch two independent contract reviews and disposition all findings.
+- [x] Dispatch two independent contract reviews and disposition all findings.
 - [ ] Commit the accepted contract/reviews as a standalone ancestor.
 - [ ] Implement UI, schema/default, route, enqueue, worker, copy, and reset flow.
 - [ ] Add exhaustive boolean-matrix and destination-invariant tests.
@@ -25,7 +25,8 @@
 
 ### In Progress
 
-- [ ] Ratify the draft contract decision.
+- [x] Obtain post-fix confirmation for COR-01 through COR-03 and SEC-01 through
+  SEC-07, then ratify the contract decision.
 
 ### Blocked
 
@@ -44,6 +45,10 @@
   RedisPrep/query-engine integrity gaps; all were incorporated (2026-08-06 UTC).
 - [x] Final follow-up confirmed REV-01 through REV-10, NEW-01/02, and REG-01
   resolved; scaffold PASS with no medium/high findings (2026-08-06 UTC).
+- [x] Independent checkpoint reviews found COR-01 through COR-03 and SEC-01
+  through SEC-07; every finding was accepted and incorporated (2026-08-06 UTC).
+- [x] Post-fix correctness and security reviews passed with zero unresolved
+  medium/high findings; operator acceptance recorded (2026-08-06 UTC).
 
 ## Decisions Log
 
@@ -82,14 +87,18 @@ examples.
 | Partial registered destination is mistaken for rollback | Medium | Medium | Specify unready partial behavior; do not claim transaction rollback | Open |
 | RedisPrep claims removed Omni work completed | High | High | Remove exactly two Omni timestamps; preserve unrelated timestamps | Open |
 | Query catalog advertises deleted Omni artifacts | Medium | High | Invalidate copied catalog/cache and test regenerated unrelated discovery | Open |
+| Copied cleanup node redirects outside destination | High | Low | Held destination-rooted descriptors, no-follow validation, external sentinels | Open |
+| Copied RedisPrep node redirects metadata mutation | High | Low | Reject symlink/special `redisprep.dump` before hydration | Open |
+| Live Omni lock is erased during reset | High | Low | Prove destination ownership and reject active locks | Open |
+| Profile target helpers resolve different trees | High | Low | Resolve one canonical destination for copy/cache/lock/controller operations | Open |
 
 ## Verification Checklist
 
 ### Contract and Security
 
-- [ ] Exact UI/request/default/response/RQ contract accepted.
-- [ ] Two independent pre-implementation reviews complete.
-- [ ] Dedicated security review has no unresolved medium/high findings.
+- [x] Exact UI/request/default/response/RQ contract accepted.
+- [x] Two independent pre-implementation reviews complete.
+- [x] Dedicated security review has no unresolved medium/high findings.
 - [ ] Standalone checkpoint SHA recorded here.
 
 ### Testing

@@ -22,8 +22,11 @@ is unchanged. Leaving the box unchecked behaves exactly as today.
 - [x] (2026-08-06 UTC) Selected rewrite-in-place reset semantics and added
   verified ancestors, Omni RedisPrep timestamp removal, and query catalog/cache
   invalidation after follow-up review.
-- [ ] Inventory and test the exact canonical fresh Omni controller state.
-- [ ] Ratify and commit the contract-first checkpoint.
+- [x] (2026-08-06 UTC) Inventoried canonical fresh state and expanded reset
+  equivalence to remove optional copied Omni-owned keys absent from fresh state.
+- [x] (2026-08-06 UTC) Obtained post-fix PASS confirmation for COR-01 through
+  COR-03 and SEC-01 through SEC-07; zero medium/high findings remain.
+- [ ] Ratify and commit the contract-first checkpoint (ratified; commit pending).
 - [ ] Implement the UI/API/RQ field without changing existing defaults.
 - [ ] Implement exact copy exclusion and one bounded destination reset operation.
 - [ ] Add exhaustive property and integration evidence.
@@ -39,6 +42,13 @@ is unchanged. Leaving the box unchecked behaves exactly as today.
 - Observation: Omni state spans `omni.nodb`, aggregate/sidecar content under
   `omni/`, and complete child projects under `_pups/omni/{scenarios,contrasts}`.
   Evidence: `wepppy/nodb/mods/omni/README.md` and `Omni.omni_dir`.
+- Observation: `_use_rq_job_pool_concurrency` can be persisted although fresh
+  `Omni.__init__` state omits it.
+  Evidence: its getter defaults on absence but its setter stores the optional key.
+- Observation: path-based query-engine and RedisPrep operations can follow
+  copied symlink/special entries, and profile destination helpers can resolve
+  different roots.
+  Evidence: checkpoint security findings SEC-01, SEC-02, and SEC-05.
 
 ## Decision Log
 
@@ -73,6 +83,17 @@ is unchanged. Leaving the box unchecked behaves exactly as today.
   copied query-engine catalog/cache for every checked tuple.
   Rationale: otherwise the destination advertises removed Omni work/artifacts.
   Date/Author: 2026-08-06, follow-up review disposition.
+- Decision: reject unknown, structured, repeated, and numeric JSON values for
+  the new boolean before registration or enqueue.
+  Rationale: the common parser otherwise preserves values that Python truthiness
+  could misclassify.
+  Date/Author: 2026-08-06, checkpoint review disposition.
+- Decision: resolve one canonical destination and hold destination-rooted
+  no-follow descriptors across destructive reset operations; reject active
+  Omni locks rather than clearing them.
+  Rationale: copied nodes and concurrent writers must not redirect or race a
+  public fork reset.
+  Date/Author: 2026-08-06, security review disposition.
 
 ## Outcomes & Retrospective
 
@@ -107,7 +128,8 @@ third-party property-testing library.
 First, inventory fresh Omni state. Create a focused NoDb test that initializes
 Omni, populates scenario and contrast state plus artifacts, invokes a proposed
 single reset API, reloads through the normal singleton/cache boundary, and
-compares the behavioral state with a freshly initialized controller. Define
+compares its complete persisted key set with a freshly initialized controller,
+including removal of optional copied Omni-owned keys absent from fresh state. Define
 the reset in the Omni subsystem rather than editing private fields from RQ.
 Confirm required config/run identity fields remain destination-specific.
 
@@ -189,7 +211,8 @@ least one scenario child, one contrast child, aggregate files, sidecars,
 non-default Omni fields, and an unrelated `_pups` sibling sentinel. With the
 option checked, the fork succeeds, reloads a fresh Omni controller, has empty
 real Omni collection/aggregate directories, retains the unrelated sentinel,
-and leaves source hashes unchanged. With the option unchecked, the populated
+and leaves source hashes unchanged except for the existing source
+`redisprep.dump` fork-job tracking delta. With the option unchecked, the populated
 Omni fixture is copied under existing semantics.
 
 The option matrix generator covers `(undisturbify,
@@ -205,8 +228,9 @@ destination reset roots must be rejected without touching their targets.
 Boundary tests also cover omitted, accepted, malformed, and repeated boolean
 forms; absent/false/true/hostile query hydration; restored tracked jobs;
 returned resolved-value display; native checkbox label/keyboard accessibility;
-and legacy four-argument readiness. Source hashes use a quiescent fixture, and
-separate spies prove no reset/cache/lock helper receives the source ID or path.
+and legacy four-argument readiness. Source hashes use a quiescent fixture and
+exclude only the existing `redisprep.dump` fork-job tracking delta; separate
+spies prove no reset/cache/lock helper receives the source ID or path.
 
 ## Idempotence and Recovery
 
@@ -233,6 +257,7 @@ The final public field is:
 It must appear in the fork request schema, resolved defaults, success response,
 enqueue arguments, `fork_rq`, and `prepare_fork_run`. The Omni reset interface
 is the public, controller-owned `Omni.reset_for_fork()` operation with a `.pyi`
-signature and documented postcondition. It rewrites the identity-correct
-destination controller under one lock/dump transaction; it does not replace
-`omni.nodb`. No external dependency is added.
+signature and documented postcondition. It mutates the identity-correct
+destination controller under one lock/dump transaction; it does not substitute
+a separately initialized controller or file, and the canonical atomic dump is
+required. No external dependency is added.

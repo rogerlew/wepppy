@@ -80,8 +80,10 @@ a standalone ancestor before implementation files are edited.
   markers.
 - [ ] The destination has neither Omni RedisPrep completion timestamp nor stale
   query-engine Omni entries, while unrelated timestamps/datasets are retained.
-- [ ] Source controller state and quiescent-fixture source run-tree hashes are
-  unchanged, and no source reset/cache/lock helper is invoked.
+- [ ] Source model/Omni state, Omni timestamps, query-engine data, and
+  quiescent-fixture hashes are unchanged after excluding only the existing
+  source `redisprep.dump` fork-job tracking delta; no source reset/cache/lock
+  helper is invoked.
 - [ ] Every combination of the three fork booleans has contract/property
   coverage, including request serialization, route parsing, enqueue arguments,
   rsync exclusions, reset decision, and terminal destination invariants.
