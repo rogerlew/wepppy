@@ -1,7 +1,7 @@
 # PROJECT_TRACKER.md
 > Kanban board for wepppy work packages and vision items
 
-**Last Updated**: 2026-08-04
+**Last Updated**: 2026-08-05
 **Active Packages**: 22
 **Quick Links**: [Work Packages Directory](docs/work-packages/) | [God-Tier Prompting Strategy](docs/god-tier-prompting-strategy.md)
 
@@ -911,6 +911,22 @@ the remaining-run controller plan has no next controller milestone.
 ---
 
 ## ✅ Done
+
+### Culvert NoDb Writer Hardening
+
+**Completed**: 2026-08-05
+**Security impact**: `high`
+**Link**: [docs/work-packages/20260805_culvert_nodb_writer_hardening/](docs/work-packages/20260805_culvert_nodb_writer_hardening/)
+**Outcome**: Restored deterministic parent/finalizer ownership of shared
+culvert batch state. The route no longer duplicates the parent receipt write,
+the parent rehydrates and retries bounded initial transactions, children write
+only run-local metadata, and the finalizer authoritatively replaces outcomes
+from those files. The strict stale-write guard remains unchanged. Focused
+validation passed (`43 passed`), the full suite passed (`5,842 passed`, `61
+skipped`), and independent correctness, QA, and high-impact security review
+closed with no unresolved findings.
+
+---
 
 ### Stevens Canyon Focal-Event Attribution
 

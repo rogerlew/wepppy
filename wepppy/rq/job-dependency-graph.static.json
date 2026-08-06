@@ -86,7 +86,7 @@
     "notes": [],
     "queue_name": "batch",
     "source_function": "_enqueue_culvert_batch_job",
-    "source_lineno": 553,
+    "source_lineno": 540,
     "source_module": "wepppy/microservices/rq_engine/culvert_routes.py"
   },
   {
@@ -96,7 +96,7 @@
     "notes": [],
     "queue_name": "batch",
     "source_function": "_enqueue_culvert_finalize_job",
-    "source_lineno": 393,
+    "source_lineno": 380,
     "source_module": "wepppy/microservices/rq_engine/culvert_routes.py"
   },
   {
@@ -106,7 +106,7 @@
     "notes": [],
     "queue_name": "batch",
     "source_function": "_enqueue_culvert_run_job",
-    "source_lineno": 376,
+    "source_lineno": 363,
     "source_module": "wepppy/microservices/rq_engine/culvert_routes.py"
   },
   {

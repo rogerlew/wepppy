@@ -265,6 +265,7 @@ def test_culverts_runner_creates_runs_and_get_wd(
         )
 
     assert tuple(run_ids) == ("1", "2")
+    assert runner.runs == {}
     base_copy = batch_root / "_base" / "README.txt"
     assert base_copy.read_text(encoding="utf-8") == "base-override"
     for run_id in run_ids:

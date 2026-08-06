@@ -10,7 +10,6 @@ import pytest
 TestClient = pytest.importorskip("fastapi.testclient").TestClient
 
 import wepppy.microservices.rq_engine as rq_engine
-from wepppy.nodb.culverts_runner import CulvertsRunner
 from wepppy.microservices.rq_engine import auth as rq_auth
 from wepppy.microservices.rq_engine import culvert_routes
 from wepppy.microservices.shape_converter.archive_validation import ArchiveLimits
@@ -315,8 +314,7 @@ def test_culvert_ingest_success(tmp_path: Path, monkeypatch: pytest.MonkeyPatch)
     metadata = json.loads(metadata_path.read_text())
     assert metadata["culvert_batch_uuid"] == payload["culvert_batch_uuid"]
     assert "created_at" in metadata
-    runner = CulvertsRunner.getInstance(str(batch_root))
-    assert runner.rq_job_ids.get("run_culvert_batch_rq") == "job-123"
+    assert not (batch_root / "culverts_runner.nodb").exists()
     assert not (batch_root / "topo" / "flovec.tif").exists()
     assert not (batch_root / "topo" / "netful.tif").exists()
 

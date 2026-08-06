@@ -1,7 +1,9 @@
 from __future__ import annotations
 
+from contextlib import contextmanager
 import json
 from pathlib import Path
+from typing import Any
 
 import numpy as np
 import pytest
@@ -48,6 +50,56 @@ def _write_culvert_points_custom(
         ],
     }
     path.write_text(json.dumps(payload), encoding="utf-8")
+
+
+def _initialize_batch_runner(
+    batch_root: Path,
+    batch_uuid: str,
+    payload_metadata: dict[str, Any],
+    model_parameters: dict[str, Any],
+) -> CulvertsRunner:
+    runner = CulvertsRunner(str(batch_root), "culvert.cfg")
+    with runner.locked():
+        runner._culvert_batch_uuid = batch_uuid
+        runner._payload_metadata = dict(payload_metadata)
+        runner._model_parameters = dict(model_parameters)
+        runner._run_config = runner._resolve_run_config(model_parameters)
+    return runner
+
+
+@contextmanager
+def _forbid_shared_runner_writes(monkeypatch: pytest.MonkeyPatch):
+    original_locked = CulvertsRunner.locked
+
+    @contextmanager
+    def _shared_runner_write_forbidden(*_args, **_kwargs):
+        raise AssertionError("culvert child attempted a shared runner write")
+        yield
+
+    monkeypatch.setattr(CulvertsRunner, "locked", _shared_runner_write_forbidden)
+    try:
+        yield
+    finally:
+        monkeypatch.setattr(CulvertsRunner, "locked", original_locked)
+
+
+def test_culvert_child_requires_parent_initialized_runner(
+    tmp_path: Path, monkeypatch: pytest.MonkeyPatch
+) -> None:
+    culverts_root = tmp_path / "culverts"
+    monkeypatch.setenv("CULVERTS_ROOT", str(culverts_root))
+    batch_uuid = "batch-missing-parent-state"
+    batch_root = culverts_root / batch_uuid
+    batch_root.mkdir(parents=True)
+
+    with pytest.raises(FileNotFoundError, match="initialized by the parent"):
+        run_culvert_run_rq(
+            f"culvert;;{batch_uuid};;1",
+            batch_uuid,
+            "1",
+        )
+
+    assert not (batch_root / "culverts_runner.nodb").exists()
 
 
 def test_culvert_batch_orchestration_writes_run_metadata(
@@ -104,6 +156,12 @@ def test_culvert_batch_orchestration_writes_run_metadata(
     (batch_root / "model-parameters.json").write_text(
         json.dumps(model_parameters), encoding="utf-8"
     )
+    runner = _initialize_batch_runner(
+        batch_root,
+        batch_uuid,
+        metadata,
+        model_parameters,
+    )
 
     def _noop(*_args, **_kwargs) -> None:
         return None
@@ -131,15 +189,19 @@ def test_culvert_batch_orchestration_writes_run_metadata(
     monkeypatch.setattr(culvert_rq_module, "activate_query_engine_for_run", _noop)
     monkeypatch.setattr(culvert_rq_module, "_generate_masked_stream_junctions", _noop)
 
-    for run_id in ("1", "2"):
-        runid = f"culvert;;{batch_uuid};;{run_id}"
-        run_culvert_run_rq(runid, batch_uuid, run_id)
-        run_wd = batch_root / "runs" / run_id
-        assert (run_wd / "ron.nodb").is_file()
+    with _forbid_shared_runner_writes(monkeypatch):
+        for run_id in ("1", "2"):
+            runid = f"culvert;;{batch_uuid};;{run_id}"
+            run_culvert_run_rq(runid, batch_uuid, run_id)
+            run_wd = batch_root / "runs" / run_id
+            assert (run_wd / "ron.nodb").is_file()
 
-    runid = f"culvert;;{batch_uuid};;2"
-    run_culvert_run_rq(runid, batch_uuid, "2")
+        runid = f"culvert;;{batch_uuid};;2"
+        run_culvert_run_rq(runid, batch_uuid, "2")
 
+        persisted_runner = CulvertsRunner.getInstance(str(batch_root))
+        assert persisted_runner is not None
+        assert persisted_runner.runs == {}
     culvert_rq_module._final_culvert_batch_complete_rq(batch_uuid)
 
     run1_metadata = json.loads(
@@ -162,10 +224,12 @@ def test_culvert_batch_orchestration_writes_run_metadata(
     assert run2_metadata["culvert_batch_uuid"] == batch_uuid
     assert run2_metadata["config"] == "culvert.cfg"
 
-    runner = CulvertsRunner.getInstance(str(batch_root))
-    assert runner is not None
-    assert runner.completed_at is not None
-    summary = runner.summary
+    finalized_runner = CulvertsRunner.getInstance(str(batch_root))
+    assert finalized_runner is not None
+    assert finalized_runner.completed_at is not None
+    assert finalized_runner.runs["1"]["status"] == "failed"
+    assert finalized_runner.runs["2"]["status"] == "success"
+    summary = finalized_runner.summary
     assert summary is not None
     assert summary["total"] == 2
     assert summary["succeeded"] == 1
@@ -176,6 +240,23 @@ def test_culvert_batch_orchestration_writes_run_metadata(
     assert "Runs Manifest" in manifest_text
     assert f"culvert;;{batch_uuid};;1" in manifest_text
     assert f"culvert;;{batch_uuid};;2" in manifest_text
+
+    retry_metadata = dict(run1_metadata)
+    retry_metadata["status"] = "success"
+    retry_metadata.pop("error")
+    (batch_root / "runs" / "1" / "run_metadata.json").write_text(
+        json.dumps(retry_metadata), encoding="utf-8"
+    )
+
+    retry_summary = culvert_rq_module._final_culvert_batch_complete_rq(batch_uuid)
+    retry_runner = CulvertsRunner.getInstance(str(batch_root))
+    assert retry_runner is not None
+    assert retry_runner.runs["1"]["status"] == "success"
+    assert "error" not in retry_runner.runs["1"]
+    assert retry_summary["succeeded"] == 2
+    assert retry_summary["failed"] == 0
+    retry_manifest = (batch_root / "runs_manifest.md").read_text(encoding="utf-8")
+    assert "landuse fail" not in retry_manifest
 
 
 def test_culvert_run_outside_watershed_validation(
@@ -205,9 +286,13 @@ def test_culvert_run_outside_watershed_validation(
     (batch_root / "model-parameters.json").write_text(
         json.dumps(model_parameters), encoding="utf-8"
     )
+    runner = _initialize_batch_runner(batch_root, batch_uuid, metadata, model_parameters)
 
     runid = f"culvert;;{batch_uuid};;1"
-    run_culvert_run_rq(runid, batch_uuid, "1")
+    with _forbid_shared_runner_writes(monkeypatch):
+        run_culvert_run_rq(runid, batch_uuid, "1")
+
+    assert runner.runs == {}
 
     run_metadata = json.loads(
         (batch_root / "runs" / "1" / "run_metadata.json").read_text(encoding="utf-8")
@@ -249,9 +334,13 @@ def test_culvert_run_minimum_area_validation(
     (batch_root / "model-parameters.json").write_text(
         json.dumps(model_parameters), encoding="utf-8"
     )
+    runner = _initialize_batch_runner(batch_root, batch_uuid, metadata, model_parameters)
 
     runid = f"culvert;;{batch_uuid};;1"
-    run_culvert_run_rq(runid, batch_uuid, "1")
+    with _forbid_shared_runner_writes(monkeypatch):
+        run_culvert_run_rq(runid, batch_uuid, "1")
+
+    assert runner.runs == {}
 
     run_metadata = json.loads(
         (batch_root / "runs" / "1" / "run_metadata.json").read_text(encoding="utf-8")
@@ -314,6 +403,7 @@ def test_culvert_run_seeds_outlet_on_no_outlet_error(
     (batch_root / "model-parameters.json").write_text(
         json.dumps(model_parameters), encoding="utf-8"
     )
+    _initialize_batch_runner(batch_root, batch_uuid, metadata, model_parameters)
 
     seeded: dict[str, tuple[int, int]] = {}
 
