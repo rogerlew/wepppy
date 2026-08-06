@@ -929,6 +929,20 @@ the remaining-run controller plan has no next controller milestone.
 
 ## ✅ Done
 
+### Batch Runner OMNI Selective Retry - Rejected (2026-08-06)
+
+**Lifecycle**: Backlog -> Rejected/Closed (2026-08-06)
+
+**Summary**: Rejected scenario-selective OMNI retry before checkpoint commit or
+implementation. The operator requires a complete OMNI scenario rerun because
+dependent scenarios, aggregates, and contrasts are too coupled to validate
+safely at the slow production multi-watershed iteration rate. No production
+code or state changed.
+
+**Link**: [docs/work-packages/20260806_batch_runner_omni_selective_retry/](docs/work-packages/20260806_batch_runner_omni_selective_retry/)
+
+---
+
 ### Batch Runner WATAR-Only Retry Correctness (2026-08-06)
 
 **Lifecycle**: In Progress -> Done (2026-08-06)
