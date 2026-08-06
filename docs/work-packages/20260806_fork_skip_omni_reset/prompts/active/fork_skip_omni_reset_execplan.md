@@ -26,7 +26,8 @@ is unchanged. Leaving the box unchecked behaves exactly as today.
   equivalence to remove optional copied Omni-owned keys absent from fresh state.
 - [x] (2026-08-06 UTC) Obtained post-fix PASS confirmation for COR-01 through
   COR-03 and SEC-01 through SEC-07; zero medium/high findings remain.
-- [ ] Ratify and commit the contract-first checkpoint (ratified; commit pending).
+- [x] (2026-08-06 UTC) Ratified and committed standalone contract-first
+  checkpoint `82e47916f`.
 - [ ] Implement the UI/API/RQ field without changing existing defaults.
 - [ ] Implement exact copy exclusion and one bounded destination reset operation.
 - [ ] Add exhaustive property and integration evidence.

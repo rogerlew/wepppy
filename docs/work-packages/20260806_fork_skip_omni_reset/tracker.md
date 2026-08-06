@@ -4,9 +4,9 @@
 
 **Timezone**: UTC
 **Started**: 2026-08-06 14:55 UTC
-**Current phase**: Accepted checkpoint commit
+**Current phase**: Test-first implementation
 **Last updated**: 2026-08-06 14:55 UTC
-**Next milestone**: Standalone checkpoint commit, then failing focused tests
+**Next milestone**: Failing focused tests
 **Security impact**: `high`
 **Dedicated security review**: `yes`
 **Security artifact**: `artifacts/2026-08-06_security_review.md`
@@ -18,7 +18,7 @@
 - [x] Select rewrite-in-place `Omni.reset_for_fork()` contract, exact persisted
   fresh-state comparison, and unconditional cache/lock sequence.
 - [x] Dispatch two independent contract reviews and disposition all findings.
-- [ ] Commit the accepted contract/reviews as a standalone ancestor.
+- [x] Commit the accepted contract/reviews as standalone ancestor `82e47916f`.
 - [ ] Implement UI, schema/default, route, enqueue, worker, copy, and reset flow.
 - [ ] Add exhaustive boolean-matrix and destination-invariant tests.
 - [ ] Complete documentation, validation, and final reviews.
@@ -99,7 +99,7 @@ examples.
 - [x] Exact UI/request/default/response/RQ contract accepted.
 - [x] Two independent pre-implementation reviews complete.
 - [x] Dedicated security review has no unresolved medium/high findings.
-- [ ] Standalone checkpoint SHA recorded here.
+- [x] Standalone checkpoint SHA `82e47916f` recorded here.
 
 ### Testing
 
