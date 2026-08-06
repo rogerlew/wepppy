@@ -1,6 +1,6 @@
 # Fork Skip Omni Scenarios/Contrasts and Reset
 
-**Status**: Open (2026-08-06)
+**Status**: Closed 2026-08-06
 **Timezone**: UTC
 **Package ID**: SURF-04B
 
@@ -69,27 +69,27 @@ a standalone ancestor before implementation files are edited.
 
 ## Success Criteria
 
-- [ ] The unchecked option is absent from behavior: existing copy and Omni state
+- [x] The unchecked option is absent from behavior: existing copy and Omni state
   remain unchanged.
-- [ ] The checked option excludes child content under both Omni collections.
-- [ ] The checked destination has real, empty
+- [x] The checked option excludes child content under both Omni collections.
+- [x] The checked destination has real, empty
   `_pups/omni/{scenarios,contrasts}` directories and an empty real `omni/`
   aggregate directory.
-- [ ] The destination `omni.nodb` loads as a fresh controller with no scenarios,
+- [x] The destination `omni.nodb` loads as a fresh controller with no scenarios,
   contrasts, dependency trees, run-state, output references, or inherited job
   markers.
-- [ ] The destination has neither Omni RedisPrep completion timestamp nor stale
+- [x] The destination has neither Omni RedisPrep completion timestamp nor stale
   query-engine Omni entries, while unrelated timestamps/datasets are retained.
-- [ ] Source model/Omni state, Omni timestamps, query-engine data, and
+- [x] Source model/Omni state, Omni timestamps, query-engine data, and
   quiescent-fixture hashes are unchanged after excluding only the existing
   source `redisprep.dump` fork-job tracking delta; no source reset/cache/lock
   helper is invoked.
-- [ ] Every combination of the three fork booleans has contract/property
+- [x] Every combination of the three fork booleans has contract/property
   coverage, including request serialization, route parsing, enqueue arguments,
   rsync exclusions, reset decision, and terminal destination invariants.
-- [ ] Failure during reset cannot report fork success or leave a destination
+- [x] Failure during reset cannot report fork success or leave a destination
   advertised as ready.
-- [ ] Focused backend/frontend tests, RQ graph check if needed, full pytest,
+- [x] Focused backend/frontend tests, RQ graph check if needed, full pytest,
   frontend lint/tests, docs lint, correctness/QA/security reviews all pass.
 
 ## Parameterization ADR Gate
@@ -145,7 +145,7 @@ a standalone ancestor before implementation files are edited.
 - `wepppy/rq/job-dependencies-catalog.md`
 - `docs/ui-docs/weppcloud-project-forking.md`
 - `wepppy/nodb/mods/omni/README.md`
-- `prompts/active/fork_skip_omni_reset_execplan.md`
+- `prompts/completed/fork_skip_omni_reset_execplan.md`
 
 ## Deliverables
 
@@ -173,4 +173,12 @@ and quiescent source evidence.
 
 ## Follow-up Work
 
-- None identified at scaffold time.
+- Real Redis/RQ recovery integration remains useful residual coverage but does
+  not block the accepted fork/reset contract or package closure.
+
+## Closure Summary
+
+Closed on 2026-08-06. Contract checkpoint `82e47916f` precedes implementation
+commit `3269f7e97`. The delivered UI/API/RQ/NoDb flow, exhaustive boolean
+matrix, destination/source invariants, focused and full validation, and final
+correctness, QA, and security reviews all passed.

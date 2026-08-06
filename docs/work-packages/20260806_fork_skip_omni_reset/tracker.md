@@ -5,8 +5,8 @@
 **Timezone**: UTC
 **Started**: 2026-08-06 14:55 UTC
 **Current phase**: Complete
-**Last updated**: 2026-08-06 18:34 UTC
-**Next milestone**: Worker-first deployment after draining fork/archive consumers
+**Last updated**: 2026-08-06 21:52 UTC
+**Next milestone**: None; package closed
 **Security impact**: `high`
 **Dedicated security review**: `yes`
 **Security artifact**: `artifacts/2026-08-06_security_review.md`
@@ -77,19 +77,19 @@ examples.
 
 | Risk | Severity | Likelihood | Mitigation | Status |
 | --- | --- | --- | --- | --- |
-| Missing children but stale `omni.nodb` references | High | High | Single Omni reset transaction plus load-after-reset tests | Open |
-| Broad rsync exclude drops unrelated `_pups` data | High | Low | Anchored exact collection exclusions and sibling-preservation properties | Open |
-| Reset mutates source through symlink/path confusion | High | Low | Descriptor/no-follow containment review and source hash invariant | Open |
-| Option interactions drift | Medium | Medium | Exhaustive eight-state matrix | Open |
-| Partial reset reports success | High | Low | Fail before readiness/success and test injected failures | Open |
-| Fifth-argument producer reaches an old worker | High | Medium | Worker-first drained rollout and legacy-job tests | Open |
-| Partial registered destination is mistaken for rollback | Medium | Medium | Specify unready partial behavior; do not claim transaction rollback | Open |
-| RedisPrep claims removed Omni work completed | High | High | Remove exactly two Omni timestamps; preserve unrelated timestamps | Open |
-| Query catalog advertises deleted Omni artifacts | Medium | High | Invalidate copied catalog/cache and test regenerated unrelated discovery | Open |
-| Copied cleanup node redirects outside destination | High | Low | Held destination-rooted descriptors, no-follow validation, external sentinels | Open |
-| Copied RedisPrep node redirects metadata mutation | High | Low | Reject symlink/special `redisprep.dump` before hydration | Open |
-| Live Omni lock is erased during reset | High | Low | Prove destination ownership and reject active locks | Open |
-| Profile target helpers resolve different trees | High | Low | Resolve one canonical destination for copy/cache/lock/controller operations | Open |
+| Missing children but stale `omni.nodb` references | High | High | Single Omni reset transaction plus load-after-reset tests | Mitigated |
+| Broad rsync exclude drops unrelated `_pups` data | High | Low | Anchored exact collection exclusions and sibling-preservation properties | Mitigated |
+| Reset mutates source through symlink/path confusion | High | Low | Descriptor/no-follow containment review and source hash invariant | Mitigated |
+| Option interactions drift | Medium | Medium | Exhaustive eight-state matrix | Mitigated |
+| Partial reset reports success | High | Low | Fail before readiness/success and test injected failures | Mitigated |
+| Fifth-argument producer reaches an old worker | High | Medium | Worker-first drained rollout and legacy-job tests | Mitigated |
+| Partial registered destination is mistaken for rollback | Medium | Medium | Specify unready partial behavior; do not claim transaction rollback | Mitigated |
+| RedisPrep claims removed Omni work completed | High | High | Remove exactly two Omni timestamps; preserve unrelated timestamps | Mitigated |
+| Query catalog advertises deleted Omni artifacts | Medium | High | Invalidate copied catalog/cache and test regenerated unrelated discovery | Mitigated |
+| Copied cleanup node redirects outside destination | High | Low | Held destination-rooted descriptors, no-follow validation, external sentinels | Mitigated |
+| Copied RedisPrep node redirects metadata mutation | High | Low | Reject symlink/special `redisprep.dump` before hydration | Mitigated |
+| Live Omni lock is erased during reset | High | Low | Prove destination ownership and reject active locks | Mitigated |
+| Profile target helpers resolve different trees | High | Low | Resolve one canonical destination for copy/cache/lock/controller operations | Mitigated |
 | Profile claim outlives or races its RQ owner | High | Low | Per-target flock, atomic ownership transfer, failure-tolerant finalizer, terminal/missing recovery | Mitigated |
 
 ## Verification Checklist
@@ -108,7 +108,7 @@ examples.
 - [x] Worker property matrix covers exclusions and reset decision.
 - [x] Checked tuples clear exactly two Omni timestamps and invalidate stale
   query-engine catalog/cache without losing unrelated state.
-- [ ] Integration tests prove empty coherent destination and unchanged source.
+- [x] Integration tests prove empty coherent destination and unchanged source.
 - [x] `wctl run-pytest tests/rq/test_project_rq_fork.py` passes.
 - [x] `wctl run-pytest tests/microservices/test_rq_engine_fork_archive_routes.py` passes.
 - [x] `wctl run-pytest tests/nodb/mods/test_omni.py` passes.
@@ -198,3 +198,23 @@ examples.
   standalone ancestor before production implementation.
 
 **Test results**: Review artifact only; production implementation remains absent.
+
+### 2026-08-06 21:52 UTC: Package closeout
+
+**Agent/Contributor**: Codex
+
+**Work completed**:
+
+- Confirmed contract checkpoint `82e47916f` and implementation commit
+  `3269f7e97` are present in history.
+- Reconciled package success criteria and integration-test evidence with the
+  completed ExecPlan, and archived the plan under `prompts/completed/`.
+- Moved the package from Backlog to Done in `PROJECT_TRACKER.md`.
+
+**Next steps**: None for package closure. Deploy worker-first after draining
+fork/archive consumers when releasing the implementation.
+
+**Test results**: Closeout rerun passed focused backend (`430 passed`), frontend
+lint and tests (`105` suites / `756` tests), package/root docs lint, and diff
+whitespace checks. See the completed ExecPlan and repository history for the
+earlier full-suite evidence.

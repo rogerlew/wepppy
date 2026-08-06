@@ -2,7 +2,7 @@
 > Kanban board for wepppy work packages and vision items
 
 **Last Updated**: 2026-08-06
-**Active Packages**: 23
+**Active Packages**: 22
 **Quick Links**: [Work Packages Directory](docs/work-packages/) | [God-Tier Prompting Strategy](docs/god-tier-prompting-strategy.md)
 
 ## Purpose
@@ -76,19 +76,6 @@ Feedback mechanisms:
 ## 📋 Backlog
 
 Work packages that are scoped but not yet started. Dependencies and prerequisites should be noted.
-
-### Fork Skip Omni Scenarios/Contrasts and Reset
-
-**Proposed**: 2026-08-06
-**Size**: Medium (3-5 focused sessions)
-**Priority**: High
-**Security impact**: `high` (public RQ input plus conditional run-tree omission
-and destination NoDb/filesystem reset; dedicated review required)
-**Link**: [docs/work-packages/20260806_fork_skip_omni_reset/](docs/work-packages/20260806_fork_skip_omni_reset/)
-**Description**: Add an opt-in fork-console checkbox that excludes Omni scenario
-and contrast child projects, then resets the destination Omni controller and
-owned directories so the fork remains coherent. Contract-first checkpoint and
-exhaustive three-boolean property coverage are required before implementation.
 
 ### Run Archive Consistency and Symlink Hardening
 
@@ -928,6 +915,32 @@ the remaining-run controller plan has no next controller milestone.
 ---
 
 ## ✅ Done
+
+### Fork Skip Omni Scenarios/Contrasts and Reset
+
+**Completed**: 2026-08-06
+**Status**: ✅ **COMPLETE**
+**Security impact**: `high`; dedicated correctness, QA, and security reviews passed
+**Link**: [docs/work-packages/20260806_fork_skip_omni_reset/](docs/work-packages/20260806_fork_skip_omni_reset/)
+**Description**: Added an opt-in fork-console checkbox that excludes Omni
+scenario and contrast child projects while resetting destination Omni state,
+RedisPrep timestamps, and query-engine cache/catalog data coherently.
+
+**Outcome**:
+
+- Preserved existing behavior when the option is omitted or false.
+- Added exhaustive three-boolean UI/API/worker coverage and destination/source
+  invariants, including malicious symlink and live-lock handling.
+- Ratified contract checkpoint `82e47916f` before implementation commit
+  `3269f7e97` and closed all correctness, QA, and security findings.
+
+**Validation Notes**:
+
+- Focused backend and frontend gates passed.
+- Full repository suite passed (`5891 passed, 61 skipped`).
+- RQ graph, docs lint, and changed broad-exception enforcement passed.
+
+---
 
 ### Batch Runner OMNI Selective Retry - Rejected (2026-08-06)
 

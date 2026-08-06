@@ -1,5 +1,14 @@
 # Add a coherent skip-Omni fork option
 
+**Outcome**: Completed on 2026-08-06. Contract checkpoint `82e47916f` and
+implementation commit `3269f7e97` delivered the option and passed focused,
+full-suite, correctness, QA, and security validation. The plan was archived
+from `prompts/active/` during package closeout.
+
+Closeout revalidation passed 430 focused backend tests, frontend lint and all
+105 Jest suites / 756 tests, package/root documentation lint, and diff
+whitespace checks.
+
 This ExecPlan is a living document. Maintain it according to
 `docs/prompt_templates/codex_exec_plans.md`, including `Progress`, `Surprises &
 Discoveries`, `Decision Log`, and `Outcomes & Retrospective` at every stopping
