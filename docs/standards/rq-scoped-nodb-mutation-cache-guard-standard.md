@@ -8,6 +8,24 @@ Prevent stale-write signature mismatch in mutable RQ tasks by requiring scoped c
 
 This standard defines when scoped cache invalidation is required, where it must be placed, and how to verify it with tests.
 
+## Concurrent Writer Boundary
+
+Scoped cache invalidation prevents initial hydration from using a stale Redis
+mirror. It does not make independent read-modify-write operations against one
+whole-object NoDb file safe.
+
+- RQ orchestration SHOULD use the single-writer or dependency-finalizer pattern
+  in `docs/schemas/nodb-persistence-concurrency-contract.md` when parallel jobs
+  can emit disjoint per-job or per-run artifacts.
+- Multiple RQ writers to one NoDb file remain permitted when aggregation cannot
+  be deferred. Each write MUST follow the contract's bounded transaction:
+  acquire the lock, refresh durable state while holding it, apply an idempotent
+  mutation, and atomically persist.
+- Different attributes or dictionary keys in the same controller are not
+  separate persistence scopes because every dump replaces the full payload.
+- A stale-write retry MUST reload current durable state and reapply the
+  operation; it MUST NOT redump the same stale controller instance.
+
 ## Contract Classification
 
 This is a canonical mutation-path coherence contract, not incident hardening.
