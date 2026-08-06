@@ -21,12 +21,16 @@ class DummyManagementSummary:
 class FakeLanduse:
     _instance = None
 
-    def __init__(self, domlc_d, managements, mapping):
+    def __init__(self, domlc_d, managements, mapping, domlc_mofe_d=None):
         self.domlc_d = domlc_d
+        self.domlc_mofe_d = domlc_mofe_d
         self.managements = managements
         self._mapping = mapping
+        self.mapping = "mock-map"
         self.dump_called = False
         self._locked = False
+        self.mofe_rebuild_calls = []
+        self.management_rebuild_calls = 0
 
     @classmethod
     def getInstance(cls, wd):
@@ -48,6 +52,12 @@ class FakeLanduse:
 
     def dump_landuse_parquet(self):
         self.dump_called = True
+
+    def _build_multiple_ofe(self, *, domlc_mofe_override=None):
+        self.mofe_rebuild_calls.append(domlc_mofe_override)
+
+    def build_managements(self):
+        self.management_rebuild_calls += 1
 
 
 class FakeSoils:
@@ -77,6 +87,18 @@ class FakeDisturbed:
 
     def __init__(self):
         self.land_soil_replacements_d = {}
+        self.modify_mofe_soils_calls = 0
+
+    def get_disturbed_key_lookup(self):
+        return {
+            "thinning_40_75": "124",
+            "forest_prescribed_fire": "110",
+            "shrub_prescribed_fire": "111",
+            "grass_prescribed_fire": "112",
+        }
+
+    def modify_mofe_soils(self):
+        self.modify_mofe_soils_calls += 1
 
     @classmethod
     def getInstance(cls, wd):
@@ -141,6 +163,126 @@ def test_build_treatments_updates_domlc_and_dumps_parquet(monkeypatch, tmp_path)
     assert landuse.dump_called is True
     assert apply_calls == [("101", "thinning_40_75", "forest")]
     assert modify_calls == ["101"]
+
+
+@pytest.mark.unit
+def test_build_treatments_propagates_thinning_to_eligible_mofe_segments(
+    monkeypatch,
+    tmp_path,
+):
+    mapping = {"140": {"DisturbedClass": "thinning_40_75", "IsTreatment": True}}
+    landuse = FakeLanduse(
+        domlc_d={"101": "41"},
+        domlc_mofe_d={"101": {"1": "41", "2": "51", "3": "43"}},
+        managements={
+            "41": DummyManagementSummary("forest"),
+            "43": DummyManagementSummary("mixed forest"),
+            "51": DummyManagementSummary("shrub"),
+            "124": DummyManagementSummary("thinning_40_75"),
+        },
+        mapping=mapping,
+    )
+    soils = FakeSoils()
+    disturbed = FakeDisturbed()
+
+    FakeLanduse._instance = landuse
+    FakeSoils._instance = soils
+    FakeDisturbed._instance = disturbed
+    monkeypatch.setattr(treatments_module, "Landuse", FakeLanduse)
+    monkeypatch.setattr(treatments_module, "Soils", FakeSoils)
+
+    import wepppy.nodb.mods.disturbed as disturbed_module
+
+    monkeypatch.setattr(disturbed_module, "Disturbed", FakeDisturbed)
+
+    treatments = treatments_module.Treatments.__new__(treatments_module.Treatments)
+    treatments.wd = str(tmp_path)
+    treatments.logger = logging.getLogger("test.treatments.mofe")
+    treatments._treatments_domlc_d = {"101": "140"}
+    monkeypatch.setattr(
+        treatments_module.Treatments,
+        "_apply_treatment",
+        lambda self, *_args, **_kwargs: "124",
+        raising=True,
+    )
+
+    import wepppy.nodb.core.watershed as watershed_module
+
+    monkeypatch.setattr(
+        watershed_module.Watershed,
+        "getInstance",
+        classmethod(lambda cls, wd: DummyWatershed()),
+        raising=True,
+    )
+
+    treatments.build_treatments()
+
+    assert landuse.domlc_d == {"101": "124"}
+    assert landuse.domlc_mofe_d == {
+        "101": {"1": "124", "2": "51", "3": "124"},
+    }
+    assert landuse.mofe_rebuild_calls == [landuse.domlc_mofe_d]
+    assert landuse.management_rebuild_calls == 1
+    assert disturbed.modify_mofe_soils_calls == 1
+
+
+@pytest.mark.unit
+def test_apply_mulch_updates_requested_mofe_assignment_only(tmp_path):
+    class Data:
+        inrcov = 0.2
+        rilcov = 0.3
+
+    class Ini:
+        data = Data()
+
+    class Management:
+        inis = [Ini()]
+
+        def __str__(self):
+            return "mulched-management\n"
+
+    class Summary(DummyManagementSummary):
+        def __init__(self):
+            super().__init__("forest high sev fire")
+            self.man_fn = "Forest.man"
+            self.key = 41
+            self.man_dir = str(tmp_path)
+            self.desc = "Forest"
+            self.inrcov = 0.2
+            self.rilcov = 0.3
+
+        def get_management(self):
+            return Management()
+
+    landuse_dir = tmp_path / "landuse"
+    landuse_dir.mkdir()
+    landuse = FakeLanduse(
+        domlc_d={"101": "41"},
+        managements={"41": Summary()},
+        mapping={},
+    )
+    landuse._locked = True
+    landuse.lc_dir = str(landuse_dir)
+    treatments = treatments_module.Treatments.__new__(treatments_module.Treatments)
+    treatments.wd = str(tmp_path)
+    treatments.logger = logging.getLogger("test.treatments.mofe.mulch")
+    assignments = {"1": "41", "2": "51"}
+
+    new_dom = treatments._apply_mulch(
+        landuse,
+        FakeDisturbed(),
+        "101",
+        "mulch_30",
+        landuse.managements["41"],
+        "forest high sev fire",
+        assignments=assignments,
+        assignment_id="1",
+    )
+
+    assert new_dom == "41030"
+    assert assignments == {"1": "41030", "2": "51"}
+    assert landuse.domlc_d == {"101": "41"}
+    assert (landuse_dir / "Forest_mulch_30.man").read_text() == "mulched-management\n"
 
 
 @pytest.mark.unit

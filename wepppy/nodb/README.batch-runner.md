@@ -88,6 +88,23 @@ Each pipeline stage can be toggled on or off. The default set:
 | `run_omni_contrasts` | on | Run OMNI contrast analysis |
 | `rmtree` | **off** | Remove existing run directory before starting |
 
+### OMNI Treatments with Multi-OFE Landuse
+
+Batch leaves configured with multi-OFE landuse store both a dominant
+hillslope-level management key (`domlc_d`) and one management key per overland
+flow element (`domlc_mofe_d`). OMNI thinning and prescribed-fire treatments must
+update each eligible OFE from that segment's own land-cover class; they must not
+replace unrelated shrub, grass, or developed segments merely because the
+hillslope's dominant class is forest.
+
+After the per-OFE mapping changes, Batch Runner regenerates
+`landuse/hill_<topaz_id>.mofe.man` and `soils/hill_<topaz_id>.mofe.sol` before
+WEPP preparation. The resulting `wepp/runs/p<wepp_id>.man` and `.sol` files are
+the propagation boundary operators should inspect when validating scenario
+canopy cover, ground cover, and soil treatment behavior. A treatment log entry
+or a changed scalar `domlc_d` alone is not sufficient evidence for a multi-OFE
+scenario.
+
 ### Template Evaluation
 
 Run IDs are generated from GeoJSON feature properties using safe expressions:

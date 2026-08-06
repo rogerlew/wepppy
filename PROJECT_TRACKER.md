@@ -929,6 +929,19 @@ the remaining-run controller plan has no next controller milestone.
 
 ## ✅ Done
 
+### Batch OMNI Multi-OFE Treatment Propagation (2026-08-06)
+
+**Lifecycle**: In Progress -> Done (2026-08-06)
+
+**Summary**: Added segment-aware thinning, prescribed-fire, and mulch treatment
+propagation for Batch Runner OMNI multi-OFE projects. Eligible OFEs now update
+without overwriting unrelated segments, synthesized management and soil files
+are rebuilt, and regression evidence proves treated cover reaches generated
+`wepp/runs/*.man` inputs. Final validation passed 5,895 repository tests with 61
+skipped and 12 passing subtests.
+
+**Link**: [docs/work-packages/20260806_batch_omni_mofe_treatments/](docs/work-packages/20260806_batch_omni_mofe_treatments/)
+
 ### Culvert NoDb Writer Hardening
 
 **Completed**: 2026-08-05
