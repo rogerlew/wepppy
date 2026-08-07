@@ -2,7 +2,7 @@
 > Kanban board for wepppy work packages and vision items
 
 **Last Updated**: 2026-08-07
-**Active Packages**: 22
+**Active Packages**: 23
 **Quick Links**: [Work Packages Directory](docs/work-packages/) | [God-Tier Prompting Strategy](docs/god-tier-prompting-strategy.md)
 
 ## Purpose
@@ -37,7 +37,7 @@ This tracker makes all work visible at a glance, helping agents coordinate and a
 ### 2. Limit Work in Progress
 **Target**: 2-4 active packages maximum to maintain focus and ensure packages complete rather than stall.
 
-**Current WIP**: 24 packages (above target range; calculated from the 24 package entries in the In Progress section)
+**Current WIP**: 23 packages (above target range; calculated from the 23 package entries in the In Progress section)
 
 ### 3. Manage Flow
 Monitor how long packages spend in each column:
@@ -353,21 +353,6 @@ When resuming Kubernetes work:
 
 ## 🚧 In Progress
 
-### RQ Jobstatus Advisory Queue Rank
-
-**Started**: 2026-08-07
-**Size**: Medium-High (contract checkpoint, implementation, focused gates, and independent reviews)
-**Priority**: High
-**Security impact**: `high` (bounded queue-state disclosure on an open-by-default polling route)
-**Link**: [docs/work-packages/20260807_rq_jobstatus_queue_rank/](docs/work-packages/20260807_rq_jobstatus_queue_rank/)
-**Description**: Add an optional advisory `queue` snapshot to jobstatus that
-  ranks the next queued member of the requested registered RQ tree, including
-  Culvert children and finalizers, with one-based rank and bounded single-queue
-  Redis access. Auth, queue topology, dependency edges, and browse-token scope
-  remain unchanged.
-**Status**: Contract checkpoint in progress; production implementation is
-  blocked until the standalone reviewed ancestor is committed.
-
 ### Fork/Archive Serial Queue Isolation (proposed SURF-03A)
 
 **Started**: 2026-08-03
@@ -487,7 +472,7 @@ authentication tokens from logs, restore persistent security logging under
 
 Currently active work packages. Limit to 2-4 packages to maintain focus.
 
-**Current WIP Count**: 24 packages (calculated from the In Progress section)
+**Current WIP Count**: 23 packages (calculated from the In Progress section)
 
 ### SSURGO Intelligent Fallback Empirical Study
 **Started**: 2026-07-21
@@ -965,6 +950,34 @@ the remaining-run controller plan has no next controller milestone.
 ---
 
 ## ✅ Done
+
+### RQ Jobstatus Advisory Queue Rank
+
+**Completed**: 2026-08-07
+**Status**: ✅ **COMPLETE**
+**Security impact**: `high`; dedicated code, QA, and security reviews recorded
+with no unresolved High/Medium findings
+**Link**: [docs/work-packages/20260807_rq_jobstatus_queue_rank/](docs/work-packages/20260807_rq_jobstatus_queue_rank/)
+**Summary**: Added the optional advisory `queue` snapshot to successful
+`GET /api/jobstatus/{job_id}` responses. The existing registered-tree traversal
+collects queued root/descendant candidates, and one same-origin ordered `batch`
+queue snapshot selects the earliest current position without exposing unrelated
+job metadata. Culvert roots can therefore report queued per-culvert children or
+the finalizer after fan-out. Auth modes, JWT issuance, browse-token scope,
+queue wiring, dependency edges, cancellation, and response status codes remain
+unchanged.
+
+**Commits**: checkpoint `7ce0cf524`, implementation `a416e7dd7`, review
+remediation `97141ba44` and `7b5c6d67a`; closure commit recorded in the package
+tracker after final commit.
+
+**Validation Notes**:
+
+- Combined focused set: 105 passed; post-remediation implementation subset: 70
+  passed; Culvert regressions: 26 passed; OpenAPI: 10 passed.
+- Full repository suite: 5,961 passed, 61 skipped, 1,054 warnings.
+- RQ graph, endpoint inventory, route checklist, stubtest, broad-exception
+  enforcement, documentation lint, and diff checks passed.
 
 ### Fork Skip Omni Scenarios/Contrasts and Reset
 

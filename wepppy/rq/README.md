@@ -38,6 +38,17 @@
 
 > **Note:** Every runtime module ships with a `.pyi` sibling. When adding new public helpers, update both files and run `wctl run-stubtest wepppy.rq.<module>` to keep the stubs honest.
 
+### Job-status queue snapshot
+
+`get_wepppy_rq_job_status()` may add an optional top-level `queue` object to a
+successful status response. It is an advisory, current snapshot of the
+one-based Redis-list position of the earliest queued member in the requested
+registered job tree. The object contains `name`, `rank`, `jobs_ahead`,
+`position_job_id`, `basis`, and `observed_at`; it is omitted for terminal or
+non-queued trees, missing or mixed queue origins, and normal Redis/status
+races. The traversal reads one ordered queue list per status calculation and
+does not expose unrelated job metadata or fabricate a cross-queue rank.
+
 ## Quick Start / Examples
 ### Run a worker locally
 ```bash

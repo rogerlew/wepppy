@@ -6,9 +6,9 @@
 
 **Timezone**: UTC
 **Started**: 2026-08-07 17:38 UTC
-**Current phase**: Discovery / Contract Checkpoint
-**Last updated**: 2026-08-07 17:38 UTC
-**Next milestone**: Complete independent contract reviews and commit the checkpoint ancestor.
+**Current phase**: Closure
+**Last updated**: 2026-08-07 19:10 UTC
+**Next milestone**: Archive the ExecPlan, register Done, and commit closure docs.
 **Security impact**: `high`
 **Dedicated security review**: `yes`
 **Security artifact**: `docs/work-packages/20260807_rq_jobstatus_queue_rank/artifacts/20260807_security_review.md`
@@ -17,27 +17,28 @@
 
 ### Ready / Backlog
 
-- [ ] Implement queue snapshot and regression tests after checkpoint ancestor.
-- [ ] Run focused and repository validation gates.
-- [ ] Obtain and disposition implementation code, QA, and security reviews.
+- None.
 
 ### In Progress
 
 - [x] Create package scaffold and register it as In Progress (2026-08-07 17:38 UTC).
 - [x] Record starting revision and dirty-tree inventory (2026-08-07 17:38 UTC).
-- [ ] Amend canonical contracts and complete checkpoint reviews.
+- [x] Amend canonical contracts and record unavailable reviewer attempts
+  (2026-08-07 17:55 UTC).
+- [x] Receive explicit operator authorization to proceed despite unavailable
+  delegated reviewer outputs (2026-08-07 18:44 UTC).
+- [x] Implement and commit the feature (`a416e7dd7`, 2026-08-07 UTC).
+- [x] Apply review remediation (`97141ba44`, 2026-08-07 UTC).
+- [x] Complete validation, reviews, documentation, and closure artifacts.
 
 ### Blocked
 
-- [ ] Two independent read-only contract reviewers are unavailable: four
-  reviewer agents were attempted in two independent pairs; each remained
-  `running` without returning review output after bounded waits and was closed.
-  Contract-first implementation is blocked until independent review outputs
-  are available.
+- None after explicit operator authorization on 2026-08-07 18:44 UTC.
 
 ### Done
 
-- None yet.
+- Package closure is ready; the closure commit SHA will be added immediately
+  after the final staged-diff review.
 
 ## Timeline
 
@@ -57,45 +58,59 @@ the smallest offset from one ordered queue list.
 **Impact**: The response can identify a queued Culvert child or finalizer while
 remaining additive, bounded, and incapable of fabricating a cross-queue rank.
 
+### 2026-08-07 18:44 UTC: Operator authorization to resume
+
+**Context**: Delegated read-only contract reviewers did not return outputs, and
+the prior session stopped before implementation under the initial governance
+instruction.
+
+**Decision**: The operator explicitly authorized implementation to proceed and
+stated that no blockers are identified. The committed checkpoint contract
+remains unchanged; implementation and post-implementation reviews must still
+document their actual evidence and findings honestly.
+
+**Impact**: The package resumes at implementation from checkpoint commit
+`7ce0cf524d9e7f4d2be6270ca220b574f04e91ed`.
+
 ## Risks and Issues
 
 | Risk | Severity | Likelihood | Mitigation | Status |
 |------|----------|------------|------------|--------|
-| Unrelated queued job ID disclosure | High | Low | Candidate IDs come only from registered tree links; return only selected candidate | Open |
-| Polling cost amplified by large trees | High | Medium | One traversal and one ordered queue snapshot for a single-origin tree | Open |
-| Queue/status race produces stale rank | Medium | High | Omit or choose remaining candidate; never fail authoritative status | Open |
-| Auth/token behavior changes accidentally | High | Low | Route/auth regression tests and explicit non-change review | Open |
-| Full suite blocked by baseline failure | Medium | Medium | Run focused gates first and record exact unrelated blocker | Open |
+| Unrelated queued job ID disclosure | High | Low | Candidate IDs come only from registered tree links; return only selected candidate | Closed |
+| Polling cost amplified by large trees | High | Medium | One traversal and one ordered queue snapshot for a single-origin tree; explicit contract limitation | Accepted by operator-approved contract |
+| Queue/status race produces stale rank | Medium | High | Omit or choose remaining candidate; never fail authoritative status | Closed |
+| Auth/token behavior changes accidentally | High | Low | Route/auth regression tests and explicit non-change review | Closed |
+| Full suite blocked by baseline failure | Medium | Medium | Run focused gates first and record exact unrelated blocker | Closed by full-suite result |
 
 ## Verification Checklist
 
 ### Code Quality
 
-- [ ] Focused RQ and route pytest suites pass.
-- [ ] Full `wctl run-pytest tests --maxfail=1` is run or exact unrelated blocker recorded.
-- [ ] Broad-exception enforcement and code-quality observability are recorded.
-- [ ] `git diff --check` passes.
+- [x] Focused RQ and route pytest suites pass.
+- [x] Full `wctl run-pytest tests --maxfail=1` is run or exact unrelated blocker recorded.
+- [x] Broad-exception enforcement and code-quality observability are recorded.
+- [x] `git diff --check` passes.
 
 ### Security
 
-- [ ] High-impact triage and dedicated artifact are complete.
-- [ ] No unresolved High/Medium security findings remain.
-- [ ] Open/optional/required auth modes and rate limiting remain unchanged.
-- [ ] Browse token remains browse/download-only.
+- [x] High-impact triage and dedicated artifact are complete.
+- [x] No unresolved High/Medium security findings remain.
+- [x] Open/optional/required auth modes and rate limiting remain unchanged.
+- [x] Browse token remains browse/download-only.
 
 ### Documentation
 
-- [ ] Canonical contracts, rq README, route usersum docs, and Culvert docs updated.
-- [ ] All changed Markdown is linted.
-- [ ] Package closure notes and review artifacts are complete.
+- [x] Canonical contracts, rq README, route usersum docs, and Culvert docs updated.
+- [x] All changed Markdown is linted.
+- [x] Package closure notes and review artifacts are complete.
 
 ### Testing
 
-- [ ] Root, descendant, finalizer, mixed-origin, race, status-normalization,
+- [x] Root, descendant, finalizer, mixed-origin, race, status-normalization,
   bounded-access, and disclosure cases are covered.
-- [ ] Existing status/progress/diagnostic/error/timestamp/not-found behavior is
+- [x] Existing status/progress/diagnostic/error/timestamp/not-found behavior is
   explicitly preserved.
-- [ ] OpenAPI contract suite passes without route-count or response-code changes.
+- [x] OpenAPI contract suite passes without route-count or response-code changes.
 
 ## Progress Notes
 
@@ -117,8 +132,8 @@ remaining additive, bounded, and incapable of fabricating a cross-queue rank.
 disposition them and commit the standalone ancestor before production edits.
 
 **Test results**: Documentation lint passed for the current checkpoint draft;
-implementation tests and all runtime gates are intentionally not run because
-the required independent contract reviews are unavailable.
+implementation tests and all runtime gates were intentionally deferred until
+the operator authorized implementation.
 
 ### 2026-08-07 17:55 UTC: Governance blocker
 
@@ -136,7 +151,40 @@ contract reviews and disposition before implementation. The reviewers were
 unavailable, so no checkpoint commit or production edit is safe.
 
 **Next steps**: Resume from the current scaffold when independent reviewer
-agents can return exact findings and verdicts.
+agents can return exact findings and verdicts. This historical note is retained
+for governance traceability; implementation later proceeded under explicit
+operator authorization.
+
+### 2026-08-07 19:10 UTC: Implementation, review, and validation
+
+**Agent/Contributor**: Codex, with independent read-only reviewer subagents
+
+**Work completed**:
+
+- Added the optional exact `queue` object to successful jobstatus responses by
+  collecting normalized queued candidates during the existing tree traversal.
+- Added deterministic coverage for root, child, finalizer, mixed-origin,
+  omission, race, enum/string status, disclosure, duplicate-entry, Redis-error,
+  and one-ordered-read large-tree behavior.
+- Updated RQ, rq-engine, and current Culvert documentation without modifying
+  `submit_payload.py`, auth issuance, queue wiring, or frozen inventories.
+- Remediated duplicate-offset selection and module stubs in `97141ba44`.
+
+**Review results**: Code, QA, and dedicated security reviews are recorded in
+the three implementation artifacts. The only High/Medium implementation concern
+was the one ordered snapshot, which is explicitly allowed by and documented as
+an operator-approved contract limitation. The pre-existing forwarded-header
+limiter concern is outside this package and unchanged.
+
+**Validation results**: Combined focused tests passed 105 tests; post-remediation
+implementation tests passed 70 tests; Culvert regressions passed 26 tests;
+OpenAPI passed 10 tests; direct stubtest passed; graph, inventory, checklist,
+broad-exception, docs-lint, and diff checks passed. Full-suite status: `wctl
+run-pytest tests --maxfail=1` passed with 5,961 passed, 61 skipped, and 1,054
+warnings in 13:03.
+
+**Commits**: checkpoint `7ce0cf524`, implementation `a416e7dd7`, remediation
+`97141ba44`, `7b5c6d67a`; closure commit pending.
 
 ## Watch List
 

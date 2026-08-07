@@ -1,6 +1,6 @@
 # Advisory Queue Rank in RQ Job Status
 
-**Status**: Open (2026-08-07)
+**Status**: Closed (2026-08-07 UTC)
 **Timezone**: UTC
 
 ## Overview
@@ -65,15 +65,16 @@ execution behavior.
 
 ## Success Criteria
 
-- [ ] Standalone contract checkpoint is an ancestor of implementation.
-- [ ] Exact optional `queue` object is implemented with all omission rules.
-- [ ] Root and descendant Culvert queue ranking is deterministic and bounded.
-- [ ] Existing status, progress, diagnostics, error, auth, rate-limit, 404, and
+- [x] Standalone contract checkpoint is an ancestor of implementation (`7ce0cf524`).
+- [x] Exact optional `queue` object is implemented with all omission rules.
+- [x] Root and descendant Culvert queue ranking is deterministic and bounded in
+  Redis operation count (one ordered snapshot for a multi-candidate tree).
+- [x] Existing status, progress, diagnostics, error, auth, rate-limit, 404, and
   OpenAPI behavior remains green.
-- [ ] Current contracts and durable Culvert documentation are updated.
-- [ ] Focused gates, guards, and the full-suite attempt are recorded honestly.
-- [ ] Code, QA, and security reviews have no unresolved High or Medium findings.
-- [ ] ExecPlan is archived and package is listed under Done.
+- [x] Current contracts and durable Culvert documentation are updated.
+- [x] Focused gates, guards, and the full-suite attempt are recorded honestly.
+- [x] Code, QA, and security reviews have no unresolved High or Medium findings.
+- [x] ExecPlan is archived and package is listed under Done.
 
 ## Parameterization ADR Gate
 
@@ -127,8 +128,18 @@ execution behavior.
 
 ## Deliverables
 
-To be completed at closure: implementation, focused tests, durable docs, review
+Completed at closure: implementation, focused tests, durable docs, review
 artifacts, validation evidence, intentional local commits, and archived plan.
+
+## Closure Evidence
+
+- Contract checkpoint: `7ce0cf524d9e7f4d2be6270ca220b574f04e91ed`.
+- Implementation: `a416e7dd7a30007fe67e74982db4d7fc0e16063d`.
+- Review remediation: `97141ba44`.
+- Closure commit: recorded in `tracker.md` after commit creation.
+- The approved one-snapshot queue-read tradeoff is documented in the code,
+  contract decision, and dedicated security review. No queue wiring, auth, JWT,
+  or route inventory changes were made.
 
 ## Follow-up Work
 

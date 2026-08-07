@@ -46,7 +46,8 @@
   - `POST /rq-engine/api/culverts-wepp-batch/` requires JWT scope `culvert:batch:submit`.
   - `POST /rq-engine/api/culverts-wepp-batch/{batch_uuid}/retry/{point_id}` requires JWT scope `culvert:batch:retry`.
   - Successful submit/retry responses include `browse_token` + `browse_token_expires_at` for batch-scoped browse/download access.
-  - `GET /rq-engine/api/jobstatus/{job_id}` and `/jobinfo/{job_id}` are open only when `RQ_ENGINE_POLL_AUTH_MODE=open`; in `token_optional` or `required`, scope `rq:status` is required.
+  - `GET /rq-engine/api/jobstatus/{job_id}` and `/jobinfo/{job_id}` are open by default and governed by `RQ_ENGINE_POLL_AUTH_MODE`; `token_optional` accepts anonymous polling but validates a supplied token, while `required` requires `rq:status`.
+  - `jobstatus` may include an optional advisory queue snapshot for a queued registered-tree member. Treat it as a current rank observation, not an ETA, and continue using `status` as lifecycle authority.
   - `GET /weppcloud/culverts/{batch_uuid}/download/{subpath}` requires browse authentication; accepts privileged `user` tokens for admin workflows and `service` tokens with `service_groups` including `culverts`.
   - Browse auth checks also require `aud` compatible with `rq-engine` and a `jti` claim (revocation lookup).
   - For culvert downloads, `runs`/`runid` must include the specific `batch_uuid`; otherwise download is denied.
@@ -55,7 +56,8 @@
   - `wepp_cloud_integration_task.py` constructs `/rq-engine/api/jobstatus/{job_id}` directly instead of using the response `status_url`; this is less robust when reverse-proxy prefixes or route shapes change.
 - Token strategy guidance:
   - Prefer short-lived tokens (for example 1 hour) with only required scopes.
-  - Use a long-lived submit token for rq-engine uploads, then use the returned `browse_token` (batch-scoped; `runs` includes `batch_uuid`) for browse/download access.
+  - Use the long-lived Culvert service JWT for submission, retry, and authenticated status polling; it includes `rq:status`.
+  - Use the returned `browse_token` (batch-scoped; `runs` includes `batch_uuid`) only for browse/download access; it is not a polling credential.
   - Do not commit `WEPPCLOUD_TOKEN`; inject it via environment/secret manager.
   - Recommended minimum scopes for end-to-end flow: `culvert:batch:submit` and `rq:status`.
 

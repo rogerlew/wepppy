@@ -32,8 +32,10 @@ Culvert_web_app developers and stakeholders integrating with the wepp.cloud culv
 
 ## Authentication (JWT)
 
-`/rq-engine/api/culverts-wepp-batch/*` now requires a bearer token. `jobstatus`/`jobinfo` remain open
-for read-only polling.
+`/rq-engine/api/culverts-wepp-batch/*` now requires a bearer token. `jobstatus`/`jobinfo` are open
+by default, and their access is governed by `RQ_ENGINE_POLL_AUTH_MODE`: `open` accepts anonymous
+polling, `token_optional` accepts anonymous polling but validates a supplied bearer token, and
+`required` requires `rq:status`.
 
 Required scopes (service token): `culvert:batch:submit`, `culvert:batch:retry`,
 `culvert:batch:read`, `rq:status`.
@@ -72,6 +74,10 @@ Successful submissions return a short-lived, **batch-scoped** bearer token (curr
 Use `browse_token` as `Authorization: Bearer <browse_token>` for:
 - `GET /weppcloud/culverts/{batch_uuid}/browse/*` (interactive browse)
 - `GET /weppcloud/culverts/{batch_uuid}/download/{subpath}` (programmatic download via `browse_token`; WEPPcloud also allows privileged `user` tokens for admin browse/download workflows)
+
+The long-lived Culvert service JWT is used for submission, retry, and authenticated status
+polling. The returned `browse_token` is a separate, short-lived batch-scoped artifact token;
+it is browse/download-only and must not be used as the polling credential.
 
 ## Payload preparation for wepp.cloud
 
@@ -843,6 +849,59 @@ lightweight and designed for frequent polling.
   "ended_at": null
 }
 ```
+
+Successful responses may also contain this optional advisory snapshot when a queued member of
+the registered job tree is still present in one queue list:
+
+```json
+{
+  "job_id": "root-job-id",
+  "status": "queued",
+  "queue": {
+    "name": "batch",
+    "rank": 17,
+    "jobs_ahead": 16,
+    "position_job_id": "next-queued-member-job-id",
+    "basis": "next_queued_job_in_tree",
+    "observed_at": "2026-08-07T18:42:11Z"
+  }
+}
+```
+
+When the orchestration root has started but a registered child remains queued, the selected
+position can be a child rather than the root:
+
+```json
+{
+  "job_id": "culvert-root-id",
+  "status": "started",
+  "queue": {
+    "name": "batch",
+    "rank": 3,
+    "jobs_ahead": 2,
+    "position_job_id": "culvert-child-job-id",
+    "basis": "next_queued_job_in_tree",
+    "observed_at": "2026-08-07T18:42:11Z"
+  }
+}
+```
+
+Terminal responses do not need a `queue` object:
+
+```json
+{
+  "job_id": "culvert-root-id",
+  "status": "finished",
+  "ended_at": "2026-08-07T18:43:02Z"
+}
+```
+
+Clients must treat `queue` as optional. Read `queue.rank`, `queue.jobs_ahead`, `queue.name`,
+and `queue.observed_at` only when present; do not calculate an ETA from them. A missing object
+does not mean that a job failed or was lost. Continue using `status` as the lifecycle authority.
+The snapshot is omitted for started-only or terminal trees, deferred/scheduled-only trees,
+missing or mixed queue origins, and normal status/Redis races. It never provides unrelated job
+IDs, queue depth, worker capacity, or a cross-queue rank.
 
 **Status values:**
 | Status | Description |
