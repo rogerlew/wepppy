@@ -53,21 +53,57 @@ Git LFS rule for `*.pdf` files.
   results match the lane with neither `wepp_ui.txt` nor `pmetpara.txt`; its ET
   interpretation is cross-referenced against the
   [Stevens Canyon legacy-ET ablation](../2026-08-03-stevens-canyon-peak-flow-inversion/artifacts/legacy-et-ablation-results.md).
+- [`artifacts/bill-windows-replication-handoff.md`](artifacts/bill-windows-replication-handoff.md)
+  — self-contained handoff for Elliot describing the Windows replication and
+  the influence of the hourly seepage and Penman-Monteith sidecars.
 - [`fixtures/hill-106/windows-reconstruction/burned-man-ballpark/`](fixtures/hill-106/windows-reconstruction/burned-man-ballpark/)
   — factorial management screen and a 40-year LAI `2.25` lane that closely
   reproduces Elliot's burned runoff, ET, lateral flow, and daily lateral-flow
   maximum.
+- [`artifacts/kslast-anisotropy-calibration-study.md`](artifacts/kslast-anisotropy-calibration-study.md)
+  — calendar-year 2020 soil calibration screens: 60 `kslast` × anisotropy
+  cases, 42 horizon-Ksat × anisotropy cases, and 48 fixed-Ksat anisotropy ×
+  PMET-Kcb cases. The closest reasonable candidate produces `9.35 mm` total
+  runoff, still above the provisional `6.2 mm` target.
+
+## Current Findings
+
+- Elliot's `288 mm` WEPPcloud value is not calendar-year 2020 surface runoff.
+  It is the long-term mean unburned Hill 106 surface runoff plus lateral flow:
+  `121 + 167 mm/year`. His corresponding `242 mm` Windows value is likewise
+  the long-term mean `220 + 22 mm/year`.
+- The archived WEPPcloud Hill 106 result for calendar year 2020 is `9.74 mm`
+  surface runoff plus `105.92 mm` lateral flow, or `115.66 mm` combined.
+- The observed `6.2 mm` value is independently reproduced from the Los Angeles
+  County Topanga Creek F54C-R calendar-year 2020 volume of `234 acre-feet`
+  divided by its `18.0 square mile` drainage area. It is measured channel
+  discharge and therefore is not a surface-runoff-only observation.
+- The observed and modeled values remain provisional as a calibration pair:
+  Topanga Creek is a nearby but different drainage area, and gauged discharge
+  combines every source and loss operating upstream of the gauge.
+- The Windows reconstruction closely reproduces Elliot's Hill 106 results
+  without `wepp_ui.txt` or `pmetpara.txt`. The hourly seepage sidecar strongly
+  increases modeled lateral flow, while PMET changes ET and the remaining
+  water partition.
+- Raising the restrictive-boundary conductivity from `0.00011` to
+  `0.6 mm/h` reduces 2020 combined Hill 106 runoff from `115.66` to
+  `12.16 mm` with the original anisotropy and Ksat. This is the dominant
+  calibration response.
+- Neither horizon Ksat nor reasonable anisotropy and PMET-Kcb tuning closes
+  the remaining difference. With original Ksat, the closest screened case is
+  `kslast = 0.6 mm/h`, anisotropy `1`, and `Kcb = 1.20`, producing `9.35 mm`
+  runoff and `295.23 mm` ET. Most additional ET displaces deep percolation
+  rather than runoff.
 
 ## Next Steps
 
-- Preserve run metadata, inputs, output inventories, and checksums before
-  changing or rerunning either working copy.
 - Build an event-level burned/undisturbed comparison from raw output using
   same-date comparisons as well as independently ranked return periods.
-- Trace the precise variables included in watershed runoff and peak-discharge
-  products before attributing differences to lateral flow.
-- Reproduce the Hill 106 experiment with documented executable versions and
-  byte-level input transformations.
-- Identify suitable observed records and verify watershed, units, period of
-  record, missing-data treatment, and drainage-area normalization before using
-  them for model evaluation.
+- Reconstruct calendar-year 2020 outlet flow for the complete WEPPcloud
+  watershed, including routed surface flow, lateral flow, groundwater/baseflow,
+  and channel losses, rather than treating one hillslope as the basin outlet.
+- Identify a modeled basin that matches the F54C-R drainage area, or locate an
+  observed record for the actual modeled watershed, before promoting any
+  calibration parameter set.
+- Constrain PMET Kcb and seasonal ET against independent vegetation or ET
+  evidence before considering `Kcb = 1.20` a candidate value.
