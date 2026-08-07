@@ -4,31 +4,32 @@
 
 **Timezone**: UTC  
 **Started**: 2026-08-07 15:17 UTC  
-**Current phase**: Corrective checkpoint commit
+**Current phase**: Complete
 **Last updated**: 2026-08-07 16:22 UTC
-**Next milestone**: Commit corrected authority, then implementation
+**Next milestone**: Release-environment visual smoke after deployment
 **Security impact**: `high` by inherited DOM-23 owner rule
 
 ## Task Board
 
 ### Ready / Backlog
 
-- [ ] Validate the source inventory and identify the owning run-page template
+- [x] Validate the source inventory and identify the owning run-page template
   for the color-shift control.
 - [x] Finalize and accept ADR-0041; masked/unmappable rendering is resolved.
 - [x] Complete corrective independent reviews of the contract decision artifact.
-- [ ] Implement shared palette/export/ingestion behavior and Rust parity.
-- [ ] Update the non-shifted run-page and GL Dashboard palettes while retaining shift state.
-- [ ] Update public, user, operator, and developer accessibility documentation.
-- [ ] Run focused, full, frontend, visual, and accessibility validation.
+- [x] Implement shared palette/export/ingestion behavior and Rust parity.
+- [x] Update the non-shifted run-page and GL Dashboard palettes while retaining shift state.
+- [x] Update public, user, operator, and developer accessibility documentation.
+- [x] Run focused, full, frontend, generated-raster, and accessibility validation;
+  retain the external Playwright/manual visual limitation in the evidence artifact.
 
 ### In Progress
 
-- Commit the corrected authority as a standalone checkpoint.
+- None.
 
 ### Blocked
 
-- Production implementation is blocked on ADR and contract acceptance.
+- None.
 
 ### Done
 
@@ -43,6 +44,8 @@
   corrected the scope (2026-08-07 UTC).
 - [x] Corrective governance and operations/security reviews passed with no
   unresolved high or medium findings (2026-08-07 UTC).
+- [x] Corrected authority committed as standalone checkpoint `084a0986b` and
+  implementation validation completed (2026-08-07 UTC).
 
 ## Decisions Log
 

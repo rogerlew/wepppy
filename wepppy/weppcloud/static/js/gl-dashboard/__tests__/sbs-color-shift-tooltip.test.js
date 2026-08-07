@@ -2,7 +2,7 @@ import { describe, expect, it } from '@jest/globals';
 import { createLayerUtils } from '../map/layers.js';
 
 describe('gl-dashboard SBS color shift', () => {
-  it('remaps SBS tooltip color values when color shift is enabled', () => {
+  it('remaps canonical SBS tooltip values when color shift is enabled', () => {
     const state = {
       dashboardMode: 'run',
       sbsColorShiftEnabled: false,
@@ -26,7 +26,7 @@ describe('gl-dashboard SBS color shift', () => {
           bounds: [0, 0, 1, 1],
           width: 1,
           height: 1,
-          values: new Uint8ClampedArray([77, 230, 0, 255]),
+          values: new Uint8ClampedArray([82, 204, 204, 255]),
         },
       ],
     };
@@ -51,7 +51,7 @@ describe('gl-dashboard SBS color shift', () => {
 
     const info = { coordinate: [0.5, 0.5] };
     const standardTooltip = layerUtils.formatTooltip(info);
-    expect(standardTooltip).toContain('Value: rgba(77, 230, 0, 255)');
+    expect(standardTooltip).toContain('Value: rgba(82, 204, 204, 255)');
 
     state.sbsColorShiftEnabled = true;
     const shiftedTooltip = layerUtils.formatTooltip(info);

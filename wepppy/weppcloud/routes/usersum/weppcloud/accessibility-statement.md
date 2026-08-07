@@ -1,6 +1,6 @@
 # Accessibility Statement
 
-Last updated: **April 1, 2026**
+Last updated: **August 7, 2026**
 
 This statement describes WEPPcloud's current accessibility posture for users and federal buyers. It is a public-facing summary and does **not** replace the product's formal Accessibility Conformance Report (ACR/VPAT).
 
@@ -17,6 +17,11 @@ WEPPcloud is developed and tested with accessibility as a product requirement. F
 - Rendered contrast validation for the AA-validated theme set
 - 200% zoom and reflow checks in manual accessibility review
 - Public and authenticated smoke testing with axe on representative pages
+- A non-shifted CVD-friendly soil burn severity palette based on the current
+  interagency Burn Severity Portal colors, with persistent text labels and a
+  bordered masked/unmappable legend swatch. The optional color-shifted view
+  remains available. Masked map cells are transparent so basemap context
+  remains visible.
 
 ## Theme Options
 
@@ -29,6 +34,9 @@ WEPPcloud provides multiple interface themes because user needs differ.
 
 - Some optional sensory-preference themes do not meet the same contrast requirements as the AA-validated theme set.
 - A formal product-specific **ACR/VPAT** is maintained separately for federal procurement and release governance.
+- The burn-severity palette is one accessibility feature; it does not by itself
+  establish Section 508 or WCAG conformance, and users should rely on class
+  labels rather than color alone.
 
 ## Feedback and Alternate Access
 

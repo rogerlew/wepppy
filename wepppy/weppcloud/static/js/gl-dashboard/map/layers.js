@@ -44,6 +44,10 @@ const D8_DIRECTION_ICON_MAPPING = Object.freeze({
 });
 const D8_DIRECTION_ICON_ID = 'arrow';
 const SBS_STANDARD_TO_SHIFTED_RGB = Object.freeze({
+  '0_128_128': [0, 158, 115],
+  '82_204_204': [86, 180, 233],
+  '255_232_32': [240, 228, 66],
+  '168_0_0': [204, 121, 167],
   '0_115_74': [0, 158, 115],
   '77_230_0': [86, 180, 233],
   '255_255_0': [240, 228, 66],

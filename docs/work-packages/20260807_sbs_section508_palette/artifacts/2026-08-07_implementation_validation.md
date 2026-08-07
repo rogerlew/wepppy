@@ -34,7 +34,7 @@ legend now matches the non-shifted table.
 
 - Full Python suite before the final localized NoData hardening: `5935 passed,
   61 skipped`.
-- Post-hardening SBS regression set: `46 passed`.
+- Post-hardening BAER/Disturbed/route regression set: `143 passed, 19 skipped`.
 - Full frontend suite: `105` suites and `758` tests passed.
 - Focused two-mode frontend set: `5` suites and `53` tests passed.
 - Companion Rust SBS unit tests: `3 passed`.
@@ -49,3 +49,11 @@ model-facing classifier retains the class-`130` fallback.
 
 All raster evidence is generated in temporary test directories. It contains no
 production run identifiers, paths, credentials, or raster metadata.
+
+The targeted Playwright SBS smoke selected four tests against the configured
+external smoke target. Three failed before SBS interaction because `#mapid` was
+absent; the empty-run test was skipped. This does not contradict controller or
+template evidence, but it prevented representative browser screenshots and
+manual light/dark-basemap inspection in this workspace. The limitation is
+retained as release evidence rather than misreported as a product failure or a
+completed manual check.

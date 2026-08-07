@@ -57,6 +57,7 @@ class SoilBurnSeverityMap(LandcoverMap):
     breaks: Optional[Sequence[int | float]]
     fname: str
     nodata_vals: Sequence[int | float]
+    source_nodata_vals: Sequence[int | float]
 
     def __init__(
         self,
@@ -81,6 +82,9 @@ class SoilBurnSeverityMap(LandcoverMap):
 
     @property
     def data(self) -> NDArray[np.uint8]: ...
+
+    @property
+    def source_valid_mask(self) -> NDArray[np.bool_]: ...
 
     def export_wgs_map(self, fn: str) -> list[list[float]]: ...
 

@@ -45,10 +45,11 @@ var WCMapGlShared = (function () {
         SHIFTED: "shifted"
     };
     var SBS_LEGEND_ITEMS_STANDARD = [
-        { key: 130, label: "No Burn", color: "#00734A" },
-        { key: 131, label: "Low Severity Burn", color: "#4DE600" },
-        { key: 132, label: "Moderate Severity Burn", color: "#FFFF00" },
-        { key: 133, label: "High Severity Burn", color: "#FF0000" }
+        { key: 130, label: "Unchanged / Unburned", color: "#008080" },
+        { key: 131, label: "Low Severity Burn", color: "#52CCCC" },
+        { key: 132, label: "Moderate Severity Burn", color: "#FFE820" },
+        { key: 133, label: "High Severity Burn", color: "#A80000" },
+        { key: 255, label: "Masked / Unmappable", color: "#FFFFFF", masked: true }
     ];
     var SBS_LEGEND_ITEMS_SHIFTED = [
         { key: 130, label: "No Burn", color: "#009E73" },
@@ -57,6 +58,10 @@ var WCMapGlShared = (function () {
         { key: 133, label: "High Severity Burn", color: "#CC79A7" }
     ];
     var SBS_STANDARD_TO_SHIFTED_RGB = {
+        "0_128_128": [0, 158, 115],
+        "82_204_204": [86, 180, 233],
+        "255_232_32": [240, 228, 66],
+        "168_0_0": [204, 121, 167],
         "0_115_74": [0, 158, 115],
         "77_230_0": [86, 180, 233],
         "255_255_0": [240, 228, 66],

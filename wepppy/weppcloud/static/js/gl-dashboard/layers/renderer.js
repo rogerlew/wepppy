@@ -48,10 +48,11 @@ export function createLayerRenderer({
 
   // SBS burn class colors and labels (matches map_gl.js / baer.py / disturbed.py)
   const SBS_CLASSES_STANDARD = [
-    { color: '#00734A', label: 'Unburned' },
-    { color: '#4DE600', label: 'Low' },
-    { color: '#FFFF00', label: 'Moderate' },
-    { color: '#FF0000', label: 'High' },
+    { color: '#008080', label: 'Unchanged / Unburned' },
+    { color: '#52CCCC', label: 'Low' },
+    { color: '#FFE820', label: 'Moderate' },
+    { color: '#A80000', label: 'High' },
+    { color: '#FFFFFF', label: 'Masked / Unmappable', masked: true },
   ];
   const SBS_CLASSES_SHIFTED = [
     { color: '#009E73', label: 'Unburned' },
@@ -1291,6 +1292,7 @@ export function createLayerRenderer({
       const swatch = document.createElement('span');
       swatch.className = 'gl-legend-categorical__swatch';
       swatch.style.backgroundColor = item.color;
+      if (item.masked) swatch.style.border = '1px solid #333';
       const label = document.createElement('span');
       label.textContent = item.label;
       row.appendChild(swatch);

@@ -548,7 +548,7 @@ describe("Map GL controller", () => {
         expect(legend.innerHTML).toContain("SBS Legend");
     });
 
-    test("SBS color shift toggle swaps legend palette", async () => {
+    test("SBS color shift toggle swaps between canonical and shifted palettes", async () => {
         const mapInstance = global.MapController.getInstance();
         mapInstance.addLayer(mapInstance.sbs_layer, { skipRefresh: true });
 
@@ -564,8 +564,10 @@ describe("Map GL controller", () => {
 
         const legend = document.getElementById("sbs_legend");
         const toggle = document.getElementById("sbs_color_shift_toggle");
-        expect(legend.innerHTML).toContain("#4DE600");
-        expect(legend.innerHTML).not.toContain("#56B4E9");
+        expect(legend.innerHTML).toContain("#008080");
+        expect(legend.innerHTML).toContain("#52CCCC");
+        expect(legend.innerHTML).toContain("Masked / Unmappable");
+        expect(legend.innerHTML).toContain("border: 1px solid #333");
 
         toggle.checked = true;
         toggle.dispatchEvent(new Event("change"));
@@ -574,7 +576,7 @@ describe("Map GL controller", () => {
 
         toggle.checked = false;
         toggle.dispatchEvent(new Event("change"));
-        expect(legend.innerHTML).toContain("#4DE600");
+        expect(legend.innerHTML).toContain("#52CCCC");
         expect(legend.innerHTML).not.toContain("#56B4E9");
     });
 

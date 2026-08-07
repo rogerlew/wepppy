@@ -929,14 +929,15 @@ class Disturbed(NoDbBase):
 
     @property
     def legend(self) -> List[Tuple[int, str, str]]:
-        keys = [130, 131, 132, 133]
+        keys = [130, 131, 132, 133, 255]
 
-        descs = ['No Burn',
+        descs = ['Unchanged / Unburned',
                 'Low Severity Burn',
                 'Moderate Severity Burn',
-                'High Severity Burn']
+                'High Severity Burn',
+                'Masked / Unmappable']
 
-        colors = ['#00734A', '#4DE600', '#FFFF00', '#FF0000']
+        colors = ['#008080', '#52CCCC', '#FFE820', '#A80000', '#FFFFFF']
 
         return list(zip(keys, descs, colors))
 
@@ -2365,15 +2366,24 @@ class Disturbed(NoDbBase):
                 assert sbs.data.shape == bounds.shape, [sbs.data.shape, bounds.shape]
 
 
-                c = Counter(sbs.data[np.where(bounds == 1.0)])
+                eligible = (bounds == 1.0) & sbs.source_valid_mask
+                c = Counter(sbs.data[eligible])
 
                 total_px = float(sum(c.values()))
 
                 # todo: calcuate based on disturbed burn classes
-                self.sbs_coverage = {
-                                     'noburn': c[130] / total_px,
-                                     'low': c[131] / total_px,
-                                     'moderate': c[132] / total_px,
-                                     'high': c[133] / total_px
-                                     }
+                if total_px == 0.0:
+                    self.sbs_coverage = {
+                        'noburn': 0.0,
+                        'low': 0.0,
+                        'moderate': 0.0,
+                        'high': 0.0,
+                    }
+                else:
+                    self.sbs_coverage = {
+                                         'noburn': c[130] / total_px,
+                                         'low': c[131] / total_px,
+                                         'moderate': c[132] / total_px,
+                                         'high': c[133] / total_px
+                                         }
         

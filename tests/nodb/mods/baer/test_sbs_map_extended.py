@@ -8,13 +8,15 @@ Tests classification logic for:
 """
 
 import os
+import importlib
 import tempfile
 import unittest
 from collections import Counter
+from unittest import mock
 
 import numpy as np
 from osgeo import gdal, osr
-from osgeo.gdalconst import GDT_Byte
+from osgeo.gdalconst import GDT_Byte, GDT_Int16
 
 from wepppy.nodb.mods.baer.sbs_map import (
     SoilBurnSeverityMap,
@@ -27,6 +29,22 @@ from wepppy.nodb.mods.baer.sbs_map import (
 
 class TestSBSMapHelpers(unittest.TestCase):
     """Test helper functions for classification."""
+
+    def test_missing_and_corrupt_color_maps_use_current_builtin_palette(self):
+        module = importlib.import_module("wepppy.nodb.mods.baer.sbs_map")
+        with tempfile.TemporaryDirectory() as temp_dir:
+            missing = os.path.join(temp_dir, "missing.json")
+            corrupt = os.path.join(temp_dir, "corrupt.json")
+            with open(corrupt, "w", encoding="utf-8") as fp:
+                fp.write("not json")
+
+            for path in (missing, corrupt):
+                module._load_sbs_color_map.cache_clear()
+                mapping = module._load_sbs_color_map(path)
+                self.assertEqual(mapping[(0, 128, 128)], "unburned")
+                self.assertEqual(mapping[(82, 204, 204)], "low")
+                self.assertEqual(mapping[(255, 232, 32)], "mod")
+                self.assertEqual(mapping[(168, 0, 0)], "high")
 
     def test_classify_basic(self):
         """Test basic classification with breaks."""
@@ -132,6 +150,7 @@ class GeoTiffTestHelper:
         color_table=None,
         nodata_val=None,
         geotransform=None,
+        gdal_type=GDT_Byte,
     ):
         """
         Create a GeoTIFF file with specified data and optional color table.
@@ -152,7 +171,7 @@ class GeoTiffTestHelper:
         if color_table is not None:
             options.append('PHOTOMETRIC=PALETTE')
             
-        dataset = driver.Create(filename, cols, rows, 1, GDT_Byte,
+        dataset = driver.Create(filename, cols, rows, 1, gdal_type,
                                 options=options)
         
         # Set basic projection (UTM Zone 10N for testing)
@@ -197,6 +216,17 @@ class GeoTiffTestHelper:
         ct.SetColorEntry(1, (86, 180, 233, 255))    # low
         ct.SetColorEntry(2, (240, 228, 66, 255))    # moderate
         ct.SetColorEntry(3, (204, 121, 167, 255))   # high
+        return ct
+
+    @staticmethod
+    def create_current_usgs_sbs_color_table():
+        """Create the current interagency CVD-friendly SBS color table."""
+        ct = gdal.ColorTable()
+        ct.SetColorEntry(0, (0, 128, 128, 255))
+        ct.SetColorEntry(1, (82, 204, 204, 255))
+        ct.SetColorEntry(2, (255, 232, 32, 255))
+        ct.SetColorEntry(3, (168, 0, 0, 255))
+        ct.SetColorEntry(9, (255, 255, 255, 255))
         return ct
         
     @staticmethod
@@ -306,6 +336,46 @@ class TestColorTableMaps(unittest.TestCase):
 
         sbs_map = SoilBurnSeverityMap(filename)
         self.assertIsNotNone(sbs_map.ct)
+
+    def test_current_usgs_palette_and_masked_source_cells(self):
+        filename = os.path.join(self.temp_dir, 'ct_current_usgs.tif')
+        data = np.array([[0, 1, 2, 3, 9]], dtype=np.uint8)
+        GeoTiffTestHelper.create_geotiff(
+            filename,
+            data,
+            color_table=GeoTiffTestHelper.create_current_usgs_sbs_color_table(),
+        )
+
+        sbs_map = SoilBurnSeverityMap(filename)
+
+        self.assertIn(0, sbs_map.ct['unburned'])
+        self.assertIn(1, sbs_map.ct['low'])
+        self.assertIn(2, sbs_map.ct['mod'])
+        self.assertIn(3, sbs_map.ct['high'])
+        self.assertIn(9, sbs_map.nodata_vals)
+        with mock.patch("wepppy.nodb.mods.baer.sbs_map._rust_sbs_map", None):
+            sbs_map._data = None
+            python_data = sbs_map.data.copy()
+        np.testing.assert_array_equal(
+            python_data.flatten(),
+            np.array([130, 131, 132, 133, 130], dtype=np.uint8),
+        )
+        module = importlib.import_module("wepppy.nodb.mods.baer.sbs_map")
+        if module._rust_sbs_map is not None:
+            sbs_map._data = None
+            np.testing.assert_array_equal(sbs_map.data, python_data)
+        np.testing.assert_array_equal(
+            sbs_map.source_valid_mask.flatten(),
+            np.array([True, True, True, True, False]),
+        )
+        np.testing.assert_array_equal(
+            sbs_map.data.flatten(),
+            np.array([130, 131, 132, 133, 130], dtype=np.uint8),
+        )
+
+        coverage = sbs_map.color_coverage_pcts
+        self.assertNotIn((255, 255, 255), coverage)
+        self.assertEqual(sum(coverage.values()), 100.0)
         self.assertIsNone(sbs_map.breaks)
 
         class_pixel_map = sbs_map.class_pixel_map
@@ -486,11 +556,26 @@ class TestNonColorTableMaps(unittest.TestCase):
         # Verify classification with these breaks
         # Value 0 should be <= 0 -> index 2 -> 130+2=132
         # Value 1 should be <= 1 -> index 3 -> 130+3=133
-        # Value 3 should be > 1 -> index 3 -> 130+3=133
+        # The isolated maximum is inferred as NoData and uses the model fallback.
         class_pixel_map = sbs_map.class_pixel_map
         self.assertIn('0', class_pixel_map)
         self.assertIn('1', class_pixel_map)
-        self.assertIn('3', class_pixel_map)
+        self.assertEqual(class_pixel_map['3'], '130')
+        self.assertIn(3, sbs_map.source_nodata_vals)
+        np.testing.assert_array_equal(sbs_map.source_valid_mask, data.T != 3)
+
+        color_table_path = os.path.join(self.temp_dir, '4class_nonseq_colors.txt')
+        sbs_map._write_color_table(color_table_path)
+        with open(color_table_path) as fp:
+            entries = {line.split(maxsplit=1)[0]: line.split(maxsplit=1)[1].strip() for line in fp}
+        self.assertEqual(entries['3'], '0 0 0 0')
+
+        output_fn = os.path.join(self.temp_dir, '4class_nonseq_export.tif')
+        sbs_map.export_4class_map(output_fn)
+        ds = gdal.Open(output_fn)
+        exported = ds.GetRasterBand(1).ReadAsArray()
+        np.testing.assert_array_equal(exported[data == 3], np.full(np.count_nonzero(data == 3), 255))
+        ds = None
         
     def test_barc_style_0_255(self):
         """Test BARC-style map with 0-255 range."""
@@ -704,53 +789,138 @@ class TestSBSMapProperties(unittest.TestCase):
 
         ds = None
 
-    def test_export_4class_map_legacy_palette(self):
-        """Legacy palette mode should remain available for transition workflows."""
-        filename = os.path.join(self.temp_dir, 'test_export_input_legacy.tif')
-        output_fn = os.path.join(self.temp_dir, 'test_export_output_legacy.tif')
+    def test_export_4class_map_preserves_masked_cells_as_transparent_nodata(self):
+        filename = os.path.join(self.temp_dir, 'test_export_input_masked.tif')
+        output_fn = os.path.join(self.temp_dir, 'test_export_output_masked.tif')
+        data = np.array([[0, 1, 2, 3, 9]], dtype=np.uint8)
+        GeoTiffTestHelper.create_geotiff(
+            filename,
+            data,
+            color_table=GeoTiffTestHelper.create_current_usgs_sbs_color_table(),
+        )
 
-        data = np.array([
-            [0, 1, 2, 3],
-            [3, 2, 1, 0],
-        ], dtype=np.uint8)
-
-        ct = GeoTiffTestHelper.create_standard_sbs_color_table()
-        GeoTiffTestHelper.create_geotiff(filename, data, color_table=ct)
-
-        sbs_map = SoilBurnSeverityMap(filename)
-        sbs_map.export_4class_map(output_fn, export_palette='legacy')
+        SoilBurnSeverityMap(filename).export_4class_map(output_fn)
 
         ds = gdal.Open(output_fn)
         self.assertIsNotNone(ds)
         band = ds.GetRasterBand(1)
-        output_ct = band.GetRasterColorTable()
-        self.assertIsNotNone(output_ct)
+        np.testing.assert_array_equal(
+            band.ReadAsArray().flatten(),
+            np.array([0, 1, 2, 3, 255], dtype=np.uint8),
+        )
+        self.assertEqual(band.GetNoDataValue(), 255)
+        self.assertEqual(band.GetRasterColorTable().GetColorEntry(255), (255, 255, 255, 0))
+        ds = None
 
-        expected_legacy_colors = {
-            0: (0, 100, 0, 255),       # unburned
-            1: (127, 255, 212, 255),   # low
-            2: (255, 255, 0, 255),     # moderate
-            3: (255, 0, 0, 255),       # high
-            255: (255, 255, 255, 0),   # nodata
+    def test_export_4class_map_legacy_palette_uses_current_usgs_colors(self):
+        """The non-shifted export mode uses the current USGS Section 508 palette."""
+        filename = os.path.join(self.temp_dir, 'test_export_input_legacy.tif')
+        output_fn = os.path.join(self.temp_dir, 'test_export_output_legacy.tif')
+        data = np.array([[0, 1, 2, 3]], dtype=np.uint8)
+        GeoTiffTestHelper.create_geotiff(
+            filename,
+            data,
+            color_table=GeoTiffTestHelper.create_standard_sbs_color_table(),
+        )
+
+        SoilBurnSeverityMap(filename).export_4class_map(output_fn, export_palette='legacy')
+
+        ds = gdal.Open(output_fn)
+        output_ct = ds.GetRasterBand(1).GetRasterColorTable()
+        expected_colors = {
+            0: (0, 128, 128, 255),
+            1: (82, 204, 204, 255),
+            2: (255, 232, 32, 255),
+            3: (168, 0, 0, 255),
+            255: (255, 255, 255, 0),
         }
-        for pixel_val, expected_color in expected_legacy_colors.items():
-            actual_color = output_ct.GetColorEntry(pixel_val)
-            self.assertEqual(actual_color, expected_color)
-
+        for pixel_val, expected_color in expected_colors.items():
+            self.assertEqual(output_ct.GetColorEntry(pixel_val), expected_color)
         ds = None
 
     def test_export_4class_map_invalid_palette(self):
-        """Unsupported export palettes should fail fast with a clear error."""
         filename = os.path.join(self.temp_dir, 'test_export_input_invalid_palette.tif')
         output_fn = os.path.join(self.temp_dir, 'test_export_output_invalid_palette.tif')
-
         data = np.array([[0, 1, 2, 3]], dtype=np.uint8)
-        ct = GeoTiffTestHelper.create_standard_sbs_color_table()
-        GeoTiffTestHelper.create_geotiff(filename, data, color_table=ct)
-
-        sbs_map = SoilBurnSeverityMap(filename)
+        GeoTiffTestHelper.create_geotiff(
+            filename,
+            data,
+            color_table=GeoTiffTestHelper.create_standard_sbs_color_table(),
+        )
         with self.assertRaises(ValueError):
-            sbs_map.export_4class_map(output_fn, export_palette='invalid')  # type: ignore[arg-type]
+            SoilBurnSeverityMap(filename).export_4class_map(
+                output_fn,
+                export_palette='invalid',  # type: ignore[arg-type]
+            )
+
+    def test_source_mask_unions_band_and_explicit_nodata(self):
+        filename = os.path.join(self.temp_dir, 'test_source_mask_nodata_union.tif')
+        data = np.array([[0, 1, 7, 9]], dtype=np.uint8)
+        GeoTiffTestHelper.create_geotiff(filename, data, nodata_val=9)
+
+        sbs_map = SoilBurnSeverityMap(
+            filename,
+            breaks=[0, 1, 2, 9],
+            nodata_vals=[7],
+        )
+
+        self.assertEqual(sbs_map.nodata_vals, [7, 9])
+        self.assertEqual(sbs_map.source_nodata_vals, [7, 9])
+        np.testing.assert_array_equal(
+            sbs_map.source_valid_mask.flatten(),
+            np.array([True, True, False, False]),
+        )
+        np.testing.assert_array_equal(
+            sbs_map.data.flatten(),
+            np.array([130, 131, 130, 130], dtype=np.uint8),
+        )
+        self.assertEqual(sbs_map.class_pixel_map['9'], '130')
+
+    def test_int16_band_nodata_is_preserved_in_mask_and_export(self):
+        filename = os.path.join(self.temp_dir, 'test_int16_nodata.tif')
+        output_fn = os.path.join(self.temp_dir, 'test_int16_nodata_export.tif')
+        data = np.array([[0, 1, 2, 3, -9999]], dtype=np.int16)
+        GeoTiffTestHelper.create_geotiff(
+            filename,
+            data,
+            nodata_val=-9999,
+            gdal_type=GDT_Int16,
+        )
+
+        sbs_map = SoilBurnSeverityMap(filename, breaks=[0, 1, 2, 3])
+        np.testing.assert_array_equal(
+            sbs_map.source_valid_mask.flatten(),
+            np.array([True, True, True, True, False]),
+        )
+        with mock.patch("wepppy.nodb.mods.baer.sbs_map._rust_sbs_map", None):
+            sbs_map._data = None
+            np.testing.assert_array_equal(
+                sbs_map.data.flatten(),
+                np.array([130, 131, 132, 133, 130], dtype=np.uint8),
+            )
+        self.assertEqual(sbs_map.class_pixel_map['-9999'], '130')
+        self.assertIn((-9999, 'No Burn', 1), sbs_map.class_map)
+        sbs_map.export_4class_map(output_fn)
+        ds = gdal.Open(output_fn)
+        np.testing.assert_array_equal(
+            ds.GetRasterBand(1).ReadAsArray().flatten(),
+            np.array([0, 1, 2, 3, 255], dtype=np.uint8),
+        )
+        ds = None
+
+    def test_numeric_color_table_writes_source_nodata_transparent(self):
+        filename = os.path.join(self.temp_dir, 'test_numeric_color_table_input.tif')
+        color_table_path = os.path.join(self.temp_dir, 'test_numeric_color_table.txt')
+        data = np.array([[0, 1, 2, 3, 9]], dtype=np.uint8)
+        GeoTiffTestHelper.create_geotiff(filename, data, nodata_val=9)
+
+        sbs_map = SoilBurnSeverityMap(filename, breaks=[0, 1, 2, 3])
+        sbs_map._write_color_table(color_table_path)
+
+        with open(color_table_path) as fp:
+            entries = {line.split(maxsplit=1)[0]: line.split(maxsplit=1)[1].strip() for line in fp}
+        self.assertEqual(entries['9'], '0 0 0 0')
+        self.assertEqual(entries['0'], '0 128 128 255')
 
 
 class TestSBSMapSanityCheck(unittest.TestCase):

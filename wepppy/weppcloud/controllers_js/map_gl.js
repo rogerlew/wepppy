@@ -1762,7 +1762,7 @@ var MapController = (function () {
             items.forEach(function (item) {
                 html += ""
                     + "<div class=\"wc-legend-item\">"
-                    + "<span class=\"wc-legend-item__swatch\" style=\"--legend-color: " + escapeHtml(item.color) + ";\" aria-label=\"Color swatch for " + escapeHtml(item.label) + "\"></span>"
+                    + "<span class=\"wc-legend-item__swatch\" style=\"--legend-color: " + escapeHtml(item.color) + ";" + (item.masked ? " border: 1px solid #333;" : "") + "\" aria-label=\"Color swatch for " + escapeHtml(item.label) + "\"></span>"
                     + "<span class=\"wc-legend-item__label\">" + escapeHtml(item.label) + " (" + escapeHtml(item.key) + ")</span>"
                     + "</div>";
             });

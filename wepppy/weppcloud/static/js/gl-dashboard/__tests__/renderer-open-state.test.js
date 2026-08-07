@@ -81,7 +81,7 @@ describe('gl-dashboard layer renderer', () => {
     expect(refreshedDetails.open).toBe(true);
   });
 
-  it('swaps SBS legend colors when color shift is enabled', () => {
+  it('swaps SBS legend colors while retaining masked cells', () => {
     const legendsContentEl = document.createElement('div');
     const legendEmptyEl = document.createElement('p');
     legendEmptyEl.id = 'gl-legend-empty';
@@ -139,8 +139,12 @@ describe('gl-dashboard layer renderer', () => {
 
     renderer.updateLegendsPanel();
     let swatches = legendsContentEl.querySelectorAll('.gl-legend-categorical__swatch');
-    expect(swatches).toHaveLength(4);
-    expect(swatches[1].style.backgroundColor).toContain('77, 230, 0');
+    expect(swatches).toHaveLength(5);
+    expect(swatches[0].style.backgroundColor).toContain('0, 128, 128');
+    expect(swatches[1].style.backgroundColor).toContain('82, 204, 204');
+    expect(swatches[3].style.backgroundColor).toContain('168, 0, 0');
+    expect(swatches[4].style.border).toContain('1px solid');
+    expect(legendsContentEl.textContent).toContain('Masked / Unmappable');
 
     state.sbsColorShiftEnabled = true;
     renderer.updateLegendsPanel();

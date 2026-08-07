@@ -1,6 +1,6 @@
 # SBS USGS Section 508 Palette Adoption
 
-**Status**: In progress — checkpoint review pending  
+**Status**: Complete — external post-deploy visual smoke remains
 **Timezone**: UTC  
 **Package ID**: SBS-A11Y-01
 
@@ -149,4 +149,4 @@ zero. Tests must prove both domains and mixed-version JSON compatibility.
 - `docs/ui-docs/accessiblity.md`
 - `docs/ui-docs/map-specification-and-behavior.md`
 - `wepppy/nodb/mods/baer/README.sbs_map.md`
-- `prompts/active/sbs_section508_palette_execplan.md`
+- `prompts/completed/sbs_section508_palette_execplan.md`

@@ -286,6 +286,10 @@ Assumptions (historical; Phase 13 flips defaults):
 ### Phase 4 handoff summary
 - Legend targets: SBS and subcatchment legends stay on `#sbs_legend` / `#sub_legend`, with show/hide controlled by overlay state.
 - SBS legend: rendered client-side, injects the opacity slider, and clears content when SBS is removed or refresh fails.
+- SBS palette: non-shifted imagery, legend, and tooltip use the interagency
+  palette (`#008080`, `#52CCCC`, `#FFE820`, `#A80000`, `#FFFFFF`). The existing
+  client-side color-shift mode remains available. Masked/unmappable pixels are transparent and
+  the labeled white legend swatch has a dark boundary.
 - Events: `baer:map:opacity` emitted on slider changes; SBS refresh emits `map:layer:refreshed`/`map:layer:error`.
 - Tests: Jest covers SBS legend show/hide + opacity slider updates; Playwright covers toggle visibility, slider updates, and empty-run behavior.
 

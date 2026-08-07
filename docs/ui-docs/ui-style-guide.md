@@ -50,7 +50,7 @@
   - [Base layout snippet](#base-layout-snippet)
 - [Tokens, colors, and typography](#tokens-colors-and-typography)
   - [Color palette](#color-palette)
-  - [Color Shift palettes (universal design)](#color-shift-palettes-universal-design)
+  - [Non-shifted SBS palette (universal design)](#non-shifted-sbs-palette-universal-design)
   - [Typography & spacing](#typography-spacing)
   - [Layout primitives](#layout-primitives)
 - [Component guidance](#component-guidance)
@@ -1465,20 +1465,22 @@ locally.【F:wepppy/wepppy/weppcloud/static-src/build-static-assets.sh†L1-L64�
 
 **Default Theme:** The values above represent the default "system" theme (light grayscale). Users can select from 11 additional themes via the theme switcher dropdown. All themes use the same CSS variable names, so controls remain theme-agnostic.
 
-### Color Shift palettes (universal design)
+### Non-shifted SBS palette (universal design)
 
 - Scope: SBS burn severity overlays in runs0_pure (`map_pure_gl`) and `gl-dashboard`.
-- Architecture: frontend-only remap. Keep backend and GeoTIFF/raster contracts unchanged.
-- UI copy: use `Apply Color Shift` for the toggle label (do not use disability-specific wording).
-- Control placement: first top-level (0-level) map/layer control in the sidebar/list for both experiences.
-- State behavior: default `off`; when enabled, apply the shifted mapping consistently to raster display, legend chips, and tooltip swatches.
+- Architecture: the non-shifted palette is consistent across source
+  recognition, generated imagery, legends, and tooltips; retain the existing
+  optional frontend color-shift toggle and alternate palette.
+- Accessibility: keep persistent class labels, make masked pixels transparent,
+  and give the white masked legend swatch a dark border.
 
-| Burn class key | Severity | Standard palette (legacy) | Shift palette (Okabe-Ito) |
-| --- | --- | --- | --- |
-| `130` | Unburned / No Burn | `RGB(0, 115, 74)` / `#00734A` | `RGB(0, 158, 115)` / `#009E73` |
-| `131` | Low | `RGB(77, 230, 0)` / `#4DE600` | `RGB(86, 180, 233)` / `#56B4E9` |
-| `132` | Moderate | `RGB(255, 255, 0)` / `#FFFF00` | `RGB(240, 228, 66)` / `#F0E442` |
-| `133` | High | `RGB(255, 0, 0)` / `#FF0000` | `RGB(204, 121, 167)` / `#CC79A7` |
+| Burn class key | Severity | Canonical color |
+| --- | --- | --- |
+| `130` | Unchanged / unburned | `RGB(0, 128, 128)` / `#008080` |
+| `131` | Low | `RGB(82, 204, 204)` / `#52CCCC` |
+| `132` | Moderate | `RGB(255, 232, 32)` / `#FFE820` |
+| `133` | High | `RGB(168, 0, 0)` / `#A80000` |
+| `255` | Masked / unmappable | `RGB(255, 255, 255)` / `#FFFFFF`, transparent on maps |
 
 ### Typography & spacing
 - Font stacks: sans-serif UI text uses `Source Sans 3` with system fallbacks; monospace uses `Source Code Pro` family.【F:wepppy/wepppy/weppcloud/static/css/ui-foundation.css†L10-L147】

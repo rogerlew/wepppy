@@ -19,12 +19,12 @@ the current interagency colors.
 - [x] (2026-08-07 UTC) Verified official palette values and inventoried the
   primary implementation surfaces.
 - [x] (2026-08-07 UTC) Scaffolded package, tracker, proposed ADR, and this plan.
-- [ ] Accept ADR-0041 and the contract-first checkpoint with two reviews.
-- [ ] Implement parser/export parity across Python and Rust.
-- [ ] Implement the run-page and GL Dashboard UI contract.
-- [ ] Update public accessibility and supporting documentation.
-- [ ] Complete automated, generated-artifact, visual, and manual accessibility
-  validation.
+- [x] (2026-08-07 UTC) Accepted corrected ADR-0041 and checkpoint with two reviews.
+- [x] (2026-08-07 UTC) Implemented parser/export parity across Python and Rust.
+- [x] (2026-08-07 UTC) Implemented the run-page and GL Dashboard UI contract.
+- [x] (2026-08-07 UTC) Updated public accessibility and supporting documentation.
+- [x] (2026-08-07 UTC) Completed automated and generated-artifact validation;
+  recorded the external Playwright target limitation for manual/visual evidence.
 
 ## Surprises & Discoveries
 
@@ -64,8 +64,12 @@ the current interagency colors.
 
 ## Outcomes & Retrospective
 
-Scaffolding is complete. No production behavior has changed. Record observed
-results, residual gaps, and final evidence here after implementation.
+The corrected implementation preserves both shifted modes and changes only the
+non-shifted palette. Native, explicit, inferred, exact-white, and Int16 NoData
+now agree across model fallback, coverage, web alpha, and interchange export.
+Full Python/frontend gates and corrective independent reviews passed. Targeted
+Playwright could not reach a run page containing `#mapid` on the configured
+external target, so manual visual evidence remains a release-environment check.
 
 ## Context and Orientation
 
