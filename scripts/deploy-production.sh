@@ -1,6 +1,8 @@
 #!/bin/bash
 # Production Deployment Script for WEPPcloud
 # Usage: ./scripts/deploy-production.sh [--skip-pull] [--skip-build] [--skip-themes] [--flush-rq-db|--no-flush-rq-db] [--skip-docker-prune] [--docker-prune-volumes]
+# The installed wctl preset selects full production, worker-pool, or the
+# dedicated wepp3 fork/archive deployment automatically.
 
 set -euo pipefail
 
@@ -314,6 +316,11 @@ HAS_WEPPCLOUD=false
 if echo "${COMPOSE_SERVICES}" | grep -q "^weppcloud$"; then
     HAS_WEPPCLOUD=true
 fi
+IS_WEPP3_FORK_ARCHIVE=false
+if [ "$(printf "%s\n" "${COMPOSE_SERVICES}" | sed '/^$/d' | wc -l | tr -d ' ')" -eq 1 ] \
+    && echo "${COMPOSE_SERVICES}" | grep -q "^rq-worker-fork-archive$"; then
+    IS_WEPP3_FORK_ARCHIVE=true
+fi
 
 if [ "${HAS_WEPPCLOUD}" = true ]; then
     DEPLOY_MODE="full"
@@ -325,9 +332,28 @@ if [ "${HAS_WEPPCLOUD}" = true ]; then
             BUILD_SERVICES+=("${svc}")
         fi
     done
+elif [ "${IS_WEPP3_FORK_ARCHIVE}" = true ]; then
+    DEPLOY_MODE="wepp3-fork-archive"
+    BUILD_SERVICES=(rq-worker-fork-archive)
 else
     DEPLOY_MODE="worker"
     BUILD_SERVICES=(rq-worker rq-worker-batch weppcloudr)
+fi
+
+if [ "${IS_WEPP3_FORK_ARCHIVE}" = true ] && [ "${FLUSH_RQ_DB}" = true ]; then
+    echo "✗ Refusing --flush-rq-db on the dedicated wepp3 worker deployment." >&2
+    echo "  Redis DB 9 is shared production state and is not owned by wepp3." >&2
+    exit 1
+fi
+
+if [ "${IS_WEPP3_FORK_ARCHIVE}" = true ]; then
+    if ! wctl docker compose run --rm --no-deps --entrypoint /bin/sh \
+        rq-worker-fork-archive -c 'test -r /run/secrets/redis_password'; then
+        echo "✗ The wepp3 worker identity (uid 1002) cannot read docker/secrets/redis_password." >&2
+        echo "  Grant a read ACL without broadening the secret's 0600 base mode:" >&2
+        echo "  sudo setfacl -m u:1002:r docker/secrets/redis_password" >&2
+        exit 1
+    fi
 fi
 
 echo "============================================"
@@ -362,8 +388,22 @@ else
     echo ""
 fi
 
-# Stop services
+# Stop services. For wepp3, SIGTERM initiates an RQ warm shutdown before
+# Compose removes the container: the worker stops dequeuing first and any job
+# already running is allowed to finish, closing the check-then-stop race.
 echo ">>> Step 3: Stopping services..."
+if [ "${IS_WEPP3_FORK_ARCHIVE}" = true ] \
+    && wctl docker compose ps --status running --services 2>/dev/null \
+        | grep -q '^rq-worker-fork-archive$'; then
+    FORK_ARCHIVE_STOP_TIMEOUT_SECONDS="${FORK_ARCHIVE_STOP_TIMEOUT_SECONDS:-216000}"
+    echo "    Requesting warm shutdown of rq-worker-fork-archive..."
+    run_wctl_with_retry \
+        "$((FORK_ARCHIVE_STOP_TIMEOUT_SECONDS + 30))" \
+        1 \
+        0 \
+        docker compose stop --timeout "${FORK_ARCHIVE_STOP_TIMEOUT_SECONDS}" \
+        rq-worker-fork-archive
+fi
 run_wctl_with_retry \
     "${WCTL_COMPOSE_TIMEOUT_SECONDS}" \
     "${WCTL_COMPOSE_RETRIES}" \
@@ -514,6 +554,38 @@ if [ "${HAS_WEPPCLOUD}" = true ]; then
     done
 else
     echo ">>> Step 6: Skipping WEPPcloud health check (worker stack detected)..."
+    if [ "${IS_WEPP3_FORK_ARCHIVE}" = true ]; then
+        echo "    Verifying dedicated fork/archive worker identity and registration..."
+        WORKER_UID="$(wctl docker compose exec -T rq-worker-fork-archive id -u)"
+        WORKER_GID="$(wctl docker compose exec -T rq-worker-fork-archive id -g)"
+        if [ "${WORKER_UID}:${WORKER_GID}" != "1002:130" ]; then
+            echo "✗ wepp3 worker identity is ${WORKER_UID}:${WORKER_GID}; expected 1002:130 for production NFS writes." >&2
+            exit 1
+        fi
+        REGISTERED_FORK_ARCHIVE_WORKERS=""
+        for _attempt in $(seq 1 60); do
+            REGISTERED_FORK_ARCHIVE_WORKERS="$(
+                wctl docker compose exec -T rq-worker-fork-archive \
+                    /opt/venv/bin/python -c \
+                    'import os; import redis; import socket; from rq import Worker; connection = redis.Redis.from_url(os.environ["RQ_REDIS_URL"], password=open(os.environ["REDIS_PASSWORD_FILE"], encoding="utf-8").read().strip()); workers = [worker for worker in Worker.all(connection=connection) if "fork-archive" in worker.queue_names()]; current = [worker for worker in workers if worker.hostname == socket.gethostname() and connection.ttl(worker.key) > 0]; print(f"{len(workers)}:{len(current)}")' \
+                    2>/dev/null || true
+            )"
+            if [ "${REGISTERED_FORK_ARCHIVE_WORKERS}" = "1:1" ]; then
+                break
+            fi
+            sleep 2
+        done
+        if [ "${REGISTERED_FORK_ARCHIVE_WORKERS}" != "1:1" ]; then
+            echo "✗ Expected one global/current-container fork-archive worker; found '${REGISTERED_FORK_ARCHIVE_WORKERS:-query failed}'." >&2
+            exit 1
+        fi
+        run_wctl_with_retry \
+            "${WCTL_COMPOSE_TIMEOUT_SECONDS}" \
+            "${WCTL_COMPOSE_RETRIES}" \
+            "${WCTL_COMPOSE_RETRY_DELAY_SECONDS}" \
+            rq-info --service rq-worker-fork-archive --detail
+        echo "✓ wepp3 fork/archive worker is running as 1002:130 and registered with RQ"
+    fi
 fi
 
 if [ "${SKIP_DOCKER_PRUNE}" = false ]; then
@@ -534,8 +606,13 @@ echo ""
 echo "============================================"
 echo "Deployment complete!"
 echo "============================================"
-echo "Controllers bundle: wepppy/weppcloud/static/js/controllers-gl.js"
-echo "Theme CSS: wepppy/weppcloud/static/css/themes/"
-echo ""
-echo "Remember to hard refresh your browser (Ctrl+Shift+R or Cmd+Shift+R)"
-echo "to bypass cache and load the new assets."
+if [ "${HAS_WEPPCLOUD}" = true ]; then
+    echo "Controllers bundle: wepppy/weppcloud/static/js/controllers-gl.js"
+    echo "Theme CSS: wepppy/weppcloud/static/css/themes/"
+    echo ""
+    echo "Remember to hard refresh your browser (Ctrl+Shift+R or Cmd+Shift+R)"
+    echo "to bypass cache and load the new assets."
+elif [ "${IS_WEPP3_FORK_ARCHIVE}" = true ]; then
+    echo "Dedicated service: rq-worker-fork-archive"
+    echo "Runtime identity: 1002:130"
+fi
