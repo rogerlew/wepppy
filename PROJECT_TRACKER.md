@@ -75,6 +75,31 @@ Feedback mechanisms:
 
 ## 📋 Backlog
 
+### SBS USGS Section 508 Palette Adoption
+**Status**: In Progress — contract checkpoint review
+
+**Proposed**: 2026-08-07
+
+**Size**: Medium (3-5 focused sessions)
+
+**Priority**: High
+
+**Security impact**: `high` by inherited DOM-23 upload/file ownership
+
+**Link**: [docs/work-packages/20260807_sbs_section508_palette/](docs/work-packages/20260807_sbs_section508_palette/)
+**Description**: Replace the run-page and GL Dashboard SBS color-shift modes
+with the current interagency CVD-friendly palette, make new SBS exports use the
+same colors, and add exact color-table recognition without breaking historical
+rasters. Includes ADR-0041, a contract-first checkpoint, generated-raster and
+Python/Rust parity evidence, accessibility validation, and an update to the
+public accessibility statement.
+
+**Next Steps**: Accept ADR-0041 with the approved transparent
+masked/unmappable treatment and pass two independent contract reviews before
+production implementation.
+
+---
+
 Work packages that are scoped but not yet started. Dependencies and prerequisites should be noted.
 
 ### Run Archive Consistency and Symlink Hardening

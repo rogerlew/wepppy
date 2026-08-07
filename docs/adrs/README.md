@@ -82,3 +82,4 @@ Each ADR should normally include:
 - `ADR-0038`: [Universal User Model-Responsibility Contract](ADR-0038-universal-user-model-responsibility-contract.md) (Accepted, 2026-08-03)
 - `ADR-0039`: [WEPP Prep-Completion Timeout](ADR-0039-wepp-prep-completion-timeout.md) (Accepted, 2026-08-07)
 - `ADR-0040`: [Canonical Parquet Counts for Run Inventory](ADR-0040-canonical-parquet-counts-for-run-inventory.md) (Accepted, 2026-08-07)
+- `ADR-0041`: [Canonical USGS SBS Accessibility Palette](ADR-0041-sbs-usgs-section508-palette.md) (Accepted, 2026-08-07)
