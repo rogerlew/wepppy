@@ -15,6 +15,8 @@ This plan implements the contract in `docs/work-packages/20260505_run_statistics
 - [x] (2026-05-05 20:26 UTC) Work package and draft spec created.
 - [x] (2026-05-05 20:42 UTC) Storage decision revised: Postgres source-of-truth ledger; stats endpoint inventory captured.
 - [x] (2026-05-05 23:05 UTC) Documentation consistency audit aligned storage, endpoint migration scope, and validation tracking.
+- [x] (2026-08-07 UTC) Production ten-hour compiler timeout diagnosed at the per-run `.slp` glob; operator approved canonical Parquet counts without legacy parity.
+- [ ] Ratify and implement the bounded canonical-Parquet active-inventory bridge.
 - [ ] Implement the Postgres statistics ledger module and unit tests.
 - [ ] Add deterministic backfill and rollup generation tests.
 - [ ] Add WEPP hillslope and WATAR runtime hooks.
@@ -24,6 +26,14 @@ This plan implements the contract in `docs/work-packages/20260505_run_statistics
 
 ## Surprises & Discoveries
 
+- Observation: Production job `7aa39c98-de7c-4298-8d5f-35e3784775e4`
+  exhausted its 36,000-second timeout inside the per-run `.slp` glob.
+  Evidence: wepp1 RQ traceback and job timestamps on 2026-08-07.
+- Observation: `watershed/hillslopes.parquet` and
+  `ash/post/hillslope_annuals.parquet` permit direct footer row counts without
+  enumerating per-hillslope directories.
+  Evidence: artifact-writer and production-run inspection on 2026-08-07.
+
 - Observation: The prior counter date was not inferred from data. It was an exclusive hard-coded cutoff: `first_access > datetime(2024, 1, 1)` in `wepppy/weppcloud/_scripts/compile_dot_logs.py`.
   Evidence: Source inspection and wepp1 `runs_counter.json` comparison on 2026-05-05.
 - Observation: The prior WEPP hillslope count was a current file count, not an execution count.
@@ -32,6 +42,13 @@ This plan implements the contract in `docs/work-packages/20260505_run_statistics
   Evidence: `_load_run_metadata()` uses `len(glob(run_dir / "ash" / "*ash.csv"))`.
 
 ## Decision Log
+
+- Decision: Immediately replace per-run legacy globs with footer row counts
+  from canonical watershed and ash-post Parquet artifacts, with no parity
+  fallback.
+  Rationale: The old scan timed out at ten hours on NAS; the operator explicitly
+  accepted changed count semantics to remove the unbounded metadata workload.
+  Date/Author: 2026-08-07 / WEPPcloud operator and Codex.
 
 - Decision: Use PostgreSQL as the durable source-of-truth ledger for historical execution counts.
   Rationale: TTL deletes run directories, flat-file append paths are collision-prone across concurrent workers, and PostgreSQL gives transactional inserts with uniqueness constraints for idempotence.
@@ -71,6 +88,17 @@ The existing public stats route is `wepppy/weppcloud/routes/stats.py`. It serves
 Only the file-backed statistics responses are in migration scope. `/getloadavg` is inventoried for completeness and remains unchanged unless a separate package changes host-load reporting.
 
 ## Plan of Work
+
+Milestone 0 is the independently closeable SURF-19A incident bridge. Before any
+code edit, register GOV-00A-M1H/SURF-19A, ratify the exact output matrix and
+ADR-0040, complete dual review and disposition, and commit them as a standalone
+ancestor. Then replace only the two per-run count globs with Parquet footer
+reads, decouple centroid and project eligibility from counts, stage all four
+outputs, and reject systemic candidates before publication. Focused fixtures
+cover footer-only reads, ignored legacy files, missing/corrupt/racing artifacts,
+warning telemetry, TTL/location behavior, aggregate semantics, and last-good
+containment. Canary a representative production invocation with scheduling
+fenced; inspect duration and warnings before accepting published outputs.
 
 Milestone 1 creates a small internal statistics module, probably under `wepppy/weppcloud/stats/`, with a `StatsEvent` construction helper, a transactional database insert function, a reader/query helper for rollups, and deterministic event-id helpers for backfill. Reuse existing database configuration and connection patterns from the WEPPcloud app stack.
 
@@ -123,6 +151,14 @@ Work from repository root `/workdir/wepppy`.
 ## Validation and Acceptance
 
 Acceptance is behavioral:
+
+- SURF-19A performs no per-run hillslope/ash directory enumeration, reads the
+  exact Parquet footers, and preserves location/project eligibility when a
+  count artifact is absent.
+- One corrupt run warns and contributes zero; systemic failures leave all four
+  last-known-good outputs unchanged.
+- A representative production canary completes within the existing 36,000
+  seconds and reports canonical read/warning counts.
 
 - A fixture project that runs WEPP hillslopes twice produces an aggregate `hillslope_run_count` equal to two completed invocations, not the number of `.slp` files.
 - A fixture project that runs WATAR once produces `watar_hillslope_run_count == len(args)` and ignores summary files matching broad `*ash.csv` patterns.

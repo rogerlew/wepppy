@@ -1,7 +1,7 @@
 # PROJECT_TRACKER.md
 > Kanban board for wepppy work packages and vision items
 
-**Last Updated**: 2026-08-06
+**Last Updated**: 2026-08-07
 **Active Packages**: 22
 **Quick Links**: [Work Packages Directory](docs/work-packages/) | [God-Tier Prompting Strategy](docs/god-tier-prompting-strategy.md)
 
@@ -186,6 +186,12 @@ checkpoint before any production implementation edits.
 **Link**: [docs/work-packages/20260505_run_statistics_ledger/](docs/work-packages/20260505_run_statistics_ledger/)
 **Description**: Replace WEPPcloud usage counters derived from active run-directory file counts with a durable PostgreSQL statistics ledger for project counts by config, repeated WEPP hillslope run counts, and WATAR ash run counts.
 
+**Incident bridge**: SURF-19A/GOV-00A-M1H is in progress after wepp1 job
+`7aa39c98-de7c-4298-8d5f-35e3784775e4` exhausted 36,000 seconds inside a
+per-run `.slp` glob. It uses canonical Parquet footer counts, decouples
+locations/projects from count presence, and retains last-good outputs on
+systemic artifact failure.
+
 **Scope**:
 - Add a PostgreSQL statistics event ledger so historical execution counts survive 90-day TTL deletion and concurrent writers are transaction-safe.
 - Keep PostgreSQL as the source-of-truth ledger; Redis may be used only as an optional summary cache/materialization layer.
@@ -200,7 +206,7 @@ checkpoint before any production implementation edits.
 
 **Dependencies**: Initial spec and active ExecPlan are created; implementation is pending.
 
-**Next Steps**: Implement the ledger module and focused writer/backfill tests before wiring WEPP, WATAR, and TTL runtime hooks.
+**Next Steps**: Commit the reviewed SURF-19A checkpoint, implement and canary the footer-only incident bridge, then resume broader ledger milestones.
 
 ---
 

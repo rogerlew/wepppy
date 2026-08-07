@@ -81,3 +81,4 @@ Each ADR should normally include:
 - `ADR-0037`: [Increase WBT Least-Cost Breach Distance Default](ADR-0037-wbt-least-cost-breach-distance-default.md) (Accepted, 2026-07-30)
 - `ADR-0038`: [Universal User Model-Responsibility Contract](ADR-0038-universal-user-model-responsibility-contract.md) (Accepted, 2026-08-03)
 - `ADR-0039`: [WEPP Prep-Completion Timeout](ADR-0039-wepp-prep-completion-timeout.md) (Accepted, 2026-08-07)
+- `ADR-0040`: [Canonical Parquet Counts for Run Inventory](ADR-0040-canonical-parquet-counts-for-run-inventory.md) (Accepted, 2026-08-07)
