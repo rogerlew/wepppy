@@ -101,6 +101,7 @@ def test_log_complete_skips_autocommit_by_default(monkeypatch: pytest.MonkeyPatc
 def test_log_complete_autocommits_when_enabled(monkeypatch: pytest.MonkeyPatch) -> None:
     _stub_log_complete_dependencies(monkeypatch)
     stages: list[str] = []
+    acquire_kwargs: list[dict[str, object]] = []
     released_tokens: list[str] = []
     monkeypatch.setattr(
         wepp_rq.Wepp,
@@ -115,7 +116,7 @@ def test_log_complete_autocommits_when_enabled(monkeypatch: pytest.MonkeyPatch) 
     monkeypatch.setattr(
         wepp_rq,
         "acquire_bootstrap_git_lock",
-        lambda *args, **kwargs: SimpleNamespace(token="lock-1"),
+        lambda *args, **kwargs: acquire_kwargs.append(kwargs) or SimpleNamespace(token="lock-1"),
     )
     monkeypatch.setattr(
         wepp_rq,
@@ -130,6 +131,7 @@ def test_log_complete_autocommits_when_enabled(monkeypatch: pytest.MonkeyPatch) 
     )
 
     assert stages == ["WEPP pipeline"]
+    assert "ttl_seconds" not in acquire_kwargs[0]
     assert released_tokens == ["lock-1"]
 
 
@@ -245,6 +247,111 @@ def test_log_prep_complete_emits_prep_trigger_without_timestamp(monkeypatch: pyt
     wepp_rq._log_prep_complete_rq("ab-run")
 
     assert any("WEPP_PREP_TASK_COMPLETED" in message for _channel, message in published)
+
+
+def test_prep_autocommit_lock_ttl_tracks_long_job_timeout() -> None:
+    job = SimpleNamespace(timeout=1_200)
+    old_job = SimpleNamespace(timeout=180)
+
+    assert wepp_rq._stage_finalize._prep_autocommit_lock_ttl_seconds(job) == 1_500
+    assert (
+        wepp_rq._stage_finalize._prep_autocommit_lock_ttl_seconds(old_job)
+        == wepp_rq._stage_finalize.BOOTSTRAP_GIT_LOCK_TTL_SECONDS
+    )
+    assert (
+        wepp_rq._stage_finalize._prep_autocommit_lock_ttl_seconds(None)
+        == wepp_rq._stage_finalize.BOOTSTRAP_GIT_LOCK_TTL_SECONDS
+    )
+
+
+def test_log_prep_complete_uses_timeout_aligned_lock_and_releases_on_success(
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    acquired_ttls: list[int] = []
+    released_tokens: list[str] = []
+    commit_stages: list[str] = []
+    monkeypatch.setattr(
+        wepp_rq,
+        "get_current_job",
+        lambda: SimpleNamespace(id="job-1", timeout=1_200),
+    )
+    monkeypatch.setattr(wepp_rq, "get_wd", lambda _runid: "/tmp/run")
+    monkeypatch.setattr(wepp_rq.StatusMessenger, "publish", lambda _channel, _message: None)
+    monkeypatch.setattr(
+        wepp_rq.Wepp,
+        "getInstance",
+        lambda _wd: SimpleNamespace(
+            bootstrap_commit_inputs=lambda stage: commit_stages.append(stage),
+            logger=SimpleNamespace(warning=lambda *args, **kwargs: None),
+        ),
+    )
+    monkeypatch.setattr(wepp_rq, "redis_connection_kwargs", lambda _db: {})
+    monkeypatch.setattr(wepp_rq.redis, "Redis", lambda **_kwargs: DummyRedis())
+
+    def _acquire(*_args, **kwargs):
+        acquired_ttls.append(kwargs["ttl_seconds"])
+        return SimpleNamespace(token="lock-1")
+
+    monkeypatch.setattr(wepp_rq, "acquire_bootstrap_git_lock", _acquire)
+    monkeypatch.setattr(
+        wepp_rq,
+        "release_bootstrap_git_lock",
+        lambda _redis_conn, *, runid, token: released_tokens.append(token) or True,
+    )
+
+    wepp_rq._log_prep_complete_rq("ab-run", auto_commit_inputs=True)
+
+    assert acquired_ttls == [1_500]
+    assert commit_stages == ["WEPP prep-only pipeline"]
+    assert released_tokens == ["lock-1"]
+
+
+def test_log_prep_complete_uses_timeout_aligned_lock_and_releases_on_failure(
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    published: list[str] = []
+    acquired_ttls: list[int] = []
+    released_tokens: list[str] = []
+    monkeypatch.setattr(
+        wepp_rq,
+        "get_current_job",
+        lambda: SimpleNamespace(id="job-1", timeout=1_200),
+    )
+    monkeypatch.setattr(wepp_rq, "get_wd", lambda _runid: "/tmp/run")
+    monkeypatch.setattr(
+        wepp_rq.StatusMessenger,
+        "publish",
+        lambda _channel, message: published.append(str(message)),
+    )
+    monkeypatch.setattr(
+        wepp_rq.Wepp,
+        "getInstance",
+        lambda _wd: SimpleNamespace(
+            bootstrap_commit_inputs=lambda _stage: (_ for _ in ()).throw(RuntimeError("git failed")),
+            logger=SimpleNamespace(warning=lambda *args, **kwargs: None),
+        ),
+    )
+    monkeypatch.setattr(wepp_rq, "redis_connection_kwargs", lambda _db: {})
+    monkeypatch.setattr(wepp_rq.redis, "Redis", lambda **_kwargs: DummyRedis())
+
+    def _acquire(*_args, **kwargs):
+        acquired_ttls.append(kwargs["ttl_seconds"])
+        return SimpleNamespace(token="lock-1")
+
+    monkeypatch.setattr(wepp_rq, "acquire_bootstrap_git_lock", _acquire)
+    monkeypatch.setattr(
+        wepp_rq,
+        "release_bootstrap_git_lock",
+        lambda _redis_conn, *, runid, token: released_tokens.append(token) or True,
+    )
+
+    with pytest.raises(RuntimeError, match="git failed"):
+        wepp_rq._log_prep_complete_rq("ab-run", auto_commit_inputs=True)
+
+    assert acquired_ttls == [1_500]
+    assert released_tokens == ["lock-1"]
+    assert not any("WEPP_PREP_TASK_COMPLETED" in message for message in published)
+    assert any("EXCEPTION" in message for message in published)
 
 
 def test_prep_watershed_enqueue_uses_prep_only_pipeline(monkeypatch: pytest.MonkeyPatch) -> None:

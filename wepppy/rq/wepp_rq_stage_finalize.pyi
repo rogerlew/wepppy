@@ -10,8 +10,16 @@ send_discord_message: Callable[[str], None] | None
 
 def _bootstrap_autocommit_actor(job: Job | None) -> str: ...
 
+def _prep_autocommit_lock_ttl_seconds(job: Job | None) -> int: ...
 
-def _bootstrap_autocommit_with_lock(runid: str, wepp: Wepp, stage: str, *, actor: str) -> str | None: ...
+def _bootstrap_autocommit_with_lock(
+    runid: str,
+    wepp: Wepp,
+    stage: str,
+    *,
+    actor: str,
+    lock_ttl_seconds: int | None = ...,
+) -> str | None: ...
 
 
 def _log_complete_rq(

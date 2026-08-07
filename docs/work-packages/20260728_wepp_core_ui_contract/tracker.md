@@ -16,6 +16,10 @@ validation passing without a production change.
 - 2026-08-07 05:15 UTC: Independent governance and operations/security reviews
   passed after disposition. The checkpoint is accepted and ready for its
   standalone ancestor; implementation remains pending.
+- 2026-08-07 05:16 UTC: Standalone checkpoint committed as `cdc51d421`.
+- 2026-08-07 05:25 UTC: Phase-1 consumer compatibility implemented. Focused
+  bootstrap/RQ suite passed 21 tests; stubtest, broad-exception, and diff gates
+  passed. Deployment to both default-worker hosts remains pending.
 - Baseline signal: one confirmed prep-only `JobTimeoutException` at 180 seconds.
   Health target: zero recurrences for 14 days after deployment. Guardrails:
   default-queue wait, finalizer duration, lock contention, and Git errors.

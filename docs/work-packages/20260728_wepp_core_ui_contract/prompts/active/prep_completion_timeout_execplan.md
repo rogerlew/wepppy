@@ -22,7 +22,13 @@ long as the measured `door-to-door-salad` recovery will not fail at RQ's
 - [x] (2026-08-07 05:15 UTC) Obtained governance and operations/security
   checkpoint reviews, dispositioned all findings, and received post-fix PASS.
 - [ ] Commit the accepted checkpoint as a standalone ancestor.
-- [ ] Implement the timeout and aligned lock lifetime with regression tests.
+- [x] (2026-08-07 05:16 UTC) Committed accepted checkpoint as standalone
+  ancestor `cdc51d421`.
+- [x] (2026-08-07 05:25 UTC) Implemented phase-1 consumer-compatible lock TTL
+  derivation with old-job, prep-only, success, failure, and sibling coverage;
+  focused suite passed 21 tests.
+- [ ] Deploy and verify phase-1 compatibility on every default-worker host.
+- [ ] Activate the 3,703-second prep-only producer timeout.
 - [ ] Run focused, RQ graph, stub, broad-exception, docs, and full test gates.
 - [ ] Obtain final correctness and security confirmation and record outcomes.
 
