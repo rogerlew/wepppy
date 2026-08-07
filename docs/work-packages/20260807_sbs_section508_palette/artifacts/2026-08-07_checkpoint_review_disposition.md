@@ -1,6 +1,6 @@
 # SBS-A11Y-01 Checkpoint Review Disposition
 
-**Status**: PASS  
+**Status**: SUPERSEDED — replaced by corrective review disposition
 **Date**: 2026-08-07 UTC
 
 ## Reviews
@@ -28,4 +28,3 @@
 There are no unresolved high or medium findings. The checkpoint is approved for
 a standalone ancestor commit. Implementation remains bounded by
 `artifacts/2026-08-07_contract_decision.md`.
-

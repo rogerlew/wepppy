@@ -1,8 +1,9 @@
 # SBS-A11Y-01 Contract Decision
 
-**Status**: Approved by operator; independently reviewed; ready for checkpoint commit  
+**Status**: Corrected by operator; corrective reviews passed
 **Decision date**: 2026-08-07  
-**Starting implementation revision**: `8c15b1c3202b937015fad66532f0389cb9a559f8`
+**Original implementation baseline**: `8c15b1c3202b937015fad66532f0389cb9a559f8`
+**Corrective baseline**: `ed0feec67` (superseded removal-contract checkpoint)
 
 ## Authority and Ownership
 
@@ -22,7 +23,7 @@ Applicable canonical authorities are:
 
 ## Exact Normative Delta
 
-1. The only canonical SBS display/export palette is unchanged/unburned
+1. The canonical non-shifted SBS display/export palette is unchanged/unburned
    `#008080`, low `#52CCCC`, moderate `#FFE820`, high `#A80000`, and
    masked/unmappable `#FFFFFF`.
 2. Normalized categorical values remain `130`, `131`, `132`, `133`, and
@@ -32,9 +33,8 @@ Applicable canonical authorities are:
    white swatch with a dark boundary.
 4. The run-page `#sbs_color_shift_toggle`, GL Dashboard
    `#gl-sbs-color-shift-toggle`, `sbsColorShiftEnabled` state key, per-pixel
-   recoloring, and dual legends are removed from their source templates,
-   bootstrap, and modules. Old `window.__GL_DASHBOARD_STATE__` payloads that
-   contain `sbsColorShiftEnabled` are ignored without error.
+   recoloring, and dual legends remain supported. Only their non-shifted
+   palette changes.
 5. Current exact RGB entries are recognized during indexed color-table
    ingestion. Existing recognized historical RGB values remain accepted.
    Unknown colors remain unknown; nearest-color matching is forbidden.
@@ -43,16 +43,17 @@ Applicable canonical authorities are:
    their source palette indices to `nodata_vals`, preserving the existing
    four-value JSON severity schema understood by old Python and Rust versions.
 6. Python and `wepppyo3` fast paths must return identical class mappings.
-7. New four-class exports contain exact color-table entries `0 = (0, 128, 128,
+7. Four-class exports requested with `export_palette="legacy"` contain exact
+   color-table entries `0 = (0, 128, 128,
    255)`, `1 = (82, 204, 204, 255)`, `2 = (255, 232, 32, 255)`, `3 = (168, 0,
-   0, 255)`, and `255 = (255, 255, 255, 0)`. Existing raster pixels are not
-   migrated merely to change presentation.
+   0, 255)`, and `255 = (255, 255, 255, 0)`. The default shifted export palette
+   is unchanged. Existing raster pixels are not migrated merely to change presentation.
 8. Class names remain visible beside swatches so meaning is not communicated by
    color alone.
 
 ## Compatibility and Data Impact
 
-The change is additive at ingestion and canonicalizing at display/export.
+The change is additive at ingestion and updates only non-shifted display/export.
 Existing categorical and historical color-table rasters remain readable.
 There is no NoDb schema, route payload, RQ wiring, authorization, upload-limit,
 or severity-threshold change. Generated-output validation must prove exact RGBA
@@ -82,6 +83,11 @@ The NoData domains are intentionally distinct:
 - `export_4class_map` is a presentation/interchange artifact with class indices
   `0..3` and NoData `255`. Source NoData is explicitly written as `255`, not
   passed through the model fallback or class-zero classification.
+- Until the companion Rust change is released into WEPPpy, exports containing
+  source NoData intentionally use the Python path. This mixed-version guard
+  prevents the installed older Rust extension from converting NoData to class
+  zero. Unmasked exports retain Rust acceleration; companion unit evidence
+  covers the corrected Rust NoData override.
 - Web display products preserve/export alpha zero for NoData, so those pixels
   reveal the basemap.
 
@@ -106,11 +112,9 @@ requires this checkpoint ancestor before implementation.
 
 ## Regression Evidence
 
-- Direct render test proves the shift checkbox is absent and both legend hosts
-  remain.
-- Jest tests prove one palette across run-page imagery, legend, tooltip, and
-  old-state bootstrap; GL Dashboard tests prove the same and explicitly ignore
-  stale `window.__GL_DASHBOARD_STATE__.sbsColorShiftEnabled`.
+- Direct render tests prove the shift checkbox and both legend hosts remain.
+- Jest tests prove the non-shifted palette across run-page imagery, legend, and
+  tooltip, then prove the toggle still selects the unchanged shifted palette.
 - GDAL fixtures prove current and historical indexed color tables, alpha,
   masked NoData, unknown colors, and canonical export tables.
 - BAER and Disturbed tests prove mixed valid/masked coverage, an all-masked
@@ -130,12 +134,15 @@ requires this checkpoint ancestor before implementation.
 
 Roger Lew explicitly directed adoption of the five current Burn Severity Portal
 colors, inclusion of the ADR and public accessibility-page update, execution of
-the work package, and transparent masked/unmappable pixels on 2026-08-07. This
-approves the exact matrix above and authorizes bounded composition of DOM-04B
-and DOM-23 without advancing or closing them.
+the work package, and transparent masked/unmappable pixels on 2026-08-07. Roger
+then explicitly corrected the scope: preserve both toggles, state, client
+recoloring, shifted colors, and the default shifted export; change only the
+non-shifted palette. This approves the corrected matrix above and authorizes
+bounded composition of DOM-04B and DOM-23 without advancing or closing them.
 
 ## Review Gate
 
-Both independent read-only reviews passed after every finding was dispositioned
-and medium/high fixes received post-fix confirmation. Implementation remains
-blocked only until this checkpoint is committed as a standalone ancestor.
+The original reviews applied to the superseded removal contract. Corrective
+governance and operations/security reviews passed with no unresolved high or
+medium findings. The corrected authority is ready for its standalone
+checkpoint commit.

@@ -4,9 +4,9 @@
 
 **Timezone**: UTC  
 **Started**: 2026-08-07 15:17 UTC  
-**Current phase**: Standalone checkpoint commit  
-**Last updated**: 2026-08-07 15:25 UTC  
-**Next milestone**: Commit checkpoint, then implement raster semantics  
+**Current phase**: Corrective checkpoint commit
+**Last updated**: 2026-08-07 16:22 UTC
+**Next milestone**: Commit corrected authority, then implementation
 **Security impact**: `high` by inherited DOM-23 owner rule
 
 ## Task Board
@@ -16,15 +16,15 @@
 - [ ] Validate the source inventory and identify the owning run-page template
   for the color-shift control.
 - [x] Finalize and accept ADR-0041; masked/unmappable rendering is resolved.
-- [x] Write and independently review the contract decision artifact.
+- [x] Complete corrective independent reviews of the contract decision artifact.
 - [ ] Implement shared palette/export/ingestion behavior and Rust parity.
-- [ ] Update the run page and GL Dashboard, then remove obsolete shift state.
+- [ ] Update the non-shifted run-page and GL Dashboard palettes while retaining shift state.
 - [ ] Update public, user, operator, and developer accessibility documentation.
 - [ ] Run focused, full, frontend, visual, and accessibility validation.
 
 ### In Progress
 
-- None.
+- Commit the corrected authority as a standalone checkpoint.
 
 ### Blocked
 
@@ -39,20 +39,22 @@
   (2026-08-07 UTC).
 - [x] Registered SBS-A11Y-01, accepted ADR-0041, amended DOM-04B/DOM-23
   matrices, and drafted the contract/security checkpoint (2026-08-07 UTC).
-- [x] Dispositioned all governance and ops/security findings; both independent
-  post-fix reviews passed with no remaining high/medium findings
-  (2026-08-07 UTC).
+- [x] Marked the original removal-contract reviews superseded after the operator
+  corrected the scope (2026-08-07 UTC).
+- [x] Corrective governance and operations/security reviews passed with no
+  unresolved high or medium findings (2026-08-07 UTC).
 
 ## Decisions Log
 
 ### 2026-08-07 UTC: Additive input compatibility
 
 **Decision**: Plan for exact recognition of both the current USGS palette and
-already supported historical palettes, with canonical USGS colors on new
-exports and displays.
+already supported historical palettes, with canonical USGS colors on
+non-shifted displays and explicit `export_palette="legacy"` exports. Default
+shifted exports remain unchanged.
 
-**Impact**: Existing uploaded SBS maps remain usable while the UI no longer
-needs a display-time color-shift mode.
+**Impact**: Existing uploaded SBS maps and the optional display-time color-shift
+mode remain usable; only the non-shifted colors change.
 
 ### 2026-08-07 UTC: Accessibility claim boundary
 
@@ -77,7 +79,7 @@ while the legend still documents the official source color and semantic class.
 | --- | --- | --- | --- |
 | Python and Rust classify the same RGB differently | High | Shared fixture matrix and forced Python/Rust parity tests | Open |
 | Transparent masked cells are confused with missing tiles | Medium | Persistent masked/unmappable legend label, bordered white swatch, and light/dark basemap review | Decision resolved; validation open |
-| Removing shift state breaks saved dashboard hashes or old clients | Medium | Define ignored legacy state and test old hashes/bootstrap | Open |
+| Non-shifted palette update accidentally breaks shifted state or old clients | High | Preserve state/API/toggles and test both modes | Open |
 | Palette-only UI still relies on color alone | Medium | Persistent text labels and manual color-independent review | Open |
 | Existing rasters stop classifying | High | Preserve historical RGB lookup fixtures | Open |
 

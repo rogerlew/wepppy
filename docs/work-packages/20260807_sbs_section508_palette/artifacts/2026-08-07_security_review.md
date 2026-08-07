@@ -1,6 +1,6 @@
 # SBS-A11Y-01 Security Review
 
-**Status**: PASS after post-fix confirmation  
+**Status**: SUPERSEDED — reviewed the pre-correction removal contract
 **Security impact**: `high` by inherited DOM-23 owner rule
 
 ## Review Boundary
@@ -19,8 +19,8 @@ surface is broadened.
 - Python and Rust fast paths share a bounded mapping and compatible failure
   behavior.
 - No test fixture or evidence artifact contains sensitive production data.
-- Removal of client recoloring does not introduce remote resource or canvas
-  handling changes.
+- Preservation of client recoloring does not introduce new remote resource or
+  canvas handling boundaries; both palettes remain finite exact mappings.
 
 ## Findings and Disposition
 
@@ -45,6 +45,6 @@ surface is broadened.
 
 ## Final Disposition
 
-The independent ops/security reviewer confirmed that no high or medium findings
-remain. Implementation and release remain conditioned on the documented test,
-generated-output, and accessibility evidence gates.
+The original PASS covered a superseded removal contract. A corrective
+independent review must confirm the preserved shifted-mode boundary before this
+artifact returns to PASS.

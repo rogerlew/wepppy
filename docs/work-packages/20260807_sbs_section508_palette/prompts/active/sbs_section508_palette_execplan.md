@@ -8,10 +8,11 @@ this plan and the package tracker at every stopping point.
 ## Purpose / Big Picture
 
 After this work, users see the same current interagency burn-severity colors in
-the run-page map, GL Dashboard, legends, tooltips, and newly exported SBS
-rasters. Uploaded indexed rasters using those colors classify correctly, while
-older supported palettes remain compatible. The application no longer
-recolors pixels in the browser through a standard/shifted toggle.
+the non-shifted run-page map, GL Dashboard, legends, tooltips, and explicit
+`export_palette="legacy"` SBS exports. Uploaded indexed rasters using those colors classify correctly, while
+older supported palettes remain compatible. The application continues to
+offer its optional color-shifted display while the non-shifted display adopts
+the current interagency colors.
 
 ## Progress
 
@@ -46,10 +47,9 @@ recolors pixels in the browser through a standard/shifted toggle.
   Rationale: these are the current values published by the interagency Burn
   Severity Portal and explicitly requested by the operator.
   Date/Author: 2026-08-07, Roger Lew / Codex.
-- Decision: retain exact historical RGB recognition but remove browser
-  display-time color shifting.
-  Rationale: backward-compatible ingestion avoids breaking old projects while
-  a single output palette prevents image/legend drift.
+- Decision: retain exact historical RGB recognition and browser display-time
+  color shifting; update only the non-shifted palette.
+  Rationale: removing the optional shifted view is outside the requested scope.
   Date/Author: 2026-08-07, Codex proposal; ADR acceptance pending.
 - Decision: update the public accessibility statement conservatively.
   Rationale: the palette is a meaningful CVD-friendly improvement, but color
@@ -80,8 +80,8 @@ The main run page renders SBS through
 `wepppy/weppcloud/controllers_js/map_gl.js`, with palette and legend helpers in
 `map_gl_shared.js`. GL Dashboard independently renders the SBS canvas and
 tooltip in `static/js/gl-dashboard/map/layers.js` and its legend in
-`layers/renderer.js`. Both currently carry standard/shifted state that must be
-retired together. The public accessibility statement is
+`layers/renderer.js`. Both carry standard/shifted state that must remain in
+sync. The public accessibility statement is
 `wepppy/weppcloud/routes/usersum/weppcloud/accessibility-statement.md`.
 
 ## Plan of Work
@@ -92,8 +92,7 @@ contract owner, update all applicable canonical contracts, obtain explicit
 operator approval and two independent reviews, and commit that checkpoint as a
 standalone ancestor. Accept ADR-0041 in the same checkpoint. Resolve masked
 white as value `255`/NoData with transparent map rendering and a labeled,
-dark-bordered white legend swatch, and specify how stale saved `shifted` state
-is ignored.
+dark-bordered white legend swatch, and preserve saved `shifted` state.
 
 Milestone 2 establishes one palette contract in raster processing. Add the
 current exact RGB triplets to `sbs_color_map.json`, retain existing triplets,
@@ -117,10 +116,10 @@ the watershed boundary. When no eligible pixels remain, store zero for all four
 coverage fractions; retain the existing no-SBS default separately. Test mixed
 and all-masked inputs and their generated summaries.
 
-Milestone 3 removes client recoloring. Replace the two run-page legend arrays
-with one canonical array, remove the toggle and shifted canvas behavior, and
-retain compatibility for old persisted state by safely ignoring it. Make the
-same changes to GL Dashboard state, canvas rendering, legends, and tooltips.
+Milestone 3 updates only non-shifted client rendering. Retain both run-page
+legend arrays, the toggle, shifted canvas behavior, and persisted state. Make
+the equivalent non-shifted color changes to GL Dashboard imagery, legends, and
+tooltips while preserving its shifted mode.
 Labels remain visible so class meaning is not conveyed by color alone. Give
 the masked white swatch a dark visible boundary while keeping its map pixels
 transparent.
@@ -160,9 +159,10 @@ artifact under this package.
 An indexed raster using `(0,128,128)`, `(82,204,204)`, `(255,232,32)`,
 `(168,0,0)`, and `(255,255,255)` must classify as unchanged, low, moderate,
 high, and masked/NoData. A representative old palette must return its previous
-classes. A newly exported raster must retain class pixels and publish the
-canonical table. On both map clients, imagery, legend swatches, and tooltips
-must agree and no palette-shift control may remain. The masked legend entry
+classes. An explicit `export_palette="legacy"` raster must retain class pixels
+and publish the canonical table; an export with no palette argument must retain
+the existing shifted table. On both map clients, imagery, legend swatches, and tooltips
+must agree in non-shifted mode and both palette-shift controls must remain. The masked legend entry
 must remain perceptible on a white surface, and masked map pixels must expose
 the basemap. The public accessibility page must describe this feature and
 retain its conformance caveat.
@@ -190,8 +190,7 @@ Use existing GDAL, NumPy, Jest, and Playwright facilities. Add no dependency.
 Keep `sbs_color_map.json` as the shared exact input-recognition source consumed
 by Python and Rust. Preserve the public Python functions `get_sbs_color_table`,
 `ct_classify`, and `SoilBurnSeverityMap.export_4class_map`, and preserve the
-run-page and GL Dashboard event contracts except for the explicitly retired
-palette-toggle state.
+run-page and GL Dashboard event and palette-toggle state contracts.
 
 Revision note: created 2026-08-07 to capture the operator-directed USGS palette,
 ADR requirement, public accessibility update, compatibility boundary, and

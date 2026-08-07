@@ -7,7 +7,7 @@
 ## Overview
 
 Adopt the current interagency Burn Severity Portal palette for soil burn
-severity (SBS) maps and legends without client-side color shifting. The
+severity (SBS) maps and legends when color shifting is not selected. The
 canonical display/export colors are teal `#008080` for unchanged/unburned,
 cyan `#52CCCC` for low severity, yellow `#FFE820` for moderate severity, dark
 red `#A80000` for high severity, and white `#FFFFFF` for
@@ -16,15 +16,15 @@ masked/unmappable cells.
 The work covers the run-page map, GL Dashboard, SBS raster export and color
 table ingestion, tests, technical documentation, and the public accessibility
 statement. Existing SBS rasters using earlier recognized palettes remain
-readable; the new palette becomes the single default for newly rendered and
-exported artifacts.
+readable; the existing optional color-shifted display and default shifted
+export remain available.
 
 ## Objectives
 
 - Render matching canonical colors in SBS imagery, legends, and tooltips on
   the run page and GL Dashboard.
-- Remove the user-facing standard/shifted palette choice and the per-pixel
-  display recoloring path after the canonical palette is wired end to end.
+- Preserve the user-facing standard/shifted palette choice and per-pixel
+  display recoloring path; update only the non-shifted palette.
 - Recognize exact current USGS RGB color-table entries during Python and Rust
   SBS classification while preserving historical recognized RGB entries.
 - Keep categorical class values `130` through `133` and existing model
@@ -40,8 +40,8 @@ exported artifacts.
 
 - Run-page SBS overlay and legend in
   `wepppy/weppcloud/controllers_js/map_gl_shared.js` and
-  `wepppy/weppcloud/controllers_js/map_gl.js`, including removal of the color
-  shift control from its owning template and state contract.
+  `wepppy/weppcloud/controllers_js/map_gl.js`, retaining the color-shift
+  control and state contract.
 - GL Dashboard SBS rendering, legend, tooltip, and state in
   `wepppy/weppcloud/static/js/gl-dashboard/map/layers.js`,
   `layers/renderer.js`, `state.js`, the live bootstrap in
@@ -110,19 +110,19 @@ zero. Tests must prove both domains and mixed-version JSON compatibility.
 ## Success Criteria
 
 - [ ] Run-page and GL Dashboard SBS imagery, legends, and tooltips use the five
-  canonical colors and labels with no color-shift toggle.
+  canonical non-shifted colors and labels with the color-shift toggle retained.
 - [ ] Current USGS indexed color tables classify four severity entries and
   recognize exact-white as source NoData. Export/display preserve NoData `255`
   and transparency; model-facing consumers retain the class-`130` fallback.
 - [ ] Historical supported palettes retain classification parity.
-- [ ] Newly exported SBS rasters contain the canonical RGBA table and preserve
-  categorical pixel values.
+- [ ] Explicit non-shifted SBS exports contain the canonical RGBA table and
+  preserve categorical pixel values; default shifted exports remain unchanged.
 - [ ] Automated tests cover maps and parsers; keyboard, zoom, color-independent
   identification, light/dark basemap, and screen-reader spot checks are
   captured as accessibility evidence.
 - [ ] The public accessibility statement names the improvement and its limits.
 - [ ] ADR, map specifications, GL Dashboard docs, BAER docs, and relevant user
-  guidance agree on one canonical contract.
+  guidance agree on the canonical non-shifted contract and retained shifted mode.
 
 ## Parameterization ADR Gate
 
