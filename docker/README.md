@@ -59,7 +59,9 @@ docker compose --env-file docker/.env -f docker/docker-compose.prod.yml --profil
 - Runs `docker builder prune -af` after builds (build cache/layers only).
 - Runs `docker system prune -a -f` at the end of deploy (unused images, stopped containers, and unused networks).
 - Does **not** prune volumes unless explicitly requested with `--docker-prune-volumes`.
-- Use `--skip-docker-prune` to disable the end-of-deploy runtime prune.
+- Use `--skip-docker-prune` to disable the end-of-deploy runtime prune. The dedicated wepp3
+  fork/archive deployment always skips the broad runtime prune; its build cache is still
+  pruned immediately after the image build.
 
 Production Python services also fail startup unless the vendored
 `wepppyo3.wepp_interchange` shared object matches the SHA-256 pinned in

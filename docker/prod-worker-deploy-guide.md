@@ -67,6 +67,9 @@ The deploy script re-resolves the effective Compose services after `git pull`.
 If the pull changes the deployment script itself, the running process re-execs
 the updated script with `--skip-pull` before building. Unknown or incomplete
 worker-only topologies fail before build/stop instead of guessing service names.
+The wepp3 mode prunes build cache after a successful build but skips the final,
+host-wide `docker system prune -a`; broad cleanup is not required for rollout
+and can block completion while Docker processes unrelated host images.
 
 ### Cutover and rollback controls
 

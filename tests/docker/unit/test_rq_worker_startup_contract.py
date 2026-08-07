@@ -169,3 +169,4 @@ def test_production_deploy_script_supports_guarded_wepp3_mode() -> None:
     assert 'connection.ttl(worker.key) > 0' in deploy_script
     assert 'REGISTERED_FORK_ARCHIVE_WORKERS}" != "1:1"' in deploy_script
     assert "rq-info --service rq-worker-fork-archive --detail" in deploy_script
+    assert "Skipping broad Docker runtime prune on the dedicated wepp3 host" in deploy_script

@@ -618,7 +618,11 @@ else
     fi
 fi
 
-if [ "${SKIP_DOCKER_PRUNE}" = false ]; then
+if [ "${IS_WEPP3_FORK_ARCHIVE}" = true ]; then
+    echo ""
+    echo ">>> Step 7: Skipping broad Docker runtime prune on the dedicated wepp3 host"
+    echo "    Build cache was pruned after the image build; unrelated host images are left intact."
+elif [ "${SKIP_DOCKER_PRUNE}" = false ]; then
     echo ""
     echo ">>> Step 7: Pruning unused Docker runtime artifacts..."
     PRUNE_ARGS=(-a -f)
