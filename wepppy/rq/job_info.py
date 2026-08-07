@@ -69,17 +69,19 @@ def _build_queue_snapshot(
 
     origin = next(iter(origins))
     try:
+        # The approved contract permits one ordered snapshot for all candidates;
+        # do not replace this with one position lookup per descendant.
         ordered_job_ids = Queue(name=origin, connection=redis_conn).get_job_ids()
     except (redis.exceptions.RedisError, NoSuchJobError):
         logger.debug("Unable to observe optional queue rank", exc_info=True)
         return None
 
     candidate_ids = {job_id for job_id, _ in queued_candidates}
-    offsets = {
-        str(job_id): offset
-        for offset, job_id in enumerate(ordered_job_ids)
-        if str(job_id) in candidate_ids
-    }
+    offsets: dict[str, int] = {}
+    for offset, job_id in enumerate(ordered_job_ids):
+        normalized_job_id = str(job_id)
+        if normalized_job_id in candidate_ids:
+            offsets.setdefault(normalized_job_id, offset)
     if not offsets:
         return None
 

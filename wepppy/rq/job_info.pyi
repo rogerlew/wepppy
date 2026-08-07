@@ -1,6 +1,7 @@
 from __future__ import annotations
 
 from datetime import datetime
+import logging
 from typing import Any, Dict, MutableMapping, Sequence, Tuple
 
 import redis
@@ -8,6 +9,9 @@ from rq.job import Job
 
 REDIS_HOST: str
 RQ_DB: int
+UNKNOWN_PROGRESS_UPDATED_AT: str
+QUEUE_RANK_BASIS: str
+logger: logging.Logger
 
 def recursive_get_job_details(
     job: Job,

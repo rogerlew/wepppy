@@ -141,6 +141,24 @@ def test_multiple_candidates_choose_minimum_queue_offset(
     assert snapshot["rank"] == 2
 
 
+def test_duplicate_queue_entry_uses_earliest_offset(
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    _QueueDouble.ids = ["candidate", "unrelated", "candidate"]
+    _QueueDouble.reads = 0
+    monkeypatch.setattr(job_info, "Queue", _QueueDouble)
+
+    snapshot = job_info._build_queue_snapshot(
+        object(),
+        [("candidate", "queued", "batch")],
+        observed_at=OBSERVED_AT,
+    )
+
+    assert snapshot is not None
+    assert snapshot["jobs_ahead"] == 0
+    assert snapshot["rank"] == 1
+
+
 def test_queue_snapshot_uses_one_ordered_read_for_large_tree(
     monkeypatch: pytest.MonkeyPatch,
 ) -> None:
