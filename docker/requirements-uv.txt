@@ -173,7 +173,7 @@ pure-eval==0.2.3
 py>=1.11.0
 pyarrow==23.0.1
 pyarrow-hotfix==0.6
-pyasn1==0.6.3
+pyasn1==0.6.4
 pyasn1-modules==0.4.0
 pycparser==2.22
 pycurl==7.45.6
