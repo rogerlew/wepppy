@@ -13,6 +13,25 @@ has the production NFS mount and otherwise runs no containers. The service must
 start alone, consume only `fork-archive`, and have no dependency on `rq-worker`,
 `rq-worker-batch`, `f-esri`, or `weppcloudr`. The wepp2 worker compose does not
 define it, and the wepp1 override forces its inherited service scale to zero.
+The service runs as numeric identity `1002:130`, matching ownership of the
+production `/wc1/runs` tree. Do not replace this with wepp3's host-local
+`roger:docker` ids; NFS authorization uses numeric ids and the host-local ids do
+not match the production run-storage identity. Keep the Redis secret's host
+mode at `0600`, and grant the worker identity a narrow read ACL:
+
+```bash
+sudo setfacl -m u:1002:r docker/secrets/redis_password
+```
+
+The deploy script verifies Redis and Discord secret mount readability before it
+builds or stops the live worker and prints remediation if a configured secret
+was replaced and lost access for uid 1002.
+
+The compose file also mounts `discord_bot_token` at the vendor package's fixed
+import path. It defaults to `/dev/null` when notifications are disabled; set
+`DISCORD_BOT_TOKEN_FILE` to the host token path to enable them. This mount is
+required even for fork jobs because RQ imports the shared WEPP job modules when
+it resolves `project_rq.fork_rq`.
 
 Do not deploy until the implementation gates in
 `docs/work-packages/20260803_fork_archive_serial_queue/` pass. The
@@ -26,13 +45,28 @@ the host with `docker compose -f docker/docker-compose.prod.wepp3.yml ps`, `dock
 compose -f docker/docker-compose.prod.wepp3.yml top`, and `ps -eo pid,stat,wchan:32,cmd`
 so D-state diagnosis does not depend on Redis.
 
-On wepp3, install and start only the dedicated stack:
+Verify the effective storage identity after every recreate:
+
+```bash
+docker compose -f docker/docker-compose.prod.wepp3.yml exec rq-worker-fork-archive id
+# expected: uid=1002 gid=130
+```
+
+On wepp3, install the dedicated preset and use the canonical production deploy
+script. The script auto-detects the single-service wepp3 topology, refuses to
+interrupt an active `fork-archive` job by using RQ warm shutdown, builds and
+recreates only that service, and verifies its runtime identity and exactly one
+RQ registration:
 
 ```bash
 ./wctl/install.sh wepp3
-wctl up -d rq-worker-fork-archive
-wctl rq-info --service rq-worker-fork-archive --detail
+./scripts/deploy-production.sh
 ```
+
+The deploy script re-resolves the effective Compose services after `git pull`.
+If the pull changes the deployment script itself, the running process re-execs
+the updated script with `--skip-pull` before building. Unknown or incomplete
+worker-only topologies fail before build/stop instead of guessing service names.
 
 ### Cutover and rollback controls
 

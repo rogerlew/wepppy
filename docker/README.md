@@ -25,6 +25,19 @@ for behavioral parity; wepp1 and wepp2 must not consume the production serial
 queue. Track rollout evidence in the
 [Fork/Archive Serial Queue Isolation work package](../docs/work-packages/20260803_fork_archive_serial_queue/package.md).
 
+Install the wepp3 preset once, then use the same production deploy entry point
+as the other production hosts. It auto-detects the dedicated single-service
+topology and deploys only `rq-worker-fork-archive`:
+
+```bash
+./wctl/install.sh wepp3
+./scripts/deploy-production.sh
+```
+
+The script restarts itself when a pull updates its implementation and validates
+the post-pull Compose topology before building. It fails closed when an active
+worker-only wctl preset does not expose a supported service set.
+
 ### Test Production (forest1.local)
 
 The test production server at `forest1.local` (accessible via `wc-prod.bearhive.duckdns.org`) should **always** use the production compose file:
@@ -317,6 +330,14 @@ docker rm wepppy-rq-worker-batch-2
 
 ## Runtime User and Group
 The shared Compose anchor sets `user: "${UID:-1000}:${GID:-993}"`, so by default every service runs as `roger` (uid `1000`) and `docker` (gid `993`). Adjust `docker/.env` if your host uses different ids or you prefer to inherit the active shell user.
+
+The dedicated wepp3 worker is pinned to the production NFS identity
+`1002:130`. Its host secret remains mode `0600` and must grant uid 1002 a read
+ACL (`sudo setfacl -m u:1002:r docker/secrets/redis_password`); the production
+deploy script checks this before disrupting the running worker.
+The wepp3 compose also follows the worker-pool Discord import contract by
+mounting `${DISCORD_BOT_TOKEN_FILE:-/dev/null}` at weppcloud2's fixed token
+path, so shared RQ modules remain importable when notifications are disabled.
 
 ### Switching to `www-data:webgroup`
 1. Confirm the ids on the host:  

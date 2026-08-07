@@ -6,14 +6,31 @@ x-wepppyo3-interchange-entrypoint: &wepppyo3-interchange-entrypoint
 services:
   rq-worker-fork-archive:
     image: ${WEPPCLOUD_IMAGE:-wepppy:latest}
+    build:
+      context: ..
+      dockerfile: docker/Dockerfile
+      args:
+        APP_USER: roger
+        APP_GROUP: docker
+        APP_UID: "1002"
+        APP_GID: "130"
+    # Production run storage is owned by numeric identity 1002:130 on the
+    # shared NFS volume.  Host-local user/group names on wepp3 use different
+    # ids, so keep this service pinned to the storage identity.
+    user: "1002:130"
     init: true
     restart: unless-stopped
+    # RQ treats SIGTERM as a warm shutdown: stop dequeuing, then let the active
+    # job finish. Match the longest fork/archive job timeout before SIGKILL.
+    stop_grace_period: 216000s
     working_dir: /workdir/wepppy
     env_file:
       - ${WEPPPY_ENV_FILE:-defaults.env}
     entrypoint: *wepppyo3-interchange-entrypoint
     secrets:
       - redis_password
+      - source: discord_bot_token
+        target: /opt/vendor/weppcloud2/weppcloud2/discord_bot/.bot_token
     environment:
       PYTHONUNBUFFERED: "1"
       MPLCONFIGDIR: /tmp/matplotlib
@@ -38,3 +55,7 @@ services:
 secrets:
   redis_password:
     file: ./secrets/redis_password
+  # Preserve the production worker import contract even when notifications are
+  # disabled; weppcloud2 reads this fixed path while its module is imported.
+  discord_bot_token:
+    file: ${DISCORD_BOT_TOKEN_FILE:-/dev/null}

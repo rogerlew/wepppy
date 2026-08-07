@@ -8,6 +8,7 @@ set -euo pipefail
 
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 PROJECT_ROOT="$(cd "${SCRIPT_DIR}/.." && pwd)"
+ORIGINAL_ARGS=("$@")
 
 # Harden compose passthrough calls against occasional docker compose hangs.
 WCTL_COMPOSE_TIMEOUT_SECONDS="${WCTL_COMPOSE_TIMEOUT_SECONDS:-180}"
@@ -305,56 +306,74 @@ done
 
 cd "${PROJECT_ROOT}"
 
-COMPOSE_SERVICES="$(
-    capture_wctl_with_retry \
-        "${WCTL_COMPOSE_TIMEOUT_SECONDS}" \
-        "${WCTL_COMPOSE_RETRIES}" \
-        "${WCTL_COMPOSE_RETRY_DELAY_SECONDS}" \
-        docker compose config --services
-)"
-HAS_WEPPCLOUD=false
-if echo "${COMPOSE_SERVICES}" | grep -q "^weppcloud$"; then
-    HAS_WEPPCLOUD=true
-fi
-IS_WEPP3_FORK_ARCHIVE=false
-if [ "$(printf "%s\n" "${COMPOSE_SERVICES}" | sed '/^$/d' | wc -l | tr -d ' ')" -eq 1 ] \
-    && echo "${COMPOSE_SERVICES}" | grep -q "^rq-worker-fork-archive$"; then
-    IS_WEPP3_FORK_ARCHIVE=true
-fi
+configure_deploy_topology() {
+    COMPOSE_SERVICES="$(
+        capture_wctl_with_retry \
+            "${WCTL_COMPOSE_TIMEOUT_SECONDS}" \
+            "${WCTL_COMPOSE_RETRIES}" \
+            "${WCTL_COMPOSE_RETRY_DELAY_SECONDS}" \
+            docker compose config --services
+    )"
+    HAS_WEPPCLOUD=false
+    IS_WEPP3_FORK_ARCHIVE=false
 
-if [ "${HAS_WEPPCLOUD}" = true ]; then
-    DEPLOY_MODE="full"
-    BUILD_SERVICES=(weppcloud rq-worker)
-    # These services have their own images/build contexts; include them when present so
-    # a full deploy doesn't accidentally keep stale binaries when compose/env changes.
-    for svc in cap status preflight; do
-        if echo "${COMPOSE_SERVICES}" | grep -q "^${svc}$"; then
-            BUILD_SERVICES+=("${svc}")
-        fi
-    done
-elif [ "${IS_WEPP3_FORK_ARCHIVE}" = true ]; then
-    DEPLOY_MODE="wepp3-fork-archive"
-    BUILD_SERVICES=(rq-worker-fork-archive)
-else
-    DEPLOY_MODE="worker"
-    BUILD_SERVICES=(rq-worker rq-worker-batch weppcloudr)
-fi
+    if echo "${COMPOSE_SERVICES}" | grep -q "^weppcloud$"; then
+        HAS_WEPPCLOUD=true
+    fi
+    if [ "$(printf "%s\n" "${COMPOSE_SERVICES}" | sed '/^$/d' | wc -l | tr -d ' ')" -eq 1 ] \
+        && echo "${COMPOSE_SERVICES}" | grep -q "^rq-worker-fork-archive$"; then
+        IS_WEPP3_FORK_ARCHIVE=true
+    fi
 
-if [ "${IS_WEPP3_FORK_ARCHIVE}" = true ] && [ "${FLUSH_RQ_DB}" = true ]; then
-    echo "✗ Refusing --flush-rq-db on the dedicated wepp3 worker deployment." >&2
-    echo "  Redis DB 9 is shared production state and is not owned by wepp3." >&2
-    exit 1
-fi
-
-if [ "${IS_WEPP3_FORK_ARCHIVE}" = true ]; then
-    if ! wctl docker compose run --rm --no-deps --entrypoint /bin/sh \
-        rq-worker-fork-archive -c 'test -r /run/secrets/redis_password'; then
-        echo "✗ The wepp3 worker identity (uid 1002) cannot read docker/secrets/redis_password." >&2
-        echo "  Grant a read ACL without broadening the secret's 0600 base mode:" >&2
-        echo "  sudo setfacl -m u:1002:r docker/secrets/redis_password" >&2
+    if [ "${HAS_WEPPCLOUD}" = true ] \
+        && echo "${COMPOSE_SERVICES}" | grep -q "^rq-worker$"; then
+        DEPLOY_MODE="full"
+        BUILD_SERVICES=(weppcloud rq-worker)
+        # These services have their own images/build contexts; include them when present so
+        # a full deploy doesn't accidentally keep stale binaries when compose/env changes.
+        for svc in cap status preflight; do
+            if echo "${COMPOSE_SERVICES}" | grep -q "^${svc}$"; then
+                BUILD_SERVICES+=("${svc}")
+            fi
+        done
+    elif [ "${IS_WEPP3_FORK_ARCHIVE}" = true ]; then
+        DEPLOY_MODE="wepp3-fork-archive"
+        BUILD_SERVICES=(rq-worker-fork-archive)
+    elif echo "${COMPOSE_SERVICES}" | grep -q "^rq-worker$" \
+        && echo "${COMPOSE_SERVICES}" | grep -q "^rq-worker-batch$" \
+        && echo "${COMPOSE_SERVICES}" | grep -q "^weppcloudr$"; then
+        DEPLOY_MODE="worker"
+        BUILD_SERVICES=(rq-worker rq-worker-batch weppcloudr)
+    else
+        echo "✗ Unsupported production Compose topology; refusing to guess deployment services." >&2
+        echo "  Effective services:" >&2
+        printf "%s\n" "${COMPOSE_SERVICES}" | sed 's/^/    /' >&2
+        echo "  Reinstall the intended wctl preset before deploying." >&2
         exit 1
     fi
-fi
+}
+
+configure_deploy_topology
+
+validate_deploy_topology() {
+    if [ "${IS_WEPP3_FORK_ARCHIVE}" = true ] && [ "${FLUSH_RQ_DB}" = true ]; then
+        echo "✗ Refusing --flush-rq-db on the dedicated wepp3 worker deployment." >&2
+        echo "  Redis DB 9 is shared production state and is not owned by wepp3." >&2
+        exit 1
+    fi
+
+    if [ "${IS_WEPP3_FORK_ARCHIVE}" = true ]; then
+        if ! wctl docker compose run --rm --no-deps --entrypoint /bin/sh \
+            rq-worker-fork-archive -c \
+            'test -r /run/secrets/redis_password && test -r /opt/vendor/weppcloud2/weppcloud2/discord_bot/.bot_token'; then
+            echo "✗ The wepp3 worker identity (uid 1002) cannot read a required mounted secret." >&2
+            echo "  Redis remediation (preserves the secret's 0600 base mode):" >&2
+            echo "  sudo setfacl -m u:1002:r docker/secrets/redis_password" >&2
+            echo "  If DISCORD_BOT_TOKEN_FILE is set, grant uid 1002 read access there too." >&2
+            exit 1
+        fi
+    fi
+}
 
 echo "============================================"
 echo "WEPPcloud Production Deployment"
@@ -367,12 +386,23 @@ echo ""
 # Git pull
 if [ "${SKIP_PULL}" = false ]; then
     echo ">>> Step 1: Pulling latest changes from git..."
+    SCRIPT_SHA_BEFORE_PULL="$(sha256sum "${SCRIPT_DIR}/deploy-production.sh" | awk '{print $1}')"
     safe_git_fast_forward_pull
+    SCRIPT_SHA_AFTER_PULL="$(sha256sum "${SCRIPT_DIR}/deploy-production.sh" | awk '{print $1}')"
+    if [ "${SCRIPT_SHA_BEFORE_PULL}" != "${SCRIPT_SHA_AFTER_PULL}" ]; then
+        echo "    Deployment script changed during pull; restarting with the updated script..."
+        exec "${SCRIPT_DIR}/deploy-production.sh" "${ORIGINAL_ARGS[@]}" --skip-pull
+    fi
+    # Compose files may change even when this script does not. Re-resolve the
+    # effective topology before constructing any build or stop command.
+    configure_deploy_topology
     echo ""
 else
     echo ">>> Step 1: Skipping git pull (--skip-pull)"
     echo ""
 fi
+
+validate_deploy_topology
 
 # Build Docker images
 if [ "${SKIP_BUILD}" = false ]; then
